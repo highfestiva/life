@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -835,7 +835,7 @@ Painter::ImageID DirectX9Painter::AddImage(const Canvas* pImage, const Canvas* p
 				IDirect3DSurface9* lSurface;
 				if (FAILED(lTexture->mD3DTexture->GetSurfaceLevel(0, &lSurface)))
 				{
-					mLog.AError("AddImage() - Failed to get surface level 0!");
+					mLog.Error("AddImage() - Failed to get surface level 0!");
 					lTexture->mD3DTexture->Release();
 					delete lTexture;
 					mTextureIDManager.RecycleId(lID);
@@ -877,7 +877,7 @@ void DirectX9Painter::UpdateImage(ImageID pImageID, const Canvas* pImage, const 
 			IDirect3DSurface9* lSurface;
 			if (FAILED(lTexture->mD3DTexture->GetSurfaceLevel(0, &lSurface)))
 			{
-				mLog.AError("UpdateImage() - Failed to get surface level 0!");
+				mLog.Error("UpdateImage() - Failed to get surface level 0!");
 				return;
 			}
 
@@ -1008,7 +1008,7 @@ void DirectX9Painter::UpdateImage(ImageID pImageID, const Canvas* pImage, const 
 			if (FAILED(lD3DTexture->GetSurfaceLevel(0, &lSurface)))
 			{
 				lD3DTexture->Release();
-				mLog.AError("UpdateImage() - Failed to get surface level 0!");
+				mLog.Error("UpdateImage() - Failed to get surface level 0!");
 				return;
 			}
 			lTexture->mWidth = pImage->GetWidth();
@@ -1404,14 +1404,14 @@ void DirectX9Painter::ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect)
 	lHRes = mD3DDevice->GetRenderTarget(0, &lRenderTarget);
 	if (FAILED(lHRes))
 	{
-		mLog.AError("GetRenderTarget failed in ReadPixels().");
+		mLog.Error("GetRenderTarget failed in ReadPixels().");
 		return;
 	}
 
 	lHRes = lRenderTarget->GetDesc(&lSurfDesc);
 	if (FAILED(lHRes)) 
 	{
-		mLog.AError("GetDesc failed in ReadPixels().");
+		mLog.Error("GetDesc failed in ReadPixels().");
 		return;
 	}
 
@@ -1422,14 +1422,14 @@ void DirectX9Painter::ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect)
 													   &lInMemTarget, NULL);
 	if (FAILED(lHRes)) 
 	{
-		mLog.AError("CreateOffscreenPlainSurface failed in ReadPixels().");
+		mLog.Error("CreateOffscreenPlainSurface failed in ReadPixels().");
 		return;
 	}
 
 	lHRes = mD3DDevice->GetRenderTargetData(lRenderTarget, lInMemTarget);
 	if (FAILED(lHRes))
 	{
-		mLog.AError("GetRenderTargetData failed in ReadPixels().");
+		mLog.Error("GetRenderTargetData failed in ReadPixels().");
 		lInMemTarget->Release();
 		return;
 	}
@@ -1437,7 +1437,7 @@ void DirectX9Painter::ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect)
 	D3DLOCKED_RECT lLockedRect;
 	if (FAILED(lInMemTarget->LockRect(&lLockedRect, NULL, 0)))
 	{
-		mLog.AError("LockRect failed in ReadPixels().");
+		mLog.Error("LockRect failed in ReadPixels().");
 		lInMemTarget->Release();
 		return;
 	}
@@ -1470,7 +1470,7 @@ void DirectX9Painter::ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect)
 		pDestCanvas.SetPalette(GetCanvas()->GetPalette());
 		break;
 	default:
-		mLog.AError("Invalid pixel format in ReadPixels().");
+		mLog.Error("Invalid pixel format in ReadPixels().");
 		pDestCanvas.Reset(0, 0, Canvas::BITDEPTH_32_BIT);
 		lInMemTarget->UnlockRect();
 		lInMemTarget->Release();

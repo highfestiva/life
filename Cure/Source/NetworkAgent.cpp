@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
  
 
@@ -91,7 +91,7 @@ const SocketAddress& NetworkAgent::GetLocalAddress() const
 
 
 bool NetworkAgent::SendStatusMessage(VSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
-	MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket)
+	MessageStatus::InfoType pInfoType, str pMessage, Packet* pPacket)
 {
 	pPacket->Release();
 	MessageStatus* lStatus = (MessageStatus*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_STATUS);
@@ -134,13 +134,13 @@ bool NetworkAgent::PlaceInSendBuffer(bool pSafe, VSocket* pSocket, Packet* pPack
 {
 	if (!pSocket)
 	{
-		mLog.AError("PlaceInSendBuffer(): unable send data via uninitialized socket.");
+		mLog.Error("PlaceInSendBuffer(): unable send data via uninitialized socket.");
 		return false;
 	}
 
 	/*for (size_t x = 0; x < pPacket->GetMessageCount(); ++x)
 	{
-		log_volatile(mLog.Tracef(_T("Sending message of type %i."), pPacket->GetMessageAt(x)->GetType()));
+		log_volatile(mLog.Tracef("Sending message of type %i.", pPacket->GetMessageAt(x)->GetType()));
 	}*/
 
 	pSocket->SetSafeSend(pSafe);
@@ -155,7 +155,7 @@ bool NetworkAgent::PlaceInSendBuffer(bool pSafe, VSocket* pSocket, Packet* pPack
 	}
 	if (!lOk)
 	{
-		mLog.AError("PlaceInSendBuffer(): unable to place data in socket output buffer.");
+		mLog.Error("PlaceInSendBuffer(): unable to place data in socket output buffer.");
 	}
 	return (lOk);
 }

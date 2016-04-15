@@ -34,7 +34,7 @@ Cure::ContextPath* Racket::QueryPath()
 {
 	if (!mPath)
 	{
-		mPath = new Cure::ContextPath(GetResourceManager(), _T("ContextPath"));
+		mPath = new Cure::ContextPath(GetResourceManager(), "ContextPath");
 		GetManager()->AddLocalObject(mPath);
 	}
 	return mPath;

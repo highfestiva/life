@@ -35,7 +35,7 @@ void TimeLogger::Transfer(const str& pPrefix)
 
 void TimeLogger::Log()
 {
-	mLog->Infof((mPrefix+_T(": %g")).c_str(), mTimer.PopTimeDiff());
+	mLog->Infof((mPrefix+": %g").c_str(), mTimer.PopTimeDiff());
 }
 
 

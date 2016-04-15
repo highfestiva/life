@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
  
 
@@ -25,7 +25,7 @@ namespace Life
 
 
 
-unsigned MasterServerNetworkParser::StrToRaw(uint8* pRawData, const wstr& pStr)
+unsigned MasterServerNetworkParser::StrToRaw(uint8* pRawData, const str& pStr)
 {
 	const int lHeaderSize = 4;
 	const int lFooterSize = 8;
@@ -38,13 +38,13 @@ unsigned MasterServerNetworkParser::StrToRaw(uint8* pRawData, const wstr& pStr)
 	lDes.SetKey(MASTER_SERVER_CRC32_DES_KEY);
 	lDes.Encrypt(&pRawData[lHeaderSize+lDataSize], lFooterSize);
 	const int lSize = lHeaderSize + lDataSize + lFooterSize;
-	LEPRA_DEBUG_CODE(wstr lTextStr);
+	LEPRA_DEBUG_CODE(str lTextStr);
 	LEPRA_DEBUG_CODE(deb_assert(MasterServerNetworkParser::RawToStr(lTextStr, pRawData, lSize)));
 	LEPRA_DEBUG_CODE(deb_assert(lTextStr == pStr));
 	return lSize;
 }
 
-bool MasterServerNetworkParser::RawToStr(wstr& pStr, const uint8* pRawData, unsigned pRawLength)
+bool MasterServerNetworkParser::RawToStr(str& pStr, const uint8* pRawData, unsigned pRawLength)
 {
 	const int lHeaderSize = 4;
 	const int lFooterSize = 8;
@@ -89,13 +89,13 @@ bool MasterServerNetworkParser::RawToStr(wstr& pStr, const uint8* pRawData, unsi
 
 bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, ServerInfo& pInfo, const SocketAddress* pRemoteAddress)
 {
-	strutil::strvec lCommandList = strutil::BlockSplit(pServerString, _T(" \t\r\n"), false, false);
+	strutil::strvec lCommandList = strutil::BlockSplit(pServerString, " \t\r\n", false, false);
 	if (lCommandList.empty())
 	{
 		return false;
 	}
 	unsigned lStartIndex = 0;
-	if (!strutil::StartsWith(lCommandList[0], _T("--")))
+	if (!strutil::StartsWith(lCommandList[0], "--"))
 	{
 		pInfo.mCommand = lCommandList[0];
 		lStartIndex = 1;
@@ -104,39 +104,39 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 	{
 		if (lCommandList.size() < x+2)
 		{
-			mLog.Error(_T("Got too few parameters!"));
+			mLog.Error("Got too few parameters!");
 			return false;
 		}
-		if (lCommandList[x] == _T("--name"))
+		if (lCommandList[x] == "--name")
 		{
 			pInfo.mName = lCommandList[x+1];
 		}
-		else if (lCommandList[x] == _T("--id"))
+		else if (lCommandList[x] == "--id")
 		{
 			pInfo.mId = lCommandList[x+1];
 		}
-		else if (lCommandList[x] == _T("--address"))
+		else if (lCommandList[x] == "--address")
 		{
 			pInfo.mGivenIpAddress = lCommandList[x+1];
 		}
-		else if (lCommandList[x] == _T("--internal-address"))
+		else if (lCommandList[x] == "--internal-address")
 		{
 			pInfo.mInternalIpAddress = lCommandList[x+1];
 		}
-		else if (lCommandList[x] == _T("--port") || lCommandList[x] == _T("--internal-port"))
+		else if (lCommandList[x] == "--port" || lCommandList[x] == "--internal-port")
 		{
 			int lPort = -1;
 			if (!strutil::StringToInt(lCommandList[x+1], lPort))
 			{
-				mLog.Error(_T("Got non-integer port parameter!"));
+				mLog.Error("Got non-integer port parameter!");
 				return false;
 			}
 			if (lPort < 0 || lPort > 65535)
 			{
-				mLog.Errorf(_T("Got invalid port number (%i)!"), lPort);
+				mLog.Errorf("Got invalid port number (%i)!", lPort);
 				return false;
 			}
-			if (lCommandList[x] == _T("--port"))
+			if (lCommandList[x] == "--port")
 			{
 				pInfo.mGivenPort = lPort;
 			}
@@ -145,31 +145,31 @@ bool MasterServerNetworkParser::ExtractServerInfo(const str& pServerString, Serv
 				pInfo.mInternalPort = lPort;
 			}
 		}
-		else if (lCommandList[x] == _T("--player-count"))
+		else if (lCommandList[x] == "--player-count")
 		{
 			if (!strutil::StringToInt(lCommandList[x+1], pInfo.mPlayerCount))
 			{
-				mLog.Error(_T("Got non-integer player count parameter!"));
+				mLog.Error("Got non-integer player count parameter!");
 				return false;
 			}
 			if (pInfo.mPlayerCount < 0 || pInfo.mPlayerCount > 512)
 			{
-				mLog.Errorf(_T("Got invalid player count number (%i)!"), pInfo.mPlayerCount);
+				mLog.Errorf("Got invalid player count number (%i)!", pInfo.mPlayerCount);
 				return false;
 			}
 		}
-		else if (lCommandList[x] == _T("--remove"))
+		else if (lCommandList[x] == "--remove")
 		{
-			if (lCommandList[x+1] != _T("true"))
+			if (lCommandList[x+1] != "true")
 			{
-				mLog.Errorf(_T("Got bad --remove argument (%s)!"), lCommandList[x+1].c_str());
+				mLog.Errorf("Got bad --remove argument (%s)!", lCommandList[x+1].c_str());
 				return false;
 			}
 			pInfo.mRemove = true;
 		}
 		else
 		{
-			mLog.Errorf(_T("Got bad parameter (%s)!"), lCommandList[x].c_str());
+			mLog.Errorf("Got bad parameter (%s)!", lCommandList[x].c_str());
 			return false;
 		}
 	}

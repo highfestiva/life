@@ -55,7 +55,7 @@ struct PathIndexLikeliness
 
 
 VehicleAi::VehicleAi(Game* pGame):
-	Parent(pGame->GetResourceManager(), _T("VehicleAi")),
+	Parent(pGame->GetResourceManager(), "VehicleAi"),
 	mGame(pGame)
 {
 }
@@ -105,7 +105,7 @@ void VehicleAi::OnTick()
 				lStartTime = lPath->GetCurrentInterpolationTime();
 				mActivePath = -1;
 			}
-			mLog.Headlinef(_T("Trying to find new path... starting iterating from  %.2f."), lStartTime);
+			mLog.Headlinef("Trying to find new path... starting iterating from  %.2f.", lStartTime);
 			vec3 lElevatorDirection;
 			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
 			{
@@ -139,7 +139,7 @@ void VehicleAi::OnTick()
 				lPath->GotoAbsoluteTime(lStartTime);
 				float lLikeliness = 1;
 				const float lNearestDistance = GetClosestPathDistance(lPosition, x, &lLikeliness)/SCALE_FACTOR/2;
-				mLog.Infof(_T(" - Path %2i is %2.2f units away."), x, lNearestDistance);
+				mLog.Infof(" - Path %2i is %2.2f units away.", x, lNearestDistance);
 				if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
 				{
 					if (lPath->GetCurrentInterpolationTime() > 0.7f)
@@ -206,7 +206,7 @@ void VehicleAi::OnTick()
 						const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
 						mGame->GetCutie()->SetEnginePower(1, lAngle*0.5f);
 					}
-					mLog.Headlinef(_T("On elevator: too long distance to path %.1f, or too many paths %u."), lBestPathDistance, lRelevantPaths.size());
+					mLog.Headlinef("On elevator: too long distance to path %.1f, or too many paths %u.", lBestPathDistance, lRelevantPaths.size());
 					if (lBestPathDistance > 15)
 					{
 						const Cure::Elevator* lNearestElevator;
@@ -225,7 +225,7 @@ void VehicleAi::OnTick()
 					}
 					return;
 				}
-				mLog.Headlinef(_T("Getting off elevator: distance to path %.1f."), lBestPathDistance);
+				mLog.Headlinef("Getting off elevator: distance to path %.1f.", lBestPathDistance);
 			}
 			deb_assert(!lRelevantPaths.empty());
 			if (lRelevantPaths.empty())
@@ -262,7 +262,7 @@ void VehicleAi::OnTick()
 			mElevatorGetOnPosition = lPath->GetValue();
 			lPath->GotoAbsoluteTime(t);
 
-			mLog.Headlinef(_T("Picked path %i (%i pickable)."), mActivePath, lRelevantPaths.size());
+			mLog.Headlinef("Picked path %i (%i pickable."), mActivePath, lRelevantPaths.size());
 			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
 			{
 				SetMode(MODE_GET_OFF_ELEVATOR);
@@ -287,10 +287,10 @@ void VehicleAi::OnTick()
 					// steepness, since pure Z-distance may be big when going over ditches.
 					const vec3 lPathPosition = lPath->GetValue();
 					const float lSteepness = (lPathPosition.z - lPosition.z) / lNearestPathDistance;
-					//mLog.Infof(_T("Checking steepness, nearest path distance is %.3f, steepness is %.3f."), lNearestPathDistance, lSteepness);
+					//mLog.Infof("Checking steepness, nearest path distance is %.3f, steepness is %.3f.", lNearestPathDistance, lSteepness);
 					if (lSteepness > 0.6f)
 					{
-						mLog.Infof(_T("Searching for new, better path, we seem to have ended up under the path. Beneath a bridge perhaps? Nearest path is %.2f, steepness is %.2f."), lNearestPathDistance, lSteepness);
+						mLog.Infof("Searching for new, better path, we seem to have ended up under the path. Beneath a bridge perhaps? Nearest path is %.2f, steepness is %.2f.", lNearestPathDistance, lSteepness);
 						SetMode(MODE_FIND_BEST_PATH);
 						return;
 					}
@@ -325,7 +325,7 @@ void VehicleAi::OnTick()
 			{
 				if (lModeRunTime > 4.5)
 				{
-					mLog.Headlinef(_T("Something presumably hinders me getting on the elevator, back square one. (mode run time=%f)"), lModeRunTime);
+					mLog.Headlinef("Something presumably hinders me getting on the elevator, back square one. (mode run time=%f"), lModeRunTime);
 					SetMode(MODE_FIND_BEST_PATH);
 					return;
 				}
@@ -386,7 +386,7 @@ void VehicleAi::OnTick()
 			}
 
 			// Are we heading towards an elevator?
-			if (mMode != MODE_GET_ON_ELEVATOR && mMode != MODE_GET_OFF_ELEVATOR && lPath->GetType() == _T("to_elevator"))
+			if (mMode != MODE_GET_ON_ELEVATOR && mMode != MODE_GET_OFF_ELEVATOR && lPath->GetType() == "to_elevator")
 			{
 				if (lPath->GetDistanceLeft() <= ELEVATOR_WAIT_DISTANCE)
 				{
@@ -427,7 +427,7 @@ void VehicleAi::OnTick()
 				{
 					const float lMoveAhead = lWantedDistance*1.1f - ::sqrt(lActualDistance2);
 					lPath->StepInterpolation(lMoveAhead * lPath->GetDistanceNormal());
-					log_volatile(mLog.Debugf(_T("Stepping %f (=%f m) from %f."), lMoveAhead*lPath->GetDistanceNormal(), lMoveAhead, lPath->GetCurrentInterpolationTime()));
+					log_volatile(mLog.Debugf("Stepping %f (=%f m from %f."), lMoveAhead*lPath->GetDistanceNormal(), lMoveAhead, lPath->GetCurrentInterpolationTime()));
 				}
 
 				// Check if we're there yet.
@@ -436,7 +436,7 @@ void VehicleAi::OnTick()
 				const float lTargetDistance = (mMode == MODE_GET_ON_ELEVATOR)? ON_ELEVATOR_DISTANCE : ON_GOAL_DISTANCE + mGame->GetCutie()->GetForwardSpeed()/4;
 				if (IsCloseToTarget(lPosition, lTargetDistance))
 				{
-					const bool lTowardsElevator = (lPath->GetType() == _T("to_elevator"));
+					const bool lTowardsElevator = (lPath->GetType() == "to_elevator");
 					if (lTowardsElevator)
 					{
 						if (mMode == MODE_GET_ON_ELEVATOR)
@@ -481,7 +481,7 @@ void VehicleAi::OnTick()
 				const float lGetOffDistance = GetClosestElevatorRadius() + ELEVATOR_GOT_OFF_EXTRA_DISTANCE;
 				vec2 lElevatorGetOff2d(mElevatorGetOffPosition.x, mElevatorGetOffPosition.y);
 				vec2 lPosition2d(lPosition.x, lPosition.y);
-				mLog.Infof(_T("ElevatorGetOff (%f;%f), pos (%f;%f)"), lElevatorGetOff2d.x, lElevatorGetOff2d.y, lPosition2d.x, lPosition2d.y);
+				mLog.Infof("ElevatorGetOff (%f;%f, pos (%f;%f)"), lElevatorGetOff2d.x, lElevatorGetOff2d.y, lPosition2d.x, lPosition2d.y);
 				if (lElevatorGetOff2d.GetDistanceSquared(lPosition2d) > lGetOffDistance*lGetOffDistance)
 				{
 					SetMode(MODE_NORMAL);
@@ -991,14 +991,14 @@ bool VehicleAi::AvoidGrenade(const vec3& pPosition, const vec3& pVelocity, float
 		}
 		if (lGrenadeTarget.GetDistanceSquared(lMyTarget+lMyExtraStep) < lDamageRange*lDamageRange)
 		{
-			mLog.Headlinef(_T("Grenade would hit: %f m (%f s)."), lGrenadeTarget.GetDistance(lMyTarget)/3, t);
+			mLog.Headlinef("Grenade would hit: %f m (%f s."), lGrenadeTarget.GetDistance(lMyTarget)/3, t);
 			mGame->GetCutie()->SetEnginePower(1, 0);	// Backup straight.
 			SetMode(MODE_BACKING_UP);
 			return true;
 		}
 		else
 		{
-			mLog.Headlinef(_T("Doging the grenade: %f m (%f s)."), lGrenadeTarget.GetDistance(lMyTarget)/3, t);
+			mLog.Headlinef("Doging the grenade: %f m (%f s."), lGrenadeTarget.GetDistance(lMyTarget)/3, t);
 		}
 	}
 	return false;
@@ -1049,27 +1049,27 @@ void VehicleAi::SetMode(Mode pMode)
 	mPreviousMode = mMode;
 	mMode = pMode;
 	mModeStartFrame = GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrame();
-	const tchar* lModeName = _T("???");
+	const tchar* lModeName = "???";
 	switch (mMode)
 	{
-		case MODE_FIND_BEST_PATH:		lModeName = _T("FIND BEST PATH");		break;
-		case MODE_FIND_PATH_OFF_ELEVATOR:	lModeName = _T("FIND PATH OFF ELEVATOR");	break;
-		case MODE_NORMAL:			lModeName = _T("NORMAL");			break;
-		case MODE_HEADING_BACK_ON_TRACK:	lModeName = _T("HEADING BACK ON TRACK");	break;
-		case MODE_BACKING_UP:			lModeName = _T("BACKING UP");			break;
-		case MODE_BACKING_UP_TO_GOAL:		lModeName = _T("BACKING UP TO GOAL");		break;
-		case MODE_FLEE:				lModeName = _T("FLEE");				break;
-		case MODE_STOPPING_AT_GOAL:		lModeName = _T("STOPPING AT GOAL");		break;
-		case MODE_AT_GOAL:			lModeName = _T("AT GOAL");			break;
-		case MODE_WAITING_FOR_ELEVATOR:		lModeName = _T("WAITING FOR ELEVATOR");		break;
-		case MODE_GET_ON_ELEVATOR:		lModeName = _T("GET ON ELEVATOR");		break;
-		case MODE_GET_OFF_ELEVATOR:		lModeName = _T("GET OFF ELEVATOR");		break;
-		case MODE_ON_ELEVATOR:			lModeName = _T("ON ELEVATOR");			break;
-		case MODE_ROTATE_ON_THE_SPOT:		lModeName = _T("ROTATE ON THE SPOT");		break;
-		case MODE_ROTATE_ON_THE_SPOT_DURING:	lModeName = _T("ROTATE ON THE SPOT DURING");	break;
-		case MODE_ROTATE_ON_THE_SPOT_WAITING:	lModeName = _T("ROTATE ON THE SPOT WAITING");	break;
+		case MODE_FIND_BEST_PATH:		lModeName = "FIND BEST PATH";		break;
+		case MODE_FIND_PATH_OFF_ELEVATOR:	lModeName = "FIND PATH OFF ELEVATOR";	break;
+		case MODE_NORMAL:			lModeName = "NORMAL";			break;
+		case MODE_HEADING_BACK_ON_TRACK:	lModeName = "HEADING BACK ON TRACK";	break;
+		case MODE_BACKING_UP:			lModeName = "BACKING UP";			break;
+		case MODE_BACKING_UP_TO_GOAL:		lModeName = "BACKING UP TO GOAL";		break;
+		case MODE_FLEE:				lModeName = "FLEE";				break;
+		case MODE_STOPPING_AT_GOAL:		lModeName = "STOPPING AT GOAL";		break;
+		case MODE_AT_GOAL:			lModeName = "AT GOAL";			break;
+		case MODE_WAITING_FOR_ELEVATOR:		lModeName = "WAITING FOR ELEVATOR";		break;
+		case MODE_GET_ON_ELEVATOR:		lModeName = "GET ON ELEVATOR";		break;
+		case MODE_GET_OFF_ELEVATOR:		lModeName = "GET OFF ELEVATOR";		break;
+		case MODE_ON_ELEVATOR:			lModeName = "ON ELEVATOR";			break;
+		case MODE_ROTATE_ON_THE_SPOT:		lModeName = "ROTATE ON THE SPOT";		break;
+		case MODE_ROTATE_ON_THE_SPOT_DURING:	lModeName = "ROTATE ON THE SPOT DURING";	break;
+		case MODE_ROTATE_ON_THE_SPOT_WAITING:	lModeName = "ROTATE ON THE SPOT WAITING";	break;
 	}
-	mLog.Headlinef(_T("Switching mode to %s."), lModeName);
+	mLog.Headlinef("Switching mode to %s.", lModeName);
 }
 
 bool VehicleAi::IsCloseToTarget(const vec3& pPosition, float pDistance) const
@@ -1077,7 +1077,7 @@ bool VehicleAi::IsCloseToTarget(const vec3& pPosition, float pDistance) const
 	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
 	const vec3 lTarget = lPath->GetValue();
 	const float lTargetDistance2 = lTarget.GetDistanceSquared(pPosition);
-	//mLog.Headlinef(_T("IsCloseToTarget ^2: %f."), lTargetDistance2);
+	//mLog.Headlinef("IsCloseToTarget ^2: %f.", lTargetDistance2);
 	const float lGoalDistance = pDistance*SCALE_FACTOR;
 	return (lTargetDistance2 <= lGoalDistance*lGoalDistance);
 }
@@ -1150,7 +1150,7 @@ vec3 VehicleAi::GetClosestElevatorPosition(const vec3& pPosition, const Cure::El
 	typedef Cure::ContextManager::ContextObjectTable ContextTable;
 	const ContextTable& lObjectTable = GetManager()->GetObjectTable();
 	ContextTable::const_iterator x = lObjectTable.begin();
-	const str lElevatorClassId = _T("Elevator");
+	const str lElevatorClassId = "Elevator";
 	float lDistance2 = -1;
 	vec3 lNearestPosition;
 	for (; x != lObjectTable.end(); ++x)
@@ -1203,19 +1203,19 @@ bool VehicleAi::IsVertical(const vec3& pVector)
 int VehicleAi::GetVehicleIndex() const
 {
 	const str& lClassId = mGame->GetCutie()->GetClassId();
-	if (lClassId == _T("cutie"))
+	if (lClassId == "cutie")
 	{
 		return 0;
 	}
-	if (lClassId == _T("monster"))
+	if (lClassId == "monster")
 	{
 		return 1;
 	}
-	if (lClassId == _T("corvette"))
+	if (lClassId == "corvette")
 	{
 		return 2;
 	}
-	if (lClassId == _T("road_roller"))
+	if (lClassId == "road_roller")
 	{
 		return 3;
 	}

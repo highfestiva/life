@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -29,7 +29,7 @@ DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
 	{
 		case DisplayManager::OPENGL_CONTEXT:	lDisplayManager = new Win32OpenGLDisplay;				break;
 		case DisplayManager::DIRECTX_CONTEXT:	lDisplayManager = new Win32DirectXDisplay;				break;
-		default:				mLog.AError("Invalid context type in CreateDisplayManager().");		break;
+		default:				mLog.Error("Invalid context type in CreateDisplayManager().");		break;
 	}
 	return (lDisplayManager);
 }
@@ -125,7 +125,7 @@ bool Win32DisplayManager::Register()
 		msWindowClass.hIconSm		= ::LoadIcon((HINSTANCE)mshThisInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
 		msWindowClass.hCursor		= ::LoadCursor(0, IDC_ARROW);
 		msWindowClass.lpszMenuName	= NULL;
-		msWindowClass.lpszClassName	= _T("LepraWin32Class");
+		msWindowClass.lpszClassName	= "LepraWin32Class";
 
 		lOk = (RegisterClassEx(&msWindowClass) != 0);
 	}
@@ -138,7 +138,7 @@ bool Win32DisplayManager::Register()
 	}
 	else
 	{
-		mLog.AError("Register() - failed to register window class.");
+		mLog.Error("Register() - failed to register window class.");
 	}
 	return lOk;
 }
@@ -148,7 +148,7 @@ void Win32DisplayManager::Unregister()
 	--msRegisterCount;
 	if (msRegisterCount == 0)
 	{
-		::UnregisterClass(_T("LepraWin32Class"), (HINSTANCE)mshThisInstance);
+		::UnregisterClass("LepraWin32Class", (HINSTANCE)mshThisInstance);
 	}
 }
 
@@ -209,17 +209,17 @@ bool Win32DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode
 
 	if (mInitialized == false)
 	{
-		mLog.AWarning("OpenScreen() - DisplayManager not initialized.");
+		mLog.Warning("OpenScreen() - DisplayManager not initialized.");
 		lOk = false;
 	}
 	else if(mScreenOpened == true)
 	{
-		mLog.AWarning("OpenScreen() - Screen already opened.");
+		mLog.Warning("OpenScreen() - Screen already opened.");
 		lOk = false;
 	}
 	else if(pDisplayMode.IsValid() == false && pScreenMode == FULLSCREEN)
 	{
-		mLog.AError("OpenScreen() - Invalid display mode.");
+		mLog.Error("OpenScreen() - Invalid display mode.");
 		lOk = false;
 	}
 
@@ -258,7 +258,7 @@ bool Win32DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode
 
 			if (lSupportedMode == false)
 			{
-				str lErr(strutil::Format(_T("OpenScreen() - Display mode %i-bit %ix%i at %i Hz is not supported!"),
+				str lErr(strutil::Format("OpenScreen( - Display mode %i-bit %ix%i at %i Hz is not supported!"),
 						 pDisplayMode.mBitDepth, 
 						 pDisplayMode.mWidth, 
 						 pDisplayMode.mHeight, 
@@ -359,7 +359,7 @@ bool Win32DisplayManager::InitWindow()
 				case DisplayManager::SPLASH_WINDOW:
 				{
 					mWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_TOPMOST,
-								_T("LepraWin32Class"), _T("Lepra"),
+								"LepraWin32Class", "Lepra",
 								WS_POPUP | WS_CLIPSIBLINGS | WS_VISIBLE,
 								GetSystemMetrics(SM_CXSCREEN) / 2 - lWindowWidth / 2,
 								GetSystemMetrics(SM_CYSCREEN) / 2 - lWindowHeight / 2,
@@ -378,7 +378,7 @@ bool Win32DisplayManager::InitWindow()
 						lStyle |= (WS_SIZEBOX | WS_MAXIMIZEBOX);
 					}
 					mWnd = ::CreateWindowEx(WS_EX_APPWINDOW,
-						_T("LepraWin32Class"), _T("Lepra"),
+						"LepraWin32Class", "Lepra",
 						lStyle,
 						GetSystemMetrics(SM_CXSCREEN) / 2 - lWindowHeight / 2,
 						GetSystemMetrics(SM_CYSCREEN) / 2 - lWindowHeight / 2,
@@ -404,7 +404,7 @@ bool Win32DisplayManager::InitWindow()
 		}
 		else
 		{
-			mLog.AError("InitWindow() - Failed to create window.");
+			mLog.Error("InitWindow() - Failed to create window.");
 		}
 	}
 

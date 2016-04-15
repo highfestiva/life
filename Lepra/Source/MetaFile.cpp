@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
@@ -208,7 +208,7 @@ str MetaFile::GetFullName() const
 		return mArchiveFile->GetFullName();
 	}
 
-	return _T("");
+	return "";
 }
 
 str MetaFile::GetName() const
@@ -222,7 +222,7 @@ str MetaFile::GetName() const
 		return mArchiveFile->GetName();
 	}
 
-	return _T("");
+	return "";
 }
 
 str MetaFile::GetPath() const
@@ -236,7 +236,7 @@ str MetaFile::GetPath() const
 		return mArchiveFile->GetPath();
 	}
 
-	return _T("");
+	return "";
 }
 
 IOError MetaFile::ReadData(void* pBuffer, size_t pSize)
@@ -517,8 +517,8 @@ bool MetaFile::SplitPath(const str& pFilename, str& pLeft, str& pRight, size_t p
 
 	for (i = 0; i < pSplitIndex; i++)
 	{
-		int lIndex1 = (int)pFilename.rfind((tchar)'/', lSplitIndex-1);
-		int lIndex2 = (int)pFilename.rfind((tchar)'\\', lSplitIndex-1);
+		int lIndex1 = (int)pFilename.rfind((char)'/', lSplitIndex-1);
+		int lIndex2 = (int)pFilename.rfind((char)'\\', lSplitIndex-1);
 
 		if (lIndex1 > lIndex2)
 		{

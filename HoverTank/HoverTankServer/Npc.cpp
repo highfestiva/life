@@ -22,7 +22,7 @@ namespace HoverTank
 
 
 Npc::Npc(GameServerLogic* pLogic):
-	Parent(0, _T("npc")),
+	Parent(0, "npc"),
 	mLogic(pLogic),
 	mIntelligence(0.5f),
 	mAvatarId(0)
@@ -80,7 +80,7 @@ void Npc::OnTick()
 	{
 		return;
 	}
-	Cure::IntAttribute* lTeam = (Cure::IntAttribute*)lMyAvatar->GetAttribute(_T("int_team"));
+	Cure::IntAttribute* lTeam = (Cure::IntAttribute*)lMyAvatar->GetAttribute("int_team");
 	if (!lTeam)
 	{
 		return;

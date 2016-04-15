@@ -302,7 +302,7 @@ ClassResourceBase<_Class, _ClassLoader>::~ClassResourceBase()
 template<class _Class, class _ClassLoader>
 const str ClassResourceBase<_Class, _ClassLoader>::GetType() const
 {
-	return (_T("Class"));
+	return ("Class");
 }
 
 template<class _Class, class _ClassLoader>

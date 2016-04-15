@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // The MemberThread template does not require inheritance to start a thread in a member method:
@@ -26,7 +26,7 @@ public:
 	typedef void (_Base::*ThreadEntry)();
 	typedef void (_Base::*ThreadEntryData)(_Object);
 
-	MemberThread(const astr& pThreadName);
+	MemberThread(const str& pThreadName);
 	virtual ~MemberThread();
 
 	bool Start(_Base* pObject, ThreadEntry pThreadEntry);
@@ -47,7 +47,7 @@ private:
 
 
 
-template<class _Base, class _Object> MemberThread<_Base, _Object>::MemberThread(const astr& pThreadName):
+template<class _Base, class _Object> MemberThread<_Base, _Object>::MemberThread(const str& pThreadName):
 	Thread(pThreadName),
 	mObject(0),
 	mThreadEntry(0),

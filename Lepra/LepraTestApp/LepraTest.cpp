@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -50,7 +50,7 @@
 using namespace Lepra;
 
 class LepraTest{};
-static LogDecorator gLLog(LogType::GetLogger(LogType::SUB_TEST), typeid(LepraTest));
+static LogDecorator gLLog(LogType::GetLogger(LogType::TEST), typeid(LepraTest));
 
 
 
@@ -67,11 +67,11 @@ void ReportTestResult(const LogDecorator& pLog, const str& pTestName, const str&
 {
 	if (pResult)
 	{
-		pLog.Headlinef(_T("%20s: passed."), pTestName.c_str());
+		pLog.Headlinef("%20s: passed.", pTestName.c_str());
 	}
 	else
 	{
-		pLog.Fatalf(_T("%20s: failed (%s)!"), pTestName.c_str(), pContext.c_str());
+		pLog.Fatalf("%20s: failed (%s)!", pTestName.c_str(), pContext.c_str());
 	}
 }
 
@@ -83,57 +83,57 @@ bool TestString(const LogDecorator& pAccount)
 	// Verify str basics.
 	if (lTestOk)
 	{
-		lContext = _T("String basics");
-		str lString = _T("ABCdefghijklmnopqrstUvwxyz");
-		lString += _T("97531") + lString + _T("02468");
+		lContext = "String basics";
+		str lString = "ABCdefghijklmnopqrstUvwxyz";
+		lString += "97531" + lString + "02468";
 		lString.erase(31, 4);	// Remove second ABCd.
-		lString = strutil::ReplaceAll(lString, _T('x'), _T(' '));
-		str lTmp1 = _T("oA");
+		lString = strutil::ReplaceAll(lString, 'x', ' ');
+		str lTmp1 = "oA";
 		strutil::ToUpper(lTmp1);
-		str lTmp2 = _T("Oa");
+		str lTmp2 = "Oa";
 		strutil::ToLower(lTmp2);
 		lString.insert(10, lTmp1+lTmp2);
-		lTmp1 = _T("*!\" #\t%&/\r()=\n\v");
+		lTmp1 = "*!\" #\t%&/\r()=\n\v";
 		strutil::StripAllWhiteSpaces(lTmp1);
 		lString.insert(30, lTmp1);
-		lString.insert(0, strutil::Right(_T("Johannes"), 6) + str(_T("Sune")).substr(0, 1));
-		lTestOk = (lString == _T("hannesSABCdefghijOAoaklmnopqrstUvw yz*!\"#%&/()=97531efghijklmnopqrstUvw yz02468") &&
-			lString.find(_T('S'), 0) == 6 &&
-			lString.rfind(_T('S'), lString.length()-1) == 6);
+		lString.insert(0, strutil::Right("Johannes", 6) + str("Sune").substr(0, 1));
+		lTestOk = (lString == "hannesSABCdefghijOAoaklmnopqrstUvw yz*!\"#%&/()=97531efghijklmnopqrstUvw yz02468" &&
+			lString.find('S', 0) == 6 &&
+			lString.rfind('S', lString.length()-1) == 6);
 		deb_assert(lTestOk);
 	}
 
 	// Verify str basics.
 	if (lTestOk)
 	{
-		lContext = _T("String start/end");
-		str lData(_T("This is the start of something new!"));
-		lTestOk = (strutil::StartsWith(lData, _T("This is")) &&
-			!strutil::StartsWith(lData, _T("That is")) &&
-			strutil::EndsWith(lData, _T(" new!")) &&
-			!strutil::EndsWith(lData, _T(" old!")));
+		lContext = "String start/end";
+		str lData("This is the start of something new!");
+		lTestOk = (strutil::StartsWith(lData, "This is") &&
+			!strutil::StartsWith(lData, "That is") &&
+			strutil::EndsWith(lData, " new!") &&
+			!strutil::EndsWith(lData, " old!"));
 		deb_assert(lTestOk);
 	}
 
 	// Verify strutil::Format.
 	if (lTestOk)
 	{
-		lContext = _T("strutil::Format()");
+		lContext = "strutil::Format()";
 		int i = 123;
 		float f = 123.321f;
-		str lString = _T("String ") + strutil::Format(_T("format test: %i, %.4f, %s"), i, f, _T("Hello World!"));
-		lTestOk = (lString == _T("String format test: 123, 123.3210, Hello World!"));
+		str lString = "String " + strutil::Format("format test: %i, %.4f, %s", i, f, "Hello World!");
+		lTestOk = (lString == "String format test: 123, 123.3210, Hello World!");
 		deb_assert(lTestOk);
 	}
 
 	// Verify str conversion to/from Ansi/Unicode.
 	if (lTestOk)
 	{
-		lContext = _T("Ansi/Unicode conversion");
-		const char* lTestData1	=  "Knastest !\"#%&/()=?'-_+\\}][{$@'*.:,;~^<>|";
-		const wchar_t* lTestData2	= L"Knastest !\"#%&/()=?'-_+\\}][{$@'*.:,;~^<>|";
-		wstr lUnicode = wstrutil::Encode(astr(lTestData1));
-		astr lAnsi = astrutil::Encode(wstr(lTestData2));
+		lContext = "Ansi/Unicode conversion";
+		const char* lTestData1    =  "Knastest !\"#%&/()=?'-_+\\}][{$@'*.:,;~^<>|";
+		const wchar_t* lTestData2 = L"Knastest !\"#%&/()=?'-_+\\}][{$@'*.:,;~^<>|";
+		wstr lUnicode = wstrutil::Encode(str(lTestData1));
+		str lAnsi = strutil::Encode(wstr(lTestData2));
 		lTestOk = (lAnsi == lTestData1 && lUnicode == lTestData2);
 		deb_assert(lTestOk);
 	}
@@ -141,22 +141,22 @@ bool TestString(const LogDecorator& pAccount)
 	// Test empty int conversion.
 	if (lTestOk)
 	{
-		lContext = _T("empty int conversion");
+		lContext = "empty int conversion";
 		int lValue = 0;
-		lTestOk = !strutil::StringToInt(_T(""), lValue);
+		lTestOk = !strutil::StringToInt("", lValue);
 		deb_assert(lTestOk);
 	}
 
 	// Test floating point conversion.
 	if (lTestOk)
 	{
-		lContext = _T("float conversion");
+		lContext = "float conversion";
 		float64 lValue = 1.5;
-		str lString = strutil::Format(_T("%.5f"), lValue);
+		str lString = strutil::Format("%.5f", lValue);
 		lTestOk = strutil::StringToDouble(lString, lValue);
 		if (lTestOk)
 		{
-			lTestOk = (lString == _T("1.50000") && lValue == 1.5f);
+			lTestOk = (lString == "1.50000" && lValue == 1.5f);
 		}
 		deb_assert(lTestOk);
 	}
@@ -164,51 +164,51 @@ bool TestString(const LogDecorator& pAccount)
 	// Test empty floating point conversion.
 	if (lTestOk)
 	{
-		lContext = _T("empty float conversion");
+		lContext = "empty float conversion";
 		double lValue = 0;
-		lTestOk = !strutil::StringToDouble(_T(""), lValue);
+		lTestOk = !strutil::StringToDouble("", lValue);
 		deb_assert(lTestOk);
 	}
 
 	// Test fast floating point conversion.
 	if (lTestOk)
 	{
-		lContext = _T("fast float conversion");
-		lTestOk = (strutil::FastDoubleToString(0.0) == _T("0.0"));
+		lContext = "fast float conversion";
+		lTestOk = (strutil::FastDoubleToString(0.0) == "0.0");
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			lTestOk = (strutil::FastDoubleToString(10.0) == _T("10.0"));
+			lTestOk = (strutil::FastDoubleToString(10.0) == "10.0");
 			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
-			lTestOk = (strutil::FastDoubleToString(-287.75) == _T("-287.75"));
+			lTestOk = (strutil::FastDoubleToString(-287.75) == "-287.75");
 			deb_assert(lTestOk);
 		}
 		if (lTestOk)
 		{
-			lTestOk = (strutil::FastDoubleToString(-2.625) == _T("-2.625"));
+			lTestOk = (strutil::FastDoubleToString(-2.625) == "-2.625");
 			deb_assert(lTestOk);
 		}
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("string -> C string");
-		lTestOk = (strutil::StringToCString(_T("Hej\"\\\n'!#\r\t")) == _T("Hej\\\"\\\\\\n'!#\\r\\t"));
+		lContext = "string -> C string";
+		lTestOk = (strutil::StringToCString("Hej\"\\\n'!#\r\t") == "Hej\\\"\\\\\\n'!#\\r\\t");
 		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("C string -> string");
+		lContext = "C string -> string";
 		str lValue;
-		lTestOk = strutil::CStringToString(_T("Hej\\\"\\\\\\n'!#\\r\\t"), lValue);
+		lTestOk = strutil::CStringToString("Hej\\\"\\\\\\n'!#\\r\\t", lValue);
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			lTestOk = (lValue == _T("Hej\"\\\n'!#\r\t"));
+			lTestOk = (lValue == "Hej\"\\\n'!#\r\t");
 			deb_assert(lTestOk);
 		}
 	}
@@ -216,101 +216,100 @@ bool TestString(const LogDecorator& pAccount)
 	strutil::strvec lTestWords;
 	if (lTestOk)
 	{
-		lContext = _T("plain string splitting");
-		lTestWords = strutil::Split(_T("Den \"kyliga Trazan'\"\tapansson\r\n\v.\t\t"), _T(" \t\v\r\n"));
-		lTestOk = (lTestWords.size() == 6 && lTestWords[0] == _T("Den") && lTestWords[1] == _T("\"kyliga") &&
-			lTestWords[2] == _T("Trazan'\"") && lTestWords[3] == _T("apansson") && lTestWords[4] == _T(".") &&
+		lContext = "plain string splitting";
+		lTestWords = strutil::Split("Den \"kyliga Trazan'\"\tapansson\r\n\v.\t\t", " \t\v\r\n");
+		lTestOk = (lTestWords.size() == 6 && lTestWords[0] == "Den" && lTestWords[1] == "\"kyliga" &&
+			lTestWords[2] == "Trazan'\"" && lTestWords[3] == "apansson" && lTestWords[4] == "." &&
 			lTestWords[5].empty());
 		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("string stripping");
-		lTestWords[1] = strutil::StripLeft(lTestWords[1], _T("\""));
-		lTestOk = (lTestWords[1] == _T("kyliga"));
+		lContext = "string stripping";
+		lTestWords[1] = strutil::StripLeft(lTestWords[1], "\"");
+		lTestOk = (lTestWords[1] == "kyliga");
 		if (lTestOk)
 		{
-			lTestOk = (strutil::StripRight(_T("aabbcc"), _T("c")) == _T("aabb"));
+			lTestOk = (strutil::StripRight("aabbcc", "c") == "aabb");
 		}
 		if (lTestOk)
 		{
-			lTestOk = (strutil::Strip(_T("  Jonte  "), _T(" ")) == _T("Jonte"));
+			lTestOk = (strutil::Strip("  Jonte  ", " ") == "Jonte");
 		}
 		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("string joining");
-		str lString = strutil::Join(lTestWords, _T(" "));
-		lTestOk = (lString == _T("Den kyliga Trazan'\" apansson . "));
+		lContext = "string joining";
+		str lString = strutil::Join(lTestWords, " ");
+		lTestOk = (lString == "Den kyliga Trazan'\" apansson . ");
 		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("block string splitting 1");
-		strutil::strvec lWords = strutil::BlockSplit(_T("\"Hej du glade\" sade jag  \ttill\n\n\r\vhonom igen."), _T(" \t\v\r\n"), false, false, 4);
+		lContext = "block string splitting 1";
+		strutil::strvec lWords = strutil::BlockSplit("\"Hej du glade\" sade jag  \ttill\n\n\r\vhonom igen.", " \t\v\r\n", false, false, 4);
 		size_t lPhraseCount = lWords.size();
 		const str& lWord0 = lWords[0];
 		const str& lWord1 = lWords[1];
 		const str& lWord2 = lWords[2];
 		const str& lWord3 = lWords[3];
 		const str& lWord4 = lWords[4];
-		lTestOk = (lPhraseCount == 5 && lWord0 == _T("Hej du glade") && lWord1 == _T("sade") &&
-			lWord2 == _T("jag") && lWord3 == _T("till") && lWord4 == _T("honom igen."));
+		lTestOk = (lPhraseCount == 5 && lWord0 == "Hej du glade" && lWord1 == "sade" &&
+			lWord2 == "jag" && lWord3 == "till" && lWord4 == "honom igen.");
 		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("block string splitting 2");
-		strutil::strvec lWords = strutil::BlockSplit(_T("\"Hej du glade \" sade jag  \t\"till\n\"\n\r\vhan..\nhonom igen."), _T(" \t\v\r\n"), true, false, 4);
-		lTestOk = (lWords.size() == 5 && lWords[0] == _T("\"Hej du glade \"") && lWords[1] == _T("sade") &&
-			lWords[2] == _T("jag") && lWords[3] == _T("\"till\n\"") && lWords[4] == _T("han..\nhonom igen."));
+		lContext = "block string splitting 2";
+		strutil::strvec lWords = strutil::BlockSplit("\"Hej du glade \" sade jag  \t\"till\n\"\n\r\vhan..\nhonom igen.", " \t\v\r\n", true, false, 4);
+		lTestOk = (lWords.size() == 5 && lWords[0] == "\"Hej du glade \"" && lWords[1] == "sade" &&
+			lWords[2] == "jag" && lWords[3] == "\"till\n\"" && lWords[4] == "han..\nhonom igen.");
 		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("block string splitting 3");
-		strutil::strvec lWords = strutil::BlockSplit(_T("\"a\\\"b\""), _T(" \t\v\r\n\""), false, true, 4);
-		lTestOk = (lWords.size() == 1 && lWords[0] == _T("a\\\"b"));
+		lContext = "block string splitting 3";
+		strutil::strvec lWords = strutil::BlockSplit("\"a\\\"b\"", " \t\v\r\n\"", false, true, 4);
+		lTestOk = (lWords.size() == 1 && lWords[0] == "a\\\"b");
 		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("block whitespace limited splitting");
-		strutil::strvec lWords = strutil::BlockSplit(_T("abc def"), _T(" \t\v\r\n\""), false, false, 1);
-		lTestOk = (lWords.size() == 2 && lWords[0] == _T("abc") && lWords[1] == _T("def"));
+		lContext = "block whitespace limited splitting";
+		strutil::strvec lWords = strutil::BlockSplit("abc def", " \t\v\r\n\"", false, false, 1);
+		lTestOk = (lWords.size() == 2 && lWords[0] == "abc" && lWords[1] == "def");
 		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("block string splitting empty quote");
-		strutil::strvec lWords = strutil::BlockSplit(_T("\"\""), _T(" \t\v\r\n"), false, true);
+		lContext = "block string splitting empty quote";
+		strutil::strvec lWords = strutil::BlockSplit("\"\"", " \t\v\r\n", false, true);
 		lTestOk = (lWords.size() == 1 && lWords[0].empty());
 		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("block string splitting quote with spaces");
-		strutil::strvec lWords = strutil::BlockSplit(_T(" \" \" "), _T(" \t\v\r\n"), false, true);
-		lTestOk = (lWords.size() == 2 && lWords[0].empty() && lWords[1] == _T(" "));
+		lContext = "block string splitting quote with spaces";
+		strutil::strvec lWords = strutil::BlockSplit(" \" \" ", " \t\v\r\n", false, true);
+		lTestOk = (lWords.size() == 2 && lWords[0].empty() && lWords[1] == " ");
 		deb_assert(lTestOk);
 	}
 
-#ifdef LEPRA_WINDOWS
 	if (lTestOk)
 	{
-		lContext = _T("JSON coder");
-		const wstr lWC = _WIDE("åäöabcÅÄÖACQñï");
+		lContext = "JSON coder";
+		const wstr lWC = _WIDE("Ã¥Ã¤Ã¶abcÃ…Ã„Ã–ACQÃ±Ã¯");
 		const str lC = strutil::Encode(lWC);
-		const str lJson = _T("\"\\u00E5\\u00E4\\u00F6abc\\u00C5\\u00C4\\u00D6ACQ\\u00F1\\u00EF\"");
+		const str lJson = "\"\\u00E5\\u00E4\\u00F6abc\\u00C5\\u00C4\\u00D6ACQ\\u00F1\\u00EF\"";
 		const str lJsonString = JsonString::ToJson(lC);
 		lTestOk = (lJsonString == lJson);
 		deb_assert(lTestOk);
@@ -321,9 +320,8 @@ bool TestString(const LogDecorator& pAccount)
 			deb_assert(lTestOk);
 		}
 	}
-#endif // Win32
 
-	ReportTestResult(pAccount, _T("String"), lContext, lTestOk);
+	ReportTestResult(pAccount, "String", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -334,7 +332,7 @@ bool TestRandom(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("uniform span");
+		lContext = "uniform span";
 		const double lLow = 0.5;
 		const double lHigh = 2.0;
 		double lAverage = 0;
@@ -348,7 +346,7 @@ bool TestRandom(const LogDecorator& pAccount)
 		}
 		if (lTestOk)
 		{
-			lContext = _T("uniform mean");
+			lContext = "uniform mean";
 			lAverage /= cnt;
 			lTestOk = (lAverage >= 1.23 && lAverage <= 1.27);
 			deb_assert(lTestOk);
@@ -368,20 +366,20 @@ bool TestRandom(const LogDecorator& pAccount)
 			deb_assert(lValues[x] >= -10 && lValues[x] <= +10);
 			lAverage += lValues[x];
 		}
-		lContext = _T("normal mean");
+		lContext = "normal mean";
 		lAverage /= cnt;
 		lTestOk = (lAverage >= lMean-0.03*lStdDev && lAverage <= lMean+0.03*lStdDev);
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			lContext = _T("normal distribuion");
+			lContext = "normal distribuion";
 			const double lActualStdDev = Math::CalculateDeviation<double>(lValues, lMean);
 			lTestOk = (lActualStdDev >= lStdDev-0.04 && lActualStdDev <= lStdDev+0.04);
 			deb_assert(lTestOk);
 		}
 	}
 
-	ReportTestResult(pAccount, _T("Random"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Random", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -393,7 +391,7 @@ bool TestMath(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("smooth clamp narrow below max exp");
+		lContext = "smooth clamp narrow below max exp";
 		lResult = Math::SmoothClamp(0.9, 0.0, 1.0, 0.1);
 		lTestOk = (lResult == 0.9);
 		deb_assert(lTestOk);
@@ -401,7 +399,7 @@ bool TestMath(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("smooth clamp wide above max exp");
+		lContext = "smooth clamp wide above max exp";
 		lResult = Math::SmoothClamp(0.95, 0.0, 1.0, 0.5);
 		lTestOk = (lResult < 0.8);
 		deb_assert(lTestOk);
@@ -409,7 +407,7 @@ bool TestMath(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("smooth clamp above min exp");
+		lContext = "smooth clamp above min exp";
 		lResult = Math::SmoothClamp(0.3, 0.0, 1.0, 0.3);
 		lTestOk = (lResult == 0.3);
 		deb_assert(lTestOk);
@@ -417,13 +415,13 @@ bool TestMath(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("smooth clamp below min exp");
+		lContext = "smooth clamp below min exp";
 		lResult = Math::SmoothClamp(0.2, 0.0, 1.0, 0.4);
 		lTestOk = (lResult > 0.23);
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("Math"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Math", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -437,8 +435,8 @@ bool TestNumber(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lDesiredResult = _T("1.00 ");
-		lContext = _T("testing ")+lDesiredResult;
+		lDesiredResult = "1.00 ";
+		lContext = "testing "+lDesiredResult;
 		lResult = Number::ConvertToPostfixNumber(1, 2);
 		lTestOk = (lResult == lDesiredResult);
 		deb_assert(lTestOk);
@@ -446,8 +444,8 @@ bool TestNumber(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lDesiredResult = _T("1.41 k");
-		lContext = _T("testing ")+lDesiredResult;
+		lDesiredResult = "1.41 k";
+		lContext = "testing "+lDesiredResult;
 		lResult = Number::ConvertToPostfixNumber(1.414444e3, 2);
 		lTestOk = (lResult == lDesiredResult);
 		deb_assert(lTestOk);
@@ -455,8 +453,8 @@ bool TestNumber(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lDesiredResult = _T("7.6667 m");
-		lContext = _T("rounding ")+lDesiredResult;
+		lDesiredResult = "7.6667 m";
+		lContext = "rounding "+lDesiredResult;
 		lResult = Number::ConvertToPostfixNumber(7.66666666666666e-3, 4);
 		lTestOk = (lResult == lDesiredResult);
 		deb_assert(lTestOk);
@@ -464,14 +462,14 @@ bool TestNumber(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lDesiredResult = _T("10 M");
-		lContext = _T("testing ")+lDesiredResult;
+		lDesiredResult = "10 M";
+		lContext = "testing "+lDesiredResult;
 		lResult = Number::ConvertToPostfixNumber(10e6, 0);
 		lTestOk = (lResult == lDesiredResult);
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("Number"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Number", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -486,14 +484,14 @@ bool TestVector3D(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lDesiredResult = 0;
-		lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
+		lContext = "testing polar angle Y " + strutil::Format("%.1f", lDesiredResult);
 		lResult = vec3(1,0,0).GetPolarCoordAngleY();
 		lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			lDesiredResult = PIF/2;
-			lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
+			lContext = "testing polar angle Y " + strutil::Format("%.1f", lDesiredResult);
 			lResult = vec3(0,0,1).GetPolarCoordAngleY();
 			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
 			deb_assert(lTestOk);
@@ -502,7 +500,7 @@ bool TestVector3D(const LogDecorator& pAccount)
 		if (lTestOk)
 		{
 			lDesiredResult = -5*PIF/6;
-			lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
+			lContext = "testing polar angle Y " + strutil::Format("%.1f", lDesiredResult);
 			//lResult = vec3(-sqrtf(3),0,-1).GetPolarCoordAngleY();
 			lResult = atan2(-1, -sqrtf(3));
 			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
@@ -512,7 +510,7 @@ bool TestVector3D(const LogDecorator& pAccount)
 		if (lTestOk)
 		{
 			lDesiredResult = +PIF;
-			lContext = _T("testing polar angle Y ") + strutil::Format(_T("%.1f"), lDesiredResult);
+			lContext = "testing polar angle Y " + strutil::Format("%.1f", lDesiredResult);
 			//lResult = vec3(-1,0,0).GetPolarCoordAngleY();
 			lResult = atan2(0.0f, -1.0f);
 			lTestOk = Math::IsEpsEqual(lResult, lDesiredResult);
@@ -520,7 +518,7 @@ bool TestVector3D(const LogDecorator& pAccount)
 		}
 	}
 
-	ReportTestResult(pAccount, _T("Vector3D"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Vector3D", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -529,30 +527,30 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 	str lContext;
 	bool lTestOk = true;
 
-	OrderedMap<astr, int> lMap;
+	OrderedMap<str, int> lMap;
 	if (lTestOk)
 	{
-		lContext = _T("empty start");
+		lContext = "empty start";
 		lTestOk = (lMap.GetCount() == 0 && lMap.Find("4") == lMap.End());
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("insert unique");
+		lContext = "insert unique";
 		lMap.PushBack("4",  5);
 		lTestOk = (lMap.GetCount() == 1 && lMap.Find("4").GetObject() == 5);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("erase -> empty");
+		lContext = "erase -> empty";
 		lMap.Remove(lMap.Find("4"));
 		lTestOk = (lMap.GetCount() == 0 && lMap.Find("4") == lMap.End());
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("insert two");
+		lContext = "insert two";
 		lMap.PushBack("4",  5);
 		lMap.PushBack("5",  4);
 		lTestOk = (lMap.GetCount() == 2 && lMap.Find("4").GetObject() == 5 && lMap.Find("5").GetObject() == 4);
@@ -560,8 +558,8 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("pop front");
-		astr lKey;
+		lContext = "pop front";
+		str lKey;
 		int lValue;
 		lMap.PopFront(lKey, lValue);
 		lTestOk = (lKey == "4" && lValue == 5 && lMap.GetCount() == 1);
@@ -569,8 +567,8 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("pop back");
-		astr lKey;
+		lContext = "pop back";
+		str lKey;
 		int lValue;
 		lMap.PopBack(lKey, lValue);
 		lTestOk = (lKey == "5" && lValue == 4 && lMap.GetCount() == 0);
@@ -578,7 +576,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("insert three");
+		lContext = "insert three";
 		lMap.PushFront("5",  4);
 		lMap.PushFront("4",  5);
 		lMap.PushFront("3",  3);
@@ -588,7 +586,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("erase mid");
+		lContext = "erase mid";
 		lMap.Remove("4");
 		lTestOk = (lMap.GetCount() == 2 && lMap.Find("3").GetObject() == 3 &&
 			lMap.Find("4") == lMap.End() && lMap.Find("5").GetObject() == 4);
@@ -596,7 +594,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("erase end");
+		lContext = "erase end";
 		lMap.Remove("5");
 		lTestOk = (lMap.GetCount() == 1 && lMap.Find("3").GetObject() == 3 &&
 			lMap.Find("4") == lMap.End() && lMap.Find("5") == lMap.End());
@@ -604,7 +602,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("erase last");
+		lContext = "erase last";
 		lMap.Remove("3");
 		lTestOk = (lMap.GetCount() == 0 && lMap.Find("3") == lMap.End() &&
 			lMap.Find("4") == lMap.End() && lMap.Find("5") == lMap.End());
@@ -612,9 +610,9 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("random add/remove");
+		lContext = "random add/remove";
 		const int lEntries = 11;
-		astr lSet[lEntries];
+		str lSet[lEntries];
 		size_t lSetCount = 0;
 		for (int x = 1; lTestOk && x < 10000; ++x)
 		{
@@ -633,7 +631,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 			}
 			else if (lSet[lIndex].empty())
 			{
-				lSet[lIndex] = ":"+astrutil::Format("%i", x);
+				lSet[lIndex] = ":"+strutil::Format("%i", x);
 				lTestOk = lMap.Find(lSet[lIndex]) == lMap.End();
 				deb_assert(lTestOk);
 				if (lTestOk)
@@ -653,7 +651,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 				if (lTestOk)
 				{
 					int lValue = -1;
-					astrutil::StringToInt(lSet[lIndex].c_str()+1, lValue, 10);
+					strutil::StringToInt(lSet[lIndex].c_str()+1, lValue, 10);
 					lTestOk = (lTestOk && lMap.Find(lSet[lIndex]).GetObject() == lValue);
 					deb_assert(lTestOk);
 				}
@@ -680,7 +678,7 @@ bool TestOrderedMap(const LogDecorator& pAccount)
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("OrderedMap"), lContext, lTestOk);
+	ReportTestResult(pAccount, "OrderedMap", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -693,149 +691,149 @@ bool TestIdManager(const LogDecorator& pAccount)
 	IdManager<int> lIdManager(3, 100, -2);
 	if (lTestOk)
 	{
-		lContext = _T("min ID");
+		lContext = "min ID";
 		lTestOk = (lIdManager.GetMinId() == 3);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("max ID");
+		lContext = "max ID";
 		lTestOk = (lIdManager.GetMaxId() == 100);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("invalid ID");
+		lContext = "invalid ID";
 		lTestOk = (lIdManager.GetInvalidId() == -2);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("reserve ID (4)");
+		lContext = "reserve ID (4)";
 		lTestOk = lIdManager.ReserveId(4);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager.GetDebugState();
-		lTestOk = (lDebugState == _T("3-2, 3-3,\n4-4, 5-100,\n"));
+		lTestOk = (lDebugState == "3-2, 3-3,\n4-4, 5-100,\n");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("alloc ID (3)");
+		lContext = "alloc ID (3)";
 		lTestOk = (lIdManager.GetFreeId() == 3);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("alloc ID (5)");
+		lContext = "alloc ID (5)";
 		lTestOk = (lIdManager.GetFreeId() == 5);
 		lDebugState = lIdManager.GetDebugState();
-		lTestOk = (lDebugState == _T("3-5, 6-100,\n"));
+		lTestOk = (lDebugState == "3-5, 6-100,\n");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("recycle ID (4)");
+		lContext = "recycle ID (4)";
 		lTestOk = lIdManager.RecycleId(4);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("invalid recycle ID (4)");
+		lContext = "invalid recycle ID (4)";
 		lTestOk = !lIdManager.RecycleId(4);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("invalid recycle ID (4)");
+		lContext = "invalid recycle ID (4)";
 		lTestOk = !lIdManager.RecycleId(4);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("invalid recycle ID (7)");
+		lContext = "invalid recycle ID (7)";
 		lTestOk = !lIdManager.RecycleId(7);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("invalid recycle ID (1000)");
+		lContext = "invalid recycle ID (1000)";
 		lTestOk = !lIdManager.RecycleId(1000);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("invalid recycle ID (-2)");
+		lContext = "invalid recycle ID (-2)";
 		lTestOk = !lIdManager.RecycleId(-2);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("reserve ID (4)");
+		lContext = "reserve ID (4)";
 		lTestOk = lIdManager.ReserveId(4);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("invalid reserve ID (3)");
+		lContext = "invalid reserve ID (3)";
 		lTestOk = !lIdManager.ReserveId(3);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("invalid reserve ID (4)");
+		lContext = "invalid reserve ID (4)";
 		lTestOk = !lIdManager.ReserveId(4);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("invalid reserve ID (2)");
+		lContext = "invalid reserve ID (2)";
 		lTestOk = !lIdManager.ReserveId(2);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("invalid reserve ID (-2)");
+		lContext = "invalid reserve ID (-2)";
 		lTestOk = !lIdManager.ReserveId(-2);
 		deb_assert(lTestOk);
 	}
 	for (int x = 6; lTestOk && x <= 100; ++x)
 	{
-		lContext = _T("alloc many IDs");
+		lContext = "alloc many IDs";
 		lTestOk = (lIdManager.GetFreeId() == x);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("no free IDs");
+		lContext = "no free IDs";
 		lTestOk = (lIdManager.GetFreeId() == -2);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager.GetDebugState();
-		lTestOk = (lDebugState == _T("3-100, 101-100,\n"));
+		lTestOk = (lDebugState == "3-100, 101-100,\n");
 		deb_assert(lTestOk);
 	}
 	for (int y = 0; y < 1000; ++y)
 	{
 		for (int z = 100; lTestOk && z >= 3; z -= 2)
 		{
-			lContext = _T("free dec-loop");
+			lContext = "free dec-loop";
 			lTestOk = lIdManager.RecycleId(z);
 			deb_assert(lTestOk);
 		}
 		for (int u = 100; lTestOk && u >= 3; u -= 2)
 		{
-			lContext = _T("reserve dec-loop");
+			lContext = "reserve dec-loop";
 			lTestOk = lIdManager.ReserveId(u);
 			deb_assert(lTestOk);
 		}
 		for (int v = 3; lTestOk && v <= 100; ++v)
 		{
-			lContext = _T("free inc-loop");
+			lContext = "free inc-loop";
 			lTestOk = lIdManager.RecycleId(v);
 			deb_assert(lTestOk);
 		}
 		for (int w = 3; lTestOk && w <= 100; ++w)
 		{
-			lContext = _T("alloc inc-loop");
+			lContext = "alloc inc-loop";
 			lTestOk = (lIdManager.GetFreeId() == w);
 			deb_assert(lTestOk);
 		}
@@ -845,155 +843,155 @@ bool TestIdManager(const LogDecorator& pAccount)
 		// Just simple an anti-crash test.
 		IdManager<int> lIdManager2(1, 0x7FFFFFFF-1, 0xFFFFFFFF);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(1);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-1, 2-2147483646,\n"));
+		lTestOk = (lDebugState == "1-1, 2-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(5);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-1, 2-4,\n5-5, 6-2147483646,\n"));
+		lTestOk = (lDebugState == "1-1, 2-4,\n5-5, 6-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(3);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-1, 2-2,\n3-3, 4-4,\n5-5, 6-2147483646,\n"));
+		lTestOk = (lDebugState == "1-1, 2-2,\n3-3, 4-4,\n5-5, 6-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(1);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(2147483646);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = !lIdManager2.RecycleId(4);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = !lIdManager2.RecycleId(6);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = !lIdManager2.RecycleId(1);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = !lIdManager2.RecycleId(2147483645);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2,\n3-3, 4-4,\n5-5, 6-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(5);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2,\n3-3, 4-2147483645,\n2147483646-2147483646, 2147483647-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(2147483646);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2,\n3-3, 4-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2,\n3-3, 4-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(3);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(1);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-1, 2-2147483646,\n"));
+		lTestOk = (lDebugState == "1-1, 2-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(7);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-1, 2-6,\n7-7, 8-2147483646,\n"));
+		lTestOk = (lDebugState == "1-1, 2-6,\n7-7, 8-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(8);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-1, 2-6,\n7-8, 9-2147483646,\n"));
+		lTestOk = (lDebugState == "1-1, 2-6,\n7-8, 9-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(4);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-1, 2-3,\n4-4, 5-6,\n7-8, 9-2147483646,\n"));
+		lTestOk = (lDebugState == "1-1, 2-3,\n4-4, 5-6,\n7-8, 9-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(1);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-3,\n4-4, 5-6,\n7-8, 9-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-3,\n4-4, 5-6,\n7-8, 9-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(4);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-6,\n7-8, 9-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-6,\n7-8, 9-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(8);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-6,\n7-7, 8-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-6,\n7-7, 8-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(7);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(8);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-7,\n8-8, 9-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-7,\n8-8, 9-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.ReserveId(7);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-6,\n7-8, 9-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-6,\n7-8, 9-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(8);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-6,\n7-7, 8-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-6,\n7-7, 8-2147483646,\n");
 		deb_assert(lTestOk);
 
 		lTestOk = lIdManager2.RecycleId(7);
 		deb_assert(lTestOk);
 		lDebugState = lIdManager2.GetDebugState();
-		lTestOk = (lDebugState == _T("1-0, 1-2147483646,\n"));
+		lTestOk = (lDebugState == "1-0, 1-2147483646,\n");
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("IdManager"), lContext, lTestOk);
+	ReportTestResult(pAccount, "IdManager", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -1005,7 +1003,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("anchor rotate 1");
+		lContext = "anchor rotate 1";
 		TransformationD lTransformation;
 		lTransformation.SetPosition(Vector3DD(4, 1, 1));
 		lTransformation.RotateAroundAnchor(Vector3DD(3, 0, -0.41), Vector3DD(0, 0, 1), PIF/2);
@@ -1014,7 +1012,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("matrix rotate");
+		lContext = "matrix rotate";
 		const Vector3DD lAxis(1, -1, 0);
 		RotationMatrixD lMatrix1;
 		lMatrix1.RotateAroundVector(lAxis, PI/4);
@@ -1028,7 +1026,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("quaternion rotate");
+		lContext = "quaternion rotate";
 		const Vector3DD lAxis(1, -1, 0);
 		QuaternionD lQuaternion1(PI/4, lAxis);
 		QuaternionD lQuaternion2(-PI*3/4, lAxis);
@@ -1040,7 +1038,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("quaternion multiply");
+		lContext = "quaternion multiply";
 		Vector3DD x(1, 0, 0);
 		QuaternionD q1(PI/2, Vector3DD(0, -1, 0));
 		x = q1*x;
@@ -1056,7 +1054,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("anchor rotate 2");
+		lContext = "anchor rotate 2";
 		const Vector3DD lAnchor(0, -1, -1);
 		TransformationD lTransformation1;
 		lTransformation1.SetPosition(Vector3DD(2, 1, -1));
@@ -1077,7 +1075,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("quaternion rotate 2");
+		lContext = "quaternion rotate 2";
 		Vector3DD lVector(0, 1, 0);
 		QuaternionD lQ(PI/4, Vector3DD(0, 0, 1));
 		lQ.RotateAroundOwnX(PI/4);
@@ -1093,7 +1091,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("quaternion back&forth 1");
+		lContext = "quaternion back&forth 1";
 		const QuaternionD lParentQ(0.95, Vector3DD(1, 1, 0));
 		const QuaternionD lChildRelativeQ(PI/4, Vector3DD(1, 0, 0));
 		const QuaternionD lChildAbsoluteQ = lChildRelativeQ*lParentQ;
@@ -1123,7 +1121,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("quaternion/matrix angle 1");
+		lContext = "quaternion/matrix angle 1";
 		QuaternionD lQ;
 		lQ.RotateAroundOwnZ(PI/3);
 		lQ.RotateAroundOwnX(-PI/7);
@@ -1141,7 +1139,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("vector spherical angles 1");
+		lContext = "vector spherical angles 1";
 		double lTheta = -1;
 		double lPhi = -1;
 		const double l45 = ::sin(PI/4);
@@ -1152,7 +1150,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("vector spherical angles 2");
+		lContext = "vector spherical angles 2";
 		double lTheta = -1;
 		double lPhi = -1;
 		const double l45 = ::sin(PI/4);
@@ -1163,7 +1161,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("vector spherical angles 3");
+		lContext = "vector spherical angles 3";
 		double lTheta = -1;
 		double lPhi = -1;
 		Vector3DD(1, 0, 0).GetSphericalAngles(lTheta, lPhi);
@@ -1173,7 +1171,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("vector spherical angles 3");
+		lContext = "vector spherical angles 3";
 		double lTheta = -1;
 		double lPhi = -1;
 		Vector3DD(0, 0, 1).GetSphericalAngles(lTheta, lPhi);
@@ -1183,7 +1181,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("vector spherical angles 4");
+		lContext = "vector spherical angles 4";
 		double lTheta = -1;
 		double lPhi = -1;
 		Vector3DD(0, -1, -1).GetSphericalAngles(lTheta, lPhi);
@@ -1193,7 +1191,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("quaternion euler angles 1");
+		lContext = "quaternion euler angles 1";
 
 		double lYaw = 0;
 		double lPitch = PI/4;
@@ -1221,7 +1219,7 @@ bool TestTransformation(const LogDecorator& pAccount)
 		}
 	}
 
-	ReportTestResult(pAccount, _T("Transformation"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Transformation", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -1233,7 +1231,7 @@ bool TestTimers(const LogDecorator& pAccount)
 	// Basic timer test.
 	if (lTestOk)
 	{
-		lContext = _T("timer");
+		lContext = "timer";
 		Thread::Sleep(0.001);	// Bail early on cpu time slice.
 		HiResTimer lHiTimer(false);
 		Timer lLoTimer;
@@ -1245,7 +1243,7 @@ bool TestTimers(const LogDecorator& pAccount)
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("Timers"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Timers", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -1257,19 +1255,19 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	// Directory test.
 	if (lTestOk)
 	{
-		lContext = _T("root directory");
+		lContext = "root directory";
 		str lRootDir = SystemManager::GetRootDirectory();
 
 #if defined(LEPRA_WINDOWS)
 		// Hugge: This test will fail if this app runs from another partition.
-		// lTestOk = (lRootDir ==_T("C:/")); 
+		// lTestOk = (lRootDir =="C:/"); 
 		str lDriveLetter = lRootDir.substr(0, 1);
 		str lRest = lRootDir.substr(1);
-		lTestOk = lDriveLetter >= _T("A") && 
-				   lDriveLetter <= _T("Z") &&
-				   lRest == _T(":/");
+		lTestOk = lDriveLetter >= "A" && 
+				   lDriveLetter <= "Z" &&
+				   lRest == ":/";
 #elif defined(LEPRA_POSIX)
-		lTestOk = (lRootDir == _T("/"));
+		lTestOk = (lRootDir == "/");
 #else // <Unknown target>
 #error "Unknown target!"
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
@@ -1277,7 +1275,7 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("current/documents directory");
+		lContext = "current/documents directory";
 		lTestOk = (SystemManager::GetCurrentDirectory().length() >= 4 &&
 			SystemManager::GetUserDirectory().length() >= 4);
 		deb_assert(lTestOk);
@@ -1286,12 +1284,12 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	// Platform/user test.
 	if (lTestOk)
 	{
-		lContext = _T("Os name");
+		lContext = "Os name";
 		str lOs = SystemManager::GetOsName();
 #if defined(LEPRA_WINDOWS)
-		lTestOk = (lOs == _T("Windows NT"));
+		lTestOk = (lOs == "Windows NT");
 #elif defined(LEPRA_POSIX)
-		lTestOk = (lOs == _T("Darwin") || lOs == _T("Linux"));
+		lTestOk = (lOs == "Darwin" || lOs == "Linux");
 #else // <Unknown target>
 #error "Not implemented for this platform!"
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
@@ -1299,13 +1297,13 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("login name");
+		lContext = "login name";
 		lTestOk = (SystemManager::GetLoginName().length() >= 1);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("user name");
+		lContext = "user name";
 		lTestOk = (SystemManager::QueryFullUserName().length() >= 1);
 		deb_assert(lTestOk);
 	}
@@ -1313,33 +1311,33 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	// Cpu test.
 	if (lTestOk)
 	{
-		lContext = _T("physical CPU count");
+		lContext = "physical CPU count";
 		lTestOk = (SystemManager::GetPhysicalCpuCount() >= 1 && SystemManager::GetPhysicalCpuCount() <= 4);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("logical CPU count");
+		lContext = "logical CPU count";
 		lTestOk = (SystemManager::GetLogicalCpuCount() >= 1 && SystemManager::GetLogicalCpuCount() <= 16);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("CPU core count");
+		lContext = "CPU core count";
 		lTestOk = (SystemManager::GetCoreCount() >= 1 && SystemManager::GetCoreCount() <= 4);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("Cpu type");
+		lContext = "Cpu type";
 		str lCpuName = SystemManager::GetCpuName();
-		lTestOk = (lCpuName == _T("GenuineIntel") || lCpuName == _T("AuthenticAMD") ||
-			lCpuName == _T("x64") || lCpuName == _T("x86") || lCpuName == _T("PowerPC"));
+		lTestOk = (lCpuName == "GenuineIntel" || lCpuName == "AuthenticAMD" ||
+			lCpuName == "x64" || lCpuName == "x86" || lCpuName == "PowerPC");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("Cpu frequency");
+		lContext = "Cpu frequency";
 		uint64 lCpuFrequency = SystemManager::QueryCpuFrequency();
 		lTestOk = (lCpuFrequency >= 700*1000*1000 &&
 			lCpuFrequency <= (uint64)6*1000*1000*1000);
@@ -1347,7 +1345,7 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("Cpu MIPS");
+		lContext = "Cpu MIPS";
 		unsigned lCpuMips = SystemManager::QueryCpuMips();
 		lTestOk = (lCpuMips >= 50 && lCpuMips <= 3500);
 		deb_assert(lTestOk);
@@ -1356,40 +1354,40 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	// Memory test.
 	if (lTestOk)
 	{
-		lContext = _T("Ram size");
+		lContext = "Ram size";
 		lTestOk = (SystemManager::GetAmountRam() >= 64*1024*1024 &&
 			SystemManager::GetAmountRam() <= (uint64)4*1024*1024*1024);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("available Ram >= total Ram");
+		lContext = "available Ram >= total Ram";
 		lTestOk = (SystemManager::GetAvailRam() <= SystemManager::GetAmountRam());
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("available Ram size");
+		lContext = "available Ram size";
 		lTestOk = (SystemManager::GetAvailRam() >= 30*1024*1024 &&
 			SystemManager::GetAvailRam() <= (uint64)4*1024*1024*1024);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("virtual memory size");
+		lContext = "virtual memory size";
 		lTestOk = (SystemManager::GetAmountVirtualMemory() >= 150*1024*1024 &&
 			SystemManager::GetAmountVirtualMemory() <= (uint64)20*1024*1024*1024);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("available virtual memory > total virtual memory");
+		lContext = "available virtual memory > total virtual memory";
 		lTestOk = (SystemManager::GetAvailVirtualMemory() <= SystemManager::GetAmountVirtualMemory());
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("available virtual memory size");
+		lContext = "available virtual memory size";
 		lTestOk = (SystemManager::GetAvailVirtualMemory() >= 100*1024*1024 &&
 			SystemManager::GetAvailVirtualMemory() <= (uint64)19*1024*1024*1024);
 		deb_assert(lTestOk);
@@ -1398,16 +1396,16 @@ bool TestSystemManager(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		// Just make sure we don't crash. Need manual verification that it works anyhoo.
-		SystemManager::WebBrowseTo(_T("http://trialepicfail.blogspot.com/"));
+		SystemManager::WebBrowseTo("http://trialepicfail.blogspot.com/");
 	}
 	if (lTestOk)
 	{
 		// Just make sure we don't crash. Need manual verification that it works anyhoo.
-		SystemManager::EmailTo(_T("info@pixeldoctrine.com"), _T("Test subject?"), _T("Hi,\n\nHow are you? Hope you're good!\n\nLater,\nJonas"));
+		SystemManager::EmailTo("info@pixeldoctrine.com", "Test subject?", "Hi,\n\nHow are you? Hope you're good!\n\nLater,\nJonas");
 	}
 #endif // !TEST_WEB_AND_MAIL
 
-	ReportTestResult(pAccount, _T("System"), lContext, lTestOk);
+	ReportTestResult(pAccount, "System", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -1418,39 +1416,39 @@ bool TestNetwork(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("network start");
+		lContext = "network start";
 		lTestOk = Network::Start();
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("local resolve");
+		lContext = "local resolve";
 		SocketAddress lAddress;
-		lTestOk = lAddress.Resolve(_T(":1024"));
+		lTestOk = lAddress.Resolve(":1024");
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
 			const str lLocalAddress = lAddress.GetAsString();
-			lTestOk = ((strutil::StartsWith(lLocalAddress, _T("127.0.")) &&
-				strutil::EndsWith(lLocalAddress, _T(".1:1024"))) ||
-				(strutil::StartsWith(lLocalAddress, _T("192.168.")) &&
-				strutil::EndsWith(lLocalAddress, _T(":1024"))));
+			lTestOk = ((strutil::StartsWith(lLocalAddress, "127.0.") &&
+				strutil::EndsWith(lLocalAddress, ".1:1024")) ||
+				(strutil::StartsWith(lLocalAddress, "192.168.") &&
+				strutil::EndsWith(lLocalAddress, ":1024")));
 			deb_assert(lTestOk);
 		}
 	}
 	if (lTestOk)
 	{
-		lContext = _T("DNS resolve");
+		lContext = "DNS resolve";
 		IPAddress lAddress;
-		lTestOk = Network::ResolveHostname(_T("ftp.sunet.se"), lAddress);
+		lTestOk = Network::ResolveHostname("ftp.sunet.se", lAddress);
 		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("UDP exclusive bind");
+		lContext = "UDP exclusive bind";
 		SocketAddress lAddress;
-		lAddress.Resolve(_T(":1025"));
+		lAddress.Resolve(":1025");
 		UdpSocket lSocket1(lAddress, true);
 		UdpSocket lSocket2(lAddress, true);
 		lTestOk = (lSocket1.IsOpen() && !lSocket2.IsOpen());
@@ -1459,11 +1457,11 @@ bool TestNetwork(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("UDP send");
+		lContext = "UDP send";
 		SocketAddress lReceiveAddress;
-		lReceiveAddress.Resolve(_T(":47346"));
+		lReceiveAddress.Resolve(":47346");
 		SocketAddress lSendAddress;
-		lSendAddress.Resolve(_T(":47347"));
+		lSendAddress.Resolve(":47347");
 		UdpSocket lReceiver(lReceiveAddress, true);
 		deb_assert(lReceiver.IsOpen());
 		UdpSocket lSender(lSendAddress, true);
@@ -1472,7 +1470,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			lContext = _T("UDP receive");
+			lContext = "UDP receive";
 			uint8 lMessage[12];
 			SocketAddress lSourceAddress;
 			int lRecvCount = lReceiver.ReceiveFrom(lMessage, sizeof(lMessage), lSourceAddress);
@@ -1484,11 +1482,11 @@ bool TestNetwork(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("TCP server init");
+		lContext = "TCP server init";
 		SocketAddress lReceiveAddress;
-		lReceiveAddress.Resolve(_T(":47346"));
+		lReceiveAddress.Resolve(":47346");
 		SocketAddress lSendAddress;
-		lSendAddress.Resolve(_T(":47347"));
+		lSendAddress.Resolve(":47347");
 		TcpListenerSocket lServer(lReceiveAddress, true);
 		lTestOk = lServer.IsOpen();
 		deb_assert(lTestOk);
@@ -1513,7 +1511,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 		DummyAcceptor* lAcceptor = 0;
 		if (lTestOk)
 		{
-			lContext = _T("TCP acceptor start");
+			lContext = "TCP acceptor start";
 			lAcceptor = new DummyAcceptor(&lServer);
 			lTestOk = lAcceptor->Start();
 			deb_assert(lTestOk);
@@ -1521,7 +1519,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 		TcpSocket lSender(lSendAddress);
 		if (lTestOk)
 		{
-			lContext = _T("TCP connect");
+			lContext = "TCP connect";
 			lTestOk = false;
 			for (int x = 0; x < 3 && !lTestOk; ++x)
 			{
@@ -1533,7 +1531,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 		TcpSocket* lReceiver = 0;
 		if (lTestOk)
 		{
-			lContext = _T("TCP accept");
+			lContext = "TCP accept";
 			for (int x = 0; !lReceiver && x < 300; ++x)
 			{
 				lReceiver = lAcceptor->mConnectSocket;
@@ -1549,7 +1547,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 		const int lPacketByteCount = 100;
 		if (lTestOk)
 		{
-			lContext = _T("TCP overflow sends");
+			lContext = "TCP overflow sends";
 			for (int x = 0; lTestOk && x < lPacketCount; ++x)
 			{
 				uint8 lValue[lPacketByteCount];
@@ -1563,7 +1561,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 		}
 		if (lTestOk)
 		{
-			lContext = _T("TCP underflow receive");
+			lContext = "TCP underflow receive";
 			Thread::Sleep(0.2f);	// On POSIX, it actually takes some time to pass through firewall and stuff.
 			for (int x = 0; lTestOk && x < lPacketCount/10; ++x)
 			{
@@ -1587,7 +1585,7 @@ bool TestNetwork(const LogDecorator& pAccount)
 
 		if (lTestOk)
 		{
-			lContext = _T("TCP algo receiver");
+			lContext = "TCP algo receiver";
 			lSender.Send("A1B2C3", 6);
 			class TestReceiver: public DatagramReceiver
 			{
@@ -1615,12 +1613,12 @@ bool TestNetwork(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("network stop");
+		lContext = "network stop";
 		lTestOk = Network::Stop();
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("Network"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Network", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -1634,15 +1632,15 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 	TcpMuxSocket* lAcceptSocket = 0;
 	if (lTestOk)
 	{
-		lContext = _T("resolving acceptor");
-		lTestOk = lAcceptAddress.Resolve(_T(":46767"));
+		lContext = "resolving acceptor";
+		lTestOk = lAcceptAddress.Resolve(":46767");
 		//lAcceptAddress.SetPort(lAcceptPort);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("opening TCP MUX");
-		lAcceptSocket = new TcpMuxSocket(_T("T1"), lAcceptAddress, true);
+		lContext = "opening TCP MUX";
+		lAcceptSocket = new TcpMuxSocket("T1", lAcceptAddress, true);
 		lAcceptSocket->SetConnectIdTimeout(5.0);
 		lTestOk = lAcceptSocket->IsOpen();
 		deb_assert(lTestOk);
@@ -1652,21 +1650,21 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 	TcpSocket* lConnectSocket = 0;
 	if (lTestOk)
 	{
-		lContext = _T("resolving connector");
-		lTestOk = lConnectorAddress.Resolve(_T(":47676"));
+		lContext = "resolving connector";
+		lTestOk = lConnectorAddress.Resolve(":47676");
 		//lConnectorAddress.SetPort(lConnectPort);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("creating TCP");
+		lContext = "creating TCP";
 		lConnectSocket = new TcpSocket(lConnectorAddress);
 		lTestOk = lConnectSocket->IsOpen();
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("connecting TCP");
+		lContext = "connecting TCP";
 		lTestOk = false;
 		for (int x = 0; !lTestOk && x < 1000; ++x)
 		{
@@ -1677,7 +1675,7 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("verifying TCP MUX connection count");
+		lContext = "verifying TCP MUX connection count";
 		unsigned lConnectionCount = 0;
 		for (int x = 0; lConnectionCount == 0 && x < 500; ++x)
 		{
@@ -1689,7 +1687,7 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("dropping non-V TCP connect");
+		lContext = "dropping non-V TCP connect";
 		lAcceptSocket->SetConnectIdTimeout(0.01);
 		lTestOk = false;
 		for (int x = 0; x < 3 && !lTestOk; ++x)
@@ -1716,7 +1714,7 @@ bool TestTcpMuxSocket(const LogDecorator& pAccount)
 
 	Network::Stop();
 
-	ReportTestResult(pAccount, _T("TcpMuxSocket"), lContext, lTestOk);
+	ReportTestResult(pAccount, "TcpMuxSocket", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -1737,7 +1735,7 @@ template<class _MuxSocket, class _VSocket> class ServerSocketHandler: public Thr
 public:
 	typedef _VSocket VSocket;
 	typedef _VSocket* (_MuxSocket::*_AcceptMethod)();
-	ServerSocketHandler(const astr& pName, _MuxSocket& pServerSocket, _AcceptMethod pAcceptMethod, bool pLoop):
+	ServerSocketHandler(const str& pName, _MuxSocket& pServerSocket, _AcceptMethod pAcceptMethod, bool pLoop):
 		Thread(pName),
 		mServerSocket(0),
 		mServerMuxSocket(pServerSocket),
@@ -1793,7 +1791,7 @@ bool DualSocketClientTest::Test()
 
 	if (lTestOk)
 	{
-		lContext = _T("network startup error");
+		lContext = "network startup error";
 		lTestOk = Network::Start();
 		deb_assert(lTestOk);
 	}
@@ -1801,18 +1799,18 @@ bool DualSocketClientTest::Test()
 	SocketAddress lLocalAddress;
 	if (lTestOk)
 	{
-		lContext = _T("address resolve");
-		lTestOk = lLocalAddress.Resolve(_T(":1025"));
+		lContext = "address resolve";
+		lTestOk = lLocalAddress.Resolve(":1025");
 		deb_assert(lTestOk);
 	}
 
 	// Create client.
 	SocketAddress lClientAddress(lLocalAddress);
 	lClientAddress.SetPort(55113);
-	DualMuxSocket lClientMuxSocket(_T("Client "), lClientAddress, false);
+	DualMuxSocket lClientMuxSocket("Client ", lClientAddress, false);
 	if (lTestOk)
 	{
-		lContext = _T("client socket open");
+		lContext = "client socket open";
 		lTestOk = lClientMuxSocket.IsOpen();
 		deb_assert(lTestOk);
 	}
@@ -1823,8 +1821,8 @@ bool DualSocketClientTest::Test()
 	DualSocket* lClientSocket = 0;
 	if (lTestOk)
 	{
-		mLog.AHeadline("Connect without TCP+UDP.");
-		lContext = _T("client forced invalid connect");
+		mLog.Headline("Connect without TCP+UDP.");
+		lContext = "client forced invalid connect";
 		const std::string lId = SystemManager::GetRandomId();
 		lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 0.5);
 		lTestOk = (lClientSocket == 0);
@@ -1833,11 +1831,11 @@ bool DualSocketClientTest::Test()
 
 	// Create and start TCP server (connect should fail if not UDP is up).
 	{
-		mLog.AHeadline("Connect without UDP.");
-		TcpMuxSocket* lServerTcpMuxSocket = new TcpMuxSocket(_T("Srv "), lServerAddress, true);
+		mLog.Headline("Connect without UDP.");
+		TcpMuxSocket* lServerTcpMuxSocket = new TcpMuxSocket("Srv ", lServerAddress, true);
 		if (lTestOk)
 		{
-			lContext = _T("server TCP socket open");
+			lContext = "server TCP socket open";
 			lTestOk = lServerTcpMuxSocket->IsOpen();
 			deb_assert(lTestOk);
 		}
@@ -1846,7 +1844,7 @@ bool DualSocketClientTest::Test()
 				"TcpDummyServerSocket", *lServerTcpMuxSocket, &TcpMuxSocket::Accept, false);
 		if (lTestOk)
 		{
-			lContext = _T("client connected without UDP");
+			lContext = "client connected without UDP";
 			const std::string lId = SystemManager::GetRandomId();
 			lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 1.0);
 			lTestOk = (lClientSocket == 0);
@@ -1854,7 +1852,7 @@ bool DualSocketClientTest::Test()
 		}
 		if (lTestOk)
 		{
-			lContext = _T("server did not drop client TCP connection in time");
+			lContext = "server did not drop client TCP connection in time";
 			Thread::Sleep(0.01);
 			TcpVSocket* lConnectorSocket = lServerTcpMuxSocket->PopReceiverSocket();
 			if (lConnectorSocket != 0)	// Already dropped?
@@ -1869,11 +1867,11 @@ bool DualSocketClientTest::Test()
 	}
 
 	// Create and start UDP server (connect should fail if not TCP is up).
-	mLog.AHeadline("Connect without TCP.");
-	UdpMuxSocket lServerUdpMuxSocket(_T("Srv "), lServerAddress, true);
+	mLog.Headline("Connect without TCP.");
+	UdpMuxSocket lServerUdpMuxSocket("Srv ", lServerAddress, true);
 	if (lTestOk)
 	{
-		lContext = _T("server UDP socket open");
+		lContext = "server UDP socket open";
 		lTestOk = lServerUdpMuxSocket.IsOpen();
 		deb_assert(lTestOk);
 	}
@@ -1882,7 +1880,7 @@ bool DualSocketClientTest::Test()
 			"UDP Server", lServerUdpMuxSocket, &UdpMuxSocket::Accept, true);
 	if (lTestOk)
 	{
-		lContext = _T("client connected without TCP");
+		lContext = "client connected without TCP";
 		const std::string lId = SystemManager::GetRandomId();
 		lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 0.5);
 		lTestOk = (lClientSocket == 0);
@@ -1890,24 +1888,24 @@ bool DualSocketClientTest::Test()
 	}
 	if (lTestOk)
 	{
-		lContext = _T("UDP server did not accept MUX connection");
+		lContext = "UDP server did not accept MUX connection";
 		lTestOk = (lServerUdpMuxSocket.GetConnectionCount() == 1);
 		deb_assert(lTestOk);
 		lUdpServer->CloseSocket();
 	}
 	if (lTestOk)
 	{
-		lContext = _T("server did not drop client UDP connection");
+		lContext = "server did not drop client UDP connection";
 		lTestOk = (lServerUdpMuxSocket.GetConnectionCount() == 0);
 		deb_assert(lTestOk);
 	}
 
 	// With both TCP and UDP sockets setup, connect should pull through.
-	mLog.AHeadline("Connect for real.");
-	TcpMuxSocket lServerTcpMuxSocket(_T("Srv "), lServerAddress, true);
+	mLog.Headline("Connect for real.");
+	TcpMuxSocket lServerTcpMuxSocket("Srv ", lServerAddress, true);
 	if (lTestOk)
 	{
-		lContext = _T("server TCP socket open");
+		lContext = "server TCP socket open";
 		lTestOk = lServerTcpMuxSocket.IsOpen();
 		deb_assert(lTestOk);
 	}
@@ -1916,7 +1914,7 @@ bool DualSocketClientTest::Test()
 			"TCP Server", lServerTcpMuxSocket, &TcpMuxSocket::Accept, true);
 	if (lTestOk)
 	{
-		lContext = _T("client TCP+UDP connect");
+		lContext = "client TCP+UDP connect";
 		Thread::Sleep(0.2);
 		const std::string lId = SystemManager::GetRandomId();
 		lClientSocket = lClientMuxSocket.Connect(lServerAddress, lId, 2.0);
@@ -1939,12 +1937,12 @@ bool DualSocketClientTest::Test()
 
 	if (lTestOk)
 	{
-		lContext = _T("network shutdown error");
+		lContext = "network shutdown error";
 		lTestOk = Network::Stop();
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(mLog, _T("GameClientSocket"), lContext, lTestOk);
+	ReportTestResult(mLog, "GameClientSocket", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -1954,28 +1952,28 @@ template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str&
 	bool lTestOk = true;
 	if (lTestOk)
 	{
-		pContext = _T("server append send");
+		pContext = "server append send";
 		IOError lError = pServer.mServerSocket->AppendSendBuffer("Hi", 3);
 		lTestOk = (lError == IO_OK);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		pContext = _T("server pop sender");
+		pContext = "server pop sender";
 		typename _Server::VSocket* lSocket = pServer.mServerMuxSocket.PopSenderSocket();
 		lTestOk = (lSocket == pServer.mServerSocket);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		pContext = _T("server send");
+		pContext = "server send";
 		int lLength = pServer.mServerSocket->SendBuffer();
 		lTestOk = (lLength == 3);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		pContext = _T("client pop receiver");
+		pContext = "client pop receiver";
 		DualSocket* lSocket = 0;
 		for (int x = 0; lSocket == 0 && x < 500; ++x)
 		{
@@ -1987,7 +1985,7 @@ template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str&
 	}
 	if (lTestOk)
 	{
-		pContext = _T("client receive");
+		pContext = "client receive";
 		uint8 lBuffer[16];
 		int lLength = pClientSocket->Receive(pSafe, lBuffer, 16);
 		lTestOk = (lLength == 3 && memcmp("Hi", lBuffer, 3) == 0);
@@ -1995,28 +1993,28 @@ template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str&
 	}
 	if (lTestOk)
 	{
-		pContext = _T("client append send");
+		pContext = "client append send";
 		IOError lError = pClientSocket->AppendSendBuffer(pSafe, "Hi", 3);
 		lTestOk = (lError == IO_OK);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		pContext = _T("client pop sender");
+		pContext = "client pop sender";
 		DualSocket* lSocket = pClientMuxSocket.PopSenderSocket();
 		lTestOk = (lSocket == pClientSocket);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		pContext = _T("client send");
+		pContext = "client send";
 		int lLength = pClientSocket->SendBuffer();
 		lTestOk = (lLength == 3);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		pContext = _T("server pop receiver");
+		pContext = "server pop receiver";
 		typename _Server::VSocket* lSocket = 0;
 		for (int x = 0; lSocket == 0 && x < 500; ++x)
 		{
@@ -2028,7 +2026,7 @@ template<class _Server> bool DualSocketClientTest::TestClientServerTransmit(str&
 	}
 	if (lTestOk)
 	{
-		pContext = _T("server receive");
+		pContext = "server receive";
 		uint8 lBuffer[16];
 		int lLength = pServer.mServerSocket->Receive(lBuffer, 16);
 		lTestOk = (lLength == 3 && memcmp("Hi", lBuffer, 3) == 0);
@@ -2054,7 +2052,7 @@ bool DualSocketServerTest::Test()
 
 	if (lTestOk)
 	{
-		lContext = _T("network startup error");
+		lContext = "network startup error";
 		lTestOk = Network::Start();
 		deb_assert(lTestOk);
 	}
@@ -2062,19 +2060,19 @@ bool DualSocketServerTest::Test()
 	SocketAddress lLocalAddress;
 	if (lTestOk)
 	{
-		lContext = _T("address resolve");
-		lTestOk = lLocalAddress.Resolve(_T(":1025"));
+		lContext = "address resolve";
+		lTestOk = lLocalAddress.Resolve(":1025");
 		deb_assert(lTestOk);
 	}
 
 	// Create server.
 	SocketAddress lServerAddress(lLocalAddress);
 	lServerAddress.SetPort(55113);
-	DualMuxSocket lServerMuxSocket(_T("Server "), lServerAddress, true);
+	DualMuxSocket lServerMuxSocket("Server ", lServerAddress, true);
 	lServerMuxSocket.SetConnectDualTimeout(0.5f);
 	if (lTestOk)
 	{
-		lContext = _T("server socket open");
+		lContext = "server socket open";
 		lTestOk = lServerMuxSocket.IsOpen();
 		deb_assert(lTestOk);
 	}
@@ -2106,17 +2104,17 @@ bool DualSocketServerTest::Test()
 	// Check one-sided client connect.
 	SocketAddress lClientAddress(lLocalAddress);
 	lClientAddress.SetPort(55112);
-	TcpMuxSocket lClientTcpSocket(_T("Client"), lClientAddress, false);
+	TcpMuxSocket lClientTcpSocket("Client", lClientAddress, false);
 	if (lTestOk)
 	{
-		lContext = _T("client TCP connect failed");
+		lContext = "client TCP connect failed";
 		ServerSocketHandler lHandler(lServerMuxSocket);
 		lTestOk = (lClientTcpSocket.Connect(lServerAddress, "Hejsan", 0.5) != 0);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("server didn't let TCP connect through");
+		lContext = "server didn't let TCP connect through";
 		for (int x = 0; lServerMuxSocket.GetConnectionCount() == 0 && x < 500; ++x)
 		{
 			Thread::Sleep(0.001);
@@ -2126,7 +2124,7 @@ bool DualSocketServerTest::Test()
 	}
 	if (lTestOk)
 	{
-		lContext = _T("server let TCP-only connect stay");
+		lContext = "server let TCP-only connect stay";
 		ServerSocketHandler lHandler(lServerMuxSocket);
 		for (int x = 0; lServerMuxSocket.GetConnectionCount() == 1 && x < 1000; ++x)
 		{
@@ -2139,12 +2137,12 @@ bool DualSocketServerTest::Test()
 
 	if (lTestOk)
 	{
-		lContext = _T("network shutdown error");
+		lContext = "network shutdown error";
 		lTestOk = Network::Stop();
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(mLog, _T("GameServerSocket"), lContext, lTestOk);
+	ReportTestResult(mLog, "GameServerSocket", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -2161,12 +2159,12 @@ bool TestArchive(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		// TODO: implement!
-		lContext = _T("?");
+		lContext = "?";
 		lTestOk = true;
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("Archive"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Archive", lContext, lTestOk);
 	return (lTestOk);
 }
 /*
@@ -2185,7 +2183,7 @@ bool TestFFT(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("FFT Direct Current failed.");
+		lContext = "FFT Direct Current failed.";
 
 		// Generate a direct current signal.
 		int i;
@@ -2214,7 +2212,7 @@ bool TestFFT(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("FFT single sine failed.");
+		lContext = "FFT single sine failed.";
 
 		// Generate a cosine wave signal.
 		int i;
@@ -2253,7 +2251,7 @@ bool TestFFT(const LogDecorator& pAccount)
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("FFT"), lContext, lTestOk);
+	ReportTestResult(pAccount, "FFT", lContext, lTestOk);
 	return (lTestOk);
 }
 */
@@ -2265,7 +2263,7 @@ bool TestCrypto(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("DES encrypt failed.");
+		lContext = "DES encrypt failed.";
 		DES lDES;
 		lDES.SetKey(LEPRA_ULONGLONG(0x1234567890FEDABC));
 		const char lString[16] = "Hello World!!!!";
@@ -2276,7 +2274,7 @@ bool TestCrypto(const LogDecorator& pAccount)
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			lContext = _T("DES decrypt failed.");
+			lContext = "DES decrypt failed.";
 			lDES.Decrypt(lData, 16);
 			lTestOk = (::memcmp(lData, lString, sizeof(lData)) == 0);
 			deb_assert(lTestOk);
@@ -2285,7 +2283,7 @@ bool TestCrypto(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("RSA encrypt failed.");
+		lContext = "RSA encrypt failed.";
 		// TODO: implement!
 //		RSA lRSA;
 //		lDES.SetKey(0x1234567890FEDABC);
@@ -2297,7 +2295,7 @@ bool TestCrypto(const LogDecorator& pAccount)
 //		deb_assert(lTestOk);
 //		if (lTestOk)
 //		{
-//			lContext = _T("RSA decrypt failed.");
+//			lContext = "RSA decrypt failed.";
 //			lDES.Decrypt(lData, 17);
 //			lTestOk = (::memcmp(lData, lString, sizeof(lData)) == 0);
 //			deb_assert(lTestOk);
@@ -2306,7 +2304,7 @@ bool TestCrypto(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("SHA-1 hashing failed.");
+		lContext = "SHA-1 hashing failed.";
 		SHA1 lSHA1;
 		uint8 lHash[20];
 		lSHA1.Hash((const uint8*)"Hello World!", 12, lHash);
@@ -2315,7 +2313,7 @@ bool TestCrypto(const LogDecorator& pAccount)
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("Crypto"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Crypto", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -2377,15 +2375,15 @@ bool TestPerformance(const LogDecorator& pAccount)
 			{
 				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(String);
-				str lString(_T("Apa"));
-				lString += _T("Esau");
-				lString.rfind(_T("e"), lString.length()-1);
+				str lString("Apa");
+				lString += "Esau";
+				lString.rfind("e", lString.length()-1);
 			}
 
 //			{
 //				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 //				LEPRA_MEASURE_SCOPE(BigInt);
-//				BigInt lBigInt(_T("84879234798733231872345687123101"));
+//				BigInt lBigInt("84879234798733231872345687123101");
 //				lBigInt >>= 8;
 //				lBigInt.Sqrt();
 //			}
@@ -2537,7 +2535,7 @@ bool TestPerformance(const LogDecorator& pAccount)
 				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(UdpSocket);
 				SocketAddress lAddress;
-				lAddress.Resolve(_T(":46666"));
+				lAddress.Resolve(":46666");
 				UdpSocket lSocket(lAddress, true);
 				{
 					LEPRA_MEASURE_SCOPE(SendTo);
@@ -2555,12 +2553,12 @@ bool TestPerformance(const LogDecorator& pAccount)
 				Thread::YieldCpu();	// Yield to not get a starved Cpu time slice.
 				LEPRA_MEASURE_SCOPE(UdpMuxSocket);
 				SocketAddress lAddress1;
-				lAddress1.Resolve(_T(":46666"));
+				lAddress1.Resolve(":46666");
 				SocketAddress lAddress2;
-				lAddress2.Resolve(_T(":46667"));
+				lAddress2.Resolve(":46667");
 				UdpVSocket* lSocket = 0;
-				UdpMuxSocket lMuxSocket1(_T("#1 "), lAddress1, false);
-				UdpMuxSocket lMuxSocket2(_T("#2 "), lAddress2, true);
+				UdpMuxSocket lMuxSocket1("#1 ", lAddress1, false);
+				UdpMuxSocket lMuxSocket2("#2 ", lAddress2, true);
 				class DummyAcceptor: public Thread
 				{
 				public:
@@ -2630,12 +2628,12 @@ bool TestPerformance(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("?");
+		lContext = "?";
 		lTestOk = true;
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("Performance"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Performance", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -2643,294 +2641,294 @@ bool TestPath(const LogDecorator& pAccount)
 {
 	str lContext;
 	bool lTestOk = true;
-	const tchar* lTestPath1 = _T("/usr/bin/.hid");
-	const tchar* lTestPath2 = _T("C:\\Documents and settings\\Sverker\\Mina dokument\\.skit...apansson");
-	const tchar* lTestPath3 = _T("apa_bepa0.cepa");
-	const tchar* lTestPath4 = _T("d1/f3");
+	const char* lTestPath1 = "/usr/bin/.hid";
+	const char* lTestPath2 = "C:\\Documents and settings\\Sverker\\Mina dokument\\.skit...apansson";
+	const char* lTestPath3 = "apa_bepa0.cepa";
+	const char* lTestPath4 = "d1/f3";
 
 	if (lTestOk)
 	{
-		lContext = _T("extension 1");
+		lContext = "extension 1";
 		str lExtension = Path::GetExtension(lTestPath1);
-		lTestOk = (lExtension == _T(""));
+		lTestOk = (lExtension == "");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("file 1");
+		lContext = "file 1";
 		str lFile = Path::GetFileBase(lTestPath1);
-		lTestOk = (lFile == _T(".hid"));
+		lTestOk = (lFile == ".hid");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("file 2");
+		lContext = "file 2";
 		str lDir = Path::GetDirectory(lTestPath3);
 		str lFile = Path::GetFileBase(lTestPath3);
 		str lExt = Path::GetExtension(lTestPath3);
-		lTestOk = (lDir == _T("") && lFile == _T("apa_bepa0") && lExt == _T("cepa"));
+		lTestOk = (lDir == "" && lFile == "apa_bepa0" && lExt == "cepa");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("file 3");
+		lContext = "file 3";
 		str lDir = Path::GetDirectory(lTestPath4);
 		str lFile = Path::GetFileBase(lTestPath4);
 		str lExt = Path::GetExtension(lTestPath4);
-		lTestOk = (lDir == _T("d1/") && lFile == _T("f3") && lExt == _T(""));
+		lTestOk = (lDir == "d1/" && lFile == "f3" && lExt == "");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("directory 1");
+		lContext = "directory 1";
 		str lDirectory = Path::GetDirectory(lTestPath1);
-		lTestOk = (lDirectory == _T("/usr/bin/"));
+		lTestOk = (lDirectory == "/usr/bin/");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("extension 2");
+		lContext = "extension 2";
 		str lExtension = Path::GetExtension(lTestPath2);
-		lTestOk = (lExtension == _T("apansson"));
+		lTestOk = (lExtension == "apansson");
 		deb_assert(lTestOk);
 	}
 #ifdef LEPRA_WINDOWS
 	if (lTestOk)
 	{
-		lContext = _T("file 2");
+		lContext = "file 2";
 		str lFile = Path::GetFileBase(lTestPath2);
-		lTestOk = (lFile == _T(".skit.."));
+		lTestOk = (lFile == ".skit..");
 		deb_assert(lTestOk);
 	}
 	str lDirectory;
 	if (lTestOk)
 	{
-		lContext = _T("directory 2");
+		lContext = "directory 2";
 		lDirectory = Path::GetDirectory(lTestPath2);
-		lTestOk = (lDirectory == _T("C:\\Documents and settings\\Sverker\\Mina dokument\\"));
+		lTestOk = (lDirectory == "C:\\Documents and settings\\Sverker\\Mina dokument\\");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("directory 3");
+		lContext = "directory 3";
 		strutil::strvec lDirectoryArray = Path::SplitNodes(lDirectory);
-		lTestOk = (lDirectoryArray.size() == 4 && lDirectoryArray[0] == _T("C:") &&
-			lDirectoryArray[1] == _T("Documents and settings") && lDirectoryArray[2] == _T("Sverker") &&
-			lDirectoryArray[3] == _T("Mina dokument"));
+		lTestOk = (lDirectoryArray.size() == 4 && lDirectoryArray[0] == "C:" &&
+			lDirectoryArray[1] == "Documents and settings" && lDirectoryArray[2] == "Sverker" &&
+			lDirectoryArray[3] == "Mina dokument");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("directory 4");
-		strutil::strvec lDirectoryArray = Path::SplitNodes(_T("\\WINDOWS.0\\"));
-		lTestOk = (lDirectoryArray.size() == 1 && lDirectoryArray[0] == _T("WINDOWS.0"));
+		lContext = "directory 4";
+		strutil::strvec lDirectoryArray = Path::SplitNodes("\\WINDOWS.0\\");
+		lTestOk = (lDirectoryArray.size() == 1 && lDirectoryArray[0] == "WINDOWS.0");
 		deb_assert(lTestOk);
 	}
 #endif // Windows
 	if (lTestOk)
 	{
-		lContext = _T("directory 5");
+		lContext = "directory 5";
 		strutil::strvec lDirectoryArray = Path::SplitNodes(lTestPath1);
-		lTestOk = (lDirectoryArray.size() == 3 && lDirectoryArray[0] == _T("usr") &&
-			lDirectoryArray[1] == _T("bin") && lDirectoryArray[2] == _T(".hid"));
+		lTestOk = (lDirectoryArray.size() == 3 && lDirectoryArray[0] == "usr" &&
+			lDirectoryArray[1] == "bin" && lDirectoryArray[2] == ".hid");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("split");
-		strutil::strvec lPathParts = Path::SplitPath(_T("a/b.c/d.e"));
-		lTestOk = (lPathParts.size() == 3 && lPathParts[0] == _T("a/b.c/") &&
-			lPathParts[1] == _T("d") && lPathParts[2] == _T("e"));
+		lContext = "split";
+		strutil::strvec lPathParts = Path::SplitPath("a/b.c/d.e");
+		lTestOk = (lPathParts.size() == 3 && lPathParts[0] == "a/b.c/" &&
+			lPathParts[1] == "d" && lPathParts[2] == "e");
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 1");
+		lContext = "normalize 1";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("/./apa/../"), lPath);
+		lTestOk = Path::NormalizePath("/./apa/../", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("/"));
+			lTestOk = (lPath == "/");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 2");
+		lContext = "normalize 2";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("/sune./apa/../"), lPath);
+		lTestOk = Path::NormalizePath("/sune./apa/../", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("/sune./"));
+			lTestOk = (lPath == "/sune./");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 3");
+		lContext = "normalize 3";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("./apa/../"), lPath);
+		lTestOk = Path::NormalizePath("./apa/../", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("./"));
+			lTestOk = (lPath == "./");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 4");
+		lContext = "normalize 4";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("./apa/.."), lPath);
+		lTestOk = Path::NormalizePath("./apa/..", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("."));
+			lTestOk = (lPath == ".");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 5");
+		lContext = "normalize 5";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("./apa/../sunk/.."), lPath);
+		lTestOk = Path::NormalizePath("./apa/../sunk/..", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("."));
+			lTestOk = (lPath == ".");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 6");
+		lContext = "normalize 6";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("/apa/../sunk/.."), lPath);
+		lTestOk = Path::NormalizePath("/apa/../sunk/..", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("/"));
+			lTestOk = (lPath == "/");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 7");
+		lContext = "normalize 7";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("/apa/../fagott/sunk/.."), lPath);
+		lTestOk = Path::NormalizePath("/apa/../fagott/sunk/..", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("/fagott"));
+			lTestOk = (lPath == "/fagott");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 8");
+		lContext = "normalize 8";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("./.."), lPath);
+		lTestOk = Path::NormalizePath("./..", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T(".."));
+			lTestOk = (lPath == "..");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 9");
+		lContext = "normalize 9";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T(".//"), lPath);
+		lTestOk = Path::NormalizePath(".//", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("./"));
+			lTestOk = (lPath == "./");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 10");
+		lContext = "normalize 10";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("//a"), lPath);
+		lTestOk = Path::NormalizePath("//a", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("/a"));
+			lTestOk = (lPath == "/a");
 		}
 		deb_assert(lTestOk);
 	}
 #ifdef LEPRA_WINDOWS
 	if (lTestOk)
 	{
-		lContext = _T("normalize 11");
+		lContext = "normalize 11";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("C:\\a..\\b\\..\\c"), lPath);
+		lTestOk = Path::NormalizePath("C:\\a..\\b\\..\\c", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("C:/a../c"));
+			lTestOk = (lPath == "C:/a../c");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 12");
+		lContext = "normalize 12";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("\\\\.\\C:\\a\\\\b\\.\\.\\c\\"), lPath);	// UNC name.
+		lTestOk = Path::NormalizePath("\\\\.\\C:\\a\\\\b\\.\\.\\c\\", lPath);	// UNC name.
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("\\\\.\\C:/a/b/c/"));
+			lTestOk = (lPath == "\\\\.\\C:/a/b/c/");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 13");
+		lContext = "normalize 13";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("\\\\MyServer\\$Share_1$\\.\\.\\Porn\\..\\Bible\\NT.txt"), lPath);
+		lTestOk = Path::NormalizePath("\\\\MyServer\\$Share_1$\\.\\.\\Porn\\..\\Bible\\NT.txt", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("\\\\MyServer/$Share_1$/Bible/NT.txt"));
+			lTestOk = (lPath == "\\\\MyServer/$Share_1$/Bible/NT.txt");
 		}
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("normalize 14");
+		lContext = "normalize 14";
 		str lPath;
-		lTestOk = Path::NormalizePath(_T("..\\..\\"), lPath);
+		lTestOk = Path::NormalizePath("..\\..\\", lPath);
 		if (lTestOk)
 		{
-			lTestOk = (lPath == _T("../../"));
+			lTestOk = (lPath == "../../");
 		}
 		deb_assert(lTestOk);
 	}
 #endif // Windows
 	if (lTestOk)
 	{
-		lContext = _T("normalize error 1");
+		lContext = "normalize error 1";
 		str lPath;
-		lTestOk = !Path::NormalizePath(_T("/../"), lPath);
+		lTestOk = !Path::NormalizePath("/../", lPath);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("wildcard error");
-		lTestOk &=  Path::IsWildcardMatch(_T("/a/b/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("/a/*/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("/a/b/*.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("/*/*/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("/a/*/c.txt"),	_T("/a/bug/c.txt"));	deb_assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("*/c.txt"),	_T("banana/c.txt"));	deb_assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("c.*"),		_T("c.txt"));		deb_assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("*.*"),		_T("c.txt"));		deb_assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("*.txt"),		_T("c.txt"));		deb_assert(lTestOk);
-		lTestOk &=  Path::IsWildcardMatch(_T("*.t*t"),		_T("c.txt"));		deb_assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("/a/c/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("/a*/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("/*/c.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("*/*.txt"),	_T("/a/b/c.txt"));	deb_assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("*.txt"),		_T("/a/b/c.txt"));	deb_assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("/a/b*"),		_T("/a/bug/c.txt"));	deb_assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("/a/b/c.t*x"),	_T("banana/c.txt"));	deb_assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("t*"),		_T("c.txt"));		deb_assert(lTestOk);
-		lTestOk &= !Path::IsWildcardMatch(_T("*c"),		_T("c.txt"));		deb_assert(lTestOk);
+		lContext = "wildcard error";
+		lTestOk &=  Path::IsWildcardMatch("/a/b/c.txt",	"/a/b/c.txt");	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch("/a/*/c.txt",	"/a/b/c.txt");	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch("/a/b/*.txt",	"/a/b/c.txt");	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch("/*/*/c.txt",	"/a/b/c.txt");	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch("/a/*/c.txt",	"/a/bug/c.txt");	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch("*/c.txt",	"banana/c.txt");	deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch("c.*",		"c.txt");		deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch("*.*",		"c.txt");		deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch("*.txt",		"c.txt");		deb_assert(lTestOk);
+		lTestOk &=  Path::IsWildcardMatch("*.t*t",		"c.txt");		deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch("/a/c/c.txt",	"/a/b/c.txt");	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch("/a*/c.txt",	"/a/b/c.txt");	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch("/*/c.txt",	"/a/b/c.txt");	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch("*/*.txt",	"/a/b/c.txt");	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch("*.txt",		"/a/b/c.txt");	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch("/a/b*",		"/a/bug/c.txt");	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch("/a/b/c.t*x",	"banana/c.txt");	deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch("t*",		"c.txt");		deb_assert(lTestOk);
+		lTestOk &= !Path::IsWildcardMatch("*c",		"c.txt");		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("Path"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Path", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -2941,7 +2939,7 @@ bool TestMemFileConcurrency(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("thread trashing");
+		lContext = "thread trashing";
 		class FileTrasher: public Thread
 		{
 		public:
@@ -2955,10 +2953,10 @@ bool TestMemFileConcurrency(const LogDecorator& pAccount)
 			void Run()
 			{
 				mSemaphore.Wait();
-				Logger* lLog = LogType::GetLogger(LogType::SUB_GENERAL_RESOURCES);
+				Logger* lLog = LogType::GetLogger(LogType::GENERAL_RESOURCES);
 				for (int x = 0; x < 1000; ++x)
 				{
-					mFile.OnLog(lLog, _T("?"), LEVEL_TRACE);
+					mFile.OnLog(lLog, "?", LEVEL_TRACE);
 				}
 			}
 			LogListener& mFile;
@@ -2997,14 +2995,14 @@ bool TestMemFileConcurrency(const LogDecorator& pAccount)
 		}
 	}
 
-	ReportTestResult(pAccount, _T("MemFileConcurrency"), lContext, lTestOk);
+	ReportTestResult(pAccount, "MemFileConcurrency", lContext, lTestOk);
 	return (lTestOk);
 }
 
 void ShowTestResult(const LogDecorator& pAccount, bool pTestOk)
 {
 	::printf("\n");
-	ReportTestResult(pAccount, _T("Total test result"), _T("?"), pTestOk);
+	ReportTestResult(pAccount, "Total test result", "?", pTestOk);
 
 	// Print termination "progress bar".
 	const char* lEndMessage = "Termination progress: [";

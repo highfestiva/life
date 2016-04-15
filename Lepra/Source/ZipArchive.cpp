@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
@@ -13,7 +13,7 @@ namespace Lepra
 {
 
 ZipArchive::ZipArchive() :
-	mArchiveName(_T("")),
+	mArchiveName(""),
 	mIOType(READ_ONLY),
 	mUnzipFile(0),
 	mZipFile(0),
@@ -40,7 +40,7 @@ IOError ZipArchive::OpenArchive(const str& pArchiveFileName, IOType pIOType)
 	{
 		case READ_ONLY:
 		{
-			mUnzipFile = ::unzOpen64(astrutil::Encode(pArchiveFileName).c_str());
+			mUnzipFile = ::unzOpen64(pArchiveFileName.c_str());
 			if (mUnzipFile != 0)
 			{
 				lIOError = IO_OK;
@@ -49,14 +49,14 @@ IOError ZipArchive::OpenArchive(const str& pArchiveFileName, IOType pIOType)
 		break;
 		case WRITE_ONLY:
 		{
-			mZipFile = ::zipOpen(astrutil::Encode(pArchiveFileName).c_str(), APPEND_STATUS_CREATE);
+			mZipFile = ::zipOpen(pArchiveFileName.c_str(), APPEND_STATUS_CREATE);
 			lCheckZipFile = true;
 		}
 		break;
 		case WRITE_APPEND:
 		{
 			if (DiskFile::Exists(pArchiveFileName) == true)
-				mZipFile = ::zipOpen(astrutil::Encode(pArchiveFileName).c_str(), APPEND_STATUS_ADDINZIP);
+				mZipFile = ::zipOpen(pArchiveFileName.c_str(), APPEND_STATUS_ADDINZIP);
 			lCheckZipFile = true;
 		}
 		break;
@@ -118,7 +118,7 @@ void ZipArchive::CloseAndRemoveArchive()
 	::_wremove(wstrutil::Encode(mArchiveName).c_str());
 #else
 #ifdef LEPRA_POSIX
-	::remove(astrutil::Encode(mArchiveName).c_str());
+	::remove(mArchiveName.c_str());
 #else
 #error "ZipArchive::CloseAndRemoveArchive() is not implemented on this platform!"
 #endif
@@ -153,7 +153,7 @@ str ZipArchive::FileFindFirst()
 		unz_file_info64 lFileInfo;
 		char lCStrFileName[1024];
 		::unzGetCurrentFileInfo64(mUnzipFile, &lFileInfo, lCStrFileName, 1024, 0, 0, 0, 0);
-		lFileName = strutil::Encode(astr(lCStrFileName));
+		lFileName = str(lCStrFileName);
 	}
 
 	return lFileName;
@@ -168,7 +168,7 @@ str ZipArchive::FileFindNext()
 		unz_file_info64 lFileInfo;
 		char lCStrFileName[1024];
 		::unzGetCurrentFileInfo64(mUnzipFile, &lFileInfo, lCStrFileName, 1024, 0, 0, 0, 0);
-		lFileName = strutil::Encode(astr(lCStrFileName));
+		lFileName = str(lCStrFileName);
 	}
 
 	return lFileName;
@@ -184,7 +184,7 @@ bool ZipArchive::FileOpen(const str& pFileName)
 		{
 			if (mUnzipFile != 0)
 			{
-				if (::unzLocateFile(mUnzipFile, astrutil::Encode(pFileName).c_str(), 0) == UNZ_OK)
+				if (::unzLocateFile(mUnzipFile, pFileName.c_str(), 0) == UNZ_OK)
 				{
 					lOK = (::unzOpenCurrentFile(mUnzipFile) == UNZ_OK);
 					if (lOK)
@@ -200,7 +200,7 @@ bool ZipArchive::FileOpen(const str& pFileName)
 		{
 			if (mZipFile != 0)
 			{
-				lOK = (::zipOpenNewFileInZip64(mZipFile, astrutil::Encode(pFileName).c_str(), 0, 0, 0, 0, 0, 0, Z_DEFLATED, Z_DEFAULT_COMPRESSION, 0) == ZIP_OK);
+				lOK = (::zipOpenNewFileInZip64(mZipFile, pFileName.c_str(), 0, 0, 0, 0, 0, 0, Z_DEFLATED, Z_DEFAULT_COMPRESSION, 0) == ZIP_OK);
 
 				str lTempName;
 				str lDirectory;
@@ -253,7 +253,7 @@ void ZipArchive::FileClose()
 					mOutFile.Close();
 					if (mOutFile.Open(lTempFile, DiskFile::MODE_READ, false, Endian::TYPE_LITTLE_ENDIAN) == false)
 					{
-						mLog.AError("Failed to add file to archive.");
+						mLog.Error("Failed to add file to archive.");
 					}
 					else
 					{
@@ -297,7 +297,7 @@ bool ZipArchive::FileExist(const str& pFileName)
 
 	if (mIOType == READ_ONLY && mUnzipFile != 0)
 	{
-		lExist = (::unzLocateFile(mUnzipFile, astrutil::Encode(pFileName).c_str(), 0) == UNZ_OK);
+		lExist = (::unzLocateFile(mUnzipFile, pFileName.c_str(), 0) == UNZ_OK);
 	}
 
 	return lExist;

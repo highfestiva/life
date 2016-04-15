@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -24,15 +24,15 @@ public:
 	UserConnection();
 	virtual ~UserConnection();
 
-	const wstr& GetLoginName() const;
-	void SetLoginName(const wstr& pName);
+	const str& GetLoginName() const;
+	void SetLoginName(const str& pName);
 	UserAccount::AccountId GetAccountId() const;
 	void SetAccountId(UserAccount::AccountId pId);
 	NetworkAgent::VSocket* GetSocket() const;
 	void SetSocket(NetworkAgent::VSocket* pSocket);
 
 private:
-	wstr mName;
+	str mName;
 	UserAccount::AccountId mAccountId;
 	NetworkAgent::VSocket* mSocket;
 };

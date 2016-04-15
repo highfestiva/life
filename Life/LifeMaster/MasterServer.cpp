@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
  
 
@@ -36,24 +36,24 @@ MasterServer::~MasterServer()
 bool MasterServer::Initialize()
 {
 	SocketAddress lAddress;
-	str lAcceptAddress = _T("0.0.0.0:") + mPort;
+	str lAcceptAddress = "0.0.0.0:" + mPort;
 	if (!lAddress.Resolve(lAcceptAddress))
 	{
-		mLog.Warningf(_T("Could not resolve address '%s'."), lAcceptAddress.c_str());
-		lAcceptAddress = _T(":") + mPort;
+		mLog.Warningf("Could not resolve address '%s'.", lAcceptAddress.c_str());
+		lAcceptAddress = ":" + mPort;
 		if (!lAddress.Resolve(lAcceptAddress))
 		{
-			mLog.Errorf(_T("Could not resolve address '%s'!"), lAcceptAddress.c_str());
+			mLog.Errorf("Could not resolve address '%s'!", lAcceptAddress.c_str());
 			return false;
 		}
 	}
-	mMuxSocket = new UdpMuxSocket(_T("MasterServer"), lAddress, true);
+	mMuxSocket = new UdpMuxSocket("MasterServer", lAddress, true);
 	if (!mMuxSocket->IsOpen())
 	{
-		mLog.Errorf(_T("Address '%s' seems busy. Terminating."), lAcceptAddress.c_str());
+		mLog.Errorf("Address '%s' seems busy. Terminating.", lAcceptAddress.c_str());
 		return false;
 	}
-	mLog.Headline(_T("Up and running, awaiting connections."));
+	mLog.Headline("Up and running, awaiting connections.");
 	SystemManager::SetQuitRequestCallback(SystemManager::QuitRequestCallback(this, &MasterServer::OnQuitRequest));
 	return true;
 }
@@ -164,17 +164,17 @@ void MasterServer::OnQuitRequest(int)
 
 void MasterServer::HandleReceive(UdpVSocket* pRemote, const uint8* pCommand, unsigned pCommandLength)
 {
-	wstr lWideData;
+	str lWideData;
 	if (!MasterServerNetworkParser::RawToStr(lWideData, pCommand, pCommandLength))
 	{
-		mLog.Error(_T("Got garbled data from game server!"));
+		mLog.Error("Got garbled data from game server!");
 		DropSocket(pRemote);
 		return;
 	}
-	const str lCommandLine = strutil::Encode(lWideData);
+	const str lCommandLine = lWideData;
 	if (!HandleCommandLine(pRemote, lCommandLine))
 	{
-		mLog.Error(_T("Got invalid command from game server!"));
+		mLog.Error("Got invalid command from game server!");
 	}
 }
 
@@ -185,32 +185,32 @@ bool MasterServer::HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLin
 	{
 		return false;
 	}
-	log_volatile(mLog.Debugf(_T("Got command: '%s'."), pCommandLine.c_str()));
-	if (lServerInfo.mCommand == _T(MASTER_SERVER_USI))
+	log_volatile(mLog.Debugf("Got command: '%s'.", pCommandLine.c_str()));
+	if (lServerInfo.mCommand == MASTER_SERVER_USI)
 	{
 		if (lServerInfo.mRemotePort < 0 || lServerInfo.mPlayerCount < 0 || lServerInfo.mId.empty())
 		{
-			mLog.Errorf(_T("Got bad parameters to command (%s) from game server!"), lServerInfo.mCommand.c_str());
+			mLog.Errorf("Got bad parameters to command (%s from game server)!", lServerInfo.mCommand.c_str());
 			return false;
 		}
 		return RegisterGameServer(lServerInfo, pRemote);
 	}
-	else if (lServerInfo.mCommand == _T(MASTER_SERVER_DSL))
+	else if (lServerInfo.mCommand == MASTER_SERVER_DSL)
 	{
 		return SendServerList(pRemote);
 	}
-	else if (lServerInfo.mCommand == _T(MASTER_SERVER_OF))
+	else if (lServerInfo.mCommand == MASTER_SERVER_OF)
 	{
 		return OpenFirewall(pRemote, lServerInfo);
 	}
-	else if (lServerInfo.mCommand == _T(MASTER_SERVER_DC))
+	else if (lServerInfo.mCommand == MASTER_SERVER_DC)
 	{
 		DropSocket(pRemote);
 		return true;
 	}
 	else
 	{
-		mLog.Errorf(_T("Got bad command (%s) from game server!"), lServerInfo.mCommand.c_str());
+		mLog.Errorf("Got bad command (%s from game server)!", lServerInfo.mCommand.c_str());
 	}
 	return false;
 }
@@ -238,7 +238,7 @@ bool MasterServer::RegisterGameServer(const ServerInfo& pServerInfo, UdpVSocket*
 				}
 				else
 				{
-					mLog.Errorf(_T("Got bad ID (%s) from game server %s!"), pServerInfo.mId.c_str(), lInfo.mName.c_str());
+					mLog.Errorf("Got bad ID (%s from game server %s)!", pServerInfo.mId.c_str(), lInfo.mName.c_str());
 				}
 			}
 			else
@@ -250,7 +250,7 @@ bool MasterServer::RegisterGameServer(const ServerInfo& pServerInfo, UdpVSocket*
 				}
 				else
 				{
-					mLog.Errorf(_T("Could not drop game server %s, due to mismatching name and/or id."), lInfo.mName.c_str());
+					mLog.Errorf("Could not drop game server %s, due to mismatching name and/or id.", lInfo.mName.c_str());
 				}
 			}
 		}
@@ -262,22 +262,22 @@ bool MasterServer::RegisterGameServer(const ServerInfo& pServerInfo, UdpVSocket*
 		}
 		else
 		{
-			mLog.Errorf(_T("Could not drop game server %s, not found."), pServerInfo.mName.c_str());
+			mLog.Errorf("Could not drop game server %s, not found.", pServerInfo.mName.c_str());
 		}
 		if (lOk)
 		{
-			mLog.RawPrint(LEVEL_DEBUG, _T("----------------------------------------\nServer list:\n"));
+			mLog.RawPrint(LEVEL_DEBUG, "----------------------------------------\nServer list:\n");
 			GameServerTable::iterator x = mGameServerTable.begin();
 			for (; x != mGameServerTable.end(); ++x)
 			{
-				mLog.RawPrint(LEVEL_DEBUG, x->second.mName + _T(" @ ") + x->first + _T("\n"));
+				mLog.RawPrint(LEVEL_DEBUG, x->second.mName + " @ " + x->first + "\n");
 			}
 		}
 	}
 
 	if (lOk)
 	{
-		Send(pRemote, _T("OK"));
+		Send(pRemote, "OK");
 		return true;
 	}
 	return false;
@@ -292,19 +292,19 @@ bool MasterServer::SendServerList(UdpVSocket* pRemote)
 		GameServerTable::iterator x = mGameServerTable.begin();
 		for (; x != mGameServerTable.end(); ++x)
 		{
-			const strutil::strvec lFullAddress = strutil::Split(x->first, _T(":"));
-			lServerList += _T("--name \"") + x->second.mName + _T("\" --address ") + lFullAddress[0] +
-				_T(" --port ") + lFullAddress[1] +
-				_T(" --player-count ") + strutil::IntToString(x->second.mPlayerCount, 10) + _T("\n");
+			const strutil::strvec lFullAddress = strutil::Split(x->first, ":");
+			lServerList += "--name \"" + x->second.mName + "\" --address " + lFullAddress[0] +
+				" --port " + lFullAddress[1] +
+				" --player-count " + strutil::IntToString(x->second.mPlayerCount, 10) + "\n";
 		}
 	}
-	lServerList += _T("OK");
+	lServerList += "OK";
 	return Send(pRemote, lServerList);
 }
 
 bool MasterServer::OpenFirewall(UdpVSocket* pRemote, const ServerInfo& pServerInfo)
 {
-	const str lAddress = pServerInfo.mGivenIpAddress + strutil::Format(_T(":%u"), pServerInfo.mGivenPort);
+	const str lAddress = pServerInfo.mGivenIpAddress + strutil::Format(":%u", pServerInfo.mGivenPort);
 	SocketAddress lSocketAddress;
 	if (lSocketAddress.Resolve(lAddress))
 	{
@@ -318,25 +318,25 @@ bool MasterServer::OpenFirewall(UdpVSocket* pRemote, const ServerInfo& pServerIn
 				// going through the firewall. At least the risk of getting caught in a NAT without hairpin
 				// is significantly decreased.
 				const GameServerInfo& lServerInfo = x->second;
-				mLog.AInfo("Asking game client to use LAN instead, since they share IP.");
-				log_volatile(mLog.Debugf(_T("Internal address is '%s'."), lServerInfo.mInternalIpAddress.c_str()));
-				return Send(pRemote, _T(MASTER_SERVER_UL) _T(" --internal-address ") + lServerInfo.mInternalIpAddress +
-					_T(" --internal-port ") + strutil::IntToString(lServerInfo.mInternalPort, 10));
+				mLog.Info("Asking game client to use LAN instead, since they share IP.");
+				log_volatile(mLog.Debugf("Internal address is '%s'.", lServerInfo.mInternalIpAddress.c_str()));
+				return Send(pRemote, MASTER_SERVER_UL " --internal-address " + lServerInfo.mInternalIpAddress +
+					" --internal-port " + strutil::IntToString(lServerInfo.mInternalPort, 10));
 			}
 
 			UdpVSocket* lGameServerSocket = mMuxSocket->GetVSocket(lSocketAddress);
 			if (lGameServerSocket)
 			{
-				if (Send(lGameServerSocket, _T(MASTER_SERVER_OF) _T(" --address ") + pServerInfo.mRemoteIpAddress + _T(" --port ") + strutil::IntToString(pServerInfo.mRemotePort, 10)))
+				if (Send(lGameServerSocket, MASTER_SERVER_OF " --address " + pServerInfo.mRemoteIpAddress + " --port " + strutil::IntToString(pServerInfo.mRemotePort, 10)))
 				{
-					mLog.AInfo("Asked game server to open firewall!");
-					return Send(pRemote, _T("OK"));
+					mLog.Info("Asked game server to open firewall!");
+					return Send(pRemote, "OK");
 				}
 			}
 		}
 	}
-	mLog.AError("Got request for connecting to offline game server!");
-	Send(pRemote, _T("Server offline."));
+	mLog.Error("Got request for connecting to offline game server!");
+	Send(pRemote, "Server offline.");
 	return false;
 }
 bool MasterServer::Send(UdpVSocket* pRemote, const str& pData)
@@ -344,13 +344,13 @@ bool MasterServer::Send(UdpVSocket* pRemote, const str& pData)
 	uint8 lRawData[1024];
 	if (pData.size() > sizeof(lRawData)/3)
 	{
-		mLog.Warning(_T("Trying to send too big chunk to game server."));
+		mLog.Warning("Trying to send too big chunk to game server.");
 		return false;
 	}
-	unsigned lSendByteCount = MasterServerNetworkParser::StrToRaw(lRawData, wstrutil::Encode(pData));
+	unsigned lSendByteCount = MasterServerNetworkParser::StrToRaw(lRawData, pData);
 	if ((unsigned)pRemote->DirectSend(lRawData, lSendByteCount) != lSendByteCount)
 	{
-		mLog.Warning(_T("Transmission to game server failed."));
+		mLog.Warning("Transmission to game server failed.");
 		return false;
 	}
 	return true;

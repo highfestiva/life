@@ -160,8 +160,8 @@ bool Win32DirectXDisplay::InitScreen()
 	if (mD3D == 0)
 	{
 		MessageBox(NULL,
-				   _T("Unable to create the Direct3D interface!"),
-			 	   _T("DirectX Error"), MB_OK | MB_ICONWARNING );
+				   "Unable to create the Direct3D interface!",
+			 	   "DirectX Error", MB_OK | MB_ICONWARNING );
 		return false;
 	}
 
@@ -174,8 +174,8 @@ bool Win32DirectXDisplay::InitScreen()
 	if (FAILED(lRes))
 	{
 		MessageBox(NULL,
-				   _T("Unable to create the Direct3D device!"),
-			 	   _T("DirectX Error"), MB_OK | MB_ICONWARNING );
+				   "Unable to create the Direct3D device!",
+			 	   "DirectX Error", MB_OK | MB_ICONWARNING );
 		mD3D->Release();
 		return false;
 	}
@@ -232,7 +232,7 @@ void Win32DirectXDisplay::Resize(int pWidth, int pHeight)
 
 void Win32DirectXDisplay::UpdateCaption()
 {
-	str lString = strutil::Format(_T("Win32DirectXDisplay (%ix%i %iBit %iHz) %s"),
+	str lString = strutil::Format("Win32DirectXDisplay (%ix%i %iBit %iHz %s"),
 		 mDisplayMode.mWidth, mDisplayMode.mHeight,
 		mDisplayMode.mBitDepth, mDisplayMode.mRefreshRate, LEPRA_BUILD_TYPE_TEXT);
 	SetCaption(lString, true);

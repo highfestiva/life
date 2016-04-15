@@ -65,7 +65,7 @@ void Label::Repaint(Painter* pPainter)
 
 	ActivateFont(pPainter);
 	const int lTextWidth  = pPainter->GetStringWidth(mText);
-	const int lTextHeight = pPainter->GetLineHeight() * (std::count(mText.begin(), mText.end(), _T('\n')) + 1);
+	const int lTextHeight = pPainter->GetLineHeight() * (std::count(mText.begin(), mText.end(), '\n') + 1);
 	if (mTextWidth != lTextWidth || mTextHeight != lTextHeight)
 	{
 		mTextWidth = lTextWidth;

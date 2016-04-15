@@ -198,12 +198,12 @@ bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
 	private:
 		void Run()
 		{
-			log_volatile(mConsole->GetLogger().Debug(_T("ForkThread: started.")));
+			log_volatile(mConsole->GetLogger().Debug("ForkThread: started."));
 			if (mConsole->ExecuteCommand(mCommand) != 0)
 			{
-				mConsole->GetLogger().AError("ForkThread: execution resulted in an error.");
+				mConsole->GetLogger().Error("ForkThread: execution resulted in an error.");
 			}
-			log_volatile(mConsole->GetLogger().Debug(_T("ForkThread: ended.")));
+			log_volatile(mConsole->GetLogger().Debug("ForkThread: ended."));
 			mConsole->RemoveFork(this);
 		}
 		ConsoleManager* mConsole;
@@ -232,7 +232,7 @@ void ConsoleManager::InitCommands()
 std::list<str> ConsoleManager::GetCommandList() const
 {
 	str lDummy;
-	std::list<str> lCommandList = mConsoleCommandManager->GetCommandCompletionList(_T(""), lDummy);
+	std::list<str> lCommandList = mConsoleCommandManager->GetCommandCompletionList("", lDummy);
 	return (lCommandList);
 }
 
@@ -259,7 +259,7 @@ void ConsoleManager::PrintCommandList(const std::list<str>& pCommandList)
 		lLongestCommand = (lLength > lLongestCommand)? lLength : lLongestCommand;
 	}
 	size_t lIndent = 0;
-	str lFormat = strutil::Format(_T("%%-%is"), lLongestCommand);
+	str lFormat = strutil::Format("%%-%is", lLongestCommand);
 	for (x = pCommandList.begin(); x != pCommandList.end(); ++x)
 	{
 		str lCommand = strutil::Format(lFormat.c_str(), x->c_str());
@@ -269,13 +269,13 @@ void ConsoleManager::PrintCommandList(const std::list<str>& pCommandList)
 		v_get(lConsoleWidth, =, GetVariableScope(), RTVAR_CONSOLE_CHARACTERWIDTH, 80);
 		if ((int)(lIndent+lLongestCommand) >= lConsoleWidth)
 		{
-			mConsoleLogger->OnLogRawMessage(_T("\n"));
+			mConsoleLogger->OnLogRawMessage("\n");
 			lIndent = 0;
 		}
 	}
 	if (!pCommandList.empty() && lIndent != 0)
 	{
-		mConsoleLogger->OnLogRawMessage(_T("\n"));
+		mConsoleLogger->OnLogRawMessage("\n");
 	}
 }
 
@@ -332,7 +332,7 @@ void ConsoleManager::ConsoleThreadEntry()
 		int lKeyEsc;
 		int lKeyPgUp;
 		int lKeyPgDn;
-		v_get(lWordDelimitorsUtf8, =, mVariableScope, RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" "));
+		v_get(lWordDelimitorsUtf8, =, mVariableScope, RTVAR_CONSOLE_CHARACTERDELIMITORS, " ");
 		v_get(lKeyCompletion, =, mVariableScope, RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t');
 		v_get(lKeyEnter, =, mVariableScope, RTVAR_CONSOLE_KEY_ENTER, (int)'\r');
 		v_get(lKeySilent, =, mVariableScope, RTVAR_CONSOLE_KEY_SILENT, (int)'\v');
@@ -359,14 +359,14 @@ void ConsoleManager::ConsoleThreadEntry()
 			// Print command completion list.
 			if (lCompletions.size() > 1)
 			{
-				mConsoleLogger->OnLogRawMessage(_T("\n"));
+				mConsoleLogger->OnLogRawMessage("\n");
 				PrintCommandList(lCompletions);
 			}
 			lInputText = wstrutil::Encode(lBestCompletionString);
 			lEditIndex = lInputText.length();
 			if (lCompletions.size() == 1)
 			{
-				lInputText += _T(' ');
+				lInputText += ' ';
 				++lEditIndex;
 			}
 		}
@@ -495,11 +495,11 @@ void ConsoleManager::OnCommandError(const str& pCommand, const strutil::strvec&,
 {
 	if (pResult < 0)
 	{
-		mLog.Warningf(_T("Unknown command: \"%s\". Type 'help' for more info."), pCommand.c_str());
+		mLog.Warningf("Unknown command: \"%s\". Type 'help' for more info.", pCommand.c_str());
 	}
 	else
 	{
-		mLog.Warningf(_T("Command error: \"%s\" returned error code %i."), pCommand.c_str(), pResult);
+		mLog.Warningf("Command error: \"%s\" returned error code %i.", pCommand.c_str(), pResult);
 	}
 }
 

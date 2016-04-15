@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -356,7 +356,7 @@ TcpListenerSocket::TcpListenerSocket(const SocketAddress& pLocalAddress, bool pI
 	mLocalAddress(pLocalAddress),
 	mReceiver(0)
 {
-	log_atrace("TcpListenerSocket()");
+	log_trace("TcpListenerSocket()");
 
 	// Initialize the socket.
 	mSocket = CreateTcpSocket();
@@ -370,7 +370,7 @@ TcpListenerSocket::TcpListenerSocket(const SocketAddress& pLocalAddress, bool pI
 		}
 		else
 		{
-			mLog.Warning(_T("Failed to bind TCP listener socket to ")+pLocalAddress.GetAsString()+_T("."));
+			mLog.Warning("Failed to bind TCP listener socket to "+pLocalAddress.GetAsString()+".");
 			Close();
 		}
 	}
@@ -378,7 +378,7 @@ TcpListenerSocket::TcpListenerSocket(const SocketAddress& pLocalAddress, bool pI
 
 TcpListenerSocket::~TcpListenerSocket()
 {
-	log_atrace("~TcpListenerSocket()");
+	log_trace("~TcpListenerSocket()");
 	mReceiver = 0;
 }
 
@@ -433,7 +433,7 @@ TcpSocket* TcpListenerSocket::Accept(SocketFactory pSocketFactory)
 			s_socket lSocket = ::accept(mSocket, SocketAddressGetter::GetRaw(lSockAddress), &lSize);
 			if (lSocket != INVALID_SOCKET)
 			{
-				log_atrace("::accept() received a ::connect()");
+				log_trace("::accept() received a ::connect()");
 				lTcpSocket = pSocketFactory(lSocket, lSockAddress, this, mReceiver);
 				BusLock::Add(&mConnectionCount, 1);
 			}
@@ -478,7 +478,7 @@ TcpSocket::TcpSocket(const SocketAddress& pLocalAddress):
 	{
 		if (::bind(mSocket, SocketAddressGetter::GetRaw(pLocalAddress), sizeof(RawSocketAddress)) != 0)
 		{
-			mLog.Warningf(_T("TCP socket binding failed! Error=%i"), SOCKET_LAST_ERROR());
+			mLog.Warningf("TCP socket binding failed! Error=%i", SOCKET_LAST_ERROR());
 			Close();
 		}
 	}
@@ -492,13 +492,13 @@ TcpSocket::TcpSocket(s_socket pSocket, const SocketAddress& pTargetAddress,
 	mTargetAddress(pTargetAddress),
 	mServerSocket(pServerSocket)
 {
-	log_atrace("TcpSocket()");
+	log_trace("TcpSocket()");
 	InitSocket(mSocket, 32*1024, false);
 }
 
 TcpSocket::~TcpSocket()
 {
-	log_atrace("~TcpSocket()");
+	log_trace("~TcpSocket()");
 	Disconnect();
 	mReceiver = 0;
 }
@@ -510,7 +510,7 @@ bool TcpSocket::Connect(const SocketAddress& pTargetAddress)
 	if (!lOk)
 	{
 		int e = SOCKET_LAST_ERROR();
-		mLog.Infof(_T("TCP connect failed! Error=%i."), e);
+		mLog.Infof("TCP connect failed! Error=%i.", e);
 		Close();
 	}
 	return (lOk);
@@ -545,7 +545,7 @@ int TcpSocket::Send(const void* pData, int pSize)
 		if (lSentByteCount <= 0)
 		{
 			int e = SOCKET_LAST_ERROR();
-			mLog.Errorf(_T("TCP send error. Error=%i, socket=%u."), e, mSocket);
+			mLog.Errorf("TCP send error. Error=%i, socket=%u.", e, mSocket);
 			CloseKeepHandle();
 		}
 		else
@@ -553,9 +553,9 @@ int TcpSocket::Send(const void* pData, int pSize)
 			log_volatile(str lLocalAddress);
 			log_volatile(if (mServerSocket) lLocalAddress = mServerSocket->GetLocalAddress().GetAsString());
 			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min((int)pSize, 50)));
-			log_volatile(str lString = strutil::Encode(astrutil::ReplaceCtrlChars((const char*)pData, '.')));
+			log_volatile(str lString = strutil::ReplaceCtrlChars((const char*)pData, '.'));
 			log_volatile(lString.resize(15));
-			log_volatile(mLog.Tracef(_T("TCP -> %u bytes (%s -> %s): %s %s."), pSize,
+			log_volatile(mLog.Tracef("TCP -> %u bytes (%s -> %s): %s %s.", pSize,
 				lLocalAddress.c_str(), mTargetAddress.GetAsString().c_str(), lData.c_str(), lString.c_str()));
 
 			mSentByteCount += lSentByteCount;
@@ -581,7 +581,7 @@ int TcpSocket::Receive(void* pData, int pMaxSize)
 		}
 		else
 		{
-			mLog.AError("Tried to ::recv() data, but unreceived data size don't match!");
+			mLog.Error("Tried to ::recv() data, but unreceived data size don't match!");
 			lSize = 0;
 		}
 		if (lSize == 0)
@@ -600,9 +600,9 @@ int TcpSocket::Receive(void* pData, int pMaxSize)
 			log_volatile(str lLocalAddress);
 			log_volatile(if (mServerSocket) lLocalAddress = mServerSocket->GetLocalAddress().GetAsString());
 			log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(lSize, 50)));
-			log_volatile(str lString = strutil::Encode(astrutil::ReplaceCtrlChars((const char*)pData, '.')));
+			log_volatile(str lString = strutil::ReplaceCtrlChars((const char*)pData, '.'));
 			log_volatile(lString.resize(15));
-			log_volatile(mLog.Tracef(_T("TCP <- %u bytes (%s <- %s): %s %s."), lSize,
+			log_volatile(mLog.Tracef("TCP <- %u bytes (%s <- %s): %s %s.", lSize,
 				lLocalAddress.c_str(), mTargetAddress.GetAsString().c_str(), lData.c_str(), lString.c_str()));
 
 			mReceivedByteCount += lSize;
@@ -646,7 +646,7 @@ bool TcpSocket::Unreceive(void* pData, int pByteCount)
 	}
 	if (!lOk)
 	{
-		mLog.Errorf(_T("Unable to unreceive %u bytes."), pByteCount);
+		mLog.Errorf("Unable to unreceive %u bytes.", pByteCount);
 	}
 	return (lOk);
 }
@@ -689,7 +689,7 @@ UdpSocket::UdpSocket(const SocketAddress& pLocalAddress, bool pIsServer):
 	{
 		if (::bind(mSocket, SocketAddressGetter::GetRaw(mLocalAddress), sizeof(RawSocketAddress)) != 0)
 		{
-			mLog.Warningf(_T("Failed to bind UDP socket to %s: %i."), pLocalAddress.GetAsString().c_str(), SOCKET_LAST_ERROR());
+			mLog.Warningf("Failed to bind UDP socket to %s: %i.", pLocalAddress.GetAsString().c_str(), SOCKET_LAST_ERROR());
 			Close();
 			mLocalAddress.Set(IPAddress(), 0);
 		}
@@ -699,12 +699,12 @@ UdpSocket::UdpSocket(const SocketAddress& pLocalAddress, bool pIsServer):
 UdpSocket::UdpSocket(const UdpSocket& pSocket):
 	mLocalAddress(pSocket.mLocalAddress)
 {
-	log_atrace("UdpSocket()");
+	log_trace("UdpSocket()");
 }
 
 UdpSocket::~UdpSocket()
 {
-	log_atrace("~UdpSocket()");
+	log_trace("~UdpSocket()");
 }
 
 const SocketAddress& UdpSocket::GetLocalAddress() const
@@ -725,7 +725,7 @@ int UdpSocket::SendTo(const uint8* pData, unsigned pSize, const SocketAddress& p
 		else
 		{
 			/*log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(pSize, (unsigned)50)));
-			log_volatile(mLog.Tracef(_T("UDP -> %u bytes (%s -> %s): %s."), pSize,
+			log_volatile(mLog.Tracef("UDP -> %u bytes (%s -> %s: %s."), pSize,
 				mLocalAddress.GetAsString().c_str(), pTargetAddress.GetAsString().c_str(),
 				lData.c_str()));*/
 			mSentByteCount += lSentByteCount;
@@ -750,7 +750,7 @@ int UdpSocket::ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSour
 		else
 		{
 			/*log_volatile(str lData = strutil::DumpData((uint8*)pData, std::min(lSize, 50)));
-			log_volatile(mLog.Tracef(_T("UDP <- %u bytes (%s <- %s): %s."), lSize,
+			log_volatile(mLog.Tracef("UDP <- %u bytes (%s <- %s: %s."), lSize,
 				mLocalAddress.GetAsString().c_str(), pSourceAddress.GetAsString().c_str(),
 				lData.c_str()));*/
 			mReceivedByteCount += lSize;
@@ -789,10 +789,10 @@ loginstance(NETWORK, UdpSocket);
 UdpMuxSocket::UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
 	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
 	MuxIo(pMaxPendingConnectionCount, pMaxConnectionCount),
-	Thread(astrutil::Encode(pName+_T("UdpMuxRecv ")+pLocalAddress.GetAsString())),
+	Thread(pName+"UdpMuxRecv "+pLocalAddress.GetAsString()),
 	UdpSocket(pLocalAddress, pIsServer)
 {
-	log_atrace("UdpMuxSocket()");
+	log_trace("UdpMuxSocket()");
 
 	if (IsOpen())
 	{
@@ -802,7 +802,7 @@ UdpMuxSocket::UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress,
 
 UdpMuxSocket::~UdpMuxSocket()
 {
-	log_atrace("~UdpMuxSocket()");
+	log_trace("~UdpMuxSocket()");
 
 	RequestStop();
 
@@ -847,7 +847,7 @@ UdpVSocket* UdpMuxSocket::Connect(const SocketAddress& pTargetAddress, const std
 			lConnectString += pConnectionId;
 			if (lSocket->DirectSend(lConnectString.c_str(), (int)lConnectString.length()) != (int)lConnectString.length())
 			{
-				mLog.AError("Send to server (as connect) failed.");
+				mLog.Error("Send to server (as connect) failed.");
 				CloseSocket(lSocket);
 				lSocket = 0;
 			}
@@ -862,22 +862,22 @@ UdpVSocket* UdpMuxSocket::Connect(const SocketAddress& pTargetAddress, const std
 		{
 			if (lBuffer.mDataSize == 0)
 			{
-				log_adebug("Remote end seems dead. Firewall?");
+				log_debug("Remote end seems dead. Firewall?");
 			}
 			else if (lBuffer.mDataSize < 0)
 			{
-				mLog.AError("Connect was refused. Firewall?");
+				mLog.Error("Connect was refused. Firewall?");
 			}
 			else if (lBuffer.mDataSize > 0)
 			{
-				mLog.AError("Connect was replied to with jibberish. Wassup?");
+				mLog.Error("Connect was replied to with jibberish. Wassup?");
 			}
 			CloseSocket(lSocket);
 			lSocket = 0;
 		}
 		else
 		{
-			log_atrace("Connect went through!");
+			log_trace("Connect went through!");
 			lSocket->SetReceiverFollowupActive(true);
 		}
 	}
@@ -908,12 +908,12 @@ UdpVSocket* UdpMuxSocket::PollAccept()
 		mAcceptTable.Remove(lSocket->GetTargetAddress());
 		if (lSocket->DirectSend(mAcceptionString, sizeof(mAcceptionString)) == sizeof(mAcceptionString))
 		{
-			log_atrace("Replied to connect with an ACK.");
+			log_trace("Replied to connect with an ACK.");
 			mSocketTable.Insert(lSocket->GetTargetAddress(), lSocket);
 		}
 		else
 		{
-			mLog.AError("Could not reply to connect with an ACK.");
+			mLog.Error("Could not reply to connect with an ACK.");
 			// TODO: blacklist after x number of incorrect queries?
 			CloseSocket(lSocket);
 			lSocket = 0;
@@ -925,7 +925,7 @@ UdpVSocket* UdpMuxSocket::PollAccept()
 
 void UdpMuxSocket::CloseSocket(UdpVSocket* pSocket)
 {
-	log_volatile(mLog.Debugf(_T("Dropping UDP MUX socket %s."), pSocket->GetTargetAddress().GetAsString().c_str()));
+	log_volatile(mLog.Debugf("Dropping UDP MUX socket %s.", pSocket->GetTargetAddress().GetAsString().c_str()));
 
 	ScopeLock lLock(&mIoLock);
 	mSocketTable.Remove(pSocket->GetTargetAddress());
@@ -953,7 +953,7 @@ UdpVSocket* UdpMuxSocket::PopSenderSocket()
 	UdpVSocket* lSocket = (UdpVSocket*)PopSender();
 	if (lSocket)
 	{
-		log_atrace("Popped UDP sender socket.");
+		log_trace("Popped UDP sender socket.");
 	}
 	return (lSocket);
 }
@@ -971,7 +971,7 @@ bool UdpMuxSocket::SendOpenFirewallData(const SocketAddress& pTargetAddress)
 
 void UdpMuxSocket::Run()
 {
-	log_atrace("Receive thread running");
+	log_trace("Receive thread running");
 
 	SocketAddress lSourceAddress;
 	Datagram* lBuffer = 0;
@@ -1003,7 +1003,7 @@ void UdpMuxSocket::Run()
 			}
 			else if(mBannedIPTable.Find(lSourceAddress.GetIP()) != mBannedIPTable.End())
 			{
-				mLog.AWarning("Banned socket sent us something. Playing ignorant.");
+				mLog.Warning("Banned socket sent us something. Playing ignorant.");
 			}
 			else if(mAcceptTable.Find(lSourceAddress) == mAcceptTable.End())
 			{
@@ -1028,25 +1028,25 @@ void UdpMuxSocket::Run()
 					}
 					else
 					{
-						mLog.AWarning("Too many sockets - didn't accept connect.");
+						mLog.Warning("Too many sockets - didn't accept connect.");
 					}
 				}
 				else if (lBuffer->mDataSize == sizeof(mOpenFirewallString) &&
 					::memcmp(lBuffer->mDataBuffer, mOpenFirewallString, sizeof(mOpenFirewallString)) == 0)
 				{
-					log_atrace("Received an \"open firewall\" datagram.");
+					log_trace("Received an \"open firewall\" datagram.");
 				}
 				else
 				{
-					mLog.AWarning("Non-connected socket sent us junk.");
+					mLog.Warning("Non-connected socket sent us junk.");
 					log_volatile(const str lData = strutil::DumpData(lBuffer->mDataBuffer, std::min(lBuffer->mDataSize, 50)));
-					log_volatile(mLog.Debugf(_T("UDP <- %i bytes (%s): %s."), lBuffer->mDataSize,
+					log_volatile(mLog.Debugf("UDP <- %i bytes (%s): %s.", lBuffer->mDataSize,
 						lSourceAddress.GetAsString().c_str(), lData.c_str()));
 				}
 			}
 			else
 			{
-				mLog.AWarning("Non-connecting send us something. (Could mean internal error...)");
+				mLog.Warning("Non-connecting send us something. (Could mean internal error...)");
 			}
 		}
 		else if (lBuffer->mDataSize < 0)
@@ -1055,7 +1055,7 @@ void UdpMuxSocket::Run()
 		}
 		else
 		{
-			mLog.AWarning("Could not receive any data on the socket.");
+			mLog.Warning("Could not receive any data on the socket.");
 		}
 	}
 
@@ -1079,13 +1079,13 @@ loginstance(NETWORK, UdpMuxSocket);
 
 UdpVSocket::UdpVSocket()
 {
-	//log_atrace("UdpVSocket()");
+	//log_trace("UdpVSocket()");
 	ClearAll();
 }
 
 UdpVSocket::~UdpVSocket()
 {
-	//log_atrace("~UdpVSocket()");
+	//log_trace("~UdpVSocket()");
 }
 
 void UdpVSocket::ClearAll()
@@ -1203,7 +1203,7 @@ void UdpVSocket::AddInputBuffer(Datagram* pBuffer)
 			// up processing the data anyway.
 
 			// Throw old data away.
-			mLog.AError("Throwing away network data, since receive buffer is full!");
+			mLog.Error("Throwing away network data, since receive buffer is full!");
 			Datagram* lReceiveBuffer = mReceiveBufferList[0];
 			mReceiveBufferList.PopFront();
 			mLock.Release();

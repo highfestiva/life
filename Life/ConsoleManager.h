@@ -91,14 +91,14 @@ protected:
 	int TranslateCommand(const HashedString& pCommand) const;
 	virtual int OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector);
 
-	virtual bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
+	virtual bool SaveApplicationConfigFile(File* pFile, const str& pUserConfig);
 
 	Cure::ResourceManager* GetResourceManager() const;
 
 protected:
-	wstr LoadUserConfig(File* pFile);
-	bool SaveSystemConfigFile(int pScopeSkipCount, File* pFile, const wstr& pUserConfig);
-	bool SaveConfigFile(File* pFile, const str& pPrefix, std::list<str>& pVariableList, const wstr& pUserConfig);
+	str LoadUserConfig(File* pFile);
+	bool SaveSystemConfigFile(int pScopeSkipCount, File* pFile, const str& pUserConfig);
+	bool SaveConfigFile(File* pFile, const str& pPrefix, std::list<str>& pVariableList, const str& pUserConfig);
 	static str GetQuoted(const str& s);
 
 	static const CommandPair mCommandIdList[];

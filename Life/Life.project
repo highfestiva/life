@@ -730,6 +730,9 @@
         <File Name="../Lepra/Source/Posix/PosixAntiCrack.cpp"/>
         <File Name="../Lepra/Source/Posix/pch.h"/>
         <File Name="../Lepra/Source/Posix/PosixThread.cxx"/>
+        <File Name="../Lepra/Source/Posix/MacLog.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../Lepra/Source/Posix/MacSystemManager.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+        <File Name="../Lepra/Source/Posix/MacThread.mm" ExcludeProjConfig="Debug;Profile;Release"/>
       </VirtualDirectory>
       <VirtualDirectory Name="Win32">
         <File Name="../Lepra/Source/Win32/Win32AntiCrack.cpp" ExcludeProjConfig="Debug;Profile;Release"/>
@@ -924,6 +927,10 @@
       <File Name="../Lepra/Include/FileArchive.h"/>
       <File Name="../Lepra/Include/ProgressCallback.h"/>
       <File Name="../Lepra/Include/StringUtility.inl"/>
+      <File Name="../Lepra/Include/ConsoleCommandManager.inl"/>
+      <File Name="../Lepra/Include/LooseBinTree.inl"/>
+      <File Name="../Lepra/Include/LooseOctree.inl"/>
+      <File Name="../Lepra/Include/LooseQuadtree.inl"/>
     </VirtualDirectory>
     <VirtualDirectory Name="LepraTestApp">
       <File Name="../Lepra/LepraTestApp/LepraTest.cpp"/>

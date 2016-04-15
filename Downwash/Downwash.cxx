@@ -81,7 +81,7 @@ Downwash* Downwash::GetApp()
 
 
 Downwash::Downwash(const strutil::strvec& pArgumentList):
-	Parent(_T("Downwash"), pArgumentList),
+	Parent("Downwash", pArgumentList),
 	mUiManager(0)
 {
 	mApp = this;
@@ -121,19 +121,19 @@ void Downwash::Init()
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	double lPhysicalScreenSize = 24.0;	// An average computer's physical screen size (inches across).
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, "OpenGL");
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, "AllowUpsideDown");
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
 
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, "OpenAL");
 
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_2D_PAINTMODE, "AlphaBlend");
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, false);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLELIGHTS, true);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
@@ -143,8 +143,8 @@ void Downwash::Init()
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 60.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 1.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
-	//v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("None"));
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("Force:Volumes"));
+	//v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "None");
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "Force:Volumes");
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.0);
@@ -159,7 +159,7 @@ void Downwash::Init()
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, true);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
 	//v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, true);
-	//v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("Force:VolumesAndMaps"));
+	//v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "Force:VolumesAndMaps");
 #endif // Computer
 
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
@@ -225,12 +225,12 @@ void Downwash::Resume(bool pHard)
 
 str Downwash::GetTypeName() const
 {
-	return _T("Client");
+	return "Client";
 }
 
 str Downwash::GetVersion() const
 {
-	return _T(PLATFORM_VERSION);
+	return PLATFORM_VERSION;
 }
 
 Cure::ApplicationTicker* Downwash::CreateTicker() const

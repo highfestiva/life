@@ -59,7 +59,7 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::Reso
 	//v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 
 	v_override(UiCure::GetSettings(), RTVAR_GAME_ALLOWPOWERDOWN, true);
-	v_override(UiCure::GetSettings(), RTVAR_GAME_USERMESSAGE, _T(""));
+	v_override(UiCure::GetSettings(), RTVAR_GAME_USERMESSAGE, "");
 
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_FPS, 60);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
@@ -69,13 +69,13 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* pUiManager, Cure::Reso
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYY, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_PHYSICS_GRAVITYZ, -9.8);
 
-	v_set(UiCure::GetSettings(), "Simulator.DeniedHosts", _T(""));
-	v_set(UiCure::GetSettings(), "Simulator.AllowedHosts", _T(""));
+	v_set(UiCure::GetSettings(), "Simulator.DeniedHosts", "");
+	v_set(UiCure::GetSettings(), "Simulator.AllowedHosts", "");
 	v_set(UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
 
-	AddBackedRtvar(_T("Simulator.DeniedHosts"));
-	AddBackedRtvar(_T("Simulator.AllowedHosts"));
-	AddBackedRtvar(_T("Simulator.AllowRemoteSync"));
+	AddBackedRtvar("Simulator.DeniedHosts");
+	AddBackedRtvar("Simulator.AllowedHosts");
+	AddBackedRtvar("Simulator.AllowRemoteSync");
 }
 
 TrabantSimTicker::~TrabantSimTicker()
@@ -122,19 +122,19 @@ bool TrabantSimTicker::OpenUiManager()
 	}
 	if (lOk)
 	{
-		mUiManager->GetDisplayManager()->SetCaption(_T("Trabant Simulator"));
+		mUiManager->GetDisplayManager()->SetCaption("Trabant Simulator");
 		UiLepra::Core::ProcessMessages();
 	}
 	if (lOk)
 	{
 		mUiManager->UpdateSettings();
 		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
-		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 1));
-		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4, 5);
+		lRenderer->AddDynamicRenderer("particle", new UiTbc::ParticleRenderer(lRenderer, 1));
+		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, "explosion.png", 4, 5);
 	}
 	if (lOk)
 	{
-		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
+		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, "env.png", UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
 		if (mEnvMap->Load())
 		{
 			if (mEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)

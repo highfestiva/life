@@ -17,7 +17,7 @@ namespace Downwash
 
 
 Automan::Automan(Cure::GameManager* pGame, Cure::GameObjectId pCarId, const vec3& pDirection):
-	Parent(pGame->GetResourceManager(), _T("Automan")),
+	Parent(pGame->GetResourceManager(), "Automan"),
 	mCarId(pCarId),
 	mDirection(pDirection)
 {

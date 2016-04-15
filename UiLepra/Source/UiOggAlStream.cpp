@@ -117,7 +117,7 @@ bool OggAlStream::Open(const str& pFilename)
 {
 	Release();
 
-	if ((mOggFile = fopen(astrutil::Encode(pFilename).c_str(), "rb")) == 0)
+	if ((mOggFile = fopen(pFilename.c_str(), "rb")) == 0)
 	{
 		return mIsOpen;
 	}

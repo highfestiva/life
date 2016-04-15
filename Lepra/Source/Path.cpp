@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -48,7 +48,7 @@ strutil::strvec Path::SplitPath(const str& pPath)
 	int x;
 	for (x = (int)pPath.length()-1; x >= 0; --x)
 	{
-		if (pPath[x] == _T('.'))
+		if (pPath[x] == '.')
 		{
 			lPathParts[2] = pPath.substr(x+1);	// Ext.
 			--x;
@@ -84,7 +84,7 @@ strutil::strvec Path::SplitPath(const str& pPath)
 		}
 		else if (lPathParts[1].empty() && !lPathParts[2].empty())
 		{
-			lPathParts[1] = _T(".")+lPathParts[2];
+			lPathParts[1] = "."+lPathParts[2];
 			lPathParts[2].clear();
 		}
 	}
@@ -96,7 +96,7 @@ void Path::SplitPath(const str& pPath, str& pDirectory, str& pFilename)
 {
 	strutil::strvec lPathParts = SplitPath(pPath);
 	pDirectory = lPathParts[0];
-	pFilename = JoinPath(_T(""), lPathParts[1], lPathParts[2]);
+	pFilename = JoinPath("", lPathParts[1], lPathParts[2]);
 }
 
 strutil::strvec Path::SplitNodes(const str& pDirectory, bool pExcludeLeadingDirectory, bool pExcludeTrailingDirectory)
@@ -104,17 +104,17 @@ strutil::strvec Path::SplitNodes(const str& pDirectory, bool pExcludeLeadingDire
 #ifdef LEPRA_WINDOWS
 	str lDirectory;
 	// Include support for Win32 UNC names.
-	if (pDirectory.substr(0, 4) == _T("\\\\.\\"))
+	if (pDirectory.substr(0, 4) == "\\\\.\\")
 	{
-		lDirectory = _T("\\\\.\\")+strutil::ReplaceAll(pDirectory.substr(4), _T('\\'), _T('/'));
+		lDirectory = "\\\\.\\"+strutil::ReplaceAll(pDirectory.substr(4), '\\', '/');
 	}
-	else if (pDirectory.substr(0, 2) == _T("\\\\"))
+	else if (pDirectory.substr(0, 2) == "\\\\")
 	{
-		lDirectory = _T("\\\\")+strutil::ReplaceAll(pDirectory.substr(2), _T('\\'), _T('/'));
+		lDirectory = "\\\\"+strutil::ReplaceAll(pDirectory.substr(2), '\\', '/');
 	}
 	else
 	{
-		lDirectory = strutil::ReplaceAll(pDirectory, _T('\\'), _T('/'));
+		lDirectory = strutil::ReplaceAll(pDirectory, '\\', '/');
 	}
 #else // !LEPRA_WINDOWS
 	str lDirectory = pDirectory;
@@ -127,7 +127,7 @@ strutil::strvec Path::SplitNodes(const str& pDirectory, bool pExcludeLeadingDire
 	{
 		lDirectory.resize(lDirectory.length()-1);
 	}
-	return (strutil::Split(lDirectory, _T("/")));
+	return (strutil::Split(lDirectory, "/"));
 }
 
 str Path::JoinPath(const str& pDirectory, const str& pFileBase, const str& pExtension)
@@ -138,13 +138,13 @@ str Path::JoinPath(const str& pDirectory, const str& pFileBase, const str& pExte
 		lFullFilename = pDirectory;
 		if (!IsPathSeparator(lFullFilename[lFullFilename.length()-1]))
 		{
-			lFullFilename += _T('/');
+			lFullFilename += '/';
 		}
 	}
 	lFullFilename += pFileBase;
 	if (!pExtension.empty())	// Only add extension if present (since "file." is different from "file" on some systems).
 	{
-		lFullFilename += _T(".")+pExtension;
+		lFullFilename += "."+pExtension;
 	}
 	return (lFullFilename);
 }
@@ -156,7 +156,7 @@ str Path::GetParentDirectory(const str& pDirectory)
 	{
 		lNodes[lNodes.size()-1].clear();
 	}
-	return strutil::Join(lNodes, _T("/"));
+	return strutil::Join(lNodes, "/");
 }
 
 bool Path::NormalizePath(const str& pInputPath, str& pOutputPath)
@@ -166,19 +166,19 @@ bool Path::NormalizePath(const str& pInputPath, str& pOutputPath)
 	strutil::strvec::iterator y = lDirectoryArray.begin();
 	for (int x = 0; y != lDirectoryArray.end(); ++x)
 	{
-		if (x >= 1 && *y == _T("."))	// Only drops non-leading "./".
+		if (x >= 1 && *y == ".")	// Only drops non-leading "./".
 		{
 			y = lDirectoryArray.erase(y);
 			--x;
 		}
-		else if (x >= 1 && x < (int)lDirectoryArray.size()-1 && *y == _T(""))	// Only drops non-leading+non-ending "/".
+		else if (x >= 1 && x < (int)lDirectoryArray.size()-1 && *y == "")	// Only drops non-leading+non-ending "/".
 		{
 			y = lDirectoryArray.erase(y);
 			--x;
 		}
-		else if (x >= 1 && *y == _T(".."))	// Only drops non-leading "../".
+		else if (x >= 1 && *y == "..")	// Only drops non-leading "../".
 		{
-			if (x == 1 && lDirectoryArray[0] == _T("."))
+			if (x == 1 && lDirectoryArray[0] == ".")
 			{
 				lDirectoryArray.erase(lDirectoryArray.begin());	// "./../" -> "../".
 				y = lDirectoryArray.begin();
@@ -187,11 +187,11 @@ bool Path::NormalizePath(const str& pInputPath, str& pOutputPath)
 			else
 			{
 				strutil::strvec::iterator z = y-1;
-				if (*z == _T(""))	// "/../" is illegal.
+				if (*z == "")	// "/../" is illegal.
 				{
 					return false;
 				}
-				if (*z != _T(".."))	// "../../" should remain the same.
+				if (*z != "..")	// "../../" should remain the same.
 				{
 					lDirectoryArray.erase(z, ++y);	// Drop this and parent directory ("a/../" -> "").
 					x -= 2;
@@ -208,29 +208,29 @@ bool Path::NormalizePath(const str& pInputPath, str& pOutputPath)
 			++y;
 		}
 	}
-	if (lDirectoryArray.size() == 1 && lDirectoryArray[0] == _T(""))
+	if (lDirectoryArray.size() == 1 && lDirectoryArray[0] == "")
 	{
-		pOutputPath = _T("/");
+		pOutputPath = "/";
 	}
 	else
 	{
-		pOutputPath = strutil::Join(lDirectoryArray, _T("/"));
+		pOutputPath = strutil::Join(lDirectoryArray, "/");
 	}
 	return (true);
 }
 
-bool Path::IsPathSeparator(const tchar pCharacter)
+bool Path::IsPathSeparator(const char pCharacter)
 {
-	return (pCharacter == _T('/')
+	return (pCharacter == '/'
 #ifdef LEPRA_WINDOWS
-		|| pCharacter == _T('\\')
+		|| pCharacter == '\\'
 #endif // LEPRA_WINDOWS
 		);
 }
 
 Path::Wildcard Path::CreateWildcard(const str& pWildcard)
 {
-	return strutil::Split(pWildcard, _T("*"));
+	return strutil::Split(pWildcard, "*");
 }
 
 bool Path::IsWildcardMatch(const str& pWildcard, const str& pFilename, bool pScan)

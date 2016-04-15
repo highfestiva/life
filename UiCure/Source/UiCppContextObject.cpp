@@ -39,12 +39,12 @@ CppContextObject::CppContextObject(Cure::ResourceManager* pResourceManager, cons
 	mSinkOffset(0),
 	mLerpMode(LERP_STOP)
 {
-	log_volatile(mLog.Tracef(_T("Construct CppCO %s."), pClassId.c_str()));
+	log_volatile(mLog.Tracef("Construct CppCO %s.", pClassId.c_str()));
 }
 
 CppContextObject::~CppContextObject()
 {
-	log_volatile(mLog.Tracef(_T("Delete CppCO %X:%s."), GetInstanceId(), GetClassId().c_str()));
+	log_volatile(mLog.Tracef("Delete CppCO %X:%s.", GetInstanceId(), GetClassId().c_str()));
 
 	for (MeshArray::iterator x = mMeshResourceArray.begin(); x != mMeshResourceArray.end(); ++x)
 	{
@@ -108,7 +108,7 @@ void CppContextObject::StartLoading()
 {
 	deb_assert(mUiClassResource == 0);
 	mUiClassResource = new UserClassResource(mUiManager);
-	const str lClassName = _T("UI:")+GetClassId()+_T(".class");
+	const str lClassName = "UI:"+GetClassId()+".class";
 	mUiClassResource->Load(GetResourceManager(), lClassName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
@@ -123,7 +123,7 @@ void CppContextObject::OnTick()
 	}
 	if (!mPhysics)
 	{
-		mLog.Warningf(_T("Physical body for %s not loaded!"), GetClassId().c_str());
+		mLog.Warningf("Physical body for %s not loaded!", GetClassId().c_str());
 		return;
 	}
 
@@ -158,7 +158,7 @@ void CppContextObject::UiMove()
 	/*if (mLerpMode == LERP_START)
 	{
 		mLerpOffset.SetIdentity();
-		//log_volatile(mLog.Debugf(_T("Starting slide of mesh on object %u/%s."), GetInstanceId(), GetClassId().c_str()));
+		//log_volatile(mLog.Debugf("Starting slide of mesh on object %u/%s.", GetInstanceId(), GetClassId().c_str()));
 	}*/
 	for (size_t x = 0; x < mMeshResourceArray.size(); ++x)
 	{
@@ -175,7 +175,7 @@ void CppContextObject::UiMove()
 			Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
 			if (!lGeometry || lBodyId == Tbc::INVALID_BODY)
 			{
-				mLog.Warningf(_T("Physical body (index %u) for %s not loaded!"), lResource->GetOffset().mGeometryIndex, lResource->GetName().c_str());
+				mLog.Warningf("Physical body (index %u) for %s not loaded!", lResource->GetOffset().mGeometryIndex, lResource->GetName().c_str());
 				continue;
 			}
 			lPhysicsManager->GetBodyTransform(lBodyId, lPhysicsTransform);
@@ -295,7 +295,7 @@ UserGeometryReferenceResource* CppContextObject::GetMeshResource(int pIndex) con
 void CppContextObject::AddMeshResource(Tbc::GeometryBase* pMesh, int pCastsShadows)
 {
 	static int lMeshCounter = 0;
-	str lMeshName = strutil::Format(_T("RawMesh%i"), lMeshCounter++);
+	str lMeshName = strutil::Format("RawMesh%i", lMeshCounter++);
 	DoAddMeshResource(lMeshName, pMesh, pCastsShadows);
 }
 
@@ -370,10 +370,10 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 	if (lMesh->GetRamData()->GetUVData(0) && lTexture)
 	{
 		const str lShader = lClass->GetMaterial(pMeshIndex).mShaderName;
-		const bool lIsBlended = (lTransparent || lShader == _T("blend"));
-		const bool lIsHighlight = (lShader == _T("highlight"));
-		const bool lIsEnv = (lShader == _T("env"));
-		const bool lIsEnvBlend = ((lTransparent && lIsEnv) || lShader == _T("env_blend"));
+		const bool lIsBlended = (lTransparent || lShader == "blend");
+		const bool lIsHighlight = (lShader == "highlight");
+		const bool lIsEnv = (lShader == "env");
+		const bool lIsEnvBlend = ((lTransparent && lIsEnv) || lShader == "env_blend");
 		UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_TEXTURE_SOLID;
 		if (lIsEnvBlend)
 		{
@@ -398,9 +398,9 @@ void CppContextObject::UpdateMaterial(int pMeshIndex)
 	{
 		UiTbc::Renderer::MaterialType lMaterialType = mEnablePixelShader? UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS : UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID;
 		const str lShader = lClass->GetMaterial(pMeshIndex).mShaderName;
-		const bool lIsBlended = (lTransparent || lShader == _T("blend"));
-		const bool lIsEnv = (lShader == _T("env"));
-		const bool lIsEnvBlend = ((lTransparent && lIsEnv) || lShader == _T("env_blend"));
+		const bool lIsBlended = (lTransparent || lShader == "blend");
+		const bool lIsEnv = (lShader == "env");
+		const bool lIsEnvBlend = ((lTransparent && lIsEnv) || lShader == "env_blend");
 		if (lIsEnvBlend)
 		{
 			lMaterialType = UiTbc::Renderer::MAT_SINGLE_COLOR_ENVMAP_BLENDED;
@@ -471,8 +471,8 @@ const Tbc::ChunkyClass* CppContextObject::GetClass() const
 
 void CppContextObject::DoAddMeshResource(const str& pMeshName, Tbc::GeometryBase* pMesh, int pCastsShadows)
 {
-	const str lMeshName = pMeshName + _T(".mesh");
-	const str lMeshRefName = strutil::Format(_T("%s;%i"), lMeshName.c_str(), GetInstanceId());
+	const str lMeshName = pMeshName + ".mesh";
+	const str lMeshRefName = strutil::Format("%s;%i", lMeshName.c_str(), GetInstanceId());
 	int lPhysIndex = 0;
 	xform lTransform;
 	float lScale = 1;
@@ -514,7 +514,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	UiTbc::ChunkyClass* lClass = pClassResource->GetData();
 	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
+		mLog.Errorf("Could not load class '%s'.", pClassResource->GetName().c_str());
 		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
@@ -557,22 +557,22 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 		float lScale;
 		lClass->GetMesh(x, lPhysIndex, lMeshName, lTransform, lScale);
 		str lMeshInstance;
-		strutil::strvec lMeshNameList = strutil::Split(lMeshName, _T(";"), 1);
+		strutil::strvec lMeshNameList = strutil::Split(lMeshName, ";", 1);
 		lMeshName = lMeshNameList[0];
 		if (lMeshNameList.size() == 1)
 		{
-			lMeshInstance = strutil::Format(_T("%s"), GetMeshInstanceId().c_str());
+			lMeshInstance = strutil::Format("%s", GetMeshInstanceId().c_str());
 		}
 		else
 		{
-			lMeshInstance = strutil::Format(_T("%s_%s"), lMeshNameList[1].c_str(), GetMeshInstanceId().c_str());
+			lMeshInstance = strutil::Format("%s_%s", lMeshNameList[1].c_str(), GetMeshInstanceId().c_str());
 		}
 		// TRICKY: load non-unique, since this mesh reference is shared. However, we set it as
 		// "don't keep", which makes sure it doesn't get cached. Example: client 0's car 1 mesh
 		// is the same as client 1's car 1 mesh. But when car 1 dies, the mesh REFERENCE should
 		// also die immediately. (The MESH, on the other hand, is a totally different topic.)
 		(*y)->Load(GetResourceManager(),
-			strutil::Format(_T("%s.mesh;%s"), lMeshName.c_str(), lMeshInstance.c_str()),
+			strutil::Format("%s.mesh;%s", lMeshName.c_str(), lMeshInstance.c_str()),
 			UserGeometryReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadMesh),
 			false);
 	}
@@ -634,7 +634,7 @@ void CppContextObject::DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshRe
 	}
 	else
 	{
-		mLog.AError("Could not load mesh! Sheit.");
+		mLog.Error("Could not load mesh! Sheit.");
 		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 	}
@@ -649,7 +649,7 @@ void CppContextObject::OnLoadTexture(UserRendererImageResource* pTextureResource
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not load texture %s. Gah!"), pTextureResource->GetName().c_str());
+		mLog.Errorf("Could not load texture %s. Gah!", pTextureResource->GetName().c_str());
 		deb_assert(false);
 	}
 }

@@ -66,7 +66,7 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 	{
 		return;
 	}
-	if (pObject->GetPhysics()->GetBoneGeometry(pOwnBodyId)->GetMaterial() != _T("grass"))
+	if (pObject->GetPhysics()->GetBoneGeometry(pOwnBodyId)->GetMaterial() != "grass")
 	{
 		return;
 	}
@@ -104,7 +104,7 @@ void GravelEmitter::OnForceApplied(Cure::ContextObject* pObject, Cure::ContextOb
 	lRelativeVelocity += RNDVEC(lCollisionLength*0.2f);
 	if (lRelativeVelocity.GetLengthSquared() < pRelativeVelocity.GetLengthSquared()*200*200)
 	{
-		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 		const float lAngularVelocity = Random::Uniform(-5.0f, 5.0f);
 		lParticleRenderer->CreatePebble(mLifeTime, mScale, lAngularVelocity, vec3(0.3f, 0.15f, 0.0f), lPosition, lRelativeVelocity);
 		mParticleTimer.ClearTimeDiff();

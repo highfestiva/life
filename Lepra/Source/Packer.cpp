@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // TODO: check if IEEE-doubles are stored in network byte order by the FPU.
@@ -211,9 +211,9 @@ int PackerOctetString::Unpack(uint8* pDestination, const uint8* pSource, int pSi
 
 
 
-int PackerUnicodeString::Pack(uint8* pDestination, const wstr& pSource)
+int PackerUnicodeString::Pack(uint8* pDestination, const str& pSource)
 {
-	const astr lUtf8 = astrutil::Encode(pSource);
+	const str lUtf8 = pSource;
 	const size_t lCharCount = lUtf8.length()+1;
 	if (pDestination)
 	{
@@ -225,7 +225,7 @@ int PackerUnicodeString::Pack(uint8* pDestination, const wstr& pSource)
 	return ((2+(int)lCharCount+3) & (~3));
 }
 
-int PackerUnicodeString::UnpackRaw(wstr* pDestination, const uint8* pSource, int pSize)
+int PackerUnicodeString::UnpackRaw(str* pDestination, const uint8* pSource, int pSize)
 {
 	int lSize = -1;
 	if (pSize >= 3)
@@ -235,7 +235,7 @@ int PackerUnicodeString::UnpackRaw(wstr* pDestination, const uint8* pSource, int
 		{
 			lSize = (2+lCharCount+3) & (~3);
 			// TODO: catch UTF-8 encoding errors (might be DoS attempts).
-			const wstr lConversion = wstrutil::Encode((const char*)pSource+2);
+			const str lConversion = strutil::Encode((const char*)pSource+2);
 			if (pDestination)
 			{
 				*pDestination = lConversion;
@@ -246,17 +246,9 @@ int PackerUnicodeString::UnpackRaw(wstr* pDestination, const uint8* pSource, int
 	return (lSize);
 }
 
-int PackerUnicodeString::Unpack(wstr& pDestination, const uint8* pSource, int pSize)
+int PackerUnicodeString::Unpack(str& pDestination, const uint8* pSource, int pSize)
 {
 	return (UnpackRaw(&pDestination, pSource, pSize));
-}
-
-int PackerUnicodeString::Unpack(astr& pDestination, const uint8* pSource, int pSize)
-{
-	wstr lTemp;
-	const int lByteCount = UnpackRaw(&lTemp, pSource, pSize);
-	pDestination = astrutil::Encode(lTemp);
-	return (lByteCount);
 }
 
 

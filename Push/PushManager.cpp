@@ -39,7 +39,7 @@
 #include "Version.h"
 
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
-#define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
+#define ICONBTNA(i,n)			ICONBTN(i, n)
 
 
 
@@ -78,12 +78,12 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mEnginePlaybackTime(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("big_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("plastic"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("big_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("plastic",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
 
 	::memset(mEnginePowerShadow, 0, sizeof(mEnginePowerShadow));
 
@@ -112,34 +112,34 @@ void PushManager::LoadSettings()
 	v_internal(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	const str lLeftName  = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
-	const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+_T(".AxisY-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+_T(".AxisY+"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+_T(".AxisX-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+_T(".AxisX+"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+_T(".AxisY-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+_T(".AxisY+"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+_T(".AxisX-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+_T(".AxisX+"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+_T(".AxisY-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+_T(".AxisY+"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+_T(".AxisY-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+_T(".AxisY+"));
+	const str lLeftName  = strutil::Format("TouchstickLeft%i", mSlaveIndex);
+	const str lRightName = strutil::Format("TouchstickRight%i", mSlaveIndex);
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+".AxisY-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+".AxisY+");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+".AxisX-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+".AxisX+");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+".AxisY-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+".AxisY+");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+".AxisX-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+".AxisX+");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+".AxisY-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+".AxisY+");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+".AxisY-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+".AxisY+");
 #endif // Touch device or emulated touch device
 
 #ifdef LEPRA_TOUCH
 	// TODO: remove hard-coding!
-	//v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("pixeldoctrine.dyndns.org:16650"));
+	//v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, "pixeldoctrine.dyndns.org:16650");
 	//v_internal(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
-	v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
 #endif // Touch device
 }
 
 void PushManager::SaveSettings()
 {
 #ifndef EMULATE_TOUCH
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand("save-application-config-file "+GetApplicationCommandFilename());
 #endif // Computer or touch device.
 }
 
@@ -201,16 +201,16 @@ bool PushManager::Paint()
 	{
 		const UiTbc::FontManager::FontId lOldFontId = SetFontHeight(36.0);
 		str lDemoText = strutil::Format(
-			_T(" This is a free demo.\n")
-			_T(" Buy the full version\n")
-			_T("to loose this annoying\n")
-			_T("  text for player %i."), mSlaveIndex+1);
+			" This is a free demo.\n"
+			" Buy the full version\n"
+			"to loose this annoying\n"
+			"  text for player %i.", mSlaveIndex+1);
 		if ((int)lTime % 3*60 >= 3*60-2)
 		{
 			lDemoText =
-				_T("     ])0n7 b3 B1FF\n")
-				_T("g!t pwn4ge & teh kekeke\n")
-				_T("     !3UYZORZ n0vv\n");
+				"     ]0n7 b3 B1FF\n")
+				"g!t pwn4ge & teh kekeke\n"
+				"     !3UYZORZ n0vv\n";
 		}
 		const int lTextWidth = mUiManager->GetFontManager()->GetStringWidth(lDemoText);
 		const int lTextHeight = mUiManager->GetFontManager()->GetLineHeight()*4;
@@ -245,7 +245,7 @@ void PushManager::SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId)
 {
 	DropAvatar();
 
-	log_volatile(mLog.Debugf(_T("Clicked avatar %s."), pAvatarId.c_str()));
+	log_volatile(mLog.Debugf("Clicked avatar %s.", pAvatarId.c_str()));
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	GetNetworkAgent()->SendStatusMessage(GetNetworkClient()->GetSocket(), 0, Cure::REMOTE_OK,
 		Cure::MessageStatus::INFO_AVATAR, wstrutil::Encode(pAvatarId), lPacket);
@@ -324,12 +324,12 @@ void PushManager::CreateLoginView()
 		if (mDisconnectReason.empty())
 		{
 			str lServerName;
-			v_tryget(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
-			if (strutil::StartsWith(lServerName, _T("0.0.0.0")))
+			v_tryget(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
+			if (strutil::StartsWith(lServerName, "0.0.0.0"))
 			{
 				lServerName = lServerName.substr(7);
 			}
-			const str lDefaultUserName = strutil::Format(_T("User%u"), mSlaveIndex);
+			const str lDefaultUserName = strutil::Format("User%u", mSlaveIndex);
 			str lUserName;
 			v_tryget(lUserName, =, GetVariableScope(), RTVAR_LOGIN_USERNAME, lDefaultUserName);
                         wstr lReadablePassword = L"CarPassword";
@@ -344,7 +344,7 @@ void PushManager::CreateLoginView()
 			mUiManager->GetDesktopWindow()->AddChild(mLoginWindow, 0, 0, 0);
 			mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
 				mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
-			mLoginWindow->GetChild(_T("User"), 0)->SetKeyboardFocus();
+			mLoginWindow->GetChild("User", 0)->SetKeyboardFocus();
 		}
 	}
 }
@@ -357,7 +357,7 @@ bool PushManager::InitializeUniverse()
 	bool lOk = true;
 	if (lOk)
 	{
-		mSun = new UiCure::Props(GetResourceManager(), _T("sun"), mUiManager);
+		mSun = new UiCure::Props(GetResourceManager(), "sun", mUiManager);
 		AddContextObject(mSun, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mSun != 0);
 		deb_assert(lOk);
@@ -369,7 +369,7 @@ bool PushManager::InitializeUniverse()
 	const int lPrimeCloudCount = 11;	// TRICKY: must be prime or clouds start moving in sync.
 	for (int x = 0; lOk && x < lPrimeCloudCount; ++x)
 	{
-		Cure::ContextObject* lCloud = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
+		Cure::ContextObject* lCloud = new UiCure::Props(GetResourceManager(), "cloud_01", mUiManager);
 		AddContextObject(lCloud, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lCloud->StartLoading();
 		mCloudArray.push_back(lCloud);
@@ -451,10 +451,10 @@ void PushManager::UpdateTouchstickPlacement()
 		v_get(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
 		const int lMinimumTouchRadius = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// 30 pixels in iPhone classic.
 		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lMinimumTouchRadius);
-		const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
+		const str lLeftName = strutil::Format("TouchstickLeft%i", mSlaveIndex);
 		mStickLeft->SetUniqueIdentifier(lLeftName);
 		mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10), 0, lMinimumTouchRadius);
-		const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
+		const str lRightName = strutil::Format("TouchstickRight%i", mSlaveIndex);
 		mStickRight->SetUniqueIdentifier(lRightName);
 	}
 	int lIndex = 0;
@@ -589,7 +589,7 @@ bool PushManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pA
 			mEnginePowerShadow[pAspect].mPower = pPower;
 			if (!mEnginePlaybackFile.IsOpen())
 			{
-				mEnginePlaybackFile.Open(_T("Data/Steering.rec"), DiskFile::MODE_TEXT_WRITE);
+				mEnginePlaybackFile.Open("Data/Steering.rec", DiskFile::MODE_TEXT_WRITE);
 				wstr lComment = wstrutil::Format(L"// Recording %s at %s.\n", pAvatar->GetClassId().c_str(), Time().GetDateTimeAsString().c_str());
 				mEnginePlaybackFile.WriteString(lComment);
 				mEnginePlaybackFile.WriteString(wstrutil::Encode("#" RTVAR_STEERING_PLAYBACKMODE " 2\n"));
@@ -639,7 +639,7 @@ bool PushManager::UpdateMassObjects(const vec3& pPosition)
 		{
 			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
 			mMassObjectArray.push_back(lMassObjectId);
-			Cure::ContextObject* lFlowers = new Life::MassObject(GetResourceManager(), _T("flower"), mUiManager, lTerrainBodyId, 600, 170);
+			Cure::ContextObject* lFlowers = new Life::MassObject(GetResourceManager(), "flower", mUiManager, lTerrainBodyId, 600, 170);
 			AddContextObject(lFlowers, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
 			lFlowers->StartLoading();
 		}
@@ -647,7 +647,7 @@ bool PushManager::UpdateMassObjects(const vec3& pPosition)
 		{
 			Cure::GameObjectId lMassObjectId = GetContext()->AllocateGameObjectId(Cure::NETWORK_OBJECT_LOCAL_ONLY);
 			mMassObjectArray.push_back(lMassObjectId);
-			Cure::ContextObject* lBushes = new Life::MassObject(GetResourceManager(), _T("bush_01"), mUiManager, lTerrainBodyId, 150, 290);
+			Cure::ContextObject* lBushes = new Life::MassObject(GetResourceManager(), "bush_01", mUiManager, lTerrainBodyId, 150, 290);
 			AddContextObject(lBushes, Cure::NETWORK_OBJECT_LOCAL_ONLY, lMassObjectId);
 			lBushes->StartLoading();
 		}
@@ -740,15 +740,15 @@ void PushManager::ProcessNetworkStatusMessage(Cure::MessageStatus* pMessage)
 		{
 			wstr lAvatarName;
 			pMessage->GetMessageString(lAvatarName);
-			Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
+			Cure::UserAccount::AvatarId lAvatarId = lAvatarName;
 			log_adebug("Status: INFO_AVATAR...");
-			str lTextureId = strutil::Format(_T("road_sign_%s.png"), lAvatarId.c_str());
+			str lTextureId = strutil::Format("road_sign_%s.png", lAvatarId.c_str());
 			if (!GetResourceManager()->QueryFileExists(lTextureId))
 			{
-				lTextureId = _T("road_sign_car.png");
+				lTextureId = "road_sign_car.png";
 			}
 			RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(),
-				mUiManager, lAvatarId, _T("road_sign_01"), lTextureId, RoadSignButton::SHAPE_ROUND);
+				mUiManager, lAvatarId, "road_sign_01", lTextureId, RoadSignButton::SHAPE_ROUND);
 			GetContext()->AddLocalObject(lButton);
 			const int SIGN_COUNT_X = 5;
 			const int SIGN_COUNT_Y = 5;
@@ -778,7 +778,7 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 			mUpdateCameraForAvatar = true;
 			mCameraMouseAngleTimer.ReduceTimeDiff(-10.0f);
 			mCameraTargetAngleFactor = 0;
-			log_volatile(mLog.Debugf(_T("Got control over avatar with ID %i."), pInteger));
+			log_volatile(mLog.Debugf("Got control over avatar with ID %i.", pInteger));
 		}
 		return;
 		case Cure::MessageNumber::INFO_FALL_APART:
@@ -789,7 +789,7 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 			{
 				Life::Explosion::FallApart(GetPhysicsManager(), lObject);
 				lObject->CenterMeshes();
-				log_volatile(mLog.Debugf(_T("Object %i falling apart."), pInteger));
+				log_volatile(mLog.Debugf("Object %i falling apart.", pInteger));
 			}
 		}
 		return;
@@ -800,11 +800,11 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 Cure::ContextObject* PushManager::CreateContextObject(const str& pClassId) const
 {
 	Cure::CppContextObject* lObject;
-	if (pClassId == _T("stone") || pClassId == _T("cube"))
+	if (pClassId == "stone" || pClassId == "cube")
 	{
 		lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
 	}
-	else if (strutil::StartsWith(pClassId, _T("level_")))
+	else if (strutil::StartsWith(pClassId, "level_"))
 	{
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 		Life::Level* lLevel = new Life::Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
@@ -828,18 +828,18 @@ void PushManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	{
 		if (pObject->GetInstanceId() == mAvatarId)
 		{
-			log_volatile(mLog.Debug(_T("Yeeha! Loaded avatar!")));
+			log_volatile(mLog.Debug("Yeeha! Loaded avatar!"));
 		}
 		else
 		{
-			log_volatile(mLog.Tracef(_T("Loaded object %s."), pObject->GetClassId().c_str()));
+			log_volatile(mLog.Tracef("Loaded object %s.", pObject->GetClassId().c_str()));
 		}
 		pObject->GetPhysics()->UpdateBonesObjectTransformation(0, gIdentityTransformationF);
 		((UiCure::CppContextObject*)pObject)->UiMove();
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
+		mLog.Errorf("Could not load object of type %s.", pObject->GetClassId().c_str());
 		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
 }
@@ -902,8 +902,8 @@ void PushManager::OnAvatarSelect(UiTbc::Button* pButton)
 
 	if (!mPickVehicleButton)
 	{
-		mPickVehicleButton = new RoadSignButton(this, GetResourceManager(), mUiManager, _T("PickVehicle"),
-			_T("road_sign_01"), _T("road_sign_car.png"), RoadSignButton::SHAPE_ROUND);
+		mPickVehicleButton = new RoadSignButton(this, GetResourceManager(), mUiManager, "PickVehicle",
+			"road_sign_01", "road_sign_car.png", RoadSignButton::SHAPE_ROUND);
 		GetContext()->AddLocalObject(mPickVehicleButton);
 		mPickVehicleButton->SetTrajectory(vec2(0, 0.45f), 20);
 		mPickVehicleButton->SetTrajectoryAngle(-PIF/2);

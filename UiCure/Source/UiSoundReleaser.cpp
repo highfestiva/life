@@ -19,7 +19,7 @@ namespace UiCure
 SoundReleaser::SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, Cure::ContextManager* pManager,
 	const str& pSoundName, UiCure::UserSound3dResource* pSound, const vec3& pPosition, const vec3& pVelocity,
 	float pVolume, float pPitch):
-	Parent(pResourceManager, _T("SoundReleaser"), pUiManager),
+	Parent(pResourceManager, "SoundReleaser", pUiManager),
 	mSound3d(pSound),
 	mSound2d(0),
 	mPosition(pPosition),
@@ -35,7 +35,7 @@ SoundReleaser::SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiMana
 
 SoundReleaser::SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, Cure::ContextManager* pManager,
 	const str& pSoundName, UiCure::UserSound2dResource* pSound, float pVolume, float pPitch):
-	Parent(pResourceManager, _T("SoundReleaser"), pUiManager),
+	Parent(pResourceManager, "SoundReleaser", pUiManager),
 	mSound3d(0),
 	mSound2d(pSound),
 	mVolume(pVolume),

@@ -80,11 +80,11 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	mPreviousCanvasAngle = mUiManager->GetCanvas()->GetOutputRotation();
 
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("big_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("big_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
 }
 
 Game::~Game()
@@ -207,15 +207,15 @@ bool Game::Tick()
 	{
 		if (mWinnerIndex == 0 && mComputerIndex != 0)
 		{
-			AddContextObject(new UiCure::Sound(GetResourceManager(), _T("win.wav"), mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			AddContextObject(new UiCure::Sound(GetResourceManager(), "win.wav", mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		}
 		else if (mWinnerIndex == 1 && mComputerIndex != 1)
 		{
-			AddContextObject(new UiCure::Sound(GetResourceManager(), _T("win.wav"), mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			AddContextObject(new UiCure::Sound(GetResourceManager(), "win.wav", mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		}
 		else
 		{
-			AddContextObject(new UiCure::Sound(GetResourceManager(), _T("kia.wav"), mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+			AddContextObject(new UiCure::Sound(GetResourceManager(), "kia.wav", mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		}
 		mHeartBalance += (!!mWinnerIndex == mFlipRenderSide)? -1 : +1;
 	}
@@ -286,7 +286,7 @@ void Game::ResetLauncher()
 	for (; x != lObjectTable.end(); ++x)
 	{
 		Cure::ContextObject* lObject = x->second;
-		if (lObject->GetClassId().find(_T("grenade")) != str::npos)
+		if (lObject->GetClassId().find("grenade") != str::npos)
 		{
 			GetContext()->PostKillObject(lObject->GetInstanceId());
 		}
@@ -364,7 +364,7 @@ bool Game::Shoot()
 		return false;
 	}
 
-	Grenade* lGrenade = (Grenade*)GameManager::CreateContextObject(_T("grenade"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	Grenade* lGrenade = (Grenade*)GameManager::CreateContextObject("grenade", Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	bool lOk = (lGrenade != 0);
 	deb_assert(lOk);
 	if (lOk)
@@ -380,7 +380,7 @@ bool Game::Shoot()
 
 Cure::ContextObject* Game::CreateRoboBall()
 {
-	RoboBall* lRoboBall = (RoboBall*)GameManager::CreateContextObject(_T("robo_ball"), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	RoboBall* lRoboBall = (RoboBall*)GameManager::CreateContextObject("robo_ball", Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	deb_assert(lRoboBall);
 	if (lRoboBall)
 	{
@@ -493,7 +493,7 @@ void Game::Detonate(const vec3& pForce, const vec3& pTorque, const vec3& pPositi
 		const int lParticleCount = (mLevel->GetStructureGeometry((unsigned)0)->GetBodyId() == pTargetBodyId)? Random::GetRandomNumber()%50+50 : 10;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
+			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), "mud_particle_01", mUiManager);
 			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 			lPuff->EnableRootShadow(false);
 			float x = Random::Uniform(-1.0f, 1.0f);
@@ -518,7 +518,7 @@ void Game::Detonate(const vec3& pForce, const vec3& pTorque, const vec3& pPositi
 		const int lParticleCount = (Random::GetRandomNumber() % 4) + 2;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
+			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), "cloud_01", mUiManager);
 			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 			lPuff->EnableRootShadow(false);
 			float x = Random::Uniform(-1.0f, 1.0f);
@@ -537,7 +537,7 @@ void Game::Detonate(const vec3& pForce, const vec3& pTorque, const vec3& pPositi
 	}
 
 	float lLevelShootEasyness = 4.5f;
-	if (mLevelName == _T("level_elevate"))	// Bigger and open level = easier to hit Cutie.
+	if (mLevelName == "level_elevate")	// Bigger and open level = easier to hit Cutie.
 	{
 		lLevelShootEasyness = 3.2f;
 	}
@@ -1135,7 +1135,7 @@ void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	if (pOk && pObject == mVehicle)
 	{
 		deb_assert(pObject->GetPhysics()->GetEngineCount() == 3);
-		const str lName = _T("float_childishness");
+		const str lName = "float_childishness";
 		new Cure::FloatAttribute(mVehicle, lName, 0.67f);
 	}
 	if (pOk && pObject == mLauncher)
@@ -1191,18 +1191,18 @@ void Game::TickInput()
 Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 {
 	UiCure::Machine* lMachine = 0;
-	if (strutil::StartsWith(pClassId, _T("grenade")))
+	if (strutil::StartsWith(pClassId, "grenade"))
 	{
 		lMachine = new Grenade(GetResourceManager(), pClassId, mUiManager, GetMuzzleVelocity());
 	}
-	else if (strutil::StartsWith(pClassId, _T("robo_ball")))
+	else if (strutil::StartsWith(pClassId, "robo_ball"))
 	{
 		lMachine = new RoboBall(this, pClassId);
 	}
-	else if (strutil::StartsWith(pClassId, _T("cutie")) ||
-		strutil::StartsWith(pClassId, _T("monster")) ||
-		strutil::StartsWith(pClassId, _T("corvette")) ||
-		strutil::StartsWith(pClassId, _T("road_roller")))
+	else if (strutil::StartsWith(pClassId, "cutie") ||
+		strutil::StartsWith(pClassId, "monster") ||
+		strutil::StartsWith(pClassId, "corvette") ||
+		strutil::StartsWith(pClassId, "road_roller"))
 	{
 		lMachine = new Cutie(GetResourceManager(), pClassId, mUiManager);
 	}
@@ -1249,7 +1249,7 @@ bool Game::Initialize()
 	}
 	if (lOk)
 	{
-		SetVehicle(_T("cutie"));
+		SetVehicle("cutie");
 		ResetLauncher();
 	}
 	if (lOk)
@@ -1283,28 +1283,28 @@ bool Game::InitializeUniverse()
 
 Cure::ContextObject* Game::CreateLogicHandler(const str& pType)
 {
-	if (pType == _T("spawner"))
+	if (pType == "spawner")
 	{
 		return new Spawner(GetContext());
 	}
-	else if (pType == _T("trig_ctf"))
+	else if (pType == "trig_ctf")
 	{
 		mCtf = new Ctf(GetContext());
 		return mCtf;
 	}
-	else if (pType == _T("trig_elevator"))
+	else if (pType == "trig_elevator")
 	{
 		return new CutieElevator(this);
 	}
-	else if (pType == _T("context_path"))
+	else if (pType == "context_path")
 	{
 		return mLevel->QueryPath();
 	}
-	else if (pType == _T("see_through"))
+	else if (pType == "see_through")
 	{
 		return new SeeThrough(GetContext(), this);
 	}
-	else if (pType == _T("anything"))
+	else if (pType == "anything")
 	{
 		return CreateRoboBall();
 	}

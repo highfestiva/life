@@ -83,7 +83,7 @@ Bound* Bound::GetApp()
 
 
 Bound::Bound(const strutil::strvec& pArgumentList):
-	Parent(_T("Bound"), pArgumentList),
+	Parent("Bound", pArgumentList),
 	mUiManager(0)
 {
 	mApp = this;
@@ -119,16 +119,16 @@ void Bound::Init()
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	double lPhysicalScreenSize = 24.0;	// An average computer's physical screen size (inches across).
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, "OpenGL");
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, _T("Fixed"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, "Fixed");
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
 
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, "OpenAL");
 
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLECLEAR, false);
@@ -140,8 +140,8 @@ void Bound::Init()
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 20.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 20.0);
-	//v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("None"));
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("Force:Volumes"));
+	//v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "None");
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "Force:Volumes");
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.0);
@@ -230,12 +230,12 @@ void Bound__Buy()
 
 str Bound::GetTypeName() const
 {
-	return _T("Client");
+	return "Client";
 }
 
 str Bound::GetVersion() const
 {
-	return _T(GAME_VERSION);
+	return GAME_VERSION;
 }
 
 Cure::ApplicationTicker* Bound::CreateTicker() const

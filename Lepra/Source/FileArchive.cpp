@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -44,7 +44,7 @@ IOError FileArchive::OpenArchive(const str& pArchiveFileName, IOType pIOType)
 
 	mArchiveFileName = pArchiveFileName;
 
-	str lTempFileName(pArchiveFileName + _T(".tmp"));
+	str lTempFileName(pArchiveFileName + ".tmp");
 
 	mIOType = pIOType;
 
@@ -130,8 +130,8 @@ void FileArchive::CloseArchive()
 			if (mIOType == WRITE_ONLY)
 			{
 				// Replace the original file with the temp file.
-				remove(astrutil::Encode(mArchiveFileName).c_str());
-				rename(astrutil::Encode(mTempFileName).c_str(), astrutil::Encode(mArchiveFileName).c_str());
+				remove(mArchiveFileName.c_str());
+				rename(mTempFileName.c_str(), mArchiveFileName.c_str());
 			}
 		}
 	}
@@ -143,8 +143,8 @@ void FileArchive::CloseArchive()
 		mWriteBufferPos = 0;
 	}
 
-	mArchiveFileName = _T("");
-	mTempFileName = _T("");
+	mArchiveFileName = "";
+	mTempFileName = "";
 
 	mOpenFileTable.RemoveAll();
 
@@ -175,7 +175,7 @@ void FileArchive::CloseAndRemoveArchive()
 	if (mIOType == READ_ONLY)
 	{
 #ifdef LEPRA_POSIX
-		::remove(astrutil::Encode(mArchiveFileName).c_str()); // TODO: Find a unicode-version of this.
+		::remove(mArchiveFileName.c_str()); // TODO: Find a unicode-version of this.
 #else
 		::_wremove(wstrutil::Encode(mArchiveFileName).c_str());
 #endif
@@ -183,7 +183,7 @@ void FileArchive::CloseAndRemoveArchive()
 	else
 	{
 #ifdef LEPRA_POSIX
-		::remove(astrutil::Encode(mTempFileName).c_str()); // TODO: Find a unicode-version of this.
+		::remove(mTempFileName.c_str()); // TODO: Find a unicode-version of this.
 #else
 		::_wremove(wstrutil::Encode(mTempFileName).c_str());
 #endif
@@ -196,15 +196,15 @@ void FileArchive::CloseAndRemoveArchive()
 		mWriteBufferPos = 0;
 	}
 
-	mArchiveFileName = _T("");
-	mTempFileName = _T("");
+	mArchiveFileName = "";
+	mTempFileName = "";
 
 	mOpenFileTable.RemoveAll();
 
 	FileNameTable::Iterator lIter = mFileNameTable.First();
 	while (lIter != mFileNameTable.End())
 	{
-		/* JB: using strings instead of tchar*.
+		/* JB: using strings instead of char*.
 		if (mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
 		{
 			// Delete filename, since it was allocated and inserted 
@@ -290,20 +290,20 @@ IOError FileArchive::WriteHeader()
 		FileArchiveFile* lFile = *lIter;
 
 		// Check for illegal '\n'
-		if (lFile->mFileName.find('\n', 0) >= 0)
+		if (lFile->mFileName.find('\n', 0) != str::npos)
 		{
 			return IO_INVALID_FILENAME;
 		}
 
 		mArchiveFile.WriteString(lFile->mFileName);
-		mArchiveFile.Write(_T('\n'));
+		mArchiveFile.Write('\n');
 
 		mArchiveFile.WriteData(&lFile->mSize, sizeof(lFile->mSize));
 		mArchiveFile.WriteData(&lFile->mStartOffset, sizeof(lFile->mStartOffset));
 	}
 
 	mArchiveFile.WriteData(&lHeaderOffset, sizeof(lHeaderOffset));
-	mArchiveFile.WriteString<tchar>(_T("BUNT"));
+	mArchiveFile.WriteString("BUNT");
 
 	return IO_OK;
 }
@@ -351,7 +351,7 @@ str FileArchive::FileFindNext()
 
 int FileArchive::FileOpen(const str& pFileName)
 {
-	if (pFileName == _T("") ||
+	if (pFileName == "" ||
 	   mIOType == INSERT_ONLY ||
 	   mArchiveFile.IsOpen() == false)
 	{

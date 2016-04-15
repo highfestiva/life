@@ -12,9 +12,9 @@
  * is shoved onto the user.
  */
 
-#ifdef _WIN32 // Jonas Byström: added this as a fallback for non-admin users on Win32.
+#ifdef _WIN32 // Jonas BystrÃ¶m: added this as a fallback for non-admin users on Win32.
 #include <share.h>
-#include <tchar.h>
+#include <char.h>
 #endif // _WIN32
 #define JPEG_INTERNALS
 #include "jinclude.h"
@@ -131,7 +131,7 @@ close_backing_store (j_common_ptr cinfo, backing_store_ptr info)
   /* Since this implementation uses tmpfile() to create the file,
    * no explicit file deletion is needed.
    */
-#ifdef _WIN32 // Jonas Byström: added this as a fallback for non-admin users on Win32.
+#ifdef _WIN32 // Jonas BystrÃ¶m: added this as a fallback for non-admin users on Win32.
   // The above is not entirely true, since I had to implement a workaround
   // to avoid writing to the root directory (non-admins may not be admitted).
   remove(info->temp_name);
@@ -139,7 +139,7 @@ close_backing_store (j_common_ptr cinfo, backing_store_ptr info)
 }
 
 
-#ifdef _WIN32 // Jonas Byström: added this as a fallback for non-admin users on Win32.
+#ifdef _WIN32 // Jonas BystrÃ¶m: added this as a fallback for non-admin users on Win32.
 FILE* __cdecl jb_tmpfile(backing_store_ptr info)
 {
 	char a[] = "jpgtmp00.tmp";
@@ -177,7 +177,7 @@ jpeg_open_backing_store (j_common_ptr cinfo, backing_store_ptr info,
 			 long total_bytes_needed)
 {
   if ((info->temp_file = tmpfile()) == NULL)
-#ifdef _WIN32 // Jonas Byström: added this as a fallback for non-admin users on Win32.
+#ifdef _WIN32 // Jonas BystrÃ¶m: added this as a fallback for non-admin users on Win32.
     if ((info->temp_file = jb_tmpfile(info)) == NULL)
 #endif // _WIN32
       ERREXITS(cinfo, JERR_TFILE_CREATE, "");

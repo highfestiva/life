@@ -52,7 +52,7 @@ bool NetworkClient::Open(const str& pLocalAddress)
 	bool lOk = !mIsSocketConnecting;
 	if (!lOk)
 	{
-		mLog.AWarning("Already connecting (from some other thread?)...");
+		mLog.Warning("Already connecting (from some other thread?)...");
 		deb_assert(false);
 	}
 	SocketAddress lLocalAddress;
@@ -62,7 +62,7 @@ bool NetworkClient::Open(const str& pLocalAddress)
 		lOk = lLocalAddress.ResolveRange(pLocalAddress, lEndPort);
 		if (!lOk)
 		{
-			mLog.AWarning("Unable to resolve public local address, network down?");
+			mLog.Warning("Unable to resolve public local address, network down?");
 			lOk = true;
 			uint8 lIpv4[] = {0,0,0,0};
 			IPAddress lIpAddress(lIpv4, sizeof(lIpv4));
@@ -75,7 +75,7 @@ bool NetworkClient::Open(const str& pLocalAddress)
 		ScopeLock lLock(&mLock);
 		for (; lLocalAddress.GetPort() <= lEndPort; lLocalAddress.SetPort(lLocalAddress.GetPort()+1))
 		{
-			SetMuxSocket(new MuxSocket(_T("Client "), lLocalAddress, false));
+			SetMuxSocket(new MuxSocket("Client ", lLocalAddress, false));
 			if (mMuxSocket->IsOpen())
 			{
 				break;
@@ -114,7 +114,7 @@ bool NetworkClient::Connect(const str& pServerAddress, double pTimeout)
 	bool lOk = !mIsSocketConnecting;
 	if (!lOk)
 	{
-		mLog.AWarning("Already connecting (from some other thread?)...");
+		mLog.Warning("Already connecting (from some other thread?)...");
 		deb_assert(false);
 	}
 
@@ -124,7 +124,7 @@ bool NetworkClient::Connect(const str& pServerAddress, double pTimeout)
 		lOk = lTargetAddress.Resolve(pServerAddress);
 		if (!lOk)
 		{
-			mLog.Warningf(_T("Could not resolve server address '%s'."), pServerAddress.c_str());
+			mLog.Warningf("Could not resolve server address '%s'.", pServerAddress.c_str());
 		}
 	}
 	if (lOk)
@@ -225,14 +225,14 @@ RemoteStatus NetworkClient::WaitLogin()
 				break;
 				case Cure::NetworkAgent::RECEIVE_PARSE_ERROR:
 				{
-					mLog.AError("Problem with receiving crap data during login wait!");
+					mLog.Error("Problem with receiving crap data during login wait!");
 					lStatus = REMOTE_LOGIN_ERRONOUS_DATA;
 					SetLoginAccountId(0);
 				}
 				break;
 				case Cure::NetworkAgent::RECEIVE_CONNECTION_BROKEN:
 				{
-					mLog.AError("Disconnected from server while waiting for login!");
+					mLog.Error("Disconnected from server while waiting for login!");
 					lStatus = REMOTE_UNKNOWN;
 					SetLoginAccountId(0);
 				}
@@ -403,7 +403,7 @@ void NetworkClient::SendDisconnect()
 	if (mSocket)
 	{
 		Cure::Packet* lPacket = GetPacketFactory()->Allocate();
-		SendStatusMessage(mSocket, 0, Cure::REMOTE_NO_CONNECTION, Cure::MessageStatus::INFO_LOGIN, L"", lPacket);
+		SendStatusMessage(mSocket, 0, Cure::REMOTE_NO_CONNECTION, Cure::MessageStatus::INFO_LOGIN, "", lPacket);
 		GetPacketFactory()->Release(lPacket);
 	}
 	SendAll();
@@ -416,13 +416,13 @@ void NetworkClient::LoginEntry()
 	bool lOk = true;
 	if (lOk && mConnectTimeout > 0)
 	{
-		mLog.Info(_T("Connecting to ") + mServerHost + _T("."));
+		mLog.Info("Connecting to " + mServerHost + ".");
 		int x = 0;
 		do
 		{
 			if (!lOk)
 			{
-				mLog.AInfo("Retrying connect...");
+				mLog.Info("Retrying connect...");
 			}
 			lOk = Connect(mServerHost, mConnectTimeout);
 		}
@@ -437,7 +437,7 @@ void NetworkClient::LoginEntry()
 	const bool lConnectOk = lOk;
 	if (lOk)
 	{
-		mLog.AInfo("Connected.");
+		mLog.Info("Connected.");
 		lOk = SendLoginRequest(mLoginToken);
 	}
 	if (lOk)
@@ -454,18 +454,18 @@ void NetworkClient::LoginEntry()
 	mIsLoggingIn = false;
 	if (lOk)
 	{
-		mLog.Infof(_T("Logged in on account # %u."), mLoginAccountId);
+		mLog.Infof("Logged in on account # %u.", mLoginAccountId);
 		// TODO: handshaking for pingtime with server.
 	}
 	if (!lOk)
 	{
 		if (!lConnectOk)
 		{
-			mLog.AError("Could not connect.");
+			mLog.Error("Could not connect.");
 		}
 		else
 		{
-			mLog.AError("Could not login.");
+			mLog.Error("Could not login.");
 		}
 		Disconnect(false);
 	}

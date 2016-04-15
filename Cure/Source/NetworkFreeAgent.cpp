@@ -33,18 +33,18 @@ bool NetworkFreeAgent::Tick()
 	if (!mMuxSocket)
 	{
 		SocketAddress lAddress;
-		str lStrAddress = _T("0.0.0.0:12345");
+		str lStrAddress = "0.0.0.0:12345";
 		if (!lAddress.Resolve(lStrAddress))
 		{
-			mLog.Warningf(_T("Could not resolve address '%s'."), lStrAddress.c_str());
-			lStrAddress = _T(":12345");
+			mLog.Warningf("Could not resolve address '%s'.", lStrAddress.c_str());
+			lStrAddress = ":12345";
 			if (!lAddress.Resolve(lStrAddress))
 			{
-				mLog.Errorf(_T("Could not resolve address '%s'!"), lStrAddress.c_str());
+				mLog.Errorf("Could not resolve address '%s'!", lStrAddress.c_str());
 				return false;
 			}
 		}
-		mMuxSocket = new MuxIoSocket(_T("FreeAgent"), lAddress, false);
+		mMuxSocket = new MuxIoSocket("FreeAgent", lAddress, false);
 	}
 
 	bool lOk = true;

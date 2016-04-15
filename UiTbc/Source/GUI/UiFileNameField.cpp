@@ -47,7 +47,7 @@ FileNameField::~FileNameField()
 PopupList* FileNameField::CreatePopupList()
 {
 	str lSearchString = strutil::Encode(GetText());
-	lSearchString += _T("*");
+	lSearchString += "*";
 
 	Painter* lPainter = 0;
 	DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
@@ -149,18 +149,18 @@ void FileNameField::ValidatePath(str& pPath)
 	bool lOk = DiskFile::FindFirst(lNormalizedPath, lFindData);
 	if (lOk == true)
 	{
-		if (lFindData.IsSubDir() && strutil::Right(lNormalizedPath, 1) != _T("/"))
+		if (lFindData.IsSubDir() && strutil::Right(lNormalizedPath, 1) != "/")
 		{
-			pPath += _T('/');
+			pPath += '/';
 		}
 	}
 	else
 	{
 		// TODO: verify code! How can the path exist if FindFirst did not find the path? Contradicting, to say the least.
 		lOk = DiskFile::PathExists(lNormalizedPath);
-		if (lOk && strutil::Right(lNormalizedPath, 2) == _T(".."))
+		if (lOk && strutil::Right(lNormalizedPath, 2) == "..")
 		{
-			lNormalizedPath += _T('/');
+			lNormalizedPath += '/';
 		}
 	}
 	pPath = lNormalizedPath;

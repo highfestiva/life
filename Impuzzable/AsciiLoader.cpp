@@ -28,7 +28,7 @@ wstr AsciiLoader::Load(const str& pFilename) const
 	File* f = mResourceManager->QueryFile(pFilename);
 	if (!f)
 	{
-		mLog.Errorf(_T("No such file %s present"), pFilename.c_str());
+		mLog.Errorf("No such file %s present", pFilename.c_str());
 		return wstr();
 	}
 	wstr s;

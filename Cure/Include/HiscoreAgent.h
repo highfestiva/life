@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #pragma once
@@ -62,12 +62,12 @@ public:
 	bool StartUploadingScore(const str& pPlatform, const str& pLevel, const str& pAvatar, const str& pName, int pScore);
 	int GetUploadedPlace() const;
 
-	bool ParseList(astr& pData);	// For testing 'JSON parsing'...
-	bool ParseScore(astr& pData);	// For testing 'JSON parsing'...
+	bool ParseList(str& pData);	// For testing 'JSON parsing'...
+	bool ParseScore(str& pData);	// For testing 'JSON parsing'...
 
 private:
 	void Reopen();
-	void AppendData(const astr& pData);
+	void AppendData(const str& pData);
 	bool CompleteList();
 	bool CompleteScore();
 	static void OnData(const happyhttp::Response* pResponse, void* pUserData, const unsigned char* pData, int pByteCount);
@@ -84,7 +84,7 @@ private:
 	ResourceLoadState mLoadState;
 	List mDownloadedList;
 	int mUploadedPlace;
-	astr mResponseData;
+	str mResponseData;
 	Action mAction;
 	MemberThread<HiscoreAgent> mConnectorThread;
 	str mConnectorPath;

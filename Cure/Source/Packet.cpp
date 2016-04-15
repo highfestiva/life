@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -103,7 +103,7 @@ Packet::ParseResult Packet::Parse(unsigned pOffset)
 			lMessageSize = lMessage->Parse(&lData[x], mParsedPacketSize-x);
 			lOk = (lMessageSize > 0);
 			x += lMessageSize;
-			//log_volatile(mLog.Debugf(_T("Received message type %i of size %i."), lType, lMessageSize));
+			//log_volatile(mLog.Debugf("Received message type %i of size %i.", lType, lMessageSize));
 		}
 		if (lOk)
 		{
@@ -120,12 +120,12 @@ Packet::ParseResult Packet::Parse(unsigned pOffset)
 	}
 	if (!lOk)
 	{
-		mLog.Errorf(_T("Received a bad network packet (length=%u, offset=%u)!"), mPacketSize, pOffset);
+		mLog.Errorf("Received a bad network packet (length=%u, offset=%u)!", mPacketSize, pOffset);
 		if (mPacketSize < 100)
 		{
-			mLog.Errorf(_T("  DATA: %s\n  STR:  %s"),
+			mLog.Errorf("  DATA: %s\n  STR:  %s",
 				strutil::DumpData(lData, mPacketSize).c_str(),
-				strutil::Encode(astrutil::ReplaceCtrlChars(astr((const char*)lData, mPacketSize), '.')).c_str());
+				strutil::ReplaceCtrlChars(str((const char*)lData, mPacketSize), '.').c_str());
 		}
 	}
 	return (lOk? PARSE_OK : PARSE_ERROR);
@@ -141,7 +141,7 @@ void Packet::AddMessage(Message* pMessage)
 {
 	mMessageVector.push_back(pMessage);
 	pMessage->SetStorage(GetWriteBuffer()+mPacketSize);
-	//log_volatile(mLog.Debugf(_T("Sending message type %i from offset %i."), pMessage->GetType(), mPacketSize));
+	//log_volatile(mLog.Debugf("Sending message type %i from offset %i.", pMessage->GetType(), mPacketSize));
 }
 
 bool Packet::AppendToPacketBuffer(Datagram& pWriteBuffer) const
@@ -352,7 +352,7 @@ int MessageLoginRequest::Parse(const uint8* pData, int pSize)
 	return (lTotalSize);
 }
 
-int MessageLoginRequest::Store(Packet* pPacket, const wstr& pLoginName, const MangledPassword& pPassword)
+int MessageLoginRequest::Store(Packet* pPacket, const str& pLoginName, const MangledPassword& pPassword)
 {
 	mWritableData[0] = (uint8)GetType();
 	unsigned lSize = 1;
@@ -362,7 +362,7 @@ int MessageLoginRequest::Store(Packet* pPacket, const wstr& pLoginName, const Ma
 	return (lSize);
 }
 
-void MessageLoginRequest::GetLoginName(wstr& pLoginName)
+void MessageLoginRequest::GetLoginName(str& pLoginName)
 {
 	PackerUnicodeString::Unpack(pLoginName, &mData[1], 1024);
 }
@@ -408,7 +408,7 @@ int MessageStatus::Parse(const uint8* pData, int pSize)
 	return (lTotalSize);
 }
 
-int MessageStatus::Store(Packet* pPacket, RemoteStatus pStatus, InfoType pInfoType, int32 pInteger, const wstr& pMessage)
+int MessageStatus::Store(Packet* pPacket, RemoteStatus pStatus, InfoType pInfoType, int32 pInteger, const str& pMessage)
 {
 	int32 lStatus = (int32)pStatus;
 	int32 lInfoType = (int32)pInfoType;
@@ -443,7 +443,7 @@ int32 MessageStatus::GetInteger() const
 	return (lInteger);
 }
 
-void MessageStatus::GetMessageString(wstr& pMessage) const
+void MessageStatus::GetMessageString(str& pMessage) const
 {
 	PackerUnicodeString::Unpack(pMessage, &mData[1+sizeof(int32)*3], 1024);
 }
@@ -578,7 +578,7 @@ int MessageCreateObject::Parse(const uint8* pData, int pSize)
 	return (lTotalSize);
 }
 
-int MessageCreateObject::Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const wstr& pClassId)
+int MessageCreateObject::Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const str& pClassId)
 {
 	int32 lInstanceId = (int32)pInstanceId;
 	unsigned lSize = Parent::Store(pPacket, lInstanceId);
@@ -593,7 +593,7 @@ void MessageCreateObject::GetTransformation(xform& pTransformation) const
 	PackerTransformation::Unpack(pTransformation, &mData[1+sizeof(int32)], 1024);
 }
 
-void MessageCreateObject::GetClassId(wstr& pClassId) const
+void MessageCreateObject::GetClassId(str& pClassId) const
 {
 	PackerUnicodeString::Unpack(pClassId, &mData[1+sizeof(int32)+7*sizeof(float)], 1024);
 }
@@ -632,7 +632,7 @@ int MessageCreateOwnedObject::Parse(const uint8* pData, int pSize)
 	return lTotalSize;
 }
 
-int MessageCreateOwnedObject::Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const wstr& pClassId, GameObjectId pOwnerInstanceId)
+int MessageCreateOwnedObject::Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const str& pClassId, GameObjectId pOwnerInstanceId)
 {
 	int32 lInstanceId = (int32)pInstanceId;
 	unsigned lSize = Parent::Store(pPacket, lInstanceId, pTransformation, pClassId);
@@ -984,7 +984,7 @@ Message* MessageFactory::Allocate(MessageType pType)
 	}
 	if (!lMessage)
 	{
-		mLog.Errorf(_T("Got invalid network message of type %i!"), pType);
+		mLog.Errorf("Got invalid network message of type %i!", pType);
 	}
 	return (lMessage);
 }

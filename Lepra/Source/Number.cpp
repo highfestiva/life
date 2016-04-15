@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -24,12 +24,12 @@ str Number::ConvertToPostfixNumber(double pNumber, unsigned decimals)
 		struct PrefixInfo
 		{
 			int mExponent;
-			const tchar* mPrefix;
+			const char* mPrefix;
 		};
 		PrefixInfo lPrefixList[] =
 		{
-			{12, _T("T")}, {9, _T("G")}, {6, _T("M")}, {3, _T("k")}, {0, _T("")},
-			{-3, _T("m")}, {-6, _T("u")}, {-9, _T("n")}
+			{12, "T"}, {9, "G"}, {6, "M"}, {3, "k"}, {0, ""},
+			{-3, "m"}, {-6, "u"}, {-9, "n"}
 		};
 		double lResult = 0;
 		int x;
@@ -42,11 +42,11 @@ str Number::ConvertToPostfixNumber(double pNumber, unsigned decimals)
 			}
 		}
 		str lFormatString = strutil::IntToString(decimals, 10);
-		lResultString = strutil::Format((_T("%.")+lFormatString+_T("f %s")).c_str(), lResult, lPrefixList[x].mPrefix);
+		lResultString = strutil::Format(("%."+lFormatString+"f %s").c_str(), lResult, lPrefixList[x].mPrefix);
 	}
 	else
 	{
-		lResultString = _T("0 ");
+		lResultString = "0 ";
 	}
 	return (lResultString);
 }

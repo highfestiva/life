@@ -5,6 +5,7 @@
 
 
 #include "pch.h"
+#include "../../../Lepra/Include/CyclicArray.h"
 #include "../../../Lepra/Include/DiskFile.h"
 #include "../../../Lepra/Include/Path.h"
 #include "../../Include/X11/UiX11FontManager.h"
@@ -26,12 +27,12 @@ FontManager* FontManager::Create(UiLepra::DisplayManager* pDisplayManager)
 X11FontManager::X11Font::X11Font():
 	mX11LoadedCharFace(0)
 {
-	::memset(&mCharWidthOffset[0], sizeof(mCharWidthOffset), 0);
+	::memset(&mCharWidthOffset[0], 0, sizeof(mCharWidthOffset));
 }
 
 bool X11FontManager::X11Font::GetCharWidth(wchar_t pChar, int& pWidth, int& pOffset)
 {
-	if (pChar < 128)
+	if (pChar < LEPRA_ARRAY_COUNT(mCharWidthOffset))
 	{
 		pWidth  = mCharWidthOffset[pChar].mWidth;
 		pOffset = mCharWidthOffset[pChar].mOffset;
@@ -49,7 +50,7 @@ bool X11FontManager::X11Font::GetCharWidth(wchar_t pChar, int& pWidth, int& pOff
 
 void X11FontManager::X11Font::PutCharWidth(wchar_t pChar, int pWidth, int pOffset)
 {
-	if (pChar < 128)
+	if (pChar < LEPRA_ARRAY_COUNT(mCharWidthOffset))
 	{
 		mCharWidthOffset[pChar].mSet = true;
 		mCharWidthOffset[pChar].mWidth = pWidth;
@@ -89,48 +90,48 @@ X11FontManager::FontId X11FontManager::AddFont(const str& pFontName, double pSiz
 {
 	if (mFontFiles.empty())
 	{
-		strutil::Append(mFontFiles, FindAllFontFiles(_T("/usr/share/fonts")));
-		strutil::Append(mFontFiles, FindAllFontFiles(_T("/usr/local/share/fonts")));
+		strutil::Append(mFontFiles, FindAllFontFiles("/usr/share/fonts"));
+		strutil::Append(mFontFiles, FindAllFontFiles("/usr/local/share/fonts"));
 	}
 	strutil::strvec lSuffixes;
 	if (pFlags & (BOLD|ITALIC))
 	{
-		lSuffixes.push_back(_T("-BoldItalic"));
-		lSuffixes.push_back(_T("bi."));
-		lSuffixes.push_back(_T("z."));
-		lSuffixes.push_back(_T("-Italic"));
-		lSuffixes.push_back(_T("i."));
-		lSuffixes.push_back(_T("-Bold"));
-		lSuffixes.push_back(_T("b."));
-		lSuffixes.push_back(_T("b"));
-		lSuffixes.push_back(_T(""));
+		lSuffixes.push_back("-BoldItalic");
+		lSuffixes.push_back("bi.");
+		lSuffixes.push_back("z.");
+		lSuffixes.push_back("-Italic");
+		lSuffixes.push_back("i.");
+		lSuffixes.push_back("-Bold");
+		lSuffixes.push_back("b.");
+		lSuffixes.push_back("b");
+		lSuffixes.push_back("");
 	}
 	else if (pFlags & BOLD)
 	{
-		lSuffixes.push_back(_T("-Bold."));
-		lSuffixes.push_back(_T("b."));
-		lSuffixes.push_back(_T("Bold"));
-		lSuffixes.push_back(_T("b"));
-		lSuffixes.push_back(_T(""));
+		lSuffixes.push_back("-Bold.");
+		lSuffixes.push_back("b.");
+		lSuffixes.push_back("Bold");
+		lSuffixes.push_back("b");
+		lSuffixes.push_back("");
 	}
 	else if (pFlags & ITALIC)
 	{
-		lSuffixes.push_back(_T("-Italic."));
-		lSuffixes.push_back(_T("i."));
-		lSuffixes.push_back(_T("Italic"));
-		lSuffixes.push_back(_T("i"));
-		lSuffixes.push_back(_T(""));
+		lSuffixes.push_back("-Italic.");
+		lSuffixes.push_back("i.");
+		lSuffixes.push_back("Italic");
+		lSuffixes.push_back("i");
+		lSuffixes.push_back("");
 	}
-	lSuffixes.push_back(_T("-Regular."));
-	lSuffixes.push_back(_T("."));
-	lSuffixes.push_back(_T("Regular"));
-	lSuffixes.push_back(_T("Light"));
-	lSuffixes.push_back(_T(""));
+	lSuffixes.push_back("-Regular.");
+	lSuffixes.push_back(".");
+	lSuffixes.push_back("Regular");
+	lSuffixes.push_back("Light");
+	lSuffixes.push_back("");
 	const str lFontFile = GetFontFile(pFontName, lSuffixes);
 	FT_Face lFace;
 	if (lFontFile.empty() || FT_New_Face(mLibrary, lFontFile.c_str(), 0, &lFace) != 0)
 	{
-		mLog.Debugf(_T("Unable to find font %s."), pFontName.c_str());
+		mLog.Debugf("Unable to find font %s.", pFontName.c_str());
 		return INVALID_FONTID;
 	}
 	FT_Set_Char_Size(lFace, 0, int(pSize*0.7*64), 90, 90);
@@ -266,7 +267,7 @@ strutil::strvec X11FontManager::FindAllFontFiles(const str& pPath)
 {
 	strutil::strvec lFiles;
 	DiskFile::FindData lData;
-	if (!DiskFile::FindFirst(Path::JoinPath(pPath, _T("*")), lData))
+	if (!DiskFile::FindFirst(Path::JoinPath(pPath, "*"), lData))
 	{
 		return lFiles;
 	}
@@ -276,7 +277,7 @@ strutil::strvec X11FontManager::FindAllFontFiles(const str& pPath)
 		{
 			strutil::Append(lFiles, FindAllFontFiles(lData.GetName()));
 		}
-		else if (strutil::EndsWith(lData.GetName(), _T(".ttf")) || strutil::EndsWith(lData.GetName(), _T(".otf")))
+		else if (strutil::EndsWith(lData.GetName(), ".ttf") || strutil::EndsWith(lData.GetName(), ".otf"))
 		{
 			lFiles.push_back(lData.GetName());
 		}
@@ -287,9 +288,9 @@ strutil::strvec X11FontManager::FindAllFontFiles(const str& pPath)
 
 str X11FontManager::GetFontFile(const str& pFontName, const strutil::strvec& pSuffixes) const
 {
-	strutil::strvec lNames = strutil::Split(pFontName, _T(" "));
+	strutil::strvec lNames = strutil::Split(pFontName, " ");
 	str lName0 = lNames[0];
-	str lFullName = strutil::Join(lNames, _T(""));
+	str lFullName = strutil::Join(lNames, "");
 	strutil::ToLower(lName0);
 	strutil::ToLower(lFullName);
 	for (auto lSuffix: pSuffixes)
@@ -299,7 +300,7 @@ str X11FontManager::GetFontFile(const str& pFontName, const strutil::strvec& pSu
 		{
 			str lLowerFontFile = lFontFile;
 			strutil::ToLower(lLowerFontFile);
-			//mLog.Infof(_T("%s == %s || %s"), lLowerFontFile.c_str(), (lFullName+lSuffix).c_str(), lName0.c_str());
+			//mLog.Infof("%s == %s || %s", lLowerFontFile.c_str(), (lFullName+lSuffix).c_str(), lName0.c_str());
 			if (lLowerFontFile.find(lFullName+lSuffix) != str::npos)
 			{
 				return lFontFile;

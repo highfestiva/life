@@ -15,7 +15,7 @@ namespace Cure
 
 template<class _T>
 DelayedDeleter<_T>::DelayedDeleter(ResourceManager* pResourceManager, ContextManager* pManager, _T* pObject):
-	Parent(pResourceManager, _T("DelayedDeleter")),
+	Parent(pResourceManager, "DelayedDeleter"),
 	mObject(pObject)
 {
 	pManager->AddLocalObject(this);

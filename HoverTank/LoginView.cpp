@@ -21,7 +21,7 @@ namespace HoverTank
 
 
 LoginView::LoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessage):
-	View(_T("Login"), new UiTbc::GridLayout(7, 1)),
+	View("Login", new UiTbc::GridLayout(7, 1)),
 	mLoginObserver(pLoginObserver)
 {
 	SetPreferredSize(200, 200);
@@ -32,27 +32,27 @@ LoginView::LoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessa
 		AddLabel(pErrorMessage, RED);
 	}
 
-	AddLabel(_T("Username"), WHITE);
+	AddLabel("Username", WHITE);
 
 	str lUserName;
-	v_tryget(lUserName, =, mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, _T("User0"));
-	AddTextField(lUserName, _T("User"));
+	v_tryget(lUserName, =, mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, "User0");
+	AddTextField(lUserName, "User");
 
-	AddLabel(_T("Password"), WHITE);
+	AddLabel("Password", WHITE);
 
-	AddTextField(_T("CarPassword"), _T("Pass"))->SetPasswordCharacter(_T('*'));
+	AddTextField("CarPassword", "Pass")->SetPasswordCharacter('*');
 
-	AddLabel(_T("Server"), WHITE);
+	AddLabel("Server", WHITE);
 
 	str lServerName;
-	v_get(lServerName, =, mLoginObserver->GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
-	if (strutil::StartsWith(lServerName, _T("0.0.0.0")))
+	v_get(lServerName, =, mLoginObserver->GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
+	if (strutil::StartsWith(lServerName, "0.0.0.0"))
 	{
 		lServerName = lServerName.substr(7);
 	}
-	AddTextField(lServerName, _T("Server"));
+	AddTextField(lServerName, "Server");
 
-	AddButton(_T("Login"), 0)->SetOnClick(LoginView, OnLogin);
+	AddButton("Login", 0)->SetOnClick(LoginView, OnLogin);
 
 	UpdateLayout();
 }
@@ -67,13 +67,13 @@ void LoginView::OnExit()
 void LoginView::OnLogin(UiTbc::Button*)
 {
 	// Save user's login info.
-	str lServer = ((UiTbc::TextField*)GetChild(_T("Server"), 0))->GetText();
+	str lServer = ((UiTbc::TextField*)GetChild("Server", 0))->GetText();
 
 	// Pick strings from UI.
-	wstr lUsername = wstrutil::Encode(((UiTbc::TextField*)GetChild(_T("User"), 0))->GetText());
-	UiTbc::TextField* lPasswordComponent = (UiTbc::TextField*)GetChild(_T("Pass"), 0);
+	wstr lUsername = wstrutil::Encode(((UiTbc::TextField*)GetChild("User", 0))->GetText());
+	UiTbc::TextField* lPasswordComponent = (UiTbc::TextField*)GetChild("Pass", 0);
 	wstr lReadablePassword = wstrutil::Encode(lPasswordComponent->GetText());
-	lPasswordComponent->SetText(_T("?"));	// Clear out password traces in component.
+	lPasswordComponent->SetText("?");	// Clear out password traces in component.
 
 	// Convert into login format.
 	Cure::MangledPassword lPassword(lReadablePassword);

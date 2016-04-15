@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -282,7 +282,7 @@ bool OpenGLMatVertexColorSolid::AddGeometry(Tbc::GeometryBase* pGeometry)
 	{
 		if (mFallBackMaterial)
 		{
-			mLog.AWarning("Material \"VertexColorSolid\", passing geometry to fallback material.");
+			mLog.Warning("Material \"VertexColorSolid\", passing geometry to fallback material.");
 			return mFallBackMaterial->AddGeometry(pGeometry);
 		}
 		return false;
@@ -370,7 +370,7 @@ bool OpenGLMatSingleTextureSolid::AddGeometry(Tbc::GeometryBase* pGeometry)
 	{
 		if (mFallBackMaterial)
 		{
-			mLog.AWarning("Material \"SingleTextureSolid\", passing geometry to fallback material.");
+			mLog.Warning("Material \"SingleTextureSolid\", passing geometry to fallback material.");
 			return mFallBackMaterial->AddGeometry(pGeometry);
 		}
 		return false;
@@ -582,7 +582,7 @@ bool OpenGLMatSingleColorEnvMapSolid::AddGeometry(Tbc::GeometryBase* pGeometry)
 	{
 		if (mFallBackMaterial)
 		{
-			mLog.AWarning("Material \"SingleColorEnvMapSolid\", passing geometry to fallback material.");
+			mLog.Warning("Material \"SingleColorEnvMapSolid\", passing geometry to fallback material.");
 			return mFallBackMaterial->AddGeometry(pGeometry);
 		}
 		return false;
@@ -1194,7 +1194,7 @@ int OpenGLMatPXS::smNumSptLights = 0;
 int OpenGLMatPXS::smLightCount = 0;
 
 
-OpenGLMatPXS::OpenGLMatPXS(const astr& pVP, const astr pFP[NUM_FP]):
+OpenGLMatPXS::OpenGLMatPXS(const str& pVP, const str pFP[NUM_FP]):
 	mVPID(0)
 {
 #ifndef LEPRA_GL_ES
@@ -1286,8 +1286,8 @@ OpenGLMatPXS::OpenGLMatPXS(const astr& pVP, const astr pFP[NUM_FP]):
 		glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &lErrorPos);
 		if (lErrorPos != -1)
 		{
-			astr lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
-			mLog.Errorf(_T("Error in vertex shader at pos %i!\r\n%s\r\n"), lErrorPos, strutil::Encode(lGlError).c_str());
+			str lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
+			mLog.Errorf("Error in vertex shader at pos %i!\r\n%s\r\n", lErrorPos, lGlError.c_str());
 		}
 		glDisable(GL_VERTEX_PROGRAM_ARB);
 
@@ -1311,9 +1311,9 @@ OpenGLMatPXS::OpenGLMatPXS(const astr& pVP, const astr pFP[NUM_FP]):
 			glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &lErrorPos);
 			if (lErrorPos != -1)
 			{
-				astr lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
-				mLog.Errorf(_T("Error in fragment shader %i at pos %i!\r\n%s\r\n"), i, lErrorPos, strutil::Encode(lGlError).c_str());
-				mLog.AInfo("Setting fragment shader to fallback shader.");
+				str lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
+				mLog.Errorf("Error in fragment shader %i at pos %i!\r\n%s\r\n", i, lErrorPos, lGlError.c_str());
+				mLog.Info("Setting fragment shader to fallback shader.");
 
 				SetToFallbackFP(i);
 			}
@@ -1911,8 +1911,8 @@ void OpenGLMatTextureAndLightmapPXS::RawRender(Tbc::GeometryBase* pGeometry, int
 
 OpenGLMatTextureSBMapPXS::OpenGLMatTextureSBMapPXS(OpenGLRenderer* pRenderer,
 						   Material* pFallBackMaterial,
-						   const astr pVP,
-						   const astr* pFP) :
+						   const str pVP,
+						   const str* pFP) :
 	OpenGLMatSingleTextureSolid(pRenderer, pFallBackMaterial),
 	OpenGLMatPXS(pVP, pFP)
 {

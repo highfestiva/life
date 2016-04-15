@@ -1,7 +1,7 @@
 /*
 	File:   OpenGLMaterials_SBMapShaders.cpp
 	Class:  -
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -11,7 +11,7 @@
 namespace UiTbc
 {
 
-const astr OpenGLMatTextureSBMapPXS::smVP =
+const str OpenGLMatTextureSBMapPXS::smVP =
 	"!!ARBvp1.0\n\
 	 OPTION ARB_position_invariant;\n\
 	 \n\
@@ -228,7 +228,7 @@ MOV outCol.a, iPrimCol.a;              # preserve alpha\n\
 END"
 
 
-const astr OpenGLMatTextureSBMapPXS::smFP[NUM_FP] =
+const str OpenGLMatTextureSBMapPXS::smFP[NUM_FP] =
 {
 	// Ambient light only.
 	"!!ARBfp1.0\n\

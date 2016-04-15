@@ -53,7 +53,8 @@ int Getc(float pTimeout)
 
 
 CommandCompleter::CommandCompleter()
-{}
+{
+}
 
 CommandCompleter::~CommandCompleter()
 {
@@ -130,7 +131,7 @@ bool ConsoleCommandManager::RemoveCommand(const str& pCommand)
 int ConsoleCommandManager::Execute(const str& pCommand, bool pAppendToHistory)
 {
 	int lExecutionResult = 0;
-	str lCommandDelimitors(_T(" \t\v\r\n"));
+	str lCommandDelimitors(" \t\v\r\n");
 
 	str lInCommand(pCommand);
 	if (!mComment.empty())
@@ -141,7 +142,7 @@ int ConsoleCommandManager::Execute(const str& pCommand, bool pAppendToHistory)
 
 	strutil::strvec lCommandList;
 	lCommandList.reserve(10);
-	strutil::FastBlockSplit(lCommandList, lInCommand, _T(";"), true, true);
+	strutil::FastBlockSplit(lCommandList, lInCommand, ";", true, true);
 
 	if (lCommandList.size() == 0)
 	{
@@ -212,7 +213,7 @@ ConsoleCommandManager::CommandList ConsoleCommandManager::GetCommandCompletionLi
 	const str& pPartialCommand, str& pCompleted) const
 {
 	// Pick partial command.
-	const str lCommandDelimitors(_T(" \t\v\r\n"));
+	const str lCommandDelimitors(" \t\v\r\n");
 	const str lPartialCommand = strutil::StripLeft(pPartialCommand, lCommandDelimitors);
 	pCompleted = lPartialCommand;
 
@@ -479,7 +480,7 @@ void StdioConsolePrompt::EraseText(size_t pCount)
 
 void StdioConsolePrompt::PrintPrompt(const str& pPrompt, const str& pInputText, size_t pEditIndex)
 {
-	::printf("\r%s%s", astrutil::Encode(pPrompt).c_str(), astrutil::Encode(pInputText).c_str());
+	::printf("\r%s%s", pPrompt.c_str(), pInputText.c_str());
 	// Back up to edit index.
 	for (size_t x = pInputText.length(); x > pEditIndex; --x)
 	{

@@ -13,7 +13,7 @@
 // ConsoleCommandManager lConsoleManager(this, &MyClass::OnUnknownCommand);
 // lConsoleManager.AddCommand("ls", &MyClass::OnCommand);
 // lConsoleManager.AddCommand("ps", &MyClass::OnCommand);
-// lConsoleManager.Execute(_T("ls -R; ps Afwl"));
+// lConsoleManager.Execute("ls -R; ps Afwl");
 
 
 

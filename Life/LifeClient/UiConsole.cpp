@@ -47,18 +47,18 @@ UiConsole::UiConsole(ConsoleManager* pManager, UiCure::GameUiManager* pUiManager
 #endif // Disallow/allow debug logging.
 		for (int x = lAllowedLevel; x < LEVEL_TYPE_COUNT; ++x)
 		{
-			LogType::GetLogger(LogType::SUB_ROOT)->AddListener(mManager->GetConsoleLogger(), (LogLevel)x);
+			LogType::GetLogger(LogType::ROOT)->AddListener(mManager->GetConsoleLogger(), (LogLevel)x);
 		}
 	}
 
 	mFontId = UiTbc::FontManager::INVALID_FONTID;
-	const tchar* lFontNames[] =
+	const char* lFontNames[] =
 	{
-		_T("Courier New"),
-		_T("LiberationMono"),
-		_T("DejaVuSansMono"),
-		_T("Mono"),
-		_T(""),
+		"Courier New",
+		"LiberationMono",
+		"DejaVuSansMono",
+		"Mono",
+		"",
 		0
 	};
 	UiTbc::FontManager::FontId lDefaultFontId = mUiManager->GetFontManager()->GetActiveFontId();
@@ -288,26 +288,26 @@ void UiConsole::OnConsoleChange()
 void UiConsole::PrintHelp()
 {
 	str lKeys;
-	v_get(lKeys, =, mManager->GetVariableScope(), RTVAR_CTRL_UI_CONTOGGLE, _T("???"));
+	v_get(lKeys, =, mManager->GetVariableScope(), RTVAR_CTRL_UI_CONTOGGLE, "???");
 	typedef strutil::strvec SV;
-	SV lKeyArray = strutil::Split(lKeys, _T(", \t"));
+	SV lKeyArray = strutil::Split(lKeys, ", \t");
 	SV lNiceKeys;
 	for (SV::iterator x = lKeyArray.begin(); x != lKeyArray.end(); ++x)
 	{
-		const str lKey = strutil::ReplaceAll(*x, _T("Key."), _T(""));
+		const str lKey = strutil::ReplaceAll(*x, "Key.", "");
 		lNiceKeys.push_back(lKey);
 	}
 	str lKeyInfo;
 	if (lKeyArray.size() == 1)
 	{
-		lKeyInfo = _T("key ");
+		lKeyInfo = "key ";
 	}
 	else
 	{
-		lKeyInfo = _T("any of the following keys: ");
+		lKeyInfo = "any of the following keys: ";
 	}
-	lKeyInfo += strutil::Join(lNiceKeys, _T(", "));
-	mLog.Infof(_T("To bring this console up again press %s."), lKeyInfo.c_str());
+	lKeyInfo += strutil::Join(lNiceKeys, ", ");
+	mLog.Infof("To bring this console up again press %s.", lKeyInfo.c_str());
 }
 
 

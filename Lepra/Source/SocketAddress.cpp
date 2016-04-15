@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
@@ -162,7 +162,7 @@ void SocketAddress::operator=(const SocketAddress& pAddr)
 str SocketAddress::GetAsString() const
 {
 	str s = GetIP().GetAsString();
-	s += strutil::Format(_T(":%i"), GetPort());
+	s += strutil::Format(":%i", GetPort());
 	return (s);
 }
 
@@ -178,7 +178,7 @@ bool SocketAddress::Resolve(const str& pAddress)
 	int lPort = 0;
 	if (lOk)
 	{
-		lVector = strutil::Split(pAddress, _T(":"));
+		lVector = strutil::Split(pAddress, ":");
 		lOk = (lVector.size() == 2);
 		if (lOk)
 		{
@@ -207,7 +207,7 @@ bool SocketAddress::Resolve(const str& pAddress)
 
 bool SocketAddress::ResolveRange(const str& pAddress, uint16& pEndPort)
 {
-	strutil::strvec lLocalAddressComponents = strutil::Split(pAddress, _T("-"));
+	strutil::strvec lLocalAddressComponents = strutil::Split(pAddress, "-");
 	bool lOk = (lLocalAddressComponents.size() >= 1 && lLocalAddressComponents.size() <= 2);
 	if (lOk)
 	{
@@ -247,9 +247,9 @@ bool SocketAddress::ResolveHost(const str& pHostname)
 	}
 #ifdef LEPRA_NETWORK_IPV6
 	// TODO: fixme!
-	else if ((lIp = inet_addr(astrutil::Encode(pHostname).c_str())) != 0xFFFFFFFF)
+	else if ((lIp = inet_addr(pHostname.c_str())) != 0xFFFFFFFF)
 #else // IPV4
-	else if ((lIp = inet_addr(astrutil::Encode(pHostname).c_str())) != 0xFFFFFFFF)
+	else if ((lIp = inet_addr(pHostname.c_str())) != 0xFFFFFFFF)
 #endif // IPv6/IPV4
 	{
 		lOk = true;

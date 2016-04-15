@@ -23,9 +23,9 @@ namespace Fire
 // Must lie before FireConsoleManager to compile.
 const FireConsoleManager::CommandPair FireConsoleManager::mCommandIdList[] =
 {
-	{_T("prev-level"), COMMAND_PREV_LEVEL},
-	{_T("next-level"), COMMAND_NEXT_LEVEL},
-	{_T("set-level-index"), COMMAND_SET_LEVEL_INDEX},
+	{"prev-level", COMMAND_PREV_LEVEL},
+	{"next-level", COMMAND_NEXT_LEVEL},
+	{"set-level-index", COMMAND_SET_LEVEL_INDEX},
 };
 
 
@@ -106,7 +106,7 @@ int FireConsoleManager::OnCommand(const HashedString& pCommand, const strutil::s
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <index>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <index>", pCommand.c_str());
 					lResult = 1;
 				}
 			}

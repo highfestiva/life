@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -22,7 +22,7 @@
 
 using namespace Lepra;
 class UiLepraTest{};
-static Lepra::LogDecorator gUiLLog(Lepra::LogType::GetLogger(Lepra::LogType::SUB_TEST), typeid(UiLepraTest));
+static Lepra::LogDecorator gUiLLog(Lepra::LogType::GetLogger(Lepra::LogType::TEST), typeid(UiLepraTest));
 void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
 bool TestLepra();
 
@@ -41,19 +41,19 @@ bool TestInput(const Lepra::LogDecorator& pLog)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("no keyboard available");
+		lContext = "no keyboard available";
 		lTestOk = (lInputManager->GetKeyboard() != 0);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("no mouse available");
+		lContext = "no mouse available";
 		lTestOk = (lInputManager->GetMouse() != 0);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("number of devices");
+		lContext = "number of devices";
 		lTestOk = (lInputManager->GetDeviceList().size() >= 2 &&
 			lInputManager->GetDeviceList().size() <= 7);
 		deb_assert(lTestOk);
@@ -64,7 +64,7 @@ bool TestInput(const Lepra::LogDecorator& pLog)
 		lInputManager = 0;
 	}
 
-	ReportTestResult(pLog, _T("Input"), lContext, lTestOk);
+	ReportTestResult(pLog, "Input", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -79,13 +79,13 @@ bool TestGraphics(const Lepra::LogDecorator& pLog)
 	UiLepra::DisplayMode lDisplayMode;
 	if (lTestOk)
 	{
-		lContext = _T("find display mode");
+		lContext = "find display mode";
 		lTestOk = lDisplay->FindDisplayMode(lDisplayMode, 640, 480);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("open screen");
+		lContext = "open screen";
 		lTestOk = lDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED, UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY);
 		deb_assert(lTestOk);
 	}
@@ -109,7 +109,7 @@ bool TestGraphics(const Lepra::LogDecorator& pLog)
 
 	delete (lDisplay);
 
-	ReportTestResult(pLog, _T("Graphics"), lContext, lTestOk);
+	ReportTestResult(pLog, "Graphics", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -123,22 +123,22 @@ bool TestSound(const Lepra::LogDecorator& pLog)
 	deb_assert(lSoundManager);
 	if (lTestOk)
 	{
-		lContext = _T("load sound");
-		lSound = lSoundManager->LoadSound3D(_T("Data/logo_trumpet.wav"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		lContext = "load sound";
+		lSound = lSoundManager->LoadSound3D("Data/logo_trumpet.wav", UiLepra::SoundManager::LOOP_FORWARD, 0);
 		lTestOk = (lSound != UiLepra::INVALID_SOUNDID);
 		deb_assert(lTestOk);
 	}
 	UiLepra::SoundManager::SoundInstanceID lSoundInstance = UiLepra::INVALID_SOUNDINSTANCEID;
 	if (lTestOk)
 	{
-		lContext = _T("create sound instance");
+		lContext = "create sound instance";
 		lSoundInstance = lSoundManager->CreateSoundInstance(lSound);
 		lTestOk = (lSoundInstance != UiLepra::INVALID_SOUNDID);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("play sound");
+		lContext = "play sound";
 		lSoundManager->Play(lSoundInstance, 1, 1);
 		for (float x = 0; x < 6*5; x += 2.0f)
 		{
@@ -158,7 +158,7 @@ bool TestSound(const Lepra::LogDecorator& pLog)
 	}
 	delete (lSoundManager);
 
-	ReportTestResult(pLog, _T("Sound"), lContext, lTestOk);
+	ReportTestResult(pLog, "Sound", lContext, lTestOk);
 	return (lTestOk);
 }
 

@@ -34,14 +34,14 @@ MacInputElement::MacInputElement(Type pType, Interpretation pInterpretation, int
 	str lName;
 	if (pType == ANALOGUE)
 	{
-		lName = _T("Axis") + strutil::IntToString(pParentDevice->GetNumAnalogueElements(), 10);
+		lName = "Axis" + strutil::IntToString(pParentDevice->GetNumAnalogueElements(), 10);
 	}
 	else
 	{
-		lName = str(_T("Button")) + strutil::IntToString(pParentDevice->GetNumDigitalElements(), 10);
+		lName = str("Button") + strutil::IntToString(pParentDevice->GetNumDigitalElements(), 10);
 	}
 	SetIdentifier(lName);
-	//mLog.Headlinef(_T("%s got Mac input element %s of type %i w/ index %i."), pParentDevice->GetIdentifier().c_str(), lName, GetType(), pTypeIndex);
+	//mLog.Headlinef("%s got Mac input element %s of type %i w/ index %i.", pParentDevice->GetIdentifier().c_str(), lName, GetType(), pTypeIndex);
 }
 
 MacInputElement::~MacInputElement()
@@ -69,7 +69,7 @@ MacInputDevice::MacInputDevice(pRecDevice pNativeDevice, InputManager* pManager)
 	mAnalogueCount(0),
 	mButtonCount(0)
 {
-	SetIdentifier(strutil::Encode((const char*)pNativeDevice->product));
+	SetIdentifier(str(pNativeDevice->product));
 	EnumElements();
 }
 
@@ -536,7 +536,7 @@ void MacInputManager::OnEvent(NSEvent* pEvent)
 			bool lConsumed = false;
 			const KeyCode lKey = ConvertMacKeyCodeToKeyCode(lMacKeyCode);
 			SetKey(lKey, lIsKeyDown);
-			//mLog.Infof(_T("Got key %s: %x (%u, '%c')."), lIsKeyDown? _T("down") : _T("up"), lMacKeyCode, lMacKeyCode, lMacKeyCode);
+			//mLog.Infof("Got key %s: %x (%u, '%c'."), lIsKeyDown? "down" : "up", lMacKeyCode, lMacKeyCode, lMacKeyCode);
 			if (lIsKeyDown)
 			{
 				lConsumed |= NotifyOnKeyDown(lKey);
@@ -554,7 +554,7 @@ void MacInputManager::OnEvent(NSEvent* pEvent)
 				for (unsigned x = 0; x < lCharacterCount; ++x)
 				{
 					unichar lChar = [lCharacters characterAtIndex:x];
-					//mLog.Infof(_T("Got char: %x (%u, '%c')"), (unsigned)lChar, (unsigned)lChar, lChar);
+					//mLog.Infof("Got char: %x (%u, '%c'"), (unsigned)lChar, (unsigned)lChar, lChar);
 					lChar = ConvertChar(lChar);
 					if (lChar)
 					{
@@ -567,7 +567,7 @@ void MacInputManager::OnEvent(NSEvent* pEvent)
 		case NSFlagsChanged:
 		{
 			const NSUInteger lKeyModifiers = [pEvent modifierFlags];
-			//mLog.Infof(_T("Got key modifiers: %x (%u)"), lKeyModifiers, lKeyModifiers);
+			//mLog.Infof("Got key modifiers: %x (%u"), lKeyModifiers, lKeyModifiers);
 			const NSUInteger lDeltaModifiers = mKeyModifiers ^ lKeyModifiers;
 			const int lTranslationTable[][2] =
 			{
@@ -693,7 +693,7 @@ void MacInputManager::EnumDevices()
 		}
 		else
 		{
-			log_volatile(mLog.Debugf(_T("%s is not of known type: usage=%i, usagePage=%i."),
+			log_volatile(mLog.Debugf("%s is not of known type: usage=%i, usagePage=%i.",
 				lDevice->GetIdentifier().c_str(), lHIDDevice->usage, lHIDDevice->usagePage));
 		}
 		lDevice->SetInterpretation(lInterpretation, mTypeCount[lInterpretation]);

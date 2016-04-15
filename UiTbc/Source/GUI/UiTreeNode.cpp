@@ -300,7 +300,7 @@ bool TreeNode::ValidateExpandButton()
 		/*mExpandButton = new CheckButton(mExpandIconID, mCollapseIconID,
 						 mExpandIconID, mCollapseIconID,
 						 mCollapseIconID, mExpandIconID,
-						 _T("ExpandButton"));*/
+						 "ExpandButton");*/
 
 		mExpandButton->SetPreferredSize(lIMan->GetImageSize(mExpandIconID));
 		mExpandButton->SetMinSize(mExpandButton->GetPreferredSize());

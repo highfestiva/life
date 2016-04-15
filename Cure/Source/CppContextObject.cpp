@@ -76,7 +76,7 @@ void CppContextObject::StabilizeTick()
 		for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 		{
 			const Tbc::ChunkyClass::Tag& lTag = lClass->GetTag(x);
-			if (lTag.mTagName == _T("upright_stabilizer"))
+			if (lTag.mTagName == "upright_stabilizer")
 			{
 				if (lTag.mFloatValueList.size() != 1 ||
 					lTag.mStringValueList.size() != 0 ||
@@ -84,7 +84,7 @@ void CppContextObject::StabilizeTick()
 					lTag.mEngineIndexList.size() != 0 ||
 					lTag.mMeshIndexList.size() != 0)
 				{
-					mLog.Errorf(_T("The upright_stabilizer tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
+					mLog.Errorf("The upright_stabilizer tag '%s' has the wrong # of parameters.", lTag.mTagName.c_str());
 					deb_assert(false);
 					return;
 				}
@@ -93,7 +93,7 @@ void CppContextObject::StabilizeTick()
 				Tbc::PhysicsEngine::UprightStabilize(mManager->GetGameManager()->GetPhysicsManager(),
 					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*lMicroStepFactor, 1);
 			}
-			else if (lTag.mTagName == _T("forward_stabilizer"))
+			else if (lTag.mTagName == "forward_stabilizer")
 			{
 				if (lTag.mFloatValueList.size() != 1 ||
 					lTag.mStringValueList.size() != 0 ||
@@ -101,7 +101,7 @@ void CppContextObject::StabilizeTick()
 					lTag.mEngineIndexList.size() != 0 ||
 					lTag.mMeshIndexList.size() != 0)
 				{
-					mLog.Errorf(_T("The forward_stabilizer tag '%s' has the wrong # of parameters."), lTag.mTagName.c_str());
+					mLog.Errorf("The forward_stabilizer tag '%s' has the wrong # of parameters.", lTag.mTagName.c_str());
 					deb_assert(false);
 					return;
 				}
@@ -120,7 +120,7 @@ void CppContextObject::StartLoading()
 {
 	deb_assert(mClassResource == 0);
 	mClassResource = new UserClassResource();
-	const str lAssetName = GetClassId()+_T(".class");
+	const str lAssetName = GetClassId()+".class";
 	mClassResource->Load(GetResourceManager(), lAssetName,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
@@ -152,8 +152,8 @@ void CppContextObject::CreatePhysics(Tbc::ChunkyPhysics* pPhysics)
 {
 	deb_assert(mPhysicsResource == 0);
 	static int lPhysicsCounter = 0;
-	const str lPhysicsName = strutil::Format(_T("RawPhys%i.phys"), ++lPhysicsCounter);
-	const str lPhysicsRefName = strutil::Format(_T("%s;%i"), lPhysicsName.c_str(), GetInstanceId());
+	const str lPhysicsName = strutil::Format("RawPhys%i.phys", ++lPhysicsCounter);
+	const str lPhysicsRefName = strutil::Format("%s;%i", lPhysicsName.c_str(), GetInstanceId());
 	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPosition.mPosition.mVelocity, mPhysicsOverride,
 		((Cure::GameTicker*)mManager->GetGameManager()->GetTicker())->GetPhysicsLock(), mManager->GetGameManager()->GetPhysicsManager(),
 		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
@@ -226,7 +226,7 @@ void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
 {
 	deb_assert(mPhysicsResource == 0);
 	const str lInstanceId = strutil::IntToString(GetInstanceId(), 10);
-	const str lAssetName = pPhysicsName + _T(".phys;") + lInstanceId.c_str();
+	const str lAssetName = pPhysicsName + ".phys;" + lInstanceId.c_str();
 	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPosition.mPosition.mVelocity, mPhysicsOverride,
 		((Cure::GameTicker*)mManager->GetGameManager()->GetTicker())->GetPhysicsLock(), mManager->GetGameManager()->GetPhysicsManager(),
 		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
@@ -315,7 +315,7 @@ void CppContextObject::OnMicroTick(float pFrameTime)
 {
 	if (mPhysics && GetManager())
 	{
-		const bool lNeedsSteeringHelp = (GetAttributeFloatValue(_T("float_is_child")) > 0.75f);
+		const bool lNeedsSteeringHelp = (GetAttributeFloatValue("float_is_child") > 0.75f);
 		int lAccIndex = GetPhysics()->GetEngineIndexFromControllerIndex(GetPhysics()->GetEngineCount()-1, -1, 0);
 		const int lTurnIndex = GetPhysics()->GetEngineIndexFromControllerIndex(0, 1, 1);
 		if (lNeedsSteeringHelp && lAccIndex >= 0 && lTurnIndex >= 0)
@@ -366,7 +366,7 @@ void CppContextObject::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, Context
 	}
 	else
 	{
-		//mLog.Errorf(_T("Physical trigger not configured for logical trigging on %s."), GetClassId().c_str());
+		//mLog.Errorf("Physical trigger not configured for logical trigging on %s.", GetClassId().c_str());
 	}
 
 	/*
@@ -406,7 +406,7 @@ void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
 	Tbc::ChunkyClass* lClass = pClassResource->GetData();
 	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		mLog.Errorf(_T("Could not load class '%s'."), pClassResource->GetName().c_str());
+		mLog.Errorf("Could not load class '%s'.", pClassResource->GetName().c_str());
 		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
@@ -421,7 +421,7 @@ void CppContextObject::OnLoadPhysics(UserPhysicsReferenceResource* pPhysicsResou
 {
 	if (pPhysicsResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
 	{
-		mLog.Errorf(_T("Could not load physics class '%s'."), pPhysicsResource->GetName().c_str());
+		mLog.Errorf("Could not load physics class '%s'.", pPhysicsResource->GetName().c_str());
 		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;

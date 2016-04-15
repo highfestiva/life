@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // Some (optional to use) simple and standard log subsystems.
@@ -28,26 +28,26 @@ class LogType
 public:
 	enum Subsystem
 	{
-		SUB_LOWEST_TYPE = 0,
-		SUB_ROOT = SUB_LOWEST_TYPE,	// Try to avoid using base log directly.
-		SUB_GENERAL,			// General data structures and algoritms.
-		SUB_GENERAL_RESOURCES,		// File handling, etc.
-		SUB_NETWORK,
-		SUB_NETWORK_CLIENT,
-		SUB_NETWORK_SERVER,
-		SUB_CONSOLE,
-		SUB_PHYSICS,
-		SUB_UI,
-		SUB_UI_INPUT,
-		SUB_UI_SOUND,
-		SUB_UI_GFX,
-		SUB_UI_GFX_2D,
-		SUB_UI_GFX_3D,
-		SUB_GAME,
-		SUB_GAME_CONTEXT,
-		SUB_GAME_CONTEXT_CPP,
-		SUB_TEST,
-		SUB_TYPE_COUNT
+		LOWEST_TYPE = 0,
+		ROOT = LOWEST_TYPE,	// Try to avoid using base log directly.
+		GENERAL,			// General data structures and algoritms.
+		GENERAL_RESOURCES,		// File handling, etc.
+		NETWORK,
+		NETWORK_CLIENT,
+		NETWORK_SERVER,
+		CONSOLE,
+		PHYSICS,
+		UI,
+		UI_INPUT,
+		UI_SOUND,
+		UI_GFX,
+		UI_GFX_2D,
+		UI_GFX_3D,
+		GAME,
+		GAME_CONTEXT,
+		GAME_CONTEXT_CPP,
+		TEST,
+		TYPE_COUNT
 	};
 
 	static void Init();
@@ -60,7 +60,7 @@ public:
 
 private:
 	static bool mInitialized;
-	static Logger* mLoggerArray[SUB_TYPE_COUNT];
+	static Logger* mLoggerArray[TYPE_COUNT];
 };
 
 

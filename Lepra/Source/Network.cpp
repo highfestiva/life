@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -36,7 +36,7 @@ bool Network::Start()
 	}
 	if (!mStarted)
 	{
-		mLog.AFatal("Could not startup networking!");
+		mLog.Fatal("Could not startup networking!");
 	}
 	return (mStarted);
 }
@@ -58,7 +58,7 @@ str Network::GetHostname()
 	char lName[256];
 	if (::gethostname(lName, sizeof(lName)) == 0)
 	{
-		return (strutil::Encode(astr(lName)));
+		return (str(lName));
 	}
 	return (str());
 }
@@ -74,7 +74,7 @@ bool Network::ResolveHostname(const str& pHostname, IPAddress& pIPAddress)
 	}
 	else
 	{
-		lHostent = ::gethostbyname(astrutil::Encode(pHostname).c_str());
+		lHostent = ::gethostbyname(pHostname.c_str());
 	}
 
 	if (lHostent)
@@ -95,7 +95,7 @@ bool Network::ResolveIp(const IPAddress& pIpAddress, str& pHostname)
 	hostent* lHostent = ::gethostbyaddr((const char*)lRawAddress, pIpAddress.GetNumBytes(), AF_INET);
 	if (lHostent && lHostent->h_name && lHostent->h_name[0])
 	{
-		pHostname = strutil::Encode(lHostent->h_name);
+		pHostname = lHostent->h_name;
 		return true;
 	}
 	return false;
@@ -104,15 +104,15 @@ bool Network::ResolveIp(const IPAddress& pIpAddress, str& pHostname)
 bool Network::IsLocalAddress(const str& pAddress)
 {
 	bool lIsLocalAddress = false;
-	const str lUrl = strutil::Split(pAddress, _T(":"), 1)[0];
+	const str lUrl = strutil::Split(pAddress, ":", 1)[0];
 	IPAddress lIpAddress;
 	if (ResolveHostname(lUrl, lIpAddress))
 	{
 		IPAddress lExternalIpAddress;
-		ResolveHostname(_T(""), lExternalIpAddress);
+		ResolveHostname("", lExternalIpAddress);
 		const str lIp = lIpAddress.GetAsString();
-		if (lIp == _T("127.0.0.1") ||
-			lIp == _T("0.0.0.0") ||
+		if (lIp == "127.0.0.1" ||
+			lIp == "0.0.0.0" ||
 			lIpAddress == lExternalIpAddress)
 		{
 			lIsLocalAddress = true;

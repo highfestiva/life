@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -552,7 +552,7 @@ void ObjectPositionalData::SetAt(size_t pIndex, PositionalData* pData)
 	}
 	else
 	{
-		mLog.AError("Trying to set positional data out of range!");
+		mLog.Error("Trying to set positional data out of range!");
 		deb_assert(false);
 	}
 }

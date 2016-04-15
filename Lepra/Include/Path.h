@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -36,7 +36,7 @@ public:
 	static str JoinPath(const str& pDirectory, const str& pFileBase, const str& pExtension = str());
 	static str GetParentDirectory(const str& pDirectory);
 	static bool NormalizePath(const str& pInputPath, str& pOutputPath);
-	static bool IsPathSeparator(const tchar pCharacter);
+	static bool IsPathSeparator(const char pCharacter);
 	static Wildcard CreateWildcard(const str& pWildcard);
 	static bool IsWildcardMatch(const str& pWildcard, const str& pFilename, bool pScan = false);
 	static bool IsWildcardMatch(const Wildcard& pWildcard, const str& pFilename, bool pScan = false);

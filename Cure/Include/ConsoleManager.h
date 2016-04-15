@@ -61,7 +61,7 @@ public:
 protected:
 	struct CommandPair
 	{
-		const tchar* mCommandName;
+		const char* mCommandName;
 		int mCommandId;
 	};
 	typedef std::unordered_map<HashedString, int, HashedStringHasher> CommandLookupMap;

@@ -208,7 +208,7 @@ void TextField::SetIsReadOnly(bool pIsReadOnly)
 	mIsReadOnly = pIsReadOnly;
 }
 
-void TextField::SetPasswordCharacter(tchar pCharacter)
+void TextField::SetPasswordCharacter(char pCharacter)
 {
 	mPasswordCharacter = pCharacter;
 }

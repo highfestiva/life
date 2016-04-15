@@ -1,7 +1,7 @@
 /*
 	File:   OpenGLMaterials_TextureAndLightmapShaders.cpp
 	Class:  -
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -11,7 +11,7 @@
 namespace UiTbc
 {
 
-const astr OpenGLMatTextureAndLightmapPXS::smVP =
+const str OpenGLMatTextureAndLightmapPXS::smVP =
 	"!!ARBvp1.0\n\
 	 OPTION ARB_position_invariant;\n\
 	 # Diffuse vp.\n\
@@ -68,7 +68,7 @@ const astr OpenGLMatTextureAndLightmapPXS::smVP =
 !!ARBfp1.0\n\
 ATTRIB iPrimCol   = fragment.color.primary;\n\
 ATTRIB iSecCol    = fragment.color.secondary;\n\
-ATTRIB iFragPos   = fragment.texcoord[0];# The fragment´s world position in eye space.\n\
+ATTRIB iFragPos   = fragment.texcoord[0];# The fragmentÂ´s world position in eye space.\n\
 ATTRIB iNormal    = fragment.texcoord[1];# The surface normal.\n\
 ATTRIB iTCoord0   = fragment.texcoord[2];\n\
 ATTRIB iTCoord1   = fragment.texcoord[3];\n\
@@ -182,7 +182,7 @@ MAD outCol.rgb, Temp, primCol, N;\n\
 MOV outCol.a, iPrimCol.a;              # preserve alpha\n\
 END"
 
-const astr OpenGLMatTextureAndLightmapPXS::smFP[NUM_FP] =
+const str OpenGLMatTextureAndLightmapPXS::smFP[NUM_FP] =
 {
 	// Ambient light and lightmap only.
 	"!!ARBfp1.0\n\

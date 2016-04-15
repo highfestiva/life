@@ -21,7 +21,7 @@ PhysicsManager* PhysicsManagerFactory::Create(Engine pEngine, float pRadius, int
 	switch (pEngine)
 	{
 		case ENGINE_ODE:	lEngine = new PhysicsManagerODE(pRadius, pLevels, pSensitivity);	break;
-		default:		mLog.Error(_T("Physics type not supported."));				break;
+		default:		mLog.Error("Physics type not supported.");				break;
 	}
 	return (lEngine);
 }

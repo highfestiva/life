@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -60,7 +60,7 @@ PhysicsEngine* PhysicsEngine::Load(ChunkyPhysics* pStructure, const void* pData,
 	const uint32* lData = (const uint32*)pData;
 	if (pByteCount != sizeof(uint32)*7 + Endian::BigToHost(lData[6])*sizeof(uint32)*3)
 	{
-		mLog.AError("Could not load; wrong data size.");
+		mLog.Error("Could not load; wrong data size.");
 		deb_assert(false);
 		return (0);
 	}
@@ -70,7 +70,7 @@ PhysicsEngine* PhysicsEngine::Load(ChunkyPhysics* pStructure, const void* pData,
 	if (lEngine->GetChunkySize() != pByteCount)
 	{
 		deb_assert(false);
-		mLog.AError("Corrupt data or error in loading algo.");
+		mLog.Error("Corrupt data or error in loading algo.");
 		delete (lEngine);
 		lEngine = 0;
 	}
@@ -205,7 +205,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 		const float lScale = lEngineNode.mScale;
 		if (!lGeometry)
 		{
-			mLog.AError("Missing node!");
+			mLog.Error("Missing node!");
 			continue;
 		}
 		switch (mEngineType)
@@ -374,7 +374,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				}
 				else
 				{
-					mLog.AError("Missing roll joint!");
+					mLog.Error("Missing roll joint!");
 				}
 			}
 			break;
@@ -401,7 +401,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				}
 				else
 				{
-					mLog.AError("Missing break joint!");
+					mLog.Error("Missing break joint!");
 				}
 			}
 			break;
@@ -455,7 +455,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 				}
 				else
 				{
-					mLog.AError("Missing rotor joint!");
+					mLog.Error("Missing rotor joint!");
 				}
 			}
 			break;
@@ -481,13 +481,13 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 					//		//vec3 r = lRelPos;
 					//		vec3 r = lOffset;
 					//		vec3 w = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
-					//		mLog.Infof(_T("Got pos (%f, %f, %f) - world pos is (%f, %f, %f)."), r.x, r.y, r.z, w.x, w.y, w.z);
+					//		mLog.Infof("Got pos (%f, %f, %f - world pos is (%f, %f, %f)."), r.x, r.y, r.z, w.x, w.y, w.z);
 					//	}
 					//}
 				}
 				else
 				{
-					mLog.AError("Missing rotor joint!");
+					mLog.Error("Missing rotor joint!");
 				}
 			}
 			break;
@@ -813,7 +813,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 	//deb_assert(pGeometry->GetJointId() != INVALID_JOINT);
 	if (pGeometry->GetJointId() == INVALID_JOINT)
 	{
-		mLog.AError("Missing torque joint!");
+		mLog.Error("Missing torque joint!");
 		return;
 	}
 
@@ -841,7 +841,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTim
 	float lIrlAngle;
 	if (!pPhysicsManager->GetAngle1(pGeometry->GetJointId(), lIrlAngle))
 	{
-		mLog.AError("Bad joint angle!");
+		mLog.Error("Bad joint angle!");
 		return;
 	}
 	// Flip angle if parent is "world".

@@ -59,7 +59,7 @@ struct AgentData: public UiLepra::KeyCodeInputObserver
 		int mLastSetFrameIndex;	// TODO: this is a hack, read up on what algo to use for clients that want to set other clients positions.
 		Lepra::vec3 mGraphicsPosition;
 		BodyInfo():
-			mType(_T("?")),
+			mType("?"),
 			mPhysicsId(0),
 			mGraphicsGeometry(0),
 			mGraphicsId((UiTbc::Renderer::GeometryID)-1),
@@ -253,24 +253,24 @@ bool NetworkLoginClients()
 
 	if (lTestOk)
 	{
-		lContext = _T("network start");
+		lContext = "network start";
 		lTestOk = Lepra::Network::Start();
 	}
 
 	Cure::NetworkServer* lServer = 0;
 	if (lTestOk)
 	{
-		lContext = _T("server start");
+		lContext = "server start";
 		lServer = new Cure::NetworkServer(Cure::GetSettings(), &gLoginListener);
 		gServer.mNetworkAgent = lServer;
 		//lServer->GetPacketFactory()->SetMessageFactory(new PositionalMessageFactory());
-		lTestOk = lServer->Start(_T(":12345"));
+		lTestOk = lServer->Start(":12345");
 	}
 
 	// Create user accounts.
 	for (int x = 0; lTestOk && x < CLIENT_COUNT; ++x)
 	{
-		lContext = _T("client create");
+		lContext = "client create";
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(Lepra::wstrutil::Format(L"user%i", x), lPassword);
@@ -307,14 +307,14 @@ bool NetworkLoginClients()
 	for (int x = 0; lTestOk && x < CLIENT_COUNT; ++x)
 	{
 		Cure::NetworkClient* lClient = new Cure::NetworkClient(Cure::GetSettings());
-		lTestOk = lClient->Open(_T(":11233"));
+		lTestOk = lClient->Open(":11233");
 		deb_assert(lTestOk);
 		gClient[x].mNetworkAgent = lClient;
-		lContext = _T("client connect+login");
+		lContext = "client connect+login";
 		wstr lBadPassword(L"feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
 		Cure::LoginId lUser(Lepra::wstrutil::Format(L"user%i", x), lPassword);
-		lClient->StartConnectLogin(_T(":12345"), 2.0, lUser);
+		lClient->StartConnectLogin(":12345", 2.0, lUser);
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		gClient[x].mClientId = lClient->GetLoginAccountId();
 		bool lTestOk = (lStatus == Cure::REMOTE_OK);
@@ -331,7 +331,7 @@ bool NetworkLoginClients()
 		}
 	}
 
-	ReportTestResult(gNptLog, _T("NetworkLoginClients"), lContext, lTestOk);
+	ReportTestResult(gNptLog, "NetworkLoginClients", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -368,7 +368,7 @@ bool CreateWorld(AgentData& pAgentData)
 	lGeometry = UiTbc::BasicMeshCreator::CreateFlatBox(lFloorSize, lFloorSize, lFloorSize);
 	lGeometry->SetAlwaysVisible(true);
 	lGraphicsId = pAgentData.mRenderer->AddGeometry(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, UiTbc::Renderer::NO_SHADOWS);
-	pAgentData.AddBody(_T("StaticBox"), lPhysicsId, lGeometry, lGraphicsId);
+	pAgentData.AddBody("StaticBox", lPhysicsId, lGeometry, lGraphicsId);
 	// Create client spheres on server.
 	for (int y = 0; y < CLIENT_COUNT; ++y)
 	{
@@ -386,7 +386,7 @@ bool CreateWorld(AgentData& pAgentData)
 			0.8f, 1.0f, true);
 		lGeometry->SetBasicMaterialSettings(lMaterial);
 		lGraphicsId = pAgentData.mRenderer->AddGeometry(lGeometry, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID, UiTbc::Renderer::NO_SHADOWS);
-		pAgentData.AddBody(_T("DynamicSphere"), lPhysicsId, lGeometry, lGraphicsId);
+		pAgentData.AddBody("DynamicSphere", lPhysicsId, lGeometry, lGraphicsId);
 	}
 	Lepra::xform lCameraPlacement;
 	Lepra::vec3 lCameraPosition(0, -lFloorSize, lClientSize*5);
@@ -438,7 +438,7 @@ void PostDelayedMovement(const Cure::ObjectPositionalData& pData, int pClientInd
 	const double lAbsoluteSendTime = lCurrentTime + pFrom->mEmulatedNetworkSendLatencyFrameCount*PHYSICS_SECONDS_PER_FRAME + Lepra::Random::Uniform(-pFrom->mEmulatedNetworkSendJitterFrameCount, pFrom->mEmulatedNetworkSendJitterFrameCount)*PHYSICS_SECONDS_PER_FRAME;
 	/*if (pFrom == &gClient[CLIENT_COUNT-1])
 	{
-		logdebug(_T("Client post"), Lepra::strutil::Format(_T("Frame %i when server on %i, waiting for time %f, current time %f."), gClient[CLIENT_COUNT-1].mCurrentPhysicsFrameIndex, gServer.mCurrentPhysicsFrameIndex, lAbsoluteSendTime, gAbsoluteTime));
+		logdebug("Client post", Lepra::strutil::Format("Frame %i when server on %i, waiting for time %f, current time %f.", gClient[CLIENT_COUNT-1].mCurrentPhysicsFrameIndex, gServer.mCurrentPhysicsFrameIndex, lAbsoluteSendTime, gAbsoluteTime));
 	}*/
 	for (std::list<DelayedNetworkSend>::iterator x = gDelayedNetworkSendArray.begin(); x != gDelayedNetworkSendArray.end(); ++x)
 	{
@@ -456,7 +456,7 @@ void PostDelayedMovement(const Cure::ObjectPositionalData& pData, int pClientInd
 		int lFrameIndex = 0;
 		Cure::ObjectPositionalData lPosition;
 		lMessage->GetData(lFrameIndex, lPosition);
-		logdebug(_T("Client post"), Lepra::strutil::Format(_T("Frame %i when server on %i, waiting for time %f, current time %f."), lFrameIndex, gServer.mCurrentPhysicsFrameIndex, gDelayedNetworkSendArray.back().mAbsoluteSendTime, gAbsoluteTime));
+		logdebug("Client post", Lepra::strutil::Format("Frame %i when server on %i, waiting for time %f, current time %f.", lFrameIndex, gServer.mCurrentPhysicsFrameIndex, gDelayedNetworkSendArray.back().mAbsoluteSendTime, gAbsoluteTime));
 	}*/
 }
 
@@ -479,7 +479,7 @@ void CalculateClientNetworkParameters(int pAgentIndex, const int pFrameDiff)
 	const double lSlidingMeanLerpFactor = 0.5;
 	lClient.mServerMeasuredNetworkLatencyFrameCount = Lepra::Math::Lerp<double>(lMedian, lClient.mServerMeasuredNetworkLatencyFrameCount, lSlidingMeanLerpFactor);
 	lClient.mServerMeasuredNetworkJitterFrameCount = Lepra::Math::Lerp<double>(lDeviation, lClient.mServerMeasuredNetworkJitterFrameCount, lSlidingMeanLerpFactor);
-	//logdebug(_T("Server measures latencies"), Lepra::strutil::Format(_T("Client %i: latency frame count=%f, jitter frame count=%f."), pAgentIndex, lClient.mServerMeasuredNetworkLatencyFrameCount, lClient.mServerMeasuredNetworkJitterFrameCount));
+	//logdebug("Server measures latencies", Lepra::strutil::Format("Client %i: latency frame count=%f, jitter frame count=%f.", pAgentIndex, lClient.mServerMeasuredNetworkLatencyFrameCount, lClient.mServerMeasuredNetworkJitterFrameCount));
 }
 
 // A positive return value n means that data from the client to the server comes n frames too late on average (client needs to speed up).
@@ -549,20 +549,20 @@ void MaybeSendClientStriveTimes(int pAgentIndex)
 		{
 			lClient.mStriveSendErrorTimeCounter = 0;
 			const int lTargetNetworkFrameDiffCount = SendClientStriveTimes(pAgentIndex);
-			gNptLog.Warning(_T("Server \"sending\" physics tick time adjustments") + Lepra::strutil::Format(_T("Client %i: %+i frames (adjusted over %i frames)."), pAgentIndex, lTargetNetworkFrameDiffCount, lClient.mPhysicsTickAdjustmentFrameCount));
+			gNptLog.Warning("Server \"sending\" physics tick time adjustments" + Lepra::strutil::Format("Client %i: %+i frames (adjusted over %i frames."), pAgentIndex, lTargetNetworkFrameDiffCount, lClient.mPhysicsTickAdjustmentFrameCount));
 		}
 		/*else
 		{
 			str s;
 			if (lNetworkFrameDiffCount < 0)
 			{
-				s = Lepra::strutil::Format(_T("Client %i: data arrives %i frames early on average."), pAgentIndex, -lNetworkFrameDiffCount);
+				s = Lepra::strutil::Format("Client %i: data arrives %i frames early on average.", pAgentIndex, -lNetworkFrameDiffCount);
 			}
 			else
 			{
-				s = Lepra::strutil::Format(_T("Client %i: data arrives %i frames late on average."), pAgentIndex, lNetworkFrameDiffCount);
+				s = Lepra::strutil::Format("Client %i: data arrives %i frames late on average.", pAgentIndex, lNetworkFrameDiffCount);
 			}
-			logtrace(_T("Server find client out of range"), s);
+			logtrace("Server find client out of range", s);
 		}*/
 	}
 	else
@@ -574,18 +574,18 @@ void MaybeSendClientStriveTimes(int pAgentIndex)
 			x = 0;
 			double lLateDropPercent = 100.0*lClient.mPacketUsageLateDropCount/(lClient.mPacketUsageLateDropCount+lClient.mPacketUsageEarlyDropCount+lClient.mPacketUsageUseCount);
 			double lEarlyDropPercent = 100.0*lClient.mPacketUsageEarlyDropCount/(lClient.mPacketUsageLateDropCount+lClient.mPacketUsageEarlyDropCount+lClient.mPacketUsageUseCount);
-			str s = Lepra::strutil::Format(_T("Client %i: data arrives %i frames early on average with a drop of %.1f %% (late) and %.1f %% (early)."), pAgentIndex, -lNetworkFrameDiffCount, lLateDropPercent, lEarlyDropPercent);
-			log_volatile(gNptLog.Debug(_T("Server find client in range ")+s));
-			s = Lepra::strutil::Format(_T("Client %i: up %.1f kB/s, down %.1f kB/s (%.2f FPS)."), pAgentIndex,
+			str s = Lepra::strutil::Format("Client %i: data arrives %i frames early on average with a drop of %.1f %% (late and %.1f %% (early)."), pAgentIndex, -lNetworkFrameDiffCount, lLateDropPercent, lEarlyDropPercent);
+			log_volatile(gNptLog.Debug("Server find client in range "+s));
+			s = Lepra::strutil::Format("Client %i: up %.1f kB/s, down %.1f kB/s (%.2f FPS."), pAgentIndex,
 				(lClient.mNetworkAgent->GetSentByteCount()-lClient.mBandwidthLastSent)/1000.0/(gAbsoluteTime-lClient.mBandwidthStartMeasureTime),
 				(lClient.mNetworkAgent->GetReceivedByteCount()-lClient.mBandwidthLastReceived)/1000.0/(gAbsoluteTime-lClient.mBandwidthStartMeasureTime), gFPS);
-			log_volatile(gNptLog.Debug(_T("Client bandwidth ")+s));
+			log_volatile(gNptLog.Debug("Client bandwidth "+s));
 			lClient.mBandwidthLastSent = lClient.mNetworkAgent->GetSentByteCount();
 			lClient.mBandwidthLastReceived = lClient.mNetworkAgent->GetReceivedByteCount();
 			lClient.mBandwidthStartMeasureTime = gAbsoluteTime;
 			/*for (int x = 0; x < NETWORK_LATENCY_CALCULATION_ARRAY_SIZE; ++x)
 			{
-				logdebug(_T("LatencyArray"), Lepra::strutil::Format(_T("%i"), lClient.mNetworkFrameLatencyArray[x]));
+				logdebug("LatencyArray", Lepra::strutil::Format("%i", lClient.mNetworkFrameLatencyArray[x]));
 			}*/
 		}
 		++lClient.mIngoreStriveErrorTimeCounter;
@@ -606,8 +606,8 @@ void ClientSetMovement(AgentData& pClientData, int pClientIndex, int pClientFram
 	if (lLastFrame < pClientFrameIndex)
 	{
 		lLastFrame = pClientFrameIndex;
-		//str s = Lepra::strutil::Format(_T("client %i at frame %i"), pClientIndex, pClientFrameIndex);
-		//logdebug(_T("Client set pos of other client"), s);
+		//str s = Lepra::strutil::Format("client %i at frame %i", pClientIndex, pClientFrameIndex);
+		//logdebug("Client set pos of other client", s);
 		Tbc::PhysicsManager::BodyID lPhysicsId = pClientData.mBodyArray[pClientIndex+1].mPhysicsId;
 		pClientData.mPhysics->SetBodyTransform(lPhysicsId, pData.mPosition.mTransformation);
 		pClientData.mPhysics->SetBodyVelocity(lPhysicsId, pData.mPosition.mVelocity);
@@ -644,7 +644,7 @@ void ClientReceive(int pAgentIndex)
 	}
 	else if (lReceived != Cure::NetworkAgent::RECEIVE_NO_DATA)
 	{
-		log_volatile(gNptLog.Debug(_T("Client networking error: problem receiving data!")));
+		log_volatile(gNptLog.Debug("Client networking error: problem receiving data!"));
 	}
 	gServer.mNetworkAgent->GetPacketFactory()->Release(lPacket);
 }
@@ -655,18 +655,18 @@ void ServerAdjustClientSimulationSpeed(int pClientIndex, int pFrameIndex)
 	int lFrameDiff = gServer.mCurrentPhysicsFrameIndex-pFrameIndex;
 	/*if (lFrameDiff == 0)
 	{
-		s = Lepra::strutil::Format(_T("client %i right on time"), pClientIndex);
-		//logdebug(_T("Server receive"), s);
+		s = Lepra::strutil::Format("client %i right on time", pClientIndex);
+		//logdebug("Server receive", s);
 	}
 	else if (lFrameDiff < 0)
 	{
-		s = Lepra::strutil::Format(_T("client %i is %i frames ahead of server"), pClientIndex, -lFrameDiff);
-		//logdebug(_T("Server receive"), s);
+		s = Lepra::strutil::Format("client %i is %i frames ahead of server", pClientIndex, -lFrameDiff);
+		//logdebug("Server receive", s);
 	}
 	else
 	{
-		s = Lepra::strutil::Format(_T("client %i is %i frames after server (s=%i, c=%i) - this is no good"), pClientIndex, lFrameDiff, gServer.mCurrentPhysicsFrameIndex, gClient[pClientIndex].mCurrentPhysicsFrameIndex);
-		//logdebug(_T("Server receive"), s);
+		s = Lepra::strutil::Format("client %i is %i frames after server (s=%i, c=%i - this is no good"), pClientIndex, lFrameDiff, gServer.mCurrentPhysicsFrameIndex, gClient[pClientIndex].mCurrentPhysicsFrameIndex);
+		//logdebug("Server receive", s);
 	}*/
 	CalculateClientNetworkParameters(pClientIndex, lFrameDiff);
 	MaybeSendClientStriveTimes(pClientIndex);
@@ -752,7 +752,7 @@ void ServerReceive()
 		int x = GetClientIndexFromNetworkId(lId);
 		if (lReceived == Cure::NetworkAgent::RECEIVE_OK)
 		{
-			//gNptLog.Debugf(_T("Server received data from client %i!"), x);
+			//gNptLog.Debugf("Server received data from client %i!", x);
 			Cure::Packet::ParseResult lParseResult;
 			do
 			{
@@ -830,7 +830,7 @@ bool TickEmulatedLatencyNetwork()
 			{
 				/*if (lTransmit.mFrom == &gClient[CLIENT_COUNT-1])
 				{
-					logdebug(_T("Client send"), Lepra::strutil::Format(_T("Frame %i when server on %i, waited for time %f, current time %f."), gClient[CLIENT_COUNT-1].mCurrentPhysicsFrameIndex, gServer.mCurrentPhysicsFrameIndex, lTransmit.mAbsoluteSendTime, gAbsoluteTime));
+					logdebug("Client send", Lepra::strutil::Format("Frame %i when server on %i, waited for time %f, current time %f.", gClient[CLIENT_COUNT-1].mCurrentPhysicsFrameIndex, gServer.mCurrentPhysicsFrameIndex, lTransmit.mAbsoluteSendTime, gAbsoluteTime));
 				}*/
 				Cure::NetworkClient* lNetworkClient = dynamic_cast<Cure::NetworkClient*>(lTransmit.mFrom->mNetworkAgent);
 				lOk = lNetworkClient->PlaceInSendBuffer(false, lNetworkClient->GetSocket(), lTransmit.mPacket);
@@ -862,19 +862,19 @@ bool OpenWindow(AgentData& pAgentData, const str& pCaption)
 	bool lTestOk = true;
 	if (lTestOk)
 	{
-		lContext = _T("create display manager");
+		lContext = "create display manager";
 		pAgentData.mDisplay = UiLepra::DisplayManager::CreateDisplayManager(UiLepra::DisplayManager::OPENGL_CONTEXT);
 		lTestOk = (pAgentData.mDisplay != 0);
 	}
 	UiLepra::DisplayMode lDisplayMode;
 	if (lTestOk)
 	{
-		lContext = _T("find display mode");
+		lContext = "find display mode";
 		lTestOk = pAgentData.mDisplay->FindDisplayMode(lDisplayMode, 640, 480, 32);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("open screen");
+		lContext = "open screen";
 		lTestOk = pAgentData.mDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED, UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY);
 	}
 	if (lTestOk)
@@ -895,7 +895,7 @@ bool OpenWindow(AgentData& pAgentData, const str& pCaption)
 	{
 		pAgentData.mActive = true;
 	}
-	ReportTestResult(gNptLog, _T("OpenWindow"), lContext, lTestOk);
+	ReportTestResult(gNptLog, "OpenWindow", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -905,15 +905,15 @@ bool OpenWindows()
 	bool lTestOk = true;
 	if (lTestOk)
 	{
-		lContext = _T("create server window");
-		lTestOk = OpenWindow(gServer, _T("Server"));
+		lContext = "create server window";
+		lTestOk = OpenWindow(gServer, "Server");
 	}
 	for (int x = 0; lTestOk && x < CLIENT_COUNT; ++x)
 	{
-		lContext = Lepra::strutil::Format(_T("create client window %i"), x);
-		lTestOk = OpenWindow(gClient[x], Lepra::strutil::Format(_T("Client %i"), x));
+		lContext = Lepra::strutil::Format("create client window %i", x);
+		lTestOk = OpenWindow(gClient[x], Lepra::strutil::Format("Client %i", x));
 	}
-	ReportTestResult(gNptLog, _T("OpenWindows"), lContext, lTestOk);
+	ReportTestResult(gNptLog, "OpenWindows", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -1184,7 +1184,7 @@ bool TestPrototypeNetworkPhysics()
 	}
 	else if (!lTestOk)
 	{
-		ReportTestResult(gNptLog, _T("ExitStatus"), _T("terminating due to error"), lTestOk);
+		ReportTestResult(gNptLog, "ExitStatus", "terminating due to error", lTestOk);
 	}
 
 	return (lTestOk);

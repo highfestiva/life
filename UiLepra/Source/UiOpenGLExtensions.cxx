@@ -14,13 +14,13 @@ namespace UiLepra
 
 bool OpenGLExtensions::IsExtensionSupported(const char* pExtension)
 {
-	astr lExtension(pExtension);
-	astrutil::StripAllWhiteSpaces(lExtension);
+	str lExtension(pExtension);
+	strutil::StripAllWhiteSpaces(lExtension);
 
 	if (lExtension.length() == 0)
 		return false;
 
-	astr lGLExtensions((char*)glGetString(GL_EXTENSIONS));
+	str lGLExtensions((char*)glGetString(GL_EXTENSIONS));
 	return (lGLExtensions.find(lExtension.c_str(), 0) != str::npos);
 }
 

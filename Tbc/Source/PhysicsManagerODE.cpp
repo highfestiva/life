@@ -394,7 +394,7 @@ bool PhysicsManagerODE::DetachToDynamic(BodyID pStaticBody, float32 pMass)
 		case dCylinderClass:	::dMassSetCylinderTotal(&lMass, (dReal)pMass, 3, ((dxCylinder*)g)->radius, ((dxCylinder*)g)->lz);		break;
 		default:
 		{
-			mLog.AError("Trying to detach object of unknown type!");
+			mLog.Error("Trying to detach object of unknown type!");
 			deb_assert(false);
 		}
 		return (false);
@@ -456,7 +456,7 @@ bool PhysicsManagerODE::AddMass(BodyID pStaticBody, BodyID pMainBody)
 	Object* lMainObject = *y;
 	if (lStaticObject->mBodyID)
 	{
-		mLog.AError("Attach() with non-static.");
+		mLog.Error("Attach() with non-static.");
 		deb_assert(false);
 		return (false);
 	}
@@ -487,7 +487,7 @@ bool PhysicsManagerODE::AddMass(BodyID pStaticBody, BodyID pMainBody)
 		case dCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
 		default:
 		{
-			mLog.AError("Trying to attach object of unknown type!");
+			mLog.Error("Trying to attach object of unknown type!");
 			deb_assert(false);
 			return (false);
 		}
@@ -568,7 +568,7 @@ bool PhysicsManagerODE::IsStaticBody(BodyID pBodyId) const
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("IsStaticBody() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("IsStaticBody() - Body %i is not part of this world!", pBodyId);
 		return (true);
 	}
 	return (lObject->mBodyID == 0);
@@ -594,7 +594,7 @@ void PhysicsManagerODE::DeleteBody(BodyID pBodyId)
 	}
 	else
 	{
-		mLog.AError("DeleteBody() - Can't find body to delete!");
+		mLog.Error("DeleteBody() - Can't find body to delete!");
 		deb_assert(false);
 	}
 }
@@ -604,7 +604,7 @@ vec3 PhysicsManagerODE::GetBodyPosition(BodyID pBodyId) const
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("GetBodyPosition() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("GetBodyPosition() - Body %i is not part of this world!", pBodyId);
 		return (vec3());
 	}
 
@@ -618,7 +618,7 @@ void PhysicsManagerODE::SetBodyPosition(BodyID pBodyId, const vec3& pPosition) c
 
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("SetBodyPosition() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("SetBodyPosition() - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -638,7 +638,7 @@ quat PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("GetBodyOrientation() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("GetBodyOrientation() - Body %i is not part of this world!", pBodyId);
 		return gIdentityQuaternionF;
 	}
 
@@ -653,7 +653,7 @@ void PhysicsManagerODE::SetBodyOrientation(BodyID pBodyId, const quat& pOrientat
 
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("SetBodyOrientation() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("SetBodyOrientation() - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -673,7 +673,7 @@ void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, xform& pTransform) cons
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("GetBodyTransform() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("GetBodyTransform() - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -687,7 +687,7 @@ void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const xform& pTransform
 
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("SetBodyTransform() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("SetBodyTransform() - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -861,7 +861,7 @@ float PhysicsManagerODE::GetBodyMass(BodyID pBodyId)
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("GetBodyMass() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("GetBodyMass() - Body %i is not part of this world!", pBodyId);
 		return (0);
 	}
 	return (lObject->mMass);
@@ -872,12 +872,12 @@ void PhysicsManagerODE::SetBodyMass(BodyID pBodyId, float pMass)
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("SetBodyMass() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("SetBodyMass() - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 	if (!lObject->mBodyID || pMass <= 0)
 	{
-		mLog.Errorf(_T("SetBodyMass() - body %i is static or mass %f is not greater than zero!"), pBodyId, pMass);
+		mLog.Errorf("SetBodyMass() - body %i is static or mass %f is not greater than zero!", pBodyId, pMass);
 		return;
 	}
 	lObject->mMass = pMass;
@@ -891,14 +891,14 @@ void PhysicsManagerODE::MassAdjustBody(BodyID pBodyId)
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("MassAdjustBody() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("MassAdjustBody() - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
 	dBodyID lBody = lObject->mBodyID;
 	if (!lBody)
 	{
-		//mLog.Warningf(_T("MassAdjustBody() - static geometry %i does not have a body!"), pBodyId);
+		//mLog.Warningf("MassAdjustBody( - static geometry %i does not have a body!"), pBodyId);
 		return;
 	}
 	// Move geometries and body to center of mass.
@@ -924,7 +924,7 @@ void PhysicsManagerODE::SetBodyData(BodyID pBodyId, void* pUserData)
 
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("SetBodyData() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("SetBodyData() - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -937,7 +937,7 @@ void* PhysicsManagerODE::GetBodyData(BodyID pBodyId)
 
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("GetBodyData() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("GetBodyData() - Body %i is not part of this world!", pBodyId);
 		return 0;
 	}
 
@@ -950,7 +950,7 @@ int PhysicsManagerODE::GetTriggerListenerId(BodyID pTrigger)
 	Object* lObject = (Object*)pTrigger;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("GetForceFeedbackListenerId() - trigger %i is not part of this world!"), pTrigger);
+		mLog.Errorf("GetForceFeedbackListenerId() - trigger %i is not part of this world!", pTrigger);
 		return (0);
 	}
 	return (lObject->mTriggerListenerId);
@@ -961,7 +961,7 @@ int PhysicsManagerODE::GetForceFeedbackListenerId(BodyID pBody)
 	Object* lObject = (Object*)pBody;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("GetForceFeedbackListenerId() - Body %i is not part of this world!"), pBody);
+		mLog.Errorf("GetForceFeedbackListenerId() - Body %i is not part of this world!", pBody);
 		return (0);
 	}
 	return (lObject->mForceFeedbackId);
@@ -972,7 +972,7 @@ void PhysicsManagerODE::SetForceFeedbackListener(BodyID pBody, int pForceFeedbac
 	Object* lObject = (Object*)pBody;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("SetForceFeedbackListener() - Body %i is not part of this world!"), pBody);
+		mLog.Errorf("SetForceFeedbackListener - Body %i is not part of this world!", pBody);
 		return;
 	}
 	lObject->mForceFeedbackId = pForceFeedbackId;
@@ -982,7 +982,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID
 {
 	Object* lObject1;
 	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, _T("CreateBallJoint()")) == false)
+	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateBallJoint") == false)
 		return INVALID_JOINT;
 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
@@ -1029,7 +1029,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyI
 {
 	Object* lObject1;
 	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, _T("CreateHingeJoint()")) == false)
+	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateHingeJoint") == false)
 		return INVALID_JOINT;
 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
@@ -1083,7 +1083,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID pBody1, Body
 {
 	Object* lObject1;
 	Object* lObject2;
-	if (CheckBodies2(pBody1, pBody2, lObject1, lObject2, _T("CreateHinge2Joint()")) == false)
+	if (CheckBodies2(pBody1, pBody2, lObject1, lObject2, "CreateHinge2Joint") == false)
 		return INVALID_JOINT;
 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
@@ -1119,7 +1119,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, B
 {
 	Object* lObject1;
 	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, _T("CreateUniversalJoint()")) == false)
+	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateUniversalJoint") == false)
 		return INVALID_JOINT;
 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
@@ -1160,7 +1160,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateSliderJoint(BodyID pBody1, Body
 {
 	Object* lObject1;
 	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, _T("CreateSliderJoint()")) == false)
+	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateSliderJoint") == false)
 		return INVALID_JOINT;
 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
@@ -1198,7 +1198,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateFixedJoint(BodyID pBody1, BodyI
 {
 	Object* lObject1;
 	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, _T("CreateFixedJoint()")) == false)
+	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateFixedJoint") == false)
 		return INVALID_JOINT;
 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
@@ -1235,7 +1235,7 @@ PhysicsManager::JointID PhysicsManagerODE::CreateAngularMotorJoint(BodyID pBody1
 {
 	Object* lObject1;
 	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, _T("CreateAngularMotorJoint()")) == false)
+	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateAngularMotorJoint") == false)
 		return INVALID_JOINT;
 
 	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
@@ -1283,7 +1283,7 @@ void PhysicsManagerODE::DeleteJoint(JointID pJointId)
 
 	Object* lObject1;
 	Object* lObject2;
-	if (lJointInfo->mBody1Id && CheckBodies(lJointInfo->mBody1Id, lJointInfo->mBody2Id, lObject1, lObject2, _T("DeleteJoint()")))
+	if (lJointInfo->mBody1Id && CheckBodies(lJointInfo->mBody1Id, lJointInfo->mBody2Id, lObject1, lObject2, "DeleteJoint"))
 	{
 		if (lObject2)
 		{
@@ -1301,7 +1301,7 @@ bool PhysicsManagerODE::StabilizeJoint(JointID pJointId)
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
+		mLog.Warningf("Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1334,7 +1334,7 @@ bool PhysicsManagerODE::StabilizeJoint(JointID pJointId)
 		break;
 		default:
 		{
-			mLog.Errorf(_T("Joint type %i of non-1-type!"), lJointInfo->mType);
+			mLog.Errorf("Joint type %i of non-1-type!", lJointInfo->mType);
 			deb_assert(false);
 		}
 		break;
@@ -1356,7 +1356,7 @@ bool PhysicsManagerODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Di
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		//mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
+		//mLog.Warningf("Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1375,7 +1375,7 @@ bool PhysicsManagerODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Di
 		break;
 		default:
 		{
-			mLog.Errorf(_T("Joint type %i of non-1-type!"), lJointInfo->mType);
+			mLog.Errorf("Joint type %i of non-1-type!", lJointInfo->mType);
 			deb_assert(false);
 		}
 		break;
@@ -1388,7 +1388,7 @@ bool PhysicsManagerODE::SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Jo
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
+		mLog.Warningf("Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1407,7 +1407,7 @@ bool PhysicsManagerODE::SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Jo
 		break;
 		default:
 		{
-			mLog.Errorf(_T("Joint type %i of non-1-type!"), lJointInfo->mType);
+			mLog.Errorf("Joint type %i of non-1-type!", lJointInfo->mType);
 			deb_assert(false);
 		}
 		break;
@@ -1420,7 +1420,7 @@ bool PhysicsManagerODE::GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Di
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		//mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
+		//mLog.Warningf("Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1434,7 +1434,7 @@ bool PhysicsManagerODE::GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Di
 		break;
 		default:
 		{
-			mLog.Errorf(_T("Joint type %i of non-2-type!"), lJointInfo->mType);
+			mLog.Errorf("Joint type %i of non-2-type!", lJointInfo->mType);
 			deb_assert(false);
 		}
 		break;
@@ -1447,7 +1447,7 @@ bool PhysicsManagerODE::SetJoint2Diff(BodyID pBodyId, JointID pJointId, const Jo
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
+		mLog.Warningf("Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1461,7 +1461,7 @@ bool PhysicsManagerODE::SetJoint2Diff(BodyID pBodyId, JointID pJointId, const Jo
 		break;
 		default:
 		{
-			mLog.Errorf(_T("Joint type %i of non-2-type!"), lJointInfo->mType);
+			mLog.Errorf("Joint type %i of non-2-type!", lJointInfo->mType);
 			deb_assert(false);
 		}
 		break;
@@ -1474,7 +1474,7 @@ bool PhysicsManagerODE::GetJoint3Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		//mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
+		//mLog.Warningf("Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1493,7 +1493,7 @@ bool PhysicsManagerODE::GetJoint3Diff(BodyID pBodyId, JointID pJointId, Joint3Di
 		break;
 		default:
 		{
-			mLog.Errorf(_T("Joint type %i of non-3-type!"), lJointInfo->mType);
+			mLog.Errorf("Joint type %i of non-3-type!", lJointInfo->mType);
 			deb_assert(false);
 		}
 		break;
@@ -1506,7 +1506,7 @@ bool PhysicsManagerODE::SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Jo
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Warningf(_T("Couldn't find joint %i!"), pJointId);
+		mLog.Warningf("Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 	bool lOk = false;
@@ -1525,7 +1525,7 @@ bool PhysicsManagerODE::SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Jo
 		break;
 		default:
 		{
-			mLog.Errorf(_T("Joint type %i of non-3-type!"), lJointInfo->mType);
+			mLog.Errorf("Joint type %i of non-3-type!", lJointInfo->mType);
 			deb_assert(false);
 		}
 		break;
@@ -1548,7 +1548,7 @@ bool PhysicsManagerODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Dif
 	deb_assert(lJointInfo->mType == JOINT_HINGE);
 	if (lJointInfo->mType != JOINT_HINGE)
 	{
-		mLog.Errorf(_T("Joint type %i of non-hinge-type!"), lJointInfo->mType);
+		mLog.Errorf("Joint type %i of non-hinge-type!", lJointInfo->mType);
 		return (false);
 	}
 
@@ -1579,7 +1579,7 @@ bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joi
 	deb_assert(lJointInfo->mType == JOINT_HINGE);
 	if (lJointInfo->mType != JOINT_HINGE)
 	{
-		mLog.Errorf(_T("Joint type %i of non-hinge-type!"), lJointInfo->mType);
+		mLog.Errorf("Joint type %i of non-hinge-type!", lJointInfo->mType);
 		return (false);
 	}
 
@@ -1672,7 +1672,7 @@ bool PhysicsManagerODE::GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Di
 	deb_assert(lJointInfo->mType == JOINT_SLIDER);
 	if (lJointInfo->mType != JOINT_SLIDER)
 	{
-		mLog.Errorf(_T("Joint type %i of non-slider-type!"), lJointInfo->mType);
+		mLog.Errorf("Joint type %i of non-slider-type!", lJointInfo->mType);
 		return (false);
 	}
 
@@ -1704,7 +1704,7 @@ bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Jo
 	deb_assert(lJointInfo->mType == JOINT_SLIDER);
 	if (lJointInfo->mType != JOINT_SLIDER)
 	{
-		mLog.Errorf(_T("Joint type %i of non-hinge-type!"), lJointInfo->mType);
+		mLog.Errorf("Joint type %i of non-hinge-type!", lJointInfo->mType);
 		return (false);
 	}
 
@@ -2149,12 +2149,12 @@ bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Join
 	return (true);
 }
 
-bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const tchar* pFunction)
+bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const char* pFunction)
 {
 	if (pBody1 == 0 && pBody2 == 0)
 	{
 		str lMsg(pFunction);
-		lMsg += _T(" - body1 = body2 = NULL!");
+		lMsg += " - body1 = body2 = NULL!";
 		mLog.Error(lMsg);
 		return (false);
 	}
@@ -2162,7 +2162,7 @@ bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pOb
 	if (pBody1 == pBody2)
 	{
 		str lMsg(pFunction);
-		lMsg += _T(" - body1 = body2!");
+		lMsg += " - body1 = body2!";
 		mLog.Error(lMsg);
 		return (false);
 	}
@@ -2183,7 +2183,7 @@ bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pOb
 		else
 		{
 			str lMsg(pFunction);
-			lMsg += _T(" - Body is not part of this world!");
+			lMsg += " - Body is not part of this world!";
 			mLog.Error(lMsg);
 			return (false);
 		}
@@ -2197,7 +2197,7 @@ bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pOb
 		else
 		{
 			str lMsg(pFunction);
-			lMsg += _T(" - Body1 is not part of this world!");
+			lMsg += " - Body1 is not part of this world!";
 			mLog.Error(lMsg);
 			return (false);
 		}
@@ -2209,7 +2209,7 @@ bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pOb
 		else
 		{
 			str lMsg(pFunction);
-			lMsg += _T(" - Body2 is not part of this world!");
+			lMsg += " - Body2 is not part of this world!";
 			mLog.Error(lMsg);
 			return (false);
 		}
@@ -2218,12 +2218,12 @@ bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pOb
 	}
 }
 
-bool PhysicsManagerODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const tchar* pFunction)
+bool PhysicsManagerODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const char* pFunction)
 {
 	if (pBody1 == 0)
 	{
 		str lMsg(pFunction);
-		lMsg += _T(" - body1 = NULL!");
+		lMsg += " - body1 = NULL!";
 		mLog.Error(lMsg);
 		return (false);
 	}
@@ -2231,7 +2231,7 @@ bool PhysicsManagerODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pO
 	if (pBody2 == 0)
 	{
 		str lMsg(pFunction);
-		lMsg += _T(" - body2 = NULL!");
+		lMsg += " - body2 = NULL!";
 		mLog.Error(lMsg);
 		return (false);
 	}
@@ -2239,7 +2239,7 @@ bool PhysicsManagerODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pO
 	if (pBody1 == pBody2)
 	{
 		str lMsg(pFunction);
-		lMsg += _T(" - body1 = body2!");
+		lMsg += " - body1 = body2!";
 		mLog.Error(lMsg);
 		return (false);
 	}
@@ -2254,7 +2254,7 @@ bool PhysicsManagerODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pO
 	else
 	{
 		str lMsg(pFunction);
-		lMsg += _T(" - Body1 is not part of this world!");
+		lMsg += " - Body1 is not part of this world!";
 		mLog.Error(lMsg);
 		return (false);
 	}
@@ -2266,7 +2266,7 @@ bool PhysicsManagerODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pO
 	else
 	{
 		str lMsg(pFunction);
-		lMsg += _T(" - Body2 is not part of this world!");
+		lMsg += " - Body2 is not part of this world!";
 		mLog.Error(lMsg);
 		return (false);
 	}
@@ -2279,7 +2279,7 @@ bool PhysicsManagerODE::GetAnchorPos(JointID pJointId, vec3& pAnchorPos) const
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetAnchorPos() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetAnchorPos - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -2302,10 +2302,10 @@ bool PhysicsManagerODE::GetAnchorPos(JointID pJointId, vec3& pAnchorPos) const
 	case JOINT_FIXED:
 	case JOINT_ANGULARMOTOR:
 	case JOINT_SLIDER:
-		mLog.AError("GetAnchorPos() - Joint doesn't have an anchor!");
+		mLog.Error("GetAnchorPos() - Joint doesn't have an anchor!");
 		return (false);
 	default:
-		mLog.AError("GetAnchorPos() - Unknown joint type!");
+		mLog.Error("GetAnchorPos() - Unknown joint type!");
 		return (false);
 	};
 
@@ -2321,7 +2321,7 @@ bool PhysicsManagerODE::GetAxis1(JointID pJointId, vec3& pAxis1) const
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetAxis1() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetAxis1 - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -2346,10 +2346,10 @@ bool PhysicsManagerODE::GetAxis1(JointID pJointId, vec3& pAxis1) const
 		break;
 	case JOINT_BALL:
 	case JOINT_FIXED:
-		mLog.AError("GetAxis1() - Joint doesn't have an axis!");
+		mLog.Error("GetAxis1() - Joint doesn't have an axis!");
 		return (false);
 	default:
-		mLog.AError("GetAxis1() - Unknown joint type!");
+		mLog.Error("GetAxis1() - Unknown joint type!");
 		return (false);
 	};
 
@@ -2365,7 +2365,7 @@ bool PhysicsManagerODE::GetAxis2(JointID pJointId, vec3& pAxis2) const
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetAxis2() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetAxis2 - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -2384,10 +2384,10 @@ bool PhysicsManagerODE::GetAxis2(JointID pJointId, vec3& pAxis2) const
 	case JOINT_SLIDER:
 	case JOINT_FIXED:
 	case JOINT_ANGULARMOTOR:
-		//mLog.AError("GetAxis2() - Joint doesn't have two axes!");
+		//mLog.Error("GetAxis2() - Joint doesn't have two axes!");
 		return (false);
 	default:
-		mLog.AError("GetAxis2() - Unknown joint type!");
+		mLog.Error("GetAxis2() - Unknown joint type!");
 		return (false);
 	};
 
@@ -2403,7 +2403,7 @@ bool PhysicsManagerODE::GetAngle1(JointID pJointId, float32& pAngle) const
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetAngle1() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetAngle1 - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -2424,10 +2424,10 @@ bool PhysicsManagerODE::GetAngle1(JointID pJointId, float32& pAngle) const
 	case JOINT_BALL:
 	case JOINT_SLIDER:
 	case JOINT_FIXED:
-		mLog.AError("GetAngle1() - Joint doesn't have an angle!");
+		mLog.Error("GetAngle1() - Joint doesn't have an angle!");
 		return (false);
 	default:
-		mLog.AError("GetAngle1() - Unknown joint type!");
+		mLog.Error("GetAngle1() - Unknown joint type!");
 		return (false);
 	};
 
@@ -2439,7 +2439,7 @@ bool PhysicsManagerODE::GetAngle2(JointID pJointId, float32& pAngle) const
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetAngle2() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetAngle2 - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -2450,17 +2450,17 @@ bool PhysicsManagerODE::GetAngle2(JointID pJointId, float32& pAngle) const
 		break;
 	case JOINT_HINGE2:
 		// TODO: implement this!
-		mLog.AError("GetAngle2() - Missing hinge2 implementation in ODE!");
+		mLog.Error("GetAngle2() - Missing hinge2 implementation in ODE!");
 		return (false);
 	case JOINT_HINGE:
 	case JOINT_ANGULARMOTOR:
 	case JOINT_BALL:
 	case JOINT_SLIDER:
 	case JOINT_FIXED:
-		mLog.AError("GetAngle2() - Joint doesn't have two angles!");
+		mLog.Error("GetAngle2() - Joint doesn't have two angles!");
 		return (false);
 	default:
-		mLog.AError("GetAngle2() - Unknown joint type!");
+		mLog.Error("GetAngle2() - Unknown joint type!");
 		return (false);
 	};
 
@@ -2472,7 +2472,7 @@ bool PhysicsManagerODE::GetAngleRate1(JointID pJointId, float32& pAngleRate) con
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetAngleRate1() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetAngleRate1 - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -2493,10 +2493,10 @@ bool PhysicsManagerODE::GetAngleRate1(JointID pJointId, float32& pAngleRate) con
 	case JOINT_BALL:
 	case JOINT_SLIDER:
 	case JOINT_FIXED:
-		mLog.AError("GetAngleRate1() - Joint doesn't have an angle!");
+		mLog.Error("GetAngleRate1() - Joint doesn't have an angle!");
 		return (false);
 	default:
-		mLog.AError("GetAngleRate1() - Unknown joint type!");
+		mLog.Error("GetAngleRate1() - Unknown joint type!");
 		return (false);
 	};
 
@@ -2508,7 +2508,7 @@ bool PhysicsManagerODE::GetAngleRate2(JointID pJointId, float32& pAngleRate) con
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetAngleRate2() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetAngleRate2 - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -2527,10 +2527,10 @@ bool PhysicsManagerODE::GetAngleRate2(JointID pJointId, float32& pAngleRate) con
 	case JOINT_SLIDER:
 	case JOINT_FIXED:
 	case JOINT_ANGULARMOTOR:
-		mLog.AError("GetAngleRate2() - Joint doesn't have two angles!");
+		mLog.Error("GetAngleRate2() - Joint doesn't have two angles!");
 		return (false);
 	default:
-		mLog.AError("GetAngleRate2() - Unknown joint type!");
+		mLog.Error("GetAngleRate2() - Unknown joint type!");
 		return (false);
 	};
 
@@ -2542,14 +2542,14 @@ bool PhysicsManagerODE::SetAngle1(BodyID pBodyId, JointID pJointId, float32 pAng
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("SetAngle1() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("SetAngle1 - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
 	Object* lObject = (Object*)pBodyId;
 	if (lObject->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("GetBodyData() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("GetBodyData - Body %i is not part of this world!", pBodyId);
 		return (false);
 	}
 
@@ -2581,7 +2581,7 @@ bool PhysicsManagerODE::SetAngle1(BodyID pBodyId, JointID pJointId, float32 pAng
 			}
 			else
 			{
-				mLog.AError("SetAngle1() - hinge-2 joint error!");
+				mLog.Error("SetAngle1() - hinge-2 joint error!");
 			}
 		}
 		break;
@@ -2604,13 +2604,13 @@ bool PhysicsManagerODE::SetAngle1(BodyID pBodyId, JointID pJointId, float32 pAng
 			}
 			else
 			{
-				mLog.AError("SetAngle1() - hinge-2 joint error!");
+				mLog.Error("SetAngle1() - hinge-2 joint error!");
 			}
 		}
 		break;
 		default:
 		{
-			mLog.AError("SetAngle1() - Unknown joint type!");
+			mLog.Error("SetAngle1() - Unknown joint type!");
 		}
 	};
 
@@ -2622,13 +2622,13 @@ bool PhysicsManagerODE::SetAngularMotorAngle(JointID pJointId, float32 pAngle)
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("SetAngularMotorAngle() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("SetAngularMotorAngle - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
 	if ((*x)->mType != JOINT_ANGULARMOTOR)
 	{
-		mLog.AError("SetAngularMotorAngle() - Joint is not an angular motor!");
+		mLog.Error("SetAngularMotorAngle() - Joint is not an angular motor!");
 		return (false);
 	}
 
@@ -2641,13 +2641,13 @@ bool PhysicsManagerODE::SetAngularMotorSpeed(JointID pJointId, float32 pSpeed)
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("SetAngularMotorSpeed() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("SetAngularMotorSpeed - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
 	if ((*x)->mType != JOINT_ANGULARMOTOR)
 	{
-		mLog.AError("SetAngularMotorSpeed() - Joint is not an angular motor!");
+		mLog.Error("SetAngularMotorSpeed() - Joint is not an angular motor!");
 		return (false);
 	}
 
@@ -2660,7 +2660,7 @@ bool PhysicsManagerODE::SetMotorMaxForce(JointID pJointId, float32 pMaxForce)
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("SetMotorMaxForce() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("SetMotorMaxForce - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -2689,7 +2689,7 @@ bool PhysicsManagerODE::SetMotorMaxForce(JointID pJointId, float32 pMaxForce)
 		dJointSetSliderParam(lJoint->mJointID, dParamFMax2, pMaxForce);
 		return (true);
 	}
-	mLog.AError("SetMotorMaxForce() - Joint is not an angular motor!");
+	mLog.Error("SetMotorMaxForce() - Joint is not an angular motor!");
 	return (false);
 }
 
@@ -2698,7 +2698,7 @@ bool PhysicsManagerODE::SetAngularMotorRoll(JointID pJointId, float32 pMaxForce,
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("SetAngularMotorRoll() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("SetAngularMotorRoll - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -2726,7 +2726,7 @@ bool PhysicsManagerODE::SetAngularMotorRoll(JointID pJointId, float32 pMaxForce,
 		::dBodyEnable(::dJointGetBody(lJoint->mJointID, 1));
 		return (true);
 	}
-	mLog.AError("SetAngularMotorRoll() - Joint is not an angular motor!");
+	mLog.Error("SetAngularMotorRoll() - Joint is not an angular motor!");
 	return (false);
 }
 
@@ -2735,7 +2735,7 @@ bool PhysicsManagerODE::GetAngularMotorRoll(JointID pJointId, float32& pMaxForce
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetAngularMotorRoll() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetAngularMotorRoll - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -2752,7 +2752,7 @@ bool PhysicsManagerODE::GetAngularMotorRoll(JointID pJointId, float32& pMaxForce
 		pTargetVelocity = ::dJointGetHingeParam(lJoint->mJointID, dParamVel);
 		return (true);
 	}
-	mLog.AError("GetAngularMotorRoll() - Joint is not an angular motor!");
+	mLog.Error("GetAngularMotorRoll() - Joint is not an angular motor!");
 	return (false);
 }
 
@@ -2761,7 +2761,7 @@ bool PhysicsManagerODE::SetAngularMotorTurn(JointID pJointId, float32 pMaxForce,
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("SetAngularMotorTurn() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("SetAngularMotorTurn - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -2780,7 +2780,7 @@ bool PhysicsManagerODE::SetAngularMotorTurn(JointID pJointId, float32 pMaxForce,
 		::dBodyEnable(::dJointGetBody(lJoint->mJointID, 1));
 		return (true);
 	}
-	mLog.AError("SetAngularMotorTurn() - Joint is not an angular motor!");
+	mLog.Error("SetAngularMotorTurn() - Joint is not an angular motor!");
 	return (false);
 }
 
@@ -2789,13 +2789,13 @@ bool PhysicsManagerODE::GetAngularMotorAngle(JointID pJointId, float32& pAngle) 
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetAngularMotorAngle() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetAngularMotorAngle - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
 	if ((*x)->mType != JOINT_ANGULARMOTOR)
 	{
-		mLog.AError("GetAngularMotorAngle() - Joint is not an angular motor!");
+		mLog.Error("GetAngularMotorAngle() - Joint is not an angular motor!");
 		return (false);
 	}
 
@@ -2808,13 +2808,13 @@ bool PhysicsManagerODE::GetAngularMotorSpeed(JointID pJointId, float32& pSpeed) 
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetAngularMotorSpeed() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetAngularMotorSpeed - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
 	if ((*x)->mType != JOINT_ANGULARMOTOR)
 	{
-		mLog.AError("GetAngularMotorSpeed() - Joint is not an angular motor!");
+		mLog.Error("GetAngularMotorSpeed() - Joint is not an angular motor!");
 		return (false);
 	}
 
@@ -2827,13 +2827,13 @@ bool PhysicsManagerODE::GetAngularMotorMaxForce(JointID pJointId, float32& pMaxF
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetAngularMotorMaxForce() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetAngularMotorMaxForce - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
 	if ((*x)->mType != JOINT_ANGULARMOTOR)
 	{
-		mLog.AError("GetAngularMotorMaxForce() - Joint is not an angular motor!");
+		mLog.Error("GetAngularMotorMaxForce() - Joint is not an angular motor!");
 		return (false);
 	}
 
@@ -2846,13 +2846,13 @@ bool PhysicsManagerODE::SetMotorTarget(JointID pJointId, float32 pMaxForce, floa
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("SetMotorTarget() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("SetMotorTarget - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
 	if ((*x)->mType != JOINT_SLIDER)
 	{
-		mLog.AError("SetMotorTarget() - Joint is not an angular motor!");
+		mLog.Error("SetMotorTarget() - Joint is not an angular motor!");
 		return (false);
 	}
 
@@ -2867,7 +2867,7 @@ bool PhysicsManagerODE::SetJointParams(JointID pJointId, float32 pLowStop, float
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("SetJointParams() - Couldn't find joint!"), pJointId);
+		mLog.Errorf("SetJointParams - Couldn't find joint!", pJointId);
 		return (false);
 	}
 
@@ -2931,12 +2931,12 @@ bool PhysicsManagerODE::SetJointParams(JointID pJointId, float32 pLowStop, float
 		case JOINT_BALL:
 		case JOINT_FIXED:
 		{
-			mLog.AError("SetJointParams() - joint doesn't have params!");
+			mLog.Error("SetJointParams() - joint doesn't have params!");
 		}
 		break;
 		default:
 		{
-			mLog.AError("SetJointParams() - Unknown joint type!");
+			mLog.Error("SetJointParams() - Unknown joint type!");
 		}
 		return (false);
 	}
@@ -2949,7 +2949,7 @@ bool PhysicsManagerODE::GetJointParams(JointID pJointId, float32& pLowStop, floa
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		//mLog.Warningf(_T("GetJointParams() - Couldn't find joint %i!"), pJointId);
+		//mLog.Warningf("GetJointParams( - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
@@ -2982,9 +2982,9 @@ bool PhysicsManagerODE::GetJointParams(JointID pJointId, float32& pLowStop, floa
 		break;
 	case JOINT_BALL:
 	case JOINT_FIXED:
-		mLog.AError("GetJointParams() - joint doesn't have params!");
+		mLog.Error("GetJointParams() - joint doesn't have params!");
 	default:
-		mLog.AError("GetJointParams() - Unknown joint type!");
+		mLog.Error("GetJointParams() - Unknown joint type!");
 		return (false);
 	}
 
@@ -2996,7 +2996,7 @@ bool PhysicsManagerODE::SetSuspension(JointID pJointId, float32 pFrameTime, floa
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("SetSyspension() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("SetSuspension - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -3009,7 +3009,7 @@ bool PhysicsManagerODE::SetSuspension(JointID pJointId, float32 pFrameTime, floa
 			1 / (pFrameTime * pSpringConstant + pDampingConstant));
 		return (true);
 	}
-	mLog.AError("SetSuspension() - Joint is not a hinge-2!");
+	mLog.Error("SetSuspension() - Joint is not a hinge-2!");
 	return (false);
 }
 
@@ -3018,7 +3018,7 @@ bool PhysicsManagerODE::GetSuspension(JointID pJointId, float32& pErp, float32& 
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetSuspension() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetSuspension - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -3029,7 +3029,7 @@ bool PhysicsManagerODE::GetSuspension(JointID pJointId, float32& pErp, float32& 
 		pCfm = ::dJointGetHinge2Param(lJoint->mJointID, dParamSuspensionCFM);
 		return (true);
 	}
-	mLog.AError("GetSuspension() - Joint is not a hinge-2!");
+	mLog.Error("GetSuspension() - Joint is not a hinge-2!");
 	return (false);
 }
 
@@ -3038,13 +3038,13 @@ bool PhysicsManagerODE::GetSliderPos(JointID pJointId, float32& pPos) const
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetSliderPos() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetSliderPos - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
 	if ((*x)->mType != JOINT_SLIDER)
 	{
-		mLog.AError("GetSliderPos() - Joint is not a slider!");
+		mLog.Error("GetSliderPos() - Joint is not a slider!");
 		return (false);
 	}
 
@@ -3057,13 +3057,13 @@ bool PhysicsManagerODE::GetSliderSpeed(JointID pJointId, float32& pSpeed) const
 	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("GetSliderSpeed() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("GetSliderSpeed - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
 	if ((*x)->mType != JOINT_SLIDER)
 	{
-		mLog.AError("GetSliderSpeed() - Joint is not a slider!");
+		mLog.Error("GetSliderSpeed() - Joint is not a slider!");
 		return (false);
 	}
 
@@ -3077,13 +3077,13 @@ bool PhysicsManagerODE::AddJointForce(JointID pJointId, float32 pForce)
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("AddJointForce() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("AddJointForce - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
 	if ((*x)->mType != JOINT_SLIDER)
 	{
-		mLog.AError("AddJointForce() - Joint is not a slider!");
+		mLog.Error("AddJointForce() - Joint is not a slider!");
 		return (false);
 	}
 
@@ -3098,7 +3098,7 @@ bool PhysicsManagerODE::AddJointTorque(JointID pJointId, float32 pTorque)
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("AddJointTorque() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("AddJointTorque - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -3119,9 +3119,9 @@ bool PhysicsManagerODE::AddJointTorque(JointID pJointId, float32 pTorque)
 	case JOINT_BALL:
 	case JOINT_FIXED:
 	case JOINT_SLIDER:
-		mLog.AError("AddJointTorque() - joint is of wrong type!");
+		mLog.Error("AddJointTorque() - joint is of wrong type!");
 	default:
-		mLog.AError("AddJointTorque() - Unknown joint type!");
+		mLog.Error("AddJointTorque() - Unknown joint type!");
 		return (false);
 	}
 	::dBodyEnable(::dJointGetBody((*x)->mJointID, 1));
@@ -3134,7 +3134,7 @@ bool PhysicsManagerODE::AddJointTorque(JointID pJointId, float32 pTorque1, float
 	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
 	if (x == mJointTable.end())
 	{
-		mLog.Errorf(_T("AddJointTorque() - Couldn't find joint %i!"), pJointId);
+		mLog.Errorf("AddJointTorque - Couldn't find joint %i!", pJointId);
 		return (false);
 	}
 
@@ -3151,9 +3151,9 @@ bool PhysicsManagerODE::AddJointTorque(JointID pJointId, float32 pTorque1, float
 	case JOINT_FIXED:
 	case JOINT_SLIDER:
 	case JOINT_ANGULARMOTOR:
-		mLog.AError("AddJointTorque() - joint is of wrong type!");
+		mLog.Error("AddJointTorque() - joint is of wrong type!");
 	default:
-		mLog.AError("AddJointTorque() - Unknown joint type!");
+		mLog.Error("AddJointTorque() - Unknown joint type!");
 		return (false);
 	}
 	::dBodyEnable(::dJointGetBody((*x)->mJointID, 1));
@@ -3165,7 +3165,7 @@ void PhysicsManagerODE::AddForce(BodyID pBodyId, const vec3& pForce)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("AddForce() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("AddForce - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -3176,7 +3176,7 @@ void PhysicsManagerODE::AddForce(BodyID pBodyId, const vec3& pForce)
 	}
 	else
 	{
-		mLog.Errorf(_T("AddForce() - Body %i is only geometry, not body!"), pBodyId);
+		mLog.Errorf("AddForce - Body %i is only geometry, not body!", pBodyId);
 	}
 }
 
@@ -3184,7 +3184,7 @@ void PhysicsManagerODE::AddTorque(BodyID pBodyId, const vec3& pTorque)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("AddTorque() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("AddTorque - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -3196,7 +3196,7 @@ void PhysicsManagerODE::AddRelForce(BodyID pBodyId, const vec3& pForce)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("AddRelForce() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("AddRelForce - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -3208,7 +3208,7 @@ void PhysicsManagerODE::AddRelTorque(BodyID pBodyId, const vec3& pTorque)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("AddRelTorque() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("AddRelTorque - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -3221,7 +3221,7 @@ void PhysicsManagerODE::AddForceAtPos(BodyID pBodyId, const vec3& pForce,
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("AddForceAtPos() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("AddForceAtPos - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -3234,7 +3234,7 @@ void PhysicsManagerODE::AddForceAtRelPos(BodyID pBodyId, const vec3& pForce,
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("AddForceAtRelPos() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("AddForceAtRelPos - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -3247,7 +3247,7 @@ void PhysicsManagerODE::AddRelForceAtPos(BodyID pBodyId, const vec3& pForce,
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("AddRelForceAtPos() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("AddRelForceAtPos - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -3260,7 +3260,7 @@ void PhysicsManagerODE::AddRelForceAtRelPos(BodyID pBodyId, const vec3& pForce,
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("AddRelForceAtRelPos() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("AddRelForceAtRelPos - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -3272,7 +3272,7 @@ void PhysicsManagerODE::RestrictBody(BodyID pBodyId, float32 pMaxSpeed, float32 
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("RestrictBody() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("RestrictBody - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -3291,7 +3291,7 @@ void PhysicsManagerODE::EnableGravity(BodyID pBodyId, bool pEnable)
 {
 	if (((Object*)pBodyId)->mWorldID != mWorldID)
 	{
-		mLog.Errorf(_T("EnableGravity() - Body %i is not part of this world!"), pBodyId);
+		mLog.Errorf("EnableGravity - Body %i is not part of this world!", pBodyId);
 		return;
 	}
 
@@ -3322,7 +3322,7 @@ void PhysicsManagerODE::EnableCollideWithSelf(BodyID pBodyId, bool pEnable)
 	}
 	else
 	{
-		mLog.Errorf(_T("EnableCollideWithSelf() - body %p is not part of this world!"), pBodyId);
+		mLog.Errorf("EnableCollideWithSelf - body %p is not part of this world!", pBodyId);
 		deb_assert(false);
 		return;
 	}

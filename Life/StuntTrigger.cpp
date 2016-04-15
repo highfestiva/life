@@ -50,7 +50,7 @@ void StuntTrigger::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
 		deb_assert(lBoneIndex >= 0);
 		lTriggerIndexArray.push_back(lBoneIndex);
 	}
-	const Tbc::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag(_T("stunt_trigger_data"), 5, 2, &lTriggerIndexArray);
+	const Tbc::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag("stunt_trigger_data", 5, 2, &lTriggerIndexArray);
 	deb_assert(lTag);
 	if (lTag)
 	{

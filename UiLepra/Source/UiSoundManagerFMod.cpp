@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -36,7 +36,7 @@ SoundManagerFMod::SoundManagerFMod(int pMixRate):
 	}
 	else
 	{
-		mLog.AError("Failed to initialize FMOD sound system!");
+		mLog.Error("Failed to initialize FMOD sound system!");
 	}
 }
 
@@ -417,7 +417,7 @@ SoundManager::SoundID SoundManagerFMod::LoadSound(const str& pFileName, const vo
 	else
 	{
 		lSample->mSample = FSOUND_Sample_Load((int)lSample->mID,
-			astrutil::Encode(pFileName).c_str(), lFlags, 0, 0);
+			pFileName.c_str(), lFlags, 0, 0);
 	}
 
 	if (lSample->mSample == 0)

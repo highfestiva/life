@@ -60,7 +60,7 @@ static XM_FileIOError fileio_open(const char *p_file, xm_bool p_big_endian_mode)
 		return XM_FILE_ERROR_IN_USE;
 	}
 
-	gFile = gFileOpener->Open(strutil::Encode(p_file));
+	gFile = gFileOpener->Open(p_file);
 	if (!gFile)
 	{
 		return XM_FILE_ERROR_CANT_OPEN;
@@ -283,7 +283,7 @@ bool ChibiXmAlStream::Open(const str& pFilename)
 	Release();
 
 	mSong = xm_song_alloc();
-	if (xm_loader_open_song(astrutil::Encode(pFilename).c_str(), mSong) != XM_LOADER_OK)
+	if (xm_loader_open_song(pFilename.c_str(), mSong) != XM_LOADER_OK)
 	{
 		Release();
 		return false;

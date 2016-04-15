@@ -93,16 +93,16 @@ void PushViewer::CreateLoginView()
 {
 	quat lFlip;
 	lFlip.RotateAroundOwnZ(PIF);
-	CreateButton(-0.2f, +0.2f,  6.0f, _T("1"),	_T("road_sign_02"), _T("road_sign_1p.png"), RoadSignButton::SHAPE_BOX);
-	RoadSignButton* lButton = CreateButton(+0.2f, +0.2f,  6.0f, _T("2"),	_T("road_sign_02"), _T("road_sign_2p.png"), RoadSignButton::SHAPE_BOX);
+	CreateButton(-0.2f, +0.2f,  6.0f, "1",	"road_sign_02", "road_sign_1p.png", RoadSignButton::SHAPE_BOX);
+	RoadSignButton* lButton = CreateButton(+0.2f, +0.2f,  6.0f, "2",	"road_sign_02", "road_sign_2p.png", RoadSignButton::SHAPE_BOX);
 	lButton->SetOrientation(lFlip);
-	CreateButton(-0.2f, -0.2f,  6.0f, _T("3"),	_T("road_sign_02"), _T("road_sign_3p.png"), RoadSignButton::SHAPE_BOX);
-	lButton = CreateButton(+0.2f, -0.2f,  6.0f, _T("4"),	_T("road_sign_02"), _T("road_sign_4p.png"), RoadSignButton::SHAPE_BOX);
+	CreateButton(-0.2f, -0.2f,  6.0f, "3",	"road_sign_02", "road_sign_3p.png", RoadSignButton::SHAPE_BOX);
+	lButton = CreateButton(+0.2f, -0.2f,  6.0f, "4",	"road_sign_02", "road_sign_4p.png", RoadSignButton::SHAPE_BOX);
 	lButton->SetOrientation(lFlip);
 
-	CreateButton(-0.4f, +0.4f, 12.0f, _T("server"),	_T("road_sign_01"), _T("road_sign_roundabout.png"), RoadSignButton::SHAPE_ROUND);
+	CreateButton(-0.4f, +0.4f, 12.0f, "server",	"road_sign_01", "road_sign_roundabout.png", RoadSignButton::SHAPE_ROUND);
 
-	CreateButton(+0.4f, +0.4f, 12.0f, _T("quit"),	_T("road_sign_01"), _T("road_sign_nostop.png"), RoadSignButton::SHAPE_ROUND);
+	CreateButton(+0.4f, +0.4f, 12.0f, "quit",	"road_sign_01", "road_sign_nostop.png", RoadSignButton::SHAPE_ROUND);
 }
 
 bool PushViewer::InitializeUniverse()
@@ -113,18 +113,18 @@ bool PushViewer::InitializeUniverse()
 	}
 
 	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
-	mLevel = new Life::Level(GetResourceManager(), _T("level_01"), mUiManager, lGravelParticleEmitter);
+	mLevel = new Life::Level(GetResourceManager(), "level_01", mUiManager, lGravelParticleEmitter);
 	AddContextObject(mLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, 0);
 	mLevel->EnableRootShadow(false);
 	mLevel->SetAllowNetworkLogic(false);
 	mLevel->StartLoading();
 
-	Cure::ContextObject* lVehicle = new UiCure::Machine(GetResourceManager(), _T("monster_02"), mUiManager);
+	Cure::ContextObject* lVehicle = new UiCure::Machine(GetResourceManager(), "monster_02", mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
 	lVehicle->SetInitialTransform(xform(gIdentityQuaternionF, vec3(-23, -80, 53)));
 	lVehicle->StartLoading();
 	mAvatarId = lVehicle->GetInstanceId();
-	GetConsoleManager()->ExecuteCommand(_T("fork execute-file Data/Steering.rec"));
+	GetConsoleManager()->ExecuteCommand("fork execute-file Data/Steering.rec");
 	return (true);
 }
 
@@ -148,7 +148,7 @@ void PushViewer::OnRequestJoinServer(const str& pServerAddress)
 {
 	v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, pServerAddress);
 	v_internal(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
-	mLog.Infof(_T("Will use server %s when logging in."), pServerAddress.c_str());
+	mLog.Infof("Will use server %s when logging in.", pServerAddress.c_str());
 	CloseJoinServerView();
 }
 
@@ -193,7 +193,7 @@ RoadSignButton* PushViewer::CreateButton(float x, float y, float z, const str& p
 
 void PushViewer::OnButtonClick(UiTbc::Button* pButton)
 {
-	if (pButton->GetName() == _T("server"))
+	if (pButton->GetName() == "server")
 	{
 		if (!mServerListView)
 		{
@@ -205,7 +205,7 @@ void PushViewer::OnButtonClick(UiTbc::Button* pButton)
 		v_set(GetVariableScope(), RTVAR_NETWORK_ENABLEONLINEMASTER, true);
 		return;
 	}
-	if (pButton->GetName() == _T("quit"))
+	if (pButton->GetName() == "quit")
 	{
 		GetMaster()->OnExit();
 		return;

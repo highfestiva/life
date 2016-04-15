@@ -130,7 +130,7 @@ str ID_QUAL::GetDebugState() const
 	typename IdSegmentList::const_iterator x = mIdSegmentList.begin();
 	for (; x != mIdSegmentList.end(); ++x)
 	{
-		lDebugState += strutil::Format(_T("%i-%i, %i-%i,\n"), x->mFirstAllocId, x->mFirstFreeId-1, x->mFirstFreeId, x->mLastFreeId);
+		lDebugState += strutil::Format("%i-%i, %i-%i,\n", x->mFirstAllocId, x->mFirstFreeId-1, x->mFirstFreeId, x->mLastFreeId);
 	}
 	return (lDebugState);
 }

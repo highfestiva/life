@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -133,9 +133,9 @@ void TerrainManager::UpdatePatchTree()
 		// cache if it is there to be had.
 
 		// TODO: remove dummy code.
-		log_atrace("Loading terrain patch.");
+		log_trace("Loading terrain patch.");
 		UserPhysicalTerrainResource* pDummyTerrainResource = new UserPhysicalTerrainResource();
-		pDummyTerrainResource->Load(mResourceManager, _T("DummyTerainPatch"),
+		pDummyTerrainResource->Load(mResourceManager, "DummyTerainPatch",
 			UserPhysicalTerrainResource::TypeLoadCallback(this, &TerrainManager::TerrainPatchLoadCallback));
 	}
 
@@ -150,7 +150,7 @@ void TerrainManager::TerrainPatchLoadCallback(UserPhysicalTerrainResource* pLoad
 {
 	if (pLoadedResource->GetConstResource()->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
 	{
-		log_adebug("Terrain patch asynchronously loaded.");
+		log_debug("Terrain patch asynchronously loaded.");
 		ScopeLock lLock(&mTerrainLock);
 		// TODO: insert patch into tree.
 		mPatchManager->AddPatch(pLoadedResource);
@@ -158,7 +158,7 @@ void TerrainManager::TerrainPatchLoadCallback(UserPhysicalTerrainResource* pLoad
 	}
 	else
 	{
-		mLog.AError("Terrain patch could not be loaded!");
+		mLog.Error("Terrain patch could not be loaded!");
 		// TODO: dunno. Terminate? Send error report?
 		delete (pLoadedResource);
 		++mLoadPatchErrorCount;

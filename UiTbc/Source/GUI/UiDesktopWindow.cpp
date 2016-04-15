@@ -18,8 +18,8 @@ namespace UiTbc
 
 
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, 
-	Layout* pLayout, const tchar* pImageDefinitionFile,
-	const tchar* pArchive):
+	Layout* pLayout, const char* pImageDefinitionFile,
+	const char* pArchive):
 	RectComponent(pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
@@ -36,7 +36,7 @@ DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPai
 }
 
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, const Color& pColor,
-	Layout* pLayout, const tchar* pImageDefinitionFile, const tchar* pArchive):
+	Layout* pLayout, const char* pImageDefinitionFile, const char* pArchive):
 	RectComponent(pColor, pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
@@ -54,8 +54,8 @@ DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPai
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter,
 	const Color& pTopLeftColor, const Color& pTopRightColor,
 	const Color& pBottomRightColor, const Color& pBottomLeftColor,
-	Layout* pLayout, const tchar* pImageDefinitionFile,
-	const tchar* pArchive):
+	Layout* pLayout, const char* pImageDefinitionFile,
+	const char* pArchive):
 	RectComponent(pTopLeftColor, pTopRightColor, pBottomRightColor, pBottomLeftColor, pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
@@ -71,7 +71,7 @@ DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPai
 }
 
 DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, Painter::ImageID pImageID,
-	Layout* pLayout, const tchar* pImageDefinitionFile, const tchar* pArchive):
+	Layout* pLayout, const char* pImageDefinitionFile, const char* pArchive):
 	RectComponent(pImageID, pLayout),
 	mInputManager(pInputManager),
 	mMouseEnabled(true),
@@ -109,7 +109,7 @@ UiLepra::InputManager* DesktopWindow::GetInputManager() const
 	return (mInputManager);
 }
 
-void DesktopWindow::Init(const tchar* /*pImageDefinitionFile*/, const tchar* /*pArchive*/)
+void DesktopWindow::Init(const char* /*pImageDefinitionFile*/, const char* /*pArchive*/)
 {
 	// Let all components access the image manager.
 	SetImageManager(&mImageManager);

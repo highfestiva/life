@@ -59,8 +59,8 @@ int LepraTestApplication::Run()
 	Lepra::Log::GetLog()->SetupStandardLogging(Lepra::Log::LEVEL_LOWEST_TYPE,
 		lConsoleLogPointer, &lFileLogger, &lPerformanceLogger, &lMemLogger);
 
-	Lepra::Log::GetLog()->Print(_T("LepraTestApp/main"), _T("\n\n--- Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ---\n"), Lepra::Log::LEVEL_ERROR);
-	lPerformanceLogger.LogListener::OnLogMessage(_T("LepraTestApp/main"), _T("\n\n---\n"), Lepra::Log::LEVEL_ERROR);
+	Lepra::Log::GetLog()->Print("LepraTestApp/main", "\n\n--- Build type: " LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT " ---\n", Lepra::Log::LEVEL_ERROR);
+	lPerformanceLogger.LogListener::OnLogMessage("LepraTestApp/main", "\n\n---\n", Lepra::Log::LEVEL_ERROR);
 	lMemLogger.Clear();
 
 	bool lTestOk = TestLepra();

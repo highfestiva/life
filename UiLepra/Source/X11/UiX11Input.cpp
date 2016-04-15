@@ -239,7 +239,7 @@ void X11InputManager::PreProcessEvents()
 		XQueryPointer(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), &rw, &cw, &_, &_, &x, &y, &lMask);
 		if (abs(x-sx) >= 100 || abs(y-sy) >= 100)
 		{
-			//mLog.Infof(_T("mwarp: (%i; %i)"), sx-x, sy-y);
+			//mLog.Infof("mwarp: (%i; %i"), sx-x, sy-y);
 			mMouseGrabDeltaX += sx - x;
 			mMouseGrabDeltaY += sy - y;
 			XWarpPointer(mDisplayManager->GetDisplay(), None, mDisplayManager->GetWindow(),
@@ -295,7 +295,7 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 			}
 			bool lIsSpecialKey;
 			KeyCode lKeyCode = TranslateKey(lKeyEvent.state, lSym, lIsSpecialKey);
-			//mLog.Infof(_T("Key event %i: keycode=%i, state=%i, lookup=%s, keysym=%i, keycode=%i"),
+			//mLog.Infof("Key event %i: keycode=%i, state=%i, lookup=%s, keysym=%i, keycode=%i",
 			//		lKeyEvent.type, lKeyEvent.keycode, lKeyEvent.state, lKey, lSym, lKeyCode);
 			if (pEvent.type == KeyPress)
 			{
@@ -366,7 +366,7 @@ bool X11InputManager::OnMessage(const XEvent& pEvent)
 				mIgnoreNextMouseMove = false;
 				break;
 			}
-			//mLog.Infof(_T("mmove: (%i; %i), cnt=%i"), dx, dy, mWarpCount);
+			//mLog.Infof("mmove: (%i; %i, cnt=%i"), dx, dy, mWarpCount);
 			mMouse->GetAxis(0)->AddValue(dx);
 			mMouse->GetAxis(1)->AddValue(dy);
 		}
@@ -520,7 +520,7 @@ void X11InputManager::SetCursorVisible(bool pVisible)
 	{
 		if (pVisible)
 		{
-			log_volatile(mLog.Debug(_T("Showing cursor.")));
+			log_volatile(mLog.Debug("Showing cursor."));
 			Cursor lCursor = XCreateFontCursor(mDisplayManager->GetDisplay(), XC_X_cursor);
 			XDefineCursor(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), lCursor);
 			XFreeCursor(mDisplayManager->GetDisplay(), lCursor);
@@ -530,7 +530,7 @@ void X11InputManager::SetCursorVisible(bool pVisible)
 		}
 		else
 		{
-			log_volatile(mLog.Debug(_T("Hiding cursor.")));
+			log_volatile(mLog.Debug("Hiding cursor."));
 			XColor lBlack;
 			lBlack.red = lBlack.green = lBlack.blue = 0;
 			static char noData[] = { 0,0,0,0,0,0,0,0 };

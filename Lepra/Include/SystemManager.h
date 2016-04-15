@@ -40,8 +40,8 @@ public:
 	static str GetDataDirectoryFromPath(const str& pArgv0);
 	static str GetLoginName();
 	static str QueryFullUserName();
-	static astr GetRandomId();
-	static astr GetSystemPseudoId();
+	static str GetRandomId();
+	static str GetSystemPseudoId();
 
 	static void WebBrowseTo(const str& pUrl);
 	static void EmailTo(const str& pTo, const str& pSubject, const str& pBody);

@@ -356,7 +356,7 @@ bool Thread::Start()
 		else
 		{
 			SetRunning(false);
-			mLog.Errorf((_T("Failed to start thread ")+strutil::Encode(GetThreadName())+_T("!")).c_str());
+			mLog.Errorf(("Failed to start thread "+strutil::Encode(GetThreadName())+"!").c_str());
 			lOk = false;
 		}
 	}
@@ -391,11 +391,11 @@ bool Thread::GraceJoin(float64 pTimeOut)
 	if (GetThreadHandle() != 0)
 	{
 		deb_assert(GetThreadId() != GetCurrentThreadId());
-		const astr lThreadNameCopy(GetThreadName());
+		const str lThreadNameCopy(GetThreadName());
 		if (::WaitForSingleObject((HANDLE)GetThreadHandle(), (DWORD)(pTimeOut * 1000.0)) == WAIT_TIMEOUT)
 		{
 			// Possible dead lock...
-			mLog.Warningf((_T("Failed to join thread \"") + strutil::Encode(lThreadNameCopy) + _T("\"! Deadlock?")).c_str());
+			mLog.Warningf(("Failed to join thread \"" + lThreadNameCopy + "\"! Deadlock?").c_str());
 			return (false);	// RAII simplifies here.
 		}
 		if (GetThreadHandle())
@@ -420,7 +420,7 @@ void Thread::Kill()
 	{
 		if (GetThreadId() != GetCurrentThreadId())
 		{
-			mLog.Warning(_T("Forcing kill of thread ") + strutil::Encode(GetThreadName()));
+			mLog.Warning("Forcing kill of thread " + GetThreadName());
 			::TerminateThread((HANDLE)GetThreadHandle(), 0);
 			SetRunning(false);
 			::CloseHandle((HANDLE)GetThreadHandle());
@@ -428,7 +428,7 @@ void Thread::Kill()
 		}
 		else
 		{
-			mLog.Warning(_T("Thread ") + strutil::Encode(GetThreadName()) + _T(" terminating self."));
+			mLog.Warning("Thread " + GetThreadName() + " terminating self.");
 			HANDLE lSelf = (HANDLE)mThreadHandle;
 			SetRunning(false);
 			delete this;

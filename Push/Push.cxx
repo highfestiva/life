@@ -81,7 +81,7 @@ Push* Push::GetApp()
 
 
 Push::Push(const strutil::strvec& pArgumentList):
-	Parent(_T(PUSH_APPLICATION_NAME), pArgumentList),
+	Parent(PUSH_APPLICATION_NAME, pArgumentList),
 	mUiManager(0)
 {
 	mApp = this;
@@ -126,16 +126,16 @@ void Push::Init()
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
 	double lPhysicalScreenSize = 24.0;	// An average computer's physical screen size (inches across).
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, "OpenGL");
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, "AllowUpsideDown");
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
 
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, "OpenAL");
 
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, false);
@@ -146,7 +146,7 @@ void Push::Init()
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 60.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 1.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("None"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "None");
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.5);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.5);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.5);
@@ -160,7 +160,7 @@ void Push::Init()
 	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.5);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, true);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("Force:Volume"));	
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "Force:Volume");	
 #endif // Computer
 
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
@@ -225,18 +225,18 @@ void Push::Resume()
 
 str Push::GetTypeName() const
 {
-	return _T("Client");
+	return "Client";
 }
 
 str Push::GetVersion() const
 {
-	return _T(PLATFORM_VERSION);
+	return PLATFORM_VERSION;
 }
 
 Cure::ApplicationTicker* Push::CreateTicker() const
 {
 	PushTicker* lTicker = new PushTicker(mUiManager, mResourceManager, 2000, 7, 1);
-	lTicker->SetMasterServerConnection(new Life::MasterServerConnection(_T(MASTER_SERVER_ADDRESS) _T(":") _T(MASTER_SERVER_PORT)));
+	lTicker->SetMasterServerConnection(new Life::MasterServerConnection(MASTER_SERVER_ADDRESS ":" MASTER_SERVER_PORT));
 	return lTicker;
 }
 

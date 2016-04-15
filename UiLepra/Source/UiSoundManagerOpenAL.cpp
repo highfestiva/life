@@ -67,7 +67,7 @@ bool SoundManagerOpenAL::Open()
 #endif // Windows / !Windows
 	if (!mDevice)
 	{
-		mLog.AError("Could not open any sound device!");
+		mLog.Error("Could not open any sound device!");
 #ifdef LEPRA_WINDOWS
 		alc_deinit();
 #endif // Windows
@@ -78,7 +78,7 @@ bool SoundManagerOpenAL::Open()
 	mContext = ::alcCreateContext(mDevice, lAttributes);
 	if (!mContext)
 	{
-		mLog.AError("Could not create sound context!");
+		mLog.Error("Could not create sound context!");
 		alcCloseDevice(mDevice);
 		mDevice = 0;
 #ifdef LEPRA_WINDOWS
@@ -240,7 +240,7 @@ SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, cons
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not get load sound %s, thus not possible to create sound."), pFileName.c_str());
+		mLog.Errorf("Could not get load sound %s, thus not possible to create sound.", pFileName.c_str());
 		deb_assert(false);
 		delete (lSample);
 		lSample = 0;
@@ -253,7 +253,7 @@ SoundStream* SoundManagerOpenAL::CreateSoundStream(const str& pFileName, LoopMod
 	OAL_ASSERT();
 
 	SoundStream* lSoundStream;
-	if (strutil::EndsWith(pFileName, _T(".xm")))
+	if (strutil::EndsWith(pFileName, ".xm"))
 	{
 		lSoundStream = new ChibiXmAlStream(this, pFileName, pLoopMode == LOOP_FORWARD);
 	}
@@ -320,7 +320,7 @@ SoundManager::SoundInstanceID SoundManagerOpenAL::CreateSoundInstance(SoundID pS
 	Sample* lSample = GetSample(pSoundID);
 	if (!lSample)
 	{
-		mLog.Errorf(_T("Could not get sound sample %u, thus not possible to create sound instance."), pSoundID);
+		mLog.Errorf("Could not get sound sample %u, thus not possible to create sound instance.", pSoundID);
 		return (INVALID_SOUNDINSTANCEID);
 	}
 
@@ -596,7 +596,7 @@ SoundManagerOpenAL::Sample::~Sample()
 		const int lError = ::alGetError();
 		if (lError != AL_NO_ERROR)
 		{
-			mLog.Errorf(_T("Could not delete OpenAL buffer (%4.4X)."), lError);
+			mLog.Errorf("Could not delete OpenAL buffer (%4.4X).", lError);
 		}
 		LEPRA_RELEASE_RESOURCE(alBuffer);
 	}
@@ -607,7 +607,7 @@ bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
 {
 	deb_assert(mBuffer == AL_NONE);
 	LEPRA_ACQUIRE_RESOURCE(alBuffer);
-	mBuffer = ::alutCreateBufferFromFile(astrutil::Encode(pFileName).c_str());
+	mBuffer = ::alutCreateBufferFromFile(pFileName.c_str());
 	OALUT_ASSERT();
 	return (mBuffer != AL_NONE);
 }
@@ -659,7 +659,7 @@ bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor
 		const int lError = ::alGetError();
 		if (lError != AL_NO_ERROR)
 		{
-			mLog.Errorf(_T("Could not generate OpenAL source (%4.4X), thus not possible to create sound instance."), lError);
+			mLog.Errorf("Could not generate OpenAL source (%4.4X), thus not possible to create sound instance.", lError);
 		}
 		return false;
 	}

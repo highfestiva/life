@@ -1,6 +1,6 @@
 /*
 	Class:  Renderer
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -178,7 +178,7 @@ void Renderer::DeletingGeometry(Tbc::GeometryBase* pGeometry)
 	GeometryData* lGeometryData = (GeometryData*)pGeometry->GetRendererData();
 	if(lGeometryData != 0)
 	{
-		mLog.Warningf(_T("Geometry with GeometryID %i is deleted before removed from Renderer."), lGeometryData->mGeometryID);
+		mLog.Warningf("Geometry with GeometryID %i is deleted before removed from Renderer.", lGeometryData->mGeometryID);
 		RemoveGeometry(lGeometryData->mGeometryID);
 	}
 }
@@ -1029,7 +1029,7 @@ Renderer::GeometryID Renderer::AddGeometry(Tbc::GeometryBase* pGeometry, Materia
 {
 	if ((int)pMaterialType < 0 || (int)pMaterialType >= Renderer::MAT_COUNT)
 	{
-		mLog.Errorf(_T("AddGeometry() - Material %i is not a valid material ID!"), (int)pMaterialType);
+		mLog.Errorf("AddGeometry - Material %i is not a valid material ID!", (int)pMaterialType);
 		return (GeometryID)mGeometryIDManager.GetInvalidId();
 	}
 
@@ -1088,7 +1088,7 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 	/*JMB
 	if (lGeometryData->mGeometry->IsGeometryReference() == true)
 	{
-		mLog.AError("Could not add texture to geometry reference!");
+		mLog.Error("Could not add texture to geometry reference!");
 		deb_assert(false);
 	}
 	else*/
@@ -1106,7 +1106,7 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 			if (!lOk)
 			{
 				//deb_assert(lOk);
-				log_atrace("Skipping add of texture to geometry a second time.");
+				log_trace("Skipping add of texture to geometry a second time.");
 			}
 		}
 		if (lOk)
@@ -1131,7 +1131,7 @@ bool Renderer::TryAddGeometryTexture(GeometryID pGeometryId, TextureID pTexture)
 			}
 			if (!lOk)
 			{
-				mLog.AError("Could not add texture - no more slots available!");
+				mLog.Error("Could not add texture - no more slots available!");
 				deb_assert(false);
 			}
 		}
@@ -1620,7 +1620,7 @@ PixelRect Renderer::GetBoundingRect(const vec3* pVertex, int pNumVertices) const
 
 	if (pNumVertices <= 2)
 	{
-		mLog.AError("GetBoundingRect() - NumVertices < 3!");
+		mLog.Error("GetBoundingRect() - NumVertices < 3!");
 		return PixelRect(0,0,0,0);
 	}
 

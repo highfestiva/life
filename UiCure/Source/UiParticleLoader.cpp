@@ -25,7 +25,7 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 	File* lFile = pResourceManager->QueryFile(pTextureName);
 	if (!lFile)
 	{
-		mLog.Errorf(_T("Unable to open particle image file '%s'."), pTextureName.c_str());
+		mLog.Errorf("Unable to open particle image file '%s'.", pTextureName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -36,7 +36,7 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 	lFile = 0;
 	if (!lLoadedOk)
 	{
-		mLog.Errorf(_T("Unable to load particle image file '%s'."), pTextureName.c_str());
+		mLog.Errorf("Unable to load particle image file '%s'.", pTextureName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -71,7 +71,7 @@ ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::R
 	pRenderer->TryAddGeometryTexture(lBillboardGasId, lTextureId);
 	pRenderer->TryAddGeometryTexture(lBillboardGlowId, lTextureId);
 
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)pRenderer->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)pRenderer->GetDynamicRenderer("particle");
 	lParticleRenderer->SetData(pSubFeatureTextureCount, pSubTotalTextureCount, lBillboardGas, lBillboardShrapnel, lBillboardSpark, lBillboardGlow);
 }
 

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -41,8 +41,8 @@ public:
 	void Stop();
 
 private:
-	char ReadCommand(TcpSocket* pSocket, astr& pData);
-	char WriteCommand(TcpSocket* pSocket, char pCommand, const astr& pData);
+	char ReadCommand(TcpSocket* pSocket, str& pData);
+	char WriteCommand(TcpSocket* pSocket, char pCommand, const str& pData);
 	void ClientCommandEntry(TcpSocket* pSocket);
 	void AcceptThreadEntry();
 

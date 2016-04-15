@@ -50,28 +50,28 @@ int UiTbcTestApplication::Run()
 	Lepra::MemFileLogListener lMemLogger;
 	Lepra::Log::SetupMainStandardLogging(lConsoleLogPointer, &lFileLogger, &lPerformanceLogger, &lMemLogger);
 
-	Lepra::Log::Out(_T("TbcTestApp/main"), _T("\n\n--- Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ---\n"), Lepra::Log::LOG_ERROR);
+	Lepra::Log::Out("TbcTestApp/main", "\n\n--- Build type: " LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT " ---\n", Lepra::Log::LOG_ERROR);
 	lMemLogger.Clear();
 
 	bool lTestOk = true;
 	if (lTestOk)
 	{
-		lPerformanceLogger.LogListener::OnLogMessage(_T("Lepra"), _T("\n\n---\n"), Lepra::Log::LOG_PERFORMANCE);
-		lTestOk = TestUiLepra(_T("Lepra"));
-		Lepra::Log::OutPerformanceNode(_T("Lepra"));
+		lPerformanceLogger.LogListener::OnLogMessage("Lepra", "\n\n---\n", Lepra::Log::LOG_PERFORMANCE);
+		lTestOk = TestUiLepra("Lepra");
+		Lepra::Log::OutPerformanceNode("Lepra");
 		Lepra::PerformanceScope::Clear();
 	}
 	if (lTestOk)
 	{
-		lPerformanceLogger.LogListener::OnLogMessage(_T("Tbc"), _T("\n\n---\n"), Lepra::Log::LOG_PERFORMANCE);
+		lPerformanceLogger.LogListener::OnLogMessage("Tbc", "\n\n---\n", Lepra::Log::LOG_PERFORMANCE);
 		Lepra::Thread::Sleep(1.0);
-		lTestOk = TestUiTbc(_T("  Tbc"));
-		Lepra::Log::OutPerformanceNode(_T("Tbc"));
+		lTestOk = TestUiTbc("  Tbc");
+		Lepra::Log::OutPerformanceNode("Tbc");
 		Lepra::PerformanceScope::Clear();
 	}
-	ShowTestResult(_T("  Tbc"), lTestOk);
+	ShowTestResult("  Tbc", lTestOk);
 
-	Lepra::Log::OutPerformanceNode(_T("TbcTestApp"));
+	Lepra::Log::OutPerformanceNode("TbcTestApp");
 	//lMemLogger.DumpToFile(_TEXT_ALTERNATIVE("Temp.log", L"TempUnicode.log"));
 
 	return (0);

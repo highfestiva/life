@@ -97,7 +97,7 @@ bool TestThreading(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("thread start");
+		lContext = "thread start";
 		for (unsigned x = 0; x < 100 && lTestOk; ++x)
 		{
 			StaticThread lThread("StartupTest");
@@ -106,7 +106,7 @@ bool TestThreading(const LogDecorator& pAccount)
 			deb_assert(lTestOk);
 			if (lTestOk)
 			{
-				lContext = _T("thread run and self termination");
+				lContext = "thread run and self termination";
 				//Thread::Sleep(0.001);	// Make sure we sleep at least once.
 				for (unsigned y = 0; y < 200 && lThread.IsRunning(); ++y)
 				{
@@ -125,7 +125,7 @@ bool TestThreading(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("mutex ownership");
+		lContext = "mutex ownership";
 		lTestOk = (gThreadTestLock.IsOwner() == false);
 		if (lTestOk)
 		{
@@ -143,7 +143,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	StaticThread lThread("LockTest");
 	if (lTestOk)
 	{
-		lContext = _T("mutex exclusiveness");
+		lContext = "mutex exclusiveness";
 		gThreadTestCounter = -1;
 		gThreadTestLock.Acquire();
 		lTestOk = lThread.Start(LockThread, 0);
@@ -158,7 +158,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("spin lock");
+		lContext = "spin lock";
 		SpinLock lLock;
 		lTestOk = lLock.TryAcquire();
 		deb_assert(lTestOk);
@@ -166,7 +166,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("semaphore exclusiveness");
+		lContext = "semaphore exclusiveness";
 		gThreadTestSemaphore.Signal();
 		gThreadTestSemaphore.Wait();
 		gThreadTestLock.Release();
@@ -176,7 +176,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("semaphore wait timeout - 1");
+		lContext = "semaphore wait timeout - 1";
 		HiResTimer lTimer(false);
 		lTestOk = !gThreadTestSemaphore.Wait(0.5);
 		deb_assert(lTestOk);
@@ -211,7 +211,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("thread operation");
+		lContext = "thread operation";
 		gThreadTestSemaphore.Signal();
 		Thread::Sleep(0.1);
 		lTestOk = (gThreadTestCounter == 6 && lThread.IsRunning());
@@ -219,7 +219,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("thread grace termination");
+		lContext = "thread grace termination";
 		lThread.RequestStop();
 		Thread::Sleep(0.1);
 		lTestOk = (gThreadTestCounter == 7 && !lThread.IsRunning());
@@ -227,7 +227,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("MemberThread");
+		lContext = "MemberThread";
 		{
 			MemberThreadTestClass lTestClass;
 			MemberThread<MemberThreadTestClass> lThread("TestMemberThread");
@@ -248,13 +248,13 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("main thread ID");
+		lContext = "main thread ID";
 		lTestOk = (Lepra::Thread::GetCurrentThreadId() != 0);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("sub thread ID");
+		lContext = "sub thread ID";
 		ThreadIdTestClass lTestInstance;
 		lTestInstance.mThreadId = 0;
 		MemberThread<ThreadIdTestClass> lThread("TestThreadId");
@@ -277,7 +277,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("semaphore wait timeout");
+		lContext = "semaphore wait timeout";
 		Lepra::Timer lTimer;
 		Lepra::Semaphore lSemaphore;
 		lTestOk = !lSemaphore.Wait(1.0);
@@ -292,7 +292,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	Lepra::Semaphore lSemaphore;
 	if (lTestOk)
 	{
-		lContext = _T("semaphore satisfied timed wait 1");
+		lContext = "semaphore satisfied timed wait 1";
 		Lepra::Timer lTimer;
 		lSemaphore.Signal();
 		lSemaphore.Signal();
@@ -307,7 +307,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("semaphore satisfied timed wait 2");
+		lContext = "semaphore satisfied timed wait 2";
 		Lepra::Timer lTimer;
 		lTestOk = lSemaphore.Wait(1.0);
 		deb_assert(lTestOk);
@@ -320,7 +320,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("semaphore permit reset");
+		lContext = "semaphore permit reset";
 		lTestOk = !lSemaphore.Wait(0.0001);
 		deb_assert(lTestOk);
 	}
@@ -329,7 +329,7 @@ bool TestThreading(const LogDecorator& pAccount)
 	StaticThread lMemUseThread("MemUser");
 	if (lTestOk)
 	{
-		lContext = _T("Memory allocator");
+		lContext = "Memory allocator";
 		lMemUseThread.Start(MemUseThreadEntry, 0);
 		lMemAllocThread.Start(MemAllocThreadEntry, 0);
 		Thread::Sleep(0.01);
@@ -338,13 +338,13 @@ bool TestThreading(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("Memory freer");
+		lContext = "Memory freer";
 		gAllocMem[1] = STATE_ALLOC_FOUND;
 		Thread::Sleep(0.01);
 		lTestOk = (gAllocMem == 0 && !lMemUseThread.IsRunning());
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("Threading"), lContext, lTestOk);
+	ReportTestResult(pAccount, "Threading", lContext, lTestOk);
 	return (lTestOk);
 }

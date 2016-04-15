@@ -110,17 +110,17 @@ private:
 class RwLock
 {
 public:
-	RwLock(const astr& pRwLockName);
+	RwLock(const str& pRwLockName);
 	virtual ~RwLock();
 
 	void AcquireRead();
 	void AcquireWrite();
 	void Release();
 
-	astr GetName();
+	str GetName();
 
 private:
-	astr mName;
+	str mName;
 	void* mSystemRwLock;
 };
 
@@ -129,14 +129,14 @@ private:
 class Thread
 {
 public:
-	Thread(const astr& pThreadName);
+	Thread(const str& pThreadName);
 	virtual ~Thread();
 
 	static void InitializeMainThread();
 	static bool QueryInitializeThread();
 	static void InitializeThread(Thread* pThread);
 
-	const astr& GetThreadName() const;
+	const str& GetThreadName() const;
 	size_t GetThreadId() const;
 	size_t GetThreadHandle() const;
 
@@ -178,7 +178,7 @@ protected:
 	void SetThreadId(size_t pThreadId);
 
 private:
-	astr mThreadName;	// Must be ANSI, to be compliant with non-unicode builds.
+	str mThreadName;	// Must be ANSI, to be compliant with non-unicode builds.
 
 	volatile bool mRunning;
 	volatile bool mStopRequested;
@@ -197,7 +197,7 @@ private:
 class StaticThread: public Thread
 {
 public:
-	StaticThread(const astr& pThreadName);
+	StaticThread(const str& pThreadName);
 	virtual ~StaticThread();
 
 	bool Start(void (*pThreadEntry)(void*), void* pData);

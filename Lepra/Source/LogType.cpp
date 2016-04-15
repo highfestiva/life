@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -24,29 +24,29 @@ void LogType::Init()
 	mInitialized = true;
 
 	::memset(mLoggerArray, 0, sizeof(mLoggerArray));
-	mLoggerArray[SUB_ROOT] = new Logger(_T("Root"), 0);
-	mLoggerArray[SUB_GENERAL] = new Logger(_T("Data"), GetLogger(SUB_ROOT));
-	mLoggerArray[SUB_GENERAL_RESOURCES] = new Logger(_T("Resources"), GetLogger(SUB_GENERAL));
-	mLoggerArray[SUB_NETWORK] = new Logger(_T("Network"), GetLogger(SUB_ROOT));
-	mLoggerArray[SUB_NETWORK_CLIENT] = new Logger(_T("NetClient"), GetLogger(SUB_NETWORK));
-	mLoggerArray[SUB_NETWORK_SERVER] = new Logger(_T("NetServer"), GetLogger(SUB_NETWORK));
-	mLoggerArray[SUB_CONSOLE] = new Logger(_T("Console"), GetLogger(SUB_ROOT));
-	mLoggerArray[SUB_PHYSICS] = new Logger(_T("Physics"), GetLogger(SUB_ROOT));
-	mLoggerArray[SUB_UI] = new Logger(_T("UI"), GetLogger(SUB_ROOT));
-	mLoggerArray[SUB_UI_INPUT] = new Logger(_T("Input"), GetLogger(SUB_UI));
-	mLoggerArray[SUB_UI_SOUND] = new Logger(_T("Sound"), GetLogger(SUB_UI));
-	mLoggerArray[SUB_UI_GFX] = new Logger(_T("Graphics"), GetLogger(SUB_UI));
-	mLoggerArray[SUB_UI_GFX_2D] = new Logger(_T("Gfx2D"), GetLogger(SUB_UI_GFX));
-	mLoggerArray[SUB_UI_GFX_3D] = new Logger(_T("Gfx3D"), GetLogger(SUB_UI_GFX));
-	mLoggerArray[SUB_GAME] = new Logger(_T("Game"), GetLogger(SUB_ROOT));
-	mLoggerArray[SUB_GAME_CONTEXT] = new Logger(_T("Context"), GetLogger(SUB_GAME));
-	mLoggerArray[SUB_GAME_CONTEXT_CPP] = new Logger(_T("C++Obj"), GetLogger(SUB_GAME_CONTEXT));
-	mLoggerArray[SUB_TEST] = new Logger(_T("Test"), GetLogger(SUB_ROOT));
+	mLoggerArray[ROOT] = new Logger("Root", 0);
+	mLoggerArray[GENERAL] = new Logger("Data", GetLogger(ROOT));
+	mLoggerArray[GENERAL_RESOURCES] = new Logger("Resources", GetLogger(GENERAL));
+	mLoggerArray[NETWORK] = new Logger("Network", GetLogger(ROOT));
+	mLoggerArray[NETWORK_CLIENT] = new Logger("NetClient", GetLogger(NETWORK));
+	mLoggerArray[NETWORK_SERVER] = new Logger("NetServer", GetLogger(NETWORK));
+	mLoggerArray[CONSOLE] = new Logger("Console", GetLogger(ROOT));
+	mLoggerArray[PHYSICS] = new Logger("Physics", GetLogger(ROOT));
+	mLoggerArray[UI] = new Logger("UI", GetLogger(ROOT));
+	mLoggerArray[UI_INPUT] = new Logger("Input", GetLogger(UI));
+	mLoggerArray[UI_SOUND] = new Logger("Sound", GetLogger(UI));
+	mLoggerArray[UI_GFX] = new Logger("Graphics", GetLogger(UI));
+	mLoggerArray[UI_GFX_2D] = new Logger("Gfx2D", GetLogger(UI_GFX));
+	mLoggerArray[UI_GFX_3D] = new Logger("Gfx3D", GetLogger(UI_GFX));
+	mLoggerArray[GAME] = new Logger("Game", GetLogger(ROOT));
+	mLoggerArray[GAME_CONTEXT] = new Logger("Context", GetLogger(GAME));
+	mLoggerArray[GAME_CONTEXT_CPP] = new Logger("C++Obj", GetLogger(GAME_CONTEXT));
+	mLoggerArray[TEST] = new Logger("Test", GetLogger(ROOT));
 }
 
 void LogType::Close()
 {
-	for (int x = SUB_LOWEST_TYPE; x < SUB_TYPE_COUNT; ++x)
+	for (int x = LOWEST_TYPE; x < TYPE_COUNT; ++x)
 	{
 		delete (mLoggerArray[x]);
 		mLoggerArray[x] = 0;
@@ -60,7 +60,7 @@ Logger* LogType::GetLogger(Subsystem pSubsystem)
 {
 	Init();
 
-	if (pSubsystem >= SUB_LOWEST_TYPE && pSubsystem < SUB_TYPE_COUNT)
+	if (pSubsystem >= LOWEST_TYPE && pSubsystem < TYPE_COUNT)
 	{
 		deb_assert(mLoggerArray[pSubsystem]);
 		return (mLoggerArray[pSubsystem]);
@@ -74,7 +74,7 @@ Logger* LogType::GetLogger(const str& pName)
 	Init();
 
 	Logger* lFoundLog = 0;
-	for (int x = SUB_LOWEST_TYPE; !lFoundLog && x < SUB_TYPE_COUNT; ++x)
+	for (int x = LOWEST_TYPE; !lFoundLog && x < TYPE_COUNT; ++x)
 	{
 		if (mLoggerArray[x] && mLoggerArray[x]->GetName() == pName)
 		{
@@ -87,7 +87,7 @@ Logger* LogType::GetLogger(const str& pName)
 const std::vector<Logger*> LogType::GetLoggers()
 {
 	std::vector<Logger*> lLogArray;
-	for (int x = SUB_LOWEST_TYPE; x < SUB_TYPE_COUNT; ++x)
+	for (int x = LOWEST_TYPE; x < TYPE_COUNT; ++x)
 	{
 		lLogArray.push_back(mLoggerArray[x]);
 	}
@@ -96,7 +96,7 @@ const std::vector<Logger*> LogType::GetLoggers()
 
 void LogType::SetLogLevel(LogLevel pLevel)
 {
-	for (int x = SUB_LOWEST_TYPE; x < SUB_TYPE_COUNT; ++x)
+	for (int x = LOWEST_TYPE; x < TYPE_COUNT; ++x)
 	{
 		mLoggerArray[x]->SetLevelThreashold(pLevel);
 	}
@@ -105,7 +105,7 @@ void LogType::SetLogLevel(LogLevel pLevel)
 
 
 bool LogType::mInitialized = false;
-Logger* LogType::mLoggerArray[SUB_TYPE_COUNT];
+Logger* LogType::mLoggerArray[TYPE_COUNT];
 
 
 

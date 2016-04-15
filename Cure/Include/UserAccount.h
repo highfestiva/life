@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -22,14 +22,14 @@ class MangledPassword
 {
 public:
 	MangledPassword();
-	MangledPassword(wstr& pPassword);
+	MangledPassword(str& pPassword);
 	MangledPassword(const MangledPassword& pPassword);
 	~MangledPassword();
 	void operator=(const MangledPassword& pPassword);
 	void Clear();
 
 	const std::string& Get() const;
-	void MangleAndSet(wstr& pPassword);
+	void MangleAndSet(str& pPassword);
 	void SetUnmodified(const std::string& pPassword);
 	bool operator==(const MangledPassword& pPassword) const;
 
@@ -43,16 +43,16 @@ class LoginId
 {
 public:
 	LoginId();
-	LoginId(const wstr& pUserAccountName, const MangledPassword& pPassword);
+	LoginId(const str& pUserAccountName, const MangledPassword& pPassword);
 	virtual ~LoginId();
 
-	const wstr& GetName() const;
+	const str& GetName() const;
 	const MangledPassword& GetMangledPassword() const;
 
 	bool operator==(const LoginId& pUserAccount) const;
 
 private:
-	wstr mUserName;
+	str mUserName;
 	MangledPassword mMangledPassword;
 };
 

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -49,7 +49,7 @@ PhysicsSpawner* PhysicsSpawner::Load(ChunkyPhysics* pStructure, const void* pDat
 {
 	if (pByteCount < sizeof(uint32)*9 /*+ ...*/)
 	{
-		mLog.AError("Could not load; wrong data size.");
+		mLog.Error("Could not load; wrong data size.");
 		deb_assert(false);
 		return (0);
 	}
@@ -58,7 +58,7 @@ PhysicsSpawner* PhysicsSpawner::Load(ChunkyPhysics* pStructure, const void* pDat
 	lSpawner->LoadChunkyData(pStructure, pData);
 	if (lSpawner->GetChunkySize() != pByteCount)
 	{
-		mLog.AError("Corrupt data or error in loading algo.");
+		mLog.Error("Corrupt data or error in loading algo.");
 		deb_assert(false);
 		delete (lSpawner);
 		lSpawner = 0;
@@ -134,11 +134,11 @@ bool PhysicsSpawner::IsEaseDown() const
 
 unsigned PhysicsSpawner::GetChunkySize() const
 {
-	size_t lStringSize = PackerUnicodeString::Pack(0, wstrutil::Encode(mFunction));
+	size_t lStringSize = PackerUnicodeString::Pack(0, mFunction);
 	SpawnObjectArray::const_iterator x = mSpawnObjectArray.begin();
 	for (; x != mSpawnObjectArray.end(); ++x)
 	{
-		lStringSize += PackerUnicodeString::Pack(0, wstrutil::Encode(x->mSpawnObject));
+		lStringSize += PackerUnicodeString::Pack(0, x->mSpawnObject);
 	}
 	return ((unsigned)(sizeof(uint32) * 4 +
 		sizeof(uint32) * mSpawnerNodeArray.size() +
@@ -155,7 +155,7 @@ void PhysicsSpawner::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData
 	uint32* lData = (uint32*)pData;
 	int i = 0;
 	lData[i++] = Endian::HostToBig(mSpawnerType);
-	i += PackerUnicodeString::Pack((uint8*)&lData[i], wstrutil::Encode(mFunction));
+	i += PackerUnicodeString::Pack((uint8*)&lData[i], mFunction);
 	lData[i++] = Endian::HostToBig((uint32)mSpawnerNodeArray.size());
 	for (int z = 0; (size_t)z < mSpawnerNodeArray.size(); ++z)
 	{
@@ -171,7 +171,7 @@ void PhysicsSpawner::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData
 	SpawnObjectArray::const_iterator x = mSpawnObjectArray.begin();
 	for (; x != mSpawnObjectArray.end(); ++x)
 	{
-		int lStringRawLength = PackerUnicodeString::Pack((uint8*)&lData[i], wstrutil::Encode(x->mSpawnObject));
+		int lStringRawLength = PackerUnicodeString::Pack((uint8*)&lData[i], x->mSpawnObject);
 		deb_assert(lStringRawLength % sizeof(lData[0]) == 0);
 		i += lStringRawLength / sizeof(lData[0]);
 		lData[i++] = Endian::HostToBigF(x->mProbability);
@@ -213,7 +213,7 @@ void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData
 		i += lStringRawLength / sizeof(lData[0]);
 		const float lProbability = Endian::BigToHostF(lData[i++]);
 		mTotalObjectProbability += lProbability;
-		mSpawnObjectArray.push_back(SpawnObject(strutil::Encode(lSpawnObject), lProbability));
+		mSpawnObjectArray.push_back(SpawnObject(lSpawnObject, lProbability));
 	}
 	mIsEaseDown = Endian::BigToHost(lData[i++])? true : false;
 }

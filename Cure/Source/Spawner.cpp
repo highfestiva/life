@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -20,7 +20,7 @@ namespace Cure
 
 
 Spawner::Spawner(ContextManager* pManager):
-	CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Spawner")),
+	CppContextObject(pManager->GetGameManager()->GetResourceManager(), "Spawner"),
 	mSpawnPointIndex(0)
 {
 	pManager->AddLocalObject(this);
@@ -79,7 +79,7 @@ void Spawner::EaseDown(Tbc::PhysicsManager* pPhysicsManager, ContextObject* pObj
 	{
 		pObject->SetFullPosition(*lNewPositionalData, 0);
 		const bool lIsColliding = pPhysicsManager->IsColliding(pObject->GetInstanceId());
-		//mLog.Infof(_T("%s at step %f"), lIsColliding? _T("Is colliding") : _T("Not colliding"), lStep);
+		//mLog.Infof("%s at step %f", lIsColliding? "Is colliding" : "Not colliding", lStep);
 		if (lStep < 0.0001f && lIsColliding)
 		{
 			break;
@@ -127,7 +127,7 @@ void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
 	const size_t lIntervalCount = lIntervals.size();
 	if (lIntervalCount < 2 || lIntervalCount > 3)
 	{
-		mLog.AError("Error: spawner has badly configured intervals!");
+		mLog.Error("Error: spawner has badly configured intervals!");
 		deb_assert(false);
 		return;
 	}
@@ -224,7 +224,7 @@ void Spawner::Create()
 		PlaceObject(lObject, mSpawnPointIndex);
 		if (++mSpawnPointIndex >= GetSpawner()->GetSpawnPointCount())
 		{
-			if (GetSpawner()->GetFunction() == _T("spawner_init"))
+			if (GetSpawner()->GetFunction() == "spawner_init")
 			{
 				deb_assert(GetSpawner()->GetSpawnPointCount() >= 2);
 				mSpawnPointIndex = 1;

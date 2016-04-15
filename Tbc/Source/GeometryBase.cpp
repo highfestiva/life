@@ -365,7 +365,7 @@ void GeometryBase::SetScale(float pScale)
 	mScale = pScale;
 	if (mScale != 1)
 	{
-		LEPRA_DEBUG_CODE(mLog.Debugf(_T("Setting scale %f on mesh %s."), mScale, mName.c_str()));
+		LEPRA_DEBUG_CODE(mLog.Debugf("Setting scale %f on mesh %s.", mScale, mName.c_str()));
 	}
 }
 
@@ -1144,7 +1144,7 @@ void GeometryBase::SetTangentAndBitangentData(const float* pTangentData, const f
 
 void GeometryBase::SetIndexData(vtx_idx_t* pIndexData, unsigned pIndexCount, unsigned pMaxIndexCount)
 {
-	mLog.Warningf(_T("Unable to set index data on mesh %s."), mName.c_str());
+	mLog.Warningf("Unable to set index data on mesh %s.", mName.c_str());
 	delete pIndexData;
 	(void)pIndexCount;
 	(void)pMaxIndexCount;

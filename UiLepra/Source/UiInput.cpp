@@ -69,7 +69,7 @@ void InputElement::SetValue(float pNewValue)
 	if (mInterpretation == RELATIVE_AXIS || ::fabs(pNewValue - mValue) > lInputEpsilon)
 	{
 		//::printf("%s(%i) = %f\n", GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
-		//mLog.Infof(_T("%s(%i) = %f\n"), GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
+		//mLog.Infof("%s(%i = %f\n"), GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
 
 		mValue = pNewValue;
 
@@ -129,7 +129,7 @@ str InputElement::GetFullName() const
 	str lId = GetIdentifier();
 	lId = strutil::ReplaceAll(lId, ' ', '_');
 	lId = strutil::ReplaceAll(lId, '-', '_');
-	return GetParentDevice()->GetUniqueIdentifier() + _T(".") + lId;
+	return GetParentDevice()->GetUniqueIdentifier() + "." + lId;
 }
 
 str InputElement::GetName() const
@@ -137,9 +137,9 @@ str InputElement::GetName() const
 	str lName;
 	switch (GetInterpretation())
 	{
-		case InputElement::ABSOLUTE_AXIS:	lName += _T("AbsoluteAxis");	break;
-		case InputElement::RELATIVE_AXIS:	lName += _T("RelativeAxis");	break;
-		default:				lName += _T("Button");		break;
+		case InputElement::ABSOLUTE_AXIS:	lName += "AbsoluteAxis";	break;
+		case InputElement::RELATIVE_AXIS:	lName += "RelativeAxis";	break;
+		default:				lName += "Button";		break;
 	}
 	lName += strutil::IntToString(GetTypeIndex(), 10);
 	return (lName);
@@ -181,7 +181,7 @@ str InputElement::GetCalibration() const
 {
 	str lData;
 	lData += strutil::IntToString(mMin, 10);
-	lData += _T(", ");
+	lData += ", ";
 	lData += strutil::IntToString(mMax, 10);
 	return (lData);
 }
@@ -189,7 +189,7 @@ str InputElement::GetCalibration() const
 bool InputElement::SetCalibration(const str& pData)
 {
 	bool lOk = false;
-	strutil::strvec lData = strutil::Split(pData, _T(", "));
+	strutil::strvec lData = strutil::Split(pData, ", ");
 	if (lData.size() >= 2)
 	{
 		lOk = true;
@@ -627,8 +627,8 @@ bool InputManager::ReadKey(KeyCode pKeyCode)
 
 str InputManager::GetKeyName(KeyCode pKeyCode)
 {
-	const tchar* lKeyName = 0;
-#define X(name)	case IN_KBD_##name:	lKeyName = _T(#name);	break
+	const char* lKeyName = 0;
+#define X(name)	case IN_KBD_##name:	lKeyName = #name;	break
 	switch (pKeyCode)
 	{
 		X(BACKSPACE);
@@ -721,7 +721,7 @@ str InputManager::GetKeyName(KeyCode pKeyCode)
 	{
 		return (lKeyName);
 	}
-	return (str(1, (tchar)pKeyCode));
+	return (str(1, (char)pKeyCode));
 }
 
 void InputManager::SetKey(KeyCode pKeyCode, bool pValue)

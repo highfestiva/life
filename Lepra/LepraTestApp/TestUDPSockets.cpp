@@ -1,7 +1,7 @@
 /*
 	File:   TestUDPSockets.cpp
 	Class:  -
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -29,9 +29,9 @@ public:
 		mTestOk = false;
 
 		SocketAddress lLocalAddress;
-		if (lLocalAddress.Resolve(_T(":10000")))
+		if (lLocalAddress.Resolve(":10000"))
 		{
-			mUdpMuxSocket = new UdpMuxSocket(_T("Srv "), lLocalAddress, true);
+			mUdpMuxSocket = new UdpMuxSocket("Srv ", lLocalAddress, true);
 			deb_assert(mUdpMuxSocket->IsOpen());
 		}
 	}
@@ -66,12 +66,12 @@ void ServerThread::Run()
 	str lString;
 	lReader.ReadLine(lString);
 
-//	printf("\nServer received \"%s\".", astrutil::Encode(lString).c_str());
+//	printf("\nServer received \"%s\".", lString.c_str());
 	
-	mTestOk = (lString == _T("Hi Server! I am Client!"));
+	mTestOk = (lString == "Hi Server! I am Client!");
 	deb_assert(mTestOk);
 
-	lWriter.WriteString<Lepra::tchar>(_T("Hi Client! I am Server!\n"));
+	lWriter.WriteString("Hi Client! I am Server!\n");
 	lSocket->Flush();
 
 	mUdpMuxSocket->CloseSocket(lSocket);
@@ -90,9 +90,9 @@ public:
 		mTestOk = false;
 
 		SocketAddress lLocalAddress;
-		if (lLocalAddress.Resolve(_T(":10001")))
+		if (lLocalAddress.Resolve(":10001"))
 		{
-			mUdpMuxSocket = new UdpMuxSocket(_T("Client "), lLocalAddress, false);
+			mUdpMuxSocket = new UdpMuxSocket("Client ", lLocalAddress, false);
 			deb_assert(mUdpMuxSocket->IsOpen());
 		}
 	}
@@ -118,23 +118,23 @@ private:
 void ClientThread::Run()
 {
 	SocketAddress lLocalAddress;
-	if (lLocalAddress.Resolve(_T(":10000")))
+	if (lLocalAddress.Resolve(":10000"))
 	{
 		UdpVSocket* lSocket = mUdpMuxSocket->Connect(lLocalAddress, "", 0.5);
 		deb_assert(lSocket);
 		Reader lReader(lSocket);
 		Writer lWriter(lSocket);
 
-		lWriter.WriteString<Lepra::tchar>(_T("Hi Server! I am Client!\n"));
+		lWriter.WriteString("Hi Server! I am Client!\n");
 		lSocket->Flush();
 
 		lSocket->WaitAvailable(0.5);
 		str lString;
 		lReader.ReadLine(lString);
 
-	//	printf("Client received \"%s\".", astrutil::Encode(lString).c_str());
+	//	printf("Client received \"%s\".", lString.c_str());
 		
-		mTestOk = (lString == _T("Hi Client! I am Server!"));
+		mTestOk = (lString == "Hi Client! I am Server!");
 		deb_assert(mTestOk);
 
 		mUdpMuxSocket->CloseSocket(lSocket);
@@ -161,13 +161,13 @@ bool TestUDPSockets(const LogDecorator& pAccount)
 		lServer.GraceJoin(10.0);
 		lClient.GraceJoin(10.0);
 
-		lContext = _T("Client/Server UdpMuxSocket communication failed");
+		lContext = "Client/Server UdpMuxSocket communication failed";
 		lTestOk = lClient.GetTestOK() && lServer.GetTestOK();
 		deb_assert(lTestOk);
 
 		Network::Stop();
 	}
 
-	ReportTestResult(pAccount, _T("UDPSockets"), lContext, lTestOk);
+	ReportTestResult(pAccount, "UDPSockets", lContext, lTestOk);
 	return (lTestOk);
 }

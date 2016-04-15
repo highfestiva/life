@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -24,7 +24,7 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 class TbcTest
 {
 };
-Lepra::LogDecorator gTbcLog(Lepra::LogType::GetLogger(Lepra::LogType::SUB_TEST), typeid(TbcTest));
+Lepra::LogDecorator gTbcLog(Lepra::LogType::GetLogger(Lepra::LogType::TEST), typeid(TbcTest));
 
 
 
@@ -69,8 +69,8 @@ bool ExportStructure()
 	Tbc::PhysicsManager* lPhysics = Tbc::PhysicsManagerFactory::Create(Tbc::PhysicsManagerFactory::ENGINE_ODE);
 	if (lOk)
 	{
-		lContext = _T("box save");
-		str lFilename(_T("box_01.phys"));
+		lContext = "box save";
+		str lFilename("box_01.phys");
 
 		Lepra::vec3 lDimensions(2.0f, 1.0f, 3.5f);
 
@@ -91,8 +91,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("box load");
-		str lFilename(_T("box_01.phys"));
+		lContext = "box load";
+		str lFilename("box_01.phys");
 
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
@@ -116,8 +116,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("sphere save");
-		str lFilename(_T("sphere_01.phys"));
+		lContext = "sphere save";
+		str lFilename("sphere_01.phys");
 
 		const float lRadius = 1.0f;
 
@@ -144,8 +144,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("sphere load");
-		str lFilename(_T("sphere_01.phys"));
+		lContext = "sphere load";
+		str lFilename("sphere_01.phys");
 
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
@@ -175,8 +175,8 @@ bool ExportStructure()
 
 	if (lOk)
 	{
-		lContext = _T("car save");
-		str lFilename(_T("car_01.phys"));
+		lContext = "car save";
+		str lFilename("car_01.phys");
 
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_WORLD2LOCAL, Tbc::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(6);
@@ -285,8 +285,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("car load");
-		str lFilename(_T("car_01.phys"));
+		lContext = "car load";
+		str lFilename("car_01.phys");
 
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
@@ -362,8 +362,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("monster save");
-		str lFilename(_T("monster_01.phys"));
+		lContext = "monster save";
+		str lFilename("monster_01.phys");
 
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_WORLD2LOCAL, Tbc::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(6);
@@ -461,8 +461,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("monster load");
-		str lFilename(_T("monster_01.phys"));
+		lContext = "monster load";
+		str lFilename("monster_01.phys");
 
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
@@ -486,8 +486,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("excavator save");
-		str lFilename(_T("excavator_01.phys"));
+		lContext = "excavator save";
+		str lFilename("excavator_01.phys");
 
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_WORLD2LOCAL, Tbc::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(13);
@@ -709,10 +709,10 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("excavator load");
-		str lFilename(_T("excavator_01.phys"));
+		lContext = "excavator load";
+		str lFilename("excavator_01.phys");
 
-		gTbcLog.Debugf(_T("--> Loading excavator. <--"));
+		gTbcLog.Debugf("--> Loading excavator. <--");
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
 		deb_assert(lOk);
@@ -766,8 +766,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("crane save");
-		str lFilename(_T("crane_01.phys"));
+		lContext = "crane save";
+		str lFilename("crane_01.phys");
 
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_WORLD2LOCAL, Tbc::ChunkyPhysics::DYNAMIC);
 		lStructure.SetBoneCount(7);
@@ -871,8 +871,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("crane load");
-		str lFilename(_T("crane_01.phys"));
+		lContext = "crane load";
+		str lFilename("crane_01.phys");
 
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
@@ -896,8 +896,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("world save");
-		str lFilename(_T("world_01.phys"));
+		lContext = "world save";
+		str lFilename("world_01.phys");
 
 		static const float lRoadWidth = 5;
 		static const float lRoadHeight = 7;
@@ -973,8 +973,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("world load");
-		str lFilename(_T("world_01.phys"));
+		lContext = "world load";
+		str lFilename("world_01.phys");
 
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
@@ -998,8 +998,8 @@ bool ExportStructure()
 	}
 	if (lOk)
 	{
-		lContext = _T("tracktor load");
-		str lFilename(_T("tractor_01.phys"));
+		lContext = "tracktor load";
+		str lFilename("tractor_01.phys");
 
 		Tbc::ChunkyPhysics lStructure(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD);
 		lOk = ReadStructure(lFilename, lStructure);
@@ -1024,6 +1024,6 @@ bool ExportStructure()
 
 	delete (lPhysics);
 
-	ReportTestResult(gTbcLog, _T("ExportStructure"), lContext, lOk);
+	ReportTestResult(gTbcLog, "ExportStructure", lContext, lOk);
 	return (lOk);
 }*/

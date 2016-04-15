@@ -87,9 +87,9 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 	mShakeSound(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->PreLoadSound(_T("explosion"));
+	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->PreLoadSound("explosion");
 
 	SetConsoleManager(new BoundConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
@@ -128,10 +128,10 @@ BoundManager::BoundManager(Life::GameClientMasterTicker* pMaster, const Cure::Ti
 		RNDMZEL;
 		std::vector<vec3> lCopy(lNGon);
 		CreateNGon(lNGon);
-		mLog.Infof(_T("----------"));
+		mLog.Infof("----------");
 		for (int x = 0; x < (int)lNGon.size(); ++x)
 		{
-			mLog.Infof(_T("%f;%f;"), lNGon[x].x, lNGon[x].z);
+			mLog.Infof("%f;%f;", lNGon[x].x, lNGon[x].z);
 		}
 		deb_assert(lNGon.size() == 5);
 	}*/
@@ -160,19 +160,19 @@ void BoundManager::LoadSettings()
 
 	Parent::LoadSettings();
 
-	v_set(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
+	v_set(GetVariableScope(), RTVAR_UI_2D_FONT, "Verdana");
 	v_set(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
 	v_set(GetVariableScope(), RTVAR_UI_3D_FOV, 52.0);
 	v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	v_set(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 prev-level"));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 next-level"));
+	GetConsoleManager()->ExecuteCommand("bind-key F2 prev-level");
+	GetConsoleManager()->ExecuteCommand("bind-key F3 next-level");
 }
 
 void BoundManager::SaveSettings()
 {
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand("save-application-config-file "+GetApplicationCommandFilename());
 }
 
 bool BoundManager::Open()
@@ -190,7 +190,7 @@ bool BoundManager::Open()
 	if (lOk)
 	{
 		mMenu = new Life::Menu(mUiManager, GetResourceManager());
-		mMenu->SetButtonTapSound(_T("tap.wav"), 0.2f, 0.05f);
+		mMenu->SetButtonTapSound("tap.wav", 0.2f, 0.05f);
 	}
 	return lOk;
 }
@@ -308,25 +308,25 @@ bool BoundManager::Paint()
 	{
 		mUiManager->GetPainter()->SetColor(BRIGHT_TEXT);
 
-		const str lCompletionText = strutil::Format(_T("Reduced: %.1f%%"), mPercentDone);
+		const str lCompletionText = strutil::Format("Reduced: %.1f%%", mPercentDone);
 		int cw = mUiManager->GetPainter()->GetStringWidth(lCompletionText);
 		PrintText(lCompletionText, (mUiManager->GetCanvas()->GetWidth()-cw)/2, 7);
 
 		mUiManager->SetScaleFont(0.9f);
 		float lPreviousScore;
 		v_get(lPreviousScore, =(float), GetVariableScope(), RTVAR_GAME_SCORE, 0.0);
-		const str lScoreText = strutil::Format(_T("Score: %.0f"), mLevelScore+lPreviousScore);
+		const str lScoreText = strutil::Format("Score: %.0f", mLevelScore+lPreviousScore);
 		PrintText(lScoreText, 25, 9);
 
 		int lLevel;
 		v_get(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
-		const str lLevelText = strutil::Format(_T("Level: %i"), lLevel+1);
+		const str lLevelText = strutil::Format("Level: %i", lLevel+1);
 		int lw = mUiManager->GetPainter()->GetStringWidth(lLevelText);
 		PrintText(lLevelText, mUiManager->GetCanvas()->GetWidth()-lw-25, 9);
 
 		mUiManager->GetPainter()->SetColor(lIsUsingACut? DIM_RED_TEXT : DIM_TEXT);
 		mUiManager->SetScaleFont(0.7f);
-		const str lLinesText = strutil::Format(_T("Cuts: %i"), mCutsLeft);
+		const str lLinesText = strutil::Format("Cuts: %i", mCutsLeft);
 		PrintText(lLinesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 31);
 
 		vec3 v = RNDPOSVEC()*255;
@@ -334,7 +334,7 @@ bool BoundManager::Paint()
 		lBlinkCol.Set(v.x, v.y, v.z, 1.0f);
 		bool lIsShowingShake = (mIsShaking && mShakeTimer.QuerySplitTime() < 2.5);
 		mUiManager->GetPainter()->SetColor(lIsShowingShake? lBlinkCol : DIM_TEXT);
-		const str lShakesText = strutil::Format(_T("Shakes: %i"), mShakesLeft);
+		const str lShakesText = strutil::Format("Shakes: %i", mShakesLeft);
 		PrintText(lShakesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 48);
 		mUiManager->SetMasterFont();
 	}
@@ -419,10 +419,10 @@ bool BoundManager::HandleCutting()
 			vec3 lStartSmokeColor(0.4f, 0.4f, 0.4f);
 			vec3 lSmokeColor(0.2f, 0.2f, 0.2f);
 			vec3 lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-			UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+			UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 			lParticleRenderer->CreateExplosion(lCollisionPoint, 0.05f, vec3(), 0.15f, 0.25f, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/3);
 			UiCure::UserSound2dResource* lBreakSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-			new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("broken_window.wav"), lBreakSound, 0.5f, Random::Uniform(0.9f, 1.2f));
+			new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "broken_window.wav", lBreakSound, 0.5f, Random::Uniform(0.9f, 1.2f));
 			mCutTimer.ReduceTimeDiff(-2.0);
 			mLevelScore -= 200;
 		}
@@ -453,7 +453,7 @@ bool BoundManager::HandleCutting()
 				}
 				mCameraRotateSpeed = (lCutX < 0)? +3+mQuickCutCount*0.5f : -3-mQuickCutCount*0.5f;
 				UiCure::UserSound2dResource* lCutSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-				new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("cut.wav"), lCutSound, 0.5f, mCutSoundPitch);
+				new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "cut.wav", lCutSound, 0.5f, mCutSoundPitch);
 			}
 		}
 		lAnyDragStarted |= lDragStarted;
@@ -504,7 +504,7 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 
 	mLastCutMode = pCutMode;
 	// Plane normal now "points" toward vertices that stays. Those on the other side gets cut off. The new triangles will use this normal.
-	TimeLogger lTimeLogger(&mLog, _T("CheckIfPlaneSlicesBetweenBalls + prep"));
+	TimeLogger lTimeLogger(&mLog, "CheckIfPlaneSlicesBetweenBalls + prep");
 	const quat q = mCameraTransform.GetOrientation();
 	const int tc = pMesh->GetVertexCount() / 3;
 	const float* v = pMesh->GetVertexData();
@@ -525,7 +525,7 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 	std::unordered_set<int> pNGonMap;
 	bool lDidCut = false;
 	const bool lCreateWindow = (pCutMode == CUT_ADD_WINDOW);
-	lTimeLogger.Transfer(_T("CutLoop"));
+	lTimeLogger.Transfer("CutLoop");
 	for (int x = 0; x < tc; ++x)
 	{
 		vec3 p0(v[x*9+0], v[x*9+1], v[x*9+2]);
@@ -661,7 +661,7 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 		}
 		return true;
 	}
-	lTimeLogger.Transfer(_T("CreateNGon()"));
+	lTimeLogger.Transfer("CreateNGon("));
 	CreateNGon(lNGon);
 	if (lNGon.size() < 3 || !lDidCut)
 	{
@@ -671,7 +671,7 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 		return false;
 	}
 	// Generate random colors and add.
-	lTimeLogger.Transfer(_T("AddNGonTriangles()"));
+	lTimeLogger.Transfer("AddNGonTriangles("));
 	std::vector<uint8> lNGonColors;
 	const size_t nvc = (lNGon.size()-2)*3;
 	lNGonColors.resize(nvc*4);
@@ -1043,10 +1043,10 @@ bool BoundManager::DidFinishLevel()
 {
 	int lLevel;
 	v_get(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
-	mLog.Headlinef(_T("Level %i done!"), lLevel);
+	mLog.Headlinef("Level %i done!", lLevel);
 	OnPauseButton(0);
 	UiCure::UserSound2dResource* lFinishSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, 0.5f, Random::Uniform(0.98f, 1.02f));
+	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "finish.wav", lFinishSound, 0.5f, Random::Uniform(0.98f, 1.02f));
 
 	bool lRunAds;
 	v_get(lRunAds, =, GetVariableScope(), RTVAR_GAME_RUNADS, true);
@@ -1114,13 +1114,13 @@ Cure::RuntimeVariableScope* BoundManager::GetVariableScope() const
 bool BoundManager::InitializeUniverse()
 {
 	// Create dummy explosion to ensure all geometries loaded and ready, to avoid LAAAG when first exploading.
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 	const vec3 v;
 	lParticleRenderer->CreateExplosion(vec3(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	mCutsLeft = 25;
 	mShakesLeft = 2;
-	mLevel = (Level*)Parent::CreateContextObject(_T("level"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Level*)Parent::CreateContextObject("level", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	StepLevel(0);
 	mSunlight = new Sunlight(mUiManager);
 	return true;
@@ -1176,7 +1176,7 @@ void BoundManager::CreateBall(int pIndex, const vec3* pPosition)
 		}
 		return;
 	}
-	Cure::ContextObject* lBall = Parent::CreateContextObject(_T("soccerball"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	Cure::ContextObject* lBall = Parent::CreateContextObject("soccerball", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	lBall->SetRootPosition(lPosition);
 	lBall->SetRootVelocity(RNDVEC(1.0f));
 	lBall->StartLoading();
@@ -1186,7 +1186,7 @@ void BoundManager::CreateBall(int pIndex, const vec3* pPosition)
 Cure::ContextObject* BoundManager::CreateContextObject(const str& pClassId) const
 {
 	UiCure::Machine* lObject = 0;
-	if (pClassId == _T("level"))
+	if (pClassId == "level")
 	{
 		lObject = new Level(GetResourceManager(), pClassId, mUiManager);
 	}
@@ -1206,13 +1206,13 @@ void BoundManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
 	if (pOk)
 	{
-		/*if (pObject->GetClassId() == _T("soccerball")))
+		/*if (pObject->GetClassId() == "soccerball"))
 		{
 		}*/
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
+		mLog.Errorf("Could not load object of type %s.", pObject->GetClassId().c_str());
 		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
 }
@@ -1236,12 +1236,12 @@ void BoundManager::ShowInstruction()
 	d->SetDirection(+1, false);
 	UiTbc::FixedLayouter lLayouter(d);
 
-	UiTbc::Label* lLabel1 = new UiTbc::Label(BRIGHT_TEXT, _T("Swipe to cut the box. Avoid hitting the"));
+	UiTbc::Label* lLabel1 = new UiTbc::Label(BRIGHT_TEXT, "Swipe to cut the box. Avoid hitting the");
 	lLayouter.AddComponent(lLabel1, 0, 6, 0, 1, 1);
-	UiTbc::Label* lLabel2 = new UiTbc::Label(BRIGHT_TEXT, _T("balls. Cut away 85% to complete level."));
+	UiTbc::Label* lLabel2 = new UiTbc::Label(BRIGHT_TEXT, "balls. Cut away 85% to complete level.");
 	lLayouter.AddComponent(lLabel2, 1, 6, 0, 1, 1);
 
-	UiTbc::Button* lResetLevelButton = new UiTbc::Button(GREEN_BUTTON, _T("OK"));
+	UiTbc::Button* lResetLevelButton = new UiTbc::Button(GREEN_BUTTON, "OK");
 	lLayouter.AddButton(lResetLevelButton, -9, 2, 3, 0, 1, 1, true);
 
 	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
@@ -1268,14 +1268,14 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 	bool lIsPaused = false;
 	if (LEVEL_DONE())
 	{
-		UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, _T("Level completed (85%)"));
+		UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, "Level completed (85%"));
 		lLabel->SetFontId(mUiManager->SetScaleFont(1.2f));
 		mUiManager->SetMasterFont();
 		lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
 		lLabel->SetAdaptive(false);
 		lLayouter.AddComponent(lLabel, lRow++, lRowCount, 0, 1, 1);
 
-		UiTbc::Button* lNextLevelButton = new UiTbc::Button(GREEN_BUTTON, _T("Next level"));
+		UiTbc::Button* lNextLevelButton = new UiTbc::Button(GREEN_BUTTON, "Next level");
 		lLayouter.AddButton(lNextLevelButton, -1, lRow++, lRowCount, 0, 1, 1, true);
 	}
 	else
@@ -1283,12 +1283,12 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		UiTbc::Label* lLabel;
 		if (mCutsLeft > 0)
 		{
-			lLabel = new UiTbc::Label(BRIGHT_TEXT, _T("Paused"));
+			lLabel = new UiTbc::Label(BRIGHT_TEXT, "Paused");
 			lIsPaused = true;
 		}
 		else
 		{
-			lLabel = new UiTbc::Label(RED_BUTTON, _T("Out of cuts!"));
+			lLabel = new UiTbc::Label(RED_BUTTON, "Out of cuts!");
 		}
 		lLabel->SetFontId(mUiManager->SetScaleFont(1.2f));
 		mUiManager->SetMasterFont();
@@ -1297,25 +1297,25 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		lLayouter.AddComponent(lLabel, lRow++, lRowCount, 0, 1, 1);
 	}
 
-	UiTbc::Button* lResetLevelButton = new UiTbc::Button(ORANGE_BUTTON, _T("Reset level"));
+	UiTbc::Button* lResetLevelButton = new UiTbc::Button(ORANGE_BUTTON, "Reset level");
 	lLayouter.AddButton(lResetLevelButton, -3, lRow++, lRowCount, 0, 1, 1, true);
 
 	if (lRow < 3)
 	{
-		UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(RED_BUTTON, _T("Reset game"));
+		UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(RED_BUTTON, "Reset game");
 		lLayouter.AddButton(lRestartFrom1stLevelButton, -4, lRow++, lRowCount, 0, 1, 1, true);
 	}
 
 	if (!lDidBuy)
 	{
-		UiTbc::Button* lBuyButton = new UiTbc::Button(BLACK_BUTTON, _T("Buy full"));
+		UiTbc::Button* lBuyButton = new UiTbc::Button(BLACK_BUTTON, "Buy full");
 		lBuyButton->SetFontColor(DIM_TEXT);
 		lLayouter.AddButton(lBuyButton, -5, lRow++, lRowCount, 0, 1, 1, true);
 	}
 
 	if (lIsPaused)
 	{
-		UiTbc::Button* lCloseButton = new UiTbc::Button(DIM_RED, _T("X"));
+		UiTbc::Button* lCloseButton = new UiTbc::Button(DIM_RED, "X");
 		lLayouter.AddCornerButton(lCloseButton, -9);
 	}
 
@@ -1328,10 +1328,10 @@ void BoundManager::OnMenuAlternative(UiTbc::Button* pButton)
 	v_get(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	switch (pButton->GetTag())
 	{
-		case -1:	GetConsoleManager()->PushYieldCommand(_T("step-level +1"));				break;
-		case -2:	GetConsoleManager()->PushYieldCommand(_T("step-level -1"));				break;
-		case -3:	GetConsoleManager()->PushYieldCommand(_T("step-level 0"));				break;
-		case -4:	GetConsoleManager()->PushYieldCommand(strutil::Format(_T("step-level %i"), -lLevel));	break;
+		case -1:	GetConsoleManager()->PushYieldCommand("step-level +1");				break;
+		case -2:	GetConsoleManager()->PushYieldCommand("step-level -1");				break;
+		case -3:	GetConsoleManager()->PushYieldCommand("step-level 0");				break;
+		case -4:	GetConsoleManager()->PushYieldCommand(strutil::Format("step-level %i", -lLevel));	break;
 		case -5:	Bound__Buy();										break;
 	}
 	mPauseButton->SetVisible(true);
@@ -1356,7 +1356,7 @@ void BoundManager::ScriptPhysicsTick()
 		}
 		if (!mCutVertices.empty() || !mCutWindowVertices.empty() || mForceCutWindow)
 		{
-			TimeLogger lTimeLogger(&mLog, _T("mLevel->SetTriangles"));
+			TimeLogger lTimeLogger(&mLog, "mLevel->SetTriangles");
 			if (mLastCutMode == CUT_ADD_WINDOW)
 			{
 				mLevel->AddCutPlane(GetPhysicsManager(), mLastCutPlane, mCutWindowVertices, Color(90, 100, 210, 180));
@@ -1422,7 +1422,7 @@ void BoundManager::ScriptPhysicsTick()
 				mShakeTimer.Start();
 				delete mShakeSound;
 				UiCure::UserSound2dResource* lBreakSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_FORWARD);
-				mShakeSound = new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("shake.wav"), lBreakSound, 0.5f, 1.0);
+				mShakeSound = new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "shake.wav", lBreakSound, 0.5f, 1.0);
 				mLevelScore -= 1000;
 				--mShakesLeft;
 			}
@@ -1475,14 +1475,14 @@ void BoundManager::ScriptPhysicsTick()
 		{
 			mNextLevelTimer.Stop();
 			strutil::strvec lResourceTypes;
-			lResourceTypes.push_back(_T("RenderImg"));
-			lResourceTypes.push_back(_T("Geometry"));
-			lResourceTypes.push_back(_T("GeometryRef"));
-			lResourceTypes.push_back(_T("Physics"));
-			lResourceTypes.push_back(_T("PhysicsShared"));
-			lResourceTypes.push_back(_T("RamImg"));
-			lResourceTypes.push_back(_T("Sound3D"));
-			lResourceTypes.push_back(_T("Sound2D"));
+			lResourceTypes.push_back("RenderImg");
+			lResourceTypes.push_back("Geometry");
+			lResourceTypes.push_back("GeometryRef");
+			lResourceTypes.push_back("Physics");
+			lResourceTypes.push_back("PhysicsShared");
+			lResourceTypes.push_back("RamImg");
+			lResourceTypes.push_back("Sound3D");
+			lResourceTypes.push_back("Sound2D");
 			GetResourceManager()->ForceFreeCache(lResourceTypes);
 			GetResourceManager()->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
 		}

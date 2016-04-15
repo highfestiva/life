@@ -228,7 +228,7 @@ protected:
 	HiResTimer mResendTimeOfLastPacket;
 	StopWatch mHideWatch;
 	double mResendIntermediatePacketTime;
-	astr mResendLastResponse;
+	str mResendLastResponse;
 	SocketAddress mOpenLocalAddress;
 	SocketAddress mInternalLocalAddress;
 	SocketAddress mLocalAddress;

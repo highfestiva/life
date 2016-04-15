@@ -59,7 +59,7 @@ bool UiOpenGLShader::Build(const str& pVertexShaderSource, const str& pFragmentS
 	mFragmentShader = Compile(GL_FRAGMENT_SHADER, pFragmentShaderSource);
 	if (mVertexShader == 0 || mFragmentShader == 0)
 	{
-		mLog.AError("Error while compiling shaders");
+		mLog.Error("Error while compiling shaders");
 		Release();
 		return false;
 	}
@@ -80,12 +80,12 @@ unsigned UiOpenGLShader::Compile(GLenum type, const str& pSource)
 {
 	if (pSource.empty())
 	{
-		mLog.Errorf(_T("Shader source '%s' is empty!"), pSource.c_str());
+		mLog.Errorf("Shader source '%s' is empty!", pSource.c_str());
 		return 0;
 	}
 
 	GLuint lShader = ::glCreateShader(type);
-	astr lAnsiSource = astrutil::Encode(pSource);
+	str lAnsiSource = pSource;
 	const char* lRawSource = lAnsiSource.c_str();
 	::glShaderSource(lShader, 1, &lRawSource, 0);
 	::glCompileShader(lShader);
@@ -93,15 +93,15 @@ unsigned UiOpenGLShader::Compile(GLenum type, const str& pSource)
 	::glGetShaderiv(lShader, GL_COMPILE_STATUS, &lStatus);
 	if (!lStatus)
 	{
-		mLog.Errorf(_T("Failed to compile shader with contents: '%s'"), pSource.c_str());
+		mLog.Errorf("Failed to compile shader with contents: '%s'", pSource.c_str());
 		GLint lLogLength;
 		::glGetShaderiv(lShader, GL_INFO_LOG_LENGTH, &lLogLength);
 		if (lLogLength > 0)
 		{
 			unsigned char* lRawLog = new unsigned char[lLogLength];
 			::glGetShaderInfoLog(lShader, lLogLength, &lLogLength, (GLchar*)&lRawLog[0]);
-			astr lCharLog((char*)lRawLog);
-			str lLog = strutil::Encode(lCharLog);
+			str lCharLog((char*)lRawLog);
+			str lLog = lCharLog;
 			mLog.Error(lLog);
 			delete lRawLog;
 		}
@@ -117,7 +117,7 @@ bool UiOpenGLShader::Link()
 	::glGetProgramiv(mShaderProgram, GL_LINK_STATUS, &lStatus);
 	if (!lStatus)
 	{
-		mLog.AError("Failed to link shader program");
+		mLog.Error("Failed to link shader program");
 	}
 	return lStatus? true : false;
 }

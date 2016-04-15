@@ -36,7 +36,7 @@ public:
 		mPainter(pPainter)
 	{
 	}
-	int stringWidth(astr s) { return mPainter->GetStringWidth(strutil::Encode(s)); }
+	int stringWidth(astr s) { return mPainter->GetStringWidth(s); }
 	int getHeight() { return mPainter->GetFontHeight(); }
 	int getAscent() { return getHeight()*4/5; }
 
@@ -77,7 +77,7 @@ public:
 	}
 	void drawString(astr s, int x, int y)
 	{
-		mPainter->PrintText(strutil::Encode(s), x, y);
+		mPainter->PrintText(s, x, y);
 	}
 
 	FontMetrics getFontMetrics()
@@ -155,7 +155,7 @@ namespace out
 {
 inline void println(astr s)
 {
-	LogType::GetLogger(LogType::SUB_ROOT)->RawPrint(strutil::Encode(s)+_T("\n"));
+	LogType::GetLogger(LogType::SUB_ROOT)->RawPrint(s+"\n");
 }
 }
 inline long currentTimeMillis()

@@ -64,7 +64,7 @@ protected:
 		COMMAND_COUNT_LIFE_CLIENT
 	};
 
-	bool SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig);
+	bool SaveApplicationConfigFile(File* pFile, const str& pUserConfig);
 
 	virtual unsigned GetCommandCount() const;
 	virtual const CommandPair& GetCommand(unsigned pIndex) const;

@@ -26,7 +26,7 @@ DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
 	switch(pCT)
 	{
 		case DisplayManager::OPENGL_CONTEXT:	lDisplayManager = new X11OpenGLDisplay;				break;
-		default:				mLog.AError("Invalid context type in CreateDisplayManager().");	break;
+		default:				mLog.Error("Invalid context type in CreateDisplayManager().");	break;
 	}
 	return (lDisplayManager);
 }
@@ -145,7 +145,7 @@ void X11DisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
 
 	if (pInternalCall == false || mCaptionSet == false)
 	{
-		::XStoreName(GetDisplay(), GetWindow(), astrutil::Encode(pCaption).c_str());
+		::XStoreName(GetDisplay(), GetWindow(), pCaption.c_str());
 	}
 }
 
@@ -155,12 +155,12 @@ bool X11DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 
 	if (mIsScreenOpen)
 	{
-		mLog.AWarning("OpenScreen() - Screen already opened.");
+		mLog.Warning("OpenScreen() - Screen already opened.");
 		lOk = false;
 	}
 	else if(pDisplayMode.IsValid() == false && pScreenMode == FULLSCREEN)
 	{
-		mLog.AError("OpenScreen() - Invalid display mode.");
+		mLog.Error("OpenScreen() - Invalid display mode.");
 		lOk = false;
 	}
 
@@ -199,7 +199,7 @@ bool X11DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 
 			if (lSupportedMode == false)
 			{
-				str lErr(strutil::Format(_T("OpenScreen() - Display mode %i-bit %ix%i at %i Hz is not supported!"),
+				str lErr(strutil::Format("OpenScreen - Display mode %i-bit %ix%i at %i Hz is not supported!",
 						 pDisplayMode.mBitDepth, 
 						 pDisplayMode.mWidth, 
 						 pDisplayMode.mHeight, 
@@ -297,7 +297,7 @@ bool X11DisplayManager::InitWindow()
 		mDisplay = XOpenDisplay(0);
 		if(!mDisplay)
 		{
-			mLog.AError("Display not opened. X started?");
+			mLog.Error("Display not opened. X started?");
 			lOk = false;
 		}
 	}
@@ -384,7 +384,7 @@ bool X11DisplayManager::InitWindow()
 		}
 		else
 		{
-			mLog.AError("InitWindow() - Failed to create window.");
+			mLog.Error("InitWindow() - Failed to create window.");
 		}
 	}
 
@@ -607,7 +607,7 @@ bool X11DisplayManager::OnMessage(const XEvent& pEvent)
 
 bool X11DisplayManager::DispatchMessage(const XEvent& pEvent)
 {
-	//mLog.Infof(_T("X message: %i"), pEvent.type);
+	//mLog.Infof("X message: %i", pEvent.type);
 
 	bool lConsumed = false;
 	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pEvent.type);

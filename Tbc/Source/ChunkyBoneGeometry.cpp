@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -64,7 +64,7 @@ ChunkyBoneGeometry* ChunkyBoneGeometry::Load(ChunkyPhysics* pStructure, const vo
 {
 	if (pByteCount < sizeof(uint32))
 	{
-		mLog.AError("Could not load; very small data size.");
+		mLog.Error("Could not load; very small data size.");
 		deb_assert(false);
 		return (0);
 	}
@@ -89,7 +89,7 @@ ChunkyBoneGeometry* ChunkyBoneGeometry::Load(ChunkyPhysics* pStructure, const vo
 		}
 		else
 		{
-			mLog.AError("Could not load; wrong data size.");
+			mLog.Error("Could not load; wrong data size.");
 			deb_assert(false);
 			delete (lGeometry);
 			lGeometry = 0;
@@ -375,7 +375,7 @@ unsigned ChunkyBoneGeometry::GetChunkySize(const void* pData) const
 	}
 	else
 	{
-		lSize += PackerUnicodeString::Pack(0, wstrutil::Encode(mMaterial));
+		lSize += PackerUnicodeString::Pack(0, mMaterial);
 	}
 	return (lSize);
 }
@@ -402,7 +402,7 @@ void ChunkyBoneGeometry::SaveChunkyData(const ChunkyPhysics* pStructure, void* p
 	{
 		lData[y++] = Endian::HostToBig(mConnectorArray[x]);
 	}
-	PackerUnicodeString::Pack((uint8*)&lData[y], wstrutil::Encode(mMaterial));
+	PackerUnicodeString::Pack((uint8*)&lData[y], mMaterial);
 }
 
 void ChunkyBoneGeometry::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)

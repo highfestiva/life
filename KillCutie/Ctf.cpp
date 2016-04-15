@@ -20,7 +20,7 @@ namespace GrenadeRun
 
 
 Ctf::Ctf(Cure::ContextManager* pManager):
-	Parent(pManager->GetGameManager()->GetResourceManager(), _T("Ctf")),
+	Parent(pManager->GetGameManager()->GetResourceManager(), "Ctf"),
 	mTrigger(0),
 	mLastFrameTriggered(false),
 	mIsTriggerTimerStarted(false),
@@ -60,7 +60,7 @@ void Ctf::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
 {
 	mTrigger = pTrigger;
 	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
-	const Tbc::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0);
+	const Tbc::ChunkyClass::Tag* lTag = lParent->FindTag("stunt_trigger_data", 4, 0);
 	deb_assert(lTag && lTag->mMeshIndexList.size() == 2);
 	if (lTag && lTag->mMeshIndexList.size() == 2)
 	{
@@ -82,7 +82,7 @@ void Ctf::OnTick()
 	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
 	if (!mFlagMesh || !mBlinkMesh)
 	{
-		const Tbc::ChunkyClass::Tag* lTag = lParent->FindTag(_T("stunt_trigger_data"), 4, 0);
+		const Tbc::ChunkyClass::Tag* lTag = lParent->FindTag("stunt_trigger_data", 4, 0);
 		mFlagMesh = (Tbc::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[0]);
 		mBlinkMesh = (Tbc::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[1]);
 		if (!mFlagMesh || !mBlinkMesh)

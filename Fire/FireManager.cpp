@@ -130,11 +130,11 @@ FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mFireDelayTimer.Start();
 
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->PreLoadSound(_T("explosion"));
+	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->PreLoadSound("explosion");
 
 	SetConsoleManager(new FireConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
@@ -145,7 +145,7 @@ FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	v_set(GetVariableScope(), RTVAR_GAME_EXPLOSIVESTRENGTH, 1.0);
 	v_set(GetVariableScope(), RTVAR_GAME_FIRSTRUN, true);
 	v_set(GetVariableScope(), RTVAR_GAME_FIREDELAY, 1.0);
-	v_set(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
+	v_set(GetVariableScope(), RTVAR_GAME_STARTLEVEL, "lvl00");
 	v_set(GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 25.0);
 }
 
@@ -169,7 +169,7 @@ void FireManager::Suspend(bool pHard)
 void FireManager::LoadSettings()
 {
 	v_set(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
-	v_set(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
+	v_set(GetVariableScope(), RTVAR_UI_2D_FONT, "Verdana");
 	v_set(GetVariableScope(), RTVAR_UI_3D_FOV, 38.8);
 
 	Parent::LoadSettings();
@@ -178,13 +178,13 @@ void FireManager::LoadSettings()
 	v_set(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 	v_set(GetVariableScope(), RTVAR_CTRL_EMULATETOUCH, true);
 
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 prev-level"));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 next-level"));
+	GetConsoleManager()->ExecuteCommand("bind-key F2 prev-level");
+	GetConsoleManager()->ExecuteCommand("bind-key F3 next-level");
 }
 
 void FireManager::SaveSettings()
 {
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand("save-application-config-file "+GetApplicationCommandFilename());
 }
 
 void FireManager::SetRenderArea(const PixelRect& pRenderArea)
@@ -197,7 +197,7 @@ bool FireManager::Open()
 	bool lOk = Parent::Open();
 	if (lOk)
 	{
-		mUiManager->GetDisplayManager()->SetCaption(_T("NSAgent"));
+		mUiManager->GetDisplayManager()->SetCaption("NSAgent");
 	}
 	if (lOk)
 	{
@@ -220,7 +220,7 @@ bool FireManager::Open()
 	if (lOk)
 	{
 		mMenu = new Life::Menu(mUiManager, GetResourceManager());
-		mMenu->SetButtonTapSound(_T("tap.wav"), 1, 0.3f);
+		mMenu->SetButtonTapSound("tap.wav", 1, 0.3f);
 	}
 	return lOk;
 }
@@ -297,7 +297,7 @@ bool FireManager::Paint()
 	}
 
 	UiTbc::Painter* lPainter = mUiManager->GetPainter();
-	str lScore = strutil::Format(_T("Score: %i/%i"), mKills, mKillLimit);
+	str lScore = strutil::Format("Score: %i/%i", mKills, mKillLimit);
 	lPainter->SetColor(WHITE);
 	lPainter->PrintText(lScore, 100, 21);
 
@@ -467,13 +467,13 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	}
 	else
 	{
-		Cure::ContextObject* lObject = Parent::CreateContextObject(_T("indicator"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
+		Cure::ContextObject* lObject = Parent::CreateContextObject("indicator", Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		lObject->SetInitialTransform(xform(gIdentityQuaternionF, lTargetPosition));
 		lObject->StartLoading();
 		GetContext()->DelayKillObject(lObject, 1.5f);
 	}
 
-	Life::Projectile* lProjectile = new Life::Projectile(GetResourceManager(), _T("rocket"), mUiManager, this);
+	Life::Projectile* lProjectile = new Life::Projectile(GetResourceManager(), "rocket", mUiManager, this);
 	lProjectile->EnableRootShadow(true);
 	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	lProjectile->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
@@ -510,7 +510,7 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 void FireManager::Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength)
 {
 	float lVolumeFactor = 1;
-	const bool lIsRocket = (pExplosive->GetClassId() == _T("rocket"));
+	const bool lIsRocket = (pExplosive->GetClassId() == "rocket");
 	if (lIsRocket)
 	{
 		float lExplosiveStrength;
@@ -534,14 +534,14 @@ void FireManager::Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBon
 			{
 				mBombButton->SetVisible(true);
 				UiCure::UserSound2dResource* lSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-				new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("great.wav"), lSound, 1, 1);
+				new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "great.wav", lSound, 1, 1);
 			}
 		}
 	}
 
-	mCollisionSoundManager->OnCollision(pStrength*lVolumeFactor, pPosition, pExplosiveGeometry, _T("explosion"));
+	mCollisionSoundManager->OnCollision(pStrength*lVolumeFactor, pPosition, pExplosiveGeometry, "explosion");
 
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
 	vec3 u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
 	u -= pVelocity;	// Mirror and inverse.
@@ -614,14 +614,14 @@ void FireManager::OnLetThroughTerrorist(BaseMachine* pTerrorist)
 
 	--mKills;
 	UiCure::UserSound2dResource* lSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("bad.wav"), lSound, 1, 1);
+	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "bad.wav", lSound, 1, 1);
 }
 
 
 
 bool FireManager::DidFinishLevel()
 {
-	mLog.Headlinef(_T("Level %s done!"), mLevel->GetClassId().c_str());
+	mLog.Headlinef("Level %s done!", mLevel->GetClassId().c_str());
 	return true;
 }
 
@@ -654,7 +654,7 @@ str FireManager::StoreLevelIndex(int pLevelNumber)
 	{
 		pLevelNumber = 0;
 	}
-	str lNewLevelName = strutil::Format(_T("lvl%2.2i"), pLevelNumber);
+	str lNewLevelName = strutil::Format("lvl%2.2i", pLevelNumber);
 	v_set(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
 	return lNewLevelName;
 }
@@ -691,12 +691,12 @@ bool FireManager::InitializeUniverse()
 	mUiManager->UpdateSettings();
 
 	// Create dummy explosion to ensure all geometries loaded and ready, to avoid LAAAG when first exploading.
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 	const vec3 v;
 	lParticleRenderer->CreateExplosion(vec3(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	str lStartLevel;
-	v_get(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("lvl00"));
+	v_get(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, "lvl00");
 	{
 		ScopeLock lLock(GetTickLock());
 		int lLevelIndex = 0;
@@ -735,14 +735,14 @@ void FireManager::ScriptPhysicsTick()
 		mAllLoadedTimer.Stop();
 		mAllLoadedTimer.ClearTimeDiff();
 		strutil::strvec lResourceTypes;
-		lResourceTypes.push_back(_T("RenderImg"));
-		lResourceTypes.push_back(_T("Geometry"));
-		lResourceTypes.push_back(_T("GeometryRef"));
-		lResourceTypes.push_back(_T("Physics"));
-		lResourceTypes.push_back(_T("PhysicsShared"));
-		lResourceTypes.push_back(_T("RamImg"));
-		lResourceTypes.push_back(_T("Sound3D"));
-		lResourceTypes.push_back(_T("Sound2D"));
+		lResourceTypes.push_back("RenderImg");
+		lResourceTypes.push_back("Geometry");
+		lResourceTypes.push_back("GeometryRef");
+		lResourceTypes.push_back("Physics");
+		lResourceTypes.push_back("PhysicsShared");
+		lResourceTypes.push_back("RamImg");
+		lResourceTypes.push_back("Sound3D");
+		lResourceTypes.push_back("Sound2D");
 		GetResourceManager()->ForceFreeCache(lResourceTypes);
 		GetResourceManager()->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
 	}
@@ -844,7 +844,7 @@ void FireManager::HandleTargets(float pTime)
 	for (; x != lObjectTable.end(); ++x)
 	{
 		Cure::ContextObject* lObject = x->second;
-		if (lObject->GetClassId().find(_T("lvl")) == 0 || lObject->GetClassId() == _T("indicator"))
+		if (lObject->GetClassId().find("lvl") == 0 || lObject->GetClassId() == "indicator")
 		{
 			continue;
 		}
@@ -940,14 +940,14 @@ void FireManager::SetLocalRender(bool pRender)
 Cure::ContextObject* FireManager::CreateContextObject(const str& pClassId) const
 {
 	Cure::CppContextObject* lObject;
-	if (strutil::StartsWith(pClassId, _T("lvl")))
+	if (strutil::StartsWith(pClassId, "lvl"))
 	{
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 		Level* lLevel = new Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
 		lLevel->EnableRootShadow(false);
 		lObject = lLevel;
 	}
-	else if (strutil::StartsWith(pClassId, _T("indicator")))
+	else if (strutil::StartsWith(pClassId, "indicator"))
 	{
 		lObject = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
 	}
@@ -988,15 +988,15 @@ Cure::ContextObject* FireManager::CreateContextObject(const str& pClassId) const
 
 Cure::ContextObject* FireManager::CreateLogicHandler(const str& pType)
 {
-	if (pType == _T("spawner") || pType == _T("spawner_init"))
+	if (pType == "spawner" || pType == "spawner_init")
 	{
 		return new Life::Spawner(GetContext());
 	}
-	else if (pType == _T("eater"))
+	else if (pType == "eater")
 	{
 		return new Eater(GetContext());
 	}
-	else if (pType == _T("context_path"))
+	else if (pType == "context_path")
 	{
 		return mLevel->QueryPath();
 	}
@@ -1011,29 +1011,29 @@ void FireManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		{
 			OnLevelLoadCompleted();
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("rocket")))
+		else if (strutil::StartsWith(pObject->GetClassId(), "rocket"))
 		{
 			pObject->SetEnginePower(0, 1.0f);
 			//pObject->SetEnginePower(2, 1.0f);
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("indicator")))
+		else if (strutil::StartsWith(pObject->GetClassId(), "indicator"))
 		{
 		}
 		else
 		{
-			new Cure::FloatAttribute(pObject, _T("float_childishness"), 1);
-			new AutoPathDriver(this, pObject->GetInstanceId(), _T("input"));
+			new Cure::FloatAttribute(pObject, "float_childishness", 1);
+			new AutoPathDriver(this, pObject->GetInstanceId(), "input");
 			vec3 lColor = RNDPOSVEC();
 			Life::ExplodingMachine* lMachine = (Life::ExplodingMachine*)pObject;
 			lMachine->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
 		}
-		log_volatile(mLog.Tracef(_T("Loaded object %s."), pObject->GetClassId().c_str()));
+		log_volatile(mLog.Tracef("Loaded object %s.", pObject->GetClassId().c_str()));
 		pObject->GetPhysics()->UpdateBonesObjectTransformation(0, gIdentityTransformationF);
 		((UiCure::CppContextObject*)pObject)->UiMove();
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
+		mLog.Errorf("Could not load object of type %s.", pObject->GetClassId().c_str());
 		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
 }
@@ -1054,7 +1054,7 @@ void FireManager::OnLevelLoadCompleted()
 	{
 		return;
 	}
-	mLog.Headlinef(_T("Level %s loaded."), mLevel->GetClassId().c_str());
+	mLog.Headlinef("Level %s loaded.", mLevel->GetClassId().c_str());
 	bool lFirstRun;
 	v_get(lFirstRun, =, GetVariableScope(), RTVAR_GAME_FIRSTRUN, false);
 	if (lFirstRun)
@@ -1151,13 +1151,13 @@ void FireManager::OnPauseButton(UiTbc::Button* pButton)
 	UiTbc::FixedLayouter lLayouter(d);
 	lLayouter.SetContentYMargin(d->GetPreferredHeight()/10);
 
-	UiTbc::Button* lRestartButton = new UiTbc::Button(Color(90, 10, 10), _T("Reset game"));
+	UiTbc::Button* lRestartButton = new UiTbc::Button(Color(90, 10, 10), "Reset game");
 	lLayouter.AddButton(lRestartButton, -8, 0, 2, 0, 1, 1, true);
 
-	UiTbc::Button* lRestartLevelButton = new UiTbc::Button(Color(10, 90, 10), _T("Restart level"));
+	UiTbc::Button* lRestartLevelButton = new UiTbc::Button(Color(10, 90, 10), "Restart level");
 	lLayouter.AddButton(lRestartLevelButton, -4, 1, 2, 0, 1, 1, true);
 
-	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), _T("X"));
+	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), "X");
 	lLayouter.AddCornerButton(lCloseButton, -9);
 
 	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
@@ -1183,21 +1183,21 @@ void FireManager::CreateNextLevelDialog()
 
 	static const tchar* lCongratulations[] =
 	{
-		_T("Well done, agent!\n\nPrepare to protect other people in other parts of the world."),
-		_T("Great Scott; you are good at this!\n\nRemember to relax between wet jobs."),
-		_T("We sure are lucky to have you on our side.\n\nField work sure beats the office, huh?"),
-		_T("On behalf of all the people in the world:\n\nTHANK YOU!!!"),
-		_T("There might be a bug in our terrorist ID software.\nPlease don't worry about it while we remedy.\n\nYou should go on a mission now."),
-		_T("They software guys say the bug might be fixed.\n\nGo kill!"),
-		_T("Everybody dies, but it's nice to see the bad ones go first.\n\nHead out agent!"),
-		_T("Rooting out vermin is your cup of tea.\n\nI'm glad that you are not in working in pesticides."),
-		_T("You are the pride and joy of our agency.\n\nOh and btw: the President sends his gratitude!"),
-		_T("Your persistency must be admired.\n\nThe last guy quit after just a week!"),
-		_T("Your next assignment is... Haha! Just kiddin'!\nWho cares where you go when there are big guns at your disposal\nand a lot of bad people at the other end of the barrel?"),
-		_T("An awful lot of bad guys out there.\n\nGood work, agent!"),
-		_T("A little collateral is not a problem.\nI mean, it's like fishing: to exterminate the big\ncatch you've gotta kill innocent fish babies."),
-		_T("There are almost no terrorists left in the world!\n\nHumanity is relying on you."),
-		_T("You've done it, the world is cleansed!\n\nHowever, disturbing reports on the outskirts of\nyour home town tells me you should go there again."),
+		"Well done, agent!\n\nPrepare to protect other people in other parts of the world.",
+		"Great Scott; you are good at this!\n\nRemember to relax between wet jobs.",
+		"We sure are lucky to have you on our side.\n\nField work sure beats the office, huh?",
+		"On behalf of all the people in the world:\n\nTHANK YOU!!!",
+		"There might be a bug in our terrorist ID software.\nPlease don't worry about it while we remedy.\n\nYou should go on a mission now.",
+		"They software guys say the bug might be fixed.\n\nGo kill!",
+		"Everybody dies, but it's nice to see the bad ones go first.\n\nHead out agent!",
+		"Rooting out vermin is your cup of tea.\n\nI'm glad that you are not in working in pesticides.",
+		"You are the pride and joy of our agency.\n\nOh and btw: the President sends his gratitude!",
+		"Your persistency must be admired.\n\nThe last guy quit after just a week!",
+		"Your next assignment is... Haha! Just kiddin'!\nWho cares where you go when there are big guns at your disposal\nand a lot of bad people at the other end of the barrel?",
+		"An awful lot of bad guys out there.\n\nGood work, agent!",
+		"A little collateral is not a problem.\nI mean, it's like fishing: to exterminate the big\ncatch you've gotta kill innocent fish babies.",
+		"There are almost no terrorists left in the world!\n\nHumanity is relying on you.",
+		"You've done it, the world is cleansed!\n\nHowever, disturbing reports on the outskirts of\nyour home town tells me you should go there again.",
 	};
 	deb_assert(LEPRA_ARRAY_COUNT(lCongratulations) == LEPRA_ARRAY_COUNT(gLevels));
 	deb_assert(lFinishedLevel < LEPRA_ARRAY_COUNT(lCongratulations));
@@ -1207,12 +1207,12 @@ void FireManager::CreateNextLevelDialog()
 	if (lFirstRun)
 	{
 		v_set(GetVariableScope(), RTVAR_GAME_FIRSTRUN, false);
-		lCongrats = _T("Our patented EnemyVisionGoggles(R) indicates villains.\nAvoid collateral damage, when possible.\n\nGood luck agent!");
+		lCongrats = "Our patented EnemyVisionGoggles(R indicates villains.\nAvoid collateral damage, when possible.\n\nGood luck agent!");
 	}
 	else
 	{
 		UiCure::UserSound2dResource* lSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("level_done.wav"), lSound, 1, 1);
+		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "level_done.wav", lSound, 1, 1);
 	}
 	UiTbc::Label* lLabel = new UiTbc::Label(LIGHT_GRAY, lCongrats);
 	lLabel->SetFontId(mUiManager->SetScaleFont(std::min(-14.0f, d->GetPreferredHeight()/-14.0f)));
@@ -1223,17 +1223,17 @@ void FireManager::CreateNextLevelDialog()
 
 	if (lFirstRun)
 	{
-		UiTbc::Button* lOkButton = new UiTbc::Button(Color(10, 90, 10), _T("OK"));
+		UiTbc::Button* lOkButton = new UiTbc::Button(Color(10, 90, 10), "OK");
 		lOkButton->SetFontId(lLabel->GetFontId());
 		lLayouter.AddButton(lOkButton, -5, 3, 4, 4, 3, 7, true);
 	}
 	else
 	{
-		UiTbc::Button* lNextLevelButton = new UiTbc::Button(Color(10, 90, 10), _T("Next level"));
+		UiTbc::Button* lNextLevelButton = new UiTbc::Button(Color(10, 90, 10), "Next level");
 		lNextLevelButton->SetFontId(lLabel->GetFontId());
 		lLayouter.AddButton(lNextLevelButton, -7, 3, 4, 4, 3, 7, true);
 
-		UiTbc::Button* lRestartButton = new UiTbc::Button(Color(90, 10, 10), _T("Restart from level 1"));
+		UiTbc::Button* lRestartButton = new UiTbc::Button(Color(90, 10, 10), "Restart from level 1");
 		lRestartButton->SetFontId(lLabel->GetFontId());
 		lLayouter.AddButton(lRestartButton, -8, 3, 4, 0, 3, 7, true);
 	}
@@ -1254,7 +1254,7 @@ void FireManager::OnMenuAlternative(UiTbc::Button* pButton)
 	else if (pButton->GetTag() == -4)
 	{
 		mPauseButton->SetVisible(true);
-		GetConsoleManager()->PushYieldCommand(strutil::Format(_T("set-level-index %i"), GetCurrentLevelNumber()));
+		GetConsoleManager()->PushYieldCommand(strutil::Format("set-level-index %i", GetCurrentLevelNumber()));
 		mMenu->DismissDialog();
 		HiResTimer::StepCounterShadow();
 		v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
@@ -1262,7 +1262,7 @@ void FireManager::OnMenuAlternative(UiTbc::Button* pButton)
 	else if (pButton->GetTag() == -7)
 	{
 		mPauseButton->SetVisible(true);
-		GetConsoleManager()->PushYieldCommand(strutil::Format(_T("set-level-index %i"), GetCurrentLevelNumber()+1));
+		GetConsoleManager()->PushYieldCommand(strutil::Format("set-level-index %i", GetCurrentLevelNumber()+1));
 		mMenu->DismissDialog();
 		HiResTimer::StepCounterShadow();
 		v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
@@ -1270,7 +1270,7 @@ void FireManager::OnMenuAlternative(UiTbc::Button* pButton)
 	else if (pButton->GetTag() == -8)
 	{
 		mPauseButton->SetVisible(true);
-		GetConsoleManager()->PushYieldCommand(_T("set-level-index 0"));
+		GetConsoleManager()->PushYieldCommand("set-level-index 0");
 		mMenu->DismissDialog();
 		HiResTimer::StepCounterShadow();
 		v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);

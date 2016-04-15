@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -37,9 +37,9 @@ void FileServer::Start()
 	{
 		return;
 	}
-	mLog.Info(_T("Starting file server."));
+	mLog.Info("Starting file server.");
 	SocketAddress lAddress;
-	lAddress.Resolve(_T("0.0.0.0:2541"));
+	lAddress.Resolve("0.0.0.0:2541");
 	mAcceptSocket = new TcpListenerSocket(lAddress, true);
 	mAcceptThread = new MemberThread<FileServer>("FileServerAcceptor");
 	mAcceptThread->Start(this, &FileServer::AcceptThreadEntry);
@@ -49,14 +49,14 @@ void FileServer::Stop()
 {
 	if (mAcceptThread)
 	{
-		mLog.Info(_T("Stopping file server."));
+		mLog.Info("Stopping file server.");
 		mAcceptThread->RequestStop();
 	}
 	if (mAcceptSocket)
 	{
 		TcpSocket lSocket(0);
 		SocketAddress lAddress;
-		lAddress.Resolve(_T("localhost:2541"));
+		lAddress.Resolve("localhost:2541");
 		lSocket.Connect(lAddress);
 	}
 	if (mAcceptThread)
@@ -71,7 +71,7 @@ void FileServer::Stop()
 
 
 
-char FileServer::ReadCommand(TcpSocket* pSocket, astr& pData)
+char FileServer::ReadCommand(TcpSocket* pSocket, str& pData)
 {
 	if (!mAcceptSocket)
 	{
@@ -105,13 +105,13 @@ char FileServer::ReadCommand(TcpSocket* pSocket, astr& pData)
 	return 'q';
 }
 
-char FileServer::WriteCommand(TcpSocket* pSocket, char pCommand, const astr& pData)
+char FileServer::WriteCommand(TcpSocket* pSocket, char pCommand, const str& pData)
 {
 	if (!mAcceptSocket)
 	{
 		return 'q';
 	}
-	astr lWriteBuffer;
+	str lWriteBuffer;
 	lWriteBuffer.resize(5+pData.size());
 	lWriteBuffer[0] = pCommand;
 	PackerInt32::Pack((uint8*)&lWriteBuffer[1], (int32)pData.size());
@@ -139,15 +139,15 @@ char FileServer::WriteCommand(TcpSocket* pSocket, char pCommand, const astr& pDa
 void FileServer::ClientCommandEntry(TcpSocket* pSocket)
 {
 	char lCommand = ' ';
-	astr lArgument;
+	str lArgument;
 	const str lDocDir = SystemManager::GetDocumentsDirectory();
-	astr lFileData;
+	str lFileData;
 	while (lCommand != 'q' && mAcceptSocket)
 	{
 		lCommand = ReadCommand(pSocket, lArgument);
 		if (lCommand == 'p')
 		{
-			str lWildCard = strutil::Encode(lArgument);
+			str lWildCard = lArgument;
 			lWildCard = Path::JoinPath(lDocDir, lWildCard);
 			strutil::strvec lFiles;
 			DiskFile::FindData lInfo;
@@ -159,7 +159,7 @@ void FileServer::ClientCommandEntry(TcpSocket* pSocket)
 				}
 				lFiles.push_back(Path::GetCompositeFilename(lInfo.GetName()));
 			}
-			astr lFilenames = astrutil::Encode(strutil::Join(lFiles, _T("\n")));
+			str lFilenames = strutil::Join(lFiles, "\n");
 			WriteCommand(pSocket, 'l', lFilenames);
 			for (strutil::strvec::iterator f = lFiles.begin(); f != lFiles.end(); ++f)
 			{
@@ -177,8 +177,8 @@ void FileServer::ClientCommandEntry(TcpSocket* pSocket)
 		}
 		else if (lCommand == 'w')
 		{
-			str lFilename = strutil::Encode(lArgument);
-			astr lContents;
+			str lFilename = lArgument;
+			str lContents;
 			lCommand = ReadCommand(pSocket, lContents);
 			bool lOk = false;
 			if (lCommand == 'b')
@@ -197,7 +197,7 @@ void FileServer::ClientCommandEntry(TcpSocket* pSocket)
 					}
 				}
 			}
-			lCommand = WriteCommand(pSocket, 'w', astr(lOk? "ok":"error"));
+			lCommand = WriteCommand(pSocket, 'w', str(lOk? "ok":"error"));
 		}
 	}
 	if (mAcceptSocket && mSyncDelegate)

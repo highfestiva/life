@@ -93,9 +93,9 @@ ImpuzzableManager::ImpuzzableManager(Life::GameClientMasterTicker* pMaster, cons
 	mShakeSound(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->PreLoadSound(_T("explosion"));
+	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->PreLoadSound("explosion");
 
 	SetConsoleManager(new ImpuzzableConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
@@ -134,10 +134,10 @@ ImpuzzableManager::ImpuzzableManager(Life::GameClientMasterTicker* pMaster, cons
 		RNDMZEL;
 		std::vector<vec3> lCopy(lNGon);
 		CreateNGon(lNGon);
-		mLog.Infof(_T("----------"));
+		mLog.Infof("----------");
 		for (int x = 0; x < (int)lNGon.size(); ++x)
 		{
-			mLog.Infof(_T("%f;%f;"), lNGon[x].x, lNGon[x].z);
+			mLog.Infof("%f;%f;", lNGon[x].x, lNGon[x].z);
 		}
 		deb_assert(lNGon.size() == 5);
 	}*/
@@ -166,19 +166,19 @@ void ImpuzzableManager::LoadSettings()
 
 	Parent::LoadSettings();
 
-	v_set(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
+	v_set(GetVariableScope(), RTVAR_UI_2D_FONT, "Verdana");
 	v_set(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
 	v_set(GetVariableScope(), RTVAR_UI_3D_FOV, 20.0);
 	v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 3);
 	v_set(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 prev-level"));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 next-level"));
+	GetConsoleManager()->ExecuteCommand("bind-key F2 prev-level");
+	GetConsoleManager()->ExecuteCommand("bind-key F3 next-level");
 }
 
 void ImpuzzableManager::SaveSettings()
 {
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand("save-application-config-file "+GetApplicationCommandFilename());
 }
 
 bool ImpuzzableManager::Open()
@@ -196,7 +196,7 @@ bool ImpuzzableManager::Open()
 	if (lOk)
 	{
 		mMenu = new Life::Menu(mUiManager, GetResourceManager());
-		mMenu->SetButtonTapSound(_T("tap.wav"), 0.2f, 0.05f);
+		mMenu->SetButtonTapSound("tap.wav", 0.2f, 0.05f);
 	}
 	return lOk;
 }
@@ -449,10 +449,10 @@ bool ImpuzzableManager::DidFinishLevel()
 {
 	int lLevel;
 	v_get(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
-	mLog.Headlinef(_T("Level %i done!"), lLevel);
+	mLog.Headlinef("Level %i done!", lLevel);
 	OnPauseButton(0);
 	UiCure::UserSound2dResource* lFinishSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, 0.5f, Random::Uniform(0.98f, 1.02f));
+	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "finish.wav", lFinishSound, 0.5f, Random::Uniform(0.98f, 1.02f));
 
 	bool lRunAds;
 	v_get(lRunAds, =, GetVariableScope(), RTVAR_GAME_RUNADS, true);
@@ -516,13 +516,13 @@ Cure::RuntimeVariableScope* ImpuzzableManager::GetVariableScope() const
 bool ImpuzzableManager::InitializeUniverse()
 {
 	// Create dummy explosion to ensure all geometries loaded and ready, to avoid LAAAG when first exploading.
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 	const vec3 v;
 	lParticleRenderer->CreateExplosion(vec3(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	mCutsLeft = 25;
 	mShakesLeft = 2;
-	mLevel = (Level*)Parent::CreateContextObject(_T("level"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mLevel = (Level*)Parent::CreateContextObject("level", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	StepLevel(0);
 	mSunlight = new Sunlight(mUiManager);
 	return true;
@@ -574,7 +574,7 @@ void ImpuzzableManager::CreatePiece(int pIndex, const vec3* pPosition)
 		GetPhysicsManager()->SetBodyPosition(mPieces[pIndex]->GetRootBodyId(), lPosition);
 		return;
 	}
-	Piece* lPiece = (Piece*)Parent::CreateContextObject(_T("testblock"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	Piece* lPiece = (Piece*)Parent::CreateContextObject("testblock", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	lPiece->SetRootPosition(lPosition);
 	lPiece->SetRootVelocity(RNDVEC(1.0f));
 	lPiece->StartLoading();
@@ -584,7 +584,7 @@ void ImpuzzableManager::CreatePiece(int pIndex, const vec3* pPosition)
 Cure::ContextObject* ImpuzzableManager::CreateContextObject(const str& pClassId) const
 {
 	UiCure::Machine* lObject = 0;
-	if (pClassId == _T("level"))
+	if (pClassId == "level")
 	{
 		lObject = new Level(GetResourceManager(), pClassId, mUiManager);
 	}
@@ -604,13 +604,13 @@ void ImpuzzableManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
 	if (pOk)
 	{
-		/*if (pObject->GetClassId() == _T("testblock")))
+		/*if (pObject->GetClassId() == "testblock"))
 		{
 		}*/
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
+		mLog.Errorf("Could not load object of type %s.", pObject->GetClassId().c_str());
 		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
 }
@@ -638,12 +638,12 @@ void ImpuzzableManager::ShowInstruction()
 	d->SetDirection(+1, false);
 	UiTbc::FixedLayouter lLayouter(d);
 
-	UiTbc::Label* lLabel1 = new UiTbc::Label(BRIGHT_TEXT, _T("Swipe to cut the box. Avoid hitting the"));
+	UiTbc::Label* lLabel1 = new UiTbc::Label(BRIGHT_TEXT, "Swipe to cut the box. Avoid hitting the");
 	lLayouter.AddComponent(lLabel1, 0, 6, 0, 1, 1);
-	UiTbc::Label* lLabel2 = new UiTbc::Label(BRIGHT_TEXT, _T("pieces. Cut away 85% to complete level."));
+	UiTbc::Label* lLabel2 = new UiTbc::Label(BRIGHT_TEXT, "pieces. Cut away 85% to complete level.");
 	lLayouter.AddComponent(lLabel2, 1, 6, 0, 1, 1);
 
-	UiTbc::Button* lResetLevelButton = new UiTbc::Button(GREEN_BUTTON, _T("OK"));
+	UiTbc::Button* lResetLevelButton = new UiTbc::Button(GREEN_BUTTON, "OK");
 	lLayouter.AddButton(lResetLevelButton, -9, 2, 3, 0, 1, 1, true);
 
 	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
@@ -670,14 +670,14 @@ void ImpuzzableManager::OnPauseButton(UiTbc::Button* pButton)
 	bool lIsPaused = false;
 	if (LEVEL_DONE())
 	{
-		UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, _T("Level completed (85%)"));
+		UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, "Level completed (85%"));
 		lLabel->SetFontId(mUiManager->SetScaleFont(1.2f));
 		mUiManager->SetMasterFont();
 		lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
 		lLabel->SetAdaptive(false);
 		lLayouter.AddComponent(lLabel, lRow++, lRowCount, 0, 1, 1);
 
-		UiTbc::Button* lNextLevelButton = new UiTbc::Button(GREEN_BUTTON, _T("Next level"));
+		UiTbc::Button* lNextLevelButton = new UiTbc::Button(GREEN_BUTTON, "Next level");
 		lLayouter.AddButton(lNextLevelButton, -1, lRow++, lRowCount, 0, 1, 1, true);
 	}
 	else
@@ -685,12 +685,12 @@ void ImpuzzableManager::OnPauseButton(UiTbc::Button* pButton)
 		UiTbc::Label* lLabel;
 		if (mCutsLeft > 0)
 		{
-			lLabel = new UiTbc::Label(BRIGHT_TEXT, _T("Paused"));
+			lLabel = new UiTbc::Label(BRIGHT_TEXT, "Paused");
 			lIsPaused = true;
 		}
 		else
 		{
-			lLabel = new UiTbc::Label(RED_BUTTON, _T("Out of cuts!"));
+			lLabel = new UiTbc::Label(RED_BUTTON, "Out of cuts!");
 		}
 		lLabel->SetFontId(mUiManager->SetScaleFont(1.2f));
 		mUiManager->SetMasterFont();
@@ -699,25 +699,25 @@ void ImpuzzableManager::OnPauseButton(UiTbc::Button* pButton)
 		lLayouter.AddComponent(lLabel, lRow++, lRowCount, 0, 1, 1);
 	}
 
-	UiTbc::Button* lResetLevelButton = new UiTbc::Button(ORANGE_BUTTON, _T("Reset level"));
+	UiTbc::Button* lResetLevelButton = new UiTbc::Button(ORANGE_BUTTON, "Reset level");
 	lLayouter.AddButton(lResetLevelButton, -3, lRow++, lRowCount, 0, 1, 1, true);
 
 	if (lRow < 3)
 	{
-		UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(RED_BUTTON, _T("Reset game"));
+		UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(RED_BUTTON, "Reset game");
 		lLayouter.AddButton(lRestartFrom1stLevelButton, -4, lRow++, lRowCount, 0, 1, 1, true);
 	}
 
 	if (!lDidBuy)
 	{
-		UiTbc::Button* lBuyButton = new UiTbc::Button(BLACK_BUTTON, _T("Buy full"));
+		UiTbc::Button* lBuyButton = new UiTbc::Button(BLACK_BUTTON, "Buy full");
 		lBuyButton->SetFontColor(DIM_TEXT);
 		lLayouter.AddButton(lBuyButton, -5, lRow++, lRowCount, 0, 1, 1, true);
 	}
 
 	if (lIsPaused)
 	{
-		UiTbc::Button* lCloseButton = new UiTbc::Button(DIM_RED, _T("X"));
+		UiTbc::Button* lCloseButton = new UiTbc::Button(DIM_RED, "X");
 		lLayouter.AddCornerButton(lCloseButton, -9);
 	}
 
@@ -730,10 +730,10 @@ void ImpuzzableManager::OnMenuAlternative(UiTbc::Button* pButton)
 	v_get(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
 	switch (pButton->GetTag())
 	{
-		case -1:	GetConsoleManager()->PushYieldCommand(_T("step-level +1"));				break;
-		case -2:	GetConsoleManager()->PushYieldCommand(_T("step-level -1"));				break;
-		case -3:	GetConsoleManager()->PushYieldCommand(_T("step-level 0"));				break;
-		case -4:	GetConsoleManager()->PushYieldCommand(strutil::Format(_T("step-level %i"), -lLevel));	break;
+		case -1:	GetConsoleManager()->PushYieldCommand("step-level +1");				break;
+		case -2:	GetConsoleManager()->PushYieldCommand("step-level -1");				break;
+		case -3:	GetConsoleManager()->PushYieldCommand("step-level 0");				break;
+		case -4:	GetConsoleManager()->PushYieldCommand(strutil::Format("step-level %i", -lLevel));	break;
 		case -5:	Impuzzable__Buy();										break;
 	}
 	mPauseButton->SetVisible(true);
@@ -767,14 +767,14 @@ void ImpuzzableManager::ScriptPhysicsTick()
 		{
 			mNextLevelTimer.Stop();
 			strutil::strvec lResourceTypes;
-			lResourceTypes.push_back(_T("RenderImg"));
-			lResourceTypes.push_back(_T("Geometry"));
-			lResourceTypes.push_back(_T("GeometryRef"));
-			lResourceTypes.push_back(_T("Physics"));
-			lResourceTypes.push_back(_T("PhysicsShared"));
-			lResourceTypes.push_back(_T("RamImg"));
-			lResourceTypes.push_back(_T("Sound3D"));
-			lResourceTypes.push_back(_T("Sound2D"));
+			lResourceTypes.push_back("RenderImg");
+			lResourceTypes.push_back("Geometry");
+			lResourceTypes.push_back("GeometryRef");
+			lResourceTypes.push_back("Physics");
+			lResourceTypes.push_back("PhysicsShared");
+			lResourceTypes.push_back("RamImg");
+			lResourceTypes.push_back("Sound3D");
+			lResourceTypes.push_back("Sound2D");
 			GetResourceManager()->ForceFreeCache(lResourceTypes);
 			GetResourceManager()->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
 		}

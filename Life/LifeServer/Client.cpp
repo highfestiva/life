@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
  
 
@@ -80,7 +80,7 @@ void Client::SetAvatarId(Cure::GameObjectId pAvatarId)
 void Client::SendAvatar(const Cure::UserAccount::AvatarId& pAvatarId, Cure::Packet* pPacket)
 {
 	mNetworkAgent->SendStatusMessage(mUserConnection->GetSocket(), 0, Cure::REMOTE_OK,
-		Cure::MessageStatus::INFO_AVATAR, wstrutil::Encode(pAvatarId), pPacket);
+		Cure::MessageStatus::INFO_AVATAR, pAvatarId, pPacket);
 }
 
 
@@ -114,7 +114,7 @@ void Client::QuerySendStriveTimes()
 		mIgnoreStriveErrorTimeCounter = 0;
 		if (mTimeManager->GetCurrentPhysicsFrameDelta(mStriveSendUnpauseFrame) < 0)
 		{
-			log_adebug("Want to send strive times, but skipping since last transmission is still in effekt.");
+			log_debug("Want to send strive times, but skipping since last transmission is still in effekt.");
 		}
 		else if (mStriveSendErrorTimeCounter >= NETWORK_DEVIATION_ERROR_COUNT)	// Only send if the error repeats itself a few times.
 		{
@@ -133,11 +133,11 @@ void Client::QuerySendStriveTimes()
 			str s;
 			if (lNetworkFrameDiffCount < 0)
 			{
-				s = strutil::Format(_T("Client movement arrives %i frames early on average."), -lNetworkFrameDiffCount);
+				s = strutil::Format("Client movement arrives %i frames early on average.", -lNetworkFrameDiffCount);
 			}
 			else
 			{
-				s = strutil::Format(_T("Client movement arrives %i frames late on average."), lNetworkFrameDiffCount);
+				s = strutil::Format("Client movement arrives %i frames late on average.", lNetworkFrameDiffCount);
 			}
 			log_debug(s);
 		}
@@ -147,7 +147,7 @@ void Client::QuerySendStriveTimes()
 		++mIgnoreStriveErrorTimeCounter;
 		if (mIgnoreStriveErrorTimeCounter >= (int)NETWORK_DEVIATION_ERROR_COUNT)	// Reset send counter if we're mostly good.
 		{
-			log_volatile(mLog.Debugf(_T("Resetting strive error counter (time diff is %i frames)."), lNetworkFrameDiffCount));
+			log_volatile(mLog.Debugf("Resetting strive error counter (time diff is %i frames).", lNetworkFrameDiffCount));
 			mIgnoreStriveErrorTimeCounter = 0;
 			mStriveSendErrorTimeCounter = 0;
 		}
@@ -174,11 +174,11 @@ void Client::SendLoginCommands(Cure::Packet* pPacket, const str& pServerGreeting
 	v_get(lPhysicsRtr, =, Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 	bool lPhysicsHalt;
 	v_get(lPhysicsHalt, =, Cure::GetSettings(), RTVAR_PHYSICS_HALT, false);
-	const wstr lCmd = wstrutil::Format(
-		L"#" _WIDE(RTVAR_PHYSICS_FPS) L" %i;\n"
-		L"#" _WIDE(RTVAR_PHYSICS_RTR) L" %f;\n"
-		L"#" _WIDE(RTVAR_PHYSICS_HALT) L" %s;\n"
-		L"%s",
+	const str lCmd = strutil::Format(
+		"#" RTVAR_PHYSICS_FPS " %i;\n"
+		"#" RTVAR_PHYSICS_RTR " %f;\n"
+		"#" RTVAR_PHYSICS_HALT " %s;\n"
+		"%s",
 		lPhysicsFps, lPhysicsRtr, wstrutil::BoolToString(lPhysicsHalt).c_str(), wstrutil::Encode(pServerGreeting).c_str());
 	mNetworkAgent->SendStatusMessage(mUserConnection->GetSocket(), 0, Cure::REMOTE_OK,
 		Cure::MessageStatus::INFO_COMMAND, lCmd, pPacket);
@@ -219,7 +219,7 @@ int Client::SendStriveTimes(int pNetworkFrameDiffCount)
 		lPhysicsTickAdjustmentTime = (float)-pNetworkFrameDiffCount/lPhysicsTickAdjustmentFrameCount;
 		pNetworkFrameDiffCount = -pNetworkFrameDiffCount;
 	}
-	log_volatile(mLog.Debugf(_T("Sending time adjustment %i frames, spread over %i frames, to client."), pNetworkFrameDiffCount, lPhysicsTickAdjustmentFrameCount));
+	log_volatile(mLog.Debugf("Sending time adjustment %i frames, spread over %i frames, to client.", pNetworkFrameDiffCount, lPhysicsTickAdjustmentFrameCount));
 	mNetworkAgent->SendNumberMessage(true, mUserConnection->GetSocket(), Cure::MessageNumber::INFO_ADJUST_TIME, lPhysicsTickAdjustmentFrameCount, lPhysicsTickAdjustmentTime);
 	return (lHalfPingFrameCount*2 + lPhysicsTickAdjustmentFrameCount);
 }

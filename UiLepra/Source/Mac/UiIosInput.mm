@@ -125,10 +125,10 @@ IosInputManager::IosInputManager(MacOpenGLDisplay* pDisplayManager):
 	IosInputElement* x = new IosInputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, 0, lTouch);
 	IosInputElement* y = new IosInputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, 1, lTouch);
 	IosInputElement* lButton = new IosInputElement(InputElement::DIGITAL, InputElement::BUTTON, 0, lTouch);
-	lTouch->SetIdentifier(_T("IosVirtualMouse"));
-	x->SetIdentifier(_T("RelAxisX"));
-	y->SetIdentifier(_T("RelAxisY"));
-	lButton->SetIdentifier(_T("Button"));
+	lTouch->SetIdentifier("IosVirtualMouse");
+	x->SetIdentifier("RelAxisX");
+	y->SetIdentifier("RelAxisY");
+	lButton->SetIdentifier("Button");
 	lTouch->AddElement(x);
 	lTouch->AddElement(y);
 	lTouch->AddElement(lButton);

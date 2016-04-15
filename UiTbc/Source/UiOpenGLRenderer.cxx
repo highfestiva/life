@@ -608,7 +608,7 @@ void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* p
 	
 	GLenum lPixelFormat;
 	SetPixelFormat(lSize, lPixelFormat, lCompress, 
-		strutil::Format(_T("AddTexture() - the texture has an invalid pixel size of %i bytes!"), lSize));
+		strutil::Format("AddTexture - the texture has an invalid pixel size of %i bytes!", lSize));
 	OGL_FAST_ASSERT();
 
 	for (int i = 0; i < pTexture->GetNumMipMapLevels(); i++)
@@ -642,7 +642,7 @@ void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
 	int lSize = pTexture->GetCubeMapPosX(0)->GetPixelByteSize();
 	GLenum lPixelFormat;
 	SetPixelFormat(lSize, lPixelFormat, lCompress, 
-		strutil::Format(_T("AddTexture() - the cube map has an invalid pixel size of %i bytes!"), lSize));
+		strutil::Format("AddTexture - the cube map has an invalid pixel size of %i bytes!", lSize));
 
 	if (pTextureData->mTMapID[Texture::CUBE_MAP] == mTMapIDManager.GetInvalidId())
 	{
@@ -773,7 +773,7 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 
 			// First, get a free buffer ID and store it first in the VoidPtr array.
 			lGeometryData->mVertexBufferID = mBufferIDManager.GetFreeId();
-			//log_volatile(mLog.Tracef(_T("Alloc buffer ID %u (vertex)."), lGeometryData->mVertexBufferID));
+			//log_volatile(mLog.Tracef("Alloc buffer ID %u (vertex."), lGeometryData->mVertexBufferID));
 			lGeometryData->mIndexBufferID  = mBufferIDManager.GetFreeId();
 		
 			// Calculate the size of the created buffer.
@@ -819,7 +819,7 @@ void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
 			}
 #endif // !GLES
 			// Bind and create the vertex buffer in GFX memory.
-			//log_volatile(mLog.Tracef(_T("glBindBuffer %u (vertex)."), lGeometryData->mVertexBufferID));
+			//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lGeometryData->mVertexBufferID));
 			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 
 							      (GLuint)lGeometryData->mVertexBufferID);
 			UiLepra::OpenGLExtensions::glBufferData(GL_ARRAY_BUFFER, 
@@ -929,7 +929,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 
 		// First, get a free buffer ID and store it first in the VoidPtr array.
 		lShadowGeom->mVertexBufferID = mBufferIDManager.GetFreeId();
-		//log_volatile(mLog.Tracef(_T("Alloc buffer ID %u (vertex)."), lShadowGeom->mVertexBufferID));
+		//log_volatile(mLog.Tracef("Alloc buffer ID %u (vertex."), lShadowGeom->mVertexBufferID));
 		lShadowGeom->mIndexBufferID  = mBufferIDManager.GetFreeId();
 	
 		// Calculate the size of the created buffer.
@@ -961,7 +961,7 @@ bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, Ligh
 #endif // !GLES
 		
 		// Bind and create the vertex buffer in GFX memory.
-		//log_volatile(mLog.Tracef(_T("glBindBuffer %u (vertex)."), lShadowGeom->mVertexBufferID));
+		//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lShadowGeom->mVertexBufferID));
 		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lShadowGeom->mVertexBufferID);
 		UiLepra::OpenGLExtensions::glBufferData(GL_ARRAY_BUFFER, 
 						      lBufferSize,
@@ -1014,7 +1014,7 @@ void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID, bool pForce)
 			   lGeometry->GetColorDataChanged() ||
 			   lGeometry->GetUVDataChanged())
 			{
-				//log_volatile(mLog.Tracef(_T("glBindBuffer %u (vertex)."), lGeomData->mVertexBufferID));
+				//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lGeomData->mVertexBufferID));
 				UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeomData->mVertexBufferID);
 			}
 
@@ -1109,9 +1109,9 @@ void OpenGLRenderer::ReleaseGeometry(Tbc::GeometryBase* pUserGeometry, GeomRelea
 		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 
-		//log_volatile(mLog.Tracef(_T("glDeleteBuffers %u (vertex)."), lVertexBufferID));
+		//log_volatile(mLog.Tracef("glDeleteBuffers %u (vertex."), lVertexBufferID));
 		UiLepra::OpenGLExtensions::glDeleteBuffers(1, &lVertexBufferID);
-		//log_volatile(mLog.Tracef(_T("glDeleteBuffers %u (index)."), lIndexBufferID));
+		//log_volatile(mLog.Tracef("glDeleteBuffers %u (index."), lIndexBufferID));
 		UiLepra::OpenGLExtensions::glDeleteBuffers(1, &lIndexBufferID);
 
 		mBufferIDManager.RecycleId(lGeometry->mVertexBufferID);
@@ -1169,13 +1169,13 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMateri
 {
 	if ((int)pMaterialType < 0 || (int)pMaterialType >= MAT_COUNT)
 	{
-		mLog.Errorf(_T("ChangeMaterial() - Material %i is not a valid material ID!"), (int)pMaterialType);
+		mLog.Errorf("ChangeMaterial - Material %i is not a valid material ID!", (int)pMaterialType);
 		return (false);
 	}
 	OpenGLMaterial* lMat = (OpenGLMaterial*)GetMaterial(pMaterialType);
 	if (lMat == 0)
 	{
-		mLog.Errorf(_T("ChangeMaterial() - Material %i is not implemented!"), (int)pMaterialType);
+		mLog.Errorf("ChangeMaterial - Material %i is not implemented!", (int)pMaterialType);
 		return (false);
 	}
 
@@ -1803,7 +1803,7 @@ void OpenGLRenderer::RenderShadowVolumes()
 					GLuint lVertexBufferID = (GLuint)lShadowGeometry->mVertexBufferID;
 					GLuint lIndexBufferID  = (GLuint)lShadowGeometry->mIndexBufferID;
 
-					//log_volatile(mLog.Tracef(_T("glBindBuffer %u (vertex)."), lShadowGeometry->mVertexBufferID));
+					//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lShadowGeometry->mVertexBufferID));
 					UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
 					glVertexPointer(3, GL_FLOAT, 0, 0);
 
@@ -1955,7 +1955,7 @@ int OpenGLRenderer::RenderShadowMaps()
 					GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 					GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 
-					//log_volatile(mLog.Tracef(_T("glBindBuffer %u (vertex)."), lGeometry->mVertexBufferID));
+					//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lGeometry->mVertexBufferID));
 					UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
 					glVertexPointer(3, GL_FLOAT, 0, 0);
 
@@ -2067,7 +2067,7 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 				GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
 				GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
 
-				//log_volatile(mLog.Tracef(_T("glBindBuffer %u (vertex)."), lGeometry->mVertexBufferID));
+				//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lGeometry->mVertexBufferID));
 				UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
 				glVertexPointer(3, GL_FLOAT, 0, 0);
 

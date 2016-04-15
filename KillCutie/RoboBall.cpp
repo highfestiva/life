@@ -102,7 +102,7 @@ void RoboBall::OnTick()
 		if (++c > 20)
 		{
 			c = 0;
-			log_volatile(mLog.Debugf(_T("RoboBall at (%.1f, %.1f, %.1f), heading towards (%.1f, %.1f), diff (%.1f, %.1f, %.1f)."),
+			log_volatile(mLog.Debugf("RoboBall at (%.1f, %.1f, %.1f, heading towards (%.1f, %.1f), diff (%.1f, %.1f, %.1f)."),
 				lPosition.x, lPosition.y, lPosition.z,
 				lSteerDirection.x, lSteerDirection.y,
 				lDirection.x, lDirection.y, lDirection.z));

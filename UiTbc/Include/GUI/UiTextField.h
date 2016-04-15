@@ -57,7 +57,7 @@ public:
 	void SetTopParent(Component* pTopParent);
 
 	void SetIsReadOnly(bool pIsReadOnly);
-	void SetPasswordCharacter(tchar pCharacter);
+	void SetPasswordCharacter(char pCharacter);
 
 	wstr GetVisibleText() const;
 	void SetText(const wstr& pText);
@@ -118,7 +118,7 @@ protected:
 private:
 	wstr mText;
 	bool mIsReadOnly;
-	tchar mPasswordCharacter;
+	char mPasswordCharacter;
 	int mTextX;
 
 	Painter::ImageID mMarkerID;

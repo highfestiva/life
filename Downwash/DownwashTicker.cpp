@@ -36,19 +36,19 @@ DownwashTicker::DownwashTicker(UiCure::GameUiManager* pUiManager, Cure::Resource
 	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
 	v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 
-	AddBackedRtvar(_T(RTVAR_GAME_STARTLEVEL));
-	AddBackedRtvar(_T(RTVAR_GAME_CHILDISHNESS));
+	AddBackedRtvar(RTVAR_GAME_STARTLEVEL);
+	AddBackedRtvar(RTVAR_GAME_CHILDISHNESS);
 	for (int x = 0; x < 20; ++x)
 	{
-		const str wr = strutil::Format(str(_T(RTVAR_GAME_WORLDRECORD_LEVEL) _T("_%i")).c_str(), x);
+		const str wr = strutil::Format(str(RTVAR_GAME_WORLDRECORD_LEVEL "_%i").c_str(), x);
 		AddBackedRtvar(wr);
-		const str pr = strutil::Format(str(_T(RTVAR_GAME_PERSONALRECORD_LEVEL) _T("_%i")).c_str(), x);
+		const str pr = strutil::Format(str(RTVAR_GAME_PERSONALRECORD_LEVEL "_%i").c_str(), x);
 		AddBackedRtvar(pr);
 	}
-	AddBackedRtvar(_T(RTVAR_PHYSICS_RTR_OFFSET));
-	AddBackedRtvar(_T(RTVAR_GAME_ALLOWTOYMODE));
-	AddBackedRtvar(_T(RTVAR_GAME_PILOTNAME));
-	AddBackedRtvar(_T(RTVAR_UI_SOUND_MASTERVOLUME));
+	AddBackedRtvar(RTVAR_PHYSICS_RTR_OFFSET);
+	AddBackedRtvar(RTVAR_GAME_ALLOWTOYMODE);
+	AddBackedRtvar(RTVAR_GAME_PILOTNAME);
+	AddBackedRtvar(RTVAR_UI_SOUND_MASTERVOLUME);
 }
 
 DownwashTicker::~DownwashTicker()
@@ -126,12 +126,12 @@ bool DownwashTicker::OpenUiManager()
 	{
 		mUiManager->UpdateSettings();
 		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
-		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 0));
-		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4, 5);
+		lRenderer->AddDynamicRenderer("particle", new UiTbc::ParticleRenderer(lRenderer, 0));
+		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, "explosion.png", 4, 5);
 	}
 	if (lOk)
 	{
-		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
+		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, "env.png", UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
 		if (mEnvMap->Load())
 		{
 			if (mEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
@@ -160,13 +160,13 @@ bool DownwashTicker::OpenUiManager()
 		mMusicPlayer = new UiCure::MusicPlayer(mUiManager->GetSoundManager());
 		mMusicPlayer->SetVolume(0.5f);
 		mMusicPlayer->SetSongPauseTime(2, 6);
-		mMusicPlayer->AddSong(_T("Dub Feral.ogg"));
-		mMusicPlayer->AddSong(_T("Easy Jam.ogg"));
-		mMusicPlayer->AddSong(_T("Firmament.ogg"));
-		mMusicPlayer->AddSong(_T("Mandeville.ogg"));
-		mMusicPlayer->AddSong(_T("Slow Ska Game Loop.ogg"));
-		mMusicPlayer->AddSong(_T("Stealth Groover.ogg"));
-		mMusicPlayer->AddSong(_T("Yallahs.ogg"));
+		mMusicPlayer->AddSong("Dub Feral.ogg");
+		mMusicPlayer->AddSong("Easy Jam.ogg");
+		mMusicPlayer->AddSong("Firmament.ogg");
+		mMusicPlayer->AddSong("Mandeville.ogg");
+		mMusicPlayer->AddSong("Slow Ska Game Loop.ogg");
+		mMusicPlayer->AddSong("Stealth Groover.ogg");
+		mMusicPlayer->AddSong("Yallahs.ogg");
 		mMusicPlayer->Shuffle();
 		lOk = mMusicPlayer->Playback();
 	}

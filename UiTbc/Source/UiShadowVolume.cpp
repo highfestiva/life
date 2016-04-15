@@ -29,7 +29,7 @@ ShadowVolume::ShadowVolume(Tbc::GeometryBase* pParentGeometry):
 {
 	LEPRA_ACQUIRE_RESOURCE(ShadowVolume);
 
-	LEPRA_DEBUG_CODE(mName = _T("Shdw->") + pParentGeometry->mName);
+	LEPRA_DEBUG_CODE(mName = "Shdw->" + pParentGeometry->mName);
 
 	SetPrimitiveType(Tbc::GeometryBase::TRIANGLES);
 

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
  
 
@@ -108,10 +108,10 @@ void MasterServerConnection::RequestOpenFirewall(const str& pGameServerConnectAd
 
 bool MasterServerConnection::UpdateServerList(ServerInfoList& pServerList) const
 {
-	strutil::strvec lServers = strutil::Split(mServerList, _T("\n"));
+	strutil::strvec lServers = strutil::Split(mServerList, "\n");
 	if (lServers.size() >= 1)
 	{
-		if (lServers.back() != _T("OK"))
+		if (lServers.back() != "OK")
 		{
 			bool lIsUpdated = !pServerList.empty();
 			pServerList.clear();
@@ -243,13 +243,13 @@ bool MasterServerConnection::TickReceive(ServerInfo& pServerInfo)
 	str lCommandLine;
 	if (!Receive(lCommandLine))
 	{
-		mLog.Error(_T("Someone snatched data received from master server!"));
+		mLog.Error("Someone snatched data received from master server!");
 		deb_assert(false);
 		return false;
 	}
 	if (!MasterServerNetworkParser::ExtractServerInfo(lCommandLine, pServerInfo, &mVSocket->GetTargetAddress()))
 	{
-		mLog.Error(_T("Got bad formatted command from master server!"));
+		mLog.Error("Got bad formatted command from master server!");
 		deb_assert(false);
 		return false;
 	}
@@ -293,13 +293,13 @@ void MasterServerConnection::StepState()
 				mState = CONNECTING;
 				if (!mConnecter->Start(this, &MasterServerConnection::ConnectEntry))
 				{
-					mLog.Warning(_T("Could not start connecter."));
+					mLog.Warning("Could not start connecter.");
 					mIsConnectError = true;
 				}
 			}
 			else
 			{
-				mLog.Warning(_T("Trying to connect while connecter still running!"));
+				mLog.Warning("Trying to connect while connecter still running!");
 				deb_assert(!mVSocket);
 				deb_assert(false);
 			}
@@ -343,7 +343,7 @@ void MasterServerConnection::ConnectEntry()
 {
 	if (mState != CONNECTING || mVSocket != 0)
 	{
-		mLog.Warning(_T("Starting connector thread while already working/connected!"));
+		mLog.Warning("Starting connector thread while already working/connected!");
 		deb_assert(false);
 		return;
 	}
@@ -351,13 +351,13 @@ void MasterServerConnection::ConnectEntry()
 	SocketAddress lTargetAddress;
 	if (!lTargetAddress.Resolve(mMasterServerAddress))
 	{
-		mLog.Warningf(_T("Could not resolve master server address '%s'."), mMasterServerAddress.c_str());
+		mLog.Warningf("Could not resolve master server address '%s'.", mMasterServerAddress.c_str());
 		Close(true);
 		return;
 	}
 	if (mConnecter->GetStopRequest() || !QueryMuxValid())
 	{
-		mLog.Warningf(_T("Connect to master server '%s' was aborted."), mMasterServerAddress.c_str());
+		mLog.Warningf("Connect to master server '%s' was aborted.", mMasterServerAddress.c_str());
 		Close(true);
 		return;
 	}
@@ -367,7 +367,7 @@ void MasterServerConnection::ConnectEntry()
 	mVSocket = mMuxSocket->Connect(lTargetAddress, lConnectionId, mConnectTimeout);
 	if (!mVSocket)
 	{
-		mLog.Warningf(_T("Could not connect to master server address '%s'."), mMasterServerAddress.c_str());
+		mLog.Warningf("Could not connect to master server address '%s'.", mMasterServerAddress.c_str());
 		Close(true);
 		return;
 	}
@@ -375,16 +375,16 @@ void MasterServerConnection::ConnectEntry()
 	deb_assert(mState == CONNECTING);
 	mState = CONNECTED;
 	mIdleTimer.PopTimeDiff();
-	mLog.Headlinef(_T("Connected to master server @ %s."), mMasterServerAddress.c_str());
+	mLog.Headlinef("Connected to master server @ %s.", mMasterServerAddress.c_str());
 }
 
 bool MasterServerConnection::UploadServerInfo()
 {
-	if (!SendAndAck(_T(MASTER_SERVER_USI) _T(" ") + mLocalServerInfo))
+	if (!SendAndAck(MASTER_SERVER_USI " " + mLocalServerInfo))
 	{
 		return false;
 	}
-	mLog.Info(_T("Uploaded server info..."));
+	mLog.Info("Uploaded server info...");
 	mUploadedServerInfo = mLocalServerInfo;
 	mIsConnectError = false;
 	return true;
@@ -392,7 +392,7 @@ bool MasterServerConnection::UploadServerInfo()
 
 bool MasterServerConnection::DownloadServerList()
 {
-	if (!SendAndRecv(_T(MASTER_SERVER_DSL) _T(" ") + mServerSortCriterias, mServerList))
+	if (!SendAndRecv(MASTER_SERVER_DSL " " + mServerSortCriterias, mServerList))
 	{
 		return false;
 	}
@@ -402,27 +402,27 @@ bool MasterServerConnection::DownloadServerList()
 
 MasterServerConnection::FirewallStatus MasterServerConnection::OpenFirewall()
 {
-	strutil::strvec lVector = strutil::Split(mGameServerConnectAddress, _T(":"));
+	strutil::strvec lVector = strutil::Split(mGameServerConnectAddress, ":");
 	if (lVector.size() != 2)
 	{
 		return FIREWALL_ERROR;
 	}
 	str lReply;
-	if (!SendAndRecv(_T(MASTER_SERVER_OF) _T(" --address ") + lVector[0] + _T(" --port ") + lVector[1], lReply))
+	if (!SendAndRecv(MASTER_SERVER_OF " --address " + lVector[0] + " --port " + lVector[1], lReply))
 	{
 		return FIREWALL_ERROR;
 	}
 	ServerInfo lInfo;
-	if (lReply == _T("OK"))
+	if (lReply == "OK")
 	{
 		mIsConnectError = false;
 		return FIREWALL_OPENED;
 	}
 	else if (MasterServerNetworkParser::ExtractServerInfo(lReply, lInfo, 0))
 	{
-		if (lInfo.mCommand == _T(MASTER_SERVER_UL))
+		if (lInfo.mCommand == MASTER_SERVER_UL)
 		{
-			mLanGameServerAddress = lInfo.mInternalIpAddress + strutil::Format(_T(":%i"), lInfo.mInternalPort);
+			mLanGameServerAddress = lInfo.mInternalIpAddress + strutil::Format(":%i", lInfo.mInternalPort);
 			return FIREWALL_USE_LAN;
 		}
 	}
@@ -436,7 +436,7 @@ bool MasterServerConnection::SendAndAck(const str& pData)
 	{
 		return false;
 	}
-	return lReply == _T("OK");
+	return lReply == "OK";
 }
 
 bool MasterServerConnection::SendAndRecv(const str& pData, str& pReply)
@@ -452,20 +452,20 @@ bool MasterServerConnection::Send(const str& pData)
 {
 	if (!mVSocket || !QueryMuxValid())
 	{
-		mLog.Warning(_T("Trying to send to master server even though unconnected."));
+		mLog.Warning("Trying to send to master server even though unconnected.");
 		Close(false);
 		return false;
 	}
 	if (pData.size() > 300)
 	{
-		mLog.Warning(_T("Trying to send too big chunk to master server."));
+		mLog.Warning("Trying to send too big chunk to master server.");
 		return false;
 	}
 	uint8 lRawData[1024];
-	unsigned lSendByteCount = MasterServerNetworkParser::StrToRaw(lRawData, wstrutil::Encode(pData));
+	unsigned lSendByteCount = MasterServerNetworkParser::StrToRaw(lRawData, pData);
 	if ((unsigned)mVSocket->DirectSend(lRawData, lSendByteCount) != lSendByteCount)
 	{
-		mLog.Warning(_T("Transmission to master server failed."));
+		mLog.Warning("Transmission to master server failed.");
 		return false;
 	}
 	return true;
@@ -475,7 +475,7 @@ bool MasterServerConnection::Receive(str& pData)
 {
 	if (!mVSocket || !QueryMuxValid())
 	{
-		mLog.Warning(_T("Trying to receive master server data even though unconnected."));
+		mLog.Warning("Trying to receive master server data even though unconnected.");
 		return false;
 	}
 	mVSocket->WaitAvailable(4.0);
@@ -483,16 +483,16 @@ bool MasterServerConnection::Receive(str& pData)
 	int lRawSize = mVSocket->Receive(lRawData, sizeof(lRawData));
 	if (lRawSize <= 0)
 	{
-		mLog.Warning(_T("Tried to receive data from master server, but it didn't send us any!"));
+		mLog.Warning("Tried to receive data from master server, but it didn't send us any!");
 		return false;
 	}
-	wstr lWideData;
-	if (!MasterServerNetworkParser::RawToStr(lWideData, lRawData, lRawSize))
+	str lData;
+	if (!MasterServerNetworkParser::RawToStr(lData, lRawData, lRawSize))
 	{
-		mLog.Error(_T("Got garbled data from master server - something is seriously wrong!"));
+		mLog.Error("Got garbled data from master server - something is seriously wrong!");
 		return false;
 	}
-	pData = strutil::Encode(lWideData);
+	pData = lData;
 	return true;
 }
 
@@ -505,7 +505,7 @@ void MasterServerConnection::Close(bool pError)
 	++mDisconnectCounter;
 	if (mMuxSocket && mVSocket)
 	{
-		Send(_T(MASTER_SERVER_DC));
+		Send(MASTER_SERVER_DC);
 		if (mSocketIoHandler)
 		{
 			mSocketIoHandler->KillIoSocket(mVSocket);

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -123,9 +123,9 @@ public:
 	MessageLoginRequest();
 	MessageType GetType() const;
 	int Parse(const uint8* pData, int pSize);
-	int Store(Packet* pPacket, const wstr& pLoginName, const MangledPassword& pPassword);
+	int Store(Packet* pPacket, const str& pLoginName, const MangledPassword& pPassword);
 
-	void GetLoginName(wstr& pLoginName);
+	void GetLoginName(str& pLoginName);
 	MangledPassword GetPassword();
 
 private:
@@ -146,12 +146,12 @@ public:
 	MessageStatus();
 	MessageType GetType() const;
 	int Parse(const uint8* pData, int pSize);
-	int Store(Packet* pPacket, RemoteStatus pStatus, InfoType pInfoType, int32 pInteger, const wstr& pMessage);
+	int Store(Packet* pPacket, RemoteStatus pStatus, InfoType pInfoType, int32 pInteger, const str& pMessage);
 
 	RemoteStatus GetRemoteStatus() const;
 	InfoType GetInfo() const;
 	int32 GetInteger() const;
-	void GetMessageString(wstr& pMessage) const;
+	void GetMessageString(str& pMessage) const;
 };
 
 class MessageNumber: public Message
@@ -204,10 +204,10 @@ public:
 	MessageCreateObject();
 	MessageType GetType() const;
 	int Parse(const uint8* pData, int pSize);
-	int Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const wstr& pClassId);
+	int Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const str& pClassId);
 
 	void GetTransformation(xform& pTransformation) const;
-	void GetClassId(wstr& pClassId) const;
+	void GetClassId(str& pClassId) const;
 };
 
 class MessageCreateOwnedObject: public MessageCreateObject
@@ -218,7 +218,7 @@ public:
 	MessageCreateOwnedObject();
 	MessageType GetType() const;
 	int Parse(const uint8* pData, int pSize);
-	int Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const wstr& pClassId, GameObjectId pOwnerInstanceId);
+	int Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const str& pClassId, GameObjectId pOwnerInstanceId);
 
 	uint32 GetOwnerInstanceId() const;
 

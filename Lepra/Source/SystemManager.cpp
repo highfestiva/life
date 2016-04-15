@@ -34,7 +34,7 @@ str SystemManager::GetDataDirectory()
 	return GetDataDirectoryFromPath(mArgumentVector[0]);
 }
 
-astr SystemManager::GetRandomId()
+str SystemManager::GetRandomId()
 {
 	str s;
 	s += GetLoginName();
@@ -44,18 +44,18 @@ astr SystemManager::GetRandomId()
 	s += strutil::IntToString(GetAvailRam(), 16);
 	s += strutil::IntToString(GetAvailVirtualMemory(), 16);
 	uint8 lHashData[20];
-	SHA1::Hash((const uint8*)s.c_str(), s.length()*sizeof(tchar), lHashData);
-	return (astr((const char*)lHashData, sizeof(lHashData)));
+	SHA1::Hash((const uint8*)s.c_str(), s.length()*sizeof(char), lHashData);
+	return str((const char*)lHashData, sizeof(lHashData));
 }
 
-astr SystemManager::GetSystemPseudoId()
+str SystemManager::GetSystemPseudoId()
 {
 	str s;
 	s += GetLoginName();
 	s += GetUniqueHardwareString();
 	uint8 lHashData[20];
-	SHA1::Hash((const uint8*)s.c_str(), s.length()*sizeof(tchar), lHashData);
-	astr lResult;
+	SHA1::Hash((const uint8*)s.c_str(), s.length()*sizeof(char), lHashData);
+	str lResult;
 	for (unsigned x = 0; x < sizeof(lHashData); ++x)
 	{
 		if (lHashData[x] == '\\')
@@ -198,7 +198,7 @@ void SystemManager::AddQuitRequest(int pValue)
 	}
 	else if (mQuitRequest >= 4)
 	{
-		mLog.AWarning("Hard termination due to several termination requests.");
+		mLog.Warning("Hard termination due to several termination requests.");
 		Thread::Sleep(0.5);	// Try to flush logs to disk.
 		ExitProcess(1);
 	}

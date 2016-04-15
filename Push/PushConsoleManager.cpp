@@ -25,10 +25,10 @@ namespace Push
 // Must lie before PushConsoleManager to compile.
 const PushConsoleManager::CommandPair PushConsoleManager::mCommandIdList[] =
 {
-	{_T("set-avatar"), COMMAND_SET_AVATAR},
-	{_T("set-avatar-engine-power"), COMMAND_SET_AVATAR_ENGINE_POWER},
+	{"set-avatar", COMMAND_SET_AVATAR},
+	{"set-avatar-engine-power", COMMAND_SET_AVATAR_ENGINE_POWER},
 #if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
-	{_T("builddata"), COMMAND_BUILD_DATA},
+	{"builddata", COMMAND_BUILD_DATA},
 #endif // Debug & Windows
 };
 
@@ -79,7 +79,7 @@ int PushConsoleManager::OnCommand(const HashedString& pCommand, const strutil::s
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <avatar>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <avatar>", pCommand.c_str());
 					lResult = 1;
 				}
 			}
@@ -101,7 +101,7 @@ int PushConsoleManager::OnCommand(const HashedString& pCommand, const strutil::s
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <aspect> <power>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <aspect> <power>", pCommand.c_str());
 					lResult = 1;
 				}
 			}
@@ -128,7 +128,7 @@ int PushConsoleManager::OnCommand(const HashedString& pCommand, const strutil::s
 				const Cure::LoginId lLoginId(wstrutil::Encode(lUserName), Cure::MangledPassword(lPw));
 				((PushManager*)GetGameManager())->RequestLogin(lServer, lLoginId);
 				((PushManager*)GetGameManager())->ToggleConsole();
-				ExecuteCommand(_T("wait-login"));
+				ExecuteCommand("wait-login");
 				((PushManager*)GetGameManager())->SelectAvatar(lAvatarType);
 			}
 			break;

@@ -63,11 +63,11 @@ void LogListener::OnLog(const Logger* pOriginator, const str& pAccount, const st
 {
 	if (mFormat & FORMAT_CLASS)
 	{
-		OnLog(pOriginator, pAccount+_T(": ")+pMessage+_T("\n"), pLevel);
+		OnLog(pOriginator, pAccount+": "+pMessage+"\n", pLevel);
 	}
 	else
 	{
-		OnLog(pOriginator, pMessage+_T("\n"), pLevel);
+		OnLog(pOriginator, pMessage+"\n", pLevel);
 	}
 }
 
@@ -82,7 +82,7 @@ void LogListener::OnLog(const Logger* pOriginator, const str& pMessage, LogLevel
 
 	if (mFormat & FORMAT_LOGCOUNT)
 	{
-		lOutputString = strutil::Format(_T("%.5i. "), mLogCount);
+		lOutputString = strutil::Format("%.5i. ", mLogCount);
 	}
 	++mLogCount;
 
@@ -90,15 +90,15 @@ void LogListener::OnLog(const Logger* pOriginator, const str& pMessage, LogLevel
 	{
 		switch(pLevel)
 		{
-			case LEVEL_TRACE:	lOutputString += _T("TRACE:       ");	break;
-			case LEVEL_DEBUG:	lOutputString += _T("DEBUG:       ");	break;
-			case LEVEL_PERFORMANCE:	lOutputString += _T("PERFORMANCE: ");	break;
-			case LEVEL_INFO:	lOutputString += _T("INFO:        ");	break;
-			case LEVEL_HEADLINE:	lOutputString += _T("HEADLINE:    ");	break;
-			case LEVEL_WARNING:	lOutputString += _T("WARNING:     ");	break;
-			case LEVEL_ERROR:	lOutputString += _T("ERROR:       ");	break;
+			case LEVEL_TRACE:	lOutputString += "TRACE:       ";	break;
+			case LEVEL_DEBUG:	lOutputString += "DEBUG:       ";	break;
+			case LEVEL_PERFORMANCE:	lOutputString += "PERFORMANCE: ";	break;
+			case LEVEL_INFO:	lOutputString += "INFO:        ";	break;
+			case LEVEL_HEADLINE:	lOutputString += "HEADLINE:    ";	break;
+			case LEVEL_WARNING:	lOutputString += "WARNING:     ";	break;
+			case LEVEL_ERROR:	lOutputString += "ERROR:       ";	break;
 			default:	// Fall through.
-			case LEVEL_FATAL:		lOutputString += _T("FATAL:       ");	break;
+			case LEVEL_FATAL:		lOutputString += "FATAL:       ";	break;
 		}
 	}
 
@@ -109,8 +109,8 @@ void LogListener::OnLog(const Logger* pOriginator, const str& pMessage, LogLevel
 
 	if (mFormat & FORMAT_TIME)
 	{
-		static const str lPre(_T("("));
-		static const str lPost(_T(") "));
+		static const str lPre("(");
+		static const str lPost(") ");
 		lOutputString += lPre + Time().GetDateTimeAsString() + lPost;
 	}
 
@@ -119,7 +119,7 @@ void LogListener::OnLog(const Logger* pOriginator, const str& pMessage, LogLevel
 		Thread* lThread = Thread::GetCurrentThread();
 		if (lThread)
 		{
-			lOutputString += strutil::Format(_T("%10s: "), strutil::Encode(lThread->GetThreadName()).c_str());
+			lOutputString += strutil::Format("%10s: ", lThread->GetThreadName().c_str());
 		}
 	}
 
@@ -146,7 +146,7 @@ const str& LogListener::GetName() const
 
 
 StdioConsoleLogListener::StdioConsoleLogListener(OutputFormat pFormat):
-	LogListener(_T("console"), pFormat)
+	LogListener("console", pFormat)
 {
 }
 
@@ -187,14 +187,14 @@ void StdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
 	lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
 	::SetConsoleTextAttribute(lStdOut, lAttributes);
 #else // !LEPRA_WINDOWS
-	::printf("%s", astrutil::Encode(pFullMessage).c_str());
+	::printf("%s", pFullMessage.c_str());
 #endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
 }
 
 
 
 InteractiveConsoleLogListener::InteractiveConsoleLogListener(OutputFormat pFormat):
-	LogListener(_T("i-console"), pFormat)
+	LogListener("i-console", pFormat)
 {
 }
 
@@ -235,7 +235,7 @@ void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLe
 	::printf("\r");
 	mStdioLogListener.WriteLog(pFullMessage, pLevel);
 
-	::printf("%s", astrutil::Encode(mAutoPrompt).c_str());
+	::printf("%s", mAutoPrompt.c_str());
 
 #ifdef LEPRA_WINDOWS
 	SHORT x = lConsoleInfo.dwCursorPosition.X;
@@ -246,7 +246,7 @@ void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLe
 	::printf("\033[u");	// Pop position.
 	for (size_t x = 0; x < pFullMessage.length(); ++x)
 	{
-		if (pFullMessage[x] == _T('\n'))
+		if (pFullMessage[x] == '\n')
 		{
 			::printf("\033[B");	// Move down.
 		}
@@ -259,13 +259,13 @@ void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLe
 
 void InteractiveStdioConsoleLogListener::OnLogRawMessage(const str& pText)
 {
-	::printf("%s", astrutil::Encode(pText).c_str());
+	::printf("%s", pText.c_str());
 }
 
 
 
 DebuggerLogListener::DebuggerLogListener(OutputFormat pFormat):
-	LogListener(_T("debug"), pFormat)
+	LogListener("debug", pFormat)
 {
 }
 
@@ -279,13 +279,13 @@ void DebuggerLogListener::WriteLog(const str& pFullMessage, LogLevel)
 #if !defined(NO_LOG_DEBUG_INFO)
 #if defined(LEPRA_WINDOWS)
 #ifdef LEPRA_UTF32
-	OutputDebugStringW((_T(">>>")+pFullMessage).c_str());
+	OutputDebugStringW((L">>>"+pFullMessage).c_str());
 #else
 	const wstr w = wstrutil::Encode(">>>"+pFullMessage);
 	OutputDebugStringW(w.c_str());
 #endif // UTF-16/UTF-8
 #elif defined(LEPRA_MAC)
-	MacLog::Write(_T(">>>")+pFullMessage);
+	MacLog::Write(">>>"+pFullMessage);
 #else // !Windows
 	// Usually "console" is equivalent to "debug console" on other systems.
 #endif // Windows/!Windows
@@ -297,7 +297,7 @@ void DebuggerLogListener::WriteLog(const str& pFullMessage, LogLevel)
 
 
 FileLogListener::FileLogListener(const str& pFilename, OutputFormat pFormat):
-	LogListener(_T("file"), pFormat)
+	LogListener("file", pFormat)
 {
 	mFile.Open(pFilename, DiskFile::MODE_TEXT_WRITE_APPEND);
 	if (mFile.GetSize() > 3*1024*1024)	// If the log starts getting big, do something about it.
@@ -326,7 +326,7 @@ void FileLogListener::WriteLog(const str& pFullMessage, LogLevel)
 
 
 MemFileLogListener::MemFileLogListener(uint64 pMaxSize, OutputFormat pFormat):
-	LogListener(_T("memory"), pFormat),
+	LogListener("memory", pFormat),
 	mFile(),
 	mMaxSize(pMaxSize)
 {
@@ -377,7 +377,7 @@ bool MemFileLogListener::Dump(File* pFile, LogListener* pLogListener, LogLevel p
 		{
 			if (pFile)
 			{
-				IOError lWriteStatus = pFile->WriteString(_T("  >>  ")+lLine+_T("\n"));
+				IOError lWriteStatus = pFile->WriteString("  >>  "+lLine+"\n");
 				if (lWriteStatus != IO_OK)
 				{
 					lStatus = (lWriteStatus == IO_BUFFER_UNDERFLOW)? IO_ERROR_WRITING_TO_STREAM : lWriteStatus;
@@ -385,7 +385,7 @@ bool MemFileLogListener::Dump(File* pFile, LogListener* pLogListener, LogLevel p
 			}
 			if (pLogListener)
 			{
-				pLogListener->WriteLog(_T("  >>  ")+lLine+_T("\n"), pLevel);
+				pLogListener->WriteLog("  >>  "+lLine+"\n", pLevel);
 			}
 		}
 	}

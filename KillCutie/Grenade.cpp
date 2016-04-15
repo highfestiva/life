@@ -56,11 +56,11 @@ void Grenade::Launch()
 	mIsLaunched = true;
 
 	mShreekSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_FORWARD);
-	mShreekSound->Load(GetResourceManager(), _T("incoming.wav"),
+	mShreekSound->Load(GetResourceManager(), "incoming.wav",
 		UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
 
 	mLaunchSound = new UiCure::UserSound3dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
-	mLaunchSound->Load(GetResourceManager(), _T("launch.wav"),
+	mLaunchSound->Load(GetResourceManager(), "launch.wav",
 		UiCure::UserSound3dResource::TypeLoadCallback(this, &Grenade::LoadPlaySound3d));
 
 	const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());

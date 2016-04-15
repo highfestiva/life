@@ -20,7 +20,7 @@ namespace Downwash
 
 
 CanonDriver::CanonDriver(DownwashManager* pGame, Cure::GameObjectId pCanonId, int pAmmoType):
-	Parent(pGame->GetResourceManager(), _T("CanonDriver")),
+	Parent(pGame->GetResourceManager(), "CanonDriver"),
 	mGame(pGame),
 	mCanonId(pCanonId),
 	mAmmoType(pAmmoType),
@@ -61,7 +61,7 @@ void CanonDriver::OnTick()
 	}
 	if (!mTagSet)
 	{
-		const Tbc::ChunkyClass::Tag* lTag = lCanon->FindTag(_T("behavior"), 2, 0);
+		const Tbc::ChunkyClass::Tag* lTag = lCanon->FindTag("behavior", 2, 0);
 		deb_assert(lTag);
 		mDistance = lTag->mFloatValueList[0];
 		mShootPeriod = 1/lTag->mFloatValueList[1];

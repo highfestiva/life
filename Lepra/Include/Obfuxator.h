@@ -16,9 +16,9 @@ namespace Lepra
 
 
 #define Obfuxator	fO_sx
-#define	__O(x)		Obfuxator::de(_T(x))
+#define	__O(x)		Obfuxator::de(x)
 #define	_O(x, y)	__O(x)
-#define _OA(x, y)	astrutil::Encode(_O(x, y))
+#define _OA(x, y)	_O(x, y)
 
 
 // This string obfuscator class really has a different name (#defined above) and also only

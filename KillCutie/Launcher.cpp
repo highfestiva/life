@@ -17,7 +17,7 @@ namespace GrenadeRun
 
 
 Launcher::Launcher(Game* pGame):
-	Parent(pGame->GetResourceManager(), _T("Launcher"), pGame->GetUiManager()),
+	Parent(pGame->GetResourceManager(), "Launcher", pGame->GetUiManager()),
 	mGame(pGame)
 {
 	SetForceLoadUnique(true);	// Needs to be unique as we set unique engines per view.

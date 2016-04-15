@@ -20,7 +20,7 @@ namespace GrenadeRun
 
 
 Spawner::Spawner(Cure::ContextManager* pManager):
-	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Spawner"))
+	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), "Spawner")
 {
 	pManager->AddLocalObject(this);
 }

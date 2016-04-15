@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -182,12 +182,12 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 					}
 					if (lOk)
 					{
-						tchar c[4];
-						c[0] = (tchar)((lType>>24)&0x7F);
-						c[1] = (tchar)((lType>>16)&0x7F);
-						c[2] = (tchar)((lType>>8)&0x7F);
-						c[3] = (tchar)((lType>>0)&0x7F);
-						log_volatile(mLog.Tracef(_T("Loading chunk '%c%c%c%c'."),
+						char c[4];
+						c[0] = (char)((lType>>24)&0x7F);
+						c[1] = (char)((lType>>16)&0x7F);
+						c[2] = (char)((lType>>8)&0x7F);
+						c[3] = (char)((lType>>0)&0x7F);
+						log_volatile(mLog.Tracef("Loading chunk '%c%c%c%c'.",
 							c[0], c[1], c[2], c[3]));
 					}
 					lElement.mIsElementLoaded = true;
@@ -234,7 +234,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 								deb_assert(lOk);
 								if (!lOk)
 								{
-									mLog.AError("Could not unpack string!");
+									mLog.Error("Could not unpack string!");
 								}
 							}
 							delete[] (lString);
@@ -246,8 +246,8 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 							deb_assert(lOk);
 							if (!lOk)
 							{
-								mLog.Errorf(_T("Trying to load %i elements,")
-									_T(" but only %i present. Format definition error?"),
+								mLog.Errorf("Trying to load %i elements,"
+									" but only %i present. Format definition error?",
 									lElement.mElementCount, y+1);
 							}
 							break;
@@ -302,7 +302,7 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkE
 
 bool ChunkyLoader::SaveSingleString(ChunkyType pType, const str& pString)
 {
-	const uint32 lSize = PackerUnicodeString::Pack(0, wstrutil::Encode(pString));	// Padding added.
+	const uint32 lSize = PackerUnicodeString::Pack(0, pString);	// Padding added.
 	int64 lChunkEndPosition = 0;
 	bool lOk = true;
 	if (lOk)
@@ -313,7 +313,7 @@ bool ChunkyLoader::SaveSingleString(ChunkyType pType, const str& pString)
 	{
 		uint8* lData = new uint8[lSize];
 		::memset(lData, 0, lSize);
-		PackerUnicodeString::Pack(lData, wstrutil::Encode(pString));
+		PackerUnicodeString::Pack(lData, pString);
 		lOk = (mFile->WriteData(lData, lSize) == IO_OK);
 		delete[] (lData);
 	}
@@ -1035,7 +1035,7 @@ bool ChunkyPhysicsLoader::LoadElementCallback(ChunkyType pType, uint32 pSize, in
 
 		if (lOk)
 		{
-			log_volatile(mLog.Tracef(_T("Current bone index is %i."),
+			log_volatile(mLog.Tracef("Current bone index is %i.",
 				mCurrentBoneIndex));
 			lPhysics->SetBoneChildCount(mCurrentBoneIndex, lChildCount);
 			for (int x = 0; lOk && x < lChildCount; ++x)
@@ -1176,7 +1176,7 @@ bool ChunkyClassLoader::Load(ChunkyClass* pData)
 			true);	// TODO: check other tags (e.g. settings).
 		if (!lOk)
 		{
-			mLog.Errorf(_T("Could not load contents of class file %s!"), pData->GetPhysicsBaseName().c_str());
+			mLog.Errorf("Could not load contents of class file %s!", pData->GetPhysicsBaseName().c_str());
 		}
 	}
 

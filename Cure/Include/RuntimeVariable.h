@@ -113,14 +113,14 @@ public:
 	bool IsDefined(const str& pName);
 	bool SetUntypedValue(SetMode pSetMode, const str& pName, const str& pValue);
 	bool SetValue(SetMode pSetMode, const str& pName, const str& pValue);
-	bool SetValue(SetMode pSetMode, const str& pName, const tchar* pValue);	// TRICKY: required for _T("") parameter to work.
+	bool SetValue(SetMode pSetMode, const str& pName, const char* pValue);	// TRICKY: required for "" parameter to work.
 	bool SetValue(SetMode pSetMode, const str& pName, bool pValue);
 	bool SetValue(SetMode pSetMode, const str& pName, int pValue);
 	bool SetValue(SetMode pSetMode, const str& pName, double pValue);
 	// Returns the parameter default value if the runtime variable is not found.
 	str GetUntypedDefaultValue(GetMode pMode, const str& pName);
 	const str& GetDefaultValue(GetMode pMode, const HashedString& pName, const str& pDefaultValue = EmptyString);
-	const str GetDefaultValue(GetMode pMode, const HashedString& pName, const tchar* pDefaultValue);	// TRICKY: required for _T("") parameter to work.
+	const str GetDefaultValue(GetMode pMode, const HashedString& pName, const char* pDefaultValue);	// TRICKY: required for "" parameter to work.
 	bool GetDefaultValue(GetMode pMode, const HashedString& pName, bool pDefaultValue);
 	int GetDefaultValue(GetMode pMode, const HashedString& pName, int pDefaultValue);
 	double GetDefaultValue(GetMode pMode, const HashedString& pName, double pDefaultValue);
@@ -173,14 +173,14 @@ private:
 
 
 
-#define v_token(var, name)			static const HashedString hs_##var(_T(name));
-#define v_slowget(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, _T(name), def)
-#define v_slowtryget(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, _T(name), def)
+#define v_token(var, name)			static const HashedString hs_##var(name);
+#define v_slowget(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, name, def)
+#define v_slowtryget(scope, name, def)		(scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, name, def)
 #define v_get(var, op, scope, name, def)	v_token(var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, hs_##var, def)
 #define v_tryget(var, op, scope, name, def)	v_token(t##var, name); var op (scope)->GetDefaultValue(Cure::RuntimeVariableScope::READ_IGNORE, hs_t##var, def)
-#define v_set(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::USAGE_NORMAL, _T(name), value)
-#define v_override(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::USAGE_SYS_OVERRIDE, _T(name), value)
-#define v_internal(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::USAGE_INTERNAL, _T(name), value)
+#define v_set(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::USAGE_NORMAL, name, value)
+#define v_override(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::USAGE_SYS_OVERRIDE, name, value)
+#define v_internal(scope, name, value)		(scope)->SetValue(Cure::RuntimeVariable::USAGE_INTERNAL, name, value)
 #define v_base_arithmetic(OP_GET, OP_SET, scope, name, type, arith, value, vmin, vmax)	\
 {											\
 	type _new_val;									\

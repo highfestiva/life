@@ -23,11 +23,11 @@ namespace Downwash
 // Must lie before DownwashConsoleManager to compile.
 const DownwashConsoleManager::CommandPair DownwashConsoleManager::mCommandIdList[] =
 {
-	{_T("set-avatar"), COMMAND_SET_AVATAR},
-	{_T("prev-level"), COMMAND_PREV_LEVEL},
-	{_T("next-level"), COMMAND_NEXT_LEVEL},
-	{_T("set-level-index"), COMMAND_SET_LEVEL_INDEX},
-	{_T("die"), COMMAND_DIE},
+	{"set-avatar", COMMAND_SET_AVATAR},
+	{"prev-level", COMMAND_PREV_LEVEL},
+	{"next-level", COMMAND_NEXT_LEVEL},
+	{"set-level-index", COMMAND_SET_LEVEL_INDEX},
+	{"die", COMMAND_DIE},
 };
 
 
@@ -87,7 +87,7 @@ int DownwashConsoleManager::OnCommand(const HashedString& pCommand, const struti
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <avatar>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <avatar>", pCommand.c_str());
 					lResult = 1;
 				}
 			}
@@ -97,7 +97,7 @@ int DownwashConsoleManager::OnCommand(const HashedString& pCommand, const struti
 				GetGameManager()->GetTickLock()->Acquire();
 				((DownwashManager*)GetGameManager())->StepLevel(-1);
 				GetGameManager()->GetTickLock()->Release();
-				ExecuteCommand(_T("die"));
+				ExecuteCommand("die");
 				return 0;
 			}
 			break;
@@ -106,7 +106,7 @@ int DownwashConsoleManager::OnCommand(const HashedString& pCommand, const struti
 				GetGameManager()->GetTickLock()->Acquire();
 				((DownwashManager*)GetGameManager())->StepLevel(+1);
 				GetGameManager()->GetTickLock()->Release();
-				ExecuteCommand(_T("die"));
+				ExecuteCommand("die");
 				return 0;
 			}
 			break;
@@ -119,12 +119,12 @@ int DownwashConsoleManager::OnCommand(const HashedString& pCommand, const struti
 					const int lLevelDelta = lTargetLevelIndex - ((DownwashManager*)GetGameManager())->GetCurrentLevelNumber();
 					((DownwashManager*)GetGameManager())->StepLevel(lLevelDelta);
 					GetGameManager()->GetTickLock()->Release();
-					ExecuteCommand(_T("die"));
+					ExecuteCommand("die");
 					return 0;
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <index>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <index>", pCommand.c_str());
 					lResult = 1;
 				}
 			}

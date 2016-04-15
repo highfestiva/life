@@ -75,7 +75,7 @@ TrabantSim* TrabantSim::GetApp()
 
 
 TrabantSim::TrabantSim(const strutil::strvec& pArgumentList):
-	Parent(_T("Trabant"), pArgumentList),
+	Parent("Trabant", pArgumentList),
 	mUiManager(0),
 	mActiveCounter(-100),
 	mIsInTick(false)
@@ -119,16 +119,16 @@ void TrabantSim::Init()
 	int lDisplayFrequency = 0;
 	bool lDisplayFullScreen = false;
 	double lPhysicalScreenSize = 24.0;	// An average computer's physical screen size (inches across).
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, "OpenGL");
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, "AllowUpsideDown");
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
 
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, "OpenAL");
 
 	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLECLEAR, true);
@@ -140,8 +140,8 @@ void TrabantSim::Init()
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 20.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 20.0);
-	//v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("None"));
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, _T("Force:Volumes"));
+	//v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "None");
+	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "Force:Volumes");
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 0.0);
 	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.0);
@@ -259,7 +259,7 @@ void TrabantSim::FoldSimulator()
 	dispatch_block_t Fold = ^
 	{
 		const int lWasActive = mActiveCounter;
-		astr lStdOut = PythonRunner::GetStdOut();
+		str lStdOut = PythonRunner::GetStdOut();
 		Suspend(false);
 		//UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
 		//[window setHidden:YES];
@@ -334,15 +334,15 @@ bool TrabantSim::ConnectQuery(const str& pHostname)
 	(void)pHostname;
 #ifdef LEPRA_IOS
 	str lDeniedHosts;
-	v_get(lDeniedHosts, =, UiCure::GetSettings(), "Simulator.DeniedHosts", _T(""));
-	strutil::strvec lHosts = strutil::Split(lDeniedHosts, _T(":"));
+	v_get(lDeniedHosts, =, UiCure::GetSettings(), "Simulator.DeniedHosts", "");
+	strutil::strvec lHosts = strutil::Split(lDeniedHosts, ":");
 	if (std::find(lHosts.begin(), lHosts.end(), pHostname) != lHosts.end())
 	{
 		return false;
 	}
 	str lAllowedHosts;
-	v_get(lAllowedHosts, =, UiCure::GetSettings(), "Simulator.AllowedHosts", _T(""));
-	lHosts = strutil::Split(lAllowedHosts, _T(":"));
+	v_get(lAllowedHosts, =, UiCure::GetSettings(), "Simulator.AllowedHosts", "");
+	lHosts = strutil::Split(lAllowedHosts, ":");
 	if (std::find(lHosts.begin(), lHosts.end(), pHostname) != lHosts.end())
 	{
 		return true;
@@ -365,12 +365,12 @@ bool TrabantSim::ConnectQuery(const str& pHostname)
 
 str TrabantSim::GetTypeName() const
 {
-	return _T("Simulator");
+	return "Simulator";
 }
 
 str TrabantSim::GetVersion() const
 {
-	return _T(TRABANT_VERSION);
+	return TRABANT_VERSION;
 }
 
 Cure::ApplicationTicker* TrabantSim::CreateTicker() const

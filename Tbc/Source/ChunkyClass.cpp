@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -45,7 +45,7 @@ bool ChunkyClass::UnpackTag(uint8* pBuffer, unsigned pSize)
 	bool lOk = true;
 	int lIndex = 0;
 	Tag lTag;
-	lTag.mTagName = _T("<unknown>");
+	lTag.mTagName = "<unknown>";
 	if (lOk)
 	{
 		int lStrSize = PackerUnicodeString::Unpack(lTag.mTagName, &pBuffer[lIndex], pSize-lIndex);
@@ -71,17 +71,17 @@ bool ChunkyClass::UnpackTag(uint8* pBuffer, unsigned pSize)
 		lIndex += sizeof(lStringValueCount);
 		for (int x = 0; lOk && x < lStringValueCount; ++x)
 		{
-			wstr lValue;
+			str lValue;
 			int lStrSize = PackerUnicodeString::Unpack(lValue, &pBuffer[lIndex], pSize-lIndex);
 			lStrSize = (lStrSize+3)&(~3);
 			lOk = (lIndex+lStrSize < (int)pSize);
 			deb_assert(lOk);
 			if (!lOk)
 			{
-				mLog.Errorf(_T("String index %i had wrong length (%i)."), x, lStrSize);
+				mLog.Errorf("String index %i had wrong length (%i).", x, lStrSize);
 			}
 			lIndex += lStrSize;
-			lTag.mStringValueList.push_back(strutil::Encode(lValue));
+			lTag.mStringValueList.push_back(lValue);
 		}
 	}
 	if (lOk)
@@ -128,7 +128,7 @@ bool ChunkyClass::UnpackTag(uint8* pBuffer, unsigned pSize)
 	}
 	else
 	{
-		mLog.Errorf(_T("File error: could not unpack class tag of type %s."), lTag.mTagName.c_str());
+		mLog.Errorf("File error: could not unpack class tag of type %s.", lTag.mTagName.c_str());
 	}
 	return (lOk);
 }

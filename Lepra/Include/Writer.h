@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -55,7 +55,7 @@ public:
 	const str& GetStreamName();
 	
 	// Writes the length of the string (excluding the implicit null-character).
-	template<class _T> IOError WriteString(const std::basic_string<_T>& pString);
+	IOError WriteString(const str& pString);
 
 protected:
 	void SetOutputStream(OutputStream* pOutStream);
@@ -65,15 +65,6 @@ private:
 	OutputStream* mOutStream;
 	Endian::EndianType mWriterEndian;
 };
-
-
-
-template<class _T>
-IOError Writer::WriteString(const std::basic_string<_T>& pString)
-{
-	astr lUtf8 = astrutil::Encode(pString);
-	return (WriteData(lUtf8.c_str(), (unsigned)lUtf8.length()));
-}
 
 
 

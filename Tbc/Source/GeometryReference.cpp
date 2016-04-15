@@ -19,7 +19,7 @@ namespace Tbc
 GeometryReference::GeometryReference(GeometryBase* pGeometry) :
 	mGeometry(pGeometry)
 {
-	LEPRA_DEBUG_CODE(mName = _T("Ref->") + pGeometry->mName);
+	LEPRA_DEBUG_CODE(mName = "Ref->" + pGeometry->mName);
 	LEPRA_ACQUIRE_RESOURCE(GeometryReference);
 	Copy(mGeometry);
 	mFlags = mDefaultFlags;

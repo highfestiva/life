@@ -181,7 +181,7 @@ bool MusicPlayer::StartPlayback()
 	}
 	else
 	{
-		mLog.Errorf(_T("Unable to load song %s!"), mSongNameList[mCurrentSongIndex].c_str());
+		mLog.Errorf("Unable to load song %s!", mSongNameList[mCurrentSongIndex].c_str());
 	}
 	return false;
 }

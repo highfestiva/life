@@ -40,7 +40,7 @@ void Init()
 	GammaLookup::Initialize();
 	Canvas::InitSamplingGrid();
 
-	MetaFile::AddZipExtension(_T(".zip"));
+	MetaFile::AddZipExtension(".zip");
 
 	Random::SetSeed((uint32)HiResTimer::GetSystemCounter());
 }

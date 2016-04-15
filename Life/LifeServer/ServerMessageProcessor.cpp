@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -46,15 +46,15 @@ void ServerMessageProcessor::ProcessNetworkInputMessage(Client* pClient, Cure::M
 				{
 					case Cure::MessageStatus::INFO_CHAT:
 					{
-						log_adebug("Chat...");
+						log_debug("Chat...");
 					}
 					break;
 					case Cure::MessageStatus::INFO_AVATAR:
 					{
-						log_adebug("Avatar selected...");
-						wstr lAvatarName;
+						log_debug("Avatar selected...");
+						str lAvatarName;
 						lStatus->GetMessageString(lAvatarName);
-						const Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
+						const Cure::UserAccount::AvatarId lAvatarId = lAvatarName;
 						mGameServerManager->OnSelectAvatar(pClient, lAvatarId);
 					}
 					break;
@@ -67,8 +67,8 @@ void ServerMessageProcessor::ProcessNetworkInputMessage(Client* pClient, Cure::M
 			}
 			else //if (lStatus->GetRemoteStatus() == Cure::REMOTE_NO_CONNECTION)
 			{
-				log_atrace("User disconnects.");
-				mGameServerManager->GetNetworkServer()->Disconnect(pClient->GetUserConnection()->GetAccountId(), _T(""), false);
+				log_trace("User disconnects.");
+				mGameServerManager->GetNetworkServer()->Disconnect(pClient->GetUserConnection()->GetAccountId(), "", false);
 			}
 		}
 		break;
@@ -89,8 +89,8 @@ void ServerMessageProcessor::ProcessNetworkInputMessage(Client* pClient, Cure::M
 			}
 			else
 			{
-				mLog.Warningf(_T("Client %s tried to control instance ID %i, but was not in possession."),
-					strutil::Encode(pClient->GetUserConnection()->GetLoginName()).c_str(),
+				mLog.Warningf("Client %s tried to control instance ID %i, but was not in possession.",
+					pClient->GetUserConnection()->GetLoginName().c_str(),
 					lInstanceId);
 			}
 		}
@@ -112,7 +112,7 @@ void ServerMessageProcessor::ProcessNetworkInputMessage(Client* pClient, Cure::M
 		break;
 		default:
 		{
-			mLog.AError("Got bad message type from client.");
+			mLog.Error("Got bad message type from client.");
 		}
 		break;
 	}
@@ -128,7 +128,7 @@ void ServerMessageProcessor::ProcessNumber(Client* pClient, Cure::MessageNumber:
 		{
 			mGameServerManager->GetNetworkServer()->SendNumberMessage(false, pClient->GetUserConnection()->GetSocket(),
 				Cure::MessageNumber::INFO_PONG, pInteger, pClient->GetPhysicsFrameAheadCount());
-			log_volatile(mLog.Debugf(_T("Replying to PING (PONG) to %s (ptr=%p)."),
+			log_volatile(mLog.Debugf("Replying to PING (PONG) to %s (ptr=%p).",
 				pClient->GetUserConnection()->GetSocket()->GetTargetAddress().GetAsString().c_str(),
 				pClient->GetUserConnection()->GetSocket()));
 		}
@@ -142,13 +142,13 @@ void ServerMessageProcessor::ProcessNumber(Client* pClient, Cure::MessageNumber:
 				ContextTable lTable;
 				lTable.insert(ContextTable::value_type(lInstanceId, lObject));
 				mGameServerManager->SendObjects(pClient, true, lTable);
-				log_volatile(mLog.Debugf(_T("Recreating %s (%i) on client."),
+				log_volatile(mLog.Debugf("Recreating %s (%i) on client.",
 					lObject->GetClassId().c_str(),
 					lInstanceId));
 			}
 			else
 			{
-				log_volatile(mLog.Debugf(_T("User %s tried to fetch unknown object with ID %i."), pClient->GetUserConnection()->GetLoginName().c_str(), lInstanceId));
+				log_volatile(mLog.Debugf("User %s tried to fetch unknown object with ID %i.", pClient->GetUserConnection()->GetLoginName().c_str(), lInstanceId));
 			}
 		}
 		break;
@@ -160,7 +160,7 @@ void ServerMessageProcessor::ProcessNumber(Client* pClient, Cure::MessageNumber:
 		break;
 		default:
 		{
-			mLog.AError("Received an invalid MessageNumber from client.");
+			mLog.Error("Received an invalid MessageNumber from client.");
 		}
 		break;
 	}

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
  
 
@@ -20,7 +20,7 @@ MangledPassword::MangledPassword()
 {
 }
 
-MangledPassword::MangledPassword(wstr& pMangledPassword)
+MangledPassword::MangledPassword(str& pMangledPassword)
 {
 	MangleAndSet(pMangledPassword);
 }
@@ -54,7 +54,7 @@ const std::string& MangledPassword::Get() const
 	return (mMangledPassword);
 }
 
-void MangledPassword::MangleAndSet(wstr& pPassword)
+void MangledPassword::MangleAndSet(str& pPassword)
 {
 	Clear();
 	mMangledPassword.resize(20);
@@ -73,7 +73,7 @@ void MangledPassword::MangleAndSet(wstr& pPassword)
 	// Clear original password.
 	for (size_t y = 0; y < lStringLength; ++y)
 	{
-		pPassword[y] = _T('\0');
+		pPassword[y] = '\0';
 	}
 	::memset(lRawData, 0, lRawDataSize);
 }
@@ -95,7 +95,7 @@ LoginId::LoginId()
 {
 }
 
-LoginId::LoginId(const wstr& pUserName, const MangledPassword& pMangledPassword):
+LoginId::LoginId(const str& pUserName, const MangledPassword& pMangledPassword):
 	mUserName(pUserName),
 	mMangledPassword(pMangledPassword)
 {
@@ -105,7 +105,7 @@ LoginId::~LoginId()
 {
 }
 
-const wstr& LoginId::GetName() const
+const str& LoginId::GetName() const
 {
 	return (mUserName);
 }
@@ -130,7 +130,7 @@ UserAccount::UserAccount(const LoginId& pLoginId, AccountId pId):
 {
 }
 
-/*UserAccount::UserAccount(const wstr& pUserName, const MangledPassword& pMangledPassword):
+/*UserAccount::UserAccount(const str& pUserName, const MangledPassword& pMangledPassword):
 	LoginId(pUserName, pMangledPassword),
 	mStatus(STATUS_OK)
 {

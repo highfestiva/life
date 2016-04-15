@@ -38,17 +38,17 @@ namespace Life
 // Must lie before ClientConsoleManager to compile.
 const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
 {
-	{_T("quit"), COMMAND_QUIT},
-	{_T("bye"), COMMAND_BYE},
-	{_T("zombie"), COMMAND_ZOMBIE},
-	{_T("echo-msgbox"), COMMAND_ECHO_MSGBOX},
-	{_T("start-login"), COMMAND_START_LOGIN},
-	{_T("wait-login"), COMMAND_WAIT_LOGIN},
-	{_T("logout"), COMMAND_LOGOUT},
-	{_T("start-reset-ui"), COMMAND_START_RESET_UI},
-	{_T("wait-reset-ui"), COMMAND_WAIT_RESET_UI},
-	{_T("add-player"), COMMAND_ADD_PLAYER},
-	{_T("set-mesh-visible"), COMMAND_SET_MESH_VISIBLE},
+	{"quit", COMMAND_QUIT},
+	{"bye", COMMAND_BYE},
+	{"zombie", COMMAND_ZOMBIE},
+	{"echo-msgbox", COMMAND_ECHO_MSGBOX},
+	{"start-login", COMMAND_START_LOGIN},
+	{"wait-login", COMMAND_WAIT_LOGIN},
+	{"logout", COMMAND_LOGOUT},
+	{"start-reset-ui", COMMAND_START_RESET_UI},
+	{"wait-reset-ui", COMMAND_WAIT_RESET_UI},
+	{"add-player", COMMAND_ADD_PLAYER},
+	{"set-mesh-visible", COMMAND_SET_MESH_VISIBLE},
 };
 
 
@@ -110,16 +110,16 @@ UiConsole* ClientConsoleManager::GetUiConsole() const
 
 int ClientConsoleManager::FilterExecuteCommand(const str& pCommandLine)
 {
-	const str lCommandDelimitors(_T(" \t\v\r\n"));
-	const strutil::strvec lCommandList = strutil::BlockSplit(pCommandLine, _T(";"), true, true);
+	const str lCommandDelimitors(" \t\v\r\n");
+	const strutil::strvec lCommandList = strutil::BlockSplit(pCommandLine, ";", true, true);
 	const int lAllowedCount = 5;
 	const str lAllowedList[lAllowedCount] =
 	{
-		str(_T("#") _T(RTVAR_PHYSICS_FPS)),
-		str(_T("#") _T(RTVAR_PHYSICS_RTR)),
-		str(_T("#") _T(RTVAR_PHYSICS_HALT)),
-		str(_T("#Ui.3D.")),
-		str(_T("echo ")),
+		str("#" RTVAR_PHYSICS_FPS),
+		str("#" RTVAR_PHYSICS_RTR),
+		str("#" RTVAR_PHYSICS_HALT),
+		str("#Ui.3D."),
+		str("echo "),
 	};
 	int lResult = 0;
 	for (size_t lCommandIndex = 0; lResult == 0 && lCommandIndex < lCommandList.size(); ++lCommandIndex)
@@ -141,12 +141,12 @@ int ClientConsoleManager::FilterExecuteCommand(const str& pCommandLine)
 
 
 
-bool ClientConsoleManager::SaveApplicationConfigFile(File* pFile, const wstr& pUserConfig)
+bool ClientConsoleManager::SaveApplicationConfigFile(File* pFile, const str& pUserConfig)
 {
 	bool lOk = Parent::SaveApplicationConfigFile(pFile, pUserConfig);
 	if (lOk && pUserConfig.empty())
 	{
-		pFile->WriteString<wchar_t>(L"//push \"start-login server:port username password\"\n");
+		pFile->WriteString("//push \"start-login server:port username password\"\n");
 		lOk = true;	// TODO: check if all writes went well.
 	}
 	return (lOk);
@@ -185,14 +185,14 @@ int ClientConsoleManager::OnCommand(const HashedString& pCommand, const strutil:
 			break;
 			case COMMAND_QUIT:
 			{
-				if (!pParameterVector.empty() && pParameterVector[0] == _T("!"))
+				if (!pParameterVector.empty() && pParameterVector[0] == "!")
 				{
-					mLog.AWarning("Hard process termination due to user command!");
+					mLog.Warning("Hard process termination due to user command!");
 					SystemManager::ExitProcess(0);
 				}
 				else
 				{
-					mLog.AInfo("Terminating due to user command.");
+					mLog.Info("Terminating due to user command.");
 					SystemManager::AddQuitRequest(+1);
 				}
 			}
@@ -227,7 +227,7 @@ int ClientConsoleManager::OnCommand(const HashedString& pCommand, const strutil:
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <title> <msg>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <title> <msg>", pCommand.c_str());
 					lResult = 1;
 				}
 			}
@@ -238,9 +238,9 @@ int ClientConsoleManager::OnCommand(const HashedString& pCommand, const strutil:
 
 				if (pParameterVector.size() == 3)
 				{
-					wstr lUsername = wstrutil::Encode(pParameterVector[1]);
-					wstr lReadablePassword = wstrutil::Encode(pParameterVector[2]);
-					//pParameterVector[2] = _T("        ");
+					str lUsername = pParameterVector[1];
+					str lReadablePassword = pParameterVector[2];
+					//pParameterVector[2] = "        ";
 					// Convert into login format.
 					Cure::MangledPassword lPassword(lReadablePassword);
 					lReadablePassword.clear();	// Clear out password traces in string.
@@ -249,14 +249,14 @@ int ClientConsoleManager::OnCommand(const HashedString& pCommand, const strutil:
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <server> <username> <password>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <server> <username> <password>", pCommand.c_str());
 					lResult = 1;
 				}
 			}
 			break;
 			case COMMAND_WAIT_LOGIN:
 			{
-				mLog.AInfo("Waiting for login to finish...");
+				mLog.Info("Waiting for login to finish...");
 				while (((GameClientSlaveManager*)GetGameManager())->IsLoggingIn())
 				{
 					Thread::Sleep(0.01);
@@ -265,48 +265,48 @@ int ClientConsoleManager::OnCommand(const HashedString& pCommand, const strutil:
 			break;
 			case COMMAND_LOGOUT:
 			{
-				mLog.AInfo("Logging off due to user command.");
+				mLog.Info("Logging off due to user command.");
 				((GameClientSlaveManager*)GetGameManager())->Logout();
 			}
 			break;
 			case COMMAND_START_RESET_UI:
 			{
-				mLog.AInfo("Running UI restart...");
+				mLog.Info("Running UI restart...");
 				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->StartResetUi())
 				{
-					mLog.AInfo("UI is restarting.");
+					mLog.Info("UI is restarting.");
 				}
 				else
 				{
-					mLog.AError("Could not run UI restart!");
+					mLog.Error("Could not run UI restart!");
 					lResult = 1;
 				}
 			}
 			break;
 			case COMMAND_WAIT_RESET_UI:
 			{
-				mLog.AInfo("Waiting for UI to be restarted...");
+				mLog.Info("Waiting for UI to be restarted...");
 				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->WaitResetUi())
 				{
-					mLog.AInfo("UI is up and running.");
+					mLog.Info("UI is up and running.");
 				}
 				else
 				{
-					mLog.AError("UI restarted was not completed in time!");
+					mLog.Error("UI restarted was not completed in time!");
 					lResult = 1;
 				}
 			}
 			break;
 			case COMMAND_ADD_PLAYER:
 			{
-				mLog.AInfo("Adding another player.");
+				mLog.Info("Adding another player.");
 				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->CreateSlave())
 				{
-					mLog.AInfo("Another player added.");
+					mLog.Info("Another player added.");
 				}
 				else
 				{
-					mLog.AError("Could not add another player!");
+					mLog.Error("Could not add another player!");
 					lResult = 1;
 				}
 			}
@@ -318,7 +318,7 @@ int ClientConsoleManager::OnCommand(const HashedString& pCommand, const strutil:
 				{
 					int lAffectedMeshCount = 0;
 					typedef Cure::ResourceManager::ResourceList ResourceList;
-					ResourceList lResourceList = mResourceManager->HookAllResourcesOfType(_T("GeometryRef"));
+					ResourceList lResourceList = mResourceManager->HookAllResourcesOfType("GeometryRef");
 					for (ResourceList::iterator x = lResourceList.begin(); x != lResourceList.end(); ++x)
 					{
 						UiCure::GeometryReferenceResource* lMeshRefResource = (UiCure::GeometryReferenceResource*)*x;
@@ -333,11 +333,11 @@ int ClientConsoleManager::OnCommand(const HashedString& pCommand, const strutil:
 						}
 					}
 					mResourceManager->UnhookResources(lResourceList);
-					mLog.Infof(_T("%i meshes affected."), lAffectedMeshCount);
+					mLog.Infof("%i meshes affected.", lAffectedMeshCount);
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <mesh> <bool>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <mesh> <bool>", pCommand.c_str());
 					lResult = 1;
 				}
 			}
@@ -369,7 +369,7 @@ void ClientConsoleManager::HeadlessTick()
 	{
 		// Post-destroy, pre-init.
 #ifdef LEPRA_WINDOWS
-		::MessageBox(NULL, _T("Ready?"), _T("Waiting..."), MB_OK);
+		::MessageBox(NULL, "Ready?", "Waiting...", MB_OK);
 #endif // Windows
 		while (ExecuteYieldCommand() >= 0)
 			;

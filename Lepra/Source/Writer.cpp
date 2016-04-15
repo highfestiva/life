@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -117,6 +117,11 @@ void Writer::SetWriterEndian(Endian::EndianType pWriterEndian)
 Endian::EndianType Writer::GetWriterEndian() const
 {
 	return mWriterEndian;
+}
+
+IOError Writer::WriteString(const str& pString)
+{
+	return (WriteData(pString.c_str(), (unsigned)pString.length()));
 }
 
 void Writer::SetOutputStream(OutputStream* pOutStream)

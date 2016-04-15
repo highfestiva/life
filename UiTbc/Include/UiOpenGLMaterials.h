@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -434,7 +434,7 @@ protected:
 		MAX_SHADER_LIGHTS = 3
 	};
 
-	OpenGLMatPXS(const astr& pVP, const astr pFP[NUM_FP]);
+	OpenGLMatPXS(const str& pVP, const str pFP[NUM_FP]);
 
 	void PrepareShaderPrograms(OpenGLRenderer* pRenderer);
 
@@ -488,8 +488,8 @@ protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
 
-	static const astr smVP;
-	static const astr smFP[NUM_FP];
+	static const str smVP;
+	static const str smFP[NUM_FP];
 
 private:
 	logclass();
@@ -510,8 +510,8 @@ protected:
 	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
 	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
 
-	static const astr smVP;
-	static const astr smFP[NUM_FP];
+	static const str smVP;
+	static const str smFP[NUM_FP];
 
 private:
 	logclass();
@@ -533,8 +533,8 @@ protected:
 	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
 	virtual void RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex);
 
-	static const astr smVP;
-	static const astr smFP[NUM_FP];
+	static const str smVP;
+	static const str smFP[NUM_FP];
 
 private:
 	logclass();
@@ -550,8 +550,8 @@ public:
 				 Material* pFallBackMaterial);
 	OpenGLMatTextureSBMapPXS(OpenGLRenderer* pRenderer,
 				 Material* pFallBackMaterial,
-				 const astr pVP,
-				 const astr* pFP);
+				 const str pVP,
+				 const str* pFP);
 
 	virtual ~OpenGLMatTextureSBMapPXS();
 
@@ -560,8 +560,8 @@ protected:
 	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry);
 	virtual void RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex);
 
-	static const astr smVP;
-	static const astr smFP[NUM_FP];
+	static const str smVP;
+	static const str smFP[NUM_FP];
 
 private:
 	logclass();
@@ -580,8 +580,8 @@ public:
 
 protected:
 
-	static const astr smVP;
-	static const astr smFP[NUM_FP];
+	static const str smVP;
+	static const str smFP[NUM_FP];
 };
 
 

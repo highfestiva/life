@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -59,8 +59,8 @@ public:
 private:
 	void PollAccept();
 	void TryLogin(VSocket* pSocket, Packet* pPacket, int pDataLength);
-	RemoteStatus QueryLogin(const wstr& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId);
-	void Login(const wstr& pUserName, UserAccount::AccountId pAccountId, VSocket* pSocket, Packet* pPacket);
+	RemoteStatus QueryLogin(const str& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId);
+	void Login(const str& pUserName, UserAccount::AccountId pAccountId, VSocket* pSocket, Packet* pPacket);
 	RemoteStatus ManageLogin(VSocket* pSocket, Packet* pPacket);
 	void AddUser(UserConnection* pUserConnection, UserAccount::AccountId& pAccountId);
 	bool RemoveUser(UserAccount::AccountId pAccountId, bool pDestroy);
@@ -69,7 +69,7 @@ private:
 	UserConnection* GetUser(UserAccount::AccountId pAccountId);
 
 	bool SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus,
-		MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket);
+		MessageStatus::InfoType pInfoType, str pMessage, Packet* pPacket);
 
 	//void OnCloseSocket(VSocket* pSocket);
 
@@ -81,7 +81,7 @@ private:
 	typedef std::unordered_set<VSocket*, LEPRA_VOIDP_HASHER> SocketSet;
 	typedef SocketSet PendingSocketTable;
 	typedef std::unordered_map<UserAccount::AccountId, UserConnection*> LoggedInIdUserTable;
-	typedef std::unordered_map<wstr, UserConnection*> LoggedInNameUserTable;
+	typedef std::unordered_map<str, UserConnection*> LoggedInNameUserTable;
 	typedef std::unordered_map<VSocket*, UserConnection*, LEPRA_VOIDP_HASHER> SocketUserTable;
 	typedef SocketSet SocketTimeoutTable;
 	typedef std::unordered_map<VSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;

@@ -38,7 +38,7 @@ void ServerFastProjectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const Tbc::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, 2);
+	const Tbc::ChunkyClass::Tag* lTag = FindTag("ammo", 4, 2);
 	deb_assert(lTag);
 	const float lMuzzleVelocity = lTag->mFloatValueList[0];
 	ProjectileUtil::StartBullet(this, lMuzzleVelocity, true);

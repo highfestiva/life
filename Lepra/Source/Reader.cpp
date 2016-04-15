@@ -1,15 +1,17 @@
-/*
-	Class:  Reader
-	Author: Jonas Byström
-	Copyright (c) Pixel Doctrine
-*/
+
+// Author: Jonas BystrÃ¶m
+// Copyright (c) Pixel Doctrine
 
 #include "pch.h"
 #include "../Include/Reader.h"
 #include "../Include/InputStream.h"
 
+
+
 namespace Lepra
 {
+
+
 
 Reader::Reader() :
 	mReadCount(0),
@@ -179,10 +181,40 @@ uint64 Reader::GetReadCount()
 	return mReadCount;
 }
 
+IOError Reader::ReadLine(str& pString)
+{
+	char lChar = '\0';
+	IOError lErr = Read(lChar);
+	if (lErr != IO_OK)
+	{
+		return (lErr);
+	}
+	while (lChar != '\0' && lChar != '\n')
+	{
+		if (lChar != '\r')
+		{
+			pString += lChar;
+		}
+		lErr = Read(lChar);
+		if (lErr != IO_OK)
+		{
+			if (lErr == IO_ERROR_READING_FROM_STREAM)
+			{
+				break;	// We'll take the error on the next (=empty) line.
+			}
+			return (lErr);
+		}
+	}
+
+	return IO_OK;
+}
+
 void Reader::SetInputStream(InputStream* pInStream)
 {
 	mReadCount = 0;
 	mInStream = pInStream;
 }
+
+
 
 }

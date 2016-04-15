@@ -37,23 +37,23 @@ ImageLoader::FileType ImageLoader::GetFileTypeFromName(const str& pFilename)
 {
 	str lFileExtension = Path::GetExtension(pFilename);
 	strutil::ToLower(lFileExtension);
-	if (lFileExtension == _T("bmp"))
+	if (lFileExtension == "bmp")
 	{
 		return BMP;
 	}
-	else if (lFileExtension ==  _T("tga"))
+	else if (lFileExtension ==  "tga")
 	{
 		return TGA;
 	}
-	else if (lFileExtension == _T("tif") || lFileExtension == _T("tiff"))
+	else if (lFileExtension == "tif" || lFileExtension == "tiff")
 	{
 		return TIF;
 	}
-	else if (lFileExtension == _T("jpg") || lFileExtension == _T("jpeg"))
+	else if (lFileExtension == "jpg" || lFileExtension == "jpeg")
 	{
 		return JPG;
 	}
-	else if (lFileExtension == _T("png"))
+	else if (lFileExtension == "png")
 	{
 		return PNG;
 	}

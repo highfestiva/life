@@ -58,12 +58,12 @@ STR_UTIL_TEMPLATE void STR_UTIL_QUAL::FastBlockSplit(strvec& pTokenVector, const
 	size_t x = 0;
 	for (int lSplitCount = 0; x < pString.length(); ++x)
 	{
-		if (pIsCString && pString[x] == _T('\\') && x+1 < pString.length())
+		if (pIsCString && pString[x] == '\\' && x+1 < pString.length())
 		{
 			lCurrentToken[y++] = pString[x];
 			lCurrentToken[y++] = pString[++x];
 		}
-		else if (pString[x] == _T('"'))
+		else if (pString[x] == '"')
 		{
 			lInsideString = !lInsideString;
 			if (pKeepQuotes)
@@ -137,12 +137,12 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StringToCString(const _String& pString)
 	{
 		switch (pString[x])
 		{
-			case _T('\\'):	lCString += _T("\\\\");	break;
-			case _T('\t'):	lCString += _T("\\t");	break;
-			case _T('\v'):	lCString += _T("\\v");	break;
-			case _T('\r'):	lCString += _T("\\r");	break;
-			case _T('\n'):	lCString += _T("\\n");	break;
-			case _T('"'):	lCString += _T("\\\"");	break;
+			case '\\':	lCString += "\\\\";	break;
+			case '\t':	lCString += "\\t";	break;
+			case '\v':	lCString += "\\v";	break;
+			case '\r':	lCString += "\\r";	break;
+			case '\n':	lCString += "\\n";	break;
+			case '"':	lCString += "\\\"";	break;
 			default:	lCString += pString[x];	break;
 		}
 	}
@@ -156,7 +156,7 @@ STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::CStringToString(const _String& pCString, _
 	size_t lLength = pCString.length();
 	for (size_t x = 0; x < lLength; ++x)
 	{
-		if (pCString[x] == _T('\\'))
+		if (pCString[x] == '\\')
 		{
 			if (x+1 >= lLength)
 			{
@@ -165,80 +165,80 @@ STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::CStringToString(const _String& pCString, _
 			}
 			switch (pCString[x+1])
 			{
-				case _T('n'):
+				case 'n':
 				{
-					pString += _T('\n');
+					pString += '\n';
 					++x;
 				}
 				break;
-				case _T('r'):
+				case 'r':
 				{
-					pString += _T('\r');
+					pString += '\r';
 					++x;
 				}
 				break;
-				case _T('t'):
+				case 't':
 				{
-					pString += _T('\t');
+					pString += '\t';
 					++x;
 				}
 				break;
-				case _T('v'):
+				case 'v':
 				{
-					pString += _T('\v');
+					pString += '\v';
 					++x;
 				}
 				break;
-				case _T('\\'):
+				case '\\':
 				{
-					pString += _T('\\');
+					pString += '\\';
 					++x;
 				}
 				break;
-				case _T('"'):
+				case '"':
 				{
-					pString += _T('"');
+					pString += '"';
 					++x;
 				}
 				break;
-				case _T('x'):
+				case 'x':
 				{
-					const tchar* lNumber = pCString.c_str()+x+2;
-					tchar* lEnd = 0;
+					const char* lNumber = pCString.c_str()+x+2;
+					char* lEnd = 0;
 					int lCharacter = StrToL(lNumber, &lEnd, 16);
-					pString += (tchar)lCharacter;
+					pString += (char)lCharacter;
 					x += 1+(unsigned)(lEnd-lNumber);
 				}
 				break;
-				case _T('0'):
+				case '0':
 				{
-					const tchar* lNumber = pCString.c_str()+x+2;
-					tchar* lEnd = 0;
+					const char* lNumber = pCString.c_str()+x+2;
+					char* lEnd = 0;
 					int lCharacter = StrToL(lNumber, &lEnd, 8);
-					pString += (tchar)lCharacter;
+					pString += (char)lCharacter;
 					x += 1+(unsigned)(lEnd-lNumber);
 				}
 				break;
-				case _T('1'):
-				case _T('2'):
-				case _T('3'):
-				case _T('4'):
-				case _T('5'):
-				case _T('6'):
-				case _T('7'):
-				case _T('8'):
-				case _T('9'):
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
 				{
-					const tchar* lNumber = pCString.c_str()+x+1;
-					tchar* lEnd = 0;
+					const char* lNumber = pCString.c_str()+x+1;
+					char* lEnd = 0;
 					int lCharacter = StrToL(lNumber, &lEnd, 10);
-					pString += (tchar)lCharacter;
+					pString += (char)lCharacter;
 					x += 1+(unsigned)(lEnd-lNumber);
 				}
 				break;
 				default:
 				{
-					pString += _T('\\');
+					pString += '\\';
 					lOk = false;
 				}
 				break;
@@ -407,7 +407,7 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceCtrlChars(const _String& pString
 STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::DumpData(const uint8* pData, size_t pLength)
 {
 	const char lHexTable[] = "0123456789ABCDEF";
-	astr lDataString(pLength*2, '?');
+	str lDataString(pLength*2, '?');
 	for (size_t x = 0; x < pLength; ++x)
 	{
 		lDataString[x*2+0] = lHexTable[pData[x]>>4];
@@ -516,12 +516,12 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::IntToString(int64 pValue, int pRadix)
 STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::StringToBool(const _String& pString, bool& pValue)
 {
 	bool lOk = false;
-	if (pString == _T("false"))
+	if (pString == "false")
 	{
 		pValue = false;
 		lOk = true;
 	}
-	else if (pString == _T("true"))
+	else if (pString == "true")
 	{
 		pValue = true;
 		lOk = true;

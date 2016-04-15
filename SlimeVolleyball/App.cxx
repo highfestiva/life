@@ -197,7 +197,7 @@ bool App::Open()
 	}
 	if (!lOk)
 	{
-		str lError(strutil::Format(_T("Unsupported resolution %ux%u."), lDisplayWidth, lDisplayHeight));
+		str lError(strutil::Format("Unsupported resolution %ux%u.", lDisplayWidth, lDisplayHeight));
 		if (lDisplayFullScreen)
 		{
 			mLog.Error(lError);
@@ -224,7 +224,7 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-		mDisplay->SetCaption(_T("Slime Volleyball"));
+		mDisplay->SetCaption("Slime Volleyball");
 		mDisplay->SetOrientation(UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN);
 		mDisplay->AddResizeObserver(this);
 
@@ -247,11 +247,11 @@ bool App::Open()
 		const double lFontHeight = lDisplayHeight / 24.0;
 		const tchar* lFontNames[] =
 		{
-			_T("Times New Roman"),
-			_T("Arial"),
-			_T("Courier New"),
-			_T("Verdana"),
-			_T("Helvetica"),
+			"Times New Roman",
+			"Arial",
+			"Courier New",
+			"Verdana",
+			"Helvetica",
 			0
 		};
 		for (int x = 0; lFontNames[x] && lFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
@@ -276,29 +276,29 @@ bool App::Open()
 		mDesktopWindow = new UiTbc::DesktopWindow(mInput, mPainter, new UiTbc::FloatingLayout(), 0, 0);
 		mDesktopWindow->SetIsHollow(true);
 		mDesktopWindow->SetPreferredSize(mCanvas->GetWidth(), mCanvas->GetHeight());
-		mLazyButton = CreateButton(_T("Slower"), Color(50, 150, 0), mDesktopWindow);
+		mLazyButton = CreateButton("Slower", Color(50, 150, 0), mDesktopWindow);
 		mLazyButton->SetOnClick(App, OnSpeedClick);
-		mHardButton = CreateButton(_T("Slow"), Color(192, 192, 0), mDesktopWindow);
+		mHardButton = CreateButton("Slow", Color(192, 192, 0), mDesktopWindow);
 		mHardButton->SetOnClick(App, OnSpeedClick);
-		mOriginalButton = CreateButton(_T("Original"), Color(210, 0, 0), mDesktopWindow);
+		mOriginalButton = CreateButton("Original", Color(210, 0, 0), mDesktopWindow);
 		mOriginalButton->SetOnClick(App, OnSpeedClick);
 
-		m1PButton = CreateButton(_T("1P"), Color(128, 64, 0), mDesktopWindow);
+		m1PButton = CreateButton("1P", Color(128, 64, 0), mDesktopWindow);
 		m1PButton->SetOnClick(App, OnPClick);
-		m2PButton = CreateButton(_T("2P"), Color(128, 0, 128), mDesktopWindow);
+		m2PButton = CreateButton("2P", Color(128, 0, 128), mDesktopWindow);
 		m2PButton->SetOnClick(App, OnPClick);
 
-		mNextButton = CreateButton(_T("Next"), Color(50, 150, 0), mDesktopWindow);
+		mNextButton = CreateButton("Next", Color(50, 150, 0), mDesktopWindow);
 		mNextButton->SetOnClick(App, OnFinishedClick);
-		mResetButton = CreateButton(_T("Menu"), Color(210, 0, 0), mDesktopWindow);
+		mResetButton = CreateButton("Menu", Color(210, 0, 0), mDesktopWindow);
 		mResetButton->SetOnClick(App, OnFinishedClick);
-		mRetryButton = CreateButton(_T("Rematch"), Color(192, 192, 0), mDesktopWindow);
+		mRetryButton = CreateButton("Rematch", Color(192, 192, 0), mDesktopWindow);
 		mRetryButton->SetOnClick(App, OnFinishedClick);
 
 #ifdef LEPRA_TOUCH
 		mGetiPhoneButton = 0;
 #else // !iOS
-		mGetiPhoneButton = CreateButton(_T("4 iPhone!"), Color(45, 45, 45), mDesktopWindow);
+		mGetiPhoneButton = CreateButton("4 iPhone!", Color(45, 45, 45), mDesktopWindow);
 		mGetiPhoneButton->SetOnClick(App, OnGetiPhoneClick);
 #endif // iOS / !iOS
 
@@ -311,10 +311,10 @@ bool App::Open()
 	if (lOk)
 	{
 		mMusicStreamer = 0;
-		mMusicStreamer = mSound->CreateSoundStream(_T("Tingaliin.ogg"), UiLepra::SoundManager::LOOP_FORWARD, 0);
+		mMusicStreamer = mSound->CreateSoundStream("Tingaliin.ogg", UiLepra::SoundManager::LOOP_FORWARD, 0);
 		if (!mMusicStreamer || !mMusicStreamer->Playback())
 		{
-			mLog.Errorf(_T("Unable to play beautiful muzak!"));
+			mLog.Errorf("Unable to play beautiful muzak!");
 		}
 	}
 
@@ -670,14 +670,14 @@ void App::OnFinishedClick(UiTbc::Button* pButton)
 
  void App::OnGetiPhoneClick(UiTbc::Button*)
 {
-	SystemManager::WebBrowseTo(_T("http://itunes.apple.com/us/app/slimeball/id447966821?mt=8&ls=1"));
+	SystemManager::WebBrowseTo("http://itunes.apple.com/us/app/slimeball/id447966821?mt=8&ls=1");
 	delete mGetiPhoneButton;
 	mGetiPhoneButton = 0;
 }
 
 UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::DesktopWindow* pDesktop)
 {
-	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 6, pColor, _T(""));
+	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 6, pColor, "");
 	lButton->SetText(pText);
 	const int h = std::max(pDesktop->GetSize().y/9, 44);
 	lButton->SetPreferredSize(pDesktop->GetSize().x/5, h);

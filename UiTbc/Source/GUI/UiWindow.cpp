@@ -466,7 +466,7 @@ void Window::SetActive(bool pActive)
 bool Window::OnChar(wchar_t pChar)
 {
 	bool lOk;
-	if (pChar == _T('\t'))
+	if (pChar == '\t')
 	{
 		// Focus next component. May wrap.
 		const DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(Component::DESKTOPWINDOW);
@@ -514,7 +514,7 @@ bool Window::OnChar(wchar_t pChar)
 		}
 		lOk = true;
 	}
-	else if (pChar == _T('\r'))
+	else if (pChar == '\r')
 	{
 		StateComponentList lComponentList = mClientRect->GetStateList(STATE_CLICKABLE);
 		StateComponentList::iterator x = lComponentList.begin();

@@ -186,7 +186,7 @@ Time& Time::operator -= (const Time& pTime)
 
 str Time::GetDateTimeAsString() const
 {
-	return strutil::Format(_T("%i-%.2i-%.2i, %.2i:%.2i:%.2i"), GetYear(), GetMonth(), GetDay(), GetHour(), GetMinute(), GetSecond());
+	return strutil::Format("%i-%.2i-%.2i, %.2i:%.2i:%.2i", GetYear(), GetMonth(), GetDay(), GetHour(), GetMinute(), GetSecond());
 }
 
 bool Time::operator < (const Time& pTime) const

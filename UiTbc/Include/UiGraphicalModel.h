@@ -66,7 +66,7 @@ public:
 
 	// Takes ownership of the geometry handler (takes care of destruction).
 	// pTransformAnimator = The animator (see Tbc::Model and BoneAnimator) to use for transform animations.
-	void AddGeometry(const str& pName, GeometryHandler* pGeometry, const str& pTransformAnimator = _T(""));
+	void AddGeometry(const str& pName, GeometryHandler* pGeometry, const str& pTransformAnimator = "");
 
 	Tbc::GeometryBase* GetGeometry(const str& pName);
 

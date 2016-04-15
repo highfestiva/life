@@ -73,7 +73,7 @@ bool GameUiManager::OpenDraw()
 	int lDisplayBpp;
 	int lDisplayFrequency;
 	bool lDisplayFullScreen;
-	v_get(lRenderTypeString, =, mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
+	v_get(lRenderTypeString, =, mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, "OpenGL");
 	v_get(lDisplayWidth, =, mVariableScope, RTVAR_UI_DISPLAY_WIDTH, 640);
 	v_get(lDisplayHeight, =, mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, 480);
 	v_get(lDisplayBpp, =, mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, 0);
@@ -81,11 +81,11 @@ bool GameUiManager::OpenDraw()
 	v_get(lDisplayFullScreen, =, mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, false);
 
 	UiLepra::DisplayManager::ContextType lRenderingContext = UiLepra::DisplayManager::OPENGL_CONTEXT;
-	if (lRenderTypeString == _T("OpenGL"))
+	if (lRenderTypeString == "OpenGL")
 	{
 		lRenderingContext = UiLepra::DisplayManager::OPENGL_CONTEXT;
 	}
-	else if (lRenderTypeString == _T("DirectX"))
+	else if (lRenderTypeString == "DirectX")
 	{
 		lRenderingContext = UiLepra::DisplayManager::DIRECTX_CONTEXT;
 	}
@@ -115,11 +115,11 @@ bool GameUiManager::OpenDraw()
 	{
 		if (lDisplayFullScreen)
 		{
-			mLog.Errorf(_T("Unsupported resolution %ux%u."), lDisplayWidth, lDisplayHeight);
+			mLog.Errorf("Unsupported resolution %ux%u.", lDisplayWidth, lDisplayHeight);
 		}
 		else
 		{
-			mLog.Infof(_T("Note that resolution %ux%u only supported in windowed mode."), lDisplayWidth, lDisplayHeight);
+			mLog.Infof("Note that resolution %ux%u only supported in windowed mode.", lDisplayWidth, lDisplayHeight);
 			lOk = true;	// Go ahead - running in a window is OK.
 			lDisplayMode.mWidth = lDisplayWidth;
 			lDisplayMode.mHeight = lDisplayHeight;
@@ -171,13 +171,13 @@ bool GameUiManager::OpenDraw()
 bool GameUiManager::OpenRest()
 {
 	str lSoundTypeString;
-	v_get(lSoundTypeString, =, mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	v_get(lSoundTypeString, =, mVariableScope, RTVAR_UI_SOUND_ENGINE, "OpenAL");
 	UiLepra::SoundManager::ContextType lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
-	if (lSoundTypeString == _T("OpenAL"))
+	if (lSoundTypeString == "OpenAL")
 	{
 		lSoundContext = UiLepra::SoundManager::CONTEXT_OPENAL;
 	}
-	else if (lSoundTypeString == _T("FMOD"))
+	else if (lSoundTypeString == "FMOD")
 	{
 		lSoundContext = UiLepra::SoundManager::CONTEXT_FMOD;
 	}
@@ -189,30 +189,30 @@ bool GameUiManager::OpenRest()
 		mPainter->SetFontManager(mFontManager);
 
 		str lFont;
-		v_get(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
+		v_get(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, "Times New Roman");
 		double lFontHeight;
 		v_get(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
 		int lFontFlags;
 		v_get(lFontFlags, =, mVariableScope, RTVAR_UI_2D_FONTFLAGS, 0);
 		UiTbc::FontManager::FontId lFontId = mFontManager->QueryAddFont(lFont, lFontHeight, lFontFlags);
-		const tchar* lFontNames[] =
+		const char* lFontNames[] =
 		{
-			_T("Times New Roman"),
-			_T("Arial"),
-			_T("Verdana"),
-			_T("Helvetica"),
-			_T("Courier New"),
-			_T("Segoe UI"),
-			_T("Open Sans"),
-			_T("Liberation Sans"),
-			_T("Liberation Serif"),
-			_T("Nimbus"),
-			_T("Cantarell"),
-			_T("Bookman"),
-			_T("Gothic"),
-			_T("Sans"),
-			_T("Serif"),
-			_T(""),
+			"Times New Roman",
+			"Arial",
+			"Verdana",
+			"Helvetica",
+			"Courier New",
+			"Segoe UI",
+			"Open Sans",
+			"Liberation Sans",
+			"Liberation Serif",
+			"Nimbus",
+			"Cantarell",
+			"Bookman",
+			"Gothic",
+			"Sans",
+			"Serif",
+			"",
 			0
 		};
 		for (int x = 0; lFontNames[x] && lFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
@@ -544,7 +544,7 @@ UiTbc::FontManager::FontId GameUiManager::SetScaleFont(float pScale)
 {
 	SetMasterFont();
 	str lFont;
-	v_get(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
+	v_get(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, "Times New Roman");
 	double lFontHeight;
 	if (pScale > 0)
 	{
@@ -612,25 +612,25 @@ void GameUiManager::UpdateSettings()
 	mDisplay->SetVSyncEnabled(lEnableVSync);
 
 	str lDisplayOrientation;
-	v_get(lDisplayOrientation, =, mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("AllowUpsideDown"));
+	v_get(lDisplayOrientation, =, mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, "AllowUpsideDown");
 	UiLepra::DisplayManager::Orientation lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN;
-	if (lDisplayOrientation == _T("AllowAny"))
+	if (lDisplayOrientation == "AllowAny")
 	{
 		lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY;
 	}
-	else if (lDisplayOrientation == _T("AllowUpsideDown"))
+	else if (lDisplayOrientation == "AllowUpsideDown")
 	{
 		lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN;
 	}
-	else if (lDisplayOrientation == _T("AllowAnyInternal"))
+	else if (lDisplayOrientation == "AllowAnyInternal")
 	{
 		lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY_INTERNAL;
 	}
-	else if (lDisplayOrientation == _T("AllowUpsideDownInternal"))
+	else if (lDisplayOrientation == "AllowUpsideDownInternal")
 	{
 		lOrientation = UiLepra::DisplayManager::ORIENTATION_ALLOW_UPSIDE_DOWN_INTERNAL;
 	}
-	else if (lDisplayOrientation == _T("Fixed"))
+	else if (lDisplayOrientation == "Fixed")
 	{
 		lOrientation = UiLepra::DisplayManager::ORIENTATION_FIXED;
 	}
@@ -684,7 +684,7 @@ void GameUiManager::UpdateSettings()
 	v_get(lFOV, =, mVariableScope, RTVAR_UI_3D_FOV, 45.0);
 	v_get(lClipNear, =, mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.1);
 	v_get(lClipFar, =, mVariableScope, RTVAR_UI_3D_CLIPFAR, 3000.0);
-	v_get(lShadowsString, =, mVariableScope, RTVAR_UI_3D_SHADOWS, _T("Volumes"));
+	v_get(lShadowsString, =, mVariableScope, RTVAR_UI_3D_SHADOWS, "Volumes");
 	v_get(lShadowDeviation, =, mVariableScope, RTVAR_UI_3D_SHADOWDEVIATION, 0.0);
 
 	mRenderer->SetLightsEnabled(lEnableLights);
@@ -700,17 +700,17 @@ void GameUiManager::UpdateSettings()
 	UiTbc::Renderer::Shadows lShadowMode = UiTbc::Renderer::NO_SHADOWS;
 	UiTbc::Renderer::ShadowHint lShadowType = UiTbc::Renderer::SH_VOLUMES_ONLY;
 	bool lForceShadowsOnAll = false;
-	if (strutil::StartsWith(lShadowsString, _T("Force:")))
+	if (strutil::StartsWith(lShadowsString, "Force:"))
 	{
 		lShadowsString = lShadowsString.substr(6);
 		lForceShadowsOnAll = true;
 	}
-	if (lShadowsString == _T("Volumes"))
+	if (lShadowsString == "Volumes")
 	{
 		lShadowMode = UiTbc::Renderer::CAST_SHADOWS;
 		lShadowType = UiTbc::Renderer::SH_VOLUMES_ONLY;
 	}
-	else if (lShadowsString == _T("VolumesAndMaps"))
+	else if (lShadowsString == "VolumesAndMaps")
 	{
 		lShadowMode = UiTbc::Renderer::CAST_SHADOWS;
 		lShadowType = UiTbc::Renderer::SH_VOLUMES_AND_MAPS;
@@ -726,25 +726,25 @@ void GameUiManager::UpdateSettings()
 	// ----------------------------------------
 	// 2D rendering settings.
 	str lPaintModeString;
-	v_get(lPaintModeString, =, mVariableScope, RTVAR_UI_2D_PAINTMODE, _T("AlphaBlend"));
+	v_get(lPaintModeString, =, mVariableScope, RTVAR_UI_2D_PAINTMODE, "AlphaBlend");
 	UiTbc::Painter::RenderMode lPainterRenderMode = UiTbc::Painter::RM_ALPHABLEND;
-	if (lPaintModeString == _T("Add"))
+	if (lPaintModeString == "Add")
 	{
 		lPainterRenderMode = UiTbc::Painter::RM_ADD;
 	}
-	else if (lPaintModeString == _T("AlphaBlend"))
+	else if (lPaintModeString == "AlphaBlend")
 	{
 		lPainterRenderMode = UiTbc::Painter::RM_ALPHABLEND;
 	}
-	else if (lPaintModeString == _T("AlphaTest"))
+	else if (lPaintModeString == "AlphaTest")
 	{
 		lPainterRenderMode = UiTbc::Painter::RM_ALPHATEST;
 	}
-	else if (lPaintModeString == _T("Normal"))
+	else if (lPaintModeString == "Normal")
 	{
 		lPainterRenderMode = UiTbc::Painter::RM_NORMAL;
 	}
-	else if (lPaintModeString == _T("Xor"))
+	else if (lPaintModeString == "Xor")
 	{
 		lPainterRenderMode = UiTbc::Painter::RM_XOR;
 	}
@@ -756,7 +756,7 @@ void GameUiManager::UpdateSettings()
 	if (mFontManager)
 	{
 		str lFont;
-		v_get(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, _T("Times New Roman"));
+		v_get(lFont, =, mVariableScope, RTVAR_UI_2D_FONT, "Times New Roman");
 		double lFontHeight;
 		v_get(lFontHeight, =, mVariableScope, RTVAR_UI_2D_FONTHEIGHT, 14.0);
 		int lFontFlags;

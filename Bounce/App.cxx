@@ -54,17 +54,17 @@ namespace Bounce
 
 
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-const str gPlatform = _T("touch");
+const str gPlatform = "touch";
 #else // Computer.
-const str gPlatform = _T("computer");
+const str gPlatform = "computer";
 #endif // Touch / computer.
-const str gLevelName = _T("nothing");
-const str gAvatarName = _T("no-one");
+const str gLevelName = "nothing";
+const str gAvatarName = "no-one";
 #define BGCOLOR_DIALOG		Color(5, 20, 30, 192)
 #define FGCOLOR_DIALOG		Color(255, 255, 255, 255)
 #define RTVAR_HISCORE_NAME	"Hiscore.Name"  // Last entered name.
 #define ICONBTN(i,n)		new UiCure::IconButton(mUiManager, mResourceManager, i, n)
-#define ICONBTNA(i,n)		ICONBTN(_T(i), _T(n))
+#define ICONBTNA(i,n)		ICONBTN(i, n)
 
 
 
@@ -185,7 +185,7 @@ public:
 		}
 		if (pChar == '\r' || pChar == '\n')
 		{
-			const str lText = strutil::Strip(GetText(), _T(" \t\v\r\n"));
+			const str lText = strutil::Strip(GetText(), " \t\v\r\n");
 			if (!lText.empty())
 			{
 				mApp->mDialog->Dismiss();
@@ -261,15 +261,15 @@ bool App::Open()
 #endif // Touch/!Touch
 	int lDisplayBpp = 0;
 	int lDisplayFrequency = 0;
-	v_set(mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, _T("OpenGL"));
+	v_set(mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, "OpenGL");
 	v_set(mVariableScope, RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
 	v_set(mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
 	v_set(mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
 	v_set(mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
 	v_set(mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	v_set(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, _T("Fixed"));
+	v_set(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, "Fixed");
 
-	v_set(mVariableScope, RTVAR_UI_SOUND_ENGINE, _T("OpenAL"));
+	v_set(mVariableScope, RTVAR_UI_SOUND_ENGINE, "OpenAL");
 
 	v_set(mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
 	v_set(mVariableScope, RTVAR_UI_3D_ENABLECLEAR, false);
@@ -281,7 +281,7 @@ bool App::Open()
 	v_set(mVariableScope, RTVAR_UI_3D_FOV, 60.0);
 	v_set(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 0.01);
 	v_set(mVariableScope, RTVAR_UI_3D_CLIPFAR, 2.0);
-	v_set(mVariableScope, RTVAR_UI_3D_SHADOWS, _T("None"));
+	v_set(mVariableScope, RTVAR_UI_3D_SHADOWS, "None");
 	v_set(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.5);
 	v_set(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.5);
 	v_set(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.5);
@@ -307,7 +307,7 @@ bool App::Open()
 	}
 	if (lOk)
 	{
-		mUiManager->GetDisplayManager()->SetCaption(_T("Bounce"));
+		mUiManager->GetDisplayManager()->SetCaption("Bounce");
 #if !defined(LEPRA_TOUCH)
 		mIsMouseDown = false;
 		mUiManager->GetInputManager()->GetMouse()->AddFunctor(new UiLepra::TInputFunctor<App>(this, &App::OnMouseInput));
@@ -316,8 +316,8 @@ bool App::Open()
 	if (lOk)
 	{
 		UiTbc::FontManager::FontId lDefaultFontId = mUiManager->GetFontManager()->GetActiveFontId();
-		mBigFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Helvetica"), 24);
-		mMonospacedFontId = mUiManager->GetFontManager()->QueryAddFont(_T("Courier New"), 14);
+		mBigFontId = mUiManager->GetFontManager()->QueryAddFont("Helvetica", 24);
+		mMonospacedFontId = mUiManager->GetFontManager()->QueryAddFont("Courier New", 14);
 		mUiManager->GetFontManager()->SetActiveFont(lDefaultFontId);
 	}
 	if (lOk)
@@ -325,11 +325,11 @@ bool App::Open()
 		mMusicPlayer = new UiCure::MusicPlayer(mUiManager->GetSoundManager());
 		mMusicPlayer->SetVolume(0.5f);
 		mMusicPlayer->SetSongPauseTime(9, 15);
-		/*mMusicPlayer->AddSong(_T("ButterflyRide.xm"));
-		mMusicPlayer->AddSong(_T("BehindTheFace.xm"));
-		mMusicPlayer->AddSong(_T("BrittiskBensin.xm"));
-		mMusicPlayer->AddSong(_T("DontYouWantMe'97.xm"));
-		mMusicPlayer->AddSong(_T("CloseEncounters.xm"));*/
+		/*mMusicPlayer->AddSong("ButterflyRide.xm");
+		mMusicPlayer->AddSong("BehindTheFace.xm");
+		mMusicPlayer->AddSong("BrittiskBensin.xm");
+		mMusicPlayer->AddSong("DontYouWantMe'97.xm");
+		mMusicPlayer->AddSong("CloseEncounters.xm");*/
 		mMusicPlayer->Shuffle();
 		lOk = mMusicPlayer->Playback();
 	}
@@ -354,13 +354,13 @@ bool App::Open()
 	if (lOk)
 	{
 		mTapClick = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-		mTapClick->Load(mResourceManager, _T("tap.wav"),
+		mTapClick->Load(mResourceManager, "tap.wav",
 			UiCure::UserSound2dResource::TypeLoadCallback(this, &App::SoundLoadCallback));
 	}
 	if (lOk)
 	{
 		mBackdrop = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_NONE);
-		mBackdrop->Load(mResourceManager, _T("backdrop.png"),
+		mBackdrop->Load(mResourceManager, "backdrop.png",
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &App::PainterImageLoadCallback));
 	}
 	if (lOk)
@@ -411,7 +411,7 @@ int App::Run()
 	UiCure::Init();
 	Network::Start();
 
-	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory(_T("Bounce")), _T("log"), _T("txt"));
+	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory("Bounce"), "log", "txt");
 	FileLogListener lFileLogger(lLogName);
 	{
 		LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(&mConsoleLogger, &mDebugLogger, &lFileLogger, 0, 0);
@@ -478,7 +478,7 @@ int App::Run()
 
 void App::DisplayLogo()
 {
-	UiCure::PainterImageResource* lLogo = new UiCure::PainterImageResource(mUiManager, mResourceManager, _T("logo.png"), UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+	UiCure::PainterImageResource* lLogo = new UiCure::PainterImageResource(mUiManager, mResourceManager, "logo.png", UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 	if (lLogo->Load())
 	{
 		if (lLogo->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
@@ -547,7 +547,7 @@ bool App::Poll()
 						}
 						else
 						{
-							EnterHiscore(_T("Please retry; score server obstipated"), LIGHT_RED);
+							EnterHiscore("Please retry; score server obstipated", LIGHT_RED);
 						}
 					}
 					break;
@@ -601,7 +601,7 @@ bool App::Poll()
 		{
 			if (mGame->GetScore() >= 1000)
 			{
-				EnterHiscore(_T("Enter your name for the hiscore list"), LIGHT_GRAY);
+				EnterHiscore("Enter your name for the hiscore list", LIGHT_GRAY);
 			}
 			else
 			{
@@ -631,13 +631,13 @@ bool App::Poll()
 
 		if (!lIsPaused)
 		{
-			const str lScore = _T("Score: ") + Int2Str((int)Math::Round(mGame->GetScore()));
+			const str lScore = "Score: " + Int2Str((int)Math::Round(mGame->GetScore()));
 			PrintText(lScore, 0, 160, mUiManager->GetCanvas()->GetHeight() - 20);
 		}
 
 		if (mHiscoreAgent)
 		{
-			const str lInfo = _T("Speaking to score server");
+			const str lInfo = "Speaking to score server";
 			PrintText(lInfo, 0,
 				mUiManager->GetCanvas()->GetWidth()/2,
 				mUiManager->GetCanvas()->GetHeight() - mUiManager->GetPainter()->GetFontHeight());
@@ -822,10 +822,10 @@ void App::MainMenu()
 	{
 		return;
 	}
-	const str lPlayText = mIsResume? _T("Resume") : _T("Play");
+	const str lPlayText = mIsResume? "Resume" : "Play";
 	d->AddButton(1, CreateButton(lPlayText, Color(40, 210, 40)), true);
-	d->AddButton(2, CreateButton(_T("High score"), Color(50, 90, 210)), true);
-	d->AddButton(3, CreateButton(_T("A number"), Color(210, 50, 40)), true);
+	d->AddButton(2, CreateButton("High score", Color(50, 90, 210)), true);
+	d->AddButton(3, CreateButton("A number", Color(210, 50, 40)), true);
 }
 
 void App::HiscoreMenu()
@@ -842,7 +842,7 @@ void App::HiscoreMenu()
 
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnHiscoreMenuAction);
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel(_T("High Score List"), mBigFontId);
+	d->SetQueryLabel("High Score List", mBigFontId);
 	UiTbc::Button* lMainMenuButton = ICONBTNA("btn_back.png", "");
 	lMainMenuButton->SetPreferredSize(d->GetPreferredSize());
 	d->AddButton(-1, lMainMenuButton, true);
@@ -859,33 +859,33 @@ void App::NumberDialog()
 	d->SetOffset(PixelCoord(0, -30));
 	const str lExecutionCount = Int2Str(GetExecutionCount());
 	d->SetQueryLabel(lExecutionCount, mBigFontId);
-	UiTbc::Button* lWhatsThis = CreateButton(_T("What's this?"), Color(210, 50, 40));
+	UiTbc::Button* lWhatsThis = CreateButton("What's this?", Color(210, 50, 40));
 	d->AddButton(1, lWhatsThis, true);
 	lWhatsThis->SetOnClick(App, OnWhatsThisClick);
-	d->AddButton(2, CreateButton(_T("Main menu"), Color(40, 210, 40)), true);
+	d->AddButton(2, CreateButton("Main menu", Color(40, 210, 40)), true);
 }
 
 void App::EnterHiscore(const str& pMessage, const Color& pColor)
 {
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel(_T("Wow - ")+Int2Str((int)mGame->GetScore())+_T(" points"), mBigFontId);
+	d->SetQueryLabel("Wow - "+Int2Str((int)mGame->GetScore())+" points", mBigFontId);
 	if (!pMessage.empty())
 	{
 		UiTbc::Label* lMessage = new UiTbc::Label(pColor, pMessage);
 		const int lStringWidth = mUiManager->GetPainter()->GetStringWidth(pMessage);
 		d->AddChild(lMessage, d->GetSize().x/2 - lStringWidth/2, 90);
 	}
-	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, _T("hiscore"));
+	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, "hiscore");
 	mHiscoreTextField->mApp = this;
-	mHiscoreTextField->SetText(v_slowget(mVariableScope, RTVAR_HISCORE_NAME, _T("")));
+	mHiscoreTextField->SetText(v_slowget(mVariableScope, RTVAR_HISCORE_NAME, ""));
 	mHiscoreTextField->SetPreferredSize(140, 25, false);
 	d->AddChild(mHiscoreTextField, 28, 107);
 	mHiscoreTextField->SetKeyboardFocus();	// TRICKY: focus after adding.
-	UiTbc::Button* lCancelButton = new UiTbc::Button(_T("cancel"));
+	UiTbc::Button* lCancelButton = new UiTbc::Button("cancel");
 	Color c = Color(210, 50, 40);
 	lCancelButton->SetBaseColor(c);
-	lCancelButton->SetText(_T("Cancel"), FGCOLOR_DIALOG, CLEAR_COLOR);
+	lCancelButton->SetText("Cancel", FGCOLOR_DIALOG, CLEAR_COLOR);
 	lCancelButton->SetRoundedRadius(8);
 	lCancelButton->SetPreferredSize(d->GetSize().x - mHiscoreTextField->GetPos().x*2 - mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight()+1);
 	d->AddButton(-1, lCancelButton, true);
@@ -896,8 +896,8 @@ void App::CreateHiscoreAgent()
 {
 	delete mHiscoreAgent;
 	const str lHost = _O("7y=196h5+;/,9p.5&92r:/;*(,509p;/1", "gamehiscore.pixeldoctrine.com");
-	mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, _T("bounce_master"));
-	//mHiscoreAgent = new Cure::HiscoreAgent(_T("localhost"), 8080, _T("bounce_master"));
+	mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, "bounce_master");
+	//mHiscoreAgent = new Cure::HiscoreAgent("localhost", 8080, "bounce_master");
 }
 
 void App::UpdateHiscore(bool pError)
@@ -908,13 +908,13 @@ void App::UpdateHiscore(bool pError)
 	}
 	if (pError)
 	{
-		UiTbc::Label* lText = new UiTbc::Label(LIGHT_RED, _T("Network problem, try again l8r."));
+		UiTbc::Label* lText = new UiTbc::Label(LIGHT_RED, "Network problem, try again l8r.");
 		lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
 		mDialog->AddChild(lText, 45, 30);
 		return;
 	}
 	str lLastHiscoreName;
-	v_get(lLastHiscoreName, =, mVariableScope, RTVAR_HISCORE_NAME, _T(""));
+	v_get(lLastHiscoreName, =, mVariableScope, RTVAR_HISCORE_NAME, "");
 	typedef Cure::HiscoreAgent::Entry HiscoreEntry;
 	typedef Cure::HiscoreAgent::List HiscoreList;
 	const HiscoreList& lHiscoreList = mHiscoreAgent->GetDownloadedList();
@@ -935,29 +935,29 @@ void App::UpdateHiscore(bool pError)
 			lPointer  = '>';
 			lPointer2 = '<';
 		}
-		const str lFormatPlace = strutil::Format(_T("%i"), lPositionDigits);
+		const str lFormatPlace = strutil::Format("%i", lPositionDigits);
 		// TRICKY: ugly circumvention for string that won't vswprintf()!
 		str lName = lEntry.mName;
 		if (lName.size() < 13)
 		{
 			lName.append(13-lName.size(), ' ');
 		}
-		const str lFormat1 = _T("%c%") + lFormatPlace + _T("i ");
-		const str lFormat2 = _T(" %10s%c\n");
+		const str lFormat1 = "%c%" + lFormatPlace + "i ";
+		const str lFormat2 = " %10s%c\n";
 		lHiscore += strutil::Format(lFormat1.c_str(), lPointer, lPlace) +
 			lName +
 			strutil::Format(lFormat2.c_str(), lScore.c_str(), lPointer2);
 	}
 	if (lHiscore.empty())
 	{
-		lHiscore = _T("No score entered. Yet.");
+		lHiscore = "No score entered. Yet.";
 	}
 	UiTbc::Label* lText = new UiTbc::Label(FGCOLOR_DIALOG, lHiscore);
 	lText->SetFontId(mMonospacedFontId);
 	lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
 	const UiTbc::FontManager::FontId lPreviousFontId = mUiManager->GetFontManager()->GetActiveFontId();
 	mUiManager->GetFontManager()->SetActiveFont(mMonospacedFontId);
-	const int lCharWidth = mUiManager->GetFontManager()->GetStringWidth(_T(" "));
+	const int lCharWidth = mUiManager->GetFontManager()->GetStringWidth(" ");
 	mUiManager->GetFontManager()->SetActiveFont(lPreviousFontId);
 	mDialog->AddChild(lText, 50 - lPositionDigits/2 * lCharWidth, 95);
 }
@@ -1017,7 +1017,7 @@ void App::OnWhatsThisClick(UiTbc::Button* pButton)
 	UiTbc::TextArea* lLabel = new UiTbc::TextArea(CLEAR_COLOR);
 	lLabel->SetPreferredSize(280, 60);
 	lLabel->SetFontColor(LIGHT_GRAY);
-	lLabel->AddText(_T("This is the number of people executed\nin a certain ping-pong nation since you\ninstalled this app."));
+	lLabel->AddText("This is the number of people executed\nin a certain ping-pong nation since you\ninstalled this app.");
 	mDialog->AddChild(lLabel);
 	lLabel->SetPos(20, y);
 }
@@ -1032,7 +1032,7 @@ void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
 {
 	if (!pButton)
 	{
-		str lLastHiscoreName = strutil::Strip(mHiscoreTextField->GetText(), _T(" \t\v\r\n"));
+		str lLastHiscoreName = strutil::Strip(mHiscoreTextField->GetText(), " \t\v\r\n");
 		mHiscoreTextField = 0;
 		if (!lLastHiscoreName.empty())
 		{

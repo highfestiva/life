@@ -18,7 +18,7 @@ namespace Fire
 
 
 Eater::Eater(Cure::ContextManager* pManager):
-	Parent(pManager->GetGameManager()->GetResourceManager(), _T("Eater"))
+	Parent(pManager->GetGameManager()->GetResourceManager(), "Eater")
 {
 	pManager->AddLocalObject(this);
 }

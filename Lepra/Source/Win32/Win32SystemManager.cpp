@@ -34,7 +34,7 @@ namespace Lepra
 
 
 
-LogDecorator gLog(LogType::GetLogger(LogType::SUB_GENERAL), typeid(SystemManager));
+LogDecorator gLog(LogType::GetLogger(LogType::GENERAL), typeid(SystemManager));
 
 
 
@@ -71,7 +71,7 @@ BOOL CtrlCallback(DWORD fdwCtrlType)
 		case CTRL_C_EVENT:
 		case CTRL_BREAK_EVENT:
 		{
-			gLog.AInfo("Setting quit state on console break event.");
+			gLog.Info("Setting quit state on console break event.");
 			lHandled = TRUE;
 			SystemManager::AddQuitRequest(+1);
 		}
@@ -79,7 +79,7 @@ BOOL CtrlCallback(DWORD fdwCtrlType)
 		case CTRL_LOGOFF_EVENT:
 		default:
 		{
-			gLog.AInfo("Ignoring console break event (i.e. logoff or similar).");
+			gLog.Info("Ignoring console break event (i.e. logoff or similar).");
 			lHandled = TRUE;
 		}
 		break;
@@ -114,7 +114,7 @@ void SystemManager::ResetTerminal()
 
 str SystemManager::GetRootDirectory()
 {
-	return (strutil::Format(_T("%c:/"), (tchar)(::_getdrive() + 'A' - 1)));
+	return (strutil::Format("%c:/", (char)(::_getdrive() + 'A' - 1)));
 }
 
 str SystemManager::GetCurrentDirectory()
@@ -123,49 +123,49 @@ str SystemManager::GetCurrentDirectory()
 	lBuffer[0] = 0;
 	if (::_getcwd(lBuffer, sizeof(lBuffer)) == NULL)
 	{
-		mLog.AError("Failed to GetCurrentDirectory()");
+		mLog.Error("Failed to GetCurrentDirectory()");
 	}
 
-	str lString(strutil::Encode(astr(lBuffer)));
-	lString = strutil::ReplaceAll(lString, _T('\\'), _T('/'));
+	str lString(str(lBuffer));
+	lString = strutil::ReplaceAll(lString, '\\', '/');
 
 	return (lString);
 }
 
 str SystemManager::GetUserDirectory()
 {
-	tchar lHomeDir[2048];
+	char lHomeDir[2048];
 	if (FAILED(::SHGetFolderPath(0, CSIDL_PROFILE, NULL, 0, lHomeDir)))
 	{
-		mLog.AWarning("Failed to GetUserDirectory()");
+		mLog.Warning("Failed to GetUserDirectory()");
 	}
 	str lString(lHomeDir);
-	lString = strutil::ReplaceAll(lString, _T('\\'), _T('/'));
+	lString = strutil::ReplaceAll(lString, '\\', '/');
 	return lString;
 }
 
 str SystemManager::GetDocumentsDirectory()
 {
-	tchar lDocsDir[2048];
+	char lDocsDir[2048];
 	if (FAILED(::SHGetFolderPath(0, CSIDL_MYDOCUMENTS, NULL, 0, lDocsDir)))
 	{
-		mLog.AWarning("Failed to GetDocumentsDirectory()");
+		mLog.Warning("Failed to GetDocumentsDirectory()");
 	}
 	str lString(lDocsDir);
-	lString = strutil::ReplaceAll(lString, _T('\\'), _T('/'));
+	lString = strutil::ReplaceAll(lString, '\\', '/');
 	return lString;
 }
 
 str SystemManager::GetIoDirectory(const str& pAppName)
 {
-	tchar lAppDir[2048];
+	char lAppDir[2048];
 	if (FAILED(::SHGetFolderPath(0, CSIDL_APPDATA, NULL, 0, lAppDir)))
 	{
-		mLog.AWarning("Failed to GetIoDirectory()");
+		mLog.Warning("Failed to GetIoDirectory()");
 	}
 	str lIoDir(lAppDir);
-	lIoDir = strutil::ReplaceAll(lIoDir, _T('\\'), _T('/'));
-	lIoDir = Path::JoinPath(lIoDir, pAppName, _T(""));
+	lIoDir = strutil::ReplaceAll(lIoDir, '\\', '/');
+	lIoDir = Path::JoinPath(lIoDir, pAppName, "");
 	if (!DiskFile::PathExists(lIoDir))
 	{
 		DiskFile::CreateDir(lIoDir);
@@ -176,7 +176,7 @@ str SystemManager::GetIoDirectory(const str& pAppName)
 str SystemManager::GetDataDirectoryFromPath(const str& pArgv0)
 {
 	pArgv0;
-	return _T("Data/");
+	return "Data/";
 }
 
 
@@ -186,7 +186,7 @@ str SystemManager::GetLoginName()
 	wchar_t lLoginName[128];
 	DWORD lLength = sizeof(lLoginName);
 	::GetUserNameW(lLoginName, &lLength);
-	return (strutil::Encode(wstr(lLoginName)));
+	return strutil::Encode(lLoginName);
 }
 
 str SystemManager::QueryFullUserName()
@@ -203,7 +203,7 @@ str SystemManager::QueryFullUserName()
 		{
 			if (lUserInfo->usri2_full_name[0])
 			{
-				lFullName = strutil::Encode(lUserInfo->usri2_full_name);
+				lFullName = lUserInfo->usri2_full_name;
 			}
 			::NetApiBufferFree(lUserInfo);
 		}
@@ -217,20 +217,20 @@ str SystemManager::QueryFullUserName()
 
 void SystemManager::WebBrowseTo(const str& pUrl)
 {
-	::ShellExecute(0, _T("open"), pUrl.c_str(), 0, 0, SW_SHOWDEFAULT);
+	::ShellExecute(0, "open", pUrl.c_str(), 0, 0, SW_SHOWDEFAULT);
 }
 
 void SystemManager::EmailTo(const str& pTo, const str& pSubject, const str& pBody)
 {
 	const str lUrlSubject = JsonString::UrlEncode(pSubject);
 	const str lUrlBody = JsonString::UrlEncode(pBody);
-	str lUrl = _T("mailto:") + pTo + _T("?subject=") + lUrlSubject + _T("&body=") + lUrlBody;
-	::ShellExecute(0, _T("open"), lUrl.c_str(), 0, 0, SW_SHOWDEFAULT);
+	str lUrl = "mailto:" + pTo + "?subject=" + lUrlSubject + "&body=" + lUrlBody;
+	::ShellExecute(0, "open", lUrl.c_str(), 0, 0, SW_SHOWDEFAULT);
 }
 
 str SystemManager::GetHwName()
 {
-	return _T("PC");
+	return "PC";
 }
 
 unsigned SystemManager::GetLogicalCpuCount()
@@ -291,7 +291,7 @@ str SystemManager::GetCpuName()
 		popa
 	}
 	lCpuName[12] = 0;
-	return (strutil::Encode(astr(lCpuName)));
+	return (str(lCpuName));
 }
 
 str SystemManager::GetOsName()
@@ -304,12 +304,12 @@ str SystemManager::GetOsName()
 		switch(lOsVer.dwPlatformId)
 		{
 			case VER_PLATFORM_WIN32_NT:
-				return _T("Windows NT");
+				return "Windows NT";
 			case VER_PLATFORM_WIN32_WINDOWS:
-				return _T("Windows 9x/Me");
+				return "Windows 9x/Me";
 		}
 	}
-	return _T("Windows");
+	return "Windows";
 }
 
 uint64 SystemManager::GetAmountRam()

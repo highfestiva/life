@@ -106,7 +106,7 @@ void Machine::OnTick()
 	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
 	float lRealTimeRatio = lTimeManager->GetRealTimeRatio();
 	const float lFrameTime = lTimeManager->GetNormalGameFrameTime();
-	const bool lIsChild = IsAttributeTrue(_T("float_childishness"));
+	const bool lIsChild = IsAttributeTrue("float_childishness");
 	const Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
 	vec3 lVelocity;
 	Tbc::PhysicsManager::BodyID lBodyId = lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId();
@@ -118,27 +118,27 @@ void Machine::OnTick()
 	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 	{
 		const UiTbc::ChunkyClass::Tag& lTag = lClass->GetTag(x);
-		if (lTag.mTagName == _T("ambient_sounds"))
+		if (lTag.mTagName == "ambient_sounds")
 		{
 			HandleTagAmbientSounds(lTag, lRealTimeRatio);
 		}
-		else if (lTag.mTagName == _T("eye"))
+		else if (lTag.mTagName == "eye")
 		{
 			HandleTagEye(lTag, lPhysicsManager, lIsChild);
 		}
-		else if (lTag.mTagName == _T("brake_light"))
+		else if (lTag.mTagName == "brake_light")
 		{
 			HandleTagBrakeLight(lTag);
 		}
-		else if (lTag.mTagName == _T("engine_light"))
+		else if (lTag.mTagName == "engine_light")
 		{
 			HandleTagEngineLight(lTag, lFrameTime*lRealTimeRatio);
 		}
-		else if (lTag.mTagName == _T("blink_light"))
+		else if (lTag.mTagName == "blink_light")
 		{
 			HandleTagBlinkLight(lTag, lFrameTime*lRealTimeRatio);
 		}
-		else if (lTag.mTagName == _T("jet_engine_emitter"))
+		else if (lTag.mTagName == "jet_engine_emitter")
 		{
 			// Faijah!
 			if (mJetEngineEmitter)
@@ -146,23 +146,23 @@ void Machine::OnTick()
 				mJetEngineEmitter->EmitFromTag(this, lTag, lFrameTime*lRealTimeRatio);
 			}
 		}
-		else if (lTag.mTagName == _T("engine_sound"))
+		else if (lTag.mTagName == "engine_sound")
 		{
 			HandleTagEngineSound(lTag, lPhysicsManager, lVelocity, lFrameTime*lRealTimeRatio, lRealTimeRatio, lEngineSoundIndex);
 		}
-		else if (lTag.mTagName == _T("engine_mesh_offset"))
+		else if (lTag.mTagName == "engine_mesh_offset")
 		{
 			HandleTagEngineMeshOffset(lTag, lFrameTime);
 		}
-		else if (lTag.mTagName == _T("mesh_offset"))
+		else if (lTag.mTagName == "mesh_offset")
 		{
 			HandleTagMeshOffset(lTag, lFrameTime*lRealTimeRatio);
 		}
-		else if (lTag.mTagName == _T("mesh_rotate"))
+		else if (lTag.mTagName == "mesh_rotate")
 		{
 			HandleTagMeshRotate(lTag, lFrameTime*lRealTimeRatio);
 		}
-		else if (lTag.mTagName == _T("exhaust"))
+		else if (lTag.mTagName == "exhaust")
 		{
 			// Particles coming out of exhaust.
 			if (mExhaustEmitter)
@@ -170,7 +170,7 @@ void Machine::OnTick()
 				mExhaustEmitter->EmitFromTag(this, lTag, lFrameTime);
 			}
 		}
-		else if (lTag.mTagName == _T("burn"))
+		else if (lTag.mTagName == "burn")
 		{
 			// Particles caused by burning.
 			if (mBurnEmitter)
@@ -197,7 +197,7 @@ void Machine::HandleTagAmbientSounds(const UiTbc::ChunkyClass::Tag& pTag, float 
 		pTag.mEngineIndexList.size() != 0 ||
 		pTag.mMeshIndexList.size() != 0)
 	{
-		mLog.Errorf(_T("The ambient_sounds tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf("The ambient_sounds tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -233,7 +233,7 @@ void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const Tbc::Physi
 		pTag.mBodyIndexList.size()+pTag.mEngineIndexList.size() != 1 ||
 		pTag.mMeshIndexList.size() < 1)
 	{
-		mLog.Errorf(_T("The eye tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf("The eye tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -276,7 +276,7 @@ void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const Tbc::Physi
 			break;
 			default:
 			{
-				mLog.Errorf(_T("Joint type %i not implemented for tag type %s."), lBone->GetJointType(), pTag.mTagName.c_str());
+				mLog.Errorf("Joint type %i not implemented for tag type %s.", lBone->GetJointType(), pTag.mTagName.c_str());
 				deb_assert(false);
 			}
 			break;
@@ -318,7 +318,7 @@ void Machine::HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag)
 		pTag.mEngineIndexList.size() != 1 ||
 		pTag.mMeshIndexList.size() < 1)
 	{
-		mLog.Errorf(_T("The brake_light tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf("The brake_light tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -354,7 +354,7 @@ void Machine::HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag, float pF
 		pTag.mEngineIndexList.size() != 1 ||
 		pTag.mMeshIndexList.size() < 1)
 	{
-		mLog.Errorf(_T("The engine_light tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf("The engine_light tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -387,7 +387,7 @@ void Machine::HandleTagBlinkLight(const UiTbc::ChunkyClass::Tag& pTag, float pFr
 		pTag.mEngineIndexList.size() != 0 ||
 		pTag.mMeshIndexList.size() < 1)
 	{
-		mLog.Errorf(_T("The blink_light tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf("The blink_light tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -426,7 +426,7 @@ void Machine::HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const Tb
 		pTag.mEngineIndexList.size() < 1 ||
 		pTag.mMeshIndexList.size() != 0)
 	{
-		mLog.Errorf(_T("The engine_sound tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf("The engine_sound tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -520,7 +520,7 @@ void Machine::HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, flo
 		pTag.mEngineIndexList.size() != 1 ||
 		pTag.mMeshIndexList.size() < 1)
 	{
-		mLog.Errorf(_T("The engine_mesh_offset tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf("The engine_mesh_offset tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -580,7 +580,7 @@ void Machine::HandleTagMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFr
 		pTag.mEngineIndexList.size() != 0 ||
 		pTag.mMeshIndexList.size() < 1)
 	{
-		mLog.Errorf(_T("The mesh_offset tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf("The mesh_offset tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -625,7 +625,7 @@ void Machine::HandleTagMeshRotate(const UiTbc::ChunkyClass::Tag& pTag, float pFr
 		pTag.mEngineIndexList.size() != 0 ||
 		pTag.mMeshIndexList.size() < 1)
 	{
-		mLog.Errorf(_T("The mesh_rotate tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf("The mesh_rotate tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -671,17 +671,17 @@ float Machine::CalculateMeshOffset(const str& pFunction, float lStartTime, float
 	}
 	float lAmplitude = 0;
 	float x = pMeshTime-lStartTime;
-	if (pFunction == _T("|sin|"))
+	if (pFunction == "|sin|")
 	{
 		lAmplitude = std::abs(::sin(x*2*PIF*pFrequency));
 	}
-	else if (pFunction == _T("linear"))
+	else if (pFunction == "linear")
 	{
 		lAmplitude = x;
 	}
 	else
 	{
-		mLog.Errorf(_T("Uknown mesh_xxx function '%s'."), pFunction.c_str());
+		mLog.Errorf("Uknown mesh_xxx function '%s'.", pFunction.c_str());
 		deb_assert(false);
 	}
 	pMeshTime += pFrameTime;

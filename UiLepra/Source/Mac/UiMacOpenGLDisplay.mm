@@ -256,18 +256,18 @@ bool MacOpenGLDisplay::InitScreen()
 	if (!SetGLPixelFormat())
 	{
 		MessageBox(NULL,
-			   _T("Unable to setup pixel format, Please install a new OpenGL driver,") \
-			   _T("or try closing other running applications..."),
-			   _T("OpenGL Error") ,MB_OK | MB_ICONWARNING );
+			   "Unable to setup pixel format, Please install a new OpenGL driver," \
+			   "or try closing other running applications...",
+			   "OpenGL Error" ,MB_OK | MB_ICONWARNING );
 		return false;
 	}
 
 	if (!CreateGLContext())
 	{
 		MessageBox(NULL,
-			   _T("Unable to setup OpenGL, Please install a new OpenGL driver,") \
-			   _T("or try closing other running applications..."),
-			   _T("OpenGL Error"),MB_OK | MB_ICONWARNING );
+			   "Unable to setup OpenGL, Please install a new OpenGL driver," \
+			   "or try closing other running applications...",
+			   "OpenGL Error",MB_OK | MB_ICONWARNING );
 		return false;
 	}*/
 
@@ -300,10 +300,10 @@ bool MacOpenGLDisplay::InitScreen()
 
 void MacOpenGLDisplay::UpdateCaption()
 {
-	str lString = strutil::Format(_T("MacOpenGLDisplay (%ix%i %iBit %iHz) %s"),
+	str lString = strutil::Format("MacOpenGLDisplay (%ix%i %iBit %iHz %s"),
 		mDisplayMode.mWidth, mDisplayMode.mHeight,
 		mDisplayMode.mBitDepth, mDisplayMode.mRefreshRate,
-		 _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT));
+		 LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT);
 	SetCaption(lString, true);
 }
 

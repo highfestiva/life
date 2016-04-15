@@ -94,13 +94,13 @@ bool ContextManager::DeleteObject(GameObjectId pInstanceId)
 	ContextObject* lObject = GetObject(pInstanceId, true);
 	if (lObject)
 	{
-		log_volatile(mLog.Tracef(_T("Deleting context object %i."), pInstanceId));
+		log_volatile(mLog.Tracef("Deleting context object %i.", pInstanceId));
 		delete (lObject);
 		lOk = true;
 	}
 	else
 	{
-		log_volatile(mLog.Debugf(_T("Could not delete context object %i, since not found."), pInstanceId));
+		log_volatile(mLog.Debugf("Could not delete context object %i, since not found.", pInstanceId));
 	}
 	return (lOk);
 }
@@ -198,7 +198,7 @@ void ContextManager::UnpackObjectAttribute(GameObjectId pObjectId, const uint8* 
 	}
 	else
 	{
-		log_volatile(mLog.Debugf(_T("Trying to unpack attribute for non-existent object %u."), pObjectId));
+		log_volatile(mLog.Debugf("Trying to unpack attribute for non-existent object %u.", pObjectId));
 	}
 }
 
@@ -339,7 +339,7 @@ void ContextManager::HandleIdledBodies()
 		}
 		/*else
 		{
-			mLog.AError("Body not present in body table!");
+			mLog.Error("Body not present in body table!");
 		}*/
 	}
 }

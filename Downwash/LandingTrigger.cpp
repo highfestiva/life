@@ -17,7 +17,7 @@ namespace Downwash
 
 
 LandingTrigger::LandingTrigger(Cure::ContextManager* pManager):
-	Parent(pManager, _T("LandingTrigger"))
+	Parent(pManager, "LandingTrigger")
 {
 }
 
@@ -29,7 +29,7 @@ LandingTrigger::~LandingTrigger()
 
 void LandingTrigger::DidTrigger(Cure::ContextObject* pBody)
 {
-	if (!strutil::StartsWith(pBody->GetClassId(), _T("helicopter")))
+	if (!strutil::StartsWith(pBody->GetClassId(), "helicopter"))
 	{
 		mAllowBulletTime = true;
 		return;

@@ -17,6 +17,7 @@ namespace Lepra
 
 
 #if defined(LEPRA_MSVC_X86_32) || defined(LEPRA_MSVC_X86_64) || defined(LEPRA_MSVC_ARM)
+
 typedef signed char		int8;
 typedef unsigned char		uint8;
 typedef signed short		int16;
@@ -29,7 +30,12 @@ typedef float			float32;
 typedef double			float64;
 #define LEPRA_LONGLONG(x)	x
 #define LEPRA_ULONGLONG(x)	x
+#if defined(LEPRA_MSVC) && !defined(_NATIVE_WCHAR_T_DEFINED)
+typedef uint16			wchar_t;
+#endif // LEPRA_MSVC && !_NATIVE_WCHAR_T_DEFINED
+
 #elif defined(LEPRA_GCC_X86_32) || defined(LEPRA_GCC_X86_64) || defined(LEPRA_GCC_POWERPC) || defined(LEPRA_GCC_ARM)
+
 typedef signed char		int8;
 typedef unsigned char		uint8;
 typedef signed short		int16;
@@ -42,37 +48,20 @@ typedef float			float32;
 typedef double			float64;
 #define LEPRA_LONGLONG(x)	x ## LL
 #define LEPRA_ULONGLONG(x)	x ## ULL
+
 #else	// Unknown platform
+
 #error "Hardware platform not supported! Define LEPRA_MSVC_X86/LEPRA_MSVC_ARM/LEPRA_GCC_X86/etc to compile for that platform."
+
 #endif	// Platform
 
 
 
-#if defined(LEPRA_MSVC) && !defined(_NATIVE_WCHAR_T_DEFINED)
-typedef uint16			wchar_t;
-#endif // LEPRA_MSVC && !_NATIVE_WCHAR_T_DEFINED
+typedef unsigned char	utchar;
+
 #define	__WIDE(x)	L ## x
 #define	_WIDE(x)	__WIDE(x)
-#ifdef	LEPRA_UTF32
-typedef	wchar_t			utchar;
-typedef	wchar_t			tchar;
-#ifdef __T
-#undef __T
-#endif
-#define	__T			__WIDE
-#else	// !LEPRA_UTF32
-typedef unsigned char		utchar;
-typedef char			tchar;
-#ifdef __T
-#undef __T
-#endif
-#define	__T(x)			x
-#endif	// LEPRA_UTF32/!LEPRA_UTF32
-#ifdef _T
-#undef _T
-#endif
-// Two-step macro (__T and _T) allows for resolving symbolic constants.
-#define	_T(x)			__T(x)
+#define	_(x)		x
 
 
 

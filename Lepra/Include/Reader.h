@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -63,7 +63,7 @@ public:
 	uint64 GetReadCount();
 
 	// Read one line of text (until '\n').
-	template<class _T> IOError ReadLine(std::basic_string<_T>& pString);
+	IOError ReadLine(str& pString);
 
 protected:
 	void SetInputStream(InputStream* pInStream);
@@ -73,40 +73,6 @@ private:
 	InputStream* mInStream;
 	Endian::EndianType mReaderEndian;
 };
-
-
-
-template<class _T>
-IOError Reader::ReadLine(std::basic_string<_T>& pString)
-{
-	astr lUtf8Line;
-	char lChar = '\0';
-	IOError lErr = Read(lChar);
-	if (lErr != IO_OK)
-	{
-		return (lErr);
-	}
-	while (lChar != '\0' && lChar != _T('\n'))
-	{
-		if (lChar != '\r')
-		{
-			lUtf8Line += lChar;
-		}
-		lErr = Read(lChar);
-		if (lErr != IO_OK)
-		{
-			if (lErr == IO_ERROR_READING_FROM_STREAM)
-			{
-				break;	// We'll take the error on the next (=empty) line.
-			}
-			return (lErr);
-		}
-	}
-
-	pString = StringUtilityTemplate<std::basic_string<_T> >::Encode(lUtf8Line);
-
-	return (IO_OK);
-}
 
 
 

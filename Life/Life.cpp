@@ -19,11 +19,11 @@ namespace Life
 
 Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName)
 {
-	if (strutil::StartsWith(pAttributeName, _T("float_")))
+	if (strutil::StartsWith(pAttributeName, "float_"))
 	{
 		return new Cure::FloatAttribute(pObject, pAttributeName, 0);
 	}
-	else if (strutil::StartsWith(pAttributeName, _T("int_")))
+	else if (strutil::StartsWith(pAttributeName, "int_"))
 	{
 		return new Cure::IntAttribute(pObject, pAttributeName, 0);
 	}

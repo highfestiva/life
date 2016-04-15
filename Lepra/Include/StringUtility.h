@@ -70,7 +70,7 @@ public:
 	static _String ReplaceCtrlChars(const _String& pString, typename _String::value_type pReplacement);
 	static _String DumpData(const uint8* pData, size_t pLength);
 
-	static const _String Encode(const astr& pString);
+	static const _String Encode(const str& pString);
 	static const _String Encode(const wstr& pString);
 
 	static void ToLower(_String& pString);
@@ -89,10 +89,9 @@ private:
 	static std::locale mLocale;
 };
 
-typedef StringUtilityTemplate<astr>	astrutil;
-typedef StringUtilityTemplate<wstr>	wstrutil;
 typedef StringUtilityTemplate<str>	strutil;
-extern const astr gEmptyAnsiString;
+typedef StringUtilityTemplate<wstr>	wstrutil;
+extern const str gEmptyAnsiString;
 extern const wstr gEmptyUnicodeString;
 #ifdef LEPRA_UTF32
 #define EmptyString		gEmptyUnicodeString

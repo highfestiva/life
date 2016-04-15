@@ -38,14 +38,14 @@ public:
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
 		Layout* pLayout = 0,
-		const tchar* pImageDefinitionFile = 0,
-		const tchar* pArchive = 0);
+		const char* pImageDefinitionFile = 0,
+		const char* pArchive = 0);
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
 		const Color& pColor,
 		Layout* pLayout = 0,
-		const tchar* pImageDefinitionFile = 0,
-		const tchar* pArchive = 0);
+		const char* pImageDefinitionFile = 0,
+		const char* pArchive = 0);
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
 		const Color& pTopLeftColor,
@@ -53,14 +53,14 @@ public:
 		const Color& pBottomRightColor,
 		const Color& pBottomLeftColor,
 		Layout* pLayout = 0,
-		const tchar* pImageDefinitionFile = 0,
-		const tchar* pArchive = 0);
+		const char* pImageDefinitionFile = 0,
+		const char* pArchive = 0);
 	DesktopWindow(UiLepra::InputManager* pInputManager,
 		Painter* pPainter,
 		Painter::ImageID pImageID,
 		Layout* pLayout = 0,
-		const tchar* pImageDefinitionFile = 0,
-		const tchar* pArchive = 0);
+		const char* pImageDefinitionFile = 0,
+		const char* pArchive = 0);
 
 	virtual ~DesktopWindow();
 
@@ -119,7 +119,7 @@ private:
 	void GetCursorPosition(int& pMouseX, int& pMouseY) const;
 	void DispatchMouseMove(int pMouseX, int pMouseY);
 
-	void Init(const tchar* pImageDefinitionFile, const tchar* pArchive);
+	void Init(const char* pImageDefinitionFile, const char* pArchive);
 	void ClampMouse(int& x, int& y) const;
 
 	void PurgeDeleted();

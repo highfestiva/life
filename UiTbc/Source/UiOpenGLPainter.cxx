@@ -1318,21 +1318,21 @@ void OpenGLPainter::PrintText(const wstr& pString, int x, int y)
 	for (size_t i = 0; i < lStringLength; i++)
 	{
 		const wchar_t lChar = pString[i];
-		if (lChar == _T('\n'))
+		if (lChar == '\n')
 		{
 			lCurrentY += lLineHeight;
 			lCurrentX = x;
 		}
-		else if (lChar == _T(' '))
+		else if (lChar == ' ')
 		{
 			lCurrentX += lSpaceSize;
 		}
-		else if(lChar == _T('\t'))
+		else if(lChar == '\t')
 		{
 			lCurrentX = (lCurrentX/lTabSize+1) * lTabSize;
 		}
-		else if(lChar != _T('\r') && 
-			lChar != _T('\b'))
+		else if(lChar != '\r' && 
+			lChar != '\b')
 		{
 			int lTextureX = 0;
 			int lCharWidth = 5;

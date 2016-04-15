@@ -9,7 +9,7 @@
 #include "../Include/ContextObject.h"
 #include "../Include/FloatAttribute.h"
 
-#define HEALTH_NAME	_T("float_health")
+#define HEALTH_NAME	"float_health"
 
 
 

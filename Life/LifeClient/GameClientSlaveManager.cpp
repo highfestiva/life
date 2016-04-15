@@ -96,25 +96,25 @@ void GameClientSlaveManager::Suspend(bool pHard)
 void GameClientSlaveManager::LoadSettings()
 {
 	str lExternalServerAddress;
-	v_get(lExternalServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
-	GetConsoleManager()->ExecuteCommand(_T("alias gfx-lo \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" false; #") _T(RTVAR_UI_3D_SHADOWS) _T(" No; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" false; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTFADING) _T(" false; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" false\""));
-	GetConsoleManager()->ExecuteCommand(_T("alias gfx-hi \"#") _T(RTVAR_UI_3D_PIXELSHADERS) _T(" true; #") _T(RTVAR_UI_3D_SHADOWS) _T(" Force:Volumes; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTS) _T(" true; #") _T(RTVAR_UI_3D_ENABLEMASSOBJECTFADING) _T(" true; #") _T(RTVAR_UI_3D_ENABLEPARTICLES) _T(" true\""));
-	GetConsoleManager()->ExecuteCommand(_T("alias iphone4-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 960; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 640; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" true; start-reset-ui\""));
-	GetConsoleManager()->ExecuteCommand(_T("alias iphone5-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 1136; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 640; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" true; start-reset-ui\""));
-	GetConsoleManager()->ExecuteCommand(_T("alias ipad2-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 1024; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 768; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" true; start-reset-ui\""));
-	GetConsoleManager()->ExecuteCommand(_T("alias ipad3-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 2048; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 1536; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" true; start-reset-ui\""));
-	GetConsoleManager()->ExecuteCommand(_T("alias computer-settings \"#") _T(RTVAR_UI_DISPLAY_WIDTH) _T(" 960; #") _T(RTVAR_UI_DISPLAY_HEIGHT) _T(" 540; #") _T(RTVAR_CTRL_EMULATETOUCH) _T(" false; start-reset-ui\""));
+	v_get(lExternalServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
+	GetConsoleManager()->ExecuteCommand("alias gfx-lo \"#" RTVAR_UI_3D_PIXELSHADERS " false; #" RTVAR_UI_3D_SHADOWS " No; #" RTVAR_UI_3D_ENABLEMASSOBJECTS " false; #" RTVAR_UI_3D_ENABLEMASSOBJECTFADING " false; #" RTVAR_UI_3D_ENABLEPARTICLES " false\"");
+	GetConsoleManager()->ExecuteCommand("alias gfx-hi \"#" RTVAR_UI_3D_PIXELSHADERS " true; #" RTVAR_UI_3D_SHADOWS " Force:Volumes; #" RTVAR_UI_3D_ENABLEMASSOBJECTS " true; #" RTVAR_UI_3D_ENABLEMASSOBJECTFADING " true; #" RTVAR_UI_3D_ENABLEPARTICLES " true\"");
+	GetConsoleManager()->ExecuteCommand("alias iphone4-settings \"#" RTVAR_UI_DISPLAY_WIDTH " 960; #" RTVAR_UI_DISPLAY_HEIGHT " 640; #" RTVAR_CTRL_EMULATETOUCH " true; start-reset-ui\"");
+	GetConsoleManager()->ExecuteCommand("alias iphone5-settings \"#" RTVAR_UI_DISPLAY_WIDTH " 1136; #" RTVAR_UI_DISPLAY_HEIGHT " 640; #" RTVAR_CTRL_EMULATETOUCH " true; start-reset-ui\"");
+	GetConsoleManager()->ExecuteCommand("alias ipad2-settings \"#" RTVAR_UI_DISPLAY_WIDTH " 1024; #" RTVAR_UI_DISPLAY_HEIGHT " 768; #" RTVAR_CTRL_EMULATETOUCH " true; start-reset-ui\"");
+	GetConsoleManager()->ExecuteCommand("alias ipad3-settings \"#" RTVAR_UI_DISPLAY_WIDTH " 2048; #" RTVAR_UI_DISPLAY_HEIGHT " 1536; #" RTVAR_CTRL_EMULATETOUCH " true; start-reset-ui\"");
+	GetConsoleManager()->ExecuteCommand("alias computer-settings \"#" RTVAR_UI_DISPLAY_WIDTH " 960; #" RTVAR_UI_DISPLAY_HEIGHT " 540; #" RTVAR_CTRL_EMULATETOUCH " false; start-reset-ui\"");
 #ifdef LEPRA_WINDOWS
 #define SHELL_REBUILD_DATA		"cd .. & Tools\\build\\rgo.py --pause-on-error builddata"
 #else
 #define SHELL_REBUILD_DATA		"cd ..; Tools/build/rgo.py --pause-on-error builddata"
 #endif // Windows shell / Posix shell
-	GetConsoleManager()->ExecuteCommand(_T("alias rebuild-data shell-execute \"") _T(SHELL_REBUILD_DATA) _T("\""));
-	GetConsoleManager()->ExecuteCommand(_T("alias zzz \"zombie nop\""));
+	GetConsoleManager()->ExecuteCommand("alias rebuild-data shell-execute \"" SHELL_REBUILD_DATA "\"");
+	GetConsoleManager()->ExecuteCommand("alias zzz \"zombie nop\"");
 #ifdef LEPRA_DEBUG
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 zzz"));
+	GetConsoleManager()->ExecuteCommand("bind-key F5 zzz");
 #endif // Debug
-	GetConsoleManager()->ExecuteCommand(_T("execute-file -i ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand("execute-file -i "+GetApplicationCommandFilename());
 	// Always default these settings, to avoid that the user can't get rid of undesired behavior.
 	v_set(UiCure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
 	v_set(UiCure::GetSettings(), RTVAR_DEBUG_INPUT_PRINT, false);
@@ -127,24 +127,24 @@ void GameClientSlaveManager::LoadSettings()
 	else
 	{
 		str lServerAddress;
-		v_get(lServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+		v_get(lServerAddress, =, UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
 		if (Network::IsLocalAddress(lServerAddress))
 		{
 			bool lIsOpenServer;
 			v_get(lIsOpenServer, =, GetVariableScope(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
-			const bool lIsCurrentlyLocalhost = (strutil::StartsWith(lServerAddress, _T("localhost:")) || strutil::StartsWith(lServerAddress, _T("127.0.0.1:")));
+			const bool lIsCurrentlyLocalhost = (strutil::StartsWith(lServerAddress, "localhost:") || strutil::StartsWith(lServerAddress, "127.0.0.1:"));
 			if (lIsOpenServer)
 			{
 				if (lIsCurrentlyLocalhost)
 				{
-					v_set(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("0.0.0.0:16650"));
+					v_set(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, "0.0.0.0:16650");
 				}
 			}
 			else
 			{
 				if (!lIsCurrentlyLocalhost)
 				{
-					v_set(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+					v_set(UiCure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
 				}
 			}
 		}
@@ -195,7 +195,7 @@ bool GameClientSlaveManager::IsQuitting() const
 
 void GameClientSlaveManager::SetIsQuitting()
 {
-	mLog.Headlinef(_T("Slave %i will quit."), GetSlaveIndex());
+	mLog.Headlinef("Slave %i will quit.", GetSlaveIndex());
 	if (Thread::GetCurrentThread()->GetThreadName() == "MainThread")
 	{
 		GetResourceManager()->Tick();
@@ -300,7 +300,7 @@ void GameClientSlaveManager::TickNetworkInput()
 	{
 		case Cure::NetworkAgent::RECEIVE_OK:
 		{
-			//log_volatile(mLog.Debugf(_T("%s received data from server."), GetName().c_str()));
+			//log_volatile(mLog.Debugf("%s received data from server.", GetName().c_str()));
 			Cure::Packet::ParseResult lParseResult;
 			// Walk packets.
 			do
@@ -310,7 +310,7 @@ void GameClientSlaveManager::TickNetworkInput()
 				for (int x = 0; x < lMessageCount; ++x)
 				{
 					Cure::Message* lMessage = lPacket->GetMessageAt(x);
-					//log_volatile(mLog.Tracef(_T("Received message of type %i."), lMessage->GetType()));
+					//log_volatile(mLog.Tracef("Received message of type %i.", lMessage->GetType()));
 					ProcessNetworkInputMessage(lMessage);
 				}
 				lParseResult = lPacket->ParseMore();
@@ -334,19 +334,19 @@ void GameClientSlaveManager::TickNetworkInput()
 			}
 			else
 			{
-				mLog.AError("Problem with receiving crap extra packet!");
+				mLog.Error("Problem with receiving crap extra packet!");
 			}
 		}
 		break;
 		case Cure::NetworkAgent::RECEIVE_PARSE_ERROR:
 		{
-			mLog.AError("Problem with receiving crap data!");
+			mLog.Error("Problem with receiving crap data!");
 		}
 		break;
 		case Cure::NetworkAgent::RECEIVE_CONNECTION_BROKEN:
 		{
-			mDisconnectReason = _T("Server abrubtly disconnected!");
-			mLog.AError("Disconnected from server!");
+			mDisconnectReason = "Server abrubtly disconnected!";
+			mLog.Error("Disconnected from server!");
 			mIsReset = false;
 			GetNetworkClient()->Disconnect(false);
 		}
@@ -409,7 +409,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 					const bool lIsPositionExpired = (lIsCollisionExpired || lIsInputExpired);
 					if (lIsPositionExpired)
 					{
-						log_atrace("Position expires.");
+						log_trace("Position expires.");
 					}
 					const bool lIsAllwedDiffSend = mSendExpireAlarm.IsExpired(0.5);
 
@@ -420,9 +420,9 @@ bool GameClientSlaveManager::TickNetworkOutput()
 						(lIsAllwedDiffSend &&
 						lPositionalData->GetScaledDifference(lObject->GetNetworkOutputGhost()) > lResyncOnDiff))
 					{
-						//if (lForceSendUnsafeClientKeepalive)	mLog.AInfo("POS_SEND: Force pos send!");
-						//if (lIsPositionExpired)			mLog.AInfo("POS_SEND: Pos expired causing pos send!");
-						//if (lIsAllwedDiffSend)			mLog.AInfo("POS_SEND: Diff causing pos send!");
+						//if (lForceSendUnsafeClientKeepalive)	mLog.Info("POS_SEND: Force pos send!");
+						//if (lIsPositionExpired)			mLog.Info("POS_SEND: Pos expired causing pos send!");
+						//if (lIsAllwedDiffSend)			mLog.Info("POS_SEND: Diff causing pos send!");
 						mSendExpireAlarm.Set();
 						lSend = true;
 						break;
@@ -451,7 +451,7 @@ bool GameClientSlaveManager::TickNetworkOutput()
 						/*for (int x = 0; x < lObject->GetPhysics()->GetEngineCount(); ++x)
 						{
 							Tbc::PhysicsEngine* lEngine = lObject->GetPhysics()->GetEngine(x);
-							log_volatile(mLog.Debugf(_T("Sync'ed engine of type %i with value %f."), lEngine->GetEngineType(), lEngine->GetValue()));
+							log_volatile(mLog.Debugf("Sync'ed engine of type %i with value %f.", lEngine->GetEngineType(), lEngine->GetValue()));
 						}*/
 					}
 				}
@@ -472,14 +472,14 @@ bool GameClientSlaveManager::TickNetworkOutput()
 				if (++mPingAttemptCount <= lPingRetryCount)
 				{
 					mLastUnsafeReceiveTime.ReduceTimeDiff(lPingInterval);
-					log_volatile(mLog.Debugf(_T("Slave %i sending ping."), mSlaveIndex));
+					log_volatile(mLog.Debugf("Slave %i sending ping.", mSlaveIndex));
 					lSendOk = GetNetworkAgent()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
 						Cure::MessageNumber::INFO_PING, GetTimeManager()->GetCurrentPhysicsFrame(), 0);
 				}
 				else
 				{
-					mDisconnectReason = _T("Server not responding!");
-					mLog.AError("Server is not responding to ping! Disconnecting now!");
+					mDisconnectReason = "Server not responding!";
+					mLog.Error("Server is not responding to ping! Disconnecting now!");
 					GetNetworkClient()->Disconnect(true);
 				}
 			}
@@ -501,8 +501,8 @@ bool GameClientSlaveManager::TickNetworkOutput()
 	// If we were unable to send to server, we conclude that it has silently died.
 	if (!lSendOk)
 	{
-		mDisconnectReason = _T("Connection to server died!");
-		mLog.AError("Server seems dead! Disconnecting silently.");
+		mDisconnectReason = "Connection to server died!";
+		mLog.Error("Server seems dead! Disconnecting silently.");
 		GetNetworkClient()->Disconnect(false);
 	}
 	return (lSendOk);
@@ -540,16 +540,16 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 
 	mIsReset = false;
 
-	str lPortRange = v_slowget(GetVariableScope(), RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, _T("1025-65535"));
+	str lPortRange = v_slowget(GetVariableScope(), RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, "1025-65535");
 	str lLocalName;
-	if (strutil::StartsWith(pServerAddress, _T("localhost:")) || strutil::StartsWith(pServerAddress, _T("127.0.0.1:")))
+	if (strutil::StartsWith(pServerAddress, "localhost:") || strutil::StartsWith(pServerAddress, "127.0.0.1:"))
 	{
-		lLocalName = _T("localhost");
+		lLocalName = "localhost";
 	}
-	str lLocalAddress = lLocalName + _T(':') + lPortRange;
+	str lLocalAddress = lLocalName + ':' + lPortRange;
 	if (!GetNetworkClient()->Open(lLocalAddress))
 	{
-		mDisconnectReason = _T("Could not use local sockets.");
+		mDisconnectReason = "Could not use local sockets.";
 		return;
 	}
 
@@ -567,7 +567,7 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 			if (lResolvedAddress.Resolve(lServerAddress))
 			{
 				str lIp = lResolvedAddress.GetIP().GetAsString();
-				if (lIp == _T("127.0.0.1") || lIp == _T("::1") || lIp == _T("0:0:0:0:0:0:0:1"))
+				if (lIp == "127.0.0.1" || lIp == "::1" || lIp == "0:0:0:0:0:0:0:1")
 				{
 					lIsLocalAddress = true;
 				}
@@ -582,25 +582,25 @@ void GameClientSlaveManager::RequestLogin(const str& pServerAddress, const Cure:
 			{
 				if (mMasterServerConnection->GetFirewallOpenStatus() == MasterServerConnection::FIREWALL_OPENED)
 				{
-					mLog.AInfo("Master seems to have asked game server to open firewall OK.");
+					mLog.Info("Master seems to have asked game server to open firewall OK.");
 					Thread::Sleep(lWaitTime+0.02);	// Let's pray. Since we got through in a certain time, perhaps the server will too.
 				}
 				else if (mMasterServerConnection->GetFirewallOpenStatus() == MasterServerConnection::FIREWALL_USE_LAN)
 				{
-					mLog.AInfo("Master seems to think the game server is on our LAN. Using that instead.");
+					mLog.Info("Master seems to think the game server is on our LAN. Using that instead.");
 					lServerAddress = mMasterServerConnection->GetLanServerConnectAddress();
 				}
 			}
 			else
 			{
-				mLog.AWarning("Master did not reply in time to if it asked game server to open firewall. Trying anyway.");
+				mLog.Warning("Master did not reply in time to if it asked game server to open firewall. Trying anyway.");
 			}
 		}
 	}
 
-	mConnectUserName = strutil::Encode(pLoginToken.GetName());
+	mConnectUserName = pLoginToken.GetName();
 	mConnectServerAddress = pServerAddress;
-	mDisconnectReason = _T("Connect failed.");
+	mDisconnectReason = "Connect failed.";
 	GetNetworkClient()->StartConnectLogin(lServerAddress, lConnectTimeout, pLoginToken);
 }
 
@@ -612,7 +612,7 @@ void GameClientSlaveManager::Logout()
 {
 	if (GetNetworkClient()->IsActive())
 	{
-		mDisconnectReason = _T("User requested logout.");
+		mDisconnectReason = "User requested logout.";
 		mLog.Warning(mDisconnectReason);
 		mIsResetComplete = false;
 		mIsReset = false;
@@ -678,7 +678,7 @@ void GameClientSlaveManager::OnInput(UiLepra::InputElement* pElement)
 	v_get(lOutputInput, =, GetVariableScope(), RTVAR_DEBUG_INPUT_PRINT, false);
 	if (lOutputInput)
 	{
-		mLog.Infof(_T("Input %s: %f."), pElement->GetFullName().c_str(), pElement->GetValue());
+		mLog.Infof("Input %s: %f.", pElement->GetFullName().c_str(), pElement->GetValue());
 	}
 	
 	mOptions.RefreshConfiguration();
@@ -713,7 +713,7 @@ void GameClientSlaveManager::HandleUnusedRelativeAxis()
 	{
 		UiLepra::InputElement* lAxis = (*x);
 
-		const str lSuffixes[] = { _T(""), _T("+"), _T("-") };
+		const str lSuffixes[] = { "", "+", "-" };
 		for (int y = 0; y < LEPRA_ARRAY_COUNT(lSuffixes); ++y)
 		{
 			str lAxisName = lAxis->GetFullName() + lSuffixes[y];
@@ -767,8 +767,8 @@ float GameClientSlaveManager::UpdateFrustum(float pFov)
 str GameClientSlaveManager::GetApplicationCommandFilename() const
 {
 	return (Application::GetIoFile(
-		_T("ClientApplication")+strutil::IntToString(mSlaveIndex, 10),
-		_T("lsh")));
+		"ClientApplication"+strutil::IntToString(mSlaveIndex, 10),
+		"lsh"));
 }
 
 
@@ -803,12 +803,12 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 		{
 			Cure::MessageStatus* lMessageStatus = (Cure::MessageStatus*)pMessage;
 			Cure::RemoteStatus lRemoteStatus = lMessageStatus->GetRemoteStatus();
-			//mLog.Infof(_T("Got remote status %i with ID %u."), lRemoteStatus, lMessageStatus->GetInteger());
+			//mLog.Infof("Got remote status %i with ID %u.", lRemoteStatus, lMessageStatus->GetInteger());
 			if (lRemoteStatus != Cure::REMOTE_OK)
 			{
-				wstr lErrorMessage;
+				str lErrorMessage;
 				lMessageStatus->GetMessageString(lErrorMessage);
-				mDisconnectReason = strutil::Encode(lErrorMessage);
+				mDisconnectReason = lErrorMessage;
 				mLog.Warning(mDisconnectReason);
 				GetNetworkClient()->Disconnect(false);
 			}
@@ -839,18 +839,18 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 		case Cure::MESSAGE_TYPE_CREATE_OWNED_OBJECT:
 		{
 			Cure::MessageCreateObject* lMessageCreateObject = (Cure::MessageCreateObject*)pMessage;
-			wstr lClassId;
+			str lClassId;
 			Lepra::xform lTransformation;
 			lMessageCreateObject->GetTransformation(lTransformation);
 			//const float a = 1.0f/::sqrt(2.0f);
 			//lTransformation.SetOrientation(quat(0, 0, -a, -a));
 			lMessageCreateObject->GetClassId(lClassId);
-			/*mLog.Infof(_T("Creating network instance %u of type %s at pos (%f; %f; %f), q (%f, %f, %f, %f)."),
+			/*mLog.Infof("Creating network instance %u of type %s at pos (%f; %f; %f, q (%f, %f, %f, %f)."),
 				lMessageCreateObject->GetObjectId(), lClassId.c_str(),
 				lTransformation.GetPosition().x, lTransformation.GetPosition().y, lTransformation.GetPosition().z,
 				lTransformation.GetOrientation().a, lTransformation.GetOrientation().b, lTransformation.GetOrientation().c, lTransformation.GetOrientation().d);*/
 			Cure::ContextObject* lObject = CreateObject(lMessageCreateObject->GetObjectId(),
-				strutil::Encode(lClassId), Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, &lTransformation);
+				lClassId, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, &lTransformation);
 			if (lType == Cure::MESSAGE_TYPE_CREATE_OWNED_OBJECT)
 			{
 				Cure::MessageCreateOwnedObject* lMessageCreateOwnedObject = (Cure::MessageCreateOwnedObject*)lMessageCreateObject;
@@ -876,7 +876,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 			Cure::ContextObject* lObject = GetContext()->GetObject(lInstanceId, true);
 			if (!lObject)
 			{
-				log_volatile(mLog.Debugf(_T("Object %u is missing, can't set pos from network data. Asking server for re-creation."), lInstanceId));
+				log_volatile(mLog.Debugf("Object %u is missing, can't set pos from network data. Asking server for re-creation.", lInstanceId));
 				GetNetworkAgent()->SendNumberMessage(true, GetNetworkClient()->GetSocket(),
 					Cure::MessageNumber::INFO_RECREATE_OBJECT, lInstanceId, 0);
 			}
@@ -933,7 +933,7 @@ void GameClientSlaveManager::ProcessNetworkInputMessage(Cure::Message* pMessage)
 		break;
 		default:
 		{
-			mLog.AError("Got bad message type from server.");
+			mLog.Error("Got bad message type from server.");
 		}
 		break;
 	}
@@ -945,17 +945,17 @@ void GameClientSlaveManager::ProcessNetworkStatusMessage(Cure::MessageStatus* pM
 	{
 		case Cure::MessageStatus::INFO_CHAT:
 		{
-			wstr lChatMessage;
+			str lChatMessage;
 			pMessage->GetMessageString(lChatMessage);
 			if (pMessage->GetInteger() == 0)
 			{
-				lChatMessage = L"ServerAdmin: "+lChatMessage;
+				lChatMessage = "ServerAdmin: "+lChatMessage;
 			}
 			else
 			{
-				lChatMessage = L"<Player?>: "+lChatMessage;
+				lChatMessage = "<Player?>: "+lChatMessage;
 			}
-			mLog.Headline(strutil::Encode(lChatMessage));
+			mLog.Headline(lChatMessage);
 		}
 		break;
 		case Cure::MessageStatus::INFO_LOGIN:
@@ -967,16 +967,16 @@ void GameClientSlaveManager::ProcessNetworkStatusMessage(Cure::MessageStatus* pM
 		{
 			if (pMessage->GetRemoteStatus() == Cure::REMOTE_OK)
 			{
-				wstr lCommand;
+				str lCommand;
 				pMessage->GetMessageString(lCommand);
 				ClientConsoleManager* lConsole = ((ClientConsoleManager*)GetConsoleManager());
 				const int lPreviousSecurityLevel = lConsole->GetSecurityLevel();
 				lConsole->SetSecurityLevel(1);
-				int lResult = lConsole->FilterExecuteCommand(strutil::Encode(lCommand));
+				int lResult = lConsole->FilterExecuteCommand(lCommand);
 				lConsole->SetSecurityLevel(lPreviousSecurityLevel);
 				if (lResult != 0)
 				{
-					mDisconnectReason = _T("Server not safe! Please join some other game.");
+					mDisconnectReason = "Server not safe! Please join some other game.";
 					GetNetworkClient()->Disconnect(false);
 				}
 			}
@@ -991,7 +991,7 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 	{
 		case Cure::MessageNumber::INFO_SET_TIME:
 		{
-			log_volatile(mLog.Tracef(_T("Setting physics frame to %i."), pInteger));
+			log_volatile(mLog.Tracef("Setting physics frame to %i.", pInteger));
 			if (!GetMaster()->IsLocalServer())
 			{
 				GetMaster()->GetTimeManager()->SetCurrentPhysicsFrame(pInteger);
@@ -1000,7 +1000,7 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 		break;
 		case Cure::MessageNumber::INFO_ADJUST_TIME:
 		{
-			log_atrace("Adjusting time.");
+			log_trace("Adjusting time.");
 			if (!GetMaster()->IsLocalServer())
 			{
 				GetMaster()->GetTimeManager()->SetPhysicsSpeedAdjustment(pFloat, pInteger);
@@ -1014,7 +1014,7 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 				mPingAttemptCount = 0;
 				log_volatile(const float lPingTime = GetTimeManager()->ConvertPhysicsFramesToSeconds(GetTimeManager()->GetCurrentPhysicsFrameDelta(pInteger)));
 				log_volatile(const float lServerStriveTime = GetTimeManager()->ConvertPhysicsFramesToSeconds((int)pFloat)*2);
-				log_volatile(mLog.Debugf(_T("Pong: this=%ss, server sim strives to be x2=%ss ahead, (self=%s)."),
+				log_volatile(mLog.Debugf("Pong: this=%ss, server sim strives to be x2=%ss ahead, (self=%s).",
 					Number::ConvertToPostfixNumber(lPingTime, 2).c_str(),
 					Number::ConvertToPostfixNumber(lServerStriveTime, 2).c_str(),
 					GetNetworkClient()->GetSocket()->GetLocalAddress().GetAsString().c_str()));
@@ -1032,7 +1032,7 @@ void GameClientSlaveManager::ProcessNumber(Cure::MessageNumber::InfoType pType, 
 				const float lOwnershipSeconds = GetTimeManager()->ConvertPhysicsFramesToSeconds(lOwnershipFrames-2);
 				lObject->SetNetworkObjectType(Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 				GetContext()->AddAlarmExternalCallback(lObject, Cure::ContextManager::AlarmExternalCallback(this, &GameClientSlaveManager::OnIdOwnershipExpired), ID_OWNERSHIP_LOAN_EXPIRES, lOwnershipSeconds, 0);
-				log_volatile(mLog.Debugf(_T("Got control over object with ID %i for %f seconds."), pInteger, lOwnershipSeconds));
+				log_volatile(mLog.Debugf("Got control over object with ID %i for %f seconds.", pInteger, lOwnershipSeconds));
 			}
 		}
 		break;
@@ -1051,14 +1051,14 @@ Cure::ContextObject* GameClientSlaveManager::CreateObject(Cure::GameObjectId pIn
 	if (lObject && lObject->GetClassId() != pClassId)
 	{
 		// Ouch, this object has been killed and we weren't informed.
-		mLog.Warningf(_T("Ouch, slave %i creating context object %s, but already had old instance of type %s (deleting that first)."),
+		mLog.Warningf("Ouch, slave %i creating context object %s, but already had old instance of type %s (deleting that first).",
 			mSlaveIndex, pClassId.c_str(), lObject->GetClassId().c_str());
 		GetContext()->DeleteObject(pInstanceId);
 		lObject = 0;
 	}
 	if (!lObject)
 	{
-		log_volatile(mLog.Debugf(_T("Slave %i creating context object %s."), mSlaveIndex, pClassId.c_str()));
+		log_volatile(mLog.Debugf("Slave %i creating context object %s.", mSlaveIndex, pClassId.c_str()));
 		lObject = Parent::CreateContextObject(pClassId, pNetworkType, pInstanceId);
 		if (pTransform)
 		{
@@ -1086,8 +1086,8 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 	{
 		x->second = pFrameIndex;
 
-		//str s = strutil::Format(_T("client %i at frame %i"), pClientIndex, pFrameIndex);
-		//log_debug(_T("Client set pos of other client"), s);
+		//str s = strutil::Format("client %i at frame %i", pClientIndex, pFrameIndex);
+		//log_debug("Client set pos of other client", s);
 		UiCure::CppContextObject* lObject = (UiCure::CppContextObject*)GetContext()->GetObject(pInstanceId, true);
 		if (lObject)
 		{
@@ -1127,12 +1127,12 @@ void GameClientSlaveManager::SetMovement(Cure::GameObjectId pInstanceId, int32 p
 		}
 		else
 		{
-			mLog.Warningf(_T("Slave %i could not set position for object %i."), mSlaveIndex, pInstanceId);
+			mLog.Warningf("Slave %i could not set position for object %i.", mSlaveIndex, pInstanceId);
 		}
 	}
 	else
 	{
-		log_volatile(mLog.Debugf(_T("Throwing away out-of-order positional data (%i frames late)."), lLastSetFrameIndex-pFrameIndex));
+		log_volatile(mLog.Debugf("Throwing away out-of-order positional data (%i frames late).", lLastSetFrameIndex-pFrameIndex));
 	}
 }
 
@@ -1143,7 +1143,7 @@ bool GameClientSlaveManager::OnPhysicsSend(Cure::ContextObject*)
 
 bool GameClientSlaveManager::OnAttributeSend(Cure::ContextObject* pObject)
 {
-	log_adebug("Sending attribute(s) for a context object...");
+	log_debug("Sending attribute(s) for a context object...");
 	typedef Cure::ContextObject::AttributeArray AttributeArray;
 	const AttributeArray& lAttributes = pObject->GetAttributes();
 	AttributeArray::const_iterator x = lAttributes.begin();

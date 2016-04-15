@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
  
 
@@ -46,7 +46,7 @@ bool MemoryUserAccountManager::AddUserAccount(const LoginId& pLoginId)
 	return (lOk);
 }
 
-bool MemoryUserAccountManager::DeleteUserAccount(const wstr& pUserName)
+bool MemoryUserAccountManager::DeleteUserAccount(const str& pUserName)
 {
 	UserAccount* lUserAccount = mUserAccountTable.FindObject(pUserName);
 	bool lOk = (lUserAccount != 0);
@@ -74,7 +74,7 @@ UserAccount::Availability MemoryUserAccountManager::GetUserAccountStatus(const L
 	return (lStatus);
 }
 
-bool MemoryUserAccountManager::SetUserAccountStatus(const wstr& pUserAccountName, UserAccount::Availability pStatus)
+bool MemoryUserAccountManager::SetUserAccountStatus(const str& pUserAccountName, UserAccount::Availability pStatus)
 {
 	UserAccount* lUserAccount = mUserAccountTable.FindObject(pUserAccountName);
 	bool lOk = (lUserAccount != 0);
@@ -85,7 +85,7 @@ bool MemoryUserAccountManager::SetUserAccountStatus(const wstr& pUserAccountName
 	return (lOk);
 }
 
-bool MemoryUserAccountManager::GetUserAccountId(const wstr& pUserName, UserAccount::AccountId& pAccountId)
+bool MemoryUserAccountManager::GetUserAccountId(const str& pUserName, UserAccount::AccountId& pAccountId)
 {
 	UserAccount* lUserAccount = mUserAccountTable.FindObject(pUserName);
 	bool lOk = (lUserAccount != 0);
@@ -96,7 +96,7 @@ bool MemoryUserAccountManager::GetUserAccountId(const wstr& pUserName, UserAccou
 	return (lOk);
 }
 
-bool MemoryUserAccountManager::AddUserAvatarId(const wstr& pUserName, const UserAccount::AvatarId& pAvatarId)
+bool MemoryUserAccountManager::AddUserAvatarId(const str& pUserName, const UserAccount::AvatarId& pAvatarId)
 {
 	UserAccount* lUserAccount = mUserAccountTable.FindObject(pUserName);
 	bool lOk = (lUserAccount != 0);
@@ -107,7 +107,7 @@ bool MemoryUserAccountManager::AddUserAvatarId(const wstr& pUserName, const User
 	return (lOk);
 }
 
-const UserAccount::AvatarIdSet* MemoryUserAccountManager::GetUserAvatarIdSet(const wstr& pUserName)
+const UserAccount::AvatarIdSet* MemoryUserAccountManager::GetUserAvatarIdSet(const str& pUserName)
 {
 	const UserAccount::AvatarIdSet* lAvatarIdSet = 0;
 	UserAccount* lUserAccount = mUserAccountTable.FindObject(pUserName);

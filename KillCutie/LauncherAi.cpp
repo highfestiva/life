@@ -22,7 +22,7 @@ namespace GrenadeRun
 
 
 LauncherAi::LauncherAi(Game* pGame):
-	Parent(pGame->GetResourceManager(), _T("LauncherAi")),
+	Parent(pGame->GetResourceManager(), "LauncherAi"),
 	mGame(pGame),
 	mDidShoot(false),
 	mShotCount(0)

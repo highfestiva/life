@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 //
 // The Application class handles the program arguments
@@ -35,7 +35,7 @@ int main(int argc, const char* argv[])	\
 	Lepra::strutil::strvec lArguments;	\
 	for (int x = 0; x < argc; ++x)	\
 	{	\
-		lArguments.push_back(Lepra::strutil::Encode(Lepra::astr(argv[x])));	\
+		lArguments.push_back(Lepra::str(argv[x]));	\
 	}	\
 	ClassName* lApplication = new ClassName(lArguments);	\
 	const int lStatus = Method(*lApplication);	\
@@ -53,7 +53,7 @@ extern HINSTANCE ghInstance;	\
 int WINAPI LEPRA_WINMAIN(HINSTANCE hInstance, HINSTANCE, PTSTR, int)	\
 {	\
 	ghInstance = hInstance;	\
-	Lepra::strutil::strvec lArguments(Lepra::strutil::BlockSplit(::GetCommandLine(), _T(" \t\v\r\n"), false, false));	\
+	Lepra::strutil::strvec lArguments(Lepra::strutil::BlockSplit(::GetCommandLine(), " \t\v\r\n", false, false));	\
 	ClassName* lApplication = new ClassName(lArguments);	\
 	const int lStatus = Method(*lApplication);	\
 	delete lApplication;	\

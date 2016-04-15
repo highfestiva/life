@@ -58,11 +58,11 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 	SetTicker(this);
 
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.1f, 0.2f, 0));
-	mCollisionSoundManager->AddSound(_T("big_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(0.4f, 0.1f, 0));
-	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.1f, 0.2f, 0));
+	mCollisionSoundManager->AddSound("big_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(0.4f, 0.1f, 0));
+	mCollisionSoundManager->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
 }
 
 Game::~Game()
@@ -155,7 +155,7 @@ bool Game::Tick()
 
 	/*if (win!)
 	{
-		AddContextObject(new UiCure::Sound(GetResourceManager(), _T("win.wav"), mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+		AddContextObject(new UiCure::Sound(GetResourceManager(), "win.wav", mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 	}
 	mPreviousFrameWinnerIndex = mWinnerIndex;*/
 
@@ -296,7 +296,7 @@ void Game::Detonate(const vec3& pForce, const vec3& pTorque, const vec3& pPositi
 		const int lParticleCount = (mLevel->GetStructureGeometry((unsigned)0)->GetBodyId() == pTargetBodyId)? Random::GetRandomNumber()%50+50 : 10;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("mud_particle_01"), mUiManager);
+			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), "mud_particle_01", mUiManager);
 			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 			lPuff->EnableRootShadow(false);
 			float x = Random::Uniform(-1.0f, 1.0f);
@@ -321,7 +321,7 @@ void Game::Detonate(const vec3& pForce, const vec3& pTorque, const vec3& pPositi
 		const int lParticleCount = (Random::GetRandomNumber() % 4) + 2;
 		for (int i = 0; i < lParticleCount; ++i)
 		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
+			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), "cloud_01", mUiManager);
 			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 			lPuff->EnableRootShadow(false);
 			float x = Random::Uniform(-1.0f, 1.0f);
@@ -340,7 +340,7 @@ void Game::Detonate(const vec3& pForce, const vec3& pTorque, const vec3& pPositi
 	}
 
 	float lLevelShootEasyness = 4.5f;
-	if (mLevelName == _T("level_elevate"))	// Bigger and open level = easier to hit Vehicle.
+	if (mLevelName == "level_elevate")	// Bigger and open level = easier to hit Vehicle.
 	{
 		lLevelShootEasyness = 3.2f;
 	}
@@ -626,7 +626,7 @@ void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	if (pOk && pObject == mVehicle)
 	{
 		deb_assert(pObject->GetPhysics()->GetEngineCount() == 3);
-		const str lName = _T("float_childishness");
+		const str lName = "float_childishness";
 		new Cure::FloatAttribute(mVehicle, lName, 0.67f);
 	}
 }
@@ -676,7 +676,7 @@ void Game::TickInput()
 
 Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
 {
-	if (strutil::StartsWith(pClassId, _T("monster_01")))
+	if (strutil::StartsWith(pClassId, "monster_01"))
 	{
 		return new Vehicle(GetResourceManager(), pClassId, mUiManager);
 	}
@@ -700,7 +700,7 @@ bool Game::Initialize()
 	}
 	if (lOk)
 	{
-		SetVehicleName(_T("monster_01"));
+		SetVehicleName("monster_01");
 	}
 	if (lOk)
 	{
@@ -732,20 +732,20 @@ bool Game::InitializeUniverse()
 
 Cure::ContextObject* Game::CreateLogicHandler(const str& pType)
 {
-	if (pType == _T("spawner"))
+	if (pType == "spawner")
 	{
 		return new Spawner(GetContext());
 	}
-	else if (pType == _T("trig_goal"))
+	else if (pType == "trig_goal")
 	{
 		mGoal = new Goal(GetContext());
 		return mGoal;
 	}
-	else if (pType == _T("trig_elevator"))
+	else if (pType == "trig_elevator")
 	{
 		return new VehicleElevator(this);
 	}
-	else if (pType == _T("context_path"))
+	else if (pType == "context_path")
 	{
 		return mLevel->QueryPath();
 	}

@@ -123,7 +123,7 @@ float Explosion::Force(Tbc::PhysicsManager* pPhysicsManager, const Cure::Context
 		d = d*d*d;
 		d = std::min(1.0f, d);
 		d *= pStrength;
-		//mLog.Infof(_T("Explosion for %s with strength %f at (%f;%f;%f)."), pObject->GetClassId().c_str(), d, pPosition.x, pPosition.y, pPosition.z);
+		//mLog.Infof("Explosion for %s with strength %f at (%f;%f;%f."), pObject->GetClassId().c_str(), d, pPosition.x, pPosition.y, pPosition.z);
 		lForce += d;
 
 		if (lForceFactor)

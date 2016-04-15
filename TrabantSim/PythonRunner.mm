@@ -97,7 +97,7 @@ void PythonRunner::Break()
 	}
 }
 
-astr PythonRunner::GetStdOut()
+str PythonRunner::GetStdOut()
 {
 	ScopeLock _(&mStdOutLock);
 	return mStdOut;
@@ -121,9 +121,9 @@ void PythonRunner::WorkerEntry(void*)
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &_);
 
 	HiResTimer lTimer(false);
-	astr lFullPathname = astrutil::Encode(mFilename);
-	astrutil::strvec lParts = astrutil::Split(lFullPathname, "/");
-	astr lFilename = lParts[lParts.size()-1];
+	str lFullPathname = mFilename;
+	strutil::strvec lParts = strutil::Split(lFullPathname, "/");
+	str lFilename = lParts[lParts.size()-1];
 	FILE* fp = fopen(lFullPathname.c_str(), "r");
 	if (!fp)
 	{
@@ -200,7 +200,7 @@ void PythonRunner::StdOutReadEntry(void*)
 StaticThread PythonRunner::mPythonWorker("PythonWorker");
 StaticThread PythonRunner::mStdOutReader("StdOutReader");
 Lock PythonRunner::mStdOutLock;
-astr PythonRunner::mStdOut;
+str PythonRunner::mStdOut;
 wstr PythonRunner::mDirectory;
 wstr PythonRunner::mFilename;
 bool PythonRunner::mKillSimulator = true;

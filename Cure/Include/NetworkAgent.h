@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -59,7 +59,7 @@ public:
 	const SocketAddress& GetLocalAddress() const;
 
 	bool SendStatusMessage(VSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
-		MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket);
+		MessageStatus::InfoType pInfoType, str pMessage, Packet* pPacket);
 	bool SendNumberMessage(bool pSafe, VSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat, Packet* pPacket = 0);
 	bool SendObjectFullPosition(VSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData);
 	bool PlaceInSendBuffer(bool pSafe, VSocket* pSocket, Packet* pPacket);

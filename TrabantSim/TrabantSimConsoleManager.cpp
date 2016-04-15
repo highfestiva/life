@@ -23,50 +23,50 @@ namespace TrabantSim
 // Must lie before TrabantSimConsoleManager to compile.
 const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::mCommandIdList[] =
 {
-	{_T("reset"), COMMAND_RESET},
-	{_T("get-platform-name"), COMMAND_GET_PLATFORM_NAME},
-	{_T("create-object"), COMMAND_CREATE_OBJECT},
-	{_T("create-clones"), COMMAND_CREATE_CLONES},
-	{_T("delete-object"), COMMAND_DELETE_OBJECT},
-	{_T("delete-all-objects"), COMMAND_DELETE_ALL_OBJECTS},
-	{_T("pick-objects"), COMMAND_PICK_OBJECTS},
-	{_T("clear-phys"), COMMAND_CLEAR_PHYS},
-	{_T("prep-phys-box"), COMMAND_PREP_PHYS_BOX},
-	{_T("prep-phys-sphere"), COMMAND_PREP_PHYS_SPHERE},
-	{_T("prep-phys-capsule"), COMMAND_PREP_PHYS_CAPSULE},
-	{_T("prep-phys-mesh"), COMMAND_PREP_PHYS_MESH},
-	{_T("prep-gfx-mesh"), COMMAND_PREP_GFX_MESH},
-	{_T("set-vertices"), COMMAND_SET_VERTICES},
-	{_T("add-vertices"), COMMAND_ADD_VERTICES},
-	{_T("set-indices"), COMMAND_SET_INDICES},
-	{_T("add-indices"), COMMAND_ADD_INDICES},
-	{_T("are-loaded"), COMMAND_ARE_LOADED},
-	{_T("wait-until-loaded"), COMMAND_WAIT_UNTIL_LOADED},
-	{_T("explode"), COMMAND_EXPLODE},
-	{_T("play-sound"), COMMAND_PLAY_SOUND},
-	{_T("pop-collisions"), COMMAND_POP_COLLISIONS},
-	{_T("get-keys"), COMMAND_GET_KEYS},
-	{_T("get-touch-drags"), COMMAND_GET_TOUCH_DRAGS},
-	{_T("get-accelerometer"), COMMAND_GET_ACCELEROMETER},
-	{_T("get-mousemove"), COMMAND_GET_MOUSEMOVE},
-	{_T("create-joystick"), COMMAND_CREATE_JOYSTICK},
-	{_T("get-joystick-data"), COMMAND_GET_JOYSTICK_DATA},
-	{_T("get-aspect-ratio"), COMMAND_GET_ASPECT_RATIO},
-	{_T("create-engine"), COMMAND_CREATE_ENGINE},
-	{_T("create-joint"), COMMAND_CREATE_JOINT},
-	{_T("position"), COMMAND_POSITION},
-	{_T("orientation"), COMMAND_ORIENTATION},
-	{_T("velocity"), COMMAND_VELOCITY},
-	{_T("angular-velocity"), COMMAND_ANGULAR_VELOCITY},
-	{_T("mass"), COMMAND_MASS},
-	{_T("color"), COMMAND_COLOR},
-	{_T("engine-force"), COMMAND_ENGINE_FORCE},
-	{_T("set-tag-floats"), COMMAND_SET_TAG_FLOATS},
-	{_T("set-tag-strings"), COMMAND_SET_TAG_STRINGS},
-	{_T("set-tag-phys"), COMMAND_SET_TAG_PHYS},
-	{_T("set-tag-engine"), COMMAND_SET_TAG_ENGINE},
-	{_T("set-tag-mesh"), COMMAND_SET_TAG_MESH},
-	{_T("add-tag"), COMMAND_ADD_TAG},
+	{"reset", COMMAND_RESET},
+	{"get-platform-name", COMMAND_GET_PLATFORM_NAME},
+	{"create-object", COMMAND_CREATE_OBJECT},
+	{"create-clones", COMMAND_CREATE_CLONES},
+	{"delete-object", COMMAND_DELETE_OBJECT},
+	{"delete-all-objects", COMMAND_DELETE_ALL_OBJECTS},
+	{"pick-objects", COMMAND_PICK_OBJECTS},
+	{"clear-phys", COMMAND_CLEAR_PHYS},
+	{"prep-phys-box", COMMAND_PREP_PHYS_BOX},
+	{"prep-phys-sphere", COMMAND_PREP_PHYS_SPHERE},
+	{"prep-phys-capsule", COMMAND_PREP_PHYS_CAPSULE},
+	{"prep-phys-mesh", COMMAND_PREP_PHYS_MESH},
+	{"prep-gfx-mesh", COMMAND_PREP_GFX_MESH},
+	{"set-vertices", COMMAND_SET_VERTICES},
+	{"add-vertices", COMMAND_ADD_VERTICES},
+	{"set-indices", COMMAND_SET_INDICES},
+	{"add-indices", COMMAND_ADD_INDICES},
+	{"are-loaded", COMMAND_ARE_LOADED},
+	{"wait-until-loaded", COMMAND_WAIT_UNTIL_LOADED},
+	{"explode", COMMAND_EXPLODE},
+	{"play-sound", COMMAND_PLAY_SOUND},
+	{"pop-collisions", COMMAND_POP_COLLISIONS},
+	{"get-keys", COMMAND_GET_KEYS},
+	{"get-touch-drags", COMMAND_GET_TOUCH_DRAGS},
+	{"get-accelerometer", COMMAND_GET_ACCELEROMETER},
+	{"get-mousemove", COMMAND_GET_MOUSEMOVE},
+	{"create-joystick", COMMAND_CREATE_JOYSTICK},
+	{"get-joystick-data", COMMAND_GET_JOYSTICK_DATA},
+	{"get-aspect-ratio", COMMAND_GET_ASPECT_RATIO},
+	{"create-engine", COMMAND_CREATE_ENGINE},
+	{"create-joint", COMMAND_CREATE_JOINT},
+	{"position", COMMAND_POSITION},
+	{"orientation", COMMAND_ORIENTATION},
+	{"velocity", COMMAND_VELOCITY},
+	{"angular-velocity", COMMAND_ANGULAR_VELOCITY},
+	{"mass", COMMAND_MASS},
+	{"color", COMMAND_COLOR},
+	{"engine-force", COMMAND_ENGINE_FORCE},
+	{"set-tag-floats", COMMAND_SET_TAG_FLOATS},
+	{"set-tag-strings", COMMAND_SET_TAG_STRINGS},
+	{"set-tag-phys", COMMAND_SET_TAG_PHYS},
+	{"set-tag-engine", COMMAND_SET_TAG_ENGINE},
+	{"set-tag-mesh", COMMAND_SET_TAG_MESH},
+	{"add-tag", COMMAND_ADD_TAG},
 };
 
 
@@ -88,7 +88,7 @@ std::vector<float> Strs2Flts(const strutil::strvec& pStrs, size_t pIndex=0)
 	return lFlts;
 }
 
-int StrToUInt(const tchar* s, const tchar** pEnd)
+int StrToUInt(const char* s, const char** pEnd)
 {
 	int i = 0;
 	for(; *s >= '0' && *s <= '9'; ++s)
@@ -99,7 +99,7 @@ int StrToUInt(const tchar* s, const tchar** pEnd)
 	return i;
 }
 
-float StrToFloat(const tchar* s, const tchar** pEnd)
+float StrToFloat(const char* s, const char** pEnd)
 {
 	float f = 0;
 	float ff = 0.1f;
@@ -175,7 +175,7 @@ bool ParamToBool(const strutil::strvec& pParam, size_t pIndex)
 	{
 		throw ParameterException();
 	}
-	return pParam[pIndex] == _T("true");
+	return pParam[pIndex] == "true";
 }
 
 int ParamToInt(const strutil::strvec& pParam, size_t pIndex, bool* pIsSet = 0)
@@ -234,8 +234,8 @@ void Params2Ints(const strutil::strvec& pParam, std::vector<int>& pInts)
 	strutil::strvec::const_iterator p;
 	for (p = pParam.begin(); p != pParam.end(); ++p)
 	{
-		const tchar* s = p->c_str();
-		const tchar* lEnd;
+		const char* s = p->c_str();
+		const char* lEnd;
 		do
 		{
 			int i = StrToUInt(s, &lEnd);
@@ -251,8 +251,8 @@ void Params2Floats(const strutil::strvec& pParam, std::vector<float>& pFloats, s
 	strutil::strvec::const_iterator p;
 	for (p = pParam.begin()+pParamIndex; p != pParam.end(); ++p)
 	{
-		const tchar* s = p->c_str();
-		const tchar* lEnd;
+		const char* s = p->c_str();
+		const char* lEnd;
 		do
 		{
 			float f = StrToFloat(s, &lEnd);
@@ -277,13 +277,13 @@ strstream& operator<<(strstream& os, const strutil::strvec& pVec)
 	return os;
 }
 
-strstream& operator<<(strstream& os, tchar c)
+strstream& operator<<(strstream& os, char c)
 {
 	(*(std::ostream*)&os) << c;
 	return os;
 }
 
-strstream& operator<<(strstream& os, const tchar* s)
+strstream& operator<<(strstream& os, const char* s)
 {
 	(*(std::ostream*)&os) << s;
 	return os;
@@ -362,7 +362,7 @@ const TrabantSimConsoleManager::CommandPair& TrabantSimConsoleManager::GetComman
 int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
 {
 	mActiveResponse.str(str());
-	mActiveResponse << _T("ok\n");
+	mActiveResponse << "ok\n";
 	int lResult = Parent::OnCommand(pCommand, pParameterVector);
 	if (lResult < 0)
 	{
@@ -382,13 +382,13 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 				case COMMAND_GET_PLATFORM_NAME:
 				{
 #if defined(LEPRA_IOS)
-					mActiveResponse << _T("iOS");
+					mActiveResponse << "iOS";
 #elif defined(LEPRA_MAC)
-					mActiveResponse << _T("Mac");
+					mActiveResponse << "Mac";
 #elif defined(LEPRA_WINDOWS)
-					mActiveResponse << _T("Win");
+					mActiveResponse << "Win";
 #else
-					mActiveResponse << _T("Unknown");
+					mActiveResponse << "Unknown";
 #endif // Platform
 
 				}
@@ -400,12 +400,12 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 					const vec3 lPosition = ParamToVec3(pParameterVector, 2);
 					const quat lOrientation = ParamToQuat(pParameterVector, 5);
 					// Work out material.
-					const bool lIsStatic = strutil::StartsWith(lType, _T("static"));
-					const bool lIsTrigger = (lType.find(_T("trigger")) != str::npos);
+					const bool lIsStatic = strutil::StartsWith(lType, "static");
+					const bool lIsTrigger = (lType.find("trigger") != str::npos);
 					ObjectMaterial lMaterial = MaterialSmooth;
-					if (lMaterialInfo == _T("flat")) lMaterial = MaterialFlat;
-					else if (lMaterialInfo == _T("checker")) lMaterial = MaterialChecker;
-					else if (lMaterialInfo == _T("noise")) lMaterial = MaterialNoise;
+					if (lMaterialInfo == "flat") lMaterial = MaterialFlat;
+					else if (lMaterialInfo == "checker") lMaterial = MaterialChecker;
+					else if (lMaterialInfo == "noise") lMaterial = MaterialNoise;
 
 					const int lObjectId = lManager->CreateObject(lOrientation, lPosition, mGfxMesh, mPhysObjects, lMaterial, lIsStatic, lIsTrigger);
 					if (lObjectId == -1)
@@ -423,11 +423,11 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 					std::vector<float> lPlacements;
 					Params2Floats(pParameterVector, lPlacements, 3);
 					// Work out material.
-					const bool lIsStatic = (lType == _T("static"));
+					const bool lIsStatic = (lType == "static");
 					ObjectMaterial lMaterial = MaterialSmooth;
-					if (lMaterialInfo == _T("flat")) lMaterial = MaterialFlat;
-					else if (lMaterialInfo == _T("checker")) lMaterial = MaterialChecker;
-					else if (lMaterialInfo == _T("noise")) lMaterial = MaterialNoise;
+					if (lMaterialInfo == "flat") lMaterial = MaterialFlat;
+					else if (lMaterialInfo == "checker") lMaterial = MaterialChecker;
+					else if (lMaterialInfo == "noise") lMaterial = MaterialNoise;
 
 					std::vector<xform> lTransforms;
 					int x = 0, cnt = (int)lPlacements.size();
@@ -446,7 +446,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 					{
 						if (x)
 						{
-							mActiveResponse << _T(',');
+							mActiveResponse << ',';
 						}
 						mActiveResponse << *y;
 					}
@@ -475,7 +475,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 					{
 						if (x)
 						{
-							mActiveResponse << _T(',');
+							mActiveResponse << ',';
 						}
 						const vec3& v = lPositions[x];
 						mActiveResponse << lObjectIds[x] << ',' << v.x << ',' << v.y << ',' << v.z;
@@ -496,7 +496,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 				{
 					if (pParameterVector.size() != 10)
 					{
-						mLog.Warningf(_T("usage: %s followed by ten float arguments (quaternion, position, size)"), pCommand.c_str());
+						mLog.Warningf("usage: %s followed by ten float arguments (quaternion, position, size)", pCommand.c_str());
 						return 1;
 					}
 					std::vector<float> lFloats = Strs2Flts(pParameterVector);
@@ -508,7 +508,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 				{
 					if (pParameterVector.size() != 8)
 					{
-						mLog.Warningf(_T("usage: %s followed by eight float arguments (quaternion, position, radius)"), pCommand.c_str());
+						mLog.Warningf("usage: %s followed by eight float arguments (quaternion, position, radius)", pCommand.c_str());
 						return 1;
 					}
 					std::vector<float> lFloats = Strs2Flts(pParameterVector);
@@ -520,7 +520,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 				{
 					if (pParameterVector.size() != 9)
 					{
-						mLog.Warningf(_T("usage: %s followed by eight float arguments (quaternion, position, radius, length)"), pCommand.c_str());
+						mLog.Warningf("usage: %s followed by eight float arguments (quaternion, position, radius, length)", pCommand.c_str());
 						return 1;
 					}
 					std::vector<float> lFloats = Strs2Flts(pParameterVector);
@@ -532,7 +532,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 				{
 					if (pParameterVector.size() != 7)
 					{
-						mLog.Warningf(_T("usage: %s followed by seven float arguments (quaternion and position)"), pCommand.c_str());
+						mLog.Warningf("usage: %s followed by seven float arguments (quaternion and position)", pCommand.c_str());
 						return 1;
 					}
 					if (mVertices.size() % 3 || mIndices.size() % 3)
@@ -550,7 +550,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 				{
 					if (pParameterVector.size() != 7)
 					{
-						mLog.Warningf(_T("usage: %s followed by seven float arguments (quaternion and position)"), pCommand.c_str());
+						mLog.Warningf("usage: %s followed by seven float arguments (quaternion and position)", pCommand.c_str());
 						return 1;
 					}
 					if (mVertices.size() % 3 || mIndices.size() % 3)
@@ -591,7 +591,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 					{
 						if (!lFirst)
 						{
-							mActiveResponse << _T(',');
+							mActiveResponse << ',';
 						}
 						lFirst = false;
 						mActiveResponse << (lManager->IsLoaded(*y)? '1' : '0');
@@ -612,7 +612,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 					}
 					if (!lLoaded)
 					{
-						mLog.Warningf(_T("Object %i did not load in time. Try calling again."), lObjectId);
+						mLog.Warningf("Object %i did not load in time. Try calling again.", lObjectId);
 					}
 				}
 				break;
@@ -646,7 +646,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 				{
 					strutil::strvec lKeys;
 					lManager->GetKeys(lKeys);
-					mActiveResponse << strutil::Join(lKeys, _T("\n"));
+					mActiveResponse << strutil::Join(lKeys, "\n");
 				}
 				break;
 				case COMMAND_GET_TOUCH_DRAGS:
@@ -665,7 +665,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 							mActiveResponse << '\n';
 						}
 						mActiveResponse << x->mLast.x*sx << ' ' << x->mLast.y*sy << ' ' << x->mStart.x*sx << ' ' << x->mStart.y*sy << ' '
-								<< x->mVelocity.x*sx << ' ' << x->mVelocity.y*sy << ' ' << (x->mIsPress?_T("true"):_T("false")) << ' ' << x->mButtonMask;
+								<< x->mVelocity.x*sx << ' ' << x->mVelocity.y*sy << ' ' << (x->mIsPress?"true":"false") << ' ' << x->mButtonMask;
 					}
 				}
 				break;
@@ -869,8 +869,8 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const stru
 		{
 			lResult = 1;
 			mActiveResponse.str(str());
-			mActiveResponse << _T("ERROR: bad or missing parameter for ") << pCommand << '(' << pParameterVector << _T(")!\n");
-			mLog.Warningf(_T("%s has missing or bad arguments (%s)"), pCommand.c_str(), strutil::Join(pParameterVector, _T(", ")).c_str());
+			mActiveResponse << "ERROR: bad or missing parameter for " << pCommand << '(' << pParameterVector << ")!\n";
+			mLog.Warningf("%s has missing or bad arguments (%s)", pCommand.c_str(), strutil::Join(pParameterVector, ", ").c_str());
 		}
 	}
 	return (lResult);

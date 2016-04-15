@@ -38,11 +38,11 @@ ImpuzzableTicker::ImpuzzableTicker(UiCure::GameUiManager* pUiManager, Cure::Reso
 	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
 	v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
 
-	AddBackedRtvar(_T(RTVAR_GAME_FIRSTTIME));
-	AddBackedRtvar(_T(RTVAR_GAME_LEVEL));
-	AddBackedRtvar(_T(RTVAR_GAME_LEVELSHAPEALTERNATE));
-	AddBackedRtvar(_T(RTVAR_GAME_RUNADS));
-	AddBackedRtvar(_T(RTVAR_GAME_SCORE));
+	AddBackedRtvar(RTVAR_GAME_FIRSTTIME);
+	AddBackedRtvar(RTVAR_GAME_LEVEL);
+	AddBackedRtvar(RTVAR_GAME_LEVELSHAPEALTERNATE);
+	AddBackedRtvar(RTVAR_GAME_RUNADS);
+	AddBackedRtvar(RTVAR_GAME_SCORE);
 }
 
 ImpuzzableTicker::~ImpuzzableTicker()
@@ -108,12 +108,12 @@ bool ImpuzzableTicker::OpenUiManager()
 	{
 		mUiManager->UpdateSettings();
 		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
-		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 0));
-		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4, 5);
+		lRenderer->AddDynamicRenderer("particle", new UiTbc::ParticleRenderer(lRenderer, 0));
+		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, "explosion.png", 4, 5);
 	}
 	if (lOk)
 	{
-		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
+		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, "env.png", UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
 		if (mEnvMap->Load())
 		{
 			if (mEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
@@ -142,13 +142,13 @@ bool ImpuzzableTicker::OpenUiManager()
 		mMusicPlayer = new UiCure::MusicPlayer(mUiManager->GetSoundManager());
 		mMusicPlayer->SetVolume(0.5f);
 		mMusicPlayer->SetSongPauseTime(2, 6);
-		/*mMusicPlayer->AddSong(_T("Dub Feral.ogg"));
-		mMusicPlayer->AddSong(_T("Easy Jam.ogg"));
-		mMusicPlayer->AddSong(_T("Firmament.ogg"));
-		mMusicPlayer->AddSong(_T("Mandeville.ogg"));
-		mMusicPlayer->AddSong(_T("Slow Ska Game Loop.ogg"));
-		mMusicPlayer->AddSong(_T("Stealth Groover.ogg"));
-		mMusicPlayer->AddSong(_T("Yallahs.ogg"));*/
+		/*mMusicPlayer->AddSong("Dub Feral.ogg");
+		mMusicPlayer->AddSong("Easy Jam.ogg");
+		mMusicPlayer->AddSong("Firmament.ogg");
+		mMusicPlayer->AddSong("Mandeville.ogg");
+		mMusicPlayer->AddSong("Slow Ska Game Loop.ogg");
+		mMusicPlayer->AddSong("Stealth Groover.ogg");
+		mMusicPlayer->AddSong("Yallahs.ogg");*/
 		mMusicPlayer->Shuffle();
 		lOk = mMusicPlayer->Playback();
 	}

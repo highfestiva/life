@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -48,26 +48,23 @@ void ContextObjectAttribute::SetCreator(const Factory& pFactory)
 
 int ContextObjectAttribute::QuerySend() const
 {
-	wstr lAttributeName = wstrutil::Encode(mName);
-	return PackerUnicodeString::Pack(0, lAttributeName);
+	return PackerUnicodeString::Pack(0, mName);
 }
 
 int ContextObjectAttribute::Pack(uint8* pDestination)
 {
-	wstr lAttributeName = wstrutil::Encode(mName);
-	return PackerUnicodeString::Pack(pDestination, lAttributeName);
+	return PackerUnicodeString::Pack(pDestination, mName);
 }
 
 int ContextObjectAttribute::Unpack(ContextObject* pContextObject, const uint8* pSource, int pMaxSize)
 {
-	wstr lWideAttributeName;
-	int lSize = PackerUnicodeString::Unpack(lWideAttributeName, pSource, pMaxSize);
+	str lAttributeName;
+	int lSize = PackerUnicodeString::Unpack(lAttributeName, pSource, pMaxSize);
 	if (lSize < 0)
 	{
 		return -1;
 	}
 
-	str lAttributeName = strutil::Encode(lWideAttributeName);
 	ContextObjectAttribute* lAttribute = pContextObject->GetAttribute(lAttributeName);
 	if (!lAttribute)
 	{

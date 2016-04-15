@@ -32,8 +32,8 @@ namespace Lepra
 DiskFile::DiskFile() :
 	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mFile(0),
-	mFileName(_T("")),
-	mPath(_T("")),
+	mFileName(""),
+	mPath(""),
 	mFileSize(0),
 	mWriter(0),
 	mReader(0),
@@ -46,8 +46,8 @@ DiskFile::DiskFile() :
 DiskFile::DiskFile(Reader* pReader) :
 	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mFile(0),
-	mFileName(_T("")),
-	mPath(_T("")),
+	mFileName(""),
+	mPath(""),
 	mFileSize(0),
 	mWriter(0),
 	mReader(pReader),
@@ -65,8 +65,8 @@ DiskFile::DiskFile(Reader* pReader) :
 DiskFile::DiskFile(Writer* pWriter) :
 	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mFile(0),
-	mFileName(_T("")),
-	mPath(_T("")),
+	mFileName(""),
+	mPath(""),
 	mFileSize(0),
 	mWriter(pWriter),
 	mReader(0),
@@ -84,8 +84,8 @@ DiskFile::DiskFile(Writer* pWriter) :
 DiskFile::DiskFile(Reader* pReader, Writer* pWriter) :
 	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
 	mFile(0),
-	mFileName(_T("")),
-	mPath(_T("")),
+	mFileName(""),
+	mPath(""),
 	mFileSize(0),
 	mWriter(pWriter),
 	mReader(pReader),
@@ -131,7 +131,7 @@ FILE* DiskFile::FileOpen(const str& pFileName, const str& pMode)
 		lFile = 0;
 	}
 #else // _MSC_VER <= 1310
-	lFile = fopen(astrutil::Encode(pFileName).c_str(), astrutil::Encode(pMode).c_str());
+	lFile = fopen(pFileName.c_str(), pMode.c_str());
 #endif // _MSC_VER > 1310 / _MSC_VER <= 1310
 
 	return (lFile);
@@ -177,23 +177,23 @@ bool DiskFile::Open(const str& pFileName, OpenMode pMode, bool pCreatePath, Endi
 	{
 		if ((pMode&(MODE_READ|MODE_WRITE|MODE_WRITE_APPEND)) == MODE_READ)
 		{
-			lModeString = _T("r");
+			lModeString = "r";
 		}
 		else if ((pMode&(MODE_READ|MODE_WRITE|MODE_WRITE_APPEND)) == MODE_WRITE)
 		{
-			lModeString = _T("w");
+			lModeString = "w";
 		}
 		else if ((pMode&(MODE_READ|MODE_WRITE_APPEND)) == MODE_WRITE_APPEND)
 		{
-			lModeString = _T("a");
+			lModeString = "a";
 		}
 		else if ((pMode&(MODE_READ|MODE_WRITE|MODE_WRITE_APPEND)) == (MODE_READ|MODE_WRITE))
 		{
-			lModeString = _T("r+");
+			lModeString = "r+";
 		}
 		else if ((pMode&(MODE_READ|MODE_WRITE_APPEND)) == (MODE_READ|MODE_WRITE_APPEND))
 		{
-			lModeString = _T("a+");
+			lModeString = "a+";
 		}
 		else
 		{
@@ -205,11 +205,11 @@ bool DiskFile::Open(const str& pFileName, OpenMode pMode, bool pCreatePath, Endi
 
 		if (pMode&MODE_TEXT)
 		{
-			lModeString += _T("t");
+			lModeString += "t";
 		}
 		else
 		{
-			lModeString += _T("b");
+			lModeString += "b";
 		}
 		mFile = FileOpen(pFileName, lModeString);
 	}
@@ -246,8 +246,8 @@ void DiskFile::Close()
 		mFile = 0;
 	}
 
-	mFileName = _T("");
-	mPath = _T("");
+	mFileName = "";
+	mPath = "";
 }
 
 void DiskFile::SetEndian(Endian::EndianType pEndian)
@@ -265,7 +265,7 @@ void DiskFile::SetEndian(Endian::EndianType pEndian)
 
 str DiskFile::GetFullName() const
 {
-	return mPath + _T("/") + mFileName;
+	return mPath + "/" + mFileName;
 }
 
 str DiskFile::GetName() const
@@ -442,7 +442,7 @@ IOError DiskFile::Load(const str& pFilename, void** pData, int64& pDataSize)
 
 bool DiskFile::Exists(const str& pFileName)
 {
-	FILE* lFile = FileOpen(pFileName, _T("rb"));
+	FILE* lFile = FileOpen(pFileName, "rb");
 
 	bool lOk = false;
 	if (lFile != 0)
@@ -460,11 +460,11 @@ bool DiskFile::PathExists(const str& pPathName)
 
 #ifdef LEPRA_WINDOWS // Hugge/TRICKY: Should we check for Visual Studio instead?
 	::_getcwd(lCurrentDir, 299);
-	bool lSuccess = _chdir(astrutil::Encode(pPathName).c_str()) == 0;
+	bool lSuccess = _chdir(pPathName.c_str()) == 0;
 	::_chdir(lCurrentDir);
 #else
 	::getcwd(lCurrentDir, 299);
-	bool lSuccess = ::chdir(astrutil::Encode(pPathName).c_str()) == 0;
+	bool lSuccess = ::chdir(pPathName.c_str()) == 0;
 	::chdir(lCurrentDir);
 #endif
 
@@ -473,29 +473,29 @@ bool DiskFile::PathExists(const str& pPathName)
 
 bool DiskFile::Delete(const str& pFileName)
 {
-	return (::remove(astrutil::Encode(pFileName).c_str()) == 0);
+	return (::remove(pFileName.c_str()) == 0);
 }
 
 bool DiskFile::Rename(const str& pOldFileName, const str& pNewFileName)
 {
-	return (::rename(astrutil::Encode(pOldFileName).c_str(), astrutil::Encode(pNewFileName).c_str()) == 0);
+	return (::rename(pOldFileName.c_str(), pNewFileName.c_str()) == 0);
 }
 
 bool DiskFile::CreateDir(const str& pPathName)
 {
 #ifdef LEPRA_POSIX 
-	return ::mkdir(astrutil::Encode(pPathName).c_str(), 0775) != -1;
+	return ::mkdir(pPathName.c_str(), 0775) != -1;
 #else
-	return ::_mkdir(astrutil::Encode(pPathName).c_str()) != -1;
+	return ::_mkdir(pPathName.c_str()) != -1;
 #endif
 }
 
 bool DiskFile::RemoveDir(const str& pPathName)
 {
 #ifdef LEPRA_WINDOWS // Hugge/TRICKY: Should we check for Visual Studio instead?
-	return ::_rmdir(astrutil::Encode(pPathName).c_str()) == 0;
+	return ::_rmdir(pPathName.c_str()) == 0;
 #else
-	return ::rmdir(astrutil::Encode(pPathName).c_str()) == 0;
+	return ::rmdir(pPathName.c_str()) == 0;
 #endif
 }
 
@@ -518,7 +518,7 @@ bool DiskFile::CreateSubDirs()
 				break;
 			}
 		}
-		lNewPath += _T("/");
+		lNewPath += "/";
 	}
 
 	return lOk;
@@ -532,7 +532,7 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 	pFindData.mFileSpec = pFileSpec;
 #if defined LEPRA_WINDOWS
 	_finddata_t lData;
-	pFindData.mFindHandle = _findfirst(astrutil::Encode(pFileSpec).c_str(), &lData);
+	pFindData.mFindHandle = _findfirst(pFileSpec.c_str(), &lData);
 	if (pFindData.mFindHandle == -1)
 	{
 		lOk = false;
@@ -540,7 +540,7 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 	if (lOk == true)
 	{
 		str lPath = Path::SplitPath(pFileSpec)[0];
-		pFindData.mName = Path::JoinPath(lPath, strutil::Encode(astr(lData.name)));	// TODO: needs real Unicode findxxx().
+		pFindData.mName = Path::JoinPath(lPath, str(lData.name));	// TODO: needs real Unicode findxxx().
 		pFindData.mSize = lData.size;
 
 		if ((lData.attrib & _A_SUBDIR) != 0)
@@ -552,10 +552,10 @@ bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
 	}
 #elif defined LEPRA_POSIX
 	pFindData.mGlobList.gl_offs = 0;
-	::glob(astrutil::Encode(pFileSpec).c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &pFindData.mGlobList);
+	::glob(pFileSpec.c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &pFindData.mGlobList);
 	if (pFindData.mGlobList.gl_pathc >= 1)
 	{
-		pFindData.mName = strutil::Encode(pFindData.mGlobList.gl_pathv[0]);
+		pFindData.mName = pFindData.mGlobList.gl_pathv[0];
 		struct stat lFileInfo;
 		::stat(pFindData.mGlobList.gl_pathv[1], &lFileInfo);	// TODO: error check.
 		pFindData.mSize = lFileInfo.st_size;
@@ -588,7 +588,7 @@ bool DiskFile::FindNext(FindData& pFindData)
 	if (lOk == true)
 	{
 		str lPath = Path::SplitPath(pFindData.mFileSpec)[0];
-		pFindData.mName = Path::JoinPath(lPath, strutil::Encode(astr(lData.name)));	// TODO: needs real Unicode findxxx()!
+		pFindData.mName = Path::JoinPath(lPath, str(lData.name));	// TODO: needs real Unicode findxxx()!
 		pFindData.mSize = lData.size;
 		pFindData.mSubDir = ((lData.attrib & _A_SUBDIR) != 0);
 		pFindData.mTime  = lData.time_write;
@@ -598,7 +598,7 @@ bool DiskFile::FindNext(FindData& pFindData)
 	if (pFindData.mGlobIndex < pFindData.mGlobList.gl_pathc)
 	{
 		lOk = true;
-		pFindData.mName = strutil::Encode(pFindData.mGlobList.gl_pathv[pFindData.mGlobIndex]);
+		pFindData.mName = pFindData.mGlobList.gl_pathv[pFindData.mGlobIndex];
 		struct stat lFileInfo;
 		::stat(pFindData.mGlobList.gl_pathv[pFindData.mGlobIndex], &lFileInfo);	// TODO: error check.
 		pFindData.mSize = lFileInfo.st_size;
@@ -626,7 +626,7 @@ bool DiskFile::FindNext(FindData& pFindData)
 str DiskFile::GenerateUniqueFileName(const str& pPath)
 {
 	str lPath(pPath);
-	lPath += _T('/');
+	lPath += '/';
 
 	int64 lRandomNumber = (int64)Random::GetRandomNumber64();
 	if (lRandomNumber < 0)

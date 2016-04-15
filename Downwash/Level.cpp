@@ -30,7 +30,7 @@ void Level::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const Tbc::ChunkyClass::Tag* lTag = FindTag(_T("textures"), 0, 1);
+	const Tbc::ChunkyClass::Tag* lTag = FindTag("textures", 0, 1);
 	if (lTag)
 	{
 		mBackgroundName = lTag->mStringValueList[0];
@@ -46,7 +46,7 @@ Cure::ContextPath* Level::QueryPath()
 {
 	if (!mPath)
 	{
-		mPath = new Cure::ContextPath(GetResourceManager(), _T("ContextPath"));
+		mPath = new Cure::ContextPath(GetResourceManager(), "ContextPath");
 		GetManager()->AddLocalObject(mPath);
 	}
 	return mPath;

@@ -159,7 +159,7 @@
 	}
 }
 
--(void) handleStdOut:(const astr&)pStdOut
+-(void) handleStdOut:(const str&)pStdOut
 {
 	NSString* text = [NSString stringWithCString:pStdOut.c_str() encoding:NSUTF8StringEncoding];
 	[self popViewControllerAnimated:NO];
@@ -403,10 +403,10 @@
 
 -(void) setAccessFor:(NSString*)hostname allow:(BOOL)allow
 {
-	str lHosts = allow? v_slowget(UiCure::GetSettings(), "Simulator.AllowedHosts", _T("")) : v_slowget(UiCure::GetSettings(), "Simulator.DeniedHosts", _T(""));
-	strutil::strvec lHostnames = strutil::Split(lHosts, _T(":"));
+	str lHosts = allow? v_slowget(UiCure::GetSettings(), "Simulator.AllowedHosts", "") : v_slowget(UiCure::GetSettings(), "Simulator.DeniedHosts", "");
+	strutil::strvec lHostnames = strutil::Split(lHosts, ":");
 	lHostnames.push_back(MacLog::Decode(hostname));
-	lHosts = strutil::Join(lHostnames, _T(":"));
+	lHosts = strutil::Join(lHostnames, ":");
 	allow? v_override(UiCure::GetSettings(), "Simulator.AllowedHosts", lHosts) : v_override(UiCure::GetSettings(), "Simulator.DeniedHosts", lHosts);
 }
 

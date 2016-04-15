@@ -90,7 +90,7 @@ void TimeManager::Tick()
 	while (mPhysicsFrameTime*2 < mAverageFrameTime)	// Half framerate if we're on a slow platform (multiplayer over network), reiterate.
 	{
 		mPhysicsFrameTime *= 2;
-		log_adebug("Halfing physics frame rate!");
+		log_debug("Halfing physics frame rate!");
 	}
 	mPhysicsStepCount = (int)::floor(mTickTimeModulo / mPhysicsFrameTime);
 	mPhysicsFrameTime *= mRealTimeRatio;
@@ -98,7 +98,7 @@ void TimeManager::Tick()
 	/*static int c = 0;
 	if (++c >= 11)
 	{
-		mLog.Infof(_T("Instance %p: tick time modulo is %.0f %%."), this, mTickTimeModulo*100/lTargetPeriod);
+		mLog.Infof("Instance %p: tick time modulo is %.0f %%.", this, mTickTimeModulo*100/lTargetPeriod);
 		c = 0;
 	}*/
 
@@ -129,14 +129,14 @@ void TimeManager::Tick()
 	}
 	/*if (c == 0)
 	{
-		mLog.Infof(_T("Instance %p: modulo offset is %.0f %%."), this, lModuloOffset*100/lTargetPeriod);
+		mLog.Infof("Instance %p: modulo offset is %.0f %%.", this, lModuloOffset*100/lTargetPeriod);
 	}*/
 	const float lDesiredModuloOffset = 0.4f;
 	/*const float lCurrentTargetOverhead = mTickTimeModulo - lDesiredModuloOffset*lTargetPeriod;
 	mTickTimeOverhead = Math::Lerp(mTickTimeOverhead, 2 * lCurrentTargetOverhead, 0.5f);*/
 	const float lCurrentTargetOverhead = 1.6f*mTickTimeModulo - lDesiredModuloOffset*lTargetPeriod;
 	mTickTimeOverhead = Math::Lerp(mTickTimeOverhead, lCurrentTargetOverhead, 0.6f);
-	//log_volatile(mLog.Debugf(_T("AverageFrameTime %f s, modulo placement %f %%, reduction %f %%, lTargetPeriod %f s."), mAverageFrameTime, mTickTimeModulo*100/lTargetPeriod, mTickTimeOverhead*100/lTargetPeriod, lTargetPeriod));
+	//log_volatile(mLog.Debugf("AverageFrameTime %f s, modulo placement %f %%, reduction %f %%, lTargetPeriod %f s.", mAverageFrameTime, mTickTimeModulo*100/lTargetPeriod, mTickTimeOverhead*100/lTargetPeriod, lTargetPeriod));
 }
 
 float TimeManager::GetAbsoluteTime(float pOffset) const

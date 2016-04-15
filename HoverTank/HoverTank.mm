@@ -81,7 +81,7 @@ using namespace Lepra;
 +(void) storeHiscoreName
 {
 	//str lLastHiscoreName;
-	//v_get(lLastHiscoreName, =, HoverTank::HoverTank::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, _T(""));
+	//v_get(lLastHiscoreName, =, HoverTank::HoverTank::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, "");
 	//NSString* name = [MacLog::Encode(lLastHiscoreName) retain];
 	//NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	//[defaults setObject:name forKey:HISCORE_NAME_KEY];

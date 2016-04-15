@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -38,7 +38,7 @@ void SetDefault(RuntimeVariableScope* pSettings)
 {
 	v_set(pSettings, RTVAR_CONSOLE_COLUMNSPACING, 2);
 	v_set(pSettings, RTVAR_CONSOLE_CHARACTERWIDTH, 80);
-	v_set(pSettings, RTVAR_CONSOLE_CHARACTERDELIMITORS, _T(" \t\v\r\n.,!?:;/\\'\"()&%#@{[]+-*|<>^_$`"));
+	v_set(pSettings, RTVAR_CONSOLE_CHARACTERDELIMITORS, " \t\v\r\n.,!?:;/\\'\"()&%#@{[]+-*|<>^_$`");
 	v_set(pSettings, RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t');
 	v_set(pSettings, RTVAR_CONSOLE_KEY_ENTER, (int)'\r');
 	v_set(pSettings, RTVAR_CONSOLE_KEY_SILENT, (int)'\v');
@@ -64,9 +64,9 @@ void SetDefault(RuntimeVariableScope* pSettings)
 	v_set(pSettings, RTVAR_NETPHYS_ENABLESMOOTHING, true);
 	v_set(pSettings, RTVAR_NETPHYS_EXTRAPOLATIONFACTOR, 0.0);
 
-	v_set(pSettings, RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	v_set(pSettings, RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
 	v_set(pSettings, RTVAR_NETWORK_CONNECT_RETRYCOUNT, 1);
-	v_set(pSettings, RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, _T("1025-65535"));
+	v_set(pSettings, RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, "1025-65535");
 	v_set(pSettings, RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 	v_set(pSettings, RTVAR_NETWORK_LOGIN_TIMEOUT, 3.0);
 	v_set(pSettings, RTVAR_NETWORK_KEEPALIVE_SENDINTERVAL, 5.0);

@@ -118,8 +118,8 @@ void PushDemo::TickUiUpdate()
 
 void PushDemo::CreateLoginView()
 {
-	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 3, GRAY, _T("FullInfo"));
-	lButton->SetText(_T("Click here for more information on the full version"), BLUE, BLUE);
+	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 3, GRAY, "FullInfo");
+	lButton->SetText("Click here for more information on the full version", BLUE, BLUE);
 	const int lButtonWidth = 370;
 	const int lButtonHeight = 30;
 	const int lMargin = 20;
@@ -137,7 +137,7 @@ bool PushDemo::InitializeUniverse()
 {
 	Merge level stuff from PushViewer.cpp.
 
-	Cure::ContextObject* lVehicle = new Machine(GetResourceManager(), _T("saucer_01"), mUiManager);
+	Cure::ContextObject* lVehicle = new Machine(GetResourceManager(), "saucer_01", mUiManager);
 	GetContext()->AddLocalObject(lVehicle);
 	mAvatarId = lVehicle->GetInstanceId();
 	lVehicle->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_STATIC);
@@ -158,7 +158,7 @@ void PushDemo::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 
 void PushDemo::BrowseFullInfo(UiTbc::Button*)
 {
-	SystemManager::WebBrowseTo(_T("http://trialepicfail.blogspot.com"));
+	SystemManager::WebBrowseTo("http://trialepicfail.blogspot.com");
 	SystemManager::AddQuitRequest(+1);
 }
 
@@ -192,12 +192,12 @@ UiTbc::FontManager::FontId PushDemo::SetFontHeight(double pHeight)
 
 const tchar* PushDemo::mInfoTextArray[6] =
 {
-	_T("The vehicle on display is only playable in the full version."),
-	_T("In the full version you can play online. Playing with your kids from the other side of the planet has never been easier."),
-	_T("Play with up to four simultanous players ON ONE SCREEN in the full version - this free demo version adds annoying texts for 3/4 players."),
-	_T("Ten more groovy vehicles are available in the full version."),
-	_T("Host a dedicated game server for family and friends. Only in the full version."),
-	_T("The development of this game was a huge undertaking by a single individual. Hope you enjoyed it!"),
+	"The vehicle on display is only playable in the full version.",
+	"In the full version you can play online. Playing with your kids from the other side of the planet has never been easier.",
+	"Play with up to four simultanous players ON ONE SCREEN in the full version - this free demo version adds annoying texts for 3/4 players.",
+	"Ten more groovy vehicles are available in the full version.",
+	"Host a dedicated game server for family and friends. Only in the full version.",
+	"The development of this game was a huge undertaking by a single individual. Hope you enjoyed it!",
 };
 
 

@@ -39,7 +39,7 @@ bool ProjectileUtil::GetBarrelByShooter(Cure::CppContextObject* pShooter, xform&
 	pTransform.GetOrientation().RotateAroundOwnX(-PIF/2);
 	pTransform.SetPosition(pShooter->GetPosition());
 	pVelocity = pShooter->GetVelocity();
-	const Tbc::ChunkyClass::Tag* lTag = pShooter->FindTag(_T("muzzle"), 0, 0);
+	const Tbc::ChunkyClass::Tag* lTag = pShooter->FindTag("muzzle", 0, 0);
 	if (lTag)
 	{
 		const int lBoneIndex = lTag->mBodyIndexList[0];
@@ -49,7 +49,7 @@ bool ProjectileUtil::GetBarrelByShooter(Cure::CppContextObject* pShooter, xform&
 		//Tbc::ChunkyBoneGeometry* lRootGeometry = pShooter->GetPhysics()->GetBoneGeometry(0);
 		//quat q = pGameManager->GetPhysicsManager()->GetBodyOrientation(lRootGeometry->GetBodyId());
 		//quat p = pShooter->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-		//mLog.Infof(_T("Shooting with body orientation (%f;%f;%f;%f) and initial orientation (%f;%f;%f;%f)."),
+		//mLog.Infof("Shooting with body orientation (%f;%f;%f;%f and initial orientation (%f;%f;%f;%f)."),
 		//	q.a, q.b, q.c, q.d,
 		//	p.a, p.b, p.c, p.d);
 #endif // Debug

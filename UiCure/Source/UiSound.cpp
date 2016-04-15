@@ -17,7 +17,7 @@ namespace UiCure
 
 
 Sound::Sound(Cure::ResourceManager* pResourceManager, const str& pSoundName, GameUiManager* pUiManager):
-	Parent(pResourceManager, _T("Sound"), pUiManager)
+	Parent(pResourceManager, "Sound", pUiManager)
 {
 	mSoundResource = new UiCure::UserSound2dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
 	mSoundResource->Load(GetResourceManager(), pSoundName,

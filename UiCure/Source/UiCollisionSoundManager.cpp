@@ -54,7 +54,7 @@ void CollisionSoundManager::AddSound(const str& pName, const SoundResourceInfo& 
 void CollisionSoundManager::PreLoadSound(const str& pName)
 {
 	CollisionSoundResource* lSound = new CollisionSoundResource(mUiManager, 0);
-	lSound->Load(mGameManager->GetResourceManager(), _T("collision_")+pName+_T(".wav"),
+	lSound->Load(mGameManager->GetResourceManager(), "collision_"+pName+".wav",
 		UiCure::UserSound3dResource::TypeLoadCallback(this, &CollisionSoundManager::OnSoundPreLoaded));
 }
 
@@ -117,7 +117,7 @@ void CollisionSoundManager::OnCollision(const vec3& pForce, const vec3& pTorque,
 	}
 	/*if (pObject1->GetVelocity().GetDistanceSquared(pObject2->GetVelocity()) < mLightImpact)
 	{
-		mLog.Infof(_T("Not playing sound due to low velocity diff. Force=(%g,%g,%g), light impact %g, v1=(%g,%g,%g), v2=(%g,%g,%g)"),
+		mLog.Infof("Not playing sound due to low velocity diff. Force=(%g,%g,%g, light impact %g, v1=(%g,%g,%g), v2=(%g,%g,%g)"),
 				pForce.x, pForce.y, pForce.z, mLightImpact, pObject1->GetVelocity().x, pObject1->GetVelocity().y, pObject1->GetVelocity().z,
 				pObject2->GetVelocity().x, pObject2->GetVelocity().y, pObject2->GetVelocity().z);
 		return;
@@ -127,13 +127,13 @@ void CollisionSoundManager::OnCollision(const vec3& pForce, const vec3& pTorque,
 	{
 		if (!pIsLoud)
 		{
-			/*mLog.Infof(_T("Not playing sound due to light impact %g (light impact %g). Force (%g,%g,%g), torque (%g,%g,%g)"),
+			/*mLog.Infof("Not playing sound due to light impact %g (light impact %g. Force (%g,%g,%g), torque (%g,%g,%g)"),
 					lImpact, mLightImpact, pForce.x, pForce.y, pForce.z, pTorque.x, pTorque.y, pTorque.z);*/
 			return;
 		}
 		lImpact = mLightImpact;
 	}
-	/*mLog.Infof(_T("Playing sound. Impact %g (light impact %g). Force (%g,%g,%g), torque (%g,%g,%g)"),
+	/*mLog.Infof("Playing sound. Impact %g (light impact %g. Force (%g,%g,%g), torque (%g,%g,%g)"),
 			lImpact, mLightImpact, pForce.x, pForce.y, pForce.z, pTorque.x, pTorque.y, pTorque.z);*/
 	const float lVolumeImpact = std::min(2.0f, lImpact*mImpactVolumeFactor);
 	const Tbc::ChunkyBoneGeometry* lKey = pObject1->GetStructureGeometry(pBody1Id);
@@ -147,7 +147,7 @@ void CollisionSoundManager::OnCollision(float pImpact, const vec3& pPosition, co
 	if (lSoundInfo)
 	{
 		const double lTime = (lSoundInfo->mSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)? mUiManager->GetSoundManager()->GetStreamTime(lSoundInfo->mSound->GetRamData()) : 0;
-		if (lTime < mSoundCutoffDuration && strutil::StartsWith(lSoundInfo->mSound->GetName(), _T("collision_")+pSoundName))
+		if (lTime < mSoundCutoffDuration && strutil::StartsWith(lSoundInfo->mSound->GetName(), "collision_"+pSoundName))
 		{
 			if (pImpact > lSoundInfo->mBaseImpact * 1.2f)
 			{
@@ -192,13 +192,13 @@ void CollisionSoundManager::PlaySound(const Tbc::ChunkyBoneGeometry* pGeometryKe
 	lGotSound &= (SoundInfo::GetVolume(pImpact, lResource) >= mLightImpact*MINIMUM_PLAYED_VOLUME_FACTOR);
 	if (!lGotSound)
 	{
-		//mLog.Warningf(_T("Unable to play sound %s."), pSoundName.c_str());
+		//mLog.Warningf("Unable to play sound %s.", pSoundName.c_str());
 		return;
 	}
 
 	if (GetPlayingSound(pGeometryKey))
 	{
-		mLog.Warningf(_T("Already playing sound %s, can't play it again!"), pSoundName.c_str());
+		mLog.Warningf("Already playing sound %s, can't play it again!", pSoundName.c_str());
 		return;
 	}
 	SoundInfo* lSoundInfo = new SoundInfo(lResource);
@@ -206,7 +206,7 @@ void CollisionSoundManager::PlaySound(const Tbc::ChunkyBoneGeometry* pGeometryKe
 	lSoundInfo->mBaseImpact = pImpact;
 	lSoundInfo->mSound = new CollisionSoundResource(mUiManager, lSoundInfo);
 	mSoundMap.insert(SoundMap::value_type(pGeometryKey, lSoundInfo));
-	lSoundInfo->mSound->Load(mGameManager->GetResourceManager(), _T("collision_")+pSoundName+_T(".wav"),
+	lSoundInfo->mSound->Load(mGameManager->GetResourceManager(), "collision_"+pSoundName+".wav",
 		UiCure::UserSound3dResource::TypeLoadCallback(this, &CollisionSoundManager::OnSoundLoaded));
 }
 

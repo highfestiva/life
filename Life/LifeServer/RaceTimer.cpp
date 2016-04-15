@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -21,11 +21,11 @@ namespace Life
 
 
 RaceTimer::RaceTimer(Cure::ContextManager* pManager):
-	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("RaceTimer")),
+	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), "RaceTimer"),
 	mTriggerCount(0)
 {
 	pManager->AddLocalObject(this);
-	mAttributeName = strutil::Format(_T("race_timer_%u"), GetInstanceId());
+	mAttributeName = strutil::Format("race_timer_%u", GetInstanceId());
 	GetManager()->EnableTickCallback(this);
 }
 
@@ -46,7 +46,7 @@ void RaceTimer::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
 		deb_assert(lBoneIndex >= 0);
 		lTriggerIndexArray.push_back(lBoneIndex);
 	}
-	const Tbc::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag(_T("race_trigger_data"), 0, 0, &lTriggerIndexArray);
+	const Tbc::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag("race_trigger_data", 0, 0, &lTriggerIndexArray);
 	deb_assert(lTag);
 	if (lTag)
 	{
@@ -98,23 +98,23 @@ void RaceTimer::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject*
 	if (!lRaceScore)
 	{
 		lRaceScore = new RaceScore(lObject, mAttributeName, 1, pTriggerId);
-		mLog.AHeadline("Race started!");
+		mLog.Headline("Race started!");
 	}
 	if (!lRaceScore->IsTriggered(pTriggerId))
 	{
 		lRaceScore->AddTriggered(pTriggerId);
-		mLog.Infof(_T("Hit %u/%u triggers in %f s."), lRaceScore->GetTriggedCount(), mTriggerCount, lRaceScore->GetTime());
+		mLog.Infof("Hit %u/%u triggers in %f s.", lRaceScore->GetTriggedCount(), mTriggerCount, lRaceScore->GetTime());
 	}
 	else if (lRaceScore->GetTriggedCount() == mTriggerCount && pTriggerId == lRaceScore->GetStartTrigger())
 	{
 		if (lRaceScore->StartNewLap() <= 0)
 		{
-			mLog.Headlinef(_T("Congratulations - finished race in %f s!"), lRaceScore->GetTime());
+			mLog.Headlinef("Congratulations - finished race in %f s!", lRaceScore->GetTime());
 			mDoneMap.insert(DoneMap::value_type(lObject->GetInstanceId(), GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrameAddSeconds(5.0)));
 		}
 		else
 		{
-			mLog.Headlinef(_T("Lap completed; time is %f s!"), lRaceScore->GetTime());
+			mLog.Headlinef("Lap completed; time is %f s!", lRaceScore->GetTime());
 		}
 	}
 }

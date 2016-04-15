@@ -25,7 +25,7 @@ typedef Cure::ContextPath::SplinePath Spline;
 
 
 AirBalloonPilot::AirBalloonPilot(DownwashManager* pGame, Cure::GameObjectId pBalloonId):
-	Parent(pGame->GetResourceManager(), _T("AirBalloonPilot")),
+	Parent(pGame->GetResourceManager(), "AirBalloonPilot"),
 	mGame(pGame),
 	mBalloonId(pBalloonId),
 	mPath(0)
@@ -74,7 +74,7 @@ void AirBalloonPilot::GetClosestPathDistance(const vec3& pPosition, vec3& pClose
 {
 	if (!mPath)
 	{
-		mPath = new Cure::ContextPath::SplinePath(*mGame->GetLevel()->QueryPath()->GetPath(_T("air_balloon_path")));
+		mPath = new Cure::ContextPath::SplinePath(*mGame->GetLevel()->QueryPath()->GetPath("air_balloon_path"));
 		mPath->StartInterpolation(0);
 	}
 	const float lCurrentTime = mPath->GetCurrentInterpolationTime();

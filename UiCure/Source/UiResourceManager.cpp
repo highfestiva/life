@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -69,7 +69,7 @@ PainterImageResource::~PainterImageResource()
 
 const str PainterImageResource::GetType() const
 {
-	return (_T("PaintImg"));
+	return ("PaintImg");
 }
 
 PainterImageResource::UserData PainterImageResource::GetUserData(const Cure::UserResource*) const
@@ -183,7 +183,7 @@ RendererImageResource::~RendererImageResource()
 
 const str RendererImageResource::GetType() const
 {
-	return (_T("RenderImg"));
+	return ("RenderImg");
 }
 
 bool RendererImageResource::Load()
@@ -224,7 +224,7 @@ TextureResource::~TextureResource()
 
 const str TextureResource::GetType() const
 {
-	return (_T("Texture"));
+	return ("Texture");
 }
 
 bool TextureResource::Load()
@@ -272,7 +272,7 @@ void GeometryResource::ReleaseGeometry()
 
 const str GeometryResource::GetType() const
 {
-	return (_T("Geometry"));
+	return ("Geometry");
 }
 
 GeometryResource::UserData GeometryResource::GetUserData(const Cure::UserResource*) const
@@ -290,7 +290,7 @@ bool GeometryResource::Load()
 
 	UiTbc::TriangleBasedGeometry* lGeometry = 0;
 
-	//strutil::strvec lParts = strutil::Split(GetName(), _T(";"));
+	//strutil::strvec lParts = strutil::Split(GetName(), ";");
 	//const str& lFilename = lParts[0];
 	const str& lFilename = GetName();
 
@@ -343,7 +343,7 @@ Cure::ResourceLoadState GeometryResource::PostProcess()
 		case 1:		lShadows = R::CAST_SHADOWS;	break;
 		case -1:	lShadows = R::FORCE_NO_SHADOWS;	break;
 	}
-	log_volatile(mLog.Debugf(_T("%s has casts shadows = %i."), GetName().c_str(), mCastsShadows));
+	log_volatile(mLog.Debugf("%s has casts shadows = %i.", GetName().c_str(), mCastsShadows));
 	mOptimizedData = GetUiManager()->GetRenderer()->AddGeometry(GetRamData(), R::MAT_NULL, lShadows);
 	deb_assert(mOptimizedData != R::INVALID_GEOMETRY);
 	Cure::ResourceLoadState lLoadState;
@@ -399,7 +399,7 @@ void GeometryReferenceResource::ReleaseGeometry()
 
 const str GeometryReferenceResource::GetType() const
 {
-	return (_T("GeometryRef"));
+	return ("GeometryRef");
 }
 
 bool GeometryReferenceResource::IsReferenceType() const
@@ -419,7 +419,7 @@ bool GeometryReferenceResource::Load()
 	deb_assert(lOk);
 	if (lOk)
 	{
-		const str lFilename = strutil::Split(GetName(), _T(";"), 1)[0];
+		const str lFilename = strutil::Split(GetName(), ";", 1)[0];
 		deb_assert(lFilename != GetName());
 		mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this,
 			&GeometryReferenceResource::OnLoadClass));
@@ -535,7 +535,7 @@ void SoundResource::Release()
 
 void SoundResource::PatchInfo(Cure::ResourceInfo& pInfo) const
 {
-	pInfo.mType += strutil::Format(_T(" (%u instances)"), GetDiversifiedData().size());
+	pInfo.mType += strutil::Format(" (%u instances)", GetDiversifiedData().size());
 }
 
 bool SoundResource::Load()
@@ -592,7 +592,7 @@ SoundResource::UserData SoundResource::CreateDiversifiedData() const
 	UserData lInstanceId = GetUiManager()->GetSoundManager()->CreateSoundInstance(GetRamData());
 	if (!lInstanceId)
 	{
-		mLog.Errorf(_T("Unable to create diversified sound data for %s!"), GetName().c_str());
+		mLog.Errorf("Unable to create diversified sound data for %s!", GetName().c_str());
 	}
 	return (lInstanceId);
 }
@@ -615,7 +615,7 @@ SoundResource2d::SoundResource2d(GameUiManager* pUiManager, Cure::ResourceManage
 
 const str SoundResource2d::GetType() const
 {
-	return (_T("Sound2D"));
+	return ("Sound2D");
 }
 
 SoundResource3d::SoundResource3d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName,
@@ -626,7 +626,7 @@ SoundResource3d::SoundResource3d(GameUiManager* pUiManager, Cure::ResourceManage
 
 const str SoundResource3d::GetType() const
 {
-	return (_T("Sound3D"));
+	return ("Sound3D");
 }
 
 

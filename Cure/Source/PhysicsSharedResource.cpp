@@ -85,7 +85,7 @@ ResourceLoadState PhysicsSharedResource::InjectPostProcess()
 
 const str PhysicsSharedResource::GetType() const
 {
-	return _T("PhysicsShared");
+	return "PhysicsShared";
 }
 
 bool PhysicsSharedResource::IsReferenceType() const
@@ -102,7 +102,7 @@ PhysicsSharedResource::ClassResource* PhysicsSharedResource::GetParent() const
 
 bool PhysicsSharedResource::Load()
 {
-	const str lFilename = strutil::Split(GetName(), _T(";"), 1)[0];
+	const str lFilename = strutil::Split(GetName(), ";", 1)[0];
 	deb_assert(lFilename != GetName());
 	mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this, &PhysicsSharedResource::OnLoadClass));
 	return true;

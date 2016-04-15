@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
  
 
@@ -57,9 +57,9 @@ bool NetworkServer::Start(const str& pHostAddress)
 	}
 	if (lOk)
 	{
-		mLog.Info(_T("Server listening to address ") + lAddress.GetAsString() + _T("."));
+		mLog.Info("Server listening to address " + lAddress.GetAsString() + ".");
 		ScopeLock lLock(&mLock);
-		SetMuxSocket(new MuxSocket(_T("Srv "), lAddress, true, 100, 1000));
+		SetMuxSocket(new MuxSocket("Srv ", lAddress, true, 100, 1000));
 		lOk = mMuxSocket->IsOpen();
 	}
 	return (lOk);
@@ -93,7 +93,7 @@ void NetworkServer::Disconnect(UserAccount::AccountId pAccountId, const str& pRe
 		{
 			Cure::Packet* lPacket = GetPacketFactory()->Allocate();
 			Parent::SendStatusMessage(lUser->GetSocket(), 0, Cure::REMOTE_NO_CONNECTION,
-				Cure::MessageStatus::INFO_LOGIN, wstrutil::Encode(pReason), lPacket);
+				Cure::MessageStatus::INFO_LOGIN, pReason, lPacket);
 			GetPacketFactory()->Release(lPacket);
 		}
 		else if (lUser->GetSocket())
@@ -136,11 +136,11 @@ bool NetworkServer::SendAll()
 			lAllSendsOk = false;
 			if (lSendCount == 0)
 			{
-				mLog.AWarning("Disconnecting socket since no data available for sending, though listed as such.");
+				mLog.Warning("Disconnecting socket since no data available for sending, though listed as such.");
 			}
 			else
 			{
-				mLog.AWarning("Disconnecting socket since send failed.");
+				mLog.Warning("Disconnecting socket since send failed.");
 			}
 
 			// Socket disconnected: drop user or socket.
@@ -191,7 +191,7 @@ NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, 
 		}
 		if (lDataLength == 0)
 		{
-			log_volatile(mLog.Debug(_T("Got zero-length packet from ")+
+			log_volatile(mLog.Debug("Got zero-length packet from "+
 				lSocket->GetTargetAddress().GetAsString()));
 			lStatus = RECEIVE_NO_DATA;
 			// TRICKY: no break here, but in sibling scopes.
@@ -209,9 +209,9 @@ NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, 
 			else
 			{
 				lStatus = RECEIVE_PARSE_ERROR;
-				mLog.Warningf(_T("Got bad data from %s on %s."),
-					lUser? (_T("logged in user ")+strutil::Encode(lUser->GetLoginName())).c_str() :
-						_T("not logged in user"),
+				mLog.Warningf("Got bad data from %s on %s.",
+					lUser? ("logged in user "+lUser->GetLoginName()).c_str() :
+						"not logged in user",
 					lSocket->GetTargetAddress().GetAsString().c_str());
 				// TODO: take action on bad network data?
 			}
@@ -225,7 +225,7 @@ NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, 
 		else
 		{
 			lStatus = RECEIVE_CONNECTION_BROKEN;
-			log_volatile(mLog.Debug(_T("Got broken pipe from ")+
+			log_volatile(mLog.Debug("Got broken pipe from "+
 				lSocket->GetTargetAddress().GetAsString()));
 			// TRICKY: break here, but not in all sibling scopes.
 			if (lUser)
@@ -320,23 +320,23 @@ void NetworkServer::TryLogin(VSocket* pSocket, Packet* pPacket, int pDataLength)
 			else
 			{
 				// This login packet was shit. Ignore it.
-				mLog.Warning(_T("Yucky hack packet from ")+
-					pSocket->GetTargetAddress().GetAsString()+_T("."));
+				mLog.Warning("Yucky hack packet from "+
+					pSocket->GetTargetAddress().GetAsString()+".");
 				DropSocket(pSocket);
 			}
 		}
 		else
 		{
 			// Too many login packets. Throo avaj.
-			mLog.Warning(_T("Too many (login?) packets or crappy data from ")+
-				pSocket->GetTargetAddress().GetAsString()+_T("."));
+			mLog.Warning("Too many (login?) packets or crappy data from "+
+				pSocket->GetTargetAddress().GetAsString()+".");
 			DropSocket(pSocket);
 		}
 	}
 	else if (pDataLength != 0)
 	{
-		mLog.Error(_T("Login connection broken to ")+
-			pSocket->GetTargetAddress().GetAsString()+_T("."));
+		mLog.Error("Login connection broken to "+
+			pSocket->GetTargetAddress().GetAsString()+".");
 		DropSocket(pSocket);
 	}
 	// TODO: add timeout for sockets in pending state.
@@ -346,49 +346,48 @@ RemoteStatus NetworkServer::ManageLogin(VSocket* pSocket, Packet* pPacket)
 {
 	Message* lMessage = pPacket->GetMessageAt(0);
 	MessageLoginRequest* lLoginMessage = (MessageLoginRequest*)lMessage;
-	wstr lPacketLoginName;
-	lLoginMessage->GetLoginName(lPacketLoginName);
-	wstr lLoginName(lPacketLoginName);
+	str lLoginName;
+	lLoginMessage->GetLoginName(lLoginName);
 	UserAccount::AccountId lAccountId;
 	RemoteStatus lStatus = QueryLogin(lLoginName, lLoginMessage, lAccountId);
 	switch (lStatus)
 	{
 		case REMOTE_OK:
 		{
-			mLog.Info(_T("Logging in user ")+strutil::Encode(lLoginName)+_T("."));
+			mLog.Info("Logging in user "+lLoginName+".");
 			Login(lLoginName, lAccountId, pSocket, pPacket);
 		}
 		break;
 		case REMOTE_LOGIN_ALREADY:
 		{
-			mLog.Warning(_T("User ")+strutil::Encode(lLoginName)+_T(" already logged in."));
+			mLog.Warning("User "+lLoginName+" already logged in.");
 			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
-				L"You have already been logged in.", pPacket);
+				"You have already been logged in.", pPacket);
 			DropSocket(pSocket);
 		}
 		break;
 		case REMOTE_LOGIN_ERRONOUS_DATA:
 		{
-			mLog.Warning(_T("User ")+strutil::Encode(lLoginName)+_T(" attempted with wrong username or password."));
+			mLog.Warning("User "+lLoginName+" attempted with wrong username or password.");
 			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
-				L"Wrong username or password. Try again.", pPacket);
+				"Wrong username or password. Try again.", pPacket);
 			DropSocket(pSocket);
 		}
 		break;
 		case REMOTE_LOGIN_BAN:
 		{
-			mLog.Warning(_T("User ")+strutil::Encode(lLoginName)+_T(" tried logging in, but was banned."));
+			mLog.Warning("User "+lLoginName+" tried logging in, but was banned.");
 			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
-				L"Sorry, you are banned. Try again later.", pPacket);
+				"Sorry, you are banned. Try again later.", pPacket);
 			DropSocket(pSocket);
 		}
 		break;
 		case REMOTE_NO_CONNECTION:	// TODO: check me out!
 		case REMOTE_UNKNOWN:
 		{
-			mLog.Error(_T("An unknown error occurred when user ")+strutil::Encode(lLoginName)+_T(" tried logging in."));
+			mLog.Error("An unknown error occurred when user "+lLoginName+" tried logging in.");
 			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
-				L"Unknown login error, please contact support.", pPacket);
+				"Unknown login error, please contact support.", pPacket);
 			DropSocket(pSocket);
 		}
 		break;
@@ -396,7 +395,7 @@ RemoteStatus NetworkServer::ManageLogin(VSocket* pSocket, Packet* pPacket)
 	return (lStatus);
 }
 
-RemoteStatus NetworkServer::QueryLogin(const wstr& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId)
+RemoteStatus NetworkServer::QueryLogin(const str& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId)
 {
 	RemoteStatus lLoginResult = REMOTE_UNKNOWN;
 
@@ -437,7 +436,7 @@ RemoteStatus NetworkServer::QueryLogin(const wstr& pLoginName, MessageLoginReque
 	return (lLoginResult);
 }
 
-void NetworkServer::Login(const wstr& pLoginName, UserAccount::AccountId pAccountId, VSocket* pSocket, Packet* pPacket)
+void NetworkServer::Login(const str& pLoginName, UserAccount::AccountId pAccountId, VSocket* pSocket, Packet* pPacket)
 {
 	UserConnection* lUser = mUserConnectionFactory->AllocateUserConnection();
 	lUser->SetLoginName(pLoginName);
@@ -446,8 +445,8 @@ void NetworkServer::Login(const wstr& pLoginName, UserAccount::AccountId pAccoun
 
 	AddUser(lUser, pAccountId);
 
-	mLog.Infof(_T("Sending login OK with account ID %i"), pAccountId);
-	SendStatusMessage(pAccountId, pAccountId, REMOTE_OK, Cure::MessageStatus::INFO_LOGIN, L"Welcome.", pPacket);
+	mLog.Infof("Sending login OK with account ID %i", pAccountId);
+	SendStatusMessage(pAccountId, pAccountId, REMOTE_OK, Cure::MessageStatus::INFO_LOGIN, "Welcome.", pPacket);
 
 	mLoginListener->OnLogin(lUser);
 }
@@ -503,7 +502,7 @@ void NetworkServer::KillDeadSockets()
 		for (; x != mDropUserList.end(); ++x)
 		{
 			UserAccount::AccountId lUserAccountId = *x;
-			mLog.Infof(_T("Kicking user ID %i in drop zone silently."), lUserAccountId);
+			mLog.Infof("Kicking user ID %i in drop zone silently.", lUserAccountId);
 			Disconnect(lUserAccountId, EmptyString, false);
 		}
 		mDropUserList.clear();
@@ -526,14 +525,14 @@ void NetworkServer::KillDeadSockets()
 			{
 				UserConnection* lUser = y->second;
 				UserAccount::AccountId lUserAccountId = lUser->GetAccountId();
-				mLog.Infof(_T("Dropping user %s (ID %i) due to network keepalive timeout."),
-					strutil::Encode(lUser->GetLoginName()).c_str(), lUserAccountId);
-				Disconnect(lUserAccountId, _T("Network timeout"), true);
+				mLog.Infof("Dropping user %s (ID %i) due to network keepalive timeout.",
+					lUser->GetLoginName().c_str(), lUserAccountId);
+				Disconnect(lUserAccountId, "Network timeout", true);
 			}
 			else
 			{
 				// A not-logged-in pending socket. Probably just a spoofer or similar. Close silently.
-				mLog.Infof(_T("Dropping connected, but not logged in socket on %s due to network keepalive timeout."),
+				mLog.Infof("Dropping connected, but not logged in socket on %s due to network keepalive timeout.",
 					lSocket->GetTargetAddress().GetAsString().c_str());
 				DropSocket(lSocket);
 			}
@@ -584,7 +583,7 @@ UserConnection* NetworkServer::GetUser(UserAccount::AccountId pAccountId)
 
 
 bool NetworkServer::SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus,
-	MessageStatus::InfoType pInfoType, wstr pMessage, Packet* pPacket)
+	MessageStatus::InfoType pInfoType, str pMessage, Packet* pPacket)
 {
 	pPacket->Release();
 	MessageStatus* lStatus = (MessageStatus*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_STATUS);
@@ -604,14 +603,14 @@ bool NetworkServer::SendStatusMessage(UserAccount::AccountId pAccountId, int32 p
 	{
 		UserConnection* lUser = x->second;
 		UserAccount::AccountId lUserAccountId = lUser->GetAccountId();
-		mLog.Infof(_T("Placing user %s (ID %i) in drop zone (due to OOB? kill). Will drop next frame."),
-			strutil::Encode(lUser->GetLoginName()).c_str(), lUserAccountId);
+		mLog.Infof("Placing user %s (ID %i in drop zone (due to OOB? kill). Will drop next frame."),
+			lUser->GetLoginName().c_str(), lUserAccountId);
 		RemoveUser(lUserAccountId, false);
 		mDropUserList.insert(lUserAccountId);
 	}
 	else
 	{
-		mLog.Infof(_T("Network drop (OOB?) of socket on %s."),
+		mLog.Infof("Network drop (OOB? of socket on %s."),
 			pSocket->GetTargetAddress().GetAsString().c_str());
 		DropSocket(pSocket);
 	}

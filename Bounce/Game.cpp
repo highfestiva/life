@@ -41,7 +41,7 @@ Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVaria
 
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->SetScale(0.05f, 0.1f, 1, 0.1f);
-	mCollisionSoundManager->AddSound(_T("hit"), UiCure::CollisionSoundManager::SoundResourceInfo(0.9f, 0.1f, 0.5f));
+	mCollisionSoundManager->AddSound("hit", UiCure::CollisionSoundManager::SoundResourceInfo(0.9f, 0.1f, 0.5f));
 
 	Initialize();
 }
@@ -169,7 +169,7 @@ bool Game::MoveRacket()
 		{
 			lForce *= 100 / f;
 		}
-		//mLog.Infof(_T("force = (%f, %f, %f)"), lForce.x, lForce.y, lForce.z);
+		//mLog.Infof("force = (%f, %f, %f"), lForce.x, lForce.y, lForce.z);
 		GameTicker::GetPhysicsManager(IsThreadSafe())->AddForce(
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lForce);
@@ -194,7 +194,7 @@ bool Game::MoveRacket()
 		f = 1;
 		vec3 lTorque = lAngleHome * f;
 		lTorque -= lRacketAngularVelocity * 0.2f;
-		//mLog.Infof(_T("torque = (%f, %f, %f)"), lTorque.x, lTorque.y, lTorque.z);
+		//mLog.Infof("torque = (%f, %f, %f"), lTorque.x, lTorque.y, lTorque.z);
 		GameTicker::GetPhysicsManager(IsThreadSafe())->AddTorque(
 			GetRacket()->GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
 			lTorque);
@@ -365,7 +365,7 @@ bool Game::InitializeUniverse()
 	if (lOk)
 	{
 		delete mRacket;
-		mRacket = new Racket(GetResourceManager(), _T("racket"), mUiManager);
+		mRacket = new Racket(GetResourceManager(), "racket", mUiManager);
 		AddContextObject(mRacket, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mRacket != 0);
 		deb_assert(lOk);
@@ -379,7 +379,7 @@ bool Game::InitializeUniverse()
 	if (lOk)
 	{
 		delete mBall;
-		mBall = new Ball(GetResourceManager(), _T("ball"), mUiManager);
+		mBall = new Ball(GetResourceManager(), "ball", mUiManager);
 		AddContextObject(mBall, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mBall != 0);
 		deb_assert(lOk);

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -81,7 +81,7 @@ DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
 	switch(pCT)
 	{
 		case DisplayManager::OPENGL_CONTEXT:	lDisplayManager = new MacOpenGLDisplay;				break;
-		default:				mLog.AError("Invalid context type in CreateDisplayManager().");	break;
+		default:				mLog.Error("Invalid context type in CreateDisplayManager().");	break;
 	}
 	return (lDisplayManager);
 }
@@ -249,8 +249,8 @@ double MacDisplayManager::GetPhysicalScreenSize() const
 	else
 	{
 		const str lHwName = SystemManager::GetHwName();
-		const bool lIsMini = (lHwName == _T("iPad2,5") ||
-			lHwName == _T("iPad2,6") || lHwName == _T("iPad2,7"));
+		const bool lIsMini = (lHwName == "iPad2,5" ||
+			lHwName == "iPad2,6" || lHwName == "iPad2,7");
 		if (!lIsMini)
 		{
 			return SCREEN_SIZE_IPAD_CLASSIC;
@@ -293,12 +293,12 @@ bool MacDisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 
 	if(mIsOpen == true)
 	{
-		mLog.AWarning("OpenScreen() - Screen already opened.");
+		mLog.Warning("OpenScreen() - Screen already opened.");
 		lOk = false;
 	}
 	else if(pDisplayMode.IsValid() == false && pScreenMode == FULLSCREEN)
 	{
-		mLog.AError("OpenScreen() - Invalid display mode.");
+		mLog.Error("OpenScreen() - Invalid display mode.");
 		lOk = false;
 	}
 
@@ -337,7 +337,7 @@ bool MacDisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode p
 
 			if (lSupportedMode == false)
 			{
-				str lErr(strutil::Format(_T("OpenScreen() - Display mode %i-bit %ix%i at %i Hz is not supported!"),
+				str lErr(strutil::Format("OpenScreen( - Display mode %i-bit %ix%i at %i Hz is not supported!"),
 						 pDisplayMode.mBitDepth, 
 						 pDisplayMode.mWidth, 
 						 pDisplayMode.mHeight, 
@@ -465,7 +465,7 @@ bool MacDisplayManager::InitWindow()
 				case DisplayManager::SPLASH_WINDOW:
 				{
 					mWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_TOPMOST,
-								_T("LepraMacClass"), _T("Lepra"),
+								"LepraMacClass", "Lepra",
 								WS_POPUP | WS_CLIPSIBLINGS | WS_VISIBLE,
 								GetSystemMetrics(SM_CXSCREEN) / 2 - lWindowWidth / 2,
 								GetSystemMetrics(SM_CYSCREEN) / 2 - lWindowHeight / 2,
@@ -486,7 +486,7 @@ bool MacDisplayManager::InitWindow()
 						lStyle |= (WS_SIZEBOX | WS_MAXIMIZEBOX);
 					}
 
-					mWnd = ::CreateWindowEx(0, _T("LepraMacClass"), _T("Lepra"),
+					mWnd = ::CreateWindowEx(0, "LepraMacClass", "Lepra",
 						lStyle,
 						GetSystemMetrics(SM_CXSCREEN) / 2 - lWindowHeight / 2,
 						GetSystemMetrics(SM_CYSCREEN) / 2 - lWindowHeight / 2,
@@ -512,7 +512,7 @@ bool MacDisplayManager::InitWindow()
 		}
 		else
 		{
-			mLog.AError("InitWindow() - Failed to create window.");
+			mLog.Error("InitWindow() - Failed to create window.");
 		}
 	}*/
 

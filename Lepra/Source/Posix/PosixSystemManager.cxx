@@ -44,7 +44,7 @@ static str ExecGetStdout(const char* pExecutable)
 #else	// Posix.
 	::fclose(lFile);
 #endif	// Mac / Posix.
-	str lStdout(strutil::Encode(lRaw));
+	str lStdout(lRaw);
 	if (lStdout.length() > 1)
 	{
 		lStdout.resize(lStdout.length()-1);
@@ -78,7 +78,7 @@ void SystemManager::ResetTerminal()
 
 str SystemManager::GetRootDirectory()
 {
-	return (_T("/"));
+	return ("/");
 }
 
 str SystemManager::GetCurrentDirectory()
@@ -87,15 +87,14 @@ str SystemManager::GetCurrentDirectory()
 	lBuffer[0] = 0;
 	if (::getcwd(lBuffer, sizeof(lBuffer)) == NULL)
 	{
-		mLog.AError("Failed to GetCurrentDirectory()");
+		mLog.Error("Failed to GetCurrentDirectory()");
 	}
-	str lString(strutil::Encode(astr(lBuffer)));
-	return (lString);
+	return str(lBuffer);
 }
 
 str SystemManager::GetUserDirectory()
 {
-	return strutil::Encode(astr(::getenv("HOME")));
+	return str(::getenv("HOME"));
 }
 
 str SystemManager::GetDocumentsDirectory()
@@ -105,13 +104,13 @@ str SystemManager::GetDocumentsDirectory()
 	NSString* lPath = [lPaths objectAtIndex:0];
 	return MacLog::Decode(lPath);
 #else // Mac
-	return Path::JoinPath(GetUserDirectory(), _T("Documents"));
+	return Path::JoinPath(GetUserDirectory(), "Documents");
 #endif
 }
 
 str SystemManager::GetIoDirectory(const str& pAppName)
 {
-	const str lIoDir = Path::JoinPath(GetUserDirectory(), _T(".")+pAppName, _T(""));
+	const str lIoDir = Path::JoinPath(GetUserDirectory(), "."+pAppName, "");
 	if (!DiskFile::PathExists(lIoDir))
 	{
 		DiskFile::CreateDir(lIoDir);
@@ -126,10 +125,10 @@ str SystemManager::GetDataDirectoryFromPath(const str& pArgv0)
 #elif defined(LEPRA_MAC)
 	str lDataDir = Path::GetDirectory(pArgv0);
 	lDataDir = Path::GetParentDirectory(lDataDir);
-	return Path::JoinPath(lDataDir, _T("Resources/Data/"));
+	return Path::JoinPath(lDataDir, "Resources/Data/");
 #else // Posix
 	(void)pArgv0;
-	return _T("Data/");
+	return "Data/";
 #endif // iOS/Mac/Posix
 }
 
@@ -142,7 +141,7 @@ str SystemManager::GetLoginName()
 	{
 		lLoginName = "<Unknown>";
 	}
-	return (strutil::Encode(astr(lLoginName)));
+	return (str(lLoginName));
 }
 
 str SystemManager::QueryFullUserName()
@@ -155,7 +154,7 @@ void SystemManager::WebBrowseTo(const str& pUrl)
 {
 	if (::fork() == 0)
 	{
-		astr lUrl = astrutil::Encode(pUrl);
+		str lUrl = pUrl;
 		bool lFound = false;
 #ifdef LEPRA_MAC
 		lFound = lFound || (::system(("open "+lUrl).c_str()) == 0);
@@ -175,8 +174,8 @@ void SystemManager::EmailTo(const str& pTo, const str& pSubject, const str& pBod
 	{
 		const str lUrlSubject = JsonString::UrlEncode(pSubject);
 		const str lUrlBody = JsonString::UrlEncode(pBody);
-		str lWUrl = _T("mailto:") + pTo + _T("?subject=") + lUrlSubject + _T("&body=") + lUrlBody;
-		astr lUrl = astrutil::Encode(lWUrl);
+		str lWUrl = "mailto:" + pTo + "?subject=" + lUrlSubject + "&body=" + lUrlBody;
+		str lUrl = lWUrl;
 		bool lFound = false;
 #ifdef LEPRA_MAC
 		lFound = lFound || (::system(("open "+lUrl).c_str()) == 0);
@@ -197,9 +196,9 @@ str SystemManager::GetHwName()
 	size_t lSize = sizeof(lMachine);
 	::memset(lMachine, 0, lSize);
 	::sysctlbyname("hw.machine", lMachine, &lSize, 0, 0);
-	return strutil::Encode(astr(lMachine));
+	return str(lMachine);
 #else // Other Posix
-	return _T("PC");
+	return "PC";
 #endif // OS X / Other Posix
 }
 
@@ -235,17 +234,17 @@ unsigned SystemManager::GetCoreCount()
 str SystemManager::GetCpuName()
 {
 #if defined(LEPRA_GCC_X86_32)
-	return (_T("x86"));
+	return ("x86");
 #elif defined(LEPRA_GCC_X86_64)
-	return (_T("x64"));
+	return ("x64");
 #elif defined(LEPRA_GCC_POWERPC)
-	return (_T("PowerPC"));
+	return ("PowerPC");
 #elif defined(LEPRA_GCC_ARM_32)
-	return (_T("ARM"));
+	return ("ARM");
 #elif defined(LEPRA_GCC_ARM_64)
-	return (_T("ARM64"));
+	return ("ARM64");
 #else // Unkonwn CPU type.
-	return (_T("Unknown"));
+	return ("Unknown");
 #endif // CPU check.
 }
 
@@ -254,7 +253,7 @@ str SystemManager::GetOsName()
 	str lOsName = ExecGetStdout("uname");
 	if (lOsName.empty())
 	{
-		return (_T("Posix"));
+		return ("Posix");
 	}
 	return (lOsName);
 }

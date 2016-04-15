@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -28,7 +28,7 @@ namespace Cure
 
 
 Elevator::Elevator(ContextManager* pManager):
-	CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Elevator")),
+	CppContextObject(pManager->GetGameManager()->GetResourceManager(), "Elevator"),
 	mActiveTrigger(0),
 	mExitDelay(2.0),
 	mStopDelay(5.0),
@@ -99,7 +99,7 @@ void Elevator::OnTick()
 			const bool lStopEngines = !lIsNonStop;
 			if (mElevatorHasBeenMoving)
 			{
-				log_adebug("TRIGGER - elevator has stopped.");
+				log_debug("TRIGGER - elevator has stopped.");
 				HaltActiveEngines(lStopEngines);
 
 				// Check if we need to restart "non_stop" or "always" trigger.
@@ -114,7 +114,7 @@ void Elevator::OnTick()
 			if (mActiveTrigger && mActiveTrigger->GetType() >= Tbc::PhysicsTrigger::TRIGGER_MOVEMENT &&
 				mTrigTime.QueryTimeDiff() > mExitDelay)
 			{
-				log_adebug("TRIGGER - exited trigger volume.");
+				log_debug("TRIGGER - exited trigger volume.");
 				// Stop the engines once again, to handle the following scenario:
 				// 1. Physically trigged, engine started.
 				// 2. Physical object came to end-point.
@@ -149,7 +149,7 @@ void Elevator::OnAlarm(int pAlarmId, void* pExtraData)
 	}
 	else
 	{
-		log_adebug("TRIGGER - no longer triggered.");
+		log_debug("TRIGGER - no longer triggered.");
 		HaltActiveEngines(true);
 		mActiveTrigger = 0;
 	}
@@ -185,7 +185,7 @@ void Elevator::Trig(const Tbc::PhysicsTrigger* pTrigger)
 	for (int y = 0; y < lEngineCount; ++y)
 	{
 		const Tbc::PhysicsTrigger::EngineTrigger& lEngineTrigger = pTrigger->GetControlledEngine(y);
-		log_volatile(mLog.Debugf(_T("TRIGGER - trigging function %s."), lEngineTrigger.mFunction.c_str()));
+		log_volatile(mLog.Debugf("TRIGGER - trigging function %s.", lEngineTrigger.mFunction.c_str()));
 		GetManager()->AddGameAlarmCallback(this, 0, lEngineTrigger.mDelay, (void*)&lEngineTrigger);
 	}
 }
@@ -248,15 +248,15 @@ void Elevator::HaltActiveEngines(bool pStop)
 void Elevator::SetFunctionTarget(const str& pFunction, Tbc::PhysicsEngine* pEngine)
 {
 	float lTargetValue = 0;	// Default it to stop.
-	if (pFunction == _T("minimum"))
+	if (pFunction == "minimum")
 	{
 		lTargetValue = -1;
 	}
-	else if (pFunction == _T("maximum"))
+	else if (pFunction == "maximum")
 	{
 		lTargetValue = 1;
 	}
-	else if (pFunction == _T("toggle"))
+	else if (pFunction == "toggle")
 	{
 		lTargetValue = -pEngine->GetValue();
 		if (Math::IsEpsEqual(lTargetValue, 0.0f))
@@ -272,7 +272,7 @@ void Elevator::SetFunctionTarget(const str& pFunction, Tbc::PhysicsEngine* pEngi
 	{
 		deb_assert(false);
 	}
-	log_volatile(mLog.Debugf(_T("TRIGGER - activating engine for function %s."), pFunction.c_str()));
+	log_volatile(mLog.Debugf("TRIGGER - activating engine for function %s.", pFunction.c_str()));
 	mElevatorIsActive = true;
 	pEngine->ForceSetValue(Tbc::PhysicsEngine::ASPECT_LOCAL_SHADOW, lTargetValue);	// Store shadow.
 	pEngine->SetValue(pEngine->GetControllerIndex(), lTargetValue);

@@ -33,7 +33,7 @@ void PortalManager::TraverseGraph(Renderer* pRenderer, const str& pCellID)
 	CellTable::Iterator lIter = mCellTable.Find(pCellID);
 	if (lIter == mCellTable.End())
 	{
-		mLog.Warning(_T("TraverseGraph() - CellID \"") + pCellID + _T("\" does not exist!"));
+		mLog.Warning("TraverseGraph - CellID \"" + pCellID + "\" does not exist!");
 		return;
 	}
 

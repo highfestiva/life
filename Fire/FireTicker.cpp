@@ -34,9 +34,9 @@ FireTicker::FireTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager*
 	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
 	v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 48.0);
 
-	AddBackedRtvar(_T(RTVAR_GAME_FIRSTRUN));
-	AddBackedRtvar(_T(RTVAR_GAME_STARTLEVEL));
-	AddBackedRtvar(_T(RTVAR_UI_SOUND_MASTERVOLUME));
+	AddBackedRtvar(RTVAR_GAME_FIRSTRUN);
+	AddBackedRtvar(RTVAR_GAME_STARTLEVEL);
+	AddBackedRtvar(RTVAR_UI_SOUND_MASTERVOLUME);
 }
 
 FireTicker::~FireTicker()
@@ -89,12 +89,12 @@ bool FireTicker::OpenUiManager()
 	{
 		mUiManager->UpdateSettings();
 		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
-		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 0));
-		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4, 5);
+		lRenderer->AddDynamicRenderer("particle", new UiTbc::ParticleRenderer(lRenderer, 0));
+		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, "explosion.png", 4, 5);
 	}
 	if (lOk)
 	{
-		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
+		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, "env.png", UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
 		if (mEnvMap->Load())
 		{
 			if (mEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)

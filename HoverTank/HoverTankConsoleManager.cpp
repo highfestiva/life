@@ -23,7 +23,7 @@ namespace HoverTank
 // Must lie before HoverTankConsoleManager to compile.
 const HoverTankConsoleManager::CommandPair HoverTankConsoleManager::mCommandIdList[] =
 {
-	{_T("set-avatar"), COMMAND_SET_AVATAR},
+	{"set-avatar", COMMAND_SET_AVATAR},
 };
 
 
@@ -84,7 +84,7 @@ int HoverTankConsoleManager::OnCommand(const HashedString& pCommand, const strut
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <avatar>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <avatar>", pCommand.c_str());
 					lResult = 1;
 				}
 			}

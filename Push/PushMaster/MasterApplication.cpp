@@ -51,7 +51,7 @@ namespace Push
 
 
 MasterApplication::MasterApplication(const strutil::strvec& pArgumentList):
-	Parent(_T(PUSH_APPLICATION_NAME), pArgumentList)
+	Parent(PUSH_APPLICATION_NAME, pArgumentList)
 {
 }
 
@@ -77,17 +77,17 @@ void MasterApplication::Init()
 
 Cure::ApplicationTicker* MasterApplication::CreateTicker() const
 {
-	return new Life::MasterServer(_T(MASTER_SERVER_PORT));
+	return new Life::MasterServer(MASTER_SERVER_PORT);
 }
 
 str MasterApplication::GetTypeName() const
 {
-	return _T("Master");
+	return "Master";
 }
 
 str MasterApplication::GetVersion() const
 {
-	return _T(PLATFORM_VERSION);
+	return PLATFORM_VERSION;
 }
 
 

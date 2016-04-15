@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -74,8 +74,8 @@ GameServerManager::~GameServerManager()
 			{
 				SystemManager::AddQuitRequest(-1);
 			}
-			mLog.Info(_T("Unregistering server with master. Might take a few secs..."));
-			mMasterConnection->AppendLocalInfo(_T(" --remove true"));
+			mLog.Info("Unregistering server with master. Might take a few secs...");
+			mMasterConnection->AppendLocalInfo(" --remove true");
 			mMasterConnection->WaitUntilDone(10.0, true);
 			mMasterConnection->GraceClose(1.0, false);
 			mMasterConnection = 0;	// Not owned by us, deleted elsewhere.
@@ -98,7 +98,7 @@ GameServerManager::~GameServerManager()
 
 	if (GetConsoleManager())
 	{
-		GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ") + Application::GetIoFile(_T("ServerApplication"), _T("lsh")));
+		GetConsoleManager()->ExecuteCommand("save-application-config-file " + Application::GetIoFile("ServerApplication", "lsh"));
 	}
 }
 
@@ -115,7 +115,7 @@ bool GameServerManager::BeginTick()
 		{
 			continue;
 		}
-		if (lObject->IsAttributeTrue(_T("float_childishness")) ||
+		if (lObject->IsAttributeTrue("float_childishness") ||
 			lObject->GetGuideMode() == Tbc::ChunkyPhysics::GUIDE_ALWAYS)
 		{
 			lObject->StabilizeTick();
@@ -139,7 +139,7 @@ void GameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLogg
 	{
 		SetConsoleManager(new ServerConsoleManager(GetResourceManager(), this, GetVariableScope(), pConsoleLogger, pConsolePrompt));
 	}
-	GetConsoleManager()->PushYieldCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ServerApplication"), _T("lsh")));
+	GetConsoleManager()->PushYieldCommand("execute-file -i " + Application::GetIoFile("ServerApplication", "lsh"));
 	GetConsoleManager()->Start();
 }
 
@@ -153,21 +153,21 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection, co
 		int x;
 		for (x = 0; lOk && x < 100; ++x)
 		{
-			const wstr lUserName = wstrutil::Format(L"User%i", x);
-			wstr lReadablePassword(L"CarPassword");
+			const str lUserName = strutil::Format("User%i", x);
+			str lReadablePassword("CarPassword");
 			Cure::MangledPassword lPassword(lReadablePassword);
 			lOk = mUserAccountManager->AddUserAccount(Cure::LoginId(lUserName, lPassword));
 			if (lOk)
 			{
 				if (lFileArray.empty())
 				{
-					lFileArray = GetResourceManager()->ListFiles(_T("*.class"));
+					lFileArray = GetResourceManager()->ListFiles("*.class");
 				}
 				strutil::strvec::const_iterator x = lFileArray.begin();
 				for (; lOk && x != lFileArray.end(); ++x)
 				{
-					if (x->find(_T("level_")) != str::npos ||
-						x->find(_T("road_sign")) != str::npos)
+					if (x->find("level_") != str::npos ||
+						x->find("road_sign") != str::npos)
 					{
 						continue;
 					}
@@ -185,12 +185,12 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection, co
 		SocketAddress lAddress;
 		if (!lAddress.Resolve(lAcceptAddress))
 		{
-			mLog.Warningf(_T("Could not resolve address '%s'."), lAcceptAddress.c_str());
-			lAcceptAddress = _T(":16650");
+			mLog.Warningf("Could not resolve address '%s'.", lAcceptAddress.c_str());
+			lAcceptAddress = ":16650";
 			if (!lAddress.Resolve(lAcceptAddress))
 			{
-				mLog.Errorf(_T("Could not resolve address '%s', defaulting to 'localhost'."), lAcceptAddress.c_str());
-				lAcceptAddress = _T("localhost:16650");
+				mLog.Errorf("Could not resolve address '%s', defaulting to 'localhost'.", lAcceptAddress.c_str());
+				lAcceptAddress = "localhost:16650";
 			}
 		}
 	}
@@ -199,7 +199,7 @@ bool GameServerManager::Initialize(MasterServerConnection* pMasterConnection, co
 		lOk = GetNetworkServer()->Start(lAcceptAddress);
 		if (!lOk)
 		{
-			mLog.Fatalf(_T("Is a server already running on '%s'?"), lAcceptAddress.c_str());
+			mLog.Fatalf("Is a server already running on '%s'?", lAcceptAddress.c_str());
 		}
 	}
 	if (lOk)
@@ -300,13 +300,13 @@ void GameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObject
 	{
 		Cure::MessageObjectMovement* lMovement = pMovement->CloneToStandalone();
 		const int lFrameCycleIndex = (lCurrentPhysicsFrame+lFrameOffset)%NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE;
-		//mLog.Infof(_T("Storing position with %u children."), ((Cure::MessageObjectPosition*)lMovement)->GetPositionalData().mBodyPositionArray.size());
+		//mLog.Infof("Storing position with %u children.", ((Cure::MessageObjectPosition*)lMovement)->GetPositionalData().mBodyPositionArray.size());
 		mMovementArrayList[lFrameCycleIndex].push_back(lMovement);
 	}
 	else
 	{
 		// This input data is already old or too much ahead! Skip it.
-		log_volatile(mLog.Debugf(_T("Skipping store of movement (%i frames ahead)."), lFrameOffset));
+		log_volatile(mLog.Debugf("Skipping store of movement (%i frames ahead).", lFrameOffset));
 	}
 }
 
@@ -341,13 +341,13 @@ void GameServerManager::LoanObject(Client* pClient, Cure::GameObjectId pInstance
 	}
 	else
 	{
-		mLog.Warningf(_T("User %s requested ownership of object with ID %i (just unloaded?)."), pClient->GetUserConnection()->GetLoginName().c_str(), pInstanceId);
+		mLog.Warningf("User %s requested ownership of object with ID %i (just unloaded?).", pClient->GetUserConnection()->GetLoginName().c_str(), pInstanceId);
 	}
 }
 
-wstrutil::strvec GameServerManager::ListUsers()
+strutil::strvec GameServerManager::ListUsers()
 {
-	wstrutil::strvec lVector;
+	strutil::strvec lVector;
 	{
 		deb_assert(!GetNetworkAgent()->GetLock()->IsOwner());
 		ScopeLock lTickLock(GetTickLock());
@@ -357,16 +357,16 @@ wstrutil::strvec GameServerManager::ListUsers()
 		for (; x != mAccountClientTable.End(); ++x)
 		{
 			const Client* lClient = x.GetObject();
-			wstr lUserInfo = lClient->GetUserConnection()->GetLoginName();
+			str lUserInfo = lClient->GetUserConnection()->GetLoginName();
 			Cure::ContextObject* lObject = GetContext()->GetObject(lClient->GetAvatarId());
 			if (lObject)
 			{
 				vec3 lPosition = lObject->GetPosition();
-				lUserInfo += wstrutil::Format(L" at (%f, %f, %f)", lPosition.x, lPosition.y, lPosition.z);
+				lUserInfo += strutil::Format(" at (%f, %f, %f)", lPosition.x, lPosition.y, lPosition.z);
 			}
 			else
 			{
-				lUserInfo += L" [not loaded]";
+				lUserInfo += " [not loaded]";
 			}
 			lVector.push_back(lUserInfo);
 		}
@@ -415,13 +415,13 @@ void GameServerManager::SendObjects(Client* pClient, bool pCreate, const Context
 			{
 				lPacket->AddMessage(lCreateOwnedMessage);
 				lCreateOwnedMessage->Store(lPacket, lObject->GetInstanceId(), lTransformation,
-					wstrutil::Encode(lObject->GetClassId()), lObject->GetOwnerInstanceId());
+					lObject->GetClassId(), lObject->GetOwnerInstanceId());
 			}
 			else
 			{
 				lPacket->AddMessage(lCreateMessage);
 				lCreateMessage->Store(lPacket, lObject->GetInstanceId(),
-					 lTransformation, wstrutil::Encode(lObject->GetClassId()));
+					 lTransformation, lObject->GetClassId());
 			}
 		}
 
@@ -455,14 +455,14 @@ void GameServerManager::BroadcastCreateObject(Cure::GameObjectId pInstanceId, co
 		Cure::MessageCreateOwnedObject* lCreate = (Cure::MessageCreateOwnedObject*)GetNetworkAgent()->
 			GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OWNED_OBJECT);
 		lPacket->AddMessage(lCreate);
-		lCreate->Store(lPacket, pInstanceId, pTransform, wstrutil::Encode(pClassId), pOwnerInstanceId);
+		lCreate->Store(lPacket, pInstanceId, pTransform, pClassId, pOwnerInstanceId);
 	}
 	else
 	{
 		Cure::MessageCreateObject* lCreate = (Cure::MessageCreateObject*)GetNetworkAgent()->
 			GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_CREATE_OBJECT);
 		lPacket->AddMessage(lCreate);
-		lCreate->Store(lPacket, pInstanceId, pTransform, wstrutil::Encode(pClassId));
+		lCreate->Store(lPacket, pInstanceId, pTransform, pClassId);
 	}
 	BroadcastPacket(0, lPacket, true);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
@@ -484,12 +484,12 @@ void GameServerManager::BroadcastObjectPosition(Cure::GameObjectId pInstanceId,
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
-bool GameServerManager::BroadcastChatMessage(const wstr& pMessage)
+bool GameServerManager::BroadcastChatMessage(const str& pMessage)
 {
 	return BroadcastStatusMessage(Cure::MessageStatus::INFO_CHAT, pMessage);
 }
 
-bool GameServerManager::BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const wstr& pString)
+bool GameServerManager::BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const str& pString)
 {
 	bool lOk = false;
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
@@ -520,7 +520,7 @@ void GameServerManager::BroadcastNumberMessage(Client* pExcludeClient, bool pSaf
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 }
 
-bool GameServerManager::SendChatMessage(const wstr& pClientUserName, const wstr& pMessage)
+bool GameServerManager::SendChatMessage(const str& pClientUserName, const str& pMessage)
 {
 	deb_assert(!GetNetworkAgent()->GetLock()->IsOwner());
 	ScopeLock lTickLock(GetTickLock());
@@ -550,7 +550,7 @@ void GameServerManager::IndicatePosition(const vec3 pPosition, float pTime)
 	{
 		return;
 	}
-	Cure::ContextObject* lObject = Parent::CreateContextObject(_T("indicator"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
+	Cure::ContextObject* lObject = Parent::CreateContextObject("indicator", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 	lObject->SetInitialTransform(xform(gIdentityQuaternionF, pPosition));
 	lObject->StartLoading();
 	GetContext()->DelayKillObject(lObject, pTime);
@@ -582,7 +582,7 @@ Client* GameServerManager::GetClientByObject(Cure::ContextObject*& pObject) cons
 			lClient = GetClientByAccount(lAccountId);
 			if (!lClient)
 			{
-				mLog.Errorf(_T("Error: client seems to have logged off before avatar %s got loaded."),
+				mLog.Errorf("Error: client seems to have logged off before avatar %s got loaded.",
 					pObject->GetClassId().c_str());
 				delete (pObject);
 				pObject = 0;
@@ -614,7 +614,7 @@ void GameServerManager::Build(const str& pWhat)
 	}
 	if (!IsThreadSafe())
 	{
-		mLog.AError("Could never reach a thread-safe slice. Aborting construction.");
+		mLog.Error("Could never reach a thread-safe slice. Aborting construction.");
 		return;
 	}
 
@@ -626,7 +626,7 @@ void GameServerManager::Build(const str& pWhat)
 		if (lObject)
 		{
 			vec3 lPosition = lObject->GetPosition() + vec3(10, 0, 0);
-			mLog.Info(_T("Building object '")+pWhat+_T("' near user ")+strutil::Encode(lClient->GetUserConnection()->GetLoginName())+_T("."));
+			mLog.Info("Building object '"+pWhat+"' near user "+lClient->GetUserConnection()->GetLoginName()+".");
 			Cure::ContextObject* lObject = Parent::CreateContextObject(pWhat, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
 			lObject->SetInitialTransform(xform(gIdentityQuaternionF, lPosition));
 			lObject->StartLoading();
@@ -653,7 +653,7 @@ void GameServerManager::TickInput()
 			{
 				Client* lClient = GetClientByAccount(lAccountId);
 				deb_assert (lClient);
-				//log_volatile(mLog.Debugf(_T("Received data from %s."), lClient->GetUserConnection()->GetLoginName().c_str()));
+				//log_volatile(mLog.Debugf("Received data from %s.", lClient->GetUserConnection()->GetLoginName().c_str()));
 				Cure::Packet::ParseResult lParseResult;
 				// Walk packets.
 				do
@@ -682,18 +682,18 @@ void GameServerManager::TickInput()
 				while (lParseResult == Cure::Packet::PARSE_OK);
 				if (lParseResult != Cure::Packet::PARSE_NO_DATA)
 				{
-					mLog.AError("Problem with receiving crap extra packet!");
+					mLog.Error("Problem with receiving crap extra packet!");
 				}
 			}
 			break;
 			case Cure::NetworkAgent::RECEIVE_PARSE_ERROR:
 			{
-				mLog.AError("Problem with receiving crap data!");
+				mLog.Error("Problem with receiving crap data!");
 			}
 			break;
 			case Cure::NetworkAgent::RECEIVE_CONNECTION_BROKEN:
 			{
-				mLog.AError("Disconnected from client!");
+				mLog.Error("Disconnected from client!");
 			}
 			break;
 			case Cure::NetworkAgent::RECEIVE_NO_DATA:
@@ -721,7 +721,7 @@ void GameServerManager::DeleteAllClients()
 	while (!mAccountClientTable.IsEmpty())
 	{
 		Cure::UserAccount::AccountId lAccountId = mAccountClientTable.First().GetKey();
-		Logout(lAccountId, _T("Server shutdown"));
+		Logout(lAccountId, "Server shutdown");
 	}
 }
 
@@ -742,7 +742,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 	deb_assert(!lClient);
 	if (lClient)
 	{
-		mLog.Errorf(_T("user %s already has an account!"), pUserConnection->GetLoginName().c_str());
+		mLog.Errorf("user %s already has an account!", pUserConnection->GetLoginName().c_str());
 		return;
 	}
 
@@ -756,7 +756,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 		mAccountClientTable.Insert(pUserConnection->GetAccountId(), lClient);
 		lClient->SendPhysicsFrame(GetTimeManager()->GetCurrentPhysicsFrameAddFrames(2), lPacket);	// TODO: adjust physics frame diff by ping-ponging some.
 		str lServerGreeting;
-		v_get(lServerGreeting, =, GetVariableScope(), RTVAR_NETWORK_LOGINGREETING, _T(""));
+		v_get(lServerGreeting, =, GetVariableScope(), RTVAR_NETWORK_LOGINGREETING, "");
 		lClient->SendLoginCommands(lPacket, lServerGreeting);
 
 		for (AvatarIdSet::const_iterator x = lAvatarIdSet->begin(); x != lAvatarIdSet->end(); ++x)
@@ -773,7 +773,7 @@ void GameServerManager::OnLogin(Cure::UserConnection* pUserConnection)
 	}
 	else
 	{
-		mLog.Error(_T("User ") + strutil::Encode(pUserConnection->GetLoginName()) + _T(" does not exist or is not allowed avatars!"));
+		mLog.Error("User " + pUserConnection->GetLoginName() + " does not exist or is not allowed avatars!");
 	}
 }
 
@@ -797,7 +797,7 @@ void GameServerManager::OnLogout(Cure::UserConnection* pUserConnection)
 	}
 	DeleteContextObject(lAvatarId);
 
-	mLog.Info(_T("User ") + strutil::Encode(pUserConnection->GetLoginName()) + _T(" logged out."));
+	mLog.Info("User " + pUserConnection->GetLoginName() + " logged out.");
 }
 
 
@@ -828,7 +828,7 @@ void GameServerManager::ApplyStoredMovement()
 	{
 		if (GetLoggedInClientCount() > 0)
 		{
-			mLog.Warningf(_T("Network positional buffer overrun: had to skip %i steps!"), lCurrentPhysicsSteps-NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE+1);
+			mLog.Warningf("Network positional buffer overrun: had to skip %i steps!", lCurrentPhysicsSteps-NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE+1);
 		}
 		lCurrentPhysicsSteps = NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE-1;
 	}
@@ -837,7 +837,7 @@ void GameServerManager::ApplyStoredMovement()
 	{
 		return;
 	}
-	//mLog.Debugf(_T("[frame %i to %i]"), lCurrentPhysicsFrame, GetTimeManager()->GetCurrentPhysicsFrame());
+	//mLog.Debugf("[frame %i to %i]", lCurrentPhysicsFrame, GetTimeManager()->GetCurrentPhysicsFrame());
 	for (; GetTimeManager()->GetCurrentPhysicsFrameDelta(lCurrentPhysicsFrame) >= 0;
 		lCurrentPhysicsFrame = GetTimeManager()->GetPhysicsFrameAddFrames(lCurrentPhysicsFrame, 1))
 	{
@@ -853,7 +853,7 @@ void GameServerManager::ApplyStoredMovement()
 			Cure::GameObjectId lInstanceId = lMovement->GetObjectId();
 			/*if (lCurrentPhysicsFrame != lMovement->GetFrameIndex())
 			{
-				mLog.AWarning("Throwing away network movement.");
+				mLog.Warning("Throwing away network movement.");
 			}
 			else*/
 			{
@@ -868,7 +868,7 @@ void GameServerManager::ApplyStoredMovement()
 					}
 					else
 					{
-						mLog.AError("Not implemented!");
+						mLog.Error("Not implemented!");
 					}
 				}
 			}
@@ -883,7 +883,7 @@ void GameServerManager::BroadcastAvatar(Client* pClient)
 {
 	Cure::ContextObject* lObject = GetContext()->GetObject(pClient->GetAvatarId());
 	Cure::GameObjectId lInstanceId = lObject->GetInstanceId();
-	mLog.Info(_T("User ")+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+_T(" login complete (avatar loaded)."));
+	mLog.Info("User "+pClient->GetUserConnection()->GetLoginName()+" login complete (avatar loaded).");
 
 	// TODO: this is hard-coded. Use a general replication-mechanism instead (where visible and added/updated objects gets replicated automatically).
 	GetNetworkAgent()->SendNumberMessage(true, pClient->GetUserConnection()->GetSocket(),
@@ -914,12 +914,12 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			mDelegate->OnLoadAvatar(lClient, pObject);
 			if (lClient)
 			{
-				mLog.Infof(_T("Loaded avatar for %s with instance id %i."),
-					strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
+				mLog.Infof("Loaded avatar for %s with instance id %i.",
+					lClient->GetUserConnection()->GetLoginName().c_str(),
 					pObject->GetInstanceId());
 				/*const quat q = pObject->GetOrientation();
-				mLog.Infof(_T("Avatar %s/%i has q=(%f, %f, %f, %f)."),
-					strutil::Encode(lClient->GetUserConnection()->GetLoginName()).c_str(),
+				mLog.Infof("Avatar %s/%i has q=(%f, %f, %f, %f."),
+					lClient->GetUserConnection(->GetLoginName()).c_str(),
 					pObject->GetInstanceId(),
 					q.a, q.b, q.c, q.d);*/
 				BroadcastAvatar(lClient);
@@ -931,7 +931,7 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		}
 		else
 		{
-			log_volatile(mLog.Debugf(_T("Loaded object %s."), pObject->GetClassId().c_str()));
+			log_volatile(mLog.Debugf("Loaded object %s.", pObject->GetClassId().c_str()));
 			mDelegate->OnLoadObject(pObject);
 			BroadcastCreateObject(pObject);
 		}
@@ -940,12 +940,12 @@ void GameServerManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	{
 		if (lClient)
 		{
-			mLog.Errorf(_T("Could not load avatar of type %s for user %s."),
+			mLog.Errorf("Could not load avatar of type %s for user %s.",
 				pObject->GetClassId().c_str(), lClient->GetUserConnection()->GetLoginName().c_str());
 		}
 		else
 		{
-			mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
+			mLog.Errorf("Could not load object of type %s.", pObject->GetClassId().c_str());
 		}
 		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
@@ -1034,7 +1034,7 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 		return;
 	}
 	// A grown-up still activating an engine = leave 'em be.
-	if (!pObject->IsAttributeTrue(_T("float_childishness")))
+	if (!pObject->IsAttributeTrue("float_childishness"))
 	{
 		const int lEngineCount = pObject->GetPhysics()->GetEngineCount();
 		for (int x = 0; x < lEngineCount; ++x)
@@ -1064,7 +1064,7 @@ void GameServerManager::FlipCheck(Cure::ContextObject* pObject) const
 	}
 	else
 	{
-		mLog.Errorf(_T("Error: vehicle %i could not be flipped!"), pObject->GetInstanceId());
+		mLog.Errorf("Error: vehicle %i could not be flipped!", pObject->GetInstanceId());
 	}
 }
 
@@ -1081,7 +1081,7 @@ bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 	if (pObject->QueryResendTime(lSendIntervalLimit, false))
 	{
 		lLastSend = true;
-		log_volatile(mLog.Debugf(_T("Sending pos for %s (%u)."), pObject->GetClassId().c_str(), pObject->GetInstanceId()));
+		log_volatile(mLog.Debugf("Sending pos for %s (%u).", pObject->GetClassId().c_str(), pObject->GetInstanceId()));
 		const Cure::ObjectPositionalData* lPosition = 0;
 		if (pObject->UpdateFullPosition(lPosition))
 		{
@@ -1095,7 +1095,7 @@ bool GameServerManager::OnPhysicsSend(Cure::ContextObject* pObject)
 
 bool GameServerManager::OnAttributeSend(Cure::ContextObject* pObject)
 {
-	log_adebug("Sending attribute(s) for a context object...");
+	log_debug("Sending attribute(s) for a context object...");
 	typedef Cure::ContextObject::AttributeArray AttributeArray;
 	const AttributeArray& lAttributes = pObject->GetAttributes();
 	AttributeArray::const_iterator x = lAttributes.begin();
@@ -1126,13 +1126,13 @@ bool GameServerManager::OnAttributeSend(Cure::ContextObject* pObject)
 					Cure::UserAccount::AccountId lAccountId = (Cure::UserAccount::AccountId)(intptr_t)pObject->GetExtraData();
 					if (!lAccountId)
 					{
-						mLog.AError("Error: trying to attribute sync to avatar without avatar!");
+						mLog.Error("Error: trying to attribute sync to avatar without avatar!");
 						break;
 					}
 					const Client* lClient = GetClientByAccount(lAccountId);
 					if (!lClient)
 					{
-						mLog.AError("Error: client seems to have logged off before attribute sync happened.");
+						mLog.Error("Error: client seems to have logged off before attribute sync happened.");
 						break;
 					}
 					Cure::NetworkAgent::VSocket* lSocket = lClient->GetUserConnection()->GetSocket();
@@ -1221,19 +1221,19 @@ void GameServerManager::HandleWorldBoundaries()
 
 Cure::ContextObject* GameServerManager::CreateLogicHandler(const str& pType)
 {
-	if (pType == _T("trig_elevator"))
+	if (pType == "trig_elevator")
 	{
 		return new Cure::Elevator(GetContext());
 	}
-	else if (pType == _T("spawner"))
+	else if (pType == "spawner")
 	{
 		return new Spawner(GetContext());
 	}
-	else if (pType == _T("real_time_ratio"))
+	else if (pType == "real_time_ratio")
 	{
 		return new BulletTime(GetContext());
 	}
-	else if (pType == _T("race_timer"))
+	else if (pType == "race_timer")
 	{
 		return new RaceTimer(GetContext());
 	}
@@ -1316,7 +1316,7 @@ void GameServerManager::TickMasterServer()
 	if (lLocalIpAddress.empty())
 	{
 		IPAddress lIpAddress;
-		if (Network::ResolveHostname(_T(""), lIpAddress))
+		if (Network::ResolveHostname("", lIpAddress))
 		{
 			lLocalIpAddress = lIpAddress.GetAsString();
 		}
@@ -1327,12 +1327,12 @@ void GameServerManager::TickMasterServer()
 	}
 
 	str lServerName;
-	v_get(lServerName, =, GetVariableScope(), RTVAR_NETWORK_SERVERNAME, _T("?"));
+	v_get(lServerName, =, GetVariableScope(), RTVAR_NETWORK_SERVERNAME, "?");
 	const str lPlayerCount = strutil::IntToString(GetLoggedInClientCount(), 10);
-	const str lId = strutil::ReplaceAll(strutil::Encode(SystemManager::GetSystemPseudoId()), _T("\""), _T("''\\''"));
-	const str lLocalServerInfo = _T("--name \"") + lServerName + _T("\" --player-count ") + lPlayerCount
-		+ _T(" --id \"") + lId + _T("\" --internal-address ") + lLocalIpAddress +
-		_T(" --internal-port ") + strutil::IntToString(GetNetworkServer()->GetLocalAddress().GetPort(), 10);
+	const str lId = strutil::ReplaceAll(SystemManager::GetSystemPseudoId(), "\"", "''\\''");
+	const str lLocalServerInfo = "--name \"" + lServerName + "\" --player-count " + lPlayerCount
+		+ " --id \"" + lId + "\" --internal-address " + lLocalIpAddress +
+		" --internal-port " + strutil::IntToString(GetNetworkServer()->GetLocalAddress().GetPort(), 10);
 	float lConnectTimeout;
 	v_get(lConnectTimeout, =(float), GetVariableScope(), RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
 	mMasterConnection->SetSocketInfo(GetNetworkServer(), lConnectTimeout);
@@ -1348,20 +1348,20 @@ void GameServerManager::TickMasterServer()
 
 bool GameServerManager::HandleMasterCommand(const ServerInfo& pServerInfo)
 {
-	if (pServerInfo.mCommand == _T(MASTER_SERVER_OF))
+	if (pServerInfo.mCommand == MASTER_SERVER_OF)
 	{
-		const str lAddress = pServerInfo.mGivenIpAddress + strutil::Format(_T(":%u"), pServerInfo.mGivenPort);
+		const str lAddress = pServerInfo.mGivenIpAddress + strutil::Format(":%u", pServerInfo.mGivenPort);
 		SocketAddress lSocketAddress;
 		if (lSocketAddress.Resolve(lAddress))
 		{
-			mLog.Infof(_T("Attempting to open local firewall to allow remote client connect from %s."), lAddress.c_str());
+			mLog.Infof("Attempting to open local firewall to allow remote client connect from %s.", lAddress.c_str());
 			Cure::SocketIoHandler* lSocketIoHandler = GetNetworkServer();
 			return lSocketIoHandler->GetMuxIoSocket()->SendOpenFirewallData(lSocketAddress);
 		}
 	}
 	else
 	{
-		mLog.Errorf(_T("Got bad command (%s) from master server!"), pServerInfo.mCommand.c_str());
+		mLog.Errorf("Got bad command (%s from master server)!", pServerInfo.mCommand.c_str());
 		deb_assert(false);
 	}
 	return false;
@@ -1376,7 +1376,7 @@ void GameServerManager::MonitorRtvars()
 		{
 			mPhysicsFpsShadow = lPhysicsFps;
 			BroadcastStatusMessage(Cure::MessageStatus::INFO_COMMAND,
-				wstrutil::Format(L"#" _WIDE(RTVAR_PHYSICS_FPS) L" %i;", lPhysicsFps));
+				strutil::Format("#" RTVAR_PHYSICS_FPS " %i;", lPhysicsFps));
 		}
 	}
 	{
@@ -1386,7 +1386,7 @@ void GameServerManager::MonitorRtvars()
 		{
 			mPhysicsRtrShadow = lPhysicsRtr;
 			BroadcastStatusMessage(Cure::MessageStatus::INFO_COMMAND,
-				wstrutil::Format(L"#" _WIDE(RTVAR_PHYSICS_RTR) L" %f;", lPhysicsRtr));
+				strutil::Format("#" RTVAR_PHYSICS_RTR " %f;", lPhysicsRtr));
 		}
 	}
 	{
@@ -1396,7 +1396,7 @@ void GameServerManager::MonitorRtvars()
 		{
 			mPhysicsHaltShadow = lPhysicsHalt;
 			BroadcastStatusMessage(Cure::MessageStatus::INFO_COMMAND,
-				wstrutil::Format(L"#" _WIDE(RTVAR_PHYSICS_RTR) L" %s;", wstrutil::BoolToString(lPhysicsHalt).c_str()));
+				strutil::Format("#" RTVAR_PHYSICS_RTR " %s;", strutil::BoolToString(lPhysicsHalt).c_str()));
 		}
 	}
 }

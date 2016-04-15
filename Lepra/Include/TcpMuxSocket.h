@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -193,7 +193,7 @@ private:
 	public:
 		Connector(const str& pName, _MuxSocket* pMuxSocket, const SocketAddress& pTargetAddress,
 			const std::string& pConnectionId, double pTimeout, Semaphore& pSemaphore):
-			Thread(astrutil::Encode(pName)),
+			Thread(pName),
 			mMuxSocket(pMuxSocket),
 			mSocket(0),
 			mTargetAddress(pTargetAddress),

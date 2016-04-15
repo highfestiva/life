@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
@@ -45,7 +45,7 @@ IPAddress::IPAddress(const uint8* pIPAddress, int pNumBytes)
 
 IPAddress::IPAddress(const str& pIPv4Address)
 {
-	unsigned lIpInt = inet_addr(astrutil::Encode(pIPv4Address).c_str());
+	unsigned lIpInt = inet_addr(pIPv4Address.c_str());
 	uint8* lIp = (uint8*)&lIpInt;
 	mAddress[0] = lIp[0];
 	mAddress[1] = lIp[1];
@@ -95,7 +95,7 @@ str IPAddress::GetAsString() const
 
 	if (mByteCount == 4)
 	{
-		lString = strutil::Format(_T("%i.%i.%i.%i"), mAddress[0], mAddress[1], mAddress[2], mAddress[3]);
+		lString = strutil::Format("%i.%i.%i.%i", mAddress[0], mAddress[1], mAddress[2], mAddress[3]);
 	}
 	else if(mByteCount == 16)
 	{

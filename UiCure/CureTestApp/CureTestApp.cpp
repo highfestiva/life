@@ -90,27 +90,27 @@ CureTestApplication::CureTestApplication(const strutil::strvec& pArgumentList):
 	{
 		str lArgument = pArgumentList[x];
 		int lMask = 0;
-		if (lArgument == _T("lepra"))
+		if (lArgument == "lepra")
 		{
 			lMask |= LEPRA_BIT;
 		}
-		else if (lArgument == _T("tbc"))
+		else if (lArgument == "tbc")
 		{
 			lMask |= TBC_BIT;
 		}
-		else if (lArgument == _T("cure"))
+		else if (lArgument == "cure")
 		{
 			lMask |= CURE_BIT;
 		}
-		else if (lArgument == _T("netphys"))
+		else if (lArgument == "netphys")
 		{
 			lMask |= NETWORK_PHYSICS_BIT;
 		}
-		else if (lArgument == _T("console"))
+		else if (lArgument == "console")
 		{
 			lMask |= CONSOLE_BIT;
 		}
-		else if (lArgument == _T("trace"))
+		else if (lArgument == "trace")
 		{
 			lMask |= TRACE_BIT;
 		}
@@ -148,15 +148,15 @@ int CureTestApplication::Run()
 	lConsoleLogPointer = &lConsoleLogger;
 #endif // LEPRA_CONSOLE
 	DebuggerLogListener lDebugLogger;
-	FileLogListener lFileLogger(_T("CureTestApp.log"));
-	FileLogListener lPerformanceLogger(_T("CureTestPerformance.log"));
+	FileLogListener lFileLogger("CureTestApp.log");
+	FileLogListener lPerformanceLogger("CureTestPerformance.log");
 	MemFileLogListener lMemLogger(100*1024);
 	LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
 		&lFileLogger, &lPerformanceLogger, &lMemLogger);
 	LogType::GetLogger(LogType::SUB_ROOT)->SetLevelThreashold(LEVEL_TRACE);
 	LogType::GetLogger(LogType::SUB_NETWORK)->SetLevelThreashold(LEVEL_ERROR);
 
-	mLog.Headline(_T("\n\n--- Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ---\n"));
+	mLog.Headline("\n\n--- Build type: " LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT " ---\n");
 
 	bool lTestOk = true;
 	if (lTestOk && mTestBits&LEPRA_BIT)

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -160,7 +160,7 @@ Resource::Resource(ResourceManager* pManager, const str& pName):
 Resource::~Resource()
 {
 	mState = RESOURCE_LOAD_ERROR;
-	log_volatile(mLog.Tracef((_T("Deleting resource ")+mName).c_str(), LEVEL_TRACE));
+	log_volatile(mLog.Tracef(("Deleting resource "+mName).c_str(), LEVEL_TRACE));
 	mManager = 0;
 
 	CallbackList::iterator x = mLoadCallbackList.begin();
@@ -376,7 +376,7 @@ PhysicsResource::~PhysicsResource()
 
 const str PhysicsResource::GetType() const
 {
-	return (_T("Physics"));
+	return ("Physics");
 }
 
 PhysicsResource::UserData PhysicsResource::GetUserData(const Cure::UserResource*) const
@@ -432,12 +432,12 @@ PhysicalTerrainResource::~PhysicalTerrainResource()
 	// This is so since types (UiLepra::SoundManager::SoundID) cannot be deleted!
 	SetRamData(0);
 
-	log_atrace("Deleting terrain patch resource.");
+	log_trace("Deleting terrain patch resource.");
 }
 
 const str PhysicalTerrainResource::GetType() const
 {
-	return (_T("PhysTerrain"));
+	return ("PhysTerrain");
 }
 
 PhysicalTerrainResource::UserData PhysicalTerrainResource::GetUserData(const UserResource*) const
@@ -447,7 +447,7 @@ PhysicalTerrainResource::UserData PhysicalTerrainResource::GetUserData(const Use
 
 bool PhysicalTerrainResource::Load()
 {
-	log_atrace("Loading actual Tbc::TerrainPatch.");
+	log_trace("Loading actual Tbc::TerrainPatch.");
 
 	deb_assert(!IsUnique());
 	// TODO: parse constants out of resource name string.
@@ -486,7 +486,7 @@ RamImageResource::~RamImageResource()
 
 const str RamImageResource::GetType() const
 {
-	return (_T("RamImg"));
+	return ("RamImg");
 }
 
 RamImageResource::UserData RamImageResource::GetUserData(const Cure::UserResource*) const
@@ -525,7 +525,7 @@ ResourceManager::ResourceManager(unsigned pLoaderThreadCount):
 	mInjectTimeLimit(0.01),
 	mLoadIntermission(0)
 {
-	if (mZipFile->OpenArchive(mPathPrefix + _T("Data.pk3"), ZipArchive::READ_ONLY) != IO_OK)
+	if (mZipFile->OpenArchive(mPathPrefix + "Data.pk3", ZipArchive::READ_ONLY) != IO_OK)
 	{
 		delete mZipFile;
 		mZipFile = 0;
@@ -628,7 +628,7 @@ void ResourceManager::StopClear()
 			Resource* lResource = *x;
 			if (lResource->IsReferenceType())
 			{
-				mLog.Errorf(_T("Reference resource '%s' not freed! Going for the kill!"), lResource->GetName().c_str());
+				mLog.Errorf("Reference resource '%s' not freed! Going for the kill!", lResource->GetName().c_str());
 				DeleteResource(lResource);
 				lDeleteMoreReferences = true;
 				break;
@@ -640,7 +640,7 @@ void ResourceManager::StopClear()
 	while (!mResourceSafeLookup.empty())
 	{
 		Resource* lResource = *mResourceSafeLookup.begin();
-		mLog.Errorf(_T("Base resource '%s' not freed! Going for the kill!"), lResource->GetName().c_str());
+		mLog.Errorf("Base resource '%s' not freed! Going for the kill!", lResource->GetName().c_str());
 		DeleteResource(lResource);
 	}
 
@@ -698,7 +698,7 @@ File* ResourceManager::QueryFile(const str& pFilename)
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not load file with name '%s'."), lFilename.c_str());
+		mLog.Errorf("Could not load file with name '%s'.", lFilename.c_str());
 	}
 	delete lFile;
 	return 0;
@@ -856,20 +856,20 @@ void ResourceManager::Release(Resource* pResource)
 			{
 				// A completely loaded resource dropped, place it "on the way out" of the system.
 				mCachedResourceTable.Insert(pResource->GetName(), pResource);
-				log_volatile(mLog.Trace(_T("Loaded resource ")+pResource->GetName()+_T(" dereferenced. Placed in cache.")));
+				log_volatile(mLog.Trace("Loaded resource "+pResource->GetName()+" dereferenced. Placed in cache."));
 				pResource->Suspend();
 			}
 			else
 			{
 				if (PrepareRemoveInLoadProgress(pResource))
 				{
-					log_volatile(mLog.Trace(_T("Incomplete resource ")+pResource->GetName()+_T(" dereferenced. Not cached - deleted immediately.")));
+					log_volatile(mLog.Trace("Incomplete resource "+pResource->GetName()+" dereferenced. Not cached - deleted immediately."));
 					deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 					DeleteResource(pResource);
 				}
 				else
 				{
-					log_volatile(mLog.Trace(_T("Currently loading resource ")+pResource->GetName()+_T(" dereferenced. Not cached - will be deleted immediately after loader thread is done.")));
+					log_volatile(mLog.Trace("Currently loading resource "+pResource->GetName()+" dereferenced. Not cached - will be deleted immediately after loader thread is done."));
 					deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 				}
 			}
@@ -879,20 +879,20 @@ void ResourceManager::Release(Resource* pResource)
 			mActiveResourceTable.Remove(pResource->GetName());	// TRICKY: this is for shared resources that are not to be kept any more when dereferenced.
 			if (PrepareRemoveInLoadProgress(pResource))
 			{
-				log_volatile(mLog.Trace(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Deleted immediately.")));
+				log_volatile(mLog.Trace("Resource "+pResource->GetName()+" (unique) dereferenced. Deleted immediately."));
 				deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 				DeleteResource(pResource);
 			}
 			else
 			{
-				log_volatile(mLog.Trace(_T("Resource ")+pResource->GetName()+_T(" (unique) dereferenced. Will be deleted immediately after loader thread is done.")));
+				log_volatile(mLog.Trace("Resource "+pResource->GetName()+" (unique) dereferenced. Will be deleted immediately after loader thread is done."));
 				deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 			}
 		}
 	}
 	else
 	{
-		log_volatile(mLog.Trace(_T("Resource ")+pResource->GetName()+_T(" dereferenced, but has other references.")));
+		log_volatile(mLog.Trace("Resource "+pResource->GetName()+" dereferenced, but has other references."));
 	}
 }
 
@@ -933,13 +933,13 @@ unsigned ResourceManager::ForceFreeCache(const strutil::strvec& pResourceTypeLis
 	ScopeLock lLock(&mThreadLock);
 	// TODO: optimize by keeping objects in cache for a while!
 
-	/*mLog.AHeadline("ForceFreeCache...");
+	/*mLog.Headline("ForceFreeCache...");
 	ResourceTable::Iterator x = mCachedResourceTable.First();
 	for (; x != mCachedResourceTable.End(); ++x)
 	{
-		mLog.Headlinef(_T("  - %s @ %p."), (*x)->GetName().c_str(), *x);
+		mLog.Headlinef("  - %s @ %p.", (*x)->GetName().c_str(), *x);
 	}
-	mLog.AHeadline("---------------");*/
+	mLog.Headline("---------------");*/
 	unsigned lDroppedResourceCount = 0;
 	ResourceTable::Iterator x = mCachedResourceTable.First();
 	while (x != mCachedResourceTable.End())
@@ -1056,22 +1056,22 @@ Resource* ResourceManager::GetAddCachedResource(const str& pName, UserResource* 
 		mActiveResourceTable.Insert(lResource->GetName(), lResource);
 		deb_assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 		pMustLoad = true;
-		log_volatile(mLog.Trace(_T("Resource ")+pName+_T(" created + starts loading.")));
+		log_volatile(mLog.Trace("Resource "+pName+" created + starts loading."));
 	}
 	else
 	{
 		if (lResource->GetLoadState() == RESOURCE_UNLOADED)
 		{
-			log_volatile(mLog.Trace(_T("Resource ")+pName+_T(" will reload.")));
+			log_volatile(mLog.Trace("Resource "+pName+" will reload."));
 			pMustLoad = true;
 		}
 		else if (lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS)
 		{
-			log_volatile(mLog.Debug(_T("Resource ")+pName+_T(" currently loading, will use it when done.")));
+			log_volatile(mLog.Debug("Resource "+pName+" currently loading, will use it when done."));
 		}
 		else
 		{
-			log_volatile(mLog.Trace(_T("Resource ")+pName+_T(" already loaded, will use it instead of reloading.")));
+			log_volatile(mLog.Trace("Resource "+pName+" already loaded, will use it instead of reloading."));
 		}
 	}
 	//deb_assert(!lResource->IsUnique());
@@ -1088,7 +1088,7 @@ void ResourceManager::StartLoad(Resource* pResource)
 	pResource->SetLoadState(RESOURCE_LOAD_IN_PROGRESS);
 	deb_assert(mRequestLoadList.GetCount() < 10000);	// Just run GetCount() to validate internal integrity.
 	log_volatile(const str& lName = pResource->GetName());
-	log_volatile(mLog.Tracef(_T("Requesting load of '%s' (%s)."), lName.c_str(), pResource->GetType().c_str()));
+	log_volatile(mLog.Tracef("Requesting load of '%s' (%s).", lName.c_str(), pResource->GetType().c_str()));
 	deb_assert(mRequestLoadList.Find(pResource) == mRequestLoadList.End());
 	mRequestLoadList.PushBack(pResource, pResource);
 	mLoadSemaphore.Signal();
@@ -1255,7 +1255,7 @@ void ResourceManager::LoadSingleResource()
 	if (lResource)
 	{
 		deb_assert(lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS);
-		log_volatile(mLog.Tracef(_T("Loading %s with %i resources in list (inclusive)."),
+		log_volatile(mLog.Tracef("Loading %s with %i resources in list (inclusive).",
 			lResource->GetName().c_str(), lListCount));
 		const bool lIsLoaded = lResource->Load();
 		deb_assert(lResource->GetLoadState() == RESOURCE_LOAD_IN_PROGRESS);
@@ -1280,7 +1280,7 @@ void ResourceManager::LoadSingleResource()
 				// the last call must also come from the main thread.
 				deb_assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 				deb_assert(lResource->GetReferenceCount() == 0);
-				mLog.Info(_T("Deleting just loaded resource '")+lResource->GetName()+_T("'."));
+				mLog.Info("Deleting just loaded resource '"+lResource->GetName()+"'.");
 				DeleteResource(lResource);
 			}
 

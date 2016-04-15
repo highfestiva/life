@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // TODO: implement a physical terrain.
@@ -51,7 +51,7 @@ void TerrainFunctionManager::LoadFunctions(const FunctionArea& pArea, float)
 
 Tbc::TerrainPatch* TerrainFunctionManager::GeneratePatchMesh(const FunctionArea& pArea, float pLod)
 {
-	log_atrace("Generating terrain patch.");
+	log_trace("Generating terrain patch.");
 	Tbc::TerrainPatch* lPatch = TerrainManager::CreatePatch(pArea, pLod);
 	mDummyTerrainFunction->AddFunction(*lPatch);
 	return (lPatch);

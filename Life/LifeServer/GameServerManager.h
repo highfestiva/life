@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -64,16 +64,16 @@ public:
 	virtual void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
 	void OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId);
 	void LoanObject(Client* pClient, Cure::GameObjectId pInstanceId);
-	wstrutil::strvec ListUsers();
+	strutil::strvec ListUsers();
 	Cure::NetworkServer* GetNetworkServer() const;
 	void SendObjects(Client* pClient, bool pCreate, const ContextTable& pObjectTable);
 	void BroadcastCreateObject(Cure::GameObjectId pInstanceId, const xform& pTransform, const str& pClassId, Cure::GameObjectId pOwnerInstanceId);
 	void BroadcastObjectPosition(Cure::GameObjectId pInstanceId, const Cure::ObjectPositionalData& pPosition,
 		Client* pExcludeClient, bool pSafe);
-	bool BroadcastChatMessage(const wstr& pMessage);
-	bool BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const wstr& pString);
+	bool BroadcastChatMessage(const str& pMessage);
+	bool BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const str& pString);
 	void BroadcastNumberMessage(Client* pExcludeClient, bool pSafe, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat);
-	bool SendChatMessage(const wstr& pClientUserName, const wstr& pMessage);
+	bool SendChatMessage(const str& pClientUserName, const str& pMessage);
 	void IndicatePosition(const vec3 pPosition, float pTime);
 
 	int GetLoggedInClientCount() const;

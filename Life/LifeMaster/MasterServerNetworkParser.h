@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -23,8 +23,8 @@ struct ServerInfo;
 class MasterServerNetworkParser
 {
 public:
-	static unsigned StrToRaw(uint8* pRawData, const wstr& pStr);
-	static bool RawToStr(wstr& pStr, const uint8* pRawData, unsigned pRawLength);
+	static unsigned StrToRaw(uint8* pRawData, const str& pStr);
+	static bool RawToStr(str& pStr, const uint8* pRawData, unsigned pRawLength);
 
 	static bool ExtractServerInfo(const str& pServerString, ServerInfo& pInfo, const SocketAddress* pRemoteAddress);
 

@@ -44,7 +44,7 @@ void Projectile::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const Tbc::ChunkyClass::Tag* lTag = FindTag(_T("ammo"), 4, -1);
+	const Tbc::ChunkyClass::Tag* lTag = FindTag("ammo", 4, -1);
 	deb_assert(lTag);
 	mExplosiveEnergy = lTag->mFloatValueList[3];
 

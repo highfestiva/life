@@ -23,7 +23,7 @@ namespace Push
 
 
 ServerListView::ServerListView(ServerSelectObserver* pSelectObserver):
-	View(_T("Join Online Game"), new UiTbc::GridLayout(11, 1)),
+	View("Join Online Game", new UiTbc::GridLayout(11, 1)),
 	mSelectObserver(pSelectObserver),
 	mIsMasterConnectError(false)
 {
@@ -32,10 +32,10 @@ ServerListView::ServerListView(ServerSelectObserver* pSelectObserver):
 	SetPreferredSize(500, 350);
 
 	UiTbc::Component* lRowLayer = AddRow(Color(0, 0, 0), 4);
-	AddLabel(_T("Server Name"), WHITE, 250, lRowLayer);
-	AddLabel(_T("Players"), WHITE, 0, lRowLayer);
-	AddLabel(_T("Ping (ms)"), WHITE, 0, lRowLayer);
-	AddLabel(_T("Select"), WHITE, 0, lRowLayer);
+	AddLabel("Server Name", WHITE, 250, lRowLayer);
+	AddLabel("Players", WHITE, 0, lRowLayer);
+	AddLabel("Ping (ms"), WHITE, 0, lRowLayer);
+	AddLabel("Select", WHITE, 0, lRowLayer);
 
 	CreateLayer(new UiTbc::CenterLayout);
 }
@@ -50,7 +50,7 @@ void ServerListView::Tick()
 			mIsMasterConnectError = true;
 			mServerList.clear();
 			ReplaceLayer(1, new UiTbc::CenterLayout);
-			AddLabel(_T("Problem connecting to master server.\nCheck your network cable and/or firewall settings."), RED, 0, this, 1)->SetPreferredSize(0, 0, true);
+			AddLabel("Problem connecting to master server.\nCheck your network cable and/or firewall settings.", RED, 0, this, 1)->SetPreferredSize(0, 0, true);
 		}
 		if (mSelectObserver->IsMasterServerConnectError() == mIsMasterConnectError)
 		{
@@ -64,13 +64,13 @@ void ServerListView::Tick()
 		if (mServerList.size() == 0)	// No response yet!
 		{
 			ReplaceLayer(1, new UiTbc::CenterLayout);
-			AddLabel(_T("Please wait while refreshing list..."), GRAY, 0, this, 1)->SetAdaptive(true);
+			AddLabel("Please wait while refreshing list...", GRAY, 0, this, 1)->SetAdaptive(true);
 		}
 		else if (mServerList.size() == 1)	// Only the status message, no servers online!
 		{
 			ReplaceLayer(1, new UiTbc::CenterLayout);
-			AddLabel(_T("I'm sorry, but no-one else seems to be running a public server.\n")
-				_T("Perhaps you would like to be the first to start one? Click here and there..."), GRAY, 0, this, 1)->SetPreferredSize(0, 0, true);
+			AddLabel("I'm sorry, but no-one else seems to be running a public server.\n"
+				"Perhaps you would like to be the first to start one? Click here and there...", GRAY, 0, this, 1)->SetPreferredSize(0, 0, true);
 		}
 		else if (mServerList.size() > 1)
 		{
@@ -112,10 +112,10 @@ void ServerListView::Tick()
 			const Life::ServerInfo& lServer = mServerList[x-1];
 			AddLabel(lServer.mName, GRAY, 250, lRowLayer)->SetAdaptive(false);
 			AddLabel(strutil::IntToString(lServer.mPlayerCount, 10), GRAY, 0, lRowLayer);
-			const str lPing = (lServer.mPing > 0)? Number::ConvertToPostfixNumber(lServer.mPing, 0)+_T("s") : _T("");
+			const str lPing = (lServer.mPing > 0)? Number::ConvertToPostfixNumber(lServer.mPing, 0)+"s" : "";
 			AddLabel(lPing, GRAY, 0, lRowLayer);
 			UiTbc::RectComponent* lCenterLayer = AddCentering(0, lRowLayer);
-			UiTbc::Button* lButton = AddButton(_T("Pick"), (void*)(x-1), lCenterLayer);
+			UiTbc::Button* lButton = AddButton("Pick", (void*)(x-1), lCenterLayer);
 			lButton->SetOnClick(ServerListView, OnSelect);
 			lButton->SetPreferredSize(100, 23, false);
 		}
@@ -138,7 +138,7 @@ void ServerListView::OnSelect(UiTbc::Button* pButton)
 	if (lServerIndex < mServerList.size())
 	{
 		mSelectObserver->OnRequestJoinServer(mServerList[lServerIndex].mGivenIpAddress +
-			strutil::Format(_T(":%i"), mServerList[lServerIndex].mGivenPort));
+			strutil::Format(":%i", mServerList[lServerIndex].mGivenPort));
 	}
 }
 

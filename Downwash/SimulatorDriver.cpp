@@ -19,7 +19,7 @@ namespace Downwash
 
 
 SimulatorDriver::SimulatorDriver(Cure::GameManager* pGame, Cure::GameObjectId pSimulatorId):
-	Parent(pGame->GetResourceManager(), _T("SimulatorDriver")),
+	Parent(pGame->GetResourceManager(), "SimulatorDriver"),
 	mGame(pGame),
 	mSimulatorId(pSimulatorId)
 {

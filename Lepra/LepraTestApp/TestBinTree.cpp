@@ -38,7 +38,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("basic iterator test");
+		lContext = "basic iterator test";
 		lTestOk = !(lIter1 != lBinTree.End() || !(lIter1 == lBinTree.End()) ||
 			lIter2 != lBinTree.End() || !(lIter2 == lBinTree.End()) ||
 			lIter3 != lBinTree.End() || !(lIter3 == lBinTree.End()));
@@ -55,7 +55,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	lBinTree.Insert(8, 13);
 	if (lTestOk)
 	{
-		lContext = _T("search success test");
+		lContext = "search success test";
 		lTestOk = !(lBinTree.Find(1) == lBinTree.End() || lBinTree.Find(2) == lBinTree.End() ||
 			lBinTree.Find(3) == lBinTree.End() || lBinTree.Find(4) == lBinTree.End() ||
 			lBinTree.Find(5) == lBinTree.End() || lBinTree.Find(6) == lBinTree.End() ||
@@ -64,7 +64,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("search fail test");
+		lContext = "search fail test";
 		lTestOk = !(lBinTree.Find(0) != lBinTree.End() || lBinTree.Find(-123) != lBinTree.End() ||
 			lBinTree.Find(123)  != lBinTree.End() || lBinTree.Find(-34)  != lBinTree.End() ||
 			lBinTree.Find(45)   != lBinTree.End() || lBinTree.Find(-56)  != lBinTree.End() ||
@@ -76,7 +76,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	lIter3 = lBinTree.First();
 	if (lTestOk)
 	{
-		lContext = _T("iterator test A");
+		lContext = "iterator test A";
 		lTestOk = !(lIter2 == lBinTree.End() || lIter3 == lBinTree.End());
 		deb_assert(lTestOk);
 	}
@@ -85,7 +85,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	lIter3--;
 	if (lTestOk)
 	{
-		lContext = _T("iterator test B");
+		lContext = "iterator test B";
 		lTestOk = !(lIter2 != lBinTree.End() || lIter3 != lBinTree.End());
 		deb_assert(lTestOk);
 	}
@@ -99,7 +99,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	// Check counting.
 	if (lTestOk)
 	{
-		lContext = _T("iterator counting");
+		lContext = "iterator counting";
 		lTestOk = !(lCount != 8 || lCount != lBinTree.GetCount());
 		deb_assert(lTestOk);
 	}
@@ -110,7 +110,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	{
 		if (lTestOk)
 		{
-			lContext = _T("sorting failed");
+			lContext = "sorting failed";
 			lTestOk = !((*lIter1) != lCount);
 			deb_assert(lTestOk);
 		}
@@ -120,7 +120,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	lBinTree.Remove(4);
 	if (lTestOk)
 	{
-		lContext = _T("remove failed");
+		lContext = "remove failed";
 		lTestOk = !(lBinTree.Find(1) == lBinTree.End() || lBinTree.Find(2) == lBinTree.End() ||
 			lBinTree.Find(3) == lBinTree.End() || lBinTree.Find(4) != lBinTree.End() ||
 			lBinTree.Find(5) == lBinTree.End() || lBinTree.Find(6) == lBinTree.End() ||
@@ -139,7 +139,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 		lBinTree.Remove(lRnd);
 		if (lTestOk)
 		{
-			lContext = _T("random remove failed");
+			lContext = "random remove failed";
 			lTestOk = !(lBinTree.GetCount() != 0);
 			deb_assert(lTestOk);
 		}
@@ -161,7 +161,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	// Check counting again.
 	if (lTestOk)
 	{
-		lContext = _T("entries failed A");
+		lContext = "entries failed A";
 		lTestOk = !(lCount != lBinTree.GetCount());
 		deb_assert(lTestOk);
 	}
@@ -177,7 +177,7 @@ bool TestBinTree(const LogDecorator& pAccount)
 	// Check counting again.
 	if (lTestOk)
 	{
-		lContext = _T("entries failed B");
+		lContext = "entries failed B";
 		lTestOk = !(lCount != lBinTree.GetCount());
 		deb_assert(lTestOk);
 	}
@@ -191,11 +191,11 @@ bool TestBinTree(const LogDecorator& pAccount)
 	}
 	if (lTestOk)
 	{
-		lContext = _T("entries found");
+		lContext = "entries found";
 		lTestOk = !(lCount != 0 || lCount != lBinTree.GetCount());
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("BinTree"), lContext, lTestOk);
+	ReportTestResult(pAccount, "BinTree", lContext, lTestOk);
 	return (lTestOk);
 }

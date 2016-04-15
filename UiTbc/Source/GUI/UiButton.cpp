@@ -163,7 +163,7 @@ void Button::SetState(State pState)
 
 	SetNeedsRepaint(true);
 
-	log_volatile(mLog.Debugf(_T("Button changing state from %i->%i."), mState, pState));
+	log_volatile(mLog.Debugf("Button changing state from %i->%i.", mState, pState));
 	mState = pState;
 
 	if (mImageButton == true)

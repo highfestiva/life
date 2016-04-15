@@ -291,7 +291,7 @@ TEMPLATE TImageIdentifier QUAL::GetCurrentImageID()
 
 
 TEMPLATE QUAL::Animation::Animation() :
-	mName(_T("")),
+	mName(""),
 	mImageID(0),
 	mTimeStamp(0),
 	mNumFrames(0),

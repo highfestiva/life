@@ -23,7 +23,7 @@ namespace Downwash
 
 
 Autopilot::Autopilot(DownwashManager* pGame):
-	Parent(pGame->GetResourceManager(), _T("Autopilot")),
+	Parent(pGame->GetResourceManager(), "Autopilot"),
 	mGame(pGame),
 	mClosestPathDistance(5.0f),
 	mPath(0)
@@ -47,7 +47,7 @@ void Autopilot::Reset()
 		return;
 	}
 	delete mPath;
-	mPath = new Cure::ContextPath::SplinePath(*mGame->GetLevel()->QueryPath()->GetPath(_T("player_path")));
+	mPath = new Cure::ContextPath::SplinePath(*mGame->GetLevel()->QueryPath()->GetPath("player_path"));
 	mPath->StartInterpolation(0);
 	mStalledRotorTimer.Stop();
 }

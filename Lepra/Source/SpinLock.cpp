@@ -18,8 +18,8 @@ namespace Lepra
 
 void VerifySoleAccessor::OnError(const Thread* pOwner)
 {
-	str lOwnerName = pOwner? strutil::Encode(pOwner->GetThreadName()) : _T("<Unknown>");
-	mLog.Errorf(_T("Someone else is accessing our resource, namely thread %s at %p!"),
+	str lOwnerName = pOwner? pOwner->GetThreadName() : "<Unknown>";
+	mLog.Errorf("Someone else is accessing our resource, namely thread %s at %p!",
 		lOwnerName.c_str(), pOwner);
 	deb_assert(false);
 	throw std::runtime_error("Resource collision failure!");

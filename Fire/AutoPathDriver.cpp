@@ -22,7 +22,7 @@ namespace Fire
 
 
 AutoPathDriver::AutoPathDriver(FireManager* pGame, Cure::GameObjectId pVehicleId, const str& pPathName):
-	Parent(pGame->GetResourceManager(), _T("AutoPathDriver")),
+	Parent(pGame->GetResourceManager(), "AutoPathDriver"),
 	mGame(pGame),
 	mVehicleId(pVehicleId),
 	mPathName(pPathName),

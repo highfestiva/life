@@ -32,12 +32,12 @@ void Level::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const Tbc::ChunkyClass::Tag* lSpeedTag = FindTag(_T("driver"), 1, 0);
+	const Tbc::ChunkyClass::Tag* lSpeedTag = FindTag("driver", 1, 0);
 	if (lSpeedTag)
 	{
 		mLevelSpeed = lSpeedTag->mFloatValueList[0];
 	}
-	const Tbc::ChunkyClass::Tag* lGravityTag = FindTag(_T("behavior"), 3, 0);
+	const Tbc::ChunkyClass::Tag* lGravityTag = FindTag("behavior", 3, 0);
 	if (lGravityTag)
 	{
 		vec3 lGravity(lGravityTag->mFloatValueList[0], lGravityTag->mFloatValueList[1], lGravityTag->mFloatValueList[2]);
@@ -53,7 +53,7 @@ Cure::ContextPath* Level::QueryPath()
 {
 	if (!mPath)
 	{
-		mPath = new Cure::ContextPath(GetResourceManager(), _T("ContextPath"));
+		mPath = new Cure::ContextPath(GetResourceManager(), "ContextPath");
 		GetManager()->AddLocalObject(mPath);
 	}
 	return mPath;

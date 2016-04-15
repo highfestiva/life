@@ -21,15 +21,15 @@ namespace Life
 // Must lie before ServerConsoleManager to compile.
 const ConsoleManager::CommandPair ServerConsoleManager::mCommandIdList[] =
 {
-	{_T("quit"), COMMAND_QUIT},
+	{"quit", COMMAND_QUIT},
 
 	// Info/debug stuff.
-	{_T("list-users"), COMMAND_LIST_USERS},
-	{_T("build"), COMMAND_BUILD},
+	{"list-users", COMMAND_LIST_USERS},
+	{"build", COMMAND_BUILD},
 
 	// Communication.
-	{_T("broadcast-msg"), COMMAND_BROADCAST_CHAT_MESSAGE},
-	{_T("priv-msg"), COMMAND_SEND_PRIVATE_CHAT_MESSAGE},
+	{"broadcast-msg", COMMAND_BROADCAST_CHAT_MESSAGE},
+	{"priv-msg", COMMAND_SEND_PRIVATE_CHAT_MESSAGE},
 };
 
 
@@ -79,19 +79,19 @@ int ServerConsoleManager::OnCommand(const HashedString& pCommand, const strutil:
 				int lClientCount = ((GameServerManager*)GetGameManager())->GetLoggedInClientCount();
 				if (lClientCount > 0)
 				{
-					if (pParameterVector.size() == 1 && pParameterVector[0] == _T("!"))
+					if (pParameterVector.size() == 1 && pParameterVector[0] == "!")
 					{
-						mLog.Warningf(_T("Forced termination with %i logged-in clients."), lClientCount);
+						mLog.Warningf("Forced termination with %i logged-in clients.", lClientCount);
 						SystemManager::AddQuitRequest(+1);
 					}
 					else
 					{
-						mLog.Warningf(_T("Not allowed to terminate (%i logged-in clients). Use '!' to override."), lClientCount);
+						mLog.Warningf("Not allowed to terminate (%i logged-in clients). Use '!' to override.", lClientCount);
 					}
 				}
 				else
 				{
-					mLog.AHeadline("Terminating due to user command.");
+					mLog.Headline("Terminating due to user command.");
 					SystemManager::AddQuitRequest(+1);
 				}
 			}
@@ -100,20 +100,20 @@ int ServerConsoleManager::OnCommand(const HashedString& pCommand, const strutil:
 			{
 				if (pParameterVector.size() == 1)
 				{
-					wstr lMessage = wstrutil::Encode(pParameterVector[0]);
+					str lMessage = pParameterVector[0];
 					if (((GameServerManager*)GetGameManager())->BroadcastChatMessage(lMessage))
 					{
-						mLog.Infof(_T("BROADCAST CHAT: %s"), pParameterVector[0].c_str());
+						mLog.Infof("BROADCAST CHAT: %s", pParameterVector[0].c_str());
 					}
 					else
 					{
-						mLog.AError("Could not broadcast chat message!");
+						mLog.Error("Could not broadcast chat message!");
 						lResult = 1;
 					}
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <message>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <message>", pCommand.c_str());
 					lResult = 1;
 				}
 			}
@@ -122,35 +122,35 @@ int ServerConsoleManager::OnCommand(const HashedString& pCommand, const strutil:
 			{
 				if (pParameterVector.size() == 2)
 				{
-					wstr lClientUserName = wstrutil::Encode(pParameterVector[0]);
-					wstr lMessage = wstrutil::Encode(pParameterVector[1]);
+					str lClientUserName = pParameterVector[0];
+					str lMessage = pParameterVector[1];
 					if (((GameServerManager*)GetGameManager())->SendChatMessage(lClientUserName, lMessage))
 					{
-						mLog.Infof(_T("PRIVATE CHAT ServerAdmin->%s: %s"), pParameterVector[0].c_str(), pParameterVector[1].c_str());
+						mLog.Infof("PRIVATE CHAT ServerAdmin->%s: %s", pParameterVector[0].c_str(), pParameterVector[1].c_str());
 					}
 					else
 					{
-						mLog.AError("Could not send private chat message!");
+						mLog.Error("Could not send private chat message!");
 						lResult = 1;
 					}
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <user> <message>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <user> <message>", pCommand.c_str());
 					lResult = 1;
 				}
 			}
 			break;
 			case COMMAND_LIST_USERS:
 			{
-				wstrutil::strvec lUserNameList;
+				strutil::strvec lUserNameList;
 				lUserNameList = ((GameServerManager*)GetGameManager())->ListUsers();
-				mLog.AInfo("Listing logged on users:");
+				mLog.Info("Listing logged on users:");
 				for (size_t x = 0; x < lUserNameList.size(); ++x)
 				{
-					mLog.Info(_T("\t\"") + strutil::Encode(lUserNameList[x]) + _T("\""));
+					mLog.Info("\t\"" + lUserNameList[x] + "\"");
 				}
-				mLog.Infof(_T("A total of %u users logged in."), (unsigned)lUserNameList.size());
+				mLog.Infof("A total of %u users logged in.", (unsigned)lUserNameList.size());
 			}
 			break;
 			case COMMAND_BUILD:
@@ -161,7 +161,7 @@ int ServerConsoleManager::OnCommand(const HashedString& pCommand, const strutil:
 				}
 				else
 				{
-					mLog.Warningf(_T("usage: %s <what>"), pCommand.c_str());
+					mLog.Warningf("usage: %s <what>", pCommand.c_str());
 					lResult = 1;
 				}
 			}

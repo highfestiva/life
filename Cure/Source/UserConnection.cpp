@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
  
 
@@ -29,12 +29,12 @@ UserConnection::~UserConnection()
 
 
 
-const wstr& UserConnection::GetLoginName() const
+const str& UserConnection::GetLoginName() const
 {
 	return (mName);
 }
 
-void UserConnection::SetLoginName(const wstr& pName)
+void UserConnection::SetLoginName(const str& pName)
 {
 	mName = pName;
 }

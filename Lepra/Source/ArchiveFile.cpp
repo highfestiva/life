@@ -23,8 +23,8 @@ ArchiveFile::ArchiveFile(const str& pArchiveName):
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
 	mFileHandle(0),
-	mFileName(_T("")),
-	mPath(_T("")),
+	mFileName(""),
+	mPath(""),
 	mFileSize(0),
 	mDataBuffer(0),
 	mDataBufferSize(1024 * 1024), // 1 Mb
@@ -40,7 +40,7 @@ ArchiveFile::ArchiveFile(const str& pArchiveName):
 
 	mDataBuffer = new uint8[(int)mDataBufferSize];
 
-	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), _T(".zip")) == 0);
+	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), ".zip") == 0);
 }
 
 ArchiveFile::ArchiveFile(const str& pArchiveName, Reader* pReader):
@@ -48,8 +48,8 @@ ArchiveFile::ArchiveFile(const str& pArchiveName, Reader* pReader):
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
 	mFileHandle(0),
-	mFileName(_T("")),
-	mPath(_T("")),
+	mFileName(""),
+	mPath(""),
 	mFileSize(0),
 	mDataBuffer(0),
 	mDataBufferSize(1024 * 1024), // 1 Mb
@@ -70,7 +70,7 @@ ArchiveFile::ArchiveFile(const str& pArchiveName, Reader* pReader):
 
 	mDataBuffer = new uint8[(int)mDataBufferSize];
 
-	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), _T(".zip")) == 0);
+	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), ".zip") == 0);
 }
 
 ArchiveFile::ArchiveFile(const str& pArchiveName, Writer* pWriter):
@@ -78,8 +78,8 @@ ArchiveFile::ArchiveFile(const str& pArchiveName, Writer* pWriter):
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
 	mFileHandle(0),
-	mFileName(_T("")),
-	mPath(_T("")),
+	mFileName(""),
+	mPath(""),
 	mFileSize(0),
 	mDataBuffer(0),
 	mDataBufferSize(1024 * 1024), // 1 Mb
@@ -100,7 +100,7 @@ ArchiveFile::ArchiveFile(const str& pArchiveName, Writer* pWriter):
 
 	mDataBuffer = new uint8[(int)mDataBufferSize];
 
-	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), _T(".zip")) == 0);
+	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), ".zip") == 0);
 }
 
 ArchiveFile::ArchiveFile(const str& pArchiveName, Reader* pReader, Writer* pWriter):
@@ -108,8 +108,8 @@ ArchiveFile::ArchiveFile(const str& pArchiveName, Reader* pReader, Writer* pWrit
 	mArchiveFileName(pArchiveName),
 	mIsZipArchive(false),
 	mFileHandle(0),
-	mFileName(_T("")),
-	mPath(_T("")),
+	mFileName(""),
+	mPath(""),
 	mFileSize(0),
 	mDataBuffer(0),
 	mDataBufferSize(1024 * 1024), // 1 Mb
@@ -135,7 +135,7 @@ ArchiveFile::ArchiveFile(const str& pArchiveName, Reader* pReader, Writer* pWrit
 
 	mDataBuffer = new uint8[(int)mDataBufferSize];
 
-	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), _T(".zip")) == 0);
+	mIsZipArchive = (strutil::CompareIgnoreCase(strutil::Right(mArchiveFileName, 4), ".zip") == 0);
 }
 
 ArchiveFile::~ArchiveFile()
@@ -485,8 +485,8 @@ void ArchiveFile::Close()
 		mFileHandle = 0;
 	}
 
-	mFileName = _T("");
-	mPath = _T("");
+	mFileName = "";
+	mPath = "";
 
 	mCurrentDBPos = 0;
 	mDataSize = 0;
@@ -496,7 +496,7 @@ void ArchiveFile::CopyArchiveFiles(FileArchive& pSource, FileArchive& pDest, con
 {
 	str lFileName = pSource.FileFindFirst();
 	
-	while (lFileName != _T(""))
+	while (lFileName != "")
 	{
 		if (strutil::CompareIgnoreCase(pExceptThisFile, lFileName) != 0)
 		{
@@ -511,7 +511,7 @@ void ArchiveFile::CopyZipArchiveFiles(ZipArchive& pSource, ZipArchive& pDest, co
 {
 	str lFileName = pSource.FileFindFirst();
 	
-	while (lFileName != _T(""))
+	while (lFileName != "")
 	{
 		if (strutil::CompareIgnoreCase(pExceptThisFile, lFileName) != 0)
 		{
@@ -627,7 +627,7 @@ void ArchiveFile::SetEndian(Endian::EndianType pEndian)
 
 str ArchiveFile::GetFullName() const
 {
-	return mPath + _T("/") + mFileName;
+	return mPath + "/" + mFileName;
 }
 
 str ArchiveFile::GetName() const

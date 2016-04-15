@@ -96,14 +96,14 @@ bool MacFontManager::RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect&
 	CGContextFillRect(textcontext, *(CGRect*)rect);
 	CGColorRef foregroundColor = CGColorCreate(colorspace, text_color);
 	CGContextSetFillColorWithColor(textcontext, foregroundColor);
-	CGContextSelectFont(textcontext, astrutil::Encode(mCurrentFont->mName).c_str(), lCorrectedFontSize, kCGEncodingMacRoman);
+	CGContextSelectFont(textcontext, mCurrentFont->mName.c_str(), lCorrectedFontSize, kCGEncodingMacRoman);
 	CGContextSetLineWidth(textcontext, 0.3);
 	CGContextSetTextDrawingMode(textcontext, kCGTextFillStroke);
 	CGContextSetRGBStrokeColor(textcontext, 1,1,1,0.5);
 #ifdef LEPRA_IOS
 	int y = (pRect.GetHeight() - ((MacFont*)mCurrentFont)->mActualSize) / 8;
 	UIGraphicsPushContext(textcontext);
-	tchar lTmpString[2] = {pChar, 0};
+	char lTmpString[2] = {pChar, 0};
 	NSString* lChar = MacLog::Encode(lTmpString);
 	NSString* lFontName = MacLog::Encode(mCurrentFont->mName);
 	[lChar drawAtPoint:CGPointMake(0, y) withFont:[TBC_APPLE_FONT fontWithName:lFontName size:lCorrectedFontSize]];

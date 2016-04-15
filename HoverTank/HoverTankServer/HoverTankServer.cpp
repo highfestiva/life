@@ -52,7 +52,7 @@ namespace HoverTank
 
 
 HoverTankServer::HoverTankServer(const strutil::strvec& pArgumentList):
-	Parent(_T(HT_APPLICATION_NAME), pArgumentList)
+	Parent(HT_APPLICATION_NAME, pArgumentList)
 {
 }
 
@@ -76,19 +76,19 @@ void HoverTankServer::Init()
 
 str HoverTankServer::GetTypeName() const
 {
-	return _T("Server");
+	return "Server";
 }
 
 str HoverTankServer::GetVersion() const
 {
-	return _T(PLATFORM_VERSION);
+	return PLATFORM_VERSION;
 }
 
 Cure::ApplicationTicker* HoverTankServer::CreateTicker() const
 {
 	Life::GameServerTicker* lTicker = new HoverTankServerTicker(mResourceManager, 2000, 7, 1);
 	lTicker->StartConsole((InteractiveStdioConsoleLogListener*)mConsoleLogger);
-	lTicker->SetMasterServerConnection(new Life::MasterServerConnection(_T(MASTER_SERVER_ADDRESS) _T(":") _T(MASTER_SERVER_PORT)));
+	lTicker->SetMasterServerConnection(new Life::MasterServerConnection(MASTER_SERVER_ADDRESS ":" MASTER_SERVER_PORT));
 	return lTicker;
 }
 

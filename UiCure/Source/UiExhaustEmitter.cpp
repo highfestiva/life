@@ -67,7 +67,7 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 		pTag.mBodyIndexList.size() != 0 ||
 		pTag.mMeshIndexList.size() < 1)
 	{
-		mLog.Errorf(_T("The exhaust tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf("The exhaust tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -97,7 +97,7 @@ void ExhaustEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::C
 	const float lOpacity = pTag.mFloatValueList[FV_OPACITY];
 	lVelocity = lOriginalOrientation*lVelocity;
 	lVelocity += pObject->GetVelocity();
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
 	{
 		Tbc::GeometryBase* lMesh = pObject->GetMesh(pTag.mMeshIndexList[y]);

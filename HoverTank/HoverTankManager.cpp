@@ -45,7 +45,7 @@
 #include "Version.h"
 
 #define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
-#define ICONBTNA(i,n)			ICONBTN(_T(i), _T(n))
+#define ICONBTNA(i,n)			ICONBTN(i, n)
 
 
 
@@ -115,12 +115,12 @@ HoverTankManager::HoverTankManager(Life::GameClientMasterTicker* pMaster, const 
 	mEnginePlaybackTime(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("big_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("plastic"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("big_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("plastic",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
 
 	::memset(mEnginePowerShadow, 0, sizeof(mEnginePowerShadow));
 
@@ -151,34 +151,34 @@ void HoverTankManager::LoadSettings()
 	v_internal(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	const str lLeftName  = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
-	const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+_T(".AxisY-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+_T(".AxisY+"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+_T(".AxisX-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+_T(".AxisX+"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+_T(".AxisY-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+_T(".AxisY+"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+_T(".AxisX-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+_T(".AxisX+"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+_T(".AxisY-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+_T(".AxisY+"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+_T(".AxisY-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+_T(".AxisY+"));
+	const str lLeftName  = strutil::Format("TouchstickLeft%i", mSlaveIndex);
+	const str lRightName = strutil::Format("TouchstickRight%i", mSlaveIndex);
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD, lLeftName+".AxisY-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BRKBACK, lLeftName+".AxisY+");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT, lLeftName+".AxisX-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT, lLeftName+".AxisX+");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_FWD3D, lRightName+".AxisY-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_BACK3D, lRightName+".AxisY+");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lRightName+".AxisX-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lRightName+".AxisX+");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lLeftName+".AxisY-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lLeftName+".AxisY+");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP, lRightName+".AxisY-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN, lRightName+".AxisY+");
 #endif // Touch device or emulated touch device
 
 #ifdef LEPRA_TOUCH
 	// TODO: remove hard-coding!
-	//v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("pixeldoctrine.dyndns.org:16650"));
+	//v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, "pixeldoctrine.dyndns.org:16650");
 	//v_internal(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
-	v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
 #endif // Touch device
 }
 
 void HoverTankManager::SaveSettings()
 {
 #ifndef EMULATE_TOUCH
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand("save-application-config-file "+GetApplicationCommandFilename());
 #endif // Computer or touch device.
 }
 
@@ -258,7 +258,7 @@ bool HoverTankManager::Paint()
 	if (lObject)
 	{
 		Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(lObject);
-		const str lInfo = lHealth? strutil::DoubleToString(lHealth->GetValue()*100, 0) : _T("");
+		const str lInfo = lHealth? strutil::DoubleToString(lHealth->GetValue()*100, 0) : "";
 		mUiManager->GetPainter()->SetColor(Color(255, 0, 0, 255), 0);
 		mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);
 		mUiManager->GetPainter()->PrintText(lInfo, mRenderArea.mLeft + 10, 10);
@@ -293,7 +293,7 @@ void HoverTankManager::SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId
 {
 	DropAvatar();
 
-	log_volatile(mLog.Debugf(_T("Clicked avatar %s."), pAvatarId.c_str()));
+	log_volatile(mLog.Debugf("Clicked avatar %s.", pAvatarId.c_str()));
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	GetNetworkAgent()->SendStatusMessage(GetNetworkClient()->GetSocket(), 0, Cure::REMOTE_OK,
 		Cure::MessageStatus::INFO_AVATAR, wstrutil::Encode(pAvatarId), lPacket);
@@ -349,10 +349,10 @@ void HoverTankManager::Detonate(Cure::ContextObject* pExplosive, const Tbc::Chun
 {
 	(void)pExplosive;
 
-	mCollisionSoundManager->OnCollision(5.0f * pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
+	mCollisionSoundManager->OnCollision(5.0f * pStrength, pPosition, pExplosiveGeometry, "explosion");
 
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
-	//mLog.Infof(_T("Hit object normal is (%.1f; %.1f; %.1f)"), pNormal.x, pNormal.y, pNormal.z);
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
+	//mLog.Infof("Hit object normal is (%.1f; %.1f; %.1f"), pNormal.x, pNormal.y, pNormal.z);
 	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
 	vec3 u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
 	u -= pVelocity;	// Mirror and inverse.
@@ -423,12 +423,12 @@ void HoverTankManager::CreateLoginView()
 		if (mDisconnectReason.empty())
 		{
 			str lServerName;
-			v_tryget(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
-			if (strutil::StartsWith(lServerName, _T("0.0.0.0")))
+			v_tryget(lServerName, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
+			if (strutil::StartsWith(lServerName, "0.0.0.0"))
 			{
 				lServerName = lServerName.substr(7);
 			}
-			const str lDefaultUserName = strutil::Format(_T("User%u"), mSlaveIndex);
+			const str lDefaultUserName = strutil::Format("User%u", mSlaveIndex);
 			str lUserName;
 			v_tryget(lUserName, =, GetVariableScope(), RTVAR_LOGIN_USERNAME, lDefaultUserName);
                         wstr lReadablePassword = L"CarPassword";
@@ -443,7 +443,7 @@ void HoverTankManager::CreateLoginView()
 			mUiManager->GetDesktopWindow()->AddChild(mLoginWindow, 0, 0, 0);
 			mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
 				mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
-			mLoginWindow->GetChild(_T("User"), 0)->SetKeyboardFocus();
+			mLoginWindow->GetChild("User", 0)->SetKeyboardFocus();
 		}
 	}
 }
@@ -456,7 +456,7 @@ bool HoverTankManager::InitializeUniverse()
 	bool lOk = true;
 	if (lOk)
 	{
-		mSun = new UiCure::Props(GetResourceManager(), _T("sun"), mUiManager);
+		mSun = new UiCure::Props(GetResourceManager(), "sun", mUiManager);
 		AddContextObject(mSun, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lOk = (mSun != 0);
 		deb_assert(lOk);
@@ -468,7 +468,7 @@ bool HoverTankManager::InitializeUniverse()
 	const int lPrimeCloudCount = 11;	// TRICKY: must be prime or clouds start moving in sync.
 	for (int x = 0; lOk && x < lPrimeCloudCount; ++x)
 	{
-		Cure::ContextObject* lCloud = new UiCure::Props(GetResourceManager(), _T("cloud_01"), mUiManager);
+		Cure::ContextObject* lCloud = new UiCure::Props(GetResourceManager(), "cloud_01", mUiManager);
 		AddContextObject(lCloud, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
 		lCloud->StartLoading();
 		mCloudArray.push_back(lCloud);
@@ -550,10 +550,10 @@ void HoverTankManager::UpdateTouchstickPlacement()
 		v_get(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
 		const int lMinimumTouchRadius = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// 30 pixels in iPhone classic.
 		mStickLeft  = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lMinimumTouchRadius);
-		const str lLeftName = strutil::Format(_T("TouchstickLeft%i"), mSlaveIndex);
+		const str lLeftName = strutil::Format("TouchstickLeft%i", mSlaveIndex);
 		mStickLeft->SetUniqueIdentifier(lLeftName);
 		mStickRight = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10), 0, lMinimumTouchRadius);
-		const str lRightName = strutil::Format(_T("TouchstickRight%i"), mSlaveIndex);
+		const str lRightName = strutil::Format("TouchstickRight%i", mSlaveIndex);
 		mStickRight->SetUniqueIdentifier(lRightName);
 	}
 	int lIndex = 0;
@@ -678,9 +678,9 @@ void HoverTankManager::TickUiInput()
 				lAvatar->GetOrientation().GetEulerAngles(lCurrentAngle, _, _);
 				//lCurrentAngle = +PIF/2 - lCurrentAngle;
 				//const vec3 fwd = lAvatar->GetForwardDirection();
-				//mLog.Infof(_T("Setting cam from avatar fwd vec %f, %f, %f"), fwd.x, fwd.y, fwd.z);
+				//mLog.Infof("Setting cam from avatar fwd vec %f, %f, %f", fwd.x, fwd.y, fwd.z);
 				//const quat r = lAvatar->GetOrientation();
-				//mLog.Infof(_T("Setting cam from Q=%f, %f, %f, %f"), r.a, r.b, r.c, r.d);
+				//mLog.Infof("Setting cam from Q=%f, %f, %f, %f", r.a, r.b, r.c, r.d);
 				mCameraMouseAngle = lCurrentAngle;
 				mCameraTargetAngle = lCurrentAngle;
 				mCameraOrientation.x = lCurrentAngle + PIF/2;
@@ -692,11 +692,11 @@ void HoverTankManager::TickUiInput()
 				{
 					pc = 0;
 					//const vec3 fwd = lAvatar->GetForwardDirection();
-					//mLog.Infof(_T("Avatar fwd vec %f, %f, %f"), fwd.x, fwd.y, fwd.z);
+					//mLog.Infof("Avatar fwd vec %f, %f, %f", fwd.x, fwd.y, fwd.z);
 					//const quat q = lAvatar->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-					//mLog.Infof(_T("Avatar original Q=%f, %f, %f, %f"), q.a, q.b, q.c, q.d);
+					//mLog.Infof("Avatar original Q=%f, %f, %f, %f", q.a, q.b, q.c, q.d);
 					const quat r = lAvatar->GetOrientation();
-					mLog.Infof(_T("Avatar Q=%f, %f, %f, %f"), r.a, r.b, r.c, r.d);
+					mLog.Infof("Avatar Q=%f, %f, %f, %f", r.a, r.b, r.c, r.d);
 				}
 			}*/
 			if (lAvatar && (lIsUpdatingYaw || lIsTimedYawUpdate))
@@ -728,7 +728,7 @@ void HoverTankManager::TickUiInput()
 				if (++pc > 5)
 				{
 					pc = 0;
-					mLog.Infof(_T("angle=%f, delta=%f, current=%f, diff=%f, friction=%f"), mCameraMouseAngle, lAngleDelta, lCurrentAngle, lCurrentAngle - mCameraMouseAngle, lRotationFriction);
+					mLog.Infof("angle=%f, delta=%f, current=%f, diff=%f, friction=%f", mCameraMouseAngle, lAngleDelta, lCurrentAngle, lCurrentAngle - mCameraMouseAngle, lRotationFriction);
 				}*/
 				const float lStrength = Math::Lerp(1.0f, 2.0f, lLeftPower.GetLength());
 				lAngleDiff *= 4;
@@ -799,7 +799,7 @@ bool HoverTankManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsign
 			mEnginePowerShadow[pAspect].mPower = pPower;
 			if (!mEnginePlaybackFile.IsOpen())
 			{
-				mEnginePlaybackFile.Open(_T("Data/Steering.rec"), DiskFile::MODE_TEXT_WRITE);
+				mEnginePlaybackFile.Open("Data/Steering.rec", DiskFile::MODE_TEXT_WRITE);
 				wstr lComment = wstrutil::Format(L"// Recording %s at %s.\n", pAvatar->GetClassId().c_str(), Time().GetDateTimeAsString().c_str());
 				mEnginePlaybackFile.WriteString(lComment);
 				mEnginePlaybackFile.WriteString(wstrutil::Encode("#" RTVAR_STEERING_PLAYBACKMODE " 2\n"));
@@ -928,15 +928,15 @@ void HoverTankManager::ProcessNetworkStatusMessage(Cure::MessageStatus* pMessage
 		{
 			wstr lAvatarName;
 			pMessage->GetMessageString(lAvatarName);
-			Cure::UserAccount::AvatarId lAvatarId = strutil::Encode(lAvatarName);
+			Cure::UserAccount::AvatarId lAvatarId = lAvatarName;
 			log_adebug("Status: INFO_AVATAR...");
-			str lTextureId = strutil::Format(_T("road_sign_%s.png"), lAvatarId.c_str());
+			str lTextureId = strutil::Format("road_sign_%s.png", lAvatarId.c_str());
 			if (!GetResourceManager()->QueryFileExists(lTextureId))
 			{
-				lTextureId = _T("road_sign_car.png");
+				lTextureId = "road_sign_car.png";
 			}
 			RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(),
-				mUiManager, lAvatarId, _T("road_sign_01"), lTextureId, RoadSignButton::SHAPE_ROUND);
+				mUiManager, lAvatarId, "road_sign_01", lTextureId, RoadSignButton::SHAPE_ROUND);
 			GetContext()->AddLocalObject(lButton);
 			const int SIGN_COUNT_X = 5;
 			const int SIGN_COUNT_Y = 5;
@@ -966,7 +966,7 @@ void HoverTankManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 
 			mUpdateCameraForAvatar = true;
 			mCameraMouseAngleTimer.ReduceTimeDiff(-10.0f);
 			mCameraTargetAngleFactor = 0;
-			log_volatile(mLog.Debugf(_T("Got control over avatar with ID %i."), pInteger));
+			log_volatile(mLog.Debugf("Got control over avatar with ID %i.", pInteger));
 		}
 		return;
 		case Cure::MessageNumber::INFO_FALL_APART:
@@ -977,7 +977,7 @@ void HoverTankManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 
 			{
 				Life::Explosion::FallApart(GetPhysicsManager(), lObject);
 				lObject->CenterMeshes();
-				log_volatile(mLog.Debugf(_T("Object %i falling apart."), pInteger));
+				log_volatile(mLog.Debugf("Object %i falling apart.", pInteger));
 			}
 		}
 		return;
@@ -998,36 +998,36 @@ void HoverTankManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 
 Cure::ContextObject* HoverTankManager::CreateContextObject(const str& pClassId) const
 {
 	Cure::CppContextObject* lObject;
-	if (pClassId == _T("grenade") || pClassId == _T("rocket"))
+	if (pClassId == "grenade" || pClassId == "rocket")
 	{
 		lObject = new Life::FastProjectile(GetResourceManager(), pClassId, mUiManager, (HoverTankManager*)this);
 	}
-	else if (pClassId == _T("bomb"))
+	else if (pClassId == "bomb")
 	{
 		lObject = new Life::Projectile(GetResourceManager(), pClassId, mUiManager, (HoverTankManager*)this);
 	}
-	else if (strutil::StartsWith(pClassId, _T("mine")))
+	else if (strutil::StartsWith(pClassId, "mine"))
 	{
 		lObject = new Life::Mine(GetResourceManager(), pClassId, mUiManager, (HoverTankManager*)this);
 	}
-	else if (pClassId == _T("stone") || pClassId == _T("cube"))
+	else if (pClassId == "stone" || pClassId == "cube")
 	{
 		lObject = new UiCure::CppContextObject(GetResourceManager(), pClassId, mUiManager);
 	}
-	else if (strutil::StartsWith(pClassId, _T("level_")))
+	else if (strutil::StartsWith(pClassId, "level_"))
 	{
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 		Life::Level* lLevel = new Life::Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
 		lLevel->EnableRootShadow(false);
 		lObject = lLevel;
 	}
-	else if (pClassId == _T("score_info"))
+	else if (pClassId == "score_info")
 	{
-		lObject = new UiCure::CppContextObject(GetResourceManager(), _T("score_info"), mUiManager);
+		lObject = new UiCure::CppContextObject(GetResourceManager(), "score_info", mUiManager);
 		lObject->SetLoadResult(true);
 	}
-	else if (strutil::StartsWith(pClassId, _T("hover_tank")) ||
-		strutil::StartsWith(pClassId, _T("deltawing")))
+	else if (strutil::StartsWith(pClassId, "hover_tank") ||
+		strutil::StartsWith(pClassId, "deltawing"))
 	{
 		UiCure::Machine* lMachine = new Life::ExplodingMachine(GetResourceManager(), pClassId, mUiManager, (HoverTankManager*)this);
 		lMachine->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
@@ -1049,18 +1049,18 @@ void HoverTankManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	{
 		if (pObject->GetInstanceId() == mAvatarId)
 		{
-			log_volatile(mLog.Debug(_T("Yeeha! Loaded avatar!")));
+			log_volatile(mLog.Debug("Yeeha! Loaded avatar!"));
 		}
 		else
 		{
-			log_volatile(mLog.Tracef(_T("Loaded object %s."), pObject->GetClassId().c_str()));
+			log_volatile(mLog.Tracef("Loaded object %s.", pObject->GetClassId().c_str()));
 		}
 		pObject->GetPhysics()->UpdateBonesObjectTransformation(0, gIdentityTransformationF);
 		((UiCure::CppContextObject*)pObject)->UiMove();
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
+		mLog.Errorf("Could not load object of type %s.", pObject->GetClassId().c_str());
 		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
 }
@@ -1141,7 +1141,7 @@ void HoverTankManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	str lAmmo;
 	switch (pWeapon)
 	{
-		case 0:	lAmmo = _T("bullet");	break;
+		case 0:	lAmmo = "bullet";	break;
 		default: deb_assert(false); return;
 	}
 	Life::FastProjectile* lProjectile = new Life::FastProjectile(GetResourceManager(), lAmmo, mUiManager, this);
@@ -1153,7 +1153,7 @@ void HoverTankManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 
 	if (pWeapon >= 0)
 	{
-		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 		xform t;
 		vec3 v;
 		Life::ProjectileUtil::GetBarrel(lProjectile, t, v);
@@ -1182,8 +1182,8 @@ void HoverTankManager::OnAvatarSelect(UiTbc::Button* pButton)
 
 	if (!mPickVehicleButton)
 	{
-		mPickVehicleButton = new RoadSignButton(this, GetResourceManager(), mUiManager, _T("PickVehicle"),
-			_T("road_sign_01"), _T("road_sign_car.png"), RoadSignButton::SHAPE_ROUND);
+		mPickVehicleButton = new RoadSignButton(this, GetResourceManager(), mUiManager, "PickVehicle",
+			"road_sign_01", "road_sign_car.png", RoadSignButton::SHAPE_ROUND);
 		GetContext()->AddLocalObject(mPickVehicleButton);
 		mPickVehicleButton->SetTrajectory(vec2(0, 0.45f), 20);
 		mPickVehicleButton->SetTrajectoryAngle(-PIF/2);
@@ -1257,7 +1257,7 @@ void HoverTankManager::DrawScore()
 			for (; y != lAttributeArray.end(); ++y)
 			{
 				Cure::ContextObjectAttribute* lAttribute = *y;
-				if (strutil::StartsWith(lAttribute->GetName(), _T("int_kills:")))
+				if (strutil::StartsWith(lAttribute->GetName(), "int_kills:"))
 				{
 					mScoreInfoId = lObject->GetInstanceId();
 					return;	// Better luck next time.
@@ -1285,19 +1285,19 @@ void HoverTankManager::DrawScore()
 		str lName;
 		int lValue = 0;
 		int lMode = 0;
-		if (strutil::StartsWith(lAttribute->GetName(), _T("int_kills:")))
+		if (strutil::StartsWith(lAttribute->GetName(), "int_kills:"))
 		{
 			lName = lAttribute->GetName().substr(10);
 			lValue = ((Cure::IntAttribute*)lAttribute)->GetValue();
 			lMode = 0;
 		}
-		else if (strutil::StartsWith(lAttribute->GetName(), _T("int_deaths:")))
+		else if (strutil::StartsWith(lAttribute->GetName(), "int_deaths:"))
 		{
 			lName = lAttribute->GetName().substr(11);
 			lValue = ((Cure::IntAttribute*)lAttribute)->GetValue();
 			lMode = 1;
 		}
-		else if (strutil::StartsWith(lAttribute->GetName(), _T("int_ping:")))
+		else if (strutil::StartsWith(lAttribute->GetName(), "int_ping:"))
 		{
 			lName = lAttribute->GetName().substr(9);
 			lValue = ((Cure::IntAttribute*)lAttribute)->GetValue();
@@ -1327,11 +1327,11 @@ void HoverTankManager::DrawScore()
 	std::sort(lScoreArray.begin(), lScoreArray.end(), gDeathsAscendingOrder);
 	std::sort(lScoreArray.begin(), lScoreArray.end(), gKillsDecendingOrder);
 	mUiManager->GetPainter()->SetTabSize(140);
-	str lScore = _T("Name\tKills\tDeaths\tPing");
+	str lScore = "Name\tKills\tDeaths\tPing";
 	ScoreArray::iterator x = lScoreArray.begin();
 	for (; x != lScoreArray.end(); ++x)
 	{
-		lScore += strutil::Format(_T("\n%s\t%i\t%i\t%i"), x->mName.c_str(), x->mKills, x->mDeaths, x->mPing);
+		lScore += strutil::Format("\n%s\t%i\t%i\t%i", x->mName.c_str(), x->mKills, x->mDeaths, x->mPing);
 	}
 	mUiManager->GetPainter()->SetColor(Color(1, 1, 1, 190), 0);
 	mUiManager->GetPainter()->SetColor(Color(0, 0, 0, 0), 1);

@@ -6,4 +6,4 @@
 
 #pragma once
 
-#define	_(x)	_T(x)	// TODO: gettext!
+#define	_(x)	x	// TODO: gettext!

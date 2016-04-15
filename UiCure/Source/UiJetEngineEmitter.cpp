@@ -81,7 +81,7 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 		pTag.mEngineIndexList.size() != 1 ||
 		pTag.mMeshIndexList.size() < 1)
 	{
-		mLog.Errorf(_T("The fire tag '%s' has the wrong # of parameters."), pTag.mTagName.c_str());
+		mLog.Errorf("The fire tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
 		deb_assert(false);
 		return;
 	}
@@ -125,7 +125,7 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 	const float lOpacity = pTag.mFloatValueList[FV_OPACITY];
 	const vec3 lDirection = lOrientation * vec3(pTag.mFloatValueList[FV_DIRECTION_X], pTag.mFloatValueList[FV_DIRECTION_Y], pTag.mFloatValueList[FV_DIRECTION_Z]);
 	const vec3 lVelocity = lDirection + pObject->GetVelocity();
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 	const float lParticleTime = lDensity;
 	float lParticleSize;	// Pick second size.
 	if (dx > dy && dy > dz)
@@ -184,7 +184,7 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 void JetEngineEmitter::DrawOvershoot(const vec3& pPosition, float pDistanceScaleFactor, const vec3& pRadius, const vec3& pColor, float pOpacity, const vec3& pCameraDirection)
 {
 	float s = std::max(std::max(pRadius.x, pRadius.y), pRadius.z);
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 	const float lMaxFlameDistance = 3 * s;
 	s += s * pDistanceScaleFactor * 0.1f;
 	lParticleRenderer->RenderFireBillboard(0, s, pColor, pOpacity, pPosition-pCameraDirection*lMaxFlameDistance);

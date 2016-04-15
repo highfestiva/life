@@ -84,9 +84,9 @@ namespace Downwash
 const int ORDERED_LEVELNO[]	= { 6, 7, 8, 9, 5, 10, 0, 4, 11, 2, 1, 3, 12, 13 };
 const int REVERSED_LEVELNO[]	= { 6, 10, 9, 11, 7, 4, 0, 1, 2, 3, 5, 8, 12, 13 };
 
-const str gPlatform = _T("any_system");
-const str gVehicleName = _T("helicopter_01");
-const str gDefaultPilotName = _T("Anonymous pilot");
+const str gPlatform = "any_system";
+const str gVehicleName = "helicopter_01";
+const str gDefaultPilotName = "Anonymous pilot";
 
 
 
@@ -132,15 +132,15 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mHiscoreAgent(0)
 {
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("small_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("big_metal"),	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("plastic"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->AddSound(_T("wood"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->AddSound(_T("thump"),		UiCure::CollisionSoundManager::SoundResourceInfo(5.0f, 0.5f, 1.0f));
-	mCollisionSoundManager->AddSound(_T("gem"),		UiCure::CollisionSoundManager::SoundResourceInfo(0.1f, 0.2f, 0.1f));
-	mCollisionSoundManager->PreLoadSound(_T("explosion"));
+	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("big_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("plastic",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("thump",		UiCure::CollisionSoundManager::SoundResourceInfo(5.0f, 0.5f, 1.0f));
+	mCollisionSoundManager->AddSound("gem",		UiCure::CollisionSoundManager::SoundResourceInfo(0.1f, 0.2f, 0.1f));
+	mCollisionSoundManager->PreLoadSound("explosion");
 
 	SetConsoleManager(new DownwashConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
@@ -148,7 +148,7 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 
 	mTouchstickTimer.ReduceTimeDiff(-5);
 
-	v_set(GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_06"));
+	v_set(GetVariableScope(), RTVAR_GAME_STARTLEVEL, "level_06");
 	v_set(GetVariableScope(), RTVAR_GAME_LEVELCOUNT, 14);
 	v_set(GetVariableScope(), RTVAR_GAME_CHILDISHNESS, 1.0);
 	v_set(GetVariableScope(), RTVAR_GAME_ALLOWTOYMODE, false);
@@ -197,7 +197,7 @@ void DownwashManager::LoadSettings()
 
 	Parent::LoadSettings();
 
-	v_set(GetVariableScope(), RTVAR_UI_2D_FONT, _T("Verdana"));
+	v_set(GetVariableScope(), RTVAR_UI_2D_FONT, "Verdana");
 	v_set(GetVariableScope(), RTVAR_UI_2D_FONTFLAGS, 0);
 	v_set(GetVariableScope(), RTVAR_UI_3D_FOV, 30.0);
 
@@ -208,33 +208,33 @@ void DownwashManager::LoadSettings()
 	v_set(GetVariableScope(), RTVAR_UI_3D_CAMXANGLE, 0.0);
 
 	v_set(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, false);
-	v_set(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, _T("Key.LEFT"));
-	v_set(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, _T("Key.RIGHT"));
-	v_set(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, _T("Key.UP"));
+	v_set(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, "Key.LEFT");
+	v_set(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, "Key.RIGHT");
+	v_set(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, "Key.UP");
 	v_set(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F1 \"#Debug.Enable true; #Ui.3D.CamDistance 100.0\""));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F2 \"#Game.Childishness 1.0\""));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F3 \"#Game.Childishness 0.5\""));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F4 \"#Game.Childishness 0.0\""));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F6 prev-level"));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F7 next-level"));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F8 \"#Physics.NoClip true\""));
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F9 \"#Physics.NoClip false\""));
+	GetConsoleManager()->ExecuteCommand("bind-key F1 \"#Debug.Enable true; #Ui.3D.CamDistance 100.0\"");
+	GetConsoleManager()->ExecuteCommand("bind-key F2 \"#Game.Childishness 1.0\"");
+	GetConsoleManager()->ExecuteCommand("bind-key F3 \"#Game.Childishness 0.5\"");
+	GetConsoleManager()->ExecuteCommand("bind-key F4 \"#Game.Childishness 0.0\"");
+	GetConsoleManager()->ExecuteCommand("bind-key F6 prev-level");
+	GetConsoleManager()->ExecuteCommand("bind-key F7 next-level");
+	GetConsoleManager()->ExecuteCommand("bind-key F8 \"#Physics.NoClip true\"");
+	GetConsoleManager()->ExecuteCommand("bind-key F9 \"#Physics.NoClip false\"");
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	const str lSchtickName = _T("Touchstick");
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lSchtickName+_T(".AxisY-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lSchtickName+_T(".AxisY+"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lSchtickName+_T(".AxisX-"));
-	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lSchtickName+_T(".AxisX+"));
+	const str lSchtickName = "Touchstick";
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, lSchtickName+".AxisY-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, lSchtickName+".AxisY+");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, lSchtickName+".AxisX-");
+	v_override(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, lSchtickName+".AxisX+");
 #endif // Touch device or emulated touch device
 }
 
 void DownwashManager::SaveSettings()
 {
 #ifndef EMULATE_TOUCH
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand("save-application-config-file "+GetApplicationCommandFilename());
 #endif // Computer or touch device.
 }
 
@@ -268,24 +268,24 @@ bool DownwashManager::Open()
 	if (lOk)
 	{
 		mMenu = new Life::Menu(mUiManager, GetResourceManager());
-		mMenu->SetButtonTapSound(_T("tap.wav"), 1, 0.3f);
+		mMenu->SetButtonTapSound("tap.wav", 1, 0.3f);
 	}
 	if (lOk)
 	{
 		mWrongDirectionImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-		mWrongDirectionImage->Load(GetResourceManager(), _T("direction.png"),
+		mWrongDirectionImage->Load(GetResourceManager(), "direction.png",
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
 
 		mCheckIcon = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-		mCheckIcon->Load(GetResourceManager(), _T("icon_check.png"),
+		mCheckIcon->Load(GetResourceManager(), "icon_check.png",
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
 
 		mLockIcon = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-		mLockIcon->Load(GetResourceManager(), _T("icon_lock.png"),
+		mLockIcon->Load(GetResourceManager(), "icon_lock.png",
 			UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
 
 		mArrow = new UiCure::UserRendererImageResource(mUiManager, UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, false));
-		mArrow->Load(GetResourceManager(), _T("arrow.png"),
+		mArrow->Load(GetResourceManager(), "arrow.png",
 			UiCure::UserRendererImageResource::TypeLoadCallback(this, &DownwashManager::RendererTextureLoadCallback));
 		mArrowBillboard = new UiTbc::BillboardGeometry(1/4.0f, 1);
 		mArrowBillboardId = mUiManager->GetRenderer()->AddGeometry(mArrowBillboard, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::FORCE_NO_SHADOWS);
@@ -487,27 +487,27 @@ bool DownwashManager::Paint()
 			uint8 g = uint8(sin(mToyModeColorTimer.QueryTimeDiff()*5)*120+128);
 			uint8 b = uint8(sin(mToyModeColorTimer.QueryTimeDiff()*7)*120+128);
 			mUiManager->GetPainter()->SetColor(Color(10, 10, 10, 128));
-			mUiManager->GetPainter()->PrintText(_T("Toy mode"), 11, 5);
+			mUiManager->GetPainter()->PrintText("Toy mode", 11, 5);
 			mUiManager->GetPainter()->SetColor(Color(r, g, b, 255));
-			mUiManager->GetPainter()->PrintText(_T("Toy mode"), 10, 4);
+			mUiManager->GetPainter()->PrintText("Toy mode", 10, 4);
 		}
 		else
 		{
 			const bool lIsFlying = mFlyTime.IsStarted();
 			const bool lIsSloppy = (lIsFlying || !lTime);
-			PrintTime(_T(""), lTime, lIsSloppy, 100, 3, Color(192, 210, 220), Color(10, 10, 10, 128));
+			PrintTime("", lTime, lIsSloppy, 100, 3, Color(192, 210, 220), Color(10, 10, 10, 128));
 
 			if (GetControlMode() != 2)
 			{
 				double lLevelBestTime = GetCurrentLevelBestTime(false);
 				if (lLevelBestTime > 0)
 				{
-					PrintTime(_T("PR: "), lLevelBestTime, lIsSloppy, 100, 43, Color(10, 30, 40), Color(192, 192, 192, 128));
+					PrintTime("PR: ", lLevelBestTime, lIsSloppy, 100, 43, Color(10, 30, 40), Color(192, 192, 192, 128));
 				}
 				lLevelBestTime = GetCurrentLevelBestTime(true);
 				if (lLevelBestTime > 0)
 				{
-					PrintTime(_T("WR: "), lLevelBestTime, lIsSloppy, 100, 83, Color(210, 40, 40, 255), Color(40, 10, 10, 128));
+					PrintTime("WR: ", lLevelBestTime, lIsSloppy, 100, 83, Color(210, 40, 40, 255), Color(40, 10, 10, 128));
 				}
 			}
 		}
@@ -571,8 +571,8 @@ bool DownwashManager::Paint()
 		if (!mWinImage)
 		{
 			mWinImage = new UiCure::UserPainterKeepImageResource(mUiManager, UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-			const str lName = strutil::Format(_T("win%i.png"), Random::GetRandomNumber()%9);
-			//mLog.Infof(_T("Showing win image %s."), lName.c_str());
+			const str lName = strutil::Format("win%i.png", Random::GetRandomNumber()%9);
+			//mLog.Infof("Showing win image %s.", lName.c_str());
 			mWinImage->LoadUnique(GetResourceManager(), lName,
 				UiCure::UserPainterKeepImageResource::TypeLoadCallback(this, &DownwashManager::PainterImageLoadCallback));
 		}
@@ -616,8 +616,8 @@ bool DownwashManager::Paint()
 void DownwashManager::PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg)
 {
 	const int lSec = (int)pTime;
-	const str lIntTimeString = pPrefix + strutil::Format(_T("%i"), lSec);
-	const str lTimeString = pPrefix + strutil::Format(lIsSloppy? _T("%.1f s") : _T("%.3f s"), pTime);
+	const str lIntTimeString = pPrefix + strutil::Format("%i", lSec);
+	const str lTimeString = pPrefix + strutil::Format(lIsSloppy? "%.1f s" : "%.3f s", pTime);
 	int w = mUiManager->GetPainter()->GetStringWidth(lIntTimeString);
 	x -= w;
 	x = (x < 4)? 4 : x;
@@ -680,12 +680,12 @@ void DownwashManager::Shoot(Cure::ContextObject* pCanon, int pAmmo)
 	{
 		default:
 		{
-			lProjectile = new Life::FastProjectile(GetResourceManager(), _T("bullet"), mUiManager, this);
+			lProjectile = new Life::FastProjectile(GetResourceManager(), "bullet", mUiManager, this);
 		}
 		break;
 		case 1:
 		{
-			Life::HomingProjectile* lHoming = new Life::HomingProjectile(GetResourceManager(), _T("missile"), mUiManager, this);
+			Life::HomingProjectile* lHoming = new Life::HomingProjectile(GetResourceManager(), "missile", mUiManager, this);
 			lHoming->SetTarget(mAvatarId);
 			lProjectile = lHoming;
 		}
@@ -697,7 +697,7 @@ void DownwashManager::Shoot(Cure::ContextObject* pCanon, int pAmmo)
 	lProjectile->SetInitialTransform(t);
 	lProjectile->StartLoading();
 
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 	vec3 v;
 	Life::ProjectileUtil::GetBarrel(lProjectile, t, v);
 	lParticleRenderer->CreateFlare(vec3(0.9f, 0.7f, 0.5f), 0.3f, 7.5f, t.GetPosition(), v);
@@ -705,9 +705,9 @@ void DownwashManager::Shoot(Cure::ContextObject* pCanon, int pAmmo)
 
 void DownwashManager::Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength)
 {
-	mCollisionSoundManager->OnCollision(pStrength, pPosition, pExplosiveGeometry, _T("explosion"));
+	mCollisionSoundManager->OnCollision(pStrength, pPosition, pExplosiveGeometry, "explosion");
 
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
 	vec3 u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
 	u -= pVelocity;	// Mirror and inverse.
@@ -718,7 +718,7 @@ void DownwashManager::Detonate(Cure::ContextObject* pExplosive, const Tbc::Chunk
 	vec3 lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	vec3 lSmokeColor(0.2f, 0.2f, 0.2f);
 	vec3 lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	if (pExplosive->GetClassId().find(_T("barrel")) != str::npos)
+	if (pExplosive->GetClassId().find("barrel") != str::npos)
 	{
 		lStartFireColor.Set(0.9f, 1.0f, 0.8f);
 		lFireColor.Set(0.3f, 0.7f, 0.2f);
@@ -764,7 +764,7 @@ void DownwashManager::Detonate(Cure::ContextObject* pExplosive, const Tbc::Chunk
 			continue;
 		}
 		float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength) * 0.5f;
-		if (pExplosive->GetClassId().find(_T("missile")) != str::npos)
+		if (pExplosive->GetClassId().find("missile") != str::npos)
 		{
 			lForce *= 5;
 		}
@@ -799,7 +799,7 @@ void DownwashManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObj
 
 bool DownwashManager::DidFinishLevel()
 {
-	mLog.Headlinef(_T("Level %s done!"), mLevel->GetClassId().c_str());
+	mLog.Headlinef("Level %s done!", mLevel->GetClassId().c_str());
 	Cure::ContextObject* lAvatar = GetContext()->GetObject(mAvatarId);
 	if (lAvatar && lAvatar->GetPhysics()->GetEngineCount() >= 3)
 	{
@@ -822,7 +822,7 @@ bool DownwashManager::DidFinishLevel()
 				mMyHiscoreIndex = -1;
 				mHiscoreJustUploadedTimer.Stop();
 				CreateHiscoreAgent();
-				const str lLevelName = strutil::Format(_T("level_%i"), GetCurrentLevelNumber());
+				const str lLevelName = strutil::Format("level_%i", GetCurrentLevelNumber());
 				const int lNegativeTime = (int)(lTime*-1000);
 				if (!mHiscoreAgent->StartUploadingScore(gPlatform, lLevelName, gVehicleName, lPilotName, lNegativeTime))
 				{
@@ -833,7 +833,7 @@ bool DownwashManager::DidFinishLevel()
 		}
 
 		UiCure::UserSound2dResource* lFinishSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), _T("finish.wav"), lFinishSound, 1.0f, 1.0f);
+		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "finish.wav", lFinishSound, 1.0f, 1.0f);
 		mZoomPlatform = true;
 		mLevelCompleted = true;
 		mWinImageTimer.Start();
@@ -868,13 +868,13 @@ str DownwashManager::StepLevel(int pCount)
 		lLevelNumber = ORDERED_LEVELNO[lLevelNumber];
 		mOldLevel = mLevel;
 		mLevelCompleted = false;
-		str lNewLevelName = strutil::Format(_T("level_%.2i"), lLevelNumber);
+		str lNewLevelName = strutil::Format("level_%.2i", lLevelNumber);
 		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 		mLevel->StartLoading();
 		v_set(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
 		return lNewLevelName;
 	}
-	return _T("");
+	return "";
 }
 
 
@@ -898,7 +898,7 @@ int DownwashManager::GetCurrentLevelNumber() const
 double DownwashManager::GetCurrentLevelBestTime(bool pWorld) const
 {
 	const int lLevelIndex = GetCurrentLevelNumber();
-	const str lRecordFormat = pWorld? _T(RTVAR_GAME_WORLDRECORD_LEVEL) _T("_%i") : _T(RTVAR_GAME_PERSONALRECORD_LEVEL) _T("_%i");
+	const str lRecordFormat = pWorld? RTVAR_GAME_WORLDRECORD_LEVEL "_%i" : RTVAR_GAME_PERSONALRECORD_LEVEL "_%i";
 	const str lLevelTimeVarName = strutil::Format(lRecordFormat.c_str(), lLevelIndex);
 	static HashedString lFastName(lLevelTimeVarName);
 	if (lFastName != lLevelTimeVarName)
@@ -910,7 +910,7 @@ double DownwashManager::GetCurrentLevelBestTime(bool pWorld) const
 
 void DownwashManager::SetLevelBestTime(int pLevelIndex, bool pWorld, double pTime)
 {
-	const str lRecordFormat = pWorld? _T(RTVAR_GAME_WORLDRECORD_LEVEL) _T("_%i") : _T(RTVAR_GAME_PERSONALRECORD_LEVEL) _T("_%i");
+	const str lRecordFormat = pWorld? RTVAR_GAME_WORLDRECORD_LEVEL "_%i" : RTVAR_GAME_PERSONALRECORD_LEVEL "_%i";
 	const str lLevelTimeVarName = strutil::Format(lRecordFormat.c_str(), pLevelIndex);
 	GetVariableScope()->SetValue(Cure::RuntimeVariable::USAGE_SYS_OVERRIDE, lLevelTimeVarName, pTime);
 }
@@ -933,12 +933,12 @@ Cure::RuntimeVariableScope* DownwashManager::GetVariableScope() const
 bool DownwashManager::InitializeUniverse()
 {
 	// Create dummy explosion to ensure all geometries loaded and ready, to avoid LAAAG when first exploading.
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 	const vec3 v;
 	lParticleRenderer->CreateExplosion(vec3(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	str lStartLevel;
-	v_get(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, _T("level_00"));
+	v_get(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, "level_00");
 	mMassObjectArray.clear();
 	mLevel = (Level*)Parent::CreateContextObject(lStartLevel, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
@@ -946,7 +946,7 @@ bool DownwashManager::InitializeUniverse()
 	lTransformBones->SetBoneCount(1);
 	lTransformBones->FinalizeInit(Tbc::BoneHierarchy::TRANSFORM_NONE);
 	mHemisphereUvTransform = new Tbc::BoneAnimator(lTransformBones);
-	mHemisphere = (UiCure::CppContextObject*)Parent::CreateContextObject(_T("hemisphere"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	mHemisphere = (UiCure::CppContextObject*)Parent::CreateContextObject("hemisphere", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mHemisphere->EnableRootShadow(false);
 	mHemisphere->EnableMeshMove(false);
 	mHemisphere->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
@@ -1030,7 +1030,7 @@ void DownwashManager::UpdateTouchstickPlacement()
 		v_get(lScreenPixelWidth, =, GetVariableScope(), RTVAR_UI_DISPLAY_WIDTH, 1024);
 		const int lMinimumTouchRadius = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// Touched area is a fraction of the required 32px/iPhone classic.
 		mStick = new Touchstick(mUiManager->GetInputManager(), Touchstick::MODE_RELATIVE_CENTER, PixelRect(0, 0, 10, 10),  0, lMinimumTouchRadius);
-		mStick->SetUniqueIdentifier(_T("Touchstick"));
+		mStick->SetUniqueIdentifier("Touchstick");
 		mStick->SetValueScale(-1,+1, -1,-0.2f);
 	}
 	int lFingerSize = (int)(mRenderArea.GetWidth() * lTouchScale);
@@ -1078,13 +1078,13 @@ void DownwashManager::UpdateControlMode()
 	{
 		// Helper engine on + upright stabilization high.
 		lAvatar->GetPhysics()->GetEngine(lHelperEngineIndex)->SetStrength(8000.0f);
-		((Tbc::ChunkyClass::Tag*)lAvatar->GetClass()->GetTag(_T("upright_stabilizer")))->mFloatValueList[0] = 3;
+		((Tbc::ChunkyClass::Tag*)lAvatar->GetClass()->GetTag("upright_stabilizer"))->mFloatValueList[0] = 3;
 	}
 	else
 	{
 		// Engine off, low upright stabilization. Arcade mode compensates by having high autopilot and high durability.
 		lAvatar->GetPhysics()->GetEngine(lHelperEngineIndex)->SetStrength(0.0f);
-		((Tbc::ChunkyClass::Tag*)lAvatar->GetClass()->GetTag(_T("upright_stabilizer")))->mFloatValueList[0] = 0.3f;
+		((Tbc::ChunkyClass::Tag*)lAvatar->GetClass()->GetTag("upright_stabilizer"))->mFloatValueList[0] = 0.3f;
 	}
 }
 
@@ -1289,55 +1289,55 @@ void DownwashManager::SetMassRender(bool pRender)
 Cure::ContextObject* DownwashManager::CreateContextObject(const str& pClassId) const
 {
 	Cure::CppContextObject* lObject;
-	if (pClassId == _T("missile"))
+	if (pClassId == "missile")
 	{
 		lObject = new Life::HomingProjectile(GetResourceManager(), pClassId, mUiManager, (DownwashManager*)this);
 	}
-	else if (pClassId == _T("grenade") || pClassId == _T("rocket"))
+	else if (pClassId == "grenade" || pClassId == "rocket")
 	{
 		lObject = new Life::FastProjectile(GetResourceManager(), pClassId, mUiManager, (DownwashManager*)this);
 	}
-	else if (pClassId == _T("bomb"))
+	else if (pClassId == "bomb")
 	{
 		lObject = new Life::Projectile(GetResourceManager(), pClassId, mUiManager, (DownwashManager*)this);
 	}
-	else if (strutil::StartsWith(pClassId, _T("barrel")))
+	else if (strutil::StartsWith(pClassId, "barrel"))
 	{
 		Life::Mine* lMine = new Life::Mine(GetResourceManager(), pClassId, mUiManager, (DownwashManager*)this);
 		Cure::Health::Set(lMine, 0.3f);
 		lMine->EnableDeleteDetonation(false);
 		lMine->SetExplosiveStrength(5);
-		new Cure::FloatAttribute(lMine, _T("DamageAbsorption"), 0.2f);
-		new Cure::FloatAttribute(lMine, _T("DamageReduction"), 0.3f);
+		new Cure::FloatAttribute(lMine, "DamageAbsorption", 0.2f);
+		new Cure::FloatAttribute(lMine, "DamageReduction", 0.3f);
 		lObject = lMine;
 	}
-	else if (pClassId == _T("stone") || pClassId == _T("cube"))
+	else if (pClassId == "stone" || pClassId == "cube")
 	{
 		lObject = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (DownwashManager*)this);
 		Cure::Health::DeleteAttribute(lObject);
 	}
-	else if (pClassId == _T("beach_ball") || pClassId == _T("dino_bubble") || pClassId == _T("clown_bubble"))
+	else if (pClassId == "beach_ball" || pClassId == "dino_bubble" || pClassId == "clown_bubble")
 	{
 		CenteredMachine* lMachine = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (DownwashManager*)this);
-		new Cure::FloatAttribute(lMachine, _T("DamageAbsorption"), 1e-3f);
+		new Cure::FloatAttribute(lMachine, "DamageAbsorption", 1e-3f);
 		lMachine->SetDeathFrameDelay(0);
 		lMachine->SetDisappearAfterDeathDelay(0.2f);
 		lObject = lMachine;
 	}
-	else if (strutil::StartsWith(pClassId, _T("level_")))
+	else if (strutil::StartsWith(pClassId, "level_"))
 	{
 		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
 		Level* lLevel = new Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
 		lLevel->EnableRootShadow(false);
 		lObject = lLevel;
 	}
-	else if (strutil::StartsWith(pClassId, _T("helicopter_")) || strutil::StartsWith(pClassId, _T("monster")) ||
-		strutil::StartsWith(pClassId, _T("fighter")))
+	else if (strutil::StartsWith(pClassId, "helicopter_") || strutil::StartsWith(pClassId, "monster") ||
+		strutil::StartsWith(pClassId, "fighter"))
 	{
 		CenteredMachine* lMachine = new CenteredMachine(GetResourceManager(), pClassId, mUiManager, (DownwashManager*)this);
-		if (strutil::StartsWith(pClassId, _T("helicopter_")))
+		if (strutil::StartsWith(pClassId, "helicopter_"))
 		{
-			new Cure::FloatAttribute(lMachine, _T("DamageAbsorption"), 1);
+			new Cure::FloatAttribute(lMachine, "DamageAbsorption", 1);
 			lMachine->SetDeathFrameDelay(2);
 		}
 		lMachine->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
@@ -1345,13 +1345,13 @@ Cure::ContextObject* DownwashManager::CreateContextObject(const str& pClassId) c
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
 	}
-	else if (strutil::StartsWith(pClassId, _T("forklift")) || strutil::StartsWith(pClassId, _T("corvette")) ||
-		strutil::StartsWith(pClassId, _T("air_balloon")) || strutil::StartsWith(pClassId, _T("turret2")))
+	else if (strutil::StartsWith(pClassId, "forklift") || strutil::StartsWith(pClassId, "corvette") ||
+		strutil::StartsWith(pClassId, "air_balloon") || strutil::StartsWith(pClassId, "turret2"))
 	{
 		UiCure::Machine* lMachine = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (DownwashManager*)this);
-		if (strutil::StartsWith(pClassId, _T("turret")))
+		if (strutil::StartsWith(pClassId, "turret"))
 		{
-			new Cure::FloatAttribute(lMachine, _T("DamageAbsorption"), 1);
+			new Cure::FloatAttribute(lMachine, "DamageAbsorption", 1);
 		}
 		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
@@ -1369,29 +1369,29 @@ Cure::ContextObject* DownwashManager::CreateContextObject(const str& pClassId) c
 
 Cure::ContextObject* DownwashManager::CreateLogicHandler(const str& pType)
 {
-	if (pType == _T("spawner") || pType == _T("spawner_init"))
+	if (pType == "spawner" || pType == "spawner_init")
 	{
 		return new Life::Spawner(GetContext());
 	}
-	else if (pType == _T("real_time_ratio"))
+	else if (pType == "real_time_ratio")
 	{
 		return new LandingTrigger(GetContext());
 	}
-	else if (pType == _T("eater"))
+	else if (pType == "eater")
 	{
 		return new Eater(GetContext());
 	}
-	else if (pType == _T("context_path"))
+	else if (pType == "context_path")
 	{
 		return mLevel->QueryPath();
 	}
-	else if (pType == _T("trig_elevator"))
+	else if (pType == "trig_elevator")
 	{
 		Cure::Elevator* lElevator = new Cure::Elevator(GetContext());
 		lElevator->SetStopDelay(0.5f);
 		return lElevator;
 	}
-	else if (strutil::StartsWith(pType, _T("driver:")))
+	else if (strutil::StartsWith(pType, "driver:"))
 	{
 		return new Cure::Driver(GetContext());
 	}
@@ -1404,7 +1404,7 @@ void DownwashManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 	{
 		if (pObject->GetInstanceId() == mAvatarId)
 		{
-			log_volatile(mLog.Debug(_T("Yeeha! Loaded avatar!")));
+			log_volatile(mLog.Debug("Yeeha! Loaded avatar!"));
 			if (mSetRandomChopperColor)
 			{
 				vec3 lColor;
@@ -1423,7 +1423,7 @@ void DownwashManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 		{
 			OnLevelLoadCompleted();
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("monster")))
+		else if (strutil::StartsWith(pObject->GetClassId(), "monster"))
 		{
 			((Life::ExplodingMachine*)pObject)->SetDeathFrameDelay(5);
 			vec3 lDirection(-1,0,0);
@@ -1436,11 +1436,11 @@ void DownwashManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			mLastVehicleColor = lColor;
 			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("forklift")) ||
-			strutil::StartsWith(pObject->GetClassId(), _T("corvette")))
+		else if (strutil::StartsWith(pObject->GetClassId(), "forklift") ||
+			strutil::StartsWith(pObject->GetClassId(), "corvette"))
 		{
-			str lBaseName = strutil::Split(pObject->GetClassId(), _T("_"))[0];
-			new AutoPathDriver(this, pObject->GetInstanceId(), lBaseName+_T("_path"));
+			str lBaseName = strutil::Split(pObject->GetClassId(), "_")[0];
+			new AutoPathDriver(this, pObject->GetInstanceId(), lBaseName+"_path");
 			vec3 lColor;
 			do
 			{
@@ -1449,15 +1449,15 @@ void DownwashManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 			mLastVehicleColor = lColor;
 			((UiCure::CppContextObject*)pObject)->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
 		}
-		else if (pObject->GetClassId() == _T("turret"))
+		else if (pObject->GetClassId() == "turret")
 		{
 			new CanonDriver(this, pObject->GetInstanceId(), 0);
 		}
-		else if (pObject->GetClassId() == _T("turret2"))
+		else if (pObject->GetClassId() == "turret2")
 		{
 			new CanonDriver(this, pObject->GetInstanceId(), 1);
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("air_balloon")))
+		else if (strutil::StartsWith(pObject->GetClassId(), "air_balloon"))
 		{
 			new AirBalloonPilot(this, pObject->GetInstanceId());
 			if (mLastVehicleColor.y > 0.4f && mLastVehicleColor.x < 0.3f && mLastVehicleColor.z < 0.3f)
@@ -1470,26 +1470,26 @@ void DownwashManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 				mLastVehicleColor = vec3(0, 1, 0);
 			}
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("fighter")))
+		else if (strutil::StartsWith(pObject->GetClassId(), "fighter"))
 		{
 			//pObject->SetEnginePower(0, 1);
 			pObject->SetEnginePower(1, 1);
 			//pObject->SetEnginePower(2, 1);
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), _T("simulator")))
+		else if (strutil::StartsWith(pObject->GetClassId(), "simulator"))
 		{
 			new SimulatorDriver(this, pObject->GetInstanceId());
 		}
 		else
 		{
-			log_volatile(mLog.Tracef(_T("Loaded object %s."), pObject->GetClassId().c_str()));
+			log_volatile(mLog.Tracef("Loaded object %s.", pObject->GetClassId().c_str()));
 		}
 		pObject->GetPhysics()->UpdateBonesObjectTransformation(0, gIdentityTransformationF);
 		((UiCure::CppContextObject*)pObject)->UiMove();
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
+		mLog.Errorf("Could not load object of type %s.", pObject->GetClassId().c_str());
 		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
 }
@@ -1598,7 +1598,7 @@ void DownwashManager::OnCollision(const vec3& pForce, const vec3& pTorque, const
 	float lCollisionImpactFactor = 3;
 	if (lIsAvatar && pObject2 == mLevel)
 	{
-		const Tbc::ChunkyClass::Tag* lTag = mLevel->GetClass()->GetTag(_T("anything"));
+		const Tbc::ChunkyClass::Tag* lTag = mLevel->GetClass()->GetTag("anything");
 		std::vector<int>::const_iterator x = lTag->mBodyIndexList.begin();
 		for (; x != lTag->mBodyIndexList.end(); ++x)
 		{
@@ -1633,7 +1633,7 @@ void DownwashManager::OnCollision(const vec3& pForce, const vec3& pTorque, const
 
 	// Check if it's a rotor!
 	bool lIsRotor = false;
-	const float lDamageFactor = pObject1->GetAttributeFloatValue(_T("DamageAbsorption"));
+	const float lDamageFactor = pObject1->GetAttributeFloatValue("DamageAbsorption");
 	if (lDamageFactor)
 	{
 		lCollisionImpactFactor *= lDamageFactor;
@@ -1647,7 +1647,7 @@ void DownwashManager::OnCollision(const vec3& pForce, const vec3& pTorque, const
 		}
 		else if (lIsAvatar && pObject2->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC)
 		{
-			const float lDamageReduction = pObject2->GetAttributeFloatValue(_T("DamageReduction"));
+			const float lDamageReduction = pObject2->GetAttributeFloatValue("DamageReduction");
 			if (lDamageReduction)
 			{
 				lCollisionImpactFactor *= lDamageReduction;
@@ -1743,7 +1743,7 @@ xform DownwashManager::GetMainRotorTransform(const UiCure::CppContextObject* pCh
 	for (size_t x = 0; x < lMeshCount; ++x)
 	{
 		((UiTbc::ChunkyClass*)pChopper->GetClass())->GetMesh(x, lPhysIndex, lMeshName, lTransform, lMeshScale);
-		if (lMeshName.find(_T("_rotor")) != str::npos)
+		if (lMeshName.find("_rotor") != str::npos)
 		{
 			return pChopper->GetMesh(x)->GetBaseTransformation();
 		}
@@ -1777,31 +1777,31 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 	double lRtrOffset;
 	v_get(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 
-	UiTbc::TextField* lNameField = new UiTbc::TextField(0, WHITE, _T("pilot_name"));
+	UiTbc::TextField* lNameField = new UiTbc::TextField(0, WHITE, "pilot_name");
 	lNameField->SetText(lPilotName);
 	lLayouter.AddWindow(lNameField, 0, 5, 0, 1, 1);
 	lNameField->SetHorizontalMargin(lNameField->GetPreferredHeight() / 3);
 	//lNameField->SetKeyboardFocus();
 
 	lLayouter.SetContentXMargin(0);
-	UiTbc::RadioButton* lEasyButton = new UiTbc::RadioButton(Color(20, 30, 20), _T("Easy"));
+	UiTbc::RadioButton* lEasyButton = new UiTbc::RadioButton(Color(20, 30, 20), "Easy");
 	lEasyButton->SetPressColor(Color(50, 210, 40));
 	lEasyButton->SetRoundedRadiusMask(0x9);
 	lEasyButton->SetPressed(lDifficultyMode == 2);
 	lLayouter.AddButton(lEasyButton, -2, 1, 5, 0, 1, 3, false);
-	UiTbc::RadioButton* lMediumButton = new UiTbc::RadioButton(Color(30, 30, 20), _T("Medium"));
+	UiTbc::RadioButton* lMediumButton = new UiTbc::RadioButton(Color(30, 30, 20), "Medium");
 	lMediumButton->SetPressColor(Color(170, 165, 10));
 	lMediumButton->SetRoundedRadiusMask(0);
 	lMediumButton->SetPressed(lDifficultyMode == 1);
 	lLayouter.AddButton(lMediumButton, -3, 1, 5, 1, 1, 3, false);
-	UiTbc::RadioButton* lHardButton = new UiTbc::RadioButton(Color(30, 20, 20), _T("Hard"));
+	UiTbc::RadioButton* lHardButton = new UiTbc::RadioButton(Color(30, 20, 20), "Hard");
 	lHardButton->SetPressColor(Color(230, 40, 30));
 	lHardButton->SetRoundedRadiusMask(0x6);
 	lHardButton->SetPressed(lDifficultyMode == 0);
 	lLayouter.AddButton(lHardButton, -4, 1, 5, 2, 1, 3, false);
 	lLayouter.SetContentXMargin(lLayouter.GetContentYMargin());
 
-	UiTbc::CheckButton* lToyModeButton = new UiTbc::CheckButton(Color(30, 70, 220), _T("Toy mode"));
+	UiTbc::CheckButton* lToyModeButton = new UiTbc::CheckButton(Color(30, 70, 220), "Toy mode");
 	lToyModeButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
 	lToyModeButton->SetCheckedIcon(mCheckIcon->GetData());
 	lToyModeButton->SetDisabledIcon(mLockIcon->GetData());
@@ -1813,25 +1813,25 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 		UiTbc::TextArea* lUnlockLabel = new UiTbc::TextArea(BLACK);
 		lUnlockLabel->GetClientRectComponent()->SetIsHollow(true);
 		lUnlockLabel->SetFontColor(WHITE);
-		lUnlockLabel->AddText(_T("Finish all levels to\nunlock toy mode"));
+		lUnlockLabel->AddText("Finish all levels to\nunlock toy mode");
 		lLayouter.AddComponent(lUnlockLabel, 2, 5, 1, 1, 2);
 		lUnlockLabel->SetHorizontalMargin(lUnlockLabel->GetPreferredHeight() / 3);
 	}
 
-	UiTbc::CheckButton* lBedsideVolumeButton = new UiTbc::CheckButton(Color(190, 50, 180), _T("Bedside volume"));
+	UiTbc::CheckButton* lBedsideVolumeButton = new UiTbc::CheckButton(Color(190, 50, 180), "Bedside volume");
 	lBedsideVolumeButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
 	lBedsideVolumeButton->SetCheckedIcon(mCheckIcon->GetData());
 	lBedsideVolumeButton->SetPressed(lMasterVolume < 0.5);
 	lLayouter.AddButton(lBedsideVolumeButton, -6, 3, 5, 0, 1, 2, false);
-	UiTbc::Button* lHiscoreButton = new UiTbc::Button(Color(90, 50, 10), _T("High score"));
+	UiTbc::Button* lHiscoreButton = new UiTbc::Button(Color(90, 50, 10), "High score");
 	lHiscoreButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
 	lLayouter.AddButton(lHiscoreButton, -7, 3, 5, 1, 1, 2, true);
 
-	UiTbc::Button* lRestartButton = new UiTbc::Button(Color(220, 110, 20), _T("Restart from first level"));
+	UiTbc::Button* lRestartButton = new UiTbc::Button(Color(220, 110, 20), "Restart from first level");
 	lRestartButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
 	lLayouter.AddButton(lRestartButton, -8, 4, 5, 0, 1, 1, true);
 
-	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), _T("X"));
+	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), "X");
 	lLayouter.AddCornerButton(lCloseButton, -9);
 
 	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
@@ -1851,19 +1851,19 @@ void DownwashManager::ShowHiscoreDialog(int pDirection)
 	mMenu->DismissDialog();
 	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative), 0.8f, 0.8f);
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
-	d->SetName(_T("hiscore_dialog"));
+	d->SetName("hiscore_dialog");
 	d->SetPreClickTarget(UiTbc::Dialog::Action(this, &DownwashManager::OnPreHiscoreAction));
 	d->SetDirection(pDirection, true);
 
 	UiTbc::FixedLayouter lLayouter(d);
 
-	UiTbc::Label* lLoadingLabel = new UiTbc::Label(WHITE, _T("Please wait while loading..."));
+	UiTbc::Label* lLoadingLabel = new UiTbc::Label(WHITE, "Please wait while loading...");
 	lLoadingLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Label::ICON_CENTER);
 	lLayouter.AddComponent(lLoadingLabel, 2, 5, 0, 1, 1);
 	lLoadingLabel->SetAdaptive(false);
 	d->SetQueryLabel(lLoadingLabel);
 
-	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), _T("X"));
+	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), "X");
 	lLayouter.AddCornerButton(lCloseButton, -9);
 
 	lLayouter.SetContentWidthPart(1);
@@ -1878,7 +1878,7 @@ void DownwashManager::ShowHiscoreDialog(int pDirection)
 
 	CreateHiscoreAgent();
 	mHiscoreLevelIndex = (mHiscoreLevelIndex >= 0)? mHiscoreLevelIndex : GetCurrentLevelNumber();
-	const str lLevelName = strutil::Format(_T("level_%i"), mHiscoreLevelIndex);
+	const str lLevelName = strutil::Format("level_%i", mHiscoreLevelIndex);
 	const int lOffset = std::max(0, mMyHiscoreIndex-5);
 	if (!mHiscoreAgent->StartDownloadingList(gPlatform, lLevelName, gVehicleName, lOffset, 10))
 	{
@@ -1891,7 +1891,7 @@ void DownwashManager::UpdateHiscoreDialog()
 {
 	UiTbc::Dialog* d = mMenu->GetDialog();
 	// If dialog still open: show it. Otherwise just fuck it.
-	if (!d || d->GetName() != _T("hiscore_dialog"))
+	if (!d || d->GetName() != "hiscore_dialog")
 	{
 		return;
 	}
@@ -1909,7 +1909,7 @@ void DownwashManager::UpdateHiscoreDialog()
 	const int lScoreCount = (int)lHiscoreList.mEntryList.size();
 	const str lLevelTitle = GetHiscoreLevelTitle();
 	UiTbc::Label* lHeader = new UiTbc::Label(WHITE, lLevelTitle);
-	lHeader->SetName(_T("level_header"));
+	lHeader->SetName("level_header");
 	lHeader->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Label::ICON_CENTER);
 	lLayouter.AddComponent(lHeader, 0, 2+lMaxEntryCount, 0, 1, 1);
 	lHeader->SetAdaptive(false);
@@ -1926,7 +1926,7 @@ void DownwashManager::UpdateHiscoreDialog()
 		str lTimeStr;
 		strutil::DoubleToString(lTime, 3, lTimeStr);
 		const Color lColor = (lPilotName == lEntry.mName)? YELLOW : WHITE;
-		UiTbc::Label* lPlaceLabel = new UiTbc::Label(lColor, strutil::Format(_T("%i."), lPlace));
+		UiTbc::Label* lPlaceLabel = new UiTbc::Label(lColor, strutil::Format("%i.", lPlace));
 		lPlaceLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Label::ICON_LEFT);
 		UiTbc::Label* lNameLabel = new UiTbc::Label(lColor, lEntry.mName);
 		UiTbc::Label* lTimeLabel = new UiTbc::Label(lColor, lTimeStr);
@@ -1940,14 +1940,14 @@ void DownwashManager::UpdateHiscoreDialog()
 	}
 	if (!lScoreCount)
 	{
-		d->UpdateQueryLabel(_T("No high score entered. Yet."), WHITE);
+		d->UpdateQueryLabel("No high score entered. Yet.", WHITE);
 	}
 }
 
 void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 {
 	// Always save pilot name.
-	UiTbc::TextField* lPilotNameField = (UiTbc::TextField*)mMenu->GetDialog()->GetChild(_T("pilot_name"), 0);
+	UiTbc::TextField* lPilotNameField = (UiTbc::TextField*)mMenu->GetDialog()->GetChild("pilot_name", 0);
 	if (lPilotNameField)
 	{
 		v_set(GetVariableScope(), RTVAR_GAME_PILOTNAME, lPilotNameField->GetText());
@@ -1991,7 +1991,7 @@ void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 	else if (pButton->GetTag() == -8)
 	{
 		mPauseButton->SetVisible(true);
-		GetConsoleManager()->PushYieldCommand(_T("set-level-index 0"));
+		GetConsoleManager()->PushYieldCommand("set-level-index 0");
 		mMenu->DismissDialog();
 		HiResTimer::StepCounterShadow();
 		v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
@@ -2043,7 +2043,7 @@ void DownwashManager::UpdateHiscoreDialogTitle()
 	UiTbc::Dialog* d = mMenu->GetDialog();
 	if (d)
 	{
-		UiTbc::Label* lHeader = (UiTbc::Label*)d->GetChild(_T("level_header"), 0);
+		UiTbc::Label* lHeader = (UiTbc::Label*)d->GetChild("level_header", 0);
 		if (lHeader)
 		{
 			lHeader->SetText(GetHiscoreLevelTitle());
@@ -2056,15 +2056,15 @@ str DownwashManager::GetHiscoreLevelTitle() const
 	str lHiscoreLevelInfo;
 	if (GetCurrentLevelNumber() == mHiscoreLevelIndex || mHiscoreLevelIndex == -1)
 	{
-		lHiscoreLevelInfo = strutil::Format(_T("Current level (%i) high score"), mHiscoreLevelIndex+1);
+		lHiscoreLevelInfo = strutil::Format("Current level (%i high score"), mHiscoreLevelIndex+1);
 	}
 	else if (GetCurrentLevelNumber()-1 == mHiscoreLevelIndex)
 	{
-		lHiscoreLevelInfo = strutil::Format(_T("Previous level (%i) high score"), mHiscoreLevelIndex+1);
+		lHiscoreLevelInfo = strutil::Format("Previous level (%i high score"), mHiscoreLevelIndex+1);
 	}
 	else
 	{
-		lHiscoreLevelInfo = strutil::Format(_T("Level %i high score"), mHiscoreLevelIndex+1);
+		lHiscoreLevelInfo = strutil::Format("Level %i high score", mHiscoreLevelIndex+1);
 	}
 	return lHiscoreLevelInfo;
 }
@@ -2073,8 +2073,8 @@ void DownwashManager::CreateHiscoreAgent()
 {
 	delete mHiscoreAgent;
 	const str lHost = _O("7y=196h5+;/,9p.5&92r:/;*(,509p;/1", "gamehiscore.pixeldoctrine.com");
-	mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, _T("downwash"));
-	//mHiscoreAgent = new Cure::HiscoreAgent(_T("localhost"), 8080, _T("downwash"));
+	mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, "downwash");
+	//mHiscoreAgent = new Cure::HiscoreAgent("localhost", 8080, "downwash");
 }
 
 void DownwashManager::TickHiscore()
@@ -2093,9 +2093,9 @@ void DownwashManager::TickHiscore()
 			mHiscoreAgent = 0;
 			UiTbc::Dialog* d = mMenu->GetDialog();
 			// If dialog still open: show it. Otherwise just fuck it.
-			if (d && d->GetName() == _T("hiscore_dialog"))
+			if (d && d->GetName() == "hiscore_dialog")
 			{
-				d->UpdateQueryLabel(_T("Network problem."), RED);
+				d->UpdateQueryLabel("Network problem.", RED);
 			}
 		}
 		return;
@@ -2187,14 +2187,14 @@ void DownwashManager::ScriptPhysicsTick()
 		{
 			mAllLoadedTimer.Stop();
 			strutil::strvec lResourceTypes;
-			lResourceTypes.push_back(_T("RenderImg"));
-			lResourceTypes.push_back(_T("Geometry"));
-			lResourceTypes.push_back(_T("GeometryRef"));
-			lResourceTypes.push_back(_T("Physics"));
-			lResourceTypes.push_back(_T("PhysicsShared"));
-			lResourceTypes.push_back(_T("RamImg"));
-			lResourceTypes.push_back(_T("Sound3D"));
-			lResourceTypes.push_back(_T("Sound2D"));
+			lResourceTypes.push_back("RenderImg");
+			lResourceTypes.push_back("Geometry");
+			lResourceTypes.push_back("GeometryRef");
+			lResourceTypes.push_back("Physics");
+			lResourceTypes.push_back("PhysicsShared");
+			lResourceTypes.push_back("RamImg");
+			lResourceTypes.push_back("Sound3D");
+			lResourceTypes.push_back("Sound2D");
 			GetResourceManager()->ForceFreeCache(lResourceTypes);
 			GetResourceManager()->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
 		}
@@ -2258,7 +2258,7 @@ void DownwashManager::HandleWorldBoundaries()
 	if (lAvatar && !mTooFarAwayTimer.IsStarted() && lAvatar->GetPosition().GetLength() > 300)
 	{
 		mTooFarAwayTimer.Start();
-		Life::HomingProjectile* lRocket = (Life::HomingProjectile*)Parent::CreateContextObject(_T("missile"), Cure::NETWORK_OBJECT_LOCAL_ONLY);
+		Life::HomingProjectile* lRocket = (Life::HomingProjectile*)Parent::CreateContextObject("missile", Cure::NETWORK_OBJECT_LOCAL_ONLY);
 		lRocket->SetTarget(mAvatarId);
 		vec3 lFirePosition(lAvatar->GetPosition().x, 0, 0);
 		lFirePosition.Normalize(200);

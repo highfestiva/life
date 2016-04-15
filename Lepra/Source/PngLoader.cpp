@@ -114,28 +114,28 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 
 	if (CheckIfPNG() == false)
 	{
-		mLog.AWarning("PNG header error!");
+		mLog.Warning("PNG header error!");
 		return STATUS_READ_HEADER_ERROR;
 	}
 
 	png_structp lPNG = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 	if (lPNG == 0)
 	{
-		mLog.AError("PNG reader runs out of memory!");
+		mLog.Error("PNG reader runs out of memory!");
 		return STATUS_MEMORY_ERROR;
 	}
 
 	png_infop lInfo = png_create_info_struct(lPNG);
 	if (lInfo == 0)
 	{
-		mLog.AError("PNG reader runs out of memory!");
+		mLog.Error("PNG reader runs out of memory!");
 		png_destroy_read_struct(&lPNG, png_infopp_NULL, png_infopp_NULL);
 		return STATUS_MEMORY_ERROR;
 	}
 
 	if (setjmp(png_jmpbuf(lPNG)))
 	{
-		mLog.AError("PNG reader runs out of memory!");
+		mLog.Error("PNG reader runs out of memory!");
 		png_destroy_read_struct(&lPNG, &lInfo, png_infopp_NULL);
 		return STATUS_MEMORY_ERROR;
 	}
@@ -279,7 +279,7 @@ PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
 		}
 		break;
 	default:
-		mLog.AError("PNG is of unknown type!");
+		mLog.Error("PNG is of unknown type!");
 		png_destroy_read_struct(&lPNG, &lInfo, 0);
 		return STATUS_READ_INFO_ERROR;
 	}

@@ -123,7 +123,7 @@ void GameTicker::StartPhysicsTick()
 {
 	if (mTimeManager->GetAffordedPhysicsStepCount() <= 0)
 	{
-		log_adebug("Could not afford a physics step.");
+		log_debug("Could not afford a physics step.");
 		return;
 	}
 
@@ -199,7 +199,7 @@ void GameTicker::PhysicsTick()
 	const float lStepIncrement = lStepTime / lAffordedMicroSteps;
 	/*if (lAffordedStepCount != 1)
 	{
-		mLog.Warningf(_T("Game time allows for %i physics steps in increments of %f."),
+		mLog.Warningf("Game time allows for %i physics steps in increments of %f.",
 			lMicroStepCount, lStepIncrement);
 	}*/
 	bool lFastAlgo;
@@ -227,7 +227,7 @@ void GameTicker::PhysicsTick()
 	}
 	catch (...)
 	{
-		mLog.Errorf(_T("Got some crash or major problem in physics simulation!"));
+		mLog.Errorf("Got some crash or major problem in physics simulation!");
 	}
 	{
 		//LEPRA_MEASURE_SCOPE(PostSteps);

@@ -22,7 +22,7 @@ public:
 	static void Run(const wchar_t* pDirectory, const wchar_t* pFilename);
 	static bool IsRunning();
 	static void Break();
-	static astr GetStdOut();
+	static str GetStdOut();
 	static void ClearStdOut();
 
 private:
@@ -32,7 +32,7 @@ private:
 	static StaticThread mPythonWorker;
 	static StaticThread mStdOutReader;
 	static Lock mStdOutLock;
-	static astr mStdOut;
+	static str mStdOut;
 	static wstr mDirectory;
 	static wstr mFilename;
 	static bool mKillSimulator;

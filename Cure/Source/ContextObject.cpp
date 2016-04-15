@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -63,7 +63,7 @@ ContextObject::~ContextObject()
 {
 	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
 
-	log_volatile(mLog.Tracef(_T("Destructing context object %s."), mClassId.c_str()));
+	log_volatile(mLog.Tracef("Destructing context object %s.", mClassId.c_str()));
 
 	DeleteNetworkOutputGhost();
 
@@ -228,7 +228,7 @@ void ContextObject::AttachToObjectByBodyIndices(unsigned pBody1Index, ContextObj
 {
 	if (IsAttachedTo(pObject2))
 	{
-		mLog.Warningf(_T("Object %i already attached to object %i!"), GetInstanceId(), pObject2->GetInstanceId());
+		mLog.Warningf("Object %i already attached to object %i!", GetInstanceId(), pObject2->GetInstanceId());
 		return;
 	}
 	AttachToObject(mPhysics->GetBoneGeometry(pBody1Index), pObject2, pObject2->GetStructureGeometry(pBody2Index), false);
@@ -366,7 +366,7 @@ float ContextObject::GetAttributeFloatValue(const str& pAttributeName) const
 
 void ContextObject::QuerySetChildishness(float pChildishness)
 {
-	const str lName = _T("float_childishness");
+	const str lName = "float_childishness";
 	Cure::FloatAttribute* lAttribute = (Cure::FloatAttribute*)GetAttribute(lName);
 	if (!lAttribute)
 	{
@@ -456,7 +456,7 @@ bool ContextObject::UpdateFullPosition(const ObjectPositionalData*& pPositionalD
 	Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
 	if (!lGeometry || lGeometry->GetBodyId() == Tbc::INVALID_BODY)
 	{
-		mLog.Errorf(_T("Could not get positional update (for streaming), since %i/%s not loaded yet!"),
+		mLog.Errorf("Could not get positional update (for streaming), since %i/%s not loaded yet!",
 			GetInstanceId(), GetClassId().c_str());
 		return false;
 	}
@@ -495,7 +495,7 @@ void ContextObject::SetFullPosition(const ObjectPositionalData& pPositionalData,
 		}
 		//if (pDeltaThreshold > 0)
 		//{
-		//	mLog.Infof(_T("Positional diff is %f."), lScaledDiff);
+		//	mLog.Infof("Positional diff is %f.", lScaledDiff);
 		//}
 	}
 
@@ -509,7 +509,7 @@ void ContextObject::SetPositionFinalized()
 void ContextObject::SetInitialTransform(const xform& pTransformation)
 {
 	//const quat& q = pTransformation.GetOrientation();
-	//mLog.Infof(_T("Setting initial quaternion (%f;%f;%f;%f) for class %s."), q.a, q.b, q.c, q.d, GetClassId().c_str());
+	//mLog.Infof("Setting initial quaternion (%f;%f;%f;%f for class %s."), q.a, q.b, q.c, q.d, GetClassId().c_str());
 	mPosition.mPosition.mTransformation = pTransformation;
 }
 
@@ -521,7 +521,7 @@ xform ContextObject::GetInitialTransform() const
 void ContextObject::SetInitialPositionalData(const ObjectPositionalData& pPositionalData)
 {
 	//const quat& q = pPositionalData.mPosition.mTransformation.GetOrientation();
-	//mLog.Infof(_T("Setting initial quaternion/pos (%f;%f;%f;%f) for class %s."), q.a, q.b, q.c, q.d, GetClassId().c_str());
+	//mLog.Infof("Setting initial quaternion/pos (%f;%f;%f;%f for class %s."), q.a, q.b, q.c, q.d, GetClassId().c_str());
 	mPosition.CopyData(&pPositionalData);
 }
 
@@ -772,7 +772,7 @@ float ContextObject::GetImpact(const vec3& pGravity, const vec3& pForce, const v
 	lImpact = std::max(lImpact, lTorqueFactor * 0.03f);
 	if (lImpact >= 1.0f)
 	{
-		log_volatile(mLog.Tracef(_T("Collided hard with something dynamic.")));
+		log_volatile(mLog.Tracef("Collided hard with something dynamic."));
 	}
 	return (lImpact);
 }
@@ -872,7 +872,7 @@ void ContextObject::AttachToObject(Tbc::ChunkyBoneGeometry* pBoneGeometry1, Cont
 			{
 				break;
 			}
-			mLog.AError("Failing to attach joint to a static object. Try reversing the attachment!");
+			mLog.Error("Failing to attach joint to a static object. Try reversing the attachment!");
 			return;
 		}
 		lBody2Connectee = lNode2Connectee->GetBodyId();
@@ -883,42 +883,42 @@ void ContextObject::AttachToObject(Tbc::ChunkyBoneGeometry* pBoneGeometry1, Cont
 
 	if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_3DOF))
 	{
-		log_adebug("Attaching two objects with ball joint.");
+		log_debug("Attaching two objects with ball joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_BALL);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_FIXED))
 	{
-		log_adebug("Attaching two objects with fixed joint.");
+		log_debug("Attaching two objects with fixed joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_FIXED);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_HINGE2))
 	{
-		log_adebug("Attaching two objects with hinge-2 joint.");
+		log_debug("Attaching two objects with hinge-2 joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_HINGE2);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_SUSPEND_HINGE))
 	{
-		log_adebug("Attaching two objects with suspend hinge joint.");
+		log_debug("Attaching two objects with suspend hinge joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_SUSPEND_HINGE);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_HINGE))
 	{
-		log_adebug("Attaching two objects with hinge joint.");
+		log_debug("Attaching two objects with hinge joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_HINGE);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_UNIVERSAL))
 	{
-		log_adebug("Attaching two objects with universal joint.");
+		log_debug("Attaching two objects with universal joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_UNIVERSAL);
 	}
 	else if (pBoneGeometry1->IsConnectorType(Tbc::ChunkyBoneGeometry::CONNECTOR_SLIDER))
 	{
-		log_adebug("Attaching two objects with slider joint.");
+		log_debug("Attaching two objects with slider joint.");
 		pBoneGeometry2->SetJointType(Tbc::ChunkyBoneGeometry::JOINT_SLIDER);
 	}
 	else
 	{
-		mLog.AError("Could not find connection type to attach two objects with a joint.");
+		mLog.Error("Could not find connection type to attach two objects with a joint.");
 		return;
 	}
 	pBoneGeometry2->GetBodyData().mParent = pBoneGeometry1;

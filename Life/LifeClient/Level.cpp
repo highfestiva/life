@@ -30,7 +30,7 @@ void Level::OnLoaded()
 {
 	Parent::OnLoaded();
 
-	const Tbc::ChunkyClass::Tag* lTag = FindTag(_T("mass_objects"), -1, -1);
+	const Tbc::ChunkyClass::Tag* lTag = FindTag("mass_objects", -1, -1);
 	if (lTag)
 	{
 		deb_assert(lTag->mStringValueList.size() == lTag->mFloatValueList.size());

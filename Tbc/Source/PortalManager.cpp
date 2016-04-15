@@ -1,7 +1,7 @@
 /*
 	File:   PortalManager.cpp
 	Class:  PortalManager
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -66,7 +66,7 @@ bool PortalManager::AddCell(const str& pCellID, const str& pCellDescription)
 
 	if (lIter != mCellTable.End())
 	{
-		mLog.Error(_T("AddCell() - Cell \"") + pCellID + _T("\" already exist!"));
+		mLog.Error("AddCell() - Cell \"" + pCellID + "\" already exist!");
 		return false;
 	}
 
@@ -83,7 +83,7 @@ bool PortalManager::AddPortal(int pNumVertices,
 {
 	if (pNumVertices < 3)
 	{
-		mLog.AError("AddPortal() - Can't add a portal with less than 3 vertices!");
+		mLog.Error("AddPortal() - Can't add a portal with less than 3 vertices!");
 	}
 
 	CellTable::Iterator lIter1;
@@ -93,12 +93,12 @@ bool PortalManager::AddPortal(int pNumVertices,
 
 	if (lIter1 == mCellTable.End())
 	{
-		mLog.Error(_T("AddCell() - Cell \"") + pCellID1 + _T("\" does not exist!"));
+		mLog.Error("AddCell() - Cell \"" + pCellID1 + "\" does not exist!");
 		return false;
 	}
 	if (lIter2 == mCellTable.End())
 	{
-		mLog.Error(_T("AddCell() - Cell \"") + pCellID2 + _T("\" does not exist!"));
+		mLog.Error("AddCell() - Cell \"" + pCellID2 + "\" does not exist!");
 		return false;
 	}
 
@@ -117,7 +117,7 @@ bool PortalManager::AddGeometry(GeometryBase* pGeometry, const str& pParentCellI
 {
 	if (mGeomSet.Find(pGeometry) != mGeomSet.End())
 	{
-		mLog.AError("AddGeometry() - Geometry already added!");
+		mLog.Error("AddGeometry() - Geometry already added!");
 		return false;
 	}
 
@@ -126,7 +126,7 @@ bool PortalManager::AddGeometry(GeometryBase* pGeometry, const str& pParentCellI
 
 	if (lIter == mCellTable.End())
 	{
-		mLog.Error(_T("AddGeometry() - Cell \"") + pParentCellID + _T("\" does not exist!"));
+		mLog.Error("AddGeometry() - Cell \"" + pParentCellID + "\" does not exist!");
 		return false;
 	}
 
@@ -149,7 +149,7 @@ void PortalManager::RemoveGeometry(GeometryBase* pGeometry)
 	}
 	else
 	{
-		mLog.AWarning("RemoveGeometry() - Parent Cell was NULL!");
+		mLog.Warning("RemoveGeometry() - Parent Cell was NULL!");
 	}
 
 	mGeomSet.Remove(pGeometry);
@@ -165,7 +165,7 @@ str PortalManager::GetParentCellID(GeometryBase* pGeometry)
 	}
 	else
 	{
-		mLog.AWarning("GetParentCellID() - Parent Cell was NULL!");
+		mLog.Warning("GetParentCellID() - Parent Cell was NULL!");
 		return *smInvalidCellID;
 	}
 }
@@ -177,7 +177,7 @@ str PortalManager::TestPortalCollision(const vec3& pFromPos,
 	Cell* lCell = (Cell*)pGeometry->GetParentCell();
 	if (lCell == 0)
 	{
-		mLog.AWarning("TestPortalCollision() - Parent Cell was NULL!");
+		mLog.Warning("TestPortalCollision() - Parent Cell was NULL!");
 		return *smInvalidCellID;
 	}
 
@@ -212,7 +212,7 @@ str PortalManager::TestPortalCollision(const vec3& pFromPos,
 	CellTable::Iterator lIter = mCellTable.Find(pCellID);
 	if (lIter == mCellTable.End())
 	{
-		mLog.Warning(_T("TestPortalCollision() - CellID \"") + pCellID + _T("\" does not exist!"));
+		mLog.Warning("TestPortalCollision() - CellID \"" + pCellID + "\" does not exist!");
 		return *smInvalidCellID;
 	}
 
@@ -264,7 +264,7 @@ PortalManager::Cell* PortalManager::Cell::TestPortalCollision(const vec3& pFromP
 
 				if (lReturnCell == 0)
 				{
-					mLog.AFatal("TestPortalCollision() - Portal graph is corrupted!");
+					mLog.Fatal("TestPortalCollision() - Portal graph is corrupted!");
 					return 0;
 				}
 
@@ -366,7 +366,7 @@ bool PortalManager::Portal::TestCollision(const vec3& pFromPos,
 	}
 	else
 	{
-		mLog.AError("Portal::TestCollision() - Invalid cell pointer!");
+		mLog.Error("Portal::TestCollision() - Invalid cell pointer!");
 		return false;
 	}
 

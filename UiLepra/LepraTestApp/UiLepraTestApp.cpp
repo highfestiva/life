@@ -51,15 +51,15 @@ int LepraTestApplication::Run()
 	Lepra::MemFileLogListener lMemLogger;
 	Lepra::Log::SetupMainStandardLogging(lConsoleLogPointer, &lFileLogger, &lPerformanceLogger, &lMemLogger);
 
-	Lepra::Log::Out(_T("LepraTestApp/main"), _T("\n\n--- Build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(" ---\n"), Lepra::Log::LOG_ERROR);
-	lPerformanceLogger.LogListener::OnLogMessage(_T("LepraTestApp/main"), _T("\n\n---\n"), Lepra::Log::LOG_ERROR);
+	Lepra::Log::Out("LepraTestApp/main", "\n\n--- Build type: " LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT " ---\n", Lepra::Log::LOG_ERROR);
+	lPerformanceLogger.LogListener::OnLogMessage("LepraTestApp/main", "\n\n---\n", Lepra::Log::LOG_ERROR);
 	lMemLogger.Clear();
 
-	const Lepra::String lLogAccount(_T("LepraTestApp"));
+	const Lepra::String lLogAccount("LepraTestApp");
 	bool lTestOk = TestUiLepra(lLogAccount);
 	ShowTestResult(lLogAccount, lTestOk);
 
-	Lepra::Log::OutPerformanceNode(_T("LepraTestApp"));
+	Lepra::Log::OutPerformanceNode("LepraTestApp");
 
 	lMemLogger.DumpToFile(_TEXT_ALTERNATIVE("Temp.log", L"TempUnicode.log"));
 

@@ -23,7 +23,7 @@ namespace Impuzzable
 // Must lie before ImpuzzableConsoleManager to compile.
 const ImpuzzableConsoleManager::CommandPair ImpuzzableConsoleManager::mCommandIdList[] =
 {
-	{_T("step-level"), COMMAND_STEP_LEVEL},
+	{"step-level", COMMAND_STEP_LEVEL},
 };
 
 

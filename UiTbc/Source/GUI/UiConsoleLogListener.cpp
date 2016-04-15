@@ -57,10 +57,10 @@ void ConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
 		str lText(pFullMessage);
 		if (mLineFeed)
 		{
-			lText = _T("\n")+lText;
+			lText = "\n"+lText;
 			mLineFeed = false;
 		}
-		if (lText.length() > 0 && lText[lText.length()-1] == _T('\n'))
+		if (lText.length() > 0 && lText[lText.length()-1] == '\n')
 		{
 			lText.resize(lText.length()-1);
 			mLineFeed = true;

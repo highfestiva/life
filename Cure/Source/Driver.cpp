@@ -20,7 +20,7 @@ namespace Cure
 
 
 Driver::Driver(ContextManager* pManager):
-	CppContextObject(pManager->GetGameManager()->GetResourceManager(), _T("Driver"))
+	CppContextObject(pManager->GetGameManager()->GetResourceManager(), "Driver")
 {
 	pManager->AddLocalObject(this);
 	GetManager()->EnableTickCallback(this);
@@ -35,7 +35,7 @@ Driver::~Driver()
 void Driver::SetTagIndex(int pIndex)
 {
 	mTag = ((CppContextObject*)mParent)->GetClass()->GetTag(pIndex);
-	mType = strutil::Split(mTag.mTagName, _T(":"))[1];
+	mType = strutil::Split(mTag.mTagName, ":")[1];
 }
 
 void Driver::OnTick()
@@ -60,7 +60,7 @@ void Driver::OnTick()
 		{
 			f = mTag.mFloatValueList[0];
 		}
-		if (mType == _T("cos"))
+		if (mType == "cos")
 		{
 			deb_assert(mTag.mFloatValueList.size() == 1);
 			lEngine->SetValue(lEngine->GetControllerIndex(), (float)::cos(mTime.QueryTimeDiff()*f));
@@ -70,7 +70,7 @@ void Driver::OnTick()
 				mTime.ReduceTimeDiff(lPeriod);
 			}
 		}
-		else if (mType == _T("random_jerker"))
+		else if (mType == "random_jerker")
 		{
 			deb_assert(mTag.mFloatValueList.size() == 2);
 			const float g = mTag.mFloatValueList[1];

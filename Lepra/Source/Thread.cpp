@@ -209,7 +209,7 @@ void Semaphore::Signal()
 }
 
 
-RwLock::RwLock(const astr& pRwLockName):
+RwLock::RwLock(const str& pRwLockName):
 	mName(pRwLockName),
 	mSystemRwLock(new FastRwLock)
 {
@@ -237,14 +237,14 @@ void RwLock::Release()
 	((FastRwLock*)mSystemRwLock)->Release();
 }
 
-astr RwLock::GetName()
+str RwLock::GetName()
 {
 	return mName;
 }
 
 
 
-Thread::Thread(const astr& pThreadName):
+Thread::Thread(const str& pThreadName):
 	mThreadName(pThreadName),
 	mRunning(false),
 	mStopRequested(false),
@@ -290,7 +290,7 @@ bool Thread::IsRunning() const
 
 void Thread::SetRunning(bool pRunning)
 {
-	log_volatile(mLog.Debug(_T("Thread ") + strutil::Encode(mThreadName) + _T(" is ") + (pRunning? _T("starting") : _T("stopping"))));
+	log_volatile(mLog.Debug("Thread " + mThreadName + " is " + (pRunning? "starting" : "stopping")));
 	mRunning = pRunning;
 }
 
@@ -327,7 +327,7 @@ void Thread::RequestSelfDestruct()
 	mSelfDestruct = true;
 }
 
-const astr& Thread::GetThreadName() const
+const str& Thread::GetThreadName() const
 {
 	return (mThreadName);
 }
@@ -380,7 +380,7 @@ loginstance(GENERAL, Thread);
 
 
 
-StaticThread::StaticThread(const astr& pThreadName):
+StaticThread::StaticThread(const str& pThreadName):
 	Thread(pThreadName),
 	mThreadEntry(0),
 	mData(0)

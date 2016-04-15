@@ -21,7 +21,7 @@ namespace Lepra
 
 
 
-template<> astr astrutil::VFormat(const char* pFormat, va_list& pArguments)
+template<> str strutil::VFormat(const char* pFormat, va_list& pArguments)
 {
 	char lBuffer[1024];
 #ifdef LEPRA_WINDOWS
@@ -33,7 +33,7 @@ template<> astr astrutil::VFormat(const char* pFormat, va_list& pArguments)
 #else // !LEPRA_WINDOWS
 	::vsnprintf(lBuffer, sizeof(lBuffer), pFormat, pArguments);
 #endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
-	return (astr(lBuffer));
+	return (str(lBuffer));
 }
 
 template<> wstr wstrutil::VFormat(const wchar_t* pFormat, va_list& pArguments)
@@ -75,7 +75,7 @@ template<> wstr wstrutil::VFormat(const wchar_t* pFormat, va_list& pArguments)
 
 
 
-template<> long astrutil::StrToL(const char* pString, char** pEndPtr, int pRadix)
+template<> long strutil::StrToL(const char* pString, char** pEndPtr, int pRadix)
 {
 	return (::strtol(pString, pEndPtr, pRadix));
 }
@@ -85,7 +85,7 @@ template<> long wstrutil::StrToL(const wchar_t* pString, wchar_t** pEndPtr, int 
 	return (::wcstol(pString, pEndPtr, pRadix));
 }
 
-template<> bool astrutil::StringToDouble(const astr& pString, double& pValue)
+template<> bool strutil::StringToDouble(const str& pString, double& pValue)
 {
 	if (pString.empty())
 	{
@@ -107,7 +107,7 @@ template<> bool wstrutil::StringToDouble(const wstr& pString, double& pValue)
 	return (pString.c_str()+pString.length() == lEndPtr);
 }
 
-template<> void astrutil::DoubleToString(double pValue, int pNumDecimals, astr& pString)
+template<> void strutil::DoubleToString(double pValue, int pNumDecimals, str& pString)
 {
 	char lFormat[32];
 	char lResult[64];
@@ -128,7 +128,7 @@ template<> void astrutil::DoubleToString(double pValue, int pNumDecimals, astr& 
 	pString = lResult;
 }
 
-template<> astr astrutil::BoolToString(bool pValue)
+template<> str strutil::BoolToString(bool pValue)
 {
 	return pValue? "true" : "false";
 }
@@ -161,7 +161,7 @@ template<> void wstrutil::DoubleToString(double pValue, int pNumDecimals, wstr& 
 
 
 
-template<> int astrutil::StrLen(const char* pString)
+template<> int strutil::StrLen(const char* pString)
 {
 	return (int)::strlen(pString);
 }
@@ -171,7 +171,7 @@ template<> int wstrutil::StrLen(const wchar_t* pString)
 	return (int)::wcslen(pString);
 }
 
-template<> int astrutil::StrCmp(const char* pString1, const char* pString2)
+template<> int strutil::StrCmp(const char* pString1, const char* pString2)
 {
 	return ::strcmp(pString1, pString2);
 }
@@ -183,7 +183,7 @@ template<> int wstrutil::StrCmp(const wchar_t* pString1, const wchar_t* pString2
 
 #ifndef LEPRA_POSIX // Implemented in str.inl instead.
 
-template<> int astrutil::StrCmpI(const char* pString1, const char* pString2)
+template<> int strutil::StrCmpI(const char* pString1, const char* pString2)
 {
 #ifdef LEPRA_MSVC
 	return ::_stricmp(pString1, pString2);
@@ -208,7 +208,7 @@ template<> int wstrutil::StrCmpI(const wchar_t* pString1, const wchar_t* pString
 
 #endif
 
-template<> int astrutil::StrNCmp(const char* pString1, const char* pString2, int pMaxCount)
+template<> int strutil::StrNCmp(const char* pString1, const char* pString2, int pMaxCount)
 {
 	return ::strncmp(pString1, pString2, pMaxCount);
 }
@@ -218,7 +218,7 @@ template<> int wstrutil::StrNCmp(const wchar_t* pString1, const wchar_t* pString
 	return ::wcsncmp(pString1, pString2, pMaxCount);
 }
 
-template<> const char* astrutil::StrStr(const char* pString, const char* pStringSearch)
+template<> const char* strutil::StrStr(const char* pString, const char* pStringSearch)
 {
 	return ::strstr(pString, pStringSearch);
 }
@@ -230,7 +230,7 @@ template<> const wchar_t* wstrutil::StrStr(const wchar_t* pString, const wchar_t
 
 
 
-template<> bool astrutil::IsWhiteSpace(char pChar)
+template<> bool strutil::IsWhiteSpace(char pChar)
 {
 	return (pChar == ' ' || pChar == '\t' || pChar == '\v' || pChar == '\r' || pChar == '\n');
 }
@@ -242,15 +242,16 @@ template<> bool wstrutil::IsWhiteSpace(wchar_t pChar)
 
 
 
-template<> const astr astrutil::Encode(const astr& pString)
+template<> const str strutil::Encode(const str& pString)
 {
+	deb_assert(false);
 	return (pString);
 }
 
-template<> const astr astrutil::Encode(const wstr& pString)
+template<> const str strutil::Encode(const wstr& pString)
 {
 	// Convert to UTF-8.
-	astr lUtf8;
+	str lUtf8;
 	lUtf8.reserve(((pString.size()*9)>>3) + 6);	// UTF-8 might be around 9/8ths and then some in many languages.
 	if (sizeof(wchar_t) == 2)
 	{
@@ -264,7 +265,7 @@ template<> const astr astrutil::Encode(const wstr& pString)
 	return (lUtf8);
 }
 
-template<> const wstr wstrutil::Encode(const astr& pString)
+template<> const wstr wstrutil::Encode(const str& pString)
 {
 	// Convert to UTF-16 or UTF-32.
 	wstr lUtfN;
@@ -283,15 +284,16 @@ template<> const wstr wstrutil::Encode(const astr& pString)
 
 template<> const wstr wstrutil::Encode(const wstr& pString)
 {
+	deb_assert(false);
 	return (pString);
 }
 
 
 
-template<> std::locale astrutil::mLocale("");
+template<> std::locale strutil::mLocale("");
 template<> std::locale wstrutil::mLocale("");
 
-const astr gEmptyAnsiString;
+const str gEmptyAnsiString;
 const wstr gEmptyUnicodeString;
 
 

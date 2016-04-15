@@ -84,10 +84,10 @@ TouchstickInputDevice::TouchstickInputDevice(InputManager* pManager, InputMode p
 	TouchstickInputElement* lButton = new TouchstickInputElement(InputElement::DIGITAL, InputElement::BUTTON, 0, this);
 	TouchstickInputElement* x = new TouchstickInputElement(InputElement::ANALOGUE, InputElement::ABSOLUTE_AXIS, 0, this);
 	TouchstickInputElement* y = new TouchstickInputElement(InputElement::ANALOGUE, InputElement::ABSOLUTE_AXIS, 1, this);
-	SetIdentifier(_T("Touchstick"));
-	lButton->SetIdentifier(_T("Button"));
-	x->SetIdentifier(_T("AxisX"));
-	y->SetIdentifier(_T("AxisY"));
+	SetIdentifier("Touchstick");
+	lButton->SetIdentifier("Button");
+	x->SetIdentifier("AxisX");
+	y->SetIdentifier("AxisY");
 	AddElement(lButton);
 	AddElement(x);
 	AddElement(y);
@@ -145,7 +145,7 @@ void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
 {
 	if (mIsPressing)
 	{
-		log_volatile(mLog.Debugf(_T("Movin': (%i; %i)"), pCoord.x, pCoord.y));
+		log_volatile(mLog.Debugf("Movin': (%i; %i)", pCoord.x, pCoord.y));
 	}
 	else
 	{

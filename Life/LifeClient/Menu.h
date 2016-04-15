@@ -12,7 +12,7 @@
 #include "../Life.h"
 
 #define ICONBTN(i,n)		new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
-#define ICONBTNA(i,n)		ICONBTN(_T(i), _T(n))
+#define ICONBTNA(i,n)		ICONBTN(i, n)
 
 
 

@@ -125,8 +125,8 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 
 	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
 	mCollisionSoundManager->SetScale(1, 0.5f, 0.08f, 0.2f);
-	mCollisionSoundManager->AddSound(_T("explosion"),	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.1f, 0));
-	mCollisionSoundManager->AddSound(_T("rubber"),		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.1f, 0));
+	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.1f, 0));
+	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.1f, 0));
 
 	SetConsoleManager(new TrabantSimConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
 
@@ -136,11 +136,11 @@ TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, cons
 	const strutil::strvec& args = SystemManager::GetArgumentVector();
 	if (args.size() <= 1 || !lAddress.Resolve(args[args.size()-1]))
 	{
-		lAddress.Resolve(_T("0.0.0.0:2541"));
+		lAddress.Resolve("0.0.0.0:2541");
 	}
 	mOpenLocalAddress = lAddress;
 	SocketAddress lInternalAddress;
-	lInternalAddress.Resolve(_T("127.0.0.1:2541"));
+	lInternalAddress.Resolve("127.0.0.1:2541");
 	lInternalAddress.SetPort(lAddress.GetPort());
 	mInternalLocalAddress = lInternalAddress;
 	bool lAllowRemoteSync;
@@ -179,7 +179,7 @@ void TrabantSimManager::Resume(bool pHard)
 	mIsControlled = false;
 	mWasControlled = false;
 	mStartupTimer.PopTimeDiff();
-	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, " ");
 
 	bool lAllowRemoteSync;
 	v_get(lAllowRemoteSync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
@@ -194,7 +194,7 @@ void TrabantSimManager::Resume(bool pHard)
 void TrabantSimManager::Suspend(bool pHard)
 {
 	mIsControlTimeout = false;
-	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, " ");
 
 	if (mCommandSocket && mCommandSocket->IsOpen())
 	{
@@ -212,7 +212,7 @@ void TrabantSimManager::Suspend(bool pHard)
 void TrabantSimManager::LoadSettings()
 {
 	Parent::LoadSettings();
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 \"\""));
+	GetConsoleManager()->ExecuteCommand("bind-key F5 \"\"");
 }
 
 void TrabantSimManager::RefreshOptions()
@@ -233,7 +233,7 @@ void TrabantSimManager::UserReset()
 	mSetCursorVisible = true;
 	mIsMouseControlled = false;
 
-	GetConsoleManager()->ExecuteCommand(_T("bind-key F5 \"\""));
+	GetConsoleManager()->ExecuteCommand("bind-key F5 \"\"");
 
 	Cure::RuntimeVariableScope* lScope = GetVariableScope();
 	const std::list<str> lVariableList = lScope->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_EXPORTABLE);
@@ -241,7 +241,7 @@ void TrabantSimManager::UserReset()
 	for (; x != lVariableList.end(); ++x)
 	{
 		const str lName = *x;
-		if (strutil::StartsWith(lName, _T("Ui.3D.Clear")) || strutil::StartsWith(lName, _T("Ui.3D.Clip")) || strutil::StartsWith(lName, _T("Ui.Pen")))
+		if (strutil::StartsWith(lName, "Ui.3D.Clear") || strutil::StartsWith(lName, "Ui.3D.Clip") || strutil::StartsWith(lName, "Ui.Pen"))
 		{
 			continue;
 		}
@@ -272,7 +272,7 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 					ObjectMaterial pMaterial, bool pIsStatic, bool pIsTrigger)
 {
 	quat pq, rootq;
-	Object* lObject = (Object*)CreateContextObject(_T("object"));
+	Object* lObject = (Object*)CreateContextObject("object");
 	Tbc::ChunkyPhysics* lPhysics = new Tbc::ChunkyPhysics(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD, pIsStatic? Tbc::ChunkyPhysics::STATIC : Tbc::ChunkyPhysics::DYNAMIC);
 	lPhysics->SetGuideMode(Tbc::ChunkyPhysics::GUIDE_ALWAYS);
 	if (pPhysObjects.empty())
@@ -319,21 +319,21 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 			if (lBox)
 			{
 				Tbc::ChunkyBoneBox* lBone = new Tbc::ChunkyBoneBox(lBoneData);
-				lBone->SetMaterial(_T("rubber"));
+				lBone->SetMaterial("rubber");
 				lBone->mSize = lBox->mSize;
 				lPhysics->AddBoneGeometry(t, lBone, lParent);
 			}
 			else if (lSphere)
 			{
 				Tbc::ChunkyBoneSphere* lBone = new Tbc::ChunkyBoneSphere(lBoneData);
-				lBone->SetMaterial(_T("rubber"));
+				lBone->SetMaterial("rubber");
 				lBone->mRadius = lSphere->mRadius;
 				lPhysics->AddBoneGeometry(t, lBone, lParent);
 			}
 			else if (lCapsule)
 			{
 				Tbc::ChunkyBoneCapsule* lBone = new Tbc::ChunkyBoneCapsule(lBoneData);
-				lBone->SetMaterial(_T("rubber"));
+				lBone->SetMaterial("rubber");
 				lBone->mRadius = lCapsule->mRadius;
 				lBone->mLength = lCapsule->mLength;
 				lPhysics->AddBoneGeometry(t, lBone, lParent);
@@ -342,12 +342,12 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 			{
 				if (lMesh->mIndices.size() <= 3)
 				{
-					mLog.Warningf(_T("Need two triangles or more (%i indices is too few) to create physics mesh."), lMesh->mIndices.size());
+					mLog.Warningf("Need two triangles or more (%i indices is too few) to create physics mesh.", lMesh->mIndices.size());
 					delete lPhysics;
 					return -1;
 				}
 				Tbc::ChunkyBoneMesh* lBone = new Tbc::ChunkyBoneMesh(lBoneData);
-				lBone->SetMaterial(_T("rubber"));
+				lBone->SetMaterial("rubber");
 				lBone->mVertexCount = (int)lMesh->mVertices.size()/3;
 				lBone->mTriangleCount = (int)lMesh->mIndices.size()/3;
 				lBone->mVertices = new float[lBone->mVertexCount*3];
@@ -396,7 +396,7 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 			delete lObject;
 			return -1;
 		}
-		const str lTexture = (pMaterial==MaterialChecker)? _T("checker.png") : _T("noise.png");
+		const str lTexture = (pMaterial==MaterialChecker)? "checker.png" : "noise.png";
 		if (pMaterial == MaterialChecker || pMaterial == MaterialNoise)
 		{
 			const float lScale = (fabs(pGfxObject.mVertices[pGfxObject.mVertices.size()-3]-pGfxObject.mVertices[0]) >= 60)? 20.0f : 2.0f;
@@ -404,7 +404,7 @@ int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosit
 			lObject->LoadTexture(lTexture);
 		}
 		lObject->AddMeshResource(lMesh, pIsStatic? -1 : 1);
-		lObject->AddMeshInfo(lObject->GetMeshResource(0)->GetName(), _T("texture"), lTexture, lColor, a);
+		lObject->AddMeshInfo(lObject->GetMeshResource(0)->GetName(), "texture", lTexture, lColor, a);
 		lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = pGfxObject.mOrientation;
 	}
 	lObject->mInitialOrientation = pq;
@@ -449,9 +449,9 @@ void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId
 		return;
 	}
 	lMeshName = lOriginal->GetMeshResource(0)->GetName();
-	lMeshName.resize(lMeshName.find(_T(".mesh")));
+	lMeshName.resize(lMeshName.find(".mesh"));
 	lPhysName = lOriginal->GetPhysicsResource()->GetName();
-	lPhysName.resize(lPhysName.find(_T(".phys")));
+	lPhysName.resize(lPhysName.find(".phys"));
 	lOriginalRoot = lOriginal->GetPhysics()->GetOriginalBoneTransformation(0).mOrientation;
 	lOriginalOffsetOrientation = lOriginal->GetMeshResource(0)->mOffset.mOffset.mOrientation;
 
@@ -465,7 +465,7 @@ void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId
 	{
 		for (XformList::const_iterator x = pPlacements.begin(); x != pPlacements.end(); ++x)
 		{
-			Object* lObject = (Object*)Parent::CreateContextObject(_T("object"), Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+			Object* lObject = (Object*)Parent::CreateContextObject("object", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 			lObject->SetPhysicsTypeOverride(pIsStatic? Cure::PHYSICS_OVERRIDE_STATIC : Cure::PHYSICS_OVERRIDE_DYNAMIC);
 			{
 				const quat pq = x->mOrientation * lOriginalRoot;
@@ -475,13 +475,13 @@ void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId
 					LEPRA_MEASURE_SCOPE(CreateClonesPhys);
 					lObject->CreatePhysicsRef(lPhysName);
 				}
-				const str lTexture = (pMaterial==MaterialChecker)? _T("checker.png") : _T("noise.png");
+				const str lTexture = (pMaterial==MaterialChecker)? "checker.png" : "noise.png";
 				if (pMaterial == MaterialChecker || pMaterial == MaterialNoise)
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesTexture);
 					lObject->LoadTexture(lTexture);
 				}
-				lObject->AddMeshInfo(lMeshName, _T("texture"), lTexture, lColor, a, lIsSmooth);
+				lObject->AddMeshInfo(lMeshName, "texture", lTexture, lColor, a, lIsSmooth);
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesMesh);
 					lObject->AddMeshResourceRef(lMeshName, pIsStatic? -1 : 1);
@@ -540,16 +540,16 @@ void TrabantSimManager::DeleteAllObjects()
 		lLastCount = lCount;
 		if (lCount == 0 || lStableCount >= 5)
 		{
-			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, " ");
 			if (lCount)
 			{
-				mLog.Warningf(_T("Unable to delete all objects, %i remaining."), lCount);
+				mLog.Warningf("Unable to delete all objects, %i remaining.", lCount);
 			}
 			break;
 		}
 		if (x > 5)
 		{
-			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Cleaning up..."));
+			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, "Cleaning up...");
 		}
 	}
 	GetContext()->SetPostKillTimeout(0.01);
@@ -579,7 +579,7 @@ void TrabantSimManager::Explode(const vec3& pPos, const vec3& pVel, float pStren
 {
 	ScopeLock lGameLock(GetTickLock());
 
-	mCollisionSoundManager->OnCollision(pStrength*pVolume, pPos, 0, _T("explosion"));
+	mCollisionSoundManager->OnCollision(pStrength*pVolume, pPos, 0, "explosion");
 
 	const float lKeepOnGoingFactor = 1.0f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
 	const int lParticles = std::max(10, Math::Lerp(8, 20, pStrength * 0.2f));
@@ -592,7 +592,7 @@ void TrabantSimManager::Explode(const vec3& pPos, const vec3& pVel, float pStren
 	vec3 lStartSmokeColor(0.4f, 0.4f, 0.4f);
 	vec3 lSmokeColor(0.2f, 0.2f, 0.2f);
 	vec3 lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 	lParticleRenderer->CreateExplosion(pPos, pStrength, pVel*lKeepOnGoingFactor, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lFires, lSmokes, lSparks, lShrapnel);
 }
 
@@ -717,7 +717,7 @@ int TrabantSimManager::CreateJoystick(float x, float y, bool pIsSloppy)
 	PixelRect lRect(0,0,10,10);
 	Touchstick::InputMode lMode = pIsSloppy? Touchstick::MODE_RELATIVE_CENTER_NOSPRING : Touchstick::MODE_RELATIVE_CENTER;
 	Touchstick* lStick = new Touchstick(mUiManager->GetInputManager(), lMode, lRect, 0, lMinimumTouchRadius);
-	const str lName = strutil::Format(_T("Touchstick%i"), mTouchstickList.size());
+	const str lName = strutil::Format("Touchstick%i", mTouchstickList.size());
 	lStick->SetUniqueIdentifier(lName);
 	mTouchstickList.push_back(TouchstickInfo(lStick, x, y, -90, pIsSloppy));
 	mTouchstickTimer.ReduceTimeDiff(-10);
@@ -768,52 +768,52 @@ int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const
 	vec2 lMaxVelocity(pMaxVelocity);
 	float lStrength = pStrength * lObject->GetMass();
 	float lFriction = pFriction*2;
-	if (pEngineType == _T("roll_turn"))
+	if (pEngineType == "roll_turn")
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE2_TURN;
 		lIsAttachment = true;
 	}
-	else if (pEngineType == _T("roll"))
+	else if (pEngineType == "roll")
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE_ROLL;
 		lIsAttachment = true;
 	}
-	else if (pEngineType == _T("walk_abs"))
+	else if (pEngineType == "walk_abs")
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_WALK;
 	}
-	else if (pEngineType == _T("push_abs"))
+	else if (pEngineType == "push_abs")
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE;
 	}
-	else if (pEngineType == _T("push_rel"))
+	else if (pEngineType == "push_rel")
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE;
 	}
-	else if (pEngineType == _T("push_turn_abs"))
+	else if (pEngineType == "push_turn_abs")
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_TURN_ABSOLUTE;
 	}
-	else if (pEngineType == _T("push_turn_rel"))
+	else if (pEngineType == "push_turn_rel")
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_TURN_RELATIVE;
 	}
-	else if (pEngineType == _T("gyro"))
+	else if (pEngineType == "gyro")
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE_GYRO;
 		lIsAttachment = true;
 	}
-	else if (pEngineType == _T("rotor"))
+	else if (pEngineType == "rotor")
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_ROTOR;
 		lIsAttachment = true;
 	}
-	else if (pEngineType == _T("tilt"))
+	else if (pEngineType == "tilt")
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_ROTOR_TILT;
 		lIsAttachment = true;
 	}
-	else if (pEngineType == _T("slider"))
+	else if (pEngineType == "slider")
 	{
 		lEngineType = Tbc::PhysicsEngine::ENGINE_SLIDER_FORCE;
 		lIsAttachment = true;
@@ -831,7 +831,7 @@ int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const
 		Cure::ContextObject* lEngineObject = lIsAttachment? lLastAttachedObject : lObject;
 		if (!lEngineObject)
 		{
-			mLog.Warningf(_T("No object attached to create a %s engine to."), pEngineType.c_str());
+			mLog.Warningf("No object attached to create a %s engine to.", pEngineType.c_str());
 			return -1;
 		}
 		lTargets.push_back(EngineTarget(lEngineObject->GetInstanceId(),1));
@@ -873,7 +873,7 @@ int TrabantSimManager::CreateJoint(int pObjectId, const str& pJointType, int pOt
 	float lHiStop = pStop.y;
 	float lSpringConstant = pSpringSettings.x;
 	float lSpringDamping = pSpringSettings.y;
-	if (pJointType == _T("hinge"))
+	if (pJointType == "hinge")
 	{
 		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_HINGE;
 		if (lLoStop == 0 && lHiStop == 0)
@@ -882,14 +882,14 @@ int TrabantSimManager::CreateJoint(int pObjectId, const str& pJointType, int pOt
 			lHiStop = +100.0f;
 		}
 	}
-	else if (pJointType == _T("suspend_hinge"))
+	else if (pJointType == "suspend_hinge")
 	{
 		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_SUSPEND_HINGE;
 		lSpringConstant = (lSpringConstant<=0)? 22 : lSpringConstant;
 		lSpringDamping = (lSpringDamping<=0)? 0.8f : lSpringDamping;
 		lSpringConstant *= lObject->GetMass() * 100;
 	}
-	else if (pJointType == _T("turn_hinge"))
+	else if (pJointType == "turn_hinge")
 	{
 		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_HINGE2;
 		if (lLoStop == 0 && lHiStop == 0)
@@ -901,11 +901,11 @@ int TrabantSimManager::CreateJoint(int pObjectId, const str& pJointType, int pOt
 		lSpringDamping = (lSpringDamping<=0)? 0.8f : lSpringDamping;
 		lSpringConstant *= lObject->GetMass() * 100;
 	}
-	else if (pJointType == _T("ball"))
+	else if (pJointType == "ball")
 	{
 		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_3DOF;
 	}
-	else if (pJointType == _T("slider"))
+	else if (pJointType == "slider")
 	{
 		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_SLIDER;
 		if (lLoStop == 0 && lHiStop == 0)
@@ -914,11 +914,11 @@ int TrabantSimManager::CreateJoint(int pObjectId, const str& pJointType, int pOt
 			lHiStop = +1.0f;
 		}
 	}
-	else if (pJointType == _T("universal"))
+	else if (pJointType == "universal")
 	{
 		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_UNIVERSAL;
 	}
-	else if (pJointType == _T("fixed"))
+	else if (pJointType == "fixed")
 	{
 		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_FIXED;
 		GetPhysicsManager()->MakeStatic(lObject2->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
@@ -1085,7 +1085,7 @@ void TrabantSimManager::EngineForce(int pObjectId, int pEngineIndex, bool pSet, 
 	}
 	if (pEngineIndex < 0 || pEngineIndex >= lObject->GetPhysics()->GetEngineCount())
 	{
-		mLog.Warningf(_T("Object %i does not have an engine with index %i."), pObjectId, pEngineIndex);
+		mLog.Warningf("Object %i does not have an engine with index %i.", pObjectId, pEngineIndex);
 		return;
 	}
 	if (pSet)
@@ -1132,7 +1132,7 @@ void TrabantSimManager::AddTag(int pObjectId, const str& pTagType, const FloatLi
 	{
 		if (*x >= lPhysics->GetBoneCount())
 		{
-			mLog.Warningf(_T("Object %i does not have a body with index %i."), pObjectId, *x);
+			mLog.Warningf("Object %i does not have a body with index %i.", pObjectId, *x);
 			return;
 		}
 	}
@@ -1140,7 +1140,7 @@ void TrabantSimManager::AddTag(int pObjectId, const str& pTagType, const FloatLi
 	{
 		if (*x >= lPhysics->GetEngineCount())
 		{
-			mLog.Warningf(_T("Object %i does not have an engine with index %i."), pObjectId, *x);
+			mLog.Warningf("Object %i does not have an engine with index %i.", pObjectId, *x);
 			return;
 		}
 	}
@@ -1148,7 +1148,7 @@ void TrabantSimManager::AddTag(int pObjectId, const str& pTagType, const FloatLi
 	{
 		if (*x >= (int)((UiTbc::ChunkyClass*)lObject->GetClass())->GetMeshCount())
 		{
-			mLog.Warningf(_T("Object %i does not have a mesh with index %i."), pObjectId, *x);
+			mLog.Warningf("Object %i does not have a mesh with index %i.", pObjectId, *x);
 			return;
 		}
 	}
@@ -1305,8 +1305,8 @@ void TrabantSimManager::CommandLoop()
 			break;
 		}
 		lData[l-1] = 0;	// Drop last linefeed.
-		const str lCommand = strutil::Encode(astr((char*)lData));
-		if (strutil::StartsWith(lCommand, _T("get-platform-name")))	// Check if user started over without terminating.
+		const str lCommand = str((char*)lData);
+		if (strutil::StartsWith(lCommand, "get-platform-name"))	// Check if user started over without terminating.
 		{
 			mResendIntermediatePacketTime = 10;	// Just make it big to begin with.
 		}
@@ -1316,14 +1316,14 @@ void TrabantSimManager::CommandLoop()
 		}
 		GetConsoleManager()->ExecuteCommand(lCommand);
 		const str lCmdResponse = ((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse();
-		mResendLastResponse = astrutil::Encode(lCmdResponse);
+		mResendLastResponse = lCmdResponse;
 		if (mCommandSocket->SendTo((const uint8*)mResendLastResponse.c_str(), (int)mResendLastResponse.length(), mLastRemoteAddress) != (int)mResendLastResponse.length())
 		{
 			mIsControlled = false;
 		}
-		//mLog.Infof(_T("Responded to %s with %s (to %s)."), lCommand.c_str(), lCmdResponse.c_str(), mLastRemoteAddress.GetAsString().c_str());
+		//mLog.Infof("Responded to %s with %s (to %s."), lCommand.c_str(), lCmdResponse.c_str(), mLastRemoteAddress.GetAsString().c_str());
 	}
-	mLog.Info(_T("Terminating command thread."));
+	mLog.Info("Terminating command thread.");
 	mIsControlled = false;
 	deb_assert(mCommandThread);
 	deb_assert(mCommandSocket);
@@ -1344,7 +1344,7 @@ bool TrabantSimManager::IsControlled()
 	{
 		if (lIsControlled)
 		{
-			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
+			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, " ");
 			const int lMicroSteps = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, RTVAR_PHYSICS_MICROSTEPS, 3);
 			v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, lMicroSteps);
 		}
@@ -1355,7 +1355,7 @@ bool TrabantSimManager::IsControlled()
 			{
 				if (mLastRemoteAddress.GetIP() == mInternalLocalAddress.GetIP())	// Otherwise it's just a push on the ESC key.
 				{
-					mLog.AWarning("Prototype script is not responding, possibly hung?");
+					mLog.Warning("Prototype script is not responding, possibly hung?");
 				}
 				Thread::Sleep(0.1);	// Wait for it to reach stdout reader thread.
 			}
@@ -1369,7 +1369,7 @@ bool TrabantSimManager::IsControlled()
 			v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 1);
 			if (mUiManager->GetDisplayManager()->IsFocused())
 			{
-				v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T("Controller died?"));
+				v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, "Controller died?");
 			}
 			else if (mHideCounter == 0)
 			{
@@ -1391,7 +1391,7 @@ bool TrabantSimManager::IsControlled()
 
 void TrabantSimManager::SaveSettings()
 {
-	GetConsoleManager()->ExecuteCommand(_T("save-application-config-file ")+GetApplicationCommandFilename());
+	GetConsoleManager()->ExecuteCommand("save-application-config-file "+GetApplicationCommandFilename());
 }
 
 void TrabantSimManager::SetRenderArea(const PixelRect& pRenderArea)
@@ -1465,12 +1465,12 @@ bool TrabantSimManager::OpenConnection()
 			mCommandThread = new MemberThread<TrabantSimManager>("CommandRecvThread");
 			mCommandThread->Start(this, &TrabantSimManager::CommandLoop);
 		}
-		mLog.Headlinef(_T("Command server listening on %s."), mLocalAddress.GetAsString().c_str());
+		mLog.Headlinef("Command server listening on %s.", mLocalAddress.GetAsString().c_str());
 		return true;
 	}
 	else
 	{
-		mLog.Headlinef(_T("Could not open server on %s. Shutting down."), mLocalAddress.GetAsString().c_str());
+		mLog.Headlinef("Could not open server on %s. Shutting down.", mLocalAddress.GetAsString().c_str());
 		SystemManager::AddQuitRequest(1);
 		return false;
 	}
@@ -1727,7 +1727,7 @@ void TrabantSimManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
 {
 	if (!pOk)
 	{
-		mLog.Errorf(_T("Could not load object of type %s."), pObject->GetClassId().c_str());
+		mLog.Errorf("Could not load object of type %s.", pObject->GetClassId().c_str());
 		GetContext()->PostKillObject(pObject->GetInstanceId());
 	}
 }
@@ -1841,7 +1841,7 @@ void TrabantSimManager::ScriptPhysicsTick()
 		v_get(gy, =(float), GetVariableScope(), RTVAR_PHYSICS_GRAVITYY, 0.0);
 		v_get(gz, =(float), GetVariableScope(), RTVAR_PHYSICS_GRAVITYZ, -9.8);
 		GetPhysicsManager()->SetGravity(vec3(gx,gy,gz));
-		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer(_T("particle"));
+		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
 		lParticleRenderer->SetGravity(vec3(gx,gy,gz));
 		MoveCamera(lPhysicsTime);
 		mLight->Tick(mCameraTransform.mOrientation);
@@ -1973,8 +1973,8 @@ void TrabantSimManager::UpdateCameraPosition(bool pUpdateMicPosition)
 void TrabantSimManager::UpdateUserMessage()
 {
 	str lUserMessage;
-	v_get(lUserMessage, =, GetVariableScope(), RTVAR_GAME_USERMESSAGE, _T(" "));
-	if (strutil::Strip(lUserMessage, _T(" \t\r\n")).empty())
+	v_get(lUserMessage, =, GetVariableScope(), RTVAR_GAME_USERMESSAGE, " ");
+	if (strutil::Strip(lUserMessage, " \t\r\n").empty())
 	{
 		if (mUserInfoDialog)
 		{

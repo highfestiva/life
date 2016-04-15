@@ -149,7 +149,7 @@ BOOL CALLBACK Win32InputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE l
 		// Set absolute axis range.
 		if ((lpddoi->dwType & DIDFT_ABSAXIS) != 0)
 		{
-			log_volatile(mLog.Debugf(_T("Found absolute axis element '%s' = '%s'."),
+			log_volatile(mLog.Debugf("Found absolute axis element '%s' = '%s'.",
 				lElement->GetFullName().c_str(),
 				lElement->GetIdentifier().c_str()));
 
@@ -235,7 +235,7 @@ void Win32InputDevice::PollEvents()
 				// System won't let us in yet. Keep trying.
 				return;
 			}
-			log_debug(GetIdentifier()+_T(": acquired input device."));
+			log_debug(GetIdentifier()+": acquired input device.");
 		}
 
 
@@ -243,13 +243,13 @@ void Win32InputDevice::PollEvents()
 		if (lHR == DIERR_INPUTLOST)
 		{
 			mReacquire = true;
-			log_debug(GetIdentifier()+_T(": lost input device."));
+			log_debug(GetIdentifier()+": lost input device.");
 			return;
 		}
 		else if (lHR != DI_OK && lHR != DI_NOEFFECT)
 		{
 			mReacquire = true;
-			mLog.Warningf((GetIdentifier() + _T(": Failed reaquiring device. Error=0x%8.8X.")).c_str(), lHR);
+			mLog.Warningf((GetIdentifier() + ": Failed reaquiring device. Error=0x%8.8X.").c_str(), lHR);
 			return;
 		}
 
@@ -339,7 +339,7 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 
 	if (lHR != DI_OK)
 	{
-		mDisplayManager->ShowMessageBox(_T("DirectX 8 not supported (dinput creation failure)!"), _T("DirectInput error!"));
+		mDisplayManager->ShowMessageBox("DirectX 8 not supported (dinput creation failure!"), "DirectInput error!");
 		return;
 	}
 
@@ -349,7 +349,7 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 	// mEnumError will be set if an error has occured.
 	if (lHR != DI_OK || mEnumError == true)
 	{
-		mDisplayManager->ShowMessageBox(_T("DirectInput failed enumerating your devices!"), _T("DirectInput error!"));
+		mDisplayManager->ShowMessageBox("DirectInput failed enumerating your devices!", "DirectInput error!");
 		return;
 	}
 
@@ -597,13 +597,13 @@ void Win32InputManager::SetCursorVisible(bool pVisible)
 	{
 		if (pVisible)
 		{
-			log_volatile(mLog.Debug(_T("Showing cursor.")));
+			log_volatile(mLog.Debug("Showing cursor."));
 			for(int x = 0; x < 10 && ::ShowCursor(pVisible) < 1; ++x)
 				;
 		}
 		else
 		{
-			log_volatile(mLog.Debug(_T("Hiding cursor.")));
+			log_volatile(mLog.Debug("Hiding cursor."));
 			for(int x = 0; x < 10 && ::ShowCursor(pVisible) > -2; ++x)
 				;
 		}

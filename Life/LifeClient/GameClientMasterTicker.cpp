@@ -38,7 +38,7 @@ namespace Life
 
 
 
-#define SET_PLAYER_COUNT	_T("set-player-count")
+#define SET_PLAYER_COUNT	"set-player-count"
 
 
 
@@ -86,8 +86,8 @@ GameClientMasterTicker::GameClientMasterTicker(UiCure::GameUiManager* pUiManager
 			this, &GameClientMasterTicker::OnCommandLocal, &GameClientMasterTicker::OnCommandError));
 	mConsole->GetConsoleCommandManager()->AddCommand(SET_PLAYER_COUNT);
 
-	mConsole->ExecuteCommand(_T("execute-file -i Default.lsh"));
-	mConsole->ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ClientBase"), _T("lsh")));
+	mConsole->ExecuteCommand("execute-file -i Default.lsh");
+	mConsole->ExecuteCommand("execute-file -i " + Application::GetIoFile("ClientBase", "lsh"));
 }
 
 GameClientMasterTicker::~GameClientMasterTicker()
@@ -97,7 +97,7 @@ GameClientMasterTicker::~GameClientMasterTicker()
 	{
 		StashCalibration();
 
-		mConsole->ExecuteCommand(_T("save-system-config-file 0 " + Application::GetIoFile(_T("ClientBase"), _T("lsh"))));
+		mConsole->ExecuteCommand("save-system-config-file 0 " + Application::GetIoFile("ClientBase", "lsh"));
 		delete (mConsole);
 		mConsole = 0;
 	}
@@ -431,7 +431,7 @@ bool GameClientMasterTicker::Tick()
 	{
 		if (!Reinitialize())
 		{
-			mLog.Fatal(_T("Failure to re-initialize UI! Going down now!"));
+			mLog.Fatal("Failure to re-initialize UI! Going down now!");
 			SystemManager::AddQuitRequest(+1);
 		}
 		mRestartUi = false;
@@ -695,7 +695,7 @@ UiGameServerManager* GameClientMasterTicker::GetLocalServer() const
 
 void GameClientMasterTicker::OnExit()
 {
-	mLog.Headline(_T("Number of players not picked, quitting."));
+	mLog.Headline("Number of players not picked, quitting.");
 	SystemManager::AddQuitRequest(+1);
 	CloseMainMenu();
 }
@@ -721,7 +721,7 @@ void GameClientMasterTicker::DownloadServerList()
 {
 	if (mMasterConnection)
 	{
-		mMasterConnection->RequestServerList(_T(""));
+		mMasterConnection->RequestServerList("");
 	}
 }
 
@@ -754,7 +754,7 @@ bool GameClientMasterTicker::CreateSlave(SlaveFactoryMethod pCreate)
 	}
 	else
 	{
-		mLog.AError("Could not create another split screen player - not supported.");
+		mLog.Error("Could not create another split screen player - not supported.");
 	}
 	return (lOk);
 }
@@ -775,7 +775,7 @@ Cure::ContextObjectAttribute* GameClientMasterTicker::CreateObjectAttribute(Cure
 			}
 		}
 	}
-	if (strutil::StartsWith(pAttributeName, _T("race_timer_")))
+	if (strutil::StartsWith(pAttributeName, "race_timer_"))
 	{
 		return new UiRaceScore(pObject, pAttributeName, lScreenPart, mUiManager, pAttributeName);
 	}
@@ -789,9 +789,9 @@ void GameClientMasterTicker::AddSlave(GameClientSlaveManager* pSlave)
 		pSlave->LoadSettings();
 /*#ifdef LEPRA_DEBUG
 		int lErrorCode;
-		if ((lErrorCode = pSlave->GetConsoleManager()->ExecuteCommand(_T("rebuild-data"))) != 0)
+		if ((lErrorCode = pSlave->GetConsoleManager()->ExecuteCommand("rebuild-data")) != 0)
 		{
-			mLog.AError("Unable to rebuild data in debug mode!");
+			mLog.Error("Unable to rebuild data in debug mode!");
 			SystemManager::ExitProcess(lErrorCode);
 		}
 #endif // Debug.*/
@@ -848,7 +848,7 @@ bool GameClientMasterTicker::Initialize()
 	{
 		if (!ApplyCalibration())
 		{
-			mLog.AError("An error ocurred when applying calibration.");
+			mLog.Error("An error ocurred when applying calibration.");
 		}
 
 		OnSlavesKilled();
@@ -900,23 +900,23 @@ bool GameClientMasterTicker::Reinitialize()
 		for (; y != lDeviceList.end(); ++y)
 		{
 			UiLepra::InputDevice* lDevice = (*y);
-			mLog.Infof(_T("Found input device %s with %u digital and %u analogue input elements."),
+			mLog.Infof("Found input device %s with %u digital and %u analogue input elements.",
 				lDevice->GetIdentifier().c_str(), lDevice->GetNumDigitalElements(),
 				lDevice->GetNumAnalogueElements());
 			if (lDevice->GetNumElements() < 30)
 			{
-				mLog.AInfo(_T("Elements are:"));
+				mLog.Info("Elements are:");
 				for (unsigned e = 0; e < lDevice->GetNumElements(); ++e)
 				{
 					UiLepra::InputElement* lElement = lDevice->GetElement(e);
 					str lInterpretation;
 					switch (lElement->GetInterpretation())
 					{
-						case UiLepra::InputElement::ABSOLUTE_AXIS:	lInterpretation += _T("AbsoluteAxis");	break;
-						case UiLepra::InputElement::RELATIVE_AXIS:	lInterpretation += _T("RelativeAxis");	break;
-						default:					lInterpretation += _T("Button");	break;
+						case UiLepra::InputElement::ABSOLUTE_AXIS:	lInterpretation += "AbsoluteAxis";	break;
+						case UiLepra::InputElement::RELATIVE_AXIS:	lInterpretation += "RelativeAxis";	break;
+						default:					lInterpretation += "Button";	break;
 					}
-					mLog.Infof(_T("  - '%s' of type '%s' with value '%f'"),
+					mLog.Infof("  - '%s' of type '%s' with value '%f'",
 						lElement->GetIdentifier().c_str(),
 						lInterpretation.c_str(),
 						lElement->GetValue());
@@ -939,7 +939,7 @@ bool GameClientMasterTicker::Reinitialize()
 	mInitialized = lOk;
 	if (!lOk)
 	{
-		mLog.AError("Could not initialize game!");
+		mLog.Error("Could not initialize game!");
 	}
 	return (lOk);
 }
@@ -968,7 +968,7 @@ void GameClientMasterTicker::Repair()
 	if (mUiManager->GetSoundManager()->IsIrreparableErrorState())
 	{
 		typedef Cure::ResourceManager::ResourceList ResourceList;
-		ResourceList lResourceList = mResourceManager->HookAllResourcesOfType(_T("Sound"));
+		ResourceList lResourceList = mResourceManager->HookAllResourcesOfType("Sound");
 		for (ResourceList::iterator x = lResourceList.begin(); x != lResourceList.end(); ++x)
 		{
 			UiCure::SoundResource* lSound = (UiCure::SoundResource*)*x;
@@ -1148,7 +1148,7 @@ float GameClientMasterTicker::GetSlavesVerticalAnimationTarget() const
 void GameClientMasterTicker::MeasureLoad()
 {
 	const ScopePerformanceData* lMainLoop = ScopePerformanceData::GetRoots()[0];
-	const ScopePerformanceData* lAppSleep = lMainLoop->GetChild(_T("AppSleep"));
+	const ScopePerformanceData* lAppSleep = lMainLoop->GetChild("AppSleep");
 	if (lAppSleep)
 	{
 		int lTargetFrameRate;
@@ -1209,11 +1209,11 @@ void GameClientMasterTicker::Profile()
 			lStart = (lStart < 0)? 0 : lStart;
 			lName  = str(lCurrentNode.second, ' ');
 			lName += lNode->GetName();
-			lName += _T(" (");
+			lName += " (";
 			lName += strutil::DoubleToString(lNode->GetRangeFactor()*100, 1);
-			lName += _T(" % fluctuation, ");
+			lName += " % fluctuation, ";
 			lName += strutil::DoubleToString(lNode->GetSlidingAverage()*lNode->GetHitCount()*lTotalPercentFactor, 1);
-			lName += _T(" % total time)");
+			lName += " % total time)";
 			mPerformanceGraphList[lRootIndex].AddSegment(lName, lStart, lStart + lTotalEstimatedDuration);
 			lNode->ResetHitCount();
 
@@ -1454,12 +1454,12 @@ int GameClientMasterTicker::OnCommandLocal(const str& pCommand, const strutil::s
 			}
 			else
 			{
-				mLog.AError("player count must lie between 1 and 4");
+				mLog.Error("player count must lie between 1 and 4");
 			}
 		}
 		else
 		{
-			mLog.Warningf(_T("usage: %s <no. of players>"), pCommand.c_str());
+			mLog.Warningf("usage: %s <no. of players>", pCommand.c_str());
 		}
 		return (1);
 	}
@@ -1544,12 +1544,12 @@ bool GameClientMasterTicker::ApplyCalibration()
 		for (; y != lVariableNames.end(); ++y)
 		{
 			const str& lVarName = *y;
-			const strutil::strvec lVarNames = strutil::Split(lVarName, _T("."), 2);
+			const strutil::strvec lVarNames = strutil::Split(lVarName, ".", 2);
 			if (lVarNames.size() != 3)
 			{
 				continue;
 			}
-			if (lVarNames[0] == _T("Calibration") && lVarNames[1] == lDeviceId)
+			if (lVarNames[0] == "Calibration" && lVarNames[1] == lDeviceId)
 			{
 				str lValue = UiCure::GetSettings()->GetUntypedDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVarName);
 				lCalibration.push_back(UiLepra::InputDevice::CalibrationElement(lVarNames[2], lValue));
@@ -1581,7 +1581,7 @@ void GameClientMasterTicker::StashCalibration()
 		{
 			const UiLepra::InputDevice::CalibrationElement& lElement = *y;
 			UiCure::GetSettings()->SetValue(Cure::RuntimeVariable::USAGE_NORMAL,
-				_T("Calibration.")+lDeviceId+_T(".")+lElement.first, lElement.second);
+				"Calibration."+lDeviceId+"."+lElement.first, lElement.second);
 		}
 	}
 }

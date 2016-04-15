@@ -19,7 +19,7 @@ HoverTankServerConsole::HoverTankServerConsole(HoverTankServerDelegate* pDelegat
 	mDelegate(pDelegate)
 {
 	pCommandManager->AddExecutor(this);
-	pCommandManager->AddCommand(_T("set-level"));
+	pCommandManager->AddCommand("set-level");
 }
 
 HoverTankServerConsole::~HoverTankServerConsole()
@@ -31,7 +31,7 @@ HoverTankServerConsole::~HoverTankServerConsole()
 int HoverTankServerConsole::Execute(const str& pCommand, const strutil::strvec& pParameterVector)
 {
 	int lResult = 0;
-	if (pCommand == _T("set-level"))
+	if (pCommand == "set-level")
 	{
 		if (pParameterVector.size() == 1)
 		{
@@ -39,7 +39,7 @@ int HoverTankServerConsole::Execute(const str& pCommand, const strutil::strvec& 
 		}
 		else
 		{
-			mLog.Warningf(_T("usage: %s <level_name>"), pCommand.c_str());
+			mLog.Warningf("usage: %s <level_name>", pCommand.c_str());
 			lResult = 1;
 		}
 	}

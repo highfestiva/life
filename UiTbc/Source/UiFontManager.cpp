@@ -90,13 +90,13 @@ int FontManager::GetStringWidth(const wstr& pString) const
 	{
 		wchar_t lChar = pString[i];
 
-		if (lChar == _T('\n'))
+		if (lChar == '\n')
 		{
 			lCurrentX = 0;
 		}
-		else if(lChar != _T('\r') && 
-			lChar != _T('\b') &&
-			lChar != _T('\t'))
+		else if(lChar != '\r' && 
+			lChar != '\b' &&
+			lChar != '\t')
 		{
 			lCurrentX += GetCharWidth(lChar) + GetCharOffset(lChar);
 		}

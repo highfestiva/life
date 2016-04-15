@@ -16,7 +16,7 @@ namespace Downwash
 
 
 Eater::Eater(Cure::ContextManager* pManager):
-	Parent(pManager->GetGameManager()->GetResourceManager(), _T("Eater"))
+	Parent(pManager->GetGameManager()->GetResourceManager(), "Eater")
 {
 	pManager->AddLocalObject(this);
 }
@@ -29,7 +29,7 @@ Eater::~Eater()
 
 void Eater::OnTrigger(Tbc::PhysicsManager::BodyID, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID, const vec3&, const vec3&)
 {
-	if (pOtherObject->GetClassId().find(_T("helicopter")) == str::npos)
+	if (pOtherObject->GetClassId().find("helicopter") == str::npos)
 	{
 		GetManager()->PostKillObject(pOtherObject->GetInstanceId());
 	}

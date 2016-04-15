@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -17,7 +17,7 @@ namespace Life
 
 
 BulletTime::BulletTime(Cure::ContextManager* pManager):
-	Parent(pManager, _T("BulletTime"))
+	Parent(pManager, "BulletTime")
 {
 }
 
@@ -36,7 +36,7 @@ void BulletTime::OnAlarm(int pAlarmId, void* pExtraData)
 			v_set(Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
 			((GameServerManager*)GetManager()->GetGameManager())->BroadcastStatusMessage(
 				Cure::MessageStatus::INFO_COMMAND,
-				wstrutil::Encode(mClientStopCommand));
+				mClientStopCommand);
 			break;
 		case 1:
 			mAllowBulletTime = true;
@@ -50,7 +50,7 @@ void BulletTime::DidTrigger(Cure::ContextObject* pBody)
 	v_set(Cure::GetSettings(), RTVAR_PHYSICS_RTR, mRealTimeRatio);
 	((GameServerManager*)GetManager()->GetGameManager())->BroadcastStatusMessage(
 		Cure::MessageStatus::INFO_COMMAND,
-		wstrutil::Encode(mClientStartCommand));
+		mClientStartCommand);
 
 	GetManager()->AddGameAlarmCallback(this, 0, mBulletTimeDuration, 0);
 	GetManager()->AddGameAlarmCallback(this, 1, std::max(mBulletTimeDuration*11, 60.0f), 0);

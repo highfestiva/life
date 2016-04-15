@@ -25,7 +25,7 @@ bool TestBigInt(const LogDecorator& pAccount)
 
 	if (lTestOk)
 	{
-		lContext = _T("assignment and comparison");
+		lContext = "assignment and comparison";
 		lTestOk = (x == 123 && y == 321 && x != y);
 		assert(lTestOk);
 	}
@@ -34,7 +34,7 @@ bool TestBigInt(const LogDecorator& pAccount)
 	BigInt w = -x + y;
 	if (lTestOk)
 	{
-		lContext = _T("addition and negation");
+		lContext = "addition and negation";
 		lTestOk = (z == 444 && w == 198);
 		assert(lTestOk);
 	}
@@ -43,7 +43,7 @@ bool TestBigInt(const LogDecorator& pAccount)
 	w = x - y;
 	if (lTestOk)
 	{
-		lContext = _T("subtraction");
+		lContext = "subtraction";
 		lTestOk = !(z != 198 || w != -198);
 		assert(lTestOk);
 	}
@@ -52,7 +52,7 @@ bool TestBigInt(const LogDecorator& pAccount)
 	w = y * x;
 	if (lTestOk)
 	{
-		lContext = _T("basic multiplication");
+		lContext = "basic multiplication";
 		lTestOk = !(z != 39483 || w != 39483 || z != w);
 		assert(lTestOk);
 	}
@@ -61,8 +61,8 @@ bool TestBigInt(const LogDecorator& pAccount)
 	y = y * y * y * y * y * y * y * y;	// 321^8 = 112730195258772277761
 	if (lTestOk)
 	{
-		lContext = _T("large multiplication and string conversion");
-		lTestOk = (x == BigInt(_T("52389094428262881")) && y == BigInt(_T("112730195258772277761")));
+		lContext = "large multiplication and string conversion";
+		lTestOk = (x == BigInt("52389094428262881") && y == BigInt("112730195258772277761"));
 		assert(lTestOk);
 	}
 
@@ -70,7 +70,7 @@ bool TestBigInt(const LogDecorator& pAccount)
 	w = -x * y;
 	if (lTestOk)
 	{
-		lContext = _T("large multiplication and negative numbers");
+		lContext = "large multiplication and negative numbers";
 		lTestOk = !(z != w || w > 0 || z > 0);
 		assert(lTestOk);
 	}
@@ -81,7 +81,7 @@ bool TestBigInt(const LogDecorator& pAccount)
 	w.Pow(8);
 	if (lTestOk)
 	{
-		lContext = _T("BigInt::Pow()");
+		lContext = "BigInt::Pow(");
 		lTestOk = !(z != x || w != y);
 		assert(lTestOk);
 	}
@@ -89,7 +89,7 @@ bool TestBigInt(const LogDecorator& pAccount)
 	z.Sqrt();
 	if (lTestOk)
 	{
-		lContext = _T("BigInt::Sqrt()");
+		lContext = "BigInt::Sqrt(");
 		lTestOk = !(z != 228886641);
 		assert(lTestOk);
 	}
@@ -109,7 +109,7 @@ bool TestBigInt(const LogDecorator& pAccount)
 	uint64 lNum = (uint64)z;
 	if (lTestOk)
 	{
-		lContext = _T("integer type cast");
+		lContext = "integer type cast";
 		lTestOk = !(lNum  != -123  || lNum != 133   || lNum  != 28782 || lNum != 28782 ||
 			lNum  != 3540186 || lNum != 3540186 || lNum  != 3540186 || lNum != 3540186);
 		assert(lTestOk);
@@ -119,11 +119,11 @@ bool TestBigInt(const LogDecorator& pAccount)
 	float64 lDouble = (float64)z;
 	if (lTestOk)
 	{
-		lContext = _T("floating point conversion");
+		lContext = "floating point conversion";
 		lTestOk = !(lFloat != 3540186.0f || lDouble != 3540186.0);
 		assert(lTestOk);
 	}
 
-	ReportTestResult(pAccount, _T("BigInt"), lContext, lTestOk);
+	ReportTestResult(pAccount, "BigInt", lContext, lTestOk);
 	return (lTestOk);
 }

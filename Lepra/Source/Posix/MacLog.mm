@@ -20,15 +20,7 @@ void MacLog::Write(const str& pText)
 
 NSString* MacLog::Encode(const str& pText)
 {
-#if defined(LEPRA_UNICODE)
-#ifdef LEPRA_IOS
-	NSString* lText = [[NSString alloc] initWithBytes:(const char*)pText.c_str() length:pText.length()*sizeof(wchar_t) encoding:NSUTF32LittleEndianStringEncoding];
-#else
-	NSString* lText = [[[NSString alloc] initWithBytes:(const char*)pText.c_str() length:pText.length()*sizeof(wchar_t) encoding:NSUTF32LittleEndianStringEncoding] autorelease];
-#endif // iOS/Mac
-#else
 	NSString* lText = [NSString stringWithCString:pText.c_str() encoding:NSUTF8StringEncoding];
-#endif
 	return lText;
 }
 

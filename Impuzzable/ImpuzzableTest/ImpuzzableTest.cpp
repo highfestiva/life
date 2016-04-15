@@ -66,7 +66,7 @@ void TestFileLoad()
 {
 	ResourceManager lResourceLoader(0);
 	AsciiLoader lLoader(&lResourceLoader);
-	wstr lAsciiParts = lLoader.Load(_T("parts3.txt"));
+	wstr lAsciiParts = lLoader.Load("parts3.txt");
 	assert(!lAsciiParts.empty());
 	std::vector<PieceInfo> lPiecesInfo;
 	assert(lLoader.ConvertPieces(lAsciiParts, lPiecesInfo));

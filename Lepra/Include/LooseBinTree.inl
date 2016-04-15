@@ -1,8 +1,6 @@
-/*
-	Class:  LooseBinTree
-	Author: Jonas Byström
-	Copyright (c) Pixel Doctrine
-*/
+
+// Author: Jonas BystrÃ¶m
+// Copyright (c) Pixel Doctrine
 
 TEMPLATE QUAL::LooseBinTree(_TObject pErrorObject,				
 							_TVarType pTotalTreeSize,
@@ -47,7 +45,7 @@ TEMPLATE void QUAL::InsertObject(_TKey pKey, _TObject pObject, _TVarType pPos, _
 {
 	if (mNodeTable.Find(pKey) != mNodeTable.End())
 	{
-		mLog.AWarning("Object already inserted.");
+		mLog.Warning("Object already inserted.");
 		return;
 	}
 
@@ -159,7 +157,7 @@ TEMPLATE bool QUAL::MoveObject(_TKey pKey, _TVarType pNewPos, _TVarType pNewSize
 	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
-		mLog.AWarning("Trying to move non existing object.");
+		mLog.Warning("Trying to move non existing object.");
 		return false;
 	}
 	Node* lNode = *lNodeIter;
@@ -178,7 +176,7 @@ TEMPLATE _TObject QUAL::MoveObject(_TKey pKey, _TVarType pNewPos)
 	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
-		mLog.AWarning("Trying to move non existing object.");
+		mLog.Warning("Trying to move non existing object.");
 		return false;
 	}
 	Node* lNode = *lNodeIter;
@@ -204,7 +202,7 @@ TEMPLATE bool QUAL::GetObjectSizeAndPos(_TKey pKey, _TVarType& pPos, _TVarType& 
 	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
 	if (lNodeIter == mNodeTable.End())
 	{
-		mLog.AWarning("Trying to fetch non existing object.");
+		mLog.Warning("Trying to fetch non existing object.");
 		lOk = false;
 	}
 
@@ -358,4 +356,4 @@ TEMPLATE typename QUAL::Node* QUAL::NewNode(Node* pParent, uint8 pIndex, _TVarTy
 	return lNode;
 }
 
-TEMPLATE LogDecorator LooseBinTree<_TKey, _TObject, _TVarType, _THashFunc>::mLog(LogType::GetLogger(LogType::SUB_GENERAL), typeid(LooseBinTree));
+TEMPLATE LogDecorator LooseBinTree<_TKey, _TObject, _TVarType, _THashFunc>::mLog(LogType::GetLogger(LogType::GENERAL), typeid(LooseBinTree));

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 //
 // NOTES:
@@ -62,7 +62,7 @@ public:
 	Painter* GetPainter() const;
 
 	// TODO: come up with a way to avoid using an image loader directly in a
-	// void LoadImages(const tchar* pImageDefinitionFile, const tchar* pArchive = 0);
+	// void LoadImages(const char* pImageDefinitionFile, const char* pArchive = 0);
 	Painter::ImageID AddImage(const Canvas& pImage, ImageStyle pStyle, BlendFunc pBlendFunc, uint8 pAlphaValue);
 	void AddLoadedImage(const Canvas& pImage, Painter::ImageID pImageId, ImageStyle pStyle, BlendFunc pBlendFunc, uint8 pAlphaValue);
 	bool RemoveImage(Painter::ImageID pImageId);

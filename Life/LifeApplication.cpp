@@ -53,10 +53,10 @@ Application::Application(const str& pBaseName, const strutil::strvec& pArgumentL
 
 Application::~Application()
 {
-	mLog.RawPrint(LEVEL_HEADLINE, _T("The end. Baba!\n"));
+	mLog.RawPrint(LEVEL_HEADLINE, "The end. Baba!\n");
 	if (mFileLogger)
 	{
-		mFileLogger->WriteLog(_T("---\n\n"), LEVEL_INFO);
+		mFileLogger->WriteLog("---\n\n", LEVEL_INFO);
 	}
 
 	// Kill all loggers, hopefully we don't need to log anything else.
@@ -91,19 +91,19 @@ void Application::Init()
 #endif // !Apple
 #endif // Showing debug information.
 #ifdef LEPRA_DEBUG
-	//mFileLogger = new FileLogListener(GetIoFile(GetTypeName(), _T("log"), false));
+	//mFileLogger = new FileLogListener(GetIoFile(GetTypeName(), "log", false));
 	//mFileLogger->SetLevelThreashold(LEVEL_INFO);
-	//mFileLogger->WriteLog(_T("\n---\n"), LEVEL_INFO);
-	//mPerformanceLogger = new FileLogListener(GetIoFile(GetTypeName()+_T("Performance"), _T("log"), false));
+	//mFileLogger->WriteLog("\n---\n", LEVEL_INFO);
+	//mPerformanceLogger = new FileLogListener(GetIoFile(GetTypeName()+"Performance", "log", false));
 	//mMemLogger = new MemFileLogListener(20*1024);
 #endif // Debug
-	LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
+	LogType::GetLogger(LogType::ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
 
 	strutil::strvec lNameParts;
 	lNameParts.push_back(mBaseName);
 	lNameParts.push_back(GetTypeName());
-	str lAppName = strutil::Join(lNameParts, _T(" "));
-	str lStartMessage = _T("Starting ") + lAppName + _T(", version ") + GetVersion() + _T(", build type: ") _T(LEPRA_STRING_TYPE_TEXT) _T(" ") _T(LEPRA_BUILD_TYPE_TEXT) _T(".\n");
+	str lAppName = strutil::Join(lNameParts, " ");
+	str lStartMessage = "Starting " + lAppName + ", version " + GetVersion() + ", build type: " LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT ".\n";
 	mLog.RawPrint(LEVEL_HEADLINE, lStartMessage);
 
 	mResourceManager = new Cure::ResourceManager(1);
@@ -161,20 +161,20 @@ bool Application::MainLoop()
 
 	if (lQuit)
 	{
-		mLog.AHeadline("User requested application termination.");
+		mLog.Headline("User requested application termination.");
 	}
 	else if (!lOk)
 	{
 		if (mMemLogger)
 		{
-			LogType::GetLogger(LogType::SUB_ROOT)->RemoveListener(mMemLogger);
+			LogType::GetLogger(LogType::ROOT)->RemoveListener(mMemLogger);
 		}
-		mLog.AFatal("Terminating application due to fatal error.");
+		mLog.Fatal("Terminating application due to fatal error.");
 		if (mMemLogger && mFileLogger)
 		{
-			mLog.RawPrint(LEVEL_FATAL, _T("\nStart dump hires logs.\n--------------------------------------------------------------------------------\n"));
+			mLog.RawPrint(LEVEL_FATAL, "\nStart dump hires logs.\n--------------------------------------------------------------------------------\n");
 			mMemLogger->Dump(mFileLogger->GetFile());
-			mLog.RawPrint(LEVEL_FATAL, _T("--------------------------------------------------------------------------------\nEnd dump hires logs.\n\n"));
+			mLog.RawPrint(LEVEL_FATAL, "--------------------------------------------------------------------------------\nEnd dump hires logs.\n\n");
 		}
 	}
 	return lOk;
@@ -240,7 +240,7 @@ str Application::GetIoFile(const str& pName, const str& pExt, bool pAddQuotes)
 		pName, pExt);
 	if (pAddQuotes)
 	{
-		lIoName = _T("\"") + lIoName + _T("\"");
+		lIoName = "\"" + lIoName + "\"";
 	}
 	return (lIoName);
 }
@@ -264,7 +264,7 @@ void Application::TickSleep(double pMainLoopTime) const
 		if (!mIsPowerSaving)
 		{
 #ifndef LEPRA_TOUCH
-			mLog.AInfo("Entering power save mode.");
+			mLog.Info("Entering power save mode.");
 #endif // !Touch.
 			mIsPowerSaving = true;
 		}
@@ -275,7 +275,7 @@ void Application::TickSleep(double pMainLoopTime) const
 		if (mIsPowerSaving)
 		{
 #ifndef LEPRA_TOUCH
-			mLog.AInfo("Leaving power save mode.");
+			mLog.Info("Leaving power save mode.");
 #endif // !Touch.
 			mIsPowerSaving = false;
 		}
@@ -312,14 +312,14 @@ void Application::TickSleep(double pMainLoopTime) const
 			if (lSleepTimeLeft < -0.01)
 #endif // Touch device / computer.
 			{
-				mLog.Warningf(_T("Overslept %f s!"), -lSleepTimeLeft);
+				mLog.Warningf("Overslept %f s!", -lSleepTimeLeft);
 			}
-			//log_volatile(mLog.Debugf(_T("Done tick sleeping, %f s left in sleep loop (measured), %f s reduction, %f s measured."), lSleepTimeLeft, mGameTicker->GetTickTimeReduction(), lSleepTime));
+			//log_volatile(mLog.Debugf("Done tick sleeping, %f s left in sleep loop (measured, %f s reduction, %f s measured."), lSleepTimeLeft, mGameTicker->GetTickTimeReduction(), lSleepTime));
 		}
 		else
 		{
 #ifndef LEPRA_IOS
-			//log_volatile(mLog.Debugf(_T("Skipping tick sleep (yield only), %f s left in sleep loop, %f s reduction."), lSleepTime, mGameTicker->GetTickTimeReduction()));
+			//log_volatile(mLog.Debugf("Skipping tick sleep (yield only, %f s left in sleep loop, %f s reduction."), lSleepTime, mGameTicker->GetTickTimeReduction()));
 			Thread::YieldCpu();	// Play nice even though time's up!
 #endif	// Not on iOS (which sleeps during timer ticks).
 		}

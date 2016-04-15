@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -193,7 +193,7 @@ int ChunkyPhysics::GetIndex(const ChunkyBoneGeometry* pGeometry) const
 		}
 	}
 	deb_assert(false);
-	mLog.AError("Trying to get uncontained geometry!");
+	mLog.Error("Trying to get uncontained geometry!");
 	return (-1);
 }
 

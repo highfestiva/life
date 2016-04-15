@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -53,7 +53,7 @@ GameServerTicker::~GameServerTicker()
 	{
 		ConsoleManager lConsole(mResourceManager, 0, Cure::GetSettings(), 0, 0);
 		lConsole.InitCommands();
-		lConsole.ExecuteCommand(_T("save-system-config-file 0 ") + Application::GetIoFile(_T("ServerBase"), _T("lsh")));
+		lConsole.ExecuteCommand("save-system-config-file 0 " + Application::GetIoFile("ServerBase", "lsh"));
 	}
 
 	mResourceManager = 0;
@@ -67,8 +67,8 @@ void GameServerTicker::StartConsole(InteractiveConsoleLogListener* pConsoleLogge
 {
 	ConsoleManager lConsole(mResourceManager, 0, Cure::GetSettings(), 0, 0);
 	lConsole.InitCommands();
-	lConsole.ExecuteCommand(_T("execute-file -i ServerDefault.lsh"));
-	lConsole.ExecuteCommand(_T("execute-file -i ") + Application::GetIoFile(_T("ServerBase"), _T("lsh")));
+	lConsole.ExecuteCommand("execute-file -i ServerDefault.lsh");
+	lConsole.ExecuteCommand("execute-file -i " + Application::GetIoFile("ServerBase", "lsh"));
 
 	mGameManager->StartConsole(pConsoleLogger, new StdioConsolePrompt);
 }
@@ -84,7 +84,7 @@ void GameServerTicker::SetMasterServerConnection(MasterServerConnection* pConnec
 bool GameServerTicker::Initialize()
 {
 	str lServerAddress;
-	v_get(lServerAddress, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _T("localhost:16650"));
+	v_get(lServerAddress, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
 	return mGameManager->Initialize(mMasterConnection, lServerAddress);
 }
 
@@ -114,7 +114,7 @@ bool GameServerTicker::Tick()
 		lMaxLoginCount = (lUserCount > lMaxLoginCount)? lUserCount : lMaxLoginCount;
 		if (lMaxLoginCount > 0 && lUserCount == 0)
 		{
-			mLog.AWarning("Server automatically shuts down since rtvar active and all users now logged off.");
+			mLog.Warning("Server automatically shuts down since rtvar active and all users now logged off.");
 			SystemManager::AddQuitRequest(+1);
 		}
 	}

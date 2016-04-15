@@ -142,7 +142,7 @@ typedef BasicScopeTimer<ScopePerformanceData> CallScopeTimer;
 		ScopeSpinLock __lLock(&__lInitLock);	\
 		if (!__lMeasureNameInitialized)	\
 		{	\
-			__lMeasureName = HashedString(strutil::Format(_T(#name) _T(";") _T(__FILE__) _T(";%i"), __LINE__));	\
+			__lMeasureName = HashedString(strutil::Format(#name ";" __FILE__ ";%i", __LINE__));	\
 			__lMeasureHash = __lMeasureName.mHash;	\
 			__lMeasureNameInitialized = true;	\
 		}	\

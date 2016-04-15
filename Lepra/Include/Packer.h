@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // TODO: implement compression.
@@ -81,10 +81,9 @@ public:
 class PackerUnicodeString
 {
 public:
-	static int Pack(uint8* pDestination, const wstr& pSource);
-	static int UnpackRaw(wstr* pDestination, const uint8* pSource, int pSize);	// Destination may be NULL.
-	static int Unpack(wstr& pDestination, const uint8* pSource, int pSize);
-	static int Unpack(astr& pDestination, const uint8* pSource, int pSize);
+	static int Pack(uint8* pDestination, const str& pSource);
+	static int UnpackRaw(str* pDestination, const uint8* pSource, int pSize);	// Destination may be NULL.
+	static int Unpack(str& pDestination, const uint8* pSource, int pSize);
 };
 
 

@@ -269,7 +269,7 @@ Spawner* GameManager::GetAvatarSpawner(GameObjectId pLevelId) const
 	ContextObject::Array::const_iterator x = lChildArray.begin();
 	for (; x != lChildArray.end(); ++x)
 	{
-		if ((*x)->GetClassId() != _T("Spawner"))
+		if ((*x)->GetClassId() != "Spawner")
 		{
 			continue;
 		}
@@ -299,7 +299,7 @@ void GameManager::OnStopped(ContextObject* pObject, Tbc::PhysicsManager::BodyID 
 
 	if (pObject->GetNetworkObjectType() == NETWORK_OBJECT_LOCALLY_CONTROLLED)
 	{
-		log_volatile(mLog.Debugf(_T("Object %u/%s stopped, sending position."), pObject->GetInstanceId(), pObject->GetClassId().c_str()));
+		log_volatile(mLog.Debugf("Object %u/%s stopped, sending position.", pObject->GetInstanceId(), pObject->GetClassId().c_str()));
 		GetContext()->AddPhysicsSenderObject(pObject);
 	}
 }
@@ -308,28 +308,28 @@ void GameManager::OnStopped(ContextObject* pObject, Tbc::PhysicsManager::BodyID 
 
 bool GameManager::ValidateVariable(int pSecurityLevel, const str& pVariable, str& pValue) const
 {
-	if (pSecurityLevel < 1 && (pVariable == _T(RTVAR_PHYSICS_FPS) ||
-		pVariable == _T(RTVAR_PHYSICS_RTR) ||
-		pVariable == _T(RTVAR_PHYSICS_HALT)))
+	if (pSecurityLevel < 1 && (pVariable == RTVAR_PHYSICS_FPS ||
+		pVariable == RTVAR_PHYSICS_RTR ||
+		pVariable == RTVAR_PHYSICS_HALT))
 	{
-		mLog.Warning(_T("You're not authorized to change this variable."));
+		mLog.Warning("You're not authorized to change this variable.");
 		return false;
 	}
-	if (pVariable == _T(RTVAR_PHYSICS_FPS) || pVariable == _T(RTVAR_PHYSICS_MICROSTEPS))
+	if (pVariable == RTVAR_PHYSICS_FPS || pVariable == RTVAR_PHYSICS_MICROSTEPS)
 	{
 		int lValue = 0;
 		if (!strutil::StringToInt(pValue, lValue)) return false;
-		lValue = (pVariable == _T(RTVAR_PHYSICS_FPS))? Math::Clamp(lValue, 5, 10000) : Math::Clamp(lValue, 1, 10);
+		lValue = (pVariable == RTVAR_PHYSICS_FPS)? Math::Clamp(lValue, 5, 10000) : Math::Clamp(lValue, 1, 10);
 		pValue = strutil::IntToString(lValue, 10);
 	}
-	else if (pVariable == _T(RTVAR_PHYSICS_RTR))
+	else if (pVariable == RTVAR_PHYSICS_RTR)
 	{
 		double lValue = 0;
 		if (!strutil::StringToDouble(pValue, lValue)) return false;
 		lValue = Math::Clamp(lValue, 0.01, 4.0);
 		strutil::DoubleToString(lValue, 4, pValue);
 	}
-	else if (pVariable == _T(RTVAR_PHYSICS_HALT))
+	else if (pVariable == RTVAR_PHYSICS_HALT)
 	{
 		bool lValue = false;
 		if (!strutil::StringToBool(pValue, lValue)) return false;
@@ -354,7 +354,7 @@ void GameManager::UpdateReportPerformance(bool pReport, double pReportInterval)
 			mReceiveBandwidth.Append(lTimeDiff, 0, mNetwork->GetReceivedByteCount());
 			if (pReport)
 			{
-				mLog.Performancef(_T("Network bandwith. Up: %sB/s (peak %sB/s). Down: %sB/s (peak %sB/s)."), 
+				mLog.Performancef("Network bandwith. Up: %sB/s (peak %sB/s). Down: %sB/s (peak %sB/s).",
 					Number::ConvertToPostfixNumber(mSendBandwidth.GetLast(), 2).c_str(),
 					Number::ConvertToPostfixNumber(mSendBandwidth.GetMaximum(), 2).c_str(),
 					Number::ConvertToPostfixNumber(mReceiveBandwidth.GetLast(), 2).c_str(),
@@ -458,8 +458,8 @@ void GameManager::ReportPerformance(const ScopePerformanceData::NodeArray& pNode
 	for (; x != pNodes.end(); ++x)
 	{
 		const ScopePerformanceData* lNode = *x;
-		str lName = strutil::Split(lNode->GetName(), _T(";"))[0];
-		mLog.Performancef((lIndent+lName+_T(" Min: %ss, last: %ss, savg: %ss, max: %ss.")).c_str(), 
+		str lName = strutil::Split(lNode->GetName(), ";")[0];
+		mLog.Performancef((lIndent+lName+" Min: %ss, last: %ss, savg: %ss, max: %ss.").c_str(), 
 			Number::ConvertToPostfixNumber(lNode->GetMinimum(), 2).c_str(),
 			Number::ConvertToPostfixNumber(lNode->GetLast(), 2).c_str(),
 			Number::ConvertToPostfixNumber(lNode->GetSlidingAverage(), 2).c_str(),

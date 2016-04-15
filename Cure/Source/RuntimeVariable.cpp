@@ -237,13 +237,13 @@ str RuntimeVariable::GetTypeName(DataType pType)
 {
 	switch (pType)
 	{
-		case RuntimeVariable::DATATYPE_STRING:	return _T("string");
-		case RuntimeVariable::DATATYPE_BOOL:	return _T("bool");
-		case RuntimeVariable::DATATYPE_INT:	return _T("int");
-		case RuntimeVariable::DATATYPE_REAL:	return _T("real");
+		case RuntimeVariable::DATATYPE_STRING:	return "string";
+		case RuntimeVariable::DATATYPE_BOOL:	return "bool";
+		case RuntimeVariable::DATATYPE_INT:	return "int";
+		case RuntimeVariable::DATATYPE_REAL:	return "real";
 	}
 	deb_assert(false);
-	return _T("void");
+	return "void";
 }
 
 bool RuntimeVariable::CheckType(DataType pType) const
@@ -252,7 +252,7 @@ bool RuntimeVariable::CheckType(DataType pType) const
 	{
 		return true;
 	}
-	mLog.Warningf(_T("Type error using variable %s; type should be %s, not %s!"),
+	mLog.Warningf("Type error using variable %s; type should be %s, not %s!",
 		mName.c_str(), GetTypeName(mDataType).c_str(), GetTypeName(pType).c_str());
 	//deb_assert(false);
 	return false;
@@ -325,7 +325,7 @@ bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const st
 	return true;
 }
 
-bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const tchar* pValue)
+bool RuntimeVariableScope::SetValue(SetMode pSetMode, const str& pName, const char* pValue)
 {
 	return (SetValue(pSetMode, pName, str(pValue)));
 }
@@ -390,7 +390,7 @@ str RuntimeVariableScope::GetUntypedDefaultValue(GetMode pMode, const str& pName
 		}
 		case RuntimeVariable::DATATYPE_BOOL:
 		{
-			return GetDefaultValue(pMode, pName, lVariable, false) ? _T("true") : _T("false");
+			return GetDefaultValue(pMode, pName, lVariable, false) ? "true" : "false";
 		}
 		case RuntimeVariable::DATATYPE_INT:
 		{
@@ -400,7 +400,7 @@ str RuntimeVariableScope::GetUntypedDefaultValue(GetMode pMode, const str& pName
 		case RuntimeVariable::DATATYPE_REAL:
 		{
 			double d = GetDefaultValue(pMode, pName, lVariable, 0.0);
-			return strutil::Format(_T("%.4f"), d);
+			return strutil::Format("%.4f", d);
 		}
 	}
 	return EmptyString;
@@ -411,7 +411,7 @@ const str& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedStri
 	return GetDefaultValue(pMode, pName, GetVariable(pName), pDefaultValue);
 }
 
-const str RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, const tchar* pDefaultValue)
+const str RuntimeVariableScope::GetDefaultValue(GetMode pMode, const HashedString& pName, const char* pDefaultValue)
 {
 	return GetDefaultValue(pMode, pName, GetVariable(pName), str(pDefaultValue));
 }
@@ -512,9 +512,9 @@ RuntimeVariableScope::DataType RuntimeVariableScope::GetType(const str& pValue, 
 
 RuntimeVariableScope::DataType RuntimeVariableScope::Cast(const str& pValue, str& pOutStr, bool& pOutBool, int& pOutInt, double& pOutDouble)
 {
-	if (pValue.substr(0, 9) == _T("(boolean)"))
+	if (pValue.substr(0, 9) == "(boolean)")
 	{
-		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 9-1);
+		size_t lConstantStart = strutil::FindNextWord(pValue, " \t\r\n)", 9-1);
 		if (lConstantStart < pValue.length())
 		{
 			const str lValue = pValue.substr(lConstantStart);
@@ -537,14 +537,14 @@ RuntimeVariableScope::DataType RuntimeVariableScope::Cast(const str& pValue, str
 				pOutBool = (lDouble >= -0.5 && lDouble < 0.5);
 				return RuntimeVariable::DATATYPE_BOOL;
 			}
-			mLog.Warningf(_T("Uncastable bool value: %s."), lValue.c_str());
+			mLog.Warningf("Uncastable bool value: %s.", lValue.c_str());
 			pOutStr = pValue;
 			return RuntimeVariable::DATATYPE_STRING;
 		}
 	}
-	else if (pValue.substr(0, 5) == _T("(int)"))
+	else if (pValue.substr(0, 5) == "(int)")
 	{
-		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 5-1);
+		size_t lConstantStart = strutil::FindNextWord(pValue, " \t\r\n)", 5-1);
 		if (lConstantStart < pValue.length())
 		{
 			const str lValue = pValue.substr(lConstantStart);
@@ -572,14 +572,14 @@ RuntimeVariableScope::DataType RuntimeVariableScope::Cast(const str& pValue, str
 				pOutInt = (unsigned)lValue[1];
 				return RuntimeVariable::DATATYPE_INT;
 			}
-			mLog.Warningf(_T("Uncastable integer value: %s."), lValue.c_str());
+			mLog.Warningf("Uncastable integer value: %s.", lValue.c_str());
 			pOutStr = pValue;
 			return RuntimeVariable::DATATYPE_STRING;
 		}
 	}
-	else if (pValue.substr(0, 6) == _T("(real)"))
+	else if (pValue.substr(0, 6) == "(real)")
 	{
-		size_t lConstantStart = strutil::FindNextWord(pValue, _T(" \t\r\n)"), 6-1);
+		size_t lConstantStart = strutil::FindNextWord(pValue, " \t\r\n)", 6-1);
 		if (lConstantStart < pValue.length())
 		{
 			const str lValue = pValue.substr(lConstantStart);
@@ -602,7 +602,7 @@ RuntimeVariableScope::DataType RuntimeVariableScope::Cast(const str& pValue, str
 				pOutDouble = lDouble;
 				return RuntimeVariable::DATATYPE_REAL;
 			}
-			mLog.Warningf(_T("Uncastable real value: %s."), lValue.c_str());
+			mLog.Warningf("Uncastable real value: %s.", lValue.c_str());
 			pOutStr = pValue;
 			return RuntimeVariable::DATATYPE_STRING;
 		}
@@ -632,7 +632,7 @@ const str& RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName
 	}
 	else if (pMode != READ_IGNORE)
 	{
-		mLog.Warningf(_T("Variable %s not found."), pName.c_str());
+		mLog.Warningf("Variable %s not found.", pName.c_str());
 	}
 	return pDefaultValue;
 }
@@ -657,7 +657,7 @@ bool RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, Runt
 	}
 	else if (pMode != READ_IGNORE)
 	{
-		mLog.Warningf(_T("Variable %s not found."), pName.c_str());
+		mLog.Warningf("Variable %s not found.", pName.c_str());
 	}
 	return pDefaultValue;
 }
@@ -682,7 +682,7 @@ int RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, Runti
 	}
 	else if (pMode != READ_IGNORE)
 	{
-		mLog.Warningf(_T("Variable %s not found."), pName.c_str());
+		mLog.Warningf("Variable %s not found.", pName.c_str());
 	}
 	return pDefaultValue;
 }
@@ -707,7 +707,7 @@ double RuntimeVariableScope::GetDefaultValue(GetMode pMode, const str& pName, Ru
 	}
 	else if (pMode != READ_IGNORE)
 	{
-		mLog.Warningf(_T("Variable %s not found."), pName.c_str());
+		mLog.Warningf("Variable %s not found.", pName.c_str());
 	}
 	return pDefaultValue;
 }

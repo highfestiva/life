@@ -159,11 +159,11 @@ PosixSemaphore::PosixSemaphore():
 {
 	if (::pthread_mutex_init(&mMutex, 0) != 0)
 	{
-		mLog.Errorf(_T("Problem initializing Posix semaphore (mutex). errno=%i."), errno);
+		mLog.Errorf("Problem initializing Posix semaphore (mutex. errno=%i).", errno);
 	}
 	if (::pthread_cond_init(&mCondition, 0) != 0)
 	{
-		mLog.Errorf(_T("Problem initializing Posix semaphore (condition). errno=%i."), errno);
+		mLog.Errorf("Problem initializing Posix semaphore (condition. errno=%i).", errno);
 	}
 }
 
@@ -173,11 +173,11 @@ PosixSemaphore::PosixSemaphore(unsigned pMaxCount):
 {
 	if (::pthread_mutex_init(&mMutex, 0) != 0)
 	{
-		mLog.Errorf(_T("Problem #2 initializing Posix semaphore (mutex). errno=%i."), errno);
+		mLog.Errorf("Problem #2 initializing Posix semaphore (mutex. errno=%i).", errno);
 	}
 	if (::pthread_cond_init(&mCondition, 0) != 0)
 	{
-		mLog.Errorf(_T("Problem #2 initializing Posix semaphore (condition). errno=%i."), errno);
+		mLog.Errorf("Problem #2 initializing Posix semaphore (condition. errno=%i).", errno);
 	}
 }
 
@@ -368,7 +368,7 @@ bool Thread::Start()
 		else
 		{
 			SetRunning(false);
-			mLog.Errorf((_T("Failed to start thread ")+strutil::Encode(GetThreadName())+_T("!")).c_str());
+			mLog.Errorf(("Failed to start thread "+strutil::Encode(GetThreadName())+"!").c_str());
 			lOk = false;
 		}
 	}
@@ -398,7 +398,7 @@ bool Thread::GraceJoin(float64 pTimeOut)
 		if (!mSemaphore.Wait(pTimeOut))
 		{
 			// Possible dead lock...
-			mLog.Warningf((_T("Failed to timed join thread \"") + strutil::Encode(GetThreadName()) + _T("\"! Deadlock?")).c_str());
+			mLog.Warningf(("Failed to timed join thread \"" + GetThreadName() + "\"! Deadlock?").c_str());
 			return (false);	// RAII simplifies here.
 		}
 		Join();
@@ -420,7 +420,7 @@ void Thread::Kill()
 	if (GetThreadHandle() != 0)
 	{
 		deb_assert(GetThreadId() != GetCurrentThreadId());
-		mLog.Warning(_T("Forcing kill of thread ") + strutil::Encode(GetThreadName()));
+		mLog.Warning("Forcing kill of thread " + GetThreadName());
 		::pthread_kill((pthread_t)mThreadHandle, SIGHUP);
 		Join();
 		SetRunning(false);

@@ -20,7 +20,7 @@ namespace TireFire
 
 
 Goal::Goal(Cure::ContextManager* pManager):
-	Parent(pManager->GetGameManager()->GetResourceManager(), _T("Goal")),
+	Parent(pManager->GetGameManager()->GetResourceManager(), "Goal"),
 	mTrigger(0),
 	mIsTriggered(false)
 {

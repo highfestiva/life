@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -62,7 +62,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const Tbc::PhysicsMana
 		const Tbc::ChunkyBoneGeometry* lStructureGeometry = pStructure->GetBoneGeometry(x);
 		if (!lStructureGeometry)
 		{
-			mLog.AError("Could not get positional update (for streaming), since *WHOLE* physical object not loaded!");
+			mLog.Error("Could not get positional update (for streaming), since *WHOLE* physical object not loaded!");
 			return false;
 		}
 		lBody = lStructureGeometry->GetBodyId();
@@ -76,7 +76,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const Tbc::PhysicsMana
 				Tbc::PhysicsManager::Joint3Diff lDiff;
 				if (!pPhysicsManager->GetJoint3Diff(lBody, lJoint, lDiff))
 				{
-					mLog.AError("Could not get hinge-2!");
+					mLog.Error("Could not get hinge-2!");
 					return false;
 				}
 				lData->mTransformation[0] = lDiff.mValue;
@@ -94,7 +94,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const Tbc::PhysicsMana
 				Tbc::PhysicsManager::Joint3Diff lDiff;
 				if (!pPhysicsManager->GetJoint3Diff(lBody, lJoint, lDiff))
 				{
-					mLog.AError("Could not get hinge-2!");
+					mLog.Error("Could not get hinge-2!");
 					return false;
 				}
 				lData->mTransformation[0] = lDiff.mValue;
@@ -116,7 +116,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const Tbc::PhysicsMana
 				Tbc::PhysicsManager::Joint1Diff lDiff;
 				if (!pPhysicsManager->GetJoint1Diff(lBody, lJoint, lDiff))
 				{
-					mLog.AError("Could not get hinge!");
+					mLog.Error("Could not get hinge!");
 					return false;
 				}
 				lData->mTransformation = lDiff.mValue;
@@ -131,7 +131,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const Tbc::PhysicsMana
 				Tbc::PhysicsManager::Joint3Diff lDiff;
 				if (!pPhysicsManager->GetJoint3Diff(lBody, lJoint, lDiff))
 				{
-					mLog.AError("Could not get ball!");
+					mLog.Error("Could not get ball!");
 					return false;
 				}
 				lData->mTransformation[0] = lDiff.mValue;
@@ -152,7 +152,7 @@ bool PositionHauler::Get(ObjectPositionalData& pPosition, const Tbc::PhysicsMana
 				Tbc::PhysicsManager::Joint2Diff lDiff;
 				if (!pPhysicsManager->GetJoint2Diff(lBody, lJoint, lDiff))
 				{
-					mLog.AError("Could not get universal!");
+					mLog.Error("Could not get universal!");
 					return false;
 				}
 				lData->mTransformation[0] = lDiff.mValue;
@@ -251,7 +251,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 	}
 	else
 	{
-		mLog.AInfo("Skipping setting of main body; we're owned by someone else.");
+		mLog.Info("Skipping setting of main body; we're owned by someone else.");
 	}
 
 	if (pPosition.mBodyPositionArray.size() <= 0)
@@ -259,7 +259,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 		return;
 	}
 
-	//mLog.AInfo("Setting full position.");
+	//mLog.Info("Setting full position.");
 
 	const int lBoneCount = pStructure->GetBoneCount();
 	size_t y = 0;
@@ -279,7 +279,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 				deb_assert(lData);
 				if (!lData)
 				{
-					mLog.AError("Could not fetch the right type of network positional!");
+					mLog.Error("Could not fetch the right type of network positional!");
 					return;
 				}
 				const Tbc::PhysicsManager::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], 100000,
@@ -287,7 +287,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 					lData->mAcceleration[0], lData->mAcceleration[1], 100000);
 				if (!pPhysicsManager->SetJoint3Diff(lBody, lJoint, lDiff))
 				{
-					mLog.AError("Could not set hinge-2!");
+					mLog.Error("Could not set hinge-2!");
 					return;
 				}
 			}
@@ -300,7 +300,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 				deb_assert(lData);
 				if (!lData)
 				{
-					mLog.AError("Could not fetch the right type of network positional!");
+					mLog.Error("Could not fetch the right type of network positional!");
 					return;
 				}
 				const Tbc::PhysicsManager::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], lData->mTransformation[2],
@@ -308,7 +308,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 					lData->mAcceleration[0], lData->mAcceleration[1], lData->mAcceleration[2]);
 				if (!pPhysicsManager->SetJoint3Diff(lBody, lJoint, lDiff))
 				{
-					mLog.AError("Could not set hinge-2!");
+					mLog.Error("Could not set hinge-2!");
 					return;
 				}
 			}
@@ -322,14 +322,14 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 				deb_assert(lData);
 				if (!lData)
 				{
-					mLog.AError("Could not fetch the right type of network positional!");
+					mLog.Error("Could not fetch the right type of network positional!");
 					return;
 				}
 				const Tbc::PhysicsManager::Joint1Diff lDiff(lData->mTransformation,
 					lData->mVelocity, lData->mAcceleration);
 				if (!pPhysicsManager->SetJoint1Diff(lBody, lJoint, lDiff))
 				{
-					mLog.AError("Could not set hinge!");
+					mLog.Error("Could not set hinge!");
 					return;
 				}
 			}
@@ -342,7 +342,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 				deb_assert(lData);
 				if (!lData)
 				{
-					mLog.AError("Could not fetch the right type of network positional!");
+					mLog.Error("Could not fetch the right type of network positional!");
 					return;
 				}
 				const Tbc::PhysicsManager::Joint3Diff lDiff(lData->mTransformation[0], lData->mTransformation[1], lData->mTransformation[2],
@@ -350,7 +350,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 					lData->mAcceleration[0], lData->mAcceleration[1], lData->mAcceleration[2]);
 				if (!pPhysicsManager->SetJoint3Diff(lBody, lJoint, lDiff))
 				{
-					mLog.AError("Could not set ball!");
+					mLog.Error("Could not set ball!");
 					return;
 				}
 			}
@@ -363,7 +363,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 				deb_assert(lData);
 				if (!lData)
 				{
-					mLog.AError("Could not fetch the right type of network positional!");
+					mLog.Error("Could not fetch the right type of network positional!");
 					return;
 				}
 				const Tbc::PhysicsManager::Joint2Diff lDiff(lData->mTransformation[0], lData->mTransformation[1],
@@ -371,7 +371,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 					lData->mAcceleration[0], lData->mAcceleration[1]);
 				if (!pPhysicsManager->SetJoint2Diff(lBody, lJoint, lDiff))
 				{
-					mLog.AError("Could not set universal!");
+					mLog.Error("Could not set universal!");
 					return;
 				}
 			}
@@ -408,7 +408,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 				deb_assert(lData);
 				if (!lData)
 				{
-					mLog.AError("Could not fetch the right type of network positional!");
+					mLog.Error("Could not fetch the right type of network positional!");
 					return;
 				}
 				pStructure->SetEnginePower(lEngine->GetControllerIndex()+0, lData->mValue[0]);
@@ -436,7 +436,7 @@ void PositionHauler::Set(const ObjectPositionalData& pPosition, Tbc::PhysicsMana
 				deb_assert(lData);
 				if (!lData)
 				{
-					mLog.AError("Could not fetch the right type of network positional!");
+					mLog.Error("Could not fetch the right type of network positional!");
 					return;
 				}
 				deb_assert(lData->mValue >= -5 && lData->mValue <= 5);

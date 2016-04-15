@@ -23,7 +23,7 @@ namespace Bound
 // Must lie before BoundConsoleManager to compile.
 const BoundConsoleManager::CommandPair BoundConsoleManager::mCommandIdList[] =
 {
-	{_T("step-level"), COMMAND_STEP_LEVEL},
+	{"step-level", COMMAND_STEP_LEVEL},
 };
 
 

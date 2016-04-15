@@ -28,7 +28,7 @@ View::View(const str& pTitle, UiTbc::Layout* pLayout):
 	SetCaption(lCaption);
 
 	UiTbc::Button* lCloseButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 1, LIGHT_RED, pTitle);
-	//lCloseButton->SetText(_T("x"), RED, BLACK);
+	//lCloseButton->SetText("x", RED, BLACK);
 	lCloseButton->SetPreferredSize(10, 10);
 	lCloseButton->SetMinSize(10, 10);
 	lCloseButton->SetOnClick(View, OnExit);
@@ -39,7 +39,7 @@ View::View(const str& pTitle, UiTbc::Layout* pLayout):
 
 UiTbc::RectComponent* View::AddRow(const Color& pColor, int pColumnCount)
 {
-	UiTbc::RectComponent* lRowLayer = new UiTbc::RectComponent(pColor, _T("Row"), new UiTbc::GridLayout(1, pColumnCount));
+	UiTbc::RectComponent* lRowLayer = new UiTbc::RectComponent(pColor, "Row", new UiTbc::GridLayout(1, pColumnCount));
 	lRowLayer->SetIsHollow(false);
 	AddChild(lRowLayer);
 	return lRowLayer;
@@ -47,7 +47,7 @@ UiTbc::RectComponent* View::AddRow(const Color& pColor, int pColumnCount)
 
 UiTbc::RectComponent* View::AddCentering(int pLayer, UiTbc::Component* pParent)
 {
-	UiTbc::RectComponent* lCenterLayer = new UiTbc::RectComponent(_T("Centering"), new UiTbc::CenterLayout);
+	UiTbc::RectComponent* lCenterLayer = new UiTbc::RectComponent("Centering", new UiTbc::CenterLayout);
 	pParent->AddChild(lCenterLayer, 0, 0, pLayer);
 	return lCenterLayer;
 }

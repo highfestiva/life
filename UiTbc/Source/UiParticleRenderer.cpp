@@ -264,7 +264,7 @@ void ParticleRenderer::CreateTempLight(const vec3& pColor, float pStrength, cons
 	if (mLights.size() < mMaxLightCount)
 	{
 		mLights.push_back(Light(pColor, pStrength, pPosition, pVelocity, pTargetVelocity, pTimeFactor));
-		//mLog.Infof(_T("Creating new light with strength %f"), pStrength);
+		//mLog.Infof("Creating new light with strength %f", pStrength);
 	}
 	else
 	{
@@ -282,7 +282,7 @@ void ParticleRenderer::CreateTempLight(const vec3& pColor, float pStrength, cons
 		}
 		if (pStrength >= lDarkestLightStrength && lDarkestLightIndex >= 0)
 		{
-			//mLog.Infof(_T("Overtaking light with render ID %i (had strength %f, got strength %f)"), mLights[lDarkestLightIndex].mRenderLightId, mLights[lDarkestLightIndex].mStrength, pStrength);
+			//mLog.Infof("Overtaking light with render ID %i (had strength %f, got strength %f"), mLights[lDarkestLightIndex].mRenderLightId, mLights[lDarkestLightIndex].mStrength, pStrength);
 			// TRICKY: don't overwrite! We must not leak the previosly allocated hardware light!
 			mLights[lDarkestLightIndex].mColor = pColor;
 			mLights[lDarkestLightIndex].mStrength = pStrength;
@@ -309,7 +309,7 @@ void ParticleRenderer::StepLights(float pTime, float pFriction)
 		{
 			if (x->mRenderLightId != Renderer::INVALID_LIGHT)
 			{
-				//mLog.Infof(_T("Dropping light with render ID %i."), x->mRenderLightId);
+				//mLog.Infof("Dropping light with render ID %i.", x->mRenderLightId);
 				mRenderer->RemoveLight(x->mRenderLightId);
 			}
 			x = mLights.erase(x);
@@ -319,7 +319,7 @@ void ParticleRenderer::StepLights(float pTime, float pFriction)
 			if (x->mRenderLightId == Renderer::INVALID_LIGHT)
 			{
 				x->mRenderLightId = mRenderer->AddPointLight(Renderer::LIGHT_MOVABLE, x->mPosition, x->mColor*x->mStrength*10, x->mStrength*10, 0);
-				//mLog.Infof(_T("Creating render ID %i for light with strength %f"), x->mRenderLightId, x->mStrength);
+				//mLog.Infof("Creating render ID %i for light with strength %f", x->mRenderLightId, x->mStrength);
 			}
 			++x;
 		}

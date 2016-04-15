@@ -55,7 +55,7 @@ using namespace Lepra;
 -(void) popViewControllerAnimated:(BOOL)animated;
 -(void) popIfGame;
 -(bool) showingSimulator;
--(void) handleStdOut:(const astr&)pStdOut;
+-(void) handleStdOut:(const str&)pStdOut;
 -(void) showNetworkControlFor:(NSString*)hostname;
 //-(void) showAd;
 -(void) tick;

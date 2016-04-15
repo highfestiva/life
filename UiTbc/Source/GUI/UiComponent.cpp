@@ -213,7 +213,7 @@ void Component::AddChild(Component* pChild, int pParam1, int pParam2, int pLayer
 	}
 	else
 	{
-		mLog.Errorf(_T("Could not add child to layer %i."), pLayer);
+		mLog.Errorf("Could not add child to layer %i.", pLayer);
 	}
 }
 

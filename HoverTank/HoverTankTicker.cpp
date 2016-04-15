@@ -100,12 +100,12 @@ bool HoverTankTicker::OpenUiManager()
 	{
 		mUiManager->UpdateSettings();
 		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
-		lRenderer->AddDynamicRenderer(_T("particle"), new UiTbc::ParticleRenderer(lRenderer, 1));
-		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, _T("explosion.png"), 4, 5);
+		lRenderer->AddDynamicRenderer("particle", new UiTbc::ParticleRenderer(lRenderer, 1));
+		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, "explosion.png", 4, 5);
 	}
 	if (lOk)
 	{
-		UiCure::RendererImageResource* lEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, _T("env.png"), UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
+		UiCure::RendererImageResource* lEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, "env.png", UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
 		if (lEnvMap->Load())
 		{
 			if (lEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
@@ -129,7 +129,7 @@ bool HoverTankTicker::OpenUiManager()
 
 void HoverTankTicker::DisplaySplashLogo()
 {
-	UiCure::PainterImageResource* lLogo = new UiCure::PainterImageResource(mUiManager, mResourceManager, _T("logo.png"), UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
+	UiCure::PainterImageResource* lLogo = new UiCure::PainterImageResource(mUiManager, mResourceManager, "logo.png", UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
 	if (lLogo->Load())
 	{
 		if (lLogo->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
@@ -152,9 +152,9 @@ void HoverTankTicker::DisplayCompanyLogo()
 	if (lShowLogo)
 	{
 		Cure::UserRamImageResource* lLogo = new Cure::UserRamImageResource;
-		Cure::UserResourceOwner<Cure::UserRamImageResource> lLogoHolder(lLogo, mResourceManager, _T("megaphone.png"));
+		Cure::UserResourceOwner<Cure::UserRamImageResource> lLogoHolder(lLogo, mResourceManager, "megaphone.png");
 		UiCure::UserSound2dResource* lLogoSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-		Cure::UserResourceOwner<UiCure::UserSound2dResource> lLogoSoundHolder(lLogoSound, mResourceManager, _T("logo_trumpet.wav"));
+		Cure::UserResourceOwner<UiCure::UserSound2dResource> lLogoSoundHolder(lLogoSound, mResourceManager, "logo_trumpet.wav");
 		for (int x = 0; x < 1000; ++x)
 		{
 			mResourceManager->Tick();
@@ -172,7 +172,7 @@ void HoverTankTicker::DisplayCompanyLogo()
 
 			UiLepra::Canvas& lCanvas = *lLogo->GetRamData();
 			const UiTbc::Painter::ImageID lImageId = mUiManager->GetDesktopWindow()->GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::STRETCHED, UiTbc::GUIImageManager::NO_BLEND, 255);
-			UiTbc::RectComponent lRect(lImageId, _T("logo"));
+			UiTbc::RectComponent lRect(lImageId, "logo");
 			mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
 			mUiManager->GetDesktopWindow()->AddChild(&lRect, 0, 0, 0);
 			const unsigned lWidth = mUiManager->GetDisplayManager()->GetWidth();

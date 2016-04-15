@@ -81,7 +81,7 @@ private:
 
 		UiTbc::ChunkyClass* lClass = pResource->GetData();
 		mPhysicsResource->LoadUnique(pResource->GetConstResource()->GetManager(),
-			lClass->GetPhysicsBaseName()+_T(".phys"),
+			lClass->GetPhysicsBaseName()+".phys",
 			Cure::UserPhysicsResource::TypeLoadCallback(this,
 				&ResourceTest::PhysicsLoadCallback));
 		const size_t lMeshCount = lClass->GetMeshCount();
@@ -94,10 +94,10 @@ private:
 			lClass->GetMesh(x, lPhysIndex, lName, lTransform, lMeshScale);
 			mMeshResourceArray.push_back(new UiCure::UserGeometryReferenceResource(
 				mUiManager, UiCure::GeometryOffset(lPhysIndex, lTransform, lMeshScale)));
-			strutil::strvec v = strutil::Split(lName, _T(";"));
-			if (v.size() < 2) { v.push_back(_T("0")); }
+			strutil::strvec v = strutil::Split(lName, ";");
+			if (v.size() < 2) { v.push_back("0"); }
 			mMeshResourceArray[x]->Load(pResource->GetConstResource()->GetManager(),
-				v[0] + _T(".mesh;0") + v[1],
+				v[0] + ".mesh;0" + v[1],
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 					&ResourceTest::MeshRefLoadCallback));
 		}
@@ -218,9 +218,9 @@ bool ResourceTest::TestAtom()
 	// Test loading a 2D image.
 	if (lTestOk)
 	{
-		lContext = _T("load 2D image");
+		lContext = "load 2D image";
 		UiCure::UserRendererImageResource lImage(mUiManager, UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
-		lImage.Load(mResourceManager, _T("blue_eye.png"), UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::RendererImageLoadCallback));
+		lImage.Load(mResourceManager, "blue_eye.png", UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::RendererImageLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		mResourceManager->SafeRelease(&lImage);
@@ -231,12 +231,12 @@ bool ResourceTest::TestAtom()
 	// Test loading a 2D image into a texture.
 	if (lTestOk)
 	{
-		lContext = _T("load 2D image into texture");
+		lContext = "load 2D image into texture";
 		// Free previous resource; it's a requirement since the name must be
 		// unique throughout all resource types.
 		mResourceManager->ForceFreeCache();
 		UiCure::UserPainterImageResource lImage(mUiManager);
-		lImage.Load(mResourceManager, _T("blue_eye.png"), UiCure::UserPainterImageResource::TypeLoadCallback(this, &ResourceTest::PainterImageLoadCallback));
+		lImage.Load(mResourceManager, "blue_eye.png", UiCure::UserPainterImageResource::TypeLoadCallback(this, &ResourceTest::PainterImageLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		mResourceManager->SafeRelease(&lImage);
@@ -248,9 +248,9 @@ bool ResourceTest::TestAtom()
 	// We don't have a texture file, so this test should fail.
 	if (lTestOk)
 	{
-		lContext = _T("load 3D texture");
+		lContext = "load 3D texture";
 		UiCure::UserRendererImageResource lTexture(mUiManager, UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, false));
-		lTexture.Load(mResourceManager, _T("NoSuchFile.tga"), UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::RendererImageLoadCallback));
+		lTexture.Load(mResourceManager, "NoSuchFile.tga", UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::RendererImageLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		mResourceManager->SafeRelease(&lTexture);
@@ -261,9 +261,9 @@ bool ResourceTest::TestAtom()
 	/*// Test loading a 3D texture that we actually do have (at least if we've ever run the UiTbc tests).
 	if (lTestOk)
 	{
-		lContext = _T("load 3D texture");
+		lContext = "load 3D texture";
 		UiCure::UserRendererImageResource lTexture(mUiManager);
-		lTexture.Load(mResourceManager, _T("normalmap.tex"), UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::TextureLoadCallback));
+		lTexture.Load(mResourceManager, "normalmap.tex", UiCure::UserRendererImageResource::TypeLoadCallback(this, &ResourceTest::TextureLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		mResourceManager->SafeRelease(&lTexture);
@@ -278,16 +278,16 @@ bool ResourceTest::TestAtom()
 	// Test loading a sound.
 	if (lTestOk)
 	{
-		lContext = _T("load sound");
+		lContext = "load sound";
 		UiCure::UserSound2dResource lSound(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-		lSound.Load(mResourceManager, _T("logo_trumpet.wav"), UiCure::UserSound2dResource::TypeLoadCallback(this, &ResourceTest::Sound2dLoadCallback));
+		lSound.Load(mResourceManager, "logo_trumpet.wav", UiCure::UserSound2dResource::TypeLoadCallback(this, &ResourceTest::Sound2dLoadCallback));
 		Lepra::Thread::Sleep(0.4);
 		mResourceManager->Tick();
 		lTestOk = (gResourceLoadCount == 3 && gResourceLoadErrorCount == 1);
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			lContext = _T("play sound");
+			lContext = "play sound";
 			lTestOk = mUiManager->GetSoundManager()->Play(lSound.GetData(), 1.0, 1.0);
 			deb_assert(lTestOk);
 			Lepra::Thread::Sleep(0.5);
@@ -296,7 +296,7 @@ bool ResourceTest::TestAtom()
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(mLog, _T("ResourceAtom"), lContext, lTestOk);
+	ReportTestResult(mLog, "ResourceAtom", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -307,11 +307,11 @@ bool ResourceTest::TestClass()
 
 	if (lTestOk)
 	{
-		lContext = _T("load class");
+		lContext = "load class";
 		gResourceLoadCount = 0;
 		gResourceLoadErrorCount = 0;
 		UiCure::UserClassResource lClass(mUiManager);
-		lClass.Load(mResourceManager, _T("UI:hover_tank_01.class"), UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::ClassLoadCallback));
+		lClass.Load(mResourceManager, "UI:hover_tank_01.class", UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::ClassLoadCallback));
 		for (int x = 0; gResourceLoadCount != 7 && x < 100; ++x)
 		{
 			Lepra::Thread::Sleep(0.01);
@@ -335,7 +335,7 @@ bool ResourceTest::TestClass()
 	mResourceManager->StopClear();
 	mResourceManager->InitDefault();
 
-	ReportTestResult(mLog, _T("ResourceClass"), lContext, lTestOk);
+	ReportTestResult(mLog, "ResourceClass", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -346,30 +346,30 @@ bool ResourceTest::TestStress()
 
 	if (lTestOk)
 	{
-		lContext = _T("no loaded resources");
+		lContext = "no loaded resources";
 		lTestOk = (mResourceManager->QueryResourceCount() == 0);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("caching 0");
+		lContext = "caching 0";
 		lTestOk = (mResourceManager->QueryCachedResourceCount() == 0);
 		deb_assert(lTestOk);
 	}
 
 	if (lTestOk)
 	{
-		lContext = _T("stress load/free unique");
+		lContext = "stress load/free unique";
 		for (int x = 0; x <= 0x100; ++x)
 		{
 			UiCure::UserGeometryReferenceResource* lMesh0 =
 				new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
 			UiCure::UserGeometryReferenceResource* lMesh1 =
 				new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
-			lMesh0->LoadUnique(mResourceManager, _T("hover_tank_01_skid.mesh;0"),
+			lMesh0->LoadUnique(mResourceManager, "hover_tank_01_skid.mesh;0",
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 					&ResourceTest::MeshRefLoadCallback));
-			lMesh1->LoadUnique(mResourceManager, _T("hover_tank_01_skid.mesh;0"),
+			lMesh1->LoadUnique(mResourceManager, "hover_tank_01_skid.mesh;0",
 				UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 					&ResourceTest::MeshRefLoadCallback));
 			delete (lMesh1);
@@ -392,13 +392,13 @@ bool ResourceTest::TestStress()
 
 	if (lTestOk)
 	{
-		lContext = _T("caching 1");
+		lContext = "caching 1";
 		lTestOk = (mResourceManager->QueryCachedResourceCount() == 0);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("clearing cache 1");
+		lContext = "clearing cache 1";
 		lTestOk = (mResourceManager->ForceFreeCache() == 0);
 		deb_assert(lTestOk);
 		if (lTestOk)
@@ -411,15 +411,15 @@ bool ResourceTest::TestStress()
 
 	if (lTestOk)
 	{
-		lContext = _T("stress load/free mass");
+		lContext = "stress load/free mass";
 		for (int x = 0; x <= 0x100; ++x)
 		{
 			typedef UiCure::UserUiTypeResource<UiCure::GeometryResource> UserMesh;
 			UserMesh* lMesh0 = new UserMesh(mUiManager);
 			UserMesh* lMesh1 = new UserMesh(mUiManager);
-			lMesh0->Load(mResourceManager, _T("hover_tank_01_skid.mesh"),
+			lMesh0->Load(mResourceManager, "hover_tank_01_skid.mesh",
 				UserMesh::TypeLoadCallback(this, &ResourceTest::MeshLoadCallback));
-			lMesh1->Load(mResourceManager, _T("hover_tank_01_skid.mesh"),
+			lMesh1->Load(mResourceManager, "hover_tank_01_skid.mesh",
 				UserMesh::TypeLoadCallback(this, &ResourceTest::MeshLoadCallback));
 			delete (lMesh1);
 			delete (lMesh0);
@@ -439,13 +439,13 @@ bool ResourceTest::TestStress()
 
 	if (lTestOk)
 	{
-		lContext = _T("caching 2");
+		lContext = "caching 2";
 		lTestOk = (mResourceManager->QueryCachedResourceCount() == 0);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("clearing cache 2");
+		lContext = "clearing cache 2";
 		mResourceManager->ForceFreeCache();
 		lTestOk = (mResourceManager->QueryResourceCount() == 0);
 		deb_assert(lTestOk);
@@ -457,7 +457,7 @@ bool ResourceTest::TestStress()
 
 	if (lTestOk)
 	{
-		lContext = _T("stressing unique load");
+		lContext = "stressing unique load";
 		typedef std::list<UiCure::UserClassResource*> ClassList;
 		ClassList lResources;
 		for (int x = 0; x < lLoopCount; ++x)
@@ -465,7 +465,7 @@ bool ResourceTest::TestStress()
 			for (int y = 0; y < lAddCount; ++y)
 			{
 				UiCure::UserClassResource* lClass = new UiCure::UserClassResource(mUiManager);
-				lClass->LoadUnique(mResourceManager, _T("UI:hover_tank_01.class"),
+				lClass->LoadUnique(mResourceManager, "UI:hover_tank_01.class",
 					UiCure::UserClassResource::TypeLoadCallback(this, &ResourceTest::DumbClassLoadCallback));
 				lResources.push_back(lClass);
 			}
@@ -494,7 +494,7 @@ bool ResourceTest::TestStress()
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			lContext = _T("unique load completeness");
+			lContext = "unique load completeness";
 			lTestOk = false;
 			for (int z = 0; !lTestOk && z < 100; ++z)
 			{
@@ -507,7 +507,7 @@ bool ResourceTest::TestStress()
 					lTestOk = ((*y)->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 					if (!lTestOk && z == 99)
 					{
-						mLog.Warningf(_T("Failed on the %ith element; load state = %i."), u, (*y)->GetLoadState());
+						mLog.Warningf("Failed on the %ith element; load state = %i.", u, (*y)->GetLoadState());
 					}
 				}
 			}
@@ -515,7 +515,7 @@ bool ResourceTest::TestStress()
 		}
 		if (lTestOk)
 		{
-			lContext = _T("unique load clear");
+			lContext = "unique load clear";
 			ClassList::iterator y = lResources.begin();
 			for (; y != lResources.end(); ++y)
 			{
@@ -529,7 +529,7 @@ bool ResourceTest::TestStress()
 
 	if (lTestOk)
 	{
-		lContext = _T("stressing mass load");
+		lContext = "stressing mass load";
 		gResourceLoadCount = 0;
 		typedef std::list<UiCure::UserGeometryReferenceResource*> MeshList;
 		MeshList lResources;
@@ -542,7 +542,7 @@ bool ResourceTest::TestStress()
 			{
 				UiCure::UserGeometryReferenceResource* lMesh =
 					new UiCure::UserGeometryReferenceResource(mUiManager, UiCure::GeometryOffset(0));
-				lMesh->Load(mResourceManager, _T("hover_tank_01_tower.mesh;0"),
+				lMesh->Load(mResourceManager, "hover_tank_01_tower.mesh;0",
 					UiCure::UserGeometryReferenceResource::TypeLoadCallback(this,
 						&ResourceTest::MeshRefLoadCallback));
 				lResources.push_back(lMesh);
@@ -569,7 +569,7 @@ bool ResourceTest::TestStress()
 		}
 		if (lTestOk)
 		{
-			lContext = _T("resource load count");
+			lContext = "resource load count";
 			TickRM lTick(mResourceManager, 0.1);
 			size_t c = mResourceManager->QueryResourceCount();
 			lTestOk = (c == 2);
@@ -577,7 +577,7 @@ bool ResourceTest::TestStress()
 		}
 		if (lTestOk)
 		{
-			lContext = _T("mass load completeness");
+			lContext = "mass load completeness";
 			MeshList::iterator y = lResources.begin();
 			int u = 0;
 			for (; lTestOk && y != lResources.end(); ++y, ++u)
@@ -585,7 +585,7 @@ bool ResourceTest::TestStress()
 				lTestOk = ((*y)->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 				if (!lTestOk)
 				{
-					mLog.Warningf(_T("Failed on the %ith element (of %u); load state = %i."),
+					mLog.Warningf("Failed on the %ith element (of %u; load state = %i."),
 						u, lResources.size(), (*y)->GetLoadState());
 				}
 			}
@@ -593,7 +593,7 @@ bool ResourceTest::TestStress()
 		}
 		if (lTestOk)
 		{
-			lContext = _T("mass ref clear");
+			lContext = "mass ref clear";
 			MeshList::iterator y = lResources.begin();
 			for (; y != lResources.end(); ++y)
 			{
@@ -605,14 +605,14 @@ bool ResourceTest::TestStress()
 		}
 		if (lTestOk)
 		{
-			lContext = _T("mass cache clear");
+			lContext = "mass cache clear";
 			mResourceManager->ForceFreeCache();
 			lTestOk = (mResourceManager->QueryResourceCount() == 0);
 			deb_assert(lTestOk);
 		}
 	}
 
-	ReportTestResult(mLog, _T("ResourceStress"), lContext, lTestOk);
+	ReportTestResult(mLog, "ResourceStress", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -632,18 +632,18 @@ bool ResourceTest::TestReloadContextObject()
 	Cure::ContextManager lContextManager(&lGameManager);
 	if (lTestOk)
 	{
-		lContext = _T("init transformation suxx");
+		lContext = "init transformation suxx";
 		lTestOk = InternalLoadTransformation(lContextManager);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)
 	{
-		lContext = _T("reload transformation suxx");
+		lContext = "reload transformation suxx";
 		lTestOk = InternalLoadTransformation(lContextManager);
 		deb_assert(lTestOk);
 	}
 
-	ReportTestResult(mLog, _T("ReloadTransform"), lContext, lTestOk);
+	ReportTestResult(mLog, "ReloadTransform", lContext, lTestOk);
 	return (lTestOk);
 }
 
@@ -659,7 +659,7 @@ bool ResourceTest::InternalLoadTransformation(Cure::ContextManager& pContextMana
 	lFlip.RotateAroundOwnX(PIF/2);
 	quat Q = -(q * lFlip);
 
-	UiCure::CppContextObject lObject(mResourceManager, _T("hover_tank_01"), mUiManager);
+	UiCure::CppContextObject lObject(mResourceManager, "hover_tank_01", mUiManager);
 	pContextManager.AddLocalObject(&lObject);
 	xform lTransform(q, vec3(1, 2, 3));
 	lObject.SetInitialTransform(lTransform);
