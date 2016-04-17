@@ -117,4 +117,4 @@ PortalManager::Cell::~Cell()
 
 loginstance(UI_GFX_3D, PortalManager);
 
-} // End namespace.
+}

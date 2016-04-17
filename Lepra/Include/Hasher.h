@@ -1,12 +1,11 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #include "Unordered.h"	// To get ahold of std::hash<>.
 
 //#pragma once
-#ifndef LEPRAHASHER_H
-#define LEPRAHASHER_H
+#pragma once
 
 // JB: extending STL with const void* hashing. This will probably not work
 // equally well on all STL implementations, so make sure to port it properly.
@@ -38,6 +37,3 @@ template<> struct LEPRA_STD_HASHER<const void *>
 
 typedef std::LEPRA_STD_HASHER<const void*> LEPRA_VOIDP_HASHER;
 typedef std::LEPRA_STD_HASHER<int> LEPRA_ENUM_HASHER;
-
-#endif
-

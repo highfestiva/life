@@ -355,4 +355,4 @@ const str OpenGLMatSingleColorSolidPXS::smFP[NUM_FP] =
 #undef FP_CALC_SPOT_LIGHT
 #undef FP_END
 
-} // End namespace.
+}

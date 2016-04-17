@@ -476,4 +476,4 @@ bool ZipArchive::ExtractFile(const str& pFileName,
 
 loginstance(GENERAL_RESOURCES, ZipArchive);
 
-} // End namespace.
+}

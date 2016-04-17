@@ -1,6 +1,6 @@
 /*
 	Class:  ProgressCallback
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -50,4 +50,4 @@ bool ProgressCallback::GetPause() const
 	return mPause;
 }
 
-} // End namespace.
+}

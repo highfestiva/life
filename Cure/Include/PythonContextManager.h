@@ -1,13 +1,10 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2007, Righteous Games
 
 
 
-#ifndef CUREPYTHONCONTEXTMANAGER_H
-#define CUREPYTHONCONTEXTMANAGER_H
-
-
+#pragma once
 
 #if 0
 #include <Python.h>
@@ -39,6 +36,3 @@ public:
 
 }
 #endif // 0
-
-
-#endif // !CUREPYTHONCONTEXTMANAGER_H

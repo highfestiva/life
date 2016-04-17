@@ -4,8 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef UIGRIDLAYOUT_H
-#define UIGRIDLAYOUT_H
+#pragma once
 
 #include "UiLayout.h"
 
@@ -71,6 +70,4 @@ int GridLayout::GetNumCols() const
 	return mNumCols;
 }
 
-} // End namespace.
-
-#endif
+}

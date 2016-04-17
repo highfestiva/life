@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -342,7 +342,7 @@ public:
 
 MemoryLeakDetector gLeakDetector;
 
-} // End namespace.
+}
 
 #else // !<Memleak detection>
 

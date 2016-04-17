@@ -1,6 +1,6 @@
 /*
 	Class:  HashSet
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -19,8 +19,7 @@
 	The objects must also be comparable using the equal-operator ==.
 */
 
-#ifndef LEPRA_HASHSET_H
-#define LEPRA_HASHSET_H
+#pragma once
 
 #include "FastAllocator.h"
 #include "Hasher.h"
@@ -181,5 +180,3 @@ TEMPLATE typename QUAL::Iterator QUAL::End()
 
 #undef TEMPLATE
 #undef QUAL
-
-#endif // !LEPRA_HASHSET_H

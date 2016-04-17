@@ -1,13 +1,10 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
-#ifndef UIRENDERERFACTORY_H
-#define UIRENDERERFACTORY_H
-
-
+#pragma once
 
 #include "../../UiLepra/Include/UiDisplayManager.h"
 #include "UiRenderer.h"
@@ -28,7 +25,3 @@ public:
 
 
 }
-
-
-
-#endif // !UIRENDERERFACTORY_H

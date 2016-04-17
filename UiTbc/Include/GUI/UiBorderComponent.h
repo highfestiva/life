@@ -4,8 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef UIBORDERCOMPONENT_H
-#define UIBORDERCOMPONENT_H
+#pragma once
 
 #include "UiRectComponent.h"
 
@@ -84,6 +83,4 @@ void BorderComponent::SetResizable(bool pResizable)
 	mResizable = pResizable;
 }
 
-} // End namespace.
-
-#endif
+}

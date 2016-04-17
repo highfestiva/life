@@ -729,4 +729,4 @@ bool TextField::NotifyDoubleClick(PopupList*, int, int)
 	return true;
 }
 
-} // End namespace.
+}

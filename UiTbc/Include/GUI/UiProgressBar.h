@@ -4,8 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef UIPROGRESSBAR_H
-#define UIPROGRESSBAR_H
+#pragma once
 
 #include "UiWindow.h"
 #include "../../../Lepra/Include/ProgressCallback.h"
@@ -79,6 +78,4 @@ void ProgressBar::SetBoxSize(int pBoxSize)
 	mBoxSize = pBoxSize;
 }
 
-} // End namespace.
-
-#endif
+}

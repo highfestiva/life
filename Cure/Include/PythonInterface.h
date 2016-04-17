@@ -1,13 +1,10 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2007, Righteous Games
 
 
 
-#ifndef CUREPYTHONINTERFACE_H
-#define CUREPYTHONINTERFACE_H
-
-
+#pragma once
 
 #if 0
 #pragma warning(push, 3)	// MSVC: Move to warning level 3.
@@ -97,7 +94,3 @@ static PyObject* CreatePythonObject(const char* pPythonName, const tuple& pArgum
 }
 }
 #endif // 0
-
-
-
-#endif // !CUREPYTHONINTERFACE_H

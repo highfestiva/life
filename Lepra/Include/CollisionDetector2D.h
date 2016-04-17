@@ -1,6 +1,6 @@
 /*
 	Class:  CollisionDetector2D
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	A class used to test collisions between 2D geometrical shapes.
@@ -8,8 +8,7 @@
 	OBR = Oriented Bounding Rectangle
 */
 
-#ifndef LEPRA_COLLISIONDETECTOR2D_H
-#define LEPRA_COLLISIONDETECTOR2D_H
+#pragma once
 
 #include "Vector2D.h"
 #include "AABR.h"
@@ -194,6 +193,4 @@ private:
 
 #include "CollisionDetector2D.inl"
 
-} // End namespace.
-
-#endif
+}

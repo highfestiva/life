@@ -523,4 +523,4 @@ Color TreeNode::smFactoryTextSelectedColor      = BLACK;
 Color TreeNode::smFactoryTextSelectedBackgColor = LIGHT_BLUE;
 
 
-} // End namespace.
+}

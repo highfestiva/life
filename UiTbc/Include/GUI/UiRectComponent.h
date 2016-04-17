@@ -9,8 +9,7 @@
 	which can have a single color, be shaded, or even have an image.
 */
 
-#ifndef UIRECTCOMPONENT_H
-#define UIRECTCOMPONENT_H
+#pragma once
 
 #include "UiComponent.h"
 #include "../UiPainter.h"
@@ -73,6 +72,4 @@ private:
 	Painter::ImageID mImageID;
 };
 
-} // End namespace.
-
-#endif
+}

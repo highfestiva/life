@@ -1,6 +1,6 @@
 /*
 	Class:  LooseBinTree
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -8,8 +8,7 @@
 	A binary space tree. This is the 1D version of a space partition tree.
 */
 
-#ifndef LOOSEBINTREE_H
-#define LOOSEBINTREE_H
+#pragma once
 
 #include "FastAllocator.h"
 #include "HashTable.h"
@@ -294,9 +293,7 @@ private:
 
 #include "LooseBinTree.inl"
 
-} // End namespace.
+}
 
 #undef TEMPLATE
 #undef QUAL
-
-#endif

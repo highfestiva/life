@@ -1,6 +1,6 @@
 /*
 	Class:  Sphere
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -8,8 +8,7 @@
 	This class is used as a representation of a sphere in CollisionDetector3D.
 */
 
-#ifndef LEPRA_SPHERE_H
-#define LEPRA_SPHERE_H
+#pragma once
 
 #include "Vector3D.h"
 
@@ -80,9 +79,7 @@ TEMPLATE _TVarType QUAL::GetRadiusSquared() const
 	return mRadiusSquared;
 }
 
-} // End namespace.
+}
 
 #undef TEMPLATE
 #undef QUAL
-
-#endif

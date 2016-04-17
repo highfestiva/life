@@ -1,6 +1,6 @@
 /*
 	Class:  AABB
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -11,8 +11,7 @@
 	vector from the center of the box to corner (xmax, ymax, zmax).
 */
 
-#ifndef AABB_H
-#define AABB_H
+#pragma once
 
 #include "Vector3D.h"
 
@@ -115,9 +114,7 @@ TEMPLATE void QUAL::SetRawData(uint8* pData)
 	mSize.z = lData[5];
 }
 
-} // End namespace.
+}
 
 #undef TEMPLATE
 #undef QUAL
-
-#endif

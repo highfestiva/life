@@ -1,6 +1,6 @@
 /*
 	Class:  LooseOctree
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -18,8 +18,7 @@
 	LOVolume.
 */
 
-#ifndef LOOSEOCTREE_H
-#define LOOSEOCTREE_H
+#pragma once
 
 #include "LepraTypes.h"
 #include "Vector3D.h"
@@ -436,11 +435,9 @@ private:
 
 #include "LooseOctree.inl"
 
-} // End namespace.
+}
 
 #undef TEMPLATE
 #undef QUAL
 #undef MACRO_LO_GO1_TEST_TOP_AND_BOTTOM
 #undef MACRO_LO_GO2_TEST_FRONT_BACK_TOP_BOTTOM
-
-#endif // LOOSEOCTREE_H

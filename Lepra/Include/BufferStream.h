@@ -1,14 +1,12 @@
 /*
 	Class:  BufferInputStream,
 			BufferOutputStream
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
 
-#ifndef LEPRA_BUFFERSTREAM_H
-#define LEPRA_BUFFERSTREAM_H
-
+#pragma once
 
 #include "InputStream.h"
 #include "OutputStream.h"
@@ -49,6 +47,4 @@ private:
 	size_t mWriteIndex;
 };
 
-} // End namespace.
-
-#endif // !LEPRA_BUFFERSTREAM_H
+}

@@ -1,6 +1,6 @@
 /*
 	Class:  AABR
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -14,8 +14,7 @@
 	vector from the center of the rect to corner (xmax, ymax).
 */
 
-#ifndef AABR_H
-#define AABR_H
+#pragma once
 
 #include "Vector2D.h"
 
@@ -95,8 +94,6 @@ AABR_TEMPLATE _TVarType AABR_QUAL::GetArea() const
 	return mSize.x * mSize.y * 4;
 }
 
-} // End namespace.
+}
 
 #undef AABR_TEMPLATE
-
-#endif

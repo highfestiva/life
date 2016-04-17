@@ -9,8 +9,7 @@
 	DesktopWindow and you are done.
 */
 
-#ifndef ASEFILECONVERTER_H
-#define ASEFILECONVERTER_H
+#pragma once
 
 #include "./GUI/UiWindow.h"
 #include "UiASELoader.h"
@@ -58,6 +57,4 @@ private:
 	FileNameField* mFileNameField;
 };
 
-} // End namespace.
-
-#endif
+}

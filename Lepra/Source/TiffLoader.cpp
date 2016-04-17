@@ -1,6 +1,6 @@
 /*
 	Class:  TiffLoader
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -1482,4 +1482,4 @@ TiffLoader::ClipData::ClipData(int pLeft, int pTop,
 	}
 }
 
-} // End namespace.
+}

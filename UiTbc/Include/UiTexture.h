@@ -1,12 +1,11 @@
 /*
 	File:   Texture.h
 	Class:  Texture
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef UITEXTURE_H
-#define UITEXTURE_H
+#pragma once
 
 #include "../../Lepra/Include/Canvas.h"
 
@@ -151,6 +150,4 @@ unsigned int Texture::GetHeight(int pMipMapLevel) const
 }
 
 
-} // End namespace.
-
-#endif
+}

@@ -2,7 +2,7 @@
 	Class:  LQArea,
 		CircleArea,
 		LooseQuadtree
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -20,8 +20,7 @@
 	LQArea.
 */
 
-#ifndef LOOSEQUADTREE_H
-#define LOOSEQUADTREE_H
+#pragma once
 
 #include "AABR.h"
 #include "Circle.h"
@@ -411,11 +410,9 @@ private:
 
 #include "LooseQuadtree.inl"
 
-} // End namespace.
+}
 
 #undef LQ_TEMPLATE
 #undef LQ_QUAL
 #undef MACRO_LO_GO1_TEST_TOP_AND_BOTTOM
 #undef MACRO_LO_GO2_TEST_TOP_AND_BOTTOM
-
-#endif // LOOSEQUADTREE_H

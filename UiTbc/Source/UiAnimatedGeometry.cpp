@@ -1,6 +1,6 @@
 /*
 	Class:  AnimatedGeometry
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -243,4 +243,4 @@ Tbc::GeometryBase* AnimatedGeometry::GetOriginalGeometry()
 
 
 
-} // End namespace.
+}

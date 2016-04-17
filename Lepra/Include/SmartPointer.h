@@ -1,15 +1,10 @@
-/*
-	Class:  SmartPointer
-	Author: Jonas Byström
-	Copyright (c) Pixel Doctrine
-*/
+
+// Author: Jonas BystrÃ¶m
+// Copyright (c) Pixel Doctrine
 
 
 
-#ifndef LEPRA_SMARTPOINTER_H
-#define LEPRA_SMARTPOINTER_H
-
-
+#pragma once
 
 namespace Lepra
 {
@@ -128,7 +123,3 @@ TEMPLATE void QUAL::ReleaseObject()
 
 
 }
-
-
-
-#endif // !LEPRA_SMARTPOINTER_H

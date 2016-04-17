@@ -10,8 +10,7 @@
 	let you know which image to show at any given time.
 */
 
-#ifndef IMAGEANIMATOR_H
-#define IMAGEANIMATOR_H
+#pragma once
 
 #include "../../Lepra/Include/HashTable.h"
 #include "../../Lepra/Include/Timer.h"
@@ -139,9 +138,7 @@ TEMPLATE bool QUAL::Animation::GetLooping()
 
 #include "ImageAnimator.inl"
 
-} // End namespace.
+}
 
 #undef TEMPLATE
 #undef QUAL
-
-#endif

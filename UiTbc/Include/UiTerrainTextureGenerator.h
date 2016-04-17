@@ -1,11 +1,10 @@
 /*
 	Class:  TerrainTextureGenerator
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef UITERRAINTEXTUREGENERATOR_H
-#define UITERRAINTEXTUREGENERATOR_H
+#pragma once
 
 //#include "UiTerrainPatch.h"	// TRICKY: this must be before UiTbc include due to a bug in MSVC8.
 #include "../../Lepra/Include/Canvas.h"
@@ -86,6 +85,4 @@ private:
 	RangeList::iterator mCurrentRangeIter;
 };
 
-} // End namespace.
-
-#endif
+}

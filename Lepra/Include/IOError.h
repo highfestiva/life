@@ -1,6 +1,6 @@
 /*
 	Class:  -
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -8,8 +8,7 @@
 	An enumeration shared by File and FileArchive.
 */
 
-#ifndef IOERROR_H
-#define IOERROR_H
+#pragma once
 
 namespace Lepra
 {
@@ -40,6 +39,4 @@ enum IOError
 
 const char* GetIOErrorString(IOError pErr);
 
-} // End namespace.
-
-#endif
+}

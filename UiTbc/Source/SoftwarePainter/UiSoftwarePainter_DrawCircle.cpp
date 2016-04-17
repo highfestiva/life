@@ -248,4 +248,4 @@ void SoftwarePainter::DrawCircle32BitAdd(int x, int y, Lepra::float64 pRadius, S
 
 #undef MACRO_DRAWCIRCLE
 
-} // End namespace.
+}

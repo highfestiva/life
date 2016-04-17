@@ -1,6 +1,6 @@
 /*
 	Class:  FileArchive
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -37,8 +37,7 @@
 	   will be overwritten.
 */
 
-#ifndef LEPRA_FILEARCHIVE_H
-#define LEPRA_FILEARCHIVE_H
+#pragma once
 
 #include "LepraTypes.h"
 #include "HashTable.h"
@@ -164,6 +163,4 @@ private:
 	ProgressCallback* mCallback;
 };
 
-} // End namespace.
-
-#endif
+}

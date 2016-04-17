@@ -20,8 +20,7 @@
 	functions would do the clipping instead.
 */
 
-#ifndef EDGE_H
-#define EDGE_H
+#pragma once
 
 #include "UiTbc.h"
 #include "UiGradients.h"
@@ -1451,6 +1450,4 @@ float Edge2DRGBA::GetA()
 	}
 }
 
-} // End namespace.
-
-#endif
+}

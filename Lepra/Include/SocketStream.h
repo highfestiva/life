@@ -42,4 +42,4 @@ private:
 	TcpSocket* mSocket;
 };
 
-} // End namespace.
+}

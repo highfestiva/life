@@ -114,4 +114,4 @@ void IPAddress::CalcHashCode() const
 	}
 }
 
-} // End namespace.
+}

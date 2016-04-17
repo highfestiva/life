@@ -1,6 +1,6 @@
 /*
 	Class:  OutputStream
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -9,8 +9,7 @@
 	bytes.
 */
 
-#ifndef LEPRA_OUTPUTSTREAM_H
-#define LEPRA_OUTPUTSTREAM_H
+#pragma once
 
 #include "LepraTypes.h"
 #include "IOError.h"
@@ -64,6 +63,4 @@ const str& OutputStream::GetName()
 	return mName;
 }
 
-} // End namespace.
-
-#endif // !LEPRA_OUTPUTSTREAM_H
+}

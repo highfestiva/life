@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -48,12 +48,7 @@
 //      |- Bone transformation for bone #n.
 //      |- Bone shape for bone #n.
 
-
-
-#ifndef CHUNKYLOADER_H
-#define CHUNKYLOADER_H
-
-
+#pragma once
 
 #include "../../Lepra/Include/LepraAssert.h"
 #include <list>
@@ -307,7 +302,3 @@ public:
 
 
 }
-
-
-
-#endif // !CHUNKYLOADER_H

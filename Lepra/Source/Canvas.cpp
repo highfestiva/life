@@ -4698,4 +4698,4 @@ ColorOctreeNodeListNode::ColorOctreeNodeListNode()
 	mNext = 0;
 }
 
-} // End namespace.
+}

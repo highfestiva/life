@@ -1,6 +1,6 @@
 /*
 	Class:  CubicSpline
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -24,8 +24,7 @@
 	values by calling GetValue() passing the appropriate value index.
 */
 
-#ifndef CUBICSPLINE_H
-#define CUBICSPLINE_H
+#pragma once
 
 #include "LepraTypes.h"
 
@@ -409,6 +408,4 @@ int CubicSpline::GetNumValuesPerPoint()
 	return mNumValuesPerPoint;
 }
 
-} // End namespace.
-
-#endif
+}

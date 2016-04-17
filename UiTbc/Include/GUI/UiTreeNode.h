@@ -25,8 +25,7 @@
 	'b' is a label, which in turn consists of an icon and a string.
 */
 
-#ifndef UITREENODE_H
-#define UITREENODE_H
+#pragma once
 
 #include "UiComponent.h"
 #include "UiCheckButton.h"
@@ -157,6 +156,4 @@ int TreeNode::GetIndentationLevel() const
 	return mIndentationLevel;
 }
 
-} // End namespace.
-
-#endif
+}

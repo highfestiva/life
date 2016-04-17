@@ -1,11 +1,10 @@
 /*
 	Class:  BasicMeshCreator
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef UIBASICMESHCREATOR_H
-#define UIBASICMESHCREATOR_H
+#pragma once
 
 namespace UiTbc
 {
@@ -45,6 +44,4 @@ public:
 	// TODO: Implement more. Capsule, tube
 };
 
-} // End namespace.
-
-#endif
+}

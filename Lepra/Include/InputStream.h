@@ -1,6 +1,6 @@
 /*
 	Class:  InputStream
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -9,8 +9,7 @@
 	bytes.
 */
 
-#ifndef INPUTSTREAM_H
-#define INPUTSTREAM_H
+#pragma once
 
 #include "LepraTypes.h"
 #include "String.h"
@@ -68,6 +67,4 @@ const str& InputStream::GetName()
 	return mName;
 }
 
-} // End namespace.
-
-#endif
+}

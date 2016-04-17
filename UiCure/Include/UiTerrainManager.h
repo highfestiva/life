@@ -1,13 +1,10 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
-#ifndef UICURETERRAINMANAGER_H
-#define UICURETERRAINMANAGER_H
-
-
+#pragma once
 
 #include "../../Lepra/Include/HashTable.h"
 #include "../Include/UiCure.h"
@@ -33,7 +30,3 @@ public:
 
 
 }
-
-
-
-#endif // !UICURETERRAINMANAGER_H

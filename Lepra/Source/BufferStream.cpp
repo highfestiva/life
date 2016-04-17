@@ -1,7 +1,7 @@
 /*
 	Class:  BufferInputStream,
 			BufferOutputStream
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -109,4 +109,4 @@ IOError BufferOutputStream::WriteRaw(void* pData, size_t pLength)
 	return lError;
 }
 
-} // End namespace.
+}

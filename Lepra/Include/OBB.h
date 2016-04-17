@@ -1,6 +1,6 @@
 /*
 	Class:  OBB
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -13,8 +13,7 @@
 */
 
 
-#ifndef LEPRA_OBB_H
-#define LEPRA_OBB_H
+#pragma once
 
 #include "Vector3D.h"
 #include "RotationMatrix.h"
@@ -135,6 +134,4 @@ int OBB<_TVarType>::SetRawData(unsigned char* p_puchData)
 	return GetRawDataSize();
 }
 
-} // End namespace.
-
-#endif
+}

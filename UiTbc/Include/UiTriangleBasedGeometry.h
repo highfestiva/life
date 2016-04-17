@@ -1,13 +1,10 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
-#ifndef UITRIANGLEBASEDGEOMETRY_H
-#define UITRIANGLEBASEDGEOMETRY_H
-
-
+#pragma once
 
 #include "../../Lepra/Include/Graphics2D.h"
 #include "../../Lepra/Include/Vector3D.h"
@@ -158,8 +155,4 @@ private:
 
 
 
-} // End namespace.
-
-
-
-#endif
+}

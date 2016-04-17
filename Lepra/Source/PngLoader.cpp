@@ -437,4 +437,4 @@ loginstance(UI_GFX_2D, PngLoader);
 
 
 
-} // End namespace.
+}

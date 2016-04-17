@@ -32,8 +32,7 @@
 	to call the default conversion methods.
 */
 
-#ifndef UIASELOADER_H
-#define UIASELOADER_H
+#pragma once
 
 #include "../../Lepra/Include/String.h"
 #include "../../Lepra/Include/HashTable.h"
@@ -516,7 +515,4 @@ private:
 	bool ReadMESH_MAPPINGCHANNEL(Mesh* pMesh, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
 };
 
-} // End namespace.
-
-#endif
-
+}

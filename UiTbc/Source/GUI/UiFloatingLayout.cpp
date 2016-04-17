@@ -186,4 +186,4 @@ void FloatingLayout::MoveToTop(Component* pComponent)
 	}
 }
 
-} // End namespace.
+}

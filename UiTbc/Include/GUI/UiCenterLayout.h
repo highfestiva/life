@@ -4,8 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef UICENTERLAYOUT_H
-#define UICENTERLAYOUT_H
+#pragma once
 
 #include "UiLayout.h"
 
@@ -42,6 +41,4 @@ private:
 	Component* mChild;
 };
 
-} // End namespace.
-
-#endif
+}

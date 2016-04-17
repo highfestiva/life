@@ -1,5 +1,5 @@
  
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -781,4 +781,4 @@ BoneHierarchy* BoneAnimator::GetBones()
 
 
 
-} // End namespace.
+}

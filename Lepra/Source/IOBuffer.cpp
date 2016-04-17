@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -191,4 +191,4 @@ void IOBuffer::ExtendDataBuffer(size_t pMinSize)
 	mBufferStart = 0;
 }
 
-} // End namespace.
+}

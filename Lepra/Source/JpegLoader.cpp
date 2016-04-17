@@ -1,6 +1,6 @@
 /*
 	Class:  JpegLoader
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -468,4 +468,4 @@ void TerminateDestination(j_compress_ptr pCInfo)
 	delete lDest;
 }
 
-} // End namespace.
+}

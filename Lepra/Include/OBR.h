@@ -1,6 +1,6 @@
 /*
 	Class:  OBR
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -8,8 +8,7 @@
 	OBR - Oriented Bounding Rectangle.
 */
 
-#ifndef LEPRA_OBR_H
-#define LEPRA_OBR_H
+#pragma once
 
 #include "Vector2D.h"
 
@@ -111,6 +110,4 @@ _TVarType OBR<_TVarType>::GetArea() const
 	return mSize.x * mSize.y * 4;
 }
 
-} // End namespace.
-
-#endif
+}

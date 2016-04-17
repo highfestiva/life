@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // The base class TerrainFunction should be sub-classed; this is where the actual implementation goes.
@@ -16,10 +16,7 @@
 
 
 
-#ifndef TERRAINFUNCTION_H
-#define TERRAINFUNCTION_H
-
-
+#pragma once
 
 #include "../../Lepra/Include/CubicDeCasteljauSpline.h"
 #include "../../Lepra/Include/Vector2D.h"
@@ -184,7 +181,3 @@ private:
 
 
 }
-
-
-
-#endif // !TERRAINFUNCTION_H

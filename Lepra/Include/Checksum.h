@@ -9,10 +9,7 @@
 
 
 
-#ifndef LEPRA_CHECKSUM_H
-#define LEPRA_CHECKSUM_H
-
-
+#pragma once
 
 #include "LepraTypes.h"
 
@@ -36,7 +33,3 @@ protected:
 
 
 }
-
-
-
-#endif // !LEPRA_CHECKSUM_H

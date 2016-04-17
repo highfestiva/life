@@ -1,6 +1,6 @@
 /*
 	Class:  GraphicalModel
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -295,4 +295,4 @@ Tbc::GeometryBase* DefaultAnimatedProgressiveGeometryHandler::GetGeometry()
 	return mGeometry;
 }
 
-} // End namespace.
+}

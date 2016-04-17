@@ -4,8 +4,7 @@
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef UIFLOATINGLAYOUT_H
-#define UIFLOATINGLAYOUT_H
+#pragma once
 
 #include "UiComponent.h"
 #include "UiLayout.h"
@@ -58,6 +57,4 @@ private:
 	int mPosCount;
 };
 
-} // End namespace.
-
-#endif
+}

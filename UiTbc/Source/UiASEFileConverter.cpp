@@ -479,4 +479,4 @@ Lepra::String ASEFileConverter::ASEViewer::ToString(bool pValue)
 	}
 }
 
-} // End namespace.
+}

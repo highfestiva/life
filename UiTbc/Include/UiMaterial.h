@@ -1,6 +1,6 @@
 /*
 	Class:  Material
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -36,8 +36,7 @@
 	last.
 */
 
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#pragma once
 
 #include "UiTbc.h"
 #include "UiRenderer.h"
@@ -199,6 +198,4 @@ public:
 	}
 };
 
-} // End namespace.
-
-#endif
+}

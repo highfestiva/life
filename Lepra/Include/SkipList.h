@@ -5,7 +5,7 @@ JB: use std::map instead. It has a balanced red-black tree in the bottom and thu
 
 
 	Class:  SkipList
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -40,8 +40,7 @@ JB: use std::map instead. It has a balanced red-black tree in the bottom and thu
 	plain stupid. :)
 /
 
-#ifndef SKIPLIST_H
-#define SKIPLIST_H
+#pragma once
 
 #include "FastAllocator.h"
 #include "LepraTypes.h"
@@ -754,10 +753,8 @@ TEMPLATE bool QUAL::IsEndNode(ListNode* pNode) const
 	return ((pNode->mNext == 0) || (pNode->mPrev == 0));
 }
 
-} // End namespace.
+}
 
 #undef TEMPLATE
 #undef QUAL
-
-#endif
 */

@@ -1,13 +1,10 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2007, Righteous Games
 
 
 
-#ifndef CUREPYTHONCONTEXTOBJECT_H
-#define CUREPYTHONCONTEXTOBJECT_H
-
-
+#pragma once
 
 #if 0
 #include "../../Lepra/Include/String.h"
@@ -53,7 +50,3 @@ private:
 
 }
 #endif // 0
-
-
-
-#endif // !CUREPYTHONCONTEXTOBJECT_H

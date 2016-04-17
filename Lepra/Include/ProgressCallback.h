@@ -1,6 +1,6 @@
 /*
 	Class:  ProgressCallback
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -9,8 +9,7 @@
 	to handle progress notification.
 */
 
-#ifndef PROGRESSCALLBACK_H
-#define PROGRESSCALLBACK_H
+#pragma once
 
 #include "LepraTypes.h"
 
@@ -41,6 +40,4 @@ private:
 	bool mPause;
 };
 
-} // End namespace.
-
-#endif
+}

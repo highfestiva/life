@@ -99,4 +99,4 @@ IOError SocketOutputStream::WriteRaw(const void* pData, size_t pLength)
 	return IO_STREAM_NOT_OPEN;
 }
 
-} // End namespace.
+}

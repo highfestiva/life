@@ -213,4 +213,4 @@ PixelCoord StackLayout::GetContentSize() const
 	return lSize;
 }
 
-} // End namespace.
+}

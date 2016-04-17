@@ -1,7 +1,7 @@
 /*
 	File:   Texture.cpp
 	Class:  Texture
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -780,4 +780,4 @@ void Texture::GenerateNormalMap(Canvas& pNormalMap, const Canvas& pBumpMap, doub
 	}
 }
 
-} // End namespace.
+}

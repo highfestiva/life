@@ -128,4 +128,4 @@ PixelCoord CenterLayout::GetContentSize() const
 	}
 }
 
-} // End namespace.
+}

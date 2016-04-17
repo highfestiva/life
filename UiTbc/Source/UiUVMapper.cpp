@@ -1,6 +1,6 @@
 /*
 	Class:  UVMapper
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -168,4 +168,4 @@ bool UVMapper::ApplyCubeMapping(Tbc::GeometryBase* pGeometry, unsigned int pUVSe
 	return lStatusOk;
 }
 
-} // End namespace.
+}

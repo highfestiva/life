@@ -683,4 +683,4 @@ bool GridLayout::HaveDoubles() const
 }
 
 
-} // End namespace.
+}

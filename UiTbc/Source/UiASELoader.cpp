@@ -2932,4 +2932,4 @@ void ASELoader::ASEData::Init()
 }
 
 
-} // End namespace.
+}

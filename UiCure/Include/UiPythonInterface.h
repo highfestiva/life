@@ -1,13 +1,10 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2007, Righteous Games
 
 
 
-#ifndef UICUREPYTHONINTERFACE_H
-#define UICUREPYTHONINTERFACE_H
-
-
+#pragma once
 
 #if 0
 #pragma warning(push, 3)	// MSVC: Move to warning level 3.
@@ -85,7 +82,3 @@ public:
 }
 }
 #endif // 0
-
-
-
-#endif // !UICUREPYTHONINTERFACE_H

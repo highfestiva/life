@@ -222,4 +222,4 @@ void FileNameField::AddFileExtension(const str& pExtension)
 	mFileExtensionList.push_back(lExtension);
 }
 
-} // End namespace.
+}

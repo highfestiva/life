@@ -1,6 +1,6 @@
 /*
 	Class:  CollisionDetector3D
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -10,8 +10,7 @@
 */
 
 
-#ifndef LEPRA_COLLISIONDETECTOR3D_H
-#define LEPRA_COLLISIONDETECTOR3D_H
+#pragma once
 
 #include "Math.h"
 #include "Vector3D.h"
@@ -439,5 +438,3 @@ public:
 #include "CollisionDetector3D.inl"
 
 } // End namespace
-
-#endif

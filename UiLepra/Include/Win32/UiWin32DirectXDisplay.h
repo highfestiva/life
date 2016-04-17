@@ -1,11 +1,10 @@
 /*
 	Class:  Win32DirectXDisplay
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef UIWIN32DIRECTXDISPLAY_H
-#define UIWIN32DIRECTXDISPLAY_H
+#pragma once
 
 #include "UiWin32DisplayManager.h"
 #include <D3d9.h>
@@ -61,6 +60,4 @@ IDirect3DDevice9* Win32DirectXDisplay::GetD3DDevice()
 	return mD3DDevice;
 }
 
-} // End namespace.
-
-#endif
+}

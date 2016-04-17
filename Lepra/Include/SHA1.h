@@ -1,6 +1,6 @@
 /*
 	Class:  SHA1
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	SHA stands for Secure Hash Algoritm. SHA-1
@@ -10,10 +10,7 @@
 
 
 
-#ifndef LEPRA_SHA1_H
-#define LEPRA_SHA1_H
-
-
+#pragma once
 
 #include "LepraTypes.h"
 
@@ -43,7 +40,3 @@ protected:
 
 
 }
-
-
-
-#endif // !LEPRA_SHA1_H

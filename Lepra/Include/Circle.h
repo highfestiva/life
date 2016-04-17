@@ -1,11 +1,10 @@
 /*
 	Class:  Circle
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef CIRCLE_H
-#define CIRCLE_H
+#pragma once
 
 #include "Vector2D.h"
 #include "Math.h"
@@ -84,9 +83,7 @@ CIRCLE_TEMPLATE _TVarType CIRCLE_QUAL::GetArea() const
 	return mRadiusSquared * PIF;
 }
 
-} // End namespace.
+}
 
 #undef CIRCLE_TEMPLATE
 #undef CIRCLE_QUAL
-
-#endif

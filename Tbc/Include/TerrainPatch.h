@@ -1,11 +1,10 @@
 /*
 	Class:  TerrainPatch
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef UITERRAINPATCH_H
-#define UITERRAINPATCH_H
+#pragma once
 
 #include <math.h>
 #include "../../Lepra/Include/CubicSpline.h"
@@ -235,6 +234,4 @@ bool TerrainPatch::CheckFlag(unsigned int pFlags, unsigned int pFlag) const
 }
 
 
-} // End namespace.
-
-#endif
+}

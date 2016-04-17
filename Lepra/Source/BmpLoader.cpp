@@ -1,6 +1,6 @@
 /*
 	Class:  BmpLoader
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -490,4 +490,4 @@ bool BmpLoader::BitmapInfoHeader::Save(Writer* pWriter)
 }
 
 
-} // End namespace.
+}

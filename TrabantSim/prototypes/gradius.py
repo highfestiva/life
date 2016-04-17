@@ -5,7 +5,7 @@
 #  + planets in the background,
 #  + health,
 #  + blink when immortal after death,
-#  - tunnel,
+#  + tunnel,
 #  - different & classical enemies,
 #  - power-ups including weapons and shield,
 #  - explosion effect when firing heavy weapons,
@@ -163,18 +163,30 @@ while loop():
 
     # Create new enemies.
     if timeout(1, 1):
-        if random() > 0.3:
-            enemy = create_box((80,0,random()*80-40), vel=(-10,0,0), avel=rndvec(), side=3)
+        es = []
+        if random() > 0.9:
+            for i in range(15):
+                x = i*3.1
+                a = 2*pi*i/15
+                enemy = create_sphere((50+x,0,sin(a)*20), radius=1.5, vel=(-18,0,0), col='#493')
+                enemy.angle = a
+                enemy.move = lambda t: (-18,0,10*sin(2*t-enemy.angle))
+                es += [enemy]
+        elif random() > 0.3:
+            enemy = create_box((80,0,random()*80-40), side=3, vel=(-10,0,0), avel=rndvec())
             enemy.move = None
+            es += [enemy]
         else:
             enemy = create_ascii_object(enemyasc, pos=vec3(80,0,random()*80-40), vel=(-5,0,0), col='#f00')
             enemy.move = lambda t: (-10,0,10*sin(2*t))
-        enemy.physical = True
-        enemy.ship_parts = (enemy,)
-        enemy.health = 20
-        enemy.hurt = 60
-        enemy.immortal = False
-        enemies += [enemy]
+            es += [enemy]
+        for enemy in es:
+            enemy.physical = True
+            enemy.ship_parts = (enemy,)
+            enemy.health = 20
+            enemy.hurt = 60
+            enemy.immortal = False
+        enemies += es
 
     # Enemies shoot.
     ais = [e for e in enemies if e.isloaded and e.move]

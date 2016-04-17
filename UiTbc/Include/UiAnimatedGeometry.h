@@ -1,13 +1,10 @@
 /*
 	Class:  AnimatedGeometry
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
-#ifndef UIANIMATEDGEOMETRY_H
-#define UIANIMATEDGEOMETRY_H
-
-
+#pragma once
 
 #include "../../Lepra/Include/Vector3D.h"
 #include "../../Tbc/Include/GeometryBase.h"
@@ -88,6 +85,4 @@ private:
 
 
 
-} // End namespace.
-
-#endif
+}

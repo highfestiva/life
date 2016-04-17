@@ -9,8 +9,7 @@
 	as a popup menu.
 */
 
-#ifndef UIPOPUPLIST_H
-#define UIPOPUPLIST_H
+#pragma once
 
 #include "UiListControl.h"
 #include "../../../UiLepra/Include/UiInput.h"
@@ -64,6 +63,4 @@ private:
 	ListenerList mListeners;
 };
 
-} // End namespace.
-
-#endif
+}

@@ -584,4 +584,4 @@ bool MetaFile::FindValidArchiveName(const str& pArchivePrefix, str& pFullArchive
 	return lOk;
 }
 
-} // End namespace.
+}

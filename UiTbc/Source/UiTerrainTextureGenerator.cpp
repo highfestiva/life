@@ -1,7 +1,7 @@
 /*
 	File:   TerrainTextureGenerator.cpp
 	Class:  TerrainTextureGenerator
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -296,5 +296,5 @@ TerrainTextureGenerator::Range::~Range()
 }
 
 
-} // End namespace.
+}
 

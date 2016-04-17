@@ -1,6 +1,6 @@
 /*
 	Class:  Cylinder
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -160,6 +160,6 @@ template<class _TVarType> typename Cylinder<_TVarType>::Alignment Cylinder<_TVar
 	return mAlignment;
 }
 
-} // End namespace.
+}
 
 #endif

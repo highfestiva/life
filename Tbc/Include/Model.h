@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // NOTE:
@@ -11,10 +11,7 @@
 
 
 
-#ifndef MODEL_H
-#define MODEL_H
-
-
+#pragma once
 
 #include "Bones.h"
 #include <list>
@@ -98,8 +95,4 @@ protected:
 
 
 
-} // End namespace.
-
-
-
-#endif // !MODEL_H
+}

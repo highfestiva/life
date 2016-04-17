@@ -1,6 +1,6 @@
 /*
 	Class:  QuickList
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -11,8 +11,7 @@
 	not very memory efficient.
 */
 
-#ifndef QUICKLIST_H
-#define QUICKLIST_H
+#pragma once
 
 #include <list>
 #include "HashTable.h"
@@ -455,9 +454,7 @@ TEMPLATE const QuickList<T, HashFunc>& QUAL::operator=(const QuickList& pOther)
 	mTable = pOther.mTable;
 }
 
-} // End namespace.
+}
 
 #undef TEMPLATE
 #undef QUAL
-
-#endif

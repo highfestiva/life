@@ -45,4 +45,4 @@ const char* GetIOErrorString(IOError pErr)
 	return lString;
 }
 
-} // End namespace.
+}

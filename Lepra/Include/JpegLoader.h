@@ -1,6 +1,6 @@
 /*
 	Class:  JpegLoader
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -8,8 +8,7 @@
 	A class used to load/save jpeg-files into/from a Canvas.
 */
 
-#ifndef JPEGLOADER_H
-#define JPEGLOADER_H
+#pragma once
 
 #include "LepraTypes.h"
 #include "String.h"
@@ -75,6 +74,4 @@ private:
 	Writer* mWriter;
 };
 
-} // End namespace.
-
-#endif
+}
