@@ -245,13 +245,25 @@ bool App::Open()
 
 		UiTbc::FontManager::FontId lFontId = UiTbc::FontManager::INVALID_FONTID;
 		const double lFontHeight = lDisplayHeight / 24.0;
-		const tchar* lFontNames[] =
+		const char* lFontNames[] =
 		{
 			"Times New Roman",
 			"Arial",
 			"Courier New",
 			"Verdana",
 			"Helvetica",
+			"Courier New",
+			"Segoe UI",
+			"Open Sans",
+			"Liberation Sans",
+			"Liberation Serif",
+			"Nimbus",
+			"Cantarell",
+			"Bookman",
+			"Gothic",
+			"Sans",
+			"Serif",
+			"",
 			0
 		};
 		for (int x = 0; lFontNames[x] && lFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
@@ -368,7 +380,7 @@ int App::Run()
 
 	StdioConsoleLogListener lConsoleLogger;
 	DebuggerLogListener lDebugLogger;
-	LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(&lConsoleLogger, &lDebugLogger, 0, 0, 0);
+	LogType::GetLogger(LogType::ROOT)->SetupBasicListeners(&lConsoleLogger, &lDebugLogger, 0, 0, 0);
 
 	bool lOk = true;
 	if (lOk)
@@ -677,8 +689,8 @@ void App::OnFinishedClick(UiTbc::Button* pButton)
 
 UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::DesktopWindow* pDesktop)
 {
-	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 6, pColor, "");
-	lButton->SetText(pText);
+	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 6, pColor, L"");
+	lButton->SetText(wstrutil::Encode(pText));
 	const int h = std::max(pDesktop->GetSize().y/9, 44);
 	lButton->SetPreferredSize(pDesktop->GetSize().x/5, h);
 	pDesktop->AddChild(lButton);

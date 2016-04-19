@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="TrabantSim" InternalType="Console">
+<CodeLite_Project Name="Downwash" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00010001N0005Debug000000000000]]>
@@ -36,57 +36,46 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="Source">
-    <File Name="Light.cpp"/>
-    <File Name="Light.h"/>
-    <File Name="Object.cpp"/>
-    <File Name="Object.h"/>
+    <File Name="AirBalloonPilot.cpp"/>
+    <File Name="AirBalloonPilot.h"/>
+    <File Name="Automan.cpp"/>
+    <File Name="Automan.h"/>
+    <File Name="AutoPathDriver.cpp"/>
+    <File Name="AutoPathDriver.h"/>
+    <File Name="Autopilot.cpp"/>
+    <File Name="Autopilot.h"/>
+    <File Name="BaseMachine.cpp"/>
+    <File Name="BaseMachine.h"/>
+    <File Name="CanonDriver.cpp"/>
+    <File Name="CanonDriver.h"/>
+    <File Name="CenteredMachine.cpp"/>
+    <File Name="CenteredMachine.h"/>
+    <File Name="Downwash.cxx"/>
+    <File Name="Downwash.h"/>
+    <File Name="Downwash.rc" ExcludeProjConfig=""/>
+    <File Name="DownwashConsoleManager.cpp"/>
+    <File Name="DownwashConsoleManager.h"/>
+    <File Name="DownwashManager.cpp"/>
+    <File Name="DownwashManager.h"/>
+    <File Name="DownwashTicker.cpp"/>
+    <File Name="DownwashTicker.h"/>
+    <File Name="Eater.cpp"/>
+    <File Name="Eater.h"/>
+    <File Name="LandingTrigger.cpp"/>
+    <File Name="LandingTrigger.h"/>
+    <File Name="Level.cpp"/>
+    <File Name="Level.h"/>
     <File Name="pch.h"/>
-    <File Name="PhysGfxObject.cpp"/>
-    <File Name="PhysGfxObject.h"/>
     <File Name="RtVar.h"/>
-    <File Name="TrabantSim.cxx"/>
-    <File Name="TrabantSim.h"/>
-    <File Name="TrabantSimConsoleManager.cpp"/>
-    <File Name="TrabantSimConsoleManager.h"/>
-    <File Name="TrabantSimManager.cpp"/>
-    <File Name="TrabantSimManager.h"/>
-    <File Name="TrabantSimTicker.cpp"/>
-    <File Name="TrabantSimTicker.h"/>
+    <File Name="SimulatorDriver.cpp"/>
+    <File Name="SimulatorDriver.h"/>
+    <File Name="Sunlight.cpp"/>
+    <File Name="Sunlight.h"/>
+    <File Name="ToDo.txt" ExcludeProjConfig="Debug;Profile;Release"/>
     <File Name="Version.h"/>
-    <File Name="FileServer.cpp"/>
-    <File Name="FileServer.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Mac">
-    <File Name="AnimatedApp.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="BackButtonHandler.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="BackButtonHandler.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CreateNewViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CreateNewViewController.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRLayoutManager.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRLayoutManager.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRTextStorage.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRTextStorage.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRTextView.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRTextView.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRToken.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRToken.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="EditViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="EditViewController.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="FileHelper.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="FileHelper.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="ListViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="ListViewController.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="PythonRunner.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="PythonRunner.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="PythonTextView.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="PythonTextView.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="SettingsViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="SettingsViewController.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="StdOutViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="StdOutViewController.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="TrabantSim.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="WebViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="WebViewController.m" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="Downwash.mm" ExcludeProjConfig="Debug;Profile;Release"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="Life"/>
@@ -217,7 +206,7 @@
         <Library Value="Life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(WorkspacePath)/../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="./$(ProjectName)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(WorkspacePath)/../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>

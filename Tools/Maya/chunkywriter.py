@@ -21,7 +21,8 @@ import sys
 physics_type = {"world":1, "static":2, "dynamic":3, "collision_detect_only":4}
 guide_mode = {"never":0, "external":1, "always":2, None:1}
 resize_hints = {"resize_fast":0, "resize_nicest":1, "resize_canvas":2}
-connector_types = {"connector_slider":1, "connector_universal":2, "connector_hinge":3, "connector_hinge2":4, "connector_3dof":5, "connectee_3dof":6}
+connector_types = {"connector_slider":1, "connector_universal":2, "connector_suspend_hinge":3, "connector_hinge":4, "connector_hinge2":5, "connector_3dof":6, "connector_fixed":7, "connectee_3dof":8}
+joints = {None:1, "exclude":1, "fixed":2, "suspend_hinge":3, "hinge2":4, "hinge":5, "ball":6, "slider":7, "universal":8}
 
 CHUNK_CLASS				= "CLAS"
 CHUNK_CLASS_PHYSICS			= "CLPH"
@@ -500,7 +501,6 @@ class PhysWriter(ChunkyWriter):
 			print("Writing shape %s friction=%f, bounce=%f." % (node.getName(), friction, bounce))
 		rootindex = -1 if not node.phys_root else self.bodies.index(node.phys_root)
 		self._writeint(rootindex)
-		joints = {None:1, "exclude":1, "suspend_hinge":2, "hinge2":3, "hinge":4, "ball":5, "slider":6, "universal":7}
 		jointtype = node.get_fixed_attribute("joint", True)
 		jointvalue = joints[jointtype]
 		#print(node.getName(), "is jointed by type", jointvalue)

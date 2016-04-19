@@ -97,7 +97,6 @@ class SlimeVolleyball
 	private: int ballVX;
 	private: int ballVY;
 	private: Graphics screen;
-	private: astr promptMsg;
 	private: bool mousePressed;
 	public: bool fInPlay;
 	private: bool fP1Fire;
@@ -119,15 +118,11 @@ class SlimeVolleyball
 	private: long pausedTime;
 	private: bool paused;
 	private: int scoringRun;
-	private: astr slimeColText[7];
 	private: Color slimeColours[7];
 	private: Color human2PSlimeColours[5];
 	private: Color* activeSlimeColours;
 	private: int activeColCount;
-	private: astr loserText1[6];
-	private: astr loserText2[6];
-	private: astr human2PSlimeColText[5];
-	private: astr* activeSlimeColText;
+	private: str* activeSlimeColText;
 	public: Color SKY_COL;
 	private: Color COURT_COL;
 	private: Color BALL_COL;
@@ -144,13 +139,18 @@ class SlimeVolleyball
 	public: bool bGameOver;
 	public: int mPlayerCount;
 	private: bool mShowTitle;
+	private: str promptMsg;
+	private: str slimeColText[7];
+	private: str loserText1[6];
+	private: str loserText2[6];
+	private: str human2PSlimeColText[5];
 
 #define aiStartLevel   0
 #define ai2PStartLevel 1
 
 	public: SlimeVolleyball()
 	{
-		CLEAR_MEMBERS(nWidth, bGameOver);
+		CLEAR_MEMBERS(nWidth, mShowTitle);
 		mPlayerCount = 2;
 	}
 
@@ -163,15 +163,15 @@ class SlimeVolleyball
 		this->fInPlay = this->fEndGame = false;
 		nScore = 5;
 		this->promptMsg = "";
-		astr s[] = { "Inferior Human Controlled Slime ", "The Lazy Orange Slime ", "The Pathetic White Slime ", "Angry Red Slimonds ", "The Slime Master ", "Psycho Slime ", "Slime Wall " };
+		str s[] = { "Inferior Human Controlled Slime ", "The Lazy Orange Slime ", "The Pathetic White Slime ", "Angry Red Slimonds ", "The Slime Master ", "Psycho Slime ", "Slime Wall " };
 		LEPRA_ARRAY_ASSIGN(this->slimeColText, s);
 		Color c[] = { YELLOW, ORANGE, Color(220,235,220), RED, BLACK, BLUE, PINK };
 		LEPRA_ARRAY_ASSIGN(this->slimeColours, c);
-		astr s2[] = { "You are a loser!", this->slimeColText[2] + "delivers pwnage!", this->slimeColText[3] + "gives you the gong!", this->slimeColText[4] + "says \"You are seriously inept.\"", this->slimeColText[5] + "laughs at the pathetic slow opposition.", this->slimeColText[6] + "is still invincible!" };
+		str s2[] = { "You are a loser!", this->slimeColText[2] + "delivers pwnage!", this->slimeColText[3] + "gives you the gong!", this->slimeColText[4] + "says \"You are seriously inept.\"", this->slimeColText[5] + "laughs at the pathetic slow opposition.", this->slimeColText[6] + "is still invincible!" };
 		LEPRA_ARRAY_ASSIGN(this->loserText1, s2);
-		astr s3[] = { "Better luck next time.", "You should repay in vengeance!", "So who has the red face bombing out on level 3, huh?", "Congrats on reaching level 4.", "Congrats on reaching level 5!", "You fell at the last hurdle... but get up and try again!" };
+		str s3[] = { "Better luck next time.", "You should repay in vengeance!", "So who has the red face bombing out on level 3, huh?", "Congrats on reaching level 4.", "Congrats on reaching level 5!", "You fell at the last hurdle... but get up and try again!" };
 		LEPRA_ARRAY_ASSIGN(this->loserText2, s3);
-		astr s4[] = { "Big Red Slime ", "Magic Green Slime ", "Golden Boy ", "The Great White Slime ", "The Grass Tree(r) " };
+		str s4[] = { "Big Red Slime ", "Magic Green Slime ", "Golden Boy ", "The Great White Slime ", "The Grass Tree(r) " };
 		LEPRA_ARRAY_ASSIGN(this->human2PSlimeColText, s4);
 		Color c2[] = { RED, GREEN, YELLOW, WHITE, BLACK };
 		LEPRA_ARRAY_ASSIGN(this->human2PSlimeColours, c2);
@@ -263,7 +263,7 @@ class SlimeVolleyball
 		{
 			const int h = localFontMetrics.getHeight();
 			this->screen.centerString("SlimeBall", this->nHeight / 2 - h*4);
-			astr s = "Base by Quin Pendragon\n" \
+			str s = "Base by Quin Pendragon\n" \
 				"AI by Daniel Wedge\n" \
 				"Port by Pixel Doctrine\n" \
 				"Music by Grotesco";
@@ -278,20 +278,20 @@ class SlimeVolleyball
 			if (mPlayerCount == 1)
 			{
 				screen.setColor(WHITE);
-				astr s1 = astr("Level ") + astrutil::IntToString(this->aiMode + 1, 10) + " clear!";
+				str s1 = str("Level ") + strutil::IntToString(this->aiMode + 1, 10) + " clear!";
 				this->screen.centerString(s1, this->nHeight / 3);
 			}
-			//astr s2 = astr("Your score: ") + astrutil::IntToString(this->gameScore, 10);
+			//str s2 = str("Your score: ") + strutil::IntToString(this->gameScore, 10);
 			//screen.centerString(s2, this->nHeight / 2);
 			/*if (this->fP1PointsWon == 6)
 			{
-				astr s3 = astr("Level bonus: ") + astrutil::IntToString(1000 * this->fP1PointsWon / (this->fP1PointsWon + this->fP2PointsWon) * scale(), 10) + " points";
+				str s3 = str("Level bonus: ") + strutil::IntToString(1000 * this->fP1PointsWon / (this->fP1PointsWon + this->fP2PointsWon) * scale(), 10) + " points";
 				screen.centerString(s3, this->nHeight / 2 + localFontMetrics.getHeight());
-				astr s4 = astr("Time bonus: ") + astrutil::IntToString((this->gameTime < 300000L ? 300000L - this->gameTime : 0L) / 1000L * scale(), 10) + " points";
+				str s4 = str("Time bonus: ") + strutil::IntToString((this->gameTime < 300000L ? 300000L - this->gameTime : 0L) / 1000L * scale(), 10) + " points";
 				screen.centerString(s4, this->nHeight / 2 + localFontMetrics.getHeight() * 2);
 				if (this->fP2PointsWon == 0)
 				{
-					astr s5 = astr("Flawless Victory: ") + astrutil::IntToString(1000 * scale(), 10) + " points";
+					str s5 = str("Flawless Victory: ") + strutil::IntToString(1000 * scale(), 10) + " points";
 					screen.centerString(s5, this->nHeight / 2 + localFontMetrics.getHeight() * 3);
 				}
 			}*/
@@ -782,22 +782,22 @@ class SlimeVolleyball
 		}
 	}
 
-	private: astr MakeTime(long paramLong)
+	private: str MakeTime(long paramLong)
 	{
-		astr s = "";
+		str s = "";
 
 		long l1 = paramLong / 1000L % 60L;
 		long l2 = paramLong / 60000L % 60L;
 
-		s = astrutil::IntToString(l2, 10) + ":";
+		s = strutil::IntToString(l2, 10) + ":";
 		if (l1 < 10L) s += "0";
-		s += astrutil::IntToString(l1, 10);
+		s += strutil::IntToString(l1, 10);
 		return s;
 	}
 
 	private: void DrawStatus()
 	{
-		astr s = (!this->fInPlay ? "" : astr("	 Time: ") + MakeTime((this->paused ? this->pausedTime : System::currentTimeMillis()) - this->startTime));
+		str s = (!this->fInPlay ? "" : str("	 Time: ") + MakeTime((this->paused ? this->pausedTime : System::currentTimeMillis()) - this->startTime));
 		this->screen.setColor(WHITE);
 		int i = this->nHeight*5/4 * 7/8 + 5;
 		this->screen.centerString(s, i);
@@ -807,7 +807,7 @@ class SlimeVolleyball
 		drawPrompt(this->promptMsg, 0);
 	}
 
-	public: void drawPrompt(astr paramString, int paramInt)
+	public: void drawPrompt(str paramString, int paramInt)
 	{
 		FontMetrics localFontMetrics = this->screen.getFontMetrics();
 		this->screen.setColor(WHITE);

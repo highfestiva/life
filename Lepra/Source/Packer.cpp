@@ -235,7 +235,7 @@ int PackerUnicodeString::UnpackRaw(str* pDestination, const uint8* pSource, int 
 		{
 			lSize = (2+lCharCount+3) & (~3);
 			// TODO: catch UTF-8 encoding errors (might be DoS attempts).
-			const str lConversion = strutil::Encode((const char*)pSource+2);
+			const str lConversion = (const char*)(pSource+2);
 			if (pDestination)
 			{
 				*pDestination = lConversion;

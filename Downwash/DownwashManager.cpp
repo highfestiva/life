@@ -103,6 +103,7 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mActiveWeapon(0),
 	mLevel(0),
 	mOldLevel(0),
+	mAutopilot(0),
 	mHemisphere(0),
 	mHemisphereUvTransform(0),
 	mRenderHemisphere(true),
@@ -249,7 +250,7 @@ bool DownwashManager::Open()
 	bool lOk = Parent::Open();
 	if (lOk)
 	{
-		mPauseButton = ICONBTNA("btn_pause.png", "");
+		mPauseButton = ICONBTNA("btn_pause.png", L"");
 		int x = mRenderArea.GetCenterX() - 32;
 		int y = mRenderArea.mBottom - 76;
 		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
@@ -258,7 +259,7 @@ bool DownwashManager::Open()
 	}
 	if (lOk)
 	{
-		mLastHiscoreButton = ICONBTNA("btn_hiscore.png", "");
+		mLastHiscoreButton = ICONBTNA("btn_hiscore.png", L"");
 		int x = 12;
 		int y = mRenderArea.mBottom - 76;
 		mUiManager->GetDesktopWindow()->AddChild(mLastHiscoreButton, x, y);
@@ -487,27 +488,27 @@ bool DownwashManager::Paint()
 			uint8 g = uint8(sin(mToyModeColorTimer.QueryTimeDiff()*5)*120+128);
 			uint8 b = uint8(sin(mToyModeColorTimer.QueryTimeDiff()*7)*120+128);
 			mUiManager->GetPainter()->SetColor(Color(10, 10, 10, 128));
-			mUiManager->GetPainter()->PrintText("Toy mode", 11, 5);
+			mUiManager->GetPainter()->PrintText(L"Toy mode", 11, 5);
 			mUiManager->GetPainter()->SetColor(Color(r, g, b, 255));
-			mUiManager->GetPainter()->PrintText("Toy mode", 10, 4);
+			mUiManager->GetPainter()->PrintText(L"Toy mode", 10, 4);
 		}
 		else
 		{
 			const bool lIsFlying = mFlyTime.IsStarted();
 			const bool lIsSloppy = (lIsFlying || !lTime);
-			PrintTime("", lTime, lIsSloppy, 100, 3, Color(192, 210, 220), Color(10, 10, 10, 128));
+			PrintTime(L"", lTime, lIsSloppy, 100, 3, Color(192, 210, 220), Color(10, 10, 10, 128));
 
 			if (GetControlMode() != 2)
 			{
 				double lLevelBestTime = GetCurrentLevelBestTime(false);
 				if (lLevelBestTime > 0)
 				{
-					PrintTime("PR: ", lLevelBestTime, lIsSloppy, 100, 43, Color(10, 30, 40), Color(192, 192, 192, 128));
+					PrintTime(L"PR: ", lLevelBestTime, lIsSloppy, 100, 43, Color(10, 30, 40), Color(192, 192, 192, 128));
 				}
 				lLevelBestTime = GetCurrentLevelBestTime(true);
 				if (lLevelBestTime > 0)
 				{
-					PrintTime("WR: ", lLevelBestTime, lIsSloppy, 100, 83, Color(210, 40, 40, 255), Color(40, 10, 10, 128));
+					PrintTime(L"WR: ", lLevelBestTime, lIsSloppy, 100, 83, Color(210, 40, 40, 255), Color(40, 10, 10, 128));
 				}
 			}
 		}
@@ -613,11 +614,11 @@ bool DownwashManager::Paint()
 	return true;
 }
 
-void DownwashManager::PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg)
+void DownwashManager::PrintTime(const wstr pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg)
 {
 	const int lSec = (int)pTime;
-	const str lIntTimeString = pPrefix + strutil::Format("%i", lSec);
-	const str lTimeString = pPrefix + strutil::Format(lIsSloppy? "%.1f s" : "%.3f s", pTime);
+	const wstr lIntTimeString = pPrefix + wstrutil::Format(L"%i", lSec);
+	const wstr lTimeString = pPrefix + wstrutil::Format(lIsSloppy? L"%.1f s" : L"%.3f s", pTime);
 	int w = mUiManager->GetPainter()->GetStringWidth(lIntTimeString);
 	x -= w;
 	x = (x < 4)? 4 : x;
@@ -1777,31 +1778,31 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 	double lRtrOffset;
 	v_get(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 
-	UiTbc::TextField* lNameField = new UiTbc::TextField(0, WHITE, "pilot_name");
-	lNameField->SetText(lPilotName);
+	UiTbc::TextField* lNameField = new UiTbc::TextField(0, WHITE);
+	lNameField->SetText(wstrutil::Encode(lPilotName));
 	lLayouter.AddWindow(lNameField, 0, 5, 0, 1, 1);
 	lNameField->SetHorizontalMargin(lNameField->GetPreferredHeight() / 3);
 	//lNameField->SetKeyboardFocus();
 
 	lLayouter.SetContentXMargin(0);
-	UiTbc::RadioButton* lEasyButton = new UiTbc::RadioButton(Color(20, 30, 20), "Easy");
+	UiTbc::RadioButton* lEasyButton = new UiTbc::RadioButton(Color(20, 30, 20), L"Easy");
 	lEasyButton->SetPressColor(Color(50, 210, 40));
 	lEasyButton->SetRoundedRadiusMask(0x9);
 	lEasyButton->SetPressed(lDifficultyMode == 2);
 	lLayouter.AddButton(lEasyButton, -2, 1, 5, 0, 1, 3, false);
-	UiTbc::RadioButton* lMediumButton = new UiTbc::RadioButton(Color(30, 30, 20), "Medium");
+	UiTbc::RadioButton* lMediumButton = new UiTbc::RadioButton(Color(30, 30, 20), L"Medium");
 	lMediumButton->SetPressColor(Color(170, 165, 10));
 	lMediumButton->SetRoundedRadiusMask(0);
 	lMediumButton->SetPressed(lDifficultyMode == 1);
 	lLayouter.AddButton(lMediumButton, -3, 1, 5, 1, 1, 3, false);
-	UiTbc::RadioButton* lHardButton = new UiTbc::RadioButton(Color(30, 20, 20), "Hard");
+	UiTbc::RadioButton* lHardButton = new UiTbc::RadioButton(Color(30, 20, 20), L"Hard");
 	lHardButton->SetPressColor(Color(230, 40, 30));
 	lHardButton->SetRoundedRadiusMask(0x6);
 	lHardButton->SetPressed(lDifficultyMode == 0);
 	lLayouter.AddButton(lHardButton, -4, 1, 5, 2, 1, 3, false);
 	lLayouter.SetContentXMargin(lLayouter.GetContentYMargin());
 
-	UiTbc::CheckButton* lToyModeButton = new UiTbc::CheckButton(Color(30, 70, 220), "Toy mode");
+	UiTbc::CheckButton* lToyModeButton = new UiTbc::CheckButton(Color(30, 70, 220), L"Toy mode");
 	lToyModeButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
 	lToyModeButton->SetCheckedIcon(mCheckIcon->GetData());
 	lToyModeButton->SetDisabledIcon(mLockIcon->GetData());
@@ -1813,25 +1814,25 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 		UiTbc::TextArea* lUnlockLabel = new UiTbc::TextArea(BLACK);
 		lUnlockLabel->GetClientRectComponent()->SetIsHollow(true);
 		lUnlockLabel->SetFontColor(WHITE);
-		lUnlockLabel->AddText("Finish all levels to\nunlock toy mode");
+		lUnlockLabel->AddText(L"Finish all levels to\nunlock toy mode");
 		lLayouter.AddComponent(lUnlockLabel, 2, 5, 1, 1, 2);
 		lUnlockLabel->SetHorizontalMargin(lUnlockLabel->GetPreferredHeight() / 3);
 	}
 
-	UiTbc::CheckButton* lBedsideVolumeButton = new UiTbc::CheckButton(Color(190, 50, 180), "Bedside volume");
+	UiTbc::CheckButton* lBedsideVolumeButton = new UiTbc::CheckButton(Color(190, 50, 180), L"Bedside volume");
 	lBedsideVolumeButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
 	lBedsideVolumeButton->SetCheckedIcon(mCheckIcon->GetData());
 	lBedsideVolumeButton->SetPressed(lMasterVolume < 0.5);
 	lLayouter.AddButton(lBedsideVolumeButton, -6, 3, 5, 0, 1, 2, false);
-	UiTbc::Button* lHiscoreButton = new UiTbc::Button(Color(90, 50, 10), "High score");
+	UiTbc::Button* lHiscoreButton = new UiTbc::Button(Color(90, 50, 10), L"High score");
 	lHiscoreButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
 	lLayouter.AddButton(lHiscoreButton, -7, 3, 5, 1, 1, 2, true);
 
-	UiTbc::Button* lRestartButton = new UiTbc::Button(Color(220, 110, 20), "Restart from first level");
+	UiTbc::Button* lRestartButton = new UiTbc::Button(Color(220, 110, 20), L"Restart from first level");
 	lRestartButton->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Button::ICON_RIGHT);
 	lLayouter.AddButton(lRestartButton, -8, 4, 5, 0, 1, 1, true);
 
-	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), "X");
+	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), L"X");
 	lLayouter.AddCornerButton(lCloseButton, -9);
 
 	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
@@ -1857,18 +1858,18 @@ void DownwashManager::ShowHiscoreDialog(int pDirection)
 
 	UiTbc::FixedLayouter lLayouter(d);
 
-	UiTbc::Label* lLoadingLabel = new UiTbc::Label(WHITE, "Please wait while loading...");
+	UiTbc::Label* lLoadingLabel = new UiTbc::Label(WHITE, L"Please wait while loading...");
 	lLoadingLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Label::ICON_CENTER);
 	lLayouter.AddComponent(lLoadingLabel, 2, 5, 0, 1, 1);
 	lLoadingLabel->SetAdaptive(false);
 	d->SetQueryLabel(lLoadingLabel);
 
-	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), "X");
+	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), L"X");
 	lLayouter.AddCornerButton(lCloseButton, -9);
 
 	lLayouter.SetContentWidthPart(1);
-	UiTbc::Button* lPrevLevelButton = ICONBTNA("btn_prev.png", "");
-	UiTbc::Button* lNextLevelButton = ICONBTNA("btn_next.png", "");
+	UiTbc::Button* lPrevLevelButton = ICONBTNA("btn_prev.png", L"");
+	UiTbc::Button* lNextLevelButton = ICONBTNA("btn_next.png", L"");
 	lLayouter.AddButton(lPrevLevelButton, -100, 0, 1, 0, 1, 7, true);
 	lLayouter.AddButton(lNextLevelButton, -101, 0, 1, 6, 1, 7, true);
 	lPrevLevelButton->GetClientRectComponent()->SetIsHollow(true);
@@ -1907,7 +1908,7 @@ void DownwashManager::UpdateHiscoreDialog()
 	const int lBasePlace = lHiscoreList.mOffset;
 	const int lMaxEntryCount = 10;
 	const int lScoreCount = (int)lHiscoreList.mEntryList.size();
-	const str lLevelTitle = GetHiscoreLevelTitle();
+	const wstr lLevelTitle = GetHiscoreLevelTitle();
 	UiTbc::Label* lHeader = new UiTbc::Label(WHITE, lLevelTitle);
 	lHeader->SetName("level_header");
 	lHeader->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Label::ICON_CENTER);
@@ -1923,12 +1924,12 @@ void DownwashManager::UpdateHiscoreDialog()
 		{
 			SetLevelBestTime(mHiscoreLevelIndex, true, lTime);
 		}
-		str lTimeStr;
-		strutil::DoubleToString(lTime, 3, lTimeStr);
+		wstr lTimeStr;
+		wstrutil::DoubleToString(lTime, 3, lTimeStr);
 		const Color lColor = (lPilotName == lEntry.mName)? YELLOW : WHITE;
-		UiTbc::Label* lPlaceLabel = new UiTbc::Label(lColor, strutil::Format("%i.", lPlace));
+		UiTbc::Label* lPlaceLabel = new UiTbc::Label(lColor, wstrutil::Format(L"%i.", lPlace));
 		lPlaceLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Label::ICON_LEFT);
-		UiTbc::Label* lNameLabel = new UiTbc::Label(lColor, lEntry.mName);
+		UiTbc::Label* lNameLabel = new UiTbc::Label(lColor, wstrutil::Encode(lEntry.mName));
 		UiTbc::Label* lTimeLabel = new UiTbc::Label(lColor, lTimeStr);
 		lTimeLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::Label::ICON_LEFT);
 		lLayouter.AddComponent(lPlaceLabel, 2+x, 2+lMaxEntryCount, 0, 1, 7);
@@ -1940,17 +1941,17 @@ void DownwashManager::UpdateHiscoreDialog()
 	}
 	if (!lScoreCount)
 	{
-		d->UpdateQueryLabel("No high score entered. Yet.", WHITE);
+		d->UpdateQueryLabel(L"No high score entered. Yet.", WHITE);
 	}
 }
 
 void DownwashManager::OnMenuAlternative(UiTbc::Button* pButton)
 {
 	// Always save pilot name.
-	UiTbc::TextField* lPilotNameField = (UiTbc::TextField*)mMenu->GetDialog()->GetChild("pilot_name", 0);
+	UiTbc::TextField* lPilotNameField = (UiTbc::TextField*)mMenu->GetDialog()->GetChild("pilot_name");
 	if (lPilotNameField)
 	{
-		v_set(GetVariableScope(), RTVAR_GAME_PILOTNAME, lPilotNameField->GetText());
+		v_set(GetVariableScope(), RTVAR_GAME_PILOTNAME, strutil::Encode(lPilotNameField->GetText()));
 	}
 
 	float lPreChildishness;
@@ -2043,7 +2044,7 @@ void DownwashManager::UpdateHiscoreDialogTitle()
 	UiTbc::Dialog* d = mMenu->GetDialog();
 	if (d)
 	{
-		UiTbc::Label* lHeader = (UiTbc::Label*)d->GetChild("level_header", 0);
+		UiTbc::Label* lHeader = (UiTbc::Label*)d->GetChild("level_header");
 		if (lHeader)
 		{
 			lHeader->SetText(GetHiscoreLevelTitle());
@@ -2051,20 +2052,20 @@ void DownwashManager::UpdateHiscoreDialogTitle()
 	}
 }
 
-str DownwashManager::GetHiscoreLevelTitle() const
+wstr DownwashManager::GetHiscoreLevelTitle() const
 {
-	str lHiscoreLevelInfo;
+	wstr lHiscoreLevelInfo;
 	if (GetCurrentLevelNumber() == mHiscoreLevelIndex || mHiscoreLevelIndex == -1)
 	{
-		lHiscoreLevelInfo = strutil::Format("Current level (%i high score"), mHiscoreLevelIndex+1);
+		lHiscoreLevelInfo = wstrutil::Format(L"Current level (%i high score)", mHiscoreLevelIndex+1);
 	}
 	else if (GetCurrentLevelNumber()-1 == mHiscoreLevelIndex)
 	{
-		lHiscoreLevelInfo = strutil::Format("Previous level (%i high score"), mHiscoreLevelIndex+1);
+		lHiscoreLevelInfo = wstrutil::Format(L"Previous level (%i high score)", mHiscoreLevelIndex+1);
 	}
 	else
 	{
-		lHiscoreLevelInfo = strutil::Format("Level %i high score", mHiscoreLevelIndex+1);
+		lHiscoreLevelInfo = wstrutil::Format(L"Level %i high score", mHiscoreLevelIndex+1);
 	}
 	return lHiscoreLevelInfo;
 }
@@ -2095,7 +2096,7 @@ void DownwashManager::TickHiscore()
 			// If dialog still open: show it. Otherwise just fuck it.
 			if (d && d->GetName() == "hiscore_dialog")
 			{
-				d->UpdateQueryLabel("Network problem.", RED);
+				d->UpdateQueryLabel(L"Network problem.", RED);
 			}
 		}
 		return;

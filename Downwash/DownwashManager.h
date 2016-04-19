@@ -77,7 +77,7 @@ public:
 
 	virtual bool Render();
 	virtual bool Paint();
-	void PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg);
+	void PrintTime(const wstr pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg);
 	virtual void DrawSyncDebugInfo();
 
 	virtual bool IsObjectRelevant(const vec3& pPosition, float pDistance) const;
@@ -143,7 +143,7 @@ protected:
 	void OnPreHiscoreAction(UiTbc::Button* pButton);
 
 	void UpdateHiscoreDialogTitle();
-	str GetHiscoreLevelTitle() const;
+	wstr GetHiscoreLevelTitle() const;
 
 	void CreateHiscoreAgent();
 	void TickHiscore();

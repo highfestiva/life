@@ -12,6 +12,11 @@
 
 +Rapid prototyping game IDE. Python.
 
+Build all games in Linux/CodeLite.
+TrabantIDE.
+CodeLite refactoring?
+Release all games .deb or summat for Ubuntu.
+
 AI vs. AI programming game. Python.
 
 Multiplayer FPS and tank game in Gbg, generated through Google maps/street view.

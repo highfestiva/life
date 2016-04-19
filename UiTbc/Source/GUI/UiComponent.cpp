@@ -51,7 +51,6 @@ Component::~Component()
 		for (int x = 0; x < 5; ++x)
 		{
 			lParent->RemoveChild(this, x);
-			lParent->Component::RemoveChild(this, x);
 		}
 	}
 }
@@ -1169,6 +1168,42 @@ GUIImageManager* Component::GetImageManager()
 void Component::SetImageManager(GUIImageManager* pImageManager)
 {
 	smImageManager = pImageManager;
+}
+
+Component* Component::GetChild(const str& pName) const
+{
+	int i;
+	for (int i = 0; i < mLayerCount; ++i)
+	{
+		if (mLayout[i])
+		{
+			Component* lChild = mLayout[i]->GetFirst();
+			while (lChild != 0)
+			{
+				if (lChild->GetName() == pName)
+				{
+					return lChild;
+				}
+				Component* lGrandChild = lChild->GetChild(pName);
+				if (lGrandChild)
+				{
+					return lGrandChild;
+				}
+				lChild = mLayout[i]->GetNext();
+			}
+		}
+	}
+	return 0;
+}
+
+void Component::SetName(const str& pName)
+{
+	mName = pName;
+}
+
+const str& Component::GetName() const
+{
+	return mName;
 }
 
 

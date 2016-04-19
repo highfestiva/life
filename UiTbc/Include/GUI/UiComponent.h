@@ -215,6 +215,10 @@ public:
 
 	virtual bool IsComplete() const;
 
+	Component* GetChild(const str& pName) const;
+	void SetName(const str& pName);
+	const str& GetName() const;
+
 protected:
 	virtual void DoSetPos(int x, int y);
 	virtual void DoSetSize(int pWidth, int pHeight);
@@ -264,6 +268,8 @@ protected:
 	Canvas mImage;
 
 	int mLayerCount;
+
+	str mName;
 
 	static GUIImageManager* smImageManager;
 

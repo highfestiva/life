@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -29,7 +29,6 @@ public:
 	virtual void OnTick();
 
 private:
-	Cure::GameManager* mGame;
 	Cure::GameObjectId mCarId;
 	vec3 mDirection;
 	StopWatch mStillTimer;

@@ -36,7 +36,7 @@ public:
 		mPainter(pPainter)
 	{
 	}
-	int stringWidth(astr s) { return mPainter->GetStringWidth(s); }
+	int stringWidth(str s) { return mPainter->GetStringWidth(wstrutil::Encode(s)); }
 	int getHeight() { return mPainter->GetFontHeight(); }
 	int getAscent() { return getHeight()*4/5; }
 
@@ -65,19 +65,19 @@ public:
 	{
 	}
 
-	void centerString(astr s, int y)
+	void centerString(str s, int y)
 	{
-		typedef astrutil::strvec svec;
-		svec ss = astrutil::Split(s, "\n");
+		typedef strutil::strvec svec;
+		svec ss = strutil::Split(s, "\n");
 		for (svec::iterator x = ss.begin(); x != ss.end(); ++x)
 		{
 			drawString(*x, width / 2 - getFontMetrics().stringWidth(*x) / 2, y - getFontMetrics().getAscent()/2);
 			y += getFontMetrics().getHeight();
 		}
 	}
-	void drawString(astr s, int x, int y)
+	void drawString(str s, int x, int y)
 	{
-		mPainter->PrintText(s, x, y);
+		mPainter->PrintText(wstrutil::Encode(s), x, y);
 	}
 
 	FontMetrics getFontMetrics()
@@ -153,9 +153,9 @@ namespace System
 static Timer mTimer;
 namespace out
 {
-inline void println(astr s)
+inline void println(str s)
 {
-	LogType::GetLogger(LogType::SUB_ROOT)->RawPrint(s+"\n");
+	LogType::GetLogger(LogType::ROOT)->RawPrint(s+"\n");
 }
 }
 inline long currentTimeMillis()

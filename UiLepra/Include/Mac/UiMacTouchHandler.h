@@ -4,8 +4,8 @@
 
 
 
-#include "../../Lepra/Include/LepraOS.h"
-#include "../../Lepra/Include/Canvas.h"
+#include "../../../Lepra/Include/LepraOS.h"
+#include "../../../Lepra/Include/Canvas.h"
 #include "../UiTouchDrag.h"
 #ifdef LEPRA_IOS
 
