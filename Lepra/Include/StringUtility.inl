@@ -413,7 +413,7 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::DumpData(const uint8* pData, size_t pLe
 		lDataString[x*2+0] = lHexTable[pData[x]>>4];
 		lDataString[x*2+1] = lHexTable[pData[x]&0xF];
 	}
-	return (Encode(lDataString));
+	return lDataString;
 }
 
 

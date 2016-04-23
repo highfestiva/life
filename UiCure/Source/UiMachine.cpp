@@ -1,5 +1,5 @@
 
-// Author: Jonas Bystrˆm
+// Author: Jonas Bystr√∂m
 // Copyright (c) Pixel Doctrine
 
 
@@ -108,12 +108,7 @@ void Machine::OnTick()
 	const float lFrameTime = lTimeManager->GetNormalGameFrameTime();
 	const bool lIsChild = IsAttributeTrue("float_childishness");
 	const Tbc::PhysicsManager* lPhysicsManager = mManager->GetGameManager()->GetPhysicsManager();
-	vec3 lVelocity;
-	Tbc::PhysicsManager::BodyID lBodyId = lPhysics->GetBoneGeometry(lPhysics->GetRootBone())->GetBodyId();
-	if (lBodyId != Tbc::INVALID_BODY)
-	{
-		lPhysicsManager->GetBodyVelocity(lBodyId, lVelocity);
-	}
+	vec3 lVelocity = GetVelocity();
 	size_t lEngineSoundIndex = 0;
 	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
 	{
@@ -226,7 +221,7 @@ void Machine::HandleTagAmbientSounds(const UiTbc::ChunkyClass::Tag& pTag, float 
 void Machine::HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const Tbc::PhysicsManager* pPhysicsManager, bool pIsChild)
 {
 	// Eyes follow steered wheels. Get wheel corresponding to eye and
-	// move eye accordingly · l‡ Lightning McQueen.
+	// move eye accordingly √° l√† Lightning McQueen.
 
 	if (pTag.mFloatValueList.size() != 1 ||
 		pTag.mStringValueList.size() != 0 ||

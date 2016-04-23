@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -85,6 +85,27 @@ void ProjectileUtil::StartBullet(Cure::ContextObject* pBullet, float pMuzzleVelo
 	}
 	const Tbc::ChunkyBoneGeometry* lGeometry = pBullet->GetPhysics()->GetBoneGeometry(pBullet->GetPhysics()->GetRootBone());
 	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lGeometry->GetBodyId(), lTransform);
+
+	pBullet->GetManager()->EnableMicroTickCallback(pBullet);	// Used hires movement + collision detection.
+}
+
+
+void ProjectileUtil::BulletMicroTick(Cure::ContextObject* pBullet, float pFrameTime, float pMaxVelocity, float pAcceleration)
+{
+	const Tbc::ChunkyBoneGeometry* lRootGeometry = pBullet->GetPhysics()->GetBoneGeometry(0);
+	Tbc::PhysicsManager::BodyID lBody = lRootGeometry->GetBodyId();
+	xform lTransform;
+	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
+	vec3 lVelocity = pBullet->GetVelocity();
+	lTransform.GetPosition() += lVelocity * pFrameTime;
+	lTransform.GetOrientation() = pBullet->GetOrientation();
+	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lBody, lTransform);
+	if (pAcceleration && lVelocity.GetLengthSquared() < pMaxVelocity*pMaxVelocity)
+	{
+		const vec3 lForward(0, pAcceleration*pFrameTime, 0);
+		lVelocity += lTransform.GetOrientation() * lForward;
+		pBullet->SetRootVelocity(lVelocity);
+	}
 }
 
 void ProjectileUtil::Detonate(Cure::ContextObject* pGrenade, bool* pIsDetonated, Launcher* pLauncher, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal,

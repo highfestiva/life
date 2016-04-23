@@ -438,8 +438,6 @@ void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId
 	}
 	const vec3 lColor(r,g,b);
 	const bool lIsSmooth = (pMaterial == MaterialSmooth);
-	quat lOriginalRoot;
-	quat lOriginalOffsetOrientation;
 
 	LEPRA_MEASURE_SCOPE(CreateClonesLock);
 	ScopeLock lGameLock(GetTickLock());
@@ -452,8 +450,8 @@ void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId
 	lMeshName.resize(lMeshName.find(".mesh"));
 	lPhysName = lOriginal->GetPhysicsResource()->GetName();
 	lPhysName.resize(lPhysName.find(".phys"));
-	lOriginalRoot = lOriginal->GetPhysics()->GetOriginalBoneTransformation(0).mOrientation;
-	lOriginalOffsetOrientation = lOriginal->GetMeshResource(0)->mOffset.mOffset.mOrientation;
+	xform lOriginalXform = lOriginal->GetPhysics()->GetOriginalBoneTransformation(0);
+	quat lOriginalOffsetOrientation = lOriginal->GetMeshResource(0)->mOffset.mOffset.mOrientation;
 
 	// Tricky loop to ensure we don't hold any of the mutexes very long.
 	while (!GetMaster()->GetPhysicsLock()->TryAcquire())
@@ -468,9 +466,9 @@ void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId
 			Object* lObject = (Object*)Parent::CreateContextObject("object", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 			lObject->SetPhysicsTypeOverride(pIsStatic? Cure::PHYSICS_OVERRIDE_STATIC : Cure::PHYSICS_OVERRIDE_DYNAMIC);
 			{
-				const quat pq = x->mOrientation * lOriginalRoot;
+				const quat pq = x->mOrientation * lOriginalXform.GetOrientation();
 				lObject->SetRootOrientation(pq);
-				lObject->SetRootPosition(x->mPosition);
+				lObject->SetRootPosition(x->mPosition - lOriginalXform.GetPosition());
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesPhys);
 					lObject->CreatePhysicsRef(lPhysName);

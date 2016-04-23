@@ -136,10 +136,10 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
 	mCollisionSoundManager->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
 	mCollisionSoundManager->AddSound("big_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
-	mCollisionSoundManager->AddSound("plastic",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
-	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->AddSound("thump",		UiCure::CollisionSoundManager::SoundResourceInfo(5.0f, 0.5f, 1.0f));
+	mCollisionSoundManager->AddSound("plastic",	UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("rubber",	UiCure::CollisionSoundManager::SoundResourceInfo(0.5f, 0.3f, 0));
+	mCollisionSoundManager->AddSound("wood",	UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("thump",	UiCure::CollisionSoundManager::SoundResourceInfo(5.0f, 0.5f, 1.0f));
 	mCollisionSoundManager->AddSound("gem",		UiCure::CollisionSoundManager::SoundResourceInfo(0.1f, 0.2f, 0.1f));
 	mCollisionSoundManager->PreLoadSound("explosion");
 
@@ -212,6 +212,7 @@ void DownwashManager::LoadSettings()
 	v_set(GetVariableScope(), RTVAR_CTRL_STEER_LEFT3D, "Key.LEFT");
 	v_set(GetVariableScope(), RTVAR_CTRL_STEER_RIGHT3D, "Key.RIGHT");
 	v_set(GetVariableScope(), RTVAR_CTRL_STEER_UP3D, "Key.UP");
+	v_set(GetVariableScope(), RTVAR_CTRL_STEER_DOWN3D, "Key.DOWN");
 	v_set(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
 
 	GetConsoleManager()->ExecuteCommand("bind-key F1 \"#Debug.Enable true; #Ui.3D.CamDistance 100.0\"");
@@ -291,6 +292,15 @@ bool DownwashManager::Open()
 		mArrowBillboard = new UiTbc::BillboardGeometry(1/4.0f, 1);
 		mArrowBillboardId = mUiManager->GetRenderer()->AddGeometry(mArrowBillboard, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::FORCE_NO_SHADOWS);
 	}
+	if (lOk)
+	{
+		str lStartLevel;
+		v_get(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, "level_06");
+		if (lStartLevel == "level_06")
+		{
+			OnPauseButton(mPauseButton);
+		}
+	}
 	return lOk;
 }
 
@@ -357,6 +367,7 @@ bool DownwashManager::Render()
 			mHemisphere->GetMesh(0)->SetUVAnimator(mHemisphereUvTransform);
 			mHemisphere->GetMesh(0)->SetPreRenderCallback(Tbc::GeometryBase::PreRenderCallback(this, &DownwashManager::DisableDepth));
 			mHemisphere->GetMesh(0)->SetPostRenderCallback(Tbc::GeometryBase::PostRenderCallback(this, &DownwashManager::EnableDepth));
+			mHemisphere->GetMesh(0)->SetTwoSided(true);
 		}
 		vec3 lPosition = mCameraTransform.GetPosition();
 		lPosition.x = -lPosition.x;
@@ -396,7 +407,7 @@ bool DownwashManager::Render()
 		return true;
 	}
 	lTotalPower = Math::Lerp(0.4f, 1.0f, lTotalPower);
-	lTotalPower *= Math::Lerp(0.4f, 1.0f, lPower);
+	//lTotalPower *= Math::Lerp(0.4f, 1.0f, lPower);
 	mArrowTotalPower = Math::Lerp(mArrowTotalPower, lTotalPower, 0.3f);
 	mArrowAngle = Math::Lerp(mArrowAngle, std::atan2(lWantedDirection, lPower), 0.3f);
 	float lSize = mArrowTotalPower*0.5f;
@@ -406,6 +417,7 @@ bool DownwashManager::Render()
 	vec3 lPosition = lTransform.GetPosition();
 	lPosition.x += ::sin(mArrowAngle) * lSize * 3.4f;
 	lPosition.z += ::cos(mArrowAngle) * lSize * 3.4f;
+	lPosition += (mCameraPreviousPosition-lPosition).GetNormalized()*4;
 
 	UiTbc::BillboardRenderInfoArray lBillboards;
 	lBillboards.push_back(UiTbc::BillboardRenderInfo(mArrowAngle, lPosition, lSize, vec3(1, 1, 1), 1, 0));
@@ -939,7 +951,7 @@ bool DownwashManager::InitializeUniverse()
 	lParticleRenderer->CreateExplosion(vec3(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	str lStartLevel;
-	v_get(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, "level_00");
+	v_get(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, "level_06");
 	mMassObjectArray.clear();
 	mLevel = (Level*)Parent::CreateContextObject(lStartLevel, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
 	mLevel->StartLoading();
@@ -1117,10 +1129,14 @@ void DownwashManager::TickUiInput()
 #define S(dir) s.mControl[Life::Options::Steering::CONTROL_##dir]
 			vec2 lUserControls(S(RIGHT3D) - S(LEFT3D), S(UP3D) - S(DOWN3D));
 			vec2 lUserDirection = lUserControls;
+			const vec3 v = lObject->GetVelocity();
 			if (lUserDirection.GetLengthSquared() < 0.01f)	// User is not controlling, AI is.
 			{
-				lUserControls = lAutoPilot * lChildishness;
-				lUserDirection = lUserControls;
+				if (v.GetLengthSquared() > 1)
+				{
+					lUserControls = lAutoPilot * lChildishness;
+					lUserDirection = lUserControls;
+				}
 			}
 			else if (lUserDirection.Dot(lAutoPilotDirection) >= 0)	// User wants to go in the same direction as AI, so AI helps.
 			{
@@ -1137,9 +1153,9 @@ void DownwashManager::TickUiInput()
 				}
 			}
 			// Pull the brakes a little bit.
-			const vec3 v = lObject->GetVelocity();
 			const float lCurrentFlyingDirectionX = v.x * 0.05f;
 			lUserDirection.x = Math::Clamp(lUserDirection.x-lCurrentFlyingDirectionX, -1.0f, +1.0f);
+			lUserDirection.x = (fabs(v.x) > 0.5f) ? lUserDirection.x : 0;
 			// X follows helicopter yaw.
 			float lYaw, _;
 			lObject->GetOrientation().GetEulerAngles(lYaw, _, _);
@@ -1154,7 +1170,7 @@ void DownwashManager::TickUiInput()
 				float f = std::min(1.0f, mAutopilot->GetRotorSpeed(lObject) / 14.0f);
 				f /= 1+0.02f*v.GetLength();	// Reduce push at higher speeds or the chopper will spin out of control for some reson.
 				SetAvatarEnginePower(lObject,  9, lUserControls.x*f);
-				SetAvatarEnginePower(lObject, 11, Math::Lerp(-1.0f, 1.0f, lUserDirection.y*f));
+				SetAvatarEnginePower(lObject, 11, lUserDirection.y*f);
 			}
 			const Life::Options::FireControl& fc = mOptions.GetFireControl();
 #define F(alt) fc.mControl[Life::Options::FireControl::FIRE##alt]
@@ -1779,6 +1795,7 @@ void DownwashManager::OnPauseButton(UiTbc::Button* pButton)
 	v_get(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
 
 	UiTbc::TextField* lNameField = new UiTbc::TextField(0, WHITE);
+	lNameField->SetName("pilot_name");
 	lNameField->SetText(wstrutil::Encode(lPilotName));
 	lLayouter.AddWindow(lNameField, 0, 5, 0, 1, 1);
 	lNameField->SetHorizontalMargin(lNameField->GetPreferredHeight() / 3);

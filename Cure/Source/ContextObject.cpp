@@ -577,7 +577,7 @@ quat ContextObject::GetOrientation() const
 	if (mPhysics)
 	{
 		const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-		if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
+		if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY && lGeometry->GetBoneType() == Tbc::ChunkyBoneGeometry::BONE_BODY)
 		{
 			return mManager->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lGeometry->GetBodyId()) *
 				mPhysics->GetOriginalBoneTransformation(0).GetOrientation();
@@ -592,7 +592,7 @@ vec3 ContextObject::GetVelocity() const
 	if (mPhysics)
 	{
 		const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-		if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
+		if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY && lGeometry->GetBoneType() == Tbc::ChunkyBoneGeometry::BONE_BODY)
 		{
 			vec3 lVelocity;
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
@@ -608,7 +608,7 @@ vec3 ContextObject::GetAngularVelocity() const
 	{
 		vec3 lAngularVelocity;
 		const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-		if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
+		if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY && lGeometry->GetBoneType() == Tbc::ChunkyBoneGeometry::BONE_BODY)
 		{
 			mManager->GetGameManager()->GetPhysicsManager()->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngularVelocity);
 		}
@@ -624,7 +624,7 @@ vec3 ContextObject::GetAcceleration() const
 {
 	vec3 lAcceleration;
 	const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
+	if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY && lGeometry->GetBoneType() == Tbc::ChunkyBoneGeometry::BONE_BODY)
 	{
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyForce(lGeometry->GetBodyId(), lAcceleration);
 	}
@@ -634,7 +634,7 @@ vec3 ContextObject::GetAcceleration() const
 vec3 ContextObject::GetForwardDirection() const
 {
 	const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
+	if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY && lGeometry->GetBoneType() == Tbc::ChunkyBoneGeometry::BONE_BODY)
 	{
 		const xform& lOriginalTransform =
 			mPhysics->GetOriginalBoneTransformation(0);
@@ -650,7 +650,7 @@ float ContextObject::GetForwardSpeed() const
 {
 	float lSpeed = 0;
 	const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-	if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY)
+	if (lGeometry && lGeometry->GetBodyId() != Tbc::INVALID_BODY && lGeometry->GetBoneType() == Tbc::ChunkyBoneGeometry::BONE_BODY)
 	{
 		vec3 lVelocity;
 		mManager->GetGameManager()->GetPhysicsManager()->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);

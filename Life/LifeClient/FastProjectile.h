@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -31,7 +31,8 @@ public:
 protected:
 	virtual void OnLoaded();
 	void StartBullet(float pMuzzleVelocity);
-	void OnTick();
+	virtual void OnMicroTick(float pFrameTime);
+	virtual void OnTick();
 	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
 	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
 

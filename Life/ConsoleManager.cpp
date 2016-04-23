@@ -732,6 +732,7 @@ int ConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strve
 						else if (lDiskFile.Open(lFilename, DiskFile::MODE_TEXT_WRITE))
 						{
 							lStoreResult = (lDiskFile.WriteData(lMemFile.GetBuffer(), (size_t)lMemFile.GetSize()) == IO_OK);
+							//lStoreResult = (lDiskFile.WriteData("HEJSAN!\n", (size_t)8) == IO_OK);
 							if (lStoreResult)
 							{
 								mLog.Infof("Successfully wrote script %s to disk.", lFilename.c_str());

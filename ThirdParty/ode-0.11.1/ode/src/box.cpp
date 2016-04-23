@@ -405,7 +405,7 @@ int dBoxBox (const dVector3 p1, const dMatrix3 R1,
 #undef TST
 #define TST(expr1,expr2,n1,n2,n3,cc) \
     expr1_val = (expr1); /* Avoid duplicate evaluation of expr1 */ \
-    s2 = dFabs(expr1_val) - (expr2); \
+    s2 = dFabs(expr1_val) - (expr2) - REAL(1e-5); /* high_festiva: EPS needed for AABs */ \
     if (s2 > 0) return 0; \
     l = dSqrt ((n1)*(n1) + (n2)*(n2) + (n3)*(n3)); \
     if (l > 0) { \

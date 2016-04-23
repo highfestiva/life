@@ -1602,9 +1602,17 @@ void OpenGLRenderer::RenderRelative(Tbc::GeometryBase* pGeometry, const quat* pL
 	GeometryData* lGeometryData = (GeometryData*)pGeometry->GetRendererData();
 	if (lGeometryData)
 	{
+		if (pGeometry->IsTwoSided())
+		{
+			::glDisable(GL_CULL_FACE);
+		}
 		GetMaterial(lGeometryData->mMaterialType)->PreRender();
 		GetMaterial(lGeometryData->mMaterialType)->RenderGeometry(pGeometry);
 		GetMaterial(lGeometryData->mMaterialType)->PostRender();
+		if (pGeometry->IsTwoSided())
+		{
+			::glEnable(GL_CULL_FACE);
+		}
 		ResetAmbientLight(false);
 	}
 

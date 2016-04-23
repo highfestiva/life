@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -192,8 +192,11 @@ void PhysicsSharedResource::OnLoadClass(ClassResource* pClassResource)
 		return;
 	}
 	Tbc::ChunkyPhysics* lCopy = new Tbc::ChunkyPhysics(*pClassResource->GetData());
-	lCopy->SetOriginalBoneTransformation(0, xform());
-	lCopy->SetBoneTransformation(0, xform());
+	// We correctly inherit the parent physics' xform. Then the whole object can be displaced
+	// when finalizing. Displacement is a special case, normal is just to load and reload in
+	// the same spot.
+	//  - Don't: lCopy->SetOriginalBoneTransformation(0, xform());
+	//  - Don't: lCopy->SetBoneTransformation(0, xform());
 	SetRamData(lCopy);
 }
 

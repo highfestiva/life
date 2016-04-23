@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -102,6 +102,12 @@ void FastProjectile::StartBullet(float pMuzzleVelocity)
 		EnableMeshSlide(true);
 		ActivateLerp();
 	}
+}
+
+void FastProjectile::OnMicroTick(float pFrameTime)
+{
+	Parent::OnMicroTick(pFrameTime);
+	ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
 }
 
 void FastProjectile::OnTick()

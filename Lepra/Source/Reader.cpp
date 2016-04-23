@@ -183,6 +183,7 @@ uint64 Reader::GetReadCount()
 
 IOError Reader::ReadLine(str& pString)
 {
+	pString.clear();
 	char lChar = '\0';
 	IOError lErr = Read(lChar);
 	if (lErr != IO_OK)

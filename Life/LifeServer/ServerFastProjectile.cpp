@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -45,6 +45,12 @@ void ServerFastProjectile::OnLoaded()
 	mMaxVelocity = lTag->mFloatValueList[1];
 	mAcceleration = lTag->mFloatValueList[2];
 	mExplosiveEnergy = lTag->mFloatValueList[3];
+}
+
+void ServerFastProjectile::OnMicroTick(float pFrameTime)
+{
+	Parent::OnMicroTick(pFrameTime);
+	ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
 }
 
 void ServerFastProjectile::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)

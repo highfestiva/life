@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -39,24 +39,22 @@ void HomingProjectile::OnTick()
 	Cure::ContextObject* lObject = GetManager()->GetObject(mTarget);
 	if (lObject && lObject->GetPhysics()->GetEngineCount() >= 1)
 	{
-		const Cure::ObjectPositionalData* lPositionalData = 0;
-		UpdateFullPosition(lPositionalData);
-		if (lPositionalData)
+		vec3 lPos = GetPosition();
+		vec3 lVel = GetVelocity();
+		vec3 lDelta = lObject->GetPosition() - lPos;
+		if (mMaxVelocity > 0)
 		{
-			vec3 lDelta = (lObject->GetPosition() - lPositionalData->mPosition.mTransformation.GetPosition()).GetNormalized();
-			if (mMaxVelocity > 0)
-			{
-				const float t = lDelta.GetLength() / mMaxVelocity;
-				lDelta += lObject->GetVelocity() * t;
-			}
-			const float xy = lDelta.ProjectOntoPlane(vec3(0,0,1)).GetLength();
-			quat q;
-			q.SetEulerAngles(-::atan2(lDelta.x, lDelta.y), ::atan2(lDelta.z, xy), 0);
-			const float v = lPositionalData->mPosition.mVelocity.GetLength();
-			const vec3 lVelocity = q * vec3(0, v, 0);
-			SetRootOrientation(q);
-			SetRootVelocity(lVelocity);
+			const float t = lDelta.GetLength() / mMaxVelocity;
+			lDelta += lObject->GetVelocity() * t;
 		}
+		lDelta.Normalize();
+		const float xy = lDelta.ProjectOntoPlane(vec3(0,0,1)).GetLength();
+		quat q;
+		q.SetEulerAngles(-::atan2(lDelta.x, lDelta.y), ::atan2(lDelta.z, xy), 0);
+		const float v = lVel.GetLength();
+		const vec3 lVelocity = q * vec3(0, v, 0);
+		SetRootOrientation(q);
+		SetRootVelocity(lVelocity);
 	}
 }
 

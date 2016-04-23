@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -30,6 +30,7 @@ public:
 
 private:
 	virtual void OnLoaded();
+	virtual void OnMicroTick(float pFrameTime);
 	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pBody, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
 
 	Launcher* mLauncher;
