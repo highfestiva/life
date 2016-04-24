@@ -931,6 +931,9 @@
       <File Name="../Lepra/Include/LooseBinTree.inl"/>
       <File Name="../Lepra/Include/LooseOctree.inl"/>
       <File Name="../Lepra/Include/LooseQuadtree.inl"/>
+      <File Name="../Lepra/Include/Transformation.inl"/>
+      <File Name="../Lepra/Include/Vector2D.inl"/>
+      <File Name="../Lepra/Include/Vector3D.inl"/>
     </VirtualDirectory>
     <VirtualDirectory Name="LepraTestApp">
       <File Name="../Lepra/LepraTestApp/LepraTest.cpp"/>

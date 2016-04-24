@@ -1,5 +1,5 @@
 /*
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -60,6 +60,7 @@ public:
 	virtual float*         GetVertexData() const;
 	virtual float*         GetUVData(unsigned int pUVSet) const;
 	virtual vtx_idx_t*     GetIndexData() const;
+	virtual void           SetIndexData(vtx_idx_t* pIndexData, unsigned pIndexCount, unsigned pMaxIndexCount);
 	virtual uint8*         GetColorData() const;
 
 protected:
@@ -70,6 +71,7 @@ private:
 	uint8* mColor;
 	unsigned int mVertexCount;
 	unsigned int mIndexCount;
+	unsigned int mMaxIndexCount;
 	unsigned int mUVSetCount;
 
 	Tbc::GeometryBase* mGeometryInstance;

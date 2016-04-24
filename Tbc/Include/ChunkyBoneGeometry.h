@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -78,6 +78,7 @@ public:
 		PARAM_OFFSET_Z,
 		PARAM_IMPACT_FACTOR,
 		PARAM_COLLIDE_WITH_SELF,
+		PARAM_DETACHABLE,
 	};
 
 	struct BodyDataBase
@@ -136,6 +137,7 @@ public:
 	void SetJointType(JointType pJointType);
 	bool IsAffectedByGravity() const;
 	bool IsCollideWithSelf() const;
+	bool IsDetachable() const;
 	BoneType GetBoneType() const;
 	PhysicsManager::JointID GetJointId() const;
 	void ResetJointId();

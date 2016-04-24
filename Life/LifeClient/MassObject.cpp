@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -191,6 +191,7 @@ void MassObject::CreateSquare(size_t pX, size_t pY)
 		{
 			std::swap(lPosition.y, lPosition.z);	// TRICKY: transform from RG coords to Maya coords.
 			lPosition.z = -lPosition.z;	// TRICKY: transform from RG coords to Maya coords.
+			//mLog.Infof("Placing mass object at (%g; %g; %g)", lPosition.x, lPosition.y, lPosition.z);
 			lDisplacementArray.push_back(xform(lRotation, lPosition));
 		}
 	}

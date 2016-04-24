@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -22,6 +22,7 @@ struct ClientOptionsManager: OptionsManager
 {
 	ClientOptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority);
 
+	const bool IsEscape() const;
 	const bool GetShowScore() const;
 	const Steering& GetSteeringControl() const;
 	const CamControl& GetCamControl() const;
@@ -34,6 +35,7 @@ private:
 	virtual bool SetDefault(int pPriority);
 
 	float mMouseSensitivity;
+	float mEscape;
 	float mShowScore;
 	Steering mSteeringControl;
 	CamControl mCamControl;

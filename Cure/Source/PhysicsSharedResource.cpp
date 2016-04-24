@@ -169,10 +169,6 @@ bool PhysicsSharedResource::FinalizeInit()
 				{
 					lTargetOrientation *= lNewPlacement->mPosition.mTransformation.GetOrientation();
 				}
-				/*else if (lStructure->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
-				{
-					lTargetOrientation.RotateAroundOwnY(PIF);
-				}*/
 				lNewPlacement->mPosition.mTransformation =
 					xform(lTargetOrientation,
 						lNewPlacement->mPosition.mTransformation.GetPosition());

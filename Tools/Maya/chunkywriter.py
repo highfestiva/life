@@ -560,6 +560,11 @@ class PhysWriter(ChunkyWriter):
 		parameters[9] = node.get_fixed_attribute("impact_factor", True, 1.0)
 		parameters[10] = 1.0 if node.get_fixed_attribute("collide_with_self", True, False) else 0.0
 
+		detachable = any(node == mesh.get_mesh_parentphys(self.bodies) for mesh in self.meshes)
+		if options.options.verbose:
+			print('%s %s detachable.' % (node.getFullName(), 'is' if detachable else 'is not'))
+		parameters[11] = 1.0 if detachable else 0.0
+
 		if options.options.verbose:
 			print("%s parameters:" % node.getName(), parameters)
 

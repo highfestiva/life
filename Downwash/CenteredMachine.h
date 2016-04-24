@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -26,6 +26,8 @@ public:
 protected:
 	virtual bool TryComplete();
 	virtual void OnMicroTick(float pFrameTime);
+
+	logclass();
 };
 
 

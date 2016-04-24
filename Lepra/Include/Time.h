@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -30,6 +30,7 @@ public:
 	int GetHour() const;	// Hour since midnight [0, 23].
 	int GetMinute() const;	// Minute since hour [0, 59].
 	int GetSecond() const;	// Second since minute [0, 59].
+	int GetMillisecond() const;
 
 	int GetDaysInMonth() const;
 
@@ -63,6 +64,7 @@ private:
 	int mHour;
 	int mMinute;
 	int mSecond;
+	int mMillis;
 
 	// This value is only valid as long as no - or + operators are used. 
 	bool mDaylightSavingTime;

@@ -140,7 +140,7 @@ int PhysicsManagerODE::QueryRayCollisionAgainst(const vec3& pRayPosition, const 
 	{
 		// Check that we've found a surface turned towards the given direction.
 		const vec3 lNormal(lContact[x].normal[0], lContact[x].normal[1], lContact[x].normal[2]);
-		if (lNormal*pRayDirection > 0)
+		if (lNormal*pRayDirection < 0)
 		{
 			pCollisionPoints[lFoundCollisionPoints++].Set(lContact[x].pos[0], lContact[x].pos[1], lContact[x].pos[2]);
 		}
@@ -622,7 +622,7 @@ void PhysicsManagerODE::SetBodyPosition(BodyID pBodyId, const vec3& pPosition) c
 		return;
 	}
 
-	if(lObject->mBodyID)
+	if (lObject->mBodyID)
 	{
 		::dBodySetPosition(lObject->mBodyID, pPosition.x, pPosition.y, pPosition.z);
 		::dBodyEnable(lObject->mBodyID);
@@ -1836,36 +1836,20 @@ bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const
 		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
 		const quat lParentQ(lPQ);
 		const dReal* lPP = ::dBodyGetPosition(lParentBody);
-		// Rotate to cross piece orientation.
-		dxJointUniversal* lUniversal = (dxJointUniversal*)lJointInfo->mJointID;
-		//quat lRelativeQ(lUniversal->qrel1);
-		quat lQ = lParentQ;
-		//quat lQ = lParentQ.GetInverse() * lRelativeQ;
-		// Rotate to body 1's input angle.
-		lQ = quat(-pDiff.mValue, lAxis1) * lQ;
-		// Apply rotation from cross piece to original child (us).
-		//lRelativeQ.Set(lUniversal->qrel2);
-		//lQ = lRelativeQ.GetInverse() * lQ;
-		// Rotating around body 1's axis changes body 2's axis. Fetch and act on it AFTER rotation 'round axis1.
-		lAxis2 = lQ * vec3(lUniversal->axis2);
-		lQ = quat(-pDiff.mAngle, lAxis2) * lQ;
-		// Set orientation.
 		vec3 lParentP(lPP);
-		xform lTransform;
-		GetBodyTransform(pBodyId, lTransform);
-		xform lParentTransformation(lParentQ, lParentP);
-		lTransform.mPosition = lParentQ*(lTransform.mPosition-lParentP) + lParentP;
-		lTransform.mOrientation = lParentQ;
-		// TODO: fix your linear algebra shit first!
-		//lTransform.SetOrientation(lQ);
-		// Align anchors (happen after rotation) and store.
-		vec3 lAnchor2(lUniversal->anchor2);
-		lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
-		//dVector3 lRealAnchor;
-		//::dJointGetUniversalAnchor2(lUniversal, lRealAnchor);
-		// TODO: fix your linear algebra shit first!
-		lTransform.mPosition += lAnchor-lAnchor2;
-		SetBodyTransform(pBodyId, lTransform);
+		dxJointUniversal* lUniversal = (dxJointUniversal*)lJointInfo->mJointID;
+		// TODO: get your linear algebra shit together!
+		quat q;
+		q.RotateAroundVector(lAxis1, pDiff.mValue);
+		q = quat(lUniversal->qrel2) * q;	// Cross piece -> child.
+		q.RotateAroundVector(lAxis2, pDiff.mAngle);
+		xform lChild(q, vec3(lUniversal->anchor2));
+		xform lCrossPiece(quat(lUniversal->qrel1), vec3(lUniversal->anchor1));	// qrel1 is parent -> cross piece.
+		xform lParent(lParentQ, lParentP);
+		lCrossPiece = lParent.Transform(lCrossPiece);
+		lChild = lCrossPiece.Transform(lChild);
+		// TODO:
+		//SetBodyTransform(pBodyId, lChild);
 	}
 
 	{
@@ -3549,7 +3533,7 @@ void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID p
 				const vec3 lAngularSurfaceVelocity1 = lAngularVelocity1.Cross(lDistance1);
 				const vec3 lAngularSurfaceVelocity2 = lAngularVelocity2.Cross(lDistance2);
 				const vec3 lSurfaceVelocity1 = -lLinearVelocity1.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
-				const vec3 lSurfaceVelocity2 = -lLinearVelocity2.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
+				const vec3 lSurfaceVelocity2 = -lLinearVelocity2.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity2;
 				lSpin = lSurfaceVelocity1-lSurfaceVelocity2;
 				const float lRelativeVelocity = lSpin.GetLength();
 				vec3 lSpinDirection(lSpin);

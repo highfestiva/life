@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -23,6 +23,7 @@ GeometryBatch::GeometryBatch(Tbc::GeometryBase* pGeometry):
 	mColor(0),
 	mVertexCount(0),
 	mIndexCount(0),
+	mMaxIndexCount(0),
 	mUVSetCount(0),
 	mGeometryInstance(pGeometry)
 {
@@ -51,8 +52,8 @@ void GeometryBatch::SetInstances(const xform* pDisplacement, const vec3& pRootOf
 	}
 
 	mVertexCount = mGeometryInstance->GetVertexCount()  * pNumInstances;
-	mIndexCount  = mGeometryInstance->GetTriangleCount() * pNumInstances * 3;
-	mUVSetCount   = mGeometryInstance->GetUVSetCount();
+	mMaxIndexCount = mIndexCount = mGeometryInstance->GetTriangleCount() * pNumInstances * 3;
+	mUVSetCount = mGeometryInstance->GetUVSetCount();
 
 	unsigned int i;
 	unsigned int j;
@@ -185,8 +186,9 @@ void GeometryBatch::ClearAllInstances()
 	}
 
 	mVertexCount = 0;
-	mIndexCount  = 0;
-	mUVSetCount   = 0;
+	mIndexCount = 0;
+	mMaxIndexCount = 0;
+	mUVSetCount = 0;
 }
 
 void GeometryBatch::SetGeometryVolatility(GeometryVolatility)
@@ -210,7 +212,7 @@ unsigned int GeometryBatch::GetMaxVertexCount()  const
 
 unsigned int GeometryBatch::GetMaxIndexCount() const
 {
-	return mIndexCount;
+	return mMaxIndexCount;
 }
 
 unsigned int GeometryBatch::GetVertexCount()  const
@@ -245,6 +247,13 @@ float* GeometryBatch::GetUVData(unsigned int pUVSet) const
 vtx_idx_t* GeometryBatch::GetIndexData() const
 {
 	return mIndex;
+}
+
+void GeometryBatch::SetIndexData(vtx_idx_t* pIndexData, unsigned pIndexCount, unsigned pMaxIndexCount)
+{
+	mIndex = pIndexData;
+	mIndexCount = pIndexCount;
+	mMaxIndexCount = pMaxIndexCount;
 }
 
 uint8* GeometryBatch::GetColorData() const

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -17,6 +17,7 @@
 #define RTVAR_CTRL_UI_CONTOGGLE			"Control.Ui.ConsoleToggle"
 #define RTVAR_CTRL_UI_CONSPEED			"Control.Ui.ConsoleSpeed"
 #define RTVAR_CTRL_UI_SHOWSCORE			"Control.Ui.ShowScore"
+#define RTVAR_CTRL_UI_ESCAPE			"Control.Ui.Escape"
 
 #define RTVAR_CTRL_UI_CAMUP			"Control.Ui.CamUp"
 #define RTVAR_CTRL_UI_CAMDOWN			"Control.Ui.CamDown"

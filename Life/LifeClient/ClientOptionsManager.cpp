@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -26,6 +26,7 @@ ClientOptionsManager::ClientOptionsManager(Cure::RuntimeVariableScope* pVariable
 	OptionsManager(pVariableScope, pPriority)
 {
 	mMouseSensitivity = 4.0f;
+	mEscape = 0;
 	mShowScore = 0;
 	::memset(&mSteeringControl, 0, sizeof(mSteeringControl));
 	::memset(&mCamControl, 0, sizeof(mCamControl));
@@ -35,6 +36,11 @@ ClientOptionsManager::ClientOptionsManager(Cure::RuntimeVariableScope* pVariable
 }
 
 
+
+const bool ClientOptionsManager::IsEscape() const
+{
+	return mEscape > 0.5f;
+}
 
 const bool ClientOptionsManager::GetShowScore() const
 {
@@ -63,6 +69,7 @@ void ClientOptionsManager::DoRefreshConfiguration()
 	const KeyValue lEntries[] =
 	{
 		KeyValue(RTVAR_CTRL_UI_CONTOGGLE, &mConsoleToggle),
+		KeyValue(RTVAR_CTRL_UI_ESCAPE, &mEscape),
 		KeyValue(RTVAR_CTRL_UI_SHOWSCORE, &mShowScore),
 		KeyValue(RTVAR_CTRL_STEER_FWD, &mSteeringControl.mControl[Steering::CONTROL_FORWARD]),
 		KeyValue(RTVAR_CTRL_STEER_BACK, &mSteeringControl.mControl[Steering::CONTROL_BACKWARD]),
@@ -155,6 +162,7 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 		case 0:
 		{
 			v_override(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, "Key.PARAGRAPH, Key.ACUTE, Key.APOSTROPHE");
+			v_override(mVariableScope, RTVAR_CTRL_UI_ESCAPE, "Key.ESC");
 			v_override(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, "Key.TAB");
 			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD, "Key.UP");
 			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK, "");
@@ -182,6 +190,7 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 		case 1:
 		{
 			v_override(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, "Key.SCROLL_LOCK");
+			v_override(mVariableScope, RTVAR_CTRL_UI_ESCAPE, "Key.ESC");
 			v_override(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, "Key.TAB");
 			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD, "Device0.Button1");
 			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK, "");
@@ -209,6 +218,7 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 		case 2:
 		{
 			v_override(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, "Key.F12");
+			v_override(mVariableScope, RTVAR_CTRL_UI_ESCAPE, "Key.ESC");
 			v_override(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, "Key.TAB");
 			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD, "Key.W");
 			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK, "");
@@ -236,6 +246,7 @@ bool ClientOptionsManager::SetDefault(int pPriority)
 		case 3:
 		{
 			v_override(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, "Key.PAUSE");
+			v_override(mVariableScope, RTVAR_CTRL_UI_ESCAPE, "Key.ESC");
 			v_override(mVariableScope, RTVAR_CTRL_UI_SHOWSCORE, "Key.TAB");
 			v_override(mVariableScope, RTVAR_CTRL_STEER_FWD, "Key.NUMPAD_8");
 			v_override(mVariableScope, RTVAR_CTRL_STEER_BACK, "");

@@ -271,6 +271,11 @@ bool ChunkyBoneGeometry::IsCollideWithSelf() const
 	return (mBodyData.mParameter[PARAM_COLLIDE_WITH_SELF] != 0);
 }
 
+bool ChunkyBoneGeometry::IsDetachable() const
+{
+	return (mBodyData.mParameter[PARAM_DETACHABLE] != 0);
+}
+
 ChunkyBoneGeometry::BoneType ChunkyBoneGeometry::GetBoneType() const
 {
 	deb_assert(mBodyData.mBoneType >= BONE_BODY && mBodyData.mBoneType <= BONE_POSITION);

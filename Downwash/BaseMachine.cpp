@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -39,7 +39,7 @@ void BaseMachine::OnDie()
 		return;
 	}
 
-	Life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this);
+	Life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this, true);
 	Parent::OnDie();
 	//CenterMeshes();
 }

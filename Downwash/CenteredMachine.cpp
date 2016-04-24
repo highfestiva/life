@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -52,6 +52,10 @@ void CenteredMachine::OnMicroTick(float pFrameTime)
 		lPhysicsManager->SetBodyVelocity(lBodyId, v);
 	}
 }
+
+
+
+loginstance(GAME_CONTEXT_CPP, CenteredMachine);
 
 
 

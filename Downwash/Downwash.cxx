@@ -38,6 +38,8 @@ public:
 	virtual ~Downwash();
 	virtual void Init();
 	virtual void Destroy();
+	virtual LogListener* CreateConsoleLogListener() const;
+
 	virtual bool MainLoop();
 
 	virtual void Suspend(bool pHard);
@@ -179,6 +181,13 @@ void Downwash::Destroy()
 	delete mUiManager;
 	mUiManager = 0;
 }
+
+LogListener* Downwash::CreateConsoleLogListener() const
+{
+	return new StdioConsoleLogListener(LogListener::FORMAT_THREADEX);
+}
+
+
 
 bool Downwash::MainLoop()
 {

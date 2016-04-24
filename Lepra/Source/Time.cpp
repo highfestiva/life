@@ -1,11 +1,12 @@
 
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
+#include "../Include/HiResTimer.h"
 #include "../Include/Time.h"
 #include <time.h>
 #pragma warning(disable: 4996)	// Deprecated functions are not to be used, as they may be removed in future versions. Circumvent problem instead.
@@ -31,6 +32,7 @@ Time::Time(const Time& pTime)
 	mHour        = pTime.mHour;
 	mMinute      = pTime.mMinute;
 	mSecond      = pTime.mSecond;
+	mMillis      = pTime.mMillis;
 	mDaylightSavingTime = pTime.mDaylightSavingTime;
 }
 
@@ -69,6 +71,7 @@ void Time::UpdateTime()
 {
 	time_t lTime = time(NULL);
 	tm* lTM = localtime(&lTime);
+	const double s = HiResTimer(false).GetTime();
 
 	mYear        = (int)lTM->tm_year + 1900;
 	mMonth       = (int)lTM->tm_mon + 1;
@@ -77,6 +80,7 @@ void Time::UpdateTime()
 	mHour        = (int)lTM->tm_hour;
 	mMinute      = (int)lTM->tm_min;
 	mSecond      = (int)lTM->tm_sec;
+	mMillis      = int((s-int(s))*1000);
 
 	mDaylightSavingTime = ((int)lTM->tm_isdst > 0);
 }
@@ -90,6 +94,10 @@ Time& Time::operator += (const Time& pTime)
 	mHour        += pTime.mHour;
 	mMinute      += pTime.mMinute;
 	mSecond      += pTime.mSecond;
+	mMillis      += pTime.mMillis;
+
+	mSecond += mMillis / 1000;
+	mMillis %= 1000;
 
 	mMinute += mSecond / 60;
 	mSecond %= 60;
@@ -128,43 +136,27 @@ Time& Time::operator -= (const Time& pTime)
 	mHour        -= pTime.mHour;
 	mMinute      -= pTime.mMinute;
 	mSecond      -= pTime.mSecond;
+	mMillis      -= pTime.mMillis;
 
+	if (mMillis < 0)
+	{
+		mSecond += (mMillis-1000-1) / 1000;
+		mMillis = (1000+mMillis) % 1000;
+	}
 	if (mSecond < 0)
 	{
-		mMinute -= (59 - mSecond) / 60;
-		mSecond = (-mSecond) % 60;
-
-		if (mSecond != 0)
-		{
-			mSecond = 60 - mSecond;
-		}
+		mMinute += (mSecond-60-1) / 60;
+		mSecond  = (60+mSecond) % 60;
 	}
 	if (mMinute < 0)
 	{
-		mHour -= (59 - mMinute) / 60;
-		mMinute = (-mMinute) % 60;
-
-		if (mMinute != 0)
-		{
-			mMinute = 60 - mMinute;
-		}
+		mHour  += (mMinute-60-1) / 60;
+		mMinute = (60+mMinute) % 60;
 	}
 	if (mHour < 0)
 	{
-		mDay -= (23 - mHour) / 24;
-		mWeekDay -= (23 - mHour) / 24;
-		
-		if (mWeekDay < 0)
-		{
-			mWeekDay = 7 - ((-mWeekDay) % 7);
-		}
-
-		mHour = (-mHour) % 24;
-
-		if (mHour != 0)
-		{
-			mHour = 24 - mHour;
-		}
+		mDay += (mHour-24-1) / 24;
+		mHour = (24+mHour) % 24;
 	}
 
 	int lDaysInMonth = GetDaysInMonth();
@@ -186,7 +178,7 @@ Time& Time::operator -= (const Time& pTime)
 
 str Time::GetDateTimeAsString() const
 {
-	return strutil::Format("%i-%.2i-%.2i, %.2i:%.2i:%.2i", GetYear(), GetMonth(), GetDay(), GetHour(), GetMinute(), GetSecond());
+	return strutil::Format("%i-%.2i-%.2i %.2i:%.2i:%.2i,%.3i", GetYear(), GetMonth(), GetDay(), GetHour(), GetMinute(), GetSecond(), GetMillisecond());
 }
 
 bool Time::operator < (const Time& pTime) const
@@ -215,7 +207,10 @@ bool Time::operator < (const Time& pTime) const
 	{
 		return mSecond < pTime.mSecond;
 	}
-
+	if (mMillis != pTime.mMillis)
+	{
+		return mMillis < pTime.mMillis;
+	}
 	return false;
 }
 
@@ -245,7 +240,10 @@ bool Time::operator >  (const Time& pTime) const
 	{
 		return mSecond > pTime.mSecond;
 	}
-
+	if (mMillis != pTime.mMillis)
+	{
+		return mMillis > pTime.mMillis;
+	}
 	return false;
 }
 
@@ -258,8 +256,8 @@ const Time& Time::operator = (const Time& pTime)
 	mHour        = pTime.mHour;
 	mMinute      = pTime.mMinute;
 	mSecond      = pTime.mSecond;
+	mMillis      = pTime.mMillis;
 	mDaylightSavingTime = pTime.mDaylightSavingTime;
-
 	return *this;
 }
 
@@ -299,6 +297,11 @@ int Time::GetSecond() const
 	return mSecond;
 }
 
+int Time::GetMillisecond() const
+{
+	return mMillis;
+}
+
 bool Time::IsLeapYear() const
 {
 	return (mYear % 4 == 0 && (mYear % 100 != 0 || mYear % 400 == 0));
@@ -311,7 +314,8 @@ bool Time::operator == (const Time& pTime) const
 	   mDay         == pTime.mDay    &&
 	   mHour        == pTime.mHour   &&
 	   mMinute      == pTime.mMinute &&
-	   mSecond      == pTime.mSecond)
+	   mSecond      == pTime.mSecond &&
+	   mMillis      == pTime.mMillis)
 	{
 		return true;
 	}

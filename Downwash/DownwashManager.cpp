@@ -108,7 +108,8 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mHemisphereUvTransform(0),
 	mRenderHemisphere(true),
 	mSunlight(0),
-	mCameraTransform(quat(), vec3(0, -200, 10)),
+	mCameraTransform(quat(), vec3(0, -200, 40)),
+	mHelicopterPosition(0, 0, 30),
 	mCameraSpeed(0),
 	mZoomPlatform(false),
 	mPostZoomPlatformFrameCount(100),
@@ -138,7 +139,7 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	mCollisionSoundManager->AddSound("big_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
 	mCollisionSoundManager->AddSound("plastic",	UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
 	mCollisionSoundManager->AddSound("rubber",	UiCure::CollisionSoundManager::SoundResourceInfo(0.5f, 0.3f, 0));
-	mCollisionSoundManager->AddSound("wood",	UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("wood",	UiCure::CollisionSoundManager::SoundResourceInfo(0.5f, 0.5f, 0));
 	mCollisionSoundManager->AddSound("thump",	UiCure::CollisionSoundManager::SoundResourceInfo(5.0f, 0.5f, 1.0f));
 	mCollisionSoundManager->AddSound("gem",		UiCure::CollisionSoundManager::SoundResourceInfo(0.1f, 0.2f, 0.1f));
 	mCollisionSoundManager->PreLoadSound("explosion");
@@ -156,6 +157,7 @@ DownwashManager::DownwashManager(Life::GameClientMasterTicker* pMaster, const Cu
 	v_set(GetVariableScope(), RTVAR_GAME_PILOTNAME, gDefaultPilotName);
 	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
 	v_set(GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+	v_set(GetVariableScope(), RTVAR_UI_3D_ENABLEMASSOBJECTS, true);
 }
 
 DownwashManager::~DownwashManager()
@@ -298,7 +300,8 @@ bool DownwashManager::Open()
 		v_get(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, "level_06");
 		if (lStartLevel == "level_06")
 		{
-			OnPauseButton(mPauseButton);
+			mPauseButton->SetVisible(false);
+			OnPauseButton(0);
 		}
 	}
 	return lOk;
@@ -367,22 +370,29 @@ bool DownwashManager::Render()
 			mHemisphere->GetMesh(0)->SetUVAnimator(mHemisphereUvTransform);
 			mHemisphere->GetMesh(0)->SetPreRenderCallback(Tbc::GeometryBase::PreRenderCallback(this, &DownwashManager::DisableDepth));
 			mHemisphere->GetMesh(0)->SetPostRenderCallback(Tbc::GeometryBase::PostRenderCallback(this, &DownwashManager::EnableDepth));
-			mHemisphere->GetMesh(0)->SetTwoSided(true);
 		}
 		vec3 lPosition = mCameraTransform.GetPosition();
 		lPosition.x = -lPosition.x;
-		lPosition.y = lPosition.z * -0.09f;
+		lPosition.y = -95 + lPosition.z * -0.09f;
 		vec3 lAngle = mCameraTransform.GetOrientation()*vec3(0,250,0);
 		lPosition.x -= lAngle.x;
 		lPosition.y -= lAngle.z;
 		mHemisphereUvTransform->GetBones()[0].GetRelativeBoneTransformation(0).GetPosition() = lPosition * 0.003f;
+
+		//xform t = mHemisphere->GetMesh(0)->GetTransformation();
+		//t.mOrientation = quat(0.707106769f, 0.707106769f, 0, 0);
+		//t.mOrientation.RotateAroundOwnX((float)v_slowtryget(GetVariableScope(), "hemi_ang", 0.0));
+		//mHemisphere->GetMesh(0)->SetTransformation(t);
 
 		mUiManager->GetRenderer()->RenderRelative(mHemisphere->GetMesh(0), 0);
 	}
 
 	bool lOk = Parent::Render();
 
-	if (!lOk)
+	double lRtrOffset;
+	v_get(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+	const bool lIsToyMode = (lRtrOffset >= 0.5);
+	if (!lOk || lIsToyMode)
 	{
 		return lOk;
 	}
@@ -407,7 +417,7 @@ bool DownwashManager::Render()
 		return true;
 	}
 	lTotalPower = Math::Lerp(0.4f, 1.0f, lTotalPower);
-	//lTotalPower *= Math::Lerp(0.4f, 1.0f, lPower);
+	lTotalPower *= Math::Lerp(0.7f, 1.0f, lPower);
 	mArrowTotalPower = Math::Lerp(mArrowTotalPower, lTotalPower, 0.3f);
 	mArrowAngle = Math::Lerp(mArrowAngle, std::atan2(lWantedDirection, lPower), 0.3f);
 	float lSize = mArrowTotalPower*0.5f;
@@ -950,6 +960,10 @@ bool DownwashManager::InitializeUniverse()
 	const vec3 v;
 	lParticleRenderer->CreateExplosion(vec3(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
+	double lRtrOffset;
+	v_get(lRtrOffset, =, GetVariableScope(), RTVAR_PHYSICS_RTR_OFFSET, 0.0);
+	v_set(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0+lRtrOffset);
+
 	str lStartLevel;
 	v_get(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, "level_06");
 	mMassObjectArray.clear();
@@ -963,7 +977,7 @@ bool DownwashManager::InitializeUniverse()
 	mHemisphere->EnableRootShadow(false);
 	mHemisphere->EnableMeshMove(false);
 	mHemisphere->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
-	mHemisphere->SetInitialTransform(xform(quat(), vec3(0, 25, 0)));
+	mHemisphere->SetInitialTransform(xform(quat(-1.69f, vec3(1,0,0)), vec3(0, 25, 0)));
 	mHemisphere->StartLoading();
 	mSunlight = new Sunlight(mUiManager);
 	mAutopilot = new Autopilot(this);
@@ -1132,7 +1146,7 @@ void DownwashManager::TickUiInput()
 			const vec3 v = lObject->GetVelocity();
 			if (lUserDirection.GetLengthSquared() < 0.01f)	// User is not controlling, AI is.
 			{
-				if (v.GetLengthSquared() > 1)
+				if (v.GetLengthSquared() > 0.1f)
 				{
 					lUserControls = lAutoPilot * lChildishness;
 					lUserDirection = lUserControls;
@@ -1155,7 +1169,7 @@ void DownwashManager::TickUiInput()
 			// Pull the brakes a little bit.
 			const float lCurrentFlyingDirectionX = v.x * 0.05f;
 			lUserDirection.x = Math::Clamp(lUserDirection.x-lCurrentFlyingDirectionX, -1.0f, +1.0f);
-			lUserDirection.x = (fabs(v.x) > 0.5f) ? lUserDirection.x : 0;
+			//lUserDirection.x = (fabs(v.x) > 0.5f) ? lUserDirection.x : 0;
 			// X follows helicopter yaw.
 			float lYaw, _;
 			lObject->GetOrientation().GetEulerAngles(lYaw, _, _);
@@ -1376,6 +1390,7 @@ Cure::ContextObject* DownwashManager::CreateContextObject(const str& pClassId) c
 	}
 	else
 	{
+		//mLog.Infof("Creating object of type %s.", pClassId.c_str());
 		UiCure::Machine* lMachine = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
 		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
 		lObject = lMachine;
@@ -1527,6 +1542,7 @@ void DownwashManager::OnLevelLoadCompleted()
 	else if (!lAvatar)
 	{
 		CreateChopper(gVehicleName);
+		//v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
 	}
 	else
 	{
@@ -2191,6 +2207,10 @@ void DownwashManager::DrawStick(Touchstick* pStick)
 
 void DownwashManager::ScriptPhysicsTick()
 {
+	if (mOptions.IsEscape() && !mMenu->GetDialog())
+	{
+		OnPauseButton(mPauseButton);
+	}
 	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
 	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
 	if (lPhysicsTime > 1e-5)

@@ -79,7 +79,7 @@ void Spawner::EaseDown(Tbc::PhysicsManager* pPhysicsManager, ContextObject* pObj
 	{
 		pObject->SetFullPosition(*lNewPositionalData, 0);
 		const bool lIsColliding = pPhysicsManager->IsColliding(pObject->GetInstanceId());
-		//mLog.Infof("%s at step %f", lIsColliding? "Is colliding" : "Not colliding", lStep);
+		//mLog.Infof("Spawned object %s %scolliding at step %i with step size %g.", pObject->GetClassId().c_str(), lIsColliding? "" : "not ", x, lStep);
 		if (lStep < 0.0001f && lIsColliding)
 		{
 			break;

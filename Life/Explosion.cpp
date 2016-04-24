@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -29,27 +29,31 @@ float Explosion::PushObject(Tbc::PhysicsManager* pPhysicsManager, const Cure::Co
 	return Force(pPhysicsManager, pObject, pPosition, pStrength, pTimeFactor);
 }
 
-void Explosion::FallApart(Tbc::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject)
+void Explosion::FallApart(Tbc::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject, bool pIncludeFixed)
 {
 	Tbc::ChunkyPhysics* lPhysics = pObject->GetPhysics();
 	const int lBoneCount = lPhysics->GetBoneCount();
 	for (int x = 0; x < lBoneCount; ++x)
 	{
 		Tbc::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
-		if (lGeometry->GetBoneType() != Tbc::ChunkyBoneGeometry::BONE_BODY)
+		if (lGeometry->GetBodyId() == Tbc::INVALID_BODY)
+		{
+			continue;
+		}
+		if (!pIncludeFixed && lGeometry->GetBoneType() != Tbc::ChunkyBoneGeometry::BONE_BODY)
 		{
 			continue;
 		}
 		if (lGeometry->GetJointType() == Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE)
 		{
-			if (!lGeometry->GetParent())
+			if (lGeometry->GetParent() && lGeometry->IsDetachable())
 			{
 				pPhysicsManager->DetachToDynamic(lGeometry->GetBodyId(), lGeometry->GetMass());
 			}
-			else
+			/*else
 			{
 				pPhysicsManager->AddMass(lGeometry->GetBodyId(), lGeometry->GetParent()->GetBodyId());
-			}
+			}*/
 		}
 		else if (lGeometry->GetJointId() != Tbc::INVALID_JOINT)
 		{

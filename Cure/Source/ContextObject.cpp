@@ -766,7 +766,7 @@ float ContextObject::GetImpact(const vec3& pGravity, const vec3& pForce, const v
 	const float lSidewaysFactor = pForce.Cross(lGravityDirection).GetLength() * lMassFactor;
 	const float lTorqueFactor = pTorque.GetLength() * lMassFactor;
 	float lImpact = 0;
-	lImpact = std::max(lImpact, lOpposingGravityFactor * 0.2f);
+	lImpact = std::max(lImpact, lOpposingGravityFactor * 0.1f);
 	lImpact = std::max(lImpact, lOpposingGravityFactor * -0.8f);
 	lImpact = std::max(lImpact, lSidewaysFactor * pSidewaysFactor * 0.01f);
 	lImpact = std::max(lImpact, lTorqueFactor * 0.03f);

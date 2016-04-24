@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -32,7 +32,7 @@ class Explosion
 public:
 	static float CalculateForce(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const vec3& pPosition, float pStrength);
 	static float PushObject(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const vec3& pPosition, float pStrength, float pTimeFactor);
-	static void FallApart(Tbc::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject);
+	static void FallApart(Tbc::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject, bool pIncludeFixed);
 	static void Freeze(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject);
 
 private:
