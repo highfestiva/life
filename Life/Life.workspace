@@ -3,7 +3,9 @@
   <Project Name="Life" Path="Life.project" Active="No"/>
   <Project Name="TrabantSim" Path="../TrabantSim/TrabantSim.project" Active="No"/>
   <Project Name="SlimeVolleyball" Path="../SlimeVolleyball/SlimeVolleyball.project" Active="No"/>
-  <Project Name="Downwash" Path="../Downwash/Downwash.project" Active="Yes"/>
+  <Project Name="Downwash" Path="../Downwash/Downwash.project" Active="No"/>
+  <Project Name="Bound" Path="../Bound/Bound.project" Active="No"/>
+  <Project Name="CureTestApp" Path="../UiCure/CureTestApp/CureTestApp.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
@@ -11,20 +13,26 @@
       <Project Name="TrabantSim" ConfigName="Debug"/>
       <Project Name="SlimeVolleyball" ConfigName="Debug"/>
       <Project Name="Downwash" ConfigName="Debug"/>
+      <Project Name="Bound" ConfigName="Debug"/>
+      <Project Name="CureTestApp" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="no">
+    <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
       <Project Name="TrabantSim" ConfigName="Release"/>
       <Project Name="Life" ConfigName="Release"/>
       <Project Name="SlimeVolleyball" ConfigName="Release"/>
       <Project Name="Downwash" ConfigName="Release"/>
+      <Project Name="Bound" ConfigName="Release"/>
+      <Project Name="CureTestApp" ConfigName="Release"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Profile" Selected="no">
+    <WorkspaceConfiguration Name="Profile" Selected="yes">
       <Environment/>
       <Project Name="TrabantSim" ConfigName="Profile"/>
       <Project Name="Life" ConfigName="Profile"/>
       <Project Name="SlimeVolleyball" ConfigName="Profile"/>
       <Project Name="Downwash" ConfigName="Profile"/>
+      <Project Name="Bound" ConfigName="Profile"/>
+      <Project Name="CureTestApp" ConfigName="Profile"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

@@ -122,7 +122,7 @@ protected:
 	virtual void MoveCamera(float pFrameTime);
 	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
 
-	void PrintText(const str& s, int x, int y) const;
+	void PrintText(const wstr& s, int x, int y) const;
 	void DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const;
 
 	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);

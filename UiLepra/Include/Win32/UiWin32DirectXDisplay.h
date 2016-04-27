@@ -19,9 +19,10 @@ public:
 	Win32DirectXDisplay();
 	virtual ~Win32DirectXDisplay();
 
-	void CloseScreen();
-	bool Activate();
-	bool UpdateScreen();
+	virtual void CloseScreen();
+	virtual bool Activate();
+	virtual bool Deactivate();
+	virtual bool UpdateScreen();
 
 	bool IsVSyncEnabled() const;
 	bool SetVSyncEnabled(bool pEnabled);

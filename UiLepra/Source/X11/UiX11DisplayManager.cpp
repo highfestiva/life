@@ -52,27 +52,18 @@ X11DisplayManager::X11DisplayManager() :
 	mWindowY(0),
 	mCaptionSet(false)
 {
-
-	/* TODO: implement!
-
-	// Count display modes.
-	DEVMODE lDevMode;
-	while (EnumDisplaySettings(NULL, mEnumeratedDisplayModeCount, &lDevMode) != 0)
+	mDisplay = ::XOpenDisplay(0);
+	if (mDisplay)
 	{
-		mEnumeratedDisplayModeCount++;
+		++mDisplayUseCount;
+		Screen* lScreen = DefaultScreenOfDisplay(mDisplay);
+		mEnumeratedDisplayModeCount = 1;
+		mEnumeratedDisplayMode = new DisplayMode[mEnumeratedDisplayModeCount];
+		mEnumeratedDisplayMode[0].mWidth = WidthOfScreen(lScreen);
+		mEnumeratedDisplayMode[0].mHeight = HeightOfScreen(lScreen);
+		mEnumeratedDisplayMode[0].mBitDepth = DefaultDepthOfScreen(lScreen);
+		mEnumeratedDisplayMode[0].mRefreshRate = 0;
 	}
-	mEnumeratedDisplayMode = new DisplayMode[mEnumeratedDisplayModeCount];
-
-	int lCount = 0;
-	while (EnumDisplaySettings(NULL, lCount, &lDevMode) != 0)
-	{
-		mEnumeratedDisplayMode[lCount].mWidth = lDevMode.dmPelsWidth;
-		mEnumeratedDisplayMode[lCount].mHeight = lDevMode.dmPelsHeight;
-		mEnumeratedDisplayMode[lCount].mBitDepth = lDevMode.dmBitsPerPel;
-		mEnumeratedDisplayMode[lCount].mRefreshRate = lDevMode.dmDisplayFrequency;
-
-		lCount++;
-	}*/
 }
 
 X11DisplayManager::~X11DisplayManager()
@@ -245,7 +236,12 @@ void X11DisplayManager::CloseScreen()
 		::XDestroyWindow(mDisplay, mWnd);
 		mWnd = 0;
 
-		::XCloseDisplay(mDisplay);
+		ProcessMessages();
+
+		if (--mDisplayUseCount == 0)
+		{
+			::XCloseDisplay(mDisplay);
+		}
 		mDisplay = 0;
 	}
 }
@@ -294,12 +290,8 @@ bool X11DisplayManager::InitWindow()
 
 	if (lOk && !mDisplay)
 	{
-		mDisplay = XOpenDisplay(0);
-		if(!mDisplay)
-		{
-			mLog.Error("Display not opened. X started?");
-			lOk = false;
-		}
+		mLog.Error("Display not opened. X started?");
+		lOk = false;
 	}
 
 	if (lOk && !mWnd)
@@ -378,11 +370,7 @@ bool X11DisplayManager::InitWindow()
 
 		lOk = (mWnd != 0);
 
-		if (lOk)
-		{
-			++msWindowCount;
-		}
-		else
+		if (!lOk)
 		{
 			mLog.Error("InitWindow() - Failed to create window.");
 		}
@@ -465,7 +453,7 @@ Window X11DisplayManager::GetWindow() const
 
 void X11DisplayManager::ProcessMessages()
 {
-	if (!mWnd)
+	if (!mDisplay)
 	{
 		return;
 	}
@@ -656,7 +644,7 @@ XVisualInfo* X11DisplayManager::GetVisualInfo() const
 
 
 
-int X11DisplayManager::msWindowCount = 0;
+int X11DisplayManager::mDisplayUseCount = 0;
 loginstance(UI_GFX, X11DisplayManager);
 
 

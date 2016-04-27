@@ -41,7 +41,7 @@ class MathTraits<float>
 {
 public:
 	inline static float Eps() { return 1e-34f; }
-	inline static float FullEps() { return 1e-7f; }
+	inline static float FullEps() { return 1e-5f; }
 	inline static float Pi() { return 3.1415926535897932384626433832795028841971693993751f; }
 	inline static bool IsNan(float fl)
 	{
@@ -55,7 +55,7 @@ class MathTraits<double>
 {
 public:
 	inline static double Eps() { return 1e-300; }
-	inline static double FullEps() { return 1e-16f; }
+	inline static double FullEps() { return 1e-14f; }
 	inline static double Pi() { return 3.1415926535897932384626433832795028841971693993751; }
 	inline static bool IsNan(double d)
 	{

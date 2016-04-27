@@ -57,7 +57,6 @@ public:
 	Display* GetDisplay() const;
 	Window GetWindow() const;
 
-	static Bool WaitForNotify(Display* d, XEvent& e, char* arg);
 	void ProcessMessages();
 	void AddObserver(unsigned pMessage, X11Observer* pObserver);
 	void RemoveObserver(unsigned pMessage, X11Observer* pObserver);
@@ -105,7 +104,7 @@ protected:
 
 	//Screen Stuff
 
-	static int msWindowCount;
+	static int mDisplayUseCount;
 	Display* mDisplay;
 	Window mWnd;
 	bool mIsScreenOpen;

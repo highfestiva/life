@@ -22,9 +22,10 @@ public:
 	X11OpenGLDisplay();
 	virtual ~X11OpenGLDisplay();
 
-	void CloseScreen();
-	bool Activate();
-	bool UpdateScreen();
+	virtual void CloseScreen();
+	virtual bool Activate();
+	virtual bool Deactivate();
+	virtual bool UpdateScreen();
 
 	bool IsVSyncEnabled() const;
 	bool SetVSyncEnabled(bool pEnabled);
@@ -40,8 +41,6 @@ protected:
 	void SetFocus(bool pFocus);
 
 private:
-	void Deactivate();
-
 	void Resize(int pWidth, int pHeight);
 	void UpdateCaption();
 

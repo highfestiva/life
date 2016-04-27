@@ -12,12 +12,19 @@
 
 +Rapid prototyping game IDE. Python.
 
-Build all games in Linux/CodeLite.
-TrabantIDE.
-CodeLite refactoring?
-Release all games .deb or summat for Ubuntu.
++AI vs. AI programming game. Python.
 
-AI vs. AI programming game. Python.
+Build all games in Linux/CodeLite.
+
+Port TrabantIDE to Linux.
+
+Release some games as .deb for Ubuntu.
+
+Create a ton of games for App Store using Trabant.
+
+Create GTA2-tank MMOG. Frags earn money, deaths+team damage looses. Use money to build bigger+better tanks.
+
+Release for Steam.
 
 Multiplayer FPS and tank game in Gbg, generated through Google maps/street view.
 

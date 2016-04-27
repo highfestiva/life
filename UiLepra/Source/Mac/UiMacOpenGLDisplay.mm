@@ -60,6 +60,19 @@ bool MacOpenGLDisplay::Activate()
 	return true;
 }
 
+void MacOpenGLDisplay::Deactivate()
+{
+	if (mIsOpen)
+	{
+#ifdef LEPRA_IOS
+		[LEPRA_APPLE_GL_CONTEXT setCurrentContext:nil];
+#else // !iOS
+		[LEPRA_APPLE_GL_CONTEXT clearCurrentContext];
+#endif // iOS/!iOS
+	}
+	return mIsOpen;
+}
+
 bool MacOpenGLDisplay::UpdateScreen()
 {
 	if (!mIsOpen)
@@ -129,18 +142,6 @@ void MacOpenGLDisplay::SetFocus(bool pFocus)
 		{
 			DispatchResize(mDisplayMode.mWidth, mDisplayMode.mHeight);
 		}
-	}
-}
-
-void MacOpenGLDisplay::Deactivate()
-{
-	if (mIsOpen)
-	{
-#ifdef LEPRA_IOS
-		[LEPRA_APPLE_GL_CONTEXT setCurrentContext:nil];
-#else // !iOS
-		[LEPRA_APPLE_GL_CONTEXT clearCurrentContext];
-#endif // iOS/!iOS
 	}
 }
 

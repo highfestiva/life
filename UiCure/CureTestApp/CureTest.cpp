@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -23,7 +23,7 @@
 using namespace Lepra;
 
 class CureTest{};
-static LogDecorator gCLog(LogType::GetLogger(LogType::SUB_TEST), typeid(CureTest));
+static LogDecorator gCLog(LogType::GetLogger(LogType::TEST), typeid(CureTest));
 void ReportTestResult(const LogDecorator& pLog, const str& pTestName, const str& pContext, bool pbResult);
 
 
@@ -37,7 +37,7 @@ bool TestPacker(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = "pack unicode";
-		lTestOk = (PackerUnicodeString::Pack(lRawData, L"ABC") == 8);
+		lTestOk = (PackerUnicodeString::Pack(lRawData, "ABC") == 8);
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
@@ -49,12 +49,12 @@ bool TestPacker(const LogDecorator& pAccount)
 	if (lTestOk)
 	{
 		lContext = "unpack unicode";
-		wstr lUnpacked;
+		str lUnpacked;
 		lTestOk = (PackerUnicodeString::Unpack(lUnpacked, lRawData, 8) == 8);
 		deb_assert(lTestOk);
 		if (lTestOk)
 		{
-			lTestOk = (lUnpacked == L"ABC");
+			lTestOk = (lUnpacked == "ABC");
 			deb_assert(lTestOk);
 		}
 	}
@@ -224,9 +224,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+" invalid client1 unconnected login";
 		log_volatile(mLog.Debug("---> Testing: "+lContext));
-		wstr lBadPassword(L"feddo");
+		str lBadPassword("feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(wstr(L"client1"), lPassword);
+		Cure::LoginId lUser(str("client1"), lPassword);
 		lClient->StartConnectLogin(":25344", 0, lUser);	// No connect time = skip connect, just try to login.
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_NO_CONNECTION);
@@ -247,9 +247,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+" invalid client1 username";
 		log_volatile(mLog.Debug("---> Testing: "+lContext));
-		wstr lBadPassword(L"feddo");
+		str lBadPassword("feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(wstr(L"client2"), lPassword);
+		Cure::LoginId lUser(str("client2"), lPassword);
 		lClient->StartConnectLogin("", 0, lUser);	// No connect time = skip connect, just try to login.
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ERRONOUS_DATA);
@@ -270,9 +270,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+" invalid client1 password";
 		log_volatile(mLog.Debug("---> Testing: "+lContext));
-		wstr lBadPassword(L"feddn");
+		str lBadPassword("feddn");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(wstr(L"client1"), lPassword);
+		Cure::LoginId lUser(str("client1"), lPassword);
 		lClient->StartConnectLogin("", 0, lUser);	// No connect time = skip connect, just try to login.
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ERRONOUS_DATA);
@@ -283,9 +283,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+" create user";
 		log_volatile(mLog.Debug("---> Testing: "+lContext));
-		wstr lBadPassword(L"feddo");
+		str lBadPassword("feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(wstr(L"client1"), lPassword);
+		Cure::LoginId lUser(str("client1"), lPassword);
 		lTestOk = lUserAccountManager->AddUserAccount(lUser);
 		deb_assert(lTestOk);
 	}
@@ -294,9 +294,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+" connect+login client";
 		log_volatile(mLog.Debug("---> Testing: "+lContext));
-		wstr lBadPassword(L"feddo");
+		str lBadPassword("feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(wstr(L"client1"), lPassword);
+		Cure::LoginId lUser(str("client1"), lPassword);
 		lTestOk = lClient->Open(":11332");
 		deb_assert(lTestOk);
 		lClient->StartConnectLogin(":25344", 2.0, lUser);
@@ -321,9 +321,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+" invalid double login client";
 		log_volatile(mLog.Debug("---> Testing: "+lContext));
-		wstr lBadPassword(L"feddo");
+		str lBadPassword("feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(wstr(L"client1"), lPassword);
+		Cure::LoginId lUser(str("client1"), lPassword);
 		lClient2->StartConnectLogin("", 0, lUser);
 		Cure::RemoteStatus lStatus = lClient2->WaitLogin();
 		lTestOk = (lStatus == Cure::REMOTE_LOGIN_ALREADY);
@@ -334,9 +334,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+" create user #2";
 		log_volatile(mLog.Debug("---> Testing: "+lContext));
-		wstr lBadPassword(L"feddo");
+		str lBadPassword("feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(wstr(L"client2"), lPassword);
+		Cure::LoginId lUser(str("client2"), lPassword);
 		lTestOk = lUserAccountManager->AddUserAccount(lUser);
 		deb_assert(lTestOk);
 	}
@@ -345,9 +345,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 	{
 		lContext = pPrefix+" connect+login 2, client2";
 		log_volatile(mLog.Debug("---> Testing: "+lContext));
-		wstr lBadPassword(L"feddo");
+		str lBadPassword("feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(wstr(L"client2"), lPassword);
+		Cure::LoginId lUser(str("client2"), lPassword);
 		lTestOk = lClient2->Open(":11333");
 		deb_assert(lTestOk);
 		lClient2->StartConnectLogin(":25344", 2.0, lUser);
@@ -387,7 +387,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lClient2->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
 		lPacket->AddMessage(lStatus);
-		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, L"Client2ToServer");
+		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, "Client2ToServer");
 		lPacket->StoreHeader();
 		for (int x = 0; lTestOk && x < lPacketCount; ++x)
 		{
@@ -419,9 +419,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 			if (lTestOk)
 			{
 				Cure::MessageStatus* lMessage = (Cure::MessageStatus*)(lPacket->GetMessageAt(0));
-				wstr lText;
+				str lText;
 				lMessage->GetMessageString(lText);
-				lTestOk = (lText == L"Client2ToServer");
+				lTestOk = (lText == "Client2ToServer");
 				deb_assert(lTestOk);
 			}
 			if (lTestOk)
@@ -468,7 +468,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lServer->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
 		lPacket->AddMessage(lStatus);
-		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, L"BajsOxe");
+		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, "BajsOxe");
 		lPacket->StoreHeader();
 		lTestOk = lServer->PlaceInSendBuffer(pSafe, lPacket, lClient2Id);
 		lServer->GetPacketFactory()->Release(lPacket);
@@ -488,9 +488,9 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 			if (lTestOk)
 			{
 				Cure::MessageStatus* lMessage = (Cure::MessageStatus*)(lPacket->GetMessageAt(0));
-				wstr lText;
+				str lText;
 				lMessage->GetMessageString(lText);
-				lTestOk = (lText == L"BajsOxe");
+				lTestOk = (lText == "BajsOxe");
 			}
 		}
 		lClient2->GetPacketFactory()->Release(lPacket);
@@ -504,7 +504,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lClient->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
 		lPacket->AddMessage(lStatus);
-		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, L"?");
+		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, "?");
 		lPacket->StoreHeader();
 		lTestOk = lClient->PlaceInSendBuffer(pSafe, lClient->GetSocket(), lPacket);
 		if (lTestOk)
@@ -537,7 +537,7 @@ bool NetworkClientServerTest::TestSpecific(const str& pPrefix, bool pSafe)
 		lPacket->Release();
 		Cure::MessageStatus* lStatus = (Cure::MessageStatus*)lServer->GetPacketFactory()->GetMessageFactory()->Allocate(Cure::MESSAGE_TYPE_STATUS);
 		lPacket->AddMessage(lStatus);
-		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, L"?");
+		lStatus->Store(lPacket, Cure::REMOTE_OK, Cure::MessageStatus::INFO_CHAT, 0, "?");
 		lPacket->StoreHeader();
 		lTestOk = lServer->PlaceInSendBuffer(pSafe, lPacket, lClientId);
 		lServer->GetPacketFactory()->Release(lPacket);
@@ -614,7 +614,7 @@ bool HiscoreTest::Test()
 	if (lTestOk)
 	{
 		lContext = "list parse";
-		astr a = "{\"offset\":2,\"total_count\":5,\"list\":[{\"name\":\"Jonte\",\"score\":4},{\"name\":\"Bea Sune\",\"score\":34567}]}";
+		str a = "{\"offset\":2,\"total_count\":5,\"list\":[{\"name\":\"Jonte\",\"score\":4},{\"name\":\"Bea Sune\",\"score\":34567}]}";
 		lTestOk = lHiscore.ParseList(a);
 		deb_assert(lHiscore.GetDownloadedList().mOffset == 2);
 		deb_assert(lHiscore.GetDownloadedList().mTotalCount == 5);
@@ -669,7 +669,7 @@ bool HiscoreTest::Test()
 	if (lTestOk)
 	{
 		lContext = "score parse";
-		astr a = "{ \"offset\" : 15 }";
+		str a = "{ \"offset\" : 15 }";
 		lTestOk = lHiscore.ParseScore(a);
 		deb_assert(lHiscore.GetUploadedPlace() == 15);
 		lHiscore.Close();

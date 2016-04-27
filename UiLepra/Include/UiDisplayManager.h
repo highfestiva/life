@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -140,6 +140,7 @@ public:
 
 	virtual void SetFocus(bool pFocus) = 0;
 	virtual bool Activate() = 0;
+	virtual bool Deactivate() = 0;
 	// Swaps buffers etc.
 	virtual bool UpdateScreen() = 0;
 

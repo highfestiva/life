@@ -80,7 +80,7 @@ bool TestGraphics(const Lepra::LogDecorator& pLog)
 	if (lTestOk)
 	{
 		lContext = "find display mode";
-		lTestOk = lDisplay->FindDisplayMode(lDisplayMode, 640, 480);
+		lTestOk = lDisplay->FindDisplayMode(lDisplayMode, 640, 480) || lDisplay->FindDisplayMode(lDisplayMode, 1920, 1080);
 		deb_assert(lTestOk);
 	}
 	if (lTestOk)

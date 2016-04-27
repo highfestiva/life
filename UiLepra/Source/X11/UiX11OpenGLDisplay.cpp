@@ -49,8 +49,22 @@ void X11OpenGLDisplay::CloseScreen()
 
 bool X11OpenGLDisplay::Activate()
 {
-	bool lOk = ::glXMakeCurrent(GetDisplay(), GetWindow(), mGlContext);
-	return (lOk);
+	bool lOk = false;
+	if (GetDisplay())
+	{
+		lOk = ::glXMakeCurrent(GetDisplay(), GetWindow(), mGlContext);
+	}
+	return lOk;
+}
+
+bool X11OpenGLDisplay::Deactivate()
+{
+	if (GetDisplay())
+	{
+		::glXMakeCurrent(GetDisplay(), 0, 0);
+		return true;
+	}
+	return false;
 }
 
 bool X11OpenGLDisplay::UpdateScreen()
@@ -99,14 +113,6 @@ void X11OpenGLDisplay::SetFocus(bool pFocus)
 		{
 			DispatchResize(mDisplayMode.mWidth, mDisplayMode.mHeight);
 		}
-	}
-}
-
-void X11OpenGLDisplay::Deactivate()
-{
-	if (GetDisplay())
-	{
-		::glXMakeCurrent(GetDisplay(), 0, 0);
 	}
 }
 

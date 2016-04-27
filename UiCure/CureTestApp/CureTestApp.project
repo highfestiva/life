@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="Downwash" InternalType="Console">
+<CodeLite_Project Name="CureTestApp" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00010001N0005Debug000000000000]]>
@@ -36,46 +36,11 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="Source">
-    <File Name="AirBalloonPilot.cpp"/>
-    <File Name="AirBalloonPilot.h"/>
-    <File Name="Automan.cpp"/>
-    <File Name="Automan.h"/>
-    <File Name="AutoPathDriver.cpp"/>
-    <File Name="AutoPathDriver.h"/>
-    <File Name="Autopilot.cpp"/>
-    <File Name="Autopilot.h"/>
-    <File Name="BaseMachine.cpp"/>
-    <File Name="BaseMachine.h"/>
-    <File Name="CanonDriver.cpp"/>
-    <File Name="CanonDriver.h"/>
-    <File Name="CenteredMachine.cpp"/>
-    <File Name="CenteredMachine.h"/>
-    <File Name="Downwash.cxx"/>
-    <File Name="Downwash.h"/>
-    <File Name="Downwash.rc" ExcludeProjConfig=""/>
-    <File Name="DownwashConsoleManager.cpp"/>
-    <File Name="DownwashConsoleManager.h"/>
-    <File Name="DownwashManager.cpp"/>
-    <File Name="DownwashManager.h"/>
-    <File Name="DownwashTicker.cpp"/>
-    <File Name="DownwashTicker.h"/>
-    <File Name="Eater.cpp"/>
-    <File Name="Eater.h"/>
-    <File Name="LandingTrigger.cpp"/>
-    <File Name="LandingTrigger.h"/>
-    <File Name="Level.cpp"/>
-    <File Name="Level.h"/>
+    <File Name="CureTest.cpp"/>
+    <File Name="CureTestApp.cpp"/>
+    <File Name="NetworkPhysicsTest.cpp"/>
     <File Name="pch.h"/>
-    <File Name="RtVar.h"/>
-    <File Name="SimulatorDriver.cpp"/>
-    <File Name="SimulatorDriver.h"/>
-    <File Name="Sunlight.cpp"/>
-    <File Name="Sunlight.h"/>
-    <File Name="ToDo.txt" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="Version.h"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="Mac">
-    <File Name="Downwash.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="UiCureTest.cpp"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="Life"/>
@@ -101,7 +66,7 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Debug"/>
+        <LibraryPath Value="../../Life/Debug"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
@@ -111,7 +76,7 @@
         <Library Value="Life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="netphys" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(ProjectPath)/../../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -148,7 +113,7 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="-pg" Required="yes">
-        <LibraryPath Value="../Life/Profile"/>
+        <LibraryPath Value="../../Life/Profile"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
@@ -158,7 +123,7 @@
         <Library Value="Life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Profile" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Profile" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(ProjectPath)/../../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -196,7 +161,7 @@
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Release"/>
+        <LibraryPath Value="../../Life/Release"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
@@ -206,7 +171,7 @@
         <Library Value="Life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(ProjectPath)/../../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>

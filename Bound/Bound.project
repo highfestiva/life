@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="Downwash" InternalType="Console">
+<CodeLite_Project Name="Bound" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00010001N0005Debug000000000000]]>
@@ -36,46 +36,28 @@
     </Plugin>
   </Plugins>
   <VirtualDirectory Name="Source">
-    <File Name="AirBalloonPilot.cpp"/>
-    <File Name="AirBalloonPilot.h"/>
-    <File Name="Automan.cpp"/>
-    <File Name="Automan.h"/>
-    <File Name="AutoPathDriver.cpp"/>
-    <File Name="AutoPathDriver.h"/>
-    <File Name="Autopilot.cpp"/>
-    <File Name="Autopilot.h"/>
-    <File Name="BaseMachine.cpp"/>
-    <File Name="BaseMachine.h"/>
-    <File Name="CanonDriver.cpp"/>
-    <File Name="CanonDriver.h"/>
-    <File Name="CenteredMachine.cpp"/>
-    <File Name="CenteredMachine.h"/>
-    <File Name="Downwash.cxx"/>
-    <File Name="Downwash.h"/>
-    <File Name="Downwash.rc" ExcludeProjConfig=""/>
-    <File Name="DownwashConsoleManager.cpp"/>
-    <File Name="DownwashConsoleManager.h"/>
-    <File Name="DownwashManager.cpp"/>
-    <File Name="DownwashManager.h"/>
-    <File Name="DownwashTicker.cpp"/>
-    <File Name="DownwashTicker.h"/>
-    <File Name="Eater.cpp"/>
-    <File Name="Eater.h"/>
-    <File Name="LandingTrigger.cpp"/>
-    <File Name="LandingTrigger.h"/>
+    <File Name="Ball.cpp"/>
+    <File Name="Ball.h"/>
+    <File Name="Bound.cxx"/>
+    <File Name="Bound.h"/>
+    <File Name="Bound.rc" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="BoundConsoleManager.cpp"/>
+    <File Name="BoundConsoleManager.h"/>
+    <File Name="BoundManager.cpp"/>
+    <File Name="BoundManager.h"/>
+    <File Name="BoundTicker.cpp"/>
+    <File Name="BoundTicker.h"/>
     <File Name="Level.cpp"/>
     <File Name="Level.h"/>
     <File Name="pch.h"/>
     <File Name="RtVar.h"/>
-    <File Name="SimulatorDriver.cpp"/>
-    <File Name="SimulatorDriver.h"/>
     <File Name="Sunlight.cpp"/>
     <File Name="Sunlight.h"/>
     <File Name="ToDo.txt" ExcludeProjConfig="Debug;Profile;Release"/>
     <File Name="Version.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="Mac">
-    <File Name="Downwash.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="Bound.mm" ExcludeProjConfig="Debug;Profile;Release"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
     <Project Name="Life"/>

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -270,7 +270,7 @@ bool ResourceTest::TestAtom()
 		lTestOk = (gResourceLoadCount == 3 && gResourceLoadErrorCount == 1);
 		if (!lTestOk)
 		{
-			mLog.AError("texture not available, try running UiTbc test first!");
+			mLog.Error("texture not available, try running UiTbc test first!");
 		}
 		deb_assert(lTestOk);
 	}*/
@@ -585,7 +585,7 @@ bool ResourceTest::TestStress()
 				lTestOk = ((*y)->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
 				if (!lTestOk)
 				{
-					mLog.Warningf("Failed on the %ith element (of %u; load state = %i."),
+					mLog.Warningf("Failed on the %ith element (of %u); load state = %i.",
 						u, lResources.size(), (*y)->GetLoadState());
 				}
 			}

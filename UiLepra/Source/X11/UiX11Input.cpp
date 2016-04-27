@@ -160,8 +160,8 @@ X11InputManager::X11InputManager(X11DisplayManager* pDisplayManager):
 	mDisplayManager(pDisplayManager),
 	//mDirectInput(0),
 	mInitialized(false),
-	mScreenWidth(0),
-	mScreenHeight(0),
+	mScreenWidth(1024),
+	mScreenHeight(768),
 	mCursorX(0),
 	mCursorY(0),
 	mIgnoreNextMouseMove(true),
@@ -173,16 +173,21 @@ X11InputManager::X11InputManager(X11DisplayManager* pDisplayManager):
 	mKeyboard(0),
 	mMouse(0)
 {
-	XIM lInputMethod = XOpenIM(mDisplayManager->GetDisplay(), NULL, NULL, NULL);
-	mInputContext = XCreateIC(lInputMethod, XNInputStyle, XIMPreeditNothing|XIMStatusNothing, XNClientWindow, mDisplayManager->GetWindow(), NULL);;
+	int mx = 0;
+	int my = 0;
+	if (mDisplayManager)
+	{
+		XIM lInputMethod = XOpenIM(mDisplayManager->GetDisplay(), NULL, NULL, NULL);
+		mInputContext = XCreateIC(lInputMethod, XNInputStyle, XIMPreeditNothing|XIMStatusNothing, XNClientWindow, mDisplayManager->GetWindow(), NULL);;
 
-	Window rw, cw;
-	int _, x, y;
-	unsigned lMask;
-	XQueryPointer(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), &rw, &cw, &_, &_, &x, &y, &lMask);
-	SetMousePosition(x, y);
-	mMouseGrabX = x;
-	mMouseGrabY = y;
+		Window rw, cw;
+		int _;
+		unsigned lMask;
+		XQueryPointer(mDisplayManager->GetDisplay(), mDisplayManager->GetWindow(), &rw, &cw, &_, &_, &mx, &my, &lMask);
+	}
+	SetMousePosition(mx, my);
+	mMouseGrabX = mx;
+	mMouseGrabY = my;
 
 	::memset(&mTypeCount, 0, sizeof(mTypeCount));
 	++mTypeCount[InputDevice::TYPE_KEYBOARD];

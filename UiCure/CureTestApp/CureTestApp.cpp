@@ -1,4 +1,4 @@
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -151,10 +151,10 @@ int CureTestApplication::Run()
 	FileLogListener lFileLogger("CureTestApp.log");
 	FileLogListener lPerformanceLogger("CureTestPerformance.log");
 	MemFileLogListener lMemLogger(100*1024);
-	LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
+	LogType::GetLogger(LogType::ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
 		&lFileLogger, &lPerformanceLogger, &lMemLogger);
-	LogType::GetLogger(LogType::SUB_ROOT)->SetLevelThreashold(LEVEL_TRACE);
-	LogType::GetLogger(LogType::SUB_NETWORK)->SetLevelThreashold(LEVEL_ERROR);
+	LogType::GetLogger(LogType::ROOT)->SetLevelThreashold(LEVEL_TRACE);
+	LogType::GetLogger(LogType::NETWORK)->SetLevelThreashold(LEVEL_ERROR);
 
 	mLog.Headline("\n\n--- Build type: " LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT " ---\n");
 

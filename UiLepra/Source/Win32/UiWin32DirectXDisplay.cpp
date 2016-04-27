@@ -1,6 +1,6 @@
 /*
 	Class:  Win32DirectXDisplay
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -48,6 +48,12 @@ void Win32DirectXDisplay::CloseScreen()
 }
 
 bool Win32DirectXDisplay::Activate()
+{
+	// TODO: implement!
+	return (true);
+}
+
+bool Win32DirectXDisplay::Deactivate()
 {
 	// TODO: implement!
 	return (true);

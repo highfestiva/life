@@ -485,7 +485,7 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 	if (lOk)
 	{
 		lContext = "find display mode";
-		lOk = gDisplay->FindDisplayMode(lDisplayMode, 640, 480, 32);
+		lOk = gDisplay->FindDisplayMode(lDisplayMode, 640, 480, 32) || gDisplay->FindDisplayMode(lDisplayMode, 1920, 1080);
 	}
 	if (lOk)
 	{
@@ -528,11 +528,13 @@ bool OpenRenderer(const Lepra::LogDecorator& pLog, UiLepra::DisplayManager::Cont
 		gPainter->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
 	}
 
+#ifdef LEPRA_WINDOWS
 	if (lOk)
 	{
 		lContext = "disable vsync";
 		lOk = gDisplay->SetVSyncEnabled(false);
 	}
+#endif // Windows
 
 	UiTbc::Texture lTextureMap;
 	if (lOk)

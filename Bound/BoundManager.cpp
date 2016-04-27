@@ -180,7 +180,7 @@ bool BoundManager::Open()
 	bool lOk = Parent::Open();
 	if (lOk)
 	{
-		mPauseButton = ICONBTNA("btn_pause.png", "");
+		mPauseButton = ICONBTNA("btn_pause.png", L"");
 		int x = mRenderArea.mLeft + 12;
 		int y = mRenderArea.mBottom - 12 - 32;
 		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
@@ -308,25 +308,25 @@ bool BoundManager::Paint()
 	{
 		mUiManager->GetPainter()->SetColor(BRIGHT_TEXT);
 
-		const str lCompletionText = strutil::Format("Reduced: %.1f%%", mPercentDone);
+		const wstr lCompletionText = wstrutil::Format(L"Reduced: %.1f%%", mPercentDone);
 		int cw = mUiManager->GetPainter()->GetStringWidth(lCompletionText);
 		PrintText(lCompletionText, (mUiManager->GetCanvas()->GetWidth()-cw)/2, 7);
 
 		mUiManager->SetScaleFont(0.9f);
 		float lPreviousScore;
 		v_get(lPreviousScore, =(float), GetVariableScope(), RTVAR_GAME_SCORE, 0.0);
-		const str lScoreText = strutil::Format("Score: %.0f", mLevelScore+lPreviousScore);
+		const wstr lScoreText = wstrutil::Format(L"Score: %.0f", mLevelScore+lPreviousScore);
 		PrintText(lScoreText, 25, 9);
 
 		int lLevel;
 		v_get(lLevel, =, GetVariableScope(), RTVAR_GAME_LEVEL, 0);
-		const str lLevelText = strutil::Format("Level: %i", lLevel+1);
+		const wstr lLevelText = wstrutil::Format(L"Level: %i", lLevel+1);
 		int lw = mUiManager->GetPainter()->GetStringWidth(lLevelText);
 		PrintText(lLevelText, mUiManager->GetCanvas()->GetWidth()-lw-25, 9);
 
 		mUiManager->GetPainter()->SetColor(lIsUsingACut? DIM_RED_TEXT : DIM_TEXT);
 		mUiManager->SetScaleFont(0.7f);
-		const str lLinesText = strutil::Format("Cuts: %i", mCutsLeft);
+		const wstr lLinesText = wstrutil::Format(L"Cuts: %i", mCutsLeft);
 		PrintText(lLinesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 31);
 
 		vec3 v = RNDPOSVEC()*255;
@@ -334,7 +334,7 @@ bool BoundManager::Paint()
 		lBlinkCol.Set(v.x, v.y, v.z, 1.0f);
 		bool lIsShowingShake = (mIsShaking && mShakeTimer.QuerySplitTime() < 2.5);
 		mUiManager->GetPainter()->SetColor(lIsShowingShake? lBlinkCol : DIM_TEXT);
-		const str lShakesText = strutil::Format("Shakes: %i", mShakesLeft);
+		const wstr lShakesText = wstrutil::Format(L"Shakes: %i", mShakesLeft);
 		PrintText(lShakesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 48);
 		mUiManager->SetMasterFont();
 	}
@@ -661,7 +661,7 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 		}
 		return true;
 	}
-	lTimeLogger.Transfer("CreateNGon("));
+	lTimeLogger.Transfer("CreateNGon");
 	CreateNGon(lNGon);
 	if (lNGon.size() < 3 || !lDidCut)
 	{
@@ -671,7 +671,7 @@ bool BoundManager::DoCut(const UiTbc::TriangleBasedGeometry* pMesh, Plane pCutPl
 		return false;
 	}
 	// Generate random colors and add.
-	lTimeLogger.Transfer("AddNGonTriangles("));
+	lTimeLogger.Transfer("AddNGonTriangles");
 	std::vector<uint8> lNGonColors;
 	const size_t nvc = (lNGon.size()-2)*3;
 	lNGonColors.resize(nvc*4);
@@ -1236,12 +1236,12 @@ void BoundManager::ShowInstruction()
 	d->SetDirection(+1, false);
 	UiTbc::FixedLayouter lLayouter(d);
 
-	UiTbc::Label* lLabel1 = new UiTbc::Label(BRIGHT_TEXT, "Swipe to cut the box. Avoid hitting the");
+	UiTbc::Label* lLabel1 = new UiTbc::Label(BRIGHT_TEXT, L"Swipe to cut the box. Avoid hitting the");
 	lLayouter.AddComponent(lLabel1, 0, 6, 0, 1, 1);
-	UiTbc::Label* lLabel2 = new UiTbc::Label(BRIGHT_TEXT, "balls. Cut away 85% to complete level.");
+	UiTbc::Label* lLabel2 = new UiTbc::Label(BRIGHT_TEXT, L"balls. Cut away 85% to complete level.");
 	lLayouter.AddComponent(lLabel2, 1, 6, 0, 1, 1);
 
-	UiTbc::Button* lResetLevelButton = new UiTbc::Button(GREEN_BUTTON, "OK");
+	UiTbc::Button* lResetLevelButton = new UiTbc::Button(GREEN_BUTTON, L"OK");
 	lLayouter.AddButton(lResetLevelButton, -9, 2, 3, 0, 1, 1, true);
 
 	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
@@ -1268,14 +1268,14 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 	bool lIsPaused = false;
 	if (LEVEL_DONE())
 	{
-		UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, "Level completed (85%"));
+		UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, L"Level completed (85%)");
 		lLabel->SetFontId(mUiManager->SetScaleFont(1.2f));
 		mUiManager->SetMasterFont();
 		lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
 		lLabel->SetAdaptive(false);
 		lLayouter.AddComponent(lLabel, lRow++, lRowCount, 0, 1, 1);
 
-		UiTbc::Button* lNextLevelButton = new UiTbc::Button(GREEN_BUTTON, "Next level");
+		UiTbc::Button* lNextLevelButton = new UiTbc::Button(GREEN_BUTTON, L"Next level");
 		lLayouter.AddButton(lNextLevelButton, -1, lRow++, lRowCount, 0, 1, 1, true);
 	}
 	else
@@ -1283,12 +1283,12 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		UiTbc::Label* lLabel;
 		if (mCutsLeft > 0)
 		{
-			lLabel = new UiTbc::Label(BRIGHT_TEXT, "Paused");
+			lLabel = new UiTbc::Label(BRIGHT_TEXT, L"Paused");
 			lIsPaused = true;
 		}
 		else
 		{
-			lLabel = new UiTbc::Label(RED_BUTTON, "Out of cuts!");
+			lLabel = new UiTbc::Label(RED_BUTTON, L"Out of cuts!");
 		}
 		lLabel->SetFontId(mUiManager->SetScaleFont(1.2f));
 		mUiManager->SetMasterFont();
@@ -1297,25 +1297,25 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		lLayouter.AddComponent(lLabel, lRow++, lRowCount, 0, 1, 1);
 	}
 
-	UiTbc::Button* lResetLevelButton = new UiTbc::Button(ORANGE_BUTTON, "Reset level");
+	UiTbc::Button* lResetLevelButton = new UiTbc::Button(ORANGE_BUTTON, L"Reset level");
 	lLayouter.AddButton(lResetLevelButton, -3, lRow++, lRowCount, 0, 1, 1, true);
 
 	if (lRow < 3)
 	{
-		UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(RED_BUTTON, "Reset game");
+		UiTbc::Button* lRestartFrom1stLevelButton = new UiTbc::Button(RED_BUTTON, L"Reset game");
 		lLayouter.AddButton(lRestartFrom1stLevelButton, -4, lRow++, lRowCount, 0, 1, 1, true);
 	}
 
 	if (!lDidBuy)
 	{
-		UiTbc::Button* lBuyButton = new UiTbc::Button(BLACK_BUTTON, "Buy full");
+		UiTbc::Button* lBuyButton = new UiTbc::Button(BLACK_BUTTON, L"Buy full");
 		lBuyButton->SetFontColor(DIM_TEXT);
 		lLayouter.AddButton(lBuyButton, -5, lRow++, lRowCount, 0, 1, 1, true);
 	}
 
 	if (lIsPaused)
 	{
-		UiTbc::Button* lCloseButton = new UiTbc::Button(DIM_RED, "X");
+		UiTbc::Button* lCloseButton = new UiTbc::Button(DIM_RED, L"X");
 		lLayouter.AddCornerButton(lCloseButton, -9);
 	}
 
@@ -1566,7 +1566,7 @@ void BoundManager::UpdateCameraPosition(bool pUpdateMicPosition)
 
 
 
-void BoundManager::PrintText(const str& s, int x, int y) const
+void BoundManager::PrintText(const wstr& s, int x, int y) const
 {
 	Color lOldColor = mUiManager->GetPainter()->GetColor(0);
 	mUiManager->GetPainter()->SetColor(DARK_BLUE, 0);

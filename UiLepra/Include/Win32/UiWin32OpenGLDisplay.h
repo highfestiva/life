@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -22,9 +22,10 @@ public:
 	Win32OpenGLDisplay();
 	virtual ~Win32OpenGLDisplay();
 
-	void CloseScreen();
-	bool Activate();
-	bool UpdateScreen();
+	virtual void CloseScreen();
+	virtual bool Activate();
+	virtual bool Deactivate();
+	virtual bool UpdateScreen();
 
 	bool IsVSyncEnabled() const;
 	bool SetVSyncEnabled(bool pEnabled);

@@ -26,9 +26,10 @@ public:
 	MacOpenGLDisplay();
 	virtual ~MacOpenGLDisplay();
 
-	void CloseScreen();
-	bool Activate();
-	bool UpdateScreen();
+	virtual void CloseScreen();
+	virtual bool Activate();
+	virtual bool Deactivate();
+	virtual bool UpdateScreen();
 	virtual void SetOrientation(Orientation pOrientation);
 
 	bool IsVSyncEnabled() const;
@@ -46,8 +47,6 @@ protected:
 	void SetFocus(bool pFocus);
 
 private:
-	void Deactivate();
-
 	void Resize(int pWidth, int pHeight);
 	void UpdateCaption();
 

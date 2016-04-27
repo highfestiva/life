@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -39,7 +39,7 @@ const int NETWORK_POSITIONAL_PACKET_BUFFER_SIZE = (int)PHYSICS_FPS/2;
 class NetworkPhysicsTest
 {
 };
-Lepra::LogDecorator gNptLog(Lepra::LogType::GetLogger(Lepra::LogType::SUB_TEST), typeid(NetworkPhysicsTest));
+Lepra::LogDecorator gNptLog(Lepra::LogType::GetLogger(Lepra::LogType::TEST), typeid(NetworkPhysicsTest));
 
 
 
@@ -271,9 +271,9 @@ bool NetworkLoginClients()
 	for (int x = 0; lTestOk && x < CLIENT_COUNT; ++x)
 	{
 		lContext = "client create";
-		wstr lBadPassword(L"feddo");
+		str lBadPassword("feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(Lepra::wstrutil::Format(L"user%i", x), lPassword);
+		Cure::LoginId lUser(Lepra::strutil::Format("user%i", x), lPassword);
 		lTestOk = gLoginListener.mUserAccountManager->AddUserAccount(lUser);
 	}
 
@@ -311,9 +311,9 @@ bool NetworkLoginClients()
 		deb_assert(lTestOk);
 		gClient[x].mNetworkAgent = lClient;
 		lContext = "client connect+login";
-		wstr lBadPassword(L"feddo");
+		str lBadPassword("feddo");
 		Cure::MangledPassword lPassword(lBadPassword);
-		Cure::LoginId lUser(Lepra::wstrutil::Format(L"user%i", x), lPassword);
+		Cure::LoginId lUser(Lepra::strutil::Format("user%i", x), lPassword);
 		lClient->StartConnectLogin(":12345", 2.0, lUser);
 		Cure::RemoteStatus lStatus = lClient->WaitLogin();
 		gClient[x].mClientId = lClient->GetLoginAccountId();
@@ -549,7 +549,7 @@ void MaybeSendClientStriveTimes(int pAgentIndex)
 		{
 			lClient.mStriveSendErrorTimeCounter = 0;
 			const int lTargetNetworkFrameDiffCount = SendClientStriveTimes(pAgentIndex);
-			gNptLog.Warning("Server \"sending\" physics tick time adjustments" + Lepra::strutil::Format("Client %i: %+i frames (adjusted over %i frames."), pAgentIndex, lTargetNetworkFrameDiffCount, lClient.mPhysicsTickAdjustmentFrameCount));
+			gNptLog.Warning("Server \"sending\" physics tick time adjustments. " + Lepra::strutil::Format("Client %i: %+i frames (adjusted over %i frames).", pAgentIndex, lTargetNetworkFrameDiffCount, lClient.mPhysicsTickAdjustmentFrameCount));
 		}
 		/*else
 		{
@@ -574,9 +574,9 @@ void MaybeSendClientStriveTimes(int pAgentIndex)
 			x = 0;
 			double lLateDropPercent = 100.0*lClient.mPacketUsageLateDropCount/(lClient.mPacketUsageLateDropCount+lClient.mPacketUsageEarlyDropCount+lClient.mPacketUsageUseCount);
 			double lEarlyDropPercent = 100.0*lClient.mPacketUsageEarlyDropCount/(lClient.mPacketUsageLateDropCount+lClient.mPacketUsageEarlyDropCount+lClient.mPacketUsageUseCount);
-			str s = Lepra::strutil::Format("Client %i: data arrives %i frames early on average with a drop of %.1f %% (late and %.1f %% (early)."), pAgentIndex, -lNetworkFrameDiffCount, lLateDropPercent, lEarlyDropPercent);
+			str s = Lepra::strutil::Format("Client %i: data arrives %i frames early on average with a drop of %.1f %% (late) and %.1f %% (early).", pAgentIndex, -lNetworkFrameDiffCount, lLateDropPercent, lEarlyDropPercent);
 			log_volatile(gNptLog.Debug("Server find client in range "+s));
-			s = Lepra::strutil::Format("Client %i: up %.1f kB/s, down %.1f kB/s (%.2f FPS."), pAgentIndex,
+			s = Lepra::strutil::Format("Client %i: up %.1f kB/s, down %.1f kB/s (%.2f FPS).", pAgentIndex,
 				(lClient.mNetworkAgent->GetSentByteCount()-lClient.mBandwidthLastSent)/1000.0/(gAbsoluteTime-lClient.mBandwidthStartMeasureTime),
 				(lClient.mNetworkAgent->GetReceivedByteCount()-lClient.mBandwidthLastReceived)/1000.0/(gAbsoluteTime-lClient.mBandwidthStartMeasureTime), gFPS);
 			log_volatile(gNptLog.Debug("Client bandwidth "+s));
@@ -779,7 +779,7 @@ void ServerReceive()
 		}
 		else if (lReceived != Cure::NetworkAgent::RECEIVE_NO_DATA)
 		{
-			gNptLog.AError("Server networking error: problem receiving data!");
+			gNptLog.Error("Server networking error: problem receiving data!");
 		}
 	}
 	gServer.mNetworkAgent->GetPacketFactory()->Release(lPacket);
@@ -822,7 +822,7 @@ bool TickEmulatedLatencyNetwork()
 					lOk = lNetworkServer->PlaceInSendBuffer(false, lTransmit.mPacket, lTransmit.mTo->mClientId);
 					if (!lOk)
 					{
-						gNptLog.AError("Could not send to remote client!");
+						gNptLog.Error("Could not send to remote client!");
 					}
 				}
 			}
@@ -836,7 +836,7 @@ bool TickEmulatedLatencyNetwork()
 				lOk = lNetworkClient->PlaceInSendBuffer(false, lNetworkClient->GetSocket(), lTransmit.mPacket);
 				if (!lOk)
 				{
-					gNptLog.AError("Could not send to remote server!");
+					gNptLog.Error("Could not send to remote server!");
 				}
 			}
 		}
@@ -867,11 +867,11 @@ bool OpenWindow(AgentData& pAgentData, const str& pCaption)
 		lTestOk = (pAgentData.mDisplay != 0);
 	}
 	UiLepra::DisplayMode lDisplayMode;
-	if (lTestOk)
+	/*if (lTestOk)
 	{
 		lContext = "find display mode";
 		lTestOk = pAgentData.mDisplay->FindDisplayMode(lDisplayMode, 640, 480, 32);
-	}
+	}*/
 	if (lTestOk)
 	{
 		lContext = "open screen";
@@ -884,7 +884,7 @@ bool OpenWindow(AgentData& pAgentData, const str& pCaption)
 		pAgentData.mRenderer = UiTbc::RendererFactory::Create(UiLepra::DisplayManager::OPENGL_CONTEXT, pAgentData.mScreen);
 		pAgentData.mRenderer->SetClearColor(Lepra::Color(128, 128, 128));
 		pAgentData.mDisplay->SetCaption(pCaption);
-		lTestOk = pAgentData.mDisplay->SetVSyncEnabled(false);
+		/*lTestOk =*/ pAgentData.mDisplay->SetVSyncEnabled(false);
 	}
 	if (lTestOk)
 	{
@@ -1095,6 +1095,10 @@ bool Tick(float pTickTime, int pAgentIndex)
 				lAgentData->mActive = false;
 			}
 		}
+		if (lTestOk)
+		{
+			lAgentData->mDisplay->Deactivate();
+		}
 		if (!lAgentData->mActive)
 		{
 			lAgentData->mDisplay->CloseScreen();
@@ -1148,8 +1152,8 @@ bool TestPrototypeNetworkPhysics()
 	}
 
 	bool lQuit = false;
-	Lepra::HiResTimer lIrlTimer;
-	Lepra::HiResTimer lTimer;
+	Lepra::HiResTimer lIrlTimer(false);
+	Lepra::HiResTimer lTimer(false);
 	while (!lQuit && lTestOk && lIrlTimer.GetTimeDiff() < 20.0)
 	{
 		float lStepTime = (float)lTimer.GetTimeDiff();
@@ -1180,7 +1184,7 @@ bool TestPrototypeNetworkPhysics()
 
 	if (lQuit)
 	{
-		gNptLog.AWarning("user requested termination");
+		gNptLog.Warning("user requested termination");
 	}
 	else if (!lTestOk)
 	{

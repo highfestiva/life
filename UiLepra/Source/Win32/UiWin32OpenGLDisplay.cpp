@@ -58,6 +58,18 @@ bool Win32OpenGLDisplay::Activate()
 	return (lOk);
 }
 
+void Win32OpenGLDisplay::Deactivate()
+{
+	::wglMakeCurrent(0, 0);
+	if (mDC)
+	{
+		::ReleaseDC(mWnd, mDC);
+		mDC = 0;
+		return true;
+	}
+	return false;
+}
+
 bool Win32OpenGLDisplay::UpdateScreen()
 {
 	if (mScreenOpened == false)
@@ -108,16 +120,6 @@ void Win32OpenGLDisplay::SetFocus(bool pFocus)
 		}
 	}
 	Parent::SetFocus(pFocus);
-}
-
-void Win32OpenGLDisplay::Deactivate()
-{
-	::wglMakeCurrent(0, 0);
-	if (mDC)
-	{
-		::ReleaseDC(mWnd, mDC);
-		mDC = 0;
-	}
 }
 
 void Win32OpenGLDisplay::OnResize(int pWidth, int pHeight)
