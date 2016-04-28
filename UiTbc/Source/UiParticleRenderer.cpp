@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -178,7 +178,7 @@ void ParticleRenderer::CreateExplosion(const vec3& pPosition, float pStrength, c
 	CreateBillboards(pPosition,  7*lStrength2+ 1*lSpeed,      pVelocity, Math::Lerp(pVelocity,mGravity*-0.2f,pFalloff), lRandomXYEndSpeed, 5.3f/pTime, lParticleSize,      pStartFireColor, pFireColor, mFires, pFires);
 	CreateBillboards(pPosition,  8*lStrength2+ 1*lSpeed,      pVelocity, Math::Lerp(pVelocity,mGravity*+0.2f,pFalloff), lRandomXYEndSpeed,    3/pTime, lParticleSize*2,    pStartSmokeColor, pSmokeColor, mSmokes, pSmokes);
 	CreateBillboards(pPosition, 20*lStrength2+20*lSpeed, 1.2f*pVelocity, Math::Lerp(pVelocity,mGravity*+0.8f,pFalloff), lRandomXYEndSpeed, 4.5f/pTime, lParticleSize*0.4f, vec3(), vec3(), mSparks, pSparks);
-	CreateBillboards(pPosition,  9*lStrength2+10*lSpeed, 1.1f*pVelocity, Math::Lerp(pVelocity,mGravity*+1.1f,pFalloff), lRandomXYEndSpeed, 0.7f/pTime, lParticleSize*0.5f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
+	CreateBillboards(pPosition,  9*lStrength2+10*lSpeed, 1.1f*pVelocity, Math::Lerp(pVelocity,mGravity*+1.1f,pFalloff), lRandomXYEndSpeed, 1.1f/pTime, lParticleSize*0.5f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
 
 	const float lMinSparkVelocity2 = lStrength2*100;
 	const vec3 lCamPlane = mRenderer->GetCameraTransformation().GetOrientation() * vec3(0,1,0);

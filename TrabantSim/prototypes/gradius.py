@@ -57,10 +57,10 @@ async_load()
 def create_celestial(x):
     global celestials
     if random() > 0.95:  # Create planets sometimes.
-        celestials += [create_sphere((x, 40, random()*80-40), radius=random()*2+1, col='#333', vel=(-35,0,0))]
+        celestials += [create_sphere((x, 40, random()*80-40), radius=random()*2+0.7, col='#222', vel=(-35,0,0))]
     else:   # Create stars.
-        idist = random()*0.6+0.4
-        celestials += [create_sphere((x, 50-10*idist, random()*80-40), radius=0.2, col=vec3(idist,idist,idist), vel=(idist*-30, 0, 0))]
+        idist = random()*0.4+0.3
+        celestials += [create_sphere((x, 50-10*idist, random()*80-40), radius=0.15, col=vec3(idist,idist,idist), vel=(idist*-30, 0, 0))]
 def dobkg():
     global celestials
     while celestials and celestials[0].pos().x < -100:
@@ -82,7 +82,7 @@ def create_tunnel_seg(z, h, x, y1, y2, seed):
         verts += [(mx*4-width/2,0,rz), (mx*4-width/2,0,rz+h)]
         t = mx*2
         tris += [0+t,2+t,1+t, 1+t,2+t,3+t]
-    seg = create_mesh(verts, tris[:-6], pos=(x,0,z), vel=(-5,0,0), col='#f00', trigger=True)
+    seg = create_mesh(verts, tris[:-6], pos=(x,0,z), vel=(-5,0,0), col='#334', trigger=True)
     seg.hurt = 50
     seg.physical = True
     return seg,lastseed

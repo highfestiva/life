@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -96,7 +96,7 @@ void PushServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::UserA
 	Cure::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
 	if (!lSpawner)
 	{
-		mLog.AError("No player spawner in level!");
+		mLog.Error("No player spawner in level!");
 		return;
 	}
 	mLog.Info("Loading avatar '"+pAvatarId+"' for user "+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+".");

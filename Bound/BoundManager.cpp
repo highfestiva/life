@@ -308,7 +308,7 @@ bool BoundManager::Paint()
 	{
 		mUiManager->GetPainter()->SetColor(BRIGHT_TEXT);
 
-		const wstr lCompletionText = wstrutil::Format(L"Reduced: %.1f%%", mPercentDone);
+		const wstr lCompletionText = wstrutil::Format(L"Reduced volume: %.1f%%", mPercentDone);
 		int cw = mUiManager->GetPainter()->GetStringWidth(lCompletionText);
 		PrintText(lCompletionText, (mUiManager->GetCanvas()->GetWidth()-cw)/2, 7);
 
@@ -329,6 +329,7 @@ bool BoundManager::Paint()
 		const wstr lLinesText = wstrutil::Format(L"Cuts: %i", mCutsLeft);
 		PrintText(lLinesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 31);
 
+#ifdef LEPRA_TOUCH
 		vec3 v = RNDPOSVEC()*255;
 		Color lBlinkCol;
 		lBlinkCol.Set(v.x, v.y, v.z, 1.0f);
@@ -336,6 +337,7 @@ bool BoundManager::Paint()
 		mUiManager->GetPainter()->SetColor(lIsShowingShake? lBlinkCol : DIM_TEXT);
 		const wstr lShakesText = wstrutil::Format(L"Shakes: %i", mShakesLeft);
 		PrintText(lShakesText, mUiManager->GetCanvas()->GetWidth()-lw-24, 48);
+#endif // Touch device.
 		mUiManager->SetMasterFont();
 	}
 	return true;
@@ -1306,12 +1308,14 @@ void BoundManager::OnPauseButton(UiTbc::Button* pButton)
 		lLayouter.AddButton(lRestartFrom1stLevelButton, -4, lRow++, lRowCount, 0, 1, 1, true);
 	}
 
+#ifdef LEPRA_TOUCH
 	if (!lDidBuy)
 	{
 		UiTbc::Button* lBuyButton = new UiTbc::Button(BLACK_BUTTON, L"Buy full");
 		lBuyButton->SetFontColor(DIM_TEXT);
 		lLayouter.AddButton(lBuyButton, -5, lRow++, lRowCount, 0, 1, 1, true);
 	}
+#endif // Touch device.
 
 	if (lIsPaused)
 	{

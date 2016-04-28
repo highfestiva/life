@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -81,9 +81,9 @@ PushManager::PushManager(Life::GameClientMasterTicker* pMaster, const Cure::Time
 	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
 	mCollisionSoundManager->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
 	mCollisionSoundManager->AddSound("big_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
-	mCollisionSoundManager->AddSound("plastic",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
-	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("plastic",	UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.4f, 0));
+	mCollisionSoundManager->AddSound("rubber",	UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	mCollisionSoundManager->AddSound("wood",	UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
 
 	::memset(mEnginePowerShadow, 0, sizeof(mEnginePowerShadow));
 
@@ -248,7 +248,7 @@ void PushManager::SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId)
 	log_volatile(mLog.Debugf("Clicked avatar %s.", pAvatarId.c_str()));
 	Cure::Packet* lPacket = GetNetworkAgent()->GetPacketFactory()->Allocate();
 	GetNetworkAgent()->SendStatusMessage(GetNetworkClient()->GetSocket(), 0, Cure::REMOTE_OK,
-		Cure::MessageStatus::INFO_AVATAR, wstrutil::Encode(pAvatarId), lPacket);
+		Cure::MessageStatus::INFO_AVATAR, pAvatarId, lPacket);
 	GetNetworkAgent()->GetPacketFactory()->Release(lPacket);
 
 	SetRoadSignsVisible(false);
@@ -332,19 +332,19 @@ void PushManager::CreateLoginView()
 			const str lDefaultUserName = strutil::Format("User%u", mSlaveIndex);
 			str lUserName;
 			v_tryget(lUserName, =, GetVariableScope(), RTVAR_LOGIN_USERNAME, lDefaultUserName);
-                        wstr lReadablePassword = L"CarPassword";
+                        str lReadablePassword = "CarPassword";
                         const Cure::MangledPassword lPassword(lReadablePassword);
-			const Cure::LoginId lLoginToken(wstrutil::Encode(lUserName), lPassword);
+			const Cure::LoginId lLoginToken(lUserName, lPassword);
 			RequestLogin(lServerName, lLoginToken);
 		}
 		else
 		{
-			mLoginWindow = new LoginView(this, mDisconnectReason);
+			mLoginWindow = new LoginView(this, wstrutil::Encode(mDisconnectReason));
 			mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
 			mUiManager->GetDesktopWindow()->AddChild(mLoginWindow, 0, 0, 0);
 			mLoginWindow->SetPos(mRenderArea.GetCenterX()-mLoginWindow->GetSize().x/2,
 				mRenderArea.GetCenterY()-mLoginWindow->GetSize().y/2);
-			mLoginWindow->GetChild("User", 0)->SetKeyboardFocus();
+			mLoginWindow->GetChild("User")->SetKeyboardFocus();
 		}
 	}
 }
@@ -590,18 +590,18 @@ bool PushManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pA
 			if (!mEnginePlaybackFile.IsOpen())
 			{
 				mEnginePlaybackFile.Open("Data/Steering.rec", DiskFile::MODE_TEXT_WRITE);
-				wstr lComment = wstrutil::Format(L"// Recording %s at %s.\n", pAvatar->GetClassId().c_str(), Time().GetDateTimeAsString().c_str());
+				str lComment = strutil::Format("// Recording %s at %s.\n", pAvatar->GetClassId().c_str(), Time().GetDateTimeAsString().c_str());
 				mEnginePlaybackFile.WriteString(lComment);
-				mEnginePlaybackFile.WriteString(wstrutil::Encode("#" RTVAR_STEERING_PLAYBACKMODE " 2\n"));
+				mEnginePlaybackFile.WriteString(strutil::Encode("#" RTVAR_STEERING_PLAYBACKMODE " 2\n"));
 			}
 			const float lTime = GetTimeManager()->GetAbsoluteTime();
 			if (lTime != mEnginePlaybackTime)
 			{
-				wstr lCommand = wstrutil::Format(L"sleep %g\n", Cure::TimeManager::GetAbsoluteTimeDiff(lTime, mEnginePlaybackTime));
+				str lCommand = strutil::Format("sleep %g\n", Cure::TimeManager::GetAbsoluteTimeDiff(lTime, mEnginePlaybackTime));
 				mEnginePlaybackFile.WriteString(lCommand);
 				mEnginePlaybackTime = lTime;
 			}
-			wstr lCommand = wstrutil::Format(L"set-avatar-engine-power %u %g\n", pAspect, pPower);
+			str lCommand = strutil::Format("set-avatar-engine-power %u %g\n", pAspect, pPower);
 			mEnginePlaybackFile.WriteString(lCommand);
 		}
 	}
@@ -611,7 +611,7 @@ bool PushManager::SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pA
 		{
 			if (mEnginePlaybackFile.IsInMode(File::WRITE_MODE))
 			{
-				mEnginePlaybackFile.WriteString(wstrutil::Encode("#" RTVAR_STEERING_PLAYBACKMODE " 0\n"));
+				mEnginePlaybackFile.WriteString(strutil::Encode("#" RTVAR_STEERING_PLAYBACKMODE " 0\n"));
 			}
 			mEnginePlaybackFile.Close();
 		}
@@ -738,10 +738,10 @@ void PushManager::ProcessNetworkStatusMessage(Cure::MessageStatus* pMessage)
 	{
 		case Cure::MessageStatus::INFO_AVATAR:
 		{
-			wstr lAvatarName;
+			str lAvatarName;
 			pMessage->GetMessageString(lAvatarName);
 			Cure::UserAccount::AvatarId lAvatarId = lAvatarName;
-			log_adebug("Status: INFO_AVATAR...");
+			log_debug("Status: INFO_AVATAR...");
 			str lTextureId = strutil::Format("road_sign_%s.png", lAvatarId.c_str());
 			if (!GetResourceManager()->QueryFileExists(lTextureId))
 			{
@@ -787,7 +787,7 @@ void PushManager::ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInte
 			UiCure::CppContextObject* lObject = (UiCure::CppContextObject*)GetContext()->GetObject(lInstanceId);
 			if (lObject)
 			{
-				Life::Explosion::FallApart(GetPhysicsManager(), lObject);
+				Life::Explosion::FallApart(GetPhysicsManager(), lObject, true);
 				lObject->CenterMeshes();
 				log_volatile(mLog.Debugf("Object %i falling apart.", pInteger));
 			}
@@ -875,7 +875,7 @@ void PushManager::OnCollision(const vec3& pForce, const vec3& pTorque, const vec
 			{
 				GetNetworkAgent()->SendNumberMessage(false, GetNetworkClient()->GetSocket(),
 					Cure::MessageNumber::INFO_REQUEST_LOAN, pObject1->GetInstanceId(), 0, 0);
-				log_adebug("Sending loan request to server.");
+				log_debug("Sending loan request to server.");
 			}
 		}
 	}

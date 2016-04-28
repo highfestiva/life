@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -88,14 +88,14 @@ int PushConsoleManager::OnCommand(const HashedString& pCommand, const strutil::s
 			{
 				if (pParameterVector.size() == 2)
 				{
-					log_adebug("Setting avatar engine power.");
+					log_debug("Setting avatar engine power.");
 					int lAspect = 0;
 					strutil::StringToInt(pParameterVector[0], lAspect);
 					double lPower;
 					strutil::StringToDouble(pParameterVector[1], lPower);
 					if (!((PushManager*)GetGameManager())->SetAvatarEnginePower(lAspect, (float)lPower))
 					{
-						mLog.AError("Could not set avatar engine power!");
+						mLog.Error("Could not set avatar engine power!");
 						lResult = 1;
 					}
 				}

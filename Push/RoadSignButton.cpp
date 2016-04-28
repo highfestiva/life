@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -32,7 +32,7 @@ RoadSignButton::RoadSignButton(Life::ScreenPart* pScreenPart, Cure::ResourceMana
 	const str& pTextureResourceName, Shape pShape):
 	Parent(pResourceManager, pClassResourceName, pUiManager),
 	mScreenPart(pScreenPart),
-	mButton(pName),
+	mButton(L""),
 	mShape(pShape),
 	mActive(false),
 	mMeshRadius(0),
@@ -48,6 +48,7 @@ RoadSignButton::RoadSignButton(Life::ScreenPart* pScreenPart, Cure::ResourceMana
 	mButton.SetPreferredSize(5, 5);
 	mButton.SetMinSize(5, 5);
 	mButton.SetPos(-50, -50);
+	mButton.SetName(pName);
 	GetUiManager()->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
 	GetUiManager()->GetDesktopWindow()->AddChild(&mButton, 0, 0, 0);
 

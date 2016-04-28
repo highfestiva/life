@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="Life" Database="">
   <Project Name="Life" Path="Life.project" Active="No"/>
-  <Project Name="TrabantSim" Path="../TrabantSim/TrabantSim.project" Active="No"/>
+  <Project Name="TrabantSim" Path="../TrabantSim/TrabantSim.project" Active="Yes"/>
   <Project Name="SlimeVolleyball" Path="../SlimeVolleyball/SlimeVolleyball.project" Active="No"/>
   <Project Name="Downwash" Path="../Downwash/Downwash.project" Active="No"/>
   <Project Name="Bound" Path="../Bound/Bound.project" Active="No"/>
-  <Project Name="CureTestApp" Path="../UiCure/CureTestApp/CureTestApp.project" Active="Yes"/>
+  <Project Name="CureTestApp" Path="../UiCure/CureTestApp/CureTestApp.project" Active="No"/>
+  <Project Name="Push" Path="../Push/Push.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
@@ -15,8 +16,9 @@
       <Project Name="Downwash" ConfigName="Debug"/>
       <Project Name="Bound" ConfigName="Debug"/>
       <Project Name="CureTestApp" ConfigName="Debug"/>
+      <Project Name="Push" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="yes">
+    <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
       <Project Name="TrabantSim" ConfigName="Release"/>
       <Project Name="Life" ConfigName="Release"/>
@@ -24,8 +26,9 @@
       <Project Name="Downwash" ConfigName="Release"/>
       <Project Name="Bound" ConfigName="Release"/>
       <Project Name="CureTestApp" ConfigName="Release"/>
+      <Project Name="Push" ConfigName="Release"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Profile" Selected="yes">
+    <WorkspaceConfiguration Name="Profile" Selected="no">
       <Environment/>
       <Project Name="TrabantSim" ConfigName="Profile"/>
       <Project Name="Life" ConfigName="Profile"/>
@@ -33,6 +36,7 @@
       <Project Name="Downwash" ConfigName="Profile"/>
       <Project Name="Bound" ConfigName="Profile"/>
       <Project Name="CureTestApp" ConfigName="Profile"/>
+      <Project Name="Push" ConfigName="Profile"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

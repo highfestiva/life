@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -28,14 +28,14 @@ namespace Push
 class View: public UiTbc::Window
 {
 public:
-	View(const str& pTitle, UiTbc::Layout* pLayout);
+	View(const wstr& pTitle, UiTbc::Layout* pLayout);
 
 protected:
 	UiTbc::RectComponent* AddRow(const Color& pColor, int pColumnCount);
 	UiTbc::RectComponent* AddCentering(int pLayer, UiTbc::Component* pParent);
-	UiTbc::Label* AddLabel(const str& pText, const Color& pColor, int pPreferredWidth = 0, UiTbc::Component* pParent = 0, int pLayer = 0);
-	UiTbc::TextField* AddTextField(const str& pDefaultText, const str& pName);
-	UiTbc::Button* AddButton(const str& pText, void* pExtraData, UiTbc::Component* pParent = 0);
+	UiTbc::Label* AddLabel(const wstr& pText, const Color& pColor, int pPreferredWidth = 0, UiTbc::Component* pParent = 0, int pLayer = 0);
+	UiTbc::TextField* AddTextField(const wstr& pDefaultText, const str& pName);
+	UiTbc::Button* AddButton(const wstr& pText, void* pExtraData, UiTbc::Component* pParent = 0);
 
 private:
 	void OnExit(UiTbc::Button*);

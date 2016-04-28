@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -174,7 +174,7 @@ void PushTicker::DisplayCompanyLogo()
 
 			UiLepra::Canvas& lCanvas = *lLogo->GetRamData();
 			const UiTbc::Painter::ImageID lImageId = mUiManager->GetDesktopWindow()->GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::STRETCHED, UiTbc::GUIImageManager::NO_BLEND, 255);
-			UiTbc::RectComponent lRect(lImageId, "logo");
+			UiTbc::RectComponent lRect(lImageId);
 			mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
 			mUiManager->GetDesktopWindow()->AddChild(&lRect, 0, 0, 0);
 			const unsigned lWidth = mUiManager->GetDisplayManager()->GetWidth();

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -30,7 +30,7 @@ class ClientLoginObserver;
 class LoginView: public View
 {
 public:
-	LoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessage);
+	LoginView(ClientLoginObserver* pLoginObserver, const wstr& pErrorMessage);
 
 private:
 	void OnExit();
