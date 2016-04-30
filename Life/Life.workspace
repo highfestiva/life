@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="Life" Database="">
   <Project Name="Life" Path="Life.project" Active="No"/>
-  <Project Name="TrabantSim" Path="../TrabantSim/TrabantSim.project" Active="Yes"/>
+  <Project Name="TrabantSim" Path="../TrabantSim/TrabantSim.project" Active="No"/>
   <Project Name="SlimeVolleyball" Path="../SlimeVolleyball/SlimeVolleyball.project" Active="No"/>
   <Project Name="Downwash" Path="../Downwash/Downwash.project" Active="No"/>
   <Project Name="Bound" Path="../Bound/Bound.project" Active="No"/>
   <Project Name="CureTestApp" Path="../UiCure/CureTestApp/CureTestApp.project" Active="No"/>
-  <Project Name="Push" Path="../Push/Push.project" Active="No"/>
+  <Project Name="Push" Path="../Push/Push.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>

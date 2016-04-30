@@ -76,7 +76,7 @@ void PushServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::UserA
 	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
 	if (lPreviousAvatarId)
 	{
-		mLog.Info("User "+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+" had an avatar, replacing it.");
+		mLog.Info("User "+pClient->GetUserConnection()->GetLoginName()+" had an avatar, replacing it.");
 		pClient->SetAvatarId(0);
 		Cure::ContextObject* lObject = mGameServerManager->GetContext()->GetObject(lPreviousAvatarId);
 		if (lObject)
@@ -99,7 +99,7 @@ void PushServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::UserA
 		mLog.Error("No player spawner in level!");
 		return;
 	}
-	mLog.Info("Loading avatar '"+pAvatarId+"' for user "+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+".");
+	mLog.Info("Loading avatar '"+pAvatarId+"' for user "+pClient->GetUserConnection()->GetLoginName()+".");
 	Cure::ContextObject* lObject = mGameServerManager->Parent::CreateContextObject(pAvatarId, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
 	lSpawner->PlaceObject(lObject, -1);
 	pClient->SetAvatarId(lObject->GetInstanceId());

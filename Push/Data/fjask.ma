@@ -70,7 +70,7 @@ createNode mesh -n "m_bodyShape" -p "m_body";
 	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
 	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -80,8 +80,7 @@ createNode mesh -n "m_bodyShape" -p "m_body";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -0.5 -0.5 0.5 0.5 -0.5 0.5 -0.5 0.5 0.5 0.5
-		 0.5 0.5 -0.5 0.5 -0.5 0.5 0.5 -0.5 -0.5 -0.5 -0.5 0.5 -0.5 -0.5 ;
+	setAttr ".rgvtx" -type "string" "[-0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_body" -p "m_body";
 	setAttr ".s" -type "double3" 1.3 1.3 1.3 ;
@@ -102,7 +101,7 @@ createNode transform -n "m_rear_wheel1" -p "m_body";
 	setAttr ".t" -type "double3" 2 0 -3 ;
 	setAttr ".s" -type "double3" 2 2 2 ;
 createNode mesh -n "m_rear_wheelShape1" -p "m_rear_wheel1";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -112,8 +111,7 @@ createNode mesh -n "m_rear_wheelShape1" -p "m_rear_wheel1";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -0.5 -0.5 0.5 0.5 -0.5 0.5 -0.5 0.5 0.5 0.5
-		 0.5 0.5 -0.5 0.5 -0.5 0.5 0.5 -0.5 -0.5 -0.5 -0.5 0.5 -0.5 -0.5 ;
+	setAttr ".rgvtx" -type "string" "[-0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_rear_wheel1" -p "m_rear_wheel1";
 	setAttr ".s" -type "double3" 0.5 0.5 0.5 ;
@@ -129,7 +127,7 @@ createNode mesh -n "phys_rear_wheelShape1" -p "phys_rear_wheel1";
 createNode transform -n "m_front_wheel1" -p "m_body";
 	setAttr ".t" -type "double3" 2 0 3 ;
 createNode mesh -n "m_front_wheel1Shape" -p "m_front_wheel1";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -139,8 +137,7 @@ createNode mesh -n "m_front_wheel1Shape" -p "m_front_wheel1";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -1 -1 1 1 -1 1 -1 1 1 1 1 1 -1 1 -1 1
-		 1 -1 -1 -1 -1 1 -1 -1 ;
+	setAttr ".rgvtx" -type "string" "[-1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1, -1, 1, -1, 1, 1, -1, -1, -1, -1, 1, -1, -1]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_front_wheel1" -p "m_front_wheel1";
 createNode mesh -n "phys_front_wheelShape1" -p "phys_front_wheel1";
@@ -157,7 +154,7 @@ createNode transform -n "m_rear_wheel2" -p "m_body";
 	setAttr ".r" -type "double3" 0 0 -45 ;
 	setAttr ".s" -type "double3" 2 2 2 ;
 createNode mesh -n "m_rear_wheelShape2" -p "m_rear_wheel2";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -167,8 +164,7 @@ createNode mesh -n "m_rear_wheelShape2" -p "m_rear_wheel2";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -0.5 -0.5 0.5 0.5 -0.5 0.5 -0.5 0.5 0.5 0.5
-		 0.5 0.5 -0.5 0.5 -0.5 0.5 0.5 -0.5 -0.5 -0.5 -0.5 0.5 -0.5 -0.5 ;
+	setAttr ".rgvtx" -type "string" "[-0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, -0.5]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_rear_wheel2" -p "m_rear_wheel2";
 	setAttr ".r" -type "double3" 0 0 45.000000000000007 ;
@@ -185,7 +181,7 @@ createNode transform -n "m_front_wheel2" -p "m_body";
 	setAttr ".t" -type "double3" -2 0 3 ;
 	setAttr ".r" -type "double3" 0 0 -45 ;
 createNode mesh -n "m_front_wheelShape2" -p "m_front_wheel2";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -195,8 +191,7 @@ createNode mesh -n "m_front_wheelShape2" -p "m_front_wheel2";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -1 -1 1 1 -1 1 -1 1 1 1 1 1 -1 1 -1 1
-		 1 -1 -1 -1 -1 1 -1 -1 ;
+	setAttr ".rgvtx" -type "string" "[-1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1, -1, 1, -1, 1, 1, -1, -1, -1, -1, 1, -1, -1]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_front_wheel2" -p "m_front_wheel2";
 	setAttr ".r" -type "double3" 0 0 45.000000000000007 ;
@@ -213,7 +208,7 @@ createNode mesh -n "phys_front_wheelShape2" -p "phys_front_wheel2";
 createNode transform -n "m_bar" -p "m_body";
 	setAttr ".t" -type "double3" 0 1.5 0 ;
 createNode mesh -n "m_barShape" -p "m_bar";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -224,10 +219,7 @@ createNode mesh -n "m_barShape" -p "m_bar";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
 	setAttr ".pt[4]" -type "float3"  -7.4505806e-009 0.0060427459 0.4554241;
-	setAttr ".rgvtx" -type "vectorArray" 18 -0.25 -0.25 3 0 -0.25 3 0.25 -0.25 3 -0.25
-		 0 3 -7.4505805969238281e-009 0.0060427458956837654 3.4554240703582764 0.25 0 3 -0.25
-		 0.25 3 0 0.25 3 0.25 0.25 3 -0.25 0.25 -3 0 0.25 -3 0.25 0.25 -3 -0.25 0 -3 0 0 -3 0.25
-		 0 -3 -0.25 -0.25 -3 0 -0.25 -3 0.25 -0.25 -3 ;
+	setAttr ".rgvtx" -type "string" "[-0.25, -0.25, 3, 0, -0.25, 3, 0.25, -0.25, 3, -0.25, 0, 3, -7.4505805969238281e-009, 0.0060427458956837654, 3.4554240703582764, 0.25, 0, 3, -0.25, 0.25, 3, 0, 0.25, 3, 0.25, 0.25, 3, -0.25, 0.25, -3, 0, 0.25, -3, 0.25, 0.25, -3, -0.25, 0, -3, 0, 0, -3, 0.25, 0, -3, -0.25, -0.25, -3, 0, -0.25, -3, 0.25, -0.25, -3]";
 	setAttr ".rgf" -type "string" "[[0,1,4,3],[1,2,5,4],[3,4,7,6],[4,5,8,7],[6,7,10,9],[7,8,11,10],[9,10,13,12],[10,11,14,13],[12,13,16,15],[13,14,17,16],[15,16,1,0],[16,17,2,1],[2,17,14,5],[5,14,11,8],[15,0,3,12],[12,3,6,9]]";
 createNode transform -n "m_subbar90" -p "m_bar";
 	setAttr ".t" -type "double3" -1 0 2 ;
@@ -236,7 +228,7 @@ createNode mesh -n "m_subbarShape90" -p "m_subbar90";
 	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
 	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -246,8 +238,7 @@ createNode mesh -n "m_subbarShape90" -p "m_subbar90";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -1 -0.125 0.125 1 -0.125 0.125 -1 0.125
-		 0.125 1 0.125 0.125 -1 0.125 -0.125 1 0.125 -0.125 -1 -0.125 -0.125 1 -0.125 -0.125 ;
+	setAttr ".rgvtx" -type "string" "[-1, -0.125, 0.125, 1, -0.125, 0.125, -1, 0.125, 0.125, 1, 0.125, 0.125, -1, 0.125, -0.125, 1, 0.125, -0.125, -1, -0.125, -0.125, 1, -0.125, -0.125]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_subbar90" -p "m_subbar90";
 	setAttr ".t" -type "double3" 1.1102230246251565e-016 2.2204460492503131e-016 0 ;
@@ -267,7 +258,7 @@ createNode transform -n "m_subbar45" -p "m_bar";
 	setAttr ".r" -type "double3" -45.000000000000007 -90 0 ;
 	setAttr ".s" -type "double3" 2.0000000000000004 2 2 ;
 createNode mesh -n "m_subbarShape45" -p "m_subbar45";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -277,9 +268,7 @@ createNode mesh -n "m_subbarShape45" -p "m_subbar45";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -0.0625 -0.0625 0.5 0.0625 -0.0625 0.5 -0.0625
-		 0.0625 0.5 0.0625 0.0625 0.5 -0.0625 0.0625 -0.5 0.0625 0.0625 -0.5 -0.0625 -0.0625
-		 -0.5 0.0625 -0.0625 -0.5 ;
+	setAttr ".rgvtx" -type "string" "[-0.0625, -0.0625, 0.5, 0.0625, -0.0625, 0.5, -0.0625, 0.0625, 0.5, 0.0625, 0.0625, 0.5, -0.0625, 0.0625, -0.5, 0.0625, 0.0625, -0.5, -0.0625, -0.0625, -0.5, 0.0625, -0.0625, -0.5]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_subbar45" -p "m_subbar45";
 	setAttr ".r" -type "double3" -4.9937649197972427e-031 1.4124500153760501e-030 1.4124500153760501e-030 ;
@@ -302,7 +291,7 @@ createNode mesh -n "m_topbarShape135" -p "m_topbar135";
 	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
 	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -312,8 +301,7 @@ createNode mesh -n "m_topbarShape135" -p "m_topbar135";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -1 -0.125 0.125 1 -0.125 0.125 -1 0.125
-		 0.125 1 0.125 0.125 -1 0.125 -0.125 1 0.125 -0.125 -1 -0.125 -0.125 1 -0.125 -0.125 ;
+	setAttr ".rgvtx" -type "string" "[-1, -0.125, 0.125, 1, -0.125, 0.125, -1, 0.125, 0.125, 1, 0.125, 0.125, -1, 0.125, -0.125, 1, 0.125, -0.125, -1, -0.125, -0.125, 1, -0.125, -0.125]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_topbar135" -p "m_topbar135";
 	setAttr ".t" -type "double3" 2.2204460492503131e-016 0 0 ;
@@ -338,7 +326,7 @@ createNode mesh -n "m_hangbar_frontShape" -p "m_hangbar_front";
 	addAttr -ci true -sn "msh" -ln "miShadingSamples" -min 0 -smx 8 -at "float";
 	addAttr -ci true -sn "mdo" -ln "miMaxDisplaceOverride" -min 0 -max 1 -at "bool";
 	addAttr -ci true -sn "mmd" -ln "miMaxDisplace" -min 0 -smx 1 -at "float";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -348,9 +336,7 @@ createNode mesh -n "m_hangbar_frontShape" -p "m_hangbar_front";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -0.5 -0.10000000149011612 1 0.5 -0.10000000149011612
-		 1 -0.5 0.10000000149011612 1 0.5 0.10000000149011612 1 -0.5 0.10000000149011612 -1 0.5
-		 0.10000000149011612 -1 -0.5 -0.10000000149011612 -1 0.5 -0.10000000149011612 -1 ;
+	setAttr ".rgvtx" -type "string" "[-0.5, -0.10000000149011612, 1, 0.5, -0.10000000149011612, 1, -0.5, 0.10000000149011612, 1, 0.5, 0.10000000149011612, 1, -0.5, 0.10000000149011612, -1, 0.5, 0.10000000149011612, -1, -0.5, -0.10000000149011612, -1, 0.5, -0.10000000149011612, -1]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_hangbar_front" -p "m_hangbar_front";
 	setAttr ".t" -type "double3" 0 8.8817841970012523e-016 0 ;
@@ -373,7 +359,7 @@ createNode transform -n "m_subbar_45" -p "m_bar";
 	setAttr ".r" -type "double3" 0 0 -45.000000000000007 ;
 	setAttr ".s" -type "double3" 2 1 2 ;
 createNode mesh -n "m_subbar_Shape45" -p "m_subbar_45";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -383,9 +369,7 @@ createNode mesh -n "m_subbar_Shape45" -p "m_subbar_45";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -0.0625 -1 0.0625 0.0625 -1 0.0625 -0.0625
-		 1 0.0625 0.0625 1 0.0625 -0.0625 1 -0.0625 0.0625 1 -0.0625 -0.0625 -1 -0.0625 0.0625
-		 -1 -0.0625 ;
+	setAttr ".rgvtx" -type "string" "[-0.0625, -1, 0.0625, 0.0625, -1, 0.0625, -0.0625, 1, 0.0625, 0.0625, 1, 0.0625, -0.0625, 1, -0.0625, 0.0625, 1, -0.0625, -0.0625, -1, -0.0625, 0.0625, -1, -0.0625]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_subbar_45" -p "m_subbar_45";
 	setAttr ".t" -type "double3" 0 0 -1.1102230246251565e-016 ;
@@ -404,7 +388,7 @@ createNode transform -n "m_backbar" -p "m_subbar_45";
 	setAttr ".s" -type "double3" 0.79056941504209466 0.63245553203367577 0.5 ;
 	setAttr ".sh" -type "double3" 0.75000000000000011 0 0 ;
 createNode mesh -n "m_backbarShape" -p "m_backbar";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -414,9 +398,7 @@ createNode mesh -n "m_backbarShape" -p "m_backbar";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -0.125 -0.125 2 0.125 -0.125 2 -0.125
-		 0.125 2 0.125 0.125 2 -0.125 0.125 -2 0.125 0.125 -2 -0.125 -0.125 -2 0.125 -0.125
-		 -2 ;
+	setAttr ".rgvtx" -type "string" "[-0.125, -0.125, 2, 0.125, -0.125, 2, -0.125, 0.125, 2, 0.125, 0.125, 2, -0.125, 0.125, -2, 0.125, 0.125, -2, -0.125, -0.125, -2, 0.125, -0.125, -2]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "m_hangbar_back" -p "m_backbar";
 	setAttr ".t" -type "double3" 0.49999999999999978 -0.86602540378443882 -3.2486469807982914 ;
@@ -427,7 +409,7 @@ createNode transform -n "m_hangbar_back" -p "m_backbar";
 	setAttr ".sp" -type "double3" 0 0 -1 ;
 	setAttr ".spt" -type "double3" 0 0 2.2204460492503126e-016 ;
 createNode mesh -n "m_hangbar_backShape" -p "m_hangbar_back";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -437,9 +419,7 @@ createNode mesh -n "m_hangbar_backShape" -p "m_hangbar_back";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -1 -0.20000000298023224 1 1 -0.20000000298023224
-		 1 -1 0.20000000298023224 1 1 0.20000000298023224 1 -1 0.20000000298023224 -1 1 0.20000000298023224
-		 -1 -1 -0.20000000298023224 -1 1 -0.20000000298023224 -1 ;
+	setAttr ".rgvtx" -type "string" "[-1, -0.20000000298023224, 1, 1, -0.20000000298023224, 1, -1, 0.20000000298023224, 1, 1, 0.20000000298023224, 1, -1, 0.20000000298023224, -1, 1, 0.20000000298023224, -1, -1, -0.20000000298023224, -1, 1, -0.20000000298023224, -1]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_hangbar_back" -p "m_hangbar_back";
 	setAttr ".t" -type "double3" -1.7763568394002499e-015 -6.1791230122925185e-015 
@@ -490,7 +470,7 @@ createNode transform -n "m_hoe_arm" -p "m_bar";
 	setAttr ".sp" -type "double3" 0 1 0 ;
 	setAttr ".spt" -type "double3" 0 2.2204460492503136e-016 -9.8607613152626476e-032 ;
 createNode mesh -n "m_hoe_armShape" -p "m_hoe_arm";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -500,22 +480,14 @@ createNode mesh -n "m_hoe_armShape" -p "m_hoe_arm";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 21 0.47552856802940369 -1 -0.15450859069824219 0.40450876951217651
-		 -1 -0.29389280080795288 0.29389280080795288 -1 -0.40450873970985413 0.15450857579708099
-		 -1 -0.47552850842475891 0 -1 -0.5000002384185791 -0.15450857579708099 -1 -0.47552847862243652 -0.29389274120330811
-		 -1 -0.40450865030288696 -0.40450862050056458 -1 -0.29389271140098572 -0.47552838921546936
-		 -1 -0.15450853109359741 -0.50000011920928955 -1 0 -0.47552838921546936 -1 0.15450853109359741 -0.40450859069824219
-		 -1 0.29389268159866333 -0.29389268159866333 -1 0.4045085608959198 -0.15450853109359741
-		 -1 0.47552832961082458 -1.4901161193847656e-008 -1 0.50000005960464478 0.15450848639011383
-		 -1 0.4755282998085022 0.29389262199401855 -1 0.40450853109359741 0.40450850129127502
-		 -1 0.29389265179634094 0.47552827000617981 -1 0.15450850129127502 0.5 -1 0 0 1 0 ;
+	setAttr ".rgvtx" -type "string" "[0.47552856802940369, -1, -0.15450859069824219, 0.40450876951217651, -1, -0.29389280080795288, 0.29389280080795288, -1, -0.40450873970985413, 0.15450857579708099, -1, -0.47552850842475891, 0, -1, -0.5000002384185791, -0.15450857579708099, -1, -0.47552847862243652, -0.29389274120330811, -1, -0.40450865030288696, -0.40450862050056458, -1, -0.29389271140098572, -0.47552838921546936, -1, -0.15450853109359741, -0.50000011920928955, -1, 0, -0.47552838921546936, -1, 0.15450853109359741, -0.40450859069824219, -1, 0.29389268159866333, -0.29389268159866333, -1, 0.4045085608959198, -0.15450853109359741, -1, 0.47552832961082458, -1.4901161193847656e-008, -1, 0.50000005960464478, 0.15450848639011383, -1, 0.4755282998085022, 0.29389262199401855, -1, 0.40450853109359741, 0.40450850129127502, -1, 0.29389265179634094, 0.47552827000617981, -1, 0.15450850129127502, 0.5, -1, 0, 0, 1, 0]";
 	setAttr ".rgf" -type "string" "[[0,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1],[0,1,20],[1,2,20],[2,3,20],[3,4,20],[4,5,20],[5,6,20],[6,7,20],[7,8,20],[8,9,20],[9,10,20],[10,11,20],[11,12,20],[12,13,20],[13,14,20],[14,15,20],[15,16,20],[16,17,20],[17,18,20],[18,19,20],[19,0,20]]";
 createNode transform -n "m_hoe_arm1" -p "m_hoe_arm";
 	setAttr ".t" -type "double3" 0 -1.86638826448897 -1.448672925199632 ;
 	setAttr ".r" -type "double3" 60.00000000000005 0 0 ;
 	setAttr ".s" -type "double3" 1 0.99999999999999989 0.99999999999999989 ;
 createNode mesh -n "m_hoe_armShape1" -p "m_hoe_arm1";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -525,17 +497,7 @@ createNode mesh -n "m_hoe_armShape1" -p "m_hoe_arm1";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 21 0.23776428401470184 -1.75 -0.077254295349121094 0.20225438475608826
-		 -1.75 -0.14694640040397644 0.14694640040397644 -1.75 -0.20225436985492706 0.077254287898540497
-		 -1.75 -0.23776425421237946 0 -1.75 -0.25000011920928955 -0.077254287898540497 -1.75
-		 -0.23776423931121826 -0.14694637060165405 -1.75 -0.20225432515144348 -0.20225431025028229
-		 -1.75 -0.14694635570049286 -0.23776419460773468 -1.75 -0.077254265546798706 -0.25000005960464478
-		 -1.75 0 -0.23776419460773468 -1.75 0.077254265546798706 -0.20225429534912109 -1.75
-		 0.14694634079933167 -0.14694634079933167 -1.75 0.2022542804479599 -0.077254265546798706
-		 -1.75 0.23776416480541229 -7.4505805969238281e-009 -1.75 0.25000002980232239 0.077254243195056915
-		 -1.75 0.2377641499042511 0.14694631099700928 -1.75 0.20225426554679871 0.20225425064563751
-		 -1.75 0.14694632589817047 0.2377641350030899 -1.75 0.077254250645637512 0.25 -1.75
-		 0 0 1.75 0 ;
+	setAttr ".rgvtx" -type "string" "[0.23776428401470184, -1.75, -0.077254295349121094, 0.20225438475608826, -1.75, -0.14694640040397644, 0.14694640040397644, -1.75, -0.20225436985492706, 0.077254287898540497, -1.75, -0.23776425421237946, 0, -1.75, -0.25000011920928955, -0.077254287898540497, -1.75, -0.23776423931121826, -0.14694637060165405, -1.75, -0.20225432515144348, -0.20225431025028229, -1.75, -0.14694635570049286, -0.23776419460773468, -1.75, -0.077254265546798706, -0.25000005960464478, -1.75, 0, -0.23776419460773468, -1.75, 0.077254265546798706, -0.20225429534912109, -1.75, 0.14694634079933167, -0.14694634079933167, -1.75, 0.2022542804479599, -0.077254265546798706, -1.75, 0.23776416480541229, -7.4505805969238281e-009, -1.75, 0.25000002980232239, 0.077254243195056915, -1.75, 0.2377641499042511, 0.14694631099700928, -1.75, 0.20225426554679871, 0.20225425064563751, -1.75, 0.14694632589817047, 0.2377641350030899, -1.75, 0.077254250645637512, 0.25, -1.75, 0, 0, 1.75, 0]";
 	setAttr ".rgf" -type "string" "[[0,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1],[0,1,20],[1,2,20],[2,3,20],[3,4,20],[4,5,20],[5,6,20],[6,7,20],[7,8,20],[8,9,20],[9,10,20],[10,11,20],[11,12,20],[12,13,20],[13,14,20],[14,15,20],[15,16,20],[16,17,20],[17,18,20],[18,19,20],[19,0,20]]";
 createNode transform -n "phys_hoe_arm1" -p "m_hoe_arm1";
 	setAttr ".t" -type "double3" 0 -0.072039322411508344 0.018962294271170244 ;
@@ -582,7 +544,7 @@ createNode transform -n "m_hoe" -p "m_hoe_arm";
 	setAttr ".sp" -type "double3" 0 0.33336817453167544 -2.2323814192759528e-006 ;
 	setAttr ".spt" -type "double3" 0 0.1666840872658378 -2.2323814192759528e-006 ;
 createNode mesh -n "m_hoeShape" -p "m_hoe";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -592,17 +554,14 @@ createNode mesh -n "m_hoeShape" -p "m_hoe";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -0.25 -0.5 0.02500000037252903 0.25 -0.5
-		 0.02500000037252903 -0.25 0.5 0.02500000037252903 0.25 0.5 0.02500000037252903 -0.25
-		 0.5 -0.02500000037252903 0.25 0.5 -0.02500000037252903 -0.25 -0.5 -0.02500000037252903 0.25
-		 -0.5 -0.02500000037252903 ;
+	setAttr ".rgvtx" -type "string" "[-0.25, -0.5, 0.02500000037252903, 0.25, -0.5, 0.02500000037252903, -0.25, 0.5, 0.02500000037252903, 0.25, 0.5, 0.02500000037252903, -0.25, 0.5, -0.02500000037252903, 0.25, 0.5, -0.02500000037252903, -0.25, -0.5, -0.02500000037252903, 0.25, -0.5, -0.02500000037252903]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "m_hoe1" -p "m_hoe";
 	setAttr ".t" -type "double3" 0 -0.2799693136234751 0.45475375337091162 ;
 	setAttr ".r" -type "double3" -29.999999999999993 0 0 ;
 	setAttr ".s" -type "double3" 1 0.99999999999999989 0.99999999999999989 ;
 createNode mesh -n "m_hoeShape1" -p "m_hoe1";
-	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "vectorArray";
+	addAttr -ci true -sn "rgvtx" -ln "rgvtx" -dt "string";
 	addAttr -ci true -sn "rgf" -ln "rgf" -dt "string";
 	setAttr -k off ".v";
 	setAttr ".vir" yes;
@@ -612,10 +571,7 @@ createNode mesh -n "m_hoeShape1" -p "m_hoe1";
 	setAttr ".dcc" -type "string" "Ambient+Diffuse";
 	setAttr ".covm[0]"  0 1 1;
 	setAttr ".cdvm[0]"  0 1 1;
-	setAttr ".rgvtx" -type "vectorArray" 8 -0.25 -0.02500000037252903 0.5 0.25 -0.02500000037252903
-		 0.5 -0.25 0.02500000037252903 0.5 0.25 0.02500000037252903 0.5 -0.25 0.02500000037252903
-		 -0.5 0.25 0.02500000037252903 -0.5 -0.25 -0.02500000037252903 -0.5 0.25 -0.02500000037252903
-		 -0.5 ;
+	setAttr ".rgvtx" -type "string" "[-0.25, -0.02500000037252903, 0.5, 0.25, -0.02500000037252903, 0.5, -0.25, 0.02500000037252903, 0.5, 0.25, 0.02500000037252903, 0.5, -0.25, 0.02500000037252903, -0.5, 0.25, 0.02500000037252903, -0.5, -0.25, -0.02500000037252903, -0.5, 0.25, -0.02500000037252903, -0.5]";
 	setAttr ".rgf" -type "string" "[[0,1,3,2],[2,3,5,4],[4,5,7,6],[6,7,1,0],[1,7,5,3],[6,0,2,4]]";
 createNode transform -n "phys_hoe1" -p "m_hoe1";
 	setAttr ".t" -type "double3" 0 0.0032567955365347956 -0.0061213151970944679 ;
