@@ -718,6 +718,8 @@ bool CppContextObject::TryComplete()
 		return (false);
 	}
 
+	UiMove();
+
 	return (true);
 }
 

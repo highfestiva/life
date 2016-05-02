@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -63,7 +63,7 @@ void LauncherAi::OnTick()
 	bool lHandled = false;
 	if (mDidShoot && mGame->IsLauncherBarrelFree())
 	{
-		mLog.AHeadline("Fire in the hole!");
+		mLog.Headline("Fire in the hole!");
 		++mShotCount;
 		mDidShoot = false;
 	}
@@ -85,19 +85,19 @@ void LauncherAi::OnTick()
 				lTargetVelocity.Set(0, 0, 0);
 				mTargetOffset.Set(0, 0, 0);
 				lAdjustedForSlowingDown = true;
-				mLog.AHeadline("Shooting at CTF platform!");
+				mLog.Headline("Shooting at CTF platform!");
 			}
 			else if (lHeadingTowardsCtf)	// Only assume slowdown if going towards our goal.
 			{
 				lTargetVelocity *= 0.3f;
 				mTargetOffset.Set(0, 0, 0);
 				lAdjustedForSlowingDown = true;
-				mLog.AHeadline("Shooting at slowing vehicle!");
+				mLog.Headline("Shooting at slowing vehicle!");
 			}
 			else
 			{
 				mTargetOffset.Set(0, 0, 0);
-				mLog.AHeadline("Shooting at vehicle plain and simple!");
+				mLog.Headline("Shooting at vehicle plain and simple!");
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -17,7 +17,7 @@ namespace GrenadeRun
 
 
 Launcher::Launcher(Game* pGame):
-	Parent(pGame->GetResourceManager(), "Launcher", pGame->GetUiManager()),
+	Parent(pGame->GetResourceManager(), "launcher", pGame->GetUiManager()),
 	mGame(pGame)
 {
 	SetForceLoadUnique(true);	// Needs to be unique as we set unique engines per view.

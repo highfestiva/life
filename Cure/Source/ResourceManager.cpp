@@ -173,7 +173,7 @@ Resource::~Resource()
 		}
 		else
 		{
-			x = mLoadCallbackList.erase(x);
+			mLoadCallbackList.erase(x++);
 		}
 	}
 	mLoadCallbackList.clear();
@@ -572,20 +572,20 @@ void ResourceManager::StopClear()
 	// correct hierarchical destruction.
 	bool lKillReferencesOnly = true;	// Kill all references first.
 	int lRefCountThreshold = 0;
-	while (!mActiveResourceTable.IsEmpty())
+	while (!mActiveResourceTable.empty())
 	{
 		ForceFreeCache();	// Must be before and after active resources' are deleted (caused by hierarchical resource structures).
 		bool lKilled = false;
 		bool lAreReferencesLeft = false;
-		ResourceTable::Iterator x = mActiveResourceTable.First();
-		while (x != mActiveResourceTable.End())
+		ResourceTable::iterator x = mActiveResourceTable.begin();
+		while (x != mActiveResourceTable.end())
 		{
-			Resource* lResource = *x;
+			Resource* lResource = x->second;
 			deb_assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 			if ((!lKillReferencesOnly || lResource->IsReferenceType()) &&
 				lResource->GetReferenceCount() <= lRefCountThreshold)
 			{
-				mActiveResourceTable.Remove(x++);
+				mActiveResourceTable.erase(x++);
 				// Check that no-one else has deleted our resource.
 				if (mResourceSafeLookup.find(lResource) != mResourceSafeLookup.end())
 				{
@@ -813,7 +813,7 @@ void ResourceManager::AddLoaded(UserResource* pUserResource)
 	Resource* lResource = pUserResource->GetResource();
 	lResource->Reference();
 	mResourceSafeLookup.insert(lResource);
-	mActiveResourceTable.Insert(lResource->GetName(), lResource);
+	mActiveResourceTable.insert(ResourceTable::value_type(lResource->GetName(), lResource));
 	mLoadedList.PushBack(lResource, lResource);
 }
 
@@ -851,11 +851,11 @@ void ResourceManager::Release(Resource* pResource)
 
 		if (!pResource->IsUnique())
 		{
-			mActiveResourceTable.Remove(pResource->GetName());
+			mActiveResourceTable.erase(pResource->GetName());
 			if (pResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
 			{
 				// A completely loaded resource dropped, place it "on the way out" of the system.
-				mCachedResourceTable.Insert(pResource->GetName(), pResource);
+				mCachedResourceTable.insert(ResourceTable::value_type(pResource->GetName(), pResource));
 				log_volatile(mLog.Trace("Loaded resource "+pResource->GetName()+" dereferenced. Placed in cache."));
 				pResource->Suspend();
 			}
@@ -876,7 +876,7 @@ void ResourceManager::Release(Resource* pResource)
 		}
 		else
 		{
-			mActiveResourceTable.Remove(pResource->GetName());	// TRICKY: this is for shared resources that are not to be kept any more when dereferenced.
+			mActiveResourceTable.erase(pResource->GetName());	// TRICKY: this is for shared resources that are not to be kept any more when dereferenced.
 			if (PrepareRemoveInLoadProgress(pResource))
 			{
 				log_volatile(mLog.Trace("Resource "+pResource->GetName()+" (unique) dereferenced. Deleted immediately."));
@@ -934,17 +934,17 @@ unsigned ResourceManager::ForceFreeCache(const strutil::strvec& pResourceTypeLis
 	// TODO: optimize by keeping objects in cache for a while!
 
 	/*mLog.Headline("ForceFreeCache...");
-	ResourceTable::Iterator x = mCachedResourceTable.First();
-	for (; x != mCachedResourceTable.End(); ++x)
+	ResourceTable::iterator x = mCachedResourceTable.begin();
+	for (; x != mCachedResourceTable.end(); ++x)
 	{
 		mLog.Headlinef("  - %s @ %p.", (*x)->GetName().c_str(), *x);
 	}
 	mLog.Headline("---------------");*/
 	unsigned lDroppedResourceCount = 0;
-	ResourceTable::Iterator x = mCachedResourceTable.First();
-	while (x != mCachedResourceTable.End())
+	ResourceTable::iterator x = mCachedResourceTable.begin();
+	while (x != mCachedResourceTable.end())
 	{
-		Resource* lResource = *x;
+		Resource* lResource = x->second;
 		deb_assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 		bool lDrop = pResourceTypeList.empty();
 		const str& lType = lResource->GetType();
@@ -955,7 +955,7 @@ unsigned ResourceManager::ForceFreeCache(const strutil::strvec& pResourceTypeLis
 		}
 		if (lDrop)
 		{
-			mCachedResourceTable.Remove(x++);
+			mCachedResourceTable.erase(x++);
 			DeleteResource(lResource);
 			++lDroppedResourceCount;
 		}
@@ -978,7 +978,7 @@ size_t ResourceManager::QueryResourceCount() const
 size_t ResourceManager::QueryCachedResourceCount() const
 {
 	ScopeLock lLock(&mThreadLock);
-	return (mCachedResourceTable.GetCount());
+	return (mCachedResourceTable.size());
 }
 
 ResourceManager::ResourceInfoList ResourceManager::QueryResourceNames()
@@ -1033,17 +1033,23 @@ void ResourceManager::UnhookResources(ResourceList& pResourceList)
 Resource* ResourceManager::GetAddCachedResource(const str& pName, UserResource* pUserResource, bool& pMustLoad)
 {
 	pMustLoad = false;
-	Resource* lResource = mActiveResourceTable.FindObject(pName);
-	if (!lResource)
+	Resource* lResource = 0;
+	ResourceTable::iterator x = mActiveResourceTable.find(pName);
+	if (x != mActiveResourceTable.end())
 	{
-		lResource = mCachedResourceTable.FindObject(pName);
-		if (lResource)
+		lResource = x->second;
+	}
+	else
+	{
+		ResourceTable::iterator x = mCachedResourceTable.find(pName);
+		if (x != mCachedResourceTable.end())
 		{
+			lResource = x->second;
 			// Resource found on the way out, move it back into the system.
-			mCachedResourceTable.Remove(lResource->GetName());
-			deb_assert(mActiveResourceTable.Find(lResource->GetName()) == mActiveResourceTable.End());
+			mCachedResourceTable.erase(lResource->GetName());
+			deb_assert(mActiveResourceTable.find(lResource->GetName()) == mActiveResourceTable.end());
 			deb_assert(lResource->GetLoadState() == RESOURCE_LOAD_COMPLETE);
-			mActiveResourceTable.Insert(lResource->GetName(), lResource);
+			mActiveResourceTable.insert(ResourceTable::value_type(lResource->GetName(), lResource));
 			lResource->Resume();
 		}
 	}
@@ -1051,9 +1057,9 @@ Resource* ResourceManager::GetAddCachedResource(const str& pName, UserResource* 
 	{
 		//deb_assert(mRequestLoadList.Find(pName) == mRequestLoadList.End());
 		lResource = CreateResource(pUserResource, pName);
-		deb_assert(mActiveResourceTable.Find(lResource->GetName()) == mActiveResourceTable.End());
+		deb_assert(mActiveResourceTable.find(lResource->GetName()) == mActiveResourceTable.end());
 		deb_assert(lResource->GetLoadState() == RESOURCE_LOAD_ERROR);
-		mActiveResourceTable.Insert(lResource->GetName(), lResource);
+		mActiveResourceTable.insert(ResourceTable::value_type(lResource->GetName(), lResource));
 		deb_assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
 		pMustLoad = true;
 		log_volatile(mLog.Trace("Resource "+pName+" created + starts loading."));

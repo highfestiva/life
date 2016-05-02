@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -21,7 +21,6 @@ DisplayManager::DisplayManager():
 	mEnumeratedDisplayMode(0),
 	mEnumeratedDisplayModeCount(0)
 {
-	AddResizeObserver(this);
 }
 
 DisplayManager::~DisplayManager()
@@ -53,6 +52,8 @@ void DisplayManager::RemoveResizeObserver(DisplayResizeObserver* pResizeObserver
 
 void DisplayManager::DispatchResize(int pWidth, int pHeight)
 {
+	OnResize(pWidth, pHeight);
+
 	ResizeObserverSet::iterator x = mResizeObserverSet.begin();
 	for (; x != mResizeObserverSet.end(); ++x)
 	{
@@ -62,6 +63,8 @@ void DisplayManager::DispatchResize(int pWidth, int pHeight)
 
 void DisplayManager::DispatchMinimize()
 {
+	OnMinimize();
+
 	ResizeObserverSet::iterator x = mResizeObserverSet.begin();
 	for (; x != mResizeObserverSet.end(); ++x)
 	{
@@ -71,6 +74,8 @@ void DisplayManager::DispatchMinimize()
 
 void DisplayManager::DispatchMaximize(int pWidth, int pHeight)
 {
+	OnMaximize(pWidth, pHeight);
+
 	ResizeObserverSet::iterator x = mResizeObserverSet.begin();
 	for (; x != mResizeObserverSet.end(); ++x)
 	{

@@ -182,10 +182,10 @@ bool Application::MainLoop()
 
 bool Application::Tick()
 {
-	HiResTimer::StepCounterShadow();
-
 	LEPRA_DO_MEASURE_SCOPE(AppTick);
 	HiResTimer lLoopTime(false);
+
+	HiResTimer::StepCounterShadow();
 
 	bool lDebug;
 	v_get(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);

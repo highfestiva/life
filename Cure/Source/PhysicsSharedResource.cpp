@@ -156,7 +156,7 @@ bool PhysicsSharedResource::FinalizeInit()
 	// is relative to the initial root bone orientation.
 	if (lOk)
 	{
-		if (lStructure->GetBoneGeometry(0)->GetBodyId() != Tbc::INVALID_BODY)
+		if (lStructure->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC)
 		{
 			const float lTotalMass = lStructure->QueryTotalMass(mInitData.mPhysicsManager);
 			ObjectPositionalData lPlacement;

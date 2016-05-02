@@ -19,11 +19,11 @@ from time import time
 from random import choice
 
 shipasc = r'''
-/XX\
-´XXXXXX\
- lXXXXXXXXXXXX>
-/XXXXXX`
-´XX`'''
+/X\
+´XXXX\
+ lXXXXXXX>
+/XXXX`
+´X`'''
 
 enemyasc = r'''
    /XXX
@@ -89,7 +89,7 @@ def create_tunnel_seg(z, h, x, y1, y2, seed):
 def create_tunnel_segs(x):
     global tunnel_segs,tunnel_top_seed,tunnel_bottom_seed
     segtop,tunnel_top_seed = create_tunnel_seg(-50, 20, x, -20, 0, tunnel_top_seed)
-    segbottom,tunnel_bottom_seed = create_tunnel_seg(40, 20, x, 0, 20, tunnel_bottom_seed)
+    segbottom,tunnel_bottom_seed = create_tunnel_seg(30, 20, x, 0, 20, tunnel_bottom_seed)
     tunnel_segs += [segtop, segbottom]
 def update_tunnel():
     px = tunnel_segs[-1].pos().x
@@ -98,6 +98,16 @@ def update_tunnel():
     if px < 90-10:
         create_tunnel_segs(px+20-0.5)
 create_tunnel_segs(-90)
+
+def curb(angle, circle_amount):
+    period = int(angle // pi)
+    ca_half = 0.5*circle_amount + 0.5
+    angle = (angle-pi*period - pi/2) * circle_amount + pi/2
+    cosamp = 1 / cos(ca_half*pi)
+    x = 2 * period + 1 + cosamp*cos(angle)
+    sinoff = sin((ca_half*0.5+0.5)*2*pi)
+    y = (sinoff + sin(angle)) * (-1 if period&1 else +1)
+    return vec3(x, 0, y)
 
 while loop():
     update_tunnel()
@@ -162,23 +172,28 @@ while loop():
         timer_callback(0.2, remove_shot)
 
     # Create new enemies.
-    if timeout(1, 1):
+    if timeout(4, 1):
         es = []
-        if random() > 0.9:
-            for i in range(15):
-                x = i*3.1
-                a = 2*pi*i/15
-                enemy = create_sphere((50+x,0,sin(a)*20), radius=1.5, vel=(-18,0,0), col='#493')
-                enemy.angle = a
-                enemy.move = lambda t: (-18,0,10*sin(2*t-enemy.angle))
+        if random() > 0.1:
+            start_t = time()
+            for i in range(20):
+                ang = 2*pi*i/20
+                tgtpos = lambda t,a: vec3(80-t*8,0,0) + curb(-1.2*t+a,1.4)*12
+                enemy = create_sphere(tgtpos(0,ang), radius=2.5, vel=(-8,0,0), col='#493' if i!=0 else '#631')
+                enemy.start_t = start_t
+                enemy.angle = ang
+                enemy.move = lambda t: (tgtpos(t-enemy.start_t,enemy.angle) - enemy.pos()) * 20
+                enemy.shoots = (i==0)
                 es += [enemy]
         elif random() > 0.3:
             enemy = create_box((80,0,random()*80-40), side=3, vel=(-10,0,0), avel=rndvec())
             enemy.move = None
+            enemy.shoots = False
             es += [enemy]
         else:
             enemy = create_ascii_object(enemyasc, pos=vec3(80,0,random()*80-40), vel=(-5,0,0), col='#f00')
             enemy.move = lambda t: (-10,0,10*sin(2*t))
+            enemy.shoots = True
             es += [enemy]
         for enemy in es:
             enemy.physical = True
@@ -189,7 +204,7 @@ while loop():
         enemies += es
 
     # Enemies shoot.
-    ais = [e for e in enemies if e.isloaded and e.move]
+    ais = [e for e in enemies if e.isloaded and e.shoots]
     if ais and timeout(1, 5):
         enemy = choice(ais)
         p = enemy.pos()
@@ -230,7 +245,7 @@ while loop():
         if not obj.physical:
             continue
         x = obj.pos().x
-        if x < -100 or x > +100:
+        if x < -100 or x > +150:
             obj.release()
             if obj in shots:
                 shots.remove(obj)

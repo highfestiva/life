@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -449,7 +449,7 @@ protected:
 	void DeleteResource(Resource* pResource);
 
 private:
-	typedef HashTable<str, Resource*> ResourceTable;
+	typedef std::unordered_map<str, Resource*> ResourceTable;
 	typedef OrderedMap<str, Resource*> ResourceMap;
 	typedef OrderedMap<Resource*, Resource*, LEPRA_VOIDP_HASHER> ResourceMapList;
 	typedef std::unordered_set<Resource*, LEPRA_VOIDP_HASHER> ResourceSet;

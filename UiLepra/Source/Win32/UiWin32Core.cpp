@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -43,7 +43,6 @@ void Core::Shutdown()
 
 void Core::ProcessMessages()
 {
-	HiResTimer::StepCounterShadow();
 	Win32Core::ProcessMessages();
 }
 

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -47,7 +47,7 @@ void SeeThrough::SetTagIndex(int pIndex)
 	}
 	else
 	{
-		mLog.AError("Badly configured see-through tag!");
+		mLog.Error("Badly configured see-through tag!");
 		deb_assert(false);
 	}
 }

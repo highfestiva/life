@@ -28,6 +28,7 @@ Label::Label(const Color& pColor, const wstr& pText):
 {
 	SetFontColor(pColor);
 	SetIsHollow(true);
+	SetName(strutil::Encode(pText));
 }
 
 Label::~Label()

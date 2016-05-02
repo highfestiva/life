@@ -35,6 +35,7 @@ Button::Button(const wstr& pText):
 	SetBaseColor(GetColor());
 	Init();
 	SetText(pText);
+	SetName(strutil::Encode(pText));
 }
 
 Button::Button(const Color& pColor, const wstr& pText):
@@ -57,6 +58,7 @@ Button::Button(const Color& pColor, const wstr& pText):
 	SetBaseColor(GetColor());
 	Init();
 	SetText(pText);
+	SetName(strutil::Encode(pText));
 }
 
 Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, const Color& pColor, const wstr& pText):
@@ -79,6 +81,7 @@ Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, co
 	SetBaseColor(GetColor());
 	Init();
 	SetText(pText);
+	SetName(strutil::Encode(pText));
 }
 
 Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImageID,
@@ -110,6 +113,7 @@ Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImage
 	SetBaseColor(GetColor());
 	Init();
 	SetText(pText);
+	SetName(strutil::Encode(pText));
 }
 
 Button::~Button()

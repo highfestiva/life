@@ -8,7 +8,7 @@ for fn in sys.argv[1:]:
 	lines = [line.rstrip('\n') for line in open(fn)]
 	olines = []
 	for line in lines:
-		if len([1 for word in ['setAttr','"vectorArray"','".rgvtx"','".rgn"','".rguv0"'] if word in line]) == 3:
+		if len([1 for word in ['setAttr','"vectorArray"','".rgvtx"','".rgn"','".rguv'] if word in line]) == 3:
 			inside = True
 			startline,line = line.split('"vectorArray" ')
 			nums = []
@@ -17,6 +17,8 @@ for fn in sys.argv[1:]:
 			if ';' not in line:
 				continue
 			nums = nums[1:]
+			if '".rguv' in startline:	# Ignore 3D coord in UV
+				nums = [n for i,n in enumerate(nums) if i%3!=2]
 			line = startline + '"string" "[' + ', '.join(nums) + ']";'
 			inside = False
 		else:
