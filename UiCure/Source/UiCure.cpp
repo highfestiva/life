@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -78,7 +78,7 @@ void SetDefault(Cure::RuntimeVariableScope* pSettings)
 	v_set(pSettings, RTVAR_UI_3D_CLIPNEAR, 0.1);
 	v_set(pSettings, RTVAR_UI_3D_CLIPFAR, 3000.0);
 	v_set(pSettings, RTVAR_UI_3D_SHADOWS, "Volumes");
-	v_set(pSettings, RTVAR_UI_3D_SHADOWDEVIATION, 0.0);
+	v_set(pSettings, RTVAR_UI_3D_SHADOWDEVIATION, 1e-5);
 	v_set(pSettings, RTVAR_UI_2D_PAINTMODE, "Normal");
 	v_set(pSettings, RTVAR_UI_2D_FONT, "Times New Roman");
 	v_set(pSettings, RTVAR_UI_2D_FONTHEIGHT, 14.0);

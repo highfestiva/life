@@ -265,6 +265,10 @@ def validateverts(node):
 	uvs = node.get_fixed_attribute("rguv", optional=True)
 	if not vs and not ts:
 		return
+	for parent in node.getparents():
+		uvs_per_vertex = parent.get_fixed_attribute("uvs_per_vertex", optional=True, default=2)
+		if uvs_per_vertex != 2:
+			break
 	if len(vs)%3 != 0 or len(ts)%3 != 0:
 		print('Internal error: %s has %i vertex floats and %i triangle indices.' % (node.getName(), len(vs), len(ts)))
 		sys.exit(5)
@@ -276,11 +280,11 @@ def validateverts(node):
 			print('Internal error: %s has %i vertices and %i normals (and %i triangle indices).' % (node.getName(), len(vs)//3, len(ns)//3, len(ts)))
 			sys.exit(5)
 	if uvs:
-		if len(uvs)%2 != 0:
+		if len(uvs)%uvs_per_vertex != 0:
 			print('Internal error: %s has %i UV floats.' % (node.getName(), len(uvs)))
 			sys.exit(5)
-		if len(uvs)*3/2 != len(vs):
-			print('Internal error: %s has %i UVs and %i vertices.' % (node.getName(), len(uvs)//2,len(vs)//3))
+		if len(uvs)*3/uvs_per_vertex != len(vs):
+			print('Internal error: %s has %i UVs and %i vertices.' % (node.getName(), len(uvs)//uvs_per_vertex,len(vs)//3))
 			sys.exit(5)
 	if len(ts) < len(vs)/3:
 		print('Internal error: %s has does not index all vertices (%f%% at most).' % (node.getName(), len(ns)*3/len(vs)))

@@ -7,7 +7,8 @@
   <Project Name="Bound" Path="../Bound/Bound.project" Active="No"/>
   <Project Name="CureTestApp" Path="../UiCure/CureTestApp/CureTestApp.project" Active="No"/>
   <Project Name="Push" Path="../Push/Push.project" Active="No"/>
-  <Project Name="KillCutie" Path="../KillCutie/KillCutie.project" Active="Yes"/>
+  <Project Name="KillCutie" Path="../KillCutie/KillCutie.project" Active="No"/>
+  <Project Name="Fire" Path="../Fire/Fire.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
@@ -19,6 +20,7 @@
       <Project Name="CureTestApp" ConfigName="Debug"/>
       <Project Name="Push" ConfigName="Debug"/>
       <Project Name="KillCutie" ConfigName="Debug"/>
+      <Project Name="Fire" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
@@ -30,6 +32,7 @@
       <Project Name="CureTestApp" ConfigName="Release"/>
       <Project Name="Push" ConfigName="Release"/>
       <Project Name="KillCutie" ConfigName="Release"/>
+      <Project Name="Fire" ConfigName="Release"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Profile" Selected="no">
       <Environment/>
@@ -41,6 +44,7 @@
       <Project Name="CureTestApp" ConfigName="Profile"/>
       <Project Name="Push" ConfigName="Profile"/>
       <Project Name="KillCutie" ConfigName="Profile"/>
+      <Project Name="Fire" ConfigName="Profile"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

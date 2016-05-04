@@ -201,7 +201,7 @@ bool FireManager::Open()
 	}
 	if (lOk)
 	{
-		mPauseButton = ICONBTNA("btn_pause.png", "");
+		mPauseButton = ICONBTNA("btn_pause.png", L"");
 		int x = 12;
 		int y = 12;
 		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
@@ -210,7 +210,7 @@ bool FireManager::Open()
 	}
 	if (lOk)
 	{
-		mBombButton = ICONBTNA("btn_bomb.png", "");
+		mBombButton = ICONBTNA("btn_bomb.png", L"");
 		int x = 12;
 		int y = 12*2+64;
 		mUiManager->GetDesktopWindow()->AddChild(mBombButton, x, y);
@@ -297,7 +297,7 @@ bool FireManager::Paint()
 	}
 
 	UiTbc::Painter* lPainter = mUiManager->GetPainter();
-	str lScore = strutil::Format("Score: %i/%i", mKills, mKillLimit);
+	wstr lScore = wstrutil::Format(L"Score: %i/%i", mKills, mKillLimit);
 	lPainter->SetColor(WHITE);
 	lPainter->PrintText(lScore, 100, 21);
 
@@ -356,7 +356,8 @@ bool FireManager::Paint()
 			const int xl = xy.x+lUnit*2-r;
 			const int yl = xy.y-lUnit*2+r;
 			const int yt = yl-lPainter->GetFontHeight()-2*r;
-			const int wl = lPainter->GetFontManager()->GetStringWidth(x->second.mVillain)+2+2*r;
+			const wstr lVillain = wstrutil::Encode(x->second.mVillain);
+			const int wl = lPainter->GetFontManager()->GetStringWidth(lVillain)+2+2*r;
 			if (lTimePart < 1)
 			{
 				const float lTextPart = std::min(1.0f, (lTimePart-lDiagonalEndPart)/(1.0f-lDiagonalEndPart));
@@ -368,10 +369,10 @@ bool FireManager::Paint()
 			lPainter->DrawRoundedRect(PixelRect(xl, yt, xl+wl, yl), r, 0x7, true);
 			lPainter->SetColor(Color(30, 30, 30, 150));
 			lPainter->SetAlphaValue(150);
-			lPainter->PrintText(x->second.mVillain, xl+r+2, yt+r+1);
+			lPainter->PrintText(lVillain, xl+r+2, yt+r+1);
 			lPainter->SetRenderMode(UiTbc::Painter::RM_NORMAL);
 			lPainter->SetColor(WHITE);
-			lPainter->PrintText(x->second.mVillain, xl+r+1, yt+r);
+			lPainter->PrintText(lVillain, xl+r+1, yt+r);
 			if (lTimePart < 1)
 			{
 				lPainter->SetClippingRect(mRenderArea);	// Restore for next loop.
@@ -435,7 +436,7 @@ void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
 	}
 	mFireDelayTimer.Start();
 	vec3 lTargetPosition;
-	if (!GetPhysicsManager()->QueryRayCollisionAgainst(mCameraTransform.GetPosition(), mShootDirection, 1000.0f, mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), &lTargetPosition, 1) == 1)
+	if (GetPhysicsManager()->QueryRayCollisionAgainst(mCameraTransform.GetPosition(), mShootDirection, 1000.0f, mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), &lTargetPosition, 1) < 1)
 	{
 		// User aiming above ground. Find vehicle closest to that position, and adjust target range thereafter.
 		float lDistance = 350.0;
@@ -1151,13 +1152,13 @@ void FireManager::OnPauseButton(UiTbc::Button* pButton)
 	UiTbc::FixedLayouter lLayouter(d);
 	lLayouter.SetContentYMargin(d->GetPreferredHeight()/10);
 
-	UiTbc::Button* lRestartButton = new UiTbc::Button(Color(90, 10, 10), "Reset game");
+	UiTbc::Button* lRestartButton = new UiTbc::Button(Color(90, 10, 10), L"Reset game");
 	lLayouter.AddButton(lRestartButton, -8, 0, 2, 0, 1, 1, true);
 
-	UiTbc::Button* lRestartLevelButton = new UiTbc::Button(Color(10, 90, 10), "Restart level");
+	UiTbc::Button* lRestartLevelButton = new UiTbc::Button(Color(10, 90, 10), L"Restart level");
 	lLayouter.AddButton(lRestartLevelButton, -4, 1, 2, 0, 1, 1, true);
 
-	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), "X");
+	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), L"X");
 	lLayouter.AddCornerButton(lCloseButton, -9);
 
 	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
@@ -1181,7 +1182,7 @@ void FireManager::CreateNextLevelDialog()
 	UiTbc::FixedLayouter lLayouter(d);
 	lLayouter.SetContentWidthPart(0.85f);
 
-	static const tchar* lCongratulations[] =
+	static const char* lCongratulations[] =
 	{
 		"Well done, agent!\n\nPrepare to protect other people in other parts of the world.",
 		"Great Scott; you are good at this!\n\nRemember to relax between wet jobs.",
@@ -1207,14 +1208,14 @@ void FireManager::CreateNextLevelDialog()
 	if (lFirstRun)
 	{
 		v_set(GetVariableScope(), RTVAR_GAME_FIRSTRUN, false);
-		lCongrats = "Our patented EnemyVisionGoggles(R indicates villains.\nAvoid collateral damage, when possible.\n\nGood luck agent!");
+		lCongrats = "Our patented EnemyVisionGoggles(r) indicates villains.\nAvoid collateral damage, when possible.\n\nGood luck agent!";
 	}
 	else
 	{
 		UiCure::UserSound2dResource* lSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
 		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "level_done.wav", lSound, 1, 1);
 	}
-	UiTbc::Label* lLabel = new UiTbc::Label(LIGHT_GRAY, lCongrats);
+	UiTbc::Label* lLabel = new UiTbc::Label(LIGHT_GRAY, wstrutil::Encode(lCongrats));
 	lLabel->SetFontId(mUiManager->SetScaleFont(std::min(-14.0f, d->GetPreferredHeight()/-14.0f)));
 	mUiManager->SetMasterFont();
 	//lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
@@ -1223,17 +1224,17 @@ void FireManager::CreateNextLevelDialog()
 
 	if (lFirstRun)
 	{
-		UiTbc::Button* lOkButton = new UiTbc::Button(Color(10, 90, 10), "OK");
+		UiTbc::Button* lOkButton = new UiTbc::Button(Color(10, 90, 10), L"OK");
 		lOkButton->SetFontId(lLabel->GetFontId());
 		lLayouter.AddButton(lOkButton, -5, 3, 4, 4, 3, 7, true);
 	}
 	else
 	{
-		UiTbc::Button* lNextLevelButton = new UiTbc::Button(Color(10, 90, 10), "Next level");
+		UiTbc::Button* lNextLevelButton = new UiTbc::Button(Color(10, 90, 10), L"Next level");
 		lNextLevelButton->SetFontId(lLabel->GetFontId());
 		lLayouter.AddButton(lNextLevelButton, -7, 3, 4, 4, 3, 7, true);
 
-		UiTbc::Button* lRestartButton = new UiTbc::Button(Color(90, 10, 10), "Restart from level 1");
+		UiTbc::Button* lRestartButton = new UiTbc::Button(Color(90, 10, 10), L"Restart from level 1");
 		lRestartButton->SetFontId(lLabel->GetFontId());
 		lLayouter.AddButton(lRestartButton, -8, 3, 4, 0, 3, 7, true);
 	}

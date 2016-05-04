@@ -52,15 +52,6 @@
     <File Name="App.mm" ExcludeProjConfig="Debug;Profile;Release"/>
     <File Name="SlimeAI.mm" ExcludeProjConfig="Debug;Profile;Release"/>
   </VirtualDirectory>
-  <Dependencies Name="Debug">
-    <Project Name="Life"/>
-  </Dependencies>
-  <Dependencies Name="Release">
-    <Project Name="Life"/>
-  </Dependencies>
-  <Dependencies Name="Profile">
-    <Project Name="Life"/>
-  </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="-std=c++11" C_Options="" Assembler="">
@@ -214,4 +205,13 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Debug">
+    <Project Name="Life"/>
+  </Dependencies>
+  <Dependencies Name="Profile">
+    <Project Name="Life"/>
+  </Dependencies>
+  <Dependencies Name="Release">
+    <Project Name="Life"/>
+  </Dependencies>
 </CodeLite_Project>

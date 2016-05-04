@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -71,7 +71,7 @@ void BaseMachine::OnDie()
 		GetBurnEmitter()->SetFreeFlow();
 	}
 
-	Life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this);
+	Life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this, true);
 	ShrinkMeshBigOrientationThreshold(1e-3f);
 	Parent::OnDie();
 	float lVehicleRemoveDelay;

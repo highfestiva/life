@@ -173,7 +173,7 @@ Resource::~Resource()
 		}
 		else
 		{
-			mLoadCallbackList.erase(x++);
+			x = mLoadCallbackList.erase(x);
 		}
 	}
 	mLoadCallbackList.clear();
@@ -585,7 +585,7 @@ void ResourceManager::StopClear()
 			if ((!lKillReferencesOnly || lResource->IsReferenceType()) &&
 				lResource->GetReferenceCount() <= lRefCountThreshold)
 			{
-				mActiveResourceTable.erase(x++);
+				x = mActiveResourceTable.erase(x);
 				// Check that no-one else has deleted our resource.
 				if (mResourceSafeLookup.find(lResource) != mResourceSafeLookup.end())
 				{
@@ -940,28 +940,34 @@ unsigned ResourceManager::ForceFreeCache(const strutil::strvec& pResourceTypeLis
 		mLog.Headlinef("  - %s @ %p.", (*x)->GetName().c_str(), *x);
 	}
 	mLog.Headline("---------------");*/
+	int lPrevDroppedResourceCount = -1;
 	unsigned lDroppedResourceCount = 0;
-	ResourceTable::iterator x = mCachedResourceTable.begin();
-	while (x != mCachedResourceTable.end())
+	while (lPrevDroppedResourceCount != lDroppedResourceCount)
 	{
-		Resource* lResource = x->second;
-		deb_assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
-		bool lDrop = pResourceTypeList.empty();
-		const str& lType = lResource->GetType();
-		strutil::strvec::const_iterator y = pResourceTypeList.begin();
-		for (; !lDrop && y != pResourceTypeList.end(); ++y)
+		lPrevDroppedResourceCount = lDroppedResourceCount;
+		ResourceTable::iterator x = mCachedResourceTable.begin();
+		while (x != mCachedResourceTable.end())
 		{
-			lDrop = (lType == *y);
-		}
-		if (lDrop)
-		{
-			mCachedResourceTable.erase(x++);
-			DeleteResource(lResource);
-			++lDroppedResourceCount;
-		}
-		else
-		{
-			++x;
+			Resource* lResource = x->second;
+			deb_assert(mRequestLoadList.Find(lResource) == mRequestLoadList.End());
+			bool lDrop = pResourceTypeList.empty();
+			const str& lType = lResource->GetType();
+			strutil::strvec::const_iterator y = pResourceTypeList.begin();
+			for (; !lDrop && y != pResourceTypeList.end(); ++y)
+			{
+				lDrop = (lType == *y);
+			}
+			if (lDrop)
+			{
+				x = mCachedResourceTable.erase(x);
+				DeleteResource(lResource);
+				++lDroppedResourceCount;
+				break;
+			}
+			else
+			{
+				++x;
+			}
 		}
 	}
 	return lDroppedResourceCount;

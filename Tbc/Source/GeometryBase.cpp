@@ -709,10 +709,11 @@ void GeometryBase::SetTransformation(const xform& pTransformation)
 	SetTransformationChanged(true);
 
 	quat q(mBigOrientation.mData);
-	q.Sub(GetTransformation().mOrientation.mData);	// Must let overrides go to work, so we can store full update.
+	quat r(GetTransformation().mOrientation.mData);	// Must let overrides go to work, so we can store full update.
+	q.Sub(r.mData);
 	if (q.GetNorm() > mBigOrientationThreshold)
 	{
-		mBigOrientation = q;
+		mBigOrientation = r;
 		SetBigOrientationChanged(true);
 	}
 }

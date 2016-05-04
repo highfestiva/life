@@ -338,7 +338,7 @@ void Dialog::OnClick(Button* pButton)
 void Dialog::DoClick(Button* pButton)
 {
 	Action lPostClickTarget = mPostClickTarget;	// Save in case of destruction.
-	if (pButton)
+	//if (pButton)	Always click!
 	{
 		mTarget(pButton);
 	}
