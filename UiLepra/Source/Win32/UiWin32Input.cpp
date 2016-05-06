@@ -339,7 +339,7 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* pDisplayManager):
 
 	if (lHR != DI_OK)
 	{
-		mDisplayManager->ShowMessageBox("DirectX 8 not supported (dinput creation failure!"), "DirectInput error!");
+		mDisplayManager->ShowMessageBox("DirectX 8 not supported (dinput creation failure)!", "DirectInput error!");
 		return;
 	}
 

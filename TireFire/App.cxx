@@ -1246,7 +1246,7 @@ void App::EnterHiscore(const str& pMessage, const Color& pColor)
 	UiTbc::Dialog* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetPreClickTarget(UiTbc::Dialog::Action(this, &App::OnPreEnterAction));
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel("Enter hiscore name ("+Int2Str((int)mGame->GetScore())+" points"), mBigFontId);
+	d->SetQueryLabel("Enter hiscore name ("+Int2Str((int)mGame->GetScore())+" points", mBigFontId);
 	if (!pMessage.empty())
 	{
 		UiTbc::Label* lMessage = new UiTbc::Label(pColor, pMessage);
