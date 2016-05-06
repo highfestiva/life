@@ -110,10 +110,10 @@ str SystemManager::GetDataDirectoryFromPath(const str& argv0) {
 #elif defined(LEPRA_MAC)
 	str data_dir = Path::GetDirectory(argv0);
 	data_dir = Path::GetParentDirectory(data_dir);
-	return Path::JoinPath(data_dir, "Resources/Data/");
+	return Path::JoinPath(data_dir, "Resources/data/");
 #else // Posix
 	(void)argv0;
-	return "Data/";
+	return "data/";
 #endif // iOS/Mac/Posix
 }
 

@@ -270,7 +270,7 @@ while loop():
     player.orientation(quat()) # Keep player straight at all times.
 
     # Open doors.
-    if 'SPACE' in keys():
+    if 'Space' in keys():
         direction = xyrot.rotate_x(pitch) * vec3(0,1,0)
         for obj,_ in pick_objects(pos, direction, 0,2):
             if hasattr(obj, 'trigger_door'):

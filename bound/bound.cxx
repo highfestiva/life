@@ -79,7 +79,7 @@ Bound* Bound::GetApp() {
 
 
 Bound::Bound(const strutil::strvec& argument_list):
-	Parent("Bound", argument_list),
+	Parent("bound", argument_list),
 	ui_manager_(0) {
 	app_ = this;
 }

@@ -34,7 +34,7 @@ DownwashTicker::DownwashTicker(UiCure::GameUiManager* ui_manager, cure::Resource
 	v_set(UiCure::GetSettings(), kRtvarPhysicsIsfixedfps, true);
 	v_set(UiCure::GetSettings(), kRtvarUi2DFontheight, 30.0);
 
-	AddBackedRtvar(kRtvarGameStartlevel);
+	AddBackedRtvar(kRtvarGameStartLevel);
 	AddBackedRtvar(kRtvarGameChildishness);
 	for (int x = 0; x < 20; ++x) {
 		const str wr = strutil::Format(str(kRtvarGameWorldrecordLevel "_%i").c_str(), x);
@@ -138,13 +138,13 @@ bool DownwashTicker::OpenUiManager() {
 		music_player_ = new UiCure::MusicPlayer(ui_manager_->GetSoundManager());
 		music_player_->SetVolume(0.5f);
 		music_player_->SetSongPauseTime(2, 6);
-		music_player_->AddSong("Dub Feral.ogg");
-		music_player_->AddSong("Easy Jam.ogg");
-		music_player_->AddSong("Firmament.ogg");
-		music_player_->AddSong("Mandeville.ogg");
-		music_player_->AddSong("Slow Ska Game Loop.ogg");
-		music_player_->AddSong("Stealth Groover.ogg");
-		music_player_->AddSong("Yallahs.ogg");
+		music_player_->AddSong("dub feral.ogg");
+		music_player_->AddSong("easy jam.ogg");
+		music_player_->AddSong("firmament.ogg");
+		music_player_->AddSong("mandeville.ogg");
+		music_player_->AddSong("slow ska game loop.ogg");
+		music_player_->AddSong("stealth groover.ogg");
+		music_player_->AddSong("yallahs.ogg");
 		music_player_->Shuffle();
 		ok = music_player_->Playback();
 	}

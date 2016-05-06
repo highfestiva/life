@@ -79,7 +79,7 @@ Downwash* Downwash::GetApp() {
 
 
 Downwash::Downwash(const strutil::strvec& argument_list):
-	Parent("Downwash", argument_list),
+	Parent("downwash", argument_list),
 	ui_manager_(0) {
 	app_ = this;
 }

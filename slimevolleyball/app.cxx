@@ -289,7 +289,7 @@ bool App::Open() {
 	}
 	if (ok) {
 		music_streamer_ = 0;
-		music_streamer_ = sound_->CreateSoundStream("Tingaliin.ogg", uilepra::SoundManager::kLoopForward, 0);
+		music_streamer_ = sound_->CreateSoundStream("tingaliin.ogg", uilepra::SoundManager::kLoopForward, 0);
 		if (!music_streamer_ || !music_streamer_->Playback()) {
 			log_.Errorf("Unable to play beautiful muzak!");
 		}

@@ -527,11 +527,11 @@ bool App::Open() {
 		music_player_ = new UiCure::MusicPlayer(ui_manager_->GetSoundManager());
 		music_player_->SetVolume(0.5f);
 		music_player_->SetSongPauseTime(9, 15);
-		music_player_->AddSong("ButterflyRide.xm");
-		music_player_->AddSong("BehindTheFace.xm");
-		music_player_->AddSong("BrittiskBensin.xm");
-		music_player_->AddSong("DontYouWantMe'97.xm");
-		music_player_->AddSong("CloseEncounters.xm");
+		music_player_->AddSong("butterflyride.xm");
+		music_player_->AddSong("behindtheface.xm");
+		music_player_->AddSong("brittiskbensin.xm");
+		music_player_->AddSong("dontyouwantme'97.xm");
+		music_player_->AddSong("closeencounters.xm");
 		music_player_->Shuffle();
 		ok = music_player_->Playback();
 	}
@@ -1919,8 +1919,8 @@ bool App::Steer(uilepra::InputManager::KeyCode key_code, float factor) {
 		case UIKEY(Right):
 		case UIKEY(Numpad6):	__directive = kDirectiveRight;					break;
 		case UIKEY(D):		__directive = kDirectiveRight;		avatar = avatar1;	break;
-		case UIKEY(Lctrl):
-		case UIKEY(Rctrl):
+		case UIKEY(LCtrl):
+		case UIKEY(RCtrl):
 		case UIKEY(Insert):
 		case UIKEY(Numpad0):	__directive = kDirectiveFunction;				break;
 		case UIKEY(E):

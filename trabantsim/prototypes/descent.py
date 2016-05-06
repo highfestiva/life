@@ -91,7 +91,7 @@ def update_level(pos, all_rooms=False):
 while loop():
     update_level(ship.pos())
 
-    pusher.force((0,1,0) if taps() or 'LCTRL' in keys() else (0,0.1,0))
+    pusher.force((0,1,0) if taps() or 'LCtrl' in keys() else (0,0.1,0))
 
     # Turn ship.
     roll_force = sum(t.x*40-20 for t in taps()) + 20*keydir().x    # Control roll by either tapping or keyboard.

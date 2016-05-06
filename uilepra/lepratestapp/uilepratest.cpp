@@ -111,7 +111,7 @@ bool TestSound(const lepra::LogDecorator& log) {
 	deb_assert(sound_manager);
 	if (test_ok) {
 		_context = "load sound";
-		sound = sound_manager->LoadSound3D("Data/logo_trumpet.wav", uilepra::SoundManager::kLoopForward, 0);
+		sound = sound_manager->LoadSound3D("data/logo_trumpet.wav", uilepra::SoundManager::kLoopForward, 0);
 		test_ok = (sound != uilepra::INVALID_SOUNDID);
 		deb_assert(test_ok);
 	}

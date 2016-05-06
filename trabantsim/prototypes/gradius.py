@@ -144,7 +144,7 @@ while loop():
     #ship.orientation(o)
 
     new_shots = []
-    if 'SPACE' in keys() and timeout(0.1, first_hit=True):
+    if 'Space' in keys() and timeout(0.1, first_hit=True):
         p = ship.pos()
         new_shots += [create_capsule(p+vec3(12,0, 0), orientation=quat().rotate_y(pi/2), vel=vec3(90,0,0), col='#a60', trigger=True)]
         new_shots += [create_capsule(p+vec3( 0,0,+3), orientation=quat().rotate_y(pi/2), vel=vec3(90,0,0), col='#a60', trigger=True)]
@@ -154,7 +154,7 @@ while loop():
             shot.shooters = ship_parts
             shot.hurt = 30
         sound(sound_bang, p, volume=0.1)
-    elif 'LCTRL' in keys() and timeout(1, first_hit=True):
+    elif 'LCtrl' in keys() and timeout(1, first_hit=True):
         p = ship.pos()
         scale = gfxscale((0.3, 0.3, 1)) # Scale X & Y, Z is height of capsule.
         laser_shots  = [create_capsule(p+vec3(85,0, 0.0), orientation=quat().rotate_y(pi/2), length=150, radius=0.8, col='#f0f', trigger=True, process=scale)]

@@ -8,7 +8,7 @@
 
 #include "../lepra/include/lepratypes.h"
 
-#define kPushApplicationName	"Push"
+#define kPushApplicationName	"push"
 //#define kMasterServerAddress	"pixeldoctrine.dyndns.org"
 #define kMasterServerAddress	"192.168.2.4"
 //#define kMasterServerAddress	"localhost"

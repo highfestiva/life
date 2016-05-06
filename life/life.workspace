@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="life" Database="">
   <Project Name="life" Path="life.project" Active="No"/>
-  <Project Name="trabantsim" Path="../trabantsim/trabantsim.project" Active="Yes"/>
+  <Project Name="trabantsim" Path="../trabantsim/trabantsim.project" Active="No"/>
   <Project Name="slimevolleyball" Path="../slimevolleyball/slimevolleyball.project" Active="No"/>
   <Project Name="downwash" Path="../downwash/downwash.project" Active="No"/>
-  <Project Name="bound" Path="../bound/bound.project" Active="No"/>
+  <Project Name="bound" Path="../bound/bound.project" Active="Yes"/>
   <Project Name="curetestapp" Path="../uicure/curetestapp/curetestapp.project" Active="No"/>
   <Project Name="push" Path="../push/push.project" Active="No"/>
   <Project Name="killcutie" Path="../killcutie/killcutie.project" Active="No"/>

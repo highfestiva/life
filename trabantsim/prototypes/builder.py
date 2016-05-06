@@ -38,7 +38,7 @@ toggle_gravity()
 
 while loop():
     if not taps():
-        if 'SPACE' in keys():
+        if 'Space' in keys():
             toggle_gravity()
             while keys():
                 loop()

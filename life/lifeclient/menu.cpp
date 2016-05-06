@@ -106,7 +106,7 @@ cure::ResourceManager* Menu::GetResourceManager() const {
 void Menu::OnAction(uitbc::Button* button) {
 	uitbc::Dialog* d = dialog_;
 	button_delegate_(button);
-	if (d == dialog_ && d->IsAutoDismissButton(button)) {
+	if (d == dialog_ && (!button || d->IsAutoDismissButton(button))) {
 		button_delegate_.clear();
 		dialog_ = 0;
 	}

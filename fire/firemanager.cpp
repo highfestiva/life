@@ -139,11 +139,11 @@ FireManager::FireManager(life::GameClientMasterTicker* pMaster, const cure::Time
 
 	tbc::GeometryBase::SetDefaultFlags(tbc::GeometryBase::kExcludeCulling);	// Save some math during rendering, as most objects are on stage in this game.
 
-	v_set(GetVariableScope(), kRtvarGameExplosivestrength, 1.0);
-	v_set(GetVariableScope(), kRtvarGameFirstrun, true);
-	v_set(GetVariableScope(), kRtvarGameFiredelay, 1.0);
-	v_set(GetVariableScope(), kRtvarGameStartlevel, "lvl00");
-	v_set(GetVariableScope(), kRtvarGameVehicleremovedelay, 25.0);
+	v_set(GetVariableScope(), kRtvarGameExplosiveStrength, 1.0);
+	v_set(GetVariableScope(), kRtvarGameFirstRun, true);
+	v_set(GetVariableScope(), kRtvarGameFireDelay, 1.0);
+	v_set(GetVariableScope(), kRtvarGameStartLevel, "lvl00");
+	v_set(GetVariableScope(), kRtvarGameVehicleRemoveDelay, 25.0);
 }
 
 FireManager::~FireManager() {
@@ -391,7 +391,7 @@ void FireManager::Shoot(cure::ContextObject* avatar, int weapon) {
 	(void)weapon;
 
 	double fire_delay;
-	v_get(fire_delay, =, GetVariableScope(), kRtvarGameFiredelay, 1.5);
+	v_get(fire_delay, =, GetVariableScope(), kRtvarGameFireDelay, 1.5);
 	if (!level_->IsLoaded() || fire_delay_timer_.QueryTimeDiff() < fire_delay) {
 		return;
 	}
@@ -467,9 +467,9 @@ void FireManager::Detonate(cure::ContextObject* explosive, const tbc::ChunkyBone
 	const bool is_rocket = (explosive->GetClassId() == "rocket");
 	if (is_rocket) {
 		float explosive_strength;
-		v_get(explosive_strength, =(float), GetVariableScope(), kRtvarGameExplosivestrength, 1.0);
+		v_get(explosive_strength, =(float), GetVariableScope(), kRtvarGameExplosiveStrength, 1.0);
 		strength *= explosive_strength;
-		v_set(GetVariableScope(), kRtvarGameExplosivestrength, 1.0);	// Reset to normal strength.
+		v_set(GetVariableScope(), kRtvarGameExplosiveStrength, 1.0);	// Reset to normal strength.
 		volume_factor *= (explosive_strength>1)? 4 : 1;
 	}
 	const float cubic_strength = 4*(::pow(strength+1, 1/3.0f) - 1);	// Reduce by 3D volume. Explosion spreads in all directions.
@@ -589,7 +589,7 @@ str FireManager::StoreLevelIndex(int level_number) {
 		level_number = 0;
 	}
 	str new_level_name = strutil::Format("lvl%2.2i", level_number);
-	v_set(GetVariableScope(), kRtvarGameStartlevel, new_level_name);
+	v_set(GetVariableScope(), kRtvarGameStartLevel, new_level_name);
 	return new_level_name;
 }
 
@@ -625,7 +625,7 @@ bool FireManager::InitializeUniverse() {
 	particle_renderer->CreateExplosion(vec3(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
 	str start_level;
-	v_get(start_level, =, GetVariableScope(), kRtvarGameStartlevel, "lvl00");
+	v_get(start_level, =, GetVariableScope(), kRtvarGameStartLevel, "lvl00");
 	{
 		ScopeLock lock(GetTickLock());
 		int level_index = 0;
@@ -910,7 +910,7 @@ void FireManager::OnLevelLoadCompleted() {
 	}
 	log_.Headlinef("Level %s loaded.", level_->GetClassId().c_str());
 	bool first_run;
-	v_get(first_run, =, GetVariableScope(), kRtvarGameFirstrun, false);
+	v_get(first_run, =, GetVariableScope(), kRtvarGameFirstRun, false);
 	if (first_run) {
 		CreateNextLevelDialog();
 	}
@@ -978,7 +978,7 @@ void FireManager::OnCollision(const vec3& force, const vec3& torque, const vec3&
 
 void FireManager::OnBombButton(uitbc::Button* button) {
 	button->SetVisible(false);
-	v_set(GetVariableScope(), kRtvarGameExplosivestrength, 10.0);
+	v_set(GetVariableScope(), kRtvarGameExplosiveStrength, 10.0);
 }
 
 void FireManager::OnPauseButton(uitbc::Button* button) {
@@ -1044,9 +1044,9 @@ void FireManager::CreateNextLevelDialog() {
 	deb_assert(finished_level < LEPRA_ARRAY_COUNT(congratulations));
 	str congrats = congratulations[finished_level];
 	bool first_run;
-	v_get(first_run, =, GetVariableScope(), kRtvarGameFirstrun, false);
+	v_get(first_run, =, GetVariableScope(), kRtvarGameFirstRun, false);
 	if (first_run) {
-		v_set(GetVariableScope(), kRtvarGameFirstrun, false);
+		v_set(GetVariableScope(), kRtvarGameFirstRun, false);
 		congrats = "Our patented EnemyVisionGoggles(r) indicates villains.\nAvoid collateral damage, when possible.\n\nGood luck agent!";
 	} else {
 		UiCure::UserSound2dResource* sound = new UiCure::UserSound2dResource(ui_manager_, uilepra::SoundManager::kLoopNone);

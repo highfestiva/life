@@ -30,7 +30,7 @@
 #define kRtvarUi3DLightanglez		"Ui.3D.LightAngleZ"
 #define kRtvarUiPenred			"Ui.PenRed"
 #define kRtvarUiPengreen		"Ui.PenGreen"
-#define kRtvarUiPenblue		"Ui.PenBlue"
+#define kRtvarUiPenblue			"Ui.PenBlue"
 #define kRtvarUiPenalpha		"Ui.PenAlpha"
 
 #define kRtvarGameAllowpowerdown	"Game.AllowPowerDown"

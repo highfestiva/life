@@ -519,7 +519,7 @@ bool PushManager::SetAvatarEnginePower(cure::ContextObject* avatar, unsigned asp
 			) {
 			engine_power_shadow_[aspect].power_ = power;
 			if (!engine_playback_file_.IsOpen()) {
-				engine_playback_file_.Open("Data/Steering.rec", DiskFile::kModeTextWrite);
+				engine_playback_file_.Open("data/steering.rec", DiskFile::kModeTextWrite);
 				str comment = strutil::Format("// Recording %s at %s.\n", avatar->GetClassId().c_str(), Time().GetDateTimeAsString().c_str());
 				engine_playback_file_.WriteString(comment);
 				engine_playback_file_.WriteString(strutil::Encode("#" kRtvarSteeringPlaybackmode " 2\n"));

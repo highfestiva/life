@@ -16,11 +16,11 @@
 #define kRtvarGameAllowtoymode		"Game.AllowToyMode"
 #define kRtvarGameLevelcount		"Game.LevelCount"
 #define kRtvarGamePersonalrecordLevel	"Game.PersonalRecord.Level"
-#define kRtvarGameStartlevel		"Game.StartLevel"
+#define kRtvarGameStartLevel		"Game.StartLevel"
 #define kRtvarGameWorldrecordLevel	"Game.WorldRecord.Level"
 #define kRtvarGamePilotname		"Game.PilotName"
 
-#define kRtvarPhysicsRtrOffset	"Physics.RTR.Offset"
+#define kRtvarPhysicsRtrOffset		"Physics.RTR.Offset"
 
 #define kRtvarUi3DCamdistance		"Ui.3D.CamDistance"
 #define kRtvarUi3DCamxoffset		"Ui.3D.CamXOffset"

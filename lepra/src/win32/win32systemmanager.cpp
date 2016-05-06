@@ -152,7 +152,7 @@ str SystemManager::GetIoDirectory(const str& app_name) {
 
 str SystemManager::GetDataDirectoryFromPath(const str& argv0) {
 	argv0;
-	return "Data/";
+	return "data/";
 }
 
 

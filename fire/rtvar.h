@@ -13,8 +13,8 @@
 
 
 
-#define kRtvarGameExplosivestrength	"Game.ExplosiveStrength"
-#define kRtvarGameFirstrun		"Game.FirstRun"
-#define kRtvarGameFiredelay		"Game.FireDelay"
-#define kRtvarGameStartlevel		"Game.StartLevel"
-#define kRtvarGameVehicleremovedelay	"Game.VehicleRemoveDelay"
+#define kRtvarGameExplosiveStrength	"Game.ExplosiveStrength"
+#define kRtvarGameFirstRun		"Game.FirstRun"
+#define kRtvarGameFireDelay		"Game.FireDelay"
+#define kRtvarGameStartLevel		"Game.StartLevel"
+#define kRtvarGameVehicleRemoveDelay	"Game.VehicleRemoveDelay"

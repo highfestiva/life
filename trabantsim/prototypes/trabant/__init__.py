@@ -558,14 +558,14 @@ def keys():
 
 def keydir():
 	'''Returns the keyboard input direction as a 3D vector. X and Y is controlled by arrow keys
-	   up/down/left/right and by WSAD. +Z is controlled by SPACE, -Z is controlled by SHIFT.'''
+	   up/down/left/right and by WSAD. +Z is controlled by Space, -Z is controlled by Shift.'''
 	directions = vec3()
-	directions += vec3(0,+1,0) if   'UP'  in keys() or 'W' in keys() else vec3()
-	directions += vec3(0,-1,0) if  'DOWN' in keys() or 'S' in keys() else vec3()
-	directions += vec3(-1,0,0) if  'LEFT' in keys() or 'A' in keys() else vec3()
-	directions += vec3(+1,0,0) if 'RIGHT' in keys() or 'D' in keys() else vec3()
-	directions += vec3(0,0,+1) if 'SPACE' in keys() else vec3()
-	directions += vec3(0,0,-1) if [1 for k in keys() if k in ('SHIFT','LSHIFT','RSHIFT')] else vec3()
+	directions += vec3(0,+1,0) if    'Up' in keys() or 'W' in keys() else vec3()
+	directions += vec3(0,-1,0) if  'Down' in keys() or 'S' in keys() else vec3()
+	directions += vec3(-1,0,0) if  'Left' in keys() or 'A' in keys() else vec3()
+	directions += vec3(+1,0,0) if 'Right' in keys() or 'D' in keys() else vec3()
+	directions += vec3(0,0,+1) if 'Space' in keys() else vec3()
+	directions += vec3(0,0,-1) if [1 for k in keys() if k in ('Shift','LShift','RShift')] else vec3()
 	return directions
 
 def taps():

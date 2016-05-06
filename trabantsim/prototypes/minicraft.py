@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # A minimal 22 LoC Minecraft imitation for the Trabant API (pixeldoctrine.com/trabant.html).
 # Note that this is made for computers and no touch controls are included.
 

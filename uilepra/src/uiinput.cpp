@@ -521,15 +521,15 @@ str InputManager::GetKeyName(KeyCode key_code) {
 		X(Backspace);
 		X(Tab);
 		X(Enter);
-		X(Lshift);
-		X(Lctrl);
-		X(Lalt);
+		X(LShift);
+		X(LCtrl);
+		X(LAlt);
 		X(Pause);
 		X(CapsLock);
 		X(Esc);
 		X(Space);
-		X(Pgup);
-		X(Pgdown);
+		X(PgUp);
+		X(PgDown);
 		X(End);
 		X(Home);
 		X(Left);
@@ -539,8 +539,8 @@ str InputManager::GetKeyName(KeyCode key_code) {
 		X(PrintScreen);
 		X(Insert);
 		X(Del);
-		X(Los);
-		X(Ros);
+		X(LOs);
+		X(ROs);
 		X(ContextMenu);
 		X(Numpad0);
 		X(Numpad1);
@@ -598,9 +598,9 @@ str InputManager::GetKeyName(KeyCode key_code) {
 		X(Acute);
 		X(Paragraph);
 		X(Compare);
-		X(Rshift);
-		X(Rctrl);
-		X(Ralt);
+		X(RShift);
+		X(RCtrl);
+		X(RAlt);
 		default: break;
 	}
 #undef X

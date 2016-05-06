@@ -401,7 +401,7 @@ def _run_local_sim(addr):
 		if sys.platform == 'darwin':
 			open_prefix,end_suffix,binname = ['/usr/bin/open','-W'],['--args'],'TrabantSim.app'
 		elif sys.platform == 'linux':
-			open_prefix,end_suffix,binname = [],[],'TrabantSim'
+			open_prefix,end_suffix,binname = [],[],'trabantsim'
 		else:
 			open_prefix,end_suffix,binname = [],[],'TrabantSim.exe'
 		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('../../bin/sim','./'), ('..','Release/'), ('..','Debug/')]:

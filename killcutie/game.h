@@ -17,8 +17,8 @@
 #endif // iOS
 //#define LEPRA_TOUCH_LOOKANDFEEL
 #define kFps			20
-#define SCALE_FACTOR		1.0f
-#define HEALTH_ROUND_FACTOR	0.8f
+#define kScaleFactor		1.0f
+#define kHealthRoundFactor	0.8f
 
 
 

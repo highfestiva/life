@@ -13,7 +13,7 @@
 
 
 #define kRtvarGameFirsttime		"Game.FirstTime"
-#define kRtvarGameLevel		"Game.Level"
+#define kRtvarGameLevel			"Game.Level"
 #define kRtvarGameLevelshapealternate	"Game.LevelShapeAlternate"
 #define kRtvarGameRunads		"Game.RunAds"
-#define kRtvarGameScore		"Game.Score"
+#define kRtvarGameScore			"Game.Score"

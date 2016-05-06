@@ -564,10 +564,7 @@ void TrabantSimManager::GetKeys(strutil::strvec& keys) {
 	for (KeyMap::iterator x = key_map_.begin(); x != key_map_.end();) {
 		keys.push_back(uilepra::InputManager::GetKeyName(x->first));
 		if (x->second) {
-			KeyMap::iterator y = x;
-			++y;
-			key_map_.erase(x);
-			x = y;
+			x = key_map_.erase(x);
 		} else {
 			++x;
 		}

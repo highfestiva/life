@@ -11,7 +11,7 @@
 #define kRtvarCtrlAccelerometerY		"Control.Accelerometer.Y"
 #define kRtvarCtrlAccelerometerZ		"Control.Accelerometer.Z"
 
-#define kRtvarDebug3DEnableaxes		"Debug.3D.EnableAxes"
+#define kRtvarDebug3DEnableaxes			"Debug.3D.EnableAxes"
 #define kRtvarDebug3DEnablejoints		"Debug.3D.EnableJoints"
 #define kRtvarDebug3DEnableshapes		"Debug.3D.EnableShapes"
 
@@ -25,22 +25,22 @@
 #define kRtvarUiDisplayEnablevsync		"Ui.Display.EnableVSync"
 #define kRtvarUiDisplayRenderengine		"Ui.Display.RenderEngine"
 
-#define kRtvarUi3DEnablelights		"Ui.3D.EnableLights"
+#define kRtvarUi3DEnablelights			"Ui.3D.EnableLights"
 #define kRtvarUi3DEnableclear			"Ui.3D.EnableClear"
-#define kRtvarUi3DEnableautoperformance	"Ui.3D.EnableAutoPerformance"
+#define kRtvarUi3DEnableautoperformance		"Ui.3D.EnableAutoPerformance"
 #define kRtvarUi3DEnablemassobjects		"Ui.3D.EnableMassObjects"
 #define kRtvarUi3DEnablemassobjectfading	"Ui.3D.EnableMassObjectFading"
 #define kRtvarUi3DEnableparticles		"Ui.3D.EnableParticles"
 #define kRtvarUi3DExhaustintensity		"Ui.3D.ExhaustIntensity"
 #define kRtvarUi3DOutlinemode			"Ui.3D.OutlineMode"
-#define kRtvarUi3DWireframemode		"Ui.3D.WireframeMode"
-#define kRtvarUi3DPixelshaders		"Ui.3D.PixelShaders"
+#define kRtvarUi3DWireframemode			"Ui.3D.WireframeMode"
+#define kRtvarUi3DPixelshaders			"Ui.3D.PixelShaders"
 #define kRtvarUi3DLinewidth			"Ui.3D.LineWidth"
 #define kRtvarUi3DClearred			"Ui.3D.ClearRed"
 #define kRtvarUi3DCleargreen			"Ui.3D.ClearGreen"
 #define kRtvarUi3DClearblue			"Ui.3D.ClearBlue"
 #define kRtvarUi3DAmbientred			"Ui.3D.AmbientRed"
-#define kRtvarUi3DAmbientgreen		"Ui.3D.AmbientGreen"
+#define kRtvarUi3DAmbientgreen			"Ui.3D.AmbientGreen"
 #define kRtvarUi3DAmbientblue			"Ui.3D.AmbientBlue"
 #define kRtvarUi3DAmbientredfactor		"Ui.3D.AmbientRedOffset"	// Internal.
 #define kRtvarUi3DAmbientgreenfactor		"Ui.3D.AmbientGreenOffset"	// Internal.
@@ -60,7 +60,7 @@
 #define kRtvarUi3DShadowdeviation		"Ui.3D.ShadowDeviation"
 
 #define kRtvarUi2DPaintmode			"Ui.2D.PaintMode"
-#define kRtvarUi2DFont			"Ui.2D.Font"
+#define kRtvarUi2DFont				"Ui.2D.Font"
 #define kRtvarUi2DFontheight			"Ui.2D.FontHeight"
 #define kRtvarUi2DFontflags			"Ui.2D.FontFlags"
 

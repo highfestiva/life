@@ -42,6 +42,15 @@
     <File Name="pch.h"/>
     <File Name="uicuretest.cpp"/>
   </VirtualDirectory>
+  <Dependencies Name="Debug">
+    <Project Name="life"/>
+  </Dependencies>
+  <Dependencies Name="Profile">
+    <Project Name="life"/>
+  </Dependencies>
+  <Dependencies Name="Release">
+    <Project Name="life"/>
+  </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="-std=c++11" C_Options="" Assembler="">
@@ -67,7 +76,7 @@
         <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
-      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="netphys" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(ProjectPath)/../../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(ProjectPath)/../../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
@@ -195,13 +204,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug">
-    <Project Name="life"/>
-  </Dependencies>
-  <Dependencies Name="Profile">
-    <Project Name="life"/>
-  </Dependencies>
-  <Dependencies Name="Release">
-    <Project Name="life"/>
-  </Dependencies>
 </CodeLite_Project>

@@ -111,7 +111,7 @@ bool PushViewer::InitializeUniverse() {
 	vehicle->SetInitialTransform(xform(kIdentityQuaternionF, vec3(-23, -80, 53)));
 	vehicle->StartLoading();
 	avatar_id_ = vehicle->GetInstanceId();
-	GetConsoleManager()->ExecuteCommand("fork execute-file Data/Steering.rec");
+	GetConsoleManager()->ExecuteCommand("fork execute-file data/steering.rec");
 	return (true);
 }
 

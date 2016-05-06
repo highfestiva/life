@@ -437,7 +437,7 @@ ResourceManager::ResourceManager(unsigned loader_thread_count):
 	zip_file_(new ZipArchive),
 	inject_time_limit_(0.01),
 	load_intermission_(0) {
-	if (zip_file_->OpenArchive(path_prefix_ + "Data.pk3", ZipArchive::kReadOnly) != kIoOk) {
+	if (zip_file_->OpenArchive(path_prefix_ + "data.pk3", ZipArchive::kReadOnly) != kIoOk) {
 		delete zip_file_;
 		zip_file_ = 0;
 	}

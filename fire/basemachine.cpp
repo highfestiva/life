@@ -14,7 +14,7 @@
 #include "../uicure/include/uiburnemitter.h"
 #include "rtvar.h"
 
-#define SINK_TIME		4.0f
+#define kSinkTime	4.0f
 #define kStartSinkingId	10
 
 
@@ -48,8 +48,8 @@ void BaseMachine::OnAlarm(int alarm_id, void* extra_data) {
 
 	if (alarm_id == kStartSinkingId) {
 		life::Explosion::Freeze(manager_->GetGameManager()->GetPhysicsManager(), this);
-		SetSinking(12/SINK_TIME);
-		manager_->DelayKillObject(this, SINK_TIME);
+		SetSinking(12/kSinkTime);
+		manager_->DelayKillObject(this, kSinkTime);
 	}
 }
 
@@ -66,7 +66,7 @@ void BaseMachine::OnDie() {
 	ShrinkMeshBigOrientationThreshold(1e-3f);
 	Parent::OnDie();
 	float vehicle_remove_delay;
-	v_get(vehicle_remove_delay, =(float), GetManager()->GetGameManager()->GetVariableScope(), kRtvarGameVehicleremovedelay, 9.0);
+	v_get(vehicle_remove_delay, =(float), GetManager()->GetGameManager()->GetVariableScope(), kRtvarGameVehicleRemoveDelay, 9.0);
 	manager_->AddGameAlarmCallback(this, kStartSinkingId, vehicle_remove_delay, 0);
 }
 

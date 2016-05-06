@@ -16,4 +16,4 @@
 
 #define kRtvarNetworkLogingreeting		"Network.Login.Greeting"
 #define kRtvarNetworkPublishserver		"Network.PublishServer"
-#define kRtvarNetworkServername		"Network.ServerName"
+#define kRtvarNetworkServername			"Network.ServerName"

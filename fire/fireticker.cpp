@@ -32,8 +32,8 @@ FireTicker::FireTicker(UiCure::GameUiManager* ui_manager, cure::ResourceManager*
 	v_set(UiCure::GetSettings(), kRtvarPhysicsIsfixedfps, true);
 	v_set(UiCure::GetSettings(), kRtvarUi2DFontheight, 48.0);
 
-	AddBackedRtvar(kRtvarGameFirstrun);
-	AddBackedRtvar(kRtvarGameStartlevel);
+	AddBackedRtvar(kRtvarGameFirstRun);
+	AddBackedRtvar(kRtvarGameStartLevel);
 	AddBackedRtvar(kRtvarUiSoundMastervolume);
 }
 

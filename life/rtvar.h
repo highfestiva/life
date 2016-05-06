@@ -8,10 +8,10 @@
 
 #include "../cure/include/runtimevariable.h"
 
-#define kRtvarDebugExtrasleeptime		"Debug.ExtraSleepTime"
+#define kRtvarDebugExtrasleeptime	"Debug.ExtraSleepTime"
 
-#define kRtvarGameSpawnpart			"Game.SpawnPart"
+#define kRtvarGameSpawnpart		"Game.SpawnPart"
 
-#define kRtvarNetworkEnableopenserver		"Network.EnableOpenServer"
+#define kRtvarNetworkEnableopenserver	"Network.EnableOpenServer"
 
-#define kRtvarPowersaveFactor			"PowerSave.Factor"
+#define kRtvarPowersaveFactor		"PowerSave.Factor"

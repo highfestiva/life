@@ -72,7 +72,7 @@
 #include "version.h"
 
 #define kStillFramesUntilCamPans	4
-#define BG_COLOR			Color(110, 110, 110, 160)
+#define kBgColor			Color(110, 110, 110, 160)
 
 
 
@@ -148,7 +148,7 @@ DownwashManager::DownwashManager(life::GameClientMasterTicker* pMaster, const cu
 
 	touchstick_timer_.ReduceTimeDiff(-5);
 
-	v_set(GetVariableScope(), kRtvarGameStartlevel, "level_06");
+	v_set(GetVariableScope(), kRtvarGameStartLevel, "level_06");
 	v_set(GetVariableScope(), kRtvarGameLevelcount, 14);
 	v_set(GetVariableScope(), kRtvarGameChildishness, 1.0);
 	v_set(GetVariableScope(), kRtvarGameAllowtoymode, false);
@@ -205,10 +205,10 @@ void DownwashManager::LoadSettings() {
 	v_set(GetVariableScope(), kRtvarUi3DCamxangle, 0.0);
 
 	v_set(GetVariableScope(), kRtvarUi3DEnableclear, false);
-	v_set(GetVariableScope(), kRtvarCtrlSteerLeft3D, "Key.LEFT");
-	v_set(GetVariableScope(), kRtvarCtrlSteerRight3D, "Key.RIGHT");
-	v_set(GetVariableScope(), kRtvarCtrlSteerUp3D, "Key.UP");
-	v_set(GetVariableScope(), kRtvarCtrlSteerDown3D, "Key.DOWN");
+	v_set(GetVariableScope(), kRtvarCtrlSteerLeft3D, "Key.Left");
+	v_set(GetVariableScope(), kRtvarCtrlSteerRight3D, "Key.Right");
+	v_set(GetVariableScope(), kRtvarCtrlSteerUp3D, "Key.Up");
+	v_set(GetVariableScope(), kRtvarCtrlSteerDown3D, "Key.Down");
 	v_set(GetVariableScope(), kRtvarPhysicsNoclip, false);
 
 	GetConsoleManager()->ExecuteCommand("bind-key F1 \"#Debug.Enable true; #Ui.3D.CamDistance 100.0\"");
@@ -283,7 +283,7 @@ bool DownwashManager::Open() {
 	}
 	if (_ok) {
 		str start_level;
-		v_get(start_level, =, GetVariableScope(), kRtvarGameStartlevel, "level_06");
+		v_get(start_level, =, GetVariableScope(), kRtvarGameStartLevel, "level_06");
 		if (start_level == "level_06") {
 			pause_button_->SetVisible(false);
 			OnPauseButton(0);
@@ -798,7 +798,7 @@ str DownwashManager::StepLevel(int count) {
 		str new_level_name = strutil::Format("level_%.2i", level_number);
 		level_ = (Level*)Parent::CreateContextObject(new_level_name, cure::kNetworkObjectLocallyControlled, 0);
 		level_->StartLoading();
-		v_set(GetVariableScope(), kRtvarGameStartlevel, new_level_name);
+		v_set(GetVariableScope(), kRtvarGameStartLevel, new_level_name);
 		return new_level_name;
 	}
 	return "";
@@ -860,7 +860,7 @@ bool DownwashManager::InitializeUniverse() {
 	v_set(GetVariableScope(), kRtvarPhysicsRtr, 1.0+rtr_offset);
 
 	str start_level;
-	v_get(start_level, =, GetVariableScope(), kRtvarGameStartlevel, "level_06");
+	v_get(start_level, =, GetVariableScope(), kRtvarGameStartLevel, "level_06");
 	mass_object_array_.clear();
 	level_ = (Level*)Parent::CreateContextObject(start_level, cure::kNetworkObjectLocallyControlled, 0);
 	level_->StartLoading();
@@ -1516,7 +1516,7 @@ void DownwashManager::OnPauseButton(uitbc::Button* button) {
 	}
 
 	uitbc::Dialog* d = menu_->CreateTbcDialog(life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative), 0.8f, 0.8f);
-	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
+	d->SetColor(kBgColor, OFF_BLACK, BLACK, BLACK);
 	d->SetDirection(+1, false);
 
 	uitbc::FixedLayouter layouter(d);
@@ -1602,7 +1602,7 @@ void DownwashManager::ShowHiscoreDialog(int direction) {
 	hiscore_just_uploaded_timer_.Stop();
 	menu_->DismissDialog();
 	uitbc::Dialog* d = menu_->CreateTbcDialog(life::Menu::ButtonAction(this, &DownwashManager::OnMenuAlternative), 0.8f, 0.8f);
-	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
+	d->SetColor(kBgColor, OFF_BLACK, BLACK, BLACK);
 	d->SetName("hiscore_dialog");
 	d->SetPreClickTarget(uitbc::Dialog::Action(this, &DownwashManager::OnPreHiscoreAction));
 	d->SetDirection(direction, true);
@@ -1770,9 +1770,9 @@ void DownwashManager::UpdateHiscoreDialogTitle() {
 wstr DownwashManager::GetHiscoreLevelTitle() const {
 	wstr hiscore_level_info;
 	if (GetCurrentLevelNumber() == hiscore_level_index_ || hiscore_level_index_ == -1) {
-		hiscore_level_info = wstrutil::Format(L"Current level (%i high score)", hiscore_level_index_+1);
+		hiscore_level_info = wstrutil::Format(L"Current level (%i) high score", hiscore_level_index_+1);
 	} else if (GetCurrentLevelNumber()-1 == hiscore_level_index_) {
-		hiscore_level_info = wstrutil::Format(L"Previous level (%i high score)", hiscore_level_index_+1);
+		hiscore_level_info = wstrutil::Format(L"Previous level (%i) high score", hiscore_level_index_+1);
 	} else {
 		hiscore_level_info = wstrutil::Format(L"Level %i high score", hiscore_level_index_+1);
 	}

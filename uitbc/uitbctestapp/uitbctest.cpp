@@ -505,7 +505,7 @@ bool OpenRenderer(const lepra::LogDecorator& log, uilepra::DisplayManager::Conte
 			_context = "load texturemap";
 			lepra::Canvas canvas;
 			lepra::PngLoader loader;
-			ok = (loader.Load("Data/nuclear.png", canvas) == lepra::PngLoader::kStatusSuccess);
+			ok = (loader.Load("data/nuclear.png", canvas) == lepra::PngLoader::kStatusSuccess);
 
 			texture_map.Set(canvas);
 			if (ok) {
@@ -525,7 +525,7 @@ bool OpenRenderer(const lepra::LogDecorator& log, uilepra::DisplayManager::Conte
 			_context = "load lightmap";
 			lepra::Canvas canvas;
 			lepra::PngLoader loader;
-			ok = (loader.Load("Data/env.png", canvas) == lepra::PngLoader::kStatusSuccess);
+			ok = (loader.Load("data/env.png", canvas) == lepra::PngLoader::kStatusSuccess);
 
 			light_map.Set(canvas);
 
@@ -546,7 +546,7 @@ bool OpenRenderer(const lepra::LogDecorator& log, uilepra::DisplayManager::Conte
 			_context = "load envmap";
 			lepra::Canvas canvas;
 			lepra::PngLoader loader;
-			ok = (loader.Load("Data/env.png", canvas) == lepra::PngLoader::kStatusSuccess);
+			ok = (loader.Load("data/env.png", canvas) == lepra::PngLoader::kStatusSuccess);
 
 			env_map.Set(canvas);
 
@@ -567,7 +567,7 @@ bool OpenRenderer(const lepra::LogDecorator& log, uilepra::DisplayManager::Conte
 			_context = "load specmap";
 			lepra::Canvas canvas;
 			lepra::PngLoader loader;
-			ok = (loader.Load("Data/env.png", canvas) == lepra::PngLoader::kStatusSuccess);
+			ok = (loader.Load("data/env.png", canvas) == lepra::PngLoader::kStatusSuccess);
 
 			spec_map.Set(canvas);
 
@@ -588,7 +588,7 @@ bool OpenRenderer(const lepra::LogDecorator& log, uilepra::DisplayManager::Conte
 			_context = "load normalmap";
 			lepra::Canvas canvas;
 			lepra::PngLoader loader;
-			ok = (loader.Load("Data/env.png", canvas) == lepra::PngLoader::kStatusSuccess);
+			ok = (loader.Load("data/env.png", canvas) == lepra::PngLoader::kStatusSuccess);
 
 			normal_map.Set(canvas);
 
@@ -1215,7 +1215,7 @@ bool TestMeshImport(const lepra::LogDecorator& log, double show_time) {
 	uitbc::TriangleBasedGeometry _geometry;
 	if (test_ok) {
 		_context = "load imported mesh";
-		const str mesh_name = "Data/tractor_01_rear_wheel0.mesh";
+		const str mesh_name = "data/tractor_01_rear_wheel0.mesh";
 		lepra::DiskFile file;
 		test_ok = file.Open(mesh_name, lepra::DiskFile::kModeRead);
 		deb_assert(test_ok);
@@ -1269,7 +1269,7 @@ bool TestLoadClass(const lepra::LogDecorator& log) {
 	lepra::DiskFile file;
 	if (test_ok) {
 		_context = "open file";
-		const str class_name = "Data/tractor_01.class";
+		const str class_name = "data/tractor_01.class";
 		test_ok = file.Open(class_name, lepra::DiskFile::kModeRead);
 		deb_assert(test_ok);
 	}
@@ -2257,7 +2257,7 @@ bool TestUiTbc() {
 			uitbc::TriangleBasedGeometry mesh;
 			bool lCastShadows = false;
 			DiskFile file;
-			test_ok = file.Open("Data/road_sign_01_sign.mesh", DiskFile::kModeRead);
+			test_ok = file.Open("data/road_sign_01_sign.mesh", DiskFile::kModeRead);
 			deb_assert(test_ok);
 			if (test_ok) {
 				uitbc::ChunkyMeshLoader loader(&file, false);

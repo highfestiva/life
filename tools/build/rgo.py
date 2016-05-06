@@ -30,8 +30,8 @@ own_tt = builddir_types["ansi"]
 verbose = False
 updates = 0
 removes = 0
-importscript = "Tools/Maya/import_chunky.py"
-makefilescriptdir = "Tools/GCC"
+importscript = "tools/maya/import_chunky.py"
+makefilescriptdir = "tools/gcc"
 makefilescript = "generate_makefile.py"
 
 showed_result = False
@@ -106,7 +106,7 @@ def _convertdata(filename):
 
 def _incremental_build_data(sourcedir):
 	import glob
-	mas = glob.glob(os.path.join(sourcedir, "Data/*.ma"))
+	mas = glob.glob(os.path.join(sourcedir, "data/*.ma"))
 	for ma in mas:
 		ft = rgohelp._filetime(ma)
 		basename = os.path.splitext(ma)[0]
@@ -183,11 +183,11 @@ def _incremental_copy_code(targetdir, buildtype):
 
 def _incremental_copy_data(sourcedir, targetdir, buildtype):
 	import glob
-	datadir = os.path.join(sourcedir, "Data")
+	datadir = os.path.join(sourcedir, "data")
 	fl = glob.glob(datadir+"/*.class") + glob.glob(datadir+"/*.mesh") + glob.glob(datadir+"/*.phys") + \
 		 glob.glob(datadir+"/*.jpg") + glob.glob(datadir+"/*.png") + glob.glob(datadir+"/*.tga") + glob.glob(datadir+"/*.bmp") + \
 		 glob.glob(datadir+"/*.wav") + glob.glob(datadir+"/*.ogg") + glob.glob(datadir+"/*.mp3") + glob.glob(datadir+"/*.xm")
-	targetdata = os.path.join(targetdir, "Data")
+	targetdata = os.path.join(targetdir, "data")
 	_incremental_copy(fl, targetdata, buildtype)
 
 
@@ -204,8 +204,8 @@ def _cleandata(da_dir):
 def _cleandata_source(sourcedir):
 	targetdir=bindir
 	global removes
-	removes += _cleandata(os.path.join(sourcedir, "Data"))
-	removes += _cleandir(os.path.join(targetdir, "Data"))
+	removes += _cleandata(os.path.join(sourcedir, "data"))
+	removes += _cleandir(os.path.join(targetdir, "data"))
 
 
 def _cleandir(da_dir):
@@ -303,8 +303,8 @@ def _copybin(targetdir, buildtype):
 	import glob
 	fl = glob.glob("bin/*")
 	_incremental_copy(fl, targetdir, buildtype, True)
-	fl = glob.glob("bin/Data/*")
-	_incremental_copy(fl, os.path.join(targetdir, "Data"), buildtype)
+	fl = glob.glob("bin/data/*")
+	_incremental_copy(fl, os.path.join(targetdir, "data"), buildtype)
 
 
 def _builddata(sourcedir, targetdir, buildtype):
@@ -320,9 +320,9 @@ def _rebuild(sourcedir, targetdir, buildtype):
 		_buildcode("rebuild", buildtype)
 		_incremental_copy_code(targetdir, buildtype)
 	else:
-		_cleandir(targetdir+"/Data")
+		_cleandir(targetdir+"/data")
 	_cleandata_source(targetdir)
-	_builddata(sourcedir+"/Data", targetdir+"/Data", buildtype)
+	_builddata(sourcedir+"/data", targetdir+"/data", buildtype)
 
 
 def _macappify(exe, name):
@@ -339,12 +339,12 @@ def _macappify(exe, name):
 			#print("install_name_tool -change %s @executable_path/%s %s" % (o, o, i))
 			os.system("install_name_tool -change %s @executable_path/%s %s" % (o, o, i))
 	import shutil
-	shutil.copytree("../Tools/build/macosx", exe+".app")
+	shutil.copytree("../tools/build/macosx", exe+".app")
 	for f in fs:
 		os.rename(f, os.path.join(exe+".app/Contents/MacOS", f))
 		updates += 1
 	try:
-		os.rename("Data", exe+".app/Contents/Resources/Data")
+		os.rename("data", exe+".app/Contents/Resources/data")
 		updates += 1
 		shutil.copy("../"+exe+"/Icons/Main.icns", exe+".app/Contents/Resources")
 		updates += 1
@@ -374,7 +374,7 @@ def _demacappify(wildcard):
 	apps = glob.glob(wildcard)
 	for app in apps:
 		fl  = glob.glob(os.path.join(app, "Contents/MacOS/*"))
-		fl += glob.glob(os.path.join(app, "Contents/Resources/Data"))
+		fl += glob.glob(os.path.join(app, "Contents/Resources/data"))
 		for f in fl:
 			os.rename(f, os.path.split(f)[1])
 		shutil.rmtree(app)
@@ -430,7 +430,7 @@ def _getmethods():
 
 def _runlocal(script, args):
 	if os.path.exists(appnames[0]+'/script/'+script+'.py'):
-		os.chdir(appnames[0]+'/Data')
+		os.chdir(appnames[0]+'/data')
 		rgohelp._run([sys.executable, '-OO', '../script/'+script+'.py'], ' '.join([script]+args))
 		os.chdir('../..')
 		return True
@@ -458,16 +458,16 @@ def builddata():
 
 def zipdata():
 	global appnames, updates
-	datadir = appnames[0] + '/Data'
+	datadir = appnames[0] + '/data'
 	os.chdir(datadir)
-	rgohelp._zipdir('', _include_data_files, "Data.pk3")
+	rgohelp._zipdir('', _include_data_files, "data.pk3")
 	os.chdir('../..')
 	updates += 1
-	# Replace bin/Data too.
+	# Replace bin/data too.
 	_cleandata_source(bindir)
 	import glob
-	fl = [datadir+"/Data.pk3"] + glob.glob(datadir+"/*.ogg") + glob.glob(datadir+"/*.mp3")	# Music goes outside of the .zip.
-	targetdata = os.path.join(bindir, "Data")
+	fl = [datadir+"/data.pk3"] + glob.glob(datadir+"/*.ogg") + glob.glob(datadir+"/*.mp3")	# Music goes outside of the .zip.
+	targetdata = os.path.join(bindir, "data")
 	_incremental_copy(fl, targetdata, default_build_mode)
 
 def buildcode():
