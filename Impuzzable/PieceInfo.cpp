@@ -1,25 +1,22 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "PieceInfo.h"
+#include "pieceinfo.h"
 
 
 
-namespace Impuzzable
-{
+namespace Impuzzable {
 
 
 
-PieceInfo::PieceInfo()
-{
+PieceInfo::PieceInfo() {
 }
 
-PieceInfo::~PieceInfo()
-{
+PieceInfo::~PieceInfo() {
 }
 
 

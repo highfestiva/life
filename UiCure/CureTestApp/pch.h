@@ -1,3 +1,3 @@
-#include "../../Lepra/Include/Lepra.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/Log.h"
+#include "../../lepra/include/lepra.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/log.h"

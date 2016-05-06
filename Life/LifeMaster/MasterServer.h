@@ -1,30 +1,29 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Lepra/Include/Unordered.h"
+#include "../../lepra/include/unordered.h"
 #include <set>
-#include "../../Cure/Include/GameTicker.h"
-#include "../../Lepra/Include/MemberThread.h"
-#include "../../Lepra/Include/Timer.h"
-#include "../Life.h"
-#include "../ServerInfo.h"
+#include "../../cure/include/gameticker.h"
+#include "../../lepra/include/memberthread.h"
+#include "../../lepra/include/timer.h"
+#include "../life.h"
+#include "../serverinfo.h"
 
-#define MASTER_SERVER_TIMEOUT	2*60
-#define MASTER_SERVER_USI	"UploadServerInfo"
-#define MASTER_SERVER_DSL	"DownloadServerList"
-#define MASTER_SERVER_OF	"OpenFirewall"
-#define MASTER_SERVER_UL	"UseLAN"
-#define MASTER_SERVER_DC	"Disconnect"
+#define kMasterServerTimeout	2*60
+#define kMasterServerUsi	"UploadServerInfo"
+#define kMasterServerDsl	"DownloadServerList"
+#define kMasterServerOf	"OpenFirewall"
+#define kMasterServerUl	"UseLAN"
+#define kMasterServerDc	"Disconnect"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class SocketAddress;
 class UdpMuxSocket;
 class UdpVSocket;
@@ -32,8 +31,7 @@ class UdpVSocket;
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -41,10 +39,9 @@ struct ServerInfo;
 
 
 
-class MasterServer: public Cure::ApplicationTicker
-{
+class MasterServer: public cure::ApplicationTicker {
 public:
-	MasterServer(const str& pPort);
+	MasterServer(const str& port);
 	virtual ~MasterServer();
 
 	virtual bool Initialize();
@@ -56,33 +53,32 @@ public:
 private:
 	void KillDeadServers();
 	void KillDeadSockets();
-	void OnQuitRequest(int pLevel);
-	void HandleReceive(UdpVSocket* pRemote, const uint8* pCommand, unsigned pCommandLength);
-	bool HandleCommandLine(UdpVSocket* pRemote, const str& pCommandLine);
-	bool RegisterGameServer(const ServerInfo& pServerInfo, UdpVSocket* pRemote);
-	bool SendServerList(UdpVSocket* pRemote);
-	bool OpenFirewall(UdpVSocket* pRemote, const ServerInfo& pServerInfo);
-	bool Send(UdpVSocket* pRemote, const str& pData);
-	void DropSocket(UdpVSocket* pRemote);
+	void OnQuitRequest(int level);
+	void HandleReceive(UdpVSocket* remote, const uint8* command, unsigned command_length);
+	bool HandleCommandLine(UdpVSocket* remote, const str& command_line);
+	bool RegisterGameServer(const ServerInfo& server_info, UdpVSocket* remote);
+	bool SendServerList(UdpVSocket* remote);
+	bool OpenFirewall(UdpVSocket* remote, const ServerInfo& server_info);
+	bool Send(UdpVSocket* remote, const str& data);
+	void DropSocket(UdpVSocket* remote);
 
-	struct GameServerInfo: public ServerInfo
-	{
-		Timer mIdleTime;
+	struct GameServerInfo: public ServerInfo {
+		Timer idle_time_;
 
-		GameServerInfo(const ServerInfo& pServerInfo);
+		GameServerInfo(const ServerInfo& server_info);
 	};
 
 	typedef std::unordered_map<str, GameServerInfo> GameServerTable;
 	typedef std::set<UdpVSocket*> SocketTable;
 
-	UdpMuxSocket* mMuxSocket;
-	str mPort;
-	SocketTable mSocketTable;
-	SocketTable mSocketTimeoutTable;
-	Lock mLock;
-	GameServerTable mGameServerTable;
-	Timer mKeepaliveTimer;
-	Timer mServerIdleTimer;
+	UdpMuxSocket* mux_socket_;
+	str port_;
+	SocketTable socket_table_;
+	SocketTable socket_timeout_table_;
+	Lock lock_;
+	GameServerTable game_server_table_;
+	Timer keepalive_timer_;
+	Timer server_idle_timer_;
 
 	logclass();
 };

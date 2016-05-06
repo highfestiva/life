@@ -1,29 +1,27 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Lepra/Include/AABR.h"
-#include "../../Lepra/Include/IdManager.h"
-#include "../../Lepra/Include/HashTable.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "Cure.h"
-#include "ResourceManager.h"
+#include "../../lepra/include/aabr.h"
+#include "../../lepra/include/idmanager.h"
+#include "../../lepra/include/hashtable.h"
+#include "../../lepra/include/vector3d.h"
+#include "cure.h"
+#include "resourcemanager.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 class TerrainPatch;
 }
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
@@ -44,53 +42,50 @@ class TerrainPatchManager;
 //    Therefore, latency when loading a function is not a problem. We do not need
 //    a resource cache of terrain functions either, because the patches in the
 //    managers cache provide already generated terrain data.
-class TerrainManager
-{
+class TerrainManager {
 public:
 	typedef int CameraId;
 	typedef AABR<float> PatchArea;
 
-	TerrainManager(ResourceManager* pResourceManager);
+	TerrainManager(ResourceManager* resource_manager);
 	virtual ~TerrainManager();
 	void Clear();
 
-	static Tbc::TerrainPatch* CreatePatch(const PatchArea& pArea, float pLod);
-	static void DeletePatch(Tbc::TerrainPatch* pPatch);
+	static tbc::TerrainPatch* CreatePatch(const PatchArea& area, float lod);
+	static void DeletePatch(tbc::TerrainPatch* patch);
 
-	CameraId AddCamera(const vec3& pPosition, float pVisibleRadius);
-	void RemoveCamera(CameraId pCameraId);
-	void MoveCamera(CameraId pCameraId, const vec3& pPosition);
+	CameraId AddCamera(const vec3& position, float visible_radius);
+	void RemoveCamera(CameraId camera_id);
+	void MoveCamera(CameraId camera_id, const vec3& position);
 
-	void GetLoadCount(int& pLoadPatchOkCount, int& pLoadPatchErrorCount);
+	void GetLoadCount(int& load_patch_ok_count, int& load_patch_error_count);
 
 private:
 	void UpdatePatchTree();
-	void TerrainPatchLoadCallback(UserPhysicalTerrainResource* pLoadedResource);
+	void TerrainPatchLoadCallback(UserPhysicalTerrainResource* loaded_resource);
 
-	Lock mTerrainLock;
+	Lock terrain_lock_;
 
-	ResourceManager* mResourceManager;
+	ResourceManager* resource_manager_;
 
-	int mLoadPatchOkCount;
-	int mLoadPatchErrorCount;
+	int load_patch_ok_count_;
+	int load_patch_error_count_;
 
-	TerrainPatchManager* mPatchManager;
+	TerrainPatchManager* patch_manager_;
 
 	typedef IdManager<CameraId> CameraIdManager;
-	CameraIdManager mCameraIdManager;
+	CameraIdManager camera_id_manager_;
 
-	struct CameraInfo
-	{
-		inline CameraInfo(const vec3& pPosition, float pVisibleRadius):
-			mPosition(pPosition),
-			mVisibleRadius(pVisibleRadius)
-		{
+	struct CameraInfo {
+		inline CameraInfo(const vec3& position, float visible_radius):
+			position_(position),
+			visible_radius_(visible_radius) {
 		}
-		vec3 mPosition;
-		float mVisibleRadius;
+		vec3 position_;
+		float visible_radius_;
 	};
 	typedef HashTable<CameraId, CameraInfo> CameraTable;
-	CameraTable mCameraTable;
+	CameraTable camera_table_;
 
 	logclass();
 };

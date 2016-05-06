@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,16 +7,15 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Lepra.h"
+#include "../../lepra/include/lepra.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-using namespace Lepra;
+using namespace lepra;
 
 void Init();
 void Shutdown();

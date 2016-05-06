@@ -16,10 +16,8 @@
 
 
 
-namespace Cure
-{
-namespace PythonInterface
-{
+namespace cure {
+namespace pythoninterface {
 
 
 
@@ -27,68 +25,66 @@ typedef boost::python::tuple tuple;
 
 
 
-class TerrainPatch
-{
+class TerrainPatch {
 public:
 	TerrainPatch();
 	virtual ~TerrainPatch();
 	void Create(int x, int y);
 	void Clear();
-	void SetSurfaceCoordinates(const tuple& pSurfaceCoordinates) const;
+	void SetSurfaceCoordinates(const tuple& surface_coordinates) const;
 	static int GetResolution();
 
 private:
-	int mTerrainId;
+	int terrain_id_;
 };
 
-class PythonObjectBase
-{
+class PythonObjectBase {
 public:
 	PythonObjectBase();
-	PythonObjectBase(const PythonObjectBase& pObject);
+	PythonObjectBase(const PythonObjectBase& object);
 	virtual ~PythonObjectBase();
-	void operator=(const PythonObjectBase& pObject);
-	void SetContextObject(PythonContextObject* pContextObject);
+	void operator=(const PythonObjectBase& object);
+	void SetContextObject(PythonContextObject* context_object);
 	PythonContextObject* GetContextObject() const;
 	void Clear();
 
 	void EnableTick();
 	void DisableTick();
-	void SetAlarm(int pAlarmId, double pSeconds);
-	void SetPosition(double pX, double pY, double pZ);
+	void SetAlarm(int alarm_id, double seconds);
+	void SetPosition(double _x, double _y, double z);
 	tuple GetPosition() const;
-	void SetOrientation(double pTheta, double pPhi, double pGimbal);
+	void SetOrientation(double theta, double phi, double gimbal);
 	tuple GetOrientation() const;
-	void ApplyForce(double pForce, double pTheta, double pPhi, double pXOffset, double pYOffset, double pZOffset);
-	void ApplyTransformedForce(double pForce, double pTheta, double pPhi, double pXOffset, double pYOffset, double pZOffset);
-	void LoadGroup(double pScale, const char* pModel);
+	void ApplyForce(double force, double theta, double phi, double x_offset, double y_offset, double z_offset);
+	void ApplyTransformedForce(double force, double theta, double phi, double x_offset, double y_offset, double z_offset);
+	void LoadGroup(double scale, const char* model);
 
 	virtual void OnCreate() const = 0;
-	virtual void OnTick(double pFrameTime) const = 0;
-	virtual void OnAlarm(int pAlarmId) const = 0;
-	virtual void OnCollision(const tuple& pCoordinate, const tuple& pForceDirection, double pArea, PyObject& pPythonObject) const = 0;
+	virtual void OnTick(double frame_time) const = 0;
+	virtual void OnAlarm(int alarm_id) const = 0;
+	virtual void OnCollision(const tuple& coordinate, const tuple& force_direction, double area, PyObject& python_object) const = 0;
 
 private:
-	PythonContextObject* mContextObject;
+	PythonContextObject* context_object_;
 };
 
 class PythonObjectWrapper: public PythonObjectBase, public boost::python::wrapper<PythonObjectBase>
 {
 public:
 	PythonObjectWrapper();
-	PythonObjectWrapper(const PythonObjectBase& pObject);
-	PythonObjectWrapper(const PythonObjectWrapper& pObject);
+	PythonObjectWrapper(const PythonObjectBase& object);
+	PythonObjectWrapper(const PythonObjectWrapper& object);
 	~PythonObjectWrapper();
-	void operator=(const PythonObjectWrapper& pObject);
+	void operator=(const PythonObjectWrapper& object);
 	operator const PythonObjectBase&();
 
 	void OnCreate() const;
-	void OnTick(double pFrameTime) const;
-	void OnAlarm(int pAlarmId) const;
-	void OnCollision(const tuple& pCoordinate, const tuple& pForceDirection, double pArea, PyObject& pPythonObject) const;
+	void OnTick(double frame_time) const;
+	void OnAlarm(int alarm_id) const;
+	void OnCollision(const tuple& coordinate, const tuple& force_direction, double area, PyObject& python_object) const;
 };
 
-static PyObject* CreatePythonObject(const char* pPythonName, const tuple& pArguments, bool pReplicated);
+static PyObject* CreatePythonObject(const char* python_name, const tuple& arguments, bool replicated);
 
 
 }

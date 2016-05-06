@@ -7,7 +7,7 @@ extern "C" {
 
 /*
 ** Copyright (c) 2007 The Khronos Group Inc.
-** 
+**
 ** Permission is hereby granted, free of charge, to any person obtaining a
 ** copy of this software and/or associated documentation files (the
 ** "Materials"), to deal in the Materials without restriction, including
@@ -15,10 +15,10 @@ extern "C" {
 ** distribute, sublicense, and/or sell copies of the Materials, and to
 ** permit persons to whom the Materials are furnished to do so, subject to
 ** the following conditions:
-** 
+**
 ** The above copyright notice and this permission notice shall be included
 ** in all copies or substantial portions of the Materials.
-** 
+**
 ** THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 ** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 ** MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -50,7 +50,7 @@ extern "C" {
 /* Current version at http://www.opengl.org/registry/ */
 #define GL_GLEXT_VERSION 39
 
-#ifndef GL_VERSION_1_2
+#ifndef kGlVersion12
 #define GL_UNSIGNED_BYTE_3_3_2            0x8032
 #define GL_UNSIGNED_SHORT_4_4_4_4         0x8033
 #define GL_UNSIGNED_SHORT_5_5_5_1         0x8034
@@ -172,7 +172,7 @@ extern "C" {
 #define GL_CONVOLUTION_BORDER_COLOR       0x8154
 #endif
 
-#ifndef GL_VERSION_1_3
+#ifndef kGlVersion13
 #define GL_TEXTURE0                       0x84C0
 #define GL_TEXTURE1                       0x84C1
 #define GL_TEXTURE2                       0x84C2
@@ -271,7 +271,7 @@ extern "C" {
 #define GL_DOT3_RGBA                      0x86AF
 #endif
 
-#ifndef GL_VERSION_1_4
+#ifndef kGlVersion14
 #define GL_BLEND_DST_RGB                  0x80C8
 #define GL_BLEND_SRC_RGB                  0x80C9
 #define GL_BLEND_DST_ALPHA                0x80CA
@@ -313,7 +313,7 @@ extern "C" {
 #define GL_COMPARE_R_TO_TEXTURE           0x884E
 #endif
 
-#ifndef GL_VERSION_1_5
+#ifndef kGlVersion15
 #define GL_BUFFER_SIZE                    0x8764
 #define GL_BUFFER_USAGE                   0x8765
 #define GL_QUERY_COUNTER_BITS             0x8864
@@ -366,7 +366,7 @@ extern "C" {
 #define GL_SRC2_ALPHA                     GL_SOURCE2_ALPHA
 #endif
 
-#ifndef GL_VERSION_2_0
+#ifndef kGlVersion20
 #define GL_BLEND_EQUATION_RGB             GL_BLEND_EQUATION
 #define GL_VERTEX_ATTRIB_ARRAY_ENABLED    0x8622
 #define GL_VERTEX_ATTRIB_ARRAY_SIZE       0x8623
@@ -453,7 +453,7 @@ extern "C" {
 #define GL_STENCIL_BACK_WRITEMASK         0x8CA5
 #endif
 
-#ifndef GL_VERSION_2_1
+#ifndef kGlVersion21
 #define GL_CURRENT_RASTER_SECONDARY_COLOR 0x845F
 #define GL_PIXEL_PACK_BUFFER              0x88EB
 #define GL_PIXEL_UNPACK_BUFFER            0x88EC
@@ -2068,29 +2068,29 @@ extern "C" {
 #endif
 
 #ifndef GL_IBM_cull
-#define GL_CULL_VERTEX_IBM                103050
+#define kGlCullVertexIbm                103050
 #endif
 
 #ifndef GL_IBM_multimode_draw_arrays
 #endif
 
 #ifndef GL_IBM_vertex_array_lists
-#define GL_VERTEX_ARRAY_LIST_IBM          103070
-#define GL_NORMAL_ARRAY_LIST_IBM          103071
-#define GL_COLOR_ARRAY_LIST_IBM           103072
-#define GL_INDEX_ARRAY_LIST_IBM           103073
-#define GL_TEXTURE_COORD_ARRAY_LIST_IBM   103074
-#define GL_EDGE_FLAG_ARRAY_LIST_IBM       103075
-#define GL_FOG_COORDINATE_ARRAY_LIST_IBM  103076
-#define GL_SECONDARY_COLOR_ARRAY_LIST_IBM 103077
-#define GL_VERTEX_ARRAY_LIST_STRIDE_IBM   103080
-#define GL_NORMAL_ARRAY_LIST_STRIDE_IBM   103081
-#define GL_COLOR_ARRAY_LIST_STRIDE_IBM    103082
-#define GL_INDEX_ARRAY_LIST_STRIDE_IBM    103083
-#define GL_TEXTURE_COORD_ARRAY_LIST_STRIDE_IBM 103084
-#define GL_EDGE_FLAG_ARRAY_LIST_STRIDE_IBM 103085
-#define GL_FOG_COORDINATE_ARRAY_LIST_STRIDE_IBM 103086
-#define GL_SECONDARY_COLOR_ARRAY_LIST_STRIDE_IBM 103087
+#define kGlVertexArrayListIbm          103070
+#define kGlNormalArrayListIbm          103071
+#define kGlColorArrayListIbm           103072
+#define kGlIndexArrayListIbm           103073
+#define kGlTextureCoordArrayListIbm   103074
+#define kGlEdgeFlagArrayListIbm       103075
+#define kGlFogCoordinateArrayListIbm  103076
+#define kGlSecondaryColorArrayListIbm 103077
+#define kGlVertexArrayListStrideIbm   103080
+#define kGlNormalArrayListStrideIbm   103081
+#define kGlColorArrayListStrideIbm    103082
+#define kGlIndexArrayListStrideIbm    103083
+#define kGlTextureCoordArrayListStrideIbm 103084
+#define kGlEdgeFlagArrayListStrideIbm 103085
+#define kGlFogCoordinateArrayListStrideIbm 103086
+#define kGlSecondaryColorArrayListStrideIbm 103087
 #endif
 
 #ifndef GL_SGIX_subsample
@@ -3386,12 +3386,12 @@ extern "C" {
 /*************************************************************/
 
 #include <stddef.h>
-#ifndef GL_VERSION_2_0
+#ifndef kGlVersion20
 /* GL type for program/shader text */
 typedef char GLchar;			/* native character */
 #endif
 
-#ifndef GL_VERSION_1_5
+#ifndef kGlVersion15
 /* GL types for handling large vertex buffer objects */
 typedef ptrdiff_t GLintptr;
 typedef ptrdiff_t GLsizeiptr;
@@ -3460,8 +3460,8 @@ typedef int64_t GLint64EXT;
 typedef uint64_t GLuint64EXT;
 #endif
 
-#ifndef GL_VERSION_1_2
-#define GL_VERSION_1_2 1
+#ifndef kGlVersion12
+#define kGlVersion12 1
 #ifdef GL_GLEXT_PROTOTYPES
 GLAPI void APIENTRY glBlendColor (GLclampf, GLclampf, GLclampf, GLclampf);
 GLAPI void APIENTRY glBlendEquation (GLenum);
@@ -3542,8 +3542,8 @@ typedef void (APIENTRYP PFNGLTEXSUBIMAGE3DPROC) (GLenum target, GLint level, GLi
 typedef void (APIENTRYP PFNGLCOPYTEXSUBIMAGE3DPROC) (GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height);
 #endif
 
-#ifndef GL_VERSION_1_3
-#define GL_VERSION_1_3 1
+#ifndef kGlVersion13
+#define kGlVersion13 1
 #ifdef GL_GLEXT_PROTOTYPES
 GLAPI void APIENTRY glActiveTexture (GLenum);
 GLAPI void APIENTRY glClientActiveTexture (GLenum);
@@ -3640,8 +3640,8 @@ typedef void (APIENTRYP PFNGLCOMPRESSEDTEXSUBIMAGE1DPROC) (GLenum target, GLint 
 typedef void (APIENTRYP PFNGLGETCOMPRESSEDTEXIMAGEPROC) (GLenum target, GLint level, GLvoid *img);
 #endif
 
-#ifndef GL_VERSION_1_4
-#define GL_VERSION_1_4 1
+#ifndef kGlVersion14
+#define kGlVersion14 1
 #ifdef GL_GLEXT_PROTOTYPES
 GLAPI void APIENTRY glBlendFuncSeparate (GLenum, GLenum, GLenum, GLenum);
 GLAPI void APIENTRY glFogCoordf (GLfloat);
@@ -3736,8 +3736,8 @@ typedef void (APIENTRYP PFNGLWINDOWPOS3SPROC) (GLshort x, GLshort y, GLshort z);
 typedef void (APIENTRYP PFNGLWINDOWPOS3SVPROC) (const GLshort *v);
 #endif
 
-#ifndef GL_VERSION_1_5
-#define GL_VERSION_1_5 1
+#ifndef kGlVersion15
+#define kGlVersion15 1
 #ifdef GL_GLEXT_PROTOTYPES
 GLAPI void APIENTRY glGenQueries (GLsizei, GLuint *);
 GLAPI void APIENTRY glDeleteQueries (GLsizei, const GLuint *);
@@ -3780,8 +3780,8 @@ typedef void (APIENTRYP PFNGLGETBUFFERPARAMETERIVPROC) (GLenum target, GLenum pn
 typedef void (APIENTRYP PFNGLGETBUFFERPOINTERVPROC) (GLenum target, GLenum pname, GLvoid* *params);
 #endif
 
-#ifndef GL_VERSION_2_0
-#define GL_VERSION_2_0 1
+#ifndef kGlVersion20
+#define kGlVersion20 1
 #ifdef GL_GLEXT_PROTOTYPES
 GLAPI void APIENTRY glBlendEquationSeparate (GLenum, GLenum);
 GLAPI void APIENTRY glDrawBuffers (GLsizei, const GLenum *);
@@ -3972,8 +3972,8 @@ typedef void (APIENTRYP PFNGLVERTEXATTRIB4USVPROC) (GLuint index, const GLushort
 typedef void (APIENTRYP PFNGLVERTEXATTRIBPOINTERPROC) (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *pointer);
 #endif
 
-#ifndef GL_VERSION_2_1
-#define GL_VERSION_2_1 1
+#ifndef kGlVersion21
+#define kGlVersion21 1
 #ifdef GL_GLEXT_PROTOTYPES
 GLAPI void APIENTRY glUniformMatrix2x3fv (GLint, GLsizei, GLboolean, const GLfloat *);
 GLAPI void APIENTRY glUniformMatrix3x2fv (GLint, GLsizei, GLboolean, const GLfloat *);

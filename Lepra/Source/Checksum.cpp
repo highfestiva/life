@@ -1,44 +1,39 @@
 /*
 	Class:  Checksum
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
 
 
 #include "pch.h"
-#include "../Include/Checksum.h"
+#include "../include/checksum.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-uint8 Checksum::CalculateLrc(const uint8* pData, unsigned pLength)
-{
+uint8 Checksum::CalculateLrc(const uint8* data, unsigned length) {
 	uint8 LRC = 0;
-	for (unsigned u = 0; u < pLength; ++u)
-	{
-		LRC ^= pData[u];
+	for (unsigned u = 0; u < length; ++u) {
+		LRC ^= data[u];
 	}
 	return (LRC);
 }
 
-uint32 Checksum::CalculateCrc32(const uint8* pData, unsigned pLength)
-{
-	uint32 lCrc = 0xFFFFFFFF;
-	for (unsigned u = 0; u < pLength; ++u)
-	{
-		lCrc = (lCrc>>8)^mCrc32Table[(lCrc^pData[u])&0xFF];
+uint32 Checksum::CalculateCrc32(const uint8* data, unsigned length) {
+	uint32 crc = 0xFFFFFFFF;
+	for (unsigned u = 0; u < length; ++u) {
+		crc = (crc>>8)^crc32_table_[(crc^data[u])&0xFF];
 	}
-	return(lCrc^0xFFFFFFFF);
+	return(crc^0xFFFFFFFF);
 }
 
 
 
-const uint32 Checksum::mCrc32Table[256] =
+const uint32 Checksum::crc32_table_[256] =
 {
 	0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA,
 	0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,

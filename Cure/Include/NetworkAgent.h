@@ -6,47 +6,43 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Thread.h"
-#include "../../Lepra/Include/SocketAddress.h"
-#include "Packet.h"
-#include "RemoteStatus.h"
+#include "../../lepra/include/thread.h"
+#include "../../lepra/include/socketaddress.h"
+#include "packet.h"
+#include "remotestatus.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class UdpVSocket;
 class UdpMuxSocket;
 }
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class NetworkAgent
-{
+class NetworkAgent {
 public:
 	//typedef DualSocket VSocket;
 	//typedef DualMuxSocket MuxSocket;
 	typedef UdpVSocket VSocket;
 	typedef UdpMuxSocket MuxSocket;
 
-	enum ReceiveStatus
-	{
-		RECEIVE_OK,
-		RECEIVE_NO_DATA,
-		RECEIVE_PARSE_ERROR,
-		RECEIVE_CONNECTION_BROKEN
+	enum ReceiveStatus {
+		kReceiveOk,
+		kReceiveNoData,
+		kReceiveParseError,
+		kReceiveConnectionBroken
 	};
 
-	NetworkAgent(RuntimeVariableScope* pVariableScope);
+	NetworkAgent(RuntimeVariableScope* variable_scope);
 	virtual ~NetworkAgent();
 	virtual void Stop();
 
-	void SetPacketFactory(PacketFactory* pPacketFactory);
+	void SetPacketFactory(PacketFactory* packet_factory);
 	PacketFactory* GetPacketFactory() const;
 
 	Lock* GetLock() const;
@@ -58,19 +54,19 @@ public:
 	unsigned GetConnectionCount() const;
 	const SocketAddress& GetLocalAddress() const;
 
-	bool SendStatusMessage(VSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
-		MessageStatus::InfoType pInfoType, str pMessage, Packet* pPacket);
-	bool SendNumberMessage(bool pSafe, VSocket* pSocket, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat, Packet* pPacket = 0);
-	bool SendObjectFullPosition(VSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData);
-	bool PlaceInSendBuffer(bool pSafe, VSocket* pSocket, Packet* pPacket);
+	bool SendStatusMessage(VSocket* socket, int32 integer, RemoteStatus status,
+		MessageStatus::InfoType info_type, str message, Packet* packet);
+	bool SendNumberMessage(bool safe, VSocket* socket, cure::MessageNumber::InfoType info, int32 integer, float32 f, Packet* packet = 0);
+	bool SendObjectFullPosition(VSocket* socket, GameObjectId instance_id, int32 frame_index, const ObjectPositionalData& data);
+	bool PlaceInSendBuffer(bool safe, VSocket* socket, Packet* packet);
 
 protected:
-	void SetMuxSocket(MuxSocket* pSocket);
+	void SetMuxSocket(MuxSocket* socket);
 
-	mutable Lock mLock;
-	RuntimeVariableScope* mVariableScope;
-	MuxSocket* mMuxSocket;
-	PacketFactory* mPacketFactory;
+	mutable Lock lock_;
+	RuntimeVariableScope* variable_scope_;
+	MuxSocket* mux_socket_;
+	PacketFactory* packet_factory_;
 
 private:
 	logclass();

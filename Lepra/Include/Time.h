@@ -6,22 +6,20 @@
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "String.h"
+#include "lepratypes.h"
+#include "string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class Time
-{
+class Time {
 public:
 
 	Time();
-	Time(const Time& pTime);
+	Time(const Time& time);
 
 	int GetYear() const;	// Returns the current year.
 	int GetMonth() const;	// The current month [0,11].
@@ -40,34 +38,34 @@ public:
 	void UpdateTime();
 
 	// Operators.
-	const Time& operator = (const Time& pTime);
+	const Time& operator = (const Time& time);
 
-	bool operator <  (const Time& pTime) const;
-	bool operator >  (const Time& pTime) const;
-	bool operator == (const Time& pTime) const;
-	bool operator != (const Time& pTime) const;
-	bool operator <= (const Time& pTime) const;
-	bool operator >= (const Time& pTime) const;
+	bool operator <  (const Time& time) const;
+	bool operator >  (const Time& time) const;
+	bool operator == (const Time& time) const;
+	bool operator != (const Time& time) const;
+	bool operator <= (const Time& time) const;
+	bool operator >= (const Time& time) const;
 
-	friend Time operator + (const Time& pLeft, const Time& pRight);
-	friend Time operator - (const Time& pLeft, const Time& pRight);
-	Time& operator += (const Time& pTime);
-	Time& operator -= (const Time& pTime);
+	friend Time operator + (const Time& left, const Time& right);
+	friend Time operator - (const Time& left, const Time& right);
+	Time& operator += (const Time& time);
+	Time& operator -= (const Time& time);
 
 	str GetDateTimeAsString() const;
 
 private:
-	int mYear;
-	int mMonth;
-	int mDay;
-	int mWeekDay;
-	int mHour;
-	int mMinute;
-	int mSecond;
-	int mMillis;
+	int year_;
+	int month_;
+	int day_;
+	int week_day_;
+	int hour_;
+	int minute_;
+	int second_;
+	int millis_;
 
-	// This value is only valid as long as no - or + operators are used. 
-	bool mDaylightSavingTime;
+	// This value is only valid as long as no - or + operators are used.
+	bool daylight_saving_time_;
 };
 
 

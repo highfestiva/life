@@ -5,12 +5,11 @@
 */
 
 #include "pch.h"
-#include "../Include/IOError.h"
+#include "../include/ioerror.h"
 
-namespace Lepra
-{
+namespace lepra {
 
-const char* gIOErrorString[] = 
+const char* kIOErrorString[] =
 {
 	"OK",
 	"File is already open.",
@@ -32,17 +31,15 @@ const char* gIOErrorString[] =
 	"Unknown IOError."
 };
 
-const char* GetIOErrorString(IOError pErr)
-{
-	const char* lString = gIOErrorString[(int)NUM_IO_ERRORS-1];
+const char* GetIOErrorString(IOError err) {
+	const char* s = kIOErrorString[(int)kNumIoErrors-1];
 
-	int lErr = (int)pErr;
-	if (lErr >= 0 && lErr < NUM_IO_ERRORS)
-	{
-		lString = gIOErrorString[lErr];
+	int _err = (int)err;
+	if (_err >= 0 && _err < kNumIoErrors) {
+		s = kIOErrorString[_err];
 	}
 
-	return lString;
+	return s;
 }
 
 }

@@ -5,71 +5,62 @@
 
 
 #include "pch.h"
-#include "ServerFastProjectile.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../Launcher.h"
-#include "../ProjectileUtil.h"
+#include "serverfastprojectile.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/gamemanager.h"
+#include "../launcher.h"
+#include "../projectileutil.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-ServerFastProjectile::ServerFastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, Launcher* pLauncher):
-	Parent(pResourceManager, pClassId),
-	mLauncher(pLauncher),
-	mMaxVelocity(0),
-	mAcceleration(0),
-	mExplosiveEnergy(0),
-	mIsDetonated(false)
-{
+ServerFastProjectile::ServerFastProjectile(cure::ResourceManager* resource_manager, const str& class_id, Launcher* launcher):
+	Parent(resource_manager, class_id),
+	launcher_(launcher),
+	max_velocity_(0),
+	acceleration_(0),
+	explosive_energy_(0),
+	is_detonated_(false) {
 }
 
-ServerFastProjectile::~ServerFastProjectile()
-{
+ServerFastProjectile::~ServerFastProjectile() {
 }
 
 
 
-void ServerFastProjectile::OnLoaded()
-{
+void ServerFastProjectile::OnLoaded() {
 	Parent::OnLoaded();
 
-	const Tbc::ChunkyClass::Tag* lTag = FindTag("ammo", 4, 2);
-	deb_assert(lTag);
-	const float lMuzzleVelocity = lTag->mFloatValueList[0];
-	ProjectileUtil::StartBullet(this, lMuzzleVelocity, true);
-	mMaxVelocity = lTag->mFloatValueList[1];
-	mAcceleration = lTag->mFloatValueList[2];
-	mExplosiveEnergy = lTag->mFloatValueList[3];
+	const tbc::ChunkyClass::Tag* tag = FindTag("ammo", 4, 2);
+	deb_assert(tag);
+	const float muzzle_velocity = tag->float_value_list_[0];
+	ProjectileUtil::StartBullet(this, muzzle_velocity, true);
+	max_velocity_ = tag->float_value_list_[1];
+	acceleration_ = tag->float_value_list_[2];
+	explosive_energy_ = tag->float_value_list_[3];
 }
 
-void ServerFastProjectile::OnMicroTick(float pFrameTime)
-{
-	Parent::OnMicroTick(pFrameTime);
-	ProjectileUtil::BulletMicroTick(this, pFrameTime, mMaxVelocity, mAcceleration);
+void ServerFastProjectile::OnMicroTick(float frame_time) {
+	Parent::OnMicroTick(frame_time);
+	ProjectileUtil::BulletMicroTick(this, frame_time, max_velocity_, acceleration_);
 }
 
-void ServerFastProjectile::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
-{
-	(void)pTriggerId;
-	(void)pBodyId;
-	if (mExplosiveEnergy)
-	{
-		ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), pNormal, mExplosiveEnergy, 0);
-	}
-	else
-	{
-		ProjectileUtil::OnBulletHit(this, &mIsDetonated, mLauncher, pOtherObject);
+void ServerFastProjectile::OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
+	(void)trigger_id;
+	(void)body_id;
+	if (explosive_energy_) {
+		ProjectileUtil::Detonate(this, &is_detonated_, launcher_, GetPosition(), GetVelocity(), normal, explosive_energy_, 0);
+	} else {
+		ProjectileUtil::OnBulletHit(this, &is_detonated_, launcher_, other_object);
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, ServerFastProjectile);
+loginstance(kGameContextCpp, ServerFastProjectile);
 
 
 

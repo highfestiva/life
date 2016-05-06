@@ -6,12 +6,11 @@
 
 #pragma once
 
-#include "UiTextField.h"
+#include "uitextfield.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
@@ -19,62 +18,58 @@ class PopupList;
 
 
 
-class FileNameField: public TextField
-{
+class FileNameField: public TextField {
 	typedef TextField Parent;
 public:
 	// Read more about the constructor paramters in TextField.h.
-	FileNameField(Component* pTopParent);
-	FileNameField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, const Color& pColor);
-	FileNameField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID);
-	FileNameField(Component* pTopParent, const Color& pColor);
-	FileNameField(Component* pTopParent, Painter::ImageID pImageID);
+	FileNameField(Component* top_parent);
+	FileNameField(Component* top_parent, unsigned border_style, int border_width, const Color& color);
+	FileNameField(Component* top_parent, unsigned border_style, int border_width, Painter::ImageID image_id);
+	FileNameField(Component* top_parent, const Color& color);
+	FileNameField(Component* top_parent, Painter::ImageID image_id);
 	virtual ~FileNameField();
 
 	// If no extensions are added, all files will be listed.
-	// Extensions are given without the dot. "txt" for .txt files, 
+	// Extensions are given without the dot. "txt" for .txt files,
 	// for instance.
-	void AddFileExtension(const str& pExtension);
+	void AddFileExtension(const str& extension);
 
-	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual bool OnKeyDown(uilepra::InputManager::KeyCode key_code);
 
-	virtual bool NotifyDoubleClick(PopupList* pList, int pMouseX, int pMouseY);
+	virtual bool NotifyDoubleClick(PopupList* _list, int mouse_x, int mouse_y);
 
 protected:
 	virtual PopupList* CreatePopupList();
 
-	void ValidatePath(str& pPath);
+	void ValidatePath(str& path);
 
 	// Searches the path backwards for slash (or backslash) number n.
 	// n = 0 gives the last slash.
-	size_t FindSlash(str& pPath, int n);
+	size_t FindSlash(str& path, int n);
 
 	void FinalizeSelection();
 
 private:
-	class FileInfo
-	{
+	class FileInfo {
 	public:
 		FileInfo() :
-			mDir(false)
-		{
+			dir_(false) {
 		}
 
-		FileInfo(const str& pName, bool pDir) :
-			mName(pName),
-			mDir(pDir)
-		{
+		FileInfo(const str& name, bool dir) :
+			name_(name),
+			dir_(dir) {
 		}
 
 		// Used for sorting.
-		bool operator < (const FileInfo& b) const { return (mName < b.mName); }
+		bool operator < (const FileInfo& b) const { return (name_ < b.name_); }
 
-		str mName;
-		bool mDir;
+		str name_;
+		bool dir_;
 	};
 
 	typedef std::list<str> StringList;
-	StringList mFileExtensionList;
+	StringList file_extension_list_;
 };
 
 

@@ -1,55 +1,50 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Spawner.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/GameManager.h"
-#include "../Lepra/Include/Random.h"
-#include "../Tbc/Include/PhysicsSpawner.h"
-#include "Game.h"
+#include "spawner.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/gamemanager.h"
+#include "../lepra/include/random.h"
+#include "../tbc/include/physicsspawner.h"
+#include "game.h"
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 
-Spawner::Spawner(Cure::ContextManager* pManager):
-	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), "Spawner")
-{
-	pManager->AddLocalObject(this);
+Spawner::Spawner(cure::ContextManager* manager):
+	cure::CppContextObject(manager->GetGameManager()->GetResourceManager(), "Spawner") {
+	manager->AddLocalObject(this);
 }
 
-Spawner::~Spawner()
-{
+Spawner::~Spawner() {
 }
 
 
 
-void Spawner::SetSpawner(const Tbc::PhysicsSpawner* pSpawner)
-{
-	Parent::SetSpawner(pSpawner);
+void Spawner::SetSpawner(const tbc::PhysicsSpawner* spawner) {
+	Parent::SetSpawner(spawner);
 
-	for (int x = 0; x < GetSpawner()->GetNumber(); ++x)
-	{
-		const str lSpawnObject = GetSpawner()->GetSpawnObject(Random::Uniform(0.0f, 1.0f));
-		ContextObject* lObject = GetManager()->GetGameManager()->CreateContextObject(lSpawnObject, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-		AddChild(lObject);
-		vec3 lInitialVelocity;
-		lObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), vec3(0.5f,0.5f,0.5f), 0, lInitialVelocity));
-		lObject->SetRootVelocity(lInitialVelocity);
-		lObject->StartLoading();
+	for (int x = 0; x < GetSpawner()->GetNumber(); ++x) {
+		const str spawn_object = GetSpawner()->GetSpawnObject(Random::Uniform(0.0f, 1.0f));
+		ContextObject* object = GetManager()->GetGameManager()->CreateContextObject(spawn_object, cure::kNetworkObjectLocallyControlled);
+		AddChild(object);
+		vec3 initial_velocity;
+		object->SetInitialTransform(GetSpawner()->GetSpawnPoint(parent_->GetPhysics(), vec3(0.5f,0.5f,0.5f), 0, initial_velocity));
+		object->SetRootVelocity(initial_velocity);
+		object->StartLoading();
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Spawner);
+loginstance(kGameContextCpp, Spawner);
 
 
 

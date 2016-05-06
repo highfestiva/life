@@ -6,13 +6,12 @@
 
 #pragma once
 
-#include "../Cure/Include/CppContextObject.h"
-#include "DownwashManager.h"
+#include "../cure/include/cppcontextobject.h"
+#include "downwashmanager.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
@@ -20,18 +19,17 @@ class DownwashManager;
 
 
 
-class Automan: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class Automan: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	Automan(Cure::GameManager* pGame, Cure::GameObjectId pCarId, const vec3& pDirection);
+	Automan(cure::GameManager* game, cure::GameObjectId car_id, const vec3& direction);
 	virtual ~Automan();
 	virtual void OnTick();
 
 private:
-	Cure::GameObjectId mCarId;
-	vec3 mDirection;
-	StopWatch mStillTimer;
+	cure::GameObjectId car_id_;
+	vec3 direction_;
+	StopWatch still_timer_;
 	logclass();
 };
 

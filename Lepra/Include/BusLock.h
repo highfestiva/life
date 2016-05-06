@@ -1,29 +1,27 @@
 
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "LepraTypes.h"
+#include "lepratypes.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class BusLock
-{
+class BusLock {
 public:
-	// Set pDestination = pSource if pDestination == pComperand.
+	// Set destination = source if destination == comperand.
 	// Returns true if a swap was performed.
-	static bool CompareAndSwap(int32* pDestination, int32 pSource, int32 pComperand);
+	static bool CompareAndSwap(int32* destination, int32 source, int32 comperand);
 
-	static void Add(int32* pDestination, int32 pAddend);
-	static void Add(int64* pDestination, int64 pAddend);
+	static void Add(int32* destination, int32 addend);
+	static void Add(int64* destination, int64 addend);
 };
 
 

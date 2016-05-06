@@ -5,744 +5,628 @@
 
 
 #include "pch.h"
-#include "../Include/ChunkyBoneGeometry.h"
+#include "../include/chunkybonegeometry.h"
 #include <algorithm>
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/CyclicArray.h"
-#include "../../Lepra/Include/Endian.h"
-#include "../../Lepra/Include/Packer.h"
-#include "../Include/ChunkyPhysics.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/cyclicarray.h"
+#include "../../lepra/include/endian.h"
+#include "../../lepra/include/packer.h"
+#include "../include/chunkyphysics.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-ChunkyBoneGeometry::ChunkyBoneGeometry(const BodyData& pBodyData):
-	mBodyData(pBodyData),
-	mJointId(INVALID_JOINT),
-	mBodyId(INVALID_BODY),
-	mExtraData(0)
-{
-	AddConnectorType(pBodyData.mConnectorType);
+ChunkyBoneGeometry::ChunkyBoneGeometry(const BodyData& body_data):
+	body_data_(body_data),
+	joint_id_(INVALID_JOINT),
+	body_id_(INVALID_BODY),
+	extra_data_(0) {
+	AddConnectorType(body_data.connector_type_);
 }
 
-ChunkyBoneGeometry::~ChunkyBoneGeometry()
-{
+ChunkyBoneGeometry::~ChunkyBoneGeometry() {
 	// Ensure all resources has been released prior to delete.
-	deb_assert(mJointId == INVALID_JOINT && mBodyId == INVALID_BODY);
+	deb_assert(joint_id_ == INVALID_JOINT && body_id_ == INVALID_BODY);
 }
 
-void ChunkyBoneGeometry::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal)
-{
-	if (pOriginal.mBodyData.mParent)
-	{
-		const int lBoneIndex = pSource->GetIndex(pOriginal.mBodyData.mParent);
-		deb_assert(lBoneIndex >= 0);
-		mBodyData.mParent = pTarget->GetBoneGeometry(lBoneIndex);
+void ChunkyBoneGeometry::RelocatePointers(const ChunkyPhysics* target, const ChunkyPhysics* source, const ChunkyBoneGeometry& original) {
+	if (original.body_data_.parent_) {
+		const int bone_index = source->GetIndex(original.body_data_.parent_);
+		deb_assert(bone_index >= 0);
+		body_data_.parent_ = target->GetBoneGeometry(bone_index);
 	}
 }
 
 
 
-ChunkyBoneGeometry* ChunkyBoneGeometry::Create(const ChunkyBoneGeometry& pOriginal)
-{
-	switch (pOriginal.GetGeometryType())
-	{
-		case GEOMETRY_CAPSULE:	return new ChunkyBoneCapsule((ChunkyBoneCapsule&)pOriginal);	break;
-		case GEOMETRY_CYLINDER:	return new ChunkyBoneCylinder((ChunkyBoneCylinder&)pOriginal);	break;
-		case GEOMETRY_SPHERE:	return new ChunkyBoneSphere((ChunkyBoneSphere&)pOriginal);	break;
-		case GEOMETRY_BOX:	return new ChunkyBoneBox((ChunkyBoneBox&)pOriginal);		break;
-		case GEOMETRY_MESH:	return new ChunkyBoneMesh((ChunkyBoneMesh&)pOriginal);		break;
+ChunkyBoneGeometry* ChunkyBoneGeometry::Create(const ChunkyBoneGeometry& original) {
+	switch (original.GetGeometryType()) {
+		case kGeometryCapsule:	return new ChunkyBoneCapsule((ChunkyBoneCapsule&)original);	break;
+		case kGeometryCylinder:	return new ChunkyBoneCylinder((ChunkyBoneCylinder&)original);	break;
+		case kGeometrySphere:	return new ChunkyBoneSphere((ChunkyBoneSphere&)original);	break;
+		case kGeometryBox:	return new ChunkyBoneBox((ChunkyBoneBox&)original);		break;
+		case kGeometryMesh:	return new ChunkyBoneMesh((ChunkyBoneMesh&)original);		break;
 	}
 	return 0;
 }
 
-ChunkyBoneGeometry* ChunkyBoneGeometry::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
-{
-	if (pByteCount < sizeof(uint32))
-	{
-		mLog.Error("Could not load; very small data size.");
+ChunkyBoneGeometry* ChunkyBoneGeometry::Load(ChunkyPhysics* structure, const void* data, unsigned byte_count) {
+	if (byte_count < sizeof(uint32)) {
+		log_.Error("Could not load; very small data size.");
 		deb_assert(false);
 		return (0);
 	}
 
-	ChunkyBoneGeometry* lGeometry = 0;
-	const uint32* lData = (const uint32*)pData;
-	BodyData lBodyData(0, 0, 0);
-	switch (Endian::BigToHost(lData[0]))
-	{
-		case GEOMETRY_CAPSULE:	lGeometry = new ChunkyBoneCapsule(lBodyData);	break;
-		case GEOMETRY_CYLINDER:	lGeometry = new ChunkyBoneCylinder(lBodyData);	break;
-		case GEOMETRY_SPHERE:	lGeometry = new ChunkyBoneSphere(lBodyData);	break;
-		case GEOMETRY_BOX:	lGeometry = new ChunkyBoneBox(lBodyData);	break;
-		case GEOMETRY_MESH:	lGeometry = new ChunkyBoneMesh(lBodyData);	break;
+	ChunkyBoneGeometry* geometry = 0;
+	const uint32* _data = (const uint32*)data;
+	BodyData _body_data(0, 0, 0);
+	switch (Endian::BigToHost(_data[0])) {
+		case kGeometryCapsule:	geometry = new ChunkyBoneCapsule(_body_data);	break;
+		case kGeometryCylinder:	geometry = new ChunkyBoneCylinder(_body_data);	break;
+		case kGeometrySphere:	geometry = new ChunkyBoneSphere(_body_data);	break;
+		case kGeometryBox:	geometry = new ChunkyBoneBox(_body_data);	break;
+		case kGeometryMesh:	geometry = new ChunkyBoneMesh(_body_data);	break;
 	}
-	if (lGeometry)
-	{
-		if (pByteCount == lGeometry->GetChunkySize(lData))
-		{
-			lGeometry->LoadChunkyData(pStructure, lData);
-			deb_assert(lGeometry->GetChunkySize() == pByteCount);
-		}
-		else
-		{
-			mLog.Error("Could not load; wrong data size.");
+	if (geometry) {
+		if (byte_count == geometry->GetChunkySize(_data)) {
+			geometry->LoadChunkyData(structure, _data);
+			deb_assert(geometry->GetChunkySize() == byte_count);
+		} else {
+			log_.Error("Could not load; wrong data size.");
 			deb_assert(false);
-			delete (lGeometry);
-			lGeometry = 0;
+			delete (geometry);
+			geometry = 0;
 		}
 	}
-	return (lGeometry);
+	return (geometry);
 }
 
-bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* pPhysics, unsigned pPhysicsFps)
-{
-	bool lOk = false;
-	if (mBodyData.mParent)
-	{
-		if (GetBoneType() == BONE_POSITION)
-		{
+bool ChunkyBoneGeometry::CreateJoint(ChunkyPhysics* structure, PhysicsManager* physics, unsigned physics_fps) {
+	bool ok = false;
+	if (body_data_.parent_) {
+		if (GetBoneType() == kBonePosition) {
 			// Need not do jack. It's not a physical object.
-			lOk = true;
-		}
-		else if (mBodyData.mJointType == JOINT_EXCLUDE)
-		{
-			lOk = pPhysics->Attach(GetBodyId(), mBodyData.mParent->GetBodyId());
-		}
-		else if (mBodyData.mJointType == JOINT_FIXED)
-		{
-			lOk = pPhysics->Attach(GetBodyId(), mBodyData.mParent->GetBodyId());
-		}
-		else if (mBodyData.mJointType == JOINT_SUSPEND_HINGE || mBodyData.mJointType == JOINT_HINGE2)
-		{
+			ok = true;
+		} else if (body_data_.joint_type_ == kJointExclude) {
+			ok = physics->Attach(GetBodyId(), body_data_.parent_->GetBodyId());
+		} else if (body_data_.joint_type_ == kJointFixed) {
+			ok = physics->Attach(GetBodyId(), body_data_.parent_->GetBodyId());
+		} else if (body_data_.joint_type_ == kJointSuspendHinge || body_data_.joint_type_ == kJointHinge2) {
 			// Calculate axis from given euler angles.
-			vec3 lSuspensionAxis(-1, 0, 0);
-			vec3 lHingeAxis(0, 0, 1);
-			quat lRotator;
-			lRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
-			lSuspensionAxis = lRotator*lSuspensionAxis;
-			lHingeAxis = lRotator*lHingeAxis;
+			vec3 suspension_axis(-1, 0, 0);
+			vec3 hinge_axis(0, 0, 1);
+			quat rotator;
+			rotator.SetEulerAngles(body_data_.parameter_[kParamEulerTheta], 0, body_data_.parameter_[kParamEulerPhi]);
+			suspension_axis = rotator*suspension_axis;
+			hinge_axis = rotator*hinge_axis;
 
-			mJointId = pPhysics->CreateHinge2Joint(mBodyData.mParent->GetBodyId(),
-				GetBodyId(), pStructure->GetTransformation(this).GetPosition(),
-				lSuspensionAxis, lHingeAxis);
-			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
-			pPhysics->SetSuspension(mJointId, 1/(float)pPhysicsFps, mBodyData.mParameter[PARAM_SPRING_CONSTANT],
-				mBodyData.mParameter[PARAM_SPRING_DAMPING]);
-			pPhysics->SetAngularMotorRoll(mJointId, 0, 0);
-			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);
-			lOk = true;
-		}
-		else if (mBodyData.mJointType == JOINT_HINGE)
-		{
+			joint_id_ = physics->CreateHinge2Joint(body_data_.parent_->GetBodyId(),
+				GetBodyId(), structure->GetTransformation(this).GetPosition(),
+				suspension_axis, hinge_axis);
+			physics->SetJointParams(joint_id_, body_data_.parameter_[kParamLowStop], body_data_.parameter_[kParamHighStop], 0);
+			physics->SetSuspension(joint_id_, 1/(float)physics_fps, body_data_.parameter_[kParamSpringConstant],
+				body_data_.parameter_[kParamSpringDamping]);
+			physics->SetAngularMotorRoll(joint_id_, 0, 0);
+			physics->SetAngularMotorTurn(joint_id_, 0, 0);
+			ok = true;
+		} else if (body_data_.joint_type_ == kJointHinge) {
 			// Calculate axis from given euler angles.
-			vec3 lHingeAxis(0, 0, 1);
-			quat lHingeRotator;
-			lHingeRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
-			lHingeAxis = lHingeRotator*lHingeAxis;
+			vec3 hinge_axis(0, 0, 1);
+			quat hinge_rotator;
+			hinge_rotator.SetEulerAngles(body_data_.parameter_[kParamEulerTheta], 0, body_data_.parameter_[kParamEulerPhi]);
+			hinge_axis = hinge_rotator*hinge_axis;
 
-			const xform& lBodyTransform = pStructure->GetTransformation(this);
-			const vec3 lAnchor = lBodyTransform.GetPosition() + GetOriginalOffset();
-			mJointId = pPhysics->CreateHingeJoint(mBodyData.mParent->GetBodyId(),
-				GetBodyId(), lAnchor, lHingeAxis);
-			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], mBodyData.mBounce);
-			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);
-			//pPhysics->GetAxis1(mJointId, lHingeAxis);
-			lOk = true;
-		}
-		else if (mBodyData.mJointType == JOINT_SLIDER)
-		{
+			const xform& body_transform = structure->GetTransformation(this);
+			const vec3 anchor = body_transform.GetPosition() + GetOriginalOffset();
+			joint_id_ = physics->CreateHingeJoint(body_data_.parent_->GetBodyId(),
+				GetBodyId(), anchor, hinge_axis);
+			physics->SetJointParams(joint_id_, body_data_.parameter_[kParamLowStop], body_data_.parameter_[kParamHighStop], body_data_.bounce_);
+			physics->SetAngularMotorTurn(joint_id_, 0, 0);
+			//physics->GetAxis1(joint_id_, hinge_axis);
+			ok = true;
+		} else if (body_data_.joint_type_ == kJointSlider) {
 			// Calculate axis from given euler angles.
-			vec3 lAxis(0, 0, 1);
-			quat lRotator;
-			lRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
-			lAxis = lRotator*lAxis;
+			vec3 axis(0, 0, 1);
+			quat rotator;
+			rotator.SetEulerAngles(body_data_.parameter_[kParamEulerTheta], 0, body_data_.parameter_[kParamEulerPhi]);
+			axis = rotator*axis;
 
-			mJointId = pPhysics->CreateSliderJoint(mBodyData.mParent->GetBodyId(),
-				GetBodyId(), lAxis);
-			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], mBodyData.mBounce);
-			pPhysics->SetMotorTarget(mJointId, 0, 0);
-			lOk = true;
-		}
-		else if (mBodyData.mJointType == JOINT_UNIVERSAL)
-		{
+			joint_id_ = physics->CreateSliderJoint(body_data_.parent_->GetBodyId(),
+				GetBodyId(), axis);
+			physics->SetJointParams(joint_id_, body_data_.parameter_[kParamLowStop], body_data_.parameter_[kParamHighStop], body_data_.bounce_);
+			physics->SetMotorTarget(joint_id_, 0, 0);
+			ok = true;
+		} else if (body_data_.joint_type_ == kJointUniversal) {
 			// Calculate axis from given euler angles.
-			vec3 lAxis1(0, 0, 1);
-			vec3 lAxis2(0, 1, 0);
-			quat lRotator;
-			lRotator.SetEulerAngles(mBodyData.mParameter[PARAM_EULER_THETA], 0, mBodyData.mParameter[PARAM_EULER_PHI]);
-			lAxis1 = lRotator*lAxis1;
-			lAxis2 = lRotator*lAxis2;
+			vec3 axis1(0, 0, 1);
+			vec3 axis2(0, 1, 0);
+			quat rotator;
+			rotator.SetEulerAngles(body_data_.parameter_[kParamEulerTheta], 0, body_data_.parameter_[kParamEulerPhi]);
+			axis1 = rotator*axis1;
+			axis2 = rotator*axis2;
 
-			const xform& lBodyTransform = pStructure->GetTransformation(this);
-			const vec3 lAnchor = lBodyTransform.GetPosition() +
-				vec3(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
-			mJointId = pPhysics->CreateUniversalJoint(mBodyData.mParent->GetBodyId(),
-				GetBodyId(), lAnchor, lAxis1, lAxis2);
-			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
-			/*pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
-			pPhysics->SetSuspension(mJointId, 1/(float)pPhysicsFps, mBodyData.mParameter[0],
-				mBodyData.mParameter[1]);
-			pPhysics->SetAngularMotorRoll(mJointId, 0, 0);
-			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);*/
-			lOk = true;
-		}
-		else if (mBodyData.mJointType == JOINT_BALL)
-		{
-			const xform& lBodyTransform = pStructure->GetTransformation(this);
-			const vec3 lAnchor = lBodyTransform.GetPosition() +
-				vec3(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
-			mJointId = pPhysics->CreateBallJoint(mBodyData.mParent->GetBodyId(),
-				GetBodyId(), lAnchor);
-			/*pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
-			pPhysics->SetJointParams(mJointId, mBodyData.mParameter[PARAM_LOW_STOP], mBodyData.mParameter[PARAM_HIGH_STOP], 0);
-			pPhysics->SetSuspension(mJointId, 1/(float)pPhysicsFps, mBodyData.mParameter[0],
-				mBodyData.mParameter[1]);
-			pPhysics->SetAngularMotorRoll(mJointId, 0, 0);
-			pPhysics->SetAngularMotorTurn(mJointId, 0, 0);*/
-			lOk = true;
-		}
-		else
-		{
+			const xform& body_transform = structure->GetTransformation(this);
+			const vec3 anchor = body_transform.GetPosition() +
+				vec3(body_data_.parameter_[kParamOffsetX], body_data_.parameter_[kParamOffsetY], body_data_.parameter_[kParamOffsetZ]);
+			joint_id_ = physics->CreateUniversalJoint(body_data_.parent_->GetBodyId(),
+				GetBodyId(), anchor, axis1, axis2);
+			physics->SetJointParams(joint_id_, body_data_.parameter_[kParamLowStop], body_data_.parameter_[kParamHighStop], 0);
+			/*physics->SetJointParams(joint_id_, body_data_.parameter_[kParamLowStop], body_data_.parameter_[kParamHighStop], 0);
+			physics->SetSuspension(joint_id_, 1/(float)physics_fps, body_data_.parameter_[0],
+				body_data_.parameter_[1]);
+			physics->SetAngularMotorRoll(joint_id_, 0, 0);
+			physics->SetAngularMotorTurn(joint_id_, 0, 0);*/
+			ok = true;
+		} else if (body_data_.joint_type_ == kJointBall) {
+			const xform& body_transform = structure->GetTransformation(this);
+			const vec3 anchor = body_transform.GetPosition() +
+				vec3(body_data_.parameter_[kParamOffsetX], body_data_.parameter_[kParamOffsetY], body_data_.parameter_[kParamOffsetZ]);
+			joint_id_ = physics->CreateBallJoint(body_data_.parent_->GetBodyId(),
+				GetBodyId(), anchor);
+			/*physics->SetJointParams(joint_id_, body_data_.parameter_[kParamLowStop], body_data_.parameter_[kParamHighStop], 0);
+			physics->SetJointParams(joint_id_, body_data_.parameter_[kParamLowStop], body_data_.parameter_[kParamHighStop], 0);
+			physics->SetSuspension(joint_id_, 1/(float)physics_fps, body_data_.parameter_[0],
+				body_data_.parameter_[1]);
+			physics->SetAngularMotorRoll(joint_id_, 0, 0);
+			physics->SetAngularMotorTurn(joint_id_, 0, 0);*/
+			ok = true;
+		} else {
 			deb_assert(false);
 		}
+	} else {
+		deb_assert(body_data_.joint_type_ == kJointExclude);
+		ok = true;
 	}
-	else
-	{
-		deb_assert(mBodyData.mJointType == JOINT_EXCLUDE);
-		lOk = true;
-	}
-	deb_assert(lOk);
-	return (lOk);
+	deb_assert(ok);
+	return (ok);
 }
 
-void ChunkyBoneGeometry::RemovePhysics(PhysicsManager* pPhysics)
-{
-	if (mJointId != INVALID_JOINT)
-	{
-		if (pPhysics)
-		{
-			pPhysics->DeleteJoint(mJointId);
+void ChunkyBoneGeometry::RemovePhysics(PhysicsManager* physics) {
+	if (joint_id_ != INVALID_JOINT) {
+		if (physics) {
+			physics->DeleteJoint(joint_id_);
 		}
-		mJointId = INVALID_JOINT;
+		joint_id_ = INVALID_JOINT;
 	}
-	if (mBodyId != INVALID_BODY)
-	{
-		if (pPhysics)
-		{
-			pPhysics->DeleteBody(mBodyId);
+	if (body_id_ != INVALID_BODY) {
+		if (physics) {
+			physics->DeleteBody(body_id_);
 		}
-		mBodyId = INVALID_BODY;
+		body_id_ = INVALID_BODY;
 	}
 }
 
 
 
-float ChunkyBoneGeometry::GetMass() const
-{
-	return mBodyData.mMass;
+float ChunkyBoneGeometry::GetMass() const {
+	return body_data_.mass_;
 }
 
-ChunkyBoneGeometry* ChunkyBoneGeometry::GetParent() const
-{
-	return (mBodyData.mParent);
+ChunkyBoneGeometry* ChunkyBoneGeometry::GetParent() const {
+	return (body_data_.parent_);
 }
 
-ChunkyBoneGeometry::JointType ChunkyBoneGeometry::GetJointType() const
-{
-	return (mBodyData.mJointType);
+ChunkyBoneGeometry::JointType ChunkyBoneGeometry::GetJointType() const {
+	return (body_data_.joint_type_);
 }
 
-void ChunkyBoneGeometry::SetJointType(JointType pJointType)
-{
-	mBodyData.mJointType = pJointType;
+void ChunkyBoneGeometry::SetJointType(JointType joint_type) {
+	body_data_.joint_type_ = joint_type;
 }
 
-bool ChunkyBoneGeometry::IsAffectedByGravity() const
-{
-	return mBodyData.mIsAffectedByGravity;
+bool ChunkyBoneGeometry::IsAffectedByGravity() const {
+	return body_data_.is_affected_by_gravity_;
 }
 
-bool ChunkyBoneGeometry::IsCollideWithSelf() const
-{
-	return (mBodyData.mParameter[PARAM_COLLIDE_WITH_SELF] != 0);
+bool ChunkyBoneGeometry::IsCollideWithSelf() const {
+	return (body_data_.parameter_[kParamCollideWithSelf] != 0);
 }
 
-bool ChunkyBoneGeometry::IsDetachable() const
-{
-	return (mBodyData.mParameter[PARAM_DETACHABLE] != 0);
+bool ChunkyBoneGeometry::IsDetachable() const {
+	return (body_data_.parameter_[kParamDetachable] != 0);
 }
 
-ChunkyBoneGeometry::BoneType ChunkyBoneGeometry::GetBoneType() const
-{
-	deb_assert(mBodyData.mBoneType >= BONE_BODY && mBodyData.mBoneType <= BONE_POSITION);
-	return (mBodyData.mBoneType);
+ChunkyBoneGeometry::BoneType ChunkyBoneGeometry::GetBoneType() const {
+	deb_assert(body_data_.bone_type_ >= kBoneBody && body_data_.bone_type_ <= kBonePosition);
+	return (body_data_.bone_type_);
 }
 
-PhysicsManager::JointID ChunkyBoneGeometry::GetJointId() const
-{
-	return (mJointId);
+PhysicsManager::JointID ChunkyBoneGeometry::GetJointId() const {
+	return (joint_id_);
 }
 
-void ChunkyBoneGeometry::ResetJointId()
-{
-	mJointId = INVALID_JOINT;
+void ChunkyBoneGeometry::ResetJointId() {
+	joint_id_ = INVALID_JOINT;
 }
 
-void ChunkyBoneGeometry::SetJointId(PhysicsManager::JointID pJointId)
-{
-	mJointId = pJointId;
+void ChunkyBoneGeometry::SetJointId(PhysicsManager::JointID joint_id) {
+	joint_id_ = joint_id;
 }
 
-PhysicsManager::BodyID ChunkyBoneGeometry::GetBodyId() const
-{
-	return (mBodyId);
+PhysicsManager::BodyID ChunkyBoneGeometry::GetBodyId() const {
+	return (body_id_);
 }
 
-void ChunkyBoneGeometry::ResetBodyId()
-{
-	mBodyId = INVALID_BODY;
+void ChunkyBoneGeometry::ResetBodyId() {
+	body_id_ = INVALID_BODY;
 }
 
-bool ChunkyBoneGeometry::IsConnectorType(ConnectorType pType) const
-{
-	return (std::find(mConnectorArray.begin(), mConnectorArray.end(), pType) != mConnectorArray.end());
+bool ChunkyBoneGeometry::IsConnectorType(ConnectorType type) const {
+	return (std::find(connector_array_.begin(), connector_array_.end(), type) != connector_array_.end());
 }
 
-void ChunkyBoneGeometry::AddConnectorType(ConnectorType pType)
-{
-	if (pType != CONNECT_NONE)
-	{
-		mConnectorArray.push_back(pType);
+void ChunkyBoneGeometry::AddConnectorType(ConnectorType type) {
+	if (type != kConnectNone) {
+		connector_array_.push_back(type);
 	}
 }
 
-void ChunkyBoneGeometry::ClearConnectorTypes()
-{
-	mConnectorArray.clear();
+void ChunkyBoneGeometry::ClearConnectorTypes() {
+	connector_array_.clear();
 }
 
-vec3 ChunkyBoneGeometry::GetOriginalOffset() const
-{
-	return vec3(mBodyData.mParameter[PARAM_OFFSET_X], mBodyData.mParameter[PARAM_OFFSET_Y], mBodyData.mParameter[PARAM_OFFSET_Z]);
+vec3 ChunkyBoneGeometry::GetOriginalOffset() const {
+	return vec3(body_data_.parameter_[kParamOffsetX], body_data_.parameter_[kParamOffsetY], body_data_.parameter_[kParamOffsetZ]);
 }
 
-float ChunkyBoneGeometry::GetImpactFactor() const
-{
-	return mBodyData.mParameter[PARAM_IMPACT_FACTOR];
+float ChunkyBoneGeometry::GetImpactFactor() const {
+	return body_data_.parameter_[kParamImpactFactor];
 }
 
-const str& ChunkyBoneGeometry::GetMaterial() const
-{
-	return mMaterial;
+const str& ChunkyBoneGeometry::GetMaterial() const {
+	return material_;
 }
 
-void ChunkyBoneGeometry::SetMaterial(const str& pMaterial)
-{
-	mMaterial = pMaterial;
+void ChunkyBoneGeometry::SetMaterial(const str& material) {
+	material_ = material;
 }
 
 
 
-float ChunkyBoneGeometry::GetExtraData() const
-{
-	return (mExtraData);
+float ChunkyBoneGeometry::GetExtraData() const {
+	return (extra_data_);
 }
 
-void ChunkyBoneGeometry::SetExtraData(float pExtraData)
-{
-	mExtraData = pExtraData;
+void ChunkyBoneGeometry::SetExtraData(float extra_data) {
+	extra_data_ = extra_data;
 }
 
-ChunkyBoneGeometry::BodyDataBase& ChunkyBoneGeometry::GetBodyData()
-{
-	return mBodyData;
+ChunkyBoneGeometry::BodyDataBase& ChunkyBoneGeometry::GetBodyData() {
+	return body_data_;
 }
 
 
 
-unsigned ChunkyBoneGeometry::GetChunkySize(const void* pData) const
-{
-	unsigned lSize = (unsigned)(sizeof(int32)*8 + sizeof(mBodyData.mParameter) +
-		sizeof(int32) + sizeof(int32)*mConnectorArray.size());
+unsigned ChunkyBoneGeometry::GetChunkySize(const void* data) const {
+	unsigned __size = (unsigned)(sizeof(int32)*8 + sizeof(body_data_.parameter_) +
+		sizeof(int32) + sizeof(int32)*connector_array_.size());
 
-	if (pData && mConnectorArray.empty() && mMaterial.empty())	// Shouldn't go here if we have something in RAM already.
-	{
-		const uint32* lData = (const uint32*)pData;
-		unsigned x = 8 + LEPRA_ARRAY_COUNT(mBodyData.mParameter);
-		const unsigned lConnectorSize = Endian::BigToHost(lData[x]) * sizeof(ConnectorType);
-		lSize += lConnectorSize;
-		x += 1 + lConnectorSize/sizeof(int32);
-		lSize += PackerUnicodeString::UnpackRaw(0, (const uint8*)&lData[x], 100);
+	if (data && connector_array_.empty() && material_.empty()) {	// Shouldn't go here if we have something in RAM already.
+		const uint32* _data = (const uint32*)data;
+		unsigned x = 8 + LEPRA_ARRAY_COUNT(body_data_.parameter_);
+		const unsigned connector_size = Endian::BigToHost(_data[x]) * sizeof(ConnectorType);
+		__size += connector_size;
+		x += 1 + connector_size/sizeof(int32);
+		__size += PackerUnicodeString::UnpackRaw(0, (const uint8*)&_data[x], 100);
+	} else {
+		__size += PackerUnicodeString::Pack(0, material_);
 	}
-	else
-	{
-		lSize += PackerUnicodeString::Pack(0, mMaterial);
-	}
-	return (lSize);
+	return (__size);
 }
 
-void ChunkyBoneGeometry::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
-{
-	uint32* lData = (uint32*)pData;
-	lData[0] = Endian::HostToBig(GetGeometryType());
-	lData[1] = Endian::HostToBigF(mBodyData.mMass);
-	lData[2] = Endian::HostToBigF(mBodyData.mFriction);
-	lData[3] = Endian::HostToBigF(mBodyData.mBounce);
-	lData[4] = mBodyData.mParent? Endian::HostToBig(pStructure->GetIndex(mBodyData.mParent)) : (unsigned)-1;
-	lData[5] = Endian::HostToBig(mBodyData.mJointType);
-	lData[6] = Endian::HostToBig(mBodyData.mIsAffectedByGravity? 1 : 0);
-	lData[7] = Endian::HostToBig(mBodyData.mBoneType);
+void ChunkyBoneGeometry::SaveChunkyData(const ChunkyPhysics* structure, void* data) const {
+	uint32* _data = (uint32*)data;
+	_data[0] = Endian::HostToBig(GetGeometryType());
+	_data[1] = Endian::HostToBigF(body_data_.mass_);
+	_data[2] = Endian::HostToBigF(body_data_.friction_);
+	_data[3] = Endian::HostToBigF(body_data_.bounce_);
+	_data[4] = body_data_.parent_? Endian::HostToBig(structure->GetIndex(body_data_.parent_)) : (unsigned)-1;
+	_data[5] = Endian::HostToBig(body_data_.joint_type_);
+	_data[6] = Endian::HostToBig(body_data_.is_affected_by_gravity_? 1 : 0);
+	_data[7] = Endian::HostToBig(body_data_.bone_type_);
 	int y = 8;
-	for (int x = 0; (size_t)x < LEPRA_ARRAY_COUNT(mBodyData.mParameter); ++x)
-	{
-		lData[y++] = Endian::HostToBigF(mBodyData.mParameter[x]);
+	for (int x = 0; (size_t)x < LEPRA_ARRAY_COUNT(body_data_.parameter_); ++x) {
+		_data[y++] = Endian::HostToBigF(body_data_.parameter_[x]);
 	}
-	const int lConnectorTypes = (int)mConnectorArray.size();
-	lData[y++] = Endian::HostToBig(lConnectorTypes);
-	for (int x = 0; x < lConnectorTypes; ++x)
-	{
-		lData[y++] = Endian::HostToBig(mConnectorArray[x]);
+	const int connector_types = (int)connector_array_.size();
+	_data[y++] = Endian::HostToBig(connector_types);
+	for (int x = 0; x < connector_types; ++x) {
+		_data[y++] = Endian::HostToBig(connector_array_[x]);
 	}
-	PackerUnicodeString::Pack((uint8*)&lData[y], mMaterial);
+	PackerUnicodeString::Pack((uint8*)&_data[y], material_);
 }
 
-void ChunkyBoneGeometry::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
-{
-	const uint32* lData = (const uint32*)pData;
+void ChunkyBoneGeometry::LoadChunkyData(ChunkyPhysics* structure, const void* data) {
+	const uint32* _data = (const uint32*)data;
 
-	deb_assert((GeometryType)Endian::BigToHost(lData[0]) == GetGeometryType());
-	mBodyData.mMass = Endian::BigToHostF(lData[1]);
-	mBodyData.mFriction = Endian::BigToHostF(lData[2]);
-	mBodyData.mBounce = Endian::BigToHostF(lData[3]);
-	int lParentIndex = Endian::BigToHost(lData[4]);
-	mBodyData.mParent = (lParentIndex < 0)? 0 : pStructure->GetBoneGeometry(lParentIndex);
-	mBodyData.mJointType = (JointType)Endian::BigToHost(lData[5]);
-	mBodyData.mIsAffectedByGravity = Endian::BigToHost(lData[6])? true : false;
-	mBodyData.mBoneType = (BoneType)Endian::BigToHost(lData[7]);
+	deb_assert((GeometryType)Endian::BigToHost(_data[0]) == GetGeometryType());
+	body_data_.mass_ = Endian::BigToHostF(_data[1]);
+	body_data_.friction_ = Endian::BigToHostF(_data[2]);
+	body_data_.bounce_ = Endian::BigToHostF(_data[3]);
+	int parent_index = Endian::BigToHost(_data[4]);
+	body_data_.parent_ = (parent_index < 0)? 0 : structure->GetBoneGeometry(parent_index);
+	body_data_.joint_type_ = (JointType)Endian::BigToHost(_data[5]);
+	body_data_.is_affected_by_gravity_ = Endian::BigToHost(_data[6])? true : false;
+	body_data_.bone_type_ = (BoneType)Endian::BigToHost(_data[7]);
 	int y = 8;
-	for (int x = 0; (size_t)x < LEPRA_ARRAY_COUNT(mBodyData.mParameter); ++x)
-	{
-		mBodyData.mParameter[x] = Endian::BigToHostF(lData[y++]);
+	for (int x = 0; (size_t)x < LEPRA_ARRAY_COUNT(body_data_.parameter_); ++x) {
+		body_data_.parameter_[x] = Endian::BigToHostF(_data[y++]);
 	}
-	const int lConnectorTypes = Endian::BigToHost(lData[y++]);
-	for (int x = 0; x < lConnectorTypes; ++x)
-	{
-		mConnectorArray.push_back((ConnectorType)Endian::BigToHost(lData[y++]));
+	const int connector_types = Endian::BigToHost(_data[y++]);
+	for (int x = 0; x < connector_types; ++x) {
+		connector_array_.push_back((ConnectorType)Endian::BigToHost(_data[y++]));
 	}
-	PackerUnicodeString::Unpack(mMaterial, (uint8*)&lData[y], 100);
+	PackerUnicodeString::Unpack(material_, (uint8*)&_data[y], 100);
 }
 
 
 
-ChunkyBoneCapsule::ChunkyBoneCapsule(const BodyData& pBodyData):
-	Parent(pBodyData),
-	mRadius(0),
-	mLength(0)
-{
+ChunkyBoneCapsule::ChunkyBoneCapsule(const BodyData& body_data):
+	Parent(body_data),
+	radius_(0),
+	length_(0) {
 }
 
-bool ChunkyBoneCapsule::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	int pForceListenerId, PhysicsManager::BodyType pType,
-	const xform& pTransform)
-{
-	RemovePhysics(pPhysics);
-	mBodyId = pPhysics->CreateCapsule(pIsRoot, pTransform, mBodyData.mMass, mRadius, mLength, pType,
-		mBodyData.mFriction, mBodyData.mBounce, pForceListenerId, mBodyData.mBoneType==BONE_TRIGGER);
-	return (mBodyId != INVALID_BODY);
+bool ChunkyBoneCapsule::CreateBody(PhysicsManager* physics, bool is_root,
+	int force_listener_id, PhysicsManager::BodyType type,
+	const xform& transform) {
+	RemovePhysics(physics);
+	body_id_ = physics->CreateCapsule(is_root, transform, body_data_.mass_, radius_, length_, type,
+		body_data_.friction_, body_data_.bounce_, force_listener_id, body_data_.bone_type_==kBoneTrigger);
+	return (body_id_ != INVALID_BODY);
 }
 
-unsigned ChunkyBoneCapsule::GetChunkySize(const void* pData) const
-{
-	return (Parent::GetChunkySize(pData) + sizeof(float32)*2);
+unsigned ChunkyBoneCapsule::GetChunkySize(const void* data) const {
+	return (Parent::GetChunkySize(data) + sizeof(float32)*2);
 }
 
-void ChunkyBoneCapsule::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
-{
-	Parent::SaveChunkyData(pStructure, pData);
+void ChunkyBoneCapsule::SaveChunkyData(const ChunkyPhysics* structure, void* data) const {
+	Parent::SaveChunkyData(structure, data);
 
-	uint32* lData = (uint32*)&((const char*)pData)[Parent::GetChunkySize()];
-	lData[0] = Endian::HostToBigF(mRadius);
-	lData[1] = Endian::HostToBigF(mLength);
+	uint32* _data = (uint32*)&((const char*)data)[Parent::GetChunkySize()];
+	_data[0] = Endian::HostToBigF(radius_);
+	_data[1] = Endian::HostToBigF(length_);
 }
 
-vec3 ChunkyBoneCapsule::GetShapeSize() const
-{
-	return (vec3(mRadius*2, mRadius*2, mLength+mRadius*2));
+vec3 ChunkyBoneCapsule::GetShapeSize() const {
+	return (vec3(radius_*2, radius_*2, length_+radius_*2));
 }
 
-void ChunkyBoneCapsule::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
-{
-	Parent::LoadChunkyData(pStructure, pData);
+void ChunkyBoneCapsule::LoadChunkyData(ChunkyPhysics* structure, const void* data) {
+	Parent::LoadChunkyData(structure, data);
 
-	const uint32* lData = (const uint32*)&((const char*)pData)[Parent::GetChunkySize()];
-	mRadius = Endian::BigToHostF(lData[0]);
-	mLength = Endian::BigToHostF(lData[1]);
+	const uint32* _data = (const uint32*)&((const char*)data)[Parent::GetChunkySize()];
+	radius_ = Endian::BigToHostF(_data[0]);
+	length_ = Endian::BigToHostF(_data[1]);
 }
 
-ChunkyBoneGeometry::GeometryType ChunkyBoneCapsule::GetGeometryType() const
-{
-	return GEOMETRY_CAPSULE;
+ChunkyBoneGeometry::GeometryType ChunkyBoneCapsule::GetGeometryType() const {
+	return kGeometryCapsule;
 }
 
 
 
-ChunkyBoneCylinder::ChunkyBoneCylinder(const BodyData& pBodyData):
-	Parent(pBodyData)
-{
+ChunkyBoneCylinder::ChunkyBoneCylinder(const BodyData& body_data):
+	Parent(body_data) {
 }
 
-bool ChunkyBoneCylinder::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	int pForceListenerId, PhysicsManager::BodyType pType,
-	const xform& pTransform)
-{
-	RemovePhysics(pPhysics);
-	mBodyId = pPhysics->CreateCylinder(pIsRoot, pTransform, mBodyData.mMass, mRadius, mLength, pType,
-		mBodyData.mFriction, mBodyData.mBounce, pForceListenerId, mBodyData.mBoneType==BONE_TRIGGER);
-	return (mBodyId != INVALID_BODY);
+bool ChunkyBoneCylinder::CreateBody(PhysicsManager* physics, bool is_root,
+	int force_listener_id, PhysicsManager::BodyType type,
+	const xform& transform) {
+	RemovePhysics(physics);
+	body_id_ = physics->CreateCylinder(is_root, transform, body_data_.mass_, radius_, length_, type,
+		body_data_.friction_, body_data_.bounce_, force_listener_id, body_data_.bone_type_==kBoneTrigger);
+	return (body_id_ != INVALID_BODY);
 }
 
-vec3 ChunkyBoneCylinder::GetShapeSize() const
-{
-	return (vec3(mRadius*2, mRadius*2, mLength));
+vec3 ChunkyBoneCylinder::GetShapeSize() const {
+	return (vec3(radius_*2, radius_*2, length_));
 }
 
-ChunkyBoneGeometry::GeometryType ChunkyBoneCylinder::GetGeometryType() const
-{
-	return GEOMETRY_CYLINDER;
+ChunkyBoneGeometry::GeometryType ChunkyBoneCylinder::GetGeometryType() const {
+	return kGeometryCylinder;
 }
 
 
 
-ChunkyBoneSphere::ChunkyBoneSphere(const BodyData& pBodyData):
-	Parent(pBodyData),
-	mRadius(0)
-{
+ChunkyBoneSphere::ChunkyBoneSphere(const BodyData& body_data):
+	Parent(body_data),
+	radius_(0) {
 }
 
-bool ChunkyBoneSphere::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	int pForceListenerId, PhysicsManager::BodyType pType,
-	const xform& pTransform)
-{
-	RemovePhysics(pPhysics);
-	mBodyId = pPhysics->CreateSphere(pIsRoot, pTransform, mBodyData.mMass, mRadius, pType, mBodyData.mFriction,
-		mBodyData.mBounce, pForceListenerId, mBodyData.mBoneType==BONE_TRIGGER);
-	return (mBodyId != INVALID_BODY);
+bool ChunkyBoneSphere::CreateBody(PhysicsManager* physics, bool is_root,
+	int force_listener_id, PhysicsManager::BodyType type,
+	const xform& transform) {
+	RemovePhysics(physics);
+	body_id_ = physics->CreateSphere(is_root, transform, body_data_.mass_, radius_, type, body_data_.friction_,
+		body_data_.bounce_, force_listener_id, body_data_.bone_type_==kBoneTrigger);
+	return (body_id_ != INVALID_BODY);
 }
 
-unsigned ChunkyBoneSphere::GetChunkySize(const void* pData) const
-{
-	return (Parent::GetChunkySize(pData) + sizeof(float32));
+unsigned ChunkyBoneSphere::GetChunkySize(const void* data) const {
+	return (Parent::GetChunkySize(data) + sizeof(float32));
 }
 
-void ChunkyBoneSphere::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
-{
-	Parent::SaveChunkyData(pStructure, pData);
+void ChunkyBoneSphere::SaveChunkyData(const ChunkyPhysics* structure, void* data) const {
+	Parent::SaveChunkyData(structure, data);
 
-	uint32* lData = (uint32*)&((const char*)pData)[Parent::GetChunkySize()];
-	lData[0] = Endian::HostToBigF(mRadius);
+	uint32* _data = (uint32*)&((const char*)data)[Parent::GetChunkySize()];
+	_data[0] = Endian::HostToBigF(radius_);
 }
 
-vec3 ChunkyBoneSphere::GetShapeSize() const
-{
-	return (vec3(mRadius*2, mRadius*2, mRadius*2));
+vec3 ChunkyBoneSphere::GetShapeSize() const {
+	return (vec3(radius_*2, radius_*2, radius_*2));
 }
 
-void ChunkyBoneSphere::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
-{
-	Parent::LoadChunkyData(pStructure, pData);
+void ChunkyBoneSphere::LoadChunkyData(ChunkyPhysics* structure, const void* data) {
+	Parent::LoadChunkyData(structure, data);
 
-	const uint32* lData = (const uint32*)&((const char*)pData)[Parent::GetChunkySize()];
-	mRadius = Endian::BigToHostF(lData[0]);
+	const uint32* _data = (const uint32*)&((const char*)data)[Parent::GetChunkySize()];
+	radius_ = Endian::BigToHostF(_data[0]);
 }
 
-ChunkyBoneGeometry::GeometryType ChunkyBoneSphere::GetGeometryType() const
-{
-	return (GEOMETRY_SPHERE);
+ChunkyBoneGeometry::GeometryType ChunkyBoneSphere::GetGeometryType() const {
+	return (kGeometrySphere);
 }
 
 
 
-ChunkyBoneBox::ChunkyBoneBox(const BodyData& pBodyData):
-	Parent(pBodyData)
-{
+ChunkyBoneBox::ChunkyBoneBox(const BodyData& body_data):
+	Parent(body_data) {
 }
 
-bool ChunkyBoneBox::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	int pForceListenerId, PhysicsManager::BodyType pType,
-	const xform& pTransform)
-{
-	RemovePhysics(pPhysics);
-	mBodyId = pPhysics->CreateBox(pIsRoot, pTransform, mBodyData.mMass, mSize, pType, mBodyData.mFriction,
-		mBodyData.mBounce, pForceListenerId, mBodyData.mBoneType==BONE_TRIGGER);
-	return (mBodyId != INVALID_BODY);
+bool ChunkyBoneBox::CreateBody(PhysicsManager* physics, bool is_root,
+	int force_listener_id, PhysicsManager::BodyType type,
+	const xform& transform) {
+	RemovePhysics(physics);
+	body_id_ = physics->CreateBox(is_root, transform, body_data_.mass_, size_, type, body_data_.friction_,
+		body_data_.bounce_, force_listener_id, body_data_.bone_type_==kBoneTrigger);
+	return (body_id_ != INVALID_BODY);
 }
 
-unsigned ChunkyBoneBox::GetChunkySize(const void* pData) const
-{
-	return (Parent::GetChunkySize(pData) + sizeof(float32)*3);
+unsigned ChunkyBoneBox::GetChunkySize(const void* data) const {
+	return (Parent::GetChunkySize(data) + sizeof(float32)*3);
 }
 
-void ChunkyBoneBox::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
-{
-	Parent::SaveChunkyData(pStructure, pData);
+void ChunkyBoneBox::SaveChunkyData(const ChunkyPhysics* structure, void* data) const {
+	Parent::SaveChunkyData(structure, data);
 
-	uint32* lData = (uint32*)&((const char*)pData)[Parent::GetChunkySize()];
-	lData[0] = Endian::HostToBigF(mSize.x);
-	lData[1] = Endian::HostToBigF(mSize.y);
-	lData[2] = Endian::HostToBigF(mSize.z);
+	uint32* _data = (uint32*)&((const char*)data)[Parent::GetChunkySize()];
+	_data[0] = Endian::HostToBigF(size_.x);
+	_data[1] = Endian::HostToBigF(size_.y);
+	_data[2] = Endian::HostToBigF(size_.z);
 }
 
-vec3 ChunkyBoneBox::GetShapeSize() const
-{
-	return (mSize);
+vec3 ChunkyBoneBox::GetShapeSize() const {
+	return (size_);
 }
 
-void ChunkyBoneBox::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
-{
-	Parent::LoadChunkyData(pStructure, pData);
+void ChunkyBoneBox::LoadChunkyData(ChunkyPhysics* structure, const void* data) {
+	Parent::LoadChunkyData(structure, data);
 
-	const uint32* lData = (const uint32*)&((const char*)pData)[Parent::GetChunkySize()];
-	mSize.x = Endian::BigToHostF(lData[0]);
-	mSize.y = Endian::BigToHostF(lData[1]);
-	mSize.z = Endian::BigToHostF(lData[2]);
+	const uint32* _data = (const uint32*)&((const char*)data)[Parent::GetChunkySize()];
+	size_.x = Endian::BigToHostF(_data[0]);
+	size_.y = Endian::BigToHostF(_data[1]);
+	size_.z = Endian::BigToHostF(_data[2]);
 }
 
-ChunkyBoneGeometry::GeometryType ChunkyBoneBox::GetGeometryType() const
-{
-	return (GEOMETRY_BOX);
+ChunkyBoneGeometry::GeometryType ChunkyBoneBox::GetGeometryType() const {
+	return (kGeometryBox);
 }
 
 
 
-ChunkyBoneMesh::ChunkyBoneMesh(const BodyData& pBodyData):
-	Parent(pBodyData),
-	mVertexCount(0),
-	mVertices(0),
-	mTriangleCount(0),
-	mIndices(0)
-{
+ChunkyBoneMesh::ChunkyBoneMesh(const BodyData& body_data):
+	Parent(body_data),
+	vertex_count_(0),
+	vertices_(0),
+	triangle_count_(0),
+	indices_(0) {
 }
 
-ChunkyBoneMesh::~ChunkyBoneMesh()
-{
+ChunkyBoneMesh::~ChunkyBoneMesh() {
 	Clear();
 }
 
-bool ChunkyBoneMesh::CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-	int pForceListenerId, PhysicsManager::BodyType pType,
-	const xform& pTransform)
-{
-	RemovePhysics(pPhysics);
-	deb_assert(mTriangleCount > 1);
-	mBodyId = pPhysics->CreateTriMesh(pIsRoot, mVertexCount, mVertices, mTriangleCount, mIndices,
-		pTransform, mBodyData.mMass, pType, mBodyData.mFriction, mBodyData.mBounce, pForceListenerId,
-		mBodyData.mBoneType==BONE_TRIGGER);
-	return (mBodyId != INVALID_BODY);
+bool ChunkyBoneMesh::CreateBody(PhysicsManager* physics, bool is_root,
+	int force_listener_id, PhysicsManager::BodyType type,
+	const xform& transform) {
+	RemovePhysics(physics);
+	deb_assert(triangle_count_ > 1);
+	body_id_ = physics->CreateTriMesh(is_root, vertex_count_, vertices_, triangle_count_, indices_,
+		transform, body_data_.mass_, type, body_data_.friction_, body_data_.bounce_, force_listener_id,
+		body_data_.bone_type_==kBoneTrigger);
+	return (body_id_ != INVALID_BODY);
 }
 
-unsigned ChunkyBoneMesh::GetChunkySize(const void* pData) const
-{
-	unsigned lSize = Parent::GetChunkySize(pData);
-	uint32 lVertexCount;
-	uint32 lTriangleCount;
-	if (mVertexCount)	// Checking size when already loaded?
-	{
-		lVertexCount = mVertexCount;
-		lTriangleCount = mTriangleCount;
+unsigned ChunkyBoneMesh::GetChunkySize(const void* data) const {
+	unsigned __size = Parent::GetChunkySize(data);
+	uint32 vertex_count;
+	uint32 triangle_count;
+	if (vertex_count_) {	// Checking size when already loaded?
+		vertex_count = vertex_count_;
+		triangle_count = triangle_count_;
+	} else {
+		const uint32* _data = (const uint32*)&((const uint8*)data)[__size];
+		vertex_count = Endian::BigToHost(_data[0]);
+		triangle_count = Endian::BigToHost(_data[1]);
 	}
-	else
-	{
-		const uint32* lData = (const uint32*)&((const uint8*)pData)[lSize];
-		lVertexCount = Endian::BigToHost(lData[0]);
-		lTriangleCount = Endian::BigToHost(lData[1]);
-	}
-	lSize += sizeof(mVertexCount)*2 + lVertexCount*sizeof(mVertices[0])*3 +
-		lTriangleCount*sizeof(mIndices[0])*3;
-	return (lSize);
+	__size += sizeof(vertex_count_)*2 + vertex_count*sizeof(vertices_[0])*3 +
+		triangle_count*sizeof(indices_[0])*3;
+	return (__size);
 }
 
-void ChunkyBoneMesh::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
-{
-	Parent::SaveChunkyData(pStructure, pData);
+void ChunkyBoneMesh::SaveChunkyData(const ChunkyPhysics* structure, void* data) const {
+	Parent::SaveChunkyData(structure, data);
 
-	uint32* lData = (uint32*)&((char*)pData)[Parent::GetChunkySize()];
-	lData[0] = Endian::HostToBig(mVertexCount);
-	lData[1] = Endian::HostToBig(mTriangleCount);
-	uint32 lBase = 2;
+	uint32* _data = (uint32*)&((char*)data)[Parent::GetChunkySize()];
+	_data[0] = Endian::HostToBig(vertex_count_);
+	_data[1] = Endian::HostToBig(triangle_count_);
+	uint32 base = 2;
 	uint32 x;
-	for (x = 0; x < mVertexCount*3; ++x)
-	{
-		lData[lBase+x] = Endian::HostToBigF(mVertices[x]);
+	for (x = 0; x < vertex_count_*3; ++x) {
+		_data[base+x] = Endian::HostToBigF(vertices_[x]);
 	}
-	lBase += x;
-	for (x = 0; x < mTriangleCount*3; ++x)
-	{
-		lData[lBase+x] = Endian::HostToBig(mIndices[x]);
+	base += x;
+	for (x = 0; x < triangle_count_*3; ++x) {
+		_data[base+x] = Endian::HostToBig(indices_[x]);
 	}
 }
 
-vec3 ChunkyBoneMesh::GetShapeSize() const
-{
+vec3 ChunkyBoneMesh::GetShapeSize() const {
 	return (vec3(10,10,10));	// Implement if you want to be able to debug mesh EXTENTS. Doesn't seem very interesting...
 }
 
-void ChunkyBoneMesh::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
-{
-	Parent::LoadChunkyData(pStructure, pData);
+void ChunkyBoneMesh::LoadChunkyData(ChunkyPhysics* structure, const void* data) {
+	Parent::LoadChunkyData(structure, data);
 
-	const uint32* lData = (const uint32*)&((const char*)pData)[Parent::GetChunkySize()];
-	mVertexCount = Endian::BigToHost(lData[0]);
-	mTriangleCount = Endian::BigToHost(lData[1]);
-	deb_assert(!mVertices && !mIndices);
-	mVertices = new float[mVertexCount*3];
-	mIndices = new uint32[mTriangleCount*3];
-	uint32 lBase = 2;
+	const uint32* _data = (const uint32*)&((const char*)data)[Parent::GetChunkySize()];
+	vertex_count_ = Endian::BigToHost(_data[0]);
+	triangle_count_ = Endian::BigToHost(_data[1]);
+	deb_assert(!vertices_ && !indices_);
+	vertices_ = new float[vertex_count_*3];
+	indices_ = new uint32[triangle_count_*3];
+	uint32 base = 2;
 	uint32 x;
-	for (x = 0; x < mVertexCount*3; ++x)
-	{
-		mVertices[x] = Endian::BigToHostF(lData[lBase+x]);
+	for (x = 0; x < vertex_count_*3; ++x) {
+		vertices_[x] = Endian::BigToHostF(_data[base+x]);
 	}
-	lBase += x;
-	for (x = 0; x < mTriangleCount*3; ++x)
-	{
-		mIndices[x] = Endian::BigToHost(lData[lBase+x]);
+	base += x;
+	for (x = 0; x < triangle_count_*3; ++x) {
+		indices_[x] = Endian::BigToHost(_data[base+x]);
 	}
 }
 
-void ChunkyBoneMesh::Clear()
-{
-	mVertexCount = 0;
-	delete (mVertices);
-	mVertices = 0;
-	mTriangleCount = 0;
-	delete (mIndices);
-	mIndices = 0;
+void ChunkyBoneMesh::Clear() {
+	vertex_count_ = 0;
+	delete (vertices_);
+	vertices_ = 0;
+	triangle_count_ = 0;
+	delete (indices_);
+	indices_ = 0;
 }
 
-ChunkyBoneGeometry::GeometryType ChunkyBoneMesh::GetGeometryType() const
-{
-	return (GEOMETRY_MESH);
+ChunkyBoneGeometry::GeometryType ChunkyBoneMesh::GetGeometryType() const {
+	return (kGeometryMesh);
 }
 
-void ChunkyBoneMesh::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal)
-{
-	Parent::RelocatePointers(pTarget, pSource, pOriginal);
+void ChunkyBoneMesh::RelocatePointers(const ChunkyPhysics* target, const ChunkyPhysics* source, const ChunkyBoneGeometry& original) {
+	Parent::RelocatePointers(target, source, original);
 
-	const float* lOriginalVertices = mVertices;
-	const uint32* lOriginalIndices = mIndices;
-	mVertices = new float[mVertexCount*3];
-	mIndices = new uint32[mTriangleCount*3];
-	::memcpy(mVertices, lOriginalVertices, mVertexCount*3*sizeof(mVertices[0]));
-	::memcpy(mIndices, lOriginalIndices, mTriangleCount*3*sizeof(mIndices[0]));
+	const float* original_vertices = vertices_;
+	const uint32* original_indices = indices_;
+	vertices_ = new float[vertex_count_*3];
+	indices_ = new uint32[triangle_count_*3];
+	::memcpy(vertices_, original_vertices, vertex_count_*3*sizeof(vertices_[0]));
+	::memcpy(indices_, original_indices, triangle_count_*3*sizeof(indices_[0]));
 }
 
 
 
-loginstance(PHYSICS, ChunkyBoneGeometry);
+loginstance(kPhysics, ChunkyBoneGeometry);
 
 
 

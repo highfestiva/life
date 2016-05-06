@@ -5,142 +5,124 @@
 
 
 #include "pch.h"
-#include "PushServerDelegate.h"
-#include "../../Cure/Include/ConsoleManager.h"
-#include "../../Cure/Include/FloatAttribute.h"
-#include "../../Cure/Include/IntAttribute.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Cure/Include/Spawner.h"
-#include "../../Cure/Include/TimeManager.h"
-#include "../../Lepra/Include/Random.h"
-#include "../../Life/LifeServer/GameServerManager.h"
-#include "../RtVar.h"
-#include "../RtVar.h"
-#include "../Version.h"
+#include "pushserverdelegate.h"
+#include "../../cure/include/consolemanager.h"
+#include "../../cure/include/floatattribute.h"
+#include "../../cure/include/intattribute.h"
+#include "../../cure/include/runtimevariable.h"
+#include "../../cure/include/spawner.h"
+#include "../../cure/include/timemanager.h"
+#include "../../lepra/include/random.h"
+#include "../../life/lifeserver/gameservermanager.h"
+#include "../rtvar.h"
+#include "../rtvar.h"
+#include "../version.h"
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
-PushServerDelegate::PushServerDelegate(Life::GameServerManager* pGameServerManager):
-	Parent(pGameServerManager)
-{
+PushServerDelegate::PushServerDelegate(life::GameServerManager* game_server_manager):
+	Parent(game_server_manager) {
 }
 
-PushServerDelegate::~PushServerDelegate()
-{
+PushServerDelegate::~PushServerDelegate() {
 }
 
 
 
-void PushServerDelegate::SetLevel(const str& pLevelName)
-{
-	ScopeLock lLock(mGameServerManager->GetTickLock());
-	if (mLevelId)
-	{
-		mGameServerManager->DeleteContextObject(mLevelId);
+void PushServerDelegate::SetLevel(const str& level_name) {
+	ScopeLock lock(game_server_manager_->GetTickLock());
+	if (level_id_) {
+		game_server_manager_->DeleteContextObject(level_id_);
 	}
 
-	Cure::ContextObject* lLevel = mGameServerManager->GameManager::CreateContextObject(pLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-	mLevelId = lLevel->GetInstanceId();
-	lLevel->StartLoading();
+	cure::ContextObject* level = game_server_manager_->GameManager::CreateContextObject(level_name, cure::kNetworkObjectLocallyControlled);
+	level_id_ = level->GetInstanceId();
+	level->StartLoading();
 }
 
 
 
-Cure::ContextObject* PushServerDelegate::CreateContextObject(const str& pClassId) const
-{
-	return new Cure::CppContextObject(mGameServerManager->GetResourceManager(), pClassId);
+cure::ContextObject* PushServerDelegate::CreateContextObject(const str& class_id) const {
+	return new cure::CppContextObject(game_server_manager_->GetResourceManager(), class_id);
 }
 
-void PushServerDelegate::OnOpen()
-{
+void PushServerDelegate::OnOpen() {
 	SetLevel("level_01");
 }
 
-void PushServerDelegate::OnLogin(Life::Client*)
-{
+void PushServerDelegate::OnLogin(life::Client*) {
 }
 
-void PushServerDelegate::OnLogout(Life::Client*)
-{
+void PushServerDelegate::OnLogout(life::Client*) {
 }
 
 
 
-void PushServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId)
-{
-	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
-	if (lPreviousAvatarId)
-	{
-		mLog.Info("User "+pClient->GetUserConnection()->GetLoginName()+" had an avatar, replacing it.");
-		pClient->SetAvatarId(0);
-		Cure::ContextObject* lObject = mGameServerManager->GetContext()->GetObject(lPreviousAvatarId);
-		if (lObject)
-		{
-			xform lTransform;
-			lTransform.SetPosition(lObject->GetPosition());
-			lTransform.GetPosition() += vec3(0, 0, 2);
-			vec3 lEulerAngles;
-			lObject->GetOrientation().GetEulerAngles(lEulerAngles);
+void PushServerDelegate::OnSelectAvatar(life::Client* client, const cure::UserAccount::AvatarId& avatar_id) {
+	const cure::GameObjectId previous_avatar_id = client->GetAvatarId();
+	if (previous_avatar_id) {
+		log_.Info("User "+client->GetUserConnection()->GetLoginName()+" had an avatar, replacing it.");
+		client->SetAvatarId(0);
+		cure::ContextObject* _object = game_server_manager_->GetContext()->GetObject(previous_avatar_id);
+		if (_object) {
+			xform transform;
+			transform.SetPosition(_object->GetPosition());
+			transform.GetPosition() += vec3(0, 0, 2);
+			vec3 euler_angles;
+			_object->GetOrientation().GetEulerAngles(euler_angles);
 			quat q;
-			q.SetEulerAngles(lEulerAngles.x, 0, 0);
-			lTransform.SetOrientation(q * lTransform.GetOrientation());
+			q.SetEulerAngles(euler_angles.x, 0, 0);
+			transform.SetOrientation(q * transform.GetOrientation());
 		}
-		mGameServerManager->DeleteContextObject(lPreviousAvatarId);
+		game_server_manager_->DeleteContextObject(previous_avatar_id);
 	}
 
-	Cure::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
-	if (!lSpawner)
-	{
-		mLog.Error("No player spawner in level!");
+	cure::Spawner* spawner = game_server_manager_->GetAvatarSpawner(level_id_);
+	if (!spawner) {
+		log_.Error("No player spawner in level!");
 		return;
 	}
-	mLog.Info("Loading avatar '"+pAvatarId+"' for user "+pClient->GetUserConnection()->GetLoginName()+".");
-	Cure::ContextObject* lObject = mGameServerManager->Parent::CreateContextObject(pAvatarId, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	lSpawner->PlaceObject(lObject, -1);
-	pClient->SetAvatarId(lObject->GetInstanceId());
-	lObject->SetExtraData((void*)(intptr_t)pClient->GetUserConnection()->GetAccountId());
-	lObject->StartLoading();
+	log_.Info("Loading avatar '"+avatar_id+"' for user "+client->GetUserConnection()->GetLoginName()+".");
+	cure::ContextObject* _object = game_server_manager_->Parent::CreateContextObject(avatar_id, cure::kNetworkObjectRemoteControlled);
+	spawner->PlaceObject(_object, -1);
+	client->SetAvatarId(_object->GetInstanceId());
+	_object->SetExtraData((void*)(intptr_t)client->GetUserConnection()->GetAccountId());
+	_object->StartLoading();
 }
 
-void PushServerDelegate::OnLoadAvatar(Life::Client* pClient, Cure::ContextObject* pAvatar)
-{
-	(void)pClient;
-	(void)pAvatar;
+void PushServerDelegate::OnLoadAvatar(life::Client* client, cure::ContextObject* avatar) {
+	(void)client;
+	(void)avatar;
 }
 
-void PushServerDelegate::OnLoadObject(Cure::ContextObject* pObject)
-{
-	(void)pObject;
+void PushServerDelegate::OnLoadObject(cure::ContextObject* object) {
+	(void)object;
 }
 
-void PushServerDelegate::OnDeleteObject(Cure::ContextObject* pObject)
-{
-	(void)pObject;
+void PushServerDelegate::OnDeleteObject(cure::ContextObject* object) {
+	(void)object;
 }
 
 
 
-bool PushServerDelegate::IsObjectLendable(Life::Client* pClient, Cure::ContextObject* pObject)
-{
-	(void)pClient;
-	(void)pObject;
+bool PushServerDelegate::IsObjectLendable(life::Client* client, cure::ContextObject* object) {
+	(void)client;
+	(void)object;
 	return true;
 }
 
 
 
-void PushServerDelegate::PreEndTick()
-{
+void PushServerDelegate::PreEndTick() {
 }
 
 
 
-loginstance(GAME, PushServerDelegate);
+loginstance(kGame, PushServerDelegate);
 
 
 

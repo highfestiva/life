@@ -1,29 +1,29 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Game.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ContextPath.h"
-#include "../Cure/Include/FloatAttribute.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Cure/Include/TimeManager.h"
-#include "../Lepra/Include/Random.h"
-#include "../Tbc/Include/PhysicsEngine.h"
-#include "../UiCure/Include/UiCollisionSoundManager.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiCure/Include/UiProps.h"
-#include "../UiCure/Include/UiRuntimeVariableName.h"
-#include "../UiCure/Include/UiSound.h"
-#include "Goal.h"
-#include "Vehicle.h"
-#include "VehicleElevator.h"
-#include "Level.h"
-#include "Spawner.h"
-#include "VehicleAi.h"
+#include "game.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/contextpath.h"
+#include "../cure/include/floatattribute.h"
+#include "../cure/include/runtimevariable.h"
+#include "../cure/include/timemanager.h"
+#include "../lepra/include/random.h"
+#include "../tbc/include/physicsengine.h"
+#include "../uicure/include/uicollisionsoundmanager.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uicure/include/uiprops.h"
+#include "../uicure/include/uiruntimevariablename.h"
+#include "../uicure/include/uisound.h"
+#include "goal.h"
+#include "vehicle.h"
+#include "vehicleelevator.h"
+#include "level.h"
+#include "spawner.h"
+#include "vehicleai.h"
 
 
 
@@ -32,722 +32,598 @@
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 
-Game::Game(UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager):
-	Cure::GameTicker(400, 4, 3),
-	Cure::GameManager(Cure::GameTicker::GetTimeManager(), pVariableScope, pResourceManager),
-	mUiManager(pUiManager),
-	mCollisionSoundManager(0),
-	mLightId(UiTbc::Renderer::INVALID_LIGHT),
-	mLevel(0),
-	mFlybyMode(FLYBY_INACTIVE),
-	mFlyByTime(0),
-	mVehicle(0),
-	mVehicleCamPos(-80, -40, 3),
-	mGoal(0),
-	mVehicleAi(0),
-	mFlipRenderSide(0),
-	mFlipRenderSideFactor(0),
-	mScore(0),
-	mScoreCountingEnabled(false)
-{
+Game::Game(UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, cure::ResourceManager* resource_manager):
+	cure::GameTicker(400, 4, 3),
+	cure::GameManager(cure::GameTicker::GetTimeManager(), variable_scope, resource_manager),
+	ui_manager_(ui_manager),
+	collision_sound_manager_(0),
+	light_id_(uitbc::Renderer::INVALID_LIGHT),
+	level_(0),
+	flyby_mode_(kFlybyInactive),
+	fly_by_time_(0),
+	vehicle_(0),
+	vehicle_cam_pos_(-80, -40, 3),
+	goal_(0),
+	vehicle_ai_(0),
+	flip_render_side_(0),
+	flip_render_side_factor_(0),
+	score_(0),
+	score_counting_enabled_(false) {
 	SetTicker(this);
 
-	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.1f, 0.2f, 0));
-	mCollisionSoundManager->AddSound("big_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
-	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(0.4f, 0.1f, 0));
-	mCollisionSoundManager->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	collision_sound_manager_ = new UiCure::CollisionSoundManager(this, ui_manager);
+	collision_sound_manager_->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
+	collision_sound_manager_->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.1f, 0.2f, 0));
+	collision_sound_manager_->AddSound("big_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(1.5f, 0.4f, 0));
+	collision_sound_manager_->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(0.4f, 0.1f, 0));
+	collision_sound_manager_->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
 }
 
-Game::~Game()
-{
-	mUiManager->GetRenderer()->RemoveLight(mLightId);
+Game::~Game() {
+	ui_manager_->GetRenderer()->RemoveLight(light_id_);
 
-	delete mCollisionSoundManager;
-	mCollisionSoundManager = 0;
-	mUiManager = 0;
+	delete collision_sound_manager_;
+	collision_sound_manager_ = 0;
+	ui_manager_ = 0;
 	SetVariableScope(0);	// Not owned by us.
 
-	mGoal = 0;
-	mVehicleAi = 0;
+	goal_ = 0;
+	vehicle_ai_ = 0;
 }
 
-UiCure::GameUiManager* Game::GetUiManager() const
-{
-	return mUiManager;
+UiCure::GameUiManager* Game::GetUiManager() const {
+	return ui_manager_;
 }
 
-const str& Game::GetLevelName() const
-{
-	return mLevelName;
+const str& Game::GetLevelName() const {
+	return level_name_;
 }
 
-bool Game::SetLevelName(const str& pLevel)
-{
-	mLevelName = pLevel;
-	if (!mVehicle)
-	{
+bool Game::SetLevelName(const str& level) {
+	level_name_ = level;
+	if (!vehicle_) {
 		return RestartLevel();
 	}
-	mGoal = 0;
+	goal_ = 0;
 	return InitializeUniverse();
 }
 
-bool Game::RestartLevel()
-{
+bool Game::RestartLevel() {
 	return Initialize();
 }
 
-xform Game::GetVehicleStart() const
-{
-	xform t(gIdentityQuaternionF, VEHICLE_START);
+xform Game::GetVehicleStart() const {
+	xform t(kIdentityQuaternionF, VEHICLE_START);
 	t.GetOrientation().RotateAroundOwnZ(-PIF/2);
 	return t;
 }
 
-bool Game::Tick()
-{
-	if (!mLevel || !mLevel->IsLoaded())
-	{
+bool Game::Tick() {
+	if (!level_ || !level_->IsLoaded()) {
 		return true;
 	}
 
-	if (mSlowmoTimer.IsStarted() && mSlowmoTimer.QueryTimeDiff() > 4.0f)
-	{
-		mSlowmoTimer.Stop();
-		v_set(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
+	if (slowmo_timer_.IsStarted() && slowmo_timer_.QueryTimeDiff() > 4.0f) {
+		slowmo_timer_.Stop();
+		v_set(GetVariableScope(), kRtvarPhysicsRtr, 1.0);
 	}
 
 	GameTicker::GetTimeManager()->Tick();
 
-	mFlipRenderSideFactor = Math::Lerp(mFlipRenderSideFactor, (float)mFlipRenderSide, 0.15f);
-	if (::fabs(mFlipRenderSideFactor-(float)mFlipRenderSide) < 0.001f)
-	{
-		mFlipRenderSideFactor = (float)mFlipRenderSide;
+	flip_render_side_factor_ = Math::Lerp(flip_render_side_factor_, (float)flip_render_side_, 0.15f);
+	if (::fabs(flip_render_side_factor_-(float)flip_render_side_) < 0.001f) {
+		flip_render_side_factor_ = (float)flip_render_side_;
 	}
 
-	vec3 lPosition;
-	vec3 lVelocity;
-	if (mVehicle && mVehicle->IsLoaded())
-	{
-		lPosition = mVehicle->GetPosition()+vec3(0, 0, +10);
-		if (lPosition.z < -50 || lPosition.z > 100 /*|| isnan(lPosition.z) || isinf(lPosition.z)*/)
-		{
-			const float lHealth = mVehicle->GetHealth();
-			const str lVehicleType = mVehicle->GetClassId();	// TRICKY: don't fetch reference!!!
-			SetVehicleName(lVehicleType);
-			mVehicle->DrainHealth(mVehicle->GetHealth() - lHealth);
-		}
-		else
-		{
-			lVelocity = mVehicle->GetVelocity();
-			mVehicle->QueryFlip();
+	vec3 _position;
+	vec3 _velocity;
+	if (vehicle_ && vehicle_->IsLoaded()) {
+		_position = vehicle_->GetPosition()+vec3(0, 0, +10);
+		if (_position.z < -50 || _position.z > 100 /*|| isnan(_position.z) || isinf(_position.z)*/) {
+			const float health = vehicle_->GetHealth();
+			const str vehicle_type = vehicle_->GetClassId();	// TRICKY: don't fetch reference!!!
+			SetVehicleName(vehicle_type);
+			vehicle_->DrainHealth(vehicle_->GetHealth() - health);
+		} else {
+			_velocity = vehicle_->GetVelocity();
+			vehicle_->QueryFlip();
 		}
 	}
-	mCollisionSoundManager->Tick(lPosition);
-	mUiManager->SetMicrophonePosition(xform(gIdentityQuaternionF, lPosition), lVelocity);
+	collision_sound_manager_->Tick(_position);
+	ui_manager_->SetMicrophonePosition(xform(kIdentityQuaternionF, _position), _velocity);
 
-	/*if (win!)
-	{
-		AddContextObject(new UiCure::Sound(GetResourceManager(), "win.wav", mUiManager), Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
+	/*if (win!) {
+		AddContextObject(new UiCure::Sound(GetResourceManager(), "win.wav", ui_manager_), cure::kNetworkObjectLocalOnly, 0);
 	}
-	mPreviousFrameWinnerIndex = mWinnerIndex;*/
+	previous_frame_winner_index_ = winner_index_;*/
 
 	return true;
 }
 
-void Game::TickFlyby()
-{
-	const double lFrameTime = 1.0/FPS;
-	mFlyByTime += lFrameTime;
+void Game::TickFlyby() {
+	const double frame_time = 1.0/kFps;
+	fly_by_time_ += frame_time;
 }
 
 
 
-str Game::GetVehicleName() const
-{
-	if (mVehicle)
-	{
-		return mVehicle->GetClassId();
+str Game::GetVehicleName() const {
+	if (vehicle_) {
+		return vehicle_->GetClassId();
 	}
 	return str();
 }
 
-void Game::SetVehicleName(const str& pVehicle)
-{
-	if (mVehicle && mVehicle->IsLoaded() &&
-		mVehicle->GetPosition().GetDistance(GetVehicleStart().GetPosition()) < 2.0f*SCALE_FACTOR &&
-		mVehicle->GetClassId() == pVehicle &&
-		mVehicle->GetHealth() > 0)
-	{
-		mVehicle->DrainHealth(-1);
+void Game::SetVehicleName(const str& vehicle) {
+	if (vehicle_ && vehicle_->IsLoaded() &&
+		vehicle_->GetPosition().GetDistance(GetVehicleStart().GetPosition()) < 2.0f*SCALE_FACTOR &&
+		vehicle_->GetClassId() == vehicle &&
+		vehicle_->GetHealth() > 0) {
+		vehicle_->DrainHealth(-1);
 		return;
 	}
-	delete mVehicle;
-	mVehicle = (Vehicle*)GameManager::CreateContextObject(pVehicle, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-	bool lOk = (mVehicle != 0);
-	deb_assert(lOk);
-	if (lOk)
-	{
-		mVehicle->SetInitialTransform(GetVehicleStart());
-		mVehicle->DrainHealth(-1);
-		mVehicle->StartLoading();
+	delete vehicle_;
+	vehicle_ = (Vehicle*)GameManager::CreateContextObject(vehicle, cure::kNetworkObjectLocalOnly, 0);
+	bool _ok = (vehicle_ != 0);
+	deb_assert(_ok);
+	if (_ok) {
+		vehicle_->SetInitialTransform(GetVehicleStart());
+		vehicle_->DrainHealth(-1);
+		vehicle_->StartLoading();
 	}
 }
 
-Level* Game::GetLevel() const
-{
-	return mLevel;
+Level* Game::GetLevel() const {
+	return level_;
 }
 
-Vehicle* Game::GetVehicle() const
-{
-	return mVehicle;
+Vehicle* Game::GetVehicle() const {
+	return vehicle_;
 }
 
-Goal* Game::GetGoal() const
-{
-	return mGoal;
+Goal* Game::GetGoal() const {
+	return goal_;
 }
 
-void Game::GetVehicleMotion(vec3& pPosition, vec3 pVelocity) const
-{
-	if (mVehicle && mVehicle->IsLoaded())
-	{
-		pPosition = mVehicle->GetPosition();
-		pVelocity = mVehicle->GetVelocity();
+void Game::GetVehicleMotion(vec3& position, vec3 velocity) const {
+	if (vehicle_ && vehicle_->IsLoaded()) {
+		position = vehicle_->GetPosition();
+		velocity = vehicle_->GetVelocity();
 	}
 }
 
-void Game::SetThrottle(float pThrottle)
-{
-	if (pThrottle < 0 && mVehicle->GetForwardSpeed() > 0.5f)
-	{
-		mVehicle->SetEnginePower(0, 0);	// Disengage throttle while braking.
-		mVehicle->SetEnginePower(2, -pThrottle);
+void Game::SetThrottle(float throttle) {
+	if (throttle < 0 && vehicle_->GetForwardSpeed() > 0.5f) {
+		vehicle_->SetEnginePower(0, 0);	// Disengage throttle while braking.
+		vehicle_->SetEnginePower(2, -throttle);
 		return;
 	}
-	mVehicle->SetEnginePower(2, 0);	// Disengage brakes.
-	mVehicle->SetEnginePower(0, pThrottle);
+	vehicle_->SetEnginePower(2, 0);	// Disengage brakes.
+	vehicle_->SetEnginePower(0, throttle);
 }
 
-Game::FlybyMode Game::GetFlybyMode() const
-{
-	if (!mVehicle || !mVehicle->IsLoaded())
-	{
-		return FLYBY_PAUSE;
+Game::FlybyMode Game::GetFlybyMode() const {
+	if (!vehicle_ || !vehicle_->IsLoaded()) {
+		return kFlybyPause;
 	}
-	return mFlybyMode;
+	return flyby_mode_;
 }
 
-void Game::SetFlybyMode(FlybyMode pFlybyMode)
-{
-	mFlybyMode = pFlybyMode;
-	if (pFlybyMode == FLYBY_INTRODUCTION)
-	{
-		mFlyByTime = 0;
+void Game::SetFlybyMode(FlybyMode flyby_mode) {
+	flyby_mode_ = flyby_mode;
+	if (flyby_mode == kFlybyIntroduction) {
+		fly_by_time_ = 0;
 	}
 }
 
-void Game::ResetScore()
-{
-	mScore = 0;
+void Game::ResetScore() {
+	score_ = 0;
 }
 
-void Game::AddScore(double pScore)
-{
-	if (!IsScoreCountingEnabled())
-	{
+void Game::AddScore(double score) {
+	if (!IsScoreCountingEnabled()) {
 		return;
 	}
-	mScore += pScore;
+	score_ += score;
 }
 
-double Game::GetScore() const
-{
-	return mScore;
+double Game::GetScore() const {
+	return score_;
 }
 
-void Game::EnableScoreCounting(bool pEnable)
-{
-	mScoreCountingEnabled = pEnable;
+void Game::EnableScoreCounting(bool enable) {
+	score_counting_enabled_ = enable;
 }
 
-bool Game::IsScoreCountingEnabled() const
-{
-	return mScoreCountingEnabled;
+bool Game::IsScoreCountingEnabled() const {
+	return score_counting_enabled_;
 }
 
-void Game::Detonate(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
-	Cure::ContextObject* pExplosive, Cure::ContextObject* pTarget, Tbc::PhysicsManager::BodyID pExplosiveBodyId, Tbc::PhysicsManager::BodyID pTargetBodyId)
-{
-	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pExplosive, mLevel, pExplosiveBodyId, 10000, true);
+void Game::Detonate(const vec3& force, const vec3& torque, const vec3& position,
+	cure::ContextObject* explosive, cure::ContextObject* target, tbc::PhysicsManager::BodyID explosive_body_id, tbc::PhysicsManager::BodyID target_body_id) {
+	collision_sound_manager_->OnCollision(force, torque, position, explosive, level_, explosive_body_id, 10000, true);
 
-	if (pTarget == mLevel)
-	{
+	if (target == level_) {
 		// Stones and mud. More if hit ground, less otherwise.
-		const float lScale = SCALE_FACTOR * 320 / mUiManager->GetCanvas()->GetWidth();
-		const int lParticleCount = (mLevel->GetStructureGeometry((unsigned)0)->GetBodyId() == pTargetBodyId)? Random::GetRandomNumber()%50+50 : 10;
-		for (int i = 0; i < lParticleCount; ++i)
-		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), "mud_particle_01", mUiManager);
-			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			lPuff->EnableRootShadow(false);
+		const float scale = SCALE_FACTOR * 320 / ui_manager_->GetCanvas()->GetWidth();
+		const int particle_count = (level_->GetStructureGeometry((unsigned)0)->GetBodyId() == target_body_id)? Random::GetRandomNumber()%50+50 : 10;
+		for (int i = 0; i < particle_count; ++i) {
+			UiCure::Props* puff = new UiCure::Props(GetResourceManager(), "mud_particle_01", ui_manager_);
+			AddContextObject(puff, cure::kNetworkObjectLocalOnly, 0);
+			puff->EnableRootShadow(false);
 			float x = Random::Uniform(-1.0f, 1.0f);
 			float y = Random::Uniform(-1.0f, 1.0f);
 			float z = -1;
-			xform lTransform(gIdentityQuaternionF, pPosition + vec3(x, y, z));
-			lPuff->SetInitialTransform(lTransform);
-			const float lAngle = Random::Uniform(0.0f, 2*PIF);
-			x = (14.0f * i/lParticleCount - 10) * cos(lAngle);
-			y = (6 * Random::Uniform(-1.0f, 1.0f)) * sin(lAngle);
-			z = (17 + 8 * sin(5*PIF*i/lParticleCount) * Random::Uniform(0.0f, 1.0f)) * Random::Uniform(0.2f, 1.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_SOLID, vec3(x, y, z), Random::Uniform(3.0f, 7.0f) * lScale, 0.5f, Random::Uniform(3.0f, 7.0f));
+			xform transform(kIdentityQuaternionF, position + vec3(x, y, z));
+			puff->SetInitialTransform(transform);
+			const float angle = Random::Uniform(0.0f, 2*PIF);
+			x = (14.0f * i/particle_count - 10) * cos(angle);
+			y = (6 * Random::Uniform(-1.0f, 1.0f)) * sin(angle);
+			z = (17 + 8 * sin(5*PIF*i/particle_count) * Random::Uniform(0.0f, 1.0f)) * Random::Uniform(0.2f, 1.0f);
+			puff->StartParticle(UiCure::Props::kParticleSolid, vec3(x, y, z), Random::Uniform(3.0f, 7.0f) * scale, 0.5f, Random::Uniform(3.0f, 7.0f));
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-			lPuff->SetFadeOutTime(0.3f);
-#endif // Touch L&F
-			lPuff->StartLoading();
+			puff->SetFadeOutTime(0.3f);
+#endif // touch L&F
+			puff->StartLoading();
 		}
 	}
 
 	{
 		// Release gas puffs.
-		const int lParticleCount = (Random::GetRandomNumber() % 4) + 2;
-		for (int i = 0; i < lParticleCount; ++i)
-		{
-			UiCure::Props* lPuff = new UiCure::Props(GetResourceManager(), "cloud_01", mUiManager);
-			AddContextObject(lPuff, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-			lPuff->EnableRootShadow(false);
+		const int particle_count = (Random::GetRandomNumber() % 4) + 2;
+		for (int i = 0; i < particle_count; ++i) {
+			UiCure::Props* puff = new UiCure::Props(GetResourceManager(), "cloud_01", ui_manager_);
+			AddContextObject(puff, cure::kNetworkObjectLocalOnly, 0);
+			puff->EnableRootShadow(false);
 			float x = Random::Uniform(-1.0f, 1.0f);
 			float y = Random::Uniform(-1.0f, 1.0f);
 			float z = Random::Uniform(-1.0f, 1.0f);
-			xform lTransform(gIdentityQuaternionF, pPosition + vec3(x, y, z));
-			lPuff->SetInitialTransform(lTransform);
-			const float lOpacity = Random::Uniform(0.025f, 0.1f);
-			lPuff->SetOpacity(lOpacity);
+			xform transform(kIdentityQuaternionF, position + vec3(x, y, z));
+			puff->SetInitialTransform(transform);
+			const float opacity = Random::Uniform(0.025f, 0.1f);
+			puff->SetOpacity(opacity);
 			x = x*12;
 			y = y*12;
 			z = Random::Uniform(0.0f, 7.0f);
-			lPuff->StartParticle(UiCure::Props::PARTICLE_GAS, vec3(x, y, z), 0.003f / lOpacity, 0.1f, Random::Uniform(1.5f, 4.0f));
-			lPuff->StartLoading();
+			puff->StartParticle(UiCure::Props::kParticleGas, vec3(x, y, z), 0.003f / opacity, 0.1f, Random::Uniform(1.5f, 4.0f));
+			puff->StartLoading();
 		}
 	}
 
-	float lLevelShootEasyness = 4.5f;
-	if (mLevelName == "level_elevate")	// Bigger and open level = easier to hit Vehicle.
-	{
-		lLevelShootEasyness = 3.2f;
+	float level_shoot_easyness = 4.5f;
+	if (level_name_ == "level_elevate") {	// Bigger and open level = easier to hit Vehicle.
+		level_shoot_easyness = 3.2f;
 	}
-	bool lDidHitVehicle = false;
-	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
-	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
-	for (; x != lObjectTable.end(); ++x)
-	{
-		const Cure::ContextObject* lObject = x->second;
-		Tbc::ChunkyPhysics* lPhysics = lObject->ContextObject::GetPhysics();
-		if (!lObject->IsLoaded() || !lPhysics)
-		{
+	bool did_hit_vehicle = false;
+	cure::ContextManager::ContextObjectTable object_table = GetContext()->GetObjectTable();
+	cure::ContextManager::ContextObjectTable::iterator x = object_table.begin();
+	for (; x != object_table.end(); ++x) {
+		const cure::ContextObject* _object = x->second;
+		tbc::ChunkyPhysics* physics = _object->ContextObject::GetPhysics();
+		if (!_object->IsLoaded() || !physics) {
 			continue;
 		}
 		// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
-		const vec3 lEpicenter = pPosition + vec3(0, 0, -0.75f);
-		const int lBoneCount = (lPhysics->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC)? 1 : lPhysics->GetBoneCount();
-		for (int x = 0; x < lBoneCount; ++x)
-		{
-			const Tbc::ChunkyBoneGeometry* lGeometry = lPhysics->GetBoneGeometry(x);
-			if (lGeometry->GetBodyId() == Tbc::INVALID_BODY)
-			{
+		const vec3 epicenter = position + vec3(0, 0, -0.75f);
+		const int bone_count = (physics->GetPhysicsType() == tbc::ChunkyPhysics::kDynamic)? 1 : physics->GetBoneCount();
+		for (int x = 0; x < bone_count; ++x) {
+			const tbc::ChunkyBoneGeometry* geometry = physics->GetBoneGeometry(x);
+			if (geometry->GetBodyId() == tbc::INVALID_BODY) {
 				continue;
 			}
-			const vec3 lBodyCenter = GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyPosition(lGeometry->GetBodyId());
-			vec3 f = lBodyCenter - lEpicenter;
+			const vec3 body_center = GameTicker::GetPhysicsManager(IsThreadSafe())->GetBodyPosition(geometry->GetBodyId());
+			vec3 f = body_center - epicenter;
 			float d = f.GetLength();
 			if (d > 80*SCALE_FACTOR ||
-				(d > 50*SCALE_FACTOR && lObject != mVehicle))
-			{
+				(d > 50*SCALE_FACTOR && _object != vehicle_)) {
 				continue;
 			}
-			float lDistance = d;
+			float distance = d;
 			d = 1/d;
 			f *= d;
-			d *= lLevelShootEasyness;
-			double lScore = d;
+			d *= level_shoot_easyness;
+			double _score = d;
 			d = d*d*d;
 			d = std::min(1.0f, d);
-			const float lMaxForceFactor = 800.0f;
-			const float ff = lMaxForceFactor * lObject->GetMass() * d;
-			if (f.z <= 0.1f)
-			{
+			const float max_force_factor = 800.0f;
+			const float ff = max_force_factor * _object->GetMass() * d;
+			if (f.z <= 0.1f) {
 				f.z += 0.3f;
 			}
 			f *= ff;
-			GameTicker::GetPhysicsManager(IsThreadSafe())->AddForce(lGeometry->GetBodyId(), f);
-			if (lObject == mVehicle)
-			{
-				if (d > 0.6f)
-				{
-					v_set(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.2);
-					mSlowmoTimer.Start();
+			GameTicker::GetPhysicsManager(IsThreadSafe())->AddForce(geometry->GetBodyId(), f);
+			if (_object == vehicle_) {
+				if (d > 0.6f) {
+					v_set(GetVariableScope(), kRtvarPhysicsRtr, 0.2);
+					slowmo_timer_.Start();
 				}
 				d = std::max(0.005f, d);
-				mVehicle->DrainHealth(d);
-				lScore *= 63;
-				lScore = std::min(20000.0, lScore*lScore);
-				if (lDistance < 25*SCALE_FACTOR)
-				{
-					lDidHitVehicle = true;
+				vehicle_->DrainHealth(d);
+				_score *= 63;
+				_score = std::min(20000.0, _score*_score);
+				if (distance < 25*SCALE_FACTOR) {
+					did_hit_vehicle = true;
+				} else {
+					_score = 0;
 				}
-				else
-				{
-					lScore = 0;
-				}
-				if (mVehicle->GetHealth() <= 0)
-				{
+				if (vehicle_->GetHealth() <= 0) {
 					AddScore(-19000);
-				}
-				else
-				{
-					AddScore(-lScore);
+				} else {
+					AddScore(-_score);
 				}
 			}
 		}
 	}
-	if (!lDidHitVehicle)
-	{
+	if (!did_hit_vehicle) {
 		AddScore(+2000);
 	}
 }
 
-void Game::OnCapture()
-{
+void Game::OnCapture() {
 	AddScore(+10000);
 }
 
-void Game::FlipRenderSides()
-{
-	mFlipRenderSide = !mFlipRenderSide;
+void Game::FlipRenderSides() {
+	flip_render_side_ = !flip_render_side_;
 }
 
-bool Game::IsFlipRenderSide() const
-{
-	return !!mFlipRenderSide;
+bool Game::IsFlipRenderSide() const {
+	return !!flip_render_side_;
 }
 
-void Game::EndSlowmo()
-{
-	mSlowmoTimer.ReduceTimeDiff(-20);
+void Game::EndSlowmo() {
+	slowmo_timer_.ReduceTimeDiff(-20);
 }
 
 
 
-bool Game::Render()
-{
-	if (!mVehicle || !mVehicle->IsLoaded() ||
-		!mLevel || !mLevel->IsLoaded() ||
-		!mGoal)
-	{
+bool Game::Render() {
+	if (!vehicle_ || !vehicle_->IsLoaded() ||
+		!level_ || !level_->IsLoaded() ||
+		!goal_) {
 		return true;
 	}
 
-	const PixelRect lFullRect(0, 0, mUiManager->GetCanvas()->GetActualWidth(), mUiManager->GetCanvas()->GetActualHeight());
+	const PixelRect full_rect(0, 0, ui_manager_->GetCanvas()->GetActualWidth(), ui_manager_->GetCanvas()->GetActualHeight());
 
-	if (mFlybyMode != FLYBY_INACTIVE)
-	{
+	if (flyby_mode_ != kFlybyInactive) {
 		return FlybyRender();
 	}
 
-	const vec3 lVehiclePos = mVehicle->GetPosition();
-	const vec3 lTargetPos = vec3(lVehiclePos.x, lVehiclePos.y, lVehiclePos.z) + CAM_OFFSET;
-	mVehicleCamPos = Math::Lerp(mVehicleCamPos, lTargetPos, 0.5f);
-	xform t(gIdentityQuaternionF, mVehicleCamPos);
-	const float lVehicleCamHeight = mVehicleCamPos.z - lVehiclePos.z;
-	const float lCamDistance = mVehicleCamPos.GetDistance(lVehiclePos);
-	t.GetOrientation().RotateAroundOwnX(-::atan(lVehicleCamHeight/lCamDistance));
+	const vec3 vehicle_pos = vehicle_->GetPosition();
+	const vec3 target_pos = vec3(vehicle_pos.x, vehicle_pos.y, vehicle_pos.z) + CAM_OFFSET;
+	vehicle_cam_pos_ = Math::Lerp(vehicle_cam_pos_, target_pos, 0.5f);
+	xform t(kIdentityQuaternionF, vehicle_cam_pos_);
+	const float vehicle_cam_height = vehicle_cam_pos_.z - vehicle_pos.z;
+	const float cam_distance = vehicle_cam_pos_.GetDistance(vehicle_pos);
+	t.GetOrientation().RotateAroundOwnX(-::atan(vehicle_cam_height/cam_distance));
 /*#ifdef LEPRA_TOUCH_LOOKANDFEEL
 	t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
-	if (mFlipRenderSideFactor)
-	{
-		t.GetOrientation().RotateAroundOwnY(PIF*mFlipRenderSideFactor);
+	if (flip_render_side_factor_) {
+		t.GetOrientation().RotateAroundOwnY(PIF*flip_render_side_factor_);
 	}
-#endif // Touch*/
-	mUiManager->SetCameraPosition(t);
-	mUiManager->GetRenderer()->SetViewFrustum(60, 1.5f, 500);
-	mUiManager->Render(lFullRect);
-	mUiManager->GetRenderer()->ResetAmbientLight(true);
+#endif // touch*/
+	ui_manager_->SetCameraPosition(t);
+	ui_manager_->GetRenderer()->SetViewFrustum(60, 1.5f, 500);
+	ui_manager_->Render(full_rect);
+	ui_manager_->GetRenderer()->ResetAmbientLight(true);
 	return true;
 }
 
-bool Game::Paint()
-{
+bool Game::Paint() {
 	return true;
 }
 
 
 
-bool Game::FlybyRender()
-{
-	const vec3 lVehicle = mVehicle->GetPosition();
-	const vec3 lGoal = mGoal->GetPosition();
-	const double lTotalFlybyTime = 37.0;
-	const double lTotalIntroductionTime = 75.0;
-	if (mFlybyMode == FLYBY_INTRODUCTION)
-	{
-		if (mFlyByTime > lTotalFlybyTime)
-		{
-			mFlybyMode = FLYBY_INTRODUCTION_FINISHING_UP;
+bool Game::FlybyRender() {
+	const vec3 _vehicle = vehicle_->GetPosition();
+	const vec3 goal = goal_->GetPosition();
+	const double total_flyby_time = 37.0;
+	const double total_introduction_time = 75.0;
+	if (flyby_mode_ == kFlybyIntroduction) {
+		if (fly_by_time_ > total_flyby_time) {
+			flyby_mode_ = kFlybyIntroductionFinishingUp;
 			return true;
 		}
-	}
-	else if (mFlybyMode == FLYBY_INTRODUCTION_FINISHING_UP)
-	{
-		if (mFlyByTime > lTotalIntroductionTime)
-		{
-			mFlybyMode = FLYBY_INACTIVE;
+	} else if (flyby_mode_ == kFlybyIntroductionFinishingUp) {
+		if (fly_by_time_ > total_introduction_time) {
+			flyby_mode_ = kFlybyInactive;
 			return true;
 		}
 	}
 
 	xform t;
-	const double lSweepTime = lTotalFlybyTime * 0.25;
-	const float lDistance = 100 * SCALE_FACTOR;
-	if (mFlyByTime < lSweepTime || mFlybyMode == FLYBY_PAUSE)
-	{
+	const double sweep_time = total_flyby_time * 0.25;
+	const float distance = 100 * SCALE_FACTOR;
+	if (fly_by_time_ < sweep_time || flyby_mode_ == kFlybyPause) {
 		// Sweep around the area in a circle.
-		const float a = 0.8f * 2*PIF * (float)(mFlyByTime/lSweepTime);
+		const float a = 0.8f * 2*PIF * (float)(fly_by_time_/sweep_time);
 		t.GetOrientation().RotateAroundOwnZ(a + PIF/2);
 		t.GetOrientation().RotateAroundOwnX(-PIF/8);
-		t.SetPosition(vec3(::cos(a)*lDistance, ::sin(a)*lDistance, ::sin(a+PIF/8)*lDistance*0.1f + lDistance/3.5f));
-	}
-	else
-	{
+		t.SetPosition(vec3(::cos(a)*distance, ::sin(a)*distance, ::sin(a+PIF/8)*distance*0.1f + distance/3.5f));
+	} else {
 		// Look at level in more detail.
-		const double lDetailTime = lTotalFlybyTime - lSweepTime;
+		const double detail_time = total_flyby_time - sweep_time;
 		// Orientation. Treat orientation and position in different time slices, because if
 		// both happen at the same time, perception of space is without a doubt lost.
-		if (mFlyByTime-lSweepTime < lDetailTime * 1/12)
-		{
+		if (fly_by_time_-sweep_time < detail_time * 1/12) {
 			// Stare right at Vehicle.
 			t.GetOrientation().RotateAroundOwnZ(+PIF/2);
 			t.GetOrientation().RotateAroundOwnX(-PIF/8);
-		}
-		else if (mFlyByTime-lSweepTime < lDetailTime * 3/12)
-		{
+		} else if (fly_by_time_-sweep_time < detail_time * 3/12) {
 			// Stand beside Vehicle.
 			t.GetOrientation().RotateAroundOwnZ(+PIF*11/12);
 			t.GetOrientation().RotateAroundOwnX(-PIF/8);
-		}
-		else if (mFlyByTime-lSweepTime < lDetailTime * 4/12)
-		{
+		} else if (fly_by_time_-sweep_time < detail_time * 4/12) {
 			// Look up at the goal.
 			t.GetOrientation().RotateAroundOwnZ(-PIF*2/5);
 			t.GetOrientation().RotateAroundOwnX(+PIF/12);
-		}
-		else if (mFlyByTime-lSweepTime < lDetailTime * 7/12)
-		{
+		} else if (fly_by_time_-sweep_time < detail_time * 7/12) {
 			// Look down at the goal.
 			t.GetOrientation().RotateAroundOwnZ(-PIF*2/5);
 			t.GetOrientation().RotateAroundOwnX(-PIF/8);
 		}
 		// Position.
-		if (mFlyByTime-lSweepTime < lDetailTime * 1/3)
-		{
-			t.SetPosition(lVehicle + vec3(+1.33f, +6.67f, +3.33f));
-		}
-		else if (mFlyByTime-lSweepTime < lDetailTime * 2/3)
-		{
-			t.SetPosition(lGoal + vec3(-13.33f, -10, +10));
+		if (fly_by_time_-sweep_time < detail_time * 1/3) {
+			t.SetPosition(_vehicle + vec3(+1.33f, +6.67f, +3.33f));
+		} else if (fly_by_time_-sweep_time < detail_time * 2/3) {
+			t.SetPosition(goal + vec3(-13.33f, -10, +10));
 		}
 	}
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 	t.GetOrientation().RotateAroundOwnY(-PIF*0.5f);
-#endif // Touch
-	//mLeftCamera.Interpolate(mLeftCamera, t, 0.05f);
-	//mUiManager->SetCameraPosition(mLeftCamera);
-	mUiManager->GetRenderer()->SetViewFrustum(60, 1.5f, 500);
-	//mUiManager->Render(mLeftRect);
+#endif // touch
+	//left_camera_.Interpolate(left_camera_, t, 0.05f);
+	//ui_manager_->SetCameraPosition(left_camera_);
+	ui_manager_->GetRenderer()->SetViewFrustum(60, 1.5f, 500);
+	//ui_manager_->Render(left_rect_);
 	return true;
 }
 
 
 
-/*void Game::MoveTo(const FingerMovement& pMove)
-{
+/*void Game::MoveTo(const FingerMovement& move) {
 }*/
 
 
-void Game::PollRoundTrip()
-{
+void Game::PollRoundTrip() {
 }
 
-float Game::GetTickTimeReduction() const
-{
+float Game::GetTickTimeReduction() const {
 	return 0;
 }
 
-float Game::GetPowerSaveAmount() const
-{
-	bool lIsMinimized = !mUiManager->GetDisplayManager()->IsVisible();
-	return (lIsMinimized? 1.0f : 0);
+float Game::GetPowerSaveAmount() const {
+	bool is_minimized = !ui_manager_->GetDisplayManager()->IsVisible();
+	return (is_minimized? 1.0f : 0);
 }
 
 
 
-void Game::WillMicroTick(float pTimeDelta)
-{
-	MicroTick(pTimeDelta);
+void Game::WillMicroTick(float time_delta) {
+	MicroTick(time_delta);
 }
 
-void Game::DidPhysicsTick()
-{
+void Game::DidPhysicsTick() {
 	PostPhysicsTick();
 }
 
-void Game::OnTrigger(Tbc::PhysicsManager::BodyID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
-{
-	GameManager::OnTrigger(pTrigger, pTriggerListenerId, pOtherObjectId, pBodyId, pPosition, pNormal);
+void Game::OnTrigger(tbc::PhysicsManager::BodyID trigger, int trigger_listener_id, int other_object_id, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
+	GameManager::OnTrigger(trigger, trigger_listener_id, other_object_id, body_id, position, normal);
 }
 
-void Game::OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-	const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity)
-{
-	GameManager::OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+void Game::OnForceApplied(int object_id, int other_object_id, tbc::PhysicsManager::BodyID body_id, tbc::PhysicsManager::BodyID other_body_id,
+	const vec3& force, const vec3& torque, const vec3& position, const vec3& relative_velocity) {
+	GameManager::OnForceApplied(object_id, other_object_id, body_id, other_body_id, force, torque, position, relative_velocity);
 }
 
 
 
-void Game::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
-{
-	if (pOk && pObject == mVehicle)
-	{
-		deb_assert(pObject->GetPhysics()->GetEngineCount() == 3);
-		const str lName = "float_childishness";
-		new Cure::FloatAttribute(mVehicle, lName, 0.67f);
+void Game::OnLoadCompleted(cure::ContextObject* object, bool ok) {
+	if (ok && object == vehicle_) {
+		deb_assert(object->GetPhysics()->GetEngineCount() == 3);
+		const str name = "float_childishness";
+		new cure::FloatAttribute(vehicle_, name, 0.67f);
 	}
 }
 
-void Game::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
-	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id)
-{
-	(void)pBody2Id;
-	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 2000, false);
+void Game::OnCollision(const vec3& force, const vec3& torque, const vec3& position,
+	cure::ContextObject* object1, cure::ContextObject* object2,
+	tbc::PhysicsManager::BodyID body1_id, tbc::PhysicsManager::BodyID body2_id) {
+	(void)body2_id;
+	collision_sound_manager_->OnCollision(force, torque, position, object1, object2, body1_id, 2000, false);
 }
 
-bool Game::OnPhysicsSend(Cure::ContextObject* pObject)
-{
-	pObject;
+bool Game::OnPhysicsSend(cure::ContextObject* object) {
+	object;
 	return true;
 }
 
-bool Game::OnAttributeSend(Cure::ContextObject* pObject)
-{
-	pObject;
+bool Game::OnAttributeSend(cure::ContextObject* object) {
+	object;
 	return true;
 }
 
-bool Game::IsServer()
-{
+bool Game::IsServer() {
 	return true;
 }
 
-void Game::SendAttach(Cure::ContextObject* pObject1, unsigned pId1, Cure::ContextObject* pObject2, unsigned pId2)
-{
-	pObject1;
-	pId1;
-	pObject2;
-	pId2;
+void Game::SendAttach(cure::ContextObject* object1, unsigned id1, cure::ContextObject* object2, unsigned id2) {
+	object1;
+	id1;
+	object2;
+	id2;
 }
 
-void Game::SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2)
-{
-	pObject1;
-	pObject2;
+void Game::SendDetach(cure::ContextObject* object1, cure::ContextObject* object2) {
+	object1;
+	object2;
 }
 
-void Game::TickInput()
-{
+void Game::TickInput() {
 }
 
-Cure::ContextObject* Game::CreateContextObject(const str& pClassId) const
-{
-	if (strutil::StartsWith(pClassId, "monster_01"))
-	{
-		return new Vehicle(GetResourceManager(), pClassId, mUiManager);
+cure::ContextObject* Game::CreateContextObject(const str& class_id) const {
+	if (strutil::StartsWith(class_id, "monster_01")) {
+		return new Vehicle(GetResourceManager(), class_id, ui_manager_);
 	}
-	return new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
+	return new UiCure::Machine(GetResourceManager(), class_id, ui_manager_);
 }
 
-bool Game::Initialize()
-{
-	bool lOk = true;
-	if (lOk)
-	{
-		lOk = InitializeUniverse();
+bool Game::Initialize() {
+	bool _ok = true;
+	if (_ok) {
+		_ok = InitializeUniverse();
 	}
-	if (lOk)
-	{
-		const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
-		mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
-			UiTbc::Renderer::LIGHT_MOVABLE, vec3(-1, 0.5f, -1.5),
-			vec3(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 300);
-		mUiManager->GetRenderer()->EnableAllLights(true);
+	if (_ok) {
+		const bool pixel_shaders_enabled = ui_manager_->GetRenderer()->IsPixelShadersEnabled();
+		light_id_ = ui_manager_->GetRenderer()->AddDirectionalLight(
+			uitbc::Renderer::kLightMovable, vec3(-1, 0.5f, -1.5),
+			vec3(1,1,1) * (pixel_shaders_enabled? 1.0f : 1.5f), 300);
+		ui_manager_->GetRenderer()->EnableAllLights(true);
 	}
-	if (lOk)
-	{
+	if (_ok) {
 		SetVehicleName("monster_01");
 	}
-	if (lOk)
-	{
-		SetFlybyMode(FLYBY_INACTIVE);
+	if (_ok) {
+		SetFlybyMode(kFlybyInactive);
 	}
-	return lOk;
+	return _ok;
 }
 
-bool Game::InitializeUniverse()
-{
-	bool lOk = true;
-	if (lOk)
-	{
-		delete mLevel;
-		mLevel = new Level(GetResourceManager(), mLevelName, mUiManager);
-		AddContextObject(mLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		lOk = (mLevel != 0);
-		deb_assert(lOk);
-		if (lOk)
-		{
-			mLevel->EnableRootShadow(false);
-			mLevel->StartLoading();
+bool Game::InitializeUniverse() {
+	bool _ok = true;
+	if (_ok) {
+		delete level_;
+		level_ = new Level(GetResourceManager(), level_name_, ui_manager_);
+		AddContextObject(level_, cure::kNetworkObjectLocalOnly, 0);
+		_ok = (level_ != 0);
+		deb_assert(_ok);
+		if (_ok) {
+			level_->EnableRootShadow(false);
+			level_->StartLoading();
 		}
 	}
-	return lOk;
+	return _ok;
 }
 
 
 
-Cure::ContextObject* Game::CreateLogicHandler(const str& pType)
-{
-	if (pType == "spawner")
-	{
+cure::ContextObject* Game::CreateLogicHandler(const str& type) {
+	if (type == "spawner") {
 		return new Spawner(GetContext());
-	}
-	else if (pType == "trig_goal")
-	{
-		mGoal = new Goal(GetContext());
-		return mGoal;
-	}
-	else if (pType == "trig_elevator")
-	{
+	} else if (type == "trig_goal") {
+		goal_ = new Goal(GetContext());
+		return goal_;
+	} else if (type == "trig_elevator") {
 		return new VehicleElevator(this);
-	}
-	else if (pType == "context_path")
-	{
-		return mLevel->QueryPath();
+	} else if (type == "context_path") {
+		return level_->QueryPath();
 	}
 	return (0);
 }

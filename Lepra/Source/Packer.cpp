@@ -8,247 +8,204 @@
 
 
 #include "pch.h"
-#include "../Include/Packer.h"
-#include "../Include/LepraAssert.h"
-#include "../Include/Endian.h"
+#include "../include/packer.h"
+#include "../include/lepraassert.h"
+#include "../include/endian.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-int PackerTransformation::Pack(uint8* pDestination, const xform& pSource)
-{
+int PackerTransformation::Pack(uint8* destination, const xform& source) {
 	typedef uint32 _T;
-	int lOffset = 0;
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().a);	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().b);	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().c);	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetOrientation().d);	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetPosition().x);		lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetPosition().y);		lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.GetPosition().z);		lOffset += sizeof(_T);
-	return (lOffset);
+	int offset = 0;
+	*(_T*)&destination[offset] = Endian::HostToBigF(source.GetOrientation().a);	offset += sizeof(_T);
+	*(_T*)&destination[offset] = Endian::HostToBigF(source.GetOrientation().b);	offset += sizeof(_T);
+	*(_T*)&destination[offset] = Endian::HostToBigF(source.GetOrientation().c);	offset += sizeof(_T);
+	*(_T*)&destination[offset] = Endian::HostToBigF(source.GetOrientation().d);	offset += sizeof(_T);
+	*(_T*)&destination[offset] = Endian::HostToBigF(source.GetPosition().x);		offset += sizeof(_T);
+	*(_T*)&destination[offset] = Endian::HostToBigF(source.GetPosition().y);		offset += sizeof(_T);
+	*(_T*)&destination[offset] = Endian::HostToBigF(source.GetPosition().z);		offset += sizeof(_T);
+	return (offset);
 }
 
-int PackerTransformation::Unpack(xform& pDestination, const uint8* pSource, int pSize)
-{
+int PackerTransformation::Unpack(xform& destination, const uint8* source, int size) {
 	typedef uint32 _T;
-	int lOffset = 0;
-	if (pSize >= (int)sizeof(_T)*7)
-	{
-		float lData[4];
-		lData[0] = Endian::BigToHostF(*(_T*)&pSource[lOffset]);				lOffset += sizeof(_T);
-		lData[1] = Endian::BigToHostF(*(_T*)&pSource[lOffset]);				lOffset += sizeof(_T);
-		lData[2] = Endian::BigToHostF(*(_T*)&pSource[lOffset]);				lOffset += sizeof(_T);
-		lData[3] = Endian::BigToHostF(*(_T*)&pSource[lOffset]);				lOffset += sizeof(_T);
-		pDestination.GetOrientation().Set(lData[0], lData[1], lData[2], lData[3]);
-		pDestination.GetPosition().x = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
-		pDestination.GetPosition().y = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
-		pDestination.GetPosition().z = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
+	int offset = 0;
+	if (size >= (int)sizeof(_T)*7) {
+		float data[4];
+		data[0] = Endian::BigToHostF(*(_T*)&source[offset]);				offset += sizeof(_T);
+		data[1] = Endian::BigToHostF(*(_T*)&source[offset]);				offset += sizeof(_T);
+		data[2] = Endian::BigToHostF(*(_T*)&source[offset]);				offset += sizeof(_T);
+		data[3] = Endian::BigToHostF(*(_T*)&source[offset]);				offset += sizeof(_T);
+		destination.GetOrientation().Set(data[0], data[1], data[2], data[3]);
+		destination.GetPosition().x = Endian::BigToHostF(*(_T*)&source[offset]);	offset += sizeof(_T);
+		destination.GetPosition().y = Endian::BigToHostF(*(_T*)&source[offset]);	offset += sizeof(_T);
+		destination.GetPosition().z = Endian::BigToHostF(*(_T*)&source[offset]);	offset += sizeof(_T);
+	} else {
+		offset = -1;
 	}
-	else
-	{
-		lOffset = -1;
-	}
-	return (lOffset);
+	return (offset);
 }
 
 
 
-int PackerVector::Pack(uint8* pDestination, const vec3& pSource)
-{
+int PackerVector::Pack(uint8* destination, const vec3& source) {
 	// TODO: improve packer.
 	typedef uint32 _T;
-	int lOffset = 0;
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.x);	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.y);	lOffset += sizeof(_T);
-	*(_T*)&pDestination[lOffset] = Endian::HostToBigF(pSource.z);	lOffset += sizeof(_T);
-	return (lOffset);
+	int offset = 0;
+	*(_T*)&destination[offset] = Endian::HostToBigF(source.x);	offset += sizeof(_T);
+	*(_T*)&destination[offset] = Endian::HostToBigF(source.y);	offset += sizeof(_T);
+	*(_T*)&destination[offset] = Endian::HostToBigF(source.z);	offset += sizeof(_T);
+	return (offset);
 }
 
-int PackerVector::Unpack(vec3& pDestination, const uint8* pSource, int pSize)
-{
+int PackerVector::Unpack(vec3& destination, const uint8* source, int size) {
 	typedef uint32 _T;
-	int lOffset = 0;
-	if (pSize >= (int)sizeof(_T)*3)
-	{
-		pDestination.x = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
-		pDestination.y = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
-		pDestination.z = Endian::BigToHostF(*(_T*)&pSource[lOffset]);	lOffset += sizeof(_T);
+	int offset = 0;
+	if (size >= (int)sizeof(_T)*3) {
+		destination.x = Endian::BigToHostF(*(_T*)&source[offset]);	offset += sizeof(_T);
+		destination.y = Endian::BigToHostF(*(_T*)&source[offset]);	offset += sizeof(_T);
+		destination.z = Endian::BigToHostF(*(_T*)&source[offset]);	offset += sizeof(_T);
+	} else {
+		offset = -1;
 	}
-	else
-	{
-		lOffset = -1;
-	}
-	return (lOffset);
+	return (offset);
 }
 
 
 
-int PackerInt32::Pack(uint8* pDestination, int32 pSource)
-{
+int PackerInt32::Pack(uint8* destination, int32 source) {
 	// TODO: fix byte order.
-	*(uint32*)pDestination = Endian::HostToBig(pSource);
-	return (sizeof(pSource));
+	*(uint32*)destination = Endian::HostToBig(source);
+	return (sizeof(source));
 }
 
-int PackerInt32::Unpack(int32& pDestination, const uint8* pSource, int pSize)
-{
+int PackerInt32::Unpack(int32& destination, const uint8* source, int size) {
 	// TODO: fix byte order.
-	int lSize = -1;
-	if (pSize >= (int)sizeof(pDestination))
-	{
-		lSize = sizeof(pDestination);
-		pDestination = Endian::BigToHost(*(uint32*)pSource);
+	int _size = -1;
+	if (size >= (int)sizeof(destination)) {
+		_size = sizeof(destination);
+		destination = Endian::BigToHost(*(uint32*)source);
+	} else {
+		_size = -1;
 	}
-	else
-	{
-		lSize = -1;
-	}
-	return (lSize);
+	return (_size);
 }
 
 
 
-int PackerInt16::Pack(uint8* pDestination, int pSource)
-{
-	*(int16*)pDestination = Endian::HostToBig((int16)pSource);
+int PackerInt16::Pack(uint8* destination, int source) {
+	*(int16*)destination = Endian::HostToBig((int16)source);
 	return (sizeof(int16));
 }
 
-int PackerInt16::Unpack(int& pDestination, const uint8* pSource, int pSize)
-{
+int PackerInt16::Unpack(int& destination, const uint8* source, int size) {
 	// TODO: fix byte order.
-	int lSize = -1;
-	if (pSize >= (int)sizeof(int16))
-	{
-		lSize = sizeof(int16);
-		pDestination = Endian::BigToHost(*(int16*)pSource);
+	int _size = -1;
+	if (size >= (int)sizeof(int16)) {
+		_size = sizeof(int16);
+		destination = Endian::BigToHost(*(int16*)source);
+	} else {
+		_size = -1;
 	}
-	else
-	{
-		lSize = -1;
-	}
-	return (lSize);
+	return (_size);
 }
 
 
 
-int PackerUInt16::Pack(uint8* pDestination, int pSource)
-{
-	*(uint16*)pDestination = Endian::HostToBig((uint16)pSource);
+int PackerUInt16::Pack(uint8* destination, int source) {
+	*(uint16*)destination = Endian::HostToBig((uint16)source);
 	return (sizeof(uint16));
 }
 
-int PackerUInt16::Unpack(int& pDestination, const uint8* pSource, int pSize)
-{
-	int lSize = -1;
-	if (pSize >= (int)sizeof(uint16))
-	{
-		lSize = sizeof(uint16);
-		pDestination = Endian::BigToHost(*(uint16*)pSource);
+int PackerUInt16::Unpack(int& destination, const uint8* source, int size) {
+	int _size = -1;
+	if (size >= (int)sizeof(uint16)) {
+		_size = sizeof(uint16);
+		destination = Endian::BigToHost(*(uint16*)source);
+	} else {
+		_size = -1;
 	}
-	else
-	{
-		lSize = -1;
-	}
-	return (lSize);
+	return (_size);
 }
 
 
 
-int PackerReal::Pack(uint8* pDestination, float pSource)
-{
-	*(uint32*)pDestination = Endian::HostToBigF(pSource);
-	return (sizeof(pSource));
+int PackerReal::Pack(uint8* destination, float source) {
+	*(uint32*)destination = Endian::HostToBigF(source);
+	return (sizeof(source));
 }
 
-int PackerReal::Unpack(float& pDestination, const uint8* pSource, int pSize)
-{
-	int lSize;
-	if (pSize >= (int)sizeof(pDestination))
-	{
-		lSize = sizeof(pDestination);
-		pDestination = Endian::BigToHostF(*(uint32*)pSource);
+int PackerReal::Unpack(float& destination, const uint8* source, int size) {
+	int _size;
+	if (size >= (int)sizeof(destination)) {
+		_size = sizeof(destination);
+		destination = Endian::BigToHostF(*(uint32*)source);
+	} else {
+		_size = -1;
 	}
-	else
-	{
-		lSize = -1;
-	}
-	return (lSize);
+	return (_size);
 }
 
 
 
-int PackerOctetString::Pack(uint8* pDestination, const uint8* pSource, unsigned pLength)
-{
-	pDestination[0] = (uint8)pLength;
-	pDestination[1] = (uint8)(pLength>>8);
-	::memcpy(pDestination+2, pSource, pLength);
-	return (2+pLength);
+int PackerOctetString::Pack(uint8* destination, const uint8* source, unsigned _length) {
+	destination[0] = (uint8)_length;
+	destination[1] = (uint8)(_length>>8);
+	::memcpy(destination+2, source, _length);
+	return (2+_length);
 }
 
-int PackerOctetString::Unpack(uint8* pDestination, const uint8* pSource, int pSize)
-{
-	int lSize = -1;
-	if (pSize >= 3)
-	{
-		unsigned lLength = pSource[0]|(((unsigned)pSource[1])<<8);
-		if (lLength >= 1 && (int)lLength+2 <= pSize)
-		{
-			lSize = 2+lLength;
-			if (pDestination)
-			{
-				::memcpy(pDestination, pSource+2, lLength);
+int PackerOctetString::Unpack(uint8* destination, const uint8* source, int size) {
+	int _size = -1;
+	if (size >= 3) {
+		unsigned __length = source[0]|(((unsigned)source[1])<<8);
+		if (__length >= 1 && (int)__length+2 <= size) {
+			_size = 2+__length;
+			if (destination) {
+				::memcpy(destination, source+2, __length);
 			}
 		}
 	}
-	return (lSize);
+	return (_size);
 }
 
 
 
-int PackerUnicodeString::Pack(uint8* pDestination, const str& pSource)
-{
-	const str lUtf8 = pSource;
-	const size_t lCharCount = lUtf8.length()+1;
-	if (pDestination)
-	{
-		pDestination[0] = (uint8)lCharCount;
-		pDestination[1] = (uint8)(lCharCount>>8);
-		::memcpy(pDestination+2, lUtf8.c_str(), lCharCount-1);
-		pDestination[2+lCharCount-1] = '\0';
+int PackerUnicodeString::Pack(uint8* destination, const str& source) {
+	const str utf8 = source;
+	const size_t char_count = utf8.length()+1;
+	if (destination) {
+		destination[0] = (uint8)char_count;
+		destination[1] = (uint8)(char_count>>8);
+		::memcpy(destination+2, utf8.c_str(), char_count-1);
+		destination[2+char_count-1] = '\0';
 	}
-	return ((2+(int)lCharCount+3) & (~3));
+	return ((2+(int)char_count+3) & (~3));
 }
 
-int PackerUnicodeString::UnpackRaw(str* pDestination, const uint8* pSource, int pSize)
-{
-	int lSize = -1;
-	if (pSize >= 3)
-	{
-		const int lCharCount = pSource[0]|(((unsigned)pSource[1])<<8);
-		if (lCharCount >= 1 && lCharCount+2 <= pSize && pSource[2+lCharCount-1] == '\0')
-		{
-			lSize = (2+lCharCount+3) & (~3);
+int PackerUnicodeString::UnpackRaw(str* destination, const uint8* source, int size) {
+	int _size = -1;
+	if (size >= 3) {
+		const int char_count = source[0]|(((unsigned)source[1])<<8);
+		if (char_count >= 1 && char_count+2 <= size && source[2+char_count-1] == '\0') {
+			_size = (2+char_count+3) & (~3);
 			// TODO: catch UTF-8 encoding errors (might be DoS attempts).
-			const str lConversion = (const char*)(pSource+2);
-			if (pDestination)
-			{
-				*pDestination = lConversion;
+			const str conversion = (const char*)(source+2);
+			if (destination) {
+				*destination = conversion;
 			}
 		}
 	}
-	deb_assert(lSize > 0);
-	return (lSize);
+	deb_assert(_size > 0);
+	return (_size);
 }
 
-int PackerUnicodeString::Unpack(str& pDestination, const uint8* pSource, int pSize)
-{
-	return (UnpackRaw(&pDestination, pSource, pSize));
+int PackerUnicodeString::Unpack(str& destination, const uint8* source, int size) {
+	return (UnpackRaw(&destination, source, size));
 }
 
 

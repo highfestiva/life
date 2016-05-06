@@ -6,35 +6,32 @@
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
-#include "Game.h"
+#include "../uicure/include/uimachine.h"
+#include "game.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ContextPath;
 }
 
 
 
-namespace Bounce
-{
+namespace bounce {
 
 
 
-class Racket: public UiCure::Machine
-{
+class Racket: public UiCure::Machine {
 public:
 	typedef UiCure::Machine Parent;
 
-	Racket(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Racket(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager);
 	virtual ~Racket();
 
-	Cure::ContextPath* QueryPath();
+	cure::ContextPath* QueryPath();
 
 private:
-	Cure::ContextPath* mPath;
+	cure::ContextPath* path_;
 
 	logclass();
 };

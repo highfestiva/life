@@ -1,37 +1,35 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "HiResTimer.h"
+#include "hirestimer.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class Alarm
-{
+class Alarm {
 public:
 	Alarm();
 
 	void Reset();
-	void Push(double pInitialWaitTime);
+	void Push(double initial_wait_time);
 	void Set();
 	void SetIfNotSet();
 	// Alarm is expired if a) started AND b) time overdue.
-	bool IsExpired(double pWaitTime);
-	bool PopExpired(double pWaitTime);
+	bool IsExpired(double wait_time);
+	bool PopExpired(double wait_time);
 	double GetTimeDiff() const;
 
 private:
-	HiResTimer mTimer;
-	bool mIsActive;
+	HiResTimer timer_;
+	bool is_active_;
 };
 
 

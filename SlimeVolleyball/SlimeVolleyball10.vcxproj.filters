@@ -1,56 +1,56 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{C734F7F1-C7A5-4376-A066-2A32FFD752A2}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{93959380-89BD-4b04-88EB-625FBEBFB52E}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="App.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile include="app.cxx">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="SlimeAI.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile include="slimeai.cxx">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="App.mm">
-      <Filter>Source Files</Filter>
+    <ClCompile include="app.mm">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Icons\Slime.ico">
-      <Filter>Source Files</Filter>
+    <None include="icons\slime.ico">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="SlimeAI.mm">
-      <Filter>Source Files</Filter>
+    <None include="slimeai.mm">
+      <Filter>src Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="SlimeBall.rc">
-      <Filter>Source Files</Filter>
+    <ResourceCompile include="slimeball.rc">
+      <Filter>src Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CrapAI.hpp">
+    <Clinclude include="crapai.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DannoAI.hpp">
+    <Clinclude include="dannoai.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DannoAI2.hpp">
+    <Clinclude include="dannoai2.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Slime.hpp">
+    <Clinclude include="slime.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SlimeAI.hpp">
+    <Clinclude include="slimeai.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SlimeVolleyball.hpp">
+    <Clinclude include="slimevolleyball.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

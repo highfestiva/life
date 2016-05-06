@@ -8,43 +8,40 @@
 
 #pragma once
 
-#include "InputStream.h"
-#include "OutputStream.h"
+#include "inputstream.h"
+#include "outputstream.h"
 
-namespace Lepra
-{
+namespace lepra {
 
-class BufferInputStream : public InputStream
-{
+class BufferInputStream : public InputStream {
 public:
-	BufferInputStream(uint8* pBuffer, size_t pBufferSize);
+	BufferInputStream(uint8* buffer, size_t buffer_size);
 	virtual ~BufferInputStream();
 
 	virtual void Close();
 	virtual int64 GetAvailable() const;
-	virtual IOError ReadRaw(void* pData, size_t pLength);
-	virtual IOError Skip(size_t pLength);
+	virtual IOError ReadRaw(void* data, size_t length);
+	virtual IOError Skip(size_t length);
 protected:
 private:
-	uint8* mBuffer;
-	size_t mBufferSize;
-	size_t mReadIndex;
+	uint8* buffer_;
+	size_t buffer_size_;
+	size_t read_index_;
 };
 
-class BufferOutputStream : public OutputStream
-{
+class BufferOutputStream : public OutputStream {
 public:
-	BufferOutputStream(uint8* pBuffer, size_t pBufferSize);
+	BufferOutputStream(uint8* buffer, size_t buffer_size);
 	virtual ~BufferOutputStream();
 
 	virtual void Close();
 	virtual void Flush();
-	virtual IOError WriteRaw(void* pData, size_t pLength);
+	virtual IOError WriteRaw(void* data, size_t length);
 protected:
 private:
-	uint8* mBuffer;
-	size_t mBufferSize;
-	size_t mWriteIndex;
+	uint8* buffer_;
+	size_t buffer_size_;
+	size_t write_index_;
 };
 
 }

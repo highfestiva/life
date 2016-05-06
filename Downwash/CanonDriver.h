@@ -1,41 +1,39 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/ContextPath.h"
-#include "../Cure/Include/CppContextObject.h"
-#include "../Lepra/Include/GameTimer.h"
-#include "DownwashManager.h"
+#include "../cure/include/contextpath.h"
+#include "../cure/include/cppcontextobject.h"
+#include "../lepra/include/gametimer.h"
+#include "downwashmanager.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-class CanonDriver: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class CanonDriver: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	CanonDriver(DownwashManager* pGame, Cure::GameObjectId pCanonId, int pAmmoType);
+	CanonDriver(DownwashManager* game, cure::GameObjectId canon_id, int ammo_type);
 	virtual ~CanonDriver();
 
 private:
 	virtual void OnTick();
 
-	DownwashManager* mGame;
-	Cure::GameObjectId mCanonId;
-	int mAmmoType;
-	float mDistance;
-	float mShootPeriod;
-	bool mTagSet;
-	GameTimer mLastShot;
-	float mJointStartAngle;
+	DownwashManager* game_;
+	cure::GameObjectId canon_id_;
+	int ammo_type_;
+	float distance_;
+	float shoot_period_;
+	bool tag_set_;
+	GameTimer last_shot_;
+	float joint_start_angle_;
 	logclass();
 };
 

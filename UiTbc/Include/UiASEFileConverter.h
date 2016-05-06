@@ -11,50 +11,47 @@
 
 #pragma once
 
-#include "./GUI/UiWindow.h"
-#include "UiASELoader.h"
+#include "./gui/uiwindow.h"
+#include "uiaseloader.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
 class DesktopWindow;
 class FileNameField;
 class Button;
 class TreeNode;
 
-class ASEFileConverter : public Window
-{
+class ASEFileConverter : public Window {
 public:
-	ASEFileConverter(DesktopWindow* pDesktopWindow);
+	ASEFileConverter(DesktopWindow* desktop_window);
 	virtual ~ASEFileConverter();
 private:
-	class ASEViewer : public Window
-	{
+	class ASEViewer : public Window {
 	public:
-		ASEViewer(DesktopWindow* pDesktopWindow, const Lepra::String& pASEFile);
+		ASEViewer(DesktopWindow* desktop_window, const lepra::String& ase_file);
 		virtual ~ASEViewer();
 	private:
-		TreeNode* CreateSceneNode(const ASELoader::Scene* pScene);
-		TreeNode* CreateCamerasNode(const ASELoader::ASEData::CameraObjectList& pCameraList);
-		TreeNode* CreateLightsNode(const ASELoader::ASEData::LightObjectList& pLightList);
-		TreeNode* CreateGeometriesNode(const ASELoader::ASEData::GeomObjectList& pGeometryList);
-		TreeNode* CreateMaterialsNode(const ASELoader::ASEData::MaterialList& pMaterialList);
-		TreeNode* CreateTMListNode(const std::list<ASELoader::NodeTM*>& pNodeTMList);
-		TreeNode* CreateTMAnimationNode(const ASELoader::TMAnimation& pTMAnimation);
+		TreeNode* CreateSceneNode(const ASELoader::Scene* scene);
+		TreeNode* CreateCamerasNode(const ASELoader::ASEData::CameraObjectList& camera_list);
+		TreeNode* CreateLightsNode(const ASELoader::ASEData::LightObjectList& light_list);
+		TreeNode* CreateGeometriesNode(const ASELoader::ASEData::GeomObjectList& geometry_list);
+		TreeNode* CreateMaterialsNode(const ASELoader::ASEData::MaterialList& material_list);
+		TreeNode* CreateTMListNode(const std::list<ASELoader::NodeTM*>& node_tm_list);
+		TreeNode* CreateTMAnimationNode(const ASELoader::TMAnimation& tm_animation);
 
-		TreeNode* CreateLightSettingsNode(const ASELoader::LightSettings* pLightSettings);
-		TreeNode* CreateMeshListNode(const ASELoader::GeomObject::MeshList& pMeshList);
-		TreeNode* CreateSubMaterialListNode(const ASELoader::Material::MaterialList& pSubMatList);
-		TreeNode* CreateMapListNode(const ASELoader::Material::MapList& pMapList, const Lepra::String& pNodeName);
+		TreeNode* CreateLightSettingsNode(const ASELoader::LightSettings* light_settings);
+		TreeNode* CreateMeshListNode(const ASELoader::GeomObject::MeshList& mesh_list);
+		TreeNode* CreateSubMaterialListNode(const ASELoader::Material::MaterialList& sub_mat_list);
+		TreeNode* CreateMapListNode(const ASELoader::Material::MapList& map_list, const lepra::String& node_name);
 
-		static int GetNumDigits(int pValue);
-		static Lepra::String ToString(bool pValue);
+		static int GetNumDigits(int value);
+		static lepra::String ToString(bool value);
 	};
 
-	void OnOk(UiTbc::Button*);
-	void OnCancel(UiTbc::Button*);
+	void OnOk(uitbc::Button*);
+	void OnCancel(uitbc::Button*);
 
-	FileNameField* mFileNameField;
+	FileNameField* file_name_field_;
 };
 
 }

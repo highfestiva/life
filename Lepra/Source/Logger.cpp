@@ -1,207 +1,169 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/LepraAssert.h"
+#include "../include/lepraassert.h"
 #include <iomanip>
 #include <iostream>
 #include <strstream>
-#include "../Include/Logger.h"
-#include "../Include/LogListener.h"
-#include "../Include/SpinLock.h"
+#include "../include/logger.h"
+#include "../include/loglistener.h"
+#include "../include/spinlock.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-Logger::Logger(const str& pName, Logger* pParent, LogLevel pLevel):
-	mName(pName),
-	mParent(pParent),
-	mLoggerListLock(new SpinLock),
-	mLevel(pLevel)
-{
+Logger::Logger(const str& name, Logger* parent, LogLevel level):
+	name_(name),
+	parent_(parent),
+	logger_list_lock_(new SpinLock),
+	level_(level) {
 }
 
-Logger::~Logger()
-{
-	delete mLoggerListLock;
+Logger::~Logger() {
+	delete logger_list_lock_;
 }
 
-void Logger::SetupBasicListeners(LogListener* pConsole, LogListener* pDebug,
-	LogListener* pFile, LogListener* pPerformance, LogListener* pMem)
-{
-	if (pConsole)
-	{
+void Logger::SetupBasicListeners(LogListener* console, LogListener* debug,
+	LogListener* file, LogListener* performance, LogListener* mem) {
+	if (console) {
 		// Console logs everything user wants.
-		for (int x = LEVEL_LOWEST_TYPE; x < LEVEL_TYPE_COUNT; ++x)
-		{
-			AddListener(pConsole, (LogLevel)x);
+		for (int x = kLevelLowestType; x < kLevelTypeCount; ++x) {
+			AddListener(console, (LogLevel)x);
 		}
 	}
 
-	if (pDebug)
-	{
+	if (debug) {
 #ifndef NO_LOG_DEBUG_INFO	// Only available in debug and release candidates.
-		for (int x = LEVEL_LOWEST_TYPE; x < LEVEL_TYPE_COUNT; ++x)
-		{
-			AddListener(pDebug, (LogLevel)x);
+		for (int x = kLevelLowestType; x < kLevelTypeCount; ++x) {
+			AddListener(debug, (LogLevel)x);
 		}
 #endif // !NO_LOG_DEBUG_INFO
 	}
 
-	if (pFile)
-	{
+	if (file) {
 		// File logs everything but performance.
-		AddListener(pFile, LEVEL_TRACE);
-		AddListener(pFile, LEVEL_DEBUG);
-		AddListener(pFile, LEVEL_INFO);
-		AddListener(pFile, LEVEL_HEADLINE);
-		AddListener(pFile, LEVEL_WARNING);
-		AddListener(pFile, LEVEL_ERROR);
-		AddListener(pFile, LEVEL_FATAL);
+		AddListener(file, kLevelTrace);
+		AddListener(file, kLevelDebug);
+		AddListener(file, kLevelInfo);
+		AddListener(file, kLevelHeadline);
+		AddListener(file, kLevelWarning);
+		AddListener(file, kLevelError);
+		AddListener(file, kLevelFatal);
 	}
 
-	if (pPerformance)
-	{
-		AddListener(pPerformance, LEVEL_PERFORMANCE);
-		AddListener(pPerformance, LEVEL_HEADLINE);
+	if (performance) {
+		AddListener(performance, kLevelPerformance);
+		AddListener(performance, kLevelHeadline);
 	}
 
-	if (pMem)
-	{
-		for (int x = LEVEL_LOWEST_TYPE; x < LEVEL_TYPE_COUNT; ++x)
-		{
-			AddListener(pMem, (LogLevel)x);
+	if (mem) {
+		for (int x = kLevelLowestType; x < kLevelTypeCount; ++x) {
+			AddListener(mem, (LogLevel)x);
 		}
 	}
 }
 
-void Logger::AddListener(LogListener* pLogger, LogLevel pLevel)
-{
-	deb_assert(pLogger);
+void Logger::AddListener(LogListener* logger, LogLevel level) {
+	deb_assert(logger);
 #ifdef NO_LEVEL_DEBUG_INFO	// Final (public release) version gets no debug messages.
-	if (pLevel >= LEVEL_INFO)
+	if (level >= kLevelInfo)
 #endif // !NO_LEVEL_DEBUG_INFO
 	{
-		deb_assert(pLevel >= LEVEL_LOWEST_TYPE && pLevel < LEVEL_TYPE_COUNT);
-		if (pLevel >= LEVEL_LOWEST_TYPE && pLevel < LEVEL_TYPE_COUNT)
-		{
-			ScopeSpinLock lScopeLock(mLoggerListLock);
-			mLoggerList[pLevel].push_back(pLogger);
-			pLogger->AddLog(this);
+		deb_assert(level >= kLevelLowestType && level < kLevelTypeCount);
+		if (level >= kLevelLowestType && level < kLevelTypeCount) {
+			ScopeSpinLock scope_lock(logger_list_lock_);
+			logger_list_[level].push_back(logger);
+			logger->AddLog(this);
 		}
 	}
 }
 
-void Logger::RemoveListener(LogListener* pLogger)
-{
-	deb_assert(pLogger);
-	ScopeSpinLock lScopeLock(mLoggerListLock);
-	for (int x = LEVEL_LOWEST_TYPE; x < LEVEL_TYPE_COUNT; ++x)
-	{
-		std::vector<LogListener*>::iterator y = mLoggerList[x].begin();
-		for (; y != mLoggerList[x].end(); ++y)
-		{
-			if (*y == pLogger)
-			{
-				mLoggerList[x].erase(y);
+void Logger::RemoveListener(LogListener* logger) {
+	deb_assert(logger);
+	ScopeSpinLock scope_lock(logger_list_lock_);
+	for (int x = kLevelLowestType; x < kLevelTypeCount; ++x) {
+		std::vector<LogListener*>::iterator y = logger_list_[x].begin();
+		for (; y != logger_list_[x].end(); ++y) {
+			if (*y == logger) {
+				logger_list_[x].erase(y);
 				break;
 			}
 		}
 	}
-	pLogger->RemoveLog(this);
+	logger->RemoveLog(this);
 }
 
-LogListener* Logger::GetListener(const str& pName) const
-{
-	LogListener* lListener = 0;
-	ScopeSpinLock lScopeLock(mLoggerListLock);
-	for (int x = LEVEL_LOWEST_TYPE; !lListener && x < LEVEL_TYPE_COUNT; ++x)
-	{
-		std::vector<LogListener*>::const_iterator y = mLoggerList[x].begin();
-		for (; !lListener && y != mLoggerList[x].end(); ++y)
-		{
-			if ((*y)->GetName() == pName)
-			{
-				lListener = *y;
+LogListener* Logger::GetListener(const str& name) const {
+	LogListener* listener = 0;
+	ScopeSpinLock scope_lock(logger_list_lock_);
+	for (int x = kLevelLowestType; !listener && x < kLevelTypeCount; ++x) {
+		std::vector<LogListener*>::const_iterator y = logger_list_[x].begin();
+		for (; !listener && y != logger_list_[x].end(); ++y) {
+			if ((*y)->GetName() == name) {
+				listener = *y;
 			}
 		}
 	}
-	return (lListener);
+	return (listener);
 }
 
-const str& Logger::GetName() const
-{
-	return (mName);
+const str& Logger::GetName() const {
+	return (name_);
 }
 
-LogLevel Logger::GetLevelThreashold()const
-{
-	return (mLevel);
+LogLevel Logger::GetLevelThreashold()const {
+	return (level_);
 }
 
-void Logger::SetLevelThreashold(LogLevel pLevel)
-{
-	if (pLevel < LEVEL_LOWEST_TYPE)
-	{
-		pLevel = LEVEL_LOWEST_TYPE;
+void Logger::SetLevelThreashold(LogLevel level) {
+	if (level < kLevelLowestType) {
+		level = kLevelLowestType;
+	} else if (level >= kLevelTypeCount) {
+		level = (LogLevel)(kLevelTypeCount-1);
 	}
-	else if (pLevel >= LEVEL_TYPE_COUNT)
-	{
-		pLevel = (LogLevel)(LEVEL_TYPE_COUNT-1);
-	}
-	mLevel = pLevel;
+	level_ = level;
 }
 
-void Logger::Print(const str& pAccount, const str& pMessage, LogLevel pLevel)
-{
-	if (pLevel >= mLevel && pLevel < LEVEL_TYPE_COUNT)
-	{
-		DoPrint(this, pAccount, pMessage, pLevel);
+void Logger::Print(const str& account, const str& message, LogLevel level) {
+	if (level >= level_ && level < kLevelTypeCount) {
+		DoPrint(this, account, message, level);
 	}
 }
 
-void Logger::RawPrint(const str& pMessage, LogLevel pLevel)
-{
-	if (pLevel >= mLevel && pLevel < LEVEL_TYPE_COUNT)
-	{
-		DoRawPrint(pMessage, pLevel);
+void Logger::RawPrint(const str& message, LogLevel level) {
+	if (level >= level_ && level < kLevelTypeCount) {
+		DoRawPrint(message, level);
 	}
 }
 
-void Logger::DoPrint(const Logger* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel)
-{
-	if (mParent)
-	{
-		mParent->DoPrint(this, pAccount, pMessage, pLevel);
+void Logger::DoPrint(const Logger* originator, const str& account, const str& message, LogLevel level) {
+	if (parent_) {
+		parent_->DoPrint(this, account, message, level);
 	}
 
-	ScopeSpinLock lScopeLock(mLoggerListLock);
-	std::vector<LogListener*>::iterator x = mLoggerList[pLevel].begin();
-	for (; x != mLoggerList[pLevel].end(); ++x)
-	{
-		(*x)->OnLog(pOriginator, pAccount, pMessage, pLevel);
+	ScopeSpinLock scope_lock(logger_list_lock_);
+	std::vector<LogListener*>::iterator x = logger_list_[level].begin();
+	for (; x != logger_list_[level].end(); ++x) {
+		(*x)->OnLog(originator, account, message, level);
 	}
 }
 
-void Logger::DoRawPrint(const str& pMessage, LogLevel pLevel)
-{
-	if (mParent)
-	{
-		mParent->DoRawPrint(pMessage, pLevel);
+void Logger::DoRawPrint(const str& message, LogLevel level) {
+	if (parent_) {
+		parent_->DoRawPrint(message, level);
 	}
 
-	ScopeSpinLock lScopeLock(mLoggerListLock);
-	std::vector<LogListener*>::iterator x = mLoggerList[pLevel].begin();
-	for (; x != mLoggerList[pLevel].end(); ++x)
-	{
-		(*x)->WriteLog(pMessage, pLevel);
+	ScopeSpinLock scope_lock(logger_list_lock_);
+	std::vector<LogListener*>::iterator x = logger_list_[level].begin();
+	for (; x != logger_list_[level].end(); ++x) {
+		(*x)->WriteLog(message, level);
 	}
 }
 

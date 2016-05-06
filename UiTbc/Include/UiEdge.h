@@ -5,7 +5,7 @@
 
 	NOTES:
 
-	Class Edge and other Edge-classes. 
+	Class Edge and other Edge-classes.
 	Used to store info about a polygon edge during rasterization.
 
 	Edge is responsible of clipping against the left and right
@@ -22,11 +22,10 @@
 
 #pragma once
 
-#include "UiTbc.h"
+#include "uitbc.h"
 #include "UiGradients.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
 class Vertex3D;
 class Vertex3DUV;
@@ -39,17 +38,16 @@ class Vertex2D;
 class Vertex2DUV;
 class Vertex2DRGBA;
 
-class Edge
-{
+class Edge {
 public:
 
-	virtual void Init(const Vertex3D* pV0, const Vertex3D* pV1);
-	void Init(const Vertex2D* pV0, const Vertex2D* pV1);
+	virtual void Init(const Vertex3D* v0, const Vertex3D* v1);
+	void Init(const Vertex2D* v0, const Vertex2D* v1);
 
-	inline static void SetClipLeftRight(int pClipLeft, int pClipRight);
+	inline static void SetClipLeftRight(int clip_left, int clip_right);
 
 	virtual inline bool Step();
-	virtual inline int Step(unsigned pCount);
+	virtual inline int Step(unsigned count);
 
 	virtual inline void Reset();
 
@@ -59,108 +57,94 @@ public:
 
 protected:
 
-	int mX;				// DDA info for x.
-	int mXStep;			// ..
-	int mNumerator;		// ..
-	int mDenominator;		// ..
-	int mErrorTerm;		// ..
+	int x_;				// DDA info for x.
+	int x_step_;			// ..
+	int numerator_;		// ..
+	int denominator_;		// ..
+	int error_term_;		// ..
 
-	int mY;				// Current y
-	int mHeight;			// Vertical count...
+	int y_;				// Current y
+	int height_;			// Vertical count...
 
-	static int smClipLeft;
-	static int smClipRight;
+	static int clip_left_;
+	static int clip_right_;
 
-	int mStartX;
-	int mStartY;
-	int mStartHeight;
-	int mStartErrorTerm;
-	float mXPrestep;
-	float mYPrestep;
+	int start_x_;
+	int start_y_;
+	int start_height_;
+	int start_error_term_;
+	float x_prestep_;
+	float y_prestep_;
 };
 
-void Edge::SetClipLeftRight(int pClipLeft, int pClipRight)
-{
-	smClipLeft = pClipLeft;
-	smClipRight = pClipRight;
+void Edge::SetClipLeftRight(int clip_left, int clip_right) {
+	clip_left_ = clip_left;
+	clip_right_ = clip_right;
 }
 
-int Edge::GetX()
-{
-	if (mX < smClipLeft)
-	{
-		return smClipLeft;
-	}
-	else if(mX > smClipRight)
-	{
-		return smClipRight;
-	}
-	else
-	{
-		return mX;
+int Edge::GetX() {
+	if (x_ < clip_left_) {
+		return clip_left_;
+	} else if(x_ > clip_right_) {
+		return clip_right_;
+	} else {
+		return x_;
 	}
 }
 
-int Edge::GetY()
-{
-	return mY;
+int Edge::GetY() {
+	return y_;
 }
 
-int Edge::GetHeight()
-{
-	return mHeight;
+int Edge::GetHeight() {
+	return height_;
 }
 
-bool Edge::Step()
-{
-	bool lStepExtra = false;
+bool Edge::Step() {
+	bool step_extra = false;
 
-	mX += mXStep;
-	mY++;
-	mHeight--;
+	x_ += x_step_;
+	y_++;
+	height_--;
 
-	mErrorTerm += mNumerator;
+	error_term_ += numerator_;
 
-	if ((unsigned)mErrorTerm >= (unsigned)mDenominator)
-	{
-		lStepExtra = true;
+	if ((unsigned)error_term_ >= (unsigned)denominator_) {
+		step_extra = true;
 
-		mX++;
-	
-		mErrorTerm -= mDenominator;
+		x_++;
+
+		error_term_ -= denominator_;
 	}
 
-	return lStepExtra;
+	return step_extra;
 }
 
-int Edge::Step(unsigned pCount)
-{
-	mX += mXStep * pCount;
-	mY += pCount;
-	mHeight -= pCount;
+int Edge::Step(unsigned count) {
+	x_ += x_step_ * count;
+	y_ += count;
+	height_ -= count;
 
-	mErrorTerm += mNumerator * pCount;
+	error_term_ += numerator_ * count;
 
-	if ((unsigned)mErrorTerm >= (unsigned)mDenominator &&
-		mDenominator > 0)
-	{
-		int lCount = (unsigned)mErrorTerm / (unsigned)mDenominator;
-		mX += lCount;
-	
-		mErrorTerm -= ((unsigned)mDenominator * lCount);
+	if ((unsigned)error_term_ >= (unsigned)denominator_ &&
+		denominator_ > 0) {
+		int _count = (unsigned)error_term_ / (unsigned)denominator_;
+		x_ += _count;
 
-		return lCount;
+		error_term_ -= ((unsigned)denominator_ * _count);
+
+		return _count;
 	}
 
 	return 0;
 }
 
-void Edge::Reset()
-{
-	mX = mStartX;
-	mY = mStartY;
-	mHeight = mStartHeight;
-	mErrorTerm = mStartErrorTerm;
+void Edge::Reset() {
+	x_ = start_x_;
+	y_ = start_y_;
+	height_ = start_height_;
+	error_term_ = start_error_term_;
 }
 
 
@@ -177,73 +161,62 @@ void Edge::Reset()
 
 
 
-class EdgeZ : public Edge
-{
+class EdgeZ : public Edge {
 public:
 
-	virtual void Init(const Vertex3D* pV0, 
-					  const Vertex3D* pV1,
-					  const Gradients* pGradients);
+	virtual void Init(const Vertex3D* v0,
+					  const Vertex3D* v1,
+					  const Gradients* gradients);
 
 	virtual inline bool Step();
-	virtual inline int Step(unsigned pCount);
+	virtual inline int Step(unsigned count);
 
-	virtual void Reset(const Gradients* pGradients);
+	virtual void Reset(const Gradients* gradients);
 
 	inline float GetOneOverZ();
 
 private:
 
-	float mOneOverZ;		// 1 / z
-	float mOneOverZStep;
-	float mOneOverZStepExtra;
+	float one_over_z_;		// 1 / z
+	float one_over_z_step_;
+	float one_over_z_step_extra_;
 
-	const Gradients* mGradients;
+	const Gradients* gradients_;
 
-	float mStartOneOverZ;		// 1 / z
+	float start_one_over_z_;		// 1 / z
 };
 
-bool EdgeZ::Step()
-{
-	bool lStepExtra = Edge::Step();
+bool EdgeZ::Step() {
+	bool step_extra = Edge::Step();
 
-	mOneOverZ += mOneOverZStep;
+	one_over_z_ += one_over_z_step_;
 
-	if (lStepExtra == true)
-	{
-		mOneOverZ += mOneOverZStepExtra;
+	if (step_extra == true) {
+		one_over_z_ += one_over_z_step_extra_;
 	}
 
-	return lStepExtra;
+	return step_extra;
 }
 
-int EdgeZ::Step(unsigned pCount)
-{
-	int lExtraSteps = Edge::Step(pCount);
+int EdgeZ::Step(unsigned count) {
+	int extra_steps = Edge::Step(count);
 
-	mOneOverZ += mOneOverZStep * (float)pCount;
+	one_over_z_ += one_over_z_step_ * (float)count;
 
-	if (lExtraSteps > 0)
-	{
-		mOneOverZ += mOneOverZStepExtra * (float)lExtraSteps;
+	if (extra_steps > 0) {
+		one_over_z_ += one_over_z_step_extra_ * (float)extra_steps;
 	}
 
-	return lExtraSteps;
+	return extra_steps;
 }
 
-float EdgeZ::GetOneOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mOneOverZ + mGradients->GetOneOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mOneOverZ - mGradients->GetOneOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mOneOverZ;
+float EdgeZ::GetOneOverZ() {
+	if (x_ < clip_left_) {
+		return one_over_z_ + gradients_->GetOneOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return one_over_z_ - gradients_->GetOneOverZXStep() * (x_ - clip_right_);
+	} else {
+		return one_over_z_;
 	}
 }
 
@@ -260,126 +233,103 @@ float EdgeZ::GetOneOverZ()
 
 
 
-class EdgeUV : public Edge
-{
+class EdgeUV : public Edge {
 public:
 
-	virtual void Init(const Vertex3DUV* pV0, 
-					  const Vertex3DUV* pV1,
-					  const GradientsUV* pGradients);
+	virtual void Init(const Vertex3DUV* v0,
+					  const Vertex3DUV* v1,
+					  const GradientsUV* gradients);
 
 	virtual inline bool Step();
-	virtual inline int Step(unsigned pCount);
+	virtual inline int Step(unsigned count);
 
-	virtual void Reset(const GradientsUV* pGradients);
+	virtual void Reset(const GradientsUV* gradients);
 
 	inline float GetOneOverZ();
 	inline float GetUOverZ();
 	inline float GetVOverZ();
 
 private:
-	float mOneOverZ;		// 1 / z
-	float mOneOverZStep;
-	float mOneOverZStepExtra;
+	float one_over_z_;		// 1 / z
+	float one_over_z_step_;
+	float one_over_z_step_extra_;
 
-	float mUOverZ;		// u / z
-	float mUOverZStep;
-	float mUOverZStepExtra;
+	float u_over_z_;		// u / z
+	float u_over_z_step_;
+	float u_over_z_step_extra_;
 
-	float mVOverZ;		// v / z
-	float mVOverZStep;
-	float mVOverZStepExtra;
+	float v_over_z_;		// v / z
+	float v_over_z_step_;
+	float v_over_z_step_extra_;
 
-	const GradientsUV* mGradients;
+	const GradientsUV* gradients_;
 
-	float mStartOneOverZ;
-	float mStartUOverZ;
-	float mStartVOverZ;
+	float start_one_over_z_;
+	float start_u_over_z_;
+	float start_v_over_z_;
 };
 
-bool EdgeUV::Step()
-{
-	bool lStepExtra = Edge::Step();
+bool EdgeUV::Step() {
+	bool step_extra = Edge::Step();
 
-	mOneOverZ += mOneOverZStep;
-	mUOverZ   += mUOverZStep;
-	mVOverZ   += mVOverZStep;
+	one_over_z_ += one_over_z_step_;
+	u_over_z_   += u_over_z_step_;
+	v_over_z_   += v_over_z_step_;
 
-	if (lStepExtra == true)
-	{
-		mOneOverZ += mOneOverZStepExtra;
-		mUOverZ   += mUOverZStepExtra;
-		mVOverZ   += mVOverZStepExtra;
+	if (step_extra == true) {
+		one_over_z_ += one_over_z_step_extra_;
+		u_over_z_   += u_over_z_step_extra_;
+		v_over_z_   += v_over_z_step_extra_;
 	}
 
-	return lStepExtra;
+	return step_extra;
 }
 
-int EdgeUV::Step(unsigned pCount)
-{
-	int lExtraSteps = Edge::Step(pCount);
-	float lCount = (float)pCount;
+int EdgeUV::Step(unsigned count) {
+	int extra_steps = Edge::Step(count);
+	float _count = (float)count;
 
-	mOneOverZ += mOneOverZStep * lCount;
-	mUOverZ   += mUOverZStep * lCount;
-	mVOverZ   += mVOverZStep * lCount;
+	one_over_z_ += one_over_z_step_ * _count;
+	u_over_z_   += u_over_z_step_ * _count;
+	v_over_z_   += v_over_z_step_ * _count;
 
-	if (lExtraSteps > 0)
-	{
-		float lExtraStepsFloat = (float)lExtraSteps;
-		mOneOverZ += mOneOverZStepExtra * lExtraStepsFloat;
-		mUOverZ   += mUOverZStepExtra * lExtraStepsFloat;
-		mVOverZ   += mVOverZStepExtra * lExtraStepsFloat;
+	if (extra_steps > 0) {
+		float extra_steps_float = (float)extra_steps;
+		one_over_z_ += one_over_z_step_extra_ * extra_steps_float;
+		u_over_z_   += u_over_z_step_extra_ * extra_steps_float;
+		v_over_z_   += v_over_z_step_extra_ * extra_steps_float;
 	}
 
-	return lExtraSteps;
+	return extra_steps;
 }
 
-float EdgeUV::GetOneOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mOneOverZ + mGradients->GetOneOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mOneOverZ - mGradients->GetOneOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mOneOverZ;
+float EdgeUV::GetOneOverZ() {
+	if (x_ < clip_left_) {
+		return one_over_z_ + gradients_->GetOneOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return one_over_z_ - gradients_->GetOneOverZXStep() * (x_ - clip_right_);
+	} else {
+		return one_over_z_;
 	}
 }
 
-float EdgeUV::GetUOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mUOverZ + mGradients->GetUOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mUOverZ - mGradients->GetUOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mUOverZ;
+float EdgeUV::GetUOverZ() {
+	if (x_ < clip_left_) {
+		return u_over_z_ + gradients_->GetUOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return u_over_z_ - gradients_->GetUOverZXStep() * (x_ - clip_right_);
+	} else {
+		return u_over_z_;
 	}
 }
 
-float EdgeUV::GetVOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mVOverZ + mGradients->GetVOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mVOverZ - mGradients->GetVOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mVOverZ;
+float EdgeUV::GetVOverZ() {
+	if (x_ < clip_left_) {
+		return v_over_z_ + gradients_->GetVOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return v_over_z_ - gradients_->GetVOverZXStep() * (x_ - clip_right_);
+	} else {
+		return v_over_z_;
 	}
 }
 
@@ -398,19 +348,18 @@ float EdgeUV::GetVOverZ()
 
 
 
-class EdgeRGB : public Edge
-{
+class EdgeRGB : public Edge {
 public:
 
-	virtual void Init(const Vertex3DRGB* pV0, 
-					  const Vertex3DRGB* pV1,
-					  const GradientsRGB* pGradients,
-					  bool pGammaConvert);
+	virtual void Init(const Vertex3DRGB* v0,
+					  const Vertex3DRGB* v1,
+					  const GradientsRGB* gradients,
+					  bool gamma_convert);
 
 	virtual inline bool Step();
-	virtual inline int Step(unsigned pCount);
+	virtual inline int Step(unsigned count);
 
-	virtual void Reset(const GradientsRGB* pGradients);
+	virtual void Reset(const GradientsRGB* gradients);
 
 	inline float GetOneOverZ();
 	inline float GetROverZ();
@@ -419,133 +368,105 @@ public:
 
 private:
 
-	float mOneOverZ;		// 1 / z
-	float mOneOverZStep;
-	float mOneOverZStepExtra;
+	float one_over_z_;		// 1 / z
+	float one_over_z_step_;
+	float one_over_z_step_extra_;
 
-	float mROverZ;		// r / z
-	float mROverZStep;
-	float mROverZStepExtra;
+	float r_over_z_;		// r / z
+	float r_over_z_step_;
+	float r_over_z_step_extra_;
 
-	float mGOverZ;	// g / z
-	float mGOverZStep;
-	float mGOverZStepExtra;
+	float g_over_z_;	// g / z
+	float g_over_z_step_;
+	float g_over_z_step_extra_;
 
-	float mBOverZ;		// b / z
-	float mBOverZStep;
-	float mBOverZStepExtra;
+	float b_over_z_;		// b / z
+	float b_over_z_step_;
+	float b_over_z_step_extra_;
 
-	const GradientsRGB* mGradients;
+	const GradientsRGB* gradients_;
 
-	float mStartOneOverZ;
-	float mStartROverZ;
-	float mStartGOverZ;
-	float mStartBOverZ;
+	float start_one_over_z_;
+	float start_r_over_z_;
+	float start_g_over_z_;
+	float start_b_over_z_;
 };
 
-bool EdgeRGB::Step()
-{
-	bool lStepExtra = Edge::Step();
+bool EdgeRGB::Step() {
+	bool step_extra = Edge::Step();
 
-	mOneOverZ += mOneOverZStep;
-	mROverZ += mROverZStep;
-	mGOverZ += mGOverZStep;
-	mBOverZ += mBOverZStep;
+	one_over_z_ += one_over_z_step_;
+	r_over_z_ += r_over_z_step_;
+	g_over_z_ += g_over_z_step_;
+	b_over_z_ += b_over_z_step_;
 
-	if (lStepExtra == true)
-	{
-		mOneOverZ += mOneOverZStepExtra;
-		mROverZ += mROverZStepExtra;
-		mGOverZ += mGOverZStepExtra;
-		mBOverZ += mBOverZStepExtra;
+	if (step_extra == true) {
+		one_over_z_ += one_over_z_step_extra_;
+		r_over_z_ += r_over_z_step_extra_;
+		g_over_z_ += g_over_z_step_extra_;
+		b_over_z_ += b_over_z_step_extra_;
 	}
 
-	return lStepExtra;
+	return step_extra;
 }
 
-int EdgeRGB::Step(unsigned pCount)
-{
-	int lExtraSteps = Edge::Step(pCount);
-	float lCount = (float)pCount;
+int EdgeRGB::Step(unsigned count) {
+	int extra_steps = Edge::Step(count);
+	float _count = (float)count;
 
-	mOneOverZ += mOneOverZStep * lCount;
-	mROverZ += mROverZStep * lCount;
-	mGOverZ += mGOverZStep * lCount;
-	mBOverZ += mBOverZStep * lCount;
+	one_over_z_ += one_over_z_step_ * _count;
+	r_over_z_ += r_over_z_step_ * _count;
+	g_over_z_ += g_over_z_step_ * _count;
+	b_over_z_ += b_over_z_step_ * _count;
 
-	if (lExtraSteps > 0)
-	{
-		float lExtraStepsFloat = (float)lExtraSteps;
-		mOneOverZ += mOneOverZStepExtra * lExtraStepsFloat;
-		mROverZ += mROverZStepExtra * lExtraStepsFloat;
-		mGOverZ += mGOverZStepExtra * lExtraStepsFloat;
-		mBOverZ += mBOverZStepExtra * lExtraStepsFloat;
+	if (extra_steps > 0) {
+		float extra_steps_float = (float)extra_steps;
+		one_over_z_ += one_over_z_step_extra_ * extra_steps_float;
+		r_over_z_ += r_over_z_step_extra_ * extra_steps_float;
+		g_over_z_ += g_over_z_step_extra_ * extra_steps_float;
+		b_over_z_ += b_over_z_step_extra_ * extra_steps_float;
 	}
 
-	return lExtraSteps;
+	return extra_steps;
 }
 
-float EdgeRGB::GetOneOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mOneOverZ + mGradients->GetOneOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mOneOverZ - mGradients->GetOneOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mOneOverZ;
+float EdgeRGB::GetOneOverZ() {
+	if (x_ < clip_left_) {
+		return one_over_z_ + gradients_->GetOneOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return one_over_z_ - gradients_->GetOneOverZXStep() * (x_ - clip_right_);
+	} else {
+		return one_over_z_;
 	}
 }
 
-float EdgeRGB::GetROverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mROverZ + mGradients->GetROverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mROverZ - mGradients->GetROverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mROverZ;
+float EdgeRGB::GetROverZ() {
+	if (x_ < clip_left_) {
+		return r_over_z_ + gradients_->GetROverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return r_over_z_ - gradients_->GetROverZXStep() * (x_ - clip_right_);
+	} else {
+		return r_over_z_;
 	}
 }
 
-float EdgeRGB::GetGOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mGOverZ + mGradients->GetGOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mGOverZ - mGradients->GetGOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mGOverZ;
+float EdgeRGB::GetGOverZ() {
+	if (x_ < clip_left_) {
+		return g_over_z_ + gradients_->GetGOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return g_over_z_ - gradients_->GetGOverZXStep() * (x_ - clip_right_);
+	} else {
+		return g_over_z_;
 	}
 }
 
-float EdgeRGB::GetBOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mBOverZ + mGradients->GetBOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mBOverZ - mGradients->GetBOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mBOverZ;
+float EdgeRGB::GetBOverZ() {
+	if (x_ < clip_left_) {
+		return b_over_z_ + gradients_->GetBOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return b_over_z_ - gradients_->GetBOverZXStep() * (x_ - clip_right_);
+	} else {
+		return b_over_z_;
 	}
 }
 
@@ -564,19 +485,18 @@ float EdgeRGB::GetBOverZ()
 
 
 
-class EdgeUVRGB : public Edge
-{
+class EdgeUVRGB : public Edge {
 public:
 
-	virtual void Init(const Vertex3DUVRGB* pV0, 
-					  const Vertex3DUVRGB* pV1,
-					  const GradientsUVRGB* pGradients,
-					  bool pGammaConvert);
+	virtual void Init(const Vertex3DUVRGB* v0,
+					  const Vertex3DUVRGB* v1,
+					  const GradientsUVRGB* gradients,
+					  bool gamma_convert);
 
 	virtual inline bool Step();
-	virtual inline int Step(unsigned pCount);
+	virtual inline int Step(unsigned count);
 
-	virtual void Reset(const GradientsUVRGB* pGradients);
+	virtual void Reset(const GradientsUVRGB* gradients);
 
 	inline float GetOneOverZ();
 	inline float GetUOverZ();
@@ -587,183 +507,143 @@ public:
 
 private:
 
-	float mOneOverZ;		// 1 / z
-	float mOneOverZStep;
-	float mOneOverZStepExtra;
+	float one_over_z_;		// 1 / z
+	float one_over_z_step_;
+	float one_over_z_step_extra_;
 
-	float mUOverZ;		// u / z
-	float mUOverZStep;
-	float mUOverZStepExtra;
+	float u_over_z_;		// u / z
+	float u_over_z_step_;
+	float u_over_z_step_extra_;
 
-	float mVOverZ;		// v / z
-	float mVOverZStep;
-	float mVOverZStepExtra;
+	float v_over_z_;		// v / z
+	float v_over_z_step_;
+	float v_over_z_step_extra_;
 
-	float mROverZ;		// r / z
-	float mROverZStep;
-	float mROverZStepExtra;
+	float r_over_z_;		// r / z
+	float r_over_z_step_;
+	float r_over_z_step_extra_;
 
-	float mGOverZ;	// g / z
-	float mGOverZStep;
-	float mGOverZStepExtra;
+	float g_over_z_;	// g / z
+	float g_over_z_step_;
+	float g_over_z_step_extra_;
 
-	float mBOverZ;		// b / z
-	float mBOverZStep;
-	float mBOverZStepExtra;
+	float b_over_z_;		// b / z
+	float b_over_z_step_;
+	float b_over_z_step_extra_;
 
-	const GradientsUVRGB* mGradients;
+	const GradientsUVRGB* gradients_;
 
-	float mStartOneOverZ;
-	float mStartUOverZ;
-	float mStartVOverZ;
-	float mStartROverZ;
-	float mStartGOverZ;
-	float mStartBOverZ;
+	float start_one_over_z_;
+	float start_u_over_z_;
+	float start_v_over_z_;
+	float start_r_over_z_;
+	float start_g_over_z_;
+	float start_b_over_z_;
 };
 
-bool EdgeUVRGB::Step()
-{
-	bool lStepExtra = Edge::Step();
+bool EdgeUVRGB::Step() {
+	bool step_extra = Edge::Step();
 
-	mOneOverZ += mOneOverZStep;
-	mUOverZ += mUOverZStep;
-	mVOverZ += mVOverZStep;
-	mROverZ += mROverZStep;
-	mGOverZ += mGOverZStep;
-	mBOverZ += mBOverZStep;
+	one_over_z_ += one_over_z_step_;
+	u_over_z_ += u_over_z_step_;
+	v_over_z_ += v_over_z_step_;
+	r_over_z_ += r_over_z_step_;
+	g_over_z_ += g_over_z_step_;
+	b_over_z_ += b_over_z_step_;
 
-	if (lStepExtra == true)
-	{
-		mOneOverZ += mOneOverZStepExtra;
-		mUOverZ += mUOverZStepExtra;
-		mVOverZ += mVOverZStepExtra;
-		mROverZ += mROverZStepExtra;
-		mGOverZ += mGOverZStepExtra;
-		mBOverZ += mBOverZStepExtra;
+	if (step_extra == true) {
+		one_over_z_ += one_over_z_step_extra_;
+		u_over_z_ += u_over_z_step_extra_;
+		v_over_z_ += v_over_z_step_extra_;
+		r_over_z_ += r_over_z_step_extra_;
+		g_over_z_ += g_over_z_step_extra_;
+		b_over_z_ += b_over_z_step_extra_;
 	}
 
-	return lStepExtra;
+	return step_extra;
 }
 
-int EdgeUVRGB::Step(unsigned pCount)
-{
-	int lExtraSteps = Edge::Step(pCount);
-	float lCount = (float)pCount;
+int EdgeUVRGB::Step(unsigned count) {
+	int extra_steps = Edge::Step(count);
+	float _count = (float)count;
 
-	mOneOverZ += mOneOverZStep * lCount;
-	mUOverZ += mUOverZStep * lCount;
-	mVOverZ += mVOverZStep * lCount;
-	mROverZ += mROverZStep * lCount;
-	mGOverZ += mGOverZStep * lCount;
-	mBOverZ += mBOverZStep * lCount;
+	one_over_z_ += one_over_z_step_ * _count;
+	u_over_z_ += u_over_z_step_ * _count;
+	v_over_z_ += v_over_z_step_ * _count;
+	r_over_z_ += r_over_z_step_ * _count;
+	g_over_z_ += g_over_z_step_ * _count;
+	b_over_z_ += b_over_z_step_ * _count;
 
-	if (lExtraSteps > 0)
-	{
-		float lExtraStepsFloat = (float)lExtraSteps;
-		mOneOverZ += mOneOverZStepExtra * lExtraStepsFloat;
-		mUOverZ += mUOverZStepExtra * lExtraStepsFloat;
-		mVOverZ += mVOverZStepExtra * lExtraStepsFloat;
-		mROverZ += mROverZStepExtra * lExtraStepsFloat;
-		mGOverZ += mGOverZStepExtra * lExtraStepsFloat;
-		mBOverZ += mBOverZStepExtra * lExtraStepsFloat;
+	if (extra_steps > 0) {
+		float extra_steps_float = (float)extra_steps;
+		one_over_z_ += one_over_z_step_extra_ * extra_steps_float;
+		u_over_z_ += u_over_z_step_extra_ * extra_steps_float;
+		v_over_z_ += v_over_z_step_extra_ * extra_steps_float;
+		r_over_z_ += r_over_z_step_extra_ * extra_steps_float;
+		g_over_z_ += g_over_z_step_extra_ * extra_steps_float;
+		b_over_z_ += b_over_z_step_extra_ * extra_steps_float;
 	}
 
-	return lExtraSteps;
+	return extra_steps;
 }
 
-float EdgeUVRGB::GetOneOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mOneOverZ + mGradients->GetOneOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mOneOverZ - mGradients->GetOneOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mOneOverZ;
+float EdgeUVRGB::GetOneOverZ() {
+	if (x_ < clip_left_) {
+		return one_over_z_ + gradients_->GetOneOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return one_over_z_ - gradients_->GetOneOverZXStep() * (x_ - clip_right_);
+	} else {
+		return one_over_z_;
 	}
 }
 
-float EdgeUVRGB::GetUOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mUOverZ + mGradients->GetUOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mUOverZ - mGradients->GetUOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mUOverZ;
+float EdgeUVRGB::GetUOverZ() {
+	if (x_ < clip_left_) {
+		return u_over_z_ + gradients_->GetUOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return u_over_z_ - gradients_->GetUOverZXStep() * (x_ - clip_right_);
+	} else {
+		return u_over_z_;
 	}
 }
 
-float EdgeUVRGB::GetVOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mVOverZ + mGradients->GetVOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mVOverZ - mGradients->GetVOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mVOverZ;
+float EdgeUVRGB::GetVOverZ() {
+	if (x_ < clip_left_) {
+		return v_over_z_ + gradients_->GetVOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return v_over_z_ - gradients_->GetVOverZXStep() * (x_ - clip_right_);
+	} else {
+		return v_over_z_;
 	}
 }
 
-float EdgeUVRGB::GetROverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mROverZ + mGradients->GetROverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mROverZ - mGradients->GetROverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mROverZ;
+float EdgeUVRGB::GetROverZ() {
+	if (x_ < clip_left_) {
+		return r_over_z_ + gradients_->GetROverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return r_over_z_ - gradients_->GetROverZXStep() * (x_ - clip_right_);
+	} else {
+		return r_over_z_;
 	}
 }
 
-float EdgeUVRGB::GetGOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mGOverZ + mGradients->GetGOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mGOverZ - mGradients->GetGOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mGOverZ;
+float EdgeUVRGB::GetGOverZ() {
+	if (x_ < clip_left_) {
+		return g_over_z_ + gradients_->GetGOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return g_over_z_ - gradients_->GetGOverZXStep() * (x_ - clip_right_);
+	} else {
+		return g_over_z_;
 	}
 }
 
-float EdgeUVRGB::GetBOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mBOverZ + mGradients->GetBOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mBOverZ - mGradients->GetBOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mBOverZ;
+float EdgeUVRGB::GetBOverZ() {
+	if (x_ < clip_left_) {
+		return b_over_z_ + gradients_->GetBOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return b_over_z_ - gradients_->GetBOverZXStep() * (x_ - clip_right_);
+	} else {
+		return b_over_z_;
 	}
 }
 
@@ -783,18 +663,17 @@ float EdgeUVRGB::GetBOverZ()
 
 
 
-class EdgeUVM : public Edge
-{
+class EdgeUVM : public Edge {
 public:
 
-	virtual void Init(const Vertex3DUVM* pV0, 
-					  const Vertex3DUVM* pV1,
-					  const GradientsUVM* pGradients);
+	virtual void Init(const Vertex3DUVM* v0,
+					  const Vertex3DUVM* v1,
+					  const GradientsUVM* gradients);
 
 	virtual inline bool Step();
-	virtual inline int Step(unsigned pCount);
+	virtual inline int Step(unsigned count);
 
-	virtual void Reset(const GradientsUVM* pGradients);
+	virtual void Reset(const GradientsUVM* gradients);
 
 	inline float GetOneOverZ();
 	inline float GetUOverZ();
@@ -803,133 +682,105 @@ public:
 
 private:
 
-	float mOneOverZ;		// 1 / z
-	float mOneOverZStep;
-	float mOneOverZStepExtra;
+	float one_over_z_;		// 1 / z
+	float one_over_z_step_;
+	float one_over_z_step_extra_;
 
-	float mUOverZ;		// u / z
-	float mUOverZStep;
-	float mUOverZStepExtra;
+	float u_over_z_;		// u / z
+	float u_over_z_step_;
+	float u_over_z_step_extra_;
 
-	float mVOverZ;		// v / z
-	float mVOverZStep;
-	float mVOverZStepExtra;
+	float v_over_z_;		// v / z
+	float v_over_z_step_;
+	float v_over_z_step_extra_;
 
-	float mMOverZ;		// m / z
-	float mMOverZStep;
-	float mMOverZStepExtra;
+	float m_over_z_;		// m / z
+	float m_over_z_step_;
+	float m_over_z_step_extra_;
 
-	const GradientsUVM* mGradients;
+	const GradientsUVM* gradients_;
 
-	float mStartOneOverZ;
-	float mStartUOverZ;
-	float mStartVOverZ;
-	float mStartMOverZ;
+	float start_one_over_z_;
+	float start_u_over_z_;
+	float start_v_over_z_;
+	float start_m_over_z_;
 };
 
-bool EdgeUVM::Step()
-{
-	bool lStepExtra = Edge::Step();
+bool EdgeUVM::Step() {
+	bool step_extra = Edge::Step();
 
-	mOneOverZ += mOneOverZStep;
-	mUOverZ   += mUOverZStep;
-	mVOverZ   += mVOverZStep;
-	mMOverZ   += mMOverZStep;
+	one_over_z_ += one_over_z_step_;
+	u_over_z_   += u_over_z_step_;
+	v_over_z_   += v_over_z_step_;
+	m_over_z_   += m_over_z_step_;
 
-	if (lStepExtra == true)
-	{
-		mOneOverZ += mOneOverZStepExtra;
-		mUOverZ   += mUOverZStepExtra;
-		mVOverZ   += mVOverZStepExtra;
-		mMOverZ   += mMOverZStepExtra;
+	if (step_extra == true) {
+		one_over_z_ += one_over_z_step_extra_;
+		u_over_z_   += u_over_z_step_extra_;
+		v_over_z_   += v_over_z_step_extra_;
+		m_over_z_   += m_over_z_step_extra_;
 	}
 
-	return lStepExtra;
+	return step_extra;
 }
 
-int EdgeUVM::Step(unsigned pCount)
-{
-	int lExtraSteps = Edge::Step(pCount);
-	float lCount = (float)pCount;
+int EdgeUVM::Step(unsigned count) {
+	int extra_steps = Edge::Step(count);
+	float _count = (float)count;
 
-	mOneOverZ += mOneOverZStep * lCount;
-	mUOverZ += mUOverZStep * lCount;
-	mVOverZ += mVOverZStep * lCount;
-	mMOverZ += mMOverZStep * lCount;
+	one_over_z_ += one_over_z_step_ * _count;
+	u_over_z_ += u_over_z_step_ * _count;
+	v_over_z_ += v_over_z_step_ * _count;
+	m_over_z_ += m_over_z_step_ * _count;
 
-	if (lExtraSteps > 0)
-	{
-		float lExtraStepsFloat = (float)lExtraSteps;
-		mOneOverZ += mOneOverZStepExtra * lExtraStepsFloat;
-		mUOverZ += mUOverZStepExtra * lExtraStepsFloat;
-		mVOverZ += mVOverZStepExtra * lExtraStepsFloat;
-		mMOverZ += mMOverZStepExtra * lExtraStepsFloat;
+	if (extra_steps > 0) {
+		float extra_steps_float = (float)extra_steps;
+		one_over_z_ += one_over_z_step_extra_ * extra_steps_float;
+		u_over_z_ += u_over_z_step_extra_ * extra_steps_float;
+		v_over_z_ += v_over_z_step_extra_ * extra_steps_float;
+		m_over_z_ += m_over_z_step_extra_ * extra_steps_float;
 	}
 
-	return lExtraSteps;
+	return extra_steps;
 }
 
-float EdgeUVM::GetOneOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mOneOverZ + mGradients->GetOneOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mOneOverZ - mGradients->GetOneOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mOneOverZ;
+float EdgeUVM::GetOneOverZ() {
+	if (x_ < clip_left_) {
+		return one_over_z_ + gradients_->GetOneOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return one_over_z_ - gradients_->GetOneOverZXStep() * (x_ - clip_right_);
+	} else {
+		return one_over_z_;
 	}
 }
 
-float EdgeUVM::GetUOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mUOverZ + mGradients->GetUOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mUOverZ - mGradients->GetUOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mUOverZ;
+float EdgeUVM::GetUOverZ() {
+	if (x_ < clip_left_) {
+		return u_over_z_ + gradients_->GetUOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return u_over_z_ - gradients_->GetUOverZXStep() * (x_ - clip_right_);
+	} else {
+		return u_over_z_;
 	}
 }
 
-float EdgeUVM::GetVOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mVOverZ + mGradients->GetVOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mVOverZ - mGradients->GetVOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mVOverZ;
+float EdgeUVM::GetVOverZ() {
+	if (x_ < clip_left_) {
+		return v_over_z_ + gradients_->GetVOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return v_over_z_ - gradients_->GetVOverZXStep() * (x_ - clip_right_);
+	} else {
+		return v_over_z_;
 	}
 }
 
-float EdgeUVM::GetMOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mMOverZ + mGradients->GetMOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mMOverZ - mGradients->GetMOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mMOverZ;
+float EdgeUVM::GetMOverZ() {
+	if (x_ < clip_left_) {
+		return m_over_z_ + gradients_->GetMOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return m_over_z_ - gradients_->GetMOverZXStep() * (x_ - clip_right_);
+	} else {
+		return m_over_z_;
 	}
 }
 
@@ -948,19 +799,18 @@ float EdgeUVM::GetMOverZ()
 
 
 
-class EdgeUVRGBM : public Edge
-{
+class EdgeUVRGBM : public Edge {
 public:
 
-	virtual void Init(const Vertex3DUVRGBM* pV0, 
-					  const Vertex3DUVRGBM* pV1,
-					  const GradientsUVRGBM* pGradients,
-					  bool pGammaConvert);
+	virtual void Init(const Vertex3DUVRGBM* v0,
+					  const Vertex3DUVRGBM* v1,
+					  const GradientsUVRGBM* gradients,
+					  bool gamma_convert);
 
 	virtual inline bool Step();
-	virtual inline int Step(unsigned pCount);
+	virtual inline int Step(unsigned count);
 
-	virtual void Reset(const GradientsUVRGBM* pGradients);
+	virtual void Reset(const GradientsUVRGBM* gradients);
 
 	inline float GetOneOverZ();
 	inline float GetUOverZ();
@@ -972,208 +822,162 @@ public:
 
 private:
 
-	float mOneOverZ;		// 1 / z
-	float mOneOverZStep;
-	float mOneOverZStepExtra;
+	float one_over_z_;		// 1 / z
+	float one_over_z_step_;
+	float one_over_z_step_extra_;
 
-	float mUOverZ;		// u / z
-	float mUOverZStep;
-	float mUOverZStepExtra;
+	float u_over_z_;		// u / z
+	float u_over_z_step_;
+	float u_over_z_step_extra_;
 
-	float mVOverZ;		// v / z
-	float mVOverZStep;
-	float mVOverZStepExtra;
+	float v_over_z_;		// v / z
+	float v_over_z_step_;
+	float v_over_z_step_extra_;
 
-	float mROverZ;		// r / z
-	float mROverZStep;
-	float mROverZStepExtra;
+	float r_over_z_;		// r / z
+	float r_over_z_step_;
+	float r_over_z_step_extra_;
 
-	float mGOverZ;	// g / z
-	float mGOverZStep;
-	float mGOverZStepExtra;
+	float g_over_z_;	// g / z
+	float g_over_z_step_;
+	float g_over_z_step_extra_;
 
-	float mBOverZ;		// b / z
-	float mBOverZStep;
-	float mBOverZStepExtra;
+	float b_over_z_;		// b / z
+	float b_over_z_step_;
+	float b_over_z_step_extra_;
 
-	float mMOverZ;		// m / z
-	float mMOverZStep;
-	float mMOverZStepExtra;
+	float m_over_z_;		// m / z
+	float m_over_z_step_;
+	float m_over_z_step_extra_;
 
-	const GradientsUVRGBM* mGradients;
+	const GradientsUVRGBM* gradients_;
 
-	float mStartOneOverZ;
-	float mStartUOverZ;
-	float mStartVOverZ;
-	float mStartROverZ;
-	float mStartGOverZ;
-	float mStartBOverZ;
-	float mStartMOverZ;
+	float start_one_over_z_;
+	float start_u_over_z_;
+	float start_v_over_z_;
+	float start_r_over_z_;
+	float start_g_over_z_;
+	float start_b_over_z_;
+	float start_m_over_z_;
 };
 
-bool EdgeUVRGBM::Step()
-{
-	bool lStepExtra = Edge::Step();
+bool EdgeUVRGBM::Step() {
+	bool step_extra = Edge::Step();
 
-	mOneOverZ += mOneOverZStep;
-	mUOverZ += mUOverZStep;
-	mVOverZ += mVOverZStep;
-	mROverZ += mROverZStep;
-	mGOverZ += mGOverZStep;
-	mBOverZ += mBOverZStep;
-	mMOverZ += mMOverZStep;
+	one_over_z_ += one_over_z_step_;
+	u_over_z_ += u_over_z_step_;
+	v_over_z_ += v_over_z_step_;
+	r_over_z_ += r_over_z_step_;
+	g_over_z_ += g_over_z_step_;
+	b_over_z_ += b_over_z_step_;
+	m_over_z_ += m_over_z_step_;
 
-	if (lStepExtra == true)
-	{
-		mOneOverZ += mOneOverZStepExtra;
-		mUOverZ += mUOverZStepExtra;
-		mVOverZ += mVOverZStepExtra;
-		mROverZ += mROverZStepExtra;
-		mGOverZ += mGOverZStepExtra;
-		mBOverZ += mBOverZStepExtra;
-		mMOverZ += mMOverZStepExtra;
+	if (step_extra == true) {
+		one_over_z_ += one_over_z_step_extra_;
+		u_over_z_ += u_over_z_step_extra_;
+		v_over_z_ += v_over_z_step_extra_;
+		r_over_z_ += r_over_z_step_extra_;
+		g_over_z_ += g_over_z_step_extra_;
+		b_over_z_ += b_over_z_step_extra_;
+		m_over_z_ += m_over_z_step_extra_;
 	}
 
-	return lStepExtra;
+	return step_extra;
 }
 
-int EdgeUVRGBM::Step(unsigned pCount)
-{
-	int lExtraSteps = Edge::Step(pCount);
-	float lCount = (float)pCount;
+int EdgeUVRGBM::Step(unsigned count) {
+	int extra_steps = Edge::Step(count);
+	float _count = (float)count;
 
-	mOneOverZ += mOneOverZStep * lCount;
-	mUOverZ += mUOverZStep * lCount;
-	mVOverZ += mVOverZStep * lCount;
-	mROverZ += mROverZStep * lCount;
-	mGOverZ += mGOverZStep * lCount;
-	mBOverZ += mBOverZStep * lCount;
-	mMOverZ += mMOverZStep * lCount;
+	one_over_z_ += one_over_z_step_ * _count;
+	u_over_z_ += u_over_z_step_ * _count;
+	v_over_z_ += v_over_z_step_ * _count;
+	r_over_z_ += r_over_z_step_ * _count;
+	g_over_z_ += g_over_z_step_ * _count;
+	b_over_z_ += b_over_z_step_ * _count;
+	m_over_z_ += m_over_z_step_ * _count;
 
-	if (lExtraSteps > 0)
-	{
-		float lExtraStepsFloat = (float)lExtraSteps;
-		mOneOverZ += mOneOverZStepExtra * lExtraStepsFloat;
-		mUOverZ += mUOverZStepExtra * lExtraStepsFloat;
-		mVOverZ += mVOverZStepExtra * lExtraStepsFloat;
-		mROverZ += mROverZStepExtra * lExtraStepsFloat;
-		mGOverZ += mGOverZStepExtra * lExtraStepsFloat;
-		mBOverZ += mBOverZStepExtra * lExtraStepsFloat;
-		mMOverZ += mMOverZStepExtra * lExtraStepsFloat;
+	if (extra_steps > 0) {
+		float extra_steps_float = (float)extra_steps;
+		one_over_z_ += one_over_z_step_extra_ * extra_steps_float;
+		u_over_z_ += u_over_z_step_extra_ * extra_steps_float;
+		v_over_z_ += v_over_z_step_extra_ * extra_steps_float;
+		r_over_z_ += r_over_z_step_extra_ * extra_steps_float;
+		g_over_z_ += g_over_z_step_extra_ * extra_steps_float;
+		b_over_z_ += b_over_z_step_extra_ * extra_steps_float;
+		m_over_z_ += m_over_z_step_extra_ * extra_steps_float;
 	}
 
-	return lExtraSteps;
+	return extra_steps;
 }
 
-float EdgeUVRGBM::GetOneOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mOneOverZ + mGradients->GetOneOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mOneOverZ - mGradients->GetOneOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mOneOverZ;
+float EdgeUVRGBM::GetOneOverZ() {
+	if (x_ < clip_left_) {
+		return one_over_z_ + gradients_->GetOneOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return one_over_z_ - gradients_->GetOneOverZXStep() * (x_ - clip_right_);
+	} else {
+		return one_over_z_;
 	}
 }
 
-float EdgeUVRGBM::GetUOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mUOverZ + mGradients->GetUOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mUOverZ - mGradients->GetUOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mUOverZ;
+float EdgeUVRGBM::GetUOverZ() {
+	if (x_ < clip_left_) {
+		return u_over_z_ + gradients_->GetUOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return u_over_z_ - gradients_->GetUOverZXStep() * (x_ - clip_right_);
+	} else {
+		return u_over_z_;
 	}
 }
 
-float EdgeUVRGBM::GetVOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mVOverZ + mGradients->GetVOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mVOverZ - mGradients->GetVOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mVOverZ;
+float EdgeUVRGBM::GetVOverZ() {
+	if (x_ < clip_left_) {
+		return v_over_z_ + gradients_->GetVOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return v_over_z_ - gradients_->GetVOverZXStep() * (x_ - clip_right_);
+	} else {
+		return v_over_z_;
 	}
 }
 
-float EdgeUVRGBM::GetROverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mROverZ + mGradients->GetROverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mROverZ - mGradients->GetROverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mROverZ;
+float EdgeUVRGBM::GetROverZ() {
+	if (x_ < clip_left_) {
+		return r_over_z_ + gradients_->GetROverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return r_over_z_ - gradients_->GetROverZXStep() * (x_ - clip_right_);
+	} else {
+		return r_over_z_;
 	}
 }
 
-float EdgeUVRGBM::GetGOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mGOverZ + mGradients->GetGOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mGOverZ - mGradients->GetGOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mGOverZ;
+float EdgeUVRGBM::GetGOverZ() {
+	if (x_ < clip_left_) {
+		return g_over_z_ + gradients_->GetGOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return g_over_z_ - gradients_->GetGOverZXStep() * (x_ - clip_right_);
+	} else {
+		return g_over_z_;
 	}
 }
 
-float EdgeUVRGBM::GetBOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mBOverZ + mGradients->GetBOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mBOverZ - mGradients->GetBOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mBOverZ;
+float EdgeUVRGBM::GetBOverZ() {
+	if (x_ < clip_left_) {
+		return b_over_z_ + gradients_->GetBOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return b_over_z_ - gradients_->GetBOverZXStep() * (x_ - clip_right_);
+	} else {
+		return b_over_z_;
 	}
 }
 
-float EdgeUVRGBM::GetMOverZ()
-{
-	if (mX < smClipLeft)
-	{
-		return mMOverZ + mGradients->GetMOverZXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mMOverZ - mGradients->GetMOverZXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mMOverZ;
+float EdgeUVRGBM::GetMOverZ() {
+	if (x_ < clip_left_) {
+		return m_over_z_ + gradients_->GetMOverZXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return m_over_z_ - gradients_->GetMOverZXStep() * (x_ - clip_right_);
+	} else {
+		return m_over_z_;
 	}
 }
 
@@ -1194,100 +998,83 @@ float EdgeUVRGBM::GetMOverZ()
 
 
 
-class Edge2DUV : public Edge
-{
+class Edge2DUV : public Edge {
 public:
 
-	virtual void Init(const Vertex2DUV* pV0, 
-					  const Vertex2DUV* pV1,
-					  const Gradients2DUV* pGradients);
+	virtual void Init(const Vertex2DUV* v0,
+					  const Vertex2DUV* v1,
+					  const Gradients2DUV* gradients);
 
 	virtual inline bool Step();
-	virtual inline int Step(unsigned pCount);
+	virtual inline int Step(unsigned count);
 
-	virtual void Reset(const Gradients2DUV* pGradients);
+	virtual void Reset(const Gradients2DUV* gradients);
 
 	inline float GetU();
 	inline float GetV();
 
 private:
-	float mU;
-	float mUStep;
-	float mUStepExtra;
+	float u_;
+	float u_step_;
+	float u_step_extra_;
 
-	float mV;
-	float mVStep;
-	float mVStepExtra;
+	float v_;
+	float v_step_;
+	float v_step_extra_;
 
-	const Gradients2DUV* mGradients;
+	const Gradients2DUV* gradients_;
 
-	float mStartU;
-	float mStartV;
+	float start_u_;
+	float start_v_;
 };
 
-bool Edge2DUV::Step()
-{
-	bool lStepExtra = Edge::Step();
+bool Edge2DUV::Step() {
+	bool step_extra = Edge::Step();
 
-	mU += mUStep;
-	mV += mVStep;
+	u_ += u_step_;
+	v_ += v_step_;
 
-	if (lStepExtra == true)
-	{
-		mU += mUStepExtra;
-		mV += mVStepExtra;
+	if (step_extra == true) {
+		u_ += u_step_extra_;
+		v_ += v_step_extra_;
 	}
 
-	return lStepExtra;
+	return step_extra;
 }
 
-int Edge2DUV::Step(unsigned pCount)
-{
-	int lExtraSteps = Edge::Step(pCount);
-	float lCount = (float)pCount;
+int Edge2DUV::Step(unsigned count) {
+	int extra_steps = Edge::Step(count);
+	float _count = (float)count;
 
-	mU += mUStep * lCount;
-	mV += mVStep * lCount;
+	u_ += u_step_ * _count;
+	v_ += v_step_ * _count;
 
-	if (lExtraSteps > 0)
-	{
-		float lExtraStepsFloat = (float)lExtraSteps;
-		mU += mUStepExtra * lExtraStepsFloat;
-		mV += mVStepExtra * lExtraStepsFloat;
+	if (extra_steps > 0) {
+		float extra_steps_float = (float)extra_steps;
+		u_ += u_step_extra_ * extra_steps_float;
+		v_ += v_step_extra_ * extra_steps_float;
 	}
 
-	return lExtraSteps;
+	return extra_steps;
 }
 
-float Edge2DUV::GetU()
-{
-	if (mX < smClipLeft)
-	{
-		return mU + mGradients->GetUXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mU - mGradients->GetUXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mU;
+float Edge2DUV::GetU() {
+	if (x_ < clip_left_) {
+		return u_ + gradients_->GetUXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return u_ - gradients_->GetUXStep() * (x_ - clip_right_);
+	} else {
+		return u_;
 	}
 }
 
-float Edge2DUV::GetV()
-{
-	if (mX < smClipLeft)
-	{
-		return mV + mGradients->GetVXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mV - mGradients->GetVXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mV;
+float Edge2DUV::GetV() {
+	if (x_ < clip_left_) {
+		return v_ + gradients_->GetVXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return v_ - gradients_->GetVXStep() * (x_ - clip_right_);
+	} else {
+		return v_;
 	}
 }
 
@@ -1301,18 +1088,17 @@ float Edge2DUV::GetV()
 
 
 
-class Edge2DRGBA : public Edge
-{
+class Edge2DRGBA : public Edge {
 public:
 
-	virtual void Init(const Vertex2DRGBA* pV0, 
-					  const Vertex2DRGBA* pV1,
-					  const Gradients2DRGBA* pGradients);
+	virtual void Init(const Vertex2DRGBA* v0,
+					  const Vertex2DRGBA* v1,
+					  const Gradients2DRGBA* gradients);
 
 	virtual inline bool Step();
-	virtual inline int Step(unsigned pCount);
+	virtual inline int Step(unsigned count);
 
-	virtual void Reset(const Gradients2DRGBA* pGradients);
+	virtual void Reset(const Gradients2DRGBA* gradients);
 
 	inline float GetR();
 	inline float GetG();
@@ -1320,133 +1106,105 @@ public:
 	inline float GetA();
 
 private:
-	float mR;
-	float mRStep;
-	float mRStepExtra;
+	float r_;
+	float r_step_;
+	float r_step_extra_;
 
-	float mG;
-	float mGStep;
-	float mGStepExtra;
+	float g_;
+	float g_step_;
+	float g_step_extra_;
 
-	float mB;
-	float mBStep;
-	float mBStepExtra;
+	float b_;
+	float b_step_;
+	float b_step_extra_;
 
-	float mA;
-	float mAStep;
-	float mAStepExtra;
+	float a_;
+	float a_step_;
+	float a_step_extra_;
 
-	const Gradients2DRGBA* mGradients;
+	const Gradients2DRGBA* gradients_;
 
-	float mStartR;
-	float mStartG;
-	float mStartB;
-	float mStartA;
+	float start_r_;
+	float start_g_;
+	float start_b_;
+	float start_a_;
 };
 
-bool Edge2DRGBA::Step()
-{
-	bool lStepExtra = Edge::Step();
+bool Edge2DRGBA::Step() {
+	bool step_extra = Edge::Step();
 
-	mR += mRStep;
-	mG += mGStep;
-	mB += mBStep;
-	mA += mAStep;
+	r_ += r_step_;
+	g_ += g_step_;
+	b_ += b_step_;
+	a_ += a_step_;
 
-	if (lStepExtra == true)
-	{
-		mR += mRStepExtra;
-		mG += mGStepExtra;
-		mB += mBStepExtra;
-		mA += mAStepExtra;
+	if (step_extra == true) {
+		r_ += r_step_extra_;
+		g_ += g_step_extra_;
+		b_ += b_step_extra_;
+		a_ += a_step_extra_;
 	}
 
-	return lStepExtra;
+	return step_extra;
 }
 
-int Edge2DRGBA::Step(unsigned pCount)
-{
-	int lExtraSteps = Edge::Step(pCount);
-	float lCount = (float)pCount;
+int Edge2DRGBA::Step(unsigned count) {
+	int extra_steps = Edge::Step(count);
+	float _count = (float)count;
 
-	mR += mRStep * lCount;
-	mG += mGStep * lCount;
-	mB += mBStep * lCount;
-	mA += mAStep * lCount;
+	r_ += r_step_ * _count;
+	g_ += g_step_ * _count;
+	b_ += b_step_ * _count;
+	a_ += a_step_ * _count;
 
-	if (lExtraSteps > 0)
-	{
-		float lExtraStepsFloat = (float)lExtraSteps;
-		mR += mRStepExtra * lExtraStepsFloat;
-		mG += mGStepExtra * lExtraStepsFloat;
-		mB += mBStepExtra * lExtraStepsFloat;
-		mA += mAStepExtra * lExtraStepsFloat;
+	if (extra_steps > 0) {
+		float extra_steps_float = (float)extra_steps;
+		r_ += r_step_extra_ * extra_steps_float;
+		g_ += g_step_extra_ * extra_steps_float;
+		b_ += b_step_extra_ * extra_steps_float;
+		a_ += a_step_extra_ * extra_steps_float;
 	}
 
-	return lExtraSteps;
+	return extra_steps;
 }
 
-float Edge2DRGBA::GetR()
-{
-	if (mX < smClipLeft)
-	{
-		return mR + mGradients->GetRXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mR - mGradients->GetRXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mR;
+float Edge2DRGBA::GetR() {
+	if (x_ < clip_left_) {
+		return r_ + gradients_->GetRXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return r_ - gradients_->GetRXStep() * (x_ - clip_right_);
+	} else {
+		return r_;
 	}
 }
 
-float Edge2DRGBA::GetG()
-{
-	if (mX < smClipLeft)
-	{
-		return mG + mGradients->GetGXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mG - mGradients->GetGXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mG;
+float Edge2DRGBA::GetG() {
+	if (x_ < clip_left_) {
+		return g_ + gradients_->GetGXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return g_ - gradients_->GetGXStep() * (x_ - clip_right_);
+	} else {
+		return g_;
 	}
 }
 
-float Edge2DRGBA::GetB()
-{
-	if (mX < smClipLeft)
-	{
-		return mB + mGradients->GetBXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mB - mGradients->GetBXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mB;
+float Edge2DRGBA::GetB() {
+	if (x_ < clip_left_) {
+		return b_ + gradients_->GetBXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return b_ - gradients_->GetBXStep() * (x_ - clip_right_);
+	} else {
+		return b_;
 	}
 }
 
-float Edge2DRGBA::GetA()
-{
-	if (mX < smClipLeft)
-	{
-		return mA + mGradients->GetAXStep() * (smClipLeft - mX);
-	}
-	else if(mX > smClipRight)
-	{
-		return mA - mGradients->GetAXStep() * (mX - smClipRight);
-	}
-	else
-	{
-		return mA;
+float Edge2DRGBA::GetA() {
+	if (x_ < clip_left_) {
+		return a_ + gradients_->GetAXStep() * (clip_left_ - x_);
+	} else if(x_ > clip_right_) {
+		return a_ - gradients_->GetAXStep() * (x_ - clip_right_);
+	} else {
+		return a_;
 	}
 }
 

@@ -5,24 +5,22 @@
 
 
 #pragma once
-#include "UiDialog.h"
+#include "uidialog.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class MessageDialog: public Dialog
-{
+class MessageDialog: public Dialog {
 	typedef Dialog Parent;
 public:
-	MessageDialog(Component* pParent, Action pOk, const wstr& pMessage);
+	MessageDialog(Component* parent, Action ok, const wstr& message);
 	virtual ~MessageDialog();
 
 private:
-	virtual void Repaint(Painter* pPainter);
+	virtual void Repaint(Painter* painter);
 };
 
 

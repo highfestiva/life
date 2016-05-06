@@ -5,230 +5,201 @@
 
 
 #include "pch.h"
-#include "../Include/PhysicsSpawner.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/Endian.h"
-#include "../../Lepra/Include/Packer.h"
-#include "../Include/ChunkyBoneGeometry.h"
-#include "../Include/ChunkyPhysics.h"
+#include "../include/physicsspawner.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/endian.h"
+#include "../../lepra/include/packer.h"
+#include "../include/chunkybonegeometry.h"
+#include "../include/chunkyphysics.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
 PhysicsSpawner::PhysicsSpawner():
-	mSpawnerType(SPAWNER_INVALID),
-	mNumber(0),
-	mIsEaseDown(false),
-	mTotalObjectProbability(1)
-{
+	spawner_type_(kSpawnerInvalid),
+	number_(0),
+	is_ease_down_(false),
+	total_object_probability_(1) {
 }
 
-PhysicsSpawner::~PhysicsSpawner()
-{
+PhysicsSpawner::~PhysicsSpawner() {
 }
 
-void PhysicsSpawner::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsSpawner& pOriginal)
-{
-	const int lCount = pOriginal.GetSpawnPointCount();
-	mSpawnerNodeArray.clear();
-	for (int x = 0; x < lCount; ++x)
-	{
-		const int lBoneIndex = pSource->GetIndex(pOriginal.mSpawnerNodeArray[x]);
-		deb_assert(lBoneIndex >= 0);
-		mSpawnerNodeArray.push_back(pTarget->GetBoneGeometry(lBoneIndex));
+void PhysicsSpawner::RelocatePointers(const ChunkyPhysics* target, const ChunkyPhysics* source, const PhysicsSpawner& original) {
+	const int count = original.GetSpawnPointCount();
+	spawner_node_array_.clear();
+	for (int x = 0; x < count; ++x) {
+		const int bone_index = source->GetIndex(original.spawner_node_array_[x]);
+		deb_assert(bone_index >= 0);
+		spawner_node_array_.push_back(target->GetBoneGeometry(bone_index));
 	}
 }
 
 
 
-PhysicsSpawner* PhysicsSpawner::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
-{
-	if (pByteCount < sizeof(uint32)*9 /*+ ...*/)
-	{
-		mLog.Error("Could not load; wrong data size.");
+PhysicsSpawner* PhysicsSpawner::Load(ChunkyPhysics* structure, const void* data, unsigned byte_count) {
+	if (byte_count < sizeof(uint32)*9 /*+ ...*/) {
+		log_.Error("Could not load; wrong data size.");
 		deb_assert(false);
 		return (0);
 	}
 
-	PhysicsSpawner* lSpawner = new PhysicsSpawner;
-	lSpawner->LoadChunkyData(pStructure, pData);
-	if (lSpawner->GetChunkySize() != pByteCount)
-	{
-		mLog.Error("Corrupt data or error in loading algo.");
+	PhysicsSpawner* spawner = new PhysicsSpawner;
+	spawner->LoadChunkyData(structure, data);
+	if (spawner->GetChunkySize() != byte_count) {
+		log_.Error("Corrupt data or error in loading algo.");
 		deb_assert(false);
-		delete (lSpawner);
-		lSpawner = 0;
+		delete (spawner);
+		spawner = 0;
 	}
-	return lSpawner;
+	return spawner;
 }
 
 
 
-PhysicsSpawner::Type PhysicsSpawner::GetType() const
-{
-	return (mSpawnerType);
+PhysicsSpawner::Type PhysicsSpawner::GetType() const {
+	return (spawner_type_);
 }
 
-const str& PhysicsSpawner::GetFunction() const
-{
-	return (mFunction);
+const str& PhysicsSpawner::GetFunction() const {
+	return (function_);
 }
 
-int PhysicsSpawner::GetSpawnPointCount() const
-{
-	return mSpawnerNodeArray.size();
+int PhysicsSpawner::GetSpawnPointCount() const {
+	return spawner_node_array_.size();
 }
 
-xform PhysicsSpawner::GetSpawnPoint(const ChunkyPhysics* pStructure, const vec3& pScaledPoint, int pIndex, vec3& pInitialVelocity) const
-{
-	pInitialVelocity = mInitialVelocity;
+xform PhysicsSpawner::GetSpawnPoint(const ChunkyPhysics* structure, const vec3& scaled_point, int index, vec3& initial_velocity) const {
+	initial_velocity = initial_velocity_;
 
-	deb_assert((size_t)pIndex < mSpawnerNodeArray.size() && pIndex >= 0);
-	Tbc::ChunkyBoneGeometry* lSpawnGeometry = mSpawnerNodeArray[pIndex];
-	vec3 lPoint = lSpawnGeometry->GetShapeSize();
-	lPoint.x = (pScaledPoint.x-0.5f) * lPoint.x;
-	lPoint.y = (pScaledPoint.y-0.5f) * lPoint.y;
-	lPoint.z = (pScaledPoint.z-0.5f) * lPoint.z;
-	const xform& lTransformation = pStructure->GetTransformation(lSpawnGeometry);
-	quat q = lTransformation.GetOrientation();
-	lPoint = q * lPoint;
+	deb_assert((size_t)index < spawner_node_array_.size() && index >= 0);
+	tbc::ChunkyBoneGeometry* spawn_geometry = spawner_node_array_[index];
+	vec3 point = spawn_geometry->GetShapeSize();
+	point.x = (scaled_point.x-0.5f) * point.x;
+	point.y = (scaled_point.y-0.5f) * point.y;
+	point.z = (scaled_point.z-0.5f) * point.z;
+	const xform& transformation = structure->GetTransformation(spawn_geometry);
+	quat q = transformation.GetOrientation();
+	point = q * point;
 	q.RotateAroundOwnY(PIF);	// This is so since the level ("the spawner") has a 180 degree orientation offset compared to objects.
-	return xform(q, lTransformation.GetPosition()+lPoint);
+	return xform(q, transformation.GetPosition()+point);
 }
 
-float PhysicsSpawner::GetNumber() const
-{
-	return mNumber;
+float PhysicsSpawner::GetNumber() const {
+	return number_;
 }
 
-const PhysicsSpawner::IntervalArray& PhysicsSpawner::GetIntervals() const
-{
-	return mIntervalArray;
+const PhysicsSpawner::IntervalArray& PhysicsSpawner::GetIntervals() const {
+	return interval_array_;
 }
 
-const str PhysicsSpawner::GetSpawnObject(float pProbabilityThreshold) const
-{
-	pProbabilityThreshold *= mTotalObjectProbability;
-	SpawnObjectArray::const_iterator x = mSpawnObjectArray.begin();
-	for (; x != mSpawnObjectArray.end(); ++x)
-	{
-		if (pProbabilityThreshold <= x->mProbability)
-		{
-			return x->mSpawnObject;
+const str PhysicsSpawner::GetSpawnObject(float probability_threshold) const {
+	probability_threshold *= total_object_probability_;
+	SpawnObjectArray::const_iterator x = spawn_object_array_.begin();
+	for (; x != spawn_object_array_.end(); ++x) {
+		if (probability_threshold <= x->probability_) {
+			return x->spawn_object_;
 		}
-		pProbabilityThreshold -= x->mProbability;
+		probability_threshold -= x->probability_;
 	}
 	return str();
 }
 
-bool PhysicsSpawner::IsEaseDown() const
-{
-	return mIsEaseDown;
+bool PhysicsSpawner::IsEaseDown() const {
+	return is_ease_down_;
 }
 
 
 
-unsigned PhysicsSpawner::GetChunkySize() const
-{
-	size_t lStringSize = PackerUnicodeString::Pack(0, mFunction);
-	SpawnObjectArray::const_iterator x = mSpawnObjectArray.begin();
-	for (; x != mSpawnObjectArray.end(); ++x)
-	{
-		lStringSize += PackerUnicodeString::Pack(0, x->mSpawnObject);
+unsigned PhysicsSpawner::GetChunkySize() const {
+	size_t string_size = PackerUnicodeString::Pack(0, function_);
+	SpawnObjectArray::const_iterator x = spawn_object_array_.begin();
+	for (; x != spawn_object_array_.end(); ++x) {
+		string_size += PackerUnicodeString::Pack(0, x->spawn_object_);
 	}
 	return ((unsigned)(sizeof(uint32) * 4 +
-		sizeof(uint32) * mSpawnerNodeArray.size() +
+		sizeof(uint32) * spawner_node_array_.size() +
 		sizeof(float) * 3 +
 		sizeof(float) +
-		sizeof(float) * mIntervalArray.size() +
-		sizeof(float) * mSpawnObjectArray.size() +
+		sizeof(float) * interval_array_.size() +
+		sizeof(float) * spawn_object_array_.size() +
 		sizeof(uint32) +	// bool IsEaseDown
-		lStringSize));
+		string_size));
 }
 
-void PhysicsSpawner::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
-{
-	uint32* lData = (uint32*)pData;
+void PhysicsSpawner::SaveChunkyData(const ChunkyPhysics* structure, void* data) const {
+	uint32* _data = (uint32*)data;
 	int i = 0;
-	lData[i++] = Endian::HostToBig(mSpawnerType);
-	i += PackerUnicodeString::Pack((uint8*)&lData[i], mFunction);
-	lData[i++] = Endian::HostToBig((uint32)mSpawnerNodeArray.size());
-	for (int z = 0; (size_t)z < mSpawnerNodeArray.size(); ++z)
-	{
-		lData[i++] = Endian::HostToBig(pStructure->GetIndex(mSpawnerNodeArray[z]));
+	_data[i++] = Endian::HostToBig(spawner_type_);
+	i += PackerUnicodeString::Pack((uint8*)&_data[i], function_);
+	_data[i++] = Endian::HostToBig((uint32)spawner_node_array_.size());
+	for (int z = 0; (size_t)z < spawner_node_array_.size(); ++z) {
+		_data[i++] = Endian::HostToBig(structure->GetIndex(spawner_node_array_[z]));
 	}
-	lData[i++] = Endian::HostToBigF(mNumber);
-	lData[i++] = Endian::HostToBig((uint32)mIntervalArray.size());
-	IntervalArray::const_iterator y = mIntervalArray.begin();
-	for (; y != mIntervalArray.end(); ++y)
-	{
-		lData[i++] = Endian::HostToBigF(*y);
+	_data[i++] = Endian::HostToBigF(number_);
+	_data[i++] = Endian::HostToBig((uint32)interval_array_.size());
+	IntervalArray::const_iterator y = interval_array_.begin();
+	for (; y != interval_array_.end(); ++y) {
+		_data[i++] = Endian::HostToBigF(*y);
 	}
-	SpawnObjectArray::const_iterator x = mSpawnObjectArray.begin();
-	for (; x != mSpawnObjectArray.end(); ++x)
-	{
-		int lStringRawLength = PackerUnicodeString::Pack((uint8*)&lData[i], x->mSpawnObject);
-		deb_assert(lStringRawLength % sizeof(lData[0]) == 0);
-		i += lStringRawLength / sizeof(lData[0]);
-		lData[i++] = Endian::HostToBigF(x->mProbability);
+	SpawnObjectArray::const_iterator x = spawn_object_array_.begin();
+	for (; x != spawn_object_array_.end(); ++x) {
+		int string_raw_length = PackerUnicodeString::Pack((uint8*)&_data[i], x->spawn_object_);
+		deb_assert(string_raw_length % sizeof(_data[0]) == 0);
+		i += string_raw_length / sizeof(_data[0]);
+		_data[i++] = Endian::HostToBigF(x->probability_);
 	}
-	lData[i++] = Endian::HostToBig(mIsEaseDown? 1 : 0);
+	_data[i++] = Endian::HostToBig(is_ease_down_? 1 : 0);
 }
 
-void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
-{
-	const uint32* lData = (const uint32*)pData;
+void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* structure, const void* data) {
+	const uint32* _data = (const uint32*)data;
 
 	int i = 0;
-	mSpawnerType = (Type)Endian::BigToHost(lData[i++]);
-	i += PackerUnicodeString::Unpack(mFunction, (uint8*)&lData[i], 1024) / sizeof(lData[0]);
-	mSpawnerNodeArray.clear();
-	const int lSpawnerNodeCount = Endian::BigToHost(lData[i++]);
-	for (int x = 0; x < lSpawnerNodeCount; ++x)
-	{
-		const int lBodyIndex = Endian::BigToHost(lData[i++]);
-		mSpawnerNodeArray.push_back(pStructure->GetBoneGeometry(lBodyIndex));
+	spawner_type_ = (Type)Endian::BigToHost(_data[i++]);
+	i += PackerUnicodeString::Unpack(function_, (uint8*)&_data[i], 1024) / sizeof(_data[0]);
+	spawner_node_array_.clear();
+	const int spawner_node_count = Endian::BigToHost(_data[i++]);
+	for (int x = 0; x < spawner_node_count; ++x) {
+		const int body_index = Endian::BigToHost(_data[i++]);
+		spawner_node_array_.push_back(structure->GetBoneGeometry(body_index));
 	}
-	const float x = Endian::BigToHostF(lData[i++]);
-	const float y = Endian::BigToHostF(lData[i++]);
-	const float z = Endian::BigToHostF(lData[i++]);
-	mInitialVelocity.Set(x, y, z);
-	mNumber = Endian::BigToHostF(lData[i++]);
-	const int lIntervalCount = Endian::BigToHost(lData[i++]);
-	for (int x = 0; x < lIntervalCount; ++x)
-	{
-		mIntervalArray.push_back(Endian::BigToHostF(lData[i++]));
+	const float x = Endian::BigToHostF(_data[i++]);
+	const float y = Endian::BigToHostF(_data[i++]);
+	const float z = Endian::BigToHostF(_data[i++]);
+	initial_velocity_.Set(x, y, z);
+	number_ = Endian::BigToHostF(_data[i++]);
+	const int interval_count = Endian::BigToHost(_data[i++]);
+	for (int x = 0; x < interval_count; ++x) {
+		interval_array_.push_back(Endian::BigToHostF(_data[i++]));
 	}
-	mTotalObjectProbability = 0;
-	const int lSpawnObjectCount = Endian::BigToHost(lData[i++]);
-	for (int x = 0; x < lSpawnObjectCount; ++x)
-	{
-		str lSpawnObject;
-		const int lStringRawLength = PackerUnicodeString::Unpack(lSpawnObject, (uint8*)&lData[i], 1024);
-		deb_assert(lStringRawLength % sizeof(lData[0]) == 0);
-		i += lStringRawLength / sizeof(lData[0]);
-		const float lProbability = Endian::BigToHostF(lData[i++]);
-		mTotalObjectProbability += lProbability;
-		mSpawnObjectArray.push_back(SpawnObject(lSpawnObject, lProbability));
+	total_object_probability_ = 0;
+	const int spawn_object_count = Endian::BigToHost(_data[i++]);
+	for (int x = 0; x < spawn_object_count; ++x) {
+		str _spawn_object;
+		const int string_raw_length = PackerUnicodeString::Unpack(_spawn_object, (uint8*)&_data[i], 1024);
+		deb_assert(string_raw_length % sizeof(_data[0]) == 0);
+		i += string_raw_length / sizeof(_data[0]);
+		const float _probability = Endian::BigToHostF(_data[i++]);
+		total_object_probability_ += _probability;
+		spawn_object_array_.push_back(SpawnObject(_spawn_object, _probability));
 	}
-	mIsEaseDown = Endian::BigToHost(lData[i++])? true : false;
+	is_ease_down_ = Endian::BigToHost(_data[i++])? true : false;
 }
 
 
 
-PhysicsSpawner::SpawnObject::SpawnObject(const str& pSpawnObject, float pProbability):
-	mSpawnObject(pSpawnObject),
-	mProbability(pProbability)
-{
+PhysicsSpawner::SpawnObject::SpawnObject(const str& spawn_object, float probability):
+	spawn_object_(spawn_object),
+	probability_(probability) {
 }
 
 
 
-loginstance(PHYSICS, PhysicsSpawner);
+loginstance(kPhysics, PhysicsSpawner);
 
 
 

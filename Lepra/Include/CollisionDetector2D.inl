@@ -1,149 +1,139 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
-#include "../Include/CollisionDetector2D.h"
-#include "../Include/Math.h"
+#include "../include/collisiondetector2d.h"
+#include "../include/math.h"
 
 
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::IsAABR1EnclosingAABR2(const AABR<_TVarType>& pBox1, const AABR<_TVarType>& pBox2)
-{
-	Vector2D<_TVarType> lMin1(pBox1.GetPosition() - pBox1.GetSize());
-	Vector2D<_TVarType> lMax1(pBox1.GetPosition() + pBox1.GetSize());
-	Vector2D<_TVarType> lMin2(pBox2.GetPosition() - pBox2.GetSize());
-	Vector2D<_TVarType> lMax2(pBox2.GetPosition() + pBox2.GetSize());
-	return (lMin1.x <= lMin2.x && lMin1.y <= lMin2.y && lMax1.x >= lMax2.x && lMax1.y >= lMax2.y);
+bool CollisionDetector2D<_TVarType>::IsAABR1EnclosingAABR2(const AABR<_TVarType>& box1, const AABR<_TVarType>& box2) {
+	Vector2D<_TVarType> min1(box1.GetPosition() - box1.GetSize());
+	Vector2D<_TVarType> max1(box1.GetPosition() + box1.GetSize());
+	Vector2D<_TVarType> min2(box2.GetPosition() - box2.GetSize());
+	Vector2D<_TVarType> max2(box2.GetPosition() + box2.GetSize());
+	return (min1.x <= min2.x && min1.y <= min2.y && max1.x >= max2.x && max1.y >= max2.y);
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::IsAABREnclosingCircle(const AABR<_TVarType>& pBox, const Circle<_TVarType>& pCircle)
-{
-	Vector2D<_TVarType> lDim(pCircle.GetRadius(), pCircle.GetRadius());
-	Vector2D<_TVarType> lCMin(pCircle.GetPosition() - lDim);
-	Vector2D<_TVarType> lCMax(pCircle.GetPosition() + lDim);
-	Vector2D<_TVarType> lMin(pBox.GetPosition() - pBox.GetSize());
-	Vector2D<_TVarType> lMax(pBox.GetPosition() + pBox.GetSize());
-	return (lMin.x <= lCMin.x && lMin.y <= lCMin.y && lMax.x >= lCMax.x && lMax.y >= lCMax.y);
+bool CollisionDetector2D<_TVarType>::IsAABREnclosingCircle(const AABR<_TVarType>& box, const Circle<_TVarType>& circle) {
+	Vector2D<_TVarType> dim(circle.GetRadius(), circle.GetRadius());
+	Vector2D<_TVarType> c_min(circle.GetPosition() - dim);
+	Vector2D<_TVarType> c_max(circle.GetPosition() + dim);
+	Vector2D<_TVarType> __min(box.GetPosition() - box.GetSize());
+	Vector2D<_TVarType> __max(box.GetPosition() + box.GetSize());
+	return (__min.x <= c_min.x && __min.y <= c_min.y && __max.x >= c_max.x && __max.y >= c_max.y);
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::IsCircle1EnclosingCircle2(const Circle<_TVarType>& pCircle1, const Circle<_TVarType>& pCircle2)
-{
-	_TVarType lDist = pCircle2.GetPosition().GetDistance(pCircle1.GetPosition());
-	return (pCircle1.GetRadius() >= lDist + pCircle2.GetRadius());
+bool CollisionDetector2D<_TVarType>::IsCircle1EnclosingCircle2(const Circle<_TVarType>& circle1, const Circle<_TVarType>& circle2) {
+	_TVarType dist = circle2.GetPosition().GetDistance(circle1.GetPosition());
+	return (circle1.GetRadius() >= dist + circle2.GetRadius());
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::IsCircleEnclosingAABR(const Circle<_TVarType>& pCircle, const AABR<_TVarType>& pBox)
-{
-	return IsCircle1EnclosingCircle2(pCircle, Circle<_TVarType>(pBox.GetPosition(), pBox.GetSize().GetLength()));
+bool CollisionDetector2D<_TVarType>::IsCircleEnclosingAABR(const Circle<_TVarType>& circle, const AABR<_TVarType>& box) {
+	return IsCircle1EnclosingCircle2(circle, Circle<_TVarType>(box.GetPosition(), box.GetSize().GetLength()));
 }
 
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticLineSegmentToLineSegmentTest(const Vector2D<_TVarType>& pStart1, const Vector2D<_TVarType>& pEnd1,
-                                        const Vector2D<_TVarType>& pStart2, const Vector2D<_TVarType>& pEnd2,
-					CollisionInfo* pCollisionInfo)
-{
-	if(pCollisionInfo != 0)
-		pCollisionInfo->mTimeToCollision = 1;
+bool CollisionDetector2D<_TVarType>::StaticLineSegmentToLineSegmentTest(const Vector2D<_TVarType>& start1, const Vector2D<_TVarType>& end1,
+                                        const Vector2D<_TVarType>& start2, const Vector2D<_TVarType>& end2,
+					CollisionInfo* collision_info) {
+	if(collision_info != 0)
+		collision_info->time_to_collision_ = 1;
 
-	Vector2D<_TVarType> lDir1(pEnd1 - pStart1);
-	Vector2D<_TVarType> lDir2(pEnd2 - pStart2);
-	_TVarType lDenominator = lDir2.y * lDir1.x - lDir2.x * lDir1.y;
+	Vector2D<_TVarType> dir1(end1 - start1);
+	Vector2D<_TVarType> dir2(end2 - start2);
+	_TVarType denominator = dir2.y * dir1.x - dir2.x * dir1.y;
 
-	if(abs(lDenominator) < MathTraits<_TVarType>::Eps())
+	if(abs(denominator) < MathTraits<_TVarType>::Eps())
 		return false;
 
-	Vector2D<_TVarType> lDiff(pStart1 - pStart2);
-	_TVarType lNumerator = lDir2.x * lDiff.y - lDir2.y * lDiff.x;
-	_TVarType t = lNumerator / lDenominator;
+	Vector2D<_TVarType> diff(start1 - start2);
+	_TVarType numerator = dir2.x * diff.y - dir2.y * diff.x;
+	_TVarType t = numerator / denominator;
 
-	// Not truly the intersection... Should be pStart1 + lDir1 * t, but
-	// pStart1 was removed as a small optimization.
-	Vector2D<_TVarType> lIntersection(lDir1 * t);
+	// Not truly the intersection... Should be start1 + dir1 * t, but
+	// start1 was removed as a small optimization.
+	Vector2D<_TVarType> intersection(dir1 * t);
 
-	_TVarType lLength = lDir1.GetLength();
-	lDir1 /= lLength; // Normalize.
+	_TVarType length = dir1.GetLength();
+	dir1 /= length; // Normalize.
 
-	// Would have been lDir1.Dot(lIntersection - pStart1) unoptimized.
-	_TVarType lProjection1 = lDir1.Dot(lIntersection);
+	// Would have been dir1.Dot(intersection - start1) unoptimized.
+	_TVarType projection1 = dir1.Dot(intersection);
 
-	if(lProjection1 < 0 || lProjection1 > lLength)
+	if(projection1 < 0 || projection1 > length)
 		return false;
 
-	lLength = lDir2.GetLength();
-	lDir2 /= lLength; // Normalize.
+	length = dir2.GetLength();
+	dir2 /= length; // Normalize.
 
-	// No difference in performance at this line, but this would have been 
-	// lDir2.Dot(lIntersection - pStart2) unoptimized.
-	_TVarType lProjection2 = lDir2.Dot(lIntersection + lDiff);
+	// No difference in performance at this line, but this would have been
+	// dir2.Dot(intersection - start2) unoptimized.
+	_TVarType projection2 = dir2.Dot(intersection + diff);
 
-	if(lProjection2 < 0 || lProjection2 > lLength)
+	if(projection2 < 0 || projection2 > length)
 		return false;
 
-	if(pCollisionInfo != 0)
-	{
-		pCollisionInfo->mTimeToCollision = 0;
-		pCollisionInfo->mPointOfCollision = lIntersection + pStart1;
+	if(collision_info != 0) {
+		collision_info->time_to_collision_ = 0;
+		collision_info->point_of_collision_ = intersection + start1;
 
-		// Split the line segments at the point of intersection into 
+		// Split the line segments at the point of intersection into
 		// four subsegments...
-		Vector2D<_TVarType> lV1(pStart1 - pCollisionInfo->mPointOfCollision);
-		Vector2D<_TVarType> lV2(pEnd1   - pCollisionInfo->mPointOfCollision);
-		Vector2D<_TVarType> lV3(pStart2 - pCollisionInfo->mPointOfCollision);
-		Vector2D<_TVarType> lV4(pEnd2   - pCollisionInfo->mPointOfCollision);
+		Vector2D<_TVarType> v1(start1 - collision_info->point_of_collision_);
+		Vector2D<_TVarType> v2(end1   - collision_info->point_of_collision_);
+		Vector2D<_TVarType> v3(start2 - collision_info->point_of_collision_);
+		Vector2D<_TVarType> v4(end2   - collision_info->point_of_collision_);
 
 		// The normals of the lines. Note that they are already normalized.
-		Vector2D<_TVarType> lNormal1(lDir1.y, -lDir1.x);
-		Vector2D<_TVarType> lNormal2(lDir2.y, -lDir2.x);
+		Vector2D<_TVarType> normal1(dir1.y, -dir1.x);
+		Vector2D<_TVarType> normal2(dir2.y, -dir2.x);
 
 		// Calculate the projections of the subsegments.
-		_TVarType lP1 = lNormal2.Dot(lV1);
-		_TVarType lP2 = lNormal2.Dot(lV2);
-		_TVarType lP3 = lNormal1.Dot(lV3);
-		_TVarType lP4 = lNormal1.Dot(lV4);
+		_TVarType p1 = normal2.Dot(v1);
+		_TVarType p2 = normal2.Dot(v2);
+		_TVarType p3 = normal1.Dot(v3);
+		_TVarType p4 = normal1.Dot(v4);
 
 		// Find the minimum projection.
-		int lMinPIndex = 0;
-		_TVarType lMinP = lP1;
-		_TVarType lMinAbsP = abs(lP1);
-		_TVarType lAbsP = abs(lP2);
-		if(lAbsP < lMinAbsP)
-		{
-			lMinAbsP = lAbsP;
-			lMinP = lP2;
-			lMinPIndex = 1;
+		int min_p_index = 0;
+		_TVarType min_p = p1;
+		_TVarType min_abs_p = abs(p1);
+		_TVarType abs_p = abs(p2);
+		if(abs_p < min_abs_p) {
+			min_abs_p = abs_p;
+			min_p = p2;
+			min_p_index = 1;
 		}
-		lAbsP = abs(lP3);
-		if(lAbsP < lMinAbsP)
-		{
-			lMinAbsP = lAbsP;
-			lMinP = lP3;
-			lMinPIndex = 2;
+		abs_p = abs(p3);
+		if(abs_p < min_abs_p) {
+			min_abs_p = abs_p;
+			min_p = p3;
+			min_p_index = 2;
 		}
-		lAbsP = abs(lP4);
-		if(lAbsP < lMinAbsP)
-		{
-			lMinAbsP = lAbsP;
-			lMinP = lP4;
-			lMinPIndex = 3;
+		abs_p = abs(p4);
+		if(abs_p < min_abs_p) {
+			min_abs_p = abs_p;
+			min_p = p4;
+			min_p_index = 3;
 		}
 
 		// Now we know the separation distance.
-		pCollisionInfo->mSeparationDistance = lMinAbsP;
+		collision_info->separation_distance_ = min_abs_p;
 
 		// Find the collision normal...
-		switch(lMinPIndex)
-		{
-			case 0: pCollisionInfo->mNormal = lP1 > 0 ? -lNormal2 : lNormal2; break;
-			case 1: pCollisionInfo->mNormal = lP2 > 0 ? -lNormal2 : lNormal2; break;
-			case 2: pCollisionInfo->mNormal = lP3 > 0 ? lNormal1 : -lNormal1; break;
-			case 3: pCollisionInfo->mNormal = lP4 > 0 ? lNormal1 : -lNormal1; break;
+		switch(min_p_index) {
+			case 0: collision_info->normal_ = p1 > 0 ? -normal2 : normal2; break;
+			case 1: collision_info->normal_ = p2 > 0 ? -normal2 : normal2; break;
+			case 2: collision_info->normal_ = p3 > 0 ? normal1 : -normal1; break;
+			case 3: collision_info->normal_ = p4 > 0 ? normal1 : -normal1; break;
 		};
 	}
 
@@ -151,55 +141,49 @@ bool CollisionDetector2D<_TVarType>::StaticLineSegmentToLineSegmentTest(const Ve
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticAABRToAABRTest(const AABR<_TVarType>& pBox1, 
-							  const AABR<_TVarType>& pBox2, 
-							  CollisionInfo* pCollisionInfo)
-{
-	Vector2D<_TVarType> lMinDist(pBox1.GetSize() + pBox2.GetSize());
-	Vector2D<_TVarType> lDist(pBox1.GetPosition() - pBox2.GetPosition());
+bool CollisionDetector2D<_TVarType>::StaticAABRToAABRTest(const AABR<_TVarType>& box1,
+							  const AABR<_TVarType>& box2,
+							  CollisionInfo* collision_info) {
+	Vector2D<_TVarType> min_dist(box1.GetSize() + box2.GetSize());
+	Vector2D<_TVarType> dist(box1.GetPosition() - box2.GetPosition());
 
-	if(lDist.x < 0.0f)
-		lDist.x = -lDist.x;
-	if(lDist.y < 0.0f)
-		lDist.y = -lDist.y;
+	if(dist.x < 0.0f)
+		dist.x = -dist.x;
+	if(dist.y < 0.0f)
+		dist.y = -dist.y;
 
-	if(lDist.x > lMinDist.x || lDist.y > lMinDist.y)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(dist.x > min_dist.x || dist.y > min_dist.y) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lBox1ExtentMin(pBox1.GetPosition() - pBox1.GetSize());
-		Vector2D<_TVarType> lBox1ExtentMax(pBox1.GetPosition() + pBox1.GetSize());
-		Vector2D<_TVarType> lBox2ExtentMin(pBox2.GetPosition() - pBox2.GetSize());
-		Vector2D<_TVarType> lBox2ExtentMax(pBox2.GetPosition() + pBox2.GetSize());
+	if(collision_info != 0) {
+		Vector2D<_TVarType> box1_extent_min(box1.GetPosition() - box1.GetSize());
+		Vector2D<_TVarType> box1_extent_max(box1.GetPosition() + box1.GetSize());
+		Vector2D<_TVarType> box2_extent_min(box2.GetPosition() - box2.GetSize());
+		Vector2D<_TVarType> box2_extent_max(box2.GetPosition() + box2.GetSize());
 
-		Vector2D<_TVarType> lOverlapMin(std::max(lBox1ExtentMin.x, lBox2ExtentMin.x), std::max(lBox1ExtentMin.y, lBox2ExtentMin.y));
-		Vector2D<_TVarType> lOverlapMax(std::min(lBox1ExtentMax.x, lBox2ExtentMax.x), std::min(lBox1ExtentMax.y, lBox2ExtentMax.y));
+		Vector2D<_TVarType> overlap_min(std::max(box1_extent_min.x, box2_extent_min.x), std::max(box1_extent_min.y, box2_extent_min.y));
+		Vector2D<_TVarType> overlap_max(std::min(box1_extent_max.x, box2_extent_max.x), std::min(box1_extent_max.y, box2_extent_max.y));
 
-		pCollisionInfo->mTimeToCollision = 0;
-		pCollisionInfo->mPointOfCollision = (lOverlapMin + lOverlapMax) * (_TVarType)0.5;
+		collision_info->time_to_collision_ = 0;
+		collision_info->point_of_collision_ = (overlap_min + overlap_max) * (_TVarType)0.5;
 
 		//Always positive.
-		Vector2D<_TVarType> lDiff(lMinDist - lDist);
-		if(lDiff.x < lDiff.y)
-		{
-			pCollisionInfo->mSeparationDistance = lDiff.x;
-			if(lDist.x >= 0)
-				pCollisionInfo->mNormal.Set(1, 0);
+		Vector2D<_TVarType> diff(min_dist - dist);
+		if(diff.x < diff.y) {
+			collision_info->separation_distance_ = diff.x;
+			if(dist.x >= 0)
+				collision_info->normal_.Set(1, 0);
 			else
-				pCollisionInfo->mNormal.Set(-1, 0);
-		}
-		else
-		{
-			pCollisionInfo->mSeparationDistance = lDiff.y;
-			if(lDist.y >= 0)
-				pCollisionInfo->mNormal.Set(0, 1);
+				collision_info->normal_.Set(-1, 0);
+		} else {
+			collision_info->separation_distance_ = diff.y;
+			if(dist.y >= 0)
+				collision_info->normal_.Set(0, 1);
 			else
-				pCollisionInfo->mNormal.Set(0, -1);
+				collision_info->normal_.Set(0, -1);
 		}
 	}
 
@@ -207,286 +191,252 @@ bool CollisionDetector2D<_TVarType>::StaticAABRToAABRTest(const AABR<_TVarType>&
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::VelocityAABRToAABRTest(const AABR<_TVarType>& pBox1,
-                                                            const AABR<_TVarType>& pBox2,
-                                                            const Vector2D<_TVarType>& pBox1Velocity,
-                                                            const Vector2D<_TVarType>& pBox2Velocity,
-                                                            CollisionInfo* pCollisionInfo)
-{
-	if(pCollisionInfo != 0)
-		pCollisionInfo->mTimeToCollision = 0;
+bool CollisionDetector2D<_TVarType>::VelocityAABRToAABRTest(const AABR<_TVarType>& box1,
+                                                            const AABR<_TVarType>& box2,
+                                                            const Vector2D<_TVarType>& box1_velocity,
+                                                            const Vector2D<_TVarType>& box2_velocity,
+                                                            CollisionInfo* collision_info) {
+	if(collision_info != 0)
+		collision_info->time_to_collision_ = 0;
 
-	Vector2D<_TVarType> lRelativeVelocity(pBox1Velocity - pBox2Velocity);
-	Vector2D<_TVarType> lMinDist(pBox1.GetSize() + pBox2.GetSize());
-	Vector2D<_TVarType> lDist(pBox1.GetPosition() - pBox2.GetPosition());
-	Vector2D<_TVarType> lAbsDist(abs(lDist.x), abs(lDist.y));
+	Vector2D<_TVarType> relative_velocity(box1_velocity - box2_velocity);
+	Vector2D<_TVarType> min_dist(box1.GetSize() + box2.GetSize());
+	Vector2D<_TVarType> dist(box1.GetPosition() - box2.GetPosition());
+	Vector2D<_TVarType> abs_dist(abs(dist.x), abs(dist.y));
 
-	Vector2D<_TVarType> lMaxAllowedMove(lAbsDist - lMinDist);
+	Vector2D<_TVarType> max_allowed_move(abs_dist - min_dist);
 
 	// Test x-axis. Even if the boxes are colliding from start,
 	// don't count it as a collision if they are moving apart.
-	if(lMaxAllowedMove.x > abs(lRelativeVelocity.x) ||
-	   (lRelativeVelocity.x >= 0 && lDist.x >= 0) ||
-	   (lRelativeVelocity.x < 0 && lDist.x < 0))
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(max_allowed_move.x > abs(relative_velocity.x) ||
+	   (relative_velocity.x >= 0 && dist.x >= 0) ||
+	   (relative_velocity.x < 0 && dist.x < 0)) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
-	}
-	else if(pCollisionInfo != 0)
-	{
-		if(lDist.x >= 0)
-			pCollisionInfo->mNormal.Set(-1, 0);
+	} else if(collision_info != 0) {
+		if(dist.x >= 0)
+			collision_info->normal_.Set(-1, 0);
 		else
-			pCollisionInfo->mNormal.Set(1, 0);
+			collision_info->normal_.Set(1, 0);
 
-		if(lMaxAllowedMove.x >= 0)
-		{
-			pCollisionInfo->mSeparationDistance = 0;
-			pCollisionInfo->mTimeToCollision = (_TVarType)lMaxAllowedMove.x / (_TVarType)abs(lRelativeVelocity.x);
-		}
-		else
-		{
-			pCollisionInfo->mSeparationDistance = -lMaxAllowedMove.x;
-			pCollisionInfo->mTimeToCollision = 0;
+		if(max_allowed_move.x >= 0) {
+			collision_info->separation_distance_ = 0;
+			collision_info->time_to_collision_ = (_TVarType)max_allowed_move.x / (_TVarType)abs(relative_velocity.x);
+		} else {
+			collision_info->separation_distance_ = -max_allowed_move.x;
+			collision_info->time_to_collision_ = 0;
 		}
 	}
 
 	// Test y-axis. Even if the boxes are colliding from start,
 	// don't count it as a collision if they are moving apart.
-	if(lMaxAllowedMove.y > abs(lRelativeVelocity.y) ||
-	   (lRelativeVelocity.y >= 0 && lDist.y >= 0) ||
-	   (lRelativeVelocity.y < 0 && lDist.y < 0))
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(max_allowed_move.y > abs(relative_velocity.y) ||
+	   (relative_velocity.y >= 0 && dist.y >= 0) ||
+	   (relative_velocity.y < 0 && dist.y < 0)) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
-	}
-	else if(pCollisionInfo != 0)
-	{
-		_TVarType lTimeToCollision = (_TVarType)lMaxAllowedMove.y / (_TVarType)abs(lRelativeVelocity.y);
-		if(lTimeToCollision > pCollisionInfo->mTimeToCollision)
-		{
-			if(lDist.y >= 0)
-				pCollisionInfo->mNormal.Set(0, -1);
+	} else if(collision_info != 0) {
+		_TVarType time_to_collision = (_TVarType)max_allowed_move.y / (_TVarType)abs(relative_velocity.y);
+		if(time_to_collision > collision_info->time_to_collision_) {
+			if(dist.y >= 0)
+				collision_info->normal_.Set(0, -1);
 			else
-				pCollisionInfo->mNormal.Set(0, 1);
+				collision_info->normal_.Set(0, 1);
 
-			if(lMaxAllowedMove.y >= 0)
-			{
-				pCollisionInfo->mSeparationDistance = 0;
-				pCollisionInfo->mTimeToCollision = lTimeToCollision;
-			}
-			else
-			{
-				pCollisionInfo->mSeparationDistance = -lMaxAllowedMove.y;
-				pCollisionInfo->mTimeToCollision = 0;
+			if(max_allowed_move.y >= 0) {
+				collision_info->separation_distance_ = 0;
+				collision_info->time_to_collision_ = time_to_collision;
+			} else {
+				collision_info->separation_distance_ = -max_allowed_move.y;
+				collision_info->time_to_collision_ = 0;
 			}
 		}
 	}
 
 	// Check for collision by looking along he velocity vector.
-	Vector2D<_TVarType> lNormal(lRelativeVelocity.y, -lRelativeVelocity.x);
-	lNormal.Normalize();
+	Vector2D<_TVarType> _normal(relative_velocity.y, -relative_velocity.x);
+	_normal.Normalize();
 
-	_TVarType lBox1Projection = abs(lNormal.Dot(pBox1.GetSize()));
-	_TVarType lBox2Projection = abs(lNormal.Dot(pBox2.GetSize()));
-	_TVarType lDistProjection = abs(lNormal.Dot(lDist));
+	_TVarType box1_projection = abs(_normal.Dot(box1.GetSize()));
+	_TVarType box2_projection = abs(_normal.Dot(box2.GetSize()));
+	_TVarType dist_projection = abs(_normal.Dot(dist));
 
-	_TVarType lMinSepDist = lBox1Projection + lBox2Projection;
+	_TVarType min_sep_dist = box1_projection + box2_projection;
 
-	if(lDistProjection > lMinSepDist)
+	if(dist_projection > min_sep_dist)
 		return false;
 
-	if(pCollisionInfo != 0)
-	{
+	if(collision_info != 0) {
 		// Calculate the point of collision.
-		Vector2D<_TVarType> lBox1ExtentMin(pBox1.GetPosition() - pBox1.GetSize());
-		Vector2D<_TVarType> lBox1ExtentMax(pBox1.GetPosition() + pBox1.GetSize());
-		Vector2D<_TVarType> lBox2ExtentMin(pBox2.GetPosition() - pBox2.GetSize());
-		Vector2D<_TVarType> lBox2ExtentMax(pBox2.GetPosition() + pBox2.GetSize());
+		Vector2D<_TVarType> box1_extent_min(box1.GetPosition() - box1.GetSize());
+		Vector2D<_TVarType> box1_extent_max(box1.GetPosition() + box1.GetSize());
+		Vector2D<_TVarType> box2_extent_min(box2.GetPosition() - box2.GetSize());
+		Vector2D<_TVarType> box2_extent_max(box2.GetPosition() + box2.GetSize());
 
-		Vector2D<_TVarType> lOverlapMin(max(lBox1ExtentMin.x, lBox2ExtentMin.x), max(lBox1ExtentMin.y, lBox2ExtentMin.y));
-		Vector2D<_TVarType> lOverlapMax(min(lBox1ExtentMax.x, lBox2ExtentMax.x), min(lBox1ExtentMax.y, lBox2ExtentMax.y));
+		Vector2D<_TVarType> overlap_min(max(box1_extent_min.x, box2_extent_min.x), max(box1_extent_min.y, box2_extent_min.y));
+		Vector2D<_TVarType> overlap_max(min(box1_extent_max.x, box2_extent_max.x), min(box1_extent_max.y, box2_extent_max.y));
 
-		Vector2D<_TVarType> lDiff(lOverlapMax - lOverlapMin);
+		Vector2D<_TVarType> diff(overlap_max - overlap_min);
 
-		pCollisionInfo->mPointOfCollision = lOverlapMin + lDiff * (_TVarType)0.5;
+		collision_info->point_of_collision_ = overlap_min + diff * (_TVarType)0.5;
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticOBRToOBRTest(const OBR<_TVarType>& pBox1, 
-							const OBR<_TVarType>& pBox2, 
-                                                        CollisionInfo* pCollisionInfo)
-{
-	if(pCollisionInfo != 0)
-		pCollisionInfo->mTimeToCollision = 0;
+bool CollisionDetector2D<_TVarType>::StaticOBRToOBRTest(const OBR<_TVarType>& box1,
+							const OBR<_TVarType>& box2,
+                                                        CollisionInfo* collision_info) {
+	if(collision_info != 0)
+		collision_info->time_to_collision_ = 0;
 
-	Vector2D<_TVarType> lDist(pBox1.GetPosition() - pBox2.GetPosition());
-	Vector2D<_TVarType> lSize(pBox1.GetSize() + pBox2.GetSize());
+	Vector2D<_TVarType> dist(box1.GetPosition() - box2.GetPosition());
+	Vector2D<_TVarType> size(box1.GetSize() + box2.GetSize());
 
-	Vector2D<_TVarType> lBox1ExtentX(pBox1.GetExtentX());
-	Vector2D<_TVarType> lBox1ExtentY(pBox1.GetExtentY());
-	Vector2D<_TVarType> lBox2ExtentX(pBox2.GetExtentX());
-	Vector2D<_TVarType> lBox2ExtentY(pBox2.GetExtentY());
+	Vector2D<_TVarType> box1_extent_x(box1.GetExtentX());
+	Vector2D<_TVarType> box1_extent_y(box1.GetExtentY());
+	Vector2D<_TVarType> box2_extent_x(box2.GetExtentX());
+	Vector2D<_TVarType> box2_extent_y(box2.GetExtentY());
 
 	// The first plane to test.
-	Vector2D<_TVarType> lNormal(lBox1ExtentX);
-	lNormal.Normalize();
-	_TVarType lBox1Projection = pBox1.GetSize().x;
-	_TVarType lBox2Projection = abs(lNormal.Dot(lBox2ExtentX)) + abs(lNormal.Dot(lBox2ExtentY));
-	_TVarType lDistProjection = lNormal.Dot(lDist);
-	_TVarType lAbsDistProjection = abs(lDistProjection);
-	if(lAbsDistProjection > lBox1Projection + lBox2Projection)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	Vector2D<_TVarType> _normal(box1_extent_x);
+	_normal.Normalize();
+	_TVarType box1_projection = box1.GetSize().x;
+	_TVarType box2_projection = abs(_normal.Dot(box2_extent_x)) + abs(_normal.Dot(box2_extent_y));
+	_TVarType dist_projection = _normal.Dot(dist);
+	_TVarType abs_dist_projection = abs(dist_projection);
+	if(abs_dist_projection > box1_projection + box2_projection) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
-	}
-	else if(pCollisionInfo != 0)
-	{
-		pCollisionInfo->mTimeToCollision = 0;
-		pCollisionInfo->mSeparationDistance = lBox1Projection + lBox2Projection - lAbsDistProjection;
-		if(lDistProjection > 0)
-			pCollisionInfo->mNormal = lNormal;
+	} else if(collision_info != 0) {
+		collision_info->time_to_collision_ = 0;
+		collision_info->separation_distance_ = box1_projection + box2_projection - abs_dist_projection;
+		if(dist_projection > 0)
+			collision_info->normal_ = _normal;
 		else
-			pCollisionInfo->mNormal = -lNormal;
+			collision_info->normal_ = -_normal;
 	}
 
 	// The second plane to test.
-	lNormal.Set(lBox1ExtentY);
-	lNormal.Normalize();
-	lBox1Projection = pBox1.GetSize().y;
-	lBox2Projection = abs(lNormal.Dot(lBox2ExtentX)) + abs(lNormal.Dot(lBox2ExtentY));
-	lDistProjection = lNormal.Dot(lDist);
-	lAbsDistProjection = abs(lDistProjection);
-	if(lAbsDistProjection > lBox1Projection + lBox2Projection)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	_normal.Set(box1_extent_y);
+	_normal.Normalize();
+	box1_projection = box1.GetSize().y;
+	box2_projection = abs(_normal.Dot(box2_extent_x)) + abs(_normal.Dot(box2_extent_y));
+	dist_projection = _normal.Dot(dist);
+	abs_dist_projection = abs(dist_projection);
+	if(abs_dist_projection > box1_projection + box2_projection) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
-	}
-	else if(pCollisionInfo != 0)
-	{
-		_TVarType lPenetrationDepth = lBox1Projection + lBox2Projection - lAbsDistProjection;
-		if(lPenetrationDepth < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mTimeToCollision = 0;
-			pCollisionInfo->mSeparationDistance = lPenetrationDepth;
-			if(lDistProjection > 0)
-				pCollisionInfo->mNormal = lNormal;
+	} else if(collision_info != 0) {
+		_TVarType penetration_depth = box1_projection + box2_projection - abs_dist_projection;
+		if(penetration_depth < collision_info->separation_distance_) {
+			collision_info->time_to_collision_ = 0;
+			collision_info->separation_distance_ = penetration_depth;
+			if(dist_projection > 0)
+				collision_info->normal_ = _normal;
 			else
-				pCollisionInfo->mNormal = -lNormal;
+				collision_info->normal_ = -_normal;
 		}
 	}
 
 	// The third plane to test.
-	lNormal.Set(lBox2ExtentX);
-	lNormal.Normalize();
-	lBox1Projection = abs(lNormal.Dot(lBox1ExtentX)) + abs(lNormal.Dot(lBox1ExtentY));
-	lBox2Projection = pBox2.GetSize().x;
-	lDistProjection = lNormal.Dot(lDist);
-	lAbsDistProjection = abs(lDistProjection);
-	if(lAbsDistProjection > lBox1Projection + lBox2Projection)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	_normal.Set(box2_extent_x);
+	_normal.Normalize();
+	box1_projection = abs(_normal.Dot(box1_extent_x)) + abs(_normal.Dot(box1_extent_y));
+	box2_projection = box2.GetSize().x;
+	dist_projection = _normal.Dot(dist);
+	abs_dist_projection = abs(dist_projection);
+	if(abs_dist_projection > box1_projection + box2_projection) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
-	}
-	else if(pCollisionInfo != 0)
-	{
-		_TVarType lPenetrationDepth = lBox1Projection + lBox2Projection - lAbsDistProjection;
-		if(lPenetrationDepth < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mTimeToCollision = 0;
-			pCollisionInfo->mSeparationDistance = lPenetrationDepth;
-			if(lDistProjection > 0)
-				pCollisionInfo->mNormal = lNormal;
+	} else if(collision_info != 0) {
+		_TVarType penetration_depth = box1_projection + box2_projection - abs_dist_projection;
+		if(penetration_depth < collision_info->separation_distance_) {
+			collision_info->time_to_collision_ = 0;
+			collision_info->separation_distance_ = penetration_depth;
+			if(dist_projection > 0)
+				collision_info->normal_ = _normal;
 			else
-				pCollisionInfo->mNormal = -lNormal;
+				collision_info->normal_ = -_normal;
 		}
 	}
 
 	// The fourth and final plane to test.
-	lNormal.Set(lBox2ExtentY);
-	lNormal.Normalize();
-	lBox1Projection = abs(lNormal.Dot(lBox1ExtentX)) + abs(lNormal.Dot(lBox1ExtentY));
-	lBox2Projection = pBox2.GetSize().y;
-	lDistProjection = lNormal.Dot(lDist);
-	lAbsDistProjection = abs(lDistProjection);
-	if(lAbsDistProjection > lBox1Projection + lBox2Projection)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	_normal.Set(box2_extent_y);
+	_normal.Normalize();
+	box1_projection = abs(_normal.Dot(box1_extent_x)) + abs(_normal.Dot(box1_extent_y));
+	box2_projection = box2.GetSize().y;
+	dist_projection = _normal.Dot(dist);
+	abs_dist_projection = abs(dist_projection);
+	if(abs_dist_projection > box1_projection + box2_projection) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
-	}
-	else if(pCollisionInfo != 0)
-	{
-		_TVarType lPenetrationDepth = lBox1Projection + lBox2Projection - lAbsDistProjection;
-		if(lPenetrationDepth < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mTimeToCollision = 0;
-			pCollisionInfo->mSeparationDistance = lPenetrationDepth;
-			if(lDistProjection > 0)
-				pCollisionInfo->mNormal = lNormal;
+	} else if(collision_info != 0) {
+		_TVarType penetration_depth = box1_projection + box2_projection - abs_dist_projection;
+		if(penetration_depth < collision_info->separation_distance_) {
+			collision_info->time_to_collision_ = 0;
+			collision_info->separation_distance_ = penetration_depth;
+			if(dist_projection > 0)
+				collision_info->normal_ = _normal;
 			else
-				pCollisionInfo->mNormal = -lNormal;
+				collision_info->normal_ = -_normal;
 		}
 	}
 
-	if(pCollisionInfo != 0 && mPOCEnabled)
-	{
-		// Calculate point of collision. First find the overlap, which is a 
+	if(collision_info != 0 && poc_enabled_) {
+		// Calculate point of collision. First find the overlap, which is a
 		// convex polygon consisting of a maximum of 8 vertices. Clip each side
 		// of Box1 against each side of Box2 using the same algorithm used in
-		// UiTbc::Software3DPainter, and finally take the mean coordinates of
+		// uitbc::Software3DPainter, and finally take the mean coordinates of
 		// the clipped points.
-		pCollisionInfo->mPointOfCollision.Set(0, 0);
+		collision_info->point_of_collision_.Set(0, 0);
 
-		Vector2D<_TVarType> lInPoly[8];
-		Vector2D<_TVarType> lOutPoly[8];
-		Vector2D<_TVarType> lBox2PoL[4]; // Point on line.
-		Vector2D<_TVarType> lBox2LineDir[4];
-		
-		lInPoly[0] = pBox1.GetPosition() + lBox1ExtentX + lBox1ExtentY;
-		lInPoly[1] = pBox1.GetPosition() + lBox1ExtentX - lBox1ExtentY;
-		lInPoly[2] = pBox1.GetPosition() - lBox1ExtentX - lBox1ExtentY;
-		lInPoly[3] = pBox1.GetPosition() - lBox1ExtentX + lBox1ExtentY;
+		Vector2D<_TVarType> in_poly[8];
+		Vector2D<_TVarType> out_poly[8];
+		Vector2D<_TVarType> box2_po_l[4]; // Point on line.
+		Vector2D<_TVarType> box2_line_dir[4];
+
+		in_poly[0] = box1.GetPosition() + box1_extent_x + box1_extent_y;
+		in_poly[1] = box1.GetPosition() + box1_extent_x - box1_extent_y;
+		in_poly[2] = box1.GetPosition() - box1_extent_x - box1_extent_y;
+		in_poly[3] = box1.GetPosition() - box1_extent_x + box1_extent_y;
 
 		// Initialize in the wrong order.
-		int lVCount = 4;
-		Vector2D<_TVarType>* lIn = lOutPoly;
-		Vector2D<_TVarType>* lOut = lInPoly;
+		int v_count = 4;
+		Vector2D<_TVarType>* in = out_poly;
+		Vector2D<_TVarType>* out = in_poly;
 
 		// Setup directions clockwise.
-		lBox2LineDir[0] = -lBox2ExtentY;
-		lBox2LineDir[1] =  lBox2ExtentX;
-		lBox2LineDir[2] =  lBox2ExtentY;
-		lBox2LineDir[3] = -lBox2ExtentX;
+		box2_line_dir[0] = -box2_extent_y;
+		box2_line_dir[1] =  box2_extent_x;
+		box2_line_dir[2] =  box2_extent_y;
+		box2_line_dir[3] = -box2_extent_x;
 
-		lBox2PoL[0] = pBox2.GetPosition() + lBox2ExtentX;
-		lBox2PoL[1] = pBox2.GetPosition() + lBox2ExtentY;
-		lBox2PoL[2] = pBox2.GetPosition() - lBox2ExtentX;
-		lBox2PoL[3] = pBox2.GetPosition() - lBox2ExtentY;
+		box2_po_l[0] = box2.GetPosition() + box2_extent_x;
+		box2_po_l[1] = box2.GetPosition() + box2_extent_y;
+		box2_po_l[2] = box2.GetPosition() - box2_extent_x;
+		box2_po_l[3] = box2.GetPosition() - box2_extent_y;
 
 		int i;
-		for(i = 0; i < 4; i++)
-		{
+		for(i = 0; i < 4; i++) {
 			// Swap in & out.
-			Vector2D<_TVarType>* lTemp = lIn;
-			lIn = lOut;
-			lOut = lTemp;
-			lVCount = ClipPolyAgainstLine(lIn, lVCount, lBox2PoL[i], lBox2LineDir[i], lOut);
+			Vector2D<_TVarType>* temp = in;
+			in = out;
+			out = temp;
+			v_count = ClipPolyAgainstLine(in, v_count, box2_po_l[i], box2_line_dir[i], out);
 		}
 
-		for(i = 0; i < lVCount; i++)
-		{
-			pCollisionInfo->mPointOfCollision += lOut[i];
+		for(i = 0; i < v_count; i++) {
+			collision_info->point_of_collision_ += out[i];
 		}
-		pCollisionInfo->mPointOfCollision /= (_TVarType)lVCount;
+		collision_info->point_of_collision_ /= (_TVarType)v_count;
 	}
 
 	return true;
@@ -494,88 +444,77 @@ bool CollisionDetector2D<_TVarType>::StaticOBRToOBRTest(const OBR<_TVarType>& pB
 /*
 // TODO: Implement this.
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::VelocityOBRToOBRTest(const OBR<_TVarType>& pBox1,
-                                                          const OBR<_TVarType>& pBox2,
-                                                          const Vector2D<_TVarType>& pBox1Velocity,
-                                                          const Vector2D<_TVarType>& pBox2Velocity,
-                                                          CollisionInfo* pCollisionInfo)
-{
+bool CollisionDetector2D<_TVarType>::VelocityOBRToOBRTest(const OBR<_TVarType>& box1,
+                                                          const OBR<_TVarType>& box2,
+                                                          const Vector2D<_TVarType>& box1_velocity,
+                                                          const Vector2D<_TVarType>& box2_velocity,
+                                                          CollisionInfo* collision_info) {
 	return false;
 }
 */
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticCircleToCircleTest(const Circle<_TVarType>& pCircle1, 
-                                                              const Circle<_TVarType>& pCircle2,
-			                                      CollisionInfo* pCollisionInfo)
-{
-	_TVarType lMinDistance = pCircle1.GetRadius() + pCircle2.GetRadius();
-	_TVarType lMinDistanceSq = lMinDistance * lMinDistance;
-	_TVarType lDistanceSq = pCircle1.GetPosition().GetDistanceSquared(pCircle2.GetPosition());
-	if(lDistanceSq > lMinDistanceSq)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+bool CollisionDetector2D<_TVarType>::StaticCircleToCircleTest(const Circle<_TVarType>& circle1,
+                                                              const Circle<_TVarType>& circle2,
+			                                      CollisionInfo* collision_info) {
+	_TVarType min_distance = circle1.GetRadius() + circle2.GetRadius();
+	_TVarType min_distance_sq = min_distance * min_distance;
+	_TVarType distance_sq = circle1.GetPosition().GetDistanceSquared(circle2.GetPosition());
+	if(distance_sq > min_distance_sq) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		pCollisionInfo->mNormal = (pCircle1.GetPosition() - pCircle2.GetPosition());
-		_TVarType lLength = pCollisionInfo->mNormal.GetLength();
-		pCollisionInfo->mNormal /= lLength; // Normalize
-		pCollisionInfo->mSeparationDistance = (_TVarType)(lMinDistance - lLength);
-		pCollisionInfo->mPointOfCollision = pCircle2.GetPosition() + pCollisionInfo->mNormal * (pCircle2.GetRadius() - pCollisionInfo->mSeparationDistance * (_TVarType)0.5);
-		pCollisionInfo->mTimeToCollision = 0;
+	if(collision_info != 0) {
+		collision_info->normal_ = (circle1.GetPosition() - circle2.GetPosition());
+		_TVarType length = collision_info->normal_.GetLength();
+		collision_info->normal_ /= length; // Normalize
+		collision_info->separation_distance_ = (_TVarType)(min_distance - length);
+		collision_info->point_of_collision_ = circle2.GetPosition() + collision_info->normal_ * (circle2.GetRadius() - collision_info->separation_distance_ * (_TVarType)0.5);
+		collision_info->time_to_collision_ = 0;
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticTriangleToTriangleTest(const Vector2D<_TVarType> pTri1[3], 
-								  const Vector2D<_TVarType> pTri2[3],
-								  CollisionInfo* pCollisionInfo)
-{
-	if(pCollisionInfo != 0)
-		pCollisionInfo->mTimeToCollision = 1;
+bool CollisionDetector2D<_TVarType>::StaticTriangleToTriangleTest(const Vector2D<_TVarType> tri1[3],
+								  const Vector2D<_TVarType> tri2[3],
+								  CollisionInfo* collision_info) {
+	if(collision_info != 0)
+		collision_info->time_to_collision_ = 1;
 
 	 // Find out wether the triangles are clockwise.
-	Vector2D<_TVarType> lPerp1((pTri1[1] - pTri1[0]).GetPerpCW());
-	Vector2D<_TVarType> lPerp2((pTri2[1] - pTri2[0]).GetPerpCW());
-	_TVarType lP1 = lPerp1.Dot(pTri1[2] - pTri1[0]);
-	_TVarType lP2 = lPerp2.Dot(pTri2[2] - pTri2[0]);
+	Vector2D<_TVarType> perp1((tri1[1] - tri1[0]).GetPerpCW());
+	Vector2D<_TVarType> perp2((tri2[1] - tri2[0]).GetPerpCW());
+	_TVarType p1 = perp1.Dot(tri1[2] - tri1[0]);
+	_TVarType p2 = perp2.Dot(tri2[2] - tri2[0]);
 
 	// Copy triangle data and make sure they are stored in clockwise order.
-	Vector2D<_TVarType> lTri1[3];
-	Vector2D<_TVarType> lTri2[3];
+	Vector2D<_TVarType> _tri1[3];
+	Vector2D<_TVarType> _tri2[3];
 
-	if(lP1 >= 0)
-	{
-		lTri1[0] = pTri1[0];
-		lTri1[1] = pTri1[1];
-		lTri1[2] = pTri1[2];
-	}
-	else
-	{
-		lTri1[0] = pTri1[0];
-		lTri1[1] = pTri1[2];
-		lTri1[2] = pTri1[1];
+	if(p1 >= 0) {
+		_tri1[0] = tri1[0];
+		_tri1[1] = tri1[1];
+		_tri1[2] = tri1[2];
+	} else {
+		_tri1[0] = tri1[0];
+		_tri1[1] = tri1[2];
+		_tri1[2] = tri1[1];
 	}
 
-	if(lP2 >= 0)
-	{
-		lTri2[0] = pTri2[0];
-		lTri2[1] = pTri2[1];
-		lTri2[2] = pTri2[2];
-	}
-	else
-	{
-		lTri2[0] = pTri2[0];
-		lTri2[1] = pTri2[2];
-		lTri2[2] = pTri2[1];
+	if(p2 >= 0) {
+		_tri2[0] = tri2[0];
+		_tri2[1] = tri2[1];
+		_tri2[2] = tri2[2];
+	} else {
+		_tri2[0] = tri2[0];
+		_tri2[1] = tri2[2];
+		_tri2[2] = tri2[1];
 	}
 
-	// We can't use the regular technique of separating "planes" (lines) as usual, 
+	// We can't use the regular technique of separating "planes" (lines) as usual,
 	// since the triangles are not (in general) symmetric along any axis. Instead,
 	// the separating line has to be fully defined (as opposed to only knowing the
 	// slope). Each side of each triangle defines one such line, against which we
@@ -583,124 +522,111 @@ bool CollisionDetector2D<_TVarType>::StaticTriangleToTriangleTest(const Vector2D
 	// lines.
 
 	// Now find the overlap between the triangles.
-	Vector2D<_TVarType> lOut[6];
-	Vector2D<_TVarType> lEdge(lTri2[1] - lTri2[0]);
-	int lVCount;
-	if((lVCount = ClipPolyAgainstLine(lTri1, 3, lTri2[0], lEdge, lOut)) == 0)
+	Vector2D<_TVarType> out[6];
+	Vector2D<_TVarType> edge(_tri2[1] - _tri2[0]);
+	int v_count;
+	if((v_count = ClipPolyAgainstLine(_tri1, 3, _tri2[0], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lTri2[0]));
-		pCollisionInfo->mSeparationDistance = lProjection;
-		pCollisionInfo->mNormal = -lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _tri2[0]));
+		collision_info->separation_distance_ = _projection;
+		collision_info->normal_ = -n;
 	}
 
-	lEdge = lTri2[2] - lTri2[1];
-	if((lVCount = ClipPolyAgainstLine(lTri1, 3, lTri2[1], lEdge, lOut)) == 0)
+	edge = _tri2[2] - _tri2[1];
+	if((v_count = ClipPolyAgainstLine(_tri1, 3, _tri2[1], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lTri2[1]));
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lProjection;
-			pCollisionInfo->mNormal = -lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _tri2[1]));
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = _projection;
+			collision_info->normal_ = -n;
 		}
 	}
 
-	lEdge = lTri2[0] - lTri2[2];
-	if((lVCount = ClipPolyAgainstLine(lTri1, 3, lTri2[2], lEdge, lOut)) == 0)
+	edge = _tri2[0] - _tri2[2];
+	if((v_count = ClipPolyAgainstLine(_tri1, 3, _tri2[2], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lTri2[2]));
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lProjection;
-			pCollisionInfo->mNormal = -lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _tri2[2]));
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = _projection;
+			collision_info->normal_ = -n;
 		}
 	}
 
-	lEdge = lTri1[1] - lTri1[0];
-	if((lVCount = ClipPolyAgainstLine(lTri2, 3, lTri1[0], lEdge, lOut)) == 0)
+	edge = _tri1[1] - _tri1[0];
+	if((v_count = ClipPolyAgainstLine(_tri2, 3, _tri1[0], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lTri1[0]));
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lProjection;
-			pCollisionInfo->mNormal = lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _tri1[0]));
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = _projection;
+			collision_info->normal_ = n;
 		}
 	}
 
-	lEdge = lTri1[2] - lTri1[1];
-	if((lVCount = ClipPolyAgainstLine(lTri2, 3, lTri1[1], lEdge, lOut)) == 0)
+	edge = _tri1[2] - _tri1[1];
+	if((v_count = ClipPolyAgainstLine(_tri2, 3, _tri1[1], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lTri1[1]));
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lProjection;
-			pCollisionInfo->mNormal = lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _tri1[1]));
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = _projection;
+			collision_info->normal_ = n;
 		}
 	}
 
-	lEdge = lTri1[0] - lTri1[2];
-	if((lVCount = ClipPolyAgainstLine(lTri2, 3, lTri1[2], lEdge, lOut)) == 0)
+	edge = _tri1[0] - _tri1[2];
+	if((v_count = ClipPolyAgainstLine(_tri2, 3, _tri1[2], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lTri1[2]));
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lProjection;
-			pCollisionInfo->mNormal = lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _tri1[2]));
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = _projection;
+			collision_info->normal_ = n;
 		}
 
-		pCollisionInfo->mTimeToCollision = 0;
+		collision_info->time_to_collision_ = 0;
 
 		// Now we have to find the overlap in order to find the point of collision.
-		if(mPOCEnabled)
-		{
-			Vector2D<_TVarType> lTemp[6];
-			int lVCount;
-			lVCount = ClipPolyAgainstLine(lTri1, 3, lTri2[0], lTri2[1] - lTri2[0], lOut);
-			lVCount = ClipPolyAgainstLine(lOut, lVCount, lTri2[1], lTri2[2] - lTri2[1], lTemp);
-			lVCount = ClipPolyAgainstLine(lTemp, lVCount, lTri2[2], lTri2[0] - lTri2[2], lOut);
+		if(poc_enabled_) {
+			Vector2D<_TVarType> temp[6];
+			int v_count;
+			v_count = ClipPolyAgainstLine(_tri1, 3, _tri2[0], _tri2[1] - _tri2[0], out);
+			v_count = ClipPolyAgainstLine(out, v_count, _tri2[1], _tri2[2] - _tri2[1], temp);
+			v_count = ClipPolyAgainstLine(temp, v_count, _tri2[2], _tri2[0] - _tri2[2], out);
 
-			pCollisionInfo->mPointOfCollision.Set(0, 0);
+			collision_info->point_of_collision_.Set(0, 0);
 			int i;
-			for(i = 0; i < lVCount; i++)
-			{
-				pCollisionInfo->mPointOfCollision += lOut[i];
+			for(i = 0; i < v_count; i++) {
+				collision_info->point_of_collision_ += out[i];
 			}
-			pCollisionInfo->mPointOfCollision /= (_TVarType)lVCount;
+			collision_info->point_of_collision_ /= (_TVarType)v_count;
 		}
 	}
 
@@ -708,337 +634,299 @@ bool CollisionDetector2D<_TVarType>::StaticTriangleToTriangleTest(const Vector2D
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticPointLeftOfLineSegmentTest(const Vector2D<_TVarType>& pPoint,
-                                                                      const Vector2D<_TVarType>& pStart, 
-                                                                      const Vector2D<_TVarType>& pEnd,
-                                                                      CollisionInfo* pCollisionInfo)
-{
-	Vector2D<_TVarType> lL(pEnd - pStart);
-	_TVarType lLength = lL.GetLength();
-	lL /= lLength; // Normalize.
-	Vector2D<_TVarType> lP(pPoint - pStart);
+bool CollisionDetector2D<_TVarType>::StaticPointLeftOfLineSegmentTest(const Vector2D<_TVarType>& point,
+                                                                      const Vector2D<_TVarType>& start,
+                                                                      const Vector2D<_TVarType>& end,
+                                                                      CollisionInfo* collision_info) {
+	Vector2D<_TVarType> l(end - start);
+	_TVarType length = l.GetLength();
+	l /= length; // Normalize.
+	Vector2D<_TVarType> p(point - start);
 
-	_TVarType lProjection = lL.Dot(lP);
-	if(lProjection < 0 || lProjection > lLength)
-	{
+	_TVarType _projection = l.Dot(p);
+	if(_projection < 0 || _projection > length) {
 		// Not between the end points of the line segment.
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
 	// Line normal, pointing to the right.
-	Vector2D<_TVarType> lLPerp(lL.y, -lL.x);
+	Vector2D<_TVarType> l_perp(l.y, -l.x);
 
-	lProjection = lLPerp.Dot(lP);
+	_projection = l_perp.Dot(p);
 
-	if(lProjection > 0)
-	{
+	if(_projection > 0) {
 		// Point is to the right of the line segment.
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		pCollisionInfo->mNormal = lLPerp;
-		pCollisionInfo->mSeparationDistance = -lProjection;
-		pCollisionInfo->mPointOfCollision = pPoint;
-		pCollisionInfo->mTimeToCollision = 0;
+	if(collision_info != 0) {
+		collision_info->normal_ = l_perp;
+		collision_info->separation_distance_ = -_projection;
+		collision_info->point_of_collision_ = point;
+		collision_info->time_to_collision_ = 0;
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticPointLeftOfLineTest(const Vector2D<_TVarType>& pPoint,
-							       const Vector2D<_TVarType>& pPointOnLine, 
-							       const Vector2D<_TVarType>& pDir,
-							       CollisionInfo* pCollisionInfo)
-{
-	Vector2D<_TVarType> lNormal(pDir.y, -pDir.x);
-	lNormal.Normalize();
-	_TVarType lProjection = lNormal.Dot(pPoint - pPointOnLine);
-	if(lProjection > 0)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+bool CollisionDetector2D<_TVarType>::StaticPointLeftOfLineTest(const Vector2D<_TVarType>& point,
+							       const Vector2D<_TVarType>& point_on_line,
+							       const Vector2D<_TVarType>& dir,
+							       CollisionInfo* collision_info) {
+	Vector2D<_TVarType> _normal(dir.y, -dir.x);
+	_normal.Normalize();
+	_TVarType _projection = _normal.Dot(point - point_on_line);
+	if(_projection > 0) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		pCollisionInfo->mNormal = lNormal;
-		pCollisionInfo->mSeparationDistance = -lProjection;
-		pCollisionInfo->mPointOfCollision = pPoint;
-		pCollisionInfo->mTimeToCollision = 0;
+	if(collision_info != 0) {
+		collision_info->normal_ = _normal;
+		collision_info->separation_distance_ = -_projection;
+		collision_info->point_of_collision_ = point;
+		collision_info->time_to_collision_ = 0;
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticPointToTriangleTest(const Vector2D<_TVarType>& pPoint,
-							       const Vector2D<_TVarType> pTri[3], 
-							       CollisionInfo* pCollisionInfo)
-{
-	if(pCollisionInfo != 0)
-		pCollisionInfo->mTimeToCollision = 1;
+bool CollisionDetector2D<_TVarType>::StaticPointToTriangleTest(const Vector2D<_TVarType>& point,
+							       const Vector2D<_TVarType> tri[3],
+							       CollisionInfo* collision_info) {
+	if(collision_info != 0)
+		collision_info->time_to_collision_ = 1;
 
 	 // Find out wether the triangle is clockwise.
-	Vector2D<_TVarType> lPerp((pTri[1] - pTri[0]).GetPerpCW());
-	_TVarType lP = lPerp.Dot(pTri[2] - pTri[0]);
+	Vector2D<_TVarType> perp((tri[1] - tri[0]).GetPerpCW());
+	_TVarType p = perp.Dot(tri[2] - tri[0]);
 
-	Vector2D<_TVarType> lTri[3];
-	if(lP >= 0)
-	{
-		lTri[0] = pTri[0];
-		lTri[1] = pTri[1];
-		lTri[2] = pTri[2];
+	Vector2D<_TVarType> _tri[3];
+	if(p >= 0) {
+		_tri[0] = tri[0];
+		_tri[1] = tri[1];
+		_tri[2] = tri[2];
+	} else {
+		_tri[0] = tri[0];
+		_tri[1] = tri[2];
+		_tri[2] = tri[1];
 	}
-	else
-	{
-		lTri[0] = pTri[0];
-		lTri[1] = pTri[2];
-		lTri[2] = pTri[1];
-	}
-	Vector2D<_TVarType> lNormal((lTri[1] - lTri[0]).GetPerpCW());
-	_TVarType lProjection = lNormal.Dot(pPoint - lTri[0]);
-	if(lProjection < 0)
+	Vector2D<_TVarType> _normal((_tri[1] - _tri[0]).GetPerpCW());
+	_TVarType _projection = _normal.Dot(point - _tri[0]);
+	if(_projection < 0)
 		return false;
 
-	if(pCollisionInfo != 0)
-	{
-		_TVarType lLengthRecip = 1 / lNormal.GetLength();
-		pCollisionInfo->mNormal = lNormal * -lLengthRecip; // Normalize.
-		pCollisionInfo->mSeparationDistance = lProjection * lLengthRecip;
+	if(collision_info != 0) {
+		_TVarType length_recip = 1 / _normal.GetLength();
+		collision_info->normal_ = _normal * -length_recip; // Normalize.
+		collision_info->separation_distance_ = _projection * length_recip;
 	}
 
-	lNormal.SetPerpCW(lTri[2] - lTri[1]);
-	lProjection = lNormal.Dot(pPoint - lTri[1]);
-	if(lProjection < 0)
+	_normal.SetPerpCW(_tri[2] - _tri[1]);
+	_projection = _normal.Dot(point - _tri[1]);
+	if(_projection < 0)
 		return false;
 
-	if(pCollisionInfo != 0)
-	{
-		_TVarType lLengthRecip = 1 / lNormal.GetLength();
-		lProjection *= lLengthRecip;
+	if(collision_info != 0) {
+		_TVarType length_recip = 1 / _normal.GetLength();
+		_projection *= length_recip;
 
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mNormal = lNormal * -lLengthRecip; // Normalize.
-			pCollisionInfo->mSeparationDistance = lProjection;
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->normal_ = _normal * -length_recip; // Normalize.
+			collision_info->separation_distance_ = _projection;
 		}
 	}
 
-	lNormal.SetPerpCW(lTri[0] - lTri[2]);
-	lProjection = lNormal.Dot(pPoint - lTri[2]);
-	if(lProjection < 0)
+	_normal.SetPerpCW(_tri[0] - _tri[2]);
+	_projection = _normal.Dot(point - _tri[2]);
+	if(_projection < 0)
 		return false;
 
-	if(pCollisionInfo != 0)
-	{
-		_TVarType lLengthRecip = 1 / lNormal.GetLength();
-		lProjection *= lLengthRecip;
+	if(collision_info != 0) {
+		_TVarType length_recip = 1 / _normal.GetLength();
+		_projection *= length_recip;
 
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mNormal = lNormal * -lLengthRecip; // Normalize.
-			pCollisionInfo->mSeparationDistance = lProjection;
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->normal_ = _normal * -length_recip; // Normalize.
+			collision_info->separation_distance_ = _projection;
 		}
 
-		pCollisionInfo->mTimeToCollision = 0;
-		pCollisionInfo->mPointOfCollision = pPoint;
+		collision_info->time_to_collision_ = 0;
+		collision_info->point_of_collision_ = point;
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticAABRToPointTest(const AABR<_TVarType>& pBox, 
-							   const Vector2D<_TVarType>& pPoint, 
-							   CollisionInfo* pCollisionInfo)
-{
-	Vector2D<_TVarType> lBoxExtentMin(pBox.GetPosition() - pBox.GetSize());
-	Vector2D<_TVarType> lBoxExtentMax(pBox.GetPosition() + pBox.GetSize());
+bool CollisionDetector2D<_TVarType>::StaticAABRToPointTest(const AABR<_TVarType>& box,
+							   const Vector2D<_TVarType>& point,
+							   CollisionInfo* collision_info) {
+	Vector2D<_TVarType> box_extent_min(box.GetPosition() - box.GetSize());
+	Vector2D<_TVarType> box_extent_max(box.GetPosition() + box.GetSize());
 
-	if(pPoint.x >= lBoxExtentMin.x && pPoint.x < lBoxExtentMax.x &&
-	   pPoint.y >= lBoxExtentMin.y && pPoint.y < lBoxExtentMax.y)
-	{
-		if(pCollisionInfo != 0)
-		{
-			pCollisionInfo->mTimeToCollision = 0;
-			pCollisionInfo->mPointOfCollision = pPoint;
+	if(point.x >= box_extent_min.x && point.x < box_extent_max.x &&
+	   point.y >= box_extent_min.y && point.y < box_extent_max.y) {
+		if(collision_info != 0) {
+			collision_info->time_to_collision_ = 0;
+			collision_info->point_of_collision_ = point;
 
 			// Assume point penetrated left side of box.
-			pCollisionInfo->mNormal.Set(1, 0); // Relative to box.
-			pCollisionInfo->mSeparationDistance = abs(pPoint.x - lBoxExtentMin.x);
-			
+			collision_info->normal_.Set(1, 0); // Relative to box.
+			collision_info->separation_distance_ = abs(point.x - box_extent_min.x);
+
 			// Check right side.
-			_TVarType lPenetrationDepth = abs(pPoint.x - lBoxExtentMax.x);
-			if(lPenetrationDepth < pCollisionInfo->mSeparationDistance)
-			{
-				pCollisionInfo->mNormal.Set(-1, 0); // Relative to box.
-				pCollisionInfo->mSeparationDistance = abs(pPoint.x - lBoxExtentMax.x);
+			_TVarType penetration_depth = abs(point.x - box_extent_max.x);
+			if(penetration_depth < collision_info->separation_distance_) {
+				collision_info->normal_.Set(-1, 0); // Relative to box.
+				collision_info->separation_distance_ = abs(point.x - box_extent_max.x);
 			}
 
 			// Check top side.
-			lPenetrationDepth = abs(pPoint.y - lBoxExtentMin.y);
-			if(lPenetrationDepth < pCollisionInfo->mSeparationDistance)
-			{
-				pCollisionInfo->mNormal.Set(0, 1); // Relative to box.
-				pCollisionInfo->mSeparationDistance = abs(pPoint.y - lBoxExtentMin.y);
+			penetration_depth = abs(point.y - box_extent_min.y);
+			if(penetration_depth < collision_info->separation_distance_) {
+				collision_info->normal_.Set(0, 1); // Relative to box.
+				collision_info->separation_distance_ = abs(point.y - box_extent_min.y);
 			}
 
 			// Check bottom side.
-			lPenetrationDepth = abs(pPoint.y - lBoxExtentMax.y);
-			if(lPenetrationDepth < pCollisionInfo->mSeparationDistance)
-			{
-				pCollisionInfo->mNormal.Set(0, -1); // Relative to box.
-				pCollisionInfo->mSeparationDistance = abs(pPoint.y - lBoxExtentMax.y);
+			penetration_depth = abs(point.y - box_extent_max.y);
+			if(penetration_depth < collision_info->separation_distance_) {
+				collision_info->normal_.Set(0, -1); // Relative to box.
+				collision_info->separation_distance_ = abs(point.y - box_extent_max.y);
 			}
 		}
 
 		return true;
-	}
-	else
-	{
-		if(pCollisionInfo != 0)
-		{
-			pCollisionInfo->mTimeToCollision = 1;
+	} else {
+		if(collision_info != 0) {
+			collision_info->time_to_collision_ = 1;
 		}
 		return false;
 	}
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticAABRToOBRTest(const AABR<_TVarType>& pBox1, 
-							 const OBR<_TVarType>& pBox2, 
-							 CollisionInfo* pCollisionInfo)
-{
+bool CollisionDetector2D<_TVarType>::StaticAABRToOBRTest(const AABR<_TVarType>& box1,
+							 const OBR<_TVarType>& box2,
+							 CollisionInfo* collision_info) {
 	// TODO: Implement a case specific optimized version if you think it's worth
 	// all the trouble. =)
-	OBR<_TVarType> lBox1(pBox1.GetPosition(), pBox1.GetSize());
-	return StaticOBRToOBRTest(lBox1, pBox2, pCollisionInfo);
+	OBR<_TVarType> _box1(box1.GetPosition(), box1.GetSize());
+	return StaticOBRToOBRTest(_box1, box2, collision_info);
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticAABRToCircleTest(const AABR<_TVarType>& pBox, 
-							    const Circle<_TVarType>& pCircle, 
-							    CollisionInfo* pCollisionInfo)
-{
-	Vector2D<_TVarType> lMin(pBox.GetPosition() - pBox.GetSize());
-	Vector2D<_TVarType> lMax(pBox.GetPosition() + pBox.GetSize());
-	Vector2D<_TVarType> lPointOnBox(0, 0);
+bool CollisionDetector2D<_TVarType>::StaticAABRToCircleTest(const AABR<_TVarType>& box,
+							    const Circle<_TVarType>& circle,
+							    CollisionInfo* collision_info) {
+	Vector2D<_TVarType> __min(box.GetPosition() - box.GetSize());
+	Vector2D<_TVarType> __max(box.GetPosition() + box.GetSize());
+	Vector2D<_TVarType> point_on_box(0, 0);
 
-	if(pCircle.GetPosition().x < lMin.x)
-		lPointOnBox.x = lMin.x;
-	else if(pCircle.GetPosition().x > lMax.x)
-		lPointOnBox.x = lMax.x;
+	if(circle.GetPosition().x < __min.x)
+		point_on_box.x = __min.x;
+	else if(circle.GetPosition().x > __max.x)
+		point_on_box.x = __max.x;
 	else
-		lPointOnBox.x = pCircle.GetPosition().x;
+		point_on_box.x = circle.GetPosition().x;
 
-	if(pCircle.GetPosition().y < lMin.y)
-		lPointOnBox.y = lMin.y;
-	else if(pCircle.GetPosition().y > lMax.y)
-		lPointOnBox.y = lMax.y;
-	else if(pCollisionInfo != 0)
-		lPointOnBox.y = pCircle.GetPosition().y;
+	if(circle.GetPosition().y < __min.y)
+		point_on_box.y = __min.y;
+	else if(circle.GetPosition().y > __max.y)
+		point_on_box.y = __max.y;
+	else if(collision_info != 0)
+		point_on_box.y = circle.GetPosition().y;
 
-	Vector2D<_TVarType> lDist(lPointOnBox - pCircle.GetPosition());
-	_TVarType lDistanceSquared = lDist.GetLengthSquared();
+	Vector2D<_TVarType> dist(point_on_box - circle.GetPosition());
+	_TVarType distance_squared = dist.GetLengthSquared();
 
-	if(lDistanceSquared > pCircle.GetRadiusSquared())
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(distance_squared > circle.GetRadiusSquared()) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		pCollisionInfo->mTimeToCollision = 0;
-		pCollisionInfo->mNormal = lDist;
-		_TVarType lLength = lDist.GetLength();
-		pCollisionInfo->mNormal /= lLength; // Normalize.
-		pCollisionInfo->mSeparationDistance = pCircle.GetRadius() - lLength;
-		pCollisionInfo->mPointOfCollision = pCircle.GetPosition() + pCollisionInfo->mNormal * ((pCircle.GetRadius() + lLength) * (_TVarType)0.5);
+	if(collision_info != 0) {
+		collision_info->time_to_collision_ = 0;
+		collision_info->normal_ = dist;
+		_TVarType length = dist.GetLength();
+		collision_info->normal_ /= length; // Normalize.
+		collision_info->separation_distance_ = circle.GetRadius() - length;
+		collision_info->point_of_collision_ = circle.GetPosition() + collision_info->normal_ * ((circle.GetRadius() + length) * (_TVarType)0.5);
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticAABRToLineSegmentTest(const AABR<_TVarType>& pBox, 
-								 const Vector2D<_TVarType>& pStart,
-								 const Vector2D<_TVarType>& pEnd,
-								 CollisionInfo* pCollisionInfo)
-{
+bool CollisionDetector2D<_TVarType>::StaticAABRToLineSegmentTest(const AABR<_TVarType>& box,
+								 const Vector2D<_TVarType>& start,
+								 const Vector2D<_TVarType>& end,
+								 CollisionInfo* collision_info) {
 	// TODO: Implement a case specific optimized version if you think it's worth
 	// all the trouble. =)
-	OBR<_TVarType> lOBR(pBox.GetPosition(), pBox.GetSize(), 0);
-	return StaticOBRToLineSegmentTest(lOBR, pStart, pEnd, pCollisionInfo);
+	OBR<_TVarType> obr(box.GetPosition(), box.GetSize(), 0);
+	return StaticOBRToLineSegmentTest(obr, start, end, collision_info);
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticAABRToTriangleTest(const AABR<_TVarType>& pBox, 
-                                                              const Vector2D<_TVarType> pTri[3], 
-                                                              CollisionInfo* pCollisionInfo)
-{
+bool CollisionDetector2D<_TVarType>::StaticAABRToTriangleTest(const AABR<_TVarType>& box,
+                                                              const Vector2D<_TVarType> tri[3],
+                                                              CollisionInfo* collision_info) {
 	// TODO: Implement a case specific optimized version if you think it's worth
 	// all the trouble. =)
-	OBR<_TVarType> lOBR(pBox.GetPosition(), pBox.GetSize(), 0);
-	return StaticOBRToTriangleTest(lOBR, pTri, pCollisionInfo);
+	OBR<_TVarType> obr(box.GetPosition(), box.GetSize(), 0);
+	return StaticOBRToTriangleTest(obr, tri, collision_info);
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticOBRToPointTest(const OBR<_TVarType>& pBox, 
-							  const Vector2D<_TVarType>& pPoint, 
-							  CollisionInfo* pCollisionInfo)
-{
-	Vector2D<_TVarType> lDist(pPoint - pBox.GetPosition());
-	Vector2D<_TVarType> lXAxis(pBox.GetExtentX());
-	lXAxis.Normalize();
-	_TVarType lXProjection = lXAxis.Dot(lDist);
-	_TVarType lAbsXProjection = abs(lXProjection);
-	if(lAbsXProjection > pBox.GetSize().x)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+bool CollisionDetector2D<_TVarType>::StaticOBRToPointTest(const OBR<_TVarType>& box,
+							  const Vector2D<_TVarType>& point,
+							  CollisionInfo* collision_info) {
+	Vector2D<_TVarType> dist(point - box.GetPosition());
+	Vector2D<_TVarType> x_axis(box.GetExtentX());
+	x_axis.Normalize();
+	_TVarType x_projection = x_axis.Dot(dist);
+	_TVarType abs_x_projection = abs(x_projection);
+	if(abs_x_projection > box.GetSize().x) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	Vector2D<_TVarType> lYAxis(pBox.GetExtentY());
-	lYAxis.Normalize();
-	_TVarType lYProjection = lYAxis.Dot(lDist);
-	_TVarType lAbsYProjection = abs(lYProjection);
-	if(lAbsYProjection > pBox.GetSize().y)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	Vector2D<_TVarType> y_axis(box.GetExtentY());
+	y_axis.Normalize();
+	_TVarType y_projection = y_axis.Dot(dist);
+	_TVarType abs_y_projection = abs(y_projection);
+	if(abs_y_projection > box.GetSize().y) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		pCollisionInfo->mTimeToCollision = 1;
-		pCollisionInfo->mPointOfCollision = pPoint;
+	if(collision_info != 0) {
+		collision_info->time_to_collision_ = 1;
+		collision_info->point_of_collision_ = point;
 
-		_TVarType lXDiff = pBox.GetSize().x - lAbsXProjection;
-		_TVarType lYDiff = pBox.GetSize().y - lAbsYProjection;
+		_TVarType x_diff = box.GetSize().x - abs_x_projection;
+		_TVarType y_diff = box.GetSize().y - abs_y_projection;
 
-		if(lXDiff < lYDiff)
-		{
-			pCollisionInfo->mNormal = lXProjection > 0 ? -lXAxis : lXAxis;
-			pCollisionInfo->mSeparationDistance = lXDiff;
+		if(x_diff < y_diff) {
+			collision_info->normal_ = x_projection > 0 ? -x_axis : x_axis;
+			collision_info->separation_distance_ = x_diff;
+		} else {
+			collision_info->normal_ = y_projection > 0 ? -y_axis : y_axis;
+			collision_info->separation_distance_ = y_diff;
 		}
-		else
-		{
-			pCollisionInfo->mNormal = lYProjection > 0 ? -lYAxis : lYAxis;
-			pCollisionInfo->mSeparationDistance = lYDiff;
-		}
-		pCollisionInfo->mNormal.Normalize();
+		collision_info->normal_.Normalize();
 	}
 
 	return true;
@@ -1046,242 +934,209 @@ bool CollisionDetector2D<_TVarType>::StaticOBRToPointTest(const OBR<_TVarType>& 
 
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticOBRToCircleTest(const OBR<_TVarType>& pBox, 
-							   const Circle<_TVarType>& pCircle,
-							   CollisionInfo* pCollisionInfo)
-{
-	Vector2D<_TVarType> lDist(pCircle.GetPosition() - pBox.GetPosition());
-	Vector2D<_TVarType> lXAxis(pBox.GetExtentX());
-	lXAxis.Normalize();
-	_TVarType lXProjection = lXAxis.Dot(lDist);
-	_TVarType lAbsXProjection = abs(lXProjection);
-	if(lAbsXProjection > pBox.GetSize().x + pCircle.GetRadius())
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+bool CollisionDetector2D<_TVarType>::StaticOBRToCircleTest(const OBR<_TVarType>& box,
+							   const Circle<_TVarType>& circle,
+							   CollisionInfo* collision_info) {
+	Vector2D<_TVarType> dist(circle.GetPosition() - box.GetPosition());
+	Vector2D<_TVarType> x_axis(box.GetExtentX());
+	x_axis.Normalize();
+	_TVarType x_projection = x_axis.Dot(dist);
+	_TVarType abs_x_projection = abs(x_projection);
+	if(abs_x_projection > box.GetSize().x + circle.GetRadius()) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	Vector2D<_TVarType> lYAxis(pBox.GetExtentY());
-	lYAxis.Normalize();
-	_TVarType lYProjection = lYAxis.Dot(lDist);
-	_TVarType lAbsYProjection = abs(lYProjection);
-	if(lAbsYProjection > pBox.GetSize().y + pCircle.GetRadius())
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	Vector2D<_TVarType> y_axis(box.GetExtentY());
+	y_axis.Normalize();
+	_TVarType y_projection = y_axis.Dot(dist);
+	_TVarType abs_y_projection = abs(y_projection);
+	if(abs_y_projection > box.GetSize().y + circle.GetRadius()) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
 	// Find the point on the box which is closest to the circle.
-	Vector2D<_TVarType> lPoL[4];
-	lPoL[0] = lPoL[1] = pBox.GetPosition() - pBox.GetExtentX() - pBox.GetExtentY();
-	lPoL[2] = lPoL[3] = pBox.GetPosition() + pBox.GetExtentX() + pBox.GetExtentY();
+	Vector2D<_TVarType> po_l[4];
+	po_l[0] = po_l[1] = box.GetPosition() - box.GetExtentX() - box.GetExtentY();
+	po_l[2] = po_l[3] = box.GetPosition() + box.GetExtentX() + box.GetExtentY();
 
-	Vector2D<_TVarType> lDir[4];
-	lDir[0] = lYAxis;
-	lDir[1] = lXAxis;
-	lDir[2] = -lYAxis;
-	lDir[3] = -lXAxis;
+	Vector2D<_TVarType> _dir[4];
+	_dir[0] = y_axis;
+	_dir[1] = x_axis;
+	_dir[2] = -y_axis;
+	_dir[3] = -x_axis;
 
-	_TVarType lMaxDirDist[4];
-	lMaxDirDist[0] = lMaxDirDist[2] = pBox.GetSize().y * 2;
-	lMaxDirDist[1] = lMaxDirDist[3] = pBox.GetSize().x * 2;
+	_TVarType max_dir_dist[4];
+	max_dir_dist[0] = max_dir_dist[2] = box.GetSize().y * 2;
+	max_dir_dist[1] = max_dir_dist[3] = box.GetSize().x * 2;
 
-	_TVarType lMinDistance = 0;
-	Vector2D<_TVarType> lClosestPoint;
-	for(int i = 0; i < 4; i++)
-	{
-		Vector2D<_TVarType> lCP;
-		_TVarType lDirDistance;
-		_TVarType lDistance = LineDistance(lPoL[i], lDir[i], pCircle.GetPosition(), lCP, lDirDistance);
+	_TVarType min_distance = 0;
+	Vector2D<_TVarType> _closest_point;
+	for(int i = 0; i < 4; i++) {
+		Vector2D<_TVarType> cp;
+		_TVarType dir_distance;
+		_TVarType distance = LineDistance(po_l[i], _dir[i], circle.GetPosition(), cp, dir_distance);
 
-		if(lDirDistance > lMaxDirDist[i])
-		{
-			lCP = lPoL[i] + lDir[i] * lMaxDirDist[i];
-			lDistance = pCircle.GetPosition().GetDistance(lCP);
-		}
-		else if(lDirDistance < 0)
-		{
-			lCP = lPoL[i];
-			lDistance = pCircle.GetPosition().GetDistance(lCP);
+		if(dir_distance > max_dir_dist[i]) {
+			cp = po_l[i] + _dir[i] * max_dir_dist[i];
+			distance = circle.GetPosition().GetDistance(cp);
+		} else if(dir_distance < 0) {
+			cp = po_l[i];
+			distance = circle.GetPosition().GetDistance(cp);
 		}
 
-		if(i == 0 || lDistance < lMinDistance)
-		{
-			lMinDistance = lDistance;
-			lClosestPoint = lCP;
+		if(i == 0 || distance < min_distance) {
+			min_distance = distance;
+			_closest_point = cp;
 		}
 	}
 
-	Vector2D<_TVarType> lNormal(pCircle.GetPosition() - lClosestPoint);
-	lNormal /= lMinDistance; // Normalize.
+	Vector2D<_TVarType> _normal(circle.GetPosition() - _closest_point);
+	_normal /= min_distance; // Normalize.
 
-	_TVarType lBoxProjection = abs(lNormal.Dot(pBox.GetExtentX())) + abs(lNormal.Dot(pBox.GetExtentY()));
-	_TVarType lDistProjection = lNormal.Dot(lDist);
-	_TVarType lAbsDistProjection = abs(lDistProjection);
-	if(lAbsDistProjection > lBoxProjection + pCircle.GetRadius())
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	_TVarType box_projection = abs(_normal.Dot(box.GetExtentX())) + abs(_normal.Dot(box.GetExtentY()));
+	_TVarType dist_projection = _normal.Dot(dist);
+	_TVarType abs_dist_projection = abs(dist_projection);
+	if(abs_dist_projection > box_projection + circle.GetRadius()) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		pCollisionInfo->mTimeToCollision = 0;
-		if(lDistProjection > 0)
-			lNormal *= -1;
-		pCollisionInfo->mNormal = lNormal;
-		pCollisionInfo->mSeparationDistance = lBoxProjection + pCircle.GetRadius() - lAbsDistProjection;
-		pCollisionInfo->mPointOfCollision = pCircle.GetPosition() + lNormal * (pCircle.GetRadius() - pCollisionInfo->mSeparationDistance * (_TVarType)0.5);
+	if(collision_info != 0) {
+		collision_info->time_to_collision_ = 0;
+		if(dist_projection > 0)
+			_normal *= -1;
+		collision_info->normal_ = _normal;
+		collision_info->separation_distance_ = box_projection + circle.GetRadius() - abs_dist_projection;
+		collision_info->point_of_collision_ = circle.GetPosition() + _normal * (circle.GetRadius() - collision_info->separation_distance_ * (_TVarType)0.5);
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticOBRToLineSegmentTest(const OBR<_TVarType>& pBox, 
-							        const Vector2D<_TVarType>& pStart,
-							        const Vector2D<_TVarType>& pEnd,
-							        CollisionInfo* pCollisionInfo)
-{
-	Vector2D<_TVarType> lExtentX(pBox.GetExtentX());
-	Vector2D<_TVarType> lExtentY(pBox.GetExtentY());
-	Vector2D<_TVarType> lDir(pEnd - pStart);
-	Vector2D<_TVarType> lNormal(lDir.y, -lDir.x);
-	lNormal.Normalize();
+bool CollisionDetector2D<_TVarType>::StaticOBRToLineSegmentTest(const OBR<_TVarType>& box,
+							        const Vector2D<_TVarType>& start,
+							        const Vector2D<_TVarType>& end,
+							        CollisionInfo* collision_info) {
+	Vector2D<_TVarType> extent_x(box.GetExtentX());
+	Vector2D<_TVarType> extent_y(box.GetExtentY());
+	Vector2D<_TVarType> _dir(end - start);
+	Vector2D<_TVarType> _normal(_dir.y, -_dir.x);
+	_normal.Normalize();
 
-	lDir *= (_TVarType)0.5;
-	Vector2D<_TVarType> lLineCenter(pStart + lDir);
-	Vector2D<_TVarType> lDist(pBox.GetPosition() - lLineCenter);
+	_dir *= (_TVarType)0.5;
+	Vector2D<_TVarType> line_center(start + _dir);
+	Vector2D<_TVarType> dist(box.GetPosition() - line_center);
 
-	_TVarType lDistProjection = lNormal.Dot(lDist);
-	_TVarType lBoxProjection = abs(lNormal.Dot(lExtentX)) + abs(lNormal.Dot(lExtentY));
+	_TVarType dist_projection = _normal.Dot(dist);
+	_TVarType box_projection = abs(_normal.Dot(extent_x)) + abs(_normal.Dot(extent_y));
 
-	if(abs(lDistProjection) > abs(lBoxProjection))
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(abs(dist_projection) > abs(box_projection)) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
-	}
-	else if(pCollisionInfo != 0)
-	{
-		if(lDistProjection > 0)
-		{
-			pCollisionInfo->mNormal = lNormal;
-			pCollisionInfo->mSeparationDistance = abs(lBoxProjection) - lDistProjection;
-		}
-		else
-		{
-			pCollisionInfo->mNormal = -lNormal;
-			pCollisionInfo->mSeparationDistance = abs(lBoxProjection) + lDistProjection;
+	} else if(collision_info != 0) {
+		if(dist_projection > 0) {
+			collision_info->normal_ = _normal;
+			collision_info->separation_distance_ = abs(box_projection) - dist_projection;
+		} else {
+			collision_info->normal_ = -_normal;
+			collision_info->separation_distance_ = abs(box_projection) + dist_projection;
 		}
 	}
 
-	lNormal = lExtentX;
-	lNormal.Normalize();
+	_normal = extent_x;
+	_normal.Normalize();
 
-	lDistProjection = lNormal.Dot(lDist);
-	lBoxProjection = pBox.GetSize().x;
-	_TVarType lLineProjection = lNormal.Dot(lDir);
-	_TVarType lLineBoxProjection = abs(lLineProjection) + lBoxProjection;
+	dist_projection = _normal.Dot(dist);
+	box_projection = box.GetSize().x;
+	_TVarType line_projection = _normal.Dot(_dir);
+	_TVarType line_box_projection = abs(line_projection) + box_projection;
 
-	if(abs(lDistProjection) > lLineBoxProjection)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(abs(dist_projection) > line_box_projection) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
-	}
-	else if(pCollisionInfo != 0)
-	{
-		_TVarType lSeparationDistance = lLineBoxProjection - abs(lDistProjection);
-		if(lSeparationDistance < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lSeparationDistance;
-			if(lDistProjection > 0)
-				pCollisionInfo->mNormal = lNormal;
+	} else if(collision_info != 0) {
+		_TVarType separation_distance = line_box_projection - abs(dist_projection);
+		if(separation_distance < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = separation_distance;
+			if(dist_projection > 0)
+				collision_info->normal_ = _normal;
 			else
-				pCollisionInfo->mNormal = -lNormal;
+				collision_info->normal_ = -_normal;
 		}
 	}
 
-	lNormal = lExtentY;
-	lNormal.Normalize();
+	_normal = extent_y;
+	_normal.Normalize();
 
-	lDistProjection = lNormal.Dot(lDist);
-	lBoxProjection = pBox.GetSize().y;
-	lLineProjection = lNormal.Dot(lDir);
-	lLineBoxProjection = abs(lLineProjection) + lBoxProjection;
+	dist_projection = _normal.Dot(dist);
+	box_projection = box.GetSize().y;
+	line_projection = _normal.Dot(_dir);
+	line_box_projection = abs(line_projection) + box_projection;
 
-	if(abs(lDistProjection) > lLineBoxProjection)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(abs(dist_projection) > line_box_projection) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
-	}
-	else if(pCollisionInfo != 0)
-	{
-		_TVarType lSeparationDistance = lLineBoxProjection - abs(lDistProjection);
-		if(lSeparationDistance < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lSeparationDistance;
-			if(lDistProjection > 0)
-				pCollisionInfo->mNormal = lNormal;
+	} else if(collision_info != 0) {
+		_TVarType separation_distance = line_box_projection - abs(dist_projection);
+		if(separation_distance < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = separation_distance;
+			if(dist_projection > 0)
+				collision_info->normal_ = _normal;
 			else
-				pCollisionInfo->mNormal = -lNormal;
+				collision_info->normal_ = -_normal;
 		}
 
-		pCollisionInfo->mTimeToCollision = 0;
+		collision_info->time_to_collision_ = 0;
 
 		// All code below calculates the point of collision.
-		if(mPOCEnabled)
-		{
-			Vector2D<_TVarType> lCorner1 = pBox.GetPosition() + lExtentX + lExtentY;
-			Vector2D<_TVarType> lCorner2 = pBox.GetPosition() + lExtentX - lExtentY;
-			Vector2D<_TVarType> lCorner3 = pBox.GetPosition() - lExtentX - lExtentY;
-			Vector2D<_TVarType> lCorner4 = pBox.GetPosition() - lExtentX + lExtentY;
+		if(poc_enabled_) {
+			Vector2D<_TVarType> corner1 = box.GetPosition() + extent_x + extent_y;
+			Vector2D<_TVarType> corner2 = box.GetPosition() + extent_x - extent_y;
+			Vector2D<_TVarType> corner3 = box.GetPosition() - extent_x - extent_y;
+			Vector2D<_TVarType> corner4 = box.GetPosition() - extent_x + extent_y;
 
-			CollisionInfo lCInfo[4];
-			int lIndex1 = -1;
-			int lIndex2 = -1;
-			if(StaticLineSegmentToLineSegmentTest(pStart, pEnd, lCorner1, lCorner2, &lCInfo[0]))
-			{
-				lIndex1 = 0;
+			CollisionInfo c_info[4];
+			int index1 = -1;
+			int index2 = -1;
+			if(StaticLineSegmentToLineSegmentTest(start, end, corner1, corner2, &c_info[0])) {
+				index1 = 0;
 			}
-			if(StaticLineSegmentToLineSegmentTest(pStart, pEnd, lCorner2, lCorner3, &lCInfo[1]))
-			{
-				if(lIndex1 < 0)
-					lIndex1 = 1;
+			if(StaticLineSegmentToLineSegmentTest(start, end, corner2, corner3, &c_info[1])) {
+				if(index1 < 0)
+					index1 = 1;
 				else
-					lIndex2 = 1;
+					index2 = 1;
 			}
-			if((lIndex1 < 0 || lIndex2 < 0) && StaticLineSegmentToLineSegmentTest(pStart, pEnd, lCorner3, lCorner4, &lCInfo[2]))
-			{
-				if(lIndex1 < 0)
-					lIndex1 = 2;
+			if((index1 < 0 || index2 < 0) && StaticLineSegmentToLineSegmentTest(start, end, corner3, corner4, &c_info[2])) {
+				if(index1 < 0)
+					index1 = 2;
 				else
-					lIndex2 = 2;
+					index2 = 2;
 			}
-			if((lIndex1 < 0 || lIndex2 < 0) && StaticLineSegmentToLineSegmentTest(pStart, pEnd, lCorner4, lCorner1, &lCInfo[3]))
-			{
-				if(lIndex1 < 0)
-					lIndex1 = 3;
+			if((index1 < 0 || index2 < 0) && StaticLineSegmentToLineSegmentTest(start, end, corner4, corner1, &c_info[3])) {
+				if(index1 < 0)
+					index1 = 3;
 				else
-					lIndex2 = 3;
+					index2 = 3;
 			}
 
-			if(lIndex2 < 0)
-			{
+			if(index2 < 0) {
 				// TODO: Fix. This is not following the definition. It should be
-				// (lCInfo[lIndex1].mPointOfCollision + pStart) * 0.5 or
-				// (lCInfo[lIndex1].mPointOfCollision + pEnd) * 0.5.
+				// (c_info[index1].point_of_collision_ + start) * 0.5 or
+				// (c_info[index1].point_of_collision_ + end) * 0.5.
 				// The problem is just to figure out which one.
-				pCollisionInfo->mPointOfCollision = lCInfo[lIndex1].mPointOfCollision;
-			}
-			else
-			{
-				pCollisionInfo->mPointOfCollision = (lCInfo[lIndex1].mPointOfCollision + lCInfo[lIndex2].mPointOfCollision) * (_TVarType)0.5;
+				collision_info->point_of_collision_ = c_info[index1].point_of_collision_;
+			} else {
+				collision_info->point_of_collision_ = (c_info[index1].point_of_collision_ + c_info[index2].point_of_collision_) * (_TVarType)0.5;
 			}
 		}
 	}
@@ -1290,186 +1145,167 @@ bool CollisionDetector2D<_TVarType>::StaticOBRToLineSegmentTest(const OBR<_TVarT
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticOBRToTriangleTest(const OBR<_TVarType>& pBox, 
-							     const Vector2D<_TVarType> pTri[3], 
-							     CollisionInfo* pCollisionInfo)
-{
-	if(pCollisionInfo != 0)
-		pCollisionInfo->mTimeToCollision = 1;
+bool CollisionDetector2D<_TVarType>::StaticOBRToTriangleTest(const OBR<_TVarType>& box,
+							     const Vector2D<_TVarType> tri[3],
+							     CollisionInfo* collision_info) {
+	if(collision_info != 0)
+		collision_info->time_to_collision_ = 1;
 
 	 // Find out wether the triangle is clockwise.
-	Vector2D<_TVarType> lPerp((pTri[1] - pTri[0]).GetPerpCW());
-	_TVarType lP = lPerp.Dot(pTri[2] - pTri[0]);
+	Vector2D<_TVarType> perp((tri[1] - tri[0]).GetPerpCW());
+	_TVarType p = perp.Dot(tri[2] - tri[0]);
 
 	// Copy triangle data and make sure it is stored in clockwise order.
-	Vector2D<_TVarType> lTri[3];
+	Vector2D<_TVarType> _tri[3];
 
-	if(lP >= 0)
-	{
-		lTri[0] = pTri[0];
-		lTri[1] = pTri[1];
-		lTri[2] = pTri[2];
-	}
-	else
-	{
-		lTri[0] = pTri[0];
-		lTri[1] = pTri[2];
-		lTri[2] = pTri[1];
+	if(p >= 0) {
+		_tri[0] = tri[0];
+		_tri[1] = tri[1];
+		_tri[2] = tri[2];
+	} else {
+		_tri[0] = tri[0];
+		_tri[1] = tri[2];
+		_tri[2] = tri[1];
 	}
 
 	// Find the corners of the box, store them in clockwise order.
-	Vector2D<_TVarType> lExtentX(pBox.GetExtentX());
-	Vector2D<_TVarType> lExtentY(pBox.GetExtentY());
-	Vector2D<_TVarType> lBox[4];
-	lBox[0] = pBox.GetPosition() - lExtentX - lExtentY;
-	lBox[1] = pBox.GetPosition() - lExtentX + lExtentY;
-	lBox[2] = pBox.GetPosition() + lExtentX + lExtentY;
-	lBox[3] = pBox.GetPosition() + lExtentX - lExtentY;
+	Vector2D<_TVarType> extent_x(box.GetExtentX());
+	Vector2D<_TVarType> extent_y(box.GetExtentY());
+	Vector2D<_TVarType> _box[4];
+	_box[0] = box.GetPosition() - extent_x - extent_y;
+	_box[1] = box.GetPosition() - extent_x + extent_y;
+	_box[2] = box.GetPosition() + extent_x + extent_y;
+	_box[3] = box.GetPosition() + extent_x - extent_y;
 
 
-	// We can't use the regular technique of separating "planes" (lines) as usual, 
+	// We can't use the regular technique of separating "planes" (lines) as usual,
 	// since the triangles are not (in general) symmetric along any axis. Instead,
 	// the separating line has to be fully defined (as opposed to only knowing the
-	// slope). Each side of the triangle and the OBR defines one such line, against 
+	// slope). Each side of the triangle and the OBR defines one such line, against
 	// which we have to clip the other shape before applying the method of separating
 	// lines.
 
 	// Now find the overlap.
-	Vector2D<_TVarType> lOut[7];
-	Vector2D<_TVarType> lEdge(lTri[1] - lTri[0]);
-	int lVCount;
-	if((lVCount = ClipPolyAgainstLine(lBox, 4, lTri[0], lEdge, lOut)) == 0)
+	Vector2D<_TVarType> out[7];
+	Vector2D<_TVarType> edge(_tri[1] - _tri[0]);
+	int v_count;
+	if((v_count = ClipPolyAgainstLine(_box, 4, _tri[0], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lTri[0]));
-		pCollisionInfo->mSeparationDistance = lProjection;
-		pCollisionInfo->mNormal = -lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _tri[0]));
+		collision_info->separation_distance_ = _projection;
+		collision_info->normal_ = -n;
 	}
 
-	lEdge = lTri[2] - lTri[1];
-	if((lVCount = ClipPolyAgainstLine(lBox, 4, lTri[1], lEdge, lOut)) == 0)
+	edge = _tri[2] - _tri[1];
+	if((v_count = ClipPolyAgainstLine(_box, 4, _tri[1], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lTri[1]));
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lProjection;
-			pCollisionInfo->mNormal = -lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _tri[1]));
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = _projection;
+			collision_info->normal_ = -n;
 		}
 	}
 
-	lEdge = lTri[0] - lTri[2];
-	if((lVCount = ClipPolyAgainstLine(lBox, 4, lTri[2], lEdge, lOut)) == 0)
+	edge = _tri[0] - _tri[2];
+	if((v_count = ClipPolyAgainstLine(_box, 4, _tri[2], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lTri[2]));
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lProjection;
-			pCollisionInfo->mNormal = -lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _tri[2]));
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = _projection;
+			collision_info->normal_ = -n;
 		}
 	}
 
-	lEdge = lBox[1] - lBox[0];
-	if((lVCount = ClipPolyAgainstLine(lTri, 3, lBox[0], lEdge, lOut)) == 0)
+	edge = _box[1] - _box[0];
+	if((v_count = ClipPolyAgainstLine(_tri, 3, _box[0], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lBox[0]));
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lProjection;
-			pCollisionInfo->mNormal = lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _box[0]));
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = _projection;
+			collision_info->normal_ = n;
 		}
 	}
 
-	lEdge = lBox[2] - lBox[1];
-	if((lVCount = ClipPolyAgainstLine(lTri, 3, lBox[1], lEdge, lOut)) == 0)
+	edge = _box[2] - _box[1];
+	if((v_count = ClipPolyAgainstLine(_tri, 3, _box[1], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lBox[1]));
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lProjection;
-			pCollisionInfo->mNormal = lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _box[1]));
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = _projection;
+			collision_info->normal_ = n;
 		}
 	}
 
-	lEdge = lBox[3] - lBox[2];
-	if((lVCount = ClipPolyAgainstLine(lTri, 3, lBox[2], lEdge, lOut)) == 0)
+	edge = _box[3] - _box[2];
+	if((v_count = ClipPolyAgainstLine(_tri, 3, _box[2], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lBox[2]));
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lProjection;
-			pCollisionInfo->mNormal = lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _box[2]));
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = _projection;
+			collision_info->normal_ = n;
 		}
 	}
 
-	lEdge = lBox[0] - lBox[3];
-	if((lVCount = ClipPolyAgainstLine(lTri, 3, lBox[3], lEdge, lOut)) == 0)
+	edge = _box[0] - _box[3];
+	if((v_count = ClipPolyAgainstLine(_tri, 3, _box[3], edge, out)) == 0)
 		return false;
-	if(pCollisionInfo != 0)
-	{
-		Vector2D<_TVarType> lN(lEdge.y, -lEdge.x);
-		lN.Normalize();
-		_TVarType lProjection = 0;
-		for(int i = 0; i < lVCount; i++)
-			lProjection += abs(lN.Dot(lOut[i] - lBox[3]));
-		if(lProjection < pCollisionInfo->mSeparationDistance)
-		{
-			pCollisionInfo->mSeparationDistance = lProjection;
-			pCollisionInfo->mNormal = lN;
+	if(collision_info != 0) {
+		Vector2D<_TVarType> n(edge.y, -edge.x);
+		n.Normalize();
+		_TVarType _projection = 0;
+		for(int i = 0; i < v_count; i++)
+			_projection += abs(n.Dot(out[i] - _box[3]));
+		if(_projection < collision_info->separation_distance_) {
+			collision_info->separation_distance_ = _projection;
+			collision_info->normal_ = n;
 		}
 
-		pCollisionInfo->mTimeToCollision = 0;
+		collision_info->time_to_collision_ = 0;
 
-		if(mPOCEnabled)
-		{
+		if(poc_enabled_) {
 			// Now we have to find the overlap in order to find the point of collision.
-			Vector2D<_TVarType> lTemp[7];
-			int lVCount;
-			lVCount = ClipPolyAgainstLine(lBox, 4, lTri[0], lTri[1] - lTri[0], lOut);
-			lVCount = ClipPolyAgainstLine(lOut, lVCount, lTri[1], lTri[2] - lTri[1], lTemp);
-			lVCount = ClipPolyAgainstLine(lTemp, lVCount, lTri[2], lTri[0] - lTri[2], lOut);
+			Vector2D<_TVarType> temp[7];
+			int v_count;
+			v_count = ClipPolyAgainstLine(_box, 4, _tri[0], _tri[1] - _tri[0], out);
+			v_count = ClipPolyAgainstLine(out, v_count, _tri[1], _tri[2] - _tri[1], temp);
+			v_count = ClipPolyAgainstLine(temp, v_count, _tri[2], _tri[0] - _tri[2], out);
 
-			pCollisionInfo->mPointOfCollision.Set(0, 0);
+			collision_info->point_of_collision_.Set(0, 0);
 			int i;
-			for(i = 0; i < lVCount; i++)
-			{
-				pCollisionInfo->mPointOfCollision += lOut[i];
+			for(i = 0; i < v_count; i++) {
+				collision_info->point_of_collision_ += out[i];
 			}
-			pCollisionInfo->mPointOfCollision /= (_TVarType)lVCount;
+			collision_info->point_of_collision_ /= (_TVarType)v_count;
 		}
 	}
 
@@ -1477,402 +1313,354 @@ bool CollisionDetector2D<_TVarType>::StaticOBRToTriangleTest(const OBR<_TVarType
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticCircleToPointTest(const Circle<_TVarType>& pCircle, 
-							     const Vector2D<_TVarType>& pPoint, 
-							     CollisionInfo* pCollisionInfo)
-{
-	_TVarType lDistanceSq = pCircle.GetPosition().GetDistanceSquared(pPoint);
-	if(lDistanceSq > pCircle.GetRadiusSquared())
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 0;
+bool CollisionDetector2D<_TVarType>::StaticCircleToPointTest(const Circle<_TVarType>& circle,
+							     const Vector2D<_TVarType>& point,
+							     CollisionInfo* collision_info) {
+	_TVarType distance_sq = circle.GetPosition().GetDistanceSquared(point);
+	if(distance_sq > circle.GetRadiusSquared()) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 0;
 		return false;
 	}
-	
-	if(pCollisionInfo != 0)
-	{
-		pCollisionInfo->mTimeToCollision = 1;
-		pCollisionInfo->mPointOfCollision = pPoint;
-		pCollisionInfo->mNormal = pCircle.GetPosition() - pPoint;
-		_TVarType lDistance = pCollisionInfo->mNormal.GetLength();
-		pCollisionInfo->mSeparationDistance = pCircle.GetRadius() - lDistance;
 
-		if(lDistance == 0)
-			pCollisionInfo->mNormal.Set(1, 0);
+	if(collision_info != 0) {
+		collision_info->time_to_collision_ = 1;
+		collision_info->point_of_collision_ = point;
+		collision_info->normal_ = circle.GetPosition() - point;
+		_TVarType distance = collision_info->normal_.GetLength();
+		collision_info->separation_distance_ = circle.GetRadius() - distance;
+
+		if(distance == 0)
+			collision_info->normal_.Set(1, 0);
 		else
-			pCollisionInfo->mNormal /= lDistance; // Normalize.
+			collision_info->normal_ /= distance; // Normalize.
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticCircleToLineSegmentTest(const Circle<_TVarType>& pCircle,
-								   const Vector2D<_TVarType>& pStart,
-								   const Vector2D<_TVarType>& pEnd,
-								   CollisionInfo* pCollisionInfo)
-{
-	Vector2D<_TVarType> lDir(pEnd - pStart);
-	Vector2D<_TVarType> lClosestPoint;
-	_TVarType lStartToCPDist;
-	_TVarType lDistance = LineDistance(pStart, lDir, pCircle.GetPosition(), lClosestPoint, lStartToCPDist);
+bool CollisionDetector2D<_TVarType>::StaticCircleToLineSegmentTest(const Circle<_TVarType>& circle,
+								   const Vector2D<_TVarType>& start,
+								   const Vector2D<_TVarType>& end,
+								   CollisionInfo* collision_info) {
+	Vector2D<_TVarType> _dir(end - start);
+	Vector2D<_TVarType> _closest_point;
+	_TVarType start_to_cp_dist;
+	_TVarType distance = LineDistance(start, _dir, circle.GetPosition(), _closest_point, start_to_cp_dist);
 
-	if(lDistance > pCircle.GetRadius())
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(distance > circle.GetRadius()) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	bool lCheckAgainstCP = false;
-	_TVarType lLineLength = lDir.GetLength();
-	if(lStartToCPDist < 0)
-	{
-		lClosestPoint = pStart;
-		lCheckAgainstCP = true;
-	}
-	else if(lStartToCPDist > lLineLength)
-	{
-		lClosestPoint = pEnd;
-		lCheckAgainstCP = true;
+	bool check_against_cp = false;
+	_TVarType line_length = _dir.GetLength();
+	if(start_to_cp_dist < 0) {
+		_closest_point = start;
+		check_against_cp = true;
+	} else if(start_to_cp_dist > line_length) {
+		_closest_point = end;
+		check_against_cp = true;
 	}
 
-	if(lCheckAgainstCP == true)
-	{
-		lDistance = pCircle.GetPosition().GetDistance(lClosestPoint);
+	if(check_against_cp == true) {
+		distance = circle.GetPosition().GetDistance(_closest_point);
 
-		if(lDistance > pCircle.GetRadius())
-		{
-			if(pCollisionInfo != 0)
-				pCollisionInfo->mTimeToCollision = 1;
+		if(distance > circle.GetRadius()) {
+			if(collision_info != 0)
+				collision_info->time_to_collision_ = 1;
 			return false;
 		}
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		pCollisionInfo->mTimeToCollision = 0;
-		pCollisionInfo->mPointOfCollision = lClosestPoint;
-		pCollisionInfo->mNormal = pCircle.GetPosition() - lClosestPoint;
-		pCollisionInfo->mNormal.Normalize();
-		pCollisionInfo->mSeparationDistance = pCircle.GetRadius() - lDistance;
+	if(collision_info != 0) {
+		collision_info->time_to_collision_ = 0;
+		collision_info->point_of_collision_ = _closest_point;
+		collision_info->normal_ = circle.GetPosition() - _closest_point;
+		collision_info->normal_.Normalize();
+		collision_info->separation_distance_ = circle.GetRadius() - distance;
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector2D<_TVarType>::StaticCircleToTriangleTest(const Circle<_TVarType>& pCircle, 
-								const Vector2D<_TVarType> pTri[3], 
-								CollisionInfo* pCollisionInfo)
-{
-	Vector2D<_TVarType> lCP; // Closest point.
-	Vector2D<_TVarType> lNormal;
-	_TVarType lProjection;
-	_TVarType lDistance = TriangleDistance(pTri, pCircle.GetPosition(), lCP, lNormal, lProjection);
+bool CollisionDetector2D<_TVarType>::StaticCircleToTriangleTest(const Circle<_TVarType>& circle,
+								const Vector2D<_TVarType> tri[3],
+								CollisionInfo* collision_info) {
+	Vector2D<_TVarType> cp; // Closest point.
+	Vector2D<_TVarType> _normal;
+	_TVarType _projection;
+	_TVarType distance = TriangleDistance(tri, circle.GetPosition(), cp, _normal, _projection);
 
-	if(lDistance > pCircle.GetRadius())
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(distance > circle.GetRadius()) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		if(lDistance == 0)
-		{
-			pCollisionInfo->mNormal = lNormal;
-			pCollisionInfo->mSeparationDistance = lProjection + pCircle.GetRadius();
-		}
-		else
-		{
-			pCollisionInfo->mNormal = pCircle.GetPosition() - lCP;
-			pCollisionInfo->mNormal.Normalize();
-			pCollisionInfo->mSeparationDistance = pCircle.GetRadius() - lDistance;
+	if(collision_info != 0) {
+		if(distance == 0) {
+			collision_info->normal_ = _normal;
+			collision_info->separation_distance_ = _projection + circle.GetRadius();
+		} else {
+			collision_info->normal_ = circle.GetPosition() - cp;
+			collision_info->normal_.Normalize();
+			collision_info->separation_distance_ = circle.GetRadius() - distance;
 		}
 
-		pCollisionInfo->mTimeToCollision = 0;
-		pCollisionInfo->mPointOfCollision = lCP;
+		collision_info->time_to_collision_ = 0;
+		collision_info->point_of_collision_ = cp;
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-int CollisionDetector2D<_TVarType>::ClipPolyAgainstLine(Vector2D<_TVarType>* pPoly, int pVertexCount,
-							const Vector2D<_TVarType>& pPointOnLine,
-							const Vector2D<_TVarType>& pDir,
-							Vector2D<_TVarType>* pPolyOut)
-{
-	Vector2D<_TVarType> lNormal(pDir.y, -pDir.x);
-	lNormal.Normalize();
-	_TVarType lC = -lNormal.Dot(pPointOnLine);
+int CollisionDetector2D<_TVarType>::ClipPolyAgainstLine(Vector2D<_TVarType>* poly, int vertex_count,
+							const Vector2D<_TVarType>& point_on_line,
+							const Vector2D<_TVarType>& dir,
+							Vector2D<_TVarType>* poly_out) {
+	Vector2D<_TVarType> _normal(dir.y, -dir.x);
+	_normal.Normalize();
+	_TVarType c = -_normal.Dot(point_on_line);
 
-	int lOutVCount = 0;
-	int lStart = pVertexCount - 1;
-	int lEnd = 0;
-	while(lEnd < pVertexCount)
-	{
-		_TVarType lS = lNormal.Dot(pPoly[lStart]) + lC;
-		_TVarType lE = lNormal.Dot(pPoly[lEnd]) + lC;
+	int out_v_count = 0;
+	int _start = vertex_count - 1;
+	int _end = 0;
+	while(_end < vertex_count) {
+		_TVarType s = _normal.Dot(poly[_start]) + c;
+		_TVarType e = _normal.Dot(poly[_end]) + c;
 
-		if(lS <= 0)
-		{
-			if(lE > 0)
-			{
+		if(s <= 0) {
+			if(e > 0) {
 				// Exiting the clipping plane. Start point clipped, store start point.
-				const _TVarType t = -lS / (lE - lS);
-				pPolyOut[lOutVCount++] = pPoly[lStart] + (pPoly[lEnd] - pPoly[lStart]) * t;
+				const _TVarType t = -s / (e - s);
+				poly_out[out_v_count++] = poly[_start] + (poly[_end] - poly[_start]) * t;
 			}
-		}
-		else
-		{
-			if (lE <= 0)
-			{
+		} else {
+			if (e <= 0) {
 				// Entering the clipping plane. Store both points. The first point is just copied.
-				pPolyOut[lOutVCount++] = pPoly[lStart];
-				const _TVarType t = -lE / (lS - lE);
-				pPolyOut[lOutVCount++] = pPoly[lEnd] + (pPoly[lStart] - pPoly[lEnd]) * t;
-			}
-			else
-			{
+				poly_out[out_v_count++] = poly[_start];
+				const _TVarType t = -e / (s - e);
+				poly_out[out_v_count++] = poly[_end] + (poly[_start] - poly[_end]) * t;
+			} else {
 				// Both points are visible, store the start point.
-				pPolyOut[lOutVCount++] = pPoly[lStart];
+				poly_out[out_v_count++] = poly[_start];
 			}
 		}
-		lStart = lEnd;
-		lEnd++;
+		_start = _end;
+		_end++;
 	}
 
-	return lOutVCount;
+	return out_v_count;
 }
 
 template<class _TVarType>
-_TVarType CollisionDetector2D<_TVarType>::TriangleDistance(const Vector2D<_TVarType> pTri[3], 
-							   const Vector2D<_TVarType>& pPoint,
-							   Vector2D<_TVarType>& pClosestPoint,
-							   Vector2D<_TVarType>& pNormal,
-							   _TVarType& pProjection)
-{
-	Vector2D<_TVarType> lDir0(pTri[1] - pTri[0]);
-	Vector2D<_TVarType> lDir1(pTri[2] - pTri[1]);
-	Vector2D<_TVarType> lDir2(pTri[0] - pTri[2]);
+_TVarType CollisionDetector2D<_TVarType>::TriangleDistance(const Vector2D<_TVarType> tri[3],
+							   const Vector2D<_TVarType>& point,
+							   Vector2D<_TVarType>& closest_point,
+							   Vector2D<_TVarType>& normal,
+							   _TVarType& projection) {
+	Vector2D<_TVarType> dir0(tri[1] - tri[0]);
+	Vector2D<_TVarType> dir1(tri[2] - tri[1]);
+	Vector2D<_TVarType> dir2(tri[0] - tri[2]);
 
 	// Relative Position.
-	Vector2D<_TVarType> lRP0(pPoint - pTri[0]);
-	Vector2D<_TVarType> lRP1(pPoint - pTri[1]);
-	Vector2D<_TVarType> lRP2(pPoint - pTri[2]);
+	Vector2D<_TVarType> r_p0(point - tri[0]);
+	Vector2D<_TVarType> r_p1(point - tri[1]);
+	Vector2D<_TVarType> r_p2(point - tri[2]);
 
-	Vector2D<_TVarType> lNormal0(lDir0.y, -lDir0.x);
-	Vector2D<_TVarType> lNormal1(lDir1.y, -lDir1.x);
-	Vector2D<_TVarType> lNormal2(lDir2.y, -lDir2.x);
+	Vector2D<_TVarType> normal0(dir0.y, -dir0.x);
+	Vector2D<_TVarType> normal1(dir1.y, -dir1.x);
+	Vector2D<_TVarType> normal2(dir2.y, -dir2.x);
 
-	_TVarType lNP0 = lNormal0.Dot(lRP0);
-	_TVarType lNP1 = lNormal1.Dot(lRP1);
-	_TVarType lNP2 = lNormal2.Dot(lRP2);
+	_TVarType n_p0 = normal0.Dot(r_p0);
+	_TVarType n_p1 = normal1.Dot(r_p1);
+	_TVarType n_p2 = normal2.Dot(r_p2);
 
-	if((lNP0 <= 0 && lNP1 <= 0 && lNP2 <= 0) || (lNP0 >= 0 && lNP1 >= 0 && lNP2 >= 0))
-	{
+	if((n_p0 <= 0 && n_p1 <= 0 && n_p2 <= 0) || (n_p0 >= 0 && n_p1 >= 0 && n_p2 >= 0)) {
 		// Inside the triangle.
-		pClosestPoint = pPoint;
+		closest_point = point;
 
-		pProjection = abs(lNP0);
-		pNormal = lNormal0;
-		_TVarType lAbsNP1 = abs(lNP1);
-		_TVarType lAbsNP2 = abs(lNP2);
-		if(lAbsNP1 < pProjection)
-		{
-			pProjection = lAbsNP1;
-			pNormal = lNormal1;
+		projection = abs(n_p0);
+		normal = normal0;
+		_TVarType abs_n_p1 = abs(n_p1);
+		_TVarType abs_n_p2 = abs(n_p2);
+		if(abs_n_p1 < projection) {
+			projection = abs_n_p1;
+			normal = normal1;
 		}
-		if(lAbsNP2 < pProjection)
-		{
-			pProjection = lAbsNP2;
-			pNormal = lNormal2;
+		if(abs_n_p2 < projection) {
+			projection = abs_n_p2;
+			normal = normal2;
 		}
 
-		_TVarType lLength = pNormal.GetLength();
-		pNormal /= lLength;
-		pProjection /= lLength;
+		_TVarType length = normal.GetLength();
+		normal /= length;
+		projection /= length;
 
-		if(lNP0 > 0)
-		{
-			pNormal = -pNormal;
+		if(n_p0 > 0) {
+			normal = -normal;
 		}
 
 		return 0;
 	}
 
-	_TVarType lL0 = lDir0.GetLength();
-	_TVarType lL1 = lDir1.GetLength();
-	_TVarType lL2 = lDir2.GetLength();
+	_TVarType l0 = dir0.GetLength();
+	_TVarType l1 = dir1.GetLength();
+	_TVarType l2 = dir2.GetLength();
 
 	// Normalize.
-	lDir0 /= lL0;
-	lDir1 /= lL1;
-	lDir2 /= lL2;
+	dir0 /= l0;
+	dir1 /= l1;
+	dir2 /= l2;
 
-	_TVarType lDP0 = lDir0.Dot(lRP0);
-	_TVarType lDP1 = lDir1.Dot(lRP1);
-	_TVarType lDP2 = lDir2.Dot(lRP2);
+	_TVarType d_p0 = dir0.Dot(r_p0);
+	_TVarType d_p1 = dir1.Dot(r_p1);
+	_TVarType d_p2 = dir2.Dot(r_p2);
 
-	Vector2D<_TVarType> lCP0;
-	Vector2D<_TVarType> lCP1;
-	Vector2D<_TVarType> lCP2;
-	if(lDP0 < 0)
-		lCP0 = pTri[0];
-	else if(lDP0 > lL0)
-		lCP0 = pTri[1];
+	Vector2D<_TVarType> c_p0;
+	Vector2D<_TVarType> c_p1;
+	Vector2D<_TVarType> c_p2;
+	if(d_p0 < 0)
+		c_p0 = tri[0];
+	else if(d_p0 > l0)
+		c_p0 = tri[1];
 	else
-		lCP0 = pTri[0] + lDir0 * lDP0;
+		c_p0 = tri[0] + dir0 * d_p0;
 
-	if(lDP1 < 0)
-		lCP1 = pTri[1];
-	else if(lDP1 > lL1)
-		lCP1 = pTri[2];
+	if(d_p1 < 0)
+		c_p1 = tri[1];
+	else if(d_p1 > l1)
+		c_p1 = tri[2];
 	else
-		lCP1 = pTri[1] + lDir1 * lDP1;
+		c_p1 = tri[1] + dir1 * d_p1;
 
-	if(lDP2 < 0)
-		lCP2 = pTri[2];
-	else if(lDP2 > lL2)
-		lCP2 = pTri[0];
+	if(d_p2 < 0)
+		c_p2 = tri[2];
+	else if(d_p2 > l2)
+		c_p2 = tri[0];
 	else
-		lCP2 = pTri[2] + lDir2 * lDP2;
+		c_p2 = tri[2] + dir2 * d_p2;
 
-	_TVarType lMinDistance = lCP0.GetDistance(pPoint);
-	pClosestPoint = lCP0;
+	_TVarType min_distance = c_p0.GetDistance(point);
+	closest_point = c_p0;
 
-	_TVarType lDistance = lCP1.GetDistance(pPoint);
-	if(lDistance < lMinDistance)
-	{
-		lMinDistance = lDistance;
-		pClosestPoint = lCP1;
+	_TVarType distance = c_p1.GetDistance(point);
+	if(distance < min_distance) {
+		min_distance = distance;
+		closest_point = c_p1;
 	}
 
-	lDistance = lCP2.GetDistance(pPoint);
-	if(lDistance < lMinDistance)
-	{
-		lMinDistance = lDistance;
-		pClosestPoint = lCP2;
+	distance = c_p2.GetDistance(point);
+	if(distance < min_distance) {
+		min_distance = distance;
+		closest_point = c_p2;
 	}
 
-	return lMinDistance;
+	return min_distance;
 }
 
 /*
-namespace Collision
-{
+namespace Collision {
 
-	bool CollisionDetector2D<_TVarType>::StaticAABRToTriangleTest(const AABR2D& pBox, const Triangle2D& pTriangle, Vector2D& pSeparation)
-	{
+	bool CollisionDetector2D<_TVarType>::StaticAABRToTriangleTest(const AABR2D& box, const Triangle2D& triangle, Vector2D& pSeparation) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::StaticOBRToTriangleTest(const OBR2D& pBox, const Triangle2D& pTriangle, Vector2D& pSeparation)
-	{
+	bool CollisionDetector2D<_TVarType>::StaticOBRToTriangleTest(const OBR2D& box, const Triangle2D& triangle, Vector2D& pSeparation) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::StaticCircleToTriangleTest(const Circle& pCircle, const Triangle2D& pTriangle, Vector2D& pSeparation)
-	{
+	bool CollisionDetector2D<_TVarType>::StaticCircleToTriangleTest(const Circle& circle, const Triangle2D& triangle, Vector2D& pSeparation) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::StaticTriangleToPointTest(const Triangle2D& pTriangle, const Vector2D& pPoint, Vector2D& pSeparation)
-	{
+	bool CollisionDetector2D<_TVarType>::StaticTriangleToPointTest(const Triangle2D& triangle, const Vector2D& point, Vector2D& pSeparation) {
 		return false;
 	}
 
 
-	bool CollisionDetector2D<_TVarType>::VelocityAABRToPointTest(const AABR2D& pBox, 
-								 const Vector2D& pPoint,
+	bool CollisionDetector2D<_TVarType>::VelocityAABRToPointTest(const AABR2D& box,
+								 const Vector2D& point,
 								 const Vector2D& pBoxVelocity,
 								 const Vector2D& pPointVelocity,
-								 _TVarType& pTimeToCollision)
-	{
+								 _TVarType& time_to_collision) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::VelocityAABRToOBRTest(const AABR2D& pBox1, 
-							   const OBR2D& pBox2,
-  							   const Vector2D& pBox1Velocity,
-							   const Vector2D& pBox2Velocity,
-							   _TVarType& pTimeToCollision)
-	{
+	bool CollisionDetector2D<_TVarType>::VelocityAABRToOBRTest(const AABR2D& box1,
+							   const OBR2D& box2,
+  							   const Vector2D& box1_velocity,
+							   const Vector2D& box2_velocity,
+							   _TVarType& time_to_collision) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::VelocityAABRToCircleTest(const AABR2D& pBox, 
-								  const Circle& pCircle,
+	bool CollisionDetector2D<_TVarType>::VelocityAABRToCircleTest(const AABR2D& box,
+								  const Circle& circle,
   								  const Vector2D& pBoxVelocity,
 								  const Vector2D& pCircleVelocity,
-								  _TVarType& pTimeToCollision)
-	{
+								  _TVarType& time_to_collision) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::VelocityAABRToTriangleTest(const AABR2D& pBox, 
-									const Triangle2D& pTriangle,
+	bool CollisionDetector2D<_TVarType>::VelocityAABRToTriangleTest(const AABR2D& box,
+									const Triangle2D& triangle,
   									const Vector2D& pBoxVelocity,
 									const Vector2D& pTriangleVelocity,
-									_TVarType& pTimeToCollision)
-	{
+									_TVarType& time_to_collision) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::VelocityOBRToPointTest(const OBR2D& pBox,
-								const Vector2D& pPoint,
+	bool CollisionDetector2D<_TVarType>::VelocityOBRToPointTest(const OBR2D& box,
+								const Vector2D& point,
 								const Vector2D& pBoxVelocity,
 								const Vector2D& pPointVelocity,
-								_TVarType& pTimeToCollision)
-	{
+								_TVarType& time_to_collision) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::VelocityOBRToCircleTest(const OBR2D& pBox,
-								 const Circle& pCircle,
+	bool CollisionDetector2D<_TVarType>::VelocityOBRToCircleTest(const OBR2D& box,
+								 const Circle& circle,
 								 const Vector2D& pBoxVelocity,
 								 const Vector2D& pCircleVelocity,
-								 _TVarType& pTimeToCollision)
-	{
+								 _TVarType& time_to_collision) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::VelocityOBRToTriangleTest(const OBR2D& pBox, 
-								   const Triangle2D& pTriangle,
+	bool CollisionDetector2D<_TVarType>::VelocityOBRToTriangleTest(const OBR2D& box,
+								   const Triangle2D& triangle,
 								   const Vector2D& pBoxVelocity,
 								   const Vector2D& pTriangleVelocity,
-								   _TVarType& pTimeToCollision)
-	{
+								   _TVarType& time_to_collision) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::VelocityCircleToPointTest(const Circle& pCircle, 
-								   const Vector2D& pPoint,
+	bool CollisionDetector2D<_TVarType>::VelocityCircleToPointTest(const Circle& circle,
+								   const Vector2D& point,
 								   const Vector2D& pCircleVelocity,
 								   const Vector2D& pPointVelocity,
-								   _TVarType& pTimeToCollision)
-	{
+								   _TVarType& time_to_collision) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::VelocityCircleToTriangleTest(const Circle& pCircle, 
-									  const Triangle2D& pTriangle,
+	bool CollisionDetector2D<_TVarType>::VelocityCircleToTriangleTest(const Circle& circle,
+									  const Triangle2D& triangle,
 									  const Vector2D& pCircleVelocity,
 									  const Vector2D& pTriangleVelocity,
-									  _TVarType& pTimeToCollision)
-	{
+									  _TVarType& time_to_collision) {
 		return false;
 	}
 
-	bool CollisionDetector2D<_TVarType>::VelocityTriangleToPointTest(const Triangle2D& pTriangle, 
-									 const Vector2D& pPoint,
+	bool CollisionDetector2D<_TVarType>::VelocityTriangleToPointTest(const Triangle2D& triangle,
+									 const Vector2D& point,
 									 const Vector2D& pTriangleVelocity,
 									 const Vector2D& pPointVelocity,
-									 _TVarType& pTimeToCollision)
-	{
+									 _TVarType& time_to_collision) {
 		return false;
 	}
 

@@ -5,184 +5,146 @@
 */
 
 #include "pch.h"
-#include "../../Include/GUI/UiFloatingLayout.h"
-#include "../../Include/GUI/UiWindow.h"
+#include "../../include/gui/uifloatinglayout.h"
+#include "../../include/gui/uiwindow.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
 FloatingLayout::FloatingLayout() :
 	Layout(),
-	mX(POSOFFSET),
-	mY(POSOFFSET),
-	mPosCount(0)
-{
+	x_(kPosoffset),
+	y_(kPosoffset),
+	pos_count_(0) {
 }
 
-FloatingLayout::~FloatingLayout()
-{
+FloatingLayout::~FloatingLayout() {
 }
 
-Layout::Type FloatingLayout::GetType() const
-{
-	return Layout::FLOATINGLAYOUT;
+Layout::Type FloatingLayout::GetType() const {
+	return Layout::kFloatinglayout;
 }
 
-void FloatingLayout::Add(Component* pComponent, int pParam1, int pParam2)
-{
-	if (mChildList.empty() == false)
-	{
-		Component* lChild = mChildList.back();
-		if (lChild->GetType() == Component::WINDOW)
-		{
-			((Window*)lChild)->SetActive(false);
+void FloatingLayout::Add(Component* component, int param1, int param2) {
+	if (child_list_.empty() == false) {
+		Component* child = child_list_.back();
+		if (child->GetType() == Component::kWindow) {
+			((Window*)child)->SetActive(false);
 		}
 	}
 
-	mChildList.push_back(pComponent);
-	//mChildList.unique();
+	child_list_.push_back(component);
+	//child_list_.unique();
 
-	if (pComponent->GetType() == Component::WINDOW)
-	{
-		((Window*)pComponent)->SetActive(true);
+	if (component->GetType() == Component::kWindow) {
+		((Window*)component)->SetActive(true);
 	}
 
-	if (pParam1 != 0 || pParam2 != 0)
-	{
-		pComponent->SetPos(pParam1, pParam2);
-	}
-	else
-	{
-		pComponent->SetPos(mX, mY);
-		mX += POSOFFSET;
-		mY += POSOFFSET;
-		mPosCount++;
+	if (param1 != 0 || param2 != 0) {
+		component->SetPos(param1, param2);
+	} else {
+		component->SetPos(x_, y_);
+		x_ += kPosoffset;
+		y_ += kPosoffset;
+		pos_count_++;
 
-		if (mPosCount >= 10)
-		{
-			mX = POSOFFSET;
-			mY = POSOFFSET;
-			mPosCount = 0;
+		if (pos_count_ >= 10) {
+			x_ = kPosoffset;
+			y_ = kPosoffset;
+			pos_count_ = 0;
 		}
 	}
 }
 
-void FloatingLayout::Remove(Component* pComponent)
-{
-	mChildList.remove(pComponent);
+void FloatingLayout::Remove(Component* component) {
+	child_list_.remove(component);
 
-	if (!mChildList.empty())
-	{
-		Component* lComp = *(--mChildList.end());
-		if (lComp->GetType() == Component::WINDOW)
-		{
-			((Window*)lComp)->SetActive(true);
+	if (!child_list_.empty()) {
+		Component* comp = *(--child_list_.end());
+		if (comp->GetType() == Component::kWindow) {
+			((Window*)comp)->SetActive(true);
 		}
 	}
 }
 
-int FloatingLayout::GetNumComponents() const
-{
-	return (int)mChildList.size();
+int FloatingLayout::GetNumComponents() const {
+	return (int)child_list_.size();
 }
 
-Component* FloatingLayout::GetFirst()
-{
-	mIter = mChildList.begin();
-	if (mIter != mChildList.end())
-	{
-		return *mIter;
+Component* FloatingLayout::GetFirst() {
+	iter_ = child_list_.begin();
+	if (iter_ != child_list_.end()) {
+		return *iter_;
 	}
 	return 0;
 }
 
-Component* FloatingLayout::GetNext()
-{
-	if (mIter != mChildList.end())
-	{
-		++mIter;
-		if (mIter != mChildList.end())
-		{
-			return *mIter;
+Component* FloatingLayout::GetNext() {
+	if (iter_ != child_list_.end()) {
+		++iter_;
+		if (iter_ != child_list_.end()) {
+			return *iter_;
 		}
 	}
 	return 0;
 }
 
-Component* FloatingLayout::GetLast()
-{
-	if(mChildList.empty())
-	{
-		mIter = mChildList.begin();
+Component* FloatingLayout::GetLast() {
+	if(child_list_.empty()) {
+		iter_ = child_list_.begin();
 		return 0;
-	}
-	else
-	{
-		mIter = --mChildList.end();
-		return *mIter;
+	} else {
+		iter_ = --child_list_.end();
+		return *iter_;
 	}
 }
 
-Component* FloatingLayout::GetPrev()
-{
-	if (mIter != mChildList.begin())
-	{
-		return *(--mIter);
+Component* FloatingLayout::GetPrev() {
+	if (iter_ != child_list_.begin()) {
+		return *(--iter_);
 	}
 
 	return 0;
 }
 
-void FloatingLayout::UpdateLayout()
-{
-	ComponentList::iterator lIter;
+void FloatingLayout::UpdateLayout() {
+	ComponentList::iterator iter;
 
-	for (lIter = mChildList.begin(); lIter != mChildList.end(); ++lIter)
-	{
-		Component* lChild = *lIter;
-		if (lChild->GetSize() != lChild->GetPreferredSize())
-		{
-			lChild->SetSize(lChild->GetPreferredSize());
+	for (iter = child_list_.begin(); iter != child_list_.end(); ++iter) {
+		Component* child = *iter;
+		if (child->GetSize() != child->GetPreferredSize()) {
+			child->SetSize(child->GetPreferredSize());
 		}
 	}
 }
 
-PixelCoord FloatingLayout::GetPreferredSize(bool /*pForceAdaptive*/)
-{
+PixelCoord FloatingLayout::GetPreferredSize(bool /*force_adaptive*/) {
 	return PixelCoord(0, 0);
 }
 
-PixelCoord FloatingLayout::GetMinSize() const
-{
+PixelCoord FloatingLayout::GetMinSize() const {
 	return PixelCoord(0, 0);
 }
 
-PixelCoord FloatingLayout::GetContentSize() const
-{
+PixelCoord FloatingLayout::GetContentSize() const {
 	return PixelCoord(0, 0);
 }
 
-void FloatingLayout::MoveToTop(Component* pComponent)
-{
-	ComponentList::iterator x = mChildList.begin();
-	for (; x != mChildList.end(); ++x)
-	{
-		if (*x == pComponent)
-		{
+void FloatingLayout::MoveToTop(Component* component) {
+	ComponentList::iterator x = child_list_.begin();
+	for (; x != child_list_.end(); ++x) {
+		if (*x == component) {
 			break;
 		}
 	}
-	if (x != mChildList.end())
-	{
-		Component* lLast = *(--mChildList.end());
-		if (lLast->GetType() == Component::WINDOW &&
-		   lLast != pComponent)
-		{
-			((Window*)lLast)->SetActive(false);
+	if (x != child_list_.end()) {
+		Component* last = *(--child_list_.end());
+		if (last->GetType() == Component::kWindow &&
+		   last != component) {
+			((Window*)last)->SetActive(false);
 		}
 
-		mChildList.erase(x);
-		mChildList.push_back(pComponent);
+		child_list_.erase(x);
+		child_list_.push_back(component);
 	}
 }
 

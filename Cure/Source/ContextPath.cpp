@@ -1,103 +1,89 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/ContextPath.h"
-#include "../../Tbc/Include/ChunkyBoneGeometry.h"
+#include "../include/contextpath.h"
+#include "../../tbc/include/chunkybonegeometry.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-ContextPath::SplinePath::SplinePath(vec3* pKeyFrames,
-	float* pTimeTags,
-	int pCount,
-	str pType,
-	float pDistanceNormal,
-	float pLikeliness):
-	Parent(pKeyFrames, pTimeTags, pCount, SplineShape::TYPE_CATMULLROM, TAKE_OWNERSHIP),
-	mType(pType),
-	mDistanceNormal(pDistanceNormal),
-	mLikeliness(pLikeliness)
-{
+ContextPath::SplinePath::SplinePath(vec3* key_frames,
+	float* time_tags,
+	int count,
+	str type,
+	float distance_normal,
+	float likeliness):
+	Parent(key_frames, time_tags, count, SplineShape::kTypeCatmullrom, TAKE_OWNERSHIP),
+	type_(type),
+	distance_normal_(distance_normal),
+	likeliness_(likeliness) {
 	EnableModulo(false);
 }
 
-ContextPath::SplinePath::SplinePath(const SplinePath& pOriginal):
-	Parent(pOriginal),
-	mType(pOriginal.mType),
-	mDistanceNormal(pOriginal.mDistanceNormal),
-	mLikeliness(pOriginal.mLikeliness)
-{
+ContextPath::SplinePath::SplinePath(const SplinePath& original):
+	Parent(original),
+	type_(original.type_),
+	distance_normal_(original.distance_normal_),
+	likeliness_(original.likeliness_) {
 }
 
-const str& ContextPath::SplinePath::GetType() const
-{
-	return mType;
+const str& ContextPath::SplinePath::GetType() const {
+	return type_;
 }
 
-float ContextPath::SplinePath::GetDistanceNormal() const
-{
-	return mDistanceNormal;
+float ContextPath::SplinePath::GetDistanceNormal() const {
+	return distance_normal_;
 }
 
-float ContextPath::SplinePath::GetLikeliness() const
-{
-	return mLikeliness;
+float ContextPath::SplinePath::GetLikeliness() const {
+	return likeliness_;
 }
 
-float ContextPath::SplinePath::GetTimeAsDistance(float pTime) const
-{
-	return pTime / mDistanceNormal;
+float ContextPath::SplinePath::GetTimeAsDistance(float time) const {
+	return time / distance_normal_;
 }
 
-float ContextPath::SplinePath::GetDistanceLeft() const
-{
-	const float lTime = GetCurrentInterpolationTime();
-	return GetTimeAsDistance(1-lTime);
+float ContextPath::SplinePath::GetDistanceLeft() const {
+	const float _time = GetCurrentInterpolationTime();
+	return GetTimeAsDistance(1-_time);
 }
 
 
 
-ContextPath::ContextPath(ResourceManager* pResourceManager, const str& pClassId):
-	CppContextObject(pResourceManager, pClassId)
-{
+ContextPath::ContextPath(ResourceManager* resource_manager, const str& class_id):
+	CppContextObject(resource_manager, class_id) {
 }
 
-ContextPath::~ContextPath()
-{
-	PathArray::iterator x = mPathArray.begin();
-	for (; x != mPathArray.end(); ++x)
-	{
+ContextPath::~ContextPath() {
+	PathArray::iterator x = path_array_.begin();
+	for (; x != path_array_.end(); ++x) {
 		delete *x;
 	}
-	mPathArray.clear();
+	path_array_.clear();
 }
 
 
 
-void ContextPath::SetTagIndex(int pIndex)
-{
-	const Tbc::ChunkyClass::Tag& lTag = ((CppContextObject*)mParent)->GetClass()->GetTag(pIndex);
-	deb_assert(lTag.mFloatValueList.size() == 1);
-	deb_assert(lTag.mStringValueList.size() <= 1);
-	const size_t lBodyCount = lTag.mBodyIndexList.size();
-	deb_assert(lBodyCount >= 2);
-	if (lTag.mFloatValueList.size() != 1 || lBodyCount < 2)
-	{
+void ContextPath::SetTagIndex(int index) {
+	const tbc::ChunkyClass::Tag& tag = ((CppContextObject*)parent_)->GetClass()->GetTag(index);
+	deb_assert(tag.float_value_list_.size() == 1);
+	deb_assert(tag.string_value_list_.size() <= 1);
+	const size_t body_count = tag.body_index_list_.size();
+	deb_assert(body_count >= 2);
+	if (tag.float_value_list_.size() != 1 || body_count < 2) {
 		return;
 	}
 
-	str lType;
-	if (lTag.mStringValueList.size() == 1)
-	{
-		lType = lTag.mStringValueList[0];
+	str _type;
+	if (tag.string_value_list_.size() == 1) {
+		_type = tag.string_value_list_[0];
 	}
 
 	// 1. Store positions.
@@ -106,65 +92,56 @@ void ContextPath::SetTagIndex(int pIndex)
 	//
 	// TRICKY: this algorithm adds one extra head vertex and two extra tail vertices to the
 	// path, to avoid spline looping.
-	float lTotalDistance = 1;	// Start at an offset (head).
-	Tbc::ChunkyPhysics* lPhysics = mParent->GetPhysics();
-	vec3* lPathPositions = new vec3[1+lBodyCount+2];
-	float* lTimes = new float[1+lBodyCount+2];
+	float total_distance = 1;	// Start at an offset (head).
+	tbc::ChunkyPhysics* physics = parent_->GetPhysics();
+	vec3* path_positions = new vec3[1+body_count+2];
+	float* times = new float[1+body_count+2];
 	size_t x;
-	for (x = 0; x < lBodyCount; ++x)
-	{
-		const int lBoneIndex = lTag.mBodyIndexList[x];
+	for (x = 0; x < body_count; ++x) {
+		const int bone_index = tag.body_index_list_[x];
 #ifdef LEPRA_DEBUG
-		Tbc::ChunkyBoneGeometry* lBone = lPhysics->GetBoneGeometry(lBoneIndex);
-		deb_assert(lBone->GetBoneType() == Tbc::ChunkyBoneGeometry::BONE_POSITION);
+		tbc::ChunkyBoneGeometry* bone = physics->GetBoneGeometry(bone_index);
+		deb_assert(bone->GetBoneType() == tbc::ChunkyBoneGeometry::kBonePosition);
 #endif // Debug
-		lPathPositions[x+1] = lPhysics->GetBoneTransformation(lBoneIndex).GetPosition();
-		if (x > 0)	// We only start from the start position (not origo).
-		{
-			lTotalDistance += lPathPositions[x+1].GetDistance(lPathPositions[x]);
-			lTimes[x+1] = lTotalDistance;
+		path_positions[x+1] = physics->GetBoneTransformation(bone_index).GetPosition();
+		if (x > 0) {	// We only start from the start position (not origo).
+			total_distance += path_positions[x+1].GetDistance(path_positions[x]);
+			times[x+1] = total_distance;
 		}
 	}
-	lTimes[0] = -1;
-	lPathPositions[0] = lPathPositions[1];
-	lTimes[1] = 0;
-	lTimes[1+lBodyCount] = lTotalDistance+1.0f;
-	lTimes[1+lBodyCount+1] = lTotalDistance+2.0f;
-	const float lScale = 1 / lTotalDistance;
-	for (size_t x = 0; x <= 1+lBodyCount+1; ++x)
-	{
-		lTimes[x] *= lScale;
+	times[0] = -1;
+	path_positions[0] = path_positions[1];
+	times[1] = 0;
+	times[1+body_count] = total_distance+1.0f;
+	times[1+body_count+1] = total_distance+2.0f;
+	const float scale = 1 / total_distance;
+	for (size_t x = 0; x <= 1+body_count+1; ++x) {
+		times[x] *= scale;
 	}
-	lPathPositions[1+lBodyCount] = lPathPositions[1+lBodyCount-1];
-	lPathPositions[1+lBodyCount+1] = lPathPositions[1+lBodyCount-1];
-	const float lLikeliness = lTag.mFloatValueList[0];
-	SplinePath* lSplinePath = new SplinePath(lPathPositions, lTimes, lBodyCount+2, lType, lScale, lLikeliness);
-	lSplinePath->StartInterpolation(0);
-	mPathArray.push_back(lSplinePath);
+	path_positions[1+body_count] = path_positions[1+body_count-1];
+	path_positions[1+body_count+1] = path_positions[1+body_count-1];
+	const float _likeliness = tag.float_value_list_[0];
+	SplinePath* spline_path = new SplinePath(path_positions, times, body_count+2, _type, scale, _likeliness);
+	spline_path->StartInterpolation(0);
+	path_array_.push_back(spline_path);
 }
 
-int ContextPath::GetPathCount() const
-{
-	return (int)mPathArray.size();
+int ContextPath::GetPathCount() const {
+	return (int)path_array_.size();
 }
 
-ContextPath::SplinePath* ContextPath::GetPath(int pIndex) const
-{
-	if (!(pIndex >= 0 && pIndex < GetPathCount()))
-	{
+ContextPath::SplinePath* ContextPath::GetPath(int index) const {
+	if (!(index >= 0 && index < GetPathCount())) {
 		// This shouldn't happen... Probably already killed.
 		return 0;
 	}
-	return mPathArray[pIndex];
+	return path_array_[index];
 }
 
-ContextPath::SplinePath* ContextPath::GetPath(const str& pType) const
-{
-	PathArray::const_iterator x = mPathArray.begin();
-	for (; x != mPathArray.end(); ++x)
-	{
-		if ((*x)->GetType() == pType)
-		{
+ContextPath::SplinePath* ContextPath::GetPath(const str& type) const {
+	PathArray::const_iterator x = path_array_.begin();
+	for (; x != path_array_.end(); ++x) {
+		if ((*x)->GetType() == type) {
 			return *x;
 		}
 	}

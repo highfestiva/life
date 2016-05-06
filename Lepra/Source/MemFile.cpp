@@ -5,290 +5,239 @@
 
 
 #include "pch.h"
-#include "../Include/MemFile.h"
-#include "../Include/LepraAssert.h"
-#include "../Include/String.h"
+#include "../include/memfile.h"
+#include "../include/lepraassert.h"
+#include "../include/string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 MemFile::MemFile():
-	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
-	mBuffer(0),
-	mSize(0),
-	mBufferSize(0),
-	mCurrentPos(0),
-	mWriter(0),
-	mReader(0)
-{
+	File(Endian::kTypeBigEndian, Endian::kTypeBigEndian, 0, 0),
+	buffer_(0),
+	size_(0),
+	buffer_size_(0),
+	current_pos_(0),
+	writer_(0),
+	reader_(0) {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
 }
 
-MemFile::MemFile(Reader* pReader):
-	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
-	mBuffer(0),
-	mSize(0),
-	mBufferSize(0),
-	mCurrentPos(0),
-	mWriter(0),
-	mReader(pReader)
-{
+MemFile::MemFile(Reader* reader):
+	File(Endian::kTypeBigEndian, Endian::kTypeBigEndian, 0, 0),
+	buffer_(0),
+	size_(0),
+	buffer_size_(0),
+	current_pos_(0),
+	writer_(0),
+	reader_(reader) {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
-	if (mReader != 0)
-	{
-		mReader->SetInputStream(this);
+	if (reader_ != 0) {
+		reader_->SetInputStream(this);
 	}
 }
 
-MemFile::MemFile(Writer* pWriter):
-	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
-	mBuffer(0),
-	mSize(0),
-	mBufferSize(0),
-	mCurrentPos(0),
-	mWriter(pWriter),
-	mReader(0)
-{
+MemFile::MemFile(Writer* writer):
+	File(Endian::kTypeBigEndian, Endian::kTypeBigEndian, 0, 0),
+	buffer_(0),
+	size_(0),
+	buffer_size_(0),
+	current_pos_(0),
+	writer_(writer),
+	reader_(0) {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
-	if (mWriter != 0)
-	{
-		mWriter->SetOutputStream(this);
+	if (writer_ != 0) {
+		writer_->SetOutputStream(this);
 	}
 }
 
-MemFile::MemFile(Reader* pReader, Writer* pWriter):
-	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
-	mBuffer(0),
-	mSize(0),
-	mBufferSize(0),
-	mCurrentPos(0),
-	mWriter(pWriter),
-	mReader(pReader)
-{
+MemFile::MemFile(Reader* reader, Writer* writer):
+	File(Endian::kTypeBigEndian, Endian::kTypeBigEndian, 0, 0),
+	buffer_(0),
+	size_(0),
+	buffer_size_(0),
+	current_pos_(0),
+	writer_(writer),
+	reader_(reader) {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
-	if (mReader != 0)
-	{
-		mReader->SetInputStream(this);
+	if (reader_ != 0) {
+		reader_->SetInputStream(this);
 	}
-	if (mWriter != 0)
-	{
-		mWriter->SetOutputStream(this);
+	if (writer_ != 0) {
+		writer_->SetOutputStream(this);
 	}
 }
 
-MemFile::~MemFile()
-{
+MemFile::~MemFile() {
 	Close();
 }
 
-void MemFile::SetEndian(Endian::EndianType pEndian)
-{
-	Parent::SetEndian(pEndian);
-	if (mReader != 0)
-	{
-		mReader->SetReaderEndian(pEndian);
+void MemFile::SetEndian(Endian::EndianType endian) {
+	Parent::SetEndian(endian);
+	if (reader_ != 0) {
+		reader_->SetReaderEndian(endian);
 	}
-	if (mWriter != 0)
-	{
-		mWriter->SetWriterEndian(pEndian);
+	if (writer_ != 0) {
+		writer_->SetWriterEndian(endian);
 	}
 }
 
-int64 MemFile::Tell() const
-{
-	return (mCurrentPos);
+int64 MemFile::Tell() const {
+	return (current_pos_);
 }
 
-int64 MemFile::Seek(int64 pOffset, FileOrigin pFrom)
-{
-	ScopeLock lLock(&mLock);
-	int64 lPos = (int64)mCurrentPos;
-	switch(pFrom)
-	{
-		case FSEEK_SET:	lPos = pOffset;			break;
-		case FSEEK_CUR:	lPos += pOffset;		break;
-		case FSEEK_END:	lPos = (int64)mSize + pOffset;	break;
+int64 MemFile::Seek(int64 offset, FileOrigin from) {
+	ScopeLock lock(&lock_);
+	int64 pos = (int64)current_pos_;
+	switch(from) {
+		case kFseekSet:	pos = offset;			break;
+		case kFseekCur:	pos += offset;		break;
+		case kFseekEnd:	pos = (int64)size_ + offset;	break;
 	}
-	if (lPos < 0)
-	{
-		mCurrentPos = 0;
+	if (pos < 0) {
+		current_pos_ = 0;
+	} else if(pos > (int64)size_) {
+		current_pos_ = size_;
+	} else {
+		current_pos_ = (size_t)pos;
 	}
-	else if(lPos > (int64)mSize)
-	{
-		mCurrentPos = mSize;
-	}
-	else
-	{
-		mCurrentPos = (size_t)lPos;
-	}
-	return (int64)mCurrentPos;
+	return (int64)current_pos_;
 }
 
-const void* MemFile::GetBuffer() const
-{
-	return (mBuffer);
+const void* MemFile::GetBuffer() const {
+	return (buffer_);
 }
 
-void* MemFile::GetBuffer()
-{
-	return (mBuffer);
+void* MemFile::GetBuffer() {
+	return (buffer_);
 }
 
-void MemFile::Clear()
-{
-	ScopeLock lLock(&mLock);
-	mCurrentPos = 0;
-	mSize = 0;
+void MemFile::Clear() {
+	ScopeLock lock(&lock_);
+	current_pos_ = 0;
+	size_ = 0;
 }
 
-int64 MemFile::GetSize() const
-{
-	return ((int64)mSize);
+int64 MemFile::GetSize() const {
+	return ((int64)size_);
 }
 
-void MemFile::Resize(size_t pSize)
-{
-	ScopeLock lLock(&mLock);
-	if (pSize >= mBufferSize)
-	{
-		const size_t lNewBufferSize = pSize * 3 / 2;
-		uint8* lBuffer = new uint8[lNewBufferSize];
-		if (mBuffer != 0)
-		{
-			::memcpy(lBuffer, mBuffer, mBufferSize);
-			delete[] mBuffer;
+void MemFile::Resize(size_t size) {
+	ScopeLock lock(&lock_);
+	if (size >= buffer_size_) {
+		const size_t new_buffer_size = size * 3 / 2;
+		uint8* _buffer = new uint8[new_buffer_size];
+		if (buffer_ != 0) {
+			::memcpy(_buffer, buffer_, buffer_size_);
+			delete[] buffer_;
 		}
-		mBuffer = lBuffer;
-		mBufferSize = lNewBufferSize;
+		buffer_ = _buffer;
+		buffer_size_ = new_buffer_size;
 	}
 
 }
 
-void MemFile::CropHead(size_t pFinalSize)
-{
-	ScopeLock lLock(&mLock);
-	deb_assert(pFinalSize <= mSize);
-	if (pFinalSize <= mSize)
-	{
+void MemFile::CropHead(size_t final_size) {
+	ScopeLock lock(&lock_);
+	deb_assert(final_size <= size_);
+	if (final_size <= size_) {
 		return;
 	}
-	size_t lCropByteCount = mSize-pFinalSize;
-	::memmove(mBuffer, mBuffer+lCropByteCount, pFinalSize);
-	mSize = pFinalSize;
-	if (mCurrentPos > lCropByteCount)
-	{
-		mCurrentPos -= lCropByteCount;
+	size_t crop_byte_count = size_-final_size;
+	::memmove(buffer_, buffer_+crop_byte_count, final_size);
+	size_ = final_size;
+	if (current_pos_ > crop_byte_count) {
+		current_pos_ -= crop_byte_count;
+	} else {
+		current_pos_ = 0;
 	}
-	else
-	{
-		mCurrentPos = 0;
-	}
-	deb_assert(mCurrentPos <= mSize);
+	deb_assert(current_pos_ <= size_);
 }
 
-void* MemFile::GetBuffer(size_t pMinimumSize)
-{
-	Resize(pMinimumSize);
-	mSize = pMinimumSize;
-	return mBuffer;
+void* MemFile::GetBuffer(size_t minimum_size) {
+	Resize(minimum_size);
+	size_ = minimum_size;
+	return buffer_;
 }
 
 
 
-int64 MemFile::GetAvailable() const
-{
-	return ((int64)mSize - (int64)mCurrentPos);
+int64 MemFile::GetAvailable() const {
+	return ((int64)size_ - (int64)current_pos_);
 }
 
-IOError MemFile::ReadRaw(void* pBuffer, size_t pSize)
-{
-	ScopeLock lLock(&mLock);
+IOError MemFile::ReadRaw(void* buffer, size_t size) {
+	ScopeLock lock(&lock_);
 
-	if (mCurrentPos >= mSize)
-	{
-		return IO_BUFFER_UNDERFLOW;
+	if (current_pos_ >= size_) {
+		return kIoBufferUnderflow;
 	}
 
-	size_t lEndPos = mCurrentPos + pSize;
-	if (lEndPos > mSize)
-	{
-		::memcpy(pBuffer, &mBuffer[mCurrentPos], mSize - mCurrentPos);
-		mCurrentPos = mSize;
-		return IO_BUFFER_UNDERFLOW;
+	size_t end_pos = current_pos_ + size;
+	if (end_pos > size_) {
+		::memcpy(buffer, &buffer_[current_pos_], size_ - current_pos_);
+		current_pos_ = size_;
+		return kIoBufferUnderflow;
 	}
 
-	::memcpy(pBuffer, &mBuffer[mCurrentPos], pSize);
-	mCurrentPos += pSize;
-	
-	return IO_OK;
+	::memcpy(buffer, &buffer_[current_pos_], size);
+	current_pos_ += size;
+
+	return kIoOk;
 }
 
-IOError MemFile::Skip(size_t pSize)
-{
-	return (Parent::Skip(pSize));
+IOError MemFile::Skip(size_t size) {
+	return (Parent::Skip(size));
 }
 
-IOError MemFile::WriteRaw(const void* pBuffer, size_t pSize)
-{
-	ScopeLock lLock(&mLock);
+IOError MemFile::WriteRaw(const void* buffer, size_t size) {
+	ScopeLock lock(&lock_);
 
-	size_t lEndPos = mCurrentPos + pSize;
+	size_t end_pos = current_pos_ + size;
 
-	Resize(lEndPos);
-	::memcpy(mBuffer+mCurrentPos, pBuffer, pSize);
-	mCurrentPos += pSize;
+	Resize(end_pos);
+	::memcpy(buffer_+current_pos_, buffer, size);
+	current_pos_ += size;
 
-	if (mCurrentPos > mSize)
-	{
-		mSize = mCurrentPos;
+	if (current_pos_ > size_) {
+		size_ = current_pos_;
 	}
 
-	return (IO_OK);
+	return (kIoOk);
 }
 
-void MemFile::Flush()
-{
+void MemFile::Flush() {
 	// Do nothing.
 }
 
-void MemFile::Close()
-{
-	ScopeLock lLock(&mLock);
-	delete[] mBuffer;
-	mBuffer = 0;
+void MemFile::Close() {
+	ScopeLock lock(&lock_);
+	delete[] buffer_;
+	buffer_ = 0;
 }
 
-IOError MemFile::ReadData(void* pBuffer, size_t pSize)
-{
-	ScopeLock lLock(&mLock);
-	if (mReader != 0)
-	{
-		return mReader->ReadData(pBuffer, pSize);
-	}
-	else
-	{
-		return Reader::ReadData(pBuffer, pSize);
+IOError MemFile::ReadData(void* buffer, size_t size) {
+	ScopeLock lock(&lock_);
+	if (reader_ != 0) {
+		return reader_->ReadData(buffer, size);
+	} else {
+		return Reader::ReadData(buffer, size);
 	}
 }
 
-IOError MemFile::WriteData(const void* pBuffer, size_t pSize)
-{
-	ScopeLock lLock(&mLock);
-	if (mWriter != 0)
-	{
-		return mWriter->WriteData(pBuffer, pSize);
-	}
-	else
-	{
-		return Writer::WriteData(pBuffer, pSize);
+IOError MemFile::WriteData(const void* buffer, size_t size) {
+	ScopeLock lock(&lock_);
+	if (writer_ != 0) {
+		return writer_->WriteData(buffer, size);
+	} else {
+		return Writer::WriteData(buffer, size);
 	}
 }
 

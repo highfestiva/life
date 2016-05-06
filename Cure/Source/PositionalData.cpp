@@ -5,26 +5,25 @@
 
 
 #include "pch.h"
-#include "../Include/PositionalData.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/Packer.h"
+#include "../include/positionaldata.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/packer.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
 #define CHECK_SIZE(size)		\
-	if (pSize < (int)(size))	\
+	if (_size < (int)(size))	\
 	{				\
 		deb_assert(false);		\
 		return (-1);		\
 	}
 
 #define CHECK_TYPE(type)			\
-	if (type != (Type)pData[lSize++])	\
+	if (type != (Type)data[__size++])	\
 	{					\
 		deb_assert(false);			\
 		return (-1);			\
@@ -33,724 +32,616 @@ namespace Cure
 
 
 PositionalData::PositionalData():
-	mSubHierarchyScale(1)
-{
+	sub_hierarchy_scale_(1) {
 }
 
-PositionalData::~PositionalData()
-{
+PositionalData::~PositionalData() {
 }
 
-float PositionalData::GetScaledDifference(const PositionalData* pReference) const
-{
-	return (mSubHierarchyScale*GetBiasedDifference(pReference));
+float PositionalData::GetScaledDifference(const PositionalData* reference) const {
+	return (sub_hierarchy_scale_*GetBiasedDifference(reference));
 }
 
-void PositionalData::SetScale(float pScale)
-{
-	mSubHierarchyScale = pScale;
+void PositionalData::SetScale(float scale) {
+	sub_hierarchy_scale_ = scale;
 }
 
-void PositionalData::Stop()
-{
+void PositionalData::Stop() {
 	// To stop or not to stop...
 }
 
 
 
-int PositionalData6::GetStaticPackSize()
-{
+int PositionalData6::GetStaticPackSize() {
 	return (1+sizeof(xform::BaseType)*7 + sizeof(vec3::BaseType)*3*4);
 }
 
-int PositionalData6::GetPackSize() const
-{
+int PositionalData6::GetPackSize() const {
 	return (GetStaticPackSize());
 }
 
-int PositionalData6::Pack(uint8* pData) const
-{
-	int lSize = 0;
-	pData[lSize++] = (uint8)TYPE_POSITION_6;
-	lSize += PackerTransformation::Pack(&pData[lSize], mTransformation);
-	lSize += PackerVector::Pack(&pData[lSize], mVelocity);
-	lSize += PackerVector::Pack(&pData[lSize], mAcceleration);
-	lSize += PackerVector::Pack(&pData[lSize], mAngularVelocity);
-	lSize += PackerVector::Pack(&pData[lSize], mAngularAcceleration);
-	return (lSize);
+int PositionalData6::Pack(uint8* data) const {
+	int __size = 0;
+	data[__size++] = (uint8)kTypePosition6;
+	__size += PackerTransformation::Pack(&data[__size], transformation_);
+	__size += PackerVector::Pack(&data[__size], velocity_);
+	__size += PackerVector::Pack(&data[__size], acceleration_);
+	__size += PackerVector::Pack(&data[__size], angular_velocity_);
+	__size += PackerVector::Pack(&data[__size], angular_acceleration_);
+	return (__size);
 }
 
-int PositionalData6::Unpack(const uint8* pData, int pSize)
-{
+int PositionalData6::Unpack(const uint8* data, int _size) {
 	CHECK_SIZE(1+sizeof(float)*7+sizeof(float)*3*4);
-	int lSize = 0;
-	CHECK_TYPE(TYPE_POSITION_6);
-	lSize += PackerTransformation::Unpack(mTransformation, &pData[lSize], sizeof(float)*7);
-	lSize += PackerVector::Unpack(mVelocity, &pData[lSize], sizeof(float)*3);
-	lSize += PackerVector::Unpack(mAcceleration, &pData[lSize], sizeof(float)*3);
-	lSize += PackerVector::Unpack(mAngularVelocity, &pData[lSize], sizeof(float)*3);
-	lSize += PackerVector::Unpack(mAngularAcceleration, &pData[lSize], sizeof(float)*3);
-	return (lSize);
+	int __size = 0;
+	CHECK_TYPE(kTypePosition6);
+	__size += PackerTransformation::Unpack(transformation_, &data[__size], sizeof(float)*7);
+	__size += PackerVector::Unpack(velocity_, &data[__size], sizeof(float)*3);
+	__size += PackerVector::Unpack(acceleration_, &data[__size], sizeof(float)*3);
+	__size += PackerVector::Unpack(angular_velocity_, &data[__size], sizeof(float)*3);
+	__size += PackerVector::Unpack(angular_acceleration_, &data[__size], sizeof(float)*3);
+	return (__size);
 }
 
-float PositionalData6::GetBiasedDifference(const PositionalData* pReference) const
-{
-	const PositionalData6& lReference = (const PositionalData6&)*pReference;
-	float lWeightedDifferenceSum =
-		(GetDifference(mTransformation.GetOrientation(), lReference.mTransformation.GetOrientation())*1.0f +
-		GetDifference(mTransformation.GetPosition(), lReference.mTransformation.GetPosition())*1.0f +
-		GetDifference(mVelocity, lReference.mVelocity)*1.0f +
-		GetDifference(mAcceleration, lReference.mAcceleration)*3.0f +	// Linear acceleration is by far the most important one when doing some simple "CrocketBalls".
-		GetDifference(mAngularVelocity, lReference.mAngularVelocity)*1.0f +
-		GetDifference(mAngularAcceleration, lReference.mAngularAcceleration)*1.0f);
-	return lWeightedDifferenceSum / 8;
+float PositionalData6::GetBiasedDifference(const PositionalData* reference) const {
+	const PositionalData6& _reference = (const PositionalData6&)*reference;
+	float weighted_difference_sum =
+		(GetDifference(transformation_.GetOrientation(), _reference.transformation_.GetOrientation())*1.0f +
+		GetDifference(transformation_.GetPosition(), _reference.transformation_.GetPosition())*1.0f +
+		GetDifference(velocity_, _reference.velocity_)*1.0f +
+		GetDifference(acceleration_, _reference.acceleration_)*3.0f +	// Linear acceleration is by far the most important one when doing some simple "CrocketBalls".
+		GetDifference(angular_velocity_, _reference.angular_velocity_)*1.0f +
+		GetDifference(angular_acceleration_, _reference.angular_acceleration_)*1.0f);
+	return weighted_difference_sum / 8;
 }
 
-void PositionalData6::Stop()
-{
-	mVelocity.Set(0, 0, 0);
-	mAcceleration.Set(0, 0, 0);
-	mAngularVelocity.Set(0, 0, 0);
-	mAngularAcceleration.Set(0, 0, 0);
+void PositionalData6::Stop() {
+	velocity_.Set(0, 0, 0);
+	acceleration_.Set(0, 0, 0);
+	angular_velocity_.Set(0, 0, 0);
+	angular_acceleration_.Set(0, 0, 0);
 }
 
-float PositionalData6::GetDifference(const quat& pQ1, const quat& pQ2)
-{
-	float lWeightedDifferenceSum =
-		(::fabs(pQ1.a-pQ2.a) +
-		::fabs(pQ1.b-pQ2.b) +
-		::fabs(pQ1.c-pQ2.c) +
-		::fabs(pQ1.d-pQ2.d));
-	return (lWeightedDifferenceSum);
+float PositionalData6::GetDifference(const quat& q1, const quat& q2) {
+	float weighted_difference_sum =
+		(::fabs(q1.a-q2.a) +
+		::fabs(q1.b-q2.b) +
+		::fabs(q1.c-q2.c) +
+		::fabs(q1.d-q2.d));
+	return (weighted_difference_sum);
 }
 
-float PositionalData6::GetDifference(const vec3& pV1, const vec3& pV2)
-{
-	float lWeightedDifferenceSum =
-		(::fabs(pV1.x-pV2.x) +
-		::fabs(pV1.y-pV2.y) +
-		::fabs(pV1.z-pV2.z));
-	return (lWeightedDifferenceSum);
+float PositionalData6::GetDifference(const vec3& v1, const vec3& v2) {
+	float weighted_difference_sum =
+		(::fabs(v1.x-v2.x) +
+		::fabs(v1.y-v2.y) +
+		::fabs(v1.z-v2.z));
+	return (weighted_difference_sum);
 }
 
-PositionalData::Type PositionalData6::GetType() const
-{
-	return (TYPE_POSITION_6);
+PositionalData::Type PositionalData6::GetType() const {
+	return (kTypePosition6);
 }
 
-void PositionalData6::CopyData(const PositionalData* pData)
-{
-	deb_assert(pData->GetType() == GetType());
-	const PositionalData6& lCopy = *(PositionalData6*)pData;
-	*this = lCopy;
+void PositionalData6::CopyData(const PositionalData* data) {
+	deb_assert(data->GetType() == GetType());
+	const PositionalData6& _copy = *(PositionalData6*)data;
+	*this = _copy;
 }
 
-PositionalData* PositionalData6::Clone() const
-{
+PositionalData* PositionalData6::Clone() const {
 	return (new PositionalData6(*this));
 }
 
-loginstance(NETWORK, PositionalData6);
+loginstance(kNetwork, PositionalData6);
 
 
 
-int PositionalData3::GetPackSize() const
-{
+int PositionalData3::GetPackSize() const {
 	return (1+sizeof(float)*3*3);
 }
 
-int PositionalData3::Pack(uint8* pData) const
-{
-	int lSize = 0;
-	pData[lSize++] = (uint8)TYPE_POSITION_3;
-	lSize += PackerReal::Pack(&pData[lSize], mTransformation[0]);
-	lSize += PackerReal::Pack(&pData[lSize], mTransformation[1]);
-	lSize += PackerReal::Pack(&pData[lSize], mTransformation[2]);
-	lSize += PackerReal::Pack(&pData[lSize], mVelocity[0]);
-	lSize += PackerReal::Pack(&pData[lSize], mVelocity[1]);
-	lSize += PackerReal::Pack(&pData[lSize], mVelocity[2]);
-	lSize += PackerReal::Pack(&pData[lSize], mAcceleration[0]);
-	lSize += PackerReal::Pack(&pData[lSize], mAcceleration[1]);
-	lSize += PackerReal::Pack(&pData[lSize], mAcceleration[2]);
-	return (lSize);
+int PositionalData3::Pack(uint8* data) const {
+	int __size = 0;
+	data[__size++] = (uint8)kTypePosition3;
+	__size += PackerReal::Pack(&data[__size], transformation_[0]);
+	__size += PackerReal::Pack(&data[__size], transformation_[1]);
+	__size += PackerReal::Pack(&data[__size], transformation_[2]);
+	__size += PackerReal::Pack(&data[__size], velocity_[0]);
+	__size += PackerReal::Pack(&data[__size], velocity_[1]);
+	__size += PackerReal::Pack(&data[__size], velocity_[2]);
+	__size += PackerReal::Pack(&data[__size], acceleration_[0]);
+	__size += PackerReal::Pack(&data[__size], acceleration_[1]);
+	__size += PackerReal::Pack(&data[__size], acceleration_[2]);
+	return (__size);
 }
 
-int PositionalData3::Unpack(const uint8* pData, int pSize)
-{
-	CHECK_SIZE(1+sizeof(mTransformation[0])*3*3);
-	int lSize = 0;
-	CHECK_TYPE(TYPE_POSITION_3);
-	lSize += PackerReal::Unpack(mTransformation[0], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mTransformation[1], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mTransformation[2], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mVelocity[0], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mVelocity[1], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mVelocity[2], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mAcceleration[0], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mAcceleration[1], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mAcceleration[2], &pData[lSize], sizeof(float));
-	return (lSize);
+int PositionalData3::Unpack(const uint8* data, int _size) {
+	CHECK_SIZE(1+sizeof(transformation_[0])*3*3);
+	int __size = 0;
+	CHECK_TYPE(kTypePosition3);
+	__size += PackerReal::Unpack(transformation_[0], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(transformation_[1], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(transformation_[2], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(velocity_[0], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(velocity_[1], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(velocity_[2], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(acceleration_[0], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(acceleration_[1], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(acceleration_[2], &data[__size], sizeof(float));
+	return (__size);
 }
 
-float PositionalData3::GetBiasedDifference(const PositionalData* pReference) const
-{
-	const PositionalData3& lReference = (const PositionalData3&)*pReference;
-	float lWeightedDifferenceSum =
-		::fabs(mTransformation[0]-lReference.mTransformation[0]) +
-		::fabs(mTransformation[1]-lReference.mTransformation[1]) +
-		::fabs(mTransformation[2]-lReference.mTransformation[2]) +
-		::fabs(mVelocity[0]-lReference.mVelocity[0])*3.0f +		// Linear acceleration seems by far the most important one.
-		::fabs(mVelocity[1]-lReference.mVelocity[1]) +
-		::fabs(mVelocity[2]-lReference.mVelocity[2]) +
-		::fabs(mAcceleration[0]-lReference.mAcceleration[0]) +
-		::fabs(mAcceleration[1]-lReference.mAcceleration[1]) +
-		::fabs(mAcceleration[2]-lReference.mAcceleration[2]);
-	return lWeightedDifferenceSum / 11;
+float PositionalData3::GetBiasedDifference(const PositionalData* reference) const {
+	const PositionalData3& _reference = (const PositionalData3&)*reference;
+	float weighted_difference_sum =
+		::fabs(transformation_[0]-_reference.transformation_[0]) +
+		::fabs(transformation_[1]-_reference.transformation_[1]) +
+		::fabs(transformation_[2]-_reference.transformation_[2]) +
+		::fabs(velocity_[0]-_reference.velocity_[0])*3.0f +		// Linear acceleration seems by far the most important one.
+		::fabs(velocity_[1]-_reference.velocity_[1]) +
+		::fabs(velocity_[2]-_reference.velocity_[2]) +
+		::fabs(acceleration_[0]-_reference.acceleration_[0]) +
+		::fabs(acceleration_[1]-_reference.acceleration_[1]) +
+		::fabs(acceleration_[2]-_reference.acceleration_[2]);
+	return weighted_difference_sum / 11;
 }
 
-PositionalData::Type PositionalData3::GetType() const
-{
-	return (TYPE_POSITION_3);
+PositionalData::Type PositionalData3::GetType() const {
+	return (kTypePosition3);
 }
 
-void PositionalData3::CopyData(const PositionalData* pData)
-{
-	deb_assert(pData->GetType() == GetType());
-	const PositionalData3& lCopy = *(PositionalData3*)pData;
-	*this = lCopy;
+void PositionalData3::CopyData(const PositionalData* data) {
+	deb_assert(data->GetType() == GetType());
+	const PositionalData3& _copy = *(PositionalData3*)data;
+	*this = _copy;
 }
 
-PositionalData* PositionalData3::Clone() const
-{
+PositionalData* PositionalData3::Clone() const {
 	return (new PositionalData3(*this));
 }
 
-void PositionalData3::Stop()
-{
-	mVelocity[0] = mVelocity[1] = mVelocity[2] = 0;
-	mAcceleration[0] = mAcceleration[1] = mAcceleration[2] = 0;
+void PositionalData3::Stop() {
+	velocity_[0] = velocity_[1] = velocity_[2] = 0;
+	acceleration_[0] = acceleration_[1] = acceleration_[2] = 0;
 }
 
 
 
-int PositionalData2::GetPackSize() const
-{
+int PositionalData2::GetPackSize() const {
 	return (1+sizeof(float)*2*3);
 }
 
-int PositionalData2::Pack(uint8* pData) const
-{
-	int lSize = 0;
-	pData[lSize++] = (uint8)TYPE_POSITION_2;
-	lSize += PackerReal::Pack(&pData[lSize], mTransformation[0]);
-	lSize += PackerReal::Pack(&pData[lSize], mTransformation[1]);
-	lSize += PackerReal::Pack(&pData[lSize], mVelocity[0]);
-	lSize += PackerReal::Pack(&pData[lSize], mVelocity[1]);
-	lSize += PackerReal::Pack(&pData[lSize], mAcceleration[0]);
-	lSize += PackerReal::Pack(&pData[lSize], mAcceleration[1]);
-	return (lSize);
+int PositionalData2::Pack(uint8* data) const {
+	int __size = 0;
+	data[__size++] = (uint8)kTypePosition2;
+	__size += PackerReal::Pack(&data[__size], transformation_[0]);
+	__size += PackerReal::Pack(&data[__size], transformation_[1]);
+	__size += PackerReal::Pack(&data[__size], velocity_[0]);
+	__size += PackerReal::Pack(&data[__size], velocity_[1]);
+	__size += PackerReal::Pack(&data[__size], acceleration_[0]);
+	__size += PackerReal::Pack(&data[__size], acceleration_[1]);
+	return (__size);
 }
 
-int PositionalData2::Unpack(const uint8* pData, int pSize)
-{
-	CHECK_SIZE(1+sizeof(mTransformation[0])*2*3);
-	int lSize = 0;
-	CHECK_TYPE(TYPE_POSITION_2);
-	lSize += PackerReal::Unpack(mTransformation[0], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mTransformation[1], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mVelocity[0], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mVelocity[1], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mAcceleration[0], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mAcceleration[1], &pData[lSize], sizeof(float));
-	return (lSize);
+int PositionalData2::Unpack(const uint8* data, int _size) {
+	CHECK_SIZE(1+sizeof(transformation_[0])*2*3);
+	int __size = 0;
+	CHECK_TYPE(kTypePosition2);
+	__size += PackerReal::Unpack(transformation_[0], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(transformation_[1], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(velocity_[0], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(velocity_[1], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(acceleration_[0], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(acceleration_[1], &data[__size], sizeof(float));
+	return (__size);
 }
 
-float PositionalData2::GetBiasedDifference(const PositionalData* pReference) const
-{
-	const PositionalData2& lReference = (const PositionalData2&)*pReference;
-	float lWeightedDifferenceSum =
-		::fabs(mTransformation[0]-lReference.mTransformation[0]) +
-		::fabs(mTransformation[1]-lReference.mTransformation[1]) +
-		::fabs(mVelocity[0]-lReference.mVelocity[0])*3.0f +		// Linear acceleration seems by far the most important one.
-		::fabs(mVelocity[1]-lReference.mVelocity[1]) +
-		::fabs(mAcceleration[0]-lReference.mAcceleration[0]) +
-		::fabs(mAcceleration[1]-lReference.mAcceleration[1]);
-	return lWeightedDifferenceSum / 8;
+float PositionalData2::GetBiasedDifference(const PositionalData* reference) const {
+	const PositionalData2& _reference = (const PositionalData2&)*reference;
+	float weighted_difference_sum =
+		::fabs(transformation_[0]-_reference.transformation_[0]) +
+		::fabs(transformation_[1]-_reference.transformation_[1]) +
+		::fabs(velocity_[0]-_reference.velocity_[0])*3.0f +		// Linear acceleration seems by far the most important one.
+		::fabs(velocity_[1]-_reference.velocity_[1]) +
+		::fabs(acceleration_[0]-_reference.acceleration_[0]) +
+		::fabs(acceleration_[1]-_reference.acceleration_[1]);
+	return weighted_difference_sum / 8;
 }
 
-PositionalData::Type PositionalData2::GetType() const
-{
-	return (TYPE_POSITION_2);
+PositionalData::Type PositionalData2::GetType() const {
+	return (kTypePosition2);
 }
 
-void PositionalData2::CopyData(const PositionalData* pData)
-{
-	deb_assert(pData->GetType() == GetType());
-	const PositionalData2& lCopy = *(PositionalData2*)pData;
-	*this = lCopy;
+void PositionalData2::CopyData(const PositionalData* data) {
+	deb_assert(data->GetType() == GetType());
+	const PositionalData2& _copy = *(PositionalData2*)data;
+	*this = _copy;
 }
 
-PositionalData* PositionalData2::Clone() const
-{
+PositionalData* PositionalData2::Clone() const {
 	return (new PositionalData2(*this));
 }
 
-void PositionalData2::Stop()
-{
-	mVelocity[0] = mVelocity[1] = 0;
-	mAcceleration[0] = mAcceleration[1] = 0;
+void PositionalData2::Stop() {
+	velocity_[0] = velocity_[1] = 0;
+	acceleration_[0] = acceleration_[1] = 0;
 }
 
 
 
-int PositionalData1::GetPackSize() const
-{
+int PositionalData1::GetPackSize() const {
 	return (1+sizeof(float)*1*3);
 }
 
-int PositionalData1::Pack(uint8* pData) const
-{
-	int lSize = 0;
-	pData[lSize++] = (uint8)TYPE_POSITION_1;
-	lSize += PackerReal::Pack(&pData[lSize], mTransformation);
-	lSize += PackerReal::Pack(&pData[lSize], mVelocity);
-	lSize += PackerReal::Pack(&pData[lSize], mAcceleration);
-	return (lSize);
+int PositionalData1::Pack(uint8* data) const {
+	int __size = 0;
+	data[__size++] = (uint8)kTypePosition1;
+	__size += PackerReal::Pack(&data[__size], transformation_);
+	__size += PackerReal::Pack(&data[__size], velocity_);
+	__size += PackerReal::Pack(&data[__size], acceleration_);
+	return (__size);
 }
 
-int PositionalData1::Unpack(const uint8* pData, int pSize)
-{
-	CHECK_SIZE(1+sizeof(mTransformation)*1*3);
-	int lSize = 0;
-	CHECK_TYPE(TYPE_POSITION_1);
-	lSize += PackerReal::Unpack(mTransformation, &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mVelocity, &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mAcceleration, &pData[lSize], sizeof(float));
-	return (lSize);
+int PositionalData1::Unpack(const uint8* data, int _size) {
+	CHECK_SIZE(1+sizeof(transformation_)*1*3);
+	int __size = 0;
+	CHECK_TYPE(kTypePosition1);
+	__size += PackerReal::Unpack(transformation_, &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(velocity_, &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(acceleration_, &data[__size], sizeof(float));
+	return (__size);
 }
 
-float PositionalData1::GetBiasedDifference(const PositionalData* pReference) const
-{
-	const PositionalData1& lReference = (const PositionalData1&)*pReference;
-	float lWeightedDifferenceSum =
-		::fabs(mTransformation-lReference.mTransformation) +
-		::fabs(mVelocity-lReference.mVelocity)*3.0f +		// Linear acceleration seems by far the most important one.
-		::fabs(mAcceleration-lReference.mAcceleration);
-	return lWeightedDifferenceSum / 5;
+float PositionalData1::GetBiasedDifference(const PositionalData* reference) const {
+	const PositionalData1& _reference = (const PositionalData1&)*reference;
+	float weighted_difference_sum =
+		::fabs(transformation_-_reference.transformation_) +
+		::fabs(velocity_-_reference.velocity_)*3.0f +		// Linear acceleration seems by far the most important one.
+		::fabs(acceleration_-_reference.acceleration_);
+	return weighted_difference_sum / 5;
 }
 
-PositionalData::Type PositionalData1::GetType() const
-{
-	return (TYPE_POSITION_1);
+PositionalData::Type PositionalData1::GetType() const {
+	return (kTypePosition1);
 }
 
-void PositionalData1::CopyData(const PositionalData* pData)
-{
-	deb_assert(pData->GetType() == GetType());
-	const PositionalData1& lCopy = *(PositionalData1*)pData;
-	*this = lCopy;
+void PositionalData1::CopyData(const PositionalData* data) {
+	deb_assert(data->GetType() == GetType());
+	const PositionalData1& _copy = *(PositionalData1*)data;
+	*this = _copy;
 }
 
-PositionalData* PositionalData1::Clone() const
-{
+PositionalData* PositionalData1::Clone() const {
 	return (new PositionalData1(*this));
 }
 
-void PositionalData1::Stop()
-{
-	mVelocity = 0;
-	mAcceleration = 0;
+void PositionalData1::Stop() {
+	velocity_ = 0;
+	acceleration_ = 0;
 }
 
 
 
-ObjectPositionalData::ObjectPositionalData()
-{
+ObjectPositionalData::ObjectPositionalData() {
 }
 
-ObjectPositionalData::~ObjectPositionalData()
-{
+ObjectPositionalData::~ObjectPositionalData() {
 	Clear();
 }
 
-void ObjectPositionalData::GhostStep(int pFrameCount, float pDeltaTime)
-{
-	if (pFrameCount < 0)
-	{
+void ObjectPositionalData::GhostStep(int pFrameCount, float delta_time) {
+	if (pFrameCount < 0) {
 		// Simply reverse delta time factor if going backwards.
-		pDeltaTime = -pDeltaTime;
+		delta_time = -delta_time;
 		pFrameCount = -pFrameCount;
 	}
-	for (int x = 0; x < pFrameCount; ++x)
-	{
+	for (int x = 0; x < pFrameCount; ++x) {
 		// We just add acceleration to velocity, and velocity to position. An improvement
 		// here might save us a few bytes of network data.
-		mPosition.mTransformation.GetPosition().Add(mPosition.mVelocity*pDeltaTime);
-		mPosition.mVelocity.Add(mPosition.mAcceleration*pDeltaTime);
+		position_.transformation_.GetPosition().Add(position_.velocity_*delta_time);
+		position_.velocity_.Add(position_.acceleration_*delta_time);
 
-		/*quat lQ;
-		lQ.RotateAroundWorldX(mPosition.mAngularVelocity.x*pDeltaTime);
-		lQ.RotateAroundWorldY(mPosition.mAngularVelocity.y*pDeltaTime);
-		lQ.RotateAroundWorldZ(mPosition.mAngularVelocity.z*pDeltaTime);
-		mPosition.mTransformation.GetOrientation() *= lQ;
-		mPosition.mAngularVelocity.Add(mPosition.mAngularAcceleration*pDeltaTime);*/
+		/*quat q;
+		q.RotateAroundWorldX(position_.angular_velocity_.x*delta_time);
+		q.RotateAroundWorldY(position_.angular_velocity_.y*delta_time);
+		q.RotateAroundWorldZ(position_.angular_velocity_.z*delta_time);
+		position_.transformation_.GetOrientation() *= q;
+		position_.angular_velocity_.Add(position_.angular_acceleration_*delta_time);*/
 	}
 }
 
-void ObjectPositionalData::Clear()
-{
-	BodyPositionArray::iterator x = mBodyPositionArray.begin();
-	for (; x != mBodyPositionArray.end(); ++x)
-	{
-		PositionalData* lPosition = *x;
-		delete (lPosition);
+void ObjectPositionalData::Clear() {
+	BodyPositionArray::iterator x = body_position_array_.begin();
+	for (; x != body_position_array_.end(); ++x) {
+		PositionalData* position = *x;
+		delete (position);
 	}
-	mBodyPositionArray.clear();
+	body_position_array_.clear();
 }
 
-int ObjectPositionalData::GetPackSize() const
-{
-	int lSize = 1+sizeof(int16)+mPosition.GetPackSize();
-	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
-	for (; x != mBodyPositionArray.end(); ++x)
-	{
-		lSize += (*x)->GetPackSize();
+int ObjectPositionalData::GetPackSize() const {
+	int __size = 1+sizeof(int16)+position_.GetPackSize();
+	BodyPositionArray::const_iterator x = body_position_array_.begin();
+	for (; x != body_position_array_.end(); ++x) {
+		__size += (*x)->GetPackSize();
 	}
-	return (lSize);
+	return (__size);
 }
 
-int ObjectPositionalData::Pack(uint8* pData) const
-{
-	int lSize = 0;
-	pData[lSize++] = (uint8)TYPE_OBJECT;
-	lSize += PackerInt16::Pack(&pData[lSize], GetPackSize()-1-sizeof(int16));
-	lSize += mPosition.Pack(&pData[lSize]);
-	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
-	for (; x != mBodyPositionArray.end(); ++x)
-	{
-		lSize += (*x)->Pack(&pData[lSize]);
+int ObjectPositionalData::Pack(uint8* data) const {
+	int __size = 0;
+	data[__size++] = (uint8)kTypeObject;
+	__size += PackerInt16::Pack(&data[__size], GetPackSize()-1-sizeof(int16));
+	__size += position_.Pack(&data[__size]);
+	BodyPositionArray::const_iterator x = body_position_array_.begin();
+	for (; x != body_position_array_.end(); ++x) {
+		__size += (*x)->Pack(&data[__size]);
 	}
-	return (lSize);
+	return (__size);
 }
 
-int ObjectPositionalData::Unpack(const uint8* pData, int pSize)
-{
+int ObjectPositionalData::Unpack(const uint8* data, int _size) {
 	CHECK_SIZE((int)(1+sizeof(int16)+PositionalData6::GetStaticPackSize()));
-	int lSize = 0;
-	CHECK_TYPE(TYPE_OBJECT);
-	deb_assert(mBodyPositionArray.size() == 0);
-	int lDataSize;
-	int lSubSize = PackerInt16::Unpack(lDataSize, &pData[lSize], pSize-lSize);
-	if (lSubSize <= 0)
-	{
+	int __size = 0;
+	CHECK_TYPE(kTypeObject);
+	deb_assert(body_position_array_.size() == 0);
+	int data_size;
+	int sub_size = PackerInt16::Unpack(data_size, &data[__size], _size-__size);
+	if (sub_size <= 0) {
 		deb_assert(false);
 		return (-1);
 	}
-	lSize += lSubSize;
-	if (lDataSize < PositionalData6::GetStaticPackSize() || lDataSize > pSize-lSize)
-	{
+	__size += sub_size;
+	if (data_size < PositionalData6::GetStaticPackSize() || data_size > _size-__size) {
 		deb_assert(false);
 		return (-1);
 	}
-	pSize = lDataSize+lSize;
-	lSubSize = mPosition.Unpack(&pData[lSize], pSize-lSize);
-	if (lSubSize <= 0)
-	{
+	_size = data_size+__size;
+	sub_size = position_.Unpack(&data[__size], _size-__size);
+	if (sub_size <= 0) {
 		deb_assert(false);
 		return (-1);
 	}
-	lSize += lSubSize;
-	while (lSize < pSize)
-	{
-		PositionalData* lPosition = 0;
-		switch (pData[lSize])
-		{
-			case TYPE_POSITION_6:	lPosition = new PositionalData6;	break;
-			case TYPE_POSITION_3:	lPosition = new PositionalData3;	break;
-			case TYPE_POSITION_2:	lPosition = new PositionalData2;	break;
-			case TYPE_POSITION_1:	lPosition = new PositionalData1;	break;
-			case TYPE_REAL_3:	lPosition = new RealData3;		break;
-			case TYPE_REAL_1:	lPosition = new RealData1;		break;
+	__size += sub_size;
+	while (__size < _size) {
+		PositionalData* position = 0;
+		switch (data[__size]) {
+			case kTypePosition6:	position = new PositionalData6;	break;
+			case kTypePosition3:	position = new PositionalData3;	break;
+			case kTypePosition2:	position = new PositionalData2;	break;
+			case kTypePosition1:	position = new PositionalData1;	break;
+			case kTypeReal3:	position = new RealData3;		break;
+			case kTypeReal1:	position = new RealData1;		break;
 		}
-		if (!lPosition)
-		{
+		if (!position) {
 			deb_assert(false);
-			lSize = -1;
+			__size = -1;
 			break;
 		}
-		mBodyPositionArray.push_back(lPosition);
-		lSubSize = lPosition->Unpack(&pData[lSize], pSize-lSize);
-		if (lSubSize > 0)
-		{
-			lSize += lSubSize;
-		}
-		else
-		{
-			lSize = -1;
+		body_position_array_.push_back(position);
+		sub_size = position->Unpack(&data[__size], _size-__size);
+		if (sub_size > 0) {
+			__size += sub_size;
+		} else {
+			__size = -1;
 			break;
 		}
 	}
-	return (lSize);
+	return (__size);
 }
 
-float ObjectPositionalData::GetBiasedDifference(const PositionalData* pReference) const
-{
-	return GetBiasedTypeDifference(pReference, false);
+float ObjectPositionalData::GetBiasedDifference(const PositionalData* reference) const {
+	return GetBiasedTypeDifference(reference, false);
 }
 
-float ObjectPositionalData::GetBiasedTypeDifference(const PositionalData* pReference, bool pPositionOnly) const
-{
-	deb_assert(GetType() == pReference->GetType());
-	const ObjectPositionalData& lReference = (const ObjectPositionalData&)*pReference;
-	deb_assert(IsSameStructure(lReference));
-	float lDiff = 0;
-	lDiff += mPosition.GetBiasedDifference(&lReference.mPosition);
-	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
-	BodyPositionArray::const_iterator y = lReference.mBodyPositionArray.begin();
-	int lBodyCount = 1 + mBodyPositionArray.size();
-	for (; x != mBodyPositionArray.end(); ++x, ++y)
-	{
-		deb_assert(y != lReference.mBodyPositionArray.end());
-		if (pPositionOnly)
-		{
-			const Type lType = (*x)->GetType();
-			if (lType != TYPE_POSITION_6 && lType != TYPE_POSITION_3 && lType != TYPE_POSITION_2 && lType != TYPE_POSITION_1)
-			{
-				--lBodyCount;
+float ObjectPositionalData::GetBiasedTypeDifference(const PositionalData* reference, bool position_only) const {
+	deb_assert(GetType() == reference->GetType());
+	const ObjectPositionalData& _reference = (const ObjectPositionalData&)*reference;
+	deb_assert(IsSameStructure(_reference));
+	float diff = 0;
+	diff += position_.GetBiasedDifference(&_reference.position_);
+	BodyPositionArray::const_iterator x = body_position_array_.begin();
+	BodyPositionArray::const_iterator y = _reference.body_position_array_.begin();
+	int body_count = 1 + body_position_array_.size();
+	for (; x != body_position_array_.end(); ++x, ++y) {
+		deb_assert(y != _reference.body_position_array_.end());
+		if (position_only) {
+			const Type __type = (*x)->GetType();
+			if (__type != kTypePosition6 && __type != kTypePosition3 && __type != kTypePosition2 && __type != kTypePosition1) {
+				--body_count;
 				continue;
 			}
 
 		}
-		lDiff += (*x)->GetScaledDifference(*y);
+		diff += (*x)->GetScaledDifference(*y);
 	}
-	deb_assert((x == mBodyPositionArray.end()) && (y == lReference.mBodyPositionArray.end()));
-	return lDiff / lBodyCount;
+	deb_assert((x == body_position_array_.end()) && (y == _reference.body_position_array_.end()));
+	return diff / body_count;
 }
 
-PositionalData* ObjectPositionalData::GetAt(size_t pIndex) const
-{
-	if (pIndex >= mBodyPositionArray.size())
-	{
+PositionalData* ObjectPositionalData::GetAt(size_t index) const {
+	if (index >= body_position_array_.size()) {
 		return (0);
 	}
-	return (mBodyPositionArray[pIndex]);
+	return (body_position_array_[index]);
 }
 
-void ObjectPositionalData::SetAt(size_t pIndex, PositionalData* pData)
-{
-	if (mBodyPositionArray.size() >= pIndex)
-	{
-		if (mBodyPositionArray.size() == pIndex)
-		{
-			mBodyPositionArray.push_back(pData);
+void ObjectPositionalData::SetAt(size_t index, PositionalData* data) {
+	if (body_position_array_.size() >= index) {
+		if (body_position_array_.size() == index) {
+			body_position_array_.push_back(data);
+		} else {
+			delete (body_position_array_[index]);
+			body_position_array_[index] = data;
 		}
-		else
-		{
-			delete (mBodyPositionArray[pIndex]);
-			mBodyPositionArray[pIndex] = pData;
-		}
-	}
-	else
-	{
-		mLog.Error("Trying to set positional data out of range!");
+	} else {
+		log_.Error("Trying to set positional data out of range!");
 		deb_assert(false);
 	}
 }
 
-void ObjectPositionalData::Trunkate(size_t pSize)
-{
-	for (size_t x = pSize; x < mBodyPositionArray.size(); ++x)
-	{
-		delete (mBodyPositionArray[x]);
+void ObjectPositionalData::Trunkate(size_t _size) {
+	for (size_t x = _size; x < body_position_array_.size(); ++x) {
+		delete (body_position_array_[x]);
 	}
-	mBodyPositionArray.resize(pSize);
+	body_position_array_.resize(_size);
 }
 
-PositionalData::Type ObjectPositionalData::GetType() const
-{
-	return (TYPE_OBJECT);
+PositionalData::Type ObjectPositionalData::GetType() const {
+	return (kTypeObject);
 }
 
-void ObjectPositionalData::CopyData(const PositionalData* pData)
-{
-	deb_assert(pData->GetType() == GetType());
-	const ObjectPositionalData& lCopy = *(ObjectPositionalData*)pData;
-	if (IsSameStructure(lCopy))
-	{
-		mPosition = lCopy.mPosition;
-		BodyPositionArray::iterator x = mBodyPositionArray.begin();
-		BodyPositionArray::iterator y = ((ObjectPositionalData*)pData)->mBodyPositionArray.begin();
-		for (; x != mBodyPositionArray.end(); ++x, ++y)
-		{
-			PositionalData* lPosition = *x;
-			lPosition->CopyData(*y);
+void ObjectPositionalData::CopyData(const PositionalData* data) {
+	deb_assert(data->GetType() == GetType());
+	const ObjectPositionalData& _copy = *(ObjectPositionalData*)data;
+	if (IsSameStructure(_copy)) {
+		position_ = _copy.position_;
+		BodyPositionArray::iterator x = body_position_array_.begin();
+		BodyPositionArray::iterator y = ((ObjectPositionalData*)data)->body_position_array_.begin();
+		for (; x != body_position_array_.end(); ++x, ++y) {
+			PositionalData* position = *x;
+			position->CopyData(*y);
 		}
-	}
-	else
-	{
+	} else {
 		Clear();
-		mPosition = lCopy.mPosition;
-		BodyPositionArray::const_iterator x = lCopy.mBodyPositionArray.begin();
-		for (; x != lCopy.mBodyPositionArray.end(); ++x)
-		{
-			mBodyPositionArray.push_back((*x)->Clone());
+		position_ = _copy.position_;
+		BodyPositionArray::const_iterator x = _copy.body_position_array_.begin();
+		for (; x != _copy.body_position_array_.end(); ++x) {
+			body_position_array_.push_back((*x)->Clone());
 		}
 	}
 }
 
-PositionalData* ObjectPositionalData::Clone() const
-{
-	ObjectPositionalData* lData = new ObjectPositionalData;
-	lData->mPosition = mPosition;
-	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
-	for (; x != mBodyPositionArray.end(); ++x)
-	{
-		lData->mBodyPositionArray.push_back((*x)->Clone());
+PositionalData* ObjectPositionalData::Clone() const {
+	ObjectPositionalData* _data = new ObjectPositionalData;
+	_data->position_ = position_;
+	BodyPositionArray::const_iterator x = body_position_array_.begin();
+	for (; x != body_position_array_.end(); ++x) {
+		_data->body_position_array_.push_back((*x)->Clone());
 	}
-	return (lData);
+	return (_data);
 }
 
-void ObjectPositionalData::Stop()
-{
-	mPosition.Stop();
-	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
-	for (; x != mBodyPositionArray.end(); ++x)
-	{
+void ObjectPositionalData::Stop() {
+	position_.Stop();
+	BodyPositionArray::const_iterator x = body_position_array_.begin();
+	for (; x != body_position_array_.end(); ++x) {
 		(*x)->Stop();
 	}
 }
 
-bool ObjectPositionalData::IsSameStructure(const ObjectPositionalData& pCopy) const
-{
-	if (mBodyPositionArray.size() != pCopy.mBodyPositionArray.size())
-	{
+bool ObjectPositionalData::IsSameStructure(const ObjectPositionalData& copy) const {
+	if (body_position_array_.size() != copy.body_position_array_.size()) {
 		return (false);
 	}
-	BodyPositionArray::const_iterator x = mBodyPositionArray.begin();
-	BodyPositionArray::const_iterator y = pCopy.mBodyPositionArray.begin();
-	for (; x != mBodyPositionArray.end(); ++x, ++y)
-	{
-		if ((*x)->GetType() != (*y)->GetType())
-		{
+	BodyPositionArray::const_iterator x = body_position_array_.begin();
+	BodyPositionArray::const_iterator y = copy.body_position_array_.begin();
+	for (; x != body_position_array_.end(); ++x, ++y) {
+		if ((*x)->GetType() != (*y)->GetType()) {
 			return (false);
 		}
 	}
 	return (true);
 }
 
-ObjectPositionalData::ObjectPositionalData(const ObjectPositionalData&)
-{
+ObjectPositionalData::ObjectPositionalData(const ObjectPositionalData&) {
 	deb_assert(false);
 }
 
-void ObjectPositionalData::operator=(const ObjectPositionalData&)
-{
+void ObjectPositionalData::operator=(const ObjectPositionalData&) {
 	deb_assert(false);
 }
 
-loginstance(NETWORK, ObjectPositionalData);
+loginstance(kNetwork, ObjectPositionalData);
 
 
 
-int RealData3::GetPackSize() const
-{
-	return (1+sizeof(mValue[0])*3);
+int RealData3::GetPackSize() const {
+	return (1+sizeof(value_[0])*3);
 }
 
-int RealData3::Pack(uint8* pData) const
-{
-	int lSize = 0;
-	pData[lSize++] = (uint8)TYPE_REAL_3;
-	lSize += PackerReal::Pack(&pData[lSize], mValue[0]);
-	lSize += PackerReal::Pack(&pData[lSize], mValue[1]);
-	lSize += PackerReal::Pack(&pData[lSize], mValue[2]);
-	return (lSize);
+int RealData3::Pack(uint8* data) const {
+	int __size = 0;
+	data[__size++] = (uint8)kTypeReal3;
+	__size += PackerReal::Pack(&data[__size], value_[0]);
+	__size += PackerReal::Pack(&data[__size], value_[1]);
+	__size += PackerReal::Pack(&data[__size], value_[2]);
+	return (__size);
 }
 
-int RealData3::Unpack(const uint8* pData, int pSize)
-{
-	CHECK_SIZE(1+sizeof(mValue[0])*3);
-	int lSize = 0;
-	CHECK_TYPE(TYPE_REAL_3);
-	lSize += PackerReal::Unpack(mValue[0], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mValue[1], &pData[lSize], sizeof(float));
-	lSize += PackerReal::Unpack(mValue[2], &pData[lSize], sizeof(float));
-	return (lSize);
+int RealData3::Unpack(const uint8* data, int _size) {
+	CHECK_SIZE(1+sizeof(value_[0])*3);
+	int __size = 0;
+	CHECK_TYPE(kTypeReal3);
+	__size += PackerReal::Unpack(value_[0], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(value_[1], &data[__size], sizeof(float));
+	__size += PackerReal::Unpack(value_[2], &data[__size], sizeof(float));
+	return (__size);
 }
 
-float RealData3::GetBiasedDifference(const PositionalData* pReference) const
-{
-	const RealData3& lReference = (const RealData3&)*pReference;
-	float lWeightedDifferenceSum =
-		::fabs(mValue[0]-lReference.mValue[0]) +
-		::fabs(mValue[1]-lReference.mValue[1]) +
-		::fabs(mValue[2]-lReference.mValue[2]);
-	return lWeightedDifferenceSum / 3;
+float RealData3::GetBiasedDifference(const PositionalData* reference) const {
+	const RealData3& _reference = (const RealData3&)*reference;
+	float weighted_difference_sum =
+		::fabs(value_[0]-_reference.value_[0]) +
+		::fabs(value_[1]-_reference.value_[1]) +
+		::fabs(value_[2]-_reference.value_[2]);
+	return weighted_difference_sum / 3;
 }
 
-PositionalData::Type RealData3::GetType() const
-{
-	return TYPE_REAL_3;
+PositionalData::Type RealData3::GetType() const {
+	return kTypeReal3;
 }
 
-void RealData3::CopyData(const PositionalData* pData)
-{
-	deb_assert(pData->GetType() == GetType());
-	const RealData3& lCopy = *(RealData3*)pData;
-	*this = lCopy;
+void RealData3::CopyData(const PositionalData* data) {
+	deb_assert(data->GetType() == GetType());
+	const RealData3& _copy = *(RealData3*)data;
+	*this = _copy;
 }
 
-PositionalData* RealData3::Clone() const
-{
+PositionalData* RealData3::Clone() const {
 	return (new RealData3(*this));
 }
 
 
 
-int RealData1::GetPackSize() const
-{
-	return (1+sizeof(mValue));
+int RealData1::GetPackSize() const {
+	return (1+sizeof(value_));
 }
 
-int RealData1::Pack(uint8* pData) const
-{
-	int lSize = 0;
-	pData[lSize++] = (uint8)TYPE_REAL_1;
-	lSize += PackerReal::Pack(&pData[lSize], mValue);
-	return (lSize);
+int RealData1::Pack(uint8* data) const {
+	int __size = 0;
+	data[__size++] = (uint8)kTypeReal1;
+	__size += PackerReal::Pack(&data[__size], value_);
+	return (__size);
 }
 
-int RealData1::Unpack(const uint8* pData, int pSize)
-{
-	CHECK_SIZE(1+sizeof(mValue));
-	int lSize = 0;
-	CHECK_TYPE(TYPE_REAL_1);
-	lSize += PackerReal::Unpack(mValue, &pData[lSize], sizeof(float));
-	return (lSize);
+int RealData1::Unpack(const uint8* data, int _size) {
+	CHECK_SIZE(1+sizeof(value_));
+	int __size = 0;
+	CHECK_TYPE(kTypeReal1);
+	__size += PackerReal::Unpack(value_, &data[__size], sizeof(float));
+	return (__size);
 }
 
-float RealData1::GetBiasedDifference(const PositionalData* pReference) const
-{
-	const RealData1& lReference = (const RealData1&)*pReference;
-	float lWeightedDifferenceSum =
-		::fabs(mValue-lReference.mValue)*3;
-	return lWeightedDifferenceSum / 1;
+float RealData1::GetBiasedDifference(const PositionalData* reference) const {
+	const RealData1& _reference = (const RealData1&)*reference;
+	float weighted_difference_sum =
+		::fabs(value_-_reference.value_)*3;
+	return weighted_difference_sum / 1;
 }
 
-PositionalData::Type RealData1::GetType() const
-{
-	return (TYPE_REAL_1);
+PositionalData::Type RealData1::GetType() const {
+	return (kTypeReal1);
 }
 
-void RealData1::CopyData(const PositionalData* pData)
-{
-	deb_assert(pData->GetType() == GetType());
-	const RealData1& lCopy = *(RealData1*)pData;
-	*this = lCopy;
+void RealData1::CopyData(const PositionalData* data) {
+	deb_assert(data->GetType() == GetType());
+	const RealData1& _copy = *(RealData1*)data;
+	*this = _copy;
 }
 
-PositionalData* RealData1::Clone() const
-{
+PositionalData* RealData1::Clone() const {
 	return (new RealData1(*this));
 }
 

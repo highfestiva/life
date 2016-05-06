@@ -1,38 +1,36 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Lepra/Include/HiResTimer.h"
-#include "../../UiTbc/Include/UiChunkyClass.h"
-#include "CppContextObject.h"
-#include "Cure.h"
+#include "../../lepra/include/hirestimer.h"
+#include "../../uitbc/include/uichunkyclass.h"
+#include "cppcontextobject.h"
+#include "cure.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class Driver: public CppContextObject
-{
+class Driver: public CppContextObject {
 	typedef CppContextObject Parent;
 public:
-	Driver(ContextManager* pManager);
+	Driver(ContextManager* manager);
 	virtual ~Driver();
 
 protected:
-	virtual void SetTagIndex(int pIndex);
+	virtual void SetTagIndex(int index);
 	virtual void OnTick();
 
 private:
-	str mType;
-	UiTbc::ChunkyClass::Tag mTag;
-	HiResTimer mTime;
+	str type_;
+	uitbc::ChunkyClass::Tag tag_;
+	HiResTimer time_;
 
 	logclass();
 };

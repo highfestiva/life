@@ -1,71 +1,69 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #pragma once
 
-#include "../../Lepra/Include/Lepra.h"	// TRICKY: must be here due to a #define compile optimization.
-#include "../../Tbc/Include/ChunkyClass.h"
-#include "../../Tbc/Include/ChunkyPhysics.h"
-#include "ContextObject.h"
-#include "PhysicsSharedResource.h"
+#include "../../lepra/include/lepra.h"	// TRICKY: must be here due to a #define compile optimization.
+#include "../../tbc/include/chunkyclass.h"
+#include "../../tbc/include/chunkyphysics.h"
+#include "contextobject.h"
+#include "physicssharedresource.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class CppContextObject: public ContextObject
-{
+class CppContextObject: public ContextObject {
 	typedef ContextObject Parent;
 public:
-	CppContextObject(ResourceManager* pResourceManager, const str& pClassId);
+	CppContextObject(ResourceManager* resource_manager, const str& class_id);
 	virtual ~CppContextObject();
 
-	Tbc::ChunkyPhysics::GuideMode GetGuideMode() const;
+	tbc::ChunkyPhysics::GuideMode GetGuideMode() const;
 	void StabilizeTick();
 
 	virtual void StartLoading();
 
-	void SetAllowNetworkLogic(bool pAllow);
+	void SetAllowNetworkLogic(bool allow);
 
-	Tbc::ChunkyPhysics* GetPhysics() const;
+	tbc::ChunkyPhysics* GetPhysics() const;
 	UserPhysicsReferenceResource* GetPhysicsResource() const;
-	void CreatePhysics(Tbc::ChunkyPhysics* pPhysics);
-	void CreatePhysicsRef(const str& pName);
-	virtual const Tbc::ChunkyClass* GetClass() const;
-	const Tbc::ChunkyClass::Tag* FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>* pTriggerIndexArray = 0) const;
-	virtual void SetTagIndex(int pIndex);
+	void CreatePhysics(tbc::ChunkyPhysics* physics);
+	void CreatePhysicsRef(const str& name);
+	virtual const tbc::ChunkyClass* GetClass() const;
+	const tbc::ChunkyClass::Tag* FindTag(const str& tag_type, int float_value_count, int string_value_count, const std::vector<int>* trigger_index_array = 0) const;
+	virtual void SetTagIndex(int index);
 
 protected:
-	void SetForceLoadUnique(bool pLoadUnique);
-	void StartLoadingPhysics(const str& pPhysicsName);
+	void SetForceLoadUnique(bool load_unique);
+	void StartLoadingPhysics(const str& physics_name);
 	virtual bool TryComplete();
 	virtual void SetupChildHandlers();
 
-	void OnMicroTick(float pFrameTime);
-	void OnAlarm(int pAlarmId, void* pExtraData);
-	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
-	virtual void OnForceApplied(ContextObject* pOtherObject,
-		 Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-		 const vec3& pForce, const vec3& pTorque,
-		 const vec3& pPosition, const vec3& pRelativeVelocity);
+	void OnMicroTick(float frame_time);
+	void OnAlarm(int alarm_id, void* extra_data);
+	virtual void OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal);
+	virtual void OnForceApplied(ContextObject* other_object,
+		 tbc::PhysicsManager::BodyID own_body_id, tbc::PhysicsManager::BodyID other_body_id,
+		 const vec3& force, const vec3& torque,
+		 const vec3& position, const vec3& relative_velocity);
 
-	void OnLoadClass(UserClassResource* pClassResource);
-	void OnLoadPhysics(UserPhysicsReferenceResource* pPhysicsResource);
+	void OnLoadClass(UserClassResource* class_resource);
+	void OnLoadPhysics(UserPhysicsReferenceResource* physics_resource);
 
 	bool GetAllowNetworkLogic() const;
 
 private:
-	typedef std::unordered_map<int, const Tbc::PhysicsTrigger*> ActiveTriggerGroupMap;
+	typedef std::unordered_map<int, const tbc::PhysicsTrigger*> ActiveTriggerGroupMap;
 
-	UserClassResource* mClassResource;
-	UserPhysicsReferenceResource* mPhysicsResource;
-	ActiveTriggerGroupMap mActiveTriggerGroupMap;
-	bool mAllowNetworkLogic;
-	bool mForceLoadUnique;
+	UserClassResource* class_resource_;
+	UserPhysicsReferenceResource* physics_resource_;
+	ActiveTriggerGroupMap active_trigger_group_map_;
+	bool allow_network_logic_;
+	bool force_load_unique_;
 
 	logclass();
 };

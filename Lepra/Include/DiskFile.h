@@ -9,7 +9,7 @@
 // It is a monster because of its inheritance... But this makes your life
 // much easier if you use it in the right way. Here are the two major features:
 //
-// 1. Automatic conversion between big/little endian byte ordering. Default 
+// 1. Automatic conversion between big/little endian byte ordering. Default
 //    is little endian (Intel standard).
 // 2. Implement your own reader/writer and save your files with your own
 //    encryption scheme.
@@ -22,10 +22,10 @@
 
 #include <stdio.h>
 
-#include "Lepra.h"
-#include "File.h"
-#include "InputStream.h"
-#include "OutputStream.h"
+#include "lepra.h"
+#include "file.h"
+#include "inputstream.h"
+#include "outputstream.h"
 
 #ifdef LEPRA_POSIX
 #include <sys/types.h>
@@ -35,8 +35,7 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -44,115 +43,104 @@ class FileArchive;
 
 
 
-class DiskFile: public File, protected InputStream, protected OutputStream
-{
+class DiskFile: public File, protected InputStream, protected OutputStream {
 	typedef File Parent;
 public:
 	// Not really an enum, but a bit field.
-	enum OpenMode
-	{
-		MODE_TEXT		= 0x01,
-		MODE_READ		= 0x02,
-		MODE_TEXT_READ		= (MODE_READ|MODE_TEXT),
-		MODE_WRITE		= 0x04,
-		MODE_TEXT_WRITE		= (MODE_WRITE|MODE_TEXT),
-		MODE_TEXT_READ_WRITE	= (MODE_WRITE|MODE_READ|MODE_TEXT),
-		MODE_WRITE_APPEND	= 0x08,
-		MODE_TEXT_WRITE_APPEND	= (MODE_WRITE_APPEND|MODE_TEXT),
+	enum OpenMode {
+		kModeText		= 0x01,
+		kModeRead		= 0x02,
+		kModeTextRead		= (kModeRead|kModeText),
+		kModeWrite		= 0x04,
+		kModeTextWrite		= (kModeWrite|kModeText),
+		kModeTextReadWrite	= (kModeWrite|kModeRead|kModeText),
+		kModeWriteAppend	= 0x08,
+		kModeTextWriteAppend	= (kModeWriteAppend|kModeText),
 	};
 
-	class FindData
-	{
+	class FindData {
 	public:
 		friend class DiskFile;
 
 		FindData() :
 #if defined LEPRA_WINDOWS
-			mFindHandle(-1),
+			find_handle_(-1),
 #elif defined LEPRA_POSIX
-			mGlobList(),
-			mGlobIndex(0xffff),
+			glob_list_(),
+			glob_index_(0xffff),
 #endif
-			mFileSpec(),
-			mName(),
-			mSubDir(false),
-			mSize(0),
-			mTime(-1)
-		{
+			file_spec_(),
+			name_(),
+			sub_dir_(false),
+			size_(0),
+			time_(-1) {
 		}
 
-		~FindData()
-		{
+		~FindData() {
 		}
 
-		inline str& GetName()
-		{
-			return mName;
+		inline str& GetName() {
+			return name_;
 		}
 
-		inline const str& GetName() const
-		{
-			return mName;
+		inline const str& GetName() const {
+			return name_;
 		}
 
-		inline uint64 GetSize()
-		{
-			return mSize;
+		inline uint64 GetSize() {
+			return size_;
 		}
 
-		inline int64 GetTimeTag()
-		{
-			return mTime;
+		inline int64 GetTimeTag() {
+			return time_;
 		}
 
-		inline bool IsSubDir()
-		{
-			return mSubDir;
+		inline bool IsSubDir() {
+			return sub_dir_;
 		}
 
-		inline void Clear()
-		{
-			mFileSpec.clear();
-			mName.clear();
-			mSize = 0;
-			mSubDir = false;
-			mTime = -1;
+		inline void Clear() {
+			file_spec_.clear();
+			name_.clear();
+			size_ = 0;
+			sub_dir_ = false;
+			time_ = -1;
 		}
-		
+
 	private:
 #if defined LEPRA_WINDOWS
-		intptr_t mFindHandle;
+		intptr_t find_handle_;
 #elif defined LEPRA_POSIX
-		glob_t mGlobList;
-		size_t mGlobIndex;
+		glob_t glob_list_;
+		size_t glob_index_;
 #else
 #error DiskFile::FindData is not properly implemented on this platform!
 #endif // LEPRA_POSIX
 
-		str mFileSpec;
-		str mName;
-		bool mSubDir;
-		uint64 mSize;
-		int64 mTime;
+		str file_spec_;
+		str name_;
+		bool sub_dir_;
+		uint64 size_;
+		int64 time_;
 	};
 
 	DiskFile();
-	DiskFile(Reader* pReader);
-	DiskFile(Writer* pWriter);
-	DiskFile(Reader* pReader, Writer* pWriter);
+	DiskFile(Reader* reader);
+	DiskFile(Writer* writer);
+	DiskFile(Reader* reader, Writer* writer);
 	virtual ~DiskFile();
 
-	// If pCreatePath is set to true, the directory structure given by
-	// pFileName will be created if it doesn't already exist, and if
-	// pMode is set to WRITE_ONLY or WRITE_APPEND.
-	bool Open(const str& pFileName, OpenMode pMode, bool pCreatePath = false, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
+	// If create_path is set to true, the directory structure given by
+	// file_name will be created if it doesn't already exist, and if
+	// mode is set to kWriteOnly or kWriteAppend.
+	bool Open(const str& file_name, OpenMode mode, bool create_path = false, Endian::EndianType endian = Endian::kTypeBigEndian);
 
 	void Close();
 
 	bool IsOpen() const;
 
 	// Use this to change the endian in the middle of a file read/write.
-	void SetEndian(Endian::EndianType pEndian);
+	void SetEndian(Endian::EndianType endian);
 
 	str GetFullName() const;	// Returns path+filename.
 	str GetName() const;		// Returns filename only.
@@ -161,63 +149,63 @@ public:
 	virtual int64 GetSize() const;
 
 	// Overrided from Reader/Writer.
-	IOError ReadData(void* pBuffer, size_t pSize);
-	IOError WriteData(const void* pBuffer, size_t pSize);
+	IOError ReadData(void* buffer, size_t size);
+	IOError WriteData(const void* buffer, size_t size);
 
 	virtual void Flush();
 
 	virtual int64 Tell() const;
-	virtual int64 Seek(int64 pOffset, FileOrigin pFrom);
+	virtual int64 Seek(int64 offset, FileOrigin from);
 
 	// Static functions.
 
-	static IOError Load(const str& pFilename, void** pData, int64& pDataSize);	// Retries a few times to avoid anti-virus glitches.
+	static IOError Load(const str& filename, void** data, int64& data_size);	// Retries a few times to avoid anti-virus glitches.
 
-	static bool Exists(const str& pFileName);
-	static bool PathExists(const str& pPathName);
-	static bool Delete(const str& pFileName);
-	static bool Rename(const str& pOldFileName, const str& pNewFileName);
-	static bool CreateDir(const str& pPathName);
-	static bool RemoveDir(const str& pPathName);
+	static bool Exists(const str& file_name);
+	static bool PathExists(const str& path_name);
+	static bool Delete(const str& file_name);
+	static bool Rename(const str& old_file_name, const str& new_file_name);
+	static bool CreateDir(const str& path_name);
+	static bool RemoveDir(const str& path_name);
 
-	static bool FindFirst(const str& pFileSpec, FindData& pFindData);
-	static bool FindNext(FindData& pFindData);
+	static bool FindFirst(const str& file_spec, FindData& find_data);
+	static bool FindNext(FindData& find_data);
 
 	// Generates a unique random file name for the given path. The filename can then
 	// be used to create a temp-file.
-	static str GenerateUniqueFileName(const str& pPath);
+	static str GenerateUniqueFileName(const str& path);
 
 	// Overrided from InputStream.
 	int64 GetAvailable() const;
-	virtual IOError ReadRaw(void* pBuffer, size_t pSize);
-	IOError Skip(size_t pSize);
+	virtual IOError ReadRaw(void* buffer, size_t size);
+	IOError Skip(size_t size);
 
 	// Overrided from OutputStream.
-	virtual IOError WriteRaw(const void* pBuffer, size_t pSize);
+	virtual IOError WriteRaw(const void* buffer, size_t size);
 private:
-	void ExtractPathAndFileName(const str& pFileName);
+	void ExtractPathAndFileName(const str& file_name);
 
 	bool CreateSubDirs();
 
-	static FILE* FileOpen(const str& pFileName, const str& pMode);
+	static FILE* FileOpen(const str& file_name, const str& mode);
 
-	//void CopyArchiveFiles(FileArchive& pSource, FileArchive& pDest, const str& pExceptThisFile);
-	//bool CopyFileBetweenArchives(FileArchive& pSource, FileArchive& pDest, const str& pFileName);
+	//void CopyArchiveFiles(FileArchive& source, FileArchive& dest, const str& except_this_file);
+	//bool CopyFileBetweenArchives(FileArchive& source, FileArchive& dest, const str& file_name);
 
 	void operator=(const DiskFile&);
 
-	FILE* mFile;
-	str mFileName;
-	str mPath;
+	FILE* file_;
+	str file_name_;
+	str path_;
 
-	int64 mFileSize;
+	int64 file_size_;
 
 	// Usually just NULL. Can be set by the user to redirect the IO
 	// through another reader/writer.
-	Writer* mWriter;
-	Reader* mReader;
+	Writer* writer_;
+	Reader* reader_;
 
-	OpenMode mMode;
+	OpenMode mode_;
 };
 
 

@@ -6,23 +6,21 @@
 
 #pragma once
 
-#include "../UiOpenGLExtensions.h"
-#include "UiMacDisplayManager.h"
+#include "../uiopenglextensions.h"
+#include "uimacdisplaymanager.h"
 #ifdef LEPRA_IOS
-#include "EAGLView.h"
+#include "eaglview.h"
 #endif // iOS
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-class MacOpenGLDisplay: public MacDisplayManager
-{
+class MacOpenGLDisplay: public MacDisplayManager {
 	typedef MacDisplayManager Parent;
-public:	
+public:
 	MacOpenGLDisplay();
 	virtual ~MacOpenGLDisplay();
 
@@ -30,33 +28,33 @@ public:
 	virtual bool Activate();
 	virtual bool Deactivate();
 	virtual bool UpdateScreen();
-	virtual void SetOrientation(Orientation pOrientation);
+	virtual void SetOrientation(Orientation orientation);
 
 	bool IsVSyncEnabled() const;
-	bool SetVSyncEnabled(bool pEnabled);
+	bool SetVSyncEnabled(bool enabled);
 
 	ContextType GetContextType();
 	LEPRA_APPLE_GL_VIEW* GetGlView() const;
 
 protected:
-	void OnResize(int pWidth, int pHeight);
+	void OnResize(int width, int height);
 	void OnMinimize();
-	void OnMaximize(int pWidth, int pHeight);
+	void OnMaximize(int width, int height);
 
 	bool InitScreen();
-	void SetFocus(bool pFocus);
+	void SetFocus(bool focus);
 
 private:
-	void Resize(int pWidth, int pHeight);
+	void Resize(int width, int height);
 	void UpdateCaption();
 
 	bool CreateGLContext();
 	void DeleteGLContext();
 	bool SetGLPixelFormat();
 
-	LEPRA_APPLE_GL_VIEW* mGlView;
-	static LEPRA_APPLE_GL_CONTEXT* mGlContext;
-	static int mContextUserCount;
+	LEPRA_APPLE_GL_VIEW* gl_view_;
+	static LEPRA_APPLE_GL_CONTEXT* gl_context_;
+	static int context_user_count_;
 };
 
 

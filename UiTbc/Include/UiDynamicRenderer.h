@@ -1,27 +1,25 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-namespace UiTbc
-{
+namespace uitbc {
 
 class Renderer;
 
-class DynamicRenderer
-{
+class DynamicRenderer {
 public:
-	DynamicRenderer(Renderer* pRenderer);
+	DynamicRenderer(Renderer* renderer);
 	virtual ~DynamicRenderer();
 
 	virtual void Render() = 0;
-	virtual void Tick(float pTime) = 0;
+	virtual void Tick(float time) = 0;
 
 protected:
-	Renderer* mRenderer;
+	Renderer* renderer_;
 };
 
 }

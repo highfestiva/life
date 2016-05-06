@@ -34,14 +34,14 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../lepra/include/lepratarget.h"
 #ifdef LEPRA_IOS
 #import "CYRTextView.h"
 #import "CYRLayoutManager.h"
 #import "CYRTextStorage.h"
 
 
-#define RGB(r,g,b) [UIColor colorWithRed:r/255.0f green:g/255.0f blue:b/255.0f alpha:1.0f]
+#define kRgb(r,g,b) [UIColor colorWithRed:r/255.0f green:g/255.0f blue:b/255.0f alpha:1.0f]
 
 
 static void *CYRTextViewContext = &CYRTextViewContext;
@@ -49,27 +49,25 @@ static const float kCursorVelocity = 1.0f/8.0f;
 
 
 @interface CYRTextView ()
-@property (nonatomic, strong) CYRLayoutManager *lineNumberLayoutManager;
-@property (nonatomic, strong) CYRTextStorage *syntaxTextStorage;
+@property (nonatomic, strong) CYRLayoutManager *number_layout_manager;
+@property (nonatomic, strong) CYRTextStorage *syntaxTextStorage_;
 @end
 
 
-@implementation CYRTextView
-{
-	NSRange startRange;
+@implementation CYRTextView {
+	NSRange range_;
 }
 
 #pragma mark - Initialization & Setup
 
-- (id)initWithFrame:(CGRect)frame
-{
+- (id)initWithFrame:(CGRect)frame {
 	CYRTextStorage *textStorage = [CYRTextStorage new];
 	CYRLayoutManager *layoutManager = [CYRLayoutManager new];
-	
-	self.lineNumberLayoutManager = layoutManager;
-	
+
+	self.number_layout_manager = layoutManager;
+
 	NSTextContainer *textContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-	
+
 	//  Wrap text to the text view's frame
 	textContainer.widthTracksTextView = YES;
 
@@ -77,83 +75,72 @@ static const float kCursorVelocity = 1.0f/8.0f;
 
 	[textStorage removeLayoutManager:textStorage.layoutManagers.firstObject];
 	[textStorage addLayoutManager:layoutManager];
-	
-	self.syntaxTextStorage = textStorage;
 
-	if ((self = [super initWithFrame:frame textContainer:textContainer]))
-	{
+	self.syntaxTextStorage_ = textStorage;
+
+	if ((self = [super initWithFrame:frame textContainer:textContainer])) {
 		self.contentMode = UIViewContentModeRedraw; // causes drawRect: to be called on frame resizing and device rotation
-		
+
 		[self _commonSetup];
 	}
-	
+
 	return self;
 }
 
-- (void)_commonSetup
-{
+- (void)_commonSetup {
 	// Setup observers
 	[self addObserver:self forKeyPath:NSStringFromSelector(@selector(font)) options:NSKeyValueObservingOptionNew context:CYRTextViewContext];
 	[self addObserver:self forKeyPath:NSStringFromSelector(@selector(textColor)) options:NSKeyValueObservingOptionNew context:CYRTextViewContext];
 	[self addObserver:self forKeyPath:NSStringFromSelector(@selector(selectedTextRange)) options:NSKeyValueObservingOptionNew context:CYRTextViewContext];
-	[self addObserver:self forKeyPath:NSStringFromSelector(@selector(selectedRange)) options:NSKeyValueObservingOptionNew context:CYRTextViewContext];
+	[self addObserver:self forKeyPath:NSStringFromSelector(@selector(selectedRange_)) options:NSKeyValueObservingOptionNew context:CYRTextViewContext];
 
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleTextViewDidChangeNotification:) name:UITextViewTextDidChangeNotification object:self];
-	
+
 	// Setup defaults
 	self.font = [UIFont systemFontOfSize:16.0f];
 	self.textColor = [UIColor blackColor];
 	self.autocapitalizationType = UITextAutocapitalizationTypeNone;
 	self.autocorrectionType	 = UITextAutocorrectionTypeNo;
-	self.lineCursorEnabled = NO;
+	self.cursor_enabled = NO;
 	self.gutterBackgroundColor = [UIColor colorWithWhite:0.95 alpha:1];
 	self.gutterLineColor	   = [UIColor lightGrayColor];
-	
+
 	// Inset the content to make room for line numbers
-	self.textContainerInset = UIEdgeInsetsMake(1, self.lineNumberLayoutManager.gutterWidth, 1, 0);
-	
+	self.textContainerInset = UIEdgeInsetsMake(1, self.number_layout_manager.gutterWidth, 1, 0);
+
 	// Setup the gesture recognizers
 	_singleFingerPanRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(singleFingerPanHappend:)];
-	_singleFingerPanRecognizer.maximumNumberOfTouches = 1;
+	_singleFingerPanRecognizer.maximumNumberOfTouches_ = 1;
 	[self addGestureRecognizer:_singleFingerPanRecognizer];
-	
+
 	_doubleFingerPanRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(doubleFingerPanHappend:)];
-	_doubleFingerPanRecognizer.minimumNumberOfTouches = 2;
+	_doubleFingerPanRecognizer.minimumNumberOfTouches_ = 2;
 	[self addGestureRecognizer:_doubleFingerPanRecognizer];
 }
 
 
 #pragma mark - Cleanup
 
-- (void)dealloc
-{
+- (void)dealloc {
 	[self removeObserver:self forKeyPath:NSStringFromSelector(@selector(font))];
 	[self removeObserver:self forKeyPath:NSStringFromSelector(@selector(textColor))];
 	[self removeObserver:self forKeyPath:NSStringFromSelector(@selector(selectedTextRange))];
-	[self removeObserver:self forKeyPath:NSStringFromSelector(@selector(selectedRange))];
+	[self removeObserver:self forKeyPath:NSStringFromSelector(@selector(selectedRange_))];
 }
 
 
 #pragma mark - KVO
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-	if ([keyPath isEqualToString:NSStringFromSelector(@selector(font))] && context == CYRTextViewContext)
-	{
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+	if ([keyPath isEqualToString:NSStringFromSelector(@selector(font))] && context == CYRTextViewContext) {
 		// Whenever the UITextView font is changed we want to keep a reference in the stickyFont ivar. We do this to counteract a bug where the underlying font can be changed without notice and cause undesired behaviour.
-		self.syntaxTextStorage.defaultFont = self.font;
-	}
-	else if ([keyPath isEqualToString:NSStringFromSelector(@selector(textColor))] && context == CYRTextViewContext)
-	{
-		self.syntaxTextStorage.defaultTextColor = self.textColor;
-	}
-	else if (([keyPath isEqualToString:NSStringFromSelector(@selector(selectedTextRange))] ||
-			  [keyPath isEqualToString:NSStringFromSelector(@selector(selectedRange))]) && context == CYRTextViewContext)
-	{
+		self.syntaxTextStorage_.defaultFont = self.font;
+	} else if ([keyPath isEqualToString:NSStringFromSelector(@selector(textColor))] && context == CYRTextViewContext) {
+		self.syntaxTextStorage_.defaultTextColor = self.textColor;
+	} else if (([keyPath isEqualToString:NSStringFromSelector(@selector(selectedTextRange))] ||
+			  [keyPath isEqualToString:NSStringFromSelector(@selector(selectedRange_))]) && context == CYRTextViewContext) {
 		[self setNeedsDisplay];
-	}
-	else
-	{
+	} else {
 		[super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 	}
 }
@@ -161,15 +148,12 @@ static const float kCursorVelocity = 1.0f/8.0f;
 
 #pragma mark - Notifications
 
-- (void)handleTextViewDidChangeNotification:(NSNotification *)notification
-{
-	/*if (notification.object == self)
-	{
+- (void)handleTextViewDidChangeNotification:(NSNotification *)notification {
+	/*if (notification.object == self) {
 		CGRect line = [self caretRectForPosition: self.selectedTextRange.start];
 		CGFloat overflow = line.origin.y + line.size.height - ( self.contentOffset.y + self.bounds.size.height - self.contentInset.bottom - self.contentInset.top );
-		
-		if ( overflow > 0 )
-		{
+
+		if ( overflow > 0 ) {
 			// We are at the bottom of the visible text and introduced a line feed, scroll down (iOS 7 does not do it)
 			// Scroll caret to visible area
 			CGPoint offset = self.contentOffset;
@@ -185,20 +169,17 @@ static const float kCursorVelocity = 1.0f/8.0f;
 
 #pragma mark - Overrides
 
-- (void)setTokens:(NSMutableArray *)tokens
-{
-	[self.syntaxTextStorage setTokens:tokens];
+- (void)setTokens:(NSMutableArray *)tokens {
+	[self.syntaxTextStorage_ setTokens:tokens];
 }
 
-- (NSArray *)tokens
-{
-	CYRTextStorage *syntaxTextStorage = (CYRTextStorage *)self.textStorage;
-	
-	return syntaxTextStorage.tokens;
+- (NSArray *)tokens {
+	CYRTextStorage *syntaxTextStorage_ = (CYRTextStorage *)self.textStorage;
+
+	return syntaxTextStorage_.tokens;
 }
 
-- (void)setText:(NSString *)text
-{
+- (void)setText:(NSString *)text {
 	UITextRange *textRange = [self textRangeFromPosition:self.beginningOfDocument toPosition:self.endOfDocument];
 	[self replaceRange:textRange withText:text];
 }
@@ -207,32 +188,30 @@ static const float kCursorVelocity = 1.0f/8.0f;
 #pragma mark - Line Drawing
 
 // Original implementation sourced from: https://github.com/alldritt/TextKit_LineNumbers
-- (void)drawRect:(CGRect)rect
-{
+- (void)drawRect:(CGRect)rect {
 	//  Drag the line number gutter background.  The line numbers them selves are drawn by LineNumberLayoutManager.
 	CGContextRef context = UIGraphicsGetCurrentContext();
 	CGRect bounds = self.bounds;
-	
+
 	CGFloat height = MAX(CGRectGetHeight(bounds), self.contentSize.height) + 200;
-	
+
 	// Set the regular fill
 	CGContextSetFillColorWithColor(context, self.gutterBackgroundColor.CGColor);
-	CGContextFillRect(context, CGRectMake(bounds.origin.x, bounds.origin.y, self.lineNumberLayoutManager.gutterWidth, height));
-	
+	CGContextFillRect(context, CGRectMake(bounds.origin.x, bounds.origin.y, self.number_layout_manager.gutterWidth, height));
+
 	// Draw line
 	CGContextSetFillColorWithColor(context, self.gutterLineColor.CGColor);
-	CGContextFillRect(context, CGRectMake(self.lineNumberLayoutManager.gutterWidth, bounds.origin.y, 0.5, height));
-	
-	if (_lineCursorEnabled)
-	{
-		self.lineNumberLayoutManager.selectedRange = self.selectedRange;
-		
-		NSRange glyphRange = [self.lineNumberLayoutManager.textStorage.string paragraphRangeForRange:self.selectedRange];
-		glyphRange = [self.lineNumberLayoutManager glyphRangeForCharacterRange:glyphRange actualCharacterRange:NULL];
-		self.lineNumberLayoutManager.selectedRange = glyphRange;
-		[self.lineNumberLayoutManager invalidateDisplayForGlyphRange:glyphRange];
+	CGContextFillRect(context, CGRectMake(self.number_layout_manager.gutterWidth, bounds.origin.y, 0.5, height));
+
+	if (_lineCursorEnabled) {
+		self.number_layout_manager.selectedRange_ = self.selectedRange_;
+
+		NSRange glyphRange = [self.number_layout_manager.textStorage.string paragraphRangeForRange:self.selectedRange_];
+		glyphRange = [self.number_layout_manager glyphRangeForCharacterRange:glyphRange actualCharacterRange:NULL];
+		self.number_layout_manager.selectedRange_ = glyphRange;
+		[self.number_layout_manager invalidateDisplayForGlyphRange:glyphRange];
 	}
-	
+
 	[super drawRect:rect];
 }
 
@@ -240,50 +219,41 @@ static const float kCursorVelocity = 1.0f/8.0f;
 #pragma mark - Gestures
 
 // Sourced from: https://github.com/srijs/NLTextView
-- (BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)gestureRecognizer
-{
+- (BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)gestureRecognizer {
 	// Only accept horizontal pans for the code navigation to preserve correct scrolling behaviour.
-	if (gestureRecognizer == _singleFingerPanRecognizer || gestureRecognizer == _doubleFingerPanRecognizer)
-	{
+	if (gestureRecognizer == _singleFingerPanRecognizer || gestureRecognizer == _doubleFingerPanRecognizer) {
 		//CGPoint translation = [gestureRecognizer translationInView:self];
 		//return fabsf(translation.x) > fabsf(translation.y);
 		return NO;
 	}
-	
+
 	return YES;
-	
+
 }
 
 // Sourced from: https://github.com/srijs/NLTextView
-- (void)singleFingerPanHappend:(UIPanGestureRecognizer *)sender
-{
-	if (sender.state == UIGestureRecognizerStateBegan)
-	{
-		startRange = self.selectedRange;
+- (void)singleFingerPanHappend:(UIPanGestureRecognizer *)sender {
+	if (sender.state == UIGestureRecognizerStateBegan) {
+		range_ = self.selectedRange_;
 	}
-	
-	CGFloat cursorLocation = MAX(startRange.location + [sender translationInView:self].x * kCursorVelocity, 0);
-	
-	self.selectedRange = NSMakeRange(cursorLocation, 0);
+
+	CGFloat cursorLocation = MAX(range_.location + [sender translationInView:self].x * kCursorVelocity, 0);
+
+	self.selectedRange_ = NSMakeRange(cursorLocation, 0);
 }
 
 // Sourced from: https://github.com/srijs/NLTextView
-- (void)doubleFingerPanHappend:(UIPanGestureRecognizer *)sender
-{
-	if (sender.state == UIGestureRecognizerStateBegan)
-	{
-		startRange = self.selectedRange;
+- (void)doubleFingerPanHappend:(UIPanGestureRecognizer *)sender {
+	if (sender.state == UIGestureRecognizerStateBegan) {
+		range_ = self.selectedRange_;
 	}
-	
-	CGFloat cursorLocation = MAX(startRange.location + [sender translationInView:self].x * kCursorVelocity, 0);
-	
-	if (cursorLocation > startRange.location)
-	{
-		self.selectedRange = NSMakeRange(startRange.location, fabsf(startRange.location - cursorLocation));
-	}
-	else
-	{
-		self.selectedRange = NSMakeRange(cursorLocation, fabsf(startRange.location - cursorLocation));
+
+	CGFloat cursorLocation = MAX(range_.location + [sender translationInView:self].x * kCursorVelocity, 0);
+
+	if (cursorLocation > range_.location) {
+		self.selectedRange_ = NSMakeRange(range_.location, fabsf(range_.location - cursorLocation));
+	} else {
+		self.selectedRange_ = NSMakeRange(cursorLocation, fabsf(range_.location - cursorLocation));
 	}
 }
 

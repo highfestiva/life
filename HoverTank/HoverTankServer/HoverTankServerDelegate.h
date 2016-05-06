@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,85 +8,81 @@
 
 
 
-#include "../../Life/LifeServer/ServerDelegate.h"
-#include "../../Lepra/Include/HiResTimer.h"
-#include "../../Life/Launcher.h"
-#include "../HoverTank.h"
-#include "GameServerLogic.h"
+#include "../../life/lifeserver/serverdelegate.h"
+#include "../../lepra/include/hirestimer.h"
+#include "../../life/launcher.h"
+#include "../hovertank.h"
+#include "gameserverlogic.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class FloatAttribute;
 }
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-class HoverTankServerDelegate: public Life::ServerDelegate, public GameServerLogic, public Life::Launcher
-{
-	typedef Life::ServerDelegate Parent;
+class HoverTankServerDelegate: public life::ServerDelegate, public GameServerLogic, public life::Launcher {
+	typedef life::ServerDelegate Parent;
 public:
-	HoverTankServerDelegate(Life::GameServerManager* pGameServerManager);
+	HoverTankServerDelegate(life::GameServerManager* game_server_manager);
 	virtual ~HoverTankServerDelegate();
 
-	virtual void SetLevel(const str& pLevelName);
+	virtual void SetLevel(const str& level_name);
 
 private:
-	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
+	virtual cure::ContextObject* CreateContextObject(const str& class_id) const;
 
 	virtual void OnOpen();
-	virtual void OnLogin(Life::Client* pClient);
-	virtual void OnLogout(Life::Client* pClient);
+	virtual void OnLogin(life::Client* client);
+	virtual void OnLogout(life::Client* client);
 
-	virtual void OnSelectAvatar(Life::Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId);
-	virtual void OnLoadAvatar(Life::Client* pClient, Cure::ContextObject* pAvatar);
-	virtual void OnLoadObject(Cure::ContextObject* pObject);
-	virtual void OnDeleteObject(Cure::ContextObject* pObject);
+	virtual void OnSelectAvatar(life::Client* client, const cure::UserAccount::AvatarId& avatar_id);
+	virtual void OnLoadAvatar(life::Client* client, cure::ContextObject* avatar);
+	virtual void OnLoadObject(cure::ContextObject* object);
+	virtual void OnDeleteObject(cure::ContextObject* object);
 
-	virtual bool IsObjectLendable(Life::Client* pClient, Cure::ContextObject* pObject);
+	virtual bool IsObjectLendable(life::Client* client, cure::ContextObject* object);
 
 	virtual void PreEndTick();
 
-	void OrderAirStrike(const vec3& pPosition, float pFlyInAngle);
+	void OrderAirStrike(const vec3& position, float fly_in_angle);
 
-	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon);
-	virtual void Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength);
-	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
+	virtual void Shoot(cure::ContextObject* avatar, int weapon);
+	virtual void Detonate(cure::ContextObject* explosive, const tbc::ChunkyBoneGeometry* explosive_geometry, const vec3& position, const vec3& velocity, const vec3& normal, float strength);
+	virtual void OnBulletHit(cure::ContextObject* bullet, cure::ContextObject* hit_object);
 
-	virtual Cure::ContextObject* CreateAvatarForNpc(Npc* pNpc);
-	virtual void AddAvatarToTeam(Cure::ContextObject* pAvatar, int pTeam);
-	virtual void RemoveAvatar(Cure::ContextObject* pAvatar);
-	virtual const AvatarIdSet& GetAvatarsInTeam(int pTeam);
+	virtual cure::ContextObject* CreateAvatarForNpc(Npc* npc);
+	virtual void AddAvatarToTeam(cure::ContextObject* avatar, int team);
+	virtual void RemoveAvatar(cure::ContextObject* avatar);
+	virtual const AvatarIdSet& GetAvatarsInTeam(int team);
 
 	void CreateNpc();
 	void DeleteNpc();
-	Npc* GetNpcByAvatar(Cure::GameObjectId pAvatarId) const;
-	void CreateScore(const str& pPlayerName, bool pCreatePing);
-	void DeleteScore(const str& pPlayerName);
+	Npc* GetNpcByAvatar(cure::GameObjectId avatar_id) const;
+	void CreateScore(const str& player_name, bool create_ping);
+	void DeleteScore(const str& player_name);
 	void UpdatePing();
-	void AddPoint(const str& pPrefix, const Cure::ContextObject* pAvatar, int pPoints);
-	void SetPoints(const str& pPrefix, const Life::Client* pClient, int pPoints);
-	void DrainHealth(Cure::ContextObject* pExplosive, Cure::ContextObject* pAvatar, Cure::FloatAttribute* pHealth, float pDamage);
-	void Die(Cure::ContextObject* pAvatar);
-	bool IsAvatarObject(const Cure::ContextObject* pObject) const;
+	void AddPoint(const str& prefix, const cure::ContextObject* avatar, int points);
+	void SetPoints(const str& prefix, const life::Client* client, int points);
+	void DrainHealth(cure::ContextObject* explosive, cure::ContextObject* avatar, cure::FloatAttribute* health, float damage);
+	void Die(cure::ContextObject* avatar);
+	bool IsAvatarObject(const cure::ContextObject* object) const;
 	void TickNpcGhosts();
 
-	enum Command
-	{
-		COMMAND_SET_LEVEL,
+	enum Command {
+		kCommandSetLevel,
 	};
 
-	Cure::GameObjectId mLevelId;
-	Cure::GameObjectId mScoreInfoId;
-	AvatarIdSet mAvatarTeamSets[2];
-	AvatarIdSet mNpcSet;
-	HiResTimer mPingUpdateTimer;
+	cure::GameObjectId level_id_;
+	cure::GameObjectId score_info_id_;
+	AvatarIdSet avatar_team_sets_[2];
+	AvatarIdSet npc_set_;
+	HiResTimer ping_update_timer_;
 
 	logclass();
 };

@@ -5,215 +5,175 @@
 
 
 #include "pch.h"
-#include "../Include/UiTouchDrag.h"
-#include "../../Lepra/Include/Thread.h"
-#include "../Include/UiTouchstick.h"
+#include "../include/uitouchdrag.h"
+#include "../../lepra/include/thread.h"
+#include "../include/uitouchstick.h"
 
 
 
-namespace UiLepra
-{
-namespace Touch
-{
+namespace uilepra {
+namespace touch {
 
 
 
-Drag::Drag(int x, int y, bool pIsPress, int pButtonMask):
-	mStart(x, y),
-	mLast(x, y),
-	mIsPress(pIsPress),
-	mIsNew(true),
-	mButtonMask(pButtonMask),
-	mFlags(0),
-	mExtra(0)
-{
+Drag::Drag(int x, int y, bool is_press, int button_mask):
+	start_(x, y),
+	last_(x, y),
+	is_press_(is_press),
+	is_new_(true),
+	button_mask_(button_mask),
+	flags_(0),
+	extra_(0) {
 }
 
-void Drag::Update(const PixelCoord& pCoord, bool pIsPress, int pButtonMask)
-{
-	mIsNew = false;
-	mLast = pCoord;
-	mIsPress = pIsPress;
-	mButtonMask = pButtonMask;
+void Drag::Update(const PixelCoord& coord, bool is_press, int button_mask) {
+	is_new_ = false;
+	last_ = coord;
+	is_press_ = is_press;
+	button_mask_ = button_mask;
 }
 
-int Drag::GetDiamondDistanceTo(const PixelCoord& pCoord) const
-{
-	return std::abs(mLast.x-pCoord.x) + std::abs(mLast.y-pCoord.y);
+int Drag::GetDiamondDistanceTo(const PixelCoord& coord) const {
+	return std::abs(last_.x-coord.x) + std::abs(last_.y-coord.y);
 }
 
 
 
 DragManager::DragManager():
-	mLock(new Lock),
-	mMouseLastPressed(false),
-	mMaxDragDiamondDistance(106)
-{
+	lock_(new Lock),
+	mouse_last_pressed_(false),
+	max_drag_diamond_distance_(106) {
 }
 
-DragManager::~DragManager()
-{
+DragManager::~DragManager() {
 }
 
-void DragManager::SetMaxDragDistance(int pMaxDragDistance)
-{
-	mMaxDragDiamondDistance = (int)(pMaxDragDistance*1.2f);
+void DragManager::SetMaxDragDistance(int max_drag_distance) {
+	max_drag_diamond_distance_ = (int)(max_drag_distance*1.2f);
 }
 
-void DragManager::UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed, int pButtonMask)
-{
-	ScopeLock lLock(mLock);
-	int lClosestDiamondDistance = 1000000;
-	DragList::iterator i = mDragList.begin();
-	DragList::iterator lBestDrag = i;
-	for (; i != mDragList.end(); ++i)
-	{
-		int d = i->GetDiamondDistanceTo(pPrevious);
-		if (d < lClosestDiamondDistance)
-		{
-			lClosestDiamondDistance = d;
-			lBestDrag = i;
+void DragManager::UpdateDrag(const PixelCoord& previous, const PixelCoord& location, bool is_pressed, int button_mask) {
+	ScopeLock lock(lock_);
+	int closest_diamond_distance = 1000000;
+	DragList::iterator i = drag_list_.begin();
+	DragList::iterator best_drag = i;
+	for (; i != drag_list_.end(); ++i) {
+		int d = i->GetDiamondDistanceTo(previous);
+		if (d < closest_diamond_distance) {
+			closest_diamond_distance = d;
+			best_drag = i;
 		}
 	}
-	if (lBestDrag != mDragList.end() && (!pIsPressed || lClosestDiamondDistance <= mMaxDragDiamondDistance))	// If releasing we must do this.
-	{
-		lBestDrag->Update(pLocation, pIsPressed, pButtonMask);
+	if (best_drag != drag_list_.end() && (!is_pressed || closest_diamond_distance <= max_drag_diamond_distance_)) {	// If releasing we must do this.
+		best_drag->Update(location, is_pressed, button_mask);
 		return;
 	}
-	mDragList.push_back(Drag(pLocation.x, pLocation.y, pIsPressed, pButtonMask));
+	drag_list_.push_back(Drag(location.x, location.y, is_pressed, button_mask));
 }
 
-void DragManager::UpdateDragByMouse(const InputManager* pInputManager)
-{
-	if (!pInputManager->GetMouse())
-	{
+void DragManager::UpdateDragByMouse(const InputManager* input_manager) {
+	if (!input_manager->GetMouse()) {
 		return;
 	}
 
-	ScopeLock lLock(mLock);
-	PixelCoord lMouse;
-	pInputManager->GetMousePosition(lMouse.x, lMouse.y);
-	int lButtonMask = 0;
-	const int c = pInputManager->GetMouse()->GetNumDigitalElements();
-	for (int x = 0; x < c; ++x)
-	{
-		lButtonMask |= ((pInputManager->GetMouse()->GetButton(x)->GetBooleanValue()? 1:0) << x);
+	ScopeLock lock(lock_);
+	PixelCoord mouse;
+	input_manager->GetMousePosition(mouse.x, mouse.y);
+	int _button_mask = 0;
+	const int c = input_manager->GetMouse()->GetNumDigitalElements();
+	for (int x = 0; x < c; ++x) {
+		_button_mask |= ((input_manager->GetMouse()->GetButton(x)->GetBooleanValue()? 1:0) << x);
 	}
-	bool lIsPressed = !!lButtonMask;
-	if (lIsPressed || mMouseLastPressed)
-	{
-		UpdateDrag(mLastMouse, lMouse, lIsPressed, lButtonMask);
+	bool _is_pressed = !!_button_mask;
+	if (_is_pressed || mouse_last_pressed_) {
+		UpdateDrag(last_mouse_, mouse, _is_pressed, _button_mask);
 	}
-	mLastMouse = lMouse;
-	mMouseLastPressed = lIsPressed;
+	last_mouse_ = mouse;
+	mouse_last_pressed_ = _is_pressed;
 }
 
-void DragManager::UpdateMouseByDrag(InputManager* pInputManager)
-{
-	ScopeLock lLock(mLock);
-	DragList::iterator i = mDragList.begin();
-	for (; i != mDragList.end(); ++i)
-	{
-		pInputManager->SetMousePosition(i->mLast.x, i->mLast.y);
-		int lButtonMask = i->mButtonMask;
-		const int c = pInputManager->GetMouse()->GetNumDigitalElements();
-		for (int x = 0; x < c; ++x)
-		{
-			pInputManager->GetMouse()->GetButton(x)->SetValue((lButtonMask&(1<<x))? 1 : 0);
+void DragManager::UpdateMouseByDrag(InputManager* input_manager) {
+	ScopeLock lock(lock_);
+	DragList::iterator i = drag_list_.begin();
+	for (; i != drag_list_.end(); ++i) {
+		input_manager->SetMousePosition(i->last_.x, i->last_.y);
+		int _button_mask = i->button_mask_;
+		const int c = input_manager->GetMouse()->GetNumDigitalElements();
+		for (int x = 0; x < c; ++x) {
+			input_manager->GetMouse()->GetButton(x)->SetValue((_button_mask&(1<<x))? 1 : 0);
 		}
 	}
 }
 
-bool DragManager::UpdateTouchsticks(InputManager* pInputManager) const
-{
-	ScopeLock lLock(mLock);
-	bool lDidUseStick = false;
-	DragList::const_iterator i = mDragList.begin();
-	for (; i != mDragList.end(); ++i)
-	{
-		Drag& lDrag = (Drag&)*i;
-		TouchstickInputDevice* lTouchstick = TouchstickInputDevice::GetByCoordinate(pInputManager, lDrag.mStart);
-		if (!lTouchstick)
-		{
-			lTouchstick = TouchstickInputDevice::GetByCoordinate(pInputManager, lDrag.mLast);
+bool DragManager::UpdateTouchsticks(InputManager* input_manager) const {
+	ScopeLock lock(lock_);
+	bool did_use_stick = false;
+	DragList::const_iterator i = drag_list_.begin();
+	for (; i != drag_list_.end(); ++i) {
+		Drag& drag = (Drag&)*i;
+		TouchstickInputDevice* touchstick = TouchstickInputDevice::GetByCoordinate(input_manager, drag.start_);
+		if (!touchstick) {
+			touchstick = TouchstickInputDevice::GetByCoordinate(input_manager, drag.last_);
 		}
-		if (lTouchstick)
-		{
-			lTouchstick->SetTap(lDrag.mLast, lDrag.mIsPress);
-			lDrag.mFlags |= DRAGGING_STICK;
-			lDidUseStick = true;
-		}
-		else
-		{
-			lDrag.mFlags &= ~DRAGGING_STICK;
+		if (touchstick) {
+			touchstick->SetTap(drag.last_, drag.is_press_);
+			drag.flags_ |= kDraggingStick;
+			did_use_stick = true;
+		} else {
+			drag.flags_ &= ~kDraggingStick;
 		}
 	}
-	return lDidUseStick;
+	return did_use_stick;
 }
 
-void DragManager::SetDraggingUi(bool pIsUi)
-{
-	ScopeLock lLock(mLock);
-	DragList::iterator i = mDragList.begin();
-	for (; i != mDragList.end(); ++i)
-	{
-		if (pIsUi)
-		{
-			i->mFlags |= DRAGGING_UI;
-		}
-		else
-		{
-			i->mFlags &= ~DRAGGING_UI;
+void DragManager::SetDraggingUi(bool is_ui) {
+	ScopeLock lock(lock_);
+	DragList::iterator i = drag_list_.begin();
+	for (; i != drag_list_.end(); ++i) {
+		if (is_ui) {
+			i->flags_ |= kDraggingUi;
+		} else {
+			i->flags_ &= ~kDraggingUi;
 		}
 	}
 }
 
-void DragManager::DropReleasedDrags()
-{
-	ScopeLock lLock(mLock);
-	DragList::iterator i = mDragList.begin();
-	for (; i != mDragList.end();)
-	{
-		if (!i->mIsPress)
-		{
-			i = mDragList.erase(i);
-		}
-		else
-		{
+void DragManager::DropReleasedDrags() {
+	ScopeLock lock(lock_);
+	DragList::iterator i = drag_list_.begin();
+	for (; i != drag_list_.end();) {
+		if (!i->is_press_) {
+			i = drag_list_.erase(i);
+		} else {
 			++i;
 		}
 	}
 }
 
-void DragManager::ClearDrags(InputManager* pInputManager)
-{
-	ScopeLock lLock(mLock);
-	mDragList.clear();
-	if (pInputManager->GetMouse())
-	{
-		const int c = pInputManager->GetMouse()->GetNumDigitalElements();
-		for (int x = 0; x < c; ++x)
-		{
-			pInputManager->GetMouse()->GetButton(x)->SetValue(0);
+void DragManager::ClearDrags(InputManager* input_manager) {
+	ScopeLock lock(lock_);
+	drag_list_.clear();
+	if (input_manager->GetMouse()) {
+		const int c = input_manager->GetMouse()->GetNumDigitalElements();
+		for (int x = 0; x < c; ++x) {
+			input_manager->GetMouse()->GetButton(x)->SetValue(0);
 		}
 	}
 }
 
-DragManager::DragList DragManager::GetDragList()
-{
-	ScopeLock lLock(mLock);
-	return mDragList;
+DragManager::DragList DragManager::GetDragList() {
+	ScopeLock lock(lock_);
+	return drag_list_;
 }
 
-void DragManager::SetDragList(const DragList& pDragList)
-{
-	ScopeLock lLock(mLock);
-	mDragList = pDragList;
+void DragManager::SetDragList(const DragList& drag_list) {
+	ScopeLock lock(lock_);
+	drag_list_ = drag_list;
 }
 
 
 
-loginstance(UI_INPUT, DragManager);
+loginstance(kUiInput, DragManager);
 
 
 

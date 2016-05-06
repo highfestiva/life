@@ -1,39 +1,37 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Lepra/Include/LepraOS.h"
-#include "../../Life/LifeServer/MasterServerConnection.h"
-#include "../../Life/LifeApplication.h"
-#include "../PushMaster/MasterServerPort.h"
-#include "../Push.h"
-#include "../RtVar.h"
-#include "../Version.h"
-#include "PushServerTicker.h"
+#include "../../cure/include/runtimevariable.h"
+#include "../../lepra/include/lepraos.h"
+#include "../../life/lifeserver/masterserverconnection.h"
+#include "../../life/lifeapplication.h"
+#include "../pushmaster/masterserverport.h"
+#include "../push.h"
+#include "../rtvar.h"
+#include "../version.h"
+#include "pushserverticker.h"
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
-class PushServer: public Life::Application
-{
-	typedef Life::Application Parent;
+class PushServer: public life::Application {
+	typedef life::Application Parent;
 public:
-	PushServer(const strutil::strvec& pArgumentList);
+	PushServer(const strutil::strvec& argument_list);
 	virtual ~PushServer();
 	virtual void Init();
 
 private:
 	str GetTypeName() const;
 	str GetVersion() const;
-	Cure::ApplicationTicker* CreateTicker() const;
+	cure::ApplicationTicker* CreateTicker() const;
 	LogListener* CreateConsoleLogListener() const;
 };
 
@@ -43,58 +41,50 @@ private:
 
 
 
-LEPRA_RUN_APPLICATION(Push::PushServer, Lepra::Main);
+LEPRA_RUN_APPLICATION(Push::PushServer, lepra::Main);
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
-PushServer::PushServer(const strutil::strvec& pArgumentList):
-	Parent(PUSH_APPLICATION_NAME, pArgumentList)
-{
+PushServer::PushServer(const strutil::strvec& argument_list):
+	Parent(kPushApplicationName, argument_list) {
 }
 
-PushServer::~PushServer()
-{
+PushServer::~PushServer() {
 	Destroy();
 
-	Cure::Shutdown();
-	Tbc::Shutdown();
-	Lepra::Shutdown();
+	cure::Shutdown();
+	tbc::Shutdown();
+	lepra::Shutdown();
 };
 
-void PushServer::Init()
-{
-	Lepra::Init();
-	Tbc::Init();
-	Cure::Init();
+void PushServer::Init() {
+	lepra::Init();
+	tbc::Init();
+	cure::Init();
 
 	Parent::Init();
 }
 
-str PushServer::GetTypeName() const
-{
+str PushServer::GetTypeName() const {
 	return "Server";
 }
 
-str PushServer::GetVersion() const
-{
-	return PLATFORM_VERSION;
+str PushServer::GetVersion() const {
+	return kPlatformVersion;
 }
 
-Cure::ApplicationTicker* PushServer::CreateTicker() const
-{
-	Life::GameServerTicker* lTicker = new PushServerTicker(mResourceManager, 2000, 7, 1);
-	lTicker->StartConsole((InteractiveStdioConsoleLogListener*)mConsoleLogger);
-	lTicker->SetMasterServerConnection(new Life::MasterServerConnection(MASTER_SERVER_ADDRESS ":" MASTER_SERVER_PORT));
-	return lTicker;
+cure::ApplicationTicker* PushServer::CreateTicker() const {
+	life::GameServerTicker* ticker = new PushServerTicker(resource_manager_, 2000, 7, 1);
+	ticker->StartConsole((InteractiveStdioConsoleLogListener*)console_logger_);
+	ticker->SetMasterServerConnection(new life::MasterServerConnection(kMasterServerAddress ":" kMasterServerPort));
+	return ticker;
 }
 
-LogListener* PushServer::CreateConsoleLogListener() const
-{
+LogListener* PushServer::CreateConsoleLogListener() const {
 	return (new InteractiveStdioConsoleLogListener());
 }
 

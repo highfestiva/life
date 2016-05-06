@@ -1,33 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiCppContextObject.h"
+#include "uicppcontextobject.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-class BurnEmitter
-{
+class BurnEmitter {
 public:
-	BurnEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager);
+	BurnEmitter(cure::ResourceManager* resource_manager, GameUiManager* ui_manager);
 	virtual ~BurnEmitter();
 
-	void EmitFromTag(const CppContextObject* pObject, const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime, float pIntensity);
+	void EmitFromTag(const CppContextObject* object, const uitbc::ChunkyClass::Tag& tag, float frame_time, float intensity);
 	void SetFreeFlow();
 
-	Cure::ResourceManager* mResourceManager;
-	GameUiManager* mUiManager;
-	float mBurnTimeout;
-	bool mFreeFlow;
+	cure::ResourceManager* resource_manager_;
+	GameUiManager* ui_manager_;
+	float burn_timeout_;
+	bool free_flow_;
 
 	logclass();
 };

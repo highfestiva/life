@@ -1,20 +1,19 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/GameTimer.h"
+#include "../include/gametimer.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-double GameTimer::mRealTimeRatio = 1;
+double GameTimer::real_time_ratio_ = 1;
 
 
 

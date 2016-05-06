@@ -6,26 +6,24 @@
 
 #pragma once
 
-#include "LepraAssert.h"
+#include "lepraassert.h"
 #include <list>
-#include "HiResTimer.h"
-#include "SpinLock.h"
+#include "hirestimer.h"
+#include "spinlock.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 // Used for single-point measurements.
-class PerformanceData
-{
+class PerformanceData {
 public:
 	PerformanceData();
 	void Clear();
-	void Set(double pMinimum, double pThis, double pMaximum);
-	void Append(double pPeriodValue, double pTimeOfLastMeasure);
+	void Set(double minimum, double value, double maximum);
+	void Append(double period_value, double time_of_last_measure);
 	void ResetHitCount();
 	int GetHitCount() const;
 	double GetTimeOfLastMeasure() const;
@@ -36,29 +34,28 @@ public:
 	double GetRangeFactor() const;
 
 private:
-	bool mFirstTime;
-	int mHitCount;
-	double mTimeOfLastMeasure;
-	double mMinimum;
-	double mLast;
-	double mSlidingAverage;
-	double mMaximum;
+	bool first_time_;
+	int hit_count_;
+	double time_of_last_measure_;
+	double minimum_;
+	double last_;
+	double sliding_average_;
+	double maximum_;
 };
 
 
 
 // Used for increasing/decreasing counters, such as for network data monitoring.
-template<class _Data = double> class SequencialPerformanceData: public PerformanceData
-{
+template<class _Data = double> class SequencialPerformanceData: public PerformanceData {
 	typedef PerformanceData Parent;
 public:
 	SequencialPerformanceData();
 	void Clear();
-	void Set(double pMinimum, double pThis, double pMaximum, _Data pPreviousValue);
-	void Append(double pDeltaTime, double pTimeOfLastMeasure, _Data pValue);
+	void Set(double minimum, double value, double maximum, _Data previous_value);
+	void Append(double delta_time, double time_of_last_measure, _Data value);
 
 private:
-	_Data mPreviousValue;
+	_Data previous_value_;
 };
 
 
@@ -66,43 +63,42 @@ private:
 // Used for hierarchical measurements, such as a call graph. This class does not need
 // mutex locking when adding nodes, since it's using per-thread storage of the currently
 // active node. However, it is needed when fiddling with the list of roots for each thread.
-class ScopePerformanceData: public PerformanceData
-{
+class ScopePerformanceData: public PerformanceData {
 	typedef PerformanceData Parent;
 public:
 	typedef std::vector<ScopePerformanceData*> NodeArray;
 
-	static ScopePerformanceData* Insert(const str& pName, size_t pHash);
+	static ScopePerformanceData* Insert(const str& _name, size_t hash);
 
-	ScopePerformanceData(ScopePerformanceData* pParent, const str& pName, size_t pHash);
+	ScopePerformanceData(ScopePerformanceData* parent, const str& _name, size_t hash);
 	~ScopePerformanceData();
 
 	static void EraseAll();
 	static void ResetAll();
-	void Append(double pPeriodValue, double pTimeOfLastMeasure);
+	void Append(double period_value, double time_of_last_measure);
 
 	static NodeArray GetRoots();
 	const str& GetName() const;
 	NodeArray GetChildren() const;
-	const ScopePerformanceData* GetChild(const str& pName) const;
+	const ScopePerformanceData* GetChild(const str& _name) const;
 
 protected:
-	static void ResetAll(NodeArray& pNodes);
+	static void ResetAll(NodeArray& nodes);
 
-	ScopePerformanceData* FindChild(/*const str& pName,*/ size_t pHash) const;
+	ScopePerformanceData* FindChild(/*const str& _name,*/ size_t hash) const;
 
 private:
-	static void AddRoot(ScopePerformanceData* pNode);
-	static void SetActive(ScopePerformanceData* pNode);
+	static void AddRoot(ScopePerformanceData* node);
+	static void SetActive(ScopePerformanceData* node);
 	static ScopePerformanceData* GetActive();
 
-	const str mName;
-	const size_t mHash;
-	ScopePerformanceData* mParent;
-	NodeArray mChildArray;
+	const str name_;
+	const size_t hash_;
+	ScopePerformanceData* parent_;
+	NodeArray child_array_;
 
-	static NodeArray mRoots;
-	static SpinLock mRootLock;
+	static NodeArray roots_;
+	static SpinLock root_lock_;
 
 	ScopePerformanceData(const ScopePerformanceData&);
 	void operator=(const ScopePerformanceData&);
@@ -111,17 +107,16 @@ private:
 
 
 // Used to mesure the time and store it in a container structure.
-template<class _T> class BasicScopeTimer
-{
+template<class _T> class BasicScopeTimer {
 public:
 	BasicScopeTimer();
-	BasicScopeTimer(_T* pData);
+	BasicScopeTimer(_T* data);
 	~BasicScopeTimer();
-	void Attach(_T* pData);
+	void Attach(_T* data);
 
 protected:
-	HiResTimer mTime;
-	_T* mData;
+	HiResTimer time_;
+	_T* data_;
 };
 
 typedef BasicScopeTimer<PerformanceData> ScopeTimer;
@@ -143,14 +138,14 @@ typedef BasicScopeTimer<ScopePerformanceData> CallScopeTimer;
 		if (!__lMeasureNameInitialized)	\
 		{	\
 			__lMeasureName = HashedString(strutil::Format(#name ";" __FILE__ ";%i", __LINE__));	\
-			__lMeasureHash = __lMeasureName.mHash;	\
+			__lMeasureHash = __lMeasureName.hash_;	\
 			__lMeasureNameInitialized = true;	\
 		}	\
 	}	\
 	__lMeasureTimer.Attach(ScopePerformanceData::Insert(__lMeasureName, __lMeasureHash))
 
-#define LEPRA_MEASURE	0
-#if LEPRA_MEASURE
+#define kLepraMeasure	0
+#if kLepraMeasure
 #define LEPRA_MEASURE_SCOPE(name)	LEPRA_DO_MEASURE_SCOPE(name)
 #else // !Measure
 #define LEPRA_MEASURE_SCOPE(name)
@@ -162,4 +157,4 @@ typedef BasicScopeTimer<ScopePerformanceData> CallScopeTimer;
 
 
 
-#include "Performance.inl"
+#include "performance.inl"

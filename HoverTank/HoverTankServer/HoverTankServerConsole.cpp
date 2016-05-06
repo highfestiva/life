@@ -1,66 +1,55 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "HoverTankServerConsole.h"
-#include "HoverTankServerDelegate.h"
+#include "hovertankserverconsole.h"
+#include "hovertankserverdelegate.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-HoverTankServerConsole::HoverTankServerConsole(HoverTankServerDelegate* pDelegate, Cure::ConsoleCommandManager* pCommandManager):
-	mDelegate(pDelegate)
-{
-	pCommandManager->AddExecutor(this);
-	pCommandManager->AddCommand("set-level");
+HoverTankServerConsole::HoverTankServerConsole(HoverTankServerDelegate* delegate, cure::ConsoleCommandManager* command_manager):
+	delegate_(delegate) {
+	command_manager->AddExecutor(this);
+	command_manager->AddCommand("set-level");
 }
 
-HoverTankServerConsole::~HoverTankServerConsole()
-{
+HoverTankServerConsole::~HoverTankServerConsole() {
 }
 
 
 
-int HoverTankServerConsole::Execute(const str& pCommand, const strutil::strvec& pParameterVector)
-{
-	int lResult = 0;
-	if (pCommand == "set-level")
-	{
-		if (pParameterVector.size() == 1)
-		{
-			mDelegate->SetLevel(pParameterVector[0]);
+int HoverTankServerConsole::Execute(const str& command, const strutil::strvec& parameter_vector) {
+	int _result = 0;
+	if (command == "set-level") {
+		if (parameter_vector.size() == 1) {
+			delegate_->SetLevel(parameter_vector[0]);
+		} else {
+			log_.Warningf("usage: %s <level_name>", command.c_str());
+			_result = 1;
 		}
-		else
-		{
-			mLog.Warningf("usage: %s <level_name>", pCommand.c_str());
-			lResult = 1;
-		}
+	} else {
+		_result = -1;
 	}
-	else
-	{
-		lResult = -1;
-	}
-	return lResult;
+	return _result;
 }
 
-void HoverTankServerConsole::OnExecutionError(const str& pCommand, const strutil::strvec& pParameterVector, int pResult)
-{
-	(void)pCommand;
-	(void)pParameterVector;
-	(void)pResult;
+void HoverTankServerConsole::OnExecutionError(const str& command, const strutil::strvec& parameter_vector, int result) {
+	(void)command;
+	(void)parameter_vector;
+	(void)result;
 	deb_assert(false);
 }
 
 
 
-loginstance(CONSOLE, HoverTankServerConsole);
+loginstance(kConsole, HoverTankServerConsole);
 
 
 

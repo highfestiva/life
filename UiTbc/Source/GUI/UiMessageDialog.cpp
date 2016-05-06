@@ -5,36 +5,31 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiMessageDialog.h"
+#include "../../include/gui/uimessagedialog.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-MessageDialog::MessageDialog(Component* pParent, Action pOk, const wstr& pMessage):
-	Parent(pParent, pOk)
-{
+MessageDialog::MessageDialog(Component* parent, Action ok, const wstr& message):
+	Parent(parent, ok) {
 	SetPreferredSize(PixelCoord(310, 170));
 	SetSize(GetPreferredSize());
-	SetQueryLabel(pMessage, FontManager::INVALID_FONTID);
+	SetQueryLabel(message, FontManager::kInvalidFontid);
 }
 
-MessageDialog::~MessageDialog()
-{
+MessageDialog::~MessageDialog() {
 }
 
 
 
-void MessageDialog::Repaint(Painter* pPainter)
-{
-	if (mButtonList.empty())
-	{
+void MessageDialog::Repaint(Painter* painter) {
+	if (button_list_.empty()) {
 		AddButton(100, L"OK", true);
 	}
-	Parent::Repaint(pPainter);
+	Parent::Repaint(painter);
 }
 
 

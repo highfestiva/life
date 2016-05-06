@@ -11,22 +11,20 @@
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "String.h"
-#include "IOError.h"
-#include "String.h"
+#include "lepratypes.h"
+#include "string.h"
+#include "ioerror.h"
+#include "string.h"
 
-namespace Lepra
-{
+namespace lepra {
 
-class InputStream
-{
+class InputStream {
 public:
-	
+
 	inline InputStream();
 	inline virtual ~InputStream();
 
-	// Closes the stream and releases any system resources associated with 
+	// Closes the stream and releases any system resources associated with
 	// this stream.
 	virtual void Close() = 0;
 
@@ -34,37 +32,33 @@ public:
 	// This value may change over time.
 	virtual int64 GetAvailable() const = 0;
 
-	// Reads pLength bytes into the specified byte array from this input 
+	// Reads length bytes into the specified byte array from this input
 	// stream.
-	virtual IOError ReadRaw(void* pData, size_t pLength) = 0;
+	virtual IOError ReadRaw(void* data, size_t length) = 0;
 
-	// Skips over and discards pLength bytes of data from this input stream.
-	virtual IOError Skip(size_t pLength) = 0;
+	// Skips over and discards length bytes of data from this input stream.
+	virtual IOError Skip(size_t length) = 0;
 
-	inline void SetName(const str& pName);
+	inline void SetName(const str& name);
 	inline const str& GetName();
 
 protected:
 private:
-	str mName;
+	str name_;
 };
 
-InputStream::InputStream()
-{
+InputStream::InputStream() {
 }
 
-InputStream::~InputStream()
-{
+InputStream::~InputStream() {
 }
 
-void InputStream::SetName(const str& pName)
-{
-	mName = pName;
+void InputStream::SetName(const str& name) {
+	name_ = name;
 }
 
-const str& InputStream::GetName()
-{
-	return mName;
+const str& InputStream::GetName() {
+	return name_;
 }
 
 }

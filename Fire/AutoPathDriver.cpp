@@ -1,141 +1,124 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "AutoPathDriver.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/Health.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "BaseMachine.h"
-#include "Level.h"
+#include "autopathdriver.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/health.h"
+#include "../cure/include/runtimevariable.h"
+#include "basemachine.h"
+#include "level.h"
 
 #define AIM_DISTANCE			10.0f
 
 
 
-namespace Fire
-{
+namespace Fire {
 
 
 
-AutoPathDriver::AutoPathDriver(FireManager* pGame, Cure::GameObjectId pVehicleId, const str& pPathName):
-	Parent(pGame->GetResourceManager(), "AutoPathDriver"),
-	mGame(pGame),
-	mVehicleId(pVehicleId),
-	mPathName(pPathName),
-	mPath(0)
-{
-	pGame->GetContext()->AddLocalObject(this);
-	pGame->GetContext()->EnableTickCallback(this);
+AutoPathDriver::AutoPathDriver(FireManager* game, cure::GameObjectId vehicle_id, const str& path_name):
+	Parent(game->GetResourceManager(), "AutoPathDriver"),
+	game_(game),
+	vehicle_id_(vehicle_id),
+	path_name_(path_name),
+	path_(0) {
+	game->GetContext()->AddLocalObject(this);
+	game->GetContext()->EnableTickCallback(this);
 }
 
-AutoPathDriver::~AutoPathDriver()
-{
-	delete mPath;
-	mPath = 0;
+AutoPathDriver::~AutoPathDriver() {
+	delete path_;
+	path_ = 0;
 }
 
 
-void AutoPathDriver::OnTick()
-{
+void AutoPathDriver::OnTick() {
 	Parent::OnTick();
 
-	BaseMachine* lVehicle = (BaseMachine*)mManager->GetObject(mVehicleId, true);
-	if (!lVehicle)
-	{
-		mManager->PostKillObject(GetInstanceId());
+	BaseMachine* vehicle = (BaseMachine*)manager_->GetObject(vehicle_id_, true);
+	if (!vehicle) {
+		manager_->PostKillObject(GetInstanceId());
 		return;
 	}
-	if (!lVehicle->IsLoaded() || lVehicle->GetPhysics()->GetEngineCount() < 3)
-	{
+	if (!vehicle->IsLoaded() || vehicle->GetPhysics()->GetEngineCount() < 3) {
 		return;
 	}
 
-	const vec3 lVehicleDirection3d = lVehicle->GetOrientation()*vec3(0,1,0);
-	const vec3 lPosition = lVehicle->GetPosition();
-	vec3 lClosestPoint;
-	GetClosestPathDistance(lPosition, lClosestPoint, AIM_DISTANCE);
-	vec3 lDirection(lClosestPoint - lPosition);
-	if (mPath)
-	{
-		lDirection = lDirection.GetNormalized() + mPath->GetSlope();
+	const vec3 vehicle_direction3d = vehicle->GetOrientation()*vec3(0,1,0);
+	const vec3 _position = vehicle->GetPosition();
+	vec3 _closest_point;
+	GetClosestPathDistance(_position, _closest_point, AIM_DISTANCE);
+	vec3 direction(_closest_point - _position);
+	if (path_) {
+		direction = direction.GetNormalized() + path_->GetSlope();
 	}
 
-	float lEnginePower = Math::Lerp(0.4f, 1.0f, lVehicle->mPanicLevel) * lVehicle->mLevelSpeed;
-	const vec2 lWantedDirection(lDirection.x, lDirection.y);
-	const vec2 lVehicleDirection(lVehicleDirection3d.x, lVehicleDirection3d.y);
-	const float lSteeringAngle = lWantedDirection.GetAngle(lVehicleDirection);
-	lEnginePower *= Math::Lerp(1.0f, 0.6f, std::min(1.0f, std::abs(lSteeringAngle)));
-	lVehicle->SetEnginePower(0, lEnginePower);
-	lVehicle->SetEnginePower(1, lSteeringAngle);
-	const float lLowLimit = 10.0f;
-	const float lPanicLimit = 30.0f;
-	const float lBrakeLimit = Math::Lerp(lLowLimit, lPanicLimit, lVehicle->mPanicLevel);
-	const float lSpeed = lVehicle->GetVelocity().GetLength();
-	float lBrakePower = 0;
-	if (lSpeed > lBrakeLimit/2)
-	{
-		float lVelocityBrakeFactor = Math::Clamp(lSpeed, 0.0f, lBrakeLimit) / lBrakeLimit;
-		lBrakePower += std::max(0.0f, (std::abs(lSteeringAngle)-0.5f)*0.5f*lVelocityBrakeFactor);
+	float engine_power = Math::Lerp(0.4f, 1.0f, vehicle->panic_level_) * vehicle->level_speed_;
+	const vec2 wanted_direction(direction.x, direction.y);
+	const vec2 vehicle_direction(vehicle_direction3d.x, vehicle_direction3d.y);
+	const float steering_angle = wanted_direction.GetAngle(vehicle_direction);
+	engine_power *= Math::Lerp(1.0f, 0.6f, std::min(1.0f, std::abs(steering_angle)));
+	vehicle->SetEnginePower(0, engine_power);
+	vehicle->SetEnginePower(1, steering_angle);
+	const float low_limit = 10.0f;
+	const float panic_limit = 30.0f;
+	const float brake_limit = Math::Lerp(low_limit, panic_limit, vehicle->panic_level_);
+	const float speed = vehicle->GetVelocity().GetLength();
+	float brake_power = 0;
+	if (speed > brake_limit/2) {
+		float velocity_brake_factor = Math::Clamp(speed, 0.0f, brake_limit) / brake_limit;
+		brake_power += std::max(0.0f, (std::abs(steering_angle)-0.5f)*0.5f*velocity_brake_factor);
 	}
-	if (lSteeringAngle > PIF/6 && lSpeed > lLowLimit / 3)
-	{
-		float lVelocityBrakeFactor = Math::Clamp(lSpeed, 0.0f, lLowLimit/2) / (lLowLimit/2);
-		lBrakePower += lVelocityBrakeFactor;
+	if (steering_angle > PIF/6 && speed > low_limit / 3) {
+		float velocity_brake_factor = Math::Clamp(speed, 0.0f, low_limit/2) / (low_limit/2);
+		brake_power += velocity_brake_factor;
 	}
-	lBrakePower = Math::Clamp(lBrakePower, 0.0f, 0.3f);
-	lVehicle->SetEnginePower(2, lBrakePower);
+	brake_power = Math::Clamp(brake_power, 0.0f, 0.3f);
+	vehicle->SetEnginePower(2, brake_power);
 
-	if (lVehicle->GetVelocity().GetLengthSquared() < 1.0f)
-	{
-		mStillTimer.TryStart();
-		if (mStillTimer.QueryTimeDiff() > 4.0f)
-		{
-			Cure::Health::Set(lVehicle, 0);
+	if (vehicle->GetVelocity().GetLengthSquared() < 1.0f) {
+		still_timer_.TryStart();
+		if (still_timer_.QueryTimeDiff() > 4.0f) {
+			cure::Health::Set(vehicle, 0);
 		}
-	}
-	else
-	{
-		mStillTimer.Stop();
+	} else {
+		still_timer_.Stop();
 	}
 }
 
-void AutoPathDriver::GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint, float pWantedDistance)
-{
-	if (!mPath)
-	{
-		if (!mGame->GetLevel() || !mGame->GetLevel()->QueryPath()->GetPath(mPathName))
-		{
-			mManager->PostKillObject(GetInstanceId());
+void AutoPathDriver::GetClosestPathDistance(const vec3& position, vec3& closest_point, float wanted_distance) {
+	if (!path_) {
+		if (!game_->GetLevel() || !game_->GetLevel()->QueryPath()->GetPath(path_name_)) {
+			manager_->PostKillObject(GetInstanceId());
 			return;
 		}
-		mPath = new Cure::ContextPath::SplinePath(*mGame->GetLevel()->QueryPath()->GetPath(mPathName));
-		mPath->StartInterpolation(0);
+		path_ = new cure::ContextPath::SplinePath(*game_->GetLevel()->QueryPath()->GetPath(path_name_));
+		path_->StartInterpolation(0);
 	}
 
-	float lNearestDistance;
-	const float lSearchStepLength = 0.06f;
-	const int lSearchSteps = 3;
-	mPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, pClosestPoint, lSearchSteps);
+	float nearest_distance;
+	const float search_step_length = 0.06f;
+	const int search_steps = 3;
+	path_->FindNearestTime(search_step_length, position, nearest_distance, closest_point, search_steps);
 
 	{
-		float lCurrentTime = mPath->GetCurrentInterpolationTime();
-		float lDeltaTime = pWantedDistance * mPath->GetDistanceNormal();
-		if (lCurrentTime+lDeltaTime < 0.1f)
-		{
-			lDeltaTime = 0.1f-lCurrentTime;
+		float current_time = path_->GetCurrentInterpolationTime();
+		float delta_time = wanted_distance * path_->GetDistanceNormal();
+		if (current_time+delta_time < 0.1f) {
+			delta_time = 0.1f-current_time;
 		}
-		mPath->StepInterpolation(lDeltaTime);
-		pClosestPoint = mPath->GetValue();
+		path_->StepInterpolation(delta_time);
+		closest_point = path_->GetValue();
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, AutoPathDriver);
+loginstance(kGameContextCpp, AutoPathDriver);
 
 
 

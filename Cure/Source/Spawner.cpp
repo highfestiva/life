@@ -5,247 +5,202 @@
 
 
 #include "pch.h"
-#include "../Include/Spawner.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../../Lepra/Include/Random.h"
-#include "../../Tbc/Include/PhysicsSpawner.h"
-#include "../Include/RuntimeVariable.h"
+#include "../include/spawner.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/gamemanager.h"
+#include "../../lepra/include/random.h"
+#include "../../tbc/include/physicsspawner.h"
+#include "../include/runtimevariable.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-Spawner::Spawner(ContextManager* pManager):
-	CppContextObject(pManager->GetGameManager()->GetResourceManager(), "Spawner"),
-	mSpawnPointIndex(0)
-{
-	pManager->AddLocalObject(this);
-	pManager->EnableTickCallback(this);
-	mManager->AddGameAlarmCallback(this, 0, 0.5f, 0);	// Create.
-	mManager->AddGameAlarmCallback(this, 1, 0.6f, 0);	// Destroy.
-	mManager->AddGameAlarmCallback(this, 2, 0.7f, 0);	// Recreate.
+Spawner::Spawner(ContextManager* manager):
+	CppContextObject(manager->GetGameManager()->GetResourceManager(), "Spawner"),
+	spawn_point_index_(0) {
+	manager->AddLocalObject(this);
+	manager->EnableTickCallback(this);
+	manager_->AddGameAlarmCallback(this, 0, 0.5f, 0);	// Create.
+	manager_->AddGameAlarmCallback(this, 1, 0.6f, 0);	// Destroy.
+	manager_->AddGameAlarmCallback(this, 2, 0.7f, 0);	// Recreate.
 }
 
-Spawner::~Spawner()
-{
-	while (!mChildArray.empty())
-	{
-		const ContextObject* lObject = mChildArray.front();
-		mChildArray.erase(mChildArray.begin());
-		GetManager()->DeleteObject(lObject->GetInstanceId());
+Spawner::~Spawner() {
+	while (!child_array_.empty()) {
+		const ContextObject* _object = child_array_.front();
+		child_array_.erase(child_array_.begin());
+		GetManager()->DeleteObject(_object->GetInstanceId());
 	}
 }
 
 
 
-void Spawner::PlaceObject(ContextObject* pObject, int pSpawnPointIndex)
-{
-	const vec3 lScalePoint = RNDPOSVEC();
-	if (pSpawnPointIndex < 0)
-	{
-		pSpawnPointIndex = Random::GetRandomNumber() % GetSpawner()->GetSpawnPointCount();
+void Spawner::PlaceObject(ContextObject* object, int spawn_point_index) {
+	const vec3 scale_point = RNDPOSVEC();
+	if (spawn_point_index < 0) {
+		spawn_point_index = Random::GetRandomNumber() % GetSpawner()->GetSpawnPointCount();
 	}
-	vec3 lInitialVelocity;
-	pObject->SetInitialTransform(GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), lScalePoint, pSpawnPointIndex, lInitialVelocity));
-	pObject->SetRootVelocity(lInitialVelocity);
+	vec3 initial_velocity;
+	object->SetInitialTransform(GetSpawner()->GetSpawnPoint(parent_->GetPhysics(), scale_point, spawn_point_index, initial_velocity));
+	object->SetRootVelocity(initial_velocity);
 }
 
-xform Spawner::GetSpawnPoint() const
-{
-	vec3 lInitialVelocity;
-	return GetSpawner()->GetSpawnPoint(mParent->GetPhysics(), vec3(), 0, lInitialVelocity);
+xform Spawner::GetSpawnPoint() const {
+	vec3 initial_velocity;
+	return GetSpawner()->GetSpawnPoint(parent_->GetPhysics(), vec3(), 0, initial_velocity);
 }
 
-void Spawner::EaseDown(Tbc::PhysicsManager* pPhysicsManager, ContextObject* pObject, const vec3* pStartPosition)
-{
-	const Cure::ObjectPositionalData* lPositionalData = 0;
-	pObject->UpdateFullPosition(lPositionalData);
-	Cure::ObjectPositionalData* lNewPositionalData = (Cure::ObjectPositionalData*)lPositionalData->Clone();
-	if (pStartPosition)
-	{
-		lNewPositionalData->mPosition.mTransformation.SetPosition(*pStartPosition);
+void Spawner::EaseDown(tbc::PhysicsManager* physics_manager, ContextObject* object, const vec3* start_position) {
+	const cure::ObjectPositionalData* positional_data = 0;
+	object->UpdateFullPosition(positional_data);
+	cure::ObjectPositionalData* new_positional_data = (cure::ObjectPositionalData*)positional_data->Clone();
+	if (start_position) {
+		new_positional_data->position_.transformation_.SetPosition(*start_position);
 	}
-	/*lNewPositionalData->mPosition.mAcceleration = vec3();
-	lNewPositionalData->mPosition.mVelocity = vec3();
-	lNewPositionalData->mPosition.mAngularAcceleration = vec3();
-	lNewPositionalData->mPosition.mAngularVelocity = vec3();*/
-	bool lHasTouchedGround = false;
-	float lStep = 1.0f;
-	for (int x = 0; x < 20; ++x)
-	{
-		pObject->SetFullPosition(*lNewPositionalData, 0);
-		const bool lIsColliding = pPhysicsManager->IsColliding(pObject->GetInstanceId());
-		//mLog.Infof("Spawned object %s %scolliding at step %i with step size %g.", pObject->GetClassId().c_str(), lIsColliding? "" : "not ", x, lStep);
-		if (lStep < 0.0001f && lIsColliding)
-		{
+	/*new_positional_data->position_.acceleration_ = vec3();
+	new_positional_data->position_.velocity_ = vec3();
+	new_positional_data->position_.angular_acceleration_ = vec3();
+	new_positional_data->position_.angular_velocity_ = vec3();*/
+	bool has_touched_ground = false;
+	float step = 1.0f;
+	for (int x = 0; x < 20; ++x) {
+		object->SetFullPosition(*new_positional_data, 0);
+		const bool is_colliding = physics_manager->IsColliding(object->GetInstanceId());
+		//log_.Infof("Spawned object %s %scolliding at step %i with step size %g.", object->GetClassId().c_str(), is_colliding? "" : "not ", x, step);
+		if (step < 0.0001f && is_colliding) {
 			break;
 		}
-		lNewPositionalData->mPosition.mTransformation.GetPosition().z += lIsColliding? +lStep : -lStep;
-		lHasTouchedGround |= lIsColliding;
-		if (lHasTouchedGround)
-		{
-			lStep /= 2;
+		new_positional_data->position_.transformation_.GetPosition().z += is_colliding? +step : -step;
+		has_touched_ground |= is_colliding;
+		if (has_touched_ground) {
+			step /= 2;
 		}
 	}
-	pObject->SetFullPosition(*lNewPositionalData, 0);
-	pObject->SetPositionFinalized();
-	delete lNewPositionalData;
+	object->SetFullPosition(*new_positional_data, 0);
+	object->SetPositionFinalized();
+	delete new_positional_data;
 }
 
 
 
-void Spawner::OnTick()
-{
+void Spawner::OnTick() {
 	Parent::OnTick();
 
-	for (GameObjectIdArray::iterator x = mEaseDownObjects.begin(); x != mEaseDownObjects.end(); ++x)
-	{
-		ContextObject* lObject = GetManager()->GetObject(*x, true);
-		if (!lObject)
-		{
-			mEaseDownObjects.erase(x);
+	for (GameObjectIdArray::iterator x = ease_down_objects_.begin(); x != ease_down_objects_.end(); ++x) {
+		ContextObject* _object = GetManager()->GetObject(*x, true);
+		if (!_object) {
+			ease_down_objects_.erase(x);
 			break;
 		}
-		if (lObject->IsLoaded())
-		{
-			EaseDown(GetManager()->GetGameManager()->GetPhysicsManager(), lObject, 0);
-			mEaseDownObjects.erase(x);
+		if (_object->IsLoaded()) {
+			EaseDown(GetManager()->GetGameManager()->GetPhysicsManager(), _object, 0);
+			ease_down_objects_.erase(x);
 			break;
 		}
 	}
 }
 
-void Spawner::OnAlarm(int pAlarmId, void* pExtraData)
-{
-	Parent::OnAlarm(pAlarmId, pExtraData);
+void Spawner::OnAlarm(int alarm_id, void* extra_data) {
+	Parent::OnAlarm(alarm_id, extra_data);
 
-	const Tbc::PhysicsSpawner::IntervalArray& lIntervals = GetSpawner()->GetIntervals();
-	const size_t lIntervalCount = lIntervals.size();
-	if (lIntervalCount < 2 || lIntervalCount > 3)
-	{
-		mLog.Error("Error: spawner has badly configured intervals!");
+	const tbc::PhysicsSpawner::IntervalArray& intervals = GetSpawner()->GetIntervals();
+	const size_t interval_count = intervals.size();
+	if (interval_count < 2 || interval_count > 3) {
+		log_.Error("Error: spawner has badly configured intervals!");
 		deb_assert(false);
 		return;
 	}
 
-	if (pAlarmId == 0)
-	{
-		const bool lHasRecreate = (lIntervalCount >= 3 && lIntervals[2]);
-		OnCreate(lIntervals[0], lHasRecreate);
-	}
-	else if (pAlarmId == 1)
-	{
-		OnDestroy(lIntervals[1]);
-	}
-	else if (lIntervalCount >= 3)
-	{
-		OnRecreate(lIntervals[2]);
+	if (alarm_id == 0) {
+		const bool _has_recreate = (interval_count >= 3 && intervals[2]);
+		OnCreate(intervals[0], _has_recreate);
+	} else if (alarm_id == 1) {
+		OnDestroy(intervals[1]);
+	} else if (interval_count >= 3) {
+		OnRecreate(intervals[2]);
 	}
 }
 
-void Spawner::OnCreate(float pCreateInterval, bool pHasRecreate)
-{
-	if (!pCreateInterval)
-	{
+void Spawner::OnCreate(float create_interval, bool has_recreate) {
+	if (!create_interval) {
 		return;
 	}
 
-	if ((int)mChildArray.size() < GetSpawnCount())
-	{
+	if ((int)child_array_.size() < GetSpawnCount()) {
 		Create();
 	}
 
-	if (!pHasRecreate)
-	{
-		mRecreateTimer.Stop();	// Make sure re-create starts over when we're done.
-		GetManager()->AddGameAlarmCallback(this, 0, pCreateInterval, 0);
-	}
-	else if (pCreateInterval < 0 && (int)mChildArray.size() < GetSpawnCount())
-	{
-		mRecreateTimer.Stop();	// Make sure re-create starts over when we're done.
-		GetManager()->AddGameAlarmCallback(this, 0, -pCreateInterval, 0);
+	if (!has_recreate) {
+		recreate_timer_.Stop();	// Make sure re-create starts over when we're done.
+		GetManager()->AddGameAlarmCallback(this, 0, create_interval, 0);
+	} else if (create_interval < 0 && (int)child_array_.size() < GetSpawnCount()) {
+		recreate_timer_.Stop();	// Make sure re-create starts over when we're done.
+		GetManager()->AddGameAlarmCallback(this, 0, -create_interval, 0);
 	}
 }
 
-void Spawner::OnDestroy(float pDestroyInterval)
-{
-	if (!pDestroyInterval)
-	{
+void Spawner::OnDestroy(float destroy_interval) {
+	if (!destroy_interval) {
 		return;
 	}
 
-	if (!mChildArray.empty())
-	{
-		if (pDestroyInterval > 0 || (int)mChildArray.size() == GetSpawnCount())
-		{
-			const ContextObject* lObject = mChildArray.front();
-			mChildArray.erase(mChildArray.begin());
-			GetManager()->DeleteObject(lObject->GetInstanceId());
+	if (!child_array_.empty()) {
+		if (destroy_interval > 0 || (int)child_array_.size() == GetSpawnCount()) {
+			const ContextObject* _object = child_array_.front();
+			child_array_.erase(child_array_.begin());
+			GetManager()->DeleteObject(_object->GetInstanceId());
 		}
 	}
-	GetManager()->AddGameAlarmCallback(this, 1, pDestroyInterval, 0);
+	GetManager()->AddGameAlarmCallback(this, 1, destroy_interval, 0);
 }
 
-void Spawner::OnRecreate(float pRecreateInterval)
-{
-	if ((int)mChildArray.size() < GetSpawnCount())
-	{
-		mRecreateTimer.TryStart();
-		if (mRecreateTimer.QueryTimeDiff() >= pRecreateInterval)
-		{
-			mRecreateTimer.Stop();
+void Spawner::OnRecreate(float recreate_interval) {
+	if ((int)child_array_.size() < GetSpawnCount()) {
+		recreate_timer_.TryStart();
+		if (recreate_timer_.QueryTimeDiff() >= recreate_interval) {
+			recreate_timer_.Stop();
 			Create();
 		}
 	}
 	GetManager()->AddGameAlarmCallback(this, 2, 0.5f, 0);
 }
 
-void Spawner::Create()
-{
-	bool lIsPhysicsHalted;
-	v_get(lIsPhysicsHalted, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
-	if (lIsPhysicsHalted)
-	{
+void Spawner::Create() {
+	bool is_physics_halted;
+	v_get(is_physics_halted, =, GetSettings(), kRtvarPhysicsHalt, false);
+	if (is_physics_halted) {
 		return;
 	}
-	const str lSpawnObject = GetSpawner()->GetSpawnObject(Random::Uniform(0.0f, 1.0f));
-	if (!lSpawnObject.empty())
-	{
-		ContextObject* lObject = GetManager()->GetGameManager()->CreateContextObject(lSpawnObject, NETWORK_OBJECT_LOCALLY_CONTROLLED);
-		AddChild(lObject);
-		if (mSpawner->IsEaseDown())
-		{
-			mEaseDownObjects.push_back(lObject->GetInstanceId());
+	const str spawn_object = GetSpawner()->GetSpawnObject(Random::Uniform(0.0f, 1.0f));
+	if (!spawn_object.empty()) {
+		ContextObject* _object = GetManager()->GetGameManager()->CreateContextObject(spawn_object, kNetworkObjectLocallyControlled);
+		AddChild(_object);
+		if (spawner_->IsEaseDown()) {
+			ease_down_objects_.push_back(_object->GetInstanceId());
 		}
-		PlaceObject(lObject, mSpawnPointIndex);
-		if (++mSpawnPointIndex >= GetSpawner()->GetSpawnPointCount())
-		{
-			if (GetSpawner()->GetFunction() == "spawner_init")
-			{
+		PlaceObject(_object, spawn_point_index_);
+		if (++spawn_point_index_ >= GetSpawner()->GetSpawnPointCount()) {
+			if (GetSpawner()->GetFunction() == "spawner_init") {
 				deb_assert(GetSpawner()->GetSpawnPointCount() >= 2);
-				mSpawnPointIndex = 1;
-			}
-			else
-			{
-				mSpawnPointIndex = 0;
+				spawn_point_index_ = 1;
+			} else {
+				spawn_point_index_ = 0;
 			}
 		}
-		lObject->StartLoading();
+		_object->StartLoading();
 	}
 }
 
-int Spawner::GetSpawnCount() const
-{
+int Spawner::GetSpawnCount() const {
 	return (int)GetSpawner()->GetNumber();
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Spawner);
+loginstance(kGameContextCpp, Spawner);
 
 
 

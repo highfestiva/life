@@ -1,268 +1,233 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Lepra/Include/LepraTarget.h"
-#include "HoverTankTicker.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "../Life/LifeClient/UiGameServerManager.h"
-#include "../Life/LifeServer/MasterServerConnection.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiCure/Include/UiParticleLoader.h"
-#include "../UiLepra/Include/UiCore.h"
-#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
-#include "../UiTbc/Include/GUI/UiFloatingLayout.h"
-#include "../UiTbc/Include/UiParticleRenderer.h"
-#include "HoverTankServer/HoverTankServerDelegate.h"
-#include "HoverTankServer/HoverTankServerMessageProcessor.h"
-#include "RtVar.h"
-#include "HoverTankViewer.h"
+#include "../lepra/include/lepratarget.h"
+#include "hovertankticker.h"
+#include "../lepra/include/systemmanager.h"
+#include "../life/lifeclient/uigameservermanager.h"
+#include "../life/lifeserver/masterserverconnection.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uicure/include/uiparticleloader.h"
+#include "../uilepra/include/uicore.h"
+#include "../uitbc/include/gui/uidesktopwindow.h"
+#include "../uitbc/include/gui/uifloatinglayout.h"
+#include "../uitbc/include/uiparticlerenderer.h"
+#include "hovertankserver/hovertankserverdelegate.h"
+#include "hovertankserver/hovertankservermessageprocessor.h"
+#include "rtvar.h"
+#include "hovertankviewer.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-HoverTankTicker::HoverTankTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
-	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
-	mIsPlayerCountViewActive(false),
-	mSunlight(0)
-{
-	v_override(UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
+HoverTankTicker::HoverTankTicker(UiCure::GameUiManager* ui_manager, cure::ResourceManager* resource_manager, float physics_radius, int physics_levels, float physics_sensitivity):
+	Parent(ui_manager, resource_manager, physics_radius, physics_levels, physics_sensitivity),
+	is_player_count_view_active_(false),
+	sunlight_(0) {
+	v_override(UiCure::GetSettings(), kRtvarGameTimeofdayfactor, 1.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablemassobjectfading, false);
 }
 
-HoverTankTicker::~HoverTankTicker()
-{
+HoverTankTicker::~HoverTankTicker() {
 	CloseMainMenu();
 
-	delete mSunlight;
-	mSunlight = 0;
+	delete sunlight_;
+	sunlight_ = 0;
 }
 
 
 
-Sunlight* HoverTankTicker::GetSunlight() const
-{
-	return mSunlight;
+Sunlight* HoverTankTicker::GetSunlight() const {
+	return sunlight_;
 }
 
 
 
-bool HoverTankTicker::CreateSlave()
-{
+bool HoverTankTicker::CreateSlave() {
 	return (Parent::CreateSlave(&HoverTankTicker::CreateSlaveManager));
 }
 
-void HoverTankTicker::OnSlavesKilled()
-{
+void HoverTankTicker::OnSlavesKilled() {
 	DeleteServer();
-	//deb_assert(!mIsPlayerCountViewActive);
-	mIsPlayerCountViewActive = true;
-	mSlaveTopSplit = 1.0f;
+	//deb_assert(!is_player_count_view_active_);
+	is_player_count_view_active_ = true;
+	slave_top_split_ = 1.0f;
 	Parent::CreateSlave(&HoverTankTicker::CreateViewer);
 }
 
-void HoverTankTicker::OnServerCreated(Life::UiGameServerManager* pServer)
-{
-	HoverTankServerDelegate* lDelegate = new HoverTankServerDelegate(pServer);
-	pServer->SetDelegate(lDelegate);
-	pServer->SetMessageProcessor(new HoverTankServerMessageProcessor(pServer, lDelegate));
+void HoverTankTicker::OnServerCreated(life::UiGameServerManager* server) {
+	HoverTankServerDelegate* delegate = new HoverTankServerDelegate(server);
+	server->SetDelegate(delegate);
+	server->SetMessageProcessor(new HoverTankServerMessageProcessor(server, delegate));
 }
 
 
 
-bool HoverTankTicker::Reinitialize()
-{
-	delete mSunlight;
-	mSunlight = 0;
-	bool lOk = Parent::Reinitialize();
-	mSunlight = new Sunlight(mUiManager);
-	return lOk;
+bool HoverTankTicker::Reinitialize() {
+	delete sunlight_;
+	sunlight_ = 0;
+	bool ok = Parent::Reinitialize();
+	sunlight_ = new Sunlight(ui_manager_);
+	return ok;
 }
 
-bool HoverTankTicker::OpenUiManager()
-{
-	bool lOk = mUiManager->OpenDraw();
-	if (lOk)
-	{
-		UiLepra::Core::ProcessMessages();
-		mUiManager->GetPainter()->ResetClippingRect();
-		mUiManager->GetPainter()->Clear(BLACK);
+bool HoverTankTicker::OpenUiManager() {
+	bool ok = ui_manager_->OpenDraw();
+	if (ok) {
+		uilepra::Core::ProcessMessages();
+		ui_manager_->GetPainter()->ResetClippingRect();
+		ui_manager_->GetPainter()->Clear(BLACK);
 		DisplaySplashLogo();
 	}
-	if (lOk)
-	{
-		mUiManager->UpdateSettings();
-		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
-		lRenderer->AddDynamicRenderer("particle", new UiTbc::ParticleRenderer(lRenderer, 1));
-		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, "explosion.png", 4, 5);
+	if (ok) {
+		ui_manager_->UpdateSettings();
+		uitbc::Renderer* renderer = ui_manager_->GetRenderer();
+		renderer->AddDynamicRenderer("particle", new uitbc::ParticleRenderer(renderer, 1));
+		UiCure::ParticleLoader loader(resource_manager_, renderer, "explosion.png", 4, 5);
 	}
-	if (lOk)
-	{
-		UiCure::RendererImageResource* lEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, "env.png", UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
-		if (lEnvMap->Load())
-		{
-			if (lEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
-			{
-				UiTbc::Renderer::TextureID lTextureId = lEnvMap->GetUserData(0);
-				mUiManager->GetRenderer()->SetEnvironmentMap(lTextureId);
+	if (ok) {
+		UiCure::RendererImageResource* env_map = new UiCure::RendererImageResource(ui_manager_, resource_manager_, "env.png", UiCure::ImageProcessSettings(Canvas::kResizeFast, true));
+		if (env_map->Load()) {
+			if (env_map->PostProcess() == cure::kResourceLoadComplete) {
+				uitbc::Renderer::TextureID texture_id = env_map->GetUserData(0);
+				ui_manager_->GetRenderer()->SetEnvironmentMap(texture_id);
 			}
 		}
 	}
-	if (lOk)
-	{
-		lOk = mUiManager->OpenRest();
+	if (ok) {
+		ok = ui_manager_->OpenRest();
 	}
-	if (lOk)
-	{
-		mUiManager->GetDesktopWindow()->CreateLayer(new UiTbc::FloatingLayout());
+	if (ok) {
+		ui_manager_->GetDesktopWindow()->CreateLayer(new uitbc::FloatingLayout());
 		DisplayCompanyLogo();
 	}
-	return lOk;
+	return ok;
 }
 
-void HoverTankTicker::DisplaySplashLogo()
-{
-	UiCure::PainterImageResource* lLogo = new UiCure::PainterImageResource(mUiManager, mResourceManager, "logo.png", UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-	if (lLogo->Load())
-	{
-		if (lLogo->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
-		{
-			//mUiManager->BeginRender(vec3(0, 1, 0));
-			mUiManager->PreparePaint(true);
-			const Canvas* lCanvas = mUiManager->GetCanvas();
-			const Canvas* lImage = lLogo->GetRamData();
-			mUiManager->GetPainter()->DrawImage(lLogo->GetUserData(0), lCanvas->GetWidth()/2 - lImage->GetWidth()/2, lCanvas->GetHeight()/2 - lImage->GetHeight()/2);
-			mUiManager->GetDisplayManager()->UpdateScreen();
+void HoverTankTicker::DisplaySplashLogo() {
+	UiCure::PainterImageResource* logo = new UiCure::PainterImageResource(ui_manager_, resource_manager_, "logo.png", UiCure::PainterImageResource::kReleaseFreeBuffer);
+	if (logo->Load()) {
+		if (logo->PostProcess() == cure::kResourceLoadComplete) {
+			//ui_manager_->BeginRender(vec3(0, 1, 0));
+			ui_manager_->PreparePaint(true);
+			const Canvas* canvas = ui_manager_->GetCanvas();
+			const Canvas* image = logo->GetRamData();
+			ui_manager_->GetPainter()->DrawImage(logo->GetUserData(0), canvas->GetWidth()/2 - image->GetWidth()/2, canvas->GetHeight()/2 - image->GetHeight()/2);
+			ui_manager_->GetDisplayManager()->UpdateScreen();
 		}
 	}
-	delete lLogo;
+	delete logo;
 }
 
-void HoverTankTicker::DisplayCompanyLogo()
-{
-	bool lShowLogo;
-	v_get(lShowLogo, =, UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, true);
-	if (lShowLogo)
-	{
-		Cure::UserRamImageResource* lLogo = new Cure::UserRamImageResource;
-		Cure::UserResourceOwner<Cure::UserRamImageResource> lLogoHolder(lLogo, mResourceManager, "megaphone.png");
-		UiCure::UserSound2dResource* lLogoSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-		Cure::UserResourceOwner<UiCure::UserSound2dResource> lLogoSoundHolder(lLogoSound, mResourceManager, "logo_trumpet.wav");
-		for (int x = 0; x < 1000; ++x)
-		{
-			mResourceManager->Tick();
-			if (lLogo->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS &&
-				lLogoSound->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS)
-			{
+void HoverTankTicker::DisplayCompanyLogo() {
+	bool show_logo;
+	v_get(show_logo, =, UiCure::GetSettings(), kRtvarGameEnablestartlogo, true);
+	if (show_logo) {
+		cure::UserRamImageResource* logo = new cure::UserRamImageResource;
+		cure::UserResourceOwner<cure::UserRamImageResource> logo_holder(logo, resource_manager_, "megaphone.png");
+		UiCure::UserSound2dResource* logo_sound = new UiCure::UserSound2dResource(ui_manager_, uilepra::SoundManager::kLoopNone);
+		cure::UserResourceOwner<UiCure::UserSound2dResource> logo_sound_holder(logo_sound, resource_manager_, "logo_trumpet.wav");
+		for (int x = 0; x < 1000; ++x) {
+			resource_manager_->Tick();
+			if (logo->GetLoadState() != cure::kResourceLoadInProgress &&
+				logo_sound->GetLoadState() != cure::kResourceLoadInProgress) {
 				break;
 			}
 			Thread::Sleep(0.001);
 		}
-		if (lLogo->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
-			lLogoSound->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-		{
-			mUiManager->GetSoundManager()->Play(lLogoSound->GetData(), 1, 1);
+		if (logo->GetLoadState() == cure::kResourceLoadComplete &&
+			logo_sound->GetLoadState() == cure::kResourceLoadComplete) {
+			ui_manager_->GetSoundManager()->Play(logo_sound->GetData(), 1, 1);
 
-			UiLepra::Canvas& lCanvas = *lLogo->GetRamData();
-			const UiTbc::Painter::ImageID lImageId = mUiManager->GetDesktopWindow()->GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::STRETCHED, UiTbc::GUIImageManager::NO_BLEND, 255);
-			UiTbc::RectComponent lRect(lImageId, "logo");
-			mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
-			mUiManager->GetDesktopWindow()->AddChild(&lRect, 0, 0, 0);
-			const unsigned lWidth = mUiManager->GetDisplayManager()->GetWidth();
-			const unsigned lHeight = mUiManager->GetDisplayManager()->GetHeight();
-			lRect.SetPreferredSize(lCanvas.GetWidth(), lCanvas.GetHeight());
-			const unsigned lTargetX = lWidth/2 - lCanvas.GetWidth()/2;
-			const unsigned lTargetY = lHeight/2 - lCanvas.GetHeight()/2;
-			mUiManager->GetRenderer()->ResetClippingRect();
-			Color lColor;
-			mUiManager->GetRenderer()->SetClearColor(Color());
-			mUiManager->GetDisplayManager()->SetVSyncEnabled(true);
+			uilepra::Canvas& canvas = *logo->GetRamData();
+			const uitbc::Painter::ImageID image_id = ui_manager_->GetDesktopWindow()->GetImageManager()->AddImage(canvas, uitbc::GUIImageManager::kStretched, uitbc::GUIImageManager::kNoBlend, 255);
+			uitbc::RectComponent rect(image_id, "logo");
+			ui_manager_->AssertDesktopLayout(new uitbc::FloatingLayout, 0);
+			ui_manager_->GetDesktopWindow()->AddChild(&rect, 0, 0, 0);
+			const unsigned width = ui_manager_->GetDisplayManager()->GetWidth();
+			const unsigned height = ui_manager_->GetDisplayManager()->GetHeight();
+			rect.SetPreferredSize(canvas.GetWidth(), canvas.GetHeight());
+			const unsigned target_x = width/2 - canvas.GetWidth()/2;
+			const unsigned target_y = height/2 - canvas.GetHeight()/2;
+			ui_manager_->GetRenderer()->ResetClippingRect();
+			Color _color;
+			ui_manager_->GetRenderer()->SetClearColor(Color());
+			ui_manager_->GetDisplayManager()->SetVSyncEnabled(true);
 
-			const float lMin = 0;
-			const float lMax = 26;
-			const int lStepCount = 50;
-			const float lBaseStep = (lMax-lMin)/(float)lStepCount;
-			float lBase = -lMax;
-			int lCount = 0;
-			const int lTotalFrameCount = 600;
-			for (lCount = 0; lCount <= lTotalFrameCount && SystemManager::GetQuitRequest() == 0; ++lCount)
-			{
-				if (lCount < lStepCount || lCount > lTotalFrameCount-lStepCount)
-				{
-					lBase += lBaseStep;
+			const float min = 0;
+			const float max = 26;
+			const int step_count = 50;
+			const float base_step = (max-min)/(float)step_count;
+			float base = -max;
+			int count = 0;
+			const int total_frame_count = 600;
+			for (count = 0; count <= total_frame_count && SystemManager::GetQuitRequest() == 0; ++count) {
+				if (count < step_count || count > total_frame_count-step_count) {
+					base += base_step;
 				}
-				int lMovement = (int)(::fabs(lBase)*lBase*3);
-				lRect.SetPos(lTargetX+lMovement, lTargetY);
+				int movement = (int)(::fabs(base)*base*3);
+				rect.SetPos(target_x+movement, target_y);
 
-				mUiManager->GetRenderer()->Clear();
-				mUiManager->Paint(false);
-				mUiManager->GetDisplayManager()->UpdateScreen();
+				ui_manager_->GetRenderer()->Clear();
+				ui_manager_->Paint(false);
+				ui_manager_->GetDisplayManager()->UpdateScreen();
 
 				Thread::Sleep(0.01);
-				mUiManager->InputTick();
-				//lOk = (SystemManager::GetQuitRequest() <= 0);
+				ui_manager_->InputTick();
+				//ok = (SystemManager::GetQuitRequest() <= 0);
 
-				if (lCount == lStepCount)
-				{
-					lBase = 0;
-				}
-				else if (lCount == lTotalFrameCount-lStepCount)
-				{
-					lBase = lMin;
+				if (count == step_count) {
+					base = 0;
+				} else if (count == total_frame_count-step_count) {
+					base = min;
 				}
 			}
-			mUiManager->GetDesktopWindow()->RemoveChild(&lRect, 0);
-			mUiManager->GetDesktopWindow()->GetImageManager()->RemoveImage(lImageId);
+			ui_manager_->GetDesktopWindow()->RemoveChild(&rect, 0);
+			ui_manager_->GetDesktopWindow()->GetImageManager()->RemoveImage(image_id);
 		}
 	}
-	mResourceManager->ForceFreeCache();
+	resource_manager_->ForceFreeCache();
 
 }
 
-void HoverTankTicker::BeginRender(vec3& pColor)
-{
-	float lRealTimeRatio;
-	v_get(lRealTimeRatio, =(float), UiCure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-	float lTimeOfDayFactor;
-	v_get(lTimeOfDayFactor, =(float), UiCure::GetSettings(), RTVAR_GAME_TIMEOFDAYFACTOR, 1.0);
-	mSunlight->Tick(lRealTimeRatio * lTimeOfDayFactor);
+void HoverTankTicker::BeginRender(vec3& color) {
+	float real_time_ratio;
+	v_get(real_time_ratio, =(float), UiCure::GetSettings(), kRtvarPhysicsRtr, 1.0);
+	float time_of_day_factor;
+	v_get(time_of_day_factor, =(float), UiCure::GetSettings(), kRtvarGameTimeofdayfactor, 1.0);
+	sunlight_->Tick(real_time_ratio * time_of_day_factor);
 
-	mSunlight->AddSunColor(pColor, 2);
-	Parent::BeginRender(pColor);
+	sunlight_->AddSunColor(color, 2);
+	Parent::BeginRender(color);
 
-	//vec3 lColor(1.2f, 1.2f, 1.2f);
-	//mSunlight->AddSunColor(lColor, 1);
-	const Color lFillColor = OFF_BLACK;
-	//lFillColor.Set(lColor.x, lColor.y, lColor.z, 1.0f);
-	mUiManager->GetRenderer()->SetOutlineFillColor(lFillColor);
+	//vec3 _color(1.2f, 1.2f, 1.2f);
+	//sunlight_->AddSunColor(_color, 1);
+	const Color fill_color = OFF_BLACK;
+	//fill_color.Set(_color.x, _color.y, _color.z, 1.0f);
+	ui_manager_->GetRenderer()->SetOutlineFillColor(fill_color);
 }
 
 
 
-void HoverTankTicker::CloseMainMenu()
-{
-	if (mIsPlayerCountViewActive)
-	{
-		DeleteSlave(mSlaveArray[0], false);
-		mIsPlayerCountViewActive = false;
+void HoverTankTicker::CloseMainMenu() {
+	if (is_player_count_view_active_) {
+		DeleteSlave(slave_array_[0], false);
+		is_player_count_view_active_ = false;
 	}
 }
 
-bool HoverTankTicker::QueryQuit()
-{
-	if (Parent::QueryQuit())
-	{
+bool HoverTankTicker::QueryQuit() {
+	if (Parent::QueryQuit()) {
 		PrepareQuit();
-		for (int x = 0; x < 4; ++x)
-		{
-			DeleteSlave(mSlaveArray[x], false);
+		for (int x = 0; x < 4; ++x) {
+			DeleteSlave(slave_array_[x], false);
 		}
 		DeleteServer();
 		return (true);
@@ -272,27 +237,25 @@ bool HoverTankTicker::QueryQuit()
 
 
 
-Life::GameClientSlaveManager* HoverTankTicker::CreateSlaveManager(Life::GameClientMasterTicker* pMaster,
-	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-	int pSlaveIndex, const PixelRect& pRenderArea)
-{
-	HoverTankManager* lGameManager = new HoverTankManager(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
-	lGameManager->SetMasterServerConnection(new Life::MasterServerConnection(pMaster->GetMasterServerConnection()->GetMasterAddress()));
-	return lGameManager;
+life::GameClientSlaveManager* HoverTankTicker::CreateSlaveManager(life::GameClientMasterTicker* pMaster,
+	cure::TimeManager* time, cure::RuntimeVariableScope* variable_scope,
+	cure::ResourceManager* resource_manager, UiCure::GameUiManager* ui_manager,
+	int slave_index, const PixelRect& render_area) {
+	HoverTankManager* game_manager = new HoverTankManager(pMaster, time, variable_scope, resource_manager, ui_manager, slave_index, render_area);
+	game_manager->SetMasterServerConnection(new life::MasterServerConnection(pMaster->GetMasterServerConnection()->GetMasterAddress()));
+	return game_manager;
 }
 
-Life::GameClientSlaveManager* HoverTankTicker::CreateViewer(Life::GameClientMasterTicker* pMaster,
-	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-	int pSlaveIndex, const PixelRect& pRenderArea)
-{
-	return new HoverTankViewer(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+life::GameClientSlaveManager* HoverTankTicker::CreateViewer(life::GameClientMasterTicker* pMaster,
+	cure::TimeManager* time, cure::RuntimeVariableScope* variable_scope,
+	cure::ResourceManager* resource_manager, UiCure::GameUiManager* ui_manager,
+	int slave_index, const PixelRect& render_area) {
+	return new HoverTankViewer(pMaster, time, variable_scope, resource_manager, ui_manager, slave_index, render_area);
 }
 
 
 
-loginstance(GAME, HoverTankTicker);
+loginstance(kGame, HoverTankTicker);
 
 
 

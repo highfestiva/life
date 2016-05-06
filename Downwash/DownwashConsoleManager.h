@@ -1,45 +1,42 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life/LifeClient/ClientConsoleManager.h"
-#include "Downwash.h"
+#include "../life/lifeclient/clientconsolemanager.h"
+#include "downwash.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-class DownwashConsoleManager: public Life::ClientConsoleManager
-{
-	typedef Life::ClientConsoleManager Parent;
+class DownwashConsoleManager: public life::ClientConsoleManager {
+	typedef life::ClientConsoleManager Parent;
 public:
-	DownwashConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-		UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea);
+	DownwashConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+		UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area);
 	virtual ~DownwashConsoleManager();
 	virtual bool Start();
 
 protected:
-	enum CommandClient
-	{
-		COMMAND_SET_AVATAR = Parent::COMMAND_COUNT_LIFE_CLIENT,
-		COMMAND_PREV_LEVEL,
-		COMMAND_NEXT_LEVEL,
-		COMMAND_SET_LEVEL_INDEX,
-		COMMAND_DIE,
+	enum CommandClient {
+		kCommandSetAvatar = Parent::kCommandCountLifeClient,
+		kCommandPrevLevel,
+		kCommandNextLevel,
+		kCommandSetLevelIndex,
+		kCommandDie,
 	};
 
 	virtual unsigned GetCommandCount() const;
-	virtual const CommandPair& GetCommand(unsigned pIndex) const;
-	virtual int OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector);
+	virtual const CommandPair& GetCommand(unsigned index) const;
+	virtual int OnCommand(const HashedString& command, const strutil::strvec& parameter_vector);
 
-	static const CommandPair mCommandIdList[];
+	static const CommandPair command_id_list_[];
 	logclass();
 };
 

@@ -8,20 +8,18 @@
 
 
 #pragma once
-#include "../../UiTbc/Include/GUI/UiButton.h"
-#include "UiResourceManager.h"
+#include "../../uitbc/include/gui/uibutton.h"
+#include "uiresourcemanager.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ResourceManager;
 }
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
@@ -29,19 +27,18 @@ class GameUiManager;
 
 
 
-class IconButton: public UiTbc::Button
-{
-	typedef UiTbc::Button Parent;
+class IconButton: public uitbc::Button {
+	typedef uitbc::Button Parent;
 public:
-	IconButton(GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, const str& pIconImageName, const wstr& pText);
+	IconButton(GameUiManager* ui_manager, cure::ResourceManager* resource_manager, const str& icon_image_name, const wstr& text);
 	virtual ~IconButton();
 
 private:
 	virtual bool IsComplete() const;
-	void PainterImageLoadCallback(UserPainterKeepImageResource* pResource);
+	void PainterImageLoadCallback(UserPainterKeepImageResource* resource);
 
-	UserPainterKeepImageResource* mIconResource;
-	UiTbc::Painter::ImageID mHighlightedIconId;
+	UserPainterKeepImageResource* icon_resource_;
+	uitbc::Painter::ImageID highlighted_icon_id_;
 };
 
 

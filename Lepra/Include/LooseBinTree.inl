@@ -2,358 +2,305 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
-TEMPLATE QUAL::LooseBinTree(_TObject pErrorObject,				
-							_TVarType pTotalTreeSize,
-							_TVarType pMinimumCellSize,
-							_TVarType pK) :
-	mErrorObject(pErrorObject)
-{
+TEMPLATE QUAL::LooseBinTree(_TObject error_object,
+							_TVarType total_tree_size,
+							_TVarType minimum_cell_size,
+							_TVarType k) :
+	error_object_(error_object) {
 	// Find required root node size.
-	_TVarType lPowOf2 = 2;
-	mMaxTreeDepth = 1;
-	while (pMinimumCellSize * lPowOf2 < pTotalTreeSize)
-	{
-		mMaxTreeDepth++;
-		lPowOf2 *= 2;
+	_TVarType pow_of2 = 2;
+	max_tree_depth_ = 1;
+	while (minimum_cell_size * pow_of2 < total_tree_size) {
+		max_tree_depth_++;
+		pow_of2 *= 2;
 	}
 
-	mK = pK;
-	_TVarType lFixedSizeHalf = pMinimumCellSize * lPowOf2 * 0.5;
-	_TVarType lSizeHalf = lFixedSizeHalf * mK;
+	k_ = k;
+	_TVarType _fixed_size_half = minimum_cell_size * pow_of2 * 0.5;
+	_TVarType _size_half = _fixed_size_half * k_;
 
-	mRootNode = new Node(0, 255, lFixedSizeHalf);
+	root_node_ = new Node(0, 255, _fixed_size_half);
 
 	// Tree center at 0.
-	mRootNode->mPos = 0;
-	mRootNode->mSizeHalf = lSizeHalf;
+	root_node_->pos_ = 0;
+	root_node_->size_half_ = _size_half;
 
-	mNumObjects = 0;
-	mNumNodes = 1;
+	num_objects_ = 0;
+	num_nodes_ = 1;
 }
 
-TEMPLATE QUAL::~LooseBinTree()
-{
-	delete mRootNode;
-	typename NodeList::iterator lIter;
-	for (lIter = mRecycledNodeList.begin(); lIter != mRecycledNodeList.end(); ++lIter)
-	{
-		delete (*lIter);
+TEMPLATE QUAL::~LooseBinTree() {
+	delete root_node_;
+	typename NodeList::iterator iter;
+	for (iter = recycled_node_list_.begin(); iter != recycled_node_list_.end(); ++iter) {
+		delete (*iter);
 	}
 }
 
-TEMPLATE void QUAL::InsertObject(_TKey pKey, _TObject pObject, _TVarType pPos, _TVarType pSizeHalf)
-{
-	if (mNodeTable.Find(pKey) != mNodeTable.End())
-	{
-		mLog.Warning("Object already inserted.");
+TEMPLATE void QUAL::InsertObject(_TKey key, _TObject object, _TVarType pos, _TVarType size_half) {
+	if (node_table_.Find(key) != node_table_.End()) {
+		log_.Warning("Object already inserted.");
 		return;
 	}
 
-	typename Node::Entry lEntry;
-	lEntry.mSizeHalf = pSizeHalf;
-	lEntry.mPos      = pPos;
-	lEntry.mObject   = pObject;
+	typename Node::Entry _entry;
+	_entry.size_half_ = size_half;
+	_entry.pos_      = pos;
+	_entry.object_   = object;
 
-	InsertObject(pKey, lEntry, mRootNode, 0);
+	InsertObject(key, _entry, root_node_, 0);
 }
 
-TEMPLATE void QUAL::InsertObject(_TKey pKey, typename Node::Entry pEntry, Node* pNode, unsigned pDepth)
-{
+TEMPLATE void QUAL::InsertObject(_TKey key, typename Node::Entry entry, Node* node, unsigned depth) {
 	// Calculate the position, size and index values of the child node.
-	_TVarType lChildNodeSizeHalf = pNode->GetSizeHalf() * 0.5;
+	_TVarType child_node_size_half = node->GetSizeHalf() * 0.5;
 
-	_TVarType lChildNodePos;
-	uint8 lChildIndex = GetChild(pEntry.mPos, pNode, lChildNodePos);
+	_TVarType child_node_pos;
+	uint8 child_index = GetChild(entry.pos_, node, child_node_pos);
 
 	// Check if the object fits in the child node or not.
-	if (	!pEntry.IsEnclosed(lChildNodePos, lChildNodeSizeHalf) ||
-		(pDepth == mMaxTreeDepth))
-	{
+	if (	!entry.IsEnclosed(child_node_pos, child_node_size_half) ||
+		(depth == max_tree_depth_)) {
 		// The object doesn't fit in the child node, so put it in the current node...
-		pNode->mEntryTable.Insert(pKey, pEntry);
-		pNode->mObjectCount++;
-		mNodeTable.Insert(pKey, pNode);
-		mNumObjects++;
-	}
-	else
-	{
+		node->entry_table_.Insert(key, entry);
+		node->object_count_++;
+		node_table_.Insert(key, node);
+		num_objects_++;
+	} else {
 		// Insert object in the child node
-		if (pNode->mChildren[lChildIndex] == 0)
-		{
-			Node* lNewChildNode = NewNode(pNode, lChildIndex, pNode->mFixedSizeHalf * 0.5);
-			lNewChildNode->mPos = lChildNodePos;
-			lNewChildNode->mSizeHalf = lChildNodeSizeHalf;
-			pNode->mChildMask |= (1 << lChildIndex);
-			mNumNodes++;
-			pNode->mChildren[lChildIndex] = lNewChildNode;
+		if (node->children_[child_index] == 0) {
+			Node* new_child_node = NewNode(node, child_index, node->fixed_size_half_ * 0.5);
+			new_child_node->pos_ = child_node_pos;
+			new_child_node->size_half_ = child_node_size_half;
+			node->child_mask_ |= (1 << child_index);
+			num_nodes_++;
+			node->children_[child_index] = new_child_node;
 		}
 
-		InsertObject(pKey, pEntry, pNode->mChildren[lChildIndex], pDepth + 1);
+		InsertObject(key, entry, node->children_[child_index], depth + 1);
 	}
 }
 
-TEMPLATE _TObject QUAL::RemoveObject(_TKey pKey)
-{
-	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
-	if (lNodeIter == mNodeTable.End())
-	{
-		return mErrorObject;
+TEMPLATE _TObject QUAL::RemoveObject(_TKey key) {
+	typename NodeTable::Iterator _node_iter = node_table_.Find(key);
+	if (_node_iter == node_table_.End()) {
+		return error_object_;
 	}
 
-	return RemoveObject(pKey, lNodeIter).mObject;
+	return RemoveObject(key, _node_iter).object_;
 }
 
-TEMPLATE typename QUAL::Node::Entry QUAL::RemoveObject(_TKey pKey, typename NodeTable::Iterator& pNodeIter)
-{
+TEMPLATE typename QUAL::Node::Entry QUAL::RemoveObject(_TKey key, typename NodeTable::Iterator& node_iter) {
 	// Removes object from the octree and deletes the node if empty.
-	Node* lCurrentNode = *pNodeIter;
+	Node* current_node = *node_iter;
 
-	typename Node::EntryTable::Iterator lIter = FindObject(pKey, lCurrentNode);
-	typename Node::Entry lEntry = *lIter;
+	typename Node::EntryTable::Iterator iter = FindObject(key, current_node);
+	typename Node::Entry _entry = *iter;
 
-	lCurrentNode->mEntryTable.Remove(lIter);
-	mNodeTable.Remove(pNodeIter);
-	mNumObjects--;
+	current_node->entry_table_.Remove(iter);
+	node_table_.Remove(node_iter);
+	num_objects_--;
 
-	while (lCurrentNode != 0 && lCurrentNode->IsEmpty() == true)
-	{
-		Node* lParent = lCurrentNode->mParent;
+	while (current_node != 0 && current_node->IsEmpty() == true) {
+		Node* _parent = current_node->parent_;
 
-		if (lParent != 0)
-		{
-			RecycleNode(lParent->mChildren[lCurrentNode->mIndex]);
-			lParent->mChildren[lCurrentNode->mIndex] = 0;
-			
-			lParent->mChildMask &= (0xFFFFFFFF ^ (1 << lCurrentNode->mIndex));
-			mNumNodes--;
+		if (_parent != 0) {
+			RecycleNode(_parent->children_[current_node->index_]);
+			_parent->children_[current_node->index_] = 0;
+
+			_parent->child_mask_ &= (0xFFFFFFFF ^ (1 << current_node->index_));
+			num_nodes_--;
 		}
 
-		lCurrentNode = lParent;
+		current_node = _parent;
 	}
 
-	return lEntry;
+	return _entry;
 }
 
 
-TEMPLATE _TObject QUAL::FindObject(_TKey pKey) const
-{
-	typename NodeTable::ConstIterator lNodeIter = mNodeTable.Find(pKey);
-	if (lNodeIter == mNodeTable.End())
-	{
-		return mErrorObject;
+TEMPLATE _TObject QUAL::FindObject(_TKey key) const {
+	typename NodeTable::ConstIterator _node_iter = node_table_.Find(key);
+	if (_node_iter == node_table_.End()) {
+		return error_object_;
 	}
 
-	return (*FindObject(pKey, *lNodeIter)).mObject;
+	return (*FindObject(key, *_node_iter)).object_;
 }
 
-TEMPLATE typename QUAL::Node::EntryTable::Iterator QUAL::FindObject(_TKey pKey, Node* pObjectNode) const
-{
-	return pObjectNode->mEntryTable.Find(pKey);
+TEMPLATE typename QUAL::Node::EntryTable::Iterator QUAL::FindObject(_TKey key, Node* object_node) const {
+	return object_node->entry_table_.Find(key);
 }
 
 
-TEMPLATE bool QUAL::MoveObject(_TKey pKey, _TVarType pNewPos, _TVarType pNewSizeHalf)
-{
-	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
-	if (lNodeIter == mNodeTable.End())
-	{
-		mLog.Warning("Trying to move non existing object.");
+TEMPLATE bool QUAL::MoveObject(_TKey key, _TVarType new_pos, _TVarType new_size_half) {
+	typename NodeTable::Iterator _node_iter = node_table_.Find(key);
+	if (_node_iter == node_table_.End()) {
+		log_.Warning("Trying to move non existing object.");
 		return false;
 	}
-	Node* lNode = *lNodeIter;
+	Node* _node = *_node_iter;
 
-	typename Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
-	(*lEntryIter).mPos      = pNewPos;
-	(*lEntryIter).mSizeHalf = pNewSizeHalf;
-	
-	MoveObject(pKey, lNodeIter, lEntryIter);
+	typename Node::EntryTable::Iterator entry_iter = FindObject(key, _node);
+	(*entry_iter).pos_      = new_pos;
+	(*entry_iter).size_half_ = new_size_half;
+
+	MoveObject(key, _node_iter, entry_iter);
 
 	return true;
 }
 
-TEMPLATE _TObject QUAL::MoveObject(_TKey pKey, _TVarType pNewPos)
-{
-	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
-	if (lNodeIter == mNodeTable.End())
-	{
-		mLog.Warning("Trying to move non existing object.");
+TEMPLATE _TObject QUAL::MoveObject(_TKey key, _TVarType new_pos) {
+	typename NodeTable::Iterator _node_iter = node_table_.Find(key);
+	if (_node_iter == node_table_.End()) {
+		log_.Warning("Trying to move non existing object.");
 		return false;
 	}
-	Node* lNode = *lNodeIter;
+	Node* _node = *_node_iter;
 
-	typename Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
-	(*lEntryIter).mPos = pNewPos;
+	typename Node::EntryTable::Iterator entry_iter = FindObject(key, _node);
+	(*entry_iter).pos_ = new_pos;
 
-	return MoveObject(pKey, lNodeIter, lEntryIter);
+	return MoveObject(key, _node_iter, entry_iter);
 }
 
-TEMPLATE _TObject QUAL::MoveObject(_TKey pKey, typename NodeTable::Iterator& pNodeIter,
-	typename Node::EntryTable::Iterator& /*pObjectIter*/)
-{
-	typename Node::Entry lEntry = RemoveObject(pKey, pNodeIter);
-	InsertObject(pKey, lEntry, mRootNode, 0);
-	return lEntry.mObject;
+TEMPLATE _TObject QUAL::MoveObject(_TKey key, typename NodeTable::Iterator& node_iter,
+	typename Node::EntryTable::Iterator& /*object_iter*/) {
+	typename Node::Entry _entry = RemoveObject(key, node_iter);
+	InsertObject(key, _entry, root_node_, 0);
+	return _entry.object_;
 }
 
-TEMPLATE bool QUAL::GetObjectSizeAndPos(_TKey pKey, _TVarType& pPos, _TVarType& pSizeHalf)
-{
-	bool lOk = true;
+TEMPLATE bool QUAL::GetObjectSizeAndPos(_TKey key, _TVarType& pos, _TVarType& size_half) {
+	bool ok = true;
 
-	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
-	if (lNodeIter == mNodeTable.End())
-	{
-		mLog.Warning("Trying to fetch non existing object.");
-		lOk = false;
+	typename NodeTable::Iterator _node_iter = node_table_.Find(key);
+	if (_node_iter == node_table_.End()) {
+		log_.Warning("Trying to fetch non existing object.");
+		ok = false;
 	}
 
-	typename Node::EntryTable::Iterator lEntryIter;
-	if (lOk)
-	{
-		Node* lNode = *lNodeIter;
-		lEntryIter = FindObject(pKey, lNode);
-		lOk = (lEntryIter != lNode->mEntryTable.End());
+	typename Node::EntryTable::Iterator entry_iter;
+	if (ok) {
+		Node* _node = *_node_iter;
+		entry_iter = FindObject(key, _node);
+		ok = (entry_iter != _node->entry_table_.End());
 	}
 
-	if (lOk)
-	{
-		pPos = (*lEntryIter).mPos;
-		pSizeHalf = (*lEntryIter).mSizeHalf;
+	if (ok) {
+		pos = (*entry_iter).pos_;
+		size_half = (*entry_iter).size_half_;
 	}
 
-	return lOk;
+	return ok;
 }
 
 
-TEMPLATE unsigned QUAL::GetOverlaps(_TVarType pPosRelParent, 
-				    _TVarType pSizeHalf, 
-				    _TVarType pChildNodeSize,
-				    _TVarType pParentNodeSize) const
-{
+TEMPLATE unsigned QUAL::GetOverlaps(_TVarType pos_rel_parent,
+				    _TVarType size_half,
+				    _TVarType child_node_size,
+				    _TVarType parent_node_size) const {
 	// Suppose that we overlap all nodes.
-	unsigned lOverlapMask = 3;
-	_TVarType lMinSeparation = pSizeHalf + pParentNodeSize;
+	unsigned overlap_mask = 3;
+	_TVarType min_separation = size_half + parent_node_size;
 
 	// Test the right child.
-	if ( ( pPosRelParent  - pChildNodeSize ) > lMinSeparation ||
-		( pChildNodeSize - pPosRelParent  ) > lMinSeparation)
-	{
+	if ( ( pos_rel_parent  - child_node_size ) > min_separation ||
+		( child_node_size - pos_rel_parent  ) > min_separation) {
 		// Remove the right child.
-		lOverlapMask &= ~2;
+		overlap_mask &= ~2;
 	}
 	// Test the left portion of the children.
-	else if( ( pPosRelParent  + pChildNodeSize) > lMinSeparation ||
-		    -( pChildNodeSize + pPosRelParent ) > lMinSeparation)
-	{
+	else if( ( pos_rel_parent  + child_node_size) > min_separation ||
+		    -( child_node_size + pos_rel_parent ) > min_separation) {
 		// Remove the left child.
-		lOverlapMask &= ~1;
+		overlap_mask &= ~1;
 	}
 
-	return lOverlapMask;
+	return overlap_mask;
 }
 
-TEMPLATE uint8 QUAL::GetChild(_TVarType pPos, const Node* pNode)
-{
-	return (pPos > pNode->mPos) ? 1 : 0;
+TEMPLATE uint8 QUAL::GetChild(_TVarType pos, const Node* node) {
+	return (pos > node->pos_) ? 1 : 0;
 }
 
-TEMPLATE uint8 QUAL::GetChild(_TVarType pPos, const Node* pNode, _TVarType& pChildPos)
-{
-	_TVarType lChildUnloosSizeHalf = pNode->mFixedSizeHalf * 0.5f;
+TEMPLATE uint8 QUAL::GetChild(_TVarType pos, const Node* node, _TVarType& child_pos) {
+	_TVarType child_unloos_size_half = node->fixed_size_half_ * 0.5f;
 
-	if (pPos > pNode->mPos)
-	{
-		pChildPos = pNode->mPos + lChildUnloosSizeHalf;
+	if (pos > node->pos_) {
+		child_pos = node->pos_ + child_unloos_size_half;
 		return 1;
-	}
-	else
-	{
-		pChildPos = pNode->mPos - lChildUnloosSizeHalf;
+	} else {
+		child_pos = node->pos_ - child_unloos_size_half;
 		return 0;
 	}
 }
 
 
-TEMPLATE void QUAL::GetObjects(ObjectList& pObjects, _TVarType pPos, _TVarType pSizeHalf)
-{
-	GetObjects(pObjects, pPos, pSizeHalf, mRootNode);
+TEMPLATE void QUAL::GetObjects(ObjectList& objects, _TVarType pos, _TVarType size_half) {
+	GetObjects(objects, pos, size_half, root_node_);
 }
 
-TEMPLATE void QUAL::GetObjects(ObjectList& pObjects, _TVarType pPos, _TVarType pSizeHalf, Node* pNode)
-{
-	typename Node::EntryTable::Iterator lIter;
-	for (lIter  = pNode->mEntryTable.First(); 
-		lIter != pNode->mEntryTable.End(); 
-		++lIter)
-	{
-		const typename Node::Entry& lEntry = *lIter;
+TEMPLATE void QUAL::GetObjects(ObjectList& objects, _TVarType pos, _TVarType size_half, Node* node) {
+	typename Node::EntryTable::Iterator iter;
+	for (iter  = node->entry_table_.First();
+		iter != node->entry_table_.End();
+		++iter) {
+		const typename Node::Entry& _entry = *iter;
 
-		if (lEntry.IsOverlapping(pPos, pSizeHalf) == true)
-		{
-			pObjects.push_back(lEntry.mObject);
+		if (_entry.IsOverlapping(pos, size_half) == true) {
+			objects.push_back(_entry.object_);
 		}
 	}
 
-	unsigned lOverlapMask = GetOverlaps(pPos - pNode->mPos, 
-					       pSizeHalf, 
-					       pNode->mSizeHalf * 0.5f, 
-					       pNode->mSizeHalf);
-	lOverlapMask &= pNode->mChildMask;
+	unsigned overlap_mask = GetOverlaps(pos - node->pos_,
+					       size_half,
+					       node->size_half_ * 0.5f,
+					       node->size_half_);
+	overlap_mask &= node->child_mask_;
 
-	if (lOverlapMask != 0)
-	{
-		if ((lOverlapMask & 1) != 0)
-		{
-			GetObjects(pObjects, pPos, pSizeHalf, pNode->mChildren[0]);
+	if (overlap_mask != 0) {
+		if ((overlap_mask & 1) != 0) {
+			GetObjects(objects, pos, size_half, node->children_[0]);
 		}
-		if ((lOverlapMask & 2) != 0)
-		{
-			GetObjects(pObjects, pPos, pSizeHalf, pNode->mChildren[1]);
+		if ((overlap_mask & 2) != 0) {
+			GetObjects(objects, pos, size_half, node->children_[1]);
 		}
 	}
 }
 
 
-TEMPLATE unsigned QUAL::GetFullTreeMemSize() const
-{
-	unsigned lNumNodes = 0;
+TEMPLATE unsigned QUAL::GetFullTreeMemSize() const {
+	unsigned num_nodes = 0;
 	int i;
 
-	for (i = 1; i <= mMaxTreeDepth; i++)
-	{
-		lNumNodes += (unsigned)(1 << i);
+	for (i = 1; i <= max_tree_depth_; i++) {
+		num_nodes += (unsigned)(1 << i);
 	}
 
-	return lNumNodes * sizeof(Node);
+	return num_nodes * sizeof(Node);
 }
 
-TEMPLATE void QUAL::RecycleNode(Node* pNode)
-{
-	if (mRecycledNodeList.size() < MAX_RECYCLED_NODES)
-	{
-		pNode->DeleteChildren(this);
-		mRecycledNodeList.push_back(pNode);
-	}
-	else
-	{
-		delete pNode;
+TEMPLATE void QUAL::RecycleNode(Node* node) {
+	if (recycled_node_list_.size() < kMaxRecycledNodes) {
+		node->DeleteChildren(this);
+		recycled_node_list_.push_back(node);
+	} else {
+		delete node;
 	}
 }
 
-TEMPLATE typename QUAL::Node* QUAL::NewNode(Node* pParent, uint8 pIndex, _TVarType pFixedSizeHalf)
-{
-	Node* lNode = 0;
+TEMPLATE typename QUAL::Node* QUAL::NewNode(Node* parent, uint8 index, _TVarType fixed_size_half) {
+	Node* _node = 0;
 
-	if (mRecycledNodeList.empty())
-	{
-		lNode = new Node(pParent, pIndex, pFixedSizeHalf);
+	if (recycled_node_list_.empty()) {
+		_node = new Node(parent, index, fixed_size_half);
+	} else {
+		_node = recycled_node_list_.front();
+		recycled_node_list_.pop_front();
+		_node->Init(parent, index, fixed_size_half);
 	}
-	else
-	{
-		lNode = mRecycledNodeList.front();
-		mRecycledNodeList.pop_front();
-		lNode->Init(pParent, pIndex, pFixedSizeHalf);
-	}
-	return lNode;
+	return _node;
 }
 
-TEMPLATE LogDecorator LooseBinTree<_TKey, _TObject, _TVarType, _THashFunc>::mLog(LogType::GetLogger(LogType::GENERAL), typeid(LooseBinTree));
+TEMPLATE LogDecorator LooseBinTree<_TKey, _TObject, _TVarType, _THashFunc>::log_(LogType::GetLogger(LogType::kGeneral), typeid(LooseBinTree));

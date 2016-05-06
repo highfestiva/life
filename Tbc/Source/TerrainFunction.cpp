@@ -1,525 +1,451 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/CubicSpline.h"
-#include "../../Lepra/Include/Math.h"
-#include "../Include/TerrainFunction.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/cubicspline.h"
+#include "../../lepra/include/math.h"
+#include "../include/terrainfunction.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
-TerrainFunction::TerrainFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius):
-	mAmplitude(pAmplitude),
-	mPosition(pPosition),
-	mInnerRadius(pInnerRadius),
-	mOuterRadius(pOuterRadius)
-{
-	deb_assert(mInnerRadius <= mOuterRadius);	// Outer radius should be AT LEAST as big as the inner ditto.
+TerrainFunction::TerrainFunction(float amplitude, const vec2& position, float inner_radius, float outer_radius):
+	amplitude_(amplitude),
+	position_(position),
+	inner_radius_(inner_radius),
+	outer_radius_(outer_radius) {
+	deb_assert(inner_radius_ <= outer_radius_);	// Outer radius should be AT LEAST as big as the inner ditto.
 }
 
-TerrainFunction::~TerrainFunction()
-{
+TerrainFunction::~TerrainFunction() {
 }
 
-void TerrainFunction::AddFunction(TerrainPatch& pPatch) const
-{
+void TerrainFunction::AddFunction(TerrainPatch& patch) const {
 	// Read all frequently used data from pGrid.
-	const vec2& lWorldSouthWest(pPatch.GetSouthWest());
-	const vec2& lWorldNorthEast(pPatch.GetNorthEast());
-	const int lVertexCountX = pPatch.GetVertexRes();
-	const int lVertexCountY = pPatch.GetVertexRes();
-	const float lGridWidth = pPatch.GetPatchSize();
-	const float lGridHeight = pPatch.GetPatchSize();
+	const vec2& world_south_west(patch.GetSouthWest());
+	const vec2& world_north_east(patch.GetNorthEast());
+	const int vertex_count_x = patch.GetVertexRes();
+	const int vertex_count_y = patch.GetVertexRes();
+	const float grid_width = patch.GetPatchSize();
+	const float grid_height = patch.GetPatchSize();
 
 	float a;
 
 	// Calculate start X vertex index.
-	int lVertexMinimumX;
-	a = mPosition.x-mOuterRadius;
-	if (a <= lWorldSouthWest.x)
-	{
-		lVertexMinimumX = 0;
-	}
-	else
-	{
-		lVertexMinimumX = (int)::floor((a-lWorldSouthWest.x) * lVertexCountX / lGridWidth);
+	int vertex_minimum_x;
+	a = position_.x-outer_radius_;
+	if (a <= world_south_west.x) {
+		vertex_minimum_x = 0;
+	} else {
+		vertex_minimum_x = (int)::floor((a-world_south_west.x) * vertex_count_x / grid_width);
 	}
 
 	// Calculate end X vertex index.
-	int lVertexMaximumX;
-	a = mPosition.x+mOuterRadius;
-	if (a >= lWorldNorthEast.x)
-	{
-		lVertexMaximumX = lVertexCountX;
-	}
-	else
-	{
-		lVertexMaximumX = (int)::ceil((a-lWorldSouthWest.x) * lVertexCountX / lGridWidth);
+	int vertex_maximum_x;
+	a = position_.x+outer_radius_;
+	if (a >= world_north_east.x) {
+		vertex_maximum_x = vertex_count_x;
+	} else {
+		vertex_maximum_x = (int)::ceil((a-world_south_west.x) * vertex_count_x / grid_width);
 	}
 
 	// Calculate start Y vertex index.
-	int lVertexMinimumY;
-	a = mPosition.y-mOuterRadius;
-	if (a <= lWorldSouthWest.y)
-	{
-		lVertexMinimumY = 0;
-	}
-	else
-	{
-		lVertexMinimumY = (int)::floor((a-lWorldSouthWest.y) * lVertexCountY / lGridHeight);
+	int vertex_minimum_y;
+	a = position_.y-outer_radius_;
+	if (a <= world_south_west.y) {
+		vertex_minimum_y = 0;
+	} else {
+		vertex_minimum_y = (int)::floor((a-world_south_west.y) * vertex_count_y / grid_height);
 	}
 
 	// Calculate end Y vertex index.
-	int lVertexMaximumY;
-	a = mPosition.y+mOuterRadius;
-	if (a >= lWorldNorthEast.y)
-	{
-		lVertexMaximumY = lVertexCountY;
-	}
-	else
-	{
-		lVertexMaximumY = (int)::ceil((a-lWorldSouthWest.y) * lVertexCountY / lGridHeight);
+	int vertex_maximum_y;
+	a = position_.y+outer_radius_;
+	if (a >= world_north_east.y) {
+		vertex_maximum_y = vertex_count_y;
+	} else {
+		vertex_maximum_y = (int)::ceil((a-world_south_west.y) * vertex_count_y / grid_height);
 	}
 
-	pPatch.IterateOverPatch(*this, lVertexMinimumX, lVertexMaximumX, lVertexMinimumY, lVertexMaximumY);
+	patch.IterateOverPatch(*this, vertex_minimum_x, vertex_maximum_x, vertex_minimum_y, vertex_maximum_y);
 }
 
-void TerrainFunction::ModifyVertex(const vec2& pWorldFlatPos, vec3& pVertex) const
-{
-	const float lDistance = pWorldFlatPos.GetDistance(mPosition);
-	if (lDistance < mOuterRadius)
-	{
+void TerrainFunction::ModifyVertex(const vec2& world_flat_pos, vec3& vertex) const {
+	const float distance = world_flat_pos.GetDistance(position_);
+	if (distance < outer_radius_) {
 		// We made it!
-		float lScale;
-		if (lDistance <= mInnerRadius)
-		{
+		float _scale;
+		if (distance <= inner_radius_) {
 			// This point is inside, or on, the inner radius.
-			lScale = 1;
-		}
-		else
-		{
+			_scale = 1;
+		} else {
 			// We linearly down-scale our method parameter. This does not necessarily mean
 			// that the parameter is used in a linear fasion.
-			lScale = 1-(lDistance-mInnerRadius)/(mOuterRadius-mInnerRadius);
+			_scale = 1-(distance-inner_radius_)/(outer_radius_-inner_radius_);
 		}
-		const vec2 lRelativeNormalizedPos = (pWorldFlatPos - mPosition) / mOuterRadius;
-		AddPoint(lRelativeNormalizedPos.x, lRelativeNormalizedPos.y, lScale, lDistance, pVertex);
+		const vec2 relative_normalized_pos = (world_flat_pos - position_) / outer_radius_;
+		AddPoint(relative_normalized_pos.x, relative_normalized_pos.y, _scale, distance, vertex);
 	}
 }
 
-float TerrainFunction::GetAmplitude() const
-{
-	return (mAmplitude);
+float TerrainFunction::GetAmplitude() const {
+	return (amplitude_);
 }
 
-const vec2& TerrainFunction::GetPosition() const
-{
-	return (mPosition);
+const vec2& TerrainFunction::GetPosition() const {
+	return (position_);
 }
 
-float TerrainFunction::GetInnerRadius() const
-{
-	return (mInnerRadius);
+float TerrainFunction::GetInnerRadius() const {
+	return (inner_radius_);
 }
 
-float TerrainFunction::GetOuterRadius() const
-{
-	return (mOuterRadius);
+float TerrainFunction::GetOuterRadius() const {
+	return (outer_radius_);
 }
 
 
-TerrainFunctionGroup::TerrainFunctionGroup(TerrainFunction** pTFArray, int pCount, 
-					   DataPolicy pArrayPolicy,
-					   SubDataPolicy pTFPolicy) :
-	mTFArray(pTFArray),
-	mCount(pCount),
-	mArrayPolicy(pArrayPolicy),
-	mTFPolicy(pTFPolicy)
-{
-	if (mArrayPolicy == FULL_COPY)
-	{
-		mTFArray = new TerrainFunction*[mCount];
-		::memcpy(mTFArray, pTFArray, mCount * sizeof(TerrainFunction*));
+TerrainFunctionGroup::TerrainFunctionGroup(TerrainFunction** tf_array, int count,
+					   DataPolicy array_policy,
+					   SubDataPolicy tf_policy) :
+	tf_array_(tf_array),
+	count_(count),
+	array_policy_(array_policy),
+	tf_policy_(tf_policy) {
+	if (array_policy_ == kFullCopy) {
+		tf_array_ = new TerrainFunction*[count_];
+		::memcpy(tf_array_, tf_array, count_ * sizeof(TerrainFunction*));
 	}
 }
 
-TerrainFunctionGroup::~TerrainFunctionGroup()
-{
-	if (mTFPolicy == TAKE_SUBDATA_OWNERSHIP)
-	{
-		for (int i = 0; i < mCount; i++)
-		{
-			delete mTFArray[i];
+TerrainFunctionGroup::~TerrainFunctionGroup() {
+	if (tf_policy_ == kTakeSubdataOwnership) {
+		for (int i = 0; i < count_; i++) {
+			delete tf_array_[i];
 		}
 	}
 
-	if (mArrayPolicy != COPY_REFERENCE)
-	{
-		delete[] mTFArray;
+	if (array_policy_ != kCopyReference) {
+		delete[] tf_array_;
 	}
 }
 
-void TerrainFunctionGroup::AddFunctions(TerrainPatch& pPatch) const
-{
+void TerrainFunctionGroup::AddFunctions(TerrainPatch& patch) const {
 	// No optimizations like the ones in TerrainFunction are possible.
-	pPatch.IterateOverPatch(*this, 0, pPatch.GetVertexRes(), 0, pPatch.GetVertexRes());
+	patch.IterateOverPatch(*this, 0, patch.GetVertexRes(), 0, patch.GetVertexRes());
 }
 
-void TerrainFunctionGroup::ModifyVertex(const vec2& pWorldFlatPos, vec3& pVertex) const
-{
-	for (int i = 0; i < mCount; i++)
-	{
-		mTFArray[i]->ModifyVertex(pWorldFlatPos, pVertex);
+void TerrainFunctionGroup::ModifyVertex(const vec2& world_flat_pos, vec3& vertex) const {
+	for (int i = 0; i < count_; i++) {
+		tf_array_[i]->ModifyVertex(world_flat_pos, vertex);
 	}
 }
 
-TerrainConeFunction::TerrainConeFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius):
-	TerrainFunction(pAmplitude, pPosition, pInnerRadius, pOuterRadius)
-{
+TerrainConeFunction::TerrainConeFunction(float amplitude, const vec2& position, float inner_radius, float outer_radius):
+	TerrainFunction(amplitude, position, inner_radius, outer_radius) {
 	// Calculate the "profile length", which is the slope plus the inner radius.
 	//      ____|____
 	//   pl/ ir |    \
 	// ___/     |     \___
 	//    or
-	mRadiusDifferance = mOuterRadius-mInnerRadius;
-	mSlopeLength = ::sqrt(mRadiusDifferance*mRadiusDifferance + pAmplitude*pAmplitude);
-	mProfileLength = mSlopeLength + mInnerRadius;
-	mPlateauPart = mInnerRadius/mProfileLength;
+	radius_differance_ = outer_radius_-inner_radius_;
+	slope_length_ = ::sqrt(radius_differance_*radius_differance_ + amplitude*amplitude);
+	profile_length_ = slope_length_ + inner_radius_;
+	plateau_part_ = inner_radius_/profile_length_;
 }
 
-void TerrainConeFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY,
-	float /*pScale*/, float pAbsoluteXyDistance, vec3& pPoint) const
-{
+void TerrainConeFunction::AddPoint(float relative_normalized_x, float relative_normalized_y,
+	float /*scale*/, float absolute_xy_distance, vec3& point) const {
 	// Does not simply crunch the terrain grid vertically, but has a smarter
 	// function that distributes the grid vertices evenly around the cone profile.
 
-	//pScale;
+	//scale;
 
 	// Calculate a new distance, where the slope is weighed in correctly.
-	const float lNormalizedXyDistance = pAbsoluteXyDistance/mOuterRadius;
-	float lNewAbsoluteXyDistance;
-	if (lNormalizedXyDistance < mPlateauPart)
-	{
+	const float normalized_xy_distance = absolute_xy_distance/outer_radius_;
+	float new_absolute_xy_distance;
+	if (normalized_xy_distance < plateau_part_) {
 		// We're inside the inner radius = simple scale.
-		lNewAbsoluteXyDistance = lNormalizedXyDistance/mPlateauPart*mInnerRadius;
-	}
-	else
-	{
+		new_absolute_xy_distance = normalized_xy_distance/plateau_part_*inner_radius_;
+	} else {
 		// We're between the inner radius and the outer radius.
-		const float lSlopePart = 1-mPlateauPart;
-		lNewAbsoluteXyDistance = (lNormalizedXyDistance-mPlateauPart)/lSlopePart*mRadiusDifferance + mInnerRadius;
+		const float slope_part = 1-plateau_part_;
+		new_absolute_xy_distance = (normalized_xy_distance-plateau_part_)/slope_part*radius_differance_ + inner_radius_;
 	}
 
 	// Move X and Y out.
-	if(pAbsoluteXyDistance != 0.0f)
-	{
-		const float lXyScale = mOuterRadius/pAbsoluteXyDistance;
-		float dx = pRelativeNormalizedX*lXyScale*lNewAbsoluteXyDistance;
-		float dy = pRelativeNormalizedY*lXyScale*lNewAbsoluteXyDistance;
-		pPoint.x = mPosition.x+dx;
-		pPoint.y = mPosition.y+dy;
+	if(absolute_xy_distance != 0.0f) {
+		const float xy_scale = outer_radius_/absolute_xy_distance;
+		float dx = relative_normalized_x*xy_scale*new_absolute_xy_distance;
+		float dy = relative_normalized_y*xy_scale*new_absolute_xy_distance;
+		point.x = position_.x+dx;
+		point.y = position_.y+dy;
 	}
 
 	// Calculate new amplitude from the new distance.
-	float lNewAmplitude;
-	if (lNewAbsoluteXyDistance <= mInnerRadius)
-	{
-		lNewAmplitude = mAmplitude;
+	float new_amplitude;
+	if (new_absolute_xy_distance <= inner_radius_) {
+		new_amplitude = amplitude_;
+	} else {
+		new_amplitude = (outer_radius_-new_absolute_xy_distance)/(outer_radius_-inner_radius_)*amplitude_;
 	}
-	else
-	{
-		lNewAmplitude = (mOuterRadius-lNewAbsoluteXyDistance)/(mOuterRadius-mInnerRadius)*mAmplitude;
-	}
-	pPoint.z += lNewAmplitude;
+	point.z += new_amplitude;
 }
 
 
 
-TerrainHemisphereFunction::TerrainHemisphereFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius):
-	TerrainFunction(pAmplitude, pPosition, pInnerRadius, pOuterRadius)
-{
+TerrainHemisphereFunction::TerrainHemisphereFunction(float amplitude, const vec2& position, float inner_radius, float outer_radius):
+	TerrainFunction(amplitude, position, inner_radius, outer_radius) {
 	//     ___
 	//   /     \
 	// _|       |_
 }
 
-void TerrainHemisphereFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY,
-	float pScale, float pAbsoluteXyDistance, vec3& pPoint) const
-{
+void TerrainHemisphereFunction::AddPoint(float relative_normalized_x, float relative_normalized_y,
+	float scale, float absolute_xy_distance, vec3& point) const {
 	// Does not simply crunch the terrain grid vertically, but has a smarter
 	// function that distributes the grid vertices evenly around the hemisphere.
 
 	// Calculate dx, dy and dz (the radius is 1).
-	float dx = pRelativeNormalizedX;
-	float dy = pRelativeNormalizedY;
+	float dx = relative_normalized_x;
+	float dy = relative_normalized_y;
 	float dz = ::sqrt(1 - (dx*dx+dy*dy));
 	// Angle between XY-plane and the point (dx, dy, dz).
-	const float lAlpha = ::asin(dz/1);	// Divided by normalized radius 1.
+	const float alpha = ::asin(dz/1);	// Divided by normalized radius 1.
 	// This is the actual function. The new angle strives with a power of two towards the steepest
-	const float lBeta = 2/PIF*lAlpha*lAlpha;
-	if (pAbsoluteXyDistance != 0)
-	{
+	const float beta = 2/PIF*alpha*alpha;
+	if (absolute_xy_distance != 0) {
 		// Calculate new distance from center in XY-plane.
-		const float lNewAbsoluteXyDistance = mOuterRadius*::cos(lBeta);
-		const float lNewLinearXyDistanceScale = lNewAbsoluteXyDistance/pAbsoluteXyDistance;
+		const float new_absolute_xy_distance = outer_radius_*::cos(beta);
+		const float new_linear_xy_distance_scale = new_absolute_xy_distance/absolute_xy_distance;
 		// Elongate dx and dy, since the angle in the XY-plane hasn't changed.
-		dx *= lNewLinearXyDistanceScale*mOuterRadius;
-		dy *= lNewLinearXyDistanceScale*mOuterRadius;
-		pPoint.x = Math::Lerp(pPoint.x, mPosition.x+dx, pScale);
-		pPoint.y = Math::Lerp(pPoint.y, mPosition.y+dy, pScale);
+		dx *= new_linear_xy_distance_scale*outer_radius_;
+		dy *= new_linear_xy_distance_scale*outer_radius_;
+		point.x = Math::Lerp(point.x, position_.x+dx, scale);
+		point.y = Math::Lerp(point.y, position_.y+dy, scale);
 	}
 	// Recalculate dz with the new vertical angle from our vector (dx, dy).
-	// We don't scale it up by mOuterRadius (to make it a perfect hemisphere),
-	// but instead by mAmplitude so that its size can be user controlled.
-	dz = mAmplitude*::sin(lBeta);
+	// We don't scale it up by outer_radius_ (to make it a perfect hemisphere),
+	// but instead by amplitude_ so that its size can be user controlled.
+	dz = amplitude_*::sin(beta);
 
-	pPoint.z += dz*pScale;
+	point.z += dz*scale;
 }
 
 
 
-TerrainDuneFunction::TerrainDuneFunction(float pWidthProportion, float pCurvature, float pAmplitude,
-	const vec2& pPosition, float pInnerRadius, float pOuterRadius):
-	TerrainFunction(pAmplitude, pPosition, pInnerRadius, pOuterRadius),
-	mProfileSpline(0),
-	mWidthProportion(pWidthProportion)
-{
-	vec2* lCoordinates = new vec2[10];
-	float* lTimes = new float[11];
-	lTimes[0] = -1.0f;
-	lCoordinates[0].x = -1;
-	lCoordinates[0].y = 0;
-	lTimes[1] = -0.5f;
-	lCoordinates[1].x = -0.1f;
-	lCoordinates[1].y = 0;
-	lTimes[2] = -0.35f;
-	lCoordinates[2].x = 0.4f*pCurvature;
-	lCoordinates[2].y = -0.25f;
-	lTimes[3] = -0.2f;
-	lCoordinates[3].x = -0.05f*pCurvature;
-	lCoordinates[3].y = 0.41f+pCurvature*0.4f;
-	lTimes[4] = -0.1f;
-	lCoordinates[4].x = -0.18f*pCurvature;
-	lCoordinates[4].y = 0.58f-pCurvature*0.4f;
-	lTimes[5] = 0.0f;
-	lCoordinates[5].x = -0.3f*pCurvature;
-	lCoordinates[5].y = 0.75f;
-	lTimes[6] = 0.1f;
-	lCoordinates[6].x = 0.0f;
-	lCoordinates[6].y = 1.0f;
-	lTimes[7] = 0.2f;
-	lCoordinates[7].x = 0.2f;
-	lCoordinates[7].y = 0.3f;
-	lTimes[8] = 0.6f;
-	lCoordinates[8].x = 0.6f;
-	lCoordinates[8].y = 0.0f;
-	lTimes[9] = 0.9f;
-	lCoordinates[9].x = 1.0f;
-	lCoordinates[9].y = 0.0f;
-	lTimes[10] = 1.0f;
-	mProfileSpline = new CubicDeCasteljauSpline<vec2, float>(lCoordinates,
-		lTimes, 10, CubicDeCasteljauSpline<vec2, float>::TYPE_BSPLINE,
+TerrainDuneFunction::TerrainDuneFunction(float width_proportion, float curvature, float amplitude,
+	const vec2& position, float inner_radius, float outer_radius):
+	TerrainFunction(amplitude, position, inner_radius, outer_radius),
+	profile_spline_(0),
+	width_proportion_(width_proportion) {
+	vec2* coordinates = new vec2[10];
+	float* times = new float[11];
+	times[0] = -1.0f;
+	coordinates[0].x = -1;
+	coordinates[0].y = 0;
+	times[1] = -0.5f;
+	coordinates[1].x = -0.1f;
+	coordinates[1].y = 0;
+	times[2] = -0.35f;
+	coordinates[2].x = 0.4f*curvature;
+	coordinates[2].y = -0.25f;
+	times[3] = -0.2f;
+	coordinates[3].x = -0.05f*curvature;
+	coordinates[3].y = 0.41f+curvature*0.4f;
+	times[4] = -0.1f;
+	coordinates[4].x = -0.18f*curvature;
+	coordinates[4].y = 0.58f-curvature*0.4f;
+	times[5] = 0.0f;
+	coordinates[5].x = -0.3f*curvature;
+	coordinates[5].y = 0.75f;
+	times[6] = 0.1f;
+	coordinates[6].x = 0.0f;
+	coordinates[6].y = 1.0f;
+	times[7] = 0.2f;
+	coordinates[7].x = 0.2f;
+	coordinates[7].y = 0.3f;
+	times[8] = 0.6f;
+	coordinates[8].x = 0.6f;
+	coordinates[8].y = 0.0f;
+	times[9] = 0.9f;
+	coordinates[9].x = 1.0f;
+	coordinates[9].y = 0.0f;
+	times[10] = 1.0f;
+	profile_spline_ = new CubicDeCasteljauSpline<vec2, float>(coordinates,
+		times, 10, CubicDeCasteljauSpline<vec2, float>::kTypeBspline,
 		TAKE_OWNERSHIP);
-	mProfileSpline->StartInterpolation(-1);
+	profile_spline_->StartInterpolation(-1);
 }
 
-TerrainDuneFunction::~TerrainDuneFunction()
-{
-	delete (mProfileSpline);
-	mProfileSpline = 0;
+TerrainDuneFunction::~TerrainDuneFunction() {
+	delete (profile_spline_);
+	profile_spline_ = 0;
 }
 
-void TerrainDuneFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float, vec3& pPoint) const
-{
-	mProfileSpline->GotoAbsoluteTime(pRelativeNormalizedX);
+void TerrainDuneFunction::AddPoint(float relative_normalized_x, float relative_normalized_y, float scale, float, vec3& point) const {
+	profile_spline_->GotoAbsoluteTime(relative_normalized_x);
 	vec2 d;
 	// Create a small bulge on the edges.
-	const float t = 3*pRelativeNormalizedX;
-	const float bz = ::exp(-t*t/mWidthProportion)*0.5f;
+	const float t = 3*relative_normalized_x;
+	const float bz = ::exp(-t*t/width_proportion_)*0.5f;
 
-	float lYScale = ::fabs(pRelativeNormalizedY)*mOuterRadius;
-	if (lYScale > mInnerRadius)
-	{
-		lYScale = 1-(lYScale-mInnerRadius)/(mOuterRadius-mInnerRadius);
-	}
-	else
-	{
-		lYScale = 1;
+	float y_scale = ::fabs(relative_normalized_y)*outer_radius_;
+	if (y_scale > inner_radius_) {
+		y_scale = 1-(y_scale-inner_radius_)/(outer_radius_-inner_radius_);
+	} else {
+		y_scale = 1;
 	}
 
-	d = mProfileSpline->GetValue();
-	if (lYScale < 0.5f)
-	{
-		d.x = Math::Lerp(pRelativeNormalizedX, d.x, lYScale*2);
-		d.y = bz*lYScale*2;
-	}
-	else
-	{
-		d.y = Math::Lerp(bz, d.y, (lYScale-0.5f)*2);
+	d = profile_spline_->GetValue();
+	if (y_scale < 0.5f) {
+		d.x = Math::Lerp(relative_normalized_x, d.x, y_scale*2);
+		d.y = bz*y_scale*2;
+	} else {
+		d.y = Math::Lerp(bz, d.y, (y_scale-0.5f)*2);
 	}
 
-	pPoint.x = Math::Lerp(pPoint.x, mPosition.x+d.x*mOuterRadius, pScale);
-	pPoint.z += d.y*mAmplitude*pScale;
+	point.x = Math::Lerp(point.x, position_.x+d.x*outer_radius_, scale);
+	point.z += d.y*amplitude_*scale;
 }
 
 
 
-TerrainDecorator::TerrainDecorator(TerrainFunction* pFunction):
-	mFunction(pFunction)
-{
+TerrainDecorator::TerrainDecorator(TerrainFunction* function):
+	function_(function) {
 }
 
-TerrainDecorator::~TerrainDecorator()
-{
-	mFunction = 0;
+TerrainDecorator::~TerrainDecorator() {
+	function_ = 0;
 }
 
 
 
-TerrainAmplitudeFunction::TerrainAmplitudeFunction(const float* pAmplitudeVector, unsigned pAmplitudeVectorLength, TerrainFunction* pFunction):
-	TerrainFunction(1.0, pFunction->GetPosition(), pFunction->GetInnerRadius(), pFunction->GetOuterRadius()),
-	TerrainDecorator(pFunction),
-	mAmplitudeSpline(0)
-{
-	deb_assert(pAmplitudeVectorLength >= 2);
+TerrainAmplitudeFunction::TerrainAmplitudeFunction(const float* amplitude_vector, unsigned amplitude_vector_length, TerrainFunction* function):
+	TerrainFunction(1.0, function->GetPosition(), function->GetInnerRadius(), function->GetOuterRadius()),
+	TerrainDecorator(function),
+	amplitude_spline_(0) {
+	deb_assert(amplitude_vector_length >= 2);
 
-	const float lTimeStep = 2.0f/(pAmplitudeVectorLength+1-1);
-	float lTime = -1;
-	float* lTimes = new float[pAmplitudeVectorLength+1];
-	for (unsigned x = 0; x < pAmplitudeVectorLength+1; ++x)
-	{
-		lTimes[x] = lTime;
-		lTime += lTimeStep;
+	const float time_step = 2.0f/(amplitude_vector_length+1-1);
+	float time = -1;
+	float* times = new float[amplitude_vector_length+1];
+	for (unsigned x = 0; x < amplitude_vector_length+1; ++x) {
+		times[x] = time;
+		time += time_step;
 	}
-	mAmplitudeSpline = new CubicDeCasteljauSpline<float, float, float>((float*)pAmplitudeVector,
-		lTimes, pAmplitudeVectorLength, CubicDeCasteljauSpline<float, float, float>::TYPE_CATMULLROM,
-		FULL_COPY);
-	delete[] (lTimes);
-	mAmplitudeSpline->StartInterpolation(-1);
+	amplitude_spline_ = new CubicDeCasteljauSpline<float, float, float>((float*)amplitude_vector,
+		times, amplitude_vector_length, CubicDeCasteljauSpline<float, float, float>::kTypeCatmullrom,
+		kFullCopy);
+	delete[] (times);
+	amplitude_spline_->StartInterpolation(-1);
 }
 
-TerrainAmplitudeFunction::~TerrainAmplitudeFunction()
-{
-	delete (mAmplitudeSpline);
-	mAmplitudeSpline = 0;
+TerrainAmplitudeFunction::~TerrainAmplitudeFunction() {
+	delete (amplitude_spline_);
+	amplitude_spline_ = 0;
 }
 
-void TerrainAmplitudeFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale,
-	float pAbsoluteXyDistance, vec3& pPoint) const
-{
-	const float oz = pPoint.z;
-	mFunction->AddPoint(pRelativeNormalizedX, pRelativeNormalizedY, pScale, pAbsoluteXyDistance, pPoint);
-	mAmplitudeSpline->GotoAbsoluteTime(pRelativeNormalizedY);
-	const float lAmplitude = mAmplitudeSpline->GetValue();
-	const float dz = pPoint.z-oz;
-	pPoint.z = oz+dz*lAmplitude;
+void TerrainAmplitudeFunction::AddPoint(float relative_normalized_x, float relative_normalized_y, float scale,
+	float absolute_xy_distance, vec3& point) const {
+	const float oz = point.z;
+	function_->AddPoint(relative_normalized_x, relative_normalized_y, scale, absolute_xy_distance, point);
+	amplitude_spline_->GotoAbsoluteTime(relative_normalized_y);
+	const float _amplitude = amplitude_spline_->GetValue();
+	const float dz = point.z-oz;
+	point.z = oz+dz*_amplitude;
 }
 
 
 
-TerrainWidthFunction::TerrainWidthFunction(float pWidthFactor, TerrainFunction* pFunction):
-	TerrainFunction(1.0, pFunction->GetPosition(), pFunction->GetInnerRadius(), pFunction->GetOuterRadius()),
-	TerrainDecorator(pFunction),
-	mWidthFactor(pWidthFactor)
-{
+TerrainWidthFunction::TerrainWidthFunction(float width_factor, TerrainFunction* function):
+	TerrainFunction(1.0, function->GetPosition(), function->GetInnerRadius(), function->GetOuterRadius()),
+	TerrainDecorator(function),
+	width_factor_(width_factor) {
 }
 
-void TerrainWidthFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale,
-	float pAbsoluteXyDistance, vec3& pPoint) const
-{
-	const float rx = pRelativeNormalizedX/mWidthFactor;
-	pAbsoluteXyDistance = ::sqrt(rx*rx+pRelativeNormalizedY*pRelativeNormalizedY)*mOuterRadius;
-	if (pAbsoluteXyDistance >= mOuterRadius)
-	{
+void TerrainWidthFunction::AddPoint(float relative_normalized_x, float relative_normalized_y, float scale,
+	float absolute_xy_distance, vec3& point) const {
+	const float rx = relative_normalized_x/width_factor_;
+	absolute_xy_distance = ::sqrt(rx*rx+relative_normalized_y*relative_normalized_y)*outer_radius_;
+	if (absolute_xy_distance >= outer_radius_) {
 		return;	// TRICKY: optimization by quick return.
+	} else if (absolute_xy_distance <= inner_radius_) {
+		scale = 1;
+	} else {
+		scale = 1-(absolute_xy_distance-inner_radius_)/(outer_radius_-inner_radius_);
 	}
-	else if (pAbsoluteXyDistance <= mInnerRadius)
-	{
-		pScale = 1;
+	float mx = point.x;
+	point.x = position_.x+(point.x-position_.x)/width_factor_;
+	mx -= point.x;
+	function_->AddPoint(rx, relative_normalized_y, scale, absolute_xy_distance, point);
+	point.x += mx;
+	//point.x = (point.x-lOriginalPoint.x)*width_factor_*scale;
+	//point.x = Math::Lerp(point.x, (point.x-position_.x)*width_factor_ + position_.x, scale);
+}
+
+
+TerrainPushFunction::TerrainPushFunction(const float* push_vector, unsigned push_vector_length, TerrainFunction* function):
+	TerrainFunction(1.0, function->GetPosition(), function->GetInnerRadius(), function->GetOuterRadius()),
+	TerrainDecorator(function),
+	push_spline_(0) {
+	deb_assert(push_vector_length >= 2);
+
+	const float time_step = 2.0f/(push_vector_length+1-1);
+	float time = -1;
+	float* times = new float[push_vector_length+1];
+	for (unsigned x = 0; x < push_vector_length+1; ++x) {
+		times[x] = time;
+		time += time_step;
 	}
-	else
-	{
-		pScale = 1-(pAbsoluteXyDistance-mInnerRadius)/(mOuterRadius-mInnerRadius);
-	}
-	float mx = pPoint.x;
-	pPoint.x = mPosition.x+(pPoint.x-mPosition.x)/mWidthFactor;
-	mx -= pPoint.x;
-	mFunction->AddPoint(rx, pRelativeNormalizedY, pScale, pAbsoluteXyDistance, pPoint);
-	pPoint.x += mx;
-	//pPoint.x = (pPoint.x-lOriginalPoint.x)*mWidthFactor*pScale;
-	//pPoint.x = Math::Lerp(pPoint.x, (pPoint.x-mPosition.x)*mWidthFactor + mPosition.x, pScale);
+	push_spline_ = new CubicDeCasteljauSpline<float, float, float>((float*)push_vector,
+		times, push_vector_length, CubicDeCasteljauSpline<float, float, float>::kTypeCatmullrom,
+		kFullCopy);
+	delete[] (times);
+	push_spline_->StartInterpolation(-1);
 }
 
-
-TerrainPushFunction::TerrainPushFunction(const float* pPushVector, unsigned pPushVectorLength, TerrainFunction* pFunction):
-	TerrainFunction(1.0, pFunction->GetPosition(), pFunction->GetInnerRadius(), pFunction->GetOuterRadius()),
-	TerrainDecorator(pFunction),
-	mPushSpline(0)
-{
-	deb_assert(pPushVectorLength >= 2);
-
-	const float lTimeStep = 2.0f/(pPushVectorLength+1-1);
-	float lTime = -1;
-	float* lTimes = new float[pPushVectorLength+1];
-	for (unsigned x = 0; x < pPushVectorLength+1; ++x)
-	{
-		lTimes[x] = lTime;
-		lTime += lTimeStep;
-	}
-	mPushSpline = new CubicDeCasteljauSpline<float, float, float>((float*)pPushVector,
-		lTimes, pPushVectorLength, CubicDeCasteljauSpline<float, float, float>::TYPE_CATMULLROM,
-		FULL_COPY);
-	delete[] (lTimes);
-	mPushSpline->StartInterpolation(-1);
+TerrainPushFunction::~TerrainPushFunction() {
+	delete (push_spline_);
+	push_spline_ = 0;
 }
 
-TerrainPushFunction::~TerrainPushFunction()
-{
-	delete (mPushSpline);
-	mPushSpline = 0;
-}
-
-void TerrainPushFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale,
-	float pAbsoluteXyDistance, vec3& pPoint) const
-{
-	mFunction->AddPoint(pRelativeNormalizedX, pRelativeNormalizedY, pScale, pAbsoluteXyDistance, pPoint);
-	mPushSpline->GotoAbsoluteTime(pRelativeNormalizedY);
-	const float lPush = mPushSpline->GetValue();
-	pPoint.x += lPush*pScale;
+void TerrainPushFunction::AddPoint(float relative_normalized_x, float relative_normalized_y, float scale,
+	float absolute_xy_distance, vec3& point) const {
+	function_->AddPoint(relative_normalized_x, relative_normalized_y, scale, absolute_xy_distance, point);
+	push_spline_->GotoAbsoluteTime(relative_normalized_y);
+	const float push = push_spline_->GetValue();
+	point.x += push*scale;
 }
 
 
 
-TerrainRotateFunction::TerrainRotateFunction(float pAngle, TerrainFunction* pFunction):
-	TerrainFunction(1.0, pFunction->GetPosition(), pFunction->GetInnerRadius(), pFunction->GetOuterRadius()),
-	TerrainDecorator(pFunction),
-	mAngle(pAngle)
-{
+TerrainRotateFunction::TerrainRotateFunction(float angle, TerrainFunction* function):
+	TerrainFunction(1.0, function->GetPosition(), function->GetInnerRadius(), function->GetOuterRadius()),
+	TerrainDecorator(function),
+	angle_(angle) {
 }
 
-void TerrainRotateFunction::AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale,
-	float pAbsoluteXyDistance, vec3& pPoint) const
-{
+void TerrainRotateFunction::AddPoint(float relative_normalized_x, float relative_normalized_y, float scale,
+	float absolute_xy_distance, vec3& point) const {
 	// TODO: optimize by using matrices for rotation.
-	const float lNewRelativeNormalizedX = ::cos(-mAngle)*pRelativeNormalizedX - ::sin(-mAngle)*pRelativeNormalizedY;
-	const float lNewRelativeNormalizedY = ::sin(-mAngle)*pRelativeNormalizedX + ::cos(-mAngle)*pRelativeNormalizedY;
-	vec3 lRotatePoint(lNewRelativeNormalizedX, lNewRelativeNormalizedY, pPoint.z/mOuterRadius);
-	lRotatePoint *= mOuterRadius;
-	lRotatePoint.x += mPosition.x;
-	lRotatePoint.y += mPosition.y;
-	mFunction->AddPoint(lNewRelativeNormalizedX, lNewRelativeNormalizedY, pScale, pAbsoluteXyDistance, lRotatePoint);
-	lRotatePoint.x -= mPosition.x;
-	lRotatePoint.y -= mPosition.y;
-	pPoint.x = ::cos(mAngle)*lRotatePoint.x - ::sin(mAngle)*lRotatePoint.y + mPosition.x;
-	pPoint.y = ::sin(mAngle)*lRotatePoint.x + ::cos(mAngle)*lRotatePoint.y + mPosition.y;
-	pPoint.z = lRotatePoint.z;
+	const float new_relative_normalized_x = ::cos(-angle_)*relative_normalized_x - ::sin(-angle_)*relative_normalized_y;
+	const float new_relative_normalized_y = ::sin(-angle_)*relative_normalized_x + ::cos(-angle_)*relative_normalized_y;
+	vec3 rotate_point(new_relative_normalized_x, new_relative_normalized_y, point.z/outer_radius_);
+	rotate_point *= outer_radius_;
+	rotate_point.x += position_.x;
+	rotate_point.y += position_.y;
+	function_->AddPoint(new_relative_normalized_x, new_relative_normalized_y, scale, absolute_xy_distance, rotate_point);
+	rotate_point.x -= position_.x;
+	rotate_point.y -= position_.y;
+	point.x = ::cos(angle_)*rotate_point.x - ::sin(angle_)*rotate_point.y + position_.x;
+	point.y = ::sin(angle_)*rotate_point.x + ::cos(angle_)*rotate_point.y + position_.y;
+	point.z = rotate_point.z;
 }
 
 

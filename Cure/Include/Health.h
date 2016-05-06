@@ -1,13 +1,12 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #pragma once
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 class ContextObject;
@@ -15,14 +14,13 @@ class FloatAttribute;
 
 
 
-class Health
-{
+class Health {
 public:
-	static FloatAttribute* GetAttribute(const ContextObject* pObject);
-	static float Get(const ContextObject* pObject, float pDefault = 0);
-	static float Add(ContextObject* pObject, float pDelta, bool pLowLimit);
-	static void Set(ContextObject* pObject, float pValue);
-	static void DeleteAttribute(ContextObject* pObject);
+	static FloatAttribute* GetAttribute(const ContextObject* object);
+	static float Get(const ContextObject* object, float _default = 0);
+	static float Add(ContextObject* object, float delta, bool low_limit);
+	static void Set(ContextObject* object, float value);
+	static void DeleteAttribute(ContextObject* object);
 };
 
 

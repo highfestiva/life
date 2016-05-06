@@ -1,35 +1,33 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiCppContextObject.h"
+#include "uicppcontextobject.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-class Sound: public CppContextObject
-{
+class Sound: public CppContextObject {
 public:
 	typedef CppContextObject Parent;
 
-	Sound(Cure::ResourceManager* pResourceManager, const str& pSoundName, GameUiManager* pUiManager);
+	Sound(cure::ResourceManager* resource_manager, const str& sound_name, GameUiManager* ui_manager);
 	virtual ~Sound();
 
 private:
-	virtual void SetManager(Cure::ContextManager* pManager);
+	virtual void SetManager(cure::ContextManager* manager);
 
-	void LoadPlaySound2d(UserSound2dResource* pSoundResource);
+	void LoadPlaySound2d(UserSound2dResource* sound_resource);
 	void OnTick();
 
-	UiCure::UserSound2dResource* mSoundResource;
+	UiCure::UserSound2dResource* sound_resource_;
 
 	logclass();
 };

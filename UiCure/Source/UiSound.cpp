@@ -1,70 +1,60 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiSound.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../Include/UiGameUiManager.h"
+#include "../include/uisound.h"
+#include "../../cure/include/contextmanager.h"
+#include "../include/uigameuimanager.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-Sound::Sound(Cure::ResourceManager* pResourceManager, const str& pSoundName, GameUiManager* pUiManager):
-	Parent(pResourceManager, "Sound", pUiManager)
-{
-	mSoundResource = new UiCure::UserSound2dResource(GetUiManager(), UiLepra::SoundManager::LOOP_NONE);
-	mSoundResource->Load(GetResourceManager(), pSoundName,
+Sound::Sound(cure::ResourceManager* resource_manager, const str& sound_name, GameUiManager* ui_manager):
+	Parent(resource_manager, "Sound", ui_manager) {
+	sound_resource_ = new UiCure::UserSound2dResource(GetUiManager(), uilepra::SoundManager::kLoopNone);
+	sound_resource_->Load(GetResourceManager(), sound_name,
 		UiCure::UserSound2dResource::TypeLoadCallback(this, &Sound::LoadPlaySound2d));
 }
 
-Sound::~Sound()
-{
-	delete mSoundResource;
-	mSoundResource = 0;
+Sound::~Sound() {
+	delete sound_resource_;
+	sound_resource_ = 0;
 }
 
 
 
-void Sound::SetManager(Cure::ContextManager* pManager)
-{
-	Parent::SetManager(pManager);
+void Sound::SetManager(cure::ContextManager* manager) {
+	Parent::SetManager(manager);
 	GetManager()->EnableTickCallback(this);
 }
 
-void Sound::LoadPlaySound2d(UserSound2dResource* pSoundResource)
-{
-	deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
-	if (pSoundResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
-	{
+void Sound::LoadPlaySound2d(UserSound2dResource* sound_resource) {
+	deb_assert(sound_resource->GetLoadState() == cure::kResourceLoadComplete);
+	if (sound_resource->GetLoadState() != cure::kResourceLoadComplete) {
 		return;
 	}
-	mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), 0.7f, 1.0);
+	ui_manager_->GetSoundManager()->Play(sound_resource->GetData(), 0.7f, 1.0);
 }
 
-void Sound::OnTick()
-{
-	if (mSoundResource->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS &&
-		mSoundResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
-	{
+void Sound::OnTick() {
+	if (sound_resource_->GetLoadState() != cure::kResourceLoadInProgress &&
+		sound_resource_->GetLoadState() != cure::kResourceLoadComplete) {
 		GetManager()->PostKillObject(GetInstanceId());
-	}
-	else if (mSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
-		!mUiManager->GetSoundManager()->IsPlaying(mSoundResource->GetData()))
-	{
+	} else if (sound_resource_->GetLoadState() == cure::kResourceLoadComplete &&
+		!ui_manager_->GetSoundManager()->IsPlaying(sound_resource_->GetData())) {
 		GetManager()->PostKillObject(GetInstanceId());
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Sound);
+loginstance(kGameContextCpp, Sound);
 
 
 

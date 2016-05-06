@@ -1,55 +1,48 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "HoverTankServerMessageProcessor.h"
-#include "../../Life/LifeServer/GameServerManager.h"
-#include "GameServerLogic.h"
-#include "HoverTankServerDelegate.h"
+#include "hovertankservermessageprocessor.h"
+#include "../../life/lifeserver/gameservermanager.h"
+#include "gameserverlogic.h"
+#include "hovertankserverdelegate.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-HoverTankServerMessageProcessor::HoverTankServerMessageProcessor(Life::GameServerManager* pGameServerManager, GameServerLogic* pLogic):
-	Parent(pGameServerManager),
-	mLogic(pLogic)
-{
+HoverTankServerMessageProcessor::HoverTankServerMessageProcessor(life::GameServerManager* game_server_manager, GameServerLogic* logic):
+	Parent(game_server_manager),
+	logic_(logic) {
 }
 
-HoverTankServerMessageProcessor::~HoverTankServerMessageProcessor()
-{
-	mLogic = 0;
+HoverTankServerMessageProcessor::~HoverTankServerMessageProcessor() {
+	logic_ = 0;
 }
 
 
 
-void HoverTankServerMessageProcessor::ProcessNumber(Life::Client* pClient, Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat)
-{
-	switch (pType)
-	{
-		case Cure::MessageNumber::INFO_TOOL_0:
-		{
-			Cure::ContextObject* lAvatar = mGameServerManager->GetContext()->GetObject(pClient->GetAvatarId());
-			if (lAvatar)
-			{
-				mLogic->Shoot(lAvatar, (int)pFloat);
+void HoverTankServerMessageProcessor::ProcessNumber(life::Client* client, cure::MessageNumber::InfoType type, int32 integer, float32 f) {
+	switch (type) {
+		case cure::MessageNumber::kInfoTool0: {
+			cure::ContextObject* avatar = game_server_manager_->GetContext()->GetObject(client->GetAvatarId());
+			if (avatar) {
+				logic_->Shoot(avatar, (int)f);
 			}
 		}
 		return;
 	}
-	Parent::ProcessNumber(pClient, pType, pInteger, pFloat);
+	Parent::ProcessNumber(client, type, integer, f);
 }
 
 
 
-loginstance(GAME, HoverTankServerMessageProcessor);
+loginstance(kGame, HoverTankServerMessageProcessor);
 
 
 

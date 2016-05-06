@@ -1,42 +1,37 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Lepra/Include/DiskFile.h"
-#include "../Tbc/Include/PhysicsEngine.h"
-#include "../Life/LifeClient/GameClientSlaveManager.h"
-#include "../Life/Launcher.h"
-#include "LoginView.h"
-#include "HoverTank.h"
-#include "Version.h"
+#include "../lepra/include/diskfile.h"
+#include "../tbc/include/physicsengine.h"
+#include "../life/lifeclient/gameclientslavemanager.h"
+#include "../life/launcher.h"
+#include "loginview.h"
+#include "hovertank.h"
+#include "version.h"
 
 
 
-namespace UiLepra
-{
-namespace Touch
-{
+namespace uilepra {
+namespace touch {
 class TouchstickInputDevice;
 }
 }
-namespace UiCure
-{
+namespace UiCure {
 class CollisionSoundManager;
 }
-namespace Life
-{
+namespace life {
 class GameClientMasterTicker;
 class Level;
 }
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
@@ -44,49 +39,48 @@ class RoadSignButton;
 
 
 
-class HoverTankManager: public Life::GameClientSlaveManager, private ClientLoginObserver, private Life::Launcher
-{
-	typedef Life::GameClientSlaveManager Parent;
+class HoverTankManager: public life::GameClientSlaveManager, private ClientLoginObserver, private life::Launcher {
+	typedef life::GameClientSlaveManager Parent;
 public:
-	HoverTankManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+	HoverTankManager(life::GameClientMasterTicker* pMaster, const cure::TimeManager* time,
+		cure::RuntimeVariableScope* variable_scope, cure::ResourceManager* resource_manager,
+		UiCure::GameUiManager* ui_manager, int slave_index, const PixelRect& render_area);
 	virtual ~HoverTankManager();
 	virtual void LoadSettings();
 	virtual void SaveSettings();
-	virtual void SetRenderArea(const PixelRect& pRenderArea);
+	virtual void SetRenderArea(const PixelRect& render_area);
 	virtual bool Open();
 	virtual void Close();
 	virtual void SetIsQuitting();
-	virtual void SetFade(float pFadeAmount);
+	virtual void SetFade(float fade_amount);
 
 	virtual bool Paint();
 
-	virtual void RequestLogin(const str& pServerAddress, const Cure::LoginId& pLoginToken);
+	virtual void RequestLogin(const str& server_address, const cure::LoginId& login_token);
 	virtual void OnLoginSuccess();
 
-	void SelectAvatar(const Cure::UserAccount::AvatarId& pAvatarId);
-	void AddLocalObjects(std::unordered_set<Cure::GameObjectId>& pLocalObjectSet);
-	virtual bool IsObjectRelevant(const vec3& pPosition, float pDistance) const;
-	Cure::GameObjectId GetAvatarInstanceId() const;
+	void SelectAvatar(const cure::UserAccount::AvatarId& avatar_id);
+	void AddLocalObjects(std::unordered_set<cure::GameObjectId>& local_object_set);
+	virtual bool IsObjectRelevant(const vec3& position, float distance) const;
+	cure::GameObjectId GetAvatarInstanceId() const;
 
-	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
+	bool SetAvatarEnginePower(unsigned aspect, float power);
 
-	virtual void Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength);
-	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
+	virtual void Detonate(cure::ContextObject* explosive, const tbc::ChunkyBoneGeometry* explosive_geometry, const vec3& position, const vec3& velocity, const vec3& normal, float strength);
+	virtual void OnBulletHit(cure::ContextObject* bullet, cure::ContextObject* hit_object);
 
 protected:
-	typedef std::unordered_map<Cure::GameObjectId, RoadSignButton*> RoadSignMap;
-	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
+	typedef std::unordered_map<cure::GameObjectId, RoadSignButton*> RoadSignMap;
+	typedef uilepra::touch::TouchstickInputDevice Touchstick;
 
-	Cure::RuntimeVariableScope* GetVariableScope() const;
+	cure::RuntimeVariableScope* GetVariableScope() const;
 
 	virtual bool Reset();
 	virtual void CreateLoginView();
 	virtual bool InitializeUniverse();
 	void CloseLoginGui();
 	void ClearRoadSigns();
-	void SetRoadSignsVisible(bool pVisible);
+	void SetRoadSignsVisible(bool visible);
 
 	virtual void ScriptPhysicsTick();
 	virtual void MoveCamera();
@@ -94,89 +88,88 @@ protected:
 
 	void UpdateTouchstickPlacement();
 	virtual void TickUiInput();
-	bool SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower);
+	bool SetAvatarEnginePower(cure::ContextObject* avatar, unsigned aspect, float power);
 	virtual void TickUiUpdate();
-	virtual bool UpdateMassObjects(const vec3& pPosition);
-	virtual void SetLocalRender(bool pRender);
-	void SetMassRender(bool pRender);
+	virtual bool UpdateMassObjects(const vec3& position);
+	virtual void SetLocalRender(bool render);
+	void SetMassRender(bool render);
 
-	virtual void ProcessNetworkInputMessage(Cure::Message* pMessage);
-	virtual void ProcessNetworkStatusMessage(Cure::MessageStatus* pMessage);
-	virtual void ProcessNumber(Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat);
-	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
-	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
-		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
+	virtual void ProcessNetworkInputMessage(cure::Message* message);
+	virtual void ProcessNetworkStatusMessage(cure::MessageStatus* message);
+	virtual void ProcessNumber(cure::MessageNumber::InfoType type, int32 integer, float32 f);
+	virtual cure::ContextObject* CreateContextObject(const str& class_id) const;
+	virtual void OnLoadCompleted(cure::ContextObject* object, bool ok);
+	void OnCollision(const vec3& force, const vec3& torque, const vec3& position,
+		cure::ContextObject* object1, cure::ContextObject* object2,
+		tbc::PhysicsManager::BodyID body1_id, tbc::PhysicsManager::BodyID body2_id);
 
-	void OnFireButton(UiTbc::Button*);
+	void OnFireButton(uitbc::Button*);
 	void AvatarShoot();
-	void Shoot(Cure::ContextObject* pAvatar, int pWeapon);
+	void Shoot(cure::ContextObject* avatar, int weapon);
 
 	void CancelLogin();
-	void OnVehicleSelect(UiTbc::Button* pButton);
-	void OnAvatarSelect(UiTbc::Button* pButton);
+	void OnVehicleSelect(uitbc::Button* button);
+	void OnAvatarSelect(uitbc::Button* button);
 	void DropAvatar();
 
-	void DrawStick(Touchstick* pStick);
+	void DrawStick(Touchstick* stick);
 	void DrawScore();
 
-	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
+	virtual void UpdateCameraPosition(bool update_mic_position);
 	quat GetCameraQuaternion() const;
 
-	UiCure::CollisionSoundManager* mCollisionSoundManager;
+	UiCure::CollisionSoundManager* collision_sound_manager_;
 
 	// Network transmission and keepalive info.
-	Cure::GameObjectId mAvatarId;
-	bool mHadAvatar;
-	bool mUpdateCameraForAvatar;
-	Life::Options::Steering mLastSteering;
-	float mCamRotateExtra;
-	int mActiveWeapon;
-	HiResTimer mFireTimeout;
+	cure::GameObjectId avatar_id_;
+	bool had_avatar_;
+	bool update_camera_for_avatar_;
+	life::options::Steering last_steering_;
+	float cam_rotate_extra_;
+	int active_weapon_;
+	HiResTimer fire_timeout_;
 
-	RoadSignButton* mPickVehicleButton;
-	int mAvatarInvisibleCount;
-	int mRoadSignIndex;
-	RoadSignMap mRoadSignMap;
+	RoadSignButton* pick_vehicle_button_;
+	int avatar_invisible_count_;
+	int road_sign_index_;
+	RoadSignMap road_sign_map_;
 
-	Cure::GameObjectId mLevelId;
-	Life::Level* mLevel;
-	ObjectArray mMassObjectArray;
-	Cure::ContextObject* mSun;
-	std::vector<Cure::ContextObject*> mCloudArray;
+	cure::GameObjectId level_id_;
+	life::Level* level_;
+	ObjectArray mass_object_array_;
+	cure::ContextObject* sun_;
+	std::vector<cure::ContextObject*> cloud_array_;
 
-	Cure::GameObjectId mScoreInfoId;
+	cure::GameObjectId score_info_id_;
 
-	vec3 mCameraPosition;
-	vec3 mCameraPreviousPosition;
-	vec3 mCameraUp;
-	vec3 mCameraOrientation;
-	vec3 mCameraPivotPosition;
-	vec3 mCameraPivotVelocity;
-	float mCameraTargetXyDistance;
-	float mCameraMaxSpeed;
-	float mCameraMouseAngle;
-	HiResTimer mCameraMouseAngleTimer;
-	float mCameraTargetAngle;
-	float mCameraTargetAngleFactor;
-	vec3 mMicrophoneSpeed;
-	UiTbc::Window* mLoginWindow;
+	vec3 camera_position_;
+	vec3 camera_previous_position_;
+	vec3 camera_up_;
+	vec3 camera_orientation_;
+	vec3 camera_pivot_position_;
+	vec3 camera_pivot_velocity_;
+	float camera_target_xy_distance_;
+	float camera_max_speed_;
+	float camera_mouse_angle_;
+	HiResTimer camera_mouse_angle_timer_;
+	float camera_target_angle_;
+	float camera_target_angle_factor_;
+	vec3 microphone_speed_;
+	uitbc::Window* login_window_;
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	UiTbc::Button* mFireButton;
-#endif // Touch or emulated touch.
+	uitbc::Button* fire_button_;
+#endif // touch or emulated touch.
 
-	HiResTimer mTouchstickTimer;
-	Touchstick* mStickLeft;
-	Touchstick* mStickRight;
+	HiResTimer touchstick_timer_;
+	Touchstick* stick_left_;
+	Touchstick* stick_right_;
 
-	struct EnginePower	// Used for recording vechile steering playback.
-	{
-		float mPower;
+	struct EnginePower {	// Used for recording vechile steering playback.
+		float power_;
 	};
-	DiskFile mEnginePlaybackFile;	// Used for recording vechile steering playback.
-	float mEnginePlaybackTime;	// Used for recording vechile steering playback.
-	EnginePower mEnginePowerShadow[Tbc::PhysicsEngine::ASPECT_COUNT];	// Used for recording vechile steering playback.
+	DiskFile engine_playback_file_;	// Used for recording vechile steering playback.
+	float engine_playback_time_;	// Used for recording vechile steering playback.
+	EnginePower engine_power_shadow_[tbc::PhysicsEngine::kAspectCount];	// Used for recording vechile steering playback.
 
 	logclass();
 };

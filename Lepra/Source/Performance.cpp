@@ -5,292 +5,236 @@
 
 
 #include "pch.h"
-#include "../Include/Math.h"
-#include "../Include/Performance.h"
+#include "../include/math.h"
+#include "../include/performance.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-PerformanceData::PerformanceData()
-{
+PerformanceData::PerformanceData() {
 	Clear();
 }
 
-void PerformanceData::Clear()
-{
-	mFirstTime = true;
-	mTimeOfLastMeasure = 0;
+void PerformanceData::Clear() {
+	first_time_ = true;
+	time_of_last_measure_ = 0;
 	Set(0, 0, 0);
 }
 
-void PerformanceData::Set(double pMinimum, double pThis, double pMaximum)
-{
+void PerformanceData::Set(double minimum, double value, double maximum) {
 	ResetHitCount();
-	mMinimum = pMinimum;
-	mLast = pThis;
-	mSlidingAverage = pThis;
-	mMaximum = pMaximum;
+	minimum_ = minimum;
+	last_ = value;
+	sliding_average_ = value;
+	maximum_ = maximum;
 }
 
-void PerformanceData::Append(double pPeriodValue, double pTimeOfLastMeasure)
-{
-	++mHitCount;
-	mTimeOfLastMeasure = pTimeOfLastMeasure;
-	if (mFirstTime)
-	{
-		mFirstTime = false;
-		Set(pPeriodValue, pPeriodValue, pPeriodValue);
-	}
-	else
-	{
-		if (pPeriodValue < mMinimum)
-		{
-			mMinimum = pPeriodValue;
-		}
-		else if (pPeriodValue > mMaximum)
-		{
-			mMaximum = pPeriodValue;
-		}
-		else
-		{
+void PerformanceData::Append(double period_value, double time_of_last_measure) {
+	++hit_count_;
+	time_of_last_measure_ = time_of_last_measure;
+	if (first_time_) {
+		first_time_ = false;
+		Set(period_value, period_value, period_value);
+	} else {
+		if (period_value < minimum_) {
+			minimum_ = period_value;
+		} else if (period_value > maximum_) {
+			maximum_ = period_value;
+		} else {
 			// Close the gap between min and max (equalizer style) so the
 			// fluctuation has some relevance even after startup.
-			const double lStep = (mMaximum-mMinimum) * 0.001;
-			mMinimum += lStep;
-			mMaximum -= lStep;
+			const double step = (maximum_-minimum_) * 0.001;
+			minimum_ += step;
+			maximum_ -= step;
 		}
 
-		mLast = pPeriodValue;
-		mSlidingAverage = Math::Lerp(mSlidingAverage, mLast, 0.05);
+		last_ = period_value;
+		sliding_average_ = Math::Lerp(sliding_average_, last_, 0.05);
 	}
 }
 
-void PerformanceData::ResetHitCount()
-{
-	mHitCount = 0;
+void PerformanceData::ResetHitCount() {
+	hit_count_ = 0;
 }
 
-int PerformanceData::GetHitCount() const
-{
-	return mHitCount;
+int PerformanceData::GetHitCount() const {
+	return hit_count_;
 }
 
-double PerformanceData::GetTimeOfLastMeasure() const
-{
-	return (mTimeOfLastMeasure);
+double PerformanceData::GetTimeOfLastMeasure() const {
+	return (time_of_last_measure_);
 }
 
-double PerformanceData::GetMinimum() const
-{
-	return (mMinimum);
+double PerformanceData::GetMinimum() const {
+	return (minimum_);
 }
 
-double PerformanceData::GetLast() const
-{
-	return (mLast);
+double PerformanceData::GetLast() const {
+	return (last_);
 }
 
-double PerformanceData::GetSlidingAverage() const
-{
-	return (mSlidingAverage);
+double PerformanceData::GetSlidingAverage() const {
+	return (sliding_average_);
 }
 
-double PerformanceData::GetMaximum() const
-{
-	return (mMaximum);
+double PerformanceData::GetMaximum() const {
+	return (maximum_);
 }
 
-double PerformanceData::GetRangeFactor() const
-{
-	if (mMinimum)
-	{
-		return ((mMaximum-mMinimum)/mMinimum);
+double PerformanceData::GetRangeFactor() const {
+	if (minimum_) {
+		return ((maximum_-minimum_)/minimum_);
 	}
 	return (0);
 }
 
 
 
-ScopePerformanceData* ScopePerformanceData::Insert(const str& pName, size_t pHash)
-{
-	ScopePerformanceData* lParent = GetActive();
-	if (!lParent)
-	{
-		ScopePerformanceData* lRoot = new ScopePerformanceData(0, pName, pHash);
-		AddRoot(lRoot);
-		SetActive(lRoot);
-		return (lRoot);
+ScopePerformanceData* ScopePerformanceData::Insert(const str& name, size_t hash) {
+	ScopePerformanceData* _parent = GetActive();
+	if (!_parent) {
+		ScopePerformanceData* root = new ScopePerformanceData(0, name, hash);
+		AddRoot(root);
+		SetActive(root);
+		return (root);
 	}
 	// Check if we're root and being reactivated, otherwise it's plain ol' recursion.
-	if (lParent->mHash == pHash && lParent->mParent == 0)
-	{
-		SetActive(lParent);
-		return (lParent);
+	if (_parent->hash_ == hash && _parent->parent_ == 0) {
+		SetActive(_parent);
+		return (_parent);
 	}
 
-	ScopePerformanceData* lNode;
+	ScopePerformanceData* _node;
 	{
-		ScopeSpinLock lLock(&mRootLock);
+		ScopeSpinLock lock(&root_lock_);
 		// Find self.
-		lNode = lParent->FindChild(/*pName,*/ pHash);
-		if (!lNode)
-		{
+		_node = _parent->FindChild(/*name,*/ hash);
+		if (!_node) {
 			// Not listed, so beam us up Scotty.
-			lNode = new ScopePerformanceData(lParent, pName, pHash);
-		}
-		else
-		{
-			deb_assert(lNode->GetName() == pName);
+			_node = new ScopePerformanceData(_parent, name, hash);
+		} else {
+			deb_assert(_node->GetName() == name);
 		}
 	}
-	SetActive(lNode);
-	return (lNode);
+	SetActive(_node);
+	return (_node);
 }
 
-ScopePerformanceData::ScopePerformanceData(ScopePerformanceData* pParent, const str& pName, size_t pHash):
-	mName(pName),
-	mHash(pHash),
-	mParent(pParent)
-{
-	if (mParent)
-	{
-		mParent->mChildArray.push_back(this);
+ScopePerformanceData::ScopePerformanceData(ScopePerformanceData* parent, const str& name, size_t hash):
+	name_(name),
+	hash_(hash),
+	parent_(parent) {
+	if (parent_) {
+		parent_->child_array_.push_back(this);
 	}
 }
 
-ScopePerformanceData::~ScopePerformanceData()
-{
-	NodeArray::const_iterator x = mChildArray.begin();
-	for (; x != mChildArray.end(); ++x)
-	{
+ScopePerformanceData::~ScopePerformanceData() {
+	NodeArray::const_iterator x = child_array_.begin();
+	for (; x != child_array_.end(); ++x) {
 		delete *x;
 	}
-	mChildArray.clear();
+	child_array_.clear();
 }
 
-void ScopePerformanceData::EraseAll()
-{
-	ScopeSpinLock lLock(&mRootLock);
-	mRoots.clear();
+void ScopePerformanceData::EraseAll() {
+	ScopeSpinLock lock(&root_lock_);
+	roots_.clear();
 }
 
-void ScopePerformanceData::ResetAll()
-{
-	ScopeSpinLock lLock(&mRootLock);
-	NodeArray::iterator x = mRoots.begin();
-	while (x != mRoots.end())
-	{
-		if ((*x)->GetMaximum() == 0)
-		{
+void ScopePerformanceData::ResetAll() {
+	ScopeSpinLock lock(&root_lock_);
+	NodeArray::iterator x = roots_.begin();
+	while (x != roots_.end()) {
+		if ((*x)->GetMaximum() == 0) {
 			delete *x;
-			x = mRoots.erase(x);
-		}
-		else
-		{
+			x = roots_.erase(x);
+		} else {
 			++x;
 		}
 	}
-	ResetAll(mRoots);
+	ResetAll(roots_);
 }
 
-void ScopePerformanceData::Append(double pPeriodValue, double pTimeOfLastMeasure)
-{
-	Parent::Append(pPeriodValue, pTimeOfLastMeasure);
-	if (mParent)
-	{
-		SetActive(mParent);
+void ScopePerformanceData::Append(double period_value, double time_of_last_measure) {
+	Parent::Append(period_value, time_of_last_measure);
+	if (parent_) {
+		SetActive(parent_);
 	}
 }
 
-ScopePerformanceData::NodeArray ScopePerformanceData::GetRoots()
-{
-	ScopeSpinLock lLock(&mRootLock);
-	NodeArray lRootsCopy(mRoots);
-	return (lRootsCopy);
+ScopePerformanceData::NodeArray ScopePerformanceData::GetRoots() {
+	ScopeSpinLock lock(&root_lock_);
+	NodeArray roots_copy(roots_);
+	return (roots_copy);
 }
 
-const str& ScopePerformanceData::GetName() const
-{
-	return (mName);
+const str& ScopePerformanceData::GetName() const {
+	return (name_);
 }
 
-ScopePerformanceData::NodeArray ScopePerformanceData::GetChildren() const
-{
-	ScopeSpinLock lLock(&mRootLock);
-	NodeArray lChildrenCopy(mChildArray);
-	return (lChildrenCopy);
+ScopePerformanceData::NodeArray ScopePerformanceData::GetChildren() const {
+	ScopeSpinLock lock(&root_lock_);
+	NodeArray children_copy(child_array_);
+	return (children_copy);
 }
 
-const ScopePerformanceData* ScopePerformanceData::GetChild(const str& pName) const
-{
-	ScopeSpinLock lLock(&mRootLock);
-	NodeArray::const_iterator x = mChildArray.begin();
-	for (; x != mChildArray.end(); ++x)
-	{
-		if ((*x)->GetName().find(pName) != str::npos)
-		{
+const ScopePerformanceData* ScopePerformanceData::GetChild(const str& name) const {
+	ScopeSpinLock lock(&root_lock_);
+	NodeArray::const_iterator x = child_array_.begin();
+	for (; x != child_array_.end(); ++x) {
+		if ((*x)->GetName().find(name) != str::npos) {
 			return *x;
 		}
 	}
 	return 0;
 }
 
-void ScopePerformanceData::ResetAll(NodeArray& pNodes)
-{
-	NodeArray::iterator x = pNodes.begin();
-	for (; x != pNodes.end(); ++x)
-	{
+void ScopePerformanceData::ResetAll(NodeArray& nodes) {
+	NodeArray::iterator x = nodes.begin();
+	for (; x != nodes.end(); ++x) {
 		(*x)->Clear();
-		ResetAll((*x)->mChildArray);
+		ResetAll((*x)->child_array_);
 	}
 }
 
-ScopePerformanceData* ScopePerformanceData::FindChild(/*const str& pName,*/ size_t pHash) const
-{
-	NodeArray::const_iterator x = mChildArray.begin();
-	for (; x != mChildArray.end(); ++x)
-	{
-		if ((*x)->mHash == pHash)
-		{
+ScopePerformanceData* ScopePerformanceData::FindChild(/*const str& name,*/ size_t hash) const {
+	NodeArray::const_iterator x = child_array_.begin();
+	for (; x != child_array_.end(); ++x) {
+		if ((*x)->hash_ == hash) {
 			return (*x);
 		}
 	}
 	return (0);
 }
 
-void ScopePerformanceData::AddRoot(ScopePerformanceData* pNode)
-{
-	ScopeSpinLock lLock(&mRootLock);
-	mRoots.push_back(pNode);
+void ScopePerformanceData::AddRoot(ScopePerformanceData* node) {
+	ScopeSpinLock lock(&root_lock_);
+	roots_.push_back(node);
 }
 
-void ScopePerformanceData::SetActive(ScopePerformanceData* pNode)
-{
-	Thread::SetExtraData(pNode);
+void ScopePerformanceData::SetActive(ScopePerformanceData* node) {
+	Thread::SetExtraData(node);
 }
 
-ScopePerformanceData* ScopePerformanceData::GetActive()
-{
+ScopePerformanceData* ScopePerformanceData::GetActive() {
 	return ((ScopePerformanceData*)Thread::GetExtraData());
 }
 
 ScopePerformanceData::ScopePerformanceData(const ScopePerformanceData&):
-	mHash(0)
-{
+	hash_(0) {
 	deb_assert(false);
 }
 
-void ScopePerformanceData::operator=(const ScopePerformanceData&)
-{
+void ScopePerformanceData::operator=(const ScopePerformanceData&) {
 	deb_assert(false);
 }
 
-ScopePerformanceData::NodeArray ScopePerformanceData::mRoots;
-SpinLock ScopePerformanceData::mRootLock;
+ScopePerformanceData::NodeArray ScopePerformanceData::roots_;
+SpinLock ScopePerformanceData::root_lock_;
 
 
 

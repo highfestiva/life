@@ -32,7 +32,7 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../lepra/include/lepratarget.h"
 #ifdef LEPRA_IOS
 #import "CYRTextStorage.h"
 #import "CYRToken.h"
@@ -48,81 +48,71 @@
 
 #pragma mark - Initialization & Setup
 
-- (id)init
-{
-    if (self = [super init])
-    {
+- (id)init {
+    if (self = [super init]) {
         _defaultFont = [UIFont systemFontOfSize:12.0f];
         _defaultTextColor = [UIColor blackColor];
         _attributedString = [NSMutableAttributedString new];
-        
+
         _tokens = @[];
-        _regularExpressionCache = @{}.mutableCopy;
+        _regularExpressionCache = @{}.mutableCopy_;
     }
-    
+
     return self;
 }
 
 
 #pragma mark - Overrides
 
-- (void)setTokens:(NSMutableArray *)tokens
-{
+- (void)setTokens:(NSMutableArray *)tokens {
     _tokens = tokens;
-    
+
     // Clear the regular expression cache
     [self.regularExpressionCache removeAllObjects];
-    
+
     // Redraw all text
     [self update];
 }
 
-- (NSString *)string
-{
+- (NSString *)string {
     return [_attributedString string];
 }
 
-- (NSDictionary *)attributesAtIndex:(NSUInteger)location effectiveRange:(NSRangePointer)range
-{
+- (NSDictionary *)attributesAtIndex:(NSUInteger)location effectiveRange:(NSRangePointer)range {
     return [_attributedString attributesAtIndex:location effectiveRange:range];
 }
 
-- (void)replaceCharactersInRange:(NSRange)range withString:(NSString*)str
-{
+- (void)replaceCharactersInRange:(NSRange)range withString:(NSString*)str {
     [self beginEditing];
-    
+
     [_attributedString replaceCharactersInRange:range withString:str];
-    
+
     [self edited:NSTextStorageEditedCharacters | NSTextStorageEditedAttributes range:range changeInLength:str.length - range.length];
     [self endEditing];
 }
 
-- (void)setAttributes:(NSDictionary*)attrs range:(NSRange)range
-{
+- (void)setAttributes:(NSDictionary*)attrs range:(NSRange)range {
     [self beginEditing];
-    
+
     [_attributedString setAttributes:attrs range:range];
-    
+
     [self edited:NSTextStorageEditedAttributes range:range changeInLength:0];
     [self endEditing];
 }
 
--(void)processEditing
-{
+-(void)processEditing {
     [self performReplacementsForRange:[self editedRange]];
     [super processEditing];
 }
 
-- (void)performReplacementsForRange:(NSRange)changedRange
-{
+- (void)performReplacementsForRange:(NSRange)changedRange {
     NSRange extendedRange = NSUnionRange(changedRange, [[_attributedString string] lineRangeForRange:NSMakeRange(NSMaxRange(changedRange), 0)]);
-    
+
     [self applyStylesToRange:extendedRange];
 }
 
 
--(void)update
-{
+-(void)update {
     NSRange range = NSMakeRange(0, self.length);
 
     NSDictionary *attributes =
@@ -135,13 +125,11 @@
     [self applyStylesToRange:range];
 }
 
-- (void)applyStylesToRange:(NSRange)searchRange
-{
-    if (self.editedRange.location == NSNotFound)
-    {
+- (void)applyStylesToRange:(NSRange)searchRange {
+    if (self.editedRange.location == NSNotFound) {
         return;
     }
-    
+
     NSRange paragaphRange = [self.string paragraphRangeForRange: self.editedRange];
     NSRange fullRange = NSMakeRange(0, [self.string length]);
 
@@ -152,13 +140,12 @@
       NSForegroundColorAttributeName : self.defaultTextColor
      };
     [self setAttributes:attributes range:paragaphRange];
-    
-    for (CYRToken *attribute in self.tokens)
-    {
+
+    for (CYRToken *attribute in self.tokens) {
         NSRegularExpression *regex = [self expressionForDefinition:attribute.name];
-	NSRange scopeRange = [attribute.name hasPrefix:@"block_"]? fullRange : paragaphRange;
-        
-        [regex enumerateMatchesInString:self.string options:0 range:scopeRange
+	NSRange range_ = [attribute.name hasPrefix:@"block_"]? fullRange : paragaphRange;
+
+        [regex enumerateMatchesInString:self.string options:0 range:range_
 		usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop) {
 			NSRange range = result.range;
 			if (attribute.processRange) {
@@ -171,28 +158,25 @@
     }
 }
 
-- (NSRegularExpression *)expressionForDefinition:(NSString *)definition
-{
+- (NSRegularExpression *)expressionForDefinition:(NSString *)definition {
     __block CYRToken *attribute = nil;
-    
+
     [self.tokens enumerateObjectsUsingBlock:^(CYRToken *enumeratedAttribute, NSUInteger idx, BOOL *stop) {
-        if ([enumeratedAttribute.name isEqualToString:definition])
-        {
+        if ([enumeratedAttribute.name isEqualToString:definition]) {
             attribute = enumeratedAttribute;
             *stop = YES;
         }
     }];
-    
+
     NSRegularExpression *expression = self.regularExpressionCache[attribute.expression];
-    
-    if (!expression)
-    {
+
+    if (!expression) {
 	NSRegularExpressionOptions options = [attribute.name hasPrefix:@"block_"]? NSRegularExpressionDotMatchesLineSeparators : 0;
         expression = [NSRegularExpression regularExpressionWithPattern:attribute.expression
                                                                options:NSRegularExpressionCaseInsensitive|options error:nil];
         [self.regularExpressionCache setObject:expression forKey:definition];
     }
-    
+
     return expression;
 }
 

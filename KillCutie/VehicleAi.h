@@ -1,25 +1,23 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/CppContextObject.h"
-#include "Game.h"
+#include "../cure/include/cppcontextobject.h"
+#include "game.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class Elevator;
 }
 
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
@@ -27,59 +25,57 @@ class Game;
 
 
 
-class VehicleAi: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class VehicleAi: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	VehicleAi(Game* pGame);
+	VehicleAi(Game* game);
 	virtual ~VehicleAi();
 	void Init();
 
 private:
-	enum Mode
-	{
-		MODE_FIND_BEST_PATH = 1,
-		MODE_FIND_PATH_OFF_ELEVATOR,
-		MODE_NORMAL,
-		MODE_HEADING_BACK_ON_TRACK,
-		MODE_BACKING_UP,
-		MODE_BACKING_UP_TO_GOAL,
-		MODE_FLEE,
-		MODE_STOPPING_AT_GOAL,
-		MODE_AT_GOAL,
-		MODE_WAITING_FOR_ELEVATOR,
-		MODE_GET_ON_ELEVATOR,
-		MODE_GET_OFF_ELEVATOR,
-		MODE_ON_ELEVATOR,
-		MODE_ROTATE_ON_THE_SPOT,
-		MODE_ROTATE_ON_THE_SPOT_DURING,
-		MODE_ROTATE_ON_THE_SPOT_WAITING,
+	enum Mode {
+		kModeFindBestPath = 1,
+		kModeFindPathOffElevator,
+		kModeNormal,
+		kModeHeadingBackOnTrack,
+		kModeBackingUp,
+		kModeBackingUpToGoal,
+		kModeFlee,
+		kModeStoppingAtGoal,
+		kModeAtGoal,
+		kModeWaitingForElevator,
+		kModeGetOnElevator,
+		kModeGetOffElevator,
+		kModeOnElevator,
+		kModeRotateOnTheSpot,
+		kModeRotateOnTheSpotDuring,
+		kModeRotateOnTheSpotWaiting,
 	};
 
 	virtual void OnTick();
-	bool AvoidGrenade(const vec3& pPosition, const vec3& pVelocity, float pCaution);
-	void SetMode(Mode pMode);
-	bool IsCloseToTarget(const vec3& pPosition, float pDistance) const;
-	float GetClosestPathDistance(const vec3& pPosition, const int pPath = -1, float* pLikeliness = 0, float pSteepFactor = 5) const;
-	vec3 GetClosestElevatorPosition(const vec3& pPosition, const Cure::Elevator*& pNearestElevator) const;
-	bool HasElevatorArrived(const Cure::Elevator*& pNearestElevator, const float pPositionZ, vec3& pNearestLiftPosition2d, float& pElevatorXyDistance2ToElevatorStop);
+	bool AvoidGrenade(const vec3& position, const vec3& velocity, float caution);
+	void SetMode(Mode mode);
+	bool IsCloseToTarget(const vec3& position, float distance) const;
+	float GetClosestPathDistance(const vec3& position, const int path = -1, float* likeliness = 0, float steep_factor = 5) const;
+	vec3 GetClosestElevatorPosition(const vec3& position, const cure::Elevator*& nearest_elevator) const;
+	bool HasElevatorArrived(const cure::Elevator*& nearest_elevator, const float position_z, vec3& nearest_lift_position2d, float& elevator_xy_distance2_to_elevator_stop);
 	float GetClosestElevatorRadius() const;
-	static bool IsVertical(const vec3& pVector);
+	static bool IsVertical(const vec3& vector);
 	int GetVehicleIndex() const;
-	float GetRelativeDriveOnAngle(const vec3& pDirection) const;
-	bool QueryCutieHindered(const Cure::TimeManager* pTime, const vec3& pVelocity);
+	float GetRelativeDriveOnAngle(const vec3& direction) const;
+	bool QueryCutieHindered(const cure::TimeManager* time, const vec3& velocity);
 
-	Game* mGame;
-	Mode mPreviousMode;
-	Mode mMode;
-	int mModeStartFrame;
-	int mStoppedFrame;
-	int mActivePath;
-	int mStuckCount;
-	float mLastAverageAngle;
-	float mRotateAngle;
-	vec3 mElevatorGetOnPosition;
-	vec3 mElevatorGetOffPosition;
+	Game* game_;
+	Mode previous_mode_;
+	Mode mode_;
+	int mode_start_frame_;
+	int stopped_frame_;
+	int active_path_;
+	int stuck_count_;
+	float last_average_angle_;
+	float rotate_angle_;
+	vec3 elevator_get_on_position_;
+	vec3 elevator_get_off_position_;
 
 	logclass();
 };

@@ -5,181 +5,155 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiLabel.h"
+#include "../../include/gui/uilabel.h"
 #include <algorithm>
-#include "../../Include/GUI/UiDesktopWindow.h"
-#include "../../Include/UiPainter.h"
+#include "../../include/gui/uidesktopwindow.h"
+#include "../../include/uipainter.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-Label::Label(const Color& pColor, const wstr& pText):
-	Parent(pColor),
-	mIconId(Painter::INVALID_IMAGEID),
-	mIconAlignment(ICON_RIGHT),
-	mText(pText),
-	mTextWidth(0),
-	mTextHeight(0),
-	mSelectable(false)
-{
-	SetFontColor(pColor);
+Label::Label(const Color& color, const wstr& text):
+	Parent(color),
+	icon_id_(Painter::kInvalidImageid),
+	icon_alignment_(kIconRight),
+	text_(text),
+	text_width_(0),
+	text_height_(0),
+	selectable_(false) {
+	SetFontColor(color);
 	SetIsHollow(true);
-	SetName(strutil::Encode(pText));
+	SetName(strutil::Encode(text));
 }
 
-Label::~Label()
-{
+Label::~Label() {
 }
 
-void Label::SetIcon(Painter::ImageID pIconId, IconAlignment pAlignment)
-{
-	mIconId = pIconId;
-	mIconAlignment = pAlignment;
+void Label::SetIcon(Painter::ImageID icon_id, IconAlignment alignment) {
+	icon_id_ = icon_id;
+	icon_alignment_ = alignment;
 }
 
-void Label::SetText(const wstr& pText)
-{
-	mText = pText;
+void Label::SetText(const wstr& text) {
+	text_ = text;
 }
 
-const wstr& Label::GetText() const
-{
-	return mText;
+const wstr& Label::GetText() const {
+	return text_;
 }
 
-void Label::SetSelected(bool pSelected)
-{
-	if (mSelectable == true && pSelected != GetSelected())
-	{
-		Parent::SetSelected(pSelected);
+void Label::SetSelected(bool selected) {
+	if (selectable_ == true && selected != GetSelected()) {
+		Parent::SetSelected(selected);
 		UpdateBackground();
 	}
 }
 
-void Label::Repaint(Painter* pPainter)
-{
+void Label::Repaint(Painter* painter) {
 	SetNeedsRepaint(false);
 
-	ActivateFont(pPainter);
-	const int lTextWidth  = pPainter->GetStringWidth(mText);
-	const int lTextHeight = pPainter->GetLineHeight() * (std::count(mText.begin(), mText.end(), '\n') + 1);
-	if (mTextWidth != lTextWidth || mTextHeight != lTextHeight)
-	{
-		mTextWidth = lTextWidth;
-		mTextHeight = lTextHeight;
+	ActivateFont(painter);
+	const int text_width  = painter->GetStringWidth(text_);
+	const int text_height = painter->GetLineHeight() * (std::count(text_.begin(), text_.end(), '\n') + 1);
+	if (text_width_ != text_width || text_height_ != text_height) {
+		text_width_ = text_width;
+		text_height_ = text_height;
 		GetParent()->UpdateLayout();
 	}
 
-	Parent::Repaint(pPainter);
+	Parent::Repaint(painter);
 
-	GUIImageManager* lIMan = GetImageManager();
+	GUIImageManager* i_man = GetImageManager();
 
-	PixelCoord lPos(GetScreenPos());
-	PixelRect lRect(lPos, lPos + GetSize());
+	PixelCoord pos(GetScreenPos());
+	PixelRect rect(pos, pos + GetSize());
 /*#ifndef LEPRA_TOUCH
-	pPainter->ReduceClippingRect(lRect);
-#endif // !Touch*/
+	painter->ReduceClippingRect(rect);
+#endif // !touch*/
 
-	int lTextY = 0;
-	switch (GetVAlign())
-	{
-		case VALIGN_TOP:	lTextY = lRect.mTop;						break;
-		case VALIGN_CENTER:	lTextY = lRect.mTop + (lRect.GetHeight() - mTextHeight) / 2;	break;
-		case VALIGN_BOTTOM:	lTextY = lRect.mBottom - mTextHeight;				break;
+	int text_y = 0;
+	switch (GetVAlign()) {
+		case kValignTop:	text_y = rect.top_;						break;
+		case kValignCenter:	text_y = rect.top_ + (rect.GetHeight() - text_height_) / 2;	break;
+		case kValignBottom:	text_y = rect.bottom_ - text_height_;				break;
 	}
 
-	int lTextX = lRect.mLeft + mHorizontalMargin;
-	switch (mIconAlignment)
-	{
-		case ICON_CENTER:
-			lTextX = lRect.GetCenterX() - pPainter->GetStringWidth(mText)/2;
+	int text_x = rect.left_ + horizontal_margin_;
+	switch (icon_alignment_) {
+		case kIconCenter:
+			text_x = rect.GetCenterX() - painter->GetStringWidth(text_)/2;
 		break;
-		case ICON_LEFT:
-			if (mIconId == Painter::INVALID_IMAGEID)
-			{
+		case kIconLeft:
+			if (icon_id_ == Painter::kInvalidImageid) {
 				// No icon, but left-aligned indication means text should be right-aligned.
-				lTextX = lRect.mRight - pPainter->GetStringWidth(mText);
-			}
-		break;
+				text_x = rect.right_ - painter->GetStringWidth(text_);
+			} break;
 	}
 
-	if (mIconId != Painter::INVALID_IMAGEID)
-	{
-		PixelCoord lImageSize(lIMan->GetImageSize(mIconId));
+	if (icon_id_ != Painter::kInvalidImageid) {
+		PixelCoord image_size(i_man->GetImageSize(icon_id_));
 
 		int x = 0;
 		int y = 0;
-		switch (mIconAlignment)
-		{
-			case ICON_LEFT:
-				x = lRect.mLeft;
-				y = lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2;
-				lTextX = lRect.mLeft + lImageSize.x + mHorizontalMargin;
+		switch (icon_alignment_) {
+			case kIconLeft:
+				x = rect.left_;
+				y = rect.top_ + (rect.GetHeight() - image_size.y) / 2;
+				text_x = rect.left_ + image_size.x + horizontal_margin_;
 			break;
-			case ICON_CENTER:
-				x = lRect.mLeft + (lRect.GetWidth()  - lImageSize.x) / 2;
-				if (!mText.empty())
-				{
-					y = lRect.mTop;
-				}
-				else
-				{
-					y = lRect.GetCenterY() - lImageSize.y/2;
-				}
-			break;
-			case ICON_RIGHT:
-				x = lRect.mRight - lImageSize.x - mHorizontalMargin;
-				y = lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2;
+			case kIconCenter:
+				x = rect.left_ + (rect.GetWidth()  - image_size.x) / 2;
+				if (!text_.empty()) {
+					y = rect.top_;
+				} else {
+					y = rect.GetCenterY() - image_size.y/2;
+				} break;
+			case kIconRight:
+				x = rect.right_ - image_size.x - horizontal_margin_;
+				y = rect.top_ + (rect.GetHeight() - image_size.y) / 2;
 			break;
 		}
-		lIMan->DrawImage(mIconId, x, y);
+		i_man->DrawImage(icon_id_, x, y);
 	}
 
-	RepaintComponents(pPainter);
+	RepaintComponents(painter);
 
-	pPainter->SetColor(GetTextColor(), 0);
-	pPainter->PrintText(mText, lTextX, lTextY);
+	painter->SetColor(GetTextColor(), 0);
+	painter->PrintText(text_, text_x, text_y);
 
-	DeactivateFont(pPainter);
+	DeactivateFont(painter);
 }
 
-void Label::ForceRepaint()
-{
+void Label::ForceRepaint() {
 	SetNeedsRepaint(true);
 }
 
-PixelCoord Label::GetPreferredSize(bool pForceAdaptive)
-{
-	GUIImageManager* lIMan = GetImageManager();
+PixelCoord Label::GetPreferredSize(bool force_adaptive) {
+	GUIImageManager* i_man = GetImageManager();
 
 	PixelCoord lIconSize(0, 0);
-	if (mIconId != Painter::INVALID_IMAGEID)
-	{
-		lIconSize = lIMan->GetImageSize(mIconId);
+	if (icon_id_ != Painter::kInvalidImageid) {
+		lIconSize = i_man->GetImageSize(icon_id_);
 	}
 
-	PixelCoord lSize(Parent::GetPreferredSize());
+	PixelCoord size(Parent::GetPreferredSize());
 
-	if (pForceAdaptive == true || IsAdaptive() == true)
-	{
-		lSize.x = lIconSize.x + mTextWidth;
-		lSize.y = std::max(lIconSize.y, mTextHeight);
+	if (force_adaptive == true || IsAdaptive() == true) {
+		size.x = lIconSize.x + text_width_;
+		size.y = std::max(lIconSize.y, text_height_);
 	}
 
-	return lSize;
+	return size;
 }
 
-Component::Type Label::GetType() const
-{
-	return Component::LABEL;
+Component::Type Label::GetType() const {
+	return Component::kLabel;
 }
 
-void Label::UpdateBackground()
-{
+void Label::UpdateBackground() {
 }
 
 

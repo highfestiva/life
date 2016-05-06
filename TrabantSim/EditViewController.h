@@ -7,7 +7,7 @@
 #import <UIKit/UIKit.h>
 
 @interface EditViewController : UIViewController <UIActionSheetDelegate, UIAlertViewDelegate>
-@property (nonatomic, strong) UIViewController* listController;
+@property (nonatomic, strong) UIViewController* controller;
 -(void) updateEditor;
--(bool) saveIfChanged;
+-(bool) if_changed_;
 @end

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="Fire" InternalType="Console">
+<CodeLite_Project Name="fire" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00010001N0005Debug000000000000]]>
@@ -35,42 +35,42 @@
  }]]]>
     </Plugin>
   </Plugins>
-  <VirtualDirectory Name="Source">
-    <File Name="AutoPathDriver.cpp"/>
-    <File Name="AutoPathDriver.h"/>
-    <File Name="BaseMachine.cpp"/>
-    <File Name="BaseMachine.h"/>
-    <File Name="Eater.cpp"/>
-    <File Name="Eater.h"/>
-    <File Name="Fire.cxx"/>
-    <File Name="Fire.h"/>
-    <File Name="Fire.rc" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="FireConsoleManager.cpp"/>
-    <File Name="FireConsoleManager.h"/>
-    <File Name="FireManager.cpp"/>
-    <File Name="FireManager.h"/>
-    <File Name="FireTicker.cpp"/>
-    <File Name="FireTicker.h"/>
-    <File Name="Level.cpp"/>
-    <File Name="Level.h"/>
+  <VirtualDirectory Name="src">
+    <File Name="autopathdriver.cpp"/>
+    <File Name="autopathdriver.h"/>
+    <File Name="basemachine.cpp"/>
+    <File Name="basemachine.h"/>
+    <File Name="eater.cpp"/>
+    <File Name="eater.h"/>
+    <File Name="fire.cxx"/>
+    <File Name="fire.h"/>
+    <File Name="fire.rc" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="fireconsolemanager.cpp"/>
+    <File Name="fireconsolemanager.h"/>
+    <File Name="firemanager.cpp"/>
+    <File Name="firemanager.h"/>
+    <File Name="fireticker.cpp"/>
+    <File Name="fireticker.h"/>
+    <File Name="level.cpp"/>
+    <File Name="level.h"/>
     <File Name="pch.h"/>
-    <File Name="RtVar.h"/>
-    <File Name="Sunlight.cpp"/>
-    <File Name="Sunlight.h"/>
-    <File Name="ToDo.txt" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="Version.h"/>
+    <File Name="rtvar.h"/>
+    <File Name="sunlight.cpp"/>
+    <File Name="sunlight.h"/>
+    <File Name="todo.txt" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="version.h"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="Mac">
-    <File Name="Fire.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+  <VirtualDirectory Name="mac">
+    <File Name="fire.mm" ExcludeProjConfig="Debug;Profile;Release"/>
   </VirtualDirectory>
   <Dependencies Name="Debug">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
   <Dependencies Name="Release">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
   <Dependencies Name="Profile">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -87,14 +87,14 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Debug"/>
+        <LibraryPath Value="../life/Debug"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -134,14 +134,14 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="-pg" Required="yes">
-        <LibraryPath Value="../Life/Profile"/>
+        <LibraryPath Value="../life/Profile"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Profile" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -182,14 +182,14 @@
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Release"/>
+        <LibraryPath Value="../life/Release"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>

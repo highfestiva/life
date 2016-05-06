@@ -5,689 +5,562 @@
 
 
 #include "pch.h"
-#include "../../Include/Win32/UiWin32DisplayManager.h"
-#include "../../../Lepra/Include/Log.h"
-#include "../../../Lepra/Include/String.h"
-#include "../../../Lepra/Include/SystemManager.h"
-#include "../../Include/UiLepra.h"
-#include "../../Include/Win32/UiWin32DirectXDisplay.h"
-#include "../../Include/Win32/UiWin32OpenGLDisplay.h"
+#include "../../include/win32/uiwin32displaymanager.h"
+#include "../../../lepra/include/log.h"
+#include "../../../lepra/include/string.h"
+#include "../../../lepra/include/systemmanager.h"
+#include "../../include/uilepra.h"
+#include "../../include/win32/uiwin32directxdisplay.h"
+#include "../../include/win32/uiwin32opengldisplay.h"
 
-#define IDI_MAIN_ICON 1001	// This must be identical to resource definition in the .rc file.
-
-
-
-namespace UiLepra
-{
+#define kIdiMainIcon 1001	// This must be identical to resource definition in the .rc file.
 
 
 
-DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
-{
-	DisplayManager* lDisplayManager = 0;
-	switch(pCT)
-	{
-		case DisplayManager::OPENGL_CONTEXT:	lDisplayManager = new Win32OpenGLDisplay;				break;
-		case DisplayManager::DIRECTX_CONTEXT:	lDisplayManager = new Win32DirectXDisplay;				break;
-		default:				mLog.Error("Invalid context type in CreateDisplayManager().");		break;
+namespace uilepra {
+
+
+
+DisplayManager* DisplayManager::CreateDisplayManager(ContextType ct) {
+	DisplayManager* display_manager = 0;
+	switch(ct) {
+		case DisplayManager::kOpenglContext:	display_manager = new Win32OpenGLDisplay;				break;
+		case DisplayManager::kDirectxContext:	display_manager = new Win32DirectXDisplay;				break;
+		default:				log_.Error("Invalid context type in CreateDisplayManager().");		break;
 	}
-	return (lDisplayManager);
+	return (display_manager);
 }
 
-void DisplayManager::EnableScreensaver(bool pEnable)
-{
-	BOOL lOldValue;
-	::SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, pEnable, &lOldValue, 0);
+void DisplayManager::EnableScreensaver(bool enable) {
+	BOOL old_value;
+	::SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, enable, &old_value, 0);
 }
 
 
 
 Win32DisplayManager::Win32DisplayManager() :
-	mWnd(0),
-	mInitialized(false),
-	mScreenOpened(false),
-	mMinimized(false),
-	mMaximized(false),
-	mNormalWidth(0),
-	mNormalHeight(0),
-	mCaptionSet(false),
-	mConsumeChar(true)
-{
+	wnd_(0),
+	initialized_(false),
+	screen_opened_(false),
+	minimized_(false),
+	maximized_(false),
+	normal_width_(0),
+	normal_height_(0),
+	caption_set_(false),
+	consume_char_(true) {
 	// Count display modes.
-	DEVMODE lDevMode;
-	while (EnumDisplaySettings(NULL, mEnumeratedDisplayModeCount, &lDevMode) != 0)
-	{
-		mEnumeratedDisplayModeCount++;
+	DEVMODE dev_mode;
+	while (EnumDisplaySettings(NULL, enumerated_display_mode_count_, &dev_mode) != 0) {
+		enumerated_display_mode_count_++;
 	}
-	mEnumeratedDisplayMode = new DisplayMode[mEnumeratedDisplayModeCount];
+	enumerated_display_mode_ = new DisplayMode[enumerated_display_mode_count_];
 
-	int lCount = 0;
-	while (EnumDisplaySettings(NULL, lCount, &lDevMode) != 0)
-	{
-		mEnumeratedDisplayMode[lCount].mWidth = lDevMode.dmPelsWidth;
-		mEnumeratedDisplayMode[lCount].mHeight = lDevMode.dmPelsHeight;
-		mEnumeratedDisplayMode[lCount].mBitDepth = lDevMode.dmBitsPerPel;
-		mEnumeratedDisplayMode[lCount].mRefreshRate = lDevMode.dmDisplayFrequency;
+	int count = 0;
+	while (EnumDisplaySettings(NULL, count, &dev_mode) != 0) {
+		enumerated_display_mode_[count].width_ = dev_mode.dmPelsWidth;
+		enumerated_display_mode_[count].height_ = dev_mode.dmPelsHeight;
+		enumerated_display_mode_[count].bit_depth_ = dev_mode.dmBitsPerPel;
+		enumerated_display_mode_[count].refresh_rate_ = dev_mode.dmDisplayFrequency;
 
-		lCount++;
+		count++;
 	}
 
 	Register();
 }
 
-Win32DisplayManager::~Win32DisplayManager()
-{
+Win32DisplayManager::~Win32DisplayManager() {
 	CloseScreen();
 
 	Unregister();
 
-	ObserverSetTable::Iterator lTIter;
-	for (lTIter = mObserverSetTable.First();
-		lTIter != mObserverSetTable.End();
-		++lTIter)
-	{
-		ObserverSet* lSet = *lTIter;
-		delete (lSet);
+	ObserverSetTable::Iterator t_iter;
+	for (t_iter = observer_set_table_.First();
+		t_iter != observer_set_table_.End();
+		++t_iter) {
+		ObserverSet* set = *t_iter;
+		delete (set);
 	}
 }
 
-void Win32DisplayManager::SetFocus(bool pFocus)
-{
-	if (pFocus)
-	{
-		//::BringWindowToTop(mWnd);
-		//::SwitchToThisWindow(mWnd, FALSE);
-		::SetWindowPos(mWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
-		::SetWindowPos(mWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
-		::SetForegroundWindow(mWnd);
+void Win32DisplayManager::SetFocus(bool focus) {
+	if (focus) {
+		//::BringWindowToTop(wnd_);
+		//::SwitchToThisWindow(wnd_, FALSE);
+		::SetWindowPos(wnd_, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+		::SetWindowPos(wnd_, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
+		::SetForegroundWindow(wnd_);
 		//HWND_NOTOPMOST
 	}
 }
 
-bool Win32DisplayManager::Register() 
-{
-	bool lOk = true;
-	if (msRegisterCount == 0)
-	{
-		++msRegisterCount;
+bool Win32DisplayManager::Register() {
+	bool ok = true;
+	if (register_count_ == 0) {
+		++register_count_;
 
-		mshThisInstance = Win32Core::GetAppInstance();
+		this_instance_ = Win32Core::GetAppInstance();
 
 		// Register window class.
-		msWindowClass.cbSize		= sizeof(msWindowClass);
-		msWindowClass.cbClsExtra	= 0;
-		msWindowClass.cbWndExtra	= 0;
-		msWindowClass.hbrBackground	= GetStockBrush(BLACK_BRUSH);
-		msWindowClass.style		= CS_DBLCLKS;
-		msWindowClass.lpfnWndProc	= WndProc;
-		msWindowClass.hInstance		= (HINSTANCE)mshThisInstance;
-		msWindowClass.hIcon		= ::LoadIcon((HINSTANCE)mshThisInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
-		msWindowClass.hIconSm		= ::LoadIcon((HINSTANCE)mshThisInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
-		msWindowClass.hCursor		= ::LoadCursor(0, IDC_ARROW);
-		msWindowClass.lpszMenuName	= NULL;
-		msWindowClass.lpszClassName	= "LepraWin32Class";
+		window_class_.cbSize		= sizeof(window_class_);
+		window_class_.cbClsExtra	= 0;
+		window_class_.cbWndExtra	= 0;
+		window_class_.hbrBackground	= GetStockBrush(BLACK_BRUSH);
+		window_class_.style		= CS_DBLCLKS;
+		window_class_.wnd_proc	= WndProc;
+		window_class_.hInstance		= (HINSTANCE)this_instance_;
+		window_class_.hIcon		= ::LoadIcon((HINSTANCE)this_instance_, MAKEINTRESOURCE(kIdiMainIcon));
+		window_class_.hIconSm		= ::LoadIcon((HINSTANCE)this_instance_, MAKEINTRESOURCE(kIdiMainIcon));
+		window_class_.hCursor		= ::LoadCursor(0, IDC_ARROW);
+		window_class_.menu_name	= NULL;
+		window_class_.class_name	= "LepraWin32Class";
 
-		lOk = (RegisterClassEx(&msWindowClass) != 0);
+		ok = (RegisterClassEx(&window_class_) != 0);
 	}
-	if (lOk) 
-	{
-		mDisplayMode.mWidth	= 0;
-		mDisplayMode.mHeight	= 0;
-		mDisplayMode.mBitDepth	= 0;
-		mInitialized		= true;
+	if (ok) {
+		display_mode_.width_	= 0;
+		display_mode_.height_	= 0;
+		display_mode_.bit_depth_	= 0;
+		initialized_		= true;
+	} else {
+		log_.Error("Register() - failed to register window class.");
 	}
-	else
-	{
-		mLog.Error("Register() - failed to register window class.");
-	}
-	return lOk;
+	return ok;
 }
 
-void Win32DisplayManager::Unregister()
-{
-	--msRegisterCount;
-	if (msRegisterCount == 0)
-	{
-		::UnregisterClass("LepraWin32Class", (HINSTANCE)mshThisInstance);
+void Win32DisplayManager::Unregister() {
+	--register_count_;
+	if (register_count_ == 0) {
+		::UnregisterClass("LepraWin32Class", (HINSTANCE)this_instance_);
 	}
 }
 
-unsigned Win32DisplayManager::GetWidth() const
-{
-	return mDisplayMode.mWidth;
+unsigned Win32DisplayManager::GetWidth() const {
+	return display_mode_.width_;
 }
 
-unsigned Win32DisplayManager::GetHeight() const
-{
-	return mDisplayMode.mHeight;
+unsigned Win32DisplayManager::GetHeight() const {
+	return display_mode_.height_;
 }
 
-unsigned Win32DisplayManager::GetBitDepth() const
-{
-	return mDisplayMode.mBitDepth;
+unsigned Win32DisplayManager::GetBitDepth() const {
+	return display_mode_.bit_depth_;
 }
 
-unsigned Win32DisplayManager::GetRefreshRate() const
-{
-	return mDisplayMode.mRefreshRate;
+unsigned Win32DisplayManager::GetRefreshRate() const {
+	return display_mode_.refresh_rate_;
 }
 
-bool Win32DisplayManager::IsFullScreen() const
-{
-	return (mScreenMode == DisplayManager::FULLSCREEN);
+bool Win32DisplayManager::IsFullScreen() const {
+	return (screen_mode_ == DisplayManager::kFullscreen);
 }
 
-double Win32DisplayManager::GetPhysicalScreenSize() const
-{
+double Win32DisplayManager::GetPhysicalScreenSize() const {
 	return 23.000;	// Estimated average user's screen size at time of playing any one of my games. Extremely accurate.
 }
 
-void Win32DisplayManager::SetCaption(const str& pCaption)
-{
-	SetCaption(pCaption, false);
+void Win32DisplayManager::SetCaption(const str& caption) {
+	SetCaption(caption, false);
 }
 
-void Win32DisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
-{
-	if (mInitialized)
-	{
-		if (pInternalCall == false)
-		{
-			mCaptionSet = true;
+void Win32DisplayManager::SetCaption(const str& caption, bool internal_call) {
+	if (initialized_) {
+		if (internal_call == false) {
+			caption_set_ = true;
 		}
 
-		if (pInternalCall == false || mCaptionSet == false)
-		{
-			::SetWindowText(mWnd, pCaption.c_str());
+		if (internal_call == false || caption_set_ == false) {
+			::SetWindowText(wnd_, caption.c_str());
 		}
 	}
 }
 
-bool Win32DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pScreenMode, Orientation pOrientation)
-{
-	bool lOk = true;
+bool Win32DisplayManager::OpenScreen(const DisplayMode& display_mode, ScreenMode screen_mode, Orientation orientation) {
+	bool ok = true;
 
-	if (mInitialized == false)
-	{
-		mLog.Warning("OpenScreen() - DisplayManager not initialized.");
-		lOk = false;
-	}
-	else if(mScreenOpened == true)
-	{
-		mLog.Warning("OpenScreen() - Screen already opened.");
-		lOk = false;
-	}
-	else if(pDisplayMode.IsValid() == false && pScreenMode == FULLSCREEN)
-	{
-		mLog.Error("OpenScreen() - Invalid display mode.");
-		lOk = false;
+	if (initialized_ == false) {
+		log_.Warning("OpenScreen() - DisplayManager not initialized.");
+		ok = false;
+	} else if(screen_opened_ == true) {
+		log_.Warning("OpenScreen() - Screen already opened.");
+		ok = false;
+	} else if(display_mode.IsValid() == false && screen_mode == kFullscreen) {
+		log_.Error("OpenScreen() - Invalid display mode.");
+		ok = false;
 	}
 
-	if (lOk)
-	{
-		mScreenMode = pScreenMode;
-		mOrientation = pOrientation;
+	if (ok) {
+		screen_mode_ = screen_mode;
+		orientation_ = orientation;
 
-		if (mScreenMode == DisplayManager::FULLSCREEN)
-		{
-			bool lSupportedMode = false;
+		if (screen_mode_ == DisplayManager::kFullscreen) {
+			bool supported_mode = false;
 
-			// We can't trust that the user actually knows what he or she is doing, 
+			// We can't trust that the user actually knows what he or she is doing,
 			// so check if the mode is actually supported.
-			if (pDisplayMode.mBitDepth == 0)
-			{
-				lSupportedMode = FindDisplayMode(mDisplayMode,
-								   pDisplayMode.mWidth, 
-								   pDisplayMode.mHeight);
-			}
-			else if(pDisplayMode.mRefreshRate == 0)
-			{
-				lSupportedMode = FindDisplayMode(mDisplayMode,
-								   pDisplayMode.mWidth, 
-								   pDisplayMode.mHeight, 
-								   pDisplayMode.mBitDepth);
-			}
-			else
-			{
-				lSupportedMode = FindDisplayMode(mDisplayMode,
-								   pDisplayMode.mWidth, 
-								   pDisplayMode.mHeight, 
-								   pDisplayMode.mBitDepth,
-								   pDisplayMode.mRefreshRate);
+			if (display_mode.bit_depth_ == 0) {
+				supported_mode = FindDisplayMode(display_mode_,
+								   display_mode.width_,
+								   display_mode.height_);
+			} else if(display_mode.refresh_rate_ == 0) {
+				supported_mode = FindDisplayMode(display_mode_,
+								   display_mode.width_,
+								   display_mode.height_,
+								   display_mode.bit_depth_);
+			} else {
+				supported_mode = FindDisplayMode(display_mode_,
+								   display_mode.width_,
+								   display_mode.height_,
+								   display_mode.bit_depth_,
+								   display_mode.refresh_rate_);
 			}
 
-			if (lSupportedMode == false)
-			{
-				str lErr(strutil::Format("OpenScreen( - Display mode %i-bit %ix%i at %i Hz is not supported!"),
-						 pDisplayMode.mBitDepth, 
-						 pDisplayMode.mWidth, 
-						 pDisplayMode.mHeight, 
-						 pDisplayMode.mRefreshRate));
+			if (supported_mode == false) {
+				str err(strutil::Format("OpenScreen( - Display mode %i-bit %ix%i at %i Hz is not supported!"),
+						 display_mode.bit_depth_,
+						 display_mode.width_,
+						 display_mode.height_,
+						 display_mode.refresh_rate_));
 
-				mLog.Error(lErr);
-				lOk = false;
+				log_.Error(err);
+				ok = false;
 			}
-		}
-		else
-		{
-			mDisplayMode = pDisplayMode;
+		} else {
+			display_mode_ = display_mode;
 		}
 	}
 
-	if (lOk)
-	{
-		lOk = InitWindow();
+	if (ok) {
+		ok = InitWindow();
 	}
 
-	if (lOk)
-	{
-		mScreenOpened = InitScreen();
+	if (ok) {
+		screen_opened_ = InitScreen();
 
-		if (mScreenOpened == true)
-		{
+		if (screen_opened_ == true) {
 			AddObserver(WM_SIZE, this);
 			AddObserver(WM_SIZING, this);
-		}
-		else
-		{
-			lOk = false;
+		} else {
+			ok = false;
 		}
 	}
 
-	return lOk;
+	return ok;
 }
 
-void Win32DisplayManager::CloseScreen()
-{
-	if (mScreenOpened)
-	{
-		mScreenOpened = false;
+void Win32DisplayManager::CloseScreen() {
+	if (screen_opened_) {
+		screen_opened_ = false;
 		Win32Core::RemoveDisplayManager(this);
 		RemoveObserver(this);
 
-		::DestroyWindow(mWnd);
-		mWnd = 0;
+		::DestroyWindow(wnd_);
+		wnd_ = 0;
 
 		// Repaint the desktop to restore background.
-		RECT lRect;
-		::GetWindowRect(GetDesktopWindow(), &lRect);
-		::MoveWindow(GetDesktopWindow(), 
-			lRect.left, 
-			lRect.top, 
-			lRect.right - lRect.left, 
-			lRect.bottom - lRect.top, 
+		RECT rect;
+		::GetWindowRect(GetDesktopWindow(), &rect);
+		::MoveWindow(GetDesktopWindow(),
+			rect.left,
+			rect.top,
+			rect.right - rect.left,
+			rect.bottom - rect.top,
 			TRUE);
 	}
 }
 
-bool Win32DisplayManager::IsVisible() const
-{
-	return !IsMinimized() && ::IsWindowVisible(mWnd);
+bool Win32DisplayManager::IsVisible() const {
+	return !IsMinimized() && ::IsWindowVisible(wnd_);
 }
 
-bool Win32DisplayManager::IsFocused() const
-{
-	return IsVisible() && (::GetActiveWindow() == mWnd);
+bool Win32DisplayManager::IsFocused() const {
+	return IsVisible() && (::GetActiveWindow() == wnd_);
 }
 
-void Win32DisplayManager::HideWindow(bool pHide)
-{
-	::ShowWindow(mWnd, pHide? SW_HIDE : SW_SHOW);
+void Win32DisplayManager::HideWindow(bool hide) {
+	::ShowWindow(wnd_, hide? SW_HIDE : SW_SHOW);
 }
 
-bool Win32DisplayManager::InitWindow()
-{
-	bool lOk = mInitialized;
+bool Win32DisplayManager::InitWindow() {
+	bool ok = initialized_;
 
-	if (lOk)
-	{
-		if (mDisplayMode.mWidth == 0 || mDisplayMode.mHeight == 0) 
-		{
-			mDisplayMode.mWidth  = GetSystemMetrics(SM_CXSCREEN);
-			mDisplayMode.mHeight = GetSystemMetrics(SM_CYSCREEN);
+	if (ok) {
+		if (display_mode_.width_ == 0 || display_mode_.height_ == 0) {
+			display_mode_.width_  = GetSystemMetrics(SM_CXSCREEN);
+			display_mode_.height_ = GetSystemMetrics(SM_CYSCREEN);
 		}
 
-		int lWindowWidth  = mDisplayMode.mWidth;
-		int lWindowHeight = mDisplayMode.mHeight;
+		int _window_width  = display_mode_.width_;
+		int _window_height = display_mode_.height_;
 
 		// Create window
-		if (mWnd == 0)
-		{
-			switch(mScreenMode)
-			{
-				case DisplayManager::FULLSCREEN:
-				case DisplayManager::SPLASH_WINDOW:
-				{
-					mWnd = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_TOPMOST,
+		if (wnd_ == 0) {
+			switch(screen_mode_) {
+				case DisplayManager::kFullscreen:
+				case DisplayManager::kSplashWindow: {
+					wnd_ = ::CreateWindowEx(WS_EX_APPWINDOW | WS_EX_TOPMOST,
 								"LepraWin32Class", "Lepra",
 								WS_POPUP | WS_CLIPSIBLINGS | WS_VISIBLE,
-								GetSystemMetrics(SM_CXSCREEN) / 2 - lWindowWidth / 2,
-								GetSystemMetrics(SM_CYSCREEN) / 2 - lWindowHeight / 2,
-								lWindowWidth, lWindowHeight,
-								GetDesktopWindow(), NULL, (HINSTANCE)mshThisInstance, NULL);
-				}
-				break;
-				case DisplayManager::WINDOWED:
-				case DisplayManager::STATIC_WINDOW:
-				{
-					lWindowWidth = GetWindowWidth(lWindowWidth);
-					lWindowHeight = GetWindowHeight(lWindowHeight);
-					DWORD lStyle = WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX;
-					if (mScreenMode == DisplayManager::WINDOWED)
-					{
-						lStyle |= (WS_SIZEBOX | WS_MAXIMIZEBOX);
+								GetSystemMetrics(SM_CXSCREEN) / 2 - _window_width / 2,
+								GetSystemMetrics(SM_CYSCREEN) / 2 - _window_height / 2,
+								_window_width, _window_height,
+								GetDesktopWindow(), NULL, (HINSTANCE)this_instance_, NULL);
+				} break;
+				case DisplayManager::kWindowed:
+				case DisplayManager::kStaticWindow: {
+					_window_width = GetWindowWidth(_window_width);
+					_window_height = GetWindowHeight(_window_height);
+					DWORD __style = WS_OVERLAPPED | WS_SYSMENU | WS_MINIMIZEBOX;
+					if (screen_mode_ == DisplayManager::kWindowed) {
+						__style |= (WS_SIZEBOX | WS_MAXIMIZEBOX);
 					}
-					mWnd = ::CreateWindowEx(WS_EX_APPWINDOW,
+					wnd_ = ::CreateWindowEx(WS_EX_APPWINDOW,
 						"LepraWin32Class", "Lepra",
-						lStyle,
-						GetSystemMetrics(SM_CXSCREEN) / 2 - lWindowHeight / 2,
-						GetSystemMetrics(SM_CYSCREEN) / 2 - lWindowHeight / 2,
-						lWindowWidth, lWindowHeight,
-						NULL, NULL, (HINSTANCE)mshThisInstance, NULL);
-				}
-				break;
+						__style,
+						GetSystemMetrics(SM_CXSCREEN) / 2 - _window_height / 2,
+						GetSystemMetrics(SM_CYSCREEN) / 2 - _window_height / 2,
+						_window_width, _window_height,
+						NULL, NULL, (HINSTANCE)this_instance_, NULL);
+				} break;
 				default:
 				break;
 			}
 
-			::ShowWindow(mWnd, SW_SHOW);
-			::UpdateWindow(mWnd);
-			mMinimized = false;
-			mMaximized = false;
+			::ShowWindow(wnd_, SW_SHOW);
+			::UpdateWindow(wnd_);
+			minimized_ = false;
+			maximized_ = false;
 		}
 
-		lOk = (mWnd != 0);
+		ok = (wnd_ != 0);
 
-		if (lOk)
-		{
-			++msWindowCount;
-		}
-		else
-		{
-			mLog.Error("InitWindow() - Failed to create window.");
+		if (ok) {
+			++window_count_;
+		} else {
+			log_.Error("InitWindow() - Failed to create window.");
 		}
 	}
 
-	if (lOk)
-	{
+	if (ok) {
 		Win32Core::AddDisplayManager(this);
 	}
 
-	return lOk;
+	return ok;
 }
 
-void Win32DisplayManager::GetBorderSize(int& pSizeX, int& pSizeY)
-{
-	if (mScreenMode == FULLSCREEN ||
-	   mScreenMode == SPLASH_WINDOW)
-	{
-		pSizeX = 0;
-		pSizeY = 0;
-	}
-	else if(mWnd != 0)
-	{
+void Win32DisplayManager::GetBorderSize(int& size_x, int& size_y) {
+	if (screen_mode_ == kFullscreen ||
+	   screen_mode_ == kSplashWindow) {
+		size_x = 0;
+		size_y = 0;
+	} else if(wnd_ != 0) {
 		// Use the safest way there is... Taking the difference between
 		// the size of the window and the size of the client area.
 		// These numbers can't lie.
-		RECT lClientRect;
-		RECT lWindowRect;
-		::GetClientRect(mWnd, &lClientRect);
-		::GetWindowRect(mWnd, &lWindowRect);
+		RECT client_rect;
+		RECT window_rect;
+		::GetClientRect(wnd_, &client_rect);
+		::GetWindowRect(wnd_, &window_rect);
 
-		pSizeX = ((lWindowRect.right - lWindowRect.left) -
-					(lClientRect.right - lClientRect.left));
+		size_x = ((window_rect.right - window_rect.left) -
+					(client_rect.right - client_rect.left));
 
-		pSizeY = ((lWindowRect.bottom - lWindowRect.top) -
-					(lClientRect.bottom - lClientRect.top));
-	}
-	else
-	{
+		size_y = ((window_rect.bottom - window_rect.top) -
+					(client_rect.bottom - client_rect.top));
+	} else {
 		// We have to use the awful system function GetSystemMetrics().
 		// I don't trust that function at all, or any of the values it returns.
-		if (mScreenMode == WINDOWED)
-		{
-			pSizeX = ::GetSystemMetrics(SM_CXSIZEFRAME) * 2;
-			pSizeY = ::GetSystemMetrics(SM_CYSIZEFRAME) * 2 +
+		if (screen_mode_ == kWindowed) {
+			size_x = ::GetSystemMetrics(SM_CXSIZEFRAME) * 2;
+			size_y = ::GetSystemMetrics(SM_CYSIZEFRAME) * 2 +
 					   ::GetSystemMetrics(SM_CYCAPTION);
-		}
-		else
-		{
+		} else {
 			// Static window.
-			pSizeX = ::GetSystemMetrics(SM_CXFIXEDFRAME) * 2;
-			pSizeY = ::GetSystemMetrics(SM_CYFIXEDFRAME) * 2 +
+			size_x = ::GetSystemMetrics(SM_CXFIXEDFRAME) * 2;
+			size_y = ::GetSystemMetrics(SM_CYFIXEDFRAME) * 2 +
 					   ::GetSystemMetrics(SM_CYCAPTION);
 		}
 	}
 }
 
-int Win32DisplayManager::GetWindowWidth(int pClientWidth)
-{
-	int lBorderSizeX;
-	int lBorderSizeY;
-	GetBorderSize(lBorderSizeX, lBorderSizeY);
+int Win32DisplayManager::GetWindowWidth(int client_width) {
+	int border_size_x;
+	int border_size_y;
+	GetBorderSize(border_size_x, border_size_y);
 
-	return pClientWidth + lBorderSizeX;
+	return client_width + border_size_x;
 }
 
-int Win32DisplayManager::GetWindowHeight(int pClientHeight)
-{
-	int lBorderSizeX;
-	int lBorderSizeY;
-	GetBorderSize(lBorderSizeX, lBorderSizeY);
+int Win32DisplayManager::GetWindowHeight(int client_height) {
+	int border_size_x;
+	int border_size_y;
+	GetBorderSize(border_size_x, border_size_y);
 
-	return pClientHeight + lBorderSizeY;
+	return client_height + border_size_y;
 }
 
-int Win32DisplayManager::GetClientWidth(int pWindowWidth)
-{
-	int lBorderSizeX;
-	int lBorderSizeY;
-	GetBorderSize(lBorderSizeX, lBorderSizeY);
+int Win32DisplayManager::GetClientWidth(int window_width) {
+	int border_size_x;
+	int border_size_y;
+	GetBorderSize(border_size_x, border_size_y);
 
-	return pWindowWidth - lBorderSizeX;
+	return window_width - border_size_x;
 }
 
-int Win32DisplayManager::GetClientHeight(int pWindowHeight)
-{
-	int lBorderSizeX;
-	int lBorderSizeY;
-	GetBorderSize(lBorderSizeX, lBorderSizeY);
+int Win32DisplayManager::GetClientHeight(int window_height) {
+	int border_size_x;
+	int border_size_y;
+	GetBorderSize(border_size_x, border_size_y);
 
-	return pWindowHeight - lBorderSizeY;
+	return window_height - border_size_y;
 }
 
-HWND Win32DisplayManager::GetHWND()
-{
-	return mWnd;
+HWND Win32DisplayManager::GetHWND() {
+	return wnd_;
 }
 
-LRESULT CALLBACK Win32DisplayManager::WndProc(HWND pWnd, unsigned int pMessage, unsigned int pwParam, LONG plParam) 
-{
-	if (pMessage  == WM_QUIT ||
-		pMessage == WM_DESTROY ||
-		pMessage == WM_CLOSE)
-	{
-		if (msWindowCount > 0)
-		{
-			--msWindowCount;
+LRESULT CALLBACK Win32DisplayManager::WndProc(HWND wnd, unsigned int message, unsigned int param, LONG param) {
+	if (message  == WM_QUIT ||
+		message == WM_DESTROY ||
+		message == WM_CLOSE) {
+		if (window_count_ > 0) {
+			--window_count_;
 		}
-		if (msWindowCount == 0)
-		{
+		if (window_count_ == 0) {
 			SystemManager::AddQuitRequest(+1);
 			// First close attempt.
-			if (pMessage == WM_CLOSE && SystemManager::GetQuitRequest() <= 1)
-			{
+			if (message == WM_CLOSE && SystemManager::GetQuitRequest() <= 1) {
 				return (TRUE);
 			}
 		}
 	}
 
-	bool lMessageWasConsumed = false;
-	Win32DisplayManager* lDisplayManager = Win32Core::GetDisplayManager(pWnd);
-	if (lDisplayManager)
-	{
-		lMessageWasConsumed = lDisplayManager->InternalDispatchMessage(pMessage, pwParam, plParam);
+	bool message_was_consumed = false;
+	Win32DisplayManager* display_manager = Win32Core::GetDisplayManager(wnd);
+	if (display_manager) {
+		message_was_consumed = display_manager->InternalDispatchMessage(message, param, param);
 	}
-	LRESULT lResult = 0;
-	if (!lMessageWasConsumed)
-	{
-		lResult = DefWindowProc(pWnd, pMessage, pwParam, plParam);
+	LRESULT result = 0;
+	if (!message_was_consumed) {
+		result = DefWindowProc(wnd, message, param, param);
 	}
-	return (lResult);
+	return (result);
 }
 
-bool Win32DisplayManager::InternalDispatchMessage(int pMessage, int pwParam, long plParam) 
-{
-	if (pMessage == WM_CHAR && mConsumeChar)	// Consume all follow-up WM_CHAR's when we already dispatched the WM_KEYDOWN.
-	{
+bool Win32DisplayManager::InternalDispatchMessage(int message, int param, long param) {
+	if (message == WM_CHAR && consume_char_) {	// Consume all follow-up WM_CHAR's when we already dispatched the WM_KEYDOWN.
 		return (true);
 	}
 
-	bool lConsumed = false;
-	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pMessage);
-	if (lTIter != mObserverSetTable.End())
-	{
-		ObserverSet* lSet = *lTIter;
-		ObserverSet::iterator lLIter;
-		for (lLIter = lSet->begin(); lLIter != lSet->end(); ++lLIter)
-		{
-			lConsumed |= (*lLIter)->OnMessage(pMessage, pwParam, plParam);
+	bool consumed = false;
+	ObserverSetTable::Iterator t_iter = observer_set_table_.Find(message);
+	if (t_iter != observer_set_table_.End()) {
+		ObserverSet* set = *t_iter;
+		ObserverSet::iterator l_iter;
+		for (l_iter = set->begin(); l_iter != set->end(); ++l_iter) {
+			consumed |= (*l_iter)->OnMessage(message, param, param);
 		}
 	}
-	if (pMessage == WM_KEYDOWN)
-	{
-		mConsumeChar = lConsumed;
+	if (message == WM_KEYDOWN) {
+		consume_char_ = consumed;
 	}
-	return (lConsumed);
+	return (consumed);
 }
 
-void Win32DisplayManager::ProcessMessages()
-{
-	if (mWnd != 0)
-	{
-		MSG lMsg;
-		while (::PeekMessage(&lMsg, mWnd, 0, 0, PM_REMOVE) == TRUE)
-		{
-			::TranslateMessage(&lMsg);
-			::DispatchMessage(&lMsg);
+void Win32DisplayManager::ProcessMessages() {
+	if (wnd_ != 0) {
+		MSG _msg;
+		while (::PeekMessage(&_msg, wnd_, 0, 0, PM_REMOVE) == TRUE) {
+			::TranslateMessage(&_msg);
+			::DispatchMessage(&_msg);
 		}
 	}
 }
 
-void Win32DisplayManager::AddObserver(unsigned int pMessage, Win32Observer* pObserver)
-{
-	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pMessage);
-	ObserverSet* lSet = 0;
+void Win32DisplayManager::AddObserver(unsigned int message, Win32Observer* observer) {
+	ObserverSetTable::Iterator t_iter = observer_set_table_.Find(message);
+	ObserverSet* set = 0;
 
-	if (lTIter == mObserverSetTable.End())
-	{
-		lSet = new ObserverSet;
-		mObserverSetTable.Insert(pMessage, lSet);
-	}
-	else
-	{
-		lSet = *lTIter;
+	if (t_iter == observer_set_table_.End()) {
+		set = new ObserverSet;
+		observer_set_table_.Insert(message, set);
+	} else {
+		set = *t_iter;
 	}
 
-	ObserverSet::iterator lLIter = lSet->find(pObserver);
-	if (lLIter == lSet->end())
-	{
-		lSet->insert(pObserver);
+	ObserverSet::iterator l_iter = set->find(observer);
+	if (l_iter == set->end()) {
+		set->insert(observer);
 	}
 }
 
-void Win32DisplayManager::RemoveObserver(unsigned int pMessage, Win32Observer* pObserver)
-{
-	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pMessage);
+void Win32DisplayManager::RemoveObserver(unsigned int message, Win32Observer* observer) {
+	ObserverSetTable::Iterator t_iter = observer_set_table_.Find(message);
 
-	if (lTIter != mObserverSetTable.End())
-	{
-		ObserverSet* lSet = *lTIter;
-		lSet->erase(pObserver);
-		if (lSet->empty())
-		{
-			mObserverSetTable.Remove(lTIter);
-			delete (lSet);
+	if (t_iter != observer_set_table_.End()) {
+		ObserverSet* set = *t_iter;
+		set->erase(observer);
+		if (set->empty()) {
+			observer_set_table_.Remove(t_iter);
+			delete (set);
 		}
 	}
 }
 
-void Win32DisplayManager::RemoveObserver(Win32Observer* pObserver)
-{
-	ObserverSetTable::Iterator lTIter = mObserverSetTable.First();
+void Win32DisplayManager::RemoveObserver(Win32Observer* observer) {
+	ObserverSetTable::Iterator t_iter = observer_set_table_.First();
 
-	while (lTIter != mObserverSetTable.End())
-	{
-		ObserverSet* lSet = *lTIter;
-		ObserverSet::iterator lLIter = lSet->find(pObserver);
-		if (lLIter != lSet->end())
-		{
-			lSet->erase(lLIter);
-			if (lSet->empty())
-			{
-				mObserverSetTable.Remove(lTIter++);
-				delete (lSet);
+	while (t_iter != observer_set_table_.End()) {
+		ObserverSet* set = *t_iter;
+		ObserverSet::iterator l_iter = set->find(observer);
+		if (l_iter != set->end()) {
+			set->erase(l_iter);
+			if (set->empty()) {
+				observer_set_table_.Remove(t_iter++);
+				delete (set);
+			} else {
+				++t_iter;
 			}
-			else
-			{
-				++lTIter;
-			}
-		}
-		else
-		{
-			++lTIter;
+		} else {
+			++t_iter;
 		}
 	}
 }
 
-void Win32DisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
-{
-	::MessageBox(mWnd, pMsg.c_str(), pCaption.c_str(), MB_OK);
+void Win32DisplayManager::ShowMessageBox(const str& msg, const str& caption) {
+	::MessageBox(wnd_, msg.c_str(), caption.c_str(), MB_OK);
 }
 
-bool Win32DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
-{
-	switch(pMsg)
-	{
-		case WM_SIZING:
-		{
-			LPRECT lRect = (LPRECT)(intptr_t)plParam;
+bool Win32DisplayManager::OnMessage(int msg, int param, long param) {
+	switch(msg) {
+		case WM_SIZING: {
+			LPRECT rect = (LPRECT)(intptr_t)param;
 
-			int lClientWidth  = GetClientWidth(lRect->right - lRect->left);
-			int lClientHeight = GetClientHeight(lRect->bottom - lRect->top);
+			int _client_width  = GetClientWidth(rect->right - rect->left);
+			int _client_height = GetClientHeight(rect->bottom - rect->top);
 
-			DispatchResize(lClientWidth, lClientHeight);
-			mMinimized = false;
-			mMaximized = false;
-		}
-		break;
-		case WM_SIZE:
-		{
-			switch(pwParam)
-			{
-				case SIZE_MINIMIZED:
-				{
+			DispatchResize(_client_width, _client_height);
+			minimized_ = false;
+			maximized_ = false;
+		} break;
+		case WM_SIZE: {
+			switch(param) {
+				case SIZE_MINIMIZED: {
 					DispatchMinimize();
-					mMinimized = true;
-					mMaximized = false;
-				}
-				break;
-				case SIZE_MAXIMIZED:
-				{
-					mNormalWidth  = mDisplayMode.mWidth;
-					mNormalHeight = mDisplayMode.mHeight;
-					DispatchMaximize((int)LOWORD(plParam), (int)HIWORD(plParam));
-					mMaximized = true;
-					mMinimized = false;
-				}
-				break;
-				case SIZE_RESTORED:
-				{
-					DispatchResize((int)LOWORD(plParam), (int)HIWORD(plParam));
-					mMinimized = false;
-					mMaximized = false;
-				}
-				break;
+					minimized_ = true;
+					maximized_ = false;
+				} break;
+				case SIZE_MAXIMIZED: {
+					normal_width_  = display_mode_.width_;
+					normal_height_ = display_mode_.height_;
+					DispatchMaximize((int)LOWORD(param), (int)HIWORD(param));
+					maximized_ = true;
+					minimized_ = false;
+				} break;
+				case SIZE_RESTORED: {
+					DispatchResize((int)LOWORD(param), (int)HIWORD(param));
+					minimized_ = false;
+					maximized_ = false;
+				} break;
 			}
 		}
 	}
@@ -697,11 +570,11 @@ bool Win32DisplayManager::OnMessage(int pMsg, int pwParam, long plParam)
 
 
 
-int Win32DisplayManager::msWindowCount = 0;
-int Win32DisplayManager::msRegisterCount = 0;
-HANDLE Win32DisplayManager::mshThisInstance = 0;
-WNDCLASSEX Win32DisplayManager::msWindowClass;
-loginstance(UI_GFX, Win32DisplayManager);
+int Win32DisplayManager::window_count_ = 0;
+int Win32DisplayManager::register_count_ = 0;
+HANDLE Win32DisplayManager::this_instance_ = 0;
+WNDCLASSEX Win32DisplayManager::window_class_;
+loginstance(kUiGfx, Win32DisplayManager);
 
 
 

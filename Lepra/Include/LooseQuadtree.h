@@ -6,10 +6,10 @@
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
-	
+
 	The LooseQuadtree class is used to store objects in two dimensions
 	spatially. It can be used as a loose quadtree as well as a normal quadtree.
-	When searching for objects in an area this is the optimal storage class 
+	When searching for objects in an area this is the optimal storage class
 	to do that.
 
 	Each object is combined with an area to tell the octree how much space
@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include "AABR.h"
-#include "Circle.h"
-#include "HashTable.h"
-#include "LepraTypes.h"
-#include "String.h"
-#include "Vector2D.h"
-#include "CollisionDetector2D.h"
+#include "aabr.h"
+#include "circle.h"
+#include "hashtable.h"
+#include "lepratypes.h"
+#include "string.h"
+#include "vector2d.h"
+#include "collisiondetector2d.h"
 #include <list>
 
 // _TObject is the object class itself.
@@ -37,22 +37,20 @@
 #define LQ_TEMPLATE template<class _TKey, class _TObject, class _TVarType, class _THashFunc>
 #define LQ_QUAL LooseQuadtree<_TKey, _TObject, _TVarType, _THashFunc>
 
-namespace Lepra
-{
+namespace lepra {
 
 template<class _TVarType>
-class LQArea
-{
+class LQArea {
 public:
 	// AABR  = Axis Aligned Bounding Rect
 	// AABSQ = Axis Aligned Bounding Square
 	// BC    = Bounding Circle
-	virtual bool IsAABREnclosingArea(const AABR<_TVarType>& pAABR) = 0;
-	virtual bool IsAABSQEnclosingArea(const Vector2D<_TVarType>& pAABSQCenter, _TVarType pHalfAABSQSize) = 0;
-	virtual bool IsBCOverlappingArea(const Circle<_TVarType>& pBC) = 0;
-	virtual bool IsAABROverlappingArea(const AABR<_TVarType>& pAABR) = 0;
+	virtual bool IsAABREnclosingArea(const AABR<_TVarType>& aabr) = 0;
+	virtual bool IsAABSQEnclosingArea(const Vector2D<_TVarType>& aabsq_center, _TVarType half_aabsq_size) = 0;
+	virtual bool IsBCOverlappingArea(const Circle<_TVarType>& bc) = 0;
+	virtual bool IsAABROverlappingArea(const AABR<_TVarType>& aabr) = 0;
 	virtual Vector2D<_TVarType> GetPosition() = 0;
-	virtual void SetPosition(const Vector2D<_TVarType>& pPos) = 0;
+	virtual void SetPosition(const Vector2D<_TVarType>& pos) = 0;
 };
 
 // Default area types.
@@ -61,95 +59,90 @@ class LQCircleArea: public Circle<_TVarType>, public LQArea<_TVarType>
 {
 public:
 	LQCircleArea():
-		Circle<_TVarType>() 
-	{
-		mCD.SetPointOfCollisionEnabled(false);
+		Circle<_TVarType>() {
+		cd_.SetPointOfCollisionEnabled(false);
 	}
-	LQCircleArea(const Vector2D<_TVarType>& pPosition, _TVarType pRadius):
-		Circle<_TVarType>(pPosition, pRadius) 
-	{
-		mCD.SetPointOfCollisionEnabled(false);
+	LQCircleArea(const Vector2D<_TVarType>& position, _TVarType radius):
+		Circle<_TVarType>(position, radius) {
+		cd_.SetPointOfCollisionEnabled(false);
 	}
 
-	bool IsAABREnclosingArea(const AABR<_TVarType>& pAABR) { return mCD.IsAABREnclosingCircle(pAABR, *this); }
-	bool IsAABSQEnclosingArea(const Vector2D<_TVarType>& pAABSQCenter, _TVarType pHalfAABSQSize) { 	return mCD.IsAABREnclosingCircle(AABR<_TVarType>(pAABSQCenter, Vector2D<_TVarType>(pHalfAABSQSize, pHalfAABSQSize)), *this); }
-	bool IsBCOverlappingArea(const Circle<_TVarType>& pBC) { return mCD.StaticCircleToCircleTest(pBC, *this); }
-	bool IsAABROverlappingArea(const AABR<_TVarType>& pAABR) { return mCD.StaticAABRToCircleTest(pAABR, *this); }
+	bool IsAABREnclosingArea(const AABR<_TVarType>& aabr) { return cd_.IsAABREnclosingCircle(aabr, *this); }
+	bool IsAABSQEnclosingArea(const Vector2D<_TVarType>& aabsq_center, _TVarType half_aabsq_size) { 	return cd_.IsAABREnclosingCircle(AABR<_TVarType>(aabsq_center, Vector2D<_TVarType>(half_aabsq_size, half_aabsq_size)), *this); }
+	bool IsBCOverlappingArea(const Circle<_TVarType>& bc) { return cd_.StaticCircleToCircleTest(bc, *this); }
+	bool IsAABROverlappingArea(const AABR<_TVarType>& aabr) { return cd_.StaticAABRToCircleTest(aabr, *this); }
 	Vector2D<_TVarType> GetPosition() { return Circle<_TVarType>::GetPosition(); }
-	void SetPosition(const Vector2D<_TVarType>& pPos) { Circle<_TVarType>::SetPosition(pPos); }
+	void SetPosition(const Vector2D<_TVarType>& pos) { Circle<_TVarType>::SetPosition(pos); }
 
 private:
-	CollisionDetector2D<_TVarType> mCD;
+	CollisionDetector2D<_TVarType> cd_;
 };
 
 template<class _TVarType>
 class LQRectArea : public AABR<_TVarType>, public LQArea<_TVarType>
 {
 public:
-	LQRectArea() : 
-		AABR<_TVarType>() 
-	{
-		mCD.SetPointOfCollisionEnabled(false);
+	LQRectArea() :
+		AABR<_TVarType>() {
+		cd_.SetPointOfCollisionEnabled(false);
 	}
-	LQRectArea(const Vector2D<_TVarType>& pPosition, const Vector2D<_TVarType>& pSize) : 
-		AABR<_TVarType>(pPosition, pSize) 
-	{
-		mCD.SetPointOfCollisionEnabled(false);
+	LQRectArea(const Vector2D<_TVarType>& position, const Vector2D<_TVarType>& size) :
+		AABR<_TVarType>(position, size) {
+		cd_.SetPointOfCollisionEnabled(false);
 	}
 
-	bool IsAABREnclosingArea(const AABR<_TVarType>& pAABR) { return mCD.IsAABR1EnclosingAABR2(pAABR, *this); }
-	bool IsAABSQEnclosingArea(const Vector2D<_TVarType>& pAABSQCenter, _TVarType pHalfAABSQSize) { return mCD.IsAABR1EnclosingAABR2(AABR<_TVarType>(pAABSQCenter, Vector2D<_TVarType>(pHalfAABSQSize, pHalfAABSQSize)), *this); }
-	bool IsBCOverlappingArea(const Circle<_TVarType>& pBC) { return mCD.StaticAABRToCircleTest(*this, pBC); }
-	bool IsAABROverlappingArea(const AABR<_TVarType>& pAABR) { return mCD.StaticAABRToAABRTest(pAABR, *this); }
+	bool IsAABREnclosingArea(const AABR<_TVarType>& aabr) { return cd_.IsAABR1EnclosingAABR2(aabr, *this); }
+	bool IsAABSQEnclosingArea(const Vector2D<_TVarType>& aabsq_center, _TVarType half_aabsq_size) { return cd_.IsAABR1EnclosingAABR2(AABR<_TVarType>(aabsq_center, Vector2D<_TVarType>(half_aabsq_size, half_aabsq_size)), *this); }
+	bool IsBCOverlappingArea(const Circle<_TVarType>& bc) { return cd_.StaticAABRToCircleTest(*this, bc); }
+	bool IsAABROverlappingArea(const AABR<_TVarType>& aabr) { return cd_.StaticAABRToAABRTest(aabr, *this); }
 	Vector2D<_TVarType> GetPosition() { return AABR<_TVarType>::GetPosition(); }
-	void SetPosition(const Vector2D<_TVarType>& pPos) { AABR<_TVarType>::SetPosition(pPos); }
+	void SetPosition(const Vector2D<_TVarType>& pos) { AABR<_TVarType>::SetPosition(pos); }
 
 private:
-	CollisionDetector2D<_TVarType> mCD;
+	CollisionDetector2D<_TVarType> cd_;
 };
 
 template<class _TKey, class _TObject, class _TVarType, class _THashFunc = std::hash<_TKey> >
-class LooseQuadtree
-{
+class LooseQuadtree {
 public:
 	typedef AABR<_TVarType>     AABR_; // Axis Aligned Bounding Rect.
 	typedef Circle<_TVarType>   BC;   // Bounding Circle
 	typedef std::list<_TObject> ObjectList;
 	typedef std::list<AABR_>     AABRList;
 
-	LooseQuadtree(_TObject pErrorObject,		// An object to return when an error occurs.
-		      _TVarType pTotalTreeSize = 65536,	// Length of one dimension of the entire 2D-space.
-		      _TVarType pMinimumCellSize = 16,	// Length of one dimension of the smallest allowed node.
-		      _TVarType pK = 2);		// Node expansion factor.
+	LooseQuadtree(_TObject error_object,		// An object to return when an error occurs.
+		      _TVarType total_tree_size = 65536,	// Length of one dimension of the entire 2D-space.
+		      _TVarType minimum_cell_size = 16,	// Length of one dimension of the smallest allowed node.
+		      _TVarType k = 2);		// Node expansion factor.
 	~LooseQuadtree();
 
-	void InsertObject(_TKey pKey, LQArea<_TVarType>* pArea, _TObject pObject);
-	_TObject RemoveObject(_TKey pKey);
-	_TObject FindObject(_TKey pKey) const;
+	void InsertObject(_TKey key, LQArea<_TVarType>* area, _TObject object);
+	_TObject RemoveObject(_TKey key);
+	_TObject FindObject(_TKey key) const;
 
-	bool MoveObject(_TKey pKey, LQArea<_TVarType>* pNewArea);
-	_TObject MoveObject(_TKey pKey, const Vector2D<_TVarType>& pToPos); // Slightly slower...
+	bool MoveObject(_TKey key, LQArea<_TVarType>* new_area);
+	_TObject MoveObject(_TKey key, const Vector2D<_TVarType>& to_pos); // Slightly slower...
 
-	// Get list with objects within the specified area. The list is not cleared, 
+	// Get list with objects within the specified area. The list is not cleared,
 	// objects are appended.
-	void GetObjects(ObjectList& pObjects, const BC& pBC);
-	void GetObjects(ObjectList& pObjects, const AABR_& pAABR);
+	void GetObjects(ObjectList& objects, const BC& bc);
+	void GetObjects(ObjectList& objects, const AABR_& aabr);
 
 	//
 	// Debug utilities.
 	//
 
-	inline unsigned	GetNumObjects() const {return mNumObjects;}
-	inline unsigned	GetNumNodes() const {return mNumNodes;}
+	inline unsigned	GetNumObjects() const {return num_objects_;}
+	inline unsigned	GetNumNodes() const {return num_nodes_;}
 
 	// Get number of bytes currently allocated by tree (only the nodes, not the objects).
-	inline unsigned	GetMemUsage() const {return mNumNodes * sizeof(Node);}
+	inline unsigned	GetMemUsage() const {return num_nodes_ * sizeof(Node);}
 	// Get number of bytes that the octree would need if all nodes were occupied.
 	// (Only the nodes, not the objects).
 	unsigned GetFullTreeMemSize() const;
 
 	str ToString() const;
-	void GetNodeRects(AABRList& pRects) const;
+	void GetNodeRects(AABRList& rects) const;
 
 private:
 
@@ -157,151 +150,127 @@ private:
 	// and since the objects are 2D, they take up some space, defined by
 	// the area. Each object- and area-pair makes one entry (look at class Entry below).
 	// All entries are stored in a hash table, typedef:ed as EntryTable.
-	class Node
-	{
+	class Node {
 		public:
 
 			// A node entry. Contains the object and its associated volume.
-			class Entry
-			{
+			class Entry {
 			public:
-				inline Entry(LQArea<_TVarType>* pArea, const _TObject& pObject) :
-					mArea(pArea),
-					mObject(pObject)
-				{
+				inline Entry(LQArea<_TVarType>* area, const _TObject& object) :
+					area_(area),
+					object_(object) {
 				}
 
-				inline Entry(const Entry& pEntry)	
-				{
-					mArea = pEntry.mArea;
-					mObject  = pEntry.mObject;
+				inline Entry(const Entry& entry) {
+					area_ = entry.area_;
+					object_  = entry.object_;
 				}
 
-				LQArea<_TVarType>* mArea;
-				_TObject mObject;
+				LQArea<_TVarType>* area_;
+				_TObject object_;
 			};
-			
+
 			typedef HashTable<_TKey, Entry, _THashFunc, 32> EntryTable;
 
-			inline Node(Node* pParent, uint8 pIndex, _TVarType pFixedSizeHalf)
-			{
-				Init(pParent, pIndex, pFixedSizeHalf);
+			inline Node(Node* parent, uint8 index, _TVarType fixed_size_half) {
+				Init(parent, index, fixed_size_half);
 			}
 
-			inline ~Node()
-			{
+			inline ~Node() {
 				DeleteChildren(0);
 			}
 
-			void Init(Node* pParent, uint8 pIndex, _TVarType pFixedSizeHalf)
-			{
+			void Init(Node* parent, uint8 index, _TVarType fixed_size_half) {
 				// Half the size of this node, "unloose", which means
 				// that this is the size of the node as it should be in a normal octree.
-				mFixedSizeHalf = pFixedSizeHalf;
+				fixed_size_half_ = fixed_size_half;
 
-				mParent = pParent;
+				parent_ = parent;
 
-				mChildren[0] = 0;
-				mChildren[1] = 0;
-				mChildren[2] = 0;
-				mChildren[3] = 0;
+				children_[0] = 0;
+				children_[1] = 0;
+				children_[2] = 0;
+				children_[3] = 0;
 
 				// The index tells us which of the parents children this node is.
-				mIndex = pIndex;
+				index_ = index;
 
 				// Childmask is a bitfield containing 1's where there is a child node,
 				// and 0's where there isn't.
-				mChildMask = 0;
-				mObjectCount = 0;
+				child_mask_ = 0;
+				object_count_ = 0;
 			}
 
-			const Vector2D<_TVarType>& GetPosition() const
-			{
-				return mNodeBox.GetPosition();
+			const Vector2D<_TVarType>& GetPosition() const {
+				return node_box_.GetPosition();
 			}
 
-			_TVarType GetSizeHalf() const
-			{
-				return mNodeBox.GetSize().x;
+			_TVarType GetSizeHalf() const {
+				return node_box_.GetSize().x;
 			}
 
-			_TVarType GetFixedSizeHalf() const
-			{
-				return mFixedSizeHalf;
+			_TVarType GetFixedSizeHalf() const {
+				return fixed_size_half_;
 			}
 
-			inline void DeleteChildren(LooseQuadtree* pQuadtree)
-			{
-				for (int i = 0; i < 4; i++)
-				{
-					if (mChildren[i] != 0)
-					{
-						mChildren[i]->DeleteChildren(pQuadtree);
+			inline void DeleteChildren(LooseQuadtree* quadtree) {
+				for (int i = 0; i < 4; i++) {
+					if (children_[i] != 0) {
+						children_[i]->DeleteChildren(quadtree);
 
-						if (pQuadtree != 0)
-						{
-							pQuadtree->RecycleNode(mChildren[i]);
+						if (quadtree != 0) {
+							quadtree->RecycleNode(children_[i]);
+						} else {
+							delete children_[i];
 						}
-						else
-						{
-							delete mChildren[i];
-						}
-						mChildren[i] = 0;
+						children_[i] = 0;
 					}
 				}
 			}
 
-			inline bool IsEmpty()
-			{
-				return (mObjectCount == 0 && mChildMask == 0);
+			inline bool IsEmpty() {
+				return (object_count_ == 0 && child_mask_ == 0);
 			}
 
 /*
-			void GetNodeInfoAsText(std::stringstream& pStr, int pLevel, int pIndex) const
-			{
+			void GetNodeInfoAsText(std::stringstream& s, int level, int index) const {
 				int i;
-				for (i = 0; i < pLevel; i++)
-				{
-					pStr << "\t";
+				for (i = 0; i < level; i++) {
+					s << "\t";
 				}
 
-				pStr << "[" << pIndex << "]\t" << mObjectCount << std::endl;
+				s << "[" << index << "]\t" << object_count_ << std::endl;
 
-				for (i = 0; i < 4; i++)
-				{
-					if (mChildren[i] != NULL)
-					{
-						mChildren[i]->GetNodeInfoAsText(pStr, pLevel + 1, i);
+				for (i = 0; i < 4; i++) {
+					if (children_[i] != NULL) {
+						children_[i]->GetNodeInfoAsText(s, level + 1, i);
 					}
 				}
 			}
 */
 
-			void GetNodeBoxRecursive(AABRList& pBoxes) const
-			{
-				pBoxes.PushBack(mNodeBox);
+			void GetNodeBoxRecursive(AABRList& boxes) const {
+				boxes.PushBack(node_box_);
 
-				for (int i = 0; i < 4; i++)
-				{
-					if (mChildren[i] != NULL)
-					{
-						mChildren[i]->GetNodeBoxRecursive(pBoxes);
+				for (int i = 0; i < 4; i++) {
+					if (children_[i] != NULL) {
+						children_[i]->GetNodeBoxRecursive(boxes);
 					}
 				}
 			}
 
-			_TVarType mFixedSizeHalf;
-			AABR_ mNodeBox;
+			_TVarType fixed_size_half_;
+			AABR_ node_box_;
 
-			Node* mParent;
-			Node* mChildren[4];
+			Node* parent_;
+			Node* children_[4];
 
-			uint8 mIndex;
-			
-			uint16 mChildMask;
-			uint16 mObjectCount;
+			uint8 index_;
 
-			EntryTable mEntryTable;
+			uint16 child_mask_;
+			uint16 object_count_;
+
+			EntryTable entry_table_;
 	};
 
 
@@ -313,57 +282,56 @@ private:
 	// Used to quickly find the object that we search for.
 	typedef HashTable<_TKey, Node*, _THashFunc> NodeTable;
 
-	void InsertObject(_TKey pKey,
-			  typename Node::Entry pEntry,
-			  Node* pNode,
-			  uint16 pDepth);
+	void InsertObject(_TKey key,
+			  typename Node::Entry entry,
+			  Node* node,
+			  uint16 depth);
 
-	typename Node::Entry RemoveObject(_TKey pKey, typename NodeTable::Iterator& pNodeIter);
+	typename Node::Entry RemoveObject(_TKey key, typename NodeTable::Iterator& node_iter);
 
-	_TObject MoveObject(_TKey pKey,
-			    typename NodeTable::Iterator& pNodeIter);
+	_TObject MoveObject(_TKey key,
+			    typename NodeTable::Iterator& node_iter);
 
-	typename Node::EntryTable::Iterator FindObject(_TKey pKey, Node* pObjectNode) const;
+	typename Node::EntryTable::Iterator FindObject(_TKey key, Node* object_node) const;
 
-	inline unsigned GetOverlaps( const Vector2D<_TVarType>& pPosRelParent, 
-				    _TVarType pBoundingRadius, 
-				    _TVarType pChildNodeSize,
-				    _TVarType pParentNodeSize) const;
-	inline unsigned GetOverlaps( const Vector2D<_TVarType>& pPosRelParent, 
-				     _TVarType pSizeX, 
-				     _TVarType pSizeY, 
-				     _TVarType pChildNodeSize,
-				     _TVarType pParentNodeSize) const;
+	inline unsigned GetOverlaps( const Vector2D<_TVarType>& pos_rel_parent,
+				    _TVarType bounding_radius,
+				    _TVarType child_node_size,
+				    _TVarType parent_node_size) const;
+	inline unsigned GetOverlaps( const Vector2D<_TVarType>& pos_rel_parent,
+				     _TVarType size_x,
+				     _TVarType size_y,
+				     _TVarType child_node_size,
+				     _TVarType parent_node_size) const;
 
-	void GetObjectsInBC(Node* pNode, ObjectList& pObjects, const BC& pBC);
-	void GetObjectsInAABR(Node* pNode, ObjectList& pObjects, const AABR_& pAABR);
+	void GetObjectsInBC(Node* node, ObjectList& objects, const BC& bc);
+	void GetObjectsInAABR(Node* node, ObjectList& objects, const AABR_& aabr);
 
-	uint8 GetChild(const Vector2D<_TVarType>& pPos, const Node* pNode);
-	uint8 GetChild(const Vector2D<_TVarType>& pPos, const Node* pNode, Vector2D<_TVarType>& pChildPos);
-	
-	void RecycleNode(Node* pNode);		// Used to minimize the use of new and delete.
-	Node* NewNode(Node* pParent, uint8 pIndex, _TVarType pFixedSizeHalf);
+	uint8 GetChild(const Vector2D<_TVarType>& pos, const Node* node);
+	uint8 GetChild(const Vector2D<_TVarType>& pos, const Node* node, Vector2D<_TVarType>& child_pos);
+
+	void RecycleNode(Node* node);		// Used to minimize the use of new and delete.
+	Node* NewNode(Node* parent, uint8 index, _TVarType fixed_size_half);
 
 
-	enum
-	{
-		MAX_RECYCLED_NODES = 1024,
+	enum {
+		kMaxRecycledNodes = 1024,
 	};
 
 	typedef std::list<Node*> NodeList;
 
-	NodeList mRecycledNodeList;
-	NodeTable mNodeTable;
+	NodeList recycled_node_list_;
+	NodeTable node_table_;
 
-	Node* mRootNode;
+	Node* root_node_;
 
-	uint16 mMaxTreeDepth;
-	_TVarType mK;				// A constant node scaling factor.
+	uint16 max_tree_depth_;
+	_TVarType k_;				// A constant node scaling factor.
 
-	unsigned mNumObjects;
-	unsigned mNumNodes;
+	unsigned num_objects_;
+	unsigned num_nodes_;
 
-	_TObject mErrorObject;
+	_TObject error_object_;
 };
 
 
@@ -372,47 +340,47 @@ private:
 // LO = LooseOctree
 // GO = GetOverlaps
 
-#define MACRO_LO_GO1_TEST_TOP_AND_BOTTOM	\
+#define kMacroLoGo1TestTopAndBottom	\
 {	\
 	/* Test top. */	\
-	if ( ( pPosRelParent.y - pChildNodeSize ) > lMinBoxSeparation || \
-	    ( pChildNodeSize - pPosRelParent.y ) > lMinBoxSeparation ) \
+	if ( ( pos_rel_parent.y - child_node_size ) > min_box_separation || \
+	    ( child_node_size - pos_rel_parent.y ) > min_box_separation ) \
 	{	\
 		/* Remove top. */	\
-		lOverlapMask &= ~(2 + 8);	\
+		overlap_mask &= ~(2 + 8);	\
 	}	\
 	/* Test bottom. */	\
-	else if( ( pPosRelParent.y + pChildNodeSize ) > lMinBoxSeparation || \
-		-( pChildNodeSize + pPosRelParent.y ) > lMinBoxSeparation ) \
+	else if( ( pos_rel_parent.y + child_node_size ) > min_box_separation || \
+		-( child_node_size + pos_rel_parent.y ) > min_box_separation ) \
 	{	\
 		/* Remove bottom. */	\
-		lOverlapMask &= ~(1 + 4);	\
+		overlap_mask &= ~(1 + 4);	\
 	}	\
 }
 
-#define MACRO_LO_GO2_TEST_TOP_AND_BOTTOM	\
+#define kMacroLoGo2TestTopAndBottom	\
 {	\
 	/* Test top. */	\
-	if ( ( pPosRelParent.y - pChildNodeSize ) > lMinBoxSeparationY || \
-	    ( pChildNodeSize - pPosRelParent.y ) > lMinBoxSeparationY ) \
+	if ( ( pos_rel_parent.y - child_node_size ) > min_box_separation_y || \
+	    ( child_node_size - pos_rel_parent.y ) > min_box_separation_y ) \
 	{	\
 		/* Remove top. */	\
-		lOverlapMask &= ~(2 + 8);	\
+		overlap_mask &= ~(2 + 8);	\
 	}	\
 	/* Test bottom. */	\
-	else if( ( pPosRelParent.y + pChildNodeSize ) > lMinBoxSeparationY || \
-		-( pChildNodeSize + pPosRelParent.y ) > lMinBoxSeparationY ) \
+	else if( ( pos_rel_parent.y + child_node_size ) > min_box_separation_y || \
+		-( child_node_size + pos_rel_parent.y ) > min_box_separation_y ) \
 	{	\
 		/* Remove bottom. */	\
-		lOverlapMask &= ~(1 + 4);	\
+		overlap_mask &= ~(1 + 4);	\
 	}	\
 }
 
-#include "LooseQuadtree.inl"
+#include "loosequadtree.inl"
 
 }
 
 #undef LQ_TEMPLATE
 #undef LQ_QUAL
-#undef MACRO_LO_GO1_TEST_TOP_AND_BOTTOM
-#undef MACRO_LO_GO2_TEST_TOP_AND_BOTTOM
+#undef kMacroLoGo1TestTopAndBottom
+#undef kMacroLoGo2TestTopAndBottom

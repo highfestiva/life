@@ -6,25 +6,23 @@
 
 #pragma once
 
-#include "UiButton.h"
+#include "uibutton.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class RadioButton : public Button
-{
+class RadioButton : public Button {
 	typedef Button Parent;
 public:
 
-	RadioButton(const Color& pBodyColor, const wstr& pText);
+	RadioButton(const Color& body_color, const wstr& text);
 	virtual ~RadioButton();
 
-	virtual void SetBaseColor(const Color& pColor);
-	virtual bool OnLButtonUp(int pMouseX, int pMouseY);
+	virtual void SetBaseColor(const Color& color);
+	virtual bool OnLButtonUp(int mouse_x, int mouse_y);
 	virtual Type GetType() const;
 };
 

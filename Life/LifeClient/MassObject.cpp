@@ -5,99 +5,84 @@
 
 
 #include "pch.h"
-#include "MassObject.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../../Lepra/Include/CyclicArray.h"
-#include "../../Lepra/Include/Random.h"
-#include "../../UiTbc/Include/UiGeometryBatch.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "RtVar.h"
+#include "massobject.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/gamemanager.h"
+#include "../../lepra/include/cyclicarray.h"
+#include "../../lepra/include/random.h"
+#include "../../uitbc/include/uigeometrybatch.h"
+#include "../../uicure/include/uigameuimanager.h"
+#include "rtvar.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-MassObject::MassObject(Cure::ResourceManager* pResourceManager, const str& pClassResourceName,
-	UiCure::GameUiManager* pUiManager, Tbc::PhysicsManager::BodyID pTerrainBodyId, size_t pInstanceCount,
-	float pSideLength):
-	Parent(pResourceManager, pClassResourceName, pUiManager),
-	mTerrainBodyId(pTerrainBodyId),
-	mSquareInstanceCount(pInstanceCount/SQUARE_COUNT),
-	mVisibleAddTerm(0.1f),
-	mSquareSideLength((int)(pSideLength/SQUARE_SIDE)),
-	mMiddleSquareX(0x80000000),
-	mMiddleSquareY(0x80000000),
-	mSeed(0)
-{
-	deb_assert(mSquareInstanceCount > 0);
-	::memset(mSquareArray, 0, sizeof(mSquareArray));
-	mFullyVisibleDistance = mSquareSideLength * (SQUARE_MID_TO_CORNER - 1.0f);
-	mVisibleDistanceFactor = (1+mVisibleAddTerm)/mSquareSideLength;
+MassObject::MassObject(cure::ResourceManager* resource_manager, const str& class_resource_name,
+	UiCure::GameUiManager* ui_manager, tbc::PhysicsManager::BodyID terrain_body_id, size_t instance_count,
+	float side_length):
+	Parent(resource_manager, class_resource_name, ui_manager),
+	terrain_body_id_(terrain_body_id),
+	square_instance_count_(instance_count/kSquareCount),
+	visible_add_term_(0.1f),
+	square_side_length_((int)(side_length/kSquareSide)),
+	middle_square_x_(0x80000000),
+	middle_square_y_(0x80000000),
+	seed_(0) {
+	deb_assert(square_instance_count_ > 0);
+	::memset(square_array_, 0, sizeof(square_array_));
+	fully_visible_distance_ = square_side_length_ * (kSquareMidToCorner - 1.0f);
+	visible_distance_factor_ = (1+visible_add_term_)/square_side_length_;
 
-	SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
+	SetPhysicsTypeOverride(cure::kPhysicsOverrideBones);
 }
 
-MassObject::~MassObject()
-{
-	for (int x = 0; x < SQUARE_COUNT; ++x)
-	{
-		delete mSquareArray[x];
+MassObject::~MassObject() {
+	for (int x = 0; x < kSquareCount; ++x) {
+		delete square_array_[x];
 	}
 }
 
 
 
-void MassObject::SetSeed(unsigned pSeed)
-{
-	mSeed = pSeed;
+void MassObject::SetSeed(unsigned seed) {
+	seed_ = seed;
 }
 
-void MassObject::SetRender(bool pRender)
-{
-	const vec3& lCenterPosition = GetPosition();
-	for (int y = 0; y < SQUARE_SIDE; ++y)
-	{
-		for (int x = 0; x < SQUARE_SIDE; ++x)
-		{
-			const size_t lOffset = y*SQUARE_SIDE+x;
-			if (mSquareArray[lOffset])
-			{
-				vec3 lSquarePosition;
-				GridToPosition(x, y, lSquarePosition);
-				const float lDistance = lSquarePosition.GetDistance(lCenterPosition);
-				const float lAlpha = (1.0f + mVisibleAddTerm) - Math::Lerp(0.0f, 1.0f, (lDistance-mFullyVisibleDistance)*mVisibleDistanceFactor);
-				mSquareArray[lOffset]->SetRender(pRender, lAlpha);
+void MassObject::SetRender(bool render) {
+	const vec3& center_position = GetPosition();
+	for (int y = 0; y < kSquareSide; ++y) {
+		for (int x = 0; x < kSquareSide; ++x) {
+			const size_t offset = y*kSquareSide+x;
+			if (square_array_[offset]) {
+				vec3 square_position;
+				GridToPosition(x, y, square_position);
+				const float distance = square_position.GetDistance(center_position);
+				const float _alpha = (1.0f + visible_add_term_) - Math::Lerp(0.0f, 1.0f, (distance-fully_visible_distance_)*visible_distance_factor_);
+				square_array_[offset]->SetRender(render, _alpha);
 			}
 		}
 	}
 }
 
-void MassObject::UiMove()
-{
-	if (!GetUiManager()->CanRender())	// Can only create/remove graphical mass objects if the renderer is online.
-	{
+void MassObject::UiMove() {
+	if (!GetUiManager()->CanRender()) {	// Can only create/remove graphical mass objects if the renderer is online.
 		return;
 	}
 
-	int x = mMiddleSquareX;
-	int y = mMiddleSquareY;
+	int x = middle_square_x_;
+	int y = middle_square_y_;
 
 	PositionToGrid(GetPosition(), x, y);
-	if (x != mMiddleSquareX || y != mMiddleSquareY)
-	{
+	if (x != middle_square_x_ || y != middle_square_y_) {
 		MoveToSquare(x, y);
 	}
-	for (size_t v = 0; v < SQUARE_SIDE; ++v)
-	{
-		for (size_t u = 0; u < SQUARE_SIDE; ++u)
-		{
-			const size_t lOffset = v*SQUARE_SIDE+u;
-			if (!mSquareArray[lOffset])
-			{
+	for (size_t v = 0; v < kSquareSide; ++v) {
+		for (size_t u = 0; u < kSquareSide; ++u) {
+			const size_t offset = v*kSquareSide+u;
+			if (!square_array_[offset]) {
 				CreateSquare(u, v);
 				return;	// Optimization: only create a single square every loop to avoid heavy burdon on single loop.
 			}
@@ -107,116 +92,100 @@ void MassObject::UiMove()
 
 
 
-void MassObject::OnLoaded()
-{
+void MassObject::OnLoaded() {
 	Parent::OnLoaded();
 
-	for (MeshArray::const_iterator y = mMeshResourceArray.begin(); y != mMeshResourceArray.end(); ++y)
-	{
-		Tbc::GeometryReference* lMesh = (Tbc::GeometryReference*)(*y)->GetRamData();
-		if (lMesh)
-		{
-			lMesh->SetAlwaysVisible(false);
+	for (MeshArray::const_iterator y = mesh_resource_array_.begin(); y != mesh_resource_array_.end(); ++y) {
+		tbc::GeometryReference* mesh = (tbc::GeometryReference*)(*y)->GetRamData();
+		if (mesh) {
+			mesh->SetAlwaysVisible(false);
 		}
 	}
 }
 
-void MassObject::PositionToGrid(const vec3& pPosition, int& pX, int& pY) const
-{
+void MassObject::PositionToGrid(const vec3& position, int& _x, int& _y) const {
 	// 2's complement...
-	pX = (pPosition.x < 0)? (int)(pPosition.x/mSquareSideLength)-1 : (int)(pPosition.x/mSquareSideLength);
-	pY = (pPosition.y < 0)? (int)(pPosition.y/mSquareSideLength)-1 : (int)(pPosition.y/mSquareSideLength);
+	_x = (position.x < 0)? (int)(position.x/square_side_length_)-1 : (int)(position.x/square_side_length_);
+	_y = (position.y < 0)? (int)(position.y/square_side_length_)-1 : (int)(position.y/square_side_length_);
 }
 
-void MassObject::GridToPosition(int pX, int pY, vec3& pPosition) const
-{
+void MassObject::GridToPosition(int _x, int _y, vec3& position) const {
 	// 2's complement...
-	pPosition.x = (float)((pX-SQUARE_MID_TO_CORNER+mMiddleSquareX) * mSquareSideLength);
-	pPosition.y = (float)((pY-SQUARE_MID_TO_CORNER+mMiddleSquareY) * mSquareSideLength);
+	position.x = (float)((_x-kSquareMidToCorner+middle_square_x_) * square_side_length_);
+	position.y = (float)((_y-kSquareMidToCorner+middle_square_y_) * square_side_length_);
 }
 
-void MassObject::MoveToSquare(int pX, int pY)
-{
-	const int dy = pY - mMiddleSquareY;
-	const int dx = pX - mMiddleSquareX;
+void MassObject::MoveToSquare(int _x, int _y) {
+	const int dy = _y - middle_square_y_;
+	const int dx = _x - middle_square_x_;
 
 	// Move all existing once that are in reach.
-	Square* lSquareArray[SQUARE_COUNT];
-	::memcpy(lSquareArray, mSquareArray, sizeof(lSquareArray));
-	for (int v = 0; v < SQUARE_SIDE; ++v)
-	{
+	Square* square_array[kSquareCount];
+	::memcpy(square_array, square_array_, sizeof(square_array));
+	for (int v = 0; v < kSquareSide; ++v) {
 		const size_t y = v + dy;
-		for (int u = 0; u < SQUARE_SIDE; ++u)
-		{
+		for (int u = 0; u < kSquareSide; ++u) {
 			const size_t x = u + dx;
-			Square* lSquare = 0;
-			if (x < SQUARE_SIDE && y < SQUARE_SIDE)
-			{
-				const size_t lReadOffset = y*SQUARE_SIDE+x;
-				lSquare = lSquareArray[lReadOffset];
-				lSquareArray[lReadOffset] = 0;
+			Square* square = 0;
+			if (x < kSquareSide && y < kSquareSide) {
+				const size_t read_offset = y*kSquareSide+x;
+				square = square_array[read_offset];
+				square_array[read_offset] = 0;
 			}
-			const size_t lWriteOffset = v*SQUARE_SIDE+u;
-			mSquareArray[lWriteOffset] = lSquare;
+			const size_t write_offset = v*kSquareSide+u;
+			square_array_[write_offset] = square;
 		}
 	}
 	// Destroy all that are no longer in use.
-	for (int x = 0; x < SQUARE_COUNT; ++x)
-	{
-		delete lSquareArray[x];
+	for (int x = 0; x < kSquareCount; ++x) {
+		delete square_array[x];
 	}
 
-	mMiddleSquareX = pX;
-	mMiddleSquareY = pY;
+	middle_square_x_ = _x;
+	middle_square_y_ = _y;
 }
 
-void MassObject::CreateSquare(size_t pX, size_t pY)
-{
-	deb_assert(pX < SQUARE_SIDE && pY < SQUARE_SIDE);
-	deb_assert(!mSquareArray[pY*SQUARE_SIDE+pX]);
+void MassObject::CreateSquare(size_t _x, size_t _y) {
+	deb_assert(_x < kSquareSide && _y < kSquareSide);
+	deb_assert(!square_array_[_y*kSquareSide+_x]);
 
-	uint32 lSeed = mSeed + (uint32)((pY<<16)+pX);
-	std::vector<xform> lDisplacementArray;
-	for (size_t x = 0; x < mSquareInstanceCount; ++x)
-	{
-		quat lRotation;
-		lRotation.RotateAroundOwnY(Random::Uniform(lSeed, 0.0f, PIF*2));
-		lRotation.RotateAroundOwnX(Random::Uniform(lSeed, 0.0f, PIF/8));
-		lRotation.RotateAroundOwnZ(Random::Uniform(lSeed, 0.0f, PIF/8));
-		vec3 lPosition;
-		GridToPosition(pX, pY, lPosition);
-		lPosition.x += Random::Uniform(lSeed, 0.3f, (float)mSquareSideLength);
-		lPosition.y += Random::Uniform(lSeed, 0.3f, (float)mSquareSideLength);
-		if (GetObjectPlacement(lPosition))
-		{
-			std::swap(lPosition.y, lPosition.z);	// TRICKY: transform from RG coords to Maya coords.
-			lPosition.z = -lPosition.z;	// TRICKY: transform from RG coords to Maya coords.
-			//mLog.Infof("Placing mass object at (%g; %g; %g)", lPosition.x, lPosition.y, lPosition.z);
-			lDisplacementArray.push_back(xform(lRotation, lPosition));
+	uint32 _seed = seed_ + (uint32)((_y<<16)+_x);
+	std::vector<xform> _displacement_array;
+	for (size_t x = 0; x < square_instance_count_; ++x) {
+		quat rotation;
+		rotation.RotateAroundOwnY(Random::Uniform(_seed, 0.0f, PIF*2));
+		rotation.RotateAroundOwnX(Random::Uniform(_seed, 0.0f, PIF/8));
+		rotation.RotateAroundOwnZ(Random::Uniform(_seed, 0.0f, PIF/8));
+		vec3 _position;
+		GridToPosition(_x, _y, _position);
+		_position.x += Random::Uniform(_seed, 0.3f, (float)square_side_length_);
+		_position.y += Random::Uniform(_seed, 0.3f, (float)square_side_length_);
+		if (GetObjectPlacement(_position)) {
+			std::swap(_position.y, _position.z);	// TRICKY: transform from RG coords to Maya coords.
+			_position.z = -_position.z;	// TRICKY: transform from RG coords to Maya coords.
+			//log_.Infof("Placing mass object at (%g; %g; %g)", _position.x, _position.y, _position.z);
+			_displacement_array.push_back(xform(rotation, _position));
 		}
 	}
-	mSquareArray[pY*SQUARE_SIDE+pX] = new Square(lSeed, mMeshResourceArray, lDisplacementArray, GetUiManager()->GetRenderer());
+	square_array_[_y*kSquareSide+_x] = new Square(_seed, mesh_resource_array_, _displacement_array, GetUiManager()->GetRenderer());
 }
 
-bool MassObject::GetObjectPlacement(vec3& pPosition) const
-{
-	const float lRayLength = 500;
-	pPosition.z += lRayLength * 0.5f;
-	quat lOrientation;
-	lOrientation.RotateAroundOwnX(PIF);
-	xform lTransform(lOrientation, pPosition);
-	vec3 lCollisionPosition[3];
-	const int lCollisions = GetManager()->GetGameManager()->GetPhysicsManager()->QueryRayCollisionAgainst(
-		lTransform, lRayLength, mTerrainBodyId, lCollisionPosition, 3);
-	if (lCollisions >= 1)
-	{
-		unsigned lIndex = 0;
-		if (lCollisions > 1)
-		{
-			unsigned lSeed = ((int)pPosition.y << 10) + (int)pPosition.x;
-			lIndex = Random::GetRandomNumber(lSeed) % lCollisions;
+bool MassObject::GetObjectPlacement(vec3& position) const {
+	const float ray_length = 500;
+	position.z += ray_length * 0.5f;
+	quat orientation;
+	orientation.RotateAroundOwnX(PIF);
+	xform transform(orientation, position);
+	vec3 collision_position[3];
+	const int collisions = GetManager()->GetGameManager()->GetPhysicsManager()->QueryRayCollisionAgainst(
+		transform, ray_length, terrain_body_id_, collision_position, 3);
+	if (collisions >= 1) {
+		unsigned index = 0;
+		if (collisions > 1) {
+			unsigned _seed = ((int)position.y << 10) + (int)position.x;
+			index = Random::GetRandomNumber(_seed) % collisions;
 		}
-		pPosition.z = lCollisionPosition[lIndex].z;
+		position.z = collision_position[index].z;
 		return true;
 	}
 	return false;
@@ -224,75 +193,62 @@ bool MassObject::GetObjectPlacement(vec3& pPosition) const
 
 
 
-MassObject::Square::Square(uint32 pSeed, const MeshArray& pResourceArray,
-	const std::vector<xform>& pDisplacementArray, UiTbc::Renderer* pRenderer):
-	mRenderer(pRenderer),
-	mDisableTransparency(false)
-{
-	if (pDisplacementArray.empty())
-	{
+MassObject::Square::Square(uint32 seed, const MeshArray& resource_array,
+	const std::vector<xform>& displacement_array, uitbc::Renderer* renderer):
+	renderer_(renderer),
+	disable_transparency_(false) {
+	if (displacement_array.empty()) {
 		return;	// No mesh batches if not inside terrain.
 	}
 
-	quat lRotation;
-	lRotation.RotateAroundWorldX(PIF*0.5f);
-	for (MeshArray::const_iterator y = pResourceArray.begin(); y != pResourceArray.end(); ++y)
-	{
-		Tbc::GeometryReference* lMesh = (Tbc::GeometryReference*)(*y)->GetRamData();
+	quat rotation;
+	rotation.RotateAroundWorldX(PIF*0.5f);
+	for (MeshArray::const_iterator y = resource_array.begin(); y != resource_array.end(); ++y) {
+		tbc::GeometryReference* mesh = (tbc::GeometryReference*)(*y)->GetRamData();
 
-		UiTbc::GeometryBatch* lBatch = new UiTbc::GeometryBatch(lMesh);
-		lBatch->SetBasicMaterialSettings(lMesh->GetBasicMaterialSettings());
-		lBatch->SetTransformation(xform(lRotation, vec3(0, 0, 0)));
-		lBatch->SetInstances(&pDisplacementArray[0], lMesh->GetTransformation().GetPosition(),
-			pDisplacementArray.size(), pSeed, 0.8f, 1.3f, 0.6f, 2.0f, 0.7f, 1.2f);
-		typedef UiTbc::Renderer R;
-		R::GeometryID lGeometryId = mRenderer->AddGeometry(lBatch, R::MAT_SINGLE_COLOR_SOLID_PXS, R::FORCE_NO_SHADOWS);
-		mMassMeshArray.push_back(MassMeshPair(lBatch, lGeometryId));
+		uitbc::GeometryBatch* batch = new uitbc::GeometryBatch(mesh);
+		batch->SetBasicMaterialSettings(mesh->GetBasicMaterialSettings());
+		batch->SetTransformation(xform(rotation, vec3(0, 0, 0)));
+		batch->SetInstances(&displacement_array[0], mesh->GetTransformation().GetPosition(),
+			displacement_array.size(), seed, 0.8f, 1.3f, 0.6f, 2.0f, 0.7f, 1.2f);
+		typedef uitbc::Renderer R;
+		R::GeometryID geometry_id = renderer_->AddGeometry(batch, R::kMatSingleColorSolidPxs, R::kForceNoShadows);
+		mass_mesh_array_.push_back(MassMeshPair(batch, geometry_id));
 	}
 }
 
-MassObject::Square::~Square()
-{
-	for (MassMeshArray::iterator x = mMassMeshArray.begin(); x != mMassMeshArray.end(); ++x)
-	{
-		mRenderer->RemoveGeometry(x->second);
+MassObject::Square::~Square() {
+	for (MassMeshArray::iterator x = mass_mesh_array_.begin(); x != mass_mesh_array_.end(); ++x) {
+		renderer_->RemoveGeometry(x->second);
 		delete x->first;
 	}
-	//mMassMeshArray.clear();
-	//mRenderer = 0;
+	//mass_mesh_array_.clear();
+	//renderer_ = 0;
 }
 
-void MassObject::Square::SetRender(bool pRender, float pAlpha)
-{
-	pAlpha = Math::Clamp(pAlpha, 0.0f, 1.0f);
-	bool lMassObjectFading;
-	v_get(lMassObjectFading, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, true);
-	if (!lMassObjectFading)
-	{
-		pAlpha = 1;
+void MassObject::Square::SetRender(bool render, float alpha) {
+	alpha = Math::Clamp(alpha, 0.0f, 1.0f);
+	bool mass_object_fading;
+	v_get(mass_object_fading, =, UiCure::GetSettings(), kRtvarUi3DEnablemassobjectfading, true);
+	if (!mass_object_fading) {
+		alpha = 1;
 	}
-	for (MassMeshArray::iterator x = mMassMeshArray.begin(); x != mMassMeshArray.end(); ++x)
-	{
-		x->first->SetAlwaysVisible(pRender);
-		x->first->GetBasicMaterialSettings().mAlpha = pAlpha;
-		if (pAlpha <= 0.001f)
-		{
+	for (MassMeshArray::iterator x = mass_mesh_array_.begin(); x != mass_mesh_array_.end(); ++x) {
+		x->first->SetAlwaysVisible(render);
+		x->first->GetBasicMaterialSettings().alpha_ = alpha;
+		if (alpha <= 0.001f) {
 			x->first->SetAlwaysVisible(false);
-		}
-		else if (pAlpha >= 0.99f)
-		{
-			mRenderer->ChangeMaterial(x->second, UiTbc::Renderer::MAT_SINGLE_COLOR_SOLID_PXS);
-		}
-		else
-		{
-			mRenderer->ChangeMaterial(x->second, UiTbc::Renderer::MAT_SINGLE_COLOR_OUTLINE_BLENDED);
+		} else if (alpha >= 0.99f) {
+			renderer_->ChangeMaterial(x->second, uitbc::Renderer::kMatSingleColorSolidPxs);
+		} else {
+			renderer_->ChangeMaterial(x->second, uitbc::Renderer::kMatSingleColorOutlineBlended);
 		}
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, MassObject);
+loginstance(kGameContextCpp, MassObject);
 
 
 

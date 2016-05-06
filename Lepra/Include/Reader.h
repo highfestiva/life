@@ -6,13 +6,12 @@
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "Endian.h"
-#include "String.h"
-#include "IOError.h"
+#include "lepratypes.h"
+#include "endian.h"
+#include "string.h"
+#include "ioerror.h"
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -20,8 +19,7 @@ class InputStream;
 
 
 
-class Reader
-{
+class Reader {
 public:
 
 	friend class DiskFile;
@@ -29,31 +27,31 @@ public:
 	friend class MemFile;
 
 	Reader();
-	Reader(Endian::EndianType pEndian);
-	Reader(InputStream* pIn);
-	Reader(InputStream* pIn, Endian::EndianType pEndian);
+	Reader(Endian::EndianType endian);
+	Reader(InputStream* in);
+	Reader(InputStream* in, Endian::EndianType endian);
 	virtual ~Reader();
 
-	IOError Read(char& pData);
-	IOError Read(wchar_t& pData);
-	IOError Read(int8& pData);
-	IOError Read(uint8& pData);
-	IOError Read(int16& pData);
-	IOError Read(uint16& pData);
-	IOError Read(int32& pData);
-	IOError Read(uint32& pData);
-	IOError Read(int64& pData);
-	IOError Read(uint64& pData);
-	IOError Read(float32& pData);
-	IOError Read(float64& pData);
-	virtual IOError ReadData(void* pBuffer, size_t pSize);
+	IOError Read(char& data);
+	IOError Read(wchar_t& data);
+	IOError Read(int8& data);
+	IOError Read(uint8& data);
+	IOError Read(int16& data);
+	IOError Read(uint16& data);
+	IOError Read(int32& data);
+	IOError Read(uint32& data);
+	IOError Read(int64& data);
+	IOError Read(uint64& data);
+	IOError Read(float32& data);
+	IOError Read(float64& data);
+	virtual IOError ReadData(void* buffer, size_t size);
 	// Allocates (new[]) memory before read. If read failes, the memory is always freed before return.
-	IOError AllocReadData(void** pBuffer, size_t pSize);
+	IOError AllocReadData(void** buffer, size_t size);
 
 	// Use this to ignore data.
-	virtual IOError Skip(size_t pSize);
+	virtual IOError Skip(size_t size);
 
-	void SetReaderEndian(Endian::EndianType pReaderEndian);
+	void SetReaderEndian(Endian::EndianType reader_endian);
 	Endian::EndianType GetReaderEndian() const;
 
 	const str& GetStreamName();
@@ -63,15 +61,15 @@ public:
 	uint64 GetReadCount();
 
 	// Read one line of text (until '\n').
-	IOError ReadLine(str& pString);
+	IOError ReadLine(str& s);
 
 protected:
-	void SetInputStream(InputStream* pInStream);
+	void SetInputStream(InputStream* in_stream);
 private:
 
-	uint64 mReadCount;
-	InputStream* mInStream;
-	Endian::EndianType mReaderEndian;
+	uint64 read_count_;
+	InputStream* in_stream_;
+	Endian::EndianType reader_endian_;
 };
 
 

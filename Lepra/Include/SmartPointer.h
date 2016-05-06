@@ -6,8 +6,7 @@
 
 #pragma once
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -15,106 +14,90 @@ namespace Lepra
 
 
 
-class SmartPointerReference
-{
+class SmartPointerReference {
 public:
-	mutable int mReferenceCount;	// Public for optimization reasons only.
+	mutable int reference_count_;	// Public for optimization reasons only.
 	inline SmartPointerReference():	// Inlined for optimization reasons only.
-		mReferenceCount(0)
-	{
+		reference_count_(0) {
 	};
 };
 
 #define TEMPLATE template<class Type>
 #define QUAL SmartPointer<Type>
 
-TEMPLATE class SmartPointer
-{
+TEMPLATE class SmartPointer {
 public:
 
-	SmartPointer(Type* pObject = 0);
-	SmartPointer(const SmartPointer& pCopy);
+	SmartPointer(Type* object = 0);
+	SmartPointer(const SmartPointer& copy);
 	// TRICKY: (optimized) this class does not have a virtual destructor.
 	~SmartPointer();
 
-	void operator=(Type* pObject);
-	void operator=(const SmartPointer& pCopy);
+	void operator=(Type* object);
+	void operator=(const SmartPointer& copy);
 	operator Type*() const;
 	Type* operator->() const;
 
-	void SetObject(Type* pObject);
+	void SetObject(Type* object);
 	void ReleaseObject();
 
 private:
-	Type* mObject;
+	Type* object_;
 };
 
 
 
-TEMPLATE QUAL::SmartPointer(Type* pObject):
-	mObject(0)
-{
-	SetObject(pObject);
+TEMPLATE QUAL::SmartPointer(Type* object):
+	object_(0) {
+	SetObject(object);
 }
 
-TEMPLATE QUAL::SmartPointer(const SmartPointer& pCopy):
-	mObject(0)
-{
-	SetObject(pCopy.mObject);
+TEMPLATE QUAL::SmartPointer(const SmartPointer& copy):
+	object_(0) {
+	SetObject(copy.object_);
 }
 
-TEMPLATE QUAL::~SmartPointer()
-{
+TEMPLATE QUAL::~SmartPointer() {
 	ReleaseObject();
 }
 
 
 
-TEMPLATE void QUAL::operator=(Type* pObject)
-{
-	SetObject(pObject);
+TEMPLATE void QUAL::operator=(Type* object) {
+	SetObject(object);
 }
 
-TEMPLATE void QUAL::operator=(const SmartPointer& pCopy)
-{
-	SetObject(pCopy.mObject);
+TEMPLATE void QUAL::operator=(const SmartPointer& copy) {
+	SetObject(copy.object_);
 }
 
-TEMPLATE QUAL::operator Type*() const
-{
-	return (mObject);
+TEMPLATE QUAL::operator Type*() const {
+	return (object_);
 }
 
-TEMPLATE Type* QUAL::operator->() const
-{
-	return (mObject);
+TEMPLATE Type* QUAL::operator->() const {
+	return (object_);
 }
 
 
 
-TEMPLATE void QUAL::SetObject(Type* pObject)
-{
-	if (pObject != mObject)
-	{
+TEMPLATE void QUAL::SetObject(Type* object) {
+	if (object != object_) {
 		ReleaseObject();
 
-		mObject = pObject;
-		if (mObject)
-		{
-			++mObject->_mRef.mReferenceCount;
+		object_ = object;
+		if (object_) {
+			++object_->_mRef.reference_count_;
 		}
 	}
 }
 
-TEMPLATE void QUAL::ReleaseObject()
-{
-	if (mObject)
-	{
-		if (--mObject->_mRef.mReferenceCount == 0)
-		{
-			delete (mObject);
+TEMPLATE void QUAL::ReleaseObject() {
+	if (object_) {
+		if (--object_->_mRef.reference_count_ == 0) {
+			delete (object_);
 		}
-		mObject = 0;
+		object_ = 0;
 	}
 }
 

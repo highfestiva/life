@@ -1,18 +1,17 @@
 
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "Win32Target.h"
-#include "../Thread.h"
+#include "win32target.h"
+#include "../thread.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -20,23 +19,21 @@ class Thread;
 
 
 
-class ThreadPointerStorage
-{
+class ThreadPointerStorage {
 public:
 	ThreadPointerStorage();
 	virtual ~ThreadPointerStorage();
 
-	void SetPointer(void* pThread);
+	void SetPointer(void* thread);
 	void* GetPointer();
 
 private:
-	DWORD mTLSIndex;
+	DWORD tls_index_;
 };
 
 
 
-class Win32Lock
-{
+class Win32Lock {
 public:
 	Win32Lock();
 	virtual	~Win32Lock();
@@ -48,19 +45,18 @@ private:
 	Win32Lock(const Win32Lock&);	// Just to forbid copying.
 	void operator=(const Win32Lock&);	// Just to forbid copying.
 
-	CRITICAL_SECTION mMutex;
+	CRITICAL_SECTION mutex_;
 };
 
 
 
-class Win32Condition
-{
+class Win32Condition {
 public:
-	Win32Condition(Win32Lock* pExternalLock);
+	Win32Condition(Win32Lock* external_lock);
 	virtual	~Win32Condition();
 
 	void Wait();
-	bool Wait(float64 pMaxWaitTime);
+	bool Wait(float64 max_wait_time);
 	void Signal();
 	void SignalAll();
 
@@ -68,32 +64,30 @@ private:
 	long Increase();
 	long Decrease();
 
-	Win32Lock* mExternalLock;
-	HANDLE mSemaphore;
-	volatile long mWaitThreadCount;
+	Win32Lock* external_lock_;
+	HANDLE semaphore_;
+	volatile long wait_thread_count_;
 };
 
 
 
-class Win32Semaphore
-{
+class Win32Semaphore {
 public:
 	Win32Semaphore();
-	Win32Semaphore(unsigned pMaxCount);
+	Win32Semaphore(unsigned max_count);
 	virtual ~Win32Semaphore();
 
 	void Wait();
-	bool Wait(float64 pMaxWaitTime);
+	bool Wait(float64 max_wait_time);
 	void Signal();
 
 protected:
-	HANDLE mSemaphore;
+	HANDLE semaphore_;
 };
 
 
 
-class Win32RwLock
-{
+class Win32RwLock {
 public:
 	Win32RwLock();
 	virtual ~Win32RwLock();
@@ -103,13 +97,13 @@ public:
 	void Release();
 
 private:
-	Win32Lock mWriteLock;
-	Win32Condition mReadCondition;
-	Win32Condition mWriteCondition;
-	int mNumPendingReaders;
-	int mNumActiveReaders;
-	int mNumPendingWriters;
-	bool mIsWriting;
+	Win32Lock write_lock_;
+	Win32Condition read_condition_;
+	Win32Condition write_condition_;
+	int num_pending_readers_;
+	int num_active_readers_;
+	int num_pending_writers_;
+	bool is_writing_;
 };
 
 

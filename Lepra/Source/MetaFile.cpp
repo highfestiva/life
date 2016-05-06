@@ -3,585 +3,453 @@
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
-#include "../Include/MetaFile.h"
+#include "../include/metafile.h"
 #include <algorithm>
-#include "../Include/Path.h"
+#include "../include/path.h"
 
-namespace Lepra
-{
+namespace lepra {
 
 MetaFile::MetaFile() :
-	mDiskFile(0),
-	mArchiveFile(0),
-	mReader(0),
-	mWriter(0),
-	mEndian(Endian::TYPE_BIG_ENDIAN)
-{
+	disk_file_(0),
+	archive_file_(0),
+	reader_(0),
+	writer_(0),
+	endian_(Endian::kTypeBigEndian) {
 }
 
-MetaFile::MetaFile(Reader* pReader) :
-	mDiskFile(0),
-	mArchiveFile(0),
-	mReader(pReader),
-	mWriter(0),
-	mEndian(Endian::TYPE_BIG_ENDIAN)
-{
+MetaFile::MetaFile(Reader* reader) :
+	disk_file_(0),
+	archive_file_(0),
+	reader_(reader),
+	writer_(0),
+	endian_(Endian::kTypeBigEndian) {
 }
 
-MetaFile::MetaFile(Writer* pWriter) :
-	mDiskFile(0),
-	mArchiveFile(0),
-	mReader(0),
-	mWriter(pWriter),
-	mEndian(Endian::TYPE_BIG_ENDIAN)
-{
+MetaFile::MetaFile(Writer* writer) :
+	disk_file_(0),
+	archive_file_(0),
+	reader_(0),
+	writer_(writer),
+	endian_(Endian::kTypeBigEndian) {
 }
 
-MetaFile::MetaFile(Reader* pReader, Writer* pWriter) :
-	mDiskFile(0),
-	mArchiveFile(0),
-	mReader(pReader),
-	mWriter(pWriter),
-	mEndian(Endian::TYPE_BIG_ENDIAN)
-{
+MetaFile::MetaFile(Reader* reader, Writer* writer) :
+	disk_file_(0),
+	archive_file_(0),
+	reader_(reader),
+	writer_(writer),
+	endian_(Endian::kTypeBigEndian) {
 }
 
-MetaFile::~MetaFile()
-{
+MetaFile::~MetaFile() {
 	Close();
 }
 
-bool MetaFile::Open(const str& pFileName, OpenMode pMode, bool pCreatePath, Endian::EndianType pEndian)
-{
+bool MetaFile::Open(const str& file_name, OpenMode mode, bool create_path, Endian::EndianType endian) {
 	Close();
-	SetEndian(pEndian);
+	SetEndian(endian);
 
-	bool lOk = false;
+	bool ok = false;
 
-	size_t lSplitIndex = 0;
-	str lPath;
-	str lFile;
-	bool lContinue = true;
+	size_t _split_index = 0;
+	str path;
+	str file;
+	bool do_continue = true;
 
 	// Find a valid combination of archive and file...
-	while (lContinue)
-	{
-		lContinue = SplitPath(pFileName, lPath, lFile, lSplitIndex);
+	while (do_continue) {
+		do_continue = SplitPath(file_name, path, file, _split_index);
 
-		if (lSplitIndex == 0)
-		{
-			lOk = DiskFile::Exists(lPath);
-			if (lOk)
-			{
+		if (_split_index == 0) {
+			ok = DiskFile::Exists(path);
+			if (ok) {
 				AllocDiskFile();
-				lOk = mDiskFile->Open(lPath, ToDiskFileMode(pMode), pCreatePath, pEndian);
-				if (lOk)
-				{
-					lContinue = false;
-				}
-				else
-				{
+				ok = disk_file_->Open(path, ToDiskFileMode(mode), create_path, endian);
+				if (ok) {
+					do_continue = false;
+				} else {
 					Close();
 				}
 			}
-		}
-		else
-		{
-			str lArchiveName;
-			lOk = FindValidArchiveName(lPath, lArchiveName);
+		} else {
+			str _archive_name;
+			ok = FindValidArchiveName(path, _archive_name);
 
-			if (lOk)
-			{
-				AllocArchiveFile(lArchiveName);
-				lOk = mArchiveFile->Open(lFile, ToArchiveMode(pMode), pEndian);
+			if (ok) {
+				AllocArchiveFile(_archive_name);
+				ok = archive_file_->Open(file, ToArchiveMode(mode), endian);
 			}
 
-			if (lOk)
-			{
-				lContinue = false;
-			}
-			else
-			{
+			if (ok) {
+				do_continue = false;
+			} else {
 				Close();
 			}
 		}
 
-		lSplitIndex++;
+		_split_index++;
 	}
 
-	lOk = (mDiskFile != 0 || mArchiveFile != 0);
+	ok = (disk_file_ != 0 || archive_file_ != 0);
 
-	return lOk;
+	return ok;
 }
 
-void MetaFile::Close()
-{
-	if (mDiskFile != 0)
-	{
-		mDiskFile->Close();
-		delete mDiskFile;
-		mDiskFile = 0;
-	}
-	else if (mArchiveFile != 0)
-	{
-		mArchiveFile->Close();
-		delete mArchiveFile;
-		mArchiveFile = 0;
+void MetaFile::Close() {
+	if (disk_file_ != 0) {
+		disk_file_->Close();
+		delete disk_file_;
+		disk_file_ = 0;
+	} else if (archive_file_ != 0) {
+		archive_file_->Close();
+		delete archive_file_;
+		archive_file_ = 0;
 	}
 }
 
-void MetaFile::SetEndian(Endian::EndianType pEndian)
-{
-	mEndian = pEndian;
-	Parent::SetEndian(pEndian);
-	if (mDiskFile != 0)
-	{
-		mDiskFile->SetEndian(mEndian);
-	}
-	else if (mArchiveFile != 0)
-	{
-		mArchiveFile->SetEndian(mEndian);
+void MetaFile::SetEndian(Endian::EndianType endian) {
+	endian_ = endian;
+	Parent::SetEndian(endian);
+	if (disk_file_ != 0) {
+		disk_file_->SetEndian(endian_);
+	} else if (archive_file_ != 0) {
+		archive_file_->SetEndian(endian_);
 	}
 }
 
-Endian::EndianType MetaFile::GetEndian()
-{
-	return mEndian;
+Endian::EndianType MetaFile::GetEndian() {
+	return endian_;
 }
 
-int64 MetaFile::GetSize() const
-{
-	int64 lSize = 0;
+int64 MetaFile::GetSize() const {
+	int64 _size = 0;
 
-	if (mDiskFile != 0)
-	{
-		lSize = mDiskFile->GetSize();
-	}
-	else if (mArchiveFile != 0)
-	{
-		lSize = mArchiveFile->GetSize();
+	if (disk_file_ != 0) {
+		_size = disk_file_->GetSize();
+	} else if (archive_file_ != 0) {
+		_size = archive_file_->GetSize();
 	}
 
-	return lSize;
+	return _size;
 }
 
-int64 MetaFile::Tell() const
-{
-	int64 lPos = 0;
+int64 MetaFile::Tell() const {
+	int64 pos = 0;
 
-	if (mDiskFile != 0)
-	{
-		lPos = mDiskFile->Tell();
-	}
-	else if (mArchiveFile != 0)
-	{
-		lPos = mArchiveFile->Tell();
+	if (disk_file_ != 0) {
+		pos = disk_file_->Tell();
+	} else if (archive_file_ != 0) {
+		pos = archive_file_->Tell();
 	}
 
-	return lPos;
+	return pos;
 }
 
-int64 MetaFile::Seek(int64 pOffset, FileOrigin pFrom)
-{
-	int64 lOffset = 0;
+int64 MetaFile::Seek(int64 offset, FileOrigin from) {
+	int64 _offset = 0;
 
-	if (mDiskFile != 0)
-	{
-		lOffset = mDiskFile->Seek(pOffset, pFrom);
-	}
-	else if (mArchiveFile != 0)
-	{
-		lOffset = mArchiveFile->Seek(pOffset, pFrom);
+	if (disk_file_ != 0) {
+		_offset = disk_file_->Seek(offset, from);
+	} else if (archive_file_ != 0) {
+		_offset = archive_file_->Seek(offset, from);
 	}
 
-	return lOffset;
+	return _offset;
 }
 
-str MetaFile::GetFullName() const
-{
-	if (mDiskFile != 0)
-	{
-		return mDiskFile->GetFullName();
-	}
-	else if (mArchiveFile != 0)
-	{
-		return mArchiveFile->GetFullName();
+str MetaFile::GetFullName() const {
+	if (disk_file_ != 0) {
+		return disk_file_->GetFullName();
+	} else if (archive_file_ != 0) {
+		return archive_file_->GetFullName();
 	}
 
 	return "";
 }
 
-str MetaFile::GetName() const
-{
-	if (mDiskFile != 0)
-	{
-		return mDiskFile->GetName();
-	}
-	else if (mArchiveFile != 0)
-	{
-		return mArchiveFile->GetName();
+str MetaFile::GetName() const {
+	if (disk_file_ != 0) {
+		return disk_file_->GetName();
+	} else if (archive_file_ != 0) {
+		return archive_file_->GetName();
 	}
 
 	return "";
 }
 
-str MetaFile::GetPath() const
-{
-	if (mDiskFile != 0)
-	{
-		return mDiskFile->GetPath();
-	}
-	else if (mArchiveFile != 0)
-	{
-		return mArchiveFile->GetPath();
+str MetaFile::GetPath() const {
+	if (disk_file_ != 0) {
+		return disk_file_->GetPath();
+	} else if (archive_file_ != 0) {
+		return archive_file_->GetPath();
 	}
 
 	return "";
 }
 
-IOError MetaFile::ReadData(void* pBuffer, size_t pSize)
-{
-	IOError lError = IO_FILE_NOT_OPEN;
+IOError MetaFile::ReadData(void* buffer, size_t size) {
+	IOError error = kIoFileNotOpen;
 
-	if (mDiskFile != 0)
-	{
-		lError = mDiskFile->ReadData(pBuffer, pSize);
-	}
-	else if (mArchiveFile != 0)
-	{
-		lError = mArchiveFile->ReadData(pBuffer, pSize);
+	if (disk_file_ != 0) {
+		error = disk_file_->ReadData(buffer, size);
+	} else if (archive_file_ != 0) {
+		error = archive_file_->ReadData(buffer, size);
 	}
 
-	return lError;
+	return error;
 }
 
-IOError MetaFile::WriteData(const void* pBuffer, size_t pSize)
-{
-	IOError lError = IO_FILE_NOT_OPEN;
+IOError MetaFile::WriteData(const void* buffer, size_t size) {
+	IOError error = kIoFileNotOpen;
 
-	if (mDiskFile != 0)
-	{
-		lError = mDiskFile->WriteData(pBuffer, pSize);
-	}
-	else if (mArchiveFile != 0)
-	{
-		lError = mArchiveFile->WriteData(pBuffer, pSize);
+	if (disk_file_ != 0) {
+		error = disk_file_->WriteData(buffer, size);
+	} else if (archive_file_ != 0) {
+		error = archive_file_->WriteData(buffer, size);
 	}
 
-	return lError;
+	return error;
 }
 
 
-int64 MetaFile::GetAvailable() const
-{
-	int64 lAvailable = 0;
+int64 MetaFile::GetAvailable() const {
+	int64 available = 0;
 
-	if (mDiskFile != 0)
-	{
-		lAvailable = mDiskFile->GetAvailable();
-	}
-	else if (mArchiveFile != 0)
-	{
-		lAvailable = mArchiveFile->GetAvailable();
+	if (disk_file_ != 0) {
+		available = disk_file_->GetAvailable();
+	} else if (archive_file_ != 0) {
+		available = archive_file_->GetAvailable();
 	}
 
-	return lAvailable;
+	return available;
 }
 
-IOError MetaFile::ReadRaw(void* pBuffer, size_t pSize)
-{
-	IOError lError = IO_FILE_NOT_OPEN;
+IOError MetaFile::ReadRaw(void* buffer, size_t size) {
+	IOError error = kIoFileNotOpen;
 
-	if (mDiskFile != 0)
-	{
-		lError = mDiskFile->ReadRaw(pBuffer, pSize);
-	}
-	else if (mArchiveFile != 0)
-	{
-		lError = mArchiveFile->ReadRaw(pBuffer, pSize);
+	if (disk_file_ != 0) {
+		error = disk_file_->ReadRaw(buffer, size);
+	} else if (archive_file_ != 0) {
+		error = archive_file_->ReadRaw(buffer, size);
 	}
 
-	return lError;
+	return error;
 }
 
-IOError MetaFile::Skip(size_t pSize)
-{
-	return (Parent::Skip(pSize));
+IOError MetaFile::Skip(size_t size) {
+	return (Parent::Skip(size));
 }
 
-IOError MetaFile::WriteRaw(const void* pBuffer, size_t pSize)
-{
-	IOError lError = IO_FILE_NOT_OPEN;
+IOError MetaFile::WriteRaw(const void* buffer, size_t size) {
+	IOError error = kIoFileNotOpen;
 
-	if (mDiskFile != 0)
-	{
-		lError = mDiskFile->WriteRaw(pBuffer, pSize);
-	}
-	else if (mArchiveFile != 0)
-	{
-		lError = mArchiveFile->WriteRaw(pBuffer, pSize);
+	if (disk_file_ != 0) {
+		error = disk_file_->WriteRaw(buffer, size);
+	} else if (archive_file_ != 0) {
+		error = archive_file_->WriteRaw(buffer, size);
 	}
 
-	return lError;
+	return error;
 }
 
-void MetaFile::Flush()
-{
-	if (mDiskFile != 0)
-	{
-		mDiskFile->Flush();
-	}
-	else if (mArchiveFile != 0)
-	{
-		mArchiveFile->Flush();
+void MetaFile::Flush() {
+	if (disk_file_ != 0) {
+		disk_file_->Flush();
+	} else if (archive_file_ != 0) {
+		archive_file_->Flush();
 	}
 }
 
-void MetaFile::AllocDiskFile()
-{
-	if(mReader != 0 && mWriter != 0)
-	{
-		mDiskFile = new DiskFile(mReader, mWriter);
-	}
-	else if(mReader != 0)
-	{
-		mDiskFile = new DiskFile(mReader);
-	}
-	else if(mWriter != 0)
-	{
-		mDiskFile = new DiskFile(mWriter);
-	}
-	else
-	{
-		mDiskFile = new DiskFile();
+void MetaFile::AllocDiskFile() {
+	if(reader_ != 0 && writer_ != 0) {
+		disk_file_ = new DiskFile(reader_, writer_);
+	} else if(reader_ != 0) {
+		disk_file_ = new DiskFile(reader_);
+	} else if(writer_ != 0) {
+		disk_file_ = new DiskFile(writer_);
+	} else {
+		disk_file_ = new DiskFile();
 	}
 
-	mDiskFile->SetEndian(mEndian);
+	disk_file_->SetEndian(endian_);
 }
 
-void MetaFile::AllocArchiveFile(const str& pArchiveName)
-{
-	if(mReader != 0 && mWriter != 0)
-	{
-		mArchiveFile = new ArchiveFile(pArchiveName, mReader, mWriter);
-	}
-	else if(mReader != 0)
-	{
-		mArchiveFile = new ArchiveFile(pArchiveName, mReader);
-	}
-	else if(mWriter != 0)
-	{
-		mArchiveFile = new ArchiveFile(pArchiveName, mWriter);
-	}
-	else
-	{
-		mArchiveFile = new ArchiveFile(pArchiveName);
+void MetaFile::AllocArchiveFile(const str& archive_name) {
+	if(reader_ != 0 && writer_ != 0) {
+		archive_file_ = new ArchiveFile(archive_name, reader_, writer_);
+	} else if(reader_ != 0) {
+		archive_file_ = new ArchiveFile(archive_name, reader_);
+	} else if(writer_ != 0) {
+		archive_file_ = new ArchiveFile(archive_name, writer_);
+	} else {
+		archive_file_ = new ArchiveFile(archive_name);
 	}
 
-	
-	if (IsZipFile(Path::GetExtension(pArchiveName)))
-	{
-		mArchiveFile->SetArchiveType(ArchiveFile::ZIP);
-	}
-	else
-	{
-		mArchiveFile->SetArchiveType(ArchiveFile::UNCOMPRESSED);
+
+	if (IsZipFile(Path::GetExtension(archive_name))) {
+		archive_file_->SetArchiveType(ArchiveFile::kZip);
+	} else {
+		archive_file_->SetArchiveType(ArchiveFile::kUncompressed);
 	}
 
-	mArchiveFile->SetEndian(mEndian);
+	archive_file_->SetEndian(endian_);
 }
 
-DiskFile::OpenMode MetaFile::ToDiskFileMode(OpenMode pMode)
-{
-	DiskFile::OpenMode lMode = DiskFile::MODE_READ;
-	switch (pMode)
-	{
-		case READ_ONLY:
-		{
-			lMode = DiskFile::MODE_READ;
+DiskFile::OpenMode MetaFile::ToDiskFileMode(OpenMode mode) {
+	DiskFile::OpenMode _mode = DiskFile::kModeRead;
+	switch (mode) {
+		case kReadOnly: {
+			_mode = DiskFile::kModeRead;
 			break;
 		}
-		case WRITE_ONLY:
-		{
-			lMode = DiskFile::MODE_WRITE;
+		case kWriteOnly: {
+			_mode = DiskFile::kModeWrite;
 			break;
 		}
-		case WRITE_APPEND:
-		{
-			lMode = DiskFile::MODE_WRITE_APPEND;
+		case kWriteAppend: {
+			_mode = DiskFile::kModeWriteAppend;
 			break;
 		}
 	}
 
-	return lMode;
+	return _mode;
 }
 
-ArchiveFile::OpenMode MetaFile::ToArchiveMode(OpenMode pMode)
-{
-	ArchiveFile::OpenMode lMode = ArchiveFile::READ_ONLY;
-	switch (pMode)
-	{
-		case READ_ONLY:
-		{
-			lMode = ArchiveFile::READ_ONLY;
+ArchiveFile::OpenMode MetaFile::ToArchiveMode(OpenMode mode) {
+	ArchiveFile::OpenMode _mode = ArchiveFile::kReadOnly;
+	switch (mode) {
+		case kReadOnly: {
+			_mode = ArchiveFile::kReadOnly;
 			break;
 		}
-		case WRITE_ONLY:
-		{
-			lMode = ArchiveFile::WRITE_ONLY;
+		case kWriteOnly: {
+			_mode = ArchiveFile::kWriteOnly;
 			break;
 		}
-		case WRITE_APPEND:
-		{
-			lMode = ArchiveFile::WRITE_APPEND;
+		case kWriteAppend: {
+			_mode = ArchiveFile::kWriteAppend;
 			break;
 		}
 	}
 
-	return lMode;
+	return _mode;
 }
 
 
-bool MetaFile::IsZipFile(const str& pExtension)
-{
-	bool lOk = false;
+bool MetaFile::IsZipFile(const str& extension) {
+	bool ok = false;
 
-	if (smZipExtensions != 0)
-	{
-		lOk = (std::find(smZipExtensions->begin(), smZipExtensions->end(), pExtension) != smZipExtensions->end());
+	if (zip_extensions_ != 0) {
+		ok = (std::find(zip_extensions_->begin(), zip_extensions_->end(), extension) != zip_extensions_->end());
 	}
-	return lOk;
+	return ok;
 }
 
-bool MetaFile::IsUncompressedArchive(const str& pExtension)
-{
-	bool lOk = false;
+bool MetaFile::IsUncompressedArchive(const str& extension) {
+	bool ok = false;
 
-	if (smArchiveExtensions != 0)
-	{
-		lOk = (std::find(smArchiveExtensions->begin(), smArchiveExtensions->end(), pExtension) != smArchiveExtensions->end());
+	if (archive_extensions_ != 0) {
+		ok = (std::find(archive_extensions_->begin(), archive_extensions_->end(), extension) != archive_extensions_->end());
 	}
 
-	return lOk;
+	return ok;
 }
 
-void MetaFile::AddZipExtension(const str& pExtension)
-{
-	if (smZipExtensions == 0)
-	{
-		smZipExtensions = new std::list<str>();
+void MetaFile::AddZipExtension(const str& extension) {
+	if (zip_extensions_ == 0) {
+		zip_extensions_ = new std::list<str>();
 	}
 
-	smZipExtensions->push_back(pExtension);
-	smZipExtensions->sort();
-	smZipExtensions->unique();
+	zip_extensions_->push_back(extension);
+	zip_extensions_->sort();
+	zip_extensions_->unique();
 }
 
-void MetaFile::AddUncompressedExtension(const str& pExtension)
-{
-	if (smArchiveExtensions == 0)
-	{
-		smArchiveExtensions = new std::list<str>();
+void MetaFile::AddUncompressedExtension(const str& extension) {
+	if (archive_extensions_ == 0) {
+		archive_extensions_ = new std::list<str>();
 	}
 
-	smArchiveExtensions->push_back(pExtension);
-	smArchiveExtensions->sort();
-	smArchiveExtensions->unique();
+	archive_extensions_->push_back(extension);
+	archive_extensions_->sort();
+	archive_extensions_->unique();
 }
 
-void MetaFile::ClearExtensions()
-{
-	if (smZipExtensions)
-	{
-		smZipExtensions->clear();
-		delete smZipExtensions;
-		smZipExtensions = 0;
+void MetaFile::ClearExtensions() {
+	if (zip_extensions_) {
+		zip_extensions_->clear();
+		delete zip_extensions_;
+		zip_extensions_ = 0;
 	}
 
-	if (smArchiveExtensions)
-	{
-		smArchiveExtensions->clear();
-		delete smArchiveExtensions;
-		smArchiveExtensions = 0;
+	if (archive_extensions_) {
+		archive_extensions_->clear();
+		delete archive_extensions_;
+		archive_extensions_ = 0;
 	}
 }
 
-std::list<str>* MetaFile::smZipExtensions;
-std::list<str>* MetaFile::smArchiveExtensions;
+std::list<str>* MetaFile::zip_extensions_;
+std::list<str>* MetaFile::archive_extensions_;
 
-bool MetaFile::SplitPath(const str& pFilename, str& pLeft, str& pRight, size_t pSplitIndex)
-{
-	bool lOk = true;
-	size_t lSplitIndex = pFilename.length();
+bool MetaFile::SplitPath(const str& filename, str& left, str& right, size_t split_index) {
+	bool ok = true;
+	size_t _split_index = filename.length();
 	size_t i;
 
-	for (i = 0; i < pSplitIndex; i++)
-	{
-		int lIndex1 = (int)pFilename.rfind((char)'/', lSplitIndex-1);
-		int lIndex2 = (int)pFilename.rfind((char)'\\', lSplitIndex-1);
+	for (i = 0; i < split_index; i++) {
+		int index1 = (int)filename.rfind((char)'/', _split_index-1);
+		int index2 = (int)filename.rfind((char)'\\', _split_index-1);
 
-		if (lIndex1 > lIndex2)
-		{
-			lSplitIndex = lIndex1;
-		}
-		else if (lIndex2 > lIndex1)
-		{
-			lSplitIndex = lIndex2;
-		}
-		else if (lIndex1 == -1 && lIndex2 == -1)
-		{
-			lSplitIndex = 0;
-			lOk = false;
+		if (index1 > index2) {
+			_split_index = index1;
+		} else if (index2 > index1) {
+			_split_index = index2;
+		} else if (index1 == -1 && index2 == -1) {
+			_split_index = 0;
+			ok = false;
 			break;
 		}
 	}
 
-	pLeft = pFilename.substr(0, lSplitIndex);
-	pRight = pFilename.substr(lSplitIndex);
+	left = filename.substr(0, _split_index);
+	right = filename.substr(_split_index);
 
-	if (!pRight.empty() && (pRight[0] == '/' || pRight[0] == '\\'))
-	{
-		pRight.erase(0, 1);
+	if (!right.empty() && (right[0] == '/' || right[0] == '\\')) {
+		right.erase(0, 1);
 	}
 
-	return lOk;
+	return ok;
 }
 
-bool MetaFile::FindValidArchiveName(const str& pArchivePrefix, str& pFullArchiveName)
-{
-	std::list<str>::iterator lIter;
+bool MetaFile::FindValidArchiveName(const str& archive_prefix, str& full_archive_name) {
+	std::list<str>::iterator iter;
 
-	bool lOk = false;
+	bool ok = false;
 
-	if (smZipExtensions != 0)
-	{
-		for (lIter = smZipExtensions->begin(); lIter != smZipExtensions->end(); ++lIter)
-		{
-			str lFileName(pArchivePrefix + (*lIter));
-			if (DiskFile::Exists(lFileName) == true)
-			{
-				pFullArchiveName = lFileName;
-				lOk = true;
+	if (zip_extensions_ != 0) {
+		for (iter = zip_extensions_->begin(); iter != zip_extensions_->end(); ++iter) {
+			str _file_name(archive_prefix + (*iter));
+			if (DiskFile::Exists(_file_name) == true) {
+				full_archive_name = _file_name;
+				ok = true;
 				break;
 			}
 		}
 	}
 
-	if (lOk == false && smArchiveExtensions != 0)
-	{
-		for (lIter = smArchiveExtensions->begin(); lIter != smArchiveExtensions->end(); ++lIter)
-		{
-			str lFileName(pArchivePrefix + (*lIter));
-			if (DiskFile::Exists(lFileName) == true)
-			{
-				pFullArchiveName = lFileName;
-				lOk = true;
+	if (ok == false && archive_extensions_ != 0) {
+		for (iter = archive_extensions_->begin(); iter != archive_extensions_->end(); ++iter) {
+			str _file_name(archive_prefix + (*iter));
+			if (DiskFile::Exists(_file_name) == true) {
+				full_archive_name = _file_name;
+				ok = true;
 				break;
 			}
 		}
 	}
 
-	return lOk;
+	return ok;
 }
 
 }

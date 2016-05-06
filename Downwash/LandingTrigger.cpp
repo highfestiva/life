@@ -1,58 +1,49 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "LandingTrigger.h"
-#include "../Cure/Include/ContextManager.h"
-#include "DownwashManager.h"
+#include "landingtrigger.h"
+#include "../cure/include/contextmanager.h"
+#include "downwashmanager.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-LandingTrigger::LandingTrigger(Cure::ContextManager* pManager):
-	Parent(pManager, "LandingTrigger")
-{
+LandingTrigger::LandingTrigger(cure::ContextManager* manager):
+	Parent(manager, "LandingTrigger") {
 }
 
-LandingTrigger::~LandingTrigger()
-{
+LandingTrigger::~LandingTrigger() {
 }
 
 
 
-void LandingTrigger::DidTrigger(Cure::ContextObject* pBody)
-{
-	if (!strutil::StartsWith(pBody->GetClassId(), "helicopter"))
-	{
-		mAllowBulletTime = true;
+void LandingTrigger::DidTrigger(cure::ContextObject* body) {
+	if (!strutil::StartsWith(body->GetClassId(), "helicopter")) {
+		allow_bullet_time_ = true;
 		return;
 	}
-	if (((DownwashManager*)GetManager()->GetGameManager())->DidFinishLevel())
-	{
-		GetManager()->AddGameAlarmCallback(this, 0, mBulletTimeDuration, 0);
-	}
-	else
-	{
-		mAllowBulletTime = true;
+	if (((DownwashManager*)GetManager()->GetGameManager())->DidFinishLevel()) {
+		GetManager()->AddGameAlarmCallback(this, 0, bullet_time_duration_, 0);
+	} else {
+		allow_bullet_time_ = true;
 	}
 }
 
-void LandingTrigger::OnAlarm(int pAlarmId, void* pExtraData)
-{
-	Parent::OnAlarm(pAlarmId, pExtraData);
+void LandingTrigger::OnAlarm(int alarm_id, void* extra_data) {
+	Parent::OnAlarm(alarm_id, extra_data);
 	((DownwashManager*)GetManager()->GetGameManager())->StepLevel(+1);
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, LandingTrigger);
+loginstance(kGameContextCpp, LandingTrigger);
 
 
 

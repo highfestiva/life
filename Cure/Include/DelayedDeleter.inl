@@ -1,32 +1,29 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2009, Righteous Games
 
 
 
-#include "../Include/DelayedDeleter.h"
+#include "../include/delayeddeleter.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
 template<class _T>
-DelayedDeleter<_T>::DelayedDeleter(ResourceManager* pResourceManager, ContextManager* pManager, _T* pObject):
-	Parent(pResourceManager, "DelayedDeleter"),
-	mObject(pObject)
-{
-	pManager->AddLocalObject(this);
+DelayedDeleter<_T>::DelayedDeleter(ResourceManager* resource_manager, ContextManager* manager, _T* object):
+	Parent(resource_manager, "DelayedDeleter"),
+	object_(object) {
+	manager->AddLocalObject(this);
 	GetManager()->PostKillObject(GetInstanceId());
 }
 
 template<class _T>
-DelayedDeleter<_T>::~DelayedDeleter()
-{
-	delete mObject;
-	mObject = 0;
+DelayedDeleter<_T>::~DelayedDeleter() {
+	delete object_;
+	object_ = 0;
 }
 
 

@@ -1,20 +1,19 @@
 
-// Author: Jonas Bystršm
+// Author: Jonas BystrÂšm
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiLepra.h"
+#include "../uilepra.h"
 #ifdef LEPRA_IOS
-#include "UiMacOpenGLDisplay.h"
-#include "../UiInput.h"
+#include "uimacopengldisplay.h"
+#include "../uiinput.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
@@ -22,19 +21,17 @@ class IosInputDevice;
 
 
 
-class IosInputElement: public InputElement
-{
+class IosInputElement: public InputElement {
 	typedef InputElement Parent;
 public:
-	IosInputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
-		IosInputDevice* pParentDevice);
+	IosInputElement(InputElement::Type type, Interpretation interpretation, int type_index,
+		IosInputDevice* parent_device);
 	virtual ~IosInputElement();
 
 private:
-	enum
-	{
-		MAX_INT = 0x7FFFFFFF,
-		MIN_INT  = 0x80000000,
+	enum {
+		kMaxInt = 0x7FFFFFFF,
+		kMinInt  = 0x80000000,
 	};
 
 	logclass();
@@ -42,10 +39,9 @@ private:
 
 
 
-class IosInputDevice: public InputDevice
-{
+class IosInputDevice: public InputDevice {
 public:
-	IosInputDevice(InputManager* pManager);
+	IosInputDevice(InputManager* manager);
 	virtual ~IosInputDevice();
 
 	virtual void Activate();
@@ -53,28 +49,27 @@ public:
 
 	virtual void PollEvents();
 
-	void AddElement(InputElement* pElement);
+	void AddElement(InputElement* element);
 
 protected:
 private:
-	int mRelAxisCount;
-	int mAbsAxisCount;
-	int mAnalogueCount;
-	int mButtonCount;
+	int rel_axis_count_;
+	int abs_axis_count_;
+	int analogue_count_;
+	int button_count_;
 
 	logclass();
 };
 
 
 
-class IosInputManager: public InputManager, public MacObserver
-{
+class IosInputManager: public InputManager, public MacObserver {
 	typedef InputManager Parent;
 public:
 	// Declared as friend in order to get access to screen width and height.
 	friend class IosInputElement;
 
-	IosInputManager(MacOpenGLDisplay* pDisplayManager);
+	IosInputManager(MacOpenGLDisplay* display_manager);
 	virtual ~IosInputManager();
 
 	bool IsInitialized();
@@ -92,7 +87,7 @@ public:
 	virtual const InputDevice* GetMouse() const;
 	virtual InputDevice* GetMouse();
 
-	virtual void SetCursorVisible(bool pVisible);
+	virtual void SetCursorVisible(bool visible);
 
 	virtual float GetCursorX();
 	virtual float GetCursorY();
@@ -104,22 +99,22 @@ private:
 	void AddObserver();
 	void RemoveObserver();
 
-	MacOpenGLDisplay* mDisplayManager;
+	MacOpenGLDisplay* display_manager_;
 
-	bool mInitialized;
+	bool initialized_;
 
 	// The entire display area (not just the user's window).
-	int mScreenWidth;
-	int mScreenHeight;
+	int screen_width_;
+	int screen_height_;
 
 	// Mouse related stuff.
-	float mCursorX;
-	float mCursorY;
+	float cursor_x_;
+	float cursor_y_;
 
 	// Default devices.
-	InputDevice* mKeyboard;
-	InputDevice* mMouse;
-	int mTypeCount[InputDevice::TYPE_COUNT];
+	InputDevice* keyboard_;
+	InputDevice* mouse_;
+	int type_count_[InputDevice::kTypeCount];
 
 	logclass();
 };

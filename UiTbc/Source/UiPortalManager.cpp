@@ -5,116 +5,100 @@
 */
 
 #include "pch.h"
-#include "../Include/UiPortalManager.h"
-#include "../Include/UiRenderer.h"
-#include "../../Lepra/Include/Log.h"
-#include "../../Tbc/Include/GeometryBase.h"
+#include "../include/uiportalmanager.h"
+#include "../include/uirenderer.h"
+#include "../../lepra/include/log.h"
+#include "../../tbc/include/geometrybase.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-Tbc::PortalManager::Portal* PortalManager::NewPortal(int pNumVertices,
-						     vec3* pVertex,
-						     Parent::Cell* pCell1,
-						     Parent::Cell* pCell2)
-{
-	return new Portal(pNumVertices, pVertex, (Cell*)pCell1, (Cell*)pCell2);
+tbc::PortalManager::Portal* PortalManager::NewPortal(int num_vertices,
+						     vec3* vertex,
+						     Parent::Cell* cell1,
+						     Parent::Cell* cell2) {
+	return new Portal(num_vertices, vertex, (Cell*)cell1, (Cell*)cell2);
 }
 
-Tbc::PortalManager::Cell* PortalManager::NewCell(const str& pCellID, 
-						 const str& pCellDescription,
-						 Parent::PortalManager* pPortalManager)
-{
-	return new Cell(pCellID, pCellDescription, (PortalManager*)pPortalManager);
+tbc::PortalManager::Cell* PortalManager::NewCell(const str& cell_id,
+						 const str& cell_description,
+						 Parent::PortalManager* portal_manager) {
+	return new Cell(cell_id, cell_description, (PortalManager*)portal_manager);
 }
 
-void PortalManager::TraverseGraph(Renderer* pRenderer, const str& pCellID)
-{
-	CellTable::Iterator lIter = mCellTable.Find(pCellID);
-	if (lIter == mCellTable.End())
-	{
-		mLog.Warning("TraverseGraph - CellID \"" + pCellID + "\" does not exist!");
+void PortalManager::TraverseGraph(Renderer* renderer, const str& cell_id) {
+	CellTable::Iterator iter = cell_table_.Find(cell_id);
+	if (iter == cell_table_.End()) {
+		log_.Warning("TraverseGraph - CellID \"" + cell_id + "\" does not exist!");
 		return;
 	}
 
-	Cell* lCell = (Cell*)*lIter;
-	lCell->Traverse(pRenderer, pRenderer->GetClippingRect());
+	Cell* cell = (Cell*)*iter;
+	cell->Traverse(renderer, renderer->GetClippingRect());
 }
 
-void PortalManager::Portal::Traverse(Renderer* pRenderer, const PixelRect& pRect, Cell* pFrom)
-{
-	PixelRect lRect(pRenderer->GetBoundingRect(mVertex, mNumVertices));
-	bool lFront = pRenderer->IsFacingFront(mVertex, mNumVertices);
+void PortalManager::Portal::Traverse(Renderer* renderer, const PixelRect& rect, Cell* from) {
+	PixelRect _rect(renderer->GetBoundingRect(vertex_, num_vertices_));
+	bool front = renderer->IsFacingFront(vertex_, num_vertices_);
 
 	// Stop the recursion if we try to traverse this portal from the "wrong" direction.
-	if ((lFront == true  && pFrom == mCell1) ||
-		(lFront == false && pFrom == mCell2))
-	{
-		lRect = lRect.GetOverlap(pRect);
+	if ((front == true  && from == cell1_) ||
+		(front == false && from == cell2_)) {
+		_rect = _rect.GetOverlap(rect);
 
-		if (lRect.mLeft < lRect.mRight &&
-		   lRect.mTop  < lRect.mBottom)
-		{
-			((Cell*)GetOtherCell(pFrom))->Traverse(pRenderer, lRect);
+		if (_rect.left_ < _rect.right_ &&
+		   _rect.top_  < _rect.bottom_) {
+			((Cell*)GetOtherCell(from))->Traverse(renderer, _rect);
 		}
 	}
 }
 
-void PortalManager::Cell::Traverse(Renderer* pRenderer, const PixelRect& pRect)
-{
-	// If not already visited, tag all geometry. Since two cells can be attached 
+void PortalManager::Cell::Traverse(Renderer* renderer, const PixelRect& rect) {
+	// If not already visited, tag all geometry. Since two cells can be attached
 	// to each other with more than one portal, we can't just return if the cell
 	// has already been visited. We have to let Portal take care of the terminating
 	// condition in this recursive process.
-	if (mLastFrameVisible != (int)pRenderer->GetCurrentFrame())
-	{
+	if (last_frame_visible_ != (int)renderer->GetCurrentFrame()) {
 		// Tag this cell as "visited".
-		mLastFrameVisible = pRenderer->GetCurrentFrame();
+		last_frame_visible_ = renderer->GetCurrentFrame();
 
 		// Set visibility on all geometry instances in this cell.
-		GeomSet::Iterator lGIter;
-		for (lGIter = mGeomSet.First(); lGIter != mGeomSet.End(); ++lGIter)
-		{
-			Tbc::GeometryBase* lGeom = *lGIter;
-			lGeom->SetLastFrameVisible(pRenderer->GetCurrentFrame());
+		GeomSet::Iterator g_iter;
+		for (g_iter = geom_set_.First(); g_iter != geom_set_.End(); ++g_iter) {
+			tbc::GeometryBase* geom = *g_iter;
+			geom->SetLastFrameVisible(renderer->GetCurrentFrame());
 		}
 	}
 
 	// Traverse the graph recursively...
-	PortalList::iterator lPIter;
-	for (lPIter = mPortalList.begin(); lPIter != mPortalList.end(); ++lPIter)
-	{
-		Portal* lPortal = (Portal*)*lPIter;
-		lPortal->Traverse(pRenderer, pRect, this);
+	PortalList::iterator p_iter;
+	for (p_iter = portal_list_.begin(); p_iter != portal_list_.end(); ++p_iter) {
+		Portal* portal = (Portal*)*p_iter;
+		portal->Traverse(renderer, rect, this);
 	}
 }
 
-PortalManager::Portal::Portal(int pNumVertices,
-			      vec3* pVertex,
-			      Cell* pCell1,
-			      Cell* pCell2) :
-	Tbc::PortalManager::Portal(pNumVertices, pVertex, pCell1, pCell2)
-{
+PortalManager::Portal::Portal(int num_vertices,
+			      vec3* vertex,
+			      Cell* cell1,
+			      Cell* cell2) :
+	tbc::PortalManager::Portal(num_vertices, vertex, cell1, cell2) {
 }
 
-PortalManager::Portal::~Portal()
-{
-}
-
-
-PortalManager::Cell::Cell(const str& pCellID, 
-			  const str& pCellDescription,
-			  PortalManager* pPortalManager) :
-	Tbc::PortalManager::Cell(pCellID, pCellDescription, pPortalManager),
-	mLastFrameVisible(-1)
-{
-}
-
-PortalManager::Cell::~Cell()
-{
+PortalManager::Portal::~Portal() {
 }
 
 
-loginstance(UI_GFX_3D, PortalManager);
+PortalManager::Cell::Cell(const str& cell_id,
+			  const str& cell_description,
+			  PortalManager* portal_manager) :
+	tbc::PortalManager::Cell(cell_id, cell_description, portal_manager),
+	last_frame_visible_(-1) {
+}
+
+PortalManager::Cell::~Cell() {
+}
+
+
+loginstance(kUiGfx3D, PortalManager);
 
 }

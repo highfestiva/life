@@ -1,21 +1,20 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
-// This class extends Tbc::Model with one or more geometries of different types.
+// This class extends tbc::Model with one or more geometries of different types.
 // It also provides functionality for the determination of the LOD-level.
 
 
 
 #pragma once
 
-#include "../../Tbc/Include/Model.h"
-#include "UiRenderer.h"
+#include "../../tbc/include/model.h"
+#include "uirenderer.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
@@ -25,203 +24,191 @@ class ProgressiveTriangleGeometry;
 
 
 
-class GraphicalModel: public Tbc::Model
-{
+class GraphicalModel: public tbc::Model {
 public:
 
 	// The geometry handler is responsible for uploading the geometry to the
-	// renderer and updating LOD and animations. It gives the user the 
-	// possibility to manage resources his/her own way. 
-	class GeometryHandler
-	{
+	// renderer and updating LOD and animations. It gives the user the
+	// possibility to manage resources his/her own way.
+	class GeometryHandler {
 	public:
 		friend class GraphicalModel;
 
 		GeometryHandler() :
-			mTransformAnimator(0)
-		{
+			transform_animator_(0) {
 		}
-		virtual ~GeometryHandler()
-		{
+		virtual ~GeometryHandler() {
 		}
 
 		// The update function may reload the geometry, update the LOD
 		// or animate the object.
-		virtual void UpdateGeometry(float pLODLevel) = 0;
-		virtual Tbc::GeometryBase* GetGeometry() = 0;
+		virtual void UpdateGeometry(float lod_level) = 0;
+		virtual tbc::GeometryBase* GetGeometry() = 0;
 	private:
-		void SetTransformAnimator(Tbc::BoneAnimator* pTransformAnimator)
-		{
-			mTransformAnimator = pTransformAnimator;
+		void SetTransformAnimator(tbc::BoneAnimator* transform_animator) {
+			transform_animator_ = transform_animator;
 		}
-		Tbc::BoneAnimator* GetTransformAnimator() const
-		{
-			return mTransformAnimator;
+		tbc::BoneAnimator* GetTransformAnimator() const {
+			return transform_animator_;
 		}
-		Tbc::BoneAnimator* mTransformAnimator;
+		tbc::BoneAnimator* transform_animator_;
 	};
 
 	GraphicalModel();
 	virtual ~GraphicalModel();
 
 	// Takes ownership of the geometry handler (takes care of destruction).
-	// pTransformAnimator = The animator (see Tbc::Model and BoneAnimator) to use for transform animations.
-	void AddGeometry(const str& pName, GeometryHandler* pGeometry, const str& pTransformAnimator = "");
+	// transform_animator = The animator (see tbc::Model and BoneAnimator) to use for transform animations.
+	void AddGeometry(const str& name, GeometryHandler* geometry, const str& transform_animator = "");
 
-	Tbc::GeometryBase* GetGeometry(const str& pName);
+	tbc::GeometryBase* GetGeometry(const str& name);
 
-	// Overloaded from Tbc::Model where it is declared as public.
-	void Update(double pDeltaTime);
+	// Overloaded from tbc::Model where it is declared as public.
+	void Update(double delta_time);
 
 	// Calculates the detail level depending on the camera and calls Update(double).
-	// void Update(double pDeltaTime, Camera* pCamera);
+	// void Update(double delta_time, Camera* pCamera);
 
 	// Level of detail in the range [0, 1] where 0 equals the lowest level and 1 the highest.
 	// This is automatically set through Update(double, Camera*).
-	void SetDetailLevel(double pLevelOfDetail);
+	void SetDetailLevel(double level_of_detail);
 
-	void SetLastFrameVisible(unsigned int pLastFrameVisible);
+	void SetLastFrameVisible(unsigned int last_frame_visible);
 	unsigned int GetLastFrameVisible() const;
-	void SetAlwaysVisible(bool pAlwaysVisible);
+	void SetAlwaysVisible(bool always_visible);
 	bool GetAlwaysVisible();
 
 private:
 
-	enum GeomType
-	{
-		GEOM_STATIC = 0,
-		GEOM_PROGRESSIVE,
-		GEOM_ANIMATED_STATIC,
-		GEOM_ANIMATED_PROGRESSIVE
+	enum GeomType {
+		kGeomStatic = 0,
+		kGeomProgressive,
+		kGeomAnimatedStatic,
+		kGeomAnimatedProgressive
 	};
 
-	struct GeometryData
-	{
-		GeomType mGeomType;
-		int mCurrentLODLevel;
-		int mNumLODLevels;
-		Tbc::GeometryBase* mGeometry;
-		Renderer::MaterialType mMaterialType;
-		Renderer::GeometryID mGeomID;
-		Renderer::TextureID* mTextureID;
-		int mNumTextures;
-		Renderer::Shadows mShadows;
-		str mName;
-		Tbc::BoneAnimator* mTransformAnimator;
+	struct GeometryData {
+		GeomType geom_type_;
+		int current_lod_level_;
+		int num_lod_levels_;
+		tbc::GeometryBase* geometry_;
+		Renderer::MaterialType material_type_;
+		Renderer::GeometryID geom_id_;
+		Renderer::TextureID* texture_id_;
+		int num_textures_;
+		Renderer::Shadows shadows_;
+		str name_;
+		tbc::BoneAnimator* transform_animator_;
 	};
 
-	int CalcLODIndex(int pMaxIndex);
+	int CalcLODIndex(int max_index);
 
 	typedef HashTable<str, GeometryHandler*, std::hash<str>, 8> GeometryTable;
 
-	GeometryTable mGeometryTable;
-	double mLevelOfDetail;
+	GeometryTable geometry_table_;
+	double level_of_detail_;
 };
 
 
 
-class DefaultStaticGeometryHandler : public GraphicalModel::GeometryHandler
-{
+class DefaultStaticGeometryHandler : public GraphicalModel::GeometryHandler {
 public:
-	DefaultStaticGeometryHandler(TriangleBasedGeometry* pGeometry,
-				     int pNumLODLevels,
-				     Renderer::TextureID* pTextureID,
-				     int pNumTextures,
-				     Renderer::MaterialType pMaterial, 
-				     Renderer::Shadows pShadows,
-				     Renderer* pRenderer);
+	DefaultStaticGeometryHandler(TriangleBasedGeometry* geometry,
+				     int num_lod_levels,
+				     Renderer::TextureID* texture_id,
+				     int num_textures,
+				     Renderer::MaterialType material,
+				     Renderer::Shadows shadows,
+				     Renderer* renderer);
 
-	void UpdateGeometry(float pLODLevel);
-	Tbc::GeometryBase* GetGeometry();
+	void UpdateGeometry(float lod_level);
+	tbc::GeometryBase* GetGeometry();
 
 private:
-	TriangleBasedGeometry* mGeometry;
-	int mNumLODLevels;
-	Renderer::TextureID* mTextureID;
-	int mNumTextures;
-	Renderer::MaterialType mMaterial;
-	Renderer::Shadows mShadows;
+	TriangleBasedGeometry* geometry_;
+	int num_lod_levels_;
+	Renderer::TextureID* texture_id_;
+	int num_textures_;
+	Renderer::MaterialType material_;
+	Renderer::Shadows shadows_;
 
-	int mCurrentLODLevel;
-	Renderer::GeometryID mGeomID;
-	Renderer* mRenderer;
+	int current_lod_level_;
+	Renderer::GeometryID geom_id_;
+	Renderer* renderer_;
 };
 
 
 
-class DefaultProgressiveGeometryHandler : public GraphicalModel::GeometryHandler
-{
+class DefaultProgressiveGeometryHandler : public GraphicalModel::GeometryHandler {
 public:
-	DefaultProgressiveGeometryHandler(ProgressiveTriangleGeometry* pGeometry, 
-					  Renderer::MaterialType pMaterial,
-					  Renderer::TextureID* pTextureID,
-					  int pNumTextures,
-					  Renderer::Shadows pShadows,
-					  Renderer* pRenderer);
+	DefaultProgressiveGeometryHandler(ProgressiveTriangleGeometry* geometry,
+					  Renderer::MaterialType material,
+					  Renderer::TextureID* texture_id,
+					  int num_textures,
+					  Renderer::Shadows shadows,
+					  Renderer* renderer);
 
-	void UpdateGeometry(float pLODLevel);
-	Tbc::GeometryBase* GetGeometry();
+	void UpdateGeometry(float lod_level);
+	tbc::GeometryBase* GetGeometry();
 
 private:
-	ProgressiveTriangleGeometry* mGeometry;
+	ProgressiveTriangleGeometry* geometry_;
 
-	Renderer::GeometryID mGeomID;
-	Renderer* mRenderer;
+	Renderer::GeometryID geom_id_;
+	Renderer* renderer_;
 };
 
 
 
-class DefaultAnimatedStaticGeometryHandler : public GraphicalModel::GeometryHandler
-{
+class DefaultAnimatedStaticGeometryHandler : public GraphicalModel::GeometryHandler {
 public:
-	DefaultAnimatedStaticGeometryHandler(AnimatedGeometry* pGeometry,
-					     int pNumLODLevels,
-					     Renderer::TextureID* pTextureID,
-					     int pNumTextures,
-					     Renderer::MaterialType pMaterial, 
-					     Renderer::Shadows pShadows,
-					     Renderer* pRenderer);
+	DefaultAnimatedStaticGeometryHandler(AnimatedGeometry* geometry,
+					     int num_lod_levels,
+					     Renderer::TextureID* texture_id,
+					     int num_textures,
+					     Renderer::MaterialType material,
+					     Renderer::Shadows shadows,
+					     Renderer* renderer);
 
-	void UpdateGeometry(float pLODLevel);
-	Tbc::GeometryBase* GetGeometry();
+	void UpdateGeometry(float lod_level);
+	tbc::GeometryBase* GetGeometry();
 private:
-	AnimatedGeometry* mGeometry;
-	int mNumLODLevels;
-	Renderer::TextureID* mTextureID;
-	int mNumTextures;
-	Renderer::MaterialType mMaterial;
-	Renderer::Shadows mShadows;
+	AnimatedGeometry* geometry_;
+	int num_lod_levels_;
+	Renderer::TextureID* texture_id_;
+	int num_textures_;
+	Renderer::MaterialType material_;
+	Renderer::Shadows shadows_;
 
-	int mCurrentLODLevel;
-	Renderer::GeometryID mGeomID;
-	Renderer* mRenderer;
+	int current_lod_level_;
+	Renderer::GeometryID geom_id_;
+	Renderer* renderer_;
 };
 
 
 
 // This class assumes that AnimatedGeometry points to a progressive mesh.
 // If it doesn't, program failure can be expected.
-class DefaultAnimatedProgressiveGeometryHandler : public GraphicalModel::GeometryHandler
-{
+class DefaultAnimatedProgressiveGeometryHandler : public GraphicalModel::GeometryHandler {
 public:
-	DefaultAnimatedProgressiveGeometryHandler(AnimatedGeometry* pGeometry,
-						  Renderer::TextureID* pTextureID,
-						  int pNumTextures,
-						  Renderer::MaterialType pMaterial, 
-						  Renderer::Shadows pShadows,
-						  Renderer* pRenderer);
+	DefaultAnimatedProgressiveGeometryHandler(AnimatedGeometry* geometry,
+						  Renderer::TextureID* texture_id,
+						  int num_textures,
+						  Renderer::MaterialType material,
+						  Renderer::Shadows shadows,
+						  Renderer* renderer);
 
-	void UpdateGeometry(float pLODLevel);
-	Tbc::GeometryBase* GetGeometry();
+	void UpdateGeometry(float lod_level);
+	tbc::GeometryBase* GetGeometry();
 private:
-	AnimatedGeometry* mGeometry;
-	Renderer::TextureID* mTextureID;
-	int mNumTextures;
-	Renderer::MaterialType mMaterial;
-	Renderer::Shadows mShadows;
+	AnimatedGeometry* geometry_;
+	Renderer::TextureID* texture_id_;
+	int num_textures_;
+	Renderer::MaterialType material_;
+	Renderer::Shadows shadows_;
 
-	Renderer::GeometryID mGeomID;
-	Renderer* mRenderer;
+	Renderer::GeometryID geom_id_;
+	Renderer* renderer_;
 };
 
 

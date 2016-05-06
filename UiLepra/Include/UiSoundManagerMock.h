@@ -1,101 +1,99 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2009, Righteous Games
 
 
 
 #pragma once
 
-#include "UiSoundManager.h"
+#include "uisoundmanager.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-class SoundManagerMock: public SoundManager
-{
+class SoundManagerMock: public SoundManager {
 	typedef SoundManager Parent;
 public:
 	SoundManagerMock();
 	virtual ~SoundManagerMock();
 
-	SoundID LoadSound2D(const str& pFileName, LoopMode LoopMode, int pPriority);
-	SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
-	SoundID LoadStream(const str& pFileName, LoopMode LoopMode, int pPriority);
+	SoundID LoadSound2D(const str& file_name, LoopMode LoopMode, int priority);
+	SoundID LoadSound3D(const str& file_name, LoopMode LoopMode, int priority);
+	SoundID LoadStream(const str& file_name, LoopMode LoopMode, int priority);
 
-	void Release(SoundID pSoundID);
+	void Release(SoundID sound_id);
 
-	double GetStreamTime(SoundID pSoundID);
+	double GetStreamTime(SoundID sound_id);
 
-	SoundInstanceID CreateSoundInstance(SoundID pSoundID);
-	void DeleteSoundInstance(SoundInstanceID pSoundIID);
+	SoundInstanceID CreateSoundInstance(SoundID sound_id);
+	void DeleteSoundInstance(SoundInstanceID sound_iid);
 
-	bool Play(SoundInstanceID pSoundIID,
-			  float pVolume,
-			  float pPitch);
+	bool Play(SoundInstanceID sound_iid,
+			  float volume,
+			  float pitch);
 
-	void Stop(SoundInstanceID pSoundIID);
+	void Stop(SoundInstanceID sound_iid);
 	void StopAll();
-	void TogglePause(SoundInstanceID pSoundIID);
+	void TogglePause(SoundInstanceID sound_iid);
 
-	bool IsPlaying(SoundInstanceID pSoundIID);
-	bool IsPaused(SoundInstanceID pSoundIID);
+	bool IsPlaying(SoundInstanceID sound_iid);
+	bool IsPaused(SoundInstanceID sound_iid);
 
-	void SetPan(SoundInstanceID pSoundIID, float pPan);
-	void SetVolume(SoundInstanceID pSoundIID, float pVolume);
-	void SetPitch(SoundInstanceID pSoundIID, float pPitch);
+	void SetPan(SoundInstanceID sound_iid, float pan);
+	void SetVolume(SoundInstanceID sound_iid, float volume);
+	void SetPitch(SoundInstanceID sound_iid, float pitch);
 
-	void SetFrequency(SoundInstanceID pSoundIID, int pFrequency);
-	int GetFrequency(SoundInstanceID pSoundIID);
+	void SetFrequency(SoundInstanceID sound_iid, int frequency);
+	int GetFrequency(SoundInstanceID sound_iid);
 
-	void SetListenerPosition(const vec3& pPos, const vec3& pVel,
-		const vec3& pUp, const vec3& pForward);
+	void SetListenerPosition(const vec3& pos, const vec3& vel,
+		const vec3& up, const vec3& forward);
 
-	void SetDopplerFactor(float pFactor);
-	void SetRollOffFactor(float pFactor);
+	void SetDopplerFactor(float factor);
+	void SetRollOffFactor(float factor);
 
-	int GetChannel(SoundInstanceID pSoundIID);
+	int GetChannel(SoundInstanceID sound_iid);
 
-	void SetChorus(SoundInstanceID pSoundIID,
-				   int pFXIndex,
-				   float pDelay,
-				   float pFeedback,
-				   float pRate,
-				   float pDepth,		// Mod amount...
-				   float pWetness);
+	void SetChorus(SoundInstanceID sound_iid,
+				   int fx_index,
+				   float delay,
+				   float feedback,
+				   float rate,
+				   float depth,		// Mod amount...
+				   float wetness);
 
-	void SetFlanger(SoundInstanceID pSoundIID,
-					int pFXIndex,
-					float pDelay,
-					float pFeedback,
-					float pRate,
-					float pDepth,		// Mod amount...
-					float pWetness);
+	void SetFlanger(SoundInstanceID sound_iid,
+					int fx_index,
+					float delay,
+					float feedback,
+					float rate,
+					float depth,		// Mod amount...
+					float wetness);
 
-	void SetCompressor(SoundInstanceID pSoundIID,
-					   int pFXIndex,
-					   float pRatio,
-					   float pThreshold,
-					   float pAttack,
-					   float pRelease);
+	void SetCompressor(SoundInstanceID sound_iid,
+					   int fx_index,
+					   float ratio,
+					   float threshold,
+					   float attack,
+					   float release);
 
-	void SetEcho(SoundInstanceID pSoundIID,
-				 int pFXIndex,
-				 float pFeedback,
-				 float pDelay,
-				 float pWetness);
+	void SetEcho(SoundInstanceID sound_iid,
+				 int fx_index,
+				 float feedback,
+				 float delay,
+				 float wetness);
 
-	void SetParamEQ(SoundInstanceID pSoundIID,
-					int pFXIndex,
-					float pCenter,
-					float pBandwidth,
-					float pGain);
+	void SetParamEQ(SoundInstanceID sound_iid,
+					int fx_index,
+					float center,
+					float bandwidth,
+					float gain);
 
 protected:
-	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const vec3& pPos, const vec3& pVel);
+	virtual void DoSetSoundPosition(SoundInstanceID sound_iid, const vec3& pos, const vec3& vel);
 
 private:
 };

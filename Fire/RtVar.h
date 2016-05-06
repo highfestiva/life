@@ -1,20 +1,20 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Life/LifeClient/RtVar.h"
-#include "../Life/LifeServer/RtVar.h"
-#include "../UiCure/Include/UiRuntimeVariableName.h"
+#include "../cure/include/runtimevariable.h"
+#include "../life/lifeclient/rtvar.h"
+#include "../life/lifeserver/rtvar.h"
+#include "../uicure/include/uiruntimevariablename.h"
 
 
 
-#define RTVAR_GAME_EXPLOSIVESTRENGTH	"Game.ExplosiveStrength"
-#define RTVAR_GAME_FIRSTRUN		"Game.FirstRun"
-#define RTVAR_GAME_FIREDELAY		"Game.FireDelay"
-#define RTVAR_GAME_STARTLEVEL		"Game.StartLevel"
-#define RTVAR_GAME_VEHICLEREMOVEDELAY	"Game.VehicleRemoveDelay"
+#define kRtvarGameExplosivestrength	"Game.ExplosiveStrength"
+#define kRtvarGameFirstrun		"Game.FirstRun"
+#define kRtvarGameFiredelay		"Game.FireDelay"
+#define kRtvarGameStartlevel		"Game.StartLevel"
+#define kRtvarGameVehicleremovedelay	"Game.VehicleRemoveDelay"

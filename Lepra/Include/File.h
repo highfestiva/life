@@ -1,70 +1,66 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "Reader.h"
-#include "Writer.h"
+#include "reader.h"
+#include "writer.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class File: public Reader, public Writer
-{
+class File: public Reader, public Writer {
 public:
-	enum FileOrigin
-	{
-		FSEEK_SET = 0,
-		FSEEK_CUR,
-		FSEEK_END,
+	enum FileOrigin {
+		kFseekSet = 0,
+		kFseekCur,
+		kFseekEnd,
 	};
-	enum //Mode flags.
-	{
-		READ_MODE = 1,
-		WRITE_MODE = 2,
+	enum { //Mode flags.
+		kReadMode = 1,
+		kWriteMode = 2,
 	};
 
-	File(Endian::EndianType pReaderEndian = Endian::TYPE_BIG_ENDIAN,
-		    Endian::EndianType pWriterEndian = Endian::TYPE_BIG_ENDIAN,
-		    InputStream* pIn = 0,
-		    OutputStream* pOut = 0);
+	File(Endian::EndianType reader_endian = Endian::kTypeBigEndian,
+		    Endian::EndianType writer_endian = Endian::kTypeBigEndian,
+		    InputStream* in = 0,
+		    OutputStream* out = 0);
 
 	virtual ~File();
 
 	virtual void Close();
 
-	virtual void SetEndian(Endian::EndianType pEndian);
+	virtual void SetEndian(Endian::EndianType endian);
 
 	virtual int64 GetSize() const = 0;
 
-	IOError Skip(size_t pSize);
+	IOError Skip(size_t size);
 
 	// Tell and Seek both return the current file position.
 	virtual int64 Tell() const = 0;
-	virtual int64 Seek(int64 pOffset, FileOrigin pFrom) = 0;
-	int64 SeekSet(int64 pOffset);
-	int64 SeekCur(int64 pOffset);
-	int64 SeekEnd(int64 pOffset);
+	virtual int64 Seek(int64 offset, FileOrigin from) = 0;
+	int64 SeekSet(int64 offset);
+	int64 SeekCur(int64 offset);
+	int64 SeekEnd(int64 offset);
 
-	bool IsInMode(unsigned pMode) const;
+	bool IsInMode(unsigned mode) const;
 
 	virtual void Flush() = 0;
 
-	bool HasSameContent(File& pOtherFile, int64 pLength);	// Compares content by reading the both files byte by byte.
+	bool HasSameContent(File& other_file, int64 length);	// Compares content by reading the both files byte by byte.
 
 protected:
-	void SetMode(unsigned pMode);
-	void ClearMode(unsigned pMode);
+	void SetMode(unsigned mode);
+	void ClearMode(unsigned mode);
 
 private:
-	unsigned mModeFlags;
+	unsigned mode_flags_;
 };
 
 

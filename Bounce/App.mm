@@ -4,19 +4,18 @@
 
 
 
-#include "../Lepra/Include/LepraOS.h"
+#include "../lepra/include/lepraos.h"
 #ifdef LEPRA_IOS
 #import <StoreKit/StoreKit.h>
 #import <iAd/ADBannerView.h>
-#include "../Lepra/Include/Vector3D.h"
+#include "../lepra/include/vector3d.h"
 #endif // iOS
 
 
-namespace Lepra
-{
+namespace lepra {
 class Canvas;
 }
-using namespace Lepra;
+using namespace lepra;
 
 
 
@@ -30,11 +29,11 @@ using namespace Lepra;
 	float _identityFactor;
 }
 
-+(void) storeHiscoreName;
--(id) init:(Canvas*)pCanvas;
++(void) hiscore_name_;
+-(id) init:(Canvas*)_canvas;
 -(void) dealloc;
--(void) startTick;
--(void) stopTick;
+-(void) tick_;
+-(void) tick_;
 -(void) tick;
 -(void) dropFingerMovements;
 @end
@@ -42,177 +41,153 @@ using namespace Lepra;
 
 
 
-#include "App.cxx"
+#include "app.cxx"
 
 
 
 #ifdef LEPRA_IOS
 
-#import "../UiLepra/Include/Mac/EAGLView.h"
+#import "../uilepra/include/mac/eaglview.h"
 
 #define HISCORE_NAME_KEY @"HiscoreName"
 
 @implementation AnimatedApp
 
-+(void) storeHiscoreName
++(void) hiscore_name_
 {
-	str lLastHiscoreName;
-	v_get(lLastHiscoreName, =, Bounce::App::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, "");
-	NSString* name = [MacLog::Encode(lLastHiscoreName) retain];
+	str last_hiscore_name;
+	v_get(last_hiscore_name, =, bounce::App::GetApp()->variable_scope_, kRtvarHiscoreName, "");
+	NSString* name = [MacLog::Encode(last_hiscore_name) retain];
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	[defaults setObject:name forKey:HISCORE_NAME_KEY];
 	[name release];
 }
 
--(id) init:(Canvas*)pCanvas
-{
-	_canvas = pCanvas;
+-(id) init:(Canvas*)_canvas {
+	_canvas = _canvas;
 	_animationTimer = nil;
 	_adInitialized = false;
 	_identityFactor = 1.0f;
 
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	double time = [defaults doubleForKey:@"FirstStartTime"];
-	if (!time)
-	{
+	if (!time) {
 		time = HiResTimer::GetSystemCounter() * HiResTimer::GetPeriod();
 		[defaults setDouble:time forKey:@"FirstStartTime"];
 	}
 
-	[[UIAccelerometer sharedAccelerometer] setUpdateInterval:1.0/FPS/2];
+	[[UIAccelerometer sharedAccelerometer] setUpdateInterval:1.0/kFps/2];
 	[[UIAccelerometer sharedAccelerometer] setDelegate:self];
 
 	return self;
 }
 
--(void) dealloc
-{
+-(void) dealloc {
         [super dealloc];
 }
 
--(void) startTick
+-(void) tick_
 {
 	_animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.005 target:self selector:@selector(tick) userInfo:nil repeats:YES];
-	[EAGLView sharedView].responder = self;
-	[[EAGLView sharedView] powerUpAcc];
+	[EAGLView sharedView_].responder = self;
+	[[EAGLView sharedView_] up_acc];
 }
 
--(void) stopTick
+-(void) tick_
 {
-	[[EAGLView sharedView] powerDownAcc];
+	[[EAGLView sharedView_] down_acc];
 	[_animationTimer invalidate];
 	_animationTimer = nil;
 }
 
--(void) tick
-{
-	EAGLView* lGlView = [EAGLView sharedView];
-	if (!lGlView.isOpen)
-	{
-		[lGlView setFramebuffer];
-	}
-	else
-	{
-		if (!_adInitialized)
-		{
+-(void) tick {
+	EAGLView* gl_view = [EAGLView sharedView_];
+	if (!gl_view.isOpen) {
+		[gl_view framebuffer_];
+	} else {
+		if (!_adInitialized) {
 			_adInitialized = true;
 			ADBannerView* adView = [[ADBannerView alloc] initWithFrame:CGRectZero];
 			adView.currentContentSizeIdentifier = ADBannerContentSizeIdentifierPortrait;
 			adView.delegate = self;
-			[lGlView addSubview:adView];
+			[gl_view addSubview:adView];
 		}
-		lGlView.canvas = _canvas;
-		Bounce::App::GetApp()->Poll();
+		gl_view.canvas = _canvas;
+		bounce::App::GetApp()->Poll();
 		[self dropFingerMovements];
 	}
 }
 
--(void) accelerometer:(UIAccelerometer*)accelerometer didAccelerate:(UIAcceleration*)acceleration
-{
-	vec3 lAcceleration(acceleration.x, acceleration.y, acceleration.z);
-	const float lLength = std::max(0.1f, lAcceleration.GetLength());
-	_identityFactor = Math::Lerp(_identityFactor, 1/lLength, 0.005f);
-	lAcceleration *= _identityFactor;
-	//NSLog(@"mom.acc: %f, sliding avg.inv.acc: %f", lLength, _identityFactor);
-	float lLiftFactor = lAcceleration.GetLength() - 1;
-	Bounce::App::GetApp()->SetRacketForce(lLiftFactor, lAcceleration);
+-(void) accelerometer:(UIAccelerometer*)accelerometer didAccelerate:(UIAcceleration*)acceleration {
+	vec3 __acceleration(acceleration.x, acceleration.y, acceleration.z);
+	const float length = std::max(0.1f, __acceleration.GetLength());
+	_identityFactor = Math::Lerp(_identityFactor, 1/length, 0.005f);
+	__acceleration *= _identityFactor;
+	//NSLog(@"mom.acc: %f, sliding avg.inv.acc: %f", length, _identityFactor);
+	float lift_factor = __acceleration.GetLength() - 1;
+	bounce::App::GetApp()->SetRacketForce(lift_factor, __acceleration);
 }
 
--(Bounce::FingerMovement&) getFingerMovement:(const CGPoint&)pLocation previous:(const CGPoint&)pPrevious
-{
-	Bounce::FingerMoveList::iterator i = Bounce::gFingerMoveList.begin();
-	for (; i != Bounce::gFingerMoveList.end(); ++i)
-	{
-		//NSLog(@"get: (%i; %i) ==? (%i; %i)", (int)i->mLastX, (int)i->mLastY, (int)pLocation.x, (int)pLocation.y);
-		if (i->Update(pPrevious.x, pPrevious.y, pLocation.x, pLocation.y))
-		{
+-(bounce::FingerMovement&) getFingerMovement:(const CGPoint&)location previous:(const CGPoint&)_previous {
+	bounce::FingerMoveList::iterator i = bounce::g_finger_move_list.begin();
+	for (; i != bounce::g_finger_move_list.end(); ++i) {
+		//NSLog(@"get: (%i; %i) ==? (%i; %i)", (int)i->last_x_, (int)i->last_y_, (int)location.x, (int)location.y);
+		if (i->Update(_previous.x, _previous.y, location.x, location.y)) {
 			//NSLog(@"get: Match!");
 			return *i;
 		}
 	}
-	Bounce::gFingerMoveList.push_back(Bounce::FingerMovement(pLocation.x, pLocation.y));
-	return Bounce::gFingerMoveList.back();
+	bounce::g_finger_move_list.push_back(bounce::FingerMovement(location.x, location.y));
+	return bounce::g_finger_move_list.back();
 }
 
--(void) dropFingerMovements
-{
-	Bounce::FingerMoveList::iterator i = Bounce::gFingerMoveList.begin();
-	for (; i != Bounce::gFingerMoveList.end();)
-	{
-		if (!i->mIsPress)
-		{
-			Bounce::gFingerMoveList.erase(i++);
+-(void) dropFingerMovements {
+	bounce::FingerMoveList::iterator i = bounce::g_finger_move_list.begin();
+	for (; i != bounce::g_finger_move_list.end();) {
+		if (!i->is_press_) {
+			bounce::g_finger_move_list.erase(i++);
 			//return;
-		}
-		else
-		{
+		} else {
 			++i;
 		}
 
 	}
 }
 
--(CGPoint) xform:(const CGPoint&)pLocation
-{
-	if (_canvas->GetDeviceOutputRotation() == 90)
-	{
-		return pLocation;
+-(CGPoint) xform:(const CGPoint&)location {
+	if (_canvas->GetDeviceOutputRotation() == 90) {
+		return location;
 	}
-	CGPoint lLocation;
-	const CGSize& lSize = [UIScreen mainScreen].bounds.size;
-	lLocation.x = lSize.width  - pLocation.x;
-	lLocation.y = lSize.height - pLocation.y;
-	return lLocation;
+	CGPoint _location;
+	const CGSize& __size = [UIScreen mainScreen].bounds.size;
+	_location.x = __size.width  - location.x;
+	_location.y = __size.height - location.y;
+	return _location;
 }
 
--(void) touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
-{
+-(void) touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
 	NSEnumerator* e = [touches objectEnumerator];
-	UITouch* lTouch;
-	while ((lTouch = (UITouch*)[e nextObject]))
-	{
-		CGPoint lTapPosition = [self xform:[lTouch locationInView:nil]];
-		CGPoint lPrevTapPosition = [self xform:[lTouch previousLocationInView:nil]];
-		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
-		Bounce::FingerMovement& lMove = [self getFingerMovement:lTapPosition previous:lPrevTapPosition];
-		lMove.mIsPress = lIsPressed;
-		/*Bounce::App::OnTap(lMove);
-		if (!lIsPressed)
-		{
-			[self dropFingerMovement:lTapPosition previous:lPrevTapPosition];
+	UITouch* touch;
+	while ((touch = (UITouch*)[e nextObject])) {
+		CGPoint tap_position = [self xform:[touch locationInView:nil]];
+		CGPoint prev_tap_position = [self xform:[touch previousLocationInView:nil]];
+		bool is_pressed = (touch.phase != UITouchPhaseEnded && touch.phase != UITouchPhaseCancelled);
+		bounce::FingerMovement& move = [self getFingerMovement:tap_position previous:prev_tap_position];
+		move.is_press_ = is_pressed;
+		/*bounce::App::OnTap(move);
+		if (!is_pressed) {
+			[self dropFingerMovement:tap_position previous:prev_tap_position];
 		}*/
 
-		//Bounce::App::OnMouseTap(lTapPosition.x, lTapPosition.y, lIsPressed);
+		//bounce::App::OnMouseTap(tap_position.x, tap_position.y, is_pressed);
 	}
 }
 
--(void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
-{
+-(void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 	[self touchesMoved:touches withEvent:event];
 }
 
--(void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
-{
+-(void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 	[self touchesMoved:touches withEvent:event];
 }
 

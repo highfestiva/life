@@ -41,12 +41,12 @@
 @interface CYRTextView : UITextView
 
 @property (nonatomic, strong) NSArray *tokens;
-@property (nonatomic, strong) UIPanGestureRecognizer *singleFingerPanRecognizer;
+@property (nonatomic, strong) UIPanGestureRecognizer *singleFingerPanRecognizer_;
 @property (nonatomic, strong) UIPanGestureRecognizer *doubleFingerPanRecognizer;
 
 @property (nonatomic, strong) UIColor *gutterBackgroundColor;
 @property (nonatomic, strong) UIColor *gutterLineColor;
 
-@property (nonatomic, assign) BOOL lineCursorEnabled;
+@property (nonatomic, assign) BOOL cursor_enabled;
 
 @end

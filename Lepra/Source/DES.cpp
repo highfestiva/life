@@ -1,20 +1,19 @@
 /*
 	Class:  Checksum
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
 
 
 #include "pch.h"
-#include "../Include/LepraAssert.h"
+#include "../include/lepraassert.h"
 #include <memory.h>
-#include "../Include/DES.h"
+#include "../include/des.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -26,101 +25,87 @@ namespace Lepra
 
 
 
-void DES::SetKey(uint64 pKey)
-{
+void DES::SetKey(uint64 key) {
 	uint64 c = 0;
 	uint64 d = 0;
-	for (int k = 0; k < 28; k++)
-	{
-		PUTBIT(c, k, GETBIT(pKey, mKP1[k]));
-		PUTBIT(d, k, GETBIT(pKey, mKP1[k+28]));
+	for (int k = 0; k < 28; k++) {
+		PUTBIT(c, k, GETBIT(key, k_p1_[k]));
+		PUTBIT(d, k, GETBIT(key, k_p1_[k+28]));
 	}
-	for (int q = 0; q < 16; q++)
-	{
-		c = (c>>mShift[q]) | ((c&mMask[q]) << (28-mShift[q]));
-		d = (d>>mShift[q]) | ((d&mMask[q]) << (28-mShift[q]));
+	for (int q = 0; q < 16; q++) {
+		c = (c>>shift_[q]) | ((c&mask_[q]) << (28-shift_[q]));
+		d = (d>>shift_[q]) | ((d&mask_[q]) << (28-shift_[q]));
 		uint64 t = ((uint64)d << 28) | c;
-		STIRBITS(t, 48, mKP2, mKey[q]);
+		STIRBITS(t, 48, k_p2_, key_[q]);
 		/*{
-			mKey[q] = 0;
-			for (int ii = 0; ii < 48; ii++)
-			{
-				uint8 a = GETBIT(t, mKP2[ii]);
-				PUTBIT(mKey[q], ii, a);
+			key_[q] = 0;
+			for (int ii = 0; ii < 48; ii++) {
+				uint8 a = GETBIT(t, k_p2_[ii]);
+				PUTBIT(key_[q], ii, a);
 			}
 		}*/
 	}
-	c = d = pKey = 0;	// Swipe stack.
+	c = d = key = 0;	// Swipe stack.
 }
 
-void DES::Encrypt(uint8* pData, unsigned pLength) const
-{
-	deb_assert(pLength%8 == 0);
-	pLength >>= 3;
-	uint64* lBlock = (uint64*)pData;
+void DES::Encrypt(uint8* data, unsigned length) const {
+	deb_assert(length%8 == 0);
+	length >>= 3;
+	uint64* block = (uint64*)data;
 	unsigned u;
-	for (u = 0; u < pLength; ++u)
-	{
-		lBlock[u] = Crypt(lBlock[u], true);
+	for (u = 0; u < length; ++u) {
+		block[u] = Crypt(block[u], true);
 	}
 }
 
-void DES::Decrypt(uint8* pData, unsigned pLength) const
-{
-	deb_assert(pLength%8 == 0);
-	pLength >>= 3;
-	uint64* lBlock = (uint64*)pData;
-	for (unsigned u = 0; u < pLength; ++u)
-	{
-		lBlock[u] = Crypt(lBlock[u], false);
+void DES::Decrypt(uint8* data, unsigned length) const {
+	deb_assert(length%8 == 0);
+	length >>= 3;
+	uint64* block = (uint64*)data;
+	for (unsigned u = 0; u < length; ++u) {
+		block[u] = Crypt(block[u], false);
 	}
 }
 
-uint64 DES::Crypt(uint64 pData, bool pForward) const
-{
+uint64 DES::Crypt(uint64 data, bool forward) const {
 	uint64 a;
 	uint64 array;
-	STIRBITS(pData, 64, mIP1, a);
+	STIRBITS(data, 64, i_p1_, a);
 	uint32 r = (uint32)(a>>32);
 	uint32 l = (uint32)a;
-	uint32 lTemp;
-	for (int idx = 0; idx <= 15; ++idx)
-	{
-		STIRBITS(r, 48, mExpansion, a);
-		if (pForward)
-		{
-			array = a ^ mKey[idx];
-		}
-		else
-		{
-			array = a ^ mKey[15 - idx];
+	uint32 temp;
+	for (int idx = 0; idx <= 15; ++idx) {
+		STIRBITS(r, 48, expansion_, a);
+		if (forward) {
+			array = a ^ key_[idx];
+		} else {
+			array = a ^ key_[15 - idx];
 		}
 		a = 0;
-		for (int j = 0; j <= 7; ++j)
-		{
+		for (int j = 0; j <= 7; ++j) {
 			a <<= 4;
-			a |= mSBox[j][(array>>((7-j)*6)) & 0x3f];
+			a |= s_box_[j][(array>>((7-j)*6)) & 0x3f];
 		}
-		STIRBITS(a, 32, mPBox, array);
-		lTemp = r;
+		STIRBITS(a, 32, p_box_, array);
+		temp = r;
 		r = l^(uint32)array;
-		l = lTemp;
+		l = temp;
 	}
 	a = ((uint64)l<<32)|r;
-	STIRBITS(a, 64, mIP2, pData);
+	STIRBITS(a, 64, i_p2_, data);
 	/*{
-		pData = 0;
+		data = 0;
 		for (int ii = 0; ii < 64; ii++)
-			PUTBIT(pData, ii, GETBIT(a, mIP2[ii]));
+			PUTBIT(data, ii, GETBIT(a, i_p2_[ii]));
 	}*/
-	a = array = r = l = lTemp = 0;	// Swipe stack.
-	return (pData);
+	a = array = r = l = temp = 0;	// Swipe stack.
+	return (data);
 }
 
 
 
 // S-box permutation. Even small modifications to the S-box could significantly weaken DES.
-const uint8 DES::mSBox[8][64] =
+const uint8 DES::s_box_[8][64] =
 {
 	{
 		14,  4, 13,  1,  2, 15, 11,  8,  3, 10,  6, 12,  5,  9,  0,  7,
@@ -173,19 +158,19 @@ const uint8 DES::mSBox[8][64] =
 };
 
 // Bit-mask used in key-making.
-const uint8 DES::mMask[16] =
+const uint8 DES::mask_[16] =
 {
 	1, 1, 3, 3, 3, 3, 3, 3, 1, 3, 3, 3, 3, 3, 3, 1
 };
 
 // Bit-shifts used in key-making.
-const uint8 DES::mShift[16] =
+const uint8 DES::shift_[16] =
 {
 	1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1
 };
 
 // Key permutation.
-const uint8 DES::mKP1[56] =
+const uint8 DES::k_p1_[56] =
 {
 	56, 48, 40, 32, 24, 16,  8,
 	 0, 57, 49, 41, 33, 25, 17,
@@ -198,7 +183,7 @@ const uint8 DES::mKP1[56] =
 };
 
 // Key compression permutation.
-const uint8 DES::mKP2[48] =
+const uint8 DES::k_p2_[48] =
 {
 	13, 16, 10, 23,  0,  4,
 	 2, 27, 14,  5, 20,  9,
@@ -211,7 +196,7 @@ const uint8 DES::mKP2[48] =
 };
 
 // Initial permutation IP.
-const uint8 DES::mIP1[64] =
+const uint8 DES::i_p1_[64] =
 {
 	57, 49, 41, 33, 25, 17,  9,  1,
 	59, 51, 43, 35, 27, 19, 11,  3,
@@ -224,7 +209,7 @@ const uint8 DES::mIP1[64] =
 };
 
 // Final permutation IP.
-const uint8 DES::mIP2[64] =
+const uint8 DES::i_p2_[64] =
 {
 	39,  7, 47, 15, 55, 23, 63, 31,
 	38,  6, 46, 14, 54, 22, 62, 30,
@@ -237,7 +222,7 @@ const uint8 DES::mIP2[64] =
 };
 
 // Expansion permutation.
-const uint8 DES::mExpansion[48] =
+const uint8 DES::expansion_[48] =
 {
 	31,  0,  1,  2,  3,  4,
 	 3,  4,  5,  6,  7,  8,
@@ -250,7 +235,7 @@ const uint8 DES::mExpansion[48] =
 };
 
 // P-box permutation.
-const uint8 DES::mPBox[32] =
+const uint8 DES::p_box_[32] =
 {
 	15,  6, 19, 20, 28, 11, 27, 16,
 	 0, 14, 22, 25,  4, 17, 30,  9,

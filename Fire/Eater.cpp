@@ -1,55 +1,48 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Eater.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/Health.h"
-#include "BaseMachine.h"
+#include "eater.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/health.h"
+#include "basemachine.h"
 
 
 
-namespace Fire
-{
+namespace Fire {
 
 
 
-Eater::Eater(Cure::ContextManager* pManager):
-	Parent(pManager->GetGameManager()->GetResourceManager(), "Eater")
-{
-	pManager->AddLocalObject(this);
+Eater::Eater(cure::ContextManager* manager):
+	Parent(manager->GetGameManager()->GetResourceManager(), "Eater") {
+	manager->AddLocalObject(this);
 }
 
-Eater::~Eater()
-{
+Eater::~Eater() {
 }
 
 
 
-void Eater::OnTrigger(Tbc::PhysicsManager::BodyID, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3&, const vec3&)
-{
-	if (pOtherObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId() == pBodyId)	// Only if whole car enters "goal", not only wheel.
-	{
-		BaseMachine* lMachine = dynamic_cast<BaseMachine*>(pOtherObject);
-		if (lMachine && !lMachine->mDidGetToTown)
-		{
-			lMachine->mDidGetToTown = true;
-			if (!lMachine->mVillain.empty() && Cure::Health::Get(lMachine) > 0)
-			{
-				((FireManager*)GetManager()->GetGameManager())->OnLetThroughTerrorist(lMachine);
+void Eater::OnTrigger(tbc::PhysicsManager::BodyID, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3&, const vec3&) {
+	if (other_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId() == body_id) {	// Only if whole car enters "goal", not only wheel.
+		BaseMachine* machine = dynamic_cast<BaseMachine*>(other_object);
+		if (machine && !machine->did_get_to_town_) {
+			machine->did_get_to_town_ = true;
+			if (!machine->villain_.empty() && cure::Health::Get(machine) > 0) {
+				((FireManager*)GetManager()->GetGameManager())->OnLetThroughTerrorist(machine);
 			}
 		}
 
-		//GetManager()->PostKillObject(pOtherObject->GetInstanceId());
+		//GetManager()->PostKillObject(other_object->GetInstanceId());
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Eater);
+loginstance(kGameContextCpp, Eater);
 
 
 

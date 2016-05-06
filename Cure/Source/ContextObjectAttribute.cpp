@@ -5,107 +5,92 @@
 
 
 #include "pch.h"
-#include "../Include/ContextObjectAttribute.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/Packer.h"
-#include "../Include/ContextObject.h"
+#include "../include/contextobjectattribute.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/packer.h"
+#include "../include/contextobject.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-ContextObjectAttribute::ContextObjectAttribute(ContextObject* pContextObject, const str& pName):
-	mContextObject(pContextObject),
-	mName(pName),
-	mNetworkType(TYPE_SERVER_BROADCAST)
-{
-	mContextObject->AddAttribute(this);
+ContextObjectAttribute::ContextObjectAttribute(ContextObject* context_object, const str& name):
+	context_object_(context_object),
+	name_(name),
+	network_type_(kTypeServerBroadcast) {
+	context_object_->AddAttribute(this);
 }
 
-ContextObjectAttribute::~ContextObjectAttribute()
-{
-	mContextObject = 0;
+ContextObjectAttribute::~ContextObjectAttribute() {
+	context_object_ = 0;
 }
 
 
 
-const str& ContextObjectAttribute::GetName() const
-{
-	return mName;
+const str& ContextObjectAttribute::GetName() const {
+	return name_;
 }
 
 
 
-void ContextObjectAttribute::SetCreator(const Factory& pFactory)
-{
-	mFactory = pFactory;
+void ContextObjectAttribute::SetCreator(const Factory& factory) {
+	factory_ = factory;
 }
 
 
 
-int ContextObjectAttribute::QuerySend() const
-{
-	return PackerUnicodeString::Pack(0, mName);
+int ContextObjectAttribute::QuerySend() const {
+	return PackerUnicodeString::Pack(0, name_);
 }
 
-int ContextObjectAttribute::Pack(uint8* pDestination)
-{
-	return PackerUnicodeString::Pack(pDestination, mName);
+int ContextObjectAttribute::Pack(uint8* destination) {
+	return PackerUnicodeString::Pack(destination, name_);
 }
 
-int ContextObjectAttribute::Unpack(ContextObject* pContextObject, const uint8* pSource, int pMaxSize)
-{
-	str lAttributeName;
-	int lSize = PackerUnicodeString::Unpack(lAttributeName, pSource, pMaxSize);
-	if (lSize < 0)
-	{
+int ContextObjectAttribute::Unpack(ContextObject* context_object, const uint8* source, int max_size) {
+	str attribute_name;
+	int size = PackerUnicodeString::Unpack(attribute_name, source, max_size);
+	if (size < 0) {
 		return -1;
 	}
 
-	ContextObjectAttribute* lAttribute = pContextObject->GetAttribute(lAttributeName);
-	if (!lAttribute)
-	{
-		deb_assert(mFactory);
-		lAttribute = mFactory(pContextObject, lAttributeName);
-		if (!lAttribute)
-		{
+	ContextObjectAttribute* attribute = context_object->GetAttribute(attribute_name);
+	if (!attribute) {
+		deb_assert(factory_);
+		attribute = factory_(context_object, attribute_name);
+		if (!attribute) {
 			return -1;
 		}
 	}
-	int lParamsSize = lAttribute->Unpack(&pSource[lSize], pMaxSize-lSize);
-	if (lParamsSize < 0)
-	{
+	int params_size = attribute->Unpack(&source[size], max_size-size);
+	if (params_size < 0) {
 		return -1;
 	}
-	lSize += lParamsSize;
-	return lSize;
+	size += params_size;
+	return size;
 }
 
 
 
-ContextObjectAttribute::NetworkType ContextObjectAttribute::GetNetworkType() const
-{
-	return mNetworkType;
+ContextObjectAttribute::NetworkType ContextObjectAttribute::GetNetworkType() const {
+	return network_type_;
 }
 
-void ContextObjectAttribute::SetNetworkType(NetworkType pNetworkType)
-{
-	mNetworkType = pNetworkType;
+void ContextObjectAttribute::SetNetworkType(NetworkType network_type) {
+	network_type_ = network_type;
 }
 
 
 
-void ContextObjectAttribute::operator=(const ContextObjectAttribute&)
-{
+void ContextObjectAttribute::operator=(const ContextObjectAttribute&) {
 	deb_assert(false);
 }
 
 
 
-ContextObjectAttribute::Factory ContextObjectAttribute::mFactory = 0;
+ContextObjectAttribute::Factory ContextObjectAttribute::factory_ = 0;
 
 
 

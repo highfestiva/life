@@ -1,31 +1,28 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "UiRaceScore.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "StopWatch.h"
+#include "uiracescore.h"
+#include "../../cure/include/contextmanager.h"
+#include "stopwatch.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-UiRaceScore::UiRaceScore(Cure::ContextObject* pContextObject, const str& pAttributeName, ScreenPart* pScreenPart,
-	UiCure::GameUiManager* pUiManager, const str& pClassResourceName):
-	Parent(pContextObject, pAttributeName, 0, Tbc::INVALID_BODY)
-{
-	StopWatch* lStopWatchChild = new StopWatch(pScreenPart, pUiManager, pClassResourceName, pAttributeName);
-	lStopWatchChild->Start(pContextObject);
+UiRaceScore::UiRaceScore(cure::ContextObject* context_object, const str& attribute_name, ScreenPart* screen_part,
+	UiCure::GameUiManager* ui_manager, const str& class_resource_name):
+	Parent(context_object, attribute_name, 0, tbc::INVALID_BODY) {
+	StopWatch* stop_watch_child = new StopWatch(screen_part, ui_manager, class_resource_name, attribute_name);
+	stop_watch_child->Start(context_object);
 }
 
-UiRaceScore::~UiRaceScore()
-{
+UiRaceScore::~UiRaceScore() {
 }
 
 

@@ -8,54 +8,51 @@
 
 #pragma once
 
-#include "UiLayout.h"
+#include "uilayout.h"
 #include <list>
-#include "../../../Lepra/Include/HashTable.h"
-#include "../../../Lepra/Include/LooseBinTree.h"
+#include "../../../lepra/include/hashtable.h"
+#include "../../../lepra/include/loosebintree.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class ListLayout: public Layout
-{
+class ListLayout: public Layout {
 public:
-	enum ListType
-	{
-		COLUMN = 0,
-		ROW,
+	enum ListType {
+		kColumn = 0,
+		kRow,
 	};
 
-	ListLayout(ListType pListType = COLUMN);
+	ListLayout(ListType list_type = kColumn);
 	virtual ~ListLayout();
 
 	virtual Type GetType() const;
-	
+
 	ListType GetListType() const;
 
 	typedef std::list<Component*> ComponentList;
 
-	// pParam1 is the indentation level, starting at 0. For normal lists
+	// param1 is the indentation level, starting at 0. For normal lists
 	//           this is always 0. This parameter can be used to create tree
 	//           views.
-	// pParam2 is not used.
-	virtual void Add(Component* pComponent, int pParam1, int pParam2);
-	virtual void Remove(Component* pComponent);
+	// param2 is not used.
+	virtual void Add(Component* component, int param1, int param2);
+	virtual void Remove(Component* component);
 
-	void AddChildAfter(Component* pChild, Component* pAfterThis, int pIndentationLevel);
-	void AddChildrenAfter(std::list<Component*>& pChildList, Component* pAfterThis, int pIndentationLevel);
+	void AddChildAfter(Component* child, Component* after_this, int indentation_level);
+	void AddChildrenAfter(std::list<Component*>& child_list, Component* after_this, int indentation_level);
 
-	// XY... If ListType is COLUMN, then this is the Y-coordinate, 
+	// XY... If ListType is kColumn, then this is the Y-coordinate,
 	// X-coordinate otherwise.
-	virtual Component* Find(int pScreenXY);
+	virtual Component* Find(int screen_xy);
 
 	// XY... Same as above.
-	virtual void Find(ComponentList& pComponents, int pScreenXY1, int pScreenXY2);
+	virtual void Find(ComponentList& components, int screen_x_y1, int screen_x_y2);
 
-	virtual Component* FindIndex(int pIndex);
+	virtual Component* FindIndex(int index);
 
 	virtual int GetNumComponents() const;
 
@@ -64,78 +61,74 @@ public:
 	virtual Component* GetLast();
 	virtual Component* GetPrev();
 
-	virtual Component* GetNext(Component* pCurrent);
-	virtual Component* GetPrev(Component* pCurrent);
+	virtual Component* GetNext(Component* current);
+	virtual Component* GetPrev(Component* current);
 
 	virtual void UpdateLayout();
 
-	virtual PixelCoord GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoord GetPreferredSize(bool force_adaptive);
 	virtual PixelCoord GetMinSize() const;
 	virtual PixelCoord GetContentSize() const;
 
-	void SetPosOffset(int pDX, int pDY);
+	void SetPosOffset(int dx, int dy);
 	int GetPosDX() const;
 	int GetPosDY() const;
 
 	// Indentation is given in pixels. This is the indentation per "level".
 	// See Add(Component* , ...) for more details.
-	void SetIndentationSize(int pIndentationSize);
+	void SetIndentationSize(int indentation_size);
 	int GetIndentationSize() const;
 
 	// HW = Height or Width. Depends on ListType:
-	// COLUMN -> Height
-	// ROW -> Width
+	// kColumn -> Height
+	// kRow -> Width
 	float64 GetAverageComponentHW() const;
 
 	bool IsEmpty() const;
 
 protected:
 private:
-	class Node
-	{
+	class Node {
 	public:
 		Node() :
-			mComponent(0),
-			mIndentationLevel(0)
-		{
+			component_(0),
+			indentation_level_(0) {
 		}
 
-		Node(const Node& pNode) :
-			mComponent(pNode.mComponent),
-			mIndentationLevel(pNode.mIndentationLevel)
-		{
+		Node(const Node& node) :
+			component_(node.component_),
+			indentation_level_(node.indentation_level_) {
 		}
 
-		Node(Component* pComponent, int pIndentationLevel) :
-			mComponent(pComponent),
-			mIndentationLevel(pIndentationLevel)
-		{
+		Node(Component* component, int indentation_level) :
+			component_(component),
+			indentation_level_(indentation_level) {
 		}
 
-		Component* mComponent;
-		int mIndentationLevel;
+		Component* component_;
+		int indentation_level_;
 	};
 
-	int GetPreferredHW(Component* pComponent);
+	int GetPreferredHW(Component* component);
 
 	typedef std::list<Node> NodeList;
 	typedef LooseBinTree<Component*, Component*, float64, LEPRA_VOIDP_HASHER> ComponentTree;
 	typedef HashTable<Component*, NodeList::iterator, LEPRA_VOIDP_HASHER> ComponentTable;
 
-	NodeList::iterator mIter;
-	NodeList mNodeList;
-	ComponentTree mComponentTree;
-	ComponentTable mComponentTable;
+	NodeList::iterator iter_;
+	NodeList node_list_;
+	ComponentTree component_tree_;
+	ComponentTable component_table_;
 
-	PixelCoord mContentSize;
+	PixelCoord content_size_;
 
-	int mPosDX;
-	int mPosDY;
-	int mListHW; // Height or Width in pixels.
+	int pos_dx_;
+	int pos_dy_;
+	int list_hw_; // Height or Width in pixels.
 
-	int mIndentationSize;
+	int indentation_size_;
 
-	ListType mListType;
+	ListType list_type_;
 };
 
 

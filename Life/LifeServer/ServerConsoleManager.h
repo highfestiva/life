@@ -8,44 +8,41 @@
 
 
 
-#include "../ConsoleManager.h"
+#include "../consolemanager.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class ServerConsoleManager: public ConsoleManager
-{
+class ServerConsoleManager: public ConsoleManager {
 	typedef ConsoleManager Parent;
 public:
-	ServerConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameServerManager,
-		Cure::RuntimeVariableScope* pVariableScope, InteractiveConsoleLogListener* pConsoleLogger,
-		ConsolePrompt* pConsolePrompt);
+	ServerConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_server_manager,
+		cure::RuntimeVariableScope* variable_scope, InteractiveConsoleLogListener* console_logger,
+		ConsolePrompt* console_prompt);
 	virtual ~ServerConsoleManager();
 
 private:
-	enum CommandServer
-	{
-		COMMAND_QUIT = COMMAND_COUNT_COMMON,
+	enum CommandServer {
+		kCommandQuit = kCommandCountCommon,
 
-		COMMAND_LOGIN_ENABLE,
-		COMMAND_LOGIN_DISABLE,
+		kCommandLoginEnable,
+		kCommandLoginDisable,
 
-		COMMAND_LIST_USERS,
-		COMMAND_BUILD,
+		kCommandListUsers,
+		kCommandBuild,
 
-		COMMAND_BROADCAST_CHAT_MESSAGE,
-		COMMAND_SEND_PRIVATE_CHAT_MESSAGE,
+		kCommandBroadcastChatMessage,
+		kCommandSendPrivateChatMessage,
 	};
 
 	virtual unsigned GetCommandCount() const;
-	virtual const CommandPair& GetCommand(unsigned pIndex) const;
-	virtual int OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector);
+	virtual const CommandPair& GetCommand(unsigned index) const;
+	virtual int OnCommand(const HashedString& command, const strutil::strvec& parameter_vector);
 
-	static const CommandPair mCommandIdList[];
+	static const CommandPair command_id_list_[];
 	logclass();
 };
 

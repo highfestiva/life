@@ -4,38 +4,34 @@
 
 
 
-#include "../../Include/Mac/UiIosInput.h"
+#include "../../include/mac/uiiosinput.h"
 #ifdef LEPRA_IOS
-//#include "../../../Lepra/Include/CyclicArray.h"
-//#include "../../../Lepra/Include/Log.h"
-//#include "../../Include/Mac/UiMacCore.h"
+//#include "../../../lepra/include/cyclicarray.h"
+//#include "../../../lepra/include/log.h"
+//#include "../../include/mac/uimaccore.h"
 //#include "../../Include/Mac/UiMacOpenGLDisplayManager.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-InputManager* InputManager::CreateInputManager(DisplayManager* pDisplayManager)
-{
-	return (new IosInputManager((MacOpenGLDisplay*)pDisplayManager));
+InputManager* InputManager::CreateInputManager(DisplayManager* display_manager) {
+	return (new IosInputManager((MacOpenGLDisplay*)display_manager));
 }
 
 
 
-IosInputElement::IosInputElement(Type pType, Interpretation pInterpretation, int pTypeIndex,
-	IosInputDevice* pParentDevice):
-	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice)
-{
+IosInputElement::IosInputElement(Type type, Interpretation interpretation, int type_index,
+	IosInputDevice* parent_device):
+	InputElement(type, interpretation, type_index, parent_device) {
 }
 
-IosInputElement::~IosInputElement()
-{
+IosInputElement::~IosInputElement() {
 }
 
-loginstance(UI_INPUT, IosInputElement);
+loginstance(kUiInput, IosInputElement);
 
 
 
@@ -43,231 +39,195 @@ loginstance(UI_INPUT, IosInputElement);
 	class IosInputDevice
 */
 
-IosInputDevice::IosInputDevice(InputManager* pManager):
-	InputDevice(pManager),
-	mRelAxisCount(0),
-	mAbsAxisCount(0),
-	mAnalogueCount(0),
-	mButtonCount(0)
-{
+IosInputDevice::IosInputDevice(InputManager* manager):
+	InputDevice(manager),
+	rel_axis_count_(0),
+	abs_axis_count_(0),
+	analogue_count_(0),
+	button_count_(0) {
 }
 
-IosInputDevice::~IosInputDevice()
-{
-	if (IsActive() == true)
-	{
+IosInputDevice::~IosInputDevice() {
+	if (IsActive() == true) {
 		Release();
 	}
-	//mNativeDevice->Release();
+	//native_device_->Release();
 
 	ElementArray::iterator x;
-	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
-	{
-		InputElement* lElement = *x;
-		delete lElement;
+	for (x = element_array_.begin(); x != element_array_.end(); ++x) {
+		InputElement* _element = *x;
+		delete _element;
 	}
-	mElementArray.clear();
+	element_array_.clear();
 }
 
-void IosInputDevice::Activate()
-{
-	if (IsActive() == false)
-	{
-		//mNativeDevice->Acquire();
+void IosInputDevice::Activate() {
+	if (IsActive() == false) {
+		//native_device_->Acquire();
 		SetActive(true);
 	}
 }
 
-void IosInputDevice::Release()
-{
-	//mNativeDevice->Unacquire();
+void IosInputDevice::Release() {
+	//native_device_->Unacquire();
 	SetActive(false);
 }
 
-void IosInputDevice::PollEvents()
-{
-	if (IsActive() == true)
-	{
+void IosInputDevice::PollEvents() {
+	if (IsActive() == true) {
 		ElementArray::iterator x;
-		for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
-		{
-			IosInputElement* lElement = (IosInputElement*)*x;
-			lElement->SetValue(lElement->GetValue());	// TODO: do some stuff?
+		for (x = element_array_.begin(); x != element_array_.end(); ++x) {
+			IosInputElement* _element = (IosInputElement*)*x;
+			_element->SetValue(_element->GetValue());	// TODO: do some stuff?
 		}
 	}
 }
 
-void IosInputDevice::AddElement(InputElement* pElement)
-{
-	mElementArray.push_back(pElement);
+void IosInputDevice::AddElement(InputElement* element) {
+	element_array_.push_back(element);
 }
 
 
 
-loginstance(UI_INPUT, IosInputDevice);
+loginstance(kUiInput, IosInputDevice);
 
 
 
-IosInputManager::IosInputManager(MacOpenGLDisplay* pDisplayManager):
-	mDisplayManager(pDisplayManager),
-	mScreenWidth(0),
-	mScreenHeight(0),
-	mCursorX(0),
-	mCursorY(0),
-	mKeyboard(0),
-	mMouse(0)
-{
+IosInputManager::IosInputManager(MacOpenGLDisplay* display_manager):
+	display_manager_(display_manager),
+	screen_width_(0),
+	screen_height_(0),
+	cursor_x_(0),
+	cursor_y_(0),
+	keyboard_(0),
+	mouse_(0) {
 	Refresh();
 
 	AddObserver();
 
-	IosInputDevice* lTouch = new IosInputDevice(this);
-	IosInputElement* x = new IosInputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, 0, lTouch);
-	IosInputElement* y = new IosInputElement(InputElement::ANALOGUE, InputElement::RELATIVE_AXIS, 1, lTouch);
-	IosInputElement* lButton = new IosInputElement(InputElement::DIGITAL, InputElement::BUTTON, 0, lTouch);
-	lTouch->SetIdentifier("IosVirtualMouse");
+	IosInputDevice* touch = new IosInputDevice(this);
+	IosInputElement* x = new IosInputElement(InputElement::kAnalogue, InputElement::kRelativeAxis, 0, touch);
+	IosInputElement* y = new IosInputElement(InputElement::kAnalogue, InputElement::kRelativeAxis, 1, touch);
+	IosInputElement* button = new IosInputElement(InputElement::kDigital, InputElement::kButton, 0, touch);
+	touch->SetIdentifier("IosVirtualMouse");
 	x->SetIdentifier("RelAxisX");
 	y->SetIdentifier("RelAxisY");
-	lButton->SetIdentifier("Button");
-	lTouch->AddElement(x);
-	lTouch->AddElement(y);
-	lTouch->AddElement(lButton);
+	button->SetIdentifier("Button");
+	touch->AddElement(x);
+	touch->AddElement(y);
+	touch->AddElement(button);
 	x->SetValue(0);
 	y->SetValue(0);
-	lButton->SetValue(1);
-	x->SetValue(mScreenWidth);
-	y->SetValue(mScreenHeight);
-	lButton->SetValue(0);
-	mDeviceList.push_back(lTouch);
-	mMouse = lTouch;
+	button->SetValue(1);
+	x->SetValue(screen_width_);
+	y->SetValue(screen_height_);
+	button->SetValue(0);
+	device_list_.push_back(touch);
+	mouse_ = touch;
 
-	mInitialized = true;
+	initialized_ = true;
 }
 
-IosInputManager::~IosInputManager()
-{
-	if (mInitialized == true)
-	{
+IosInputManager::~IosInputManager() {
+	if (initialized_ == true) {
 		//HIDReleaseDeviceList();
 	}
 
 	RemoveObserver();
 
-	mDisplayManager = 0;
+	display_manager_ = 0;
 }
 
-bool IosInputManager::IsInitialized()
-{
-	return (mInitialized);
+bool IosInputManager::IsInitialized() {
+	return (initialized_);
 }
 
-void IosInputManager::Refresh()
-{
-	mScreenWidth  = mDisplayManager->GetWidth();
-	mScreenHeight = mDisplayManager->GetHeight();
-	/*if (mDisplayManager != 0 && mDisplayManager->GetHWND() != 0)
-	{
-		RECT lRect;
-		::GetClientRect(mDisplayManager->GetHWND(), &lRect);
-		
-		mScreenWidth  = lRect.right - lRect.left;
-		mScreenHeight = lRect.bottom - lRect.top;
-	}
-	else
-	{
+void IosInputManager::Refresh() {
+	screen_width_  = display_manager_->GetWidth();
+	screen_height_ = display_manager_->GetHeight();
+	/*if (display_manager_ != 0 && display_manager_->GetHWND() != 0) {
+		RECT rect;
+		::GetClientRect(display_manager_->GetHWND(), &rect);
+
+		screen_width_  = rect.right - rect.left;
+		screen_height_ = rect.bottom - rect.top;
+	} else {
 		// Get the entire screen area.
-		mScreenWidth  = ::GetSystemMetrics(SM_CXVIRTUALSCREEN);
-		mScreenHeight = ::GetSystemMetrics(SM_CYVIRTUALSCREEN);
+		screen_width_  = ::GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		screen_height_ = ::GetSystemMetrics(SM_CYVIRTUALSCREEN);
 
-		if (mScreenWidth == 0 || mScreenHeight == 0)
-		{
+		if (screen_width_ == 0 || screen_height_ == 0) {
 			// Virtual screen not supported, use the primary display.
-			mScreenWidth  = ::GetSystemMetrics(SM_CXSCREEN);
-			mScreenHeight = ::GetSystemMetrics(SM_CYSCREEN);
+			screen_width_  = ::GetSystemMetrics(SM_CXSCREEN);
+			screen_height_ = ::GetSystemMetrics(SM_CYSCREEN);
 		}
 	}*/
 }
 
-MacDisplayManager* IosInputManager::GetDisplayManager() const
-{
-	return (mDisplayManager);
+MacDisplayManager* IosInputManager::GetDisplayManager() const {
+	return (display_manager_);
 }
 
-void IosInputManager::ActivateKeyboard()
-{
-	EAGLView* lView = mDisplayManager->GetGlView();
-	[lView becomeFirstResponder];
+void IosInputManager::ActivateKeyboard() {
+	EAGLView* view = display_manager_->GetGlView();
+	[view becomeFirstResponder];
 }
 
-void IosInputManager::ReleaseKeyboard()
-{
-	EAGLView* lView = mDisplayManager->GetGlView();
-	[lView resignFirstResponder];
+void IosInputManager::ReleaseKeyboard() {
+	EAGLView* view = display_manager_->GetGlView();
+	[view resignFirstResponder];
 }
 
-void IosInputManager::SetCursorVisible(bool pVisible)
-{
-	(void)pVisible;
+void IosInputManager::SetCursorVisible(bool visible) {
+	(void)visible;
 }
 
-float IosInputManager::GetCursorX()
-{
-	return mCursorX;
+float IosInputManager::GetCursorX() {
+	return cursor_x_;
 }
 
-float IosInputManager::GetCursorY()
-{
-	return mCursorY;
+float IosInputManager::GetCursorY() {
+	return cursor_y_;
 }
 
-void IosInputManager::SetMousePosition(int x, int y)
-{
-	mCursorX = 2.0 * x / mScreenWidth  - 1.0;
-	mCursorY = 2.0 * y / mScreenHeight - 1.0;
+void IosInputManager::SetMousePosition(int x, int y) {
+	cursor_x_ = 2.0 * x / screen_width_  - 1.0;
+	cursor_y_ = 2.0 * y / screen_height_ - 1.0;
 }
 
-const InputDevice* IosInputManager::GetKeyboard() const
-{
-	return mKeyboard;
+const InputDevice* IosInputManager::GetKeyboard() const {
+	return keyboard_;
 }
 
-InputDevice* IosInputManager::GetKeyboard()
-{
-	return mKeyboard;
+InputDevice* IosInputManager::GetKeyboard() {
+	return keyboard_;
 }
 
-const InputDevice* IosInputManager::GetMouse() const
-{
-	return mMouse;
+const InputDevice* IosInputManager::GetMouse() const {
+	return mouse_;
 }
 
-InputDevice* IosInputManager::GetMouse()
-{
-	return mMouse;
+InputDevice* IosInputManager::GetMouse() {
+	return mouse_;
 }
 
-void IosInputManager::OnEvent(LEPRA_APPLE_EVENT* e)
-{
+void IosInputManager::OnEvent(LEPRA_APPLE_EVENT* e) {
 }
 
-void IosInputManager::AddObserver()
-{
-	if (mDisplayManager)
-	{
-		EAGLView* lView = mDisplayManager->GetGlView();
-		lView.inputManager = this;
+void IosInputManager::AddObserver() {
+	if (display_manager_) {
+		EAGLView* view = display_manager_->GetGlView();
+		view.inputManager = this;
 	}
 }
 
-void IosInputManager::RemoveObserver()
-{
-	if (mDisplayManager)
-	{
-		mDisplayManager->RemoveObserver(this);
+void IosInputManager::RemoveObserver() {
+	if (display_manager_) {
+		display_manager_->RemoveObserver(this);
 	}
 }
 
-loginstance(UI_INPUT, IosInputManager);
+loginstance(kUiInput, IosInputManager);
 
 
 

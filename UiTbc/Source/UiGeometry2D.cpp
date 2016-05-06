@@ -1,345 +1,279 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiGeometry2D.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../Include/UiTbc.h"
+#include "../include/uigeometry2d.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../include/uitbc.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-Geometry2D::Geometry2D(unsigned pVertexFormat, int pVertexCapacity, int pTriangleCapacity):
-	mVertexFormat(pVertexFormat),
-	mVertexData(0),
-	mColorData(0),
-	mUVData(0),
-	mVertexCapacity(0),
-	mTriangleCapacity(pTriangleCapacity),
-	mVertexCount(0),
-	mTriangleCount(0)
-{
-	if (IsFlagSet(VTX_INDEX16))
-	{
-		mTriangleData16 = new uint16[pTriangleCapacity];
-	}
-	else
-	{
-		mTriangleData32 = new uint32[pTriangleCapacity];
+Geometry2D::Geometry2D(unsigned vertex_format, int vertex_capacity, int triangle_capacity):
+	vertex_format_(vertex_format),
+	vertex_data_(0),
+	color_data_(0),
+	uv_data_(0),
+	vertex_capacity_(0),
+	triangle_capacity_(triangle_capacity),
+	vertex_count_(0),
+	triangle_count_(0) {
+	if (IsFlagSet(kVtxIndex16)) {
+		triangle_data16_ = new uint16[triangle_capacity];
+	} else {
+		triangle_data32_ = new uint32[triangle_capacity];
 	}
 
-	Init(pVertexFormat, pVertexCapacity, pTriangleCapacity);
+	Init(vertex_format, vertex_capacity, triangle_capacity);
 }
 
-Geometry2D::~Geometry2D()
-{
-	delete[] (float*)mVertexData;	// Cast to dumb type; we don't want any destructor anyways.
-	delete[] mColorData;
-	delete[] mUVData;
-	if (IsFlagSet(VTX_INDEX16))
-	{
-		delete[] mTriangleData16;
-	}
-	else
-	{
-		delete[] mTriangleData32;
+Geometry2D::~Geometry2D() {
+	delete[] (float*)vertex_data_;	// Cast to dumb type; we don't want any destructor anyways.
+	delete[] color_data_;
+	delete[] uv_data_;
+	if (IsFlagSet(kVtxIndex16)) {
+		delete[] triangle_data16_;
+	} else {
+		delete[] triangle_data32_;
 	}
 }
 
-void Geometry2D::Init(unsigned pVertexFormat, int pVertexCapacity, int pTriangleCapacity)
-{
-	mVertexFormat = pVertexFormat;
+void Geometry2D::Init(unsigned vertex_format, int vertex_capacity, int triangle_capacity) {
+	vertex_format_ = vertex_format;
 
-	if (mVertexData == 0)
-	{
-		if (IsFlagSet(VTX_INTERLEAVED))
-		{
-			unsigned lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
-			switch(lFlags)
-			{
-				case 0: mVertexData = new VertexXY[pVertexCapacity]; break;
-				case VTX_UV: mVertexData = new VertexXYUV[pVertexCapacity]; break;
-				case VTX_RGB: mVertexData = new VertexXYRGB[pVertexCapacity]; break;
-				case VTX_UV | VTX_RGB: mVertexData = new VertexXYUVRGB[pVertexCapacity]; break;
+	if (vertex_data_ == 0) {
+		if (IsFlagSet(kVtxInterleaved)) {
+			unsigned flags = (vertex_format_ & (kVtxUv | kVtxRgb));
+			switch(flags) {
+				case 0: vertex_data_ = new VertexXY[vertex_capacity]; break;
+				case kVtxUv: vertex_data_ = new VertexXYUV[vertex_capacity]; break;
+				case kVtxRgb: vertex_data_ = new VertexXYRGB[vertex_capacity]; break;
+				case kVtxUv | kVtxRgb: vertex_data_ = new VertexXYUVRGB[vertex_capacity]; break;
+			}
+		} else {
+			vertex_data_ = new float[vertex_capacity * 2];
+			if (IsFlagSet(kVtxUv)) {
+				uv_data_ = new float[vertex_capacity * 2];
+			}
+			if (IsFlagSet(kVtxRgb)) {
+				color_data_ = new float[vertex_capacity * 3];
 			}
 		}
-		else
-		{
-			mVertexData = new float[pVertexCapacity * 2];
-			if (IsFlagSet(VTX_UV))
-			{
-				mUVData = new float[pVertexCapacity * 2];
-			}
-			if (IsFlagSet(VTX_RGB))
-			{
-				mColorData = new float[pVertexCapacity * 3];
-			}
-		}
-	}
-	else
-	{
-		deb_assert(!IsFlagSet(VTX_INTERLEAVED));	// Cannot handle interleaved yet.
+	} else {
+		deb_assert(!IsFlagSet(kVtxInterleaved));	// Cannot handle interleaved yet.
 
-		if (IsFlagSet(VTX_UV) != (mUVData != 0))
-		{
-			if (mUVData)
-			{
-				delete (mUVData);
-				mUVData = 0;
-			}
-			else
-			{
-				mUVData = new float[pVertexCapacity * 2];
+		if (IsFlagSet(kVtxUv) != (uv_data_ != 0)) {
+			if (uv_data_) {
+				delete (uv_data_);
+				uv_data_ = 0;
+			} else {
+				uv_data_ = new float[vertex_capacity * 2];
 			}
 		}
-		if (IsFlagSet(VTX_RGB) != (mColorData != 0))
-		{
-			if (mColorData)
-			{
-				delete (mColorData);
-				mColorData = 0;
-			}
-			else
-			{
-				mColorData = new float[pVertexCapacity * 3];
+		if (IsFlagSet(kVtxRgb) != (color_data_ != 0)) {
+			if (color_data_) {
+				delete (color_data_);
+				color_data_ = 0;
+			} else {
+				color_data_ = new float[vertex_capacity * 3];
 			}
 		}
-		AssureVertexCapacity(pVertexCapacity);
-		AssureTriangleCapacity(pTriangleCapacity);
+		AssureVertexCapacity(vertex_capacity);
+		AssureTriangleCapacity(triangle_capacity);
 		Reset();
 	}
 }
 
-void Geometry2D::ReallocVertexBuffers(int pVertexCapacity)
-{
-	if (IsFlagSet(VTX_INTERLEAVED))
-	{
-		unsigned lFlags = (mVertexFormat & (VTX_UV | VTX_RGB));
-		switch(lFlags)
-		{
-			case 0: Realloc(&mVertexData, pVertexCapacity * sizeof(VertexXY), mVertexCount * sizeof(VertexXY)); break;
-			case VTX_UV: Realloc(&mVertexData, pVertexCapacity * sizeof(VertexXYUV), mVertexCount * sizeof(VertexXYUV)); break;
-			case VTX_RGB: Realloc(&mVertexData, pVertexCapacity * sizeof(VertexXYRGB), mVertexCount * sizeof(VertexXYRGB)); break;
-			case VTX_UV | VTX_RGB: Realloc(&mVertexData, pVertexCapacity * sizeof(VertexXYUVRGB), mVertexCount * sizeof(VertexXYUVRGB)); break;
+void Geometry2D::ReallocVertexBuffers(int vertex_capacity) {
+	if (IsFlagSet(kVtxInterleaved)) {
+		unsigned flags = (vertex_format_ & (kVtxUv | kVtxRgb));
+		switch(flags) {
+			case 0: Realloc(&vertex_data_, vertex_capacity * sizeof(VertexXY), vertex_count_ * sizeof(VertexXY)); break;
+			case kVtxUv: Realloc(&vertex_data_, vertex_capacity * sizeof(VertexXYUV), vertex_count_ * sizeof(VertexXYUV)); break;
+			case kVtxRgb: Realloc(&vertex_data_, vertex_capacity * sizeof(VertexXYRGB), vertex_count_ * sizeof(VertexXYRGB)); break;
+			case kVtxUv | kVtxRgb: Realloc(&vertex_data_, vertex_capacity * sizeof(VertexXYUVRGB), vertex_count_ * sizeof(VertexXYUVRGB)); break;
+		}
+	} else {
+		Realloc(&vertex_data_, vertex_capacity * 2 * sizeof(float), vertex_count_ * 2 * sizeof(float));
+		if (color_data_) {
+			void* temp_color = (void*)color_data_;
+			Realloc(&temp_color, vertex_capacity * 3 * sizeof(float), vertex_count_ * 3 * sizeof(float));
+			color_data_ = (float*)temp_color;
+		}
+		if (uv_data_) {
+			void* temp_uv = (void*)uv_data_;
+			Realloc(&temp_uv, vertex_capacity * 2 * sizeof(float), vertex_count_ * 2 * sizeof(float));
+			uv_data_ = (float*)temp_uv;
 		}
 	}
-	else
-	{
-		Realloc(&mVertexData, pVertexCapacity * 2 * sizeof(float), mVertexCount * 2 * sizeof(float));
-		if (mColorData)
-		{
-			void* lTempColor = (void*)mColorData;
-			Realloc(&lTempColor, pVertexCapacity * 3 * sizeof(float), mVertexCount * 3 * sizeof(float));
-			mColorData = (float*)lTempColor;
-		}
-		if (mUVData)
-		{
-			void* lTempUV = (void*)mUVData;
-			Realloc(&lTempUV, pVertexCapacity * 2 * sizeof(float), mVertexCount * 2 * sizeof(float));
-			mUVData = (float*)lTempUV;
-		}
-	}
-	mVertexCapacity = pVertexCapacity;
+	vertex_capacity_ = vertex_capacity;
 }
 
-void Geometry2D::ReallocTriangleBuffer(int pTriangleCapacity)
-{
-	if (IsFlagSet(VTX_INDEX16))
-	{
-		uint16* lTriangleData16 = new uint16[pTriangleCapacity * 3];
-		::memcpy(lTriangleData16, mTriangleData16, std::min(pTriangleCapacity, mTriangleCount) * 3 * sizeof(uint16));
-		delete[] mTriangleData16;
-		mTriangleData16 = lTriangleData16;
+void Geometry2D::ReallocTriangleBuffer(int triangle_capacity) {
+	if (IsFlagSet(kVtxIndex16)) {
+		uint16* triangle_data16 = new uint16[triangle_capacity * 3];
+		::memcpy(triangle_data16, triangle_data16_, std::min(triangle_capacity, triangle_count_) * 3 * sizeof(uint16));
+		delete[] triangle_data16_;
+		triangle_data16_ = triangle_data16;
+	} else {
+		uint32* triangle_data32 = new uint32[triangle_capacity * 3];
+		::memcpy(triangle_data32, triangle_data32_, std::min(triangle_capacity, triangle_count_) * 3 * sizeof(uint32));
+		delete[] triangle_data32_;
+		triangle_data32_ = triangle_data32;
 	}
-	else
-	{
-		uint32* lTriangleData32 = new uint32[pTriangleCapacity * 3];
-		::memcpy(lTriangleData32, mTriangleData32, std::min(pTriangleCapacity, mTriangleCount) * 3 * sizeof(uint32));
-		delete[] mTriangleData32;
-		mTriangleData32 = lTriangleData32;
-	}
-	mTriangleCapacity = pTriangleCapacity;
+	triangle_capacity_ = triangle_capacity;
 }
 
-void Geometry2D::AssureVertexCapacity(int pVertexCapacity)
-{
-	if (pVertexCapacity >= mVertexCapacity)
-	{
-		int lNewCapacity = pVertexCapacity + mVertexCapacity / 2;
-		ReallocVertexBuffers(lNewCapacity);
+void Geometry2D::AssureVertexCapacity(int vertex_capacity) {
+	if (vertex_capacity >= vertex_capacity_) {
+		int new_capacity = vertex_capacity + vertex_capacity_ / 2;
+		ReallocVertexBuffers(new_capacity);
 	}
 }
 
-void Geometry2D::AssureTriangleCapacity(int pTriangleCapacity)
-{
-	if (pTriangleCapacity >= mTriangleCapacity)
-	{
-		int lNewCapacity = pTriangleCapacity + mTriangleCapacity / 2;
-		ReallocTriangleBuffer(lNewCapacity);
+void Geometry2D::AssureTriangleCapacity(int triangle_capacity) {
+	if (triangle_capacity >= triangle_capacity_) {
+		int new_capacity = triangle_capacity + triangle_capacity_ / 2;
+		ReallocTriangleBuffer(new_capacity);
 	}
 }
 
-uint32 Geometry2D::SetVertex(float x, float y)
-{
-	AssureVertexCapacity(mVertexCount + 1);
+uint32 Geometry2D::SetVertex(float x, float y) {
+	AssureVertexCapacity(vertex_count_ + 1);
 
-	if (IsFlagSet(VTX_INTERLEAVED))
-	{
-		VertexXY* lVertexData = (VertexXY*)mVertexData;
-		lVertexData[mVertexCount].x = x;
-		lVertexData[mVertexCount].y = y;
+	if (IsFlagSet(kVtxInterleaved)) {
+		VertexXY* vertex_data = (VertexXY*)vertex_data_;
+		vertex_data[vertex_count_].x = x;
+		vertex_data[vertex_count_].y = y;
+	} else {
+		int vertex_index = (vertex_count_ << 1);
+		float* vertex_data = (float*)vertex_data_;
+		vertex_data[vertex_index + 0] = x;
+		vertex_data[vertex_index + 1] = y;
 	}
-	else
-	{
-		int lVertexIndex = (mVertexCount << 1);
-		float* lVertexData = (float*)mVertexData;
-		lVertexData[lVertexIndex + 0] = x;
-		lVertexData[lVertexIndex + 1] = y;
-	}
-	return mVertexCount++;
+	return vertex_count_++;
 }
 
-uint32 Geometry2D::SetVertex(float x, float y, float u, float v)
-{
-	AssureVertexCapacity(mVertexCount + 1);
+uint32 Geometry2D::SetVertex(float x, float y, float u, float v) {
+	AssureVertexCapacity(vertex_count_ + 1);
 
-	if (IsFlagSet(VTX_INTERLEAVED))
-	{
-		VertexXYUV* lVertexData = (VertexXYUV*)mVertexData;
-		lVertexData[mVertexCount].x = x;
-		lVertexData[mVertexCount].y = y;
-		lVertexData[mVertexCount].z = 0;
-		lVertexData[mVertexCount].w = 1;
-		lVertexData[mVertexCount].u = u;
-		lVertexData[mVertexCount].v = v;
+	if (IsFlagSet(kVtxInterleaved)) {
+		VertexXYUV* vertex_data = (VertexXYUV*)vertex_data_;
+		vertex_data[vertex_count_].x = x;
+		vertex_data[vertex_count_].y = y;
+		vertex_data[vertex_count_].z = 0;
+		vertex_data[vertex_count_].w = 1;
+		vertex_data[vertex_count_].u = u;
+		vertex_data[vertex_count_].v = v;
+	} else {
+		int vertex_index = (vertex_count_ << 1);
+		float* vertex_data = (float*)vertex_data_;
+		vertex_data[vertex_index + 0] = x;
+		vertex_data[vertex_index + 1] = y;
+		uv_data_[vertex_index + 0] = u;
+		uv_data_[vertex_index + 1] = v;
 	}
-	else
-	{
-		int lVertexIndex = (mVertexCount << 1);
-		float* lVertexData = (float*)mVertexData;
-		lVertexData[lVertexIndex + 0] = x;
-		lVertexData[lVertexIndex + 1] = y;
-		mUVData[lVertexIndex + 0] = u;
-		mUVData[lVertexIndex + 1] = v;
-	}
-	return mVertexCount++;
+	return vertex_count_++;
 }
 
-uint32 Geometry2D::SetVertex(float x, float y, float r, float g, float b)
-{
-	AssureVertexCapacity(mVertexCount + 1);
+uint32 Geometry2D::SetVertex(float x, float y, float r, float g, float b) {
+	AssureVertexCapacity(vertex_count_ + 1);
 
-	if (IsFlagSet(VTX_INTERLEAVED))
-	{
-		VertexXYRGB* lVertexData = (VertexXYRGB*)mVertexData;
-		lVertexData[mVertexCount].x = x;
-		lVertexData[mVertexCount].y = y;
-		lVertexData[mVertexCount].z = 0;
-		lVertexData[mVertexCount].w = 1;
-		lVertexData[mVertexCount].mBlue  = (uint8)(b * 255.0f);
-		lVertexData[mVertexCount].mGreen = (uint8)(g * 255.0f);
-		lVertexData[mVertexCount].mRed   = (uint8)(r * 255.0f);
-		lVertexData[mVertexCount].mAlpha = 255;
-	}
-	else
-	{
-		int lVertexIndex = (mVertexCount << 1);
-		float* lVertexData = (float*)mVertexData;
-		lVertexData[lVertexIndex + 0] = x;
-		lVertexData[lVertexIndex + 1] = y;
+	if (IsFlagSet(kVtxInterleaved)) {
+		VertexXYRGB* vertex_data = (VertexXYRGB*)vertex_data_;
+		vertex_data[vertex_count_].x = x;
+		vertex_data[vertex_count_].y = y;
+		vertex_data[vertex_count_].z = 0;
+		vertex_data[vertex_count_].w = 1;
+		vertex_data[vertex_count_].blue_  = (uint8)(b * 255.0f);
+		vertex_data[vertex_count_].green_ = (uint8)(g * 255.0f);
+		vertex_data[vertex_count_].red_   = (uint8)(r * 255.0f);
+		vertex_data[vertex_count_].alpha_ = 255;
+	} else {
+		int vertex_index = (vertex_count_ << 1);
+		float* vertex_data = (float*)vertex_data_;
+		vertex_data[vertex_index + 0] = x;
+		vertex_data[vertex_index + 1] = y;
 
-		lVertexIndex += mVertexCount; // lVertexIndex = mCurrentVertex * 3.
-		mColorData[lVertexIndex + 0] = r;
-		mColorData[lVertexIndex + 1] = g;
-		mColorData[lVertexIndex + 2] = b;
+		vertex_index += vertex_count_; // vertex_index = mCurrentVertex * 3.
+		color_data_[vertex_index + 0] = r;
+		color_data_[vertex_index + 1] = g;
+		color_data_[vertex_index + 2] = b;
 	}
-	return mVertexCount++;
+	return vertex_count_++;
 }
 
-uint32 Geometry2D::SetVertex(float x, float y, float u, float v, float r, float g, float b)
-{
-	AssureVertexCapacity(mVertexCount + 1);
+uint32 Geometry2D::SetVertex(float x, float y, float u, float v, float r, float g, float b) {
+	AssureVertexCapacity(vertex_count_ + 1);
 
-	if (IsFlagSet(VTX_INTERLEAVED))
-	{
-		VertexXYUVRGB* lVertexData = (VertexXYUVRGB*)mVertexData;
-		lVertexData[mVertexCount].x = x;
-		lVertexData[mVertexCount].y = y;
-		lVertexData[mVertexCount].z = 0;
-		lVertexData[mVertexCount].w = 1;
-		lVertexData[mVertexCount].u = u;
-		lVertexData[mVertexCount].v = v;
+	if (IsFlagSet(kVtxInterleaved)) {
+		VertexXYUVRGB* vertex_data = (VertexXYUVRGB*)vertex_data_;
+		vertex_data[vertex_count_].x = x;
+		vertex_data[vertex_count_].y = y;
+		vertex_data[vertex_count_].z = 0;
+		vertex_data[vertex_count_].w = 1;
+		vertex_data[vertex_count_].u = u;
+		vertex_data[vertex_count_].v = v;
 
-		lVertexData[mVertexCount].mBlue  = (uint8)(b * 255.0f);
-		lVertexData[mVertexCount].mGreen = (uint8)(g * 255.0f);
-		lVertexData[mVertexCount].mRed   = (uint8)(r * 255.0f);
-		lVertexData[mVertexCount].mAlpha = 255;
+		vertex_data[vertex_count_].blue_  = (uint8)(b * 255.0f);
+		vertex_data[vertex_count_].green_ = (uint8)(g * 255.0f);
+		vertex_data[vertex_count_].red_   = (uint8)(r * 255.0f);
+		vertex_data[vertex_count_].alpha_ = 255;
+	} else {
+		int vertex_index = (vertex_count_ << 1);
+		float* vertex_data = (float*)vertex_data_;
+		vertex_data[vertex_index + 0] = x;
+		vertex_data[vertex_index + 1] = y;
+		uv_data_[vertex_index + 0] = u;
+		uv_data_[vertex_index + 1] = v;
+
+		vertex_index += vertex_count_; // vertex_index = mCurrentVertex * 3.
+		color_data_[vertex_index + 0] = r;
+		color_data_[vertex_index + 1] = g;
+		color_data_[vertex_index + 2] = b;
 	}
-	else
-	{
-		int lVertexIndex = (mVertexCount << 1);
-		float* lVertexData = (float*)mVertexData;
-		lVertexData[lVertexIndex + 0] = x;
-		lVertexData[lVertexIndex + 1] = y;
-		mUVData[lVertexIndex + 0] = u;
-		mUVData[lVertexIndex + 1] = v;
-
-		lVertexIndex += mVertexCount; // lVertexIndex = mCurrentVertex * 3.
-		mColorData[lVertexIndex + 0] = r;
-		mColorData[lVertexIndex + 1] = g;
-		mColorData[lVertexIndex + 2] = b;
-	}
-	return mVertexCount++;
+	return vertex_count_++;
 }
 
-void Geometry2D::SetTriangle(uint32 pV1, uint32 pV2, uint32 pV3)
-{
-	AssureTriangleCapacity(mTriangleCount + 1);
+void Geometry2D::SetTriangle(uint32 v1, uint32 v2, uint32 v3) {
+	AssureTriangleCapacity(triangle_count_ + 1);
 
-	int lTriangleIndex = mTriangleCount * 3;
-	if (IsFlagSet(VTX_INDEX16))
-	{
-		mTriangleData16[lTriangleIndex + 0] = (uint16)pV1;
-		mTriangleData16[lTriangleIndex + 1] = (uint16)pV2;
-		mTriangleData16[lTriangleIndex + 2] = (uint16)pV3;
+	int triangle_index = triangle_count_ * 3;
+	if (IsFlagSet(kVtxIndex16)) {
+		triangle_data16_[triangle_index + 0] = (uint16)v1;
+		triangle_data16_[triangle_index + 1] = (uint16)v2;
+		triangle_data16_[triangle_index + 2] = (uint16)v3;
+	} else {
+		triangle_data32_[triangle_index + 0] = v1;
+		triangle_data32_[triangle_index + 1] = v2;
+		triangle_data32_[triangle_index + 2] = v3;
 	}
-	else
-	{
-		mTriangleData32[lTriangleIndex + 0] = pV1;
-		mTriangleData32[lTriangleIndex + 1] = pV2;
-		mTriangleData32[lTriangleIndex + 2] = pV3;
-	}
-	mTriangleCount++;
+	triangle_count_++;
 }
 
-void Geometry2D::Reset()
-{
-	mVertexCount = 0;
-	mTriangleCount = 0;
+void Geometry2D::Reset() {
+	vertex_count_ = 0;
+	triangle_count_ = 0;
 }
 
-void Geometry2D::Realloc(void** pData, size_t pNewSize, size_t pBytesToCopy)
-{
-	uint8* lNewData = new uint8[pNewSize];
-	::memcpy(lNewData, *pData, std::min(pNewSize, pBytesToCopy));
-	delete[] (float*)(*pData);	// Cast to dumb type, we don't want any destructor anyways.
-	*pData = lNewData;
+void Geometry2D::Realloc(void** data, size_t new_size, size_t bytes_to_copy) {
+	uint8* new_data = new uint8[new_size];
+	::memcpy(new_data, *data, std::min(new_size, bytes_to_copy));
+	delete[] (float*)(*data);	// Cast to dumb type, we don't want any destructor anyways.
+	*data = new_data;
 }
 
-Geometry2D::Geometry2D(const Geometry2D&)
-{
+Geometry2D::Geometry2D(const Geometry2D&) {
 	deb_assert(false);
 }
 
-void Geometry2D::operator=(const Geometry2D&)
-{
+void Geometry2D::operator=(const Geometry2D&) {
 	deb_assert(false);
 }
 

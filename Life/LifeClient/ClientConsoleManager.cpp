@@ -5,387 +5,306 @@
 
 
 #include "pch.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Cure/Include/RuntimeVariableName.h"
-#include "../../Cure/Include/TimeManager.h"
-#include "../../Lepra/Include/CyclicArray.h"
-#include "../../Lepra/Include/LepraOS.h"
-#include "../../Lepra/Include/Number.h"
-#include "../../Lepra/Include/Path.h"
-#include "../../Lepra/Include/SystemManager.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiCure/Include/UiResourceManager.h"
-#include "../../UiTbc/Include/GUI/UiConsoleLogListener.h"
-#include "../../UiTbc/Include/GUI/UiConsolePrompt.h"
-#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTbc/Include/GUI/UiFileNameField.h"
-#include "../../UiTbc/Include/GUI/UiTextArea.h"
-#include "../LifeApplication.h"
-#include "GameClientSlaveManager.h"
-#include "GameClientMasterTicker.h"
-#include "ClientConsoleManager.h"
-#include "RtVar.h"
-#include "UiConsole.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/runtimevariable.h"
+#include "../../cure/include/runtimevariablename.h"
+#include "../../cure/include/timemanager.h"
+#include "../../lepra/include/cyclicarray.h"
+#include "../../lepra/include/lepraos.h"
+#include "../../lepra/include/number.h"
+#include "../../lepra/include/path.h"
+#include "../../lepra/include/systemmanager.h"
+#include "../../uicure/include/uigameuimanager.h"
+#include "../../uicure/include/uiresourcemanager.h"
+#include "../../uitbc/include/gui/uiconsoleloglistener.h"
+#include "../../uitbc/include/gui/uiconsoleprompt.h"
+#include "../../uitbc/include/gui/uidesktopwindow.h"
+#include "../../uitbc/include/gui/uifilenamefield.h"
+#include "../../uitbc/include/gui/uitextarea.h"
+#include "../lifeapplication.h"
+#include "gameclientslavemanager.h"
+#include "gameclientmasterticker.h"
+#include "clientconsolemanager.h"
+#include "rtvar.h"
+#include "uiconsole.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
 // Must lie before ClientConsoleManager to compile.
-const ClientConsoleManager::CommandPair ClientConsoleManager::mCommandIdList[] =
+const ClientConsoleManager::CommandPair ClientConsoleManager::command_id_list_[] =
 {
-	{"quit", COMMAND_QUIT},
-	{"bye", COMMAND_BYE},
-	{"zombie", COMMAND_ZOMBIE},
-	{"echo-msgbox", COMMAND_ECHO_MSGBOX},
-	{"start-login", COMMAND_START_LOGIN},
-	{"wait-login", COMMAND_WAIT_LOGIN},
-	{"logout", COMMAND_LOGOUT},
-	{"start-reset-ui", COMMAND_START_RESET_UI},
-	{"wait-reset-ui", COMMAND_WAIT_RESET_UI},
-	{"add-player", COMMAND_ADD_PLAYER},
-	{"set-mesh-visible", COMMAND_SET_MESH_VISIBLE},
+	{"quit", kCommandQuit},
+	{"bye", kCommandBye},
+	{"zombie", kCommandZombie},
+	{"echo-msgbox", kCommandEchoMsgbox},
+	{"start-login", kCommandStartLogin},
+	{"wait-login", kCommandWaitLogin},
+	{"logout", kCommandLogout},
+	{"start-reset-ui", kCommandStartResetUi},
+	{"wait-reset-ui", kCommandWaitResetUi},
+	{"add-player", kCommandAddPlayer},
+	{"set-mesh-visible", kCommandSetMeshVisible},
 };
 
 
 
-ClientConsoleManager::ClientConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-	UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea):
-	ConsoleManager(pResourceManager, pGameManager, pVariableScope, new UiTbc::ConsoleLogListener,
-		new UiTbc::ConsolePrompt),
-	mWasCursorVisible(true)
-{
-	mUiConsole = new UiConsole(this, pUiManager, pArea);
+ClientConsoleManager::ClientConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+	UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area):
+	ConsoleManager(resource_manager, game_manager, variable_scope, new uitbc::ConsoleLogListener,
+		new uitbc::ConsolePrompt),
+	was_cursor_visible_(true) {
+	ui_console_ = new UiConsole(this, ui_manager, area);
 }
 
-ClientConsoleManager::~ClientConsoleManager()
-{
+ClientConsoleManager::~ClientConsoleManager() {
 	delete GetConsoleLogger();
 	SetConsoleLogger(0);
-	delete (mUiConsole);
-	mUiConsole = 0;
+	delete (ui_console_);
+	ui_console_ = 0;
 }
 
 
 
-bool ClientConsoleManager::Start()
-{
-	mUiConsole->Open();
+bool ClientConsoleManager::Start() {
+	ui_console_->Open();
 	return Parent::Start();
 }
 
-void ClientConsoleManager::Join()
-{
-	mUiConsole->Close();
+void ClientConsoleManager::Join() {
+	ui_console_->Close();
 	Parent::Join();
 }
 
 
 
-bool ClientConsoleManager::ToggleVisible()
-{
-	const bool lConsoleActive = mUiConsole->ToggleVisible();
-	if (lConsoleActive)
-	{
-		mWasCursorVisible = mUiConsole->GetUiManager()->GetInputManager()->IsCursorVisible();
-		mUiConsole->GetUiManager()->GetInputManager()->SetCursorVisible(lConsoleActive);
+bool ClientConsoleManager::ToggleVisible() {
+	const bool console_active = ui_console_->ToggleVisible();
+	if (console_active) {
+		was_cursor_visible_ = ui_console_->GetUiManager()->GetInputManager()->IsCursorVisible();
+		ui_console_->GetUiManager()->GetInputManager()->SetCursorVisible(console_active);
+	} else {
+		ui_console_->GetUiManager()->GetInputManager()->SetCursorVisible(was_cursor_visible_);
 	}
-	else
-	{
-		mUiConsole->GetUiManager()->GetInputManager()->SetCursorVisible(mWasCursorVisible);
-	}
-	return lConsoleActive;
+	return console_active;
 }
 
-UiConsole* ClientConsoleManager::GetUiConsole() const
-{
-	return (mUiConsole);
+UiConsole* ClientConsoleManager::GetUiConsole() const {
+	return (ui_console_);
 }
 
 
 
-int ClientConsoleManager::FilterExecuteCommand(const str& pCommandLine)
-{
-	const str lCommandDelimitors(" \t\v\r\n");
-	const strutil::strvec lCommandList = strutil::BlockSplit(pCommandLine, ";", true, true);
-	const int lAllowedCount = 5;
-	const str lAllowedList[lAllowedCount] =
+int ClientConsoleManager::FilterExecuteCommand(const str& command_line) {
+	const str command_delimitors(" \t\v\r\n");
+	const strutil::strvec command_list = strutil::BlockSplit(command_line, ";", true, true);
+	const int allowed_count = 5;
+	const str allowed_list[allowed_count] =
 	{
-		str("#" RTVAR_PHYSICS_FPS),
-		str("#" RTVAR_PHYSICS_RTR),
-		str("#" RTVAR_PHYSICS_HALT),
+		str("#" kRtvarPhysicsFps),
+		str("#" kRtvarPhysicsRtr),
+		str("#" kRtvarPhysicsHalt),
 		str("#Ui.3D."),
 		str("echo "),
 	};
-	int lResult = 0;
-	for (size_t lCommandIndex = 0; lResult == 0 && lCommandIndex < lCommandList.size(); ++lCommandIndex)
-	{
-		lResult = -1;
-		const str& lTempCommand = lCommandList[lCommandIndex];
-		const str lCommand = strutil::StripLeft(lTempCommand, lCommandDelimitors);
-		for (int x = 0; x < lAllowedCount; ++x)
-		{
-			if (strutil::StartsWith(lCommand, lAllowedList[x]))
-			{
-				lResult = ExecuteCommand(lCommand);
+	int result = 0;
+	for (size_t command_index = 0; result == 0 && command_index < command_list.size(); ++command_index) {
+		result = -1;
+		const str& temp_command = command_list[command_index];
+		const str _command = strutil::StripLeft(temp_command, command_delimitors);
+		for (int x = 0; x < allowed_count; ++x) {
+			if (strutil::StartsWith(_command, allowed_list[x])) {
+				result = ExecuteCommand(_command);
 				break;
 			}
 		}
 	}
-	return lResult;
+	return result;
 }
 
 
 
-bool ClientConsoleManager::SaveApplicationConfigFile(File* pFile, const str& pUserConfig)
-{
-	bool lOk = Parent::SaveApplicationConfigFile(pFile, pUserConfig);
-	if (lOk && pUserConfig.empty())
-	{
-		pFile->WriteString("//push \"start-login server:port username password\"\n");
-		lOk = true;	// TODO: check if all writes went well.
+bool ClientConsoleManager::SaveApplicationConfigFile(File* file, const str& user_config) {
+	bool ok = Parent::SaveApplicationConfigFile(file, user_config);
+	if (ok && user_config.empty()) {
+		file->WriteString("//push \"start-login server:port username password\"\n");
+		ok = true;	// TODO: check if all writes went well.
 	}
-	return (lOk);
+	return (ok);
 }
 
 
 
-unsigned ClientConsoleManager::GetCommandCount() const
-{
-	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(mCommandIdList);
+unsigned ClientConsoleManager::GetCommandCount() const {
+	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(command_id_list_);
 }
 
-const ClientConsoleManager::CommandPair& ClientConsoleManager::GetCommand(unsigned pIndex) const
-{
-	if (pIndex < Parent::GetCommandCount())
-	{
-		return (Parent::GetCommand(pIndex));
+const ClientConsoleManager::CommandPair& ClientConsoleManager::GetCommand(unsigned index) const {
+	if (index < Parent::GetCommandCount()) {
+		return (Parent::GetCommand(index));
 	}
-	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
+	return (command_id_list_[index-Parent::GetCommandCount()]);
 }
 
-int ClientConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
-{
-	int lResult = Parent::OnCommand(pCommand, pParameterVector);
-	if (lResult < 0)
-	{
-		lResult = 0;
+int ClientConsoleManager::OnCommand(const HashedString& command, const strutil::strvec& parameter_vector) {
+	int result = Parent::OnCommand(command, parameter_vector);
+	if (result < 0) {
+		result = 0;
 
-		CommandClient lCommand = (CommandClient)TranslateCommand(pCommand);
-		switch ((int)lCommand)
-		{
-			case COMMAND_SET_DEFAULT_CONFIG:
-			{
+		CommandClient _command = (CommandClient)TranslateCommand(command);
+		switch ((int)_command) {
+			case kCommandSetDefaultConfig: {
 				UiCure::SetDefault(GetVariableScope());
-			}
-			break;
-			case COMMAND_QUIT:
-			{
-				if (!pParameterVector.empty() && pParameterVector[0] == "!")
-				{
-					mLog.Warning("Hard process termination due to user command!");
+			} break;
+			case kCommandQuit: {
+				if (!parameter_vector.empty() && parameter_vector[0] == "!") {
+					log_.Warning("Hard process termination due to user command!");
 					SystemManager::ExitProcess(0);
-				}
-				else
-				{
-					mLog.Info("Terminating due to user command.");
+				} else {
+					log_.Info("Terminating due to user command.");
 					SystemManager::AddQuitRequest(+1);
 				}
-			}
-			break;
-			case COMMAND_BYE:
-			{
+			} break;
+			case kCommandBye: {
 				((GameClientSlaveManager*)GetGameManager())->SetIsQuitting();
-			}
-			break;
-			case COMMAND_ZOMBIE:
-			{
+			} break;
+			case kCommandZombie: {
 				Application::GetApplication()->SetZombieTick(Application::ZombieTick(this, &ClientConsoleManager::HeadlessTick));
-				while (Application::GetApplication()->GetTicker())
-				{
+				while (Application::GetApplication()->GetTicker()) {
 					Thread::Sleep(0.5f);
 				}
-				for (size_t x = 0; x < pParameterVector.size(); ++x)
-				{
-					PushYieldCommand(pParameterVector[x]);
+				for (size_t x = 0; x < parameter_vector.size(); ++x) {
+					PushYieldCommand(parameter_vector[x]);
 				}
-				MemberThread<Cure::ConsoleManager>* lConsoleThread = mConsoleThread;
-				mConsoleThread = 0;
-				lConsoleThread->RequestSelfDestruct();
-				lConsoleThread->RequestStop();
-			}
-			break;
-			case COMMAND_ECHO_MSGBOX:
-			{
-				if (pParameterVector.size() == 2)
-				{
-					mUiConsole->GetUiManager()->GetDisplayManager()->ShowMessageBox(pParameterVector[1], pParameterVector[0]);
+				MemberThread<cure::ConsoleManager>* console_thread = console_thread_;
+				console_thread_ = 0;
+				console_thread->RequestSelfDestruct();
+				console_thread->RequestStop();
+			} break;
+			case kCommandEchoMsgbox: {
+				if (parameter_vector.size() == 2) {
+					ui_console_->GetUiManager()->GetDisplayManager()->ShowMessageBox(parameter_vector[1], parameter_vector[0]);
+				} else {
+					log_.Warningf("usage: %s <title> <msg>", command.c_str());
+					result = 1;
 				}
-				else
-				{
-					mLog.Warningf("usage: %s <title> <msg>", pCommand.c_str());
-					lResult = 1;
-				}
-			}
-			break;
-			case COMMAND_START_LOGIN:
-			{
+			} break;
+			case kCommandStartLogin: {
 				((GameClientSlaveManager*)GetGameManager())->Logout();
 
-				if (pParameterVector.size() == 3)
-				{
-					str lUsername = pParameterVector[1];
-					str lReadablePassword = pParameterVector[2];
-					//pParameterVector[2] = "        ";
+				if (parameter_vector.size() == 3) {
+					str username = parameter_vector[1];
+					str readable_password = parameter_vector[2];
+					//parameter_vector[2] = "        ";
 					// Convert into login format.
-					Cure::MangledPassword lPassword(lReadablePassword);
-					lReadablePassword.clear();	// Clear out password traces in string.
-					Cure::LoginId lLoginToken(lUsername, lPassword);
-					((GameClientSlaveManager*)GetGameManager())->RequestLogin(pParameterVector[0], lLoginToken);
+					cure::MangledPassword password(readable_password);
+					readable_password.clear();	// Clear out password traces in string.
+					cure::LoginId login_token(username, password);
+					((GameClientSlaveManager*)GetGameManager())->RequestLogin(parameter_vector[0], login_token);
+				} else {
+					log_.Warningf("usage: %s <server> <username> <password>", command.c_str());
+					result = 1;
 				}
-				else
-				{
-					mLog.Warningf("usage: %s <server> <username> <password>", pCommand.c_str());
-					lResult = 1;
-				}
-			}
-			break;
-			case COMMAND_WAIT_LOGIN:
-			{
-				mLog.Info("Waiting for login to finish...");
-				while (((GameClientSlaveManager*)GetGameManager())->IsLoggingIn())
-				{
+			} break;
+			case kCommandWaitLogin: {
+				log_.Info("Waiting for login to finish...");
+				while (((GameClientSlaveManager*)GetGameManager())->IsLoggingIn()) {
 					Thread::Sleep(0.01);
 				}
-			}
-			break;
-			case COMMAND_LOGOUT:
-			{
-				mLog.Info("Logging off due to user command.");
+			} break;
+			case kCommandLogout: {
+				log_.Info("Logging off due to user command.");
 				((GameClientSlaveManager*)GetGameManager())->Logout();
-			}
-			break;
-			case COMMAND_START_RESET_UI:
-			{
-				mLog.Info("Running UI restart...");
-				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->StartResetUi())
-				{
-					mLog.Info("UI is restarting.");
+			} break;
+			case kCommandStartResetUi: {
+				log_.Info("Running UI restart...");
+				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->StartResetUi()) {
+					log_.Info("UI is restarting.");
+				} else {
+					log_.Error("Could not run UI restart!");
+					result = 1;
 				}
-				else
-				{
-					mLog.Error("Could not run UI restart!");
-					lResult = 1;
+			} break;
+			case kCommandWaitResetUi: {
+				log_.Info("Waiting for UI to be restarted...");
+				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->WaitResetUi()) {
+					log_.Info("UI is up and running.");
+				} else {
+					log_.Error("UI restarted was not completed in time!");
+					result = 1;
 				}
-			}
-			break;
-			case COMMAND_WAIT_RESET_UI:
-			{
-				mLog.Info("Waiting for UI to be restarted...");
-				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->WaitResetUi())
-				{
-					mLog.Info("UI is up and running.");
+			} break;
+			case kCommandAddPlayer: {
+				log_.Info("Adding another player.");
+				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->CreateSlave()) {
+					log_.Info("Another player added.");
+				} else {
+					log_.Error("Could not add another player!");
+					result = 1;
 				}
-				else
-				{
-					mLog.Error("UI restarted was not completed in time!");
-					lResult = 1;
-				}
-			}
-			break;
-			case COMMAND_ADD_PLAYER:
-			{
-				mLog.Info("Adding another player.");
-				if (((GameClientSlaveManager*)GetGameManager())->GetMaster()->CreateSlave())
-				{
-					mLog.Info("Another player added.");
-				}
-				else
-				{
-					mLog.Error("Could not add another player!");
-					lResult = 1;
-				}
-			}
-			break;
-			case COMMAND_SET_MESH_VISIBLE:
-			{
-				bool lVisible = false;
-				if (pParameterVector.size() == 2 && strutil::StringToBool(pParameterVector[1], lVisible))
-				{
-					int lAffectedMeshCount = 0;
-					typedef Cure::ResourceManager::ResourceList ResourceList;
-					ResourceList lResourceList = mResourceManager->HookAllResourcesOfType("GeometryRef");
-					for (ResourceList::iterator x = lResourceList.begin(); x != lResourceList.end(); ++x)
-					{
-						UiCure::GeometryReferenceResource* lMeshRefResource = (UiCure::GeometryReferenceResource*)*x;
-						if (lMeshRefResource->GetName().find(pParameterVector[0]) != str::npos)
-						{
-							Tbc::GeometryBase* lMesh = lMeshRefResource->GetRamData();
-							if (lMesh)
-							{
-								lMesh->SetAlwaysVisible(lVisible);
-								++lAffectedMeshCount;
+			} break;
+			case kCommandSetMeshVisible: {
+				bool visible = false;
+				if (parameter_vector.size() == 2 && strutil::StringToBool(parameter_vector[1], visible)) {
+					int affected_mesh_count = 0;
+					typedef cure::ResourceManager::ResourceList ResourceList;
+					ResourceList resource_list = resource_manager_->HookAllResourcesOfType("GeometryRef");
+					for (ResourceList::iterator x = resource_list.begin(); x != resource_list.end(); ++x) {
+						UiCure::GeometryReferenceResource* mesh_ref_resource = (UiCure::GeometryReferenceResource*)*x;
+						if (mesh_ref_resource->GetName().find(parameter_vector[0]) != str::npos) {
+							tbc::GeometryBase* mesh = mesh_ref_resource->GetRamData();
+							if (mesh) {
+								mesh->SetAlwaysVisible(visible);
+								++affected_mesh_count;
 							}
 						}
 					}
-					mResourceManager->UnhookResources(lResourceList);
-					mLog.Infof("%i meshes affected.", lAffectedMeshCount);
+					resource_manager_->UnhookResources(resource_list);
+					log_.Infof("%i meshes affected.", affected_mesh_count);
+				} else {
+					log_.Warningf("usage: %s <mesh> <bool>", command.c_str());
+					result = 1;
 				}
-				else
-				{
-					mLog.Warningf("usage: %s <mesh> <bool>", pCommand.c_str());
-					lResult = 1;
-				}
-			}
-			break;
-			default:
-			{
-				lResult = -1;
-			}
-			break;
+			} break;
+			default: {
+				result = -1;
+			} break;
 		}
 	}
-	return (lResult);
+	return (result);
 }
 
 
 
-void ClientConsoleManager::HeadlessTick()
-{
+void ClientConsoleManager::HeadlessTick() {
 	// Check What state our application zombie is in.
-	if (mUiConsole)
-	{
+	if (ui_console_) {
 		// Pre-destroy.
-		delete mUiConsole;
-		mUiConsole = 0;
+		delete ui_console_;
+		ui_console_ = 0;
 		GetGameManager()->SetConsoleManager(0);	// Snip. Now we're free floating.
 		SetGameManager(0);
-	}
-	else if (!Application::GetApplication()->GetTicker())
-	{
+	} else if (!Application::GetApplication()->GetTicker()) {
 		// Post-destroy, pre-init.
 #ifdef LEPRA_WINDOWS
 		::MessageBox(NULL, "Ready?", "Waiting...", MB_OK);
 #endif // Windows
 		while (ExecuteYieldCommand() >= 0)
 			;
-	}
-	else
-	{
+	} else {
 		// Post-init.
-		SetGameManager(((Life::GameClientMasterTicker*)Application::GetApplication()->GetTicker())->GetSlave(0));
-		Life::Application::GetApplication()->SetZombieTick(Life::Application::ZombieTick());
+		SetGameManager(((life::GameClientMasterTicker*)Application::GetApplication()->GetTicker())->GetSlave(0));
+		life::Application::GetApplication()->SetZombieTick(life::Application::ZombieTick());
 		delete this;	// Nice...
 	}
 }
 
 
 
-loginstance(CONSOLE, ClientConsoleManager);
+loginstance(kConsole, ClientConsoleManager);
 
 
 

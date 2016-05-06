@@ -1,26 +1,24 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life/LifeClient/ExplodingMachine.h"
-#include "Downwash.h"
+#include "../life/lifeclient/explodingmachine.h"
+#include "downwash.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-class BaseMachine: public Life::ExplodingMachine
-{
-	typedef Life::ExplodingMachine Parent;
+class BaseMachine: public life::ExplodingMachine {
+	typedef life::ExplodingMachine Parent;
 public:
-	BaseMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher);
+	BaseMachine(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, life::Launcher* launcher);
 	virtual ~BaseMachine();
 
 protected:

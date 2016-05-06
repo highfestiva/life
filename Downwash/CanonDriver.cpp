@@ -1,109 +1,98 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "CanonDriver.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/Health.h"
-#include "../Lepra/Include/Random.h"
-#include "../Life/ProjectileUtil.h"
-#include "Level.h"
+#include "canondriver.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/health.h"
+#include "../lepra/include/random.h"
+#include "../life/projectileutil.h"
+#include "level.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-CanonDriver::CanonDriver(DownwashManager* pGame, Cure::GameObjectId pCanonId, int pAmmoType):
-	Parent(pGame->GetResourceManager(), "CanonDriver"),
-	mGame(pGame),
-	mCanonId(pCanonId),
-	mAmmoType(pAmmoType),
-	mDistance(1000),
-	mShootPeriod(1),
-	mTagSet(false)
-{
-	pGame->GetContext()->AddLocalObject(this);
-	pGame->GetContext()->EnableTickCallback(this);
+CanonDriver::CanonDriver(DownwashManager* game, cure::GameObjectId canon_id, int ammo_type):
+	Parent(game->GetResourceManager(), "CanonDriver"),
+	game_(game),
+	canon_id_(canon_id),
+	ammo_type_(ammo_type),
+	distance_(1000),
+	shoot_period_(1),
+	tag_set_(false) {
+	game->GetContext()->AddLocalObject(this);
+	game->GetContext()->EnableTickCallback(this);
 
-	Cure::CppContextObject* lCanon = (Cure::CppContextObject*)mManager->GetObject(mCanonId, true);
-	deb_assert(lCanon);
-	xform lMuzzleTransform;
+	cure::CppContextObject* canon = (cure::CppContextObject*)manager_->GetObject(canon_id_, true);
+	deb_assert(canon);
+	xform muzzle_transform;
 	vec3 _;
-	Life::ProjectileUtil::GetBarrelByShooter(lCanon, lMuzzleTransform, _);
-	mJointStartAngle = (lMuzzleTransform.GetOrientation() * vec3(0,0,1)).GetAngle(vec3(0,0,1));
+	life::ProjectileUtil::GetBarrelByShooter(canon, muzzle_transform, _);
+	joint_start_angle_ = (muzzle_transform.GetOrientation() * vec3(0,0,1)).GetAngle(vec3(0,0,1));
 }
 
-CanonDriver::~CanonDriver()
-{
+CanonDriver::~CanonDriver() {
 }
 
 
 
-void CanonDriver::OnTick()
-{
+void CanonDriver::OnTick() {
 	Parent::OnTick();
 
-	Cure::CppContextObject* lCanon = (Cure::CppContextObject*)mManager->GetObject(mCanonId, true);
-	if (!lCanon)
-	{
-		mManager->PostKillObject(GetInstanceId());
+	cure::CppContextObject* canon = (cure::CppContextObject*)manager_->GetObject(canon_id_, true);
+	if (!canon) {
+		manager_->PostKillObject(GetInstanceId());
 		return;
 	}
-	if (!lCanon->IsLoaded() || lCanon->GetPhysics()->GetEngineCount() < 1)
-	{
+	if (!canon->IsLoaded() || canon->GetPhysics()->GetEngineCount() < 1) {
 		return;
 	}
-	if (!mTagSet)
-	{
-		const Tbc::ChunkyClass::Tag* lTag = lCanon->FindTag("behavior", 2, 0);
-		deb_assert(lTag);
-		mDistance = lTag->mFloatValueList[0];
-		mShootPeriod = 1/lTag->mFloatValueList[1];
-		mTagSet = true;
+	if (!tag_set_) {
+		const tbc::ChunkyClass::Tag* tag = canon->FindTag("behavior", 2, 0);
+		deb_assert(tag);
+		distance_ = tag->float_value_list_[0];
+		shoot_period_ = 1/tag->float_value_list_[1];
+		tag_set_ = true;
 	}
 
-	Cure::ContextObject* lAvatar = mManager->GetObject(mGame->GetAvatarInstanceId());
-	if (!lAvatar)
-	{
+	cure::ContextObject* avatar = manager_->GetObject(game_->GetAvatarInstanceId());
+	if (!avatar) {
 		return;
 	}
 
-	const vec3 lTarget(lAvatar->GetPosition() + lAvatar->GetVelocity()*0.2f);
-	const vec2 d(lTarget.z - lCanon->GetPosition().z, lTarget.x - lCanon->GetPosition().x);
-	if (d.GetLengthSquared() >= mDistance*mDistance)
-	{
+	const vec3 target(avatar->GetPosition() + avatar->GetVelocity()*0.2f);
+	const vec2 d(target.z - canon->GetPosition().z, target.x - canon->GetPosition().x);
+	if (d.GetLengthSquared() >= distance_*distance_) {
 		return;	// Don't shoot at distant objects.
 	}
-	Tbc::ChunkyBoneGeometry* lBarrel = lCanon->GetPhysics()->GetBoneGeometry(1);
-	Tbc::PhysicsManager::Joint1Diff lDiff;
-	mGame->GetPhysicsManager()->GetJoint1Diff(lBarrel->GetBodyId(), lBarrel->GetJointId(), lDiff);
-	const float lAngle = -d.GetAngle() - (mJointStartAngle + lDiff.mValue);
-	const float lTargetAngle = Math::Clamp(lAngle*20, -2.0f, +2.0f);
-	lCanon->SetEnginePower(1, -lTargetAngle);
+	tbc::ChunkyBoneGeometry* barrel = canon->GetPhysics()->GetBoneGeometry(1);
+	tbc::PhysicsManager::Joint1Diff diff;
+	game_->GetPhysicsManager()->GetJoint1Diff(barrel->GetBodyId(), barrel->GetJointId(), diff);
+	const float angle = -d.GetAngle() - (joint_start_angle_ + diff.value_);
+	const float target_angle = Math::Clamp(angle*20, -2.0f, +2.0f);
+	canon->SetEnginePower(1, -target_angle);
 
-	if (mLastShot.QueryTimeDiff() >= 0)
-	{
-		float lLowAngle = 0;
-		float lHighAngle = 0;
-		float lBounce;
-		mGame->GetPhysicsManager()->GetJointParams(lBarrel->GetJointId(), lLowAngle, lHighAngle, lBounce);
-		if (std::abs(lAngle) < std::abs(lHighAngle-lLowAngle)*0.1f)
-		{
-			mLastShot.Start(-Random::Normal(mShootPeriod, mShootPeriod/4, mShootPeriod*0.75f, mShootPeriod*1.25f));
-			mGame->Shoot(lCanon, mAmmoType);
+	if (last_shot_.QueryTimeDiff() >= 0) {
+		float low_angle = 0;
+		float high_angle = 0;
+		float bounce;
+		game_->GetPhysicsManager()->GetJointParams(barrel->GetJointId(), low_angle, high_angle, bounce);
+		if (std::abs(angle) < std::abs(high_angle-low_angle)*0.1f) {
+			last_shot_.Start(-Random::Normal(shoot_period_, shoot_period_/4, shoot_period_*0.75f, shoot_period_*1.25f));
+			game_->Shoot(canon, ammo_type_);
 		}
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, CanonDriver);
+loginstance(kGameContextCpp, CanonDriver);
 
 
 

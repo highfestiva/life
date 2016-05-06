@@ -1,636 +1,583 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiProgressiveTriangleGeometry.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/ListUtil.h"
+#include "../include/uiprogressivetrianglegeometry.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/listutil.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
 ProgressiveTriangleGeometry::ProgressiveTriangleGeometry():
-	mBaseVertexCount(0),
-	mBaseTriangleCount(0),
+	base_vertex_count_(0),
+	base_triangle_count_(0),
 
-	mCurrentVertexCount(0),
-	mCurrentTriangleCount(0),
+	current_vertex_count_(0),
+	current_triangle_count_(0),
 
-	mMaxVertexCount(0),
-	mMaxTriangleCount(0),
+	max_vertex_count_(0),
+	max_triangle_count_(0),
 
-	mCurrentVertexData(0),
-	mCurrentUVData(0),
-	mCurrentColorData(0),
-	mCurrentNormalData(0),
-	mCurrentColorData8(0),
-	mCurrentIndices(0),
+	current_vertex_data_(0),
+	current_uv_data_(0),
+	current_color_data_(0),
+	current_normal_data_(0),
+	current_color_data8_(0),
+	current_indices_(0),
 
-	mBaseVertexData(0),
-	mBaseUVData(0),
-	mBaseColorData(0),
-	mBaseNormalData(0),
-	mBaseIndices(0),
+	base_vertex_data_(0),
+	base_uv_data_(0),
+	base_color_data_(0),
+	base_normal_data_(0),
+	base_indices_(0),
 
-	mCurrentVSplit(0),
-	mNumVertexSplits(0),
-	mVertexSplit(0),
+	current_v_split_(0),
+	num_vertex_splits_(0),
+	vertex_split_(0),
 
-	mColorFormat(Tbc::GeometryBase::COLOR_RGBA)
-{
+	color_format_(tbc::GeometryBase::kColorRgba) {
 }
 
-ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(ProgressiveTriangleGeometry& pProgressiveGeometry):
-	mBaseVertexCount(0),
-	mBaseTriangleCount(0),
+ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(ProgressiveTriangleGeometry& progressive_geometry):
+	base_vertex_count_(0),
+	base_triangle_count_(0),
 
-	mCurrentVertexCount(0),
-	mCurrentTriangleCount(0),
+	current_vertex_count_(0),
+	current_triangle_count_(0),
 
-	mMaxVertexCount(0),
-	mMaxTriangleCount(0),
+	max_vertex_count_(0),
+	max_triangle_count_(0),
 
-	mCurrentVertexData(0),
-	mCurrentUVData(0),
-	mCurrentColorData(0),
-	mCurrentNormalData(0),
-	mCurrentColorData8(0),
-	mCurrentIndices(0),
+	current_vertex_data_(0),
+	current_uv_data_(0),
+	current_color_data_(0),
+	current_normal_data_(0),
+	current_color_data8_(0),
+	current_indices_(0),
 
-	mBaseVertexData(0),
-	mBaseUVData(0),
-	mBaseColorData(0),
-	mBaseNormalData(0),
-	mBaseIndices(0),
+	base_vertex_data_(0),
+	base_uv_data_(0),
+	base_color_data_(0),
+	base_normal_data_(0),
+	base_indices_(0),
 
-	mCurrentVSplit(0),
-	mNumVertexSplits(0),
-	mVertexSplit(0),
+	current_v_split_(0),
+	num_vertex_splits_(0),
+	vertex_split_(0),
 
-	mColorFormat(Tbc::GeometryBase::COLOR_RGBA)
-{
-	Copy(pProgressiveGeometry);
+	color_format_(tbc::GeometryBase::kColorRgba) {
+	Copy(progressive_geometry);
 }
 
-ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(TriangleBasedGeometry& pGeometry):
-	mBaseVertexCount(0),
-	mBaseTriangleCount(0),
+ProgressiveTriangleGeometry::ProgressiveTriangleGeometry(TriangleBasedGeometry& geometry):
+	base_vertex_count_(0),
+	base_triangle_count_(0),
 
-	mCurrentVertexCount(0),
-	mCurrentTriangleCount(0),
+	current_vertex_count_(0),
+	current_triangle_count_(0),
 
-	mMaxVertexCount(0),
-	mMaxTriangleCount(0),
+	max_vertex_count_(0),
+	max_triangle_count_(0),
 
-	mCurrentVertexData(0),
-	mCurrentUVData(0),
-	mCurrentColorData(0),
-	mCurrentNormalData(0),
-	mCurrentColorData8(0),
-	mCurrentIndices(0),
+	current_vertex_data_(0),
+	current_uv_data_(0),
+	current_color_data_(0),
+	current_normal_data_(0),
+	current_color_data8_(0),
+	current_indices_(0),
 
-	mBaseVertexData(0),
-	mBaseUVData(0),
-	mBaseColorData(0),
-	mBaseNormalData(0),
-	mBaseIndices(0),
+	base_vertex_data_(0),
+	base_uv_data_(0),
+	base_color_data_(0),
+	base_normal_data_(0),
+	base_indices_(0),
 
-	mCurrentVSplit(0),
-	mNumVertexSplits(0),
-	mVertexSplit(0),
+	current_v_split_(0),
+	num_vertex_splits_(0),
+	vertex_split_(0),
 
-	mColorFormat(Tbc::GeometryBase::COLOR_RGBA)
-{
-	Set(pGeometry);
+	color_format_(tbc::GeometryBase::kColorRgba) {
+	Set(geometry);
 }
 
-ProgressiveTriangleGeometry::~ProgressiveTriangleGeometry()
-{
+ProgressiveTriangleGeometry::~ProgressiveTriangleGeometry() {
 	ClearAll();
 }
 
-void ProgressiveTriangleGeometry::ClearAll()
-{
-	delete[] mCurrentVertexData;
-	delete[] mCurrentUVData;
-	delete[] mCurrentColorData;
-	delete[] mCurrentColorData8;
-	delete[] mCurrentIndices;
-	delete[] mBaseVertexData;
-	delete[] mBaseUVData;
-	delete[] mBaseColorData;
-	delete[] mBaseIndices;
-	delete[] mVertexSplit;
+void ProgressiveTriangleGeometry::ClearAll() {
+	delete[] current_vertex_data_;
+	delete[] current_uv_data_;
+	delete[] current_color_data_;
+	delete[] current_color_data8_;
+	delete[] current_indices_;
+	delete[] base_vertex_data_;
+	delete[] base_uv_data_;
+	delete[] base_color_data_;
+	delete[] base_indices_;
+	delete[] vertex_split_;
 
-	mCurrentVertexData = 0;
-	mCurrentUVData = 0;
-	mCurrentColorData = 0;
-	mCurrentColorData8 = 0;
-	mCurrentIndices = 0;
-	mBaseVertexData = 0;
-	mBaseUVData = 0;
-	mBaseColorData = 0;
-	mBaseIndices = 0;
-	mVertexSplit = 0;
+	current_vertex_data_ = 0;
+	current_uv_data_ = 0;
+	current_color_data_ = 0;
+	current_color_data8_ = 0;
+	current_indices_ = 0;
+	base_vertex_data_ = 0;
+	base_uv_data_ = 0;
+	base_color_data_ = 0;
+	base_indices_ = 0;
+	vertex_split_ = 0;
 
-	mMaxVertexCount       = 0;
-	mMaxTriangleCount     = 0;
+	max_vertex_count_       = 0;
+	max_triangle_count_     = 0;
 
-	mBaseVertexCount      = 0;
-	mBaseTriangleCount    = 0;
+	base_vertex_count_      = 0;
+	base_triangle_count_    = 0;
 
-	mCurrentVertexCount   = 0;
-	mCurrentTriangleCount = 0;
+	current_vertex_count_   = 0;
+	current_triangle_count_ = 0;
 
-	mNumVertexSplits      = 0;
+	num_vertex_splits_      = 0;
 
-	Tbc::GeometryBase::SetBoundingRadius(0.0f);
+	tbc::GeometryBase::SetBoundingRadius(0.0f);
 }
 
-void ProgressiveTriangleGeometry::Copy(ProgressiveTriangleGeometry& pProgressiveGeometry)
-{
-	mMaxVertexCount	      = pProgressiveGeometry.mMaxVertexCount;
-	mMaxTriangleCount	  = pProgressiveGeometry.mMaxTriangleCount;
+void ProgressiveTriangleGeometry::Copy(ProgressiveTriangleGeometry& progressive_geometry) {
+	max_vertex_count_	      = progressive_geometry.max_vertex_count_;
+	max_triangle_count_	  = progressive_geometry.max_triangle_count_;
 
-	mBaseVertexCount	  = pProgressiveGeometry.mBaseVertexCount;
-	mBaseTriangleCount	  = pProgressiveGeometry.mBaseTriangleCount;
+	base_vertex_count_	  = progressive_geometry.base_vertex_count_;
+	base_triangle_count_	  = progressive_geometry.base_triangle_count_;
 
-	mCurrentVertexCount	  = pProgressiveGeometry.mCurrentVertexCount;
-	mCurrentTriangleCount = pProgressiveGeometry.mCurrentTriangleCount;
+	current_vertex_count_	  = progressive_geometry.current_vertex_count_;
+	current_triangle_count_ = progressive_geometry.current_triangle_count_;
 
-	mCurrentVertexData	  = 0;
-	mCurrentUVData	      = 0;
-	mCurrentColorData	  = 0;
-	mCurrentColorData8	  = 0;
-	mCurrentIndices	      = 0;
+	current_vertex_data_	  = 0;
+	current_uv_data_	      = 0;
+	current_color_data_	  = 0;
+	current_color_data8_	  = 0;
+	current_indices_	      = 0;
 
-	mBaseVertexData	      = 0;
-	mBaseUVData		      = 0;
-	mBaseColorData	      = 0;
-	mBaseIndices	      = 0;
+	base_vertex_data_	      = 0;
+	base_uv_data_		      = 0;
+	base_color_data_	      = 0;
+	base_indices_	      = 0;
 
-	mVertexSplit		  = 0;
-	mCurrentVSplit	      = pProgressiveGeometry.mCurrentVSplit;
-	mNumVertexSplits	  = pProgressiveGeometry.mNumVertexSplits;
+	vertex_split_		  = 0;
+	current_v_split_	      = progressive_geometry.current_v_split_;
+	num_vertex_splits_	  = progressive_geometry.num_vertex_splits_;
 
-	mColorFormat		  = pProgressiveGeometry.mColorFormat;
+	color_format_		  = progressive_geometry.color_format_;
 
-	SetTransformation(pProgressiveGeometry.GetTransformation());
+	SetTransformation(progressive_geometry.GetTransformation());
 
-	const Tbc::GeometryBase::BasicMaterialSettings& lMatSettings = pProgressiveGeometry.GetBasicMaterialSettings();
-	Tbc::GeometryBase::SetBasicMaterialSettings(lMatSettings);
+	const tbc::GeometryBase::BasicMaterialSettings& mat_settings = progressive_geometry.GetBasicMaterialSettings();
+	tbc::GeometryBase::SetBasicMaterialSettings(mat_settings);
 
-	SetLastFrameVisible(pProgressiveGeometry.GetLastFrameVisible());
+	SetLastFrameVisible(progressive_geometry.GetLastFrameVisible());
 
-	Tbc::GeometryBase::SetRendererData(pProgressiveGeometry.GetRendererData());
+	tbc::GeometryBase::SetRendererData(progressive_geometry.GetRendererData());
 
 	int i;
 	// Copy the current state data.
 
-	if (pProgressiveGeometry.mCurrentVertexData != 0)
-	{
-		int lNumElements = (mBaseVertexCount + mNumVertexSplits) * 3;
-		mCurrentVertexData = new float[lNumElements];
-		for (i = 0; i < lNumElements; i++)
-		{
-			mCurrentVertexData[i] = pProgressiveGeometry.mCurrentVertexData[i];
+	if (progressive_geometry.current_vertex_data_ != 0) {
+		int num_elements = (base_vertex_count_ + num_vertex_splits_) * 3;
+		current_vertex_data_ = new float[num_elements];
+		for (i = 0; i < num_elements; i++) {
+			current_vertex_data_[i] = progressive_geometry.current_vertex_data_[i];
 		}
 	}
 
-	if (pProgressiveGeometry.mCurrentUVData != 0)
-	{
-		int lNumElements = (mBaseVertexCount + mNumVertexSplits) * 2;
-		mCurrentUVData = new float[lNumElements];
-		for (i = 0; i < lNumElements; i++)
-		{
-			mCurrentUVData[i] = pProgressiveGeometry.mCurrentUVData[i];
+	if (progressive_geometry.current_uv_data_ != 0) {
+		int num_elements = (base_vertex_count_ + num_vertex_splits_) * 2;
+		current_uv_data_ = new float[num_elements];
+		for (i = 0; i < num_elements; i++) {
+			current_uv_data_[i] = progressive_geometry.current_uv_data_[i];
 		}
 	}
 
-	if (pProgressiveGeometry.mCurrentColorData != 0)
-	{
-		int lNumElements = (mBaseVertexCount + mNumVertexSplits) * 4;
-		mCurrentColorData = new float[lNumElements];
-		for (i = 0; i < lNumElements; i++)
-		{
-			mCurrentColorData[i] = pProgressiveGeometry.mCurrentColorData[i];
+	if (progressive_geometry.current_color_data_ != 0) {
+		int num_elements = (base_vertex_count_ + num_vertex_splits_) * 4;
+		current_color_data_ = new float[num_elements];
+		for (i = 0; i < num_elements; i++) {
+			current_color_data_[i] = progressive_geometry.current_color_data_[i];
 		}
 	}
 
-	if (pProgressiveGeometry.mCurrentColorData8 != 0)
-	{
-		int lNumElements = (mBaseVertexCount + mNumVertexSplits) * 4;
-		mCurrentColorData8 = new uint8[lNumElements];
-		for (i = 0; i < lNumElements; i++)
-		{
-			mCurrentColorData8[i] = pProgressiveGeometry.mCurrentColorData8[i];
+	if (progressive_geometry.current_color_data8_ != 0) {
+		int num_elements = (base_vertex_count_ + num_vertex_splits_) * 4;
+		current_color_data8_ = new uint8[num_elements];
+		for (i = 0; i < num_elements; i++) {
+			current_color_data8_[i] = progressive_geometry.current_color_data8_[i];
 		}
 	}
 
-	if (pProgressiveGeometry.mCurrentIndices != 0)
-	{
-		int lNumElements = (mBaseTriangleCount + mNumVertexSplits * 2) * 3;
-		mCurrentIndices = new uint32[lNumElements];
-		for (i = 0; i < lNumElements; i++)
-		{
-			mCurrentIndices[i] = pProgressiveGeometry.mCurrentIndices[i];
+	if (progressive_geometry.current_indices_ != 0) {
+		int num_elements = (base_triangle_count_ + num_vertex_splits_ * 2) * 3;
+		current_indices_ = new uint32[num_elements];
+		for (i = 0; i < num_elements; i++) {
+			current_indices_[i] = progressive_geometry.current_indices_[i];
 		}
 	}
 
 	// Copy the base mesh data.
-	if (pProgressiveGeometry.mBaseVertexData != 0)
-	{
-		int lNumElements = mBaseVertexCount * 3;
-		mBaseVertexData = new float[lNumElements];
-		for (i = 0; i < lNumElements; i++)
-		{
-			mBaseVertexData[i] = pProgressiveGeometry.mBaseVertexData[i];
+	if (progressive_geometry.base_vertex_data_ != 0) {
+		int num_elements = base_vertex_count_ * 3;
+		base_vertex_data_ = new float[num_elements];
+		for (i = 0; i < num_elements; i++) {
+			base_vertex_data_[i] = progressive_geometry.base_vertex_data_[i];
 		}
 	}
 
-	if (pProgressiveGeometry.mBaseUVData != 0)
-	{
-		int lNumElements = mBaseVertexCount * 2;
-		mBaseUVData = new float[lNumElements];
-		for (i = 0; i < lNumElements; i++)
-		{
-			mBaseUVData[i] = pProgressiveGeometry.mBaseUVData[i];
+	if (progressive_geometry.base_uv_data_ != 0) {
+		int num_elements = base_vertex_count_ * 2;
+		base_uv_data_ = new float[num_elements];
+		for (i = 0; i < num_elements; i++) {
+			base_uv_data_[i] = progressive_geometry.base_uv_data_[i];
 		}
 	}
 
-	if (pProgressiveGeometry.mBaseColorData != 0)
-	{
-		int lNumElements = mBaseVertexCount * 4;
-		mBaseColorData = new float[lNumElements];
-		for (i = 0; i < lNumElements; i++)
-		{
-			mBaseColorData[i] = pProgressiveGeometry.mBaseColorData[i];
+	if (progressive_geometry.base_color_data_ != 0) {
+		int num_elements = base_vertex_count_ * 4;
+		base_color_data_ = new float[num_elements];
+		for (i = 0; i < num_elements; i++) {
+			base_color_data_[i] = progressive_geometry.base_color_data_[i];
 		}
 	}
 
-	if (pProgressiveGeometry.mBaseIndices != 0)
-	{
-		int lNumElements = mBaseTriangleCount * 3;
-		mBaseIndices = new uint32[lNumElements];
-		for (i = 0; i < lNumElements; i++)
-		{
-			mBaseIndices[i] = pProgressiveGeometry.mBaseIndices[i];
+	if (progressive_geometry.base_indices_ != 0) {
+		int num_elements = base_triangle_count_ * 3;
+		base_indices_ = new uint32[num_elements];
+		for (i = 0; i < num_elements; i++) {
+			base_indices_[i] = progressive_geometry.base_indices_[i];
 		}
 	}
 
-	if (pProgressiveGeometry.mVertexSplit != 0)
-	{
-		int lNumElements = mNumVertexSplits;
-		mVertexSplit = new VertexSplit[lNumElements];
-		for (i = 0; i < lNumElements; i++)
-		{
-			mVertexSplit[i].Copy(pProgressiveGeometry.mVertexSplit[i]);
+	if (progressive_geometry.vertex_split_ != 0) {
+		int num_elements = num_vertex_splits_;
+		vertex_split_ = new VertexSplit[num_elements];
+		for (i = 0; i < num_elements; i++) {
+			vertex_split_[i].Copy(progressive_geometry.vertex_split_[i]);
 		}
 	}
 
-	Tbc::GeometryBase::SetBoundingRadius(pProgressiveGeometry.GetBoundingRadius());
+	tbc::GeometryBase::SetBoundingRadius(progressive_geometry.GetBoundingRadius());
 }
 
-void ProgressiveTriangleGeometry::FindEdgeToCollapse(VertexList& /*pOrgVertexList*/,
-	TriangleList& /*pOrgTriangleList*/, VertexList& pVertexList, TriangleList& pTriangleList, Edge& pEdge)
-{
-	if (pTriangleList.empty())
+void ProgressiveTriangleGeometry::FindEdgeToCollapse(VertexList& /*org_vertex_list*/,
+	TriangleList& /*org_triangle_list*/, VertexList& vertex_list, TriangleList& triangle_list, Edge& edge) {
+	if (triangle_list.empty())
 		return;
 
-	float lCurrentError = 0.0f;
-	float lCurrentMaxError = 0.0f;
+	float current_error = 0.0f;
+	float current_max_error = 0.0f;
 
-	pEdge.mV1 = 0;
-	pEdge.mV2 = 0;
-	pEdge.mTriangleList.clear();
+	edge.v1_ = 0;
+	edge.v2_ = 0;
+	edge.triangle_list_.clear();
 
 	// Calculate mean error.
-	VertexList::iterator lVIter;
-	for (lVIter = pVertexList.begin();
-	     lVIter != pVertexList.end();
-	     ++lVIter)
-	{
-		if (lVIter == pVertexList.begin())
-		{
-			lCurrentMaxError = (*lVIter)->mError;
-		}
-		else if((*lVIter)->mError > lCurrentMaxError)
-		{
-			lCurrentMaxError = (*lVIter)->mError;
+	VertexList::iterator v_iter;
+	for (v_iter = vertex_list.begin();
+	     v_iter != vertex_list.end();
+	     ++v_iter) {
+		if (v_iter == vertex_list.begin()) {
+			current_max_error = (*v_iter)->error_;
+		} else if((*v_iter)->error_ > current_max_error) {
+			current_max_error = (*v_iter)->error_;
 		}
 
-		lCurrentError += (*lVIter)->mError;
+		current_error += (*v_iter)->error_;
 	}
 
-	lCurrentError /= (float)pVertexList.size();
+	current_error /= (float)vertex_list.size();
 
-	float lMinError = 0.0f;
-	float lMinError1 = 0.0f;	// Temporary error value storage for lEdge->mV1.
-	float lMinError2 = 0.0f;	// Temporary error value storage for lEdge->mV2.
-	bool lFirst = true;
+	float min_error = 0.0f;
+	float min_error1 = 0.0f;	// Temporary error value storage for _edge->v1_.
+	float min_error2 = 0.0f;	// Temporary error value storage for _edge->v2_.
+	bool first = true;
 
 	// Test vertex collaps on all triangles.
-	TriangleList::iterator lTriIter;
-	for (lTriIter = pTriangleList.begin(); 
-	     lTriIter != pTriangleList.end(); 
-	     ++lTriIter)
-	{
-		Triangle* lTriangle = *lTriIter;
-		vec3 lDiff1;
-		vec3 lDiff2;
-		Vertex lMid;
+	TriangleList::iterator tri_iter;
+	for (tri_iter = triangle_list.begin();
+	     tri_iter != triangle_list.end();
+	     ++tri_iter) {
+		Triangle* triangle = *tri_iter;
+		vec3 diff1;
+		vec3 diff2;
+		Vertex mid;
 
 		// Test V1 and V2.
-		lMid.x() = (lTriangle->mV1->x() + lTriangle->mV2->x()) * 0.5f;
-		lMid.y() = (lTriangle->mV1->y() + lTriangle->mV2->y()) * 0.5f;
-		lMid.z() = (lTriangle->mV1->z() + lTriangle->mV2->z()) * 0.5f;
+		mid.x() = (triangle->v1_->x() + triangle->v2_->x()) * 0.5f;
+		mid.y() = (triangle->v1_->y() + triangle->v2_->y()) * 0.5f;
+		mid.z() = (triangle->v1_->z() + triangle->v2_->z()) * 0.5f;
 
 		// Calculate the distance between the new, merged position,
 		// and the original vertex position.
-		lDiff1.Set(lMid.x() - lTriangle->mV1->mTwin->x(),
-		            lMid.y() - lTriangle->mV1->mTwin->y(),
-		            lMid.z() - lTriangle->mV1->mTwin->z());
-		lDiff2.Set(lMid.x() - lTriangle->mV2->mTwin->x(),
-		            lMid.y() - lTriangle->mV2->mTwin->y(),
-		            lMid.z() - lTriangle->mV2->mTwin->z());
+		diff1.Set(mid.x() - triangle->v1_->twin_->x(),
+		            mid.y() - triangle->v1_->twin_->y(),
+		            mid.z() - triangle->v1_->twin_->z());
+		diff2.Set(mid.x() - triangle->v2_->twin_->x(),
+		            mid.y() - triangle->v2_->twin_->y(),
+		            mid.z() - triangle->v2_->twin_->z());
 
-		float lError1 = lDiff1.GetLength() + lTriangle->mV1->mError;
-		float lError2 = lDiff2.GetLength() + lTriangle->mV2->mError;
-		float lError = (lError1 + lError2 + lCurrentError) / 3.0f;
+		float error1 = diff1.GetLength() + triangle->v1_->error_;
+		float error2 = diff2.GetLength() + triangle->v2_->error_;
+		float error = (error1 + error2 + current_error) / 3.0f;
 
-		if (lFirst == true || lError < lMinError)
-		{
-			pEdge.mV1 = lTriangle->mV1;
-			pEdge.mV2 = lTriangle->mV2;
-			lMinError1 = lError1;
-			lMinError2 = lError2;
-			lMinError = lError;
-			lFirst = false;
+		if (first == true || error < min_error) {
+			edge.v1_ = triangle->v1_;
+			edge.v2_ = triangle->v2_;
+			min_error1 = error1;
+			min_error2 = error2;
+			min_error = error;
+			first = false;
 		}
 
 		// Test V2 and V3.
-		lMid.x() = (lTriangle->mV2->x() + lTriangle->mV3->x()) * 0.5f;
-		lMid.y() = (lTriangle->mV2->y() + lTriangle->mV3->y()) * 0.5f;
-		lMid.z() = (lTriangle->mV2->z() + lTriangle->mV3->z()) * 0.5f;
+		mid.x() = (triangle->v2_->x() + triangle->v3_->x()) * 0.5f;
+		mid.y() = (triangle->v2_->y() + triangle->v3_->y()) * 0.5f;
+		mid.z() = (triangle->v2_->z() + triangle->v3_->z()) * 0.5f;
 
 		// Calculate the distance between the new, merged position,
 		// and the original vertex position.
-		lDiff1.Set(lMid.x() - lTriangle->mV2->mTwin->x(),
-		            lMid.y() - lTriangle->mV2->mTwin->y(),
-		            lMid.z() - lTriangle->mV2->mTwin->z());
-		lDiff2.Set(lMid.x() - lTriangle->mV3->mTwin->x(),
-		            lMid.y() - lTriangle->mV3->mTwin->y(),
-		            lMid.z() - lTriangle->mV3->mTwin->z());
-		
-		lError1 = lDiff1.GetLength() + lTriangle->mV1->mError;
-		lError2 = lDiff2.GetLength() + lTriangle->mV2->mError;
-		lError = (lError1 + lError2 + lCurrentError) / 3.0f;
+		diff1.Set(mid.x() - triangle->v2_->twin_->x(),
+		            mid.y() - triangle->v2_->twin_->y(),
+		            mid.z() - triangle->v2_->twin_->z());
+		diff2.Set(mid.x() - triangle->v3_->twin_->x(),
+		            mid.y() - triangle->v3_->twin_->y(),
+		            mid.z() - triangle->v3_->twin_->z());
 
-		if (lError < lMinError)
-		{
-			pEdge.mV1 = lTriangle->mV1;
-			pEdge.mV2 = lTriangle->mV2;
-			lMinError = lError;
-			lMinError1 = lError1;
-			lMinError2 = lError2;
+		error1 = diff1.GetLength() + triangle->v1_->error_;
+		error2 = diff2.GetLength() + triangle->v2_->error_;
+		error = (error1 + error2 + current_error) / 3.0f;
+
+		if (error < min_error) {
+			edge.v1_ = triangle->v1_;
+			edge.v2_ = triangle->v2_;
+			min_error = error;
+			min_error1 = error1;
+			min_error2 = error2;
 		}
 
 		// Test V3 and V1.
-		lMid.x() = (lTriangle->mV3->x() + lTriangle->mV1->x()) * 0.5f;
-		lMid.y() = (lTriangle->mV3->y() + lTriangle->mV1->y()) * 0.5f;
-		lMid.z() = (lTriangle->mV3->z() + lTriangle->mV1->z()) * 0.5f;
+		mid.x() = (triangle->v3_->x() + triangle->v1_->x()) * 0.5f;
+		mid.y() = (triangle->v3_->y() + triangle->v1_->y()) * 0.5f;
+		mid.z() = (triangle->v3_->z() + triangle->v1_->z()) * 0.5f;
 
 		// Calculate the distance between the new, merged position,
 		// and the original vertex position.
-		lDiff1.Set(lMid.x() - lTriangle->mV3->mTwin->x(),
-		            lMid.y() - lTriangle->mV3->mTwin->y(),
-		            lMid.z() - lTriangle->mV3->mTwin->z());
-		lDiff2.Set(lMid.x() - lTriangle->mV1->mTwin->x(),
-		            lMid.y() - lTriangle->mV1->mTwin->y(),
-		            lMid.z() - lTriangle->mV1->mTwin->z());
-		
-		lError1 = lDiff1.GetLength() + lTriangle->mV1->mError;
-		lError2 = lDiff2.GetLength() + lTriangle->mV2->mError;
-		lError = (lError1 + lError2 + lCurrentError) / 3.0f;
+		diff1.Set(mid.x() - triangle->v3_->twin_->x(),
+		            mid.y() - triangle->v3_->twin_->y(),
+		            mid.z() - triangle->v3_->twin_->z());
+		diff2.Set(mid.x() - triangle->v1_->twin_->x(),
+		            mid.y() - triangle->v1_->twin_->y(),
+		            mid.z() - triangle->v1_->twin_->z());
 
-		if (lError < lMinError)
-		{
-			pEdge.mV1 = lTriangle->mV1;
-			pEdge.mV2 = lTriangle->mV2;
-			lMinError = lError;
-			lMinError1 = lError1;
-			lMinError2 = lError2;
+		error1 = diff1.GetLength() + triangle->v1_->error_;
+		error2 = diff2.GetLength() + triangle->v2_->error_;
+		error = (error1 + error2 + current_error) / 3.0f;
+
+		if (error < min_error) {
+			edge.v1_ = triangle->v1_;
+			edge.v2_ = triangle->v2_;
+			min_error = error;
+			min_error1 = error1;
+			min_error2 = error2;
 		}
 
-		if (lMinError == 0.0f && pEdge.mV1 != 0 && pEdge.mV2 != 0)
+		if (min_error == 0.0f && edge.v1_ != 0 && edge.v2_ != 0)
 			break;
 	}
-	
-	pEdge.mV1->mError = lMinError1;
-	pEdge.mV2->mError = lMinError2;
 
-	// Now add all triangles to lEdge that share the two vertices
-	// lEdge->mV1 and lEdge->mV2.
-	for (lTriIter = pTriangleList.begin(); 
-		lTriIter != pTriangleList.end(); 
-		++lTriIter)
-	{
-		Triangle* lTriangle = *lTriIter;
-		if (lTriangle->HaveVertex(pEdge.mV1) &&
-			lTriangle->HaveVertex(pEdge.mV2))
-		{
-			pEdge.mTriangleList.push_back(lTriangle);
+	edge.v1_->error_ = min_error1;
+	edge.v2_->error_ = min_error2;
+
+	// Now add all triangles to _edge that share the two vertices
+	// _edge->v1_ and _edge->v2_.
+	for (tri_iter = triangle_list.begin();
+		tri_iter != triangle_list.end();
+		++tri_iter) {
+		Triangle* triangle = *tri_iter;
+		if (triangle->HaveVertex(edge.v1_) &&
+			triangle->HaveVertex(edge.v2_)) {
+			edge.triangle_list_.push_back(triangle);
 		}
 	}
 }
 
-void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
-{
+void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& geometry) {
 	int i;
 	ClearAll();
 
-	mMaxVertexCount  = pGeometry.GetMaxVertexCount();
-	mMaxTriangleCount = pGeometry.GetMaxTriangleCount();
+	max_vertex_count_  = geometry.GetMaxVertexCount();
+	max_triangle_count_ = geometry.GetMaxTriangleCount();
 
-	Tbc::GeometryBase::SetBoundingRadius(pGeometry.GetBoundingRadius());
+	tbc::GeometryBase::SetBoundingRadius(geometry.GetBoundingRadius());
 
-	Tbc::GeometryBase::SetBasicMaterialSettings(pGeometry.GetBasicMaterialSettings());
+	tbc::GeometryBase::SetBasicMaterialSettings(geometry.GetBasicMaterialSettings());
 
-	SetLastFrameVisible(pGeometry.GetLastFrameVisible());
-	SetTransformation(pGeometry.GetTransformation());
+	SetLastFrameVisible(geometry.GetLastFrameVisible());
+	SetTransformation(geometry.GetTransformation());
 
-	VertexList   lVertexList;
-	TriangleList lTriangleList;
-	VertexList   lOrgVertexList;
-	TriangleList lOrgTriangleList;
-	VertexSplitList lVertexSplitList;
+	VertexList   _vertex_list;
+	TriangleList _triangle_list;
+	VertexList   org_vertex_list;
+	TriangleList org_triangle_list;
+	VertexSplitList vertex_split_list;
 
-	bool lClearNormalData = (pGeometry.GetNormalData() != 0);
-	pGeometry.GenerateVertexNormalData();
+	bool clear_normal_data = (geometry.GetNormalData() != 0);
+	geometry.GenerateVertexNormalData();
 
 	/*
 		Copy vertex, uv and color data.
 	*/
 
-	for (i = 0; i < (int)pGeometry.GetVertexCount(); i++)
-	{
-		Vertex* lVertex = new Vertex;
-		lVertex->x()  = pGeometry.GetVertexData()[i * 3 + 0];
-		lVertex->y()  = pGeometry.GetVertexData()[i * 3 + 1];
-		lVertex->z()  = pGeometry.GetVertexData()[i * 3 + 2];
-		lVertex->nx() = pGeometry.GetNormalData()[i * 3 + 0];
-		lVertex->ny() = pGeometry.GetNormalData()[i * 3 + 1];
-		lVertex->nz() = pGeometry.GetNormalData()[i * 3 + 2];
+	for (i = 0; i < (int)geometry.GetVertexCount(); i++) {
+		Vertex* vertex = new Vertex;
+		vertex->x()  = geometry.GetVertexData()[i * 3 + 0];
+		vertex->y()  = geometry.GetVertexData()[i * 3 + 1];
+		vertex->z()  = geometry.GetVertexData()[i * 3 + 2];
+		vertex->nx() = geometry.GetNormalData()[i * 3 + 0];
+		vertex->ny() = geometry.GetNormalData()[i * 3 + 1];
+		vertex->nz() = geometry.GetNormalData()[i * 3 + 2];
 
-		if (pGeometry.GetUVData() != 0)
-		{
-			lVertex->u() = pGeometry.GetUVData()[i * 2 + 0];
-			lVertex->v() = pGeometry.GetUVData()[i * 2 + 1];
-		}
-		else
-		{
-			lVertex->u() = 0.0f;
-			lVertex->v() = 0.0f;
+		if (geometry.GetUVData() != 0) {
+			vertex->u() = geometry.GetUVData()[i * 2 + 0];
+			vertex->v() = geometry.GetUVData()[i * 2 + 1];
+		} else {
+			vertex->u() = 0.0f;
+			vertex->v() = 0.0f;
 		}
 
-		if (pGeometry.GetColorData() != 0)
-		{
-			int lSize = 4;
-			if (pGeometry.GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
-				lSize = 3;
+		if (geometry.GetColorData() != 0) {
+			int __size = 4;
+			if (geometry.GetColorFormat() == tbc::GeometryBase::kColorRgb)
+				__size = 3;
 
-			lVertex->r() = (float)pGeometry.GetColorData()[i * lSize + 0] / 255.0f;
-			lVertex->g() = (float)pGeometry.GetColorData()[i * lSize + 1] / 255.0f;
-			lVertex->b() = (float)pGeometry.GetColorData()[i * lSize + 2] / 255.0f;
-			lVertex->a() = 1.0f;
+			vertex->r() = (float)geometry.GetColorData()[i * __size + 0] / 255.0f;
+			vertex->g() = (float)geometry.GetColorData()[i * __size + 1] / 255.0f;
+			vertex->b() = (float)geometry.GetColorData()[i * __size + 2] / 255.0f;
+			vertex->a() = 1.0f;
 
-			if (lSize == 4)
-			{
-				lVertex->a() = (float)pGeometry.GetColorData()[i * lSize + 3] / 255.0f;
+			if (__size == 4) {
+				vertex->a() = (float)geometry.GetColorData()[i * __size + 3] / 255.0f;
 			}
-		}
-		else
-		{
-			lVertex->r() = 0.0f;
-			lVertex->g() = 0.0f;
-			lVertex->b() = 0.0f;
-			lVertex->a() = 1.0f;
+		} else {
+			vertex->r() = 0.0f;
+			vertex->g() = 0.0f;
+			vertex->b() = 0.0f;
+			vertex->a() = 1.0f;
 		}
 
-		lVertexList.push_back(lVertex);
+		_vertex_list.push_back(vertex);
 
-		Vertex* lVCopy = new Vertex(lVertex);
-		lVertex->mTwin = lVCopy;
+		Vertex* v_copy = new Vertex(vertex);
+		vertex->twin_ = v_copy;
 		// Keep a copy of the original mesh.
-		lOrgVertexList.push_back(lVCopy);
+		org_vertex_list.push_back(v_copy);
 	}
 
 	/*
 		Copy triangles.
 	*/
 
-	int lTriangleCount = (int)pGeometry.GetTriangleCount();
-	for (i = 0; i < lTriangleCount; i++)
-	{
-		Triangle* lTriangle = new Triangle;
-		Triangle* lTriangle2 = new Triangle;
+	int triangle_count = (int)geometry.GetTriangleCount();
+	for (i = 0; i < triangle_count; i++) {
+		Triangle* triangle = new Triangle;
+		Triangle* triangle2 = new Triangle;
 
-		uint32 lIndices[4];
-		pGeometry.GetTriangleIndices(i, lIndices);
+		uint32 indices[4];
+		geometry.GetTriangleIndices(i, indices);
 
-		lTriangle->mV1 = *ListUtil::FindByIndex(lVertexList, lIndices[0]);
-		lTriangle->mV2 = *ListUtil::FindByIndex(lVertexList, lIndices[1]);
-		lTriangle->mV3 = *ListUtil::FindByIndex(lVertexList, lIndices[2]);
+		triangle->v1_ = *ListUtil::FindByIndex(_vertex_list, indices[0]);
+		triangle->v2_ = *ListUtil::FindByIndex(_vertex_list, indices[1]);
+		triangle->v3_ = *ListUtil::FindByIndex(_vertex_list, indices[2]);
 
-		lTriangle2->mV1 = *ListUtil::FindByIndex(lOrgVertexList, lIndices[0]);
-		lTriangle2->mV2 = *ListUtil::FindByIndex(lOrgVertexList, lIndices[1]);
-		lTriangle2->mV3 = *ListUtil::FindByIndex(lOrgVertexList, lIndices[2]);
+		triangle2->v1_ = *ListUtil::FindByIndex(org_vertex_list, indices[0]);
+		triangle2->v2_ = *ListUtil::FindByIndex(org_vertex_list, indices[1]);
+		triangle2->v3_ = *ListUtil::FindByIndex(org_vertex_list, indices[2]);
 
-		lTriangleList.push_back(lTriangle);
-		lOrgTriangleList.push_back(lTriangle2);
+		_triangle_list.push_back(triangle);
+		org_triangle_list.push_back(triangle2);
 	}
 
 	/*
 		The main loop.
 	*/
 
-	Edge lEdgeToCollapse;
+	Edge edge_to_collapse;
 
-	while (!lTriangleList.empty())
-	{
+	while (!_triangle_list.empty()) {
 		// FindEdgeToCollapse() will put the collapsing edge last in the array.
-		FindEdgeToCollapse(lOrgVertexList,
-				   lOrgTriangleList,
-				   lVertexList,
-				   lTriangleList,
-				   lEdgeToCollapse);
+		FindEdgeToCollapse(org_vertex_list,
+				   org_triangle_list,
+				   _vertex_list,
+				   _triangle_list,
+				   edge_to_collapse);
 
-		VertexSplit* lVertexSplit = new VertexSplit;
-		lVertexSplitList.push_back(lVertexSplit);
+		VertexSplit* vertex_split = new VertexSplit;
+		vertex_split_list.push_back(vertex_split);
 
-		lVertexSplit->mVertexToSplit = lEdgeToCollapse.mV2;
-		lVertexSplit->mNewVertex = lEdgeToCollapse.mV1;
+		vertex_split->vertex_to_split_ = edge_to_collapse.v2_;
+		vertex_split->new_vertex_ = edge_to_collapse.v1_;
 
-		lVertexSplit->mNumOldTriangles = (int)(lTriangleList.size() - lEdgeToCollapse.mTriangleList.size());
-		lVertexSplit->mNumNewTriangles = (int)lEdgeToCollapse.mTriangleList.size();
+		vertex_split->num_old_triangles_ = (int)(_triangle_list.size() - edge_to_collapse.triangle_list_.size());
+		vertex_split->num_new_triangles_ = (int)edge_to_collapse.triangle_list_.size();
 
-		SetDeltaScalars(lVertexSplit->mDeltaScalars,
-				lEdgeToCollapse.mV1->mScalars,
-				lEdgeToCollapse.mV2->mScalars);
+		SetDeltaScalars(vertex_split->delta_scalars_,
+				edge_to_collapse.v1_->scalars_,
+				edge_to_collapse.v2_->scalars_);
 
-		CopyAddScalars(lVertexSplit->mPivotScalars,
-				lEdgeToCollapse.mV2->mScalars,
-				lVertexSplit->mDeltaScalars);
+		CopyAddScalars(vertex_split->pivot_scalars_,
+				edge_to_collapse.v2_->scalars_,
+				vertex_split->delta_scalars_);
 
-		CopyScalars(lEdgeToCollapse.mV2->mScalars,
-				lVertexSplit->mPivotScalars);
+		CopyScalars(edge_to_collapse.v2_->scalars_,
+				vertex_split->pivot_scalars_);
 
-		TriangleList::iterator lTriIter;
+		TriangleList::iterator tri_iter;
 
-		for (lTriIter = lEdgeToCollapse.mTriangleList.begin();
-			lTriIter != lEdgeToCollapse.mTriangleList.end();
-			++lTriIter)
-		{
-			Triangle* lTriangle = *lTriIter;
-			lTriangleList.remove(lTriangle);
-			lVertexSplit->mNewTriangles.push_back(lTriangle);
+		for (tri_iter = edge_to_collapse.triangle_list_.begin();
+			tri_iter != edge_to_collapse.triangle_list_.end();
+			++tri_iter) {
+			Triangle* triangle = *tri_iter;
+			_triangle_list.remove(triangle);
+			vertex_split->new_triangles_.push_back(triangle);
 		}
 
 		// Setup the affected triangles. Affected triangles are those that
 		// are sharing the vertex that will be removed. We need to change the pointer that
 		// points at the removed vertex to point to the other vertex instead.
-		for (lTriIter =  lTriangleList.begin();
-			lTriIter != lTriangleList.end();
-			++lTriIter)
-		{
-			Triangle* lTriangle = *lTriIter;
+		for (tri_iter =  _triangle_list.begin();
+			tri_iter != _triangle_list.end();
+			++tri_iter) {
+			Triangle* triangle = *tri_iter;
 
-			if (lTriangle->HaveVertex(lEdgeToCollapse.mV1) == true)
-			{
-				lVertexSplit->mFixTriangles.push_back(lTriangle);
-				lTriangle->ReplaceVertex(lEdgeToCollapse.mV1, lVertexSplit->mVertexToSplit);
+			if (triangle->HaveVertex(edge_to_collapse.v1_) == true) {
+				vertex_split->fix_triangles_.push_back(triangle);
+				triangle->ReplaceVertex(edge_to_collapse.v1_, vertex_split->vertex_to_split_);
 
 				// If two vertices are the same.
-				if (lTriangle->mV1 == lTriangle->mV2 ||
-				   lTriangle->mV1 == lTriangle->mV3 ||
-				   lTriangle->mV2 == lTriangle->mV3)
-				{
+				if (triangle->v1_ == triangle->v2_ ||
+				   triangle->v1_ == triangle->v3_ ||
+				   triangle->v2_ == triangle->v3_) {
 					deb_assert(false);
 				}
 			}
 		}
 
 		// Place V2 last in the list, and remove V1 completely.
-		lVertexList.remove(lEdgeToCollapse.mV1);
-		lVertexList.remove(lEdgeToCollapse.mV2);
-		lVertexList.push_back(lEdgeToCollapse.mV2);
+		_vertex_list.remove(edge_to_collapse.v1_);
+		_vertex_list.remove(edge_to_collapse.v2_);
+		_vertex_list.push_back(edge_to_collapse.v2_);
 	} // End while(lVertexCount > 1)
 
 
@@ -638,435 +585,403 @@ void ProgressiveTriangleGeometry::Set(TriangleBasedGeometry& pGeometry)
 	// It's time to generate the final data.
 
 	// Start with creating the lowest level mesh data.
-	mBaseVertexCount = (int)lVertexList.size();
-	mBaseTriangleCount = (int)lTriangleList.size();
-	mNumVertexSplits = (int)lVertexSplitList.size();
+	base_vertex_count_ = (int)_vertex_list.size();
+	base_triangle_count_ = (int)_triangle_list.size();
+	num_vertex_splits_ = (int)vertex_split_list.size();
 
-	mCurrentVertexCount = mBaseVertexCount;
-	mCurrentTriangleCount = mBaseTriangleCount;
+	current_vertex_count_ = base_vertex_count_;
+	current_triangle_count_ = base_triangle_count_;
 
-	mBaseVertexData = new float[mBaseVertexCount * 3];
-	mBaseNormalData = new float[mBaseVertexCount * 3];
-	mCurrentVertexData = new float[(mCurrentVertexCount + mNumVertexSplits) * 3];
-	mCurrentNormalData = new float[(mCurrentVertexCount + mNumVertexSplits) * 3];
+	base_vertex_data_ = new float[base_vertex_count_ * 3];
+	base_normal_data_ = new float[base_vertex_count_ * 3];
+	current_vertex_data_ = new float[(current_vertex_count_ + num_vertex_splits_) * 3];
+	current_normal_data_ = new float[(current_vertex_count_ + num_vertex_splits_) * 3];
 
-	if (pGeometry.GetUVData() != 0)
-	{
-		mBaseUVData = new float[mBaseVertexCount * 2];
-		mCurrentUVData = new float[(mCurrentVertexCount + mNumVertexSplits) * 2];
+	if (geometry.GetUVData() != 0) {
+		base_uv_data_ = new float[base_vertex_count_ * 2];
+		current_uv_data_ = new float[(current_vertex_count_ + num_vertex_splits_) * 2];
 	}
-	if (pGeometry.GetColorData() != 0)
-	{
-		mBaseColorData = new float[mBaseVertexCount * 4];
-		mCurrentColorData = new float[(mCurrentVertexCount + mNumVertexSplits) * 4];
-		mCurrentColorData8 = new uint8[(mCurrentVertexCount + mNumVertexSplits) * 4];
+	if (geometry.GetColorData() != 0) {
+		base_color_data_ = new float[base_vertex_count_ * 4];
+		current_color_data_ = new float[(current_vertex_count_ + num_vertex_splits_) * 4];
+		current_color_data8_ = new uint8[(current_vertex_count_ + num_vertex_splits_) * 4];
 	}
 
-	VertexList::iterator lVertexIter;
+	VertexList::iterator vertex_iter;
 
-	for (lVertexIter = lVertexList.begin(), i = 0; 
-		lVertexIter != lVertexList.end(); 
-		++lVertexIter, ++i)
-	{
-		Vertex* lVertex = *lVertexIter;
+	for (vertex_iter = _vertex_list.begin(), i = 0;
+		vertex_iter != _vertex_list.end();
+		++vertex_iter, ++i) {
+		Vertex* vertex = *vertex_iter;
 
-		mBaseVertexData[i * 3 + 0] = lVertex->x();
-		mBaseVertexData[i * 3 + 1] = lVertex->y();
-		mBaseVertexData[i * 3 + 2] = lVertex->z();
-		mCurrentVertexData[i * 3 + 0] = lVertex->x();
-		mCurrentVertexData[i * 3 + 1] = lVertex->y();
-		mCurrentVertexData[i * 3 + 2] = lVertex->z();
+		base_vertex_data_[i * 3 + 0] = vertex->x();
+		base_vertex_data_[i * 3 + 1] = vertex->y();
+		base_vertex_data_[i * 3 + 2] = vertex->z();
+		current_vertex_data_[i * 3 + 0] = vertex->x();
+		current_vertex_data_[i * 3 + 1] = vertex->y();
+		current_vertex_data_[i * 3 + 2] = vertex->z();
 
-		mBaseNormalData[i * 3 + 0] = lVertex->nx();
-		mBaseNormalData[i * 3 + 1] = lVertex->ny();
-		mBaseNormalData[i * 3 + 2] = lVertex->nz();
-		mCurrentNormalData[i * 3 + 0] = lVertex->nx();
-		mCurrentNormalData[i * 3 + 1] = lVertex->ny();
-		mCurrentNormalData[i * 3 + 2] = lVertex->nz();
+		base_normal_data_[i * 3 + 0] = vertex->nx();
+		base_normal_data_[i * 3 + 1] = vertex->ny();
+		base_normal_data_[i * 3 + 2] = vertex->nz();
+		current_normal_data_[i * 3 + 0] = vertex->nx();
+		current_normal_data_[i * 3 + 1] = vertex->ny();
+		current_normal_data_[i * 3 + 2] = vertex->nz();
 
-		if (pGeometry.GetUVData() != 0)
-		{
-			mBaseUVData[i * 2 + 0] = lVertex->u();
-			mBaseUVData[i * 2 + 1] = lVertex->v();
+		if (geometry.GetUVData() != 0) {
+			base_uv_data_[i * 2 + 0] = vertex->u();
+			base_uv_data_[i * 2 + 1] = vertex->v();
 
-			mCurrentUVData[i * 2 + 0] = lVertex->u();
-			mCurrentUVData[i * 2 + 1] = lVertex->v();
+			current_uv_data_[i * 2 + 0] = vertex->u();
+			current_uv_data_[i * 2 + 1] = vertex->v();
 		}
 
-		if (pGeometry.GetColorData() != 0)
-		{
-			mBaseColorData[i * 4 + 0] = lVertex->r();
-			mBaseColorData[i * 4 + 1] = lVertex->g();
-			mBaseColorData[i * 4 + 2] = lVertex->b();
-			mBaseColorData[i * 4 + 3] = lVertex->a();
+		if (geometry.GetColorData() != 0) {
+			base_color_data_[i * 4 + 0] = vertex->r();
+			base_color_data_[i * 4 + 1] = vertex->g();
+			base_color_data_[i * 4 + 2] = vertex->b();
+			base_color_data_[i * 4 + 3] = vertex->a();
 
-			mCurrentColorData[i * 4 + 0] = lVertex->r();
-			mCurrentColorData[i * 4 + 1] = lVertex->g();
-			mCurrentColorData[i * 4 + 2] = lVertex->b();
-			mCurrentColorData[i * 4 + 3] = lVertex->a();
+			current_color_data_[i * 4 + 0] = vertex->r();
+			current_color_data_[i * 4 + 1] = vertex->g();
+			current_color_data_[i * 4 + 2] = vertex->b();
+			current_color_data_[i * 4 + 3] = vertex->a();
 
-			mCurrentColorData8[i * 4 + 0] = (uint8)(lVertex->r() * 255.0f);
-			mCurrentColorData8[i * 4 + 1] = (uint8)(lVertex->g() * 255.0f);
-			mCurrentColorData8[i * 4 + 2] = (uint8)(lVertex->b() * 255.0f);
-			mCurrentColorData8[i * 4 + 3] = (uint8)(lVertex->a() * 255.0f);
+			current_color_data8_[i * 4 + 0] = (uint8)(vertex->r() * 255.0f);
+			current_color_data8_[i * 4 + 1] = (uint8)(vertex->g() * 255.0f);
+			current_color_data8_[i * 4 + 2] = (uint8)(vertex->b() * 255.0f);
+			current_color_data8_[i * 4 + 3] = (uint8)(vertex->a() * 255.0f);
 		}
 	}
 
-	mCurrentIndices = new uint32[lTriangleList.size() * 3];
+	current_indices_ = new uint32[_triangle_list.size() * 3];
 
-	if (lTriangleList.empty() == false)
-	{
-		mBaseIndices = new uint32[lTriangleList.size() * 3];
+	if (_triangle_list.empty() == false) {
+		base_indices_ = new uint32[_triangle_list.size() * 3];
 
-		TriangleList::iterator lTriIter;
-		for (lTriIter = lTriangleList.begin(), i = 0;
-			lTriIter != lTriangleList.end();
-			++lTriIter, ++i)
-		{
-			Triangle* lTriangle = *lTriIter;
+		TriangleList::iterator tri_iter;
+		for (tri_iter = _triangle_list.begin(), i = 0;
+			tri_iter != _triangle_list.end();
+			++tri_iter, ++i) {
+			Triangle* triangle = *tri_iter;
 
-			unsigned long lIndex0 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
-			unsigned long lIndex1 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
-			unsigned long lIndex2 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
+			unsigned long index0 = ListUtil::FindIndexOf(_vertex_list, triangle->v1_);
+			unsigned long index1 = ListUtil::FindIndexOf(_vertex_list, triangle->v2_);
+			unsigned long index2 = ListUtil::FindIndexOf(_vertex_list, triangle->v3_);
 
-			deb_assert(lIndex0 >= 0);
-			deb_assert(lIndex1 >= 0);
-			deb_assert(lIndex2 >= 0);
+			deb_assert(index0 >= 0);
+			deb_assert(index1 >= 0);
+			deb_assert(index2 >= 0);
 
-			mBaseIndices[i * 3 + 0] = lIndex0;
-			mBaseIndices[i * 3 + 1] = lIndex1;
-			mBaseIndices[i * 3 + 2] = lIndex2;
-			mCurrentIndices[i * 3 + 0] = lIndex0;
-			mCurrentIndices[i * 3 + 1] = lIndex1;
-			mCurrentIndices[i * 3 + 2] = lIndex2;
+			base_indices_[i * 3 + 0] = index0;
+			base_indices_[i * 3 + 1] = index1;
+			base_indices_[i * 3 + 2] = index2;
+			current_indices_[i * 3 + 0] = index0;
+			current_indices_[i * 3 + 1] = index1;
+			current_indices_[i * 3 + 2] = index2;
 		}
 	}
 
 	// Now let's create the rest of the data needed.
 
-	if (lVertexSplitList.size() > 0)
-	{
-		int lVertexIndex = (int)lVertexList.size();
+	if (vertex_split_list.size() > 0) {
+		int vertex_index = (int)_vertex_list.size();
 
-		mVertexSplit = new VertexSplit[lVertexSplitList.size()];
+		vertex_split_ = new VertexSplit[vertex_split_list.size()];
 
-		VertexSplitList::reverse_iterator lVSIter;
+		VertexSplitList::reverse_iterator vs_iter;
 
-		for (lVSIter = lVertexSplitList.rbegin(), i = 0; 
-			lVSIter != lVertexSplitList.rend(); 
-			++lVSIter, i++)
-		{
-			VertexSplit* lVS = *lVSIter;
-			mVertexSplit[i].LightCopy(*lVS);
-			mVertexSplit[i].mNumNewTriangles    = (int)lVS->mNewTriangles.size();
-			mVertexSplit[i].mNumOldTriangles    = (int)lTriangleList.size();
-			mVertexSplit[i].mNumOldVertices     = (int)lVertexList.size();
-			mVertexSplit[i].mVertexToSplitIndex = ListUtil::FindIndexOf(lVertexList, lVS->mVertexToSplit);
-			mVertexSplit[i].mNumIndexFixes      = (int)lVS->mFixTriangles.size();
-			mVertexSplit[i].mIndexFix           = new int[mVertexSplit[i].mNumIndexFixes];
-			mVertexSplit[i].mIndexFixIndex      = new int[mVertexSplit[i].mNumIndexFixes * 2];
+		for (vs_iter = vertex_split_list.rbegin(), i = 0;
+			vs_iter != vertex_split_list.rend();
+			++vs_iter, i++) {
+			VertexSplit* vs = *vs_iter;
+			vertex_split_[i].LightCopy(*vs);
+			vertex_split_[i].num_new_triangles_    = (int)vs->new_triangles_.size();
+			vertex_split_[i].num_old_triangles_    = (int)_triangle_list.size();
+			vertex_split_[i].num_old_vertices_     = (int)_vertex_list.size();
+			vertex_split_[i].vertex_to_split_index_ = ListUtil::FindIndexOf(_vertex_list, vs->vertex_to_split_);
+			vertex_split_[i].num_index_fixes_      = (int)vs->fix_triangles_.size();
+			vertex_split_[i].index_fix_           = new int[vertex_split_[i].num_index_fixes_];
+			vertex_split_[i].index_fix_index_      = new int[vertex_split_[i].num_index_fixes_ * 2];
 
 			// Write new vertex data.
-			lVertexList.push_back(lVS->mNewVertex);
+			_vertex_list.push_back(vs->new_vertex_);
 
-			mCurrentVertexData[lVertexIndex * 3 + 0] = lVS->mNewVertex->x();
-			mCurrentVertexData[lVertexIndex * 3 + 1] = lVS->mNewVertex->y();
-			mCurrentVertexData[lVertexIndex * 3 + 2] = lVS->mNewVertex->z();
+			current_vertex_data_[vertex_index * 3 + 0] = vs->new_vertex_->x();
+			current_vertex_data_[vertex_index * 3 + 1] = vs->new_vertex_->y();
+			current_vertex_data_[vertex_index * 3 + 2] = vs->new_vertex_->z();
 
-			mCurrentNormalData[lVertexIndex * 3 + 0] = lVS->mNewVertex->nx();
-			mCurrentNormalData[lVertexIndex * 3 + 1] = lVS->mNewVertex->ny();
-			mCurrentNormalData[lVertexIndex * 3 + 2] = lVS->mNewVertex->nz();
+			current_normal_data_[vertex_index * 3 + 0] = vs->new_vertex_->nx();
+			current_normal_data_[vertex_index * 3 + 1] = vs->new_vertex_->ny();
+			current_normal_data_[vertex_index * 3 + 2] = vs->new_vertex_->nz();
 
-			if (pGeometry.GetUVData() != 0)
-			{
-				mCurrentUVData[lVertexIndex * 2 + 0] = lVS->mNewVertex->u();
-				mCurrentUVData[lVertexIndex * 2 + 1] = lVS->mNewVertex->v();
+			if (geometry.GetUVData() != 0) {
+				current_uv_data_[vertex_index * 2 + 0] = vs->new_vertex_->u();
+				current_uv_data_[vertex_index * 2 + 1] = vs->new_vertex_->v();
 			}
 
-			if (pGeometry.GetColorData() != 0)
-			{
-				mCurrentColorData[lVertexIndex * 4 + 0] = lVS->mNewVertex->r();
-				mCurrentColorData[lVertexIndex * 4 + 1] = lVS->mNewVertex->g();
-				mCurrentColorData[lVertexIndex * 4 + 2] = lVS->mNewVertex->b();
-				mCurrentColorData[lVertexIndex * 4 + 3] = lVS->mNewVertex->a();
+			if (geometry.GetColorData() != 0) {
+				current_color_data_[vertex_index * 4 + 0] = vs->new_vertex_->r();
+				current_color_data_[vertex_index * 4 + 1] = vs->new_vertex_->g();
+				current_color_data_[vertex_index * 4 + 2] = vs->new_vertex_->b();
+				current_color_data_[vertex_index * 4 + 3] = vs->new_vertex_->a();
 
-				mCurrentColorData8[lVertexIndex * 4 + 0] = (uint8)(lVS->mNewVertex->r() * 255.0f);
-				mCurrentColorData8[lVertexIndex * 4 + 1] = (uint8)(lVS->mNewVertex->g() * 255.0f);
-				mCurrentColorData8[lVertexIndex * 4 + 2] = (uint8)(lVS->mNewVertex->b() * 255.0f);
-				mCurrentColorData8[lVertexIndex * 4 + 3] = (uint8)(lVS->mNewVertex->a() * 255.0f);
+				current_color_data8_[vertex_index * 4 + 0] = (uint8)(vs->new_vertex_->r() * 255.0f);
+				current_color_data8_[vertex_index * 4 + 1] = (uint8)(vs->new_vertex_->g() * 255.0f);
+				current_color_data8_[vertex_index * 4 + 2] = (uint8)(vs->new_vertex_->b() * 255.0f);
+				current_color_data8_[vertex_index * 4 + 3] = (uint8)(vs->new_vertex_->a() * 255.0f);
 			}
 
-			lVertexIndex++;
+			vertex_index++;
 
 			// Write index fixes. (Fix the "old" triangles).
 			int j;
-			TriangleList::iterator lTriIter;
+			TriangleList::iterator tri_iter;
 
-			for (lTriIter = lVS->mFixTriangles.begin(), j = 0;
-				lTriIter != lVS->mFixTriangles.end();
-				++lTriIter, ++j)
-			{
-				Triangle* lTriangle = *lTriIter;
+			for (tri_iter = vs->fix_triangles_.begin(), j = 0;
+				tri_iter != vs->fix_triangles_.end();
+				++tri_iter, ++j) {
+				Triangle* triangle = *tri_iter;
 
-				deb_assert(lTriangle->mVertexIndexHistory.size() > 0);
-				deb_assert(lTriangle->mVertexHistory.size() > 0);
+				deb_assert(triangle->vertex_index_history_.size() > 0);
+				deb_assert(triangle->vertex_history_.size() > 0);
 
-				int lTriIndex = ListUtil::FindIndexOf(lTriangleList, lTriangle);
-				int lVertex = lTriangle->mVertexIndexHistory.back();
-				lTriangle->mVertexIndexHistory.pop_back();
-				int lIndex = lTriIndex * 3 + lVertex;
-				mVertexSplit[i].mIndexFix[j] = lIndex;
+				int tri_index = ListUtil::FindIndexOf(_triangle_list, triangle);
+				int vertex = triangle->vertex_index_history_.back();
+				triangle->vertex_index_history_.pop_back();
+				int index = tri_index * 3 + vertex;
+				vertex_split_[i].index_fix_[j] = index;
 
-				int lOldValue = 0;
-				int lNewValue = 0;
+				int old_value = 0;
+				int new_value = 0;
 
-				switch(lVertex)
-				{
+				switch(vertex) {
 				case 0:
-					lOldValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
-					lTriangle->mV1 = lTriangle->mVertexHistory.back();
-					lTriangle->mVertexHistory.pop_back();
-					lNewValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
+					old_value = ListUtil::FindIndexOf(_vertex_list, triangle->v1_);
+					triangle->v1_ = triangle->vertex_history_.back();
+					triangle->vertex_history_.pop_back();
+					new_value = ListUtil::FindIndexOf(_vertex_list, triangle->v1_);
 					break;
 				case 1:
-					lOldValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
-					lTriangle->mV2 = lTriangle->mVertexHistory.back();
-					lTriangle->mVertexHistory.pop_back();
-					lNewValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
+					old_value = ListUtil::FindIndexOf(_vertex_list, triangle->v2_);
+					triangle->v2_ = triangle->vertex_history_.back();
+					triangle->vertex_history_.pop_back();
+					new_value = ListUtil::FindIndexOf(_vertex_list, triangle->v2_);
 					break;
 				case 2:
-					lOldValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
-					lTriangle->mV3 = lTriangle->mVertexHistory.back();
-					lTriangle->mVertexHistory.pop_back();
-					lNewValue = ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
+					old_value = ListUtil::FindIndexOf(_vertex_list, triangle->v3_);
+					triangle->v3_ = triangle->vertex_history_.back();
+					triangle->vertex_history_.pop_back();
+					new_value = ListUtil::FindIndexOf(_vertex_list, triangle->v3_);
 					break;
 				};
 
-				mVertexSplit[i].mIndexFixIndex[j * 2 + 0] = lOldValue;
-				mVertexSplit[i].mIndexFixIndex[j * 2 + 1] = lNewValue;
+				vertex_split_[i].index_fix_index_[j * 2 + 0] = old_value;
+				vertex_split_[i].index_fix_index_[j * 2 + 1] = new_value;
 			}
 
 			// Write all new triangles.
-			for (lTriIter = lVS->mNewTriangles.begin();
-				lTriIter != lVS->mNewTriangles.end();
-				++lTriIter)
-			{
-				Triangle* lTriangle = *lTriIter;
-				lTriangleList.push_back(lTriangle);
-				int lTriIndex = (int)lTriangleList.size() - 1;
+			for (tri_iter = vs->new_triangles_.begin();
+				tri_iter != vs->new_triangles_.end();
+				++tri_iter) {
+				Triangle* triangle = *tri_iter;
+				_triangle_list.push_back(triangle);
+				int tri_index = (int)_triangle_list.size() - 1;
 
-				unsigned long lIndex0 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV1);
-				unsigned long lIndex1 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV2);
-				unsigned long lIndex2 = ListUtil::FindIndexOf(lVertexList, lTriangle->mV3);
+				unsigned long index0 = ListUtil::FindIndexOf(_vertex_list, triangle->v1_);
+				unsigned long index1 = ListUtil::FindIndexOf(_vertex_list, triangle->v2_);
+				unsigned long index2 = ListUtil::FindIndexOf(_vertex_list, triangle->v3_);
 
-				mCurrentIndices[lTriIndex * 3 + 0] = lIndex0;
-				mCurrentIndices[lTriIndex * 3 + 1] = lIndex1;
-				mCurrentIndices[lTriIndex * 3 + 2] = lIndex2;
+				current_indices_[tri_index * 3 + 0] = index0;
+				current_indices_[tri_index * 3 + 1] = index1;
+				current_indices_[tri_index * 3 + 2] = index2;
 			}
 		}
 	}
 
 	// Delete all memory allocated.
-	ListUtil::DeleteAll(lTriangleList);
-	ListUtil::DeleteAll(lVertexList);
-	ListUtil::DeleteAll(lVertexSplitList);
+	ListUtil::DeleteAll(_triangle_list);
+	ListUtil::DeleteAll(_vertex_list);
+	ListUtil::DeleteAll(vertex_split_list);
 
-	if (lClearNormalData == true)
-	{
-		pGeometry.ClearVertexNormalData();
+	if (clear_normal_data == true) {
+		geometry.ClearVertexNormalData();
 	}
 }
 
-void ProgressiveTriangleGeometry::SetDetailLevel(float pLevelOfDetail)
-{
-	if (mNumVertexSplits == 0)
-	{
+void ProgressiveTriangleGeometry::SetDetailLevel(float level_of_detail) {
+	if (num_vertex_splits_ == 0) {
 		return;
 	}
 
-	if (pLevelOfDetail < 0.0f)
-	{
-		pLevelOfDetail = 0.0f;
+	if (level_of_detail < 0.0f) {
+		level_of_detail = 0.0f;
 	}
-	if (pLevelOfDetail > 1.0f)
-	{
-		pLevelOfDetail = 1.0f;
+	if (level_of_detail > 1.0f) {
+		level_of_detail = 1.0f;
 	}
 
-	unsigned int lTargetVSplit = (unsigned int)(pLevelOfDetail * (float)mNumVertexSplits);
-	float lFrac = pLevelOfDetail * (float)mNumVertexSplits - (float)lTargetVSplit;
+	unsigned int target_v_split = (unsigned int)(level_of_detail * (float)num_vertex_splits_);
+	float frac = level_of_detail * (float)num_vertex_splits_ - (float)target_v_split;
 
-	if (lTargetVSplit >= mNumVertexSplits)
-	{
-		lTargetVSplit = mNumVertexSplits - 1;
-		lFrac = 1.0f;
+	if (target_v_split >= num_vertex_splits_) {
+		target_v_split = num_vertex_splits_ - 1;
+		frac = 1.0f;
 	}
 
-	if (lTargetVSplit >= mCurrentVSplit)
-	{
-		float lF = lFrac;
-		lFrac = 1.0f;
+	if (target_v_split >= current_v_split_) {
+		float __f = frac;
+		frac = 1.0f;
 
 		// Expand some edges.
-		for (int i = mCurrentVSplit; i <= (int)lTargetVSplit; i++)
-		{
-			if (i == (int)lTargetVSplit)
-				lFrac = lF;
+		for (int i = current_v_split_; i <= (int)target_v_split; i++) {
+			if (i == (int)target_v_split)
+				frac = __f;
 
 			// Setup the new vertices.
-			float lNewScalars0[V_NUMSCALARS];
-			float lNewScalars1[V_NUMSCALARS];
+			float new_scalars0[kVNumscalars];
+			float new_scalars1[kVNumscalars];
 
-			CopyAddScalars(lNewScalars0,
-						   mVertexSplit[i].mPivotScalars,
-						   mVertexSplit[i].mDeltaScalars,
-						   -lFrac);
+			CopyAddScalars(new_scalars0,
+						   vertex_split_[i].pivot_scalars_,
+						   vertex_split_[i].delta_scalars_,
+						   -frac);
 
-			CopyAddScalars(lNewScalars1,
-						   mVertexSplit[i].mPivotScalars,
-						   mVertexSplit[i].mDeltaScalars,
-						   lFrac);
+			CopyAddScalars(new_scalars1,
+						   vertex_split_[i].pivot_scalars_,
+						   vertex_split_[i].delta_scalars_,
+						   frac);
 
-			int lIndex0 = mVertexSplit[i].mVertexToSplitIndex * 3;
-			int lIndex1 = mVertexSplit[i].mNumOldVertices * 3; // The newly created vertex.
+			int index0 = vertex_split_[i].vertex_to_split_index_ * 3;
+			int index1 = vertex_split_[i].num_old_vertices_ * 3; // The newly created vertex.
 
-			CopyScalars(&mCurrentVertexData[lIndex0], &lNewScalars0[VX], 3);
-			CopyScalars(&mCurrentVertexData[lIndex1], &lNewScalars1[VX], 3);
+			CopyScalars(&current_vertex_data_[index0], &new_scalars0[kVx], 3);
+			CopyScalars(&current_vertex_data_[index1], &new_scalars1[kVx], 3);
 
-			float lScale0 = 1.0f / sqrt(lNewScalars0[VNX] * lNewScalars0[VNX] + 
-										  lNewScalars0[VNY] * lNewScalars0[VNY] + 
-										  lNewScalars0[VNZ] * lNewScalars0[VNZ]);
-			float lScale1 = 1.0f / sqrt(lNewScalars1[VNX] * lNewScalars1[VNX] + 
-										  lNewScalars1[VNY] * lNewScalars1[VNY] + 
-										  lNewScalars1[VNZ] * lNewScalars1[VNZ]);
-			CopyScalars(&mCurrentNormalData[lIndex0], &lNewScalars0[VNX], 3, lScale0);
-			CopyScalars(&mCurrentNormalData[lIndex1], &lNewScalars1[VNX], 3, lScale1);
+			float scale0 = 1.0f / sqrt(new_scalars0[kVnx] * new_scalars0[kVnx] +
+										  new_scalars0[kVny] * new_scalars0[kVny] +
+										  new_scalars0[kVnz] * new_scalars0[kVnz]);
+			float scale1 = 1.0f / sqrt(new_scalars1[kVnx] * new_scalars1[kVnx] +
+										  new_scalars1[kVny] * new_scalars1[kVny] +
+										  new_scalars1[kVnz] * new_scalars1[kVnz]);
+			CopyScalars(&current_normal_data_[index0], &new_scalars0[kVnx], 3, scale0);
+			CopyScalars(&current_normal_data_[index1], &new_scalars1[kVnx], 3, scale1);
 
-			if (mCurrentUVData != 0)
-			{
-				int lUVIndex0 = mVertexSplit[i].mVertexToSplitIndex * 2;
-				int lUVIndex1 = mVertexSplit[i].mNumOldVertices * 2;
-				CopyScalars(&mCurrentUVData[lUVIndex0], &lNewScalars0[VU], 2);
-				CopyScalars(&mCurrentUVData[lUVIndex1], &lNewScalars1[VU], 2);
+			if (current_uv_data_ != 0) {
+				int uv_index0 = vertex_split_[i].vertex_to_split_index_ * 2;
+				int uv_index1 = vertex_split_[i].num_old_vertices_ * 2;
+				CopyScalars(&current_uv_data_[uv_index0], &new_scalars0[kVu], 2);
+				CopyScalars(&current_uv_data_[uv_index1], &new_scalars1[kVu], 2);
 			}
 
-			if (mCurrentColorData != 0)
-			{
-				int lColorIndex0 = mVertexSplit[i].mVertexToSplitIndex * 3;
-				int lColorIndex1 = mVertexSplit[i].mNumOldVertices * 3;
-				CopyScalars(&mCurrentColorData[lColorIndex0], &lNewScalars0[VR], 3);
-				CopyScalars(&mCurrentColorData[lColorIndex1], &lNewScalars1[VR], 3);
-				CopyScalarsUC(&mCurrentColorData8[lColorIndex0], &lNewScalars0[VR], 3);
-				CopyScalarsUC(&mCurrentColorData8[lColorIndex1], &lNewScalars1[VR], 3);
+			if (current_color_data_ != 0) {
+				int color_index0 = vertex_split_[i].vertex_to_split_index_ * 3;
+				int color_index1 = vertex_split_[i].num_old_vertices_ * 3;
+				CopyScalars(&current_color_data_[color_index0], &new_scalars0[kVr], 3);
+				CopyScalars(&current_color_data_[color_index1], &new_scalars1[kVr], 3);
+				CopyScalarsUC(&current_color_data8_[color_index0], &new_scalars0[kVr], 3);
+				CopyScalarsUC(&current_color_data8_[color_index1], &new_scalars1[kVr], 3);
 			}
 
 			// New triangles.
-			mCurrentTriangleCount = mVertexSplit[i].mNumOldTriangles +
-									mVertexSplit[i].mNumNewTriangles;
+			current_triangle_count_ = vertex_split_[i].num_old_triangles_ +
+									vertex_split_[i].num_new_triangles_;
 
-			mCurrentVertexCount = mVertexSplit[i].mNumOldVertices + 1;
+			current_vertex_count_ = vertex_split_[i].num_old_vertices_ + 1;
 
 			// Fix old triangles that should share the new vertex.
-			for (int j = 0; j < mVertexSplit[i].mNumIndexFixes; j++)
-			{
-				mCurrentIndices[mVertexSplit[i].mIndexFix[j]] = mVertexSplit[i].mIndexFixIndex[j * 2 + 1];
+			for (int j = 0; j < vertex_split_[i].num_index_fixes_; j++) {
+				current_indices_[vertex_split_[i].index_fix_[j]] = vertex_split_[i].index_fix_index_[j * 2 + 1];
 			}
 		}
 
-		mCurrentVSplit = lTargetVSplit;
-	}
-	else if(lTargetVSplit < mCurrentVSplit)
-	{
-		float lF = lFrac;
-		lFrac = 1.0f;
+		current_v_split_ = target_v_split;
+	} else if(target_v_split < current_v_split_) {
+		float __f = frac;
+		frac = 1.0f;
 
 		// Collapse some edges.
-		for (int i = mCurrentVSplit - 1; i >= (int)lTargetVSplit; i--)
-		{
-			if (i == (int)lTargetVSplit)
-				lFrac = lF;
+		for (int i = current_v_split_ - 1; i >= (int)target_v_split; i--) {
+			if (i == (int)target_v_split)
+				frac = __f;
 
 			// Remove triangles.
-			mCurrentTriangleCount = mVertexSplit[i].mNumOldTriangles +
-									mVertexSplit[i].mNumNewTriangles;
+			current_triangle_count_ = vertex_split_[i].num_old_triangles_ +
+									vertex_split_[i].num_new_triangles_;
 
-			mCurrentVertexCount = mVertexSplit[i].mNumOldVertices + 1;
+			current_vertex_count_ = vertex_split_[i].num_old_vertices_ + 1;
 
 			// Setup the new vertex.
-			float lNewScalars0[V_NUMSCALARS];
-			float lNewScalars1[V_NUMSCALARS];
+			float new_scalars0[kVNumscalars];
+			float new_scalars1[kVNumscalars];
 
-			CopyAddScalars(lNewScalars0,
-						   mVertexSplit[i].mPivotScalars,
-						   mVertexSplit[i].mDeltaScalars,
-						   -lFrac);
+			CopyAddScalars(new_scalars0,
+						   vertex_split_[i].pivot_scalars_,
+						   vertex_split_[i].delta_scalars_,
+						   -frac);
 
-			CopyAddScalars(lNewScalars1,
-						   mVertexSplit[i].mPivotScalars,
-						   mVertexSplit[i].mDeltaScalars,
-						   lFrac);
+			CopyAddScalars(new_scalars1,
+						   vertex_split_[i].pivot_scalars_,
+						   vertex_split_[i].delta_scalars_,
+						   frac);
 
-			int lIndex0 = mVertexSplit[i].mVertexToSplitIndex * 3;
-			int lIndex1 = mVertexSplit[i].mNumOldVertices * 3; // The newly created vertex.
+			int index0 = vertex_split_[i].vertex_to_split_index_ * 3;
+			int index1 = vertex_split_[i].num_old_vertices_ * 3; // The newly created vertex.
 
-			CopyScalars(&mCurrentVertexData[lIndex0], &lNewScalars0[VX], 3);
-			CopyScalars(&mCurrentVertexData[lIndex1], &lNewScalars1[VX], 3);
+			CopyScalars(&current_vertex_data_[index0], &new_scalars0[kVx], 3);
+			CopyScalars(&current_vertex_data_[index1], &new_scalars1[kVx], 3);
 
-			float lScale0 = 1.0f / sqrt(lNewScalars0[VNX] * lNewScalars0[VNX] + 
-										  lNewScalars0[VNY] * lNewScalars0[VNY] + 
-										  lNewScalars0[VNZ] * lNewScalars0[VNZ]);
-			float lScale1 = 1.0f / sqrt(lNewScalars1[VNX] * lNewScalars1[VNX] + 
-										  lNewScalars1[VNY] * lNewScalars1[VNY] + 
-										  lNewScalars1[VNZ] * lNewScalars1[VNZ]);
-			CopyScalars(&mCurrentNormalData[lIndex0], &lNewScalars0[VNX], 3, lScale0);
-			CopyScalars(&mCurrentNormalData[lIndex1], &lNewScalars1[VNX], 3, lScale1);
+			float scale0 = 1.0f / sqrt(new_scalars0[kVnx] * new_scalars0[kVnx] +
+										  new_scalars0[kVny] * new_scalars0[kVny] +
+										  new_scalars0[kVnz] * new_scalars0[kVnz]);
+			float scale1 = 1.0f / sqrt(new_scalars1[kVnx] * new_scalars1[kVnx] +
+										  new_scalars1[kVny] * new_scalars1[kVny] +
+										  new_scalars1[kVnz] * new_scalars1[kVnz]);
+			CopyScalars(&current_normal_data_[index0], &new_scalars0[kVnx], 3, scale0);
+			CopyScalars(&current_normal_data_[index1], &new_scalars1[kVnx], 3, scale1);
 
-			if (mCurrentUVData != 0)
-			{
-				int lUVIndex0 = mVertexSplit[i].mVertexToSplitIndex * 2;
-				int lUVIndex1 = mVertexSplit[i].mNumOldVertices * 2;
-				CopyScalars(&mCurrentUVData[lUVIndex0], &lNewScalars0[VU], 2);
-				CopyScalars(&mCurrentUVData[lUVIndex1], &lNewScalars1[VU], 2);
+			if (current_uv_data_ != 0) {
+				int uv_index0 = vertex_split_[i].vertex_to_split_index_ * 2;
+				int uv_index1 = vertex_split_[i].num_old_vertices_ * 2;
+				CopyScalars(&current_uv_data_[uv_index0], &new_scalars0[kVu], 2);
+				CopyScalars(&current_uv_data_[uv_index1], &new_scalars1[kVu], 2);
 			}
 
-			if (mCurrentColorData != 0)
-			{
-				int lColorIndex0 = mVertexSplit[i].mVertexToSplitIndex * 3;
-				int lColorIndex1 = mVertexSplit[i].mNumOldVertices * 3;
-				CopyScalars(&mCurrentColorData[lColorIndex0], &lNewScalars0[VR], 3);
-				CopyScalars(&mCurrentColorData[lColorIndex1], &lNewScalars1[VR], 3);
-				CopyScalarsUC(&mCurrentColorData8[lColorIndex0], &lNewScalars0[VR], 3);
-				CopyScalarsUC(&mCurrentColorData8[lColorIndex1], &lNewScalars1[VR], 3);
+			if (current_color_data_ != 0) {
+				int color_index0 = vertex_split_[i].vertex_to_split_index_ * 3;
+				int color_index1 = vertex_split_[i].num_old_vertices_ * 3;
+				CopyScalars(&current_color_data_[color_index0], &new_scalars0[kVr], 3);
+				CopyScalars(&current_color_data_[color_index1], &new_scalars1[kVr], 3);
+				CopyScalarsUC(&current_color_data8_[color_index0], &new_scalars0[kVr], 3);
+				CopyScalarsUC(&current_color_data8_[color_index1], &new_scalars1[kVr], 3);
 			}
 
-			for (int j = 0; j < mVertexSplit[i + 1].mNumIndexFixes; j++)
-			{
-				mCurrentIndices[mVertexSplit[i + 1].mIndexFix[j]] = 
-					mVertexSplit[i + 1].mIndexFixIndex[j * 2 + 0];
+			for (int j = 0; j < vertex_split_[i + 1].num_index_fixes_; j++) {
+				current_indices_[vertex_split_[i + 1].index_fix_[j]] =
+					vertex_split_[i + 1].index_fix_index_[j * 2 + 0];
 			}
 		}
 
-		mCurrentVSplit = lTargetVSplit;
+		current_v_split_ = target_v_split;
 	}
 
-	Tbc::GeometryBase::SetVertexDataChanged(true);
-	Tbc::GeometryBase::SetColorDataChanged(true);
-	Tbc::GeometryBase::SetUVDataChanged(true);
-	Tbc::GeometryBase::SetIndexDataChanged(true);
+	tbc::GeometryBase::SetVertexDataChanged(true);
+	tbc::GeometryBase::SetColorDataChanged(true);
+	tbc::GeometryBase::SetUVDataChanged(true);
+	tbc::GeometryBase::SetIndexDataChanged(true);
 }
 
-void ProgressiveTriangleGeometry::GetCurrentState(TriangleBasedGeometry& pGeometry)
-{
-	pGeometry.Set(mCurrentVertexData,
-	              mCurrentNormalData,
-	              mCurrentUVData,
-	              mCurrentColorData8,
-	              TriangleBasedGeometry::COLOR_RGBA,
-	              mCurrentIndices,
-	              mCurrentVertexCount,
-	              mCurrentTriangleCount * 3,
-	              Tbc::GeometryBase::TRIANGLES,
-	              Tbc::GeometryBase::GEOM_DYNAMIC);
+void ProgressiveTriangleGeometry::GetCurrentState(TriangleBasedGeometry& geometry) {
+	geometry.Set(current_vertex_data_,
+	              current_normal_data_,
+	              current_uv_data_,
+	              current_color_data8_,
+	              TriangleBasedGeometry::kColorRgba,
+	              current_indices_,
+	              current_vertex_count_,
+	              current_triangle_count_ * 3,
+	              tbc::GeometryBase::kTriangles,
+	              tbc::GeometryBase::kGeomDynamic);
 }
 
 

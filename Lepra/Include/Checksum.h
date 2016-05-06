@@ -11,23 +11,21 @@
 
 #pragma once
 
-#include "LepraTypes.h"
+#include "lepratypes.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class Checksum
-{
+class Checksum {
 public:
-	static uint8 CalculateLrc(const uint8* pData, unsigned pLength);
-	static uint32 CalculateCrc32(const uint8* pData, unsigned pLength);
+	static uint8 CalculateLrc(const uint8* data, unsigned length);
+	static uint32 CalculateCrc32(const uint8* data, unsigned length);
 
 protected:
-	static const unsigned mCrc32Table[256];
+	static const unsigned crc32_table_[256];
 };
 
 

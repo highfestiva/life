@@ -5,30 +5,28 @@
 
 
 #pragma once
-#include "UiButton.h"
+#include "uibutton.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class CheckButton: public Button
-{
+class CheckButton: public Button {
 	typedef Button Parent;
 public:
-	CheckButton(const Color& pBodyColor, const wstr& pText);
+	CheckButton(const Color& body_color, const wstr& text);
 	virtual ~CheckButton();
 
-	virtual void Repaint(Painter* pPainter);
-	virtual bool OnLButtonUp(int pMouseX, int pMouseY);
+	virtual void Repaint(Painter* painter);
+	virtual bool OnLButtonUp(int mouse_x, int mouse_y);
 
-	void SetCheckedIcon(Painter::ImageID pIconId);
+	void SetCheckedIcon(Painter::ImageID icon_id);
 	virtual Painter::ImageID GetCurrentIcon() const;
 
 protected:
-	Painter::ImageID mCheckedIconId;
+	Painter::ImageID checked_icon_id_;
 };
 
 

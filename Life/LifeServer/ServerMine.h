@@ -1,18 +1,17 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Cure/Include/CppContextObject.h"
-#include "../Life.h"
+#include "../../cure/include/cppcontextobject.h"
+#include "../life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -20,25 +19,24 @@ class Launcher;
 
 
 
-class ServerMine: public Cure::CppContextObject
-{
+class ServerMine: public cure::CppContextObject {
 public:
-	typedef Cure::CppContextObject Parent;
+	typedef cure::CppContextObject Parent;
 
-	ServerMine(Cure::ResourceManager* pResourceManager, const str& pClassId, Launcher* pLauncher);
+	ServerMine(cure::ResourceManager* resource_manager, const str& class_id, Launcher* launcher);
 	virtual ~ServerMine();
 
 private:
 	virtual void OnTick();
-	virtual void OnForceApplied(Cure::ContextObject* pOtherObject,
-		Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-		const vec3& pForce, const vec3& pTorque,
-		const vec3& pPosition, const vec3& pRelativeVelocity);
+	virtual void OnForceApplied(cure::ContextObject* other_object,
+		tbc::PhysicsManager::BodyID own_body_id, tbc::PhysicsManager::BodyID other_body_id,
+		const vec3& force, const vec3& torque,
+		const vec3& position, const vec3& relative_velocity);
 
-	Launcher* mLauncher;
-	int mTicksTilFullyActivated;
-	int mTicksTilDetonation;
-	bool mIsDetonated;
+	Launcher* launcher_;
+	int ticks_til_fully_activated_;
+	int ticks_til_detonation_;
+	bool is_detonated_;
 
 	logclass();
 };

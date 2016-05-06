@@ -3,114 +3,95 @@
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
-#include "../Include/LepraOS.h"
-#include "../Include/LepraTypes.h"
-#include "../Include/IPAddress.h"
-#include "../Include/String.h"
+#include "../include/lepraos.h"
+#include "../include/lepratypes.h"
+#include "../include/ipaddress.h"
+#include "../include/string.h"
 
-namespace Lepra
-{
+namespace lepra {
 
 IPAddress::IPAddress() :
-	mByteCount(0),
-	mHashCode(0),
-	mIsHashValid(false)
-{
+	byte_count_(0),
+	hash_code_(0),
+	is_hash_valid_(false) {
 }
 
-IPAddress::IPAddress(const IPAddress& pIPAddress) :
-	mByteCount(pIPAddress.mByteCount),
-	mHashCode(pIPAddress.mHashCode),
-	mIsHashValid(pIPAddress.mIsHashValid)
-{
-	Set(pIPAddress.mAddress, mByteCount);
+IPAddress::IPAddress(const IPAddress& ip_address) :
+	byte_count_(ip_address.byte_count_),
+	hash_code_(ip_address.hash_code_),
+	is_hash_valid_(ip_address.is_hash_valid_) {
+	Set(ip_address.address_, byte_count_);
 }
 
-IPAddress::IPAddress(unsigned pIP4Address)
-{
+IPAddress::IPAddress(unsigned i_p4_address) {
 	// Store address in big endian format.
-	mAddress[0] = (uint8)((pIP4Address >> 24) & 0x000000FF);
-	mAddress[1] = (uint8)((pIP4Address >> 16) & 0x000000FF);
-	mAddress[2] = (uint8)((pIP4Address >> 8) & 0x000000FF);
-	mAddress[3] = (uint8)((pIP4Address >> 0) & 0x000000FF);
+	address_[0] = (uint8)((i_p4_address >> 24) & 0x000000FF);
+	address_[1] = (uint8)((i_p4_address >> 16) & 0x000000FF);
+	address_[2] = (uint8)((i_p4_address >> 8) & 0x000000FF);
+	address_[3] = (uint8)((i_p4_address >> 0) & 0x000000FF);
 
-	mByteCount = 4;
-	mIsHashValid = false;
+	byte_count_ = 4;
+	is_hash_valid_ = false;
 }
 
-IPAddress::IPAddress(const uint8* pIPAddress, int pNumBytes)
-{
-	Set(pIPAddress, pNumBytes);
+IPAddress::IPAddress(const uint8* ip_address, int num_bytes) {
+	Set(ip_address, num_bytes);
 }
 
-IPAddress::IPAddress(const str& pIPv4Address)
-{
-	unsigned lIpInt = inet_addr(pIPv4Address.c_str());
-	uint8* lIp = (uint8*)&lIpInt;
-	mAddress[0] = lIp[0];
-	mAddress[1] = lIp[1];
-	mAddress[2] = lIp[2];
-	mAddress[3] = lIp[3];
-	mByteCount = 4;
-	mIsHashValid = false;
+IPAddress::IPAddress(const str& i_pv4_address) {
+	unsigned ip_int = inet_addr(i_pv4_address.c_str());
+	uint8* ip = (uint8*)&ip_int;
+	address_[0] = ip[0];
+	address_[1] = ip[1];
+	address_[2] = ip[2];
+	address_[3] = ip[3];
+	byte_count_ = 4;
+	is_hash_valid_ = false;
 }
 
-IPAddress::~IPAddress()
-{
+IPAddress::~IPAddress() {
 }
 
-void IPAddress::Set(const uint8* pIPAddress, int pNumBytes)
-{
-	mByteCount = pNumBytes;
+void IPAddress::Set(const uint8* ip_address, int num_bytes) {
+	byte_count_ = num_bytes;
 
-	if (mByteCount > 16)
-	{
-		mByteCount = 16;
+	if (byte_count_ > 16) {
+		byte_count_ = 16;
 	}
 
-	if (mByteCount < 0)
-	{
-		mByteCount = 0;
+	if (byte_count_ < 0) {
+		byte_count_ = 0;
 	}
 
-	for (int i = 0; i < mByteCount; i++)
-	{
-		mAddress[i] = pIPAddress[i];
+	for (int i = 0; i < byte_count_; i++) {
+		address_[i] = ip_address[i];
 	}
 
-	mIsHashValid = false;
+	is_hash_valid_ = false;
 }
 
-void IPAddress::Get(uint8* pIPAddress) const
-{
-	for (int i = 0; i < mByteCount; i++)
-	{
-		pIPAddress[i] = mAddress[i];
+void IPAddress::Get(uint8* ip_address) const {
+	for (int i = 0; i < byte_count_; i++) {
+		ip_address[i] = address_[i];
 	}
 }
 
-str IPAddress::GetAsString() const
-{
-	str lString;
+str IPAddress::GetAsString() const {
+	str s;
 
-	if (mByteCount == 4)
-	{
-		lString = strutil::Format("%i.%i.%i.%i", mAddress[0], mAddress[1], mAddress[2], mAddress[3]);
-	}
-	else if(mByteCount == 16)
-	{
+	if (byte_count_ == 4) {
+		s = strutil::Format("%i.%i.%i.%i", address_[0], address_[1], address_[2], address_[3]);
+	} else if(byte_count_ == 16) {
 		// TODO: Implement IPv6 text representation of the IP-address.
 	}
 
-	return (lString);
+	return (s);
 }
 
-void IPAddress::CalcHashCode() const
-{
-	mHashCode = 0;
-	for (int i = 0; i < mByteCount; i++)
-	{
-		mHashCode += (unsigned)mAddress[i] << ((i & 3) * 8);
+void IPAddress::CalcHashCode() const {
+	hash_code_ = 0;
+	for (int i = 0; i < byte_count_; i++) {
+		hash_code_ += (unsigned)address_[i] << ((i & 3) * 8);
 	}
 }
 

@@ -1,42 +1,39 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life/LifeClient/Level.h"
-#include "Fire.h"
+#include "../life/lifeclient/level.h"
+#include "fire.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ContextPath;
 }
 
 
 
-namespace Fire
-{
+namespace Fire {
 
 
 
-class Level: public Life::Level
-{
-	typedef Life::Level Parent;
+class Level: public life::Level {
+	typedef life::Level Parent;
 public:
-	Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Cure::ContextForceListener* pGravelEmitter);
+	Level(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, cure::ContextForceListener* gravel_emitter);
 	virtual ~Level();
 
 	virtual void OnLoaded();
-	Cure::ContextPath* QueryPath();
+	cure::ContextPath* QueryPath();
 	float GetLevelSpeed() const;
 
 private:
-	Cure::ContextPath* mPath;
-	float mLevelSpeed;
+	cure::ContextPath* path_;
+	float level_speed_;
 };
 
 

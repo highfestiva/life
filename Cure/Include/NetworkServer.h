@@ -6,20 +6,19 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Unordered.h"
-#include "../../Lepra/Include/Unordered.h"
-#include "../../Lepra/Include/MemberThread.h"
-#include "../../Lepra/Include/String.h"
-#include "../../Lepra/Include/Timer.h"
-#include "NetworkAgent.h"
-#include "SocketIoHandler.h"
-#include "UserConnection.h"
-#include "UserAccountManager.h"
+#include "../../lepra/include/unordered.h"
+#include "../../lepra/include/unordered.h"
+#include "../../lepra/include/memberthread.h"
+#include "../../lepra/include/string.h"
+#include "../../lepra/include/timer.h"
+#include "networkagent.h"
+#include "socketiohandler.h"
+#include "userconnection.h"
+#include "useraccountmanager.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
@@ -28,55 +27,53 @@ class MessageLoginRequest;
 
 
 
-class NetworkServer: public NetworkAgent, public SocketIoHandler
-{
+class NetworkServer: public NetworkAgent, public SocketIoHandler {
 public:
 	typedef NetworkAgent Parent;
 
-	class LoginListener
-	{
+	class LoginListener {
 	public:
 		LoginListener();
 		virtual ~LoginListener();
-		virtual UserAccount::Availability QueryLogin(const LoginId& pLoginId, UserAccount::AccountId& pAccountId) = 0;
-		virtual void OnLogin(UserConnection* pUserConnection) = 0;
-		virtual void OnLogout(UserConnection* pUserConnection) = 0;
+		virtual UserAccount::Availability QueryLogin(const LoginId& login_id, UserAccount::AccountId& account_id) = 0;
+		virtual void OnLogin(UserConnection* user_connection) = 0;
+		virtual void OnLogout(UserConnection* user_connection) = 0;
 	};
 
-	NetworkServer(RuntimeVariableScope* pVariableScope, LoginListener* pLoginListener);
+	NetworkServer(RuntimeVariableScope* variable_scope, LoginListener* login_listener);
 	virtual ~NetworkServer();
 
-	virtual bool Start(const str& pHostAddress);
+	virtual bool Start(const str& host_address);
 	virtual void Stop();
 
-	void Disconnect(UserAccount::AccountId pAccountId, const str& pReason, bool pSendDisconnect);
+	void Disconnect(UserAccount::AccountId account_id, const str& reason, bool send_disconnect);
 
-	bool PlaceInSendBuffer(bool pSafe, Packet* pPacket, UserAccount::AccountId pAccountId);
+	bool PlaceInSendBuffer(bool safe, Packet* packet, UserAccount::AccountId account_id);
 	bool SendAll();
-	ReceiveStatus ReceiveFirstPacket(Packet* pPacket, UserAccount::AccountId& pAccountId);
-	ReceiveStatus ReceiveMore(UserAccount::AccountId pAccountId, Packet* pPacket);
+	ReceiveStatus ReceiveFirstPacket(Packet* packet, UserAccount::AccountId& account_id);
+	ReceiveStatus ReceiveMore(UserAccount::AccountId account_id, Packet* packet);
 
 private:
 	void PollAccept();
-	void TryLogin(VSocket* pSocket, Packet* pPacket, int pDataLength);
-	RemoteStatus QueryLogin(const str& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId);
-	void Login(const str& pUserName, UserAccount::AccountId pAccountId, VSocket* pSocket, Packet* pPacket);
-	RemoteStatus ManageLogin(VSocket* pSocket, Packet* pPacket);
-	void AddUser(UserConnection* pUserConnection, UserAccount::AccountId& pAccountId);
-	bool RemoveUser(UserAccount::AccountId pAccountId, bool pDestroy);
+	void TryLogin(VSocket* socket, Packet* packet, int data_length);
+	RemoteStatus QueryLogin(const str& login_name, MessageLoginRequest* login_request, UserAccount::AccountId& account_id);
+	void Login(const str& user_name, UserAccount::AccountId account_id, VSocket* socket, Packet* packet);
+	RemoteStatus ManageLogin(VSocket* socket, Packet* packet);
+	void AddUser(UserConnection* user_connection, UserAccount::AccountId& account_id);
+	bool RemoveUser(UserAccount::AccountId account_id, bool destroy);
 	void KillDeadSockets();
-	void DropSocket(VSocket* pSocket);
-	UserConnection* GetUser(UserAccount::AccountId pAccountId);
+	void DropSocket(VSocket* socket);
+	UserConnection* GetUser(UserAccount::AccountId account_id);
 
-	bool SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus,
-		MessageStatus::InfoType pInfoType, str pMessage, Packet* pPacket);
+	bool SendStatusMessage(UserAccount::AccountId account_id, int32 integer, RemoteStatus status,
+		MessageStatus::InfoType info_type, str message, Packet* packet);
 
-	//void OnCloseSocket(VSocket* pSocket);
+	//void OnCloseSocket(VSocket* socket);
 
 	virtual MuxIoSocket* GetMuxIoSocket() const;
-	virtual void AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback);
+	virtual void AddFilterIoSocket(VIoSocket* socket, const DropFilterCallback& on_drop_callback);
 	virtual void RemoveAllFilterIoSockets();
-	virtual void KillIoSocket(VIoSocket* pSocket);
+	virtual void KillIoSocket(VIoSocket* socket);
 
 	typedef std::unordered_set<VSocket*, LEPRA_VOIDP_HASHER> SocketSet;
 	typedef SocketSet PendingSocketTable;
@@ -87,17 +84,17 @@ private:
 	typedef std::unordered_map<VSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;
 	typedef std::unordered_set<UserAccount::AccountId> AccountIdSet;
 
-	UserConnectionFactory* mUserConnectionFactory;
-	LoginListener* mLoginListener;
-	PendingSocketTable mPendingLoginTable;
-	LoggedInIdUserTable mLoggedInIdUserTable;
-	LoggedInNameUserTable mLoggedInNameUserTable;
-	SocketUserTable mSocketUserTable;
-	SocketTimeoutTable mSocketTimeoutTable;
-	SocketReceiveFilterTable mSocketReceiveFilterTable;
-	AccountIdSet mDropUserList;
+	UserConnectionFactory* user_connection_factory_;
+	LoginListener* login_listener_;
+	PendingSocketTable pending_login_table_;
+	LoggedInIdUserTable logged_in_id_user_table_;
+	LoggedInNameUserTable logged_in_name_user_table_;
+	SocketUserTable socket_user_table_;
+	SocketTimeoutTable socket_timeout_table_;
+	SocketReceiveFilterTable socket_receive_filter_table_;
+	AccountIdSet drop_user_list_;
 
-	Timer mKeepaliveTimer;
+	Timer keepalive_timer_;
 
 	logclass();
 };

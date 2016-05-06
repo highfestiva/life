@@ -5,57 +5,55 @@
 
 
 #include "pch.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Lepra/Include/LepraOS.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "../Life/LifeClient/GameClientSlaveManager.h"
-#include "../Life/LifeServer/MasterServerConnection.h"
-#include "../Life/LifeApplication.h"
-#include "../UiCure/Include/UiCure.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiLepra/Include/UiCore.h"
-#include "../UiLepra/Include/UiSoundManager.h"
-#include "../UiLepra/Include/UiTouchDrag.h"
-#include "../UiTbc/Include/UiTbc.h"
-#include "Bound.h"
-#include "BoundTicker.h"
-#include "RtVar.h"
-#include "Version.h"
+#include "../cure/include/runtimevariable.h"
+#include "../lepra/include/lepraos.h"
+#include "../lepra/include/systemmanager.h"
+#include "../life/lifeclient/gameclientslavemanager.h"
+#include "../life/lifeserver/masterserverconnection.h"
+#include "../life/lifeapplication.h"
+#include "../uicure/include/uicure.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uilepra/include/uicore.h"
+#include "../uilepra/include/uisoundmanager.h"
+#include "../uilepra/include/uitouchdrag.h"
+#include "../uitbc/include/uitbc.h"
+#include "bound.h"
+#include "boundticker.h"
+#include "rtvar.h"
+#include "version.h"
 
 
 
-namespace Bound
-{
+namespace Bound {
 
 
 
-class Bound: public Life::Application
-{
-	typedef Life::Application Parent;
+class Bound: public life::Application {
+	typedef life::Application Parent;
 public:
 	static Bound* GetApp();
 
-	Bound(const strutil::strvec& pArgumentList);
+	Bound(const strutil::strvec& argument_list);
 	virtual ~Bound();
 	virtual void Init();
 	virtual void Destroy();
 	virtual bool MainLoop();
 
-	virtual void Suspend(bool pHard);
-	virtual void Resume(bool pHard);
+	virtual void Suspend(bool hard);
+	virtual void Resume(bool hard);
 	void SavePurchase();
 
 	str GetTypeName() const;
 	str GetVersion() const;
-	Cure::ApplicationTicker* CreateTicker() const;
+	cure::ApplicationTicker* CreateTicker() const;
 
-	static Bound* mApp;
+	static Bound* app_;
 #ifdef LEPRA_TOUCH
-	AnimatedApp* mAnimatedApp;
-#endif // Touch
+	AnimatedApp* animated_app_;
+#endif // touch
 
-	UiCure::GameUiManager* mUiManager;
-	UiLepra::Touch::DragManager mDragManager;
+	UiCure::GameUiManager* ui_manager_;
+	uilepra::touch::DragManager drag_manager_;
 
 	logclass();
 };
@@ -66,187 +64,172 @@ public:
 
 
 
-LEPRA_RUN_APPLICATION(Bound::Bound, UiLepra::UiMain);
+LEPRA_RUN_APPLICATION(Bound::Bound, uilepra::UiMain);
 
 
 
-namespace Bound
-{
+namespace Bound {
 
 
 
-Bound* Bound::GetApp()
-{
-	return mApp;
+Bound* Bound::GetApp() {
+	return app_;
 }
 
 
 
-Bound::Bound(const strutil::strvec& pArgumentList):
-	Parent("Bound", pArgumentList),
-	mUiManager(0)
-{
-	mApp = this;
+Bound::Bound(const strutil::strvec& argument_list):
+	Parent("Bound", argument_list),
+	ui_manager_(0) {
+	app_ = this;
 }
 
-Bound::~Bound()
-{
+Bound::~Bound() {
 	Destroy();
 
 	UiCure::Shutdown();
-	UiTbc::Shutdown();
-	UiLepra::Shutdown();
+	uitbc::Shutdown();
+	uilepra::Shutdown();
 }
 
-void Bound::Init()
-{
-	UiLepra::Init();
-	UiTbc::Init();
+void Bound::Init() {
+	uilepra::Init();
+	uitbc::Init();
 	UiCure::Init();
 
 #if defined(LEPRA_IOS)
 	Thread::Sleep(3.0);	// Wait a bit longer so Pixel Doctrine splash is visible.
-	CGSize lSize = [UIScreen mainScreen].bounds.size;
-	int lScale = [[UIScreen mainScreen] scale];
-	const int lDisplayWidth = lSize.height * lScale;
-	const int lDisplayHeight = lSize.width * lScale;
-	bool lDisplayFullScreen = true;
+	CGSize __size = [UIScreen mainScreen].bounds.size;
+	int __scale = [[UIScreen mainScreen] scale];
+	const int display_width = __size.height * __scale;
+	const int display_height = __size.width * __scale;
+	bool display_full_screen = true;
 #else // Computer L&F
-	const int lDisplayWidth = 760;
-	const int lDisplayHeight = 524;
-	bool lDisplayFullScreen = false;
-#endif // Touch / Computer L&F
-	int lDisplayBpp = 0;
-	int lDisplayFrequency = 0;
-	double lPhysicalScreenSize = 24.0;	// An average computer's physical screen size (inches across).
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, "OpenGL");
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, "Fixed");
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
+	const int display_width = 760;
+	const int display_height = 524;
+	bool display_full_screen = false;
+#endif // touch / Computer L&F
+	int display_bpp = 0;
+	int display_frequency = 0;
+	double physical_screen_size = 24.0;	// An average computer's physical screen size (inches across).
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayRenderengine, "OpenGL");
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayWidth, display_width);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayHeight, display_height);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayBitsperpixel, display_bpp);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayFrequency, display_frequency);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayFullscreen, display_full_screen);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayOrientation, "Fixed");
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayPhysicalsize, physical_screen_size);
 
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, "OpenAL");
+	v_override(UiCure::GetSettings(), kRtvarUiSoundEngine, "OpenAL");
 
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLECLEAR, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLELIGHTS, true);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 20.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 20.0);
-	//v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "None");
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "Force:Volumes");
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 0.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 0.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.5);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.5);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.5);
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.1);
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_DOPPLER, 1.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_MUSICVOLUME, 0.6);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayEnablevsync, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnableclear, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DPixelshaders, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablelights, true);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnabletrilinearfiltering, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablebilinearfiltering, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablemipmapping, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DFov, 20.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DClipnear, 0.1);
+	v_override(UiCure::GetSettings(), kRtvarUi3DClipfar, 20.0);
+	//v_override(UiCure::GetSettings(), kRtvarUi3DShadows, "None");
+	v_override(UiCure::GetSettings(), kRtvarUi3DShadows, "Force:Volumes");
+	v_override(UiCure::GetSettings(), kRtvarUi3DClearred, 0.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DCleargreen, 0.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DClearblue, 0.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DAmbientred, 0.5);
+	v_override(UiCure::GetSettings(), kRtvarUi3DAmbientgreen, 0.5);
+	v_override(UiCure::GetSettings(), kRtvarUi3DAmbientblue, 0.5);
+	v_override(UiCure::GetSettings(), kRtvarUiSoundRolloff, 0.1);
+	v_override(UiCure::GetSettings(), kRtvarUiSoundDoppler, 1.0);
+	v_override(UiCure::GetSettings(), kRtvarUiSoundMusicvolume, 0.6);
 
-	v_override(UiCure::GetSettings(), RTVAR_CTRL_EMULATETOUCH, true);
+	v_override(UiCure::GetSettings(), kRtvarCtrlEmulatetouch, true);
 
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
 	// since that causes the client to start without defaults.
-	v_override(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
-	v_override(UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 4.0);
-	v_override(UiCure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 4.0);
+	v_override(UiCure::GetSettings(), kRtvarNetworkEnableopenserver, false);
+	v_override(UiCure::GetSettings(), kRtvarNetworkConnectTimeout, 4.0);
+	v_override(UiCure::GetSettings(), kRtvarNetworkLoginTimeout, 4.0);
 
-	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings(), &mDragManager);
+	ui_manager_ = new UiCure::GameUiManager(UiCure::GetSettings(), &drag_manager_);
 
 	Parent::Init();
 }
 
-void Bound::Destroy()
-{
+void Bound::Destroy() {
 	Parent::Destroy();
-	delete mUiManager;
-	mUiManager = 0;
+	delete ui_manager_;
+	ui_manager_ = 0;
 }
 
-bool Bound::MainLoop()
-{
+bool Bound::MainLoop() {
 #ifndef LEPRA_IOS
 	return Parent::MainLoop();
 #else // iOS
 	// iOS has uses timer callbacks instead of a main loop.
-	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
+	animated_app_ = [[AnimatedApp alloc] init:ui_manager_->GetCanvas()];
 	return true;
 #endif // !iOS/iOS
 }
 
 
 
-void Bound::Suspend(bool pHard)
-{
-	mGameTicker->Suspend(pHard);
-	mUiManager->GetSoundManager()->Suspend();
+void Bound::Suspend(bool hard) {
+	game_ticker_->Suspend(hard);
+	ui_manager_->GetSoundManager()->Suspend();
 #ifdef LEPRA_IOS
-	[mAnimatedApp stopTick];
+	[animated_app_ tick_];
 #endif // iOS
 }
 
-void Bound::Resume(bool pHard)
-{
+void Bound::Resume(bool hard) {
 #ifdef LEPRA_IOS
-	[mAnimatedApp startTick];
+	[animated_app_ tick_];
 #endif // iOS
-	mUiManager->GetSoundManager()->Resume();
-	mGameTicker->Resume(pHard);
+	ui_manager_->GetSoundManager()->Resume();
+	game_ticker_->Resume(hard);
 }
 
-void Bound::SavePurchase()
-{
-	Life::GameClientMasterTicker* lTicker = (Life::GameClientMasterTicker*)mGameTicker;
-	Life::GameClientSlaveManager* lManager = lTicker->GetSlave(0);
-	v_set(lManager->GetVariableScope(), RTVAR_GAME_LEVELSHAPEALTERNATE, true);
-	v_set(lManager->GetVariableScope(), RTVAR_GAME_RUNADS, false);
-	lTicker->SaveRtvars(mUiManager->GetVariableScope());
+void Bound::SavePurchase() {
+	life::GameClientMasterTicker* ticker = (life::GameClientMasterTicker*)game_ticker_;
+	life::GameClientSlaveManager* manager = ticker->GetSlave(0);
+	v_set(manager->GetVariableScope(), kRtvarGameLevelshapealternate, true);
+	v_set(manager->GetVariableScope(), kRtvarGameRunads, false);
+	ticker->SaveRtvars(ui_manager_->GetVariableScope());
 }
 
-void Bound__ShowAd()
-{
+void Bound__ShowAd() {
 #ifdef LEPRA_IOS
-        [Bound::GetApp()->mAnimatedApp showAd];
+        [Bound::GetApp()->animated_app_ ad_];
 #endif // iOS
 }
 
-void Bound__Buy()
-{
+void Bound__Buy() {
 #ifdef LEPRA_IOS
-	[Bound::GetApp()->mAnimatedApp startPurchase:@"BoundFullInAppPurchase"];
+	[Bound::GetApp()->animated_app_ startPurchase:@"BoundFullInAppPurchase"];
 #endif // iOS
 }
 
 
 
-str Bound::GetTypeName() const
-{
+str Bound::GetTypeName() const {
 	return "Client";
 }
 
-str Bound::GetVersion() const
-{
-	return GAME_VERSION;
+str Bound::GetVersion() const {
+	return kGameVersion;
 }
 
-Cure::ApplicationTicker* Bound::CreateTicker() const
-{
-	return new BoundTicker(mUiManager, mResourceManager, 200, 5, 5);
+cure::ApplicationTicker* Bound::CreateTicker() const {
+	return new BoundTicker(ui_manager_, resource_manager_, 200, 5, 5);
 }
 
 
 
-Bound* Bound::mApp;
-loginstance(GAME, Bound);
+Bound* Bound::app_;
+loginstance(kGame, Bound);
 
 
 

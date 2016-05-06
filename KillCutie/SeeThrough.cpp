@@ -5,115 +5,98 @@
 
 
 #include "pch.h"
-#include "SeeThrough.h"
-#include "../Cure/Include/CppContextObject.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Lepra/Include/CollisionDetector3D.h"
-#include "../Tbc/Include/PhysicsTrigger.h"
-#include "../UiCure/Include/UiCppContextObject.h"
+#include "seethrough.h"
+#include "../cure/include/cppcontextobject.h"
+#include "../cure/include/contextmanager.h"
+#include "../lepra/include/collisiondetector3d.h"
+#include "../tbc/include/physicstrigger.h"
+#include "../uicure/include/uicppcontextobject.h"
 
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
-SeeThrough::SeeThrough(Cure::ContextManager* pManager, const Game* pGame):
-	Parent(pManager->GetGameManager()->GetResourceManager(), "SeeThrough", pGame->GetUiManager()),
-	mGame(pGame),
-	mTag(0),
-	mOpacity(1)
-{
-	pManager->AddLocalObject(this);
+SeeThrough::SeeThrough(cure::ContextManager* manager, const Game* game):
+	Parent(manager->GetGameManager()->GetResourceManager(), "SeeThrough", game->GetUiManager()),
+	game_(game),
+	tag_(0),
+	opacity_(1) {
+	manager->AddLocalObject(this);
 	GetManager()->EnableTickCallback(this);
 }
 
-SeeThrough::~SeeThrough()
-{
+SeeThrough::~SeeThrough() {
 }
 
 
 
-void SeeThrough::SetTagIndex(int pIndex)
-{
-	Cure::CppContextObject* lParent = (Cure::CppContextObject*)mParent;
-	const Tag* lTag = &lParent->GetClass()->GetTag(pIndex);
-	if (lTag->mBodyIndexList.size() == 1 && lTag->mEngineIndexList.size() == 0 &&
-		lTag->mFloatValueList.size() == 8 && lTag->mMeshIndexList.size() == 1 &&
-		lTag->mStringValueList.size() == 0)
-	{
-		mTag = lTag;
-	}
-	else
-	{
-		mLog.Error("Badly configured see-through tag!");
+void SeeThrough::SetTagIndex(int index) {
+	cure::CppContextObject* parent = (cure::CppContextObject*)parent_;
+	const Tag* tag = &parent->GetClass()->GetTag(index);
+	if (tag->body_index_list_.size() == 1 && tag->engine_index_list_.size() == 0 &&
+		tag->float_value_list_.size() == 8 && tag->mesh_index_list_.size() == 1 &&
+		tag->string_value_list_.size() == 0) {
+		tag_ = tag;
+	} else {
+		log_.Error("Badly configured see-through tag!");
 		deb_assert(false);
 	}
 }
 
-void SeeThrough::OnTick()
-{
-	deb_assert(mTag);
-	if (!mTag)
-	{
+void SeeThrough::OnTick() {
+	deb_assert(tag_);
+	if (!tag_) {
 		return;
 	}
-	const Cure::ContextObject* lTarget = mGame->GetP1();
-	if (!lTarget || !lTarget->IsLoaded())
-	{
+	const cure::ContextObject* target = game_->GetP1();
+	if (!target || !target->IsLoaded()) {
 		return;
 	}
 
-	enum FloatValues
-	{
-		MAX_TRANSPARENCY = 0,
-		MAX_OPACITY,
-		XO,
-		YO,
-		ZO,
-		XS,
-		YS,
-		ZS,
+	enum FloatValues {
+		kMaxTransparency = 0,
+		kMaxOpacity,
+		kXo,
+		kYo,
+		kZo,
+		kXs,
+		kYs,
+		kZs,
 	};
-	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
-	Tbc::ChunkyPhysics* lPhysics = mParent->GetPhysics();
-	const int lBoneIndex = mTag->mBodyIndexList[0];
-	const vec3 lBonePosition = lPhysics->GetBoneTransformation(lBoneIndex).GetPosition();
-	const vec3 lTargetPosition = lTarget->GetPosition();
-	const vec3 lHalfSize(mTag->mFloatValueList[XS]/2, mTag->mFloatValueList[YS]/2, mTag->mFloatValueList[ZS]/2);
-	AABB<float> lAABB;
-	lAABB.SetPosition(lBonePosition + vec3(mTag->mFloatValueList[XO], mTag->mFloatValueList[YO], mTag->mFloatValueList[ZO]));
-	lAABB.SetSize(lHalfSize);
-	if (CollisionDetector3D<float>::IsAABBEnclosingPoint(lAABB, lTargetPosition))
-	{
-		mOpacity = Math::Lerp(mOpacity, mTag->mFloatValueList[MAX_TRANSPARENCY], 0.05f);
-	}
-	else
-	{
-		mOpacity = Math::Lerp(mOpacity, mTag->mFloatValueList[MAX_OPACITY], 0.05f);
-		if (mOpacity >= mTag->mFloatValueList[MAX_OPACITY]*0.95f)
-		{
-			mOpacity = mTag->mFloatValueList[MAX_OPACITY];
+	UiCure::CppContextObject* parent = (UiCure::CppContextObject*)parent_;
+	tbc::ChunkyPhysics* physics = parent_->GetPhysics();
+	const int bone_index = tag_->body_index_list_[0];
+	const vec3 bone_position = physics->GetBoneTransformation(bone_index).GetPosition();
+	const vec3 target_position = target->GetPosition();
+	const vec3 half_size(tag_->float_value_list_[kXs]/2, tag_->float_value_list_[kYs]/2, tag_->float_value_list_[kZs]/2);
+	AABB<float> aabb;
+	aabb.SetPosition(bone_position + vec3(tag_->float_value_list_[kXo], tag_->float_value_list_[kYo], tag_->float_value_list_[kZo]));
+	aabb.SetSize(half_size);
+	if (CollisionDetector3D<float>::IsAABBEnclosingPoint(aabb, target_position)) {
+		opacity_ = Math::Lerp(opacity_, tag_->float_value_list_[kMaxTransparency], 0.05f);
+	} else {
+		opacity_ = Math::Lerp(opacity_, tag_->float_value_list_[kMaxOpacity], 0.05f);
+		if (opacity_ >= tag_->float_value_list_[kMaxOpacity]*0.95f) {
+			opacity_ = tag_->float_value_list_[kMaxOpacity];
 		}
 	}
 
-	UiCure::UserGeometryReferenceResource* lMesh = lParent->GetMeshResource(mTag->mMeshIndexList[0]);
-	if (lMesh && lMesh->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		const float lAlpha = lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha;
-		lMesh->GetRamData()->GetBasicMaterialSettings().mAlpha = mOpacity;
-		if ((lAlpha == 1 || mOpacity == 1) && lAlpha != mOpacity)
-		{
-			lParent->EnablePixelShader(false);
-			lParent->UpdateMaterial(mTag->mMeshIndexList[0]);
+	UiCure::UserGeometryReferenceResource* mesh = parent->GetMeshResource(tag_->mesh_index_list_[0]);
+	if (mesh && mesh->GetLoadState() == cure::kResourceLoadComplete) {
+		const float alpha = mesh->GetRamData()->GetBasicMaterialSettings().alpha_;
+		mesh->GetRamData()->GetBasicMaterialSettings().alpha_ = opacity_;
+		if ((alpha == 1 || opacity_ == 1) && alpha != opacity_) {
+			parent->EnablePixelShader(false);
+			parent->UpdateMaterial(tag_->mesh_index_list_[0]);
 		}
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, SeeThrough);
+loginstance(kGameContextCpp, SeeThrough);
 
 
 

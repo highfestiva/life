@@ -5,8 +5,8 @@
 	NOTES:
 
 	The vegetation patch is a group of objects sharing the same
-	geometry. Thus, a tree can be duplicated into a hundred copies 
-	of the same tree-mesh, and stored as only one single geometry 
+	geometry. Thus, a tree can be duplicated into a hundred copies
+	of the same tree-mesh, and stored as only one single geometry
 	instance.
 
 	This increases rendering performance in cases where thousand of
@@ -20,32 +20,30 @@
 
 
 
-#include "../../Tbc/Include/GeometryBase.h"
-#include "../Include/UiTbc.h"
+#include "../../tbc/include/geometrybase.h"
+#include "../include/uitbc.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class GeometryBatch: public Tbc::GeometryBase
-{
+class GeometryBatch: public tbc::GeometryBase {
 public:
 
-	GeometryBatch(Tbc::GeometryBase* pGeometry);
+	GeometryBatch(tbc::GeometryBase* geometry);
 	virtual ~GeometryBatch();
 
 	// Creates new instances.
-	void SetInstances(const xform* pDisplacement, const vec3& pRootOffset,
-		int pNumInstances, uint32 pRandomSeed,
-		float pXScaleMin, float pXScaleMax,
-		float pYScaleMin, float pYScaleMax,
-		float pZScaleMin, float pZScaleMax);
+	void SetInstances(const xform* displacement, const vec3& root_offset,
+		int num_instances, uint32 random_seed,
+		float x_scale_min, float x_scale_max,
+		float y_scale_min, float y_scale_max,
+		float z_scale_min, float z_scale_max);
 	void ClearAllInstances();
 
-	virtual void SetGeometryVolatility(GeometryVolatility pVolatility);
+	virtual void SetGeometryVolatility(GeometryVolatility volatility);
 	virtual GeometryVolatility GetGeometryVolatility() const;
 
 	virtual ColorFormat GetColorFormat() const;
@@ -58,23 +56,23 @@ public:
 	virtual unsigned int GetUVSetCount()    const;
 
 	virtual float*         GetVertexData() const;
-	virtual float*         GetUVData(unsigned int pUVSet) const;
+	virtual float*         GetUVData(unsigned int uv_set) const;
 	virtual vtx_idx_t*     GetIndexData() const;
-	virtual void           SetIndexData(vtx_idx_t* pIndexData, unsigned pIndexCount, unsigned pMaxIndexCount);
+	virtual void           SetIndexData(vtx_idx_t* index_data, unsigned index_count, unsigned max_index_count);
 	virtual uint8*         GetColorData() const;
 
 protected:
 private:
-	float* mVertex;
-	float** mUV;
-	vtx_idx_t* mIndex;
-	uint8* mColor;
-	unsigned int mVertexCount;
-	unsigned int mIndexCount;
-	unsigned int mMaxIndexCount;
-	unsigned int mUVSetCount;
+	float* vertex_;
+	float** uv_;
+	vtx_idx_t* index_;
+	uint8* color_;
+	unsigned int vertex_count_;
+	unsigned int index_count_;
+	unsigned int max_index_count_;
+	unsigned int uv_set_count_;
 
-	Tbc::GeometryBase* mGeometryInstance;
+	tbc::GeometryBase* geometry_instance_;
 };
 
 

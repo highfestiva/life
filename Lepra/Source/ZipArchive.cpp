@@ -3,477 +3,375 @@
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
-#include "../Include/DiskFile.h"
-#include "../Include/Log.h"
-#include "../Include/Path.h"
-#include "../Include/ZipArchive.h"
+#include "../include/diskfile.h"
+#include "../include/log.h"
+#include "../include/path.h"
+#include "../include/ziparchive.h"
 #include <stdio.h>
 
-namespace Lepra
-{
+namespace lepra {
 
 ZipArchive::ZipArchive() :
-	mArchiveName(""),
-	mIOType(READ_ONLY),
-	mUnzipFile(0),
-	mZipFile(0),
-	mFileSize(0)
-{
+	archive_name_(""),
+	io_type_(kReadOnly),
+	unzip_file_(0),
+	zip_file_(0),
+	file_size_(0) {
 }
 
-ZipArchive::~ZipArchive()
-{
+ZipArchive::~ZipArchive() {
 	CloseArchive();
 }
 
-IOError ZipArchive::OpenArchive(const str& pArchiveFileName, IOType pIOType)
-{
+IOError ZipArchive::OpenArchive(const str& archive_file_name, IOType io_type) {
 	CloseArchive();
 
-	mArchiveName = pArchiveFileName;
+	archive_name_ = archive_file_name;
 
-	IOError lIOError = IO_FILE_NOT_FOUND;
-	bool lCheckZipFile = false;
+	IOError io_error = kIoFileNotFound;
+	bool check_zip_file = false;
 
-	mIOType = pIOType;
-	switch(mIOType)
-	{
-		case READ_ONLY:
-		{
-			mUnzipFile = ::unzOpen64(pArchiveFileName.c_str());
-			if (mUnzipFile != 0)
-			{
-				lIOError = IO_OK;
+	io_type_ = io_type;
+	switch(io_type_) {
+		case kReadOnly: {
+			unzip_file_ = ::unzOpen64(archive_file_name.c_str());
+			if (unzip_file_ != 0) {
+				io_error = kIoOk;
 			}
-		}
-		break;
-		case WRITE_ONLY:
-		{
-			mZipFile = ::zipOpen(pArchiveFileName.c_str(), APPEND_STATUS_CREATE);
-			lCheckZipFile = true;
-		}
-		break;
-		case WRITE_APPEND:
-		{
-			if (DiskFile::Exists(pArchiveFileName) == true)
-				mZipFile = ::zipOpen(pArchiveFileName.c_str(), APPEND_STATUS_ADDINZIP);
-			lCheckZipFile = true;
-		}
-		break;
-		case INSERT_ONLY:
-		{
-		}
-		break;
+		} break;
+		case kWriteOnly: {
+			zip_file_ = ::zipOpen(archive_file_name.c_str(), APPEND_STATUS_CREATE);
+			check_zip_file = true;
+		} break;
+		case kWriteAppend: {
+			if (DiskFile::Exists(archive_file_name) == true)
+				zip_file_ = ::zipOpen(archive_file_name.c_str(), APPEND_STATUS_ADDINZIP);
+			check_zip_file = true;
+		} break;
+		case kInsertOnly: {
+		} break;
 	}
 
-	if (lCheckZipFile == true)
-	{
-		if (mZipFile != 0)
-		{
-			lIOError = IO_OK;
-		}
-		else
-		{
-			lIOError = IO_FILE_CREATION_FAILED;
+	if (check_zip_file == true) {
+		if (zip_file_ != 0) {
+			io_error = kIoOk;
+		} else {
+			io_error = kIoFileCreationFailed;
 		}
 	}
 
-	return lIOError;
+	return io_error;
 }
 
-void ZipArchive::CloseArchive()
-{
-	switch(mIOType)
-	{
-		case READ_ONLY:
-		{
-			if (mUnzipFile != 0)
-			{
-				::unzClose(mUnzipFile);
-				mUnzipFile = 0;
+void ZipArchive::CloseArchive() {
+	switch(io_type_) {
+		case kReadOnly: {
+			if (unzip_file_ != 0) {
+				::unzClose(unzip_file_);
+				unzip_file_ = 0;
 			}
-		}
-		break;
-		case WRITE_ONLY:
-		case WRITE_APPEND:
-		{
-			if (mZipFile != 0)
-			{
-				::zipClose(mZipFile, "");
-				mZipFile = 0;
+		} break;
+		case kWriteOnly:
+		case kWriteAppend: {
+			if (zip_file_ != 0) {
+				::zipClose(zip_file_, "");
+				zip_file_ = 0;
 			}
-		}
-		break;
-		case INSERT_ONLY:
-		{
-		}
-		break;
+		} break;
+		case kInsertOnly: {
+		} break;
 	}
 }
 
-void ZipArchive::CloseAndRemoveArchive()
-{
+void ZipArchive::CloseAndRemoveArchive() {
 	CloseArchive();
 #ifdef LEPRA_MSVC
-	::_wremove(wstrutil::Encode(mArchiveName).c_str());
+	::_wremove(wstrutil::Encode(archive_name_).c_str());
 #else
 #ifdef LEPRA_POSIX
-	::remove(mArchiveName.c_str());
+	::remove(archive_name_.c_str());
 #else
 #error "ZipArchive::CloseAndRemoveArchive() is not implemented on this platform!"
 #endif
 #endif
 }
 
-int ZipArchive::GetFileCount()
-{
-	int lCount = 0;
+int ZipArchive::GetFileCount() {
+	int count = 0;
 
-	if (mIOType == READ_ONLY && mUnzipFile != 0)
-	{
-		unz_global_info64 lUnzGlobalInfo;
-		::unzGetGlobalInfo64(mUnzipFile, &lUnzGlobalInfo);
-		lCount = (int)lUnzGlobalInfo.number_entry;
+	if (io_type_ == kReadOnly && unzip_file_ != 0) {
+		unz_global_info64 unz_global_info;
+		::unzGetGlobalInfo64(unzip_file_, &unz_global_info);
+		count = (int)unz_global_info.number_entry;
 	}
 
-	return lCount;
+	return count;
 }
 
-IOError ZipArchive::InsertArchive(const str& /*pArchiveFileName*/)
-{
-	return IO_OK;
+IOError ZipArchive::InsertArchive(const str& /*archive_file_name*/) {
+	return kIoOk;
 }
 
-str ZipArchive::FileFindFirst()
-{
-	str lFileName;
+str ZipArchive::FileFindFirst() {
+	str _file_name;
 
-	if (mIOType == READ_ONLY && mUnzipFile != 0 && ::unzGoToFirstFile(mUnzipFile) == UNZ_OK)
-	{
-		unz_file_info64 lFileInfo;
-		char lCStrFileName[1024];
-		::unzGetCurrentFileInfo64(mUnzipFile, &lFileInfo, lCStrFileName, 1024, 0, 0, 0, 0);
-		lFileName = str(lCStrFileName);
+	if (io_type_ == kReadOnly && unzip_file_ != 0 && ::unzGoToFirstFile(unzip_file_) == UNZ_OK) {
+		unz_file_info64 file_info;
+		char c_str_file_name[1024];
+		::unzGetCurrentFileInfo64(unzip_file_, &file_info, c_str_file_name, 1024, 0, 0, 0, 0);
+		_file_name = str(c_str_file_name);
 	}
 
-	return lFileName;
+	return _file_name;
 }
 
-str ZipArchive::FileFindNext()
-{
-	str lFileName;
+str ZipArchive::FileFindNext() {
+	str _file_name;
 
-	if (mIOType == READ_ONLY && mUnzipFile != 0 && ::unzGoToNextFile(mUnzipFile) == UNZ_OK)
-	{
-		unz_file_info64 lFileInfo;
-		char lCStrFileName[1024];
-		::unzGetCurrentFileInfo64(mUnzipFile, &lFileInfo, lCStrFileName, 1024, 0, 0, 0, 0);
-		lFileName = str(lCStrFileName);
+	if (io_type_ == kReadOnly && unzip_file_ != 0 && ::unzGoToNextFile(unzip_file_) == UNZ_OK) {
+		unz_file_info64 file_info;
+		char c_str_file_name[1024];
+		::unzGetCurrentFileInfo64(unzip_file_, &file_info, c_str_file_name, 1024, 0, 0, 0, 0);
+		_file_name = str(c_str_file_name);
 	}
 
-	return lFileName;
+	return _file_name;
 }
 
-bool ZipArchive::FileOpen(const str& pFileName)
-{
-	bool lOK = false;
+bool ZipArchive::FileOpen(const str& file_name) {
+	bool ok = false;
 
-	switch(mIOType)
-	{
-		case READ_ONLY:
-		{
-			if (mUnzipFile != 0)
-			{
-				if (::unzLocateFile(mUnzipFile, pFileName.c_str(), 0) == UNZ_OK)
-				{
-					lOK = (::unzOpenCurrentFile(mUnzipFile) == UNZ_OK);
-					if (lOK)
-					{
-						mFileSize = FileSize();
+	switch(io_type_) {
+		case kReadOnly: {
+			if (unzip_file_ != 0) {
+				if (::unzLocateFile(unzip_file_, file_name.c_str(), 0) == UNZ_OK) {
+					ok = (::unzOpenCurrentFile(unzip_file_) == UNZ_OK);
+					if (ok) {
+						file_size_ = FileSize();
 					}
 				}
 			}
-		}
-		break;
-		case WRITE_ONLY:
-		case WRITE_APPEND:
-		{
-			if (mZipFile != 0)
-			{
-				lOK = (::zipOpenNewFileInZip64(mZipFile, pFileName.c_str(), 0, 0, 0, 0, 0, 0, Z_DEFLATED, Z_DEFAULT_COMPRESSION, 0) == ZIP_OK);
+		} break;
+		case kWriteOnly:
+		case kWriteAppend: {
+			if (zip_file_ != 0) {
+				ok = (::zipOpenNewFileInZip64(zip_file_, file_name.c_str(), 0, 0, 0, 0, 0, 0, Z_DEFLATED, Z_DEFAULT_COMPRESSION, 0) == ZIP_OK);
 
-				str lTempName;
-				str lDirectory;
-				lDirectory = Path::GetDirectory(mArchiveName);
+				str temp_name;
+				str directory;
+				directory = Path::GetDirectory(archive_name_);
 
-				if (lOK)
-				{
-					lTempName = DiskFile::GenerateUniqueFileName(lDirectory);
-					lOK = mOutFile.Open(lTempName, DiskFile::MODE_WRITE, false, Endian::TYPE_LITTLE_ENDIAN);
+				if (ok) {
+					temp_name = DiskFile::GenerateUniqueFileName(directory);
+					ok = out_file_.Open(temp_name, DiskFile::kModeWrite, false, Endian::kTypeLittleEndian);
 
-					if (lOK == false)
-					{
-						::zipCloseFileInZip(mZipFile);
+					if (ok == false) {
+						::zipCloseFileInZip(zip_file_);
 					}
 				}
 			}
-		}
-		break;
-		case INSERT_ONLY:
-		{
-		}
-		break;
+		} break;
+		case kInsertOnly: {
+		} break;
 	}
 
-	return lOK;
+	return ok;
 }
 
-void ZipArchive::FileClose()
-{
-	switch(mIOType)
-	{
-		case READ_ONLY:
-		{
-			if (mUnzipFile != 0)
-			{
-				::unzCloseCurrentFile(mUnzipFile);
-				mFileSize = 0;
+void ZipArchive::FileClose() {
+	switch(io_type_) {
+		case kReadOnly: {
+			if (unzip_file_ != 0) {
+				::unzCloseCurrentFile(unzip_file_);
+				file_size_ = 0;
 			}
-		}
-		break;
-		case WRITE_ONLY:
-		case WRITE_APPEND:
-		{
-			if (mZipFile != 0)
-			{
-				if (mOutFile.IsOpen() == true)
-				{
-					str lTempFile = mOutFile.GetFullName();
-					int64 lSize = mOutFile.GetSize();
-					mOutFile.Close();
-					if (mOutFile.Open(lTempFile, DiskFile::MODE_READ, false, Endian::TYPE_LITTLE_ENDIAN) == false)
-					{
-						mLog.Error("Failed to add file to archive.");
-					}
-					else
-					{
+		} break;
+		case kWriteOnly:
+		case kWriteAppend: {
+			if (zip_file_ != 0) {
+				if (out_file_.IsOpen() == true) {
+					str temp_file = out_file_.GetFullName();
+					int64 _size = out_file_.GetSize();
+					out_file_.Close();
+					if (out_file_.Open(temp_file, DiskFile::kModeRead, false, Endian::kTypeLittleEndian) == false) {
+						log_.Error("Failed to add file to archive.");
+					} else {
 						// Copy temp file to the zip archive.
-						uint8 lBuf[1024];
-						int64 lSteps = lSize / 1024;
-						int64 lRest = lSize % 1024;
+						uint8 buf[1024];
+						int64 steps = _size / 1024;
+						int64 rest = _size % 1024;
 						int64 i;
 
-						for (i = 0; i < lSteps; i++)
-						{
-							mOutFile.ReadData(lBuf, 1024);
-							::zipWriteInFileInZip(mZipFile, lBuf, 1024);
+						for (i = 0; i < steps; i++) {
+							out_file_.ReadData(buf, 1024);
+							::zipWriteInFileInZip(zip_file_, buf, 1024);
 						}
 
-						if (lRest > 0)
-						{
-							mOutFile.ReadData(lBuf, (unsigned long)lRest);
-							::zipWriteInFileInZip(mZipFile, lBuf, (unsigned long)lRest);
+						if (rest > 0) {
+							out_file_.ReadData(buf, (unsigned long)rest);
+							::zipWriteInFileInZip(zip_file_, buf, (unsigned long)rest);
 						}
 
-						mOutFile.Close();
-						DiskFile::Delete(lTempFile);
+						out_file_.Close();
+						DiskFile::Delete(temp_file);
 					}
 
-					::zipCloseFileInZip(mZipFile);
+					::zipCloseFileInZip(zip_file_);
 				}
 			}
-		}
-		break;
-		case INSERT_ONLY:
-		{
-		}
-		break;
+		} break;
+		case kInsertOnly: {
+		} break;
 	}
 }
 
-bool ZipArchive::FileExist(const str& pFileName)
-{
-	bool lExist = false;
+bool ZipArchive::FileExist(const str& file_name) {
+	bool exist = false;
 
-	if (mIOType == READ_ONLY && mUnzipFile != 0)
-	{
-		lExist = (::unzLocateFile(mUnzipFile, pFileName.c_str(), 0) == UNZ_OK);
+	if (io_type_ == kReadOnly && unzip_file_ != 0) {
+		exist = (::unzLocateFile(unzip_file_, file_name.c_str(), 0) == UNZ_OK);
 	}
 
-	return lExist;
+	return exist;
 }
 
-IOError ZipArchive::FileRead(void* pDest, int pSize)
-{
-	IOError lErr = IO_ERROR_READING_FROM_STREAM;
+IOError ZipArchive::FileRead(void* dest, int size) {
+	IOError err = kIoErrorReadingFromStream;
 
-	if (mIOType == READ_ONLY)
-	{
-		if (mUnzipFile != 0)
-		{
-			int lSize = ::unzReadCurrentFile(mUnzipFile, pDest, pSize);
-			if (lSize > 0)
-			{
-				lErr = IO_OK;
+	if (io_type_ == kReadOnly) {
+		if (unzip_file_ != 0) {
+			int _size = ::unzReadCurrentFile(unzip_file_, dest, size);
+			if (_size > 0) {
+				err = kIoOk;
+			} else if(_size == 0) {
+				err = kIoNoDataAvailable;
 			}
-			else if(lSize == 0)
-			{
-				lErr = IO_NO_DATA_AVAILABLE;
-			}
-		}
-		else
-		{
-			lErr = IO_STREAM_NOT_OPEN;
+		} else {
+			err = kIoStreamNotOpen;
 		}
 	}
 
-	return lErr;
+	return err;
 }
 
-IOError ZipArchive::FileWrite(void* pSource, int pSize)
-{
-	IOError lErr = IO_ERROR_WRITING_TO_STREAM;
+IOError ZipArchive::FileWrite(void* source, int size) {
+	IOError err = kIoErrorWritingToStream;
 
-	if (mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
-	{
-		mOutFile.WriteData(pSource, pSize);
-/*		if (::zipWriteInFileInZip(mZipFile, pSource, pSize) == ZIP_OK)
-		{
-			lErr = IO_OK;
+	if (io_type_ == kWriteOnly || io_type_ == kWriteAppend) {
+		out_file_.WriteData(source, size);
+/*		if (::zipWriteInFileInZip(zip_file_, source, size) == ZIP_OK) {
+			err = kIoOk;
 		}
 */
 	}
 
-	return lErr;
+	return err;
 }
 
-int64 ZipArchive::FileSize()
-{
-	int64 lSize = 0;
+int64 ZipArchive::FileSize() {
+	int64 _size = 0;
 
-	if (mIOType == READ_ONLY && mUnzipFile != 0)
-	{
-		unz_file_info64 lFileInfo;
-		if (::unzGetCurrentFileInfo64(mUnzipFile, &lFileInfo, 0, 0, 0, 0, 0, 0) == UNZ_OK)
-		{
-			lSize = (int64)lFileInfo.uncompressed_size;
+	if (io_type_ == kReadOnly && unzip_file_ != 0) {
+		unz_file_info64 file_info;
+		if (::unzGetCurrentFileInfo64(unzip_file_, &file_info, 0, 0, 0, 0, 0, 0) == UNZ_OK) {
+			_size = (int64)file_info.uncompressed_size;
 		}
-	}
-	else if(mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
-	{
-		lSize = mOutFile.GetSize();
+	} else if(io_type_ == kWriteOnly || io_type_ == kWriteAppend) {
+		_size = out_file_.GetSize();
 	}
 
-	return lSize;
+	return _size;
 }
 
-void ZipArchive::FileSeek(int64 pOffset, FileOrigin pOrigin)
-{
-	if (mIOType == READ_ONLY && mUnzipFile != 0 && mFileSize != 0)
-	{
-		int64 lOffset = pOffset;
-		switch(pOrigin)
-		{
-		case FSEEK_SET:
-			lOffset = pOffset;
+void ZipArchive::FileSeek(int64 offset, FileOrigin origin) {
+	if (io_type_ == kReadOnly && unzip_file_ != 0 && file_size_ != 0) {
+		int64 _offset = offset;
+		switch(origin) {
+		case kFseekSet:
+			_offset = offset;
 			break;
-		case FSEEK_CUR:
-			lOffset = ::unztell64(mUnzipFile) + pOffset;
+		case kFseekCur:
+			_offset = ::unztell64(unzip_file_) + offset;
 			break;
-		case FSEEK_END:
-			lOffset = (uLong)(mFileSize + pOffset - 1);
+		case kFseekEnd:
+			_offset = (uLong)(file_size_ + offset - 1);
 			break;
 		}
 
-		::unzCloseCurrentFile(mUnzipFile);
-		::unzOpenCurrentFile(mUnzipFile);
+		::unzCloseCurrentFile(unzip_file_);
+		::unzOpenCurrentFile(unzip_file_);
 
-		// Now skip lOffset bytes of data.
-		uint8 lBuf[1024];
-		int64 lSteps = lOffset / 1024;
-		int64 lRest  = lOffset % 1024;
+		// Now skip _offset bytes of data.
+		uint8 buf[1024];
+		int64 steps = _offset / 1024;
+		int64 rest  = _offset % 1024;
 
 		int64 i;
-		for (i = 0; i < lSteps; i++)
-		{
-			::unzReadCurrentFile(mUnzipFile, lBuf, 1024);
+		for (i = 0; i < steps; i++) {
+			::unzReadCurrentFile(unzip_file_, buf, 1024);
 		}
 
-		if (lRest > 0)
-		{
-			::unzReadCurrentFile(mUnzipFile, lBuf, (uLong)lRest);
+		if (rest > 0) {
+			::unzReadCurrentFile(unzip_file_, buf, (uLong)rest);
 		}
-	}
-	else if(mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
-	{
-		switch(pOrigin)
-		{
+	} else if(io_type_ == kWriteOnly || io_type_ == kWriteAppend) {
+		switch(origin) {
 		case SEEK_SET:
-			mOutFile.Seek(pOffset, File::FSEEK_SET);
+			out_file_.Seek(offset, File::kFseekSet);
 			break;
 		case SEEK_CUR:
-			mOutFile.Seek(pOffset, File::FSEEK_CUR);
+			out_file_.Seek(offset, File::kFseekCur);
 			break;
 		case SEEK_END:
-			mOutFile.Seek(pOffset, File::FSEEK_END);
+			out_file_.Seek(offset, File::kFseekEnd);
 			break;
 		}
 	}
 }
 
-bool ZipArchive::ExtractFile(const str& pFileName, 
-			     const str& pDestFileName,
-			     int pBufferSize, SizeUnit pUnit)
-{
-	if (mIOType != READ_ONLY)
-	{
+bool ZipArchive::ExtractFile(const str& file_name,
+			     const str& dest_file_name,
+			     int buffer_size, SizeUnit unit) {
+	if (io_type_ != kReadOnly) {
 		return false;
 	}
 
-	bool lOK = FileOpen(pFileName);
+	bool ok = FileOpen(file_name);
 
-	if (lOK == true)
-	{
-		DiskFile lFile;
-		if (lFile.Open(pDestFileName, DiskFile::MODE_WRITE, false, Endian::TYPE_LITTLE_ENDIAN) == true)
-		{
-			int lBufferSize = (int)pBufferSize * (int)pUnit;
-			int64 lDataSize = FileSize();
-			uint8* lBuffer = new uint8[(unsigned)lBufferSize];
+	if (ok == true) {
+		DiskFile file;
+		if (file.Open(dest_file_name, DiskFile::kModeWrite, false, Endian::kTypeLittleEndian) == true) {
+			int _buffer_size = (int)buffer_size * (int)unit;
+			int64 data_size = FileSize();
+			uint8* buffer = new uint8[(unsigned)_buffer_size];
 
-			int64 lNumChunks = lDataSize / lBufferSize;
-			int lRest = (int)(lDataSize % (int64)lBufferSize);
+			int64 num_chunks = data_size / _buffer_size;
+			int rest = (int)(data_size % (int64)_buffer_size);
 
-			for (int64 i = 0; i < lNumChunks; i++)
-			{
-				FileRead(lBuffer, lBufferSize);
-				lFile.WriteData(lBuffer, lBufferSize);
+			for (int64 i = 0; i < num_chunks; i++) {
+				FileRead(buffer, _buffer_size);
+				file.WriteData(buffer, _buffer_size);
 			}
 
-			if (lRest != 0)
-			{
-				FileRead(lBuffer, lRest);
-				lFile.WriteData(lBuffer, lRest);
+			if (rest != 0) {
+				FileRead(buffer, rest);
+				file.WriteData(buffer, rest);
 			}
 
 			FileClose();
-			lFile.Close();
+			file.Close();
 
-			delete[] lBuffer;
+			delete[] buffer;
 
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
-	}
-	else
-	{
+	} else {
 		return false;
 	}
 }
 
-loginstance(GENERAL_RESOURCES, ZipArchive);
+loginstance(kGeneralResources, ZipArchive);
 
 }

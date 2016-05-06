@@ -5,39 +5,33 @@
 
 
 #include "pch.h"
-#include "../../Include/X11/UiX11OpenGLDisplay.h"
+#include "../../include/x11/uix11opengldisplay.h"
 #include <stdio.h>
-#include "../../../Lepra/Include/String.h"
-#include "../../Include/UiLepra.h"
-#include "../../Include/UiOpenGLExtensions.h"
+#include "../../../lepra/include/string.h"
+#include "../../include/uilepra.h"
+#include "../../include/uiopenglextensions.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-X11OpenGLDisplay::X11OpenGLDisplay()
-{
+X11OpenGLDisplay::X11OpenGLDisplay() {
 }
 
-X11OpenGLDisplay::~X11OpenGLDisplay()
-{
+X11OpenGLDisplay::~X11OpenGLDisplay() {
 	CloseScreen();
 }
 
-void X11OpenGLDisplay::CloseScreen()
-{
+void X11OpenGLDisplay::CloseScreen() {
 	Deactivate();
 
-	if (!mIsScreenOpen)
-	{
+	if (!is_screen_open_) {
 		return;
 	}
 
-	/*if (IsFullScreen() == true)
-	{
+	/*if (IsFullScreen() == true) {
 		TODO: port!
 		::ChangeDisplaySettings(NULL, 0);
 	}*/
@@ -47,179 +41,147 @@ void X11OpenGLDisplay::CloseScreen()
 	X11DisplayManager::CloseScreen();
 }
 
-bool X11OpenGLDisplay::Activate()
-{
-	bool lOk = false;
-	if (GetDisplay())
-	{
-		lOk = ::glXMakeCurrent(GetDisplay(), GetWindow(), mGlContext);
+bool X11OpenGLDisplay::Activate() {
+	bool ok = false;
+	if (GetDisplay()) {
+		ok = ::glXMakeCurrent(GetDisplay(), GetWindow(), gl_context_);
 	}
-	return lOk;
+	return ok;
 }
 
-bool X11OpenGLDisplay::Deactivate()
-{
-	if (GetDisplay())
-	{
+bool X11OpenGLDisplay::Deactivate() {
+	if (GetDisplay()) {
 		::glXMakeCurrent(GetDisplay(), 0, 0);
 		return true;
 	}
 	return false;
 }
 
-bool X11OpenGLDisplay::UpdateScreen()
-{
-	if (!mIsScreenOpen)
-	{
+bool X11OpenGLDisplay::UpdateScreen() {
+	if (!is_screen_open_) {
 		return (false);
 	}
 
 	// Disable scissor test to make sure that the entire screen will
 	// be updated.
-	GLboolean lScissorsEnabled = ::glIsEnabled(GL_SCISSOR_TEST);
+	GLboolean scissors_enabled = ::glIsEnabled(GL_SCISSOR_TEST);
 	::glDisable(GL_SCISSOR_TEST);
 	::glXSwapBuffers(GetDisplay(), GetWindow());
-	if (lScissorsEnabled)
-	{
+	if (scissors_enabled) {
 		::glEnable(GL_SCISSOR_TEST);
 	}
 	return (true);
 }
 
-bool X11OpenGLDisplay::IsVSyncEnabled() const
-{
+bool X11OpenGLDisplay::IsVSyncEnabled() const {
 	return OpenGLExtensions::IsVSyncEnabled();
 }
 
-bool X11OpenGLDisplay::SetVSyncEnabled(bool pEnabled)
-{
-	return (mIsScreenOpen? OpenGLExtensions::SetVSyncEnabled(pEnabled) : false);
+bool X11OpenGLDisplay::SetVSyncEnabled(bool enabled) {
+	return (is_screen_open_? OpenGLExtensions::SetVSyncEnabled(enabled) : false);
 }
 
-DisplayManager::ContextType X11OpenGLDisplay::GetContextType()
-{
-	return DisplayManager::OPENGL_CONTEXT;
+DisplayManager::ContextType X11OpenGLDisplay::GetContextType() {
+	return DisplayManager::kOpenglContext;
 }
 
-void X11OpenGLDisplay::SetFocus(bool pFocus)
-{
-	if (IsFullScreen() == true)
-	{
-		if (pFocus == false)
-		{
+void X11OpenGLDisplay::SetFocus(bool focus) {
+	if (IsFullScreen() == true) {
+		if (focus == false) {
 			DispatchMinimize();
-		}
-		else
-		{
-			DispatchResize(mDisplayMode.mWidth, mDisplayMode.mHeight);
+		} else {
+			DispatchResize(display_mode_.width_, display_mode_.height_);
 		}
 	}
 }
 
-void X11OpenGLDisplay::OnResize(int pWidth, int pHeight)
-{
-	Resize(pWidth, pHeight);
+void X11OpenGLDisplay::OnResize(int width, int height) {
+	Resize(width, height);
 	//TODO: X11 resize!
-	//::ShowWindow(mWnd, SW_SHOWNORMAL);
+	//::ShowWindow(wnd_, SW_SHOWNORMAL);
 	Activate();
 }
 
-void X11OpenGLDisplay::Resize(int pWidth, int pHeight)
-{
-	if (IsFullScreen() == true)
-	{
+void X11OpenGLDisplay::Resize(int width, int height) {
+	if (IsFullScreen() == true) {
 		// Since we are in fullscreen mode, we ignore the width and height
 		// given as parameters.
-		if (IsMinimized() == true)
-		{
+		if (IsMinimized() == true) {
 			//TODO: something!
-			//::ChangeDisplaySettings(&lNewMode, CDS_FULLSCREEN);
+			//::ChangeDisplaySettings(&new_mode, CDS_FULLSCREEN);
 		}
-	}
-	else
-	{
-		mDisplayMode.mWidth  = pWidth;
-		mDisplayMode.mHeight = pHeight;
+	} else {
+		display_mode_.width_  = width;
+		display_mode_.height_ = height;
 	}
 
-	::glViewport(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight);
+	::glViewport(0, 0, display_mode_.width_, display_mode_.height_);
 	UpdateCaption();
 }
 
-void X11OpenGLDisplay::OnMinimize()
-{
+void X11OpenGLDisplay::OnMinimize() {
 	Deactivate();
 
-	if (IsFullScreen() == true)
-	{
+	if (IsFullScreen() == true) {
 		//TODO: something!
 		//::ChangeDisplaySettings(NULL, 0);
 	}
 
 	// TODO:
-	//::ShowWindow(mWnd, SW_MINIMIZE);
+	//::ShowWindow(wnd_, SW_MINIMIZE);
 }
 
-void X11OpenGLDisplay::OnMaximize(int pWidth, int pHeight)
-{
-	Resize(pWidth, pHeight);
+void X11OpenGLDisplay::OnMaximize(int width, int height) {
+	Resize(width, height);
 	//TODO: port!
-	//::ShowWindow(mWnd, SW_SHOWMAXIMIZED);
+	//::ShowWindow(wnd_, SW_SHOWMAXIMIZED);
 	Activate();
 }
 
-bool X11OpenGLDisplay::InitScreen()
-{
+bool X11OpenGLDisplay::InitScreen() {
 	UpdateCaption();
 
 /*TODO: port!
 
-	if (mScreenMode == FULLSCREEN)
-	{
-		DEVMODE lNewMode;
-		lNewMode.dmSize             = sizeof(lNewMode);
-		lNewMode.dmBitsPerPel       = mDisplayMode.mBitDepth;
-		lNewMode.dmPelsWidth        = mDisplayMode.mWidth;
-		lNewMode.dmPelsHeight       = mDisplayMode.mHeight;
-		lNewMode.dmDisplayFrequency = mDisplayMode.mRefreshRate;
-		lNewMode.dmFields = DM_BITSPERPEL | 
-							 DM_PELSWIDTH  | 
-							 DM_PELSHEIGHT | 
+	if (screen_mode_ == kFullscreen) {
+		DEVMODE new_mode;
+		new_mode.dmSize             = sizeof(new_mode);
+		new_mode.dmBitsPerPel       = display_mode_.bit_depth_;
+		new_mode.dmPelsWidth        = display_mode_.width_;
+		new_mode.dmPelsHeight       = display_mode_.height_;
+		new_mode.dmDisplayFrequency = display_mode_.refresh_rate_;
+		new_mode.dmFields = DM_BITSPERPEL |
+							 DM_PELSWIDTH  |
+							 DM_PELSHEIGHT |
 							 DM_DISPLAYFREQUENCY;
 
-		if (::ChangeDisplaySettings(&lNewMode, CDS_FULLSCREEN) !=
-		   DISP_CHANGE_SUCCESSFUL)
-		{
+		if (::ChangeDisplaySettings(&new_mode, CDS_FULLSCREEN) !=
+		   DISP_CHANGE_SUCCESSFUL) {
 			//return false;
 		}
 
-		::MoveWindow(mWnd, 0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight, TRUE);
-	}
-	else if(mScreenMode == DisplayManager::WINDOWED ||
-		mScreenMode == DisplayManager::STATIC_WINDOW)
-	{
+		::MoveWindow(wnd_, 0, 0, display_mode_.width_, display_mode_.height_, TRUE);
+	} else if(screen_mode_ == DisplayManager::kWindowed ||
+		screen_mode_ == DisplayManager::kStaticWindow) {
 		// TODO: This stuff is weird! Sometimes it works, and sometimes
 		// it doesn't.
-		int lWindowWidth  = GetWindowWidth(mDisplayMode.mWidth);
-		int lWindowHeight = GetWindowHeight(mDisplayMode.mHeight);
+		int window_width  = GetWindowWidth(display_mode_.width_);
+		int window_height = GetWindowHeight(display_mode_.height_);
 
-		int lX = GetSystemMetrics(SM_CXSCREEN) / 2 - mDisplayMode.mWidth / 2;
-		int lY = GetSystemMetrics(SM_CYSCREEN) / 2 - mDisplayMode.mHeight / 2;
+		int x = GetSystemMetrics(SM_CXSCREEN) / 2 - display_mode_.width_ / 2;
+		int y = GetSystemMetrics(SM_CYSCREEN) / 2 - display_mode_.height_ / 2;
 
-		::MoveWindow(mWnd, lX, lY, lWindowWidth, lWindowHeight, TRUE);
-	}
-	else
-	{
-		int lX = GetSystemMetrics(SM_CXSCREEN) / 2 - mDisplayMode.mWidth / 2;
-		int lY = GetSystemMetrics(SM_CYSCREEN) / 2 - mDisplayMode.mHeight / 2;
+		::MoveWindow(wnd_, x, y, window_width, window_height, TRUE);
+	} else {
+		int x = GetSystemMetrics(SM_CXSCREEN) / 2 - display_mode_.width_ / 2;
+		int y = GetSystemMetrics(SM_CYSCREEN) / 2 - display_mode_.height_ / 2;
 
-		::MoveWindow(mWnd, lX, lY, mDisplayMode.mWidth, mDisplayMode.mHeight, TRUE);
+		::MoveWindow(wnd_, x, y, display_mode_.width_, display_mode_.height_, TRUE);
 	}
 
-	mDC = ::GetDC(mWnd);
+	dc_ = ::GetDC(wnd_);
 
-	if (!SetGLPixelFormat())
-	{
+	if (!SetGLPixelFormat()) {
 		MessageBox(NULL,
 			   "Unable to setup pixel format, Please install a new OpenGL driver," \
 			   "or try closing other running applications...",
@@ -227,70 +189,61 @@ bool X11OpenGLDisplay::InitScreen()
 		return false;
 	}*/
 
-	if (!CreateGLContext())
-	{
+	if (!CreateGLContext()) {
 		/*MessageBox(NULL,
 			   "Unable to setup OpenGL, Please install a new OpenGL driver," \
 			   "or try closing other running applications...",
 			   "OpenGL Error",MB_OK | MB_ICONWARNING );*/
-		mLog.Error("Unable to setup OpenGL. Driver error?");
+		log_.Error("Unable to setup OpenGL. Driver error?");
 		return false;
 	}
 
 	//glEnable(GL_SCISSOR_TEST);
-	if (mContextUserCount == 1)
-	{
+	if (context_user_count_ == 1) {
 		OpenGLExtensions::InitExtensions();
 	}
 
 	return true;
 }
 
-void X11OpenGLDisplay::UpdateCaption()
-{
-	str lString = strutil::Format("X11OpenGLDisplay (%ix%i %iBit %iHz %s)",
-		mDisplayMode.mWidth, mDisplayMode.mHeight,
-		mDisplayMode.mBitDepth, mDisplayMode.mRefreshRate,
-		LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT);
-	SetCaption(lString, true);
+void X11OpenGLDisplay::UpdateCaption() {
+	str s = strutil::Format("X11OpenGLDisplay (%ix%i %iBit %iHz %s)",
+		display_mode_.width_, display_mode_.height_,
+		display_mode_.bit_depth_, display_mode_.refresh_rate_,
+		kLepraStringTypeText " " kLepraBuildTypeText);
+	SetCaption(s, true);
 }
 
-bool X11OpenGLDisplay::CreateGLContext()
-{
-	if (mGlContext == 0)
-	{
-		mGlContext = ::glXCreateContext(GetDisplay(), GetVisualInfo(), 0, GL_TRUE);
+bool X11OpenGLDisplay::CreateGLContext() {
+	if (gl_context_ == 0) {
+		gl_context_ = ::glXCreateContext(GetDisplay(), GetVisualInfo(), 0, GL_TRUE);
 	}
 
-	bool lOk = (mGlContext != 0);
-	if (lOk)
-	{
-		++mContextUserCount;
-		lOk = Activate();
+	bool ok = (gl_context_ != 0);
+	if (ok) {
+		++context_user_count_;
+		ok = Activate();
 	}
-	return (lOk);
+	return (ok);
 }
 
-void X11OpenGLDisplay::DeleteGLContext()
-{
-	if (mContextUserCount >= 1)
-	{
-		--mContextUserCount;
+void X11OpenGLDisplay::DeleteGLContext() {
+	if (context_user_count_ >= 1) {
+		--context_user_count_;
 	}
-	if (mContextUserCount == 0)
-	{
+	if (context_user_count_ == 0) {
 		::glXMakeCurrent(GetDisplay(), 0, 0);
-		::glXDestroyContext(GetDisplay(), mGlContext);
-		mGlContext = 0;
+		::glXDestroyContext(GetDisplay(), gl_context_);
+		gl_context_ = 0;
 	}
 }
 
 
 
-GLXContext X11OpenGLDisplay::mGlContext = 0;
-int X11OpenGLDisplay::mContextUserCount = 0;
+GLXContext X11OpenGLDisplay::gl_context_ = 0;
+int X11OpenGLDisplay::context_user_count_ = 0;
 
-loginstance(UI_GFX_3D, X11OpenGLDisplay);
+loginstance(kUiGfx3D, X11OpenGLDisplay);
 
 
 

@@ -5,118 +5,97 @@
 */
 
 #include "pch.h"
-#include "../Include/UiGraphicalModel.h"
-#include "../Include/UiTriangleBasedGeometry.h"
-#include "../Include/UiAnimatedGeometry.h"
-#include "../Include/UiProgressiveTriangleGeometry.h"
+#include "../include/uigraphicalmodel.h"
+#include "../include/uitrianglebasedgeometry.h"
+#include "../include/uianimatedgeometry.h"
+#include "../include/uiprogressivetrianglegeometry.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
 GraphicalModel::GraphicalModel() :
-	mLevelOfDetail(1)
-{
+	level_of_detail_(1) {
 }
 
-GraphicalModel::~GraphicalModel()
-{
+GraphicalModel::~GraphicalModel() {
 }
 
-void GraphicalModel::AddGeometry(const str& pName, GeometryHandler* pGeometry, const str& pTransformAnimator)
-{
-	pGeometry->SetTransformAnimator(Model::GetAnimator(pTransformAnimator));
-	pGeometry->UpdateGeometry((float)mLevelOfDetail);
-	mGeometryTable.Insert(pName, pGeometry);
+void GraphicalModel::AddGeometry(const str& name, GeometryHandler* geometry, const str& transform_animator) {
+	geometry->SetTransformAnimator(Model::GetAnimator(transform_animator));
+	geometry->UpdateGeometry((float)level_of_detail_);
+	geometry_table_.Insert(name, geometry);
 }
 
-Tbc::GeometryBase* GraphicalModel::GetGeometry(const str& pName)
-{
-	Tbc::GeometryBase* lGeometry = 0;
-	GeometryTable::Iterator lIter = mGeometryTable.Find(pName);
-	if (lIter != mGeometryTable.End())
-	{
-		lGeometry = (*lIter)->GetGeometry();
+tbc::GeometryBase* GraphicalModel::GetGeometry(const str& name) {
+	tbc::GeometryBase* _geometry = 0;
+	GeometryTable::Iterator iter = geometry_table_.Find(name);
+	if (iter != geometry_table_.End()) {
+		_geometry = (*iter)->GetGeometry();
 	}
 
-	return lGeometry;
+	return _geometry;
 }
 
-void GraphicalModel::Update(double pDeltaTime)
-{
-	Model::Update(pDeltaTime);
+void GraphicalModel::Update(double delta_time) {
+	Model::Update(delta_time);
 
-	GeometryTable::Iterator lIter;
-	for (lIter = mGeometryTable.First(); lIter != mGeometryTable.End(); ++lIter)
-	{
-		GeometryHandler* lGeometryHandler = *lIter;
-		lGeometryHandler->UpdateGeometry((float)mLevelOfDetail);
+	GeometryTable::Iterator iter;
+	for (iter = geometry_table_.First(); iter != geometry_table_.End(); ++iter) {
+		GeometryHandler* geometry_handler = *iter;
+		geometry_handler->UpdateGeometry((float)level_of_detail_);
 
-		Tbc::GeometryBase* lGeometry = lGeometryHandler->GetGeometry();
-		Tbc::BoneAnimator* lAnimator = lGeometryHandler->GetTransformAnimator();
+		tbc::GeometryBase* _geometry = geometry_handler->GetGeometry();
+		tbc::BoneAnimator* animator = geometry_handler->GetTransformAnimator();
 
 		// Set transformation.
-		xform lTransform;
-		if (lAnimator != 0)
-		{
-			lTransform = mTransformation.Transform(lAnimator->GetBones()->GetRelativeBoneTransformation(0));
-		}
-		else
-		{
-			lTransform = mTransformation;
+		xform transform;
+		if (animator != 0) {
+			transform = transformation_.Transform(animator->GetBones()->GetRelativeBoneTransformation(0));
+		} else {
+			transform = transformation_;
 		}
 
-		lGeometry->SetTransformation(lTransform);
+		_geometry->SetTransformation(transform);
 
-		if(lGeometry->GetUVAnimator() != 0)
-		{
-			lGeometry->GetUVAnimator()->Step((float)pDeltaTime);
+		if(_geometry->GetUVAnimator() != 0) {
+			_geometry->GetUVAnimator()->Step((float)delta_time);
 		}
 	}
 }
 
-void GraphicalModel::SetDetailLevel(double pLevelOfDetail)
-{
-	mLevelOfDetail = pLevelOfDetail;
+void GraphicalModel::SetDetailLevel(double level_of_detail) {
+	level_of_detail_ = level_of_detail;
 }
 
-void GraphicalModel::SetLastFrameVisible(unsigned int pLastFrameVisible)
-{
-	GeometryTable::Iterator lIter;
-	for (lIter = mGeometryTable.First(); lIter != mGeometryTable.End(); ++lIter)
-	{
-		(*lIter)->GetGeometry()->SetLastFrameVisible(pLastFrameVisible);
+void GraphicalModel::SetLastFrameVisible(unsigned int last_frame_visible) {
+	GeometryTable::Iterator iter;
+	for (iter = geometry_table_.First(); iter != geometry_table_.End(); ++iter) {
+		(*iter)->GetGeometry()->SetLastFrameVisible(last_frame_visible);
 	}
 }
 
-unsigned int GraphicalModel::GetLastFrameVisible() const
-{
-	unsigned int lLastFrameVisible = 0;
+unsigned int GraphicalModel::GetLastFrameVisible() const {
+	unsigned int _last_frame_visible = 0;
 
-	if (mGeometryTable.IsEmpty() == false)
-	{
-		lLastFrameVisible = (*mGeometryTable.First())->GetGeometry()->GetLastFrameVisible();
+	if (geometry_table_.IsEmpty() == false) {
+		_last_frame_visible = (*geometry_table_.First())->GetGeometry()->GetLastFrameVisible();
 	}
-	return lLastFrameVisible;
+	return _last_frame_visible;
 }
 
-void GraphicalModel::SetAlwaysVisible(bool pAlwaysVisible)
-{
-	GeometryTable::Iterator lIter;
-	for (lIter = mGeometryTable.First(); lIter != mGeometryTable.End(); ++lIter)
-	{
-		(*lIter)->GetGeometry()->SetAlwaysVisible(pAlwaysVisible);
+void GraphicalModel::SetAlwaysVisible(bool always_visible) {
+	GeometryTable::Iterator iter;
+	for (iter = geometry_table_.First(); iter != geometry_table_.End(); ++iter) {
+		(*iter)->GetGeometry()->SetAlwaysVisible(always_visible);
 	}
 }
 
-bool GraphicalModel::GetAlwaysVisible()
-{
-	bool lAlwaysVisible = false;
+bool GraphicalModel::GetAlwaysVisible() {
+	bool _always_visible = false;
 
-	if (mGeometryTable.IsEmpty() == false)
-	{
-		lAlwaysVisible = (*mGeometryTable.First())->GetGeometry()->GetAlwaysVisible();
+	if (geometry_table_.IsEmpty() == false) {
+		_always_visible = (*geometry_table_.First())->GetGeometry()->GetAlwaysVisible();
 	}
-	return lAlwaysVisible;
+	return _always_visible;
 }
 
 
@@ -126,173 +105,151 @@ bool GraphicalModel::GetAlwaysVisible()
 
 
 
-DefaultStaticGeometryHandler::DefaultStaticGeometryHandler(TriangleBasedGeometry* pGeometry,
-							   int pNumLODLevels,
-							   Renderer::TextureID* pTextureID,
-							   int pNumTextures,
-							   Renderer::MaterialType pMaterial, 
-							   Renderer::Shadows pShadows,
-							   Renderer* pRenderer) :
-	mGeometry(pGeometry),
-	mNumLODLevels(pNumLODLevels),
-	mTextureID(pTextureID),
-	mNumTextures(pNumTextures),
-	mMaterial(pMaterial),
-	mShadows(pShadows),
-	mCurrentLODLevel(-1),
-	mGeomID(Renderer::INVALID_GEOMETRY),
-	mRenderer(pRenderer)
-{
+DefaultStaticGeometryHandler::DefaultStaticGeometryHandler(TriangleBasedGeometry* geometry,
+							   int num_lod_levels,
+							   Renderer::TextureID* texture_id,
+							   int num_textures,
+							   Renderer::MaterialType material,
+							   Renderer::Shadows shadows,
+							   Renderer* renderer) :
+	geometry_(geometry),
+	num_lod_levels_(num_lod_levels),
+	texture_id_(texture_id),
+	num_textures_(num_textures),
+	material_(material),
+	shadows_(shadows),
+	current_lod_level_(-1),
+	geom_id_(Renderer::INVALID_GEOMETRY),
+	renderer_(renderer) {
 }
 
-void DefaultStaticGeometryHandler::UpdateGeometry(float pLODLevel)
-{
-	int lNewLODIndex = (int)std::min(mNumLODLevels - 1, (int)floor(pLODLevel * (mNumLODLevels - 1) + 0.5));
+void DefaultStaticGeometryHandler::UpdateGeometry(float lod_level) {
+	int new_lod_index = (int)std::min(num_lod_levels_ - 1, (int)floor(lod_level * (num_lod_levels_ - 1) + 0.5));
 
-	if (lNewLODIndex != mCurrentLODLevel)
-	{
-		mCurrentLODLevel = lNewLODIndex;
-		mRenderer->RemoveGeometry(mGeomID);
-		mGeomID = mRenderer->AddGeometry(&mGeometry[lNewLODIndex], 
-						   mMaterial,
-						   mShadows);
-		if (mGeomID != Renderer::INVALID_GEOMETRY)
-		{
-			for (int x = 0; x < mNumTextures; ++x)
-			{
-				mRenderer->TryAddGeometryTexture(mGeomID, mTextureID[x]);
+	if (new_lod_index != current_lod_level_) {
+		current_lod_level_ = new_lod_index;
+		renderer_->RemoveGeometry(geom_id_);
+		geom_id_ = renderer_->AddGeometry(&geometry_[new_lod_index],
+						   material_,
+						   shadows_);
+		if (geom_id_ != Renderer::INVALID_GEOMETRY) {
+			for (int x = 0; x < num_textures_; ++x) {
+				renderer_->TryAddGeometryTexture(geom_id_, texture_id_[x]);
 			}
 		}
 	}
 }
 
-Tbc::GeometryBase* DefaultStaticGeometryHandler::GetGeometry()
-{
-	Tbc::GeometryBase* lGeometry = 0;
-	if (mCurrentLODLevel >= 0 && mCurrentLODLevel < mNumLODLevels)
-	{
-		lGeometry = &mGeometry[mCurrentLODLevel];
+tbc::GeometryBase* DefaultStaticGeometryHandler::GetGeometry() {
+	tbc::GeometryBase* _geometry = 0;
+	if (current_lod_level_ >= 0 && current_lod_level_ < num_lod_levels_) {
+		_geometry = &geometry_[current_lod_level_];
 	}
-	return lGeometry;
+	return _geometry;
 }
 
 
 
 
-DefaultProgressiveGeometryHandler::DefaultProgressiveGeometryHandler(ProgressiveTriangleGeometry* pGeometry, 
-								     Renderer::MaterialType pMaterial,
-								     Renderer::TextureID* pTextureID,
-								     int pNumTextures,
-								     Renderer::Shadows pShadows,
-								     Renderer* pRenderer) :
-	mGeometry(pGeometry),
-	mRenderer(pRenderer)
-{
-	mGeomID = mRenderer->AddGeometry(mGeometry, pMaterial, pShadows);
-	if (mGeomID != Renderer::INVALID_GEOMETRY)
-	{
-		for (int x = 0; x < pNumTextures; ++x)
-		{
-			mRenderer->TryAddGeometryTexture(mGeomID, pTextureID[x]);
+DefaultProgressiveGeometryHandler::DefaultProgressiveGeometryHandler(ProgressiveTriangleGeometry* geometry,
+								     Renderer::MaterialType material,
+								     Renderer::TextureID* texture_id,
+								     int num_textures,
+								     Renderer::Shadows shadows,
+								     Renderer* renderer) :
+	geometry_(geometry),
+	renderer_(renderer) {
+	geom_id_ = renderer_->AddGeometry(geometry_, material, shadows);
+	if (geom_id_ != Renderer::INVALID_GEOMETRY) {
+		for (int x = 0; x < num_textures; ++x) {
+			renderer_->TryAddGeometryTexture(geom_id_, texture_id[x]);
 		}
 	}
 }
 
-void DefaultProgressiveGeometryHandler::UpdateGeometry(float pLODLevel)
-{
-	mGeometry->SetDetailLevel(pLODLevel);
+void DefaultProgressiveGeometryHandler::UpdateGeometry(float lod_level) {
+	geometry_->SetDetailLevel(lod_level);
 }
 
-Tbc::GeometryBase* DefaultProgressiveGeometryHandler::GetGeometry()
-{
-	return mGeometry;
+tbc::GeometryBase* DefaultProgressiveGeometryHandler::GetGeometry() {
+	return geometry_;
 }
 
 
 
 
-DefaultAnimatedStaticGeometryHandler::DefaultAnimatedStaticGeometryHandler(AnimatedGeometry* pGeometry,
-									   int pNumLODLevels,
-									   Renderer::TextureID* pTextureID,
-									   int pNumTextures,
-									   Renderer::MaterialType pMaterial, 
-									   Renderer::Shadows pShadows,
-									   Renderer* pRenderer) :
-	mGeometry(pGeometry),
-	mNumLODLevels(pNumLODLevels),
-	mTextureID(pTextureID),
-	mNumTextures(pNumTextures),
-	mMaterial(pMaterial),
-	mShadows(pShadows),
-	mCurrentLODLevel(-1),
-	mGeomID(Renderer::INVALID_GEOMETRY),
-	mRenderer(pRenderer)
-{
+DefaultAnimatedStaticGeometryHandler::DefaultAnimatedStaticGeometryHandler(AnimatedGeometry* geometry,
+									   int num_lod_levels,
+									   Renderer::TextureID* texture_id,
+									   int num_textures,
+									   Renderer::MaterialType material,
+									   Renderer::Shadows shadows,
+									   Renderer* renderer) :
+	geometry_(geometry),
+	num_lod_levels_(num_lod_levels),
+	texture_id_(texture_id),
+	num_textures_(num_textures),
+	material_(material),
+	shadows_(shadows),
+	current_lod_level_(-1),
+	geom_id_(Renderer::INVALID_GEOMETRY),
+	renderer_(renderer) {
 }
 
-void DefaultAnimatedStaticGeometryHandler::UpdateGeometry(float pLODLevel)
-{
-	int lNewLODIndex = (int)std::min(mNumLODLevels - 1, (int)floor(pLODLevel * (mNumLODLevels - 1) + 0.5));
+void DefaultAnimatedStaticGeometryHandler::UpdateGeometry(float lod_level) {
+	int new_lod_index = (int)std::min(num_lod_levels_ - 1, (int)floor(lod_level * (num_lod_levels_ - 1) + 0.5));
 
-	if (lNewLODIndex != mCurrentLODLevel)
-	{
-		mCurrentLODLevel = lNewLODIndex;
-		mRenderer->RemoveGeometry(mGeomID);
-		mGeomID = mRenderer->AddGeometry(&mGeometry[lNewLODIndex], 
-						   mMaterial,
-						   mShadows);
-		if (mGeomID != Renderer::INVALID_GEOMETRY)
-		{
-			for (int x = 0; x < mNumTextures; ++x)
-			{
-				mRenderer->TryAddGeometryTexture(mGeomID, mTextureID[x]);
+	if (new_lod_index != current_lod_level_) {
+		current_lod_level_ = new_lod_index;
+		renderer_->RemoveGeometry(geom_id_);
+		geom_id_ = renderer_->AddGeometry(&geometry_[new_lod_index],
+						   material_,
+						   shadows_);
+		if (geom_id_ != Renderer::INVALID_GEOMETRY) {
+			for (int x = 0; x < num_textures_; ++x) {
+				renderer_->TryAddGeometryTexture(geom_id_, texture_id_[x]);
 			}
 		}
 	}
 
-	mGeometry[mCurrentLODLevel].UpdateAnimatedGeometry();
+	geometry_[current_lod_level_].UpdateAnimatedGeometry();
 }
 
-Tbc::GeometryBase* DefaultAnimatedStaticGeometryHandler::GetGeometry()
-{
-	Tbc::GeometryBase* lGeometry = 0;
-	if (mCurrentLODLevel >= 0 && mCurrentLODLevel < mNumLODLevels)
-	{
-		lGeometry = &mGeometry[mCurrentLODLevel];
+tbc::GeometryBase* DefaultAnimatedStaticGeometryHandler::GetGeometry() {
+	tbc::GeometryBase* _geometry = 0;
+	if (current_lod_level_ >= 0 && current_lod_level_ < num_lod_levels_) {
+		_geometry = &geometry_[current_lod_level_];
 	}
-	return lGeometry;
+	return _geometry;
 }
 
 
 
 
-DefaultAnimatedProgressiveGeometryHandler::DefaultAnimatedProgressiveGeometryHandler(AnimatedGeometry* pGeometry,
-										     Renderer::TextureID* pTextureID,
-										     int pNumTextures,
-										     Renderer::MaterialType pMaterial, 
-										     Renderer::Shadows pShadows,
-										     Renderer* pRenderer) :
-	mGeometry(pGeometry),
-	mTextureID(pTextureID),
-	mNumTextures(pNumTextures),
-	mMaterial(pMaterial),
-	mShadows(pShadows),
-	mGeomID(Renderer::INVALID_GEOMETRY),
-	mRenderer(pRenderer)
-{
+DefaultAnimatedProgressiveGeometryHandler::DefaultAnimatedProgressiveGeometryHandler(AnimatedGeometry* geometry,
+										     Renderer::TextureID* texture_id,
+										     int num_textures,
+										     Renderer::MaterialType material,
+										     Renderer::Shadows shadows,
+										     Renderer* renderer) :
+	geometry_(geometry),
+	texture_id_(texture_id),
+	num_textures_(num_textures),
+	material_(material),
+	shadows_(shadows),
+	geom_id_(Renderer::INVALID_GEOMETRY),
+	renderer_(renderer) {
 }
 
-void DefaultAnimatedProgressiveGeometryHandler::UpdateGeometry(float pLODLevel)
-{
+void DefaultAnimatedProgressiveGeometryHandler::UpdateGeometry(float lod_level) {
 	// TRICKY: This typecast is the reason why the user needs to be extra careful
 	//         using this class.
-	((ProgressiveTriangleGeometry*)mGeometry->GetOriginalGeometry())->SetDetailLevel(pLODLevel);
-	mGeometry->UpdateAnimatedGeometry();
+	((ProgressiveTriangleGeometry*)geometry_->GetOriginalGeometry())->SetDetailLevel(lod_level);
+	geometry_->UpdateAnimatedGeometry();
 }
 
-Tbc::GeometryBase* DefaultAnimatedProgressiveGeometryHandler::GetGeometry()
-{
-	return mGeometry;
+tbc::GeometryBase* DefaultAnimatedProgressiveGeometryHandler::GetGeometry() {
+	return geometry_;
 }
 
 }

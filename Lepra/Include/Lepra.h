@@ -1,37 +1,34 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "LepraTarget.h"
-#include "LepraTypes.h"
-#include "Log.h"
-#include "MemoryLeakTracker.h"
+#include "lepratarget.h"
+#include "lepratypes.h"
+#include "log.h"
+#include "memoryleaktracker.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-// The data policy can be used in setters and in constructors where pointers to 
+// The data policy can be used in setters and in constructors where pointers to
 // large amounts of data are passed.
-enum DataPolicy
-{
-	FULL_COPY = 0, // Copy all the data.
-	COPY_REFERENCE, // Reference the same data.
+enum DataPolicy {
+	kFullCopy = 0, // Copy all the data.
+	kCopyReference, // Reference the same data.
 	TAKE_OWNERSHIP // Reference the data and delete it when done.
 };
 
 // If the data contain pointers to subdata, use these policies for that data.
-enum SubDataPolicy
-{
-	KEEP_REFERENCE = 0, // Just keep the reference. 
-	TAKE_SUBDATA_OWNERSHIP
+enum SubDataPolicy {
+	kKeepReference = 0, // Just keep the reference.
+	kTakeSubdataOwnership
 };
 
 

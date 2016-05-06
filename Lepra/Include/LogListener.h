@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // An abstract callback class (Observer) used receive log events.
@@ -12,141 +12,132 @@
 
 #pragma once
 
-#include "DiskFile.h"
-#include "Logger.h"
-#include "MemFile.h"
+#include "diskfile.h"
+#include "logger.h"
+#include "memfile.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class LogListener
-{
+class LogListener {
 public:
-	enum OutputFormat
-	{
-		FORMAT_PLAIN		= 0,
-		FORMAT_SUBSYSTEM	= (1 << 0),
-		FORMAT_CLASS		= (1 << 1),
-		FORMAT_TIME		= (1 << 2),
-		FORMAT_TYPE		= (1 << 3),
-		FORMAT_LOGCOUNT		= (1 << 4),
-		FORMAT_THREAD		= (1 << 5),
-		FORMAT_THREAD_CLASS	= (FORMAT_CLASS|FORMAT_THREAD),
-		FORMAT_CLASS_TIME	= (FORMAT_CLASS|FORMAT_TIME),
-		FORMAT_THREADEX		= (FORMAT_THREAD_CLASS|FORMAT_TYPE|FORMAT_TIME),
+	enum OutputFormat {
+		kFormatPlain		= 0,
+		kFormatSubsystem	= (1 << 0),
+		kFormatClass		= (1 << 1),
+		kFormatTime		= (1 << 2),
+		kFormatType		= (1 << 3),
+		kFormatLogcount		= (1 << 4),
+		kFormatThread		= (1 << 5),
+		kFormatThreadClass	= (kFormatClass|kFormatThread),
+		kFormatClassTime	= (kFormatClass|kFormatTime),
+		kFormatThreadex		= (kFormatThreadClass|kFormatType|kFormatTime),
 	};
 
-	LogListener(str pName, OutputFormat pFormat = FORMAT_THREADEX);
+	LogListener(str name, OutputFormat format = kFormatThreadex);
 	virtual ~LogListener();
 	void KillSelf();
-	void AddLog(Logger* pLog);
-	void RemoveLog(Logger* pLog);
-	void OnLog(const Logger* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel);
-	void OnLog(const Logger* pOriginator, const str& pMessage, LogLevel pLevel);
-	virtual void WriteLog(const str& pMessage, LogLevel pLevel) = 0;
+	void AddLog(Logger* log);
+	void RemoveLog(Logger* log);
+	void OnLog(const Logger* originator, const str& account, const str& message, LogLevel level);
+	void OnLog(const Logger* originator, const str& message, LogLevel level);
+	virtual void WriteLog(const str& message, LogLevel level) = 0;
 	LogLevel GetLevelThreashold() const;
-	void SetLevelThreashold(LogLevel pType);
+	void SetLevelThreashold(LogLevel type);
 
 	const str& GetName() const;
 
 protected:
-	Logger* mLog;
-	str mName;
-	LogLevel mLevel;
-	OutputFormat mFormat;
-	int mLogCount;
+	Logger* log_;
+	str name_;
+	LogLevel level_;
+	OutputFormat format_;
+	int log_count_;
 };
 
 
-class StdioConsoleLogListener: public LogListener
-{
+class StdioConsoleLogListener: public LogListener {
 public:
-	StdioConsoleLogListener(OutputFormat pFormat = FORMAT_THREAD_CLASS);
+	StdioConsoleLogListener(OutputFormat format = kFormatThreadClass);
 	virtual ~StdioConsoleLogListener();
-	void WriteLog(const str& pFullMessage, LogLevel pLevel);
+	void WriteLog(const str& full_message, LogLevel level);
 };
 
 
 
 // Logger listener for interactive consoles.
-class InteractiveConsoleLogListener: public LogListener
-{
+class InteractiveConsoleLogListener: public LogListener {
 public:
-	InteractiveConsoleLogListener(OutputFormat pFormat = FORMAT_THREAD_CLASS);
-	void SetAutoPrompt(const str& pPrompt);
-	virtual void StepPage(int pPageCount);
-	virtual void OnLogRawMessage(const str& pText) = 0;
+	InteractiveConsoleLogListener(OutputFormat format = kFormatThreadClass);
+	void SetAutoPrompt(const str& prompt);
+	virtual void StepPage(int page_count);
+	virtual void OnLogRawMessage(const str& text) = 0;
 
 protected:
-	Lock mLock;
-	str mAutoPrompt;
+	Lock lock_;
+	str auto_prompt_;
 };
 
-class InteractiveStdioConsoleLogListener: public InteractiveConsoleLogListener
-{
+class InteractiveStdioConsoleLogListener: public InteractiveConsoleLogListener {
 public:
 	InteractiveStdioConsoleLogListener();
 	virtual ~InteractiveStdioConsoleLogListener();
 
 protected:
-	void WriteLog(const str& pFullMessage, LogLevel pLevel);
-	void OnLogRawMessage(const str& pText);
+	void WriteLog(const str& full_message, LogLevel level);
+	void OnLogRawMessage(const str& text);
 
-	StdioConsoleLogListener mStdioLogListener;
+	StdioConsoleLogListener stdio_log_listener_;
 };
 
 
 
-class DebuggerLogListener: public LogListener
-{
+class DebuggerLogListener: public LogListener {
 public:
-	DebuggerLogListener(OutputFormat pFormat = FORMAT_THREAD_CLASS);
+	DebuggerLogListener(OutputFormat format = kFormatThreadClass);
 	virtual ~DebuggerLogListener();
 
 protected:
-	void WriteLog(const str& pFullMessage, LogLevel pLevel);
+	void WriteLog(const str& full_message, LogLevel level);
 };
 
 
 
-class FileLogListener: public LogListener
-{
+class FileLogListener: public LogListener {
 public:
-	FileLogListener(const str& pFilename, OutputFormat pFormat = FORMAT_THREADEX);
+	FileLogListener(const str& filename, OutputFormat format = kFormatThreadex);
 	~FileLogListener();
 
 	File& GetFile();
 
-	void WriteLog(const str& pFullMessage, LogLevel pLevel);
+	void WriteLog(const str& full_message, LogLevel level);
 
 protected:
-	DiskFile mFile;
+	DiskFile file_;
 };
 
 
 
-class MemFileLogListener: public LogListener
-{
+class MemFileLogListener: public LogListener {
 public:
-	MemFileLogListener(uint64 pMaxSize, OutputFormat pFormat = FORMAT_THREADEX);
+	MemFileLogListener(uint64 max_size, OutputFormat format = kFormatThreadex);
 	~MemFileLogListener();
 
 	void Clear();
-	bool Dump(const str& pFilename);
-	bool Dump(File& pFile);
-	bool Dump(LogListener& pLogListener, LogLevel pLevel);
+	bool Dump(const str& filename);
+	bool Dump(File& file);
+	bool Dump(LogListener& log_listener, LogLevel level);
 
 protected:
-	bool Dump(File* pFile, LogListener* pLogListener, LogLevel pLevel);
+	bool Dump(File* file, LogListener* log_listener, LogLevel level);
 
-	void WriteLog(const str& pFullMessage, LogLevel pLevel);
+	void WriteLog(const str& full_message, LogLevel level);
 
-	MemFile mFile;
-	uint64 mMaxSize;
+	MemFile file_;
+	uint64 max_size_;
 };
 
 

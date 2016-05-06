@@ -1,83 +1,79 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiParticleLoader.h"
-#include "../../Cure/Include/ResourceManager.h"
-#include "../../Lepra/Include/Canvas.h"
-#include "../../Lepra/Include/File.h"
-#include "../../Lepra/Include/ImageLoader.h"
-#include "../../UiTbc/Include/UiBillboardGeometry.h"
-#include "../../UiTbc/Include/UiParticleRenderer.h"
+#include "../include/uiparticleloader.h"
+#include "../../cure/include/resourcemanager.h"
+#include "../../lepra/include/canvas.h"
+#include "../../lepra/include/file.h"
+#include "../../lepra/include/imageloader.h"
+#include "../../uitbc/include/uibillboardgeometry.h"
+#include "../../uitbc/include/uiparticlerenderer.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-ParticleLoader::ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::Renderer* pRenderer, const str& pTextureName, size_t pSubFeatureTextureCount, size_t pSubTotalTextureCount)
-{
-	File* lFile = pResourceManager->QueryFile(pTextureName);
-	if (!lFile)
-	{
-		mLog.Errorf("Unable to open particle image file '%s'.", pTextureName.c_str());
+ParticleLoader::ParticleLoader(cure::ResourceManager* resource_manager, uitbc::Renderer* renderer, const str& texture_name, size_t sub_feature_texture_count, size_t sub_total_texture_count) {
+	File* file = resource_manager->QueryFile(texture_name);
+	if (!file) {
+		log_.Errorf("Unable to open particle image file '%s'.", texture_name.c_str());
 		deb_assert(false);
 		return;
 	}
-	Canvas lImage;
-	ImageLoader lLoader;
-	bool lLoadedOk = lLoader.Load(ImageLoader::GetFileTypeFromName(pTextureName), *lFile, lImage);
-	delete lFile;
-	lFile = 0;
-	if (!lLoadedOk)
-	{
-		mLog.Errorf("Unable to load particle image file '%s'.", pTextureName.c_str());
+	Canvas image;
+	ImageLoader loader;
+	bool loaded_ok = loader.Load(ImageLoader::GetFileTypeFromName(texture_name), *file, image);
+	delete file;
+	file = 0;
+	if (!loaded_ok) {
+		log_.Errorf("Unable to load particle image file '%s'.", texture_name.c_str());
 		deb_assert(false);
 		return;
 	}
 
-	UiTbc::BillboardGeometry* lBillboardGas = new UiTbc::BillboardGeometry(1, pSubTotalTextureCount);
-	UiTbc::Renderer::GeometryID lBillboardGasId = pRenderer->AddGeometry(lBillboardGas, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::FORCE_NO_SHADOWS);
-	UiTbc::BillboardGeometry* lBillboardGlow = new UiTbc::BillboardGeometry(3, pSubTotalTextureCount);
-	UiTbc::Renderer::GeometryID lBillboardGlowId = pRenderer->AddGeometry(lBillboardGlow, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::FORCE_NO_SHADOWS);
-	UiTbc::BillboardGeometry* lBillboardShrapnel = new UiTbc::BillboardGeometry(1, 0);
-	const float lShrapnelTriStrip[] =
+	uitbc::BillboardGeometry* billboard_gas = new uitbc::BillboardGeometry(1, sub_total_texture_count);
+	uitbc::Renderer::GeometryID billboard_gas_id = renderer->AddGeometry(billboard_gas, uitbc::Renderer::kMatNull, uitbc::Renderer::kForceNoShadows);
+	uitbc::BillboardGeometry* billboard_glow = new uitbc::BillboardGeometry(3, sub_total_texture_count);
+	uitbc::Renderer::GeometryID billboard_glow_id = renderer->AddGeometry(billboard_glow, uitbc::Renderer::kMatNull, uitbc::Renderer::kForceNoShadows);
+	uitbc::BillboardGeometry* billboard_shrapnel = new uitbc::BillboardGeometry(1, 0);
+	const float shrapnel_tri_strip[] =
 	{
 		-0.6f,0,+1.2f,
 		+0.6f,0,+1.0f,
 		-0.6f,0,-1.2f,
 		+0.6f,0,-0.7f,
 	};
-	lBillboardShrapnel->SetVertexData(lShrapnelTriStrip);
-	pRenderer->AddGeometry(lBillboardShrapnel, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::FORCE_NO_SHADOWS);
-	UiTbc::BillboardGeometry* lBillboardSpark = new UiTbc::BillboardGeometry(1, 0);
-	const float lSparkTriStrip[] =
+	billboard_shrapnel->SetVertexData(shrapnel_tri_strip);
+	renderer->AddGeometry(billboard_shrapnel, uitbc::Renderer::kMatNull, uitbc::Renderer::kForceNoShadows);
+	uitbc::BillboardGeometry* billboard_spark = new uitbc::BillboardGeometry(1, 0);
+	const float spark_tri_strip[] =
 	{
 		+0.0f,0,+0.3f,
 		-0.2f,0,-0.0f,
 		+0.2f,0,+0.0f,
 		+0.0f,0,-4.0f,
 	};
-	lBillboardSpark->SetVertexData(lSparkTriStrip);
-	pRenderer->AddGeometry(lBillboardSpark, UiTbc::Renderer::MAT_NULL, UiTbc::Renderer::FORCE_NO_SHADOWS);
-	UiTbc::Texture* lTexture = new UiTbc::Texture(lImage, Canvas::RESIZE_FAST, -1);
-	UiTbc::Renderer::TextureID lTextureId = pRenderer->AddTexture(lTexture);
-	delete lTexture;
-	pRenderer->TryAddGeometryTexture(lBillboardGasId, lTextureId);
-	pRenderer->TryAddGeometryTexture(lBillboardGlowId, lTextureId);
+	billboard_spark->SetVertexData(spark_tri_strip);
+	renderer->AddGeometry(billboard_spark, uitbc::Renderer::kMatNull, uitbc::Renderer::kForceNoShadows);
+	uitbc::Texture* texture = new uitbc::Texture(image, Canvas::kResizeFast, -1);
+	uitbc::Renderer::TextureID texture_id = renderer->AddTexture(texture);
+	delete texture;
+	renderer->TryAddGeometryTexture(billboard_gas_id, texture_id);
+	renderer->TryAddGeometryTexture(billboard_glow_id, texture_id);
 
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)pRenderer->GetDynamicRenderer("particle");
-	lParticleRenderer->SetData(pSubFeatureTextureCount, pSubTotalTextureCount, lBillboardGas, lBillboardShrapnel, lBillboardSpark, lBillboardGlow);
+	uitbc::ParticleRenderer* particle_renderer = (uitbc::ParticleRenderer*)renderer->GetDynamicRenderer("particle");
+	particle_renderer->SetData(sub_feature_texture_count, sub_total_texture_count, billboard_gas, billboard_shrapnel, billboard_spark, billboard_glow);
 }
 
 
 
-loginstance(UI_GFX_3D, ParticleLoader);
+loginstance(kUiGfx3D, ParticleLoader);
 
 
 

@@ -4,11 +4,11 @@
 
 
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../lepra/include/lepratarget.h"
 #ifdef LEPRA_IOS
 
 #import "CreateNewViewController.h"
-#import "EditViewController.h"
+#import "editviewcontroller.h"
 #import "FileHelper.h"
 
 
@@ -17,8 +17,7 @@
 
 #pragma mark - View Lifecycle
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
 	[super viewDidLoad];
 
 	self.view.backgroundColor = [UIColor whiteColor];
@@ -64,18 +63,15 @@
 	[self.filename becomeFirstResponder];
 }
 
--(BOOL) textFieldShouldReturn:(UITextField*)textField
-{
+-(BOOL) textFieldShouldReturn:(UITextField*)textField {
 	return [self createFile];
 }
 
--(void) cancel
-{
+-(void) cancel {
 	[self.parent popCreateNew:nil];
 }
 
--(bool) createFile
-{
+-(bool) createFile {
 	if (self.filename.text.length == 0 || [FileHelper fileExists:self.filename.text]) {
 		return false;
 	}

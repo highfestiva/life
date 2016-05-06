@@ -1,82 +1,69 @@
 
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
- 
+
 
 
 #include "pch.h"
-#include "../Include/UserConnection.h"
+#include "../include/userconnection.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
 UserConnection::UserConnection():
-	mName(),
-	mAccountId(0xFFFFFFFF),
-	mSocket(0)
-{
+	name_(),
+	account_id_(0xFFFFFFFF),
+	socket_(0) {
 }
 
-UserConnection::~UserConnection()
-{
+UserConnection::~UserConnection() {
 	SetSocket(0);
-	mAccountId = 0xFFFFFFFF;
+	account_id_ = 0xFFFFFFFF;
 }
 
 
 
-const str& UserConnection::GetLoginName() const
-{
-	return (mName);
+const str& UserConnection::GetLoginName() const {
+	return (name_);
 }
 
-void UserConnection::SetLoginName(const str& pName)
-{
-	mName = pName;
+void UserConnection::SetLoginName(const str& name) {
+	name_ = name;
 }
 
-UserAccount::AccountId UserConnection::GetAccountId() const
-{
-	return (mAccountId);
+UserAccount::AccountId UserConnection::GetAccountId() const {
+	return (account_id_);
 }
 
-void UserConnection::SetAccountId(UserAccount::AccountId pAccountId)
-{
-	mAccountId = pAccountId;
+void UserConnection::SetAccountId(UserAccount::AccountId account_id) {
+	account_id_ = account_id;
 }
 
-NetworkAgent::VSocket* UserConnection::GetSocket() const
-{
-	return (mSocket);
+NetworkAgent::VSocket* UserConnection::GetSocket() const {
+	return (socket_);
 }
 
-void UserConnection::SetSocket(NetworkAgent::VSocket* pSocket)
-{
-	mSocket = pSocket;
+void UserConnection::SetSocket(NetworkAgent::VSocket* socket) {
+	socket_ = socket;
 }
 
 
 
-UserConnectionFactory::UserConnectionFactory()
-{
+UserConnectionFactory::UserConnectionFactory() {
 }
 
-UserConnectionFactory::~UserConnectionFactory()
-{
+UserConnectionFactory::~UserConnectionFactory() {
 }
 
-UserConnection* UserConnectionFactory::AllocateUserConnection()
-{
+UserConnection* UserConnectionFactory::AllocateUserConnection() {
 	return new UserConnection;
 }
 
-void UserConnectionFactory::FreeUserConnection(UserConnection* pUserConnection)
-{
-	delete (pUserConnection);
+void UserConnectionFactory::FreeUserConnection(UserConnection* user_connection) {
+	delete (user_connection);
 }
 
 

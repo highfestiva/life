@@ -5,18 +5,18 @@
 
 
 #include "pch.h"
-#include "VehicleAi.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ContextPath.h"
-#include "../Cure/Include/Elevator.h"
-#include "../Cure/Include/TimeManager.h"
-#include "../Lepra/Include/Random.h"
-#include "Ctf.h"
-#include "Cutie.h"
-#include "Game.h"
-#include "Grenade.h"
-#include "Launcher.h"
-#include "Level.h"
+#include "vehicleai.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/contextpath.h"
+#include "../cure/include/elevator.h"
+#include "../cure/include/timemanager.h"
+#include "../lepra/include/random.h"
+#include "ctf.h"
+#include "cutie.h"
+#include "game.h"
+#include "grenade.h"
+#include "launcher.h"
+#include "level.h"
 
 
 
@@ -38,381 +38,315 @@
 #define AIM_DISTANCE()			(((GetVehicleIndex() == 1)? 1.2f : 1.0f) * SCALE_FACTOR * NORMAL_AIM_AHEAD)
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
-typedef Cure::ContextPath::SplinePath Spline;
+typedef cure::ContextPath::SplinePath Spline;
 
-struct PathIndexLikeliness
-{
-	int mPathIndex;
-	float mLikeliness;
-	float mDistance;
+struct PathIndexLikeliness {
+	int path_index_;
+	float likeliness_;
+	float distance_;
 };
 
 
 
-VehicleAi::VehicleAi(Game* pGame):
-	Parent(pGame->GetResourceManager(), "VehicleAi"),
-	mGame(pGame)
-{
+VehicleAi::VehicleAi(Game* game):
+	Parent(game->GetResourceManager(), "VehicleAi"),
+	game_(game) {
 }
 
-VehicleAi::~VehicleAi()
-{
+VehicleAi::~VehicleAi() {
 }
 
-void VehicleAi::Init()
-{
-	mStoppedFrame = -1;
-	mActivePath = -1;
-	mMode = MODE_AT_GOAL;	// Will end up in previous mode.
-	SetMode(MODE_FIND_BEST_PATH);
+void VehicleAi::Init() {
+	stopped_frame_ = -1;
+	active_path_ = -1;
+	mode_ = kModeAtGoal;	// Will end up in previous mode.
+	SetMode(kModeFindBestPath);
 	GetManager()->EnableTickCallback(this);
 }
 
 
 
-void VehicleAi::OnTick()
-{
-	if (!mGame->GetCutie() || !mGame->GetCutie()->IsLoaded() ||
-		!mGame->GetLevel() || !mGame->GetLevel()->IsLoaded() ||
-		mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
-	{
+void VehicleAi::OnTick() {
+	if (!game_->GetCutie() || !game_->GetCutie()->IsLoaded() ||
+		!game_->GetLevel() || !game_->GetLevel()->IsLoaded() ||
+		game_->GetFlybyMode() != Game::kFlybyInactive) {
 		return;
 	}
 
-	const Cure::TimeManager* lTime = GetManager()->GetGameManager()->GetTimeManager();
-	const int lModeRunDeltaFrameCount = lTime->GetCurrentPhysicsFrameDelta(mModeStartFrame);
-	const float lModeRunTime = lTime->ConvertPhysicsFramesToSeconds(lModeRunDeltaFrameCount);
-	const float lAimDistance = AIM_DISTANCE();
+	const cure::TimeManager* _time = GetManager()->GetGameManager()->GetTimeManager();
+	const int mode_run_delta_frame_count = _time->GetCurrentPhysicsFrameDelta(mode_start_frame_);
+	const float mode_run_time = _time->ConvertPhysicsFramesToSeconds(mode_run_delta_frame_count);
+	const float aim_distance = AIM_DISTANCE();
 
-	float lStrength = Math::Lerp(0.6f, 1.0f, mGame->GetComputerDifficulty());
-	const vec3 lPosition = mGame->GetCutie()->GetPosition();
-	const vec3 lVelocity = mGame->GetCutie()->GetVelocity();
-	switch (mMode)
-	{
-		case MODE_FIND_BEST_PATH:
-		case MODE_FIND_PATH_OFF_ELEVATOR:
-		{
-			float lStartTime = 0.5f;
-			if (mActivePath != -1)
-			{
+	float strength = Math::Lerp(0.6f, 1.0f, game_->GetComputerDifficulty());
+	const vec3 _position = game_->GetCutie()->GetPosition();
+	const vec3 _velocity = game_->GetCutie()->GetVelocity();
+	switch (mode_) {
+		case kModeFindBestPath:
+		case kModeFindPathOffElevator: {
+			float start_time = 0.5f;
+			if (active_path_ != -1) {
 				// Synchronize all paths.
-				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-				lStartTime = lPath->GetCurrentInterpolationTime();
-				mActivePath = -1;
+				Spline* _path = game_->GetLevel()->QueryPath()->GetPath(active_path_);
+				start_time = _path->GetCurrentInterpolationTime();
+				active_path_ = -1;
 			}
-			mLog.Headlinef("Trying to find new path... starting iterating from  %.2f.", lStartTime);
-			vec3 lElevatorDirection;
-			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
-			{
-				if (lModeRunDeltaFrameCount%5 == 3)
-				{
-					if (AvoidGrenade(lPosition, lVelocity, 1))
-					{
+			log_.Headlinef("Trying to find new path... starting iterating from  %.2f.", start_time);
+			vec3 elevator_direction;
+			if (mode_ == kModeFindPathOffElevator) {
+				if (mode_run_delta_frame_count%5 == 3) {
+					if (AvoidGrenade(_position, _velocity, 1)) {
 						return;
 					}
 				}
-				mGame->GetCutie()->SetEnginePower(0, 0);
-				mGame->GetCutie()->SetEnginePower(2, -lStrength);	// Negative = use full brakes, not only hand brake.
-				const Cure::Elevator* lNearestElevator;
-				const vec3 lElevatorPosition = GetClosestElevatorPosition(lPosition, lNearestElevator);
-				if (lElevatorPosition.GetDistanceSquared(lPosition) > ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE)
-				{
-					mLog.Headline("Fell off elevator while looking for get-off route. Looking for somewhere else to go.");
-					SetMode(MODE_FIND_BEST_PATH);
+				game_->GetCutie()->SetEnginePower(0, 0);
+				game_->GetCutie()->SetEnginePower(2, -strength);	// Negative = use full brakes, not only hand brake.
+				const cure::Elevator* _nearest_elevator;
+				const vec3 elevator_position = GetClosestElevatorPosition(_position, _nearest_elevator);
+				if (elevator_position.GetDistanceSquared(_position) > ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE) {
+					log_.Headline("Fell off elevator while looking for get-off route. Looking for somewhere else to go.");
+					SetMode(kModeFindBestPath);
 					return;
 				}
-				lElevatorDirection = lNearestElevator->GetVelocity().GetNormalized(0.5f);
+				elevator_direction = _nearest_elevator->GetVelocity().GetNormalized(0.5f);
 			}
-			float lBestPathDistance = 1000000;
-			std::vector<PathIndexLikeliness> lRelevantPaths;
-			bool lLiftingTowardsGoal = false;
-			const int lPathCount = mGame->GetLevel()->QueryPath()->GetPathCount();
-			for (int x = 0; x < lPathCount; ++x)
-			{
-				bool lCurrentLiftingTowardsGoal = false;
-				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(x);
-				lPath->GotoAbsoluteTime(lStartTime);
-				float lLikeliness = 1;
-				const float lNearestDistance = GetClosestPathDistance(lPosition, x, &lLikeliness)/SCALE_FACTOR/2;
-				mLog.Infof(" - Path %2i is %2.2f units away.", x, lNearestDistance);
-				if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
-				{
-					if (lPath->GetCurrentInterpolationTime() > 0.7f)
-					{
+			float best_path_distance = 1000000;
+			std::vector<PathIndexLikeliness> relevant_paths;
+			bool lifting_towards_goal = false;
+			const int path_count = game_->GetLevel()->QueryPath()->GetPathCount();
+			for (int x = 0; x < path_count; ++x) {
+				bool current_lifting_towards_goal = false;
+				Spline* _path = game_->GetLevel()->QueryPath()->GetPath(x);
+				_path->GotoAbsoluteTime(start_time);
+				float _likeliness = 1;
+				const float nearest_distance = GetClosestPathDistance(_position, x, &_likeliness)/SCALE_FACTOR/2;
+				log_.Infof(" - Path %2i is %2.2f units away.", x, nearest_distance);
+				if (mode_ == kModeFindPathOffElevator) {
+					if (_path->GetCurrentInterpolationTime() > 0.7f) {
 						// This path is probably the one I used to get ON the elevator (or one
 						// just like it from another direction), we're not using that!
-						mLog.Info("   (Not relevant, too close to path end.)");
+						log_.Info("   (Not relevant, too close to path end.)");
 						continue;
-					}
-					else
-					{
-						const float lTowardsDistance = GetClosestPathDistance(lPosition+lElevatorDirection, x)/SCALE_FACTOR/2;
-						if (lTowardsDistance < lNearestDistance)
-						{
-							lCurrentLiftingTowardsGoal = true;
-							if (!lLiftingTowardsGoal)
-							{
-								lLiftingTowardsGoal = true;
-								lBestPathDistance = 1000000;
+					} else {
+						const float towards_distance = GetClosestPathDistance(_position+elevator_direction, x)/SCALE_FACTOR/2;
+						if (towards_distance < nearest_distance) {
+							current_lifting_towards_goal = true;
+							if (!lifting_towards_goal) {
+								lifting_towards_goal = true;
+								best_path_distance = 1000000;
 							}
 						}
 					}
 				}
-				if (!lCurrentLiftingTowardsGoal && lLiftingTowardsGoal)
-				{
+				if (!current_lifting_towards_goal && lifting_towards_goal) {
 					// This elevator isn't heading in the right direction, but at least one other is.
 					continue;
 				}
 				PathIndexLikeliness pl;
-				pl.mPathIndex = x;
-				pl.mLikeliness = lLikeliness;
-				pl.mDistance = lNearestDistance;
-				lRelevantPaths.push_back(pl);
-				if (lNearestDistance < lBestPathDistance)
-				{
-					lBestPathDistance = lNearestDistance;
+				pl.path_index_ = x;
+				pl.likeliness_ = _likeliness;
+				pl.distance_ = nearest_distance;
+				relevant_paths.push_back(pl);
+				if (nearest_distance < best_path_distance) {
+					best_path_distance = nearest_distance;
 				}
 			}
 			// Sort out those that are too far away.
-			float lTotalLikeliness = 0;
+			float total_likeliness = 0;
 			std::vector<PathIndexLikeliness>::iterator x;
-			for (x = lRelevantPaths.begin(); x != lRelevantPaths.end();)
-			{
-				if (x->mDistance < lBestPathDistance+2.0f)
-				{
-					lTotalLikeliness += x->mLikeliness;
+			for (x = relevant_paths.begin(); x != relevant_paths.end();) {
+				if (x->distance_ < best_path_distance+2.0f) {
+					total_likeliness += x->likeliness_;
 					++x;
-				}
-				else
-				{
-					x = lRelevantPaths.erase(x);
+				} else {
+					x = relevant_paths.erase(x);
 				}
 			}
-			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
-			{
-				if (lBestPathDistance > 5 || lRelevantPaths.size() != 1)
-				{
-					if (lRelevantPaths.size() == 1)
-					{
+			if (mode_ == kModeFindPathOffElevator) {
+				if (best_path_distance > 5 || relevant_paths.size() != 1) {
+					if (relevant_paths.size() == 1) {
 						// Point wheels in the right direction for us to get off safely.
-						Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(lRelevantPaths[0].mPathIndex);
-						const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
-						const vec3 lWantedDirection = lPath->GetValue() - lPosition;
-						const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
-						mGame->GetCutie()->SetEnginePower(1, lAngle*0.5f);
+						Spline* _path = game_->GetLevel()->QueryPath()->GetPath(relevant_paths[0].path_index_);
+						const vec3 _direction = game_->GetCutie()->GetOrientation() * vec3(0,1,0);
+						const vec3 wanted_direction = _path->GetValue() - _position;
+						const float angle = LEPRA_XY_ANGLE(wanted_direction, _direction);
+						game_->GetCutie()->SetEnginePower(1, angle*0.5f);
 					}
-					mLog.Headlinef("On elevator: too long distance to path %.1f, or too many paths %u.", lBestPathDistance, lRelevantPaths.size());
-					if (lBestPathDistance > 15)
-					{
-						const Cure::Elevator* lNearestElevator;
-						const vec3 lNearestLiftPosition = GetClosestElevatorPosition(lPosition, lNearestElevator);
-						if (lNearestLiftPosition.GetDistanceSquared(lPosition) > ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE)
-						{
+					log_.Headlinef("On elevator: too long distance to path %.1f, or too many paths %u.", best_path_distance, relevant_paths.size());
+					if (best_path_distance > 15) {
+						const cure::Elevator* _nearest_elevator;
+						const vec3 nearest_lift_position = GetClosestElevatorPosition(_position, _nearest_elevator);
+						if (nearest_lift_position.GetDistanceSquared(_position) > ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE) {
 							// DUCK!!! We fell off!
-							mLog.Headline("Was on elevator: I'm far from the elevator, so must've fallen off!");
-							SetMode(MODE_FIND_BEST_PATH);
+							log_.Headline("Was on elevator: I'm far from the elevator, so must've fallen off!");
+							SetMode(kModeFindBestPath);
 						}
 					}
-					if (lModeRunTime >= 20)
-					{
-						mLog.Headline("On elevator: been here too long, getting off!");
-						SetMode(MODE_FIND_BEST_PATH);
+					if (mode_run_time >= 20) {
+						log_.Headline("On elevator: been here too long, getting off!");
+						SetMode(kModeFindBestPath);
 					}
 					return;
 				}
-				mLog.Headlinef("Getting off elevator: distance to path %.1f.", lBestPathDistance);
+				log_.Headlinef("Getting off elevator: distance to path %.1f.", best_path_distance);
 			}
-			deb_assert(!lRelevantPaths.empty());
-			if (lRelevantPaths.empty())
-			{
+			deb_assert(!relevant_paths.empty());
+			if (relevant_paths.empty()) {
 				return;
 			}
-			const float lPickedLikeliness = Random::Uniform(0.0f, lTotalLikeliness);
-			lTotalLikeliness = 0;
-			for (x = lRelevantPaths.begin(); x != lRelevantPaths.end(); ++x)
-			{
-				const float lNextLikeliness = lTotalLikeliness + x->mLikeliness;
-				if (lPickedLikeliness >= lTotalLikeliness && lPickedLikeliness <= lNextLikeliness)
-				{
-					mActivePath = x->mPathIndex;
+			const float picked_likeliness = Random::Uniform(0.0f, total_likeliness);
+			total_likeliness = 0;
+			for (x = relevant_paths.begin(); x != relevant_paths.end(); ++x) {
+				const float next_likeliness = total_likeliness + x->likeliness_;
+				if (picked_likeliness >= total_likeliness && picked_likeliness <= next_likeliness) {
+					active_path_ = x->path_index_;
 					break;
 				}
-				lTotalLikeliness = lNextLikeliness;
+				total_likeliness = next_likeliness;
 			}
-			if (mActivePath < 0)
-			{
-				mActivePath = lRelevantPaths[Random::GetRandomNumber() % lRelevantPaths.size()].mPathIndex;
+			if (active_path_ < 0) {
+				active_path_ = relevant_paths[Random::GetRandomNumber() % relevant_paths.size()].path_index_;
 			}
-			Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-			const float lWantedDistance = lAimDistance;
-			float lStep = lWantedDistance * lPath->GetDistanceNormal();
-			if (lStep + lPath->GetCurrentInterpolationTime() > 1)
-			{
-				lStep = 1 - lPath->GetCurrentInterpolationTime();
+			Spline* _path = game_->GetLevel()->QueryPath()->GetPath(active_path_);
+			const float wanted_distance = aim_distance;
+			float step = wanted_distance * _path->GetDistanceNormal();
+			if (step + _path->GetCurrentInterpolationTime() > 1) {
+				step = 1 - _path->GetCurrentInterpolationTime();
 			}
-			lPath->StepInterpolation(lStep);
+			_path->StepInterpolation(step);
 			// Fetch ending position.
-			const float t = lPath->GetCurrentInterpolationTime();
-			lPath->GotoAbsoluteTime(END_PATH_TIME);
-			mElevatorGetOnPosition = lPath->GetValue();
-			lPath->GotoAbsoluteTime(t);
+			const float t = _path->GetCurrentInterpolationTime();
+			_path->GotoAbsoluteTime(END_PATH_TIME);
+			elevator_get_on_position_ = _path->GetValue();
+			_path->GotoAbsoluteTime(t);
 
-			mLog.Headlinef("Picked path %i (%i pickable).", mActivePath, lRelevantPaths.size());
-			if (mMode == MODE_FIND_PATH_OFF_ELEVATOR)
-			{
-				SetMode(MODE_GET_OFF_ELEVATOR);
+			log_.Headlinef("Picked path %i (%i pickable).", active_path_, relevant_paths.size());
+			if (mode_ == kModeFindPathOffElevator) {
+				SetMode(kModeGetOffElevator);
+			} else {
+				SetMode(kModeHeadingBackOnTrack);
 			}
-			else
-			{
-				SetMode(MODE_HEADING_BACK_ON_TRACK);
-			}
-		}
-		break;
-		case MODE_HEADING_BACK_ON_TRACK:
-		{
-			if (lModeRunDeltaFrameCount%5 == 2)
-			{
-				const float lVelocityScaleFactor = std::min(1.0f, lVelocity.GetLength() / 2.5f);
-				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-				const float lCurrentTime = lPath->GetCurrentInterpolationTime();
-				const float lNearestPathDistance = GetClosestPathDistance(lPosition, mActivePath, 0, 1);
-				if (lNearestPathDistance > 3.0f)
-				{
+		} break;
+		case kModeHeadingBackOnTrack: {
+			if (mode_run_delta_frame_count%5 == 2) {
+				const float velocity_scale_factor = std::min(1.0f, _velocity.GetLength() / 2.5f);
+				Spline* _path = game_->GetLevel()->QueryPath()->GetPath(active_path_);
+				const float current_time = _path->GetCurrentInterpolationTime();
+				const float nearest_path_distance = GetClosestPathDistance(_position, active_path_, 0, 1);
+				if (nearest_path_distance > 3.0f) {
 					// First verify that we haven't ended up under path somehow. We do that by checking
 					// steepness, since pure Z-distance may be big when going over ditches.
-					const vec3 lPathPosition = lPath->GetValue();
-					const float lSteepness = (lPathPosition.z - lPosition.z) / lNearestPathDistance;
-					//mLog.Infof("Checking steepness, nearest path distance is %.3f, steepness is %.3f.", lNearestPathDistance, lSteepness);
-					if (lSteepness > 0.6f)
-					{
-						mLog.Infof("Searching for new, better path, we seem to have ended up under the path. Beneath a bridge perhaps? Nearest path is %.2f, steepness is %.2f.", lNearestPathDistance, lSteepness);
-						SetMode(MODE_FIND_BEST_PATH);
+					const vec3 path_position = _path->GetValue();
+					const float steepness = (path_position.z - _position.z) / nearest_path_distance;
+					//log_.Infof("Checking steepness, nearest path distance is %.3f, steepness is %.3f.", nearest_path_distance, steepness);
+					if (steepness > 0.6f) {
+						log_.Infof("Searching for new, better path, we seem to have ended up under the path. Beneath a bridge perhaps? Nearest path is %.2f, steepness is %.2f.", nearest_path_distance, steepness);
+						SetMode(kModeFindBestPath);
 						return;
 					}
 				}
-				lPath->GotoAbsoluteTime(lCurrentTime);
-				if (lNearestPathDistance < SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor)
-				{
+				_path->GotoAbsoluteTime(current_time);
+				if (nearest_path_distance < SCALE_FACTOR * OFF_COURSE_DISTANCE * velocity_scale_factor) {
 					// We were able to return to normal, keep on running.
-					SetMode(MODE_NORMAL);
+					SetMode(kModeNormal);
 					return;
 				}
-				/*else if (lNearestPathDistance > SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor * 5)
-				{
+				/*else if (nearest_path_distance > SCALE_FACTOR * OFF_COURSE_DISTANCE * velocity_scale_factor * 5) {
 					// We're far off, perhaps we fell down from a plateu.
-					mActivePath = -1;
-					SetMode(MODE_FIND_BEST_PATH);
+					active_path_ = -1;
+					SetMode(kModeFindBestPath);
 					return;
 				}*/
-				else if (lModeRunTime > 7.0f)
-				{
-					SetMode(MODE_FIND_BEST_PATH);
+				else if (mode_run_time > 7.0f) {
+					SetMode(kModeFindBestPath);
 					return;
 				}
 			}
 		}
 		// TRICKY: fall through.
-		case MODE_NORMAL:
-		case MODE_GET_ON_ELEVATOR:
-		case MODE_GET_OFF_ELEVATOR:
-		{
-			if (mMode == MODE_GET_ON_ELEVATOR)
-			{
-				if (lModeRunTime > 4.5)
-				{
-					mLog.Headlinef("Something presumably hinders me getting on the elevator, back square one. (mode run time=%f)", lModeRunTime);
-					SetMode(MODE_FIND_BEST_PATH);
+		case kModeNormal:
+		case kModeGetOnElevator:
+		case kModeGetOffElevator: {
+			if (mode_ == kModeGetOnElevator) {
+				if (mode_run_time > 4.5) {
+					log_.Headlinef("Something presumably hinders me getting on the elevator, back square one. (mode run time=%f)", mode_run_time);
+					SetMode(kModeFindBestPath);
 					return;
 				}
-				const Cure::Elevator* lNearestElevator;
-				const vec3 lNearestLiftPosition = GetClosestElevatorPosition(mElevatorGetOnPosition, lNearestElevator);
-				if (lNearestLiftPosition.z > lPosition.z+0.5f)
-				{
-					mLog.Headline("Couldn't get on in time, going back to waiting.");
-					SetMode(MODE_WAITING_FOR_ELEVATOR);
+				const cure::Elevator* _nearest_elevator;
+				const vec3 nearest_lift_position = GetClosestElevatorPosition(elevator_get_on_position_, _nearest_elevator);
+				if (nearest_lift_position.z > _position.z+0.5f) {
+					log_.Headline("Couldn't get on in time, going back to waiting.");
+					SetMode(kModeWaitingForElevator);
 					return;
 				}
 			}
 
-			if (mMode != MODE_HEADING_BACK_ON_TRACK && mMode != MODE_GET_ON_ELEVATOR && lModeRunDeltaFrameCount%20 == 19)
-			{
-				const float lDistance = GetClosestPathDistance(lPosition);
-				if (lDistance > SCALE_FACTOR * TOTALLY_OFF_COURSE_DISTANCE)
-				{
-					mLog.Headline("Fell off something. Trying some new path.");
-					SetMode(MODE_FIND_BEST_PATH);
+			if (mode_ != kModeHeadingBackOnTrack && mode_ != kModeGetOnElevator && mode_run_delta_frame_count%20 == 19) {
+				const float _distance = GetClosestPathDistance(_position);
+				if (_distance > SCALE_FACTOR * TOTALLY_OFF_COURSE_DISTANCE) {
+					log_.Headline("Fell off something. Trying some new path.");
+					SetMode(kModeFindBestPath);
 					return;
 				}
-				const float lVelocityScaleFactor = ((mMode == MODE_NORMAL)? 1.0f : 3.0f) * Math::Clamp(lVelocity.GetLength() / 2.5f, 0.3f, 1.0f);
-				if (lDistance > SCALE_FACTOR * OFF_COURSE_DISTANCE * lVelocityScaleFactor)
-				{
-					mLog.Headline("Going about my way, but got offside somehow. Heading back.");
-					SetMode(MODE_HEADING_BACK_ON_TRACK);
+				const float velocity_scale_factor = ((mode_ == kModeNormal)? 1.0f : 3.0f) * Math::Clamp(_velocity.GetLength() / 2.5f, 0.3f, 1.0f);
+				if (_distance > SCALE_FACTOR * OFF_COURSE_DISTANCE * velocity_scale_factor) {
+					log_.Headline("Going about my way, but got offside somehow. Heading back.");
+					SetMode(kModeHeadingBackOnTrack);
 					return;
 				}
 			}
 
-			Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-			vec3 lTarget = lPath->GetValue();
+			Spline* _path = game_->GetLevel()->QueryPath()->GetPath(active_path_);
+			vec3 target = _path->GetValue();
 
 			// Check if vehicle stopped. That would mean either crashed against something or too steep hill.
-			if (lModeRunDeltaFrameCount%7 == 4 && mGame->GetCutie()->GetHealth() > 0)
-			{
-				if (QueryCutieHindered(lTime, lVelocity))
-				{
-					const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
-					const vec3 lWantedDirection = lTarget-lPosition;
-					const float lForwardAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
+			if (mode_run_delta_frame_count%7 == 4 && game_->GetCutie()->GetHealth() > 0) {
+				if (QueryCutieHindered(_time, _velocity)) {
+					const vec3 _direction = game_->GetCutie()->GetOrientation() * vec3(0,1,0);
+					const vec3 wanted_direction = target-_position;
+					const float forward_angle = LEPRA_XY_ANGLE(wanted_direction, _direction);
 					// Amplify angle to be either full left or full right.
-					const float lAngle = (lForwardAngle < 0)? -1.0f : 1.0f;
-					mGame->GetCutie()->SetEnginePower(1, -lAngle);
-					SetMode(MODE_BACKING_UP);
+					const float angle = (forward_angle < 0)? -1.0f : 1.0f;
+					game_->GetCutie()->SetEnginePower(1, -angle);
+					SetMode(kModeBackingUp);
 					return;
 				}
 			}
 
 			// Check if incoming.
-			if (lModeRunDeltaFrameCount%5 == 1)
-			{
-				if (AvoidGrenade(lPosition, lVelocity, 0.5f))
-				{
+			if (mode_run_delta_frame_count%5 == 1) {
+				if (AvoidGrenade(_position, _velocity, 0.5f)) {
 					return;
 				}
 			}
 
 			// Are we heading towards an elevator?
-			if (mMode != MODE_GET_ON_ELEVATOR && mMode != MODE_GET_OFF_ELEVATOR && lPath->GetType() == "to_elevator")
-			{
-				if (lPath->GetDistanceLeft() <= ELEVATOR_WAIT_DISTANCE)
-				{
-					if (mElevatorGetOnPosition.GetDistanceSquared(lPosition) <= ELEVATOR_WAIT_DISTANCE*ELEVATOR_WAIT_DISTANCE)
-					{
-						mLog.Headline("Normal mode close to end of path to elevator, changing mode.");
-						SetMode(MODE_WAITING_FOR_ELEVATOR);
+			if (mode_ != kModeGetOnElevator && mode_ != kModeGetOffElevator && _path->GetType() == "to_elevator") {
+				if (_path->GetDistanceLeft() <= ELEVATOR_WAIT_DISTANCE) {
+					if (elevator_get_on_position_.GetDistanceSquared(_position) <= ELEVATOR_WAIT_DISTANCE*ELEVATOR_WAIT_DISTANCE) {
+						log_.Headline("Normal mode close to end of path to elevator, changing mode.");
+						SetMode(kModeWaitingForElevator);
 						return;
 					}
 				}
 			}
 
 			// Did we just pass (fly by?) the goal?
-			if (lModeRunDeltaFrameCount%3 == 0)
-			{
-				const vec3 lGoalDirection = mGame->GetCtf()->GetPosition() - lPosition;
-				if (::fabs(lGoalDirection.z) < 2 &&
-					lGoalDirection.GetLengthSquared() < ELEVATOR_FAR_DISTANCE*ELEVATOR_FAR_DISTANCE &&
-					lVelocity.GetLengthSquared() < 6*6)
-				{
-					const vec3 lCutieDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
-					const float lDeltaAngle = ::fabs(LEPRA_XY_ANGLE(lGoalDirection, lCutieDirection));
-					if (lDeltaAngle >= PIF-PIF/4 && lDeltaAngle <= PIF+PIF/4)
-					{
-						mLog.Headline("Passed goal, it's right behind me!");
-						SetMode(MODE_BACKING_UP_TO_GOAL);
+			if (mode_run_delta_frame_count%3 == 0) {
+				const vec3 goal_direction = game_->GetCtf()->GetPosition() - _position;
+				if (::fabs(goal_direction.z) < 2 &&
+					goal_direction.GetLengthSquared() < ELEVATOR_FAR_DISTANCE*ELEVATOR_FAR_DISTANCE &&
+					_velocity.GetLengthSquared() < 6*6) {
+					const vec3 cutie_direction = game_->GetCutie()->GetOrientation() * vec3(0,1,0);
+					const float delta_angle = ::fabs(LEPRA_XY_ANGLE(goal_direction, cutie_direction));
+					if (delta_angle >= PIF-PIF/4 && delta_angle <= PIF+PIF/4) {
+						log_.Headline("Passed goal, it's right behind me!");
+						SetMode(kModeBackingUpToGoal);
 						return;
 					}
 				}
@@ -420,537 +354,432 @@ void VehicleAi::OnTick()
 
 			// Step target (aim) ahead.
 			{
-				const float lActualDistance2 = lTarget.GetDistanceSquared(lPosition);
-				const float lMaxAimFactor = (mMode == MODE_GET_OFF_ELEVATOR)? 1.0f : 1.5f;
-				const float lWantedDistance = lAimDistance * Math::Clamp(lVelocity.GetLength() / 2.5f, 0.5f, lMaxAimFactor);
-				if (lActualDistance2 < lWantedDistance*lWantedDistance)
-				{
-					const float lMoveAhead = lWantedDistance*1.1f - ::sqrt(lActualDistance2);
-					lPath->StepInterpolation(lMoveAhead * lPath->GetDistanceNormal());
-					log_volatile(mLog.Debugf("Stepping %f (=%f m from %f).", lMoveAhead*lPath->GetDistanceNormal(), lMoveAhead, lPath->GetCurrentInterpolationTime()));
+				const float actual_distance2 = target.GetDistanceSquared(_position);
+				const float max_aim_factor = (mode_ == kModeGetOffElevator)? 1.0f : 1.5f;
+				const float wanted_distance = aim_distance * Math::Clamp(_velocity.GetLength() / 2.5f, 0.5f, max_aim_factor);
+				if (actual_distance2 < wanted_distance*wanted_distance) {
+					const float move_ahead = wanted_distance*1.1f - ::sqrt(actual_distance2);
+					_path->StepInterpolation(move_ahead * _path->GetDistanceNormal());
+					log_volatile(log_.Debugf("Stepping %f (=%f m from %f).", move_ahead*_path->GetDistanceNormal(), move_ahead, _path->GetCurrentInterpolationTime()));
 				}
 
 				// Check if we're there yet.
-				const float t = lPath->GetCurrentInterpolationTime();
-				lPath->GotoAbsoluteTime(1.0f);
-				const float lTargetDistance = (mMode == MODE_GET_ON_ELEVATOR)? ON_ELEVATOR_DISTANCE : ON_GOAL_DISTANCE + mGame->GetCutie()->GetForwardSpeed()/4;
-				if (IsCloseToTarget(lPosition, lTargetDistance))
-				{
-					const bool lTowardsElevator = (lPath->GetType() == "to_elevator");
-					if (lTowardsElevator)
-					{
-						if (mMode == MODE_GET_ON_ELEVATOR)
-						{
-							SetMode(MODE_ON_ELEVATOR);
+				const float t = _path->GetCurrentInterpolationTime();
+				_path->GotoAbsoluteTime(1.0f);
+				const float target_distance = (mode_ == kModeGetOnElevator)? ON_ELEVATOR_DISTANCE : ON_GOAL_DISTANCE + game_->GetCutie()->GetForwardSpeed()/4;
+				if (IsCloseToTarget(_position, target_distance)) {
+					const bool towards_elevator = (_path->GetType() == "to_elevator");
+					if (towards_elevator) {
+						if (mode_ == kModeGetOnElevator) {
+							SetMode(kModeOnElevator);
 							return;
-						}
-						else if (mMode != MODE_GET_OFF_ELEVATOR)
-						{
+						} else if (mode_ != kModeGetOffElevator) {
 							// We got off track somewhere, try to shape up!
-							mLog.Headline("Normal mode target wrapped on our way to an elevator, changing mode.");
-							SetMode(MODE_WAITING_FOR_ELEVATOR);
+							log_.Headline("Normal mode target wrapped on our way to an elevator, changing mode.");
+							SetMode(kModeWaitingForElevator);
 							return;
 						}
-					}
-					else
-					{
-						SetMode(MODE_STOPPING_AT_GOAL);
+					} else {
+						SetMode(kModeStoppingAtGoal);
 						return;
 					}
 				}
-				lPath->GotoAbsoluteTime(t);
+				_path->GotoAbsoluteTime(t);
 
-				lTarget = lPath->GetValue();
+				target = _path->GetValue();
 			}
 
-			const float lGetOffDelayTime = (GetVehicleIndex() == 3)? mGame->GetComputerDifficulty() / 3.0f - 0.15f: 0.4f;
-			if (!(mMode == MODE_GET_OFF_ELEVATOR && lModeRunTime < lGetOffDelayTime))
-			{
+			const float get_off_delay_time = (GetVehicleIndex() == 3)? game_->GetComputerDifficulty() / 3.0f - 0.15f: 0.4f;
+			if (!(mode_ == kModeGetOffElevator && mode_run_time < get_off_delay_time)) {
 				// Move forward.
-				mGame->GetCutie()->SetEnginePower(0, +lStrength);
-				mGame->GetCutie()->SetEnginePower(2, 0);
+				game_->GetCutie()->SetEnginePower(0, +strength);
+				game_->GetCutie()->SetEnginePower(2, 0);
 			}
 
 			// Steer.
-			const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
-			const vec3 lWantedDirection = lTarget-lPosition;
-			float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
-			if (mMode == MODE_GET_OFF_ELEVATOR)
-			{
+			const vec3 _direction = game_->GetCutie()->GetOrientation() * vec3(0,1,0);
+			const vec3 wanted_direction = target-_position;
+			float angle = LEPRA_XY_ANGLE(wanted_direction, _direction);
+			if (mode_ == kModeGetOffElevator) {
 				// Aborting too early might cause us to stop, waiting for the next ride in mid-air.
-				const float lGetOffDistance = GetClosestElevatorRadius() + ELEVATOR_GOT_OFF_EXTRA_DISTANCE;
-				vec2 lElevatorGetOff2d(mElevatorGetOffPosition.x, mElevatorGetOffPosition.y);
-				vec2 lPosition2d(lPosition.x, lPosition.y);
-				mLog.Infof("ElevatorGetOff (%f;%f), pos (%f;%f)", lElevatorGetOff2d.x, lElevatorGetOff2d.y, lPosition2d.x, lPosition2d.y);
-				if (lElevatorGetOff2d.GetDistanceSquared(lPosition2d) > lGetOffDistance*lGetOffDistance)
-				{
-					SetMode(MODE_NORMAL);
+				const float get_off_distance = GetClosestElevatorRadius() + ELEVATOR_GOT_OFF_EXTRA_DISTANCE;
+				vec2 elevator_get_off2d(elevator_get_off_position_.x, elevator_get_off_position_.y);
+				vec2 position2d(_position.x, _position.y);
+				log_.Infof("ElevatorGetOff (%f;%f), pos (%f;%f)", elevator_get_off2d.x, elevator_get_off2d.y, position2d.x, position2d.y);
+				if (elevator_get_off2d.GetDistanceSquared(position2d) > get_off_distance*get_off_distance) {
+					SetMode(kModeNormal);
 				}
-				lAngle *= 2;	// Make steering more powerful while getting off.
+				angle *= 2;	// Make steering more powerful while getting off.
 			}
-			if (GetVehicleIndex() == 3)
-			{
-				lAngle *= 2;
+			if (GetVehicleIndex() == 3) {
+				angle *= 2;
 			}
-			mGame->GetCutie()->SetEnginePower(1, +lAngle);
-			mLastAverageAngle = Math::Lerp(mLastAverageAngle, lAngle, 0.5f);
+			game_->GetCutie()->SetEnginePower(1, +angle);
+			last_average_angle_ = Math::Lerp(last_average_angle_, angle, 0.5f);
 
 			// Check if we need to slow down.
-			const float lHighSpeed = SCALE_FACTOR * 2.7f;
-			const float lAbsAngle = ::fabs(lAngle);
-			if (lVelocity.GetLengthSquared() > lHighSpeed*lHighSpeed)
-			{
-				if (lAbsAngle > 0.2f)
-				{
-					float lFactor = 0;
-					switch (GetVehicleIndex())
-					{
-						case 0: lFactor = 0.02f;	break;
-						case 1:	lFactor = 0.10f;	break;
-						case 2:	lFactor = 0.02f;	break;
+			const float high_speed = SCALE_FACTOR * 2.7f;
+			const float abs_angle = ::fabs(angle);
+			if (_velocity.GetLengthSquared() > high_speed*high_speed) {
+				if (abs_angle > 0.2f) {
+					float factor = 0;
+					switch (GetVehicleIndex()) {
+						case 0: factor = 0.02f;	break;
+						case 1:	factor = 0.10f;	break;
+						case 2:	factor = 0.02f;	break;
 					}
-					mGame->GetCutie()->SetEnginePower(2, lAbsAngle*lFactor + lVelocity.GetLength()*lFactor*0.1f);
-				}
-				else if (lPath->GetCurrentInterpolationTime() >= DOUBLE_OFF_END_PATH_TIME &&
-					IsCloseToTarget(lPosition, SLOW_DOWN_DISTANCE))
-				{
-					mGame->GetCutie()->SetEnginePower(2, 0.2f);
+					game_->GetCutie()->SetEnginePower(2, abs_angle*factor + _velocity.GetLength()*factor*0.1f);
+				} else if (_path->GetCurrentInterpolationTime() >= DOUBLE_OFF_END_PATH_TIME &&
+					IsCloseToTarget(_position, SLOW_DOWN_DISTANCE)) {
+					game_->GetCutie()->SetEnginePower(2, 0.2f);
 				}
 			}
-		}
-		break;
-		case MODE_BACKING_UP:
-		{
+		} break;
+		case kModeBackingUp: {
 			// Brake or move backward.
-			const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
-			mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength);
-			mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f);
+			const bool is_moving_forward = (game_->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
+			game_->GetCutie()->SetEnginePower(0, is_moving_forward? 0.0f : -strength);
+			game_->GetCutie()->SetEnginePower(2, is_moving_forward? strength :  0.0f);
 
-			const float lBackTime = (GetVehicleIndex() == 3)? 2.5f : 1.7f;
-			if (!lIsMovingForward && lModeRunTime > lBackTime)
-			{
-				SetMode(MODE_HEADING_BACK_ON_TRACK);
+			const float back_time = (GetVehicleIndex() == 3)? 2.5f : 1.7f;
+			if (!is_moving_forward && mode_run_time > back_time) {
+				SetMode(kModeHeadingBackOnTrack);
 				return;
 			}
-		}
-		break;
-		case MODE_BACKING_UP_TO_GOAL:
-		{
-			vec3 lWantedDirection = mGame->GetCtf()->GetPosition() - lPosition;
-			const float lDistance2 = lWantedDirection.GetLengthSquared();
-			if (lDistance2 <= ON_GOAL_DISTANCE*ON_GOAL_DISTANCE)
-			{
-				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-				lPath->GotoAbsoluteTime(END_PATH_TIME);
-				SetMode(MODE_STOPPING_AT_GOAL);
+		} break;
+		case kModeBackingUpToGoal: {
+			vec3 wanted_direction = game_->GetCtf()->GetPosition() - _position;
+			const float distance2 = wanted_direction.GetLengthSquared();
+			if (distance2 <= ON_GOAL_DISTANCE*ON_GOAL_DISTANCE) {
+				Spline* _path = game_->GetLevel()->QueryPath()->GetPath(active_path_);
+				_path->GotoAbsoluteTime(END_PATH_TIME);
+				SetMode(kModeStoppingAtGoal);
 				return;
-			}
-			else if (lDistance2 >= TOTALLY_OFF_COURSE_DISTANCE*TOTALLY_OFF_COURSE_DISTANCE)
-			{
-				SetMode(MODE_FIND_BEST_PATH);
+			} else if (distance2 >= TOTALLY_OFF_COURSE_DISTANCE*TOTALLY_OFF_COURSE_DISTANCE) {
+				SetMode(kModeFindBestPath);
 				return;
 			}
 
 			// Brake or move backward.
-			const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
-			mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength);
-			mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f);
+			const bool is_moving_forward = (game_->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
+			game_->GetCutie()->SetEnginePower(0, is_moving_forward? 0.0f : -strength);
+			game_->GetCutie()->SetEnginePower(2, is_moving_forward? strength :  0.0f);
 
 			// Turn steering wheel.
-			const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
-			float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
-			lAngle += (lAngle < 0)? +PIF : -PIF;
-			lAngle *= 3;
-			mGame->GetCutie()->SetEnginePower(1, -lAngle);
+			const vec3 _direction = game_->GetCutie()->GetOrientation() * vec3(0,1,0);
+			float angle = LEPRA_XY_ANGLE(wanted_direction, _direction);
+			angle += (angle < 0)? +PIF : -PIF;
+			angle *= 3;
+			game_->GetCutie()->SetEnginePower(1, -angle);
 
-			if (lModeRunTime > 15)
-			{
-				mLog.Headline("Not getting back to goal. Fuck it.");
-				SetMode(MODE_ROTATE_ON_THE_SPOT);
+			if (mode_run_time > 15) {
+				log_.Headline("Not getting back to goal. Fuck it.");
+				SetMode(kModeRotateOnTheSpot);
 				return;
 			}
-		}
-		break;
-		case MODE_FLEE:
-		{
+		} break;
+		case kModeFlee: {
 			// Pedal to the metal.
-			mGame->GetCutie()->SetEnginePower(0, +lStrength);
-			mGame->GetCutie()->SetEnginePower(1, 0);
-			mGame->GetCutie()->SetEnginePower(2, 0);
-			if (lModeRunTime > 3.0f)
-			{
-				SetMode(MODE_FIND_BEST_PATH);
+			game_->GetCutie()->SetEnginePower(0, +strength);
+			game_->GetCutie()->SetEnginePower(1, 0);
+			game_->GetCutie()->SetEnginePower(2, 0);
+			if (mode_run_time > 3.0f) {
+				SetMode(kModeFindBestPath);
 				return;
 			}
-		}
-		break;
-		case MODE_STOPPING_AT_GOAL:
-		case MODE_AT_GOAL:
-		{
-			if (lModeRunDeltaFrameCount%5 == 3 && mGame->GetCtf()->GetCaptureLevel() < 0.85f)
-			{
-				if (AvoidGrenade(lPosition, lVelocity, 1))
-				{
+		} break;
+		case kModeStoppingAtGoal:
+		case kModeAtGoal: {
+			if (mode_run_delta_frame_count%5 == 3 && game_->GetCtf()->GetCaptureLevel() < 0.85f) {
+				if (AvoidGrenade(_position, _velocity, 1)) {
 					return;
 				}
 			}
-			Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-			if (!IsCloseToTarget(lPosition, ON_GOAL_DISTANCE))
-			{
+			Spline* _path = game_->GetLevel()->QueryPath()->GetPath(active_path_);
+			if (!IsCloseToTarget(_position, ON_GOAL_DISTANCE)) {
 				// If either already stopped at goal, OR stopped but at the wrong spot.
-				if (mMode != MODE_STOPPING_AT_GOAL || mGame->GetCutie()->GetForwardSpeed() < 0.5f*SCALE_FACTOR)
-				{
-					lPath->GotoAbsoluteTime(DOUBLE_OFF_END_PATH_TIME);	// Close to end, but not at end.
-					SetMode(MODE_HEADING_BACK_ON_TRACK);
+				if (mode_ != kModeStoppingAtGoal || game_->GetCutie()->GetForwardSpeed() < 0.5f*SCALE_FACTOR) {
+					_path->GotoAbsoluteTime(DOUBLE_OFF_END_PATH_TIME);	// Close to end, but not at end.
+					SetMode(kModeHeadingBackOnTrack);
 					return;
 				}
 			}
-			if (mMode != MODE_AT_GOAL)
-			{
-				SetMode(MODE_AT_GOAL);
+			if (mode_ != kModeAtGoal) {
+				SetMode(kModeAtGoal);
 			}
 			// Brake!
-			mGame->GetCutie()->SetEnginePower(0, 0);
-			mGame->GetCutie()->SetEnginePower(2, -lStrength);	// Negative = use full brakes, not only hand brake.
-		}
-		break;
-		case MODE_WAITING_FOR_ELEVATOR:
-		{
-			if (lModeRunDeltaFrameCount%5 == 3)
-			{
-				if (AvoidGrenade(lPosition, lVelocity, 1))
-				{
+			game_->GetCutie()->SetEnginePower(0, 0);
+			game_->GetCutie()->SetEnginePower(2, -strength);	// Negative = use full brakes, not only hand brake.
+		} break;
+		case kModeWaitingForElevator: {
+			if (mode_run_delta_frame_count%5 == 3) {
+				if (AvoidGrenade(_position, _velocity, 1)) {
 					return;
 				}
 			}
-			if (lModeRunTime > 25.0f)
-			{
-				mLog.Headline("Movin' on, I've waited for the elevator too long.");
-				SetMode(MODE_FLEE);
+			if (mode_run_time > 25.0f) {
+				log_.Headline("Movin' on, I've waited for the elevator too long.");
+				SetMode(kModeFlee);
 				return;
 			}
-			if (::fabs(mLastAverageAngle) > 0.1f && GetVehicleIndex() == 1)
-			{
-				lStrength *= SMOOTH_BRAKING_FACTOR;	// Smooth braking when turning, we can always back up if necessary.
+			if (::fabs(last_average_angle_) > 0.1f && GetVehicleIndex() == 1) {
+				strength *= SMOOTH_BRAKING_FACTOR;	// Smooth braking when turning, we can always back up if necessary.
 			}
-			const float lElevatorDistance2 = mElevatorGetOnPosition.GetDistanceSquared(lPosition);
-			if (lElevatorDistance2 < ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE)
-			{
-				mLog.Headline("Got too close to the elevator stop position, backing up.");
+			const float elevator_distance2 = elevator_get_on_position_.GetDistanceSquared(_position);
+			if (elevator_distance2 < ELEVATOR_TOO_CLOSE_DISTANCE*ELEVATOR_TOO_CLOSE_DISTANCE) {
+				log_.Headline("Got too close to the elevator stop position, backing up.");
 				// Back up parallel to the spline direction.
-				const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
-				Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-				const vec3 lWantedDirection = lPath->GetSlope();
-				const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
-				mGame->GetCutie()->SetEnginePower(1, +lAngle);
-				const bool lIsMovingForward = (mGame->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
-				mGame->GetCutie()->SetEnginePower(0, lIsMovingForward? 0.0f : -lStrength);
-				mGame->GetCutie()->SetEnginePower(2, lIsMovingForward? lStrength :  0.0f);
+				const vec3 _direction = game_->GetCutie()->GetOrientation() * vec3(0,1,0);
+				Spline* _path = game_->GetLevel()->QueryPath()->GetPath(active_path_);
+				const vec3 wanted_direction = _path->GetSlope();
+				const float angle = LEPRA_XY_ANGLE(wanted_direction, _direction);
+				game_->GetCutie()->SetEnginePower(1, +angle);
+				const bool is_moving_forward = (game_->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
+				game_->GetCutie()->SetEnginePower(0, is_moving_forward? 0.0f : -strength);
+				game_->GetCutie()->SetEnginePower(2, is_moving_forward? strength :  0.0f);
 
-				const Cure::Elevator* lNearestElevator;
-				vec3 lNearestLiftPosition2d;
-				float lElevatorXyDistance2ToElevatorStop;
-				const bool lIsElevatorHere = HasElevatorArrived(lNearestElevator, lPosition.z, lNearestLiftPosition2d, lElevatorXyDistance2ToElevatorStop);
-				if (lIsElevatorHere)
-				{
-					SetMode(MODE_GET_ON_ELEVATOR);
-				}
-				else if (QueryCutieHindered(lTime, lVelocity))
-				{
-					mLastAverageAngle = (Random::Uniform(0.0f, 1.0f) > 0.5f)? +2.0f : -2.0f;
-					SetMode(MODE_ROTATE_ON_THE_SPOT);
+				const cure::Elevator* _nearest_elevator;
+				vec3 _nearest_lift_position2d;
+				float _elevator_xy_distance2_to_elevator_stop;
+				const bool is_elevator_here = HasElevatorArrived(_nearest_elevator, _position.z, _nearest_lift_position2d, _elevator_xy_distance2_to_elevator_stop);
+				if (is_elevator_here) {
+					SetMode(kModeGetOnElevator);
+				} else if (QueryCutieHindered(_time, _velocity)) {
+					last_average_angle_ = (Random::Uniform(0.0f, 1.0f) > 0.5f)? +2.0f : -2.0f;
+					SetMode(kModeRotateOnTheSpot);
 				}
 				return;
 			}
-			if (::fabs(mElevatorGetOnPosition.z-lPosition.z) >= 3 ||
-				lElevatorDistance2 > ELEVATOR_FAR_DISTANCE*ELEVATOR_FAR_DISTANCE)
-			{
-				mLog.Headline("Somehow got away from the elevator wait position, doing something else.");
-				SetMode(MODE_FIND_BEST_PATH);
+			if (::fabs(elevator_get_on_position_.z-_position.z) >= 3 ||
+				elevator_distance2 > ELEVATOR_FAR_DISTANCE*ELEVATOR_FAR_DISTANCE) {
+				log_.Headline("Somehow got away from the elevator wait position, doing something else.");
+				SetMode(kModeFindBestPath);
 				return;
 			}
 
 			// Check that we're headed towards the elevator center.
-			if (lVelocity.GetLengthSquared() < 0.5f)
-			{
-				vec3 lUp(0, 0, 1);
-				lUp = mGame->GetCutie()->GetOrientation() * lUp;
-				if (lUp.z > 0.7f)
-				{
-					const vec3 lDirection = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
-					const vec3 lWantedDirection = mElevatorGetOnPosition - lPosition;
-					const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, lDirection);
-					if (::fabs(lAngle) > PIF/12)
-					{
-						mRotateAngle = -lAngle;
-						SetMode(MODE_ROTATE_ON_THE_SPOT_WAITING);
+			if (_velocity.GetLengthSquared() < 0.5f) {
+				vec3 up(0, 0, 1);
+				up = game_->GetCutie()->GetOrientation() * up;
+				if (up.z > 0.7f) {
+					const vec3 _direction = game_->GetCutie()->GetOrientation() * vec3(0,1,0);
+					const vec3 wanted_direction = elevator_get_on_position_ - _position;
+					const float angle = LEPRA_XY_ANGLE(wanted_direction, _direction);
+					if (::fabs(angle) > PIF/12) {
+						rotate_angle_ = -angle;
+						SetMode(kModeRotateOnTheSpotWaiting);
 						return;
 					}
 				}
 			}
 
-			const Cure::Elevator* lNearestElevator;
-			vec3 lNearestLiftPosition2d;
-			float lElevatorXyDistance2ToElevatorStop;
-			if (HasElevatorArrived(lNearestElevator, lPosition.z, lNearestLiftPosition2d, lElevatorXyDistance2ToElevatorStop))
-			{
-				vec3 lVelocityXY = lNearestElevator->GetVelocity();
-				bool lTryGetOn = false;
+			const cure::Elevator* _nearest_elevator;
+			vec3 _nearest_lift_position2d;
+			float _elevator_xy_distance2_to_elevator_stop;
+			if (HasElevatorArrived(_nearest_elevator, _position.z, _nearest_lift_position2d, _elevator_xy_distance2_to_elevator_stop)) {
+				vec3 velocity_xy = _nearest_elevator->GetVelocity();
+				bool try_get_on = false;
 				// Check if elevator is on it's way out.
-				if (IsVertical(lVelocityXY))
-				{
-					lTryGetOn = true;
-				}
-				else
-				{
-					lVelocityXY.x *= 0.1f;
-					lVelocityXY.y *= 0.1f;
-					lVelocityXY.z  = 0;
-					if (lElevatorXyDistance2ToElevatorStop+0.1f >= mElevatorGetOnPosition.GetDistanceSquared(lNearestLiftPosition2d+lVelocityXY))
-					{
-						lTryGetOn = true;
+				if (IsVertical(velocity_xy)) {
+					try_get_on = true;
+				} else {
+					velocity_xy.x *= 0.1f;
+					velocity_xy.y *= 0.1f;
+					velocity_xy.z  = 0;
+					if (_elevator_xy_distance2_to_elevator_stop+0.1f >= elevator_get_on_position_.GetDistanceSquared(_nearest_lift_position2d+velocity_xy)) {
+						try_get_on = true;
 					}
 				}
-				if (lTryGetOn)
-				{
-					mLog.Info("Elevator here - getting on!");
-					SetMode(MODE_GET_ON_ELEVATOR);
+				if (try_get_on) {
+					log_.Info("Elevator here - getting on!");
+					SetMode(kModeGetOnElevator);
 					return;
-				}
-				else
-				{
-					mLog.Info("Waiting for elevator: not getting on, since elevator is departing!");
+				} else {
+					log_.Info("Waiting for elevator: not getting on, since elevator is departing!");
 				}
 			}
 
-			mGame->GetCutie()->SetEnginePower(1, 0);
+			game_->GetCutie()->SetEnginePower(1, 0);
 			// Brake!
-			mGame->GetCutie()->SetEnginePower(0, 0);
-			mGame->GetCutie()->SetEnginePower(2, -lStrength);	// Negative = use full brakes, not only hand brake.
-		}
-		break;
-		case MODE_ON_ELEVATOR:
-		{
-			lStrength *= SMOOTH_BRAKING_FACTOR;	// Smooth braking, we can always back up if necessary.
+			game_->GetCutie()->SetEnginePower(0, 0);
+			game_->GetCutie()->SetEnginePower(2, -strength);	// Negative = use full brakes, not only hand brake.
+		} break;
+		case kModeOnElevator: {
+			strength *= SMOOTH_BRAKING_FACTOR;	// Smooth braking, we can always back up if necessary.
 
 			// Brake!
-			mGame->GetCutie()->SetEnginePower(0, 0);
-			mGame->GetCutie()->SetEnginePower(1, 0);
-			mGame->GetCutie()->SetEnginePower(2, -lStrength);	// Negative = use full brakes, not only hand brake.
+			game_->GetCutie()->SetEnginePower(0, 0);
+			game_->GetCutie()->SetEnginePower(1, 0);
+			game_->GetCutie()->SetEnginePower(2, -strength);	// Negative = use full brakes, not only hand brake.
 
 			// Check if elevator departed.
-			const float lMinimumVelocity2 = 0.5f*0.5f;
-			if (lModeRunTime > 0.7f && lVelocity.GetLengthSquared() > lMinimumVelocity2)
-			{
-				const Cure::Elevator* lNearestElevator;
-				const vec3 lNearestLiftPosition = GetClosestElevatorPosition(mElevatorGetOnPosition, lNearestElevator);
-				if (lNearestLiftPosition.z > lPosition.z+0.2f)
-				{
+			const float minimum_velocity2 = 0.5f*0.5f;
+			if (mode_run_time > 0.7f && _velocity.GetLengthSquared() > minimum_velocity2) {
+				const cure::Elevator* _nearest_elevator;
+				const vec3 nearest_lift_position = GetClosestElevatorPosition(elevator_get_on_position_, _nearest_elevator);
+				if (nearest_lift_position.z > _position.z+0.2f) {
 					// Crap, we missed it!
-					mLog.Headline("Must have missed the elevator (it's not close!), waiting for it again!");
-					SetMode(MODE_WAITING_FOR_ELEVATOR);
+					log_.Headline("Must have missed the elevator (it's not close!), waiting for it again!");
+					SetMode(kModeWaitingForElevator);
 					return;
 				}
 				// Vehicle speed check not enouch (bouncy wheels), so check elevator speed too.
-				vec3 lElevatorVelocity = lNearestElevator->GetVelocity();
-				if (lElevatorVelocity.GetLengthSquared() > lMinimumVelocity2)
-				{
-					const bool lIsHorizontal = !IsVertical(lElevatorVelocity);
-					const vec3 lDirection = lIsHorizontal? lElevatorVelocity : mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
-					mRotateAngle = -GetRelativeDriveOnAngle(lDirection);
-					if (::fabs(mRotateAngle) > PIF/6 || lIsHorizontal)
-					{
-						if (lIsHorizontal)
-						{
-							mRotateAngle = (mRotateAngle < 0)? -1.3f : +1.3f;
+				vec3 elevator_velocity = _nearest_elevator->GetVelocity();
+				if (elevator_velocity.GetLengthSquared() > minimum_velocity2) {
+					const bool is_horizontal = !IsVertical(elevator_velocity);
+					const vec3 _direction = is_horizontal? elevator_velocity : game_->GetCutie()->GetOrientation() * vec3(0,1,0);
+					rotate_angle_ = -GetRelativeDriveOnAngle(_direction);
+					if (::fabs(rotate_angle_) > PIF/6 || is_horizontal) {
+						if (is_horizontal) {
+							rotate_angle_ = (rotate_angle_ < 0)? -1.3f : +1.3f;
 						}
-						SetMode(MODE_ROTATE_ON_THE_SPOT_DURING);
+						SetMode(kModeRotateOnTheSpotDuring);
 						return;
 					}
-					SetMode(MODE_FIND_PATH_OFF_ELEVATOR);
+					SetMode(kModeFindPathOffElevator);
 					return;
 				}
-			}
-			else if (lModeRunTime > 4.5f)
-			{
+			} else if (mode_run_time > 4.5f) {
 				// Crap, we missed it!
-				mLog.Headline("Must have missed the elevator (I'm still here!), waiting for it again!");
-				SetMode(MODE_WAITING_FOR_ELEVATOR);
+				log_.Headline("Must have missed the elevator (I'm still here!), waiting for it again!");
+				SetMode(kModeWaitingForElevator);
 				return;
 			}
 
-			if (lModeRunTime > 0.8f)
-			{
+			if (mode_run_time > 0.8f) {
 				// Check if we should adjust pos.
-				const vec3 lForward = mGame->GetCutie()->GetOrientation() * vec3(0,1,0);
-				const float lDist = mElevatorGetOnPosition.GetDistanceSquared(lPosition);
-				if (lDist > mElevatorGetOnPosition.GetDistanceSquared(lPosition+lForward))
-				{
-					mGame->GetCutie()->SetEnginePower(0, +lStrength);
-					mGame->GetCutie()->SetEnginePower(2, 0);
-				}
-				else if (lDist > mElevatorGetOnPosition.GetDistanceSquared(lPosition-lForward))
-				{
-					mGame->GetCutie()->SetEnginePower(0, -lStrength);
-					mGame->GetCutie()->SetEnginePower(2, 0);
+				const vec3 forward = game_->GetCutie()->GetOrientation() * vec3(0,1,0);
+				const float dist = elevator_get_on_position_.GetDistanceSquared(_position);
+				if (dist > elevator_get_on_position_.GetDistanceSquared(_position+forward)) {
+					game_->GetCutie()->SetEnginePower(0, +strength);
+					game_->GetCutie()->SetEnginePower(2, 0);
+				} else if (dist > elevator_get_on_position_.GetDistanceSquared(_position-forward)) {
+					game_->GetCutie()->SetEnginePower(0, -strength);
+					game_->GetCutie()->SetEnginePower(2, 0);
 				}
 			}
-		}
-		break;
-		case MODE_ROTATE_ON_THE_SPOT:
-		case MODE_ROTATE_ON_THE_SPOT_DURING:
-		case MODE_ROTATE_ON_THE_SPOT_WAITING:
-		{
-			float lAngle = mRotateAngle;
-			const float lMinAngle = 0.3f;
-			if (::fabs(lAngle) < lMinAngle)
-			{
-				lAngle = (lAngle < 0)? -lMinAngle : +lMinAngle;
+		} break;
+		case kModeRotateOnTheSpot:
+		case kModeRotateOnTheSpotDuring:
+		case kModeRotateOnTheSpotWaiting: {
+			float angle = rotate_angle_;
+			const float min_angle = 0.3f;
+			if (::fabs(angle) < min_angle) {
+				angle = (angle < 0)? -min_angle : +min_angle;
 			}
-			float lSteerEndTime = 0.4f;
-			float lForwardEndTime = lSteerEndTime + 0.9f;
-			float lOtherSteerEndTime = lForwardEndTime + lSteerEndTime;
-			float lPeriod = lOtherSteerEndTime + 0.8f;
-			switch (GetVehicleIndex())
-			{
-				case 0:
-				{
+			float steer_end_time = 0.4f;
+			float forward_end_time = steer_end_time + 0.9f;
+			float other_steer_end_time = forward_end_time + steer_end_time;
+			float period = other_steer_end_time + 0.8f;
+			switch (GetVehicleIndex()) {
+				case 0: {
 					// Cutie less forward acceleration, because it has good grip and accelerates quite well.
-					lAngle *= 1.2f;
-					lForwardEndTime = lSteerEndTime + 0.7f;
-					lOtherSteerEndTime = lForwardEndTime + lSteerEndTime;
-					lPeriod = lOtherSteerEndTime + 0.8f;
-				}
-				break;
-				case 1:
-				{
+					angle *= 1.2f;
+					forward_end_time = steer_end_time + 0.7f;
+					other_steer_end_time = forward_end_time + steer_end_time;
+					period = other_steer_end_time + 0.8f;
+				} break;
+				case 1: {
 					// Hardie's steering impared.
-					lAngle *= 2;
-					lSteerEndTime = 0.7f;
-					lForwardEndTime = lSteerEndTime + 0.7f;
-					lOtherSteerEndTime = lForwardEndTime + lSteerEndTime;
-					lPeriod = lOtherSteerEndTime + 1.0f;
-					lStrength *= SMOOTH_BRAKING_FACTOR;
-				}
-				break;
-				case 2:
-				{
+					angle *= 2;
+					steer_end_time = 0.7f;
+					forward_end_time = steer_end_time + 0.7f;
+					other_steer_end_time = forward_end_time + steer_end_time;
+					period = other_steer_end_time + 1.0f;
+					strength *= SMOOTH_BRAKING_FACTOR;
+				} break;
+				case 2: {
 					// Speedie turns really effectively.
-					lAngle *= 0.5f;
-				}
-				break;
-				case 3:
-				{
+					angle *= 0.5f;
+				} break;
+				case 3: {
 					// Sleepie needs longer running time, since so slow.
-					lAngle *= 2;
-					lForwardEndTime = lSteerEndTime + 1.0f;
-					lOtherSteerEndTime = lForwardEndTime + lSteerEndTime;
-					lPeriod = lOtherSteerEndTime + 1.5f;
-				}
-				break;
+					angle *= 2;
+					forward_end_time = steer_end_time + 1.0f;
+					other_steer_end_time = forward_end_time + steer_end_time;
+					period = other_steer_end_time + 1.5f;
+				} break;
 			}
-			if (mMode == MODE_ROTATE_ON_THE_SPOT_WAITING)
-			{
-				const Cure::Elevator* lNearestElevator;
-				vec3 lNearestLiftPosition2d;
-				float lElevatorXyDistance2ToElevatorStop;
-				if (HasElevatorArrived(lNearestElevator, lPosition.z, lNearestLiftPosition2d, lElevatorXyDistance2ToElevatorStop))
-				{
-					mLog.Headline("Elevator arrived while rotating on the spot, getting on instead!");
-					SetMode(MODE_GET_ON_ELEVATOR);
+			if (mode_ == kModeRotateOnTheSpotWaiting) {
+				const cure::Elevator* _nearest_elevator;
+				vec3 _nearest_lift_position2d;
+				float _elevator_xy_distance2_to_elevator_stop;
+				if (HasElevatorArrived(_nearest_elevator, _position.z, _nearest_lift_position2d, _elevator_xy_distance2_to_elevator_stop)) {
+					log_.Headline("Elevator arrived while rotating on the spot, getting on instead!");
+					SetMode(kModeGetOnElevator);
 					return;
 				}
 			}
 			// Finish this rotation show if we're getting there.
-			const int lIterations = (mMode == MODE_ROTATE_ON_THE_SPOT_WAITING)? 1 : 2;
-			if (lModeRunTime > lIterations*lPeriod+lSteerEndTime)
-			{
-				mGame->GetCutie()->SetEnginePower(0, 0);
-				mGame->GetCutie()->SetEnginePower(1, -lAngle);
-				mGame->GetCutie()->SetEnginePower(2, -1);
-				if (mMode == MODE_ROTATE_ON_THE_SPOT)
-				{
-					SetMode(MODE_HEADING_BACK_ON_TRACK);
-				}
-				else if (mMode == MODE_ROTATE_ON_THE_SPOT_DURING)
-				{
-					SetMode(MODE_FIND_PATH_OFF_ELEVATOR);
-				}
-				else
-				{
-					SetMode(MODE_WAITING_FOR_ELEVATOR);
+			const int iterations = (mode_ == kModeRotateOnTheSpotWaiting)? 1 : 2;
+			if (mode_run_time > iterations*period+steer_end_time) {
+				game_->GetCutie()->SetEnginePower(0, 0);
+				game_->GetCutie()->SetEnginePower(1, -angle);
+				game_->GetCutie()->SetEnginePower(2, -1);
+				if (mode_ == kModeRotateOnTheSpot) {
+					SetMode(kModeHeadingBackOnTrack);
+				} else if (mode_ == kModeRotateOnTheSpotDuring) {
+					SetMode(kModeFindPathOffElevator);
+				} else {
+					SetMode(kModeWaitingForElevator);
 				}
 				return;
 			}
-			for (int x = 0; x < lIterations+1; ++x)
-			{
-				const float lBase = x*lPeriod;
-				if (lModeRunTime >= lBase && lModeRunTime < lBase+lSteerEndTime)
-				{
+			for (int x = 0; x < iterations+1; ++x) {
+				const float base = x*period;
+				if (mode_run_time >= base && mode_run_time < base+steer_end_time) {
 					// Brake and turn in "forward direction".
-					mGame->GetCutie()->SetEnginePower(0, 0);
-					mGame->GetCutie()->SetEnginePower(1, -lAngle);
-					mGame->GetCutie()->SetEnginePower(2, -lStrength);
+					game_->GetCutie()->SetEnginePower(0, 0);
+					game_->GetCutie()->SetEnginePower(1, -angle);
+					game_->GetCutie()->SetEnginePower(2, -strength);
 					break;
-				}
-				else if (lModeRunTime >= lBase+lSteerEndTime && lModeRunTime < lBase+lForwardEndTime)
-				{
+				} else if (mode_run_time >= base+steer_end_time && mode_run_time < base+forward_end_time) {
 					// Drive forward.
-					mGame->GetCutie()->SetEnginePower(0, +lStrength);
-					mGame->GetCutie()->SetEnginePower(2, 0);
+					game_->GetCutie()->SetEnginePower(0, +strength);
+					game_->GetCutie()->SetEnginePower(2, 0);
 					break;
-				}
-				else if (lModeRunTime >= lBase+lForwardEndTime && lModeRunTime < lBase+lOtherSteerEndTime)
-				{
+				} else if (mode_run_time >= base+forward_end_time && mode_run_time < base+other_steer_end_time) {
 					// Brake and turn in "backward direction".
-					mGame->GetCutie()->SetEnginePower(0, 0);
-					mGame->GetCutie()->SetEnginePower(1, +lAngle);
-					mGame->GetCutie()->SetEnginePower(2, -lStrength);
+					game_->GetCutie()->SetEnginePower(0, 0);
+					game_->GetCutie()->SetEnginePower(1, +angle);
+					game_->GetCutie()->SetEnginePower(2, -strength);
 					break;
-				}
-				else if (lModeRunTime >= lBase+lOtherSteerEndTime && lModeRunTime < lBase+lPeriod)
-				{
+				} else if (mode_run_time >= base+other_steer_end_time && mode_run_time < base+period) {
 					// Drive backward.
-					mGame->GetCutie()->SetEnginePower(0, -0.7f*lStrength);
-					mGame->GetCutie()->SetEnginePower(2, 0);
+					game_->GetCutie()->SetEnginePower(0, -0.7f*strength);
+					game_->GetCutie()->SetEnginePower(2, 0);
 					break;
 				}
 			}
-		}
-		break;
+		} break;
 	}
 }
 
-bool VehicleAi::AvoidGrenade(const vec3& pPosition, const vec3& pVelocity, float pCaution)
-{
-	if (mGame->GetComputerDifficulty() < 0.6f)
-	{
+bool VehicleAi::AvoidGrenade(const vec3& position, const vec3& velocity, float caution) {
+	if (game_->GetComputerDifficulty() < 0.6f) {
 		return false;
 	}
 
 	// Walk all objects, pick out grenades.
-	const Cure::ContextManager::ContextObjectTable& lObjectTable = GetManager()->GetObjectTable();
-	Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();
-	for (; x != lObjectTable.end(); ++x)
-	{
-		Grenade* lGrenade = dynamic_cast<Grenade*>(x->second);
-		if (!lGrenade)
-		{
+	const cure::ContextManager::ContextObjectTable& object_table = GetManager()->GetObjectTable();
+	cure::ContextManager::ContextObjectTable::const_iterator x = object_table.begin();
+	for (; x != object_table.end(); ++x) {
+		Grenade* grenade = dynamic_cast<Grenade*>(x->second);
+		if (!grenade) {
 			continue;
 		}
 		// Ignore those too high up, too far down or still heading upwards.
-		const vec3 lGrenadePosition = lGrenade->GetPosition();
-		const float h = lGrenadePosition.z - pPosition.z;
-		const vec3 lGrenadeVelocity = lGrenade->GetVelocity();
+		const vec3 grenade_position = grenade->GetPosition();
+		const float h = grenade_position.z - position.z;
+		const vec3 grenade_velocity = grenade->GetVelocity();
 		if (h > REACT_TO_GRENADE_HEIGHT * SCALE_FACTOR ||
 			h < 4.0f * SCALE_FACTOR ||	// Still gonna blow up in our face, so ignore it.
-			lGrenadeVelocity.z >= 0)
-		{
+			grenade_velocity.z >= 0) {
 			continue;
 		}
 		float t;
 		{
-			const float vup = lGrenadeVelocity.z;
+			const float vup = grenade_velocity.z;
 			// g*t^2/2 - vup*t + h = 0
 			//
 			// Quaderatic formula:
@@ -964,301 +793,245 @@ bool VehicleAi::AvoidGrenade(const vec3& pPosition, const vec3& pVelocity, float
 			const float c = -h;
 			const float b2 = b*b;
 			const float _4ac = 4*a*c;
-			if (b2 < _4ac)	// Will never rise high enough.
-			{
-				mLog.Headline("Ignoring grenade, ballistic says it can not hit.");
+			if (b2 < _4ac) {	// Will never rise high enough.
+				log_.Headline("Ignoring grenade, ballistic says it can not hit.");
 				continue;
 			}
 			t = (-b + sqrt(b2 - _4ac)) / (2*a);
 			deb_assert(t > 0);
 		}
-		const vec2 lGrenadeTarget(lGrenadePosition.x + lGrenadeVelocity.x * t,
-			lGrenadePosition.y + lGrenadeVelocity.y * t);
+		const vec2 grenade_target(grenade_position.x + grenade_velocity.x * t,
+			grenade_position.y + grenade_velocity.y * t);
 		// Compare against some point in front of my vehicle, so that I won't break
 		// if it's better to speed up.
-		const float lDamageRange = 8.0f * SCALE_FACTOR * pCaution;
-		const vec2 lMyTarget(pPosition.x + pVelocity.x * t,
-			pPosition.y + pVelocity.y * t);
-		vec2 lMyExtraStep(pVelocity.x, pVelocity.y);
-		if (lMyExtraStep.GetLengthSquared() < SCALE_FACTOR*SCALE_FACTOR)
-		{
-			lMyExtraStep.Set(0, 0);
-		}
-		else
-		{
+		const float damage_range = 8.0f * SCALE_FACTOR * caution;
+		const vec2 my_target(position.x + velocity.x * t,
+			position.y + velocity.y * t);
+		vec2 my_extra_step(velocity.x, velocity.y);
+		if (my_extra_step.GetLengthSquared() < SCALE_FACTOR*SCALE_FACTOR) {
+			my_extra_step.Set(0, 0);
+		} else {
 			// Overlap the sweet spot some with my probable position.
-			lMyExtraStep.Normalize(lDamageRange*0.6f);
+			my_extra_step.Normalize(damage_range*0.6f);
 		}
-		if (lGrenadeTarget.GetDistanceSquared(lMyTarget+lMyExtraStep) < lDamageRange*lDamageRange)
-		{
-			mLog.Headlinef("Grenade would hit: %f m (%f s).", lGrenadeTarget.GetDistance(lMyTarget)/3, t);
-			mGame->GetCutie()->SetEnginePower(1, 0);	// Backup straight.
-			SetMode(MODE_BACKING_UP);
+		if (grenade_target.GetDistanceSquared(my_target+my_extra_step) < damage_range*damage_range) {
+			log_.Headlinef("Grenade would hit: %f m (%f s).", grenade_target.GetDistance(my_target)/3, t);
+			game_->GetCutie()->SetEnginePower(1, 0);	// Backup straight.
+			SetMode(kModeBackingUp);
 			return true;
-		}
-		else
-		{
-			mLog.Headlinef("Doging the grenade: %f m (%f s).", lGrenadeTarget.GetDistance(lMyTarget)/3, t);
+		} else {
+			log_.Headlinef("Doging the grenade: %f m (%f s).", grenade_target.GetDistance(my_target)/3, t);
 		}
 	}
 	return false;
 }
 
-void VehicleAi::SetMode(Mode pMode)
-{
-	if (pMode == mPreviousMode && pMode != MODE_NORMAL)
-	{
-		++mStuckCount;
+void VehicleAi::SetMode(Mode mode) {
+	if (mode == previous_mode_ && mode != kModeNormal) {
+		++stuck_count_;
+	} else {
+		stuck_count_ = 0;
 	}
-	else
-	{
-		mStuckCount = 0;
-	}
-	if (mStuckCount >= 2)
-	{
-		vec3 lVelocity = mGame->GetCutie()->GetVelocity();
-		lVelocity.z = 0;
-		if (lVelocity.GetLengthSquared() < 2*2)
-		{
-			mLog.Headline("Stuck in a vehicle AI loop, trying to break out!");
-			if (pMode != MODE_FIND_BEST_PATH && mMode != MODE_FIND_BEST_PATH)
-			{
-				pMode = MODE_FIND_BEST_PATH;
-			}
-			else
-			{
-				mRotateAngle = (Random::Uniform(0.0f, 1.0f) > 0.5f)? +2.0f : -2.0f;
-				pMode = MODE_ROTATE_ON_THE_SPOT;
+	if (stuck_count_ >= 2) {
+		vec3 _velocity = game_->GetCutie()->GetVelocity();
+		_velocity.z = 0;
+		if (_velocity.GetLengthSquared() < 2*2) {
+			log_.Headline("Stuck in a vehicle AI loop, trying to break out!");
+			if (mode != kModeFindBestPath && mode_ != kModeFindBestPath) {
+				mode = kModeFindBestPath;
+			} else {
+				rotate_angle_ = (Random::Uniform(0.0f, 1.0f) > 0.5f)? +2.0f : -2.0f;
+				mode = kModeRotateOnTheSpot;
 			}
 		}
-		mStuckCount = 0;
+		stuck_count_ = 0;
+	} else if (mode == kModeFindPathOffElevator) {
+		active_path_ = -1;	// Treat all paths as equals.
+	} else if (mode == kModeHeadingBackOnTrack || mode == kModeNormal) {
+		last_average_angle_ = 0;
+	} else if (mode == kModeGetOffElevator) {
+		elevator_get_off_position_ = game_->GetCutie()->GetPosition();
 	}
-	else if (pMode == MODE_FIND_PATH_OFF_ELEVATOR)
-	{
-		mActivePath = -1;	// Treat all paths as equals.
+	stopped_frame_ = -1;
+	previous_mode_ = mode_;
+	mode_ = mode;
+	mode_start_frame_ = GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrame();
+	const char* mode_name = "???";
+	switch (mode_) {
+		case kModeFindBestPath:		mode_name = "FIND BEST PATH";			break;
+		case kModeFindPathOffElevator:	mode_name = "FIND PATH OFF ELEVATOR";		break;
+		case kModeNormal:			mode_name = "NORMAL";				break;
+		case kModeHeadingBackOnTrack:	mode_name = "HEADING BACK ON TRACK";		break;
+		case kModeBackingUp:			mode_name = "BACKING UP";			break;
+		case kModeBackingUpToGoal:		mode_name = "BACKING UP TO GOAL";		break;
+		case kModeFlee:				mode_name = "FLEE";				break;
+		case kModeStoppingAtGoal:		mode_name = "STOPPING AT GOAL";			break;
+		case kModeAtGoal:			mode_name = "AT GOAL";				break;
+		case kModeWaitingForElevator:		mode_name = "WAITING FOR ELEVATOR";		break;
+		case kModeGetOnElevator:		mode_name = "GET ON ELEVATOR";			break;
+		case kModeGetOffElevator:		mode_name = "GET OFF ELEVATOR";			break;
+		case kModeOnElevator:			mode_name = "ON ELEVATOR";			break;
+		case kModeRotateOnTheSpot:		mode_name = "ROTATE ON THE SPOT";		break;
+		case kModeRotateOnTheSpotDuring:	mode_name = "ROTATE ON THE SPOT DURING";	break;
+		case kModeRotateOnTheSpotWaiting:	mode_name = "ROTATE ON THE SPOT WAITING";	break;
 	}
-	else if (pMode == MODE_HEADING_BACK_ON_TRACK || pMode == MODE_NORMAL)
-	{
-		mLastAverageAngle = 0;
-	}
-	else if (pMode == MODE_GET_OFF_ELEVATOR)
-	{
-		mElevatorGetOffPosition = mGame->GetCutie()->GetPosition();
-	}
-	mStoppedFrame = -1;
-	mPreviousMode = mMode;
-	mMode = pMode;
-	mModeStartFrame = GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrame();
-	const char* lModeName = "???";
-	switch (mMode)
-	{
-		case MODE_FIND_BEST_PATH:		lModeName = "FIND BEST PATH";			break;
-		case MODE_FIND_PATH_OFF_ELEVATOR:	lModeName = "FIND PATH OFF ELEVATOR";		break;
-		case MODE_NORMAL:			lModeName = "NORMAL";				break;
-		case MODE_HEADING_BACK_ON_TRACK:	lModeName = "HEADING BACK ON TRACK";		break;
-		case MODE_BACKING_UP:			lModeName = "BACKING UP";			break;
-		case MODE_BACKING_UP_TO_GOAL:		lModeName = "BACKING UP TO GOAL";		break;
-		case MODE_FLEE:				lModeName = "FLEE";				break;
-		case MODE_STOPPING_AT_GOAL:		lModeName = "STOPPING AT GOAL";			break;
-		case MODE_AT_GOAL:			lModeName = "AT GOAL";				break;
-		case MODE_WAITING_FOR_ELEVATOR:		lModeName = "WAITING FOR ELEVATOR";		break;
-		case MODE_GET_ON_ELEVATOR:		lModeName = "GET ON ELEVATOR";			break;
-		case MODE_GET_OFF_ELEVATOR:		lModeName = "GET OFF ELEVATOR";			break;
-		case MODE_ON_ELEVATOR:			lModeName = "ON ELEVATOR";			break;
-		case MODE_ROTATE_ON_THE_SPOT:		lModeName = "ROTATE ON THE SPOT";		break;
-		case MODE_ROTATE_ON_THE_SPOT_DURING:	lModeName = "ROTATE ON THE SPOT DURING";	break;
-		case MODE_ROTATE_ON_THE_SPOT_WAITING:	lModeName = "ROTATE ON THE SPOT WAITING";	break;
-	}
-	mLog.Headlinef("Switching mode to %s.", lModeName);
+	log_.Headlinef("Switching mode to %s.", mode_name);
 }
 
-bool VehicleAi::IsCloseToTarget(const vec3& pPosition, float pDistance) const
-{
-	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-	const vec3 lTarget = lPath->GetValue();
-	const float lTargetDistance2 = lTarget.GetDistanceSquared(pPosition);
-	//mLog.Headlinef("IsCloseToTarget ^2: %f.", lTargetDistance2);
-	const float lGoalDistance = pDistance*SCALE_FACTOR;
-	return (lTargetDistance2 <= lGoalDistance*lGoalDistance);
+bool VehicleAi::IsCloseToTarget(const vec3& position, float distance) const {
+	Spline* _path = game_->GetLevel()->QueryPath()->GetPath(active_path_);
+	const vec3 target = _path->GetValue();
+	const float target_distance2 = target.GetDistanceSquared(position);
+	//log_.Headlinef("IsCloseToTarget ^2: %f.", target_distance2);
+	const float goal_distance = distance*SCALE_FACTOR;
+	return (target_distance2 <= goal_distance*goal_distance);
 }
 
-float VehicleAi::GetClosestPathDistance(const vec3& pPosition, const int pPath, float* pLikeliness, float pSteepFactor) const
-{
-	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath((pPath >= 0)? pPath : mActivePath);
-	if (pLikeliness)
-	{
-		*pLikeliness = lPath->GetLikeliness();
+float VehicleAi::GetClosestPathDistance(const vec3& position, const int path, float* likeliness, float steep_factor) const {
+	Spline* _path = game_->GetLevel()->QueryPath()->GetPath((path >= 0)? path : active_path_);
+	if (likeliness) {
+		*likeliness = _path->GetLikeliness();
 	}
-	const float lCurrentTime = lPath->GetCurrentInterpolationTime();
+	const float current_time = _path->GetCurrentInterpolationTime();
 
-	if (pPath < 0)
-	{
+	if (path < 0) {
 		// We can assume the path "current" pointer is a bit ahead, so step back some to get a closer
 		// approximation of where to start looking for our closest point on the spline.
-		const float lWantedDistance = AIM_DISTANCE();
-		float lDeltaTime = -lWantedDistance * lPath->GetDistanceNormal();
-		if (lCurrentTime+lDeltaTime < 0)
-		{
-			lDeltaTime = -lCurrentTime;
+		const float wanted_distance = AIM_DISTANCE();
+		float delta_time = -wanted_distance * _path->GetDistanceNormal();
+		if (current_time+delta_time < 0) {
+			delta_time = -current_time;
 		}
-		lPath->StepInterpolation(lDeltaTime);
-	}
-	else
-	{
+		_path->StepInterpolation(delta_time);
+	} else {
 		// Coarse check first to find a reasonable sample in the whole path.
-		int lBestSample = -1;
-		float lBestDistance2 = 1e8f;
-		const int lSteps = 5;
-		for (int x = 0; x < 5; ++x)
-		{
-			const float lSampleTime = 1.0f/(lSteps+1) * (x+1);
-			lPath->GotoAbsoluteTime(lSampleTime);
-			const float lDistance2 = lPath->GetValue().GetDistanceSquared(pPosition);
-			if (lDistance2 < lBestDistance2)
-			{
-				lBestSample = x;
-				lBestDistance2 = lDistance2;
+		int best_sample = -1;
+		float best_distance2 = 1e8f;
+		const int steps = 5;
+		for (int x = 0; x < 5; ++x) {
+			const float sample_time = 1.0f/(steps+1) * (x+1);
+			_path->GotoAbsoluteTime(sample_time);
+			const float distance2 = _path->GetValue().GetDistanceSquared(position);
+			if (distance2 < best_distance2) {
+				best_sample = x;
+				best_distance2 = distance2;
 			}
 		}
-		const float lBestTime = 1.0f/(lSteps+1) * (lBestSample+1);
-		lPath->GotoAbsoluteTime(lBestTime);
+		const float best_time = 1.0f/(steps+1) * (best_sample+1);
+		_path->GotoAbsoluteTime(best_time);
 	}
 
-	float lNearestDistance;
-	vec3 lClosestPoint;
-	const float lSearchStepLength = (pPath >= 0)? -0.1f : 0.0125f;
-	const int lSearchSteps = (pPath >= 0)? 10 : 3;
-	lPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, lClosestPoint, lSearchSteps);
+	float nearest_distance;
+	vec3 closest_point;
+	const float search_step_length = (path >= 0)? -0.1f : 0.0125f;
+	const int search_steps = (path >= 0)? 10 : 3;
+	_path->FindNearestTime(search_step_length, position, nearest_distance, closest_point, search_steps);
 	// Steep check.
-	if (lNearestDistance < ::fabs(pPosition.z - lClosestPoint.z)*3)
-	{
-		lNearestDistance *= pSteepFactor;
+	if (nearest_distance < ::fabs(position.z - closest_point.z)*3) {
+		nearest_distance *= steep_factor;
 	}
 
-	if (pPath < 0)
-	{
+	if (path < 0) {
 		// Step back to target point.
-		lPath->GotoAbsoluteTime(lCurrentTime);
+		_path->GotoAbsoluteTime(current_time);
 	}
 
-	return lNearestDistance;
+	return nearest_distance;
 }
 
-vec3 VehicleAi::GetClosestElevatorPosition(const vec3& pPosition, const Cure::Elevator*& pNearestElevator) const
-{
-	pNearestElevator = 0;
-	typedef Cure::ContextManager::ContextObjectTable ContextTable;
-	const ContextTable& lObjectTable = GetManager()->GetObjectTable();
-	ContextTable::const_iterator x = lObjectTable.begin();
-	const str lElevatorClassId = "Elevator";
-	float lDistance2 = -1;
-	vec3 lNearestPosition;
-	for (; x != lObjectTable.end(); ++x)
-	{
-		const Cure::ContextObject* lObject = x->second;
-		if (lObject->GetClassId() != lElevatorClassId)
-		{
+vec3 VehicleAi::GetClosestElevatorPosition(const vec3& position, const cure::Elevator*& nearest_elevator) const {
+	nearest_elevator = 0;
+	typedef cure::ContextManager::ContextObjectTable ContextTable;
+	const ContextTable& object_table = GetManager()->GetObjectTable();
+	ContextTable::const_iterator x = object_table.begin();
+	const str elevator_class_id = "Elevator";
+	float distance2 = -1;
+	vec3 nearest_position;
+	for (; x != object_table.end(); ++x) {
+		const cure::ContextObject* object = x->second;
+		if (object->GetClassId() != elevator_class_id) {
 			continue;
 		}
-		const Cure::Elevator* lElevator = (const Cure::Elevator*)lObject;
-		const vec3 lElevatorPosition = lElevator->GetPosition();
-		const float lThisDistance2 = lElevatorPosition.GetDistanceSquared(pPosition);
-		if (lDistance2 < 0)
-		{
-			pNearestElevator = lElevator;
-			lDistance2 = lThisDistance2;
-			lNearestPosition = lElevatorPosition;
-		}
-		else if (lThisDistance2 < lDistance2)
-		{
-			pNearestElevator = lElevator;
-			lDistance2 = lThisDistance2;
-			lNearestPosition = lElevatorPosition;
+		const cure::Elevator* elevator = (const cure::Elevator*)object;
+		const vec3 elevator_position = elevator->GetPosition();
+		const float this_distance2 = elevator_position.GetDistanceSquared(position);
+		if (distance2 < 0) {
+			nearest_elevator = elevator;
+			distance2 = this_distance2;
+			nearest_position = elevator_position;
+		} else if (this_distance2 < distance2) {
+			nearest_elevator = elevator;
+			distance2 = this_distance2;
+			nearest_position = elevator_position;
 		}
 	}
-	return lNearestPosition;
+	return nearest_position;
 }
 
-bool VehicleAi::HasElevatorArrived(const Cure::Elevator*& pNearestElevator, const float pPositionZ, vec3& pNearestLiftPosition2d, float& pElevatorXyDistance2ToElevatorStop)
-{
-	const vec3 lNearestLiftPosition = GetClosestElevatorPosition(mElevatorGetOnPosition, pNearestElevator);
-	pNearestLiftPosition2d = lNearestLiftPosition;
-	pNearestLiftPosition2d.z = mElevatorGetOnPosition.z;
-	pElevatorXyDistance2ToElevatorStop = mElevatorGetOnPosition.GetDistanceSquared(pNearestLiftPosition2d);
-	return (lNearestLiftPosition.z < pPositionZ+0.5f && pElevatorXyDistance2ToElevatorStop < 2*2);
+bool VehicleAi::HasElevatorArrived(const cure::Elevator*& nearest_elevator, const float position_z, vec3& nearest_lift_position2d, float& elevator_xy_distance2_to_elevator_stop) {
+	const vec3 nearest_lift_position = GetClosestElevatorPosition(elevator_get_on_position_, nearest_elevator);
+	nearest_lift_position2d = nearest_lift_position;
+	nearest_lift_position2d.z = elevator_get_on_position_.z;
+	elevator_xy_distance2_to_elevator_stop = elevator_get_on_position_.GetDistanceSquared(nearest_lift_position2d);
+	return (nearest_lift_position.z < position_z+0.5f && elevator_xy_distance2_to_elevator_stop < 2*2);
 }
 
-float VehicleAi::GetClosestElevatorRadius() const
-{
-	const Cure::Elevator* lNearestElevator;
-	GetClosestElevatorPosition(mElevatorGetOnPosition, lNearestElevator);
-	return lNearestElevator->GetRadius();
+float VehicleAi::GetClosestElevatorRadius() const {
+	const cure::Elevator* _nearest_elevator;
+	GetClosestElevatorPosition(elevator_get_on_position_, _nearest_elevator);
+	return _nearest_elevator->GetRadius();
 }
 
-bool VehicleAi::IsVertical(const vec3& pVector)
-{
-	return (::fabs(pVector.z) > 2 * (::fabs(pVector.x) + ::fabs(pVector.y)));
+bool VehicleAi::IsVertical(const vec3& _vector) {
+	return (::fabs(_vector.z) > 2 * (::fabs(_vector.x) + ::fabs(_vector.y)));
 }
 
-int VehicleAi::GetVehicleIndex() const
-{
-	const str& lClassId = mGame->GetCutie()->GetClassId();
-	if (lClassId == "cutie")
-	{
+int VehicleAi::GetVehicleIndex() const {
+	const str& class_id = game_->GetCutie()->GetClassId();
+	if (class_id == "cutie") {
 		return 0;
 	}
-	if (lClassId == "monster")
-	{
+	if (class_id == "monster") {
 		return 1;
 	}
-	if (lClassId == "corvette")
-	{
+	if (class_id == "corvette") {
 		return 2;
 	}
-	if (lClassId == "road_roller")
-	{
+	if (class_id == "road_roller") {
 		return 3;
 	}
 	deb_assert(false);
 	return -1;
 }
 
-float VehicleAi::GetRelativeDriveOnAngle(const vec3& pDirection) const
-{
-	deb_assert(mActivePath >= 0);
-	if (mActivePath < 0)
-	{
+float VehicleAi::GetRelativeDriveOnAngle(const vec3& direction) const {
+	deb_assert(active_path_ >= 0);
+	if (active_path_ < 0) {
 		return 0;
 	}
-	Spline* lPath = mGame->GetLevel()->QueryPath()->GetPath(mActivePath);
-	lPath->GotoAbsoluteTime(0.95f);
-	const vec3 p1 = lPath->GetValue();
-	lPath->StepInterpolation(0.04f);
-	const vec3 p2 = lPath->GetValue();
-	const vec3 lWantedDirection = p2-p1;
-	const float lAngle = LEPRA_XY_ANGLE(lWantedDirection, pDirection);
-	return lAngle;
+	Spline* _path = game_->GetLevel()->QueryPath()->GetPath(active_path_);
+	_path->GotoAbsoluteTime(0.95f);
+	const vec3 p1 = _path->GetValue();
+	_path->StepInterpolation(0.04f);
+	const vec3 p2 = _path->GetValue();
+	const vec3 wanted_direction = p2-p1;
+	const float angle = LEPRA_XY_ANGLE(wanted_direction, direction);
+	return angle;
 }
 
-bool VehicleAi::QueryCutieHindered(const Cure::TimeManager* pTime, const vec3& pVelocity)
-{
-	const float lSlowSpeed = 0.35f * SCALE_FACTOR;
-	if (pVelocity.GetLengthSquared() < lSlowSpeed*lSlowSpeed)
-	{
-		if (mStoppedFrame == -1)
-		{
-			mStoppedFrame = pTime->GetCurrentPhysicsFrame();
+bool VehicleAi::QueryCutieHindered(const cure::TimeManager* time, const vec3& velocity) {
+	const float slow_speed = 0.35f * SCALE_FACTOR;
+	if (velocity.GetLengthSquared() < slow_speed*slow_speed) {
+		if (stopped_frame_ == -1) {
+			stopped_frame_ = time->GetCurrentPhysicsFrame();
 		}
-		const int lStoppedDeltaFrameCount = pTime->GetCurrentPhysicsFrameDelta(mStoppedFrame);
-		const float lStoppedTime = pTime->ConvertPhysicsFramesToSeconds(lStoppedDeltaFrameCount);
-		if (lStoppedTime >= 1.0f)
-		{
+		const int stopped_delta_frame_count = time->GetCurrentPhysicsFrameDelta(stopped_frame_);
+		const float stopped_time = time->ConvertPhysicsFramesToSeconds(stopped_delta_frame_count);
+		if (stopped_time >= 1.0f) {
 			return true;
 		}
-	}
-	else
-	{
-		mStoppedFrame = -1;
+	} else {
+		stopped_frame_ = -1;
 	}
 	return false;
 }
@@ -1266,7 +1039,7 @@ bool VehicleAi::QueryCutieHindered(const Cure::TimeManager* pTime, const vec3& p
 
 
 
-loginstance(GAME_CONTEXT_CPP, VehicleAi);
+loginstance(kGameContextCpp, VehicleAi);
 
 
 

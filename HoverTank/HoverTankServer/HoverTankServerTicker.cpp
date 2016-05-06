@@ -1,32 +1,29 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "HoverTankServerTicker.h"
-#include "../../Life/LifeServer/GameServerManager.h"
-#include "HoverTankServerDelegate.h"
-#include "HoverTankServerMessageProcessor.h"
+#include "hovertankserverticker.h"
+#include "../../life/lifeserver/gameservermanager.h"
+#include "hovertankserverdelegate.h"
+#include "hovertankservermessageprocessor.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-HoverTankServerTicker::HoverTankServerTicker(Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
-	Parent(pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity)
-{
-	HoverTankServerDelegate* lDelegate = new HoverTankServerDelegate(mGameManager);
-	mGameManager->SetDelegate(lDelegate);
-	mGameManager->SetMessageProcessor(new HoverTankServerMessageProcessor(mGameManager, lDelegate));
+HoverTankServerTicker::HoverTankServerTicker(cure::ResourceManager* resource_manager, float physics_radius, int physics_levels, float physics_sensitivity):
+	Parent(resource_manager, physics_radius, physics_levels, physics_sensitivity) {
+	HoverTankServerDelegate* delegate = new HoverTankServerDelegate(game_manager_);
+	game_manager_->SetDelegate(delegate);
+	game_manager_->SetMessageProcessor(new HoverTankServerMessageProcessor(game_manager_, delegate));
 }
 
-HoverTankServerTicker::~HoverTankServerTicker()
-{
+HoverTankServerTicker::~HoverTankServerTicker() {
 }
 
 

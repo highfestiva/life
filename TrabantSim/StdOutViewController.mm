@@ -4,17 +4,16 @@
 
 
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../lepra/include/lepratarget.h"
 #ifdef LEPRA_IOS
 
-#import "StdOutViewController.h"
+#import "stdoutviewcontroller.h"
 
 
 
 @implementation StdOutViewController
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
 	[super viewDidLoad];
 
 	self.view.backgroundColor = [UIColor whiteColor];
@@ -23,11 +22,11 @@
 	self.textView.autoresizingMask = UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleBottomMargin;
 	self.textView.editable = NO;
 	[self.textView setScrollEnabled:YES];
-	self.scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
-	self.scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
-	self.scrollView.bounces = NO;
-	[self.scrollView addSubview:self.textView];
-	[self.view addSubview:self.scrollView];
+	self.scrollView_ = [[UIScrollView alloc] initWithFrame:self.view.bounds];
+	self.scrollView_.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+	self.scrollView_.bounces = NO;
+	[self.scrollView_ addSubview:self.textView];
+	[self.view addSubview:self.scrollView_];
 
 	dispatch_async(dispatch_get_main_queue(), ^{
 		NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:@"File \".*pylib/" options:0 error:nil];
@@ -37,21 +36,20 @@
 		[self.textView setText:text];
 
 		CGSize fit = [self.textView fitTextSize];
-		CGRect r = CGRectUnion(CGRectMake(0,0,fit.width,fit.height), self.scrollView.bounds);
+		CGRect r = CGRectUnion(CGRectMake(0,0,fit.width,fit.height), self.scrollView_.bounds);
 		r.size.height += r.origin.y;
 		r.origin.y = 0;
-		self.scrollView.contentSize = r.size;
+		self.scrollView_.contentSize = r.size;
 		self.textView.frame = r;
 	});
 }
 
--(void) viewWillLayoutSubviews
-{
+-(void) viewWillLayoutSubviews {
 	CGSize fit = [self.textView fitTextSize];
-	CGRect r = CGRectUnion(CGRectMake(0,0,fit.width,fit.height), self.scrollView.bounds);
+	CGRect r = CGRectUnion(CGRectMake(0,0,fit.width,fit.height), self.scrollView_.bounds);
 	r.size.height += r.origin.y;
 	r.origin.y = 0;
-	self.scrollView.contentSize = r.size;
+	self.scrollView_.contentSize = r.size;
 	self.textView.frame = r;
 }
 

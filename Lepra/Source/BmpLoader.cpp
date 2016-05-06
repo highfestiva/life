@@ -6,245 +6,213 @@
 
 #include "pch.h"
 #include <math.h>
-#include "../Include/BmpLoader.h"
-#include "../Include/Canvas.h"
-#include "../Include/DiskFile.h"
-#include "../Include/MetaFile.h"
-#include "../Include/ArchiveFile.h"
+#include "../include/bmploader.h"
+#include "../include/canvas.h"
+#include "../include/diskfile.h"
+#include "../include/metafile.h"
+#include "../include/archivefile.h"
 
-namespace Lepra
-{
+namespace lepra {
 
-BmpLoader::Status BmpLoader::Load(const str& pFileName, Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	MetaFile lFile;
-	
-	if (lFile.Open(pFileName, MetaFile::READ_ONLY, false, Endian::TYPE_LITTLE_ENDIAN) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+BmpLoader::Status BmpLoader::Load(const str& file_name, Canvas& canvas) {
+	Status status = kStatusSuccess;
+	MetaFile file;
+
+	if (file.Open(file_name, MetaFile::kReadOnly, false, Endian::kTypeLittleEndian) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		Load(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		Load(file, canvas);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-BmpLoader::Status BmpLoader::Save(const str& pFileName, const Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	DiskFile lFile;
-	
-	if (lFile.Open(pFileName, DiskFile::MODE_WRITE, false, Endian::TYPE_LITTLE_ENDIAN) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+BmpLoader::Status BmpLoader::Save(const str& file_name, const Canvas& canvas) {
+	Status status = kStatusSuccess;
+	DiskFile file;
+
+	if (file.Open(file_name, DiskFile::kModeWrite, false, Endian::kTypeLittleEndian) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		Save(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		Save(file, canvas);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-BmpLoader::Status BmpLoader::Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	ArchiveFile lFile(pArchiveName);
-	
-	if (lFile.Open(pFileName, ArchiveFile::READ_ONLY, Endian::TYPE_LITTLE_ENDIAN) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+BmpLoader::Status BmpLoader::Load(const str& archive_name, const str& file_name, Canvas& canvas) {
+	Status status = kStatusSuccess;
+	ArchiveFile file(archive_name);
+
+	if (file.Open(file_name, ArchiveFile::kReadOnly, Endian::kTypeLittleEndian) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		Load(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		Load(file, canvas);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-BmpLoader::Status BmpLoader::Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	ArchiveFile lFile(pArchiveName);
-	
-	if (lFile.Open(pFileName, ArchiveFile::WRITE_ONLY, Endian::TYPE_LITTLE_ENDIAN) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+BmpLoader::Status BmpLoader::Save(const str& archive_name, const str& file_name, const Canvas& canvas) {
+	Status status = kStatusSuccess;
+	ArchiveFile file(archive_name);
+
+	if (file.Open(file_name, ArchiveFile::kWriteOnly, Endian::kTypeLittleEndian) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		Save(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		Save(file, canvas);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-BmpLoader::Status BmpLoader::Load(Reader& pReader, Canvas& pCanvas)
-{
-	BitmapFileHeader lFileHeader;
-	BitmapInfoHeader lInfoHeader;
+BmpLoader::Status BmpLoader::Load(Reader& reader, Canvas& canvas) {
+	BitmapFileHeader file_header;
+	BitmapInfoHeader info_header;
 
 	// Load the file header data:
-	if (lFileHeader.Load(&pReader) == false)
-	{
-		return STATUS_READ_HEADER_ERROR;
+	if (file_header.Load(&reader) == false) {
+		return kStatusReadHeaderError;
 	}
 
 	// Load the information header data:
-	if (lInfoHeader.Load(&pReader) == false)
-	{
-		return STATUS_READ_INFO_ERROR;
+	if (info_header.Load(&reader) == false) {
+		return kStatusReadInfoError;
 	}
 
-	int lColorCount = (int) (1 << lInfoHeader.mBitCount);
-	int lBitDepth   = lInfoHeader.mBitCount;
+	int color_count = (int) (1 << info_header.bit_count_);
+	int bit_depth   = info_header.bit_count_;
 
-	if (lBitDepth <= 8)
-	{
-		Color lPalette[256];
+	if (bit_depth <= 8) {
+		Color palette[256];
 
-		for (int i = 0; i < lColorCount; i++)
-		{
-			if (pReader.ReadData(&lPalette[i], sizeof(Color)) != IO_OK)
-			{
-				return STATUS_READ_PALETTE_ERROR;
+		for (int i = 0; i < color_count; i++) {
+			if (reader.ReadData(&palette[i], sizeof(Color)) != kIoOk) {
+				return kStatusReadPaletteError;
 			}
 		}
 
-		pCanvas.SetPalette(lPalette);
+		canvas.SetPalette(palette);
 	}
 
-	int lWidth	= lInfoHeader.mWidth;
-	int lHeight	= lInfoHeader.mHeight;
+	int width	= info_header.width_;
+	int height	= info_header.height_;
 
-	pCanvas.Reset(abs(lWidth), abs(lHeight), Canvas::IntToBitDepth(lBitDepth));
-	pCanvas.CreateBuffer();
+	canvas.Reset(abs(width), abs(height), Canvas::IntToBitDepth(bit_depth));
+	canvas.CreateBuffer();
 
 	// The ScanWidth is a multiple by 4.
-	int lScanWidth = ((lWidth * (lBitDepth >> 3)) + 3) & (~3);
-	int lScanPadding	= lScanWidth - (lWidth * (lBitDepth >> 3));
+	int scan_width = ((width * (bit_depth >> 3)) + 3) & (~3);
+	int scan_padding	= scan_width - (width * (bit_depth >> 3));
 
-	pReader.Skip(lFileHeader.mOffBits - (int)pReader.GetReadCount());
-	//lFile.SeekSet(lFileHeader.mOffBits);
+	reader.Skip(file_header.off_bits_ - (int)reader.GetReadCount());
+	//file.SeekSet(file_header.off_bits_);
 
-	uint8* lImage = (uint8*)pCanvas.GetBuffer();
+	uint8* image = (uint8*)canvas.GetBuffer();
 
 	// Load the bitmap:
-	for (int y = 0; y < abs(lHeight); y++)
-	{
-		unsigned lYOffset;
+	for (int y = 0; y < abs(height); y++) {
+		unsigned y_offset;
 
 		// Load a scan-line:
-		switch(lInfoHeader.mCompression)
-		{
-			case COMP_BI_RGB:
+		switch(info_header.compression_) {
+			case kCompBiRgb:
 
 				// Uncompressed image:
-				if (lHeight < 0)
-				{
-					lYOffset = y * lWidth * (lBitDepth >> 3);
-				}
-				else
-				{
-					//YPos = ((-mHeight - Y) * (mWidth * (mBitDepth >> 3))) - (mWidth * (mBitDepth >> 3));
-					lYOffset = (lHeight - (y + 1)) * lWidth * (lBitDepth >> 3);
+				if (height < 0) {
+					y_offset = y * width * (bit_depth >> 3);
+				} else {
+					//YPos = ((-height_ - Y) * (width_ * (bit_depth_ >> 3))) - (width_ * (bit_depth_ >> 3));
+					y_offset = (height - (y + 1)) * width * (bit_depth >> 3);
 				}
 
-				if (pReader.ReadData(&lImage[lYOffset], lWidth * (lBitDepth >> 3)) != IO_OK)
-				{
-					return STATUS_READ_PICTURE_ERROR;
-				}
-				break;
-			case COMP_BI_RLE8:
-			case COMP_BI_RLE4:
-			case COMP_BI_BITFIELDS:
+				if (reader.ReadData(&image[y_offset], width * (bit_depth >> 3)) != kIoOk) {
+					return kStatusReadPictureError;
+				} break;
+			case kCompBiRle8:
+			case kCompBiRle4:
+			case kCompBiBitfields:
 			default:
-				return STATUS_COMPRESSION_ERROR;
+				return kStatusCompressionError;
 		}
 		// Skip the padding possibly located at the end of each
 		// scan-line:
-		pReader.Skip(lScanPadding);
+		reader.Skip(scan_padding);
 	}
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-BmpLoader::Status BmpLoader::Save(Writer& pWriter, const Canvas& pCanvas)
-{
-	BitmapFileHeader lFileHeader;
-	BitmapInfoHeader lInfoHeader;
+BmpLoader::Status BmpLoader::Save(Writer& writer, const Canvas& canvas) {
+	BitmapFileHeader file_header;
+	BitmapInfoHeader info_header;
 
-	lFileHeader.mType = (((int16)'M') << 8) + (int16)'B';
-	lFileHeader.mSize = lFileHeader.GetSize() + lInfoHeader.GetSize() +
-						   pCanvas.GetWidth() * pCanvas.GetHeight() * pCanvas.GetPixelByteSize();
-	lFileHeader.mReserved1 = 0;
-	lFileHeader.mReserved2 = 0;
-	lFileHeader.mOffBits = lFileHeader.GetSize() + lInfoHeader.GetSize();
+	file_header.type_ = (((int16)'M') << 8) + (int16)'B';
+	file_header.size_ = file_header.GetSize() + info_header.GetSize() +
+						   canvas.GetWidth() * canvas.GetHeight() * canvas.GetPixelByteSize();
+	file_header.reserved1_ = 0;
+	file_header.reserved2_ = 0;
+	file_header.off_bits_ = file_header.GetSize() + info_header.GetSize();
 
-	if (pCanvas.GetBitDepth() == Canvas::BITDEPTH_8_BIT)
-	{
-		lFileHeader.mSize += sizeof(Color) * 256;
-		lFileHeader.mOffBits += sizeof(Color) * 256;
+	if (canvas.GetBitDepth() == Canvas::kBitdepth8Bit) {
+		file_header.size_ += sizeof(Color) * 256;
+		file_header.off_bits_ += sizeof(Color) * 256;
 	}
 
-	unsigned lBitDepth = Canvas::BitDepthToInt(pCanvas.GetBitDepth());
+	unsigned bit_depth = Canvas::BitDepthToInt(canvas.GetBitDepth());
 
-	lInfoHeader.mSize			= lInfoHeader.GetSize();
-	lInfoHeader.mWidth			= pCanvas.GetWidth();
-	lInfoHeader.mHeight			= pCanvas.GetHeight();
-	lInfoHeader.mPlanes			= 1;
-	lInfoHeader.mBitCount		= (int16)lBitDepth;
-	lInfoHeader.mCompression		= COMP_BI_RGB;
-	lInfoHeader.mSizeImage		= pCanvas.GetWidth() * pCanvas.GetHeight() * pCanvas.GetPixelByteSize();
-	lInfoHeader.mXPelsPerMeter	= 2834;	// Kind'a Photoshop standard, I think.
-	lInfoHeader.mYPelsPerMeter	= 2834;
-	lInfoHeader.mClrUsed			= 0;
-	lInfoHeader.mClrImportant	= 0;
+	info_header.size_			= info_header.GetSize();
+	info_header.width_			= canvas.GetWidth();
+	info_header.height_			= canvas.GetHeight();
+	info_header.planes_			= 1;
+	info_header.bit_count_		= (int16)bit_depth;
+	info_header.compression_		= kCompBiRgb;
+	info_header.size_image_		= canvas.GetWidth() * canvas.GetHeight() * canvas.GetPixelByteSize();
+	info_header.x_pels_per_meter_	= 2834;	// Kind'a Photoshop standard, I think.
+	info_header.y_pels_per_meter_	= 2834;
+	info_header.clr_used_			= 0;
+	info_header.clr_important_	= 0;
 
-	if (lBitDepth <= 8)
-	{
-		lInfoHeader.mClrUsed			= (1 << lBitDepth);
-		lInfoHeader.mClrImportant	= (1 << lBitDepth);
+	if (bit_depth <= 8) {
+		info_header.clr_used_			= (1 << bit_depth);
+		info_header.clr_important_	= (1 << bit_depth);
 	}
 
-	lFileHeader.Save(&pWriter);
-	lInfoHeader.Save(&pWriter);
+	file_header.Save(&writer);
+	info_header.Save(&writer);
 
 	int y;
 
-	if (lBitDepth <= 8)
-	{
-		for (y = 0; y < (1 << lBitDepth); y++)
-		{
-			pWriter.WriteData(&pCanvas.GetPalette()[y], sizeof(Color));
+	if (bit_depth <= 8) {
+		for (y = 0; y < (1 << bit_depth); y++) {
+			writer.WriteData(&canvas.GetPalette()[y], sizeof(Color));
 		}
 	}
 
-	int lScanWidth	= ((pCanvas.GetWidth() * pCanvas.GetPixelByteSize()) + 3) & (~3);
-	int lScanPadding	= lScanWidth - (pCanvas.GetWidth() * pCanvas.GetPixelByteSize());
-	uint8 lPadBytes[4];
+	int scan_width	= ((canvas.GetWidth() * canvas.GetPixelByteSize()) + 3) & (~3);
+	int scan_padding	= scan_width - (canvas.GetWidth() * canvas.GetPixelByteSize());
+	uint8 pad_bytes[4];
 
-	for (y = pCanvas.GetHeight() - 1; y >= 0; y--)
-	{
-		pWriter.WriteData((uint8*)pCanvas.GetBuffer() + y * pCanvas.GetPitch() * pCanvas.GetPixelByteSize(),
-						 pCanvas.GetWidth() * pCanvas.GetPixelByteSize());
+	for (y = canvas.GetHeight() - 1; y >= 0; y--) {
+		writer.WriteData((uint8*)canvas.GetBuffer() + y * canvas.GetPitch() * canvas.GetPixelByteSize(),
+						 canvas.GetWidth() * canvas.GetPixelByteSize());
 		// The ScanWidth must be a multiple by 4.
-		pWriter.WriteData(lPadBytes, lScanPadding);
+		writer.WriteData(pad_bytes, scan_padding);
 	}
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
 
@@ -254,44 +222,37 @@ BmpLoader::Status BmpLoader::Save(Writer& pWriter, const Canvas& pCanvas)
 //                                                 //
 /////////////////////////////////////////////////////
 
-int BmpLoader::BitmapFileHeader::GetSize()
-{
-	int lSize = sizeof(mType) +
-					sizeof(mSize) +
-					sizeof(mReserved1) +
-					sizeof(mReserved2) +
-					sizeof(mOffBits);
+int BmpLoader::BitmapFileHeader::GetSize() {
+	int size = sizeof(type_) +
+					sizeof(size_) +
+					sizeof(reserved1_) +
+					sizeof(reserved2_) +
+					sizeof(off_bits_);
 
-	return lSize;
+	return size;
 }
 
 
-bool BmpLoader::BitmapFileHeader::Load(Reader* pReader)
-{
+bool BmpLoader::BitmapFileHeader::Load(Reader* reader) {
 	// Load each member one by one... This is done to avoid errors that
 	// can occur due to strange compiler settings.
-	if (pReader->Read(mType) != IO_OK)
-	{
+	if (reader->Read(type_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mSize) != IO_OK)
-	{
+	if (reader->Read(size_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mReserved1) != IO_OK)
-	{
+	if (reader->Read(reserved1_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mReserved2) != IO_OK)
-	{
+	if (reader->Read(reserved2_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mOffBits) != IO_OK)
-	{
+	if (reader->Read(off_bits_) != kIoOk) {
 		return false;
 	}
 
@@ -301,32 +262,26 @@ bool BmpLoader::BitmapFileHeader::Load(Reader* pReader)
 
 
 
-bool BmpLoader::BitmapFileHeader::Save(Writer* pWriter)
-{
+bool BmpLoader::BitmapFileHeader::Save(Writer* writer) {
 	// Save each member one by one... This is done to avoid errors that
 	// can occur due to strange compiler settings.
-	if (pWriter->Write(mType) != IO_OK)
-	{
+	if (writer->Write(type_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mSize) != IO_OK)
-	{
+	if (writer->Write(size_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mReserved1) != IO_OK)
-	{
+	if (writer->Write(reserved1_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mReserved2) != IO_OK)
-	{
+	if (writer->Write(reserved2_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mOffBits) != IO_OK)
-	{
+	if (writer->Write(off_bits_) != kIoOk) {
 		return false;
 	}
 
@@ -343,80 +298,67 @@ bool BmpLoader::BitmapFileHeader::Save(Writer* pWriter)
 
 
 
-int BmpLoader::BitmapInfoHeader::GetSize()
-{
-	int lSize = sizeof(mSize) +
-					sizeof(mWidth) +
-					sizeof(mHeight) +
-					sizeof(mPlanes) +
-					sizeof(mBitCount) +
-					sizeof(mCompression) +
-					sizeof(mSizeImage) +
-					sizeof(mXPelsPerMeter) +
-					sizeof(mYPelsPerMeter) +
-					sizeof(mClrUsed) +
-					sizeof(mClrImportant);
-	return lSize;
+int BmpLoader::BitmapInfoHeader::GetSize() {
+	int size = sizeof(size_) +
+					sizeof(width_) +
+					sizeof(height_) +
+					sizeof(planes_) +
+					sizeof(bit_count_) +
+					sizeof(compression_) +
+					sizeof(size_image_) +
+					sizeof(x_pels_per_meter_) +
+					sizeof(y_pels_per_meter_) +
+					sizeof(clr_used_) +
+					sizeof(clr_important_);
+	return size;
 }
 
 
-bool BmpLoader::BitmapInfoHeader::Load(Reader* pReader)
-{
+bool BmpLoader::BitmapInfoHeader::Load(Reader* reader) {
 	// Load each member one by one... This is done to avoid errors that
 	// can occur due to strange compiler settings.
 
-	if (pReader->Read(mSize) != IO_OK)
-	{
+	if (reader->Read(size_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mWidth) != IO_OK)
-	{
+	if (reader->Read(width_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mHeight) != IO_OK)
-	{
+	if (reader->Read(height_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mPlanes) != IO_OK)
-	{
+	if (reader->Read(planes_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mBitCount) != IO_OK)
-	{
+	if (reader->Read(bit_count_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mCompression) != IO_OK)
-	{
+	if (reader->Read(compression_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mSizeImage) != IO_OK)
-	{
+	if (reader->Read(size_image_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mXPelsPerMeter) != IO_OK)
-	{
+	if (reader->Read(x_pels_per_meter_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mYPelsPerMeter) != IO_OK)
-	{
+	if (reader->Read(y_pels_per_meter_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mClrUsed) != IO_OK)
-	{
+	if (reader->Read(clr_used_) != kIoOk) {
 		return false;
 	}
 
-	if (pReader->Read(mClrImportant) != IO_OK)
-	{
+	if (reader->Read(clr_important_) != kIoOk) {
 		return false;
 	}
 
@@ -426,63 +368,51 @@ bool BmpLoader::BitmapInfoHeader::Load(Reader* pReader)
 
 
 
-bool BmpLoader::BitmapInfoHeader::Save(Writer* pWriter)
-{
+bool BmpLoader::BitmapInfoHeader::Save(Writer* writer) {
 	// Save each member one by one... This is done to avoid errors that
 	// can occur due to strange compiler settings.
 
-	if (pWriter->Write(mSize) != IO_OK)
-	{
+	if (writer->Write(size_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mWidth) != IO_OK)
-	{
+	if (writer->Write(width_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mHeight) != IO_OK)
-	{
+	if (writer->Write(height_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mPlanes) != IO_OK)
-	{
+	if (writer->Write(planes_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mBitCount) != IO_OK)
-	{
+	if (writer->Write(bit_count_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mCompression) != IO_OK)
-	{
+	if (writer->Write(compression_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mSizeImage) != IO_OK)
-	{
+	if (writer->Write(size_image_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mXPelsPerMeter) != IO_OK)
-	{
+	if (writer->Write(x_pels_per_meter_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mYPelsPerMeter) != IO_OK)
-	{
+	if (writer->Write(y_pels_per_meter_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mClrUsed) != IO_OK)
-	{
+	if (writer->Write(clr_used_) != kIoOk) {
 		return false;
 	}
 
-	if (pWriter->Write(mClrImportant) != IO_OK)
-	{
+	if (writer->Write(clr_important_) != kIoOk) {
 		return false;
 	}
 

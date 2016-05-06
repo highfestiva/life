@@ -4,15 +4,15 @@
 
 
 
-#include "../../Include/Mac/UiMacCore.h"
-#include "../../../Lepra/Include/Log.h"
-#include "../../../Lepra/Include/SystemManager.h"
-#include "../../../Lepra/Include/Thread.h"
-#include "../../Include/Mac/UiMacDisplayManager.h"
+#include "../../include/mac/uimaccore.h"
+#include "../../../lepra/include/log.h"
+#include "../../../lepra/include/systemmanager.h"
+#include "../../../lepra/include/thread.h"
+#include "../../include/mac/uimacdisplaymanager.h"
 
 
 
-static Lepra::Application* gApplication = 0;
+static lepra::Application* g_application = 0;
 
 
 
@@ -28,9 +28,8 @@ static Lepra::Application* gApplication = 0;
 @end
 
 @implementation LEPRA_APPLE_APP(UiLepraTerminateExtension)
-- (void)terminate:(id)sender
-{
-	Lepra::SystemManager::AddQuitRequest(+1);
+- (void)terminate:(id)sender {
+	lepra::SystemManager::AddQuitRequest(+1);
 }
 @end
 
@@ -47,38 +46,34 @@ static Lepra::Application* gApplication = 0;
 #endif // iOS/!iOS
 {
 	// Hand off to main application code.
-	gApplication->Init();
+	g_application->Init();
 #ifndef LEPRA_IOS
-	const int lExitStatus = gApplication->Run();
-	delete gApplication;
-	exit(lExitStatus);
+	const int exit_status = g_application->Run();
+	delete g_application;
+	exit(exit_status);
 #else // iOS
-	gApplication->Run();
+	g_application->Run();
 #endif // !iOS/iOS
 }
 
 #ifdef LEPRA_IOS
-- (void)applicationWillResignActive:(UIApplication *)application
-{
-	gApplication->Suspend(true);
+- (void)applicationWillResignActive:(UIApplication *)application {
+	g_application->Suspend(true);
 }
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-	gApplication->Resume(true);
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+	g_application->Resume(true);
 }
 #endif // iOS
 @end
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
 #ifndef LEPRA_IOS
-static NSString* getApplicationName(void)
-{
+static NSString* getApplicationName(void) {
 	const NSDictionary* dict;
 	NSString* appName = 0;
 
@@ -93,17 +88,16 @@ static NSString* getApplicationName(void)
 	return appName;
 }
 
-static void setApplicationMenu(void)
-{
+static void setApplicationMenu(void) {
 	// Warning: this code is very odd.
 	NSMenu *appleMenu;
-	NSMenuItem *menuItem;
+	NSMenuItem *item_;
 	NSString *title;
 	NSString *appName;
 
 	appName = getApplicationName();
 	appleMenu = [[NSMenu alloc] initWithTitle:@""];
-    
+
 	// Add menu items.
 	title = [@"About " stringByAppendingString:appName];
 	[appleMenu addItemWithTitle:title action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
@@ -113,8 +107,8 @@ static void setApplicationMenu(void)
 	title = [@"Hide " stringByAppendingString:appName];
 	[appleMenu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@"h"];
 
-	menuItem = (NSMenuItem *)[appleMenu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
-	[menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
+	item_ = (NSMenuItem *)[appleMenu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
+	[item_ setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
 
 	[appleMenu addItemWithTitle:@"Show All" action:@selector(unhideAllApplications:) keyEquivalent:@""];
 
@@ -124,29 +118,28 @@ static void setApplicationMenu(void)
 	[appleMenu addItemWithTitle:title action:@selector(terminate:) keyEquivalent:@"q"];
 
 	// Put menu into the menubar.
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
-	[menuItem setSubmenu:appleMenu];
-	[[[NSApplication sharedApplication] mainMenu] addItem:menuItem];
+	item_ = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
+	[item_ setSubmenu:appleMenu];
+	[[[NSApplication sharedApplication] mainMenu] addItem:item_];
 
 	// Tell the application object that this is now the application menu.
 	[[NSApplication sharedApplication] setAppleMenu:appleMenu];
 
 	[appleMenu release];
-	[menuItem release];
+	[item_ release];
 }
 
-static void setupWindowMenu(void)
-{
+static void setupWindowMenu(void) {
 	NSMenu      *windowMenu;
 	NSMenuItem  *windowMenuItem;
-	NSMenuItem  *menuItem;
+	NSMenuItem  *item_;
 
 	windowMenu = [[NSMenu alloc] initWithTitle:@"Window"];
 
 	// "Minimize" item.
-	menuItem = [[NSMenuItem alloc] initWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@"m"];
-	[windowMenu addItem:menuItem];
-	[menuItem release];
+	item_ = [[NSMenuItem alloc] initWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@"m"];
+	[windowMenu addItem:item_];
+	[item_ release];
 
 	// Put menu into the menubar.
 	windowMenuItem = [[NSMenuItem alloc] initWithTitle:@"Window" action:nil keyEquivalent:@""];
@@ -163,13 +156,12 @@ static void setupWindowMenu(void)
 
 
 
-int UiMain(Application& pApplication)
-{
+int UiMain(Application& _application) {
 #ifndef LEPRA_IOS
-	NSAutoreleasePool* lPool = [[NSAutoreleasePool alloc] init];
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 #endif // Mac
 
-	gApplication = &pApplication;
+	g_application = &_application;
 
 #ifndef LEPRA_IOS
 	// Ensure the application object is initialised.
@@ -187,117 +179,102 @@ int UiMain(Application& pApplication)
 	}
 #endif // CPS
 
-	MacCore::mApplication = [NSApplication sharedApplication];
+	MacCore::application_ = [NSApplication sharedApplication];
 
 	// Setup menu.
 	[[NSApplication sharedApplication] setMainMenu:[[NSMenu alloc] init]];
 	setApplicationMenu();
 	setupWindowMenu();
 
-	UiLepraLoadedDispatcher* lLoadedDispatcher = [[UiLepraLoadedDispatcher alloc] init];
-	[[NSApplication sharedApplication] setDelegate:lLoadedDispatcher];
+	UiLepraLoadedDispatcher* loaded_dispatcher = [[UiLepraLoadedDispatcher alloc] init];
+	[[NSApplication sharedApplication] setDelegate:loaded_dispatcher];
 	[[NSApplication sharedApplication] run];
-	[lLoadedDispatcher release];
+	[loaded_dispatcher release];
 
 #else // iOS
-	MacCore::mApplication = [UIApplication sharedApplication];
+	MacCore::application_ = [UIApplication sharedApplication];
 	UIApplicationMain(0, 0, nil, @"UiLepraLoadedDispatcher");
 #endif // !iOS/iOS
 
 #ifndef LEPRA_IOS
-	[lPool release];
+	[pool release];
 #endif // Mac
 	return 0;
 }
 
 
 
-void Core::Init()
-{
+void Core::Init() {
 	MacCore::Init();
 }
 
-void Core::Shutdown()
-{
+void Core::Shutdown() {
 	MacCore::Shutdown();
 }
 
-void Core::ProcessMessages()
-{
+void Core::ProcessMessages() {
 	MacCore::ProcessMessages();
 }
 
 
 
-void MacCore::Init()
-{
-	if (!mLock)
-	{
-		mLock = new Lock();
+void MacCore::Init() {
+	if (!lock_) {
+		lock_ = new Lock();
 	}
 }
 
-void MacCore::Shutdown()
-{
-	delete (mLock);
-	mLock = 0;
+void MacCore::Shutdown() {
+	delete (lock_);
+	lock_ = 0;
 }
 
-void MacCore::ProcessMessages()
-{
-	ScopeLock lLock(mLock);
-	if (mWindowTable.IsEmpty())
-	{
+void MacCore::ProcessMessages() {
+	ScopeLock lock(lock_);
+	if (window_table_.IsEmpty()) {
 		return;
 	}
 
 #ifndef LEPRA_IOS
-	LEPRA_APPLE_EVENT* lEvent;
-	do
-	{
-		lEvent = [mApplication nextEventMatchingMask:NSAnyEventMask
+	LEPRA_APPLE_EVENT* event;
+	do {
+		event = [application_ nextEventMatchingMask:NSAnyEventMask
 						   untilDate:nil
 						      inMode:NSDefaultRunLoopMode
 						     dequeue:YES];
-		if (lEvent)
-		{
-			[mApplication sendEvent:lEvent];
+		if (event) {
+			[application_ sendEvent:event];
 		}
-	}
-	while (lEvent);
-	//[mApplication updateWindows];
+	} while (event);
+	//[application_ updateWindows];
 #endif // !iOS
 
-	for (WindowTable::Iterator x = mWindowTable.First(); x != mWindowTable.End(); ++x)
-	{
-		MacDisplayManager* lDisplayManager = x.GetObject();
-		lDisplayManager->ProcessMessages();
+	for (WindowTable::Iterator x = window_table_.First(); x != window_table_.End(); ++x) {
+		MacDisplayManager* _display_manager = x.GetObject();
+		_display_manager->ProcessMessages();
 	}
 }
 
-void MacCore::AddDisplayManager(MacDisplayManager* pDisplayManager)
-{
-	ScopeLock lLock(mLock);
-	mWindowTable.Insert((__bridge void*)pDisplayManager->GetWindow(), pDisplayManager);
+void MacCore::AddDisplayManager(MacDisplayManager* display_manager) {
+	ScopeLock lock(lock_);
+	window_table_.Insert((__bridge void*)display_manager->GetWindow(), display_manager);
 }
 
-void MacCore::RemoveDisplayManager(MacDisplayManager* pDisplayManager)
-{
-	ScopeLock lLock(mLock);
-	mWindowTable.Remove((__bridge void*)pDisplayManager->GetWindow());
+void MacCore::RemoveDisplayManager(MacDisplayManager* display_manager) {
+	ScopeLock lock(lock_);
+	window_table_.Remove((__bridge void*)display_manager->GetWindow());
 }
 
-MacDisplayManager* MacCore::GetDisplayManager(LEPRA_APPLE_WINDOW* pWindowHandle)
-{
-	ScopeLock lLock(mLock);
-	return (mWindowTable.FindObject((__bridge void*)pWindowHandle));
+MacDisplayManager* MacCore::GetDisplayManager(LEPRA_APPLE_WINDOW* window_handle) {
+	ScopeLock lock(lock_);
+	return (window_table_.FindObject((__bridge void*)window_handle));
 }
 
 
 
-LEPRA_APPLE_APP* MacCore::mApplication;
-Lock* MacCore::mLock = 0;
-MacCore::WindowTable MacCore::mWindowTable;
+LEPRA_APPLE_APP* MacCore::application_;
+Lock* MacCore::lock_ = 0;
+MacCore::WindowTable MacCore::window_table_;
 
 
 

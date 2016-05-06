@@ -1,30 +1,28 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "PushManager.h"
-#include "RoadSignButton.h"
+#include "pushmanager.h"
+#include "roadsignbutton.h"
 
 
 
 #ifdef PUSH_DEMO
-namespace Push
-{
+namespace Push {
 
 
 
 // This is just a simple viewer that shows a background for menus and shows off in demo mode.
-class PushDemo: public PushManager
-{
+class PushDemo: public PushManager {
 	typedef PushManager Parent;
 public:
-	PushDemo(GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+	PushDemo(GameClientMasterTicker* pMaster, const cure::TimeManager* time,
+		cure::RuntimeVariableScope* variable_scope, cure::ResourceManager* resource_manager,
+		UiCure::GameUiManager* ui_manager, int slave_index, const PixelRect& render_area);
 	virtual ~PushDemo();
 
 private:
@@ -33,23 +31,23 @@ private:
 	virtual void TickUiUpdate();
 	virtual void CreateLoginView();
 	virtual bool InitializeUniverse();
-	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	void BrowseFullInfo(UiTbc::Button*);
+	virtual void OnLoadCompleted(cure::ContextObject* object, bool ok);
+	void BrowseFullInfo(uitbc::Button*);
 
-	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
-	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
-	virtual void OnInput(UiLepra::InputElement* pElement);
+	virtual bool OnKeyDown(uilepra::InputManager::KeyCode key_code);
+	virtual bool OnKeyUp(uilepra::InputManager::KeyCode key_code);
+	virtual void OnInput(uilepra::InputElement* element);
 
-	UiTbc::FontManager::FontId PushDemo::SetFontHeight(double pHeight);
+	uitbc::FontManager::FontId PushDemo::SetFontHeight(double height);
 
-	float mCameraAngle;
+	float camera_angle_;
 
-	float mInfoTextX;
-	float mInfoTextTargetY;
-	float mInfoTextSlideY;
-	str mInfoText;
-	int mCurrentInfoTextIndex;
-	static const tchar* mInfoTextArray[6];
+	float info_text_x_;
+	float info_text_target_y_;
+	float info_text_slide_y_;
+	str info_text_;
+	int current_info_text_index_;
+	static const tchar* info_text_array_[6];
 };
 
 

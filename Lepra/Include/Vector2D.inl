@@ -1,468 +1,405 @@
 /*
 	Class:  Vector2D
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
 #define V2D_TEMPLATE template<class _TVarType>
 #define V2D_QUAL Vector2D<_TVarType>
 
-V2D_TEMPLATE V2D_QUAL::Vector2D()
-{
+V2D_TEMPLATE V2D_QUAL::Vector2D() {
 	x = 0;
 	y = 0;
 }
 
-V2D_TEMPLATE V2D_QUAL::Vector2D(_TVarType pX, _TVarType pY)
-{
-	x = pX;
-	y = pY;
+V2D_TEMPLATE V2D_QUAL::Vector2D(_TVarType _x, _TVarType _y) {
+	x = _x;
+	y = _y;
 }
 
-V2D_TEMPLATE V2D_QUAL::Vector2D(const Vector2D<_TVarType>& pV)
-{
-	x = pV.x;
-	y = pV.y;
+V2D_TEMPLATE V2D_QUAL::Vector2D(const Vector2D<_TVarType>& v) {
+	x = v.x;
+	y = v.y;
 }
 
-V2D_TEMPLATE void V2D_QUAL::Set(_TVarType pX, _TVarType pY)
-{
-	x = pX;
-	y = pY;
+V2D_TEMPLATE void V2D_QUAL::Set(_TVarType _x, _TVarType _y) {
+	x = _x;
+	y = _y;
 }
 
-V2D_TEMPLATE void V2D_QUAL::Set(const Vector2D<_TVarType>& pV)
-{
-	x = pV.x;
-	y = pV.y;
+V2D_TEMPLATE void V2D_QUAL::Set(const Vector2D<_TVarType>& v) {
+	x = v.x;
+	y = v.y;
 }
 
-V2D_TEMPLATE void V2D_QUAL::SetPerpCW(const Vector2D<_TVarType>& pV)
-{
-	x = pV.y;
-	y = -pV.x;
+V2D_TEMPLATE void V2D_QUAL::SetPerpCW(const Vector2D<_TVarType>& v) {
+	x = v.y;
+	y = -v.x;
 }
 
-V2D_TEMPLATE void V2D_QUAL::SetPerpCCW(const Vector2D<_TVarType>& pV)
-{
-	x = -pV.y;
-	y = pV.x;
+V2D_TEMPLATE void V2D_QUAL::SetPerpCCW(const Vector2D<_TVarType>& v) {
+	x = -v.y;
+	y = v.x;
 }
 
-V2D_TEMPLATE void V2D_QUAL::SetPolar(_TVarType pAngle, _TVarType pLength)
-{
-	x = (_TVarType)cos(pAngle) * pLength;
-	y = (_TVarType)sin(pAngle) * pLength;
+V2D_TEMPLATE void V2D_QUAL::SetPolar(_TVarType angle, _TVarType length) {
+	x = (_TVarType)cos(angle) * length;
+	y = (_TVarType)sin(angle) * length;
 }
 
-V2D_TEMPLATE void V2D_QUAL::SetBezier(const Vector2D<_TVarType>& pVA, 
-						const Vector2D<_TVarType>& pVTA, 
-						const Vector2D<_TVarType>& pVTB, 
-						const Vector2D<_TVarType>& pVB, 
-						_TVarType pT)
-{
+V2D_TEMPLATE void V2D_QUAL::SetBezier(const Vector2D<_TVarType>& va,
+						const Vector2D<_TVarType>& vta,
+						const Vector2D<_TVarType>& vtb,
+						const Vector2D<_TVarType>& vb,
+						_TVarType t) {
 	// Calculate lots of temporary variables to minimize number of operations.
-	_TVarType lT1_05 = (_TVarType)(0.5 * pT);
+	_TVarType t1_05 = (_TVarType)(0.5 * t);
 
-	_TVarType lT2_10 = pT * pT;
-	_TVarType lT2_05 = (_TVarType)(0.5 * lT2_10);
-	_TVarType lT2_20 = (_TVarType)(2.0 * lT2_10);
-	_TVarType lT2_25 = (_TVarType)(2.5 * lT2_10);
+	_TVarType t2_10 = t * t;
+	_TVarType t2_05 = (_TVarType)(0.5 * t2_10);
+	_TVarType t2_20 = (_TVarType)(2.0 * t2_10);
+	_TVarType t2_25 = (_TVarType)(2.5 * t2_10);
 
-	_TVarType lT3 = lT2_10 * pT;
-	_TVarType lT3_05 = (_TVarType)(0.5 * lT3);
-	_TVarType lT3_15 = (_TVarType)(1.5 * lT3);
+	_TVarType t3 = t2_10 * t;
+	_TVarType t3_05 = (_TVarType)(0.5 * t3);
+	_TVarType t3_15 = (_TVarType)(1.5 * t3);
 
-	_TVarType lTA = -lT3_05 + lT2_10 - lT1_05;
-	_TVarType lTB = lT3_15 - lT2_25 + 1.0;
-	_TVarType lTC = -lT3_15 + lT2_20 + lT1_05;
-	_TVarType lTD = lT3_05 - lT2_05;
+	_TVarType ta = -t3_05 + t2_10 - t1_05;
+	_TVarType tb = t3_15 - t2_25 + 1.0;
+	_TVarType tc = -t3_15 + t2_20 + t1_05;
+	_TVarType td = t3_05 - t2_05;
 
-	x = (_TVarType)(lTA * pVA.x  +
-					lTB * pVTA.x +
-					lTC * pVTB.x +
-					lTD * pVB.x);
-	y = (_TVarType)(lTA * pVA.y  +
-					lTB * pVTA.y +
-					lTC * pVTB.y +
-					lTD * pVB.y);
+	x = (_TVarType)(ta * va.x  +
+					tb * vta.x +
+					tc * vtb.x +
+					td * vb.x);
+	y = (_TVarType)(ta * va.y  +
+					tb * vta.y +
+					tc * vtb.y +
+					td * vb.y);
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::GetPerpCW()
-{
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::GetPerpCW() {
 	return Vector2D<_TVarType>(y, -x);
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::GetPerpCCW()
-{
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::GetPerpCCW() {
 	return Vector2D<_TVarType>(-y, x);
 }
 
-V2D_TEMPLATE void V2D_QUAL::Add(_TVarType pX, _TVarType pY)
-{
-	x += pX;
-	y += pY;
+V2D_TEMPLATE void V2D_QUAL::Add(_TVarType _x, _TVarType _y) {
+	x += _x;
+	y += _y;
 }
 
-V2D_TEMPLATE void V2D_QUAL::Add(const Vector2D<_TVarType>& pV)
-{
-	x += pV.x; 
-	y += pV.y; 
+V2D_TEMPLATE void V2D_QUAL::Add(const Vector2D<_TVarType>& v) {
+	x += v.x;
+	y += v.y;
 }
 
-V2D_TEMPLATE void V2D_QUAL::Sub(_TVarType pX, _TVarType pY)
-{
-	x -= pX;
-	y -= pY;
+V2D_TEMPLATE void V2D_QUAL::Sub(_TVarType _x, _TVarType _y) {
+	x -= _x;
+	y -= _y;
 }
 
-V2D_TEMPLATE void V2D_QUAL::Sub(const Vector2D<_TVarType>& pV)
-{
-	x -= pV.x;
-	y -= pV.y;
+V2D_TEMPLATE void V2D_QUAL::Sub(const Vector2D<_TVarType>& v) {
+	x -= v.x;
+	y -= v.y;
 }
 
-V2D_TEMPLATE void V2D_QUAL::Mul(_TVarType pScalar)
-{
-	x *= pScalar;
-	y *= pScalar;
+V2D_TEMPLATE void V2D_QUAL::Mul(_TVarType scalar) {
+	x *= scalar;
+	y *= scalar;
 }
 
-V2D_TEMPLATE void V2D_QUAL::Div(_TVarType pScalar)
-{
-	_TVarType lInvScalar = 1.0f / pScalar;
-	x *= lInvScalar; 
-	y *= lInvScalar; 
+V2D_TEMPLATE void V2D_QUAL::Div(_TVarType scalar) {
+	_TVarType inv_scalar = 1.0f / scalar;
+	x *= inv_scalar;
+	y *= inv_scalar;
 }
 
-V2D_TEMPLATE _TVarType V2D_QUAL::Dot(const Vector2D<_TVarType>& pV) const
-{
-	return (x * pV.x + y * pV.y);
+V2D_TEMPLATE _TVarType V2D_QUAL::Dot(const Vector2D<_TVarType>& v) const {
+	return (x * v.x + y * v.y);
 }
 
-V2D_TEMPLATE _TVarType V2D_QUAL::GetLength() const
-{
+V2D_TEMPLATE _TVarType V2D_QUAL::GetLength() const {
 	return (_TVarType)sqrt(x * x + y * y);
 }
 
-V2D_TEMPLATE _TVarType V2D_QUAL::GetLengthSquared() const
-{
+V2D_TEMPLATE _TVarType V2D_QUAL::GetLengthSquared() const {
 	return (x * x + y * y);
 }
 
-V2D_TEMPLATE _TVarType V2D_QUAL::GetDistance(const Vector2D<_TVarType>& pV) const
-{
-	_TVarType lDx = pV.x - x;
-	_TVarType lDy = pV.y - y;
+V2D_TEMPLATE _TVarType V2D_QUAL::GetDistance(const Vector2D<_TVarType>& v) const {
+	_TVarType dx = v.x - x;
+	_TVarType dy = v.y - y;
 
-	return (_TVarType)sqrt(lDx * lDx + lDy * lDy);
+	return (_TVarType)sqrt(dx * dx + dy * dy);
 }
 
-V2D_TEMPLATE _TVarType V2D_QUAL::GetDistanceSquared(const Vector2D<_TVarType>& pV) const
-{
-	_TVarType lDx = pV.x - x;
-	_TVarType lDy = pV.y - y;
+V2D_TEMPLATE _TVarType V2D_QUAL::GetDistanceSquared(const Vector2D<_TVarType>& v) const {
+	_TVarType dx = v.x - x;
+	_TVarType dy = v.y - y;
 
-	return (lDx * lDx + lDy * lDy);
+	return (dx * dx + dy * dy);
 }
 
-V2D_TEMPLATE _TVarType V2D_QUAL::GetAngle() const
-{
+V2D_TEMPLATE _TVarType V2D_QUAL::GetAngle() const {
 	return atan2(y, x);
 }
 
-V2D_TEMPLATE _TVarType V2D_QUAL::GetAngle(const Vector2D<_TVarType>& pV) const
-{
-	BaseType a = pV.GetAngle() - GetAngle();
-	if (a  < -(BaseType)PI)
-	{
+V2D_TEMPLATE _TVarType V2D_QUAL::GetAngle(const Vector2D<_TVarType>& v) const {
+	BaseType a = v.GetAngle() - GetAngle();
+	if (a  < -(BaseType)PI) {
 		a += 2*(BaseType)PI;
-	}
-	else if (a  > +(BaseType)PI)
-	{
+	} else if (a  > +(BaseType)PI) {
 		a -= 2*(BaseType)PI;
 	}
 	return a;
 }
 
-V2D_TEMPLATE void V2D_QUAL::Cross(const Vector2D<_TVarType>& pV)
-{
-	x = -pV.y;
-	y = pV.x;
+V2D_TEMPLATE void V2D_QUAL::Cross(const Vector2D<_TVarType>& v) {
+	x = -v.y;
+	y = v.x;
 }
 
-V2D_TEMPLATE void V2D_QUAL::CrossUnit(const Vector2D<_TVarType>& pV)
-{
-	Cross(pV);
+V2D_TEMPLATE void V2D_QUAL::CrossUnit(const Vector2D<_TVarType>& v) {
+	Cross(v);
 	Normalize();
 }
 
-V2D_TEMPLATE void V2D_QUAL::RotateAround(const Vector2D<_TVarType>& pOrigin, _TVarType pAngle)
-{
-	_TVarType lX = x - pOrigin.x;
-	_TVarType lY = y - pOrigin.y;
-	_TVarType lSinA = (_TVarType)sin(pAngle);
-	_TVarType lCosA = (_TVarType)cos(pAngle);
+V2D_TEMPLATE void V2D_QUAL::RotateAround(const Vector2D<_TVarType>& origin, _TVarType angle) {
+	_TVarType __x = x - origin.x;
+	_TVarType __y = y - origin.y;
+	_TVarType sin_a = (_TVarType)sin(angle);
+	_TVarType cos_a = (_TVarType)cos(angle);
 
-	x = lCosA * lX - lSinA * lY + pOrigin.x;
-	y = lSinA * lX + lCosA * lY + pOrigin.y;
+	x = cos_a * __x - sin_a * __y + origin.x;
+	y = sin_a * __x + cos_a * __y + origin.y;
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator= (const Vector2D<_TVarType>& pV)
-{
-	x = pV.x;
-	y = pV.y;
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator= (const Vector2D<_TVarType>& v) {
+	x = v.x;
+	y = v.y;
 
 	return *this;
 }
 
-V2D_TEMPLATE bool V2D_QUAL::operator== (const Vector2D<_TVarType>& pV) const
-{
-	return (x == pV.x && y == pV.y);
+V2D_TEMPLATE bool V2D_QUAL::operator== (const Vector2D<_TVarType>& v) const {
+	return (x == v.x && y == v.y);
 }
 
-V2D_TEMPLATE bool V2D_QUAL::operator!= (const Vector2D<_TVarType>& pV) const
-{
-	return (x != pV.x || y != pV.y);
+V2D_TEMPLATE bool V2D_QUAL::operator!= (const Vector2D<_TVarType>& v) const {
+	return (x != v.x || y != v.y);
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator+= (const Vector2D<_TVarType>& pV)
-{
-	x += pV.x;
-	y += pV.y;
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator+= (const Vector2D<_TVarType>& v) {
+	x += v.x;
+	y += v.y;
 
 	return *this;
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator+ (const Vector2D<_TVarType>& pV) const
-{
-	Vector2D lTemp;
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator+ (const Vector2D<_TVarType>& v) const {
+	Vector2D temp;
 
-	lTemp.x = x + pV.x;
-	lTemp.y = y + pV.y;
+	temp.x = x + v.x;
+	temp.y = y + v.y;
 
-	return lTemp;
+	return temp;
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator-= (const Vector2D<_TVarType>& pV)
-{
-	x -= pV.x;
-	y -= pV.y;
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator-= (const Vector2D<_TVarType>& v) {
+	x -= v.x;
+	y -= v.y;
 
 	return *this;
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator- (const Vector2D<_TVarType>& pV) const
-{
-	Vector2D lTemp;
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator- (const Vector2D<_TVarType>& v) const {
+	Vector2D temp;
 
-	lTemp.x = x - pV.x;
-	lTemp.y = y - pV.y;
+	temp.x = x - v.x;
+	temp.y = y - v.y;
 
-	return lTemp;
+	return temp;
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator- () const
-{
-	Vector2D lTemp;
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator- () const {
+	Vector2D temp;
 
-	lTemp.x = -x;
-	lTemp.y = -y;
+	temp.x = -x;
+	temp.y = -y;
 
-	return lTemp;
+	return temp;
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator*= (_TVarType pScalar)
-{
-	x *= pScalar;
-	y *= pScalar;
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator*= (_TVarType scalar) {
+	x *= scalar;
+	y *= scalar;
 
 	return *this;
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator* (_TVarType pScalar) const
-{
-	Vector2D lTemp;
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator* (_TVarType scalar) const {
+	Vector2D temp;
 
-	lTemp.x = x * pScalar;
-	lTemp.y = y * pScalar;
+	temp.x = x * scalar;
+	temp.y = y * scalar;
 
-	return lTemp;
+	return temp;
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator/= (_TVarType pScalar)
-{
-	_TVarType lInvScalar = 1.0f / pScalar;
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator/= (_TVarType scalar) {
+	_TVarType inv_scalar = 1.0f / scalar;
 
-	x *= lInvScalar;
-	y *= lInvScalar;
+	x *= inv_scalar;
+	y *= inv_scalar;
 
 	return *this;
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator/ (_TVarType pScalar) const
-{
-	_TVarType lInvScalar = 1.0f / pScalar;
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::operator/ (_TVarType scalar) const {
+	_TVarType inv_scalar = 1.0f / scalar;
 
-	Vector2D lTemp;
+	Vector2D temp;
 
-	lTemp.x = x * lInvScalar;
-	lTemp.y = y * lInvScalar;
+	temp.x = x * inv_scalar;
+	temp.y = y * inv_scalar;
 
-	return lTemp;
+	return temp;
 }
 
-V2D_TEMPLATE _TVarType V2D_QUAL::operator* (const Vector2D<_TVarType>& pV) const
-{
-	return(x * pV.x + y * pV.y);
+V2D_TEMPLATE _TVarType V2D_QUAL::operator* (const Vector2D<_TVarType>& v) const {
+	return(x * v.x + y * v.y);
 }
 
-V2D_TEMPLATE void V2D_QUAL::Normalize(_TVarType pLength)
-{
-	_TVarType lLength = GetLength();
+V2D_TEMPLATE void V2D_QUAL::Normalize(_TVarType length) {
+	_TVarType _length = GetLength();
 
-	if (lLength >= MathTraits<_TVarType>::FullEps())
-	{
-		Div(lLength);
-		Mul(pLength);
-	}
-	else
-	{
+	if (_length >= MathTraits<_TVarType>::FullEps()) {
+		Div(_length);
+		Mul(length);
+	} else {
 		Set(0.0f, 0.0f);
 	}
 }
 
-V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::GetNormalized() const
-{
-	_TVarType lLength = GetLength();
-	if (lLength >= MathTraits<_TVarType>::FullEps())
-	{
-		return Vector2D<_TVarType>(x/lLength, y/lLength);
+V2D_TEMPLATE Vector2D<_TVarType> V2D_QUAL::GetNormalized() const {
+	_TVarType _length = GetLength();
+	if (_length >= MathTraits<_TVarType>::FullEps()) {
+		return Vector2D<_TVarType>(x/_length, y/_length);
 	}
 	return Vector2D<_TVarType>(0, 0);
 }
 
-V2D_TEMPLATE int V2D_QUAL::GetRawDataSize()
-{
+V2D_TEMPLATE int V2D_QUAL::GetRawDataSize() {
 	return sizeof(_TVarType) * 2;
 }
 
-V2D_TEMPLATE int V2D_QUAL::GetRawData(uint8* pData)
-{
-	_TVarType* lData = (_TVarType*)pData;
-	lData[0] = x;
-	lData[1] = y;
-	return (sizeof(lData[0])*2);
+V2D_TEMPLATE int V2D_QUAL::GetRawData(uint8* data) {
+	_TVarType* _data = (_TVarType*)data;
+	_data[0] = x;
+	_data[1] = y;
+	return (sizeof(_data[0])*2);
 }
 
-V2D_TEMPLATE int V2D_QUAL::SetRawData(uint8* pData)
-{
-	_TVarType* lData = (_TVarType*)pData;
-	x = lData[0];
-	y = lData[1];
-	return (sizeof(lData[0])*2);
+V2D_TEMPLATE int V2D_QUAL::SetRawData(uint8* data) {
+	_TVarType* _data = (_TVarType*)data;
+	x = _data[0];
+	y = _data[1];
+	return (sizeof(_data[0])*2);
 }
 
-V2D_TEMPLATE bool V2D_QUAL::IsNullVector() const
-{
+V2D_TEMPLATE bool V2D_QUAL::IsNullVector() const {
 	return (fabs(x) <= MathTraits<_TVarType>::FullEps() &&
 		fabs(y) <= MathTraits<_TVarType>::FullEps());
 }
 
-V2D_TEMPLATE Vector2D<float> V2D_QUAL::ToFloat() const
-{
+V2D_TEMPLATE Vector2D<float> V2D_QUAL::ToFloat() const {
 	return Vector2D<float>((float)x, (float)y);
 }
 
-V2D_TEMPLATE Vector2D<double> V2D_QUAL::ToDouble() const
-{
+V2D_TEMPLATE Vector2D<double> V2D_QUAL::ToDouble() const {
 	return Vector2D<double>((double)x, (double)y);
 }
 
 template<class _TVarType>
-inline Vector2D<_TVarType> operator*(_TVarType pScalar, const Vector2D<_TVarType>& pVec)
-{
-	return pVec * pScalar;
+inline Vector2D<_TVarType> operator*(_TVarType scalar, const Vector2D<_TVarType>& vec) {
+	return vec * scalar;
 }
 
 template<class _TVarType>
-inline Vector2D<_TVarType> operator / (_TVarType pScalar, const Vector2D<_TVarType>& pVec)
-{
-	return pVec / pScalar;
+inline Vector2D<_TVarType> operator / (_TVarType scalar, const Vector2D<_TVarType>& vec) {
+	return vec / scalar;
 }
 
-inline float LineDistance(const Vector2D<float>& pPoL, const Vector2D<float>& pDir, const Vector2D<float>& pPoint)
-{
-	Vector2D<float> lNormDir(pDir);
-	lNormDir.Normalize();
-	Vector2D<float> lV(pPoint - pPoL);
-	return std::abs(lNormDir.GetPerpCW().Dot(lV));
+inline float LineDistance(const Vector2D<float>& po_l, const Vector2D<float>& dir, const Vector2D<float>& point) {
+	Vector2D<float> norm_dir(dir);
+	norm_dir.Normalize();
+	Vector2D<float> _v(point - po_l);
+	return std::abs(norm_dir.GetPerpCW().Dot(_v));
 }
 
-inline double LineDistance(const Vector2D<double>& pPoL, const Vector2D<double>& pDir, const Vector2D<double>& pPoint)
-{
-	Vector2D<double> lNormDir(pDir);
-	lNormDir.Normalize();
-	Vector2D<double> lV(pPoint - pPoL);
-	return std::abs(lNormDir.GetPerpCW().Dot(lV));
+inline double LineDistance(const Vector2D<double>& po_l, const Vector2D<double>& dir, const Vector2D<double>& point) {
+	Vector2D<double> norm_dir(dir);
+	norm_dir.Normalize();
+	Vector2D<double> _v(point - po_l);
+	return std::abs(norm_dir.GetPerpCW().Dot(_v));
 }
 
-inline float LineDistance(const Vector2D<float>& pPoL, const Vector2D<float>& pDir, const Vector2D<float>& pPoint, Vector2D<float>& pClosestPoint, float& pDirDistance)
-{
-	Vector2D<float> lNormDir(pDir);
-	lNormDir.Normalize();
-	Vector2D<float> lV(pPoint - pPoL);
-	pDirDistance = lNormDir.Dot(lV);
-	Vector2D<float> lD(lNormDir * pDirDistance);
-	pClosestPoint = pPoL + lD;
-	return std::abs(lNormDir.GetPerpCW().Dot(lV));
+inline float LineDistance(const Vector2D<float>& po_l, const Vector2D<float>& dir, const Vector2D<float>& point, Vector2D<float>& closest_point, float& dir_distance) {
+	Vector2D<float> norm_dir(dir);
+	norm_dir.Normalize();
+	Vector2D<float> _v(point - po_l);
+	dir_distance = norm_dir.Dot(_v);
+	Vector2D<float> d(norm_dir * dir_distance);
+	closest_point = po_l + d;
+	return std::abs(norm_dir.GetPerpCW().Dot(_v));
 }
 
-inline double LineDistance(const Vector2D<double>& pPoL, const Vector2D<double>& pDir, const Vector2D<double>& pPoint, Vector2D<double>& pClosestPoint, double& pDirDistance)
-{
-	Vector2D<double> lNormDir(pDir);
-	lNormDir.Normalize();
-	Vector2D<double> lV(pPoint - pPoL);
-	pDirDistance = lNormDir.Dot(lV);
-	Vector2D<double> lD(lNormDir * pDirDistance);
-	pClosestPoint = pPoL + lD;
-	return std::abs(lNormDir.GetPerpCW().Dot(lV));
+inline double LineDistance(const Vector2D<double>& po_l, const Vector2D<double>& dir, const Vector2D<double>& point, Vector2D<double>& closest_point, double& dir_distance) {
+	Vector2D<double> norm_dir(dir);
+	norm_dir.Normalize();
+	Vector2D<double> _v(point - po_l);
+	dir_distance = norm_dir.Dot(_v);
+	Vector2D<double> d(norm_dir * dir_distance);
+	closest_point = po_l + d;
+	return std::abs(norm_dir.GetPerpCW().Dot(_v));
 }
 
-inline float LineSegmentDistance(const Vector2D<float>& pStart, const Vector2D<float>& pEnd, const Vector2D<float>& pPoint, Vector2D<float>& pClosestPoint, float& pDirDistance)
-{
-	Vector2D<float> lNormDir(pEnd - pStart);
-	float lMaxDistance = lNormDir.GetLength();
-	lNormDir /= lMaxDistance; // Normalize.
+inline float LineSegmentDistance(const Vector2D<float>& start, const Vector2D<float>& end, const Vector2D<float>& point, Vector2D<float>& closest_point, float& dir_distance) {
+	Vector2D<float> norm_dir(end - start);
+	float max_distance = norm_dir.GetLength();
+	norm_dir /= max_distance; // Normalize.
 
-	Vector2D<float> lV(pPoint - pStart);
-	pDirDistance = lNormDir.Dot(lV);
+	Vector2D<float> _v(point - start);
+	dir_distance = norm_dir.Dot(_v);
 
-	if(pDirDistance < 0)
-		pDirDistance = 0;
-	else if(pDirDistance > lMaxDistance)
-		pDirDistance = lMaxDistance;
+	if(dir_distance < 0)
+		dir_distance = 0;
+	else if(dir_distance > max_distance)
+		dir_distance = max_distance;
 
-	pClosestPoint = pStart + lNormDir * pDirDistance;
-	return pPoint.GetDistance(pClosestPoint);
+	closest_point = start + norm_dir * dir_distance;
+	return point.GetDistance(closest_point);
 }
 
-inline double LineSegmentDistance(const Vector2D<double>& pStart, const Vector2D<double>& pEnd, const Vector2D<double>& pPoint, Vector2D<double>& pClosestPoint, double& pDirDistance)
-{
-	Vector2D<double> lNormDir(pEnd - pStart);
-	double lMaxDistance = lNormDir.GetLength();
-	lNormDir /= lMaxDistance; // Normalize.
+inline double LineSegmentDistance(const Vector2D<double>& start, const Vector2D<double>& end, const Vector2D<double>& point, Vector2D<double>& closest_point, double& dir_distance) {
+	Vector2D<double> norm_dir(end - start);
+	double max_distance = norm_dir.GetLength();
+	norm_dir /= max_distance; // Normalize.
 
-	Vector2D<double> lV(pPoint - pStart);
-	pDirDistance = lNormDir.Dot(lV);
+	Vector2D<double> _v(point - start);
+	dir_distance = norm_dir.Dot(_v);
 
-	if(pDirDistance < 0)
-		pDirDistance = 0;
-	else if(pDirDistance > lMaxDistance)
-		pDirDistance = lMaxDistance;
+	if(dir_distance < 0)
+		dir_distance = 0;
+	else if(dir_distance > max_distance)
+		dir_distance = max_distance;
 
-	pClosestPoint = pStart + lNormDir * pDirDistance;
-	return pPoint.GetDistance(pClosestPoint);
+	closest_point = start + norm_dir * dir_distance;
+	return point.GetDistance(closest_point);
 }
 
 #undef V2D_TEMPLATE

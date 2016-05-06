@@ -5,192 +5,156 @@
 
 
 #include "pch.h"
-#include "../../../Lepra/Include/Math.h"
-#include "../../../Lepra/Include/LepraAssert.h"
-#include "../../../Lepra/Include/ListUtil.h"
-#include "../../Include/GUI/UiTextArea.h"
+#include "../../../lepra/include/math.h"
+#include "../../../lepra/include/lepraassert.h"
+#include "../../../lepra/include/listutil.h"
+#include "../../include/gui/uitextarea.h"
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-TextArea::TextArea(const Color& pColor):
-	Parent(0, 1, pColor),
-	mFirstVisibleLine(0),
-	mVisibleLineCount(0),
-	mLineHeight(0),
-	mFocusAnchor(ANCHOR_TOP_LINE),
-	mScrollLock(false),
-	mMaxLineCount(50)
-{
-	mHorizontalMargin = 0;
+TextArea::TextArea(const Color& color):
+	Parent(0, 1, color),
+	first_visible_line_(0),
+	visible_line_count_(0),
+	line_height_(0),
+	focus_anchor_(kAnchorTopLine),
+	scroll_lock_(false),
+	max_line_count_(50) {
+	horizontal_margin_ = 0;
 	Init();
 }
 
-TextArea::TextArea(Painter::ImageID pImageId):
-	Parent(0, 1, pImageId),
-	mFirstVisibleLine(0),
-	mVisibleLineCount(0),
-	mLineHeight(0),
-	mFocusAnchor(ANCHOR_TOP_LINE),
-	mScrollLock(false),
-	mMaxLineCount(50)
-{
-	mHorizontalMargin = 0;
+TextArea::TextArea(Painter::ImageID image_id):
+	Parent(0, 1, image_id),
+	first_visible_line_(0),
+	visible_line_count_(0),
+	line_height_(0),
+	focus_anchor_(kAnchorTopLine),
+	scroll_lock_(false),
+	max_line_count_(50) {
+	horizontal_margin_ = 0;
 	Init();
 }
 
-TextArea::~TextArea()
-{
+TextArea::~TextArea() {
 }
 
 
 
-void TextArea::Clear()
-{
-	ScopeLock lLock(&mLock);
-	mFirstVisibleLine = 0;
-	mVisibleLineCount = 0;
-	mLineHeight = 0;
-	mLineList.clear();
+void TextArea::Clear() {
+	ScopeLock lock(&lock_);
+	first_visible_line_ = 0;
+	visible_line_count_ = 0;
+	line_height_ = 0;
+	line_list_.clear();
 	SetNeedsRepaint(true);
 }
 
-bool TextArea::InsertLine(unsigned pLineIndex, const wstr& pText, Color* pColor)
-{
-	ScopeLock lLock(&mLock);
-	bool lOk = false;
-	if (pLineIndex <= GetLineCount())
-	{
-		lOk = true;
-		LineInfo lLineInfo;
-		lLineInfo.mText = pText;
-		if (pColor)
-		{
-			lLineInfo.mColor = *pColor;
+bool TextArea::InsertLine(unsigned line_index, const wstr& text, Color* color) {
+	ScopeLock lock(&lock_);
+	bool ok = false;
+	if (line_index <= GetLineCount()) {
+		ok = true;
+		LineInfo line_info;
+		line_info.text_ = text;
+		if (color) {
+			line_info.color_ = *color;
+		} else {
+			line_info.color_ = GetTextColor();
 		}
-		else
-		{
-			lLineInfo.mColor = GetTextColor();
-		}
-		mLineList.insert(GetIterator(pLineIndex), lLineInfo);
-		if (GetLineCount() > mMaxLineCount)
-		{
-			mLineList.pop_front();
+		line_list_.insert(GetIterator(line_index), line_info);
+		if (GetLineCount() > max_line_count_) {
+			line_list_.pop_front();
 		}
 		// Not scroll lock and added the last line.
-		if (!mScrollLock && pLineIndex >= GetLineCount()-1)
-		{
+		if (!scroll_lock_ && line_index >= GetLineCount()-1) {
 			ScrollToLastLine();
 		}
 	}
 	RequestRepaint();
-	return (lOk);
+	return (ok);
 }
 
-unsigned TextArea::AddLine(const wstr& pText, Color* pColor)
-{
-	InsertLine(GetLineCount(), pText, pColor);
+unsigned TextArea::AddLine(const wstr& text, Color* color) {
+	InsertLine(GetLineCount(), text, color);
 	return (GetLineCount()-1);
 }
 
-void TextArea::AddText(const wstr& pText, Color* pColor)
-{
-	ScopeLock lLock(&mLock);
-	bool lFirstLine = true;
-	wstrutil::strvec lLines = wstrutil::Split(pText, L"\n");
-	for (unsigned x = 0; x < lLines.size(); ++x)
-	{
-		if (lFirstLine)
-		{
-			lFirstLine = false;
-			if (lLines[x].empty())
-			{
-			}
-			else if (GetLineCount() <= 0)
-			{
-				AddLine(pText, pColor);
-			}
-			else
-			{
-				mLineList.back().mText += lLines[x];
-				if (pColor)
-				{
-					mLineList.back().mColor = *pColor;
+void TextArea::AddText(const wstr& text, Color* color) {
+	ScopeLock lock(&lock_);
+	bool first_line = true;
+	wstrutil::strvec lines = wstrutil::Split(text, L"\n");
+	for (unsigned x = 0; x < lines.size(); ++x) {
+		if (first_line) {
+			first_line = false;
+			if (lines[x].empty()) {
+			} else if (GetLineCount() <= 0) {
+				AddLine(text, color);
+			} else {
+				line_list_.back().text_ += lines[x];
+				if (color) {
+					line_list_.back().color_ = *color;
 				}
 			}
-		}
-		else
-		{
-			AddLine(lLines[x], pColor);
+		} else {
+			AddLine(lines[x], color);
 		}
 	}
 	RequestRepaint();
 }
 
-bool TextArea::RemoveLine(unsigned pLineIndex)
-{
-	ScopeLock lLock(&mLock);
-	bool lOk = (pLineIndex < GetLineCount());
-	if (lOk)
-	{
-		mLineList.erase(GetIterator(pLineIndex));
-		if (pLineIndex < mFirstVisibleLine)
-		{
-			--mFirstVisibleLine;
+bool TextArea::RemoveLine(unsigned line_index) {
+	ScopeLock lock(&lock_);
+	bool ok = (line_index < GetLineCount());
+	if (ok) {
+		line_list_.erase(GetIterator(line_index));
+		if (line_index < first_visible_line_) {
+			--first_visible_line_;
 		}
 		RequestRepaint();
 	}
-	return (lOk);
+	return (ok);
 }
 
-unsigned TextArea::GetLineCount() const
-{
-	ScopeLock lLock(&mLock);
-	return ((unsigned)mLineList.size());
+unsigned TextArea::GetLineCount() const {
+	ScopeLock lock(&lock_);
+	return ((unsigned)line_list_.size());
 }
 
-unsigned TextArea::GetFirstVisibleLineIndex() const
-{
-	return (mFirstVisibleLine);
+unsigned TextArea::GetFirstVisibleLineIndex() const {
+	return (first_visible_line_);
 }
 
-void TextArea::SetFirstVisibleLineIndex(unsigned pLineIndex)
-{
-	int lMaxDownIndex = Math::Clamp(
-		(int)(GetLineCount()-GetVisibleLineCount()), 0, (int)mMaxLineCount);
-	pLineIndex = Math::Clamp((int)pLineIndex, 0, lMaxDownIndex);
-	if (pLineIndex != mFirstVisibleLine)
-	{
-		mFirstVisibleLine = pLineIndex;
+void TextArea::SetFirstVisibleLineIndex(unsigned line_index) {
+	int max_down_index = Math::Clamp(
+		(int)(GetLineCount()-GetVisibleLineCount()), 0, (int)max_line_count_);
+	line_index = Math::Clamp((int)line_index, 0, max_down_index);
+	if (line_index != first_visible_line_) {
+		first_visible_line_ = line_index;
 		RequestRepaint();
 	}
 }
 
-unsigned TextArea::GetVisibleLineCount() const
-{
-	return (mVisibleLineCount);
+unsigned TextArea::GetVisibleLineCount() const {
+	return (visible_line_count_);
 }
 
 
 
-void TextArea::SetFocusAnchor(FocusAnchor pAnchor)
-{
-	mFocusAnchor = pAnchor;
+void TextArea::SetFocusAnchor(FocusAnchor anchor) {
+	focus_anchor_ = anchor;
 }
 
-void TextArea::SetScrollLock(bool pScrollLock)
-{
-	mScrollLock = pScrollLock;
+void TextArea::SetScrollLock(bool scroll_lock) {
+	scroll_lock_ = scroll_lock;
 }
 
-void TextArea::SetMaxLineCount(unsigned pMaxLineCount)
-{
-	mMaxLineCount = pMaxLineCount;
-	while (mMaxLineCount > GetLineCount())
-	{
+void TextArea::SetMaxLineCount(unsigned max_line_count) {
+	max_line_count_ = max_line_count;
+	while (max_line_count_ > GetLineCount()) {
 		RemoveLine(0);
 	}
 	RequestRepaint();
@@ -198,87 +162,75 @@ void TextArea::SetMaxLineCount(unsigned pMaxLineCount)
 
 
 
-void TextArea::Repaint(Painter* pPainter)
-{
-	Parent::Repaint(pPainter);
+void TextArea::Repaint(Painter* painter) {
+	Parent::Repaint(painter);
 
-	ActivateFont(pPainter);
-	mLineHeight = pPainter->GetLineHeight();
+	ActivateFont(painter);
+	line_height_ = painter->GetLineHeight();
 	UpdateVisibleSize();
 
-	pPainter->PushAttrib(Painter::ATTR_ALL);
+	painter->PushAttrib(Painter::kAttrAll);
 
-	PixelRect lRect(GetClientRect());
-	pPainter->ReduceClippingRect(lRect);
+	PixelRect rect(GetClientRect());
+	painter->ReduceClippingRect(rect);
 
-	int lBeginY;
-	int lEndY;
-	int lPixelOffsetY;
-	int lPrintedLineCount = Math::Clamp((int)GetVisibleLineCount(), 0, (int)GetLineCount());
-	if (mFocusAnchor == ANCHOR_TOP_LINE)
-	{
-		lBeginY = 0;
-		lEndY = lPrintedLineCount;
-		lPixelOffsetY = 0;
+	int begin_y;
+	int end_y;
+	int pixel_offset_y;
+	int printed_line_count = Math::Clamp((int)GetVisibleLineCount(), 0, (int)GetLineCount());
+	if (focus_anchor_ == kAnchorTopLine) {
+		begin_y = 0;
+		end_y = printed_line_count;
+		pixel_offset_y = 0;
+	} else {
+		begin_y = -printed_line_count;
+		end_y = 0;
+		pixel_offset_y = rect.GetHeight();
 	}
-	else
-	{
-		lBeginY = -lPrintedLineCount;
-		lEndY = 0;
-		lPixelOffsetY = lRect.GetHeight();
-	}
-	ScopeLock lLock(&mLock);
+	ScopeLock lock(&lock_);
 	TextLineList::iterator s = GetIterator(GetFirstVisibleLineIndex());
-	for (int y = lBeginY; s != mLineList.end() && y < lEndY; ++y, ++s)
-	{
-		pPainter->SetColor(s->mColor);
-		pPainter->PrintText(s->mText, lRect.mLeft+mHorizontalMargin, lRect.mTop+y*mLineHeight+lPixelOffsetY);
+	for (int y = begin_y; s != line_list_.end() && y < end_y; ++y, ++s) {
+		painter->SetColor(s->color_);
+		painter->PrintText(s->text_, rect.left_+horizontal_margin_, rect.top_+y*line_height_+pixel_offset_y);
 	}
 
-	pPainter->PopAttrib();
-	DeactivateFont(pPainter);
+	painter->PopAttrib();
+	DeactivateFont(painter);
 }
 
 
 
-void TextArea::ForceRepaint()
-{
+void TextArea::ForceRepaint() {
 	SetNeedsRepaint(true);
 }
 
 
 
-TextArea::TextLineList::iterator TextArea::GetIterator(unsigned pLineIndex)
-{
-	deb_assert(pLineIndex <= GetLineCount());
-	return ListUtil::FindByIndex(mLineList, pLineIndex);
+TextArea::TextLineList::iterator TextArea::GetIterator(unsigned line_index) {
+	deb_assert(line_index <= GetLineCount());
+	return ListUtil::FindByIndex(line_list_, line_index);
 }
 
 
 
-void TextArea::DoSetSize(int pWidth, int pHeight)
-{
-	Parent::DoSetSize(pWidth, pHeight);
+void TextArea::DoSetSize(int width, int height) {
+	Parent::DoSetSize(width, height);
 	UpdateVisibleSize();
 }
 
-void TextArea::UpdateVisibleSize()
-{
-	mVisibleLineCount = 0;
-	if (mLineHeight)
-	{
-		mVisibleLineCount = (GetSize().y+mLineHeight-1)/mLineHeight;
-		if (!mScrollLock)
-		{
+void TextArea::UpdateVisibleSize() {
+	visible_line_count_ = 0;
+	if (line_height_) {
+		visible_line_count_ = (GetSize().y+line_height_-1)/line_height_;
+		if (!scroll_lock_) {
 			ScrollToLastLine();
 		}
 	}
 }
 
-void TextArea::ScrollToLastLine()
-{
-	int lScrollDownToIndex = Math::Clamp((int)(GetLineCount()-GetVisibleLineCount()), 0, (int)mMaxLineCount);
-	SetFirstVisibleLineIndex(lScrollDownToIndex);
+void TextArea::ScrollToLastLine() {
+	int scroll_down_to_index = Math::Clamp((int)(GetLineCount()-GetVisibleLineCount()), 0, (int)max_line_count_);
+	SetFirstVisibleLineIndex(scroll_down_to_index);
 }
 
 

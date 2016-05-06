@@ -1,29 +1,27 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/CppContextObject.h"
+#include "../cure/include/cppcontextobject.h"
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 
-class Spawner: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class Spawner: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	Spawner(Cure::ContextManager* pManager);
+	Spawner(cure::ContextManager* manager);
 	virtual ~Spawner();
 
 private:
-	virtual void SetSpawner(const Tbc::PhysicsSpawner* pSpawner);
+	virtual void SetSpawner(const tbc::PhysicsSpawner* spawner);
 
 	logclass();
 };

@@ -5,7 +5,7 @@
 
 
 #include "pch.h"
-#include "../Include/MemoryLeakTracker.h"
+#include "../include/memoryleaktracker.h"
 
 //#define MEMOVERWRITE_DETECT	1
 
@@ -25,303 +25,272 @@
 #include <string.h>
 #include <windows.h>
 #include <crtdbg.h>
-#include "../Include/SpinLock.h"
+#include "../include/spinlock.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
-class MemoryLeakTracker
-{
+class MemoryLeakTracker {
 public:
 
 	friend class MemoryLeakDetector;
 
-	static void AddTrack(void* pAddr, unsigned long pSize, const char* pFName, unsigned long pNum);
-	static bool RemoveTrack(void* pAddr);
+	static void AddTrack(void* addr, unsigned long size, const char* f_name, unsigned long num);
+	static bool RemoveTrack(void* addr);
 	static void DumpLeaks();
 
-	static int smMaxAllocated;
-	static int smCurrentlyAllocated;
-	static SpinLock smSpinLock;
-	static bool lLeaksDumped;
+	static int max_allocated_;
+	static int currently_allocated_;
+	static SpinLock spin_lock_;
+	static bool leaks_dumped;
 };
 
 }
 
 
 
-void* operator new(size_t pSize, const char* pFileName, int pLine)
-{
-	void* lPointer = (void*)malloc(pSize);
-	if (lPointer == 0)
+void* operator new(size_t size, const char* file_name, int line) {
+	void* _pointer = (void*)malloc(size);
+	if (_pointer == 0)
 		throw std::bad_alloc(); // ANSI/ISO compliant behavior
 
-	Lepra::MemoryLeakTracker::AddTrack(lPointer, (unsigned long)pSize, pFileName, pLine);
+	lepra::MemoryLeakTracker::AddTrack(_pointer, (unsigned long)size, file_name, line);
 
-	return lPointer;
+	return _pointer;
 }
 
-/*void* operator new(size_t pSize)
-{
-	void* lPointer = (void*)malloc(pSize);
-	if (lPointer == 0)
+/*void* operator new(size_t size) {
+	void* _pointer = (void*)malloc(size);
+	if (_pointer == 0)
 		throw std::bad_alloc(); // ANSI/ISO compliant behavior
 
-	Lepra::MemoryLeakTracker::AddTrack(lPointer, pSize, "<Unknown file - make sure to include Lepra.h>", 0);
+	lepra::MemoryLeakTracker::AddTrack(_pointer, size, "<Unknown file - make sure to include lepra.h>", 0);
 
-	return lPointer;
+	return _pointer;
 }
 */
-void operator delete(void* pPointer, const char*, int)
-{
-	//_ASSERT(pPointer != 0);
-	if (pPointer != 0)
-	{
-		Lepra::MemoryLeakTracker::RemoveTrack(pPointer);
-		free(pPointer);
+void operator delete(void* pointer, const char*, int) {
+	//_ASSERT(pointer != 0);
+	if (pointer != 0) {
+		lepra::MemoryLeakTracker::RemoveTrack(pointer);
+		free(pointer);
 	}
 }
 
-void operator delete(void* pPointer)
-{
-	//_ASSERT(pPointer != 0);
-	if (pPointer != 0)
-	{
-		Lepra::MemoryLeakTracker::RemoveTrack(pPointer);
-		free(pPointer);
+void operator delete(void* pointer) {
+	//_ASSERT(pointer != 0);
+	if (pointer != 0) {
+		lepra::MemoryLeakTracker::RemoveTrack(pointer);
+		free(pointer);
 	}
 }
 
-void operator delete[](void* pPointer)
-{
-	//_ASSERT(pPointer != 0);
-	if (pPointer != 0)
-	{
-		Lepra::MemoryLeakTracker::RemoveTrack(pPointer);
-		free(pPointer);
+void operator delete[](void* pointer) {
+	//_ASSERT(pointer != 0);
+	if (pointer != 0) {
+		lepra::MemoryLeakTracker::RemoveTrack(pointer);
+		free(pointer);
 	}
 }
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
-struct ALLOC_INFO
-{
-	void*		mAddress;
-	unsigned long	mSize;
-	char		mFile[256];
-	unsigned long	mLine;
-	ALLOC_INFO*	mNextAllocInfo;
+struct ALLOC_INFO {
+	void*		address_;
+	unsigned long	size_;
+	char		file_[256];
+	unsigned long	line_;
+	ALLOC_INFO*	next_alloc_info_;
 };
 
-ALLOC_INFO* gFirstInfo = 0;
-ALLOC_INFO* gLastInfo = 0;
-int gNumFalseLeaks = 0;
+ALLOC_INFO* g_first_info = 0;
+ALLOC_INFO* g_last_info = 0;
+int g_num_false_leaks = 0;
 
-int MemoryLeakTracker::smMaxAllocated = 0;
-int MemoryLeakTracker::smCurrentlyAllocated = 0;
-SpinLock MemoryLeakTracker::smSpinLock;
-bool MemoryLeakTracker::lLeaksDumped = false;
+int MemoryLeakTracker::max_allocated_ = 0;
+int MemoryLeakTracker::currently_allocated_ = 0;
+SpinLock MemoryLeakTracker::spin_lock_;
+bool MemoryLeakTracker::leaks_dumped = false;
 
-void MemoryLeakTracker::AddTrack(void* pAddr, unsigned long pSize, const char* pFName, unsigned long pNum)
-{
+void MemoryLeakTracker::AddTrack(void* addr, unsigned long size, const char* f_name, unsigned long num) {
 	// TODO: optimize HARD!!!
 
-	smSpinLock.UncheckedAcquire();
+	spin_lock_.UncheckedAcquire();
 
-	ALLOC_INFO* lInfo;
+	ALLOC_INFO* info;
 
-	lInfo = (ALLOC_INFO*)malloc(sizeof(ALLOC_INFO));
-	lInfo->mAddress = pAddr;
-	strncpy(lInfo->mFile, pFName, 255);
-	lInfo->mLine = pNum;
-	lInfo->mSize = pSize;
-	lInfo->mNextAllocInfo = 0;
+	info = (ALLOC_INFO*)malloc(sizeof(ALLOC_INFO));
+	info->address_ = addr;
+	strncpy(info->file_, f_name, 255);
+	info->line_ = num;
+	info->size_ = size;
+	info->next_alloc_info_ = 0;
 
-	if (gFirstInfo == 0)
-	{
-		gFirstInfo = lInfo;
-		gLastInfo  = lInfo;
-	}
-	else
-	{
-		gLastInfo->mNextAllocInfo = lInfo;
-		gLastInfo = lInfo;
+	if (g_first_info == 0) {
+		g_first_info = info;
+		g_last_info  = info;
+	} else {
+		g_last_info->next_alloc_info_ = info;
+		g_last_info = info;
 	}
 
-	smCurrentlyAllocated += pSize;
-	if (smCurrentlyAllocated > smMaxAllocated)
-		smMaxAllocated = smCurrentlyAllocated;
+	currently_allocated_ += size;
+	if (currently_allocated_ > max_allocated_)
+		max_allocated_ = currently_allocated_;
 
-	smSpinLock.Release();
+	spin_lock_.Release();
 };
 
-bool MemoryLeakTracker::RemoveTrack(void* pAddr)
-{
+bool MemoryLeakTracker::RemoveTrack(void* addr) {
 	// TODO: optimize HARD!!!
 
-	smSpinLock.UncheckedAcquire();
+	spin_lock_.UncheckedAcquire();
 
-	ALLOC_INFO* lCurrentInfo = gFirstInfo;
-	ALLOC_INFO* lPrevInfo = 0;
+	ALLOC_INFO* current_info = g_first_info;
+	ALLOC_INFO* prev_info = 0;
 
-	bool lTrackFound = false;
+	bool track_found = false;
 
-	while (lCurrentInfo != 0)
-	{
-		if (lCurrentInfo->mAddress == pAddr)
-		{
-			smCurrentlyAllocated -= lCurrentInfo->mSize;
+	while (current_info != 0) {
+		if (current_info->address_ == addr) {
+			currently_allocated_ -= current_info->size_;
 
-			if (gFirstInfo == lCurrentInfo)
-				gFirstInfo = lCurrentInfo->mNextAllocInfo;
-			if (gLastInfo == lCurrentInfo)
-				gLastInfo = lPrevInfo;
+			if (g_first_info == current_info)
+				g_first_info = current_info->next_alloc_info_;
+			if (g_last_info == current_info)
+				g_last_info = prev_info;
 
-			if (lPrevInfo != 0)
-			{
-				lPrevInfo->mNextAllocInfo = lCurrentInfo->mNextAllocInfo;
+			if (prev_info != 0) {
+				prev_info->next_alloc_info_ = current_info->next_alloc_info_;
 			}
 
-			free(lCurrentInfo);
+			free(current_info);
 
-			lTrackFound = true;
+			track_found = true;
 			break;
 		}
 
-		lPrevInfo = lCurrentInfo;
-		lCurrentInfo = lCurrentInfo->mNextAllocInfo;
+		prev_info = current_info;
+		current_info = current_info->next_alloc_info_;
 	}
 
-	/*if (lTrackFound == false)
-	{
-		char lString[256];
-		if (lLeaksDumped == true)
-		{
-			gNumFalseLeaks++;
-			sprintf(lString, "False memory leak reported at address 0x%p, (Count: %d)\n", pAddr, gNumFalseLeaks);
+	/*if (track_found == false) {
+		char s[256];
+		if (leaks_dumped == true) {
+			g_num_false_leaks++;
+			sprintf(s, "False memory leak reported at address 0x%p, (Count: %d)\n", addr, g_num_false_leaks);
+		} else {
+			sprintf(s, "Released unknown memory address 0x%p (allocated in BSS = global object)\n", addr);
 		}
-		else
-		{
-			sprintf(lString, "Released unknown memory address 0x%p (allocated in BSS = global object)\n", pAddr);
-		}
-		OutputDebugStringA(lString);
+		OutputDebugStringA(s);
 	}*/
 
-	smSpinLock.Release();
+	spin_lock_.Release();
 
-	return lTrackFound;
+	return track_found;
 };
 
-void MemoryLeakTracker::DumpLeaks()
-{
-	smSpinLock.UncheckedAcquire();
+void MemoryLeakTracker::DumpLeaks() {
+	spin_lock_.UncheckedAcquire();
 
-	unsigned long lTotalSize = 0;
-	char lBuf[1024];
+	unsigned long total_size = 0;
+	char buf[1024];
 
-	ALLOC_INFO* lCurrentInfo = gFirstInfo;
+	ALLOC_INFO* current_info = g_first_info;
 
 	// Get the maximum file name length in order to pad the output
 	// nice.
-	int lMaxLength = 0;
-	int lMaxLength2 = 0;
-	int lMaxLineDigits = 0;
-	while (lCurrentInfo != 0)
-	{
-		sprintf(lBuf, "%s()", lCurrentInfo->mFile);
-		int lLength = (int)::strlen(lBuf);
+	int max_length = 0;
+	int max_length2 = 0;
+	int max_line_digits = 0;
+	while (current_info != 0) {
+		sprintf(buf, "%s()", current_info->file_);
+		int length = (int)::strlen(buf);
 
-		sprintf(lBuf, "%d", lCurrentInfo->mLine);
-		int lLineDigits = (int)::strlen(lBuf);
+		sprintf(buf, "%d", current_info->line_);
+		int line_digits = (int)::strlen(buf);
 
-		lLength += lLineDigits;
+		length += line_digits;
 
-		if (lLength > lMaxLength)
-			lMaxLength = lLength;
-		if (lLineDigits > lMaxLineDigits)
-			lMaxLineDigits = lLineDigits;
+		if (length > max_length)
+			max_length = length;
+		if (line_digits > max_line_digits)
+			max_line_digits = line_digits;
 
-		lCurrentInfo = lCurrentInfo->mNextAllocInfo;
+		current_info = current_info->next_alloc_info_;
 	}
-	lMaxLength += 4;
+	max_length += 4;
 
 	// 22 is the length of "ADDRESS 0x00000000    ".
-	lMaxLength2 = lMaxLength + 22 + lMaxLineDigits + 1;
+	max_length2 = max_length + 22 + max_line_digits + 1;
 
-	lCurrentInfo = gFirstInfo;
-	gFirstInfo = 0;
-	gLastInfo = 0;
+	current_info = g_first_info;
+	g_first_info = 0;
+	g_last_info = 0;
 
-	int lNumUnfreed = 0;
+	int num_unfreed = 0;
 
-	while (lCurrentInfo != 0)
-	{
-		sprintf(lBuf, "%s(%d)", lCurrentInfo->mFile, lCurrentInfo->mLine);
-		int lLength = (int)::strlen(lBuf);
+	while (current_info != 0) {
+		sprintf(buf, "%s(%d)", current_info->file_, current_info->line_);
+		int length = (int)::strlen(buf);
 
 		// Pad with whitespace.
 		int i;
-		for (i = lLength; i < lMaxLength; i++)
-		{
-			lBuf[i] = ' ';
+		for (i = length; i < max_length; i++) {
+			buf[i] = ' ';
 		}
-		lBuf[lMaxLength] = 0;
+		buf[max_length] = 0;
 
-		sprintf(&lBuf[lMaxLength], "ADDRESS 0x%p    %d", lCurrentInfo->mAddress,
-			lCurrentInfo->mSize);
+		sprintf(&buf[max_length], "ADDRESS 0x%p    %d", current_info->address_,
+			current_info->size_);
 
-		lLength = (int)::strlen(lBuf);
+		length = (int)::strlen(buf);
 
 		// Pad with more whitespace.
-		for (i = lLength; i < lMaxLength2; i++)
-		{
-			lBuf[i] = ' ';
+		for (i = length; i < max_length2; i++) {
+			buf[i] = ' ';
 		}
-		lBuf[lMaxLength2] = 0;
+		buf[max_length2] = 0;
 
-		sprintf(&lBuf[lMaxLength2], "bytes unfreed\n");
+		sprintf(&buf[max_length2], "bytes unfreed\n");
 
-		OutputDebugStringA(lBuf);
-		lTotalSize += lCurrentInfo->mSize;
+		OutputDebugStringA(buf);
+		total_size += current_info->size_;
 
-		ALLOC_INFO* lInfo = lCurrentInfo;
-		lCurrentInfo = lCurrentInfo->mNextAllocInfo;
-		free(lInfo);
+		ALLOC_INFO* info = current_info;
+		current_info = current_info->next_alloc_info_;
+		free(info);
 
-		lNumUnfreed++;
+		num_unfreed++;
 	}
 
-	sprintf(lBuf, "-----------------------------------------------------------\n");
-	OutputDebugStringA(lBuf);
-	sprintf(lBuf, "Total Unfreed: %d bytes in %d allocations.\n", lTotalSize, lNumUnfreed);
-	OutputDebugStringA(lBuf);
-	sprintf(lBuf, "Peak alloc: %d bytes.\n", smMaxAllocated);
-	OutputDebugStringA(lBuf);
+	sprintf(buf, "-----------------------------------------------------------\n");
+	OutputDebugStringA(buf);
+	sprintf(buf, "Total Unfreed: %d bytes in %d allocations.\n", total_size, num_unfreed);
+	OutputDebugStringA(buf);
+	sprintf(buf, "Peak alloc: %d bytes.\n", max_allocated_);
+	OutputDebugStringA(buf);
 
-	lLeaksDumped = true;
+	leaks_dumped = true;
 
-	smSpinLock.Release();
+	spin_lock_.Release();
 };
 
 /*
-void MemoryLeakTracker::InitMemoryLeakDetection()
-{
+void MemoryLeakTracker::InitMemoryLeakDetection() {
 	// Clear all records.
-	ALLOC_INFO* lCurrentInfo = gFirstInfo;
+	ALLOC_INFO* current_info = g_first_info;
 
-	gFirstInfo = 0;
-	gLastInfo = 0;
+	g_first_info = 0;
+	g_last_info = 0;
 
-	while (lCurrentInfo != 0)
-	{
-		ALLOC_INFO* lInfo = lCurrentInfo;
-		lCurrentInfo = lCurrentInfo->mNextAllocInfo;
-		free(lInfo);
+	while (current_info != 0) {
+		ALLOC_INFO* info = current_info;
+		current_info = current_info->next_alloc_info_;
+		free(info);
 	}
 }
 */
@@ -329,18 +298,16 @@ void MemoryLeakTracker::InitMemoryLeakDetection()
 // TODO: place this in a systemcall so that we're the last function to
 // execute (not as in this case, when we're just another global object
 // being destroyed.
-class MemoryLeakDetector
-{
+class MemoryLeakDetector {
 public:
 	MemoryLeakDetector(){}
 
-	~MemoryLeakDetector()
-	{
+	~MemoryLeakDetector() {
 		MemoryLeakTracker::DumpLeaks();
 	}
 };
 
-MemoryLeakDetector gLeakDetector;
+MemoryLeakDetector g_leak_detector;
 
 }
 
@@ -349,49 +316,46 @@ MemoryLeakDetector gLeakDetector;
 #include <new>
 #include <exception>
 #include <cstdlib>
-#include "../Include/LepraAssert.h"
+#include "../include/lepraassert.h"
 
-void* operator new(size_t pSize)
-{
+void* operator new(size_t size) {
 #if !defined(MEMOVERWRITE_DETECT)	// Normal operation, no overwrite detection
-	void* lPointer = malloc(pSize);
-	if (lPointer == 0) throw std::bad_alloc(); // ANSI/ISO compliant behavior
-	return lPointer;
+	void* _pointer = malloc(size);
+	if (_pointer == 0) throw std::bad_alloc(); // ANSI/ISO compliant behavior
+	return _pointer;
 #else // Overwrite detection - YEAH!
-	char* lPointer = (char*)malloc(pSize+12);
-	if (lPointer == 0) throw std::bad_alloc(); // ANSI/ISO compliant behavior
-	*(int*)lPointer = 0x5AF00FA5;
-	*(int*)(lPointer+4) = (int)pSize;
-	*(int*)(lPointer+pSize+8) = 0x55C3F0A9;
-	return lPointer+8;
+	char* _pointer = (char*)malloc(size+12);
+	if (_pointer == 0) throw std::bad_alloc(); // ANSI/ISO compliant behavior
+	*(int*)_pointer = 0x5AF00FA5;
+	*(int*)(_pointer+4) = (int)size;
+	*(int*)(_pointer+size+8) = 0x55C3F0A9;
+	return _pointer+8;
 #endif // Normal alloc / With overwrite detection.
 }
 
-void operator delete(void* pPointer)
-{
+void operator delete(void* pointer) {
 #if !defined(MEMOVERWRITE_DETECT)	// Normal operation, no overwrite detection
-	free(pPointer);
+	free(pointer);
 #else // Overwrite detection - YEAH!
-	if (!pPointer) return;
-	char* lPointer = (char*)pPointer - 8;
-	deb_assert(*(int*)lPointer == 0x5AF00FA5);
-	int lSize = *(int*)(lPointer+4);
-	deb_assert(*(int*)(lPointer+lSize+8) == 0x55C3F0A9);
-	free(lPointer);
+	if (!pointer) return;
+	char* _pointer = (char*)pointer - 8;
+	deb_assert(*(int*)_pointer == 0x5AF00FA5);
+	int _size = *(int*)(_pointer+4);
+	deb_assert(*(int*)(_pointer+_size+8) == 0x55C3F0A9);
+	free(_pointer);
 #endif // Normal alloc / With overwrite detection.
 }
 
-void operator delete[](void* pPointer)
-{
+void operator delete[](void* pointer) {
 #if !defined(MEMOVERWRITE_DETECT)	// Normal operation, no overwrite detection
-	free(pPointer);
+	free(pointer);
 #else // Overwrite detection - YEAH!
-	if (!pPointer) return;
-	char* lPointer = (char*)pPointer - 8;
-	deb_assert(*(int*)lPointer == 0x5AF00FA5);
-	int lSize = *(int*)(lPointer+4);
-	deb_assert(*(int*)(lPointer+lSize+8) == 0x55C3F0A9);
-	free(lPointer);
+	if (!pointer) return;
+	char* _pointer = (char*)pointer - 8;
+	deb_assert(*(int*)_pointer == 0x5AF00FA5);
+	int _size = *(int*)(_pointer+4);
+	deb_assert(*(int*)(_pointer+_size+8) == 0x55C3F0A9);
+	free(_pointer);
 #endif // Normal alloc / With overwrite detection.
 }
 

@@ -2,7 +2,7 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 //
-// NOTES: 
+// NOTES:
 //
 // This class can only render bitmaps with dimensions of a power of 2.
 // The openGL texture "names" (or IDs) between 1-10000 are reserved to bitmap rendering.
@@ -12,20 +12,19 @@
 
 #pragma once
 
-#include "UiTbc.h"
-#include "../../Lepra/Include/Graphics2D.h"
-#include "../../Lepra/Include/Canvas.h"
-#include "../../Lepra/Include/HashTable.h"
-#include "../../Lepra/Include/IdManager.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../../UiLepra/Include/UiOpenGLExtensions.h"	// Included to get the gl-headers.
-#include "UiPainter.h"
+#include "uitbc.h"
+#include "../../lepra/include/graphics2d.h"
+#include "../../lepra/include/canvas.h"
+#include "../../lepra/include/hashtable.h"
+#include "../../lepra/include/idmanager.h"
+#include "../../lepra/include/vector3d.h"
+#include "../../uilepra/include/uiopenglextensions.h"	// Included to get the gl-headers.
+#include "uipainter.h"
 #include <list>
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
@@ -33,36 +32,35 @@ class FontTexture;
 
 
 
-class OpenGLPainter: public Painter
-{
+class OpenGLPainter: public Painter {
 public:
 	OpenGLPainter();
 	virtual ~OpenGLPainter();
 
 	// Set the drawing surface.
-	void SetDestCanvas(Canvas* pCanvas);
-	void SetRenderMode(RenderMode pRM);
-	virtual void Clear(const Color& pColor);
-	virtual void PrePaint(bool pClearDepthBuffer);
+	void SetDestCanvas(Canvas* canvas);
+	void SetRenderMode(RenderMode rm);
+	virtual void Clear(const Color& color);
+	virtual void PrePaint(bool clear_depth_buffer);
 
 	// Set the current alpha value. Overrides alpha buffer...
 	// In 8-bit color mode, this is a specific color that will "be" transparent.
-	void SetAlphaValue(Lepra::uint8 pAlpha);
+	void SetAlphaValue(lepra::uint8 alpha);
 
-	void SetClippingRect(int pLeft, int pTop, int pRight, int pBottom);
+	void SetClippingRect(int left, int top, int right, int bottom);
 	void ResetClippingRect();
 
-	void SetColor(const Color& pColor, unsigned pColorIndex = 0);
-	virtual void SetLineWidth(float pPixels);
+	void SetColor(const Color& color, unsigned color_index = 0);
+	virtual void SetLineWidth(float pixels);
 
-	ImageID AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer);
-	void UpdateImage(ImageID pImageID, 
-			 const Canvas* pImage, 
-			 const Canvas* pAlphaBuffer, 
-			 UpdateHint pHint = UPDATE_ACCURATE);
-	void RemoveImage(ImageID pImageID);
+	ImageID AddImage(const Canvas* image, const Canvas* alpha_buffer);
+	void UpdateImage(ImageID image_id,
+			 const Canvas* image,
+			 const Canvas* alpha_buffer,
+			 UpdateHint hint = kUpdateAccurate);
+	void RemoveImage(ImageID image_id);
 
-	void ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect);
+	void ReadPixels(Canvas& dest_canvas, const PixelRect& rect);
 
 	RGBOrder GetRGBOrder() const;
 
@@ -70,63 +68,61 @@ protected:
 	void DoSetRenderMode() const;
 
 	void DoDrawPixel(int x, int y);
-	void DoDrawLine(int pX1, int pY1, int pX2, int pY2);
-	void DoFillTriangle(float pX1, float pY1,
-			    float pX2, float pY2,
-			    float pX3, float pY3);
-	void DoFillShadedTriangle(float pX1, float pY1,
-				  float pX2, float pY2,
-				  float pX3, float pY3);
-	void DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
-			    float pX2, float pY2, float pU2, float pV2,
-			    float pX3, float pY3, float pU3, float pV3,
-			    ImageID pImageID);
-	void DoDrawRect(int pLeft, int pTop, int pRight, int pBottom);
-	void DoFillRect(int pLeft, int pTop, int pRight, int pBottom);
-	void DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken);
-	void DoFillShadedRect(int pLeft, int pTop, int pRight, int pBottom);
-	void DrawFan(const std::vector<vec2>& pCoords, bool pFill);
-	void DrawImageFan(ImageID pImageID, const std::vector<vec2>& pCoords, const std::vector<vec2>& pTexCoords);
-	void DoDrawImage(ImageID pImageID, int x, int y);
-	void DoDrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect);
-	void DoDrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect);
-	void DoDrawImage(ImageID pImageID, const PixelRect& pRect);
-	void DoDrawAlphaImage(ImageID pImageID, int x, int y);
+	void DoDrawLine(int x1, int y1, int x2, int y2);
+	void DoFillTriangle(float x1, float y1,
+			    float x2, float y2,
+			    float x3, float y3);
+	void DoFillShadedTriangle(float x1, float y1,
+				  float x2, float y2,
+				  float x3, float y3);
+	void DoFillTriangle(float x1, float y1, float u1, float v1,
+			    float x2, float y2, float u2, float v2,
+			    float x3, float y3, float u3, float v3,
+			    ImageID image_id);
+	void DoDrawRect(int left, int top, int right, int bottom);
+	void DoFillRect(int left, int top, int right, int bottom);
+	void DoDraw3DRect(int left, int top, int right, int bottom, int width, bool sunken);
+	void DoFillShadedRect(int left, int top, int right, int bottom);
+	void DrawFan(const std::vector<vec2>& coords, bool fill);
+	void DrawImageFan(ImageID image_id, const std::vector<vec2>& coords, const std::vector<vec2>& tex_coords);
+	void DoDrawImage(ImageID image_id, int x, int y);
+	void DoDrawImage(ImageID image_id, int x, int y, const PixelRect& subpatch_rect);
+	void DoDrawImage(ImageID image_id, const PixelRect& rect, const PixelRect& subpatch_rect);
+	void DoDrawImage(ImageID image_id, const PixelRect& rect);
+	void DoDrawAlphaImage(ImageID image_id, int x, int y);
 
-	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const;
-	void PrintText(const wstr& pString, int x, int y);
-	void SetFontSmoothness(bool pSmooth);
+	void GetImageSize(ImageID image_id, int& width, int& height) const;
+	void PrintText(const wstr& s, int x, int y);
+	void SetFontSmoothness(bool smooth);
 
-	virtual void AdjustVertexFormat(unsigned& pVertexFormat);
-	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
+	virtual void AdjustVertexFormat(unsigned& vertex_format);
+	void DoRenderDisplayList(std::vector<DisplayEntity*>* display_list);
 
 	virtual void ClearFontBuffers();
-	FontTexture* SelectGlyphs(uint32 pFontHash, int pFontHeight, const wstr& pString);
+	FontTexture* SelectGlyphs(uint32 font_hash, int font_height, const wstr& s);
 
 private:
-	vec3 mRCol[4];
+	vec3 r_col_[4];
 
-	class Texture
-	{
+	class Texture {
 	public:
 		Texture() :
-			mWidth(0),
-			mHeight(0)
-		{
+			width_(0),
+			height_(0) {
 		}
 
-		int mWidth;
-		int mHeight;
+		int width_;
+		int height_;
 	};
 
 	typedef HashTable<int, Texture*> TextureTable;
 	typedef std::unordered_map<uint32, FontTexture*> FontTextureTable;
 
-	IdManager<int> mTextureIDManager;
-	TextureTable mTextureTable;
-	FontTextureTable mFontTextureTable;
+	IdManager<int> texture_id_manager_;
+	TextureTable texture_table_;
+	FontTextureTable font_texture_table_;
 
-	bool mSmoothFont;
+	bool smooth_font_;
 };
 
 

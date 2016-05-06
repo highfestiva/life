@@ -1,19 +1,18 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Cure/Include/Cure.h"
-#include "../../Cure/Include/UserAccount.h"
-#include "../Life.h"
+#include "../../cure/include/cure.h"
+#include "../../cure/include/useraccount.h"
+#include "../life.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ContextObject;
 class NetworkAgent;
 class Packet;
@@ -23,33 +22,31 @@ class UserConnection;
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class Client
-{
+class Client {
 public:
-	Client(const Cure::TimeManager* pTimeManager, Cure::NetworkAgent* pNetworkAgent, Cure::UserConnection* pUserConnection);
+	Client(const cure::TimeManager* time_manager, cure::NetworkAgent* network_agent, cure::UserConnection* user_connection);
 	virtual ~Client();
 
-	Cure::UserConnection* GetUserConnection() const;
-	void SetUserConnection(Cure::UserConnection* pUserConnection);
+	cure::UserConnection* GetUserConnection() const;
+	void SetUserConnection(cure::UserConnection* user_connection);
 
-	Cure::GameObjectId GetAvatarId() const;
-	void SetAvatarId(Cure::GameObjectId pAvatarId);
-	void SendAvatar(const Cure::UserAccount::AvatarId& pAvatarId, Cure::Packet* pPacket);
+	cure::GameObjectId GetAvatarId() const;
+	void SetAvatarId(cure::GameObjectId avatar_id);
+	void SendAvatar(const cure::UserAccount::AvatarId& avatar_id, cure::Packet* packet);
 
-	void StoreFrameDiff(int pFrameDiff);
+	void StoreFrameDiff(int frame_diff);
 	void QuerySendStriveTimes();
-	void SendPhysicsFrame(int pPhysicsFrameIndex, Cure::Packet* pPacket = 0);
+	void SendPhysicsFrame(int physics_frame_index, cure::Packet* packet = 0);
 	float GetPhysicsFrameAheadCount() const;
 
-	void SendLoginCommands(Cure::Packet* pPacket, const str& pServerGreeting);
+	void SendLoginCommands(cure::Packet* packet, const str& server_greeting);
 
 private:
-	int SendStriveTimes(int pNetworkFrameDiffCount);
+	int SendStriveTimes(int network_frame_diff_count);
 
 	// A positive return value n means that data from the client to the server comes n frames too late on average (client needs to speed up).
 	// A negative return value n means that data from the client to the server comes n frames too early on average (client needs to slow down).
@@ -59,17 +56,17 @@ private:
 	static const int NETWORK_LATENCY_CALCULATION_ARRAY_SIZE = NETWORK_DEVIATION_ERROR_COUNT;
 	typedef std::vector<int> NetworkLatencyArray;
 
-	const Cure::TimeManager* mTimeManager;
-	Cure::NetworkAgent* mNetworkAgent;
-	Cure::UserConnection* mUserConnection;
-	Cure::GameObjectId mAvatarId;
-	NetworkLatencyArray mNetworkFrameLatencyArray;
-	size_t mNetworkFrameLatencyArrayIndex;
-	float mMeasuredNetworkLatencyFrameCount;
-	float mMeasuredNetworkJitterFrameCount;
-	int mStriveSendErrorTimeCounter;
-	int mStriveSendUnpauseFrame;
-	int mIgnoreStriveErrorTimeCounter;
+	const cure::TimeManager* time_manager_;
+	cure::NetworkAgent* network_agent_;
+	cure::UserConnection* user_connection_;
+	cure::GameObjectId avatar_id_;
+	NetworkLatencyArray network_frame_latency_array_;
+	size_t network_frame_latency_array_index_;
+	float measured_network_latency_frame_count_;
+	float measured_network_jitter_frame_count_;
+	int strive_send_error_time_counter_;
+	int strive_send_unpause_frame_;
+	int ignore_strive_error_time_counter_;
 
 	logclass();
 };

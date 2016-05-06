@@ -5,111 +5,93 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiTextComponent.h"
-#include "../../Include/UiPainter.h"
+#include "../../include/gui/uitextcomponent.h"
+#include "../../include/uipainter.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
 TextComponent::TextComponent():
-	mTextColor(OFF_BLACK),
-	mFontId(FontManager::INVALID_FONTID),
-	mIsFontActive(false),
-	mVAlignment(VALIGN_CENTER),
-	mHorizontalMargin(3)
-{
+	text_color_(OFF_BLACK),
+	font_id_(FontManager::kInvalidFontid),
+	is_font_active_(false),
+	v_alignment_(kValignCenter),
+	horizontal_margin_(3) {
 }
 
-TextComponent::~TextComponent()
-{
+TextComponent::~TextComponent() {
 }
 
-void TextComponent::SetFontColor(const Color& pTextColor)
-{
-	deb_assert(pTextColor != BLACK);
-	mTextColor = pTextColor;
+void TextComponent::SetFontColor(const Color& text_color) {
+	deb_assert(text_color != BLACK);
+	text_color_ = text_color;
 	ForceRepaint();
 }
 
-void TextComponent::SetFontId(const FontManager::FontId& pFontId)
-{
-	deb_assert(!mIsFontActive);
-	mFontId = pFontId;
+void TextComponent::SetFontId(const FontManager::FontId& font_id) {
+	deb_assert(!is_font_active_);
+	font_id_ = font_id;
 	ForceRepaint();
 }
 
-FontManager::FontId TextComponent::GetFontId() const
-{
-	return mFontId;
+FontManager::FontId TextComponent::GetFontId() const {
+	return font_id_;
 }
 
-void TextComponent::ActivateFont(Painter* pPainter)
-{
-	deb_assert(!mIsFontActive);
-	if (mIsFontActive)
-	{
+void TextComponent::ActivateFont(Painter* painter) {
+	deb_assert(!is_font_active_);
+	if (is_font_active_) {
 		return;
 	}
-	if (mFontId != FontManager::INVALID_FONTID)
-	{
-		const FontManager::FontId lOldFontId = pPainter->GetFontManager()->GetActiveFontId();
-		pPainter->GetFontManager()->SetActiveFont(mFontId);
-		mFontId = lOldFontId;
-		mIsFontActive = true;
+	if (font_id_ != FontManager::kInvalidFontid) {
+		const FontManager::FontId old_font_id = painter->GetFontManager()->GetActiveFontId();
+		painter->GetFontManager()->SetActiveFont(font_id_);
+		font_id_ = old_font_id;
+		is_font_active_ = true;
 	}
 }
 
-void TextComponent::DeactivateFont(Painter* pPainter)
-{
-	deb_assert(mIsFontActive || mFontId == FontManager::INVALID_FONTID);
-	if (mIsFontActive)
-	{
-		const FontManager::FontId lOurFontId = pPainter->GetFontManager()->GetActiveFontId();
-		if (mFontId != FontManager::INVALID_FONTID)
-		{
-			pPainter->GetFontManager()->SetActiveFont(mFontId);
+void TextComponent::DeactivateFont(Painter* painter) {
+	deb_assert(is_font_active_ || font_id_ == FontManager::kInvalidFontid);
+	if (is_font_active_) {
+		const FontManager::FontId our_font_id = painter->GetFontManager()->GetActiveFontId();
+		if (font_id_ != FontManager::kInvalidFontid) {
+			painter->GetFontManager()->SetActiveFont(font_id_);
 		}
-		mFontId = lOurFontId;
+		font_id_ = our_font_id;
 	}
-	mIsFontActive = false;
+	is_font_active_ = false;
 }
 
-void TextComponent::SetHorizontalMargin(int pHorizontalMargin)
-{
-	mHorizontalMargin = pHorizontalMargin;
+void TextComponent::SetHorizontalMargin(int horizontal_margin) {
+	horizontal_margin_ = horizontal_margin;
 }
 
-void TextComponent::SetVericalAlignment(VAlign pAlignment)
-{
-	mVAlignment = pAlignment;
+void TextComponent::SetVericalAlignment(VAlign alignment) {
+	v_alignment_ = alignment;
 }
 
-void TextComponent::DoPrintText(Painter* pPainter, const wstr& pText, int x, int y)
-{
-	pPainter->SetColor(mTextColor, 0);
-	pPainter->PrintText(pText, x, y);
+void TextComponent::DoPrintText(Painter* painter, const wstr& text, int x, int y) {
+	painter->SetColor(text_color_, 0);
+	painter->PrintText(text, x, y);
 }
 
-void TextComponent::PrintTextDeactivate(Painter* pPainter, const wstr& pText, int x, int y)
-{
-	DoPrintText(pPainter, pText, x, y);
-	DeactivateFont(pPainter);
+void TextComponent::PrintTextDeactivate(Painter* painter, const wstr& text, int x, int y) {
+	DoPrintText(painter, text, x, y);
+	DeactivateFont(painter);
 }
 
 
 
-Color TextComponent::GetTextColor() const
-{
-	return (mTextColor);
+Color TextComponent::GetTextColor() const {
+	return (text_color_);
 }
 
-TextComponent::VAlign TextComponent::GetVAlign() const
-{
-	return mVAlignment;
+TextComponent::VAlign TextComponent::GetVAlign() const {
+	return v_alignment_;
 }
 
 

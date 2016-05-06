@@ -1,199 +1,160 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiMusicPlayer.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/Random.h"
-#include "../../UiLepra/Include/UiSoundStream.h"
+#include "../include/uimusicplayer.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/random.h"
+#include "../../uilepra/include/uisoundstream.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-MusicPlayer::MusicPlayer(UiLepra::SoundManager* pSoundManager):
-	mSoundManager(pSoundManager),
-	mMusicStream(0),
-	mMode(MODE_IDLE),
-	mCurrentSongIndex(0x7FFFFFFF),
-	mVolume(1),
-	mPreSongPauseTime(0),
-	mPostSongPauseTime(0)
-{
+MusicPlayer::MusicPlayer(uilepra::SoundManager* sound_manager):
+	sound_manager_(sound_manager),
+	music_stream_(0),
+	mode_(kModeIdle),
+	current_song_index_(0x7FFFFFFF),
+	volume_(1),
+	pre_song_pause_time_(0),
+	post_song_pause_time_(0) {
 }
 
-MusicPlayer::~MusicPlayer()
-{
+MusicPlayer::~MusicPlayer() {
 	KillSong();
-	mSoundManager = 0;
+	sound_manager_ = 0;
 }
 
 
 
-void MusicPlayer::AddSong(const str& pName)
-{
-	mSongNameList.push_back(pName);
+void MusicPlayer::AddSong(const str& name) {
+	song_name_list_.push_back(name);
 }
 
-void MusicPlayer::Shuffle()
-{
-	SongNameList lShuffeledList;
-	while (!mSongNameList.empty())
-	{
-		const size_t lIndex = Random::GetRandomNumber() % mSongNameList.size();
-		const str& lName = mSongNameList[lIndex];
-		lShuffeledList.push_back(lName);
-		mSongNameList.erase(mSongNameList.begin()+lIndex);
+void MusicPlayer::Shuffle() {
+	SongNameList shuffeled_list;
+	while (!song_name_list_.empty()) {
+		const size_t index = Random::GetRandomNumber() % song_name_list_.size();
+		const str& _name = song_name_list_[index];
+		shuffeled_list.push_back(_name);
+		song_name_list_.erase(song_name_list_.begin()+index);
 	}
-	mSongNameList = lShuffeledList;
+	song_name_list_ = shuffeled_list;
 }
 
-void MusicPlayer::SetVolume(float pVolume)
-{
-	if (!Math::IsEpsEqual(mVolume, pVolume))
-	{
-		mVolume = pVolume;
-		if (mMusicStream)
-		{
-			mMusicStream->SetVolume(mVolume);
+void MusicPlayer::SetVolume(float volume) {
+	if (!Math::IsEpsEqual(volume_, volume)) {
+		volume_ = volume;
+		if (music_stream_) {
+			music_stream_->SetVolume(volume_);
 		}
 	}
 }
 
-void MusicPlayer::SetSongPauseTime(float pBefore, float pAfter)
-{
-	mPreSongPauseTime = pBefore;
-	mPostSongPauseTime = pAfter;
+void MusicPlayer::SetSongPauseTime(float before, float after) {
+	pre_song_pause_time_ = before;
+	post_song_pause_time_ = after;
 }
 
-bool MusicPlayer::Playback()
-{
-	if (mMode == MODE_IDLE)
-	{
-		SetMode(MODE_PRE_PLAYBACK);
+bool MusicPlayer::Playback() {
+	if (mode_ == kModeIdle) {
+		SetMode(kModePrePlayback);
 	}
 	return true;
 }
 
-bool MusicPlayer::Pause()
-{
-	if (mMusicStream)
-	{
-		return mMusicStream->Pause();
+bool MusicPlayer::Pause() {
+	if (music_stream_) {
+		return music_stream_->Pause();
 	}
 	return false;
 }
 
-bool MusicPlayer::Stop()
-{
+bool MusicPlayer::Stop() {
 	KillSong();
-	SetMode(MODE_IDLE);
+	SetMode(kModeIdle);
 	return true;
 }
 
-bool MusicPlayer::Update()
-{
-	mModeSetTimer.UpdateTimer();
+bool MusicPlayer::Update() {
+	mode_set_timer_.UpdateTimer();
 
-	switch (mMode)
-	{
-		case MODE_IDLE:
+	switch (mode_) {
+		case kModeIdle:
 		break;
-		case MODE_PRE_PLAYBACK:
-		{
-			if (mModeSetTimer.GetTimeDiff() >= mPreSongPauseTime)
-			{
+		case kModePrePlayback: {
+			if (mode_set_timer_.GetTimeDiff() >= pre_song_pause_time_) {
 				StartPlayback();
-				if (mMusicStream)
-				{
-					SetMode(MODE_PLAYBACK);
-				}
-				else
-				{
+				if (music_stream_) {
+					SetMode(kModePlayback);
+				} else {
 					return false;
 				}
 			}
-		}
-		break;
-		case MODE_PLAYBACK:
-		{
-			deb_assert(mMusicStream);
-			if (!mMusicStream)
-			{
+		} break;
+		case kModePlayback: {
+			deb_assert(music_stream_);
+			if (!music_stream_) {
 				return false;
 			}
-			mMusicStream->Update();
-			if (!mMusicStream->IsPlaying())
-			{
-				SetMode(MODE_POST_PLAYBACK);
+			music_stream_->Update();
+			if (!music_stream_->IsPlaying()) {
+				SetMode(kModePostPlayback);
 			}
-		}
-		break;
-		case MODE_POST_PLAYBACK:
-		{
+		} break;
+		case kModePostPlayback: {
 			KillSong();
-			if (mModeSetTimer.GetTimeDiff() >= mPostSongPauseTime)
-			{
-				SetMode(MODE_PRE_PLAYBACK);
+			if (mode_set_timer_.GetTimeDiff() >= post_song_pause_time_) {
+				SetMode(kModePrePlayback);
 			}
-		}
-		break;
+		} break;
 	}
 	return true;
 }
 
 
 
-void MusicPlayer::SetMode(MODE pMode)
-{
-	mMode = pMode;
-	mModeSetTimer.PopTimeDiff();
+void MusicPlayer::SetMode(kMode mode) {
+	mode_ = mode;
+	mode_set_timer_.PopTimeDiff();
 }
 
-bool MusicPlayer::StartPlayback()
-{
-	if (mMusicStream)
-	{
-		delete mMusicStream;
-		mMusicStream = 0;
+bool MusicPlayer::StartPlayback() {
+	if (music_stream_) {
+		delete music_stream_;
+		music_stream_ = 0;
 	}
 
-	if (mSongNameList.empty())
-	{
+	if (song_name_list_.empty()) {
 		return false;
 	}
-	++mCurrentSongIndex;
-	if (mCurrentSongIndex >= mSongNameList.size())
-	{
-		mCurrentSongIndex = 0;
+	++current_song_index_;
+	if (current_song_index_ >= song_name_list_.size()) {
+		current_song_index_ = 0;
 	}
-	mMusicStream = mSoundManager->CreateSoundStream(mSongNameList[mCurrentSongIndex], UiLepra::SoundManager::LOOP_NONE, 0);
-	if (mMusicStream)
-	{
-		mMusicStream->SetVolume(mVolume);
-		return mMusicStream->Playback();
-	}
-	else
-	{
-		mLog.Errorf("Unable to load song %s!", mSongNameList[mCurrentSongIndex].c_str());
+	music_stream_ = sound_manager_->CreateSoundStream(song_name_list_[current_song_index_], uilepra::SoundManager::kLoopNone, 0);
+	if (music_stream_) {
+		music_stream_->SetVolume(volume_);
+		return music_stream_->Playback();
+	} else {
+		log_.Errorf("Unable to load song %s!", song_name_list_[current_song_index_].c_str());
 	}
 	return false;
 }
 
-void MusicPlayer::KillSong()
-{
-	delete mMusicStream;
-	mMusicStream = 0;
+void MusicPlayer::KillSong() {
+	delete music_stream_;
+	music_stream_ = 0;
 }
 
 
-loginstance(GAME, MusicPlayer);
+loginstance(kGame, MusicPlayer);
 
 
 

@@ -5,201 +5,175 @@
 
 
 #include "pch.h"
-#include "ProjectileUtil.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/CppContextObject.h"
-#include "../Cure/Include/GameManager.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Lepra/Include/Random.h"
-#include "Launcher.h"
+#include "projectileutil.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/cppcontextobject.h"
+#include "../cure/include/gamemanager.h"
+#include "../cure/include/runtimevariable.h"
+#include "../lepra/include/random.h"
+#include "launcher.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-bool ProjectileUtil::GetBarrel(Cure::ContextObject* pProjectile, xform& pTransform, vec3& pVelocity)
-{
-	deb_assert(pProjectile);
-	//deb_assert(pProjectile->GetOwnerInstanceId());
-	Cure::CppContextObject* lShooter = (Cure::CppContextObject*)pProjectile->GetManager()->GetObject(pProjectile->GetOwnerInstanceId());
-	if (!lShooter)
-	{
-		//pProjectile->GetManager()->PostKillObject(pProjectile->GetInstanceId());
+bool ProjectileUtil::GetBarrel(cure::ContextObject* projectile, xform& transform, vec3& velocity) {
+	deb_assert(projectile);
+	//deb_assert(projectile->GetOwnerInstanceId());
+	cure::CppContextObject* _shooter = (cure::CppContextObject*)projectile->GetManager()->GetObject(projectile->GetOwnerInstanceId());
+	if (!_shooter) {
+		//projectile->GetManager()->PostKillObject(projectile->GetInstanceId());
 		return false;
 	}
-	return GetBarrelByShooter(lShooter, pTransform, pVelocity);
+	return GetBarrelByShooter(_shooter, transform, velocity);
 }
 
-bool ProjectileUtil::GetBarrelByShooter(Cure::CppContextObject* pShooter, xform& pTransform, vec3& pVelocity)
-{
-	pTransform.SetOrientation(pShooter->GetOrientation());
-	pTransform.GetOrientation().RotateAroundOwnX(-PIF/2);
-	pTransform.SetPosition(pShooter->GetPosition());
-	pVelocity = pShooter->GetVelocity();
-	const Tbc::ChunkyClass::Tag* lTag = pShooter->FindTag("muzzle", 0, 0);
-	if (lTag)
-	{
-		const int lBoneIndex = lTag->mBodyIndexList[0];
-		const Tbc::ChunkyBoneGeometry* lBone = pShooter->GetPhysics()->GetBoneGeometry(lBoneIndex);
-		deb_assert(lBone->GetBoneType() == Tbc::ChunkyBoneGeometry::BONE_POSITION);
+bool ProjectileUtil::GetBarrelByShooter(cure::CppContextObject* shooter, xform& transform, vec3& velocity) {
+	transform.SetOrientation(shooter->GetOrientation());
+	transform.GetOrientation().RotateAroundOwnX(-PIF/2);
+	transform.SetPosition(shooter->GetPosition());
+	velocity = shooter->GetVelocity();
+	const tbc::ChunkyClass::Tag* tag = shooter->FindTag("muzzle", 0, 0);
+	if (tag) {
+		const int bone_index = tag->body_index_list_[0];
+		const tbc::ChunkyBoneGeometry* bone = shooter->GetPhysics()->GetBoneGeometry(bone_index);
+		deb_assert(bone->GetBoneType() == tbc::ChunkyBoneGeometry::kBonePosition);
 #ifdef LEPRA_DEBUG
-		//Tbc::ChunkyBoneGeometry* lRootGeometry = pShooter->GetPhysics()->GetBoneGeometry(0);
-		//quat q = pGameManager->GetPhysicsManager()->GetBodyOrientation(lRootGeometry->GetBodyId());
-		//quat p = pShooter->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-		//mLog.Infof("Shooting with body orientation (%f;%f;%f;%f and initial orientation (%f;%f;%f;%f)."),
+		//tbc::ChunkyBoneGeometry* root_geometry = shooter->GetPhysics()->GetBoneGeometry(0);
+		//quat q = game_manager->GetPhysicsManager()->GetBodyOrientation(root_geometry->GetBodyId());
+		//quat p = shooter->GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
+		//log_.Infof("Shooting with body orientation (%f;%f;%f;%f and initial orientation (%f;%f;%f;%f)."),
 		//	q.a, q.b, q.c, q.d,
 		//	p.a, p.b, p.c, p.d);
 #endif // Debug
-		const int lParentIndex = pShooter->GetPhysics()->GetIndex(lBone->GetParent());
-		const Tbc::PhysicsManager::BodyID lParentBodyId = pShooter->GetPhysics()->GetBoneGeometry(lParentIndex)->GetBodyId();
-		const quat lParentOrientation = pShooter->GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(lParentBodyId);
-		const vec3 lMuzzleOffset = pShooter->GetPhysics()->GetOriginalBoneTransformation(lBoneIndex).GetPosition();
-		pTransform.GetPosition() += lParentOrientation * lMuzzleOffset;
-		pTransform.SetOrientation(lParentOrientation);
+		const int parent_index = shooter->GetPhysics()->GetIndex(bone->GetParent());
+		const tbc::PhysicsManager::BodyID parent_body_id = shooter->GetPhysics()->GetBoneGeometry(parent_index)->GetBodyId();
+		const quat parent_orientation = shooter->GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyOrientation(parent_body_id);
+		const vec3 muzzle_offset = shooter->GetPhysics()->GetOriginalBoneTransformation(bone_index).GetPosition();
+		transform.GetPosition() += parent_orientation * muzzle_offset;
+		transform.SetOrientation(parent_orientation);
 	}
 	return true;
 }
 
-void ProjectileUtil::StartBullet(Cure::ContextObject* pBullet, float pMuzzleVelocity, bool pUseBarrel)
-{
-	xform lTransform;
-	if (pUseBarrel)
-	{
-		vec3 lParentVelocity;
-		if (!GetBarrel(pBullet, lTransform, lParentVelocity))
-		{
+void ProjectileUtil::StartBullet(cure::ContextObject* bullet, float muzzle_velocity, bool use_barrel) {
+	xform _transform;
+	if (use_barrel) {
+		vec3 parent_velocity;
+		if (!GetBarrel(bullet, _transform, parent_velocity)) {
 			return;
 		}
-		vec3 lVelocity = lTransform.GetOrientation() * vec3(0, 0, pMuzzleVelocity);
-		lVelocity += lParentVelocity;
-		pBullet->SetRootOrientation(lTransform.GetOrientation());
-		pBullet->SetRootVelocity(lVelocity);
-		lTransform.GetPosition() += lTransform.GetOrientation() * vec3(0, 0, 2);
+		vec3 _velocity = _transform.GetOrientation() * vec3(0, 0, muzzle_velocity);
+		_velocity += parent_velocity;
+		bullet->SetRootOrientation(_transform.GetOrientation());
+		bullet->SetRootVelocity(_velocity);
+		_transform.GetPosition() += _transform.GetOrientation() * vec3(0, 0, 2);
+	} else {
+		_transform = bullet->GetInitialTransform();
 	}
-	else
-	{
-		lTransform = pBullet->GetInitialTransform();
-	}
-	const Tbc::ChunkyBoneGeometry* lGeometry = pBullet->GetPhysics()->GetBoneGeometry(pBullet->GetPhysics()->GetRootBone());
-	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lGeometry->GetBodyId(), lTransform);
+	const tbc::ChunkyBoneGeometry* geometry = bullet->GetPhysics()->GetBoneGeometry(bullet->GetPhysics()->GetRootBone());
+	bullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(geometry->GetBodyId(), _transform);
 
-	pBullet->GetManager()->EnableMicroTickCallback(pBullet);	// Used hires movement + collision detection.
+	bullet->GetManager()->EnableMicroTickCallback(bullet);	// Used hires movement + collision detection.
 }
 
 
-void ProjectileUtil::BulletMicroTick(Cure::ContextObject* pBullet, float pFrameTime, float pMaxVelocity, float pAcceleration)
-{
-	const Tbc::ChunkyBoneGeometry* lRootGeometry = pBullet->GetPhysics()->GetBoneGeometry(0);
-	Tbc::PhysicsManager::BodyID lBody = lRootGeometry->GetBodyId();
-	xform lTransform;
-	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBody, lTransform);
-	vec3 lVelocity = pBullet->GetVelocity();
-	lTransform.GetPosition() += lVelocity * pFrameTime;
-	lTransform.GetOrientation() = pBullet->GetOrientation();
-	pBullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(lBody, lTransform);
-	if (pAcceleration && lVelocity.GetLengthSquared() < pMaxVelocity*pMaxVelocity)
-	{
-		const vec3 lForward(0, pAcceleration*pFrameTime, 0);
-		lVelocity += lTransform.GetOrientation() * lForward;
-		pBullet->SetRootVelocity(lVelocity);
+void ProjectileUtil::BulletMicroTick(cure::ContextObject* bullet, float frame_time, float max_velocity, float acceleration) {
+	const tbc::ChunkyBoneGeometry* root_geometry = bullet->GetPhysics()->GetBoneGeometry(0);
+	tbc::PhysicsManager::BodyID body = root_geometry->GetBodyId();
+	xform _transform;
+	bullet->GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyTransform(body, _transform);
+	vec3 _velocity = bullet->GetVelocity();
+	_transform.GetPosition() += _velocity * frame_time;
+	_transform.GetOrientation() = bullet->GetOrientation();
+	bullet->GetManager()->GetGameManager()->GetPhysicsManager()->SetBodyTransform(body, _transform);
+	if (acceleration && _velocity.GetLengthSquared() < max_velocity*max_velocity) {
+		const vec3 forward(0, acceleration*frame_time, 0);
+		_velocity += _transform.GetOrientation() * forward;
+		bullet->SetRootVelocity(_velocity);
 	}
 }
 
-void ProjectileUtil::Detonate(Cure::ContextObject* pGrenade, bool* pIsDetonated, Launcher* pLauncher, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal,
-	float pStrength, float pDeleteDelay)
-{
-	/*if (pOtherObject->GetInstanceId() == GetOwnerInstanceId())
-	{
+void ProjectileUtil::Detonate(cure::ContextObject* grenade, bool* is_detonated, Launcher* launcher, const vec3& position, const vec3& velocity, const vec3& normal,
+	float strength, float delete_delay) {
+	/*if (other_object->GetInstanceId() == GetOwnerInstanceId()) {
 		return;
 	}*/
-	if (*pIsDetonated)
-	{
+	if (*is_detonated) {
 		return;
 	}
-	*pIsDetonated = true;
+	*is_detonated = true;
 
-	Tbc::ChunkyPhysics* lPhysics = pGrenade->GetPhysics();
-	if (lPhysics)
-	{
-		pLauncher->Detonate(pGrenade, lPhysics->GetBoneGeometry(0), pPosition, pVelocity, pNormal, pStrength);
-		if (pDeleteDelay == 0)
-		{
-			pGrenade->GetManager()->PostKillObject(pGrenade->GetInstanceId());
-		}
-		else if (pDeleteDelay > 0)
-		{
-			pGrenade->GetManager()->DelayKillObject(pGrenade, pDeleteDelay);
+	tbc::ChunkyPhysics* physics = grenade->GetPhysics();
+	if (physics) {
+		launcher->Detonate(grenade, physics->GetBoneGeometry(0), position, velocity, normal, strength);
+		if (delete_delay == 0) {
+			grenade->GetManager()->PostKillObject(grenade->GetInstanceId());
+		} else if (delete_delay > 0) {
+			grenade->GetManager()->DelayKillObject(grenade, delete_delay);
 		}
 	}
 }
 
-void ProjectileUtil::OnBulletHit(Cure::ContextObject* pBullet, bool* pIsDetonated, Launcher* pLauncher, Cure::ContextObject* pTarget)
-{
-	if (pTarget->GetInstanceId() == pBullet->GetOwnerInstanceId())	// Can't hit oneself.
-	{
+void ProjectileUtil::OnBulletHit(cure::ContextObject* bullet, bool* is_detonated, Launcher* launcher, cure::ContextObject* target) {
+	if (target->GetInstanceId() == bullet->GetOwnerInstanceId()) {	// Can't hit oneself.
 		return;
 	}
-	if (*pIsDetonated)
-	{
+	if (*is_detonated) {
 		return;
 	}
-	*pIsDetonated = true;
+	*is_detonated = true;
 
-	pLauncher->OnBulletHit(pBullet, pTarget);
-	pBullet->GetManager()->PostKillObject(pBullet->GetInstanceId());
+	launcher->OnBulletHit(bullet, target);
+	bullet->GetManager()->PostKillObject(bullet->GetInstanceId());
 }
 
-float ProjectileUtil::GetShotSounds(Cure::ContextManager* pManager, const strutil::strvec& pSoundNames, str& pLaunchSoundName, str& pShreekSoundName)
-{
-	const size_t lSoundCount = pSoundNames.size() / 2;	// First half are launch sounds, last half are shreek sounds.
-	if (lSoundCount)
-	{
-		pLaunchSoundName = pSoundNames[Random::GetRandomNumber()%lSoundCount];
-		pShreekSoundName = pSoundNames[Random::GetRandomNumber()%lSoundCount + lSoundCount];
-		float lPitch;
-		v_get(lPitch, = (float), pManager->GetGameManager()->GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
-		return lPitch;
+float ProjectileUtil::GetShotSounds(cure::ContextManager* manager, const strutil::strvec& sound_names, str& launch_sound_name, str& shreek_sound_name) {
+	const size_t sound_count = sound_names.size() / 2;	// First half are launch sounds, last half are shreek sounds.
+	if (sound_count) {
+		launch_sound_name = sound_names[Random::GetRandomNumber()%sound_count];
+		shreek_sound_name = sound_names[Random::GetRandomNumber()%sound_count + sound_count];
+		float pitch;
+		v_get(pitch, = (float), manager->GetGameManager()->GetVariableScope(), kRtvarPhysicsRtr, 1.0);
+		return pitch;
 	}
 	return 0;
 }
 
 
 
-vec3 ProjectileUtil::CalculateInitialProjectileDirection(const vec3& pDistance, float pAcceleration, float pTerminalSpeed, const vec3& pGravity, float pAccelerationGravityRecip)
-{
+vec3 ProjectileUtil::CalculateInitialProjectileDirection(const vec3& distance, float acceleration, float terminal_speed, const vec3& gravity, float acceleration_gravity_recip) {
 	// 1. How long time, t, will it take the missile to accelerate to the endpoint?
 	// 2. Given t, how much (d) will the missile fall during it's travel (excluding g for optimization)?
 	// 3. Compensate for projectile acceleration in gravitational direction.
 	// 4. Create a quaternion pointing to dir+d.
-	const float l = pDistance.GetLength();
-	const float a = pAcceleration;
-	const float vt = pTerminalSpeed;
+	const float l = distance.GetLength();
+	const float a = acceleration;
+	const float vt = terminal_speed;
 	const float r = ::exp(l*a/(vt*vt));
 	float d = 0;
 	deb_assert(r >= 1);
-	if (r >= 1)
-	{
+	if (r >= 1) {
 		const float t = vt/a*Math::acosh(r);	// Derived from "free fall with air resistance" in Wikipedia. Thanks a bunch!
 		// 2
 		d = t*t*0.5f;
 	}
 	// 3
-	const vec3 g = pGravity.GetNormalized(pAccelerationGravityRecip);
-	const float f = 1 + pDistance*g/l;
+	const vec3 g = gravity.GetNormalized(acceleration_gravity_recip);
+	const float f = 1 + distance*g/l;
 	d *= f;
 	// 4
-	const vec3 lTarget = pDistance - d*pGravity;
-	const float xy = ::sqrt(lTarget.x*lTarget.x + lTarget.y*lTarget.y);
-	//const float zy = ::sqrt(lTarget.z*lTarget.z + lTarget.y*lTarget.y);
-	return vec3(::atan2(-lTarget.x, lTarget.y), ::atan2(lTarget.z, xy), 0);
+	const vec3 _target = distance - d*gravity;
+	const float xy = ::sqrt(_target.x*_target.x + _target.y*_target.y);
+	//const float zy = ::sqrt(_target.z*_target.z + _target.y*_target.y);
+	return vec3(::atan2(-_target.x, _target.y), ::atan2(_target.z, xy), 0);
 }
 
 
 
-loginstance(GAME_CONTEXT, ProjectileUtil);
+loginstance(kGameContext, ProjectileUtil);
 
 
 

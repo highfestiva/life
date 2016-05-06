@@ -1,71 +1,59 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/Alarm.h"
+#include "../include/alarm.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-Alarm::Alarm()
-{
+Alarm::Alarm() {
 	Reset();
 }
 
-void Alarm::Reset()
-{
-	mIsActive = false;
+void Alarm::Reset() {
+	is_active_ = false;
 }
 
-void Alarm::Push(double pInitialWaitTime)
-{
-	if (!mIsActive)
-	{
+void Alarm::Push(double initial_wait_time) {
+	if (!is_active_) {
 		Set();
-		mTimer.ReduceTimeDiff(pInitialWaitTime);
+		timer_.ReduceTimeDiff(initial_wait_time);
 	}
 }
 
-void Alarm::Set()
-{
-	mTimer.PopTimeDiff();
-	mIsActive = true;
+void Alarm::Set() {
+	timer_.PopTimeDiff();
+	is_active_ = true;
 }
 
-void Alarm::SetIfNotSet()
-{
-	if (!mIsActive)
-	{
+void Alarm::SetIfNotSet() {
+	if (!is_active_) {
 		Set();
 	}
 }
 
-bool Alarm::IsExpired(double pWaitTime)
-{
-	mTimer.UpdateTimer();
-	return (mIsActive && mTimer.GetTimeDiff() >= pWaitTime);
+bool Alarm::IsExpired(double wait_time) {
+	timer_.UpdateTimer();
+	return (is_active_ && timer_.GetTimeDiff() >= wait_time);
 }
 
-bool Alarm::PopExpired(double pWaitTime)
-{
-	bool lIsExpired = IsExpired(pWaitTime);
-	if (lIsExpired)
-	{
+bool Alarm::PopExpired(double wait_time) {
+	bool is_expired = IsExpired(wait_time);
+	if (is_expired) {
 		Reset();
 	}
-	return (lIsExpired);
+	return (is_expired);
 }
 
-double Alarm::GetTimeDiff() const
-{
-	return mTimer.GetTimeDiff();
+double Alarm::GetTimeDiff() const {
+	return timer_.GetTimeDiff();
 }
 
 

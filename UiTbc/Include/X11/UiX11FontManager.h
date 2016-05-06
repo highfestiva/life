@@ -6,63 +6,58 @@
 
 #pragma once
 
-#include "../../../Lepra/Include/LepraTarget.h"
-#include "../../../Lepra/Include/Unordered.h"
-#include "../UiFontManager.h"
+#include "../../../lepra/include/lepratarget.h"
+#include "../../../lepra/include/unordered.h"
+#include "../uifontmanager.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 class X11DisplayManager;
 }
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class X11FontManager: public FontManager
-{
+class X11FontManager: public FontManager {
 	typedef FontManager Parent;
 public:
 	X11FontManager();
 	virtual ~X11FontManager();
 
-	virtual FontId AddFont(const str& pFontName, double pSize, int pFlags = NORMAL);
-	virtual bool RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect& pRect);
-	virtual int GetCharWidth(wchar_t pChar) const;
-	virtual int GetCharOffset(wchar_t pChar) const;
+	virtual FontId AddFont(const str& font_name, double size, int flags = kNormal);
+	virtual bool RenderGlyph(wchar_t c, Canvas& image, const PixelRect& rect);
+	virtual int GetCharWidth(wchar_t c) const;
+	virtual int GetCharOffset(wchar_t c) const;
 
 private:
-	struct CharWidthOffset
-	{
-		bool mSet;
-		int mWidth;
-		int mOffset;
+	struct CharWidthOffset {
+		bool set_;
+		int width_;
+		int offset_;
 	};
 	typedef std::unordered_map<wchar_t, CharWidthOffset> CharPlacementMap;
-	struct X11Font: Font
-	{
-		FT_Face mX11Face;
-		wchar_t mX11LoadedCharFace;
-		CharWidthOffset mCharWidthOffset[128];
-		CharPlacementMap mCharPlacements;
+	struct X11Font: Font {
+		FT_Face x11_face_;
+		wchar_t x11_loaded_char_face_;
+		CharWidthOffset char_width_offset_[128];
+		CharPlacementMap char_placements_;
 
 		X11Font();
-		bool GetCharWidth(wchar_t pChar, int& pWidth, int& pOffset);
-		void PutCharWidth(wchar_t pChar, int pWidth, int pOffset);
+		bool GetCharWidth(wchar_t c, int& width, int& offset);
+		void PutCharWidth(wchar_t c, int width, int offset);
 	};
 
-	static strutil::strvec FindAllFontFiles(const str& pPath);
-	str GetFontFile(const str& pFontName, const strutil::strvec& pSuffixes) const;
+	static strutil::strvec FindAllFontFiles(const str& path);
+	str GetFontFile(const str& font_name, const strutil::strvec& suffixes) const;
 
-	FT_Library mLibrary;
-	strutil::strvec mFontFiles;
+	FT_Library library_;
+	strutil::strvec font_files_;
 
 	logclass();
 };

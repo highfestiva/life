@@ -6,20 +6,18 @@
 
 #pragma once
 
-#include "TrabantSim.h"
-#include "../Lepra/Include/Thread.h"
+#include "trabantsim.h"
+#include "../lepra/include/thread.h"
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
-class PythonRunner
-{
+class PythonRunner {
 public:
-	static void Run(const wchar_t* pDirectory, const wchar_t* pFilename);
+	static void Run(const wchar_t* directory, const wchar_t* filename);
 	static bool IsRunning();
 	static void Break();
 	static str GetStdOut();
@@ -29,14 +27,14 @@ private:
 	static void WorkerEntry(void*);
 	static void StdOutReadEntry(void*);
 
-	static StaticThread mPythonWorker;
-	static StaticThread mStdOutReader;
-	static Lock mStdOutLock;
-	static str mStdOut;
-	static wstr mDirectory;
-	static wstr mFilename;
-	static bool mKillSimulator;
-	static bool mIsStopping;
+	static StaticThread python_worker_;
+	static StaticThread std_out_reader_;
+	static Lock std_out_lock_;
+	static str std_out_;
+	static wstr directory_;
+	static wstr filename_;
+	static bool kill_simulator_;
+	static bool is_stopping_;
 };
 
 

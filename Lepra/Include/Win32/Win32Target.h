@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // TRICKY: do NOT add "#pragma once" to this file.
@@ -32,11 +32,11 @@
 #pragma warning(pop)	// Enable all warnings again.
 
 #ifndef WS_EX_LAYERED
-#define WS_EX_LAYERED 0x80000 
+#define WS_EX_LAYERED 0x80000
 #endif // !WS_EX_LAYERED
 
 // Drop asshole M$ #defines.
-#include "../LepraUndef.h"
+#include "../lepraundef.h"
 
 #define LEPRA_HEAP_CHECK()			::_heapchk()
 
@@ -52,8 +52,7 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 	typedef	SOCKET sys_socket;
 }
 typedef int socklen_t;

@@ -7,7 +7,7 @@
 
 	This class is used to concatenate several files into one large file.
 	No compression is performed though. If you need a compressed archive,
-	please use ZipArchive instead. Use this class if read/write performance 
+	please use ZipArchive instead. Use this class if read/write performance
 	is an issue.
 
 	QUICK DOCUMENTATION (OBS! READ THIS BEFORE USING THIS CLASS!!!):
@@ -19,18 +19,18 @@
 	   When done, call CloseArchive().
 
 	3. FileFindFirst(), FileFindNext(), FileSize(), FileSetPos() and
-	   FileRead() only works in READ_ONLY mode.
+	   FileRead() only works in kReadOnly mode.
 
-	4. FileOpen() only returns a filehandle in READ_ONLY mode. Otherwise
+	4. FileOpen() only returns a filehandle in kReadOnly mode. Otherwise
 	   it just returns 1 if successful.
 
-	5. In WRITE_ONLY mode, you can only write to one file at a time, and
+	5. In kWriteOnly mode, you can only write to one file at a time, and
 	   that's the last opened file (no file handles are used). When you
 	   are done writing, and opened another file to write to, you can't go
 	   back writing to the previous file again. Just send 0 as the
 	   filehandle when calling FileClose().
 
-	6. InsertArchive() can only be used in INSERT_ONLY mode, and that's
+	6. InsertArchive() can only be used in kInsertOnly mode, and that's
 	   the only function that can be used in that mode. It inserts a
 	   FileArchive package into "this" package. If there are two files
 	   (one in each package) with the same name, the file in "this" package
@@ -39,93 +39,85 @@
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "HashTable.h"
-#include "DiskFile.h"
-#include "IOError.h"
+#include "lepratypes.h"
+#include "hashtable.h"
+#include "diskfile.h"
+#include "ioerror.h"
 #include <list>
 
-namespace Lepra
-{
+namespace lepra {
 
 class ProgressCallback;
 
-class FileArchive
-{
+class FileArchive {
 public:
 
-	enum IOType
-	{
-		READ_ONLY = 0,
-		WRITE_ONLY,
-		WRITE_APPEND,
-		INSERT_ONLY
+	enum IOType {
+		kReadOnly = 0,
+		kWriteOnly,
+		kWriteAppend,
+		kInsertOnly
 	};
 
-	enum FileOrigin
-	{
-		FSEEK_SET = 0,
-		FSEEK_CUR,
-		FSEEK_END,
+	enum FileOrigin {
+		kFseekSet = 0,
+		kFseekCur,
+		kFseekEnd,
 	};
 
-	enum SizeUnit
-	{
-		BYTES = 1,
-		KB    = 1024,
-		MB    = 1024 * KB,
+	enum SizeUnit {
+		kBytes = 1,
+		kKb    = 1024,
+		kMb    = 1024 * kKb,
 	};
 
 	FileArchive();
 	virtual ~FileArchive();
 
-	IOError OpenArchive(const str& pArchiveFileName, IOType pIOType);
+	IOError OpenArchive(const str& archive_file_name, IOType io_type);
 	void CloseArchive();
 	void CloseAndRemoveArchive();
 
 	int GetFileCount();
 
-	IOError InsertArchive(const str& pArchiveFileName);
+	IOError InsertArchive(const str& archive_file_name);
 
 	str FileFindFirst();
 	str FileFindNext();
 
-	int FileOpen(const str& pFileName);
-	void FileClose(int pFileHandle);
+	int FileOpen(const str& file_name);
+	void FileClose(int file_handle);
 
-	bool FileExist(const str& pFileName);
+	bool FileExist(const str& file_name);
 
-	IOError FileRead(void* pDest, int pSize, int pFileHandle);
-	IOError FileWrite(void* pSource, int pSize);
+	IOError FileRead(void* dest, int size, int file_handle);
+	IOError FileWrite(void* source, int size);
 
-	int64 FileSize(int pFileHandle);
-	void FileSeek(int64 pOffset, FileOrigin pOrigin, int pFileHandle);
+	int64 FileSize(int file_handle);
+	void FileSeek(int64 offset, FileOrigin origin, int file_handle);
 
-	void SetProgressCallback(ProgressCallback* pCallback);
+	void SetProgressCallback(ProgressCallback* callback);
 
-	bool AddFile(const str& pFileName, const str& pDestFileName, 
-		     int pCacheSize = 1, SizeUnit pUnit = MB);
-	bool ExtractFile(const str& pFileName, const str& pDestFileName, 
-			 int pCacheSize = 1, SizeUnit pUnit = MB);
+	bool AddFile(const str& file_name, const str& dest_file_name,
+		     int cache_size = 1, SizeUnit unit = kMb);
+	bool ExtractFile(const str& file_name, const str& dest_file_name,
+			 int cache_size = 1, SizeUnit unit = kMb);
 
 private:
 
-	class FileArchiveFile
-	{
+	class FileArchiveFile {
 	public:
-		FileArchiveFile(const str& pFileName) :
-			mFileName(pFileName)
-		{
+		FileArchiveFile(const str& file_name) :
+			file_name_(file_name) {
 		}
 
-		~FileArchiveFile()
-		{
+		~FileArchiveFile() {
 		}
 
-		str mFileName;
-		int64 mStartOffset;
-		int64 mCurrentPos;
-		int64 mSize;
+		str file_name_;
+		int64 start_offset_;
+		int64 current_pos_;
+		int64 size_;
 	};
 
 
@@ -133,34 +125,34 @@ private:
 	typedef HashTable<str, FileArchiveFile*> FileNameTable;
 	typedef std::list<FileArchiveFile*> FileList;
 
-	IOError ReadHeader(int64* pHeaderOffset = 0, bool pFillFileNameList = false);
+	IOError ReadHeader(int64* header_offset = 0, bool fill_file_name_list = false);
 	IOError WriteHeader();
 
-	FileArchiveFile* GetFile(int pFileHandle);
+	FileArchiveFile* GetFile(int file_handle);
 
-	FileTable mOpenFileTable;
-	FileNameTable mFileNameTable;
-	FileList mFileNameList;  // Only used in WRITE_ONLY mode.
+	FileTable open_file_table_;
+	FileNameTable file_name_table_;
+	FileList file_name_list_;  // Only used in kWriteOnly mode.
 
-	str mArchiveFileName;
-	str mTempFileName;
+	str archive_file_name_;
+	str temp_file_name_;
 
-	DiskFile mArchiveFile;
-	IOType mIOType;
+	DiskFile archive_file_;
+	IOType io_type_;
 
-	int mCurrentFindIndex;
-	FileNameTable::Iterator mCurrentFindIterator;
+	int current_find_index_;
+	FileNameTable::Iterator current_find_iterator_;
 
-	FileArchiveFile* mCurrentWriteFile;
+	FileArchiveFile* current_write_file_;
 
-	int mFileHandleCounter;
+	int file_handle_counter_;
 
-	uint8* mWriteBuffer;
-	const int mWriteBufferSize;
-	int mWriteBufferPos;
-	int64 mCurrentWritePos;
+	uint8* write_buffer_;
+	const int write_buffer_size_;
+	int write_buffer_pos_;
+	int64 current_write_pos_;
 
-	ProgressCallback* mCallback;
+	ProgressCallback* callback_;
 };
 
 }

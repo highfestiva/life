@@ -6,13 +6,12 @@
 
 #pragma once
 
-#include "../../Lepra/Include/HashTable.h"
-#include "../Include/UiCure.h"
+#include "../../lepra/include/hashtable.h"
+#include "../include/uicure.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
@@ -20,8 +19,7 @@ class GraphicsObject;
 
 
 
-class TerrainManager
-{
+class TerrainManager {
 public:
 	TerrainManager();
 	virtual ~TerrainManager();

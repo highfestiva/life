@@ -1,41 +1,38 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life/LifeClient/ClientConsoleManager.h"
-#include "HoverTank.h"
+#include "../life/lifeclient/clientconsolemanager.h"
+#include "hovertank.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-class HoverTankConsoleManager: public Life::ClientConsoleManager
-{
-	typedef Life::ClientConsoleManager Parent;
+class HoverTankConsoleManager: public life::ClientConsoleManager {
+	typedef life::ClientConsoleManager Parent;
 public:
-	HoverTankConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-		UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea);
+	HoverTankConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+		UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area);
 	virtual ~HoverTankConsoleManager();
 	bool Start();
 
 protected:
-	enum CommandClient
-	{
-		COMMAND_SET_AVATAR = Parent::COMMAND_COUNT_LIFE_CLIENT,
+	enum CommandClient {
+		kCommandSetAvatar = Parent::kCommandCountLifeClient,
 	};
 
 	virtual unsigned GetCommandCount() const;
-	virtual const CommandPair& GetCommand(unsigned pIndex) const;
-	virtual int OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector);
+	virtual const CommandPair& GetCommand(unsigned index) const;
+	virtual int OnCommand(const HashedString& command, const strutil::strvec& parameter_vector);
 
-	static const CommandPair mCommandIdList[];
+	static const CommandPair command_id_list_[];
 	logclass();
 };
 

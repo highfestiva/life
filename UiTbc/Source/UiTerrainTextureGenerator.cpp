@@ -6,293 +6,246 @@
 */
 
 #include "pch.h"
-#include "../Include/UiTerrainTextureGenerator.h"
+#include "../include/uiterraintexturegenerator.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-TerrainTextureGenerator::TerrainTextureGenerator()
-{
+TerrainTextureGenerator::TerrainTextureGenerator() {
 }
 
-TerrainTextureGenerator::~TerrainTextureGenerator()
-{
-	RangeList::iterator lIter;
-	for (lIter = mRangeList.begin(); lIter != mRangeList.end(); ++lIter)
-	{
-		delete (*lIter);
+TerrainTextureGenerator::~TerrainTextureGenerator() {
+	RangeList::iterator iter;
+	for (iter = range_list_.begin(); iter != range_list_.end(); ++iter) {
+		delete (*iter);
 	}
 }
 
-bool TerrainTextureGenerator::AddNewRange(float pMaxLevel, float pFadeRange, Canvas* pImages,
-	float* pMinNormalY, float* pMaxNormalY, float* pAngularFadeRange, int pNumImages)
-{
-	if (mRangeList.empty() == true)
-	{
-		Range* lRange = new Range(pMaxLevel, pFadeRange, pImages, pMinNormalY, pMaxNormalY, pAngularFadeRange, pNumImages);
-		mRangeList.push_back(lRange);
+bool TerrainTextureGenerator::AddNewRange(float max_level, float fade_range, Canvas* images,
+	float* min_normal_y, float* max_normal_y, float* angular_fade_range, int num_images) {
+	if (range_list_.empty() == true) {
+		Range* _range = new Range(max_level, fade_range, images, min_normal_y, max_normal_y, angular_fade_range, num_images);
+		range_list_.push_back(_range);
 		return true;
-	}
-	else
-	{
-		Range* lLastRange = *(--mRangeList.end());
-		if (lLastRange->mMaxLevel >= pMaxLevel)
-		{
+	} else {
+		Range* last_range = *(--range_list_.end());
+		if (last_range->max_level_ >= max_level) {
 			return false;
 		}
 
-		Range* lRange = new Range(lLastRange->mMaxLevel, pMaxLevel, pFadeRange, pImages, pMinNormalY, pMaxNormalY, pAngularFadeRange, pNumImages);
-		mRangeList.push_back(lRange);
+		Range* _range = new Range(last_range->max_level_, max_level, fade_range, images, min_normal_y, max_normal_y, angular_fade_range, num_images);
+		range_list_.push_back(_range);
 		return true;
 	}
 }
 
-/*void TerrainTextureGenerator::RenderTexture(const TerrainPatch& pPatch, Canvas& pCanvas)
-{
-	pCanvas.CreateBuffer();
-	pCanvas.Clear();
+/*void TerrainTextureGenerator::RenderTexture(const TerrainPatch& patch, Canvas& canvas) {
+	canvas.CreateBuffer();
+	canvas.Clear();
 
-	float lOneOverWidth = 1.0f / ((float)pCanvas.GetWidth() - 1);
-	float lOneOverHeight = 1.0f / ((float)pCanvas.GetHeight() - 1);
+	float one_over_width = 1.0f / ((float)canvas.GetWidth() - 1);
+	float one_over_height = 1.0f / ((float)canvas.GetHeight() - 1);
 
-	vec3* lPos = 0;
-	vec3* lNormal = 0;
+	vec3* _pos = 0;
+	vec3* _normal = 0;
 
-	for (unsigned y = 0; y < pCanvas.GetHeight(); y++)
-	{
-		float lV = (float)y * lOneOverHeight;
+	for (unsigned y = 0; y < canvas.GetHeight(); y++) {
+		float _v = (float)y * one_over_height;
 
-		for (unsigned x = 0; x < pCanvas.GetWidth(); x++)
-		{
-			float lU = (float)x * lOneOverWidth;
+		for (unsigned x = 0; x < canvas.GetWidth(); x++) {
+			float _u = (float)x * one_over_width;
 
-			vec3 lPos;
-			vec3 lNormal;
+			vec3 _pos;
+			vec3 _normal;
 
-			pPatch.GetPosAndNormal(lU, lV, lPos, lNormal);
+			patch.GetPosAndNormal(_u, _v, _pos, _normal);
 
 			float r = 0;
 			float g = 0;
 			float b = 0;
-			GetHeightDependentRGB(lPos, lNormal, lU, lV, r, g, b);
+			GetHeightDependentRGB(_pos, _normal, _u, _v, r, g, b);
 
-			Color lColor((uint8)floor(r * 255.0f), (uint8)floor(g * 255.0f), (uint8)floor(b * 255.0f));
-			pCanvas.SetPixelColor(x, y, lColor);
+			Color color((uint8)floor(r * 255.0f), (uint8)floor(g * 255.0f), (uint8)floor(b * 255.0f));
+			canvas.SetPixelColor(x, y, color);
 		}
 	}
 
-	if (lPos != 0)
-	{
-		delete[] lPos;
+	if (_pos != 0) {
+		delete[] _pos;
 	}
-	if (lNormal != 0)
-	{
-		delete[] lNormal;
+	if (_normal != 0) {
+		delete[] _normal;
 	}
 }*/
 
-void TerrainTextureGenerator::GetHeightDependentRGB(const vec3& pPos,
-													const vec3& pNormal,
-													float pU, float pV,
-													float& r, float& g, float& b)
-{
-	RangeList::iterator lIter;
-	for (lIter = mRangeList.begin(); lIter != mRangeList.end(); ++lIter)
-	{
-		Range* lRange = *lIter;
-		float lMinMin = lRange->mMinLevel - lRange->mFadeRange;
-		float lMinMax = lRange->mMinLevel + lRange->mFadeRange;
-		float lMaxMin = lRange->mMaxLevel - lRange->mFadeRange;
-		float lMaxMax = lRange->mMaxLevel + lRange->mFadeRange;
-		
-		if (pPos.y < lRange->mMinLevel && lIter != mRangeList.begin())
-		{
-			RangeList::iterator lPrev(lIter);
-			--lPrev;
-			Range* lTemp = *lPrev;
-			lMinMin = lRange->mMinLevel - lTemp->mFadeRange;
-			lMinMax = lRange->mMinLevel + lTemp->mFadeRange;
+void TerrainTextureGenerator::GetHeightDependentRGB(const vec3& pos,
+													const vec3& normal,
+													float u, float v,
+													float& r, float& g, float& b) {
+	RangeList::iterator iter;
+	for (iter = range_list_.begin(); iter != range_list_.end(); ++iter) {
+		Range* _range = *iter;
+		float min_min = _range->min_level_ - _range->fade_range_;
+		float min_max = _range->min_level_ + _range->fade_range_;
+		float max_min = _range->max_level_ - _range->fade_range_;
+		float max_max = _range->max_level_ + _range->fade_range_;
+
+		if (pos.y < _range->min_level_ && iter != range_list_.begin()) {
+			RangeList::iterator prev(iter);
+			--prev;
+			Range* temp = *prev;
+			min_min = _range->min_level_ - temp->fade_range_;
+			min_max = _range->min_level_ + temp->fade_range_;
 		}
-		if (pPos.y > lRange->mMaxLevel && lIter != mRangeList.end())
-		{
-			RangeList::iterator lNext(lIter);
-			++lNext;
-			Range* lTemp = *lNext;
-			lMaxMin = lRange->mMaxLevel - lTemp->mFadeRange;
-			lMaxMax = lRange->mMaxLevel + lTemp->mFadeRange;
+		if (pos.y > _range->max_level_ && iter != range_list_.end()) {
+			RangeList::iterator next(iter);
+			++next;
+			Range* temp = *next;
+			max_min = _range->max_level_ - temp->fade_range_;
+			max_max = _range->max_level_ + temp->fade_range_;
 		}
 
-		float lMinDiff = (pPos.y - lMinMin) / (lMinMax - lMinMin);
-		float lMaxDiff = 1.0f - (pPos.y - lMaxMin) / (lMaxMax - lMaxMin);
+		float min_diff = (pos.y - min_min) / (min_max - min_min);
+		float max_diff = 1.0f - (pos.y - max_min) / (max_max - max_min);
 
-		float lRed   = 0;
-		float lGreen = 0;
-		float lBlue  = 0;
-		GetAngleDependentRGB(lRange, pNormal, pU, pV, lRed, lGreen, lBlue);
+		float red   = 0;
+		float green = 0;
+		float blue  = 0;
+		GetAngleDependentRGB(_range, normal, u, v, red, green, blue);
 
-		if (lMaxDiff >= 0 && lMaxDiff <= 1)
-		{
-			if (lIter == mRangeList.begin())
-			{
-				r = lRed;
-				g = lGreen;
-				b = lBlue;
+		if (max_diff >= 0 && max_diff <= 1) {
+			if (iter == range_list_.begin()) {
+				r = red;
+				g = green;
+				b = blue;
+			} else {
+				float t = max_diff;
+				r = t * red   + (1.0f - t) * r;
+				g = t * green + (1.0f - t) * g;
+				b = t * blue  + (1.0f - t) * b;
 			}
-			else
-			{
-				float t = lMaxDiff;
-				r = t * lRed   + (1.0f - t) * r;
-				g = t * lGreen + (1.0f - t) * g;
-				b = t * lBlue  + (1.0f - t) * b;
+		} else if(min_diff >= 0 && min_diff <= 1) {
+			if (iter == range_list_.begin()) {
+				r = red;
+				g = green;
+				b = blue;
+			} else {
+				float t = min_diff;
+				r = t * red   + (1.0f - t) * r;
+				g = t * green + (1.0f - t) * g;
+				b = t * blue  + (1.0f - t) * b;
 			}
-		}
-		else if(lMinDiff >= 0 && lMinDiff <= 1)
-		{
-			if (lIter == mRangeList.begin())
-			{
-				r = lRed;
-				g = lGreen;
-				b = lBlue;
-			}
-			else
-			{
-				float t = lMinDiff;
-				r = t * lRed   + (1.0f - t) * r;
-				g = t * lGreen + (1.0f - t) * g;
-				b = t * lBlue  + (1.0f - t) * b;
-			}
-		}
-		else if(pPos.y >= lRange->mMinLevel && pPos.y < lRange->mMaxLevel)
-		{
-			r = lRed;
-			g = lGreen;
-			b = lBlue;
+		} else if(pos.y >= _range->min_level_ && pos.y < _range->max_level_) {
+			r = red;
+			g = green;
+			b = blue;
 		}
 	}
 }
 
-void TerrainTextureGenerator::GetAngleDependentRGB(Range* pRange, 
-												   const vec3& pNormal, 
-												   float pU, float pV,
-												   float& r, float& g, float& b)
-{
-	for (int i = 0; i < pRange->mNumImages; i++)
-	{
-		Color lColor;
-		pRange->mImages[i].GetPixelColor((unsigned)(pU * (float)(pRange->mImages[i].GetWidth() - 1)), 
-											 (unsigned)(pV * (float)(pRange->mImages[i].GetHeight() - 1)),
-											 lColor);
-		float lMinMin = pRange->mMinNormalY[i] - pRange->mAngularFadeRange[i];
-		float lMinMax = pRange->mMinNormalY[i] + pRange->mAngularFadeRange[i];
-		float lMaxMin = pRange->mMaxNormalY[i] - pRange->mAngularFadeRange[i];
-		float lMaxMax = pRange->mMaxNormalY[i] + pRange->mAngularFadeRange[i];
+void TerrainTextureGenerator::GetAngleDependentRGB(Range* range,
+												   const vec3& normal,
+												   float u, float v,
+												   float& r, float& g, float& b) {
+	for (int i = 0; i < range->num_images_; i++) {
+		Color color;
+		range->images_[i].GetPixelColor((unsigned)(u * (float)(range->images_[i].GetWidth() - 1)),
+											 (unsigned)(v * (float)(range->images_[i].GetHeight() - 1)),
+											 color);
+		float min_min = range->min_normal_y_[i] - range->angular_fade_range_[i];
+		float min_max = range->min_normal_y_[i] + range->angular_fade_range_[i];
+		float max_min = range->max_normal_y_[i] - range->angular_fade_range_[i];
+		float max_max = range->max_normal_y_[i] + range->angular_fade_range_[i];
 
-		float lMinDiff = (pNormal.y - lMinMin) / (lMinMax - lMinMin);
-		float lMaxDiff = 1.0f - (pNormal.y - lMaxMin) / (lMaxMax - lMaxMin);
-		if (lMaxDiff >= 0 && lMaxDiff <= 1)
-		{
-			if (i == 0)
-			{
-				r = (float)lColor.mRed   / 255.0f;
-				g = (float)lColor.mGreen / 255.0f;
-				b = (float)lColor.mBlue  / 255.0f;
+		float min_diff = (normal.y - min_min) / (min_max - min_min);
+		float max_diff = 1.0f - (normal.y - max_min) / (max_max - max_min);
+		if (max_diff >= 0 && max_diff <= 1) {
+			if (i == 0) {
+				r = (float)color.red_   / 255.0f;
+				g = (float)color.green_ / 255.0f;
+				b = (float)color.blue_  / 255.0f;
+			} else {
+				float t = max_diff;
+				r = t * (float)color.red_   / 255.0f + (1.0f - t) * r;
+				g = t * (float)color.green_ / 255.0f + (1.0f - t) * g;
+				b = t * (float)color.blue_  / 255.0f + (1.0f - t) * b;
 			}
-			else
-			{
-				float t = lMaxDiff;
-				r = t * (float)lColor.mRed   / 255.0f + (1.0f - t) * r;
-				g = t * (float)lColor.mGreen / 255.0f + (1.0f - t) * g;
-				b = t * (float)lColor.mBlue  / 255.0f + (1.0f - t) * b;
+		} else if(min_diff >= 0 && min_diff <= 1) {
+			if (i == 0) {
+				r = (float)color.red_   / 255.0f;
+				g = (float)color.green_ / 255.0f;
+				b = (float)color.blue_  / 255.0f;
+			} else {
+				float t = min_diff;
+				r = t * (float)color.red_   / 255.0f + (1.0f - t) * r;
+				g = t * (float)color.green_ / 255.0f + (1.0f - t) * g;
+				b = t * (float)color.blue_  / 255.0f + (1.0f - t) * b;
 			}
-		}
-		else if(lMinDiff >= 0 && lMinDiff <= 1)
-		{
-			if (i == 0)
-			{
-				r = (float)lColor.mRed   / 255.0f;
-				g = (float)lColor.mGreen / 255.0f;
-				b = (float)lColor.mBlue  / 255.0f;
-			}
-			else
-			{
-				float t = lMinDiff;
-				r = t * (float)lColor.mRed   / 255.0f + (1.0f - t) * r;
-				g = t * (float)lColor.mGreen / 255.0f + (1.0f - t) * g;
-				b = t * (float)lColor.mBlue  / 255.0f + (1.0f - t) * b;
-			}
-		}
-		else if(pNormal.y >= pRange->mMinNormalY[i] && pNormal.y < pRange->mMaxNormalY[i])
-		{
-			r = (float)lColor.mRed   / 255.0f;
-			g = (float)lColor.mGreen / 255.0f;
-			b = (float)lColor.mBlue  / 255.0f;
+		} else if(normal.y >= range->min_normal_y_[i] && normal.y < range->max_normal_y_[i]) {
+			r = (float)color.red_   / 255.0f;
+			g = (float)color.green_ / 255.0f;
+			b = (float)color.blue_  / 255.0f;
 		}
 	}
 }
 
-TerrainTextureGenerator::Range::Range(float pMaxLevel,
-									  float pFadeRange,
-									  Canvas* pImages, 
-									  float* pMinNormalY, 
-									  float* pMaxNormalY, 
-									  float* pAngularFadeRange,
-									  int pNumImages)
-{
+TerrainTextureGenerator::Range::Range(float max_level,
+									  float fade_range,
+									  Canvas* images,
+									  float* min_normal_y,
+									  float* max_normal_y,
+									  float* angular_fade_range,
+									  int num_images) {
 	// The first range begins at negative infinity.
-	unsigned lBits = 0xFF800000;
-	mMinLevel = *(float*)&lBits;
-	mMaxLevel = pMaxLevel;
-	mFadeRange = pFadeRange;
-	mNumImages = pNumImages;
+	unsigned bits = 0xFF800000;
+	min_level_ = *(float*)&bits;
+	max_level_ = max_level;
+	fade_range_ = fade_range;
+	num_images_ = num_images;
 
-	mImages = new Canvas[mNumImages];
-	mMinNormalY = new float[mNumImages];
-	mMaxNormalY = new float[mNumImages];
-	mAngularFadeRange = new float[mNumImages];
+	images_ = new Canvas[num_images_];
+	min_normal_y_ = new float[num_images_];
+	max_normal_y_ = new float[num_images_];
+	angular_fade_range_ = new float[num_images_];
 
-	for (int i = 0; i < mNumImages; i++)
-	{
-		mImages[i].Copy(pImages[i]);
-		mMinNormalY[i] = pMinNormalY[i];
-		mMaxNormalY[i] = pMaxNormalY[i];
-		mAngularFadeRange[i] = pAngularFadeRange[i];
+	for (int i = 0; i < num_images_; i++) {
+		images_[i].Copy(images[i]);
+		min_normal_y_[i] = min_normal_y[i];
+		max_normal_y_[i] = max_normal_y[i];
+		angular_fade_range_[i] = angular_fade_range[i];
 	}
 }
 
-TerrainTextureGenerator::Range::Range(float pMinLevel,
-									  float pMaxLevel,
-									  float pFadeRange,
-									  Canvas* pImages, 
-									  float* pMinNormalY, 
-									  float* pMaxNormalY, 
-									  float* pAngularFadeRange,
-									  int pNumImages)
-{
-	mMinLevel = pMinLevel;
-	mMaxLevel = pMaxLevel;
-	mFadeRange = pFadeRange;
-	mNumImages = pNumImages;
+TerrainTextureGenerator::Range::Range(float min_level,
+									  float max_level,
+									  float fade_range,
+									  Canvas* images,
+									  float* min_normal_y,
+									  float* max_normal_y,
+									  float* angular_fade_range,
+									  int num_images) {
+	min_level_ = min_level;
+	max_level_ = max_level;
+	fade_range_ = fade_range;
+	num_images_ = num_images;
 
-	mImages = new Canvas[mNumImages];
-	mMinNormalY = new float[mNumImages];
-	mMaxNormalY = new float[mNumImages];
-	mAngularFadeRange = new float[mNumImages];
+	images_ = new Canvas[num_images_];
+	min_normal_y_ = new float[num_images_];
+	max_normal_y_ = new float[num_images_];
+	angular_fade_range_ = new float[num_images_];
 
-	for (int i = 0; i < mNumImages; i++)
-	{
-		mImages[i].Copy(pImages[i]);
-		mMinNormalY[i] = pMinNormalY[i];
-		mMaxNormalY[i] = pMaxNormalY[i];
-		mAngularFadeRange[i] = pAngularFadeRange[i];
+	for (int i = 0; i < num_images_; i++) {
+		images_[i].Copy(images[i]);
+		min_normal_y_[i] = min_normal_y[i];
+		max_normal_y_[i] = max_normal_y[i];
+		angular_fade_range_[i] = angular_fade_range[i];
 	}
 }
 
-TerrainTextureGenerator::Range::~Range()
-{
-	delete[] mImages;
-	delete[] mMinNormalY;
-	delete[] mMaxNormalY;
-	delete[] mAngularFadeRange;
+TerrainTextureGenerator::Range::~Range() {
+	delete[] images_;
+	delete[] min_normal_y_;
+	delete[] max_normal_y_;
+	delete[] angular_fade_range_;
 }
 
 

@@ -5,221 +5,186 @@
 */
 
 #include "pch.h"
-#include "../../../Lepra/Include/DiskFile.h"
-#include "../../../Lepra/Include/Path.h"
-#include "../../Include/GUI/UiFileNameField.h"
-#include "../../Include/GUI/UiPopupList.h"
-#include "../../Include/GUI/UiDesktopWindow.h"
+#include "../../../lepra/include/diskfile.h"
+#include "../../../lepra/include/path.h"
+#include "../../include/gui/uifilenamefield.h"
+#include "../../include/gui/uipopuplist.h"
+#include "../../include/gui/uidesktopwindow.h"
 #include <algorithm>
 
-namespace UiTbc
-{
+namespace uitbc {
 
-FileNameField::FileNameField(Component* pTopParent):
-	TextField(pTopParent)
-{
+FileNameField::FileNameField(Component* top_parent):
+	TextField(top_parent) {
 }
 
-FileNameField::FileNameField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, const Color& pColor):
-	TextField(pTopParent, pBorderStyle, pBorderWidth, pColor)
-{
+FileNameField::FileNameField(Component* top_parent, unsigned border_style, int border_width, const Color& color):
+	TextField(top_parent, border_style, border_width, color) {
 }
 
-FileNameField::FileNameField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID):
-	TextField(pTopParent, pBorderStyle, pBorderWidth, pImageID)
-{
+FileNameField::FileNameField(Component* top_parent, unsigned border_style, int border_width, Painter::ImageID image_id):
+	TextField(top_parent, border_style, border_width, image_id) {
 }
 
-FileNameField::FileNameField(Component* pTopParent, const Color& pColor):
-	TextField(pTopParent, pColor)
-{
+FileNameField::FileNameField(Component* top_parent, const Color& color):
+	TextField(top_parent, color) {
 }
 
-FileNameField::FileNameField(Component* pTopParent, Painter::ImageID pImageID):
-	TextField(pTopParent, pImageID)
-{
+FileNameField::FileNameField(Component* top_parent, Painter::ImageID image_id):
+	TextField(top_parent, image_id) {
 }
 
-FileNameField::~FileNameField()
-{
+FileNameField::~FileNameField() {
 }
 
-PopupList* FileNameField::CreatePopupList()
-{
-	str lSearchString = strutil::Encode(GetText());
-	lSearchString += "*";
+PopupList* FileNameField::CreatePopupList() {
+	str search_string = strutil::Encode(GetText());
+	search_string += "*";
 
-	Painter* lPainter = 0;
-	DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-	if (lDesktopWindow != 0)
-	{
-		lPainter = lDesktopWindow->GetPainter();
+	Painter* painter = 0;
+	DesktopWindow* desktop_window = (DesktopWindow*)GetParentOfType(kDesktopwindow);
+	if (desktop_window != 0) {
+		painter = desktop_window->GetPainter();
 	}
 
-	std::list<FileInfo> lFileList;
-	DiskFile::FindData lFindData;
-	bool lOk = DiskFile::FindFirst(lSearchString, lFindData);
-	while (lOk)
-	{
-		bool lFileExtensionOk = true;
+	std::list<FileInfo> file_list;
+	DiskFile::FindData find_data;
+	bool ok = DiskFile::FindFirst(search_string, find_data);
+	while (ok) {
+		bool file_extension_ok = true;
 
-		if (mFileExtensionList.empty() == false && lFindData.IsSubDir() == false)
-		{
-			str lExtension = Path::GetExtension(lFindData.GetName());
-			strutil::ToLower(lExtension);
-			lFileExtensionOk = std::find(mFileExtensionList.begin(), mFileExtensionList.end(), lExtension) != mFileExtensionList.end();
+		if (file_extension_list_.empty() == false && find_data.IsSubDir() == false) {
+			str _extension = Path::GetExtension(find_data.GetName());
+			strutil::ToLower(_extension);
+			file_extension_ok = std::find(file_extension_list_.begin(), file_extension_list_.end(), _extension) != file_extension_list_.end();
 		}
-		
-		if (lFileExtensionOk == true)
-		{
-			lFileList.push_back(FileInfo(lFindData.GetName(), lFindData.IsSubDir()));
+
+		if (file_extension_ok == true) {
+			file_list.push_back(FileInfo(find_data.GetName(), find_data.IsSubDir()));
 		}
-		lOk = DiskFile::FindNext(lFindData);
+		ok = DiskFile::FindNext(find_data);
 	}
 
-	PopupList* lPopupList = 0;
+	PopupList* popup_list = 0;
 
-	if (!lFileList.empty())
-	{
-		lPopupList = new PopupList(BORDER_SUNKEN, 3, WHITE);
-		lPopupList->SetStyle(ListControl::SINGLE_SELECT);
+	if (!file_list.empty()) {
+		popup_list = new PopupList(kBorderSunken, 3, WHITE);
+		popup_list->SetStyle(ListControl::kSingleSelect);
 
-		lFileList.sort();
+		file_list.sort();
 
-		std::list<FileInfo>::iterator lIter;
-		int lLabelHeight = 0;
-		for (lIter = lFileList.begin(); lIter != lFileList.end(); ++lIter)
-		{
-			Label* lLabel = new Label(GetTextColor(), wstrutil::Encode((*lIter).mName));
-			lLabel->SetPreferredSize(0, 12);
-			lPopupList->AddChild(lLabel);
+		std::list<FileInfo>::iterator iter;
+		int label_height = 0;
+		for (iter = file_list.begin(); iter != file_list.end(); ++iter) {
+			Label* label = new Label(GetTextColor(), wstrutil::Encode((*iter).name_));
+			label->SetPreferredSize(0, 12);
+			popup_list->AddChild(label);
 
-			if (lIter == lFileList.begin())
-			{
-				lLabelHeight = lLabel->GetPreferredHeight(true);
+			if (iter == file_list.begin()) {
+				label_height = label->GetPreferredHeight(true);
 			}
 		}
 
-		lPopupList->SetPreferredHeight(lLabelHeight * (int)std::min(lPopupList->GetNumChildren(), 10));
+		popup_list->SetPreferredHeight(label_height * (int)std::min(popup_list->GetNumChildren(), 10));
 	}
 
-	return lPopupList;
+	return popup_list;
 }
 
-bool FileNameField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	Parent::OnKeyDown(pKeyCode);
-	switch (pKeyCode)
-	{
-		case UiLepra::InputManager::IN_KBD_ENTER:
-		{
+bool FileNameField::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
+	Parent::OnKeyDown(key_code);
+	switch (key_code) {
+		case uilepra::InputManager::kInKbdEnter: {
 			FinalizeSelection();
-		}
-		break;
+		} break;
 		default: break;
 	}
 	return (false);
 }
 
-bool FileNameField::NotifyDoubleClick(PopupList*, int pMouseX, int pMouseY)
-{
-	bool lReturnValue = true;
+bool FileNameField::NotifyDoubleClick(PopupList*, int mouse_x, int mouse_y) {
+	bool return_value = true;
 
-	Component* lItem = GetPopupList()->GetFirstSelectedItem();
+	Component* item = GetPopupList()->GetFirstSelectedItem();
 
-	if (lItem != 0 && lItem->IsOver(pMouseX, pMouseY))
-	{
+	if (item != 0 && item->IsOver(mouse_x, mouse_y)) {
 		FinalizeSelection();
-		lReturnValue = false;
+		return_value = false;
 	}
 
-	return lReturnValue;
+	return return_value;
 }
 
-void FileNameField::ValidatePath(str& pPath)
-{
-	str lNormalizedPath;
-	if (!Path::NormalizePath(pPath, lNormalizedPath))
-	{
+void FileNameField::ValidatePath(str& path) {
+	str normalized_path;
+	if (!Path::NormalizePath(path, normalized_path)) {
 		// TRICKY: nothing to do - this is not a path!
 		return;
 	}
 
-	DiskFile::FindData lFindData;
-	bool lOk = DiskFile::FindFirst(lNormalizedPath, lFindData);
-	if (lOk == true)
-	{
-		if (lFindData.IsSubDir() && strutil::Right(lNormalizedPath, 1) != "/")
-		{
-			pPath += '/';
+	DiskFile::FindData find_data;
+	bool ok = DiskFile::FindFirst(normalized_path, find_data);
+	if (ok == true) {
+		if (find_data.IsSubDir() && strutil::Right(normalized_path, 1) != "/") {
+			path += '/';
 		}
-	}
-	else
-	{
+	} else {
 		// TODO: verify code! How can the path exist if FindFirst did not find the path? Contradicting, to say the least.
-		lOk = DiskFile::PathExists(lNormalizedPath);
-		if (lOk && strutil::Right(lNormalizedPath, 2) == "..")
-		{
-			lNormalizedPath += '/';
+		ok = DiskFile::PathExists(normalized_path);
+		if (ok && strutil::Right(normalized_path, 2) == "..") {
+			normalized_path += '/';
 		}
 	}
-	pPath = lNormalizedPath;
+	path = normalized_path;
 }
 
-size_t FileNameField::FindSlash(str& pPath, int n)
-{
-	size_t lIndex = pPath.length();
-	if (lIndex > 0)
-	{
+size_t FileNameField::FindSlash(str& path, int n) {
+	size_t index = path.length();
+	if (index > 0) {
 		int i = 0;
-		do
-		{
-			int lIndex1 = (int)pPath.rfind('/', lIndex-1);
-			int lIndex2 = (int)pPath.rfind('\\', lIndex-1);
-			lIndex = lIndex1 > lIndex2 ? lIndex1 : lIndex2;
+		do {
+			int index1 = (int)path.rfind('/', index-1);
+			int index2 = (int)path.rfind('\\', index-1);
+			index = index1 > index2 ? index1 : index2;
 
 			i++;
 		} while(i < n);
 	}
-	return lIndex;
+	return index;
 }
 
-void FileNameField::FinalizeSelection()
-{
-	if (GetPopupList() != 0)
-	{
-		str lText = strutil::Encode(GetText());
+void FileNameField::FinalizeSelection() {
+	if (GetPopupList() != 0) {
+		str text = strutil::Encode(GetText());
 
-		if (!lText.empty())
-		{
+		if (!text.empty()) {
 			// We have to remove everything from the last '/' or '\\'.
-			// Why? 
+			// Why?
 			// 1. If the user wrote "C:\Program" and then selected
 			//    "Program Files", "Program Files" should replace "Program".
 			// 2. If the user wrote "C:\Program Files\", nothing is removed.
-			size_t lIndex = FindSlash(lText, 0);
-			lText.erase(lIndex + 1, lText.length() - (lIndex + 1));
-		}		
+			size_t index = FindSlash(text, 0);
+			text.erase(index + 1, text.length() - (index + 1));
+		}
 
-		ValidatePath(lText);
-		Label* lSelectedItem = (Label*)GetPopupList()->GetFirstSelectedItem();
-		lText += strutil::Encode(lSelectedItem->GetText());
+		ValidatePath(text);
+		Label* selected_item = (Label*)GetPopupList()->GetFirstSelectedItem();
+		text += strutil::Encode(selected_item->GetText());
 
-		ValidatePath(lText);
-		const wstr lWideText = wstrutil::Encode(lText);
-		SetText(lWideText);
+		ValidatePath(text);
+		const wstr wide_text = wstrutil::Encode(text);
+		SetText(wide_text);
 
 		DestroyPopupList();
-		SetMarkerPos(lWideText.length());
+		SetMarkerPos(wide_text.length());
 		SetKeyboardFocus();
 	}
 }
 
-void FileNameField::AddFileExtension(const str& pExtension)
-{
-	str lExtension(pExtension);
-	strutil::ToLower(lExtension);
-	mFileExtensionList.push_back(lExtension);
+void FileNameField::AddFileExtension(const str& extension) {
+	str _extension(extension);
+	strutil::ToLower(_extension);
+	file_extension_list_.push_back(_extension);
 }
 
 }

@@ -6,18 +6,17 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Unordered.h"
+#include "../../lepra/include/unordered.h"
 #include <list>
 #include <vector>
-#include "../../Lepra/Include/LepraTypes.h"
-#include "../../Lepra/Include/String.h"
-#include "../../Lepra/Include/HashTable.h"
-#include "../Include/UiLepra.h"
+#include "../../lepra/include/lepratypes.h"
+#include "../../lepra/include/string.h"
+#include "../../lepra/include/hashtable.h"
+#include "../include/uilepra.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
@@ -28,77 +27,67 @@ class InputManager;
 
 
 
-class TextInputObserver
-{
+class TextInputObserver {
 public:
-	virtual bool OnChar(wchar_t pChar) = 0;
+	virtual bool OnChar(wchar_t c) = 0;
 };
 
 class KeyCodeInputObserver;
 
-class MouseInputObserver
-{
+class MouseInputObserver {
 public:
 	virtual bool OnDoubleClick() = 0;
 };
 
 
 
-class InputFunctor
-{
+class InputFunctor {
 public:
-	virtual void Call(InputElement* pElement) = 0;
+	virtual void Call(InputElement* element) = 0;
 	virtual InputFunctor* CreateCopy() const = 0;
 };
 
-template<class _TClass> class TInputFunctor : public InputFunctor
-{
+template<class _TClass> class TInputFunctor : public InputFunctor {
 public:
-	TInputFunctor(_TClass* pObject, void (_TClass::*pFunc)(InputElement* pElement)):
-		mObject(pObject),
-		mFunc(pFunc)
-	{
-	}
-	
-	virtual void Call(InputElement* pElement)
-	{
-		(mObject->*mFunc)(pElement);
+	TInputFunctor(_TClass* object, void (_TClass::*func)(InputElement* element)):
+		object_(object),
+		mFunc(func) {
 	}
 
-	InputFunctor* CreateCopy() const
-	{
-		return new TInputFunctor(mObject, mFunc);
+	virtual void Call(InputElement* element) {
+		(object_->*mFunc)(element);
+	}
+
+	InputFunctor* CreateCopy() const {
+		return new TInputFunctor(object_, mFunc);
 	}
 
 private:
-	_TClass* mObject;
-	void (_TClass::*mFunc)(InputElement* pElement);
+	_TClass* object_;
+	void (_TClass::*mFunc)(InputElement* element);
 };
 
 
 
-class InputElement
-{
+class InputElement {
 public:
 	typedef std::vector<InputFunctor*> FunctorArray;
-	
+
 	friend class InputDevice;
 
-	enum Type
-	{
-		UNKNOWN = 0,
-		ANALOGUE,
-		DIGITAL,
+	enum Type {
+		kUnknown = 0,
+		kAnalogue,
+		kDigital,
 	};
 
-	enum Interpretation
-	{
-		ABSOLUTE_AXIS,
-		RELATIVE_AXIS,
-		BUTTON,
+	enum Interpretation {
+		kAbsoluteAxis,
+		kRelativeAxis,
+		kButton,
 	};
 
-	InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex, InputDevice* pParentDevice);
+	InputElement(Type type, Interpretation interpretation, int type_index, InputDevice* parent_device);
 	virtual ~InputElement();
 
 	Type GetType() const;
@@ -111,81 +100,79 @@ public:
 	// If digital:
 	//    Returns true if "pressed", false otherwise.
 	// If analogue:
-	//    Returns true if the analogue value is greater than pThreshold.
-	bool GetBooleanValue(float pThreshold = 0.5) const;
+	//    Returns true if the analogue value is greater than threshold.
+	bool GetBooleanValue(float threshold = 0.5) const;
 
 	float GetValue() const;
-	void SetValue(float pNewValue);
+	void SetValue(float new_value);
 	// (Only useful with analogue elements).
-	void SetValue(int pValue);
-	void AddValue(int pValue);
+	void SetValue(int value);
+	void AddValue(int value);
 
-	void SetIdentifier(const str& pIdentifier);
+	void SetIdentifier(const str& identifier);
 	const str& GetIdentifier() const;
 	str GetFullName() const;
 	str GetName() const;
 
 	// Sets the input listener functor. The InputElement will be responsible
 	// of deleting it.
-	void AddFunctor(InputFunctor* pFunctor);
+	void AddFunctor(InputFunctor* functor);
 	void ClearFunctors();
 	const FunctorArray& GetFunctorArray() const;
 	void TriggerFunctors();
 
 	str GetCalibration() const;
-	bool SetCalibration(const str& pData);
+	bool SetCalibration(const str& data);
 
 private:
-	float mValue;
-	int mMin;
-	int mMax;
+	float value_;
+	int min_;
+	int max_;
 
-	Type mType;
-	Interpretation mInterpretation;
-	int mTypeIndex;
-	InputDevice* mParentDevice;
+	Type type_;
+	Interpretation interpretation_;
+	int type_index_;
+	InputDevice* parent_device_;
 
-	str mIdentifier;
+	str identifier_;
 
-	FunctorArray mFunctorArray;
+	FunctorArray functor_array_;
 
 	logclass();
 };
 
 #define ADD_INPUT_CALLBACK(_e, _func, _class) \
-	(_e)->AddFunctor(new UiLepra::TInputFunctor<_class>(this, &_class::_func));
+	(_e)->AddFunctor(new uilepra::TInputFunctor<_class>(this, &_class::_func));
 
 
 
-class InputDevice
-{
+class InputDevice {
 public:
 	typedef std::vector<InputElement*> ElementArray;
 
-	enum Interpretation
-	{
-		TYPE_MOUSE = 0,
-		TYPE_KEYBOARD,
-		TYPE_JOYSTICK,
-		TYPE_GAMEPAD,
-		TYPE_1STPERSON,
-		TYPE_PEDALS,
-		TYPE_WHEEL,
-		TYPE_FLIGHT,
-		TYPE_OTHER,
-		TYPE_COUNT
+	enum Interpretation {
+		kTypeMouse = 0,
+		kTypeKeyboard,
+		kTypeJoystick,
+		kTypeGamepad,
+		kType1Stperson,
+		kTypePedals,
+		kTypeWheel,
+		kTypeFlight,
+		kTypeOther,
+		kTypeCount
 	};
 
 	typedef std::pair<str, str> CalibrationElement;
 	typedef std::vector<CalibrationElement> CalibrationData;
 
-	InputDevice(InputManager* pManager);
+	InputDevice(InputManager* manager);
 	virtual ~InputDevice();
 	virtual bool IsOwnedByManager() const;
 
 	Interpretation GetInterpretation() const;
 	int GetTypeIndex() const;
-	void SetInterpretation(Interpretation pInterpretation, int pTypeIndex);
+	void SetInterpretation(Interpretation interpretation, int type_index);
 
 	InputManager* GetManager() const;
 
@@ -201,52 +188,52 @@ public:
 
 	const ElementArray& GetElements() const;
 
-	// Returns the first input element identified by pIdentifier.
+	// Returns the first input element identified by identifier.
 	// Returns NULL if no element was found.
-	const InputElement* GetElement(const str& pIdentifier) const;
-	InputElement* GetElement(const str& pIdentifier);
-	InputElement* GetElement(unsigned pElementIndex) const;
-	unsigned GetElementIndex(InputElement* pElement) const;
+	const InputElement* GetElement(const str& identifier) const;
+	InputElement* GetElement(const str& identifier);
+	InputElement* GetElement(unsigned element_index) const;
+	unsigned GetElementIndex(InputElement* element) const;
 
-	InputElement* GetButton(unsigned pButtonIndex) const;
-	InputElement* GetAxis(unsigned pAxisIndex) const;
+	InputElement* GetButton(unsigned button_index) const;
+	InputElement* GetAxis(unsigned axis_index) const;
 
 	unsigned GetNumElements() const;
 	unsigned GetNumDigitalElements() const;
 	unsigned GetNumAnalogueElements() const;
 	void CountElements() const;
 
-	void SetIdentifier(const str& pIdentifier);
-	void SetUniqueIdentifier(const str& pIdentifier);
+	void SetIdentifier(const str& identifier);
+	void SetUniqueIdentifier(const str& identifier);
 	const str& GetIdentifier() const;
 	const str& GetUniqueIdentifier() const;
 
 	// Sets an observer on the entire device. (All elements).
 	// The device takes care of deleting the functor.
-	void AddFunctor(InputFunctor* pFunctor);
+	void AddFunctor(InputFunctor* functor);
 	void ClearFunctors();
 
 	CalibrationData GetCalibration() const;
-	bool SetCalibration(const CalibrationData& pData);
+	bool SetCalibration(const CalibrationData& data);
 
 protected:
 
-	void SetActive(bool pActive);
+	void SetActive(bool active);
 
-	ElementArray mElementArray;
+	ElementArray element_array_;
 
 private:
 
-	InputManager* mManager;
-	Interpretation mInterpretation;
-	int mTypeIndex;
-	mutable int mNumDigitalElements;
-	mutable int mNumAnalogueElements;
+	InputManager* manager_;
+	Interpretation interpretation_;
+	int type_index_;
+	mutable int num_digital_elements_;
+	mutable int num_analogue_elements_;
 
-	bool mActive;
+	bool active_;
 
-	str mIdentifier;
-	str mUniqueIdentifier;
+	str identifier_;
+	str unique_identifier_;
 
 	logclass();
 };
@@ -261,156 +248,154 @@ private:
 	some default mouse functionality.
 */
 
-class InputManager
-{
+class InputManager {
 public:
 
 	typedef std::list<InputDevice*> DeviceList;
 
-	enum KeyCode
-	{
-		IN_KBD_BACKSPACE	= 8,
-		IN_KBD_TAB		= 9,
+	enum KeyCode {
+		kInKbdBackspace	= 8,
+		kInKbdTab		= 9,
 
-		IN_KBD_CENTER		= 12,
-		IN_KBD_ENTER		= 13,
+		kInKbdCenter		= 12,
+		kInKbdEnter		= 13,
 
-		IN_KBD_LSHIFT		= 16,
-		IN_KBD_LCTRL		= 17,
-		IN_KBD_LALT		= 18,
+		kInKbdLshift		= 16,
+		kInKbdLctrl		= 17,
+		kInKbdLalt		= 18,
 
-		IN_KBD_PAUSE		= 19,
-		IN_KBD_CAPS_LOCK	= 20,
+		kInKbdPause		= 19,
+		kInKbdCapsLock	= 20,
 
-		IN_KBD_ESC		= 27,
+		kInKbdEsc		= 27,
 
-		IN_KBD_SPACE		= 32,
-		IN_KBD_PGUP		= 33,
-		IN_KBD_PGDOWN		= 34,
-		IN_KBD_END		= 35,
-		IN_KBD_HOME		= 36,
-		IN_KBD_LEFT		= 37,
-		IN_KBD_UP		= 38,
-		IN_KBD_RIGHT		= 39,
-		IN_KBD_DOWN		= 40,
+		kInKbdSpace		= 32,
+		kInKbdPgup		= 33,
+		kInKbdPgdown		= 34,
+		kInKbdEnd		= 35,
+		kInKbdHome		= 36,
+		kInKbdLeft		= 37,
+		kInKbdUp		= 38,
+		kInKbdRight		= 39,
+		kInKbdDown		= 40,
 
-		IN_KBD_PRINT_SCREEN	= 44,
-		IN_KBD_INSERT		= 45,
-		IN_KBD_DEL		= 46,
+		kInKbdPrintScreen	= 44,
+		kInKbdInsert		= 45,
+		kInKbdDel		= 46,
 
-		IN_KBD_0		= 48,
-		IN_KBD_1		= 49,
-		IN_KBD_2		= 50,
-		IN_KBD_3		= 51,
-		IN_KBD_4		= 52,
-		IN_KBD_5		= 53,
-		IN_KBD_6		= 54,
-		IN_KBD_7		= 55,
-		IN_KBD_8		= 56,
-		IN_KBD_9		= 57,
+		kInKbd0		= 48,
+		kInKbd1		= 49,
+		kInKbd2		= 50,
+		kInKbd3		= 51,
+		kInKbd4		= 52,
+		kInKbd5		= 53,
+		kInKbd6		= 54,
+		kInKbd7		= 55,
+		kInKbd8		= 56,
+		kInKbd9		= 57,
 
-		IN_KBD_A		= 65,
-		IN_KBD_B		= 66,
-		IN_KBD_C		= 67,
-		IN_KBD_D		= 68,
-		IN_KBD_E		= 69,
-		IN_KBD_F		= 70,
-		IN_KBD_G		= 71,
-		IN_KBD_H		= 72,
-		IN_KBD_I		= 73,
-		IN_KBD_J		= 74,
-		IN_KBD_K		= 75,
-		IN_KBD_L		= 76,
-		IN_KBD_M		= 77,
-		IN_KBD_N		= 78,
-		IN_KBD_O		= 79,
-		IN_KBD_P		= 80,
-		IN_KBD_Q		= 81,
-		IN_KBD_R		= 82,
-		IN_KBD_S		= 83,
-		IN_KBD_T		= 84,
-		IN_KBD_U		= 85,
-		IN_KBD_V		= 86,
-		IN_KBD_W		= 87,
-		IN_KBD_X		= 88,
-		IN_KBD_Y		= 89,
-		IN_KBD_Z		= 90,
-		IN_KBD_LOS		= 91,
-		IN_KBD_ROS		= 92,
+		kInKbdA		= 65,
+		kInKbdB		= 66,
+		kInKbdC		= 67,
+		kInKbdD		= 68,
+		kInKbdE		= 69,
+		kInKbdF		= 70,
+		kInKbdG		= 71,
+		kInKbdH		= 72,
+		kInKbdI		= 73,
+		kInKbdJ		= 74,
+		kInKbdK		= 75,
+		kInKbdL		= 76,
+		kInKbdM		= 77,
+		kInKbdN		= 78,
+		kInKbdO		= 79,
+		kInKbdP		= 80,
+		kInKbdQ		= 81,
+		kInKbdR		= 82,
+		kInKbdS		= 83,
+		kInKbdT		= 84,
+		kInKbdU		= 85,
+		kInKbdV		= 86,
+		kInKbdW		= 87,
+		kInKbdX		= 88,
+		kInKbdY		= 89,
+		kInKbdZ		= 90,
+		kInKbdLos		= 91,
+		kInKbdRos		= 92,
 
-		IN_KBD_CONTEXT_MENU	= 93,	// The "windows menu" button on Microsoft-compatible keyboards.
+		kInKbdContextMenu	= 93,	// The "windows menu" button on Microsoft-compatible keyboards.
 
-		IN_KBD_NUMPAD_0		= 96,
-		IN_KBD_NUMPAD_1		= 97,
-		IN_KBD_NUMPAD_2		= 98,
-		IN_KBD_NUMPAD_3		= 99,
-		IN_KBD_NUMPAD_4		= 100,
-		IN_KBD_NUMPAD_5		= 101,
-		IN_KBD_NUMPAD_6		= 102,
-		IN_KBD_NUMPAD_7		= 103,
-		IN_KBD_NUMPAD_8		= 104,
-		IN_KBD_NUMPAD_9		= 105,
-		IN_KBD_NUMPAD_MUL	= 106,
-		IN_KBD_NUMPAD_PLUS	= 107,
-		IN_KBD_NUMPAD_MINUS	= 109,
-		IN_KBD_NUMPAD_DOT	= 110,
-		IN_KBD_NUMPAD_DIV	= 111,
-		IN_KBD_F1		= 112,
-		IN_KBD_F2		= 113,
-		IN_KBD_F3		= 114,
-		IN_KBD_F4		= 115,
-		IN_KBD_F5		= 116,
-		IN_KBD_F6		= 117,
-		IN_KBD_F7		= 118,
-		IN_KBD_F8		= 119,
-		IN_KBD_F9		= 120,
-		IN_KBD_F10		= 121,
-		IN_KBD_F11		= 122,
-		IN_KBD_F12		= 123,
-		IN_KBD_NUM_LOCK		= 144,
-		IN_KBD_SCROLL_LOCK	= 145,
+		kInKbdNumpad0		= 96,
+		kInKbdNumpad1		= 97,
+		kInKbdNumpad2		= 98,
+		kInKbdNumpad3		= 99,
+		kInKbdNumpad4		= 100,
+		kInKbdNumpad5		= 101,
+		kInKbdNumpad6		= 102,
+		kInKbdNumpad7		= 103,
+		kInKbdNumpad8		= 104,
+		kInKbdNumpad9		= 105,
+		kInKbdNumpadMul	= 106,
+		kInKbdNumpadPlus	= 107,
+		kInKbdNumpadMinus	= 109,
+		kInKbdNumpadDot	= 110,
+		kInKbdNumpadDiv	= 111,
+		kInKbdF1		= 112,
+		kInKbdF2		= 113,
+		kInKbdF3		= 114,
+		kInKbdF4		= 115,
+		kInKbdF5		= 116,
+		kInKbdF6		= 117,
+		kInKbdF7		= 118,
+		kInKbdF8		= 119,
+		kInKbdF9		= 120,
+		kInKbdF10		= 121,
+		kInKbdF11		= 122,
+		kInKbdF12		= 123,
+		kInKbdNumLock		= 144,
+		kInKbdScrollLock	= 145,
 
-		IN_KBD_QUICK_BACK	= 166,
-		IN_KBD_QUICK_FORWARD	= 167,
-		IN_KBD_QUICK_REFRESH	= 168,
-		IN_KBD_QUICK_STOP	= 169,
-		IN_KBD_QUICK_SEARCH	= 170,
-		IN_KBD_QUICK_FAVORITES	= 171,
-		IN_KBD_QUICK_WEB_HOME	= 172,
-		IN_KBD_QUICK_SOUND_MUTE	= 173,
-		IN_KBD_QUICK_DECR_VOLUME= 174,
-		IN_KBD_QUICK_INCR_VOLUME= 175,
-		IN_KBD_QUICK_NAV_RIGHT	= 176,
-		IN_KBD_QUICK_NAV_LEFT	= 177,
-		IN_KBD_QUICK_NAV_STOP	= 178,
-		IN_KBD_QUICK_NAV_PLAYPAUSE= 179,
-		IN_KBD_QUICK_MAIL	= 180,
-		IN_KBD_QUICK_MEDIA	= 181,
-		IN_KBD_QUICK_MY_COMPUTER= 182,
-		IN_KBD_QUICK_CALCULATOR	= 183,
+		kInKbdQuickBack	= 166,
+		kInKbdQuickForward	= 167,
+		kInKbdQuickRefresh	= 168,
+		kInKbdQuickStop	= 169,
+		kInKbdQuickSearch	= 170,
+		kInKbdQuickFavorites	= 171,
+		kInKbdQuickWebHome	= 172,
+		kInKbdQuickSoundMute	= 173,
+		kInKbdQuickDecrVolume= 174,
+		kInKbdQuickIncrVolume= 175,
+		kInKbdQuickNavRight	= 176,
+		kInKbdQuickNavLeft	= 177,
+		kInKbdQuickNavStop	= 178,
+		kInKbdQuickNavPlaypause= 179,
+		kInKbdQuickMail	= 180,
+		kInKbdQuickMedia	= 181,
+		kInKbdQuickMyComputer= 182,
+		kInKbdQuickCalculator	= 183,
 
-		IN_KBD_DIAERESIS	= 186,
-		IN_KBD_PLUS		= 187,
-		IN_KBD_COMMA		= 188,
-		IN_KBD_MINUS		= 189,
-		IN_KBD_DOT		= 190,
-		IN_KBD_APOSTROPHE	= 191,
+		kInKbdDiaeresis	= 186,
+		kInKbdPlus		= 187,
+		kInKbdComma		= 188,
+		kInKbdMinus		= 189,
+		kInKbdDot		= 190,
+		kInKbdApostrophe	= 191,
 
-		IN_KBD_OE		= 192,
+		kInKbdOe		= 192,
 
-		IN_KBD_ACUTE		= 219,
-		IN_KBD_PARAGRAPH	= 220,
-		IN_KBD_AA		= 221,
-		IN_KBD_AE		= 222,
+		kInKbdAcute		= 219,
+		kInKbdParagraph	= 220,
+		kInKbdAa		= 221,
+		kInKbdAe		= 222,
 
-		IN_KBD_COMPARE		= 226,
+		kInKbdCompare		= 226,
 
-		IN_KBD_RSHIFT		= 227,	// Not defined by Win32.
-		IN_KBD_RCTRL		= 228,	// Not defined by Win32.
-		IN_KBD_RALT		= 229,	// Not defined by Win32.
+		kInKbdRshift		= 227,	// Not defined by Win32.
+		kInKbdRctrl		= 228,	// Not defined by Win32.
+		kInKbdRalt		= 229,	// Not defined by Win32.
 	};
 
-	static InputManager* CreateInputManager(DisplayManager* pDisplayManager);
+	static InputManager* CreateInputManager(DisplayManager* display_manager);
 
 	// Returns a singleton input manager (created if needed).
 	// This function is implemented elsewhere (not in Input.cpp),
@@ -428,7 +413,7 @@ public:
 
 	// Returns a list of all available input devices.
 	const DeviceList& GetDeviceList() const;
-	
+
 	// Returns the keyboard device, if there is one... NULL otherwise.
 	virtual const InputDevice* GetKeyboard() const = 0;
 	virtual InputDevice* GetKeyboard() = 0;
@@ -437,38 +422,38 @@ public:
 	virtual const InputDevice* GetMouse() const = 0;
 	virtual InputDevice* GetMouse() = 0;
 
-	// Searches for device number pN, with identifier pDeviceIdentifier.
-	InputDevice* FindDevice(const str& pDeviceIdentifier, int pN = 0);
+	// Searches for device number n, with identifier device_identifier.
+	InputDevice* FindDevice(const str& device_identifier, int n = 0);
 
 	// Returns the number of devices with the same identifier.
-	int QueryIdentifierCount(const str& pDeviceIdentifier) const;
+	int QueryIdentifierCount(const str& device_identifier) const;
 
 	// Returns which index the device has in the list of devices with the
 	// same identifier. Thus, if there are two gamepads, and we pass one
 	// of them as the parameter, the function will return either 0 or 1,
 	// depending on if this is the first or second gamepad. This index can
 	// be used with FindDevice() later on.
-	unsigned GetDeviceIndex(InputDevice* pDevice) const;
+	unsigned GetDeviceIndex(InputDevice* device) const;
 
-	void AddTextInputObserver(TextInputObserver* pListener);
-	void RemoveTextInputObserver(TextInputObserver* pListener);
+	void AddTextInputObserver(TextInputObserver* listener);
+	void RemoveTextInputObserver(TextInputObserver* listener);
 
-	void AddKeyCodeInputObserver(KeyCodeInputObserver* pListener);
-	void RemoveKeyCodeInputObserver(KeyCodeInputObserver* pListener);
+	void AddKeyCodeInputObserver(KeyCodeInputObserver* listener);
+	void RemoveKeyCodeInputObserver(KeyCodeInputObserver* listener);
 
-	void AddMouseInputObserver(MouseInputObserver* pListener);
-	void RemoveMouseInputObserver(MouseInputObserver* pListener);
+	void AddMouseInputObserver(MouseInputObserver* listener);
+	void RemoveMouseInputObserver(MouseInputObserver* listener);
 
 	virtual void PreProcessEvents();
 	virtual void PollEvents();
 
 	// Sets one observer on all input devices, and all elements.
 	// The input manager takes care of deleting the functor.
-	void AddFunctor(InputFunctor* pFunctor);
+	void AddFunctor(InputFunctor* functor);
 	void ClearFunctors();
 
-	void AddInputDevice(InputDevice* pDevice);
-	void RemoveInputDevice(InputDevice* pDevice);
+	void AddInputDevice(InputDevice* device);
+	void RemoveInputDevice(InputDevice* device);
 
 	// Activase/release all devices.
 	void ActivateAll();
@@ -482,7 +467,7 @@ public:
 	*/
 
 	// Show/hide system default cursor.
-	virtual void SetCursorVisible(bool pVisible) = 0;
+	virtual void SetCursorVisible(bool visible) = 0;
 	bool IsCursorVisible() const;
 
 	// Range: [-1, 1] (Left and right, up and down)
@@ -491,45 +476,44 @@ public:
 	void GetMousePosition(int& x, int& y) const;
 	virtual void SetMousePosition(int x, int y);
 
-	bool NotifyOnChar(wchar_t pChar);
-	bool NotifyOnKeyDown(KeyCode pKeyCode);
-	bool NotifyOnKeyUp(KeyCode pKeyCode);
+	bool NotifyOnChar(wchar_t c);
+	bool NotifyOnKeyDown(KeyCode key_code);
+	bool NotifyOnKeyUp(KeyCode key_code);
 	bool NotifyMouseDoubleClick();
 
-	bool ReadKey(KeyCode pKeyCode);
+	bool ReadKey(KeyCode key_code);
 
-	static str GetKeyName(KeyCode pKeyCode);
+	static str GetKeyName(KeyCode key_code);
 
 protected:
 
-	DeviceList mDeviceList;
+	DeviceList device_list_;
 
 	InputManager();
 
-	void SetKey(KeyCode pKeyCode, bool pValue);
+	void SetKey(KeyCode key_code, bool value);
 
 	typedef std::unordered_set<TextInputObserver*, LEPRA_VOIDP_HASHER> TextObserverList;
 	typedef std::unordered_set<KeyCodeInputObserver*, LEPRA_VOIDP_HASHER> KeyCodeObserverList;
 	typedef std::unordered_set<MouseInputObserver*, LEPRA_VOIDP_HASHER> MouseObserverList;
-	TextObserverList mTextObserverList;
-	KeyCodeObserverList mKeyCodeObserverList;
-	MouseObserverList mMouseObserverList;
+	TextObserverList text_observer_list_;
+	KeyCodeObserverList key_code_observer_list_;
+	MouseObserverList mouse_observer_list_;
 
-	bool mKeyDown[256];
-	int mMouseX;
-	int mMouseY;
-	bool mIsCursorVisible;
+	bool key_down_[256];
+	int mouse_x_;
+	int mouse_y_;
+	bool is_cursor_visible_;
 
 	logclass();
 };
 
 
 
-class KeyCodeInputObserver
-{
+class KeyCodeInputObserver {
 public:
-	virtual bool OnKeyDown(InputManager::KeyCode pKeyCode) = 0;
-	virtual bool OnKeyUp(InputManager::KeyCode pKeyCode) = 0;
+	virtual bool OnKeyDown(InputManager::KeyCode key_code) = 0;
+	virtual bool OnKeyUp(InputManager::KeyCode key_code) = 0;
 };
 
 

@@ -1,33 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "FastProjectile.h"
+#include "fastprojectile.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class HomingProjectile: public FastProjectile
-{
+class HomingProjectile: public FastProjectile {
 public:
 	typedef FastProjectile Parent;
 
-	HomingProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher);
+	HomingProjectile(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, Launcher* launcher);
 	virtual ~HomingProjectile();
-	void SetTarget(Cure::GameObjectId pTarget);
+	void SetTarget(cure::GameObjectId target);
 
 protected:
 	virtual void OnTick();
 
-	Cure::GameObjectId mTarget;
+	cure::GameObjectId target_;
 
 	logclass();
 };

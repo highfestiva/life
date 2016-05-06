@@ -6,138 +6,125 @@
 */
 
 #include "pch.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../Include/Log.h"
-#include "../Include/Network.h"
-#include "../Include/Socket.h"
-#include "../Include/String.h"
-#include "../Include/Thread.h"
-#include "../Include/Reader.h"
-#include "../Include/Writer.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../include/log.h"
+#include "../include/network.h"
+#include "../include/socket.h"
+#include "../include/string.h"
+#include "../include/thread.h"
+#include "../include/reader.h"
+#include "../include/writer.h"
 
-using namespace Lepra;
+using namespace lepra;
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
+void ReportTestResult(const lepra::LogDecorator& log, const str& test_name, const str& context, bool result);
 
-class ServerThread : public Thread
-{
+class ServerThread : public Thread {
 public:
 	inline ServerThread():
 		Thread("ServerThread"),
-		mUdpMuxSocket(0)
-	{
-		mTestOk = false;
+		udp_mux_socket_(0) {
+		test_ok_ = false;
 
-		SocketAddress lLocalAddress;
-		if (lLocalAddress.Resolve(":10000"))
-		{
-			mUdpMuxSocket = new UdpMuxSocket("Srv ", lLocalAddress, true);
-			deb_assert(mUdpMuxSocket->IsOpen());
+		SocketAddress local_address;
+		if (local_address.Resolve(":10000")) {
+			udp_mux_socket_ = new UdpMuxSocket("Srv ", local_address, true);
+			deb_assert(udp_mux_socket_->IsOpen());
 		}
 	}
 
-	inline ~ServerThread()
-	{
-		delete mUdpMuxSocket;
+	inline ~ServerThread() {
+		delete udp_mux_socket_;
 	}
 
-	inline bool GetTestOK()
-	{
-		return (mTestOk);
+	inline bool GetTestOK() {
+		return (test_ok_);
 	}
 
 protected:
 	void Run();
 private:
 
-	UdpMuxSocket* mUdpMuxSocket;
-	bool mTestOk;
+	UdpMuxSocket* udp_mux_socket_;
+	bool test_ok_;
 };
 
-void ServerThread::Run()
-{
-	UdpVSocket* lSocket = mUdpMuxSocket->Accept();
-	deb_assert(lSocket);
-	Reader lReader(lSocket);
-	Writer lWriter(lSocket);
+void ServerThread::Run() {
+	UdpVSocket* socket = udp_mux_socket_->Accept();
+	deb_assert(socket);
+	Reader reader(socket);
+	Writer writer(socket);
 
-	lSocket->WaitAvailable(0.5);
+	socket->WaitAvailable(0.5);
 
-	str lString;
-	lReader.ReadLine(lString);
+	str s;
+	reader.ReadLine(s);
 
-//	printf("\nServer received \"%s\".", lString.c_str());
-	
-	mTestOk = (lString == "Hi Server! I am Client!");
-	deb_assert(mTestOk);
+//	printf("\nServer received \"%s\".", s.c_str());
 
-	lWriter.WriteString("Hi Client! I am Server!\n");
-	lSocket->Flush();
+	test_ok_ = (s == "Hi Server! I am Client!");
+	deb_assert(test_ok_);
 
-	mUdpMuxSocket->CloseSocket(lSocket);
+	writer.WriteString("Hi Client! I am Server!\n");
+	socket->Flush();
+
+	udp_mux_socket_->CloseSocket(socket);
 }
 
 
 
 
-class ClientThread : public Thread
-{
+class ClientThread : public Thread {
 public:
 	inline ClientThread() :
 		Thread("ClientThread"),
-		mUdpMuxSocket(0)
-	{
-		mTestOk = false;
+		udp_mux_socket_(0) {
+		test_ok_ = false;
 
-		SocketAddress lLocalAddress;
-		if (lLocalAddress.Resolve(":10001"))
-		{
-			mUdpMuxSocket = new UdpMuxSocket("Client ", lLocalAddress, false);
-			deb_assert(mUdpMuxSocket->IsOpen());
+		SocketAddress local_address;
+		if (local_address.Resolve(":10001")) {
+			udp_mux_socket_ = new UdpMuxSocket("Client ", local_address, false);
+			deb_assert(udp_mux_socket_->IsOpen());
 		}
 	}
 
-	inline ~ClientThread()
-	{
-		delete mUdpMuxSocket;
+	inline ~ClientThread() {
+		delete udp_mux_socket_;
 	}
 
-	inline bool GetTestOK()
-	{
-		return mTestOk;
+	inline bool GetTestOK() {
+		return test_ok_;
 	}
 
 protected:
 	void Run();
 private:
 
-	UdpMuxSocket* mUdpMuxSocket;
-	bool mTestOk;
+	UdpMuxSocket* udp_mux_socket_;
+	bool test_ok_;
 };
 
-void ClientThread::Run()
-{
-	SocketAddress lLocalAddress;
-	if (lLocalAddress.Resolve(":10000"))
-	{
-		UdpVSocket* lSocket = mUdpMuxSocket->Connect(lLocalAddress, "", 0.5);
-		deb_assert(lSocket);
-		Reader lReader(lSocket);
-		Writer lWriter(lSocket);
+void ClientThread::Run() {
+	SocketAddress local_address;
+	if (local_address.Resolve(":10000")) {
+		UdpVSocket* socket = udp_mux_socket_->Connect(local_address, "", 0.5);
+		deb_assert(socket);
+		Reader reader(socket);
+		Writer writer(socket);
 
-		lWriter.WriteString("Hi Server! I am Client!\n");
-		lSocket->Flush();
+		writer.WriteString("Hi Server! I am Client!\n");
+		socket->Flush();
 
-		lSocket->WaitAvailable(0.5);
-		str lString;
-		lReader.ReadLine(lString);
+		socket->WaitAvailable(0.5);
+		str s;
+		reader.ReadLine(s);
 
-	//	printf("Client received \"%s\".", lString.c_str());
-		
-		mTestOk = (lString == "Hi Client! I am Server!");
-		deb_assert(mTestOk);
+	//	printf("Client received \"%s\".", s.c_str());
 
-		mUdpMuxSocket->CloseSocket(lSocket);
+		test_ok_ = (s == "Hi Client! I am Server!");
+		deb_assert(test_ok_);
+
+		udp_mux_socket_->CloseSocket(socket);
 	}
 }
 
@@ -145,29 +132,27 @@ void ClientThread::Run()
 
 
 
-bool TestUDPSockets(const LogDecorator& pAccount)
-{
-	str lContext;
-	bool lTestOk = Network::Start();
+bool TestUDPSockets(const LogDecorator& account) {
+	str _context;
+	bool test_ok = Network::Start();
 
-	if (lTestOk)
-	{
-		ServerThread lServer;
-		lServer.Start();
+	if (test_ok) {
+		ServerThread server;
+		server.Start();
 
-		ClientThread lClient;
-		lClient.Start();
+		ClientThread client;
+		client.Start();
 
-		lServer.GraceJoin(10.0);
-		lClient.GraceJoin(10.0);
+		server.GraceJoin(10.0);
+		client.GraceJoin(10.0);
 
-		lContext = "Client/Server UdpMuxSocket communication failed";
-		lTestOk = lClient.GetTestOK() && lServer.GetTestOK();
-		deb_assert(lTestOk);
+		_context = "Client/Server UdpMuxSocket communication failed";
+		test_ok = client.GetTestOK() && server.GetTestOK();
+		deb_assert(test_ok);
 
 		Network::Stop();
 	}
 
-	ReportTestResult(pAccount, "UDPSockets", lContext, lTestOk);
-	return (lTestOk);
+	ReportTestResult(account, "UDPSockets", _context, test_ok);
+	return (test_ok);
 }

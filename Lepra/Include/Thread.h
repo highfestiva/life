@@ -6,16 +6,15 @@
 
 #pragma once
 
-#include "LepraTarget.h"
-#include "LepraTypes.h"
-#include "Log.h"
-#include "String.h"
-#include "BusLock.h"
+#include "lepratarget.h"
+#include "lepratypes.h"
+#include "log.h"
+#include "string.h"
+#include "buslock.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -23,8 +22,7 @@ class Thread;
 
 
 
-class OwnedLock
-{
+class OwnedLock {
 public:
 	bool IsOwner() const;
 	Thread* GetOwner() const;
@@ -37,12 +35,11 @@ public:
 	void Dereference();
 
 private:
-	Thread* mOwner;
-	int mAcquireCount;
+	Thread* owner_;
+	int acquire_count_;
 };
 
-class Lock: public OwnedLock
-{
+class Lock: public OwnedLock {
 public:
 	Lock();
 	virtual	~Lock();
@@ -54,63 +51,59 @@ public:
 private:
 	void operator=(const Lock&);
 
-	void* mSystemLock;
+	void* system_lock_;
 };
 
 // Try using this whenever possible.
-class ScopeLock
-{
+class ScopeLock {
 public:
-	ScopeLock(Lock* pLock);
+	ScopeLock(Lock* lock);
 	~ScopeLock();
 	void Acquire();
 	void Release();
 
 protected:
-	Lock* mLock;
+	Lock* lock_;
 };
 
 
 
-class Condition
-{
+class Condition {
 public:
-	Condition(Lock* pExternalLock = 0);
+	Condition(Lock* external_lock = 0);
 	virtual ~Condition();
 
 	void Wait();
-	bool Wait(float64 pMaxWaitTime);
+	bool Wait(float64 max_wait_time);
 	void Signal();
 	void SignalAll();	// Unblock all waiting threads.
 
 private:
-	Lock* mExternalLock;
-	void* mSystemCondition;
+	Lock* external_lock_;
+	void* system_condition_;
 };
 
 
 
-class Semaphore
-{
+class Semaphore {
 public:
 	Semaphore();
-	Semaphore(unsigned pMaxCount);
+	Semaphore(unsigned max_count);
 	virtual ~Semaphore();
 
 	void Wait();
-	bool Wait(float64 pMaxWaitTime);
+	bool Wait(float64 max_wait_time);
 	void Signal();	// Unblocks one currently, or future, waiting thread.
 
 private:
-	void* mSystemSemaphore;
+	void* system_semaphore_;
 };
 
 
 
-class RwLock
-{
+class RwLock {
 public:
-	RwLock(const str& pRwLockName);
+	RwLock(const str& rw_lock_name);
 	virtual ~RwLock();
 
 	void AcquireRead();
@@ -120,21 +113,20 @@ public:
 	str GetName();
 
 private:
-	str mName;
-	void* mSystemRwLock;
+	str name_;
+	void* system_rw_lock_;
 };
 
 
 
-class Thread
-{
+class Thread {
 public:
-	Thread(const str& pThreadName);
+	Thread(const str& thread_name);
 	virtual ~Thread();
 
 	static void InitializeMainThread();
 	static bool QueryInitializeThread();
-	static void InitializeThread(Thread* pThread);
+	static void InitializeThread(Thread* thread);
 
 	const str& GetThreadName() const;
 	size_t GetThreadId() const;
@@ -152,63 +144,62 @@ public:
 	static size_t GetCurrentThreadId();
 	static Thread* GetCurrentThread();
 	static void* GetExtraData();
-	static void SetExtraData(void* pData);
-	void SetCpuAffinityMask(uint64 pAffinityMask);
+	static void SetExtraData(void* data);
+	void SetCpuAffinityMask(uint64 affinity_mask);
 
 	bool Start();
-	static void Sleep(float64 pTime);
+	static void Sleep(float64 time);
 	static void YieldCpu();
 
 	bool Join();
-	bool Join(float64 pTimeOut);
-	bool GraceJoin(float64 pTimeOut);
-	void Signal(int pSignal);
+	bool Join(float64 time_out);
+	bool GraceJoin(float64 time_out);
+	void Signal(int signal);
 	void Kill();
 
 protected:
-	static void Sleep(unsigned int pMicroSeconds);
+	static void Sleep(unsigned int micro_seconds);
 	virtual void Run() = 0;
 	void PostRun();
 
 	void RunThread();
-	friend void RunThread(Thread* pThread);
+	friend void RunThread(Thread* thread);
 
-	void SetStopRequest(bool pStopRequest);
-	void SetRunning(bool pRunning);
-	void SetThreadId(size_t pThreadId);
+	void SetStopRequest(bool stop_request);
+	void SetRunning(bool running);
+	void SetThreadId(size_t thread_id);
 
 private:
-	str mThreadName;	// Must be ANSI, to be compliant with non-unicode builds.
+	str thread_name_;	// Must be ANSI, to be compliant with non-unicode builds.
 
-	volatile bool mRunning;
-	volatile bool mStopRequested;
-	bool mSelfDestruct;
+	volatile bool running_;
+	volatile bool stop_requested_;
+	bool self_destruct_;
 
-	size_t mThreadHandle;
-	size_t mThreadId;
+	size_t thread_handle_;
+	size_t thread_id_;
 
-	Semaphore mSemaphore;
+	Semaphore semaphore_;
 
 	logclass();
 };
 
 
 
-class StaticThread: public Thread
-{
+class StaticThread: public Thread {
 public:
-	StaticThread(const str& pThreadName);
+	StaticThread(const str& thread_name);
 	virtual ~StaticThread();
 
-	bool Start(void (*pThreadEntry)(void*), void* pData);
+	bool Start(void (*thread_entry)(void*), void* data);
 
 protected:
 	bool Start();
 	void Run();
 
 private:
-	void (*mThreadEntry)(void*);
-	void* mData;
+	void (*thread_entry_)(void*);
+	void* data_;
 };
 
 

@@ -7,12 +7,12 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDisplayName</key>
-	<string>Bounce</string>
+	<string>bounce</string>
 	<key>CFBundleExecutable</key>
 	<string>${EXECUTABLE_NAME}</string>
 	<key>CFBundleIconFiles</key>
 	<array>
-		<string>Icon.png</string>
+		<string>icon.png</string>
 		<string>Icon@2x.png</string>
 	</array>
 	<key>CFBundleIdentifier</key>

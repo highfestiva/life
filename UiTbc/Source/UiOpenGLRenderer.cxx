@@ -3,27 +3,26 @@
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
-#include "../Include/UiOpenGLRenderer.h"
-#include "../../Lepra/Include/Canvas.h"
-#include "../../Lepra/Include/Log.h"
-#include "../../Lepra/Include/Math.h"
-#include "../../Lepra/Include/Performance.h"
-#include "../../Lepra/Include/Transformation.h"
-#include "../../Tbc/Include/GeometryReference.h"
-#include "../../UiLepra/Include/UiOpenGLExtensions.h"
-#include "../Include/UiDynamicRenderer.h"
-#include "../Include/UiOpenGLMaterials.h"
-#include "../Include/UiTexture.h"
+#include "../include/uiopenglrenderer.h"
+#include "../../lepra/include/canvas.h"
+#include "../../lepra/include/log.h"
+#include "../../lepra/include/math.h"
+#include "../../lepra/include/performance.h"
+#include "../../lepra/include/transformation.h"
+#include "../../tbc/include/geometryreference.h"
+#include "../../uilepra/include/uiopenglextensions.h"
+#include "../include/uidynamicrenderer.h"
+#include "../include/uiopenglmaterials.h"
+#include "../include/uitexture.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
 #ifdef LEPRA_DEBUG
-#define OGL_ASSERT()		{ GLenum lGlError = glGetError(); deb_assert(lGlError == GL_NO_ERROR); }
+#define OGL_ASSERT()		{ GLenum gl_error = glGetError(); deb_assert(gl_error == GL_NO_ERROR); }
 #define OGL_FAST_ASSERT()	OGL_ASSERT();
 #else // !Debug
 #define OGL_ASSERT()
@@ -32,65 +31,60 @@ namespace UiTbc
 
 
 
-static void EnableGlLights(OpenGLRenderer* pRenderer, std::unordered_map<Renderer::LightID,Renderer::LightData*>& pLightMap, bool pEnable)
-{
+static void EnableGlLights(OpenGLRenderer* renderer, std::unordered_map<Renderer::LightID,Renderer::LightData*>& light_map, bool enable) {
 		// Disable all lights (for shadow rendering).
-		for (std::unordered_map<Renderer::LightID,Renderer::LightData*>::iterator x = pLightMap.begin(); x != pLightMap.end(); ++x)
-		{
-			if (x->second->mEnabled)
-			{
-				pEnable? glEnable(GL_LIGHT0 + x->first) : glDisable(GL_LIGHT0 + x->first);
+		for (std::unordered_map<Renderer::LightID,Renderer::LightData*>::iterator x = light_map.begin(); x != light_map.end(); ++x) {
+			if (x->second->enabled_) {
+				enable? glEnable(GL_LIGHT0 + x->first) : glDisable(GL_LIGHT0 + x->first);
 			}
 		}
-		pEnable? pRenderer->SetLightsEnabled(pEnable) : pRenderer->Renderer::SetLightsEnabled(pEnable);
+		enable? renderer->SetLightsEnabled(enable) : renderer->Renderer::SetLightsEnabled(enable);
 }
 
 
 
-Material* OpenGLRenderer::CreateMaterial(MaterialType pMaterialType)
-{
-	switch(pMaterialType)
-	{
-	case MAT_NULL:
+Material* OpenGLRenderer::CreateMaterial(MaterialType material_type) {
+	switch(material_type) {
+	case kMatNull:
 		return new NullMaterial(this);
-	case MAT_SINGLE_COLOR_SOLID:
+	case kMatSingleColorSolid:
 		return new OpenGLMatSingleColorSolid(this, 0);
-	case MAT_SINGLE_COLOR_SOLID_PXS:
-		return new OpenGLMatSingleColorSolidPXS(this, GetMaterial(MAT_SINGLE_COLOR_SOLID));
-	case MAT_VERTEX_COLOR_SOLID:
-		return new OpenGLMatVertexColorSolid(this, GetMaterial(MAT_SINGLE_COLOR_SOLID));
-	case MAT_SINGLE_TEXTURE_SOLID:
-		return new OpenGLMatSingleTextureSolid(this, GetMaterial(MAT_SINGLE_COLOR_SOLID));
-	case MAT_SINGLE_TEXTURE_HIGHLIGHT:
-		return new OpenGLMatSingleTextureHighlight(this, GetMaterial(MAT_SINGLE_TEXTURE_SOLID));
-	case MAT_SINGLE_TEXTURE_SOLID_PXS:
-		return new OpenGLMatSingleTextureSolidPXS(this, GetMaterial(MAT_SINGLE_TEXTURE_SOLID));
-	case MAT_SINGLE_COLOR_ENVMAP_SOLID:
-		return new OpenGLMatSingleColorEnvMapSolid(this, GetMaterial(MAT_SINGLE_COLOR_SOLID));
-	case MAT_SINGLE_TEXTURE_ENVMAP_SOLID:
-		return new OpenGLMatSingleTextureEnvMapSolid(this, GetMaterial(MAT_SINGLE_TEXTURE_SOLID));
-	case MAT_TEXTURE_AND_LIGHTMAP:
-		return new OpenGLMatTextureAndLightmap(this, GetMaterial(MAT_SINGLE_TEXTURE_SOLID));
-	case MAT_TEXTURE_AND_LIGHTMAP_PXS:
-		return new OpenGLMatTextureAndLightmapPXS(this, GetMaterial(MAT_TEXTURE_AND_LIGHTMAP));
-	case MAT_TEXTURE_AND_DIFFUSE_BUMPMAP_PXS:
-		return new OpenGLMatTextureDiffuseBumpMapPXS(this, GetMaterial(MAT_SINGLE_TEXTURE_SOLID_PXS));
-	case MAT_TEXTURE_SBMAP_PXS:
-		return new OpenGLMatTextureSBMapPXS(this, GetMaterial(MAT_TEXTURE_AND_DIFFUSE_BUMPMAP_PXS));
-	case MAT_SINGLE_COLOR_BLENDED:
+	case kMatSingleColorSolidPxs:
+		return new OpenGLMatSingleColorSolidPXS(this, GetMaterial(kMatSingleColorSolid));
+	case kMatVertexColorSolid:
+		return new OpenGLMatVertexColorSolid(this, GetMaterial(kMatSingleColorSolid));
+	case kMatSingleTextureSolid:
+		return new OpenGLMatSingleTextureSolid(this, GetMaterial(kMatSingleColorSolid));
+	case kMatSingleTextureHighlight:
+		return new OpenGLMatSingleTextureHighlight(this, GetMaterial(kMatSingleTextureSolid));
+	case kMatSingleTextureSolidPxs:
+		return new OpenGLMatSingleTextureSolidPXS(this, GetMaterial(kMatSingleTextureSolid));
+	case kMatSingleColorEnvmapSolid:
+		return new OpenGLMatSingleColorEnvMapSolid(this, GetMaterial(kMatSingleColorSolid));
+	case kMatSingleTextureEnvmapSolid:
+		return new OpenGLMatSingleTextureEnvMapSolid(this, GetMaterial(kMatSingleTextureSolid));
+	case kMatTextureAndLightmap:
+		return new OpenGLMatTextureAndLightmap(this, GetMaterial(kMatSingleTextureSolid));
+	case kMatTextureAndLightmapPxs:
+		return new OpenGLMatTextureAndLightmapPXS(this, GetMaterial(kMatTextureAndLightmap));
+	case kMatTextureAndDiffuseBumpmapPxs:
+		return new OpenGLMatTextureDiffuseBumpMapPXS(this, GetMaterial(kMatSingleTextureSolidPxs));
+	case kMatTextureSbmapPxs:
+		return new OpenGLMatTextureSBMapPXS(this, GetMaterial(kMatTextureAndDiffuseBumpmapPxs));
+	case kMatSingleColorBlended:
 		return new OpenGLMatSingleColorBlended(this, 0, false);
-	case MAT_SINGLE_COLOR_OUTLINE_BLENDED:
+	case kMatSingleColorOutlineBlended:
 		return new OpenGLMatSingleColorBlended(this, 0, true);
-	case MAT_VERTEX_COLOR_BLENDED:
-		return new OpenGLMatVertexColorBlended(this, GetMaterial(MAT_SINGLE_COLOR_BLENDED));
-	case MAT_SINGLE_TEXTURE_BLENDED:
-		return new OpenGLMatSingleTextureBlended(this, GetMaterial(MAT_SINGLE_COLOR_BLENDED));
-	case MAT_SINGLE_TEXTURE_ALPHATESTED:
-		return new OpenGLMatSingleTextureAlphaTested(this, GetMaterial(MAT_SINGLE_COLOR_BLENDED));
-	case MAT_SINGLE_COLOR_ENVMAP_BLENDED:
-		return new OpenGLMatSingleColorEnvMapBlended(this, GetMaterial(MAT_SINGLE_COLOR_BLENDED));
-	case MAT_SINGLE_TEXTURE_ENVMAP_BLENDED:
-		return new OpenGLMatSingleTextureEnvMapBlended(this, GetMaterial(MAT_SINGLE_TEXTURE_BLENDED));
+	case kMatVertexColorBlended:
+		return new OpenGLMatVertexColorBlended(this, GetMaterial(kMatSingleColorBlended));
+	case kMatSingleTextureBlended:
+		return new OpenGLMatSingleTextureBlended(this, GetMaterial(kMatSingleColorBlended));
+	case kMatSingleTextureAlphatested:
+		return new OpenGLMatSingleTextureAlphaTested(this, GetMaterial(kMatSingleColorBlended));
+	case kMatSingleColorEnvmapBlended:
+		return new OpenGLMatSingleColorEnvMapBlended(this, GetMaterial(kMatSingleColorBlended));
+	case kMatSingleTextureEnvmapBlended:
+		return new OpenGLMatSingleTextureEnvMapBlended(this, GetMaterial(kMatSingleTextureBlended));
 	default:
 		return 0;
 	}
@@ -98,12 +92,11 @@ Material* OpenGLRenderer::CreateMaterial(MaterialType pMaterialType)
 
 
 
-OpenGLRenderer::OpenGLRenderer(Canvas* pScreen) :
-	Renderer(pScreen),
-	mBufferIDManager(1, 1000000, 0),
-	mTMapIDManager(10001, 1000000, INVALID_TEXTURE),	// 1-10000 is reserved by Painter.
-	mGLClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-{
+OpenGLRenderer::OpenGLRenderer(Canvas* screen) :
+	Renderer(screen),
+	buffer_id_manager_(1, 1000000, 0),
+	t_map_id_manager_(10001, 1000000, INVALID_TEXTURE),	// 1-10000 is reserved by Painter.
+	gl_clear_mask_(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) {
 	OGL_ASSERT();
 
 	InitRenderer();
@@ -112,7 +105,7 @@ OpenGLRenderer::OpenGLRenderer(Canvas* pScreen) :
 	GetAmbientLight(r, g, b);
 	SetAmbientLight(r, g, b);
 
-	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &mNumTextureUnits);
+	glGetIntegerv(GL_MAX_TEXTURE_UNITS, &num_texture_units_);
 	glGetError();	// If we have a weak card, let's do our best with funny looks.
 	glDepthFunc(GL_LEQUAL);
 	glClearStencil(128);
@@ -121,317 +114,272 @@ OpenGLRenderer::OpenGLRenderer(Canvas* pScreen) :
 
 
 
-OpenGLRenderer::~OpenGLRenderer()
-{
+OpenGLRenderer::~OpenGLRenderer() {
 	CloseRenderer();
 }
 
-void OpenGLRenderer::Clear(unsigned pClearFlags)
-{
+void OpenGLRenderer::Clear(unsigned clear_flags) {
 	OGL_FAST_ASSERT();
 
-	mGLClearMask = 0;
+	gl_clear_mask_ = 0;
 
-	if (CheckFlag(pClearFlags, CLEAR_COLORBUFFER))
-	{
-		mGLClearMask |= GL_COLOR_BUFFER_BIT;
+	if (CheckFlag(clear_flags, kClearColorbuffer)) {
+		gl_clear_mask_ |= GL_COLOR_BUFFER_BIT;
 	}
-	if (CheckFlag(pClearFlags, CLEAR_DEPTHBUFFER))
-	{
-		mGLClearMask |= GL_DEPTH_BUFFER_BIT;
+	if (CheckFlag(clear_flags, kClearDepthbuffer)) {
+		gl_clear_mask_ |= GL_DEPTH_BUFFER_BIT;
 	}
-	if (CheckFlag(pClearFlags, CLEAR_STENCILBUFFER))
-	{
-		mGLClearMask |= GL_STENCIL_BUFFER_BIT;
+	if (CheckFlag(clear_flags, kClearStencilbuffer)) {
+		gl_clear_mask_ |= GL_STENCIL_BUFFER_BIT;
 	}
 #ifndef LEPRA_GL_ES
-	if (CheckFlag(pClearFlags, CLEAR_ACCUMULATIONBUFFER))
-	{
-		mGLClearMask |= GL_ACCUM_BUFFER_BIT;
+	if (CheckFlag(clear_flags, kClearAccumulationbuffer)) {
+		gl_clear_mask_ |= GL_ACCUM_BUFFER_BIT;
 	}
 #endif // !GLES
 
-	if (GetShadowMode() != UiTbc::Renderer::NO_SHADOWS)
-	{
+	if (GetShadowMode() != uitbc::Renderer::kNoShadows) {
 		// Always clear the stencil buffer if shadows are activated.
-		mGLClearMask |= GL_STENCIL_BUFFER_BIT;
+		gl_clear_mask_ |= GL_STENCIL_BUFFER_BIT;
 	}
 
-	glClear(mGLClearMask);
+	glClear(gl_clear_mask_);
 
 	OGL_ASSERT();
 }
 
-void OpenGLRenderer::SetClearColor(const Color& pColor)
-{
-	Parent::SetClearColor(pColor);
-	::glClearColor(pColor.GetRf(), pColor.GetGf(), pColor.GetBf(), 1.0f);
+void OpenGLRenderer::SetClearColor(const Color& color) {
+	Parent::SetClearColor(color);
+	::glClearColor(color.GetRf(), color.GetGf(), color.GetBf(), 1.0f);
 	OGL_FAST_ASSERT();
 }
 
-bool OpenGLRenderer::IsPixelShadersEnabled() const
-{
-	return UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported() && Parent::IsPixelShadersEnabled();
+bool OpenGLRenderer::IsPixelShadersEnabled() const {
+	return uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported() && Parent::IsPixelShadersEnabled();
 }
 
-void OpenGLRenderer::SetViewFrustum(float pFOVAngle, float pNear, float pFar)
-{
-	Parent::SetViewFrustum(pFOVAngle, pNear, pFar);
-	Perspective(pFOVAngle, GetAspectRatio(), pNear, pFar);
+void OpenGLRenderer::SetViewFrustum(float fov_angle, float near, float far) {
+	Parent::SetViewFrustum(fov_angle, near, far);
+	Perspective(fov_angle, GetAspectRatio(), near, far);
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::SetShadowMode(Shadows pShadowMode, ShadowHint pHint)
-{
-	Parent::SetShadowMode(pShadowMode, UiLepra::OpenGLExtensions::IsShadowMapsSupported()? pHint : SH_VOLUMES_ONLY);
+void OpenGLRenderer::SetShadowMode(Shadows shadow_mode, ShadowHint hint) {
+	Parent::SetShadowMode(shadow_mode, uilepra::OpenGLExtensions::IsShadowMapsSupported()? hint : kShVolumesOnly);
 }
 
-void OpenGLRenderer::SetDepthWriteEnabled(bool pEnabled)
-{
-	if (pEnabled == true)
+void OpenGLRenderer::SetDepthWriteEnabled(bool enabled) {
+	if (enabled == true)
 		glDepthMask(GL_TRUE);
 	else
 		glDepthMask(GL_FALSE);
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::SetDepthTestEnabled(bool pEnabled)
-{
-	if (pEnabled == true)
+void OpenGLRenderer::SetDepthTestEnabled(bool enabled) {
+	if (enabled == true)
 		glEnable(GL_DEPTH_TEST);
 	else
 		glDisable(GL_DEPTH_TEST);
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::SetLightsEnabled(bool pEnabled)
-{
-	Parent::SetLightsEnabled(pEnabled);
-	if (pEnabled)
-	{
+void OpenGLRenderer::SetLightsEnabled(bool enabled) {
+	Parent::SetLightsEnabled(enabled);
+	if (enabled) {
 		::glEnable(GL_LIGHTING);
-	}
-	else
-	{
+	} else {
 		::glDisable(GL_LIGHTING);
 	}
 }
 
-void OpenGLRenderer::SetTexturingEnabled(bool pEnabled)
-{
-	Parent::SetTexturingEnabled(pEnabled);
-	if (pEnabled)
-	{
+void OpenGLRenderer::SetTexturingEnabled(bool enabled) {
+	Parent::SetTexturingEnabled(enabled);
+	if (enabled) {
 		::glEnable(GL_TEXTURE_2D);
 		::glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	}
-	else
-	{
+	} else {
 		::glDisable(GL_TEXTURE_2D);
 		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	}
 }
 
-void OpenGLRenderer::SetLineWidth(float pPixels)
-{
-	Parent::SetLineWidth(pPixels);
-	::glLineWidth(pPixels);
+void OpenGLRenderer::SetLineWidth(float pixels) {
+	Parent::SetLineWidth(pixels);
+	::glLineWidth(pixels);
 }
 
-void OpenGLRenderer::SetAmbientLight(float pRed, float pGreen, float pBlue)
-{
-	Parent::SetAmbientLight(pRed, pGreen, pBlue);
+void OpenGLRenderer::SetAmbientLight(float red, float green, float blue) {
+	Parent::SetAmbientLight(red, green, blue);
 
-	float lAmbientLight[] = {pRed, pGreen, pBlue, 1.0f};
-	::glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
-	::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lAmbientLight);
+	float ambient_light[] = {red, green, blue, 1.0f};
+	::glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_light);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient_light);
 #ifndef LEPRA_GL_ES
-	if (IsPixelShadersEnabled())
-	{
-		GLfloat lLightAmbient[4] = {0,0,0,0};
-		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 3, lLightAmbient);
+	if (IsPixelShadersEnabled()) {
+		GLfloat light_ambient[4] = {0,0,0,0};
+		uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 3, light_ambient);
 	}
 #endif // !OpenGL ES
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::AddAmbience(float pRed, float pGreen, float pBlue)
-{
-	if (pRed != 0 || pGreen != 0 || pBlue != 0)
-	{
-		Parent::AddAmbience(pRed, pGreen, pBlue);
-		float lAmbientLight[4];
-		GetAmbientLight(lAmbientLight[0], lAmbientLight[1], lAmbientLight[2]);
-		lAmbientLight[3] = 1.0f;
-		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lAmbientLight);
+void OpenGLRenderer::AddAmbience(float red, float green, float blue) {
+	if (red != 0 || green != 0 || blue != 0) {
+		Parent::AddAmbience(red, green, blue);
+		float ambient_light[4];
+		GetAmbientLight(ambient_light[0], ambient_light[1], ambient_light[2]);
+		ambient_light[3] = 1.0f;
+		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient_light);
 	}
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::DoSetClippingRect(const PixelRect& pRect)
-{
+void OpenGLRenderer::DoSetClippingRect(const PixelRect& rect) {
 	::glGetError();
 	::glEnable(GL_SCISSOR_TEST);
-	::glScissor(GetScreen()->GetActualWidth() - pRect.mRight, GetScreen()->GetActualHeight() - pRect.mBottom, pRect.GetWidth(), pRect.GetHeight());
+	::glScissor(GetScreen()->GetActualWidth() - rect.right_, GetScreen()->GetActualHeight() - rect.bottom_, rect.GetWidth(), rect.GetHeight());
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::DoSetViewport(const PixelRect& pViewport)
-{
+void OpenGLRenderer::DoSetViewport(const PixelRect& viewport) {
 	OGL_FAST_ASSERT();
-	::glViewport(GetScreen()->GetActualWidth() - pViewport.mRight, GetScreen()->GetActualHeight() - pViewport.mBottom, pViewport.GetWidth(), pViewport.GetHeight());
+	::glViewport(GetScreen()->GetActualWidth() - viewport.right_, GetScreen()->GetActualHeight() - viewport.bottom_, viewport.GetWidth(), viewport.GetHeight());
 	OGL_FAST_ASSERT();
 }
 
-int OpenGLRenderer::ReleaseShadowMap(int pShadowMapID)
-{
-	if (pShadowMapID != mTMapIDManager.GetInvalidId())
-	{
-		mTMapIDManager.RecycleId(pShadowMapID);
-		GLuint lShadowMapID = (GLuint)pShadowMapID;
-		glDeleteTextures(1, &lShadowMapID);
+int OpenGLRenderer::ReleaseShadowMap(int shadow_map_id) {
+	if (shadow_map_id != t_map_id_manager_.GetInvalidId()) {
+		t_map_id_manager_.RecycleId(shadow_map_id);
+		GLuint _shadow_map_id = (GLuint)shadow_map_id;
+		glDeleteTextures(1, &_shadow_map_id);
 	}
 	//OGL_FAST_ASSERT();
-	return mTMapIDManager.GetInvalidId();
+	return t_map_id_manager_.GetInvalidId();
 }
 
 
 
 
-Renderer::LightID OpenGLRenderer::AddDirectionalLight(LightHint pHint,
-		const vec3& pDir,
-		const vec3& pColor,
-		float pShadowRange)
-{
-	LightID lLightID = Parent::AddDirectionalLight(pHint, pDir, pColor, pShadowRange);
-	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
+Renderer::LightID OpenGLRenderer::AddDirectionalLight(LightHint hint,
+		const vec3& dir,
+		const vec3& color,
+		float shadow_range) {
+	LightID _light_id = Parent::AddDirectionalLight(hint, dir, color, shadow_range);
+	SetupGLLight((int)_light_id, GetLightData((int)_light_id));
 	OGL_FAST_ASSERT();
-	return lLightID;
+	return _light_id;
 }
 
-Renderer::LightID OpenGLRenderer::AddPointLight(LightHint pHint,
-		const vec3& pPos,
-		const vec3& pColor,
-		float pLightRadius,
-		float pShadowRange)
-{
-	LightID lLightID = Parent::AddPointLight(pHint, pPos, pColor, pLightRadius, pShadowRange);
-	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
+Renderer::LightID OpenGLRenderer::AddPointLight(LightHint hint,
+		const vec3& pos,
+		const vec3& color,
+		float light_radius,
+		float shadow_range) {
+	LightID _light_id = Parent::AddPointLight(hint, pos, color, light_radius, shadow_range);
+	SetupGLLight((int)_light_id, GetLightData((int)_light_id));
 	OGL_FAST_ASSERT();
-	return lLightID;
+	return _light_id;
 }
 
-Renderer::LightID OpenGLRenderer::AddSpotLight(LightHint pHint,
-		const vec3& pPos,
-		const vec3& pDir,
-		const vec3& pColor,
-		float pCutoffAngle,
-		float pSpotExponent,
-		float pLightRadius,
-		float pShadowRange)
-{
-	LightID lLightID = Parent::AddSpotLight(pHint, 
-		pPos,
-		pDir,
-		pColor,
-		pCutoffAngle, 
-		pSpotExponent, 
-		pLightRadius, 
-		pShadowRange);
-	SetupGLLight((int)lLightID, GetLightData((int)lLightID));
+Renderer::LightID OpenGLRenderer::AddSpotLight(LightHint hint,
+		const vec3& pos,
+		const vec3& dir,
+		const vec3& color,
+		float cutoff_angle,
+		float spot_exponent,
+		float light_radius,
+		float shadow_range) {
+	LightID _light_id = Parent::AddSpotLight(hint,
+		pos,
+		dir,
+		color,
+		cutoff_angle,
+		spot_exponent,
+		light_radius,
+		shadow_range);
+	SetupGLLight((int)_light_id, GetLightData((int)_light_id));
 	OGL_FAST_ASSERT();
-	return lLightID;
+	return _light_id;
 }
 
-void OpenGLRenderer::SetupGLLight(int pLightIndex, const LightData* pLight)
-{
-	GLenum lLight = GL_LIGHT0 + pLightIndex;
-	glEnable(lLight);
+void OpenGLRenderer::SetupGLLight(int light_index, const LightData* light) {
+	GLenum _light = GL_LIGHT0 + light_index;
+	glEnable(_light);
 
-	if (pLight->mType != LIGHT_SPOT)
-	{
+	if (light->type_ != kLightSpot) {
 		float l180 = 180.0f;
-		glLightf(lLight, GL_SPOT_CUTOFF, l180);
+		glLightf(_light, GL_SPOT_CUTOFF, l180);
 
-		float lDir[3] = {0, 0, -1};
-		glLightfv(lLight, GL_SPOT_DIRECTION, lDir);
+		float _dir[3] = {0, 0, -1};
+		glLightfv(_light, GL_SPOT_DIRECTION, _dir);
 	}
 
-	float lPos[4];
-	if (pLight->mType == LIGHT_POINT ||
-	   pLight->mType == LIGHT_SPOT)
-	{
-		vec3 lLightPos = GetCameraActualTransformation().InverseTransform(pLight->mPosition);
-		lPos[0] = (float)lLightPos.x;
-		lPos[1] = (float)lLightPos.y;
-		lPos[2] = (float)lLightPos.z;
-		lPos[3] = 1.0f;
+	float _pos[4];
+	if (light->type_ == kLightPoint ||
+	   light->type_ == kLightSpot) {
+		vec3 light_pos = GetCameraActualTransformation().InverseTransform(light->position_);
+		_pos[0] = (float)light_pos.x;
+		_pos[1] = (float)light_pos.y;
+		_pos[2] = (float)light_pos.z;
+		_pos[3] = 1.0f;
 
-		if (pLight->mType == LIGHT_SPOT)
-		{
-			vec3 lLightDir = GetCameraActualOrientationInverse() * pLight->mDirection;
+		if (light->type_ == kLightSpot) {
+			vec3 light_dir = GetCameraActualOrientationInverse() * light->direction_;
 
-			float lDir[3];
-			lDir[0] = (float)lLightDir.x;
-			lDir[1] = (float)lLightDir.y;
-			lDir[2] = (float)lLightDir.z;
+			float _dir[3];
+			_dir[0] = (float)light_dir.x;
+			_dir[1] = (float)light_dir.y;
+			_dir[2] = (float)light_dir.z;
 
-			glLightfv(lLight, GL_SPOT_DIRECTION, lDir);
-			glLightfv(lLight, GL_SPOT_CUTOFF, &pLight->mCutoffAngle);
+			glLightfv(_light, GL_SPOT_DIRECTION, _dir);
+			glLightfv(_light, GL_SPOT_CUTOFF, &light->cutoff_angle_);
 		}
 
-		float lConst = 0.0f;
-		float lLinear = 0.0f;
-		float lQuad = 1.0f;
-		glLightfv(lLight, GL_CONSTANT_ATTENUATION, &lConst);
-		glLightfv(lLight, GL_LINEAR_ATTENUATION, &lLinear);
-		glLightfv(lLight, GL_QUADRATIC_ATTENUATION, &lQuad);
-	}
-	else if(pLight->mType == LIGHT_DIRECTIONAL)
-	{
-		vec3 lLightDir = GetCameraActualOrientationInverse() * pLight->mDirection;
-		lPos[0] = -(float)lLightDir.x;
-		lPos[1] = -(float)lLightDir.y;
-		lPos[2] = -(float)lLightDir.z;
-		lPos[3] = 0.0f;
+		float constant = 0.0f;
+		float linear = 0.0f;
+		float quad = 1.0f;
+		glLightfv(_light, GL_CONSTANT_ATTENUATION, &constant);
+		glLightfv(_light, GL_LINEAR_ATTENUATION, &linear);
+		glLightfv(_light, GL_QUADRATIC_ATTENUATION, &quad);
+	} else if(light->type_ == kLightDirectional) {
+		vec3 light_dir = GetCameraActualOrientationInverse() * light->direction_;
+		_pos[0] = -(float)light_dir.x;
+		_pos[1] = -(float)light_dir.y;
+		_pos[2] = -(float)light_dir.z;
+		_pos[3] = 0.0f;
 
-		float lConst = 1.0f;
-		float lLinear = 0.0f;
-		float lQuad = 0.0f;
-		glLightfv(lLight, GL_CONSTANT_ATTENUATION, &lConst);
-		glLightfv(lLight, GL_LINEAR_ATTENUATION, &lLinear);
-		glLightfv(lLight, GL_QUADRATIC_ATTENUATION, &lQuad);
+		float constant = 1.0f;
+		float linear = 0.0f;
+		float quad = 0.0f;
+		glLightfv(_light, GL_CONSTANT_ATTENUATION, &constant);
+		glLightfv(_light, GL_LINEAR_ATTENUATION, &linear);
+		glLightfv(_light, GL_QUADRATIC_ATTENUATION, &quad);
 	}
 
-	float lBlack[] = {0, 0, 0, 1.0f};
+	float black[] = {0, 0, 0, 1.0f};
 
-	glLightfv(lLight, GL_POSITION, lPos);
-	glLightfv(lLight, GL_AMBIENT, lBlack);
-	glLightfv(lLight, GL_DIFFUSE, pLight->mColor);
-	glLightfv(lLight, GL_SPECULAR, lBlack);
+	glLightfv(_light, GL_POSITION, _pos);
+	glLightfv(_light, GL_AMBIENT, black);
+	glLightfv(_light, GL_DIFFUSE, light->color_);
+	glLightfv(_light, GL_SPECULAR, black);
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::RemoveLight(LightID pLightID)
-{
-	Parent::RemoveLight(pLightID);
-	GLenum lLight = (int)pLightID;
-	glDisable(GL_LIGHT0+lLight);
+void OpenGLRenderer::RemoveLight(LightID light_id) {
+	Parent::RemoveLight(light_id);
+	GLenum _light = (int)light_id;
+	glDisable(GL_LIGHT0+_light);
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::EnableAllLights(bool pEnable)
-{
-	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
-	{
-		LightData* lLight = x->second;
-		lLight->mEnabled = pEnable;
-		if (pEnable)
-		{
+void OpenGLRenderer::EnableAllLights(bool enable) {
+	for (LightDataMap::iterator x = light_data_map_.begin(); x != light_data_map_.end(); ++x) {
+		LightData* _light = x->second;
+		_light->enabled_ = enable;
+		if (enable) {
 			::glEnable(GL_LIGHT0 + x->first);
-		}
-		else
-		{
+		} else {
 			::glDisable(GL_LIGHT0 + x->first);
 		}
 	}
@@ -439,690 +387,621 @@ void OpenGLRenderer::EnableAllLights(bool pEnable)
 
 
 
-void OpenGLRenderer::SetLightPosition(LightID pLightID, const vec3& pPos)
-{
-	Parent::SetLightPosition(pLightID, pPos);
+void OpenGLRenderer::SetLightPosition(LightID light_id, const vec3& pos) {
+	Parent::SetLightPosition(light_id, pos);
 
-	int lLightIndex = (int)pLightID;
-	if (lLightIndex == INVALID_LIGHT)
+	int _light_index = (int)light_id;
+	if (_light_index == INVALID_LIGHT)
 		return;
 
-	LightData* lLightData = GetLightData(lLightIndex);
-	if (lLightData->mType == LIGHT_POINT ||
-	   lLightData->mType == LIGHT_SPOT)
-	{
-		vec3 lLightPos = GetCameraActualTransformation().InverseTransform(pPos);
-		float lPos[4];
-		lPos[0] = (float)lLightPos.x;
-		lPos[1] = (float)lLightPos.y;
-		lPos[2] = (float)lLightPos.z;
-		lPos[3] = 1.0f;
+	LightData* light_data = GetLightData(_light_index);
+	if (light_data->type_ == kLightPoint ||
+	   light_data->type_ == kLightSpot) {
+		vec3 light_pos = GetCameraActualTransformation().InverseTransform(pos);
+		float _pos[4];
+		_pos[0] = (float)light_pos.x;
+		_pos[1] = (float)light_pos.y;
+		_pos[2] = (float)light_pos.z;
+		_pos[3] = 1.0f;
 
-		GLenum lLight = GL_LIGHT0 + lLightIndex;
-		glLightfv(lLight, GL_POSITION, lPos);
+		GLenum _light = GL_LIGHT0 + _light_index;
+		glLightfv(_light, GL_POSITION, _pos);
 	}
 	OGL_FAST_ASSERT();
 }
 
 
 
-void OpenGLRenderer::SetLightDirection(LightID pLightID, const vec3& pDir)
-{
-	Parent::SetLightDirection(pLightID, pDir);
+void OpenGLRenderer::SetLightDirection(LightID light_id, const vec3& dir) {
+	Parent::SetLightDirection(light_id, dir);
 
-	int lLightIndex = (int)pLightID;
-	if (lLightIndex == INVALID_LIGHT)
+	int _light_index = (int)light_id;
+	if (_light_index == INVALID_LIGHT)
 		return;
 
-	LightData* lLightData = GetLightData(lLightIndex);
-	if (lLightData->mType == LIGHT_DIRECTIONAL ||
-	   lLightData->mType == LIGHT_SPOT)
-	{
-		GLenum lLight = GL_LIGHT0 + lLightIndex;
+	LightData* light_data = GetLightData(_light_index);
+	if (light_data->type_ == kLightDirectional ||
+	   light_data->type_ == kLightSpot) {
+		GLenum _light = GL_LIGHT0 + _light_index;
 
-		if (lLightData->mType == LIGHT_DIRECTIONAL)
-		{
-			float lVector[4];
-			lVector[0] = -pDir.x;
-			lVector[1] = -pDir.y;
-			lVector[2] = -pDir.z;
-			lVector[3] = 0.0f;
-			glLightfv(lLight, GL_POSITION, lVector);
-		}
-		else
-		{
-			float lVector[3];
-			lVector[0] = pDir.x;
-			lVector[1] = pDir.y;
-			lVector[2] = pDir.z;
-			glLightfv(lLight, GL_SPOT_DIRECTION, lVector);
+		if (light_data->type_ == kLightDirectional) {
+			float _vector[4];
+			_vector[0] = -dir.x;
+			_vector[1] = -dir.y;
+			_vector[2] = -dir.z;
+			_vector[3] = 0.0f;
+			glLightfv(_light, GL_POSITION, _vector);
+		} else {
+			float _vector[3];
+			_vector[0] = dir.x;
+			_vector[1] = dir.y;
+			_vector[2] = dir.z;
+			glLightfv(_light, GL_SPOT_DIRECTION, _vector);
 		}
 	}
 	OGL_FAST_ASSERT();
 }
 
-Renderer::TextureID OpenGLRenderer::AddTexture(Texture* pTexture)
-{
-	pTexture->SwapRGBOrder();
-	return (Parent::AddTexture(pTexture));
+Renderer::TextureID OpenGLRenderer::AddTexture(Texture* texture) {
+	texture->SwapRGBOrder();
+	return (Parent::AddTexture(texture));
 }
 
-void OpenGLRenderer::SetGlobalMaterialReflectance(float pRed, float pGreen, float pBlue, float pSpecularity)
-{
-	// This function is the evidence of the total stupidity behind 
+void OpenGLRenderer::SetGlobalMaterialReflectance(float red, float green, float blue, float specularity) {
+	// This function is the evidence of the total stupidity behind
 	// OpenGL and probably computer graphics in general.
-	// To be able to have full control of a surface's diffuseness, 
+	// To be able to have full control of a surface's diffuseness,
 	// we need to update the light's diffuseness. And therein lies
 	// the stupidity - light with "diffuseness" doesn't make any sense
 	// at all.
 
 	// TRICKY: must add some to the colors, since black light means disabled light!
-	pRed += 0.01f;
-	pGreen += 0.01f;
-	pBlue += 0.01f;
+	red += 0.01f;
+	green += 0.01f;
+	blue += 0.01f;
 
-	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
-	{
-		LightData* lLightData = x->second;
+	for (LightDataMap::iterator x = light_data_map_.begin(); x != light_data_map_.end(); ++x) {
+		LightData* light_data = x->second;
 
-		if (lLightData->mEnabled == true)
-		{
-			const float lRed   = lLightData->mColor[0] * pRed;
-			const float lGreen = lLightData->mColor[1] * pGreen;
-			const float lBlue  = lLightData->mColor[2] * pBlue;
+		if (light_data->enabled_ == true) {
+			const float _red   = light_data->color_[0] * red;
+			const float _green = light_data->color_[1] * green;
+			const float _blue  = light_data->color_[2] * blue;
 
-			float lSpecular[] =
+			float specular[] =
 			{
-				lRed   * pSpecularity,
-				lGreen * pSpecularity,
-				lBlue  * pSpecularity,
+				_red   * specularity,
+				_green * specularity,
+				_blue  * specularity,
 				1.0f
 			};
 
-			float lDiffuse[] =
+			float diffuse[] =
 			{
-				lRed   * (1.0f - pSpecularity),
-				lGreen * (1.0f - pSpecularity),
-				lBlue  * (1.0f - pSpecularity),
+				_red   * (1.0f - specularity),
+				_green * (1.0f - specularity),
+				_blue  * (1.0f - specularity),
 				1.0f
 			};
 
-			float lAmbient[] = {0, 0, 0, 1.0f};
+			float ambient[] = {0, 0, 0, 1.0f};
 
-			GLenum lLight = GL_LIGHT0 + x->first;
-			glLightfv(lLight, GL_DIFFUSE, lDiffuse);
-			glLightfv(lLight, GL_SPECULAR, lSpecular);
-			glLightfv(lLight, GL_AMBIENT, lAmbient);
+			GLenum _light = GL_LIGHT0 + x->first;
+			glLightfv(_light, GL_DIFFUSE, diffuse);
+			glLightfv(_light, GL_SPECULAR, specular);
+			glLightfv(_light, GL_AMBIENT, ambient);
 		}
 	}
 	OGL_FAST_ASSERT();
 }
 
-Renderer::TextureData* OpenGLRenderer::CreateTextureData(TextureID pTextureID)
-{
-	return new Parent::TextureData(pTextureID, mTMapIDManager.GetInvalidId());
+Renderer::TextureData* OpenGLRenderer::CreateTextureData(TextureID texture_id) {
+	return new Parent::TextureData(texture_id, t_map_id_manager_.GetInvalidId());
 }
 
-Renderer::GeometryData* OpenGLRenderer::CreateGeometryData()
-{
+Renderer::GeometryData* OpenGLRenderer::CreateGeometryData() {
 	return new OGLGeometryData();
 }
 
-const Canvas* OpenGLRenderer::GetMap(int pMapType, int pMipMapLevel, Texture* pUserTexture)
-{
-	switch (pMapType)
-	{
-		case Texture::COLOR_MAP:
-			return pUserTexture->GetColorMap(pMipMapLevel);
-		case Texture::ALPHA_MAP:
-			return pUserTexture->GetAlphaMap(pMipMapLevel);
-		case Texture::NORMAL_MAP:
-			return pUserTexture->GetNormalMap(pMipMapLevel);
-		case Texture::SPECULAR_MAP:
-			return pUserTexture->GetSpecularMap(pMipMapLevel);
+const Canvas* OpenGLRenderer::GetMap(int map_type, int mip_map_level, Texture* user_texture) {
+	switch (map_type) {
+		case Texture::kColorMap:
+			return user_texture->GetColorMap(mip_map_level);
+		case Texture::kAlphaMap:
+			return user_texture->GetAlphaMap(mip_map_level);
+		case Texture::kNormalMap:
+			return user_texture->GetNormalMap(mip_map_level);
+		case Texture::kSpecularMap:
+			return user_texture->GetSpecularMap(mip_map_level);
 		default:
 			deb_assert(false);
 			return 0;
 	};
 }
 
-void OpenGLRenderer::BindMap(int pMapType, TextureData* pTextureData, Texture* pTexture)
-{
+void OpenGLRenderer::BindMap(int map_type, TextureData* texture_data, Texture* texture) {
 	OGL_FAST_ASSERT();
-	deb_assert(pMapType >= 0 && pMapType < Texture::NUM_MAPS);
+	deb_assert(map_type >= 0 && map_type < Texture::kNumMaps);
 
-	bool lCompress = UiLepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
+	bool _compress = uilepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
 					GetCompressedTexturesEnabled();
 
-	if (pTextureData->mTMapID[pMapType] == mTMapIDManager.GetInvalidId())
-	{
-		pTextureData->mTMapID[pMapType] = mTMapIDManager.GetFreeId();
-		pTextureData->mTMipMapLevelCount[pMapType] = pTexture->GetNumMipMapLevels();
+	if (texture_data->t_map_id_[map_type] == t_map_id_manager_.GetInvalidId()) {
+		texture_data->t_map_id_[map_type] = t_map_id_manager_.GetFreeId();
+		texture_data->t_mip_map_level_count_[map_type] = texture->GetNumMipMapLevels();
 	}
 
-	glBindTexture(GL_TEXTURE_2D, pTextureData->mTMapID[pMapType]);
+	glBindTexture(GL_TEXTURE_2D, texture_data->t_map_id_[map_type]);
 	OGL_FAST_ASSERT();
 
-	int lSize = GetMap(pMapType, 0, pTexture)->GetPixelByteSize();
-	deb_assert(lSize == 1 || lSize == 3 || lSize == 4);
-	
-	GLenum lPixelFormat;
-	SetPixelFormat(lSize, lPixelFormat, lCompress, 
-		strutil::Format("AddTexture - the texture has an invalid pixel size of %i bytes!", lSize));
+	int __size = GetMap(map_type, 0, texture)->GetPixelByteSize();
+	deb_assert(__size == 1 || __size == 3 || __size == 4);
+
+	GLenum _pixel_format;
+	SetPixelFormat(__size, _pixel_format, _compress,
+		strutil::Format("AddTexture - the texture has an invalid pixel size of %i bytes!", __size));
 	OGL_FAST_ASSERT();
 
-	for (int i = 0; i < pTexture->GetNumMipMapLevels(); i++)
-	{
-		const Canvas* lMap = GetMap(pMapType, i, pTexture);
-		glTexImage2D(GL_TEXTURE_2D, 
+	for (int i = 0; i < texture->GetNumMipMapLevels(); i++) {
+		const Canvas* map = GetMap(map_type, i, texture);
+		glTexImage2D(GL_TEXTURE_2D,
 			     i,
-			     lSize,
-			     lMap->GetWidth(),
-			     lMap->GetHeight(),
+			     __size,
+			     map->GetWidth(),
+			     map->GetHeight(),
 			     0,
-			     lPixelFormat, // TODO: Verify that this is GL_LUMINANCE for specular maps.
+			     _pixel_format, // TODO: Verify that this is GL_LUMINANCE for specular maps.
 			     GL_UNSIGNED_BYTE,
-			     lMap->GetBuffer());
+			     map->GetBuffer());
 		OGL_FAST_ASSERT();
-		if (!GetMipMappingEnabled())
-		{
+		if (!GetMipMappingEnabled()) {
 			break;
 		}
 	}
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::BindCubeMap(TextureData* pTextureData, Texture* pTexture)
-{
+void OpenGLRenderer::BindCubeMap(TextureData* texture_data, Texture* texture) {
 #ifndef LEPRA_GL_ES
 	// Compress textures if possible.
-	bool lCompress = UiLepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
+	bool _compress = uilepra::OpenGLExtensions::IsCompressedTexturesSupported() &&
 				GetCompressedTexturesEnabled();
 
-	int lSize = pTexture->GetCubeMapPosX(0)->GetPixelByteSize();
-	GLenum lPixelFormat;
-	SetPixelFormat(lSize, lPixelFormat, lCompress, 
-		strutil::Format("AddTexture - the cube map has an invalid pixel size of %i bytes!", lSize));
+	int __size = texture->GetCubeMapPosX(0)->GetPixelByteSize();
+	GLenum _pixel_format;
+	SetPixelFormat(__size, _pixel_format, _compress,
+		strutil::Format("AddTexture - the cube map has an invalid pixel size of %i bytes!", __size));
 
-	if (pTextureData->mTMapID[Texture::CUBE_MAP] == mTMapIDManager.GetInvalidId())
-	{
-		pTextureData->mTMapID[Texture::CUBE_MAP] = mTMapIDManager.GetFreeId();
-		pTextureData->mTMipMapLevelCount[Texture::CUBE_MAP] = pTexture->GetNumMipMapLevels();
+	if (texture_data->t_map_id_[Texture::kCubeMap] == t_map_id_manager_.GetInvalidId()) {
+		texture_data->t_map_id_[Texture::kCubeMap] = t_map_id_manager_.GetFreeId();
+		texture_data->t_mip_map_level_count_[Texture::kCubeMap] = texture->GetNumMipMapLevels();
 	}
 
 	// Bind cube map.
-	glBindTexture(GL_TEXTURE_CUBE_MAP, pTextureData->mTMapID[Texture::CUBE_MAP]);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_data->t_map_id_[Texture::kCubeMap]);
 
-	for (int i = 0; i < pTexture->GetNumMipMapLevels(); i++)
-	{
+	for (int i = 0; i < texture->GetNumMipMapLevels(); i++) {
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X,
 			     i,
-			     lSize,
-			     pTexture->GetCubeMapPosX(i)->GetWidth(),
-			     pTexture->GetCubeMapPosX(i)->GetHeight(),
+			     __size,
+			     texture->GetCubeMapPosX(i)->GetWidth(),
+			     texture->GetCubeMapPosX(i)->GetHeight(),
 			     0,
-			     lPixelFormat,
+			     _pixel_format,
 			     GL_UNSIGNED_BYTE,
-			     pTexture->GetCubeMapPosX(i)->GetBuffer());
+			     texture->GetCubeMapPosX(i)->GetBuffer());
 
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
 			     i,
-			     lSize,
-			     pTexture->GetCubeMapNegX(i)->GetWidth(),
-			     pTexture->GetCubeMapNegX(i)->GetHeight(),
+			     __size,
+			     texture->GetCubeMapNegX(i)->GetWidth(),
+			     texture->GetCubeMapNegX(i)->GetHeight(),
 			     0,
-			     lPixelFormat,
+			     _pixel_format,
 			     GL_UNSIGNED_BYTE,
-			     pTexture->GetCubeMapNegX(i)->GetBuffer());
+			     texture->GetCubeMapNegX(i)->GetBuffer());
 
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
 			     i,
-			     lSize,
-			     pTexture->GetCubeMapPosY(i)->GetWidth(),
-			     pTexture->GetCubeMapPosY(i)->GetHeight(),
+			     __size,
+			     texture->GetCubeMapPosY(i)->GetWidth(),
+			     texture->GetCubeMapPosY(i)->GetHeight(),
 			     0,
-			     lPixelFormat,
+			     _pixel_format,
 			     GL_UNSIGNED_BYTE,
-			     pTexture->GetCubeMapPosY(i)->GetBuffer());
+			     texture->GetCubeMapPosY(i)->GetBuffer());
 
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
 			     i,
-			     lSize,
-			     pTexture->GetCubeMapNegY(i)->GetWidth(),
-			     pTexture->GetCubeMapNegY(i)->GetHeight(),
+			     __size,
+			     texture->GetCubeMapNegY(i)->GetWidth(),
+			     texture->GetCubeMapNegY(i)->GetHeight(),
 			     0,
-			     lPixelFormat,
+			     _pixel_format,
 			     GL_UNSIGNED_BYTE,
-			     pTexture->GetCubeMapNegY(i)->GetBuffer());
+			     texture->GetCubeMapNegY(i)->GetBuffer());
 
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
 			     i,
-			     lSize,
-			     pTexture->GetCubeMapPosZ(i)->GetWidth(),
-			     pTexture->GetCubeMapPosZ(i)->GetHeight(),
+			     __size,
+			     texture->GetCubeMapPosZ(i)->GetWidth(),
+			     texture->GetCubeMapPosZ(i)->GetHeight(),
 			     0,
-			     lPixelFormat,
+			     _pixel_format,
 			     GL_UNSIGNED_BYTE,
-			     pTexture->GetCubeMapPosZ(i)->GetBuffer());
+			     texture->GetCubeMapPosZ(i)->GetBuffer());
 
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z,
 			     i,
-			     lSize,
-			     pTexture->GetCubeMapNegZ(i)->GetWidth(),
-			     pTexture->GetCubeMapNegZ(i)->GetHeight(),
+			     __size,
+			     texture->GetCubeMapNegZ(i)->GetWidth(),
+			     texture->GetCubeMapNegZ(i)->GetHeight(),
 			     0,
-			     lPixelFormat,
+			     _pixel_format,
 			     GL_UNSIGNED_BYTE,
-			     pTexture->GetCubeMapNegZ(i)->GetBuffer());
+			     texture->GetCubeMapNegZ(i)->GetBuffer());
 	}
 	OGL_FAST_ASSERT();
 #endif // !GLES
 }
 
-void OpenGLRenderer::ReleaseMap(TextureData* pTextureData)
-{
-	for (int i = 0; i < Texture::NUM_MAPS; i++)
-	{
-		if (pTextureData->mTMapID[i] != 0)
-		{
-			mTMapIDManager.RecycleId(pTextureData->mTMapID[i]);
-			GLuint lTextureName = pTextureData->mTMapID[i];
-			glDeleteTextures(1, &lTextureName);
-			pTextureData->mTMapID[i] = 0;
-			pTextureData->mTMipMapLevelCount[i] = 0;
+void OpenGLRenderer::ReleaseMap(TextureData* texture_data) {
+	for (int i = 0; i < Texture::kNumMaps; i++) {
+		if (texture_data->t_map_id_[i] != 0) {
+			t_map_id_manager_.RecycleId(texture_data->t_map_id_[i]);
+			GLuint texture_name = texture_data->t_map_id_[i];
+			glDeleteTextures(1, &texture_name);
+			texture_data->t_map_id_[i] = 0;
+			texture_data->t_mip_map_level_count_[i] = 0;
 		}
 	}
 
-	if (pTextureData == GetEnvTexture())
-	{
+	if (texture_data == GetEnvTexture()) {
 		SetEnvironmentMap(INVALID_TEXTURE);
 	}
 	//OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::BindGeometry(Tbc::GeometryBase* pGeometry,
-				  GeometryID /*pID*/,
-				  MaterialType pMaterialType)
-{
+void OpenGLRenderer::BindGeometry(tbc::GeometryBase* geometry,
+				  GeometryID /*id*/,
+				  MaterialType material_type) {
 	OGL_FAST_ASSERT();
 
 	// A hard coded check to make life easier for the user.
-	if (pMaterialType == MAT_TEXTURE_SBMAP_PXS ||
-	    pMaterialType == MAT_TEXTURE_AND_DIFFUSE_BUMPMAP_PXS)
-	{
-		pGeometry->GenerateTangentAndBitangentData();
+	if (material_type == kMatTextureSbmapPxs ||
+	    material_type == kMatTextureAndDiffuseBumpmapPxs) {
+		geometry->GenerateTangentAndBitangentData();
 	}
 
-	OGLGeometryData* lGeometryData = (OGLGeometryData*)pGeometry->GetRendererData();
-	if (pGeometry->IsGeometryReference())
-	{
-		Tbc::GeometryBase* lParentGeometry = ((Tbc::GeometryReference*)pGeometry)->GetParentGeometry();
-		GeometryData* lParentGeometryData = (GeometryData*)lParentGeometry->GetRendererData();
-		lGeometryData->CopyReferenceData(lParentGeometryData);
-	}
-	else
-	{
-		AppendWireframeLines(pGeometry);
-		lGeometryData->mIndexCount[0] = pGeometry->GetIndexCount();
-		lGeometryData->mIndexCount[1] = pGeometry->GetMaxIndexCount() - pGeometry->GetIndexCount();
-		lGeometryData->mIndexOffset[1] = pGeometry->GetIndexCount()*sizeof(vtx_idx_t);
+	OGLGeometryData* geometry_data = (OGLGeometryData*)geometry->GetRendererData();
+	if (geometry->IsGeometryReference()) {
+		tbc::GeometryBase* parent_geometry = ((tbc::GeometryReference*)geometry)->GetParentGeometry();
+		GeometryData* parent_geometry_data = (GeometryData*)parent_geometry->GetRendererData();
+		geometry_data->CopyReferenceData(parent_geometry_data);
+	} else {
+		AppendWireframeLines(geometry);
+		geometry_data->index_count_[0] = geometry->GetIndexCount();
+		geometry_data->index_count_[1] = geometry->GetMaxIndexCount() - geometry->GetIndexCount();
+		geometry_data->index_offset_[1] = geometry->GetIndexCount()*sizeof(vtx_idx_t);
 
-		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-		{
+		if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
 			// Upload geometry to the GFX hardware.
 
 			// First, get a free buffer ID and store it first in the VoidPtr array.
-			lGeometryData->mVertexBufferID = mBufferIDManager.GetFreeId();
+			geometry_data->vertex_buffer_id_ = buffer_id_manager_.GetFreeId();
 			//log_volatile(mLog.Tracef("Alloc buffer ID %u (vertex."), lGeometryData->mVertexBufferID));
-			lGeometryData->mIndexBufferID  = mBufferIDManager.GetFreeId();
-		
-			// Calculate the size of the created buffer.
-			int lVertexCount = pGeometry->GetMaxVertexCount();
-			int lBufferSize = lVertexCount * sizeof(float) * 3;
-			if (pGeometry->GetNormalData() != 0)
-			{
-				lBufferSize += lVertexCount * sizeof(float) * 3;
-			}
-			if (pGeometry->GetColorData() != 0)
-			{
-				int lSize = 4;
-				if (pGeometry->GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
-					lSize = 3;
+			geometry_data->index_buffer_id_  = buffer_id_manager_.GetFreeId();
 
-				lBufferSize += lVertexCount * sizeof(unsigned char) * lSize;
+			// Calculate the size of the created buffer.
+			int vertex_count = geometry->GetMaxVertexCount();
+			int buffer_size = vertex_count * sizeof(float) * 3;
+			if (geometry->GetNormalData() != 0) {
+				buffer_size += vertex_count * sizeof(float) * 3;
 			}
-			if (pGeometry->GetUVSetCount() > 0)
-			{
-				lBufferSize += (lVertexCount * sizeof(float) * pGeometry->GetUVCountPerVertex()) * pGeometry->GetUVSetCount();
+			if (geometry->GetColorData() != 0) {
+				int __size = 4;
+				if (geometry->GetColorFormat() == tbc::GeometryBase::kColorRgb)
+					__size = 3;
+
+				buffer_size += vertex_count * sizeof(unsigned char) * __size;
 			}
-			if (pGeometry->GetTangentData() != 0)
-			{
+			if (geometry->GetUVSetCount() > 0) {
+				buffer_size += (vertex_count * sizeof(float) * geometry->GetUVCountPerVertex()) * geometry->GetUVSetCount();
+			}
+			if (geometry->GetTangentData() != 0) {
 				// Assume that we have bitangent data as well.
-				lBufferSize += lVertexCount * sizeof(float) * 6;
+				buffer_size += vertex_count * sizeof(float) * 6;
 			}
 
 			// Set the most appropriate buffer object hint.
-			GLenum lGLHint = GL_DYNAMIC_DRAW;
+			GLenum gl_hint = GL_DYNAMIC_DRAW;
 #ifndef LEPRA_GL_ES
-			switch(pGeometry->GetGeometryVolatility())
-			{
-			case Tbc::GeometryBase::GEOM_STATIC:
-			case Tbc::GeometryBase::GEOM_SEMI_STATIC:
-				lGLHint = GL_STATIC_DRAW;
+			switch(geometry->GetGeometryVolatility()) {
+			case tbc::GeometryBase::kGeomStatic:
+			case tbc::GeometryBase::kGeomSemiStatic:
+				gl_hint = GL_STATIC_DRAW;
 				break;
-			case Tbc::GeometryBase::GEOM_DYNAMIC:
-				lGLHint = GL_DYNAMIC_DRAW;
+			case tbc::GeometryBase::kGeomDynamic:
+				gl_hint = GL_DYNAMIC_DRAW;
 				break;
-			case Tbc::GeometryBase::GEOM_VOLATILE:
-				lGLHint = GL_STREAM_DRAW;
+			case tbc::GeometryBase::kGeomVolatile:
+				gl_hint = GL_STREAM_DRAW;
 				break;
 			}
 #endif // !GLES
 			// Bind and create the vertex buffer in GFX memory.
 			//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lGeometryData->mVertexBufferID));
-			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 
-							      (GLuint)lGeometryData->mVertexBufferID);
-			UiLepra::OpenGLExtensions::glBufferData(GL_ARRAY_BUFFER, 
-							      lBufferSize,
-							      NULL, lGLHint);
+			uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER,
+							      (GLuint)geometry_data->vertex_buffer_id_);
+			uilepra::OpenGLExtensions::glBufferData(GL_ARRAY_BUFFER,
+							      buffer_size,
+							      NULL, gl_hint);
 
-			size_t lOffset = 0;
+			size_t offset = 0;
 			// Upload vertex data.
-			UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, lOffset,
-				lVertexCount * sizeof(float) * 3, (void*)pGeometry->GetVertexData());
-			lOffset += lVertexCount * sizeof(float) * 3;
+			uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, offset,
+				vertex_count * sizeof(float) * 3, (void*)geometry->GetVertexData());
+			offset += vertex_count * sizeof(float) * 3;
 
 			// Upload normal data.
-			lGeometryData->mNormalOffset = lOffset;
-			if (pGeometry->GetNormalData() != 0)
-			{
-				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, lOffset,
-						lVertexCount * sizeof(float) * 3, (void*)pGeometry->GetNormalData());
-				lOffset += lVertexCount * sizeof(float) * 3;
+			geometry_data->normal_offset_ = offset;
+			if (geometry->GetNormalData() != 0) {
+				uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, offset,
+						vertex_count * sizeof(float) * 3, (void*)geometry->GetNormalData());
+				offset += vertex_count * sizeof(float) * 3;
 			}
 
 			// Upload color data.
-			lGeometryData->mColorOffset = lOffset;
-			if (pGeometry->GetColorData() != 0)
-			{
-				int lSize = 4;
-				if (pGeometry->GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
-					lSize = 3;
+			geometry_data->color_offset_ = offset;
+			if (geometry->GetColorData() != 0) {
+				int __size = 4;
+				if (geometry->GetColorFormat() == tbc::GeometryBase::kColorRgb)
+					__size = 3;
 
-				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
-									 lOffset,
-									 lVertexCount * sizeof(unsigned char) * lSize,
-									 (void*)pGeometry->GetColorData());
-				lOffset += lVertexCount * sizeof(unsigned char) * lSize;
+				uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
+									 offset,
+									 vertex_count * sizeof(unsigned char) * __size,
+									 (void*)geometry->GetColorData());
+				offset += vertex_count * sizeof(unsigned char) * __size;
 			}
 
 
 			// Upload UV data.
-			lGeometryData->mUVOffset = lOffset;
-			if (pGeometry->GetUVSetCount() > 0)
-			{
-				const int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
-				for (unsigned i = 0; i < pGeometry->GetUVSetCount(); i++)
-				{
-					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
-										 lOffset,
-										 lVertexCount * sizeof(float) * lUVCountPerVertex,
-										 (void*)pGeometry->GetUVData(i));
-					lOffset += lVertexCount * sizeof(float) * lUVCountPerVertex;
+			geometry_data->uv_offset_ = offset;
+			if (geometry->GetUVSetCount() > 0) {
+				const int uv_count_per_vertex = geometry->GetUVCountPerVertex();
+				for (unsigned i = 0; i < geometry->GetUVSetCount(); i++) {
+					uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
+										 offset,
+										 vertex_count * sizeof(float) * uv_count_per_vertex,
+										 (void*)geometry->GetUVData(i));
+					offset += vertex_count * sizeof(float) * uv_count_per_vertex;
 				}
 			}
 
 			// Upload tangent data.
-			lGeometryData->mTangentOffset = lOffset;
-			if (pGeometry->GetTangentData() != 0)
-			{
-				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
-									 lOffset,
-									 lVertexCount * sizeof(float) * 3,
-									 (void*)pGeometry->GetTangentData());
-				lOffset += lVertexCount * sizeof(float) * 3;
-			}
-			else
-			{
-				lGeometryData->mTangentOffset = 0;
+			geometry_data->tangent_offset_ = offset;
+			if (geometry->GetTangentData() != 0) {
+				uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
+									 offset,
+									 vertex_count * sizeof(float) * 3,
+									 (void*)geometry->GetTangentData());
+				offset += vertex_count * sizeof(float) * 3;
+			} else {
+				geometry_data->tangent_offset_ = 0;
 			}
 
 			// Upload bitangent data.
-			lGeometryData->mBitangentOffset = lOffset;
-			if (pGeometry->GetBitangentData() != 0)
-			{
-				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
-									 lOffset,
-									 lVertexCount * sizeof(float) * 3,
-									 (void*)pGeometry->GetBitangentData());
-				lOffset += lVertexCount * sizeof(float) * 3;
-			}
-			else
-			{
-				lGeometryData->mBitangentOffset = 0;
+			geometry_data->bitangent_offset_ = offset;
+			if (geometry->GetBitangentData() != 0) {
+				uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
+									 offset,
+									 vertex_count * sizeof(float) * 3,
+									 (void*)geometry->GetBitangentData());
+				offset += vertex_count * sizeof(float) * 3;
+			} else {
+				geometry_data->bitangent_offset_ = 0;
 			}
 
 			// Bind and create the index buffer in GFX memory.
-			UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)lGeometryData->mIndexBufferID);
-			UiLepra::OpenGLExtensions::glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-							      pGeometry->GetMaxIndexCount() * sizeof(vtx_idx_t),
-							      0, lGLHint);
+			uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)geometry_data->index_buffer_id_);
+			uilepra::OpenGLExtensions::glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+							      geometry->GetMaxIndexCount() * sizeof(vtx_idx_t),
+							      0, gl_hint);
 
-			UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,
+			uilepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER,
 								 0,
-								 pGeometry->GetMaxIndexCount() * sizeof(vtx_idx_t),
-								 (void*)pGeometry->GetIndexData());
+								 geometry->GetMaxIndexCount() * sizeof(vtx_idx_t),
+								 (void*)geometry->GetIndexData());
 		}
 	}
 
 	OGL_FAST_ASSERT();
 }
 
-bool OpenGLRenderer::BindShadowGeometry(UiTbc::ShadowVolume* pShadowVolume, LightHint pLightHint)
-{
-	bool lOK = false;
+bool OpenGLRenderer::BindShadowGeometry(uitbc::ShadowVolume* shadow_volume, LightHint light_hint) {
+	bool ok = false;
 
-	OGLGeometryData* lShadowGeom = (OGLGeometryData*)pShadowVolume->GetRendererData();
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
+	OGLGeometryData* shadow_geom = (OGLGeometryData*)shadow_volume->GetRendererData();
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
 		// Upload geometry to the GFX hardware.
 
 		// First, get a free buffer ID and store it first in the VoidPtr array.
-		lShadowGeom->mVertexBufferID = mBufferIDManager.GetFreeId();
+		shadow_geom->vertex_buffer_id_ = buffer_id_manager_.GetFreeId();
 		//log_volatile(mLog.Tracef("Alloc buffer ID %u (vertex."), lShadowGeom->mVertexBufferID));
-		lShadowGeom->mIndexBufferID  = mBufferIDManager.GetFreeId();
-	
+		shadow_geom->index_buffer_id_  = buffer_id_manager_.GetFreeId();
+
 		// Calculate the size of the created buffer.
-		int lVertexCount = pShadowVolume->GetMaxVertexCount();
-		int lBufferSize = lVertexCount * sizeof(float) * 3;
+		int vertex_count = shadow_volume->GetMaxVertexCount();
+		int buffer_size = vertex_count * sizeof(float) * 3;
 
 		// Set the most appropriate buffer object hint.
-		GLenum lGLHint = GL_DYNAMIC_DRAW;
+		GLenum gl_hint = GL_DYNAMIC_DRAW;
 #ifndef LEPRA_GL_ES
-		switch(pShadowVolume->GetGeometryVolatility())
-		{
-		case Tbc::GeometryBase::GEOM_STATIC:
-		case Tbc::GeometryBase::GEOM_SEMI_STATIC:
-			if (pLightHint == LIGHT_MOVABLE)
-				lGLHint = GL_STREAM_DRAW;
+		switch(shadow_volume->GetGeometryVolatility()) {
+		case tbc::GeometryBase::kGeomStatic:
+		case tbc::GeometryBase::kGeomSemiStatic:
+			if (light_hint == kLightMovable)
+				gl_hint = GL_STREAM_DRAW;
 			else
-				lGLHint = GL_STATIC_DRAW;
+				gl_hint = GL_STATIC_DRAW;
 			break;
-		case Tbc::GeometryBase::GEOM_DYNAMIC:
-			if (pLightHint == LIGHT_MOVABLE)
-				lGLHint = GL_STREAM_DRAW;
+		case tbc::GeometryBase::kGeomDynamic:
+			if (light_hint == kLightMovable)
+				gl_hint = GL_STREAM_DRAW;
 			else
-				lGLHint = GL_DYNAMIC_DRAW;
+				gl_hint = GL_DYNAMIC_DRAW;
 			break;
-		case Tbc::GeometryBase::GEOM_VOLATILE:
-			lGLHint = GL_STREAM_DRAW;
+		case tbc::GeometryBase::kGeomVolatile:
+			gl_hint = GL_STREAM_DRAW;
 			break;
 		}
 #endif // !GLES
-		
+
 		// Bind and create the vertex buffer in GFX memory.
 		//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lShadowGeom->mVertexBufferID));
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lShadowGeom->mVertexBufferID);
-		UiLepra::OpenGLExtensions::glBufferData(GL_ARRAY_BUFFER, 
-						      lBufferSize,
-						      NULL, lGLHint);
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)shadow_geom->vertex_buffer_id_);
+		uilepra::OpenGLExtensions::glBufferData(GL_ARRAY_BUFFER,
+						      buffer_size,
+						      NULL, gl_hint);
 
-		int lOffset = 0;
+		int offset = 0;
 		// Upload vertex data.
-		UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
-							 lOffset, 
-							 lVertexCount * sizeof(float) * 3,
-							 (void*)pShadowVolume->GetVertexData());
-		lOffset += lVertexCount * sizeof(float) * 3;
+		uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
+							 offset,
+							 vertex_count * sizeof(float) * 3,
+							 (void*)shadow_volume->GetVertexData());
+		offset += vertex_count * sizeof(float) * 3;
 
 		// Bind and create the index buffer in GFX memory.
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)lShadowGeom->mIndexBufferID);
-		UiLepra::OpenGLExtensions::glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-						      pShadowVolume->GetMaxIndexCount() * sizeof(vtx_idx_t),
-						      pShadowVolume->GetIndexData(), lGLHint);
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)shadow_geom->index_buffer_id_);
+		uilepra::OpenGLExtensions::glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+						      shadow_volume->GetMaxIndexCount() * sizeof(vtx_idx_t),
+						      shadow_volume->GetIndexData(), gl_hint);
 
-		lOK = true;
+		ok = true;
 	}
 
 	OGL_FAST_ASSERT();
-	return lOK;
+	return ok;
 }
 
-void OpenGLRenderer::UpdateGeometry(GeometryID pGeometryID, bool pForce)
-{
-	GeometryTable::Iterator lIter;
-	lIter = GetGeometryTable().Find(pGeometryID);
+void OpenGLRenderer::UpdateGeometry(GeometryID geometry_id, bool force) {
+	GeometryTable::Iterator iter;
+	iter = GetGeometryTable().Find(geometry_id);
 
-	if (lIter != GetGeometryTable().End())
-	{
-		OGLGeometryData* lGeomData = (OGLGeometryData*)*lIter;
-		Tbc::GeometryBase* lGeometry = lGeomData->mGeometry;
+	if (iter != GetGeometryTable().End()) {
+		OGLGeometryData* geom_data = (OGLGeometryData*)*iter;
+		tbc::GeometryBase* _geometry = geom_data->geometry_;
 
-		if (pForce)
-		{
-			ReleaseGeometry(lGeometry, GRO_IGNORE_MATERIAL);
-			BindGeometry(lGeometry, pGeometryID, GetMaterialType(pGeometryID));
+		if (force) {
+			ReleaseGeometry(_geometry, kGroIgnoreMaterial);
+			BindGeometry(_geometry, geometry_id, GetMaterialType(geometry_id));
 			return;
 		}
 		// Force update of shadow volumes.
 
-		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() && !lGeometry->IsGeometryReference())
-		{
-			int lVertexCount = lGeometry->GetVertexCount();
+		if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() && !_geometry->IsGeometryReference()) {
+			int vertex_count = _geometry->GetVertexCount();
 
-			if (lGeometry->GetVertexDataChanged() ||
-			   lGeometry->GetColorDataChanged() ||
-			   lGeometry->GetUVDataChanged())
-			{
+			if (_geometry->GetVertexDataChanged() ||
+			   _geometry->GetColorDataChanged() ||
+			   _geometry->GetUVDataChanged()) {
 				//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lGeomData->mVertexBufferID));
-				UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeomData->mVertexBufferID);
+				uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)geom_data->vertex_buffer_id_);
 			}
 
-			if (lGeometry->GetVertexDataChanged())
-			{
-				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
-									 lGeomData->mVertexOffset,
-									 lVertexCount * sizeof(float) * 3,
-									 (void*)lGeometry->GetVertexData());
+			if (_geometry->GetVertexDataChanged()) {
+				uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
+									 geom_data->vertex_offset_,
+									 vertex_count * sizeof(float) * 3,
+									 (void*)_geometry->GetVertexData());
 
-				if (lGeometry->GetNormalData())
-				{
-					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
-										 lGeomData->mNormalOffset,
-										 lVertexCount * sizeof(float) * 3,
-										 (void*)lGeometry->GetNormalData());
+				if (_geometry->GetNormalData()) {
+					uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
+										 geom_data->normal_offset_,
+										 vertex_count * sizeof(float) * 3,
+										 (void*)_geometry->GetNormalData());
 				}
 
 				// Only reset the flag if there are no shadows to update.
 				// The flag will be reset when the shadows are updated.
-				if (lGeomData->mShadow <= NO_SHADOWS)
-				{
-					lGeometry->SetVertexDataChanged(false);
+				if (geom_data->shadow_ <= kNoShadows) {
+					_geometry->SetVertexDataChanged(false);
 				}
 			}
 
-			if (lGeometry->GetColorDataChanged() && lGeometry->GetColorData())
-			{
-				int lSize = 4;
-				if (lGeometry->GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
-					lSize = 3;
+			if (_geometry->GetColorDataChanged() && _geometry->GetColorData()) {
+				int __size = 4;
+				if (_geometry->GetColorFormat() == tbc::GeometryBase::kColorRgb)
+					__size = 3;
 
-				UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
-									 lGeomData->mColorOffset,
-									 lVertexCount * sizeof(unsigned char) * lSize,
-									 (void*)lGeometry->GetColorData());
+				uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
+									 geom_data->color_offset_,
+									 vertex_count * sizeof(unsigned char) * __size,
+									 (void*)_geometry->GetColorData());
 			}
 
-			if (lGeometry->GetUVDataChanged())
-			{
+			if (_geometry->GetUVDataChanged()) {
 				OGL_FAST_ASSERT();
-				size_t lOffset = lGeomData->mUVOffset;
-				int lUVCountPerVertex = lGeometry->GetUVCountPerVertex();
-				for (unsigned i = 0; i < lGeometry->GetUVSetCount(); i++)
-				{
-					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, lOffset,
-						lVertexCount * sizeof(float) * lUVCountPerVertex, (void*)lGeometry->GetUVData(i));
-					lOffset += lVertexCount * sizeof(float) * lUVCountPerVertex;
+				size_t offset = geom_data->uv_offset_;
+				int uv_count_per_vertex = _geometry->GetUVCountPerVertex();
+				for (unsigned i = 0; i < _geometry->GetUVSetCount(); i++) {
+					uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, offset,
+						vertex_count * sizeof(float) * uv_count_per_vertex, (void*)_geometry->GetUVData(i));
+					offset += vertex_count * sizeof(float) * uv_count_per_vertex;
 					OGL_FAST_ASSERT();
 				}
 			}
 
-			if (lGeometry->GetTangentData() != 0 &&
-			   (lGeometry->GetVertexDataChanged() || lGeometry->GetUVDataChanged()))
-			{
-				if (lGeomData->mTangentOffset > 0)
-				{
-					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
-										 lGeomData->mTangentOffset,
-										 lVertexCount * sizeof(float) * 3,
-										 (void*)lGeometry->GetTangentData());
+			if (_geometry->GetTangentData() != 0 &&
+			   (_geometry->GetVertexDataChanged() || _geometry->GetUVDataChanged())) {
+				if (geom_data->tangent_offset_ > 0) {
+					uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
+										 geom_data->tangent_offset_,
+										 vertex_count * sizeof(float) * 3,
+										 (void*)_geometry->GetTangentData());
 				}
 
-				if (lGeomData->mBitangentOffset > 0)
-				{
-					UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 
-										 lGeomData->mBitangentOffset,
-										 lVertexCount * sizeof(float) * 3,
-										 (void*)lGeometry->GetBitangentData());
+				if (geom_data->bitangent_offset_ > 0) {
+					uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER,
+										 geom_data->bitangent_offset_,
+										 vertex_count * sizeof(float) * 3,
+										 (void*)_geometry->GetBitangentData());
 				}
 			}
 
-			if (lGeometry->GetIndexDataChanged())
-			{
-				UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)lGeomData->mIndexBufferID);
-				UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
-					lGeometry->GetTriangleCount() * 3 * sizeof(vtx_idx_t),
-					(void*)lGeometry->GetIndexData());
+			if (_geometry->GetIndexDataChanged()) {
+				uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (GLuint)geom_data->index_buffer_id_);
+				uilepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
+					_geometry->GetTriangleCount() * 3 * sizeof(vtx_idx_t),
+					(void*)_geometry->GetIndexData());
 			}
 		}
 	}
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::ReleaseGeometry(Tbc::GeometryBase* pUserGeometry, GeomReleaseOption pOption)
-{
-	OGLGeometryData* lGeometry = (OGLGeometryData*)pUserGeometry->GetRendererData();
+void OpenGLRenderer::ReleaseGeometry(tbc::GeometryBase* user_geometry, GeomReleaseOption option) {
+	OGLGeometryData* _geometry = (OGLGeometryData*)user_geometry->GetRendererData();
 
-	if (pUserGeometry->IsGeometryReference() == false && 
-		UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
+	if (user_geometry->IsGeometryReference() == false &&
+		uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		GLuint vertex_buffer_id = (GLuint)_geometry->vertex_buffer_id_;
+		GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
 
 		//log_volatile(mLog.Tracef("glDeleteBuffers %u (vertex."), lVertexBufferID));
-		UiLepra::OpenGLExtensions::glDeleteBuffers(1, &lVertexBufferID);
+		uilepra::OpenGLExtensions::glDeleteBuffers(1, &vertex_buffer_id);
 		//log_volatile(mLog.Tracef("glDeleteBuffers %u (index."), lIndexBufferID));
-		UiLepra::OpenGLExtensions::glDeleteBuffers(1, &lIndexBufferID);
+		uilepra::OpenGLExtensions::glDeleteBuffers(1, &index_buffer_id);
 
-		mBufferIDManager.RecycleId(lGeometry->mVertexBufferID);
-		mBufferIDManager.RecycleId(lGeometry->mIndexBufferID);
+		buffer_id_manager_.RecycleId(_geometry->vertex_buffer_id_);
+		buffer_id_manager_.RecycleId(_geometry->index_buffer_id_);
 	}
 
-	if (pOption == GRO_REMOVE_FROM_MATERIAL)
-	{
-		OpenGLMaterial* lMat = (OpenGLMaterial*)GetMaterial(lGeometry->mMaterialType);
-		if (lMat->RemoveGeometry(pUserGeometry) == Material::NOT_REMOVED)
-		{
+	if (option == kGroRemoveFromMaterial) {
+		OpenGLMaterial* mat = (OpenGLMaterial*)GetMaterial(_geometry->material_type_);
+		if (mat->RemoveGeometry(user_geometry) == Material::kNotRemoved) {
 			// Make sure the geometry is properly removed -- otherwise we have a leak!
 			// In case fallback materials are disabled, the material may not have added
 			// the geometry in the first place.
@@ -1130,144 +1009,120 @@ void OpenGLRenderer::ReleaseGeometry(Tbc::GeometryBase* pUserGeometry, GeomRelea
 		}
 	}
 
-	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
-	{
-		LightData* lLight = x->second;
-		lLight->mShadowMapGeometrySet.Remove(lGeometry);
+	for (LightDataMap::iterator x = light_data_map_.begin(); x != light_data_map_.end(); ++x) {
+		LightData* _light = x->second;
+		_light->shadow_map_geometry_set_.Remove(_geometry);
 	}
 
 	//OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::AppendWireframeLines(Tbc::GeometryBase* pGeometry)
-{
-	if (pGeometry->GetPrimitiveType() != Tbc::GeometryBase::TRIANGLES || pGeometry->CheckFlag(Tbc::GeometryBase::CONTAINS_WIREFRAME))
-	{
+void OpenGLRenderer::AppendWireframeLines(tbc::GeometryBase* geometry) {
+	if (geometry->GetPrimitiveType() != tbc::GeometryBase::kTriangles || geometry->CheckFlag(tbc::GeometryBase::kContainsWireframe)) {
 		return;
 	}
-	pGeometry->SetFlag(Tbc::GeometryBase::CONTAINS_WIREFRAME);
-	if (!pGeometry->GetEdgeData())
-	{
-		pGeometry->GenerateEdgeData();
+	geometry->SetFlag(tbc::GeometryBase::kContainsWireframe);
+	if (!geometry->GetEdgeData()) {
+		geometry->GenerateEdgeData();
 	}
-	const int lLineCount = pGeometry->GetEdgeCount();
-	const int lBaseIndex = pGeometry->GetIndexCount();
-	const int lTotalIndexCount = lBaseIndex+lLineCount*2;
-	vtx_idx_t* lIndexData = new vtx_idx_t[lTotalIndexCount];
-	::memcpy(lIndexData, pGeometry->GetIndexData(), pGeometry->GetIndexCount()*sizeof(vtx_idx_t));
-	const Tbc::GeometryBase::Edge* lEdges = pGeometry->GetEdgeData();
-	for (int i = 0; i < lLineCount; ++i)
-	{
-		lIndexData[i*2+0+lBaseIndex] = lEdges[i].mVertex[0];
-		lIndexData[i*2+1+lBaseIndex] = lEdges[i].mVertex[1];
+	const int line_count = geometry->GetEdgeCount();
+	const int base_index = geometry->GetIndexCount();
+	const int total_index_count = base_index+line_count*2;
+	vtx_idx_t* index_data = new vtx_idx_t[total_index_count];
+	::memcpy(index_data, geometry->GetIndexData(), geometry->GetIndexCount()*sizeof(vtx_idx_t));
+	const tbc::GeometryBase::Edge* edges = geometry->GetEdgeData();
+	for (int i = 0; i < line_count; ++i) {
+		index_data[i*2+0+base_index] = edges[i].vertex_[0];
+		index_data[i*2+1+base_index] = edges[i].vertex_[1];
 	}
-	pGeometry->SetIndexData(lIndexData, pGeometry->GetIndexCount(), lTotalIndexCount);
+	geometry->SetIndexData(index_data, geometry->GetIndexCount(), total_index_count);
 }
 
 
-bool OpenGLRenderer::ChangeMaterial(GeometryID pGeometryID, MaterialType pMaterialType)
-{
-	if ((int)pMaterialType < 0 || (int)pMaterialType >= MAT_COUNT)
-	{
-		mLog.Errorf("ChangeMaterial - Material %i is not a valid material ID!", (int)pMaterialType);
+bool OpenGLRenderer::ChangeMaterial(GeometryID geometry_id, MaterialType material_type) {
+	if ((int)material_type < 0 || (int)material_type >= kMatCount) {
+		log_.Errorf("ChangeMaterial - Material %i is not a valid material ID!", (int)material_type);
 		return (false);
 	}
-	OpenGLMaterial* lMat = (OpenGLMaterial*)GetMaterial(pMaterialType);
-	if (lMat == 0)
-	{
-		mLog.Errorf("ChangeMaterial - Material %i is not implemented!", (int)pMaterialType);
+	OpenGLMaterial* mat = (OpenGLMaterial*)GetMaterial(material_type);
+	if (mat == 0) {
+		log_.Errorf("ChangeMaterial - Material %i is not implemented!", (int)material_type);
 		return (false);
 	}
 
-	GeometryTable::Iterator lIter;
-	lIter = GetGeometryTable().Find(pGeometryID);
+	GeometryTable::Iterator iter;
+	iter = GetGeometryTable().Find(geometry_id);
 
-	bool lOk = (lIter != GetGeometryTable().End());
-	if (lOk)
-	{
-		OGLGeometryData* lGeometry = (OGLGeometryData*)*lIter;
-		if (lGeometry->mMaterialType != pMaterialType)
-		{
-			OpenGLMaterial* lMat = (OpenGLMaterial*)GetMaterial(lGeometry->mMaterialType);
-			lMat->RemoveGeometry(lGeometry->mGeometry);
-			lGeometry->mMaterialType = pMaterialType;
-			lMat = (OpenGLMaterial*)GetMaterial(lGeometry->mMaterialType);
-			lOk = lMat->AddGeometry(lGeometry->mGeometry);
+	bool ok = (iter != GetGeometryTable().End());
+	if (ok) {
+		OGLGeometryData* _geometry = (OGLGeometryData*)*iter;
+		if (_geometry->material_type_ != material_type) {
+			OpenGLMaterial* mat = (OpenGLMaterial*)GetMaterial(_geometry->material_type_);
+			mat->RemoveGeometry(_geometry->geometry_);
+			_geometry->material_type_ = material_type;
+			mat = (OpenGLMaterial*)GetMaterial(_geometry->material_type_);
+			ok = mat->AddGeometry(_geometry->geometry_);
 		}
 	}
 	OGL_FAST_ASSERT();
-	return (lOk);
+	return (ok);
 }
 
 
 
-bool OpenGLRenderer::PreRender(Tbc::GeometryBase* pGeometry)
-{
-	if (pGeometry->IsTwoSided())
-	{
+bool OpenGLRenderer::PreRender(tbc::GeometryBase* geometry) {
+	if (geometry->IsTwoSided()) {
 		::glDisable(GL_CULL_FACE);
 	}
 	// Check if we can avoid double-rendering (if in unlit mode).
-	if (pGeometry->IsRecvNoShadows())
-	{
-		const bool lLightsEnabled = GetLightsEnabled();
-		if (GetShadowMode() != NO_SHADOWS && !lLightsEnabled)
-		{
+	if (geometry->IsRecvNoShadows()) {
+		const bool lights_enabled = GetLightsEnabled();
+		if (GetShadowMode() != kNoShadows && !lights_enabled) {
 			return false;
-		}
-		else if (lLightsEnabled)
-		{
+		} else if (lights_enabled) {
 			::glDisable(GL_STENCIL_TEST);
 		}
 	}
 
-	const xform& t = pGeometry->GetTransformation();
-	if (pGeometry->IsExcludeCulling() || CheckCamCulling(t.GetPosition(), pGeometry->GetBoundingRadius()))
-	{
-		mVisibleTriangleCount += pGeometry->GetTriangleCount();
-		mCamSpaceTransformation.FastInverseTransform(mCameraActualTransformation, mCameraActualOrientationInverse, t);
-		float lModelViewMatrix[16];
-		mCamSpaceTransformation.GetAs4x4TransposeMatrix(pGeometry->GetScale(), lModelViewMatrix);
+	const xform& t = geometry->GetTransformation();
+	if (geometry->IsExcludeCulling() || CheckCamCulling(t.GetPosition(), geometry->GetBoundingRadius())) {
+		visible_triangle_count_ += geometry->GetTriangleCount();
+		cam_space_transformation_.FastInverseTransform(camera_actual_transformation_, camera_actual_orientation_inverse_, t);
+		float model_view_matrix[16];
+		cam_space_transformation_.GetAs4x4TransposeMatrix(geometry->GetScale(), model_view_matrix);
 		glMatrixMode(GL_MODELVIEW);
-		glLoadMatrixf(lModelViewMatrix);
+		glLoadMatrixf(model_view_matrix);
 		return true;
-	}
-	else
-	{
-		mCulledTriangleCount += pGeometry->GetTriangleCount();
+	} else {
+		culled_triangle_count_ += geometry->GetTriangleCount();
 	}
 	return false;
 }
 
-void OpenGLRenderer::PostRender(Tbc::GeometryBase* pGeometry)
-{
-	pGeometry->SetTransformationChanged(false);
-	if (pGeometry->IsRecvNoShadows())
-	{
-		if (GetLightsEnabled())
-		{
+void OpenGLRenderer::PostRender(tbc::GeometryBase* geometry) {
+	geometry->SetTransformationChanged(false);
+	if (geometry->IsRecvNoShadows()) {
+		if (GetLightsEnabled()) {
 			::glEnable(GL_STENCIL_TEST);
 		}
 	}
-	if (pGeometry->IsTwoSided())
-	{
+	if (geometry->IsTwoSided()) {
 		::glEnable(GL_CULL_FACE);
 	}
 }
 
 
 
-void OpenGLRenderer::DrawLine(const vec3& pPosition, const vec3& pVector, const Color& pColor)
-{
+void OpenGLRenderer::DrawLine(const vec3& position, const vec3& vector, const Color& color) {
 	glEnable(GL_DEPTH_TEST);
-	xform lCamTransform = GetCameraActualTransformation().InverseTransform(gIdentityTransformationF);
-	float lModelViewMatrix[16];
-	lCamTransform.GetAs4x4TransposeMatrix(lModelViewMatrix);
+	xform cam_transform = GetCameraActualTransformation().InverseTransform(kIdentityTransformationF);
+	float model_view_matrix[16];
+	cam_transform.GetAs4x4TransposeMatrix(model_view_matrix);
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(lModelViewMatrix);
+	glLoadMatrixf(model_view_matrix);
 
-	glColor4ub(pColor.mRed, pColor.mGreen, pColor.mBlue, 255);
-	GLfloat v[] = {pPosition.x, pPosition.y, pPosition.z, pPosition.x+pVector.x, pPosition.y+pVector.y, pPosition.z+pVector.z};
+	glColor4ub(color.red_, color.green_, color.blue_, 255);
+	GLfloat v[] = {position.x, position.y, position.z, position.x+vector.x, position.y+vector.y, position.z+vector.z};
 	::glVertexPointer(3, GL_FLOAT, 0, v);
 	::glDrawArrays(GL_LINES, 0, 2);
 
@@ -1276,8 +1131,7 @@ void OpenGLRenderer::DrawLine(const vec3& pPosition, const vec3& pVector, const 
 
 
 
-unsigned OpenGLRenderer::RenderScene()
-{
+unsigned OpenGLRenderer::RenderScene() {
 	LEPRA_MEASURE_SCOPE(RenderScene);
 
 	OGL_ASSERT();
@@ -1296,11 +1150,11 @@ unsigned OpenGLRenderer::RenderScene()
 		//but the Get-functions will return the values stored in Renderer,
 		//while the Set-functions are virtual and will call the OpenGLRenderer-ditto.
 		SetViewport(GetViewport());
-		float lFOVAngle;
-		float lNear;
-		float lFar;
-		GetViewFrustum(lFOVAngle, lNear, lFar);
-		SetViewFrustum(lFOVAngle, lNear, lFar);
+		float _fov_angle;
+		float _near;
+		float _far;
+		GetViewFrustum(_fov_angle, _near, _far);
+		SetViewFrustum(_fov_angle, _near, _far);
 
 		CalcCamCulling();
 
@@ -1316,41 +1170,35 @@ unsigned OpenGLRenderer::RenderScene()
 		::glCullFace(GL_BACK);
 		::glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 		::glEnable(GL_LINE_SMOOTH);
-		if (GetFogFar() > 0)
-		{
+		if (GetFogFar() > 0) {
 			::glEnable(GL_FOG);
 			::glFogf(GL_FOG_MODE, (GetFogExponent()>0)? (float)GL_EXP : (float)GL_LINEAR);
 			::glFogf(GL_FOG_DENSITY, GetFogDensity());
 			::glFogf(GL_FOG_START, GetFogNear());
 			::glFogf(GL_FOG_END, GetFogFar());
-			const float lFogColor[4] = {mClearColor.GetRf(), mClearColor.GetGf(), mClearColor.GetBf(), mClearColor.GetAf()};
-			::glFogfv(GL_FOG_COLOR, lFogColor);
-		}
-		else
-		{
+			const float fog_color[4] = {clear_color_.GetRf(), clear_color_.GetGf(), clear_color_.GetBf(), clear_color_.GetAf()};
+			::glFogfv(GL_FOG_COLOR, fog_color);
+		} else {
 			::glDisable(GL_FOG);
 		}
 		Material::EnableDrawMaterial(true);
 		Material::EnableWireframe(IsWireframeEnabled());
 
-		if (!IsPixelShadersEnabled())
-		{
+		if (!IsPixelShadersEnabled()) {
 			OpenGLMatPXS::CleanupShaderPrograms();
 		}
 	}
 
-	float lAmbientRed, lAmbientGreen, lAmbientBlue;
-	GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+	float ambient_red, ambient_green, ambient_blue;
+	GetAmbientLight(ambient_red, ambient_green, ambient_blue);
 
-	if (GetShadowMode() != NO_SHADOWS && GetLightsEnabled())
-	{
+	if (GetShadowMode() != kNoShadows && GetLightsEnabled()) {
 		UpdateShadowMaps();
 
-		EnableGlLights(this, mLightDataMap, false);
+		EnableGlLights(this, light_data_map_, false);
 
-		if (IsOutlineRenderingEnabled())
-		{
-			SetAmbientLight(lAmbientRed*0.5f, lAmbientGreen*0.5f, lAmbientBlue*0.5f);
+		if (IsOutlineRenderingEnabled()) {
+			SetAmbientLight(ambient_red*0.5f, ambient_green*0.5f, ambient_blue*0.5f);
 			glEnable(GL_POLYGON_OFFSET_FILL);
 			glPolygonOffset(-1, -2000);
 		}
@@ -1359,31 +1207,28 @@ unsigned OpenGLRenderer::RenderScene()
 		OpenGLMatPXS::PrepareLights(this);
 
 		// Render the scene darkened.
-		for (int i = 0; i <= (int)MAT_LAST_SOLID; i++)
-		{
-			Material* lMaterial = GetMaterial((MaterialType)i);
-			if (lMaterial == 0)
-			{
+		for (int i = 0; i <= (int)kMatLastSolid; i++) {
+			Material* material = GetMaterial((MaterialType)i);
+			if (material == 0) {
 				continue;
 			}
-			Material::RenderAllGeometry(GetCurrentFrame(), lMaterial);
+			Material::RenderAllGeometry(GetCurrentFrame(), material);
 			OGL_FAST_ASSERT();
 		}
 
 		// Render the outline before shadow volumes, to avoid obfuscation.
-		if (IsOutlineRenderingEnabled())
-		{
-			EnableGlLights(this, mLightDataMap, true);
+		if (IsOutlineRenderingEnabled()) {
+			EnableGlLights(this, light_data_map_, true);
 			glPolygonOffset(0, 0);
 			glDisable(GL_POLYGON_OFFSET_FILL);
-			SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+			SetAmbientLight(ambient_red, ambient_green, ambient_blue);
 			Material::EnableWireframe(true);
-			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
-			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
-			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_ENVMAP_SOLID), GetMaterial(MAT_SINGLE_COLOR_SOLID));
-			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
+			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(kMatSingleColorSolid));
+			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(kMatSingleColorSolidPxs), GetMaterial(kMatSingleColorSolid));
+			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(kMatSingleColorEnvmapSolid), GetMaterial(kMatSingleColorSolid));
+			Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(kMatSingleColorOutlineBlended));
 			Material::EnableWireframe(false);
-			EnableGlLights(this, mLightDataMap, false);
+			EnableGlLights(this, light_data_map_, false);
 		}
 
 		// Shadow stencil buffer operations.
@@ -1393,8 +1238,7 @@ unsigned OpenGLRenderer::RenderScene()
 
 		// Render all shadow maps. In this step, we only render the shadows
 		// using alpha testing to the stencil buffer (no output to the color buffer).
-		if (GetNumSpotLights() > 0 && GetShadowHint() == SH_VOLUMES_AND_MAPS)
-		{
+		if (GetNumSpotLights() > 0 && GetShadowHint() == kShVolumesAndMaps) {
 			RenderShadowMaps();
 		}
 
@@ -1407,29 +1251,28 @@ unsigned OpenGLRenderer::RenderScene()
 		::glStencilFunc(GL_GEQUAL, 128, 0xFF);
 		::glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-		EnableGlLights(this, mLightDataMap, true);
+		EnableGlLights(this, light_data_map_, true);
 	}
 
-	bool lSkipOutlined = false;
-	if (IsOutlineRenderingEnabled() && !IsWireframeEnabled())
-	{
+	bool skip_outlined = false;
+	if (IsOutlineRenderingEnabled() && !IsWireframeEnabled()) {
 		Material::EnableDrawMaterial(false);
 		SetAmbientLight(1, 1, 1);
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(-1, -2600);
-		const vec3 lColor(mOutlineFillColor.GetRf(), mOutlineFillColor.GetGf(), mOutlineFillColor.GetBf());
-		Tbc::GeometryBase::BasicMaterialSettings lMaterial(vec3(1, 1, 1), lColor, vec3(), 1, 1, false);
-		OpenGLMaterial::SetBasicMaterial(lMaterial, this);
-		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID));
-		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_SOLID_PXS), GetMaterial(MAT_SINGLE_COLOR_SOLID));
-		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_ENVMAP_SOLID), GetMaterial(MAT_SINGLE_COLOR_SOLID));
-		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(MAT_SINGLE_COLOR_OUTLINE_BLENDED));
+		const vec3 _color(outline_fill_color_.GetRf(), outline_fill_color_.GetGf(), outline_fill_color_.GetBf());
+		tbc::GeometryBase::BasicMaterialSettings material(vec3(1, 1, 1), _color, vec3(), 1, 1, false);
+		OpenGLMaterial::SetBasicMaterial(material, this);
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(kMatSingleColorSolid));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(kMatSingleColorSolidPxs), GetMaterial(kMatSingleColorSolid));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(kMatSingleColorEnvmapSolid), GetMaterial(kMatSingleColorSolid));
+		Material::RenderAllGeometry(GetCurrentFrame(), GetMaterial(kMatSingleColorOutlineBlended));
 		Material::EnableDrawMaterial(true);
 
-		lSkipOutlined = true;
+		skip_outlined = true;
 	}
 
-	SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+	SetAmbientLight(ambient_red, ambient_green, ambient_blue);
 
 	{
 		// Prepare the pixel shader materials.
@@ -1437,36 +1280,30 @@ unsigned OpenGLRenderer::RenderScene()
 	}
 	{
 		// This renders the scene.
-		for (int i = 0; i < (int)MAT_COUNT; ++i)
-		{
-			if (lSkipOutlined && (i == MAT_SINGLE_COLOR_SOLID || i == MAT_SINGLE_COLOR_OUTLINE_BLENDED ||
-				i == MAT_SINGLE_COLOR_ENVMAP_SOLID || i == MAT_SINGLE_COLOR_SOLID_PXS))
-			{
+		for (int i = 0; i < (int)kMatCount; ++i) {
+			if (skip_outlined && (i == kMatSingleColorSolid || i == kMatSingleColorOutlineBlended ||
+				i == kMatSingleColorEnvmapSolid || i == kMatSingleColorSolidPxs)) {
 				continue;
 			}
-			if (i == MAT_LAST_SOLID)
-			{
+			if (i == kMatLastSolid) {
 				::glDisable(GL_STENCIL_TEST);
 			}
-			Material* lMaterial = GetMaterial((MaterialType)i);
-			if (lMaterial != 0)
-			{
-				Material::RenderAllGeometry(GetCurrentFrame(), lMaterial);
+			Material* material = GetMaterial((MaterialType)i);
+			if (material != 0) {
+				Material::RenderAllGeometry(GetCurrentFrame(), material);
 			}
 		}
 
-		DynamicRendererMap::iterator x = mDynamicRendererMap.begin();
-		for (; x != mDynamicRendererMap.end(); ++x)
-		{
+		DynamicRendererMap::iterator x = dynamic_renderer_map_.begin();
+		for (; x != dynamic_renderer_map_.end(); ++x) {
 			x->second->Render();
 		}
 	}
 
 	{
-		for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
-		{
-			LightData* lLight = x->second;
-			lLight->mTransformationChanged = false;
+		for (LightDataMap::iterator x = light_data_map_.begin(); x != light_data_map_.end(); ++x) {
+			LightData* _light = x->second;
+			_light->transformation_changed_ = false;
 		}
 
 		StepCurrentFrame();
@@ -1482,10 +1319,9 @@ unsigned OpenGLRenderer::RenderScene()
 		::glDisableClientState(GL_NORMAL_ARRAY);
 		//::glDisableClientState(GL_INDEX_ARRAY);
 		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-		{
-			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 0);
-			UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+			uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, 0);
+			uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 		glPolygonOffset(0, 0);
 		glDisable(GL_POLYGON_OFFSET_FILL);
@@ -1496,38 +1332,30 @@ unsigned OpenGLRenderer::RenderScene()
 	return (GetCurrentFrame());
 }
 
-void OpenGLRenderer::RenderBillboards(Tbc::GeometryBase* pGeometry, bool pRenderTexture, bool pAddativeBlending, const BillboardRenderInfoArray& pBillboards)
-{
-	if (pBillboards.size() == 0)
-	{
+void OpenGLRenderer::RenderBillboards(tbc::GeometryBase* geometry, bool render_texture, bool addative_blending, const BillboardRenderInfoArray& billboards) {
+	if (billboards.size() == 0) {
 		return;
 	}
 
 	OGL_FAST_ASSERT();
 
-	Material* lMaterial;
-	if (pRenderTexture)
-	{
-		lMaterial = GetMaterial(MAT_SINGLE_TEXTURE_BLENDED);
-		OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-		((OpenGLMatSingleTextureBlended*)lMaterial)->BindTexture(
-			lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP],
-			lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
+	Material* material;
+	if (render_texture) {
+		material = GetMaterial(kMatSingleTextureBlended);
+		OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
+		((OpenGLMatSingleTextureBlended*)material)->BindTexture(
+			_geometry->ta_->maps_[0].map_id_[Texture::kColorMap],
+			_geometry->ta_->maps_[0].mip_map_level_count_[Texture::kColorMap]);
 		::glMatrixMode(GL_TEXTURE);
 		::glLoadIdentity();
 		::glMatrixMode(GL_MODELVIEW);
+	} else {
+		material = GetMaterial(kMatSingleColorBlended);
 	}
-	else
-	{
-		lMaterial = GetMaterial(MAT_SINGLE_COLOR_BLENDED);
-	}
-	lMaterial->PreRender();
-	if (pAddativeBlending)
-	{
+	material->PreRender();
+	if (addative_blending) {
 		::glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	}
-	else
-	{
+	} else {
 		::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 	::glEnable(GL_DEPTH_TEST);
@@ -1542,32 +1370,30 @@ void OpenGLRenderer::RenderBillboards(Tbc::GeometryBase* pGeometry, bool pRender
 	::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	xform lCamSpace;
-	//Tbc::GeometryBase::BasicMaterialSettings lMaterialSettings(vec3(), vec3(), vec3(), 0, 0, false);
-	BillboardRenderInfoArray::const_iterator x = pBillboards.begin();
-	for (; x != pBillboards.end(); ++x)
-	{
-		//lMaterialSettings.mDiffuse = x->mColor;
-		//lMaterialSettings.mAlpha = x->mOpacity;
-		//lMaterial->SetBasicMaterial(lMaterialSettings);
-		glColor4f(x->mColor.x, x->mColor.y, x->mColor.z, x->mOpacity);
+	xform cam_space;
+	//tbc::GeometryBase::BasicMaterialSettings lMaterialSettings(vec3(), vec3(), vec3(), 0, 0, false);
+	BillboardRenderInfoArray::const_iterator x = billboards.begin();
+	for (; x != billboards.end(); ++x) {
+		//lMaterialSettings.diffuse_ = x->color_;
+		//lMaterialSettings.alpha_ = x->opacity_;
+		//material->SetBasicMaterial(lMaterialSettings);
+		glColor4f(x->color_.x, x->color_.y, x->color_.z, x->opacity_);
 
-		quat lRot = mCameraTransformation.GetOrientation();
-		lRot.RotateAroundOwnY(x->mAngle);
-		lCamSpace.FastInverseTransform(mCameraActualTransformation, mCameraActualOrientationInverse, xform(lRot, x->mPosition));
-		float lModelViewMatrix[16];
-		lCamSpace.GetAs4x4TransposeMatrix(x->mScale, lModelViewMatrix);
-		::glLoadMatrixf(lModelViewMatrix);
+		quat rot = camera_transformation_.GetOrientation();
+		rot.RotateAroundOwnY(x->angle_);
+		cam_space.FastInverseTransform(camera_actual_transformation_, camera_actual_orientation_inverse_, xform(rot, x->position_));
+		float model_view_matrix[16];
+		cam_space.GetAs4x4TransposeMatrix(x->scale_, model_view_matrix);
+		::glLoadMatrixf(model_view_matrix);
 
-		lMaterial->RawRender(pGeometry, x->mUVIndex);
+		material->RawRender(geometry, x->uv_index_);
 	}
-	lMaterial->PostRender();
+	material->PostRender();
 	::glDepthMask(GL_TRUE);
 	//::glEnable(GL_NORMALIZE);
 	::glDisable(GL_BLEND);
 	::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	if (!GetTexturingEnabled())
-	{
+	if (!GetTexturingEnabled()) {
 		::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		::glDisable(GL_TEXTURE_2D);
 	}
@@ -1575,53 +1401,47 @@ void OpenGLRenderer::RenderBillboards(Tbc::GeometryBase* pGeometry, bool pRender
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::RenderRelative(Tbc::GeometryBase* pGeometry, const quat* pLightOrientation)
-{
+void OpenGLRenderer::RenderRelative(tbc::GeometryBase* geometry, const quat* light_orientation) {
 	OGL_FAST_ASSERT();
 
 	::glMatrixMode(GL_MODELVIEW);
 	::glPushMatrix();
-	float lModelViewMatrix[16];
-	pGeometry->GetTransformation().GetAs4x4TransposeMatrix(pGeometry->GetScale(), lModelViewMatrix);
-	::glLoadMatrixf(lModelViewMatrix);
+	float model_view_matrix[16];
+	geometry->GetTransformation().GetAs4x4TransposeMatrix(geometry->GetScale(), model_view_matrix);
+	::glLoadMatrixf(model_view_matrix);
 
 	::glEnable(GL_DEPTH_TEST);
 
-	const LightID lLightId = GetClosestLight(GetLightCount()-1);
-	const LightData* lLightData = GetLightData(lLightId);
-	if (pLightOrientation)
-	{
+	const LightID light_id = GetClosestLight(GetLightCount()-1);
+	const LightData* light_data = GetLightData(light_id);
+	if (light_orientation) {
 		::glEnable(GL_LIGHTING);
-		quat lOrientation = pGeometry->GetTransformation().GetOrientation().GetInverse();
-		LightData lDataCopy = *lLightData;
-		lOrientation *= *pLightOrientation;
-		lDataCopy.mDirection = lOrientation * lLightData->mDirection;
-		SetupGLLight(lLightId, &lDataCopy);
+		quat orientation = geometry->GetTransformation().GetOrientation().GetInverse();
+		LightData data_copy = *light_data;
+		orientation *= *light_orientation;
+		data_copy.direction_ = orientation * light_data->direction_;
+		SetupGLLight(light_id, &data_copy);
 	}
 
-	GeometryData* lGeometryData = (GeometryData*)pGeometry->GetRendererData();
-	if (lGeometryData)
-	{
-		if (pGeometry->IsTwoSided())
-		{
+	GeometryData* geometry_data = (GeometryData*)geometry->GetRendererData();
+	if (geometry_data) {
+		if (geometry->IsTwoSided()) {
 			::glDisable(GL_CULL_FACE);
 		}
-		GetMaterial(lGeometryData->mMaterialType)->PreRender();
-		GetMaterial(lGeometryData->mMaterialType)->RenderGeometry(pGeometry);
-		GetMaterial(lGeometryData->mMaterialType)->PostRender();
-		if (pGeometry->IsTwoSided())
-		{
+		GetMaterial(geometry_data->material_type_)->PreRender();
+		GetMaterial(geometry_data->material_type_)->RenderGeometry(geometry);
+		GetMaterial(geometry_data->material_type_)->PostRender();
+		if (geometry->IsTwoSided()) {
 			::glEnable(GL_CULL_FACE);
 		}
 		ResetAmbientLight(false);
 	}
 
-	if (pLightOrientation)
-	{
-		SetupGLLight(lLightId, lLightData);
+	if (light_orientation) {
+		SetupGLLight(light_id, light_data);
 	}
 
-	PostRender(pGeometry);
+	PostRender(geometry);
 
 	::glDisable(GL_LIGHTING);
 	::glDisable(GL_DEPTH_TEST);
@@ -1632,105 +1452,88 @@ void OpenGLRenderer::RenderRelative(Tbc::GeometryBase* pGeometry, const quat* pL
 	OGL_FAST_ASSERT();
 }
 
-int OpenGLRenderer::GetEnvMapID()
-{
-	if (GetEnvTexture() != 0)
-	{
-		if (GetEnvTexture()->mIsCubeMap == false)
-		{
-			return GetEnvTexture()->mTMapID[Texture::COLOR_MAP];
-		}
-		else
-		{
-			return GetEnvTexture()->mTMapID[Texture::CUBE_MAP];
+int OpenGLRenderer::GetEnvMapID() {
+	if (GetEnvTexture() != 0) {
+		if (GetEnvTexture()->is_cube_map_ == false) {
+			return GetEnvTexture()->t_map_id_[Texture::kColorMap];
+		} else {
+			return GetEnvTexture()->t_map_id_[Texture::kCubeMap];
 		}
 	}
 
-	return mTMapIDManager.GetInvalidId();
+	return t_map_id_manager_.GetInvalidId();
 }
 
 
-int OpenGLRenderer::GetNumTextureUnits() const
-{
-	return mNumTextureUnits;
+int OpenGLRenderer::GetNumTextureUnits() const {
+	return num_texture_units_;
 }
 
-void OpenGLRenderer::ProcessLights()
-{
+void OpenGLRenderer::ProcessLights() {
 	SetLightsEnabled(GetLightsEnabled());
-	
-	// Transform all light positions.
-	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
-	{
-		LightData* lLight = x->second;
 
-		if (lLight->mType == LIGHT_DIRECTIONAL)
-		{
-			vec3 lLightDir = GetCameraActualOrientationInverse() * lLight->mDirection;
-			float lPos[4] =
+	// Transform all light positions.
+	for (LightDataMap::iterator x = light_data_map_.begin(); x != light_data_map_.end(); ++x) {
+		LightData* _light = x->second;
+
+		if (_light->type_ == kLightDirectional) {
+			vec3 light_dir = GetCameraActualOrientationInverse() * _light->direction_;
+			float _pos[4] =
 			{
-				(float)-lLightDir.x,
-				(float)-lLightDir.y,
-				(float)-lLightDir.z,
+				(float)-light_dir.x,
+				(float)-light_dir.y,
+				(float)-light_dir.z,
 				0.0f
 			};
-			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, lPos);
-		}
-		else if(lLight->mType == LIGHT_POINT)
-		{
-			vec3 lLightPos = GetCameraActualTransformation().InverseTransform(lLight->mPosition);
-			float lPos[4] =
+			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, _pos);
+		} else if(_light->type_ == kLightPoint) {
+			vec3 light_pos = GetCameraActualTransformation().InverseTransform(_light->position_);
+			float _pos[4] =
 			{
-				(float)lLightPos.x,
-				(float)lLightPos.y,
-				(float)lLightPos.z,
+				(float)light_pos.x,
+				(float)light_pos.y,
+				(float)light_pos.z,
 				1.0f
 			};
-			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, lPos);
-		}
-		else if(lLight->mType == LIGHT_SPOT)
-		{
-			vec3 lLightPos = GetCameraActualTransformation().InverseTransform(lLight->mPosition);
-			vec3 lLightDir = GetCameraActualOrientationInverse() * lLight->mDirection;
-			float lPos[4] =
+			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, _pos);
+		} else if(_light->type_ == kLightSpot) {
+			vec3 light_pos = GetCameraActualTransformation().InverseTransform(_light->position_);
+			vec3 light_dir = GetCameraActualOrientationInverse() * _light->direction_;
+			float _pos[4] =
 			{
-				(float)lLightPos.x,
-				(float)lLightPos.y,
-				(float)lLightPos.z,
+				(float)light_pos.x,
+				(float)light_pos.y,
+				(float)light_pos.z,
 				1.0f
 			};
 
-			float lDir[3] =
+			float _dir[3] =
 			{
-				(float)lLightDir.x,
-				(float)lLightDir.y,
-				(float)lLightDir.z
+				(float)light_dir.x,
+				(float)light_dir.y,
+				(float)light_dir.z
 			};
 
-			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, lPos);
-			glLightfv(GL_LIGHT0 + x->first, GL_SPOT_DIRECTION, lDir);
+			glLightfv(GL_LIGHT0 + x->first, GL_POSITION, _pos);
+			glLightfv(GL_LIGHT0 + x->first, GL_SPOT_DIRECTION, _dir);
 
-			if (GetShadowHint() == SH_VOLUMES_AND_MAPS)
-			{
-				if (lLight->mTransformationChanged == true)
-				{
-					if (lLight->mShadowRange > 0)
-					{
-						lLight->mShadowMapNeedUpdate = true;
+			if (GetShadowHint() == kShVolumesAndMaps) {
+				if (_light->transformation_changed_ == true) {
+					if (_light->shadow_range_ > 0) {
+						_light->shadow_map_need_update_ = true;
 					}
-					lLight->mTransformationChanged = false;
+					_light->transformation_changed_ = false;
 				}
 
-				if (lLight->mShadowMapNeedUpdate == true)
-					RegenerateShadowMap(lLight);
+				if (_light->shadow_map_need_update_ == true)
+					RegenerateShadowMap(_light);
 			}
 		}
 	}
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::RenderShadowVolumes()
-{
+void OpenGLRenderer::RenderShadowVolumes() {
 	OGL_FAST_ASSERT();
 
 	// Disable all fancy gfx.
@@ -1762,81 +1565,68 @@ void OpenGLRenderer::RenderShadowVolumes()
 	glMatrixMode(GL_MODELVIEW);
 
 	// Offset shadow in light direction to avoid Z-fighting.
-	vec3 lCamShadowOffset;
-	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
-	{
-		LightData* lLight = x->second;
-		if (lLight->mEnabled && lLight->mType == LIGHT_DIRECTIONAL)
-		{
-			lCamShadowOffset = lLight->mDirection*0.1f;
+	vec3 cam_shadow_offset;
+	for (LightDataMap::iterator x = light_data_map_.begin(); x != light_data_map_.end(); ++x) {
+		LightData* _light = x->second;
+		if (_light->enabled_ && _light->type_ == kLightDirectional) {
+			cam_shadow_offset = _light->direction_*0.1f;
 		}
 	}
 
 	// Render shadow volumes in two steps.
-	for (int lStep = 0; lStep < 2; lStep++)
-	{
-		if (lStep == 0)
-		{
+	for (int step = 0; step < 2; step++) {
+		if (step == 0) {
 			// Render back faces.
 			glCullFace(GL_FRONT);
 			glStencilFunc(GL_ALWAYS, 128, 0xFF);
 			glStencilOp(GL_KEEP, GL_INCR, GL_KEEP);
-		}
-		else // lStep == 1
-		{
+		} else { // step == 1
 			// Render front faces.
 			glCullFace(GL_BACK);
 			glStencilFunc(GL_ALWAYS, 128, 0xFF);
 			glStencilOp(GL_KEEP, GL_DECR, GL_KEEP);
 		}
 
-		ShadowVolumeTable::Iterator lIter;
-		for (lIter = GetShadowVolumeTable().First(); lIter != GetShadowVolumeTable().End(); ++lIter)
-		{
-			OGLGeometryData* lShadowGeometry = (OGLGeometryData*)*lIter;
-			ShadowVolume* lShadowVolume = (ShadowVolume*)lShadowGeometry->mGeometry;
+		ShadowVolumeTable::Iterator iter;
+		for (iter = GetShadowVolumeTable().First(); iter != GetShadowVolumeTable().End(); ++iter) {
+			OGLGeometryData* shadow_geometry = (OGLGeometryData*)*iter;
+			ShadowVolume* _shadow_volume = (ShadowVolume*)shadow_geometry->geometry_;
 
-			if (lShadowVolume->GetParentGeometry()->GetAlwaysVisible() == true ||
-			   lShadowVolume->GetParentGeometry()->GetLastFrameVisible() == GetCurrentFrame())
-			{
-				xform lShadowTransformation(lShadowVolume->GetTransformation());
-				lShadowTransformation.GetPosition() += lCamShadowOffset;
-				mCamSpaceTransformation.FastInverseTransform(mCameraActualTransformation, mCameraActualOrientationInverse, lShadowTransformation);
-				float lModelViewMatrix[16];
-				mCamSpaceTransformation.GetAs4x4TransposeMatrix(lShadowVolume->GetScale(), lModelViewMatrix);
-				::glLoadMatrixf(lModelViewMatrix);
+			if (_shadow_volume->GetParentGeometry()->GetAlwaysVisible() == true ||
+			   _shadow_volume->GetParentGeometry()->GetLastFrameVisible() == GetCurrentFrame()) {
+				xform shadow_transformation(_shadow_volume->GetTransformation());
+				shadow_transformation.GetPosition() += cam_shadow_offset;
+				cam_space_transformation_.FastInverseTransform(camera_actual_transformation_, camera_actual_orientation_inverse_, shadow_transformation);
+				float model_view_matrix[16];
+				cam_space_transformation_.GetAs4x4TransposeMatrix(_shadow_volume->GetScale(), model_view_matrix);
+				::glLoadMatrixf(model_view_matrix);
 
-				if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-				{
-					GLuint lVertexBufferID = (GLuint)lShadowGeometry->mVertexBufferID;
-					GLuint lIndexBufferID  = (GLuint)lShadowGeometry->mIndexBufferID;
+				if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+					GLuint vertex_buffer_id = (GLuint)shadow_geometry->vertex_buffer_id_;
+					GLuint index_buffer_id  = (GLuint)shadow_geometry->index_buffer_id_;
 
 					//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lShadowGeometry->mVertexBufferID));
-					UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
+					uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
 					glVertexPointer(3, GL_FLOAT, 0, 0);
 
-					if (lShadowVolume->GetVertexDataChanged() == true)
-					{
+					if (_shadow_volume->GetVertexDataChanged() == true) {
 						// Upload new vertices.
-						UiLepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 0,
-							lShadowVolume->GetVertexCount() * sizeof(float) * 3, (void*)lShadowVolume->GetVertexData());
-						lShadowVolume->SetVertexDataChanged(false);
+						uilepra::OpenGLExtensions::glBufferSubData(GL_ARRAY_BUFFER, 0,
+							_shadow_volume->GetVertexCount() * sizeof(float) * 3, (void*)_shadow_volume->GetVertexData());
+						_shadow_volume->SetVertexDataChanged(false);
 					}
 
-					UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-					
-					if (lShadowVolume->GetIndexDataChanged() == true)
-					{
-						UiLepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
-							lShadowVolume->GetTriangleCount() * 3 * sizeof(vtx_idx_t), (void*)lShadowVolume->GetIndexData());
+					uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+
+					if (_shadow_volume->GetIndexDataChanged() == true) {
+						uilepra::OpenGLExtensions::glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
+							_shadow_volume->GetTriangleCount() * 3 * sizeof(vtx_idx_t), (void*)_shadow_volume->GetIndexData());
 					}
 
-					glDrawElements(GL_TRIANGLES, lShadowVolume->GetTriangleCount() * 3, LEPRA_GL_INDEX_TYPE, 0);
-				}
-				else
-				{
-					glVertexPointer(3, GL_FLOAT, 0, lShadowVolume->GetVertexData());
-					glDrawElements(GL_TRIANGLES, lShadowVolume->GetTriangleCount() * 3, LEPRA_GL_INDEX_TYPE, lShadowVolume->GetIndexData());
+					glDrawElements(GL_TRIANGLES, _shadow_volume->GetTriangleCount() * 3, LEPRA_GL_INDEX_TYPE, 0);
+				} else {
+					glVertexPointer(3, GL_FLOAT, 0, _shadow_volume->GetVertexData());
+					glDrawElements(GL_TRIANGLES, _shadow_volume->GetTriangleCount() * 3, LEPRA_GL_INDEX_TYPE, _shadow_volume->GetIndexData());
 				}
 			}
 		}
@@ -1853,9 +1643,8 @@ void OpenGLRenderer::RenderShadowVolumes()
 	OGL_FAST_ASSERT();
 }
 
-int OpenGLRenderer::RenderShadowMaps()
-{
-	int lCount = 0;
+int OpenGLRenderer::RenderShadowMaps() {
+	int count = 0;
 #ifndef LEPRA_GL_ES
 
 	OGL_FAST_ASSERT();
@@ -1897,94 +1686,88 @@ int OpenGLRenderer::RenderShadowMaps()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 
 
-	static const GLfloat slSPlane[4] = {1.0f, 0.0f, 0.0f, 0.0f};
-	static const GLfloat slTPlane[4] = {0.0f, 1.0f, 0.0f, 0.0f};
-	static const GLfloat slRPlane[4] = {0.0f, 0.0f, 1.0f, 0.0f};
-	static const GLfloat slQPlane[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+	static const GLfloat s_plane_[4] = {1.0f, 0.0f, 0.0f, 0.0f};
+	static const GLfloat t_plane_[4] = {0.0f, 1.0f, 0.0f, 0.0f};
+	static const GLfloat r_plane_[4] = {0.0f, 0.0f, 1.0f, 0.0f};
+	static const GLfloat q_plane_[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
-	glTexGenfv(GL_S, GL_EYE_PLANE, slSPlane);
-	glTexGenfv(GL_T, GL_EYE_PLANE, slTPlane);
-	glTexGenfv(GL_R, GL_EYE_PLANE, slRPlane);
-	glTexGenfv(GL_Q, GL_EYE_PLANE, slQPlane);
+	glTexGenfv(GL_S, GL_EYE_PLANE, s_plane_);
+	glTexGenfv(GL_T, GL_EYE_PLANE, t_plane_);
+	glTexGenfv(GL_R, GL_EYE_PLANE, r_plane_);
+	glTexGenfv(GL_Q, GL_EYE_PLANE, q_plane_);
 
 	glEnable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
 	glAlphaFunc(GL_LESS, 0.5f);
 
-	for (LightDataMap::iterator x = mLightDataMap.begin(); x != mLightDataMap.end(); ++x)
-	{
-		LightData* lLight = x->second;
+	for (LightDataMap::iterator x = light_data_map_.begin(); x != light_data_map_.end(); ++x) {
+		LightData* _light = x->second;
 
-		if (lLight->mShadowMapID != 0)
-		{
-			glBindTexture(GL_TEXTURE_2D, lLight->mShadowMapID);
+		if (_light->shadow_map_id_ != 0) {
+			glBindTexture(GL_TEXTURE_2D, _light->shadow_map_id_);
 
 			// Prepare the texture projection matrix.
-			static float slTextureMatrix[16];
+			static float texture_matrix_[16];
 			glMatrixMode(GL_TEXTURE);
 			glLoadIdentity();
 			glTranslatef(0.5f, 0.5f, 0.5f);
 			glScalef(0.5f, 0.5f, 0.5f);
-			glMultMatrixf(lLight->mLightProjectionMatrix);
-			glGetFloatv(GL_TEXTURE_MATRIX, slTextureMatrix);
+			glMultMatrixf(_light->light_projection_matrix_);
+			glGetFloatv(GL_TEXTURE_MATRIX, texture_matrix_);
 
-			LightData::GeometrySet::Iterator lGeoIter;
-			for (lGeoIter = lLight->mShadowMapGeometrySet.First();
-				lGeoIter != lLight->mShadowMapGeometrySet.End();
-				++lGeoIter)
-			{
-				OGLGeometryData* lGeometry = (OGLGeometryData*)*lGeoIter;
+			LightData::GeometrySet::Iterator geo_iter;
+			for (geo_iter = _light->shadow_map_geometry_set_.First();
+				geo_iter != _light->shadow_map_geometry_set_.End();
+				++geo_iter) {
+				OGLGeometryData* _geometry = (OGLGeometryData*)*geo_iter;
 
-				float lModelViewMatrix[16];
-				GetCameraActualTransformation().InverseTransform(lGeometry->mGeometry->GetTransformation()).GetAs4x4TransposeMatrix(lModelViewMatrix);
+				float model_view_matrix[16];
+				GetCameraActualTransformation().InverseTransform(_geometry->geometry_->GetTransformation()).GetAs4x4TransposeMatrix(model_view_matrix);
 
 				// Camera model view matrix.
 				glMatrixMode(GL_MODELVIEW);
-				glLoadMatrixf(lModelViewMatrix);
+				glLoadMatrixf(model_view_matrix);
 
-				float lLightModelViewMatrix[16];
-				xform lLightTransformation(lLight->mOrientation, lLight->mPosition);
-				lLightTransformation.mOrientation *= mCameraActualRotation;
-				(lLightTransformation.InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lLightModelViewMatrix);
+				float light_model_view_matrix[16];
+				xform light_transformation(_light->orientation_, _light->position_);
+				light_transformation.orientation_ *= camera_actual_rotation_;
+				(light_transformation.InverseTransform(_geometry->geometry_->GetTransformation())).GetAs4x4TransposeMatrix(light_model_view_matrix);
 
 				// Setup the texture projection matrix.
 				glMatrixMode(GL_TEXTURE);
-				glLoadMatrixf(slTextureMatrix);
-				glMultMatrixf(lLightModelViewMatrix);
+				glLoadMatrixf(texture_matrix_);
+				glMultMatrixf(light_model_view_matrix);
 
 				// Need to call these here to update the model view transform.
-				glTexGenfv(GL_S, GL_EYE_PLANE, slSPlane);
-				glTexGenfv(GL_T, GL_EYE_PLANE, slTPlane);
-				glTexGenfv(GL_R, GL_EYE_PLANE, slRPlane);
-				glTexGenfv(GL_Q, GL_EYE_PLANE, slQPlane);
+				glTexGenfv(GL_S, GL_EYE_PLANE, s_plane_);
+				glTexGenfv(GL_T, GL_EYE_PLANE, t_plane_);
+				glTexGenfv(GL_R, GL_EYE_PLANE, r_plane_);
+				glTexGenfv(GL_Q, GL_EYE_PLANE, q_plane_);
 
-				if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-				{
-					GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
-					GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
+				if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+					GLuint vertex_buffer_id = (GLuint)_geometry->vertex_buffer_id_;
+					GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
 
 					//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lGeometry->mVertexBufferID));
-					UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
+					uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
 					glVertexPointer(3, GL_FLOAT, 0, 0);
 
-					UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-					
+					uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+
 					glDrawElements(GL_TRIANGLES,
-								lGeometry->mGeometry->GetTriangleCount() * 3,
+								_geometry->geometry_->GetTriangleCount() * 3,
 								LEPRA_GL_INDEX_TYPE,
 								0);
-				}
-				else
-				{
-					glVertexPointer(3, GL_FLOAT, 0, lGeometry->mGeometry->GetVertexData());
+				} else {
+					glVertexPointer(3, GL_FLOAT, 0, _geometry->geometry_->GetVertexData());
 					glDrawElements(GL_TRIANGLES,
-								lGeometry->mGeometry->GetTriangleCount() * 3,
+								_geometry->geometry_->GetTriangleCount() * 3,
 								LEPRA_GL_INDEX_TYPE,
-								lGeometry->mGeometry->GetIndexData());
+								_geometry->geometry_->GetIndexData());
 				}
 			}
 
-			lCount++;
+			count++;
 		}
 	}
 
@@ -2010,11 +1793,10 @@ int OpenGLRenderer::RenderShadowMaps()
 	OGL_FAST_ASSERT();
 #endif // !GLES
 
-	return lCount;
+	return count;
 }
 
-void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
-{
+void OpenGLRenderer::RegenerateShadowMap(LightData* light) {
 	//glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_DEPTH_BUFFER_BIT | GL_VIEWPORT_BIT);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);
@@ -2031,86 +1813,80 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 	glColorMask(0, 0, 0, 0);
 
 	// Set viewport.
-	glViewport(0, 0, pLight->mShadowMapRes, pLight->mShadowMapRes);
+	glViewport(0, 0, light->shadow_map_res_, light->shadow_map_res_);
 
 	// Set projection matrix.
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	Perspective(pLight->mCutoffAngle * 2.0f, 1.0f, pLight->mShadowMapNear, pLight->mShadowMapFar);
+	Perspective(light->cutoff_angle_ * 2.0f, 1.0f, light->shadow_map_near_, light->shadow_map_far_);
 
-	glGetFloatv(GL_PROJECTION_MATRIX, pLight->mLightProjectionMatrix);
+	glGetFloatv(GL_PROJECTION_MATRIX, light->light_projection_matrix_);
 
 	glMatrixMode(GL_MODELVIEW);
 
 
-	xform lLightTransformation(pLight->mOrientation, pLight->mPosition);
-    
+	xform light_transformation(light->orientation_, light->position_);
+
 	// Clear depth buffer.
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 
-	// Render "scene" with no fx, and only to the depth buffer. 
+	// Render "scene" with no fx, and only to the depth buffer.
 	// The scene in this case are all objects within the light's bounding radius.
 
 	// Overcome imprecision.
 	//glEnable(GL_POLYGON_OFFSET_FILL);
 	//glPolygonOffset(1.5f, 700);
 
-	LightData::GeometrySet::Iterator lIter;
-	for (lIter = pLight->mShadowMapGeometrySet.First(); 
-		lIter != pLight->mShadowMapGeometrySet.End(); 
-		++lIter)
-	{
-		OGLGeometryData* lGeometry = (OGLGeometryData*)*lIter;
+	LightData::GeometrySet::Iterator iter;
+	for (iter = light->shadow_map_geometry_set_.First();
+		iter != light->shadow_map_geometry_set_.End();
+		++iter) {
+		OGLGeometryData* _geometry = (OGLGeometryData*)*iter;
 
-		if (lGeometry->mShadow >= CAST_SHADOWS)
-		{
-			float lModelViewMatrix[16];
-			(lLightTransformation.InverseTransform(lGeometry->mGeometry->GetTransformation())).GetAs4x4TransposeMatrix(lModelViewMatrix);
-			glLoadMatrixf(lModelViewMatrix);
+		if (_geometry->shadow_ >= kCastShadows) {
+			float model_view_matrix[16];
+			(light_transformation.InverseTransform(_geometry->geometry_->GetTransformation())).GetAs4x4TransposeMatrix(model_view_matrix);
+			glLoadMatrixf(model_view_matrix);
 
-			if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-			{
-				GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
-				GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
+			if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+				GLuint vertex_buffer_id = (GLuint)_geometry->vertex_buffer_id_;
+				GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
 
 				//log_volatile(mLog.Tracef("glBindBuffer %u (vertex."), lGeometry->mVertexBufferID));
-				UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
+				uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
 				glVertexPointer(3, GL_FLOAT, 0, 0);
 
-				UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-				
+				uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+
 				glDrawElements(GL_TRIANGLES,
-							lGeometry->mGeometry->GetTriangleCount() * 3,
+							_geometry->geometry_->GetTriangleCount() * 3,
 							LEPRA_GL_INDEX_TYPE,
 							0);
-			}
-			else
-			{
-				glVertexPointer(3, GL_FLOAT, 0, lGeometry->mGeometry->GetVertexData());
+			} else {
+				glVertexPointer(3, GL_FLOAT, 0, _geometry->geometry_->GetVertexData());
 				glDrawElements(GL_TRIANGLES,
-							lGeometry->mGeometry->GetTriangleCount() * 3,
+							_geometry->geometry_->GetTriangleCount() * 3,
 							LEPRA_GL_INDEX_TYPE,
-							lGeometry->mGeometry->GetIndexData());
+							_geometry->geometry_->GetIndexData());
 			}
 		}
 	}
 
-	if (pLight->mShadowMapID == 0)
-	{
+	if (light->shadow_map_id_ == 0) {
 		// Create a new depth texture.
-		pLight->mShadowMapID = mTMapIDManager.GetFreeId();
+		light->shadow_map_id_ = t_map_id_manager_.GetFreeId();
 	}
 
 	// Bind the texture.
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, pLight->mShadowMapID);
+	glBindTexture(GL_TEXTURE_2D, light->shadow_map_id_);
 
 #ifndef LEPRA_GL_ES
 	// And finally read it from the back buffer.
-	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 
-					 0, 0, pLight->mShadowMapRes, pLight->mShadowMapRes, 0);
+	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+					 0, 0, light->shadow_map_res_, light->shadow_map_res_, 0);
 #endif // !GLES
 
 	//glDisable(GL_POLYGON_OFFSET_FILL);
@@ -2119,27 +1895,25 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* pLight)
 	//glPopAttrib();
 	glShadeModel(GL_SMOOTH);
 	glColorMask(1, 1, 1, 1);
-	if (GetLightsEnabled())
-	{
+	if (GetLightsEnabled()) {
 		glEnable(GL_LIGHTING);
 	}
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	pLight->mShadowMapNeedUpdate = false;
+	light->shadow_map_need_update_ = false;
 
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNear, float pFar)
-{
+void OpenGLRenderer::Perspective(float fov_angle, float aspect_ratio, float near, float far) {
 	/*
 	    Looking at the FOV from above.
 
 	    \             /  <- Field of view.
 	     \           /
-	   -1 l----x----r 1  <- Projection plane (width = 2). X marks the center, 
+	   -1 l----x----r 1  <- Projection plane (width = 2). X marks the center,
 	       \   |   /        l = left at -1, and r = right at 1.
 	        \  |D /   <- D = Distance from eye position to projection plane.
 	     	 \ | /
@@ -2148,17 +1922,17 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 
 	   Consider the triangle *-x-r.
 
-	   The angle between the line D, and the FOV's right side is halv the 
+	   The angle between the line D, and the FOV's right side is halv the
 	   angle of the FOV, which gives us FOVAngle / 2.0f.
 
 	   Now notice that OpenGL consideres the screen to be a square area with
 	   the coordinates (-1, 1) at left and right screen edges, and (-1, 1)
 	   at the bottom and top screen edges as well.
 
-	   Thus, the distance between x and r is 1.0, which is half the width of 
+	   Thus, the distance between x and r is 1.0, which is half the width of
 	   the projection plane. From no on, "1.0f" represents this distance.
 
-	   Recalling what we have learned in school about trigonometry, we know 
+	   Recalling what we have learned in school about trigonometry, we know
 	   that 1.0f / D = tan(FOVAngle / 2.0f).
 
 	   This implies D = 1.0f / tan(FOVAngle / 2.0f).
@@ -2169,37 +1943,36 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 	   D * "aspect ratio".
 	*/
 
-	float lDY = 1.0f / tan(Math::Deg2Rad(pFOVAngle) / 2.0f);
-	float lDX = lDY / pAspectRatio;
-	if (GetScreen()->GetOutputRotation()%180 != 0)
-	{
-		std::swap(lDX, lDY);
+	float dy = 1.0f / tan(Math::Deg2Rad(fov_angle) / 2.0f);
+	float dx = dy / aspect_ratio;
+	if (GetScreen()->GetOutputRotation()%180 != 0) {
+		std::swap(dx, dy);
 	}
 
-	float lProjectionMatrix[16];
+	float projection_matrix[16];
 
-	lProjectionMatrix[0]  = lDX;
-	lProjectionMatrix[1]  = 0;
-	lProjectionMatrix[2]  = 0;
-	lProjectionMatrix[3]  = 0;
+	projection_matrix[0]  = dx;
+	projection_matrix[1]  = 0;
+	projection_matrix[2]  = 0;
+	projection_matrix[3]  = 0;
 
-	lProjectionMatrix[4]  = 0;
-	lProjectionMatrix[5]  = lDY;
-	lProjectionMatrix[6]  = 0;
-	lProjectionMatrix[7]  = 0;
+	projection_matrix[4]  = 0;
+	projection_matrix[5]  = dy;
+	projection_matrix[6]  = 0;
+	projection_matrix[7]  = 0;
 
-	lProjectionMatrix[8]  = 0;
-	lProjectionMatrix[9]  = 0;
-	lProjectionMatrix[10] = -(pFar + pNear) / (pFar - pNear);
-	lProjectionMatrix[11] = -1;
+	projection_matrix[8]  = 0;
+	projection_matrix[9]  = 0;
+	projection_matrix[10] = -(far + near) / (far - near);
+	projection_matrix[11] = -1;
 
-	lProjectionMatrix[12] = 0;
-	lProjectionMatrix[13] = 0;
-	lProjectionMatrix[14] = (-2.0f * pFar * pNear) / (pFar - pNear);
-	lProjectionMatrix[15] = 0;
+	projection_matrix[12] = 0;
+	projection_matrix[13] = 0;
+	projection_matrix[14] = (-2.0f * far * near) / (far - near);
+	projection_matrix[15] = 0;
 
 	::glMatrixMode(GL_PROJECTION);
-	::glLoadMatrixf(lProjectionMatrix);
+	::glLoadMatrixf(projection_matrix);
 	::glRotatef((float)GetScreen()->GetOutputRotation(), 0, 0, 1);
 
 	::glMatrixMode(GL_MODELVIEW);
@@ -2207,40 +1980,35 @@ void OpenGLRenderer::Perspective(float pFOVAngle, float pAspectRatio, float pNea
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::SetPixelFormat(int& pSize, GLenum& pPixelFormat, bool pCompress, const str& pErrorMessage)
-{
-	switch(pSize)
-	{
-	case 4:	pPixelFormat	= GL_RGBA;	break;
-	case 3:	pPixelFormat	= GL_RGB;	break;
-	case 1:	pPixelFormat	= GL_LUMINANCE;	break;
+void OpenGLRenderer::SetPixelFormat(int& _size, GLenum& pixel_format, bool compress, const str& error_message) {
+	switch(_size) {
+	case 4:	pixel_format	= GL_RGBA;	break;
+	case 3:	pixel_format	= GL_RGB;	break;
+	case 1:	pixel_format	= GL_LUMINANCE;	break;
 	default:
-		pPixelFormat	= GL_RGB;
-		mLog.Info(pErrorMessage);
+		pixel_format	= GL_RGB;
+		log_.Info(error_message);
 	break;
 	}
 
 #ifndef LEPRA_GL_ES
-	if (pCompress == true)
-	{
-		pSize = (pSize == 4) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB;
-	}
-	else
+	if (compress == true) {
+		_size = (_size == 4) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB;
+	} else
 #endif // !GLES
 	{
-		switch(pSize)
-		{
-			case 4:		pSize = GL_RGBA;	break;
-			case 3:		pSize = GL_RGB;		break;
-			case 1:		pSize = GL_ALPHA;	break;
-			default:	pSize = GL_RGB;		break;
+		switch(_size) {
+			case 4:		_size = GL_RGBA;	break;
+			case 3:		_size = GL_RGB;		break;
+			case 1:		_size = GL_ALPHA;	break;
+			default:	_size = GL_RGB;		break;
 		}
 	}
 }
 
 
 
-loginstance(UI_GFX_3D, OpenGLRenderer);
+loginstance(kUiGfx3D, OpenGLRenderer);
 
 
 

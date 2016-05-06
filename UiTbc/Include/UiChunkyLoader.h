@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -24,14 +24,13 @@
 
 #pragma once
 
-#include "../../Tbc/Include/ChunkyLoader.h"
-#include "UiAnimatedGeometry.h"
-#include "UiTbc.h"
+#include "../../tbc/include/chunkyloader.h"
+#include "uianimatedgeometry.h"
+#include "uitbc.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
@@ -40,38 +39,35 @@ class TriangleBasedGeometry;
 
 
 
-class ChunkyMeshLoader: public Tbc::ChunkyLoader	// Contains the mesh. Excluded is skin weight information and materials.
-{
+class ChunkyMeshLoader: public tbc::ChunkyLoader {	// Contains the mesh. Excluded is skin weight information and materials.
 public:
-	ChunkyMeshLoader(File* pFile, bool pIsFileOwner);
+	ChunkyMeshLoader(File* file, bool is_file_owner);
 	virtual ~ChunkyMeshLoader();
-	bool Load(TriangleBasedGeometry* pMeshData, int& pCastsShadows);
-	bool Save(const TriangleBasedGeometry* pMeshData, int pCastsShadows);
+	bool Load(TriangleBasedGeometry* mesh_data, int& casts_shadows);
+	bool Save(const TriangleBasedGeometry* mesh_data, int casts_shadows);
 };
 
-class ChunkySkinLoader: public Tbc::ChunkyLoader	// Contains mesh skin weight information. 1-1 relation to meshes.
-{
+class ChunkySkinLoader: public tbc::ChunkyLoader {	// Contains mesh skin weight information. 1-1 relation to meshes.
 public:
-	ChunkySkinLoader(File* pFile, bool pIsFileOwner);
+	ChunkySkinLoader(File* file, bool is_file_owner);
 	virtual ~ChunkySkinLoader();
-	bool Load(AnimatedGeometry* pSkinData);
-	bool Save(const AnimatedGeometry* pSkinData);
+	bool Load(AnimatedGeometry* skin_data);
+	bool Save(const AnimatedGeometry* skin_data);
 
 private:
-	bool LoadElementCallback(Tbc::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
-	bool SaveBoneWeightChunkArray(const AnimatedGeometry* pSkinData);
+	bool LoadElementCallback(tbc::ChunkyType type, uint32 size, int64 chunk_end_position, void* storage);
+	bool SaveBoneWeightChunkArray(const AnimatedGeometry* skin_data);
 };
 
-class ChunkyClassLoader: public Tbc::ChunkyClassLoader
-{
-	typedef Tbc::ChunkyClassLoader Parent;
+class ChunkyClassLoader: public tbc::ChunkyClassLoader {
+	typedef tbc::ChunkyClassLoader Parent;
 public:
-	ChunkyClassLoader(File* pFile, bool pIsFileOwner);
+	ChunkyClassLoader(File* file, bool is_file_owner);
 	virtual ~ChunkyClassLoader();
 
 protected:
-	virtual void AddLoadElements(Parent::FileElementList& pElementList, Tbc::ChunkyClass* pData);
-	bool LoadElementCallback(Tbc::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
+	virtual void AddLoadElements(Parent::FileElementList& element_list, tbc::ChunkyClass* data);
+	bool LoadElementCallback(tbc::ChunkyType type, uint32 size, int64 chunk_end_position, void* storage);
 
 private:
 	logclass();

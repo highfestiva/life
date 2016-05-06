@@ -3,217 +3,181 @@
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
-#include "../Include/Reader.h"
-#include "../Include/InputStream.h"
+#include "../include/reader.h"
+#include "../include/inputstream.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 Reader::Reader() :
-	mReadCount(0),
-	mInStream(0),
-	mReaderEndian(Endian::TYPE_BIG_ENDIAN)
-{
+	read_count_(0),
+	in_stream_(0),
+	reader_endian_(Endian::kTypeBigEndian) {
 }
 
-Reader::Reader(Endian::EndianType pEndian) :
-	mReadCount(0),
-	mInStream(0),
-	mReaderEndian(pEndian)
-{
+Reader::Reader(Endian::EndianType endian) :
+	read_count_(0),
+	in_stream_(0),
+	reader_endian_(endian) {
 }
 
-Reader::Reader(InputStream* pIn) :
-	mReadCount(0),
-	mInStream(pIn),
-	mReaderEndian(Endian::TYPE_BIG_ENDIAN)
-{
+Reader::Reader(InputStream* in) :
+	read_count_(0),
+	in_stream_(in),
+	reader_endian_(Endian::kTypeBigEndian) {
 }
 
-Reader::Reader(InputStream* pIn, Endian::EndianType pEndian) :
-	mReadCount(0),
-	mInStream(pIn),
-	mReaderEndian(pEndian)
-{
+Reader::Reader(InputStream* in, Endian::EndianType endian) :
+	read_count_(0),
+	in_stream_(in),
+	reader_endian_(endian) {
 }
 
-Reader::~Reader()
-{
+Reader::~Reader() {
 }
 
-IOError Reader::Read(char& pData)
-{
-	return (ReadData(&pData, sizeof(pData)));
+IOError Reader::Read(char& data) {
+	return (ReadData(&data, sizeof(data)));
 }
 
-IOError Reader::Read(wchar_t& pData)
-{
-	return (ReadData(&pData, sizeof(pData)));
+IOError Reader::Read(wchar_t& data) {
+	return (ReadData(&data, sizeof(data)));
 }
 
-IOError Reader::Read(int8& pData)
-{
-	return ReadData(&pData, sizeof(int8));
+IOError Reader::Read(int8& data) {
+	return ReadData(&data, sizeof(int8));
 }
 
-IOError Reader::Read(uint8& pData)
-{
-	return ReadData(&pData, sizeof(uint8));
+IOError Reader::Read(uint8& data) {
+	return ReadData(&data, sizeof(uint8));
 }
 
-IOError Reader::Read(int16& pData)
-{
-	int16 lData;
-	IOError lErr = ReadData(&lData, sizeof(int16));
-	pData = Endian::HostTo(mReaderEndian, lData);
+IOError Reader::Read(int16& data) {
+	int16 _data;
+	IOError err = ReadData(&_data, sizeof(int16));
+	data = Endian::HostTo(reader_endian_, _data);
 
-	return lErr;
+	return err;
 }
 
-IOError Reader::Read(uint16& pData)
-{
-	uint16 lData;
-	IOError lErr = ReadData(&lData, sizeof(uint16));
-	pData = Endian::HostTo(mReaderEndian, lData);
-	return lErr;
+IOError Reader::Read(uint16& data) {
+	uint16 _data;
+	IOError err = ReadData(&_data, sizeof(uint16));
+	data = Endian::HostTo(reader_endian_, _data);
+	return err;
 }
 
-IOError Reader::Read(int32& pData)
-{
-	int lData;
-	IOError lErr = ReadData(&lData, sizeof(int));
-	pData = Endian::HostTo(mReaderEndian, lData);
-	return lErr;
+IOError Reader::Read(int32& data) {
+	int _data;
+	IOError err = ReadData(&_data, sizeof(int));
+	data = Endian::HostTo(reader_endian_, _data);
+	return err;
 }
 
-IOError Reader::Read(uint32& pData)
-{
-	unsigned lData;
-	IOError lErr = ReadData(&lData, sizeof(unsigned));
-	pData = Endian::HostTo(mReaderEndian, lData);
-	return lErr;
+IOError Reader::Read(uint32& data) {
+	unsigned _data;
+	IOError err = ReadData(&_data, sizeof(unsigned));
+	data = Endian::HostTo(reader_endian_, _data);
+	return err;
 }
 
-IOError Reader::Read(int64& pData)
-{
-	int64 lData;
-	IOError lErr = ReadData(&lData, sizeof(int64));
-	pData = Endian::HostTo(mReaderEndian, lData);
-	return lErr;
+IOError Reader::Read(int64& data) {
+	int64 _data;
+	IOError err = ReadData(&_data, sizeof(int64));
+	data = Endian::HostTo(reader_endian_, _data);
+	return err;
 }
 
-IOError Reader::Read(uint64& pData)
-{
-	uint64 lData;
-	IOError lErr = ReadData(&lData, sizeof(uint64));
-	pData = Endian::HostTo(mReaderEndian, lData);
-	return lErr;
+IOError Reader::Read(uint64& data) {
+	uint64 _data;
+	IOError err = ReadData(&_data, sizeof(uint64));
+	data = Endian::HostTo(reader_endian_, _data);
+	return err;
 }
 
-IOError Reader::Read(float32& pData)
-{
-	float32 lData;
-	IOError lErr = ReadData(&lData, sizeof(float32));
-	pData = Endian::HostTo(mReaderEndian, lData);
-	return lErr;
+IOError Reader::Read(float32& data) {
+	float32 _data;
+	IOError err = ReadData(&_data, sizeof(float32));
+	data = Endian::HostTo(reader_endian_, _data);
+	return err;
 }
 
-IOError Reader::Read(float64& pData)
-{
-	float64 lData;
-	IOError lErr = ReadData(&lData, sizeof(float64));
-	pData = Endian::HostTo(mReaderEndian, lData);
-	return lErr;
+IOError Reader::Read(float64& data) {
+	float64 _data;
+	IOError err = ReadData(&_data, sizeof(float64));
+	data = Endian::HostTo(reader_endian_, _data);
+	return err;
 }
 
-IOError Reader::ReadData(void* pBuffer, size_t pSize)
-{
-	mReadCount += (uint64)pSize;
-	return mInStream->ReadRaw(pBuffer, pSize);
+IOError Reader::ReadData(void* buffer, size_t size) {
+	read_count_ += (uint64)size;
+	return in_stream_->ReadRaw(buffer, size);
 }
 
-IOError Reader::AllocReadData(void** pBuffer, size_t pSize)
-{
-	char* lData = new char[pSize];
-	IOError lStatus = ReadData(lData, pSize);
-	if (lStatus == IO_OK)
-	{
-		*pBuffer = (void*)lData;
+IOError Reader::AllocReadData(void** buffer, size_t size) {
+	char* _data = new char[size];
+	IOError status = ReadData(_data, size);
+	if (status == kIoOk) {
+		*buffer = (void*)_data;
+	} else {
+		delete[] (_data);
 	}
-	else
-	{
-		delete[] (lData);
+	return (status);
+}
+
+IOError Reader::Skip(size_t size) {
+	return in_stream_->Skip(size);
+}
+
+void Reader::SetReaderEndian(Endian::EndianType reader_endian) {
+	reader_endian_ = reader_endian;
+}
+
+Endian::EndianType Reader::GetReaderEndian() const {
+	return reader_endian_;
+}
+
+const str& Reader::GetStreamName() {
+	return in_stream_->GetName();
+}
+
+int64 Reader::GetAvailable() const {
+	return in_stream_->GetAvailable();
+}
+
+uint64 Reader::GetReadCount() {
+	return read_count_;
+}
+
+IOError Reader::ReadLine(str& s) {
+	s.clear();
+	char c = '\0';
+	IOError err = Read(c);
+	if (err != kIoOk) {
+		return (err);
 	}
-	return (lStatus);
-}
-
-IOError Reader::Skip(size_t pSize)
-{
-	return mInStream->Skip(pSize);
-}
-
-void Reader::SetReaderEndian(Endian::EndianType pReaderEndian)
-{
-	mReaderEndian = pReaderEndian;
-}
-
-Endian::EndianType Reader::GetReaderEndian() const
-{
-	return mReaderEndian;
-}
-
-const str& Reader::GetStreamName()
-{
-	return mInStream->GetName();
-}
-
-int64 Reader::GetAvailable() const
-{
-	return mInStream->GetAvailable();
-}
-
-uint64 Reader::GetReadCount()
-{
-	return mReadCount;
-}
-
-IOError Reader::ReadLine(str& pString)
-{
-	pString.clear();
-	char lChar = '\0';
-	IOError lErr = Read(lChar);
-	if (lErr != IO_OK)
-	{
-		return (lErr);
-	}
-	while (lChar != '\0' && lChar != '\n')
-	{
-		if (lChar != '\r')
-		{
-			pString += lChar;
+	while (c != '\0' && c != '\n') {
+		if (c != '\r') {
+			s += c;
 		}
-		lErr = Read(lChar);
-		if (lErr != IO_OK)
-		{
-			if (lErr == IO_ERROR_READING_FROM_STREAM)
-			{
+		err = Read(c);
+		if (err != kIoOk) {
+			if (err == kIoErrorReadingFromStream) {
 				break;	// We'll take the error on the next (=empty) line.
 			}
-			return (lErr);
+			return (err);
 		}
 	}
 
-	return IO_OK;
+	return kIoOk;
 }
 
-void Reader::SetInputStream(InputStream* pInStream)
-{
-	mReadCount = 0;
-	mInStream = pInStream;
+void Reader::SetInputStream(InputStream* in_stream) {
+	read_count_ = 0;
+	in_stream_ = in_stream;
 }
 
 

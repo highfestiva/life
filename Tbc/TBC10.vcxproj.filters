@@ -1,124 +1,124 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Bones.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\bones.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ChunkyBoneGeometry.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\chunkybonegeometry.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ChunkyClass.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\chunkyclass.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ChunkyLoader.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\chunkyloader.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ChunkyPhysics.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\chunkyphysics.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GeometryBase.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\geometrybase.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GeometryReference.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\geometryreference.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Model.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\model.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PhysicsEngine.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\physicsengine.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PhysicsManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\physicsmanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PhysicsManagerFactory.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\physicsmanagerfactory.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PhysicsManagerODE.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\physicsmanagerode.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PhysicsSpawner.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\physicsspawner.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PhysicsTrigger.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\physicstrigger.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PortalManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\portalmanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Tbc.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\tbc.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\TerrainFunction.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\terrainfunction.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\TerrainPatch.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\terrainpatch.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\Bones.h">
+    <Clinclude include="include\bones.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ChunkyBoneGeometry.h">
+    <Clinclude include="include\chunkybonegeometry.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ChunkyClass.h">
+    <Clinclude include="include\chunkyclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ChunkyLoader.h">
+    <Clinclude include="include\chunkyloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ChunkyPhysics.h">
+    <Clinclude include="include\chunkyphysics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\GeometryBase.h">
+    <Clinclude include="include\geometrybase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\GeometryReference.h">
+    <Clinclude include="include\geometryreference.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Model.h">
+    <Clinclude include="include\model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PhysicsEngine.h">
+    <Clinclude include="include\physicsengine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PhysicsManager.h">
+    <Clinclude include="include\physicsmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PhysicsManagerFactory.h">
+    <Clinclude include="include\physicsmanagerfactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PhysicsManagerODE.h">
+    <Clinclude include="include\physicsmanagerode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PhysicsSpawner.h">
+    <Clinclude include="include\physicsspawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PhysicsTrigger.h">
+    <Clinclude include="include\physicstrigger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PortalManager.h">
+    <Clinclude include="include\portalmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Tbc.h">
+    <Clinclude include="include\tbc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\TerrainFunction.h">
+    <Clinclude include="include\terrainfunction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\TerrainPatch.h">
+    <Clinclude include="include\terrainpatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

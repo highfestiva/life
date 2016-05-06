@@ -1,58 +1,53 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
-#include "TrabantSim.h"
+#include "../uicure/include/uimachine.h"
+#include "trabantsim.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class Color;
 class Plane;
 }
-namespace Tbc
-{
+namespace tbc {
 class PhysicsManager;
 }
-namespace UiTbc
-{
+namespace uitbc {
 class TriangleBasedGeometry;
 }
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
-class Object: public UiCure::Machine
-{
+class Object: public UiCure::Machine {
 	typedef UiCure::Machine Parent;
 public:
-	Object(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Object(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager);
 	virtual ~Object();
 
-	virtual const Tbc::ChunkyClass* GetClass() const;
-	UiTbc::TriangleBasedGeometry* CreateGfxMesh(const std::vector<float>& pVertices, const std::vector<int>& pIndices, const vec3& pColor, float pAlpha, bool pIsSmooth);
-	void AddMeshInfo(const str& pMeshName, const str& pShader, const str& pTexture, const vec3& pColor=vec3(1,1,1), float pAlpha=1, bool pIsSmooth=false);
+	virtual const tbc::ChunkyClass* GetClass() const;
+	uitbc::TriangleBasedGeometry* CreateGfxMesh(const std::vector<float>& vertices, const std::vector<int>& indices, const vec3& color, float alpha, bool is_smooth);
+	void AddMeshInfo(const str& mesh_name, const str& shader, const str& texture, const vec3& color=vec3(1,1,1), float alpha=1, bool is_smooth=false);
 
 	virtual void OnLoaded();
 
-	quat mInitialOrientation;
-	quat mInitialInverseOrientation;
-	Tbc::ChunkyPhysics* mGeneratedPhysics;
+	quat initial_orientation_;
+	quat initial_inverse_orientation_;
+	tbc::ChunkyPhysics* generated_physics_;
 
 private:
-	UiTbc::ChunkyClass* mClass;
-	UiTbc::TriangleBasedGeometry* mGfxMesh;
-	UiTbc::Renderer::GeometryID mGfxMeshId;
+	uitbc::ChunkyClass* clazz_;
+	uitbc::TriangleBasedGeometry* gfx_mesh_;
+	uitbc::Renderer::GeometryID gfx_mesh_id_;
 };
 
 

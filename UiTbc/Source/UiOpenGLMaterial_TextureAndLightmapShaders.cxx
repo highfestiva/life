@@ -6,12 +6,11 @@
 */
 
 #include "pch.h"
-#include "../Include/UiOpenGLMaterials.h"
+#include "../include/uiopenglmaterials.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-const str OpenGLMatTextureAndLightmapPXS::smVP =
+const str OpenGLMatTextureAndLightmapPXS::vp_ =
 	"!!ARBvp1.0\n\
 	 OPTION ARB_position_invariant;\n\
 	 # Diffuse vp.\n\
@@ -34,7 +33,7 @@ const str OpenGLMatTextureAndLightmapPXS::smVP =
 	 PARAM mv[4]  = { state.matrix.modelview }; # model-view matrix\n\
 	 PARAM mtx[4] = { state.matrix.texture };   # texture matrix\n\
 	 # inverse transpose of model-view matrix:\n\
-	 PARAM mvIT[4] = { state.matrix.modelview.invtrans };\n\
+	 PARAM it_[4] = { state.matrix.modelview.invtrans };\n\
 	 \n\
 	 TEMP V;                                    # temporary registers\n\
 	 \n\
@@ -54,9 +53,9 @@ const str OpenGLMatTextureAndLightmapPXS::smVP =
 	 \n\
 	 MOV oFragPos, V;                           # output position for use in the fragment shader.\n\
 	 \n\
-	 DP3 oNormal.x, iNormal, mvIT[0];           # transform normal to eye space\n\
-	 DP3 oNormal.y, iNormal, mvIT[1];\n\
-	 DP3 oNormal.z, iNormal, mvIT[2];\n\
+	 DP3 oNormal.x, iNormal, it_[0];           # transform normal to eye space\n\
+	 DP3 oNormal.y, iNormal, it_[1];\n\
+	 DP3 oNormal.z, iNormal, it_[2];\n\
 	 \n\
 	 MOV oPriCol, iPriCol;\n\
 	 MOV oTCoord0, iTCoord0;\n\
@@ -95,10 +94,10 @@ TEMP DiffuseCol;\n\
 TEMP SpecularCol;\n\
 TEMP fSpot;\n\
 TEMP fSpotNorm;\n\
-TEMP primCol;\n\
+TEMP col;\n\
 \n\
-TEX primCol, iTCoord0, texture[0], 2D;\n\
-MUL primCol, primCol, iPrimCol;\n\
+TEX col, iTCoord0, texture[0], 2D;\n\
+MUL col, col, iPrimCol;\n\
 \n\
 TEX DiffuseCol, iTCoord1, texture[1], 2D;\n\
 \n\
@@ -177,12 +176,12 @@ MAD SpecularCol, fSpot, fromLIT.z, SpecularCol;\n\
 
 #define FP_END "\
 LRP Temp, specular, SpecularCol, DiffuseCol;\n\
-MUL N, primCol, ambientCol;\n\
-MAD outCol.rgb, Temp, primCol, N;\n\
+MUL N, col, ambientCol;\n\
+MAD outCol.rgb, Temp, col, N;\n\
 MOV outCol.a, iPrimCol.a;              # preserve alpha\n\
 END"
 
-const str OpenGLMatTextureAndLightmapPXS::smFP[NUM_FP] =
+const str OpenGLMatTextureAndLightmapPXS::fp_[kNumFp] =
 {
 	// Ambient light and lightmap only.
 	"!!ARBfp1.0\n\
@@ -196,19 +195,19 @@ const str OpenGLMatTextureAndLightmapPXS::smFP[NUM_FP] =
 	 PARAM specular   = program.local[0];   # specularity factor.\n\
 	 PARAM ambientCol = program.local[3];   # ambient color.\n\
 	 \n\
-	 TEMP primCol, lightCol, diffuse, T;\n\
+	 TEMP col, col, diffuse, T;\n\
 	 \n\
 	 SUB diffuse, 1, specular;\n\
 	 \n\
-	 TEX primCol, iTCoord0, texture[0], 2D;\n\
-	 MUL primCol, primCol, iPrimCol;\n\
+	 TEX col, iTCoord0, texture[0], 2D;\n\
+	 MUL col, col, iPrimCol;\n\
 	 \n\
-	 TEX lightCol, iTCoord1, texture[1], 2D;\n\
-	 #ADD lightCol, lightCol, ambientCol;\n\
-	 MUL lightCol, lightCol, diffuse;\n\
+	 TEX col, iTCoord1, texture[1], 2D;\n\
+	 #ADD col, col, ambientCol;\n\
+	 MUL col, col, diffuse;\n\
 	 \n\
-	 MUL T, primCol, lightCol;\n\
-	 MAD outCol.rgb, primCol, ambientCol, T;\n\
+	 MUL T, col, col;\n\
+	 MAD outCol.rgb, col, ambientCol, T;\n\
 	 MOV outCol.a, iPrimCol.a;\n\
 	 END",
 

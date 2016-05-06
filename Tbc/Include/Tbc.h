@@ -1,19 +1,18 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
-#include "../../Lepra/Include/Lepra.h"
+#include "../../lepra/include/lepra.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-using namespace Lepra;
+using namespace lepra;
 
 void Init();
 void Shutdown();

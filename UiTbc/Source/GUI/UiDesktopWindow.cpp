@@ -5,89 +5,83 @@
 
 
 #include "pch.h"
-#include "../../../UiLepra/Include/UiInput.h"
-#include "../../../Lepra/Include/Log.h"
-#include "../../../Lepra/Include/ListUtil.h"
-#include "../../Include/GUI/UiDesktopWindow.h"
+#include "../../../uilepra/include/uiinput.h"
+#include "../../../lepra/include/log.h"
+#include "../../../lepra/include/listutil.h"
+#include "../../include/gui/uidesktopwindow.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, 
-	Layout* pLayout, const char* pImageDefinitionFile,
-	const char* pArchive):
-	RectComponent(pLayout),
-	mInputManager(pInputManager),
-	mMouseEnabled(true),
-	mKeyboardEnabled(true),
-	mMouseArea(0, 0, 0, 0),
-	mMouseX(0),
-	mMouseY(0),
-	mMousePrevX(0),
-	mMousePrevY(0),
-	mMouseButtonFlags(0),
-	mPainter(pPainter)
-{
-	Init(pImageDefinitionFile, pArchive);
+DesktopWindow::DesktopWindow(uilepra::InputManager* input_manager, Painter* painter,
+	Layout* layout, const char* image_definition_file,
+	const char* archive):
+	RectComponent(layout),
+	input_manager_(input_manager),
+	mouse_enabled_(true),
+	keyboard_enabled_(true),
+	mouse_area_(0, 0, 0, 0),
+	mouse_x_(0),
+	mouse_y_(0),
+	mouse_prev_x_(0),
+	mouse_prev_y_(0),
+	mouse_button_flags_(0),
+	painter_(painter) {
+	Init(image_definition_file, archive);
 }
 
-DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, const Color& pColor,
-	Layout* pLayout, const char* pImageDefinitionFile, const char* pArchive):
-	RectComponent(pColor, pLayout),
-	mInputManager(pInputManager),
-	mMouseEnabled(true),
-	mKeyboardEnabled(true),
-	mMouseArea(0, 0, 0, 0),
-	mMouseX(0),
-	mMouseY(0),
-	mMousePrevX(0),
-	mMousePrevY(0),
-	mPainter(pPainter)
-{
-	Init(pImageDefinitionFile, pArchive);
+DesktopWindow::DesktopWindow(uilepra::InputManager* input_manager, Painter* painter, const Color& color,
+	Layout* layout, const char* image_definition_file, const char* archive):
+	RectComponent(color, layout),
+	input_manager_(input_manager),
+	mouse_enabled_(true),
+	keyboard_enabled_(true),
+	mouse_area_(0, 0, 0, 0),
+	mouse_x_(0),
+	mouse_y_(0),
+	mouse_prev_x_(0),
+	mouse_prev_y_(0),
+	painter_(painter) {
+	Init(image_definition_file, archive);
 }
 
-DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter,
-	const Color& pTopLeftColor, const Color& pTopRightColor,
-	const Color& pBottomRightColor, const Color& pBottomLeftColor,
-	Layout* pLayout, const char* pImageDefinitionFile,
-	const char* pArchive):
-	RectComponent(pTopLeftColor, pTopRightColor, pBottomRightColor, pBottomLeftColor, pLayout),
-	mInputManager(pInputManager),
-	mMouseEnabled(true),
-	mKeyboardEnabled(true),
-	mMouseArea(0, 0, 0, 0),
-	mMouseX(0),
-	mMouseY(0),
-	mMousePrevX(0),
-	mMousePrevY(0),
-	mPainter(pPainter)
-{
-	Init(pImageDefinitionFile, pArchive);
+DesktopWindow::DesktopWindow(uilepra::InputManager* input_manager, Painter* painter,
+	const Color& top_left_color, const Color& top_right_color,
+	const Color& bottom_right_color, const Color& bottom_left_color,
+	Layout* layout, const char* image_definition_file,
+	const char* archive):
+	RectComponent(top_left_color, top_right_color, bottom_right_color, bottom_left_color, layout),
+	input_manager_(input_manager),
+	mouse_enabled_(true),
+	keyboard_enabled_(true),
+	mouse_area_(0, 0, 0, 0),
+	mouse_x_(0),
+	mouse_y_(0),
+	mouse_prev_x_(0),
+	mouse_prev_y_(0),
+	painter_(painter) {
+	Init(image_definition_file, archive);
 }
 
-DesktopWindow::DesktopWindow(UiLepra::InputManager* pInputManager, Painter* pPainter, Painter::ImageID pImageID,
-	Layout* pLayout, const char* pImageDefinitionFile, const char* pArchive):
-	RectComponent(pImageID, pLayout),
-	mInputManager(pInputManager),
-	mMouseEnabled(true),
-	mKeyboardEnabled(true),
-	mMouseArea(0, 0, 0, 0),
-	mMouseX(0),
-	mMouseY(0),
-	mMousePrevX(0),
-	mMousePrevY(0),
-	mPainter(pPainter)
-{
-	Init(pImageDefinitionFile, pArchive);
+DesktopWindow::DesktopWindow(uilepra::InputManager* input_manager, Painter* painter, Painter::ImageID image_id,
+	Layout* layout, const char* image_definition_file, const char* archive):
+	RectComponent(image_id, layout),
+	input_manager_(input_manager),
+	mouse_enabled_(true),
+	keyboard_enabled_(true),
+	mouse_area_(0, 0, 0, 0),
+	mouse_x_(0),
+	mouse_y_(0),
+	mouse_prev_x_(0),
+	mouse_prev_y_(0),
+	painter_(painter) {
+	Init(image_definition_file, archive);
 }
 
-DesktopWindow::~DesktopWindow()
-{
+DesktopWindow::~DesktopWindow() {
 	PurgeDeleted();
 
 	// TRICKY: this has gotta be done here, too. Component parent
@@ -96,60 +90,53 @@ DesktopWindow::~DesktopWindow()
 	// get killed.
 	DeleteAllLayers();
 
-	ListUtil::DeleteAll(mCleanerList);
+	ListUtil::DeleteAll(cleaner_list_);
 
-	mInputManager->RemoveTextInputObserver(this);
-	mInputManager->RemoveKeyCodeInputObserver(this);
-	mInputManager->RemoveMouseInputObserver(this);
-	mInputManager = 0;
+	input_manager_->RemoveTextInputObserver(this);
+	input_manager_->RemoveKeyCodeInputObserver(this);
+	input_manager_->RemoveMouseInputObserver(this);
+	input_manager_ = 0;
 }
 
-UiLepra::InputManager* DesktopWindow::GetInputManager() const
-{
-	return (mInputManager);
+uilepra::InputManager* DesktopWindow::GetInputManager() const {
+	return (input_manager_);
 }
 
-void DesktopWindow::Init(const char* /*pImageDefinitionFile*/, const char* /*pArchive*/)
-{
+void DesktopWindow::Init(const char* /*image_definition_file*/, const char* /*archive*/) {
 	// Let all components access the image manager.
-	SetImageManager(&mImageManager);
+	SetImageManager(&image_manager_);
 
-	mImageManager.SetPainter(mPainter);
+	image_manager_.SetPainter(painter_);
 
-	UiLepra::InputDevice* lMouse = 0;
-	if (mInputManager)
-	{
-		mInputManager->AddTextInputObserver(this);
-		mInputManager->AddKeyCodeInputObserver(this);
-		mInputManager->AddMouseInputObserver(this);
-		lMouse = mInputManager->GetMouse();
+	uilepra::InputDevice* mouse = 0;
+	if (input_manager_) {
+		input_manager_->AddTextInputObserver(this);
+		input_manager_->AddKeyCodeInputObserver(this);
+		input_manager_->AddMouseInputObserver(this);
+		mouse = input_manager_->GetMouse();
 	}
 
-	if (lMouse != 0)
-	{
-		UiLepra::InputElement* lButton1 = lMouse->GetButton(0);
-		UiLepra::InputElement* lButton2 = lMouse->GetButton(1);
-		UiLepra::InputElement* lButton3 = lMouse->GetButton(2);
+	if (mouse != 0) {
+		uilepra::InputElement* button1 = mouse->GetButton(0);
+		uilepra::InputElement* button2 = mouse->GetButton(1);
+		uilepra::InputElement* button3 = mouse->GetButton(2);
 
-		if (lButton1 != 0)
-		{
-			ADD_INPUT_CALLBACK(lButton1, OnButton1, DesktopWindow);
+		if (button1 != 0) {
+			ADD_INPUT_CALLBACK(button1, OnButton1, DesktopWindow);
 		}
-		if (lButton2 != 0)
-		{
-			ADD_INPUT_CALLBACK(lButton2, OnButton2, DesktopWindow);
+		if (button2 != 0) {
+			ADD_INPUT_CALLBACK(button2, OnButton2, DesktopWindow);
 		}
-		if (lButton3 != 0)
-		{
-			ADD_INPUT_CALLBACK(lButton3, OnButton3, DesktopWindow);
+		if (button3 != 0) {
+			ADD_INPUT_CALLBACK(button3, OnButton3, DesktopWindow);
 		}
 	}
 
 //	This code is left as a comment to remind you that reading the keyboard
 //	shouldn't be done the same way as the mouse. It is possible of course,
-//	but it would require huge amounts of code and isn't practial. 
+//	but it would require huge amounts of code and isn't practial.
 //
-//	UiLepra::InputDevice* lKeyboard = mInputManager->GetKeyboard();
+//	uilepra::InputDevice* lKeyboard = input_manager_->GetKeyboard();
 //
 //	if (lKeyboard != 0)
 //	{
@@ -158,290 +145,236 @@ void DesktopWindow::Init(const char* /*pImageDefinitionFile*/, const char* /*pAr
 
 }
 
-void DesktopWindow::PurgeDeleted()
-{
+void DesktopWindow::PurgeDeleted() {
 	// Delete all prerendered images from the painter.
-	ComponentList::iterator lIter;
-	for (lIter = mDeleteQueue.begin(); lIter != mDeleteQueue.end(); ++lIter)
-	{
-		Component* lChild = *lIter;
-		if (lChild->mImageID != Painter::INVALID_IMAGEID)
-		{
-			mPainter->RemoveImage(lChild->mImageID);
-			lChild->ReleaseKeyboardFocus();
+	ComponentList::iterator iter;
+	for (iter = delete_queue_.begin(); iter != delete_queue_.end(); ++iter) {
+		Component* _child = *iter;
+		if (_child->image_id_ != Painter::kInvalidImageid) {
+			painter_->RemoveImage(_child->image_id_);
+			_child->ReleaseKeyboardFocus();
 		}
-		RemoveChild(lChild, 0);
+		RemoveChild(_child, 0);
 	}
 	// Delete all queued components.
-	ListUtil::DeleteAll(mDeleteQueue);
+	ListUtil::DeleteAll(delete_queue_);
 }
 
-void DesktopWindow::DoSetSize(int pWidth, int pHeight)
-{
-	Parent::DoSetSize(pWidth, pHeight);
-	PixelCoord lPos(GetScreenPos());
-	mMouseArea.Set(lPos.x, lPos.y, lPos.x + pWidth, lPos.y + pHeight);
+void DesktopWindow::DoSetSize(int width, int height) {
+	Parent::DoSetSize(width, height);
+	PixelCoord pos(GetScreenPos());
+	mouse_area_.Set(pos.x, pos.y, pos.x + width, pos.y + height);
 }
 
-void DesktopWindow::SetMouseEnabled(bool pEnabled)
-{
-	mMouseEnabled = pEnabled;
+void DesktopWindow::SetMouseEnabled(bool enabled) {
+	mouse_enabled_ = enabled;
 }
 
-void DesktopWindow::ClampMouse(int& x, int& y) const
-{
-	bool lUpdateMouse = false;
+void DesktopWindow::ClampMouse(int& x, int& y) const {
+	bool update_mouse = false;
 
-	if (x < mMouseArea.mLeft)
-	{
-		x = mMouseArea.mLeft;
-		lUpdateMouse = true;
+	if (x < mouse_area_.left_) {
+		x = mouse_area_.left_;
+		update_mouse = true;
 	}
 
-	if (x >= mMouseArea.mRight)
-	{
-		x = mMouseArea.mRight - 1;
-		lUpdateMouse = true;
+	if (x >= mouse_area_.right_) {
+		x = mouse_area_.right_ - 1;
+		update_mouse = true;
 	}
 
-	if (y < mMouseArea.mTop)
-	{
-		y = mMouseArea.mTop;
-		lUpdateMouse = true;
+	if (y < mouse_area_.top_) {
+		y = mouse_area_.top_;
+		update_mouse = true;
 	}
 
-	if (y >= mMouseArea.mBottom)
-	{
-		y = mMouseArea.mBottom - 1;
-		lUpdateMouse = true;
+	if (y >= mouse_area_.bottom_) {
+		y = mouse_area_.bottom_ - 1;
+		update_mouse = true;
 	}
 }
 
-void DesktopWindow::AddChild(Component* pChild, int pParam1, int pParam2, int pLayer)
-{
-	Parent::AddChild(pChild, pParam1, pParam2, pLayer);
-	pChild->OnConnectedToDesktopWindow();
+void DesktopWindow::AddChild(Component* child, int param1, int param2, int layer) {
+	Parent::AddChild(child, param1, param2, layer);
+	child->OnConnectedToDesktopWindow();
 }
 
-void DesktopWindow::Repaint(Painter* /*pPainter*/)
-{
+void DesktopWindow::Repaint(Painter* /*painter*/) {
 	PurgeDeleted();
 
 	// Call OnIdle() on all subscribers.
-	ComponentList::iterator lIter;
-	for (lIter = mIdleSubscribers.begin(); 
-		lIter != mIdleSubscribers.end(); ++lIter)
-	{
-		(*lIter)->OnIdle();
+	ComponentList::iterator iter;
+	for (iter = idle_subscribers_.begin();
+		iter != idle_subscribers_.end(); ++iter) {
+		(*iter)->OnIdle();
 	}
 
 	// Handle mouse...
-	GetCursorPosition(mMouseX, mMouseY);
-	DispatchMouseMove(mMouseX, mMouseY);
+	GetCursorPosition(mouse_x_, mouse_y_);
+	DispatchMouseMove(mouse_x_, mouse_y_);
 
-	if (NeedsRepaint() == true || mUpdateLayout)
-	{
+	if (NeedsRepaint() == true || update_layout_) {
 		UpdateLayout();
-		mUpdateLayout = false;
+		update_layout_ = false;
 	}
-	Parent::Repaint(mPainter);
+	Parent::Repaint(painter_);
 }
 
-void DesktopWindow::RepaintChild(Component* pChild, Painter* pPainter)
-{
-	pChild->Repaint(pPainter);
+void DesktopWindow::RepaintChild(Component* child, Painter* painter) {
+	child->Repaint(painter);
 }
 
-void DesktopWindow::OnButton1(UiLepra::InputElement* pElement)
-{
-	if (mMouseEnabled == true)
-	{
-		int lMouseX;
-		int lMouseY;
-		GetCursorPosition(lMouseX, lMouseY);
-		if (pElement->GetBooleanValue() == true)
-		{
-			if (OnLButtonDown(lMouseX, lMouseY))
-			{
-				mMouseButtonFlags |= CONSUMED_MOUSE_BUTTON1;
+void DesktopWindow::OnButton1(uilepra::InputElement* element) {
+	if (mouse_enabled_ == true) {
+		int _mouse_x;
+		int _mouse_y;
+		GetCursorPosition(_mouse_x, _mouse_y);
+		if (element->GetBooleanValue() == true) {
+			if (OnLButtonDown(_mouse_x, _mouse_y)) {
+				mouse_button_flags_ |= kConsumedMouseButton1;
 			}
-		}
-		else
-		{
-			mMouseButtonFlags &= ~CONSUMED_MOUSE_BUTTON1;
-			DispatchMouseMove(lMouseX, lMouseY);
-			OnLButtonUp(lMouseX, lMouseY);
+		} else {
+			mouse_button_flags_ &= ~kConsumedMouseButton1;
+			DispatchMouseMove(_mouse_x, _mouse_y);
+			OnLButtonUp(_mouse_x, _mouse_y);
 		}
 	}
 }
 
-void DesktopWindow::OnButton2(UiLepra::InputElement* pElement)
-{
-	if (mMouseEnabled == true)
-	{
-		int lMouseX;
-		int lMouseY;
-		GetCursorPosition(lMouseX, lMouseY);
-		if (pElement->GetBooleanValue() == true)
-		{
-			if (OnRButtonDown(lMouseX, lMouseY))
-			{
-				mMouseButtonFlags |= CONSUMED_MOUSE_BUTTON2;
+void DesktopWindow::OnButton2(uilepra::InputElement* element) {
+	if (mouse_enabled_ == true) {
+		int _mouse_x;
+		int _mouse_y;
+		GetCursorPosition(_mouse_x, _mouse_y);
+		if (element->GetBooleanValue() == true) {
+			if (OnRButtonDown(_mouse_x, _mouse_y)) {
+				mouse_button_flags_ |= kConsumedMouseButton2;
 			}
-		}
-		else
-		{
-			mMouseButtonFlags &= ~CONSUMED_MOUSE_BUTTON2;
-			DispatchMouseMove(lMouseX, lMouseY);
-			OnRButtonUp(lMouseX, lMouseY);
+		} else {
+			mouse_button_flags_ &= ~kConsumedMouseButton2;
+			DispatchMouseMove(_mouse_x, _mouse_y);
+			OnRButtonUp(_mouse_x, _mouse_y);
 		}
 	}
 }
 
-void DesktopWindow::OnButton3(UiLepra::InputElement* pElement)
-{
-	if (mMouseEnabled == true)
-	{
-		int lMouseX;
-		int lMouseY;
-		GetCursorPosition(lMouseX, lMouseY);
-		if (pElement->GetBooleanValue() == true)
-		{
-			if (OnMButtonDown(lMouseX, lMouseY))
-			{
-				mMouseButtonFlags |= CONSUMED_MOUSE_BUTTON3;
+void DesktopWindow::OnButton3(uilepra::InputElement* element) {
+	if (mouse_enabled_ == true) {
+		int _mouse_x;
+		int _mouse_y;
+		GetCursorPosition(_mouse_x, _mouse_y);
+		if (element->GetBooleanValue() == true) {
+			if (OnMButtonDown(_mouse_x, _mouse_y)) {
+				mouse_button_flags_ |= kConsumedMouseButton3;
 			}
-		}
-		else
-		{
-			mMouseButtonFlags &= ~CONSUMED_MOUSE_BUTTON3;
-			DispatchMouseMove(lMouseX, lMouseY);
-			OnMButtonUp(lMouseX, lMouseY);
+		} else {
+			mouse_button_flags_ &= ~kConsumedMouseButton3;
+			DispatchMouseMove(_mouse_x, _mouse_y);
+			OnMButtonUp(_mouse_x, _mouse_y);
 		}
 	}
 }
 
-void DesktopWindow::GetCursorPosition(int& pMouseX, int& pMouseY) const
-{
-	if (!mInputManager)
-	{
+void DesktopWindow::GetCursorPosition(int& mouse_x, int& mouse_y) const {
+	if (!input_manager_) {
 		return;
 	}
 
-	float64 lWidth  = (float64)mMouseArea.GetWidth();
-	float64 lHeight = (float64)mMouseArea.GetHeight();
+	float64 _width  = (float64)mouse_area_.GetWidth();
+	float64 _height = (float64)mouse_area_.GetHeight();
 
-	pMouseX = (int)((mInputManager->GetCursorX() + 1.0) * lWidth / 2.0);
-	pMouseY = (int)((mInputManager->GetCursorY() + 1.0) * lHeight / 2.0);
+	mouse_x = (int)((input_manager_->GetCursorX() + 1.0) * _width / 2.0);
+	mouse_y = (int)((input_manager_->GetCursorY() + 1.0) * _height / 2.0);
 
-	ClampMouse(pMouseX, pMouseY);
+	ClampMouse(mouse_x, mouse_y);
 }
 
-void DesktopWindow::DispatchMouseMove(int pMouseX, int pMouseY)
-{
-	if (!mMouseEnabled)
-	{
+void DesktopWindow::DispatchMouseMove(int mouse_x, int mouse_y) {
+	if (!mouse_enabled_) {
 		return;
 	}
 
-	if (mMousePrevX != pMouseX || mMousePrevY != pMouseY)
-	{
-		OnMouseMove(pMouseX, pMouseY, pMouseX - mMousePrevX, pMouseY - mMousePrevY);
-		mMousePrevX = pMouseX;
-		mMousePrevY = pMouseY;
+	if (mouse_prev_x_ != mouse_x || mouse_prev_y_ != mouse_y) {
+		OnMouseMove(mouse_x, mouse_y, mouse_x - mouse_prev_x_, mouse_y - mouse_prev_y_);
+		mouse_prev_x_ = mouse_x;
+		mouse_prev_y_ = mouse_y;
 	}
 }
 
-bool DesktopWindow::OnChar(wchar_t pChar)
-{
-	return (Parent::OnChar(pChar));
+bool DesktopWindow::OnChar(wchar_t c) {
+	return (Parent::OnChar(c));
 }
 
-bool DesktopWindow::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	return (Parent::OnKeyDown(pKeyCode));
+bool DesktopWindow::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
+	return (Parent::OnKeyDown(key_code));
 }
 
-bool DesktopWindow::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	return (Parent::OnKeyUp(pKeyCode));
+bool DesktopWindow::OnKeyUp(uilepra::InputManager::KeyCode key_code) {
+	return (Parent::OnKeyUp(key_code));
 }
 
-bool DesktopWindow::OnDoubleClick()
-{
+bool DesktopWindow::OnDoubleClick() {
 	Parent::OnDoubleClick();
 
-	if (mMouseEnabled == true)
-	{
-		int lMouseX;
-		int lMouseY;
-		GetCursorPosition(lMouseX, lMouseY);
-		Parent::OnDoubleClick(lMouseX, lMouseY);
+	if (mouse_enabled_ == true) {
+		int _mouse_x;
+		int _mouse_y;
+		GetCursorPosition(_mouse_x, _mouse_y);
+		Parent::OnDoubleClick(_mouse_x, _mouse_y);
 	}
 	return (false);
 }
 
-DesktopWindow::MouseButtonFlags DesktopWindow::GetMouseButtonFlags() const
-{
-	return (MouseButtonFlags)mMouseButtonFlags;
+DesktopWindow::MouseButtonFlags DesktopWindow::GetMouseButtonFlags() const {
+	return (MouseButtonFlags)mouse_button_flags_;
 }
 
-void DesktopWindow::PostDeleteComponent(Component* pComponent, int /*pLayer*/)
-{
-	mDeleteQueue.push_back(pComponent);
+void DesktopWindow::PostDeleteComponent(Component* component, int /*layer*/) {
+	delete_queue_.push_back(component);
 }
 
-Painter* DesktopWindow::GetPainter()
-{
+Painter* DesktopWindow::GetPainter() {
 	deb_assert(this);
-	return (mPainter);
+	return (painter_);
 }
 
-void DesktopWindow::SetKeyboardEnabled(bool pEnabled)
-{
-	mKeyboardEnabled = pEnabled;
+void DesktopWindow::SetKeyboardEnabled(bool enabled) {
+	keyboard_enabled_ = enabled;
 }
 
-void DesktopWindow::SetUpdateLayout(bool pUpdateLayout)
-{
-	mUpdateLayout = pUpdateLayout;
+void DesktopWindow::SetUpdateLayout(bool update_layout) {
+	update_layout_ = update_layout;
 }
 
-void DesktopWindow::AddIdleSubscriber(Component* pComponent)
-{
-	mIdleSubscribers.push_back(pComponent);
-	mIdleSubscribers.unique();
+void DesktopWindow::AddIdleSubscriber(Component* component) {
+	idle_subscribers_.push_back(component);
+	idle_subscribers_.unique();
 }
 
-void DesktopWindow::RemoveIdleSubscriber(Component* pComponent)
-{
-	mIdleSubscribers.remove(pComponent);
+void DesktopWindow::RemoveIdleSubscriber(Component* component) {
+	idle_subscribers_.remove(component);
 }
 
-void DesktopWindow::ActivateKeyboard()
-{
-	mInputManager->ActivateKeyboard();
+void DesktopWindow::ActivateKeyboard() {
+	input_manager_->ActivateKeyboard();
 }
 
-void DesktopWindow::DeactivateKeyboard()
-{
-	mInputManager->ReleaseKeyboard();
+void DesktopWindow::DeactivateKeyboard() {
+	input_manager_->ReleaseKeyboard();
 }
 
-void DesktopWindow::AddCleaner(Cleaner* pCleaner)
-{
-	mCleanerList.push_back(pCleaner);
-	mCleanerList.unique();
+void DesktopWindow::AddCleaner(Cleaner* cleaner) {
+	cleaner_list_.push_back(cleaner);
+	cleaner_list_.unique();
 }
 
-Component::Type DesktopWindow::GetType() const
-{
-	return Component::DESKTOPWINDOW;
+Component::Type DesktopWindow::GetType() const {
+	return Component::kDesktopwindow;
 }
 
 
 
-loginstance(UI_GFX_2D, DesktopWindow);
+loginstance(kUiGfx2D, DesktopWindow);
 
 
 

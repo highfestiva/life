@@ -1,1 +1,1 @@
-#include "UiOpenGLRenderer.cxx"
+#include "uiopenglrenderer.cxx"

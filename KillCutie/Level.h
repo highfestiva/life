@@ -1,47 +1,44 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
-#include "../Cure/Include/ContextForceListener.h"
-#include "Game.h"
+#include "../uicure/include/uimachine.h"
+#include "../cure/include/contextforcelistener.h"
+#include "game.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ContextPath;
 }
 
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
-class Level: public UiCure::Machine
-{
+class Level: public UiCure::Machine {
 public:
 	typedef UiCure::Machine Parent;
 
-	Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Cure::ContextForceListener* pGravelEmitter);
+	Level(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, cure::ContextForceListener* gravel_emitter);
 	virtual ~Level();
 
-	Cure::ContextPath* QueryPath();
+	cure::ContextPath* QueryPath();
 
 private:
-	virtual void OnForceApplied(Cure::ContextObject* pOtherObject,
-		Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-		const vec3& pForce, const vec3& pTorque,
-		const vec3& pPosition, const vec3& pRelativeVelocity);
+	virtual void OnForceApplied(cure::ContextObject* other_object,
+		tbc::PhysicsManager::BodyID own_body_id, tbc::PhysicsManager::BodyID other_body_id,
+		const vec3& force, const vec3& torque,
+		const vec3& position, const vec3& relative_velocity);
 
-	Cure::ContextPath* mPath;
-	Cure::ContextForceListener* mGravelEmitter;
+	cure::ContextPath* path_;
+	cure::ContextForceListener* gravel_emitter_;
 
 	logclass();
 };

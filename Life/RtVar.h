@@ -1,17 +1,17 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/RuntimeVariable.h"
+#include "../cure/include/runtimevariable.h"
 
-#define RTVAR_DEBUG_EXTRASLEEPTIME		"Debug.ExtraSleepTime"
+#define kRtvarDebugExtrasleeptime		"Debug.ExtraSleepTime"
 
-#define RTVAR_GAME_SPAWNPART			"Game.SpawnPart"
+#define kRtvarGameSpawnpart			"Game.SpawnPart"
 
-#define RTVAR_NETWORK_ENABLEOPENSERVER		"Network.EnableOpenServer"
+#define kRtvarNetworkEnableopenserver		"Network.EnableOpenServer"
 
-#define RTVAR_POWERSAVE_FACTOR			"PowerSave.Factor"
+#define kRtvarPowersaveFactor			"PowerSave.Factor"

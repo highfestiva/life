@@ -1,40 +1,37 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
-#include "Game.h"
+#include "../uicure/include/uimachine.h"
+#include "game.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ContextPath;
 }
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 
-class Level: public UiCure::Machine
-{
+class Level: public UiCure::Machine {
 public:
 	typedef UiCure::Machine Parent;
 
-	Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Level(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager);
 	virtual ~Level();
 
-	Cure::ContextPath* QueryPath();
+	cure::ContextPath* QueryPath();
 
 private:
-	Cure::ContextPath* mPath;
+	cure::ContextPath* path_;
 
 	logclass();
 };

@@ -5,147 +5,122 @@
 
 
 #include "pch.h"
-#include "PushConsoleManager.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ResourceManager.h"
-#include "../Lepra/Include/CyclicArray.h"
-#include "../Lepra/Include/LepraOS.h"
-#include "../Lepra/Include/Path.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "PushManager.h"
-#include "RtVar.h"
+#include "pushconsolemanager.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/resourcemanager.h"
+#include "../lepra/include/cyclicarray.h"
+#include "../lepra/include/lepraos.h"
+#include "../lepra/include/path.h"
+#include "../lepra/include/systemmanager.h"
+#include "pushmanager.h"
+#include "rtvar.h"
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
 // Must lie before PushConsoleManager to compile.
-const PushConsoleManager::CommandPair PushConsoleManager::mCommandIdList[] =
+const PushConsoleManager::CommandPair PushConsoleManager::command_id_list_[] =
 {
-	{"set-avatar", COMMAND_SET_AVATAR},
-	{"set-avatar-engine-power", COMMAND_SET_AVATAR_ENGINE_POWER},
+	{"set-avatar", kCommandSetAvatar},
+	{"set-avatar-engine-power", kCommandSetAvatarEnginePower},
 #if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
-	{"builddata", COMMAND_BUILD_DATA},
+	{"builddata", kCommandBuildData},
 #endif // Debug & Windows
 };
 
 
 
-PushConsoleManager::PushConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-	UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea):
-	Parent(pResourceManager, pGameManager, pUiManager, pVariableScope, pArea)
-{
+PushConsoleManager::PushConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+	UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area):
+	Parent(resource_manager, game_manager, ui_manager, variable_scope, area) {
 	InitCommands();
 }
 
-PushConsoleManager::~PushConsoleManager()
-{
+PushConsoleManager::~PushConsoleManager() {
 }
 
 
 
-unsigned PushConsoleManager::GetCommandCount() const
-{
-	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(mCommandIdList);
+unsigned PushConsoleManager::GetCommandCount() const {
+	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(command_id_list_);
 }
 
-const PushConsoleManager::CommandPair& PushConsoleManager::GetCommand(unsigned pIndex) const
-{
-	if (pIndex < Parent::GetCommandCount())
-	{
-		return (Parent::GetCommand(pIndex));
+const PushConsoleManager::CommandPair& PushConsoleManager::GetCommand(unsigned index) const {
+	if (index < Parent::GetCommandCount()) {
+		return (Parent::GetCommand(index));
 	}
-	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
+	return (command_id_list_[index-Parent::GetCommandCount()]);
 }
 
-int PushConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
-{
-	int lResult = Parent::OnCommand(pCommand, pParameterVector);
-	if (lResult < 0)
-	{
-		lResult = 0;
+int PushConsoleManager::OnCommand(const HashedString& command, const strutil::strvec& parameter_vector) {
+	int result = Parent::OnCommand(command, parameter_vector);
+	if (result < 0) {
+		result = 0;
 
-		CommandClient lCommand = (CommandClient)TranslateCommand(pCommand);
-		switch ((int)lCommand)
-		{
-			case COMMAND_SET_AVATAR:
-			{
-				if (pParameterVector.size() == 1)
-				{
-					((PushManager*)GetGameManager())->SelectAvatar(pParameterVector[0]);
+		CommandClient _command = (CommandClient)TranslateCommand(command);
+		switch ((int)_command) {
+			case kCommandSetAvatar: {
+				if (parameter_vector.size() == 1) {
+					((PushManager*)GetGameManager())->SelectAvatar(parameter_vector[0]);
+				} else {
+					log_.Warningf("usage: %s <avatar>", command.c_str());
+					result = 1;
 				}
-				else
-				{
-					mLog.Warningf("usage: %s <avatar>", pCommand.c_str());
-					lResult = 1;
-				}
-			}
-			break;
-			case COMMAND_SET_AVATAR_ENGINE_POWER:
-			{
-				if (pParameterVector.size() == 2)
-				{
+			} break;
+			case kCommandSetAvatarEnginePower: {
+				if (parameter_vector.size() == 2) {
 					log_debug("Setting avatar engine power.");
-					int lAspect = 0;
-					strutil::StringToInt(pParameterVector[0], lAspect);
-					double lPower;
-					strutil::StringToDouble(pParameterVector[1], lPower);
-					if (!((PushManager*)GetGameManager())->SetAvatarEnginePower(lAspect, (float)lPower))
-					{
-						mLog.Error("Could not set avatar engine power!");
-						lResult = 1;
+					int aspect = 0;
+					strutil::StringToInt(parameter_vector[0], aspect);
+					double power;
+					strutil::StringToDouble(parameter_vector[1], power);
+					if (!((PushManager*)GetGameManager())->SetAvatarEnginePower(aspect, (float)power)) {
+						log_.Error("Could not set avatar engine power!");
+						result = 1;
 					}
+				} else {
+					log_.Warningf("usage: %s <aspect> <power>", command.c_str());
+					result = 1;
 				}
-				else
-				{
-					mLog.Warningf("usage: %s <aspect> <power>", pCommand.c_str());
-					lResult = 1;
-				}
-			}
-			break;
+			} break;
 #if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
-			case COMMAND_BUILD_DATA:
-			{
-				const Cure::GameObjectId lAvatarId = ((PushManager*)GetGameManager())->GetAvatarInstanceId();
-				if (!lAvatarId)
-				{
+			case kCommandBuildData: {
+				const cure::GameObjectId avatar_id = ((PushManager*)GetGameManager())->GetAvatarInstanceId();
+				if (!avatar_id) {
 					break;
 				}
-				const str lAvatarType = GetGameManager()->GetContext()->GetObject(lAvatarId)->GetClassId();
+				const str avatar_type = GetGameManager()->GetContext()->GetObject(avatar_id)->GetClassId();
 				((PushManager*)GetGameManager())->Logout();
 				Thread::Sleep(0.5);
 				GetResourceManager()->ForceFreeCache();
-				const str lCurrentDir = SystemManager::GetCurrentDirectory();
-				::SetCurrentDirectoryA(astrutil::Encode(Path::GetParentDirectory(lCurrentDir)).c_str());
+				const str current_dir = SystemManager::GetCurrentDirectory();
+				::SetCurrentDirectoryA(astrutil::Encode(Path::GetParentDirectory(current_dir)).c_str());
 				::system("c:/Program/Python31/python.exe -B Tools/build/rgo.py builddata");
-				::SetCurrentDirectoryA(astrutil::Encode(lCurrentDir).c_str());
-				const str lUserName = v_slowget(GetVariableScope(), RTVAR_LOGIN_USERNAME, EmptyString);
-				const str lServer = v_slowget(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, EmptyString);
-				wstr lPw(L"CarPassword");
-				const Cure::LoginId lLoginId(wstrutil::Encode(lUserName), Cure::MangledPassword(lPw));
-				((PushManager*)GetGameManager())->RequestLogin(lServer, lLoginId);
+				::SetCurrentDirectoryA(astrutil::Encode(current_dir).c_str());
+				const str user_name = v_slowget(GetVariableScope(), kRtvarLoginUsername, EmptyString);
+				const str server = v_slowget(GetVariableScope(), kRtvarNetworkServeraddress, EmptyString);
+				wstr pw(L"CarPassword");
+				const cure::LoginId login_id(wstrutil::Encode(user_name), cure::MangledPassword(pw));
+				((PushManager*)GetGameManager())->RequestLogin(server, login_id);
 				((PushManager*)GetGameManager())->ToggleConsole();
 				ExecuteCommand("wait-login");
-				((PushManager*)GetGameManager())->SelectAvatar(lAvatarType);
-			}
-			break;
+				((PushManager*)GetGameManager())->SelectAvatar(avatar_type);
+			} break;
 #endif // Debug & Windows
-			default:
-			{
-				lResult = -1;
-			}
-			break;
+			default: {
+				result = -1;
+			} break;
 		}
 	}
-	return (lResult);
+	return (result);
 }
 
 
 
-loginstance(CONSOLE, PushConsoleManager);
+loginstance(kConsole, PushConsoleManager);
 
 
 

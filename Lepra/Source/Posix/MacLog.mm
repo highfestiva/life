@@ -4,35 +4,30 @@
 
 
 
-#include "../../Include/Posix/MacLog.h"
+#include "../../include/posix/maclog.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-void MacLog::Write(const str& pText)
-{
-	NSLog(@"%@", MacLog::Encode(pText));
+void MacLog::Write(const str& text) {
+	NSLog(@"%@", MacLog::Encode(text));
 }
 
-NSString* MacLog::Encode(const str& pText)
-{
-	NSString* lText = [NSString stringWithCString:pText.c_str() encoding:NSUTF8StringEncoding];
-	return lText;
+NSString* MacLog::Encode(const str& text) {
+	NSString* _text = [NSString stringWithCString:text.c_str() encoding:NSUTF8StringEncoding];
+	return _text;
 }
 
-str MacLog::Decode(NSString* pText)
-{
-	if (pText == nil)
-	{
+str MacLog::Decode(NSString* text) {
+	if (text == nil) {
 		return str();
 	}
-	const char* cString = [pText UTF8String];
-	Lepra::astr lUtf8String(cString);
-	return Lepra::strutil::Encode(lUtf8String);
+	const char* cString = [text UTF8String];
+	lepra::astr utf8_string(cString);
+	return lepra::strutil::Encode(utf8_string);
 }
 
 

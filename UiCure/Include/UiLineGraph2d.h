@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,37 +7,33 @@
 #pragma once
 
 #include <list>
-#include "../../Lepra/Include/String.h"
-#include "../../UiTbc/Include/UiPainter.h"
-#include "../Include/UiCure.h"
+#include "../../lepra/include/string.h"
+#include "../../uitbc/include/uipainter.h"
+#include "../include/uicure.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-struct LineGraph2d
-{
-	LineGraph2d(UiTbc::Painter* mPainter);
+struct LineGraph2d {
+	LineGraph2d(uitbc::Painter* painter_);
 	LineGraph2d(const LineGraph2d&);
 	void operator=(const LineGraph2d&);
 	virtual ~LineGraph2d();
 
-	void TickLine(size_t pNewSize);	// Rolls up the graph by one step and inserts a "blank line".
-	void AddSegment(const str& pName, double p1, double p2);
-	void Render(int pMarginX, float pScaleX, int& pOffsetY) const;
+	void TickLine(size_t new_size);	// Rolls up the graph by one step and inserts a "blank line".
+	void AddSegment(const str& name, double p1, double p2);
+	void Render(int margin_x, float scale_x, int& offset_y) const;
 	void RenderNames(int x, int& y) const;
 
 private:
-	class ColorPicker
-	{
+	class ColorPicker {
 	public:
-		ColorPicker(int pIndex, UiTbc::Painter* pPainter);
+		ColorPicker(int index, uitbc::Painter* painter);
 	};
-	struct Segment
-	{
+	struct Segment {
 		Segment(double pp1, double pp2);
 		double p1;
 		double p2;
@@ -46,11 +42,11 @@ private:
 	typedef std::list<Segments> Fill;
 	typedef strutil::strvec SegmentNames;
 
-	UiTbc::Painter* mPainter;
-	UiTbc::Painter::DisplayListID mDisplayListId;
+	uitbc::Painter* painter_;
+	uitbc::Painter::DisplayListID display_list_id_;
 
-	Fill mData;
-	SegmentNames mNames;
+	Fill data_;
+	SegmentNames names_;
 };
 
 

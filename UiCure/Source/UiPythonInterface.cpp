@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2007, Righteous Games
 
 
@@ -7,221 +7,195 @@
 #include "pch.h"
 #if 0
 #include <stdexcept>
-#include "../../Cure/Include/PythonContextManager.h"
-#include "../../Cure/Include/PythonContextObject.h"
-#include "../../Lepra/Include/PerformanceScope.h"
-#include "../Include/UiContextManager.h"
-#include "../Include/UiGraphicsManager.h"
-#include "../Include/UiGraphicsObject.h"
-#include "../Include/UiPythonInterface.h"
-#include "../Include/UiSoundManager.h"
-//#include "../Include/UiTerrainManager.h"
+#include "../../cure/include/pythoncontextmanager.h"
+#include "../../cure/include/pythoncontextobject.h"
+#include "../../lepra/include/PerformanceScope.h"
+#include "../include/UiContextManager.h"
+#include "../include/UiGraphicsManager.h"
+#include "../include/UiGraphicsObject.h"
+#include "../include/uipythoninterface.h"
+#include "../include/uisoundmanager.h"
+//#include "../include/uiterrainmanager.h"
 
 
 
-BOOST_PYTHON_MODULE(uicure)
-{
+BOOST_PYTHON_MODULE(uicure) {
 	{
-		boost::python::scope GfxScope = boost::python::class_<UiCure::PythonInterface::Graphics>("Graphics")
-			.def("createScreen", &UiCure::PythonInterface::Graphics::CreateScreen)
+		boost::python::scope GfxScope = boost::python::class_<UiCure::pythoninterface::Graphics>("Graphics")
+			.def("createScreen", &UiCure::pythoninterface::Graphics::CreateScreen)
 			.staticmethod("createScreen")
-			.def("getFullscreenResolutions", &UiCure::PythonInterface::Graphics::GetFullscreenResolutions)
+			.def("getFullscreenResolutions", &UiCure::pythoninterface::Graphics::GetFullscreenResolutions)
 			.staticmethod("getFullscreenResolutions")
 		;
-		boost::python::enum<UiLepra::DisplayManager::ContextType>("renderType")
-			.value("OPENGL", UiLepra::DisplayManager::OPENGL_CONTEXT)
-			.value("DIRECT3D", UiLepra::DisplayManager::DIRECTX_CONTEXT)
-			.value("SOFTWARE", UiLepra::DisplayManager::SOFTWARE_CONTEXT)
+		boost::python::enum<uilepra::DisplayManager::ContextType>("renderType")
+			.value("OPENGL", uilepra::DisplayManager::kOpenglContext)
+			.value("DIRECT3D", uilepra::DisplayManager::kDirectxContext)
+			.value("SOFTWARE", uilepra::DisplayManager::SOFTWARE_CONTEXT)
 		;
-		boost::python::class_<UiCure::PythonInterface::Graphics::Screen>("Screen")
-			.def("getClippingRectangle", &UiCure::PythonInterface::Graphics::Screen::GetClippingRectangle)
-			.def("setClippingRectangle", &UiCure::PythonInterface::Graphics::Screen::SetClippingRectangle)
-			.def("moveCamera", &UiCure::PythonInterface::Graphics::Screen::MoveCamera)
-			.def("render", &UiCure::PythonInterface::Graphics::Screen::Render)
-			.def("createViewport", &UiCure::PythonInterface::Graphics::Screen::CreateViewport)
-			.def("printText", &UiCure::PythonInterface::Graphics::Screen::PrintText)
+		boost::python::class_<UiCure::pythoninterface::Graphics::Screen>("Screen")
+			.def("getClippingRectangle", &UiCure::pythoninterface::Graphics::Screen::GetClippingRectangle)
+			.def("setClippingRectangle", &UiCure::pythoninterface::Graphics::Screen::SetClippingRectangle)
+			.def("moveCamera", &UiCure::pythoninterface::Graphics::Screen::MoveCamera)
+			.def("render", &UiCure::pythoninterface::Graphics::Screen::Render)
+			.def("createViewport", &UiCure::pythoninterface::Graphics::Screen::CreateViewport)
+			.def("printText", &UiCure::pythoninterface::Graphics::Screen::PrintText)
 		;
-		boost::python::class_<UiCure::PythonInterface::Graphics::Viewport>("Viewport")
-			.def("getClippingRectangle", &UiCure::PythonInterface::Graphics::Viewport::GetClippingRectangle)
-			.def("setClippingRectangle", &UiCure::PythonInterface::Graphics::Viewport::SetClippingRectangle)
-			.def("moveCamera", &UiCure::PythonInterface::Graphics::Viewport::MoveCamera)
-			.def("render", &UiCure::PythonInterface::Graphics::Viewport::Render)
-			.def("printText", &UiCure::PythonInterface::Graphics::Viewport::PrintText)
+		boost::python::class_<UiCure::pythoninterface::Graphics::Viewport>("Viewport")
+			.def("getClippingRectangle", &UiCure::pythoninterface::Graphics::Viewport::GetClippingRectangle)
+			.def("setClippingRectangle", &UiCure::pythoninterface::Graphics::Viewport::SetClippingRectangle)
+			.def("moveCamera", &UiCure::pythoninterface::Graphics::Viewport::MoveCamera)
+			.def("render", &UiCure::pythoninterface::Graphics::Viewport::Render)
+			.def("printText", &UiCure::pythoninterface::Graphics::Viewport::PrintText)
 		;
 	}
 
-	boost::python::class_<UiCure::PythonInterface::Sound>("Sound")
-		.def("setMicrophonePosition", &UiCure::PythonInterface::Sound::SetMicrophonePosition)
+	boost::python::class_<UiCure::pythoninterface::Sound>("Sound")
+		.def("setMicrophonePosition", &UiCure::pythoninterface::Sound::SetMicrophonePosition)
 		.staticmethod("setMicrophonePosition")
-		.def("setMicrophoneVelocity", &UiCure::PythonInterface::Sound::SetMicrophoneVelocity)
+		.def("setMicrophoneVelocity", &UiCure::pythoninterface::Sound::SetMicrophoneVelocity)
 		.staticmethod("setMicrophoneVelocity")
-		.def("setMicrophoneOrientation", &UiCure::PythonInterface::Sound::SetMicrophoneOrientation)
+		.def("setMicrophoneOrientation", &UiCure::pythoninterface::Sound::SetMicrophoneOrientation)
 		.staticmethod("setMicrophoneOrientation")
 	;
 }
 
 
 
-namespace UiCure
-{
-namespace PythonInterface
-{
+namespace UiCure {
+namespace pythoninterface {
 
 
 
 Graphics::Viewport::Viewport():
-	mX(0),
-	mY(0),
-	mWidth(320),
-	mHeight(180)
-{
+	x_(0),
+	y_(0),
+	width_(320),
+	height_(180) {
 }
 
-Graphics::Viewport::Viewport(const Viewport& pOriginal)
-{
-	*this = pOriginal;
+Graphics::Viewport::Viewport(const Viewport& original) {
+	*this = original;
 }
 
-Graphics::Viewport::~Viewport()
-{
+Graphics::Viewport::~Viewport() {
 }
 
-const Graphics::Viewport& Graphics::Viewport::operator=(const Graphics::Viewport& pOriginal)
-{
-	mX = pOriginal.mX;
-	mY = pOriginal.mY;
-	mWidth = pOriginal.mWidth;
-	mHeight = pOriginal.mHeight;
+const Graphics::Viewport& Graphics::Viewport::operator=(const Graphics::Viewport& original) {
+	x_ = original.x_;
+	y_ = original.y_;
+	width_ = original.width_;
+	height_ = original.height_;
 	return (*this);
 }
 
-tuple Graphics::Viewport::GetClippingRectangle()
-{
-	return (boost::python::make_tuple(mX, mY, mWidth, mHeight));
+tuple Graphics::Viewport::GetClippingRectangle() {
+	return (boost::python::make_tuple(x_, y_, width_, height_));
 }
 
-void Graphics::Viewport::SetClippingRectangle(int pX, int pY, int pWidth, int pHeight)
-{
-	mX = pX;
-	mY = pY;
-	mWidth = pWidth;
-	mHeight = pHeight;
+void Graphics::Viewport::SetClippingRectangle(int _x, int y, int width, int height) {
+	x_ = _x;
+	y_ = y;
+	width_ = width;
+	height_ = height;
 }
 
-void Graphics::Viewport::MoveCamera(const tuple& pPosition, const tuple& pOrientation)
-{
-	float lX = boost::python::extract<float>(pPosition[0]);
-	float lY = boost::python::extract<float>(pPosition[1]);
-	float lZ = boost::python::extract<float>(pPosition[2]);
-	ContextManager::Get()->GetGraphicsManager()->SetCameraPosition(lX, lY, lZ);
-	float lTheta = boost::python::extract<float>(pOrientation[0]);
-	float lPhi = boost::python::extract<float>(pOrientation[1]);
-	float lGimbal = boost::python::extract<float>(pOrientation[2]);
-	ContextManager::Get()->GetGraphicsManager()->SetCameraOrientation(lTheta, lPhi, lGimbal);
+void Graphics::Viewport::MoveCamera(const tuple& position, const tuple& orientation) {
+	float __x = boost::python::extract<float>(position[0]);
+	float _y = boost::python::extract<float>(position[1]);
+	float _z = boost::python::extract<float>(position[2]);
+	ContextManager::Get()->GetGraphicsManager()->SetCameraPosition(__x, _y, _z);
+	float _theta = boost::python::extract<float>(orientation[0]);
+	float _phi = boost::python::extract<float>(orientation[1]);
+	float _gimbal = boost::python::extract<float>(orientation[2]);
+	ContextManager::Get()->GetGraphicsManager()->SetCameraOrientation(_theta, _phi, _gimbal);
 }
 
-void Graphics::Viewport::Render()
-{
-	ContextManager::Get()->GetGraphicsManager()->SetViewport(mX, mY, mWidth, mHeight);
+void Graphics::Viewport::Render() {
+	ContextManager::Get()->GetGraphicsManager()->SetViewport(x_, y_, width_, height_);
 	ContextManager::Get()->GetGraphicsManager()->RenderScene();
 }
 
-void Graphics::Viewport::PrintText(int pX, int pY, const char* pText)
-{
-	Lepra::AnsiString lString(pText);
-	ContextManager::Get()->GetGraphicsManager()->PrintText(mX+pX, mY+pY, lString.ToCurrentCode());
+void Graphics::Viewport::PrintText(int _x, int y, const char* text) {
+	lepra::AnsiString s(text);
+	ContextManager::Get()->GetGraphicsManager()->PrintText(x_+_x, y_+y, s.ToCurrentCode());
 }
 
 Graphics::Screen::Screen():
-	Viewport()
-{
-	++mReferenceCount;
+	Viewport() {
+	++reference_count_;
 }
 
-Graphics::Screen::Screen(const Screen& pOriginal):
-	Viewport()
-{
-	++mReferenceCount;
-	*this = pOriginal;
+Graphics::Screen::Screen(const Screen& original):
+	Viewport() {
+	++reference_count_;
+	*this = original;
 }
 
-Graphics::Screen::Screen(UiLepra::DisplayManager::ContextType pRenderingContext, const tuple& pMode, bool pIsWindowed):
-	Viewport()
-{
-	++mReferenceCount;
+Graphics::Screen::Screen(uilepra::DisplayManager::ContextType rendering_context, const tuple& mode, bool is_windowed):
+	Viewport() {
+	++reference_count_;
 
-	int lWidth = boost::python::extract<int>(pMode[0]);
-	int lHeight = boost::python::extract<int>(pMode[1]);
-	int lBpp = boost::python::extract<int>(pMode[2]);
-	int lFrequency = boost::python::extract<int>(pMode[3]);
-	lHeight = lHeight > 0? lHeight : lHeight = lWidth*3/4;
-	SetClippingRectangle(0, 0, lWidth, lHeight);
+	int _width = boost::python::extract<int>(mode[0]);
+	int _height = boost::python::extract<int>(mode[1]);
+	int bpp = boost::python::extract<int>(mode[2]);
+	int frequency = boost::python::extract<int>(mode[3]);
+	_height = _height > 0? _height : _height = _width*3/4;
+	SetClippingRectangle(0, 0, _width, _height);
 
-	ContextManager::Get()->GetGraphicsManager()->Open(pRenderingContext, lWidth, lHeight, lBpp, lFrequency, pIsWindowed);
+	ContextManager::Get()->GetGraphicsManager()->Open(rendering_context, _width, _height, bpp, frequency, is_windowed);
 }
 
-Graphics::Screen::~Screen()
-{
-	if (--mReferenceCount <= 0)
-	{
+Graphics::Screen::~Screen() {
+	if (--reference_count_ <= 0) {
 		ContextManager::Get()->GetGraphicsManager()->Close();
 	}
 }
 
-const Graphics::Screen& Graphics::Screen::operator=(const Graphics::Screen& pOriginal)
-{
-	Viewport::operator=(pOriginal);
+const Graphics::Screen& Graphics::Screen::operator=(const Graphics::Screen& original) {
+	Viewport::operator=(original);
 	return (*this);
 }
 
-void Graphics::Screen::UpdateScreen()
-{
+void Graphics::Screen::UpdateScreen() {
 	ContextManager::Get()->GetGraphicsManager()->UpdateScreen();
 }
 
-Graphics::Viewport Graphics::Screen::CreateViewport(int pX, int pY, int pWidth, int pHeight)
-{
-	Viewport lViewport;
-	lViewport.SetClippingRectangle(pX, pY, pWidth, pHeight);
-	return (lViewport);
+Graphics::Viewport Graphics::Screen::CreateViewport(int _x, int y, int width, int height) {
+	Viewport viewport;
+	viewport.SetClippingRectangle(_x, y, width, height);
+	return (viewport);
 }
 
-int Graphics::Screen::mReferenceCount = 0;
+int Graphics::Screen::reference_count_ = 0;
 
-Graphics::Screen Graphics::CreateScreen(UiLepra::DisplayManager::ContextType pRenderingContext, const tuple& pMode, bool pIsWindowed)
-{
-	return (Screen(pRenderingContext, pMode, pIsWindowed));
+Graphics::Screen Graphics::CreateScreen(uilepra::DisplayManager::ContextType rendering_context, const tuple& mode, bool is_windowed) {
+	return (Screen(rendering_context, mode, is_windowed));
 }
 
-tuple Graphics::GetFullscreenResolutions()
-{
+tuple Graphics::GetFullscreenResolutions() {
 	tuple t;
-	UiLepra::DisplayManager* lDisplay = UiLepra::DisplayManager::CreateDisplayManager(UiLepra::DisplayManager::OPENGL_CONTEXT);
-	for (int x = 0; x < lDisplay->GetNumDisplayModes(); ++x)
-	{
-		UiLepra::DisplayMode lDisplayMode;
-		lDisplay->GetDisplayMode(lDisplayMode, x);
-		t += boost::python::make_tuple(boost::python::make_tuple(lDisplayMode.mWidth, lDisplayMode.mHeight, lDisplayMode.mBitDepth, lDisplayMode.mRefreshRate));
+	uilepra::DisplayManager* display = uilepra::DisplayManager::CreateDisplayManager(uilepra::DisplayManager::kOpenglContext);
+	for (int x = 0; x < display->GetNumDisplayModes(); ++x) {
+		uilepra::DisplayMode display_mode;
+		display->GetDisplayMode(display_mode, x);
+		t += boost::python::make_tuple(boost::python::make_tuple(display_mode.width_, display_mode.height_, display_mode.bit_depth_, display_mode.refresh_rate_));
 	}
-	delete (lDisplay);
+	delete (display);
 	return (t);
 }
 
 
 
-void Sound::SetMicrophonePosition(float pX, float pY, float pZ)
-{
-	ContextManager::Get()->GetSoundManager()->SetMicrophonePosition(Lepra::Vector3DD(pX, pY, pZ));
+void Sound::SetMicrophonePosition(float _x, float y, float z) {
+	ContextManager::Get()->GetSoundManager()->SetMicrophonePosition(lepra::Vector3DD(_x, y, z));
 }
 
-void Sound::SetMicrophoneVelocity(float pVelocityX, float pVelocityY, float pVelocityZ)
-{
-	ContextManager::Get()->GetSoundManager()->SetMicrophoneVelocity(Lepra::Vector3DD(pVelocityX, pVelocityY, pVelocityZ));
+void Sound::SetMicrophoneVelocity(float velocity_x, float velocity_y, float velocity_z) {
+	ContextManager::Get()->GetSoundManager()->SetMicrophoneVelocity(lepra::Vector3DD(velocity_x, velocity_y, velocity_z));
 }
 
-void Sound::SetMicrophoneOrientation(float pTheta, float pPhi, float pGimbal)
-{
-	ContextManager::Get()->GetSoundManager()->SetMicrophoneOrientation(Lepra::Vector3DD(pTheta, pPhi, pGimbal));
+void Sound::SetMicrophoneOrientation(float theta, float phi, float gimbal) {
+	ContextManager::Get()->GetSoundManager()->SetMicrophoneOrientation(lepra::Vector3DD(theta, phi, gimbal));
 }
 
 

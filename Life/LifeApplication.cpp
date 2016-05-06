@@ -5,71 +5,66 @@
 
 
 #include "pch.h"
-#include "LifeApplication.h"
-#include "../Cure/Include/ConsoleManager.h"
-#include "../Cure/Include/GameTicker.h"
-#include "../Cure/Include/ResourceManager.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Lepra/Include/AntiCrack.h"
-#include "../Lepra/Include/LogListener.h"
-#include "../Lepra/Include/Network.h"
-#include "../Lepra/Include/Path.h"
-#include "../Lepra/Include/Random.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "Life.h"
-#include "RtVar.h"
+#include "lifeapplication.h"
+#include "../cure/include/consolemanager.h"
+#include "../cure/include/gameticker.h"
+#include "../cure/include/resourcemanager.h"
+#include "../cure/include/runtimevariable.h"
+#include "../lepra/include/anticrack.h"
+#include "../lepra/include/loglistener.h"
+#include "../lepra/include/network.h"
+#include "../lepra/include/path.h"
+#include "../lepra/include/random.h"
+#include "../lepra/include/systemmanager.h"
+#include "life.h"
+#include "rtvar.h"
 
 
 
-namespace
-{
+namespace {
 // Run before main() is started.
 AntiCrack _r__;
 
-Life::Application* gApplication = 0;
+life::Application* g_application = 0;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-Application::Application(const str& pBaseName, const strutil::strvec& pArgumentList):
-	Lepra::Application(pArgumentList),
-	mResourceManager(0),
-	mGameTicker(0),
-	mConsoleLogger(0),
-	mIsPowerSaving(false),
-	mDebugLogger(0),
-	mFileLogger(0),
-	mPerformanceLogger(0),
-	mMemLogger(0)
-{
-	gApplication = this;
-	mBaseName = pBaseName;
+Application::Application(const str& base_name, const strutil::strvec& argument_list):
+	lepra::Application(argument_list),
+	resource_manager_(0),
+	game_ticker_(0),
+	console_logger_(0),
+	is_power_saving_(false),
+	debug_logger_(0),
+	file_logger_(0),
+	performance_logger_(0),
+	mem_logger_(0) {
+	g_application = this;
+	base_name_ = base_name;
 }
 
-Application::~Application()
-{
-	mLog.RawPrint(LEVEL_HEADLINE, "The end. Baba!\n");
-	if (mFileLogger)
-	{
-		mFileLogger->WriteLog("---\n\n", LEVEL_INFO);
+Application::~Application() {
+	log_.RawPrint(kLevelHeadline, "The end. Baba!\n");
+	if (file_logger_) {
+		file_logger_->WriteLog("---\n\n", kLevelInfo);
 	}
 
 	// Kill all loggers, hopefully we don't need to log anything else.
-	delete (mConsoleLogger);
-	mConsoleLogger = 0;
-	delete (mMemLogger);
-	mMemLogger = 0;
-	delete (mPerformanceLogger);
-	mPerformanceLogger = 0;
-	delete (mFileLogger);
-	mFileLogger = 0;
-	delete (mDebugLogger);
-	mDebugLogger = 0;
+	delete (console_logger_);
+	console_logger_ = 0;
+	delete (mem_logger_);
+	mem_logger_ = 0;
+	delete (performance_logger_);
+	performance_logger_ = 0;
+	delete (file_logger_);
+	file_logger_ = 0;
+	delete (debug_logger_);
+	debug_logger_ = 0;
 
 	// Drop performance measurement resources.
 	ScopePerformanceData::EraseAll();
@@ -77,54 +72,51 @@ Application::~Application()
 	LogType::Close();
 }
 
-void Application::Init()
-{
-	v_set(Cure::GetSettings(), RTVAR_PHYSICS_FPS, PHYSICS_FPS);
-	v_set(Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 1.0);
-	v_set(Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
+void Application::Init() {
+	v_set(cure::GetSettings(), kRtvarPhysicsFps, PHYSICS_FPS);
+	v_set(cure::GetSettings(), kRtvarPowersaveFactor, 1.0);
+	v_set(cure::GetSettings(), kRtvarDebugExtrasleeptime, 0.0);
 
-	mConsoleLogger = CreateConsoleLogListener();
-	//mConsoleLogger->SetLevelThreashold(LEVEL_INFO);
+	console_logger_ = CreateConsoleLogListener();
+	//console_logger_->SetLevelThreashold(kLevelInfo);
 #ifndef NO_LOG_DEBUG_INFO
 #ifndef LEPRA_MAC
-	mDebugLogger = new DebuggerLogListener();
+	debug_logger_ = new DebuggerLogListener();
 #endif // !Apple
 #endif // Showing debug information.
 #ifdef LEPRA_DEBUG
-	//mFileLogger = new FileLogListener(GetIoFile(GetTypeName(), "log", false));
-	//mFileLogger->SetLevelThreashold(LEVEL_INFO);
-	//mFileLogger->WriteLog("\n---\n", LEVEL_INFO);
-	//mPerformanceLogger = new FileLogListener(GetIoFile(GetTypeName()+"Performance", "log", false));
-	//mMemLogger = new MemFileLogListener(20*1024);
+	//file_logger_ = new FileLogListener(GetIoFile(GetTypeName(), "log", false));
+	//file_logger_->SetLevelThreashold(kLevelInfo);
+	//file_logger_->WriteLog("\n---\n", kLevelInfo);
+	//performance_logger_ = new FileLogListener(GetIoFile(GetTypeName()+"Performance", "log", false));
+	//mem_logger_ = new MemFileLogListener(20*1024);
 #endif // Debug
-	LogType::GetLogger(LogType::ROOT)->SetupBasicListeners(mConsoleLogger, mDebugLogger, mFileLogger, mPerformanceLogger, mMemLogger);
+	LogType::GetLogger(LogType::kRoot)->SetupBasicListeners(console_logger_, debug_logger_, file_logger_, performance_logger_, mem_logger_);
 
-	strutil::strvec lNameParts;
-	lNameParts.push_back(mBaseName);
-	lNameParts.push_back(GetTypeName());
-	str lAppName = strutil::Join(lNameParts, " ");
-	str lStartMessage = "Starting " + lAppName + ", version " + GetVersion() + ", build type: " LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT ".\n";
-	mLog.RawPrint(LEVEL_HEADLINE, lStartMessage);
+	strutil::strvec name_parts;
+	name_parts.push_back(base_name_);
+	name_parts.push_back(GetTypeName());
+	str app_name = strutil::Join(name_parts, " ");
+	str start_message = "Starting " + app_name + ", version " + GetVersion() + ", build type: " kLepraStringTypeText " " kLepraBuildTypeText ".\n";
+	log_.RawPrint(kLevelHeadline, start_message);
 
-	mResourceManager = new Cure::ResourceManager(1);
-	mGameTicker = CreateTicker();
+	resource_manager_ = new cure::ResourceManager(1);
+	game_ticker_ = CreateTicker();
 }
 
-void Application::Destroy()
-{
+void Application::Destroy() {
 	// Delete in order of priority.
 
 	// Drop all major components first, while keeping all loggers intact.
-	delete (mGameTicker);
-	mGameTicker = 0;
-	delete (mResourceManager);	// Resource manager lives long enough for all volontary resources to disappear.
-	mResourceManager = 0;
+	delete (game_ticker_);
+	game_ticker_ = 0;
+	delete (resource_manager_);	// Resource manager lives long enough for all volontary resources to disappear.
+	resource_manager_ = 0;
 
 	Network::Stop();
 }
 
-int Application::Run()
-{
+int Application::Run() {
 	// We like all threads that measure time to be on a single CPU. This is due to high resolution timers,
 	// which may differ between different CPU cores. Several seconds can differ between different cores.
 	// The main thread is locked to the first CPU. If there are more CPUs, the physics thread will lock to
@@ -133,191 +125,155 @@ int Application::Run()
 	// physics instances when running split screen.
 	//Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
 
-	bool lOk = true;
-	if (lOk)
-	{
-		lOk = Network::Start();
+	bool ok = true;
+	if (ok) {
+		ok = Network::Start();
 	}
-	if (lOk)
-	{
-		lOk = mGameTicker->Initialize();
+	if (ok) {
+		ok = game_ticker_->Initialize();
 	}
-	if (lOk)
-	{
-		lOk = MainLoop();
+	if (ok) {
+		ok = MainLoop();
 	}
-	return lOk? 0 : 1;
+	return ok? 0 : 1;
 }
 
-bool Application::MainLoop()
-{
-	bool lOk = true;
-	bool lQuit = false;
-	while (lOk && !lQuit)
-	{
-		lOk = Tick();
-		lQuit = mGameTicker->QueryQuit();
+bool Application::MainLoop() {
+	bool ok = true;
+	bool quit = false;
+	while (ok && !quit) {
+		ok = Tick();
+		quit = game_ticker_->QueryQuit();
 	}
 
-	if (lQuit)
-	{
-		mLog.Headline("User requested application termination.");
-	}
-	else if (!lOk)
-	{
-		if (mMemLogger)
-		{
-			LogType::GetLogger(LogType::ROOT)->RemoveListener(mMemLogger);
+	if (quit) {
+		log_.Headline("User requested application termination.");
+	} else if (!ok) {
+		if (mem_logger_) {
+			LogType::GetLogger(LogType::kRoot)->RemoveListener(mem_logger_);
 		}
-		mLog.Fatal("Terminating application due to fatal error.");
-		if (mMemLogger && mFileLogger)
-		{
-			mLog.RawPrint(LEVEL_FATAL, "\nStart dump hires logs.\n--------------------------------------------------------------------------------\n");
-			mMemLogger->Dump(mFileLogger->GetFile());
-			mLog.RawPrint(LEVEL_FATAL, "--------------------------------------------------------------------------------\nEnd dump hires logs.\n\n");
+		log_.Fatal("Terminating application due to fatal error.");
+		if (mem_logger_ && file_logger_) {
+			log_.RawPrint(kLevelFatal, "\nStart dump hires logs.\n--------------------------------------------------------------------------------\n");
+			mem_logger_->Dump(file_logger_->GetFile());
+			log_.RawPrint(kLevelFatal, "--------------------------------------------------------------------------------\nEnd dump hires logs.\n\n");
 		}
 	}
-	return lOk;
+	return ok;
 }
 
-bool Application::Tick()
-{
+bool Application::Tick() {
 	LEPRA_DO_MEASURE_SCOPE(AppTick);
-	HiResTimer lLoopTime(false);
+	HiResTimer loop_time(false);
 
 	HiResTimer::StepCounterShadow();
 
-	bool lDebug;
-	v_get(lDebug, =, Cure::GetSettings(), RTVAR_DEBUG_ENABLE, false);
-	if (lDebug)
-	{
-		mGameTicker->Profile();
+	bool debug;
+	v_get(debug, =, cure::GetSettings(), kRtvarDebugEnable, false);
+	if (debug) {
+		game_ticker_->Profile();
 	}
 	Random::GetRandomNumber();	// To move seed ahead.
-	bool lOk = mGameTicker->Tick();
-	float lExtraSleep;
-	v_get(lExtraSleep, =(float), Cure::GetSettings(), RTVAR_DEBUG_EXTRASLEEPTIME, 0.0);
-	if (lExtraSleep > 0)
-	{
-		Thread::Sleep(lExtraSleep);
+	bool ok = game_ticker_->Tick();
+	float extra_sleep;
+	v_get(extra_sleep, =(float), cure::GetSettings(), kRtvarDebugExtrasleeptime, 0.0);
+	if (extra_sleep > 0) {
+		Thread::Sleep(extra_sleep);
 	}
-	if (lOk)
-	{
+	if (ok) {
 		LEPRA_DO_MEASURE_SCOPE(AppSleep);
-		TickSleep(lLoopTime.QueryTimeDiff());
+		TickSleep(loop_time.QueryTimeDiff());
 	}
-	if (lOk)
-	{
+	if (ok) {
 		HandleZombieMode();
 	}
-	return lOk;
+	return ok;
 }
 
 
 
-Cure::ApplicationTicker* Application::GetTicker() const
-{
-	return mGameTicker;
+cure::ApplicationTicker* Application::GetTicker() const {
+	return game_ticker_;
 }
 
-void Application::SetZombieTick(const ZombieTick& pZombieTick)
-{
-	mZombieTick = pZombieTick;
+void Application::SetZombieTick(const ZombieTick& zombie_tick) {
+	zombie_tick_ = zombie_tick;
 }
 
 
 
-Application* Application::GetApplication()
-{
-	return gApplication;
+Application* Application::GetApplication() {
+	return g_application;
 }
 
-str Application::GetIoFile(const str& pName, const str& pExt, bool pAddQuotes)
-{
-	str lAppName = mBaseName;
-	str lIoName = Path::JoinPath(
-		SystemManager::GetIoDirectory(lAppName),
-		pName, pExt);
-	if (pAddQuotes)
-	{
-		lIoName = "\"" + lIoName + "\"";
+str Application::GetIoFile(const str& name, const str& ext, bool add_quotes) {
+	str app_name = base_name_;
+	str io_name = Path::JoinPath(
+		SystemManager::GetIoDirectory(app_name),
+		name, ext);
+	if (add_quotes) {
+		io_name = "\"" + io_name + "\"";
 	}
-	return (lIoName);
+	return (io_name);
 }
 
 
 
-LogListener* Application::CreateConsoleLogListener() const
-{
+LogListener* Application::CreateConsoleLogListener() const {
 	return (new StdioConsoleLogListener());
 }
 
 
 
-void Application::TickSleep(double pMainLoopTime) const
-{
-	float lPowerSaveFactor;
-	v_get(lPowerSaveFactor, =(float), Cure::GetSettings(), RTVAR_POWERSAVE_FACTOR, 1.0);
-	const float lPowerSaveAmount = mGameTicker->GetPowerSaveAmount() * lPowerSaveFactor;
-	if (lPowerSaveAmount > 0)
-	{
-		if (!mIsPowerSaving)
-		{
+void Application::TickSleep(double main_loop_time) const {
+	float power_save_factor;
+	v_get(power_save_factor, =(float), cure::GetSettings(), kRtvarPowersaveFactor, 1.0);
+	const float power_save_amount = game_ticker_->GetPowerSaveAmount() * power_save_factor;
+	if (power_save_amount > 0) {
+		if (!is_power_saving_) {
 #ifndef LEPRA_TOUCH
-			mLog.Info("Entering power save mode.");
-#endif // !Touch.
-			mIsPowerSaving = true;
+			log_.Info("Entering power save mode.");
+#endif // !touch.
+			is_power_saving_ = true;
 		}
-		Thread::Sleep(1.0*lPowerSaveAmount);
-	}
-	else
-	{
-		if (mIsPowerSaving)
-		{
+		Thread::Sleep(1.0*power_save_amount);
+	} else {
+		if (is_power_saving_) {
 #ifndef LEPRA_TOUCH
-			mLog.Info("Leaving power save mode.");
-#endif // !Touch.
-			mIsPowerSaving = false;
+			log_.Info("Leaving power save mode.");
+#endif // !touch.
+			is_power_saving_ = false;
 		}
 
-		int lFps;
-		v_get(lFps, =, Cure::GetSettings(), RTVAR_PHYSICS_FPS, 2);
-		double lWantedFrameTime = lFps? 1.0/lFps : 1;
-		const double lSleepTime = lWantedFrameTime - pMainLoopTime - mGameTicker->GetTickTimeReduction();
+		int fps;
+		v_get(fps, =, cure::GetSettings(), kRtvarPhysicsFps, 2);
+		double wanted_frame_time = fps? 1.0/fps : 1;
+		const double sleep_time = wanted_frame_time - main_loop_time - game_ticker_->GetTickTimeReduction();
 		const double MAXIMUM_SLEEP_TIME = 0.01;
-		if (lSleepTime >= 0)
-		{
-			double lSleepTimeLeft = lSleepTime;
-			HiResTimer lSleepTimer(false);
-			while (lSleepTimeLeft >= 0)
-			{
-				if (lSleepTimeLeft > MAXIMUM_SLEEP_TIME*1.7)
-				{
-					mGameTicker->PollRoundTrip();
+		if (sleep_time >= 0) {
+			double sleep_time_left = sleep_time;
+			HiResTimer sleep_timer(false);
+			while (sleep_time_left >= 0) {
+				if (sleep_time_left > MAXIMUM_SLEEP_TIME*1.7) {
+					game_ticker_->PollRoundTrip();
 					Thread::Sleep(MAXIMUM_SLEEP_TIME);
-				}
-				else if (lSleepTimeLeft > SystemManager::GetSleepResolution())
-				{
-					Thread::Sleep(lSleepTimeLeft - SystemManager::GetSleepResolution()/2);
-				}
-				else
-				{
+				} else if (sleep_time_left > SystemManager::GetSleepResolution()) {
+					Thread::Sleep(sleep_time_left - SystemManager::GetSleepResolution()/2);
+				} else {
 					Thread::YieldCpu();	// For lousy computers that have very big sleep intervals.
 				}
-				lSleepTimeLeft = lSleepTime - lSleepTimer.QueryTimeDiff();
+				sleep_time_left = sleep_time - sleep_timer.QueryTimeDiff();
 			}
 #ifdef LEPRA_TOUCH
-			if (lSleepTimeLeft < -0.5)
+			if (sleep_time_left < -0.5)
 #else // Computer
-			if (lSleepTimeLeft < -0.01)
-#endif // Touch device / computer.
+			if (sleep_time_left < -0.01)
+#endif // touch device / computer.
 			{
-				mLog.Warningf("Overslept %f s!", -lSleepTimeLeft);
+				log_.Warningf("Overslept %f s!", -sleep_time_left);
 			}
 			//log_volatile(mLog.Debugf("Done tick sleeping, %f s left in sleep loop (measured, %f s reduction, %f s measured."), lSleepTimeLeft, mGameTicker->GetTickTimeReduction(), lSleepTime));
-		}
-		else
-		{
+		} else {
 #ifndef LEPRA_IOS
 			//log_volatile(mLog.Debugf("Skipping tick sleep (yield only, %f s left in sleep loop, %f s reduction."), lSleepTime, mGameTicker->GetTickTimeReduction()));
 			Thread::YieldCpu();	// Play nice even though time's up!
@@ -326,27 +282,25 @@ void Application::TickSleep(double pMainLoopTime) const
 	}
 }
 
-void Application::HandleZombieMode()
-{
-	if (mZombieTick)
-	{
-		mZombieTick();
+void Application::HandleZombieMode() {
+	if (zombie_tick_) {
+		zombie_tick_();
 		Destroy();
-		mZombieTick();
+		zombie_tick_();
 		SystemManager::AddQuitRequest(-1);
 		ScopePerformanceData::EraseAll();
 		Init();
 		Network::Start();
-		mGameTicker->Initialize();
-		mZombieTick();
+		game_ticker_->Initialize();
+		zombie_tick_();
 	}
 }
 
 
 
-str Application::mBaseName;
+str Application::base_name_;
 
-loginstance(GAME, Application);
+loginstance(kGame, Application);
 
 
 

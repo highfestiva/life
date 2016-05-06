@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,12 +7,11 @@
 #pragma once
 
 #include <set>
-#include "Tbc.h"
+#include "tbc.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
@@ -20,17 +19,15 @@ class ChunkyPhysics;
 
 
 
-class ChunkyClass
-{
+class ChunkyClass {
 public:
-	struct Tag
-	{
-		str mTagName;
-		std::vector<float> mFloatValueList;
-		std::vector<str> mStringValueList;
-		std::vector<int> mBodyIndexList;
-		std::vector<int> mEngineIndexList;
-		std::vector<int> mMeshIndexList;
+	struct Tag {
+		str tag_name_;
+		std::vector<float> float_value_list_;
+		std::vector<str> string_value_list_;
+		std::vector<int> body_index_list_;
+		std::vector<int> engine_index_list_;
+		std::vector<int> mesh_index_list_;
 	};
 
 	ChunkyClass();
@@ -39,21 +36,21 @@ public:
 	const str& GetPhysicsBaseName() const;
 	str& GetPhysicsBaseName();
 
-	bool UnpackTag(uint8* pBuffer, unsigned pSize);
-	void AddTag(const Tag& pTag);
-	void RemoveTag(size_t pTagIndex);
+	bool UnpackTag(uint8* buffer, unsigned size);
+	void AddTag(const Tag& tag);
+	void RemoveTag(size_t tag_index);
 	size_t GetTagCount() const;
-	const Tag& GetTag(size_t pTagIndex) const;
-	const Tag* GetTag(const str& pTagName) const;
+	const Tag& GetTag(size_t tag_index) const;
+	const Tag* GetTag(const str& tag_name) const;
 
-	void AddPhysRoot(int pPhysIndex);
-	bool IsPhysRoot(int pPhysIndex) const;
+	void AddPhysRoot(int phys_index);
+	bool IsPhysRoot(int phys_index) const;
 
 protected:
 private:
-	str mPhysicsBaseName;
-	std::vector<Tag> mTagArray;
-	std::set<int> mPhysRootSet;
+	str physics_base_name_;
+	std::vector<Tag> tag_array_;
+	std::set<int> phys_root_set_;
 
 	logclass();
 };

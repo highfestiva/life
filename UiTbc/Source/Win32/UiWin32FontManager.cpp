@@ -5,241 +5,207 @@
 
 
 #include "pch.h"
-#include "../../Include/Win32/UiWin32FontManager.h"
-#include "../../../UiLepra/Include/Win32/UiWin32DisplayManager.h"
+#include "../../include/win32/uiwin32fontmanager.h"
+#include "../../../uilepra/include/win32/uiwin32displaymanager.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-FontManager* FontManager::Create(UiLepra::DisplayManager* pDisplayManager)
-{
-	return (new Win32FontManager((UiLepra::Win32DisplayManager*)pDisplayManager));
+FontManager* FontManager::Create(uilepra::DisplayManager* display_manager) {
+	return (new Win32FontManager((uilepra::Win32DisplayManager*)display_manager));
 }
 
 
 
-Win32FontManager::Win32FontManager(UiLepra::Win32DisplayManager* pDisplayManager):
-	mDisplayManager(pDisplayManager)
-{
-	HWND lWnd = mDisplayManager->GetHWND();
-	mDC = ::GetDC(lWnd);
+Win32FontManager::Win32FontManager(uilepra::Win32DisplayManager* display_manager):
+	display_manager_(display_manager) {
+	HWND wnd = display_manager_->GetHWND();
+	dc_ = ::GetDC(wnd);
 
-	COLORREF lColor = RGB(255, 255, 255);
-	mColorRef[0] = lColor;
-	lColor = RGB(0, 0, 0);
-	mColorRef[1] = lColor;
-	mColorRef[2] = lColor;
-	mColorRef[3] = lColor;
+	COLORREF color = kRgb(255, 255, 255);
+	color_ref_[0] = color;
+	color = kRgb(0, 0, 0);
+	color_ref_[1] = color;
+	color_ref_[2] = color;
+	color_ref_[3] = color;
 }
 
-Win32FontManager::~Win32FontManager()
-{
-	FontTable::iterator x = mFontTable.begin();
-	if (x != mFontTable.end())
-	{
-		Win32Font* lFont = (Win32Font*)x->second;
-		::DeleteObject(lFont->mWin32FontHandle);
-		delete (lFont);
+Win32FontManager::~Win32FontManager() {
+	FontTable::iterator x = font_table_.begin();
+	if (x != font_table_.end()) {
+		Win32Font* font = (Win32Font*)x->second;
+		::DeleteObject(font->win32_font_handle_);
+		delete (font);
 	}
-	mFontTable.clear();
+	font_table_.clear();
 
-	::ReleaseDC(mDisplayManager->GetHWND(), mDC);
-	mDisplayManager = 0;
+	::ReleaseDC(display_manager_->GetHWND(), dc_);
+	display_manager_ = 0;
 }
 
 
 
-Win32FontManager::FontId Win32FontManager::AddFont(const str& pFontName, double pSize, int pFlags)
-{
-	int lWeight  = ((pFlags & BOLD) != 0) ? FW_BOLD : FW_NORMAL;
-	DWORD lItalic = ((pFlags & ITALIC) != 0) ? TRUE : FALSE;
-	DWORD lUnderline = ((pFlags & UNDERLINE) != 0) ? TRUE : FALSE;
-	DWORD lStrikeOut = ((pFlags & STRIKEOUT) != 0) ? TRUE : FALSE;
+Win32FontManager::FontId Win32FontManager::AddFont(const str& font_name, double size, int flags) {
+	int weight  = ((flags & kBold) != 0) ? FW_BOLD : FW_NORMAL;
+	DWORD italic = ((flags & kItalic) != 0) ? TRUE : FALSE;
+	DWORD underline = ((flags & kUnderline) != 0) ? TRUE : FALSE;
+	DWORD strike_out = ((flags & kStrikeout) != 0) ? TRUE : FALSE;
 
-	HFONT lFontHandle = ::CreateFont((int)(pSize + 0.5),
+	HFONT font_handle = ::CreateFont((int)(size + 0.5),
 					  0,
 					  0, 0,
-					  lWeight,
-					  lItalic,
-					  lUnderline,
-					  lStrikeOut,
-					  DEFAULT_CHARSET,
-					  OUT_DEFAULT_PRECIS,
-					  CLIP_DEFAULT_PRECIS,
-					  DEFAULT_QUALITY,
+					  weight,
+					  italic,
+					  underline,
+					  strike_out,
+					  kDefaultCharset,
+					  kOutDefaultPrecis,
+					  kClipDefaultPrecis,
+					  kDefaultQuality,
 					  DEFAULT_PITCH | FF_DONTCARE,
-					  pFontName.c_str());
+					  font_name.c_str());
 
-	FontId lId = INVALID_FONTID;
-	if (lFontHandle != NULL)
-	{
-		Win32Font* lFont = new Win32Font();
-		lFont->mWin32FontHandle = lFontHandle;
-		lFont->mName = pFontName;
-		lFont->mSize = pSize;
-		lFont->mFlags = pFlags;
-		if (!InternalAddFont(lFont))
-		{
-			delete (lFont);
-			::DeleteObject(lFontHandle);
-		}
-		else
-		{
-			lId = lFont->mFontId;
+	FontId id = kInvalidFontid;
+	if (font_handle != NULL) {
+		Win32Font* font = new Win32Font();
+		font->win32_font_handle_ = font_handle;
+		font->name_ = font_name;
+		font->size_ = size;
+		font->flags_ = flags;
+		if (!InternalAddFont(font)) {
+			delete (font);
+			::DeleteObject(font_handle);
+		} else {
+			id = font->font_id_;
 		}
 	}
 
-	return (FontId)lId;
+	return (FontId)id;
 }
 
-bool Win32FontManager::RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect& pRect)
-{
-	bool lOk = (mCurrentFont != 0);
-	if (lOk)
-	{
-		lOk = (pRect.mTop >= 0 && pRect.mLeft >= 0 &&
-			pRect.GetWidth() >= 1 && pRect.GetHeight() >= 1 &&
-			pImage.GetBitDepth() > 0);
+bool Win32FontManager::RenderGlyph(wchar_t c, Canvas& image, const PixelRect& rect) {
+	bool ok = (current_font_ != 0);
+	if (ok) {
+		ok = (rect.top_ >= 0 && rect.left_ >= 0 &&
+			rect.GetWidth() >= 1 && rect.GetHeight() >= 1 &&
+			image.GetBitDepth() > 0);
 	}
-	HDC lRamDc = 0;
-	if (lOk)
-	{
-		lRamDc = ::CreateCompatibleDC(mDC);
-		lOk = (lRamDc != 0);
+	HDC ram_dc = 0;
+	if (ok) {
+		ram_dc = ::CreateCompatibleDC(dc_);
+		ok = (ram_dc != 0);
 	}
-	HBITMAP lRamBitmap = 0;
-	if (lOk)
-	{
-		lRamBitmap = ::CreateCompatibleBitmap(mDC, pRect.GetWidth(), pRect.GetHeight());
-		lOk = (lRamBitmap != 0);
+	HBITMAP ram_bitmap = 0;
+	if (ok) {
+		ram_bitmap = ::CreateCompatibleBitmap(dc_, rect.GetWidth(), rect.GetHeight());
+		ok = (ram_bitmap != 0);
 	}
-	HGDIOBJ lDefaultBitmap = 0;
-	BITMAPINFO lBitmapInfo;
-	::memset(&lBitmapInfo, 0, sizeof(lBitmapInfo));
-	if (lOk)
-	{
-		lDefaultBitmap = ::SelectObject(lRamDc, lRamBitmap);
-		lBitmapInfo.bmiHeader.biSize = sizeof(lBitmapInfo.bmiHeader);
-		::GetDIBits(lRamDc, lRamBitmap, 0, 0, 0, &lBitmapInfo, DIB_RGB_COLORS);
-		lOk = (lBitmapInfo.bmiHeader.biWidth == pRect.GetWidth() &&
-			lBitmapInfo.bmiHeader.biHeight == pRect.GetHeight());
+	HGDIOBJ default_bitmap = 0;
+	BITMAPINFO bitmap_info;
+	::memset(&bitmap_info, 0, sizeof(bitmap_info));
+	if (ok) {
+		default_bitmap = ::SelectObject(ram_dc, ram_bitmap);
+		bitmap_info.bmiHeader.biSize = sizeof(bitmap_info.bmiHeader);
+		::GetDIBits(ram_dc, ram_bitmap, 0, 0, 0, &bitmap_info, DIB_RGB_COLORS);
+		ok = (bitmap_info.bmiHeader.biWidth == rect.GetWidth() &&
+			bitmap_info.bmiHeader.biHeight == rect.GetHeight());
 	}
-	if (lOk)
-	{
-		HGDIOBJ lDefaultObject = ::SelectObject(lRamDc, ((Win32Font*)mCurrentFont)->mWin32FontHandle);
-		::SetTextColor(lRamDc, mColorRef[0]);
-		::SetBkColor(lRamDc, mColorRef[1]);
-		::SetTextAlign(mDC, TA_BASELINE | TA_LEFT);
-		lOk = (::TextOut(lRamDc, 0, 0, &pChar, 1) != FALSE);
-		::SelectObject(lRamDc, lDefaultObject);
+	if (ok) {
+		HGDIOBJ default_object = ::SelectObject(ram_dc, ((Win32Font*)current_font_)->win32_font_handle_);
+		::SetTextColor(ram_dc, color_ref_[0]);
+		::SetBkColor(ram_dc, color_ref_[1]);
+		::SetTextAlign(dc_, TA_BASELINE | TA_LEFT);
+		ok = (::TextOut(ram_dc, 0, 0, &c, 1) != FALSE);
+		::SelectObject(ram_dc, default_object);
 	}
-	uint8* lBitmap = 0;
-	int lBpp = -1;
-	if (lOk)
-	{
-		lBitmapInfo.bmiHeader.biHeight = -pRect.GetHeight();
-		lBitmapInfo.bmiHeader.biCompression = 0;
-		lBpp = lBitmapInfo.bmiHeader.biBitCount;
-		int lBytePerPixel = (lBpp+7)/8;
-		int lByteCount = pRect.GetWidth()*pRect.GetHeight()*lBytePerPixel;
-		lBitmap = new uint8[lByteCount];
-		lOk = (::GetDIBits(lRamDc, lRamBitmap, 0, pRect.GetHeight(), lBitmap, &lBitmapInfo, DIB_RGB_COLORS) == pRect.GetHeight());
-		::SelectObject(lRamDc, lDefaultBitmap);
-		if (!lOk)
-		{
-			delete[] lBitmap;
+	uint8* bitmap = 0;
+	int bpp = -1;
+	if (ok) {
+		bitmap_info.bmiHeader.biHeight = -rect.GetHeight();
+		bitmap_info.bmiHeader.biCompression = 0;
+		bpp = bitmap_info.bmiHeader.biBitCount;
+		int byte_per_pixel = (bpp+7)/8;
+		int byte_count = rect.GetWidth()*rect.GetHeight()*byte_per_pixel;
+		bitmap = new uint8[byte_count];
+		ok = (::GetDIBits(ram_dc, ram_bitmap, 0, rect.GetHeight(), bitmap, &bitmap_info, DIB_RGB_COLORS) == rect.GetHeight());
+		::SelectObject(ram_dc, default_bitmap);
+		if (!ok) {
+			delete[] bitmap;
 		}
 	}
-	if (lOk)
-	{
-		Canvas::BitDepth lSourceBitDepth = Canvas::IntToBitDepth(lBpp);
-		Canvas::BitDepth lTargetBitDepth = pImage.GetBitDepth();
-		pImage.Reset(pRect.GetWidth(), pRect.GetHeight(), lSourceBitDepth);
-		pImage.SetBuffer(lBitmap, false, true);
-		lBitmap = 0;	// Don't delete it, ownership now taken by calling canvas.
-		pImage.ConvertBitDepth(lTargetBitDepth);
-		pImage.FlipVertical();	// Bitmap is upside down...
-		pImage.SwapRGBOrder();	// ... and BGR.
-		for (int y = 0; y < pRect.GetHeight(); ++y)
-		{
-			for (int x = 0; x < pRect.GetWidth(); ++x)
-			{
-				Color lColor;
-				pImage.GetPixelColor(x, y, lColor);
-				lColor.mAlpha = (uint8)(lColor.SumRgb()/3);
-				lColor.mRed = lColor.mGreen = lColor.mBlue = 255;
-				pImage.SetPixelColor(x, y, lColor);
+	if (ok) {
+		Canvas::BitDepth source_bit_depth = Canvas::IntToBitDepth(bpp);
+		Canvas::BitDepth target_bit_depth = image.GetBitDepth();
+		image.Reset(rect.GetWidth(), rect.GetHeight(), source_bit_depth);
+		image.SetBuffer(bitmap, false, true);
+		bitmap = 0;	// Don't delete it, ownership now taken by calling canvas.
+		image.ConvertBitDepth(target_bit_depth);
+		image.FlipVertical();	// Bitmap is upside down...
+		image.SwapRGBOrder();	// ... and kBgr.
+		for (int y = 0; y < rect.GetHeight(); ++y) {
+			for (int x = 0; x < rect.GetWidth(); ++x) {
+				Color color;
+				image.GetPixelColor(x, y, color);
+				color.alpha_ = (uint8)(color.SumRgb()/3);
+				color.red_ = color.green_ = color.blue_ = 255;
+				image.SetPixelColor(x, y, color);
 			}
 		}
 	}
-	delete[] (lBitmap);
-	lBitmap = 0;
-	if (lRamBitmap)
-	{
-		::DeleteObject(lRamBitmap);
-		lRamBitmap = 0;
+	delete[] (bitmap);
+	bitmap = 0;
+	if (ram_bitmap) {
+		::DeleteObject(ram_bitmap);
+		ram_bitmap = 0;
 	}
-	if (lRamDc)
-	{
-		::DeleteDC(lRamDc);
-		lRamDc = 0;
+	if (ram_dc) {
+		::DeleteDC(ram_dc);
+		ram_dc = 0;
 	}
 
-	/*printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
-	for (int y = 0; y < (int)pImage.GetHeight(); ++y)
-	{
-		for (int x = 0; x < (int)pImage.GetWidth(); ++x)
-		{
-			if (pImage.GetPixelColor(x, y).To32() == 0)
-			{
+	/*printf("Rendering glyph '%c' (height=%i):\n", c, image.GetHeight());
+	for (int y = 0; y < (int)image.GetHeight(); ++y) {
+		for (int x = 0; x < (int)image.GetWidth(); ++x) {
+			if (image.GetPixelColor(x, y).To32() == 0) {
 				//printf("         ");
 				printf(" ");
-			}
-			else
-			{
-				//printf("%8.8X ", pImage.GetPixelColor(x, y).To32());
+			} else {
+				//printf("%8.8X ", image.GetPixelColor(x, y).To32());
 				printf("*");
 			}
 		}
 		printf("\n");
 	}*/
 
-	return (lOk);
+	return (ok);
 }
 
 
 
-int Win32FontManager::GetCharWidth(wchar_t pChar) const
-{
-	Win32Font* lFont = (Win32Font*)mCurrentFont;
-	HGDIOBJ lDefaultObject = ::SelectObject(mDC, lFont->mWin32FontHandle);
-	ABC lABC;
-	INT lWidth;
-	int lCharWidth = 0;
-	if (::GetCharABCWidths(mDC, (utchar)pChar, (utchar)pChar, &lABC) != FALSE)
-	{
-		lCharWidth = (int)(lABC.abcA + lABC.abcB + lABC.abcC);
+int Win32FontManager::GetCharWidth(wchar_t c) const {
+	Win32Font* font = (Win32Font*)current_font_;
+	HGDIOBJ default_object = ::SelectObject(dc_, font->win32_font_handle_);
+	ABC abc;
+	INT width;
+	int char_width = 0;
+	if (::GetCharABCWidths(dc_, (utchar)c, (utchar)c, &abc) != FALSE) {
+		char_width = (int)(abc.abcA + abc.abcB + abc.abcC);
+	} else if (::GetCharWidth32(dc_, (utchar)c, (utchar)c, &width) != FALSE) {
+		char_width = (int)width;
 	}
-	else if (::GetCharWidth32(mDC, (utchar)pChar, (utchar)pChar, &lWidth) != FALSE)
-	{
-		lCharWidth = (int)lWidth;
-	}
-	::SelectObject(mDC, lDefaultObject);
-	return lCharWidth;
+	::SelectObject(dc_, default_object);
+	return char_width;
 }
 
-int Win32FontManager::GetCharOffset(wchar_t pChar) const
-{
-	Win32Font* lFont = (Win32Font*)mCurrentFont;
-	HGDIOBJ lDefaultObject = ::SelectObject(mDC, lFont->mWin32FontHandle);
-	ABC lABC;
-	if (::GetCharABCWidths(mDC, (utchar)pChar, (utchar)pChar, &lABC) != FALSE)
-	{
-		return lABC.abcA;
+int Win32FontManager::GetCharOffset(wchar_t c) const {
+	Win32Font* font = (Win32Font*)current_font_;
+	HGDIOBJ default_object = ::SelectObject(dc_, font->win32_font_handle_);
+	ABC abc;
+	if (::GetCharABCWidths(dc_, (utchar)c, (utchar)c, &abc) != FALSE) {
+		return abc.abcA;
 	}
 	return 0;
 }

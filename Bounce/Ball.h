@@ -6,26 +6,24 @@
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
-#include "Game.h"
+#include "../uicure/include/uimachine.h"
+#include "game.h"
 
 
 
-namespace Bounce
-{
+namespace bounce {
 
 
 
-class Ball: public UiCure::Machine
-{
+class Ball: public UiCure::Machine {
 public:
 	typedef UiCure::Machine Parent;
 
-	Ball(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Ball(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager);
 	virtual ~Ball();
 
 private:
-	virtual void OnMicroTick(float pFrameTime);
+	virtual void OnMicroTick(float frame_time);
 	virtual void OnLoaded();
 
 	logclass();

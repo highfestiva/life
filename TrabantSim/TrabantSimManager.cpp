@@ -5,1901 +5,1584 @@
 
 
 #include "pch.h"
-#include "TrabantSimManager.h"
+#include "trabantsimmanager.h"
 #include <algorithm>
 #include <iterator>
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/TimeManager.h"
-#include "../Lepra/Include/CyclicArray.h"
-#include "../Lepra/Include/Random.h"
-#include "../Lepra/Include/Socket.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "../Lepra/Include/TimeLogger.h"
-#include "../Lepra/Include/Unordered.h"
-#include "../Life/LifeClient/GameClientMasterTicker.h"
-#include "../Life/LifeClient/UiConsole.h"
-#include "../Tbc/Include/PhysicsEngine.h"
-#include "../UiCure/Include/UiCollisionSoundManager.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiCure/Include/UiIconButton.h"
-#include "../UiCure/Include/UiMachine.h"
-#include "../UiCure/Include/UiSoundReleaser.h"
-#include "../UiLepra/Include/UiTouchDrag.h"
-#include "../UiLepra/Include/UiTouchstick.h"
-#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
-#include "../UiTbc/Include/GUI/UiFixedLayouter.h"
-#include "../UiTbc/Include/UiMaterial.h"
-#include "../UiTbc/Include/UiParticleRenderer.h"
-#include "../UiTbc/Include/UiTriangleBasedGeometry.h"
-#include "FileServer.h"
-#include "Light.h"
-#include "Object.h"
-#include "RtVar.h"
-#include "TrabantSim.h"
-#include "TrabantSimConsoleManager.h"
-#include "Version.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/timemanager.h"
+#include "../lepra/include/cyclicarray.h"
+#include "../lepra/include/random.h"
+#include "../lepra/include/socket.h"
+#include "../lepra/include/systemmanager.h"
+#include "../lepra/include/timelogger.h"
+#include "../lepra/include/unordered.h"
+#include "../life/lifeclient/gameclientmasterticker.h"
+#include "../life/lifeclient/uiconsole.h"
+#include "../tbc/include/physicsengine.h"
+#include "../uicure/include/uicollisionsoundmanager.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uicure/include/uiiconbutton.h"
+#include "../uicure/include/uimachine.h"
+#include "../uicure/include/uisoundreleaser.h"
+#include "../uilepra/include/uitouchdrag.h"
+#include "../uilepra/include/uitouchstick.h"
+#include "../uitbc/include/gui/uidesktopwindow.h"
+#include "../uitbc/include/gui/uifixedlayouter.h"
+#include "../uitbc/include/uimaterial.h"
+#include "../uitbc/include/uiparticlerenderer.h"
+#include "../uitbc/include/uitrianglebasedgeometry.h"
+#include "fileserver.h"
+#include "light.h"
+#include "object.h"
+#include "rtvar.h"
+#include "trabantsim.h"
+#include "trabantsimconsolemanager.h"
+#include "version.h"
 
 #define BG_COLOR		Color(25, 35, 45, 190)
 #define BRIGHT_TEXT		Color(220, 215, 205)
 #define GREEN_BUTTON		Color(20, 190, 15)
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
 void FoldSuspendSimulator();
 void UnfoldSimulator();
 void DidSyncFiles();
-bool ConnectQuery(const str& pHostname);
+bool ConnectQuery(const str& hostname);
 
 
 
-struct AppSyncDelegate: SyncDelegate
-{
-	virtual bool WillSync(const str& pHostname)
-	{
-		return ConnectQuery(pHostname);
+struct AppSyncDelegate: SyncDelegate {
+	virtual bool WillSync(const str& hostname) {
+		return ConnectQuery(hostname);
 	};
-	virtual void DidSync()
-	{
+	virtual void DidSync() {
 		DidSyncFiles();
 	};
 };
 
 
 
-TrabantSimManager::JoystickData::JoystickData(int pJoystickId, float px, float py):
-	mJoystickId(pJoystickId),
+TrabantSimManager::JoystickData::JoystickData(int joystick_id, float px, float py):
+	joystick_id_(joystick_id),
 	x(px),
-	y(py)
-{
+	y(py) {
 }
 
-TrabantSimManager::TouchstickInfo::TouchstickInfo(Touchstick* pStick, float px, float py, int pOrientation, bool pIsSloppy):
-	mStick(pStick),
+TrabantSimManager::TouchstickInfo::TouchstickInfo(Touchstick* stick, float px, float py, int orientation, bool is_sloppy):
+	stick_(stick),
 	x(px),
 	y(py),
-	mOrientation(pOrientation),
-	mIsSloppy(pIsSloppy)
-{
+	orientation_(orientation),
+	is_sloppy_(is_sloppy) {
 }
 
-TrabantSimManager::EngineTarget::EngineTarget(int pInstanceId, float pStrength):
-	mInstanceId(pInstanceId),
-	mStrength(pStrength)
-{
+TrabantSimManager::EngineTarget::EngineTarget(int instance_id, float strength):
+	instance_id_(instance_id),
+	strength_(strength) {
 }
 
 
 
-TrabantSimManager::TrabantSimManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
-	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
-	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
-	mCollisionSoundManager(0),
-	mIsMouseControlled(false),
-	mSetFocus(false),
-	mSetCursorVisible(true),
-	mSetCursorInvisible(false),
-	mMenu(0),
-	mLight(0),
-	mCameraTransform(quat(), vec3(0, -3, 0)),
-	mPauseButton(0),
-	mBackButton(0),
-	mLastSoundVolume(1.0),
-	mMasterVolume(1.0),
-	mIsPaused(false),
-	mIsControlled(false),
-	mWasControlled(false),
-	mHideCounter(0),
-	mIsControlTimeout(false),
-	mCommandSocket(0),
-	mCommandThread(0),
-	mFileServer(0),
-	mUserInfoDialog(0),
-	mUserInfoLabel(0)
-{
-	mUiManager->SetVariableScope(pVariableScope);
+TrabantSimManager::TrabantSimManager(life::GameClientMasterTicker* pMaster, const cure::TimeManager* time,
+	cure::RuntimeVariableScope* variable_scope, cure::ResourceManager* resource_manager,
+	UiCure::GameUiManager* ui_manager, int slave_index, const PixelRect& render_area):
+	Parent(pMaster, time, variable_scope, resource_manager, ui_manager, slave_index, render_area),
+	collision_sound_manager_(0),
+	is_mouse_controlled_(false),
+	set_focus_(false),
+	set_cursor_visible_(true),
+	set_cursor_invisible_(false),
+	menu_(0),
+	light_(0),
+	camera_transform_(quat(), vec3(0, -3, 0)),
+	pause_button_(0),
+	back_button_(0),
+	last_sound_volume_(1.0),
+	master_volume_(1.0),
+	is_paused_(false),
+	is_controlled_(false),
+	was_controlled_(false),
+	hide_counter_(0),
+	is_control_timeout_(false),
+	command_socket_(0),
+	command_thread_(0),
+	file_server_(0),
+	user_info_dialog_(0),
+	user_info_label_(0) {
+	ui_manager_->SetVariableScope(variable_scope);
 
-	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->SetScale(1, 0.5f, 0.08f, 0.2f);
-	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.1f, 0));
-	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.1f, 0));
+	collision_sound_manager_ = new UiCure::CollisionSoundManager(this, ui_manager);
+	collision_sound_manager_->SetScale(1, 0.5f, 0.08f, 0.2f);
+	collision_sound_manager_->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.1f, 0));
+	collision_sound_manager_->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.1f, 0));
 
-	SetConsoleManager(new TrabantSimConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
+	SetConsoleManager(new TrabantSimConsoleManager(GetResourceManager(), this, ui_manager_, GetVariableScope(), render_area_));
 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, 0.03f, 0.2f);
 
-	SocketAddress lAddress;
+	SocketAddress address;
 	const strutil::strvec& args = SystemManager::GetArgumentVector();
-	if (args.size() <= 1 || !lAddress.Resolve(args[args.size()-1]))
-	{
-		lAddress.Resolve("0.0.0.0:2541");
+	if (args.size() <= 1 || !address.Resolve(args[args.size()-1])) {
+		address.Resolve("0.0.0.0:2541");
 	}
-	mOpenLocalAddress = lAddress;
-	SocketAddress lInternalAddress;
-	lInternalAddress.Resolve("127.0.0.1:2541");
-	lInternalAddress.SetPort(lAddress.GetPort());
-	mInternalLocalAddress = lInternalAddress;
-	bool lAllowRemoteSync;
-	v_get(lAllowRemoteSync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
-	if (!lAllowRemoteSync)
-	{
-		lAddress = lInternalAddress;
+	open_local_address_ = address;
+	SocketAddress internal_address;
+	internal_address.Resolve("127.0.0.1:2541");
+	internal_address.SetPort(address.GetPort());
+	internal_local_address_ = internal_address;
+	bool allow_remote_sync;
+	v_get(allow_remote_sync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
+	if (!allow_remote_sync) {
+		address = internal_address;
 	}
-	mLocalAddress = lAddress;
-	mLastRemoteAddress = lAddress;
-	mLastAcceptedAddress = lAddress;
+	local_address_ = address;
+	last_remote_address_ = address;
+	last_accepted_address_ = address;
 
-	mFileServer = new FileServer(new AppSyncDelegate);
+	file_server_ = new FileServer(new AppSyncDelegate);
 
 	Resume(true);
 }
 
-TrabantSimManager::~TrabantSimManager()
-{
+TrabantSimManager::~TrabantSimManager() {
 	CloseConnection();
-	delete mFileServer;
-	mFileServer = 0;
+	delete file_server_;
+	file_server_ = 0;
 
 	Close();
 
-	delete mCollisionSoundManager;
-	mCollisionSoundManager = 0;
+	delete collision_sound_manager_;
+	collision_sound_manager_ = 0;
 }
 
 
 
-void TrabantSimManager::Resume(bool pHard)
-{
-	(void)pHard;
-	mIsControlTimeout = false;
-	mIsControlled = false;
-	mWasControlled = false;
-	mStartupTimer.PopTimeDiff();
-	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, " ");
+void TrabantSimManager::Resume(bool hard) {
+	(void)hard;
+	is_control_timeout_ = false;
+	is_controlled_ = false;
+	was_controlled_ = false;
+	startup_timer_.PopTimeDiff();
+	v_set(GetVariableScope(), kRtvarGameUsermessage, " ");
 
-	bool lAllowRemoteSync;
-	v_get(lAllowRemoteSync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
-	if (lAllowRemoteSync)
-	{
-		mFileServer->Start();
+	bool allow_remote_sync;
+	v_get(allow_remote_sync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
+	if (allow_remote_sync) {
+		file_server_->Start();
 	}
 
 	OpenConnection();
 }
 
-void TrabantSimManager::Suspend(bool pHard)
-{
-	mIsControlTimeout = false;
-	v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, " ");
+void TrabantSimManager::Suspend(bool hard) {
+	is_control_timeout_ = false;
+	v_set(GetVariableScope(), kRtvarGameUsermessage, " ");
 
-	if (mCommandSocket && mCommandSocket->IsOpen())
-	{
-		if (mLastRemoteAddress != mInternalLocalAddress)
-		{
-			mCommandSocket->SendTo((const unsigned char*)"disconnect\n", 11, mLastRemoteAddress);
+	if (command_socket_ && command_socket_->IsOpen()) {
+		if (last_remote_address_ != internal_local_address_) {
+			command_socket_->SendTo((const unsigned char*)"disconnect\n", 11, last_remote_address_);
 		}
 	}
-	if (pHard)
-	{
+	if (hard) {
 		CloseConnection();
 	}
 }
 
-void TrabantSimManager::LoadSettings()
-{
+void TrabantSimManager::LoadSettings() {
 	Parent::LoadSettings();
 	GetConsoleManager()->ExecuteCommand("bind-key F5 \"\"");
 }
 
-void TrabantSimManager::RefreshOptions()
-{
+void TrabantSimManager::RefreshOptions() {
 	Parent::RefreshOptions();
 
-	double lFontHeight;
-	v_get(lFontHeight, =, Cure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
-	lFontHeight *= mUiManager->GetCanvas()->GetHeight()/500.0;
-	v_override(GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
-	mUiManager->UpdateSettings();
+	double font_height;
+	v_get(font_height, =, cure::GetSettings(), kRtvarUi2DFontheight, 30.0);
+	font_height *= ui_manager_->GetCanvas()->GetHeight()/500.0;
+	v_override(GetVariableScope(), kRtvarUi2DFontheight, font_height);
+	ui_manager_->UpdateSettings();
 }
 
 
-void TrabantSimManager::UserReset()
-{
-	mSetFocus = true;
-	mSetCursorVisible = true;
-	mIsMouseControlled = false;
+void TrabantSimManager::UserReset() {
+	set_focus_ = true;
+	set_cursor_visible_ = true;
+	is_mouse_controlled_ = false;
 
 	GetConsoleManager()->ExecuteCommand("bind-key F5 \"\"");
 
-	Cure::RuntimeVariableScope* lScope = GetVariableScope();
-	const std::list<str> lVariableList = lScope->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_EXPORTABLE);
-	std::list<str>::const_iterator x = lVariableList.begin();
-	for (; x != lVariableList.end(); ++x)
-	{
-		const str lName = *x;
-		if (strutil::StartsWith(lName, "Ui.3D.Clear") || strutil::StartsWith(lName, "Ui.3D.Clip") || strutil::StartsWith(lName, "Ui.Pen"))
-		{
+	cure::RuntimeVariableScope* scope = GetVariableScope();
+	const std::list<str> variable_list = scope->GetVariableNameList(cure::RuntimeVariableScope::kSearchExportable);
+	std::list<str>::const_iterator x = variable_list.begin();
+	for (; x != variable_list.end(); ++x) {
+		const str name = *x;
+		if (strutil::StartsWith(name, "Ui.3D.Clear") || strutil::StartsWith(name, "Ui.3D.Clip") || strutil::StartsWith(name, "Ui.Pen")) {
 			continue;
 		}
-		lScope->ResetDefaultValue(lName);
+		scope->ResetDefaultValue(name);
 	}
-	mCameraAngle.Set(0,0,0);
-	mCameraVelocity.Set(0,0,0);
+	camera_angle_.Set(0,0,0);
+	camera_velocity_.Set(0,0,0);
 
 	GetResourceManager()->ForceFreeCache();
 	GetResourceManager()->ForceFreeCache();
 	GetResourceManager()->ForceFreeCache();
 
-	ScopeLock lGameLock(GetTickLock());
+	ScopeLock game_lock(GetTickLock());
 
-	mCollisionList.clear();
-	mDragList.clear();
-	mUiManager->GetDragManager()->ClearDrags(mUiManager->GetInputManager());
+	collision_list_.clear();
+	drag_list_.clear();
+	ui_manager_->GetDragManager()->ClearDrags(ui_manager_->GetInputManager());
 
-	TouchstickList::iterator y = mTouchstickList.begin();
-	for (; y != mTouchstickList.end(); ++y)
-	{
-		delete y->mStick;
+	TouchstickList::iterator y = touchstick_list_.begin();
+	for (; y != touchstick_list_.end(); ++y) {
+		delete y->stick_;
 	}
-	mTouchstickList.clear();
+	touchstick_list_.clear();
 }
 
-int TrabantSimManager::CreateObject(const quat& pOrientation, const vec3& pPosition, const MeshObject& pGfxObject, const PhysObjectArray& pPhysObjects,
-					ObjectMaterial pMaterial, bool pIsStatic, bool pIsTrigger)
-{
+int TrabantSimManager::CreateObject(const quat& orientation, const vec3& position, const MeshObject& gfx_object, const PhysObjectArray& phys_objects,
+					ObjectMaterial material, bool is_static, bool is_trigger) {
 	quat pq, rootq;
-	Object* lObject = (Object*)CreateContextObject("object");
-	Tbc::ChunkyPhysics* lPhysics = new Tbc::ChunkyPhysics(Tbc::BoneHierarchy::TRANSFORM_LOCAL2WORLD, pIsStatic? Tbc::ChunkyPhysics::STATIC : Tbc::ChunkyPhysics::DYNAMIC);
-	lPhysics->SetGuideMode(Tbc::ChunkyPhysics::GUIDE_ALWAYS);
-	if (pPhysObjects.empty())
-	{
-		lObject->SetPhysicsTypeOverride(Cure::PHYSICS_OVERRIDE_BONES);
-		lPhysics->SetBoneCount(1);
-		Tbc::ChunkyBoneGeometry::BodyData lBoneData(0,0,0);
-		Tbc::ChunkyBoneGeometry* lBone = new Tbc::ChunkyBoneSphere(lBoneData);
-		lPhysics->AddBoneGeometry(xform(pOrientation,pPosition), lBone);
-	}
-	else
-	{
-		float lFriction, lBounce;
-		v_get(lFriction, =(float), GetVariableScope(), RTVAR_PHYSICS_FRICTION, 0.5);
-		v_get(lBounce, =(float), GetVariableScope(), RTVAR_PHYSICS_BOUNCE, 0.2);
+	Object* _object = (Object*)CreateContextObject("object");
+	tbc::ChunkyPhysics* physics = new tbc::ChunkyPhysics(tbc::BoneHierarchy::kTransformLocal2World, is_static? tbc::ChunkyPhysics::kStatic : tbc::ChunkyPhysics::kDynamic);
+	physics->SetGuideMode(tbc::ChunkyPhysics::kGuideAlways);
+	if (phys_objects.empty()) {
+		_object->SetPhysicsTypeOverride(cure::kPhysicsOverrideBones);
+		physics->SetBoneCount(1);
+		tbc::ChunkyBoneGeometry::BodyData bone_data(0,0,0);
+		tbc::ChunkyBoneGeometry* bone = new tbc::ChunkyBoneSphere(bone_data);
+		physics->AddBoneGeometry(xform(orientation,position), bone);
+	} else {
+		float _friction, bounce;
+		v_get(_friction, =(float), GetVariableScope(), kRtvarPhysicsFriction, 0.5);
+		v_get(bounce, =(float), GetVariableScope(), kRtvarPhysicsBounce, 0.2);
 
-		lPhysics->SetBoneCount((int)pPhysObjects.size());
-		PhysObjectArray::const_iterator x = pPhysObjects.begin();
+		physics->SetBoneCount((int)phys_objects.size());
+		PhysObjectArray::const_iterator x = phys_objects.begin();
 		int y = 0;
-		Tbc::ChunkyBoneGeometry* lParent = 0;
-		PlacedObject* lParentPhysObject = 0;
-		for (; x != pPhysObjects.end(); ++x, ++y)
-		{
-			Tbc::ChunkyBoneGeometry::BodyData lBoneData(y==0? 15.0f:1.0f, lFriction, lBounce, lParent, Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE, Tbc::ChunkyBoneGeometry::CONNECTEE_3DOF);
-			lBoneData.mBoneType = pIsTrigger? Tbc::ChunkyBoneGeometry::BONE_TRIGGER : Tbc::ChunkyBoneGeometry::BONE_BODY;
-			PlacedObject* lPhysObject = *x;
-			xform t = xform(lPhysObject->mOrientation, lPhysObject->mPos);
-			if (lParentPhysObject)
-			{
-				t.mPosition = rootq.GetInverse() * t.mPosition;
-				t.mOrientation = rootq.GetInverse() * t.mOrientation;
+		tbc::ChunkyBoneGeometry* parent = 0;
+		PlacedObject* parent_phys_object = 0;
+		for (; x != phys_objects.end(); ++x, ++y) {
+			tbc::ChunkyBoneGeometry::BodyData bone_data(y==0? 15.0f:1.0f, _friction, bounce, parent, tbc::ChunkyBoneGeometry::kJointExclude, tbc::ChunkyBoneGeometry::kConnectee3Dof);
+			bone_data.bone_type_ = is_trigger? tbc::ChunkyBoneGeometry::kBoneTrigger : tbc::ChunkyBoneGeometry::kBoneBody;
+			PlacedObject* phys_object = *x;
+			xform t = xform(phys_object->orientation_, phys_object->pos_);
+			if (parent_phys_object) {
+				t.position_ = rootq.GetInverse() * t.position_;
+				t.orientation_ = rootq.GetInverse() * t.orientation_;
+			} else {
+				rootq = t.orientation_;
+				t.orientation_ = orientation * t.orientation_;
+				t.position_ += position;
+				pq = t.orientation_;
 			}
-			else
-			{
-				rootq = t.mOrientation;
-				t.mOrientation = pOrientation * t.mOrientation;
-				t.mPosition += pPosition;
-				pq = t.mOrientation;
-			}
-			BoxObject* lBox = dynamic_cast<BoxObject*>(lPhysObject);
-			SphereObject* lSphere = dynamic_cast<SphereObject*>(lPhysObject);
-			CapsuleObject* lCapsule = dynamic_cast<CapsuleObject*>(lPhysObject);
-			MeshObject* lMesh = dynamic_cast<MeshObject*>(lPhysObject);
-			if (lBox)
-			{
-				Tbc::ChunkyBoneBox* lBone = new Tbc::ChunkyBoneBox(lBoneData);
-				lBone->SetMaterial("rubber");
-				lBone->mSize = lBox->mSize;
-				lPhysics->AddBoneGeometry(t, lBone, lParent);
-			}
-			else if (lSphere)
-			{
-				Tbc::ChunkyBoneSphere* lBone = new Tbc::ChunkyBoneSphere(lBoneData);
-				lBone->SetMaterial("rubber");
-				lBone->mRadius = lSphere->mRadius;
-				lPhysics->AddBoneGeometry(t, lBone, lParent);
-			}
-			else if (lCapsule)
-			{
-				Tbc::ChunkyBoneCapsule* lBone = new Tbc::ChunkyBoneCapsule(lBoneData);
-				lBone->SetMaterial("rubber");
-				lBone->mRadius = lCapsule->mRadius;
-				lBone->mLength = lCapsule->mLength;
-				lPhysics->AddBoneGeometry(t, lBone, lParent);
-			}
-			else if (lMesh)
-			{
-				if (lMesh->mIndices.size() <= 3)
-				{
-					mLog.Warningf("Need two triangles or more (%i indices is too few) to create physics mesh.", lMesh->mIndices.size());
-					delete lPhysics;
+			BoxObject* box = dynamic_cast<BoxObject*>(phys_object);
+			SphereObject* sphere = dynamic_cast<SphereObject*>(phys_object);
+			CapsuleObject* capsule = dynamic_cast<CapsuleObject*>(phys_object);
+			MeshObject* _mesh = dynamic_cast<MeshObject*>(phys_object);
+			if (box) {
+				tbc::ChunkyBoneBox* bone = new tbc::ChunkyBoneBox(bone_data);
+				bone->SetMaterial("rubber");
+				bone->size_ = box->size_;
+				physics->AddBoneGeometry(t, bone, parent);
+			} else if (sphere) {
+				tbc::ChunkyBoneSphere* bone = new tbc::ChunkyBoneSphere(bone_data);
+				bone->SetMaterial("rubber");
+				bone->radius_ = sphere->radius_;
+				physics->AddBoneGeometry(t, bone, parent);
+			} else if (capsule) {
+				tbc::ChunkyBoneCapsule* bone = new tbc::ChunkyBoneCapsule(bone_data);
+				bone->SetMaterial("rubber");
+				bone->radius_ = capsule->radius_;
+				bone->length_ = capsule->length_;
+				physics->AddBoneGeometry(t, bone, parent);
+			} else if (_mesh) {
+				if (_mesh->indices_.size() <= 3) {
+					log_.Warningf("Need two triangles or more (%i indices is too few) to create physics mesh.", _mesh->indices_.size());
+					delete physics;
 					return -1;
 				}
-				Tbc::ChunkyBoneMesh* lBone = new Tbc::ChunkyBoneMesh(lBoneData);
-				lBone->SetMaterial("rubber");
-				lBone->mVertexCount = (int)lMesh->mVertices.size()/3;
-				lBone->mTriangleCount = (int)lMesh->mIndices.size()/3;
-				lBone->mVertices = new float[lBone->mVertexCount*3];
-				lBone->mIndices = new uint32[lBone->mTriangleCount*3];
-				for (unsigned x = 0; x < lBone->mVertexCount; ++x)
-				{
-					lBone->mVertices[x*3+0] = lMesh->mVertices[x*3+0];
-					lBone->mVertices[x*3+1] = lMesh->mVertices[x*3+1];
-					lBone->mVertices[x*3+2] = lMesh->mVertices[x*3+2];
+				tbc::ChunkyBoneMesh* bone = new tbc::ChunkyBoneMesh(bone_data);
+				bone->SetMaterial("rubber");
+				bone->vertex_count_ = (int)_mesh->vertices_.size()/3;
+				bone->triangle_count_ = (int)_mesh->indices_.size()/3;
+				bone->vertices_ = new float[bone->vertex_count_*3];
+				bone->indices_ = new uint32[bone->triangle_count_*3];
+				for (unsigned x = 0; x < bone->vertex_count_; ++x) {
+					bone->vertices_[x*3+0] = _mesh->vertices_[x*3+0];
+					bone->vertices_[x*3+1] = _mesh->vertices_[x*3+1];
+					bone->vertices_[x*3+2] = _mesh->vertices_[x*3+2];
 				}
-				for (unsigned x = 0; x < lBone->mTriangleCount; ++x)
-				{
-					lBone->mIndices[x*3+0] = lMesh->mIndices[x*3+0];
-					lBone->mIndices[x*3+1] = lMesh->mIndices[x*3+1];
-					lBone->mIndices[x*3+2] = lMesh->mIndices[x*3+2];
+				for (unsigned x = 0; x < bone->triangle_count_; ++x) {
+					bone->indices_[x*3+0] = _mesh->indices_[x*3+0];
+					bone->indices_[x*3+1] = _mesh->indices_[x*3+1];
+					bone->indices_[x*3+2] = _mesh->indices_[x*3+2];
 				}
-				lPhysics->AddBoneGeometry(t, lBone, lParent);
+				physics->AddBoneGeometry(t, bone, parent);
 			}
-			if (y == 0)
-			{
-				lParent = lPhysics->GetBoneGeometry(0);
-				lParentPhysObject = lPhysObject;
+			if (y == 0) {
+				parent = physics->GetBoneGeometry(0);
+				parent_phys_object = phys_object;
 			}
 		}
 	}
-	lObject->SetRootOrientation(pq);
-	if (!pGfxObject.mVertices.empty() && !pGfxObject.mIndices.empty())
-	{
+	_object->SetRootOrientation(pq);
+	if (!gfx_object.vertices_.empty() && !gfx_object.indices_.empty()) {
 		float r,g,b,a;
-		if (pMaterial == MaterialChecker)
-		{
+		if (material == MaterialChecker) {
 			r = g = b = a = 1;
+		} else {
+			v_get(r, =(float), GetVariableScope(), kRtvarUiPenred, 0.5);
+			v_get(g, =(float), GetVariableScope(), kRtvarUiPengreen, 0.5);
+			v_get(b, =(float), GetVariableScope(), kRtvarUiPenblue, 0.5);
+			v_get(a, =(float), GetVariableScope(), kRtvarUiPenalpha, 1.0);
 		}
-		else
-		{
-			v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
-			v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
-			v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
-			v_get(a, =(float), GetVariableScope(), RTVAR_UI_PENALPHA, 1.0);
-		}
-		vec3 lColor(r,g,b);
-		const bool lIsSmooth = (pMaterial == MaterialSmooth);
-		UiTbc::TriangleBasedGeometry* lMesh = lObject->CreateGfxMesh(pGfxObject.mVertices, pGfxObject.mIndices, lColor, a, lIsSmooth);
-		if (!lMesh)
-		{
-			delete lObject;
+		vec3 _color(r,g,b);
+		const bool is_smooth = (material == MaterialSmooth);
+		uitbc::TriangleBasedGeometry* _mesh = _object->CreateGfxMesh(gfx_object.vertices_, gfx_object.indices_, _color, a, is_smooth);
+		if (!_mesh) {
+			delete _object;
 			return -1;
 		}
-		const str lTexture = (pMaterial==MaterialChecker)? "checker.png" : "noise.png";
-		if (pMaterial == MaterialChecker || pMaterial == MaterialNoise)
-		{
-			const float lScale = (fabs(pGfxObject.mVertices[pGfxObject.mVertices.size()-3]-pGfxObject.mVertices[0]) >= 60)? 20.0f : 2.0f;
-			AddCheckerTexturing(lMesh, lScale);
-			lObject->LoadTexture(lTexture);
+		const str texture = (material==MaterialChecker)? "checker.png" : "noise.png";
+		if (material == MaterialChecker || material == MaterialNoise) {
+			const float _scale = (fabs(gfx_object.vertices_[gfx_object.vertices_.size()-3]-gfx_object.vertices_[0]) >= 60)? 20.0f : 2.0f;
+			AddCheckerTexturing(_mesh, _scale);
+			_object->LoadTexture(texture);
 		}
-		lObject->AddMeshResource(lMesh, pIsStatic? -1 : 1);
-		lObject->AddMeshInfo(lObject->GetMeshResource(0)->GetName(), "texture", lTexture, lColor, a);
-		lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = pGfxObject.mOrientation;
+		_object->AddMeshResource(_mesh, is_static? -1 : 1);
+		_object->AddMeshInfo(_object->GetMeshResource(0)->GetName(), "texture", texture, _color, a);
+		_object->GetMeshResource(0)->offset_.offset_.orientation_ = gfx_object.orientation_;
 	}
-	lObject->mInitialOrientation = pq;
-	lObject->mInitialInverseOrientation = pq.GetInverse();
+	_object->initial_orientation_ = pq;
+	_object->initial_inverse_orientation_ = pq.GetInverse();
 
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
-	AddContextObject(lObject, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-	mObjects.insert(lObject->GetInstanceId());
-	lObject->CreatePhysics(lPhysics);
-	//lObject->mGeneratedPhysics = lPhysics;
+	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+	ScopeLock game_lock(GetTickLock());
+	AddContextObject(_object, cure::kNetworkObjectLocalOnly, 0);
+	objects_.insert(_object->GetInstanceId());
+	_object->CreatePhysics(physics);
+	//_object->generated_physics_ = physics;
 
-	return lObject->GetInstanceId();
+	return _object->GetInstanceId();
 }
 
-void TrabantSimManager::CreateClones(IntList& pCreatedObjectIds, int pOriginalId, const XformList& pPlacements, ObjectMaterial pMaterial, bool pIsStatic)
-{
-	str lMeshName;
-	str lPhysName;
+void TrabantSimManager::CreateClones(IntList& created_object_ids, int original_id, const XformList& placements, ObjectMaterial material, bool is_static) {
+	str mesh_name;
+	str phys_name;
 	float r,g,b,a;
-	if (pMaterial == MaterialChecker)
-	{
+	if (material == MaterialChecker) {
 		r = g = b = a = 1;
+	} else {
+		v_get(r, =(float), GetVariableScope(), kRtvarUiPenred, 0.5);
+		v_get(g, =(float), GetVariableScope(), kRtvarUiPengreen, 0.5);
+		v_get(b, =(float), GetVariableScope(), kRtvarUiPenblue, 0.5);
+		v_get(a, =(float), GetVariableScope(), kRtvarUiPenalpha, 1.0);
 	}
-	else
-	{
-		v_get(r, =(float), GetVariableScope(), RTVAR_UI_PENRED, 0.5);
-		v_get(g, =(float), GetVariableScope(), RTVAR_UI_PENGREEN, 0.5);
-		v_get(b, =(float), GetVariableScope(), RTVAR_UI_PENBLUE, 0.5);
-		v_get(a, =(float), GetVariableScope(), RTVAR_UI_PENALPHA, 1.0);
-	}
-	const vec3 lColor(r,g,b);
-	const bool lIsSmooth = (pMaterial == MaterialSmooth);
+	const vec3 _color(r,g,b);
+	const bool is_smooth = (material == MaterialSmooth);
 
 	LEPRA_MEASURE_SCOPE(CreateClonesLock);
-	ScopeLock lGameLock(GetTickLock());
-	Object* lOriginal = (Object*)GetContext()->GetObject(pOriginalId);
-	if (!lOriginal)
-	{
+	ScopeLock game_lock(GetTickLock());
+	Object* original = (Object*)GetContext()->GetObject(original_id);
+	if (!original) {
 		return;
 	}
-	lMeshName = lOriginal->GetMeshResource(0)->GetName();
-	lMeshName.resize(lMeshName.find(".mesh"));
-	lPhysName = lOriginal->GetPhysicsResource()->GetName();
-	lPhysName.resize(lPhysName.find(".phys"));
-	xform lOriginalXform = lOriginal->GetPhysics()->GetOriginalBoneTransformation(0);
-	quat lOriginalOffsetOrientation = lOriginal->GetMeshResource(0)->mOffset.mOffset.mOrientation;
+	mesh_name = original->GetMeshResource(0)->GetName();
+	mesh_name.resize(mesh_name.find(".mesh"));
+	phys_name = original->GetPhysicsResource()->GetName();
+	phys_name.resize(phys_name.find(".phys"));
+	xform original_xform = original->GetPhysics()->GetOriginalBoneTransformation(0);
+	quat original_offset_orientation = original->GetMeshResource(0)->offset_.offset_.orientation_;
 
 	// Tricky loop to ensure we don't hold any of the mutexes very long.
-	while (!GetMaster()->GetPhysicsLock()->TryAcquire())
-	{
-		lGameLock.Release();
+	while (!GetMaster()->GetPhysicsLock()->TryAcquire()) {
+		game_lock.Release();
 		Thread::YieldCpu();
-		lGameLock.Acquire();
+		game_lock.Acquire();
 	}
 	{
-		for (XformList::const_iterator x = pPlacements.begin(); x != pPlacements.end(); ++x)
-		{
-			Object* lObject = (Object*)Parent::CreateContextObject("object", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
-			lObject->SetPhysicsTypeOverride(pIsStatic? Cure::PHYSICS_OVERRIDE_STATIC : Cure::PHYSICS_OVERRIDE_DYNAMIC);
+		for (XformList::const_iterator x = placements.begin(); x != placements.end(); ++x) {
+			Object* _object = (Object*)Parent::CreateContextObject("object", cure::kNetworkObjectLocallyControlled, 0);
+			_object->SetPhysicsTypeOverride(is_static? cure::kPhysicsOverrideStatic : cure::kPhysicsOverrideDynamic);
 			{
-				const quat pq = x->mOrientation * lOriginalXform.GetOrientation();
-				lObject->SetRootOrientation(pq);
-				lObject->SetRootPosition(x->mPosition - lOriginalXform.GetPosition());
+				const quat pq = x->orientation_ * original_xform.GetOrientation();
+				_object->SetRootOrientation(pq);
+				_object->SetRootPosition(x->position_ - original_xform.GetPosition());
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesPhys);
-					lObject->CreatePhysicsRef(lPhysName);
+					_object->CreatePhysicsRef(phys_name);
 				}
-				const str lTexture = (pMaterial==MaterialChecker)? "checker.png" : "noise.png";
-				if (pMaterial == MaterialChecker || pMaterial == MaterialNoise)
-				{
+				const str texture = (material==MaterialChecker)? "checker.png" : "noise.png";
+				if (material == MaterialChecker || material == MaterialNoise) {
 					LEPRA_MEASURE_SCOPE(CreateClonesTexture);
-					lObject->LoadTexture(lTexture);
+					_object->LoadTexture(texture);
 				}
-				lObject->AddMeshInfo(lMeshName, "texture", lTexture, lColor, a, lIsSmooth);
+				_object->AddMeshInfo(mesh_name, "texture", texture, _color, a, is_smooth);
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesMesh);
-					lObject->AddMeshResourceRef(lMeshName, pIsStatic? -1 : 1);
+					_object->AddMeshResourceRef(mesh_name, is_static? -1 : 1);
 				}
-				lObject->GetMeshResource(0)->mOffset.mOffset.mOrientation = lOriginalOffsetOrientation;
-				lObject->mInitialOrientation = pq;
-				lObject->mInitialInverseOrientation = pq.GetInverse();
-				mObjects.insert(lObject->GetInstanceId());
-				pCreatedObjectIds.push_back(lObject->GetInstanceId());
+				_object->GetMeshResource(0)->offset_.offset_.orientation_ = original_offset_orientation;
+				_object->initial_orientation_ = pq;
+				_object->initial_inverse_orientation_ = pq.GetInverse();
+				objects_.insert(_object->GetInstanceId());
+				created_object_ids.push_back(_object->GetInstanceId());
 			}
 		}
 	}
 	GetMaster()->GetPhysicsLock()->Release();
 }
 
-void TrabantSimManager::DeleteObject(int pObjectId)
-{
-	ScopeLock lGameLock(GetTickLock());
-	GetContext()->PostKillObject(pObjectId);
-	std::set<Cure::GameObjectId>::iterator x = mObjects.find(pObjectId);
-	if (x != mObjects.end())
-	{
-		mObjects.erase(x);
+void TrabantSimManager::DeleteObject(int object_id) {
+	ScopeLock game_lock(GetTickLock());
+	GetContext()->PostKillObject(object_id);
+	std::set<cure::GameObjectId>::iterator x = objects_.find(object_id);
+	if (x != objects_.end()) {
+		objects_.erase(x);
 	}
 	GetResourceManager()->ForceFreeCache();
 }
 
-void TrabantSimManager::DeleteAllObjects()
-{
+void TrabantSimManager::DeleteAllObjects() {
 	GetContext()->SetPostKillTimeout(1);
 	{
-		ScopeLock lGameLock(GetTickLock());
-		std::set<Cure::GameObjectId>::iterator x;
-		for (x = mObjects.begin(); x != mObjects.end(); ++x)
-		{
+		ScopeLock game_lock(GetTickLock());
+		std::set<cure::GameObjectId>::iterator x;
+		for (x = objects_.begin(); x != objects_.end(); ++x) {
 			GetContext()->PostKillObject(*x);
 		}
-		mObjects.clear();
+		objects_.clear();
 		GetResourceManager()->ForceFreeCache();
 	}
-	int lStableCount = 0;
-	size_t lLastCount = 0;
-	for (int x = 0;; ++x)
-	{
+	int stable_count = 0;
+	size_t last_count = 0;
+	for (int x = 0;; ++x) {
 		Thread::Sleep(0.1);
-		ScopeLock lGameLock(GetTickLock());
-		const size_t lCount = GetContext()->GetObjectTable().size();
-		if (lCount == lLastCount)
-		{
-			++lStableCount;
+		ScopeLock game_lock(GetTickLock());
+		const size_t count = GetContext()->GetObjectTable().size();
+		if (count == last_count) {
+			++stable_count;
+		} else {
+			stable_count = 0;
 		}
-		else
-		{
-			lStableCount = 0;
+		last_count = count;
+		if (count == 0 || stable_count >= 5) {
+			v_set(GetVariableScope(), kRtvarGameUsermessage, " ");
+			if (count) {
+				log_.Warningf("Unable to delete all objects, %i remaining.", count);
+			} break;
 		}
-		lLastCount = lCount;
-		if (lCount == 0 || lStableCount >= 5)
-		{
-			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, " ");
-			if (lCount)
-			{
-				mLog.Warningf("Unable to delete all objects, %i remaining.", lCount);
-			}
-			break;
-		}
-		if (x > 5)
-		{
-			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, "Cleaning up...");
+		if (x > 5) {
+			v_set(GetVariableScope(), kRtvarGameUsermessage, "Cleaning up...");
 		}
 	}
 	GetContext()->SetPostKillTimeout(0.01);
 	GetResourceManager()->SetInjectTimeLimit(0.01);
 }
 
-void TrabantSimManager::PickObjects(const vec3& pPosition, const vec3& pDirection, const vec2& pRange, IntList& pPickedObjectIds, Vec3List& pPickedPositions)
-{
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
-	vec3 lDirection = pDirection.GetNormalized();
-	vec3 lPosition = pPosition + lDirection*pRange.x;
-	int lHitObjects[16];
-	vec3 lHitPositions[16];
-	const int lHits = GetPhysicsManager()->QueryRayPick(lPosition, lDirection, pRange.y-pRange.x, lHitObjects, lHitPositions, LEPRA_ARRAY_COUNT(lHitObjects));
-	std::copy(&lHitObjects[0], &lHitObjects[lHits], std::back_inserter(pPickedObjectIds));
-	std::copy(&lHitPositions[0], &lHitPositions[lHits], std::back_inserter(pPickedPositions));
+void TrabantSimManager::PickObjects(const vec3& position, const vec3& direction, const vec2& range, IntList& picked_object_ids, Vec3List& picked_positions) {
+	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+	ScopeLock game_lock(GetTickLock());
+	vec3 _direction = direction.GetNormalized();
+	vec3 _position = position + _direction*range.x;
+	int hit_objects[16];
+	vec3 hit_positions[16];
+	const int hits = GetPhysicsManager()->QueryRayPick(_position, _direction, range.y-range.x, hit_objects, hit_positions, LEPRA_ARRAY_COUNT(hit_objects));
+	std::copy(&hit_objects[0], &hit_objects[hits], std::back_inserter(picked_object_ids));
+	std::copy(&hit_positions[0], &hit_positions[hits], std::back_inserter(picked_positions));
 }
 
-bool TrabantSimManager::IsLoaded(int pObjectId)
-{
-	ScopeLock lGameLock(GetTickLock());
-	return !!GetContext()->GetObject(pObjectId);
+bool TrabantSimManager::IsLoaded(int object_id) {
+	ScopeLock game_lock(GetTickLock());
+	return !!GetContext()->GetObject(object_id);
 }
 
-void TrabantSimManager::Explode(const vec3& pPos, const vec3& pVel, float pStrength, float pVolume)
-{
-	ScopeLock lGameLock(GetTickLock());
+void TrabantSimManager::Explode(const vec3& pos, const vec3& vel, float strength, float volume) {
+	ScopeLock game_lock(GetTickLock());
 
-	mCollisionSoundManager->OnCollision(pStrength*pVolume, pPos, 0, "explosion");
+	collision_sound_manager_->OnCollision(strength*volume, pos, 0, "explosion");
 
-	const float lKeepOnGoingFactor = 1.0f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
-	const int lParticles = std::max(10, Math::Lerp(8, 20, pStrength * 0.2f));
-	const int lFires    = lParticles;
-	const int lSmokes   = lParticles;
-	const int lSparks   = lParticles/2;
-	const int lShrapnel = lParticles/3;
-	vec3 lStartFireColor(1.0f, 1.0f, 0.3f);
-	vec3 lFireColor(0.6f, 0.4f, 0.2f);
-	vec3 lStartSmokeColor(0.4f, 0.4f, 0.4f);
-	vec3 lSmokeColor(0.2f, 0.2f, 0.2f);
-	vec3 lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
-	lParticleRenderer->CreateExplosion(pPos, pStrength, pVel*lKeepOnGoingFactor, 1, 1, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lFires, lSmokes, lSparks, lShrapnel);
+	const float keep_on_going_factor = 1.0f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
+	const int particles = std::max(10, Math::Lerp(8, 20, strength * 0.2f));
+	const int fires    = particles;
+	const int smokes   = particles;
+	const int sparks   = particles/2;
+	const int shrapnel = particles/3;
+	vec3 start_fire_color(1.0f, 1.0f, 0.3f);
+	vec3 fire_color(0.6f, 0.4f, 0.2f);
+	vec3 start_smoke_color(0.4f, 0.4f, 0.4f);
+	vec3 smoke_color(0.2f, 0.2f, 0.2f);
+	vec3 shrapnel_color(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
+	uitbc::ParticleRenderer* particle_renderer = (uitbc::ParticleRenderer*)ui_manager_->GetRenderer()->GetDynamicRenderer("particle");
+	particle_renderer->CreateExplosion(pos, strength, vel*keep_on_going_factor, 1, 1, start_fire_color, fire_color, start_smoke_color, smoke_color, shrapnel_color, fires, smokes, sparks, shrapnel);
 }
 
-void TrabantSimManager::PlaySound(const str& pSound, const vec3& pPos, const vec3& pVel, float pVolume)
-{
-	ScopeLock lGameLock(GetTickLock());
-	UiCure::UserSound3dResource* lSoundResource = new UiCure::UserSound3dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), pSound, lSoundResource, pPos, pVel, pVolume, 1);
+void TrabantSimManager::PlaySound(const str& sound, const vec3& pos, const vec3& vel, float volume) {
+	ScopeLock game_lock(GetTickLock());
+	UiCure::UserSound3dResource* sound_resource = new UiCure::UserSound3dResource(ui_manager_, uilepra::SoundManager::kLoopNone);
+	new UiCure::SoundReleaser(GetResourceManager(), ui_manager_, GetContext(), sound, sound_resource, pos, vel, volume, 1);
 }
 
-void TrabantSimManager::PopCollisions(CollisionList& pCollisionList)
-{
+void TrabantSimManager::PopCollisions(CollisionList& collision_list) {
 	{
-		ScopeLock lGameLock(GetTickLock());
-		pCollisionList.splice(pCollisionList.end(), mCollisionList);
+		ScopeLock game_lock(GetTickLock());
+		collision_list.splice(collision_list.end(), collision_list_);
 	}
 
 	// Reduce the number of collisions to avoid bandwidth problems.
 	typedef std::unordered_map<unsigned,CollisionInfo> CollisionMap;
-	CollisionMap lReducedCollisions;
-	for (CollisionList::iterator x = pCollisionList.begin(); x != pCollisionList.end(); ++x)
-	{
-		unsigned y = x->mObjectId;
-		unsigned z = x->mOtherObjectId;
-		unsigned lKey = ((y^z)<<16) + (y+z);
-		CollisionMap::iterator c = lReducedCollisions.find(lKey);
-		if (c != lReducedCollisions.end())
-		{
-			CollisionInfo& lCollision = c->second;
-			if (lCollision.mForce*x->mForce > 0)
-			{
-				lCollision.mForce = (lCollision.mForce+x->mForce)*0.5f;
-				lCollision.mPosition = (lCollision.mPosition+x->mPosition)*0.5f;
+	CollisionMap reduced_collisions;
+	for (CollisionList::iterator x = collision_list.begin(); x != collision_list.end(); ++x) {
+		unsigned y = x->object_id_;
+		unsigned z = x->other_object_id_;
+		unsigned key = ((y^z)<<16) + (y+z);
+		CollisionMap::iterator c = reduced_collisions.find(key);
+		if (c != reduced_collisions.end()) {
+			CollisionInfo& collision = c->second;
+			if (collision.force_*x->force_ > 0) {
+				collision.force_ = (collision.force_+x->force_)*0.5f;
+				collision.position_ = (collision.position_+x->position_)*0.5f;
 			}
-		}
-		else
-		{
-			lReducedCollisions.insert(CollisionMap::value_type(lKey, *x));
+		} else {
+			reduced_collisions.insert(CollisionMap::value_type(key, *x));
 		}
 	}
-	pCollisionList.clear();
-	for (CollisionMap::iterator x = lReducedCollisions.begin(); x != lReducedCollisions.end(); ++x)
-	{
-		pCollisionList.push_back(x->second);
+	collision_list.clear();
+	for (CollisionMap::iterator x = reduced_collisions.begin(); x != reduced_collisions.end(); ++x) {
+		collision_list.push_back(x->second);
 	}
 }
 
-void TrabantSimManager::GetKeys(strutil::strvec& pKeys)
-{
-	ScopeLock lGameLock(GetTickLock());
-	for (KeyMap::iterator x = mKeyMap.begin(); x != mKeyMap.end();)
-	{
-		pKeys.push_back(UiLepra::InputManager::GetKeyName(x->first));
-		if (x->second)
-		{
+void TrabantSimManager::GetKeys(strutil::strvec& keys) {
+	ScopeLock game_lock(GetTickLock());
+	for (KeyMap::iterator x = key_map_.begin(); x != key_map_.end();) {
+		keys.push_back(uilepra::InputManager::GetKeyName(x->first));
+		if (x->second) {
 			KeyMap::iterator y = x;
 			++y;
-			mKeyMap.erase(x);
+			key_map_.erase(x);
 			x = y;
-		}
-		else
-		{
+		} else {
 			++x;
 		}
 	}
 }
 
-void TrabantSimManager::GetTouchDrags(DragList& pDragList)
-{
-	ScopeLock lGameLock(GetTickLock());
-	pDragList = mDragList;
+void TrabantSimManager::GetTouchDrags(DragList& drag_list) {
+	ScopeLock game_lock(GetTickLock());
+	drag_list = drag_list_;
 
-	for (DragEraseList::iterator x = mDragEraseList.begin(); x != mDragEraseList.end(); ++x)
-	{
-		for (DragList::iterator y = mDragList.begin(); y != mDragList.end();)
-		{
-			if (y->mStart.x == x->x && y->mStart.y == x->y)
-			{
-				y = mDragList.erase(y);
-			}
-			else
-			{
+	for (DragEraseList::iterator x = drag_erase_list_.begin(); x != drag_erase_list_.end(); ++x) {
+		for (DragList::iterator y = drag_list_.begin(); y != drag_list_.end();) {
+			if (y->start_.x == x->x && y->start_.y == x->y) {
+				y = drag_list_.erase(y);
+			} else {
 				++y;
 			}
 		}
 	}
-	mDragEraseList.clear();
+	drag_erase_list_.clear();
 }
 
-vec3 TrabantSimManager::GetAccelerometer() const
-{
-	return mUiManager->GetAccelerometer();
+vec3 TrabantSimManager::GetAccelerometer() const {
+	return ui_manager_->GetAccelerometer();
 }
 
-vec3 TrabantSimManager::GetMouseMove()
-{
+vec3 TrabantSimManager::GetMouseMove() {
 #ifdef LEPRA_TOUCH
 	return vec3();
 #else // Computer
-	if (!mIsMouseControlled)
-	{
-		mIsMouseControlled = true;
-		mSetCursorInvisible = true;
+	if (!is_mouse_controlled_) {
+		is_mouse_controlled_ = true;
+		set_cursor_invisible_ = true;
 	}
-	vec3 m(mMouseMove);
-	mMouseMove.Set(0,0,0);
-	if (((TrabantSimConsoleManager*)GetConsoleManager())->GetUiConsole()->IsVisible())
-	{
+	vec3 m(mouse_move_);
+	mouse_move_.Set(0,0,0);
+	if (((TrabantSimConsoleManager*)GetConsoleManager())->GetUiConsole()->IsVisible()) {
 		m.Set(0,0,0);
 	}
 	return m;
-#endif // Touch device / computer
+#endif // touch device / computer
 }
 
-int TrabantSimManager::CreateJoystick(float x, float y, bool pIsSloppy)
-{
-	ScopeLock lGameLock(GetTickLock());
-	const float lTouchSideScale = 1.28f;	// Inches.
-	const float lTouchScale = lTouchSideScale / (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
-	const int lScreenPixelWidth = mUiManager->GetDisplayManager()->GetWidth();
-	const int lMinimumTouchRadius = (int)(lScreenPixelWidth*lTouchScale*0.17f);	// 30 pixels in iPhone classic.
-	PixelRect lRect(0,0,10,10);
-	Touchstick::InputMode lMode = pIsSloppy? Touchstick::MODE_RELATIVE_CENTER_NOSPRING : Touchstick::MODE_RELATIVE_CENTER;
-	Touchstick* lStick = new Touchstick(mUiManager->GetInputManager(), lMode, lRect, 0, lMinimumTouchRadius);
-	const str lName = strutil::Format("Touchstick%i", mTouchstickList.size());
-	lStick->SetUniqueIdentifier(lName);
-	mTouchstickList.push_back(TouchstickInfo(lStick, x, y, -90, pIsSloppy));
-	mTouchstickTimer.ReduceTimeDiff(-10);
-	return (int)mTouchstickList.size()-1;
+int TrabantSimManager::CreateJoystick(float x, float y, bool is_sloppy) {
+	ScopeLock game_lock(GetTickLock());
+	const float touch_side_scale = 1.28f;	// Inches.
+	const float touch_scale = touch_side_scale / (float)ui_manager_->GetDisplayManager()->GetPhysicalScreenSize();
+	const int screen_pixel_width = ui_manager_->GetDisplayManager()->GetWidth();
+	const int minimum_touch_radius = (int)(screen_pixel_width*touch_scale*0.17f);	// 30 pixels in iPhone classic.
+	PixelRect rect(0,0,10,10);
+	Touchstick::InputMode mode = is_sloppy? Touchstick::kModeRelativeCenterNospring : Touchstick::kModeRelativeCenter;
+	Touchstick* _stick = new Touchstick(ui_manager_->GetInputManager(), mode, rect, 0, minimum_touch_radius);
+	const str name = strutil::Format("Touchstick%i", touchstick_list_.size());
+	_stick->SetUniqueIdentifier(name);
+	touchstick_list_.push_back(TouchstickInfo(_stick, x, y, -90, is_sloppy));
+	touchstick_timer_.ReduceTimeDiff(-10);
+	return (int)touchstick_list_.size()-1;
 }
 
-TrabantSimManager::JoystickDataList TrabantSimManager::GetJoystickData() const
-{
-	ScopeLock lGameLock(GetTickLock());
-	JoystickDataList lList;
-	int lId = 0;
-	TouchstickList::const_iterator x = mTouchstickList.begin();
-	for (; x != mTouchstickList.end(); ++x, ++lId)
-	{
+TrabantSimManager::JoystickDataList TrabantSimManager::GetJoystickData() const {
+	ScopeLock game_lock(GetTickLock());
+	JoystickDataList __list;
+	int id = 0;
+	TouchstickList::const_iterator x = touchstick_list_.begin();
+	for (; x != touchstick_list_.end(); ++x, ++id) {
 		float jx = 0;
 		float jy = 0;
-		bool lIsPressing = false;
-		x->mStick->GetValue(jx, jy, lIsPressing);
-		if (lIsPressing)
-		{
-			lList.push_back(JoystickData(lId, jx, -jy));
+		bool is_pressing = false;
+		x->stick_->GetValue(jx, jy, is_pressing);
+		if (is_pressing) {
+			__list.push_back(JoystickData(id, jx, -jy));
 		}
-		if (!x->mIsSloppy)
-		{
-			x->mStick->ResetTap();
+		if (!x->is_sloppy_) {
+			x->stick_->ResetTap();
 		}
 	}
-	return lList;
+	return __list;
 }
 
-float TrabantSimManager::GetAspectRatio() const
-{
-	return mUiManager->GetDisplayManager()->GetWidth()/(float)mUiManager->GetDisplayManager()->GetHeight();
+float TrabantSimManager::GetAspectRatio() const {
+	return ui_manager_->GetDisplayManager()->GetWidth()/(float)ui_manager_->GetDisplayManager()->GetHeight();
 }
 
-int TrabantSimManager::CreateEngine(int pObjectId, const str& pEngineType, const vec2& pMaxVelocity, float pStrength, float pFriction, const EngineTargetList& pEngineTargets)
-{
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject)
-	{
+int TrabantSimManager::CreateEngine(int object_id, const str& engine_type, const vec2& max_velocity, float strength, float friction, const EngineTargetList& engine_targets) {
+	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+	ScopeLock game_lock(GetTickLock());
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object) {
 		return -1;
 	}
 
-	bool lIsAttachment = false;
-	Tbc::PhysicsEngine::EngineType lEngineType;
-	vec2 lMaxVelocity(pMaxVelocity);
-	float lStrength = pStrength * lObject->GetMass();
-	float lFriction = pFriction*2;
-	if (pEngineType == "roll_turn")
-	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE2_TURN;
-		lIsAttachment = true;
-	}
-	else if (pEngineType == "roll")
-	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE_ROLL;
-		lIsAttachment = true;
-	}
-	else if (pEngineType == "walk_abs")
-	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_WALK;
-	}
-	else if (pEngineType == "push_abs")
-	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE;
-	}
-	else if (pEngineType == "push_rel")
-	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE;
-	}
-	else if (pEngineType == "push_turn_abs")
-	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_TURN_ABSOLUTE;
-	}
-	else if (pEngineType == "push_turn_rel")
-	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_PUSH_TURN_RELATIVE;
-	}
-	else if (pEngineType == "gyro")
-	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_HINGE_GYRO;
-		lIsAttachment = true;
-	}
-	else if (pEngineType == "rotor")
-	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_ROTOR;
-		lIsAttachment = true;
-	}
-	else if (pEngineType == "tilt")
-	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_ROTOR_TILT;
-		lIsAttachment = true;
-	}
-	else if (pEngineType == "slider")
-	{
-		lEngineType = Tbc::PhysicsEngine::ENGINE_SLIDER_FORCE;
-		lIsAttachment = true;
-	}
-	else
-	{
+	bool is_attachment = false;
+	tbc::PhysicsEngine::EngineType _engine_type;
+	vec2 _max_velocity(max_velocity);
+	float _strength = strength * _object->GetMass();
+	float _friction = friction*2;
+	if (engine_type == "roll_turn") {
+		_engine_type = tbc::PhysicsEngine::kEngineHinge2Turn;
+		is_attachment = true;
+	} else if (engine_type == "roll") {
+		_engine_type = tbc::PhysicsEngine::kEngineHingeRoll;
+		is_attachment = true;
+	} else if (engine_type == "walk_abs") {
+		_engine_type = tbc::PhysicsEngine::kEngineWalk;
+	} else if (engine_type == "push_abs") {
+		_engine_type = tbc::PhysicsEngine::kEnginePushAbsolute;
+	} else if (engine_type == "push_rel") {
+		_engine_type = tbc::PhysicsEngine::kEnginePushRelative;
+	} else if (engine_type == "push_turn_abs") {
+		_engine_type = tbc::PhysicsEngine::kEnginePushTurnAbsolute;
+	} else if (engine_type == "push_turn_rel") {
+		_engine_type = tbc::PhysicsEngine::kEnginePushTurnRelative;
+	} else if (engine_type == "gyro") {
+		_engine_type = tbc::PhysicsEngine::kEngineHingeGyro;
+		is_attachment = true;
+	} else if (engine_type == "rotor") {
+		_engine_type = tbc::PhysicsEngine::kEngineRotor;
+		is_attachment = true;
+	} else if (engine_type == "tilt") {
+		_engine_type = tbc::PhysicsEngine::kEngineRotorTilt;
+		is_attachment = true;
+	} else if (engine_type == "slider") {
+		_engine_type = tbc::PhysicsEngine::kEngineSliderForce;
+		is_attachment = true;
+	} else {
 		return -1;
 	}
 
-	EngineTargetList lTargets(pEngineTargets);
-	if (lTargets.empty())
-	{
-		Object::Array lObjects = lObject->GetAttachedObjects();
-		Cure::ContextObject* lLastAttachedObject = lObjects.empty()? 0 : lObjects.back();
-		Cure::ContextObject* lEngineObject = lIsAttachment? lLastAttachedObject : lObject;
-		if (!lEngineObject)
-		{
-			mLog.Warningf("No object attached to create a %s engine to.", pEngineType.c_str());
+	EngineTargetList targets(engine_targets);
+	if (targets.empty()) {
+		Object::Array objects = _object->GetAttachedObjects();
+		cure::ContextObject* last_attached_object = objects.empty()? 0 : objects.back();
+		cure::ContextObject* engine_object = is_attachment? last_attached_object : _object;
+		if (!engine_object) {
+			log_.Warningf("No object attached to create a %s engine to.", engine_type.c_str());
 			return -1;
 		}
-		lTargets.push_back(EngineTarget(lEngineObject->GetInstanceId(),1));
+		targets.push_back(EngineTarget(engine_object->GetInstanceId(),1));
 	}
 
-	Tbc::PhysicsEngine* lEngine = new Tbc::PhysicsEngine(lEngineType, lStrength, lMaxVelocity.x, lMaxVelocity.y, lFriction, lObject->GetPhysics()->GetEngineCount()*4);
-	for (EngineTargetList::iterator x = lTargets.begin(); x != lTargets.end(); ++x)
-	{
-		Cure::ContextObject* lEngineObject = GetContext()->GetObject(x->mInstanceId);
-		Tbc::ChunkyBoneGeometry* lGeometry = lEngineObject->GetPhysics()->GetBoneGeometry(0);
-		lEngine->AddControlledGeometry(lGeometry, x->mStrength);
+	tbc::PhysicsEngine* engine = new tbc::PhysicsEngine(_engine_type, _strength, _max_velocity.x, _max_velocity.y, _friction, _object->GetPhysics()->GetEngineCount()*4);
+	for (EngineTargetList::iterator x = targets.begin(); x != targets.end(); ++x) {
+		cure::ContextObject* engine_object = GetContext()->GetObject(x->instance_id_);
+		tbc::ChunkyBoneGeometry* geometry = engine_object->GetPhysics()->GetBoneGeometry(0);
+		engine->AddControlledGeometry(geometry, x->strength_);
 	}
-	lObject->GetPhysics()->AddEngine(lEngine);
-	if (lIsAttachment)
-	{
-		for (EngineTargetList::iterator x = lTargets.begin(); x != lTargets.end(); ++x)
-		{
-			Cure::ContextObject* lEngineObject = GetContext()->GetObject(x->mInstanceId);
-			lObject->AddAttachedObjectEngine(lEngineObject, lEngine);
+	_object->GetPhysics()->AddEngine(engine);
+	if (is_attachment) {
+		for (EngineTargetList::iterator x = targets.begin(); x != targets.end(); ++x) {
+			cure::ContextObject* engine_object = GetContext()->GetObject(x->instance_id_);
+			_object->AddAttachedObjectEngine(engine_object, engine);
 		}
 	}
-	GetContext()->EnableMicroTickCallback(lObject);
-	return lObject->GetPhysics()->GetEngineCount()-1;
+	GetContext()->EnableMicroTickCallback(_object);
+	return _object->GetPhysics()->GetEngineCount()-1;
 }
 
-int TrabantSimManager::CreateJoint(int pObjectId, const str& pJointType, int pOtherObjectId, const vec3& pAxis, const vec2& pStop, const vec2& pSpringSettings)
-{
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	Object* lObject2 = (Object*)GetContext()->GetObject(pOtherObjectId);
-	if (!lObject || !lObject2)
-	{
+int TrabantSimManager::CreateJoint(int object_id, const str& joint_type, int other_object_id, const vec3& axis, const vec2& stop, const vec2& spring_settings) {
+	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+	ScopeLock game_lock(GetTickLock());
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	Object* _object2 = (Object*)GetContext()->GetObject(other_object_id);
+	if (!_object || !_object2) {
 		return -1;
 	}
 
-	Tbc::ChunkyBoneGeometry::ConnectorType lType;
-	float lLoStop = pStop.x;
-	float lHiStop = pStop.y;
-	float lSpringConstant = pSpringSettings.x;
-	float lSpringDamping = pSpringSettings.y;
-	if (pJointType == "hinge")
-	{
-		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_HINGE;
-		if (lLoStop == 0 && lHiStop == 0)
-		{
-			lLoStop = -100.0f;
-			lHiStop = +100.0f;
+	tbc::ChunkyBoneGeometry::ConnectorType type;
+	float lo_stop = stop.x;
+	float hi_stop = stop.y;
+	float spring_constant = spring_settings.x;
+	float spring_damping = spring_settings.y;
+	if (joint_type == "hinge") {
+		type = tbc::ChunkyBoneGeometry::kConnectorHinge;
+		if (lo_stop == 0 && hi_stop == 0) {
+			lo_stop = -100.0f;
+			hi_stop = +100.0f;
 		}
-	}
-	else if (pJointType == "suspend_hinge")
-	{
-		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_SUSPEND_HINGE;
-		lSpringConstant = (lSpringConstant<=0)? 22 : lSpringConstant;
-		lSpringDamping = (lSpringDamping<=0)? 0.8f : lSpringDamping;
-		lSpringConstant *= lObject->GetMass() * 100;
-	}
-	else if (pJointType == "turn_hinge")
-	{
-		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_HINGE2;
-		if (lLoStop == 0 && lHiStop == 0)
-		{
-			lLoStop = -0.5f;
-			lHiStop = +0.5f;
+	} else if (joint_type == "suspend_hinge") {
+		type = tbc::ChunkyBoneGeometry::kConnectorSuspendHinge;
+		spring_constant = (spring_constant<=0)? 22 : spring_constant;
+		spring_damping = (spring_damping<=0)? 0.8f : spring_damping;
+		spring_constant *= _object->GetMass() * 100;
+	} else if (joint_type == "turn_hinge") {
+		type = tbc::ChunkyBoneGeometry::kConnectorHinge2;
+		if (lo_stop == 0 && hi_stop == 0) {
+			lo_stop = -0.5f;
+			hi_stop = +0.5f;
 		}
-		lSpringConstant = (lSpringConstant<=0)? 22 : lSpringConstant;
-		lSpringDamping = (lSpringDamping<=0)? 0.8f : lSpringDamping;
-		lSpringConstant *= lObject->GetMass() * 100;
-	}
-	else if (pJointType == "ball")
-	{
-		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_3DOF;
-	}
-	else if (pJointType == "slider")
-	{
-		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_SLIDER;
-		if (lLoStop == 0 && lHiStop == 0)
-		{
-			lLoStop = -1.0f;
-			lHiStop = +1.0f;
+		spring_constant = (spring_constant<=0)? 22 : spring_constant;
+		spring_damping = (spring_damping<=0)? 0.8f : spring_damping;
+		spring_constant *= _object->GetMass() * 100;
+	} else if (joint_type == "ball") {
+		type = tbc::ChunkyBoneGeometry::kConnector3Dof;
+	} else if (joint_type == "slider") {
+		type = tbc::ChunkyBoneGeometry::kConnectorSlider;
+		if (lo_stop == 0 && hi_stop == 0) {
+			lo_stop = -1.0f;
+			hi_stop = +1.0f;
 		}
-	}
-	else if (pJointType == "universal")
-	{
-		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_UNIVERSAL;
-	}
-	else if (pJointType == "fixed")
-	{
-		lType = Tbc::ChunkyBoneGeometry::CONNECTOR_FIXED;
-		GetPhysicsManager()->MakeStatic(lObject2->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
-	}
-	else
-	{
+	} else if (joint_type == "universal") {
+		type = tbc::ChunkyBoneGeometry::kConnectorUniversal;
+	} else if (joint_type == "fixed") {
+		type = tbc::ChunkyBoneGeometry::kConnectorFixed;
+		GetPhysicsManager()->MakeStatic(_object2->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+	} else {
 		return -1;
 	}
 
-	lObject->GetPhysics()->GetBoneGeometry(0)->ClearConnectorTypes();
-	lObject->GetPhysics()->GetBoneGeometry(0)->AddConnectorType(lType);
-	Tbc::ChunkyBoneGeometry::BodyDataBase& lBodyData = lObject2->GetPhysics()->GetBoneGeometry(0)->GetBodyData();
-	lBodyData.mParameter[Tbc::ChunkyBoneGeometry::PARAM_EULER_THETA] = pAxis.GetPolarCoordAngleZ();
-	lBodyData.mParameter[Tbc::ChunkyBoneGeometry::PARAM_EULER_PHI] = pAxis.GetAngle(vec3(0,0,1));
-	lBodyData.mParameter[Tbc::ChunkyBoneGeometry::PARAM_LOW_STOP] = lLoStop;
-	lBodyData.mParameter[Tbc::ChunkyBoneGeometry::PARAM_HIGH_STOP] = lHiStop;
-	lBodyData.mParameter[Tbc::ChunkyBoneGeometry::PARAM_SPRING_CONSTANT] = lSpringConstant;
-	lBodyData.mParameter[Tbc::ChunkyBoneGeometry::PARAM_SPRING_DAMPING] = lSpringDamping;
-	lBodyData.mParameter[Tbc::ChunkyBoneGeometry::PARAM_OFFSET_X] = 0;
-	lBodyData.mParameter[Tbc::ChunkyBoneGeometry::PARAM_OFFSET_Y] = 0;
-	lBodyData.mParameter[Tbc::ChunkyBoneGeometry::PARAM_OFFSET_Z] = 0;
-	lObject->AttachToObjectByBodyIndices(0, lObject2, 0);
-	const float lTotalMass = lObject->GetMass() + lObject2->GetMass();
-	lObject->SetMass(lTotalMass);	// Avoid collision sounds.
-	lObject2->SetMass(lTotalMass);
+	_object->GetPhysics()->GetBoneGeometry(0)->ClearConnectorTypes();
+	_object->GetPhysics()->GetBoneGeometry(0)->AddConnectorType(type);
+	tbc::ChunkyBoneGeometry::BodyDataBase& body_data = _object2->GetPhysics()->GetBoneGeometry(0)->GetBodyData();
+	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamEulerTheta] = axis.GetPolarCoordAngleZ();
+	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamEulerPhi] = axis.GetAngle(vec3(0,0,1));
+	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamLowStop] = lo_stop;
+	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamHighStop] = hi_stop;
+	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamSpringConstant] = spring_constant;
+	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamSpringDamping] = spring_damping;
+	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamOffsetX] = 0;
+	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamOffsetY] = 0;
+	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamOffsetZ] = 0;
+	_object->AttachToObjectByBodyIndices(0, _object2, 0);
+	const float total_mass = _object->GetMass() + _object2->GetMass();
+	_object->SetMass(total_mass);	// Avoid collision sounds.
+	_object2->SetMass(total_mass);
 	return 0;
 }
 
-void TrabantSimManager::Position(int pObjectId, bool pSet, vec3& pPosition)
-{
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
-	{
+void TrabantSimManager::Position(int object_id, bool _set, vec3& position) {
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
-	if (pSet)
-	{
-		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->SetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pPosition);
-		if (lObject->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
-		{
-			ScopeLock lGameLock(GetTickLock());
-			lObject->UiMove();
+	if (_set) {
+		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+		GetMaster()->GetPhysicsManager(true)->SetBodyPosition(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), position);
+		if (_object->GetPhysics()->GetPhysicsType() == tbc::ChunkyPhysics::kStatic) {
+			ScopeLock game_lock(GetTickLock());
+			_object->UiMove();
 		}
-	}
-	else
-	{
-		pPosition = GetMaster()->GetPhysicsManager(true)->GetBodyPosition(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+	} else {
+		position = GetMaster()->GetPhysicsManager(true)->GetBodyPosition(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
 	}
 }
 
-void TrabantSimManager::Orientation(int pObjectId, bool pSet, quat& pOrientation)
-{
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
-	{
+void TrabantSimManager::Orientation(int object_id, bool _set, quat& orientation) {
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
-	if (pSet)
-	{
-		pOrientation = pOrientation * lObject->mInitialOrientation;
-		if (pOrientation.GetNorm() < 0.5)
-		{
+	if (_set) {
+		orientation = orientation * _object->initial_orientation_;
+		if (orientation.GetNorm() < 0.5) {
 			return;
 		}
-		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->SetBodyOrientation(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pOrientation);
-		if (lObject->GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
-		{
-			ScopeLock lGameLock(GetTickLock());
-			lObject->UiMove();
+		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+		GetMaster()->GetPhysicsManager(true)->SetBodyOrientation(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), orientation);
+		if (_object->GetPhysics()->GetPhysicsType() == tbc::ChunkyPhysics::kStatic) {
+			ScopeLock game_lock(GetTickLock());
+			_object->UiMove();
 		}
-	}
-	else
-	{
-		quat lOrientation = GetMaster()->GetPhysicsManager(true)->GetBodyOrientation(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
-		pOrientation = lOrientation * lObject->mInitialInverseOrientation;
+	} else {
+		quat _orientation = GetMaster()->GetPhysicsManager(true)->GetBodyOrientation(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+		orientation = _orientation * _object->initial_inverse_orientation_;
 	}
 }
 
-void TrabantSimManager::Velocity(int pObjectId, bool pSet, vec3& pVelocity)
-{
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
-	{
+void TrabantSimManager::Velocity(int object_id, bool _set, vec3& velocity) {
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
-	if (pSet)
-	{
-		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->SetBodyVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pVelocity);
-	}
-	else
-	{
-		GetMaster()->GetPhysicsManager(true)->GetBodyVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pVelocity);
+	if (_set) {
+		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+		GetMaster()->GetPhysicsManager(true)->SetBodyVelocity(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), velocity);
+	} else {
+		GetMaster()->GetPhysicsManager(true)->GetBodyVelocity(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), velocity);
 	}
 }
 
-void TrabantSimManager::AngularVelocity(int pObjectId, bool pSet, vec3& pAngularVelocity)
-{
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
-	{
+void TrabantSimManager::AngularVelocity(int object_id, bool _set, vec3& angular_velocity) {
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
-	if (pSet)
-	{
-		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->SetBodyAngularVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pAngularVelocity);
-	}
-	else
-	{
-		GetMaster()->GetPhysicsManager(true)->GetBodyAngularVelocity(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pAngularVelocity);
+	if (_set) {
+		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+		GetMaster()->GetPhysicsManager(true)->SetBodyAngularVelocity(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), angular_velocity);
+	} else {
+		GetMaster()->GetPhysicsManager(true)->GetBodyAngularVelocity(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), angular_velocity);
 	}
 }
 
-void TrabantSimManager::Mass(int pObjectId, bool pSet, float& pMass)
-{
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject || !lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId())
-	{
+void TrabantSimManager::Mass(int object_id, bool _set, float& mass) {
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
-	if (pSet)
-	{
-		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->SetBodyMass(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pMass);
-		lObject->QueryMass();
-	}
-	else
-	{
-		pMass = GetMaster()->GetPhysicsManager(true)->GetBodyMass(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+	if (_set) {
+		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+		GetMaster()->GetPhysicsManager(true)->SetBodyMass(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), mass);
+		_object->QueryMass();
+	} else {
+		mass = GetMaster()->GetPhysicsManager(true)->GetBodyMass(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
 	}
 }
 
-void TrabantSimManager::ObjectColor(int pObjectId, bool pSet, vec3& pColor, float pAlpha)
-{
-	ScopeLock lGameLock(GetTickLock());
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject)
-	{
+void TrabantSimManager::ObjectColor(int object_id, bool _set, vec3& color, float alpha) {
+	ScopeLock game_lock(GetTickLock());
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object) {
 		return;
 	}
-	if (pSet)
-	{
-		lObject->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = pColor;
-		lObject->GetMesh(0)->GetBasicMaterialSettings().mAlpha = pAlpha;
-		lObject->GetMesh(0)->SetAlwaysVisible(!!pAlpha);
-	}
-	else
-	{
-		pColor = lObject->GetMesh(0)->GetBasicMaterialSettings().mDiffuse;
+	if (_set) {
+		_object->GetMesh(0)->GetBasicMaterialSettings().diffuse_ = color;
+		_object->GetMesh(0)->GetBasicMaterialSettings().alpha_ = alpha;
+		_object->GetMesh(0)->SetAlwaysVisible(!!alpha);
+	} else {
+		color = _object->GetMesh(0)->GetBasicMaterialSettings().diffuse_;
 	}
 }
 
-void TrabantSimManager::EngineForce(int pObjectId, int pEngineIndex, bool pSet, vec3& pForce)
-{
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject)
-	{
+void TrabantSimManager::EngineForce(int object_id, int engine_index, bool _set, vec3& force) {
+	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+	ScopeLock game_lock(GetTickLock());
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object) {
 		return;
 	}
-	if (pEngineIndex < 0 || pEngineIndex >= lObject->GetPhysics()->GetEngineCount())
-	{
-		mLog.Warningf("Object %i does not have an engine with index %i.", pObjectId, pEngineIndex);
+	if (engine_index < 0 || engine_index >= _object->GetPhysics()->GetEngineCount()) {
+		log_.Warningf("Object %i does not have an engine with index %i.", object_id, engine_index);
 		return;
 	}
-	if (pSet)
-	{
-		switch (lObject->GetPhysics()->GetEngine(pEngineIndex)->GetEngineType())
-		{
-			case Tbc::PhysicsEngine::ENGINE_WALK:
-			case Tbc::PhysicsEngine::ENGINE_PUSH_ABSOLUTE:
-			case Tbc::PhysicsEngine::ENGINE_PUSH_RELATIVE:
-				lObject->SetEnginePower(pEngineIndex*4+0, pForce.y);
-				lObject->SetEnginePower(pEngineIndex*4+1, pForce.x);
-				lObject->SetEnginePower(pEngineIndex*4+3, pForce.z);
+	if (_set) {
+		switch (_object->GetPhysics()->GetEngine(engine_index)->GetEngineType()) {
+			case tbc::PhysicsEngine::kEngineWalk:
+			case tbc::PhysicsEngine::kEnginePushAbsolute:
+			case tbc::PhysicsEngine::kEnginePushRelative:
+				_object->SetEnginePower(engine_index*4+0, force.y);
+				_object->SetEnginePower(engine_index*4+1, force.x);
+				_object->SetEnginePower(engine_index*4+3, force.z);
 				break;
-			case Tbc::PhysicsEngine::ENGINE_PUSH_TURN_ABSOLUTE:
-			case Tbc::PhysicsEngine::ENGINE_PUSH_TURN_RELATIVE:
-				lObject->SetEnginePower(pEngineIndex*4+0, pForce.z);
-				lObject->SetEnginePower(pEngineIndex*4+1, pForce.x);
-				lObject->SetEnginePower(pEngineIndex*4+3, pForce.y);
+			case tbc::PhysicsEngine::kEnginePushTurnAbsolute:
+			case tbc::PhysicsEngine::kEnginePushTurnRelative:
+				_object->SetEnginePower(engine_index*4+0, force.z);
+				_object->SetEnginePower(engine_index*4+1, force.x);
+				_object->SetEnginePower(engine_index*4+3, force.y);
 				break;
 			default:
-				lObject->SetEnginePower(pEngineIndex*4+0, pForce.x);
-				lObject->SetEnginePower(pEngineIndex*4+1, pForce.y);
-				lObject->SetEnginePower(pEngineIndex*4+3, pForce.z);
+				_object->SetEnginePower(engine_index*4+0, force.x);
+				_object->SetEnginePower(engine_index*4+1, force.y);
+				_object->SetEnginePower(engine_index*4+3, force.z);
 				break;
 		}
-	}
-	else
-	{
+	} else {
 		// That's fine, wouldn't you say?
 	}
 }
 
-void TrabantSimManager::AddTag(int pObjectId, const str& pTagType, const FloatList& pFloats, const StringList& pStrings, const IntList& pPhys, const IntList& pEngines, const IntList& pMeshes)
-{
-	ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-	ScopeLock lGameLock(GetTickLock());
-	Object* lObject = (Object*)GetContext()->GetObject(pObjectId);
-	if (!lObject)
-	{
+void TrabantSimManager::AddTag(int object_id, const str& tag_type, const FloatList& floats, const StringList& strings, const IntList& phys, const IntList& engines, const IntList& meshes) {
+	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+	ScopeLock game_lock(GetTickLock());
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object) {
 		return;
 	}
-	const Tbc::ChunkyPhysics* lPhysics = lObject->GetPhysics();
-	for (IntList::const_iterator x = pPhys.begin(); x != pPhys.end(); ++x)
-	{
-		if (*x >= lPhysics->GetBoneCount())
-		{
-			mLog.Warningf("Object %i does not have a body with index %i.", pObjectId, *x);
+	const tbc::ChunkyPhysics* physics = _object->GetPhysics();
+	for (IntList::const_iterator x = phys.begin(); x != phys.end(); ++x) {
+		if (*x >= physics->GetBoneCount()) {
+			log_.Warningf("Object %i does not have a body with index %i.", object_id, *x);
 			return;
 		}
 	}
-	for (IntList::const_iterator x = pEngines.begin(); x != pEngines.end(); ++x)
-	{
-		if (*x >= lPhysics->GetEngineCount())
-		{
-			mLog.Warningf("Object %i does not have an engine with index %i.", pObjectId, *x);
+	for (IntList::const_iterator x = engines.begin(); x != engines.end(); ++x) {
+		if (*x >= physics->GetEngineCount()) {
+			log_.Warningf("Object %i does not have an engine with index %i.", object_id, *x);
 			return;
 		}
 	}
-	for (IntList::const_iterator x = pMeshes.begin(); x != pMeshes.end(); ++x)
-	{
-		if (*x >= (int)((UiTbc::ChunkyClass*)lObject->GetClass())->GetMeshCount())
-		{
-			mLog.Warningf("Object %i does not have a mesh with index %i.", pObjectId, *x);
+	for (IntList::const_iterator x = meshes.begin(); x != meshes.end(); ++x) {
+		if (*x >= (int)((uitbc::ChunkyClass*)_object->GetClass())->GetMeshCount()) {
+			log_.Warningf("Object %i does not have a mesh with index %i.", object_id, *x);
 			return;
 		}
 	}
-	Tbc::ChunkyClass::Tag lTag;
-	lTag.mTagName = pTagType;
-	lTag.mFloatValueList = pFloats;
-	lTag.mStringValueList = pStrings;
-	lTag.mBodyIndexList = pPhys;
-	lTag.mEngineIndexList = pEngines;
-	lTag.mMeshIndexList = pMeshes;
-	((Tbc::ChunkyClass*)lObject->GetClass())->AddTag(lTag);
+	tbc::ChunkyClass::Tag tag;
+	tag.tag_name_ = tag_type;
+	tag.float_value_list_ = floats;
+	tag.string_value_list_ = strings;
+	tag.body_index_list_ = phys;
+	tag.engine_index_list_ = engines;
+	tag.mesh_index_list_ = meshes;
+	((tbc::ChunkyClass*)_object->GetClass())->AddTag(tag);
 }
 
 
 
-void TrabantSimManager::CommandLoop()
-{
-	mIsControlled = false;
-	mIsControlTimeout = false;
+void TrabantSimManager::CommandLoop() {
+	is_controlled_ = false;
+	is_control_timeout_ = false;
 	{
-		ScopeLock lPhysLock(GetMaster()->GetPhysicsLock());
-		ScopeLock lGameLock(GetTickLock());
+		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+		ScopeLock game_lock(GetTickLock());
 		GetPhysicsManager()->InitCurrentThread();
 	}
 #ifdef LEPRA_TOUCH
-	const double lNetworkTimeout = 5;
+	const double network_timeout = 5;
 #else // Computer
-	const double lNetworkTimeout = 2;
-#endif // Touch / computer
-	uint8 lData[128*1024];
-	while (!mCommandThread->GetStopRequest())
-	{
-		const double lThisTimeout = mIsControlled? 0.2 : lNetworkTimeout;
-		if (!mIsControlled || mIsControlTimeout)
-		{
-			mResendLastResponse.clear();
+	const double network_timeout = 2;
+#endif // touch / computer
+	uint8 __data[128*1024];
+	while (!command_thread_->GetStopRequest()) {
+		const double this_timeout = is_controlled_? 0.2 : network_timeout;
+		if (!is_controlled_ || is_control_timeout_) {
+			resend_last_response_.clear();
 		}
-		const int l = mCommandSocket->ReceiveFrom(lData, sizeof(lData), mLastRemoteAddress, lThisTimeout);
-		if (mCommandThread->GetStopRequest())
-		{
+		const int l = command_socket_->ReceiveFrom(__data, sizeof(__data), last_remote_address_, this_timeout);
+		if (command_thread_->GetStopRequest()) {
 			break;
 		}
-		if (mHideWatch.IsStarted())
-		{
-			if (mHideWatch.QuerySplitTime() < 0.5)
-			{
+		if (hide_watch_.IsStarted()) {
+			if (hide_watch_.QuerySplitTime() < 0.5) {
 				continue;
 			}
-			mHideWatch.Stop();
+			hide_watch_.Stop();
 		}
-		if (l <= 0 || lData[l-1] != '\n' || ::memcmp("disconnect\n", lData, 11) == 0)
-		{
-			if (l == 0)
-			{
-				bool lAllowRemoteSync;
-				v_get(lAllowRemoteSync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
-				if (lAllowRemoteSync != (mLocalAddress == mOpenLocalAddress))
-				{
-					if (mOpenLocalAddress != mInternalLocalAddress)
-					{
-						delete mCommandSocket;
-						mCommandSocket = 0;
+		if (l <= 0 || __data[l-1] != '\n' || ::memcmp("disconnect\n", __data, 11) == 0) {
+			if (l == 0) {
+				bool allow_remote_sync;
+				v_get(allow_remote_sync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
+				if (allow_remote_sync != (local_address_ == open_local_address_)) {
+					if (open_local_address_ != internal_local_address_) {
+						delete command_socket_;
+						command_socket_ = 0;
 						OpenConnection();
 					}
-					if (lAllowRemoteSync)
-					{
-						mFileServer->Start();
-					}
-					else
-					{
-						mFileServer->Stop();
+					if (allow_remote_sync) {
+						file_server_->Start();
+					} else {
+						file_server_->Stop();
 					}
 				}
-				bool lAllowTimeout = (mStartupTimer.QueryTimeDiff() >= 12);
-				if (mIsControlled)
-				{
+				bool allow_timeout = (startup_timer_.QueryTimeDiff() >= 12);
+				if (is_controlled_) {
 					// Try a re-send if we haven't had a response in a long time.
-					const double lWaited = mResendTimeOfLastPacket.QueryTimeDiff();
-					lAllowTimeout &= (lWaited >= lNetworkTimeout);
-					if (!lAllowTimeout)
-					{
-						if (!mResendLastResponse.empty() && lWaited > std::max(mResendIntermediatePacketTime*2, 0.5))
-						{
-							if (mCommandSocket->SendTo((const uint8*)mResendLastResponse.c_str(), (int)mResendLastResponse.length(), mLastRemoteAddress) != (int)mResendLastResponse.length())
-							{
-								mIsControlled = false;
+					const double waited = resend_time_of_last_packet_.QueryTimeDiff();
+					allow_timeout &= (waited >= network_timeout);
+					if (!allow_timeout) {
+						if (!resend_last_response_.empty() && waited > std::max(resend_intermediate_packet_time_*2, 0.5)) {
+							if (command_socket_->SendTo((const uint8*)resend_last_response_.c_str(), (int)resend_last_response_.length(), last_remote_address_) != (int)resend_last_response_.length()) {
+								is_controlled_ = false;
 							}
-							mResendLastResponse.clear();
+							resend_last_response_.clear();
 						}
 					}
 				}
-				if (lAllowTimeout)
-				{
-					mIsControlTimeout = true;
+				if (allow_timeout) {
+					is_control_timeout_ = true;
 				}
+			} else {
+				is_controlled_ = false;
 			}
-			else
-			{
-				mIsControlled = false;
-			}
-			mCommandSocket->ClearErrors();
-			/*for (int x = 0; x < 10; ++x)
-			{
-				if (mCommandSocket->ReceiveFrom(lData, sizeof(lData), mLastRemoteAddress, 0.01) == 0)
-				{
+			command_socket_->ClearErrors();
+			/*for (int x = 0; x < 10; ++x) {
+				if (command_socket_->ReceiveFrom(__data, sizeof(__data), last_remote_address_, 0.01) == 0) {
 					break;
 				}
 			}*/
 			continue;
 		}
 #ifdef LEPRA_TOUCH
-		if (mLastRemoteAddress.GetIP() != mInternalLocalAddress.GetIP() &&
-		    mLastRemoteAddress.GetIP() != mLastAcceptedAddress.GetIP())
-		{
-			str lHostname;
-			if (!mLastRemoteAddress.ResolveIpToHostname(lHostname))
-			{
-				lHostname = mLastRemoteAddress.GetIP().GetAsString();
+		if (last_remote_address_.GetIP() != internal_local_address_.GetIP() &&
+		    last_remote_address_.GetIP() != last_accepted_address_.GetIP()) {
+			str _hostname;
+			if (!last_remote_address_.ResolveIpToHostname(_hostname)) {
+				_hostname = last_remote_address_.GetIP().GetAsString();
 			}
-			if (ConnectQuery(lHostname))
-			{
-				mLastAcceptedAddress = mLastRemoteAddress;
-			}
-			else
-			{
-				mCommandSocket->SendTo((const uint8*)"disconnect\n", 11, mLastRemoteAddress);
+			if (ConnectQuery(_hostname)) {
+				last_accepted_address_ = last_remote_address_;
+			} else {
+				command_socket_->SendTo((const uint8*)"disconnect\n", 11, last_remote_address_);
 				continue;
 			}
 		}
-#endif // Touch device.
+#endif // touch device.
 
-		if (!mIsControlled || mIsControlTimeout)
-		{
+		if (!is_controlled_ || is_control_timeout_) {
 			UnfoldSimulator();
-			mResendTimeOfLastPacket.PopTimeDiff();
-			mResendIntermediatePacketTime = 10;	// Just make it big to begin with.
+			resend_time_of_last_packet_.PopTimeDiff();
+			resend_intermediate_packet_time_ = 10;	// Just make it big to begin with.
 		}
-		if (mIsPaused && mIsControlled)
-		{
+		if (is_paused_ && is_controlled_) {
 			Thread::Sleep(0.5);
-			mResendTimeOfLastPacket.PopTimeDiff();
-			const str lPauseResponse = "\x16pause\x16";
-			if (mCommandSocket->SendTo((const uint8*)lPauseResponse.c_str(), (int)lPauseResponse.length(), mLastRemoteAddress) != (int)lPauseResponse.length())
-			{
-				mIsControlled = false;
+			resend_time_of_last_packet_.PopTimeDiff();
+			const str pause_response = "\x16pause\x16";
+			if (command_socket_->SendTo((const uint8*)pause_response.c_str(), (int)pause_response.length(), last_remote_address_) != (int)pause_response.length()) {
+				is_controlled_ = false;
 			}
 			continue;
 		}
-		mIsControlled = true;
-		mIsControlTimeout = false;
-		mResendIntermediatePacketTime = Math::Lerp(mResendIntermediatePacketTime, mResendTimeOfLastPacket.PopTimeDiff(), 0.05);
-		if (mCommandThread->GetStopRequest())
-		{
+		is_controlled_ = true;
+		is_control_timeout_ = false;
+		resend_intermediate_packet_time_ = Math::Lerp(resend_intermediate_packet_time_, resend_time_of_last_packet_.PopTimeDiff(), 0.05);
+		if (command_thread_->GetStopRequest()) {
 			break;
 		}
-		lData[l-1] = 0;	// Drop last linefeed.
-		const str lCommand = str((char*)lData);
-		if (strutil::StartsWith(lCommand, "get-platform-name"))	// Check if user started over without terminating.
-		{
-			mResendIntermediatePacketTime = 10;	// Just make it big to begin with.
+		__data[l-1] = 0;	// Drop last linefeed.
+		const str command = str((char*)__data);
+		if (strutil::StartsWith(command, "get-platform-name")) {	// Check if user started over without terminating.
+			resend_intermediate_packet_time_ = 10;	// Just make it big to begin with.
 		}
-		if (!GetConsoleManager())
-		{
+		if (!GetConsoleManager()) {
 			break;
 		}
-		GetConsoleManager()->ExecuteCommand(lCommand);
-		const str lCmdResponse = ((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse();
-		mResendLastResponse = lCmdResponse;
-		if (mCommandSocket->SendTo((const uint8*)mResendLastResponse.c_str(), (int)mResendLastResponse.length(), mLastRemoteAddress) != (int)mResendLastResponse.length())
-		{
-			mIsControlled = false;
+		GetConsoleManager()->ExecuteCommand(command);
+		const str cmd_response = ((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse();
+		resend_last_response_ = cmd_response;
+		if (command_socket_->SendTo((const uint8*)resend_last_response_.c_str(), (int)resend_last_response_.length(), last_remote_address_) != (int)resend_last_response_.length()) {
+			is_controlled_ = false;
 		}
 		//mLog.Infof("Responded to %s with %s (to %s."), lCommand.c_str(), lCmdResponse.c_str(), mLastRemoteAddress.GetAsString().c_str());
 	}
-	mLog.Info("Terminating command thread.");
-	mIsControlled = false;
-	deb_assert(mCommandThread);
-	deb_assert(mCommandSocket);
+	log_.Info("Terminating command thread.");
+	is_controlled_ = false;
+	deb_assert(command_thread_);
+	deb_assert(command_socket_);
 }
 
-bool TrabantSimManager::IsControlled()
-{
-	if (!mCommandThread || !mCommandThread->IsRunning())
-	{
+bool TrabantSimManager::IsControlled() {
+	if (!command_thread_ || !command_thread_->IsRunning()) {
 		return false;
 	}
 
-	bool lAllowPowerDown;
-	v_get(lAllowPowerDown, =, GetVariableScope(), RTVAR_GAME_ALLOWPOWERDOWN, true);
-	const bool lIsPowerDown = (lAllowPowerDown && mIsControlTimeout);
-	const bool lIsControlled = (!lIsPowerDown || mIsControlled);
-	if (lIsControlled != mWasControlled)
-	{
-		if (lIsControlled)
-		{
-			v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, " ");
-			const int lMicroSteps = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, RTVAR_PHYSICS_MICROSTEPS, 3);
-			v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, lMicroSteps);
-		}
-		else
-		{
+	bool allow_power_down;
+	v_get(allow_power_down, =, GetVariableScope(), kRtvarGameAllowpowerdown, true);
+	const bool is_power_down = (allow_power_down && is_control_timeout_);
+	const bool is_controlled = (!is_power_down || is_controlled_);
+	if (is_controlled != was_controlled_) {
+		if (is_controlled) {
+			v_set(GetVariableScope(), kRtvarGameUsermessage, " ");
+			const int micro_steps = GetVariableScope()->GetDefaultValue(cure::RuntimeVariableScope::kReadDefault, kRtvarPhysicsMicrosteps, 3);
+			v_set(GetVariableScope(), kRtvarPhysicsMicrosteps, micro_steps);
+		} else {
 #ifdef LEPRA_TOUCH
-			if (mIsControlTimeout)
-			{
-				if (mLastRemoteAddress.GetIP() == mInternalLocalAddress.GetIP())	// Otherwise it's just a push on the ESC key.
-				{
-					mLog.Warning("Prototype script is not responding, possibly hung?");
+			if (is_control_timeout_) {
+				if (last_remote_address_.GetIP() == internal_local_address_.GetIP()) {	// Otherwise it's just a push on the ESC key.
+					log_.Warning("Prototype script is not responding, possibly hung?");
 				}
 				Thread::Sleep(0.1);	// Wait for it to reach stdout reader thread.
 			}
 			FoldSuspendSimulator();
 #else // Computer
-			if (mIsPaused)
-			{
-				mMenu->DismissDialog();
+			if (is_paused_) {
+				menu_->DismissDialog();
 				OnMenuAlternative(0);
 			}
-			v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 1);
-			if (mUiManager->GetDisplayManager()->IsFocused())
-			{
-				v_set(GetVariableScope(), RTVAR_GAME_USERMESSAGE, "Controller died?");
+			v_set(GetVariableScope(), kRtvarPhysicsMicrosteps, 1);
+			if (ui_manager_->GetDisplayManager()->IsFocused()) {
+				v_set(GetVariableScope(), kRtvarGameUsermessage, "Controller died?");
+			} else if (hide_counter_ == 0) {
+				hide_counter_ = 1;
 			}
-			else if (mHideCounter == 0)
-			{
-				mHideCounter = 1;
-			}
-#endif // Touch device.
+#endif // touch device.
 		}
-		mWasControlled = lIsControlled;
+		was_controlled_ = is_controlled;
 	}
-	if (!lIsControlled)
-	{
-		mSetCursorVisible = true;
-		mIsMouseControlled = false;
+	if (!is_controlled) {
+		set_cursor_visible_ = true;
+		is_mouse_controlled_ = false;
 	}
-	return lIsControlled;
+	return is_controlled;
 }
 
 
 
-void TrabantSimManager::SaveSettings()
-{
+void TrabantSimManager::SaveSettings() {
 	GetConsoleManager()->ExecuteCommand("save-application-config-file "+GetApplicationCommandFilename());
 }
 
-void TrabantSimManager::SetRenderArea(const PixelRect& pRenderArea)
-{
-	Parent::SetRenderArea(pRenderArea);
+void TrabantSimManager::SetRenderArea(const PixelRect& render_area) {
+	Parent::SetRenderArea(render_area);
 	UpdateTouchstickPlacement();
 }
 
-bool TrabantSimManager::Open()
-{
-	bool lOk = Parent::Open();
-	if (lOk)
-	{
+bool TrabantSimManager::Open() {
+	bool _ok = Parent::Open();
+	if (_ok) {
 #ifndef LEPRA_TOUCH
-		mPauseButton = new UiTbc::Button(GREEN_BUTTON, L"Pause");
-		mPauseButton->SetOnClick(TrabantSimManager, OnPauseButton);
-		UiTbc::Button* lButton = mPauseButton;
+		pause_button_ = new uitbc::Button(GREEN_BUTTON, L"Pause");
+		pause_button_->SetOnClick(TrabantSimManager, OnPauseButton);
+		uitbc::Button* _button = pause_button_;
 #else
-		mBackButton = new UiTbc::Button(GREEN_BUTTON, L"Back");
-		mBackButton->SetOnClick(TrabantSimManager, OnBackButton);
-		UiTbc::Button* lButton = mBackButton;
+		back_button_ = new uitbc::Button(GREEN_BUTTON, L"Back");
+		back_button_->SetOnClick(TrabantSimManager, OnBackButton);
+		uitbc::Button* _button = back_button_;
 #endif
-		int x = mRenderArea.mLeft + 2;
-		int y = mRenderArea.mTop + 2;
-		mUiManager->GetDesktopWindow()->AddChild(lButton, x, y);
-		double lFontHeight;
-		v_get(lFontHeight, =, GetVariableScope(), RTVAR_UI_2D_FONTHEIGHT, 30.0);
-		lButton->SetPreferredSize((int)(lFontHeight*7/3), (int)lFontHeight);
-		lButton->SetRoundedRadius(4);
-		lButton->SetVisible(true);
+		int x = render_area_.left_ + 2;
+		int y = render_area_.top_ + 2;
+		ui_manager_->GetDesktopWindow()->AddChild(_button, x, y);
+		double font_height;
+		v_get(font_height, =, GetVariableScope(), kRtvarUi2DFontheight, 30.0);
+		_button->SetPreferredSize((int)(font_height*7/3), (int)font_height);
+		_button->SetRoundedRadius(4);
+		_button->SetVisible(true);
 	}
-	if (lOk)
-	{
-		mMenu = new Life::Menu(mUiManager, GetResourceManager());
+	if (_ok) {
+		menu_ = new life::Menu(ui_manager_, GetResourceManager());
 	}
-	return lOk;
+	return _ok;
 }
 
-void TrabantSimManager::Close()
-{
-	ScopeLock lLock(GetTickLock());
-	delete mPauseButton;
-	mPauseButton = 0;
-	delete mBackButton;
-	mBackButton = 0;
-	delete mMenu;
-	mMenu = 0;
-	if (mLight)
-	{
-		delete mLight;
-		mLight = 0;
+void TrabantSimManager::Close() {
+	ScopeLock lock(GetTickLock());
+	delete pause_button_;
+	pause_button_ = 0;
+	delete back_button_;
+	back_button_ = 0;
+	delete menu_;
+	menu_ = 0;
+	if (light_) {
+		delete light_;
+		light_ = 0;
 	}
 	Parent::Close();
 }
 
-bool TrabantSimManager::OpenConnection()
-{
-	if (mCommandSocket)
-	{
+bool TrabantSimManager::OpenConnection() {
+	if (command_socket_) {
 		return true;
 	}
 
-	bool lAllowRemoteSync;
-	v_get(lAllowRemoteSync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
-	mLocalAddress = lAllowRemoteSync? mOpenLocalAddress : mInternalLocalAddress;
-	mCommandSocket = new UdpSocket(mLocalAddress, true);
-	if (mCommandSocket->IsOpen())
-	{
-		if (!mCommandThread)
-		{
-			mCommandThread = new MemberThread<TrabantSimManager>("CommandRecvThread");
-			mCommandThread->Start(this, &TrabantSimManager::CommandLoop);
+	bool allow_remote_sync;
+	v_get(allow_remote_sync, =, UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);
+	local_address_ = allow_remote_sync? open_local_address_ : internal_local_address_;
+	command_socket_ = new UdpSocket(local_address_, true);
+	if (command_socket_->IsOpen()) {
+		if (!command_thread_) {
+			command_thread_ = new MemberThread<TrabantSimManager>("CommandRecvThread");
+			command_thread_->Start(this, &TrabantSimManager::CommandLoop);
 		}
-		mLog.Headlinef("Command server listening on %s.", mLocalAddress.GetAsString().c_str());
+		log_.Headlinef("Command server listening on %s.", local_address_.GetAsString().c_str());
 		return true;
-	}
-	else
-	{
-		mLog.Headlinef("Could not open server on %s. Shutting down.", mLocalAddress.GetAsString().c_str());
+	} else {
+		log_.Headlinef("Could not open server on %s. Shutting down.", local_address_.GetAsString().c_str());
 		SystemManager::AddQuitRequest(1);
 		return false;
 	}
 }
 
-void TrabantSimManager::CloseConnection()
-{
-	if (mCommandSocket)
-	{
-		if (mCommandThread) mCommandThread->RequestStop();
-		//mCommandSocket->Shutdown(SocketBase::SHUTDOWN_RECV);
-		mCommandSocket->SendTo((uint8*)"disconnect\n", 11, mLastRemoteAddress);
-		//mCommandSocket->Shutdown(SocketBase::SHUTDOWN_BOTH);
-		UdpSocket(SocketAddress(), false).SendTo((uint8*)"?", 1, mCommandSocket->GetLocalAddress());
-		delete mCommandThread;
-		mCommandThread = 0;
+void TrabantSimManager::CloseConnection() {
+	if (command_socket_) {
+		if (command_thread_) command_thread_->RequestStop();
+		//command_socket_->Shutdown(SocketBase::kShutdownRecv);
+		command_socket_->SendTo((uint8*)"disconnect\n", 11, last_remote_address_);
+		//command_socket_->Shutdown(SocketBase::kShutdownBoth);
+		UdpSocket(SocketAddress(), false).SendTo((uint8*)"?", 1, command_socket_->GetLocalAddress());
+		delete command_thread_;
+		command_thread_ = 0;
 		//Thread::Sleep(0.1);	// Wait for shutdown.
-		delete mCommandSocket;
-		mCommandSocket = 0;
+		delete command_socket_;
+		command_socket_ = 0;
 	}
-	mFileServer->Stop();
+	file_server_->Stop();
 }
 
-void TrabantSimManager::SetIsQuitting()
-{
+void TrabantSimManager::SetIsQuitting() {
 	((TrabantSimConsoleManager*)GetConsoleManager())->GetUiConsole()->SetVisible(false);
 	Parent::SetIsQuitting();
 }
 
-void TrabantSimManager::SetFade(float pFadeAmount)
-{
-	(void)pFadeAmount;
+void TrabantSimManager::SetFade(float fade_amount) {
+	(void)fade_amount;
 }
 
 
 
-bool TrabantSimManager::Paint()
-{
-	if (!Parent::Paint())
-	{
+bool TrabantSimManager::Paint() {
+	if (!Parent::Paint()) {
 		return false;
 	}
 
 	float r, g, b;
-	v_get(r, =1-(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 1.0);
-	v_get(g, =1-(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 1.0);
-	v_get(b, =1-(float), UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 1.0);
-	Color lColor = Color::CreateColor(r,g,b,1);
-	mUiManager->GetPainter()->SetColor(lColor, 0);
-	TouchstickList::iterator x = mTouchstickList.begin();
-	for (; x != mTouchstickList.end(); ++x)
-	{
-		DrawStick(x->mStick, x->mIsSloppy);
+	v_get(r, =1-(float), UiCure::GetSettings(), kRtvarUi3DClearred, 1.0);
+	v_get(g, =1-(float), UiCure::GetSettings(), kRtvarUi3DCleargreen, 1.0);
+	v_get(b, =1-(float), UiCure::GetSettings(), kRtvarUi3DClearblue, 1.0);
+	Color _color = Color::CreateColor(r,g,b,1);
+	ui_manager_->GetPainter()->SetColor(_color, 0);
+	TouchstickList::iterator x = touchstick_list_.begin();
+	for (; x != touchstick_list_.end(); ++x) {
+		DrawStick(x->stick_, x->is_sloppy_);
 	}
 	return true;
 }
 
-void TrabantSimManager::DrawStick(Touchstick* pStick, bool pIsSloppy)
-{
-	PixelRect lArea = pStick->GetArea();
-	const int ow = lArea.GetWidth();
-	const int lMargin = pStick->GetFingerRadius() / 8;
-	const int r = pStick->GetFingerRadius() - lMargin;
-	lArea.Shrink(lMargin*2);
-	mUiManager->GetPainter()->DrawArc(lArea.mLeft, lArea.mTop, lArea.GetWidth(), lArea.GetHeight(), 0, 360, false);
+void TrabantSimManager::DrawStick(Touchstick* stick, bool is_sloppy) {
+	PixelRect area = stick->GetArea();
+	const int ow = area.GetWidth();
+	const int margin = stick->GetFingerRadius() / 8;
+	const int r = stick->GetFingerRadius() - margin;
+	area.Shrink(margin*2);
+	ui_manager_->GetPainter()->DrawArc(area.left_, area.top_, area.GetWidth(), area.GetHeight(), 0, 360, false);
 	float x;
 	float y;
-	bool lIsPressing;
-	pStick->GetValue(x, y, lIsPressing);
-	if (lIsPressing || pIsSloppy)
-	{
+	bool is_pressing;
+	stick->GetValue(x, y, is_pressing);
+	if (is_pressing || is_sloppy) {
 		vec2 v(x, y);
-		v.Mul((ow+lMargin*2) / (float)ow);
-		const float lLength = v.GetLength();
-		if (lLength > 1)
-		{
-			v.Div(lLength);
+		v.Mul((ow+margin*2) / (float)ow);
+		const float __length = v.GetLength();
+		if (__length > 1) {
+			v.Div(__length);
 		}
 		x = v.x;
 		y = v.y;
 		x = 0.5f*x + 0.5f;
 		y = 0.5f*y + 0.5f;
-		const int w = lArea.GetWidth()  - r*2;
-		const int h = lArea.GetHeight() - r*2;
-		mUiManager->GetPainter()->DrawArc(
-			lArea.mLeft + (int)(w*x),
-			lArea.mTop  + (int)(h*y),
+		const int w = area.GetWidth()  - r*2;
+		const int h = area.GetHeight() - r*2;
+		ui_manager_->GetPainter()->DrawArc(
+			area.left_ + (int)(w*x),
+			area.top_  + (int)(h*y),
 			r*2, r*2, 0, 360, true);
 	}
 }
 
 
 
-bool TrabantSimManager::InitializeUniverse()
-{
-	mLight = new Light(mUiManager);
+bool TrabantSimManager::InitializeUniverse() {
+	light_ = new Light(ui_manager_);
 	return true;
 }
 
-void TrabantSimManager::TickInput()
-{
+void TrabantSimManager::TickInput() {
 	TickNetworkInput();
 	TickUiInput();
-	if (mSetFocus)
-	{
-		mSetFocus = false;
-		mUiManager->GetDisplayManager()->SetFocus(true);
+	if (set_focus_) {
+		set_focus_ = false;
+		ui_manager_->GetDisplayManager()->SetFocus(true);
 	}
-	if (mSetCursorVisible)
-	{
-		mSetCursorVisible = false;
-		mUiManager->GetInputManager()->SetCursorVisible(true);
-		if (mPauseButton)
-		{
-			mPauseButton->SetVisible(true);
+	if (set_cursor_visible_) {
+		set_cursor_visible_ = false;
+		ui_manager_->GetInputManager()->SetCursorVisible(true);
+		if (pause_button_) {
+			pause_button_->SetVisible(true);
 		}
 	}
-	if (mSetCursorInvisible)
-	{
-		mSetCursorInvisible = false;
-		mUiManager->GetInputManager()->SetCursorVisible(false);
-		if (mPauseButton)
-		{
-			mPauseButton->SetVisible(false);
+	if (set_cursor_invisible_) {
+		set_cursor_invisible_ = false;
+		ui_manager_->GetInputManager()->SetCursorVisible(false);
+		if (pause_button_) {
+			pause_button_->SetVisible(false);
 		}
 	}
 }
 
-void TrabantSimManager::UpdateTouchstickPlacement()
-{
-	if (mTouchstickTimer.QueryTimeDiff() < 3.0)
-	{
+void TrabantSimManager::UpdateTouchstickPlacement() {
+	if (touchstick_timer_.QueryTimeDiff() < 3.0) {
 		return;
 	}
-	mTouchstickTimer.ClearTimeDiff();
+	touchstick_timer_.ClearTimeDiff();
 
-	const float lTouchSideScale = 1.28f;	// Inches.
-	float lPhysicalScale = (float)mUiManager->GetDisplayManager()->GetPhysicalScreenSize();
-	lPhysicalScale -= 2.5f;
-	lPhysicalScale = ::sqrt(lPhysicalScale);
-	lPhysicalScale += 2.5f;
-	const float lTouchScale = lTouchSideScale / lPhysicalScale;
-	const int lSide = (int)(mRenderArea.GetHeight() * lTouchScale);
-	TouchstickList::iterator x = mTouchstickList.begin();
-	for (; x != mTouchstickList.end(); ++x)
-	{
-		PixelRect lStickArea(mRenderArea);
-		lStickArea.mTop = lStickArea.mBottom - lSide;
-		lStickArea.mRight = lStickArea.mLeft + lStickArea.GetHeight();
-		const int ox = (int)(x->x * (mRenderArea.GetWidth()-lSide));
-		const int oy = -(int)(x->y * (mRenderArea.GetHeight()-lSide));
-		lStickArea.Offset(ox,oy);
-		x->mStick->Move(lStickArea, x->mOrientation);
+	const float touch_side_scale = 1.28f;	// Inches.
+	float physical_scale = (float)ui_manager_->GetDisplayManager()->GetPhysicalScreenSize();
+	physical_scale -= 2.5f;
+	physical_scale = ::sqrt(physical_scale);
+	physical_scale += 2.5f;
+	const float touch_scale = touch_side_scale / physical_scale;
+	const int side = (int)(render_area_.GetHeight() * touch_scale);
+	TouchstickList::iterator x = touchstick_list_.begin();
+	for (; x != touchstick_list_.end(); ++x) {
+		PixelRect stick_area(render_area_);
+		stick_area.top_ = stick_area.bottom_ - side;
+		stick_area.right_ = stick_area.left_ + stick_area.GetHeight();
+		const int ox = (int)(x->x * (render_area_.GetWidth()-side));
+		const int oy = -(int)(x->y * (render_area_.GetHeight()-side));
+		stick_area.Offset(ox,oy);
+		x->stick_->Move(stick_area, x->orientation_);
 	}
 }
 
-void TrabantSimManager::TickUiInput()
-{
+void TrabantSimManager::TickUiInput() {
 }
 
-void TrabantSimManager::TickUiUpdate()
-{
-	if (mHideCounter > 0)
-	{
-		mHideWatch.Start();
-		mIsControlled = false;
+void TrabantSimManager::TickUiUpdate() {
+	if (hide_counter_ > 0) {
+		hide_watch_.Start();
+		is_controlled_ = false;
 		Suspend(true);
-		mUiManager->GetDisplayManager()->HideWindow(true);
+		ui_manager_->GetDisplayManager()->HideWindow(true);
 		Resume(true);
-		v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, 1);
-		mHideCounter = -1;
-	}
-	else if (mHideCounter < 0 && mIsControlled)
-	{
-		mUiManager->GetDisplayManager()->HideWindow(false);
-		const int lMicroSteps = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, RTVAR_PHYSICS_MICROSTEPS, 3);
-		v_set(GetVariableScope(), RTVAR_PHYSICS_MICROSTEPS, lMicroSteps);
-		mHideCounter = 0;
+		v_set(GetVariableScope(), kRtvarPhysicsMicrosteps, 1);
+		hide_counter_ = -1;
+	} else if (hide_counter_ < 0 && is_controlled_) {
+		ui_manager_->GetDisplayManager()->HideWindow(false);
+		const int micro_steps = GetVariableScope()->GetDefaultValue(cure::RuntimeVariableScope::kReadDefault, kRtvarPhysicsMicrosteps, 3);
+		v_set(GetVariableScope(), kRtvarPhysicsMicrosteps, micro_steps);
+		hide_counter_ = 0;
 	}
 
 	((TrabantSimConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
-	mCollisionSoundManager->Tick(mCameraTransform.GetPosition());
+	collision_sound_manager_->Tick(camera_transform_.GetPosition());
 }
 
-void TrabantSimManager::SetLocalRender(bool pRender)
-{
-	(void)pRender;
+void TrabantSimManager::SetLocalRender(bool render) {
+	(void)render;
 }
 
 
 
-void TrabantSimManager::AddCheckerTexturing(UiTbc::TriangleBasedGeometry* pMesh, float pScale)
-{
-	const float lScale = 1/pScale;
-	const float lOff = lScale*0.5f;
-	const float* lVertices = pMesh->GetVertexData();
-	const vtx_idx_t* lTriangles = pMesh->GetIndexData();
-	const unsigned tc = pMesh->GetTriangleCount();
-	std::vector<float> lUVs;
-	lUVs.resize(pMesh->GetVertexCount()*2);
-	for (unsigned t = 0; t < tc; ++t)
-	{
+void TrabantSimManager::AddCheckerTexturing(uitbc::TriangleBasedGeometry* mesh, float scale) {
+	const float _scale = 1/scale;
+	const float off = _scale*0.5f;
+	const float* vertices = mesh->GetVertexData();
+	const vtx_idx_t* triangles = mesh->GetIndexData();
+	const unsigned tc = mesh->GetTriangleCount();
+	std::vector<float> u_vs;
+	u_vs.resize(mesh->GetVertexCount()*2);
+	for (unsigned t = 0; t < tc; ++t) {
 		int v0,v1,v2;
-		v0 = lTriangles[t*3+0];
-		v1 = lTriangles[t*3+1];
-		v2 = lTriangles[t*3+2];
-		vec3 u0(lVertices[v0*3+0], lVertices[v0*3+1], lVertices[v0*3+2]);
-		vec3 u1(lVertices[v1*3+0], lVertices[v1*3+1], lVertices[v1*3+2]);
-		vec3 u2(lVertices[v2*3+0], lVertices[v2*3+1], lVertices[v2*3+2]);
+		v0 = triangles[t*3+0];
+		v1 = triangles[t*3+1];
+		v2 = triangles[t*3+2];
+		vec3 u0(vertices[v0*3+0], vertices[v0*3+1], vertices[v0*3+2]);
+		vec3 u1(vertices[v1*3+0], vertices[v1*3+1], vertices[v1*3+2]);
+		vec3 u2(vertices[v2*3+0], vertices[v2*3+1], vertices[v2*3+2]);
 		vec3 n = (u1-u0).Cross(u2-u0);
 		n.x = fabs(n.x); n.y = fabs(n.y); n.z = fabs(n.z);
-		u0 *= lScale; u1 *= lScale; u2 *= lScale;
-		if (n.x > n.y && n.x > n.z)
-		{
-			lUVs[v0*2+0] = u0.y+lOff;
-			lUVs[v0*2+1] = u0.z+lOff;
-			lUVs[v1*2+0] = u1.y+lOff;
-			lUVs[v1*2+1] = u1.z+lOff;
-			lUVs[v2*2+0] = u2.y+lOff;
-			lUVs[v2*2+1] = u2.z+lOff;
-		}
-		else if (n.y > n.z)
-		{
-			lUVs[v0*2+0] = u0.x+lOff;
-			lUVs[v0*2+1] = u0.z+lOff;
-			lUVs[v1*2+0] = u1.x+lOff;
-			lUVs[v1*2+1] = u1.z+lOff;
-			lUVs[v2*2+0] = u2.x+lOff;
-			lUVs[v2*2+1] = u2.z+lOff;
-		}
-		else
-		{
-			lUVs[v0*2+0] = u0.x+lOff;
-			lUVs[v0*2+1] = u0.y+lOff;
-			lUVs[v1*2+0] = u1.x+lOff;
-			lUVs[v1*2+1] = u1.y+lOff;
-			lUVs[v2*2+0] = u2.x+lOff;
-			lUVs[v2*2+1] = u2.y+lOff;
+		u0 *= _scale; u1 *= _scale; u2 *= _scale;
+		if (n.x > n.y && n.x > n.z) {
+			u_vs[v0*2+0] = u0.y+off;
+			u_vs[v0*2+1] = u0.z+off;
+			u_vs[v1*2+0] = u1.y+off;
+			u_vs[v1*2+1] = u1.z+off;
+			u_vs[v2*2+0] = u2.y+off;
+			u_vs[v2*2+1] = u2.z+off;
+		} else if (n.y > n.z) {
+			u_vs[v0*2+0] = u0.x+off;
+			u_vs[v0*2+1] = u0.z+off;
+			u_vs[v1*2+0] = u1.x+off;
+			u_vs[v1*2+1] = u1.z+off;
+			u_vs[v2*2+0] = u2.x+off;
+			u_vs[v2*2+1] = u2.z+off;
+		} else {
+			u_vs[v0*2+0] = u0.x+off;
+			u_vs[v0*2+1] = u0.y+off;
+			u_vs[v1*2+0] = u1.x+off;
+			u_vs[v1*2+1] = u1.y+off;
+			u_vs[v2*2+0] = u2.x+off;
+			u_vs[v2*2+1] = u2.y+off;
 		}
 	}
-	pMesh->AddUVSet(lUVs.data());
+	mesh->AddUVSet(u_vs.data());
 }
 
 
 
-Cure::ContextObject* TrabantSimManager::CreateContextObject(const str& pClassId) const
-{
-	UiCure::Machine* lObject = new Object(GetResourceManager(), pClassId, mUiManager);
-	lObject->SetAllowNetworkLogic(true);
-	return lObject;
+cure::ContextObject* TrabantSimManager::CreateContextObject(const str& class_id) const {
+	UiCure::Machine* _object = new Object(GetResourceManager(), class_id, ui_manager_);
+	_object->SetAllowNetworkLogic(true);
+	return _object;
 }
 
-void TrabantSimManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
-{
-	if (!pOk)
-	{
-		mLog.Errorf("Could not load object of type %s.", pObject->GetClassId().c_str());
-		GetContext()->PostKillObject(pObject->GetInstanceId());
+void TrabantSimManager::OnLoadCompleted(cure::ContextObject* object, bool ok) {
+	if (!ok) {
+		log_.Errorf("Could not load object of type %s.", object->GetClassId().c_str());
+		GetContext()->PostKillObject(object->GetInstanceId());
 	}
 }
 
-void TrabantSimManager::OnTrigger(Tbc::PhysicsManager::BodyID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
-{
-	Parent::OnTrigger(pTrigger, pTriggerListenerId, pOtherObjectId, pBodyId, pPosition, pNormal);
-	PushCollision(pTriggerListenerId, vec3(), pPosition, pOtherObjectId);
+void TrabantSimManager::OnTrigger(tbc::PhysicsManager::BodyID trigger, int trigger_listener_id, int other_object_id, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
+	Parent::OnTrigger(trigger, trigger_listener_id, other_object_id, body_id, position, normal);
+	PushCollision(trigger_listener_id, vec3(), position, other_object_id);
 }
 
-void TrabantSimManager::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
-	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id)
-{
-	(void)pBody2Id;
+void TrabantSimManager::OnCollision(const vec3& force, const vec3& torque, const vec3& position,
+	cure::ContextObject* object1, cure::ContextObject* object2,
+	tbc::PhysicsManager::BodyID body1_id, tbc::PhysicsManager::BodyID body2_id) {
+	(void)body2_id;
 
-	if (pObject1->GetPhysics()->GetPhysicsType() != Tbc::ChunkyPhysics::DYNAMIC)
-	{
+	if (object1->GetPhysics()->GetPhysicsType() != tbc::ChunkyPhysics::kDynamic) {
 		return;
 	}
 
-	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 5000, false);
+	collision_sound_manager_->OnCollision(force, torque, position, object1, object2, body1_id, 5000, false);
 
-	PushCollision(pObject1->GetInstanceId(), pForce, pPosition, pObject2->GetInstanceId());
+	PushCollision(object1->GetInstanceId(), force, position, object2->GetInstanceId());
 }
 
-void TrabantSimManager::PushCollision(Cure::GameObjectId pObjectId1, const vec3& pForce, const vec3& pPosition, Cure::GameObjectId pObjectId2)
-{
-	ScopeLock lGameLock(GetTickLock());
+void TrabantSimManager::PushCollision(cure::GameObjectId object_id1, const vec3& force, const vec3& position, cure::GameObjectId object_id2) {
+	ScopeLock game_lock(GetTickLock());
 	CollisionInfo ci;
-	ci.mObjectId = pObjectId1;
-	ci.mForce = pForce;
-	ci.mPosition = pPosition;
-	ci.mOtherObjectId = pObjectId2;
-	mCollisionList.push_back(ci);
-	if (mCollisionList.size() > 300)
-	{
-		mCollisionList.pop_front();
+	ci.object_id_ = object_id1;
+	ci.force_ = force;
+	ci.position_ = position;
+	ci.other_object_id_ = object_id2;
+	collision_list_.push_back(ci);
+	if (collision_list_.size() > 300) {
+		collision_list_.pop_front();
 	}
 }
 
 
-void TrabantSimManager::OnPauseButton(UiTbc::Button* pButton)
-{
-	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &TrabantSimManager::OnMenuAlternative), 0.5f, 0.3f);
-	if (!d)
-	{
+void TrabantSimManager::OnPauseButton(uitbc::Button* button) {
+	uitbc::Dialog* d = menu_->CreateTbcDialog(life::Menu::ButtonAction(this, &TrabantSimManager::OnMenuAlternative), 0.5f, 0.3f);
+	if (!d) {
 		return;
 	}
 
-	if (pButton)
-	{
-		mMenu->OnTapSound(pButton);
+	if (button) {
+		menu_->OnTapSound(button);
 	}
-	mPauseButton->SetVisible(false);
-	mIsPaused = true;
+	pause_button_->SetVisible(false);
+	is_paused_ = true;
 
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
 	d->SetDirection(+1, false);
-	UiTbc::FixedLayouter lLayouter(d);
+	uitbc::FixedLayouter layouter(d);
 
-	UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, L"Paused");
-	lLabel->SetFontId(mUiManager->SetScaleFont(1.2f));
-	mUiManager->SetMasterFont();
-	lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
-	lLabel->SetAdaptive(false);
-	lLayouter.AddComponent(lLabel, 0, 2, 0, 1, 1);
+	uitbc::Label* label = new uitbc::Label(BRIGHT_TEXT, L"Paused");
+	label->SetFontId(ui_manager_->SetScaleFont(1.2f));
+	ui_manager_->SetMasterFont();
+	label->SetIcon(uitbc::Painter::kInvalidImageid, uitbc::TextComponent::kIconCenter);
+	label->SetAdaptive(false);
+	layouter.AddComponent(label, 0, 2, 0, 1, 1);
 
-	UiTbc::Button* lUnpauseButton = new UiTbc::Button(GREEN_BUTTON, L">");
-	lLayouter.AddButton(lUnpauseButton, -1000, 1, 2, 0, 1, 1, true);
+	uitbc::Button* unpause_button = new uitbc::Button(GREEN_BUTTON, L">");
+	layouter.AddButton(unpause_button, -1000, 1, 2, 0, 1, 1, true);
 
-	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
+	v_set(GetVariableScope(), kRtvarPhysicsHalt, true);
 }
 
-void TrabantSimManager::OnBackButton(UiTbc::Button*)
-{
+void TrabantSimManager::OnBackButton(uitbc::Button*) {
 	FoldSuspendSimulator();
 }
 
-void TrabantSimManager::OnMenuAlternative(UiTbc::Button*)
-{
-	mPauseButton->SetVisible(true);
-	mIsPaused = false;
+void TrabantSimManager::OnMenuAlternative(uitbc::Button*) {
+	pause_button_->SetVisible(true);
+	is_paused_ = false;
 	HiResTimer::StepCounterShadow();
-	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
+	v_set(GetVariableScope(), kRtvarPhysicsHalt, false);
 }
 
 
 
-void TrabantSimManager::ScriptPhysicsTick()
-{
-	/*typedef Cure::ContextManager::ContextObjectTable ContextTable;
-	const ContextTable& lObjectTable = GetContext()->GetObjectTable();
-	ContextTable::const_iterator x = lObjectTable.begin();
-	for (; x != lObjectTable.end(); ++x)
-	{
-		Object* lObject = (Object*)x->second;
-		if (lObject->mGeneratedPhysics)
-		{
-			lObject->CreatePhysics(lObject->mGeneratedPhysics);
-			lObject->mGeneratedPhysics = 0;
+void TrabantSimManager::ScriptPhysicsTick() {
+	/*typedef cure::ContextManager::ContextObjectTable ContextTable;
+	const ContextTable& object_table = GetContext()->GetObjectTable();
+	ContextTable::const_iterator x = object_table.begin();
+	for (; x != object_table.end(); ++x) {
+		Object* _object = (Object*)x->second;
+		if (_object->generated_physics_) {
+			_object->CreatePhysics(_object->generated_physics_);
+			_object->generated_physics_ = 0;
 		}
 	}*/
 
 	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
-	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
-	if (lPhysicsTime > 1e-5)
-	{
+	const float physics_time = GetTimeManager()->GetAffordedPhysicsTotalTime();
+	if (physics_time > 1e-5) {
 		float gx,gy,gz;
-		v_get(gx, =(float), GetVariableScope(), RTVAR_PHYSICS_GRAVITYX, 0.0);
-		v_get(gy, =(float), GetVariableScope(), RTVAR_PHYSICS_GRAVITYY, 0.0);
-		v_get(gz, =(float), GetVariableScope(), RTVAR_PHYSICS_GRAVITYZ, -9.8);
+		v_get(gx, =(float), GetVariableScope(), kRtvarPhysicsGravityx, 0.0);
+		v_get(gy, =(float), GetVariableScope(), kRtvarPhysicsGravityy, 0.0);
+		v_get(gz, =(float), GetVariableScope(), kRtvarPhysicsGravityz, -9.8);
 		GetPhysicsManager()->SetGravity(vec3(gx,gy,gz));
-		UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
-		lParticleRenderer->SetGravity(vec3(gx,gy,gz));
-		MoveCamera(lPhysicsTime);
-		mLight->Tick(mCameraTransform.mOrientation);
+		uitbc::ParticleRenderer* particle_renderer = (uitbc::ParticleRenderer*)ui_manager_->GetRenderer()->GetDynamicRenderer("particle");
+		particle_renderer->SetGravity(vec3(gx,gy,gz));
+		MoveCamera(physics_time);
+		light_->Tick(camera_transform_.orientation_);
 		UpdateCameraPosition(true);
 
 		UpdateUserMessage();
 	}
 
-	double lSoundVolume;
-	v_get(lSoundVolume, =, GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
-	if (lSoundVolume != mLastSoundVolume)
-	{
-		mMasterVolume = lSoundVolume;
+	double sound_volume;
+	v_get(sound_volume, =, GetVariableScope(), kRtvarUiSoundMastervolume, 1.0);
+	if (sound_volume != last_sound_volume_) {
+		master_volume_ = sound_volume;
 	}
-	const double lVolume = IsControlled()? mMasterVolume : 0.0;
-	v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, lVolume);
-	mUiManager->GetSoundManager()->SetMasterVolume((float)lVolume);
-	mLastSoundVolume = lVolume;
+	const double _volume = IsControlled()? master_volume_ : 0.0;
+	v_set(GetVariableScope(), kRtvarUiSoundMastervolume, _volume);
+	ui_manager_->GetSoundManager()->SetMasterVolume((float)_volume);
+	last_sound_volume_ = _volume;
 
 	{
-		ScopeLock lGameLock(GetTickLock());
-		const UiDragList lDrags = mUiManager->GetDragManager()->GetDragList();
-		for (UiDragList::const_iterator x = lDrags.begin(); x != lDrags.end(); ++x)
-		{
-			if (x->mFlags&UiLepra::Touch::DRAGGING_OTHER)
-			{
-				// Ignore drag if pressing some UI element, but don't ignore release if it originated outside of a stick.
-				if (x->mIsPress || ((x->mFlags&UiLepra::Touch::DRAGGING_STICK) && UiLepra::Touch::TouchstickInputDevice::GetByCoordinate(mUiManager->GetInputManager(), x->mStart)))
-				{
+		ScopeLock game_lock(GetTickLock());
+		const UiDragList drags = ui_manager_->GetDragManager()->GetDragList();
+		for (UiDragList::const_iterator x = drags.begin(); x != drags.end(); ++x) {
+			if (x->flags_&uilepra::touch::kDraggingOther) {
+				// Ignore drag if pressing some kUi element, but don't ignore release if it originated outside of a stick.
+				if (x->is_press_ || ((x->flags_&uilepra::touch::kDraggingStick) && uilepra::touch::TouchstickInputDevice::GetByCoordinate(ui_manager_->GetInputManager(), x->start_))) {
 					continue;
 				}
 			}
 
-			bool lFound = false;
-			for (DragList::iterator y = mDragList.begin(); y != mDragList.end(); ++y)
-			{
-				if (y->mStart.x == x->mStart.x && y->mStart.y == x->mStart.y)
-				{
-					lFound = true;
-					const float tf = 1 / (float)y->mTimer.PopTimeDiff();
-					if (tf > 1e-3)
-					{
-						y->mVelocity = Math::Lerp(y->mVelocity, vec2((x->mLast.x - y->mLast.x)*tf, (x->mLast.y - y->mLast.y)*tf), 0.5f);
+			bool found = false;
+			for (DragList::iterator y = drag_list_.begin(); y != drag_list_.end(); ++y) {
+				if (y->start_.x == x->start_.x && y->start_.y == x->start_.y) {
+					found = true;
+					const float tf = 1 / (float)y->timer_.PopTimeDiff();
+					if (tf > 1e-3) {
+						y->velocity_ = Math::Lerp(y->velocity_, vec2((x->last_.x - y->last_.x)*tf, (x->last_.y - y->last_.y)*tf), 0.5f);
 					}
-					y->mLast = x->mLast;
-					y->mIsPress = x->mIsPress;
+					y->last_ = x->last_;
+					y->is_press_ = x->is_press_;
 				}
 			}
-			if (!lFound)
-			{
+			if (!found) {
 				Drag d;
-				d.mStart = x->mStart;
-				d.mLast = x->mLast;
-				d.mIsPress = x->mIsPress;
-				d.mButtonMask = x->mButtonMask;
-				mDragList.push_back(d);
+				d.start_ = x->start_;
+				d.last_ = x->last_;
+				d.is_press_ = x->is_press_;
+				d.button_mask_ = x->button_mask_;
+				drag_list_.push_back(d);
 			}
-			if (!x->mIsPress)
-			{
-				mDragEraseList.push_back(x->mStart);
+			if (!x->is_press_) {
+				drag_erase_list_.push_back(x->start_);
 			}
 		}
 	}
@@ -1908,127 +1591,109 @@ void TrabantSimManager::ScriptPhysicsTick()
 	GetResourceManager()->ForceFreeCache();
 }
 
-void TrabantSimManager::MoveCamera(float pFrameTime)
-{
+void TrabantSimManager::MoveCamera(float frame_time) {
 	int ctgt = 0;
 	float clx,cly,clz,cdist,cax,cay,caz,crx,cry,crz,smooth;
 	bool car;
-	v_get(ctgt, =, GetVariableScope(), RTVAR_UI_3D_CAMTARGETOBJECT, 0);
-	v_get(car, =, GetVariableScope(), RTVAR_UI_3D_CAMANGLERELATIVE, false);
-	v_get(clx, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKATX, 0.0);
-	v_get(cly, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKATY, 0.0);
-	v_get(clz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMLOOKATZ, 0.0);
-	v_get(cdist, =(float), GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 3.0);
-	v_get(cax, =(float), GetVariableScope(), RTVAR_UI_3D_CAMANGLEX, 0.0);
-	v_get(cay, =(float), GetVariableScope(), RTVAR_UI_3D_CAMANGLEY, 0.0);
-	v_get(caz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMANGLEZ, 0.0);
-	v_get(crx, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATEX, 0.0);
-	v_get(cry, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATEY, 0.0);
-	v_get(crz, =(float), GetVariableScope(), RTVAR_UI_3D_CAMROTATEZ, 0.0);
-	v_get(smooth, =(float), GetVariableScope(), RTVAR_UI_3D_CAMSMOOTH, 0.0);
-	vec3 lLookAt(clx,cly,clz);
-	Object* lObject = 0;
-	if (ctgt)
-	{
-		lObject = (Object*)GetContext()->GetObject(ctgt);
-		if (lObject)
-		{
-			lLookAt = lObject->GetPosition() + lObject->GetOrientation()*lLookAt;
-			mCameraVelocity = lObject->GetVelocity();
+	v_get(ctgt, =, GetVariableScope(), kRtvarUi3DCamtargetobject, 0);
+	v_get(car, =, GetVariableScope(), kRtvarUi3DCamanglerelative, false);
+	v_get(clx, =(float), GetVariableScope(), kRtvarUi3DCamlookatx, 0.0);
+	v_get(cly, =(float), GetVariableScope(), kRtvarUi3DCamlookaty, 0.0);
+	v_get(clz, =(float), GetVariableScope(), kRtvarUi3DCamlookatz, 0.0);
+	v_get(cdist, =(float), GetVariableScope(), kRtvarUi3DCamdistance, 3.0);
+	v_get(cax, =(float), GetVariableScope(), kRtvarUi3DCamanglex, 0.0);
+	v_get(cay, =(float), GetVariableScope(), kRtvarUi3DCamangley, 0.0);
+	v_get(caz, =(float), GetVariableScope(), kRtvarUi3DCamanglez, 0.0);
+	v_get(crx, =(float), GetVariableScope(), kRtvarUi3DCamrotatex, 0.0);
+	v_get(cry, =(float), GetVariableScope(), kRtvarUi3DCamrotatey, 0.0);
+	v_get(crz, =(float), GetVariableScope(), kRtvarUi3DCamrotatez, 0.0);
+	v_get(smooth, =(float), GetVariableScope(), kRtvarUi3DCamsmooth, 0.0);
+	vec3 look_at(clx,cly,clz);
+	Object* _object = 0;
+	if (ctgt) {
+		_object = (Object*)GetContext()->GetObject(ctgt);
+		if (_object) {
+			look_at = _object->GetPosition() + _object->GetOrientation()*look_at;
+			camera_velocity_ = _object->GetVelocity();
 		}
 	}
-	xform t(quat(), lLookAt+vec3(0,-cdist,0));
-	t.RotateAroundAnchor(lLookAt, vec3(0,1,0), cay);
-	t.RotateAroundAnchor(lLookAt, vec3(1,0,0), cax);
-	t.RotateAroundAnchor(lLookAt, vec3(0,0,1), caz);
-	if (lObject && car)
-	{
+	xform t(quat(), look_at+vec3(0,-cdist,0));
+	t.RotateAroundAnchor(look_at, vec3(0,1,0), cay);
+	t.RotateAroundAnchor(look_at, vec3(1,0,0), cax);
+	t.RotateAroundAnchor(look_at, vec3(0,0,1), caz);
+	if (_object && car) {
 		xform pt;
-		GetPhysicsManager()->GetBodyTransform(lObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pt);
-		quat q = pt.mOrientation * lObject->mInitialInverseOrientation;
-		t.mOrientation = q * t.mOrientation;
-		t.mPosition = q*(t.mPosition-lLookAt) + lLookAt;
+		GetPhysicsManager()->GetBodyTransform(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pt);
+		quat q = pt.orientation_ * _object->initial_inverse_orientation_;
+		t.orientation_ = q * t.orientation_;
+		t.position_ = q*(t.position_-look_at) + look_at;
 	}
-	t.RotateAroundAnchor(lLookAt, vec3(0,1,0), mCameraAngle.y);
-	t.RotateAroundAnchor(lLookAt, vec3(1,0,0), mCameraAngle.x);
-	t.RotateAroundAnchor(lLookAt, vec3(0,0,1), mCameraAngle.z);
-	mCameraAngle.x = fmod(mCameraAngle.x+crx*pFrameTime*2*PIF,2*PIF);
-	mCameraAngle.y = fmod(mCameraAngle.y+cry*pFrameTime*2*PIF,2*PIF);
-	mCameraAngle.z = fmod(mCameraAngle.z+crz*pFrameTime*2*PIF,2*PIF);
-	mCameraTransform.mPosition = t.mPosition;
-	mCameraTransform.mOrientation.Slerp(t.mOrientation, mCameraTransform.mOrientation, smooth);
+	t.RotateAroundAnchor(look_at, vec3(0,1,0), camera_angle_.y);
+	t.RotateAroundAnchor(look_at, vec3(1,0,0), camera_angle_.x);
+	t.RotateAroundAnchor(look_at, vec3(0,0,1), camera_angle_.z);
+	camera_angle_.x = fmod(camera_angle_.x+crx*frame_time*2*PIF,2*PIF);
+	camera_angle_.y = fmod(camera_angle_.y+cry*frame_time*2*PIF,2*PIF);
+	camera_angle_.z = fmod(camera_angle_.z+crz*frame_time*2*PIF,2*PIF);
+	camera_transform_.position_ = t.position_;
+	camera_transform_.orientation_.Slerp(t.orientation_, camera_transform_.orientation_, smooth);
 }
 
-void TrabantSimManager::UpdateCameraPosition(bool pUpdateMicPosition)
-{
-	mUiManager->SetCameraPosition(mCameraTransform);
-	if (pUpdateMicPosition)
-	{
-		mUiManager->SetMicrophonePosition(mCameraTransform, mCameraVelocity);
+void TrabantSimManager::UpdateCameraPosition(bool update_mic_position) {
+	ui_manager_->SetCameraPosition(camera_transform_);
+	if (update_mic_position) {
+		ui_manager_->SetMicrophonePosition(camera_transform_, camera_velocity_);
 	}
 }
 
-void TrabantSimManager::UpdateUserMessage()
-{
-	str lUserMessage;
-	v_get(lUserMessage, =, GetVariableScope(), RTVAR_GAME_USERMESSAGE, " ");
-	if (strutil::Strip(lUserMessage, " \t\r\n").empty())
-	{
-		if (mUserInfoDialog)
-		{
-			mMenu->DismissDialog();
-			mUserInfoDialog = 0;
-			mUserInfoLabel = 0;
+void TrabantSimManager::UpdateUserMessage() {
+	str user_message;
+	v_get(user_message, =, GetVariableScope(), kRtvarGameUsermessage, " ");
+	if (strutil::Strip(user_message, " \t\r\n").empty()) {
+		if (user_info_dialog_) {
+			menu_->DismissDialog();
+			user_info_dialog_ = 0;
+			user_info_label_ = 0;
 		}
-	}
-	else
-	{
-		wstr lWideUserMessage = wstrutil::Encode(lUserMessage);
-		if (mUserInfoDialog)
-		{
-			if (mUserInfoLabel->GetText() != lWideUserMessage)
-			{
-				mUserInfoLabel->SetText(lWideUserMessage);
+	} else {
+		wstr wide_user_message = wstrutil::Encode(user_message);
+		if (user_info_dialog_) {
+			if (user_info_label_->GetText() != wide_user_message) {
+				user_info_label_->SetText(wide_user_message);
 			}
-		}
-		else
-		{
-			UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &TrabantSimManager::OnMenuAlternative), 0.8f, 0.5f);
-			if (!d)
-			{
+		} else {
+			uitbc::Dialog* d = menu_->CreateTbcDialog(life::Menu::ButtonAction(this, &TrabantSimManager::OnMenuAlternative), 0.8f, 0.5f);
+			if (!d) {
 				return;
 			}
 			d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
 			d->SetDirection(+1, false);
-			UiTbc::FixedLayouter lLayouter(d);
+			uitbc::FixedLayouter layouter(d);
 
-			UiTbc::Label* lLabel = new UiTbc::Label(BRIGHT_TEXT, lWideUserMessage);
-			lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
-			lLabel->SetAdaptive(false);
-			lLayouter.AddComponent(lLabel, 0, 1, 0, 1, 1);
-			mUserInfoDialog = d;
-			mUserInfoLabel = lLabel;
+			uitbc::Label* label = new uitbc::Label(BRIGHT_TEXT, wide_user_message);
+			label->SetIcon(uitbc::Painter::kInvalidImageid, uitbc::TextComponent::kIconCenter);
+			label->SetAdaptive(false);
+			layouter.AddComponent(label, 0, 1, 0, 1, 1);
+			user_info_dialog_ = d;
+			user_info_label_ = label;
 		}
 	}
 }
 
 
 
-void TrabantSimManager::PrintText(const wstr& s, int x, int y) const
-{
-	Color lOldColor = mUiManager->GetPainter()->GetColor(0);
-	mUiManager->GetPainter()->SetColor(DARK_BLUE, 0);
-	mUiManager->GetPainter()->PrintText(s, x, y+1);
-	mUiManager->GetPainter()->SetColor(lOldColor, 0);
-	mUiManager->GetPainter()->PrintText(s, x, y);
+void TrabantSimManager::PrintText(const wstr& s, int x, int y) const {
+	Color old_color = ui_manager_->GetPainter()->GetColor(0);
+	ui_manager_->GetPainter()->SetColor(DARK_BLUE, 0);
+	ui_manager_->GetPainter()->PrintText(s, x, y+1);
+	ui_manager_->GetPainter()->SetColor(old_color, 0);
+	ui_manager_->GetPainter()->PrintText(s, x, y);
 }
 
-void TrabantSimManager::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const
-{
+void TrabantSimManager::DrawImage(uitbc::Painter::ImageID image_id, float cx, float cy, float w, float h, float angle) const {
 	cx -= 0.5f;
 
-	const float ca = ::cos(pAngle);
-	const float sa = ::sin(pAngle);
+	const float ca = ::cos(angle);
+	const float sa = ::sin(angle);
 	const float w2 = w*0.5f;
 	const float h2 = h*0.5f;
 	const float x = cx - w2*ca - h2*sa;
@@ -2036,88 +1701,69 @@ void TrabantSimManager::DrawImage(UiTbc::Painter::ImageID pImageId, float cx, fl
 	const vec2 c[] = { vec2(x, y), vec2(x+w*ca, y-w*sa), vec2(x+w*ca+h*sa, y+h*ca-w*sa), vec2(x+h*sa, y+h*ca) };
 	const vec2 t[] = { vec2(0, 0), vec2(1, 0), vec2(1, 1), vec2(0, 1) };
 #define V(z) std::vector<vec2>(z, z+LEPRA_ARRAY_COUNT(z))
-	mUiManager->GetPainter()->DrawImageFan(pImageId, V(c), V(t));
+	ui_manager_->GetPainter()->DrawImageFan(image_id, V(c), V(t));
 }
 
 
 
-bool TrabantSimManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	if (!Parent::OnKeyDown(pKeyCode))
-	{
-		ScopeLock lGameLock(GetTickLock());
-		mKeyMap.insert(KeyMap::value_type(pKeyCode,false));
+bool TrabantSimManager::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
+	if (!Parent::OnKeyDown(key_code)) {
+		ScopeLock game_lock(GetTickLock());
+		key_map_.insert(KeyMap::value_type(key_code,false));
 		return false;
 	}
 	return true;
 }
 
-bool TrabantSimManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	if (pKeyCode == UiLepra::InputManager::IN_KBD_ESC && mIsMouseControlled)
-	{
-		if (mPauseButton)
-		{
-			if (mPauseButton->IsVisible())
-			{
-				mSetCursorInvisible = true;
-			}
-			else
-			{
-				mSetCursorVisible = true;
+bool TrabantSimManager::OnKeyUp(uilepra::InputManager::KeyCode key_code) {
+	if (key_code == uilepra::InputManager::kInKbdEsc && is_mouse_controlled_) {
+		if (pause_button_) {
+			if (pause_button_->IsVisible()) {
+				set_cursor_invisible_ = true;
+			} else {
+				set_cursor_visible_ = true;
 			}
 		}
 	}
-	if (pKeyCode == UiLepra::InputManager::IN_KBD_F5)
-	{
-		if (mIsControlled)
-		{
-			mCommandSocket->SendTo((const unsigned char*)"disconnect\n", 11, mLastRemoteAddress);
-			mIsControlled = false;
+	if (key_code == uilepra::InputManager::kInKbdF5) {
+		if (is_controlled_) {
+			command_socket_->SendTo((const unsigned char*)"disconnect\n", 11, last_remote_address_);
+			is_controlled_ = false;
 		}
-		mHideCounter = 1;
+		hide_counter_ = 1;
 	}
 
 	{
-		ScopeLock lGameLock(GetTickLock());
-		mKeyMap[pKeyCode] = true;
+		ScopeLock game_lock(GetTickLock());
+		key_map_[key_code] = true;
 	}
-	return Parent::OnKeyUp(pKeyCode);
+	return Parent::OnKeyUp(key_code);
 }
 
-void TrabantSimManager::OnInput(UiLepra::InputElement* pElement)
-{
-	if (pElement->GetInterpretation() == UiLepra::InputElement::RELATIVE_AXIS)
-	{
-		UiLepra::InputDevice* lMouse = mUiManager->GetInputManager()->GetMouse();
-		if (pElement == lMouse->GetAxis(0))
-		{
-			mMouseMove.x += pElement->GetValue();
-		}
-		else if (pElement == lMouse->GetAxis(1))
-		{
-			mMouseMove.y += pElement->GetValue();
-		}
-		else
-		{
-			mMouseMove.z += pElement->GetValue();
+void TrabantSimManager::OnInput(uilepra::InputElement* element) {
+	if (element->GetInterpretation() == uilepra::InputElement::kRelativeAxis) {
+		uilepra::InputDevice* mouse = ui_manager_->GetInputManager()->GetMouse();
+		if (element == mouse->GetAxis(0)) {
+			mouse_move_.x += element->GetValue();
+		} else if (element == mouse->GetAxis(1)) {
+			mouse_move_.y += element->GetValue();
+		} else {
+			mouse_move_.z += element->GetValue();
 		}
 	}
-	return Parent::OnInput(pElement);
+	return Parent::OnInput(element);
 }
 
-void TrabantSimManager::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource)
-{
-	if (pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		mUiManager->GetDesktopWindow()->GetImageManager()->AddLoadedImage(*pResource->GetRamData(), pResource->GetData(),
-			UiTbc::GUIImageManager::CENTERED, UiTbc::GUIImageManager::ALPHABLEND, 255);
+void TrabantSimManager::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* resource) {
+	if (resource->GetLoadState() == cure::kResourceLoadComplete) {
+		ui_manager_->GetDesktopWindow()->GetImageManager()->AddLoadedImage(*resource->GetRamData(), resource->GetData(),
+			uitbc::GUIImageManager::kCentered, uitbc::GUIImageManager::kAlphablend, 255);
 	}
 }
 
 
 
-loginstance(GAME, TrabantSimManager);
+loginstance(kGame, TrabantSimManager);
 
 
 

@@ -6,146 +6,141 @@
 
 #pragma once
 
-#include "../../../Lepra/Include/Timer.h"
-#include "UiRectComponent.h"
-#include "UiButton.h"
-#include "UiCleaner.h"
+#include "../../../lepra/include/timer.h"
+#include "uirectcomponent.h"
+#include "uibutton.h"
+#include "uicleaner.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class ScrollBar: public RectComponent
-{
+class ScrollBar: public RectComponent {
 	typedef RectComponent Parent;
 public:
 
-	enum Style
-	{
-		HORIZONTAL = 0,
-		VERTICAL,
+	enum Style {
+		kHorizontal = 0,
+		kVertical,
 	};
 
-	ScrollBar(Style pStyle = HORIZONTAL,
-		  int pSize = 16, int pButtonSize = 16,
-		  const Color& pBodyColor = Color(192, 192, 192),
-		  const Color& pBackgColor = Color(192, 192, 192),
-		  BorderComponent::BorderShadeFunc pBorderShadeFunc = BorderComponent::LINEAR,
-		  int pBorderWidth = 3);
+	ScrollBar(Style style = kHorizontal,
+		  int size = 16, int button_size = 16,
+		  const Color& body_color = Color(192, 192, 192),
+		  const Color& backg_color = Color(192, 192, 192),
+		  BorderComponent::BorderShadeFunc border_shade_func = BorderComponent::kLinear,
+		  int border_width = 3);
 
-	ScrollBar(Style pStyle,
-		  Painter::ImageID pBackgImageID,
-		  Button* pTopLeftButton,
-		  Button* pBottomRightButton,
-		  Button* pScrollerButton);
+	ScrollBar(Style style,
+		  Painter::ImageID backg_image_id,
+		  Button* top_left_button,
+		  Button* bottom_right_button,
+		  Button* scroller_button);
 
 	// 0 <= visible <= max.
-	void SetScrollRatio(float64 pVisible, float64 pMax);
+	void SetScrollRatio(float64 visible, float64 max);
 	float64 GetScrollRatioVisible() const;
 	float64 GetScrollRatioMax() const;
 
 	// Makes the scroller width/height static with the given size.
-	void SetStaticScrollerSize(int pScrollerSize);
+	void SetStaticScrollerSize(int scroller_size);
 
 	// Scroll position is in the range [0, 1].
 	float64 GetScrollPos();
-	void SetScrollPos(float64 pPos);
+	void SetScrollPos(float64 pos);
 
-	void SetScrollDelay(float64 pFirstDelay, float64 pDelay);
+	void SetScrollDelay(float64 first_delay, float64 delay);
 
-	virtual void Repaint(Painter* pPainter);
+	virtual void Repaint(Painter* painter);
 
-	virtual void DoSetSize(int pWidth, int pHeight);
+	virtual void DoSetSize(int width, int height);
 
 	virtual void OnConnectedToDesktopWindow();
 	virtual void OnIdle();
 
 	virtual Type GetType() const;
 
-	void SetOwner(Component* pOwner);
+	void SetOwner(Component* owner);
 
 protected:
 
-	GridLayout* CreateLayout(Style pStyle);
+	GridLayout* CreateLayout(Style style);
 	void LoadIcons();
 	void SetupScrollButton();
 	void LoadButtons();
 	void CheckAndSetSize();
-	void CheckButtonSize(Button* pButton);
+	void CheckButtonSize(Button* button);
 	void InitPreferredSize();
 	void DoLayout();
 
-	void OnScrollTL(Button* pButton);
-	void OnScrollBR(Button* pButton);
-	void OnStopScroll(Button* pButton);
-	void OnScrollerDown(Button* pButton);
-	bool OnScrollerDragged(Button* pButton, int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
+	void OnScrollTL(Button* button);
+	void OnScrollBR(Button* button);
+	void OnStopScroll(Button* button);
+	void OnScrollerDown(Button* button);
+	bool OnScrollerDragged(Button* button, int mouse_x, int mouse_y, int delta_x, int delta_y);
 
 private:
 
-	void AddImage(Painter::ImageID& pImageID, uint8 pImage[], int pDim);
+	void AddImage(Painter::ImageID& image_id, uint8 image[], int dim);
 
 	// Cleans up among the static variables.
-	class ScrollbarCleaner : public Cleaner
-	{
+	class ScrollbarCleaner : public Cleaner {
 	public:
-		~ScrollbarCleaner()
-		{
-			ScrollBar::smIconLeftID  = Painter::INVALID_IMAGEID;
-			ScrollBar::smIconRightID = Painter::INVALID_IMAGEID;
-			ScrollBar::smIconUpID    = Painter::INVALID_IMAGEID;
-			ScrollBar::smIconDownID  = Painter::INVALID_IMAGEID;
-			ScrollBar::smPrevPainter = 0;
-			ScrollBar::smCleaner = 0;
+		~ScrollbarCleaner() {
+			ScrollBar::icon_left_id_  = Painter::kInvalidImageid;
+			ScrollBar::icon_right_id_ = Painter::kInvalidImageid;
+			ScrollBar::icon_up_id_    = Painter::kInvalidImageid;
+			ScrollBar::icon_down_id_  = Painter::kInvalidImageid;
+			ScrollBar::prev_painter_ = 0;
+			ScrollBar::cleaner_ = 0;
 		}
 	};
 
-	static uint8 smIconArrowLeft[];
-	static uint8 smIconArrowRight[];
-	static uint8 smIconArrowUp[];
-	static uint8 smIconArrowDown[];
+	static uint8 icon_arrow_left_[];
+	static uint8 icon_arrow_right_[];
+	static uint8 icon_arrow_up_[];
+	static uint8 icon_arrow_down_[];
 
-	static Painter::ImageID smIconLeftID;
-	static Painter::ImageID smIconRightID;
-	static Painter::ImageID smIconUpID;
-	static Painter::ImageID smIconDownID;
+	static Painter::ImageID icon_left_id_;
+	static Painter::ImageID icon_right_id_;
+	static Painter::ImageID icon_up_id_;
+	static Painter::ImageID icon_down_id_;
 
-	static Painter* smPrevPainter;
-	static ScrollbarCleaner* smCleaner;
+	static Painter* prev_painter_;
+	static ScrollbarCleaner* cleaner_;
 
-	Style mStyle;
+	Style style_;
 
-	bool mUserDefinedGfx;
+	bool user_defined_gfx_;
 
-	Painter::ImageID mBackgImageID;
-	Button* mTLButton;
-	Button* mBRButton;
-	Button* mScrollerButton;
-	RectComponent* mTLRect;
-	RectComponent* mBRRect;
+	Painter::ImageID backg_image_id_;
+	Button* tl_button_;
+	Button* br_button_;
+	Button* scroller_button_;
+	RectComponent* tl_rect_;
+	RectComponent* br_rect_;
 
-	Color mBodyColor;
+	Color body_color_;
 
-	float64 mVisible;
-	float64 mMax;
-	float64 mPos;
-	float64 mScrollSpeed;
-	float64 mFirstDelay;
-	float64 mDelay;
+	float64 visible_;
+	float64 max_;
+	float64 pos_;
+	float64 scroll_speed_;
+	float64 first_delay_;
+	float64 delay_;
 
-	Timer mTimer;
-	bool mFirstDelayDone;
+	Timer timer_;
+	bool first_delay_done_;
 
-	int mSize;
-	int mButtonSize;
-	int mScrollerSize;
-	BorderComponent::BorderShadeFunc mBorderShadeFunc;
-	int mBorderWidth;
+	int size_;
+	int button_size_;
+	int scroller_size_;
+	BorderComponent::BorderShadeFunc border_shade_func_;
+	int border_width_;
 
-	Component* mOwner;
+	Component* owner_;
 };
 
 

@@ -4,14 +4,14 @@
 
 
 #pragma once
-#include "LepraTarget.h"
+#include "lepratarget.h"
 
 
 
 #if defined(LEPRA_WINDOWS)
-#include "Win32/Win32Target.h"
+#include "win32/win32target.h"
 #elif defined(LEPRA_POSIX)
-#include "Posix/PosixTarget.h"
+#include "posix/posixtarget.h"
 #else
 #error "No recognized target platform specified!"
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/?

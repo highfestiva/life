@@ -1,40 +1,38 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Lepra/Include/LepraOS.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "../Life/LifeServer/MasterServerConnection.h"
-#include "../Life/LifeApplication.h"
-#include "../UiCure/Include/UiCure.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiLepra/Include/UiTouchDrag.h"
-#include "../UiLepra/Include/UiCore.h"
-#include "../UiTbc/Include/UiTbc.h"
-#include "PushMaster/MasterServerPort.h"
-#include "Push.h"
-#include "PushTicker.h"
-#include "RtVar.h"
-#include "Version.h"
+#include "../cure/include/runtimevariable.h"
+#include "../lepra/include/lepraos.h"
+#include "../lepra/include/systemmanager.h"
+#include "../life/lifeserver/masterserverconnection.h"
+#include "../life/lifeapplication.h"
+#include "../uicure/include/uicure.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uilepra/include/uitouchdrag.h"
+#include "../uilepra/include/uicore.h"
+#include "../uitbc/include/uitbc.h"
+#include "pushmaster/masterserverport.h"
+#include "push.h"
+#include "pushticker.h"
+#include "rtvar.h"
+#include "version.h"
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
-class Push: public Life::Application
-{
-	typedef Life::Application Parent;
+class Push: public life::Application {
+	typedef life::Application Parent;
 public:
 	static Push* GetApp();
 
-	Push(const strutil::strvec& pArgumentList);
+	Push(const strutil::strvec& argument_list);
 	virtual ~Push();
 	virtual void Init();
 	virtual void Destroy();
@@ -45,15 +43,15 @@ public:
 
 	str GetTypeName() const;
 	str GetVersion() const;
-	Cure::ApplicationTicker* CreateTicker() const;
+	cure::ApplicationTicker* CreateTicker() const;
 
-	static Push* mApp;
+	static Push* app_;
 #ifdef LEPRA_TOUCH
-	AnimatedApp* mAnimatedApp;
-#endif // Touch
+	AnimatedApp* animated_app_;
+#endif // touch
 
-	UiCure::GameUiManager* mUiManager;
-	UiLepra::Touch::DragManager mDragManager;
+	UiCure::GameUiManager* ui_manager_;
+	uilepra::touch::DragManager drag_manager_;
 
 	logclass();
 };
@@ -64,186 +62,174 @@ public:
 
 
 
-LEPRA_RUN_APPLICATION(Push::Push, UiLepra::UiMain);
+LEPRA_RUN_APPLICATION(Push::Push, uilepra::UiMain);
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
-Push* Push::GetApp()
-{
-	return mApp;
+Push* Push::GetApp() {
+	return app_;
 }
 
 
 
-Push::Push(const strutil::strvec& pArgumentList):
-	Parent(PUSH_APPLICATION_NAME, pArgumentList),
-	mUiManager(0)
-{
-	mApp = this;
+Push::Push(const strutil::strvec& argument_list):
+	Parent(kPushApplicationName, argument_list),
+	ui_manager_(0) {
+	app_ = this;
 }
 
-Push::~Push()
-{
+Push::~Push() {
 	Destroy();
 
 	UiCure::Shutdown();
-	UiTbc::Shutdown();
-	UiLepra::Shutdown();
+	uitbc::Shutdown();
+	uilepra::Shutdown();
 }
 
-void Push::Init()
-{
-	UiLepra::Init();
-	UiTbc::Init();
+void Push::Init() {
+	uilepra::Init();
+	uitbc::Init();
 	UiCure::Init();
 
 #if defined(LEPRA_TOUCH) || defined(EMULATE_TOUCH)
-	const bool lStartLogo = false;
-	const bool lOnlineMaster = false;
+	const bool start_logo = false;
+	const bool online_master = false;
 #else // Computer
-	const bool lStartLogo = true;
-	const bool lOnlineMaster = true;
-#endif // Touch / computer
+	const bool start_logo = true;
+	const bool online_master = true;
+#endif // touch / computer
 #if defined(LEPRA_IOS)
-	CGSize lSize = [UIScreen mainScreen].bounds.size;
-	const int lDisplayWidth = lSize.height;
-	const int lDisplayHeight = lSize.width;
-	bool lDisplayFullScreen = true;
+	CGSize __size = [UIScreen mainScreen].bounds.size;
+	const int display_width = __size.height;
+	const int display_height = __size.width;
+	bool display_full_screen = true;
 #elif defined(EMULATE_TOUCH)
-	const int lDisplayWidth = 480;
-	const int lDisplayHeight = 320;
-	bool lDisplayFullScreen = false;
+	const int display_width = 480;
+	const int display_height = 320;
+	bool display_full_screen = false;
 #else // Computer L&F
-	const int lDisplayWidth = 760;
-	const int lDisplayHeight = 524;
-	bool lDisplayFullScreen = false;
-#endif // Touch / Emulated / Computer L&F
-	int lDisplayBpp = 0;
-	int lDisplayFrequency = 0;
-	double lPhysicalScreenSize = 24.0;	// An average computer's physical screen size (inches across).
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, "OpenGL");
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, "AllowUpsideDown");
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
+	const int display_width = 760;
+	const int display_height = 524;
+	bool display_full_screen = false;
+#endif // touch / Emulated / Computer L&F
+	int display_bpp = 0;
+	int display_frequency = 0;
+	double physical_screen_size = 24.0;	// An average computer's physical screen size (inches across).
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayRenderengine, "OpenGL");
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayWidth, display_width);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayHeight, display_height);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayBitsperpixel, display_bpp);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayFrequency, display_frequency);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayFullscreen, display_full_screen);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayOrientation, "AllowUpsideDown");
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayPhysicalsize, physical_screen_size);
 
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, "OpenAL");
+	v_override(UiCure::GetSettings(), kRtvarUiSoundEngine, "OpenAL");
 
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLELIGHTS, true);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 60.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 1.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 1000.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "None");
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.5);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.5);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.5);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayEnablevsync, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DPixelshaders, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablelights, true);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnabletrilinearfiltering, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablebilinearfiltering, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablemipmapping, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DFov, 60.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DClipnear, 1.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DClipfar, 1000.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DShadows, "None");
+	v_override(UiCure::GetSettings(), kRtvarUi3DAmbientred, 0.5);
+	v_override(UiCure::GetSettings(), kRtvarUi3DAmbientgreen, 0.5);
+	v_override(UiCure::GetSettings(), kRtvarUi3DAmbientblue, 0.5);
 #ifdef LEPRA_TOUCH
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.9);
-#endif // Touch device.
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_DOPPLER, 1.0);
+	v_override(UiCure::GetSettings(), kRtvarUiSoundRolloff, 0.9);
+#endif // touch device.
+	v_override(UiCure::GetSettings(), kRtvarUiSoundDoppler, 1.0);
 
 #if !defined(LEPRA_TOUCH) && !defined(EMULATE_TOUCH)
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, true);
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.5);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, true);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "Force:Volume");	
+	v_override(UiCure::GetSettings(), kRtvarUi3DPixelshaders, true);
+	v_override(UiCure::GetSettings(), kRtvarUiSoundRolloff, 0.5);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnabletrilinearfiltering, true);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablemipmapping, true);
+	v_override(UiCure::GetSettings(), kRtvarUi3DShadows, "Force:Volume");
 #endif // Computer
 
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
 	// since that causes the client to start without defaults.
-	v_override(UiCure::GetSettings(), RTVAR_GAME_ENABLESTARTLOGO, lStartLogo);
-	v_override(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEONLINEMASTER, lOnlineMaster);
-	v_override(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
-	v_override(UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 4.0);
-	v_override(UiCure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 4.0);
+	v_override(UiCure::GetSettings(), kRtvarGameEnablestartlogo, start_logo);
+	v_override(UiCure::GetSettings(), kRtvarNetworkEnableonlinemaster, online_master);
+	v_override(UiCure::GetSettings(), kRtvarNetworkEnableopenserver, false);
+	v_override(UiCure::GetSettings(), kRtvarNetworkConnectTimeout, 4.0);
+	v_override(UiCure::GetSettings(), kRtvarNetworkLoginTimeout, 4.0);
 
-	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings(), &mDragManager);
+	ui_manager_ = new UiCure::GameUiManager(UiCure::GetSettings(), &drag_manager_);
 
 	Parent::Init();
 
 }
 
-void Push::Destroy()
-{
+void Push::Destroy() {
 	Parent::Destroy();
-	delete mUiManager;
-	mUiManager = 0;
+	delete ui_manager_;
+	ui_manager_ = 0;
 }
 
-bool Push::MainLoop()
-{
+bool Push::MainLoop() {
 #ifndef LEPRA_IOS
 	return Parent::MainLoop();
 #else // iOS
 	// iOS has uses timer callbacks instead of a main loop.
-	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
+	animated_app_ = [[AnimatedApp alloc] init:ui_manager_->GetCanvas()];
 	return true;
 #endif // !iOS/iOS
 }
 
 
 
-void Push::Suspend()
-{
-	//if (mMusicPlayer)
+void Push::Suspend() {
+	//if (music_player_)
 	//{
-	//	mMusicPlayer->Pause();
+	//	music_player_->Pause();
 	//}
 	//DoPause();
 #ifdef LEPRA_IOS
-	[mAnimatedApp stopTick];
+	[animated_app_ tick_];
 #endif // iOS
 }
 
-void Push::Resume()
-{
+void Push::Resume() {
 #ifdef LEPRA_IOS
-	[mAnimatedApp startTick];
+	[animated_app_ tick_];
 #endif // iOS
-	//if (mMusicPlayer)
+	//if (music_player_)
 	//{
-	//	mMusicPlayer->Stop();
-	//	mMusicPlayer->Playback();
+	//	music_player_->Stop();
+	//	music_player_->Playback();
 	//}
 }
 
 
 
-str Push::GetTypeName() const
-{
+str Push::GetTypeName() const {
 	return "Client";
 }
 
-str Push::GetVersion() const
-{
-	return PLATFORM_VERSION;
+str Push::GetVersion() const {
+	return kPlatformVersion;
 }
 
-Cure::ApplicationTicker* Push::CreateTicker() const
-{
-	PushTicker* lTicker = new PushTicker(mUiManager, mResourceManager, 2000, 7, 1);
-	lTicker->SetMasterServerConnection(new Life::MasterServerConnection(MASTER_SERVER_ADDRESS ":" MASTER_SERVER_PORT));
-	return lTicker;
+cure::ApplicationTicker* Push::CreateTicker() const {
+	PushTicker* ticker = new PushTicker(ui_manager_, resource_manager_, 2000, 7, 1);
+	ticker->SetMasterServerConnection(new life::MasterServerConnection(kMasterServerAddress ":" kMasterServerPort));
+	return ticker;
 }
 
 
 
-Push* Push::mApp;
-loginstance(GAME, Push);
+Push* Push::app_;
+loginstance(kGame, Push);
 
 
 

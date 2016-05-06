@@ -5,123 +5,101 @@
 
 
 #include "pch.h"
-#include "RaceTimer.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/TimeManager.h"
-#include "../../Tbc/Include/ChunkyPhysics.h"
-#include "../../Tbc/Include/PhysicsTrigger.h"
-#include "../RaceScore.h"
+#include "racetimer.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/gamemanager.h"
+#include "../../cure/include/timemanager.h"
+#include "../../tbc/include/chunkyphysics.h"
+#include "../../tbc/include/physicstrigger.h"
+#include "../racescore.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-RaceTimer::RaceTimer(Cure::ContextManager* pManager):
-	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), "RaceTimer"),
-	mTriggerCount(0)
-{
-	pManager->AddLocalObject(this);
-	mAttributeName = strutil::Format("race_timer_%u", GetInstanceId());
+RaceTimer::RaceTimer(cure::ContextManager* manager):
+	cure::CppContextObject(manager->GetGameManager()->GetResourceManager(), "RaceTimer"),
+	trigger_count_(0) {
+	manager->AddLocalObject(this);
+	attribute_name_ = strutil::Format("race_timer_%u", GetInstanceId());
 	GetManager()->EnableTickCallback(this);
 }
 
-RaceTimer::~RaceTimer()
-{
+RaceTimer::~RaceTimer() {
 }
 
 
 
-void RaceTimer::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
-{
-	std::vector<int> lTriggerIndexArray;
-	const Tbc::ChunkyPhysics* lPhysics = mParent->GetPhysics();
-	mTriggerCount = pTrigger->GetTriggerGeometryCount();
-	for (int x = 0; x < (int)mTriggerCount; ++x)
-	{
-		const int lBoneIndex = lPhysics->GetIndex(pTrigger->GetTriggerGeometry(x));
-		deb_assert(lBoneIndex >= 0);
-		lTriggerIndexArray.push_back(lBoneIndex);
+void RaceTimer::FinalizeTrigger(const tbc::PhysicsTrigger* trigger) {
+	std::vector<int> trigger_index_array;
+	const tbc::ChunkyPhysics* physics = parent_->GetPhysics();
+	trigger_count_ = trigger->GetTriggerGeometryCount();
+	for (int x = 0; x < (int)trigger_count_; ++x) {
+		const int bone_index = physics->GetIndex(trigger->GetTriggerGeometry(x));
+		deb_assert(bone_index >= 0);
+		trigger_index_array.push_back(bone_index);
 	}
-	const Tbc::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag("race_trigger_data", 0, 0, &lTriggerIndexArray);
-	deb_assert(lTag);
-	if (lTag)
-	{
+	const tbc::ChunkyClass::Tag* tag = ((CppContextObject*)parent_)->FindTag("race_trigger_data", 0, 0, &trigger_index_array);
+	deb_assert(tag);
+	if (tag) {
 	}
 }
 
-void RaceTimer::OnTick()
-{
-	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
-	DoneMap::iterator x = mDoneMap.begin();
-	while (x != mDoneMap.end())
-	{
-		if (lTimeManager->GetCurrentPhysicsFrameDelta(x->second) >= 0)
-		{
-			Cure::ContextObject* lObject = GetManager()->GetObject(x->first);
-			if (lObject)
-			{
-				lObject->DeleteAttribute(mAttributeName);
+void RaceTimer::OnTick() {
+	const cure::TimeManager* time_manager = GetManager()->GetGameManager()->GetTimeManager();
+	DoneMap::iterator x = done_map_.begin();
+	while (x != done_map_.end()) {
+		if (time_manager->GetCurrentPhysicsFrameDelta(x->second) >= 0) {
+			cure::ContextObject* object = GetManager()->GetObject(x->first);
+			if (object) {
+				object->DeleteAttribute(attribute_name_);
 			}
-			mDoneMap.erase(x++);
-		}
-		else
-		{
+			done_map_.erase(x++);
+		} else {
 			++x;
 		}
 	}
 }
 
-void RaceTimer::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
-{
-	(void)pBodyId;
-	(void)pPosition;
-	(void)pNormal;
+void RaceTimer::OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
+	(void)body_id;
+	(void)position;
+	(void)normal;
 
-	Cure::ContextObject* lObject = pOtherObject;
-	if (lObject->GetPhysics()->GetEngineCount() <= 0)	// Only self-movable stuff can let the games begin!
-	{
+	cure::ContextObject* object = other_object;
+	if (object->GetPhysics()->GetEngineCount() <= 0) {	// Only self-movable stuff can let the games begin!
 		return;
 	}
 
 	// Check if just finished this race.
-	DoneMap::iterator i = mDoneMap.find(lObject->GetInstanceId());
-	if (i != mDoneMap.end())
-	{
+	DoneMap::iterator i = done_map_.find(object->GetInstanceId());
+	if (i != done_map_.end()) {
 		return;
 	}
 
-	RaceScore* lRaceScore = (RaceScore*)lObject->GetAttribute(mAttributeName);
-	if (!lRaceScore)
-	{
-		lRaceScore = new RaceScore(lObject, mAttributeName, 1, pTriggerId);
-		mLog.Headline("Race started!");
+	RaceScore* race_score = (RaceScore*)object->GetAttribute(attribute_name_);
+	if (!race_score) {
+		race_score = new RaceScore(object, attribute_name_, 1, trigger_id);
+		log_.Headline("Race started!");
 	}
-	if (!lRaceScore->IsTriggered(pTriggerId))
-	{
-		lRaceScore->AddTriggered(pTriggerId);
-		mLog.Infof("Hit %u/%u triggers in %f s.", lRaceScore->GetTriggedCount(), mTriggerCount, lRaceScore->GetTime());
-	}
-	else if (lRaceScore->GetTriggedCount() == mTriggerCount && pTriggerId == lRaceScore->GetStartTrigger())
-	{
-		if (lRaceScore->StartNewLap() <= 0)
-		{
-			mLog.Headlinef("Congratulations - finished race in %f s!", lRaceScore->GetTime());
-			mDoneMap.insert(DoneMap::value_type(lObject->GetInstanceId(), GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrameAddSeconds(5.0)));
-		}
-		else
-		{
-			mLog.Headlinef("Lap completed; time is %f s!", lRaceScore->GetTime());
+	if (!race_score->IsTriggered(trigger_id)) {
+		race_score->AddTriggered(trigger_id);
+		log_.Infof("Hit %u/%u triggers in %f s.", race_score->GetTriggedCount(), trigger_count_, race_score->GetTime());
+	} else if (race_score->GetTriggedCount() == trigger_count_ && trigger_id == race_score->GetStartTrigger()) {
+		if (race_score->StartNewLap() <= 0) {
+			log_.Headlinef("Congratulations - finished race in %f s!", race_score->GetTime());
+			done_map_.insert(DoneMap::value_type(object->GetInstanceId(), GetManager()->GetGameManager()->GetTimeManager()->GetCurrentPhysicsFrameAddSeconds(5.0)));
+		} else {
+			log_.Headlinef("Lap completed; time is %f s!", race_score->GetTime());
 		}
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, RaceTimer);
+loginstance(kGameContextCpp, RaceTimer);
 
 
 

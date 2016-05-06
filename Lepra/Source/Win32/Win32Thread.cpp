@@ -5,447 +5,374 @@
 
 
 #include "pch.h"
-#include "../../Include/LepraAssert.h"
-#include "../../Include/Win32/Win32Thread.h"
-#include "../../Include/Lepra.h"
-#include "../../Include/Log.h"
+#include "../../include/lepraassert.h"
+#include "../../include/win32/win32thread.h"
+#include "../../include/lepra.h"
+#include "../../include/log.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-static ThreadPointerStorage gThreadStorage;
-static ThreadPointerStorage gExtraDataStorage;
+static ThreadPointerStorage g_thread_storage;
+static ThreadPointerStorage g_extra_data_storage;
 
 
 
-ThreadPointerStorage::ThreadPointerStorage()
-{
-	mTLSIndex = ::TlsAlloc();
+ThreadPointerStorage::ThreadPointerStorage() {
+	tls_index_ = ::TlsAlloc();
 }
 
-ThreadPointerStorage::~ThreadPointerStorage()
-{
-	::TlsFree(mTLSIndex);
+ThreadPointerStorage::~ThreadPointerStorage() {
+	::TlsFree(tls_index_);
 }
 
-void ThreadPointerStorage::SetPointer(void* pData)
-{
-	::TlsSetValue(mTLSIndex, (LPVOID)pData);
+void ThreadPointerStorage::SetPointer(void* data) {
+	::TlsSetValue(tls_index_, (LPVOID)data);
 }
 
-void* ThreadPointerStorage::GetPointer()
-{
-	return ::TlsGetValue(mTLSIndex);
+void* ThreadPointerStorage::GetPointer() {
+	return ::TlsGetValue(tls_index_);
 }
 
 
 
 // This gives the thread a name when debugging in VS.
-void SetVisualStudioThreadName(const char* szThreadName, DWORD dwThreadId)
-{
+void SetVisualStudioThreadName(const char* thread_name_, DWORD dwThreadId) {
 #pragma pack(push,8)
-	struct THREADNAME_INFO
-	{
+	struct THREADNAME_INFO {
 		DWORD dwType;		// must be 0x1000
-		LPCSTR szName;		// pointer to name (in user addr space)
+		LPCSTR name_;		// pointer to name (in user addr space)
 		DWORD dwThreadId;	// thread Id (-1=caller thread)
 		DWORD dwFlags;		// reserved for future use, must be zero
 	};
 #pragma pack(pop)
-	THREADNAME_INFO lThreadNameInfo;
-	lThreadNameInfo.dwType = 0x1000;
-	lThreadNameInfo.szName = szThreadName;
-	lThreadNameInfo.dwThreadId = dwThreadId;
-	lThreadNameInfo.dwFlags = 0;
-	__try
-	{
-		RaiseException(0x406D1388, 0, sizeof(lThreadNameInfo)/sizeof(DWORD), (DWORD*)&lThreadNameInfo);
+	THREADNAME_INFO thread_name_info;
+	thread_name_info.dwType = 0x1000;
+	thread_name_info.name_ = thread_name_;
+	thread_name_info.dwThreadId = dwThreadId;
+	thread_name_info.dwFlags = 0;
+	__try {
+		RaiseException(0x406D1388, 0, sizeof(thread_name_info)/sizeof(DWORD), (DWORD*)&thread_name_info);
 	}
-	__except(EXCEPTION_CONTINUE_EXECUTION)
-	{
+	__except(EXCEPTION_CONTINUE_EXECUTION) {
 	}
 }
 
 // This is where the thread starts. A global standard C-function.
-DWORD __stdcall ThreadEntry(void* pThread)
-{
-	Thread* lThread = (Thread*)pThread;
-	gThreadStorage.SetPointer(lThread);
-	gExtraDataStorage.SetPointer(0);
-	deb_assert(gThreadStorage.GetPointer() == lThread);
-	deb_assert(Thread::GetCurrentThread() == lThread);
-	SetVisualStudioThreadName(lThread->GetThreadName().c_str(), (DWORD)-1);
-	RunThread(lThread);
+DWORD __stdcall ThreadEntry(void* thread) {
+	Thread* _thread = (Thread*)thread;
+	g_thread_storage.SetPointer(_thread);
+	g_extra_data_storage.SetPointer(0);
+	deb_assert(g_thread_storage.GetPointer() == _thread);
+	deb_assert(Thread::GetCurrentThread() == _thread);
+	SetVisualStudioThreadName(_thread->GetThreadName().c_str(), (DWORD)-1);
+	RunThread(_thread);
 	return 0;
 }
 
 
 
-Win32Lock::Win32Lock()
-{
-	::InitializeCriticalSection(&mMutex);
+Win32Lock::Win32Lock() {
+	::InitializeCriticalSection(&mutex_);
 }
 
-Win32Lock::~Win32Lock()
-{
-	::DeleteCriticalSection(&mMutex);
+Win32Lock::~Win32Lock() {
+	::DeleteCriticalSection(&mutex_);
 }
 
-void Win32Lock::Acquire()
-{
-	::EnterCriticalSection(&mMutex);
+void Win32Lock::Acquire() {
+	::EnterCriticalSection(&mutex_);
 }
 
-bool Win32Lock::TryAcquire()
-{
-	return (::TryEnterCriticalSection(&mMutex) == TRUE);
+bool Win32Lock::TryAcquire() {
+	return (::TryEnterCriticalSection(&mutex_) == TRUE);
 }
 
-void Win32Lock::Release()
-{
-	::LeaveCriticalSection(&mMutex);
+void Win32Lock::Release() {
+	::LeaveCriticalSection(&mutex_);
 }
 
 
 
 
-Win32Condition::Win32Condition(Win32Lock* pExternalLock):
-	mExternalLock(pExternalLock),
-	mSemaphore(::CreateSemaphore(0, 0, 0x7fffffff, 0)),
-	mWaitThreadCount(0)
-{
+Win32Condition::Win32Condition(Win32Lock* external_lock):
+	external_lock_(external_lock),
+	semaphore_(::CreateSemaphore(0, 0, 0x7fffffff, 0)),
+	wait_thread_count_(0) {
 }
 
-Win32Condition::~Win32Condition()
-{
-	::CloseHandle(mSemaphore);
+Win32Condition::~Win32Condition() {
+	::CloseHandle(semaphore_);
 }
 
-void Win32Condition::Wait()
-{
-	::InterlockedIncrement(&mWaitThreadCount);
-	mExternalLock->Release();
-	::WaitForSingleObject(mSemaphore, INFINITE);
-	mExternalLock->Acquire();
-	::InterlockedDecrement(&mWaitThreadCount);
+void Win32Condition::Wait() {
+	::InterlockedIncrement(&wait_thread_count_);
+	external_lock_->Release();
+	::WaitForSingleObject(semaphore_, INFINITE);
+	external_lock_->Acquire();
+	::InterlockedDecrement(&wait_thread_count_);
 }
 
-bool Win32Condition::Wait(float64 pMaxWaitTime)
-{
-	if (pMaxWaitTime < 0)
-	{
-		pMaxWaitTime = 0;
+bool Win32Condition::Wait(float64 max_wait_time) {
+	if (max_wait_time < 0) {
+		max_wait_time = 0;
 	}
-	::InterlockedIncrement(&mWaitThreadCount);
-	mExternalLock->Release();
-	bool lSignalled = (::WaitForSingleObject(mSemaphore, (DWORD)(pMaxWaitTime*1000.0)) == WAIT_OBJECT_0);
-	mExternalLock->Acquire();
-	::InterlockedDecrement(&mWaitThreadCount);
-	return (lSignalled);
+	::InterlockedIncrement(&wait_thread_count_);
+	external_lock_->Release();
+	bool signalled = (::WaitForSingleObject(semaphore_, (DWORD)(max_wait_time*1000.0)) == WAIT_OBJECT_0);
+	external_lock_->Acquire();
+	::InterlockedDecrement(&wait_thread_count_);
+	return (signalled);
 }
 
-void Win32Condition::Signal()
-{
-	if (mWaitThreadCount)
-	{
-		::ReleaseSemaphore(mSemaphore, 1, 0);
+void Win32Condition::Signal() {
+	if (wait_thread_count_) {
+		::ReleaseSemaphore(semaphore_, 1, 0);
 	}
 }
 
-void Win32Condition::SignalAll()
-{
-	if (mWaitThreadCount)
-	{
-		::ReleaseSemaphore(mSemaphore, mWaitThreadCount, 0);
+void Win32Condition::SignalAll() {
+	if (wait_thread_count_) {
+		::ReleaseSemaphore(semaphore_, wait_thread_count_, 0);
 	}
 }
 
 
 
-Win32Semaphore::Win32Semaphore()
-{
-	mSemaphore = ::CreateSemaphore(0, 0, 10000, 0);
+Win32Semaphore::Win32Semaphore() {
+	semaphore_ = ::CreateSemaphore(0, 0, 10000, 0);
 }
 
-Win32Semaphore::Win32Semaphore(unsigned pMaxCount)
-{
-	mSemaphore = ::CreateSemaphore(0, 0, pMaxCount, 0);
+Win32Semaphore::Win32Semaphore(unsigned max_count) {
+	semaphore_ = ::CreateSemaphore(0, 0, max_count, 0);
 }
 
-Win32Semaphore::~Win32Semaphore()
-{
-	::CloseHandle(mSemaphore);
-	mSemaphore = 0;
+Win32Semaphore::~Win32Semaphore() {
+	::CloseHandle(semaphore_);
+	semaphore_ = 0;
 }
 
-void Win32Semaphore::Wait()
-{
-	::WaitForSingleObject(mSemaphore, INFINITE);
+void Win32Semaphore::Wait() {
+	::WaitForSingleObject(semaphore_, INFINITE);
 }
 
-bool Win32Semaphore::Wait(float64 pMaxWaitTime)
-{
-	bool lSignalled = false;
-	if (pMaxWaitTime > 0)
-	{
-		lSignalled = (::WaitForSingleObject(mSemaphore, (DWORD)(pMaxWaitTime*1000.0)) == WAIT_OBJECT_0);
+bool Win32Semaphore::Wait(float64 max_wait_time) {
+	bool signalled = false;
+	if (max_wait_time > 0) {
+		signalled = (::WaitForSingleObject(semaphore_, (DWORD)(max_wait_time*1000.0)) == WAIT_OBJECT_0);
 	}
-	return (lSignalled);
+	return (signalled);
 }
 
-void Win32Semaphore::Signal()
-{
-	::ReleaseSemaphore(mSemaphore, 1, 0);
+void Win32Semaphore::Signal() {
+	::ReleaseSemaphore(semaphore_, 1, 0);
 }
 
 
 
 
 Win32RwLock::Win32RwLock():
-	mReadCondition(0),
-	mWriteCondition(0),
-	mNumPendingReaders(0),
-	mNumActiveReaders(0),
-	mNumPendingWriters(0),
-	mIsWriting(false)
-{
+	read_condition_(0),
+	write_condition_(0),
+	num_pending_readers_(0),
+	num_active_readers_(0),
+	num_pending_writers_(0),
+	is_writing_(false) {
 }
 
-Win32RwLock::~Win32RwLock()
-{
+Win32RwLock::~Win32RwLock() {
 }
 
-void Win32RwLock::AcquireRead()
-{
+void Win32RwLock::AcquireRead() {
 	// If someone's writing, we will sit tight here.
-	mWriteLock.Acquire();
+	write_lock_.Acquire();
 
 	// Wait until there are no more pending writers.
 	// (Writing has higher priority than reading).
-	while (mNumPendingWriters > 0 || mIsWriting == true)
-	{
-		mNumPendingReaders++;
-		mReadCondition.Wait();	// Wait until the writer says GO!
-		mNumPendingReaders--;
+	while (num_pending_writers_ > 0 || is_writing_ == true) {
+		num_pending_readers_++;
+		read_condition_.Wait();	// Wait until the writer says GO!
+		num_pending_readers_--;
 	}
 
-	mNumActiveReaders++;
-	mWriteLock.Release();
+	num_active_readers_++;
+	write_lock_.Release();
 }
 
-void Win32RwLock::AcquireWrite()
-{
+void Win32RwLock::AcquireWrite() {
 	// If someone else is writing, we will sit tight here.
-	mWriteLock.Acquire();
+	write_lock_.Acquire();
 
 	// Wait until all active readers are done.
-	while (mNumActiveReaders > 0)
-	{
-		mNumPendingWriters++;
-		mWriteCondition.Wait(); // Wait until the reader says GO!
-		mNumPendingWriters--;
+	while (num_active_readers_ > 0) {
+		num_pending_writers_++;
+		write_condition_.Wait(); // Wait until the reader says GO!
+		num_pending_writers_--;
 	}
 
-	mIsWriting = true;
+	is_writing_ = true;
 }
 
-void Win32RwLock::Release()
-{
-	if (mIsWriting == true)
-	{
+void Win32RwLock::Release() {
+	if (is_writing_ == true) {
 		// The current thread has been writing, and the mutex is locked.
-		mIsWriting = false;
+		is_writing_ = false;
 
 		// If there are any other writers waiting, let them in.
-		if (mNumPendingWriters > 0)
-		{
-			mWriteCondition.Signal();
-			mWriteLock.Release();
-		}
-		else
-		{
+		if (num_pending_writers_ > 0) {
+			write_condition_.Signal();
+			write_lock_.Release();
+		} else {
 			// ...otherwise let the readers in.
-			mReadCondition.SignalAll();
-			mWriteLock.Release();
+			read_condition_.SignalAll();
+			write_lock_.Release();
 		}
-	}
-	else
-	{
+	} else {
 		// The current thread has been reading...
-		mWriteLock.Acquire();
-		
-		if (mNumActiveReaders > 0)
-		{
-			mNumActiveReaders--;
+		write_lock_.Acquire();
 
-			if (mNumActiveReaders == 0)
-			{
+		if (num_active_readers_ > 0) {
+			num_active_readers_--;
+
+			if (num_active_readers_ == 0) {
 				// Let the next writer in...
-				mWriteCondition.Signal();
+				write_condition_.Signal();
 			}
 		}
 
-		mWriteLock.Release();
+		write_lock_.Release();
 	}
 }
 
 
 
-void Thread::InitializeThread(Thread* pThread)
-{
-	gThreadStorage.SetPointer(pThread);
-	gExtraDataStorage.SetPointer(0);
-	pThread->SetThreadId(GetCurrentThreadId());
-	deb_assert(gThreadStorage.GetPointer() == pThread);
-	deb_assert(Thread::GetCurrentThread() == pThread);
-	SetVisualStudioThreadName(pThread->GetThreadName().c_str(), (DWORD)-1);
+void Thread::InitializeThread(Thread* thread) {
+	g_thread_storage.SetPointer(thread);
+	g_extra_data_storage.SetPointer(0);
+	thread->SetThreadId(GetCurrentThreadId());
+	deb_assert(g_thread_storage.GetPointer() == thread);
+	deb_assert(Thread::GetCurrentThread() == thread);
+	SetVisualStudioThreadName(thread->GetThreadName().c_str(), (DWORD)-1);
 }
 
-size_t Thread::GetCurrentThreadId()
-{
+size_t Thread::GetCurrentThreadId() {
 	return (::GetCurrentThreadId());
 }
 
-Thread* Thread::GetCurrentThread()
-{
-	return ((Thread*)gThreadStorage.GetPointer());
+Thread* Thread::GetCurrentThread() {
+	return ((Thread*)g_thread_storage.GetPointer());
 }
 
-void* Thread::GetExtraData()
-{
-	return (gExtraDataStorage.GetPointer());
+void* Thread::GetExtraData() {
+	return (g_extra_data_storage.GetPointer());
 }
 
-void Thread::SetExtraData(void* pData)
-{
-	gExtraDataStorage.SetPointer(pData);
+void Thread::SetExtraData(void* data) {
+	g_extra_data_storage.SetPointer(data);
 }
 
-void Thread::SetCpuAffinityMask(uint64 pAffinityMask)
-{
-	DWORD_PTR lMask = (DWORD_PTR)pAffinityMask;
-	::SetThreadAffinityMask((HANDLE)GetThreadHandle(), lMask);
+void Thread::SetCpuAffinityMask(uint64 affinity_mask) {
+	DWORD_PTR mask = (DWORD_PTR)affinity_mask;
+	::SetThreadAffinityMask((HANDLE)GetThreadHandle(), mask);
 	// Cut timeslice short and allow OS to reschedule us to the given CPU immediately.
 	YieldCpu();
 }
 
-void Thread::Sleep(unsigned int pMicroSeconds)
-{
-	::Sleep(pMicroSeconds/1000);
+void Thread::Sleep(unsigned int micro_seconds) {
+	::Sleep(micro_seconds/1000);
 }
 
-bool Thread::Start()
-{
-	bool lOk = true;
+bool Thread::Start() {
+	bool ok = true;
 
-	if (!IsRunning())
-	{
+	if (!IsRunning()) {
 		SetStopRequest(false);
 
-		DWORD lThreadId = 0;
-		mThreadHandle = (size_t)::CreateThread(0, 0, ThreadEntry, this, 0, &lThreadId);
-		if (mThreadHandle)
-		{
+		DWORD thread_id = 0;
+		thread_handle_ = (size_t)::CreateThread(0, 0, ThreadEntry, this, 0, &thread_id);
+		if (thread_handle_) {
 			// Try to wait for newly created thread.
-			mSemaphore.Wait(5.0);
-		}
-		else
-		{
+			semaphore_.Wait(5.0);
+		} else {
 			SetRunning(false);
-			mLog.Errorf(("Failed to start thread "+strutil::Encode(GetThreadName())+"!").c_str());
-			lOk = false;
+			log_.Errorf(("Failed to start thread "+strutil::Encode(GetThreadName())+"!").c_str());
+			ok = false;
 		}
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool Thread::Join()
-{
-	bool lReturnValue = true;
+bool Thread::Join() {
+	bool return_value = true;
 
 	SetStopRequest(true);
-	if (GetThreadHandle() != 0)
-	{
+	if (GetThreadHandle() != 0) {
 		deb_assert(GetThreadId() != GetCurrentThreadId());
 		Thread::YieldCpu();	// Try to let thread self destruct.
 		::WaitForSingleObject((HANDLE)GetThreadHandle(), INFINITE);
 		deb_assert(!IsRunning());
-		if (GetThreadHandle())
-		{
+		if (GetThreadHandle()) {
 			::CloseHandle((HANDLE)GetThreadHandle());
 		}
-		mThreadHandle = 0;
-		mThreadId = 0;
+		thread_handle_ = 0;
+		thread_id_ = 0;
 	}
 	SetStopRequest(false);
 
-	return (lReturnValue);
+	return (return_value);
 }
 
-bool Thread::GraceJoin(float64 pTimeOut)
-{
-	if (GetThreadHandle() != 0)
-	{
+bool Thread::GraceJoin(float64 time_out) {
+	if (GetThreadHandle() != 0) {
 		deb_assert(GetThreadId() != GetCurrentThreadId());
-		const str lThreadNameCopy(GetThreadName());
-		if (::WaitForSingleObject((HANDLE)GetThreadHandle(), (DWORD)(pTimeOut * 1000.0)) == WAIT_TIMEOUT)
-		{
+		const str thread_name_copy(GetThreadName());
+		if (::WaitForSingleObject((HANDLE)GetThreadHandle(), (DWORD)(time_out * 1000.0)) == WAIT_TIMEOUT) {
 			// Possible dead lock...
-			mLog.Warningf(("Failed to join thread \"" + lThreadNameCopy + "\"! Deadlock?").c_str());
+			log_.Warningf(("Failed to join thread \"" + thread_name_copy + "\"! Deadlock?").c_str());
 			return (false);	// RAII simplifies here.
 		}
-		if (GetThreadHandle())
-		{
+		if (GetThreadHandle()) {
 			::CloseHandle((HANDLE)GetThreadHandle());
 		}
-		mThreadHandle = 0;
-		mThreadId = 0;
+		thread_handle_ = 0;
+		thread_id_ = 0;
 	}
 	SetStopRequest(false);
 	return true;
 }
 
-void Thread::Signal(int)
-{
+void Thread::Signal(int) {
 	// We don't need this on Windows, since nothing really blocks hard.
 }
 
-void Thread::Kill()
-{
-	if (GetThreadHandle() != 0)
-	{
-		if (GetThreadId() != GetCurrentThreadId())
-		{
-			mLog.Warning("Forcing kill of thread " + GetThreadName());
+void Thread::Kill() {
+	if (GetThreadHandle() != 0) {
+		if (GetThreadId() != GetCurrentThreadId()) {
+			log_.Warning("Forcing kill of thread " + GetThreadName());
 			::TerminateThread((HANDLE)GetThreadHandle(), 0);
 			SetRunning(false);
 			::CloseHandle((HANDLE)GetThreadHandle());
-			mThreadHandle = 0;
-		}
-		else
-		{
-			mLog.Warning("Thread " + GetThreadName() + " terminating self.");
-			HANDLE lSelf = (HANDLE)mThreadHandle;
+			thread_handle_ = 0;
+		} else {
+			log_.Warning("Thread " + GetThreadName() + " terminating self.");
+			HANDLE self = (HANDLE)thread_handle_;
 			SetRunning(false);
 			delete this;
-			::TerminateThread(lSelf, 0);
-			::CloseHandle(lSelf);
+			::TerminateThread(self, 0);
+			::CloseHandle(self);
 		}
 	}
 	SetStopRequest(false);
 }
 
-void Thread::YieldCpu()
-{
+void Thread::YieldCpu() {
 	::SwitchToThread();
 }
 
-void Thread::PostRun()
-{
+void Thread::PostRun() {
 }
 
 

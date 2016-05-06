@@ -1,25 +1,23 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life.h"
+#include "../life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class ScreenPart
-{
+class ScreenPart {
 public:
 	virtual PixelRect GetRenderArea() const = 0;
-	virtual float UpdateFrustum(float pFov) = 0;	// Returns actual FoV.
+	virtual float UpdateFrustum(float fov) = 0;	// Returns actual FoV.
 };
 
 

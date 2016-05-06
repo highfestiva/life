@@ -1,35 +1,33 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/Elevator.h"
-#include "Game.h"
+#include "../cure/include/elevator.h"
+#include "game.h"
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 class Game;
 
 
 
-class VehicleElevator: public Cure::Elevator
-{
-	typedef Cure::Elevator Parent;
+class VehicleElevator: public cure::Elevator {
+	typedef cure::Elevator Parent;
 public:
-	VehicleElevator(Game* pGame);
+	VehicleElevator(Game* game);
 	virtual ~VehicleElevator();
 
 private:
-	void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
+	void OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal);
 
-	Game* mGame;
+	Game* game_;
 
 	logclass();
 };

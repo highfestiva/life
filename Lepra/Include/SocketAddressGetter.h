@@ -1,13 +1,13 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "LepraOS.h"
-#include "SocketAddress.h"
+#include "lepraos.h"
+#include "socketaddress.h"
 
 #ifdef LEPRA_NETWORK_IPV6
 typedef sockaddr_in6 RawSocketAddress;
@@ -17,27 +17,22 @@ typedef sockaddr_in RawSocketAddress;
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class SocketAddressGetter
-{
+class SocketAddressGetter {
 public:
-	static sockaddr* GetRaw(SocketAddress& pAddress)
-	{
-		return (sockaddr*)pAddress.GetRawData();
+	static sockaddr* GetRaw(SocketAddress& address) {
+		return (sockaddr*)address.GetRawData();
 	}
 
-	static const sockaddr* GetRaw(const SocketAddress& pAddress)
-	{
-		return (const sockaddr*)pAddress.GetRawData();
+	static const sockaddr* GetRaw(const SocketAddress& address) {
+		return (const sockaddr*)address.GetRawData();
 	}
 
-	static const RawSocketAddress& Get(const SocketAddress& pAddress)
-	{
-		return *(RawSocketAddress*)pAddress.GetRawData();
+	static const RawSocketAddress& Get(const SocketAddress& address) {
+		return *(RawSocketAddress*)address.GetRawData();
 	}
 };
 

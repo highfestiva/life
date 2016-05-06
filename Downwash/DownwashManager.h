@@ -6,40 +6,34 @@
 
 #pragma once
 
-#include "../Lepra/Include/DiskFile.h"
-#include "../Lepra/Include/GameTimer.h"
-#include "../Tbc/Include/PhysicsEngine.h"
-#include "../Life/LifeClient/GameClientSlaveManager.h"
-#include "../Life/Launcher.h"
-#include "../UiCure/Include/UiResourceManager.h"
-#include "Downwash.h"
-#include "Version.h"
+#include "../lepra/include/diskfile.h"
+#include "../lepra/include/gametimer.h"
+#include "../tbc/include/physicsengine.h"
+#include "../life/lifeclient/gameclientslavemanager.h"
+#include "../life/launcher.h"
+#include "../uicure/include/uiresourcemanager.h"
+#include "downwash.h"
+#include "version.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class HiscoreAgent;
 }
-namespace UiLepra
-{
-namespace Touch
-{
+namespace uilepra {
+namespace touch {
 class TouchstickInputDevice;
 }
 }
-namespace UiCure
-{
+namespace UiCure {
 class CollisionSoundManager;
 class CppContextObject;
 }
-namespace UiTbc
-{
+namespace uitbc {
 class BillboardGeometry;
 class Button;
 }
-namespace Life
-{
+namespace life {
 class GameClientMasterTicker;
 class Level;
 class Menu;
@@ -47,8 +41,7 @@ class Menu;
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
@@ -58,54 +51,53 @@ class Sunlight;
 
 
 
-class DownwashManager: public Life::GameClientSlaveManager, private Life::Launcher
-{
-	typedef Life::GameClientSlaveManager Parent;
+class DownwashManager: public life::GameClientSlaveManager, private life::Launcher {
+	typedef life::GameClientSlaveManager Parent;
 public:
-	DownwashManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+	DownwashManager(life::GameClientMasterTicker* pMaster, const cure::TimeManager* time,
+		cure::RuntimeVariableScope* variable_scope, cure::ResourceManager* resource_manager,
+		UiCure::GameUiManager* ui_manager, int slave_index, const PixelRect& render_area);
 	virtual ~DownwashManager();
-	virtual void Suspend(bool pHard);
+	virtual void Suspend(bool hard);
 	virtual void LoadSettings();
 	virtual void SaveSettings();
-	virtual void SetRenderArea(const PixelRect& pRenderArea);
+	virtual void SetRenderArea(const PixelRect& render_area);
 	virtual bool Open();
 	virtual void Close();
 	virtual void SetIsQuitting();
-	virtual void SetFade(float pFadeAmount);
+	virtual void SetFade(float fade_amount);
 
 	virtual bool Render();
 	virtual bool Paint();
-	void PrintTime(const wstr pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg);
+	void PrintTime(const wstr prefix, double time, bool is_sloppy, int x, int y, const Color c, const Color bg);
 	virtual void DrawSyncDebugInfo();
 
-	virtual bool IsObjectRelevant(const vec3& pPosition, float pDistance) const;
-	Cure::GameObjectId GetAvatarInstanceId() const;
+	virtual bool IsObjectRelevant(const vec3& position, float distance) const;
+	cure::GameObjectId GetAvatarInstanceId() const;
 
-	bool SetAvatarEnginePower(unsigned pAspect, float pPower);
+	bool SetAvatarEnginePower(unsigned aspect, float power);
 
-	virtual void Shoot(Cure::ContextObject* pCanon, int pAmmo);
-	virtual void Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength);
-	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
+	virtual void Shoot(cure::ContextObject* canon, int ammo);
+	virtual void Detonate(cure::ContextObject* explosive, const tbc::ChunkyBoneGeometry* explosive_geometry, const vec3& position, const vec3& velocity, const vec3& normal, float strength);
+	virtual void OnBulletHit(cure::ContextObject* bullet, cure::ContextObject* hit_object);
 
 	virtual bool DidFinishLevel();
-	virtual str StepLevel(int pCount);
+	virtual str StepLevel(int count);
 
 	virtual Level* GetLevel() const;
 	virtual int GetCurrentLevelNumber() const;
-	virtual double GetCurrentLevelBestTime(bool pWorld) const;
-	virtual void SetLevelBestTime(int pLevelIndex, bool pWorld, double pTime);
-	virtual Cure::ContextObject* GetAvatar() const;
+	virtual double GetCurrentLevelBestTime(bool world) const;
+	virtual void SetLevelBestTime(int level_index, bool world, double time);
+	virtual cure::ContextObject* GetAvatar() const;
 
-	Cure::RuntimeVariableScope* GetVariableScope() const;
+	cure::RuntimeVariableScope* GetVariableScope() const;
 
 protected:
-	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
+	typedef uilepra::touch::TouchstickInputDevice Touchstick;
 
 	virtual bool InitializeUniverse();
-	void CreateChopper(const str& pClassId);
-	void UpdateChopperColor(float pLerp);
+	void CreateChopper(const str& class_id);
+	void UpdateChopperColor(float lerp);
 
 	virtual void ScriptPhysicsTick();
 	virtual void HandleWorldBoundaries();
@@ -117,30 +109,30 @@ protected:
 	int GetControlMode() const;
 	void UpdateControlMode();
 	virtual void TickUiInput();
-	bool SetAvatarEnginePower(Cure::ContextObject* pAvatar, unsigned pAspect, float pPower);
+	bool SetAvatarEnginePower(cure::ContextObject* avatar, unsigned aspect, float power);
 	virtual void TickUiUpdate();
-	virtual bool UpdateMassObjects(const vec3& pPosition);
-	virtual void SetLocalRender(bool pRender);
-	void SetMassRender(bool pRender);
+	virtual bool UpdateMassObjects(const vec3& position);
+	virtual void SetLocalRender(bool render);
+	void SetMassRender(bool render);
 
-	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
-	virtual Cure::ContextObject* CreateLogicHandler(const str& pType);
-	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
+	virtual cure::ContextObject* CreateContextObject(const str& class_id) const;
+	virtual cure::ContextObject* CreateLogicHandler(const str& type);
+	virtual void OnLoadCompleted(cure::ContextObject* object, bool ok);
 	virtual void OnLevelLoadCompleted();
-	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
-		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
+	void OnCollision(const vec3& force, const vec3& torque, const vec3& position,
+		cure::ContextObject* object1, cure::ContextObject* object2,
+		tbc::PhysicsManager::BodyID body1_id, tbc::PhysicsManager::BodyID body2_id);
 
-	vec3 GetLandingTriggerPosition(Cure::ContextObject* pLevel) const;
-	void EaseDown(Cure::ContextObject* pObject, const vec3* pStartPosition);
-	xform GetMainRotorTransform(const UiCure::CppContextObject* pChopper) const;
+	vec3 GetLandingTriggerPosition(cure::ContextObject* level) const;
+	void EaseDown(cure::ContextObject* object, const vec3* start_position);
+	xform GetMainRotorTransform(const UiCure::CppContextObject* chopper) const;
 
-	void OnPauseButton(UiTbc::Button*);
-	void OnLastHiscoreButton(UiTbc::Button*);
-	void ShowHiscoreDialog(int pDirection);
+	void OnPauseButton(uitbc::Button*);
+	void OnLastHiscoreButton(uitbc::Button*);
+	void ShowHiscoreDialog(int direction);
 	void UpdateHiscoreDialog();
-	void OnMenuAlternative(UiTbc::Button* pButton);
-	void OnPreHiscoreAction(UiTbc::Button* pButton);
+	void OnMenuAlternative(uitbc::Button* button);
+	void OnPreHiscoreAction(uitbc::Button* button);
 
 	void UpdateHiscoreDialogTitle();
 	wstr GetHiscoreLevelTitle() const;
@@ -148,81 +140,81 @@ protected:
 	void CreateHiscoreAgent();
 	void TickHiscore();
 
-	void DrawStick(Touchstick* pStick);
+	void DrawStick(Touchstick* stick);
 
-	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
+	virtual void UpdateCameraPosition(bool update_mic_position);
 
-	void DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const;
+	void DrawImage(uitbc::Painter::ImageID image_id, float cx, float cy, float w, float h, float angle) const;
 
-	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
-	void RendererTextureLoadCallback(UiCure::UserRendererImageResource* pResource);
+	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* resource);
+	void RendererTextureLoadCallback(UiCure::UserRendererImageResource* resource);
 
 	bool DisableDepth();
 	void EnableDepth();
 
-	UiCure::CollisionSoundManager* mCollisionSoundManager;
-	Life::Menu* mMenu;
+	UiCure::CollisionSoundManager* collision_sound_manager_;
+	life::Menu* menu_;
 
 	// Network transmission and keepalive info.
-	Cure::GameObjectId mAvatarId;
-	StopWatch mAllLoadedTimer;
-	StopWatch mTooFarAwayTimer;
-	StopWatch mAvatarCreateTimer;
-	StopWatch mAvatarDied;
-	GameTimer mFlyTime;
-	StopWatch mSlowmoTimer;
-	HiResTimer mToyModeColorTimer;
-	vec3 mLastVehicleColor;
-	vec3 mLastChopperColor;
-	bool mSetRandomChopperColor;
-	bool mHadAvatar;
-	bool mUpdateCameraForAvatar;
-	Life::Options::Steering mLastSteering;
-	int mActiveWeapon;
+	cure::GameObjectId avatar_id_;
+	StopWatch all_loaded_timer_;
+	StopWatch too_far_away_timer_;
+	StopWatch avatar_create_timer_;
+	StopWatch avatar_died_;
+	GameTimer fly_time_;
+	StopWatch slowmo_timer_;
+	HiResTimer toy_mode_color_timer_;
+	vec3 last_vehicle_color_;
+	vec3 last_chopper_color_;
+	bool set_random_chopper_color_;
+	bool had_avatar_;
+	bool update_camera_for_avatar_;
+	life::options::Steering last_steering_;
+	int active_weapon_;
 
-	Level* mLevel;
-	Level* mOldLevel;
-	Autopilot* mAutopilot;
-	UiCure::CppContextObject* mHemisphere;
-	Tbc::BoneAnimator* mHemisphereUvTransform;
-	bool mRenderHemisphere;
-	Sunlight* mSunlight;
-	ObjectArray mMassObjectArray;
+	Level* level_;
+	Level* old_level_;
+	Autopilot* autopilot_;
+	UiCure::CppContextObject* hemisphere_;
+	tbc::BoneAnimator* hemisphere_uv_transform_;
+	bool render_hemisphere_;
+	Sunlight* sunlight_;
+	ObjectArray mass_object_array_;
 
-	xform mCameraTransform;
-	vec3 mCameraPreviousPosition;
-	vec3 mHelicopterPosition;
-	mutable vec3 mLastLandingTriggerPosition;
-	float mCameraSpeed;
-	bool mZoomPlatform;
-	int mPostZoomPlatformFrameCount;
-	int mHitGroundFrameCount;
-	bool mIsHitThisFrame;
-	bool mLevelCompleted;
-	vec3 mMicrophoneSpeed;
-	UiTbc::Button* mPauseButton;
-	UiTbc::Button* mLastHiscoreButton;
+	xform camera_transform_;
+	vec3 camera_previous_position_;
+	vec3 helicopter_position_;
+	mutable vec3 last_landing_trigger_position_;
+	float camera_speed_;
+	bool zoom_platform_;
+	int post_zoom_platform_frame_count_;
+	int hit_ground_frame_count_;
+	bool is_hit_this_frame_;
+	bool level_completed_;
+	vec3 microphone_speed_;
+	uitbc::Button* pause_button_;
+	uitbc::Button* last_hiscore_button_;
 
-	HiResTimer mTouchstickTimer;
-	Touchstick* mStick;
+	HiResTimer touchstick_timer_;
+	Touchstick* stick_;
 
-	UiCure::UserPainterKeepImageResource* mWrongDirectionImage;
-	UiCure::UserPainterKeepImageResource* mWinImage;
-	UiCure::UserPainterKeepImageResource* mCheckIcon;
-	UiCure::UserPainterKeepImageResource* mLockIcon;
-	StopWatch mDirectionImageTimer;
-	StopWatch mWinImageTimer;
-	UiCure::UserRendererImageResource* mArrow;
-	UiTbc::BillboardGeometry* mArrowBillboard;
-	UiTbc::Renderer::GeometryID mArrowBillboardId;
-	float mArrowTotalPower;
-	float mArrowAngle;
-	int mSlowSystemCounter;
+	UiCure::UserPainterKeepImageResource* wrong_direction_image_;
+	UiCure::UserPainterKeepImageResource* win_image_;
+	UiCure::UserPainterKeepImageResource* check_icon_;
+	UiCure::UserPainterKeepImageResource* lock_icon_;
+	StopWatch direction_image_timer_;
+	StopWatch win_image_timer_;
+	UiCure::UserRendererImageResource* arrow_;
+	uitbc::BillboardGeometry* arrow_billboard_;
+	uitbc::Renderer::GeometryID arrow_billboard_id_;
+	float arrow_total_power_;
+	float arrow_angle_;
+	int slow_system_counter_;
 
-	int mHiscoreLevelIndex;
-	int mMyHiscoreIndex;
-	Cure::HiscoreAgent* mHiscoreAgent;
-	StopWatch mHiscoreJustUploadedTimer;
+	int hiscore_level_index_;
+	int my_hiscore_index_;
+	cure::HiscoreAgent* hiscore_agent_;
+	StopWatch hiscore_just_uploaded_timer_;
 
 	logclass();
 };

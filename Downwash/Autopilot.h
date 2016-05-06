@@ -1,19 +1,18 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/ContextPath.h"
-#include "../Cure/Include/CppContextObject.h"
-#include "DownwashManager.h"
+#include "../cure/include/contextpath.h"
+#include "../cure/include/cppcontextobject.h"
+#include "downwashmanager.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
@@ -21,11 +20,10 @@ class DownwashManager;
 
 
 
-class Autopilot: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class Autopilot: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	Autopilot(DownwashManager* pGame);
+	Autopilot(DownwashManager* game);
 	virtual ~Autopilot();
 	void Reset();
 	vec3 GetSteering();
@@ -33,20 +31,20 @@ public:
 	float GetClosestPathDistance() const;
 	vec3 GetClosestPathVector() const;
 	vec3 GetLastAvatarPosition() const;
-	float GetRotorSpeed(const Cure::ContextObject* pChopper) const;
+	float GetRotorSpeed(const cure::ContextObject* chopper) const;
 
 private:
-	void CheckStalledRotor(Cure::ContextObject* pChopper);
-	float GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint) const;
+	void CheckStalledRotor(cure::ContextObject* chopper);
+	float GetClosestPathDistance(const vec3& position, vec3& closest_point) const;
 
-	typedef Cure::ContextPath::SplinePath Spline;
+	typedef cure::ContextPath::SplinePath Spline;
 
-	DownwashManager* mGame;
-	GameTimer mStalledRotorTimer;
-	float mClosestPathDistance;
-	vec3 mClosestPathPosition;
-	vec3 mLastAvatarPosition;
-	Spline* mPath;
+	DownwashManager* game_;
+	GameTimer stalled_rotor_timer_;
+	float closest_path_distance_;
+	vec3 closest_path_position_;
+	vec3 last_avatar_position_;
+	Spline* path_;
 	logclass();
 };
 

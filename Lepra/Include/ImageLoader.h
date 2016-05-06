@@ -1,12 +1,12 @@
 /*
 	Class:  ImageLoader
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
 
 	A class used to load an image into a Canvas, by using all
-	file-format specific image loaders in Lepra. With other words,
+	file-format specific image loaders in lepra. With other words,
 	you can load images stored using the bmp-, jpeg-, tga-, tiff-
 	and png-format.
 
@@ -16,12 +16,11 @@
 
 #pragma once
 
-#include "String.h"
+#include "string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -31,30 +30,28 @@ class Writer;
 
 
 
-class ImageLoader
-{
+class ImageLoader {
 public:
 
-	enum FileType
-	{
-		UNKNOWN = -1,
-		BMP,
-		TGA,
-		TIF,
-		JPG,
+	enum FileType {
+		kUnknown = -1,
+		kBmp,
+		kTga,
+		kTif,
+		kJpg,
 		PNG
 	};
 
 	ImageLoader();
 	virtual ~ImageLoader();
 
-	static FileType GetFileTypeFromName(const str& pFilename);
+	static FileType GetFileTypeFromName(const str& filename);
 
-	bool Load(const str& pFileName, Canvas& pCanvas);
-	bool Save(const str& pFileName, const Canvas& pCanvas);
+	bool Load(const str& file_name, Canvas& canvas);
+	bool Save(const str& file_name, const Canvas& canvas);
 
-	bool Load(FileType pFileType, Reader& pReader, Canvas& pCanvas);
-	bool Save(FileType pFileType, Writer& pWriter, const Canvas& pCanvas);
+	bool Load(FileType file_type, Reader& reader, Canvas& canvas);
+	bool Save(FileType file_type, Writer& writer, const Canvas& canvas);
 };
 
 

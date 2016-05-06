@@ -1,104 +1,95 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "AirBalloonPilot.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ContextPath.h"
-#include "DownwashManager.h"
-#include "Level.h"
+#include "airballoonpilot.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/contextpath.h"
+#include "downwashmanager.h"
+#include "level.h"
 
 #define AIM_DISTANCE			10.0f
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-typedef Cure::ContextPath::SplinePath Spline;
+typedef cure::ContextPath::SplinePath Spline;
 
 
 
-AirBalloonPilot::AirBalloonPilot(DownwashManager* pGame, Cure::GameObjectId pBalloonId):
-	Parent(pGame->GetResourceManager(), "AirBalloonPilot"),
-	mGame(pGame),
-	mBalloonId(pBalloonId),
-	mPath(0)
-{
-	pGame->GetContext()->AddLocalObject(this);
-	pGame->GetContext()->EnableTickCallback(this);
+AirBalloonPilot::AirBalloonPilot(DownwashManager* game, cure::GameObjectId balloon_id):
+	Parent(game->GetResourceManager(), "AirBalloonPilot"),
+	game_(game),
+	balloon_id_(balloon_id),
+	path_(0) {
+	game->GetContext()->AddLocalObject(this);
+	game->GetContext()->EnableTickCallback(this);
 }
 
-AirBalloonPilot::~AirBalloonPilot()
-{
-	delete mPath;
-	mPath = 0;
+AirBalloonPilot::~AirBalloonPilot() {
+	delete path_;
+	path_ = 0;
 }
 
 
 
-void AirBalloonPilot::OnTick()
-{
+void AirBalloonPilot::OnTick() {
 	Parent::OnTick();
 
-	Cure::ContextObject* lBalloon = mManager->GetObject(mBalloonId, true);
-	if (!lBalloon || !mGame->GetLevel())
-	{
-		mManager->PostKillObject(GetInstanceId());
+	cure::ContextObject* balloon = manager_->GetObject(balloon_id_, true);
+	if (!balloon || !game_->GetLevel()) {
+		manager_->PostKillObject(GetInstanceId());
 		return;
 	}
-	if (!lBalloon->IsLoaded() || lBalloon->GetPhysics()->GetEngineCount() < 1)
-	{
+	if (!balloon->IsLoaded() || balloon->GetPhysics()->GetEngineCount() < 1) {
 		return;
 	}
 
-	const vec3 lPosition = lBalloon->GetPosition();
-	vec3 lClosestPoint;
-	GetClosestPathDistance(lPosition, lClosestPoint);
-	const vec3 lDirectionForce = (lClosestPoint - lPosition) * 0.2f;
-	const vec3 lAntiRotationForce = lBalloon->GetAngularVelocity() * -50.0f;
-	const vec3 lForce(lDirectionForce.x+lAntiRotationForce.y, lDirectionForce.y-lAntiRotationForce.x, lDirectionForce.z);
-	lBalloon->SetEnginePower(0, Math::Clamp(lForce.y, -0.1f, +0.1f));
-	lBalloon->SetEnginePower(1, Math::Clamp(lForce.x, -0.1f, +0.1f));
-	lBalloon->SetEnginePower(3, Math::Clamp(lForce.z, +0.4f, +1.0f));
+	const vec3 _position = balloon->GetPosition();
+	vec3 _closest_point;
+	GetClosestPathDistance(_position, _closest_point);
+	const vec3 direction_force = (_closest_point - _position) * 0.2f;
+	const vec3 anti_rotation_force = balloon->GetAngularVelocity() * -50.0f;
+	const vec3 force(direction_force.x+anti_rotation_force.y, direction_force.y-anti_rotation_force.x, direction_force.z);
+	balloon->SetEnginePower(0, Math::Clamp(force.y, -0.1f, +0.1f));
+	balloon->SetEnginePower(1, Math::Clamp(force.x, -0.1f, +0.1f));
+	balloon->SetEnginePower(3, Math::Clamp(force.z, +0.4f, +1.0f));
 }
 
 
 
-void AirBalloonPilot::GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint)
-{
-	if (!mPath)
-	{
-		mPath = new Cure::ContextPath::SplinePath(*mGame->GetLevel()->QueryPath()->GetPath("air_balloon_path"));
-		mPath->StartInterpolation(0);
+void AirBalloonPilot::GetClosestPathDistance(const vec3& position, vec3& closest_point) {
+	if (!path_) {
+		path_ = new cure::ContextPath::SplinePath(*game_->GetLevel()->QueryPath()->GetPath("air_balloon_path"));
+		path_->StartInterpolation(0);
 	}
-	const float lCurrentTime = mPath->GetCurrentInterpolationTime();
+	const float current_time = path_->GetCurrentInterpolationTime();
 
-	float lNearestDistance;
-	const float lSearchStepLength = 0.06f;
-	const int lSearchSteps = 3;
-	mPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, pClosestPoint, lSearchSteps);
+	float nearest_distance;
+	const float search_step_length = 0.06f;
+	const int search_steps = 3;
+	path_->FindNearestTime(search_step_length, position, nearest_distance, closest_point, search_steps);
 
 	{
-		const float lWantedDistance = AIM_DISTANCE;
-		float lDeltaTime = lWantedDistance * mPath->GetDistanceNormal();
-		if (lCurrentTime+lDeltaTime < 0)
-		{
-			lDeltaTime = -lCurrentTime;
+		const float wanted_distance = AIM_DISTANCE;
+		float delta_time = wanted_distance * path_->GetDistanceNormal();
+		if (current_time+delta_time < 0) {
+			delta_time = -current_time;
 		}
-		mPath->StepInterpolation(lDeltaTime);
-		pClosestPoint = mPath->GetValue();
+		path_->StepInterpolation(delta_time);
+		closest_point = path_->GetValue();
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, AirBalloonPilot);
+loginstance(kGameContextCpp, AirBalloonPilot);
 
 
 

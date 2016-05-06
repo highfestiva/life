@@ -6,12 +6,12 @@
 	NOTES:
 
 	This class constitutes a portal/cell graph which can be used to
-	perform portal culling in an indoor scene. 
+	perform portal culling in an indoor scene.
 
 	All portals are convex polygons. Concave polygons will result in errors.
 
-	Performance hint: Keep the number of portals per cell as low as 
-	possible. All portals in a cell are tested for collision when 
+	Performance hint: Keep the number of portals per cell as low as
+	possible. All portals in a cell are tested for collision when
 	calling TestPortalCollision().
 */
 
@@ -19,14 +19,13 @@
 
 #pragma once
 
-#include "../../Tbc/Include/PortalManager.h"
-#include "../../Lepra/Include/String.h"
-#include "../Include/UiTbc.h"
+#include "../../tbc/include/portalmanager.h"
+#include "../../lepra/include/string.h"
+#include "../include/uitbc.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
@@ -34,50 +33,47 @@ class Renderer;
 
 
 
-class PortalManager: public Tbc::PortalManager
-{
-	typedef Tbc::PortalManager Parent;
+class PortalManager: public tbc::PortalManager {
+	typedef tbc::PortalManager Parent;
 public:
 	PortalManager(){}
 	virtual ~PortalManager(){}
 
-	void TraverseGraph(Renderer* pRenderer, const str& pCellID);
+	void TraverseGraph(Renderer* renderer, const str& cell_id);
 
 private:
 
 	class Cell;
 
-	class Portal : public Parent::Portal
-	{
+	class Portal : public Parent::Portal {
 	public:
-		Portal(int pNumVertices,
-		       vec3* pVertex,
-		       Cell* pCell1,
-		       Cell* pCell2);
+		Portal(int num_vertices,
+		       vec3* vertex,
+		       Cell* cell1,
+		       Cell* cell2);
 		virtual ~Portal();
 
-		void Traverse(Renderer* pRenderer, const PixelRect& pRect, Cell* pFrom);
+		void Traverse(Renderer* renderer, const PixelRect& rect, Cell* from);
 	};
 
-	class Cell: public Parent::Cell
-	{
+	class Cell: public Parent::Cell {
 	public:
-		Cell(const str& pCellID, const str& pCellDescription, PortalManager* pPortalManager);
+		Cell(const str& cell_id, const str& cell_description, PortalManager* portal_manager);
 		virtual ~Cell();
 
-		void Traverse(Renderer* pRenderer, const PixelRect& pRect);
+		void Traverse(Renderer* renderer, const PixelRect& rect);
 
 	private:
-		int mLastFrameVisible;
+		int last_frame_visible_;
 	};
 
-	virtual Parent::Portal* NewPortal(int pNumVertices,
-						      vec3* pVertex,
-						      Parent::Cell* pCell1,
-						      Parent::Cell* pCell2);
-	virtual Parent::Cell* NewCell(const str& pCellID, 
-						  const str& pCellDescription,
-						  Parent::PortalManager* pPortalManager);
+	virtual Parent::Portal* NewPortal(int num_vertices,
+						      vec3* vertex,
+						      Parent::Cell* cell1,
+						      Parent::Cell* cell2);
+	virtual Parent::Cell* NewCell(const str& cell_id,
+						  const str& cell_description,
+						  Parent::PortalManager* portal_manager);
 
 	logclass();
 };

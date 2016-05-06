@@ -5,304 +5,240 @@
 
 
 #include "pch.h"
-#include "../Include/UiTouchstick.h"
+#include "../include/uitouchstick.h"
 
 
 
-namespace UiLepra
-{
-namespace Touch
-{
+namespace uilepra {
+namespace touch {
 
 
 
-using namespace Lepra;
+using namespace lepra;
 
 
 
-TouchstickInputElement::TouchstickInputElement(Type pType, Interpretation pInterpretation, int pTypeIndex, TouchstickInputDevice* pParentDevice):
-	InputElement(pType, pInterpretation, pTypeIndex, pParentDevice),
-	mScale(1),
-	mOffset(0)
-{
+TouchstickInputElement::TouchstickInputElement(Type type, Interpretation interpretation, int type_index, TouchstickInputDevice* parent_device):
+	InputElement(type, interpretation, type_index, parent_device),
+	scale_(1),
+	offset_(0) {
 }
 
-TouchstickInputElement::~TouchstickInputElement()
-{
+TouchstickInputElement::~TouchstickInputElement() {
 }
 
-float TouchstickInputElement::GetValueScaled() const
-{
-	return (GetValue()-mOffset) / mScale;
+float TouchstickInputElement::GetValueScaled() const {
+	return (GetValue()-offset_) / scale_;
 }
 
-void TouchstickInputElement::SetValueScaled(float pValue)
-{
-	SetValue(pValue*mScale + mOffset);
+void TouchstickInputElement::SetValueScaled(float value) {
+	SetValue(value*scale_ + offset_);
 }
 
-void TouchstickInputElement::SetScale(float pMinimum, float pMaximum)
-{
-	mOffset = (pMaximum+pMinimum) / 2;
-	mScale  = (pMaximum-pMinimum) / 2;	// Default scale is one, between -1 and +1.
+void TouchstickInputElement::SetScale(float minimum, float maximum) {
+	offset_ = (maximum+minimum) / 2;
+	scale_  = (maximum-minimum) / 2;	// Default scale is one, between -1 and +1.
 }
 
 
 
-TouchstickInputDevice* TouchstickInputDevice::GetByCoordinate(InputManager* pManager, const PixelCoord& pCoord)
-{
-	const InputManager::DeviceList& lList = pManager->GetDeviceList();
+TouchstickInputDevice* TouchstickInputDevice::GetByCoordinate(InputManager* manager, const PixelCoord& coord) {
+	const InputManager::DeviceList& list = manager->GetDeviceList();
 	InputManager::DeviceList::const_iterator x;
-	for (x = lList.begin(); x != lList.end(); ++x)
-	{
-		TouchstickInputDevice* lStick = dynamic_cast<TouchstickInputDevice*>(*x);
-		if (lStick)
-		{
-			if (lStick->IncludesCoord(pCoord))
-			{
-				return lStick;
+	for (x = list.begin(); x != list.end(); ++x) {
+		TouchstickInputDevice* stick = dynamic_cast<TouchstickInputDevice*>(*x);
+		if (stick) {
+			if (stick->IncludesCoord(coord)) {
+				return stick;
 			}
 		}
 	}
 	return 0;
 }
 
-TouchstickInputDevice::TouchstickInputDevice(InputManager* pManager, InputMode pMode, const PixelRect& pArea, int pAngle, int pFingerRadius):
-	Parent(pManager),
-	mMode(pMode),
-	mArea(pArea),
-	mTouchArea(pArea),
-	mAngle(pAngle),
-	mFingerRadius(pFingerRadius)
-{
-	mTouchArea.Shrink(mFingerRadius);
-	if (mAngle < -45)
-	{
-		mAngle += 360;
+TouchstickInputDevice::TouchstickInputDevice(InputManager* manager, InputMode mode, const PixelRect& area, int angle, int finger_radius):
+	Parent(manager),
+	mode_(mode),
+	area_(area),
+	touch_area_(area),
+	angle_(angle),
+	finger_radius_(finger_radius) {
+	touch_area_.Shrink(finger_radius_);
+	if (angle_ < -45) {
+		angle_ += 360;
 	}
 
-	TouchstickInputElement* lButton = new TouchstickInputElement(InputElement::DIGITAL, InputElement::BUTTON, 0, this);
-	TouchstickInputElement* x = new TouchstickInputElement(InputElement::ANALOGUE, InputElement::ABSOLUTE_AXIS, 0, this);
-	TouchstickInputElement* y = new TouchstickInputElement(InputElement::ANALOGUE, InputElement::ABSOLUTE_AXIS, 1, this);
+	TouchstickInputElement* button = new TouchstickInputElement(InputElement::kDigital, InputElement::kButton, 0, this);
+	TouchstickInputElement* x = new TouchstickInputElement(InputElement::kAnalogue, InputElement::kAbsoluteAxis, 0, this);
+	TouchstickInputElement* y = new TouchstickInputElement(InputElement::kAnalogue, InputElement::kAbsoluteAxis, 1, this);
 	SetIdentifier("Touchstick");
-	lButton->SetIdentifier("Button");
+	button->SetIdentifier("Button");
 	x->SetIdentifier("AxisX");
 	y->SetIdentifier("AxisY");
-	AddElement(lButton);
+	AddElement(button);
 	AddElement(x);
 	AddElement(y);
 
 	GetManager()->AddInputDevice(this);
 }
 
-TouchstickInputDevice::~TouchstickInputDevice()
-{
+TouchstickInputDevice::~TouchstickInputDevice() {
 	GetManager()->RemoveInputDevice(this);
 }
 
-bool TouchstickInputDevice::IsOwnedByManager() const
-{
+bool TouchstickInputDevice::IsOwnedByManager() const {
 	return false;
 }
 
 
 
-void TouchstickInputDevice::Move(const PixelRect& pArea, int pAngle)
-{
-	mArea = pArea;
-	mTouchArea = pArea;
-	mTouchArea.Shrink(mFingerRadius);
-	mAngle = pAngle;
-	if (mAngle < -45)
-	{
-		mAngle += 360;
+void TouchstickInputDevice::Move(const PixelRect& area, int angle) {
+	area_ = area;
+	touch_area_ = area;
+	touch_area_.Shrink(finger_radius_);
+	angle_ = angle;
+	if (angle_ < -45) {
+		angle_ += 360;
 	}
 }
 
-const PixelRect& TouchstickInputDevice::GetArea() const
-{
-	return mArea;
+const PixelRect& TouchstickInputDevice::GetArea() const {
+	return area_;
 }
 
-int TouchstickInputDevice::GetFingerRadius() const
-{
-	return mFingerRadius;
+int TouchstickInputDevice::GetFingerRadius() const {
+	return finger_radius_;
 }
 
-void TouchstickInputDevice::SetFingerRadius(int pFingerRadius)
-{
-	mFingerRadius = pFingerRadius;
+void TouchstickInputDevice::SetFingerRadius(int finger_radius) {
+	finger_radius_ = finger_radius;
 }
 
-void TouchstickInputDevice::ResetTap()
-{
-	mElementArray[0]->SetValue(0.0f);
-	mElementArray[1]->SetValue(0.0f);
-	mElementArray[2]->SetValue(0.0f);
+void TouchstickInputDevice::ResetTap() {
+	element_array_[0]->SetValue(0.0f);
+	element_array_[1]->SetValue(0.0f);
+	element_array_[2]->SetValue(0.0f);
 }
 
-void TouchstickInputDevice::SetTap(const PixelCoord& pCoord, bool pIsPress)
-{
-	if (mIsPressing)
-	{
-		log_volatile(mLog.Debugf("Movin': (%i; %i)", pCoord.x, pCoord.y));
+void TouchstickInputDevice::SetTap(const PixelCoord& coord, bool is_press) {
+	if (is_pressing_) {
+		log_volatile(log_.Debugf("Movin': (%i; %i)", coord.x, coord.y));
+	} else {
+		start_ = coord;
 	}
-	else
-	{
-		mStart = pCoord;
-	}
-	mIsPressing = pIsPress;
+	is_pressing_ = is_press;
 
-	const float dx = mTouchArea.GetWidth()*0.5f;
-	const float dy = mTouchArea.GetHeight()*0.5f;
+	const float dx = touch_area_.GetWidth()*0.5f;
+	const float dy = touch_area_.GetHeight()*0.5f;
 	float rx;
 	float ry;
-	switch (mMode)
-	{
+	switch (mode_) {
 		default:
-		case MODE_RELATIVE_CENTER:
-		{
-			rx = (pCoord.x - mArea.GetCenterX()) / dx;
-			ry = (pCoord.y - mArea.GetCenterY()) / dy;
-		}
-		break;
-		case MODE_RELATIVE_START:
-		{
-			rx = (pCoord.x - mStart.x) / dx;
-			ry = (pCoord.y - mStart.y) / dy;
-		}
-		break;
-		case MODE_RELATIVE_LAST:
-		{
-			rx = (pCoord.x - mStart.x) / dx;
-			ry = (pCoord.y - mStart.y) / dy;
-			mStart = pCoord;
-		}
-		break;
+		case kModeRelativeCenter: {
+			rx = (coord.x - area_.GetCenterX()) / dx;
+			ry = (coord.y - area_.GetCenterY()) / dy;
+		} break;
+		case kModeRelativeStart: {
+			rx = (coord.x - start_.x) / dx;
+			ry = (coord.y - start_.y) / dy;
+		} break;
+		case kModeRelativeLast: {
+			rx = (coord.x - start_.x) / dx;
+			ry = (coord.y - start_.y) / dy;
+			start_ = coord;
+		} break;
 	}
 
 	rx = Math::Clamp(rx, -1.0f, +1.0f);
 	ry = Math::Clamp(ry, -1.0f, +1.0f);
 	// Handle the angles.
-	if (mAngle < 45)
-	{
-	}
-	else if (mAngle < 135)
-	{
+	if (angle_ < 45) {
+	} else if (angle_ < 135) {
 		ry = -ry;
 		std::swap(rx, ry);
-	}
-	else if (mAngle < 225)
-	{
+	} else if (angle_ < 225) {
 		rx = -rx;
 		ry = -ry;
-	}
-	else
-	{
+	} else {
 		rx = -rx;
 		std::swap(rx, ry);
 	}
 
-	mElementArray[0]->SetValue(mIsPressing? 1.0f : 0.0f);
-	if (mIsPressing)
-	{
-		((TouchstickInputElement*)mElementArray[1])->SetValueScaled(rx);
-		((TouchstickInputElement*)mElementArray[2])->SetValueScaled(ry);
-	}
-	else if (mMode != MODE_RELATIVE_CENTER_NOSPRING)
-	{
-		mElementArray[1]->SetValue(0.0f);
-		mElementArray[2]->SetValue(0.0f);
+	element_array_[0]->SetValue(is_pressing_? 1.0f : 0.0f);
+	if (is_pressing_) {
+		((TouchstickInputElement*)element_array_[1])->SetValueScaled(rx);
+		((TouchstickInputElement*)element_array_[2])->SetValueScaled(ry);
+	} else if (mode_ != kModeRelativeCenterNospring) {
+		element_array_[1]->SetValue(0.0f);
+		element_array_[2]->SetValue(0.0f);
 	}
 }
 
-void TouchstickInputDevice::GetValue(float& x, float& y, bool& pIsPressing)
-{
-	x = ((TouchstickInputElement*)mElementArray[1])->GetValueScaled();
-	y = ((TouchstickInputElement*)mElementArray[2])->GetValueScaled();
-	pIsPressing = mElementArray[0]->GetBooleanValue();
+void TouchstickInputDevice::GetValue(float& x, float& y, bool& is_pressing) {
+	x = ((TouchstickInputElement*)element_array_[1])->GetValueScaled();
+	y = ((TouchstickInputElement*)element_array_[2])->GetValueScaled();
+	is_pressing = element_array_[0]->GetBooleanValue();
 
-	if (mAngle < 45)
-	{
-	}
-	else if (mAngle < 135)
-	{
+	if (angle_ < 45) {
+	} else if (angle_ < 135) {
 		x = -x;
 		std::swap(x, y);
-	}
-	else if (mAngle < 225)
-	{
+	} else if (angle_ < 225) {
 		x = -x;
 		y = -y;
-	}
-	else
-	{
+	} else {
 		y = -y;
 		std::swap(x, y);
 	}
 }
 
-void TouchstickInputDevice::SetValue(float x, float y)
-{
-	if (mAngle < 45)
-	{
-	}
-	else if (mAngle < 135)
-	{
+void TouchstickInputDevice::SetValue(float x, float y) {
+	if (angle_ < 45) {
+	} else if (angle_ < 135) {
 		x = -x;
 		std::swap(x, y);
-	}
-	else if (mAngle < 225)
-	{
+	} else if (angle_ < 225) {
 		x = -x;
 		y = -y;
-	}
-	else
-	{
+	} else {
 		y = -y;
 		std::swap(x, y);
 	}
-	((TouchstickInputElement*)mElementArray[1])->SetValueScaled(x);
-	((TouchstickInputElement*)mElementArray[2])->SetValueScaled(y);
+	((TouchstickInputElement*)element_array_[1])->SetValueScaled(x);
+	((TouchstickInputElement*)element_array_[2])->SetValueScaled(y);
 }
 
-void TouchstickInputDevice::SetValueScale(float pMinX, float pMaxX, float pMinY, float pMaxY)
-{
-	((TouchstickInputElement*)mElementArray[1])->SetScale(pMinX, pMaxX);
-	((TouchstickInputElement*)mElementArray[2])->SetScale(pMinY, pMaxY);
-}
-
-
-
-void TouchstickInputDevice::AddElement(InputElement* pElement)
-{
-	mElementArray.push_back(pElement);
+void TouchstickInputDevice::SetValueScale(float min_x, float max_x, float min_y, float max_y) {
+	((TouchstickInputElement*)element_array_[1])->SetScale(min_x, max_x);
+	((TouchstickInputElement*)element_array_[2])->SetScale(min_y, max_y);
 }
 
 
 
-bool TouchstickInputDevice::IncludesCoord(const PixelCoord& pCoord) const
-{
-	return mArea.IsInside(pCoord.x, pCoord.y);
+void TouchstickInputDevice::AddElement(InputElement* element) {
+	element_array_.push_back(element);
 }
 
 
 
-void TouchstickInputDevice::Activate()
-{
-}
-
-void TouchstickInputDevice::Release()
-{
-}
-
-void TouchstickInputDevice::PollEvents()
-{
+bool TouchstickInputDevice::IncludesCoord(const PixelCoord& coord) const {
+	return area_.IsInside(coord.x, coord.y);
 }
 
 
 
-loginstance(UI_INPUT, TouchstickInputDevice);
+void TouchstickInputDevice::Activate() {
+}
+
+void TouchstickInputDevice::Release() {
+}
+
+void TouchstickInputDevice::PollEvents() {
+}
+
+
+
+loginstance(kUiInput, TouchstickInputDevice);
 
 
 

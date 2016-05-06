@@ -1,21 +1,20 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiInput.h"
+#include "../uiinput.h"
 #define	DIRECTINPUT_VERSION	0x0800
 #include <dinput.h>
-#include "../Win32/UiWin32DisplayManager.h"
-#include "../UiLepra.h"
+#include "../win32/uiwin32displaymanager.h"
+#include "../uilepra.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
@@ -23,12 +22,11 @@ class Win32InputDevice;
 
 
 
-class Win32InputElement: public InputElement
-{
+class Win32InputElement: public InputElement {
 	typedef InputElement Parent;
 public:
-	Win32InputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
-		Win32InputDevice* pParentDevice, LPCDIDEVICEOBJECTINSTANCE pElement, unsigned pFieldOffset);
+	Win32InputElement(InputElement::Type type, Interpretation interpretation, int type_index,
+		Win32InputDevice* parent_device, LPCDIDEVICEOBJECTINSTANCE element, unsigned field_offset);
 	virtual ~Win32InputElement();
 
 	const LPCDIDEVICEOBJECTINSTANCE GetDirectInputElement() const;
@@ -37,35 +35,31 @@ public:
 protected:
 private:
 
-	enum
-	{
-		MAX_INT = 0x7FFFFFFF,
-		MIN_INT  = 0x80000000,
+	enum {
+		kMaxInt = 0x7FFFFFFF,
+		kMinInt  = 0x80000000,
 	};
 
-	LPCDIDEVICEOBJECTINSTANCE mElement;
-	DIOBJECTDATAFORMAT mDataFormat;
+	LPCDIDEVICEOBJECTINSTANCE element_;
+	DIOBJECTDATAFORMAT data_format_;
 
 	logclass();
 };
 
-const LPCDIDEVICEOBJECTINSTANCE Win32InputElement::GetDirectInputElement() const
-{
-	return mElement;
+const LPCDIDEVICEOBJECTINSTANCE Win32InputElement::GetDirectInputElement() const {
+	return element_;
 }
 
-const LPDIOBJECTDATAFORMAT Win32InputElement::GetDataFormat() const
-{
-	return (LPDIOBJECTDATAFORMAT)&mDataFormat;
+const LPDIOBJECTDATAFORMAT Win32InputElement::GetDataFormat() const {
+	return (LPDIOBJECTDATAFORMAT)&data_format_;
 }
 
 
 
 
-class Win32InputDevice: public InputDevice
-{
+class Win32InputDevice: public InputDevice {
 public:
-	Win32InputDevice(LPDIRECTINPUTDEVICE8 pDIDevice, LPCDIDEVICEINSTANCE pInfo, InputManager* pManager);
+	Win32InputDevice(LPDIRECTINPUTDEVICE8 di_device, LPCDIDEVICEINSTANCE info, InputManager* manager);
 	virtual ~Win32InputDevice();
 
 	virtual void Activate();
@@ -75,33 +69,32 @@ public:
 
 protected:
 private:
-	static BOOL CALLBACK EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef);
+	static BOOL CALLBACK EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID ref);
 
-	LPDIRECTINPUTDEVICE8 mDIDevice;
-	bool mReacquire;
+	LPDIRECTINPUTDEVICE8 di_device_;
+	bool reacquire_;
 
-	int mRelAxisCount;
-	int mAbsAxisCount;
-	int mAnalogueCount;
-	int mButtonCount;
+	int rel_axis_count_;
+	int abs_axis_count_;
+	int analogue_count_;
+	int button_count_;
 
 	// The DirectInput data format description of mInputData.
-	DIDATAFORMAT mDataFormat;
-	LPDIDEVICEOBJECTDATA mDeviceObjectData;
+	DIDATAFORMAT data_format_;
+	LPDIDEVICEOBJECTDATA device_object_data_;
 
 	logclass();
 };
 
 
 
-class Win32InputManager: public InputManager, public Win32Observer
-{
+class Win32InputManager: public InputManager, public Win32Observer {
 	typedef InputManager Parent;
 public:
 	// Declared as friend in order to get access to screen width and height.
 	friend class Win32InputElement;
 
-	Win32InputManager(Win32DisplayManager* pDisplayManager);
+	Win32InputManager(Win32DisplayManager* display_manager);
 	virtual ~Win32InputManager();
 
 	virtual void Refresh();
@@ -115,7 +108,7 @@ public:
 	virtual const InputDevice* GetMouse() const;
 	virtual InputDevice* GetMouse();
 
-	virtual void SetCursorVisible(bool pVisible);
+	virtual void SetCursorVisible(bool visible);
 
 	virtual float GetCursorX();
 	virtual float GetCursorY();
@@ -125,38 +118,38 @@ public:
 
 
 protected:
-	bool OnMessage(int pMsg, int pwParam, long plParam);
-	void SetKey(KeyCode pWParam, long pLParam, bool pIsDown);
+	bool OnMessage(int msg, int param, long param);
+	void SetKey(KeyCode w_param, long l_param, bool is_down);
 
 private:
 	// The DirectInput device enumeration callback.
-	static BOOL CALLBACK EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
+	static BOOL CALLBACK EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID ref);
 
 	void AddObserver();
 	void RemoveObserver();
 
-	void SetMousePosition(int pMsg, int x, int y);
+	void SetMousePosition(int msg, int x, int y);
 
-	Win32DisplayManager* mDisplayManager;
+	Win32DisplayManager* display_manager_;
 
 	// The DirectInput object.
-	LPDIRECTINPUT8 mDirectInput;
+	LPDIRECTINPUT8 direct_input_;
 
-	bool mEnumError;
-	bool mInitialized;
+	bool enum_error_;
+	bool initialized_;
 
 	// The entire display area (not just the user's window).
-	int mScreenWidth;
-	int mScreenHeight;
+	int screen_width_;
+	int screen_height_;
 
 	// Mouse related stuff.
-	float mCursorX;
-	float mCursorY;
+	float cursor_x_;
+	float cursor_y_;
 
 	// Default devices.
-	InputDevice* mKeyboard;
-	InputDevice* mMouse;
-	int mTypeCount[InputDevice::TYPE_COUNT];
+	InputDevice* keyboard_;
+	InputDevice* mouse_;
+	int type_count_[InputDevice::kTypeCount];
 	logclass();
 };
 

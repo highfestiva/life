@@ -6,42 +6,38 @@
 
 #pragma once
 
-#include "../../../Lepra/Include/LepraTarget.h"
-#include "../UiFontManager.h"
+#include "../../../lepra/include/lepratarget.h"
+#include "../uifontmanager.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 class MacDisplayManager;
 }
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class MacFontManager: public FontManager
-{
+class MacFontManager: public FontManager {
 	typedef FontManager Parent;
 public:
-	MacFontManager(UiLepra::MacDisplayManager* pDisplayManager);
+	MacFontManager(uilepra::MacDisplayManager* display_manager);
 	virtual ~MacFontManager();
 
-	virtual FontId AddFont(const str& pFontName, double pSize, int pFlags = NORMAL);
-	virtual bool RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect& pRect);
-	virtual int GetCharWidth(wchar_t pChar) const;
-	virtual int GetCharOffset(wchar_t pChar) const;
+	virtual FontId AddFont(const str& font_name, double size, int flags = kNormal);
+	virtual bool RenderGlyph(wchar_t c, Canvas& image, const PixelRect& rect);
+	virtual int GetCharWidth(wchar_t c) const;
+	virtual int GetCharOffset(wchar_t c) const;
 
 private:
-	struct MacFont: Font
-	{
-		double mActualSize;
+	struct MacFont: Font {
+		double actual_size_;
 	};
 
-	UiLepra::MacDisplayManager* mDisplayManager;
+	uilepra::MacDisplayManager* display_manager_;
 };
 
 

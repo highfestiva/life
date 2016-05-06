@@ -7,488 +7,416 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiListLayout.h"
-#include "../../Include/GUI/UiComponent.h"
-#include "../../../Lepra/Include/ListUtil.h"
+#include "../../include/gui/uilistlayout.h"
+#include "../../include/gui/uicomponent.h"
+#include "../../../lepra/include/listutil.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-ListLayout::ListLayout(ListType pListType):
-	mComponentTree(0, (float64)(1 << 30), 1.0),
-	mContentSize(0,0),
-	mPosDX(0),
-	mPosDY(0),
-	mListHW(0),
-	mIndentationSize(1),
-	mListType(pListType)
-{
-	mIter = mNodeList.end();
+ListLayout::ListLayout(ListType list_type):
+	component_tree_(0, (float64)(1 << 30), 1.0),
+	content_size_(0,0),
+	pos_dx_(0),
+	pos_dy_(0),
+	list_hw_(0),
+	indentation_size_(1),
+	list_type_(list_type) {
+	iter_ = node_list_.end();
 }
 
-ListLayout::~ListLayout()
-{
+ListLayout::~ListLayout() {
 }
 
-Layout::Type ListLayout::GetType() const
-{
-	return Layout::LISTLAYOUT;
+Layout::Type ListLayout::GetType() const {
+	return Layout::kListlayout;
 }
 
-void ListLayout::Add(Component* pComponent, int pParam1, int /*pParam2*/)
-{
-	float64 lHalfHW = (float64)GetPreferredHW(pComponent) / 2.0;
-	float64 lPos    = (float64)mListHW + lHalfHW;
-	mComponentTree.InsertObject(pComponent, pComponent, lPos, lHalfHW);
+void ListLayout::Add(Component* component, int param1, int /*param2*/) {
+	float64 half_hw = (float64)GetPreferredHW(component) / 2.0;
+	float64 pos    = (float64)list_hw_ + half_hw;
+	component_tree_.InsertObject(component, component, pos, half_hw);
 
-	mNodeList.push_back(Node(pComponent, pParam1));
-	mComponentTable.Insert(pComponent, --mNodeList.end());
+	node_list_.push_back(Node(component, param1));
+	component_table_.Insert(component, --node_list_.end());
 
-	mListHW += GetPreferredHW(pComponent);
+	list_hw_ += GetPreferredHW(component);
 }
 
-void ListLayout::AddChildAfter(Component* pChild, Component* pAfterThis, int pIndentationLevel)
-{
-	ComponentTable::Iterator lTIter = mComponentTable.Find(pAfterThis);
+void ListLayout::AddChildAfter(Component* child, Component* after_this, int indentation_level) {
+	ComponentTable::Iterator t_iter = component_table_.Find(after_this);
 
-	if (lTIter != mComponentTable.End())
-	{
-		NodeList::iterator lBeforeThisIter(*lTIter);
-		++lBeforeThisIter;
-		NodeList::iterator lChildIter = mNodeList.insert(lBeforeThisIter, Node(pChild, pIndentationLevel));
-		mComponentTable.Insert(pChild, lChildIter);
+	if (t_iter != component_table_.End()) {
+		NodeList::iterator before_this_iter(*t_iter);
+		++before_this_iter;
+		NodeList::iterator child_iter = node_list_.insert(before_this_iter, Node(child, indentation_level));
+		component_table_.Insert(child, child_iter);
 
-		int lHW = GetPreferredHW(pChild);
-		mListHW += lHW;
+		int hw = GetPreferredHW(child);
+		list_hw_ += hw;
 
 		// Get the size and position of the existing child.
-		float64 lPrevHalfHW;
-		float64 lPrevPos;
-		mComponentTree.GetObjectSizeAndPos((*(*lTIter)).mComponent, lPrevPos, lPrevHalfHW);
+		float64 prev_half_hw;
+		float64 prev_pos;
+		component_tree_.GetObjectSizeAndPos((*(*t_iter)).component_, prev_pos, prev_half_hw);
 
 		// The position and the size of the new child.
-		float64 lHalfHW = (float64)lHW / 2.0;
-		float64 lPos    = lPrevPos + lPrevHalfHW + lHalfHW;
-		
-		float64 lNewPos = lPos + lHalfHW;
+		float64 half_hw = (float64)hw / 2.0;
+		float64 pos    = prev_pos + prev_half_hw + half_hw;
+
+		float64 new_pos = pos + half_hw;
 
 		// Move all affected objects in the component tree.
-		NodeList::iterator lIter2(lChildIter);
-		++lIter2;
-		for (; lIter2 != mNodeList.end(); ++lIter2)
-		{
-			float64 lNewHW = GetPreferredHW((*lIter2).mComponent);
-			mComponentTree.MoveObject((*lIter2).mComponent, lNewPos + lNewHW / 2.0, lNewHW / 2.0);
-			lNewPos += lNewHW;
+		NodeList::iterator iter2(child_iter);
+		++iter2;
+		for (; iter2 != node_list_.end(); ++iter2) {
+			float64 new_hw = GetPreferredHW((*iter2).component_);
+			component_tree_.MoveObject((*iter2).component_, new_pos + new_hw / 2.0, new_hw / 2.0);
+			new_pos += new_hw;
 		}
 
 		// Insert the new child in the component tree.
-		mComponentTree.InsertObject(pChild, pChild, lPos, lHalfHW);
+		component_tree_.InsertObject(child, child, pos, half_hw);
 	}
 }
 
-void ListLayout::AddChildrenAfter(std::list<Component*>& pChildList, Component* pAfterThis, int pIndentationLevel)
-{
-	ComponentTable::Iterator lTIter = mComponentTable.Find(pAfterThis);
+void ListLayout::AddChildrenAfter(std::list<Component*>& child_list, Component* after_this, int indentation_level) {
+	ComponentTable::Iterator t_iter = component_table_.Find(after_this);
 
-	if (lTIter != mComponentTable.End())
-	{
-		NodeList::iterator lAfterThisIter(*lTIter);
+	if (t_iter != component_table_.End()) {
+		NodeList::iterator after_this_iter(*t_iter);
 
 		// Get the size and position of the existing child.
-		float64 lHalfHW;
-		float64 lPos;
-		mComponentTree.GetObjectSizeAndPos((*lAfterThisIter).mComponent, lPos, lHalfHW);
-		lPos += lHalfHW;
+		float64 half_hw;
+		float64 pos;
+		component_tree_.GetObjectSizeAndPos((*after_this_iter).component_, pos, half_hw);
+		pos += half_hw;
 
-		NodeList::iterator lNext(lAfterThisIter);
-		++lNext;
+		NodeList::iterator next(after_this_iter);
+		++next;
 
-		std::list<Component*>::iterator lCLIter;
-		for (lCLIter = pChildList.begin(); lCLIter != pChildList.end(); ++lCLIter)
-		{
-			Component* lChild = *lCLIter;
+		std::list<Component*>::iterator cl_iter;
+		for (cl_iter = child_list.begin(); cl_iter != child_list.end(); ++cl_iter) {
+			Component* _child = *cl_iter;
 
-			NodeList::iterator lChildIter = mNodeList.insert(++lAfterThisIter, Node(lChild, pIndentationLevel));
-			lAfterThisIter = lChildIter;
-			mComponentTable.Insert(lChild, lChildIter);
+			NodeList::iterator child_iter = node_list_.insert(++after_this_iter, Node(_child, indentation_level));
+			after_this_iter = child_iter;
+			component_table_.Insert(_child, child_iter);
 
-			int lHW = GetPreferredHW(lChild);
-			mListHW += lHW;
+			int hw = GetPreferredHW(_child);
+			list_hw_ += hw;
 
-			lHalfHW = (float64)lHW / 2.0;
+			half_hw = (float64)hw / 2.0;
 
 			// Insert the new child in the component tree.
-			mComponentTree.InsertObject(lChild, lChild, lPos + lHalfHW, lHalfHW);
+			component_tree_.InsertObject(_child, _child, pos + half_hw, half_hw);
 
-			lPos += (float64)lHW;
+			pos += (float64)hw;
 		}
 
-		
+
 		// Move all affected objects in the component tree.
-		for (; lNext != mNodeList.end(); ++lNext)
-		{
-			float64 lNewHW = GetPreferredHW((*lNext).mComponent);
-			mComponentTree.MoveObject((*lNext).mComponent, lPos + lNewHW / 2.0, lNewHW / 2.0);
-			lPos += lNewHW;
+		for (; next != node_list_.end(); ++next) {
+			float64 new_hw = GetPreferredHW((*next).component_);
+			component_tree_.MoveObject((*next).component_, pos + new_hw / 2.0, new_hw / 2.0);
+			pos += new_hw;
 		}
 	}
 }
 
-void ListLayout::Remove(Component* pComponent)
-{
-	ComponentTable::Iterator lTIter = mComponentTable.Find(pComponent);
-	if (lTIter != mComponentTable.End())
-	{
-		NodeList::iterator lIter = (*lTIter);
-		mNodeList.erase(lIter);
-		mComponentTree.RemoveObject(pComponent);
-		mComponentTable.Remove(lTIter);
+void ListLayout::Remove(Component* component) {
+	ComponentTable::Iterator t_iter = component_table_.Find(component);
+	if (t_iter != component_table_.End()) {
+		NodeList::iterator iter = (*t_iter);
+		node_list_.erase(iter);
+		component_tree_.RemoveObject(component);
+		component_table_.Remove(t_iter);
 
 		// We need to loop through the entire list and update the layout.
-		
-		mListHW = 0;
+
+		list_hw_ = 0;
 		int i = 0;
-		
-		for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
-		{
-			Node& lNode = *lIter;
-			int lHW = GetPreferredHW(lNode.mComponent);
-			
-			float64 lHalfHW = (float64)lHW / 2.0;
-			float64 lPos    = (float64)mListHW + lHalfHW;
-			mComponentTree.MoveObject(lNode.mComponent, lPos, lHalfHW);
-			mListHW += lHW;
+
+		for (iter = node_list_.begin(); iter != node_list_.end(); ++iter) {
+			Node& node = *iter;
+			int hw = GetPreferredHW(node.component_);
+
+			float64 half_hw = (float64)hw / 2.0;
+			float64 pos    = (float64)list_hw_ + half_hw;
+			component_tree_.MoveObject(node.component_, pos, half_hw);
+			list_hw_ += hw;
 			i++;
 		}
 	}
 }
 
-int ListLayout::GetNumComponents() const
-{
-	return (int)mNodeList.size();
+int ListLayout::GetNumComponents() const {
+	return (int)node_list_.size();
 }
 
-Component* ListLayout::Find(int pScreenXY)
-{
-	PixelCoord lOwnerPos(GetOwner()->GetScreenPos());
-	float64 lPos = 0;
-	
-	if (mListType == COLUMN)
-	{
-		lPos = (float64)(pScreenXY - lOwnerPos.y - mPosDY);
-	}
-	else // if (mListType == ROW)
-	{
-		lPos = (float64)(pScreenXY - lOwnerPos.x - mPosDX);
+Component* ListLayout::Find(int screen_xy) {
+	PixelCoord owner_pos(GetOwner()->GetScreenPos());
+	float64 pos = 0;
+
+	if (list_type_ == kColumn) {
+		pos = (float64)(screen_xy - owner_pos.y - pos_dy_);
+	} else { // if (list_type_ == kRow)
+		pos = (float64)(screen_xy - owner_pos.x - pos_dx_);
 	}
 
-	ComponentTree::ObjectList lList;
-	mComponentTree.GetObjects(lList, lPos, 0.5);
+	ComponentTree::ObjectList __list;
+	component_tree_.GetObjects(__list, pos, 0.5);
 
-	if (lList.empty() == true)
-	{
+	if (__list.empty() == true) {
 		return 0;
 	}
 
-	if (lList.size() == 1)
-	{
-		return lList.front();
+	if (__list.size() == 1) {
+		return __list.front();
 	}
 
 	// The list shouldn't contain more than one component.
 	// But if it does, somehow, let's find the correct one.
-	ComponentTree::ObjectList::iterator lIter;
-	for (lIter = lList.begin(); lIter != lList.end(); ++lIter)
-	{
-		Component* lComp = *lIter;
-		PixelRect lRect(lComp->GetScreenRect());
+	ComponentTree::ObjectList::iterator iter;
+	for (iter = __list.begin(); iter != __list.end(); ++iter) {
+		Component* comp = *iter;
+		PixelRect rect(comp->GetScreenRect());
 
-		if ((mListType == COLUMN && lRect.IsInside(lRect.GetCenterX(), pScreenXY) == true) ||
-		    (mListType == ROW && lRect.IsInside(pScreenXY, lRect.GetCenterY()) == true))
-		{
-			return lComp;
+		if ((list_type_ == kColumn && rect.IsInside(rect.GetCenterX(), screen_xy) == true) ||
+		    (list_type_ == kRow && rect.IsInside(screen_xy, rect.GetCenterY()) == true)) {
+			return comp;
 		}
 	}
 
 	return 0;
 }
 
-void ListLayout::Find(ComponentList& pComponents, int pScreenXY1, int pScreenXY2)
-{
-	PixelCoord lOwnerPos(GetOwner()->GetScreenPos());
+void ListLayout::Find(ComponentList& components, int screen_x_y1, int screen_x_y2) {
+	PixelCoord owner_pos(GetOwner()->GetScreenPos());
 
-	if (pScreenXY1 > pScreenXY2)
-	{
-		int lTemp = pScreenXY1;
-		pScreenXY1 = pScreenXY2;
-		pScreenXY2 = lTemp;
+	if (screen_x_y1 > screen_x_y2) {
+		int temp = screen_x_y1;
+		screen_x_y1 = screen_x_y2;
+		screen_x_y2 = temp;
 	}
 
-	float64 lUpper = 0;
-	float64 lLower = 0;
-	
-	if (mListType == COLUMN)
-	{
-		lUpper = (float64)(pScreenXY1 - lOwnerPos.y - mPosDY);
-		lLower = (float64)(pScreenXY2 - lOwnerPos.y - mPosDY);
-	}
-	else // if (mListType == ROW)
-	{
-		lUpper = (float64)(pScreenXY1 - lOwnerPos.x - mPosDX);
-		lLower = (float64)(pScreenXY2 - lOwnerPos.x - mPosDX);
+	float64 upper = 0;
+	float64 lower = 0;
+
+	if (list_type_ == kColumn) {
+		upper = (float64)(screen_x_y1 - owner_pos.y - pos_dy_);
+		lower = (float64)(screen_x_y2 - owner_pos.y - pos_dy_);
+	} else { // if (list_type_ == kRow)
+		upper = (float64)(screen_x_y1 - owner_pos.x - pos_dx_);
+		lower = (float64)(screen_x_y2 - owner_pos.x - pos_dx_);
 	}
 
-	mComponentTree.GetObjects(pComponents, (lLower + lUpper) * 0.5, (lLower - lUpper) * 0.5);
+	component_tree_.GetObjects(components, (lower + upper) * 0.5, (lower - upper) * 0.5);
 }
 
-Component* ListLayout::FindIndex(int pIndex)
-{
-	Component* lComponent = 0;
+Component* ListLayout::FindIndex(int index) {
+	Component* _component = 0;
 
-	if (pIndex >= 0 && pIndex < (int)mNodeList.size())
-	{
-		lComponent = (*ListUtil::FindByIndex(mNodeList, pIndex)).mComponent;
+	if (index >= 0 && index < (int)node_list_.size()) {
+		_component = (*ListUtil::FindByIndex(node_list_, index)).component_;
 	}
 
-	return lComponent;
+	return _component;
 }
 
-Component* ListLayout::GetFirst()
-{
-	if (mNodeList.empty() == true)
-	{
+Component* ListLayout::GetFirst() {
+	if (node_list_.empty() == true) {
 		return 0;
 	}
 
-	mIter = mNodeList.begin();
-	return (*mIter).mComponent;
+	iter_ = node_list_.begin();
+	return (*iter_).component_;
 }
 
-Component* ListLayout::GetNext()
-{
-	++mIter;
-	if (mIter == mNodeList.end())
-	{
+Component* ListLayout::GetNext() {
+	++iter_;
+	if (iter_ == node_list_.end()) {
 		return 0;
 	}
 
-	return (*mIter).mComponent;
+	return (*iter_).component_;
 }
 
-Component* ListLayout::GetLast()
-{
-	if (mNodeList.empty() == true)
-	{
+Component* ListLayout::GetLast() {
+	if (node_list_.empty() == true) {
 		return 0;
 	}
 
-	mIter = --mNodeList.end();
-	return (*mIter).mComponent;
+	iter_ = --node_list_.end();
+	return (*iter_).component_;
 }
 
-Component* ListLayout::GetPrev()
-{
-	--mIter;
-	if (mIter == mNodeList.end())
-	{
+Component* ListLayout::GetPrev() {
+	--iter_;
+	if (iter_ == node_list_.end()) {
 		return 0;
 	}
 
-	return (*mIter).mComponent;
+	return (*iter_).component_;
 }
 
-Component* ListLayout::GetNext(Component* pCurrent)
-{
-	Component* lNext = 0;
-	ComponentTable::Iterator lIter = mComponentTable.Find(pCurrent);
+Component* ListLayout::GetNext(Component* current) {
+	Component* next = 0;
+	ComponentTable::Iterator iter = component_table_.Find(current);
 
-	if (lIter != mComponentTable.End())
-	{
-		NodeList::iterator lListIter = (*lIter);
-		++lListIter;
+	if (iter != component_table_.End()) {
+		NodeList::iterator list_iter = (*iter);
+		++list_iter;
 
-		if (lListIter != mNodeList.end())
-		{
-			lNext = (*lListIter).mComponent;
+		if (list_iter != node_list_.end()) {
+			next = (*list_iter).component_;
 		}
 	}
 
-	return lNext;
+	return next;
 }
 
-Component* ListLayout::GetPrev(Component* pCurrent)
-{
-	Component* lPrev = 0;
-	ComponentTable::Iterator lIter = mComponentTable.Find(pCurrent);
+Component* ListLayout::GetPrev(Component* current) {
+	Component* prev = 0;
+	ComponentTable::Iterator iter = component_table_.Find(current);
 
-	if (lIter != mComponentTable.End())
-	{
-		NodeList::iterator lListIter = (*lIter);
-		--lListIter;
+	if (iter != component_table_.End()) {
+		NodeList::iterator list_iter = (*iter);
+		--list_iter;
 
-		if (lListIter != mNodeList.end())
-		{
-			lPrev = (*lListIter).mComponent;
+		if (list_iter != node_list_.end()) {
+			prev = (*list_iter).component_;
 		}
 	}
 
-	return lPrev;
+	return prev;
 }
 
-void ListLayout::UpdateLayout()
-{
-	mContentSize.x = 0;
-	mContentSize.y = 0;
+void ListLayout::UpdateLayout() {
+	content_size_.x = 0;
+	content_size_.y = 0;
 
-	PixelCoord lOwnerSize(GetOwner()->GetSize());
-	NodeList::iterator lIter;
+	PixelCoord owner_size(GetOwner()->GetSize());
+	NodeList::iterator iter;
 
-	if (mListType == COLUMN)
-	{
-		for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
-		{
-			Node& lNode = *lIter;
-			PixelCoord lSize(lNode.mComponent->GetPreferredWidth(true), lNode.mComponent->GetPreferredHeight());
+	if (list_type_ == kColumn) {
+		for (iter = node_list_.begin(); iter != node_list_.end(); ++iter) {
+			Node& node = *iter;
+			PixelCoord __size(node.component_->GetPreferredWidth(true), node.component_->GetPreferredHeight());
 
-			lSize.x += lNode.mIndentationLevel * mIndentationSize;
+			__size.x += node.indentation_level_ * indentation_size_;
 
-			if (lSize.x < lOwnerSize.x)
-			{
-				lSize.x = lOwnerSize.x;
+			if (__size.x < owner_size.x) {
+				__size.x = owner_size.x;
 			}
 
-			if (mContentSize.x < lSize.x)
-			{
-				mContentSize.x = lSize.x;
+			if (content_size_.x < __size.x) {
+				content_size_.x = __size.x;
 			}
 
-			mContentSize.y += lSize.y;
+			content_size_.y += __size.y;
 		}
 
-		int y = mPosDY;
-		for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
-		{
-			Node& lNode = *lIter;
-			lNode.mComponent->SetPos(mPosDX + lNode.mIndentationLevel * mIndentationSize, y);
-			PixelCoord lSize(lNode.mComponent->GetPreferredSize());
+		int y = pos_dy_;
+		for (iter = node_list_.begin(); iter != node_list_.end(); ++iter) {
+			Node& node = *iter;
+			node.component_->SetPos(pos_dx_ + node.indentation_level_ * indentation_size_, y);
+			PixelCoord __size(node.component_->GetPreferredSize());
 
-			lSize.x = mContentSize.x;
-			lNode.mComponent->SetSize(lSize);
+			__size.x = content_size_.x;
+			node.component_->SetSize(__size);
 
-			y += lSize.y;
+			y += __size.y;
 		}
-	}
-	else // if (mListType == ROW)
-	{
-		for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
-		{
-			Node& lNode = *lIter;
-			PixelCoord lSize(lNode.mComponent->GetPreferredWidth(), lNode.mComponent->GetPreferredHeight(true));
+	} else { // if (list_type_ == kRow)
+		for (iter = node_list_.begin(); iter != node_list_.end(); ++iter) {
+			Node& node = *iter;
+			PixelCoord __size(node.component_->GetPreferredWidth(), node.component_->GetPreferredHeight(true));
 
-			lSize.y += lNode.mIndentationLevel * mIndentationSize;
+			__size.y += node.indentation_level_ * indentation_size_;
 
-			if (lSize.y < lOwnerSize.y)
-			{
-				lSize.y = lOwnerSize.y;
+			if (__size.y < owner_size.y) {
+				__size.y = owner_size.y;
 			}
 
-			if (mContentSize.y < lSize.y)
-			{
-				mContentSize.y = lSize.y;
+			if (content_size_.y < __size.y) {
+				content_size_.y = __size.y;
 			}
 
-			mContentSize.x += lSize.x;
+			content_size_.x += __size.x;
 		}
 
-		int x = mPosDX;
-		for (lIter = mNodeList.begin(); lIter != mNodeList.end(); ++lIter)
-		{
-			Node& lNode = *lIter;
-			lNode.mComponent->SetPos(x, mPosDY + lNode.mIndentationLevel * mIndentationSize);
-			PixelCoord lSize(lNode.mComponent->GetPreferredSize());
+		int x = pos_dx_;
+		for (iter = node_list_.begin(); iter != node_list_.end(); ++iter) {
+			Node& node = *iter;
+			node.component_->SetPos(x, pos_dy_ + node.indentation_level_ * indentation_size_);
+			PixelCoord __size(node.component_->GetPreferredSize());
 
-			lSize.y = mContentSize.y;
-			lNode.mComponent->SetSize(lSize);
+			__size.y = content_size_.y;
+			node.component_->SetSize(__size);
 
-			x += lSize.x;
+			x += __size.x;
 		}
 	}
 }
 
-PixelCoord ListLayout::GetPreferredSize(bool /*pForceAdaptive*/)
-{
+PixelCoord ListLayout::GetPreferredSize(bool /*force_adaptive*/) {
 	return PixelCoord(0, 0);
 }
 
-PixelCoord ListLayout::GetMinSize() const
-{
+PixelCoord ListLayout::GetMinSize() const {
 	return PixelCoord(0, 0);
 }
 
-PixelCoord ListLayout::GetContentSize() const
-{
-	return mContentSize;
+PixelCoord ListLayout::GetContentSize() const {
+	return content_size_;
 }
 
-int ListLayout::GetPreferredHW(Component* pComponent)
-{
-	return mListType == COLUMN ? pComponent->GetPreferredHeight() : pComponent->GetPreferredWidth();
+int ListLayout::GetPreferredHW(Component* component) {
+	return list_type_ == kColumn ? component->GetPreferredHeight() : component->GetPreferredWidth();
 }
 
-ListLayout::ListType ListLayout::GetListType() const
-{
-	return mListType;
+ListLayout::ListType ListLayout::GetListType() const {
+	return list_type_;
 }
 
-void ListLayout::SetPosOffset(int pDX, int pDY)
-{
-	mPosDX = pDX;
-	mPosDY = pDY;
+void ListLayout::SetPosOffset(int dx, int dy) {
+	pos_dx_ = dx;
+	pos_dy_ = dy;
 }
 
-int ListLayout::GetPosDX() const
-{
-	return mPosDX;
+int ListLayout::GetPosDX() const {
+	return pos_dx_;
 }
 
-int ListLayout::GetPosDY() const
-{
-	return mPosDY;
+int ListLayout::GetPosDY() const {
+	return pos_dy_;
 }
 
-float64 ListLayout::GetAverageComponentHW() const
-{
-	float64 lHW = 0;
-	if (mListType == COLUMN)
-	{
-		lHW = (float64)mContentSize.y / (float64)mNodeList.size();
-	}
-	else // if (mListType == ROW)
-	{
-		lHW = (float64)mContentSize.x / (float64)mNodeList.size();
+float64 ListLayout::GetAverageComponentHW() const {
+	float64 hw = 0;
+	if (list_type_ == kColumn) {
+		hw = (float64)content_size_.y / (float64)node_list_.size();
+	} else { // if (list_type_ == kRow)
+		hw = (float64)content_size_.x / (float64)node_list_.size();
 	}
 
-	return lHW;
+	return hw;
 }
 
-bool ListLayout::IsEmpty() const
-{
-	return mNodeList.empty();
+bool ListLayout::IsEmpty() const {
+	return node_list_.empty();
 }
 
-void ListLayout::SetIndentationSize(int pIndentationSize)
-{
-	mIndentationSize = pIndentationSize;
+void ListLayout::SetIndentationSize(int indentation_size) {
+	indentation_size_ = indentation_size;
 }
 
-int ListLayout::GetIndentationSize() const
-{
-	return mIndentationSize;
+int ListLayout::GetIndentationSize() const {
+	return indentation_size_;
 }
 
 

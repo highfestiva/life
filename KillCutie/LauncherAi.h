@@ -1,18 +1,17 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/CppContextObject.h"
-#include "Game.h"
+#include "../cure/include/cppcontextobject.h"
+#include "game.h"
 
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
@@ -20,22 +19,21 @@ class Game;
 
 
 
-class LauncherAi: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class LauncherAi: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	LauncherAi(Game* pGame);
+	LauncherAi(Game* game);
 	virtual ~LauncherAi();
 	void Init();
 
 private:
 	virtual void OnTick();
 
-	Game* mGame;
-	HiResTimer mLastShot;
-	vec3 mTargetOffset;
-	bool mDidShoot;
-	int mShotCount;
+	Game* game_;
+	HiResTimer last_shot_;
+	vec3 target_offset_;
+	bool did_shoot_;
+	int shot_count_;
 
 	logclass();
 };

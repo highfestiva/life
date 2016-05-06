@@ -5,191 +5,148 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiConsolePrompt.h"
-#include "../../Include/GUI/UiTextField.h"
+#include "../../include/gui/uiconsoleprompt.h"
+#include "../../include/gui/uitextfield.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
 ConsolePrompt::ConsolePrompt():
-	mParent(0),
-	mIsCtrlPressed(false),
-	mIsAltPressed(false),
-	mIsShiftPressed(false)
-{
+	parent_(0),
+	is_ctrl_pressed_(false),
+	is_alt_pressed_(false),
+	is_shift_pressed_(false) {
 }
 
-ConsolePrompt::~ConsolePrompt()
-{
+ConsolePrompt::~ConsolePrompt() {
 	SetInputComponent(0);
-	mSemaphore.Signal();
+	semaphore_.Signal();
 }
 
 
 
-void ConsolePrompt::SetInputComponent(TextField* pInputComponent)
-{
-	if (mParent)
-	{
-		mParent->RemoveTextListener(this);
-		mParent->RemoveKeyListener(this);
+void ConsolePrompt::SetInputComponent(TextField* input_component) {
+	if (parent_) {
+		parent_->RemoveTextListener(this);
+		parent_->RemoveKeyListener(this);
 	}
-	mParent = pInputComponent;
-	if (mParent)
-	{
-		mParent->AddTextListener(this);
-		mParent->AddKeyListener(this);
+	parent_ = input_component;
+	if (parent_) {
+		parent_->AddTextListener(this);
+		parent_->AddKeyListener(this);
 
-		mParent->SetIsReadOnly(true);
+		parent_->SetIsReadOnly(true);
 	}
 }
 
 
 
-bool ConsolePrompt::OnChar(wchar_t pChar)
-{
+bool ConsolePrompt::OnChar(wchar_t c) {
 	{
-		ScopeLock lLock(&mLock);
-		wchar_t lChar = pChar;
-		if (lChar == 27)
-		{
-			lChar = CON_KEY_ESCAPE;
+		ScopeLock lock(&lock_);
+		wchar_t _c = c;
+		if (_c == 27) {
+			_c = kConKeyEscape;
 		}
-		mBufferedChars.push_back(lChar);
+		buffered_chars_.push_back(_c);
 	}
-	mSemaphore.Signal();
+	semaphore_.Signal();
 	return (false);
 }
 
-bool ConsolePrompt::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	if (pKeyCode == UiLepra::InputManager::IN_KBD_LCTRL || pKeyCode == UiLepra::InputManager::IN_KBD_RCTRL)
-	{
-		mIsCtrlPressed = true;
-	}
-	else if (pKeyCode == UiLepra::InputManager::IN_KBD_LALT || pKeyCode == UiLepra::InputManager::IN_KBD_RALT)
-	{
-		mIsAltPressed = true;
-	}
-	else if (pKeyCode == UiLepra::InputManager::IN_KBD_LSHIFT || pKeyCode == UiLepra::InputManager::IN_KBD_RSHIFT)
-	{
-		mIsShiftPressed = true;
+bool ConsolePrompt::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
+	if (key_code == uilepra::InputManager::kInKbdLctrl || key_code == uilepra::InputManager::kInKbdRctrl) {
+		is_ctrl_pressed_ = true;
+	} else if (key_code == uilepra::InputManager::kInKbdLalt || key_code == uilepra::InputManager::kInKbdRalt) {
+		is_alt_pressed_ = true;
+	} else if (key_code == uilepra::InputManager::kInKbdLshift || key_code == uilepra::InputManager::kInKbdRshift) {
+		is_shift_pressed_ = true;
 	}
 
 	{
-		ScopeLock lLock(&mLock);
-		switch(pKeyCode)
-		{
-			case UiLepra::InputManager::IN_KBD_LEFT:
-			{
-				if (mIsCtrlPressed)
-				{
-					mBufferedChars.push_back(CON_KEY_CTRL_LEFT);
+		ScopeLock lock(&lock_);
+		switch(key_code) {
+			case uilepra::InputManager::kInKbdLeft: {
+				if (is_ctrl_pressed_) {
+					buffered_chars_.push_back(kConKeyCtrlLeft);
+				} else {
+					buffered_chars_.push_back(kConKeyLeft);
 				}
-				else
-				{
-					mBufferedChars.push_back(CON_KEY_LEFT);
+			} break;
+			case uilepra::InputManager::kInKbdRight: {
+				if (is_ctrl_pressed_) {
+					buffered_chars_.push_back(kConKeyCtrlRight);
+				} else {
+					buffered_chars_.push_back(kConKeyRight);
 				}
-			}
-			break;
-			case UiLepra::InputManager::IN_KBD_RIGHT:
-			{
-				if (mIsCtrlPressed)
-				{
-					mBufferedChars.push_back(CON_KEY_CTRL_RIGHT);
-				}
-				else
-				{
-					mBufferedChars.push_back(CON_KEY_RIGHT);
-				}
-			}
-			break;
-			case UiLepra::InputManager::IN_KBD_HOME:	mBufferedChars.push_back(CON_KEY_HOME);		break;
-			case UiLepra::InputManager::IN_KBD_END:		mBufferedChars.push_back(CON_KEY_END);		break;
-			case UiLepra::InputManager::IN_KBD_DOWN:	mBufferedChars.push_back(CON_KEY_DOWN);		break;
-			case UiLepra::InputManager::IN_KBD_UP:		mBufferedChars.push_back(CON_KEY_UP);		break;
-			case UiLepra::InputManager::IN_KBD_DEL:		mBufferedChars.push_back(CON_KEY_DELETE);	break;
-			case UiLepra::InputManager::IN_KBD_PGUP:	mBufferedChars.push_back(CON_KEY_PAGE_UP);	break;
-			case UiLepra::InputManager::IN_KBD_PGDOWN:	mBufferedChars.push_back(CON_KEY_PAGE_DOWN);	break;
+			} break;
+			case uilepra::InputManager::kInKbdHome:	buffered_chars_.push_back(kConKeyHome);		break;
+			case uilepra::InputManager::kInKbdEnd:		buffered_chars_.push_back(kConKeyEnd);		break;
+			case uilepra::InputManager::kInKbdDown:	buffered_chars_.push_back(kConKeyDown);		break;
+			case uilepra::InputManager::kInKbdUp:		buffered_chars_.push_back(kConKeyUp);		break;
+			case uilepra::InputManager::kInKbdDel:		buffered_chars_.push_back(kConKeyDelete);	break;
+			case uilepra::InputManager::kInKbdPgup:	buffered_chars_.push_back(kConKeyPageUp);	break;
+			case uilepra::InputManager::kInKbdPgdown:	buffered_chars_.push_back(kConKeyPageDown);	break;
 			default:					return (false);	// TRICKY: RAII!
 		}
 	}
-	mSemaphore.Signal();
+	semaphore_.Signal();
 	return (false);
 }
 
-bool ConsolePrompt::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	if (pKeyCode == UiLepra::InputManager::IN_KBD_LCTRL || pKeyCode == UiLepra::InputManager::IN_KBD_RCTRL)
-	{
-		mIsCtrlPressed = false;
-	}
-	else if (pKeyCode == UiLepra::InputManager::IN_KBD_LALT || pKeyCode == UiLepra::InputManager::IN_KBD_RALT)
-	{
-		mIsAltPressed = false;
-	}
-	else if (pKeyCode == UiLepra::InputManager::IN_KBD_LSHIFT || pKeyCode == UiLepra::InputManager::IN_KBD_RSHIFT)
-	{
-		mIsShiftPressed = false;
+bool ConsolePrompt::OnKeyUp(uilepra::InputManager::KeyCode key_code) {
+	if (key_code == uilepra::InputManager::kInKbdLctrl || key_code == uilepra::InputManager::kInKbdRctrl) {
+		is_ctrl_pressed_ = false;
+	} else if (key_code == uilepra::InputManager::kInKbdLalt || key_code == uilepra::InputManager::kInKbdRalt) {
+		is_alt_pressed_ = false;
+	} else if (key_code == uilepra::InputManager::kInKbdLshift || key_code == uilepra::InputManager::kInKbdRshift) {
+		is_shift_pressed_ = false;
 	}
 	return (false);
 }
 
-void ConsolePrompt::SetFocus(bool pFocus)
-{
-	if (mParent)
-	{
-		if (pFocus)
-		{
-			mParent->SetKeyboardFocus();
-		}
-		else
-		{
-			mParent->ReleaseKeyboardFocus();
+void ConsolePrompt::SetFocus(bool focus) {
+	if (parent_) {
+		if (focus) {
+			parent_->SetKeyboardFocus();
+		} else {
+			parent_->ReleaseKeyboardFocus();
 		}
 	}
 }
 
-int ConsolePrompt::WaitChar()
-{
-	mSemaphore.Wait();
-	int lChar = -100;
+int ConsolePrompt::WaitChar() {
+	semaphore_.Wait();
+	int _c = -100;
 	{
-		ScopeLock lLock(&mLock);
-		if (!mBufferedChars.empty())
-		{
-			lChar = mBufferedChars.front();
-			mBufferedChars.pop_front();
+		ScopeLock lock(&lock_);
+		if (!buffered_chars_.empty()) {
+			_c = buffered_chars_.front();
+			buffered_chars_.pop_front();
 		}
 	}
-	return (lChar);
+	return (_c);
 }
 
-void ConsolePrompt::ReleaseWaitCharThread()
-{
-	mSemaphore.Signal();
+void ConsolePrompt::ReleaseWaitCharThread() {
+	semaphore_.Signal();
 }
 
-void ConsolePrompt::Backspace(size_t)
-{
+void ConsolePrompt::Backspace(size_t) {
 	// Handled by PrintPrompt() in this implementation.
 }
 
-void ConsolePrompt::EraseText(size_t)
-{
+void ConsolePrompt::EraseText(size_t) {
 	// Handled by PrintPrompt() in this implementation.
 }
 
-void ConsolePrompt::PrintPrompt(const str& pPrompt, const str& pInputText, size_t pEditIndex)
-{
-	if (mParent)
-	{
-		mParent->SetText(wstrutil::Encode(pPrompt+pInputText));
-		mParent->SetMarkerPosition(pPrompt.length()+pEditIndex);
+void ConsolePrompt::PrintPrompt(const str& prompt, const str& input_text, size_t edit_index) {
+	if (parent_) {
+		parent_->SetText(wstrutil::Encode(prompt+input_text));
+		parent_->SetMarkerPosition(prompt.length()+edit_index);
 	}
 }
 

@@ -6,34 +6,32 @@
 
 #pragma once
 
-#include "LepraTypes.h"
+#include "lepratypes.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class DES
-{
+class DES {
 public:
-	void SetKey(uint64 pKey);
-	void Encrypt(uint8* pData, unsigned pLength) const;
-	void Decrypt(uint8* pData, unsigned pLength) const;
-	uint64 Crypt(uint64 pData, bool pForward) const;
+	void SetKey(uint64 key);
+	void Encrypt(uint8* data, unsigned length) const;
+	void Decrypt(uint8* data, unsigned length) const;
+	uint64 Crypt(uint64 data, bool forward) const;
 
 protected:
-	uint64 mKey[16];
-	static const uint8 mSBox[8][64];
-	static const uint8 mMask[16];
-	static const uint8 mShift[16];
-	static const uint8 mKP1[56];
-	static const uint8 mKP2[48];
-	static const uint8 mIP1[64];
-	static const uint8 mIP2[64];
-	static const uint8 mExpansion[48];
-	static const uint8 mPBox[32];
+	uint64 key_[16];
+	static const uint8 s_box_[8][64];
+	static const uint8 mask_[16];
+	static const uint8 shift_[16];
+	static const uint8 k_p1_[56];
+	static const uint8 k_p2_[48];
+	static const uint8 i_p1_[64];
+	static const uint8 i_p2_[64];
+	static const uint8 expansion_[48];
+	static const uint8 p_box_[32];
 };
 
 

@@ -4,65 +4,51 @@
 
 
 
-#include "../../../Lepra/Include/LepraOS.h"
-#include "../../../Lepra/Include/Canvas.h"
-#include "../UiTouchDrag.h"
+#include "../../../lepra/include/lepraos.h"
+#include "../../../lepra/include/canvas.h"
+#include "../uitouchdrag.h"
 #ifdef LEPRA_IOS
 
 
 
-namespace UiLepra
-{
-namespace Touch
-{
+namespace uilepra {
+namespace touch {
 
 
 
-class TouchHandler
-{
+class TouchHandler {
 public:
-static void HandleTouches(NSSet* pTouches, const Canvas* pCanvas, DragManager& pDragManager)
-{
-	NSEnumerator* e = [pTouches objectEnumerator];
-	UITouch* lTouch;
-	while ((lTouch = (UITouch*)[e nextObject]))
-	{
-		CGPoint lTapPosition = [lTouch locationInView:nil];
-		CGPoint lPrevTapPosition = [lTouch previousLocationInView:nil];
-		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
+static void HandleTouches(NSSet* touches, const Canvas* canvas, DragManager& drag_manager) {
+	NSEnumerator* e = [touches objectEnumerator];
+	UITouch* touch;
+	while ((touch = (UITouch*)[e nextObject])) {
+		CGPoint tap_position = [touch locationInView:nil];
+		CGPoint prev_tap_position = [touch previousLocationInView:nil];
+		bool is_pressed = (touch.phase != UITouchPhaseEnded && touch.phase != UITouchPhaseCancelled);
 		const int s = [[UIScreen mainScreen] scale];
-		PixelCoord lPreviousTap;
-		PixelCoord lThisTap;
-		static const bool lIsIOS7 = ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0);
-		const int lRotation = lIsIOS7? (pCanvas->GetDeviceOutputRotation()+90)%360 : pCanvas->GetOutputRotation();
-		switch (lRotation)
-		{
-			case 0:
-			{
-				lPreviousTap = PixelCoord(lPrevTapPosition.x*s, lPrevTapPosition.y*s);
-				lThisTap = PixelCoord(lTapPosition.x*s, lTapPosition.y*s);
-			}
-			break;
-			case 90:
-			{
-				lPreviousTap = PixelCoord(lPrevTapPosition.y*s, pCanvas->GetActualHeight() - lPrevTapPosition.x*s);
-				lThisTap = PixelCoord(lTapPosition.y*s, pCanvas->GetActualHeight() - lTapPosition.x*s);
-			}
-			break;
-			case 180:
-			{
-				lPreviousTap = PixelCoord(pCanvas->GetActualWidth() - lPrevTapPosition.x*s, pCanvas->GetActualHeight() - lPrevTapPosition.y*s);
-				lThisTap = PixelCoord(pCanvas->GetActualWidth() - lTapPosition.x*s, pCanvas->GetActualHeight() - lTapPosition.y*s);
-			}
-			break;
-			default:
-			{
-				lPreviousTap = PixelCoord(pCanvas->GetActualWidth() - lPrevTapPosition.y*s, lPrevTapPosition.x*s);
-				lThisTap = PixelCoord(pCanvas->GetActualWidth() - lTapPosition.y*s, lTapPosition.x*s);
-			}
-			break;
+		PixelCoord previous_tap;
+		PixelCoord this_tap;
+		static const bool is_io_s7 = ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0);
+		const int rotation = is_io_s7? (canvas->GetDeviceOutputRotation()+90)%360 : canvas->GetOutputRotation();
+		switch (rotation) {
+			case 0: {
+				previous_tap = PixelCoord(prev_tap_position.x*s, prev_tap_position.y*s);
+				this_tap = PixelCoord(tap_position.x*s, tap_position.y*s);
+			} break;
+			case 90: {
+				previous_tap = PixelCoord(prev_tap_position.y*s, canvas->GetActualHeight() - prev_tap_position.x*s);
+				this_tap = PixelCoord(tap_position.y*s, canvas->GetActualHeight() - tap_position.x*s);
+			} break;
+			case 180: {
+				previous_tap = PixelCoord(canvas->GetActualWidth() - prev_tap_position.x*s, canvas->GetActualHeight() - prev_tap_position.y*s);
+				this_tap = PixelCoord(canvas->GetActualWidth() - tap_position.x*s, canvas->GetActualHeight() - tap_position.y*s);
+			} break;
+			default: {
+				previous_tap = PixelCoord(canvas->GetActualWidth() - prev_tap_position.y*s, prev_tap_position.x*s);
+				this_tap = PixelCoord(canvas->GetActualWidth() - tap_position.y*s, tap_position.x*s);
+			} break;
 		}
-		pDragManager.UpdateDrag(lPreviousTap, lThisTap, lIsPressed, lIsPressed? 1 : 0);
+		drag_manager.UpdateDrag(previous_tap, this_tap, is_pressed, is_pressed? 1 : 0);
 	}
 }
 };

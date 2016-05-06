@@ -1,29 +1,27 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "LepraTypes.h"
+#include "lepratypes.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class HiResTimer
-{
+class HiResTimer {
 public:
-	HiResTimer(bool pUseShadow = true);
-	HiResTimer(uint64 pCount);
-	HiResTimer(const HiResTimer& pTimer);
+	HiResTimer(bool use_shadow = true);
+	HiResTimer(uint64 count);
+	HiResTimer(const HiResTimer& timer);
 	~HiResTimer();
 
-	void EnableShadowCounter(bool pEnable);
+	void EnableShadowCounter(bool enable);
 	static void StepCounterShadow();
 
 	// Updates time, returns current time diff and resets time diff.
@@ -37,14 +35,14 @@ public:
 	// Returns the actual counter value.
 	int64 GetCounter() const;
 
-	// Updates to the current time. 
+	// Updates to the current time.
 	// Does not update the previous time.
 	void UpdateTimer();
 
 	// Sets the previous time to the same value as
 	// the current time.
 	void ClearTimeDiff();
-	void ReduceTimeDiff(double pSecsonds);
+	void ReduceTimeDiff(double secsonds);
 
 	// Returns the time difference between the current time
 	// and the previous time.
@@ -53,17 +51,17 @@ public:
 	int64 GetCounterDiff() const;
 
 	// Operators.
-	const HiResTimer& operator = (const HiResTimer& pTimer);
+	const HiResTimer& operator = (const HiResTimer& timer);
 
-	bool operator <  (const HiResTimer& pTimer) const;
-	bool operator >  (const HiResTimer& pTimer) const;
-	bool operator == (const HiResTimer& pTimer) const;
-	bool operator != (const HiResTimer& pTimer) const;
-	bool operator <= (const HiResTimer& pTimer) const;
-	bool operator >= (const HiResTimer& pTimer) const;
+	bool operator <  (const HiResTimer& timer) const;
+	bool operator >  (const HiResTimer& timer) const;
+	bool operator == (const HiResTimer& timer) const;
+	bool operator != (const HiResTimer& timer) const;
+	bool operator <= (const HiResTimer& timer) const;
+	bool operator >= (const HiResTimer& timer) const;
 
-	HiResTimer& operator += (const HiResTimer& pTimer);
-	HiResTimer& operator -= (const HiResTimer& pTimer);
+	HiResTimer& operator += (const HiResTimer& timer);
+	HiResTimer& operator -= (const HiResTimer& timer);
 
 	uint64 GetSystemCounterShadow();
 
@@ -73,19 +71,18 @@ public:
 	static uint64 GetSystemCounter();
 
 protected:
-	uint64 mPrevCounter;
-	uint64 mCounter;
-	bool mUseShadow;
+	uint64 prev_counter_;
+	uint64 counter_;
+	bool use_shadow_;
 
-	static uint64 mFrequency;
-	static double mPeriod;
-	static uint64 mLastSystemCounter;
+	static uint64 frequency_;
+	static double period_;
+	static uint64 last_system_counter_;
 };
 
 
 
-class StopWatch: public HiResTimer
-{
+class StopWatch: public HiResTimer {
 	typedef HiResTimer Parent;
 public:
 	StopWatch();
@@ -99,8 +96,8 @@ public:
 	int GetStartCount() const;
 
 protected:
-	bool mIsStarted;
-	int mStartCount;
+	bool is_started_;
+	int start_count_;
 };
 
 

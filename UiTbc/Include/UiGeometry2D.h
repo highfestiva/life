@@ -1,10 +1,10 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 //
 // NOTES:
 //
-// This class was implemented in order to optimize 2D rendering using hardware 
+// This class was implemented in order to optimize 2D rendering using hardware
 // accelerated Painters (see Painter.h).
 //
 // Use this class with care! This class is implemented with performance in mind,
@@ -12,56 +12,50 @@
 
 
 
-#include "../../Lepra/Include/LepraTypes.h"
-#include "../../Lepra/Include/Vector2D.h"
-#include "UiTbc.h"
+#include "../../lepra/include/lepratypes.h"
+#include "../../lepra/include/vector2d.h"
+#include "uitbc.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class Geometry2D
-{
+class Geometry2D {
 public:
 	// Used to define what data that will be allocated for each vertex.
 	// X and Y coordinates are mandatory, so they are not available as
 	// an option. These flags can be combined using the | operator.
-	// If VTX_INTERLEAVED is set, the data will be stored for Direct3D-
+	// If kVtxInterleaved is set, the data will be stored for Direct3D-
 	// compatibility (colors as 32-bit BGRA integers (in little endian)).
-	enum //VertexFormat
-	{
-		VTX_INTERLEAVED = (1 << 0), // Opposite is separate buffers.
-		VTX_UV          = (1 << 1), // Texture coordinates.
-		VTX_RGB         = (1 << 2), // Vertex colors.
-		VTX_INDEX16     = (1 << 3), // Indices are 16-bit.
+	enum { //VertexFormat
+		kVtxInterleaved = (1 << 0), // Opposite is separate buffers.
+		kVtxUv          = (1 << 1), // Texture coordinates.
+		kVtxRgb         = (1 << 2), // Vertex colors.
+		kVtxIndex16     = (1 << 3), // Indices are 16-bit.
 	};
 
 	// Structs used for the interleaved format. Direct3D compatible.
-	struct VertexXY
-	{
+	struct VertexXY {
 		float x;
 		float y;
 		float z; // = 0
 		float w; // = 1
 	};
 
-	struct VertexXYRGB
-	{
+	struct VertexXYRGB {
 		float x;
 		float y;
 		float z; // = 0
 		float w; // = 1
-		Lepra::uint8 mBlue;
-		Lepra::uint8 mGreen;
-		Lepra::uint8 mRed;
-		Lepra::uint8 mAlpha;
+		lepra::uint8 blue_;
+		lepra::uint8 green_;
+		lepra::uint8 red_;
+		lepra::uint8 alpha_;
 	};
 
-	struct VertexXYUV
-	{
+	struct VertexXYUV {
 		float x;
 		float y;
 		float z; // = 0
@@ -70,89 +64,87 @@ public:
 		float v;
 	};
 
-	struct VertexXYUVRGB
-	{
+	struct VertexXYUVRGB {
 		float x;
 		float y;
 		float z; // = 0
 		float w; // = 1
-		Lepra::uint8 mBlue;
-		Lepra::uint8 mGreen;
-		Lepra::uint8 mRed;
-		Lepra::uint8 mAlpha;
+		lepra::uint8 blue_;
+		lepra::uint8 green_;
+		lepra::uint8 red_;
+		lepra::uint8 alpha_;
 		float u;
 		float v;
 	};
 
-	Geometry2D(unsigned pVertexFormat = VTX_RGB,
-		int pVertexCapacity = 16, int pTriangleCapacity = 8);
+	Geometry2D(unsigned vertex_format = kVtxRgb,
+		int vertex_capacity = 16, int triangle_capacity = 8);
 	~Geometry2D();
-	void Init(unsigned pVertexFormat = VTX_RGB,
-		int pVertexCapacity = 16, int pTriangleCapacity = 8);
+	void Init(unsigned vertex_format = kVtxRgb,
+		int vertex_capacity = 16, int triangle_capacity = 8);
 
-	inline unsigned GetVertexFormat() const { return mVertexFormat; }
+	inline unsigned GetVertexFormat() const { return vertex_format_; }
 
 	// Will allocate exactly the amount of space specified by the parameter.
-	void ReallocVertexBuffers(int pVertexCapacity);
-	void ReallocTriangleBuffer(int pTriangleCapacity);
+	void ReallocVertexBuffers(int vertex_capacity);
+	void ReallocTriangleBuffer(int triangle_capacity);
 
-	void AssureVertexCapacity(int pVertexCapacity);
-	void AssureTriangleCapacity(int pTriangleCapacity);
+	void AssureVertexCapacity(int vertex_capacity);
+	void AssureTriangleCapacity(int triangle_capacity);
 
 	// The first time these functions are called, they will add a vertex and
-	// increase the vertex count with 1. After calling ResetIndices, the 
+	// increase the vertex count with 1. After calling ResetIndices, the
 	// vertex count will remain constant, but the "current vertex"-index will
 	// increase by each call. Make sure to use the function that matches the
 	// declared vertex format.
-	Lepra::uint32 SetVertex(float x, float y);
-	Lepra::uint32 SetVertex(float x, float y, float u, float v);
-	Lepra::uint32 SetVertex(float x, float y, float r, float g, float b);
-	Lepra::uint32 SetVertex(float x, float y, float u, float v, float r, float g, float b);
-	void SetTriangle(Lepra::uint32 pV1, Lepra::uint32 pV2, Lepra::uint32 pV3);
+	lepra::uint32 SetVertex(float x, float y);
+	lepra::uint32 SetVertex(float x, float y, float u, float v);
+	lepra::uint32 SetVertex(float x, float y, float r, float g, float b);
+	lepra::uint32 SetVertex(float x, float y, float u, float v, float r, float g, float b);
+	void SetTriangle(lepra::uint32 v1, lepra::uint32 v2, lepra::uint32 v3);
 
 	// Sets the VertexCount and the TriangleCount to zero.
 	void Reset();
 
 	// Returns valid buffer pointers to buffers specified by the vertex format.
-	// If VTX_INTERLEAVED is set, the pointer from GetVertexData() should be
+	// If kVtxInterleaved is set, the pointer from GetVertexData() should be
 	// casted to either a void or a byte pointer, float pointer otherwise.
-	inline const void* GetVertexData() const { return mVertexData; }
-	inline const float* GetColorData() const { return mColorData; }
-	inline const float* GetUVData() const { return mUVData; }
-	inline const Lepra::uint16* GetTriangleData16() const { return mTriangleData16; }
-	inline const Lepra::uint32* GetTriangleData32() const { return mTriangleData32; }
-	inline int GetVertexCapacity() const { return mVertexCapacity; }
-	inline int GetTriangleCapacity() const { return mTriangleCapacity; }
-	inline int GetVertexCount() const { return mVertexCount; }
-	inline int GetTriangleCount() const { return mTriangleCount; }
+	inline const void* GetVertexData() const { return vertex_data_; }
+	inline const float* GetColorData() const { return color_data_; }
+	inline const float* GetUVData() const { return uv_data_; }
+	inline const lepra::uint16* GetTriangleData16() const { return triangle_data16_; }
+	inline const lepra::uint32* GetTriangleData32() const { return triangle_data32_; }
+	inline int GetVertexCapacity() const { return vertex_capacity_; }
+	inline int GetTriangleCapacity() const { return triangle_capacity_; }
+	inline int GetVertexCount() const { return vertex_count_; }
+	inline int GetTriangleCount() const { return triangle_count_; }
 
-	inline const vec2& GetPos() const { return mPos; }
-	inline void SetPos(const vec2& pPos) { mPos = pPos; }
+	inline const vec2& GetPos() const { return pos_; }
+	inline void SetPos(const vec2& pos) { pos_ = pos; }
 
-	inline bool IsFlagSet(unsigned pFlag) { return ((mVertexFormat & pFlag) != 0); }
+	inline bool IsFlagSet(unsigned pFlag) { return ((vertex_format_ & pFlag) != 0); }
 
 private:
-	void Realloc(void** pData, size_t pNewSize, size_t pBytesToCopy);
+	void Realloc(void** data, size_t new_size, size_t bytes_to_copy);
 
 	Geometry2D(const Geometry2D&);
 	void operator=(const Geometry2D&);
 
-	unsigned mVertexFormat;
+	unsigned vertex_format_;
 
-	void* mVertexData;
-	float* mColorData;
-	float* mUVData;
-	union
-	{
-		Lepra::uint16* mTriangleData16;
-		Lepra::uint32* mTriangleData32;
+	void* vertex_data_;
+	float* color_data_;
+	float* uv_data_;
+	union {
+		lepra::uint16* triangle_data16_;
+		lepra::uint32* triangle_data32_;
 	};
-	int mVertexCapacity;
-	int mTriangleCapacity;
-	int mVertexCount;
-	int mTriangleCount;
+	int vertex_capacity_;
+	int triangle_capacity_;
+	int vertex_count_;
+	int triangle_count_;
 
-	Vector2D<float> mPos;
+	Vector2D<float> pos_;
 };
 
 

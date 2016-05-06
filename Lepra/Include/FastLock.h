@@ -6,13 +6,13 @@
 
 #pragma once
 
-#include "Thread.h"
+#include "thread.h"
 
 
 
 #if defined(LEPRA_WINDOWS)
 
-#include "Win32/Win32Thread.h"
+#include "win32/win32thread.h"
 #define FastLock	Win32Lock
 #define FastCondition	Win32Condition
 #define FastSemaphore	Win32Semaphore
@@ -20,7 +20,7 @@
 
 #elif defined(LEPRA_POSIX)
 
-#include "Posix/PosixThread.h"
+#include "posix/posixthread.h"
 #define FastLock	PosixLock
 #define FastCondition	PosixCondition
 #define FastSemaphore	PosixSemaphore

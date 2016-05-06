@@ -1,238 +1,238 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Header Files\Win32">
+    <Filter include="Header Files\win32">
       <UniqueIdentifier>{38ad0768-e740-406b-91b9-f5bf05326270}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\X11">
+    <Filter include="Header Files\x11">
       <UniqueIdentifier>{413e3a0f-d58a-4565-8947-f134c86796d6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Mac">
+    <Filter include="Header Files\mac">
       <UniqueIdentifier>{8fbed4a5-158c-4803-be79-16b9b0e969fb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Source Files\Win32">
+    <Filter include="src Files\win32">
       <UniqueIdentifier>{fa7e5f9c-68a3-449e-9072-eebafa501f6a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\X11">
+    <Filter include="src Files\x11">
       <UniqueIdentifier>{485074d3-9c91-4ead-bbc8-9718429f8771}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Mac">
+    <Filter include="src Files\mac">
       <UniqueIdentifier>{e066df9f-eb00-4277-b0a5-b7d772e914b9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\GLEXT.H">
+    <Clinclude include="include\glext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiChibiXmAlStream.h">
+    <Clinclude include="include\uichibixmalstream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiCore.h">
+    <Clinclude include="include\uicore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiDisplayManager.h">
+    <Clinclude include="include\uidisplaymanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiInput.h">
+    <Clinclude include="include\uiinput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiLepra.h">
+    <Clinclude include="include\uilepra.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiOggAlStream.h">
+    <Clinclude include="include\uioggalstream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiOpenGLExtensions.h">
+    <Clinclude include="include\uiopenglextensions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiSoundManager.h">
+    <Clinclude include="include\uisoundmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiSoundManagerFMod.h">
+    <Clinclude include="include\uisoundmanagerfmod.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiSoundManagerOpenAL.h">
+    <Clinclude include="include\uisoundmanageropenal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Win32\UiWin32Core.h">
-      <Filter>Header Files\Win32</Filter>
+    <Clinclude include="include\win32\uiwin32core.h">
+      <Filter>Header Files\win32</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Win32\UiWin32DirectXDisplay.h">
-      <Filter>Header Files\Win32</Filter>
+    <Clinclude include="include\win32\uiwin32directxdisplay.h">
+      <Filter>Header Files\win32</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Win32\UiWin32DisplayManager.h">
-      <Filter>Header Files\Win32</Filter>
+    <Clinclude include="include\win32\uiwin32displaymanager.h">
+      <Filter>Header Files\win32</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Win32\UiWin32Input.h">
-      <Filter>Header Files\Win32</Filter>
+    <Clinclude include="include\win32\uiwin32input.h">
+      <Filter>Header Files\win32</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Win32\UiWin32OpenGLDisplay.h">
-      <Filter>Header Files\Win32</Filter>
+    <Clinclude include="include\win32\uiwin32opengldisplay.h">
+      <Filter>Header Files\win32</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Win32\WGLEXT.H">
-      <Filter>Header Files\Win32</Filter>
+    <Clinclude include="include\win32\wglext.h">
+      <Filter>Header Files\win32</Filter>
     </ClInclude>
-    <ClInclude Include="Include\X11\UiX11Core.h">
-      <Filter>Header Files\X11</Filter>
+    <Clinclude include="include\x11\uix11core.h">
+      <Filter>Header Files\x11</Filter>
     </ClInclude>
-    <ClInclude Include="Include\X11\UiX11DisplayManager.h">
-      <Filter>Header Files\X11</Filter>
+    <Clinclude include="include\x11\uix11displaymanager.h">
+      <Filter>Header Files\x11</Filter>
     </ClInclude>
-    <ClInclude Include="Include\X11\UiX11Input.h">
-      <Filter>Header Files\X11</Filter>
+    <Clinclude include="include\x11\uix11input.h">
+      <Filter>Header Files\x11</Filter>
     </ClInclude>
-    <ClInclude Include="Include\X11\UiX11OpenGLDisplay.h">
-      <Filter>Header Files\X11</Filter>
+    <Clinclude include="include\x11\uix11opengldisplay.h">
+      <Filter>Header Files\x11</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mac\EAGLView.h">
-      <Filter>Header Files\Mac</Filter>
+    <Clinclude include="include\mac\eaglview.h">
+      <Filter>Header Files\mac</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mac\UiMacCore.h">
-      <Filter>Header Files\Mac</Filter>
+    <Clinclude include="include\mac\uimaccore.h">
+      <Filter>Header Files\mac</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mac\UiMacDisplayManager.h">
-      <Filter>Header Files\Mac</Filter>
+    <Clinclude include="include\mac\uimacdisplaymanager.h">
+      <Filter>Header Files\mac</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mac\UiMacInput.h">
-      <Filter>Header Files\Mac</Filter>
+    <Clinclude include="include\mac\uimacinput.h">
+      <Filter>Header Files\mac</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mac\UiMacOpenGLDisplay.h">
-      <Filter>Header Files\Mac</Filter>
+    <Clinclude include="include\mac\uimacopengldisplay.h">
+      <Filter>Header Files\mac</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mac\UiMacTouchHandler.h">
-      <Filter>Header Files\Mac</Filter>
+    <Clinclude include="include\mac\uimactouchhandler.h">
+      <Filter>Header Files\mac</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mac\RotatingController.h">
-      <Filter>Header Files\Mac</Filter>
+    <Clinclude include="include\mac\rotatingcontroller.h">
+      <Filter>Header Files\mac</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mac\UiIosDef.h">
-      <Filter>Header Files\Mac</Filter>
+    <Clinclude include="include\mac\uiiosdef.h">
+      <Filter>Header Files\mac</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Mac\UiIosInput.h">
-      <Filter>Header Files\Mac</Filter>
+    <Clinclude include="include\mac\uiiosinput.h">
+      <Filter>Header Files\mac</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiTouchstick.h">
+    <Clinclude include="include\uitouchstick.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiSoundManagerMock.h">
+    <Clinclude include="include\uisoundmanagermock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiSoundStream.h">
+    <Clinclude include="include\uisoundstream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UiTouchDrag.h">
+    <Clinclude include="include\uitouchdrag.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\iosglext.h">
+    <Clinclude include="include\iosglext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\macglext.h">
+    <Clinclude include="include\macglext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Win32\UiWin32GDIDisplay.h">
-      <Filter>Header Files\Win32</Filter>
+    <Clinclude include="include\win32\uiwin32gdidisplay.h">
+      <Filter>Header Files\win32</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\UiChibiXmAlStream.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uichibixmalstream.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiDisplayManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uidisplaymanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiInput.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uiinput.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiLepra.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uilepra.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiOggAlStream.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uioggalstream.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiOpenGLExtensions.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uiopenglextensions.cxx">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiSoundManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uisoundmanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiSoundManagerFMod.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uisoundmanagerfmod.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiSoundManagerOpenAL.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uisoundmanageropenal.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiSoundStream.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uisoundstream.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Win32\UiWin32Core.cpp">
-      <Filter>Source Files\Win32</Filter>
+    <ClCompile include="src\win32\uiwin32core.cpp">
+      <Filter>src Files\win32</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Win32\UiWin32DirectXDisplay.cpp">
-      <Filter>Source Files\Win32</Filter>
+    <ClCompile include="src\win32\uiwin32directxdisplay.cpp">
+      <Filter>src Files\win32</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Win32\UiWin32DisplayManager.cpp">
-      <Filter>Source Files\Win32</Filter>
+    <ClCompile include="src\win32\uiwin32displaymanager.cpp">
+      <Filter>src Files\win32</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Win32\UiWin32Input.cpp">
-      <Filter>Source Files\Win32</Filter>
+    <ClCompile include="src\win32\uiwin32input.cpp">
+      <Filter>src Files\win32</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Win32\UiWin32OpenGLDisplay.cpp">
-      <Filter>Source Files\Win32</Filter>
+    <ClCompile include="src\win32\uiwin32opengldisplay.cpp">
+      <Filter>src Files\win32</Filter>
     </ClCompile>
-    <ClCompile Include="Source\X11\UiX11Core.cpp">
-      <Filter>Source Files\X11</Filter>
+    <ClCompile include="src\x11\uix11core.cpp">
+      <Filter>src Files\x11</Filter>
     </ClCompile>
-    <ClCompile Include="Source\X11\UiX11DisplayManager.cpp">
-      <Filter>Source Files\X11</Filter>
+    <ClCompile include="src\x11\uix11displaymanager.cpp">
+      <Filter>src Files\x11</Filter>
     </ClCompile>
-    <ClCompile Include="Source\X11\UiX11Input.cpp">
-      <Filter>Source Files\X11</Filter>
+    <ClCompile include="src\x11\uix11input.cpp">
+      <Filter>src Files\x11</Filter>
     </ClCompile>
-    <ClCompile Include="Source\X11\UiX11OpenGLDisplay.cpp">
-      <Filter>Source Files\X11</Filter>
+    <ClCompile include="src\x11\uix11opengldisplay.cpp">
+      <Filter>src Files\x11</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mac\UiMacCore.mm">
-      <Filter>Source Files\Mac</Filter>
+    <ClCompile include="src\mac\uimaccore.mm">
+      <Filter>src Files\mac</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mac\UiMacDisplayManager.mm">
-      <Filter>Source Files\Mac</Filter>
+    <ClCompile include="src\mac\uimacdisplaymanager.mm">
+      <Filter>src Files\mac</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mac\UiMacInput.mm">
-      <Filter>Source Files\Mac</Filter>
+    <ClCompile include="src\mac\uimacinput.mm">
+      <Filter>src Files\mac</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Mac\UiMacOpenGLDisplay.mm">
-      <Filter>Source Files\Mac</Filter>
+    <ClCompile include="src\mac\uimacopengldisplay.mm">
+      <Filter>src Files\mac</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiTouchDrag.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uitouchdrag.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UiTouchstick.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\uitouchstick.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Win32\UiWin32GDIDisplay.cpp">
-      <Filter>Source Files\Win32</Filter>
+    <ClCompile include="src\win32\uiwin32gdidisplay.cpp">
+      <Filter>src Files\win32</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Source\UiOpenGLExtensions.mm">
-      <Filter>Source Files</Filter>
+    <None include="src\uiopenglextensions.mm">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="Source\Mac\EAGLView.mm">
-      <Filter>Source Files\Mac</Filter>
+    <None include="src\mac\eaglview.mm">
+      <Filter>src Files\mac</Filter>
     </None>
-    <None Include="Source\Mac\UiIosInput.mm">
-      <Filter>Source Files\Mac</Filter>
+    <None include="src\mac\uiiosinput.mm">
+      <Filter>src Files\mac</Filter>
     </None>
-    <None Include="Source\Mac\RotatingController.mm">
-      <Filter>Source Files\Mac</Filter>
+    <None include="src\mac\rotatingcontroller.mm">
+      <Filter>src Files\mac</Filter>
     </None>
   </ItemGroup>
 </Project>

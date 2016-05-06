@@ -5,32 +5,30 @@
 
 
 #include "pch.h"
-#include "../Include/Lepra.h"
-#include "../Include/Canvas.h"
-#include "../Include/GammaLookup.h"
-#include "../Include/HiResTimer.h"
-#include "../Include/MetaFile.h"
-#include "../Include/Quaternion.h"
-#include "../Include/Random.h"
-#include "../Include/SystemManager.h"
-#include "../Include/Transformation.h"
+#include "../include/lepra.h"
+#include "../include/canvas.h"
+#include "../include/gammalookup.h"
+#include "../include/hirestimer.h"
+#include "../include/metafile.h"
+#include "../include/quaternion.h"
+#include "../include/random.h"
+#include "../include/systemmanager.h"
+#include "../include/transformation.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-const quat gIdentityQuaternionF;
-const QuaternionD gIdentityQuaternionD;
-const xform gIdentityTransformationF;
-const TransformationD gIdentityTransformationD;
+const quat kIdentityQuaternionF;
+const QuaternionD kIdentityQuaternionD;
+const xform kIdentityTransformationF;
+const TransformationD kIdentityTransformationD;
 
 
 
-void Init()
-{
+void Init() {
 	LogType::Init();
 
 	HiResTimer::InitFrequency();
@@ -46,8 +44,7 @@ void Init()
 	Random::SetSeed((uint32)HiResTimer::GetSystemCounter());
 }
 
-void Shutdown()
-{
+void Shutdown() {
 	MetaFile::ClearExtensions();
 	SystemManager::Shutdown();
 }

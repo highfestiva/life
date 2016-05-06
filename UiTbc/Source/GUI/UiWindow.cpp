@@ -5,657 +5,569 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiWindow.h"
-#include "../../Include/GUI/UiCaption.h"
-#include "../../Include/GUI/UiFloatingLayout.h"
-#include "../../Include/GUI/UiDesktopWindow.h"
-#include "../../../Lepra/Include/Log.h"
+#include "../../include/gui/uiwindow.h"
+#include "../../include/gui/uicaption.h"
+#include "../../include/gui/uifloatinglayout.h"
+#include "../../include/gui/uidesktopwindow.h"
+#include "../../../lepra/include/log.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-Window::Window(Layout* pLayout) :
+Window::Window(Layout* layout) :
 	Component(new GridLayout(1, 1)),
-	mTLBorder(0),
-	mTRBorder(0),
-	mBRBorder(0),
-	mBLBorder(0),
-	mTBorder(0),
-	mBBorder(0),
-	mLBorder(0),
-	mRBorder(0),
-	mCenterComponent(0),
-	mClientRect(0),
-	mCaption(0),
-	mBorder(true),
-	mBorderWidth(0),
-	mBodyColor(0, 0, 0),
-	mBorderStyle(0)
-{
-	mClientRect = new RectComponent(pLayout);
-	mCenterComponent = new RectComponent(new GridLayout(2, 1));
-	mCenterComponent->AddChild(mClientRect, 1, 0);
+	tl_border_(0),
+	tr_border_(0),
+	br_border_(0),
+	bl_border_(0),
+	t_border_(0),
+	b_border_(0),
+	l_border_(0),
+	r_border_(0),
+	center_component_(0),
+	client_rect_(0),
+	caption_(0),
+	border_(true),
+	border_width_(0),
+	body_color_(0, 0, 0),
+	border_style_(0) {
+	client_rect_ = new RectComponent(layout);
+	center_component_ = new RectComponent(new GridLayout(2, 1));
+	center_component_->AddChild(client_rect_, 1, 0);
 	//Init();
 }
 
-Window::Window(unsigned pBorderStyle,
-			   int pBorderWidth,
-			   const Color& pColor,
-			   Layout* pLayout) :
+Window::Window(unsigned border_style,
+			   int border_width,
+			   const Color& color,
+			   Layout* layout) :
 	Component(new GridLayout(3, 3)),
-	mTLBorder(0),
-	mTRBorder(0),
-	mBRBorder(0),
-	mBLBorder(0),
-	mTBorder(0),
-	mBBorder(0),
-	mLBorder(0),
-	mRBorder(0),
-	mCenterComponent(0),
-	mClientRect(0),
-	mCaption(0),
-	mBorder(true),
-	mBorderWidth(pBorderWidth),
-	mBodyColor(pColor),
-	mBorderStyle(pBorderStyle)
-{
-	mClientRect = new RectComponent(pColor, pLayout);
-	//mClientRect->SetPreferredSize(0, 0, true);
-	mCenterComponent = new RectComponent(new GridLayout(2, 1));
-	mCenterComponent->AddChild(mClientRect, 1, 0);
+	tl_border_(0),
+	tr_border_(0),
+	br_border_(0),
+	bl_border_(0),
+	t_border_(0),
+	b_border_(0),
+	l_border_(0),
+	r_border_(0),
+	center_component_(0),
+	client_rect_(0),
+	caption_(0),
+	border_(true),
+	border_width_(border_width),
+	body_color_(color),
+	border_style_(border_style) {
+	client_rect_ = new RectComponent(color, layout);
+	//client_rect_->SetPreferredSize(0, 0, true);
+	center_component_ = new RectComponent(new GridLayout(2, 1));
+	center_component_->AddChild(client_rect_, 1, 0);
 	//InitBorder();
 }
 
-Window::Window(unsigned pBorderStyle,
-			 int pBorderWidth,
-			 Painter::ImageID pImageID,
-			 Layout* pLayout) :
+Window::Window(unsigned border_style,
+			 int border_width,
+			 Painter::ImageID image_id,
+			 Layout* layout) :
 	Component(new GridLayout(3, 3)),
-	mTLBorder(0),
-	mTRBorder(0),
-	mBRBorder(0),
-	mBLBorder(0),
-	mTBorder(0),
-	mBBorder(0),
-	mLBorder(0),
-	mRBorder(0),
-	mCenterComponent(0),
-	mClientRect(0),
-	mCaption(0),
-	mBorder(true),
-	mBorderWidth(pBorderWidth),
-	mBodyColor(192, 192, 192),
-	mBorderStyle(pBorderStyle)
-{
-	mClientRect = new RectComponent(pImageID, pLayout);
-	//mClientRect->SetPreferredSize(0, 0, true);
-	mCenterComponent = new RectComponent(new GridLayout(2, 1));
-	mCenterComponent->AddChild(mClientRect, 1, 0);
+	tl_border_(0),
+	tr_border_(0),
+	br_border_(0),
+	bl_border_(0),
+	t_border_(0),
+	b_border_(0),
+	l_border_(0),
+	r_border_(0),
+	center_component_(0),
+	client_rect_(0),
+	caption_(0),
+	border_(true),
+	border_width_(border_width),
+	body_color_(192, 192, 192),
+	border_style_(border_style) {
+	client_rect_ = new RectComponent(image_id, layout);
+	//client_rect_->SetPreferredSize(0, 0, true);
+	center_component_ = new RectComponent(new GridLayout(2, 1));
+	center_component_->AddChild(client_rect_, 1, 0);
 	//InitBorder();
 }
 
-Window::Window(const Color& pColor,
-			 Layout* pLayout) :
+Window::Window(const Color& color,
+			 Layout* layout) :
 	Component(new GridLayout(1, 1)),
-	mTLBorder(0),
-	mTRBorder(0),
-	mBRBorder(0),
-	mBLBorder(0),
-	mTBorder(0),
-	mBBorder(0),
-	mLBorder(0),
-	mRBorder(0),
-	mCenterComponent(0),
-	mClientRect(0),
-	mCaption(0),
-	mBorder(false),
-	mBorderWidth(0),
-	mBodyColor(pColor),
-	mBorderStyle(0)
-{
-	mClientRect = new RectComponent(pColor, pLayout);
-	//mClientRect->SetPreferredSize(0, 0, true);
-	mCenterComponent = new RectComponent(new GridLayout(2, 1));
-	mCenterComponent->AddChild(mClientRect, 1, 0);
+	tl_border_(0),
+	tr_border_(0),
+	br_border_(0),
+	bl_border_(0),
+	t_border_(0),
+	b_border_(0),
+	l_border_(0),
+	r_border_(0),
+	center_component_(0),
+	client_rect_(0),
+	caption_(0),
+	border_(false),
+	border_width_(0),
+	body_color_(color),
+	border_style_(0) {
+	client_rect_ = new RectComponent(color, layout);
+	//client_rect_->SetPreferredSize(0, 0, true);
+	center_component_ = new RectComponent(new GridLayout(2, 1));
+	center_component_->AddChild(client_rect_, 1, 0);
 	//InitBorder();
 }
 
-Window::Window(Painter::ImageID pImageID,
-			 Layout* pLayout) :
+Window::Window(Painter::ImageID image_id,
+			 Layout* layout) :
 	Component(new GridLayout(1, 1)),
-	mTLBorder(0),
-	mTRBorder(0),
-	mBRBorder(0),
-	mBLBorder(0),
-	mTBorder(0),
-	mBBorder(0),
-	mLBorder(0),
-	mRBorder(0),
-	mCenterComponent(0),
-	mClientRect(0),
-	mCaption(0),
-	mBorder(false),
-	mBorderWidth(0),
-	mBodyColor(192, 192, 192),
-	mBorderStyle(0)
-{
-	mClientRect = new RectComponent(pImageID, pLayout);
-	//mClientRect->SetPreferredSize(0, 0, true);
-	mCenterComponent = new RectComponent(new GridLayout(2, 1));
-	mCenterComponent->AddChild(mClientRect, 1, 0);
-	Parent::AddChild(mCenterComponent);
+	tl_border_(0),
+	tr_border_(0),
+	br_border_(0),
+	bl_border_(0),
+	t_border_(0),
+	b_border_(0),
+	l_border_(0),
+	r_border_(0),
+	center_component_(0),
+	client_rect_(0),
+	caption_(0),
+	border_(false),
+	border_width_(0),
+	body_color_(192, 192, 192),
+	border_style_(0) {
+	client_rect_ = new RectComponent(image_id, layout);
+	//client_rect_->SetPreferredSize(0, 0, true);
+	center_component_ = new RectComponent(new GridLayout(2, 1));
+	center_component_->AddChild(client_rect_, 1, 0);
+	Parent::AddChild(center_component_);
 	//InitBorder();
 }
 
-Window::~Window()
-{
-	delete mTRBorder;
-	delete mBRBorder;
-	delete mBLBorder;
-	delete mBBorder;
-	delete mRBorder;
-	delete mTLBorder;
-	delete mTBorder;
-	delete mLBorder;
-	delete mClientRect;
+Window::~Window() {
+	delete tr_border_;
+	delete br_border_;
+	delete bl_border_;
+	delete b_border_;
+	delete r_border_;
+	delete tl_border_;
+	delete t_border_;
+	delete l_border_;
+	delete client_rect_;
 
-	Parent::RemoveChild(mCenterComponent, 0);
-	delete mCenterComponent;
+	Parent::RemoveChild(center_component_, 0);
+	delete center_component_;
 }
 
-void Window::Init()
-{
-	Parent::AddChild(mCenterComponent, 0, 0);
+void Window::Init() {
+	Parent::AddChild(center_component_, 0, 0);
 
-	SetColor(mBodyColor);
+	SetColor(body_color_);
 	SetNeedsRepaint(true);
 }
 
-void Window::InitBorder()
-{
-	BorderComponent::BorderShadeFunc lFunc = BorderComponent::ZIGZAG;
-	if (Check(mBorderStyle, BORDER_LINEARSHADING) == true)
-	{
-		lFunc = BorderComponent::LINEAR;
+void Window::InitBorder() {
+	BorderComponent::BorderShadeFunc func = BorderComponent::kZigzag;
+	if (Check(border_style_, kBorderLinearshading) == true) {
+		func = BorderComponent::kLinear;
 	}
 
-	if (Check(mBorderStyle, BORDER_HALF) == false)
-	{
-		mTRBorder = new BorderComponent(BorderComponent::TOPRIGHT_CORNER,    mBodyColor, lFunc);
-		mBRBorder = new BorderComponent(BorderComponent::BOTTOMRIGHT_CORNER, mBodyColor, lFunc);
-		mBLBorder = new BorderComponent(BorderComponent::BOTTOMLEFT_CORNER,  mBodyColor, lFunc);
-		mBBorder  = new BorderComponent(BorderComponent::BOTTOM_BORDER,      mBodyColor, lFunc);
-		mRBorder  = new BorderComponent(BorderComponent::RIGHT_BORDER,       mBodyColor, lFunc);
+	if (Check(border_style_, kBorderHalf) == false) {
+		tr_border_ = new BorderComponent(BorderComponent::kToprightCorner,    body_color_, func);
+		br_border_ = new BorderComponent(BorderComponent::kBottomrightCorner, body_color_, func);
+		bl_border_ = new BorderComponent(BorderComponent::kBottomleftCorner,  body_color_, func);
+		b_border_  = new BorderComponent(BorderComponent::kBottomBorder,      body_color_, func);
+		r_border_  = new BorderComponent(BorderComponent::kRightBorder,       body_color_, func);
 	}
-	mTLBorder = new BorderComponent(BorderComponent::TOPLEFT_CORNER,     mBodyColor, lFunc);
-	mTBorder  = new BorderComponent(BorderComponent::TOP_BORDER,         mBodyColor, lFunc);
-	mLBorder  = new BorderComponent(BorderComponent::LEFT_BORDER,        mBodyColor, lFunc);
+	tl_border_ = new BorderComponent(BorderComponent::kTopleftCorner,     body_color_, func);
+	t_border_  = new BorderComponent(BorderComponent::kTopBorder,         body_color_, func);
+	l_border_  = new BorderComponent(BorderComponent::kLeftBorder,        body_color_, func);
 
-	if (Check(mBorderStyle, BORDER_SUNKEN) == true)
-	{
-		if (Check(mBorderStyle, BORDER_HALF) == false)
-		{
-			mTRBorder->SetSunken(true);
-			mBRBorder->SetSunken(true);
-			mBLBorder->SetSunken(true);
-			mBBorder->SetSunken(true);
-			mRBorder->SetSunken(true);
+	if (Check(border_style_, kBorderSunken) == true) {
+		if (Check(border_style_, kBorderHalf) == false) {
+			tr_border_->SetSunken(true);
+			br_border_->SetSunken(true);
+			bl_border_->SetSunken(true);
+			b_border_->SetSunken(true);
+			r_border_->SetSunken(true);
 		}
-		mTLBorder->SetSunken(true);
-		mTBorder->SetSunken(true);
-		mLBorder->SetSunken(true);
+		tl_border_->SetSunken(true);
+		t_border_->SetSunken(true);
+		l_border_->SetSunken(true);
 	}
 
-	if (Check(mBorderStyle, BORDER_HALF) == false)
-	{
-		mTRBorder->SetMinSize(mBorderWidth, mBorderWidth);
-		mBRBorder->SetMinSize(mBorderWidth, mBorderWidth);
-		mBLBorder->SetMinSize(mBorderWidth, mBorderWidth);
-		mBBorder->SetMinSize(0, mBorderWidth);
-		mRBorder->SetMinSize(mBorderWidth, 0);
+	if (Check(border_style_, kBorderHalf) == false) {
+		tr_border_->SetMinSize(border_width_, border_width_);
+		br_border_->SetMinSize(border_width_, border_width_);
+		bl_border_->SetMinSize(border_width_, border_width_);
+		b_border_->SetMinSize(0, border_width_);
+		r_border_->SetMinSize(border_width_, 0);
 	}
-	mTLBorder->SetMinSize(mBorderWidth, mBorderWidth);
-	mTBorder->SetMinSize(0, mBorderWidth);
-	mLBorder->SetMinSize(mBorderWidth, 0);
+	tl_border_->SetMinSize(border_width_, border_width_);
+	t_border_->SetMinSize(0, border_width_);
+	l_border_->SetMinSize(border_width_, 0);
 
-	if (Check(mBorderStyle, BORDER_HALF) == false)
-	{
-		mTRBorder->SetPreferredSize(mBorderWidth, mBorderWidth);
-		mBRBorder->SetPreferredSize(mBorderWidth, mBorderWidth);
-		mBLBorder->SetPreferredSize(mBorderWidth, mBorderWidth);
-		mBBorder->SetPreferredSize(0, mBorderWidth);
-		mRBorder->SetPreferredSize(mBorderWidth, 0);
+	if (Check(border_style_, kBorderHalf) == false) {
+		tr_border_->SetPreferredSize(border_width_, border_width_);
+		br_border_->SetPreferredSize(border_width_, border_width_);
+		bl_border_->SetPreferredSize(border_width_, border_width_);
+		b_border_->SetPreferredSize(0, border_width_);
+		r_border_->SetPreferredSize(border_width_, 0);
 	}
-	mTLBorder->SetPreferredSize(mBorderWidth, mBorderWidth);
-	mTBorder->SetPreferredSize(0, mBorderWidth);
-	mLBorder->SetPreferredSize(mBorderWidth, 0);
+	tl_border_->SetPreferredSize(border_width_, border_width_);
+	t_border_->SetPreferredSize(0, border_width_);
+	l_border_->SetPreferredSize(border_width_, 0);
 
-	if (Check(mBorderStyle, BORDER_RESIZABLE) == true)
-	{
-		if (Check(mBorderStyle, BORDER_HALF) == false)
-		{
-			mTRBorder->SetResizable(true);
-			mBRBorder->SetResizable(true);
-			mBLBorder->SetResizable(true);
-			mBBorder->SetResizable(true);
-			mRBorder->SetResizable(true);
+	if (Check(border_style_, kBorderResizable) == true) {
+		if (Check(border_style_, kBorderHalf) == false) {
+			tr_border_->SetResizable(true);
+			br_border_->SetResizable(true);
+			bl_border_->SetResizable(true);
+			b_border_->SetResizable(true);
+			r_border_->SetResizable(true);
 		}
-		mTLBorder->SetResizable(true);
-		mTBorder->SetResizable(true);
-		mLBorder->SetResizable(true);
+		tl_border_->SetResizable(true);
+		t_border_->SetResizable(true);
+		l_border_->SetResizable(true);
 	}
 
-//	mCenterComponent->SetPreferredSize(0, 0);
-	if (Check(mBorderStyle, BORDER_HALF) == false)
-	{
-		Parent::AddChild(mTRBorder, 0, 2);
-		Parent::AddChild(mBRBorder, 2, 2);
-		Parent::AddChild(mBLBorder, 2, 0);
-		Parent::AddChild(mBBorder, 2, 1);
-		Parent::AddChild(mRBorder, 1, 2);
+//	center_component_->SetPreferredSize(0, 0);
+	if (Check(border_style_, kBorderHalf) == false) {
+		Parent::AddChild(tr_border_, 0, 2);
+		Parent::AddChild(br_border_, 2, 2);
+		Parent::AddChild(bl_border_, 2, 0);
+		Parent::AddChild(b_border_, 2, 1);
+		Parent::AddChild(r_border_, 1, 2);
 	}
 
-	Parent::AddChild(mTLBorder, 0, 0);
-	Parent::AddChild(mTBorder, 0, 1);
-	Parent::AddChild(mLBorder, 1, 0);
+	Parent::AddChild(tl_border_, 0, 0);
+	Parent::AddChild(t_border_, 0, 1);
+	Parent::AddChild(l_border_, 1, 0);
 
 	SetNeedsRepaint(true);
 }
 
-void Window::SetBorder(unsigned pBorderStyle, int pWidth)
-{
-	if (mBorder == false || (pBorderStyle == mBorderStyle && pWidth == mBorderWidth))
-	{
+void Window::SetBorder(unsigned border_style, int width) {
+	if (border_ == false || (border_style == border_style_ && width == border_width_)) {
 		return;
 	}
 
-	mBorderStyle = pBorderStyle;
+	border_style_ = border_style;
 
-	BorderComponent::BorderShadeFunc lFunc = BorderComponent::ZIGZAG;
-	if (Check(mBorderStyle, BORDER_LINEARSHADING) == true)
-	{
-		lFunc = BorderComponent::LINEAR;
+	BorderComponent::BorderShadeFunc func = BorderComponent::kZigzag;
+	if (Check(border_style_, kBorderLinearshading) == true) {
+		func = BorderComponent::kLinear;
 	}
 
-	mBorderWidth = pWidth;
+	border_width_ = width;
 
-	if (mTLBorder)
-	{
-		mTLBorder->SetPreferredSize(pWidth, pWidth);
-		mTRBorder->SetPreferredSize(pWidth, pWidth);
-		mBRBorder->SetPreferredSize(pWidth, pWidth);
-		mBLBorder->SetPreferredSize(pWidth, pWidth);
-		mTBorder->SetPreferredSize(0, pWidth);
-		mBBorder->SetPreferredSize(0, pWidth);
-		mLBorder->SetPreferredSize(pWidth, 0);
-		mRBorder->SetPreferredSize(pWidth, 0);
+	if (tl_border_) {
+		tl_border_->SetPreferredSize(width, width);
+		tr_border_->SetPreferredSize(width, width);
+		br_border_->SetPreferredSize(width, width);
+		bl_border_->SetPreferredSize(width, width);
+		t_border_->SetPreferredSize(0, width);
+		b_border_->SetPreferredSize(0, width);
+		l_border_->SetPreferredSize(width, 0);
+		r_border_->SetPreferredSize(width, 0);
 
-		mTLBorder->Set(mBodyColor, lFunc);
-		mTRBorder->Set(mBodyColor, lFunc);
-		mBRBorder->Set(mBodyColor, lFunc);
-		mBLBorder->Set(mBodyColor, lFunc);
-		mTBorder->Set(mBodyColor, lFunc);
-		mBBorder->Set(mBodyColor, lFunc);
-		mLBorder->Set(mBodyColor, lFunc);
-		mRBorder->Set(mBodyColor, lFunc);
+		tl_border_->Set(body_color_, func);
+		tr_border_->Set(body_color_, func);
+		br_border_->Set(body_color_, func);
+		bl_border_->Set(body_color_, func);
+		t_border_->Set(body_color_, func);
+		b_border_->Set(body_color_, func);
+		l_border_->Set(body_color_, func);
+		r_border_->Set(body_color_, func);
 
-		if (Check(mBorderStyle, BORDER_SUNKEN) == true)
-		{
-			mTLBorder->SetSunken(true);
-			mTRBorder->SetSunken(true);
-			mBRBorder->SetSunken(true);
-			mBLBorder->SetSunken(true);
-			mTBorder->SetSunken(true);
-			mBBorder->SetSunken(true);
-			mLBorder->SetSunken(true);
-			mRBorder->SetSunken(true);
+		if (Check(border_style_, kBorderSunken) == true) {
+			tl_border_->SetSunken(true);
+			tr_border_->SetSunken(true);
+			br_border_->SetSunken(true);
+			bl_border_->SetSunken(true);
+			t_border_->SetSunken(true);
+			b_border_->SetSunken(true);
+			l_border_->SetSunken(true);
+			r_border_->SetSunken(true);
 		}
 	}
 
 	SetNeedsRepaint(true);
 }
 
-void Window::SetBorder(unsigned pBorderStyle,
-		       Painter::ImageID pTopLeftID,
-		       Painter::ImageID pTopRightID,
-		       Painter::ImageID pBottomLeftID,
-		       Painter::ImageID pBottomRightID,
-		       Painter::ImageID pTopID,
-		       Painter::ImageID pBottomID,
-		       Painter::ImageID pLeftID,
-		       Painter::ImageID pRightID)
-{
-	if (mBorder == false)
-	{
+void Window::SetBorder(unsigned border_style,
+		       Painter::ImageID top_left_id,
+		       Painter::ImageID top_right_id,
+		       Painter::ImageID bottom_left_id,
+		       Painter::ImageID bottom_right_id,
+		       Painter::ImageID top_id,
+		       Painter::ImageID bottom_id,
+		       Painter::ImageID left_id,
+		       Painter::ImageID right_id) {
+	if (border_ == false) {
 		return;
 	}
 
-	mBorderStyle = pBorderStyle;
+	border_style_ = border_style;
 
-	GUIImageManager* lIMan = GetImageManager();
+	GUIImageManager* i_man = GetImageManager();
 
-	mTLBorder->SetPreferredSize(lIMan->GetImageSize(pTopLeftID));
-	mTRBorder->SetPreferredSize(lIMan->GetImageSize(pTopRightID));
-	mBLBorder->SetPreferredSize(lIMan->GetImageSize(pBottomLeftID));
-	mBRBorder->SetPreferredSize(lIMan->GetImageSize(pBottomRightID));
-	mTBorder->SetPreferredSize(0, lIMan->GetImageSize(pTopID).y);
-	mBBorder->SetPreferredSize(0, lIMan->GetImageSize(pBottomID).y);
-	mLBorder->SetPreferredSize(lIMan->GetImageSize(pLeftID).x, 0);
-	mRBorder->SetPreferredSize(lIMan->GetImageSize(pRightID).x, 0);
+	tl_border_->SetPreferredSize(i_man->GetImageSize(top_left_id));
+	tr_border_->SetPreferredSize(i_man->GetImageSize(top_right_id));
+	bl_border_->SetPreferredSize(i_man->GetImageSize(bottom_left_id));
+	br_border_->SetPreferredSize(i_man->GetImageSize(bottom_right_id));
+	t_border_->SetPreferredSize(0, i_man->GetImageSize(top_id).y);
+	b_border_->SetPreferredSize(0, i_man->GetImageSize(bottom_id).y);
+	l_border_->SetPreferredSize(i_man->GetImageSize(left_id).x, 0);
+	r_border_->SetPreferredSize(i_man->GetImageSize(right_id).x, 0);
 
-	mTLBorder->Set(pTopLeftID);
-	mTRBorder->Set(pTopRightID);
-	mBRBorder->Set(pBottomRightID);
-	mBLBorder->Set(pBottomLeftID);
-	mTBorder->Set(pTopID);
-	mBBorder->Set(pBottomID);
-	mLBorder->Set(pLeftID);
-	mRBorder->Set(pRightID);
+	tl_border_->Set(top_left_id);
+	tr_border_->Set(top_right_id);
+	br_border_->Set(bottom_right_id);
+	bl_border_->Set(bottom_left_id);
+	t_border_->Set(top_id);
+	b_border_->Set(bottom_id);
+	l_border_->Set(left_id);
+	r_border_->Set(right_id);
 }
 
-bool Window::IsOver(int pScreenX, int pScreenY)
-{
-	return GetScreenRect().IsInside(pScreenX, pScreenY);
-	/*if (GetScreenRect().IsInside(pScreenX, pScreenY) == true)
-	{
-		Layout* lLayout = GetLayout();
-		if (lLayout != 0)
-		{
-			Component* lChild = lLayout->GetFirst();
-			while (lChild != 0)
-			{
-				if (lChild->GetScreenRect().IsInside(pScreenX, pScreenY) == true)
-				{
-					return lChild->IsOver(pScreenX, pScreenY);
+bool Window::IsOver(int screen_x, int screen_y) {
+	return GetScreenRect().IsInside(screen_x, screen_y);
+	/*if (GetScreenRect().IsInside(screen_x, screen_y) == true) {
+		Layout* _layout = GetLayout();
+		if (_layout != 0) {
+			Component* _child = _layout->GetFirst();
+			while (_child != 0) {
+				if (_child->GetScreenRect().IsInside(screen_x, screen_y) == true) {
+					return _child->IsOver(screen_x, screen_y);
 				}
-				lChild = lLayout->GetNext();
+				_child = _layout->GetNext();
 			}
 		}
 	}
 	return false;*/
 }
 
-bool Window::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
-{
-	Parent::OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
-	return IsOver(pMouseX, pMouseY);
+bool Window::OnMouseMove(int mouse_x, int mouse_y, int delta_x, int delta_y) {
+	Parent::OnMouseMove(mouse_x, mouse_y, delta_x, delta_y);
+	return IsOver(mouse_x, mouse_y);
 }
 
-void Window::SetCaption(Caption* pCaption)
-{
-	if (mCaption != 0)
-	{
-		mCenterComponent->RemoveChild(mCaption, 0);
+void Window::SetCaption(Caption* caption) {
+	if (caption_ != 0) {
+		center_component_->RemoveChild(caption_, 0);
 	}
 
-	mCaption = pCaption;
+	caption_ = caption;
 
-	if (mCaption != 0)
-	{
-		mCenterComponent->AddChild(mCaption, 0, 0);
+	if (caption_ != 0) {
+		center_component_->AddChild(caption_, 0, 0);
 	}
 }
 
-PixelRect Window::GetClientRect() const
-{
-	return mCenterComponent->GetScreenRect();
+PixelRect Window::GetClientRect() const {
+	return center_component_->GetScreenRect();
 }
 
-RectComponent* Window::GetClientRectComponent() const
-{
-	return mClientRect;
+RectComponent* Window::GetClientRectComponent() const {
+	return client_rect_;
 }
 
-void Window::AddChild(Component* pChild, int pParam1, int pParam2, int pLayer)
-{
-	mClientRect->AddChild(pChild, pParam1, pParam2, pLayer);
+void Window::AddChild(Component* child, int param1, int param2, int layer) {
+	client_rect_->AddChild(child, param1, param2, layer);
 }
 
-void Window::RemoveChild(Component* pChild, int pLayer)
-{
-	mClientRect->RemoveChild(pChild, pLayer);
+void Window::RemoveChild(Component* child, int layer) {
+	client_rect_->RemoveChild(child, layer);
 }
 
-int Window::GetNumChildren() const
-{
-	return mClientRect->GetNumChildren();
+int Window::GetNumChildren() const {
+	return client_rect_->GetNumChildren();
 }
 
-void Window::SetActive(bool pActive)
-{
-	if (IsVisible())
-	{
-		if (pActive)
-		{
-			if (mCaption != 0)
-			{
-				mCaption->SetActive(true);
+void Window::SetActive(bool active) {
+	if (IsVisible()) {
+		if (active) {
+			if (caption_ != 0) {
+				caption_->SetActive(true);
 			}
 
-			Component* lParent = Parent::GetParent();
+			Component* parent = Parent::GetParent();
 
-			if (lParent != 0)
-			{
-				Layout* lParentLayout = lParent->GetLayout();
+			if (parent != 0) {
+				Layout* parent_layout = parent->GetLayout();
 
-				if (lParentLayout->GetType() == Layout::FLOATINGLAYOUT)
-				{
-					((FloatingLayout*)lParentLayout)->MoveToTop(this);
+				if (parent_layout->GetType() == Layout::kFloatinglayout) {
+					((FloatingLayout*)parent_layout)->MoveToTop(this);
 				}
 			}
-		}
-		else
-		{
-			if (mCaption != 0)
-			{
-				if (HasKeyboardFocus() ==  true)
-				{
-					GetTopParent()->ReleaseKeyboardFocus(RECURSE_DOWN);
+		} else {
+			if (caption_ != 0) {
+				if (HasKeyboardFocus() ==  true) {
+					GetTopParent()->ReleaseKeyboardFocus(kRecurseDown);
 				}
 
-				mCaption->SetActive(false);
+				caption_->SetActive(false);
 			}
 		}
 	}
 }
 
-bool Window::OnChar(wchar_t pChar)
-{
-	bool lOk;
-	if (pChar == '\t')
-	{
+bool Window::OnChar(wchar_t c) {
+	bool ok;
+	if (c == '\t') {
 		// Focus next component. May wrap.
-		const DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(Component::DESKTOPWINDOW);
-		UiLepra::InputManager* lInputManager = lDesktopWindow->GetInputManager();
-		bool lFocusPrevious = false;
-		bool lFocusNext = false;
-		StateComponentList lComponentList = GetStateList(STATE_FOCUSABLE);
-		StateComponentList::iterator x = lComponentList.begin();
-		for (; x != lComponentList.end(); ++x)
-		{
-			if (lFocusNext)
-			{
+		const DesktopWindow* desktop_window = (DesktopWindow*)GetParentOfType(Component::kDesktopwindow);
+		uilepra::InputManager* input_manager = desktop_window->GetInputManager();
+		bool focus_previous = false;
+		bool focus_next = false;
+		StateComponentList component_list = GetStateList(kStateFocusable);
+		StateComponentList::iterator x = component_list.begin();
+		for (; x != component_list.end(); ++x) {
+			if (focus_next) {
 				break;
 			}
-			if (x->first == 2)
-			{
-				return (Parent::OnChar(pChar));	// RAII simplifies.
-			}
-			else if (x->first)
-			{
-				if (lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LSHIFT) ||
-					lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RSHIFT))
-				{
-					lFocusPrevious = true;
+			if (x->first == 2) {
+				return (Parent::OnChar(c));	// RAII simplifies.
+			} else if (x->first) {
+				if (input_manager->ReadKey(uilepra::InputManager::kInKbdLshift) ||
+					input_manager->ReadKey(uilepra::InputManager::kInKbdRshift)) {
+					focus_previous = true;
 					break;
 				}
-				lFocusNext = true;
+				focus_next = true;
 			}
 		}
-		if (lFocusPrevious)
-		{
-			if (x == lComponentList.begin())
-			{
-				x = lComponentList.end();
+		if (focus_previous) {
+			if (x == component_list.begin()) {
+				x = component_list.end();
 			}
 			--x;
+		} else if (!focus_next || x == component_list.end()) {
+			x = component_list.begin();
 		}
-		else if (!lFocusNext || x == lComponentList.end())
-		{
-			x = lComponentList.begin();
-		}
-		if (x != lComponentList.end())	// Any available focusable children?
-		{
+		if (x != component_list.end()) {	// Any available focusable children?
 			x->second->SetKeyboardFocus();
 		}
-		lOk = true;
-	}
-	else if (pChar == '\r')
-	{
-		StateComponentList lComponentList = mClientRect->GetStateList(STATE_CLICKABLE);
-		StateComponentList::iterator x = lComponentList.begin();
-		if (x != lComponentList.end())
-		{
+		ok = true;
+	} else if (c == '\r') {
+		StateComponentList component_list = client_rect_->GetStateList(kStateClickable);
+		StateComponentList::iterator x = component_list.begin();
+		if (x != component_list.end()) {
 			((Button*)x->second)->Click(true);
+		} else {
+			return (Parent::OnChar(c));	// RAII simplifies.
 		}
-		else
-		{
-			return (Parent::OnChar(pChar));	// RAII simplifies.
-		}
-		lOk = true;
+		ok = true;
+	} else {
+		ok = Parent::OnChar(c);
 	}
+	return (ok);
+}
+
+bool Window::OnLButtonDown(int mouse_x, int mouse_y) {
+	bool __return = Parent::OnLButtonDown(mouse_x, mouse_y);
+	SetActive(true);
+	return __return;
+}
+
+bool Window::OnRButtonDown(int mouse_x, int mouse_y) {
+	bool __return = Parent::OnRButtonDown(mouse_x, mouse_y);
+	SetActive(true);
+	return __return;
+}
+
+bool Window::OnMButtonDown(int mouse_x, int mouse_y) {
+	bool __return = Parent::OnMButtonDown(mouse_x, mouse_y);
+	SetActive(true);
+	return __return;
+}
+
+
+
+void Window::DoSetSize(int width, int height) {
+	Parent::DoSetSize(width, height);
+	center_component_->SetSize(width, height);
+	center_component_->UpdateLayout();
+}
+
+
+
+bool Window::Check(unsigned flags, unsigned pFlag) {
+	return ((flags & pFlag) != 0);
+}
+
+Caption* Window::GetCaption() {
+	return caption_;
+}
+
+void Window::SetBackgroundImage(Painter::ImageID image_id) {
+	SetNeedsRepaint(image_id != client_rect_->GetImage());
+	client_rect_->SetImage(image_id);
+}
+
+void Window::SetBaseColor(const Color& color) {
+	body_color_ = color;
+	SetColor(color);
+}
+
+void Window::SetColor(const Color& color) {
+	SetNeedsRepaint(color != client_rect_->GetColor());
+	client_rect_->SetColor(color);
+
+	if (tl_border_) {
+		BorderComponent::BorderShadeFunc func =
+			Check(border_style_, kBorderLinearshading)? BorderComponent::kLinear : BorderComponent::kZigzag;
+		tl_border_->Set(color, func);
+		tr_border_->Set(color, func);
+		br_border_->Set(color, func);
+		bl_border_->Set(color, func);
+		t_border_->Set(color, func);
+		b_border_->Set(color, func);
+		l_border_->Set(color, func);
+		r_border_->Set(color, func);
+	}
+}
+
+Painter::ImageID Window::GetBackgroundImage() {
+	return client_rect_->GetImage();
+}
+
+const Color& Window::GetColor() {
+	return body_color_;
+}
+
+unsigned Window::GetBorderStyle() {
+	return border_style_;
+}
+
+int Window::GetBorderWidth() {
+	return border_width_;
+}
+
+int Window::GetTotalBorderWidth() {
+	if (Check(border_style_, kBorderHalf) == true)
+		return border_width_;
 	else
-	{
-		lOk = Parent::OnChar(pChar);
-	}
-	return (lOk);
+		return border_width_ * 2;
 }
 
-bool Window::OnLButtonDown(int pMouseX, int pMouseY)
-{
-	bool lReturn = Parent::OnLButtonDown(pMouseX, pMouseY);
-	SetActive(true);
-	return lReturn;
-}
-
-bool Window::OnRButtonDown(int pMouseX, int pMouseY)
-{
-	bool lReturn = Parent::OnRButtonDown(pMouseX, pMouseY);
-	SetActive(true);
-	return lReturn;
-}
-
-bool Window::OnMButtonDown(int pMouseX, int pMouseY)
-{
-	bool lReturn = Parent::OnMButtonDown(pMouseX, pMouseY);
-	SetActive(true);
-	return lReturn;
-}
-
-
-
-void Window::DoSetSize(int pWidth, int pHeight)
-{
-	Parent::DoSetSize(pWidth, pHeight);
-	mCenterComponent->SetSize(pWidth, pHeight);
-	mCenterComponent->UpdateLayout();
-}
-
-
-
-bool Window::Check(unsigned pFlags, unsigned pFlag)
-{
-	return ((pFlags & pFlag) != 0);
-}
-
-Caption* Window::GetCaption()
-{
-	return mCaption;
-}
-
-void Window::SetBackgroundImage(Painter::ImageID pImageID)
-{
-	SetNeedsRepaint(pImageID != mClientRect->GetImage());
-	mClientRect->SetImage(pImageID);
-}
-
-void Window::SetBaseColor(const Color& pColor)
-{
-	mBodyColor = pColor;
-	SetColor(pColor);
-}
-
-void Window::SetColor(const Color& pColor)
-{
-	SetNeedsRepaint(pColor != mClientRect->GetColor());
-	mClientRect->SetColor(pColor);
-
-	if (mTLBorder)
-	{
-		BorderComponent::BorderShadeFunc lFunc =
-			Check(mBorderStyle, BORDER_LINEARSHADING)? BorderComponent::LINEAR : BorderComponent::ZIGZAG;
-		mTLBorder->Set(pColor, lFunc);
-		mTRBorder->Set(pColor, lFunc);
-		mBRBorder->Set(pColor, lFunc);
-		mBLBorder->Set(pColor, lFunc);
-		mTBorder->Set(pColor, lFunc);
-		mBBorder->Set(pColor, lFunc);
-		mLBorder->Set(pColor, lFunc);
-		mRBorder->Set(pColor, lFunc);
-	}
-}
-
-Painter::ImageID Window::GetBackgroundImage()
-{
-	return mClientRect->GetImage();
-}
-
-const Color& Window::GetColor()
-{
-	return mBodyColor;
-}
-
-unsigned Window::GetBorderStyle()
-{
-	return mBorderStyle;
-}
-
-int Window::GetBorderWidth()
-{
-	return mBorderWidth;
-}
-
-int Window::GetTotalBorderWidth()
-{
-	if (Check(mBorderStyle, BORDER_HALF) == true)
-		return mBorderWidth;
-	else
-		return mBorderWidth * 2;
-}
-
-int Window::GetRoundedRadius() const
-{
+int Window::GetRoundedRadius() const {
 	return GetClientRectComponent()->GetCornerRadius();
 }
 
-void Window::SetRoundedRadius(int pRadius)
-{
-	GetClientRectComponent()->SetCornerRadius(pRadius);
+void Window::SetRoundedRadius(int radius) {
+	GetClientRectComponent()->SetCornerRadius(radius);
 	GetClientRectComponent()->SetIsHollow(false);
 }
 
-void Window::SetRoundedRadiusMask(int pMask)
-{
-	GetClientRectComponent()->SetCornerRadiusMask(pMask);
+void Window::SetRoundedRadiusMask(int mask) {
+	GetClientRectComponent()->SetCornerRadiusMask(mask);
 }
 
-Component::Type Window::GetType() const
-{
-	return Component::WINDOW;
+Component::Type Window::GetType() const {
+	return Component::kWindow;
 }
 
 

@@ -1,17 +1,16 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "LepraTypes.h"
+#include "lepratypes.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -21,61 +20,52 @@ namespace Lepra
 
 
 
-class Random
-{
+class Random {
 public:
-	static void SetSeed(uint32 pSeed);
+	static void SetSeed(uint32 seed);
 	static uint32 GetRandomNumber();
-	static uint32 GetRandomNumber(uint32& pSeed);
+	static uint32 GetRandomNumber(uint32& seed);
 	static uint64 GetRandomNumber64();
 
-	template<class _T> static inline _T Uniform(_T pLower, _T pUpper);
-	template<class _T> static inline _T Uniform(uint32& pSeed, _T pLower, _T pUpper);
-	template<class _T> static inline _T Normal(_T pMean, _T pStdDev);
-	template<class _T> static inline _T Normal(_T pMean, _T pStdDev, _T pLowCutoff, _T pHighCutoff);
+	template<class _T> static inline _T Uniform(_T lower, _T upper);
+	template<class _T> static inline _T Uniform(uint32& seed, _T lower, _T upper);
+	template<class _T> static inline _T Normal(_T mean, _T std_dev);
+	template<class _T> static inline _T Normal(_T mean, _T std_dev, _T low_cutoff, _T high_cutoff);
 
 private:
-	static uint32 mSeed;
+	static uint32 seed_;
 };
 
 
 
-template<class _T> _T Random::Uniform(_T pLower, _T pUpper)
-{
-	return Uniform(mSeed, pLower, pUpper);
+template<class _T> _T Random::Uniform(_T lower, _T upper) {
+	return Uniform(seed_, lower, upper);
 }
 
-template<class _T> _T Random::Uniform(uint32& pSeed, _T pLower, _T pUpper)
-{
-	return GetRandomNumber(pSeed)/(_T)0xFFFFFFFF * (pUpper-pLower) + pLower;
+template<class _T> _T Random::Uniform(uint32& seed, _T lower, _T upper) {
+	return GetRandomNumber(seed)/(_T)0xFFFFFFFF * (upper-lower) + lower;
 }
 
-template<class _T> _T Random::Normal(_T pMean, _T pStdDev)
-{
+template<class _T> _T Random::Normal(_T mean, _T std_dev) {
 	// Box-Muller.
 	_T v;
 	_T s;
-	do
-	{
+	do {
 		v = Uniform((_T)-1, (_T)1);
 		_T u = Uniform((_T)-1, (_T)1);
 		s = v*v + u*u;
-	}
-	while (s >= 1.0);
+	} while (s >= 1.0);
 	const _T f = sqrt((_T)-2.0 * (_T)log(s) / s);
 	v = f * v;
-	return v * pStdDev + pMean;
+	return v * std_dev + mean;
 }
 
-template<class _T> _T Random::Normal(_T pMean, _T pStdDev, _T pLowCutoff, _T pHighCutoff)
-{
-	_T lValue;
-	do
-	{
-		lValue = Normal(pMean, pStdDev);
-	}
-	while (lValue < pLowCutoff || lValue > pHighCutoff);
-	return lValue;
+template<class _T> _T Random::Normal(_T mean, _T std_dev, _T low_cutoff, _T high_cutoff) {
+	_T value;
+	do {
+		value = Normal(mean, std_dev);
+	} while (value < low_cutoff || value > high_cutoff);
+	return value;
 }
 
 

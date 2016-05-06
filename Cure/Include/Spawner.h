@@ -1,48 +1,46 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "CppContextObject.h"
-#include "../../Lepra/Include/HiResTimer.h"
-#include "Cure.h"
+#include "cppcontextobject.h"
+#include "../../lepra/include/hirestimer.h"
+#include "cure.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class Spawner: public CppContextObject
-{
+class Spawner: public CppContextObject {
 	typedef CppContextObject Parent;
 public:
-	Spawner(ContextManager* pManager);
+	Spawner(ContextManager* manager);
 	virtual ~Spawner();
 
-	void PlaceObject(ContextObject* pObject, int pSpawnPointIndex);
+	void PlaceObject(ContextObject* object, int spawn_point_index);
 	xform GetSpawnPoint() const;
-	static void EaseDown(Tbc::PhysicsManager* pPhysicsManager, ContextObject* pObject, const vec3* pStartPosition);
+	static void EaseDown(tbc::PhysicsManager* physics_manager, ContextObject* object, const vec3* start_position);
 
 protected:
 	virtual void OnTick();
-	virtual void OnAlarm(int pAlarmId, void* pExtraData);
-	void OnCreate(float pCreateInterval, bool pHasRecreate);
-	void OnDestroy(float pDestroyInterval);
-	void OnRecreate(float pRecreateInterval);
+	virtual void OnAlarm(int alarm_id, void* extra_data);
+	void OnCreate(float create_interval, bool has_recreate);
+	void OnDestroy(float destroy_interval);
+	void OnRecreate(float recreate_interval);
 	void Create();
 	virtual int GetSpawnCount() const;
 
 private:
 	typedef std::vector<GameObjectId> GameObjectIdArray;
 
-	StopWatch mRecreateTimer;
-	int mSpawnPointIndex;
-	GameObjectIdArray mEaseDownObjects;
+	StopWatch recreate_timer_;
+	int spawn_point_index_;
+	GameObjectIdArray ease_down_objects_;
 
 	logclass();
 };

@@ -11,65 +11,63 @@
 
 #pragma once
 
-#include "UiComponent.h"
-#include "../UiPainter.h"
-#include "../../../Lepra/Include/Graphics2D.h"
+#include "uicomponent.h"
+#include "../uipainter.h"
+#include "../../../lepra/include/graphics2d.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-class RectComponent : public Component
-{
+class RectComponent : public Component {
 public:
-	RectComponent(Layout* pLayout = 0);
-	RectComponent(const Color& pColor, Layout* pLayout = 0);
-	RectComponent(const Color& pTopLeftColor,
-				  const Color& pTopRightColor,
-				  const Color& pBottomRightColor,
-				  const Color& pBottomLeftColor,
-				  Layout* pLayout = 0);
-	RectComponent(Painter::ImageID pImageID, Layout* pLayout = 0);
+	RectComponent(Layout* layout = 0);
+	RectComponent(const Color& color, Layout* layout = 0);
+	RectComponent(const Color& top_left_color,
+				  const Color& top_right_color,
+				  const Color& bottom_right_color,
+				  const Color& bottom_left_color,
+				  Layout* layout = 0);
+	RectComponent(Painter::ImageID image_id, Layout* layout = 0);
 
 	virtual ~RectComponent();
 
-	virtual void RepaintBackground(Painter* pPainter);
-	virtual bool IsOver(int pScreenX, int pScreenY);
+	virtual void RepaintBackground(Painter* painter);
+	virtual bool IsOver(int screen_x, int screen_y);
 
-	void SetImage(Painter::ImageID pImageID);
-	virtual void SetColor(const Color& pColor);
-	virtual void SetColor(const Color& pTopLeftColor, const Color& pTopRightColor, const Color& pBottomRightColor, const Color& pBottomLeftColor);
+	void SetImage(Painter::ImageID image_id);
+	virtual void SetColor(const Color& color);
+	virtual void SetColor(const Color& top_left_color, const Color& top_right_color, const Color& bottom_right_color, const Color& bottom_left_color);
 
 	Painter::ImageID GetImage();
 	Color GetColor();
-	void GetColor(Color& pTopLeftColor,
-			     Color& pTopRightColor,
-			     Color& pBottomRightColor,
-			     Color& pBottomLeftColor);
+	void GetColor(Color& top_left_color,
+			     Color& top_right_color,
+			     Color& bottom_right_color,
+			     Color& bottom_left_color);
 
 	virtual Type GetType() const;
 
-	void SetIsHollow(bool pIsHollow);
-	void SetBehaveSolid(bool pBehaveSolid);
+	void SetIsHollow(bool is_hollow);
+	void SetBehaveSolid(bool behave_solid);
 	bool GetBehaveSolid() const;
 
 	int GetCornerRadius() const;
-	void SetCornerRadius(int pRadius);
-	void SetCornerRadiusMask(int pMask);
+	void SetCornerRadius(int radius);
+	void SetCornerRadiusMask(int mask);
 
 protected:
 	bool IsHollow();
 	bool IsShaded();
 
-	Color mColor[4];
+	Color color_[4];
 
 private:
-	bool mShaded;
-	bool mHollow;
-	bool mBehaveSolid;
-	int mCornerRadius;
-	int mCornerRadiusMask;
+	bool shaded_;
+	bool hollow_;
+	bool behave_solid_;
+	int corner_radius_;
+	int corner_radius_mask_;
 
-	Painter::ImageID mImageID;
+	Painter::ImageID image_id_;
 };
 
 }

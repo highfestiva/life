@@ -2,7 +2,7 @@
 
 
 
-//#include "../../../Lepra/Include/LepraTarget.h"
+//#include "../../../lepra/include/lepratarget.h"
 #ifdef LEPRA_IOS
 
 
@@ -10,12 +10,12 @@
 #import <QuartzCore/QuartzCore.h>
 #import "../../Include/Mac/EAGLView.h"
 #import "../../../Cure/Include/RuntimeVariable.h"
-#import "../../../Lepra/Include/Posix/MacLog.h"
+#import "../../../lepra/include/posix/maclog.h"
 #import "../../../Lepra/Include/StringUtility.h"
 #import "../../../UiCure/Include/UiRuntimeVariableName.h"
 #import "../../../UiCure/Include/UiCure.h"
 
-static EAGLView* gSharedView;
+static EAGLView* g_shared_view;
 
 @interface EAGLView (PrivateMethods)
 - (void)createFramebuffer;
@@ -39,19 +39,16 @@ static EAGLView* gSharedView;
 @synthesize keyboardAppearance;
 @synthesize keyboardType;
 @synthesize returnKeyType;
-@synthesize secureTextEntry;
+@synthesize secureTextEntry_;
 //@synthesize spellCheckingType;
 
 // You must implement this method
-+ (Class)layerClass
-{
++ (Class)layerClass {
 	return [CAEAGLLayer class];
 }
 
-- (id)initWithFrame:(CGRect)frame
-{
-	if (!(self = [super initWithFrame:frame]))
-	{
+- (id)initWithFrame:(CGRect)frame {
+	if (!(self = [super initWithFrame:frame])) {
 		return nil;
 	}
 
@@ -61,14 +58,13 @@ static EAGLView* gSharedView;
 		[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
 		kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
 	eaglLayer.anchorPoint = CGPointMake(0.5, 0.5);
-	if ([self respondsToSelector:@selector(setContentScaleFactor:)])
-	{
+	if ([self respondsToSelector:@selector(setContentScaleFactor:)]) {
 		self.contentScaleFactor = [[UIScreen mainScreen] scale];
 		eaglLayer.contentsScale = [[UIScreen mainScreen] scale];
 	}
 
-	self.multipleTouchEnabled = YES;
-	gSharedView = self;
+	self.multipleTouchEnabled_ = YES;
+	g_shared_view = self;
 	isOpen = false;
 	responder = nil;
 	_baseAngle = 0;
@@ -83,14 +79,13 @@ static EAGLView* gSharedView;
 	keyboardAppearance = UIKeyboardAppearanceDefault;
 	keyboardType = UIKeyboardTypeDefault;
 	returnKeyType = UIReturnKeySend;
-	secureTextEntry = NO;
+	secureTextEntry_ = NO;
 	//spellCheckingType = UITextSpellCheckingTypeNo;
 
 	return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
 	[self deleteFramebuffer];
 	canvas = 0;
 #ifndef LEPRA_IOS
@@ -103,23 +98,18 @@ static EAGLView* gSharedView;
 #endif // !iOS
 }
 
-- (void)setOrientationStrictness:(int)strictness
-{
-	if (_preResponderStrictness <= -1)
-	{
+- (void)setOrientationStrictness:(int)strictness {
+	if (_preResponderStrictness <= -1) {
 		_orientationStrictness = strictness;
 	}
 }
 
-- (void)setPreferredRotation:(UIInterfaceOrientation)rotation
-{
+- (void)setPreferredRotation:(UIInterfaceOrientation)rotation {
 	_preferredRotation = rotation;
 }
 
-- (void)setContext:(EAGLContext *)newContext
-{
-	if (context != newContext)
-	{
+- (void)setContext:(EAGLContext *)newContext {
+	if (context != newContext) {
 		[self deleteFramebuffer];
 
 #ifdef LEPRA_IOS
@@ -133,19 +123,15 @@ static EAGLView* gSharedView;
 	}
 }
 
-- (void)setCanvas:(Lepra::Canvas*)newCanvas
-{
-	if (canvas != newCanvas)
-	{
+- (void)setCanvas:(lepra::Canvas*)newCanvas {
+	if (canvas != newCanvas) {
 		canvas = newCanvas;
 		[self orientationDidChange:nil];
 	}
 }
 
-- (void)createFramebuffer
-{
-	if (context && !defaultFramebuffer)
-	{
+- (void)createFramebuffer {
+	if (context && !defaultFramebuffer) {
 		[EAGLContext setCurrentContext:context];
 
 		// Create default framebuffer object.
@@ -172,35 +158,29 @@ static EAGLView* gSharedView;
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
 #endif // Simulator / device
 
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		{
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 			NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
 			glGetError();
-			v_set(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "None");
+			v_set(UiCure::GetSettings(), kRtvarUi3DShadows, "None");
 		}
 	}
 }
 
-- (void)deleteFramebuffer
-{
-	if (context)
-	{
+- (void)deleteFramebuffer {
+	if (context) {
 		[EAGLContext setCurrentContext:context];
-		
-		if (defaultFramebuffer)
-		{
+
+		if (defaultFramebuffer) {
 			glDeleteFramebuffers(1, &defaultFramebuffer);
 			defaultFramebuffer = 0;
 		}
-		
-		if (colorRenderbuffer)
-		{
+
+		if (colorRenderbuffer) {
 			glDeleteRenderbuffers(1, &colorRenderbuffer);
 			colorRenderbuffer = 0;
 		}
 
-		if (depthRenderbuffer)
-		{
+		if (depthRenderbuffer) {
 			glDeleteRenderbuffers(1, &depthRenderbuffer);
 			depthRenderbuffer = 0;
 		}
@@ -209,32 +189,29 @@ static EAGLView* gSharedView;
 	}
 }
 
-+ (EAGLView*)sharedView
++ (EAGLView*)sharedView_
 {
-	return gSharedView;
+	return g_shared_view;
 }
 
-- (void)setFramebuffer
+- (void)framebuffer_
 {
-	if (context)
-	{
+	if (context) {
 		[EAGLContext setCurrentContext:context];
-		
+
 		if (!defaultFramebuffer)
 			[self createFramebuffer];
-		
+
 		glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebuffer);
-		
+
 		glViewport(0, 0, framebufferWidth, framebufferHeight);
 		isOpen = true;
 	}
 }
 
-- (BOOL)presentFramebuffer
-{
+- (BOOL)presentFramebuffer {
 	BOOL success = FALSE;
-	if (context)
-	{
+	if (context) {
 		[EAGLContext setCurrentContext:context];
 		glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbuffer);
 		success = [context presentRenderbuffer:GL_RENDERBUFFER];
@@ -242,93 +219,70 @@ static EAGLView* gSharedView;
 	return success;
 }
 
-- (void)powerUpAcc
-{
+- (void)up_acc {
 	[self orientationDidChange:nil];
-	UIDevice* lDevice = [UIDevice currentDevice];
-	[lDevice beginGeneratingDeviceOrientationNotifications];
+	UIDevice* device = [UIDevice currentDevice];
+	[device beginGeneratingDeviceOrientationNotifications];
 	[[NSNotificationCenter defaultCenter] addObserver:self
 						 selector:@selector(orientationDidChange:)
 						     name:UIDeviceOrientationDidChangeNotification
 						   object:nil];
 }
 
-- (void)powerDownAcc
-{
-	UIDevice* lDevice = [UIDevice currentDevice];
-	[lDevice endGeneratingDeviceOrientationNotifications];
+- (void)down_acc {
+	UIDevice* device = [UIDevice currentDevice];
+	[device endGeneratingDeviceOrientationNotifications];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-	if (_orientationStrictness >= 2)
-	{
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+	if (_orientationStrictness >= 2) {
 		return NO;
-	}
-	else if (_orientationStrictness == 1)
-	{
+	} else if (_orientationStrictness == 1) {
 		return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft ||
 			interfaceOrientation == UIInterfaceOrientationLandscapeRight);
 	}
 	return YES;
 }
 
-- (BOOL)shouldAutorotate
+- (BOOL)shouldAutorotate_
 {
-	if (_orientationStrictness >= 2)
-	{
+	if (_orientationStrictness >= 2) {
 		return NO;
 	}
 	return YES;
 }
 
-- (NSUInteger)supportedInterfaceOrientations
+- (NSUInteger)supportedInterfaceOrientations_
 {
-	if (_orientationStrictness >= 2)
-	{
+	if (_orientationStrictness >= 2) {
 		return UIInterfaceOrientationMaskLandscapeLeft;
-	}
-	else if (_orientationStrictness == 1)
-	{
+	} else if (_orientationStrictness == 1) {
 		return UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight;
 	}
 	return UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight
 		| UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskPortraitUpsideDown;
 }
 
-- (void)orientationDidChange:(NSNotification*)notification
-{
+- (void)orientationDidChange:(NSNotification*)notification {
 	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-	if (canvas)
-	{
+	if (canvas) {
 		int angle = _baseAngle;
-		switch (orientation)
-		{
-			case UIDeviceOrientationLandscapeLeft:
-			{
+		switch (orientation) {
+			case UIDeviceOrientationLandscapeLeft: {
 				angle = 0 + _baseAngle;
-			}
-			break;
-			case UIDeviceOrientationLandscapeRight:
-			{
+			} break;
+			case UIDeviceOrientationLandscapeRight: {
 				angle = 180 + _baseAngle;
-			}
-			break;
-			case UIDeviceOrientationPortrait:
-			{
+			} break;
+			case UIDeviceOrientationPortrait: {
 				if (_orientationStrictness == 3) angle = 90 + _baseAngle;
-			}
-			break;
-			case UIDeviceOrientationPortraitUpsideDown:
-			{
+			} break;
+			case UIDeviceOrientationPortraitUpsideDown: {
 				if (_orientationStrictness == 3) angle = -90 + _baseAngle;
-			}
-			break;
-			default:
-			{
-				if (isLayoutSet)
-				{
+			} break;
+			default: {
+				if (isLayoutSet) {
 					return;	// Face up and what not: should not be acted upon!
 				}
 				orientation = UIDeviceOrientationLandscapeRight;
@@ -338,95 +292,76 @@ static EAGLView* gSharedView;
 		isLayoutSet = true;
 		angle += (angle < -90)? 360 : 0;
 		angle -= (angle > 180)? 360 : 0;
-		if (_orientationStrictness >= 2 && _orientationStrictness <= 3)	// Internal rotation (used when native screen orientation inappropriate).
-		{
+		if (_orientationStrictness >= 2 && _orientationStrictness <= 3) {	// Internal rotation (used when native screen orientation inappropriate).
 			canvas->SetOutputRotation(angle);
-		}
-		else if (_orientationStrictness <= 1)
-		{
+		} else if (_orientationStrictness <= 1) {
 			canvas->SetDeviceRotation(angle);
 		}
 
-		//[UIApplication sharedApplication].statusBarOrientation = (UIInterfaceOrientation)orientation;
+		//[UIApplication sharedApplication].statusBarOrientation_ = (UIInterfaceOrientation)orientation;
 	}
 }
 
--(BOOL) becomeFirstResponder
-{
+-(BOOL) becomeFirstResponder {
 	//_preResponderStrictness = _orientationStrictness;
 	//_orientationStrictness = 4;
 	return [super becomeFirstResponder];
 }
 
--(BOOL) resignFirstResponder
-{
+-(BOOL) resignFirstResponder {
 	//_orientationStrictness = _preResponderStrictness;
 	//_preResponderStrictness = -1;
 	//[self orientationDidChange:nil];
 	return [super resignFirstResponder];
 }
 
-- (void)layoutSubviews
-{
-	// The framebuffer will be re-created at the beginning of the next setFramebuffer method call.
+- (void)layoutSubviews {
+	// The framebuffer will be re-created at the beginning of the next framebuffer_ method call.
 	[self deleteFramebuffer];
 }
 
-- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
-{
-	if (responder)
-	{
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
+	if (responder) {
 		[responder touchesMoved:touches withEvent:event];
 	}
 }
 
-- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
-{
-	if (responder)
-	{
+- (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
+	if (responder) {
 		[responder touchesMoved:touches withEvent:event];
 	}
 }
 
 
-- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
-{
-	if (responder)
-	{
+- (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event {
+	if (responder) {
 		[responder touchesEnded:touches withEvent:event];
 	}
 }
 
-- (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event
-{
-	if (responder)
-	{
+- (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event {
+	if (responder) {
 		[responder touchesCancelled:touches withEvent:event];
 	}
 }
 
-- (void)insertText:(NSString*)text
-{
-	Lepra::str s = Lepra::MacLog::Decode(text);
-	Lepra::wstr w = Lepra::wstrutil::Encode(s);
-	for (size_t x = 0; x < w.length(); ++x)
-	{
+- (void)insertText:(NSString*)text {
+	lepra::str s = lepra::MacLog::Decode(text);
+	lepra::wstr w = lepra::wstrutil::Encode(s);
+	for (size_t x = 0; x < w.length(); ++x) {
 		inputManager->NotifyOnChar(w[x]);
 	}
 }
 
-- (void)deleteBackward
-{
+- (void)deleteBackward {
 	inputManager->NotifyOnChar('\b');
 }
 
-- (BOOL)hasText
-{
+- (BOOL)hasText {
     return YES;
 }
 
-- (BOOL)canBecomeFirstResponder
-{
+- (BOOL)canBecomeFirstResponder {
     return YES;
 }
 

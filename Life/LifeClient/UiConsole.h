@@ -1,30 +1,27 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Lepra/Include/Graphics2D.h"
-#include "../../UiTbc/Include/UiFontManager.h"
-#include "../Life.h"
+#include "../../lepra/include/graphics2d.h"
+#include "../../uitbc/include/uifontmanager.h"
+#include "../life.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 class Component;
 class TextArea;
 class TextField;
 }
-namespace UiCure
-{
+namespace UiCure {
 class GameUiManager;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -33,23 +30,22 @@ class ConsoleManager;
 
 
 
-class UiConsole
-{
+class UiConsole {
 public:
-	UiConsole(ConsoleManager* pManager, UiCure::GameUiManager* pUiManager, const PixelRect& pArea);
+	UiConsole(ConsoleManager* manager, UiCure::GameUiManager* ui_manager, const PixelRect& area);
 	virtual ~UiConsole();
 
 	void Open();
 	void Close();
 
-	void SetRenderArea(const PixelRect& pRenderArea);
-	void SetColor(const Color& pColor);
+	void SetRenderArea(const PixelRect& render_area);
+	void SetColor(const Color& color);
 	bool ToggleVisible();
-	void SetVisible(bool pVisible);
+	void SetVisible(bool visible);
 	bool IsVisible() const;
 	void Tick();
 	UiCure::GameUiManager* GetUiManager() const;
-	UiTbc::FontManager::FontId GetFontId() const;
+	uitbc::FontManager::FontId GetFontId() const;
 
 private:
 	void InitGraphics();
@@ -57,17 +53,17 @@ private:
 	void OnConsoleChange();
 	void PrintHelp();
 
-	ConsoleManager* mManager;
-	UiCure::GameUiManager* mUiManager;
-	PixelRect mArea;
-	Color mColor;
-	UiTbc::Component* mConsoleComponent;
-	UiTbc::TextArea* mConsoleOutput;
-	UiTbc::TextField* mConsoleInput;
-	bool mIsConsoleVisible;
-	bool mIsFirstConsoleUse;
-	float mConsoleTargetPosition;
-	UiTbc::FontManager::FontId mFontId;
+	ConsoleManager* manager_;
+	UiCure::GameUiManager* ui_manager_;
+	PixelRect area_;
+	Color color_;
+	uitbc::Component* console_component_;
+	uitbc::TextArea* console_output_;
+	uitbc::TextField* console_input_;
+	bool is_console_visible_;
+	bool is_first_console_use_;
+	float console_target_position_;
+	uitbc::FontManager::FontId font_id_;
 
 	logclass();
 };

@@ -5,78 +5,69 @@
 
 
 #include "pch.h"
-#include "BaseMachine.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/Health.h"
-#include "../Cure/Include/GameManager.h"
-#include "../Life/Explosion.h"
-#include "../Life/Launcher.h"
-#include "../UiCure/Include/UiBurnEmitter.h"
-#include "RtVar.h"
+#include "basemachine.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/health.h"
+#include "../cure/include/gamemanager.h"
+#include "../life/explosion.h"
+#include "../life/launcher.h"
+#include "../uicure/include/uiburnemitter.h"
+#include "rtvar.h"
 
 #define SINK_TIME		4.0f
-#define START_SINKING_ID	10
+#define kStartSinkingId	10
 
 
 
-namespace Fire
-{
+namespace Fire {
 
 
 
-BaseMachine::BaseMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher):
-	Parent(pResourceManager, pClassId, pUiManager, pLauncher),
-	mLevelSpeed(1),
-	mPanicLevel(0),
-	mDangerousness(0),
-	mDidGetToTown(false)
-{
-	Cure::Health::Set(this, 1);
+BaseMachine::BaseMachine(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, life::Launcher* launcher):
+	Parent(resource_manager, class_id, ui_manager, launcher),
+	level_speed_(1),
+	panic_level_(0),
+	dangerousness_(0),
+	did_get_to_town_(false) {
+	cure::Health::Set(this, 1);
 }
 
-BaseMachine::~BaseMachine()
-{
+BaseMachine::~BaseMachine() {
 }
 
 
 
-void BaseMachine::AddPanic(float pPanic)
-{
-	mPanicLevel = Math::Clamp(mPanicLevel+pPanic, 0.0f, 1.1f);
+void BaseMachine::AddPanic(float panic) {
+	panic_level_ = Math::Clamp(panic_level_+panic, 0.0f, 1.1f);
 }
 
 
 
-void BaseMachine::OnAlarm(int pAlarmId, void* pExtraData)
-{
-	Parent::OnAlarm(pAlarmId, pExtraData);
+void BaseMachine::OnAlarm(int alarm_id, void* extra_data) {
+	Parent::OnAlarm(alarm_id, extra_data);
 
-	if (pAlarmId == START_SINKING_ID)
-	{
-		Life::Explosion::Freeze(mManager->GetGameManager()->GetPhysicsManager(), this);
+	if (alarm_id == kStartSinkingId) {
+		life::Explosion::Freeze(manager_->GetGameManager()->GetPhysicsManager(), this);
 		SetSinking(12/SINK_TIME);
-		mManager->DelayKillObject(this, SINK_TIME);
+		manager_->DelayKillObject(this, SINK_TIME);
 	}
 }
 
-void BaseMachine::OnDie()
-{
-	if (mIsDetonated)
-	{
+void BaseMachine::OnDie() {
+	if (is_detonated_) {
 		return;
 	}
 
-	if (GetBurnEmitter())
-	{
+	if (GetBurnEmitter()) {
 		GetBurnEmitter()->SetFreeFlow();
 	}
 
-	Life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this, true);
+	life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this, true);
 	ShrinkMeshBigOrientationThreshold(1e-3f);
 	Parent::OnDie();
-	float lVehicleRemoveDelay;
-	v_get(lVehicleRemoveDelay, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 9.0);
-	mManager->AddGameAlarmCallback(this, START_SINKING_ID, lVehicleRemoveDelay, 0);
+	float vehicle_remove_delay;
+	v_get(vehicle_remove_delay, =(float), GetManager()->GetGameManager()->GetVariableScope(), kRtvarGameVehicleremovedelay, 9.0);
+	manager_->AddGameAlarmCallback(this, kStartSinkingId, vehicle_remove_delay, 0);
 }
 
 

@@ -6,35 +6,31 @@
 
 #pragma once
 
-//#include "../Tbc/Include/PhysicsEngine.h"
-#include "../Life/LifeClient/GameClientSlaveManager.h"
-#include "../Life/Launcher.h"
-#include "../Lepra/Include/GameTimer.h"
-#include "../UiCure/Include/UiResourceManager.h"
-#include "Fire.h"
-#include "Version.h"
+//#include "../tbc/include/physicsengine.h"
+#include "../life/lifeclient/gameclientslavemanager.h"
+#include "../life/launcher.h"
+#include "../lepra/include/gametimer.h"
+#include "../uicure/include/uiresourcemanager.h"
+#include "fire.h"
+#include "version.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 class CollisionSoundManager;
 class CppContextObject;
 }
-namespace UiTbc
-{
+namespace uitbc {
 class Button;
 }
-namespace Life
-{
+namespace life {
 class GameClientMasterTicker;
 class Menu;
 }
 
 
 
-namespace Fire
-{
+namespace Fire {
 
 
 
@@ -45,62 +41,59 @@ class Sunlight;
 
 
 
-class FireManager: public Life::GameClientSlaveManager, private Life::Launcher
-{
-	typedef Life::GameClientSlaveManager Parent;
+class FireManager: public life::GameClientSlaveManager, private life::Launcher {
+	typedef life::GameClientSlaveManager Parent;
 public:
-	FireManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+	FireManager(life::GameClientMasterTicker* pMaster, const cure::TimeManager* time,
+		cure::RuntimeVariableScope* variable_scope, cure::ResourceManager* resource_manager,
+		UiCure::GameUiManager* ui_manager, int slave_index, const PixelRect& render_area);
 	virtual ~FireManager();
-	virtual void Suspend(bool pHard);
+	virtual void Suspend(bool hard);
 	virtual void LoadSettings();
 	virtual void SaveSettings();
-	virtual void SetRenderArea(const PixelRect& pRenderArea);
+	virtual void SetRenderArea(const PixelRect& render_area);
 	virtual bool Open();
 	virtual void Close();
 	virtual void SetIsQuitting();
-	virtual void SetFade(float pFadeAmount);
+	virtual void SetFade(float fade_amount);
 
 	PixelRect GetRenderableArea() const;
 	virtual bool Render();
 	virtual bool Paint();
-	void PrintTime(const str pPrefix, double pTime, bool lIsSloppy, int x, int y, const Color c, const Color bg);
+	void PrintTime(const str prefix, double time, bool is_sloppy, int x, int y, const Color c, const Color bg);
 	virtual void DrawSyncDebugInfo();
 
-	virtual bool IsObjectRelevant(const vec3& pPosition, float pDistance) const;
+	virtual bool IsObjectRelevant(const vec3& position, float distance) const;
 
-	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon);
-	virtual void Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength);
-	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject);
-	void OnLetThroughTerrorist(BaseMachine* pTerrorist);
+	virtual void Shoot(cure::ContextObject* avatar, int weapon);
+	virtual void Detonate(cure::ContextObject* explosive, const tbc::ChunkyBoneGeometry* explosive_geometry, const vec3& position, const vec3& velocity, const vec3& normal, float strength);
+	virtual void OnBulletHit(cure::ContextObject* bullet, cure::ContextObject* hit_object);
+	void OnLetThroughTerrorist(BaseMachine* terrorist);
 
 	virtual bool DidFinishLevel();
-	virtual str StepLevel(int pCount);
-	str StoreLevelIndex(int pLevelNumber);
+	virtual str StepLevel(int count);
+	str StoreLevelIndex(int level_number);
 
 	virtual Level* GetLevel() const;
 	virtual int GetCurrentLevelNumber() const;
 
-	Cure::RuntimeVariableScope* GetVariableScope() const;
+	cure::RuntimeVariableScope* GetVariableScope() const;
 
-	struct TargetInfo
-	{
-		TargetInfo(str pVillain, PixelCoord pXY, float pDangerousness, float pScale):
-			mVillain(pVillain),
-			xy(pXY),
-			mDangerousness(pDangerousness),
-			mIsActive(true),
-			mTime(0),
-			mScale(pScale)
-		{
+	struct TargetInfo {
+		TargetInfo(str villain, PixelCoord _xy, float dangerousness, float scale):
+			villain_(villain),
+			xy(_xy),
+			dangerousness_(dangerousness),
+			is_active_(true),
+			time_(0),
+			scale_(scale) {
 		}
-		str mVillain;
+		str villain_;
 		PixelCoord xy;
-		float mDangerousness;
-		bool mIsActive;
-		float mTime;
-		float mScale;
+		float dangerousness_;
+		bool is_active_;
+		float time_;
+		float scale_;
 	};
 	typedef std::unordered_map<void*, TargetInfo> VillainMap;
 	typedef std::pair<void*, TargetInfo> VillainPair;
@@ -110,51 +103,51 @@ public:
 	virtual void ScriptPhysicsTick();
 	virtual void HandleWorldBoundaries();
 	virtual void MoveCamera();
-	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
+	virtual void UpdateCameraPosition(bool update_mic_position);
 	virtual void HandleShooting();
-	virtual void HandleTargets(float pTime);
+	virtual void HandleTargets(float time);
 
 	virtual void TickInput();
 	virtual void TickUiInput();
 	virtual void TickUiUpdate();
-	virtual void SetLocalRender(bool pRender);
+	virtual void SetLocalRender(bool render);
 
-	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
-	virtual Cure::ContextObject* CreateLogicHandler(const str& pType);
-	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
+	virtual cure::ContextObject* CreateContextObject(const str& class_id) const;
+	virtual cure::ContextObject* CreateLogicHandler(const str& type);
+	virtual void OnLoadCompleted(cure::ContextObject* object, bool ok);
 	virtual void OnLevelLoadCompleted();
-	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
-		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
+	void OnCollision(const vec3& force, const vec3& torque, const vec3& position,
+		cure::ContextObject* object1, cure::ContextObject* object2,
+		tbc::PhysicsManager::BodyID body1_id, tbc::PhysicsManager::BodyID body2_id);
 
-	void OnBombButton(UiTbc::Button*);
-	void OnPauseButton(UiTbc::Button* pButton);
+	void OnBombButton(uitbc::Button*);
+	void OnPauseButton(uitbc::Button* button);
 	void CreateNextLevelDialog();
-	void OnMenuAlternative(UiTbc::Button* pButton);
+	void OnMenuAlternative(uitbc::Button* button);
 
-	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
+	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* resource);
 
 	bool DisableAmbient();
 	void EnableAmbient();
 
-	UiCure::CollisionSoundManager* mCollisionSoundManager;
-	Life::Menu* mMenu;
-	Level* mLevel;
-	bool mSteppedLevel;
-	Sunlight* mSunlight;
-	xform mCameraTransform;
-	UiTbc::Button* mPauseButton;
-	UiTbc::Button* mBombButton;
-	vec3 mShootDirection;
-	StopWatch mAllLoadedTimer;
-	StopWatch mSlowmoTimer;
-	GameTimer mFireDelayTimer;
-	vec3 mStoreAmbient;
-	bool mStoreLightsEnabled;
-	int mKills;
-	int mKillLimit;
-	int mLevelTotalKills;
-	VillainMap mVillainMap;
+	UiCure::CollisionSoundManager* collision_sound_manager_;
+	life::Menu* menu_;
+	Level* level_;
+	bool stepped_level_;
+	Sunlight* sunlight_;
+	xform camera_transform_;
+	uitbc::Button* pause_button_;
+	uitbc::Button* bomb_button_;
+	vec3 shoot_direction_;
+	StopWatch all_loaded_timer_;
+	StopWatch slowmo_timer_;
+	GameTimer fire_delay_timer_;
+	vec3 store_ambient_;
+	bool store_lights_enabled_;
+	int kills_;
+	int kill_limit_;
+	int level_total_kills_;
+	VillainMap villain_map_;
 
 	logclass();
 };

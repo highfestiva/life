@@ -1,22 +1,20 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "SocketIoHandler.h"
+#include "socketiohandler.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class NetworkFreeAgent: public SocketIoHandler
-{
+class NetworkFreeAgent: public SocketIoHandler {
 public:
 	NetworkFreeAgent();
 	virtual ~NetworkFreeAgent();
@@ -25,14 +23,14 @@ public:
 
 private:
 	virtual MuxIoSocket* GetMuxIoSocket() const;
-	virtual void AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback);
+	virtual void AddFilterIoSocket(VIoSocket* socket, const DropFilterCallback& on_drop_callback);
 	virtual void RemoveAllFilterIoSockets();
-	virtual void KillIoSocket(VIoSocket* pSocket);
+	virtual void KillIoSocket(VIoSocket* socket);
 
 	typedef std::unordered_map<VIoSocket*, DropFilterCallback, LEPRA_VOIDP_HASHER> SocketReceiveFilterTable;
 
-	MuxIoSocket* mMuxSocket;
-	SocketReceiveFilterTable mSocketReceiveFilterTable;
+	MuxIoSocket* mux_socket_;
+	SocketReceiveFilterTable socket_receive_filter_table_;
 
 	logclass();
 };

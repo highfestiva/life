@@ -1,31 +1,29 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiCppContextObject.h"
+#include "uicppcontextobject.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-class ExhaustEmitter
-{
+class ExhaustEmitter {
 public:
-	ExhaustEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager);
+	ExhaustEmitter(cure::ResourceManager* resource_manager, GameUiManager* ui_manager);
 	virtual ~ExhaustEmitter();
 
-	void EmitFromTag(const CppContextObject* pObject, const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
+	void EmitFromTag(const CppContextObject* object, const uitbc::ChunkyClass::Tag& tag, float frame_time);
 
-	Cure::ResourceManager* mResourceManager;
-	GameUiManager* mUiManager;
-	float mExhaustTimeout;
+	cure::ResourceManager* resource_manager_;
+	GameUiManager* ui_manager_;
+	float exhaust_timeout_;
 
 	logclass();
 };

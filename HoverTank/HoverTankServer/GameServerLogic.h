@@ -1,24 +1,22 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../HoverTank.h"
+#include "../hovertank.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ContextObject;
 }
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
@@ -26,20 +24,19 @@ class Npc;
 
 
 
-class GameServerLogic
-{
+class GameServerLogic {
 public:
-	typedef std::unordered_set<Cure::GameObjectId> AvatarIdSet;
+	typedef std::unordered_set<cure::GameObjectId> AvatarIdSet;
 
 	GameServerLogic();
 	virtual ~GameServerLogic();
 
-	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon) = 0;
+	virtual void Shoot(cure::ContextObject* avatar, int weapon) = 0;
 
-	virtual Cure::ContextObject* CreateAvatarForNpc(Npc* pNpc) = 0;
-	virtual void AddAvatarToTeam(Cure::ContextObject* pAvatar, int pTeam) = 0;
-	virtual void RemoveAvatar(Cure::ContextObject* pAvatar) = 0;
-	virtual const AvatarIdSet& GetAvatarsInTeam(int pTeam) = 0;
+	virtual cure::ContextObject* CreateAvatarForNpc(Npc* npc) = 0;
+	virtual void AddAvatarToTeam(cure::ContextObject* avatar, int team) = 0;
+	virtual void RemoveAvatar(cure::ContextObject* avatar) = 0;
+	virtual const AvatarIdSet& GetAvatarsInTeam(int team) = 0;
 };
 
 

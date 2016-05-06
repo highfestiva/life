@@ -5,64 +5,53 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiRadioButton.h"
+#include "../../include/gui/uiradiobutton.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-RadioButton::RadioButton(const Color& pBodyColor, const wstr& pText):
-	Parent(pBodyColor, pText)
-{
+RadioButton::RadioButton(const Color& body_color, const wstr& text):
+	Parent(body_color, text) {
 	SetBaseColor(GetColor());
 }
 
-RadioButton::~RadioButton()
-{
+RadioButton::~RadioButton() {
 }
 
-void RadioButton::SetBaseColor(const Color& pColor)
-{
-	Parent::SetBaseColor(pColor);
-	mPressColor = mHooverColor * 1.6f;
+void RadioButton::SetBaseColor(const Color& color) {
+	Parent::SetBaseColor(color);
+	press_color_ = hoover_color_ * 1.6f;
 }
 
-bool RadioButton::OnLButtonUp(int pMouseX, int pMouseY)
-{
-	if (IsOver(pMouseX, pMouseY) == true)
-	{
-		Component* lParent = GetParent();
-		Layout* lLayout = lParent->GetLayout();
+bool RadioButton::OnLButtonUp(int mouse_x, int mouse_y) {
+	if (IsOver(mouse_x, mouse_y) == true) {
+		Component* parent = GetParent();
+		Layout* layout = parent->GetLayout();
 
 		// Update all the other radio buttons.
-		Component* lChild = lLayout->GetFirst();
-		while (lChild != 0)
-		{
-			if (lChild != this && lChild->GetType() == Component::RADIOBUTTON)
-			{
-				RadioButton* lButton = (RadioButton*)lChild;
-				lButton->SetPressed(false);
+		Component* child = layout->GetFirst();
+		while (child != 0) {
+			if (child != this && child->GetType() == Component::kRadiobutton) {
+				RadioButton* button = (RadioButton*)child;
+				button->SetPressed(false);
 			}
 
-			lChild = lLayout->GetNext();
+			child = layout->GetNext();
 		}
 
 		SetPressed(true);
 		Click(true);
-	}
-	else
-	{
+	} else {
 		// Go back to previous state.
-		switch(GetState())
-		{
-		case RELEASING:
-			SetState(PRESSED);
+		switch(GetState()) {
+		case kReleasing:
+			SetState(kPressed);
 			break;
-		case PRESSING:
-			SetState(RELEASED);
+		case kPressing:
+			SetState(kReleased);
 			break;
 		default:
 			break;
@@ -73,9 +62,8 @@ bool RadioButton::OnLButtonUp(int pMouseX, int pMouseY)
 	return true;
 }
 
-Component::Type RadioButton::GetType() const
-{
-	return Component::RADIOBUTTON;
+Component::Type RadioButton::GetType() const {
+	return Component::kRadiobutton;
 }
 
 

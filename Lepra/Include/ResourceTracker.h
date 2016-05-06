@@ -6,14 +6,13 @@
 
 #pragma once
 
-#include "Thread.h"
-#include "String.h"
-#include "Unordered.h"
+#include "thread.h"
+#include "string.h"
+#include "unordered.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -21,34 +20,33 @@ class ResourceTracker;
 
 
 
-class ResourceTracker
-{
+class ResourceTracker {
 public:
 	typedef std::unordered_map<HashedString, int, HashedStringHasher> CounterMap;
 
 	ResourceTracker();
-	void Add(const HashedString& pResourceName, int pValue);
+	void Add(const HashedString& resource_name, int value);
 	CounterMap GetAll() const;
 
 protected:
-	mutable Lock mLock;
-	CounterMap mCounterMap;
+	mutable Lock lock_;
+	CounterMap counter_map_;
 };
 
 
 
-extern ResourceTracker gResourceTracker;
+extern ResourceTracker g_resource_tracker;
 
 
 
 #define LEPRA_ADD_RESOURCE(name, val)	\
 	static HashedString __lTrackName##name(#name);	\
-	gResourceTracker.Add(__lTrackName##name, val);
+	g_resource_tracker.Add(__lTrackName##name, val);
 #define LEPRA_DO_ACQUIRE_RESOURCE(name)	LEPRA_ADD_RESOURCE(name, +1)
 #define LEPRA_DO_RELEASE_RESOURCE(name)	LEPRA_ADD_RESOURCE(name, -1)
 
-#define LEPRA_TRACK_RESOURCES	1
-#if LEPRA_TRACK_RESOURCES
+#define kLepraTrackResources	1
+#if kLepraTrackResources
 #define LEPRA_ACQUIRE_RESOURCE(name)	LEPRA_DO_ACQUIRE_RESOURCE(name)
 #define LEPRA_RELEASE_RESOURCE(name)	LEPRA_DO_RELEASE_RESOURCE(name)
 #else // !Tracking

@@ -5,151 +5,126 @@
 
 
 #include "pch.h"
-#include "../Lepra/Include/LepraTarget.h"
-#include "FireTicker.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiCure/Include/UiMusicPlayer.h"
-#include "../UiCure/Include/UiParticleLoader.h"
-#include "../UiCure/Include/UiResourceManager.h"
-#include "../UiLepra/Include/UiCore.h"
-#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
-#include "../UiTbc/Include/GUI/UiFloatingLayout.h"
-#include "../UiTbc/Include/UiParticleRenderer.h"
-#include "RtVar.h"
-#include "FireManager.h"
+#include "../lepra/include/lepratarget.h"
+#include "fireticker.h"
+#include "../lepra/include/systemmanager.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uicure/include/uimusicplayer.h"
+#include "../uicure/include/uiparticleloader.h"
+#include "../uicure/include/uiresourcemanager.h"
+#include "../uilepra/include/uicore.h"
+#include "../uitbc/include/gui/uidesktopwindow.h"
+#include "../uitbc/include/gui/uifloatinglayout.h"
+#include "../uitbc/include/uiparticlerenderer.h"
+#include "rtvar.h"
+#include "firemanager.h"
 
 
 
-namespace Fire
-{
+namespace Fire {
 
 
 
-FireTicker::FireTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
-	Parent(pUiManager, pResourceManager, pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
-	mEnvMap(0)
-{
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMASSOBJECTFADING, false);
-	v_set(UiCure::GetSettings(), RTVAR_PHYSICS_ISFIXEDFPS, true);
-	v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 48.0);
+FireTicker::FireTicker(UiCure::GameUiManager* ui_manager, cure::ResourceManager* resource_manager, float physics_radius, int physics_levels, float physics_sensitivity):
+	Parent(ui_manager, resource_manager, physics_radius, physics_levels, physics_sensitivity),
+	env_map_(0) {
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablemassobjectfading, false);
+	v_set(UiCure::GetSettings(), kRtvarPhysicsIsfixedfps, true);
+	v_set(UiCure::GetSettings(), kRtvarUi2DFontheight, 48.0);
 
-	AddBackedRtvar(RTVAR_GAME_FIRSTRUN);
-	AddBackedRtvar(RTVAR_GAME_STARTLEVEL);
-	AddBackedRtvar(RTVAR_UI_SOUND_MASTERVOLUME);
+	AddBackedRtvar(kRtvarGameFirstrun);
+	AddBackedRtvar(kRtvarGameStartlevel);
+	AddBackedRtvar(kRtvarUiSoundMastervolume);
 }
 
-FireTicker::~FireTicker()
-{
+FireTicker::~FireTicker() {
 	CloseMainMenu();
-	delete mEnvMap;
-	mEnvMap = 0;
+	delete env_map_;
+	env_map_ = 0;
 }
 
 
 
-void FireTicker::Suspend(bool pHard)
-{
-	Parent::Suspend(pHard);
+void FireTicker::Suspend(bool hard) {
+	Parent::Suspend(hard);
 }
 
-void FireTicker::Resume(bool pHard)
-{
-	Parent::Resume(pHard);
+void FireTicker::Resume(bool hard) {
+	Parent::Resume(hard);
 }
 
-bool FireTicker::CreateSlave()
-{
+bool FireTicker::CreateSlave() {
 	return (Parent::CreateSlave(&FireTicker::CreateSlaveManager));
 }
 
-void FireTicker::OnSlavesKilled()
-{
+void FireTicker::OnSlavesKilled() {
 	CreateSlave();
 }
 
-void FireTicker::OnServerCreated(Life::UiGameServerManager*)
-{
+void FireTicker::OnServerCreated(life::UiGameServerManager*) {
 }
 
 
 
-bool FireTicker::OpenUiManager()
-{
-	bool lOk = true;
-	if (lOk)
-	{
-		lOk = mUiManager->OpenDraw();
+bool FireTicker::OpenUiManager() {
+	bool ok = true;
+	if (ok) {
+		ok = ui_manager_->OpenDraw();
 	}
-	if (lOk)
-	{
-		UiLepra::Core::ProcessMessages();
+	if (ok) {
+		uilepra::Core::ProcessMessages();
 	}
-	if (lOk)
-	{
-		mUiManager->UpdateSettings();
-		UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
-		lRenderer->AddDynamicRenderer("particle", new UiTbc::ParticleRenderer(lRenderer, 0));
-		UiCure::ParticleLoader lLoader(mResourceManager, lRenderer, "explosion.png", 4, 5);
+	if (ok) {
+		ui_manager_->UpdateSettings();
+		uitbc::Renderer* renderer = ui_manager_->GetRenderer();
+		renderer->AddDynamicRenderer("particle", new uitbc::ParticleRenderer(renderer, 0));
+		UiCure::ParticleLoader loader(resource_manager_, renderer, "explosion.png", 4, 5);
 	}
-	if (lOk)
-	{
-		mEnvMap = new UiCure::RendererImageResource(mUiManager, mResourceManager, "env.png", UiCure::ImageProcessSettings(Canvas::RESIZE_FAST, true));
-		if (mEnvMap->Load())
-		{
-			if (mEnvMap->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
-			{
-				UiTbc::Renderer::TextureID lTextureId = mEnvMap->GetUserData(0);
-				mUiManager->GetRenderer()->SetEnvironmentMap(lTextureId);
+	if (ok) {
+		env_map_ = new UiCure::RendererImageResource(ui_manager_, resource_manager_, "env.png", UiCure::ImageProcessSettings(Canvas::kResizeFast, true));
+		if (env_map_->Load()) {
+			if (env_map_->PostProcess() == cure::kResourceLoadComplete) {
+				uitbc::Renderer::TextureID texture_id = env_map_->GetUserData(0);
+				ui_manager_->GetRenderer()->SetEnvironmentMap(texture_id);
 			}
 		}
 	}
-	if (lOk)
-	{
-		if (mUiManager->GetCanvas()->GetHeight() < 600)
-		{
-			double lFontHeight;
-			v_get(lFontHeight, =, UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, 48.0);
-			if (lFontHeight > 47.0)
-			{
-				lFontHeight *= mUiManager->GetCanvas()->GetHeight()/600.0;
-				v_set(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
+	if (ok) {
+		if (ui_manager_->GetCanvas()->GetHeight() < 600) {
+			double font_height;
+			v_get(font_height, =, UiCure::GetSettings(), kRtvarUi2DFontheight, 48.0);
+			if (font_height > 47.0) {
+				font_height *= ui_manager_->GetCanvas()->GetHeight()/600.0;
+				v_set(UiCure::GetSettings(), kRtvarUi2DFontheight, font_height);
 			}
 		}
-		lOk = mUiManager->OpenRest();
+		ok = ui_manager_->OpenRest();
 	}
-	if (lOk)
-	{
-		mUiManager->GetDesktopWindow()->CreateLayer(new UiTbc::FloatingLayout());
+	if (ok) {
+		ui_manager_->GetDesktopWindow()->CreateLayer(new uitbc::FloatingLayout());
 	}
-	return lOk;
+	return ok;
 }
 
-void FireTicker::BeginRender(vec3& pColor)
-{
-	Parent::BeginRender(pColor);
-	mUiManager->GetRenderer()->SetOutlineFillColor(OFF_BLACK);
+void FireTicker::BeginRender(vec3& color) {
+	Parent::BeginRender(color);
+	ui_manager_->GetRenderer()->SetOutlineFillColor(OFF_BLACK);
 }
 
-void FireTicker::PreWaitPhysicsTick()
-{
+void FireTicker::PreWaitPhysicsTick() {
 	Parent::PreWaitPhysicsTick();
 }
 
 
 
-void FireTicker::CloseMainMenu()
-{
+void FireTicker::CloseMainMenu() {
 }
 
-bool FireTicker::QueryQuit()
-{
-	if (Parent::QueryQuit())
-	{
+bool FireTicker::QueryQuit() {
+	if (Parent::QueryQuit()) {
 		PrepareQuit();
-		for (int x = 0; x < 4; ++x)
-		{
-			DeleteSlave(mSlaveArray[x], false);
+		for (int x = 0; x < 4; ++x) {
+			DeleteSlave(slave_array_[x], false);
 		}
 		DeleteServer();
 		return (true);
@@ -159,17 +134,16 @@ bool FireTicker::QueryQuit()
 
 
 
-Life::GameClientSlaveManager* FireTicker::CreateSlaveManager(Life::GameClientMasterTicker* pMaster,
-	Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-	int pSlaveIndex, const PixelRect& pRenderArea)
-{
-	return new FireManager(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea);
+life::GameClientSlaveManager* FireTicker::CreateSlaveManager(life::GameClientMasterTicker* pMaster,
+	cure::TimeManager* time, cure::RuntimeVariableScope* variable_scope,
+	cure::ResourceManager* resource_manager, UiCure::GameUiManager* ui_manager,
+	int slave_index, const PixelRect& render_area) {
+	return new FireManager(pMaster, time, variable_scope, resource_manager, ui_manager, slave_index, render_area);
 }
 
 
 
-loginstance(GAME, FireTicker);
+loginstance(kGame, FireTicker);
 
 
 

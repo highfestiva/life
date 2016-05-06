@@ -6,14 +6,13 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Vector3D.h"
+#include "../../lepra/include/vector3d.h"
 //#include "ChunkyLoader.h"
-#include "PhysicsManager.h"
+#include "physicsmanager.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
@@ -21,193 +20,181 @@ class ChunkyPhysics;
 
 
 
-class ChunkyBoneGeometry
-{
+class ChunkyBoneGeometry {
 public:
-	enum BoneType
-	{
-		BONE_BODY = 1,
-		BONE_TRIGGER,
-		BONE_POSITION,
+	enum BoneType {
+		kBoneBody = 1,
+		kBoneTrigger,
+		kBonePosition,
 	};
 
-	enum GeometryType
-	{
-		GEOMETRY_CAPSULE = 1,
-		GEOMETRY_CYLINDER,
-		GEOMETRY_SPHERE,
-		GEOMETRY_BOX,
-		GEOMETRY_MESH,
+	enum GeometryType {
+		kGeometryCapsule = 1,
+		kGeometryCylinder,
+		kGeometrySphere,
+		kGeometryBox,
+		kGeometryMesh,
 	};
 
-	enum JointType
-	{
-		JOINT_EXCLUDE = 1,
-		JOINT_FIXED,
-		JOINT_SUSPEND_HINGE,
-		JOINT_HINGE2,
-		JOINT_HINGE,
-		JOINT_BALL,
-		JOINT_SLIDER,
-		JOINT_UNIVERSAL,
+	enum JointType {
+		kJointExclude = 1,
+		kJointFixed,
+		kJointSuspendHinge,
+		kJointHinge2,
+		kJointHinge,
+		kJointBall,
+		kJointSlider,
+		kJointUniversal,
 	};
 
-	enum ConnectorType
-	{
-		CONNECT_NONE = 0,
-		CONNECTOR_SLIDER,
-		CONNECTOR_UNIVERSAL,
-		CONNECTOR_SUSPEND_HINGE,
-		CONNECTOR_HINGE,
-		CONNECTOR_HINGE2,
-		CONNECTOR_3DOF,	// Three degrees of freedom.
-		CONNECTOR_FIXED,
-		CONNECTEE_3DOF,
+	enum ConnectorType {
+		kConnectNone = 0,
+		kConnectorSlider,
+		kConnectorUniversal,
+		kConnectorSuspendHinge,
+		kConnectorHinge,
+		kConnectorHinge2,
+		kConnector3Dof,	// Three degrees of freedom.
+		kConnectorFixed,
+		kConnectee3Dof,
 	};
 
-	enum BodyParameters
-	{
-		PARAM_SPRING_CONSTANT = 0,
-		PARAM_SPRING_DAMPING,
-		PARAM_EULER_THETA,
-		PARAM_EULER_PHI,
-		PARAM_LOW_STOP,
-		PARAM_HIGH_STOP,
-		PARAM_OFFSET_X,
-		PARAM_OFFSET_Y,
-		PARAM_OFFSET_Z,
-		PARAM_IMPACT_FACTOR,
-		PARAM_COLLIDE_WITH_SELF,
-		PARAM_DETACHABLE,
+	enum BodyParameters {
+		kParamSpringConstant = 0,
+		kParamSpringDamping,
+		kParamEulerTheta,
+		kParamEulerPhi,
+		kParamLowStop,
+		kParamHighStop,
+		kParamOffsetX,
+		kParamOffsetY,
+		kParamOffsetZ,
+		kParamImpactFactor,
+		kParamCollideWithSelf,
+		kParamDetachable,
 	};
 
-	struct BodyDataBase
-	{
-		BodyDataBase(float pMass, float pFriction, float pBounce, ChunkyBoneGeometry* pParent,
-			JointType pJointType, bool pIsAffectedByGravity, BoneType pBoneType):
-			mMass(pMass),
-			mFriction(pFriction),
-			mBounce(pBounce),
-			mParent(pParent),
-			mJointType(pJointType),
-			mIsAffectedByGravity(pIsAffectedByGravity),
-			mBoneType(pBoneType)
-		{
-			::memset(mParameter, 0, sizeof(mParameter));
+	struct BodyDataBase {
+		BodyDataBase(float mass, float friction, float bounce, ChunkyBoneGeometry* parent,
+			JointType joint_type, bool is_affected_by_gravity, BoneType bone_type):
+			mass_(mass),
+			friction_(friction),
+			bounce_(bounce),
+			parent_(parent),
+			joint_type_(joint_type),
+			is_affected_by_gravity_(is_affected_by_gravity),
+			bone_type_(bone_type) {
+			::memset(parameter_, 0, sizeof(parameter_));
 		}
-		float mMass;
-		float mFriction;
-		float mBounce;
-		ChunkyBoneGeometry* mParent;
-		JointType mJointType;
-		bool mIsAffectedByGravity;
-		BoneType mBoneType;
-		float mParameter[16];
+		float mass_;
+		float friction_;
+		float bounce_;
+		ChunkyBoneGeometry* parent_;
+		JointType joint_type_;
+		bool is_affected_by_gravity_;
+		BoneType bone_type_;
+		float parameter_[16];
 	};
-	struct BodyData: public BodyDataBase
-	{
-		BodyData(float pMass, float pFriction, float pBounce, ChunkyBoneGeometry* pParent = 0,
-			JointType pJointType = JOINT_EXCLUDE, ConnectorType pConnectorType = CONNECT_NONE,
-			bool pIsAffectedByGravity = true, BoneType pBoneType = BONE_BODY):
-			BodyDataBase(pMass, pFriction, pBounce, pParent, pJointType, pIsAffectedByGravity, pBoneType),
-			mConnectorType(pConnectorType)
-		{
+	struct BodyData: public BodyDataBase {
+		BodyData(float mass, float friction, float bounce, ChunkyBoneGeometry* parent = 0,
+			JointType joint_type = kJointExclude, ConnectorType connector_type = kConnectNone,
+			bool is_affected_by_gravity = true, BoneType bone_type = kBoneBody):
+			BodyDataBase(mass, friction, bounce, parent, joint_type, is_affected_by_gravity, bone_type),
+			connector_type_(connector_type) {
 		}
-		ConnectorType mConnectorType;
+		ConnectorType connector_type_;
 	};
 
-	ChunkyBoneGeometry(const BodyData& pBodyData);
+	ChunkyBoneGeometry(const BodyData& body_data);
 	virtual ~ChunkyBoneGeometry();
-	virtual void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal);
+	virtual void RelocatePointers(const ChunkyPhysics* target, const ChunkyPhysics* source, const ChunkyBoneGeometry& original);
 
-	static ChunkyBoneGeometry* Create(const ChunkyBoneGeometry& pOriginal);
-	static ChunkyBoneGeometry* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
+	static ChunkyBoneGeometry* Create(const ChunkyBoneGeometry& original);
+	static ChunkyBoneGeometry* Load(ChunkyPhysics* structure, const void* data, unsigned byte_count);
 
 	virtual GeometryType GetGeometryType() const = 0;
 
-	bool CreateJoint(ChunkyPhysics* pStructure, PhysicsManager* pPhysics, unsigned pPhysicsFps);
-	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot,
-		int pForceListenerId, PhysicsManager::BodyType pType,
-		const xform& pTransform) = 0;
-	void RemovePhysics(PhysicsManager* pPhysics);
+	bool CreateJoint(ChunkyPhysics* structure, PhysicsManager* physics, unsigned physics_fps);
+	virtual bool CreateBody(PhysicsManager* physics, bool is_root,
+		int force_listener_id, PhysicsManager::BodyType type,
+		const xform& transform) = 0;
+	void RemovePhysics(PhysicsManager* physics);
 
 	float GetMass() const;
 	ChunkyBoneGeometry* GetParent() const;
 	JointType GetJointType() const;
-	void SetJointType(JointType pJointType);
+	void SetJointType(JointType joint_type);
 	bool IsAffectedByGravity() const;
 	bool IsCollideWithSelf() const;
 	bool IsDetachable() const;
 	BoneType GetBoneType() const;
 	PhysicsManager::JointID GetJointId() const;
 	void ResetJointId();
-	void SetJointId(PhysicsManager::JointID pJointId);
+	void SetJointId(PhysicsManager::JointID joint_id);
 	PhysicsManager::BodyID GetBodyId() const;
 	void ResetBodyId();
-	bool IsConnectorType(ConnectorType pType) const;
-	void AddConnectorType(ConnectorType pType);
+	bool IsConnectorType(ConnectorType type) const;
+	void AddConnectorType(ConnectorType type);
 	void ClearConnectorTypes();
 	vec3 GetOriginalOffset() const;
 	float GetImpactFactor() const;
 	const str& GetMaterial() const;
-	void SetMaterial(const str& pMaterial);
+	void SetMaterial(const str& material);
 
 	float GetExtraData() const;
-	void SetExtraData(float pExtraData);
+	void SetExtraData(float extra_data);
 
 	BodyDataBase& GetBodyData();	// Only use when fiddling with internals.
 
-	virtual unsigned GetChunkySize(const void* pData = 0) const;
-	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	virtual unsigned GetChunkySize(const void* data = 0) const;
+	virtual void SaveChunkyData(const ChunkyPhysics* structure, void* data) const;
 
 	virtual vec3 GetShapeSize() const = 0;
 
 protected:
-	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	virtual void LoadChunkyData(ChunkyPhysics* structure, const void* data);
 
 	typedef std::vector<ConnectorType> ConnectorArray;
 
-	BodyDataBase mBodyData;
-	PhysicsManager::JointID mJointId;
-	PhysicsManager::BodyID mBodyId;
-	PhysicsManager::BodyID mTriggerId;
-	ConnectorArray mConnectorArray;
-	str mMaterial;
-	float mExtraData;
+	BodyDataBase body_data_;
+	PhysicsManager::JointID joint_id_;
+	PhysicsManager::BodyID body_id_;
+	PhysicsManager::BodyID trigger_id_;
+	ConnectorArray connector_array_;
+	str material_;
+	float extra_data_;
 
 	logclass();
 };
 
 
 
-class ChunkyBoneCapsule: public ChunkyBoneGeometry
-{
+class ChunkyBoneCapsule: public ChunkyBoneGeometry {
 	typedef ChunkyBoneGeometry Parent;
 public:
-	ChunkyBoneCapsule(const BodyData& pBodyData);
-	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
-		PhysicsManager::BodyType pType, const xform& pTransform);
+	ChunkyBoneCapsule(const BodyData& body_data);
+	virtual bool CreateBody(PhysicsManager* physics, bool is_root, int force_listener_id,
+		PhysicsManager::BodyType type, const xform& transform);
 
-	virtual unsigned GetChunkySize(const void* pData = 0) const;
-	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	virtual unsigned GetChunkySize(const void* data = 0) const;
+	virtual void SaveChunkyData(const ChunkyPhysics* structure, void* data) const;
 
-	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	virtual void LoadChunkyData(ChunkyPhysics* structure, const void* data);
 	virtual vec3 GetShapeSize() const;
 	virtual GeometryType GetGeometryType() const;
 
-	float32 mRadius;
-	float32 mLength;
+	float32 radius_;
+	float32 length_;
 };
 
 
 
-class ChunkyBoneCylinder: public ChunkyBoneCapsule
-{
+class ChunkyBoneCylinder: public ChunkyBoneCapsule {
 	typedef ChunkyBoneCapsule Parent;
 public:
-	ChunkyBoneCylinder(const BodyData& pBodyData);
-	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
-		PhysicsManager::BodyType pType, const xform& pTransform);
+	ChunkyBoneCylinder(const BodyData& body_data);
+	virtual bool CreateBody(PhysicsManager* physics, bool is_root, int force_listener_id,
+		PhysicsManager::BodyType type, const xform& transform);
 
 private:
 	virtual vec3 GetShapeSize() const;
@@ -216,69 +203,66 @@ private:
 
 
 
-class ChunkyBoneSphere: public ChunkyBoneGeometry
-{
+class ChunkyBoneSphere: public ChunkyBoneGeometry {
 	typedef ChunkyBoneGeometry Parent;
 public:
-	ChunkyBoneSphere(const BodyData& pBodyData);
-	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
-		PhysicsManager::BodyType pType, const xform& pTransform);
+	ChunkyBoneSphere(const BodyData& body_data);
+	virtual bool CreateBody(PhysicsManager* physics, bool is_root, int force_listener_id,
+		PhysicsManager::BodyType type, const xform& transform);
 
-	virtual unsigned GetChunkySize(const void* pData = 0) const;
-	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	virtual unsigned GetChunkySize(const void* data = 0) const;
+	virtual void SaveChunkyData(const ChunkyPhysics* structure, void* data) const;
 
 	virtual vec3 GetShapeSize() const;
-	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	virtual void LoadChunkyData(ChunkyPhysics* structure, const void* data);
 	virtual GeometryType GetGeometryType() const;
 
-	float32 mRadius;
+	float32 radius_;
 };
 
 
 
-class ChunkyBoneBox: public ChunkyBoneGeometry
-{
+class ChunkyBoneBox: public ChunkyBoneGeometry {
 	typedef ChunkyBoneGeometry Parent;
 public:
-	ChunkyBoneBox(const BodyData& pBodyData);
-	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
-		PhysicsManager::BodyType pType, const xform& pTransform);
+	ChunkyBoneBox(const BodyData& body_data);
+	virtual bool CreateBody(PhysicsManager* physics, bool is_root, int force_listener_id,
+		PhysicsManager::BodyType type, const xform& transform);
 
-	virtual unsigned GetChunkySize(const void* pData = 0) const;
-	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	virtual unsigned GetChunkySize(const void* data = 0) const;
+	virtual void SaveChunkyData(const ChunkyPhysics* structure, void* data) const;
 
 	virtual vec3 GetShapeSize() const;
 
-	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	virtual void LoadChunkyData(ChunkyPhysics* structure, const void* data);
 	virtual GeometryType GetGeometryType() const;
 
-	vec3 mSize;
+	vec3 size_;
 };
 
 
 
-class ChunkyBoneMesh: public ChunkyBoneGeometry
-{
+class ChunkyBoneMesh: public ChunkyBoneGeometry {
 	typedef ChunkyBoneGeometry Parent;
 public:
-	ChunkyBoneMesh(const BodyData& pBodyData);
+	ChunkyBoneMesh(const BodyData& body_data);
 	virtual ~ChunkyBoneMesh();
-	virtual bool CreateBody(PhysicsManager* pPhysics, bool pIsRoot, int pForceListenerId,
-		PhysicsManager::BodyType pType, const xform& pTransform);
+	virtual bool CreateBody(PhysicsManager* physics, bool is_root, int force_listener_id,
+		PhysicsManager::BodyType type, const xform& transform);
 
-	virtual unsigned GetChunkySize(const void* pData = 0) const;
-	virtual void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	virtual unsigned GetChunkySize(const void* data = 0) const;
+	virtual void SaveChunkyData(const ChunkyPhysics* structure, void* data) const;
 
 	virtual vec3 GetShapeSize() const;
-	virtual void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	virtual void LoadChunkyData(ChunkyPhysics* structure, const void* data);
 	void Clear();
 	virtual GeometryType GetGeometryType() const;
-	virtual void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const ChunkyBoneGeometry& pOriginal);
+	virtual void RelocatePointers(const ChunkyPhysics* target, const ChunkyPhysics* source, const ChunkyBoneGeometry& original);
 
-	uint32 mVertexCount;
-	float* mVertices;
-	uint32 mTriangleCount;
-	uint32* mIndices;
+	uint32 vertex_count_;
+	float* vertices_;
+	uint32 triangle_count_;
+	uint32* indices_;
 };
 
 

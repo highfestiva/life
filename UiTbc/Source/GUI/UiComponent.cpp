@@ -5,296 +5,239 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiComponent.h"
-#include "../../Include/GUI/UiDesktopWindow.h"
-#include "../../../Lepra/Include/Log.h"
+#include "../../include/gui/uicomponent.h"
+#include "../../include/gui/uidesktopwindow.h"
+#include "../../../lepra/include/log.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-Component::Component(Layout* pLayout) :
-	mParent(0),
-	mMouseFocusChild(0),
-	mKeyboardFocusChild(0),
-	mLayout(0),
-	mParentLayout(0),
-	mPos(0, 0),
-	mPreferredSize(0, 0),
-	mSize(0, 0),
-	mNeedsRepaint(true),
-	mVisible(true),
-	mAdaptivePreferredSize(false),
-	mSelected(false),
-	mEnabled(true),
-	mImageID(Painter::INVALID_IMAGEID),
-	mLayerCount(0)
-{
-	CreateLayer(pLayout);
+Component::Component(Layout* layout) :
+	parent_(0),
+	mouse_focus_child_(0),
+	keyboard_focus_child_(0),
+	layout_(0),
+	parent_layout_(0),
+	pos_(0, 0),
+	preferred_size_(0, 0),
+	size_(0, 0),
+	needs_repaint_(true),
+	visible_(true),
+	adaptive_preferred_size_(false),
+	selected_(false),
+	enabled_(true),
+	image_id_(Painter::kInvalidImageid),
+	layer_count_(0) {
+	CreateLayer(layout);
 }
 
-Component::~Component()
-{
+Component::~Component() {
 	ReleaseKeyboardFocus();
 	ReleaseMouseFocus();
-	mKeyboardFocusChild = 0;
-	mMouseFocusChild = 0;
+	keyboard_focus_child_ = 0;
+	mouse_focus_child_ = 0;
 
 	DeleteAllLayers();
 
-	if (mParent)
-	{
-		Component* lParent = mParent;
-		for (int x = 0; x < 5; ++x)
-		{
-			lParent->RemoveChild(this, x);
+	if (parent_) {
+		Component* _parent = parent_;
+		for (int x = 0; x < 5; ++x) {
+			_parent->RemoveChild(this, x);
 		}
 	}
 }
 
-void Component::DeleteAllLayers()
-{
-	for (int i = 0; i < mLayerCount; i++)
-	{
+void Component::DeleteAllLayers() {
+	for (int i = 0; i < layer_count_; i++) {
 		DeleteLayout(i);
 	}
-	mLayerCount = 0;
-	delete[] mLayout;
-	mLayout = 0;
+	layer_count_ = 0;
+	delete[] layout_;
+	layout_ = 0;
 }
 
-void Component::DeleteLayout(int pLayer)
-{
-	if (pLayer >= 0 && pLayer < mLayerCount)
-	{
-		if (mLayout[pLayer] != 0)
-		{
-			DeleteChildrenInLayer(pLayer);
-			delete mLayout[pLayer];
-			mLayout[pLayer] = 0;
+void Component::DeleteLayout(int layer) {
+	if (layer >= 0 && layer < layer_count_) {
+		if (layout_[layer] != 0) {
+			DeleteChildrenInLayer(layer);
+			delete layout_[layer];
+			layout_[layer] = 0;
 		}
 	}
 }
 
-int Component::CreateLayer(Layout* pLayout)
-{
-	Layout** lLayout = new Layout*[mLayerCount + 1];
-	for (int i = 0; i < mLayerCount; i++)
-	{
-		lLayout[i] = mLayout[i];
+int Component::CreateLayer(Layout* layout) {
+	Layout** _layout = new Layout*[layer_count_ + 1];
+	for (int i = 0; i < layer_count_; i++) {
+		_layout[i] = layout_[i];
 	}
-	lLayout[mLayerCount] = pLayout;
-	if (pLayout)
-	{
-		pLayout->SetOwner(this);
+	_layout[layer_count_] = layout;
+	if (layout) {
+		layout->SetOwner(this);
 	}
 
-	delete[] mLayout;
-	mLayout = lLayout;
-	++mLayerCount;
+	delete[] layout_;
+	layout_ = _layout;
+	++layer_count_;
 
-	return (mLayerCount - 1);
+	return (layer_count_ - 1);
 }
 
-void Component::DeleteLayer(int pLayer)
-{
-	if (pLayer >= 0 && pLayer < mLayerCount)
-	{
-		DeleteLayout(pLayer);
+void Component::DeleteLayer(int layer) {
+	if (layer >= 0 && layer < layer_count_) {
+		DeleteLayout(layer);
 
-		if (mLayerCount > 1)
-		{
-			Layout** lLayout = new Layout*[mLayerCount - 1];
+		if (layer_count_ > 1) {
+			Layout** _layout = new Layout*[layer_count_ - 1];
 
 			int i;
-			for (i = 0; i < pLayer; i++)
-			{
-				lLayout[i] = mLayout[i];
+			for (i = 0; i < layer; i++) {
+				_layout[i] = layout_[i];
 			}
 
 			int j;
-			for (j = i + 1; j < mLayerCount; i++, j++)
-			{
-				lLayout[i] = mLayout[j];
+			for (j = i + 1; j < layer_count_; i++, j++) {
+				_layout[i] = layout_[j];
 			}
 
-			delete[] mLayout;
-			mLayout = lLayout;
-		}
-		else // if (mLayerCount == 1)
-		{
-			delete[] mLayout;
-			mLayout = 0;
+			delete[] layout_;
+			layout_ = _layout;
+		} else { // if (layer_count_ == 1)
+			delete[] layout_;
+			layout_ = 0;
 		}
 
-		mLayerCount--;
+		layer_count_--;
 	}
 }
 
-void Component::DeleteChildrenInLayer(int pLayer)
-{
-	if (pLayer >= 0 && pLayer < mLayerCount)
-	{
-		Component* lChild;
-		while ((lChild = mLayout[pLayer]->GetFirst()) != 0)
-		{
-			delete lChild;
+void Component::DeleteChildrenInLayer(int layer) {
+	if (layer >= 0 && layer < layer_count_) {
+		Component* _child;
+		while ((_child = layout_[layer]->GetFirst()) != 0) {
+			delete _child;
 		}
 	}
 }
 
-void Component::ReplaceLayer(int pLayer, Layout* pLayout)
-{
-	if (pLayer >= 0 && pLayer < mLayerCount)
-	{
-		delete (mLayout[pLayer]);
-		mLayout[pLayer] = pLayout;
-		pLayout->SetOwner(this);
+void Component::ReplaceLayer(int layer, Layout* layout) {
+	if (layer >= 0 && layer < layer_count_) {
+		delete (layout_[layer]);
+		layout_[layer] = layout;
+		layout->SetOwner(this);
 	}
 }
 
-PixelCoord Component::GetPreferredSize(bool pForceAdaptive)
-{
-	PixelCoord lSize(mPreferredSize);
-	
-	if ((pForceAdaptive == true || mAdaptivePreferredSize == true) && mLayout[0] != 0 && 
-	   (lSize.x == 0 || lSize.y == 0))
-	{
-		PixelCoord lTemp(mLayout[0]->GetPreferredSize(pForceAdaptive));
+PixelCoord Component::GetPreferredSize(bool force_adaptive) {
+	PixelCoord _size(preferred_size_);
 
-		if (lSize.x == 0)
-		{
-			lSize.x = lTemp.x;
+	if ((force_adaptive == true || adaptive_preferred_size_ == true) && layout_[0] != 0 &&
+	   (_size.x == 0 || _size.y == 0)) {
+		PixelCoord temp(layout_[0]->GetPreferredSize(force_adaptive));
+
+		if (_size.x == 0) {
+			_size.x = temp.x;
 		}
-		if (lSize.y == 0)
-		{
-			lSize.y = lTemp.y;
+		if (_size.y == 0) {
+			_size.y = temp.y;
 		}
 	}
 
-	return lSize;
+	return _size;
 }
 
-PixelCoord Component::GetMinSize() const
-{
-	PixelCoord lSize(mMinSize);
-	
-	if (mLayout[0] != 0 && (lSize.x == 0 || lSize.y == 0))
-	{
-		PixelCoord lTemp(mLayout[0]->GetMinSize());
+PixelCoord Component::GetMinSize() const {
+	PixelCoord _size(min_size_);
 
-		if (lSize.x == 0)
-		{
-			lSize.x = lTemp.x;
+	if (layout_[0] != 0 && (_size.x == 0 || _size.y == 0)) {
+		PixelCoord temp(layout_[0]->GetMinSize());
+
+		if (_size.x == 0) {
+			_size.x = temp.x;
 		}
-		if (lSize.y == 0)
-		{
-			lSize.y = lTemp.y;
+		if (_size.y == 0) {
+			_size.y = temp.y;
 		}
 	}
 
-	return lSize;
+	return _size;
 }
 
-void Component::AddChild(Component* pChild, int pParam1, int pParam2, int pLayer)
-{
-	if (pLayer >= 0 && pLayer < mLayerCount && mLayout[pLayer] != 0)
-	{
-		deb_assert(pChild->GetParentLayout() == 0);
-		pChild->SetParent(this);
-		mLayout[pLayer]->Add(pChild, pParam1, pParam2);
-		pChild->SetParentLayout(mLayout[pLayer]);
+void Component::AddChild(Component* child, int param1, int param2, int layer) {
+	if (layer >= 0 && layer < layer_count_ && layout_[layer] != 0) {
+		deb_assert(child->GetParentLayout() == 0);
+		child->SetParent(this);
+		layout_[layer]->Add(child, param1, param2);
+		child->SetParentLayout(layout_[layer]);
 		UpdateLayout();
 		SetNeedsRepaint(true);
-	}
-	else
-	{
-		mLog.Errorf("Could not add child to layer %i.", pLayer);
+	} else {
+		log_.Errorf("Could not add child to layer %i.", layer);
 	}
 }
 
-void Component::RemoveChild(Component* pChild, int pLayer)
-{
-	if (pLayer >= 0 && pLayer < mLayerCount && mLayout[pLayer] != 0)
-	{
-		mLayout[pLayer]->Remove(pChild);
-		pChild->SetParentLayout(0);
-		if (pChild == mMouseFocusChild)
-		{
-			pChild->ReleaseMouseFocus();
+void Component::RemoveChild(Component* child, int layer) {
+	if (layer >= 0 && layer < layer_count_ && layout_[layer] != 0) {
+		layout_[layer]->Remove(child);
+		child->SetParentLayout(0);
+		if (child == mouse_focus_child_) {
+			child->ReleaseMouseFocus();
 		}
-		if (pChild == mKeyboardFocusChild)
-		{
-			pChild->ReleaseKeyboardFocus();
+		if (child == keyboard_focus_child_) {
+			child->ReleaseKeyboardFocus();
 		}
-		pChild->SetParent(0);
+		child->SetParent(0);
 	}
 }
 
-int Component::GetNumChildren() const
-{
-	int lNumChildren = 0;
+int Component::GetNumChildren() const {
+	int num_children = 0;
 
-	for (int i = 0; i < mLayerCount; i++)
-	{
-		if (mLayout[i] != 0)
-		{
-			lNumChildren = mLayout[i]->GetNumComponents();
+	for (int i = 0; i < layer_count_; i++) {
+		if (layout_[i] != 0) {
+			num_children = layout_[i]->GetNumComponents();
 		}
 	}
 
-	return lNumChildren;
+	return num_children;
 }
 
-void Component::AddTextListener(UiLepra::TextInputObserver* pListener)
-{
-	mTextListenerSet.insert(pListener);
+void Component::AddTextListener(uilepra::TextInputObserver* listener) {
+	text_listener_set_.insert(listener);
 }
 
-void Component::RemoveTextListener(UiLepra::TextInputObserver* pListener)
-{
-	mTextListenerSet.erase(pListener);
+void Component::RemoveTextListener(uilepra::TextInputObserver* listener) {
+	text_listener_set_.erase(listener);
 }
 
-void Component::AddKeyListener(UiLepra::KeyCodeInputObserver* pListener)
-{
-	mKeyListenerSet.insert(pListener);
+void Component::AddKeyListener(uilepra::KeyCodeInputObserver* listener) {
+	key_listener_set_.insert(listener);
 }
 
-void Component::RemoveKeyListener(UiLepra::KeyCodeInputObserver* pListener)
-{
-	mKeyListenerSet.erase(pListener);
+void Component::RemoveKeyListener(uilepra::KeyCodeInputObserver* listener) {
+	key_listener_set_.erase(listener);
 }
 
-Component* Component::GetChild(int pScreenX, int pScreenY, int pLevelsDown)
-{
+Component* Component::GetChild(int screen_x, int screen_y, int levels_down) {
 	int i;
-	for (i = mLayerCount - 1; i >= 0; --i)
-	{
-		if (mLayout[i] != 0)
-		{
-			Component* lChild = mLayout[i]->GetLast();
-			while (lChild != 0)
-			{
-				if (lChild->IsVisible() == true)
-				{
-					if (lChild->IsOver(pScreenX, pScreenY) == true)
-					{
-						if (pLevelsDown <= 0)
-						{
-							return lChild;
-						}
-						else
-						{
-							return lChild->GetChild(pScreenX, pScreenY, pLevelsDown - 1);
+	for (i = layer_count_ - 1; i >= 0; --i) {
+		if (layout_[i] != 0) {
+			Component* _child = layout_[i]->GetLast();
+			while (_child != 0) {
+				if (_child->IsVisible() == true) {
+					if (_child->IsOver(screen_x, screen_y) == true) {
+						if (levels_down <= 0) {
+							return _child;
+						} else {
+							return _child->GetChild(screen_x, screen_y, levels_down - 1);
 						}
 					}
 				}
 
-				lChild = mLayout[i]->GetPrev();
+				_child = layout_[i]->GetPrev();
 			}
 		}
 	}
@@ -302,92 +245,70 @@ Component* Component::GetChild(int pScreenX, int pScreenY, int pLevelsDown)
 	return 0;
 }
 
-void Component::UpdateLayout()
-{
-	for (int i = 0; i < mLayerCount; i++)
-	{
-		if (mLayout[i] != 0)
-		{
-			Component* lChild = mLayout[i]->GetFirst();
-			while (lChild != 0)
-			{
-				if (lChild->IsLocalVisible() &&
-				    lChild->NeedsRepaint())
-				{
-					lChild->UpdateLayout();
+void Component::UpdateLayout() {
+	for (int i = 0; i < layer_count_; i++) {
+		if (layout_[i] != 0) {
+			Component* _child = layout_[i]->GetFirst();
+			while (_child != 0) {
+				if (_child->IsLocalVisible() &&
+				    _child->NeedsRepaint()) {
+					_child->UpdateLayout();
 				}
-				lChild = mLayout[i]->GetNext();
+				_child = layout_[i]->GetNext();
 			}
-			mLayout[i]->UpdateLayout();
+			layout_[i]->UpdateLayout();
 		}
 	}
 }
 
-void Component::Repaint(Painter* pPainter)
-{
-	RepaintBackground(pPainter);
-	RepaintComponents(pPainter);
+void Component::Repaint(Painter* painter) {
+	RepaintBackground(painter);
+	RepaintComponents(painter);
 }
 
-void Component::RepaintBackground(Painter* pPainter)
-{
-	(void)pPainter;
+void Component::RepaintBackground(Painter* painter) {
+	(void)painter;
 }
 
-void Component::RepaintComponents(Painter* pPainter)
-{
-	for (int i = 0; i < mLayerCount; i++)
-	{
-		if (mLayout[i] != 0)
-		{
-			Component* lChild = mLayout[i]->GetFirst();
+void Component::RepaintComponents(Painter* painter) {
+	for (int i = 0; i < layer_count_; i++) {
+		if (layout_[i] != 0) {
+			Component* _child = layout_[i]->GetFirst();
 
-			while (lChild != 0)
-			{
-				if (lChild->IsVisible() == true)
-				{
-					RepaintChild(lChild, pPainter);
+			while (_child != 0) {
+				if (_child->IsVisible() == true) {
+					RepaintChild(_child, painter);
 				}
 
-				lChild = mLayout[i]->GetNext();
+				_child = layout_[i]->GetNext();
 			}
 		}
 	}
-	mNeedsRepaint = false;
+	needs_repaint_ = false;
 }
 
-bool Component::OnDoubleClick(int pMouseX, int pMouseY)
-{
-	if (mMouseFocusChild != 0)
-	{
-		mMouseFocusChild->OnDoubleClick(pMouseX, pMouseY);
-	}
-	else
-	{
-		Component* lChild = GetChild(pMouseX, pMouseY);
+bool Component::OnDoubleClick(int mouse_x, int mouse_y) {
+	if (mouse_focus_child_ != 0) {
+		mouse_focus_child_->OnDoubleClick(mouse_x, mouse_y);
+	} else {
+		Component* _child = GetChild(mouse_x, mouse_y);
 
-		if (lChild != 0)
-		{
-			lChild->OnDoubleClick(pMouseX, pMouseY);
+		if (_child != 0) {
+			_child->OnDoubleClick(mouse_x, mouse_y);
 		}
 	}
 	return (false);
 }
 
-bool Component::OnLButtonDown(int pMouseX, int pMouseY)
-{
-	if (mMouseFocusChild != 0)
-	{
-		mMouseFocusChild->OnLButtonDown(pMouseX, pMouseY);
+bool Component::OnLButtonDown(int mouse_x, int mouse_y) {
+	if (mouse_focus_child_ != 0) {
+		mouse_focus_child_->OnLButtonDown(mouse_x, mouse_y);
 		return true;
-	}
-	else
-	{
-		Component* lChild = GetChild(pMouseX, pMouseY);
+	} else {
+		Component* _child = GetChild(mouse_x, mouse_y);
 
-		if (lChild != 0)
-		{
-			lChild->OnLButtonDown(pMouseX, pMouseY);
+		if (_child != 0) {
+			_child->OnLButtonDown(mouse_x, mouse_y);
 			return true;
 		}
 
@@ -395,20 +316,15 @@ bool Component::OnLButtonDown(int pMouseX, int pMouseY)
 	}
 }
 
-bool Component::OnRButtonDown(int pMouseX, int pMouseY)
-{
-	if (mMouseFocusChild != 0)
-	{
-		mMouseFocusChild->OnRButtonDown(pMouseX, pMouseY);
+bool Component::OnRButtonDown(int mouse_x, int mouse_y) {
+	if (mouse_focus_child_ != 0) {
+		mouse_focus_child_->OnRButtonDown(mouse_x, mouse_y);
 		return true;
-	}
-	else
-	{
-		Component* lChild = GetChild(pMouseX, pMouseY);
+	} else {
+		Component* _child = GetChild(mouse_x, mouse_y);
 
-		if (lChild != 0)
-		{
-			lChild->OnRButtonDown(pMouseX, pMouseY);
+		if (_child != 0) {
+			_child->OnRButtonDown(mouse_x, mouse_y);
 			return true;
 		}
 
@@ -416,20 +332,15 @@ bool Component::OnRButtonDown(int pMouseX, int pMouseY)
 	}
 }
 
-bool Component::OnMButtonDown(int pMouseX, int pMouseY)
-{
-	if (mMouseFocusChild != 0)
-	{
-		mMouseFocusChild->OnMButtonDown(pMouseX, pMouseY);
+bool Component::OnMButtonDown(int mouse_x, int mouse_y) {
+	if (mouse_focus_child_ != 0) {
+		mouse_focus_child_->OnMButtonDown(mouse_x, mouse_y);
 		return true;
-	}
-	else
-	{
-		Component* lChild = GetChild(pMouseX, pMouseY);
+	} else {
+		Component* _child = GetChild(mouse_x, mouse_y);
 
-		if (lChild != 0)
-		{
-			lChild->OnMButtonDown(pMouseX, pMouseY);
+		if (_child != 0) {
+			_child->OnMButtonDown(mouse_x, mouse_y);
 			return true;
 		}
 
@@ -437,20 +348,15 @@ bool Component::OnMButtonDown(int pMouseX, int pMouseY)
 	}
 }
 
-bool Component::OnLButtonUp(int pMouseX, int pMouseY)
-{
-	if (mMouseFocusChild != 0)
-	{
-		mMouseFocusChild->OnLButtonUp(pMouseX, pMouseY);
+bool Component::OnLButtonUp(int mouse_x, int mouse_y) {
+	if (mouse_focus_child_ != 0) {
+		mouse_focus_child_->OnLButtonUp(mouse_x, mouse_y);
 		return true;
-	}
-	else
-	{
-		Component* lChild = GetChild(pMouseX, pMouseY);
+	} else {
+		Component* _child = GetChild(mouse_x, mouse_y);
 
-		if (lChild != 0)
-		{
-			lChild->OnLButtonUp(pMouseX, pMouseY);
+		if (_child != 0) {
+			_child->OnLButtonUp(mouse_x, mouse_y);
 			return true;
 		}
 
@@ -458,20 +364,15 @@ bool Component::OnLButtonUp(int pMouseX, int pMouseY)
 	}
 }
 
-bool Component::OnRButtonUp(int pMouseX, int pMouseY)
-{
-	if (mMouseFocusChild != 0)
-	{
-		mMouseFocusChild->OnRButtonUp(pMouseX, pMouseY);
+bool Component::OnRButtonUp(int mouse_x, int mouse_y) {
+	if (mouse_focus_child_ != 0) {
+		mouse_focus_child_->OnRButtonUp(mouse_x, mouse_y);
 		return true;
-	}
-	else
-	{
-		Component* lChild = GetChild(pMouseX, pMouseY);
+	} else {
+		Component* _child = GetChild(mouse_x, mouse_y);
 
-		if (lChild != 0)
-		{
-			lChild->OnRButtonUp(pMouseX, pMouseY);
+		if (_child != 0) {
+			_child->OnRButtonUp(mouse_x, mouse_y);
 			return true;
 		}
 
@@ -479,20 +380,15 @@ bool Component::OnRButtonUp(int pMouseX, int pMouseY)
 	}
 }
 
-bool Component::OnMButtonUp(int pMouseX, int pMouseY)
-{
-	if (mMouseFocusChild != 0)
-	{
-		mMouseFocusChild->OnMButtonUp(pMouseX, pMouseY);
+bool Component::OnMButtonUp(int mouse_x, int mouse_y) {
+	if (mouse_focus_child_ != 0) {
+		mouse_focus_child_->OnMButtonUp(mouse_x, mouse_y);
 		return true;
-	}
-	else
-	{
-		Component* lChild = GetChild(pMouseX, pMouseY);
+	} else {
+		Component* _child = GetChild(mouse_x, mouse_y);
 
-		if (lChild != 0)
-		{
-			lChild->OnMButtonUp(pMouseX, pMouseY);
+		if (_child != 0) {
+			_child->OnMButtonUp(mouse_x, mouse_y);
 			return true;
 		}
 
@@ -500,20 +396,15 @@ bool Component::OnMButtonUp(int pMouseX, int pMouseY)
 	}
 }
 
-bool Component::OnMouseWheel(int pMouseX, int pMouseY, int pChange, bool pDown)
-{
-	if (mMouseFocusChild != 0)
-	{
-		mMouseFocusChild->OnMouseWheel(pMouseX, pMouseY, pChange, pDown);
+bool Component::OnMouseWheel(int mouse_x, int mouse_y, int change, bool down) {
+	if (mouse_focus_child_ != 0) {
+		mouse_focus_child_->OnMouseWheel(mouse_x, mouse_y, change, down);
 		return true;
-	}
-	else
-	{
-		Component* lChild = GetChild(pMouseX, pMouseY);
+	} else {
+		Component* _child = GetChild(mouse_x, mouse_y);
 
-		if (lChild != 0)
-		{
-			lChild->OnMouseWheel(pMouseX, pMouseY, pChange, pDown);
+		if (_child != 0) {
+			_child->OnMouseWheel(mouse_x, mouse_y, change, down);
 			return true;
 		}
 
@@ -521,575 +412,456 @@ bool Component::OnMouseWheel(int pMouseX, int pMouseY, int pChange, bool pDown)
 	}
 }
 
-bool Component::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
-{
-	bool lIsOver = false;
-	for (int i = mLayerCount-1; !lIsOver && i >= 0; --i)
-	{
-		if (mLayout[i] != 0)
-		{
-			Component* lChild = mLayout[i]->GetFirst();
-			for (; lChild; lChild = mLayout[i]->GetNext())
-			{
-				lIsOver |= lChild->OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
+bool Component::OnMouseMove(int mouse_x, int mouse_y, int delta_x, int delta_y) {
+	bool is_over = false;
+	for (int i = layer_count_-1; !is_over && i >= 0; --i) {
+		if (layout_[i] != 0) {
+			Component* _child = layout_[i]->GetFirst();
+			for (; _child; _child = layout_[i]->GetNext()) {
+				is_over |= _child->OnMouseMove(mouse_x, mouse_y, delta_x, delta_y);
 			}
 		}
 	}
-	return lIsOver;
+	return is_over;
 }
 
-bool Component::OnChar(wchar_t pChar)
-{
-	DispatchChar(pChar);
+bool Component::OnChar(wchar_t _c) {
+	DispatchChar(_c);
 
-	if (mKeyboardFocusChild != 0)
-	{
-		mKeyboardFocusChild->OnChar(pChar);
+	if (keyboard_focus_child_ != 0) {
+		keyboard_focus_child_->OnChar(_c);
 	}
 	return (false);
 }
 
-bool Component::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	KeyListenerSet::iterator x = mKeyListenerSet.begin();
-	for (; x != mKeyListenerSet.end(); ++x)
-	{
-		(*x)->OnKeyDown(pKeyCode);
+bool Component::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
+	KeyListenerSet::iterator x = key_listener_set_.begin();
+	for (; x != key_listener_set_.end(); ++x) {
+		(*x)->OnKeyDown(key_code);
 	}
 
-	if (mKeyboardFocusChild != 0)
-	{
-		mKeyboardFocusChild->OnKeyDown(pKeyCode);
+	if (keyboard_focus_child_ != 0) {
+		keyboard_focus_child_->OnKeyDown(key_code);
 	}
 	return (false);
 }
 
-bool Component::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	KeyListenerSet::iterator x = mKeyListenerSet.begin();
-	for (; x != mKeyListenerSet.end(); ++x)
-	{
-		(*x)->OnKeyUp(pKeyCode);
+bool Component::OnKeyUp(uilepra::InputManager::KeyCode key_code) {
+	KeyListenerSet::iterator x = key_listener_set_.begin();
+	for (; x != key_listener_set_.end(); ++x) {
+		(*x)->OnKeyUp(key_code);
 	}
 
-	if (mKeyboardFocusChild != 0)
-	{
-		mKeyboardFocusChild->OnKeyUp(pKeyCode);
+	if (keyboard_focus_child_ != 0) {
+		keyboard_focus_child_->OnKeyUp(key_code);
 	}
 	return (false);
 }
 
-bool Component::OnDoubleClick()
-{
+bool Component::OnDoubleClick() {
 	return (false);
 }
 
-void Component::OnConnectedToDesktopWindow()
-{
+void Component::OnConnectedToDesktopWindow() {
 	// Notify children.
-	for(int i = 0; i < mLayerCount; i++)
-	{
-		Layout* lLayout = mLayout[i];
-		if(lLayout != 0)
-		{
-			Component* lChild = lLayout->GetFirst();
-			while(lChild != 0)
-			{
-				lChild->OnConnectedToDesktopWindow();
-				lChild = lLayout->GetNext();
+	for(int i = 0; i < layer_count_; i++) {
+		Layout* _layout = layout_[i];
+		if(_layout != 0) {
+			Component* _child = _layout->GetFirst();
+			while(_child != 0) {
+				_child->OnConnectedToDesktopWindow();
+				_child = _layout->GetNext();
 			}
 		}
 	}
 }
 
-Component* Component::GetParentOfType(Type pType)
-{
-	Component* lParent = this;
+Component* Component::GetParentOfType(Type type) {
+	Component* _parent = this;
 
-	while (lParent != 0)
-	{
-		if (lParent->GetType() == pType)
-		{
-			return lParent;
+	while (_parent != 0) {
+		if (_parent->GetType() == type) {
+			return _parent;
 		}
 
-		lParent = lParent->GetParent();
+		_parent = _parent->GetParent();
 	}
 
 	return 0;
 }
 
-Component* Component::GetTopParent()
-{
-	Component* lTopParent = this;
-	Component* lParent = this;
+Component* Component::GetTopParent() {
+	Component* top_parent = this;
+	Component* _parent = this;
 
-	while (lParent != 0)
-	{
-		lTopParent = lParent;
-		lParent = lParent->GetParent();
+	while (_parent != 0) {
+		top_parent = _parent;
+		_parent = _parent->GetParent();
 	}
 
-	return lTopParent;
+	return top_parent;
 }
 
-bool Component::IsChildOf(Component* pParent)
-{
-	Component* lParent = GetParent();
+bool Component::IsChildOf(Component* parent) {
+	Component* _parent = GetParent();
 
-	while(lParent != 0 && lParent != pParent)
-	{
-		lParent = lParent->GetParent();
+	while(_parent != 0 && _parent != parent) {
+		_parent = _parent->GetParent();
 	}
 
-	return (lParent != 0);
+	return (_parent != 0);
 }
 
-bool Component::IsOver(int pScreenX, int pScreenY)
-{
-	PixelCoord lPos(GetScreenPos());
-	PixelRect lRect(lPos, lPos + GetSize());
-	return lRect.IsInside(pScreenX, pScreenY);
+bool Component::IsOver(int screen_x, int screen_y) {
+	PixelCoord _pos(GetScreenPos());
+	PixelRect _rect(_pos, _pos + GetSize());
+	return _rect.IsInside(screen_x, screen_y);
 }
 
-Component::StateComponentList Component::GetStateList(ComponentState pState)
-{
-	StateComponentList lList;
-	for (int i = 0; i < mLayerCount; i++)
-	{
-		if (mLayout[i] != 0)
-		{
-			Component* c = mLayout[i]->GetFirst();
-			for (; c; c = mLayout[i]->GetNext())
-			{
-				StateComponentList lChildList = c->GetStateList(pState);
-				lList.splice(lList.end(), lChildList);
+Component::StateComponentList Component::GetStateList(ComponentState state) {
+	StateComponentList list;
+	for (int i = 0; i < layer_count_; i++) {
+		if (layout_[i] != 0) {
+			Component* c = layout_[i]->GetFirst();
+			for (; c; c = layout_[i]->GetNext()) {
+				StateComponentList child_list = c->GetStateList(state);
+				list.splice(list.end(), child_list);
 			}
 		}
 	}
-	return (lList);
+	return (list);
 }
 
-void Component::RepaintChild(Component* pChild, Painter* pPainter)
-{
+void Component::RepaintChild(Component* child, Painter* painter) {
 	// Simply let the child repaint itself.
-	pChild->Repaint(pPainter);
+	child->Repaint(painter);
 }
 
-void Component::SetPos(int x, int y)
-{
-	if (x != mPos.x || y != mPos.y)
-	{
+void Component::SetPos(int x, int y) {
+	if (x != pos_.x || y != pos_.y) {
 		DoSetPos(x, y);
 	}
 }
 
-void Component::DoSetPos(int x, int y)
-{
-	// Can't repaint just because of a position change. That will spoil 
+void Component::DoSetPos(int x, int y) {
+	// Can't repaint just because of a position change. That will spoil
 	// the rendering optimization in DesktopWindow.
 	// SetNeedsRepaint(true);
-	if (GetParent())
-	{
-		if (GetParent()->GetType() == Component::DESKTOPWINDOW)
-		{
+	if (GetParent()) {
+		if (GetParent()->GetType() == Component::kDesktopwindow) {
 			((DesktopWindow*)GetParent())->SetUpdateLayout(true);
 		}
-	}
-	else if (GetType() == Component::DESKTOPWINDOW)
-	{
+	} else if (GetType() == Component::kDesktopwindow) {
 		((DesktopWindow*)this)->SetUpdateLayout(true);
 	}
 
-	mPos.x = x;
-	mPos.y = y;
+	pos_.x = x;
+	pos_.y = y;
 }
 
-void Component::SetSize(int pWidth, int pHeight)
-{
-	if (mSize.x != pWidth || mSize.y != pHeight)
-	{
-		DoSetSize(pWidth, pHeight);
+void Component::SetSize(int width, int height) {
+	if (size_.x != width || size_.y != height) {
+		DoSetSize(width, height);
 	}
 }
 
-void Component::DoSetSize(int pWidth, int pHeight)
-{
+void Component::DoSetSize(int width, int height) {
 	SetNeedsRepaint(true);
-	mSize.x = pWidth;
-	mSize.y = pHeight;
+	size_.x = width;
+	size_.y = height;
 }
 
-void Component::SetMinSize(int pWidth, int pHeight)
-{
-	DoSetMinSize(pWidth, pHeight);
+void Component::SetMinSize(int width, int height) {
+	DoSetMinSize(width, height);
 }
 
-void Component::DoSetMinSize(int pWidth, int pHeight)
-{
-	mMinSize.x = pWidth  < 0 ? 0 : pWidth;
-	mMinSize.y = pHeight < 0 ? 0 : pHeight;
+void Component::DoSetMinSize(int width, int height) {
+	min_size_.x = width  < 0 ? 0 : width;
+	min_size_.y = height < 0 ? 0 : height;
 }
 
-void Component::SetPreferredSize(const PixelCoord& pSize, bool pAdaptive)
-{
-	if (mPreferredSize == pSize)
-	{
+void Component::SetPreferredSize(const PixelCoord& size, bool adaptive) {
+	if (preferred_size_ == size) {
 		return;
 	}
 
 	SetNeedsRepaint(true);
 
-	mPreferredSize = pSize;
+	preferred_size_ = size;
 
-	if (mPreferredSize.x != 0 && mPreferredSize.x < mMinSize.x)
-	{
-		mPreferredSize.x = mMinSize.x;
+	if (preferred_size_.x != 0 && preferred_size_.x < min_size_.x) {
+		preferred_size_.x = min_size_.x;
 	}
 
-	if (mPreferredSize.y != 0 && mPreferredSize.y < mMinSize.y)
-	{
-		mPreferredSize.y = mMinSize.y;
+	if (preferred_size_.y != 0 && preferred_size_.y < min_size_.y) {
+		preferred_size_.y = min_size_.y;
 	}
 
-	if (mParent == 0)
-	{
-		SetSize(mPreferredSize);
+	if (parent_ == 0) {
+		SetSize(preferred_size_);
 	}
 
 
-	mAdaptivePreferredSize = pAdaptive;
+	adaptive_preferred_size_ = adaptive;
 }
 
-void Component::SetPreferredSize(int pWidth, int pHeight, bool pAdaptive)
-{
-	PixelCoord lSize(pWidth, pHeight);
-	SetPreferredSize(lSize, pAdaptive);
+void Component::SetPreferredSize(int width, int height, bool adaptive) {
+	PixelCoord _size(width, height);
+	SetPreferredSize(_size, adaptive);
 }
 
-void Component::SetSelected(bool pSelected)
-{
-	mSelected = pSelected;
+void Component::SetSelected(bool selected) {
+	selected_ = selected;
 
-	if (mSelected)
-	{
+	if (selected_) {
 		SetKeyboardFocus();
 	}
 }
 
-void Component::Enable(bool pEnable)
-{
-	mEnabled = pEnable;
+void Component::Enable(bool enable) {
+	enabled_ = enable;
 }
 
-void Component::SetMouseFocus()
-{
-	if (!HasMouseFocus())
-	{
-		GetTopParent()->ReleaseMouseFocus(RECURSE_DOWN, this);
+void Component::SetMouseFocus() {
+	if (!HasMouseFocus()) {
+		GetTopParent()->ReleaseMouseFocus(kRecurseDown, this);
 
-		if (mParent != 0)
-		{
-			mParent->SetMouseFocus(this);
+		if (parent_ != 0) {
+			parent_->SetMouseFocus(this);
 		}
 	}
 }
 
-void Component::SetMouseFocus(Component* pChild)
-{
-	mMouseFocusChild = pChild;
-	if (mParent != 0)
-	{
-		mParent->SetMouseFocus(this);
+void Component::SetMouseFocus(Component* child) {
+	mouse_focus_child_ = child;
+	if (parent_ != 0) {
+		parent_->SetMouseFocus(this);
 	}
 }
 
-void Component::DispatchChar(wchar_t pChar)
-{
-	TextListenerSet::iterator x = mTextListenerSet.begin();
-	for (; x != mTextListenerSet.end(); ++x)
-	{
-		(*x)->OnChar(pChar);
+void Component::DispatchChar(wchar_t _c) {
+	TextListenerSet::iterator x = text_listener_set_.begin();
+	for (; x != text_listener_set_.end(); ++x) {
+		(*x)->OnChar(_c);
 	}
 }
 
-bool Component::IsDispatcher() const
-{
-	return (!mTextListenerSet.empty());
+bool Component::IsDispatcher() const {
+	return (!text_listener_set_.empty());
 }
 
-void Component::ReleaseMouseFocus(RecurseDir pDir, Component* pFocusedComponent)
-{
-	if (pDir == RECURSE_UP)
-	{
-		if (mParent != 0 && mParent->mMouseFocusChild == this)
-		{
-			mParent->mMouseFocusChild = 0;
-			mParent->ReleaseMouseFocus(pDir, pFocusedComponent);
+void Component::ReleaseMouseFocus(RecurseDir dir, Component* focused_component) {
+	if (dir == kRecurseUp) {
+		if (parent_ != 0 && parent_->mouse_focus_child_ == this) {
+			parent_->mouse_focus_child_ = 0;
+			parent_->ReleaseMouseFocus(dir, focused_component);
 		}
-	}
-	else
-	{
-		if (mMouseFocusChild != 0)
-		{
-			mMouseFocusChild->ReleaseMouseFocus(pDir, pFocusedComponent);
-			mMouseFocusChild = 0;
+	} else {
+		if (mouse_focus_child_ != 0) {
+			mouse_focus_child_->ReleaseMouseFocus(dir, focused_component);
+			mouse_focus_child_ = 0;
 		}
 	}
 }
 
-void Component::SetKeyboardFocus()
-{
-	if (!HasKeyboardFocus())
-	{
-		GetTopParent()->ReleaseKeyboardFocus(RECURSE_DOWN, this);
+void Component::SetKeyboardFocus() {
+	if (!HasKeyboardFocus()) {
+		GetTopParent()->ReleaseKeyboardFocus(kRecurseDown, this);
 
-		if (mParent != 0)
-		{
-			mParent->SetKeyboardFocus(this);
+		if (parent_ != 0) {
+			parent_->SetKeyboardFocus(this);
 		}
 	}
 }
 
-void Component::SetKeyboardFocus(Component* pChild)
-{
-	mKeyboardFocusChild = pChild;
-	if (mParent != 0)
-	{
-		mParent->SetKeyboardFocus(this);
+void Component::SetKeyboardFocus(Component* child) {
+	keyboard_focus_child_ = child;
+	if (parent_ != 0) {
+		parent_->SetKeyboardFocus(this);
 	}
 }
 
-void Component::ReleaseKeyboardFocus(RecurseDir pDir, Component* pFocusedComponent)
-{
-	if (pDir == RECURSE_UP)
-	{
-		if (mParent != 0 && mParent->mKeyboardFocusChild == this)
-		{
-			mParent->mKeyboardFocusChild = 0;
-			mParent->ReleaseKeyboardFocus(pDir, pFocusedComponent);
+void Component::ReleaseKeyboardFocus(RecurseDir dir, Component* focused_component) {
+	if (dir == kRecurseUp) {
+		if (parent_ != 0 && parent_->keyboard_focus_child_ == this) {
+			parent_->keyboard_focus_child_ = 0;
+			parent_->ReleaseKeyboardFocus(dir, focused_component);
 		}
-	}
-	else
-	{
-		if (mKeyboardFocusChild != 0)
-		{
-			mKeyboardFocusChild->ReleaseKeyboardFocus(pDir, pFocusedComponent);
-			mKeyboardFocusChild = 0;
+	} else {
+		if (keyboard_focus_child_ != 0) {
+			keyboard_focus_child_->ReleaseKeyboardFocus(dir, focused_component);
+			keyboard_focus_child_ = 0;
 		}
 	}
 }
 
-Component* Component::GetParent()
-{
-	return mParent;
+Component* Component::GetParent() {
+	return parent_;
 }
 
-void Component::SetParent(Component* pParent)
-{
-/*	if (mParent != 0)
-	{
-		mParent->RemoveChild(this);
+void Component::SetParent(Component* parent) {
+/*	if (parent_ != 0) {
+		parent_->RemoveChild(this);
 	}
 */
-	mParent = pParent;
+	parent_ = parent;
 
 	// OnNewTopParentConnected();
 }
 
-const PixelCoord& Component::GetPos() const
-{
-	return mPos;
+const PixelCoord& Component::GetPos() const {
+	return pos_;
 }
 
-PixelCoord Component::GetScreenPos() const
-{
-	PixelCoord lPos(mPos);
+PixelCoord Component::GetScreenPos() const {
+	PixelCoord _pos(pos_);
 
-	if (mParent != 0)
-	{
-		lPos += mParent->GetScreenPos();
+	if (parent_ != 0) {
+		_pos += parent_->GetScreenPos();
 	}
 
-	return lPos;
+	return _pos;
 }
 
-void Component::SetPos(const PixelCoord& pPos)
-{
-	SetPos(pPos.x, pPos.y);
+void Component::SetPos(const PixelCoord& pos) {
+	SetPos(pos.x, pos.y);
 }
 
-void Component::SetSize(const PixelCoord& pSize)
-{
-	SetSize(pSize.x, pSize.y);
+void Component::SetSize(const PixelCoord& size) {
+	SetSize(size.x, size.y);
 }
 
-void Component::SetMinSize(const PixelCoord& pSize)
-{
-	SetMinSize(pSize.x, pSize.y);
+void Component::SetMinSize(const PixelCoord& size) {
+	SetMinSize(size.x, size.y);
 }
 
-const PixelCoord& Component::GetSize() const
-{
-	return mSize;
+const PixelCoord& Component::GetSize() const {
+	return size_;
 }
 
-PixelRect Component::GetScreenRect() const
-{
-	PixelCoord lPos(GetScreenPos());
-	return PixelRect(lPos, lPos + GetSize());
+PixelRect Component::GetScreenRect() const {
+	PixelCoord _pos(GetScreenPos());
+	return PixelRect(_pos, _pos + GetSize());
 }
 
 
-void Component::SetPreferredWidth(int pWidth)
-{
-	SetPreferredSize(pWidth, mPreferredSize.y, mAdaptivePreferredSize);
+void Component::SetPreferredWidth(int width) {
+	SetPreferredSize(width, preferred_size_.y, adaptive_preferred_size_);
 }
 
-void Component::SetPreferredHeight(int pHeight)
-{
-	SetPreferredSize(mPreferredSize.x, pHeight, mAdaptivePreferredSize);
+void Component::SetPreferredHeight(int height) {
+	SetPreferredSize(preferred_size_.x, height, adaptive_preferred_size_);
 }
 
-int Component::GetPreferredWidth(bool pForceAdaptive)
-{
-	return GetPreferredSize(pForceAdaptive).x;
+int Component::GetPreferredWidth(bool force_adaptive) {
+	return GetPreferredSize(force_adaptive).x;
 }
 
-int Component::GetPreferredHeight(bool pForceAdaptive)
-{
-	return GetPreferredSize(pForceAdaptive).y;
+int Component::GetPreferredHeight(bool force_adaptive) {
+	return GetPreferredSize(force_adaptive).y;
 }
 
-void Component::SetAdaptive(bool pAdaptive)
-{
-	mAdaptivePreferredSize = pAdaptive;
+void Component::SetAdaptive(bool adaptive) {
+	adaptive_preferred_size_ = adaptive;
 }
 
-bool Component::IsAdaptive()
-{
-	return mAdaptivePreferredSize;
+bool Component::IsAdaptive() {
+	return adaptive_preferred_size_;
 }
 
-void Component::SetVisible(bool pVisible)
-{
-	if (mVisible == false && pVisible == true)
-	{
+void Component::SetVisible(bool visible) {
+	if (visible_ == false && visible == true) {
 		SetNeedsRepaint(true);
-	}
-	else if (mVisible == true && pVisible == false)
-	{
+	} else if (visible_ == true && visible == false) {
 		ReleaseKeyboardFocus();
 		ReleaseMouseFocus();
 	}
 
-	mVisible = pVisible;
+	visible_ = visible;
 }
 
-bool Component::IsVisible() const
-{
-	bool lParentVisible = mVisible;
-	if (mParent && mVisible)
-	{
-		lParentVisible = mParent->IsVisible();
+bool Component::IsVisible() const {
+	bool parent_visible = visible_;
+	if (parent_ && visible_) {
+		parent_visible = parent_->IsVisible();
 	}
-	return (lParentVisible);
+	return (parent_visible);
 }
 
-bool Component::IsLocalVisible() const
-{
-	return mVisible;
+bool Component::IsLocalVisible() const {
+	return visible_;
 }
 
-PixelCoord Component::ClientToWindow(const PixelCoord& pCoords)
-{
-	return pCoords + mPos;
+PixelCoord Component::ClientToWindow(const PixelCoord& coords) {
+	return coords + pos_;
 }
 
-PixelCoord Component::WindowToClient(const PixelCoord& pCoords)
-{
-	return pCoords - mPos;
+PixelCoord Component::WindowToClient(const PixelCoord& coords) {
+	return coords - pos_;
 }
 
-PixelCoord Component::WindowToScreen(const PixelCoord& pCoords)
-{
-	return pCoords + GetScreenPos();
+PixelCoord Component::WindowToScreen(const PixelCoord& coords) {
+	return coords + GetScreenPos();
 }
 
-PixelCoord Component::ScreenToWindow(const PixelCoord& pCoords)
-{
-	return pCoords - GetScreenPos();
+PixelCoord Component::ScreenToWindow(const PixelCoord& coords) {
+	return coords - GetScreenPos();
 }
 
-PixelCoord Component::ClientToScreen(const PixelCoord& pCoords)
-{
-	return WindowToScreen(ClientToWindow(pCoords));
+PixelCoord Component::ClientToScreen(const PixelCoord& coords) {
+	return WindowToScreen(ClientToWindow(coords));
 }
 
-PixelCoord Component::ScreenToClient(const PixelCoord& pCoords)
-{
-	return WindowToClient(ScreenToWindow(pCoords));
+PixelCoord Component::ScreenToClient(const PixelCoord& coords) {
+	return WindowToClient(ScreenToWindow(coords));
 }
 
-PixelRect Component::ClientToWindow(const PixelRect& pRect)
-{
-	PixelRect lRect(pRect);
-	lRect.Offset(mPos.x, mPos.y);
-	return lRect;
+PixelRect Component::ClientToWindow(const PixelRect& rect) {
+	PixelRect _rect(rect);
+	_rect.Offset(pos_.x, pos_.y);
+	return _rect;
 }
 
-PixelRect Component::WindowToClient(const PixelRect& pRect)
-{
-	PixelRect lRect(pRect);
-	lRect.Offset(-mPos.x, -mPos.y);
-	return lRect;
+PixelRect Component::WindowToClient(const PixelRect& rect) {
+	PixelRect _rect(rect);
+	_rect.Offset(-pos_.x, -pos_.y);
+	return _rect;
 }
 
-PixelRect Component::WindowToScreen(const PixelRect& pRect)
-{
-	PixelRect lRect(pRect);
-	PixelCoord lPos(GetScreenPos());
-	lRect.Offset(lPos.x, lPos.y);
-	return lRect;
+PixelRect Component::WindowToScreen(const PixelRect& rect) {
+	PixelRect _rect(rect);
+	PixelCoord _pos(GetScreenPos());
+	_rect.Offset(_pos.x, _pos.y);
+	return _rect;
 }
 
-PixelRect Component::ScreenToWindow(const PixelRect& pRect)
-{
-	PixelRect lRect(pRect);
-	PixelCoord lPos(GetScreenPos());
-	lRect.Offset(-lPos.x, -lPos.y);
-	return lRect;
+PixelRect Component::ScreenToWindow(const PixelRect& rect) {
+	PixelRect _rect(rect);
+	PixelCoord _pos(GetScreenPos());
+	_rect.Offset(-_pos.x, -_pos.y);
+	return _rect;
 }
 
-PixelRect Component::ClientToScreen(const PixelRect& pRect)
-{
-	return WindowToScreen(ClientToWindow(pRect));
+PixelRect Component::ClientToScreen(const PixelRect& rect) {
+	return WindowToScreen(ClientToWindow(rect));
 }
 
-PixelRect Component::ScreenToClient(const PixelRect& pRect)
-{
-	return WindowToClient(ScreenToWindow(pRect));
+PixelRect Component::ScreenToClient(const PixelRect& rect) {
+	return WindowToClient(ScreenToWindow(rect));
 }
 
-void Component::RequestRepaint()
-{
-	if (IsVisible())
-	{
+void Component::RequestRepaint() {
+	if (IsVisible()) {
 		SetNeedsRepaint(true);
 	}
 }
 
-bool Component::IsComplete() const
-{
-	for (int i = 0; i < mLayerCount; i++)
-	{
-		if (mLayout[i] != 0)
-		{
-			Component* c = mLayout[i]->GetFirst();
-			for (; c; c = mLayout[i]->GetNext())
-			{
-				if (!c->IsComplete())
-				{
+bool Component::IsComplete() const {
+	for (int i = 0; i < layer_count_; i++) {
+		if (layout_[i] != 0) {
+			Component* c = layout_[i]->GetFirst();
+			for (; c; c = layout_[i]->GetNext()) {
+				if (!c->IsComplete()) {
 					return false;
 				}
 			}
@@ -1098,119 +870,97 @@ bool Component::IsComplete() const
 	return true;
 }
 
-bool Component::NeedsRepaint()
-{
-	return mNeedsRepaint;
+bool Component::NeedsRepaint() {
+	return needs_repaint_;
 }
 
-void Component::SetNeedsRepaint(bool pNeedsRepaint)
-{
-	if (mParent != 0 && 
-	   mNeedsRepaint == false && 
-	   pNeedsRepaint == true)
-	{
-		mParent->SetNeedsRepaint(true);
+void Component::SetNeedsRepaint(bool needs_repaint) {
+	if (parent_ != 0 &&
+	   needs_repaint_ == false &&
+	   needs_repaint == true) {
+		parent_->SetNeedsRepaint(true);
 	}
 
-	mNeedsRepaint = pNeedsRepaint;
+	needs_repaint_ = needs_repaint;
 }
 
-bool Component::GetSelected() const
-{
-	return mSelected;
+bool Component::GetSelected() const {
+	return selected_;
 }
 
-bool Component::HasMouseFocus() const
-{
-	return (mParent && mParent->mMouseFocusChild == this);
+bool Component::HasMouseFocus() const {
+	return (parent_ && parent_->mouse_focus_child_ == this);
 }
 
-bool Component::HasKeyboardFocus() const
-{
-	bool lFocused = (mParent == 0 || mParent->mKeyboardFocusChild == this);
-	if (lFocused && mParent)
-	{
-		lFocused = mParent->HasKeyboardFocus();
+bool Component::HasKeyboardFocus() const {
+	bool focused = (parent_ == 0 || parent_->keyboard_focus_child_ == this);
+	if (focused && parent_) {
+		focused = parent_->HasKeyboardFocus();
 	}
-	return (lFocused);
+	return (focused);
 }
 
-Layout* Component::GetLayout(int pLayer) const
-{
-	Layout* lLayout = 0;
-	if (pLayer >= 0 && pLayer < mLayerCount)
-	{
-		lLayout = mLayout[pLayer];
+Layout* Component::GetLayout(int layer) const {
+	Layout* _layout = 0;
+	if (layer >= 0 && layer < layer_count_) {
+		_layout = layout_[layer];
 	}
-	return lLayout;
+	return _layout;
 }
 
-void Component::SetParentLayout(Layout* pLayout)
-{
-	mParentLayout = pLayout;
+void Component::SetParentLayout(Layout* layout) {
+	parent_layout_ = layout;
 }
 
-Layout* Component::GetParentLayout() const
-{
-	return mParentLayout;
+Layout* Component::GetParentLayout() const {
+	return parent_layout_;
 }
 
-Component::Type Component::GetType() const
-{
-	return COMPONENT;
+Component::Type Component::GetType() const {
+	return kComponent;
 }
 
-GUIImageManager* Component::GetImageManager()
-{
-	return smImageManager;
+GUIImageManager* Component::GetImageManager() {
+	return image_manager_;
 }
 
-void Component::SetImageManager(GUIImageManager* pImageManager)
-{
-	smImageManager = pImageManager;
+void Component::SetImageManager(GUIImageManager* image_manager) {
+	image_manager_ = image_manager;
 }
 
-Component* Component::GetChild(const str& pName) const
-{
+Component* Component::GetChild(const str& name) const {
 	int i;
-	for (int i = 0; i < mLayerCount; ++i)
-	{
-		if (mLayout[i])
-		{
-			Component* lChild = mLayout[i]->GetFirst();
-			while (lChild != 0)
-			{
-				if (lChild->GetName() == pName)
-				{
-					return lChild;
+	for (int i = 0; i < layer_count_; ++i) {
+		if (layout_[i]) {
+			Component* _child = layout_[i]->GetFirst();
+			while (_child != 0) {
+				if (_child->GetName() == name) {
+					return _child;
 				}
-				Component* lGrandChild = lChild->GetChild(pName);
-				if (lGrandChild)
-				{
-					return lGrandChild;
+				Component* grand_child = _child->GetChild(name);
+				if (grand_child) {
+					return grand_child;
 				}
-				lChild = mLayout[i]->GetNext();
+				_child = layout_[i]->GetNext();
 			}
 		}
 	}
 	return 0;
 }
 
-void Component::SetName(const str& pName)
-{
-	mName = pName;
+void Component::SetName(const str& name) {
+	name_ = name;
 }
 
-const str& Component::GetName() const
-{
-	return mName;
+const str& Component::GetName() const {
+	return name_;
 }
 
 
 
-GUIImageManager* Component::smImageManager = 0;
+GUIImageManager* Component::image_manager_ = 0;
 
-loginstance(UI_GFX_2D, Component);
+loginstance(kUiGfx2D, Component);
 
 
 

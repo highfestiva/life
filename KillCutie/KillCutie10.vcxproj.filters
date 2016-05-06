@@ -1,104 +1,104 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{C734F7F1-C7A5-4376-A066-2A32FFD752A2}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{93959380-89BD-4b04-88EB-625FBEBFB52E}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="App.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile include="app.cxx">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ctf.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="ctf.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Cutie.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="cutie.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="game.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Grenade.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="grenade.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Launcher.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="launcher.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="LauncherAi.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="launcherai.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Level.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="level.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Spawner.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="spawner.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="VehicleAi.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="vehicleai.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="SeeThrough.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="seethrough.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="RoboBall.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="roboball.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="CutieElevator.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="cutieelevator.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="App.mm">
-      <Filter>Source Files</Filter>
+    <ClCompile include="app.mm">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Icons\GrenadeRun.ico">
-      <Filter>Source Files</Filter>
+    <None include="icons\grenaderun.ico">
+      <Filter>src Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="GrenadeRun.rc">
-      <Filter>Source Files</Filter>
+    <ResourceCompile include="grenaderun.rc">
+      <Filter>src Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Ctf.h">
+    <Clinclude include="ctf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Cutie.h">
+    <Clinclude include="cutie.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Game.h">
+    <Clinclude include="game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Grenade.h">
+    <Clinclude include="grenade.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Launcher.h">
+    <Clinclude include="launcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LauncherAi.h">
+    <Clinclude include="launcherai.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Level.h">
+    <Clinclude include="level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Spawner.h">
+    <Clinclude include="spawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VehicleAi.h">
+    <Clinclude include="vehicleai.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SeeThrough.h">
+    <Clinclude include="seethrough.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RoboBall.h">
+    <Clinclude include="roboball.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CutieElevator.h">
+    <Clinclude include="cutieelevator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

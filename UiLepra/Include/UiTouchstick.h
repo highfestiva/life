@@ -1,93 +1,88 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiInput.h"
-#include "../../Lepra/Include/Graphics2D.h"
-#include "UiLepra.h"
+#include "uiinput.h"
+#include "../../lepra/include/graphics2d.h"
+#include "uilepra.h"
 
 
 
-namespace UiLepra
-{
-namespace Touch
-{
+namespace uilepra {
+namespace touch {
 
 
 class TouchstickInputDevice;
 
 
 
-class TouchstickInputElement: public InputElement
-{
+class TouchstickInputElement: public InputElement {
 	typedef InputElement Parent;
 public:
-	TouchstickInputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex, TouchstickInputDevice* pParentDevice);
+	TouchstickInputElement(InputElement::Type type, Interpretation interpretation, int type_index, TouchstickInputDevice* parent_device);
 	virtual ~TouchstickInputElement();
 
 	float GetValueScaled() const;
-	void SetValueScaled(float pValue);
-	void SetScale(float pMinimum, float pMaximum);
+	void SetValueScaled(float value);
+	void SetScale(float minimum, float maximum);
 
 private:
-	float mScale;
-	float mOffset;
+	float scale_;
+	float offset_;
 	logclass();
 };
 
 
 
-class TouchstickInputDevice: public InputDevice
-{
+class TouchstickInputDevice: public InputDevice {
 	typedef InputDevice Parent;
 public:
-	enum InputMode
-	{
-		MODE_RELATIVE_CENTER = 0,
-		MODE_RELATIVE_START,
-		MODE_RELATIVE_LAST,
-		MODE_RELATIVE_CENTER_NOSPRING,	// Doesn't go back to center when releasing.
-		MODE_COUNT
+	enum InputMode {
+		kModeRelativeCenter = 0,
+		kModeRelativeStart,
+		kModeRelativeLast,
+		kModeRelativeCenterNospring,	// Doesn't go back to center when releasing.
+		kModeCount
 	};
 
-	static TouchstickInputDevice* GetByCoordinate(InputManager* pManager, const PixelCoord& pCoord);
+	static TouchstickInputDevice* GetByCoordinate(InputManager* manager, const PixelCoord& coord);
 
-	TouchstickInputDevice(InputManager* pManager, InputMode pMode, const PixelRect& pArea, int pAngle, int pFingerRadius);
+	TouchstickInputDevice(InputManager* manager, InputMode mode, const PixelRect& area, int angle, int finger_radius);
 	virtual ~TouchstickInputDevice();
 	bool IsOwnedByManager() const;
 
-	void Move(const PixelRect& pArea, int pAngle);
+	void Move(const PixelRect& area, int angle);
 	const PixelRect& GetArea() const;
 	int GetFingerRadius() const;
-	void SetFingerRadius(int pFingerRadius);
+	void SetFingerRadius(int finger_radius);
 
 	void ResetTap();
-	void SetTap(const PixelCoord& pCoord, bool pIsPress);
-	void GetValue(float& x, float& y, bool& pIsPressing);
+	void SetTap(const PixelCoord& coord, bool is_press);
+	void GetValue(float& x, float& y, bool& is_pressing);
 	void SetValue(float x, float y);
-	void SetValueScale(float pMinX, float pMaxX, float pMinY, float pMaxY);
+	void SetValueScale(float min_x, float max_x, float min_y, float max_y);
 
 private:
-	void AddElement(InputElement* pElement);
+	void AddElement(InputElement* element);
 
-	bool IncludesCoord(const PixelCoord& pCoord) const;
+	bool IncludesCoord(const PixelCoord& coord) const;
 
 	virtual void Activate();
 	virtual void Release();
 	virtual void PollEvents();
 
-	InputMode mMode;
-	PixelRect mArea;
-	PixelRect mTouchArea;
-	PixelCoord mStart;
-	bool mIsPressing;
-	int mAngle;
-	int mFingerRadius;
-	/*int mMovedDistance;
+	InputMode mode_;
+	PixelRect area_;
+	PixelRect touch_area_;
+	PixelCoord start_;
+	bool is_pressing_;
+	int angle_;
+	int finger_radius_;
+	/*int moved_distance_;
 	HiResTimer mPressedTimer;
 	HiResTimer mReleasedTimer;*/
 

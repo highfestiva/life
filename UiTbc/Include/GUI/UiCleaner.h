@@ -1,6 +1,6 @@
 /*
 	Class:  DesktopWindow
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -16,11 +16,9 @@
 
 #pragma once
 
-namespace UiTbc
-{
+namespace uitbc {
 
-class Cleaner
-{
+class Cleaner {
 public:
 	virtual ~Cleaner() {}
 };

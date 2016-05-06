@@ -11,11 +11,11 @@ JB: use std::map instead. It has a balanced red-black tree in the bottom and thu
 	NOTES:
 
 	A skip list (which is a Map, just like a hash table).
-	
+
 	Never heard of skip lists before? Well, you are not alone.
 
 	It is a fast and SORTED(!) list (map) of key and value pairs. Each
-	key maps to exactly one value (or object). Thus, there cannot be 
+	key maps to exactly one value (or object). Thus, there cannot be
 	more than one value per key.
 
 	The list is sorted in ascending key order.
@@ -32,280 +32,252 @@ JB: use std::map instead. It has a balanced red-black tree in the bottom and thu
 
 	In the worst case, both a binary tree and a skip list will perform
 	just as bad as a linked list, which is O(n). But since a skip list
-	is using a probabilistic approach, there is always a high probability 
+	is using a probabilistic approach, there is always a high probability
 	that it will perform at O(log n).
 
 	If you can guarantee that your binary tree is always perfecly balanced,
-	and if you can do that in constant time, then using a skip list is just 
+	and if you can do that in constant time, then using a skip list is just
 	plain stupid. :)
 /
 
 #pragma once
 
-#include "FastAllocator.h"
-#include "LepraTypes.h"
+#include "fastallocator.h"
+#include "lepratypes.h"
 #include "Random.h"
 
 #define TEMPLATE template<class _TKey, class _TObject>
 #define QUAL SkipList<_TKey, _TObject>
 
-namespace Lepra
-{
+namespace lepra {
 
 template<class _TKey, class _TObject>
-class SkipList
-{
+class SkipList {
 private:
-	class ListNode
-	{
+	class ListNode {
 	public:
 
-		inline ListNode() : mNext(0), mPrev(0), mUp(0), mDown(0) {}
+		inline ListNode() : next_(0), prev_(0), mUp(0), mDown(0) {}
 
-		void Init()
-		{
-			mNext = 0;
-			mPrev = 0;
+		void Init() {
+			next_ = 0;
+			prev_ = 0;
 			mUp   = 0;
 			mDown = 0;
 		}
 
-		ListNode* mNext;
-		ListNode* mPrev;
+		ListNode* next_;
+		ListNode* prev_;
 		ListNode* mUp;
 		ListNode* mDown;
 
-		_TKey     mKey;
-		_TObject  mObject;
+		_TKey     key_;
+		_TObject  object_;
 	};
 
 public:
 	class ConstIterator;
 
-	class Iterator
-	{
+	class Iterator {
 	public:
 		friend class SkipList;
 
-		Iterator() : mNode(0){}
-		Iterator(const Iterator& pIterator) : mNode(pIterator.mNode){}
+		Iterator() : node_(0){}
+		Iterator(const Iterator& iterator) : node_(iterator.node_){}
 
-		Iterator& operator = (const Iterator& pOther)
-		{
-			mNode = pOther.mNode;
+		Iterator& operator = (const Iterator& other) {
+			node_ = other.node_;
 
 			return *this;
 		}
 
-		Iterator& operator = (const Iterator* pOther)
-		{
-			mNode = pOther->mNode;
+		Iterator& operator = (const Iterator* other) {
+			node_ = other->node_;
 
 			return *this;
 		}
 
 		// Logical equality operator for iterator comparisons.
-		inline bool operator==(const Iterator& pOther) const		{ return mNode == pOther.mNode; }
-		inline bool operator==(const ConstIterator& pOther) const	{ return mNode == pOther.mNode; }
+		inline bool operator==(const Iterator& other) const		{ return node_ == other.node_; }
+		inline bool operator==(const ConstIterator& other) const	{ return node_ == other.node_; }
 
 		// Logical inequality operator for iterator comparisons.
-		inline bool operator!=(const Iterator& pOther) const		{ return !operator==(pOther); }
-		inline bool operator!=(const ConstIterator& pOther) const	{ return !operator==(pOther); }
+		inline bool operator!=(const Iterator& other) const		{ return !operator==(other); }
+		inline bool operator!=(const ConstIterator& other) const	{ return !operator==(other); }
 
 		// Gets the contents of the iterator.
-		_TKey& GetKey() const		{ return (mNode->mKey); }
-		_TObject& operator*() const	{ return mNode->mObject; }
+		_TKey& GetKey() const		{ return (node_->key_); }
+		_TObject& operator*() const	{ return node_->object_; }
 
 		// Pre- and postfix increment operators for traversing a list.
-		inline Iterator& operator++()
-		{
-			mNode = mNode->mNext; 
-			if (mNode->mNext == 0)	// Set to end.
-				mNode = 0;
-			return *this; 
+		inline Iterator& operator++() {
+			node_ = node_->next_;
+			if (node_->next_ == 0)	// Set to end.
+				node_ = 0;
+			return *this;
 		}
-		inline Iterator  operator++(int)
-		{ 
-			ListNode* lTemp = mNode; 
-			mNode = mNode->mNext; 
-			if (mNode->mNext == 0)	// Set to end.
-				mNode = 0;
-			return Iterator(lTemp); 
+		inline Iterator  operator++(int) {
+			ListNode* temp = node_;
+			node_ = node_->next_;
+			if (node_->next_ == 0)	// Set to end.
+				node_ = 0;
+			return Iterator(temp);
 		}
 
 		// Pre- and postfix decrement operators for traversing a list.
-		inline Iterator& operator--()		
-		{ 
-			mNode = mNode->mPrev; 
-			if (mNode->mPrev == 0)	// Set to end.
-				mNode = 0;
-			return *this; 
+		inline Iterator& operator--() {
+			node_ = node_->prev_;
+			if (node_->prev_ == 0)	// Set to end.
+				node_ = 0;
+			return *this;
 		}
-		inline Iterator operator--(int)
-		{ 
-			ListNode* lTemp = mNode; 
-			mNode = mNode->mPrev;
-			if (mNode->mPrev == 0)	// Set to end.
-				mNode = 0;
-			return Iterator(lTemp); 
+		inline Iterator operator--(int) {
+			ListNode* temp = node_;
+			node_ = node_->prev_;
+			if (node_->prev_ == 0)	// Set to end.
+				node_ = 0;
+			return Iterator(temp);
 		}
 
-		Iterator& operator+=(int pCount)
-		{
-			for (int i = 0; i < pCount; i++, ++*this);
+		Iterator& operator+=(int count) {
+			for (int i = 0; i < count; i++, ++*this);
 			return *this;
 		}
 
-		Iterator& operator-=(int pCount)
-		{
-			for (int i = 0; i < pCount; i++, --*this);
+		Iterator& operator-=(int count) {
+			for (int i = 0; i < count; i++, --*this);
 			return *this;
 		}
 
-		Iterator operator + (int pCount)
-		{
-			Iterator i(mNode);
-			i += pCount;
+		Iterator operator + (int count) {
+			Iterator i(node_);
+			i += count;
 			return i;
 		}
 
-		Iterator operator - (int pCount)
-		{
-			Iterator i(mNode);
-			i -= pCount;
+		Iterator operator - (int count) {
+			Iterator i(node_);
+			i -= count;
 			return i;
 		}
 
 	private:
 
-		Iterator(ListNode* pNode) : mNode(pNode){}
-		ListNode* mNode;
+		Iterator(ListNode* node) : node_(node){}
+		ListNode* node_;
 	};
 
-	class ConstIterator
-	{
+	class ConstIterator {
 	public:
 		friend class SkipList;
 
-		ConstIterator() : mNode(0){}
-		ConstIterator(const ConstIterator& pIterator) : mNode(pIterator.mNode){}
+		ConstIterator() : node_(0){}
+		ConstIterator(const ConstIterator& iterator) : node_(iterator.node_){}
 
-		ConstIterator& operator = (const ConstIterator& pOther)
-		{
-			mNode = pOther.mNode;
+		ConstIterator& operator = (const ConstIterator& other) {
+			node_ = other.node_;
 			return *this;
 		}
 
-		ConstIterator& operator = (const ConstIterator* pOther)
-		{
-			mNode = pOther->mNode;
+		ConstIterator& operator = (const ConstIterator* other) {
+			node_ = other->node_;
 			return *this;
 		}
 
-		ConstIterator& operator = (const Iterator& pOther)
-		{
-			mNode = pOther.mNode;
+		ConstIterator& operator = (const Iterator& other) {
+			node_ = other.node_;
 			return *this;
 		}
 
-		ConstIterator& operator = (const Iterator* pOther)
-		{
-			mNode = pOther->mNode;
+		ConstIterator& operator = (const Iterator* other) {
+			node_ = other->node_;
 			return *this;
 		}
 
 
 		// Logical equality operator for iterator comparisons.
-		bool operator==(const Iterator& pOther) const		{ return mNode == pOther.mNode; }
-		bool operator==(const ConstIterator& pOther) const	{ return mNode == pOther.mNode; }
-		bool operator==(_TObject pOtherObject) const			{ return mNode->mObject == pOtherObject; }
+		bool operator==(const Iterator& other) const		{ return node_ == other.node_; }
+		bool operator==(const ConstIterator& other) const	{ return node_ == other.node_; }
+		bool operator==(_TObject other_object) const			{ return node_->object_ == other_object; }
 
 		// Logical inequality operator for iterator comparisons.
-		bool operator!=(const Iterator& pOther) const		{ return !operator==(pOther); }
-		bool operator!=(const ConstIterator& pOther) const	{ return !operator==(pOther); }
-		bool operator!=(_TObject pOtherObject) const			{ return !operator==(pOtherObject); }
+		bool operator!=(const Iterator& other) const		{ return !operator==(other); }
+		bool operator!=(const ConstIterator& other) const	{ return !operator==(other); }
+		bool operator!=(_TObject other_object) const			{ return !operator==(other_object); }
 
 		// Gets the contents of the iterator.
-		_TKey& GetKey() const		{ return (mNode->mKey); }
-		_TObject& operator*() const	{ return mNode->mObject; }
+		_TKey& GetKey() const		{ return (node_->key_); }
+		_TObject& operator*() const	{ return node_->object_; }
 
 		// Pre- and postfix increment operators for traversing a list.
-		inline ConstIterator& operator++()
-		{
-			mNode = mNode->mNext; 
-			if (mNode->mNext == 0)	// Set to end.
-				mNode = 0;
-			return *this; 
+		inline ConstIterator& operator++() {
+			node_ = node_->next_;
+			if (node_->next_ == 0)	// Set to end.
+				node_ = 0;
+			return *this;
 		}
-		inline ConstIterator  operator++(int)	
-		{ 
-			ListNode* lTemp = mNode; 
-			mNode = mNode->mNext; 
-			if (mNode->mNext == 0)	// Set to end.
-				mNode = 0;
-			return ConstIterator(lTemp); 
+		inline ConstIterator  operator++(int) {
+			ListNode* temp = node_;
+			node_ = node_->next_;
+			if (node_->next_ == 0)	// Set to end.
+				node_ = 0;
+			return ConstIterator(temp);
 		}
 
 		// Pre- and postfix decrement operators for traversing a list.
-		inline ConstIterator& operator--()		
-		{ 
-			mNode = mNode->mPrev; 
-			if (mNode->mPrev == 0)	// Set to end.
-				mNode = 0;
-			return *this; 
+		inline ConstIterator& operator--() {
+			node_ = node_->prev_;
+			if (node_->prev_ == 0)	// Set to end.
+				node_ = 0;
+			return *this;
 		}
-		inline ConstIterator  operator--(int)	
-		{ 
-			ListNode* lTemp = mNode; 
-			mNode = mNode->mPrev;
-			if (mNode->mPrev == 0)	// Set to end.
-				mNode = 0;
-			return ConstIterator(lTemp); 
+		inline ConstIterator  operator--(int) {
+			ListNode* temp = node_;
+			node_ = node_->prev_;
+			if (node_->prev_ == 0)	// Set to end.
+				node_ = 0;
+			return ConstIterator(temp);
 		}
 
-		ConstIterator& operator+=(int pCount)
-		{
-			for (int i = 0; i < pCount; i++, ++*this);
+		ConstIterator& operator+=(int count) {
+			for (int i = 0; i < count; i++, ++*this);
 			return *this;
 		}
 
-		ConstIterator& operator-=(int pCount)
-		{
-			for (int i = 0; i < pCount; i++, --*this);
+		ConstIterator& operator-=(int count) {
+			for (int i = 0; i < count; i++, --*this);
 			return *this;
 		}
 
-		ConstIterator operator + (int pCount)
-		{
-			ConstIterator i(mNode);
-			i += pCount;
+		ConstIterator operator + (int count) {
+			ConstIterator i(node_);
+			i += count;
 			return i;
 		}
 
-		ConstIterator operator - (int pCount)
-		{
-			ConstIterator i(mNode);
-			i -= pCount;
+		ConstIterator operator - (int count) {
+			ConstIterator i(node_);
+			i -= count;
 			return i;
 		}
 
 	private:
 
-		ConstIterator(const ListNode* pNode) : mNode(pNode){}
-		const ListNode* mNode;
+		ConstIterator(const ListNode* node) : node_(node){}
+		const ListNode* node_;
 	};
 
 	SkipList();
 	virtual ~SkipList();
 
-	void Insert(const _TKey& pKey, const _TObject& pObject);
-	void Remove(const _TKey& pKey);
-	void Remove(const Iterator& pIter);
+	void Insert(const _TKey& key, const _TObject& object);
+	void Remove(const _TKey& key);
+	void Remove(const Iterator& iter);
 
 	void RemoveAll();
 
-	_TObject FindObject(const _TKey& pKey) const;
-	Iterator Find(const _TKey& pKey) const;
+	_TObject FindObject(const _TKey& key) const;
+	Iterator Find(const _TKey& key) const;
 
 	inline Iterator First() const;
 	inline Iterator Last() const;
@@ -314,119 +286,107 @@ public:
 	inline int GetCount() const;
 	inline bool IsEmpty() const;
 
-	// Copies the pointer to the node allocator of pList. pList is 
-	// considered the "owner" of the allocator, and is responsible of 
-	// deleting it. This means that you can't delete the owner list 
+	// Copies the pointer to the node allocator of list. list is
+	// considered the "owner" of the allocator, and is responsible of
+	// deleting it. This means that you can't delete the owner list
 	// before the others.
 	//
 	// You can only call this function on empty lists. If the list isn't
 	// empty, the function has no effect.
-	inline void ShareNodePool(SkipList* pList);
+	inline void ShareNodePool(SkipList* list);
 
 protected:
 private:
 	typedef FastAllocator<ListNode> NodeAllocator;
 
 	inline NodeAllocator* GetNodeAllocator();
-	inline void SetNodeAllocator(NodeAllocator* pNodeAllocator);
+	inline void SetNodeAllocator(NodeAllocator* node_allocator);
 
 	inline ListNode* NewNode();
-	inline void RecycleNode(ListNode* pNode);
+	inline void RecycleNode(ListNode* node);
 
 	void AddNewTopLevel();
 	void RemoveTopLevel();
 
-	ListNode* FindClosestNode(ListNode* pLeft, const _TKey& pKey) const;
-	ListNode* SearchLevel(ListNode* pLeft, const _TKey& pKey) const;
-	ListNode* Insert(ListNode* pLeft, const _TKey& pKey, const _TObject& pObject);
+	ListNode* FindClosestNode(ListNode* left, const _TKey& key) const;
+	ListNode* SearchLevel(ListNode* left, const _TKey& key) const;
+	ListNode* Insert(ListNode* left, const _TKey& key, const _TObject& object);
 
-	inline bool IsEndNode(ListNode* pNode) const;
+	inline bool IsEndNode(ListNode* node) const;
 
-	bool mAllocatorOwner;
-	NodeAllocator* mNodeAllocator;
+	bool allocator_owner_;
+	NodeAllocator* node_allocator_;
 
 	ListNode* mTopLeft;
 	ListNode* mBottomLeft;
 	ListNode* mBottomRight;
 
-	int mCount;
+	int count_;
 };
 
 TEMPLATE QUAL::SkipList() :
-	mAllocatorOwner(true),
-	mNodeAllocator(0),
+	allocator_owner_(true),
+	node_allocator_(0),
 	mTopLeft(0),
 	mBottomLeft(0),
 	mBottomRight(0),
-	mCount(0)
-{
-	mNodeAllocator = new NodeAllocator();
+	count_(0) {
+	node_allocator_ = new NodeAllocator();
 	AddNewTopLevel();
 }
 
-TEMPLATE QUAL::~SkipList()
-{
+TEMPLATE QUAL::~SkipList() {
 	// Delete all nodes...
-	while (mTopLeft != 0)
-	{
+	while (mTopLeft != 0) {
 		RemoveTopLevel();
 	}
 
-	if (mAllocatorOwner == true)
-	{
-		delete mNodeAllocator;
+	if (allocator_owner_ == true) {
+		delete node_allocator_;
 	}
 }
 
-TEMPLATE void QUAL::Insert(const _TKey& pKey, const _TObject& pObject)
-{
-	ListNode* lNodeDown = Insert(mTopLeft, pKey, pObject);
+TEMPLATE void QUAL::Insert(const _TKey& key, const _TObject& object) {
+	ListNode* lNodeDown = Insert(mTopLeft, key, object);
 
-	while (lNodeDown != 0)
-	{
+	while (lNodeDown != 0) {
 		AddNewTopLevel();
 
 		// Create the new node to insert.
-		ListNode* lNewNode = NewNode();
-		lNewNode->mKey = pKey;
-		lNewNode->mObject = pObject;
+		ListNode* new_node = NewNode();
+		new_node->key_ = key;
+		new_node->object_ = object;
 
 		// Insert horizontally at the current level.
-		lNewNode->mPrev   = mTopLeft;
-		lNewNode->mNext   = mTopLeft->mNext;
-		mTopLeft->mNext   = lNewNode;
-		lNewNode->mNext->mPrev = lNewNode;
+		new_node->prev_   = mTopLeft;
+		new_node->next_   = mTopLeft->next_;
+		mTopLeft->next_   = new_node;
+		new_node->next_->prev_ = new_node;
 
 		// Link up and down.
-		lNewNode->mDown = lNodeDown;
-		lNodeDown->mUp  = lNewNode;
+		new_node->mDown = lNodeDown;
+		lNodeDown->mUp  = new_node;
 
 		// Randomize with 50% probability if we should add this node
 		// at the higher level.
-		if (Random::GetRandomNumber()&0x400)	// 50-50: bit is 1 or 0.
-		{
-			lNodeDown = lNewNode;
-		}
-		else
-		{
+		if (Random::GetRandomNumber()&0x400) {	// 50-50: bit is 1 or 0.
+			lNodeDown = new_node;
+		} else {
 			lNodeDown = 0;
 		}
 	}
 }
 
-TEMPLATE typename QUAL::ListNode* QUAL::Insert(ListNode* pLeft, 
-					       const _TKey& pKey, 
-					       const _TObject& pObject)
-{
-	ListNode* lNode = SearchLevel(pLeft, pKey);
+TEMPLATE typename QUAL::ListNode* QUAL::Insert(ListNode* left,
+					       const _TKey& key,
+					       const _TObject& object) {
+	ListNode* node = SearchLevel(left, key);
 
-	if (lNode->mPrev != 0 && lNode->mKey == pKey)
-	{
+	if (node->prev_ != 0 && node->key_ == key) {
 		// The key already exist, so just update the contents (the object).
-		while (lNode != 0)
-		{
-			lNode->mObject = pObject;
-			lNode = lNode->mDown;
+		while (node != 0) {
+			node->object_ = object;
+			node = node->mDown;
 		}
 		return 0;
 	}
@@ -435,322 +395,265 @@ TEMPLATE typename QUAL::ListNode* QUAL::Insert(ListNode* pLeft,
 	ListNode* lNodeDown = 0;
 
 	// If we are at the lowest level.
-	if (lNode->mDown == 0)
-	{
+	if (node->mDown == 0) {
 		lCreateNewNode = true;
-		mCount++;
-	}
-	else
-	{
+		count_++;
+	} else {
 		// Continue searching down.
-		lNodeDown = Insert(lNode->mDown, pKey, pObject);
+		lNodeDown = Insert(node->mDown, key, object);
 		lCreateNewNode = (lNodeDown != 0);
 	}
 
-	if (lCreateNewNode == true)
-	{
+	if (lCreateNewNode == true) {
 		// Create the new node to insert.
-		ListNode* lNewNode = NewNode();
-		lNewNode->mKey = pKey;
-		lNewNode->mObject = pObject;
+		ListNode* new_node = NewNode();
+		new_node->key_ = key;
+		new_node->object_ = object;
 
 		// Insert horizontally at the current level.
-		lNewNode->mPrev   = lNode;
-		lNewNode->mNext   = lNode->mNext;
-		lNode->mNext      = lNewNode;
-		lNewNode->mNext->mPrev = lNewNode;
+		new_node->prev_   = node;
+		new_node->next_   = node->next_;
+		node->next_      = new_node;
+		new_node->next_->prev_ = new_node;
 
-		if (lNodeDown != 0)
-		{
+		if (lNodeDown != 0) {
 			// Link up and down.
-			lNewNode->mDown = lNodeDown;
-			lNodeDown->mUp  = lNewNode;
+			new_node->mDown = lNodeDown;
+			lNodeDown->mUp  = new_node;
 		}
 
 		// Randomize with 50% probability if we should add this node
 		// at the higher level.
-		if (Random::GetRandomNumber()&0x10)	// 50-50: bit is 1 or 0.
-		{
-			return lNewNode;
+		if (Random::GetRandomNumber()&0x10) {	// 50-50: bit is 1 or 0.
+			return new_node;
 		}
 	}
 
 	return 0;
 }
 
-TEMPLATE void QUAL::Remove(const _TKey& pKey)
-{
-	ListNode* lNode = FindClosestNode(mTopLeft, pKey);
+TEMPLATE void QUAL::Remove(const _TKey& key) {
+	ListNode* node = FindClosestNode(mTopLeft, key);
 
-	if (IsEndNode(lNode) == false && lNode->mKey == pKey)
-	{
-		while (lNode != 0)
-		{
-			lNode->mPrev->mNext = lNode->mNext;
-			lNode->mNext->mPrev = lNode->mPrev;
+	if (IsEndNode(node) == false && node->key_ == key) {
+		while (node != 0) {
+			node->prev_->next_ = node->next_;
+			node->next_->prev_ = node->prev_;
 
-			ListNode* lTemp = lNode;
-			lNode = lNode->mDown;
+			ListNode* temp = node;
+			node = node->mDown;
 			// Hugge-TODO for JB: This fix is wrong. Try to find your bug again.
-			//if (lNode)	// JB-TODO for Hugge: verify that this check is valid.
+			//if (node)	// JB-TODO for Hugge: verify that this check is valid.
 			{
-				RecycleNode(lTemp);
+				RecycleNode(temp);
 			}
 		}
 
-		mCount--;
+		count_--;
 	}
 }
 
-TEMPLATE void QUAL::Remove(const Iterator& pIter)
-{
-	ListNode* lNode = pIter.mNode;
+TEMPLATE void QUAL::Remove(const Iterator& iter) {
+	ListNode* node = iter.node_;
 
-	if (lNode == 0 || IsEndNode(lNode))
-	{
+	if (node == 0 || IsEndNode(node)) {
 		return;
 	}
-	
-	mCount--;
 
-	while (lNode != 0)
-	{
-		lNode->mPrev->mNext = lNode->mNext;
-		lNode->mNext->mPrev = lNode->mPrev;
+	count_--;
 
-		ListNode* lTemp = lNode;
-		lNode = lNode->mUp;
+	while (node != 0) {
+		node->prev_->next_ = node->next_;
+		node->next_->prev_ = node->prev_;
+
+		ListNode* temp = node;
+		node = node->mUp;
 
 		// Hugge: Fixed the bug. TODO for JB: Verify that it works.
 		//if (lNode)	// JB-TODO for Hugge: verify that this code is correct. At least it doesn't crash anymore. :)
 		{
-			RecycleNode(lTemp);
+			RecycleNode(temp);
 		}
 	}
 }
 
-TEMPLATE void QUAL::RemoveAll()
-{
+TEMPLATE void QUAL::RemoveAll() {
 	// Delete all nodes...
-	while (mTopLeft != 0)
-	{
+	while (mTopLeft != 0) {
 		RemoveTopLevel();
 	}
-	mCount = 0;
+	count_ = 0;
 
 	AddNewTopLevel();
 }
 
-TEMPLATE _TObject QUAL::FindObject(const _TKey& pKey) const
-{
-	ListNode* lNode = FindClosestNode(mTopLeft, pKey);
+TEMPLATE _TObject QUAL::FindObject(const _TKey& key) const {
+	ListNode* node = FindClosestNode(mTopLeft, key);
 
-	if (lNode->mKey == pKey)
-	{
-		return lNode->mObject;
-	}
-	else
-	{
+	if (node->key_ == key) {
+		return node->object_;
+	} else {
 		return 0;
 	}
 }
 
-TEMPLATE typename QUAL::Iterator QUAL::Find(const _TKey& pKey) const
-{
-	ListNode* lNode = FindClosestNode(mTopLeft, pKey);
+TEMPLATE typename QUAL::Iterator QUAL::Find(const _TKey& key) const {
+	ListNode* node = FindClosestNode(mTopLeft, key);
 
-	if (IsEndNode(lNode) == true)
-	{
+	if (IsEndNode(node) == true) {
 		return End();
 	}
 
-	if (lNode->mKey == pKey)
-	{
-		return Iterator(lNode);
-	}
-	else
-	{
+	if (node->key_ == key) {
+		return Iterator(node);
+	} else {
 		return End();
 	}
 }
 
-TEMPLATE typename QUAL::Iterator QUAL::First() const
-{
-	if (IsEndNode(mBottomLeft->mNext) == true)
-	{
+TEMPLATE typename QUAL::Iterator QUAL::First() const {
+	if (IsEndNode(mBottomLeft->next_) == true) {
 		return End();
 	}
-	return Iterator(mBottomLeft->mNext);
+	return Iterator(mBottomLeft->next_);
 }
 
-TEMPLATE typename QUAL::Iterator QUAL::Last() const
-{
-	if (IsEndNode(mBottomRight->mPrev) == true)
-	{
+TEMPLATE typename QUAL::Iterator QUAL::Last() const {
+	if (IsEndNode(mBottomRight->prev_) == true) {
 		return End();
 	}
-	return Iterator(mBottomRight->mPrev);
+	return Iterator(mBottomRight->prev_);
 }
 
-TEMPLATE typename QUAL::Iterator QUAL::End() const
-{
+TEMPLATE typename QUAL::Iterator QUAL::End() const {
 	return Iterator(0);
 }
 
-TEMPLATE int QUAL::GetCount() const
-{
-	return mCount;
+TEMPLATE int QUAL::GetCount() const {
+	return count_;
 }
 
-TEMPLATE bool QUAL::IsEmpty() const
-{
-	return (mCount == 0);
+TEMPLATE bool QUAL::IsEmpty() const {
+	return (count_ == 0);
 }
 
-TEMPLATE void QUAL::AddNewTopLevel()
-{
-	ListNode* lTopLeft  = NewNode();
-	ListNode* lTopRight = NewNode();
+TEMPLATE void QUAL::AddNewTopLevel() {
+	ListNode* top_left  = NewNode();
+	ListNode* top_right = NewNode();
 
-	lTopLeft->mNext  = lTopRight;
-	lTopRight->mPrev = lTopLeft;
+	top_left->next_  = top_right;
+	top_right->prev_ = top_left;
 
-	if (mTopLeft != 0)
-	{
-		lTopLeft->mDown = mTopLeft;
-		mTopLeft->mUp   = lTopLeft;
-	
+	if (mTopLeft != 0) {
+		top_left->mDown = mTopLeft;
+		mTopLeft->mUp   = top_left;
+
 		// Find the rightmost node.
-		ListNode* lTemp = mTopLeft;
-		while (lTemp->mNext != 0)
-		{
-			lTemp = lTemp->mNext;
+		ListNode* temp = mTopLeft;
+		while (temp->next_ != 0) {
+			temp = temp->next_;
 		}
 
-		lTopRight->mDown = lTemp;
-		lTemp->mUp = lTopRight;
+		top_right->mDown = temp;
+		temp->mUp = top_right;
 	}
 
-	mTopLeft = lTopLeft;
+	mTopLeft = top_left;
 
-	if (mBottomLeft == 0 || mBottomRight == 0)
-	{
-		mBottomLeft  = lTopLeft;
-		mBottomRight = lTopRight;
+	if (mBottomLeft == 0 || mBottomRight == 0) {
+		mBottomLeft  = top_left;
+		mBottomRight = top_right;
 	}
 }
 
-TEMPLATE void QUAL::RemoveTopLevel()
-{
-	if (mTopLeft != 0)
-	{
-		ListNode* lNode = mTopLeft;
+TEMPLATE void QUAL::RemoveTopLevel() {
+	if (mTopLeft != 0) {
+		ListNode* node = mTopLeft;
 		mTopLeft = mTopLeft->mDown;
 
-		while (lNode != 0)
-		{
-			if (lNode->mDown != 0)
-			{
-				lNode->mDown->mUp = 0;
+		while (node != 0) {
+			if (node->mDown != 0) {
+				node->mDown->mUp = 0;
 			}
 
-			ListNode* lTemp = lNode;
-			lNode = lNode->mNext;
-			RecycleNode(lTemp);
+			ListNode* temp = node;
+			node = node->next_;
+			RecycleNode(temp);
 		}
 	}
 
-	if (mTopLeft == 0)
-	{
+	if (mTopLeft == 0) {
 		mBottomLeft  = 0;
 		mBottomRight = 0;
 	}
 }
 
-TEMPLATE typename QUAL::ListNode* QUAL::FindClosestNode(ListNode* pLeft, const _TKey& pKey) const
-{
+TEMPLATE typename QUAL::ListNode* QUAL::FindClosestNode(ListNode* left, const _TKey& key) const {
 	// Search this level...
-	ListNode* lNode = SearchLevel(pLeft, pKey);
+	ListNode* node = SearchLevel(left, key);
 
-	if (lNode->mKey == pKey ||
-	   lNode->mDown == 0)
-	{
+	if (node->key_ == key ||
+	   node->mDown == 0) {
 		// We have found the node.
-		return lNode;
+		return node;
 	}
 
-	if (lNode->mDown != 0)
-	{
+	if (node->mDown != 0) {
 		// Step back and down one level, and continue searching.
-		return FindClosestNode(lNode->mDown, pKey);
-	}
-	else
-	{
-		return lNode;
+		return FindClosestNode(node->mDown, key);
+	} else {
+		return node;
 	}
 }
 
-TEMPLATE typename QUAL::ListNode* QUAL::SearchLevel(ListNode* pLeft, const _TKey& pKey) const
-{
-	ListNode* lCurrentNode = pLeft;
+TEMPLATE typename QUAL::ListNode* QUAL::SearchLevel(ListNode* left, const _TKey& key) const {
+	ListNode* current_node = left;
 
-	while (lCurrentNode->mNext != 0 &&
-		  (lCurrentNode->mPrev == 0 ||
-		  lCurrentNode->mKey < pKey))
-	{
-		lCurrentNode = lCurrentNode->mNext;
+	while (current_node->next_ != 0 &&
+		  (current_node->prev_ == 0 ||
+		  current_node->key_ < key)) {
+		current_node = current_node->next_;
 	}
 
 	// Have we found the node?
-	if (lCurrentNode->mKey == pKey)
-	{
-		return lCurrentNode;
-	}
-	else
-	{
-		return lCurrentNode->mPrev;
+	if (current_node->key_ == key) {
+		return current_node;
+	} else {
+		return current_node->prev_;
 	}
 }
 
-TEMPLATE void QUAL::ShareNodePool(SkipList* pList)
-{
-	if (IsEmpty() == true)
-	{
-		SetNodeAllocator(pList->GetNodeAllocator());
+TEMPLATE void QUAL::ShareNodePool(SkipList* list) {
+	if (IsEmpty() == true) {
+		SetNodeAllocator(list->GetNodeAllocator());
 	}
 }
 
-TEMPLATE typename QUAL::NodeAllocator* QUAL::GetNodeAllocator()
-{
-	return mNodeAllocator;
+TEMPLATE typename QUAL::NodeAllocator* QUAL::GetNodeAllocator() {
+	return node_allocator_;
 }
 
-TEMPLATE void QUAL::SetNodeAllocator(NodeAllocator* pNodeAllocator)
-{
-	if (mNodeAllocator != 0)
-	{
-		delete mNodeAllocator;
+TEMPLATE void QUAL::SetNodeAllocator(NodeAllocator* node_allocator) {
+	if (node_allocator_ != 0) {
+		delete node_allocator_;
 	}
 
-	mNodeAllocator = pNodeAllocator;
-	mAllocatorOwner = false;
+	node_allocator_ = node_allocator;
+	allocator_owner_ = false;
 }
 
-TEMPLATE typename QUAL::ListNode* QUAL::NewNode()
-{
-	ListNode* lNode = mNodeAllocator->Alloc();
-	lNode->Init();
-	return lNode;
+TEMPLATE typename QUAL::ListNode* QUAL::NewNode() {
+	ListNode* node = node_allocator_->Alloc();
+	node->Init();
+	return node;
 }
 
-TEMPLATE void QUAL::RecycleNode(ListNode* pNode)
-{
-	mNodeAllocator->Free(pNode);
+TEMPLATE void QUAL::RecycleNode(ListNode* node) {
+	node_allocator_->Free(node);
 }
 
-TEMPLATE bool QUAL::IsEndNode(ListNode* pNode) const
-{
-	return ((pNode->mNext == 0) || (pNode->mPrev == 0));
+TEMPLATE bool QUAL::IsEndNode(ListNode* node) const {
+	return ((node->next_ == 0) || (node->prev_ == 0));
 }
 
 }

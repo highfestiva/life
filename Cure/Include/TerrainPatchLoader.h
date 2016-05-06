@@ -1,44 +1,41 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Include/Cure.h"
-#include "../Include/TerrainManager.h"
+#include "../include/cure.h"
+#include "../include/terrainmanager.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 class TerrainPatch;
 }
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class TerrainPatchLoader
-{
+class TerrainPatchLoader {
 public:
 	typedef TerrainManager::PatchArea PatchArea;
 
-	TerrainPatchLoader(ResourceManager* pResourceManager);
+	TerrainPatchLoader(ResourceManager* resource_manager);
 	virtual ~TerrainPatchLoader();
 
-	Tbc::TerrainPatch* LoadPatch(const PatchArea& pArea, float pLod);
-	static void DeletePatch(Tbc::TerrainPatch* pPatch);
+	tbc::TerrainPatch* LoadPatch(const PatchArea& area, float lod);
+	static void DeletePatch(tbc::TerrainPatch* patch);
 
 private:
-	Tbc::TerrainPatch* LoadPatchMesh(const PatchArea& pArea, float pLod);
-	Tbc::TerrainPatch* GeneratePatchMesh(const PatchArea& pArea, float pLod);
+	tbc::TerrainPatch* LoadPatchMesh(const PatchArea& area, float lod);
+	tbc::TerrainPatch* GeneratePatchMesh(const PatchArea& area, float lod);
 
-	ResourceManager* mResourceManager;
+	ResourceManager* resource_manager_;
 };
 
 

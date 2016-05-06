@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,15 +7,14 @@
 #pragma once
 
 #include <vector>
-#include "../../Lepra/Include/Log.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../Include/PhysicsManager.h"
-#include "../Include/Tbc.h"
+#include "../../lepra/include/log.h"
+#include "../../lepra/include/vector3d.h"
+#include "../include/physicsmanager.h"
+#include "../include/tbc.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
@@ -24,56 +23,53 @@ class ChunkyPhysics;
 
 
 
-class PhysicsSpawner
-{
+class PhysicsSpawner {
 public:
 	typedef std::vector<float> IntervalArray;
-	enum Type
-	{
-		SPAWNER_INVALID = 0,
-		SPAWNER_TELEPORT,
-		SPAWNER_CREATOR,
+	enum Type {
+		kSpawnerInvalid = 0,
+		kSpawnerTeleport,
+		kSpawnerCreator,
 	};
 
 	PhysicsSpawner();
 	virtual ~PhysicsSpawner();
-	void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsSpawner& pOriginal);
+	void RelocatePointers(const ChunkyPhysics* target, const ChunkyPhysics* source, const PhysicsSpawner& original);
 
-	static PhysicsSpawner* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
+	static PhysicsSpawner* Load(ChunkyPhysics* structure, const void* data, unsigned byte_count);
 
 	Type GetType() const;
 	const str& GetFunction() const;
 	int GetSpawnPointCount() const;
-	xform GetSpawnPoint(const ChunkyPhysics* pStructure, const vec3& pScaledPoint, int pIndex, vec3& pInitialVelocity) const;
+	xform GetSpawnPoint(const ChunkyPhysics* structure, const vec3& scaled_point, int index, vec3& initial_velocity) const;
 	float GetNumber() const;
 	const IntervalArray& GetIntervals() const;
-	const str GetSpawnObject(float pProbabilityThreshold) const;
+	const str GetSpawnObject(float probability_threshold) const;
 	bool IsEaseDown() const;
 
 	unsigned GetChunkySize() const;
-	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	void SaveChunkyData(const ChunkyPhysics* structure, void* data) const;
 
 private:
-	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	void LoadChunkyData(ChunkyPhysics* structure, const void* data);
 
-	struct SpawnObject
-	{
-		str mSpawnObject;
-		float mProbability;
-		SpawnObject(const str& pSpawnObject, float pProbability);
+	struct SpawnObject {
+		str spawn_object_;
+		float probability_;
+		SpawnObject(const str& spawn_object, float probability);
 	};
 	typedef std::vector<SpawnObject> SpawnObjectArray;
 	typedef std::vector<ChunkyBoneGeometry*> SpawnNodeArray;
 
-	Type mSpawnerType;
-	str mFunction;
-	SpawnNodeArray mSpawnerNodeArray;
-	vec3 mInitialVelocity;
-	float mNumber;
-	IntervalArray mIntervalArray;
-	SpawnObjectArray mSpawnObjectArray;
-	bool mIsEaseDown;
-	float mTotalObjectProbability;
+	Type spawner_type_;
+	str function_;
+	SpawnNodeArray spawner_node_array_;
+	vec3 initial_velocity_;
+	float number_;
+	IntervalArray interval_array_;
+	SpawnObjectArray spawn_object_array_;
+	bool is_ease_down_;
+	float total_object_probability_;
 
 	logclass();
 };

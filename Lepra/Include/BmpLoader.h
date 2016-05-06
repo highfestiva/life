@@ -1,6 +1,6 @@
 /*
 	Class:  BmpLoader
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -11,13 +11,12 @@
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "String.h"
+#include "lepratypes.h"
+#include "string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -27,76 +26,71 @@ class Writer;
 
 
 
-class BmpLoader
-{
+class BmpLoader {
 public:
 
-	enum Status
-	{
-		STATUS_OPEN_ERROR = 0, 
-		STATUS_SUCCESS,
-		STATUS_MEMORY_ERROR,
-		STATUS_READ_HEADER_ERROR,
-		STATUS_READ_INFO_ERROR,
-		STATUS_READ_PALETTE_ERROR,
-		STATUS_READ_PICTURE_ERROR,
-		STATUS_RESOLUTION_ERROR,
-		STATUS_COMPRESSION_ERROR,
+	enum Status {
+		kStatusOpenError = 0,
+		kStatusSuccess,
+		kStatusMemoryError,
+		kStatusReadHeaderError,
+		kStatusReadInfoError,
+		kStatusReadPaletteError,
+		kStatusReadPictureError,
+		kStatusResolutionError,
+		kStatusCompressionError,
 	};
 
-	enum Compression
-	{
-		COMP_BI_RGB		= 0,
-		COMP_BI_RLE8,
-		COMP_BI_RLE4,
-		COMP_BI_BITFIELDS,
+	enum Compression {
+		kCompBiRgb		= 0,
+		kCompBiRle8,
+		kCompBiRle4,
+		kCompBiBitfields,
 	};
 
-	Status Load(const str& pFileName, Canvas& pCanvas);
-	Status Save(const str& pFileName, const Canvas& pCanvas);
+	Status Load(const str& file_name, Canvas& canvas);
+	Status Save(const str& file_name, const Canvas& canvas);
 
-	Status Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas);
-	Status Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas);
+	Status Load(const str& archive_name, const str& file_name, Canvas& canvas);
+	Status Save(const str& archive_name, const str& file_name, const Canvas& canvas);
 
-	Status Load(Reader& pReader, Canvas& pCanvas);
-	Status Save(Writer& pWriter, const Canvas& pCanvas);
+	Status Load(Reader& reader, Canvas& canvas);
+	Status Save(Writer& writer, const Canvas& canvas);
 
 private:
 
-	class BitmapFileHeader 
-	{
+	class BitmapFileHeader {
 	public:
-		uint16	mType;
-		unsigned	mSize;
-		uint16	mReserved1;
-		uint16	mReserved2;
-		unsigned	mOffBits;
+		uint16	type_;
+		unsigned	size_;
+		uint16	reserved1_;
+		uint16	reserved2_;
+		unsigned	off_bits_;
 
 		int GetSize();
 
-		bool Load(Reader* pReader);
-		bool Save(Writer* pWriter);
+		bool Load(Reader* reader);
+		bool Save(Writer* writer);
 	};
 
-	class BitmapInfoHeader
-	{
+	class BitmapInfoHeader {
 	public:
-		int	mSize;
-		int	mWidth;
-		int	mHeight;
-		int16	mPlanes;
-		int16	mBitCount;
-		int	mCompression;
-		int	mSizeImage;
-		int	mXPelsPerMeter;
-		int	mYPelsPerMeter;
-		int	mClrUsed;
-		int	mClrImportant;
+		int	size_;
+		int	width_;
+		int	height_;
+		int16	planes_;
+		int16	bit_count_;
+		int	compression_;
+		int	size_image_;
+		int	x_pels_per_meter_;
+		int	y_pels_per_meter_;
+		int	clr_used_;
+		int	clr_important_;
 
 		int GetSize();
 
-		bool Load(Reader* pReader);
-		bool Save(Writer* pWriter);
+		bool Load(Reader* reader);
+		bool Save(Writer* writer);
 	};
 
 };

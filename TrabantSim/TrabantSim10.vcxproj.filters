@@ -1,152 +1,152 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{C7D1C39C-9710-11E4-A7E0-BCEE7B8C67B1}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{C7D1C39D-9710-11E4-AAD3-BCEE7B8C67B1}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TrabantSim.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile include="trabantsim.cxx">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="TrabantSimConsoleManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="trabantsimconsolemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="TrabantSimManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="trabantsimmanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="TrabantSimTicker.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="trabantsimticker.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="object.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="light.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="PhysGfxObject.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="physgfxobject.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="FileServer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="fileserver.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TrabantSim.h">
+    <Clinclude include="trabantsim.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TrabantSimConsoleManager.h">
+    <Clinclude include="trabantsimconsolemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TrabantSimManager.h">
+    <Clinclude include="trabantsimmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TrabantSimTicker.h">
+    <Clinclude include="trabantsimticker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RtVar.h">
+    <Clinclude include="rtvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Version.h">
+    <Clinclude include="version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
+    <Clinclude include="object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
+    <Clinclude include="light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PhysGfxObject.h">
+    <Clinclude include="physgfxobject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EditViewController.h">
+    <Clinclude include="editviewcontroller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ListViewController.h">
+    <Clinclude include="listviewcontroller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PythonTextView.h">
+    <Clinclude include="pythontextview.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CYRLayoutManager.h">
+    <Clinclude include="cyrlayoutmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CYRTextStorage.h">
+    <Clinclude include="cyrtextstorage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CYRTextView.h">
+    <Clinclude include="cyrtextview.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CYRToken.h">
+    <Clinclude include="cyrtoken.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AnimatedApp.h">
+    <Clinclude include="animatedapp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BackButtonHandler.h">
+    <Clinclude include="backbuttonhandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CreateNewViewController.h">
+    <Clinclude include="createnewviewcontroller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FileServer.h">
+    <Clinclude include="fileserver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h">
+    <Clinclude include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PythonRunner.h">
+    <Clinclude include="pythonrunner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StdOutViewController.h">
+    <Clinclude include="stdoutviewcontroller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="TrabantSim.mm">
-      <Filter>Source Files</Filter>
+    <None include="trabantsim.mm">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="PythonTextView.m">
-      <Filter>Source Files</Filter>
+    <None include="pythontextview.m">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="ListViewController.m">
-      <Filter>Source Files</Filter>
+    <None include="ListViewController.m">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="CYRLayoutManager.m">
-      <Filter>Source Files</Filter>
+    <None include="cyrlayoutmanager.m">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="CYRToken.m">
-      <Filter>Source Files</Filter>
+    <None include="cyrtoken.m">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="CYRTextStorage.m">
-      <Filter>Source Files</Filter>
+    <None include="cyrtextstorage.m">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="CYRTextView.m">
-      <Filter>Source Files</Filter>
+    <None include="cyrtextview.m">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="EditViewController.mm">
-      <Filter>Source Files</Filter>
+    <None include="editviewcontroller.mm">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="ToDo.txt" />
-    <None Include="BackButtonHandler.m">
-      <Filter>Source Files</Filter>
+    <None include="todo.txt" />
+    <None include="backbuttonhandler.m">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="StdOutViewController.mm">
-      <Filter>Source Files</Filter>
+    <None include="stdoutviewcontroller.mm">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="CreateNewViewController.m">
-      <Filter>Source Files</Filter>
+    <None include="createnewviewcontroller.m">
+      <Filter>src Files</Filter>
     </None>
-    <None Include="PythonRunner.mm">
-      <Filter>Source Files</Filter>
+    <None include="pythonrunner.mm">
+      <Filter>src Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="TrabantSim.rc" />
+    <ResourceCompile include="trabantsim.rc" />
   </ItemGroup>
 </Project>

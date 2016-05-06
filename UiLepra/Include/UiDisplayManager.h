@@ -6,149 +6,137 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Unordered.h"
-#include "../../Lepra/Include/Canvas.h"
-#include "../../Lepra/Include/Log.h"
-#include "../Include/UiLepra.h"
+#include "../../lepra/include/unordered.h"
+#include "../../lepra/include/canvas.h"
+#include "../../lepra/include/log.h"
+#include "../include/uilepra.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-class DisplayMode
-{
+class DisplayMode {
 public:
 
 	// Set to default values on creation.
 	inline DisplayMode() :
-		mWidth(640),
-		mHeight(480),
-		mBitDepth(0),
-		mRefreshRate(0)
-	{
+		width_(640),
+		height_(480),
+		bit_depth_(0),
+		refresh_rate_(0) {
 	}
 
-	inline DisplayMode(int pWidth, int pHeight) :
-		mWidth(pWidth),
-		mHeight(pHeight),
-		mBitDepth(0),
-		mRefreshRate(0)
-	{
+	inline DisplayMode(int width, int height) :
+		width_(width),
+		height_(height),
+		bit_depth_(0),
+		refresh_rate_(0) {
 	}
 
-	inline DisplayMode(int pWidth, int pHeight, int pBitDepth) :
-		mWidth(pWidth),
-		mHeight(pHeight),
-		mBitDepth(pBitDepth),
-		mRefreshRate(0)
-	{
+	inline DisplayMode(int width, int height, int bit_depth) :
+		width_(width),
+		height_(height),
+		bit_depth_(bit_depth),
+		refresh_rate_(0) {
 	}
 
-	inline bool IsValid() const
-	{
-		if (mWidth <= 0 || mHeight <= 0 || mRefreshRate <= 0 ||
+	inline bool IsValid() const {
+		if (width_ <= 0 || height_ <= 0 || refresh_rate_ <= 0 ||
 			(
-				mBitDepth != 0 &&
-				mBitDepth != 8 &&
-				mBitDepth != 15 &&
-				mBitDepth != 16 &&
-				mBitDepth != 24 &&
-				mBitDepth != 32
+				bit_depth_ != 0 &&
+				bit_depth_ != 8 &&
+				bit_depth_ != 15 &&
+				bit_depth_ != 16 &&
+				bit_depth_ != 24 &&
+				bit_depth_ != 32
 			)
-		  )
-		{
+		  ) {
 			return false;
 		}
 
 		return true;
 	}
 
-	int mWidth;
-	int mHeight;
-	int mBitDepth;      // Set to 0 means "don't care". Will be set to highest possible value.
-	int mRefreshRate;   // Set to 0 means "don't care", the system will 
+	int width_;
+	int height_;
+	int bit_depth_;      // Set to 0 means "don't care". Will be set to highest possible value.
+	int refresh_rate_;   // Set to 0 means "don't care", the system will
                             // use the highest supported frequency.
 };
 
-class DisplayResizeObserver
-{
+class DisplayResizeObserver {
 public:
-	virtual void OnResize(int pWidth, int pHeight) = 0;
+	virtual void OnResize(int width, int height) = 0;
 	virtual void OnMinimize() = 0;
-	virtual void OnMaximize(int pWidth, int pHeight) = 0;
+	virtual void OnMaximize(int width, int height) = 0;
 };
 
 
-class DisplayManager: public DisplayResizeObserver
-{
+class DisplayManager: public DisplayResizeObserver {
 public:
 
-	enum ScreenMode
-	{
-		WINDOWED,	// Windowed and resizable.
-		STATIC_WINDOW,	// Windowed and not resizable.
-		SPLASH_WINDOW,	// No border.
-		FULLSCREEN,
+	enum ScreenMode {
+		kWindowed,	// Windowed and resizable.
+		kStaticWindow,	// Windowed and not resizable.
+		kSplashWindow,	// No border.
+		kFullscreen,
 	};
 
-	enum Orientation
-	{
-		ORIENTATION_ALLOW_ANY = 0,
-		ORIENTATION_ALLOW_UPSIDE_DOWN,
-		ORIENTATION_ALLOW_ANY_INTERNAL,
-		ORIENTATION_ALLOW_UPSIDE_DOWN_INTERNAL,
-		ORIENTATION_FIXED,
+	enum Orientation {
+		kOrientationAllowAny = 0,
+		kOrientationAllowUpsideDown,
+		kOrientationAllowAnyInternal,
+		kOrientationAllowUpsideDownInternal,
+		kOrientationFixed,
 	};
 
-	enum ContextType
-	{
-		OPENGL_CONTEXT,
-		DIRECTX_CONTEXT,
+	enum ContextType {
+		kOpenglContext,
+		kDirectxContext,
 	};
 
 	// Creates a platform dependent display manager. This function
-	// is implemented elsewhere, (not in DisplayManager.cpp). The 
-	// exact location of this function depends on the platform 
+	// is implemented elsewhere, (not in DisplayManager.cpp). The
+	// exact location of this function depends on the platform
 	// specific implementation. There can be only one display manager.
 	// If this function is called twice with different contexts,
 	// the first display manager will be deleted.
-	static DisplayManager* CreateDisplayManager(ContextType pCT);
+	static DisplayManager* CreateDisplayManager(ContextType ct);
 
 	DisplayManager();
 	virtual ~DisplayManager();
 
-	static void EnableScreensaver(bool pEnable);
+	static void EnableScreensaver(bool enable);
 
 	virtual ContextType GetContextType() = 0;
 
 	// Sets the caption of the window.
-	virtual void SetCaption(const str& pCaption) = 0;
+	virtual void SetCaption(const str& caption) = 0;
 
 	// Creates a window in windowed or fullscreen mode on the main display device.
-	virtual bool OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pMode, Orientation pOrientation) = 0;
+	virtual bool OpenScreen(const DisplayMode& display_mode, ScreenMode mode, Orientation orientation) = 0;
 	virtual void CloseScreen() = 0;
 
-	virtual void SetOrientation(Orientation pOrientation);
-	void AddResizeObserver(DisplayResizeObserver* pResizeObserver);
-	void RemoveResizeObserver(DisplayResizeObserver* pResizeObserver);
-	void DispatchResize(int pWidth, int pHeight);
+	virtual void SetOrientation(Orientation orientation);
+	void AddResizeObserver(DisplayResizeObserver* resize_observer);
+	void RemoveResizeObserver(DisplayResizeObserver* resize_observer);
+	void DispatchResize(int width, int height);
 	void DispatchMinimize();
-	void DispatchMaximize(int pWidth, int pHeight);
+	void DispatchMaximize(int width, int height);
 
-	virtual void SetFocus(bool pFocus) = 0;
+	virtual void SetFocus(bool focus) = 0;
 	virtual bool Activate() = 0;
 	virtual bool Deactivate() = 0;
 	// Swaps buffers etc.
 	virtual bool UpdateScreen() = 0;
 
 	virtual bool IsVSyncEnabled() const = 0;
-	virtual bool SetVSyncEnabled(bool pEnabled) = 0;
+	virtual bool SetVSyncEnabled(bool enabled) = 0;
 	virtual bool IsVisible() const = 0;
 	virtual bool IsFocused() const = 0;
-	virtual void HideWindow(bool pHide) = 0;
+	virtual void HideWindow(bool hide) = 0;
 
 	/*
 		Display mode enumeration (fullscreen modes).
@@ -157,23 +145,23 @@ public:
 
 	// Returns the number of supported display modes on this computer.
 	virtual int GetNumDisplayModes();
-	virtual int GetNumDisplayModes(int pBitDepth);
-	virtual int GetNumDisplayModes(int pWidth, int pHeight);
-	virtual int GetNumDisplayModes(int pWidth, int pHeight, int pBitDepth);
+	virtual int GetNumDisplayModes(int bit_depth);
+	virtual int GetNumDisplayModes(int width, int height);
+	virtual int GetNumDisplayModes(int width, int height, int bit_depth);
 
-	// Fills pDisplayMode with the mode number pMode.
-	// pMode must be a number greater or equal to 0, and less than the number returned from
+	// Fills display_mode with the mode number mode.
+	// mode must be a number greater or equal to 0, and less than the number returned from
 	// the corresponding GetNumDisplayModes().
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode);
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pBitDepth);
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight);
-	virtual bool GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight, int pBitDepth);
+	virtual bool GetDisplayMode(DisplayMode& display_mode, int mode);
+	virtual bool GetDisplayMode(DisplayMode& display_mode, int mode, int bit_depth);
+	virtual bool GetDisplayMode(DisplayMode& display_mode, int mode, int width, int height);
+	virtual bool GetDisplayMode(DisplayMode& display_mode, int mode, int width, int height, int bit_depth);
 
-	// Display mode search. Returns true if a matching display mode was found, 
+	// Display mode search. Returns true if a matching display mode was found,
 	// and fills the DisplayMode struct.
-	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight);
-	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth);
-	virtual bool FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth, int pRefreshRate);
+	virtual bool FindDisplayMode(DisplayMode& display_mode, int width, int height);
+	virtual bool FindDisplayMode(DisplayMode& display_mode, int width, int height, int bit_depth);
+	virtual bool FindDisplayMode(DisplayMode& display_mode, int width, int height, int bit_depth, int refresh_rate);
 
 	virtual unsigned GetWidth() const = 0;
 	virtual unsigned GetHeight() const = 0;
@@ -182,28 +170,28 @@ public:
 	virtual bool IsFullScreen() const = 0;
 	virtual double GetPhysicalScreenSize() const = 0;
 
-	// Returns the canvas describing the screen. In accelerated modes 
+	// Returns the canvas describing the screen. In accelerated modes
 	// (OpenGL, DirectX etc) you can't assume that there is a valid pointer
 	// to the display memory. If there is a valid pointer, it's only valid
 	// for the current frame.
-	void GetScreenCanvas(Canvas& pCanvas);
-	void GetScreenCanvas(Canvas* pCanvas);
+	void GetScreenCanvas(Canvas& canvas);
+	void GetScreenCanvas(Canvas* canvas);
 
 	// Functions implemented for conveniency.
-	static Lepra::uint8 GetPaletteColor(int pRed, int pGreen, int pBlue, const Color* pPalette);
+	static lepra::uint8 GetPaletteColor(int red, int green, int blue, const Color* palette);
 
-	virtual void ShowMessageBox(const str& pMsg, const str& pCaption) = 0;
+	virtual void ShowMessageBox(const str& msg, const str& caption) = 0;
 
 protected:
 	typedef std::unordered_set<DisplayResizeObserver*, LEPRA_VOIDP_HASHER> ResizeObserverSet;
-	ResizeObserverSet mResizeObserverSet;
+	ResizeObserverSet resize_observer_set_;
 
-	DisplayMode mDisplayMode;
-	ScreenMode mScreenMode;	// Fullscreen or windowed.
-	Orientation mOrientation;
+	DisplayMode display_mode_;
+	ScreenMode screen_mode_;	// Fullscreen or windowed.
+	Orientation orientation_;
 
-	DisplayMode* mEnumeratedDisplayMode;
-	int mEnumeratedDisplayModeCount;
+	DisplayMode* enumerated_display_mode_;
+	int enumerated_display_mode_count_;
 
 private:
 	logclass();

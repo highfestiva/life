@@ -1,40 +1,38 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiTbc.h"
-#include "UiTriangleBasedGeometry.h"
-#include "../../Tbc/Include/GeometryBase.h"
+#include "uitbc.h"
+#include "uitrianglebasedgeometry.h"
+#include "../../tbc/include/geometrybase.h"
 #include <list>
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class ProgressiveTriangleGeometry : public Tbc::GeometryBase
-{
+class ProgressiveTriangleGeometry : public tbc::GeometryBase {
 public:
 	ProgressiveTriangleGeometry();
-	ProgressiveTriangleGeometry(ProgressiveTriangleGeometry& pProgressiveGeometry);
-	ProgressiveTriangleGeometry(TriangleBasedGeometry& pGeometry);
+	ProgressiveTriangleGeometry(ProgressiveTriangleGeometry& progressive_geometry);
+	ProgressiveTriangleGeometry(TriangleBasedGeometry& geometry);
 	virtual ~ProgressiveTriangleGeometry();
 
-	void Copy(ProgressiveTriangleGeometry& pProgressiveGeometry);
-	void Set(TriangleBasedGeometry& pGeometry);
+	void Copy(ProgressiveTriangleGeometry& progressive_geometry);
+	void Set(TriangleBasedGeometry& geometry);
 
 	// SetDetailLevel() will collapse or expand edges to the given level of detail.
-	// pLevelOfDetail must be a value between 0 and 1, where 0 is the lowest 
+	// level_of_detail must be a value between 0 and 1, where 0 is the lowest
 	// detail level, and 1 is the highest.
-	void SetDetailLevel(float pLevelOfDetail);
+	void SetDetailLevel(float level_of_detail);
 
-	void GetCurrentState(TriangleBasedGeometry& pGeometry);
+	void GetCurrentState(TriangleBasedGeometry& geometry);
 
 	// Data access...
 	inline virtual unsigned int GetMaxVertexCount() const;
@@ -47,7 +45,7 @@ public:
 	// When writing to any of the arrays returned by the following functions,
 	// the results of any future calls to the member functions is undefined.
 	inline virtual float*         GetVertexData() const;
-	inline virtual float*         GetUVData(unsigned int pUVSet) const;
+	inline virtual float*         GetUVData(unsigned int uv_set) const;
 	inline virtual uint32* GetIndices() const;
 	inline virtual uint8*  GetColorData() const;
 	inline virtual float*         GetNormalData() const; // Vertex normals..
@@ -57,71 +55,60 @@ public:
 
 	inline ColorFormat GetColorFormat() const;
 
-	// Overloads from Tbc::GeometryBase.
+	// Overloads from tbc::GeometryBase.
 	virtual inline GeometryVolatility GetGeometryVolatility() const;
 
 private:
 
 	/*
-		Some structures and functions used to make life easier 
+		Some structures and functions used to make life easier
 		when producing the progressive mesh.
 	*/
 
-	enum
-	{
-		VX = 0,
-		VY,
-		VZ,
-		VU,
-		VV,
-		VR,
-		VG,
-		VB,
-		VA,
-		VNX,
-		VNY,
-		VNZ,
+	enum {
+		kVx = 0,
+		kVy,
+		kVz,
+		kVu,
+		kVv,
+		kVr,
+		kVg,
+		kVb,
+		kVa,
+		kVnx,
+		kVny,
+		kVnz,
 
-		V_NUMSCALARS
+		kVNumscalars
 	};
 
-	inline static void CopyScalars(float* pDest, const float* pSource, int pN = V_NUMSCALARS, float pScale = 1.0f)
-	{
-		for (int i = 0; i < pN; i++)
-		{
-			pDest[i] = pSource[i] * pScale;
+	inline static void CopyScalars(float* dest, const float* source, int n = kVNumscalars, float scale = 1.0f) {
+		for (int i = 0; i < n; i++) {
+			dest[i] = source[i] * scale;
 		}
 	}
 
-	inline static void CopyScalarsUC(unsigned char* pDest, const float* pSource, int pN = V_NUMSCALARS, float pScale = 255.0f)
-	{
-		for (int i = 0; i < pN; i++)
-		{
-			pDest[i] = (unsigned char)(pSource[i] * pScale);
+	inline static void CopyScalarsUC(unsigned char* dest, const float* source, int n = kVNumscalars, float scale = 255.0f) {
+		for (int i = 0; i < n; i++) {
+			dest[i] = (unsigned char)(source[i] * scale);
 		}
 	}
 
-	inline static void SetScalars(float* pDest, float pValue)
-	{
-		for (int i = 0; i < V_NUMSCALARS; i++)
-		{
-			pDest[i] = pValue;
+	inline static void SetScalars(float* dest, float value) {
+		for (int i = 0; i < kVNumscalars; i++) {
+			dest[i] = value;
 		}
 	}
 
-	inline static void SetDeltaScalars(float* pDest, float* pSrc1, float* pSrc2)
-	{
-		for (int i = 0; i < V_NUMSCALARS; i++)
-		{
-			pDest[i] = (pSrc1[i] - pSrc2[i]) * 0.5f;
+	inline static void SetDeltaScalars(float* dest, float* src1, float* src2) {
+		for (int i = 0; i < kVNumscalars; i++) {
+			dest[i] = (src1[i] - src2[i]) * 0.5f;
 		}
 	}
 
-	inline static void CopyAddScalars(float* pDest, float* pSrc1, float* pSrc2, float pFrac = 1.0f)
-	{
-		for (int i = 0; i < V_NUMSCALARS; i++)
-		{
-			pDest[i] = pSrc1[i] + pSrc2[i] * pFrac;
+	inline static void CopyAddScalars(float* dest, float* src1, float* src2, float frac = 1.0f) {
+		for (int i = 0; i < kVNumscalars; i++) {
+			dest[i] = src1[i] + src2[i] * frac;
 		}
 	}
 
@@ -132,356 +119,316 @@ private:
 	typedef std::list<Vertex*>   VertexList;
 	typedef std::list<Edge*>     EdgeList;
 
-	class Vertex
-	{
+	class Vertex {
 	public:
 
 		Vertex() :
-			mError(0),
-			mTwin(0)
-		{
-			SetScalars(mScalars, 0.0f);
+			error_(0),
+			twin_(0) {
+			SetScalars(scalars_, 0.0f);
 		}
 
-		Vertex(Vertex* pV) :
-			mError(pV->mError),
-			mTwin(0)
-		{
-			CopyScalars(mScalars, pV->mScalars);
+		Vertex(Vertex* _v) :
+			error_(_v->error_),
+			twin_(0) {
+			CopyScalars(scalars_, _v->scalars_);
 		}
 
-		inline float& x() { return mScalars[VX]; }
-		inline float& y() { return mScalars[VY]; }
-		inline float& z() { return mScalars[VZ]; }
-		inline float& u() { return mScalars[VU]; }
-		inline float& v() { return mScalars[VV]; }
-		inline float& r() { return mScalars[VR]; }
-		inline float& g() { return mScalars[VG]; }
-		inline float& b() { return mScalars[VB]; }
-		inline float& a() { return mScalars[VA]; }
-		inline float& nx() { return mScalars[VNX]; }
-		inline float& ny() { return mScalars[VNY]; }
-		inline float& nz() { return mScalars[VNZ]; }
+		inline float& x() { return scalars_[kVx]; }
+		inline float& y() { return scalars_[kVy]; }
+		inline float& z() { return scalars_[kVz]; }
+		inline float& u() { return scalars_[kVu]; }
+		inline float& v() { return scalars_[kVv]; }
+		inline float& r() { return scalars_[kVr]; }
+		inline float& g() { return scalars_[kVg]; }
+		inline float& b() { return scalars_[kVb]; }
+		inline float& a() { return scalars_[kVa]; }
+		inline float& nx() { return scalars_[kVnx]; }
+		inline float& ny() { return scalars_[kVny]; }
+		inline float& nz() { return scalars_[kVnz]; }
 
-		float mScalars[V_NUMSCALARS];
-		float mError; // Used in FindEdgeToCollapse().
+		float scalars_[kVNumscalars];
+		float error_; // Used in FindEdgeToCollapse().
 
-		Vertex* mTwin;
+		Vertex* twin_;
 	};
 
-	class Edge
-	{
+	class Edge {
 	public:
 
-		Edge()
-		{
-			mV1 = 0;
-			mV2 = 0;
+		Edge() {
+			v1_ = 0;
+			v2_ = 0;
 		}
 
-		~Edge()
-		{
-			mV1 = 0;
-			mV2 = 0;
-			mTriangleList.clear();
+		~Edge() {
+			v1_ = 0;
+			v2_ = 0;
+			triangle_list_.clear();
 		}
 
-		Vertex* mV1;
-		Vertex* mV2;
-		TriangleList mTriangleList;
+		Vertex* v1_;
+		Vertex* v2_;
+		TriangleList triangle_list_;
 
-		inline bool HaveVertex(Vertex* pVertex)
-		{
-			return (mV1 == pVertex || mV2 == pVertex);
+		inline bool HaveVertex(Vertex* vertex) {
+			return (v1_ == vertex || v2_ == vertex);
 		}
 	};
 
-	class Triangle
-	{
+	class Triangle {
 	public:
 
 		Triangle() :
-			mV1(0),
-			mV2(0),
-			mV3(0)
-		{
+			v1_(0),
+			v2_(0),
+			v3_(0) {
 		}
 
-		Vertex* mV1;
-		Vertex* mV2;
-		Vertex* mV3;
+		Vertex* v1_;
+		Vertex* v2_;
+		Vertex* v3_;
 
-		vec3 mNormal;    // Used in FindEdgeToCollapse().
-		std::list<int> mVertexIndexHistory;
-		VertexList mVertexHistory;
+		vec3 normal_;    // Used in FindEdgeToCollapse().
+		std::list<int> vertex_index_history_;
+		VertexList vertex_history_;
 
-		inline bool HaveVertex(Vertex* pVertex)
-		{
-			return (pVertex == mV1 || pVertex == mV2 || pVertex == mV3);
+		inline bool HaveVertex(Vertex* vertex) {
+			return (vertex == v1_ || vertex == v2_ || vertex == v3_);
 		}
 
-		inline void ReplaceVertex(Vertex* pVertex, Vertex* pReplacement)
-		{
-			if (mV1 == pVertex)
-			{
-				mVertexIndexHistory.push_back(0);
-				mVertexHistory.push_back(mV1);
-				mV1 = pReplacement;
+		inline void ReplaceVertex(Vertex* vertex, Vertex* replacement) {
+			if (v1_ == vertex) {
+				vertex_index_history_.push_back(0);
+				vertex_history_.push_back(v1_);
+				v1_ = replacement;
 			}
-			if (mV2 == pVertex)
-			{
-				mVertexIndexHistory.push_back(1);
-				mVertexHistory.push_back(mV2);
-				mV2 = pReplacement;
+			if (v2_ == vertex) {
+				vertex_index_history_.push_back(1);
+				vertex_history_.push_back(v2_);
+				v2_ = replacement;
 			}
-			if (mV3 == pVertex)
-			{
-				mVertexIndexHistory.push_back(2);
-				mVertexHistory.push_back(mV3);
-				mV3 = pReplacement;
+			if (v3_ == vertex) {
+				vertex_index_history_.push_back(2);
+				vertex_history_.push_back(v3_);
+				v3_ = replacement;
 			}
 		}
 	};
 
 	// A class used during construction of the progressive mesh (in function Set()).
-	class VertexSplit
-	{
+	class VertexSplit {
 	public:
-		enum
-		{
-			INVALID_INDEX = -1,
+		enum {
+			kInvalidIndex = -1,
 		};
 
-		VertexSplit()
-		{
-			SetScalars(mDeltaScalars, 0.0f);
-			SetScalars(mPivotScalars, 0.0f);
+		VertexSplit() {
+			SetScalars(delta_scalars_, 0.0f);
+			SetScalars(pivot_scalars_, 0.0f);
 
-			mNumNewTriangles  = 0;
-			mNumOldTriangles  = 0;
-			mNumOldVertices   = 0;
+			num_new_triangles_  = 0;
+			num_old_triangles_  = 0;
+			num_old_vertices_   = 0;
 
-			mIndexFix        = 0;
-			mIndexFixIndex   = 0;
-			mNumIndexFixes    = 0;
-			mVertexToSplit    = 0;
+			index_fix_        = 0;
+			index_fix_index_   = 0;
+			num_index_fixes_    = 0;
+			vertex_to_split_    = 0;
 
-			mVertexToSplit    = 0;
+			vertex_to_split_    = 0;
 		}
 
-		virtual ~VertexSplit()
-		{
+		virtual ~VertexSplit() {
 			ClearAll();
 		}
 
-		void ClearAll()
-		{
-			SetScalars(mDeltaScalars, 0.0f);
-			SetScalars(mPivotScalars, 0.0f);
+		void ClearAll() {
+			SetScalars(delta_scalars_, 0.0f);
+			SetScalars(pivot_scalars_, 0.0f);
 
-			mVertexToSplit    = 0;
-			mNumNewTriangles  = 0;
-			mNumOldTriangles  = 0;
-			mNumOldVertices   = 0;
+			vertex_to_split_    = 0;
+			num_new_triangles_  = 0;
+			num_old_triangles_  = 0;
+			num_old_vertices_   = 0;
 
-			if (mIndexFix != 0)
-			{
-				delete[] mIndexFix;
-				delete[] mIndexFixIndex;
-				mIndexFix = 0;
-				mIndexFixIndex = 0;
+			if (index_fix_ != 0) {
+				delete[] index_fix_;
+				delete[] index_fix_index_;
+				index_fix_ = 0;
+				index_fix_index_ = 0;
 			}
 
-			mNumIndexFixes = 0;
-			mVertexToSplit = 0;
-			mNewVertex = 0;
+			num_index_fixes_ = 0;
+			vertex_to_split_ = 0;
+			new_vertex_ = 0;
 
-			mNewTriangles.clear();
-			mFixTriangles.clear();
+			new_triangles_.clear();
+			fix_triangles_.clear();
 		}
 
-		void Copy(const VertexSplit& pVS)
-		{
-			LightCopy(pVS);
+		void Copy(const VertexSplit& vs) {
+			LightCopy(vs);
 
-			mNumIndexFixes = pVS.mNumIndexFixes;
-			mNewVertex = pVS.mNewVertex;
+			num_index_fixes_ = vs.num_index_fixes_;
+			new_vertex_ = vs.new_vertex_;
 
-			if (mNumIndexFixes > 0)
-			{
-				mIndexFix = new int[mNumIndexFixes];
-				mIndexFixIndex = new int[mNumIndexFixes * 2];
+			if (num_index_fixes_ > 0) {
+				index_fix_ = new int[num_index_fixes_];
+				index_fix_index_ = new int[num_index_fixes_ * 2];
 			}
 
-			for (int i = 0; i < mNumIndexFixes; i++)
-			{
-				mIndexFix[i] = pVS.mIndexFix[i];
-				mIndexFixIndex[i * 2 + 0] = pVS.mIndexFixIndex[i * 2 + 0];
-				mIndexFixIndex[i * 2 + 1] = pVS.mIndexFixIndex[i * 2 + 1];
+			for (int i = 0; i < num_index_fixes_; i++) {
+				index_fix_[i] = vs.index_fix_[i];
+				index_fix_index_[i * 2 + 0] = vs.index_fix_index_[i * 2 + 0];
+				index_fix_index_[i * 2 + 1] = vs.index_fix_index_[i * 2 + 1];
 			}
 
-			TriangleList::const_iterator lTriIter;
-			for (lTriIter = pVS.mNewTriangles.begin();
-				lTriIter != pVS.mNewTriangles.end();
-				++lTriIter)
-			{
-				mNewTriangles.push_back(*lTriIter);
+			TriangleList::const_iterator tri_iter;
+			for (tri_iter = vs.new_triangles_.begin();
+				tri_iter != vs.new_triangles_.end();
+				++tri_iter) {
+				new_triangles_.push_back(*tri_iter);
 			}
 
-			for (lTriIter = pVS.mFixTriangles.begin();
-				lTriIter != pVS.mFixTriangles.end();
-				++lTriIter)
-			{
-				mFixTriangles.push_back(*lTriIter);
+			for (tri_iter = vs.fix_triangles_.begin();
+				tri_iter != vs.fix_triangles_.end();
+				++tri_iter) {
+				fix_triangles_.push_back(*tri_iter);
 			}
 		}
 
-		void LightCopy(const VertexSplit& pVS)
-		{
+		void LightCopy(const VertexSplit& vs) {
 			ClearAll();
 
-			CopyScalars(mDeltaScalars, pVS.mDeltaScalars);
-			CopyScalars(mPivotScalars, pVS.mPivotScalars);
+			CopyScalars(delta_scalars_, vs.delta_scalars_);
+			CopyScalars(pivot_scalars_, vs.pivot_scalars_);
 
-			mVertexToSplit    = pVS.mVertexToSplit;
-			mNumNewTriangles  = pVS.mNumNewTriangles;
-			mNumOldTriangles  = pVS.mNumOldTriangles;
-			mNumOldVertices   = pVS.mNumOldVertices;
+			vertex_to_split_    = vs.vertex_to_split_;
+			num_new_triangles_  = vs.num_new_triangles_;
+			num_old_triangles_  = vs.num_old_triangles_;
+			num_old_vertices_   = vs.num_old_vertices_;
 		}
 
-		float mDeltaScalars[V_NUMSCALARS];
-		float mPivotScalars[V_NUMSCALARS];
+		float delta_scalars_[kVNumscalars];
+		float pivot_scalars_[kVNumscalars];
 
 		// Stores all indices into the index array, where the indices should be updated with
-		// new values... Eh.. 
+		// new values... Eh..
 		// When splitting a vertex, all "old" triangles that point at that vertex,
 		// needs to point at the new vertex instead. The indices to update are indexed
 		// by this array. I hope that helped to clear things up.
-		int* mIndexFix;		// Stores the index into the index array.
-		int* mIndexFixIndex; // Stores the actual values to write to the index arrays.
-		int mNumIndexFixes;
-		int mVertexToSplitIndex;
-		int mNumOldTriangles;
-		int mNumNewTriangles;
-		int mNumOldVertices;
+		int* index_fix_;		// Stores the index into the index array.
+		int* index_fix_index_; // Stores the actual values to write to the index arrays.
+		int num_index_fixes_;
+		int vertex_to_split_index_;
+		int num_old_triangles_;
+		int num_new_triangles_;
+		int num_old_vertices_;
 
-		Vertex*    mVertexToSplit;
-		Vertex*    mNewVertex;
-		TriangleList mNewTriangles;
-		TriangleList mFixTriangles; // Triangles that needs changed indices.
+		Vertex*    vertex_to_split_;
+		Vertex*    new_vertex_;
+		TriangleList new_triangles_;
+		TriangleList fix_triangles_; // Triangles that needs changed indices.
 	};
 
 	typedef std::list<VertexSplit*> VertexSplitList;
 
 	void ClearAll();
 
-	void FindEdgeToCollapse(VertexList& pOrgVertexList,
-				TriangleList& pOrgTriangleList,
-				VertexList& pVertexList,
-				TriangleList& pTriangleList,
-				Edge& pEdge);
+	void FindEdgeToCollapse(VertexList& org_vertex_list,
+				TriangleList& org_triangle_list,
+				VertexList& vertex_list,
+				TriangleList& triangle_list,
+				Edge& edge);
 
-	unsigned int mBaseVertexCount;
-	unsigned int mBaseTriangleCount;
+	unsigned int base_vertex_count_;
+	unsigned int base_triangle_count_;
 
-	unsigned int mCurrentVertexCount;
-	unsigned int mCurrentTriangleCount;
+	unsigned int current_vertex_count_;
+	unsigned int current_triangle_count_;
 
-	unsigned int mMaxVertexCount;
-	unsigned int mMaxTriangleCount;
+	unsigned int max_vertex_count_;
+	unsigned int max_triangle_count_;
 
-	float* mCurrentVertexData;			// Triplets of (x, y, z).
-	float* mCurrentUVData;				// Doublets of (u, v).
-	float* mCurrentColorData;
-	float* mCurrentNormalData;			// Triplets of (x, y, z).
-	uint8* mCurrentColorData8;
-	uint32* mCurrentIndices;		// Triplets of vertex indices.
+	float* current_vertex_data_;			// Triplets of (x, y, z).
+	float* current_uv_data_;				// Doublets of (u, v).
+	float* current_color_data_;
+	float* current_normal_data_;			// Triplets of (x, y, z).
+	uint8* current_color_data8_;
+	uint32* current_indices_;		// Triplets of vertex indices.
 
-	float* mBaseVertexData;			// Triplets of (x, y, z).
-	float* mBaseUVData;				// Doublets of (u, v).
-	float* mBaseColorData;
-	float* mBaseNormalData;			// Triplets of (x, y, z).
-	uint32* mBaseIndices;	// Triplets of vertex indices.
+	float* base_vertex_data_;			// Triplets of (x, y, z).
+	float* base_uv_data_;				// Doublets of (u, v).
+	float* base_color_data_;
+	float* base_normal_data_;			// Triplets of (x, y, z).
+	uint32* base_indices_;	// Triplets of vertex indices.
 
-	unsigned int mCurrentVSplit;
-	unsigned int mNumVertexSplits;
-	VertexSplit* mVertexSplit;
+	unsigned int current_v_split_;
+	unsigned int num_vertex_splits_;
+	VertexSplit* vertex_split_;
 
-	ColorFormat mColorFormat;
+	ColorFormat color_format_;
 };
 
-unsigned int ProgressiveTriangleGeometry::GetMaxVertexCount() const
-{
-	return mMaxVertexCount;
+unsigned int ProgressiveTriangleGeometry::GetMaxVertexCount() const {
+	return max_vertex_count_;
 }
 
-unsigned int ProgressiveTriangleGeometry::GetMaxNumIndices() const
-{
-	return mMaxTriangleCount * 3;
+unsigned int ProgressiveTriangleGeometry::GetMaxNumIndices() const {
+	return max_triangle_count_ * 3;
 }
 
-unsigned int ProgressiveTriangleGeometry::GetVertexCount() const
-{
-	return mCurrentVertexCount;
+unsigned int ProgressiveTriangleGeometry::GetVertexCount() const {
+	return current_vertex_count_;
 }
 
-unsigned int ProgressiveTriangleGeometry::GetNumIndices() const
-{
-	return mCurrentTriangleCount * 3;
+unsigned int ProgressiveTriangleGeometry::GetNumIndices() const {
+	return current_triangle_count_ * 3;
 }
 
-unsigned int ProgressiveTriangleGeometry::GetNumUVSets() const
-{
-	if (mBaseUVData != 0)
+unsigned int ProgressiveTriangleGeometry::GetNumUVSets() const {
+	if (base_uv_data_ != 0)
 		return 1;
 	else
 		return 0;
 }
 
-float* ProgressiveTriangleGeometry::GetVertexData() const
-{
-	return mCurrentVertexData;
+float* ProgressiveTriangleGeometry::GetVertexData() const {
+	return current_vertex_data_;
 }
 
-float* ProgressiveTriangleGeometry::GetUVData(unsigned int /*pUVSet*/) const
-{
-	return mCurrentUVData;
+float* ProgressiveTriangleGeometry::GetUVData(unsigned int /*uv_set*/) const {
+	return current_uv_data_;
 }
 
-uint32* ProgressiveTriangleGeometry::GetIndices() const
-{
-	return mCurrentIndices;
+uint32* ProgressiveTriangleGeometry::GetIndices() const {
+	return current_indices_;
 }
 
-uint8* ProgressiveTriangleGeometry::GetColorData() const
-{
-	return mCurrentColorData8;
+uint8* ProgressiveTriangleGeometry::GetColorData() const {
+	return current_color_data8_;
 }
 
-float* ProgressiveTriangleGeometry::GetNormalData() const
-{
-	return mCurrentNormalData;
+float* ProgressiveTriangleGeometry::GetNormalData() const {
+	return current_normal_data_;
 }
 
-Tbc::GeometryBase::GeometryVolatility ProgressiveTriangleGeometry::GetGeometryVolatility() const
-{
+tbc::GeometryBase::GeometryVolatility ProgressiveTriangleGeometry::GetGeometryVolatility() const {
 	// Volatile, because the geometry is constantly changed.
-	return Tbc::GeometryBase::GEOM_VOLATILE;
+	return tbc::GeometryBase::kGeomVolatile;
 }
 
-Tbc::GeometryBase::ColorFormat ProgressiveTriangleGeometry::GetColorFormat() const
-{
-	return mColorFormat;
+tbc::GeometryBase::ColorFormat ProgressiveTriangleGeometry::GetColorFormat() const {
+	return color_format_;
 }
 
-void ProgressiveTriangleGeometry::ClearVertexNormalData()
-{
+void ProgressiveTriangleGeometry::ClearVertexNormalData() {
 	// Do nothing.
 }
 
-bool ProgressiveTriangleGeometry::HaveVertexNormalData()
-{
-	return (mCurrentNormalData != 0);
+bool ProgressiveTriangleGeometry::HaveVertexNormalData() {
+	return (current_normal_data_ != 0);
 }
 
 

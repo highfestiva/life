@@ -1,65 +1,54 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/Health.h"
-#include "../Include/ContextObject.h"
-#include "../Include/FloatAttribute.h"
+#include "../include/health.h"
+#include "../include/contextobject.h"
+#include "../include/floatattribute.h"
 
-#define HEALTH_NAME	"float_health"
-
-
-
-namespace Cure
-{
+#define kHealthName	"float_health"
 
 
 
-FloatAttribute* Health::GetAttribute(const ContextObject* pObject)
-{
-	return (FloatAttribute*)pObject->GetAttribute(HEALTH_NAME);
+namespace cure {
+
+
+
+FloatAttribute* Health::GetAttribute(const ContextObject* object) {
+	return (FloatAttribute*)object->GetAttribute(kHealthName);
 }
 
-float Health::Get(const ContextObject* pObject, float pDefault)
-{
-	FloatAttribute* lHealth = GetAttribute(pObject);
-	if (lHealth)
-	{
-		return lHealth->GetValue();
+float Health::Get(const ContextObject* object, float _default) {
+	FloatAttribute* health = GetAttribute(object);
+	if (health) {
+		return health->GetValue();
 	}
-	return pDefault;
+	return _default;
 }
 
-float Health::Add(ContextObject* pObject, float pDelta, bool pLowLimit)
-{
-	float lValue = Get(pObject) + pDelta;
-	if (pLowLimit)
-	{
-		lValue = std::max(0.0f, lValue);
+float Health::Add(ContextObject* object, float delta, bool low_limit) {
+	float _value = Get(object) + delta;
+	if (low_limit) {
+		_value = std::max(0.0f, _value);
 	}
-	Set(pObject, lValue);
-	return lValue;
+	Set(object, _value);
+	return _value;
 }
 
-void Health::Set(ContextObject* pObject, float pValue)
-{
-	FloatAttribute* lHealth = GetAttribute(pObject);
-	if (lHealth)
-	{
-		lHealth->SetValue(pValue);
-	}
-	else
-	{
-		new FloatAttribute(pObject, HEALTH_NAME, pValue);
+void Health::Set(ContextObject* object, float value) {
+	FloatAttribute* health = GetAttribute(object);
+	if (health) {
+		health->SetValue(value);
+	} else {
+		new FloatAttribute(object, kHealthName, value);
 	}
 }
 
-void Health::DeleteAttribute(ContextObject* pObject)
-{
-	pObject->DeleteAttribute(HEALTH_NAME);
+void Health::DeleteAttribute(ContextObject* object) {
+	object->DeleteAttribute(kHealthName);
 }
 
 

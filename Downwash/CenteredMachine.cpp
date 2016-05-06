@@ -5,57 +5,50 @@
 
 
 #include "pch.h"
-#include "CenteredMachine.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/GameManager.h"
+#include "centeredmachine.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/gamemanager.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-CenteredMachine::CenteredMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher):
-	Parent(pResourceManager, pClassId, pUiManager, pLauncher)
-{
+CenteredMachine::CenteredMachine(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, life::Launcher* launcher):
+	Parent(resource_manager, class_id, ui_manager, launcher) {
 }
 
-CenteredMachine::~CenteredMachine()
-{
+CenteredMachine::~CenteredMachine() {
 }
 
 
-bool CenteredMachine::TryComplete()
-{
-	if (Parent::TryComplete())
-	{
+bool CenteredMachine::TryComplete() {
+	if (Parent::TryComplete()) {
 		GetManager()->EnableMicroTickCallback(this);
 		return true;
 	}
 	return false;
 }
 
-void CenteredMachine::OnMicroTick(float pFrameTime)
-{
-	Parent::OnMicroTick(pFrameTime);
+void CenteredMachine::OnMicroTick(float frame_time) {
+	Parent::OnMicroTick(frame_time);
 
-	if (!mIsDetonated)
-	{
-		Tbc::PhysicsManager* lPhysicsManager = GetManager()->GetGameManager()->GetPhysicsManager();
-		Tbc::PhysicsManager::BodyID lBodyId = GetPhysics()->GetBoneGeometry(0)->GetBodyId();
-		vec3 v = lPhysicsManager->GetBodyPosition(lBodyId);
+	if (!is_detonated_) {
+		tbc::PhysicsManager* physics_manager = GetManager()->GetGameManager()->GetPhysicsManager();
+		tbc::PhysicsManager::BodyID body_id = GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+		vec3 v = physics_manager->GetBodyPosition(body_id);
 		v.y = 0;
-		lPhysicsManager->SetBodyPosition(lBodyId, v);
-		lPhysicsManager->GetBodyVelocity(lBodyId, v);
+		physics_manager->SetBodyPosition(body_id, v);
+		physics_manager->GetBodyVelocity(body_id, v);
 		v.y = 0;
-		lPhysicsManager->SetBodyVelocity(lBodyId, v);
+		physics_manager->SetBodyVelocity(body_id, v);
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, CenteredMachine);
+loginstance(kGameContextCpp, CenteredMachine);
 
 
 

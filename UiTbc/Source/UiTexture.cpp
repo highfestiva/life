@@ -6,776 +6,681 @@
 */
 
 #include "pch.h"
-#include "../Include/UiTbc.h"
-#include "../Include/UiTexture.h"
-#include "../../Lepra/Include/Canvas.h"
-#include "../../Lepra/Include/ResourceTracker.h"
+#include "../include/uitbc.h"
+#include "../include/uitexture.h"
+#include "../../lepra/include/canvas.h"
+#include "../../lepra/include/resourcetracker.h"
 #include <math.h>
 
-namespace UiTbc
-{
+namespace uitbc {
 
 Texture::Texture():
-	mNumMipMapLevels(0),
-	mIsCubeMap(false),
-	mColorMap(0),
-	mAlphaMap(0),
-	mNormalMap(0),
-	mSpecularMap(0),
-	mCubeMapPosX(0),
-	mCubeMapNegX(0),
-	mCubeMapPosY(0),
-	mCubeMapNegY(0),
-	mCubeMapPosZ(0),
-	mCubeMapNegZ(0)
-{
+	num_mip_map_levels_(0),
+	is_cube_map_(false),
+	color_map_(0),
+	alpha_map_(0),
+	normal_map_(0),
+	specular_map_(0),
+	cube_map_pos_x_(0),
+	cube_map_neg_x_(0),
+	cube_map_pos_y_(0),
+	cube_map_neg_y_(0),
+	cube_map_pos_z_(0),
+	cube_map_neg_z_(0) {
 	LEPRA_ACQUIRE_RESOURCE(Texture);
 }
 
-Texture::Texture(const Canvas& pColorMap, Canvas::ResizeHint pResizeHint, int pGenerateMipMapLevels):
-	mNumMipMapLevels(0),
-	mIsCubeMap(false),
-	mColorMap(0),
-	mAlphaMap(0),
-	mNormalMap(0),
-	mSpecularMap(0),
-	mCubeMapPosX(0),
-	mCubeMapNegX(0),
-	mCubeMapPosY(0),
-	mCubeMapNegY(0),
-	mCubeMapPosZ(0),
-	mCubeMapNegZ(0)
-{
+Texture::Texture(const Canvas& color_map, Canvas::ResizeHint resize_hint, int generate_mip_map_levels):
+	num_mip_map_levels_(0),
+	is_cube_map_(false),
+	color_map_(0),
+	alpha_map_(0),
+	normal_map_(0),
+	specular_map_(0),
+	cube_map_pos_x_(0),
+	cube_map_neg_x_(0),
+	cube_map_pos_y_(0),
+	cube_map_neg_y_(0),
+	cube_map_pos_z_(0),
+	cube_map_neg_z_(0) {
 	LEPRA_ACQUIRE_RESOURCE(Texture);
-	Set(pColorMap, pResizeHint, pGenerateMipMapLevels);
+	Set(color_map, resize_hint, generate_mip_map_levels);
 }
 
-Texture::Texture(Texture* pTexture):
-	mNumMipMapLevels(0),
-	mIsCubeMap(false),
-	mColorMap(0),
-	mAlphaMap(0),
-	mNormalMap(0),
-	mSpecularMap(0),
-	mCubeMapPosX(0),
-	mCubeMapNegX(0),
-	mCubeMapPosY(0),
-	mCubeMapNegY(0),
-	mCubeMapPosZ(0),
-	mCubeMapNegZ(0)
-{
+Texture::Texture(Texture* texture):
+	num_mip_map_levels_(0),
+	is_cube_map_(false),
+	color_map_(0),
+	alpha_map_(0),
+	normal_map_(0),
+	specular_map_(0),
+	cube_map_pos_x_(0),
+	cube_map_neg_x_(0),
+	cube_map_pos_y_(0),
+	cube_map_neg_y_(0),
+	cube_map_pos_z_(0),
+	cube_map_neg_z_(0) {
 	LEPRA_ACQUIRE_RESOURCE(Texture);
-	Copy(pTexture);
+	Copy(texture);
 }
 
-Texture::~Texture()
-{
+Texture::~Texture() {
 	ClearAll();
 	LEPRA_RELEASE_RESOURCE(Texture);
 }
 
-void Texture::ClearAll()
-{
-	delete[] mColorMap;
-	mColorMap = 0;
-	delete[] mAlphaMap;
-	mAlphaMap = 0;
-	delete[] mNormalMap;
-	mNormalMap = 0;
-	delete[] mSpecularMap;
-	mSpecularMap = 0;
-	delete[] mCubeMapPosX;
-	mCubeMapPosX = 0;
-	delete[] mCubeMapNegX;
-	mCubeMapNegX = 0;
-	delete[] mCubeMapPosY;
-	mCubeMapPosY = 0;
-	delete[] mCubeMapNegY;
-	mCubeMapNegY = 0;
-	delete[] mCubeMapPosZ;
-	mCubeMapPosZ = 0;
-	delete[] mCubeMapNegZ;
-	mCubeMapNegZ = 0;
+void Texture::ClearAll() {
+	delete[] color_map_;
+	color_map_ = 0;
+	delete[] alpha_map_;
+	alpha_map_ = 0;
+	delete[] normal_map_;
+	normal_map_ = 0;
+	delete[] specular_map_;
+	specular_map_ = 0;
+	delete[] cube_map_pos_x_;
+	cube_map_pos_x_ = 0;
+	delete[] cube_map_neg_x_;
+	cube_map_neg_x_ = 0;
+	delete[] cube_map_pos_y_;
+	cube_map_pos_y_ = 0;
+	delete[] cube_map_neg_y_;
+	cube_map_neg_y_ = 0;
+	delete[] cube_map_pos_z_;
+	cube_map_pos_z_ = 0;
+	delete[] cube_map_neg_z_;
+	cube_map_neg_z_ = 0;
 
-	mNumMipMapLevels = 0;
-	mIsCubeMap = false;
+	num_mip_map_levels_ = 0;
+	is_cube_map_ = false;
 }
 
-void Texture::Copy(Texture* pTexture)
-{
+void Texture::Copy(Texture* texture) {
 	ClearAll();
 
-	mNumMipMapLevels = pTexture->mNumMipMapLevels;
-	mIsCubeMap       = pTexture->mIsCubeMap;
+	num_mip_map_levels_ = texture->num_mip_map_levels_;
+	is_cube_map_       = texture->is_cube_map_;
 
-	if (pTexture->mColorMap != 0)
-	{
-		mColorMap = new Canvas[mNumMipMapLevels];
-		for (int i = 0; i < mNumMipMapLevels; i++)
-		{
-			mColorMap[i].Copy(pTexture->mColorMap[i]);
+	if (texture->color_map_ != 0) {
+		color_map_ = new Canvas[num_mip_map_levels_];
+		for (int i = 0; i < num_mip_map_levels_; i++) {
+			color_map_[i].Copy(texture->color_map_[i]);
 		}
 	}
 
-	if (pTexture->mAlphaMap != 0)
-	{
-		mAlphaMap = new Canvas[mNumMipMapLevels];
-		for (int i = 0; i < mNumMipMapLevels; i++)
-		{
-			mAlphaMap[i].Copy(pTexture->mAlphaMap[i]);
+	if (texture->alpha_map_ != 0) {
+		alpha_map_ = new Canvas[num_mip_map_levels_];
+		for (int i = 0; i < num_mip_map_levels_; i++) {
+			alpha_map_[i].Copy(texture->alpha_map_[i]);
 		}
 	}
 
-	if (pTexture->mNormalMap != 0)
-	{
-		mNormalMap = new Canvas[mNumMipMapLevels];
-		for (int i = 0; i < mNumMipMapLevels; i++)
-		{
-			mNormalMap[i].Copy(pTexture->mNormalMap[i]);
+	if (texture->normal_map_ != 0) {
+		normal_map_ = new Canvas[num_mip_map_levels_];
+		for (int i = 0; i < num_mip_map_levels_; i++) {
+			normal_map_[i].Copy(texture->normal_map_[i]);
 		}
 	}
 
-	if (pTexture->mSpecularMap != 0)
-	{
-		mSpecularMap = new Canvas[mNumMipMapLevels];
-		for (int i = 0; i < mNumMipMapLevels; i++)
-		{
-			mSpecularMap[i].Copy(pTexture->mSpecularMap[i]);
+	if (texture->specular_map_ != 0) {
+		specular_map_ = new Canvas[num_mip_map_levels_];
+		for (int i = 0; i < num_mip_map_levels_; i++) {
+			specular_map_[i].Copy(texture->specular_map_[i]);
 		}
 	}
 
-	if (pTexture->mCubeMapPosX != 0)
-	{
-		mCubeMapPosX = new Canvas[mNumMipMapLevels];
-		for (int i = 0; i < mNumMipMapLevels; i++)
-		{
-			mCubeMapPosX[i].Copy(pTexture->mCubeMapPosX[i]);
+	if (texture->cube_map_pos_x_ != 0) {
+		cube_map_pos_x_ = new Canvas[num_mip_map_levels_];
+		for (int i = 0; i < num_mip_map_levels_; i++) {
+			cube_map_pos_x_[i].Copy(texture->cube_map_pos_x_[i]);
 		}
 	}
 
-	if (pTexture->mCubeMapNegX != 0)
-	{
-		mCubeMapNegX = new Canvas[mNumMipMapLevels];
-		for (int i = 0; i < mNumMipMapLevels; i++)
-		{
-			mCubeMapNegX[i].Copy(pTexture->mCubeMapNegX[i]);
+	if (texture->cube_map_neg_x_ != 0) {
+		cube_map_neg_x_ = new Canvas[num_mip_map_levels_];
+		for (int i = 0; i < num_mip_map_levels_; i++) {
+			cube_map_neg_x_[i].Copy(texture->cube_map_neg_x_[i]);
 		}
 	}
 
-	if (pTexture->mCubeMapPosY != 0)
-	{
-		mCubeMapPosY = new Canvas[mNumMipMapLevels];
-		for (int i = 0; i < mNumMipMapLevels; i++)
-		{
-			mCubeMapPosY[i].Copy(pTexture->mCubeMapPosY[i]);
+	if (texture->cube_map_pos_y_ != 0) {
+		cube_map_pos_y_ = new Canvas[num_mip_map_levels_];
+		for (int i = 0; i < num_mip_map_levels_; i++) {
+			cube_map_pos_y_[i].Copy(texture->cube_map_pos_y_[i]);
 		}
 	}
 
-	if (pTexture->mCubeMapNegY != 0)
-	{
-		mCubeMapNegY = new Canvas[mNumMipMapLevels];
-		for (int i = 0; i < mNumMipMapLevels; i++)
-		{
-			mCubeMapNegY[i].Copy(pTexture->mCubeMapNegY[i]);
+	if (texture->cube_map_neg_y_ != 0) {
+		cube_map_neg_y_ = new Canvas[num_mip_map_levels_];
+		for (int i = 0; i < num_mip_map_levels_; i++) {
+			cube_map_neg_y_[i].Copy(texture->cube_map_neg_y_[i]);
 		}
 	}
 
-	if (pTexture->mCubeMapPosZ != 0)
-	{
-		mCubeMapPosZ = new Canvas[mNumMipMapLevels];
-		for (int i = 0; i < mNumMipMapLevels; i++)
-		{
-			mCubeMapPosZ[i].Copy(pTexture->mCubeMapPosZ[i]);
+	if (texture->cube_map_pos_z_ != 0) {
+		cube_map_pos_z_ = new Canvas[num_mip_map_levels_];
+		for (int i = 0; i < num_mip_map_levels_; i++) {
+			cube_map_pos_z_[i].Copy(texture->cube_map_pos_z_[i]);
 		}
 	}
 
-	if (pTexture->mCubeMapNegZ != 0)
-	{
-		mCubeMapNegZ = new Canvas[mNumMipMapLevels];
-		for (int i = 0; i < mNumMipMapLevels; i++)
-		{
-			mCubeMapNegZ[i].Copy(pTexture->mCubeMapNegZ[i]);
+	if (texture->cube_map_neg_z_ != 0) {
+		cube_map_neg_z_ = new Canvas[num_mip_map_levels_];
+		for (int i = 0; i < num_mip_map_levels_; i++) {
+			cube_map_neg_z_[i].Copy(texture->cube_map_neg_z_[i]);
 		}
 	}
 }
 
-void Texture::Set(const Canvas& pColorMap, Canvas::ResizeHint pResizeHint, int pNumLevels, const Canvas* pAlphaMap, const Canvas* pNormalMap,
-	const Canvas* pSpecularMap, bool pMergeColorWithAlpha)
-{
+void Texture::Set(const Canvas& color_map, Canvas::ResizeHint resize_hint, int num_levels, const Canvas* alpha_map, const Canvas* normal_map,
+	const Canvas* specular_map, bool merge_color_with_alpha) {
 	// The texture's dimensions must be a power of two.
 	// Check if they are, otherwise set them to the nearest lower
 	// power of two.
-	int lWidth = pColorMap.GetWidth();
-	int lHeight = pColorMap.GetHeight();
+	int _width = color_map.GetWidth();
+	int _height = color_map.GetHeight();
 	int i;
-	int lNumWidthBits = 0;
-	int lNumHeightBits = 0;
-	int lNearestPow2Width = 1;
-	int lNearestPow2Height = 1;
-	for (i = 0; i < (int)sizeof(int) * 8; i++)
-	{
-		if (lNearestPow2Width * 2 > lWidth)
+	int num_width_bits = 0;
+	int num_height_bits = 0;
+	int nearest_pow2_width = 1;
+	int nearest_pow2_height = 1;
+	for (i = 0; i < (int)sizeof(int) * 8; i++) {
+		if (nearest_pow2_width * 2 > _width)
 			break;
-		lNearestPow2Width <<= 1;
-		lNumWidthBits++;
+		nearest_pow2_width <<= 1;
+		num_width_bits++;
 	}
-	for (i = 0; i < (int)sizeof(int) * 8; i++)
-	{
-		if (lNearestPow2Height * 2 > lHeight)
+	for (i = 0; i < (int)sizeof(int) * 8; i++) {
+		if (nearest_pow2_height * 2 > _height)
 			break;
-		lNearestPow2Height <<= 1;
-		lNumHeightBits++;
+		nearest_pow2_height <<= 1;
+		num_height_bits++;
 	}
-	if (pResizeHint == Canvas::RESIZE_CANVAS)
-	{
-		if (lNearestPow2Width < lWidth)
-		{
-			lNearestPow2Width <<= 1;
+	if (resize_hint == Canvas::kResizeCanvas) {
+		if (nearest_pow2_width < _width) {
+			nearest_pow2_width <<= 1;
 		}
-		if (lNearestPow2Height < lHeight)
-		{
-			lNearestPow2Height <<= 1;
+		if (nearest_pow2_height < _height) {
+			nearest_pow2_height <<= 1;
 		}
 	}
 
-	if (pNumLevels <= 0)
-	{
+	if (num_levels <= 0) {
 		// Calculate how many levels there will be.
-		pNumLevels = lNumWidthBits > lNumHeightBits ? lNumWidthBits : lNumHeightBits;
-		pNumLevels++;
+		num_levels = num_width_bits > num_height_bits ? num_width_bits : num_height_bits;
+		num_levels++;
 	}
 
 	ClearAll();
 
 	// Create all textures.
-	mColorMap = new Canvas[pNumLevels];
-	if (pAlphaMap != 0 && pMergeColorWithAlpha == false)
-		pAlphaMap = new Canvas[pNumLevels];
-	if (pNormalMap != 0)
-		mNormalMap = new Canvas[pNumLevels];
-	if (pSpecularMap != 0)
-		mSpecularMap = new Canvas[pNumLevels];
+	color_map_ = new Canvas[num_levels];
+	if (alpha_map != 0 && merge_color_with_alpha == false)
+		alpha_map = new Canvas[num_levels];
+	if (normal_map != 0)
+		normal_map_ = new Canvas[num_levels];
+	if (specular_map != 0)
+		specular_map_ = new Canvas[num_levels];
 
 	// And finally, resize them to their respective size.
-	for (int lLevel = 0; lLevel < pNumLevels; lLevel++)
-	{
-		int lWidth  = (lNearestPow2Width  >> lLevel);
-		int lHeight = (lNearestPow2Height >> lLevel);
+	for (int level = 0; level < num_levels; level++) {
+		int _width  = (nearest_pow2_width  >> level);
+		int _height = (nearest_pow2_height >> level);
 
 		// If the texture isn't square, either width or height
 		// will become 0 at the smallest levels, which we can't
 		// allow.
-		if (lWidth == 0)
-			lWidth = 1;
-		if (lHeight == 0)
-			lHeight = 1;
+		if (_width == 0)
+			_width = 1;
+		if (_height == 0)
+			_height = 1;
 
-		mColorMap[lLevel].Copy(pColorMap);
+		color_map_[level].Copy(color_map);
 
-		if (pMergeColorWithAlpha == true)
-		{
-			if (pAlphaMap != 0)
-			{
-				Canvas lAlphaMap(*pAlphaMap);
-				lAlphaMap.Resize(mColorMap[lLevel].GetWidth(), mColorMap[lLevel].GetHeight(), pResizeHint);
-				mColorMap[lLevel].ConvertTo32BitWithAlpha(lAlphaMap);
-			}
-			else
-				mColorMap[lLevel].ConvertBitDepth(Canvas::BITDEPTH_32_BIT);
-		}
-		else if(pAlphaMap != 0)
-		{
+		if (merge_color_with_alpha == true) {
+			if (alpha_map != 0) {
+				Canvas _alpha_map(*alpha_map);
+				_alpha_map.Resize(color_map_[level].GetWidth(), color_map_[level].GetHeight(), resize_hint);
+				color_map_[level].ConvertTo32BitWithAlpha(_alpha_map);
+			} else
+				color_map_[level].ConvertBitDepth(Canvas::kBitdepth32Bit);
+		} else if(alpha_map != 0) {
 			// Alpha map is stored separately and color map keeps its bitrate.
-			mAlphaMap[lLevel].Copy(*pAlphaMap);
-			mAlphaMap[lLevel].ConvertToGrayscale();
-			mAlphaMap[lLevel].Resize(lWidth, lHeight, pResizeHint);
+			alpha_map_[level].Copy(*alpha_map);
+			alpha_map_[level].ConvertToGrayscale();
+			alpha_map_[level].Resize(_width, _height, resize_hint);
 		}
 
-		mColorMap[lLevel].Resize(lWidth, lHeight, pResizeHint);
+		color_map_[level].Resize(_width, _height, resize_hint);
 
-		if (pNormalMap != 0)
-		{
-			mNormalMap[lLevel].Copy(*pNormalMap);
-			mNormalMap[lLevel].ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
-			mNormalMap[lLevel].Resize(lWidth, lHeight, pResizeHint);
+		if (normal_map != 0) {
+			normal_map_[level].Copy(*normal_map);
+			normal_map_[level].ConvertBitDepth(Canvas::kBitdepth24Bit);
+			normal_map_[level].Resize(_width, _height, resize_hint);
 		}
-		if (pSpecularMap != 0)
-		{
-			mSpecularMap[lLevel].Copy(*pSpecularMap);
-			mSpecularMap[lLevel].ConvertToGrayscale();
-			mSpecularMap[lLevel].Resize(lWidth, lHeight, pResizeHint);
+		if (specular_map != 0) {
+			specular_map_[level].Copy(*specular_map);
+			specular_map_[level].ConvertToGrayscale();
+			specular_map_[level].Resize(_width, _height, resize_hint);
 		}
 	}
 
-	mNumMipMapLevels = pNumLevels;
-	mIsCubeMap = false;
+	num_mip_map_levels_ = num_levels;
+	is_cube_map_ = false;
 }
 
-void Texture::Set(const Canvas& pCubeMapPosX,
-		  const Canvas& pCubeMapNegX,
-		  const Canvas& pCubeMapPosY,
-		  const Canvas& pCubeMapNegY,
-		  const Canvas& pCubeMapPosZ,
-		  const Canvas& pCubeMapNegZ)
-{
+void Texture::Set(const Canvas& cube_map_pos_x,
+		  const Canvas& cube_map_neg_x,
+		  const Canvas& cube_map_pos_y,
+		  const Canvas& cube_map_neg_y,
+		  const Canvas& cube_map_pos_z,
+		  const Canvas& cube_map_neg_z) {
 	ClearAll();
 
 	// The texture's dimensions must be a power of two.
 	// Check if they are, otherwise set them to the nearest lower
 	// power of two.
-	int lWidth = pCubeMapPosX.GetWidth();
-	int lHeight = pCubeMapPosX.GetHeight();
+	int _width = cube_map_pos_x.GetWidth();
+	int _height = cube_map_pos_x.GetHeight();
 	int i;
-	int lNumWidthBits = 0;
-	int lNumHeightBits = 0;
-	int lNearestPow2Width = 1;
-	int lNearestPow2Height = 1;
-	for (i = 0; i < (int)sizeof(int) * 8; i++)
-	{
-		if (lNearestPow2Width * 2 > lWidth)
+	int num_width_bits = 0;
+	int num_height_bits = 0;
+	int nearest_pow2_width = 1;
+	int nearest_pow2_height = 1;
+	for (i = 0; i < (int)sizeof(int) * 8; i++) {
+		if (nearest_pow2_width * 2 > _width)
 			break;
-		lNearestPow2Width <<= 1;
-		lNumWidthBits++;
+		nearest_pow2_width <<= 1;
+		num_width_bits++;
 	}
-	for (i = 0; i < (int)sizeof(int) * 8; i++)
-	{
-		if (lNearestPow2Height * 2 > lHeight)
+	for (i = 0; i < (int)sizeof(int) * 8; i++) {
+		if (nearest_pow2_height * 2 > _height)
 			break;
-		lNearestPow2Height <<= 1;
-		lNumHeightBits++;
+		nearest_pow2_height <<= 1;
+		num_height_bits++;
 	}
 
 	// First calculate how many levels there will be.
-	unsigned int lNumLevels = lNumWidthBits > lNumHeightBits ? lNumWidthBits : lNumHeightBits;
-	lNumLevels++;
+	unsigned int _num_levels = num_width_bits > num_height_bits ? num_width_bits : num_height_bits;
+	_num_levels++;
 
 	// Now create all textures.
-	mCubeMapPosX = new Canvas[lNumLevels];
-	mCubeMapNegX = new Canvas[lNumLevels];
-	mCubeMapPosY = new Canvas[lNumLevels];
-	mCubeMapNegY = new Canvas[lNumLevels];
-	mCubeMapPosZ = new Canvas[lNumLevels];
-	mCubeMapNegZ = new Canvas[lNumLevels];
+	cube_map_pos_x_ = new Canvas[_num_levels];
+	cube_map_neg_x_ = new Canvas[_num_levels];
+	cube_map_pos_y_ = new Canvas[_num_levels];
+	cube_map_neg_y_ = new Canvas[_num_levels];
+	cube_map_pos_z_ = new Canvas[_num_levels];
+	cube_map_neg_z_ = new Canvas[_num_levels];
 
 	// And finally, resize them to their respective size.
-	for (unsigned int lLevel = 0; lLevel < lNumLevels; lLevel++)
-	{
-		int lWidth  = (lNearestPow2Width  >> lLevel);
-		int lHeight = (lNearestPow2Height >> lLevel);
+	for (unsigned int level = 0; level < _num_levels; level++) {
+		int _width  = (nearest_pow2_width  >> level);
+		int _height = (nearest_pow2_height >> level);
 
 		// If the texture isn't square, either width or height
 		// will become 0 at the smallest levels, which we can't
 		// allow.
-		if (lWidth == 0)
-			lWidth = 1;
-		if (lHeight == 0)
-			lHeight = 1;
+		if (_width == 0)
+			_width = 1;
+		if (_height == 0)
+			_height = 1;
 
-		mCubeMapPosX[lLevel].Copy(pCubeMapPosX);
-		mCubeMapNegX[lLevel].Copy(pCubeMapNegX);
-		mCubeMapPosY[lLevel].Copy(pCubeMapPosY);
-		mCubeMapNegY[lLevel].Copy(pCubeMapNegY);
-		mCubeMapPosZ[lLevel].Copy(pCubeMapPosZ);
-		mCubeMapNegZ[lLevel].Copy(pCubeMapNegZ);
+		cube_map_pos_x_[level].Copy(cube_map_pos_x);
+		cube_map_neg_x_[level].Copy(cube_map_neg_x);
+		cube_map_pos_y_[level].Copy(cube_map_pos_y);
+		cube_map_neg_y_[level].Copy(cube_map_neg_y);
+		cube_map_pos_z_[level].Copy(cube_map_pos_z);
+		cube_map_neg_z_[level].Copy(cube_map_neg_z);
 
-		mCubeMapPosX[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
-		mCubeMapNegX[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
-		mCubeMapPosY[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
-		mCubeMapNegY[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
-		mCubeMapPosZ[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
-		mCubeMapNegZ[lLevel].Resize(lWidth, lHeight, Canvas::RESIZE_NICEST);
+		cube_map_pos_x_[level].Resize(_width, _height, Canvas::kResizeNicest);
+		cube_map_neg_x_[level].Resize(_width, _height, Canvas::kResizeNicest);
+		cube_map_pos_y_[level].Resize(_width, _height, Canvas::kResizeNicest);
+		cube_map_neg_y_[level].Resize(_width, _height, Canvas::kResizeNicest);
+		cube_map_pos_z_[level].Resize(_width, _height, Canvas::kResizeNicest);
+		cube_map_neg_z_[level].Resize(_width, _height, Canvas::kResizeNicest);
 	}
 
-	mNumMipMapLevels = lNumLevels;
-	mIsCubeMap = true;
+	num_mip_map_levels_ = _num_levels;
+	is_cube_map_ = true;
 }
 
-void Texture::Prepare(bool pColorMap,
-		      bool pAlphaMap,
-		      bool pNormalMap,
-		      bool pSpecularMap,
-		      bool pCubeMap,
-		      unsigned int pWidth,
-		      unsigned int pHeight)
-{
+void Texture::Prepare(bool color_map,
+		      bool alpha_map,
+		      bool normal_map,
+		      bool specular_map,
+		      bool cube_map,
+		      unsigned int width,
+		      unsigned int height) {
 	ClearAll();
 
 	// The texture's dimensions must be a power of two.
 	// Check if they are, otherwise set them to the nearest lower
 	// power of two.
 	unsigned int i;
-	unsigned int lNumWidthBits = 0;
-	unsigned int lNumHeightBits = 0;
-	unsigned int lNearestPow2Width = 1;
-	unsigned int lNearestPow2Height = 1;
-	for (i = 0; i < sizeof(int) * 8; i++)
-	{
-		if (lNearestPow2Width * 2 > pWidth)
+	unsigned int num_width_bits = 0;
+	unsigned int num_height_bits = 0;
+	unsigned int nearest_pow2_width = 1;
+	unsigned int nearest_pow2_height = 1;
+	for (i = 0; i < sizeof(int) * 8; i++) {
+		if (nearest_pow2_width * 2 > width)
 			break;
-		lNearestPow2Width <<= 1;
-		lNumWidthBits++;
+		nearest_pow2_width <<= 1;
+		num_width_bits++;
 	}
-	for (i = 0; i < sizeof(int) * 8; i++)
-	{
-		if (lNearestPow2Height * 2 > pHeight)
+	for (i = 0; i < sizeof(int) * 8; i++) {
+		if (nearest_pow2_height * 2 > height)
 			break;
-		lNearestPow2Height <<= 1;
-		lNumHeightBits++;
+		nearest_pow2_height <<= 1;
+		num_height_bits++;
 	}
 
 	// First calculate how many levels there will be.
-	unsigned int lNumLevels = lNumWidthBits > lNumHeightBits ? lNumWidthBits : lNumHeightBits;
-	lNumLevels++;
+	unsigned int _num_levels = num_width_bits > num_height_bits ? num_width_bits : num_height_bits;
+	_num_levels++;
 
-	mNumMipMapLevels = lNumLevels;
-	mIsCubeMap = pCubeMap;
+	num_mip_map_levels_ = _num_levels;
+	is_cube_map_ = cube_map;
 
-	if (pCubeMap == false)
-	{
-		if (pColorMap == true)
-			mColorMap = new Canvas[lNumLevels];
-		if (pAlphaMap == true)
-			mAlphaMap = new Canvas[lNumLevels];
-		if (pNormalMap == true)
-			mNormalMap = new Canvas[lNumLevels];
-		if (pSpecularMap == true)
-			mSpecularMap = new Canvas[lNumLevels];
+	if (cube_map == false) {
+		if (color_map == true)
+			color_map_ = new Canvas[_num_levels];
+		if (alpha_map == true)
+			alpha_map_ = new Canvas[_num_levels];
+		if (normal_map == true)
+			normal_map_ = new Canvas[_num_levels];
+		if (specular_map == true)
+			specular_map_ = new Canvas[_num_levels];
 
-		for (unsigned int lLevel = 0; lLevel < lNumLevels; lLevel++)
-		{
-			unsigned int lWidth  = (lNearestPow2Width  >> lLevel);
-			unsigned int lHeight = (lNearestPow2Height >> lLevel);
+		for (unsigned int level = 0; level < _num_levels; level++) {
+			unsigned int _width  = (nearest_pow2_width  >> level);
+			unsigned int _height = (nearest_pow2_height >> level);
 
 			// If the texture isn't square, either width or height
 			// will become 0 at the smallest levels, which we can't
 			// allow.
-			if (lWidth == 0)
-				lWidth = 1;
-			if (lHeight == 0)
-				lHeight = 1;
+			if (_width == 0)
+				_width = 1;
+			if (_height == 0)
+				_height = 1;
 
-			if (pColorMap == true)
-			{
-				mColorMap[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
-				mColorMap[lLevel].CreateBuffer();
+			if (color_map == true) {
+				color_map_[level].Reset(_width, _height, Canvas::kBitdepth24Bit);
+				color_map_[level].CreateBuffer();
 			}
 
-			if (pAlphaMap == true)
-			{
-				mAlphaMap[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_8_BIT);
-				mAlphaMap[lLevel].CreateBuffer();
-				mAlphaMap[lLevel].SetGrayscalePalette();
+			if (alpha_map == true) {
+				alpha_map_[level].Reset(_width, _height, Canvas::kBitdepth8Bit);
+				alpha_map_[level].CreateBuffer();
+				alpha_map_[level].SetGrayscalePalette();
 			}
 
-			if (pNormalMap == true)
-			{
-				mNormalMap[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
-				mNormalMap[lLevel].CreateBuffer();
+			if (normal_map == true) {
+				normal_map_[level].Reset(_width, _height, Canvas::kBitdepth24Bit);
+				normal_map_[level].CreateBuffer();
 			}
 
-			if (pSpecularMap == true)
-			{
-				mSpecularMap[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_8_BIT);
-				mSpecularMap[lLevel].CreateBuffer();
-				mSpecularMap[lLevel].SetGrayscalePalette();
+			if (specular_map == true) {
+				specular_map_[level].Reset(_width, _height, Canvas::kBitdepth8Bit);
+				specular_map_[level].CreateBuffer();
+				specular_map_[level].SetGrayscalePalette();
 			}
 		}
-	}
-	else
-	{
-		mCubeMapPosX = new Canvas[lNumLevels];
-		mCubeMapNegX = new Canvas[lNumLevels];
-		mCubeMapPosY = new Canvas[lNumLevels];
-		mCubeMapNegY = new Canvas[lNumLevels];
-		mCubeMapPosZ = new Canvas[lNumLevels];
-		mCubeMapNegZ = new Canvas[lNumLevels];
+	} else {
+		cube_map_pos_x_ = new Canvas[_num_levels];
+		cube_map_neg_x_ = new Canvas[_num_levels];
+		cube_map_pos_y_ = new Canvas[_num_levels];
+		cube_map_neg_y_ = new Canvas[_num_levels];
+		cube_map_pos_z_ = new Canvas[_num_levels];
+		cube_map_neg_z_ = new Canvas[_num_levels];
 
-		for (unsigned int lLevel = 0; lLevel < lNumLevels; lLevel++)
-		{
-			unsigned int lWidth  = (lNearestPow2Width  >> lLevel);
-			unsigned int lHeight = (lNearestPow2Height >> lLevel);
+		for (unsigned int level = 0; level < _num_levels; level++) {
+			unsigned int _width  = (nearest_pow2_width  >> level);
+			unsigned int _height = (nearest_pow2_height >> level);
 
 			// If the texture isn't square, either width or height
 			// will become 0 at the smallest levels, which we can't
 			// allow.
-			if (lWidth == 0)
-				lWidth = 1;
-			if (lHeight == 0)
-				lHeight = 1;
+			if (_width == 0)
+				_width = 1;
+			if (_height == 0)
+				_height = 1;
 
-			mCubeMapPosX[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
-			mCubeMapNegX[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
-			mCubeMapPosY[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
-			mCubeMapNegY[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
-			mCubeMapPosZ[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
-			mCubeMapNegZ[lLevel].Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
+			cube_map_pos_x_[level].Reset(_width, _height, Canvas::kBitdepth24Bit);
+			cube_map_neg_x_[level].Reset(_width, _height, Canvas::kBitdepth24Bit);
+			cube_map_pos_y_[level].Reset(_width, _height, Canvas::kBitdepth24Bit);
+			cube_map_neg_y_[level].Reset(_width, _height, Canvas::kBitdepth24Bit);
+			cube_map_pos_z_[level].Reset(_width, _height, Canvas::kBitdepth24Bit);
+			cube_map_neg_z_[level].Reset(_width, _height, Canvas::kBitdepth24Bit);
 
-			mCubeMapPosX[lLevel].CreateBuffer();
-			mCubeMapNegX[lLevel].CreateBuffer();
-			mCubeMapPosY[lLevel].CreateBuffer();
-			mCubeMapNegY[lLevel].CreateBuffer();
-			mCubeMapPosZ[lLevel].CreateBuffer();
-			mCubeMapNegZ[lLevel].CreateBuffer();
+			cube_map_pos_x_[level].CreateBuffer();
+			cube_map_neg_x_[level].CreateBuffer();
+			cube_map_pos_y_[level].CreateBuffer();
+			cube_map_neg_y_[level].CreateBuffer();
+			cube_map_pos_z_[level].CreateBuffer();
+			cube_map_neg_z_[level].CreateBuffer();
 		}
 	}
 }
 
-const Canvas* Texture::GetColorMap(unsigned int pMipMapLevel) const
-{
-	if (mColorMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mColorMap[pMipMapLevel];
+const Canvas* Texture::GetColorMap(unsigned int mip_map_level) const {
+	if (color_map_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &color_map_[mip_map_level];
 
 	return 0;
 }
 
-const Canvas* Texture::GetAlphaMap(unsigned int pMipMapLevel) const
-{
-	if (mAlphaMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mAlphaMap[pMipMapLevel];
+const Canvas* Texture::GetAlphaMap(unsigned int mip_map_level) const {
+	if (alpha_map_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &alpha_map_[mip_map_level];
 
 	return 0;
 }
 
-const Canvas* Texture::GetNormalMap(unsigned int pMipMapLevel) const
-{
-	if (mNormalMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mNormalMap[pMipMapLevel];
+const Canvas* Texture::GetNormalMap(unsigned int mip_map_level) const {
+	if (normal_map_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &normal_map_[mip_map_level];
 
 	return 0;
 }
 
-const Canvas* Texture::GetSpecularMap(unsigned int pMipMapLevel) const
-{
-	if (mSpecularMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mSpecularMap[pMipMapLevel];
+const Canvas* Texture::GetSpecularMap(unsigned int mip_map_level) const {
+	if (specular_map_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &specular_map_[mip_map_level];
 
 	return 0;
 }
 
-const Canvas* Texture::GetCubeMapPosX(unsigned int pMipMapLevel) const
-{
-	if (mCubeMapPosX != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapPosX[pMipMapLevel];
+const Canvas* Texture::GetCubeMapPosX(unsigned int mip_map_level) const {
+	if (cube_map_pos_x_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_pos_x_[mip_map_level];
 
 	return 0;
 }
 
-const Canvas* Texture::GetCubeMapNegX(unsigned int pMipMapLevel) const
-{
-	if (mCubeMapNegX != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapNegX[pMipMapLevel];
+const Canvas* Texture::GetCubeMapNegX(unsigned int mip_map_level) const {
+	if (cube_map_neg_x_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_neg_x_[mip_map_level];
 
 	return 0;
 }
 
-const Canvas* Texture::GetCubeMapPosY(unsigned int pMipMapLevel) const
-{
-	if (mCubeMapPosY != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapPosY[pMipMapLevel];
+const Canvas* Texture::GetCubeMapPosY(unsigned int mip_map_level) const {
+	if (cube_map_pos_y_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_pos_y_[mip_map_level];
 
 	return 0;
 }
 
-const Canvas* Texture::GetCubeMapNegY(unsigned int pMipMapLevel) const
-{
-	if (mCubeMapNegY != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapNegY[pMipMapLevel];
+const Canvas* Texture::GetCubeMapNegY(unsigned int mip_map_level) const {
+	if (cube_map_neg_y_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_neg_y_[mip_map_level];
 
 	return 0;
 }
 
-const Canvas* Texture::GetCubeMapPosZ(unsigned int pMipMapLevel) const
-{
-	if (mCubeMapPosZ != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapPosZ[pMipMapLevel];
+const Canvas* Texture::GetCubeMapPosZ(unsigned int mip_map_level) const {
+	if (cube_map_pos_z_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_pos_z_[mip_map_level];
 
 	return 0;
 }
 
-const Canvas* Texture::GetCubeMapNegZ(unsigned int pMipMapLevel) const
-{
-	if (mCubeMapNegZ != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapNegZ[pMipMapLevel];
+const Canvas* Texture::GetCubeMapNegZ(unsigned int mip_map_level) const {
+	if (cube_map_neg_z_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_neg_z_[mip_map_level];
 
 	return 0;
 }
 
-Canvas* Texture::_GetColorMap(unsigned int pMipMapLevel)
-{
-	if (mColorMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mColorMap[pMipMapLevel];
+Canvas* Texture::_GetColorMap(unsigned int mip_map_level) {
+	if (color_map_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &color_map_[mip_map_level];
 
 	return 0;
 }
 
-Canvas* Texture::_GetAlphaMap(unsigned int pMipMapLevel)
-{
-	if (mAlphaMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mAlphaMap[pMipMapLevel];
+Canvas* Texture::_GetAlphaMap(unsigned int mip_map_level) {
+	if (alpha_map_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &alpha_map_[mip_map_level];
 
 	return 0;
 }
 
-Canvas* Texture::_GetNormalMap(unsigned int pMipMapLevel)
-{
-	if (mNormalMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mNormalMap[pMipMapLevel];
+Canvas* Texture::_GetNormalMap(unsigned int mip_map_level) {
+	if (normal_map_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &normal_map_[mip_map_level];
 
 	return 0;
 }
 
-Canvas* Texture::_GetSpecularMap(unsigned int pMipMapLevel)
-{
-	if (mSpecularMap != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mSpecularMap[pMipMapLevel];
+Canvas* Texture::_GetSpecularMap(unsigned int mip_map_level) {
+	if (specular_map_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &specular_map_[mip_map_level];
 
 	return 0;
 }
 
-Canvas* Texture::_GetCubeMapPosX(unsigned int pMipMapLevel)
-{
-	if (mCubeMapPosX != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapPosX[pMipMapLevel];
+Canvas* Texture::_GetCubeMapPosX(unsigned int mip_map_level) {
+	if (cube_map_pos_x_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_pos_x_[mip_map_level];
 
 	return 0;
 }
 
-Canvas* Texture::_GetCubeMapNegX(unsigned int pMipMapLevel)
-{
-	if (mCubeMapNegX != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapNegX[pMipMapLevel];
+Canvas* Texture::_GetCubeMapNegX(unsigned int mip_map_level) {
+	if (cube_map_neg_x_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_neg_x_[mip_map_level];
 
 	return 0;
 }
 
-Canvas* Texture::_GetCubeMapPosY(unsigned int pMipMapLevel)
-{
-	if (mCubeMapPosY != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapPosY[pMipMapLevel];
+Canvas* Texture::_GetCubeMapPosY(unsigned int mip_map_level) {
+	if (cube_map_pos_y_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_pos_y_[mip_map_level];
 
 	return 0;
 }
 
-Canvas* Texture::_GetCubeMapNegY(unsigned int pMipMapLevel)
-{
-	if (mCubeMapNegY != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapNegY[pMipMapLevel];
+Canvas* Texture::_GetCubeMapNegY(unsigned int mip_map_level) {
+	if (cube_map_neg_y_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_neg_y_[mip_map_level];
 
 	return 0;
 }
 
-Canvas* Texture::_GetCubeMapPosZ(unsigned int pMipMapLevel)
-{
-	if (mCubeMapPosZ != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapPosZ[pMipMapLevel];
+Canvas* Texture::_GetCubeMapPosZ(unsigned int mip_map_level) {
+	if (cube_map_pos_z_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_pos_z_[mip_map_level];
 
 	return 0;
 }
 
-Canvas* Texture::_GetCubeMapNegZ(unsigned int pMipMapLevel)
-{
-	if (mCubeMapNegZ != 0 && pMipMapLevel < (unsigned int)mNumMipMapLevels)
-		return &mCubeMapNegZ[pMipMapLevel];
+Canvas* Texture::_GetCubeMapNegZ(unsigned int mip_map_level) {
+	if (cube_map_neg_z_ != 0 && mip_map_level < (unsigned int)num_mip_map_levels_)
+		return &cube_map_neg_z_[mip_map_level];
 
 	return 0;
 }
 
-unsigned int Texture::GetPixelByteSize() const
-{
-	if (mColorMap != 0)
-		return mColorMap[0].GetPixelByteSize();
+unsigned int Texture::GetPixelByteSize() const {
+	if (color_map_ != 0)
+		return color_map_[0].GetPixelByteSize();
 	else
-		return mCubeMapPosX[0].GetPixelByteSize();
+		return cube_map_pos_x_[0].GetPixelByteSize();
 }
 
-void Texture::SwapRGBOrder()
-{
+void Texture::SwapRGBOrder() {
 	int i;
 
-	if (mColorMap != 0)
-	{
-		for (i = 0; i < GetNumMipMapLevels(); i++)
-		{
-			mColorMap[i].SwapRGBOrder();
-			if (mSpecularMap != 0)
-				mSpecularMap[i].SwapRGBOrder();
-			if (mNormalMap != 0)
-				mNormalMap[i].SwapRGBOrder();
+	if (color_map_ != 0) {
+		for (i = 0; i < GetNumMipMapLevels(); i++) {
+			color_map_[i].SwapRGBOrder();
+			if (specular_map_ != 0)
+				specular_map_[i].SwapRGBOrder();
+			if (normal_map_ != 0)
+				normal_map_[i].SwapRGBOrder();
 		}
-	}
-	else
-	{
-		for (i = 0; i < GetNumMipMapLevels(); i++)
-		{
-			mCubeMapPosX[i].SwapRGBOrder();
-			mCubeMapNegX[i].SwapRGBOrder();
-			mCubeMapPosY[i].SwapRGBOrder();
-			mCubeMapNegY[i].SwapRGBOrder();
-			mCubeMapPosZ[i].SwapRGBOrder();
-			mCubeMapNegZ[i].SwapRGBOrder();
+	} else {
+		for (i = 0; i < GetNumMipMapLevels(); i++) {
+			cube_map_pos_x_[i].SwapRGBOrder();
+			cube_map_neg_x_[i].SwapRGBOrder();
+			cube_map_pos_y_[i].SwapRGBOrder();
+			cube_map_neg_y_[i].SwapRGBOrder();
+			cube_map_pos_z_[i].SwapRGBOrder();
+			cube_map_neg_z_[i].SwapRGBOrder();
 		}
 	}
 }
 
-void Texture::ConvertBitDepth(Canvas::BitDepth pBitDepth)
-{
-	if (mColorMap != 0)
-	{
-		for (int i = 0; i < mNumMipMapLevels; i++)
-		{
-			mColorMap[i].ConvertBitDepth(pBitDepth);
+void Texture::ConvertBitDepth(Canvas::BitDepth bit_depth) {
+	if (color_map_ != 0) {
+		for (int i = 0; i < num_mip_map_levels_; i++) {
+			color_map_[i].ConvertBitDepth(bit_depth);
 		}
 	}
 }
 
-void Texture::GenerateNormalMap(Canvas& pNormalMap, const Canvas& pBumpMap, double pScale)
-{
-	Canvas lBumpMap(pBumpMap, true);
-	lBumpMap.ConvertToGrayscale();
+void Texture::GenerateNormalMap(Canvas& normal_map, const Canvas& bump_map, double scale) {
+	Canvas _bump_map(bump_map, true);
+	_bump_map.ConvertToGrayscale();
 
-	pNormalMap.Reset(lBumpMap.GetWidth(), lBumpMap.GetHeight(), Canvas::BITDEPTH_24_BIT);
-	pNormalMap.CreateBuffer();
+	normal_map.Reset(_bump_map.GetWidth(), _bump_map.GetHeight(), Canvas::kBitdepth24Bit);
+	normal_map.CreateBuffer();
 
-	for (unsigned y = 0; y < lBumpMap.GetHeight(); y++)
-	{
-		for (unsigned x = 0; x < lBumpMap.GetWidth(); x++)
-		{
-			double lNorthValue = 0;
-			double lSouthValue = 0;
-			double lEastValue  = 0;
-			double lWestValue  = 0;
+	for (unsigned y = 0; y < _bump_map.GetHeight(); y++) {
+		for (unsigned x = 0; x < _bump_map.GetWidth(); x++) {
+			double north_value = 0;
+			double south_value = 0;
+			double east_value  = 0;
+			double west_value  = 0;
 
-			if (y > 0)
-			{
-				Color lColor;
-				lBumpMap.GetPixelColor(x, y - 1, lColor);
-				lNorthValue = (double)lColor.mRed * pScale;
+			if (y > 0) {
+				Color color;
+				_bump_map.GetPixelColor(x, y - 1, color);
+				north_value = (double)color.red_ * scale;
 			}
-			if (y < lBumpMap.GetHeight() - 1)
-			{
-				Color lColor;
-				lBumpMap.GetPixelColor(x, y + 1, lColor);
-				lSouthValue = (double)lColor.mRed * pScale;
+			if (y < _bump_map.GetHeight() - 1) {
+				Color color;
+				_bump_map.GetPixelColor(x, y + 1, color);
+				south_value = (double)color.red_ * scale;
 			}
-			if (x > 0)
-			{
-				Color lColor;
-				lBumpMap.GetPixelColor(x - 1, y, lColor);
-				lWestValue = (double)lColor.mRed * pScale;
+			if (x > 0) {
+				Color color;
+				_bump_map.GetPixelColor(x - 1, y, color);
+				west_value = (double)color.red_ * scale;
 			}
-			if (x < lBumpMap.GetWidth() - 1)
-			{
-				Color lColor;
-				lBumpMap.GetPixelColor(x + 1, y, lColor);
-				lEastValue = (double)lColor.mRed * pScale;
+			if (x < _bump_map.GetWidth() - 1) {
+				Color color;
+				_bump_map.GetPixelColor(x + 1, y, color);
+				east_value = (double)color.red_ * scale;
 			}
 
-			double lNX = sin(atan(-(lEastValue - lWestValue) / 255.0));
-			double lNY = sin(atan((lSouthValue - lNorthValue) / 255.0));
-			double lNZ = 1.0 - (lNX * lNX + lNY * lNY);
+			double nx = sin(atan(-(east_value - west_value) / 255.0));
+			double ny = sin(atan((south_value - north_value) / 255.0));
+			double nz = 1.0 - (nx * nx + ny * ny);
 
-			Color lColor((uint8)(lNX * 127.0) + 128, (uint8)(lNY * 127.0) + 128, (uint8)(lNZ * 127.0) + 128);
-			pNormalMap.SetPixelColor(x, y, lColor);
+			Color color((uint8)(nx * 127.0) + 128, (uint8)(ny * 127.0) + 128, (uint8)(nz * 127.0) + 128);
+			normal_map.SetPixelColor(x, y, color);
 		}
 	}
 }

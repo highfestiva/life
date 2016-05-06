@@ -1,51 +1,45 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Mine.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/Health.h"
-#include "../ProjectileUtil.h"
+#include "mine.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/health.h"
+#include "../projectileutil.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-Mine::Mine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher):
-	Parent(pResourceManager, pClassId, pUiManager, pLauncher),
-	mEnableDeleteDetonation(true)
-{
-	Cure::Health::Set(this, 1);
+Mine::Mine(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, Launcher* launcher):
+	Parent(resource_manager, class_id, ui_manager, launcher),
+	enable_delete_detonation_(true) {
+	cure::Health::Set(this, 1);
 }
 
-Mine::~Mine()
-{
-	if (mEnableDeleteDetonation)
-	{
+Mine::~Mine() {
+	if (enable_delete_detonation_) {
 		OnDie();
 	}
 }
 
-void Mine::EnableDeleteDetonation(bool pEnable)
-{
-	mEnableDeleteDetonation = pEnable;
+void Mine::EnableDeleteDetonation(bool enable) {
+	enable_delete_detonation_ = enable;
 }
 
-void Mine::OnDie()
-{
+void Mine::OnDie() {
 	Parent::OnDie();
 	GetManager()->PostKillObject(GetInstanceId());
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Mine);
+loginstance(kGameContextCpp, Mine);
 
 
 

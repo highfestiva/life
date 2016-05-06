@@ -1,17 +1,16 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #pragma once
 
-#include "UiDynamicRenderer.h"
-#include "../../Lepra/Include/Thread.h"
-#include "UiRenderer.h"
+#include "uidynamicrenderer.h"
+#include "../../lepra/include/thread.h"
+#include "uirenderer.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
@@ -19,93 +18,89 @@ class BillboardGeometry;
 
 
 
-class ParticleRenderer: public DynamicRenderer
-{
+class ParticleRenderer: public DynamicRenderer {
 	typedef DynamicRenderer Parent;
 public:
-	ParticleRenderer(Renderer* pRenderer, int pMaxLightCount);
+	ParticleRenderer(Renderer* renderer, int max_light_count);
 	virtual ~ParticleRenderer();
 
-	void SetGravity(vec3 pGravity);
-	void SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark, BillboardGeometry* pGlow);
+	void SetGravity(vec3 gravity);
+	void SetData(int gas_texture_count, int total_texture_count, BillboardGeometry* gas, BillboardGeometry* shrapnel, BillboardGeometry* spark, BillboardGeometry* glow);
 
 	virtual void Render();
-	virtual void Tick(float pTime);
+	virtual void Tick(float time);
 
-	void CreateFlare(const vec3& pColor, float pStrength, float pTimeFactor, const vec3& pPosition, const vec3& pVelocity);
-	void CreateExplosion(const vec3& pPosition, float pStrength, const vec3& pVelocity, float pFalloff, float pTime, const vec3& pStartFireColor, const vec3& pFireColor,
-		const vec3& pStartSmokeColor, const vec3& pSmokeColor, const vec3& pSharpnelColor, int pFires, int pSmokes, int pSparks, int pShrapnels);
-	void CreatePebble(float pTime, float pScale, float pAngularVelocity, const vec3& pColor, const vec3& pPosition, const vec3& pVelocity);
-	void CreateFume(float pTime, float pScale, float pAngularVelocity, float pOpacity, const vec3& pPosition, const vec3& pVelocity);
-	void CreateGlow(float pTime, float pScale, const vec3& pStartColor, const vec3& pColor, float pOpacity, const vec3& pPosition, const vec3& pVelocity);
-	void RenderFireBillboard(float pAngle, float pSize, const vec3& pColor, float pOpacity, const vec3& pPosition);
+	void CreateFlare(const vec3& color, float strength, float time_factor, const vec3& position, const vec3& velocity);
+	void CreateExplosion(const vec3& position, float strength, const vec3& velocity, float falloff, float time, const vec3& start_fire_color, const vec3& fire_color,
+		const vec3& start_smoke_color, const vec3& smoke_color, const vec3& sharpnel_color, int fires, int smokes, int sparks, int shrapnels);
+	void CreatePebble(float time, float scale, float angular_velocity, const vec3& color, const vec3& position, const vec3& velocity);
+	void CreateFume(float time, float scale, float angular_velocity, float opacity, const vec3& position, const vec3& velocity);
+	void CreateGlow(float time, float scale, const vec3& start_color, const vec3& color, float opacity, const vec3& position, const vec3& velocity);
+	void RenderFireBillboard(float angle, float size, const vec3& color, float opacity, const vec3& position);
 
 protected:
-	struct Light
-	{
-		Light(const vec3& pColor, float pStrength, const vec3& pPosition, const vec3& pVelocity, const vec3& pTargetVelocity, float pTimeFactor):
-			mColor(pColor),
-			mPosition(pPosition),
-			mVelocity(pVelocity),
-			mTargetVelocity(pTargetVelocity),
-			mStrength(pStrength),
-			mTimeFactor(pTimeFactor),
-			mRenderLightId(Renderer::INVALID_LIGHT)
-		{
+	struct Light {
+		Light(const vec3& color, float strength, const vec3& position, const vec3& velocity, const vec3& target_velocity, float time_factor):
+			color_(color),
+			position_(position),
+			velocity_(velocity),
+			target_velocity_(target_velocity),
+			strength_(strength),
+			time_factor_(time_factor),
+			render_light_id_(Renderer::INVALID_LIGHT) {
 		}
-		vec3 mColor;
-		vec3 mPosition;
-		vec3 mVelocity;
-		vec3 mTargetVelocity;
-		float mStrength;
-		float mTimeFactor;
-		Renderer::LightID mRenderLightId;
+		vec3 color_;
+		vec3 position_;
+		vec3 velocity_;
+		vec3 target_velocity_;
+		float strength_;
+		float time_factor_;
+		Renderer::LightID render_light_id_;
 	};
 	typedef std::vector<Light> LightArray;
 
-	struct Billboard
-	{
-		vec3 mPosition;
-		vec3 mVelocity;
-		vec3 mTargetVelocity;
-		vec3 mStartColor;
-		vec3 mColor;
-		int mTextureIndex;
-		float mSizeFactor;
-		float mDepth;
-		float mAngle;
-		float mAngularVelocity;
-		float mOpacity;
-		float mOpacityFactor;
-		float mOpacityTime;
-		float mTimeFactor;
+	struct Billboard {
+		vec3 position_;
+		vec3 velocity_;
+		vec3 target_velocity_;
+		vec3 start_color_;
+		vec3 color_;
+		int texture_index_;
+		float size_factor_;
+		float depth_;
+		float angle_;
+		float angular_velocity_;
+		float opacity_;
+		float opacity_factor_;
+		float opacity_time_;
+		float time_factor_;
 	};
 	typedef std::vector<Billboard> BillboardArray;
 
-	void CreateTempLight(const vec3& pColor, float pStrength, const vec3& pPosition, const vec3& pVelocity, const vec3& pTargetVelocity, float pTimeFactor);
-	void StepLights(float pTime, float pFriction);
+	void CreateTempLight(const vec3& color, float strength, const vec3& position, const vec3& velocity, const vec3& target_velocity, float time_factor);
+	void StepLights(float time, float friction);
 
-	void CreateBillboards(const vec3& pPosition, float pStrength, const vec3& pVelocity, const vec3& pTargetVelocity,
-		float pEndTurbulence, float pTimeFactor, float pSizeFactor, const vec3& pStartColor, const vec3& pColor,
-		BillboardArray& pBillboards, int pCount);
-	static void StepBillboards(BillboardArray& pBillboards, float pTime, float pFriction);
+	void CreateBillboards(const vec3& position, float strength, const vec3& velocity, const vec3& target_velocity,
+		float end_turbulence, float time_factor, float size_factor, const vec3& start_color, const vec3& color,
+		BillboardArray& billboards, int count);
+	static void StepBillboards(BillboardArray& billboards, float time, float friction);
 
-	Lock* mLock;
-	vec3 mGravity;
-	LightArray mLights;
-	size_t mMaxLightCount;
-	size_t mGasTextureCount;
-	size_t mTotalTextureCount;
-	BillboardGeometry* mBillboardGas;
-	BillboardGeometry* mBillboardShrapnel;
-	BillboardGeometry* mBillboardSpark;
-	BillboardGeometry* mBillboardGlow;
+	Lock* lock_;
+	vec3 gravity_;
+	LightArray lights_;
+	size_t max_light_count_;
+	size_t gas_texture_count_;
+	size_t total_texture_count_;
+	BillboardGeometry* billboard_gas_;
+	BillboardGeometry* billboard_shrapnel_;
+	BillboardGeometry* billboard_spark_;
+	BillboardGeometry* billboard_glow_;
 
-	BillboardArray mFires;
-	BillboardArray mSmokes;
-	BillboardArray mSparks;
-	BillboardArray mShrapnels;
-	BillboardArray mTempFires;
+	BillboardArray fires_;
+	BillboardArray smokes_;
+	BillboardArray sparks_;
+	BillboardArray shrapnels_;
+	BillboardArray temp_fires_;
 
 	logclass();
 };

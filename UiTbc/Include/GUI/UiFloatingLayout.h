@@ -6,23 +6,21 @@
 
 #pragma once
 
-#include "UiComponent.h"
-#include "UiLayout.h"
+#include "uicomponent.h"
+#include "uilayout.h"
 #include <list>
 
-namespace UiTbc
-{
+namespace uitbc {
 
-class FloatingLayout : public Layout
-{
+class FloatingLayout : public Layout {
 public:
 	FloatingLayout();
 	virtual ~FloatingLayout();
 
 	virtual Type GetType() const;
 
-	virtual void Add(Component* pComponent, int pParam1, int pParam2);
-	virtual void Remove(Component* pComponent);
+	virtual void Add(Component* component, int param1, int param2);
+	virtual void Remove(Component* component);
 	virtual int GetNumComponents() const;
 
 	virtual Component* GetFirst();
@@ -32,29 +30,28 @@ public:
 
 	virtual void UpdateLayout();
 
-	virtual PixelCoord GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoord GetPreferredSize(bool force_adaptive);
 	virtual PixelCoord GetMinSize() const;
 	virtual PixelCoord GetContentSize() const;
 
 	// Functions that are unique to the floating layout.
-	void MoveToTop(Component* pComponent);
+	void MoveToTop(Component* component);
 
 protected:
 private:
 
-	enum
-	{
-		POSOFFSET = 20
+	enum {
+		kPosoffset = 20
 	};
 
 	typedef std::list<Component*> ComponentList;
 
-	ComponentList mChildList;
-	ComponentList::iterator mIter;
+	ComponentList child_list_;
+	ComponentList::iterator iter_;
 
-	int mX;
-	int mY;
-	int mPosCount;
+	int x_;
+	int y_;
+	int pos_count_;
 };
 
 }

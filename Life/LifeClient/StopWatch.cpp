@@ -5,74 +5,67 @@
 
 
 #include "pch.h"
-#include "StopWatch.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
-#include "../RaceScore.h"
-#include "ScreenPart.h"
+#include "stopwatch.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../uicure/include/uigameuimanager.h"
+#include "../../uitbc/include/gui/uidesktopwindow.h"
+#include "../../uitbc/include/gui/uifloatinglayout.h"
+#include "../racescore.h"
+#include "screenpart.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-StopWatch::StopWatch(ScreenPart* pScreenPart, UiCure::GameUiManager* pUiManager, const str& pClassResourceName,
-	const str& pAttributeName):
-	Parent(0, pClassResourceName, pUiManager),
-	mScreenPart(pScreenPart),
-	mAttributeName(pAttributeName),
-	mLabel(RED, L"")
-{
-	mLabel.SetPreferredSize(50, 20);
-	mLabel.SetMinSize(30, 15);
-	mLabel.SetPos(0, 0);
-	GetUiManager()->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
-	GetUiManager()->GetDesktopWindow()->AddChild(&mLabel, 0, 0, 0);
+StopWatch::StopWatch(ScreenPart* screen_part, UiCure::GameUiManager* ui_manager, const str& class_resource_name,
+	const str& attribute_name):
+	Parent(0, class_resource_name, ui_manager),
+	screen_part_(screen_part),
+	attribute_name_(attribute_name),
+	label_(RED, L"") {
+	label_.SetPreferredSize(50, 20);
+	label_.SetMinSize(30, 15);
+	label_.SetPos(0, 0);
+	GetUiManager()->AssertDesktopLayout(new uitbc::FloatingLayout, 0);
+	GetUiManager()->GetDesktopWindow()->AddChild(&label_, 0, 0, 0);
 }
 
-StopWatch::~StopWatch()
-{
-	GetUiManager()->GetDesktopWindow()->RemoveChild(&mLabel, 0);
+StopWatch::~StopWatch() {
+	GetUiManager()->GetDesktopWindow()->RemoveChild(&label_, 0);
 }
 
-void StopWatch::Start(Cure::ContextObject* pParent)
-{
-	pParent->GetManager()->AddLocalObject(this);
-	pParent->AddChild(this);
+void StopWatch::Start(cure::ContextObject* parent) {
+	parent->GetManager()->AddLocalObject(this);
+	parent->AddChild(this);
 	GetManager()->EnableTickCallback(this);
 }
 
 
 
-void StopWatch::OnTick()
-{
-	if (!GetManager())
-	{
+void StopWatch::OnTick() {
+	if (!GetManager()) {
 		return;
 	}
 
-	const RaceScore* lScore = (RaceScore*)mParent->GetAttribute(mAttributeName);
-	if (!lScore)
-	{
+	const RaceScore* score = (RaceScore*)parent_->GetAttribute(attribute_name_);
+	if (!score) {
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
 	}
-	PixelRect lArea = mScreenPart->GetRenderArea();
-	mLabel.SetPos(lArea.mRight-65, lArea.mTop+16);
-	const double lTime = lScore->GetTime();
-	const int lMinute = (int)(lTime / 60);
-	const int lSecond = (int)::fmod(lTime, 60);
-	const int lCentiSecond = (int)(100 * (lTime - lMinute*60 - lSecond));
-	mLabel.SetText(wstrutil::Format(L"%i:%2.2i.%2.2i", lMinute, lSecond, lCentiSecond));
+	PixelRect area = screen_part_->GetRenderArea();
+	label_.SetPos(area.right_-65, area.top_+16);
+	const double time = score->GetTime();
+	const int minute = (int)(time / 60);
+	const int second = (int)::fmod(time, 60);
+	const int centi_second = (int)(100 * (time - minute*60 - second));
+	label_.SetText(wstrutil::Format(L"%i:%2.2i.%2.2i", minute, second, centi_second));
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, StopWatch);
+loginstance(kGameContextCpp, StopWatch);
 
 
 

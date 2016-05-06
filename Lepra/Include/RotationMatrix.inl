@@ -1,430 +1,375 @@
 /*
 	Class:  RotationMatrix
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
-TEMPLATE QUAL::RotationMatrix()
-{
+TEMPLATE QUAL::RotationMatrix() {
 	MakeIdentity();
 }
 
 TEMPLATE QUAL::RotationMatrix(_TVarType p11, _TVarType p12, _TVarType p13,
 			      _TVarType p21, _TVarType p22, _TVarType p23,
-			      _TVarType p31, _TVarType p32, _TVarType p33)
-{
-	mMatrix[0] = p11;
-	mMatrix[1] = p12;
-	mMatrix[2] = p13;
+			      _TVarType p31, _TVarType p32, _TVarType p33) {
+	matrix_[0] = p11;
+	matrix_[1] = p12;
+	matrix_[2] = p13;
 
-	mMatrix[3] = p21;
-	mMatrix[4] = p22;
-	mMatrix[5] = p23;
+	matrix_[3] = p21;
+	matrix_[4] = p22;
+	matrix_[5] = p23;
 
-	mMatrix[6] = p31;
-	mMatrix[7] = p32;
-	mMatrix[8] = p33;
+	matrix_[6] = p31;
+	matrix_[7] = p32;
+	matrix_[8] = p33;
 }
 
-TEMPLATE QUAL::RotationMatrix(const Vector3D<_TVarType>& pVectorX, 
-			      const Vector3D<_TVarType>& pVectorY, 
-			      const Vector3D<_TVarType>& pVectorZ)
-{
-	mMatrix[0] = pVectorX.x;
-	mMatrix[1] = pVectorY.x;
-	mMatrix[2] = pVectorZ.x;
+TEMPLATE QUAL::RotationMatrix(const Vector3D<_TVarType>& vector_x,
+			      const Vector3D<_TVarType>& vector_y,
+			      const Vector3D<_TVarType>& vector_z) {
+	matrix_[0] = vector_x.x;
+	matrix_[1] = vector_y.x;
+	matrix_[2] = vector_z.x;
 
-	mMatrix[3] = pVectorX.y;
-	mMatrix[4] = pVectorY.y;
-	mMatrix[5] = pVectorZ.y;
+	matrix_[3] = vector_x.y;
+	matrix_[4] = vector_y.y;
+	matrix_[5] = vector_z.y;
 
-	mMatrix[6] = pVectorX.z;
-	mMatrix[7] = pVectorY.z;
-	mMatrix[8] = pVectorZ.z;
+	matrix_[6] = vector_x.z;
+	matrix_[7] = vector_y.z;
+	matrix_[8] = vector_z.z;
 }
 
-TEMPLATE QUAL::RotationMatrix(const Vector3D<_TVarType>& pVectorX, 
-			      const Vector3D<_TVarType>& pVectorY)
-{
-	Vector3D<_TVarType> lVectorX(pVectorX);
-	lVectorX.Normalize();
+TEMPLATE QUAL::RotationMatrix(const Vector3D<_TVarType>& vector_x,
+			      const Vector3D<_TVarType>& vector_y) {
+	Vector3D<_TVarType> _vector_x(vector_x);
+	_vector_x.Normalize();
 
-	Vector3D<_TVarType> lVectorY(pVectorY);
-	lVectorY -= lVectorX * lVectorX.Dot(lVectorY);
-	lVectorY.Normalize();
-	
-	Vector3D<_TVarType> lVectorZ(lVectorX, lVectorY);
+	Vector3D<_TVarType> _vector_y(vector_y);
+	_vector_y -= _vector_x * _vector_x.Dot(_vector_y);
+	_vector_y.Normalize();
 
-	mMatrix[0] = lVectorX.x;
-	mMatrix[1] = lVectorY.x;
-	mMatrix[2] = lVectorZ.x;
+	Vector3D<_TVarType> _vector_z(_vector_x, _vector_y);
 
-	mMatrix[3] = lVectorX.y;
-	mMatrix[4] = lVectorY.y;
-	mMatrix[5] = lVectorZ.y;
+	matrix_[0] = _vector_x.x;
+	matrix_[1] = _vector_y.x;
+	matrix_[2] = _vector_z.x;
 
-	mMatrix[6] = lVectorX.z;
-	mMatrix[7] = lVectorY.z;
-	mMatrix[8] = lVectorZ.z;
+	matrix_[3] = _vector_x.y;
+	matrix_[4] = _vector_y.y;
+	matrix_[5] = _vector_z.y;
+
+	matrix_[6] = _vector_x.z;
+	matrix_[7] = _vector_y.z;
+	matrix_[8] = _vector_z.z;
 }
 
-TEMPLATE QUAL::RotationMatrix(const RotationMatrix& pMatrix, bool pMakeInverse /* = false */)
-{
-	if (pMakeInverse == false)
-	{
-		mMatrix[0] = pMatrix.mMatrix[0];
-		mMatrix[1] = pMatrix.mMatrix[1];
-		mMatrix[2] = pMatrix.mMatrix[2];
+TEMPLATE QUAL::RotationMatrix(const RotationMatrix& matrix, bool make_inverse /* = false */) {
+	if (make_inverse == false) {
+		matrix_[0] = matrix.matrix_[0];
+		matrix_[1] = matrix.matrix_[1];
+		matrix_[2] = matrix.matrix_[2];
 
-		mMatrix[3] = pMatrix.mMatrix[3];
-		mMatrix[4] = pMatrix.mMatrix[4];
-		mMatrix[5] = pMatrix.mMatrix[5];
+		matrix_[3] = matrix.matrix_[3];
+		matrix_[4] = matrix.matrix_[4];
+		matrix_[5] = matrix.matrix_[5];
 
-		mMatrix[6] = pMatrix.mMatrix[6];
-		mMatrix[7] = pMatrix.mMatrix[7];
-		mMatrix[8] = pMatrix.mMatrix[8];
-	}
-	else
-	{
-		mMatrix[0] = pMatrix.mMatrix[0];
-		mMatrix[1] = pMatrix.mMatrix[3];
-		mMatrix[2] = pMatrix.mMatrix[6];
+		matrix_[6] = matrix.matrix_[6];
+		matrix_[7] = matrix.matrix_[7];
+		matrix_[8] = matrix.matrix_[8];
+	} else {
+		matrix_[0] = matrix.matrix_[0];
+		matrix_[1] = matrix.matrix_[3];
+		matrix_[2] = matrix.matrix_[6];
 
-		mMatrix[3] = pMatrix.mMatrix[1];
-		mMatrix[4] = pMatrix.mMatrix[4];
-		mMatrix[5] = pMatrix.mMatrix[7];
+		matrix_[3] = matrix.matrix_[1];
+		matrix_[4] = matrix.matrix_[4];
+		matrix_[5] = matrix.matrix_[7];
 
-		mMatrix[6] = pMatrix.mMatrix[2];
-		mMatrix[7] = pMatrix.mMatrix[5];
-		mMatrix[8] = pMatrix.mMatrix[8];
+		matrix_[6] = matrix.matrix_[2];
+		matrix_[7] = matrix.matrix_[5];
+		matrix_[8] = matrix.matrix_[8];
 	}
 }
 
-TEMPLATE QUAL::~RotationMatrix()
-{
+TEMPLATE QUAL::~RotationMatrix() {
 }
 
-TEMPLATE void QUAL::MakeIdentity()
-{
-	mMatrix[0] = 1.0f;
-	mMatrix[1] = 0.0f;
-	mMatrix[2] = 0.0f;
+TEMPLATE void QUAL::MakeIdentity() {
+	matrix_[0] = 1.0f;
+	matrix_[1] = 0.0f;
+	matrix_[2] = 0.0f;
 
-	mMatrix[3] = 0.0f;
-	mMatrix[4] = 1.0f;
-	mMatrix[5] = 0.0f;
+	matrix_[3] = 0.0f;
+	matrix_[4] = 1.0f;
+	matrix_[5] = 0.0f;
 
-	mMatrix[6] = 0.0f;
-	mMatrix[7] = 0.0f;
-	mMatrix[8] = 1.0f;
+	matrix_[6] = 0.0f;
+	matrix_[7] = 0.0f;
+	matrix_[8] = 1.0f;
 }
 
-TEMPLATE void QUAL::MakeInverse()
-{
-	_TVarType lTemp;
+TEMPLATE void QUAL::MakeInverse() {
+	_TVarType temp;
 
-	lTemp = mMatrix[3];
-	mMatrix[3] = mMatrix[1];
-	mMatrix[1] = lTemp;
+	temp = matrix_[3];
+	matrix_[3] = matrix_[1];
+	matrix_[1] = temp;
 
-	lTemp = mMatrix[6];
-	mMatrix[6] = mMatrix[2];
-	mMatrix[2] = lTemp;
+	temp = matrix_[6];
+	matrix_[6] = matrix_[2];
+	matrix_[2] = temp;
 
-	lTemp = mMatrix[7];
-	mMatrix[7] = mMatrix[5];
-	mMatrix[5] = lTemp;
+	temp = matrix_[7];
+	matrix_[7] = matrix_[5];
+	matrix_[5] = temp;
 }
 
-TEMPLATE QUAL QUAL::GetInverse() const
-{
-	RotationMatrix lRotMtx(*this);
-	lRotMtx.MakeInverse();
+TEMPLATE QUAL QUAL::GetInverse() const {
+	RotationMatrix rot_mtx(*this);
+	rot_mtx.MakeInverse();
 
-	return lRotMtx;
+	return rot_mtx;
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::GetAxisX() const
-{
-	return Vector3D<_TVarType>(mMatrix[0], mMatrix[3], mMatrix[6]);
+TEMPLATE Vector3D<_TVarType> QUAL::GetAxisX() const {
+	return Vector3D<_TVarType>(matrix_[0], matrix_[3], matrix_[6]);
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::GetAxisY() const
-{
-	return Vector3D<_TVarType>(mMatrix[1], mMatrix[4], mMatrix[7]);
+TEMPLATE Vector3D<_TVarType> QUAL::GetAxisY() const {
+	return Vector3D<_TVarType>(matrix_[1], matrix_[4], matrix_[7]);
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::GetAxisZ() const
-{
-	return Vector3D<_TVarType>(mMatrix[2], mMatrix[5], mMatrix[8]);
+TEMPLATE Vector3D<_TVarType> QUAL::GetAxisZ() const {
+	return Vector3D<_TVarType>(matrix_[2], matrix_[5], matrix_[8]);
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::GetAxisByIndex(int pIndex)
-{
-	switch(pIndex)
-	{
+TEMPLATE Vector3D<_TVarType> QUAL::GetAxisByIndex(int index) {
+	switch(index) {
 	case 0:
-		return Vector3D<_TVarType>(mMatrix[0], mMatrix[3], mMatrix[6]);
+		return Vector3D<_TVarType>(matrix_[0], matrix_[3], matrix_[6]);
 	case 1:
-		return Vector3D<_TVarType>(mMatrix[1], mMatrix[4], mMatrix[7]);
+		return Vector3D<_TVarType>(matrix_[1], matrix_[4], matrix_[7]);
 	case 2:
-		return Vector3D<_TVarType>(mMatrix[2], mMatrix[5], mMatrix[8]);
+		return Vector3D<_TVarType>(matrix_[2], matrix_[5], matrix_[8]);
 	default:
 		return Vector3D<_TVarType>(0, 0, 0);
 	};
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::GetInverseAxisX() const
-{
-	return Vector3D<_TVarType>(mMatrix[0], mMatrix[1], mMatrix[2]);
+TEMPLATE Vector3D<_TVarType> QUAL::GetInverseAxisX() const {
+	return Vector3D<_TVarType>(matrix_[0], matrix_[1], matrix_[2]);
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::GetInverseAxisY() const
-{
-	return Vector3D<_TVarType>(mMatrix[3], mMatrix[4], mMatrix[5]);
+TEMPLATE Vector3D<_TVarType> QUAL::GetInverseAxisY() const {
+	return Vector3D<_TVarType>(matrix_[3], matrix_[4], matrix_[5]);
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::GetInverseAxisZ() const
-{
-	return Vector3D<_TVarType>(mMatrix[6], mMatrix[7], mMatrix[8]);
+TEMPLATE Vector3D<_TVarType> QUAL::GetInverseAxisZ() const {
+	return Vector3D<_TVarType>(matrix_[6], matrix_[7], matrix_[8]);
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::GetInverseAxisByIndex(int pIndex)
-{
-	switch(pIndex)
-	{
+TEMPLATE Vector3D<_TVarType> QUAL::GetInverseAxisByIndex(int index) {
+	switch(index) {
 	case 0:
-		return Vector3D<_TVarType>(mMatrix[0], mMatrix[1], mMatrix[2]);
+		return Vector3D<_TVarType>(matrix_[0], matrix_[1], matrix_[2]);
 	case 1:
-		return Vector3D<_TVarType>(mMatrix[3], mMatrix[4], mMatrix[5]);
+		return Vector3D<_TVarType>(matrix_[3], matrix_[4], matrix_[5]);
 	case 2:
-		return Vector3D<_TVarType>(mMatrix[6], mMatrix[7], mMatrix[8]);
+		return Vector3D<_TVarType>(matrix_[6], matrix_[7], matrix_[8]);
 	default:
 		return Vector3D<_TVarType>(0, 0, 0);
 	};
 }
 
-TEMPLATE void QUAL::SetAxisX(const Vector3D<_TVarType>& pAxisX)
-{
-	mMatrix[0] = pAxisX.x;
-	mMatrix[3] = pAxisX.y;
-	mMatrix[6] = pAxisX.z;
+TEMPLATE void QUAL::SetAxisX(const Vector3D<_TVarType>& axis_x) {
+	matrix_[0] = axis_x.x;
+	matrix_[3] = axis_x.y;
+	matrix_[6] = axis_x.z;
 }
 
-TEMPLATE void QUAL::SetAxisY(const Vector3D<_TVarType>& pAxisY)
-{
-	mMatrix[1] = pAxisY.x;
-	mMatrix[4] = pAxisY.y;
-	mMatrix[7] = pAxisY.z;
+TEMPLATE void QUAL::SetAxisY(const Vector3D<_TVarType>& axis_y) {
+	matrix_[1] = axis_y.x;
+	matrix_[4] = axis_y.y;
+	matrix_[7] = axis_y.z;
 }
 
-TEMPLATE void QUAL::SetAxisZ(const Vector3D<_TVarType>& pAxisZ)
-{
-	mMatrix[2] = pAxisZ.x;
-	mMatrix[5] = pAxisZ.y;
-	mMatrix[8] = pAxisZ.z;
+TEMPLATE void QUAL::SetAxisZ(const Vector3D<_TVarType>& axis_z) {
+	matrix_[2] = axis_z.x;
+	matrix_[5] = axis_z.y;
+	matrix_[8] = axis_z.z;
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::GetRotatedVector(const Vector3D<_TVarType>& pVector) const
-{
+TEMPLATE Vector3D<_TVarType> QUAL::GetRotatedVector(const Vector3D<_TVarType>& vector) const {
 	// Normal rotation requires inverted rotation axes.
 	return Vector3D<_TVarType>
 	       (
-		mMatrix[0] * pVector.x + mMatrix[1] * pVector.y + mMatrix[2] * pVector.z,
-		mMatrix[3] * pVector.x + mMatrix[4] * pVector.y + mMatrix[5] * pVector.z,
-		mMatrix[6] * pVector.x + mMatrix[7] * pVector.y + mMatrix[8] * pVector.z
+		matrix_[0] * vector.x + matrix_[1] * vector.y + matrix_[2] * vector.z,
+		matrix_[3] * vector.x + matrix_[4] * vector.y + matrix_[5] * vector.z,
+		matrix_[6] * vector.x + matrix_[7] * vector.y + matrix_[8] * vector.z
 	       );
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::GetInverseRotatedVector(const Vector3D<_TVarType>& pVector) const
-{
+TEMPLATE Vector3D<_TVarType> QUAL::GetInverseRotatedVector(const Vector3D<_TVarType>& vector) const {
 	// Inverse rotation requires normal rotation axes.
 	return Vector3D<_TVarType>
 	       (
-		mMatrix[0] * pVector.x + mMatrix[3] * pVector.y + mMatrix[6] * pVector.z,
-		mMatrix[1] * pVector.x + mMatrix[4] * pVector.y + mMatrix[7] * pVector.z,
-		mMatrix[2] * pVector.x + mMatrix[5] * pVector.y + mMatrix[8] * pVector.z
+		matrix_[0] * vector.x + matrix_[3] * vector.y + matrix_[6] * vector.z,
+		matrix_[1] * vector.x + matrix_[4] * vector.y + matrix_[7] * vector.z,
+		matrix_[2] * vector.x + matrix_[5] * vector.y + matrix_[8] * vector.z
 	       );
 }
 
-TEMPLATE _TVarType QUAL::GetElement(int pIndex) const
-{
-	return mMatrix[pIndex];
+TEMPLATE _TVarType QUAL::GetElement(int index) const {
+	return matrix_[index];
 }
 
-TEMPLATE _TVarType QUAL::GetTrace() const
-{
-	return mMatrix[0] + mMatrix[4] + mMatrix[8];
+TEMPLATE _TVarType QUAL::GetTrace() const {
+	return matrix_[0] + matrix_[4] + matrix_[8];
 }
 
-TEMPLATE bool QUAL::operator == (const RotationMatrix& pMatrix)
-{
-	return mMatrix[0] == pMatrix.mMatrix[0] &&
-	       mMatrix[1] == pMatrix.mMatrix[1] &&
-	       mMatrix[2] == pMatrix.mMatrix[2] &&
-	       mMatrix[3] == pMatrix.mMatrix[3] &&
-	       mMatrix[4] == pMatrix.mMatrix[4] &&
-	       mMatrix[5] == pMatrix.mMatrix[5] &&
-	       mMatrix[6] == pMatrix.mMatrix[6] &&
-	       mMatrix[7] == pMatrix.mMatrix[7] &&
-	       mMatrix[8] == pMatrix.mMatrix[8];
+TEMPLATE bool QUAL::operator == (const RotationMatrix& matrix) {
+	return matrix_[0] == matrix.matrix_[0] &&
+	       matrix_[1] == matrix.matrix_[1] &&
+	       matrix_[2] == matrix.matrix_[2] &&
+	       matrix_[3] == matrix.matrix_[3] &&
+	       matrix_[4] == matrix.matrix_[4] &&
+	       matrix_[5] == matrix.matrix_[5] &&
+	       matrix_[6] == matrix.matrix_[6] &&
+	       matrix_[7] == matrix.matrix_[7] &&
+	       matrix_[8] == matrix.matrix_[8];
 }
 
-TEMPLATE bool QUAL::operator != (const RotationMatrix& pMatrix)
-{
-	return !(*this == pMatrix);
+TEMPLATE bool QUAL::operator != (const RotationMatrix& matrix) {
+	return !(*this == matrix);
 }
 
-TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator =  (const RotationMatrix& pMatrix)
-{
-	Set(pMatrix);
+TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator =  (const RotationMatrix& matrix) {
+	Set(matrix);
 	return *this;
 }
 
-TEMPLATE RotationMatrix<_TVarType> QUAL::operator +  (const RotationMatrix& pMatrix) const
-{
-	RotationMatrix lTemp(this);
-	lTemp.Add(pMatrix);
-	return lTemp;
+TEMPLATE RotationMatrix<_TVarType> QUAL::operator +  (const RotationMatrix& matrix) const {
+	RotationMatrix temp(this);
+	temp.Add(matrix);
+	return temp;
 }
 
-TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator += (const RotationMatrix& pMatrix)
-{
-	Add(pMatrix);
+TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator += (const RotationMatrix& matrix) {
+	Add(matrix);
 	return *this;
 }
 
-TEMPLATE RotationMatrix<_TVarType> QUAL::operator -  (const RotationMatrix& pMatrix) const
-{
-	RotationMatrix lTemp(this);
-	lTemp.Sub(pMatrix);
-	return lTemp;
+TEMPLATE RotationMatrix<_TVarType> QUAL::operator -  (const RotationMatrix& matrix) const {
+	RotationMatrix temp(this);
+	temp.Sub(matrix);
+	return temp;
 }
 
-TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator -= (const RotationMatrix& pMatrix)
-{
-	Sub(pMatrix);
+TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator -= (const RotationMatrix& matrix) {
+	Sub(matrix);
 	return *this;
 }
 
-TEMPLATE RotationMatrix<_TVarType> QUAL::operator *  (const RotationMatrix& pMatrix) const
-{
-	RotationMatrix lTemp(*this);
-	lTemp.Mul(pMatrix);
-	return lTemp;
+TEMPLATE RotationMatrix<_TVarType> QUAL::operator *  (const RotationMatrix& matrix) const {
+	RotationMatrix temp(*this);
+	temp.Mul(matrix);
+	return temp;
 }
 
-TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator *= (const RotationMatrix& pMatrix)
-{
-	Mul(pMatrix);
+TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator *= (const RotationMatrix& matrix) {
+	Mul(matrix);
 	return *this;
 }
 
-TEMPLATE RotationMatrix<_TVarType> QUAL::operator /  (const RotationMatrix& pMatrix) const
-{
-	RotationMatrix lTemp(*this);
-	lTemp.Mul(pMatrix.GetInverse());
-	return lTemp;
+TEMPLATE RotationMatrix<_TVarType> QUAL::operator /  (const RotationMatrix& matrix) const {
+	RotationMatrix temp(*this);
+	temp.Mul(matrix.GetInverse());
+	return temp;
 }
 
-TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator /= (const RotationMatrix& pMatrix)
-{
-	Mul(pMatrix.GetInverse());
+TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator /= (const RotationMatrix& matrix) {
+	Mul(matrix.GetInverse());
 	return *this;
 }
 
-TEMPLATE RotationMatrix<_TVarType> QUAL::operator ! ()
-{
-	RotationMatrix lTemp(this);
-	lTemp.MakeInverse();
-	return lTemp;
+TEMPLATE RotationMatrix<_TVarType> QUAL::operator ! () {
+	RotationMatrix temp(this);
+	temp.MakeInverse();
+	return temp;
 }
 
-TEMPLATE RotationMatrix<_TVarType> QUAL::operator - () const
-{
-	RotationMatrix lTemp(this);
-	lTemp.Mul(-1);
-	return lTemp;
+TEMPLATE RotationMatrix<_TVarType> QUAL::operator - () const {
+	RotationMatrix temp(this);
+	temp.Mul(-1);
+	return temp;
 }
 
-TEMPLATE RotationMatrix<_TVarType> QUAL::operator +  (const _TVarType pScalar) const
-{
-	RotationMatrix lTemp(this);
-	lTemp.Add(pScalar);
-	return lTemp;
+TEMPLATE RotationMatrix<_TVarType> QUAL::operator +  (const _TVarType scalar) const {
+	RotationMatrix temp(this);
+	temp.Add(scalar);
+	return temp;
 }
 
-TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator += (const _TVarType pScalar)
-{
-	Add(pScalar);
+TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator += (const _TVarType scalar) {
+	Add(scalar);
 	return *this;
 }
 
-TEMPLATE RotationMatrix<_TVarType> QUAL::operator -  (const _TVarType pScalar) const
-{
-	RotationMatrix lTemp(this);
-	lTemp.Sub(pScalar);
-	return lTemp;
+TEMPLATE RotationMatrix<_TVarType> QUAL::operator -  (const _TVarType scalar) const {
+	RotationMatrix temp(this);
+	temp.Sub(scalar);
+	return temp;
 }
 
-TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator -= (const _TVarType pScalar)
-{
-	Sub(pScalar);
+TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator -= (const _TVarType scalar) {
+	Sub(scalar);
 	return *this;
 }
 
-TEMPLATE RotationMatrix<_TVarType> QUAL::operator * (const _TVarType pScalar) const
-{
-	RotationMatrix lTemp(this);
-	lTemp.Mul(pScalar);
-	return lTemp;
+TEMPLATE RotationMatrix<_TVarType> QUAL::operator * (const _TVarType scalar) const {
+	RotationMatrix temp(this);
+	temp.Mul(scalar);
+	return temp;
 }
 
-TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator *= (const _TVarType pScalar)
-{
-	Mul(pScalar);
+TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator *= (const _TVarType scalar) {
+	Mul(scalar);
 	return *this;
 }
 
-TEMPLATE RotationMatrix<_TVarType> QUAL::operator / (const _TVarType pScalar) const
-{
-	RotationMatrix lTemp(this);
-	lTemp.Mul(1.0f / pScalar);
-	return lTemp;
+TEMPLATE RotationMatrix<_TVarType> QUAL::operator / (const _TVarType scalar) const {
+	RotationMatrix temp(this);
+	temp.Mul(1.0f / scalar);
+	return temp;
 }
 
-TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator /= (const _TVarType pScalar)
-{
-	Mul(1.0f / pScalar);
+TEMPLATE const RotationMatrix<_TVarType>& QUAL::operator /= (const _TVarType scalar) {
+	Mul(1.0f / scalar);
 	return *this;
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::operator * (const Vector3D<_TVarType>& pVector) const
-{
-	return GetRotatedVector(pVector);
+TEMPLATE Vector3D<_TVarType> QUAL::operator * (const Vector3D<_TVarType>& vector) const {
+	return GetRotatedVector(vector);
 }
 
-TEMPLATE QUAL::operator const _TVarType* () const
-{
-	return mMatrix;
+TEMPLATE QUAL::operator const _TVarType* () const {
+	return matrix_;
 }
 
-TEMPLATE QUAL::operator _TVarType* ()
-{
-	return mMatrix;
+TEMPLATE QUAL::operator _TVarType* () {
+	return matrix_;
 }
 
 #if !defined(LEPRA_MSVC)
 
-TEMPLATE inline Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const RotationMatrix<_TVarType>& pMtx)
-{
-	return pMtx.GetInverseRotatedVector(pVector);
+TEMPLATE inline Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& vector, const RotationMatrix<_TVarType>& mtx) {
+	return mtx.GetInverseRotatedVector(vector);
 }
 
-TEMPLATE inline Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const RotationMatrix<_TVarType>& pMtx)
-{
-	pVector = pMtx.GetInverseRotatedVector(pVector);
-	return pVector;
+TEMPLATE inline Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& vector, const RotationMatrix<_TVarType>& mtx) {
+	vector = mtx.GetInverseRotatedVector(vector);
+	return vector;
 }
 
 #else // LEPRA_MSVC
@@ -432,962 +377,911 @@ TEMPLATE inline Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, 
 // Visual Studio .NET can't handle function templates... (.NET 2003 can? .NET 2005 can!).
 // Need to implement the functions separately like this.
 
-inline Vector3D<float32> operator * (const Vector3D<float32>& pVector, const RotationMatrix<float32>& pMtx)
-{
-	return pMtx.GetInverseRotatedVector(pVector);
+inline Vector3D<float32> operator * (const Vector3D<float32>& vector, const RotationMatrix<float32>& mtx) {
+	return mtx.GetInverseRotatedVector(vector);
 }
 
-inline Vector3D<float32>& operator *= (Vector3D<float32>& pVector, const RotationMatrix<float32>& pMtx)
-{
-	pVector = pMtx.GetInverseRotatedVector(pVector);
-	return pVector;
+inline Vector3D<float32>& operator *= (Vector3D<float32>& vector, const RotationMatrix<float32>& mtx) {
+	vector = mtx.GetInverseRotatedVector(vector);
+	return vector;
 }
 
-inline Vector3D<float64> operator * (const Vector3D<float64>& pVector, const RotationMatrix<float64>& pMtx)
-{
-	return pMtx.GetInverseRotatedVector(pVector);
+inline Vector3D<float64> operator * (const Vector3D<float64>& vector, const RotationMatrix<float64>& mtx) {
+	return mtx.GetInverseRotatedVector(vector);
 }
 
-inline Vector3D<float64>& operator *= (Vector3D<float64>& pVector, const RotationMatrix<float64>& pMtx)
-{
-	pVector = pMtx.GetInverseRotatedVector(pVector);
-	return pVector;
+inline Vector3D<float64>& operator *= (Vector3D<float64>& vector, const RotationMatrix<float64>& mtx) {
+	vector = mtx.GetInverseRotatedVector(vector);
+	return vector;
 }
 
 #endif // !LEPRA_MSVC/LEPRA_MSVC
 
 
 
-TEMPLATE void QUAL::RotateAroundWorldX(_TVarType pAngle)
-{
-	_TVarType lCosA = (_TVarType)cos(pAngle);
-	_TVarType lSinA = (_TVarType)sin(pAngle);
+TEMPLATE void QUAL::RotateAroundWorldX(_TVarType angle) {
+	_TVarType cos_a = (_TVarType)cos(angle);
+	_TVarType sin_a = (_TVarType)sin(angle);
 
-	_TVarType lY, lZ;
+	_TVarType __y, __z;
 
-	lY = mMatrix[3]; // X.y
-	lZ = mMatrix[6]; // X.z
-	mMatrix[3] = (lCosA * lY - lSinA * lZ);
-	mMatrix[6] = (lSinA * lY + lCosA * lZ);
+	__y = matrix_[3]; // X.y
+	__z = matrix_[6]; // X.z
+	matrix_[3] = (cos_a * __y - sin_a * __z);
+	matrix_[6] = (sin_a * __y + cos_a * __z);
 
-	lY = mMatrix[4]; // Y.y
-	lZ = mMatrix[7]; // Y.z
-	mMatrix[4] = (lCosA * lY - lSinA * lZ);
-	mMatrix[7] = (lSinA * lY + lCosA * lZ);
+	__y = matrix_[4]; // Y.y
+	__z = matrix_[7]; // Y.z
+	matrix_[4] = (cos_a * __y - sin_a * __z);
+	matrix_[7] = (sin_a * __y + cos_a * __z);
 
-	lY = mMatrix[5]; // Z.y
-	lZ = mMatrix[8]; // Z.z
-	mMatrix[5] = (lCosA * lY - lSinA * lZ);
-	mMatrix[8] = (lSinA * lY + lCosA * lZ);
+	__y = matrix_[5]; // Z.y
+	__z = matrix_[8]; // Z.z
+	matrix_[5] = (cos_a * __y - sin_a * __z);
+	matrix_[8] = (sin_a * __y + cos_a * __z);
 }
 
-TEMPLATE void QUAL::RotateAroundWorldY(_TVarType pAngle)
-{
-	_TVarType lCosA = (_TVarType)cos(pAngle);
-	_TVarType lSinA = (_TVarType)sin(pAngle);
+TEMPLATE void QUAL::RotateAroundWorldY(_TVarType angle) {
+	_TVarType cos_a = (_TVarType)cos(angle);
+	_TVarType sin_a = (_TVarType)sin(angle);
 
-	_TVarType lX, lZ;
+	_TVarType __x, __z;
 
-	lX = mMatrix[0]; // X.x
-	lZ = mMatrix[6]; // X.z
-	mMatrix[0] = (lSinA * lZ + lCosA * lX);
-	mMatrix[6] = (lCosA * lZ - lSinA * lX);
+	__x = matrix_[0]; // X.x
+	__z = matrix_[6]; // X.z
+	matrix_[0] = (sin_a * __z + cos_a * __x);
+	matrix_[6] = (cos_a * __z - sin_a * __x);
 
-	lX = mMatrix[1]; // Y.x
-	lZ = mMatrix[7]; // Y.z
-	mMatrix[1] = (lSinA * lZ + lCosA * lX);
-	mMatrix[7] = (lCosA * lZ - lSinA * lX);
+	__x = matrix_[1]; // Y.x
+	__z = matrix_[7]; // Y.z
+	matrix_[1] = (sin_a * __z + cos_a * __x);
+	matrix_[7] = (cos_a * __z - sin_a * __x);
 
-	lX = mMatrix[2]; // Z.x
-	lZ = mMatrix[8]; // Z.z
-	mMatrix[2] = (lSinA * lZ + lCosA * lX);
-	mMatrix[8] = (lCosA * lZ - lSinA * lX);
+	__x = matrix_[2]; // Z.x
+	__z = matrix_[8]; // Z.z
+	matrix_[2] = (sin_a * __z + cos_a * __x);
+	matrix_[8] = (cos_a * __z - sin_a * __x);
 }
 
-TEMPLATE void QUAL::RotateAroundWorldZ(_TVarType pAngle)
-{
-	_TVarType lCosA = (_TVarType)cos(pAngle);
-	_TVarType lSinA = (_TVarType)sin(pAngle);
+TEMPLATE void QUAL::RotateAroundWorldZ(_TVarType angle) {
+	_TVarType cos_a = (_TVarType)cos(angle);
+	_TVarType sin_a = (_TVarType)sin(angle);
 
-	_TVarType lX, lY;
+	_TVarType __x, __y;
 
-	lX = mMatrix[0]; // X.x
-	lY = mMatrix[3]; // X.y
-	mMatrix[0] = lCosA * lX - lSinA * lY;
-	mMatrix[3] = lSinA * lX + lCosA * lY;
+	__x = matrix_[0]; // X.x
+	__y = matrix_[3]; // X.y
+	matrix_[0] = cos_a * __x - sin_a * __y;
+	matrix_[3] = sin_a * __x + cos_a * __y;
 
-	lX = mMatrix[1]; // Y.x
-	lY = mMatrix[4]; // Y.y
-	mMatrix[1] = lCosA * lX - lSinA * lY;
-	mMatrix[4] = lSinA * lX + lCosA * lY;
+	__x = matrix_[1]; // Y.x
+	__y = matrix_[4]; // Y.y
+	matrix_[1] = cos_a * __x - sin_a * __y;
+	matrix_[4] = sin_a * __x + cos_a * __y;
 
-	lX = mMatrix[2]; // Z.x
-	lY = mMatrix[5]; // Z.y
-	mMatrix[2] = lCosA * lX - lSinA * lY;
-	mMatrix[5] = lSinA * lX + lCosA * lY;
+	__x = matrix_[2]; // Z.x
+	__y = matrix_[5]; // Z.y
+	matrix_[2] = cos_a * __x - sin_a * __y;
+	matrix_[5] = sin_a * __x + cos_a * __y;
 }
 
-TEMPLATE void QUAL::RotateAroundOwnX(_TVarType pAngle)
-{
-	_TVarType lCosA = (_TVarType)cos(pAngle);
-	_TVarType lSinA = (_TVarType)sin(pAngle);
+TEMPLATE void QUAL::RotateAroundOwnX(_TVarType angle) {
+	_TVarType cos_a = (_TVarType)cos(angle);
+	_TVarType sin_a = (_TVarType)sin(angle);
 
 	Mul(RotationMatrix(1,  0,       0,
-			   0,  lCosA,-lSinA,
-			   0,  lSinA, lCosA));
+			   0,  cos_a,-sin_a,
+			   0,  sin_a, cos_a));
 }
 
-TEMPLATE void QUAL::RotateAroundOwnY(_TVarType pAngle)
-{
-	_TVarType lCosA = (_TVarType)cos(pAngle);
-	_TVarType lSinA = (_TVarType)sin(pAngle);
+TEMPLATE void QUAL::RotateAroundOwnY(_TVarType angle) {
+	_TVarType cos_a = (_TVarType)cos(angle);
+	_TVarType sin_a = (_TVarType)sin(angle);
 
-	Mul(RotationMatrix( lCosA,  0,  lSinA,
+	Mul(RotationMatrix( cos_a,  0,  sin_a,
 			    0,        1,  0,
-			   -lSinA,  0,  lCosA));
+			   -sin_a,  0,  cos_a));
 }
 
-TEMPLATE void QUAL::RotateAroundOwnZ(_TVarType pAngle)
-{
-	_TVarType lCosA = (_TVarType)cos(pAngle);
-	_TVarType lSinA = (_TVarType)sin(pAngle);
+TEMPLATE void QUAL::RotateAroundOwnZ(_TVarType angle) {
+	_TVarType cos_a = (_TVarType)cos(angle);
+	_TVarType sin_a = (_TVarType)sin(angle);
 
-	Mul(RotationMatrix(lCosA, -lSinA, 0,
-			   lSinA,  lCosA, 0,
+	Mul(RotationMatrix(cos_a, -sin_a, 0,
+			   sin_a,  cos_a, 0,
 			   0,        0,       1));
 }
 
-TEMPLATE void QUAL::RotateAroundVector(const Vector3D<_TVarType>& pVector, _TVarType pAngle)
-{
-	if (pVector.IsNullVector() == true)
-	{
+TEMPLATE void QUAL::RotateAroundVector(const Vector3D<_TVarType>& vector, _TVarType angle) {
+	if (vector.IsNullVector() == true) {
 		return;
 	}
 
-	Vector3D<_TVarType> lXAxis(pVector);
-	Vector3D<_TVarType> lYAxis;
-	Vector3D<_TVarType> lZAxis;
+	Vector3D<_TVarType> x_axis(vector);
+	Vector3D<_TVarType> y_axis;
+	Vector3D<_TVarType> z_axis;
 
 	// Generate a y- and a z-axis.
 
-	lXAxis.Normalize();
+	x_axis.Normalize();
 
-	// Check if pVector is parallel to the world y-axis. No matter what, the resulting
+	// Check if vector is parallel to the world y-axis. No matter what, the resulting
 	// coordinate system will always have the same orientation.
-	_TVarType lAbsDot = (_TVarType)fabs(lXAxis.Dot(Vector3D<_TVarType>(0.0f, 1.0f, 0.0f)));
+	_TVarType abs_dot = (_TVarType)fabs(x_axis.Dot(Vector3D<_TVarType>(0.0f, 1.0f, 0.0f)));
 
-	if ((1.0f - lAbsDot) > 1e-6f)
-	{
+	if ((1.0f - abs_dot) > 1e-6f) {
 		// It wasn't parallel. Generate the z-axis first.
-		lZAxis.CrossUnit(lXAxis, Vector3D<_TVarType>(0.0f, 1.0f, 0.0f));
-		lYAxis.CrossUnit(lZAxis, lXAxis);
-	}
-	else
-	{
+		z_axis.CrossUnit(x_axis, Vector3D<_TVarType>(0.0f, 1.0f, 0.0f));
+		y_axis.CrossUnit(z_axis, x_axis);
+	} else {
 		// It was parallel. Generate the y-axis first.
-		lYAxis.CrossUnit(Vector3D<_TVarType>(0.0f, 0.0f, 1.0f), lXAxis);
-		lZAxis.CrossUnit(lXAxis, lYAxis);
+		y_axis.CrossUnit(Vector3D<_TVarType>(0.0f, 0.0f, 1.0f), x_axis);
+		z_axis.CrossUnit(x_axis, y_axis);
 	}
 
-	RotationMatrix lMtx(lXAxis, lYAxis, lZAxis);
+	RotationMatrix _mtx(x_axis, y_axis, z_axis);
 
-	InvBMulA(lMtx);	// this = Mtx' * this
+	InvBMulA(_mtx);	// this = Mtx' * this
 
-	RotateAroundWorldX(pAngle);
+	RotateAroundWorldX(angle);
 
-	BMulA(lMtx);	// this = Mtx * this
+	BMulA(_mtx);	// this = Mtx * this
 }
 
-TEMPLATE void QUAL::GetRotationVector(Vector3D<_TVarType>& pVector, _TVarType& pAngle) const
-{
-	_TVarType lCosA = (mMatrix[0] + mMatrix[4] + mMatrix[8] - (_TVarType)1.0) * (_TVarType)0.5;
-	pAngle = (_TVarType)acos(lCosA);
+TEMPLATE void QUAL::GetRotationVector(Vector3D<_TVarType>& vector, _TVarType& angle) const {
+	_TVarType cos_a = (matrix_[0] + matrix_[4] + matrix_[8] - (_TVarType)1.0) * (_TVarType)0.5;
+	angle = (_TVarType)acos(cos_a);
 
-	pVector.x = mMatrix[7] - mMatrix[5];
-	pVector.y = mMatrix[2] - mMatrix[6];
-	pVector.z = mMatrix[3] - mMatrix[1];
+	vector.x = matrix_[7] - matrix_[5];
+	vector.y = matrix_[2] - matrix_[6];
+	vector.z = matrix_[3] - matrix_[1];
 
-	if (pVector.IsNullVector() == true)
-	{
+	if (vector.IsNullVector() == true) {
 		// We can get a null vector in two cases:
 		// 1. The matrix is the identity matrix, in which case we don't care about the rotation vector.
 		// 2. The matrix is rotated exactly 180 degrees compared to the identity matrix,
 		//    and we need to find the rotation vector by checking the rotation axes.
 
-		const _TVarType lEpsilonOne = 1.0f - 1e-6f;
+		const _TVarType epsilon_one = 1.0f - 1e-6f;
 
 		// AxisX.x
-		if (mMatrix[0] >= lEpsilonOne)
-		{
-			pVector.x = 1.0f;
-			pVector.y = 0.0f;
-			pVector.z = 0.0f;
+		if (matrix_[0] >= epsilon_one) {
+			vector.x = 1.0f;
+			vector.y = 0.0f;
+			vector.z = 0.0f;
 		}
 		// AxisY.y
-		else if(mMatrix[4] >= lEpsilonOne)
-		{
-			pVector.x = 0.0f;
-			pVector.y = 1.0f;
-			pVector.z = 0.0f;
+		else if(matrix_[4] >= epsilon_one) {
+			vector.x = 0.0f;
+			vector.y = 1.0f;
+			vector.z = 0.0f;
 		}
 		// AxisZ.z
-		else if(mMatrix[8] >= lEpsilonOne)
-		{
-			pVector.x = 0.0f;
-			pVector.y = 0.0f;
-			pVector.z = 1.0f;
-		}
-		else
-		{
+		else if(matrix_[8] >= epsilon_one) {
+			vector.x = 0.0f;
+			vector.y = 0.0f;
+			vector.z = 1.0f;
+		} else {
 			// ???
-			pVector.x = 1.0f;
-			pVector.y = 1.0f;
-			pVector.z = 1.0f;
+			vector.x = 1.0f;
+			vector.y = 1.0f;
+			vector.z = 1.0f;
 		}
 	}
 }
 
-TEMPLATE void QUAL::Reorthogonalize()
-{
+TEMPLATE void QUAL::Reorthogonalize() {
 
 	//
 	// Step 1. (Fix the x-axis)
 	//
 
 	// Normalize x-axis
-	_TVarType lInvLength = (_TVarType)(1.0 / sqrt(mMatrix[0] * mMatrix[0] + mMatrix[1] * mMatrix[1] + mMatrix[2] * mMatrix[2]));
+	_TVarType inv_length = (_TVarType)(1.0 / sqrt(matrix_[0] * matrix_[0] + matrix_[1] * matrix_[1] + matrix_[2] * matrix_[2]));
 
-	mMatrix[0] *= lInvLength;
-	mMatrix[1] *= lInvLength;
-	mMatrix[2] *= lInvLength;
+	matrix_[0] *= inv_length;
+	matrix_[1] *= inv_length;
+	matrix_[2] *= inv_length;
 
 	//
 	// Step 2. (Fix the y-axis)
 	//
 
 	// Calculate the dot product between the x- and the y-axis.
-	_TVarType lDot = mMatrix[0] * mMatrix[3] + mMatrix[1] * mMatrix[4] + mMatrix[2] * mMatrix[5];
+	_TVarType dot = matrix_[0] * matrix_[3] + matrix_[1] * matrix_[4] + matrix_[2] * matrix_[5];
 
 	// Make the y-axis orthogonal to the x-axis.
-	mMatrix[3] -= lDot * mMatrix[0];
-	mMatrix[4] -= lDot * mMatrix[1];
-	mMatrix[5] -= lDot * mMatrix[2];
+	matrix_[3] -= dot * matrix_[0];
+	matrix_[4] -= dot * matrix_[1];
+	matrix_[5] -= dot * matrix_[2];
 
 	// Normalize y-axis
-	lInvLength = (_TVarType)(1.0 / sqrt(mMatrix[3] * mMatrix[3] + mMatrix[4] * mMatrix[4] + mMatrix[5] * mMatrix[5]));
+	inv_length = (_TVarType)(1.0 / sqrt(matrix_[3] * matrix_[3] + matrix_[4] * matrix_[4] + matrix_[5] * matrix_[5]));
 
-	mMatrix[3] *= lInvLength;
-	mMatrix[4] *= lInvLength;
-	mMatrix[5] *= lInvLength;
+	matrix_[3] *= inv_length;
+	matrix_[4] *= inv_length;
+	matrix_[5] *= inv_length;
 
 	//
 	// Step 3. (Fix the z-axis)
 	//
 
 	// Calculate the dot product between the x- and the z-axis.
-	lDot = mMatrix[0] * mMatrix[6] + mMatrix[1] * mMatrix[7] + mMatrix[2] * mMatrix[8];
+	dot = matrix_[0] * matrix_[6] + matrix_[1] * matrix_[7] + matrix_[2] * matrix_[8];
 
 	// Make the z-axis orthogonal to the x-axis.
-	mMatrix[6] -= lDot * mMatrix[0];
-	mMatrix[7] -= lDot * mMatrix[1];
-	mMatrix[8] -= lDot * mMatrix[2];
+	matrix_[6] -= dot * matrix_[0];
+	matrix_[7] -= dot * matrix_[1];
+	matrix_[8] -= dot * matrix_[2];
 
 	// Calculate the dot product between the y- and the z-axis.
-	lDot = mMatrix[3] * mMatrix[6] + mMatrix[4] * mMatrix[7] + mMatrix[5] * mMatrix[8];
+	dot = matrix_[3] * matrix_[6] + matrix_[4] * matrix_[7] + matrix_[5] * matrix_[8];
 
 	// Make the z-axis orthogonal to the y-axis.
-	mMatrix[6] -= lDot * mMatrix[3];
-	mMatrix[7] -= lDot * mMatrix[4];
-	mMatrix[8] -= lDot * mMatrix[5];
+	matrix_[6] -= dot * matrix_[3];
+	matrix_[7] -= dot * matrix_[4];
+	matrix_[8] -= dot * matrix_[5];
 
 	// Normalize z-axis
-	lInvLength = (_TVarType)(1.0 / sqrt(mMatrix[6] * mMatrix[6] + mMatrix[7] * mMatrix[7] + mMatrix[8] * mMatrix[8]));
+	inv_length = (_TVarType)(1.0 / sqrt(matrix_[6] * matrix_[6] + matrix_[7] * matrix_[7] + matrix_[8] * matrix_[8]));
 
-	mMatrix[6] *= lInvLength;
-	mMatrix[7] *= lInvLength;
-	mMatrix[8] *= lInvLength;
+	matrix_[6] *= inv_length;
+	matrix_[7] *= inv_length;
+	matrix_[8] *= inv_length;
 }
 
-TEMPLATE void QUAL::Get3x3Array(_TVarType* pArray) const
-{
-	pArray[0] = mMatrix[0];
-	pArray[1] = mMatrix[1];
-	pArray[2] = mMatrix[2];
+TEMPLATE void QUAL::Get3x3Array(_TVarType* array) const {
+	array[0] = matrix_[0];
+	array[1] = matrix_[1];
+	array[2] = matrix_[2];
 
-	pArray[3] = mMatrix[3];
-	pArray[4] = mMatrix[4];
-	pArray[5] = mMatrix[5];
+	array[3] = matrix_[3];
+	array[4] = matrix_[4];
+	array[5] = matrix_[5];
 
-	pArray[6] = mMatrix[6];
-	pArray[7] = mMatrix[7];
-	pArray[8] = mMatrix[8];
+	array[6] = matrix_[6];
+	array[7] = matrix_[7];
+	array[8] = matrix_[8];
 }
 
-TEMPLATE void QUAL::GetInverse3x3Array(_TVarType* pArray) const
-{
-	pArray[0] = mMatrix[0];
-	pArray[1] = mMatrix[3];
-	pArray[2] = mMatrix[6];
+TEMPLATE void QUAL::GetInverse3x3Array(_TVarType* array) const {
+	array[0] = matrix_[0];
+	array[1] = matrix_[3];
+	array[2] = matrix_[6];
 
-	pArray[3] = mMatrix[1];
-	pArray[4] = mMatrix[4];
-	pArray[5] = mMatrix[7];
+	array[3] = matrix_[1];
+	array[4] = matrix_[4];
+	array[5] = matrix_[7];
 
-	pArray[6] = mMatrix[2];
-	pArray[7] = mMatrix[5];
-	pArray[8] = mMatrix[8];
+	array[6] = matrix_[2];
+	array[7] = matrix_[5];
+	array[8] = matrix_[8];
 }
 
-TEMPLATE void QUAL::Get4x4Array(_TVarType* pArray) const
-{
-	pArray[0] = mMatrix[0];
-	pArray[1] = mMatrix[1];
-	pArray[2] = mMatrix[2];
-	pArray[3]  = 0.0f;
+TEMPLATE void QUAL::Get4x4Array(_TVarType* array) const {
+	array[0] = matrix_[0];
+	array[1] = matrix_[1];
+	array[2] = matrix_[2];
+	array[3]  = 0.0f;
 
-	pArray[4] = mMatrix[3];
-	pArray[5] = mMatrix[4];
-	pArray[6] = mMatrix[5];
-	pArray[7]  = 0.0f;
+	array[4] = matrix_[3];
+	array[5] = matrix_[4];
+	array[6] = matrix_[5];
+	array[7]  = 0.0f;
 
-	pArray[8]  = mMatrix[6];
-	pArray[9]  = mMatrix[7];
-	pArray[10] = mMatrix[8];
-	pArray[11] = 0.0f;
+	array[8]  = matrix_[6];
+	array[9]  = matrix_[7];
+	array[10] = matrix_[8];
+	array[11] = 0.0f;
 
-	pArray[12] = 0.0f;
-	pArray[13] = 0.0f;
-	pArray[14] = 0.0f;
-	pArray[15] = 1.0f;
+	array[12] = 0.0f;
+	array[13] = 0.0f;
+	array[14] = 0.0f;
+	array[15] = 1.0f;
 }
 
-TEMPLATE void QUAL::GetInverse4x4Array(_TVarType* pArray) const
-{
-	pArray[0]  = mMatrix[0];
-	pArray[1]  = mMatrix[3];
-	pArray[2]  = mMatrix[6];
-	pArray[3]  = 0.0f;
+TEMPLATE void QUAL::GetInverse4x4Array(_TVarType* array) const {
+	array[0]  = matrix_[0];
+	array[1]  = matrix_[3];
+	array[2]  = matrix_[6];
+	array[3]  = 0.0f;
 
-	pArray[4]  = mMatrix[1];
-	pArray[5]  = mMatrix[4];
-	pArray[6]  = mMatrix[7];
-	pArray[7]  = 0.0f;
+	array[4]  = matrix_[1];
+	array[5]  = matrix_[4];
+	array[6]  = matrix_[7];
+	array[7]  = 0.0f;
 
-	pArray[8]  = mMatrix[2];
-	pArray[9]  = mMatrix[5];
-	pArray[10] = mMatrix[8];
-	pArray[11] = 0.0f;
+	array[8]  = matrix_[2];
+	array[9]  = matrix_[5];
+	array[10] = matrix_[8];
+	array[11] = 0.0f;
 
-	pArray[12] = 0.0f;
-	pArray[13] = 0.0f;
-	pArray[14] = 0.0f;
-	pArray[15] = 1.0f;
+	array[12] = 0.0f;
+	array[13] = 0.0f;
+	array[14] = 0.0f;
+	array[15] = 1.0f;
 }
 
-TEMPLATE void QUAL::Mul(const RotationMatrix& pMatrix)
-{
-	_TVarType lTemp[9];
+TEMPLATE void QUAL::Mul(const RotationMatrix& matrix) {
+	_TVarType temp[9];
 
-	lTemp[0] = mMatrix[0] * pMatrix.mMatrix[0] +
-		     mMatrix[1] * pMatrix.mMatrix[3] +
-		     mMatrix[2] * pMatrix.mMatrix[6];
-	lTemp[1] = mMatrix[0] * pMatrix.mMatrix[1] +
-		     mMatrix[1] * pMatrix.mMatrix[4] +
-		     mMatrix[2] * pMatrix.mMatrix[7];
-	lTemp[2] = mMatrix[0] * pMatrix.mMatrix[2] +
-		     mMatrix[1] * pMatrix.mMatrix[5] +
-		     mMatrix[2] * pMatrix.mMatrix[8];
+	temp[0] = matrix_[0] * matrix.matrix_[0] +
+		     matrix_[1] * matrix.matrix_[3] +
+		     matrix_[2] * matrix.matrix_[6];
+	temp[1] = matrix_[0] * matrix.matrix_[1] +
+		     matrix_[1] * matrix.matrix_[4] +
+		     matrix_[2] * matrix.matrix_[7];
+	temp[2] = matrix_[0] * matrix.matrix_[2] +
+		     matrix_[1] * matrix.matrix_[5] +
+		     matrix_[2] * matrix.matrix_[8];
 
-	lTemp[3] = mMatrix[3] * pMatrix.mMatrix[0] +
-		     mMatrix[4] * pMatrix.mMatrix[3] +
-		     mMatrix[5] * pMatrix.mMatrix[6];
-	lTemp[4] = mMatrix[3] * pMatrix.mMatrix[1] +
-		     mMatrix[4] * pMatrix.mMatrix[4] +
-		     mMatrix[5] * pMatrix.mMatrix[7];
-	lTemp[5] = mMatrix[3] * pMatrix.mMatrix[2] +
-		     mMatrix[4] * pMatrix.mMatrix[5] +
-		     mMatrix[5] * pMatrix.mMatrix[8];
+	temp[3] = matrix_[3] * matrix.matrix_[0] +
+		     matrix_[4] * matrix.matrix_[3] +
+		     matrix_[5] * matrix.matrix_[6];
+	temp[4] = matrix_[3] * matrix.matrix_[1] +
+		     matrix_[4] * matrix.matrix_[4] +
+		     matrix_[5] * matrix.matrix_[7];
+	temp[5] = matrix_[3] * matrix.matrix_[2] +
+		     matrix_[4] * matrix.matrix_[5] +
+		     matrix_[5] * matrix.matrix_[8];
 
-	lTemp[6] = mMatrix[6] * pMatrix.mMatrix[0] +
-		     mMatrix[7] * pMatrix.mMatrix[3] +
-		     mMatrix[8] * pMatrix.mMatrix[6];
-	lTemp[7] = mMatrix[6] * pMatrix.mMatrix[1] +
-		     mMatrix[7] * pMatrix.mMatrix[4] +
-		     mMatrix[8] * pMatrix.mMatrix[7];
-	lTemp[8] = mMatrix[6] * pMatrix.mMatrix[2] +
-		     mMatrix[7] * pMatrix.mMatrix[5] +
-		     mMatrix[8] * pMatrix.mMatrix[8];
+	temp[6] = matrix_[6] * matrix.matrix_[0] +
+		     matrix_[7] * matrix.matrix_[3] +
+		     matrix_[8] * matrix.matrix_[6];
+	temp[7] = matrix_[6] * matrix.matrix_[1] +
+		     matrix_[7] * matrix.matrix_[4] +
+		     matrix_[8] * matrix.matrix_[7];
+	temp[8] = matrix_[6] * matrix.matrix_[2] +
+		     matrix_[7] * matrix.matrix_[5] +
+		     matrix_[8] * matrix.matrix_[8];
 
-	mMatrix[0] = lTemp[0];
-	mMatrix[1] = lTemp[1];
-	mMatrix[2] = lTemp[2];
-	mMatrix[3] = lTemp[3];
-	mMatrix[4] = lTemp[4];
-	mMatrix[5] = lTemp[5];
-	mMatrix[6] = lTemp[6];
-	mMatrix[7] = lTemp[7];
-	mMatrix[8] = lTemp[8];
+	matrix_[0] = temp[0];
+	matrix_[1] = temp[1];
+	matrix_[2] = temp[2];
+	matrix_[3] = temp[3];
+	matrix_[4] = temp[4];
+	matrix_[5] = temp[5];
+	matrix_[6] = temp[6];
+	matrix_[7] = temp[7];
+	matrix_[8] = temp[8];
 }
 
-TEMPLATE void QUAL::Mul(const RotationMatrix& pMatrix1, const RotationMatrix& pMatrix2)
-{
-	mMatrix[0] = pMatrix1.mMatrix[0] * pMatrix2.mMatrix[0] +
-			pMatrix1.mMatrix[1] * pMatrix2.mMatrix[3] +
-			pMatrix1.mMatrix[2] * pMatrix2.mMatrix[6];
-	mMatrix[1] = pMatrix1.mMatrix[0] * pMatrix2.mMatrix[1] +
-			pMatrix1.mMatrix[1] * pMatrix2.mMatrix[4] +
-			pMatrix1.mMatrix[2] * pMatrix2.mMatrix[7];
-	mMatrix[2] = pMatrix1.mMatrix[0] * pMatrix2.mMatrix[2] +
-			pMatrix1.mMatrix[1] * pMatrix2.mMatrix[5] +
-			pMatrix1.mMatrix[2] * pMatrix2.mMatrix[8];
+TEMPLATE void QUAL::Mul(const RotationMatrix& matrix1, const RotationMatrix& matrix2) {
+	matrix_[0] = matrix1.matrix_[0] * matrix2.matrix_[0] +
+			matrix1.matrix_[1] * matrix2.matrix_[3] +
+			matrix1.matrix_[2] * matrix2.matrix_[6];
+	matrix_[1] = matrix1.matrix_[0] * matrix2.matrix_[1] +
+			matrix1.matrix_[1] * matrix2.matrix_[4] +
+			matrix1.matrix_[2] * matrix2.matrix_[7];
+	matrix_[2] = matrix1.matrix_[0] * matrix2.matrix_[2] +
+			matrix1.matrix_[1] * matrix2.matrix_[5] +
+			matrix1.matrix_[2] * matrix2.matrix_[8];
 
-	mMatrix[3] = pMatrix1.mMatrix[3] * pMatrix2.mMatrix[0] +
-			pMatrix1.mMatrix[4] * pMatrix2.mMatrix[3] +
-			pMatrix1.mMatrix[5] * pMatrix2.mMatrix[6];
-	mMatrix[4] = pMatrix1.mMatrix[3] * pMatrix2.mMatrix[1] +
-			pMatrix1.mMatrix[4] * pMatrix2.mMatrix[4] +
-			pMatrix1.mMatrix[5] * pMatrix2.mMatrix[7];
-	mMatrix[5] = pMatrix1.mMatrix[3] * pMatrix2.mMatrix[2] +
-			pMatrix1.mMatrix[4] * pMatrix2.mMatrix[5] +
-			pMatrix1.mMatrix[5] * pMatrix2.mMatrix[8];
+	matrix_[3] = matrix1.matrix_[3] * matrix2.matrix_[0] +
+			matrix1.matrix_[4] * matrix2.matrix_[3] +
+			matrix1.matrix_[5] * matrix2.matrix_[6];
+	matrix_[4] = matrix1.matrix_[3] * matrix2.matrix_[1] +
+			matrix1.matrix_[4] * matrix2.matrix_[4] +
+			matrix1.matrix_[5] * matrix2.matrix_[7];
+	matrix_[5] = matrix1.matrix_[3] * matrix2.matrix_[2] +
+			matrix1.matrix_[4] * matrix2.matrix_[5] +
+			matrix1.matrix_[5] * matrix2.matrix_[8];
 
-	mMatrix[6] = pMatrix1.mMatrix[6] * pMatrix2.mMatrix[0] +
-			pMatrix1.mMatrix[7] * pMatrix2.mMatrix[3] +
-			pMatrix1.mMatrix[8] * pMatrix2.mMatrix[6];
-	mMatrix[7] = pMatrix1.mMatrix[6] * pMatrix2.mMatrix[1] +
-			pMatrix1.mMatrix[7] * pMatrix2.mMatrix[4] +
-			pMatrix1.mMatrix[8] * pMatrix2.mMatrix[7];
-	mMatrix[8] = pMatrix1.mMatrix[6] * pMatrix2.mMatrix[2] +
-			pMatrix1.mMatrix[7] * pMatrix2.mMatrix[5] +
-			pMatrix1.mMatrix[8] * pMatrix2.mMatrix[8];
+	matrix_[6] = matrix1.matrix_[6] * matrix2.matrix_[0] +
+			matrix1.matrix_[7] * matrix2.matrix_[3] +
+			matrix1.matrix_[8] * matrix2.matrix_[6];
+	matrix_[7] = matrix1.matrix_[6] * matrix2.matrix_[1] +
+			matrix1.matrix_[7] * matrix2.matrix_[4] +
+			matrix1.matrix_[8] * matrix2.matrix_[7];
+	matrix_[8] = matrix1.matrix_[6] * matrix2.matrix_[2] +
+			matrix1.matrix_[7] * matrix2.matrix_[5] +
+			matrix1.matrix_[8] * matrix2.matrix_[8];
 }
 
-TEMPLATE void QUAL::Mul(_TVarType pScalar)
-{
-	mMatrix[0] *= pScalar;
-	mMatrix[1] *= pScalar;
-	mMatrix[2] *= pScalar;
+TEMPLATE void QUAL::Mul(_TVarType scalar) {
+	matrix_[0] *= scalar;
+	matrix_[1] *= scalar;
+	matrix_[2] *= scalar;
 
-	mMatrix[3] *= pScalar;
-	mMatrix[4] *= pScalar;
-	mMatrix[5] *= pScalar;
+	matrix_[3] *= scalar;
+	matrix_[4] *= scalar;
+	matrix_[5] *= scalar;
 
-	mMatrix[6] *= pScalar;
-	mMatrix[7] *= pScalar;
-	mMatrix[8] *= pScalar;
+	matrix_[6] *= scalar;
+	matrix_[7] *= scalar;
+	matrix_[8] *= scalar;
 }
 
-TEMPLATE void QUAL::InvAMulB(const RotationMatrix& pMatrix)
-{
-	_TVarType lTemp[9];
+TEMPLATE void QUAL::InvAMulB(const RotationMatrix& matrix) {
+	_TVarType temp[9];
 
-	lTemp[0] = mMatrix[0] * pMatrix.mMatrix[0] +
-		     mMatrix[3] * pMatrix.mMatrix[3] +
-		     mMatrix[6] * pMatrix.mMatrix[6];
-	lTemp[1] = mMatrix[0] * pMatrix.mMatrix[1] +
-		     mMatrix[3] * pMatrix.mMatrix[4] +
-		     mMatrix[6] * pMatrix.mMatrix[7];
-	lTemp[2] = mMatrix[0] * pMatrix.mMatrix[2] +
-		     mMatrix[3] * pMatrix.mMatrix[5] +
-		     mMatrix[6] * pMatrix.mMatrix[8];
+	temp[0] = matrix_[0] * matrix.matrix_[0] +
+		     matrix_[3] * matrix.matrix_[3] +
+		     matrix_[6] * matrix.matrix_[6];
+	temp[1] = matrix_[0] * matrix.matrix_[1] +
+		     matrix_[3] * matrix.matrix_[4] +
+		     matrix_[6] * matrix.matrix_[7];
+	temp[2] = matrix_[0] * matrix.matrix_[2] +
+		     matrix_[3] * matrix.matrix_[5] +
+		     matrix_[6] * matrix.matrix_[8];
 
-	lTemp[3] = mMatrix[1] * pMatrix.mMatrix[0] +
-		     mMatrix[4] * pMatrix.mMatrix[3] +
-		     mMatrix[7] * pMatrix.mMatrix[6];
-	lTemp[4] = mMatrix[1] * pMatrix.mMatrix[1] +
-		     mMatrix[4] * pMatrix.mMatrix[4] +
-		     mMatrix[7] * pMatrix.mMatrix[7];
-	lTemp[5] = mMatrix[1] * pMatrix.mMatrix[2] +
-		     mMatrix[4] * pMatrix.mMatrix[5] +
-		     mMatrix[7] * pMatrix.mMatrix[8];
+	temp[3] = matrix_[1] * matrix.matrix_[0] +
+		     matrix_[4] * matrix.matrix_[3] +
+		     matrix_[7] * matrix.matrix_[6];
+	temp[4] = matrix_[1] * matrix.matrix_[1] +
+		     matrix_[4] * matrix.matrix_[4] +
+		     matrix_[7] * matrix.matrix_[7];
+	temp[5] = matrix_[1] * matrix.matrix_[2] +
+		     matrix_[4] * matrix.matrix_[5] +
+		     matrix_[7] * matrix.matrix_[8];
 
-	lTemp[6] = mMatrix[2] * pMatrix.mMatrix[0] +
-		     mMatrix[5] * pMatrix.mMatrix[3] +
-		     mMatrix[8] * pMatrix.mMatrix[6];
-	lTemp[7] = mMatrix[2] * pMatrix.mMatrix[1] +
-		     mMatrix[5] * pMatrix.mMatrix[4] +
-		     mMatrix[8] * pMatrix.mMatrix[7];
-	lTemp[8] = mMatrix[2] * pMatrix.mMatrix[2] +
-		     mMatrix[5] * pMatrix.mMatrix[5] +
-		     mMatrix[8] * pMatrix.mMatrix[8];
+	temp[6] = matrix_[2] * matrix.matrix_[0] +
+		     matrix_[5] * matrix.matrix_[3] +
+		     matrix_[8] * matrix.matrix_[6];
+	temp[7] = matrix_[2] * matrix.matrix_[1] +
+		     matrix_[5] * matrix.matrix_[4] +
+		     matrix_[8] * matrix.matrix_[7];
+	temp[8] = matrix_[2] * matrix.matrix_[2] +
+		     matrix_[5] * matrix.matrix_[5] +
+		     matrix_[8] * matrix.matrix_[8];
 
-	mMatrix[0] = lTemp[0];
-	mMatrix[1] = lTemp[1];
-	mMatrix[2] = lTemp[2];
-	mMatrix[3] = lTemp[3];
-	mMatrix[4] = lTemp[4];
-	mMatrix[5] = lTemp[5];
-	mMatrix[6] = lTemp[6];
-	mMatrix[7] = lTemp[7];
-	mMatrix[8] = lTemp[8];
+	matrix_[0] = temp[0];
+	matrix_[1] = temp[1];
+	matrix_[2] = temp[2];
+	matrix_[3] = temp[3];
+	matrix_[4] = temp[4];
+	matrix_[5] = temp[5];
+	matrix_[6] = temp[6];
+	matrix_[7] = temp[7];
+	matrix_[8] = temp[8];
 }
 
-TEMPLATE void QUAL::InvAMulInvB(const RotationMatrix& pMatrix)
-{
-	_TVarType lTemp[9];
+TEMPLATE void QUAL::InvAMulInvB(const RotationMatrix& matrix) {
+	_TVarType temp[9];
 
-	lTemp[0] = mMatrix[0] * pMatrix.mMatrix[0] +
-		     mMatrix[3] * pMatrix.mMatrix[1] +
-		     mMatrix[6] * pMatrix.mMatrix[2];
-	lTemp[1] = mMatrix[0] * pMatrix.mMatrix[3] +
-		     mMatrix[3] * pMatrix.mMatrix[4] +
-		     mMatrix[6] * pMatrix.mMatrix[5];
-	lTemp[2] = mMatrix[0] * pMatrix.mMatrix[6] +
-		     mMatrix[3] * pMatrix.mMatrix[7] +
-		     mMatrix[6] * pMatrix.mMatrix[8];
+	temp[0] = matrix_[0] * matrix.matrix_[0] +
+		     matrix_[3] * matrix.matrix_[1] +
+		     matrix_[6] * matrix.matrix_[2];
+	temp[1] = matrix_[0] * matrix.matrix_[3] +
+		     matrix_[3] * matrix.matrix_[4] +
+		     matrix_[6] * matrix.matrix_[5];
+	temp[2] = matrix_[0] * matrix.matrix_[6] +
+		     matrix_[3] * matrix.matrix_[7] +
+		     matrix_[6] * matrix.matrix_[8];
 
-	lTemp[3] = mMatrix[1] * pMatrix.mMatrix[0] +
-		     mMatrix[4] * pMatrix.mMatrix[1] +
-		     mMatrix[7] * pMatrix.mMatrix[2];
-	lTemp[4] = mMatrix[1] * pMatrix.mMatrix[3] +
-		     mMatrix[4] * pMatrix.mMatrix[4] +
-		     mMatrix[7] * pMatrix.mMatrix[5];
-	lTemp[5] = mMatrix[1] * pMatrix.mMatrix[6] +
-		     mMatrix[4] * pMatrix.mMatrix[7] +
-		     mMatrix[7] * pMatrix.mMatrix[8];
+	temp[3] = matrix_[1] * matrix.matrix_[0] +
+		     matrix_[4] * matrix.matrix_[1] +
+		     matrix_[7] * matrix.matrix_[2];
+	temp[4] = matrix_[1] * matrix.matrix_[3] +
+		     matrix_[4] * matrix.matrix_[4] +
+		     matrix_[7] * matrix.matrix_[5];
+	temp[5] = matrix_[1] * matrix.matrix_[6] +
+		     matrix_[4] * matrix.matrix_[7] +
+		     matrix_[7] * matrix.matrix_[8];
 
-	lTemp[6] = mMatrix[2] * pMatrix.mMatrix[0] +
-		     mMatrix[5] * pMatrix.mMatrix[1] +
-		     mMatrix[8] * pMatrix.mMatrix[2];
-	lTemp[7] = mMatrix[2] * pMatrix.mMatrix[3] +
-		     mMatrix[5] * pMatrix.mMatrix[4] +
-		     mMatrix[8] * pMatrix.mMatrix[5];
-	lTemp[8] = mMatrix[2] * pMatrix.mMatrix[6] +
-		     mMatrix[5] * pMatrix.mMatrix[7] +
-		     mMatrix[8] * pMatrix.mMatrix[8];
+	temp[6] = matrix_[2] * matrix.matrix_[0] +
+		     matrix_[5] * matrix.matrix_[1] +
+		     matrix_[8] * matrix.matrix_[2];
+	temp[7] = matrix_[2] * matrix.matrix_[3] +
+		     matrix_[5] * matrix.matrix_[4] +
+		     matrix_[8] * matrix.matrix_[5];
+	temp[8] = matrix_[2] * matrix.matrix_[6] +
+		     matrix_[5] * matrix.matrix_[7] +
+		     matrix_[8] * matrix.matrix_[8];
 
-	mMatrix[0] = lTemp[0];
-	mMatrix[1] = lTemp[1];
-	mMatrix[2] = lTemp[2];
-	mMatrix[3] = lTemp[3];
-	mMatrix[4] = lTemp[4];
-	mMatrix[5] = lTemp[5];
-	mMatrix[6] = lTemp[6];
-	mMatrix[7] = lTemp[7];
-	mMatrix[8] = lTemp[8];
+	matrix_[0] = temp[0];
+	matrix_[1] = temp[1];
+	matrix_[2] = temp[2];
+	matrix_[3] = temp[3];
+	matrix_[4] = temp[4];
+	matrix_[5] = temp[5];
+	matrix_[6] = temp[6];
+	matrix_[7] = temp[7];
+	matrix_[8] = temp[8];
 }
 
-TEMPLATE void QUAL::AMulInvB(const RotationMatrix& pMatrix)
-{
-	_TVarType lTemp[9];
+TEMPLATE void QUAL::AMulInvB(const RotationMatrix& matrix) {
+	_TVarType temp[9];
 
-	lTemp[0] = mMatrix[0] * pMatrix.mMatrix[0] +
-		     mMatrix[1] * pMatrix.mMatrix[1] +
-		     mMatrix[2] * pMatrix.mMatrix[2];
-	lTemp[1] = mMatrix[0] * pMatrix.mMatrix[3] +
-		     mMatrix[1] * pMatrix.mMatrix[4] +
-		     mMatrix[2] * pMatrix.mMatrix[5];
-	lTemp[2] = mMatrix[0] * pMatrix.mMatrix[6] +
-		     mMatrix[1] * pMatrix.mMatrix[7] +
-		     mMatrix[2] * pMatrix.mMatrix[8];
+	temp[0] = matrix_[0] * matrix.matrix_[0] +
+		     matrix_[1] * matrix.matrix_[1] +
+		     matrix_[2] * matrix.matrix_[2];
+	temp[1] = matrix_[0] * matrix.matrix_[3] +
+		     matrix_[1] * matrix.matrix_[4] +
+		     matrix_[2] * matrix.matrix_[5];
+	temp[2] = matrix_[0] * matrix.matrix_[6] +
+		     matrix_[1] * matrix.matrix_[7] +
+		     matrix_[2] * matrix.matrix_[8];
 
-	lTemp[3] = mMatrix[3] * pMatrix.mMatrix[0] +
-		     mMatrix[4] * pMatrix.mMatrix[1] +
-		     mMatrix[5] * pMatrix.mMatrix[2];
-	lTemp[4] = mMatrix[3] * pMatrix.mMatrix[3] +
-		     mMatrix[4] * pMatrix.mMatrix[4] +
-		     mMatrix[5] * pMatrix.mMatrix[5];
-	lTemp[5] = mMatrix[3] * pMatrix.mMatrix[6] +
-		     mMatrix[4] * pMatrix.mMatrix[7] +
-		     mMatrix[5] * pMatrix.mMatrix[8];
+	temp[3] = matrix_[3] * matrix.matrix_[0] +
+		     matrix_[4] * matrix.matrix_[1] +
+		     matrix_[5] * matrix.matrix_[2];
+	temp[4] = matrix_[3] * matrix.matrix_[3] +
+		     matrix_[4] * matrix.matrix_[4] +
+		     matrix_[5] * matrix.matrix_[5];
+	temp[5] = matrix_[3] * matrix.matrix_[6] +
+		     matrix_[4] * matrix.matrix_[7] +
+		     matrix_[5] * matrix.matrix_[8];
 
-	lTemp[6] = mMatrix[6] * pMatrix.mMatrix[0] +
-		     mMatrix[7] * pMatrix.mMatrix[1] +
-		     mMatrix[8] * pMatrix.mMatrix[2];
-	lTemp[7] = mMatrix[6] * pMatrix.mMatrix[3] +
-		     mMatrix[7] * pMatrix.mMatrix[4] +
-		     mMatrix[8] * pMatrix.mMatrix[5];
-	lTemp[8] = mMatrix[6] * pMatrix.mMatrix[6] +
-		     mMatrix[7] * pMatrix.mMatrix[7] +
-		     mMatrix[8] * pMatrix.mMatrix[8];
+	temp[6] = matrix_[6] * matrix.matrix_[0] +
+		     matrix_[7] * matrix.matrix_[1] +
+		     matrix_[8] * matrix.matrix_[2];
+	temp[7] = matrix_[6] * matrix.matrix_[3] +
+		     matrix_[7] * matrix.matrix_[4] +
+		     matrix_[8] * matrix.matrix_[5];
+	temp[8] = matrix_[6] * matrix.matrix_[6] +
+		     matrix_[7] * matrix.matrix_[7] +
+		     matrix_[8] * matrix.matrix_[8];
 
-	mMatrix[0] = lTemp[0];
-	mMatrix[1] = lTemp[1];
-	mMatrix[2] = lTemp[2];
-	mMatrix[3] = lTemp[3];
-	mMatrix[4] = lTemp[4];
-	mMatrix[5] = lTemp[5];
-	mMatrix[6] = lTemp[6];
-	mMatrix[7] = lTemp[7];
-	mMatrix[8] = lTemp[8];
+	matrix_[0] = temp[0];
+	matrix_[1] = temp[1];
+	matrix_[2] = temp[2];
+	matrix_[3] = temp[3];
+	matrix_[4] = temp[4];
+	matrix_[5] = temp[5];
+	matrix_[6] = temp[6];
+	matrix_[7] = temp[7];
+	matrix_[8] = temp[8];
 }
 
 
 
-TEMPLATE void QUAL::BMulA(const RotationMatrix& pMatrix)
-{
-	_TVarType lTemp[9];
+TEMPLATE void QUAL::BMulA(const RotationMatrix& matrix) {
+	_TVarType temp[9];
 
-	lTemp[0] = pMatrix.mMatrix[0] * mMatrix[0] +
-		     pMatrix.mMatrix[1] * mMatrix[3] +
-		     pMatrix.mMatrix[2] * mMatrix[6];
-	lTemp[1] = pMatrix.mMatrix[0] * mMatrix[1] +
-		     pMatrix.mMatrix[1] * mMatrix[4] +
-		     pMatrix.mMatrix[2] * mMatrix[7];
-	lTemp[2] = pMatrix.mMatrix[0] * mMatrix[2] +
-		     pMatrix.mMatrix[1] * mMatrix[5] +
-		     pMatrix.mMatrix[2] * mMatrix[8];
+	temp[0] = matrix.matrix_[0] * matrix_[0] +
+		     matrix.matrix_[1] * matrix_[3] +
+		     matrix.matrix_[2] * matrix_[6];
+	temp[1] = matrix.matrix_[0] * matrix_[1] +
+		     matrix.matrix_[1] * matrix_[4] +
+		     matrix.matrix_[2] * matrix_[7];
+	temp[2] = matrix.matrix_[0] * matrix_[2] +
+		     matrix.matrix_[1] * matrix_[5] +
+		     matrix.matrix_[2] * matrix_[8];
 
-	lTemp[3] = pMatrix.mMatrix[3] * mMatrix[0] +
-		     pMatrix.mMatrix[4] * mMatrix[3] +
-		     pMatrix.mMatrix[5] * mMatrix[6];
-	lTemp[4] = pMatrix.mMatrix[3] * mMatrix[1] +
-		     pMatrix.mMatrix[4] * mMatrix[4] +
-		     pMatrix.mMatrix[5] * mMatrix[7];
-	lTemp[5] = pMatrix.mMatrix[3] * mMatrix[2] +
-		     pMatrix.mMatrix[4] * mMatrix[5] +
-		     pMatrix.mMatrix[5] * mMatrix[8];
+	temp[3] = matrix.matrix_[3] * matrix_[0] +
+		     matrix.matrix_[4] * matrix_[3] +
+		     matrix.matrix_[5] * matrix_[6];
+	temp[4] = matrix.matrix_[3] * matrix_[1] +
+		     matrix.matrix_[4] * matrix_[4] +
+		     matrix.matrix_[5] * matrix_[7];
+	temp[5] = matrix.matrix_[3] * matrix_[2] +
+		     matrix.matrix_[4] * matrix_[5] +
+		     matrix.matrix_[5] * matrix_[8];
 
-	lTemp[6] = pMatrix.mMatrix[6] * mMatrix[0] +
-		     pMatrix.mMatrix[7] * mMatrix[3] +
-		     pMatrix.mMatrix[8] * mMatrix[6];
-	lTemp[7] = pMatrix.mMatrix[6] * mMatrix[1] +
-		     pMatrix.mMatrix[7] * mMatrix[4] +
-		     pMatrix.mMatrix[8] * mMatrix[7];
-	lTemp[8] = pMatrix.mMatrix[6] * mMatrix[2] +
-		     pMatrix.mMatrix[7] * mMatrix[5] +
-		     pMatrix.mMatrix[8] * mMatrix[8];
+	temp[6] = matrix.matrix_[6] * matrix_[0] +
+		     matrix.matrix_[7] * matrix_[3] +
+		     matrix.matrix_[8] * matrix_[6];
+	temp[7] = matrix.matrix_[6] * matrix_[1] +
+		     matrix.matrix_[7] * matrix_[4] +
+		     matrix.matrix_[8] * matrix_[7];
+	temp[8] = matrix.matrix_[6] * matrix_[2] +
+		     matrix.matrix_[7] * matrix_[5] +
+		     matrix.matrix_[8] * matrix_[8];
 
-	mMatrix[0] = lTemp[0];
-	mMatrix[1] = lTemp[1];
-	mMatrix[2] = lTemp[2];
-	mMatrix[3] = lTemp[3];
-	mMatrix[4] = lTemp[4];
-	mMatrix[5] = lTemp[5];
-	mMatrix[6] = lTemp[6];
-	mMatrix[7] = lTemp[7];
-	mMatrix[8] = lTemp[8];
+	matrix_[0] = temp[0];
+	matrix_[1] = temp[1];
+	matrix_[2] = temp[2];
+	matrix_[3] = temp[3];
+	matrix_[4] = temp[4];
+	matrix_[5] = temp[5];
+	matrix_[6] = temp[6];
+	matrix_[7] = temp[7];
+	matrix_[8] = temp[8];
 }
 
 
 
-TEMPLATE void QUAL::BMulInvA(const RotationMatrix& pMatrix)
-{
-	_TVarType lTemp[9];
+TEMPLATE void QUAL::BMulInvA(const RotationMatrix& matrix) {
+	_TVarType temp[9];
 
-	lTemp[0] = pMatrix.mMatrix[0] * mMatrix[0] +
-		     pMatrix.mMatrix[1] * mMatrix[3] +
-		     pMatrix.mMatrix[2] * mMatrix[6];
-	lTemp[1] = pMatrix.mMatrix[0] * mMatrix[1] +
-		     pMatrix.mMatrix[1] * mMatrix[4] +
-		     pMatrix.mMatrix[2] * mMatrix[7];
-	lTemp[2] = pMatrix.mMatrix[0] * mMatrix[2] +
-		     pMatrix.mMatrix[1] * mMatrix[5] +
-		     pMatrix.mMatrix[2] * mMatrix[8];
+	temp[0] = matrix.matrix_[0] * matrix_[0] +
+		     matrix.matrix_[1] * matrix_[3] +
+		     matrix.matrix_[2] * matrix_[6];
+	temp[1] = matrix.matrix_[0] * matrix_[1] +
+		     matrix.matrix_[1] * matrix_[4] +
+		     matrix.matrix_[2] * matrix_[7];
+	temp[2] = matrix.matrix_[0] * matrix_[2] +
+		     matrix.matrix_[1] * matrix_[5] +
+		     matrix.matrix_[2] * matrix_[8];
 
-	lTemp[3] = pMatrix.mMatrix[3] * mMatrix[0] +
-		     pMatrix.mMatrix[4] * mMatrix[3] +
-		     pMatrix.mMatrix[5] * mMatrix[6];
-	lTemp[4] = pMatrix.mMatrix[3] * mMatrix[1] +
-		     pMatrix.mMatrix[4] * mMatrix[4] +
-		     pMatrix.mMatrix[5] * mMatrix[7];
-	lTemp[5] = pMatrix.mMatrix[3] * mMatrix[2] +
-		     pMatrix.mMatrix[4] * mMatrix[5] +
-		     pMatrix.mMatrix[5] * mMatrix[8];
+	temp[3] = matrix.matrix_[3] * matrix_[0] +
+		     matrix.matrix_[4] * matrix_[3] +
+		     matrix.matrix_[5] * matrix_[6];
+	temp[4] = matrix.matrix_[3] * matrix_[1] +
+		     matrix.matrix_[4] * matrix_[4] +
+		     matrix.matrix_[5] * matrix_[7];
+	temp[5] = matrix.matrix_[3] * matrix_[2] +
+		     matrix.matrix_[4] * matrix_[5] +
+		     matrix.matrix_[5] * matrix_[8];
 
-	lTemp[6] = pMatrix.mMatrix[6] * mMatrix[0] +
-		     pMatrix.mMatrix[7] * mMatrix[3] +
-		     pMatrix.mMatrix[8] * mMatrix[6];
-	lTemp[7] = pMatrix.mMatrix[6] * mMatrix[1] +
-		     pMatrix.mMatrix[7] * mMatrix[4] +
-		     pMatrix.mMatrix[8] * mMatrix[7];
-	lTemp[8] = pMatrix.mMatrix[6] * mMatrix[2] +
-		     pMatrix.mMatrix[7] * mMatrix[5] +
-		     pMatrix.mMatrix[8] * mMatrix[8];
+	temp[6] = matrix.matrix_[6] * matrix_[0] +
+		     matrix.matrix_[7] * matrix_[3] +
+		     matrix.matrix_[8] * matrix_[6];
+	temp[7] = matrix.matrix_[6] * matrix_[1] +
+		     matrix.matrix_[7] * matrix_[4] +
+		     matrix.matrix_[8] * matrix_[7];
+	temp[8] = matrix.matrix_[6] * matrix_[2] +
+		     matrix.matrix_[7] * matrix_[5] +
+		     matrix.matrix_[8] * matrix_[8];
 
-	mMatrix[0] = lTemp[0];
-	mMatrix[1] = lTemp[1];
-	mMatrix[2] = lTemp[2];
-	mMatrix[3] = lTemp[3];
-	mMatrix[4] = lTemp[4];
-	mMatrix[5] = lTemp[5];
-	mMatrix[6] = lTemp[6];
-	mMatrix[7] = lTemp[7];
-	mMatrix[8] = lTemp[8];
+	matrix_[0] = temp[0];
+	matrix_[1] = temp[1];
+	matrix_[2] = temp[2];
+	matrix_[3] = temp[3];
+	matrix_[4] = temp[4];
+	matrix_[5] = temp[5];
+	matrix_[6] = temp[6];
+	matrix_[7] = temp[7];
+	matrix_[8] = temp[8];
 }
 
 
 
-TEMPLATE void QUAL::InvBMulInvA(const RotationMatrix& pMatrix)
-{
-	_TVarType lTemp[9];
+TEMPLATE void QUAL::InvBMulInvA(const RotationMatrix& matrix) {
+	_TVarType temp[9];
 
-	lTemp[0] = pMatrix.mMatrix[0] * mMatrix[0] +
-		     pMatrix.mMatrix[3] * mMatrix[1] +
-		     pMatrix.mMatrix[6] * mMatrix[2];
-	lTemp[1] = pMatrix.mMatrix[0] * mMatrix[3] +
-		     pMatrix.mMatrix[3] * mMatrix[4] +
-		     pMatrix.mMatrix[6] * mMatrix[5];
-	lTemp[2] = pMatrix.mMatrix[0] * mMatrix[6] +
-		     pMatrix.mMatrix[3] * mMatrix[7] +
-		     pMatrix.mMatrix[6] * mMatrix[8];
+	temp[0] = matrix.matrix_[0] * matrix_[0] +
+		     matrix.matrix_[3] * matrix_[1] +
+		     matrix.matrix_[6] * matrix_[2];
+	temp[1] = matrix.matrix_[0] * matrix_[3] +
+		     matrix.matrix_[3] * matrix_[4] +
+		     matrix.matrix_[6] * matrix_[5];
+	temp[2] = matrix.matrix_[0] * matrix_[6] +
+		     matrix.matrix_[3] * matrix_[7] +
+		     matrix.matrix_[6] * matrix_[8];
 
-	lTemp[3] = pMatrix.mMatrix[1] * mMatrix[0] +
-		     pMatrix.mMatrix[4] * mMatrix[1] +
-		     pMatrix.mMatrix[7] * mMatrix[2];
-	lTemp[4] = pMatrix.mMatrix[1] * mMatrix[3] +
-		     pMatrix.mMatrix[4] * mMatrix[4] +
-		     pMatrix.mMatrix[7] * mMatrix[5];
-	lTemp[5] = pMatrix.mMatrix[1] * mMatrix[6] +
-		     pMatrix.mMatrix[4] * mMatrix[7] +
-		     pMatrix.mMatrix[7] * mMatrix[8];
+	temp[3] = matrix.matrix_[1] * matrix_[0] +
+		     matrix.matrix_[4] * matrix_[1] +
+		     matrix.matrix_[7] * matrix_[2];
+	temp[4] = matrix.matrix_[1] * matrix_[3] +
+		     matrix.matrix_[4] * matrix_[4] +
+		     matrix.matrix_[7] * matrix_[5];
+	temp[5] = matrix.matrix_[1] * matrix_[6] +
+		     matrix.matrix_[4] * matrix_[7] +
+		     matrix.matrix_[7] * matrix_[8];
 
-	lTemp[6] = pMatrix.mMatrix[2] * mMatrix[0] +
-		     pMatrix.mMatrix[5] * mMatrix[1] +
-		     pMatrix.mMatrix[8] * mMatrix[2];
-	lTemp[7] = pMatrix.mMatrix[2] * mMatrix[3] +
-		     pMatrix.mMatrix[5] * mMatrix[4] +
-		     pMatrix.mMatrix[8] * mMatrix[5];
-	lTemp[8] = pMatrix.mMatrix[2] * mMatrix[6] +
-		     pMatrix.mMatrix[5] * mMatrix[7] +
-		     pMatrix.mMatrix[8] * mMatrix[8];
+	temp[6] = matrix.matrix_[2] * matrix_[0] +
+		     matrix.matrix_[5] * matrix_[1] +
+		     matrix.matrix_[8] * matrix_[2];
+	temp[7] = matrix.matrix_[2] * matrix_[3] +
+		     matrix.matrix_[5] * matrix_[4] +
+		     matrix.matrix_[8] * matrix_[5];
+	temp[8] = matrix.matrix_[2] * matrix_[6] +
+		     matrix.matrix_[5] * matrix_[7] +
+		     matrix.matrix_[8] * matrix_[8];
 
-	mMatrix[0] = lTemp[0];
-	mMatrix[1] = lTemp[1];
-	mMatrix[2] = lTemp[2];
-	mMatrix[3] = lTemp[3];
-	mMatrix[4] = lTemp[4];
-	mMatrix[5] = lTemp[5];
-	mMatrix[6] = lTemp[6];
-	mMatrix[7] = lTemp[7];
-	mMatrix[8] = lTemp[8];
+	matrix_[0] = temp[0];
+	matrix_[1] = temp[1];
+	matrix_[2] = temp[2];
+	matrix_[3] = temp[3];
+	matrix_[4] = temp[4];
+	matrix_[5] = temp[5];
+	matrix_[6] = temp[6];
+	matrix_[7] = temp[7];
+	matrix_[8] = temp[8];
 }
 
 
 
-TEMPLATE void QUAL::InvBMulA(const RotationMatrix& pMatrix)
-{
-	_TVarType lTemp[9];
+TEMPLATE void QUAL::InvBMulA(const RotationMatrix& matrix) {
+	_TVarType temp[9];
 
-	lTemp[0] = pMatrix.mMatrix[0] * mMatrix[0] +
-		     pMatrix.mMatrix[3] * mMatrix[3] +
-		     pMatrix.mMatrix[6] * mMatrix[6];
-	lTemp[1] = pMatrix.mMatrix[0] * mMatrix[1] +
-		     pMatrix.mMatrix[3] * mMatrix[4] +
-		     pMatrix.mMatrix[6] * mMatrix[7];
-	lTemp[2] = pMatrix.mMatrix[0] * mMatrix[2] +
-		     pMatrix.mMatrix[3] * mMatrix[5] +
-		     pMatrix.mMatrix[6] * mMatrix[8];
+	temp[0] = matrix.matrix_[0] * matrix_[0] +
+		     matrix.matrix_[3] * matrix_[3] +
+		     matrix.matrix_[6] * matrix_[6];
+	temp[1] = matrix.matrix_[0] * matrix_[1] +
+		     matrix.matrix_[3] * matrix_[4] +
+		     matrix.matrix_[6] * matrix_[7];
+	temp[2] = matrix.matrix_[0] * matrix_[2] +
+		     matrix.matrix_[3] * matrix_[5] +
+		     matrix.matrix_[6] * matrix_[8];
 
-	lTemp[3] = pMatrix.mMatrix[1] * mMatrix[0] +
-		     pMatrix.mMatrix[4] * mMatrix[3] +
-		     pMatrix.mMatrix[7] * mMatrix[6];
-	lTemp[4] = pMatrix.mMatrix[1] * mMatrix[1] +
-		     pMatrix.mMatrix[4] * mMatrix[4] +
-		     pMatrix.mMatrix[7] * mMatrix[7];
-	lTemp[5] = pMatrix.mMatrix[1] * mMatrix[2] +
-		     pMatrix.mMatrix[4] * mMatrix[5] +
-		     pMatrix.mMatrix[7] * mMatrix[8];
+	temp[3] = matrix.matrix_[1] * matrix_[0] +
+		     matrix.matrix_[4] * matrix_[3] +
+		     matrix.matrix_[7] * matrix_[6];
+	temp[4] = matrix.matrix_[1] * matrix_[1] +
+		     matrix.matrix_[4] * matrix_[4] +
+		     matrix.matrix_[7] * matrix_[7];
+	temp[5] = matrix.matrix_[1] * matrix_[2] +
+		     matrix.matrix_[4] * matrix_[5] +
+		     matrix.matrix_[7] * matrix_[8];
 
-	lTemp[6] = pMatrix.mMatrix[2] * mMatrix[0] +
-		     pMatrix.mMatrix[5] * mMatrix[3] +
-		     pMatrix.mMatrix[8] * mMatrix[6];
-	lTemp[7] = pMatrix.mMatrix[2] * mMatrix[1] +
-		     pMatrix.mMatrix[5] * mMatrix[4] +
-		     pMatrix.mMatrix[8] * mMatrix[7];
-	lTemp[8] = pMatrix.mMatrix[2] * mMatrix[2] +
-		     pMatrix.mMatrix[5] * mMatrix[5] +
-		     pMatrix.mMatrix[8] * mMatrix[8];
+	temp[6] = matrix.matrix_[2] * matrix_[0] +
+		     matrix.matrix_[5] * matrix_[3] +
+		     matrix.matrix_[8] * matrix_[6];
+	temp[7] = matrix.matrix_[2] * matrix_[1] +
+		     matrix.matrix_[5] * matrix_[4] +
+		     matrix.matrix_[8] * matrix_[7];
+	temp[8] = matrix.matrix_[2] * matrix_[2] +
+		     matrix.matrix_[5] * matrix_[5] +
+		     matrix.matrix_[8] * matrix_[8];
 
-	mMatrix[0] = lTemp[0];
-	mMatrix[1] = lTemp[1];
-	mMatrix[2] = lTemp[2];
-	mMatrix[3] = lTemp[3];
-	mMatrix[4] = lTemp[4];
-	mMatrix[5] = lTemp[5];
-	mMatrix[6] = lTemp[6];
-	mMatrix[7] = lTemp[7];
-	mMatrix[8] = lTemp[8];
+	matrix_[0] = temp[0];
+	matrix_[1] = temp[1];
+	matrix_[2] = temp[2];
+	matrix_[3] = temp[3];
+	matrix_[4] = temp[4];
+	matrix_[5] = temp[5];
+	matrix_[6] = temp[6];
+	matrix_[7] = temp[7];
+	matrix_[8] = temp[8];
 }
 
 
 
-TEMPLATE void QUAL::Add(const RotationMatrix& pMatrix)
-{
-	mMatrix[0] += pMatrix.mMatrix[0];
-	mMatrix[1] += pMatrix.mMatrix[1];
-	mMatrix[2] += pMatrix.mMatrix[2];
+TEMPLATE void QUAL::Add(const RotationMatrix& matrix) {
+	matrix_[0] += matrix.matrix_[0];
+	matrix_[1] += matrix.matrix_[1];
+	matrix_[2] += matrix.matrix_[2];
 
-	mMatrix[3] += pMatrix.mMatrix[3];
-	mMatrix[4] += pMatrix.mMatrix[4];
-	mMatrix[5] += pMatrix.mMatrix[5];
+	matrix_[3] += matrix.matrix_[3];
+	matrix_[4] += matrix.matrix_[4];
+	matrix_[5] += matrix.matrix_[5];
 
-	mMatrix[6] += pMatrix.mMatrix[6];
-	mMatrix[7] += pMatrix.mMatrix[7];
-	mMatrix[8] += pMatrix.mMatrix[8];
+	matrix_[6] += matrix.matrix_[6];
+	matrix_[7] += matrix.matrix_[7];
+	matrix_[8] += matrix.matrix_[8];
 }
 
-TEMPLATE void QUAL::Add(const RotationMatrix& pMatrix1, const RotationMatrix& pMatrix2)
-{
-	mMatrix[0] = pMatrix1.mMatrix[0] + pMatrix2.mMatrix[0];
-	mMatrix[1] = pMatrix1.mMatrix[1] + pMatrix2.mMatrix[1];
-	mMatrix[2] = pMatrix1.mMatrix[2] + pMatrix2.mMatrix[2];
+TEMPLATE void QUAL::Add(const RotationMatrix& matrix1, const RotationMatrix& matrix2) {
+	matrix_[0] = matrix1.matrix_[0] + matrix2.matrix_[0];
+	matrix_[1] = matrix1.matrix_[1] + matrix2.matrix_[1];
+	matrix_[2] = matrix1.matrix_[2] + matrix2.matrix_[2];
 
-	mMatrix[3] = pMatrix1.mMatrix[3] + pMatrix2.mMatrix[3];
-	mMatrix[4] = pMatrix1.mMatrix[4] + pMatrix2.mMatrix[4];
-	mMatrix[5] = pMatrix1.mMatrix[5] + pMatrix2.mMatrix[5];
+	matrix_[3] = matrix1.matrix_[3] + matrix2.matrix_[3];
+	matrix_[4] = matrix1.matrix_[4] + matrix2.matrix_[4];
+	matrix_[5] = matrix1.matrix_[5] + matrix2.matrix_[5];
 
-	mMatrix[6] = pMatrix1.mMatrix[6] + pMatrix2.mMatrix[6];
-	mMatrix[7] = pMatrix1.mMatrix[7] + pMatrix2.mMatrix[7];
-	mMatrix[8] = pMatrix1.mMatrix[8] + pMatrix2.mMatrix[8];
+	matrix_[6] = matrix1.matrix_[6] + matrix2.matrix_[6];
+	matrix_[7] = matrix1.matrix_[7] + matrix2.matrix_[7];
+	matrix_[8] = matrix1.matrix_[8] + matrix2.matrix_[8];
 }
 
-TEMPLATE void QUAL::Add(_TVarType pScalar)
-{
-	mMatrix[0] += pScalar;
-	mMatrix[1] += pScalar;
-	mMatrix[2] += pScalar;
+TEMPLATE void QUAL::Add(_TVarType scalar) {
+	matrix_[0] += scalar;
+	matrix_[1] += scalar;
+	matrix_[2] += scalar;
 
-	mMatrix[3] += pScalar;
-	mMatrix[4] += pScalar;
-	mMatrix[5] += pScalar;
+	matrix_[3] += scalar;
+	matrix_[4] += scalar;
+	matrix_[5] += scalar;
 
-	mMatrix[6] += pScalar;
-	mMatrix[7] += pScalar;
-	mMatrix[8] += pScalar;
+	matrix_[6] += scalar;
+	matrix_[7] += scalar;
+	matrix_[8] += scalar;
 }
 
-TEMPLATE void QUAL::Sub(const RotationMatrix& pMatrix)
-{
-	mMatrix[0] -= pMatrix.mMatrix[0];
-	mMatrix[1] -= pMatrix.mMatrix[1];
-	mMatrix[2] -= pMatrix.mMatrix[2];
+TEMPLATE void QUAL::Sub(const RotationMatrix& matrix) {
+	matrix_[0] -= matrix.matrix_[0];
+	matrix_[1] -= matrix.matrix_[1];
+	matrix_[2] -= matrix.matrix_[2];
 
-	mMatrix[3] -= pMatrix.mMatrix[3];
-	mMatrix[4] -= pMatrix.mMatrix[4];
-	mMatrix[5] -= pMatrix.mMatrix[5];
+	matrix_[3] -= matrix.matrix_[3];
+	matrix_[4] -= matrix.matrix_[4];
+	matrix_[5] -= matrix.matrix_[5];
 
-	mMatrix[6] -= pMatrix.mMatrix[6];
-	mMatrix[7] -= pMatrix.mMatrix[7];
-	mMatrix[8] -= pMatrix.mMatrix[8];
+	matrix_[6] -= matrix.matrix_[6];
+	matrix_[7] -= matrix.matrix_[7];
+	matrix_[8] -= matrix.matrix_[8];
 }
 
-TEMPLATE void QUAL::Sub(const RotationMatrix& pMatrix1, const RotationMatrix& pMatrix2)
-{
-	mMatrix[0] = pMatrix1.mMatrix[0] - pMatrix2.mMatrix[0];
-	mMatrix[1] = pMatrix1.mMatrix[1] - pMatrix2.mMatrix[1];
-	mMatrix[2] = pMatrix1.mMatrix[2] - pMatrix2.mMatrix[2];
+TEMPLATE void QUAL::Sub(const RotationMatrix& matrix1, const RotationMatrix& matrix2) {
+	matrix_[0] = matrix1.matrix_[0] - matrix2.matrix_[0];
+	matrix_[1] = matrix1.matrix_[1] - matrix2.matrix_[1];
+	matrix_[2] = matrix1.matrix_[2] - matrix2.matrix_[2];
 
-	mMatrix[3] = pMatrix1.mMatrix[3] - pMatrix2.mMatrix[3];
-	mMatrix[4] = pMatrix1.mMatrix[4] - pMatrix2.mMatrix[4];
-	mMatrix[5] = pMatrix1.mMatrix[5] - pMatrix2.mMatrix[5];
+	matrix_[3] = matrix1.matrix_[3] - matrix2.matrix_[3];
+	matrix_[4] = matrix1.matrix_[4] - matrix2.matrix_[4];
+	matrix_[5] = matrix1.matrix_[5] - matrix2.matrix_[5];
 
-	mMatrix[6] = pMatrix1.mMatrix[6] - pMatrix2.mMatrix[6];
-	mMatrix[7] = pMatrix1.mMatrix[7] - pMatrix2.mMatrix[7];
-	mMatrix[8] = pMatrix1.mMatrix[8] - pMatrix2.mMatrix[8];
+	matrix_[6] = matrix1.matrix_[6] - matrix2.matrix_[6];
+	matrix_[7] = matrix1.matrix_[7] - matrix2.matrix_[7];
+	matrix_[8] = matrix1.matrix_[8] - matrix2.matrix_[8];
 }
 
-TEMPLATE void QUAL::Sub(_TVarType pScalar)
-{
-	mMatrix[0] -= pScalar;
-	mMatrix[1] -= pScalar;
-	mMatrix[2] -= pScalar;
+TEMPLATE void QUAL::Sub(_TVarType scalar) {
+	matrix_[0] -= scalar;
+	matrix_[1] -= scalar;
+	matrix_[2] -= scalar;
 
-	mMatrix[3] -= pScalar;
-	mMatrix[4] -= pScalar;
-	mMatrix[5] -= pScalar;
+	matrix_[3] -= scalar;
+	matrix_[4] -= scalar;
+	matrix_[5] -= scalar;
 
-	mMatrix[6] -= pScalar;
-	mMatrix[7] -= pScalar;
-	mMatrix[8] -= pScalar;
+	matrix_[6] -= scalar;
+	matrix_[7] -= scalar;
+	matrix_[8] -= scalar;
 }
 
-TEMPLATE void QUAL::Set(const RotationMatrix& pMatrix)
-{
-	mMatrix[0] = pMatrix.mMatrix[0];
-	mMatrix[1] = pMatrix.mMatrix[1];
-	mMatrix[2] = pMatrix.mMatrix[2];
+TEMPLATE void QUAL::Set(const RotationMatrix& matrix) {
+	matrix_[0] = matrix.matrix_[0];
+	matrix_[1] = matrix.matrix_[1];
+	matrix_[2] = matrix.matrix_[2];
 
-	mMatrix[3] = pMatrix.mMatrix[3];
-	mMatrix[4] = pMatrix.mMatrix[4];
-	mMatrix[5] = pMatrix.mMatrix[5];
+	matrix_[3] = matrix.matrix_[3];
+	matrix_[4] = matrix.matrix_[4];
+	matrix_[5] = matrix.matrix_[5];
 
-	mMatrix[6] = pMatrix.mMatrix[6];
-	mMatrix[7] = pMatrix.mMatrix[7];
-	mMatrix[8] = pMatrix.mMatrix[8];
+	matrix_[6] = matrix.matrix_[6];
+	matrix_[7] = matrix.matrix_[7];
+	matrix_[8] = matrix.matrix_[8];
 }
 
-TEMPLATE void QUAL::Set(_TVarType* pMatrix)
-{
-	mMatrix[0] = pMatrix[0];
-	mMatrix[1] = pMatrix[1];
-	mMatrix[2] = pMatrix[2];
+TEMPLATE void QUAL::Set(_TVarType* matrix) {
+	matrix_[0] = matrix[0];
+	matrix_[1] = matrix[1];
+	matrix_[2] = matrix[2];
 
-	mMatrix[3] = pMatrix[3];
-	mMatrix[4] = pMatrix[4];
-	mMatrix[5] = pMatrix[5];
+	matrix_[3] = matrix[3];
+	matrix_[4] = matrix[4];
+	matrix_[5] = matrix[5];
 
-	mMatrix[6] = pMatrix[6];
-	mMatrix[7] = pMatrix[7];
-	mMatrix[8] = pMatrix[8];
+	matrix_[6] = matrix[6];
+	matrix_[7] = matrix[7];
+	matrix_[8] = matrix[8];
 }
 
 TEMPLATE void QUAL::Set(_TVarType p11, _TVarType p12, _TVarType p13,
 			_TVarType p21, _TVarType p22, _TVarType p23,
-			_TVarType p31, _TVarType p32, _TVarType p33)
-{
-	mMatrix[0] = p11;
-	mMatrix[1] = p12;
-	mMatrix[2] = p13;
+			_TVarType p31, _TVarType p32, _TVarType p33) {
+	matrix_[0] = p11;
+	matrix_[1] = p12;
+	matrix_[2] = p13;
 
-	mMatrix[3] = p21;
-	mMatrix[4] = p22;
-	mMatrix[5] = p23;
+	matrix_[3] = p21;
+	matrix_[4] = p22;
+	matrix_[5] = p23;
 
-	mMatrix[6] = p31;
-	mMatrix[7] = p32;
-	mMatrix[8] = p33;
+	matrix_[6] = p31;
+	matrix_[7] = p32;
+	matrix_[8] = p33;
 }
 
-TEMPLATE int QUAL::GetRawDataSize()
-{
+TEMPLATE int QUAL::GetRawDataSize() {
 	return sizeof(_TVarType) * 9;
 }
 
-TEMPLATE int QUAL::GetRawData(uint8* pData)
-{
-	_TVarType* lData = (_TVarType*)pData;
+TEMPLATE int QUAL::GetRawData(uint8* data) {
+	_TVarType* _data = (_TVarType*)data;
 
-	lData[0] = mMatrix[0];
-	lData[1] = mMatrix[1];
-	lData[2] = mMatrix[2];
-	lData[3] = mMatrix[3];
-	lData[4] = mMatrix[4];
-	lData[5] = mMatrix[5];
-	lData[6] = mMatrix[6];
-	lData[7] = mMatrix[7];
-	lData[8] = mMatrix[8];
-
-	return GetRawDataSize();
-}
-
-TEMPLATE int QUAL::SetRawData(uint8* pData)
-{
-	_TVarType* lData = (_TVarType*)pData;
-
-	mMatrix[0] = lData[0];
-	mMatrix[1] = lData[1];
-	mMatrix[2] = lData[2];
-	mMatrix[3] = lData[3];
-	mMatrix[4] = lData[4];
-	mMatrix[5] = lData[5];
-	mMatrix[6] = lData[6];
-	mMatrix[7] = lData[7];
-	mMatrix[8] = lData[8];
+	_data[0] = matrix_[0];
+	_data[1] = matrix_[1];
+	_data[2] = matrix_[2];
+	_data[3] = matrix_[3];
+	_data[4] = matrix_[4];
+	_data[5] = matrix_[5];
+	_data[6] = matrix_[6];
+	_data[7] = matrix_[7];
+	_data[8] = matrix_[8];
 
 	return GetRawDataSize();
 }
 
-TEMPLATE RotationMatrix<float> QUAL::ToFloat() const
-{
-	return RotationMatrix<float>((float)mMatrix[0], (float)mMatrix[1], (float)mMatrix[2],
-				     (float)mMatrix[3], (float)mMatrix[4], (float)mMatrix[5],
-				     (float)mMatrix[6], (float)mMatrix[7], (float)mMatrix[8]);
+TEMPLATE int QUAL::SetRawData(uint8* data) {
+	_TVarType* _data = (_TVarType*)data;
+
+	matrix_[0] = _data[0];
+	matrix_[1] = _data[1];
+	matrix_[2] = _data[2];
+	matrix_[3] = _data[3];
+	matrix_[4] = _data[4];
+	matrix_[5] = _data[5];
+	matrix_[6] = _data[6];
+	matrix_[7] = _data[7];
+	matrix_[8] = _data[8];
+
+	return GetRawDataSize();
 }
 
-TEMPLATE RotationMatrix<double> QUAL::ToDouble() const
-{
-	return RotationMatrix<double>((double)mMatrix[0], (double)mMatrix[1], (double)mMatrix[2],
-				      (double)mMatrix[3], (double)mMatrix[4], (double)mMatrix[5],
-				      (double)mMatrix[6], (double)mMatrix[7], (double)mMatrix[8]);
+TEMPLATE RotationMatrix<float> QUAL::ToFloat() const {
+	return RotationMatrix<float>((float)matrix_[0], (float)matrix_[1], (float)matrix_[2],
+				     (float)matrix_[3], (float)matrix_[4], (float)matrix_[5],
+				     (float)matrix_[6], (float)matrix_[7], (float)matrix_[8]);
+}
+
+TEMPLATE RotationMatrix<double> QUAL::ToDouble() const {
+	return RotationMatrix<double>((double)matrix_[0], (double)matrix_[1], (double)matrix_[2],
+				      (double)matrix_[3], (double)matrix_[4], (double)matrix_[5],
+				      (double)matrix_[6], (double)matrix_[7], (double)matrix_[8]);
 }

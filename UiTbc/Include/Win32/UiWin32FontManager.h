@@ -6,44 +6,40 @@
 
 #pragma once
 
-#include "../../../Lepra/Include/LepraOS.h"
-#include "../UiFontManager.h"
+#include "../../../lepra/include/lepraos.h"
+#include "../uifontmanager.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 class Win32DisplayManager;
 }
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class Win32FontManager: public FontManager
-{
+class Win32FontManager: public FontManager {
 	typedef FontManager Parent;
 public:
-	Win32FontManager(UiLepra::Win32DisplayManager* pDisplayManager);
+	Win32FontManager(uilepra::Win32DisplayManager* display_manager);
 	virtual ~Win32FontManager();
 
-	virtual FontId AddFont(const str& pFontName, double pSize, int pFlags = NORMAL);
-	virtual bool RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect& pRect);
-	virtual int GetCharWidth(wchar_t pChar) const;
-	virtual int GetCharOffset(wchar_t pChar) const;
+	virtual FontId AddFont(const str& font_name, double size, int flags = kNormal);
+	virtual bool RenderGlyph(wchar_t c, Canvas& image, const PixelRect& rect);
+	virtual int GetCharWidth(wchar_t c) const;
+	virtual int GetCharOffset(wchar_t c) const;
 
 private:
-	struct Win32Font: Font
-	{
-		HFONT mWin32FontHandle;
+	struct Win32Font: Font {
+		HFONT win32_font_handle_;
 	};
 
-	UiLepra::Win32DisplayManager* mDisplayManager;
-	HDC mDC;
-	COLORREF mColorRef[4];
+	uilepra::Win32DisplayManager* display_manager_;
+	HDC dc_;
+	COLORREF color_ref_[4];
 };
 
 

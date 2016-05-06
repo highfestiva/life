@@ -1,169 +1,146 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Ctf.h"
-#include "../Cure/Include/CppContextObject.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Tbc/Include/PhysicsTrigger.h"
-#include "../UiCure/Include/UiCppContextObject.h"
+#include "ctf.h"
+#include "../cure/include/cppcontextobject.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/runtimevariable.h"
+#include "../tbc/include/physicstrigger.h"
+#include "../uicure/include/uicppcontextobject.h"
 
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
-Ctf::Ctf(Cure::ContextManager* pManager):
-	Parent(pManager->GetGameManager()->GetResourceManager(), "Ctf"),
-	mTrigger(0),
-	mLastFrameTriggered(false),
-	mIsTriggerTimerStarted(false),
-	mFlagMesh(0),
-	mSlideDown(false),
-	mBlinkTime(0)
-{
-	pManager->AddLocalObject(this);
+Ctf::Ctf(cure::ContextManager* manager):
+	Parent(manager->GetGameManager()->GetResourceManager(), "Ctf"),
+	trigger_(0),
+	last_frame_triggered_(false),
+	is_trigger_timer_started_(false),
+	flag_mesh_(0),
+	slide_down_(false),
+	blink_time_(0) {
+	manager->AddLocalObject(this);
 	GetManager()->EnableTickCallback(this);
 }
 
-Ctf::~Ctf()
-{
+Ctf::~Ctf() {
 }
 
 
 
-vec3 Ctf::GetPosition() const
-{
-	const Tbc::ChunkyBoneGeometry* lCutieGoal = mTrigger->GetTriggerGeometry(0);
-	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lCutieGoal->GetBodyId());
+vec3 Ctf::GetPosition() const {
+	const tbc::ChunkyBoneGeometry* cutie_goal = trigger_->GetTriggerGeometry(0);
+	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(cutie_goal->GetBodyId());
 }
 
-float Ctf::GetCaptureLevel() const
-{
-	return 1 - (mFlagTop - mFlagMesh->GetOffsetTransformation().GetPosition()).GetLength() / mFlagOffset.GetLength();
+float Ctf::GetCaptureLevel() const {
+	return 1 - (flag_top_ - flag_mesh_->GetOffsetTransformation().GetPosition()).GetLength() / flag_offset_.GetLength();
 }
 
-void Ctf::StartSlideDown()
-{
-	mSlideDown = true;
-	mCatchingFlagVelocity = mStartFlagVelocity;
+void Ctf::StartSlideDown() {
+	slide_down_ = true;
+	catching_flag_velocity_ = start_flag_velocity_;
 }
 
 
-void Ctf::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
-{
-	mTrigger = pTrigger;
-	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
-	const Tbc::ChunkyClass::Tag* lTag = lParent->FindTag("stunt_trigger_data", 4, 0);
-	deb_assert(lTag && lTag->mMeshIndexList.size() == 2);
-	if (lTag && lTag->mMeshIndexList.size() == 2)
-	{
-		mFlagOffset.x		= lTag->mFloatValueList[0];
-		mFlagOffset.y		= lTag->mFloatValueList[1];
-		mFlagOffset.z		= lTag->mFloatValueList[2];
-		mCatchingFlagVelocity	= -mFlagOffset / lTag->mFloatValueList[3];
-		mStartFlagVelocity	= mCatchingFlagVelocity;
+void Ctf::FinalizeTrigger(const tbc::PhysicsTrigger* trigger) {
+	trigger_ = trigger;
+	UiCure::CppContextObject* parent = (UiCure::CppContextObject*)parent_;
+	const tbc::ChunkyClass::Tag* tag = parent->FindTag("stunt_trigger_data", 4, 0);
+	deb_assert(tag && tag->mesh_index_list_.size() == 2);
+	if (tag && tag->mesh_index_list_.size() == 2) {
+		flag_offset_.x		= tag->float_value_list_[0];
+		flag_offset_.y		= tag->float_value_list_[1];
+		flag_offset_.z		= tag->float_value_list_[2];
+		catching_flag_velocity_	= -flag_offset_ / tag->float_value_list_[3];
+		start_flag_velocity_	= catching_flag_velocity_;
 	}
 }
 
-void Ctf::OnTick()
-{
-	if (!mLastFrameTriggered)
-	{
-		mIsTriggerTimerStarted = false;
+void Ctf::OnTick() {
+	if (!last_frame_triggered_) {
+		is_trigger_timer_started_ = false;
 	}
 
-	UiCure::CppContextObject* lParent = (UiCure::CppContextObject*)mParent;
-	if (!mFlagMesh || !mBlinkMesh)
-	{
-		const Tbc::ChunkyClass::Tag* lTag = lParent->FindTag("stunt_trigger_data", 4, 0);
-		mFlagMesh = (Tbc::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[0]);
-		mBlinkMesh = (Tbc::GeometryReference*)lParent->GetMesh(lTag->mMeshIndexList[1]);
-		if (!mFlagMesh || !mBlinkMesh)
-		{
+	UiCure::CppContextObject* parent = (UiCure::CppContextObject*)parent_;
+	if (!flag_mesh_ || !blink_mesh_) {
+		const tbc::ChunkyClass::Tag* tag = parent->FindTag("stunt_trigger_data", 4, 0);
+		flag_mesh_ = (tbc::GeometryReference*)parent->GetMesh(tag->mesh_index_list_[0]);
+		blink_mesh_ = (tbc::GeometryReference*)parent->GetMesh(tag->mesh_index_list_[1]);
+		if (!flag_mesh_ || !blink_mesh_) {
 			return;
 		}
-		mFlagTop = mFlagMesh->GetOffsetTransformation().GetPosition();
-		mFlagMesh->AddOffset(mFlagOffset);
-		mBlinkStartColor = mBlinkMesh->GetBasicMaterialSettings().mDiffuse;
+		flag_top_ = flag_mesh_->GetOffsetTransformation().GetPosition();
+		flag_mesh_->AddOffset(flag_offset_);
+		blink_start_color_ = blink_mesh_->GetBasicMaterialSettings().diffuse_;
 	}
 	//else
 	//{
-	//	lParent->EnableMeshSlide(false);
+	//	parent->EnableMeshSlide(false);
 	//}
 
 	// Move flag up or down...
-	Game* lGame = (Game*)GetManager()->GetGameManager();
-	float lFactor = 1.0f / FPS;
-	if (mIsTriggerTimerStarted && !mSlideDown)
-	{
+	Game* game = (Game*)GetManager()->GetGameManager();
+	float factor = 1.0f / kFps;
+	if (is_trigger_timer_started_ && !slide_down_) {
 		// Move up or stop if reached top.
-		if (lGame->GetComputerIndex() == 0)
-		{
-			const float t = lGame->GetComputerDifficulty();
-			if (t >= 0 && t < 0.5f)
-			{
-				lFactor *= Math::Lerp(0.4f, 1.0f, t*2);
+		if (game->GetComputerIndex() == 0) {
+			const float t = game->GetComputerDifficulty();
+			if (t >= 0 && t < 0.5f) {
+				factor *= Math::Lerp(0.4f, 1.0f, t*2);
 			}
 		}
-		float lRealTimeRatio;
-		v_get(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-		lFactor *= lRealTimeRatio;
-		mFlagMesh->AddOffset(mCatchingFlagVelocity * lFactor);
-		if ((mFlagTop - mFlagMesh->GetOffsetTransformation().GetPosition()).Dot(mCatchingFlagVelocity) <= 0)
-		{
-			mCatchingFlagVelocity.Set(0, 0, 0);
-			lGame->OnCapture();
+		float real_time_ratio;
+		v_get(real_time_ratio, =(float), cure::GetSettings(), kRtvarPhysicsRtr, 1.0);
+		factor *= real_time_ratio;
+		flag_mesh_->AddOffset(catching_flag_velocity_ * factor);
+		if ((flag_top_ - flag_mesh_->GetOffsetTransformation().GetPosition()).Dot(catching_flag_velocity_) <= 0) {
+			catching_flag_velocity_.Set(0, 0, 0);
+			game->OnCapture();
 		}
-		mBlinkTime += lRealTimeRatio * 0.05f;
-		const float r = -::cos(mBlinkTime*3)*0.5f + 0.5f;
-		const float g = -::cos(mBlinkTime*4)*0.5f + 0.5f;
-		const float b = -::cos(mBlinkTime*5)*0.5f + 0.5f;
-		mBlinkMesh->GetBasicMaterialSettings().mDiffuse.Set(r, g, b);
-	}
-	else
-	{
-		mBlinkMesh->GetBasicMaterialSettings().mDiffuse = mBlinkStartColor;
-		mBlinkTime = 0;
+		blink_time_ += real_time_ratio * 0.05f;
+		const float r = -::cos(blink_time_*3)*0.5f + 0.5f;
+		const float g = -::cos(blink_time_*4)*0.5f + 0.5f;
+		const float b = -::cos(blink_time_*5)*0.5f + 0.5f;
+		blink_mesh_->GetBasicMaterialSettings().diffuse_.Set(r, g, b);
+	} else {
+		blink_mesh_->GetBasicMaterialSettings().diffuse_ = blink_start_color_;
+		blink_time_ = 0;
 		// Move down if not at bottom.
-		if (mSlideDown && (mFlagOffset - (mFlagMesh->GetOffsetTransformation().GetPosition() - mFlagTop)).Dot(mFlagOffset) > 0)
-		{
-			mFlagMesh->AddOffset(mCatchingFlagVelocity * -lFactor);
-		}
-		else
-		{
-			mSlideDown = false;
+		if (slide_down_ && (flag_offset_ - (flag_mesh_->GetOffsetTransformation().GetPosition() - flag_top_)).Dot(flag_offset_) > 0) {
+			flag_mesh_->AddOffset(catching_flag_velocity_ * -factor);
+		} else {
+			slide_down_ = false;
 		}
 	}
 
-	mLastFrameTriggered = false;
-	mTriggerTimer.UpdateTimer();
+	last_frame_triggered_ = false;
+	trigger_timer_.UpdateTimer();
 }
 
-void Ctf::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
-{
-	(void)pTriggerId;
-	(void)pOtherObject;
-	(void)pBodyId;
-	(void)pNormal;
+void Ctf::OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
+	(void)trigger_id;
+	(void)other_object;
+	(void)body_id;
+	(void)normal;
 
-	mLastFrameTriggered = true;
-	if (!mIsTriggerTimerStarted)
-	{
-		mTriggerTimer.PopTimeDiff();
-		mIsTriggerTimerStarted = true;
+	last_frame_triggered_ = true;
+	if (!is_trigger_timer_started_) {
+		trigger_timer_.PopTimeDiff();
+		is_trigger_timer_started_ = true;
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Ctf);
+loginstance(kGameContextCpp, Ctf);
 
 
 

@@ -5,13 +5,12 @@
 
 
 #include "pch.h"
-#include "ServerMessageProcessor.h"
-#include "GameServerManager.h"
+#include "servermessageprocessor.h"
+#include "gameservermanager.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -20,155 +19,115 @@ const int NETWORK_POSITIONAL_AHEAD_BUFFER_SIZE = PHYSICS_FPS/2;
 
 
 
-ServerMessageProcessor::ServerMessageProcessor(GameServerManager* pGameServerManager):
-	mGameServerManager(pGameServerManager)
-{
+ServerMessageProcessor::ServerMessageProcessor(GameServerManager* game_server_manager):
+	game_server_manager_(game_server_manager) {
 }
 
-ServerMessageProcessor::~ServerMessageProcessor()
-{
-	mGameServerManager = 0;
+ServerMessageProcessor::~ServerMessageProcessor() {
+	game_server_manager_ = 0;
 }
 
 
 
-void ServerMessageProcessor::ProcessNetworkInputMessage(Client* pClient, Cure::Message* pMessage)
-{
-	Cure::MessageType lType = pMessage->GetType();
-	switch (lType)
-	{
-		case Cure::MESSAGE_TYPE_STATUS:
-		{
-			Cure::MessageStatus* lStatus = (Cure::MessageStatus*)pMessage;
-			if (lStatus->GetRemoteStatus() == Cure::REMOTE_OK)
-			{
-				switch (lStatus->GetInfo())
-				{
-					case Cure::MessageStatus::INFO_CHAT:
-					{
+void ServerMessageProcessor::ProcessNetworkInputMessage(Client* client, cure::Message* message) {
+	cure::MessageType _type = message->GetType();
+	switch (_type) {
+		case cure::kMessageTypeStatus: {
+			cure::MessageStatus* status = (cure::MessageStatus*)message;
+			if (status->GetRemoteStatus() == cure::kRemoteOk) {
+				switch (status->GetInfo()) {
+					case cure::MessageStatus::kInfoChat: {
 						log_debug("Chat...");
-					}
-					break;
-					case Cure::MessageStatus::INFO_AVATAR:
-					{
+					} break;
+					case cure::MessageStatus::kInfoAvatar: {
 						log_debug("Avatar selected...");
-						str lAvatarName;
-						lStatus->GetMessageString(lAvatarName);
-						const Cure::UserAccount::AvatarId lAvatarId = lAvatarName;
-						mGameServerManager->OnSelectAvatar(pClient, lAvatarId);
-					}
-					break;
-					default:
-					{
+						str avatar_name;
+						status->GetMessageString(avatar_name);
+						const cure::UserAccount::AvatarId avatar_id = avatar_name;
+						game_server_manager_->OnSelectAvatar(client, avatar_id);
+					} break;
+					default: {
 						deb_assert(false);
-					}
-					break;
+					} break;
 				}
-			}
-			else //if (lStatus->GetRemoteStatus() == Cure::REMOTE_NO_CONNECTION)
-			{
+			} else { //if (status->GetRemoteStatus() == cure::kRemoteNoConnection)
 				log_trace("User disconnects.");
-				mGameServerManager->GetNetworkServer()->Disconnect(pClient->GetUserConnection()->GetAccountId(), "", false);
+				game_server_manager_->GetNetworkServer()->Disconnect(client->GetUserConnection()->GetAccountId(), "", false);
 			}
-		}
-		break;
-		case Cure::MESSAGE_TYPE_OBJECT_POSITION:
-		{
-			Cure::MessageObjectPosition* lMovement = (Cure::MessageObjectPosition*)pMessage;
+		} break;
+		case cure::kMessageTypeObjectPosition: {
+			cure::MessageObjectPosition* movement = (cure::MessageObjectPosition*)message;
 			// TODO: make sure client is authorized to control object with given ID.
-			Cure::GameObjectId lInstanceId = lMovement->GetObjectId();
-			Cure::ContextObject* lObject = mGameServerManager->GetContext()->GetObject(lInstanceId);
-			if (lObject && (pClient->GetAvatarId() == lInstanceId || pClient->GetAvatarId() == lObject->GetBorrowerInstanceId()))
-			{
-				int32 lClientFrameIndex = lMovement->GetFrameIndex();
-				mGameServerManager->AdjustClientSimulationSpeed(pClient, lClientFrameIndex);
+			cure::GameObjectId instance_id = movement->GetObjectId();
+			cure::ContextObject* object = game_server_manager_->GetContext()->GetObject(instance_id);
+			if (object && (client->GetAvatarId() == instance_id || client->GetAvatarId() == object->GetBorrowerInstanceId())) {
+				int32 client_frame_index = movement->GetFrameIndex();
+				game_server_manager_->AdjustClientSimulationSpeed(client, client_frame_index);
 				// Pass on to other clients.
-				const Cure::ObjectPositionalData& lPosition = lMovement->GetPositionalData();
-				mGameServerManager->BroadcastObjectPosition(lInstanceId, lPosition, pClient, false);
-				mGameServerManager->StoreMovement(lClientFrameIndex, lMovement);
+				const cure::ObjectPositionalData& position = movement->GetPositionalData();
+				game_server_manager_->BroadcastObjectPosition(instance_id, position, client, false);
+				game_server_manager_->StoreMovement(client_frame_index, movement);
+			} else {
+				log_.Warningf("Client %s tried to control instance ID %i, but was not in possession.",
+					client->GetUserConnection()->GetLoginName().c_str(),
+					instance_id);
 			}
-			else
-			{
-				mLog.Warningf("Client %s tried to control instance ID %i, but was not in possession.",
-					pClient->GetUserConnection()->GetLoginName().c_str(),
-					lInstanceId);
-			}
-		}
-		break;
-		case Cure::MESSAGE_TYPE_NUMBER:
-		{
-			Cure::MessageNumber* lMessageNumber = (Cure::MessageNumber*)pMessage;
-			ProcessNumber(pClient, lMessageNumber->GetInfo(), lMessageNumber->GetInteger(), lMessageNumber->GetFloat());
-		}
-		break;
-		case Cure::MESSAGE_TYPE_OBJECT_ATTRIBUTE:
-		{
-			Cure::MessageObjectAttribute* lMessageAttrib = (Cure::MessageObjectAttribute*)pMessage;
-			Cure::GameObjectId lObjectId = lMessageAttrib->GetObjectId();
-			unsigned lByteSize = 0;
-			const uint8* lBuffer = lMessageAttrib->GetReadBuffer(lByteSize);
-			mGameServerManager->GetContext()->UnpackObjectAttribute(lObjectId, lBuffer, lByteSize);
-		}
-		break;
-		default:
-		{
-			mLog.Error("Got bad message type from client.");
-		}
-		break;
+		} break;
+		case cure::kMessageTypeNumber: {
+			cure::MessageNumber* message_number = (cure::MessageNumber*)message;
+			ProcessNumber(client, message_number->GetInfo(), message_number->GetInteger(), message_number->GetFloat());
+		} break;
+		case cure::kMessageTypeObjectAttribute: {
+			cure::MessageObjectAttribute* message_attrib = (cure::MessageObjectAttribute*)message;
+			cure::GameObjectId object_id = message_attrib->GetObjectId();
+			unsigned byte_size = 0;
+			const uint8* buffer = message_attrib->GetReadBuffer(byte_size);
+			game_server_manager_->GetContext()->UnpackObjectAttribute(object_id, buffer, byte_size);
+		} break;
+		default: {
+			log_.Error("Got bad message type from client.");
+		} break;
 	}
 }
 
-void ServerMessageProcessor::ProcessNumber(Client* pClient, Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat)
-{
-	(void)pFloat;
+void ServerMessageProcessor::ProcessNumber(Client* client, cure::MessageNumber::InfoType type, int32 integer, float32 _f) {
+	(void)_f;
 
-	switch (pType)
-	{
-		case Cure::MessageNumber::INFO_PING:
-		{
-			mGameServerManager->GetNetworkServer()->SendNumberMessage(false, pClient->GetUserConnection()->GetSocket(),
-				Cure::MessageNumber::INFO_PONG, pInteger, pClient->GetPhysicsFrameAheadCount());
-			log_volatile(mLog.Debugf("Replying to PING (PONG) to %s (ptr=%p).",
-				pClient->GetUserConnection()->GetSocket()->GetTargetAddress().GetAsString().c_str(),
-				pClient->GetUserConnection()->GetSocket()));
-		}
-		break;
-		case Cure::MessageNumber::INFO_RECREATE_OBJECT:
-		{
-			const Cure::GameObjectId lInstanceId = pInteger;
-			Cure::ContextObject* lObject = mGameServerManager->GetContext()->GetObject(lInstanceId);
-			if (lObject)
-			{
-				ContextTable lTable;
-				lTable.insert(ContextTable::value_type(lInstanceId, lObject));
-				mGameServerManager->SendObjects(pClient, true, lTable);
-				log_volatile(mLog.Debugf("Recreating %s (%i) on client.",
-					lObject->GetClassId().c_str(),
-					lInstanceId));
+	switch (type) {
+		case cure::MessageNumber::kInfoPing: {
+			game_server_manager_->GetNetworkServer()->SendNumberMessage(false, client->GetUserConnection()->GetSocket(),
+				cure::MessageNumber::kInfoPong, integer, client->GetPhysicsFrameAheadCount());
+			log_volatile(log_.Debugf("Replying to PING (PONG) to %s (ptr=%p).",
+				client->GetUserConnection()->GetSocket()->GetTargetAddress().GetAsString().c_str(),
+				client->GetUserConnection()->GetSocket()));
+		} break;
+		case cure::MessageNumber::kInfoRecreateObject: {
+			const cure::GameObjectId instance_id = integer;
+			cure::ContextObject* object = game_server_manager_->GetContext()->GetObject(instance_id);
+			if (object) {
+				ContextTable table;
+				table.insert(ContextTable::value_type(instance_id, object));
+				game_server_manager_->SendObjects(client, true, table);
+				log_volatile(log_.Debugf("Recreating %s (%i) on client.",
+					object->GetClassId().c_str(),
+					instance_id));
+			} else {
+				log_volatile(log_.Debugf("User %s tried to fetch unknown object with ID %i.", client->GetUserConnection()->GetLoginName().c_str(), instance_id));
 			}
-			else
-			{
-				log_volatile(mLog.Debugf("User %s tried to fetch unknown object with ID %i.", pClient->GetUserConnection()->GetLoginName().c_str(), lInstanceId));
-			}
-		}
-		break;
-		case Cure::MessageNumber::INFO_REQUEST_LOAN:
-		{
-			const Cure::GameObjectId lInstanceId = pInteger;
-			mGameServerManager->LoanObject(pClient, lInstanceId);
-		}
-		break;
-		default:
-		{
-			mLog.Error("Received an invalid MessageNumber from client.");
-		}
-		break;
+		} break;
+		case cure::MessageNumber::kInfoRequestLoan: {
+			const cure::GameObjectId instance_id = integer;
+			game_server_manager_->LoanObject(client, instance_id);
+		} break;
+		default: {
+			log_.Error("Received an invalid MessageNumber from client.");
+		} break;
 	}
 }
 
 
 
-loginstance(GAME, ServerMessageProcessor);
+loginstance(kGame, ServerMessageProcessor);
 
 
 

@@ -6,26 +6,24 @@
 
 #pragma once
 
-#include "../Lepra.h"
+#include "../lepra.h"
 #ifdef __OBJC__
 #include <Foundation/Foundation.h>
 #endif // Objective-C
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class MacLog
-{
+class MacLog {
 public:
-	static void Write(const str& pText);
+	static void Write(const str& text);
 
 #ifdef __OBJC__
-	static NSString* Encode(const str& pText);
-	static str Decode(NSString* pText);
+	static NSString* Encode(const str& text);
+	static str Decode(NSString* text);
 #endif // Objective-C
 };
 

@@ -10,107 +10,91 @@
 
 
 
-namespace Life
-{
-namespace Options
-{
+namespace life {
+namespace options {
 
 
 
-struct CamControl
-{
-	enum Direction
-	{
-		CAMDIR_UP = 0,
-		CAMDIR_DOWN,
-		CAMDIR_LEFT,
-		CAMDIR_RIGHT,
-		CAMDIR_FORWARD,
-		CAMDIR_BACKWARD,
-		CAMDIR_COUNT
+struct CamControl {
+	enum Direction {
+		kCamdirUp = 0,
+		kCamdirDown,
+		kCamdirLeft,
+		kCamdirRight,
+		kCamdirForward,
+		kCamdirBackward,
+		kCamdirCount
 	};
-	float mControl[CAMDIR_COUNT];
+	float control_[kCamdirCount];
 
-	inline CamControl()
-	{
-		::memset(mControl, 0, sizeof(mControl));
+	inline CamControl() {
+		::memset(control_, 0, sizeof(control_));
 	}
 
-	inline void operator=(const CamControl& pControl)
-	{
-		::memcpy(mControl, pControl.mControl, sizeof(mControl));
+	inline void operator=(const CamControl& control) {
+		::memcpy(control_, control.control_, sizeof(control_));
 	}
 };
 
 
 
-struct Steering
-{
-	enum Control
-	{
-		CONTROL_FORWARD = 0,
-		CONTROL_BACKWARD,
-		CONTROL_FORWARD3D,
-		CONTROL_BACKWARD3D,
-		CONTROL_BRAKEANDBACK,
-		CONTROL_LEFT,
-		CONTROL_RIGHT,
-		CONTROL_LEFT3D,
-		CONTROL_RIGHT3D,
-		CONTROL_UP,
-		CONTROL_DOWN,
-		CONTROL_UP3D,
-		CONTROL_DOWN3D,
-		CONTROL_HANDBRAKE,
-		CONTROL_BREAK,
-		CONTROL_YAW_ANGLE,
-		CONTROL_PITCH_ANGLE,
-		CONTROL_COUNT
+struct Steering {
+	enum Control {
+		kControlForward = 0,
+		kControlBackward,
+		kControlForward3D,
+		kControlBackward3D,
+		kControlBrakeAndBack,
+		kControlLeft,
+		kControlRight,
+		kControlLeft3D,
+		kControlRight3D,
+		kControlUp,
+		kControlDown,
+		kControlUp3D,
+		kControlDown3D,
+		kControlHandbrake,
+		kControlBrake,
+		kControlYawAngle,
+		kControlPitchAngle,
+		kControlCount
 	};
-	float mControl[CONTROL_COUNT];
+	float control_[kControlCount];
 
-	inline Steering()
-	{
-		::memset(mControl, 0, sizeof(mControl));
+	inline Steering() {
+		::memset(control_, 0, sizeof(control_));
 	}
 
-	inline void operator=(const Steering& pVehicle)
-	{
-		::memcpy(mControl, pVehicle.mControl, sizeof(mControl));
+	inline void operator=(const Steering& vehicle) {
+		::memcpy(control_, vehicle.control_, sizeof(control_));
 	}
 
-	inline float operator-(const Steering& pVehicle) const
-	{
-		float lSum = 0;
-		for (int x = 0; x < CONTROL_COUNT; ++x)
-		{
-			lSum += fabs(mControl[x]-pVehicle.mControl[x]);
+	inline float operator-(const Steering& vehicle) const {
+		float sum = 0;
+		for (int x = 0; x < kControlCount; ++x) {
+			sum += fabs(control_[x]-vehicle.control_[x]);
 		}
-		return (lSum);
+		return (sum);
 	}
 };
 
 
 
-struct FireControl
-{
-	enum Control
-	{
-		FIRE0 = 0,
-		FIRE1,
-		FIRE2,
-		FIRE_COUNT
+struct FireControl {
+	enum Control {
+		kFire0 = 0,
+		kFire1,
+		kFire2,
+		kFireCount
 	};
-	float mControl[FIRE_COUNT];
+	float control_[kFireCount];
 
-	inline FireControl()
-	{
-		::memset(mControl, 0, sizeof(mControl));
+	inline FireControl() {
+		::memset(control_, 0, sizeof(control_));
 	}
 
-	inline void operator=(const FireControl& pShooting)
-	{
-		::memcpy(mControl, pShooting.mControl, sizeof(mControl));
+	inline void operator=(const FireControl& shooting) {
+		::memcpy(control_, shooting.control_, sizeof(control_));
 	}
 };
 

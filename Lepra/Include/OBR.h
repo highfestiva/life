@@ -10,38 +10,34 @@
 
 #pragma once
 
-#include "Vector2D.h"
+#include "vector2d.h"
 
-namespace Lepra
-{
+namespace lepra {
 
 template<class _TVarType>
-class OBR
-{
+class OBR {
 public:
-	OBR(const Vector2D<_TVarType>& pPosition, 
-	    const Vector2D<_TVarType>& pSize,
-	    _TVarType pOrientation) :
-		mPosition(pPosition),
-		mSize(pSize),
-		mOrientation(pOrientation)
-	{
+	OBR(const Vector2D<_TVarType>& position,
+	    const Vector2D<_TVarType>& size,
+	    _TVarType orientation) :
+		position_(position),
+		size_(size),
+		orientation_(orientation) {
 	}
 
-	OBR(const OBR& pOBB) :
-		mPosition(pOBB.mPosition),
-		mSize(pOBB.mSize),
-		mOrientation(pOBB.mOrientation)
-	{
+	OBR(const OBR& obb) :
+		position_(obb.position_),
+		size_(obb.size_),
+		orientation_(obb.orientation_) {
 	}
 
-	inline void SetPosition(const Vector2D<_TVarType>& pPosition);
+	inline void SetPosition(const Vector2D<_TVarType>& position);
 	inline const Vector2D<_TVarType>& GetPosition() const;
 
-	inline void SetSize(const Vector2D<_TVarType>& pSize);
+	inline void SetSize(const Vector2D<_TVarType>& size);
 	inline const Vector2D<_TVarType>& GetSize() const;
 
-	inline void SetOrientation(const _TVarType pOrientation);
+	inline void SetOrientation(const _TVarType orientation);
 	inline _TVarType GetOrientation() const;
 
 	inline Vector2D<_TVarType> GetExtentX() const; // Vector (Size.x, 0) rotated.
@@ -51,63 +47,54 @@ public:
 
 private:
 
-	Vector2D<_TVarType> mPosition;	// The center of the box.
-	Vector2D<_TVarType> mSize;	// The "radius", or half size, of the box.
-	_TVarType mOrientation;		// The rotation angle in radians.
+	Vector2D<_TVarType> position_;	// The center of the box.
+	Vector2D<_TVarType> size_;	// The "radius", or half size, of the box.
+	_TVarType orientation_;		// The rotation angle in radians.
 };
 
 template<class _TVarType>
-void OBR<_TVarType>::SetPosition(const Vector2D<_TVarType>& pPosition)
-{
-	mPosition = pPosition;
+void OBR<_TVarType>::SetPosition(const Vector2D<_TVarType>& position) {
+	position_ = position;
 }
 
 template<class _TVarType>
-const Vector2D<_TVarType>& OBR<_TVarType>::GetPosition() const
-{
-	return mPosition;
+const Vector2D<_TVarType>& OBR<_TVarType>::GetPosition() const {
+	return position_;
 }
 
 template<class _TVarType>
-void OBR<_TVarType>::SetSize(const Vector2D<_TVarType>& pSize)
-{
-	mSize = pSize;
+void OBR<_TVarType>::SetSize(const Vector2D<_TVarType>& size) {
+	size_ = size;
 }
 
 template<class _TVarType>
-const Vector2D<_TVarType>& OBR<_TVarType>::GetSize() const
-{
-	return mSize;
+const Vector2D<_TVarType>& OBR<_TVarType>::GetSize() const {
+	return size_;
 }
 
 template<class _TVarType>
-void OBR<_TVarType>::SetOrientation(const _TVarType pOrientation)
-{
-	mOrientation = pOrientation;
+void OBR<_TVarType>::SetOrientation(const _TVarType orientation) {
+	orientation_ = orientation;
 }
 
 template<class _TVarType>
-_TVarType OBR<_TVarType>::GetOrientation() const
-{
-	return mOrientation;
+_TVarType OBR<_TVarType>::GetOrientation() const {
+	return orientation_;
 }
 
 template<class _TVarType>
-Vector2D<_TVarType> OBR<_TVarType>::GetExtentX() const
-{
-	return Vector2D<_TVarType>(mSize.x * cos(mOrientation), mSize.x * sin(mOrientation));
+Vector2D<_TVarType> OBR<_TVarType>::GetExtentX() const {
+	return Vector2D<_TVarType>(size_.x * cos(orientation_), size_.x * sin(orientation_));
 }
 
 template<class _TVarType>
-Vector2D<_TVarType> OBR<_TVarType>::GetExtentY() const
-{
-	return Vector2D<_TVarType>(-mSize.y * sin(mOrientation), mSize.y * cos(mOrientation));
+Vector2D<_TVarType> OBR<_TVarType>::GetExtentY() const {
+	return Vector2D<_TVarType>(-size_.y * sin(orientation_), size_.y * cos(orientation_));
 }
 
 template<class _TVarType>
-_TVarType OBR<_TVarType>::GetArea() const
-{
-	return mSize.x * mSize.y * 4;
+_TVarType OBR<_TVarType>::GetArea() const {
+	return size_.x * size_.y * 4;
 }
 
 }

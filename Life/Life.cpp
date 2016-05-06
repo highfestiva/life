@@ -1,34 +1,29 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Life.h"
-#include "../Cure/Include/FloatAttribute.h"
-#include "../Cure/Include/IntAttribute.h"
-#include "../Lepra/Include/LepraAssert.h"
+#include "life.h"
+#include "../cure/include/floatattribute.h"
+#include "../cure/include/intattribute.h"
+#include "../lepra/include/lepraassert.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName)
-{
-	if (strutil::StartsWith(pAttributeName, "float_"))
-	{
-		return new Cure::FloatAttribute(pObject, pAttributeName, 0);
+cure::ContextObjectAttribute* CreateObjectAttribute(cure::ContextObject* object, const str& attribute_name) {
+	if (strutil::StartsWith(attribute_name, "float_")) {
+		return new cure::FloatAttribute(object, attribute_name, 0);
+	} else if (strutil::StartsWith(attribute_name, "int_")) {
+		return new cure::IntAttribute(object, attribute_name, 0);
 	}
-	else if (strutil::StartsWith(pAttributeName, "int_"))
-	{
-		return new Cure::IntAttribute(pObject, pAttributeName, 0);
-	}
-	(void)pObject;
-	(void)pAttributeName;
+	(void)object;
+	(void)attribute_name;
 	deb_assert(false);
 	return 0;
 }

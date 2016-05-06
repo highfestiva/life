@@ -5,13 +5,13 @@
 
 
 #include "pch.h"
-#include "../Include/UiSoundManagerOpenAL.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/ResourceTracker.h"
-#include "../../Lepra/Include/SystemManager.h"
-#include "../../ThirdParty/freealut-1.1.0/include/AL/alut.h"
-#include "../Include/UiChibiXmAlStream.h"
-#include "../Include/UiOggAlStream.h"
+#include "../include/uisoundmanageropenal.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/resourcetracker.h"
+#include "../../lepra/include/systemmanager.h"
+#include "../../thirdparty/freealut-1.1.0/include/AL/alut.h"
+#include "../include/uichibixmalstream.h"
+#include "../include/uioggalstream.h"
 
 
 
@@ -21,106 +21,96 @@ extern "C" ALC_API void ALC_APIENTRY alc_deinit(void);	// Not intended for this 
 #endif // Windows
 
 #ifdef LEPRA_DEBUG
-#define OAL_ASSERT()	{ ALenum lAlError = alGetError(); deb_assert(lAlError == AL_NO_ERROR); }
-#define OALUT_ASSERT()	{ ALenum lAlutError = alutGetError(); deb_assert(lAlutError == ALUT_ERROR_NO_ERROR); }
+#define OAL_ASSERT()	{ ALenum al_error = alGetError(); deb_assert(al_error == AL_NO_ERROR); }
+#define OALUT_ASSERT()	{ ALenum alut_error = alutGetError(); deb_assert(alut_error == ALUT_ERROR_NO_ERROR); }
 #else // !Debug
 #define OAL_ASSERT()	alGetError()
 #define OALUT_ASSERT()	alutGetError()
 #endif // Debug / !debug
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-SoundManagerOpenAL::SoundManagerOpenAL(int pMixRate):
-	mDevice(0),
-	mContext(0),
-	mRollOffFactor(1),
-	mMasterVolume(1),
-	mMusicVolume(1),
-	mMixRate(pMixRate),
-	mIsIrreparableErrorState(false)
-{
+SoundManagerOpenAL::SoundManagerOpenAL(int mix_rate):
+	device_(0),
+	context_(0),
+	roll_off_factor_(1),
+	master_volume_(1),
+	music_volume_(1),
+	mix_rate_(mix_rate),
+	is_irreparable_error_state_(false) {
 	Open();
 }
 
-SoundManagerOpenAL::~SoundManagerOpenAL()
-{
+SoundManagerOpenAL::~SoundManagerOpenAL() {
 	OAL_ASSERT();
 	SetFileOpener(0);
 	Close();
 }
 
-bool SoundManagerOpenAL::Open()
-{
+bool SoundManagerOpenAL::Open() {
 #ifdef LEPRA_WINDOWS
 	alc_init();
-	mDevice = ::alcOpenDevice(0);
+	device_ = ::alcOpenDevice(0);
 #else // !Windows
-	mDevice = ::alcOpenDevice("'((direction \"write\")) '((devices '(alsa sdl native null)))");
-	if (!mDevice)
-	{
-		mDevice = ::alcOpenDevice(0);
+	device_ = ::alcOpenDevice("'((direction \"write\")) '((devices '(alsa sdl native null)))");
+	if (!device_) {
+		device_ = ::alcOpenDevice(0);
 	}
 #endif // Windows / !Windows
-	if (!mDevice)
-	{
-		mLog.Error("Could not open any sound device!");
+	if (!device_) {
+		log_.Error("Could not open any sound device!");
 #ifdef LEPRA_WINDOWS
 		alc_deinit();
 #endif // Windows
 		return false;
 	}
 
-	const int lAttributes[3] = { ALC_FREQUENCY, mMixRate, 0 };
-	mContext = ::alcCreateContext(mDevice, lAttributes);
-	if (!mContext)
-	{
-		mLog.Error("Could not create sound context!");
-		alcCloseDevice(mDevice);
-		mDevice = 0;
+	const int attributes[3] = { ALC_FREQUENCY, mix_rate_, 0 };
+	context_ = ::alcCreateContext(device_, attributes);
+	if (!context_) {
+		log_.Error("Could not create sound context!");
+		alcCloseDevice(device_);
+		device_ = 0;
 #ifdef LEPRA_WINDOWS
 		alc_deinit();
 #endif // Windows
 		return false;
 	}
-	::alcMakeContextCurrent(mContext);
+	::alcMakeContextCurrent(context_);
 	OAL_ASSERT();
 
 	::alutInitWithoutContext(0, 0);
 	OALUT_ASSERT();
 
-	const float lPos[3] = {0, 0, 0};
-	const float lVel[3] = {0, 0, 0};
-	const float lDirection[3+3] = {0, 1, 0, 0, 0, 1};	// Forward along Y, up along Z.
-	::alListenerfv(AL_POSITION, lPos);
-	::alListenerfv(AL_VELOCITY, lVel);
-	::alListenerfv(AL_ORIENTATION, lDirection);
+	const float _pos[3] = {0, 0, 0};
+	const float _vel[3] = {0, 0, 0};
+	const float direction[3+3] = {0, 1, 0, 0, 0, 1};	// Forward along Y, up along Z.
+	::alListenerfv(AL_POSITION, _pos);
+	::alListenerfv(AL_VELOCITY, _vel);
+	::alListenerfv(AL_ORIENTATION, direction);
 
-	mIsIrreparableErrorState = false;
+	is_irreparable_error_state_ = false;
 
 	OAL_ASSERT();
 
 	return true;
 }
 
-void SoundManagerOpenAL::Close()
-{
+void SoundManagerOpenAL::Close() {
 	StopAll();
-	SourceSet::iterator x = mSourceSet.begin();
-	for (; x != mSourceSet.end(); ++x)
-	{
+	SourceSet::iterator x = source_set_.begin();
+	for (; x != source_set_.end(); ++x) {
 		delete (*x);
 	}
-	SampleSet::iterator y = mSampleSet.begin();
-	for (; y != mSampleSet.end(); ++y)
-	{
+	SampleSet::iterator y = sample_set_.begin();
+	for (; y != sample_set_.end(); ++y) {
 		delete (*y);
 	}
-	mSourceSet.clear();
-	mSampleSet.clear();
+	source_set_.clear();
+	sample_set_.clear();
 
 	OAL_ASSERT();
 
@@ -128,15 +118,13 @@ void SoundManagerOpenAL::Close()
 	OALUT_ASSERT();
 
 	::alcMakeContextCurrent(0);
-	if (mContext)
-	{
-		::alcDestroyContext(mContext);
-		mContext = 0;
+	if (context_) {
+		::alcDestroyContext(context_);
+		context_ = 0;
 	}
-	if (mDevice)
-	{
-		::alcCloseDevice(mDevice);
-		mDevice = 0;
+	if (device_) {
+		::alcCloseDevice(device_);
+		device_ = 0;
 	}
 
 #ifdef LEPRA_WINDOWS
@@ -144,551 +132,456 @@ void SoundManagerOpenAL::Close()
 #endif // Windows
 }
 
-void SoundManagerOpenAL::Suspend()
-{
-	ScopeLock lLock(&mLock);
+void SoundManagerOpenAL::Suspend() {
+	ScopeLock lock(&lock_);
 	::alcMakeContextCurrent(0);
-	::alcSuspendContext(mContext);
+	::alcSuspendContext(context_);
 	OAL_ASSERT();
 }
 
-void SoundManagerOpenAL::Resume()
-{
-	ScopeLock lLock(&mLock);
-	::alcMakeContextCurrent(mContext);
-	::alcProcessContext(mContext);
+void SoundManagerOpenAL::Resume() {
+	ScopeLock lock(&lock_);
+	::alcMakeContextCurrent(context_);
+	::alcProcessContext(context_);
 	OAL_ASSERT();
 }
 
-bool SoundManagerOpenAL::IsIrreparableErrorState() const
-{
-	return mIsIrreparableErrorState;
+bool SoundManagerOpenAL::IsIrreparableErrorState() const {
+	return is_irreparable_error_state_;
 }
 
 
-float SoundManagerOpenAL::GetMasterVolume() const
-{
-	return mMasterVolume;
+float SoundManagerOpenAL::GetMasterVolume() const {
+	return master_volume_;
 }
 
-void SoundManagerOpenAL::SetMasterVolume(float pVolume)
-{
-	mMasterVolume = pVolume;
+void SoundManagerOpenAL::SetMasterVolume(float volume) {
+	master_volume_ = volume;
 }
 
-float SoundManagerOpenAL::GetMusicVolume() const
-{
-	return mMasterVolume * mMusicVolume;
+float SoundManagerOpenAL::GetMusicVolume() const {
+	return master_volume_ * music_volume_;
 }
 
-void SoundManagerOpenAL::SetMusicVolume(float pVolume)
-{
-	mMusicVolume = pVolume;
+void SoundManagerOpenAL::SetMusicVolume(float volume) {
+	music_volume_ = volume;
 }
 
 
 
-SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority)
-{
-	Sample* lSample = (Sample*)LoadSound3D(pFileName, pLoopMode, pPriority);
-	if (lSample)
-	{
-		lSample->mIsAmbient = true;
+SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const str& file_name, LoopMode loop_mode, int priority) {
+	Sample* _sample = (Sample*)LoadSound3D(file_name, loop_mode, priority);
+	if (_sample) {
+		_sample->is_ambient_ = true;
 	}
-	return ((SoundID)lSample);
+	return ((SoundID)_sample);
 }
 
-SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority)
-{
-	Sample* lSample = (Sample*)LoadSound3D(pFileName, pData, pDataSize, pLoopMode, pPriority);
-	if (lSample)
-	{
-		lSample->mIsAmbient = true;
+SoundManager::SoundID SoundManagerOpenAL::LoadSound2D(const str& file_name, const void* data, size_t data_size, LoopMode loop_mode, int priority) {
+	Sample* _sample = (Sample*)LoadSound3D(file_name, data, data_size, loop_mode, priority);
+	if (_sample) {
+		_sample->is_ambient_ = true;
 	}
-	return ((SoundID)lSample);
+	return ((SoundID)_sample);
 }
 
-SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, LoopMode pLoopMode, int pPriority)
-{
-	return LoadSound3D(pFileName, 0, 0, pLoopMode, pPriority);
+SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& file_name, LoopMode loop_mode, int priority) {
+	return LoadSound3D(file_name, 0, 0, loop_mode, priority);
 }
 
-SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority)
-{
-	Sample* lSample = new Sample(pLoopMode != LOOP_NONE, pPriority);
-	bool lOk = false;
-	for (int x = 0; !lOk && x < 3; ++x)	// TRICKY: retry to avoid anti-virus glitches (for the file version) and sound driver glitches (for the raw data version).
-	{
-		if (pData)
-		{
-			lOk = lSample->Load(pData, pDataSize);
+SoundManager::SoundID SoundManagerOpenAL::LoadSound3D(const str& file_name, const void* data, size_t data_size, LoopMode loop_mode, int priority) {
+	Sample* _sample = new Sample(loop_mode != kLoopNone, priority);
+	bool ok = false;
+	for (int x = 0; !ok && x < 3; ++x) {	// TRICKY: retry to avoid anti-virus glitches (for the file version) and sound driver glitches (for the raw data version).
+		if (data) {
+			ok = _sample->Load(data, data_size);
+		} else {
+			ok = _sample->Load(file_name);
 		}
-		else
-		{
-			lOk = lSample->Load(pFileName);
-		}
-		if (!lOk)
-		{
+		if (!ok) {
 			Thread::Sleep(0.05f);
 		}
 	}
-	if (lOk)
-	{
-		ScopeLock lLock(&mLock);
-		deb_assert(mSampleSet.find(lSample) == mSampleSet.end());
-		mSampleSet.insert(lSample);
-	}
-	else
-	{
-		mLog.Errorf("Could not get load sound %s, thus not possible to create sound.", pFileName.c_str());
+	if (ok) {
+		ScopeLock lock(&lock_);
+		deb_assert(sample_set_.find(_sample) == sample_set_.end());
+		sample_set_.insert(_sample);
+	} else {
+		log_.Errorf("Could not get load sound %s, thus not possible to create sound.", file_name.c_str());
 		deb_assert(false);
-		delete (lSample);
-		lSample = 0;
+		delete (_sample);
+		_sample = 0;
 	}
-	return ((SoundID)lSample);
+	return ((SoundID)_sample);
 }
 
-SoundStream* SoundManagerOpenAL::CreateSoundStream(const str& pFileName, LoopMode pLoopMode, int)
-{
+SoundStream* SoundManagerOpenAL::CreateSoundStream(const str& file_name, LoopMode loop_mode, int) {
 	OAL_ASSERT();
 
-	SoundStream* lSoundStream;
-	if (strutil::EndsWith(pFileName, ".xm"))
-	{
-		lSoundStream = new ChibiXmAlStream(this, pFileName, pLoopMode == LOOP_FORWARD);
+	SoundStream* sound_stream;
+	if (strutil::EndsWith(file_name, ".xm")) {
+		sound_stream = new ChibiXmAlStream(this, file_name, loop_mode == kLoopForward);
+	} else {
+		sound_stream = new OggAlStream(this, SystemManager::GetDataDirectory()+file_name, loop_mode == kLoopForward);
 	}
-	else
-	{
-		lSoundStream = new OggAlStream(this, SystemManager::GetDataDirectory()+pFileName, pLoopMode == LOOP_FORWARD);
-	}
-	if (!lSoundStream->IsOpen())
-	{
-		delete lSoundStream;
-		lSoundStream = 0;
+	if (!sound_stream->IsOpen()) {
+		delete sound_stream;
+		sound_stream = 0;
 	}
 
 	OAL_ASSERT();
 
-	return lSoundStream;;
+	return sound_stream;;
 }
 
-void SoundManagerOpenAL::Release(SoundID pSoundID)
-{
-	ScopeLock lLock(&mLock);
-	Sample* lSample = GetSample(pSoundID);
-	if (!lSample)
-	{
+void SoundManagerOpenAL::Release(SoundID sound_id) {
+	ScopeLock lock(&lock_);
+	Sample* _sample = GetSample(sound_id);
+	if (!_sample) {
 		return;
 	}
 
-	mSampleSet.erase(mSampleSet.find((Sample*)pSoundID));
-	delete (lSample);
+	sample_set_.erase(sample_set_.find((Sample*)sound_id));
+	delete (_sample);
 }
 
-double SoundManagerOpenAL::GetStreamTime(SoundID pSoundID)
-{
-	ScopeLock lLock(&mLock);
-	Sample* lSample = GetSample(pSoundID);
-	if (!lSample)
-	{
+double SoundManagerOpenAL::GetStreamTime(SoundID sound_id) {
+	ScopeLock lock(&lock_);
+	Sample* _sample = GetSample(sound_id);
+	if (!_sample) {
 		return (-1);
 	}
 
-	ALfloat lSourceTime = 0;
-	if (!lSample->mSourceList.empty())
-	{
-		Source* lSource = *lSample->mSourceList.begin();
-		ALint lState = AL_PAUSED;
-		alGetSourcei(lSource->mSid, AL_SOURCE_STATE, &lState);
-		if (lState == AL_PLAYING)
-		{
-			::alGetSourcef(lSource->mSid, AL_SEC_OFFSET, &lSourceTime);
-		}
-		else
-		{
-			lSourceTime = 1e12f;	// Anything big is good, this sample is done.
+	ALfloat source_time = 0;
+	if (!_sample->source_list_.empty()) {
+		Source* source = *_sample->source_list_.begin();
+		ALint state = AL_PAUSED;
+		alGetSourcei(source->sid_, AL_SOURCE_STATE, &state);
+		if (state == AL_PLAYING) {
+			::alGetSourcef(source->sid_, AL_SEC_OFFSET, &source_time);
+		} else {
+			source_time = 1e12f;	// Anything big is good, this sample is done.
 		}
 	}
 	OAL_ASSERT();
-	return (lSourceTime);
+	return (source_time);
 
 }
 
-SoundManager::SoundInstanceID SoundManagerOpenAL::CreateSoundInstance(SoundID pSoundID)
-{
-	ScopeLock lLock(&mLock);
-	Sample* lSample = GetSample(pSoundID);
-	if (!lSample)
-	{
-		mLog.Errorf("Could not get sound sample %u, thus not possible to create sound instance.", pSoundID);
+SoundManager::SoundInstanceID SoundManagerOpenAL::CreateSoundInstance(SoundID sound_id) {
+	ScopeLock lock(&lock_);
+	Sample* _sample = GetSample(sound_id);
+	if (!_sample) {
+		log_.Errorf("Could not get sound sample %u, thus not possible to create sound instance.", sound_id);
 		return (INVALID_SOUNDINSTANCEID);
 	}
 
-	Source* lSource = new Source;
-	if (lSource->SetSample(lSample, mRollOffFactor))
-	{
-		deb_assert(mSourceSet.find(lSource) == mSourceSet.end());
-		mSourceSet.insert(lSource);
+	Source* source = new Source;
+	if (source->SetSample(_sample, roll_off_factor_)) {
+		deb_assert(source_set_.find(source) == source_set_.end());
+		source_set_.insert(source);
+	} else {
+		delete (source);
+		source = 0;
 	}
-	else
-	{
-		delete (lSource);
-		lSource = 0;
-	}
-	return ((SoundInstanceID)lSource);
+	return ((SoundInstanceID)source);
 }
 
-void SoundManagerOpenAL::DeleteSoundInstance(SoundInstanceID pSoundIID)
-{
-	ScopeLock lLock(&mLock);
-	Source* lSource = GetSource(pSoundIID);
-	if (!lSource)
-	{
+void SoundManagerOpenAL::DeleteSoundInstance(SoundInstanceID sound_iid) {
+	ScopeLock lock(&lock_);
+	Source* source = GetSource(sound_iid);
+	if (!source) {
 		deb_assert(false);
 		return;
 	}
 
-	mSourceSet.erase(mSourceSet.find((Source*)pSoundIID));
-	delete (lSource);
+	source_set_.erase(source_set_.find((Source*)sound_iid));
+	delete (source);
 }
 
-bool SoundManagerOpenAL::Play(SoundInstanceID pSoundIID, float pVolume, float pPitch)
-{
-	ScopeLock lLock(&mLock);
-	Source* lSource = GetSource(pSoundIID);
-	if (!lSource)
-	{
+bool SoundManagerOpenAL::Play(SoundInstanceID sound_iid, float volume, float pitch) {
+	ScopeLock lock(&lock_);
+	Source* source = GetSource(sound_iid);
+	if (!source) {
 		return (false);
 	}
 
-	::alSourcef(lSource->mSid, AL_GAIN, pVolume * mMasterVolume);
-	::alSourcef(lSource->mSid, AL_PITCH, pPitch);
-	::alSourcePlay(lSource->mSid);
-	if (alGetError() != AL_NO_ERROR)
-	{
-		mIsIrreparableErrorState = true;
+	::alSourcef(source->sid_, AL_GAIN, volume * master_volume_);
+	::alSourcef(source->sid_, AL_PITCH, pitch);
+	::alSourcePlay(source->sid_);
+	if (alGetError() != AL_NO_ERROR) {
+		is_irreparable_error_state_ = true;
 	}
 	return (true);
 }
 
-void SoundManagerOpenAL::StopAll()
-{
-	ScopeLock lLock(&mLock);
-	SourceSet::iterator x = mSourceSet.begin();
-	for (; x != mSourceSet.end(); ++x)
-	{
-		::alSourceStop((*x)->mSid);
+void SoundManagerOpenAL::StopAll() {
+	ScopeLock lock(&lock_);
+	SourceSet::iterator x = source_set_.begin();
+	for (; x != source_set_.end(); ++x) {
+		::alSourceStop((*x)->sid_);
 	}
 	OAL_ASSERT();
 }
 
-void SoundManagerOpenAL::Stop(SoundInstanceID pSoundIID)
-{
-	ScopeLock lLock(&mLock);
-	Source* lSource = GetSource(pSoundIID);
-	if (!lSource)
-	{
+void SoundManagerOpenAL::Stop(SoundInstanceID sound_iid) {
+	ScopeLock lock(&lock_);
+	Source* source = GetSource(sound_iid);
+	if (!source) {
 		return;
 	}
-	::alSourceStop(lSource->mSid);
+	::alSourceStop(source->sid_);
 	OAL_ASSERT();
 }
 
-void SoundManagerOpenAL::TogglePause(SoundInstanceID pSoundIID)
-{
-	ScopeLock lLock(&mLock);
-	Source* lSource = GetSource(pSoundIID);
-	if (!lSource)
-	{
+void SoundManagerOpenAL::TogglePause(SoundInstanceID sound_iid) {
+	ScopeLock lock(&lock_);
+	Source* source = GetSource(sound_iid);
+	if (!source) {
 		return;
 	}
-	ALint lState = AL_PAUSED;
-	alGetSourcei(lSource->mSid, AL_SOURCE_STATE, &lState);
-	if (lState != AL_PLAYING)
-	{
-		::alSourcePlay(lSource->mSid);
-	}
-	else
-	{
-		::alSourcePause(lSource->mSid);
+	ALint state = AL_PAUSED;
+	alGetSourcei(source->sid_, AL_SOURCE_STATE, &state);
+	if (state != AL_PLAYING) {
+		::alSourcePlay(source->sid_);
+	} else {
+		::alSourcePause(source->sid_);
 	}
 	OAL_ASSERT();
 }
 
-bool SoundManagerOpenAL::IsPlaying(SoundInstanceID pSoundIID)
-{
-	ScopeLock lLock(&mLock);
-	Source* lSource = GetSource(pSoundIID);
-	if (!lSource)
-	{
+bool SoundManagerOpenAL::IsPlaying(SoundInstanceID sound_iid) {
+	ScopeLock lock(&lock_);
+	Source* source = GetSource(sound_iid);
+	if (!source) {
 		return (false);
 	}
-	ALint lState = AL_PAUSED;
-	alGetSourcei(lSource->mSid, AL_SOURCE_STATE, &lState);
+	ALint state = AL_PAUSED;
+	alGetSourcei(source->sid_, AL_SOURCE_STATE, &state);
 	OAL_ASSERT();
-	return (lState == AL_PLAYING);
+	return (state == AL_PLAYING);
 }
 
-bool SoundManagerOpenAL::IsPaused(SoundInstanceID pSoundIID)
-{
-	return (!IsPlaying(pSoundIID));
+bool SoundManagerOpenAL::IsPaused(SoundInstanceID sound_iid) {
+	return (!IsPlaying(sound_iid));
 }
 
-void SoundManagerOpenAL::SetPan(SoundInstanceID pSoundIID, float)
-{
-	ScopeLock lLock(&mLock);
-	Source* lSource = GetSource(pSoundIID);
-	if (!lSource)
-	{
+void SoundManagerOpenAL::SetPan(SoundInstanceID sound_iid, float) {
+	ScopeLock lock(&lock_);
+	Source* source = GetSource(sound_iid);
+	if (!source) {
 		return;
 	}
-	//lSource->SetPan(pPan);
+	//source->SetPan(pan);
 }
 
-void SoundManagerOpenAL::SetVolume(SoundInstanceID pSoundIID, float pVolume)
-{
-	ScopeLock lLock(&mLock);
-	Source* lSource = GetSource(pSoundIID);
-	if (!lSource || pVolume <= 0)
-	{
+void SoundManagerOpenAL::SetVolume(SoundInstanceID sound_iid, float volume) {
+	ScopeLock lock(&lock_);
+	Source* source = GetSource(sound_iid);
+	if (!source || volume <= 0) {
 		return;
 	}
-	::alSourcef(lSource->mSid, AL_GAIN, pVolume * mMasterVolume);
+	::alSourcef(source->sid_, AL_GAIN, volume * master_volume_);
 	OAL_ASSERT();
 }
 
-void SoundManagerOpenAL::SetPitch(SoundInstanceID pSoundIID, float pPitch)
-{
-	ScopeLock lLock(&mLock);
-	Source* lSource = GetSource(pSoundIID);
-	if (!lSource || pPitch <= 0)
-	{
+void SoundManagerOpenAL::SetPitch(SoundInstanceID sound_iid, float pitch) {
+	ScopeLock lock(&lock_);
+	Source* source = GetSource(sound_iid);
+	if (!source || pitch <= 0) {
 		return;
 	}
-	::alSourcef(lSource->mSid, AL_PITCH, pPitch);
+	::alSourcef(source->sid_, AL_PITCH, pitch);
 	OAL_ASSERT();
 }
 
-void SoundManagerOpenAL::SetFrequency(SoundInstanceID, int)
-{
+void SoundManagerOpenAL::SetFrequency(SoundInstanceID, int) {
 }
 
-int SoundManagerOpenAL::GetFrequency(SoundInstanceID)
-{
+int SoundManagerOpenAL::GetFrequency(SoundInstanceID) {
 	return (0);
 }
 
-void SoundManagerOpenAL::SetDopplerFactor(float pFactor)
-{
-	ScopeLock lLock(&mLock);
-	::alDopplerFactor(pFactor);
+void SoundManagerOpenAL::SetDopplerFactor(float factor) {
+	ScopeLock lock(&lock_);
+	::alDopplerFactor(factor);
 	OAL_ASSERT();
 }
 
-void SoundManagerOpenAL::SetRollOffFactor(float pFactor)
-{
-	ScopeLock lLock(&mLock);
-	mRollOffFactor = pFactor;
-	SourceSet::iterator x = mSourceSet.begin();
-	for (; x != mSourceSet.end(); ++x)
-	{
-		::alSourcef((*x)->mSid, AL_ROLLOFF_FACTOR, pFactor);
+void SoundManagerOpenAL::SetRollOffFactor(float factor) {
+	ScopeLock lock(&lock_);
+	roll_off_factor_ = factor;
+	SourceSet::iterator x = source_set_.begin();
+	for (; x != source_set_.end(); ++x) {
+		::alSourcef((*x)->sid_, AL_ROLLOFF_FACTOR, factor);
 	}
 	OAL_ASSERT();
 }
 
-void SoundManagerOpenAL::SetChorus(SoundInstanceID, int, float, float, float, float, float)
-{
+void SoundManagerOpenAL::SetChorus(SoundInstanceID, int, float, float, float, float, float) {
 }
 
-void SoundManagerOpenAL::SetFlanger(SoundInstanceID, int, float, float, float, float, float)
-{
+void SoundManagerOpenAL::SetFlanger(SoundInstanceID, int, float, float, float, float, float) {
 }
 
-void SoundManagerOpenAL::SetCompressor(SoundInstanceID, int, float, float, float, float)
-{
+void SoundManagerOpenAL::SetCompressor(SoundInstanceID, int, float, float, float, float) {
 }
 
-void SoundManagerOpenAL::SetEcho(SoundInstanceID, int, float, float, float)
-{
+void SoundManagerOpenAL::SetEcho(SoundInstanceID, int, float, float, float) {
 }
 
-void SoundManagerOpenAL::SetParamEQ(SoundInstanceID, int, float, float, float)
-{
+void SoundManagerOpenAL::SetParamEQ(SoundInstanceID, int, float, float, float) {
 }
 
 
 
-void SoundManagerOpenAL::SetFileOpener(FileOpener* pOpener)
-{
-	ChibiXmAlStream::SetFileOpener(pOpener);
+void SoundManagerOpenAL::SetFileOpener(FileOpener* opener) {
+	ChibiXmAlStream::SetFileOpener(opener);
 }
 
 
 
-void SoundManagerOpenAL::DoSetSoundPosition(SoundInstanceID pSoundIID, const vec3& pPos, const vec3& pVel)
-{
-	ScopeLock lLock(&mLock);
-	Source* lSource = GetSource(pSoundIID);
-	if (!lSource)
-	{
+void SoundManagerOpenAL::DoSetSoundPosition(SoundInstanceID sound_iid, const vec3& pos, const vec3& vel) {
+	ScopeLock lock(&lock_);
+	Source* source = GetSource(sound_iid);
+	if (!source) {
 		deb_assert(false);
 		return;
 	}
 
-	float lPos[3];
-	float lVel[3];
-	lPos[0] = pPos.x;
-	lPos[1] = pPos.y;
-	lPos[2] = pPos.z;
-	lVel[0] = pVel.x;
-	lVel[1] = pVel.y;
-	lVel[2] = pVel.z;
-	::alSourcefv(lSource->mSid, AL_POSITION, lPos);
-	::alSourcefv(lSource->mSid, AL_VELOCITY, lVel);
+	float _pos[3];
+	float _vel[3];
+	_pos[0] = pos.x;
+	_pos[1] = pos.y;
+	_pos[2] = pos.z;
+	_vel[0] = vel.x;
+	_vel[1] = vel.y;
+	_vel[2] = vel.z;
+	::alSourcefv(source->sid_, AL_POSITION, _pos);
+	::alSourcefv(source->sid_, AL_VELOCITY, _vel);
 
 	OAL_ASSERT();
 }
 
 
 
-SoundManagerOpenAL::Sample* SoundManagerOpenAL::GetSample(SoundID pSoundID) const
-{
-	Sample* lSample = (Sample*)pSoundID;
-	SampleSet::const_iterator x = mSampleSet.find(lSample);
-	if (x == mSampleSet.end())
-	{
+SoundManagerOpenAL::Sample* SoundManagerOpenAL::GetSample(SoundID sound_id) const {
+	Sample* _sample = (Sample*)sound_id;
+	SampleSet::const_iterator x = sample_set_.find(_sample);
+	if (x == sample_set_.end()) {
 		deb_assert(false);
-		lSample = 0;
+		_sample = 0;
 	}
-	return (lSample);
+	return (_sample);
 }
 
-SoundManagerOpenAL::Source* SoundManagerOpenAL::GetSource(SoundInstanceID pSoundInstanceID) const
-{
-	Source* lSource = (Source*)pSoundInstanceID;
-	SourceSet::const_iterator x = mSourceSet.find(lSource);
-	if (x == mSourceSet.end())
-	{
+SoundManagerOpenAL::Source* SoundManagerOpenAL::GetSource(SoundInstanceID sound_instance_id) const {
+	Source* source = (Source*)sound_instance_id;
+	SourceSet::const_iterator x = source_set_.find(source);
+	if (x == source_set_.end()) {
 		deb_assert(false);
-		lSource = 0;
+		source = 0;
 	}
-	return (lSource);
+	return (source);
 }
 
 
 
-SoundManagerOpenAL::Sample::Sample(bool pLooping, int pPriority):
-	mBuffer(AL_NONE),
-	mIsLooping(pLooping),
-	mPriority(pPriority),
-	mIsAmbient(false)
-{
+SoundManagerOpenAL::Sample::Sample(bool looping, int priority):
+	buffer_(AL_NONE),
+	is_looping_(looping),
+	priority_(priority),
+	is_ambient_(false) {
 }
 
-SoundManagerOpenAL::Sample::~Sample()
-{
+SoundManagerOpenAL::Sample::~Sample() {
 	OAL_ASSERT();
-	if (mBuffer != AL_NONE)
-	{
-		::alDeleteBuffers(1, &mBuffer);
-		mBuffer = AL_NONE;
-		const int lError = ::alGetError();
-		if (lError != AL_NO_ERROR)
-		{
-			mLog.Errorf("Could not delete OpenAL buffer (%4.4X).", lError);
+	if (buffer_ != AL_NONE) {
+		::alDeleteBuffers(1, &buffer_);
+		buffer_ = AL_NONE;
+		const int error = ::alGetError();
+		if (error != AL_NO_ERROR) {
+			log_.Errorf("Could not delete OpenAL buffer (%4.4X).", error);
 		}
 		LEPRA_RELEASE_RESOURCE(alBuffer);
 	}
 	OAL_ASSERT();
 }
 
-bool SoundManagerOpenAL::Sample::Load(const str& pFileName)
-{
-	deb_assert(mBuffer == AL_NONE);
+bool SoundManagerOpenAL::Sample::Load(const str& file_name) {
+	deb_assert(buffer_ == AL_NONE);
 	LEPRA_ACQUIRE_RESOURCE(alBuffer);
-	mBuffer = ::alutCreateBufferFromFile(pFileName.c_str());
+	buffer_ = ::alutCreateBufferFromFile(file_name.c_str());
 	OALUT_ASSERT();
-	return (mBuffer != AL_NONE);
+	return (buffer_ != AL_NONE);
 }
 
-bool SoundManagerOpenAL::Sample::Load(const void* pData, size_t pDataSize)
-{
-	deb_assert(mBuffer == AL_NONE);
+bool SoundManagerOpenAL::Sample::Load(const void* data, size_t data_size) {
+	deb_assert(buffer_ == AL_NONE);
 	LEPRA_ACQUIRE_RESOURCE(alBuffer);
-	mBuffer = ::alutCreateBufferFromFileImage(pData, pDataSize);
+	buffer_ = ::alutCreateBufferFromFileImage(data, data_size);
 	OALUT_ASSERT();
-	return (mBuffer != AL_NONE);
+	return (buffer_ != AL_NONE);
 }
 
 
 
 SoundManagerOpenAL::Source::Source():
-	mSample(0),
-	mSid((ALuint)-1)
-{
+	sample_(0),
+	sid_((ALuint)-1) {
 }
 
-SoundManagerOpenAL::Source::~Source()
-{
+SoundManagerOpenAL::Source::~Source() {
 	OAL_ASSERT();
-	if (mSample)
-	{
-		mSample->mSourceList.erase(this);
-		mSample = 0;
+	if (sample_) {
+		sample_->source_list_.erase(this);
+		sample_ = 0;
 	}
-	if (mSid != (ALuint)-1)
-	{
-		::alSourceStop(mSid);
+	if (sid_ != (ALuint)-1) {
+		::alSourceStop(sid_);
 		OAL_ASSERT();
-		::alDeleteSources(1, &mSid);
+		::alDeleteSources(1, &sid_);
 		OAL_ASSERT();
-		mSid = (ALuint)-1;
+		sid_ = (ALuint)-1;
 		LEPRA_RELEASE_RESOURCE(alSources);
 	}
 	OAL_ASSERT();
 }
 
-bool SoundManagerOpenAL::Source::SetSample(Sample* pSample, float pRollOffFactor)
-{
-	deb_assert(mSid == (ALuint)-1);
+bool SoundManagerOpenAL::Source::SetSample(Sample* sample, float roll_off_factor) {
+	deb_assert(sid_ == (ALuint)-1);
 	LEPRA_ACQUIRE_RESOURCE(alSources);
-	::alGenSources(1, &mSid);
-	if (mSid == (ALuint)-1)
-	{
-		const int lError = ::alGetError();
-		if (lError != AL_NO_ERROR)
-		{
-			mLog.Errorf("Could not generate OpenAL source (%4.4X), thus not possible to create sound instance.", lError);
+	::alGenSources(1, &sid_);
+	if (sid_ == (ALuint)-1) {
+		const int error = ::alGetError();
+		if (error != AL_NO_ERROR) {
+			log_.Errorf("Could not generate OpenAL source (%4.4X), thus not possible to create sound instance.", error);
 		}
 		return false;
 	}
 
-	deb_assert(mSample == 0);
-	mSample = pSample;
-	deb_assert(mSample->mSourceList.find(this) == mSample->mSourceList.end());
-	mSample->mSourceList.insert(this);
+	deb_assert(sample_ == 0);
+	sample_ = sample;
+	deb_assert(sample_->source_list_.find(this) == sample_->source_list_.end());
+	sample_->source_list_.insert(this);
 
-	::alSourcei(mSid, AL_LOOPING, mSample->mIsLooping? 1 : 0);
-	if (mSample->mIsAmbient)
-	{
-		::alSourcei(mSid, AL_SOURCE_RELATIVE, AL_TRUE);
-		::alSourcef(mSid, AL_ROLLOFF_FACTOR, 0);
-		::alSource3f(mSid, AL_DIRECTION, 0,0,0);	// Omnidirectional sound source.
+	::alSourcei(sid_, AL_LOOPING, sample_->is_looping_? 1 : 0);
+	if (sample_->is_ambient_) {
+		::alSourcei(sid_, AL_SOURCE_RELATIVE, AL_TRUE);
+		::alSourcef(sid_, AL_ROLLOFF_FACTOR, 0);
+		::alSource3f(sid_, AL_DIRECTION, 0,0,0);	// Omnidirectional sound source.
+	} else {
+		::alSourcei(sid_, AL_SOURCE_RELATIVE, AL_FALSE);
+		::alSourcef(sid_, AL_ROLLOFF_FACTOR, roll_off_factor);
 	}
-	else
-	{
-		::alSourcei(mSid, AL_SOURCE_RELATIVE, AL_FALSE);
-		::alSourcef(mSid, AL_ROLLOFF_FACTOR, pRollOffFactor);
-	}
-	::alSourcei(mSid, AL_BUFFER, mSample->mBuffer);
+	::alSourcei(sid_, AL_BUFFER, sample_->buffer_);
 	OAL_ASSERT();
 	return true;
 }
 
 
 
-loginstance(UI_SOUND, SoundManagerOpenAL);
+loginstance(kUiSound, SoundManagerOpenAL);
 
 
 

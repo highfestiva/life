@@ -7,7 +7,7 @@
 
 	The list control will store components in, and render them as, a list.
 	The components should preferrably be Labels, but can be of any type.
-	
+
 	The list control assumes that each component has a static preferred size.
 	If you change the size of one component, you have to rebuild the entire
 	list. The list won't work properly otherwise.
@@ -15,79 +15,76 @@
 
 #pragma once
 
-#include "UiWindow.h"
-#include "UiGridLayout.h"
-#include "UiListLayout.h"
-#include "UiScrollBar.h"
-#include "UiRectComponent.h"
-#include "UiLabel.h"
+#include "uiwindow.h"
+#include "uigridlayout.h"
+#include "uilistlayout.h"
+#include "uiscrollbar.h"
+#include "uirectcomponent.h"
+#include "uilabel.h"
 #include <list>
-#include "../../../Lepra/Include/HashTable.h"
+#include "../../../lepra/include/hashtable.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class ListControl: public Window
-{
+class ListControl: public Window {
 	typedef Window Parent;
 public:
 
-	enum Style
-	{
-		SINGLE_SELECT = 0,	// Select at most one (by clicking).
-		MULTI_SELECT,		// Select zero or more.
-		MENU_SELECT,	// Like single select, but selects by hovering with the cursor.
+	enum Style {
+		kSingleSelect = 0,	// Select at most one (by clicking).
+		kMultiSelect,		// Select zero or more.
+		kMenuSelect,	// Like single select, but selects by hovering with the cursor.
 	};
 
-	ListControl(unsigned pBorderStyle,
-		    int pBorderWidth,
-		    const Color& pColor,
-		    ListLayout::ListType pListType = ListLayout::COLUMN);
-	ListControl(unsigned pBorderStyle,
-		    int pBorderWidth,
-		    Painter::ImageID pImageID,
-		    ListLayout::ListType pListType = ListLayout::COLUMN);
-	ListControl(const Color& pColor, ListLayout::ListType pListType = ListLayout::COLUMN);
-	ListControl(Painter::ImageID pImageID, ListLayout::ListType pListType = ListLayout::COLUMN);
+	ListControl(unsigned border_style,
+		    int border_width,
+		    const Color& color,
+		    ListLayout::ListType list_type = ListLayout::kColumn);
+	ListControl(unsigned border_style,
+		    int border_width,
+		    Painter::ImageID image_id,
+		    ListLayout::ListType list_type = ListLayout::kColumn);
+	ListControl(const Color& color, ListLayout::ListType list_type = ListLayout::kColumn);
+	ListControl(Painter::ImageID image_id, ListLayout::ListType list_type = ListLayout::kColumn);
 
 	virtual ~ListControl();
 
 	inline Style GetStyle();
-	inline void SetStyle(Style pStyle);
+	inline void SetStyle(Style style);
 
-	void SetScrollBars(ScrollBar* pHScrollBar, ScrollBar* pVScrollBar, RectComponent* pCornerRect);
+	void SetScrollBars(ScrollBar* h_scroll_bar, ScrollBar* v_scroll_bar, RectComponent* corner_rect);
 
-	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0, int pLayer = 0);
-	virtual void RemoveChild(Component* pChild, int pLayer);
+	virtual void AddChild(Component* child, int param1 = 0, int param2 = 0, int layer = 0);
+	virtual void RemoveChild(Component* child, int layer);
 	virtual int GetNumChildren() const;
 
-	void AddChildAfter(Component* pChild, Component* pAfterThis, int pIndentationLevel);
-	void AddChildrenAfter(std::list<Component*>& pChildList, Component* pAfterThis, int pIndentationLevel);
+	void AddChildAfter(Component* child, Component* after_this, int indentation_level);
+	void AddChildrenAfter(std::list<Component*>& child_list, Component* after_this, int indentation_level);
 
-	void GetScrollOffsets(int& pHorizontalOffset, int& pVerticalOffset) const;
-	void SetScrollOffsets(int pHorizontalOffset, int pVerticalOffset);
+	void GetScrollOffsets(int& horizontal_offset, int& vertical_offset) const;
+	void SetScrollOffsets(int horizontal_offset, int vertical_offset);
 
-	void SetItemSelected(int pItemIndex, bool pSelected);
+	void SetItemSelected(int item_index, bool selected);
 
 	Component* GetFirstSelectedItem();
 	Component* GetNextSelectedItem();
 
-	virtual bool OnLButtonDown(int pMouseX, int pMouseY);
-	virtual bool OnLButtonUp(int pMouseX, int pMouseY);
+	virtual bool OnLButtonDown(int mouse_x, int mouse_y);
+	virtual bool OnLButtonUp(int mouse_x, int mouse_y);
 
-	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
+	virtual bool OnMouseMove(int mouse_x, int mouse_y, int delta_x, int delta_y);
 
-	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
-	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual bool OnKeyDown(uilepra::InputManager::KeyCode key_code);
+	virtual bool OnKeyUp(uilepra::InputManager::KeyCode key_code);
 
 	// Override this if implementing a popup menu.
-	virtual void OnItemSelected(Component* pItem);
+	virtual void OnItemSelected(Component* item);
 
-	virtual void DoSetMinSize(int pWidth, int pHeight);
+	virtual void DoSetMinSize(int width, int height);
 
 	virtual void UpdateLayout();
 
@@ -96,51 +93,47 @@ public:
 	inline PixelCoord GetContentSize();
 
 protected:
-	void Init(ListLayout::ListType pListType);
+	void Init(ListLayout::ListType list_type);
 private:
 
 	typedef std::list<Component*> ComponentList;
 
-	void Select(Component* pChild, int pSelectedX, int pSelectedY);
-	void SetSelected(Component* pChild, bool pSelected);
+	void Select(Component* child, int selected_x, int selected_y);
+	void SetSelected(Component* child, bool selected);
 	void DeselectAll();
 
 	void UpdateScrollPos();
-	
-	void ScrollToChild(Component* pChild);
 
-	ComponentList mSelectedList;
+	void ScrollToChild(Component* child);
 
-	Style mStyle;
+	ComponentList selected_list_;
 
-	ScrollBar* mHScrollBar;
-	ScrollBar* mVScrollBar;
+	Style style_;
 
-	RectComponent* mListRect;
+	ScrollBar* h_scroll_bar_;
+	ScrollBar* v_scroll_bar_;
+
+	RectComponent* list_rect_;
 	// The square in the bottom right corner where the scroll bars meet.
-	RectComponent* mCornerRect;
+	RectComponent* corner_rect_;
 
-	Component* mLastSelected;
+	Component* last_selected_;
 };
 
-ListControl::Style ListControl::GetStyle()
-{
-	return mStyle;
+ListControl::Style ListControl::GetStyle() {
+	return style_;
 }
 
-void ListControl::SetStyle(Style pStyle)
-{
-	mStyle = pStyle;
+void ListControl::SetStyle(Style style) {
+	style_ = style;
 }
 
-Component::Type ListControl::GetType() const
-{
-	return Component::LISTCONTROL;
+Component::Type ListControl::GetType() const {
+	return Component::kListcontrol;
 }
 
-PixelCoord ListControl::GetContentSize()
-{
-	return ((ListLayout*)mListRect->GetLayout())->GetContentSize();
+PixelCoord ListControl::GetContentSize() {
+	return ((ListLayout*)list_rect_->GetLayout())->GetContentSize();
 }
 
 

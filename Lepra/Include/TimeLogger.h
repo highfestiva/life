@@ -1,32 +1,30 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "HiResTimer.h"
+#include "hirestimer.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class TimeLogger
-{
+class TimeLogger {
 public:
-	TimeLogger(LogDecorator* pLog, const str& pPrefix);
+	TimeLogger(LogDecorator* log, const str& prefix);
 	~TimeLogger();
-	void Transfer(const str& pPrefix);
+	void Transfer(const str& prefix);
 	void Log();
 
 private:
-	LogDecorator* mLog;
-	str mPrefix;
-	HiResTimer mTimer;
+	LogDecorator* log_;
+	str prefix_;
+	HiResTimer timer_;
 };
 
 

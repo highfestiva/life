@@ -5,445 +5,357 @@
 
 
 #include "pch.h"
-#include "../Include/TcpMuxSocket.h"
-#include "../Include/HashUtil.h"
-#include "../Include/SystemManager.h"
+#include "../include/tcpmuxsocket.h"
+#include "../include/hashutil.h"
+#include "../include/systemmanager.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-TcpMuxSocket::TcpMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
-	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
-	MuxIo(pMaxPendingConnectionCount, pMaxConnectionCount),
-	TcpListenerSocket(pLocalAddress, pIsServer),
-	mAcceptThread(pName+"TcpMuxAccept "+pLocalAddress.GetAsString()),
-	mSelectThread(pName+"TcpMuxSelect "+pLocalAddress.GetAsString()),
-	mConnectIdTimeout(DEFAULT_CONNECT_ID_TIMEOUT),
-	mActiveReceiverMapChanged(false),
-	mConnectedSocketSemaphore(100),
-	mVSentByteCount(0),
-	mVReceivedByteCount(0)
-{
+TcpMuxSocket::TcpMuxSocket(const str& name, const SocketAddress& local_address, bool is_server,
+	unsigned max_pending_connection_count, unsigned max_connection_count):
+	MuxIo(max_pending_connection_count, max_connection_count),
+	TcpListenerSocket(local_address, is_server),
+	accept_thread_(name+"TcpMuxAccept "+local_address.GetAsString()),
+	select_thread_(name+"TcpMuxSelect "+local_address.GetAsString()),
+	connect_id_timeout_(DEFAULT_CONNECT_ID_TIMEOUT),
+	active_receiver_map_changed_(false),
+	connected_socket_semaphore_(100),
+	v_sent_byte_count_(0),
+	v_received_byte_count_(0) {
 	log_trace("TcpMuxSocket()");
-	if (pIsServer)
-	{
-		mAcceptThread.Start(this, &TcpMuxSocket::AcceptThreadEntry);
+	if (is_server) {
+		accept_thread_.Start(this, &TcpMuxSocket::AcceptThreadEntry);
 	}
-	mSelectThread.Start(this, &TcpMuxSocket::SelectThreadEntry);
+	select_thread_.Start(this, &TcpMuxSocket::SelectThreadEntry);
 }
 
-TcpMuxSocket::~TcpMuxSocket()
-{
+TcpMuxSocket::~TcpMuxSocket() {
 	log_trace("~TcpMuxSocket()");
-	mAcceptThread.RequestStop();
-	mSelectThread.RequestStop();
+	accept_thread_.RequestStop();
+	select_thread_.RequestStop();
 	Close();
 	ReleaseSocketThreads();
-	mAcceptThread.Join(5.0f);
-	mSelectThread.Join(5.0f);
+	accept_thread_.Join(5.0f);
+	select_thread_.Join(5.0f);
 }
 
-TcpVSocket* TcpMuxSocket::Connect(const SocketAddress& pTargetAddress, const std::string& pConnectionId, double pTimeout)
-{
-	TcpVSocket* lSocket = new TcpVSocket(*this, GetDatagramReceiver());
-	bool lOk = lSocket->Connect(pTargetAddress, pConnectionId, pTimeout);
-	if (lOk)
-	{
-		std::string lConnectString(mConnectionString, sizeof(mConnectionString));
-		lConnectString += pConnectionId;
-		lOk = (lSocket->Send(lConnectString.c_str(), (int)lConnectString.length()) == (int)lConnectString.length());
-		if (!lOk)
-		{
-			mLog.Error("Could not send connect data to server!");
+TcpVSocket* TcpMuxSocket::Connect(const SocketAddress& target_address, const std::string& connection_id, double timeout) {
+	TcpVSocket* _socket = new TcpVSocket(*this, GetDatagramReceiver());
+	bool ok = _socket->Connect(target_address, connection_id, timeout);
+	if (ok) {
+		std::string connect_string(connection_string_, sizeof(connection_string_));
+		connect_string += connection_id;
+		ok = (_socket->Send(connect_string.c_str(), (int)connect_string.length()) == (int)connect_string.length());
+		if (!ok) {
+			log_.Error("Could not send connect data to server!");
 		}
 	}
-	if (lOk)
-	{
-		Datagram lBuffer;
-		lBuffer.mDataSize = lSocket->Receive(lBuffer.mDataBuffer, sizeof(lBuffer.mDataBuffer), pTimeout, false);
-		lOk = (lBuffer.mDataSize == sizeof(mAcceptionString) && ::memcmp(mAcceptionString, lBuffer.mDataBuffer, sizeof(mAcceptionString)) == 0);
-		if (lOk)
-		{
-			AddConnectedSocket(lSocket);
+	if (ok) {
+		Datagram buffer;
+		buffer.data_size_ = _socket->Receive(buffer.data_buffer_, sizeof(buffer.data_buffer_), timeout, false);
+		ok = (buffer.data_size_ == sizeof(acception_string_) && ::memcmp(acception_string_, buffer.data_buffer_, sizeof(acception_string_)) == 0);
+		if (ok) {
+			AddConnectedSocket(_socket);
 			log_trace("Connect went through!");
-		}
-		else
-		{
-			if (lBuffer.mDataSize == 0)
-			{
+		} else {
+			if (buffer.data_size_ == 0) {
 				log_debug("Remote end seems dead. Firewall?");
-			}
-			else if (lBuffer.mDataSize < 0)
-			{
-				mLog.Error("Connect was refused. Firewall?");
-			}
-			else if (lBuffer.mDataSize > 0)
-			{
-				mLog.Error("Connect was replied to with jibberish. Wassup?");
+			} else if (buffer.data_size_ < 0) {
+				log_.Error("Connect was refused. Firewall?");
+			} else if (buffer.data_size_ > 0) {
+				log_.Error("Connect was replied to with jibberish. Wassup?");
 			}
 		}
 	}
-	if (!lOk)
-	{
-		CloseSocket(lSocket, true);
-		lSocket = 0;
+	if (!ok) {
+		CloseSocket(_socket, true);
+		_socket = 0;
 	}
-	return (lSocket);
+	return (_socket);
 }
 
-TcpVSocket* TcpMuxSocket::Accept()
-{
-	TcpVSocket* lSocket = 0;
-	while (IsOpen() && (lSocket = PollAccept()) == 0)
-	{
-		const double lWaitTime = (mPendingConnectIdMap.GetCountSafe() > 0)? 0.001 : 10.0;
-		mAcceptSemaphore.Wait(lWaitTime);
+TcpVSocket* TcpMuxSocket::Accept() {
+	TcpVSocket* _socket = 0;
+	while (IsOpen() && (_socket = PollAccept()) == 0) {
+		const double wait_time = (pending_connect_id_map_.GetCountSafe() > 0)? 0.001 : 10.0;
+		accept_semaphore_.Wait(wait_time);
 	}
-	return (lSocket);
+	return (_socket);
 }
 
-TcpVSocket* TcpMuxSocket::PollAccept()
-{
-	HiResTimer lTime(false);
-	TcpVSocket* lTcpSocket = 0;
-	size_t lPendingSocketCount = mPendingConnectIdMap.GetCountSafe();
-	for (size_t x = 0; !lTcpSocket && x < lPendingSocketCount; ++x)
-	{
+TcpVSocket* TcpMuxSocket::PollAccept() {
+	HiResTimer time(false);
+	TcpVSocket* _tcp_socket = 0;
+	size_t pending_socket_count = pending_connect_id_map_.GetCountSafe();
+	for (size_t x = 0; !_tcp_socket && x < pending_socket_count; ++x) {
 		{
-			ScopeLock lLock(&mIoLock);
-			if (mPendingConnectIdMap.GetCount() > 0)
-			{
-				mPendingConnectIdMap.PopFront(lTcpSocket, lTime);
+			ScopeLock lock(&io_lock_);
+			if (pending_connect_id_map_.GetCount() > 0) {
+				pending_connect_id_map_.PopFront(_tcp_socket, time);
 			}
 		}
-		if (lTcpSocket)
-		{
+		if (_tcp_socket) {
 			log_trace("Popped a connected socket.");
-			AcceptStatus lAcceptStatus = QueryReceiveConnectString(lTcpSocket);
-			if (lAcceptStatus == ACCEPT_CLOSE)
-			{
-				CloseSocket(lTcpSocket, true);
-				lTcpSocket = 0;
-			}
-			else if (lAcceptStatus == ACCEPT_QUERY_WAIT)
-			{
-				if (lTime.QueryTimeDiff() >= mConnectIdTimeout)
-				{
+			AcceptStatus accept_status = QueryReceiveConnectString(_tcp_socket);
+			if (accept_status == kAcceptClose) {
+				CloseSocket(_tcp_socket, true);
+				_tcp_socket = 0;
+			} else if (accept_status == kAcceptQueryWait) {
+				if (time.QueryTimeDiff() >= connect_id_timeout_) {
 					log_debug("Connected socket ID-timed out => dropped.");
-					CloseSocket(lTcpSocket, true);
+					CloseSocket(_tcp_socket, true);
+				} else {
+					ScopeLock lock(&io_lock_);
+					pending_connect_id_map_.PushBack(_tcp_socket, time);
 				}
-				else
-				{
-					ScopeLock lLock(&mIoLock);
-					mPendingConnectIdMap.PushBack(lTcpSocket, lTime);
-				}
-				lTcpSocket = 0;
+				_tcp_socket = 0;
 			}
 		}
 	}
-	return (lTcpSocket);
+	return (_tcp_socket);
 }
 
-void TcpMuxSocket::DispatchCloseSocket(TcpVSocket* pSocket)
-{
-	if (!mCloseDispatcher.empty())
-	{
-		mCloseDispatcher(pSocket);
+void TcpMuxSocket::DispatchCloseSocket(TcpVSocket* socket) {
+	if (!close_dispatcher_.empty()) {
+		close_dispatcher_(socket);
 	}
-	CloseSocket(pSocket, false);
+	CloseSocket(socket, false);
 }
 
-void TcpMuxSocket::CloseSocket(TcpVSocket* pSocket, bool pForceDelete)
-{
+void TcpMuxSocket::CloseSocket(TcpVSocket* socket, bool force_delete) {
 	{
-		ScopeLock lLock(&mIoLock);
+		ScopeLock lock(&io_lock_);
 		log_trace("Closing TcpVSocket.");
-		pForceDelete |= mPendingConnectIdMap.Remove(pSocket);
-		pForceDelete |= RemoveConnectedSocketNoLock(pSocket);
-		RemoveSenderNoLock(pSocket);
-		RemoveReceiverNoLock(pSocket);
+		force_delete |= pending_connect_id_map_.Remove(socket);
+		force_delete |= RemoveConnectedSocketNoLock(socket);
+		RemoveSenderNoLock(socket);
+		RemoveReceiverNoLock(socket);
 	}
-	if (pForceDelete)
-	{
-		delete (pSocket);
+	if (force_delete) {
+		delete (socket);
 	}
 }
 
-TcpVSocket* TcpMuxSocket::PopReceiverSocket()
-{
-	TcpVSocket* lSocket = (TcpVSocket*)PopReceiver();
-	if (lSocket)
-	{
-		mActiveReceiverMapChanged = true;
-		mConnectedSocketSemaphore.Signal();
+TcpVSocket* TcpMuxSocket::PopReceiverSocket() {
+	TcpVSocket* _socket = (TcpVSocket*)PopReceiver();
+	if (_socket) {
+		active_receiver_map_changed_ = true;
+		connected_socket_semaphore_.Signal();
 	}
-	return (lSocket);
+	return (_socket);
 }
 
-TcpVSocket* TcpMuxSocket::PopSenderSocket()
-{
-	TcpVSocket* lSocket = (TcpVSocket*)PopSender();
-	if (lSocket)
-	{
+TcpVSocket* TcpMuxSocket::PopSenderSocket() {
+	TcpVSocket* _socket = (TcpVSocket*)PopSender();
+	if (_socket) {
 		log_trace("Popped TCP sender socket.");
 	}
-	return (lSocket);
+	return (_socket);
 }
 
-uint64 TcpMuxSocket::GetTotalSentByteCount() const
-{
-	return (GetSentByteCount()+mVSentByteCount);
+uint64 TcpMuxSocket::GetTotalSentByteCount() const {
+	return (GetSentByteCount()+v_sent_byte_count_);
 }
 
-uint64 TcpMuxSocket::GetTotalReceivedByteCount() const
-{
-	return (GetReceivedByteCount()+mVReceivedByteCount);
+uint64 TcpMuxSocket::GetTotalReceivedByteCount() const {
+	return (GetReceivedByteCount()+v_received_byte_count_);
 }
 
-void TcpMuxSocket::AddTotalSentByteCount(unsigned pByteCount)
-{
-	BusLock::Add(&mVSentByteCount, pByteCount);
+void TcpMuxSocket::AddTotalSentByteCount(unsigned byte_count) {
+	BusLock::Add(&v_sent_byte_count_, byte_count);
 }
 
-void TcpMuxSocket::AddTotalReceivedByteCount(unsigned pByteCount)
-{
-	BusLock::Add(&mVReceivedByteCount, pByteCount);
+void TcpMuxSocket::AddTotalReceivedByteCount(unsigned byte_count) {
+	BusLock::Add(&v_received_byte_count_, byte_count);
 }
 
-void TcpMuxSocket::SetConnectIdTimeout(double pTimeout)
-{
-	mConnectIdTimeout = pTimeout;
+void TcpMuxSocket::SetConnectIdTimeout(double timeout) {
+	connect_id_timeout_ = timeout;
 }
 
-TcpSocket* TcpMuxSocket::CreateSocket(s_socket pSocket, const SocketAddress& pTargetAddress,
-	TcpListenerSocket* pServerSocket, DatagramReceiver* pReceiver)
-{
-	return (new TcpVSocket(pSocket, pTargetAddress, *(TcpMuxSocket*)pServerSocket, pReceiver));
+TcpSocket* TcpMuxSocket::CreateSocket(s_socket socket, const SocketAddress& target_address,
+	TcpListenerSocket* server_socket, DatagramReceiver* receiver) {
+	return (new TcpVSocket(socket, target_address, *(TcpMuxSocket*)server_socket, receiver));
 }
 
-void TcpMuxSocket::AddConnectedSocket(TcpVSocket* pSocket)
-{
-	ScopeLock lLock(&mIoLock);
-	log_volatile(mLog.Tracef("AddConnectedSocket(%i)", pSocket->GetSysSocket()));
-	mConnectedSocketMap.insert(SocketVMap::value_type(pSocket->GetSysSocket(), pSocket));
-	mActiveReceiverMapChanged = true;
-	mConnectedSocketSemaphore.Signal();
+void TcpMuxSocket::AddConnectedSocket(TcpVSocket* socket) {
+	ScopeLock lock(&io_lock_);
+	log_volatile(log_.Tracef("AddConnectedSocket(%i)", socket->GetSysSocket()));
+	connected_socket_map_.insert(SocketVMap::value_type(socket->GetSysSocket(), socket));
+	active_receiver_map_changed_ = true;
+	connected_socket_semaphore_.Signal();
 }
 
-bool TcpMuxSocket::RemoveConnectedSocketNoLock(TcpVSocket* pSocket)
-{
-	log_volatile(mLog.Tracef("RemoveConnectedSocketNoLock(%i)", pSocket->GetSysSocket()));
-	size_t lEraseCount = mConnectedSocketMap.erase(pSocket->GetSysSocket());
-	mActiveReceiverMapChanged = true;
-	mConnectedSocketSemaphore.Signal();
-	return (lEraseCount > 0);
+bool TcpMuxSocket::RemoveConnectedSocketNoLock(TcpVSocket* socket) {
+	log_volatile(log_.Tracef("RemoveConnectedSocketNoLock(%i)", socket->GetSysSocket()));
+	size_t erase_count = connected_socket_map_.erase(socket->GetSysSocket());
+	active_receiver_map_changed_ = true;
+	connected_socket_semaphore_.Signal();
+	return (erase_count > 0);
 }
 
-int TcpMuxSocket::BuildConnectedSocketSet(FdSet& pSocketSet)
-{
-	int lSocketCount;
-	if (mActiveReceiverMapChanged)
-	{
-		ScopeLock lLock(&mIoLock);
-		mActiveReceiverMapChanged = false;
-		//lSocketCount = mConnectedSocketMap.size();
-		//log_volatile(mLog.Tracef("Rebuilding active receiver map with %i possible sockets.", lSocketCount));
-		LEPRA_FD_ZERO(&pSocketSet);
-		for (SocketVMap::iterator x = mConnectedSocketMap.begin(); x != mConnectedSocketMap.end(); ++x)
-		{
-			TcpVSocket* lSocket = x->second;
-			if (!IsReceiverNoLock(lSocket))
-			{
-				s_socket lSysSocket = x->first;
+int TcpMuxSocket::BuildConnectedSocketSet(FdSet& socket_set) {
+	int socket_count;
+	if (active_receiver_map_changed_) {
+		ScopeLock lock(&io_lock_);
+		active_receiver_map_changed_ = false;
+		//socket_count = connected_socket_map_.size();
+		//log_volatile(log_.Tracef("Rebuilding active receiver map with %i possible sockets.", socket_count));
+		LEPRA_FD_ZERO(&socket_set);
+		for (SocketVMap::iterator x = connected_socket_map_.begin(); x != connected_socket_map_.end(); ++x) {
+			TcpVSocket* _socket = x->second;
+			if (!IsReceiverNoLock(_socket)) {
+				s_socket __sys_socket = x->first;
 #pragma warning(push)
 #pragma warning(disable: 4127)	// MSVC warning: conditional expression is constant.
-				LEPRA_FD_SET((sys_socket)lSysSocket, &pSocketSet);
+				LEPRA_FD_SET((sys_socket)__sys_socket, &socket_set);
 #pragma warning(pop)
 			}
 		}
-		lSocketCount = FdSetHelper::Copy(mBackupFdSet, pSocketSet);
+		socket_count = FdSetHelper::Copy(backup_fd_set_, socket_set);
+	} else {
+		socket_count = FdSetHelper::Copy(socket_set, backup_fd_set_);
 	}
-	else
-	{
-		lSocketCount = FdSetHelper::Copy(pSocketSet, mBackupFdSet);
-	}
-	deb_assert(lSocketCount == (int)LEPRA_FD_GET_COUNT(&pSocketSet));
-	return (lSocketCount);
+	deb_assert(socket_count == (int)LEPRA_FD_GET_COUNT(&socket_set));
+	return (socket_count);
 }
 
-void TcpMuxSocket::PushReceiverSockets(const FdSet& pSocketSet)
-{
-	ScopeLock lLock(&mIoLock);
+void TcpMuxSocket::PushReceiverSockets(const FdSet& socket_set) {
+	ScopeLock lock(&io_lock_);
 	// TODO: optimize (using platform specifics?).
-	bool lAdded = false;
-	for (SocketVMap::iterator y = mConnectedSocketMap.begin(); y != mConnectedSocketMap.end(); ++y)
-	{
-		s_socket lSysSocket = y->first;
-		if (FD_ISSET(lSysSocket, (fd_set*)LEPRA_FDS(&pSocketSet)))
-		{
-			TcpVSocket* lSocket = y->second;
+	bool added = false;
+	for (SocketVMap::iterator y = connected_socket_map_.begin(); y != connected_socket_map_.end(); ++y) {
+		s_socket __sys_socket = y->first;
+		if (FD_ISSET(__sys_socket, (fd_set*)LEPRA_FDS(&socket_set))) {
+			TcpVSocket* _socket = y->second;
 			log_debug("Adding receiver socket.");
-			AddReceiverNoLock(lSocket);
-			lAdded = true;
-		}
-		else
-		{
+			AddReceiverNoLock(_socket);
+			added = true;
+		} else {
 			log_debug("Didn't add receiver socket.");
 		}
 	}
-	if (lAdded)
-	{
-		mActiveReceiverMapChanged = true;
-		mConnectedSocketSemaphore.Signal();
+	if (added) {
+		active_receiver_map_changed_ = true;
+		connected_socket_semaphore_.Signal();
 	}
 }
 
-TcpMuxSocket::AcceptStatus TcpMuxSocket::QueryReceiveConnectString(TcpVSocket* pSocket)
-{
-	if (mBannedIPTable.Find(pSocket->GetTargetAddress().GetIP()) != mBannedIPTable.End())
-	{
-		mLog.Warning("Received a connect from a banned client.");
-		return (ACCEPT_CLOSE);	// RAII is great here.
+TcpMuxSocket::AcceptStatus TcpMuxSocket::QueryReceiveConnectString(TcpVSocket* socket) {
+	if (banned_ip_table_.Find(socket->GetTargetAddress().GetIP()) != banned_ip_table_.End()) {
+		log_.Warning("Received a connect from a banned client.");
+		return (kAcceptClose);	// RAII is great here.
 	}
 
 	// Check if we get the connection string (containing an ID that connects the TCP and UDP sockets).
-	AcceptStatus lAcceptStatus = ACCEPT_QUERY_WAIT;
-	Datagram lBuffer;
-	lBuffer.mDataSize = pSocket->Receive(lBuffer.mDataBuffer, sizeof(lBuffer.mDataBuffer), false);
-	if (lBuffer.mDataSize > 0)
-	{
+	AcceptStatus accept_status = kAcceptQueryWait;
+	Datagram buffer;
+	buffer.data_size_ = socket->Receive(buffer.data_buffer_, sizeof(buffer.data_buffer_), false);
+	if (buffer.data_size_ > 0) {
 		log_trace("Received a connect string.");
 
 		// Look for "VSocket connect magic".
-		if (lBuffer.mDataSize >= (int)sizeof(mConnectionString) &&
-			::memcmp(lBuffer.mDataBuffer, mConnectionString, sizeof(mConnectionString)) == 0)
-		{
-			std::string lConnectionId((const char*)&lBuffer.mDataBuffer[sizeof(mConnectionString)], lBuffer.mDataSize-sizeof(mConnectionString));
-			unsigned lSocketCount = GetConnectionCount();
-			if (lSocketCount < mMaxConnectionCount)
-			{
-				pSocket->SetConnectionId(lConnectionId);
-				if (pSocket->Send(mAcceptionString, sizeof(mAcceptionString)) == sizeof(mAcceptionString))
-				{
-					lAcceptStatus = ACCEPT_OK;
-					AddConnectedSocket(pSocket);
+		if (buffer.data_size_ >= (int)sizeof(connection_string_) &&
+			::memcmp(buffer.data_buffer_, connection_string_, sizeof(connection_string_)) == 0) {
+			std::string _connection_id((const char*)&buffer.data_buffer_[sizeof(connection_string_)], buffer.data_size_-sizeof(connection_string_));
+			unsigned socket_count = GetConnectionCount();
+			if (socket_count < max_connection_count_) {
+				socket->SetConnectionId(_connection_id);
+				if (socket->Send(acception_string_, sizeof(acception_string_)) == sizeof(acception_string_)) {
+					accept_status = kAcceptOk;
+					AddConnectedSocket(socket);
+				} else {
+					accept_status = kAcceptClose;
 				}
-				else
-				{
-					lAcceptStatus = ACCEPT_CLOSE;
-				}
+			} else {
+				log_.Warning("Too many sockets!");
+				accept_status = kAcceptClose;
 			}
-			else
-			{
-				mLog.Warning("Too many sockets!");
-				lAcceptStatus = ACCEPT_CLOSE;
-			}
+		} else {
+			log_.Warning("Invalid connection string.");
+			accept_status = kAcceptClose;
 		}
-		else
-		{
-			mLog.Warning("Invalid connection string.");
-			lAcceptStatus = ACCEPT_CLOSE;
-		}
-	}
-	else
-	{
+	} else {
 		log_trace("Waited for connect magic, but none came this loop.");
 	}
-	return (lAcceptStatus);
+	return (accept_status);
 }
 
-void TcpMuxSocket::ReleaseSocketThreads()
-{
+void TcpMuxSocket::ReleaseSocketThreads() {
 	MuxIo::ReleaseSocketThreads();
-	for (int x = 0; x < 10; ++x)
-	{
-		mConnectedSocketSemaphore.Signal();
+	for (int x = 0; x < 10; ++x) {
+		connected_socket_semaphore_.Signal();
 	}
 }
 
-void TcpMuxSocket::AcceptThreadEntry()
-{
+void TcpMuxSocket::AcceptThreadEntry() {
 	log_trace("Accept thread running");
 
-	while (IsOpen() && !mAcceptThread.GetStopRequest())
-	{
-		TcpVSocket* lSocket = (TcpVSocket*)TcpListenerSocket::Accept(&TcpMuxSocket::CreateSocket);
-		if (lSocket)
-		{
+	while (IsOpen() && !accept_thread_.GetStopRequest()) {
+		TcpVSocket* _socket = (TcpVSocket*)TcpListenerSocket::Accept(&TcpMuxSocket::CreateSocket);
+		if (_socket) {
 			log_trace("Received a connect.");
-			HiResTimer lTime(false);
-			ScopeLock lLock(&mIoLock);
-			mPendingConnectIdMap.PushBack(lSocket, lTime);
-			mAcceptSemaphore.Signal();
+			HiResTimer time(false);
+			ScopeLock lock(&io_lock_);
+			pending_connect_id_map_.PushBack(_socket, time);
+			accept_semaphore_.Signal();
 		}
 	}
 }
 
-void TcpMuxSocket::SelectThreadEntry()
-{
+void TcpMuxSocket::SelectThreadEntry() {
 	log_trace("Select thread running");
 
-	FdSet lReadSet;
-	LEPRA_FD_ZERO(&mBackupFdSet);
-	mActiveReceiverMapChanged = true;
-	while (IsOpen() && !mSelectThread.GetStopRequest())
-	{
-		int lSocketCount = BuildConnectedSocketSet(lReadSet);
-		if (lSocketCount > 0)
-		{
-			timeval lTimeout;
-			lTimeout.tv_sec = 0;
-			lTimeout.tv_usec = 200000;
-			deb_assert(lSocketCount == (int)LEPRA_FD_GET_COUNT(&lReadSet));
-			FdSet lExceptionSet;
-			FdSetHelper::Copy(lExceptionSet, lReadSet);
-			int lSelectCount = ::select(LEPRA_FD_GET_MAX_HANDLE(&lReadSet)+1, LEPRA_FDS(&lReadSet), 0, LEPRA_FDS(&lExceptionSet), &lTimeout);
-			if (lSelectCount > 0)
-			{
+	FdSet read_set;
+	LEPRA_FD_ZERO(&backup_fd_set_);
+	active_receiver_map_changed_ = true;
+	while (IsOpen() && !select_thread_.GetStopRequest()) {
+		int socket_count = BuildConnectedSocketSet(read_set);
+		if (socket_count > 0) {
+			timeval _timeout;
+			_timeout.tv_sec = 0;
+			_timeout.tv_usec = 200000;
+			deb_assert(socket_count == (int)LEPRA_FD_GET_COUNT(&read_set));
+			FdSet exception_set;
+			FdSetHelper::Copy(exception_set, read_set);
+			int select_count = ::select(LEPRA_FD_GET_MAX_HANDLE(&read_set)+1, LEPRA_FDS(&read_set), 0, LEPRA_FDS(&exception_set), &_timeout);
+			if (select_count > 0) {
 				log_trace("Picked up a receive socket.");
-				PushReceiverSockets(lReadSet);
-			}
-			else if (lSelectCount < 0)
-			{
+				PushReceiverSockets(read_set);
+			} else if (select_count < 0) {
 				int e = SOCKET_LAST_ERROR();
-				mLog.Warningf("Could not ::select() properly. Error=%i, sockets=%u, exception set=%u.", e, lSocketCount, LEPRA_FD_GET_COUNT(&lExceptionSet));
+				log_.Warningf("Could not ::select() properly. Error=%i, sockets=%u, exception set=%u.", e, socket_count, LEPRA_FD_GET_COUNT(&exception_set));
 
-				for (unsigned x = 0; x < LEPRA_FD_GET_COUNT(&lExceptionSet); ++x)
-				{
-					const s_socket lSysSocket = LEPRA_FD_GET(&lExceptionSet, x);
-					int lErrorCode = 0;
-					socklen_t lErrorSize = sizeof(lErrorCode);
-					if (::getsockopt(lSysSocket, SOL_SOCKET, SO_ERROR, (char*)&lErrorCode, &lErrorSize) == 0 &&
-						lErrorCode == 0)
-					{
+				for (unsigned x = 0; x < LEPRA_FD_GET_COUNT(&exception_set); ++x) {
+					const s_socket __sys_socket = LEPRA_FD_GET(&exception_set, x);
+					int error_code = 0;
+					socklen_t error_size = sizeof(error_code);
+					if (::getsockopt(__sys_socket, SOL_SOCKET, SO_ERROR, (char*)&error_code, &error_size) == 0 &&
+						error_code == 0) {
 						continue;
 					}
 
-					TcpVSocket* lSocket = 0;
+					TcpVSocket* _socket = 0;
 					{
-						ScopeLock lLock(&mIoLock);
-						SocketVMap::iterator y = mConnectedSocketMap.find(lSysSocket);
-						if (y != mConnectedSocketMap.end())
-						{
-							lSocket = y->second;
+						ScopeLock lock(&io_lock_);
+						SocketVMap::iterator y = connected_socket_map_.find(__sys_socket);
+						if (y != connected_socket_map_.end()) {
+							_socket = y->second;
 						}
 					}
-					if (lSocket)
-					{
-						mLog.Warning("Kicking socket due to ::select() failure.");
-						DispatchCloseSocket(lSocket);
+					if (_socket) {
+						log_.Warning("Kicking socket due to ::select() failure.");
+						DispatchCloseSocket(_socket);
 					}
 				}
 			}
-		}
-		else
-		{
+		} else {
 			log_debug("Going into \"wait for socket connect\" state.");
-			mConnectedSocketSemaphore.Wait(10.0f);
+			connected_socket_semaphore_.Wait(10.0f);
 			log_debug("Leaving \"wait for socket connect\" state.");
 		}
 	}
@@ -451,681 +363,549 @@ void TcpMuxSocket::SelectThreadEntry()
 
 
 
-TcpVSocket::TcpVSocket(TcpMuxSocket& pMuxSocket, DatagramReceiver* pReceiver):
-	TcpSocket(pReceiver)
-{
+TcpVSocket::TcpVSocket(TcpMuxSocket& mux_socket, DatagramReceiver* receiver):
+	TcpSocket(receiver) {
 	log_trace("TcpVSocket()");
-	mMuxIo = &pMuxSocket;
+	mux_io_ = &mux_socket;
 }
 
-TcpVSocket::TcpVSocket(s_socket pSocket, const SocketAddress& pTargetAddress, TcpMuxSocket& pMuxSocket,
-	DatagramReceiver* pReceiver):
-	TcpSocket(pSocket, pTargetAddress, &pMuxSocket, pReceiver)
-{
+TcpVSocket::TcpVSocket(s_socket socket, const SocketAddress& target_address, TcpMuxSocket& mux_socket,
+	DatagramReceiver* receiver):
+	TcpSocket(socket, target_address, &mux_socket, receiver) {
 	log_trace("TcpVSocket()");
-	mMuxIo = &pMuxSocket;
+	mux_io_ = &mux_socket;
 	MakeNonBlocking();
 }
 
-TcpVSocket::~TcpVSocket()
-{
+TcpVSocket::~TcpVSocket() {
 	log_trace("~TcpVSocket()");
 	SendBuffer();
 }
 
-bool TcpVSocket::Connect(const SocketAddress& pTargetAddress, const std::string& pConnectionId, double /*pTimeout*/)
-{
-	// TODO: respect lTimeout?
-	SetConnectionId(pConnectionId);
-	bool lConnected = TcpSocket::Connect(pTargetAddress);
-	if (lConnected)
-	{
+bool TcpVSocket::Connect(const SocketAddress& target_address, const std::string& connection_id, double /*timeout*/) {
+	// TODO: respect _timeout?
+	SetConnectionId(connection_id);
+	bool connected = TcpSocket::Connect(target_address);
+	if (connected) {
 		MakeNonBlocking();
 		DisableNagleAlgo();
 		// TODO: send connection ID to acceptor.
 	}
-	return (lConnected);
+	return (connected);
 }
 
-int TcpVSocket::SendBuffer()
-{
-	int lSendResult = 0;
-	if (mSendBuffer.mDataSize > 0)
-	{
-		lSendResult = Send(mSendBuffer.mDataBuffer, mSendBuffer.mDataSize);
-		if (lSendResult > 0)
-		{
-			((TcpMuxSocket*)mMuxIo)->AddTotalSentByteCount(lSendResult);
+int TcpVSocket::SendBuffer() {
+	int send_result = 0;
+	if (send_buffer_.data_size_ > 0) {
+		send_result = Send(send_buffer_.data_buffer_, send_buffer_.data_size_);
+		if (send_result > 0) {
+			((TcpMuxSocket*)mux_io_)->AddTotalSentByteCount(send_result);
 		}
-		mSendBuffer.Init();
+		send_buffer_.Init();
 	}
-	return (lSendResult);
+	return (send_result);
 }
 
-int TcpVSocket::Receive(void* pData, int pMaxSize, bool pDatagram)
-{
-	int lReceiveResult = pDatagram? TcpSocket::ReceiveDatagram(pData, pMaxSize) : TcpSocket::Receive(pData, pMaxSize);
-	if (lReceiveResult > 0)
-	{
-		((TcpMuxSocket*)mMuxIo)->AddTotalReceivedByteCount(lReceiveResult);
+int TcpVSocket::Receive(void* data, int max_size, bool datagram) {
+	int receive_result = datagram? TcpSocket::ReceiveDatagram(data, max_size) : TcpSocket::Receive(data, max_size);
+	if (receive_result > 0) {
+		((TcpMuxSocket*)mux_io_)->AddTotalReceivedByteCount(receive_result);
 	}
-	return (lReceiveResult);
+	return (receive_result);
 }
 
-int TcpVSocket::Receive(void* pData, int pMaxSize, double pTimeout, bool pDatagram)
-{
-	HiResTimer lTimer(false);
-	int lReceiveCount;
-	do
-	{
-		lReceiveCount = Receive(pData, pMaxSize, pDatagram);
-		if (lReceiveCount == 0)
-		{
+int TcpVSocket::Receive(void* data, int max_size, double timeout, bool datagram) {
+	HiResTimer timer(false);
+	int receive_count;
+	do {
+		receive_count = Receive(data, max_size, datagram);
+		if (receive_count == 0) {
 			Thread::Sleep(0.001);
-			lTimer.UpdateTimer();
+			timer.UpdateTimer();
 		}
-	}
-	while (lReceiveCount == 0 && lTimer.GetTimeDiff() < pTimeout && !SystemManager::GetQuitRequest());
-	return (lReceiveCount);
+	} while (receive_count == 0 && timer.GetTimeDiff() < timeout && !SystemManager::GetQuitRequest());
+	return (receive_count);
 }
 
 
 
-DualMuxSocket::DualMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
-	unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount):
-	mTcpMuxSocket(new TcpMuxSocket(pName, pLocalAddress, pIsServer, pMaxPendingConnectionCount, pMaxConnectionCount)),
-	mUdpMuxSocket(new UdpMuxSocket(pName, pLocalAddress, pIsServer, pMaxPendingConnectionCount, pMaxConnectionCount)),
-	mConnectDualTimeout(DEFAULT_CONNECT_DUAL_TIMEOUT),
-	mPopSafeToggle(false)
-{
-	mTcpMuxSocket->SetCloseCallback(this, &DualMuxSocket::OnCloseTcpSocket);
+DualMuxSocket::DualMuxSocket(const str& name, const SocketAddress& local_address, bool is_server,
+	unsigned max_pending_connection_count, unsigned max_connection_count):
+	tcp_mux_socket_(new TcpMuxSocket(name, local_address, is_server, max_pending_connection_count, max_connection_count)),
+	udp_mux_socket_(new UdpMuxSocket(name, local_address, is_server, max_pending_connection_count, max_connection_count)),
+	connect_dual_timeout_(DEFAULT_CONNECT_DUAL_TIMEOUT),
+	pop_safe_toggle_(false) {
+	tcp_mux_socket_->SetCloseCallback(this, &DualMuxSocket::OnCloseTcpSocket);
 	log_trace("DualMuxSocket()");
 }
 
-DualMuxSocket::~DualMuxSocket()
-{
+DualMuxSocket::~DualMuxSocket() {
 	log_trace("~DualMuxSocket()");
 
-	ScopeLock lLock(&mLock);
-	while (!mIdSocketMap.empty())
-	{
-		CloseSocket(mIdSocketMap.begin()->second);
+	ScopeLock lock(&lock_);
+	while (!id_socket_map_.empty()) {
+		CloseSocket(id_socket_map_.begin()->second);
 	}
 
-	delete (mTcpMuxSocket);
-	mTcpMuxSocket = 0;
-	delete (mUdpMuxSocket);
-	mUdpMuxSocket = 0;
+	delete (tcp_mux_socket_);
+	tcp_mux_socket_ = 0;
+	delete (udp_mux_socket_);
+	udp_mux_socket_ = 0;
 }
 
-bool DualMuxSocket::IsOpen() const
-{
-	ScopeLock lLock(&mLock);
-	return (mTcpMuxSocket && mUdpMuxSocket && mTcpMuxSocket->IsOpen() && mUdpMuxSocket->IsOpen());
+bool DualMuxSocket::IsOpen() const {
+	ScopeLock lock(&lock_);
+	return (tcp_mux_socket_ && udp_mux_socket_ && tcp_mux_socket_->IsOpen() && udp_mux_socket_->IsOpen());
 }
 
-bool DualMuxSocket::IsOpen(DualSocket* pSocket) const
-{
-	ScopeLock lLock(&mLock);
-	return (HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()) == pSocket);
+bool DualMuxSocket::IsOpen(DualSocket* socket) const {
+	ScopeLock lock(&lock_);
+	return (HashUtil::FindMapObject(id_socket_map_, socket->GetConnectionId()) == socket);
 }
 
-DualSocket* DualMuxSocket::Connect(const SocketAddress& pTargetAddress, const std::string& pConnectionId, double pTimeout)
-{
+DualSocket* DualMuxSocket::Connect(const SocketAddress& target_address, const std::string& connection_id, double timeout) {
 	// Simulatanously connect TCP and UDP.
-	ScopeLock lLock(&mLock);
-	Semaphore lConnectedSemaphore;
-	Connector<TcpMuxSocket, TcpVSocket> lTcpConnector("TCP connector", mTcpMuxSocket, pTargetAddress, pConnectionId, pTimeout, lConnectedSemaphore);
-	Connector<UdpMuxSocket, UdpVSocket> lUdpConnector("UDP connector", mUdpMuxSocket, pTargetAddress, pConnectionId, pTimeout, lConnectedSemaphore);
-	if (lTcpConnector.Start() && lUdpConnector.Start())
-	{
+	ScopeLock lock(&lock_);
+	Semaphore connected_semaphore;
+	Connector<TcpMuxSocket, TcpVSocket> tcp_connector("TCP connector", tcp_mux_socket_, target_address, connection_id, timeout, connected_semaphore);
+	Connector<UdpMuxSocket, UdpVSocket> udp_connector("UDP connector", udp_mux_socket_, target_address, connection_id, timeout, connected_semaphore);
+	if (tcp_connector.Start() && udp_connector.Start()) {
 		// Wait for both connectors to finish.
-		HiResTimer lTime(false);
-		lConnectedSemaphore.Wait(pTimeout);
-		lConnectedSemaphore.Wait(pTimeout - lTime.PopTimeDiff());
-		lUdpConnector.Join();
-		lTcpConnector.Join();	// Join TCP last, in hope that it'll have made it through.
+		HiResTimer time(false);
+		connected_semaphore.Wait(timeout);
+		connected_semaphore.Wait(timeout - time.PopTimeDiff());
+		udp_connector.Join();
+		tcp_connector.Join();	// Join TCP last, in hope that it'll have made it through.
 	}
-	DualSocket* lSocket = 0;
-	if (lTcpConnector.mSocket && lUdpConnector.mSocket)
-	{
-		lSocket = new DualSocket(this, pConnectionId);
-		AddSocket(lSocket, lTcpConnector.mSocket, lUdpConnector.mSocket);
-	}
-	else
-	{
-		if (lTcpConnector.mSocket)
-		{
-			mTcpMuxSocket->CloseSocket(lTcpConnector.mSocket, true);
+	DualSocket* _socket = 0;
+	if (tcp_connector.socket_ && udp_connector.socket_) {
+		_socket = new DualSocket(this, connection_id);
+		AddSocket(_socket, tcp_connector.socket_, udp_connector.socket_);
+	} else {
+		if (tcp_connector.socket_) {
+			tcp_mux_socket_->CloseSocket(tcp_connector.socket_, true);
 		}
-		if (lUdpConnector.mSocket)
-		{
-			mUdpMuxSocket->CloseSocket(lUdpConnector.mSocket);
+		if (udp_connector.socket_) {
+			udp_mux_socket_->CloseSocket(udp_connector.socket_);
 		}
 	}
-	return (lSocket);
+	return (_socket);
 }
 
-void DualMuxSocket::Close()
-{
-	ScopeLock lLock(&mLock);
-	if (mTcpMuxSocket)
-	{
-		mTcpMuxSocket->Close();
+void DualMuxSocket::Close() {
+	ScopeLock lock(&lock_);
+	if (tcp_mux_socket_) {
+		tcp_mux_socket_->Close();
 	}
-	if (mUdpMuxSocket)
-	{
-		mUdpMuxSocket->Close();
+	if (udp_mux_socket_) {
+		udp_mux_socket_->Close();
 	}
 }
 
-DualSocket* DualMuxSocket::PollAccept()
-{
-	ScopeLock lLock(&mLock);
+DualSocket* DualMuxSocket::PollAccept() {
+	ScopeLock lock(&lock_);
 
 	// Slaughter old single-sided-connector (ONLY TCP or ONLY UDP).
 	KillNonDualConnected();
 
-	DualSocket* lSocket = 0;
+	DualSocket* _socket = 0;
 
 	// Try to connect TCP to an existing DualSocket, or create a new one.
-	TcpVSocket* lTcpSocket = mTcpMuxSocket->PollAccept();
-	if (lTcpSocket)
-	{
-		IdSocketMap::iterator x = mIdSocketMap.find(lTcpSocket->GetConnectionId());
-		if (x != mIdSocketMap.end())
-		{
+	TcpVSocket* _tcp_socket = tcp_mux_socket_->PollAccept();
+	if (_tcp_socket) {
+		IdSocketMap::iterator x = id_socket_map_.find(_tcp_socket->GetConnectionId());
+		if (x != id_socket_map_.end()) {
 			// UDP is already connected.
-			lSocket = x->second;
-			AddSocket(lSocket, lTcpSocket, 0);
-		}
-		else
-		{
+			_socket = x->second;
+			AddSocket(_socket, _tcp_socket, 0);
+		} else {
 			// TCP is first.
-			lSocket = new DualSocket(this, lTcpSocket->GetConnectionId());
-			AddSocket(lSocket, lTcpSocket, 0);
+			_socket = new DualSocket(this, _tcp_socket->GetConnectionId());
+			AddSocket(_socket, _tcp_socket, 0);
 		}
 	}
 
-	if (!lTcpSocket)
-	{
+	if (!_tcp_socket) {
 		// Try to connect UDP to an existing DualSocket, or create a new one.
-		UdpVSocket* lUdpSocket = mUdpMuxSocket->PollAccept();
-		if (lUdpSocket)
-		{
-			IdSocketMap::iterator x = mIdSocketMap.find(lUdpSocket->GetConnectionId());
-			if (x != mIdSocketMap.end())
-			{
+		UdpVSocket* _udp_socket = udp_mux_socket_->PollAccept();
+		if (_udp_socket) {
+			IdSocketMap::iterator x = id_socket_map_.find(_udp_socket->GetConnectionId());
+			if (x != id_socket_map_.end()) {
 				// TCP is already connected.
-				lSocket = x->second;
-				AddSocket(lSocket, 0, lUdpSocket);
-			}
-			else
-			{
+				_socket = x->second;
+				AddSocket(_socket, 0, _udp_socket);
+			} else {
 				// UDP is first.
-				lSocket = new DualSocket(this, lUdpSocket->GetConnectionId());
-				AddSocket(lSocket, 0, lUdpSocket);
+				_socket = new DualSocket(this, _udp_socket->GetConnectionId());
+				AddSocket(_socket, 0, _udp_socket);
 			}
 		}
 	}
 
 	// If both TCP and UDP are connected, we roll.
-	if (lSocket && !lSocket->IsOpen())
-	{
-		lSocket = 0;
+	if (_socket && !_socket->IsOpen()) {
+		_socket = 0;
 	}
-	return (lSocket);
+	return (_socket);
 }
 
-DualSocket* DualMuxSocket::PopReceiverSocket()
-{
-	mPopSafeToggle = !mPopSafeToggle;
-	return PopReceiverSocket(mPopSafeToggle);
+DualSocket* DualMuxSocket::PopReceiverSocket() {
+	pop_safe_toggle_ = !pop_safe_toggle_;
+	return PopReceiverSocket(pop_safe_toggle_);
 }
 
-DualSocket* DualMuxSocket::PopReceiverSocket(bool pSafe)
-{
-	ScopeLock lLock(&mLock);
+DualSocket* DualMuxSocket::PopReceiverSocket(bool safe) {
+	ScopeLock lock(&lock_);
 
-	DualSocket* lSocket = 0;
+	DualSocket* _socket = 0;
 
-	if (pSafe)
-	{
-		TcpVSocket* lTcpSocket = mTcpMuxSocket->PopReceiverSocket();
-		if (lTcpSocket)
-		{
-			lSocket = HashUtil::FindMapObject(mTcpSocketMap, lTcpSocket);
+	if (safe) {
+		TcpVSocket* _tcp_socket = tcp_mux_socket_->PopReceiverSocket();
+		if (_tcp_socket) {
+			_socket = HashUtil::FindMapObject(tcp_socket_map_, _tcp_socket);
 		}
-	}
-	else
-	{
-		UdpVSocket* lUdpSocket = mUdpMuxSocket->PopReceiverSocket();
-		if (lUdpSocket)
-		{
-			lSocket = HashUtil::FindMapObject(mUdpSocketMap, lUdpSocket);
+	} else {
+		UdpVSocket* _udp_socket = udp_mux_socket_->PopReceiverSocket();
+		if (_udp_socket) {
+			_socket = HashUtil::FindMapObject(udp_socket_map_, _udp_socket);
 		}
 	}
 
 	// If we received something, even though the socket isn't fully opened we throw it away.
-	if (lSocket)
-	{
-		if (!lSocket->IsOpen())
-		{
-			CloseSocket(lSocket);
-			lSocket = 0;
-		}
-		else
-		{
-			lSocket->SetSafeReceive(pSafe);
+	if (_socket) {
+		if (!_socket->IsOpen()) {
+			CloseSocket(_socket);
+			_socket = 0;
+		} else {
+			_socket->SetSafeReceive(safe);
 		}
 	}
-	return (lSocket);
+	return (_socket);
 }
 
-DualSocket* DualMuxSocket::PopSenderSocket()
-{
-	ScopeLock lLock(&mLock);
+DualSocket* DualMuxSocket::PopSenderSocket() {
+	ScopeLock lock(&lock_);
 
-	DualSocket* lSocket = 0;
+	DualSocket* _socket = 0;
 
-	//if (!lSocket)
+	//if (!_socket)
 	{
-		TcpVSocket* lTcpSocket = mTcpMuxSocket->PopSenderSocket();
-		if (lTcpSocket)
-		{
-			lSocket = HashUtil::FindMapObject(mTcpSocketMap, lTcpSocket);
+		TcpVSocket* _tcp_socket = tcp_mux_socket_->PopSenderSocket();
+		if (_tcp_socket) {
+			_socket = HashUtil::FindMapObject(tcp_socket_map_, _tcp_socket);
 		}
 	}
-	if (!lSocket)
-	{
-		UdpVSocket* lUdpSocket = mUdpMuxSocket->PopSenderSocket();
-		if (lUdpSocket)
-		{
-			lSocket = HashUtil::FindMapObject(mUdpSocketMap, lUdpSocket);
+	if (!_socket) {
+		UdpVSocket* _udp_socket = udp_mux_socket_->PopSenderSocket();
+		if (_udp_socket) {
+			_socket = HashUtil::FindMapObject(udp_socket_map_, _udp_socket);
 		}
 	}
 
-	deb_assert(!lSocket || lSocket->IsOpen());
-	return (lSocket);
+	deb_assert(!_socket || _socket->IsOpen());
+	return (_socket);
 }
 
-uint64 DualMuxSocket::GetSentByteCount() const
-{
+uint64 DualMuxSocket::GetSentByteCount() const {
 	return GetSentByteCount(false) + GetSentByteCount(true);
 }
 
-uint64 DualMuxSocket::GetSentByteCount(bool pSafe) const
-{
-	ScopeLock lLock(&mLock);
-	return pSafe? mTcpMuxSocket->GetTotalSentByteCount() : mUdpMuxSocket->GetSentByteCount();
+uint64 DualMuxSocket::GetSentByteCount(bool safe) const {
+	ScopeLock lock(&lock_);
+	return safe? tcp_mux_socket_->GetTotalSentByteCount() : udp_mux_socket_->GetSentByteCount();
 }
 
-uint64 DualMuxSocket::GetReceivedByteCount() const
-{
+uint64 DualMuxSocket::GetReceivedByteCount() const {
 	return GetReceivedByteCount(false) + GetReceivedByteCount(true);
 }
 
-uint64 DualMuxSocket::GetReceivedByteCount(bool pSafe) const
-{
-	ScopeLock lLock(&mLock);
-	return pSafe? mTcpMuxSocket->GetTotalReceivedByteCount() : mUdpMuxSocket->GetReceivedByteCount();
+uint64 DualMuxSocket::GetReceivedByteCount(bool safe) const {
+	ScopeLock lock(&lock_);
+	return safe? tcp_mux_socket_->GetTotalReceivedByteCount() : udp_mux_socket_->GetReceivedByteCount();
 }
 
-SocketAddress DualMuxSocket::GetLocalAddress() const
-{
-	if (mTcpMuxSocket)
-	{
+SocketAddress DualMuxSocket::GetLocalAddress() const {
+	if (tcp_mux_socket_) {
 		// RAII.
-		return (mTcpMuxSocket->GetLocalAddress());
+		return (tcp_mux_socket_->GetLocalAddress());
 	}
-	if (mUdpMuxSocket)
-	{
+	if (udp_mux_socket_) {
 		// RAII.
-		return (mUdpMuxSocket->GetLocalAddress());
+		return (udp_mux_socket_->GetLocalAddress());
 	}
 	return (SocketAddress());
 }
 
-unsigned DualMuxSocket::GetConnectionCount() const
-{
-	ScopeLock lLock(&mLock);
-	return ((unsigned)mIdSocketMap.size());
+unsigned DualMuxSocket::GetConnectionCount() const {
+	ScopeLock lock(&lock_);
+	return ((unsigned)id_socket_map_.size());
 }
 
-void DualMuxSocket::SetSafeConnectIdTimeout(double pTimeout)
-{
-	mTcpMuxSocket->SetConnectIdTimeout(pTimeout);
+void DualMuxSocket::SetSafeConnectIdTimeout(double timeout) {
+	tcp_mux_socket_->SetConnectIdTimeout(timeout);
 }
 
-void DualMuxSocket::SetConnectDualTimeout(double pTimeout)
-{
-	mConnectDualTimeout = pTimeout;
+void DualMuxSocket::SetConnectDualTimeout(double timeout) {
+	connect_dual_timeout_ = timeout;
 }
 
-void DualMuxSocket::SetDatagramReceiver(DatagramReceiver* pReceiver)
-{
-	mTcpMuxSocket->SetDatagramReceiver(pReceiver);
+void DualMuxSocket::SetDatagramReceiver(DatagramReceiver* receiver) {
+	tcp_mux_socket_->SetDatagramReceiver(receiver);
 }
 
-void DualMuxSocket::CloseSocket(DualSocket* pSocket)
-{
-	ScopeLock lLock(&mLock);
-	if (HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()) == pSocket)
-	{
-		if (pSocket->GetTcpSocket())
-		{
-			mTcpSocketMap.erase(pSocket->GetTcpSocket());
-			mTcpMuxSocket->CloseSocket(pSocket->GetTcpSocket(), false);
+void DualMuxSocket::CloseSocket(DualSocket* socket) {
+	ScopeLock lock(&lock_);
+	if (HashUtil::FindMapObject(id_socket_map_, socket->GetConnectionId()) == socket) {
+		if (socket->GetTcpSocket()) {
+			tcp_socket_map_.erase(socket->GetTcpSocket());
+			tcp_mux_socket_->CloseSocket(socket->GetTcpSocket(), false);
 		}
 
-		if (pSocket->GetUdpSocket())
-		{
-			mUdpSocketMap.erase(pSocket->GetUdpSocket());
-			mUdpMuxSocket->CloseSocket(pSocket->GetUdpSocket());
+		if (socket->GetUdpSocket()) {
+			udp_socket_map_.erase(socket->GetUdpSocket());
+			udp_mux_socket_->CloseSocket(socket->GetUdpSocket());
 		}
 
-		mIdSocketMap.erase(pSocket->GetConnectionId());
-		mPendingDualConnectMap.Remove(pSocket);
-		delete (pSocket);
+		id_socket_map_.erase(socket->GetConnectionId());
+		pending_dual_connect_map_.Remove(socket);
+		delete (socket);
 	}
 }
 
-void DualMuxSocket::DispatchCloseSocket(DualSocket* pSocket)
-{
-	if (!mCloseDispatcher.empty())
-	{
-		mCloseDispatcher(pSocket);
+void DualMuxSocket::DispatchCloseSocket(DualSocket* socket) {
+	if (!close_dispatcher_.empty()) {
+		close_dispatcher_(socket);
 	}
-	CloseSocket(pSocket);
+	CloseSocket(socket);
 }
 
-void DualMuxSocket::AddUdpReceiverSocket(UdpVSocket* pUdpSocket)
-{
-	ScopeLock lLock(&mLock);
-	deb_assert(HashUtil::FindMapObject(mUdpSocketMap, pUdpSocket));
-	mUdpMuxSocket->AddReceiver(pUdpSocket);
+void DualMuxSocket::AddUdpReceiverSocket(UdpVSocket* udp_socket) {
+	ScopeLock lock(&lock_);
+	deb_assert(HashUtil::FindMapObject(udp_socket_map_, udp_socket));
+	udp_mux_socket_->AddReceiver(udp_socket);
 }
 
-void DualMuxSocket::AddSocket(DualSocket* pSocket, TcpVSocket* pTcpSocket, UdpVSocket* pUdpSocket)
-{
-	if (pTcpSocket && pUdpSocket)
-	{
-		deb_assert(!HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()));
+void DualMuxSocket::AddSocket(DualSocket* socket, TcpVSocket* tcp_socket, UdpVSocket* udp_socket) {
+	if (tcp_socket && udp_socket) {
+		deb_assert(!HashUtil::FindMapObject(id_socket_map_, socket->GetConnectionId()));
 	}
-	if (pTcpSocket)
-	{
-		deb_assert(!HashUtil::FindMapObject(mTcpSocketMap, pTcpSocket));
-		pSocket->SetSocket(pTcpSocket);
-		mTcpSocketMap.insert(TcpSocketMap::value_type(pTcpSocket, pSocket));
+	if (tcp_socket) {
+		deb_assert(!HashUtil::FindMapObject(tcp_socket_map_, tcp_socket));
+		socket->SetSocket(tcp_socket);
+		tcp_socket_map_.insert(TcpSocketMap::value_type(tcp_socket, socket));
 	}
-	if (pUdpSocket)
-	{
-		deb_assert(!HashUtil::FindMapObject(mUdpSocketMap, pUdpSocket));
-		pSocket->SetSocket(pUdpSocket);
-		mUdpSocketMap.insert(UdpSocketMap::value_type(pUdpSocket, pSocket));
+	if (udp_socket) {
+		deb_assert(!HashUtil::FindMapObject(udp_socket_map_, udp_socket));
+		socket->SetSocket(udp_socket);
+		udp_socket_map_.insert(UdpSocketMap::value_type(udp_socket, socket));
 	}
-	if (!HashUtil::FindMapObject(mIdSocketMap, pSocket->GetConnectionId()))
-	{
+	if (!HashUtil::FindMapObject(id_socket_map_, socket->GetConnectionId())) {
 		log_trace("Adding DualSocket with ID "+
-			strutil::ReplaceCtrlChars(pSocket->GetConnectionId(), '.')+
-			(pSocket->GetTcpSocket()?" TCP set,":" no TCP,")+str()+
-			(pSocket->GetUdpSocket()?" UDP set.":" no UDP."));
-		mIdSocketMap.insert(IdSocketMap::value_type(pSocket->GetConnectionId(), pSocket));
-	}
-	else
-	{
+			strutil::ReplaceCtrlChars(socket->GetConnectionId(), '.')+
+			(socket->GetTcpSocket()?" TCP set,":" no TCP,")+str()+
+			(socket->GetUdpSocket()?" UDP set.":" no UDP."));
+		id_socket_map_.insert(IdSocketMap::value_type(socket->GetConnectionId(), socket));
+	} else {
 		log_debug("Appending info to DualSocket with ID "+
-			strutil::ReplaceCtrlChars(pSocket->GetConnectionId(), '.') +
-			(pSocket->GetTcpSocket()?" TCP set,":" no TCP,")+str()+
-			(pSocket->GetUdpSocket()?" UDP set.":" no UDP."));
+			strutil::ReplaceCtrlChars(socket->GetConnectionId(), '.') +
+			(socket->GetTcpSocket()?" TCP set,":" no TCP,")+str()+
+			(socket->GetUdpSocket()?" UDP set.":" no UDP."));
 	}
-	if (!pSocket->GetTcpSocket() || !pSocket->GetUdpSocket())
-	{
+	if (!socket->GetTcpSocket() || !socket->GetUdpSocket()) {
 		log_trace("Adding a not-yet-fully-connected DualSocket to 'pending dual' list.");
-		mPendingDualConnectMap.PushBack(pSocket, HiResTimer(false));
-	}
-	else
-	{
+		pending_dual_connect_map_.PushBack(socket, HiResTimer(false));
+	} else {
 		log_trace("Dropping a fully connected DualSocket from 'pending dual' list.");
-		mPendingDualConnectMap.Remove(pSocket);
+		pending_dual_connect_map_.Remove(socket);
 	}
 }
 
-void DualMuxSocket::KillNonDualConnected()
-{
-	for (SocketTimeMap::Iterator x = mPendingDualConnectMap.First(); x != mPendingDualConnectMap.End();)
-	{
-		HiResTimer& lTime = x.GetObject();
-		if (lTime.QueryTimeDiff() >= mConnectDualTimeout)
-		{
+void DualMuxSocket::KillNonDualConnected() {
+	for (SocketTimeMap::Iterator x = pending_dual_connect_map_.First(); x != pending_dual_connect_map_.End();) {
+		HiResTimer& time = x.GetObject();
+		if (time.QueryTimeDiff() >= connect_dual_timeout_) {
 			log_debug("Connected socket dual-timed out => dropped.");
-			DualSocket* lSocket = x.GetKey();
+			DualSocket* _socket = x.GetKey();
 			++x;	// Must be increased before we close the socket (implicitly removes it from the table).
-			CloseSocket(lSocket);
-		}
-		else
-		{
+			CloseSocket(_socket);
+		} else {
 			++x;
 		}
 	}
 }
 
-void DualMuxSocket::OnCloseTcpSocket(TcpVSocket* pTcpSocket)
-{
-	DualSocket* lSocket;
+void DualMuxSocket::OnCloseTcpSocket(TcpVSocket* tcp_socket) {
+	DualSocket* _socket;
 	{
-		ScopeLock lLock(&mLock);
-		lSocket = HashUtil::FindMapObject(mTcpSocketMap, pTcpSocket);
+		ScopeLock lock(&lock_);
+		_socket = HashUtil::FindMapObject(tcp_socket_map_, tcp_socket);
 	}
-	if (lSocket)
-	{
-		DispatchCloseSocket(lSocket);
+	if (_socket) {
+		DispatchCloseSocket(_socket);
 	}
 }
 
 
 
-DualSocket::DualSocket(DualMuxSocket* pMuxSocket, const std::string& pConnectionId):
+DualSocket::DualSocket(DualMuxSocket* mux_socket, const std::string& connection_id):
 	ConnectionWithId(),
-	mMuxSocket(pMuxSocket),
-	mTcpSocket(0),
-	mUdpSocket(0),
-	mDefaultSafeSend(false),
-	mDefaultSafeReceive(false)
-{
+	mux_socket_(mux_socket),
+	tcp_socket_(0),
+	udp_socket_(0),
+	default_safe_send_(false),
+	default_safe_receive_(false) {
 	log_trace("DualSocket()");
-	SetConnectionId(pConnectionId);
+	SetConnectionId(connection_id);
 }
 
-bool DualSocket::SetSocket(TcpVSocket* pSocket)
-{
-	bool lOk = (!mTcpSocket);
-	deb_assert(lOk);
-	if (lOk)
-	{
-		mTcpSocket = pSocket;
+bool DualSocket::SetSocket(TcpVSocket* socket) {
+	bool ok = (!tcp_socket_);
+	deb_assert(ok);
+	if (ok) {
+		tcp_socket_ = socket;
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool DualSocket::SetSocket(UdpVSocket* pSocket)
-{
-	bool lOk = (!mUdpSocket);
-	deb_assert(lOk);
-	if (lOk)
-	{
-		mUdpSocket = pSocket;
+bool DualSocket::SetSocket(UdpVSocket* socket) {
+	bool ok = (!udp_socket_);
+	deb_assert(ok);
+	if (ok) {
+		udp_socket_ = socket;
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool DualSocket::IsOpen() const
-{
-	return (mTcpSocket && mUdpSocket && mTcpSocket->IsOpen() && mMuxSocket->IsOpen());
+bool DualSocket::IsOpen() const {
+	return (tcp_socket_ && udp_socket_ && tcp_socket_->IsOpen() && mux_socket_->IsOpen());
 }
 
-void DualSocket::ClearAll()
-{
-	mTcpSocket = 0;
-	mUdpSocket = 0;
+void DualSocket::ClearAll() {
+	tcp_socket_ = 0;
+	udp_socket_ = 0;
 	ClearConnectionId();
 }
 
-SocketAddress DualSocket::GetLocalAddress() const
-{
-	if (mMuxSocket)
-	{
+SocketAddress DualSocket::GetLocalAddress() const {
+	if (mux_socket_) {
 		// RAII.
-		return (mMuxSocket->GetLocalAddress());
+		return (mux_socket_->GetLocalAddress());
 	}
 	return (SocketAddress());
 }
 
-SocketAddress DualSocket::GetTargetAddress() const
-{
-	if (mTcpSocket)
-	{
+SocketAddress DualSocket::GetTargetAddress() const {
+	if (tcp_socket_) {
 		// RAII.
-		return (mTcpSocket->GetTargetAddress());
+		return (tcp_socket_->GetTargetAddress());
 	}
-	if (mUdpSocket)
-	{
+	if (udp_socket_) {
 		// RAII.
-		mUdpSocket->GetTargetAddress();
+		udp_socket_->GetTargetAddress();
 	}
 	return (SocketAddress());
 }
 
-void DualSocket::ClearOutputData()
-{
-	if (mTcpSocket)
-	{
-		mTcpSocket->ClearOutputData();
+void DualSocket::ClearOutputData() {
+	if (tcp_socket_) {
+		tcp_socket_->ClearOutputData();
 	}
-	if (mUdpSocket)
-	{
-		mUdpSocket->ClearOutputData();
+	if (udp_socket_) {
+		udp_socket_->ClearOutputData();
 	}
 }
 
-void DualSocket::SetSafeSend(bool pSafe)
-{
-	mDefaultSafeSend = pSafe;
+void DualSocket::SetSafeSend(bool safe) {
+	default_safe_send_ = safe;
 }
 
-Datagram& DualSocket::GetSendBuffer() const
-{
-	return GetSendBuffer(mDefaultSafeSend);
+Datagram& DualSocket::GetSendBuffer() const {
+	return GetSendBuffer(default_safe_send_);
 }
 
-Datagram& DualSocket::GetSendBuffer(bool pSafe) const
-{
-	if (pSafe)
-	{
-		return (mTcpSocket->GetSendBuffer());
-	}
-	else
-	{
-		return (mUdpSocket->GetSendBuffer());
+Datagram& DualSocket::GetSendBuffer(bool safe) const {
+	if (safe) {
+		return (tcp_socket_->GetSendBuffer());
+	} else {
+		return (udp_socket_->GetSendBuffer());
 	}
 }
 
-IOError DualSocket::AppendSendBuffer(const void* pData, int pLength)
-{
-	return AppendSendBuffer(mDefaultSafeSend, pData, pLength);
+IOError DualSocket::AppendSendBuffer(const void* data, int _length) {
+	return AppendSendBuffer(default_safe_send_, data, _length);
 }
 
-IOError DualSocket::AppendSendBuffer(bool pSafe, const void* pData, int pLength)
-{
-	IOError lSendResult = IO_OK;
-	if (pSafe)
-	{
-		lSendResult = mTcpSocket->AppendSendBuffer(pData, (int)pLength);
+IOError DualSocket::AppendSendBuffer(bool safe, const void* data, int _length) {
+	IOError send_result = kIoOk;
+	if (safe) {
+		send_result = tcp_socket_->AppendSendBuffer(data, (int)_length);
+	} else {
+		send_result = udp_socket_->AppendSendBuffer(data, _length);
 	}
-	else
-	{
-		lSendResult = mUdpSocket->AppendSendBuffer(pData, pLength);
-	}
-	return (lSendResult);
+	return (send_result);
 }
 
-int DualSocket::SendBuffer()
-{
-	int lTcpSentCount = 0;
-	if (mTcpSocket && !mTcpSocket->GetInSenderList())	// If it is in the sender list, it will be served later.
-	{
-		lTcpSentCount = mTcpSocket->SendBuffer();
-		log_volatile(mLog.Tracef("TCP send returned %i.", lTcpSentCount));
+int DualSocket::SendBuffer() {
+	int tcp_sent_count = 0;
+	if (tcp_socket_ && !tcp_socket_->GetInSenderList()) {	// If it is in the sender list, it will be served later.
+		tcp_sent_count = tcp_socket_->SendBuffer();
+		log_volatile(log_.Tracef("TCP send returned %i.", tcp_sent_count));
 	}
-	int lUdpSentCount = 0;
-	if (mUdpSocket && !mUdpSocket->GetInSenderList())	// If it is in the sender list, it will be served later.
-	{
-		lUdpSentCount = mUdpSocket->SendBuffer();
-		log_volatile(mLog.Tracef("UDP send returned %i.", lUdpSentCount));
+	int udp_sent_count = 0;
+	if (udp_socket_ && !udp_socket_->GetInSenderList()) {	// If it is in the sender list, it will be served later.
+		udp_sent_count = udp_socket_->SendBuffer();
+		log_volatile(log_.Tracef("UDP send returned %i.", udp_sent_count));
 	}
-	int lSentCount = -1;
-	if (lTcpSentCount >= 0 && lUdpSentCount >= 0)
-	{
-		lSentCount = lTcpSentCount+lUdpSentCount;
+	int sent_count = -1;
+	if (tcp_sent_count >= 0 && udp_sent_count >= 0) {
+		sent_count = tcp_sent_count+udp_sent_count;
 	}
-	return (lSentCount);
+	return (sent_count);
 }
 
-bool DualSocket::HasSendData() const
-{
-	return (mTcpSocket->HasSendData() || mUdpSocket->HasSendData());
+bool DualSocket::HasSendData() const {
+	return (tcp_socket_->HasSendData() || udp_socket_->HasSendData());
 }
 
-void DualSocket::SetSafeReceive(bool pSafe)
-{
-	mDefaultSafeReceive = pSafe;
+void DualSocket::SetSafeReceive(bool safe) {
+	default_safe_receive_ = safe;
 }
 
-int DualSocket::Receive(void* pData, int pLength)
-{
-	return Receive(mDefaultSafeReceive, pData, pLength);
+int DualSocket::Receive(void* data, int _length) {
+	return Receive(default_safe_receive_, data, _length);
 }
 
-int DualSocket::Receive(bool pSafe, void* pData, int pLength)
-{
-	int lReceiveCount;
-	if (pSafe)
-	{
-		lReceiveCount = mTcpSocket->Receive(pData, pLength, true);
-		//log_volatile(mLog.Tracef("TCP recv returned %i.", lReceiveCount));
+int DualSocket::Receive(bool safe, void* data, int _length) {
+	int receive_count;
+	if (safe) {
+		receive_count = tcp_socket_->Receive(data, _length, true);
+		//log_volatile(log_.Tracef("TCP recv returned %i.", receive_count));
+	} else {
+		receive_count = udp_socket_->Receive(data, _length);
+		//log_volatile(log_.Tracef("UDP recv returned %i.", receive_count));
 	}
-	else
-	{
-		lReceiveCount = mUdpSocket->Receive(pData, pLength);
-		//log_volatile(mLog.Tracef("UDP recv returned %i.", lReceiveCount));
-	}
-	return (lReceiveCount);
+	return (receive_count);
 }
 
-void DualSocket::TryAddReceiverSocket()
-{
+void DualSocket::TryAddReceiverSocket() {
 	// TODO: add TCP receiver socket...
-	if (mUdpSocket->NeedInputPeek())
-	{
-		mMuxSocket->AddUdpReceiverSocket(mUdpSocket);
+	if (udp_socket_->NeedInputPeek()) {
+		mux_socket_->AddUdpReceiverSocket(udp_socket_);
 	}
 }
 
-DualSocket::~DualSocket()
-{
+DualSocket::~DualSocket() {
 	log_trace("~DualSocket()");
 	ClearAll();
-	mMuxSocket = 0;
+	mux_socket_ = 0;
 }
 
-TcpVSocket* DualSocket::GetTcpSocket() const
-{
-	return (mTcpSocket);
+TcpVSocket* DualSocket::GetTcpSocket() const {
+	return (tcp_socket_);
 }
 
-UdpVSocket* DualSocket::GetUdpSocket() const
-{
-	return (mUdpSocket);
+UdpVSocket* DualSocket::GetUdpSocket() const {
+	return (udp_socket_);
 }
 
 
@@ -1133,10 +913,10 @@ UdpVSocket* DualSocket::GetUdpSocket() const
 const double TcpMuxSocket::DEFAULT_CONNECT_ID_TIMEOUT = 2.0;
 const double DualMuxSocket::DEFAULT_CONNECT_DUAL_TIMEOUT = 5.0;
 
-loginstance(NETWORK, TcpMuxSocket);
-loginstance(NETWORK, TcpVSocket);
-loginstance(NETWORK, DualMuxSocket);
-loginstance(NETWORK, DualSocket);
+loginstance(kNetwork, TcpMuxSocket);
+loginstance(kNetwork, TcpVSocket);
+loginstance(kNetwork, DualMuxSocket);
+loginstance(kNetwork, DualSocket);
 
 
 

@@ -1,33 +1,28 @@
 #pragma once
-#include "SlimeAI.hpp"
+#include "slimeai.hpp"
 
 
 
-namespace Slime
-{
+namespace slime {
 
 
 
-class DannoAI: public SlimeAI
-{
-	private: int serveType;
+class DannoAI: public SlimeAI {
+	private: int type_;
 
-	public: DannoAI()
-	{
+	public: DannoAI() {
 		this->team = 4;
-		this->serveType = -1;
+		this->type_ = -1;
 	}
 
-	private: int howManyFrames(int paramInt)
-	{
+	private: int howManyFrames(int _i) {
 		int i = 0; int j = this->ballY; int k = this->ballVY;
-		do { i++; k--; } while ((j += k) > paramInt);
+		do { i++; k--; } while ((j += k) > _i);
 		return i;
 	}
 
-	private: int whereWillBallCross(int paramInt)
-	{
-		int i = howManyFrames(paramInt);
+	private: int whereWillBallCross(int _i) {
+		int i = howManyFrames(_i);
 		int j = this->ballX; int k = this->ballVX;
 
 		for (int m = 0; m < i; m++) {
@@ -39,25 +34,22 @@ class DannoAI: public SlimeAI
 		return j;
 	}
 
-	public: void moveSlime()
-	{
-		if ((this->ballX < 500) && (this->serveType != -1)) this->serveType = -1;
+	public: void moveSlime() {
+		if ((this->ballX < 500) && (this->type_ != -1)) this->type_ = -1;
 		int i = whereWillBallCross(125); howManyFrames(125);
 		int j;
 		if ((this->p2Y != 0) && (this->p2X < 575)) j = 0; else {
 			j = 25 + (int)(10.0 * Math::random());
 		}
-		if (((this->ballVX == 0) && (this->ballX == 800)) || (this->serveType != -1))
-		{
-			if (this->serveType == -1)
-			{
-				if (this->p1X > 250) this->serveType = 0;
-				else if (this->p1X < 200) this->serveType = 1;
-				else if (this->p1X < 250) this->serveType = 2;
+		if (((this->ballVX == 0) && (this->ballX == 800)) || (this->type_ != -1)) {
+			if (this->type_ == -1) {
+				if (this->p1X > 250) this->type_ = 0;
+				else if (this->p1X < 200) this->type_ = 1;
+				else if (this->p1X < 250) this->type_ = 2;
 				if (Math::random() < 0.35)
-					this->serveType = (int)(3.0 * Math::random());
+					this->type_ = (int)(3.0 * Math::random());
 			}
-			switch (this->serveType) {
+			switch (this->type_) {
 			case 0:
 				if ((this->ballY >= 300) || (this->ballVY >= -3))
 					break;
@@ -87,14 +79,12 @@ class DannoAI: public SlimeAI
 			return;
 		}
 
-		if (i < 500)
-		{
+		if (i < 500) {
 			if (Math::abs(this->p2X - 666) < 20) { move(3); return; }
 			if (this->p2X > 666) { move(0); return; }
 			if (this->p2X < 666) move(1);
 			return;
-		}if (Math::abs(this->p2X - i) < j)
-		{
+		}if (Math::abs(this->p2X - i) < j) {
 			if ((this->p2Y != 0) || ((this->p2Fire) && (Math::random() < 0.3))) return;
 
 			if (((this->p2X >= 900) && (this->ballX > 830)) || ((this->p2X <= 580) && (this->ballX < 530) && (Math::abs(this->ballX - this->p2X) < 100)))
@@ -107,8 +97,7 @@ class DannoAI: public SlimeAI
 				jump();
 			}
 		}
-		if ((this->p2Y == 0) && (this->serveType == -1))
-		{
+		if ((this->p2Y == 0) && (this->type_ == -1)) {
 			if (Math::abs(this->p2X - i) < j) { move(3); return; }
 			if (i + j < this->p2X) { move(0); return; }
 			if (i + j > this->p2X) { move(1);
@@ -116,24 +105,20 @@ class DannoAI: public SlimeAI
 				return;
 			}
 
-		}
-		else if (this->serveType == -1)
-		{
+		} else if (this->type_ == -1) {
 			if (this->p2X < 575) return;
 
-			if (this->p2X > 900)
-			{
+			if (this->p2X > 900) {
 				move(1);
 				return;
 			}
 			if (Math::abs(this->p2X - this->ballX) < j) { move(3); return; }
 			if (this->ballX < this->p2X) { move(0); return; }
-			if (this->ballX > this->p2X) move(1); 
+			if (this->ballX > this->p2X) move(1);
 		}
 	}
 
-	private: void jump()
-	{
+	private: void jump() {
 		if (Math::random() < 0.85)
 			move(2);
 	}

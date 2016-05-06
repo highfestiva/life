@@ -8,23 +8,21 @@
 
 
 
-#include "../../Lepra/Include/ConsoleCommandManager.h"
-#include "../../Lepra/Include/Log.h"
-#include "../../Lepra/Include/MemberThread.h"
-#include "../../Lepra/Include/String.h"
-#include "../Include/Cure.h"
+#include "../../lepra/include/consolecommandmanager.h"
+#include "../../lepra/include/log.h"
+#include "../../lepra/include/memberthread.h"
+#include "../../lepra/include/string.h"
+#include "../include/cure.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class InteractiveConsoleLogListener;
 }
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
@@ -32,67 +30,65 @@ class RuntimeVariableScope;
 
 
 
-class ConsoleManager
-{
+class ConsoleManager {
 public:
-	ConsoleManager(RuntimeVariableScope* pVariableScope, InteractiveConsoleLogListener* pConsoleLogger,
-		ConsolePrompt* pConsolePrompt);
+	ConsoleManager(RuntimeVariableScope* variable_scope, InteractiveConsoleLogListener* console_logger,
+		ConsolePrompt* console_prompt);
 	virtual ~ConsoleManager();
-	void SetConsoleLogger(InteractiveConsoleLogListener* pLogger);
+	void SetConsoleLogger(InteractiveConsoleLogListener* logger);
 
 	virtual bool Start();
 	virtual void Join();
 
-	void PushYieldCommand(const str& pCommand);
-	int ExecuteCommand(const str& pCommand);
+	void PushYieldCommand(const str& command);
+	int ExecuteCommand(const str& command);
 	int ExecuteYieldCommand();
 
 	ConsoleCommandManager* GetConsoleCommandManager() const;
 
 	virtual LogDecorator& GetLogger() const;
 
-	void AddFork(Thread* pThread);
-	void RemoveFork(Thread* pThread);
+	void AddFork(Thread* thread);
+	void RemoveFork(Thread* thread);
 
 	InteractiveConsoleLogListener* GetConsoleLogger() const;
 	ConsolePrompt* GetConsolePrompt() const;
 	RuntimeVariableScope* GetVariableScope() const;
 
 protected:
-	struct CommandPair
-	{
-		const char* mCommandName;
-		int mCommandId;
+	struct CommandPair {
+		const char* command_name_;
+		int command_id_;
 	};
 	typedef std::unordered_map<HashedString, int, HashedStringHasher> CommandLookupMap;
 	typedef std::list<Thread*> ForkList;
 
-	bool ForkExecuteCommand(const str& pCommand);
+	bool ForkExecuteCommand(const str& command);
 
 	virtual void InitCommands();
 	std::list<str> GetCommandList() const;
-	virtual int TranslateCommand(const HashedString& pCommand) const;
-	void PrintCommandList(const std::list<str>& pCommandList);
+	virtual int TranslateCommand(const HashedString& command) const;
+	void PrintCommandList(const std::list<str>& command_list);
 
 	void AddCommands();
 	void ConsoleThreadEntry();
-	int OnCommandLocal(const str& pCommand, const strutil::strvec& pParameterVector);
-	void OnCommandError(const str& pCommand, const strutil::strvec& pParameterVector, int pResult);
+	int OnCommandLocal(const str& command, const strutil::strvec& parameter_vector);
+	void OnCommandError(const str& command, const strutil::strvec& parameter_vector, int result);
 
 	virtual unsigned GetCommandCount() const = 0;
-	virtual const CommandPair& GetCommand(unsigned pIndex) const = 0;
-	virtual int OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector) = 0;
+	virtual const CommandPair& GetCommand(unsigned index) const = 0;
+	virtual int OnCommand(const HashedString& command, const strutil::strvec& parameter_vector) = 0;
 
-	RuntimeVariableScope* mVariableScope;
-	InteractiveConsoleLogListener* mConsoleLogger;
-	ConsolePrompt* mConsolePrompt;
-	ConsoleCommandManager* mConsoleCommandManager;
-	MemberThread<ConsoleManager>* mConsoleThread;
-	CommandLookupMap mCommandLookup;
-	Lock mLock;
-	std::list<str> mYieldCommandList;
-	ForkList mForkList;
-	bool mHistorySilentUntilNextExecute;
+	RuntimeVariableScope* variable_scope_;
+	InteractiveConsoleLogListener* console_logger_;
+	ConsolePrompt* console_prompt_;
+	ConsoleCommandManager* console_command_manager_;
+	MemberThread<ConsoleManager>* console_thread_;
+	CommandLookupMap command_lookup_;
+	Lock lock_;
+	std::list<str> yield_command_list_;
+	ForkList fork_list_;
+	bool history_silent_until_next_execute_;
 
 	logclass();
 };

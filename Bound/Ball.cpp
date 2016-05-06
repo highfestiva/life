@@ -1,57 +1,49 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Ball.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/GameManager.h"
+#include "ball.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/gamemanager.h"
 
 
 
-namespace Bound
-{
+namespace Bound {
 
 
 
-Ball::Ball(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
-	Parent(pResourceManager, pClassId, pUiManager),
-	mAverageSpeed(0)
-{
+Ball::Ball(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager):
+	Parent(resource_manager, class_id, ui_manager),
+	average_speed_(0) {
 }
 
-Ball::~Ball()
-{
+Ball::~Ball() {
 }
 
 
 
-void Ball::OnTick()
-{
+void Ball::OnTick() {
 	Parent::OnTick();
 
-	vec3 lVelocity = GetVelocity();
-	bool lNormalize = false;
-	float lSpeed = lVelocity.GetLength();
-	mAverageSpeed = Math::Lerp(mAverageSpeed, lSpeed, 0.1f);
-	if (lSpeed > 3.1f)
-	{
-		lSpeed = 2.9f;
-		lNormalize = true;
+	vec3 velocity = GetVelocity();
+	bool normalize = false;
+	float speed = velocity.GetLength();
+	average_speed_ = Math::Lerp(average_speed_, speed, 0.1f);
+	if (speed > 3.1f) {
+		speed = 2.9f;
+		normalize = true;
+	} else if (average_speed_ < 1.0f) {
+		speed = 2.9f;
+		average_speed_ = 2.9f;
+		normalize = true;
 	}
-	else if (mAverageSpeed < 1.0f)
-	{
-		lSpeed = 2.9f;
-		mAverageSpeed = 2.9f;
-		lNormalize = true;
-	}
-	if (lNormalize)
-	{
-		lVelocity.Normalize(lSpeed);
-		const Tbc::ChunkyBoneGeometry* lGeometry = mPhysics->GetBoneGeometry(mPhysics->GetRootBone());
-		mManager->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
+	if (normalize) {
+		velocity.Normalize(speed);
+		const tbc::ChunkyBoneGeometry* geometry = physics_->GetBoneGeometry(physics_->GetRootBone());
+		manager_->GetGameManager()->GetPhysicsManager()->SetBodyVelocity(geometry->GetBodyId(), velocity);
 	}
 }
 

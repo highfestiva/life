@@ -1,6 +1,6 @@
 /*
 	Class:  TiffLoader
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -10,12 +10,11 @@
 
 #pragma once
 
-#include "String.h"
+#include "string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -27,61 +26,58 @@ class Writer;
 
 
 
-class TiffLoader
-{
+class TiffLoader {
 public:
-	
-	enum Status
-	{
-		STATUS_OPEN_ERROR = 0, 
-		STATUS_SUCCESS,
-		STATUS_MEMORY_ERROR,
-		STATUS_READ_HEADER_ERROR,
-		STATUS_READ_INFO_ERROR,
-		STATUS_READ_PALETTE_ERROR,
-		STATUS_READ_PICTURE_ERROR,
-		STATUS_PIXELFORMAT_ERROR,
-		STATUS_RESOLUTION_ERROR,
-		STATUS_COMPRESSION_ERROR,
-		STATUS_UNKNOWNFILESIZE_ERROR,
-		STATUS_READSTREAM_ERROR,
+
+	enum Status {
+		kStatusOpenError = 0,
+		kStatusSuccess,
+		kStatusMemoryError,
+		kStatusReadHeaderError,
+		kStatusReadInfoError,
+		kStatusReadPaletteError,
+		kStatusReadPictureError,
+		kStatusPixelformatError,
+		kStatusResolutionError,
+		kStatusCompressionError,
+		kStatusUnknownfilesizeError,
+		kStatusReadstreamError,
 	};
 
-	struct Header
-	{
-		int mWidth;
-		int mHeight;
-		int mSamplesPerPixel;
-		int mBitsPerPixel;
+	struct Header {
+		int width_;
+		int height_;
+		int samples_per_pixel_;
+		int bits_per_pixel_;
 	};
 
-	Status Load(const str& pFileName, Canvas& pCanvas);
-	Status Save(const str& pFileName, const Canvas& pCanvas);
+	Status Load(const str& file_name, Canvas& canvas);
+	Status Save(const str& file_name, const Canvas& canvas);
 
-	Status Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas);
-	Status Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas);
+	Status Load(const str& archive_name, const str& file_name, Canvas& canvas);
+	Status Save(const str& archive_name, const str& file_name, const Canvas& canvas);
 
-	Status Load(Reader& pReader, Canvas& pCanvas);
-	Status Save(Writer& pWriter, const Canvas& pCanvas);
+	Status Load(Reader& reader, Canvas& canvas);
+	Status Save(Writer& writer, const Canvas& canvas);
 
-	Status ReadHeader(const str& pFileName, Header& pHeader);
-	Status ReadHeader(const str& pArchiveName, const str& pFileName, Header& pHeader);
+	Status ReadHeader(const str& file_name, Header& header);
+	Status ReadHeader(const str& archive_name, const str& file_name, Header& header);
 
 
 	/*
-		Special piece by piece loading functions. 
+		Special piece by piece loading functions.
 		Good to use with very large files.
 	*/
 
 	// Will open the file, read the header, and return.
 	// The user must call EndLoad() when finished.
-	Status StartLoad(const str& pFileName, Header& pHeader);
-	Status StartLoad(const str& pArchiveName, const str& pFileName, Header& pHeader);
+	Status StartLoad(const str& file_name, Header& header);
+	Status StartLoad(const str& archive_name, const str& file_name, Header& header);
 
-	// Will load the given rectangle into pCanvas. 
-	// The coordinates may be outside the image, in which 
+	// Will load the given rectangle into canvas.
+	// The coordinates may be outside the image, in which
 	// case the "outside" will be filled with zeroes (usually black).
-	Status LoadPiece(int pLeft, int pTop, int pRight, int pBottom, Canvas& pCanvas);
+	Status LoadPiece(int left, int top, int right, int bottom, Canvas& canvas);
 
 	void EndLoad();
 
@@ -90,151 +86,141 @@ public:
 protected:
 private:
 
-	Status StartLoad(Header& pHeader);
+	Status StartLoad(Header& header);
 
-	Status Load(File& pFile, Canvas& pCanvas);
+	Status Load(File& file, Canvas& canvas);
 
-	enum Tag
-	{
+	enum Tag {
 		// Basic tags.
-		TAG_NEWSUBFILETYPE			= 254,
-		TAG_SUBFILETYPE				= 255,
-		TAG_IMAGEWIDTH				= 256,
-		TAG_IMAGELENGTH				= 257,
-		TAG_BITSPERSAMPLE			= 258,
-		TAG_COMPRESSION				= 259,
-		TAG_PHOTOMETRICLNTERP		= 262,
-		TAG_THRESHOLDING			= 263,
-		TAG_CELLWIDTH				= 264,
-		TAG_CELLLENGTH				= 265,
-		TAG_FILLORDER				= 266,
-		TAG_DOCUMENTNAME			= 269,
-		TAG_IMAGEDESCRIPTION		= 270,
-		TAG_MAKE					= 271,
-		TAG_MODEL					= 272,
-		TAG_STRIPOFFSETS			= 273,
-		TAG_ORIENTATION				= 274,
-		TAG_SAMPLESPERPIXEL			= 277,
-		TAG_ROWSPERSTRIP			= 278,
-		TAG_STRIPBYTECOUNTS			= 279,
-		TAG_MINSAMPLEVALUE			= 280,
-		TAG_MAXSAMPLEVALUE			= 281,
-		TAG_XRESOLUTION				= 282,
-		TAG_YRESOLUTION				= 283,
-		TAG_PLANARCONFIGURATION		= 284,
-		TAG_PAGENAME				= 285,
-		TAG_XPOSITION				= 286,
-		TAG_YPOSITION				= 287,
-		TAG_FREEOFFSETS				= 288,
-		TAG_FREEBYTECOUNTS			= 289,
-		TAG_GRAYRESPONSEUNIT		= 290,
-		TAG_GRAYRESPONSECURVE		= 291,
-		TAG_GROUP3OPTIONS			= 292,
-		TAG_GROUP4OPTIONS			= 293,
-		TAG_RESOLUTIONUNIT			= 296,
-		TAG_PAGENUMBER				= 297,
-		TAG_COLORRESPONSECURVE		= 301,
-		TAG_SOFTWARE				= 305,
-		TAG_DATETIME				= 306,
-		TAG_PREDICTOR				= 317,
-		TAG_ARTIST					= 315,
-		TAG_HOSTCOMPUTER			= 316,
-		TAG_WHITEPOINT				= 318,
-		TAG_PRIMARYCHROMATICITIES	= 319,
-		TAG_COLORMAP				= 320,
-		TAG_EXTRASAMPLES			= 338,
-		TAG_COPYRIGHT				= 33432,
+		kTagNewsubfiletype			= 254,
+		kTagSubfiletype				= 255,
+		kTagImagewidth				= 256,
+		kTagImagelength				= 257,
+		kTagBitspersample			= 258,
+		kTagCompression				= 259,
+		kTagPhotometriclnterp		= 262,
+		kTagThresholding			= 263,
+		kTagCellwidth				= 264,
+		kTagCelllength				= 265,
+		kTagFillorder				= 266,
+		kTagDocumentname			= 269,
+		kTagImagedescription		= 270,
+		kTagMake					= 271,
+		kTagModel					= 272,
+		kTagStripoffsets			= 273,
+		kTagOrientation				= 274,
+		kTagSamplesperpixel			= 277,
+		kTagRowsperstrip			= 278,
+		kTagStripbytecounts			= 279,
+		kTagMinsamplevalue			= 280,
+		kTagMaxsamplevalue			= 281,
+		kTagXresolution				= 282,
+		kTagYresolution				= 283,
+		kTagPlanarconfiguration		= 284,
+		kTagPagename				= 285,
+		kTagXposition				= 286,
+		kTagYposition				= 287,
+		kTagFreeoffsets				= 288,
+		kTagFreebytecounts			= 289,
+		kTagGrayresponseunit		= 290,
+		kTagGrayresponsecurve		= 291,
+		kTagGroup3Options			= 292,
+		kTagGroup4Options			= 293,
+		kTagResolutionunit			= 296,
+		kTagPagenumber				= 297,
+		kTagColorresponsecurve		= 301,
+		kTagSoftware				= 305,
+		kTagDatetime				= 306,
+		kTagPredictor				= 317,
+		kTagArtist					= 315,
+		kTagHostcomputer			= 316,
+		kTagWhitepoint				= 318,
+		kTagPrimarychromaticities	= 319,
+		kTagColormap				= 320,
+		kTagExtrasamples			= 338,
+		kTagCopyright				= 33432,
 	};
 
-	enum //Field Type
-	{
-		TYPE_BYTE = 1,	// 8 bits.
-		TYPE_ASCII,		// null-terminated string.
-		TYPE_SHORT,		// 2 bytes.
-		TYPE_LONG,		// 4 bytes.
-		TYPE_RATIONAL,	// A rational number, 2 LONG, first is numerator, second is denominator.
-		TYPE_SBYTE,		// 8 bits, signed byte (twos-complement).
-		TYPE_UNDEFINED,	// 8 bits of arbitrary data specified by the tag.
-		TYPE_SSHORT,	// A 16-bit (2-byte) signed (twos-complement) integer.
-		TYPE_SLONG,		// A 32-bit (4-byte) signed (twos-complement) integer.
-		TYPE_SRATIONAL,	// 2 SLONGS.
-		TYPE_FLOAT,		// Single precision (4-byte) IEEE format.
-		TYPE_DOUBLE,	// Double precision (8-byte) IEEE format.
+	enum { //Field Type
+		kTypeByte = 1,	// 8 bits.
+		kTypeAscii,		// null-terminated string.
+		kTypeShort,		// 2 bytes.
+		kTypeLong,		// 4 bytes.
+		kTypeRational,	// A rational number, 2 LONG, first is numerator, second is denominator.
+		kTypeSbyte,		// 8 bits, signed byte (twos-complement).
+		kTypeUndefined,	// 8 bits of arbitrary data specified by the tag.
+		kTypeSshort,	// A 16-bit (2-byte) signed (twos-complement) integer.
+		kTypeSlong,		// A 32-bit (4-byte) signed (twos-complement) integer.
+		kTypeSrational,	// 2 SLONGS.
+		kTypeFloat,		// Single precision (4-byte) IEEE format.
+		kTypeDouble,	// Double precision (8-byte) IEEE format.
 	};
 
-	enum Orientation
-	{
-		ORIENTATION_TOPLEFT = 1,	// 0th row at top,    0th column at left.
-		ORIENTATION_TOPRIGHT,		// 0th row at top,    0th column at right.
-		ORIENTATION_BOTTOMRIGHT,	// 0th row at bottom, 0th column at right.
-		ORIENTATION_BOTTOMLEFT,		// 0th row at bottom, 0th column at left.
-		ORIENTATION_LEFTTOP,		// 0th row at left,   0th column at top.
-		ORIENTATION_RIGHTTOP,		// 0th row at right,  0th column at top.
-		ORIENTATION_RIGHTBOTTOM,	// 0th row at right,  0th column at bottom.
-		ORIENTATION_LEFTBOTTOM,		// 0th row at left,   0th column at bottom.
+	enum Orientation {
+		kOrientationTopleft = 1,	// 0th row at top,    0th column at left.
+		kOrientationTopright,		// 0th row at top,    0th column at right.
+		kOrientationBottomright,	// 0th row at bottom, 0th column at right.
+		kOrientationBottomleft,		// 0th row at bottom, 0th column at left.
+		kOrientationLefttop,		// 0th row at left,   0th column at top.
+		kOrientationRighttop,		// 0th row at right,  0th column at top.
+		kOrientationRightbottom,	// 0th row at right,  0th column at bottom.
+		kOrientationLeftbottom,		// 0th row at left,   0th column at bottom.
 
-		ORIENTATION_DEFAULT = ORIENTATION_TOPLEFT,
+		kOrientationDefault = kOrientationTopleft,
 	};
 
-	enum PhotometricInterpretation
-	{
-		PI_INVALID = -1,	// Not in the TIFF specification.
+	enum PhotometricInterpretation {
+		kPiInvalid = -1,	// Not in the TIFF specification.
 
-		PI_WHITEISZERO = 0,
-		PI_BLACKISZERO,
-		PI_RGB,
-		PI_PALETTE,
-		PI_TRANSPARENCYMASK,
+		kPiWhiteiszero = 0,
+		kPiBlackiszero,
+		kPiRgb,
+		kPiPalette,
+		kPiTransparencymask,
 	};
 
-	enum PlanarConfig
-	{
-		PC_CHUNKY = 1,
-		PC_PLANAR,
+	enum PlanarConfig {
+		kPcChunky = 1,
+		kPcPlanar,
 	};
 
-	enum Compression
-	{
-		COMPRESSION_NONE     = 1,
-		COMPRESSION_CCITT    = 2,
-		COMPRESSION_CCITT_T4 = 3,
-		COMPRESSION_CCITT_T6 = 4,
-		COMPRESSION_LZW      = 5, // OBS! Patented in the US! You need a license in order to implement this.
-		COMPRESSION_PACKBITS = 32733,
+	enum Compression {
+		kCompressionNone     = 1,
+		kCompressionCcitt    = 2,
+		kCompressionCcittT4 = 3,
+		kCompressionCcittT6 = 4,
+		kCompressionLzw      = 5, // OBS! Patented in the US! You need a license in order to implement this.
+		kCompressionPackbits = 32733,
 
-		COMPRESSION_DEFAULT = COMPRESSION_NONE,
+		kCompressionDefault = kCompressionNone,
 	};
 
-	enum ExtraSamples
-	{
-		EXTRA_UNSPECIFIED = 0,
-		EXTRA_ASSOCIATEDALPHA,
-		EXTRA_UNASSOCIATEDALPHA,
+	enum ExtraSamples {
+		kExtraUnspecified = 0,
+		kExtraAssociatedalpha,
+		kExtraUnassociatedalpha,
 	};
 
-	enum FillOrder
-	{
-		FILLORDER_HIGHBITSTOTHELEFT = 1,
-		FILLORDER_HIGHBITSTOTHERIGHT,
+	enum FillOrder {
+		kFillorderHighbitstotheleft = 1,
+		kFillorderHighbitstotheright,
 
-		FILLORDER_DEFAULT = FILLORDER_HIGHBITSTOTHELEFT,
+		kFillorderDefault = kFillorderHighbitstotheleft,
 	};
 
-	class DirectoryEntry
-	{
+	class DirectoryEntry {
 	public:
 		DirectoryEntry();
-		DirectoryEntry(File& pFile);
-		uint16 mTag;
-		uint16 mType;
-		unsigned mCount;
-		unsigned mValueOffset;
+		DirectoryEntry(File& file);
+		uint16 tag_;
+		uint16 type_;
+		unsigned count_;
+		unsigned value_offset_;
 	};
 
 	// A class containing all data that we are interested in to be able
 	// to load the image.
-	class IFDInfo
-	{
+	class IFDInfo {
 	public:
 
 		IFDInfo();
@@ -242,68 +228,66 @@ private:
 
 		bool CheckPixelFormat();
 
-		bool mReducedResVersion;
-		bool mIsSinglePage;
-		bool mIsAlphaMask;
-		unsigned   mWidth;
-		unsigned   mHeight;
-		unsigned   mSamplesPerPixel;
-		uint16* mSampleBits;
-		unsigned   mBitsPerPixel;
-		unsigned   mRowsPerStrip;
-		unsigned*  mStripByteCounts;
-		unsigned*  mStripOffsets;
-		unsigned   mStripCount; // Num indices in mStripByteCounts.
-		unsigned   mExtraSamples;
-		ExtraSamples mExtra;
-		Orientation mOrientation;
-		Compression mCompression;
-		FillOrder mFillOrder;
-		PhotometricInterpretation mPI;
-		PlanarConfig mPlanarConfig;
-		Color* mPalette;
-		uint16 mPaletteColorCount;
+		bool reduced_res_version_;
+		bool is_single_page_;
+		bool is_alpha_mask_;
+		unsigned   width_;
+		unsigned   height_;
+		unsigned   samples_per_pixel_;
+		uint16* sample_bits_;
+		unsigned   bits_per_pixel_;
+		unsigned   rows_per_strip_;
+		unsigned*  strip_byte_counts_;
+		unsigned*  strip_offsets_;
+		unsigned   strip_count_; // Num indices in strip_byte_counts_.
+		unsigned   extra_samples_;
+		ExtraSamples extra_;
+		Orientation orientation_;
+		Compression compression_;
+		FillOrder fill_order_;
+		PhotometricInterpretation pi_;
+		PlanarConfig planar_config_;
+		Color* palette_;
+		uint16 palette_color_count_;
 
 	private:
 	};
 
-	class ClipData
-	{
+	class ClipData {
 	public:
-		ClipData(int pLeft, int pTop, 
-				 int pRight, int pBottom, 
-				 int pDstWidth, int pDstHeight);
+		ClipData(int left, int top,
+				 int right, int bottom,
+				 int dst_width, int dst_height);
 
-		int mDstXOffset;
-		int mDstYOffset;
+		int dst_x_offset_;
+		int dst_y_offset_;
 
-		int mSrcXOffset;
-		int mSrcYOffset;
+		int src_x_offset_;
+		int src_y_offset_;
 
-		int mSrcReadWidth;
-		int mSrcReadHeight;
+		int src_read_width_;
+		int src_read_height_;
 
 	};
 
-	inline bool CheckBit(unsigned pSource, int pBit);
+	inline bool CheckBit(unsigned source, int bit);
 
-	Status ReadIFD(File& pFile, IFDInfo& pIFDInfo);
-	Status ReadImage(File& pFile, IFDInfo& pIFDInfo, Canvas& pCanvas);
-	Status ReadMonochromeImage(File& pFile, IFDInfo& pIFDInfo, Canvas& pCanvas, bool pInvert);
-	Status ReadIndexedImage(File& pFile, IFDInfo& pIFDInfo, Canvas& pCanvas);
-	Status ReadColorImage(File& pFile, IFDInfo& pIFDInfo, Canvas& pCanvas);
+	Status ReadIFD(File& file, IFDInfo& ifd_info);
+	Status ReadImage(File& file, IFDInfo& ifd_info, Canvas& canvas);
+	Status ReadMonochromeImage(File& file, IFDInfo& ifd_info, Canvas& canvas, bool invert);
+	Status ReadIndexedImage(File& file, IFDInfo& ifd_info, Canvas& canvas);
+	Status ReadColorImage(File& file, IFDInfo& ifd_info, Canvas& canvas);
 
-	Status ReadMonochromeImage(ClipData& pClipData, Canvas& pCanvas);
-	Status ReadColorImage(ClipData& pClipData, Canvas& pCanvas);
+	Status ReadMonochromeImage(ClipData& clip_data, Canvas& canvas);
+	Status ReadColorImage(ClipData& clip_data, Canvas& canvas);
 
 	// Used when loading piece by piece.
-	File* mLoadFile;
-	IFDInfo mIFDInfo;
+	File* load_file_;
+	IFDInfo ifd_info_;
 };
 
-bool TiffLoader::CheckBit(unsigned pSource, int pBit)
-{
-	return (pSource & (1 << pBit)) != 0;
+bool TiffLoader::CheckBit(unsigned source, int bit) {
+	return (source & (1 << bit)) != 0;
 }
 
 

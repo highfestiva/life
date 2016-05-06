@@ -4,21 +4,21 @@
 
 
 #include "pch.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Cure/Include/Cure.h"
-#include "../../Lepra/Include/Application.h"
-#include "../../Lepra/Include/LepraOS.h"
-#include "../../Lepra/Include/Log.h"
-#include "../../Lepra/Include/LogListener.h"
-#include "../../Lepra/Include/Socket.h"
-#include "../../Lepra/Include/String.h"
-#include "../../Lepra/Include/DiskFile.h"
-#include "../../Lepra/Include/Quaternion.h"
-#include "../../Tbc/Include/Tbc.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../cure/include/cure.h"
+#include "../../lepra/include/application.h"
+#include "../../lepra/include/lepraos.h"
+#include "../../lepra/include/log.h"
+#include "../../lepra/include/loglistener.h"
+#include "../../lepra/include/socket.h"
+#include "../../lepra/include/string.h"
+#include "../../lepra/include/diskfile.h"
+#include "../../lepra/include/quaternion.h"
+#include "../../tbc/include/tbc.h"
 #ifndef CURE_TEST_WITHOUT_UI
-#include "../../UiLepra/Include/UiLepra.h"
-#include "../../UiTbc/Include/UiTbc.h"
-#include "../../UiCure/Include/UiCure.h"
+#include "../../uilepra/include/uilepra.h"
+#include "../../uitbc/include/uitbc.h"
+#include "../../uicure/include/uicure.h"
 #endif // !CURE_TEST_WITHOUT_UI
 
 static bool TestRunDummy() { return (true); }
@@ -31,20 +31,20 @@ static bool TestRunDummy() { return (true); }
 #define TEST_RUN_TBC		TestUiTbc
 #define TEST_RUN_CURE		TestUiCure
 #define TEST_RUN_NETPHYS	TestPrototypeNetworkPhysics
-#define LEPRA_NS		UiLepra
-#define TBC_NS			UiTbc
+#define LEPRA_NS		uilepra
+#define TBC_NS			uitbc
 #define CURE_NS			UiCure
 #else // CURE_TEST_WITHOUT_UI
 #define TEST_RUN_LEPRA		TEST_RUN_LEPRA_CON
 #define TEST_RUN_TBC		TEST_RUN_TBC_CON
 #define TEST_RUN_CURE		TEST_RUN_CURE_CON
 #define TEST_RUN_NETPHYS	TEST_RUN_NETPHYS_CON
-#define LEPRA_NS		Lepra
-#define TBC_NS			Tbc
-#define CURE_NS			Cure
-#endif // With / without UI.
+#define LEPRA_NS		lepra
+#define TBC_NS			tbc
+#define CURE_NS			cure
+#endif // With / without kUi.
 
-using namespace Lepra;
+using namespace lepra;
 
 bool TEST_RUN_LEPRA_CON();
 bool TEST_RUN_TBC_CON();
@@ -54,134 +54,109 @@ bool TEST_RUN_LEPRA();
 bool TEST_RUN_TBC();
 bool TEST_RUN_CURE();
 bool TEST_RUN_NETPHYS();
-void ShowTestResult(const LogDecorator& pAccount, bool pbTestOk);
+void ShowTestResult(const LogDecorator& account, bool test_ok);
 
 
 
-class CureTestApplication: public Application
-{
+class CureTestApplication: public Application {
 public:
-	CureTestApplication(const strutil::strvec& pArgumentList);
+	CureTestApplication(const strutil::strvec& argument_list);
 	virtual void Init();
 	int Run();
 
 private:
-	enum TestBits
-	{
-		LEPRA_BIT = (1<<0),
-		TBC_BIT = (1<<1),
-		CURE_BIT = (1<<2),
-		NETWORK_PHYSICS_BIT = (1<<3),
-		CONSOLE_BIT = (1<<29),
-		TRACE_BIT = (1<<30),
-		MASTER_BITS = (CONSOLE_BIT | TRACE_BIT)
+	enum TestBits {
+		kLepraBit = (1<<0),
+		kTbcBit = (1<<1),
+		kCureBit = (1<<2),
+		kNetworkPhysicsBit = (1<<3),
+		kConsoleBit = (1<<29),
+		kTraceBit = (1<<30),
+		kMasterBits = (kConsoleBit | kTraceBit)
 	};
-	int mTestBits;
+	int test_bits_;
 	logclass();
 };
 
 LEPRA_RUN_APPLICATION(CureTestApplication, LEPRA_NS::Main);
 
-CureTestApplication::CureTestApplication(const strutil::strvec& pArgumentList):
-	Application(pArgumentList),
-	mTestBits(~(unsigned)(CONSOLE_BIT|TRACE_BIT))
-{
-	for (size_t x = 1; x < pArgumentList.size(); ++x)
-	{
-		str lArgument = pArgumentList[x];
-		int lMask = 0;
-		if (lArgument == "lepra")
-		{
-			lMask |= LEPRA_BIT;
-		}
-		else if (lArgument == "tbc")
-		{
-			lMask |= TBC_BIT;
-		}
-		else if (lArgument == "cure")
-		{
-			lMask |= CURE_BIT;
-		}
-		else if (lArgument == "netphys")
-		{
-			lMask |= NETWORK_PHYSICS_BIT;
-		}
-		else if (lArgument == "console")
-		{
-			lMask |= CONSOLE_BIT;
-		}
-		else if (lArgument == "trace")
-		{
-			lMask |= TRACE_BIT;
-		}
-		else
-		{
+CureTestApplication::CureTestApplication(const strutil::strvec& argument_list):
+	Application(argument_list),
+	test_bits_(~(unsigned)(kConsoleBit|kTraceBit)) {
+	for (size_t x = 1; x < argument_list.size(); ++x) {
+		str argument = argument_list[x];
+		int mask = 0;
+		if (argument == "lepra") {
+			mask |= kLepraBit;
+		} else if (argument == "tbc") {
+			mask |= kTbcBit;
+		} else if (argument == "cure") {
+			mask |= kCureBit;
+		} else if (argument == "netphys") {
+			mask |= kNetworkPhysicsBit;
+		} else if (argument == "console") {
+			mask |= kConsoleBit;
+		} else if (argument == "trace") {
+			mask |= kTraceBit;
+		} else {
 			deb_assert(false);	// Unknown command line argument.
 		}
-		if ((lMask&(~MASTER_BITS)) && ((mTestBits&(~MASTER_BITS)) == ~MASTER_BITS))
-		{
-			mTestBits &= MASTER_BITS;
+		if ((mask&(~kMasterBits)) && ((test_bits_&(~kMasterBits)) == ~kMasterBits)) {
+			test_bits_ &= kMasterBits;
 		}
-		mTestBits &= ~lMask;
-		mTestBits |= lMask;
+		test_bits_ &= ~mask;
+		test_bits_ |= mask;
 	}
 }
 
-void CureTestApplication::Init()
-{
+void CureTestApplication::Init() {
 	LEPRA_NS::Init();
 	TBC_NS::Init();
 	CURE_NS::Init();
 };
 
 
-int CureTestApplication::Run()
-{
+int CureTestApplication::Run() {
 	// We like to be on a single CPU on the time measuring thread, due to high resolution timers,
 	// which may differ between different CPU cores. Several seconds can differ between different cores.
 	Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
 
-	StdioConsoleLogListener* lConsoleLogPointer = 0;
+	StdioConsoleLogListener* console_log_pointer = 0;
 #ifdef LEPRA_CONSOLE
-	StdioConsoleLogListener lConsoleLogger;
-	lConsoleLogger.SetLevelThreashold((mTestBits&TRACE_BIT)? LEVEL_TRACE : LEVEL_HEADLINE);
-	lConsoleLogPointer = &lConsoleLogger;
+	StdioConsoleLogListener console_logger;
+	console_logger.SetLevelThreashold((test_bits_&kTraceBit)? kLevelTrace : kLevelHeadline);
+	console_log_pointer = &console_logger;
 #endif // LEPRA_CONSOLE
-	DebuggerLogListener lDebugLogger;
-	FileLogListener lFileLogger("CureTestApp.log");
-	FileLogListener lPerformanceLogger("CureTestPerformance.log");
-	MemFileLogListener lMemLogger(100*1024);
-	LogType::GetLogger(LogType::ROOT)->SetupBasicListeners(lConsoleLogPointer, &lDebugLogger,
-		&lFileLogger, &lPerformanceLogger, &lMemLogger);
-	LogType::GetLogger(LogType::ROOT)->SetLevelThreashold(LEVEL_TRACE);
-	LogType::GetLogger(LogType::NETWORK)->SetLevelThreashold(LEVEL_ERROR);
+	DebuggerLogListener debug_logger;
+	FileLogListener file_logger("CureTestApp.log");
+	FileLogListener performance_logger("CureTestPerformance.log");
+	MemFileLogListener mem_logger(100*1024);
+	LogType::GetLogger(LogType::kRoot)->SetupBasicListeners(console_log_pointer, &debug_logger,
+		&file_logger, &performance_logger, &mem_logger);
+	LogType::GetLogger(LogType::kRoot)->SetLevelThreashold(kLevelTrace);
+	LogType::GetLogger(LogType::kNetwork)->SetLevelThreashold(kLevelError);
 
-	mLog.Headline("\n\n--- Build type: " LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT " ---\n");
+	log_.Headline("\n\n--- Build type: " kLepraStringTypeText " " kLepraBuildTypeText " ---\n");
 
-	bool lTestOk = true;
-	if (lTestOk && mTestBits&LEPRA_BIT)
-	{
-		lTestOk = (mTestBits&CONSOLE_BIT)? TEST_RUN_LEPRA_CON() : TEST_RUN_LEPRA();
+	bool test_ok = true;
+	if (test_ok && test_bits_&kLepraBit) {
+		test_ok = (test_bits_&kConsoleBit)? TEST_RUN_LEPRA_CON() : TEST_RUN_LEPRA();
 	}
-	if (lTestOk && mTestBits&TBC_BIT)
-	{
-		lTestOk = (mTestBits&CONSOLE_BIT)? TEST_RUN_TBC_CON() : TEST_RUN_TBC();
+	if (test_ok && test_bits_&kTbcBit) {
+		test_ok = (test_bits_&kConsoleBit)? TEST_RUN_TBC_CON() : TEST_RUN_TBC();
 	}
-	if (lTestOk && mTestBits&CURE_BIT)
-	{
-		lTestOk = (mTestBits&CONSOLE_BIT)? TEST_RUN_CURE_CON() : TEST_RUN_CURE();
+	if (test_ok && test_bits_&kCureBit) {
+		test_ok = (test_bits_&kConsoleBit)? TEST_RUN_CURE_CON() : TEST_RUN_CURE();
 	}
-	if (lTestOk && mTestBits&NETWORK_PHYSICS_BIT)
-	{
-		lTestOk = (mTestBits&CONSOLE_BIT)? TEST_RUN_NETPHYS_CON() : TEST_RUN_NETPHYS();
+	if (test_ok && test_bits_&kNetworkPhysicsBit) {
+		test_ok = (test_bits_&kConsoleBit)? TEST_RUN_NETPHYS_CON() : TEST_RUN_NETPHYS();
 	}
 #ifdef LEPRA_CONSOLE
-	if (!lTestOk)
-	{
-		lMemLogger.Dump(lConsoleLogger, LEVEL_ERROR);
+	if (!test_ok) {
+		mem_logger.Dump(console_logger, kLevelError);
 	}
 #endif // LEPRA_CONSOLE
-	ShowTestResult(mLog, lTestOk);
+	ShowTestResult(log_, test_ok);
 
 	CURE_NS::Shutdown();
 	TBC_NS::Shutdown();
@@ -191,4 +166,4 @@ int CureTestApplication::Run()
 
 
 
-loginstance(TEST, CureTestApplication);
+loginstance(kTest, CureTestApplication);

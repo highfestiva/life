@@ -1,179 +1,159 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiJetEngineEmitter.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Lepra/Include/Random.h"
-#include "../../Tbc/Include/PhysicsEngine.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiTbc/Include/UiParticleRenderer.h"
-#include "../Include/UiProps.h"
-#include "../Include/UiRuntimeVariableName.h"
+#include "../include/uijetengineemitter.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/gamemanager.h"
+#include "../../cure/include/runtimevariable.h"
+#include "../../lepra/include/random.h"
+#include "../../tbc/include/physicsengine.h"
+#include "../../uicure/include/uigameuimanager.h"
+#include "../../uitbc/include/uiparticlerenderer.h"
+#include "../include/uiprops.h"
+#include "../include/uiruntimevariablename.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-JetEngineEmitter::JetEngineEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager):
-	mResourceManager(pResourceManager),
-	mUiManager(pUiManager),
-	mInterleaveTimeout(0)
-{
+JetEngineEmitter::JetEngineEmitter(cure::ResourceManager* resource_manager, GameUiManager* ui_manager):
+	resource_manager_(resource_manager),
+	ui_manager_(ui_manager),
+	interleave_timeout_(0) {
 }
 
-JetEngineEmitter::~JetEngineEmitter()
-{
-	mResourceManager = 0;
-	mUiManager = 0;
+JetEngineEmitter::~JetEngineEmitter() {
+	resource_manager_ = 0;
+	ui_manager_ = 0;
 }
 
 
 
-void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime)
-{
-	bool lParticlesEnabled;
-	v_get(lParticlesEnabled, =, UiCure::GetSettings(), RTVAR_UI_3D_ENABLEPARTICLES, false);
-	if (!lParticlesEnabled)
-	{
+void JetEngineEmitter::EmitFromTag(const CppContextObject* object, const uitbc::ChunkyClass::Tag& tag, float frame_time) {
+	bool particles_enabled;
+	v_get(particles_enabled, =, UiCure::GetSettings(), kRtvarUi3DEnableparticles, false);
+	if (!particles_enabled) {
 		return;
 	}
 
-	enum FloatValue
-	{
-		FV_START_R = 0,
-		FV_START_G,
-		FV_START_B,
-		FV_END_R,
-		FV_END_G,
-		FV_END_B,
-		FV_X,
-		FV_Y,
-		FV_Z,
-		FV_RADIUS_X,
-		FV_RADIUS_Y,
-		FV_RADIUS_Z,
-		FV_SCALE_X,
-		FV_SCALE_Y,
-		FV_SCALE_Z,
-		FV_DIRECTION_X,
-		FV_DIRECTION_Y,
-		FV_DIRECTION_Z,
-		FV_DENSITY,
-		FV_OPACITY,
-		FV_OVERSHOOT_OPACITY,
-		FV_OVERSHOOT_CUTOFF_DOT,
-		FV_OVERSHOOT_DISTANCE_UPSCALE,
-		FV_OVERSHOOT_ENGINE_FACTOR_BASE,
-		FV_COUNT
+	enum FloatValue {
+		kFvStartR = 0,
+		kFvStartG,
+		kFvStartB,
+		kFvEndR,
+		kFvEndG,
+		kFvEndB,
+		kFvX,
+		kFvY,
+		kFvZ,
+		kFvRadiusX,
+		kFvRadiusY,
+		kFvRadiusZ,
+		kFvScaleX,
+		kFvScaleY,
+		kFvScaleZ,
+		kFvDirectionX,
+		kFvDirectionY,
+		kFvDirectionZ,
+		kFvDensity,
+		kFvOpacity,
+		kFvOvershootOpacity,
+		kFvOvershootCutoffDot,
+		kFvOvershootDistanceUpscale,
+		kFvOvershootEngineFactorBase,
+		kFvCount
 	};
-	if (pTag.mFloatValueList.size() != FV_COUNT ||
-		pTag.mStringValueList.size() != 0 ||
-		pTag.mBodyIndexList.size() != 0 ||
-		pTag.mEngineIndexList.size() != 1 ||
-		pTag.mMeshIndexList.size() < 1)
-	{
-		mLog.Errorf("The fire tag '%s' has the wrong # of parameters.", pTag.mTagName.c_str());
+	if (tag.float_value_list_.size() != kFvCount ||
+		tag.string_value_list_.size() != 0 ||
+		tag.body_index_list_.size() != 0 ||
+		tag.engine_index_list_.size() != 1 ||
+		tag.mesh_index_list_.size() < 1) {
+		log_.Errorf("The fire tag '%s' has the wrong # of parameters.", tag.tag_name_.c_str());
 		deb_assert(false);
 		return;
 	}
-	const int lEngineIndex = pTag.mEngineIndexList[0];
-	if (lEngineIndex >= pObject->GetPhysics()->GetEngineCount())
-	{
+	const int engine_index = tag.engine_index_list_[0];
+	if (engine_index >= object->GetPhysics()->GetEngineCount()) {
 		return;
 	}
-	const Tbc::PhysicsEngine* lEngine = pObject->GetPhysics()->GetEngine(lEngineIndex);
-	const float lThrottleUpSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[FV_OVERSHOOT_ENGINE_FACTOR_BASE]*0.5f, pFrameTime);
-	const float lThrottleDownSpeed = Math::GetIterateLerpTime(pTag.mFloatValueList[FV_OVERSHOOT_ENGINE_FACTOR_BASE], pFrameTime);
-	const float lEngineThrottle = lEngine->GetLerpThrottle(lThrottleUpSpeed, lThrottleDownSpeed, true);
-	const quat lOrientation = pObject->GetOrientation();
-	vec3 lRadius(pTag.mFloatValueList[FV_RADIUS_X], pTag.mFloatValueList[FV_RADIUS_Y], pTag.mFloatValueList[FV_RADIUS_Z]);
-	lRadius.x *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_SCALE_X], lEngineThrottle);
-	lRadius.y *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_SCALE_Y], lEngineThrottle);
-	lRadius.z *= Math::Lerp(1.0f, pTag.mFloatValueList[FV_SCALE_Z], lEngineThrottle);
-	vec3 lPosition(pTag.mFloatValueList[FV_X], pTag.mFloatValueList[FV_Y], pTag.mFloatValueList[FV_Z]);
-	lPosition = lOrientation * lPosition;
-	const vec3 lColor(pTag.mFloatValueList[FV_END_R], pTag.mFloatValueList[FV_END_B], pTag.mFloatValueList[FV_END_B]);
+	const tbc::PhysicsEngine* engine = object->GetPhysics()->GetEngine(engine_index);
+	const float throttle_up_speed = Math::GetIterateLerpTime(tag.float_value_list_[kFvOvershootEngineFactorBase]*0.5f, frame_time);
+	const float throttle_down_speed = Math::GetIterateLerpTime(tag.float_value_list_[kFvOvershootEngineFactorBase], frame_time);
+	const float engine_throttle = engine->GetLerpThrottle(throttle_up_speed, throttle_down_speed, true);
+	const quat orientation = object->GetOrientation();
+	vec3 _radius(tag.float_value_list_[kFvRadiusX], tag.float_value_list_[kFvRadiusY], tag.float_value_list_[kFvRadiusZ]);
+	_radius.x *= Math::Lerp(1.0f, tag.float_value_list_[kFvScaleX], engine_throttle);
+	_radius.y *= Math::Lerp(1.0f, tag.float_value_list_[kFvScaleY], engine_throttle);
+	_radius.z *= Math::Lerp(1.0f, tag.float_value_list_[kFvScaleZ], engine_throttle);
+	vec3 _position(tag.float_value_list_[kFvX], tag.float_value_list_[kFvY], tag.float_value_list_[kFvZ]);
+	_position = orientation * _position;
+	const vec3 _color(tag.float_value_list_[kFvEndR], tag.float_value_list_[kFvEndB], tag.float_value_list_[kFvEndB]);
 
-	bool lCreateParticle = false;
-	const float lDensity = pTag.mFloatValueList[FV_DENSITY];
-	float lExhaustIntensity;
-	v_get(lExhaustIntensity, =(float), UiCure::GetSettings(), RTVAR_UI_3D_EXHAUSTINTENSITY, 1.0);
-	mInterleaveTimeout -= Math::Lerp(0.3f, 1.0f, lEngineThrottle) * lExhaustIntensity * pFrameTime;
-	if (mInterleaveTimeout <= 0)	// Release particle this frame?
-	{
-		lCreateParticle = true;
-		mInterleaveTimeout = 0.05f / lDensity;
-	}
-	else
-	{
-		lCreateParticle = false;
+	bool create_particle = false;
+	const float density = tag.float_value_list_[kFvDensity];
+	float exhaust_intensity;
+	v_get(exhaust_intensity, =(float), UiCure::GetSettings(), kRtvarUi3DExhaustintensity, 1.0);
+	interleave_timeout_ -= Math::Lerp(0.3f, 1.0f, engine_throttle) * exhaust_intensity * frame_time;
+	if (interleave_timeout_ <= 0) {	// Release particle this frame?
+		create_particle = true;
+		interleave_timeout_ = 0.05f / density;
+	} else {
+		create_particle = false;
 	}
 
-	const float dx = pTag.mFloatValueList[FV_RADIUS_X];
-	const float dy = pTag.mFloatValueList[FV_RADIUS_Y];
-	const float dz = pTag.mFloatValueList[FV_RADIUS_Z];
-	const vec3 lStartColor(pTag.mFloatValueList[FV_START_R], pTag.mFloatValueList[FV_START_B], pTag.mFloatValueList[FV_START_B]);
-	const float lOpacity = pTag.mFloatValueList[FV_OPACITY];
-	const vec3 lDirection = lOrientation * vec3(pTag.mFloatValueList[FV_DIRECTION_X], pTag.mFloatValueList[FV_DIRECTION_Y], pTag.mFloatValueList[FV_DIRECTION_Z]);
-	const vec3 lVelocity = lDirection + pObject->GetVelocity();
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
-	const float lParticleTime = lDensity;
-	float lParticleSize;	// Pick second size.
-	if (dx > dy && dy > dz)
-	{
-		lParticleSize = dy;
+	const float dx = tag.float_value_list_[kFvRadiusX];
+	const float dy = tag.float_value_list_[kFvRadiusY];
+	const float dz = tag.float_value_list_[kFvRadiusZ];
+	const vec3 start_color(tag.float_value_list_[kFvStartR], tag.float_value_list_[kFvStartB], tag.float_value_list_[kFvStartB]);
+	const float _opacity = tag.float_value_list_[kFvOpacity];
+	const vec3 direction = orientation * vec3(tag.float_value_list_[kFvDirectionX], tag.float_value_list_[kFvDirectionY], tag.float_value_list_[kFvDirectionZ]);
+	const vec3 velocity = direction + object->GetVelocity();
+	uitbc::ParticleRenderer* particle_renderer = (uitbc::ParticleRenderer*)ui_manager_->GetRenderer()->GetDynamicRenderer("particle");
+	const float particle_time = density;
+	float particle_size;	// Pick second size.
+	if (dx > dy && dy > dz) {
+		particle_size = dy;
+	} else if (dy > dx && dx > dz) {
+		particle_size = dx;
+	} else {
+		particle_size = dz;
 	}
-	else if (dy > dx && dx > dz)
-	{
-		lParticleSize = dx;
-	}
-	else
-	{
-		lParticleSize = dz;
-	}
-	lParticleSize *= 0.2f;
+	particle_size *= 0.2f;
 
-	const float lDistanceScaleFactor = pTag.mFloatValueList[FV_OVERSHOOT_DISTANCE_UPSCALE];
-	for (size_t y = 0; y < pTag.mMeshIndexList.size(); ++y)
-	{
-		Tbc::GeometryBase* lMesh = pObject->GetMesh(pTag.mMeshIndexList[y]);
-		if (lMesh)
-		{
-			int lPhysIndex = -1;
-			str lMeshName;
-			xform lTransform;
-			float lMeshScale;
-			((UiTbc::ChunkyClass*)pObject->GetClass())->GetMesh(pTag.mMeshIndexList[y], lPhysIndex, lMeshName, lTransform, lMeshScale);
-			lTransform = lMesh->GetBaseTransformation() * lTransform;
-			vec3 lMeshPos = lTransform.GetPosition() + lPosition;
+	const float _distance_scale_factor = tag.float_value_list_[kFvOvershootDistanceUpscale];
+	for (size_t y = 0; y < tag.mesh_index_list_.size(); ++y) {
+		tbc::GeometryBase* mesh = object->GetMesh(tag.mesh_index_list_[y]);
+		if (mesh) {
+			int phys_index = -1;
+			str mesh_name;
+			xform transform;
+			float mesh_scale;
+			((uitbc::ChunkyClass*)object->GetClass())->GetMesh(tag.mesh_index_list_[y], phys_index, mesh_name, transform, mesh_scale);
+			transform = mesh->GetBaseTransformation() * transform;
+			vec3 mesh_pos = transform.GetPosition() + _position;
 
-			const vec3 lCamDistance = lMeshPos - mUiManager->GetRenderer()->GetCameraTransformation().GetPosition();
-			const float lDistance = lCamDistance.GetLength();
-			const vec3 lCamDirection(lCamDistance / lDistance);
-			float lOvershootFactor = -(lCamDirection*lDirection);
-			if (lOvershootFactor > pTag.mFloatValueList[FV_OVERSHOOT_CUTOFF_DOT])
-			{
-				lOvershootFactor = Math::Lerp(lOvershootFactor*0.5f, lOvershootFactor, lEngineThrottle);
-				const float lOpacity = (lOvershootFactor+0.6f) * pTag.mFloatValueList[FV_OVERSHOOT_OPACITY];
-				DrawOvershoot(lMeshPos, lDistanceScaleFactor*lDistance, lRadius, lColor, lOpacity, lCamDirection);
+			const vec3 cam_distance = mesh_pos - ui_manager_->GetRenderer()->GetCameraTransformation().GetPosition();
+			const float distance = cam_distance.GetLength();
+			const vec3 cam_direction(cam_distance / distance);
+			float overshoot_factor = -(cam_direction*direction);
+			if (overshoot_factor > tag.float_value_list_[kFvOvershootCutoffDot]) {
+				overshoot_factor = Math::Lerp(overshoot_factor*0.5f, overshoot_factor, engine_throttle);
+				const float _opacity = (overshoot_factor+0.6f) * tag.float_value_list_[kFvOvershootOpacity];
+				DrawOvershoot(mesh_pos, _distance_scale_factor*distance, _radius, _color, _opacity, cam_direction);
 			}
 
-			if (lCreateParticle)
-			{
+			if (create_particle) {
 				const float sx = Random::Normal(0.0f, dx*0.5f, -dx, +dx);
 				const float sy = Random::Normal(0.0f, dy*0.5f, -dy, +dy);
 				const float sz = Random::Normal(0.0f, dz*0.5f, -dz, +dz);
-				lMeshPos += lOrientation * vec3(sx, sy, sz);
-				lParticleRenderer->CreateGlow(lParticleTime, lParticleSize, lStartColor, lColor, lOpacity, lMeshPos, lVelocity);
+				mesh_pos += orientation * vec3(sx, sy, sz);
+				particle_renderer->CreateGlow(particle_time, particle_size, start_color, _color, _opacity, mesh_pos, velocity);
 			}
 		}
 	}
@@ -181,18 +161,17 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* pObject, const UiTbc:
 
 
 
-void JetEngineEmitter::DrawOvershoot(const vec3& pPosition, float pDistanceScaleFactor, const vec3& pRadius, const vec3& pColor, float pOpacity, const vec3& pCameraDirection)
-{
-	float s = std::max(std::max(pRadius.x, pRadius.y), pRadius.z);
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
-	const float lMaxFlameDistance = 3 * s;
-	s += s * pDistanceScaleFactor * 0.1f;
-	lParticleRenderer->RenderFireBillboard(0, s, pColor, pOpacity, pPosition-pCameraDirection*lMaxFlameDistance);
+void JetEngineEmitter::DrawOvershoot(const vec3& position, float distance_scale_factor, const vec3& radius, const vec3& color, float opacity, const vec3& camera_direction) {
+	float s = std::max(std::max(radius.x, radius.y), radius.z);
+	uitbc::ParticleRenderer* particle_renderer = (uitbc::ParticleRenderer*)ui_manager_->GetRenderer()->GetDynamicRenderer("particle");
+	const float max_flame_distance = 3 * s;
+	s += s * distance_scale_factor * 0.1f;
+	particle_renderer->RenderFireBillboard(0, s, color, opacity, position-camera_direction*max_flame_distance);
 }
 
 
 
-loginstance(GAME_CONTEXT, JetEngineEmitter);
+loginstance(kGameContext, JetEngineEmitter);
 
 
 

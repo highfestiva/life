@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="TrabantSim" InternalType="Console">
+<CodeLite_Project Name="trabantsim" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00010001N0005Debug000000000000]]>
@@ -35,58 +35,58 @@
  }]]]>
     </Plugin>
   </Plugins>
-  <VirtualDirectory Name="Source">
-    <File Name="Light.cpp"/>
-    <File Name="Light.h"/>
-    <File Name="Object.cpp"/>
-    <File Name="Object.h"/>
+  <VirtualDirectory Name="src">
+    <File Name="light.cpp"/>
+    <File Name="light.h"/>
+    <File Name="object.cpp"/>
+    <File Name="object.h"/>
     <File Name="pch.h"/>
-    <File Name="PhysGfxObject.cpp"/>
-    <File Name="PhysGfxObject.h"/>
-    <File Name="RtVar.h"/>
-    <File Name="TrabantSim.cxx"/>
-    <File Name="TrabantSim.h"/>
-    <File Name="TrabantSimConsoleManager.cpp"/>
-    <File Name="TrabantSimConsoleManager.h"/>
-    <File Name="TrabantSimManager.cpp"/>
-    <File Name="TrabantSimManager.h"/>
-    <File Name="TrabantSimTicker.cpp"/>
-    <File Name="TrabantSimTicker.h"/>
-    <File Name="Version.h"/>
-    <File Name="FileServer.cpp"/>
-    <File Name="FileServer.h"/>
+    <File Name="physgfxobject.cpp"/>
+    <File Name="physgfxobject.h"/>
+    <File Name="rtvar.h"/>
+    <File Name="trabantsim.cxx"/>
+    <File Name="trabantsim.h"/>
+    <File Name="trabantsimconsolemanager.cpp"/>
+    <File Name="trabantsimconsolemanager.h"/>
+    <File Name="trabantsimmanager.cpp"/>
+    <File Name="trabantsimmanager.h"/>
+    <File Name="trabantsimticker.cpp"/>
+    <File Name="trabantsimticker.h"/>
+    <File Name="version.h"/>
+    <File Name="fileserver.cpp"/>
+    <File Name="fileserver.h"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="Mac">
-    <File Name="AnimatedApp.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="BackButtonHandler.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="BackButtonHandler.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CreateNewViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CreateNewViewController.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRLayoutManager.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRLayoutManager.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRTextStorage.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRTextStorage.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRTextView.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRTextView.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRToken.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="CYRToken.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="EditViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="EditViewController.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="FileHelper.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="FileHelper.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="ListViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="ListViewController.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="PythonRunner.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="PythonRunner.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="PythonTextView.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="PythonTextView.m" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="SettingsViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="SettingsViewController.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="StdOutViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="StdOutViewController.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="TrabantSim.mm" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="WebViewController.h" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="WebViewController.m" ExcludeProjConfig="Debug;Profile;Release"/>
+  <VirtualDirectory Name="mac">
+    <File Name="animatedapp.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="backbuttonhandler.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="backbuttonhandler.m" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="createnewviewcontroller.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="createnewviewcontroller.m" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="cyrlayoutmanager.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="cyrlayoutmanager.m" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="cyrtextstorage.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="cyrtextstorage.m" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="cyrtextview.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="cyrtextview.m" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="cyrtoken.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="cyrtoken.m" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="editviewcontroller.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="editviewcontroller.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="filehelper.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="filehelper.m" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="listviewcontroller.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="listviewcontroller.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="pythonrunner.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="pythonrunner.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="pythontextview.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="pythontextview.m" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="settingsviewcontroller.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="settingsviewcontroller.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="stdoutviewcontroller.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="stdoutviewcontroller.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="trabantsim.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="webviewcontroller.h" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="webviewcontroller.m" ExcludeProjConfig="Debug;Profile;Release"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -103,14 +103,14 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Debug"/>
+        <LibraryPath Value="../life/Debug"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(WorkspacePath)/../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -150,14 +150,14 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="-pg" Required="yes">
-        <LibraryPath Value="../Life/Profile"/>
+        <LibraryPath Value="../life/Profile"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Profile" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(WorkspacePath)/../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -198,14 +198,14 @@
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Release"/>
+        <LibraryPath Value="../life/Release"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(WorkspacePath)/../bin" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -242,12 +242,12 @@
     </Configuration>
   </Settings>
   <Dependencies Name="Debug">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
   <Dependencies Name="Profile">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
   <Dependencies Name="Release">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
 </CodeLite_Project>

@@ -10,54 +10,52 @@
 
 #pragma once
 
-#include "FastAllocator.h"
-#include "HashTable.h"
-#include "LepraTypes.h"
-#include "Log.h"
+#include "fastallocator.h"
+#include "hashtable.h"
+#include "lepratypes.h"
+#include "log.h"
 #include <list>
 
 #define TEMPLATE template<class _TKey, class _TObject, class _TVarType, class _THashFunc>
 #define QUAL LooseBinTree<_TKey, _TObject, _TVarType, _THashFunc>
 
-namespace Lepra
-{
+namespace lepra {
 
 template<class _TKey, class _TObject, class _TVarType, class _THashFunc = std::hash<_TKey> >
-class LooseBinTree
-{
+class LooseBinTree {
 public:
 
 	typedef std::list<_TObject> ObjectList;
 
-	LooseBinTree(_TObject pErrorObject,			// An object to return when an error occurs.
-		     _TVarType pTotalTreeSize = 65536,	// Length of the entire 1D-space.
-		     _TVarType pMinimumCellSize = 16,		// Length of the smallest allowed node.
-		     _TVarType pK = 2);			// Node expansion factor.
+	LooseBinTree(_TObject error_object,			// An object to return when an error occurs.
+		     _TVarType total_tree_size = 65536,	// Length of the entire 1D-space.
+		     _TVarType minimum_cell_size = 16,		// Length of the smallest allowed node.
+		     _TVarType k = 2);			// Node expansion factor.
 
 	virtual ~LooseBinTree();
 
-	void InsertObject(_TKey pKey, _TObject pObject, _TVarType pPos, _TVarType pSize);
-	_TObject RemoveObject(_TKey pKey);
-	_TObject FindObject(_TKey pKey) const;
+	void InsertObject(_TKey key, _TObject object, _TVarType pos, _TVarType size);
+	_TObject RemoveObject(_TKey key);
+	_TObject FindObject(_TKey key) const;
 
-	bool MoveObject(_TKey pKey, _TVarType pNewPos, _TVarType pNewSizeHalf);
-	_TObject MoveObject(_TKey pKey, _TVarType pNewPos); // Slightly slower...
+	bool MoveObject(_TKey key, _TVarType new_pos, _TVarType new_size_half);
+	_TObject MoveObject(_TKey key, _TVarType new_pos); // Slightly slower...
 
-	bool GetObjectSizeAndPos(_TKey pKey, _TVarType& pPos, _TVarType& pSizeHalf);
-																					
-	// Get list with objects within the specified area. The list is not cleared, 
+	bool GetObjectSizeAndPos(_TKey key, _TVarType& pos, _TVarType& size_half);
+
+	// Get list with objects within the specified area. The list is not cleared,
 	// objects are appended.
-	void GetObjects(ObjectList& pObjects, _TVarType pPos, _TVarType pSizeHalf);
+	void GetObjects(ObjectList& objects, _TVarType pos, _TVarType size_half);
 
 	//
 	// Debug utilities.
 	//
 
-	inline unsigned	GetNumObjects() const {return mNumObjects;}
-	inline unsigned	GetNumNodes() const {return mNumNodes;}
+	inline unsigned	GetNumObjects() const {return num_objects_;}
+	inline unsigned	GetNumNodes() const {return num_nodes_;}
 
 	// Get number of bytes currently allocated by tree (only the nodes, not the objects).
-	inline unsigned	GetMemUsage() const {return mNumNodes * sizeof(Node);}
+	inline unsigned	GetMemUsage() const {return num_nodes_ * sizeof(Node);}
 	// Get number of bytes that the octree would need if all nodes were occupied.
 	// (Only the nodes, not the objects).
 	unsigned GetFullTreeMemSize() const;
@@ -66,172 +64,149 @@ private:
 
 	// One node of the LooseBinTree... A node is a line segment containing objects,
 	// and since the objects are 1D, they take up some space, defined by
-	// the position and size. Each object- pos- and size-triple makes one entry 
+	// the position and size. Each object- pos- and size-triple makes one entry
 	// (look at class Entry below).
 	// All entries are stored in a hash table, typedef'ed as EntryTable.
-	class Node
-	{
+	class Node {
 		public:
 
 			// A node entry. Contains the object and its associated size.
-			class Entry
-			{
+			class Entry {
 				public:
-					inline Entry()
-					{
+					inline Entry() {
 					}
 
-					inline Entry(const Entry& pEntry)	
-					{
-						mPos      = pEntry.mPos;
-						mSizeHalf = pEntry.mSizeHalf;
-						mObject   = pEntry.mObject;
+					inline Entry(const Entry& entry) {
+						pos_      = entry.pos_;
+						size_half_ = entry.size_half_;
+						object_   = entry.object_;
 					}
 
-					inline bool IsEnclosing(_TVarType pPos, _TVarType pSizeHalf) const
-					{
-						_TVarType lMin1(pPos - pSizeHalf);
-						_TVarType lMax1(pPos + pSizeHalf);
-						_TVarType lMin2(mPos - mSizeHalf);
-						_TVarType lMax2(mPos + mSizeHalf);
+					inline bool IsEnclosing(_TVarType pos, _TVarType size_half) const {
+						_TVarType min1(pos - size_half);
+						_TVarType max1(pos + size_half);
+						_TVarType min2(pos_ - size_half_);
+						_TVarType max2(pos_ + size_half_);
 
-						return(lMax2 > lMax1 && lMin2 < lMin1);
+						return(max2 > max1 && min2 < min1);
 					}
 
-					inline bool IsEnclosed(_TVarType pPos, _TVarType pSizeHalf) const
-					{
-						_TVarType lMin1(pPos - pSizeHalf);
-						_TVarType lMax1(pPos + pSizeHalf);
-						_TVarType lMin2(mPos - mSizeHalf);
-						_TVarType lMax2(mPos + mSizeHalf);
+					inline bool IsEnclosed(_TVarType pos, _TVarType size_half) const {
+						_TVarType min1(pos - size_half);
+						_TVarType max1(pos + size_half);
+						_TVarType min2(pos_ - size_half_);
+						_TVarType max2(pos_ + size_half_);
 
-						return(lMax1 > lMax2 && lMin1 < lMin2);
+						return(max1 > max2 && min1 < min2);
 					}
 
-					inline bool IsOverlapping(_TVarType pPos, _TVarType pSizeHalf) const
-					{
-						_TVarType lMinSeparationDist(pSizeHalf + mSizeHalf);
-						_TVarType lDist(pPos - mPos);
+					inline bool IsOverlapping(_TVarType pos, _TVarType size_half) const {
+						_TVarType min_separation_dist(size_half + size_half_);
+						_TVarType dist(pos - pos_);
 
-						if (lDist < 0.0f)
-						{
-							lDist = -lDist;
+						if (dist < 0.0f) {
+							dist = -dist;
 						}
 
-						return (lDist < lMinSeparationDist);
+						return (dist < min_separation_dist);
 					}
 
-					_TVarType		mPos;
-					_TVarType		mSizeHalf;
-					_TObject		mObject;
+					_TVarType		pos_;
+					_TVarType		size_half_;
+					_TObject		object_;
 			};
-			
+
 			typedef HashTable<_TKey, Entry, _THashFunc, 32> EntryTable;
 
-			inline Node(Node* pParent, uint8 pIndex, _TVarType pFixedSizeHalf)
-			{
-				Init(pParent, pIndex, pFixedSizeHalf);
+			inline Node(Node* parent, uint8 index, _TVarType fixed_size_half) {
+				Init(parent, index, fixed_size_half);
 			}
 
-			inline ~Node()
-			{
+			inline ~Node() {
 				DeleteChildren(0);
 			}
 
-			void Init(Node* pParent, uint8 pIndex, _TVarType pFixedSizeHalf)
-			{
+			void Init(Node* parent, uint8 index, _TVarType fixed_size_half) {
 				// Half the size of this node, "unloose", which means
 				// that this is the size of the node as it should be in a normal LooseBinTree.
-				mFixedSizeHalf = pFixedSizeHalf;
+				fixed_size_half_ = fixed_size_half;
 
-				mParent = pParent;
+				parent_ = parent;
 
-				mChildren[0] = 0;
-				mChildren[1] = 0;
+				children_[0] = 0;
+				children_[1] = 0;
 
 				// The index tells us which of the parents children this node is.
-				mIndex = pIndex;
+				index_ = index;
 
 				// Childmask is a bitfield containing 1's where there is a child node,
 				// and 0's where there isn't.
-				mChildMask = 0;
-				mObjectCount = 0;
+				child_mask_ = 0;
+				object_count_ = 0;
 			}
 
-			_TVarType GetPosition() const
-			{
-				return mPos;
+			_TVarType GetPosition() const {
+				return pos_;
 			}
 
-			_TVarType GetSizeHalf() const
-			{
-				return mSizeHalf;
+			_TVarType GetSizeHalf() const {
+				return size_half_;
 			}
 
-			_TVarType GetFixedSizeHalf() const
-			{
-				return mFixedSizeHalf;
+			_TVarType GetFixedSizeHalf() const {
+				return fixed_size_half_;
 			}
 
-			inline void DeleteChildren(LooseBinTree* pLooseBinTree)
-			{
-				for (int i = 0; i < 2; i++)
-				{
-					if (mChildren[i] != 0)
-					{
-						mChildren[i]->DeleteChildren(pLooseBinTree);
+			inline void DeleteChildren(LooseBinTree* loose_bin_tree) {
+				for (int i = 0; i < 2; i++) {
+					if (children_[i] != 0) {
+						children_[i]->DeleteChildren(loose_bin_tree);
 
-						if (pLooseBinTree != 0)
-						{
-							pLooseBinTree->RecycleNode(mChildren[i]);
+						if (loose_bin_tree != 0) {
+							loose_bin_tree->RecycleNode(children_[i]);
+						} else {
+							delete children_[i];
 						}
-						else
-						{
-							delete mChildren[i];
-						}
-						mChildren[i] = 0;
+						children_[i] = 0;
 					}
 				}
 			}
 
-			inline bool IsEmpty() const
-			{
-				return (mObjectCount == 0 && mChildMask == 0);
+			inline bool IsEmpty() const {
+				return (object_count_ == 0 && child_mask_ == 0);
 			}
 
-			inline bool IsEnclosing(_TVarType pPos, _TVarType pSizeHalf) const
-			{
-				_TVarType lMin1(pPos - pSizeHalf);
-				_TVarType lMax1(pPos + pSizeHalf);
-				_TVarType lMin2(mPos - mSizeHalf);
-				_TVarType lMax2(mPos + mSizeHalf);
+			inline bool IsEnclosing(_TVarType pos, _TVarType size_half) const {
+				_TVarType min1(pos - size_half);
+				_TVarType max1(pos + size_half);
+				_TVarType min2(pos_ - size_half_);
+				_TVarType max2(pos_ + size_half_);
 
-				return(lMax2 > lMax1 && lMin2 < lMin1);
+				return(max2 > max1 && min2 < min1);
 			}
 
-			inline bool IsEnclosed(_TVarType pPos, _TVarType pSizeHalf) const
-			{
-				_TVarType lMin1(pPos - pSizeHalf);
-				_TVarType lMax1(pPos + pSizeHalf);
-				_TVarType lMin2(mPos - mSizeHalf);
-				_TVarType lMax2(mPos + mSizeHalf);
+			inline bool IsEnclosed(_TVarType pos, _TVarType size_half) const {
+				_TVarType min1(pos - size_half);
+				_TVarType max1(pos + size_half);
+				_TVarType min2(pos_ - size_half_);
+				_TVarType max2(pos_ + size_half_);
 
-				return(lMax1 > lMax2 && lMin1 < lMin2);
+				return(max1 > max2 && min1 < min2);
 			}
 
-			_TVarType	mFixedSizeHalf;
-			_TVarType	mPos;
-			_TVarType	mSizeHalf;
+			_TVarType	fixed_size_half_;
+			_TVarType	pos_;
+			_TVarType	size_half_;
 
-			Node*		mParent;
-			Node*		mChildren[2];
+			Node*		parent_;
+			Node*		children_[2];
 
-			uint8		mIndex;
-			
-			uint16		mChildMask;
-			uint16		mObjectCount;
+			uint8		index_;
 
-			EntryTable	mEntryTable;
+			uint16		child_mask_;
+			uint16		object_count_;
+
+			EntryTable	entry_table_;
 	};
 
 	friend class Node;
@@ -239,59 +214,58 @@ private:
 	// Used to quickly find the object that we search for.
 	typedef HashTable<_TKey, Node*, _THashFunc> NodeTable;
 
-	void InsertObject(_TKey pKey,
-			  typename Node::Entry pEntry,
-			  Node* pNode,
-			  unsigned pDepth);
+	void InsertObject(_TKey key,
+			  typename Node::Entry entry,
+			  Node* node,
+			  unsigned depth);
 
-	typename Node::Entry RemoveObject(_TKey pKey, typename NodeTable::Iterator& pNodeIter);
+	typename Node::Entry RemoveObject(_TKey key, typename NodeTable::Iterator& node_iter);
 
-	_TObject MoveObject(_TKey pKey,
-			    typename NodeTable::Iterator& pNodeIter,
-			    typename Node::EntryTable::Iterator& pObjectIter);
+	_TObject MoveObject(_TKey key,
+			    typename NodeTable::Iterator& node_iter,
+			    typename Node::EntryTable::Iterator& object_iter);
 
-	typename Node::EntryTable::Iterator FindObject(_TKey pKey, Node* pObjectNode) const;
+	typename Node::EntryTable::Iterator FindObject(_TKey key, Node* object_node) const;
 
-	inline unsigned GetOverlaps(_TVarType pPosRelParent, 
-				    _TVarType pSizeHalf, 
-				    _TVarType pChildNodeSize,
-				    _TVarType pParentNodeSize) const;
+	inline unsigned GetOverlaps(_TVarType pos_rel_parent,
+				    _TVarType size_half,
+				    _TVarType child_node_size,
+				    _TVarType parent_node_size) const;
 
-	void GetObjects(ObjectList& pObjects, 
-			_TVarType pPos, 
-			_TVarType pSizeHalf, 
-			Node* pNode);
+	void GetObjects(ObjectList& objects,
+			_TVarType pos,
+			_TVarType size_half,
+			Node* node);
 
-	uint8 GetChild(_TVarType pPos, const Node* pNode);
-	uint8 GetChild(_TVarType pPos, const Node* pNode, _TVarType& pChildPos);
-	
-	void RecycleNode(Node* pNode);		// Used to minimize the use of new and delete.
-	Node* NewNode(Node* pParent, uint8 pIndex, _TVarType pFixedSizeHalf);
+	uint8 GetChild(_TVarType pos, const Node* node);
+	uint8 GetChild(_TVarType pos, const Node* node, _TVarType& child_pos);
 
-	enum
-	{
-		MAX_RECYCLED_NODES = 1024,
+	void RecycleNode(Node* node);		// Used to minimize the use of new and delete.
+	Node* NewNode(Node* parent, uint8 index, _TVarType fixed_size_half);
+
+	enum {
+		kMaxRecycledNodes = 1024,
 	};
 
 	typedef std::list<Node*> NodeList;
 
-	NodeList mRecycledNodeList;
-	NodeTable mNodeTable;
+	NodeList recycled_node_list_;
+	NodeTable node_table_;
 
-	Node* mRootNode;
+	Node* root_node_;
 
-	unsigned mMaxTreeDepth;
-	_TVarType mK;		// A constant node scaling factor.
+	unsigned max_tree_depth_;
+	_TVarType k_;		// A constant node scaling factor.
 
-	unsigned mNumObjects;
-	unsigned mNumNodes;
+	unsigned num_objects_;
+	unsigned num_nodes_;
 
-	_TObject mErrorObject;
+	_TObject error_object_;
 
 	logclass();
 };
 
-#include "LooseBinTree.inl"
+#include "loosebintree.inl"
 
 }
 

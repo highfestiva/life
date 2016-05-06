@@ -8,28 +8,24 @@
 
 
 
-#include "../../Lepra/Include/Transformation.h"
-#include "../../UiLepra/Include/UiDisplayManager.h"
-#include "../../UiTbc/Include/UiFontManager.h"
-#include "UiCure.h"
+#include "../../lepra/include/transformation.h"
+#include "../../uilepra/include/uidisplaymanager.h"
+#include "../../uitbc/include/uifontmanager.h"
+#include "uicure.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class Canvas;
 }
-namespace UiLepra
-{
-namespace Touch
-{
+namespace uilepra {
+namespace touch {
 class DragManager;
 }
 class InputManager;
 class SoundManager;
 }
-namespace UiTbc
-{
+namespace uitbc {
 class DesktopWindow;
 class Layout;
 class Painter;
@@ -38,15 +34,13 @@ class Renderer;
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-class GameUiManager: public UiLepra::DisplayResizeObserver
-{
+class GameUiManager: public uilepra::DisplayResizeObserver {
 public:
-	GameUiManager(Cure::RuntimeVariableScope* pVariableScope, UiLepra::Touch::DragManager* pDragManager);
+	GameUiManager(cure::RuntimeVariableScope* variable_scope, uilepra::touch::DragManager* drag_manager);
 	virtual ~GameUiManager();
 
 	bool Open();
@@ -59,59 +53,59 @@ public:
 
 	void InputTick();
 	void EndInputTick();
-	void BeginRender(const vec3& pBackgroundColor);
-	void Render(const PixelRect& pArea);
-	void Paint(bool pClearDepthBuffer);
-	void PreparePaint(bool pClearDepthBuffer);
-	void EndRender(float pFrameTime);
+	void BeginRender(const vec3& background_color);
+	void Render(const PixelRect& area);
+	void Paint(bool clear_depth_buffer);
+	void PreparePaint(bool clear_depth_buffer);
+	void EndRender(float frame_time);
 
-	Cure::RuntimeVariableScope* GetVariableScope() const;
-	void SetVariableScope(Cure::RuntimeVariableScope* pVariableScope);
-	UiLepra::DisplayManager* GetDisplayManager() const;
+	cure::RuntimeVariableScope* GetVariableScope() const;
+	void SetVariableScope(cure::RuntimeVariableScope* variable_scope);
+	uilepra::DisplayManager* GetDisplayManager() const;
 	Canvas* GetCanvas() const;
-	UiTbc::Renderer* GetRenderer() const;
-	UiTbc::Painter* GetPainter() const;
-	UiTbc::FontManager* GetFontManager() const;
-	UiLepra::InputManager* GetInputManager() const;
-	UiLepra::Touch::DragManager* GetDragManager() const;
-	UiTbc::DesktopWindow* GetDesktopWindow() const;
-	UiLepra::SoundManager* GetSoundManager() const;
+	uitbc::Renderer* GetRenderer() const;
+	uitbc::Painter* GetPainter() const;
+	uitbc::FontManager* GetFontManager() const;
+	uilepra::InputManager* GetInputManager() const;
+	uilepra::touch::DragManager* GetDragManager() const;
+	uitbc::DesktopWindow* GetDesktopWindow() const;
+	uilepra::SoundManager* GetSoundManager() const;
 
 	vec3 GetAccelerometer() const;
-	void SetCameraPosition(const xform& pTransform);
-	void SetMicrophonePosition(const xform& pTransform, const vec3& pVelocity);
-	void SetViewport(int pLeft, int pTop, int pWidth, int pHeight);
-	void Clear(float pRed, float pGreen, float pBlue, bool pClearDepth = true);
+	void SetCameraPosition(const xform& transform);
+	void SetMicrophonePosition(const xform& transform, const vec3& velocity);
+	void SetViewport(int left, int top, int width, int height);
+	void Clear(float red, float green, float blue, bool clear_depth = true);
 	void ClearDepth();
 
-	UiTbc::FontManager::FontId SetScaleFont(float pScale);
+	uitbc::FontManager::FontId SetScaleFont(float scale);
 	void SetMasterFont();
-	void PrintText(int pX, int pY, const wstr& pText);
+	void PrintText(int x, int y, const wstr& text);
 
 	PixelCoord GetMouseDisplayPosition() const;
 
-	void AssertDesktopLayout(UiTbc::Layout* pLayout, int pLayer);
+	void AssertDesktopLayout(uitbc::Layout* layout, int layer);
 
 	void UpdateSettings();
 
 private:
-	void OnResize(int pWidth, int pHeight);
+	void OnResize(int width, int height);
 	void OnMinimize();
-	void OnMaximize(int pWidth, int pHeight);
+	void OnMaximize(int width, int height);
 
-	Cure::RuntimeVariableScope* mVariableScope;
-	UiLepra::DisplayManager* mDisplay;
-	Canvas* mCanvas;
-	UiTbc::Renderer* mRenderer;
-	UiTbc::Painter* mPainter;
-	UiTbc::FontManager* mFontManager;
-	UiTbc::DesktopWindow* mDesktopWindow;
-	UiLepra::InputManager* mInput;
-	UiLepra::Touch::DragManager* mDragManager;
-	UiLepra::SoundManager* mSound;
-	double mSoundRollOffShadow;	// Optimization.
-	double mSoundDopplerShadow;	// Optimization.
-	UiTbc::FontManager::FontId mCurrentFontId;
+	cure::RuntimeVariableScope* variable_scope_;
+	uilepra::DisplayManager* display_;
+	Canvas* canvas_;
+	uitbc::Renderer* renderer_;
+	uitbc::Painter* painter_;
+	uitbc::FontManager* font_manager_;
+	uitbc::DesktopWindow* desktop_window_;
+	uilepra::InputManager* input_;
+	uilepra::touch::DragManager* drag_manager_;
+	uilepra::SoundManager* sound_;
+	double sound_roll_off_shadow_;	// Optimization.
+	double sound_doppler_shadow_;	// Optimization.
+	uitbc::FontManager::FontId current_font_id_;
 
 	logclass();
 };

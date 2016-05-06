@@ -1,82 +1,77 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../UiCure/Include/UiCppContextObject.h"
-#include "../Life.h"
+#include "../../uicure/include/uicppcontextobject.h"
+#include "../life.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 class GeometryBatch;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class MassObject: public UiCure::CppContextObject
-{
+class MassObject: public UiCure::CppContextObject {
 	typedef UiCure::CppContextObject Parent;
 public:
-	MassObject(Cure::ResourceManager* pResourceManager, const str& pClassResourceName,
-		UiCure::GameUiManager* pUiManager, Tbc::PhysicsManager::BodyID pTerrainBodyId, size_t pInstanceCount,
-		float pSideLength);
+	MassObject(cure::ResourceManager* resource_manager, const str& class_resource_name,
+		UiCure::GameUiManager* ui_manager, tbc::PhysicsManager::BodyID terrain_body_id, size_t instance_count,
+		float side_length);
 	virtual ~MassObject();
 
-	void SetSeed(unsigned pSeed);
-	void SetRender(bool pRender);
+	void SetSeed(unsigned seed);
+	void SetRender(bool render);
 	virtual void UiMove();
 
 private:
 	virtual void OnLoaded();
-	void PositionToGrid(const vec3& pPosition, int& pX, int& pY) const;
-	void GridToPosition(int pX, int pY, vec3& pPosition) const;
-	void MoveToSquare(int pX, int pY);
-	void CreateSquare(size_t pX, size_t pY);
-	bool GetObjectPlacement(vec3& pPosition) const;
+	void PositionToGrid(const vec3& position, int& x, int& y) const;
+	void GridToPosition(int x, int y, vec3& position) const;
+	void MoveToSquare(int x, int y);
+	void CreateSquare(size_t x, size_t y);
+	bool GetObjectPlacement(vec3& position) const;
 
-	class Square
-	{
+	class Square {
 	public:
-		Square(uint32 pSeed, const MeshArray& pResourceArray,
-			const std::vector<xform>& pDisplacementArray, UiTbc::Renderer* pRenderer);
+		Square(uint32 seed, const MeshArray& resource_array,
+			const std::vector<xform>& displacement_array, uitbc::Renderer* renderer);
 		~Square();
-		void SetRender(bool pRender, float pAlpha);
+		void SetRender(bool render, float alpha);
 
 	private:
-		typedef std::pair<UiTbc::GeometryBatch*, UiTbc::Renderer::GeometryID> MassMeshPair;
+		typedef std::pair<uitbc::GeometryBatch*, uitbc::Renderer::GeometryID> MassMeshPair;
 		typedef std::vector<MassMeshPair> MassMeshArray;
-		MassMeshArray mMassMeshArray;
-		UiTbc::Renderer* mRenderer;
-		bool mDisableTransparency;
+		MassMeshArray mass_mesh_array_;
+		uitbc::Renderer* renderer_;
+		bool disable_transparency_;
 	};
 
-	enum
-	{
-		SQUARE_MID_TO_CORNER	= 3,
-		SQUARE_SIDE		= 7,
-		SQUARE_COUNT		= SQUARE_SIDE*SQUARE_SIDE,
+	enum {
+		kSquareMidToCorner	= 3,
+		kSquareSide		= 7,
+		kSquareCount		= kSquareSide*kSquareSide,
 	};
 
-	Tbc::PhysicsManager::BodyID mTerrainBodyId;
-	size_t mSquareInstanceCount;
-	Square* mSquareArray[SQUARE_COUNT];
-	const float mVisibleAddTerm;
-	float mFullyVisibleDistance;
-	float mVisibleDistanceFactor;
-	int mSquareSideLength;
-	int mMiddleSquareX;
-	int mMiddleSquareY;
-	unsigned mSeed;
+	tbc::PhysicsManager::BodyID terrain_body_id_;
+	size_t square_instance_count_;
+	Square* square_array_[kSquareCount];
+	const float visible_add_term_;
+	float fully_visible_distance_;
+	float visible_distance_factor_;
+	int square_side_length_;
+	int middle_square_x_;
+	int middle_square_y_;
+	unsigned seed_;
 
 	logclass();
 };

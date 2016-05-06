@@ -1,31 +1,29 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "Quaternion.h"
-#include "Vector3D.h"
+#include "quaternion.h"
+#include "vector3d.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class Plane
-{
+class Plane {
 public:
 	Plane();
-	Plane(const vec3& pNormal, float D);
-	Plane(const vec3& pPosition, const vec3& pTangent, const vec3& pApproximateNormal);
-	void operator=(const Plane& pCopy);
+	Plane(const vec3& normal, float D);
+	Plane(const vec3& position, const vec3& tangent, const vec3& approximate_normal);
+	void operator=(const Plane& copy);
 
-	float GetAbsDistance(const vec3& pPosition) const;
-	float GetDistance(const vec3& pPosition) const;
+	float GetAbsDistance(const vec3& position) const;
+	float GetDistance(const vec3& position) const;
 	quat GetOrientation() const;
 
 	Plane operator-() const;

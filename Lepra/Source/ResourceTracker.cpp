@@ -5,43 +5,36 @@
 
 
 #include "pch.h"
-#include "../Include/LepraAssert.h"
-#include "../Include/ResourceTracker.h"
+#include "../include/lepraassert.h"
+#include "../include/resourcetracker.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-ResourceTracker::ResourceTracker()
-{
+ResourceTracker::ResourceTracker() {
 }
 
-void ResourceTracker::Add(const HashedString& pResourceName, int pValue)
-{
-	ScopeLock lLock(&mLock);
-	CounterMap::iterator x = mCounterMap.find(pResourceName);
-	if (x == mCounterMap.end())
-	{
-		mCounterMap.insert(CounterMap::value_type(pResourceName, pValue));
-	}
-	else
-	{
-		x->second += pValue;
+void ResourceTracker::Add(const HashedString& resource_name, int value) {
+	ScopeLock lock(&lock_);
+	CounterMap::iterator x = counter_map_.find(resource_name);
+	if (x == counter_map_.end()) {
+		counter_map_.insert(CounterMap::value_type(resource_name, value));
+	} else {
+		x->second += value;
 	}
 }
 
-ResourceTracker::CounterMap ResourceTracker::GetAll() const
-{
-	ScopeLock lLock(&mLock);
-	return mCounterMap;
+ResourceTracker::CounterMap ResourceTracker::GetAll() const {
+	ScopeLock lock(&lock_);
+	return counter_map_;
 }
 
 
 
-ResourceTracker gResourceTracker;
+ResourceTracker g_resource_tracker;
 
 
 

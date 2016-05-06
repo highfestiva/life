@@ -1,33 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/ResourceManager.h"
-#include "Impuzzable.h"
-#include "PieceInfo.h"
+#include "../cure/include/resourcemanager.h"
+#include "impuzzable.h"
+#include "pieceinfo.h"
 
 
 
-namespace Impuzzable
-{
+namespace Impuzzable {
 
 
 
-class AsciiLoader
-{
+class AsciiLoader {
 public:
-	AsciiLoader(Cure::ResourceManager* pResourceManager);
+	AsciiLoader(cure::ResourceManager* resource_manager);
 	virtual ~AsciiLoader();
 
-	virtual wstr Load(const str& pFilename) const;
-	bool ConvertPieces(const wstr& pAscii, std::vector<PieceInfo>& pPieces) const;
+	virtual wstr Load(const str& filename) const;
+	bool ConvertPieces(const wstr& ascii, std::vector<PieceInfo>& pieces) const;
 
 private:
-	Cure::ResourceManager* mResourceManager;
+	cure::ResourceManager* resource_manager_;
 	logclass();
 };
 

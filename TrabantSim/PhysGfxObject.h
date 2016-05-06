@@ -1,62 +1,56 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
-#include "TrabantSim.h"
+#include "../uicure/include/uimachine.h"
+#include "trabantsim.h"
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
-class PlacedObject
-{
+class PlacedObject {
 public:
-	quat mOrientation;
-	vec3 mPos;
-	PlacedObject(const quat& pOrientation, const vec3& pPos);
+	quat orientation_;
+	vec3 pos_;
+	PlacedObject(const quat& orientation, const vec3& pos);
 	virtual ~PlacedObject();
 };
 
-class BoxObject: public PlacedObject
-{
+class BoxObject: public PlacedObject {
 	typedef PlacedObject Parent;
 public:
-	vec3 mSize;
-	BoxObject(const quat& pQuat, const vec3& pPos, const vec3& pSize);
+	vec3 size_;
+	BoxObject(const quat& _quat, const vec3& pos, const vec3& size);
 };
 
-class SphereObject: public PlacedObject
-{
+class SphereObject: public PlacedObject {
 	typedef PlacedObject Parent;
 public:
-	float mRadius;
-	SphereObject(const quat& pQuat, const vec3& pPos, float pRadius);
+	float radius_;
+	SphereObject(const quat& _quat, const vec3& pos, float radius);
 };
 
-class CapsuleObject: public PlacedObject
-{
+class CapsuleObject: public PlacedObject {
 	typedef PlacedObject Parent;
 public:
-	float mRadius;
-	float mLength;
-	CapsuleObject(const quat& pQuat, const vec3& pPos, float pRadius, float pLength);
+	float radius_;
+	float length_;
+	CapsuleObject(const quat& _quat, const vec3& pos, float radius, float length);
 };
 
-class MeshObject: public PlacedObject
-{
+class MeshObject: public PlacedObject {
 	typedef PlacedObject Parent;
 public:
-	std::vector<float> mVertices;
-	std::vector<int> mIndices;
+	std::vector<float> vertices_;
+	std::vector<int> indices_;
 	MeshObject();
-	MeshObject(const quat& pQuat, const vec3& pPos);
+	MeshObject(const quat& _quat, const vec3& pos);
 };
 
 
@@ -65,8 +59,7 @@ typedef std::vector<PlacedObject*> PhysObjectArray;
 
 
 
-enum ObjectMaterial
-{
+enum ObjectMaterial {
 	MaterialSmooth = 1,
 	MaterialFlat,
 	MaterialChecker,

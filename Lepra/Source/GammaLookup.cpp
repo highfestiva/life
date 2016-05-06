@@ -1,17 +1,16 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/GammaLookup.h"
+#include "../include/gammalookup.h"
 #include <math.h>
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -19,35 +18,30 @@ namespace Lepra
 
 
 
-void GammaLookup::Initialize()
-{
-	for (int i = 0; i < 256; i++)
-	{
-		smGammaToLinearFloat[i] = ::powf(i/255.0f, GAMMA_FACTOR) * 65535.0f;
-		smGammaToLinearInt[i] = (int)::floorf(smGammaToLinearFloat[i] + 0.5f);
+void GammaLookup::Initialize() {
+	for (int i = 0; i < 256; i++) {
+		gamma_to_linear_float_[i] = ::powf(i/255.0f, GAMMA_FACTOR) * 65535.0f;
+		gamma_to_linear_int_[i] = (int)::floorf(gamma_to_linear_float_[i] + 0.5f);
 	}
-	for (int i = 0; i < 65536; i++)
-	{
-		int lResult = (int)::floorf(powf(i/65535.0f, 1.0f/GAMMA_FACTOR) * 255.0f + 0.5f);
-		smLinearToGammaInt[i] = (uint8)lResult;
+	for (int i = 0; i < 65536; i++) {
+		int result = (int)::floorf(powf(i/65535.0f, 1.0f/GAMMA_FACTOR) * 255.0f + 0.5f);
+		linear_to_gamma_int_[i] = (uint8)result;
 	}
 }
 
-float GammaLookup::GammaToLinearF(float pGammaValue)
-{
-	return (powf(pGammaValue, GAMMA_FACTOR));
+float GammaLookup::GammaToLinearF(float gamma_value) {
+	return (powf(gamma_value, GAMMA_FACTOR));
 }
 
-float GammaLookup::LinearToGammaF(float pLinearValue)
-{
-	return (powf(pLinearValue, 1.0f / GAMMA_FACTOR));
+float GammaLookup::LinearToGammaF(float linear_value) {
+	return (powf(linear_value, 1.0f / GAMMA_FACTOR));
 }
 
 
 
-int GammaLookup::smGammaToLinearInt[256];
-float GammaLookup::smGammaToLinearFloat[256];
-uint8 GammaLookup::smLinearToGammaInt[65536];
+int GammaLookup::gamma_to_linear_int_[256];
+float GammaLookup::gamma_to_linear_float_[256];
+uint8 GammaLookup::linear_to_gamma_int_[65536];
 
 
 

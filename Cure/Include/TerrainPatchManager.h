@@ -1,65 +1,60 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Lepra/Include/AABR.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../../Lepra/Include/LooseQuadtree.h"
-#include "../Include/Cure.h"
-#include "../Include/ResourceManager.h"
+#include "../../lepra/include/aabr.h"
+#include "../../lepra/include/vector3d.h"
+#include "../../lepra/include/loosequadtree.h"
+#include "../include/cure.h"
+#include "../include/resourcemanager.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 class TerrainFunction;
 class TerrainPatch;
 }
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
 // Data holder for the actual terrain patches. Cache handling must be avoided
 // by this class, since that would be redundant (already better handled by the
 // resource system).
-class TerrainPatchManager
-{
+class TerrainPatchManager {
 public:
 	TerrainPatchManager();
 	virtual ~TerrainPatchManager();
 	void Clear();
 
-	void AddPatch(UserPhysicalTerrainResource* pPatchResource);
+	void AddPatch(UserPhysicalTerrainResource* patch_resource);
 
 	void MarkAllDirty();
-	void MarkInUse(const vec3& pPosition, float pRadius);
+	void MarkInUse(const vec3& position, float radius);
 	void DeleteDirty();
 
 private:
 	typedef int PatchId;
-	struct PatchDirtyInfo
-	{
-		inline PatchDirtyInfo(UserPhysicalTerrainResource* pResourcePatch, bool pIsDirty):
-			mResourcePatch(pResourcePatch),
-			mIsDirty(pIsDirty)
-		{
+	struct PatchDirtyInfo {
+		inline PatchDirtyInfo(UserPhysicalTerrainResource* resource_patch, bool is_dirty):
+			resource_patch_(resource_patch),
+			is_dirty_(is_dirty) {
 		}
-		UserPhysicalTerrainResource* mResourcePatch;
-		bool mIsDirty;
+		UserPhysicalTerrainResource* resource_patch_;
+		bool is_dirty_;
 	};
 
-	void Delete(bool pDirtyOnly);
+	void Delete(bool dirty_only);
 
 	typedef HashTable<PatchId, PatchDirtyInfo> PatchTable;
-	PatchTable* mPatchTable;
+	PatchTable* patch_table_;
 };
 
 

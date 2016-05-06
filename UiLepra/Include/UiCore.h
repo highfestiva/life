@@ -1,21 +1,19 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 #pragma once
 
-#include "../../Lepra/Include/Application.h"
+#include "../../lepra/include/application.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-class Core
-{
+class Core {
 public:
 	static void Init();
 	static void Shutdown();
@@ -24,7 +22,7 @@ public:
 
 
 
-int UiMain(Lepra::Application& pApplication);
+int UiMain(lepra::Application& application);
 
 
 

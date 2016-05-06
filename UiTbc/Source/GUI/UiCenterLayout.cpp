@@ -5,125 +5,94 @@
 */
 
 #include "pch.h"
-#include "../../Include/GUI/UiCenterLayout.h"
-#include "../../Include/GUI/UiComponent.h"
+#include "../../include/gui/uicenterlayout.h"
+#include "../../include/gui/uicomponent.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
 CenterLayout::CenterLayout() :
-	mChild(0)
-{
+	child_(0) {
 }
 
-CenterLayout::~CenterLayout()
-{
+CenterLayout::~CenterLayout() {
 }
 
-Layout::Type CenterLayout::GetType() const
-{
-	return Layout::CENTERLAYOUT;
+Layout::Type CenterLayout::GetType() const {
+	return Layout::kCenterlayout;
 }
 
-void CenterLayout::Add(Component* pComponent, int /*pParam1*/, int /*pParam2*/)
-{
-	if (mChild == 0)
-	{
-		mChild = pComponent;
-	}
-	else
-	{
+void CenterLayout::Add(Component* component, int /*param1*/, int /*param2*/) {
+	if (child_ == 0) {
+		child_ = component;
+	} else {
 		deb_assert(false);
 	}
 }
 
-void CenterLayout::Remove(Component* pComponent)
-{
-	if (mChild == pComponent)
-	{
-		mChild = 0;
+void CenterLayout::Remove(Component* component) {
+	if (child_ == component) {
+		child_ = 0;
 	}
 }
 
-int CenterLayout::GetNumComponents() const
-{
-	return (mChild == 0) ? 0 : 1;
+int CenterLayout::GetNumComponents() const {
+	return (child_ == 0) ? 0 : 1;
 }
 
-Component* CenterLayout::GetFirst()
-{
-	return mChild;
+Component* CenterLayout::GetFirst() {
+	return child_;
 }
 
-Component* CenterLayout::GetNext()
-{
+Component* CenterLayout::GetNext() {
 	return 0;
 }
 
-Component* CenterLayout::GetLast()
-{
-	return mChild;
+Component* CenterLayout::GetLast() {
+	return child_;
 }
 
-Component* CenterLayout::GetPrev()
-{
+Component* CenterLayout::GetPrev() {
 	return 0;
 }
 
-void CenterLayout::UpdateLayout()
-{
-	if (mChild != 0)
-	{
-		PixelCoord lOwnerSize(GetOwner()->GetSize());
-		PixelCoord lChildSize(mChild->GetPreferredSize());
+void CenterLayout::UpdateLayout() {
+	if (child_ != 0) {
+		PixelCoord owner_size(GetOwner()->GetSize());
+		PixelCoord child_size(child_->GetPreferredSize());
 
-		if (lChildSize.x > lOwnerSize.x)
-		{
-			lChildSize.x = lOwnerSize.x;
+		if (child_size.x > owner_size.x) {
+			child_size.x = owner_size.x;
 		}
-		if (lChildSize.y > lOwnerSize.y)
-		{
-			lChildSize.y = lOwnerSize.y;
+		if (child_size.y > owner_size.y) {
+			child_size.y = owner_size.y;
 		}
 
-		mChild->SetPos((lOwnerSize.x - lChildSize.x) / 2,
-						 (lOwnerSize.y - lChildSize.y) / 2);
-		mChild->SetSize(lChildSize);
+		child_->SetPos((owner_size.x - child_size.x) / 2,
+						 (owner_size.y - child_size.y) / 2);
+		child_->SetSize(child_size);
 	}
 }
 
-PixelCoord CenterLayout::GetPreferredSize(bool pForceAdaptive)
-{
-	if (mChild != 0)
-	{
-		return mChild->GetPreferredSize(pForceAdaptive);
-	}
-	else
-	{
+PixelCoord CenterLayout::GetPreferredSize(bool force_adaptive) {
+	if (child_ != 0) {
+		return child_->GetPreferredSize(force_adaptive);
+	} else {
 		return PixelCoord(0, 0);
 	}
 }
 
-PixelCoord CenterLayout::GetMinSize() const
-{
-	if (mChild != 0)
-	{
-		return mChild->GetMinSize();
-	}
-	else
-	{
+PixelCoord CenterLayout::GetMinSize() const {
+	if (child_ != 0) {
+		return child_->GetMinSize();
+	} else {
 		return PixelCoord(0, 0);
 	}
 }
 
-PixelCoord CenterLayout::GetContentSize() const
-{
-	if (mChild != 0)
-	{
-		return mChild->GetPreferredSize();
-	}
-	else
-	{
+PixelCoord CenterLayout::GetContentSize() const {
+	if (child_ != 0) {
+		return child_->GetPreferredSize();
+	} else {
 		return PixelCoord(0, 0);
 	}
 }

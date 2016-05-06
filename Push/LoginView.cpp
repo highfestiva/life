@@ -5,38 +5,35 @@
 
 
 #include "pch.h"
-#include "LoginView.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Cure/Include/UserAccount.h"
-#include "../Lepra/Include/Network.h"
-#include "../UiTbc/Include/GUI/UiCaption.h"
-#include "../UiTbc/Include/GUI/UiTextField.h"
-#include "RtVar.h"
+#include "loginview.h"
+#include "../cure/include/runtimevariable.h"
+#include "../cure/include/useraccount.h"
+#include "../lepra/include/network.h"
+#include "../uitbc/include/gui/uicaption.h"
+#include "../uitbc/include/gui/uitextfield.h"
+#include "rtvar.h"
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
-LoginView::LoginView(ClientLoginObserver* pLoginObserver, const wstr& pErrorMessage):
-	View(L"Login", new UiTbc::GridLayout(7, 1)),
-	mLoginObserver(pLoginObserver)
-{
+LoginView::LoginView(ClientLoginObserver* login_observer, const wstr& error_message):
+	View(L"Login", new uitbc::GridLayout(7, 1)),
+	login_observer_(login_observer) {
 	SetPreferredSize(200, 200);
 
-	if (!pErrorMessage.empty())
-	{
-		((UiTbc::GridLayout*)GetClientRectComponent()->GetLayout())->InsertRow(0);
-		AddLabel(pErrorMessage, RED);
+	if (!error_message.empty()) {
+		((uitbc::GridLayout*)GetClientRectComponent()->GetLayout())->InsertRow(0);
+		AddLabel(error_message, RED);
 	}
 
 	AddLabel(L"Username", WHITE);
 
-	str lUserName;
-	v_tryget(lUserName, =, mLoginObserver->GetVariableScope(), RTVAR_LOGIN_USERNAME, "User0");
-	AddTextField(wstrutil::Encode(lUserName), "User");
+	str user_name;
+	v_tryget(user_name, =, login_observer_->GetVariableScope(), kRtvarLoginUsername, "User0");
+	AddTextField(wstrutil::Encode(user_name), "User");
 
 	AddLabel(L"Password", WHITE);
 
@@ -44,13 +41,12 @@ LoginView::LoginView(ClientLoginObserver* pLoginObserver, const wstr& pErrorMess
 
 	AddLabel(L"Server", WHITE);
 
-	str lServerName;
-	v_get(lServerName, =, mLoginObserver->GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
-	if (strutil::StartsWith(lServerName, "0.0.0.0"))
-	{
-		lServerName = lServerName.substr(7);
+	str server_name;
+	v_get(server_name, =, login_observer_->GetVariableScope(), kRtvarNetworkServeraddress, "localhost:16650");
+	if (strutil::StartsWith(server_name, "0.0.0.0")) {
+		server_name = server_name.substr(7);
 	}
-	AddTextField(wstrutil::Encode(lServerName), "Server");
+	AddTextField(wstrutil::Encode(server_name), "Server");
 
 	AddButton(L"Login", 0)->SetOnClick(LoginView, OnLogin);
 
@@ -59,28 +55,26 @@ LoginView::LoginView(ClientLoginObserver* pLoginObserver, const wstr& pErrorMess
 
 
 
-void LoginView::OnExit()
-{
-	mLoginObserver->CancelLogin();
+void LoginView::OnExit() {
+	login_observer_->CancelLogin();
 }
 
-void LoginView::OnLogin(UiTbc::Button*)
-{
+void LoginView::OnLogin(uitbc::Button*) {
 	// Save user's login info.
-	str lServer = strutil::Encode(((UiTbc::TextField*)GetChild("Server"))->GetText());
+	str server = strutil::Encode(((uitbc::TextField*)GetChild("Server"))->GetText());
 
-	// Pick strings from UI.
-	str lUsername = strutil::Encode(((UiTbc::TextField*)GetChild("User"))->GetText());
-	UiTbc::TextField* lPasswordComponent = (UiTbc::TextField*)GetChild("Pass");
-	str lReadablePassword = strutil::Encode(lPasswordComponent->GetText());
-	lPasswordComponent->SetText(L"?");	// Clear out password traces in component.
+	// Pick strings from kUi.
+	str username = strutil::Encode(((uitbc::TextField*)GetChild("User"))->GetText());
+	uitbc::TextField* password_component = (uitbc::TextField*)GetChild("Pass");
+	str readable_password = strutil::Encode(password_component->GetText());
+	password_component->SetText(L"?");	// Clear out password traces in component.
 
 	// Convert into login format.
-	Cure::MangledPassword lPassword(lReadablePassword);
-	lReadablePassword.clear();	// Clear out password traces in string.
-	Cure::LoginId lLoginToken(lUsername, lPassword);
+	cure::MangledPassword password(readable_password);
+	readable_password.clear();	// Clear out password traces in string.
+	cure::LoginId login_token(username, password);
 
-	mLoginObserver->RequestLogin(lServer, lLoginToken);
+	login_observer_->RequestLogin(server, login_token);
 }
 
 

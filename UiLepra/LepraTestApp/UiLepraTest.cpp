@@ -6,184 +6,161 @@
 
 #include "pch.h"
 #ifndef CURE_TEST_WITHOUT_UI
-#include "../../Lepra/Include/LepraAssert.h"
+#include "../../lepra/include/lepraassert.h"
 #include <math.h>
-#include "../../Lepra/Include/Log.h"
-#include "../../Lepra/Include/SystemManager.h"
-#include "../../Lepra/Include/Thread.h"
-#include "../../Lepra/Include/Timer.h"
-#include "../Include/UiCore.h"
-#include "../Include/UiDisplayManager.h"
-#include "../Include/UiLepra.h"
-#include "../Include/UiSoundManager.h"
-#include "../Include/UiInput.h"
+#include "../../lepra/include/log.h"
+#include "../../lepra/include/systemmanager.h"
+#include "../../lepra/include/thread.h"
+#include "../../lepra/include/timer.h"
+#include "../include/uicore.h"
+#include "../include/uidisplaymanager.h"
+#include "../include/uilepra.h"
+#include "../include/uisoundmanager.h"
+#include "../include/uiinput.h"
 
 
 
-using namespace Lepra;
+using namespace lepra;
 class UiLepraTest{};
-static Lepra::LogDecorator gUiLLog(Lepra::LogType::GetLogger(Lepra::LogType::TEST), typeid(UiLepraTest));
-void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
+static lepra::LogDecorator gUiLLog(lepra::LogType::GetLogger(lepra::LogType::kTest), typeid(UiLepraTest));
+void ReportTestResult(const lepra::LogDecorator& log, const str& test_name, const str& context, bool result);
 bool TestLepra();
 
 
 
-bool TestInput(const Lepra::LogDecorator& pLog)
-{
-	str lContext;
-	bool lTestOk = true;
-	const UiLepra::InputManager* lInputManager = 0;
+bool TestInput(const lepra::LogDecorator& log) {
+	str _context;
+	bool test_ok = true;
+	const uilepra::InputManager* input_manager = 0;
 
-	if (lTestOk)
-	{
-		lInputManager = UiLepra::InputManager::CreateInputManager(0);
-		lTestOk = (lInputManager != 0);
+	if (test_ok) {
+		input_manager = uilepra::InputManager::CreateInputManager(0);
+		test_ok = (input_manager != 0);
 	}
-	if (lTestOk)
-	{
-		lContext = "no keyboard available";
-		lTestOk = (lInputManager->GetKeyboard() != 0);
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "no keyboard available";
+		test_ok = (input_manager->GetKeyboard() != 0);
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "no mouse available";
-		lTestOk = (lInputManager->GetMouse() != 0);
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "no mouse available";
+		test_ok = (input_manager->GetMouse() != 0);
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "number of devices";
-		lTestOk = (lInputManager->GetDeviceList().size() >= 2 &&
-			lInputManager->GetDeviceList().size() <= 7);
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "number of devices";
+		test_ok = (input_manager->GetDeviceList().size() >= 2 &&
+			input_manager->GetDeviceList().size() <= 7);
+		deb_assert(test_ok);
 	}
-	if (lInputManager)
-	{
-		delete (lInputManager);
-		lInputManager = 0;
+	if (input_manager) {
+		delete (input_manager);
+		input_manager = 0;
 	}
 
-	ReportTestResult(pLog, "Input", lContext, lTestOk);
-	return (lTestOk);
+	ReportTestResult(log, "Input", _context, test_ok);
+	return (test_ok);
 }
 
-bool TestGraphics(const Lepra::LogDecorator& pLog)
-{
-	str lContext;
-	bool lTestOk = true;
+bool TestGraphics(const lepra::LogDecorator& log) {
+	str _context;
+	bool test_ok = true;
 
-	UiLepra::DisplayManager* lDisplay = UiLepra::DisplayManager::CreateDisplayManager(UiLepra::DisplayManager::OPENGL_CONTEXT);
-	deb_assert(lDisplay);
+	uilepra::DisplayManager* display = uilepra::DisplayManager::CreateDisplayManager(uilepra::DisplayManager::kOpenglContext);
+	deb_assert(display);
 
-	UiLepra::DisplayMode lDisplayMode;
-	if (lTestOk)
-	{
-		lContext = "find display mode";
-		lTestOk = lDisplay->FindDisplayMode(lDisplayMode, 640, 480) || lDisplay->FindDisplayMode(lDisplayMode, 1920, 1080);
-		deb_assert(lTestOk);
+	uilepra::DisplayMode display_mode;
+	if (test_ok) {
+		_context = "find display mode";
+		test_ok = display->FindDisplayMode(display_mode, 640, 480) || display->FindDisplayMode(display_mode, 1920, 1080);
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "open screen";
-		lTestOk = lDisplay->OpenScreen(lDisplayMode, UiLepra::DisplayManager::WINDOWED, UiLepra::DisplayManager::ORIENTATION_ALLOW_ANY);
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "open screen";
+		test_ok = display->OpenScreen(display_mode, uilepra::DisplayManager::kWindowed, uilepra::DisplayManager::kOrientationAllowAny);
+		deb_assert(test_ok);
 	}
 
-	if (lTestOk)
-	{
-		Lepra::Canvas lScreen(lDisplay->GetWidth(), lDisplay->GetHeight(), Lepra::Canvas::IntToBitDepth(lDisplay->GetBitDepth()));
-		Lepra::Timer lTimer;
-		lTimer.UpdateTimer();
-		lTimer.ClearTimeDiff();
-		while (lTimer.GetTimeDiff() < 0.5 && !Lepra::SystemManager::GetQuitRequest())
-		{
-			UiLepra::Core::ProcessMessages();
-			Lepra::Thread::YieldCpu();
-			lScreen.SetBuffer(0);
-			lDisplay->UpdateScreen();
-			lTimer.UpdateTimer();
+	if (test_ok) {
+		lepra::Canvas screen(display->GetWidth(), display->GetHeight(), lepra::Canvas::IntToBitDepth(display->GetBitDepth()));
+		lepra::Timer timer;
+		timer.UpdateTimer();
+		timer.ClearTimeDiff();
+		while (timer.GetTimeDiff() < 0.5 && !lepra::SystemManager::GetQuitRequest()) {
+			uilepra::Core::ProcessMessages();
+			lepra::Thread::YieldCpu();
+			screen.SetBuffer(0);
+			display->UpdateScreen();
+			timer.UpdateTimer();
 		}
-		lDisplay->CloseScreen();
+		display->CloseScreen();
 	}
 
-	delete (lDisplay);
+	delete (display);
 
-	ReportTestResult(pLog, "Graphics", lContext, lTestOk);
-	return (lTestOk);
+	ReportTestResult(log, "Graphics", _context, test_ok);
+	return (test_ok);
 }
 
-bool TestSound(const Lepra::LogDecorator& pLog)
-{
-	str lContext;
-	bool lTestOk = true;
+bool TestSound(const lepra::LogDecorator& log) {
+	str _context;
+	bool test_ok = true;
 
-	UiLepra::SoundManager::SoundID lSound = UiLepra::INVALID_SOUNDID;
-	UiLepra::SoundManager* lSoundManager = UiLepra::SoundManager::CreateSoundManager(UiLepra::SoundManager::CONTEXT_OPENAL);
-	deb_assert(lSoundManager);
-	if (lTestOk)
-	{
-		lContext = "load sound";
-		lSound = lSoundManager->LoadSound3D("Data/logo_trumpet.wav", UiLepra::SoundManager::LOOP_FORWARD, 0);
-		lTestOk = (lSound != UiLepra::INVALID_SOUNDID);
-		deb_assert(lTestOk);
+	uilepra::SoundManager::SoundID sound = uilepra::INVALID_SOUNDID;
+	uilepra::SoundManager* sound_manager = uilepra::SoundManager::CreateSoundManager(uilepra::SoundManager::kContextOpenal);
+	deb_assert(sound_manager);
+	if (test_ok) {
+		_context = "load sound";
+		sound = sound_manager->LoadSound3D("Data/logo_trumpet.wav", uilepra::SoundManager::kLoopForward, 0);
+		test_ok = (sound != uilepra::INVALID_SOUNDID);
+		deb_assert(test_ok);
 	}
-	UiLepra::SoundManager::SoundInstanceID lSoundInstance = UiLepra::INVALID_SOUNDINSTANCEID;
-	if (lTestOk)
-	{
-		lContext = "create sound instance";
-		lSoundInstance = lSoundManager->CreateSoundInstance(lSound);
-		lTestOk = (lSoundInstance != UiLepra::INVALID_SOUNDID);
-		deb_assert(lTestOk);
+	uilepra::SoundManager::SoundInstanceID sound_instance = uilepra::INVALID_SOUNDINSTANCEID;
+	if (test_ok) {
+		_context = "create sound instance";
+		sound_instance = sound_manager->CreateSoundInstance(sound);
+		test_ok = (sound_instance != uilepra::INVALID_SOUNDID);
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "play sound";
-		lSoundManager->Play(lSoundInstance, 1, 1);
-		for (float x = 0; x < 6*5; x += 2.0f)
-		{
-			Lepra::vec3 lPosition(::sinf(x)*10, ::cosf(x)*10, 0);
-			Lepra::vec3 lVelocity;
-			lSoundManager->SetSoundPosition(lSoundInstance, lPosition, lVelocity);
-			Lepra::Thread::Sleep(0.3);
+	if (test_ok) {
+		_context = "play sound";
+		sound_manager->Play(sound_instance, 1, 1);
+		for (float x = 0; x < 6*5; x += 2.0f) {
+			lepra::vec3 position(::sinf(x)*10, ::cosf(x)*10, 0);
+			lepra::vec3 velocity;
+			sound_manager->SetSoundPosition(sound_instance, position, velocity);
+			lepra::Thread::Sleep(0.3);
 		}
 	}
-	if (lSoundInstance != UiLepra::INVALID_SOUNDINSTANCEID)
-	{
-		lSoundManager->DeleteSoundInstance(lSoundInstance);
+	if (sound_instance != uilepra::INVALID_SOUNDINSTANCEID) {
+		sound_manager->DeleteSoundInstance(sound_instance);
 	}
-	if (lSound != UiLepra::INVALID_SOUNDID)
-	{
-		lSoundManager->Release(lSound);
+	if (sound != uilepra::INVALID_SOUNDID) {
+		sound_manager->Release(sound);
 	}
-	delete (lSoundManager);
+	delete (sound_manager);
 
-	ReportTestResult(pLog, "Sound", lContext, lTestOk);
-	return (lTestOk);
+	ReportTestResult(log, "Sound", _context, test_ok);
+	return (test_ok);
 }
 
-bool TestUiLepra()
-{
-	bool lTestOk = true;
+bool TestUiLepra() {
+	bool test_ok = true;
 
-	if (lTestOk)
-	{
-		lTestOk = TestLepra();
+	if (test_ok) {
+		test_ok = TestLepra();
 	}
-	if (lTestOk)
-	{
-		lTestOk = TestInput(gUiLLog);
+	if (test_ok) {
+		test_ok = TestInput(gUiLLog);
 	}
-	if (lTestOk)
-	{
-		lTestOk = TestGraphics(gUiLLog);
+	if (test_ok) {
+		test_ok = TestGraphics(gUiLLog);
 	}
-	if (lTestOk)
-	{
-		lTestOk = TestSound(gUiLLog);
+	if (test_ok) {
+		test_ok = TestSound(gUiLLog);
 	}
 
-	return (lTestOk);
+	return (test_ok);
 }
 
 #endif //!CURE_TEST_WITHOUT_UI

@@ -1,50 +1,46 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
-#include "ResourceManager.h"
+#include "resourcemanager.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 class PhysicsManager;
 }
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-struct PhysicsSharedInitData
-{
-	xform mTransformation;
-	vec3 mVelocity;
-	PhysicsOverride mPhysicsOverride;
-	Lock* mPhysicsLock;
-	Tbc::PhysicsManager* mPhysicsManager;
-	const int mPhysicsFps;
-	const GameObjectId mInstanceId;
+struct PhysicsSharedInitData {
+	xform transformation_;
+	vec3 velocity_;
+	PhysicsOverride physics_override_;
+	Lock* physics_lock_;
+	tbc::PhysicsManager* physics_manager_;
+	const int physics_fps_;
+	const GameObjectId instance_id_;
 
-	PhysicsSharedInitData(const xform& pTransformation, const vec3& pVelocity, PhysicsOverride pPhysicsOverride,
-		Lock* pPhysicsLock, Tbc::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId);
+	PhysicsSharedInitData(const xform& transformation, const vec3& velocity, PhysicsOverride physics_override,
+		Lock* physics_lock, tbc::PhysicsManager* physics_manager, int physics_fps, GameObjectId instance_id);
 	void operator=(const PhysicsSharedInitData&);
 };
 
 
 
 // This class is used when sharing a physics manager (engine) between different contexts (such as split-screen clients).
-class PhysicsSharedResource: public PhysicsResource
-{
+class PhysicsSharedResource: public PhysicsResource {
 	typedef PhysicsResource Parent;
 public:
 	typedef UserTypeResource<PhysicsResource> ClassResource;
 
-	PhysicsSharedResource(ResourceManager* pManager, const str& pName, const PhysicsSharedInitData& pInitData);
+	PhysicsSharedResource(ResourceManager* manager, const str& name, const PhysicsSharedInitData& init_data);
 	virtual ~PhysicsSharedResource();
 
 	ResourceLoadState InjectPostProcess();
@@ -60,9 +56,9 @@ public:
 	void OnLoadClass(ClassResource*);
 
 private:
-	ClassResource* mClassResource;
-	PhysicsSharedInitData mInitData;
-	ResourceLoadState mPhysicsLoadState;
+	ClassResource* class_resource_;
+	PhysicsSharedInitData init_data_;
+	ResourceLoadState physics_load_state_;
 
 	logclass();
 };

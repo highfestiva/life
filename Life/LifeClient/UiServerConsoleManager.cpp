@@ -5,69 +5,62 @@
 
 
 #include "pch.h"
-#include "UiServerConsoleManager.h"
-#include "../../Lepra/Include/LogListener.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiLepra/Include/UiInput.h"
-#include "UiConsole.h"
+#include "uiserverconsolemanager.h"
+#include "../../lepra/include/loglistener.h"
+#include "../../uicure/include/uigameuimanager.h"
+#include "../../uilepra/include/uiinput.h"
+#include "uiconsole.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-UiServerConsoleManager::UiServerConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-	UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea,
-	InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt):
-	ServerConsoleManager(pResourceManager, pGameManager, pVariableScope, pConsoleLogger, pConsolePrompt)
-{
-	mUiConsole = new UiConsole(this, pUiManager, pArea);
+UiServerConsoleManager::UiServerConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+	UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area,
+	InteractiveConsoleLogListener* console_logger, ConsolePrompt* console_prompt):
+	ServerConsoleManager(resource_manager, game_manager, variable_scope, console_logger, console_prompt) {
+	ui_console_ = new UiConsole(this, ui_manager, area);
 }
 
-UiServerConsoleManager::~UiServerConsoleManager()
-{
+UiServerConsoleManager::~UiServerConsoleManager() {
 	Join();
 	delete GetConsoleLogger();
 	SetConsoleLogger(0);
-	delete (mUiConsole);
-	mUiConsole = 0;
+	delete (ui_console_);
+	ui_console_ = 0;
 }
 
 
 
-bool UiServerConsoleManager::Start()
-{
-	bool lOk = Parent::Start();
-	mUiConsole->SetColor(Color(60, 10, 10, 255));
-	mUiConsole->Open();
-	return (lOk);
+bool UiServerConsoleManager::Start() {
+	bool ok = Parent::Start();
+	ui_console_->SetColor(Color(60, 10, 10, 255));
+	ui_console_->Open();
+	return (ok);
 }
 
-void UiServerConsoleManager::Join()
-{
-	mUiConsole->Close();
+void UiServerConsoleManager::Join() {
+	ui_console_->Close();
 	Parent::Join();
 }
 
 
 
-bool UiServerConsoleManager::ToggleVisible()
-{
-	const bool lConsoleActive = mUiConsole->ToggleVisible();
-	mUiConsole->GetUiManager()->GetInputManager()->SetCursorVisible(lConsoleActive);
-	return lConsoleActive;
+bool UiServerConsoleManager::ToggleVisible() {
+	const bool console_active = ui_console_->ToggleVisible();
+	ui_console_->GetUiManager()->GetInputManager()->SetCursorVisible(console_active);
+	return console_active;
 }
 
-UiConsole* UiServerConsoleManager::GetUiConsole() const
-{
-	return (mUiConsole);
+UiConsole* UiServerConsoleManager::GetUiConsole() const {
+	return (ui_console_);
 }
 
 
 
-loginstance(CONSOLE, UiServerConsoleManager);
+loginstance(kConsole, UiServerConsoleManager);
 
 
 

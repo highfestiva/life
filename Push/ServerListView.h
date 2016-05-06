@@ -1,18 +1,17 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "View.h"
-#include "../Life/ServerInfo.h"
+#include "view.h"
+#include "../life/serverinfo.h"
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
@@ -20,30 +19,28 @@ class ServerSelectObserver;
 
 
 
-class ServerListView: public View
-{
+class ServerListView: public View {
 public:
-	ServerListView(ServerSelectObserver* pSelectObserver);
+	ServerListView(ServerSelectObserver* select_observer);
 
 	void Tick();
 
 private:
 	void OnExit();
-	void OnSelect(UiTbc::Button*);
+	void OnSelect(uitbc::Button*);
 
-	ServerSelectObserver* mSelectObserver;
-	Life::ServerInfoList mServerList;
-	bool mIsMasterConnectError;
+	ServerSelectObserver* select_observer_;
+	life::ServerInfoList server_list_;
+	bool is_master_connect_error_;
 };
 
 
 
-class ServerSelectObserver
-{
+class ServerSelectObserver {
 public:
 	virtual void OnCancelJoinServer() = 0;
-	virtual void OnRequestJoinServer(const str& pServerAddress) = 0;
-	virtual bool UpdateServerList(Life::ServerInfoList& pServerList) const = 0;
+	virtual void OnRequestJoinServer(const str& server_address) = 0;
+	virtual bool UpdateServerList(life::ServerInfoList& server_list) const = 0;
 	virtual bool IsMasterServerConnectError() const = 0;
 };
 

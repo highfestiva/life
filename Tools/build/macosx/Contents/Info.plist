@@ -13,7 +13,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleIconFile</key>
-	<string>Main.icns</string>
+	<string>main.icns</string>
 	<key>CFBundleShortVersionString</key>
 	<string>0.2</string>
 	<key>CFBundleSignature</key>

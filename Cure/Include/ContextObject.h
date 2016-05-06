@@ -1,23 +1,22 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Tbc/Include/PhysicsManager.h"
-#include "../../Lepra/Include/Unordered.h"
+#include "../../tbc/include/physicsmanager.h"
+#include "../../lepra/include/unordered.h"
 #include <list>
 #include <vector>
-#include "../../Lepra/Include/String.h"
-#include "Cure.h"
-#include "PositionalData.h"
+#include "../../lepra/include/string.h"
+#include "cure.h"
+#include "positionaldata.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 class ChunkyPhysics;
 class ChunkyBoneGeometry;
 class PhysicsEngine;
@@ -27,8 +26,7 @@ class PhysicsTrigger;
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
@@ -37,75 +35,74 @@ class ContextObjectAttribute;
 class ResourceManager;
 
 
-class ContextObject
-{
+class ContextObject {
 public:
 	typedef std::vector<ContextObject*> Array;
 	typedef std::vector<ContextObjectAttribute*> AttributeArray;
 
-	ContextObject(ResourceManager* pResourceManager, const str& pClassId);
+	ContextObject(ResourceManager* resource_manager, const str& class_id);
 	virtual ~ContextObject();
 
 	ContextManager* GetManager() const;
-	virtual void SetManager(ContextManager* pManager);
+	virtual void SetManager(ContextManager* manager);
 
 	GameObjectId GetInstanceId() const;
-	void SetInstanceId(GameObjectId pInstanceId);
+	void SetInstanceId(GameObjectId instance_id);
 	const str& GetClassId() const;
 	GameObjectId GetOwnerInstanceId() const;
-	void SetOwnerInstanceId(GameObjectId pInstanceId);
+	void SetOwnerInstanceId(GameObjectId instance_id);
 	GameObjectId GetBorrowerInstanceId() const;
-	void SetBorrowerInstanceId(GameObjectId pInstanceId);
+	void SetBorrowerInstanceId(GameObjectId instance_id);
 
 	NetworkObjectType GetNetworkObjectType() const;
-	void SetNetworkObjectType(NetworkObjectType pType);
+	void SetNetworkObjectType(NetworkObjectType type);
 
 	void* GetExtraData() const;
-	void SetExtraData(void* pData);
+	void SetExtraData(void* data);
 
 	bool IsLoaded() const;
-	void SetLoadResult(bool pOk);
+	void SetLoadResult(bool ok);
 
-	void SetAllowMoveRoot(bool pAllow);
-	void AttachToObjectByBodyIds(Tbc::PhysicsManager::BodyID pBody1, ContextObject* pObject2, Tbc::PhysicsManager::BodyID pBody2);
-	void AttachToObjectByBodyIndices(unsigned pBody1Index, ContextObject* pObject2, unsigned pBody2Index);
+	void SetAllowMoveRoot(bool allow);
+	void AttachToObjectByBodyIds(tbc::PhysicsManager::BodyID body1, ContextObject* object2, tbc::PhysicsManager::BodyID body2);
+	void AttachToObjectByBodyIndices(unsigned body1_index, ContextObject* object2, unsigned body2_index);
 	void DetachAll();
-	bool DetachFromObject(ContextObject* pObject);
+	bool DetachFromObject(ContextObject* object);
 	Array GetAttachedObjects() const;
-	void AddAttachedObjectEngine(ContextObject* pAttachedObject, Tbc::PhysicsEngine* pEngine);
+	void AddAttachedObjectEngine(ContextObject* attached_object, tbc::PhysicsEngine* engine);
 
-	void AddAttribute(ContextObjectAttribute* pAttribute);
-	void DeleteAttribute(const str& pName);
-	ContextObjectAttribute* GetAttribute(const str& pName) const;
+	void AddAttribute(ContextObjectAttribute* attribute);
+	void DeleteAttribute(const str& name);
+	ContextObjectAttribute* GetAttribute(const str& name) const;
 	const AttributeArray& GetAttributes() const;
-	float GetAttributeFloatValue(const str& pAttributeName) const;
-	void QuerySetChildishness(float pChildishness);
-	bool IsAttributeTrue(const str& pAttributeName) const;
-	void OnAttributeUpdated(ContextObjectAttribute* pAttribute);
+	float GetAttributeFloatValue(const str& attribute_name) const;
+	void QuerySetChildishness(float childishness);
+	bool IsAttributeTrue(const str& attribute_name) const;
+	void OnAttributeUpdated(ContextObjectAttribute* attribute);
 
-	void AddTrigger(Tbc::PhysicsManager::BodyID pTriggerId, const void*);
-	virtual void FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger);
-	const void* GetTrigger(Tbc::PhysicsManager::BodyID pTriggerId) const;
-	size_t GetTriggerCount(const void*& pTrigger) const;
+	void AddTrigger(tbc::PhysicsManager::BodyID trigger_id, const void*);
+	virtual void FinalizeTrigger(const tbc::PhysicsTrigger* trigger);
+	const void* GetTrigger(tbc::PhysicsManager::BodyID trigger_id) const;
+	size_t GetTriggerCount(const void*& trigger) const;
 
-	virtual void SetSpawner(const Tbc::PhysicsSpawner* pSpawner);
-	const Tbc::PhysicsSpawner* GetSpawner() const;
+	virtual void SetSpawner(const tbc::PhysicsSpawner* spawner);
+	const tbc::PhysicsSpawner* GetSpawner() const;
 
-	void AddChild(ContextObject* pChild);
+	void AddChild(ContextObject* child);
 	const Array& GetChildArray() const;
 
-	bool UpdateFullPosition(const ObjectPositionalData*& pPositionalData);	// Fetch full phys position (and update object graph as necessary).
-	static bool UpdateFullPosition(ObjectPositionalData& pPosition, Tbc::PhysicsManager* pPhysicsManager, Tbc::ChunkyPhysics* pStructure);
-	void SetFullPosition(const ObjectPositionalData& pPositionalData, float pDeltaThreshold);	// Sets full phys position if structure or significant difference seen.
+	bool UpdateFullPosition(const ObjectPositionalData*& positional_data);	// Fetch full phys position (and update object graph as necessary).
+	static bool UpdateFullPosition(ObjectPositionalData& position, tbc::PhysicsManager* physics_manager, tbc::ChunkyPhysics* structure);
+	void SetFullPosition(const ObjectPositionalData& positional_data, float delta_threshold);	// Sets full phys position if structure or significant difference seen.
 	virtual void SetPositionFinalized();
-	void SetInitialTransform(const xform& pTransformation);
+	void SetInitialTransform(const xform& transformation);
 	xform GetInitialTransform() const;
-	void SetInitialPositionalData(const ObjectPositionalData& pPositionalData);
+	void SetInitialPositionalData(const ObjectPositionalData& positional_data);
 	vec3 GetPosition() const;
-	void SetRootPosition(const vec3& pPosition);
+	void SetRootPosition(const vec3& position);
 	vec3 GetRootPosition() const;
-	void SetRootOrientation(const quat& pOrientation);
-	void SetRootVelocity(const vec3& pVelocity);
+	void SetRootOrientation(const quat& orientation);
+	void SetRootVelocity(const vec3& velocity);
 	quat GetOrientation() const;
 	vec3 GetVelocity() const;
 	vec3 GetAngularVelocity() const;
@@ -114,89 +111,86 @@ public:
 	float GetForwardSpeed() const;
 	float GetMass() const;
 	float QueryMass();
-	void SetMass(float pMass);
+	void SetMass(float mass);
 	ObjectPositionalData* GetNetworkOutputGhost();
 	void DeleteNetworkOutputGhost();
 
-	void SetPhysics(Tbc::ChunkyPhysics* pStructure);
+	void SetPhysics(tbc::ChunkyPhysics* structure);
 	void ClearPhysics();
-	Tbc::ChunkyPhysics* GetPhysics() const;
-	void SetPhysicsTypeOverride(PhysicsOverride pPhysicsOverride);
-	Tbc::ChunkyBoneGeometry* GetStructureGeometry(unsigned pIndex) const;
-	Tbc::ChunkyBoneGeometry* GetStructureGeometry(Tbc::PhysicsManager::BodyID pBodyId) const;
-	bool SetEnginePower(unsigned pAspect, float pPower);
-	float GetImpact(const vec3& pGravity, const vec3& pForce, const vec3& pTorque, float pExtraMass = 0, float pSidewaysFactor = 1) const;
+	tbc::ChunkyPhysics* GetPhysics() const;
+	void SetPhysicsTypeOverride(PhysicsOverride physics_override);
+	tbc::ChunkyBoneGeometry* GetStructureGeometry(unsigned index) const;
+	tbc::ChunkyBoneGeometry* GetStructureGeometry(tbc::PhysicsManager::BodyID body_id) const;
+	bool SetEnginePower(unsigned aspect, float power);
+	float GetImpact(const vec3& gravity, const vec3& force, const vec3& torque, float extra_mass = 0, float sideways_factor = 1) const;
 
 	void ForceSend();
-	bool QueryResendTime(float pDeltaTime, bool pUnblockDelta);
+	bool QueryResendTime(float delta_time, bool unblock_delta);
 	int PopSendCount();
-	void SetSendCount(int pCount);
+	void SetSendCount(int count);
 
 	virtual void StartLoading() = 0;
 	virtual void OnLoaded();
-	virtual void OnMicroTick(float pFrameTime) = 0;
-	virtual void OnAlarm(int pAlarmId, void* pExtraData) = 0;
-	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal) = 0;
-	virtual void OnForceApplied(ContextObject* pOtherObject,
-		 Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-		 const vec3& pForce, const vec3& pTorque,
-		 const vec3& pPosition, const vec3& pRelativeVelocity) = 0;
+	virtual void OnMicroTick(float frame_time) = 0;
+	virtual void OnAlarm(int alarm_id, void* extra_data) = 0;
+	virtual void OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) = 0;
+	virtual void OnForceApplied(ContextObject* other_object,
+		 tbc::PhysicsManager::BodyID own_body_id, tbc::PhysicsManager::BodyID other_body_id,
+		 const vec3& force, const vec3& torque,
+		 const vec3& position, const vec3& relative_velocity) = 0;
 	virtual void OnTick();
 
 protected:
-	void ForceSetFullPosition(const ObjectPositionalData& pPositionalData);
-	void AttachToObject(Tbc::ChunkyBoneGeometry* pBoneGeometry1, ContextObject* pObject2, Tbc::ChunkyBoneGeometry* pBoneGeometry2, bool pSend);
-	bool IsAttachedTo(ContextObject* pObject) const;
-	void AddAttachment(ContextObject* pObject, Tbc::PhysicsManager::JointID pJoint, Tbc::PhysicsEngine* pEngine);
+	void ForceSetFullPosition(const ObjectPositionalData& positional_data);
+	void AttachToObject(tbc::ChunkyBoneGeometry* bone_geometry1, ContextObject* object2, tbc::ChunkyBoneGeometry* bone_geometry2, bool send);
+	bool IsAttachedTo(ContextObject* object) const;
+	void AddAttachment(ContextObject* object, tbc::PhysicsManager::JointID joint, tbc::PhysicsEngine* engine);
 
-	void RemoveChild(ContextObject* pChild);
-	void SetParent(ContextObject* pParent);
+	void RemoveChild(ContextObject* child);
+	void SetParent(ContextObject* parent);
 	virtual void SetupChildHandlers();
 
 	ResourceManager* GetResourceManager() const;
 
-	typedef std::vector<Tbc::PhysicsEngine*> EngineList;
-	struct Connection
-	{
-		Connection(ContextObject* pObject, Tbc::PhysicsManager::JointID pJointId, Tbc::PhysicsEngine* pEngine=0):
-			mObject(pObject),
-			mJointId(pJointId)
-		{
-			if (pEngine)
-			{
-				mEngineList.push_back(pEngine);
+	typedef std::vector<tbc::PhysicsEngine*> EngineList;
+	struct Connection {
+		Connection(ContextObject* object, tbc::PhysicsManager::JointID joint_id, tbc::PhysicsEngine* engine=0):
+			object_(object),
+			joint_id_(joint_id) {
+			if (engine) {
+				engine_list_.push_back(engine);
 			}
 		}
-		ContextObject* mObject;
-		Tbc::PhysicsManager::JointID mJointId;
-		EngineList mEngineList;
+		ContextObject* object_;
+		tbc::PhysicsManager::JointID joint_id_;
+		EngineList engine_list_;
 	};
 	typedef std::list<Connection> ConnectionList;
-	typedef std::unordered_map<Tbc::PhysicsManager::BodyID, const void*> TriggerMap;
+	typedef std::unordered_map<tbc::PhysicsManager::BodyID, const void*> TriggerMap;
 
-	ContextManager* mManager;
-	ResourceManager* mResourceManager;
-	GameObjectId mInstanceId;
-	GameObjectId mOwnerInstanceId;
-	GameObjectId mBorrowerInstanceId;
-	str mClassId;
-	NetworkObjectType mNetworkObjectType;
-	ContextObject* mParent;
-	void* mExtraData;
-	Array mChildArray;
-	TriggerMap mTriggerMap;
-	const Tbc::PhysicsSpawner* mSpawner;
-	bool mIsLoaded;
-	AttributeArray mAttributeArray;
-	Tbc::ChunkyPhysics* mPhysics;
-	PhysicsOverride mPhysicsOverride;
-	float mTotalMass;
-	float mLastSendTime;
-	ObjectPositionalData mPosition;
-	ObjectPositionalData* mNetworkOutputGhost;
-	int mSendCount;
-	bool mAllowMoveRoot;	// This is set to false when attached to someone/something else.
-	ConnectionList mConnectionList;
+	ContextManager* manager_;
+	ResourceManager* resource_manager_;
+	GameObjectId instance_id_;
+	GameObjectId owner_instance_id_;
+	GameObjectId borrower_instance_id_;
+	str class_id_;
+	NetworkObjectType network_object_type_;
+	ContextObject* parent_;
+	void* extra_data_;
+	Array child_array_;
+	TriggerMap trigger_map_;
+	const tbc::PhysicsSpawner* spawner_;
+	bool is_loaded_;
+	AttributeArray attribute_array_;
+	tbc::ChunkyPhysics* physics_;
+	PhysicsOverride physics_override_;
+	float total_mass_;
+	float last_send_time_;
+	ObjectPositionalData position_;
+	ObjectPositionalData* network_output_ghost_;
+	int send_count_;
+	bool allow_move_root_;	// This is set to false when attached to someone/something else.
+	ConnectionList connection_list_;
 
 	logclass();
 };

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // Use LogDecorator and pass typeid(class) as constructor parameter.
@@ -10,15 +10,14 @@
 
 #include <typeinfo>
 #include <vector>
-#include "LepraTypes.h"
-#include "LogLevel.h"
-#include "LogType.h"
-#include "String.h"
+#include "lepratypes.h"
+#include "loglevel.h"
+#include "logtype.h"
+#include "string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -27,31 +26,30 @@ class SpinLock;
 
 
 
-class Logger
-{
+class Logger {
 public:
-	Logger(const str& pName, Logger* pParent, LogLevel pLevel = LEVEL_INFO);
+	Logger(const str& name, Logger* parent, LogLevel level = kLevelInfo);
 	virtual ~Logger();
-	void SetupBasicListeners(LogListener* pConsole = 0, LogListener* pDebug = 0,
-		LogListener* pFile = 0, LogListener* pPerformance = 0, LogListener* pMem = 0);
-	void AddListener(LogListener* pLogger, LogLevel pLevel);
-	void RemoveListener(LogListener* pLogger);
-	LogListener* GetListener(const str& pName) const;
+	void SetupBasicListeners(LogListener* console = 0, LogListener* debug = 0,
+		LogListener* file = 0, LogListener* performance = 0, LogListener* mem = 0);
+	void AddListener(LogListener* logger, LogLevel level);
+	void RemoveListener(LogListener* logger);
+	LogListener* GetListener(const str& name) const;
 	const str& GetName() const;
 	LogLevel GetLevelThreashold() const;
-	void SetLevelThreashold(LogLevel pLevel);
-	void Print(const str& pAccount, const str& pMessage, LogLevel pLevel = LEVEL_INFO);
-	void RawPrint(const str& pMessage, LogLevel pLevel = LEVEL_INFO);
+	void SetLevelThreashold(LogLevel level);
+	void Print(const str& account, const str& message, LogLevel level = kLevelInfo);
+	void RawPrint(const str& message, LogLevel level = kLevelInfo);
 
 private:
-	void DoPrint(const Logger* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel = LEVEL_INFO);
-	void DoRawPrint(const str& pMessage, LogLevel pLevel = LEVEL_INFO);
+	void DoPrint(const Logger* originator, const str& account, const str& message, LogLevel level = kLevelInfo);
+	void DoRawPrint(const str& message, LogLevel level = kLevelInfo);
 
-	str mName;
-	Logger* mParent;
-	std::vector<LogListener*> mLoggerList[LEVEL_TYPE_COUNT];
-	SpinLock* mLoggerListLock;
-	LogLevel mLevel;
+	str name_;
+	Logger* parent_;
+	std::vector<LogListener*> logger_list_[kLevelTypeCount];
+	SpinLock* logger_list_lock_;
+	LogLevel level_;
 };
 
 

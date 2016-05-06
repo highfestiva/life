@@ -10,88 +10,77 @@
 	This is the 2D-version of AABB.
 
 	The size vector contains half(!) the width (x), the height (y) of the rect.
-	All are positive numbers. With other words: The size vector is a 
+	All are positive numbers. With other words: The size vector is a
 	vector from the center of the rect to corner (xmax, ymax).
 */
 
 #pragma once
 
-#include "Vector2D.h"
+#include "vector2d.h"
 
 #define AABR_TEMPLATE template<class _TVarType>
 #define AABR_QUAL AABR<_TVarType>
 
-namespace Lepra
-{
+namespace lepra {
 
-AABR_TEMPLATE class AABR
-{
+AABR_TEMPLATE class AABR {
 public:
 	inline AABR();
-	inline AABR(_TVarType pX, _TVarType pY, _TVarType pWidth, _TVarType pHeight);
-	inline AABR(const Vector2D<_TVarType>& pPosition, const Vector2D<_TVarType>& pSize);
+	inline AABR(_TVarType _x, _TVarType _y, _TVarType width, _TVarType height);
+	inline AABR(const Vector2D<_TVarType>& position, const Vector2D<_TVarType>& size);
 
 	// The position is always the center of the box.
-	inline void SetPosition(const Vector2D<_TVarType>& pPosition);
+	inline void SetPosition(const Vector2D<_TVarType>& position);
 	inline const Vector2D<_TVarType>& GetPosition() const;
-	inline void Move(const Vector2D<_TVarType>& pOffset);
+	inline void Move(const Vector2D<_TVarType>& offset);
 
-	inline void SetSize(const Vector2D<_TVarType>& pSize);
+	inline void SetSize(const Vector2D<_TVarType>& size);
 	inline const Vector2D<_TVarType>& GetSize() const;
 
 	inline _TVarType GetArea() const;
 
 private:
-	Vector2D<_TVarType> mPosition;
-	Vector2D<_TVarType> mSize;
+	Vector2D<_TVarType> position_;
+	Vector2D<_TVarType> size_;
 };
 
 AABR_TEMPLATE AABR_QUAL::AABR() :
-	mPosition(0, 0),
-	mSize(0, 0)
-{
+	position_(0, 0),
+	size_(0, 0) {
 }
 
-AABR_TEMPLATE AABR_QUAL::AABR(_TVarType pX, _TVarType pY, _TVarType pWidth, _TVarType pHeight):
-	mPosition(pX, pY),
-	mSize(pWidth, pHeight)
-{
+AABR_TEMPLATE AABR_QUAL::AABR(_TVarType _x, _TVarType _y, _TVarType width, _TVarType height):
+	position_(_x, _y),
+	size_(width, height) {
 }
 
-AABR_TEMPLATE AABR_QUAL::AABR(const Vector2D<_TVarType>& pPosition, const Vector2D<_TVarType>& pSize):
-	mPosition(pPosition),
-	mSize(pSize)
-{
+AABR_TEMPLATE AABR_QUAL::AABR(const Vector2D<_TVarType>& position, const Vector2D<_TVarType>& size):
+	position_(position),
+	size_(size) {
 }
 
-AABR_TEMPLATE void AABR_QUAL::SetPosition(const Vector2D<_TVarType>& pPosition)
-{
-	mPosition.Set(pPosition);
+AABR_TEMPLATE void AABR_QUAL::SetPosition(const Vector2D<_TVarType>& position) {
+	position_.Set(position);
 }
 
-AABR_TEMPLATE const Vector2D<_TVarType>& AABR_QUAL::GetPosition() const
-{
-	return mPosition;
+AABR_TEMPLATE const Vector2D<_TVarType>& AABR_QUAL::GetPosition() const {
+	return position_;
 }
 
-AABR_TEMPLATE void AABR_QUAL::Move(const Vector2D<_TVarType>& pOffset)
-{
-	mPosition += pOffset;
+AABR_TEMPLATE void AABR_QUAL::Move(const Vector2D<_TVarType>& offset) {
+	position_ += offset;
 }
 
-AABR_TEMPLATE void AABR<_TVarType>::SetSize(const Vector2D<_TVarType>& pSize)
-{
-	mSize.Set(pSize);
+AABR_TEMPLATE void AABR<_TVarType>::SetSize(const Vector2D<_TVarType>& size) {
+	size_.Set(size);
 }
 
-AABR_TEMPLATE const Vector2D<_TVarType>& AABR_QUAL::GetSize() const
-{
-	return mSize;
+AABR_TEMPLATE const Vector2D<_TVarType>& AABR_QUAL::GetSize() const {
+	return size_;
 }
 
-AABR_TEMPLATE _TVarType AABR_QUAL::GetArea() const
-{
-	return mSize.x * mSize.y * 4;
+AABR_TEMPLATE _TVarType AABR_QUAL::GetArea() const {
+	return size_.x * size_.y * 4;
 }
 
 }

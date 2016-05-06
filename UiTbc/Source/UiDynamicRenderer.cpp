@@ -1,26 +1,23 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiDynamicRenderer.h"
+#include "../include/uidynamicrenderer.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-DynamicRenderer::DynamicRenderer(Renderer* pRenderer):
-	mRenderer(pRenderer)
-{
+DynamicRenderer::DynamicRenderer(Renderer* renderer):
+	renderer_(renderer) {
 }
 
-DynamicRenderer::~DynamicRenderer()
-{
+DynamicRenderer::~DynamicRenderer() {
 }
 
 

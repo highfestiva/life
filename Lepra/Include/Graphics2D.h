@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,130 +7,114 @@
 
 #pragma once
 
-#include "GammaLookup.h"
-#include "Math.h"
+#include "gammalookup.h"
+#include "math.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class PixelCoord
-{
+class PixelCoord {
 public:
 	PixelCoord() :
 		x(0),
-		y(0)
-	{
+		y(0) {
 	}
 
-	PixelCoord(int pX, int pY) :
-		x(pX),
-		y(pY)
-	{
+	PixelCoord(int _x, int _y) :
+		x(_x),
+		y(_y) {
 	}
 
-	PixelCoord(const PixelCoord& pCoords) :
-		x(pCoords.x),
-		y(pCoords.y)
-	{
+	PixelCoord(const PixelCoord& coords) :
+		x(coords.x),
+		y(coords.y) {
 	}
 
-	inline PixelCoord operator = (const PixelCoord& pCoords);
-	inline PixelCoord operator += (const PixelCoord& pCoords);
-	inline PixelCoord operator -= (const PixelCoord& pCoords);
-	inline PixelCoord operator + (const PixelCoord& pCoords) const;
-	inline PixelCoord operator - (const PixelCoord& pCoords) const;
-	inline PixelCoord operator * (int pFactor) const;
-	inline PixelCoord operator / (int pDividend) const;
+	inline PixelCoord operator = (const PixelCoord& coords);
+	inline PixelCoord operator += (const PixelCoord& coords);
+	inline PixelCoord operator -= (const PixelCoord& coords);
+	inline PixelCoord operator + (const PixelCoord& coords) const;
+	inline PixelCoord operator - (const PixelCoord& coords) const;
+	inline PixelCoord operator * (int factor) const;
+	inline PixelCoord operator / (int dividend) const;
 
-	inline bool operator == (const PixelCoord& pCoords) const;
-	inline bool operator != (const PixelCoord& pCoords) const;
+	inline bool operator == (const PixelCoord& coords) const;
+	inline bool operator != (const PixelCoord& coords) const;
 
-	inline float GetDistance(const PixelCoord& pCoords) const;
+	inline float GetDistance(const PixelCoord& coords) const;
 
 	int x, y;
 };
 
-PixelCoord PixelCoord::operator = (const PixelCoord& pCoords)
-{
-	x = pCoords.x;
-	y = pCoords.y;
+PixelCoord PixelCoord::operator = (const PixelCoord& coords) {
+	x = coords.x;
+	y = coords.y;
 	return *this;
 }
 
-PixelCoord PixelCoord::operator += (const PixelCoord& pCoords)
-{
-	x += pCoords.x;
-	y += pCoords.y;
+PixelCoord PixelCoord::operator += (const PixelCoord& coords) {
+	x += coords.x;
+	y += coords.y;
 	return *this;
 }
 
-PixelCoord PixelCoord::operator -= (const PixelCoord& pCoords)
-{
-	x -= pCoords.x;
-	y -= pCoords.y;
+PixelCoord PixelCoord::operator -= (const PixelCoord& coords) {
+	x -= coords.x;
+	y -= coords.y;
 	return *this;
 }
 
-PixelCoord PixelCoord::operator + (const PixelCoord& pCoords) const
-{
-	PixelCoord lTemp(*this);
-	lTemp += pCoords;
-	return lTemp;
+PixelCoord PixelCoord::operator + (const PixelCoord& coords) const {
+	PixelCoord temp(*this);
+	temp += coords;
+	return temp;
 }
 
-PixelCoord PixelCoord::operator - (const PixelCoord& pCoords) const
-{
-	PixelCoord lTemp(*this);
-	lTemp -= pCoords;
-	return lTemp;
+PixelCoord PixelCoord::operator - (const PixelCoord& coords) const {
+	PixelCoord temp(*this);
+	temp -= coords;
+	return temp;
 }
 
-PixelCoord PixelCoord::operator*(int pFactor) const
-{
-	PixelCoord lTemp(*this);
-	lTemp.x *= pFactor;
-	lTemp.y *= pFactor;
-	return lTemp;
+PixelCoord PixelCoord::operator*(int factor) const {
+	PixelCoord temp(*this);
+	temp.x *= factor;
+	temp.y *= factor;
+	return temp;
 }
 
-PixelCoord PixelCoord::operator/(int pDividend) const
-{
-	PixelCoord lTemp(*this);
-	lTemp.x /= pDividend;
-	lTemp.y /= pDividend;
-	return lTemp;
+PixelCoord PixelCoord::operator/(int dividend) const {
+	PixelCoord temp(*this);
+	temp.x /= dividend;
+	temp.y /= dividend;
+	return temp;
 }
 
-bool PixelCoord::operator == (const PixelCoord& pCoords) const
-{
-	return (x == pCoords.x && y == pCoords.y);
+bool PixelCoord::operator == (const PixelCoord& coords) const {
+	return (x == coords.x && y == coords.y);
 }
 
-bool PixelCoord::operator != (const PixelCoord& pCoords) const
-{
-	return (x != pCoords.x || y != pCoords.y);
+bool PixelCoord::operator != (const PixelCoord& coords) const {
+	return (x != coords.x || y != coords.y);
 }
 
-float PixelCoord::GetDistance(const PixelCoord& pCoords) const
-{
-	int lDX = x-pCoords.x;
-	int lDY = y-pCoords.y;
-	return (::sqrt((float)(lDX*lDX + lDY*lDY)));
+float PixelCoord::GetDistance(const PixelCoord& coords) const {
+	int dx = x-coords.x;
+	int dy = y-coords.y;
+	return (::sqrt((float)(dx*dx + dy*dy)));
 }
 
 
 
-class PixelRect
-{
+class PixelRect {
 public:
 	inline PixelRect();
-	inline PixelRect(const PixelRect& pRect);
-	inline PixelRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight);
-	inline PixelRect(int pLeft, int pTop, int pRight, int pBottom);
+	inline PixelRect(const PixelRect& rect);
+	inline PixelRect(const PixelCoord& top_left, const PixelCoord& bottom_right);
+	inline PixelRect(int left, int top, int right, int bottom);
 
 	inline int GetWidth() const;
 	inline int GetHeight() const;
@@ -140,182 +124,155 @@ public:
 	inline int GetCenterY() const;
 
 	inline bool IsInside(int x, int y) const;
-	inline bool Overlap(const PixelRect& pRect) const;
-	inline bool VerticalOverlap(const PixelRect& pRect) const;
-	inline bool HorizontalOverlap(const PixelRect& pRect) const;
+	inline bool Overlap(const PixelRect& rect) const;
+	inline bool VerticalOverlap(const PixelRect& rect) const;
+	inline bool HorizontalOverlap(const PixelRect& rect) const;
 
-	inline PixelRect GetOverlap(const PixelRect& pRect) const;
+	inline PixelRect GetOverlap(const PixelRect& rect) const;
 
-	inline void Shrink(int pNumPixels);
-	inline void Enlarge(int pNumPixels);
+	inline void Shrink(int num_pixels);
+	inline void Enlarge(int num_pixels);
 	inline void Offset(int x, int y);
-	inline void Set(int pLeft, int pTop, int pRight, int pBottom);
+	inline void Set(int left, int top, int right, int bottom);
 
-	inline bool operator==(const PixelRect& pRect) const;
+	inline bool operator==(const PixelRect& rect) const;
 
-	int mTop;
-	int mBottom;
-	int mLeft;
-	int mRight;
+	int top_;
+	int bottom_;
+	int left_;
+	int right_;
 };
 
-PixelRect::PixelRect()
-{
-	mTop = 0;
-	mBottom = 0;
-	mLeft = 0;
-	mRight = 0;
+PixelRect::PixelRect() {
+	top_ = 0;
+	bottom_ = 0;
+	left_ = 0;
+	right_ = 0;
 }
 
-PixelRect::PixelRect(const PixelRect& pRect) :
-	mTop(pRect.mTop),
-	mBottom(pRect.mBottom),
-	mLeft(pRect.mLeft),
-	mRight(pRect.mRight)
-{
+PixelRect::PixelRect(const PixelRect& rect) :
+	top_(rect.top_),
+	bottom_(rect.bottom_),
+	left_(rect.left_),
+	right_(rect.right_) {
 }
 
-PixelRect::PixelRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight) :
-	mTop(pTopLeft.y),
-	mBottom(pBottomRight.y),
-	mLeft(pTopLeft.x),
-	mRight(pBottomRight.x)
-{
+PixelRect::PixelRect(const PixelCoord& top_left, const PixelCoord& bottom_right) :
+	top_(top_left.y),
+	bottom_(bottom_right.y),
+	left_(top_left.x),
+	right_(bottom_right.x) {
 }
 
-PixelRect::PixelRect(int pLeft, int pTop, int pRight, int pBottom) :
-	mTop(pTop),
-	mBottom(pBottom),
-	mLeft(pLeft),
-	mRight(pRight)
-{
+PixelRect::PixelRect(int left, int top, int right, int bottom) :
+	top_(top),
+	bottom_(bottom),
+	left_(left),
+	right_(right) {
 }
 
-int PixelRect::GetWidth() const
-{
-	return (mRight - mLeft);
+int PixelRect::GetWidth() const {
+	return (right_ - left_);
 }
 
-int PixelRect::GetHeight() const
-{
-	return (mBottom - mTop);
+int PixelRect::GetHeight() const {
+	return (bottom_ - top_);
 }
 
-PixelCoord PixelRect::GetSize() const
-{
+PixelCoord PixelRect::GetSize() const {
 	return (PixelCoord(GetWidth(), GetHeight()));
 }
 
-int PixelRect::GetCenterX() const
-{
-	return mLeft + (GetWidth() >> 1);
+int PixelRect::GetCenterX() const {
+	return left_ + (GetWidth() >> 1);
 }
 
-int PixelRect::GetCenterY() const
-{
-	return mTop + (GetHeight() >> 1);
+int PixelRect::GetCenterY() const {
+	return top_ + (GetHeight() >> 1);
 }
 
-bool PixelRect::IsInside(int x, int y) const
-{
-	if (x >= mLeft && x < mRight && y >= mTop && y < mBottom)
-	{
+bool PixelRect::IsInside(int x, int y) const {
+	if (x >= left_ && x < right_ && y >= top_ && y < bottom_) {
 		return true;
 	}
 
 	return false;
 }
 
-bool PixelRect::Overlap(const PixelRect& pRect) const
-{
-	if (pRect.mLeft > mRight ||
-	   pRect.mRight < mLeft ||
-	   pRect.mTop > mBottom ||
-	   pRect.mBottom < mTop)
-	{
+bool PixelRect::Overlap(const PixelRect& rect) const {
+	if (rect.left_ > right_ ||
+	   rect.right_ < left_ ||
+	   rect.top_ > bottom_ ||
+	   rect.bottom_ < top_) {
 		return false;
 	}
 
 	return true;
 }
 
-bool PixelRect::VerticalOverlap(const PixelRect& pRect) const
-{
-	if (pRect.mTop > mBottom ||
-	   pRect.mBottom < mTop)
-	{
+bool PixelRect::VerticalOverlap(const PixelRect& rect) const {
+	if (rect.top_ > bottom_ ||
+	   rect.bottom_ < top_) {
 		return false;
 	}
 
 	return true;
 }
 
-bool PixelRect::HorizontalOverlap(const PixelRect& pRect) const
-{
-	if (pRect.mLeft > mRight ||
-	   pRect.mRight < mLeft)
-	{
+bool PixelRect::HorizontalOverlap(const PixelRect& rect) const {
+	if (rect.left_ > right_ ||
+	   rect.right_ < left_) {
 		return false;
 	}
 
 	return true;
 }
 
-PixelRect PixelRect::GetOverlap(const PixelRect& pRect) const
-{
-	PixelRect lRect(*this);
-	if (pRect.mLeft > lRect.mLeft)
-	{
-		lRect.mLeft = pRect.mLeft;
+PixelRect PixelRect::GetOverlap(const PixelRect& rect) const {
+	PixelRect _rect(*this);
+	if (rect.left_ > _rect.left_) {
+		_rect.left_ = rect.left_;
 	}
-	if (pRect.mRight < lRect.mRight)
-	{
-		lRect.mRight = pRect.mRight;
+	if (rect.right_ < _rect.right_) {
+		_rect.right_ = rect.right_;
 	}
-	if (pRect.mTop > lRect.mTop)
-	{
-		lRect.mTop = pRect.mTop;
+	if (rect.top_ > _rect.top_) {
+		_rect.top_ = rect.top_;
 	}
-	if (pRect.mBottom < lRect.mBottom)
-	{
-		lRect.mBottom = pRect.mBottom;
+	if (rect.bottom_ < _rect.bottom_) {
+		_rect.bottom_ = rect.bottom_;
 	}
-	return lRect;
+	return _rect;
 }
 
-void PixelRect::Set(int pLeft, int pTop, int pRight, int pBottom)
-{
-	mTop = pTop;
-	mBottom = pBottom;
-	mLeft = pLeft;
-	mRight = pRight;
+void PixelRect::Set(int left, int top, int right, int bottom) {
+	top_ = top;
+	bottom_ = bottom;
+	left_ = left;
+	right_ = right;
 }
 
-bool PixelRect::operator==(const PixelRect& pRect) const
-{
-	return (mTop == pRect.mTop && mBottom == pRect.mBottom &&
-		mLeft == pRect.mLeft && mRight == pRect.mRight);
+bool PixelRect::operator==(const PixelRect& rect) const {
+	return (top_ == rect.top_ && bottom_ == rect.bottom_ &&
+		left_ == rect.left_ && right_ == rect.right_);
 }
 
-void PixelRect::Shrink(int pNumPixels)
-{
-	mTop		+= pNumPixels;
-	mBottom	-= pNumPixels;
-	mLeft		+= pNumPixels;
-	mRight	-= pNumPixels;
+void PixelRect::Shrink(int num_pixels) {
+	top_		+= num_pixels;
+	bottom_	-= num_pixels;
+	left_		+= num_pixels;
+	right_	-= num_pixels;
 }
 
-void PixelRect::Enlarge(int pNumPixels)
-{
-	Shrink(-pNumPixels);
+void PixelRect::Enlarge(int num_pixels) {
+	Shrink(-num_pixels);
 }
 
-void PixelRect::Offset(int x, int y)
-{
-	mTop		+= y;
-	mBottom	+= y;
-	mLeft		+= x;
-	mRight	+= x;
+void PixelRect::Offset(int x, int y) {
+	top_		+= y;
+	bottom_	+= y;
+	left_		+= x;
+	right_	+= x;
 }
 
 
@@ -351,32 +308,31 @@ void PixelRect::Offset(int x, int y)
 #define LIGHT_MAGENTA	Color(255, 64, 255)
 #define LIGHT_CYAN	Color(64, 255, 255)
 
-class Color
-{
+class Color {
 public:
-	
+
 	inline Color();
-	inline Color(const Color& pColor);
-	inline Color(uint8 pRed, uint8 pGreen, uint8 pBlue);
-	inline Color(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pColorIndex);
-	static inline Color CreateColor(float pRed, float pGreen, float pBlue, float pAlpha);
+	inline Color(const Color& color);
+	inline Color(uint8 red, uint8 green, uint8 blue);
+	inline Color(uint8 red, uint8 green, uint8 blue, uint8 color_index);
+	static inline Color CreateColor(float red, float green, float blue, float alpha);
 
 	// Interpolation constructor.
-	inline Color(const Color& pColor1, const Color& pColor2, float t);
+	inline Color(const Color& color1, const Color& color2, float t);
 
 	// Set()-overloads for all standard types. This makes life easier when setting the color,
 	// because you don't have to typecast all variables to uint8 all the time.
 	// The float overloads assumes that the rgb values are in the range [0, 1].
 	// All integer types in the range [0, 255].
-	inline void Set(int8 pRed, int8 pGreen, int8 pBlue, int8 pColorIndex);
-	inline void Set(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pColorIndex);
-	inline void Set(int16   pRed,  int16   pGreen,  int16   pBlue,  int16   pColorIndex);
-	inline void Set(uint16  pRed, uint16  pGreen, uint16  pBlue, uint16  pColorIndex);
-	inline void Set(int32 pRed, int32 pGreen, int32 pBlue, int32 pColorIndex);
-	inline void Set(uint32 pRed, uint32 pGreen, uint32 pBlue, uint32 pColorIndex);
-	inline void Set(int64   pRed,  int64   pGreen,  int64   pBlue,  int64   pColorIndex);
-	inline void Set(uint64  pRed, uint64  pGreen, uint64  pBlue, uint64  pColorIndex);
-	inline void Set(float pRed,  float pGreen,  float pBlue,  float pColorIndex);
+	inline void Set(int8 red, int8 green, int8 blue, int8 color_index);
+	inline void Set(uint8 red, uint8 green, uint8 blue, uint8 color_index);
+	inline void Set(int16   red,  int16   green,  int16   blue,  int16   color_index);
+	inline void Set(uint16  red, uint16  green, uint16  blue, uint16  color_index);
+	inline void Set(int32 red, int32 green, int32 blue, int32 color_index);
+	inline void Set(uint32 red, uint32 green, uint32 blue, uint32 color_index);
+	inline void Set(int64   red,  int64   green,  int64   blue,  int64   color_index);
+	inline void Set(uint64  red, uint64  green, uint64  blue, uint64  color_index);
+	inline void Set(float red,  float green,  float blue,  float color_index);
 
 	inline float GetRf() const;
 	inline float GetGf() const;
@@ -384,345 +340,303 @@ public:
 	inline float GetAf() const;
 	inline uint32 To32() const;
 
-	inline Color operator = (const Color& pColor);
-	
-	// The following operators will operate on all color components 
+	inline Color operator = (const Color& color);
+
+	// The following operators will operate on all color components
 	// (Red, Green, Blue) but NOT(!) the alpha channel.
-	inline Color operator += (const Color& pColor);
-	inline Color operator + (const Color& pColor) const;
-	inline Color operator -= (const Color& pColor);
-	inline Color operator - (const Color& pColor) const;
+	inline Color operator += (const Color& color);
+	inline Color operator + (const Color& color) const;
+	inline Color operator -= (const Color& color);
+	inline Color operator - (const Color& color) const;
 
-	inline Color operator += (int pValue);
-	inline Color operator +  (int pValue) const;
-	inline Color operator -= (int pValue);
-	inline Color operator -  (int pValue) const;
-	inline Color operator *= (int pScalar);
-	inline Color operator *  (int pScalar) const;
-	inline Color operator /= (int pScalar);
-	inline Color operator /  (int pScalar) const;
-	inline Color operator *= (float pScalar);
-	inline Color operator *  (float pScalar) const;
-	inline Color operator /= (float pScalar);
-	inline Color operator /  (float pScalar) const;
+	inline Color operator += (int value);
+	inline Color operator +  (int value) const;
+	inline Color operator -= (int value);
+	inline Color operator -  (int value) const;
+	inline Color operator *= (int scalar);
+	inline Color operator *  (int scalar) const;
+	inline Color operator /= (int scalar);
+	inline Color operator /  (int scalar) const;
+	inline Color operator *= (float scalar);
+	inline Color operator *  (float scalar) const;
+	inline Color operator /= (float scalar);
+	inline Color operator /  (float scalar) const;
 
-	inline bool operator==(const Color& pOther) const;
-	inline bool operator!=(const Color& pOther) const;
+	inline bool operator==(const Color& other) const;
+	inline bool operator!=(const Color& other) const;
 
 	inline int SumRgb() const;
 
-	uint8 mRed;
-	uint8 mGreen;
-	uint8 mBlue;
-	uint8 mAlpha;	// Only used in 8-bit color mode.
+	uint8 red_;
+	uint8 green_;
+	uint8 blue_;
+	uint8 alpha_;	// Only used in 8-bit color mode.
 
 private:
 	inline int Max(int v1, int v2) const;
 	inline int Min(int v1, int v2) const;
 };
 
-Color::Color()
-{
-	mRed   = 0;
-	mGreen = 0;
-	mBlue  = 0;
-	mAlpha = 255;	// Treat as alpha.
+Color::Color() {
+	red_   = 0;
+	green_ = 0;
+	blue_  = 0;
+	alpha_ = 255;	// Treat as alpha.
 }
 
-Color::Color(const Color& pColor)
-{
-	mRed   = pColor.mRed;
-	mGreen = pColor.mGreen;
-	mBlue  = pColor.mBlue;
-	mAlpha = pColor.mAlpha;
+Color::Color(const Color& color) {
+	red_   = color.red_;
+	green_ = color.green_;
+	blue_  = color.blue_;
+	alpha_ = color.alpha_;
 }
 
-Color::Color(uint8 pRed, uint8 pGreen, uint8 pBlue)
-{
-	mRed   = pRed;
-	mGreen = pGreen;
-	mBlue  = pBlue;
-	mAlpha = 255;
+Color::Color(uint8 red, uint8 green, uint8 blue) {
+	red_   = red;
+	green_ = green;
+	blue_  = blue;
+	alpha_ = 255;
 }
 
-Color::Color(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pColorIndex)
-{
-	mRed   = pRed;
-	mGreen = pGreen;
-	mBlue  = pBlue;
-	mAlpha = pColorIndex;
+Color::Color(uint8 red, uint8 green, uint8 blue, uint8 color_index) {
+	red_   = red;
+	green_ = green;
+	blue_  = blue;
+	alpha_ = color_index;
 }
 
-Color Color::CreateColor(float pRed, float pGreen, float pBlue, float pAlpha)
-{
+Color Color::CreateColor(float red, float green, float blue, float alpha) {
 	Color c;
-	c.Set(pRed, pGreen, pBlue, pAlpha);
+	c.Set(red, green, blue, alpha);
 	return c;
 }
 
-Color::Color(const Color& pColor1, const Color& pColor2, float t)
-{
-	const float r1 = GammaLookup::GammaToLinearFloat(pColor1.mRed);
-	const float g1 = GammaLookup::GammaToLinearFloat(pColor1.mGreen);
-	const float b1 = GammaLookup::GammaToLinearFloat(pColor1.mBlue);
-	const float r2 = GammaLookup::GammaToLinearFloat(pColor2.mRed);
-	const float g2 = GammaLookup::GammaToLinearFloat(pColor2.mGreen);
-	const float b2 = GammaLookup::GammaToLinearFloat(pColor2.mBlue);
+Color::Color(const Color& color1, const Color& color2, float t) {
+	const float r1 = GammaLookup::GammaToLinearFloat(color1.red_);
+	const float g1 = GammaLookup::GammaToLinearFloat(color1.green_);
+	const float b1 = GammaLookup::GammaToLinearFloat(color1.blue_);
+	const float r2 = GammaLookup::GammaToLinearFloat(color2.red_);
+	const float g2 = GammaLookup::GammaToLinearFloat(color2.green_);
+	const float b2 = GammaLookup::GammaToLinearFloat(color2.blue_);
 
-	mRed   = GammaLookup::LinearToGamma((int)Math::Lerp(r1, r2, t));
-	mGreen = GammaLookup::LinearToGamma((int)Math::Lerp(g1, g2, t));
-	mBlue  = GammaLookup::LinearToGamma((int)Math::Lerp(b1, b2, t));
-	mAlpha = (uint8)Math::Lerp((float)pColor1.mAlpha, (1/255.0f)*pColor1.mAlpha*pColor2.mAlpha, t);
+	red_   = GammaLookup::LinearToGamma((int)Math::Lerp(r1, r2, t));
+	green_ = GammaLookup::LinearToGamma((int)Math::Lerp(g1, g2, t));
+	blue_  = GammaLookup::LinearToGamma((int)Math::Lerp(b1, b2, t));
+	alpha_ = (uint8)Math::Lerp((float)color1.alpha_, (1/255.0f)*color1.alpha_*color2.alpha_, t);
 }
 
-int Color::Max(int v1, int v2) const
-{
+int Color::Max(int v1, int v2) const {
 	return (v1 > v2 ? v1 : v2);
 }
 
-int Color::Min(int v1, int v2) const
-{
+int Color::Min(int v1, int v2) const {
 	return (v1 < v2 ? v1 : v2);
 }
 
-void Color::Set(int8 pRed, int8 pGreen, int8 pBlue, int8 pColorIndex)
-{
-	Set((uint8)pRed, (uint8)pGreen, (uint8)pBlue, (uint8)pColorIndex);
+void Color::Set(int8 red, int8 green, int8 blue, int8 color_index) {
+	Set((uint8)red, (uint8)green, (uint8)blue, (uint8)color_index);
 }
 
-void Color::Set(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pColorIndex)
-{
-	mRed	= pRed;
-	mGreen	= pGreen;
-	mBlue	= pBlue;
-	mAlpha	= pColorIndex;
+void Color::Set(uint8 red, uint8 green, uint8 blue, uint8 color_index) {
+	red_	= red;
+	green_	= green;
+	blue_	= blue;
+	alpha_	= color_index;
 }
 
-void Color::Set(int16 pRed, int16 pGreen, int16 pBlue, int16 pColorIndex)
-{
-	Set((uint8)pRed, (uint8)pGreen, (uint8)pBlue, (uint8)pColorIndex);
+void Color::Set(int16 red, int16 green, int16 blue, int16 color_index) {
+	Set((uint8)red, (uint8)green, (uint8)blue, (uint8)color_index);
 }
 
-void Color::Set(uint16 pRed, uint16 pGreen, uint16 pBlue, uint16 pColorIndex)
-{
-	Set((uint8)pRed, (uint8)pGreen, (uint8)pBlue, (uint8)pColorIndex);
+void Color::Set(uint16 red, uint16 green, uint16 blue, uint16 color_index) {
+	Set((uint8)red, (uint8)green, (uint8)blue, (uint8)color_index);
 }
 
-void Color::Set(int32 pRed, int32 pGreen, int32 pBlue, int32 pColorIndex)
-{
-	Set((uint8)pRed, (uint8)pGreen, (uint8)pBlue, (uint8)pColorIndex);
+void Color::Set(int32 red, int32 green, int32 blue, int32 color_index) {
+	Set((uint8)red, (uint8)green, (uint8)blue, (uint8)color_index);
 }
 
-void Color::Set(uint32 pRed, uint32 pGreen, uint32 pBlue, uint32 pColorIndex)
-{
-	Set((uint8)pRed, (uint8)pGreen, (uint8)pBlue, (uint8)pColorIndex);
+void Color::Set(uint32 red, uint32 green, uint32 blue, uint32 color_index) {
+	Set((uint8)red, (uint8)green, (uint8)blue, (uint8)color_index);
 }
 
-void Color::Set(int64 pRed, int64 pGreen, int64 pBlue, int64 pColorIndex)
-{
-	Set((uint8)pRed, (uint8)pGreen, (uint8)pBlue, (uint8)pColorIndex);
+void Color::Set(int64 red, int64 green, int64 blue, int64 color_index) {
+	Set((uint8)red, (uint8)green, (uint8)blue, (uint8)color_index);
 }
 
-void Color::Set(uint64 pRed, uint64 pGreen, uint64 pBlue, uint64 pColorIndex)
-{
-	Set((uint8)pRed, (uint8)pGreen, (uint8)pBlue, (uint8)pColorIndex);
+void Color::Set(uint64 red, uint64 green, uint64 blue, uint64 color_index) {
+	Set((uint8)red, (uint8)green, (uint8)blue, (uint8)color_index);
 }
 
-void Color::Set(float pRed, float pGreen, float pBlue, float pColorIndex)
-{
-	Set((uint8)(pRed * 255.0f), 
-		(uint8)(pGreen * 255.0f), 
-		(uint8)(pBlue * 255.0f), 
-		(uint8)(pColorIndex * 255.0f)); // Color index treated as alpha channel.
+void Color::Set(float red, float green, float blue, float color_index) {
+	Set((uint8)(red * 255.0f),
+		(uint8)(green * 255.0f),
+		(uint8)(blue * 255.0f),
+		(uint8)(color_index * 255.0f)); // Color index treated as alpha channel.
 }
 
-float Color::GetRf() const
-{
-	return (mRed/255.0f);
+float Color::GetRf() const {
+	return (red_/255.0f);
 }
 
-float Color::GetGf() const
-{
-	return (mGreen/255.0f);
+float Color::GetGf() const {
+	return (green_/255.0f);
 }
 
-float Color::GetBf() const
-{
-	return (mBlue/255.0f);
+float Color::GetBf() const {
+	return (blue_/255.0f);
 }
 
-float Color::GetAf() const
-{
-	return (mAlpha/255.0f);
+float Color::GetAf() const {
+	return (alpha_/255.0f);
 }
 
-uint32 Color::To32() const
-{
+uint32 Color::To32() const {
 	typedef uint32 u;
-	return ((((u)mRed)<<24) + (((u)mGreen)<<16) + (((u)mBlue)<<8) + (u)mAlpha);
+	return ((((u)red_)<<24) + (((u)green_)<<16) + (((u)blue_)<<8) + (u)alpha_);
 }
 
-Color Color::operator = (const Color& pColor)
-{
-	mRed   = pColor.mRed;
-	mGreen = pColor.mGreen;
-	mBlue  = pColor.mBlue;
-	mAlpha = pColor.mAlpha;
+Color Color::operator = (const Color& color) {
+	red_   = color.red_;
+	green_ = color.green_;
+	blue_  = color.blue_;
+	alpha_ = color.alpha_;
 	return *this;
 }
 
-Color Color::operator += (const Color& pColor)
-{
-	mRed   = (uint8)Min(255, (int)mRed   + (int)pColor.mRed);
-	mGreen = (uint8)Min(255, (int)mGreen + (int)pColor.mGreen);
-	mBlue  = (uint8)Min(255, (int)mBlue  + (int)pColor.mBlue);
-	mAlpha = (uint8)Min(255, (int)mAlpha + (int)pColor.mAlpha);
+Color Color::operator += (const Color& color) {
+	red_   = (uint8)Min(255, (int)red_   + (int)color.red_);
+	green_ = (uint8)Min(255, (int)green_ + (int)color.green_);
+	blue_  = (uint8)Min(255, (int)blue_  + (int)color.blue_);
+	alpha_ = (uint8)Min(255, (int)alpha_ + (int)color.alpha_);
 	return *this;
 }
 
-Color Color::operator + (const Color& pColor) const
-{
-	return Color((uint8)Min(255, (int)mRed   + (int)pColor.mRed),
-		         (uint8)Min(255, (int)mGreen + (int)pColor.mGreen),
-				 (uint8)Min(255, (int)mBlue  + (int)pColor.mBlue),
-				 (uint8)Min(255, (int)mAlpha + (int)pColor.mAlpha));
+Color Color::operator + (const Color& color) const {
+	return Color((uint8)Min(255, (int)red_   + (int)color.red_),
+		         (uint8)Min(255, (int)green_ + (int)color.green_),
+				 (uint8)Min(255, (int)blue_  + (int)color.blue_),
+				 (uint8)Min(255, (int)alpha_ + (int)color.alpha_));
 }
 
-Color Color::operator -= (const Color& pColor)
-{
-	mRed   = (uint8)Max(0, (int)mRed   - (int)pColor.mRed);
-	mGreen = (uint8)Max(0, (int)mGreen - (int)pColor.mGreen);
-	mBlue  = (uint8)Max(0, (int)mBlue  - (int)pColor.mBlue);
-	mAlpha = (uint8)Max(0, (int)mAlpha - (int)pColor.mAlpha);
+Color Color::operator -= (const Color& color) {
+	red_   = (uint8)Max(0, (int)red_   - (int)color.red_);
+	green_ = (uint8)Max(0, (int)green_ - (int)color.green_);
+	blue_  = (uint8)Max(0, (int)blue_  - (int)color.blue_);
+	alpha_ = (uint8)Max(0, (int)alpha_ - (int)color.alpha_);
 	return *this;
 }
 
-Color Color::operator - (const Color& pColor) const
-{
-	return Color((uint8)Max(0, (int)mRed   - (int)pColor.mRed),
-		         (uint8)Max(0, (int)mGreen - (int)pColor.mGreen),
-				 (uint8)Max(0, (int)mBlue  - (int)pColor.mBlue),
-				 (uint8)Max(0, (int)mAlpha - (int)pColor.mAlpha));
+Color Color::operator - (const Color& color) const {
+	return Color((uint8)Max(0, (int)red_   - (int)color.red_),
+		         (uint8)Max(0, (int)green_ - (int)color.green_),
+				 (uint8)Max(0, (int)blue_  - (int)color.blue_),
+				 (uint8)Max(0, (int)alpha_ - (int)color.alpha_));
 }
 
-Color Color::operator += (int pValue)
-{
-	mRed   = (uint8)Max(0, Min(255, (int)mRed   + pValue));
-	mGreen = (uint8)Max(0, Min(255, (int)mGreen + pValue));
-	mBlue  = (uint8)Max(0, Min(255, (int)mBlue  + pValue));
-	mAlpha = (uint8)Max(0, Min(255, (int)mAlpha + pValue));
+Color Color::operator += (int value) {
+	red_   = (uint8)Max(0, Min(255, (int)red_   + value));
+	green_ = (uint8)Max(0, Min(255, (int)green_ + value));
+	blue_  = (uint8)Max(0, Min(255, (int)blue_  + value));
+	alpha_ = (uint8)Max(0, Min(255, (int)alpha_ + value));
 	return *this;
 }
 
-Color Color::operator + (int pValue) const
-{
-	return Color((uint8)Max(0, Min(255, (int)mRed   + pValue)),
-		         (uint8)Max(0, Min(255, (int)mGreen + pValue)),
-				 (uint8)Max(0, Min(255, (int)mBlue  + pValue)),
-				 mAlpha);
+Color Color::operator + (int value) const {
+	return Color((uint8)Max(0, Min(255, (int)red_   + value)),
+		         (uint8)Max(0, Min(255, (int)green_ + value)),
+				 (uint8)Max(0, Min(255, (int)blue_  + value)),
+				 alpha_);
 }
 
-Color Color::operator -= (int pValue)
-{
-	mRed   = (uint8)Min(255, Max(0, (int)mRed   - pValue));
-	mGreen = (uint8)Min(255, Max(0, (int)mGreen - pValue));
-	mBlue  = (uint8)Min(255, Max(0, (int)mBlue  - pValue));
+Color Color::operator -= (int value) {
+	red_   = (uint8)Min(255, Max(0, (int)red_   - value));
+	green_ = (uint8)Min(255, Max(0, (int)green_ - value));
+	blue_  = (uint8)Min(255, Max(0, (int)blue_  - value));
 	return *this;
 }
 
-Color Color::operator - (int pValue) const
-{
-	return Color((uint8)Min(255, Max(0, (int)mRed   - pValue)),
-		         (uint8)Min(255, Max(0, (int)mGreen - pValue)),
-				 (uint8)Min(255, Max(0, (int)mBlue  - pValue)),
-				 mAlpha);
+Color Color::operator - (int value) const {
+	return Color((uint8)Min(255, Max(0, (int)red_   - value)),
+		         (uint8)Min(255, Max(0, (int)green_ - value)),
+				 (uint8)Min(255, Max(0, (int)blue_  - value)),
+				 alpha_);
 }
 
-Color Color::operator *= (int pScalar)
-{
-	mRed   = (uint8)Max(0, Min(255, (int)mRed   * pScalar));
-	mGreen = (uint8)Max(0, Min(255, (int)mGreen * pScalar));
-	mBlue  = (uint8)Max(0, Min(255, (int)mBlue  * pScalar));
+Color Color::operator *= (int scalar) {
+	red_   = (uint8)Max(0, Min(255, (int)red_   * scalar));
+	green_ = (uint8)Max(0, Min(255, (int)green_ * scalar));
+	blue_  = (uint8)Max(0, Min(255, (int)blue_  * scalar));
 	return *this;
 }
 
-Color Color::operator * (int pScalar) const
-{
-	return Color((uint8)Max(0, Min(255, (int)mRed   * pScalar)),
-		         (uint8)Max(0, Min(255, (int)mGreen * pScalar)),
-				 (uint8)Max(0, Min(255, (int)mBlue  * pScalar)),
-				 mAlpha);
+Color Color::operator * (int scalar) const {
+	return Color((uint8)Max(0, Min(255, (int)red_   * scalar)),
+		         (uint8)Max(0, Min(255, (int)green_ * scalar)),
+				 (uint8)Max(0, Min(255, (int)blue_  * scalar)),
+				 alpha_);
 }
 
-Color Color::operator /= (int pScalar)
-{
-	mRed   = (uint8)Max(0, Min(255, (int)mRed   / pScalar));
-	mGreen = (uint8)Max(0, Min(255, (int)mGreen / pScalar));
-	mBlue  = (uint8)Max(0, Min(255, (int)mBlue  / pScalar));
+Color Color::operator /= (int scalar) {
+	red_   = (uint8)Max(0, Min(255, (int)red_   / scalar));
+	green_ = (uint8)Max(0, Min(255, (int)green_ / scalar));
+	blue_  = (uint8)Max(0, Min(255, (int)blue_  / scalar));
 	return *this;
 }
 
-Color Color::operator / (int pScalar) const
-{
-	return Color((uint8)Max(0, Min(255, (int)mRed   / pScalar)),
-		         (uint8)Max(0, Min(255, (int)mGreen / pScalar)),
-				 (uint8)Max(0, Min(255, (int)mBlue  / pScalar)),
-				 mAlpha);
+Color Color::operator / (int scalar) const {
+	return Color((uint8)Max(0, Min(255, (int)red_   / scalar)),
+		         (uint8)Max(0, Min(255, (int)green_ / scalar)),
+				 (uint8)Max(0, Min(255, (int)blue_  / scalar)),
+				 alpha_);
 }
 
-Color Color::operator *= (float pScalar)
-{
-	mRed   = (uint8)Max(0, Min(255, (int)((float)mRed   * pScalar)));
-	mGreen = (uint8)Max(0, Min(255, (int)((float)mGreen * pScalar)));
-	mBlue  = (uint8)Max(0, Min(255, (int)((float)mBlue  * pScalar)));
+Color Color::operator *= (float scalar) {
+	red_   = (uint8)Max(0, Min(255, (int)((float)red_   * scalar)));
+	green_ = (uint8)Max(0, Min(255, (int)((float)green_ * scalar)));
+	blue_  = (uint8)Max(0, Min(255, (int)((float)blue_  * scalar)));
 	return *this;
 }
 
-Color Color::operator * (float pScalar) const
-{
-	return Color((uint8)Max(0, Min(255, (int)((float)mRed   * pScalar))),
-		         (uint8)Max(0, Min(255, (int)((float)mGreen * pScalar))),
-				 (uint8)Max(0, Min(255, (int)((float)mBlue  * pScalar))),
-				 mAlpha);
+Color Color::operator * (float scalar) const {
+	return Color((uint8)Max(0, Min(255, (int)((float)red_   * scalar))),
+		         (uint8)Max(0, Min(255, (int)((float)green_ * scalar))),
+				 (uint8)Max(0, Min(255, (int)((float)blue_  * scalar))),
+				 alpha_);
 }
 
-Color Color::operator /= (float pScalar)
-{
-	mRed   = (uint8)Max(0, Min(255, (int)((float)mRed   / pScalar)));
-	mGreen = (uint8)Max(0, Min(255, (int)((float)mGreen / pScalar)));
-	mBlue  = (uint8)Max(0, Min(255, (int)((float)mBlue  / pScalar)));
+Color Color::operator /= (float scalar) {
+	red_   = (uint8)Max(0, Min(255, (int)((float)red_   / scalar)));
+	green_ = (uint8)Max(0, Min(255, (int)((float)green_ / scalar)));
+	blue_  = (uint8)Max(0, Min(255, (int)((float)blue_  / scalar)));
 	return *this;
 }
 
-Color Color::operator / (float pScalar) const
-{
-	return Color((uint8)Max(0, Min(255, (int)((float)mRed   / pScalar))),
-		         (uint8)Max(0, Min(255, (int)((float)mGreen / pScalar))),
-				 (uint8)Max(0, Min(255, (int)((float)mBlue  / pScalar))),
-				 mAlpha);
+Color Color::operator / (float scalar) const {
+	return Color((uint8)Max(0, Min(255, (int)((float)red_   / scalar))),
+		         (uint8)Max(0, Min(255, (int)((float)green_ / scalar))),
+				 (uint8)Max(0, Min(255, (int)((float)blue_  / scalar))),
+				 alpha_);
 }
 
-bool Color::operator==(const Color& pOther) const	
-{ 
-	return mRed   == pOther.mRed   &&
-		   mGreen == pOther.mGreen &&
-		   mBlue  == pOther.mBlue  &&
-		   mAlpha == pOther.mAlpha;
+bool Color::operator==(const Color& other) const {
+	return red_   == other.red_   &&
+		   green_ == other.green_ &&
+		   blue_  == other.blue_  &&
+		   alpha_ == other.alpha_;
 }
 
-bool Color::operator!=(const Color& pOther) const	
-{ 
-	return mRed   != pOther.mRed   ||
-		   mGreen != pOther.mGreen ||
-		   mBlue  != pOther.mBlue  ||
-		   mAlpha != pOther.mAlpha;
+bool Color::operator!=(const Color& other) const {
+	return red_   != other.red_   ||
+		   green_ != other.green_ ||
+		   blue_  != other.blue_  ||
+		   alpha_ != other.alpha_;
 }
 
 
 
-int Color::SumRgb() const
-{
-	return (mRed+mGreen+mBlue);
+int Color::SumRgb() const {
+	return (red_+green_+blue_);
 }
 
 

@@ -1,25 +1,23 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "View.h"
+#include "view.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class LoginId;
 class RuntimeVariableScope;
 }
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
@@ -27,26 +25,24 @@ class ClientLoginObserver;
 
 
 
-class LoginView: public View
-{
+class LoginView: public View {
 public:
-	LoginView(ClientLoginObserver* pLoginObserver, const str& pErrorMessage);
+	LoginView(ClientLoginObserver* login_observer, const str& error_message);
 
 private:
 	void OnExit();
-	void OnLogin(UiTbc::Button*);
+	void OnLogin(uitbc::Button*);
 
-	ClientLoginObserver* mLoginObserver;
+	ClientLoginObserver* login_observer_;
 };
 
 
 
-class ClientLoginObserver
-{
+class ClientLoginObserver {
 public:
 	virtual void CancelLogin() = 0;
-	virtual void RequestLogin(const str& pServerAddress, const Cure::LoginId& pLoginToken) = 0;
-	virtual Cure::RuntimeVariableScope* GetVariableScope() const = 0;
+	virtual void RequestLogin(const str& server_address, const cure::LoginId& login_token) = 0;
+	virtual cure::RuntimeVariableScope* GetVariableScope() const = 0;
 };
 
 

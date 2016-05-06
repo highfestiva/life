@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include "../../../Lepra/Include/HashTable.h"
-#include "../../../Lepra/Include/Thread.h"
-#include "../UiCore.h"
-#include "../UiLepra.h"
+#include "../../../lepra/include/hashtable.h"
+#include "../../../lepra/include/thread.h"
+#include "../uicore.h"
+#include "../uilepra.h"
 
 // Must be after OS includes to get #defines below.
 #ifdef LEPRA_IOS
@@ -34,8 +34,7 @@
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
@@ -43,8 +42,7 @@ class MacDisplayManager;
 
 
 
-class MacCore
-{
+class MacCore {
 public:
 	static void Init();
 	static void Shutdown();
@@ -53,16 +51,16 @@ public:
 	// Must be called at least once "per frame".
 	static void ProcessMessages();
 
-	static void AddDisplayManager(MacDisplayManager* pDisplayManager);
-	static void RemoveDisplayManager(MacDisplayManager* pDisplayManager);
-	static MacDisplayManager* GetDisplayManager(LEPRA_APPLE_WINDOW* pWindowHandle);
+	static void AddDisplayManager(MacDisplayManager* display_manager);
+	static void RemoveDisplayManager(MacDisplayManager* display_manager);
+	static MacDisplayManager* GetDisplayManager(LEPRA_APPLE_WINDOW* window_handle);
 
-	static LEPRA_APPLE_APP* mApplication;
+	static LEPRA_APPLE_APP* application_;
 
 private:
-	static Lock* mLock;
+	static Lock* lock_;
 	typedef HashTable<void*, MacDisplayManager*, LEPRA_VOIDP_HASHER> WindowTable;
-	static WindowTable mWindowTable;
+	static WindowTable window_table_;
 };
 
 

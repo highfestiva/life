@@ -1,201 +1,179 @@
 /*
 	Class:  -
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
 #include "pch.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../Include/Log.h"
-#include "../Include/String.h"
-#include "../Include/BinTree.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../include/log.h"
+#include "../include/string.h"
+#include "../include/bintree.h"
 
-using namespace Lepra;
+using namespace lepra;
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
+void ReportTestResult(const lepra::LogDecorator& log, const str& test_name, const str& context, bool result);
 
-bool TestBinTree(const LogDecorator& pAccount)
-{
-	str lContext;
-	bool lTestOk = true;
+bool TestBinTree(const LogDecorator& account) {
+	str _context;
+	bool test_ok = true;
 
-	BinTree<int, int> lBinTree;
-	BinTree<int, int>::Iterator lIter1;
-	BinTree<int, int>::Iterator lIter2;
-	BinTree<int, int>::Iterator lIter3;
+	BinTree<int, int> bin_tree;
+	BinTree<int, int>::Iterator iter1;
+	BinTree<int, int>::Iterator iter2;
+	BinTree<int, int>::Iterator iter3;
 
 	// Test iterator.
-	lIter1 = lBinTree.End();
-	lIter2 = lBinTree.Last();
-	lIter3 = lBinTree.First();
-	if (lIter2 != lBinTree.End())
-	{
-		lIter2++;
+	iter1 = bin_tree.End();
+	iter2 = bin_tree.Last();
+	iter3 = bin_tree.First();
+	if (iter2 != bin_tree.End()) {
+		iter2++;
 	}
-	if (lIter3 != lBinTree.End())
-	{
-		lIter3--;
+	if (iter3 != bin_tree.End()) {
+		iter3--;
 	}
-	if (lTestOk)
-	{
-		lContext = "basic iterator test";
-		lTestOk = !(lIter1 != lBinTree.End() || !(lIter1 == lBinTree.End()) ||
-			lIter2 != lBinTree.End() || !(lIter2 == lBinTree.End()) ||
-			lIter3 != lBinTree.End() || !(lIter3 == lBinTree.End()));
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "basic iterator test";
+		test_ok = !(iter1 != bin_tree.End() || !(iter1 == bin_tree.End()) ||
+			iter2 != bin_tree.End() || !(iter2 == bin_tree.End()) ||
+			iter3 != bin_tree.End() || !(iter3 == bin_tree.End()));
+		deb_assert(test_ok);
 	}
 
-	lBinTree.Insert(1, 20);
-	lBinTree.Insert(2, 19);
-	lBinTree.Insert(3, 18);
-	lBinTree.Insert(4, 17);
-	lBinTree.Insert(5, 16);
-	lBinTree.Insert(6, 15);
-	lBinTree.Insert(7, 14);
-	lBinTree.Insert(8, 13);
-	if (lTestOk)
-	{
-		lContext = "search success test";
-		lTestOk = !(lBinTree.Find(1) == lBinTree.End() || lBinTree.Find(2) == lBinTree.End() ||
-			lBinTree.Find(3) == lBinTree.End() || lBinTree.Find(4) == lBinTree.End() ||
-			lBinTree.Find(5) == lBinTree.End() || lBinTree.Find(6) == lBinTree.End() ||
-			lBinTree.Find(7) == lBinTree.End() || lBinTree.Find(8) == lBinTree.End());
-		deb_assert(lTestOk);
+	bin_tree.Insert(1, 20);
+	bin_tree.Insert(2, 19);
+	bin_tree.Insert(3, 18);
+	bin_tree.Insert(4, 17);
+	bin_tree.Insert(5, 16);
+	bin_tree.Insert(6, 15);
+	bin_tree.Insert(7, 14);
+	bin_tree.Insert(8, 13);
+	if (test_ok) {
+		_context = "search success test";
+		test_ok = !(bin_tree.Find(1) == bin_tree.End() || bin_tree.Find(2) == bin_tree.End() ||
+			bin_tree.Find(3) == bin_tree.End() || bin_tree.Find(4) == bin_tree.End() ||
+			bin_tree.Find(5) == bin_tree.End() || bin_tree.Find(6) == bin_tree.End() ||
+			bin_tree.Find(7) == bin_tree.End() || bin_tree.Find(8) == bin_tree.End());
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "search fail test";
-		lTestOk = !(lBinTree.Find(0) != lBinTree.End() || lBinTree.Find(-123) != lBinTree.End() ||
-			lBinTree.Find(123)  != lBinTree.End() || lBinTree.Find(-34)  != lBinTree.End() ||
-			lBinTree.Find(45)   != lBinTree.End() || lBinTree.Find(-56)  != lBinTree.End() ||
-			lBinTree.Find(67)   != lBinTree.End() || lBinTree.Find(-78)  != lBinTree.End());
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "search fail test";
+		test_ok = !(bin_tree.Find(0) != bin_tree.End() || bin_tree.Find(-123) != bin_tree.End() ||
+			bin_tree.Find(123)  != bin_tree.End() || bin_tree.Find(-34)  != bin_tree.End() ||
+			bin_tree.Find(45)   != bin_tree.End() || bin_tree.Find(-56)  != bin_tree.End() ||
+			bin_tree.Find(67)   != bin_tree.End() || bin_tree.Find(-78)  != bin_tree.End());
+		deb_assert(test_ok);
 	}
 
-	lIter2 = lBinTree.Last();
-	lIter3 = lBinTree.First();
-	if (lTestOk)
-	{
-		lContext = "iterator test A";
-		lTestOk = !(lIter2 == lBinTree.End() || lIter3 == lBinTree.End());
-		deb_assert(lTestOk);
+	iter2 = bin_tree.Last();
+	iter3 = bin_tree.First();
+	if (test_ok) {
+		_context = "iterator test A";
+		test_ok = !(iter2 == bin_tree.End() || iter3 == bin_tree.End());
+		deb_assert(test_ok);
 	}
 	// These should become end pointers.
-	lIter2++;
-	lIter3--;
-	if (lTestOk)
-	{
-		lContext = "iterator test B";
-		lTestOk = !(lIter2 != lBinTree.End() || lIter3 != lBinTree.End());
-		deb_assert(lTestOk);
+	iter2++;
+	iter3--;
+	if (test_ok) {
+		_context = "iterator test B";
+		test_ok = !(iter2 != bin_tree.End() || iter3 != bin_tree.End());
+		deb_assert(test_ok);
 	}
 
 	// Check iterating.
-	int lCount = 0;
-	for (lIter1 = lBinTree.First(); lIter1 != lBinTree.End(); ++lIter1)
-	{
-		lCount++;
+	int count = 0;
+	for (iter1 = bin_tree.First(); iter1 != bin_tree.End(); ++iter1) {
+		count++;
 	}
 	// Check counting.
-	if (lTestOk)
-	{
-		lContext = "iterator counting";
-		lTestOk = !(lCount != 8 || lCount != lBinTree.GetCount());
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "iterator counting";
+		test_ok = !(count != 8 || count != bin_tree.GetCount());
+		deb_assert(test_ok);
 	}
 
 	// Check if sorted.
-	lCount = 20;
-	for (lIter1 = lBinTree.First(); lIter1 != lBinTree.End(); ++lIter1, --lCount)
-	{
-		if (lTestOk)
-		{
-			lContext = "sorting failed";
-			lTestOk = !((*lIter1) != lCount);
-			deb_assert(lTestOk);
+	count = 20;
+	for (iter1 = bin_tree.First(); iter1 != bin_tree.End(); ++iter1, --count) {
+		if (test_ok) {
+			_context = "sorting failed";
+			test_ok = !((*iter1) != count);
+			deb_assert(test_ok);
 		}
 	}
 
 	// Test remove.
-	lBinTree.Remove(4);
-	if (lTestOk)
-	{
-		lContext = "remove failed";
-		lTestOk = !(lBinTree.Find(1) == lBinTree.End() || lBinTree.Find(2) == lBinTree.End() ||
-			lBinTree.Find(3) == lBinTree.End() || lBinTree.Find(4) != lBinTree.End() ||
-			lBinTree.Find(5) == lBinTree.End() || lBinTree.Find(6) == lBinTree.End() ||
-			lBinTree.Find(7) == lBinTree.End() || lBinTree.Find(8) == lBinTree.End());
-		deb_assert(lTestOk);
+	bin_tree.Remove(4);
+	if (test_ok) {
+		_context = "remove failed";
+		test_ok = !(bin_tree.Find(1) == bin_tree.End() || bin_tree.Find(2) == bin_tree.End() ||
+			bin_tree.Find(3) == bin_tree.End() || bin_tree.Find(4) != bin_tree.End() ||
+			bin_tree.Find(5) == bin_tree.End() || bin_tree.Find(6) == bin_tree.End() ||
+			bin_tree.Find(7) == bin_tree.End() || bin_tree.Find(8) == bin_tree.End());
+		deb_assert(test_ok);
 	}
 
 	// Now, do some random input and removal.
-	lBinTree.RemoveAll();
-	lCount = 0;
+	bin_tree.RemoveAll();
+	count = 0;
 	int i;
-	for (i = 0; i < 1024; i++)
-	{
-		int lRnd = rand();
-		lBinTree.Insert(lRnd, lRnd);
-		lBinTree.Remove(lRnd);
-		if (lTestOk)
-		{
-			lContext = "random remove failed";
-			lTestOk = !(lBinTree.GetCount() != 0);
-			deb_assert(lTestOk);
+	for (i = 0; i < 1024; i++) {
+		int rnd = rand();
+		bin_tree.Insert(rnd, rnd);
+		bin_tree.Remove(rnd);
+		if (test_ok) {
+			_context = "random remove failed";
+			test_ok = !(bin_tree.GetCount() != 0);
+			deb_assert(test_ok);
 		}
 	}
 
-	for (i = 0; i < 1024; i++)
-	{
-		int lRnd = rand();
-		lBinTree.Insert(lRnd, lRnd);
-		lRnd = rand();
-		lBinTree.Remove(lRnd);
+	for (i = 0; i < 1024; i++) {
+		int rnd = rand();
+		bin_tree.Insert(rnd, rnd);
+		rnd = rand();
+		bin_tree.Remove(rnd);
 	}
 	// Try iterating.
-	lCount = 0;
-	for (lIter1 = lBinTree.First(); lIter1 != lBinTree.End(); ++lIter1)
-	{
-		lCount++;
+	count = 0;
+	for (iter1 = bin_tree.First(); iter1 != bin_tree.End(); ++iter1) {
+		count++;
 	}
 	// Check counting again.
-	if (lTestOk)
-	{
-		lContext = "entries failed A";
-		lTestOk = !(lCount != lBinTree.GetCount());
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "entries failed A";
+		test_ok = !(count != bin_tree.GetCount());
+		deb_assert(test_ok);
 	}
 
 	// Balance the tree.
-	lBinTree.Balance();
+	bin_tree.Balance();
 	// Try iterating.
-	lCount = 0;
-	for (lIter1 = lBinTree.First(); lIter1 != lBinTree.End(); ++lIter1)
-	{
-		lCount++;
+	count = 0;
+	for (iter1 = bin_tree.First(); iter1 != bin_tree.End(); ++iter1) {
+		count++;
 	}
 	// Check counting again.
-	if (lTestOk)
-	{
-		lContext = "entries failed B";
-		lTestOk = !(lCount != lBinTree.GetCount());
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "entries failed B";
+		test_ok = !(count != bin_tree.GetCount());
+		deb_assert(test_ok);
 	}
 
 	// Remove all, and count again.
-	lBinTree.RemoveAll();
-	lCount = 0;
-	for (lIter1 = lBinTree.First(); lIter1 != lBinTree.End(); ++lIter1)
-	{
-		lCount++;
+	bin_tree.RemoveAll();
+	count = 0;
+	for (iter1 = bin_tree.First(); iter1 != bin_tree.End(); ++iter1) {
+		count++;
 	}
-	if (lTestOk)
-	{
-		lContext = "entries found";
-		lTestOk = !(lCount != 0 || lCount != lBinTree.GetCount());
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "entries found";
+		test_ok = !(count != 0 || count != bin_tree.GetCount());
+		deb_assert(test_ok);
 	}
 
-	ReportTestResult(pAccount, "BinTree", lContext, lTestOk);
-	return (lTestOk);
+	ReportTestResult(account, "BinTree", _context, test_ok);
+	return (test_ok);
 }

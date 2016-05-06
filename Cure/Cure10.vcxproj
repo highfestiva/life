@@ -1,68 +1,68 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
+    <ProjectConfiguration include="Debug|win32">
       <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Final|Win32">
+    <ProjectConfiguration include="Final|win32">
       <Configuration>Final</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release Candidate|Win32">
+    <ProjectConfiguration include="Release Candidate|win32">
       <Configuration>Release Candidate</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Unicode Debug|Win32">
+    <ProjectConfiguration include="Unicode Debug|win32">
       <Configuration>Unicode Debug</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Unicode Final|Win32">
+    <ProjectConfiguration include="Unicode Final|win32">
       <Configuration>Unicode Final</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Unicode Release Candidate|Win32">
+    <ProjectConfiguration include="Unicode Release Candidate|win32">
       <Configuration>Unicode Release Candidate</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>Cure</ProjectName>
+    <ProjectName>cure</ProjectName>
     <ProjectGuid>{6DBF3606-E311-454B-B162-27FD92B67D53}</ProjectGuid>
     <RootNamespace>Migel</RootNamespace>
     <Keyword>ManagedCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <CLRSupport>false</CLRSupport>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <CLRSupport>false</CLRSupport>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <CLRSupport>false</CLRSupport>
@@ -70,51 +70,51 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Final|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(ProjectName)UD</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Final|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Final|win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">$(ProjectName)UD</TargetName>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\happyhttp-0.1;..\thirdparty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -130,13 +130,13 @@
       <OutputFile>$(TargetPath)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|win32'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\happyhttp-0.1;..\thirdparty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -152,13 +152,13 @@
       <OutputFile>$(TargetPath)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\happyhttp-0.1;..\thirdparty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -173,10 +173,10 @@
       <OutputFile>$(TargetPath)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\happyhttp-0.1;..\thirdparty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -192,13 +192,13 @@
       <OutputFile>$(TargetPath)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\happyhttp-0.1;..\thirdparty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -214,13 +214,13 @@
       <OutputFile>$(TargetPath)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\happyhttp-0.1;..\ThirdParty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\happyhttp-0.1;..\thirdparty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -236,107 +236,107 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Reference Include="mscorlib">
+    <Reference include="mscorlib">
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
     </Reference>
-    <Reference Include="System">
+    <Reference include="System">
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
     </Reference>
-    <Reference Include="System.Data">
+    <Reference include="System.Data">
       <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\ConsoleManager.cpp" />
-    <ClCompile Include="Source\ContextManager.cpp" />
-    <ClCompile Include="Source\ContextObject.cpp" />
-    <ClCompile Include="Source\ContextObjectAttribute.cpp" />
-    <ClCompile Include="Source\ContextPath.cpp" />
-    <ClCompile Include="Source\CppContextObject.cpp" />
-    <ClCompile Include="Source\Cure.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">Create</PrecompiledHeader>
+    <ClCompile include="src\consolemanager.cpp" />
+    <ClCompile include="src\contextmanager.cpp" />
+    <ClCompile include="src\contextobject.cpp" />
+    <ClCompile include="src\contextobjectattribute.cpp" />
+    <ClCompile include="src\contextpath.cpp" />
+    <ClCompile include="src\cppcontextobject.cpp" />
+    <ClCompile include="src\cure.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Source\Driver.cpp" />
-    <ClCompile Include="Source\Elevator.cpp" />
-    <ClCompile Include="Source\FloatAttribute.cpp" />
-    <ClCompile Include="Source\GameManager.cpp" />
-    <ClCompile Include="Source\GameTicker.cpp" />
-    <ClCompile Include="Source\Health.cpp" />
-    <ClCompile Include="Source\HiscoreAgent.cpp" />
-    <ClCompile Include="Source\IntAttribute.cpp" />
-    <ClCompile Include="Source\NetworkAgent.cpp" />
-    <ClCompile Include="Source\NetworkFreeAgent.cpp" />
-    <ClCompile Include="Source\Packet.cpp" />
-    <ClCompile Include="Source\PhysicsSharedResource.cpp" />
-    <ClCompile Include="Source\PositionalData.cpp" />
-    <ClCompile Include="Source\PositionHauler.cpp" />
-    <ClCompile Include="Source\PythonInterface.cpp" />
-    <ClCompile Include="Source\ResourceManager.cpp" />
-    <ClCompile Include="Source\RuntimeVariable.cpp" />
-    <ClCompile Include="Source\Spawner.cpp" />
-    <ClCompile Include="Source\TerrainFunctionManager.cpp" />
-    <ClCompile Include="Source\TerrainManager.cpp" />
-    <ClCompile Include="Source\TerrainPatchLoader.cpp" />
-    <ClCompile Include="Source\TerrainPatchManager.cpp" />
-    <ClCompile Include="Source\TimeManager.cpp" />
-    <ClCompile Include="Source\NetworkClient.cpp" />
-    <ClCompile Include="Source\NetworkServer.cpp" />
-    <ClCompile Include="Source\UserAccount.cpp" />
-    <ClCompile Include="Source\UserAccountManager.cpp" />
-    <ClCompile Include="Source\UserConnection.cpp" />
+    <ClCompile include="src\driver.cpp" />
+    <ClCompile include="src\elevator.cpp" />
+    <ClCompile include="src\floatattribute.cpp" />
+    <ClCompile include="src\gamemanager.cpp" />
+    <ClCompile include="src\gameticker.cpp" />
+    <ClCompile include="src\health.cpp" />
+    <ClCompile include="src\hiscoreagent.cpp" />
+    <ClCompile include="src\intattribute.cpp" />
+    <ClCompile include="src\networkagent.cpp" />
+    <ClCompile include="src\networkfreeagent.cpp" />
+    <ClCompile include="src\packet.cpp" />
+    <ClCompile include="src\physicssharedresource.cpp" />
+    <ClCompile include="src\positionaldata.cpp" />
+    <ClCompile include="src\positionhauler.cpp" />
+    <ClCompile include="src\pythoninterface.cpp" />
+    <ClCompile include="src\resourcemanager.cpp" />
+    <ClCompile include="src\runtimevariable.cpp" />
+    <ClCompile include="src\spawner.cpp" />
+    <ClCompile include="src\terrainfunctionmanager.cpp" />
+    <ClCompile include="src\terrainmanager.cpp" />
+    <ClCompile include="src\terrainpatchloader.cpp" />
+    <ClCompile include="src\terrainpatchmanager.cpp" />
+    <ClCompile include="src\timemanager.cpp" />
+    <ClCompile include="src\networkclient.cpp" />
+    <ClCompile include="src\networkserver.cpp" />
+    <ClCompile include="src\useraccount.cpp" />
+    <ClCompile include="src\useraccountmanager.cpp" />
+    <ClCompile include="src\userconnection.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\ConsoleManager.h" />
-    <ClInclude Include="Include\ContextForceListener.h" />
-    <ClInclude Include="Include\ContextManager.h" />
-    <ClInclude Include="Include\ContextObject.h" />
-    <ClInclude Include="Include\ContextObjectAttribute.h" />
-    <ClInclude Include="Include\ContextPath.h" />
-    <ClInclude Include="Include\CppContextObject.h" />
-    <ClInclude Include="Include\Cure.h" />
-    <ClInclude Include="Include\DelayedDeleter.h" />
-    <ClInclude Include="Include\Driver.h" />
-    <ClInclude Include="Include\Elevator.h" />
-    <ClInclude Include="Include\FloatAttribute.h" />
-    <ClInclude Include="Include\GameManager.h" />
-    <ClInclude Include="Include\GameTicker.h" />
-    <ClInclude Include="Include\Health.h" />
-    <ClInclude Include="Include\HiscoreAgent.h" />
-    <ClInclude Include="Include\IntAttribute.h" />
-    <ClInclude Include="Include\NetworkAgent.h" />
-    <ClInclude Include="Include\NetworkFreeAgent.h" />
-    <ClInclude Include="Include\Packet.h" />
-    <ClInclude Include="Include\PhysicsSharedResource.h" />
-    <ClInclude Include="Include\PositionalData.h" />
-    <ClInclude Include="Include\PositionHauler.h" />
-    <ClInclude Include="Include\RemoteStatus.h" />
-    <ClInclude Include="Include\ResourceManager.h" />
-    <ClInclude Include="Include\RuntimeVariable.h" />
-    <ClInclude Include="Include\RuntimeVariableName.h" />
-    <ClInclude Include="Include\Spawner.h" />
-    <ClInclude Include="Include\TerrainFunctionManager.h" />
-    <ClInclude Include="Include\TerrainManager.h" />
-    <ClInclude Include="Include\TerrainPatchLoader.h" />
-    <ClInclude Include="Include\TerrainPatchManager.h" />
-    <ClInclude Include="Include\TimeManager.h" />
-    <ClInclude Include="Include\NetworkClient.h" />
-    <ClInclude Include="Include\NetworkServer.h" />
-    <ClInclude Include="Include\SocketIoHandler.h" />
-    <ClInclude Include="Include\UserAccount.h" />
-    <ClInclude Include="Include\UserAccountManager.h" />
-    <ClInclude Include="Include\UserConnection.h" />
+    <Clinclude include="include\consolemanager.h" />
+    <Clinclude include="include\contextforcelistener.h" />
+    <Clinclude include="include\contextmanager.h" />
+    <Clinclude include="include\contextobject.h" />
+    <Clinclude include="include\contextobjectattribute.h" />
+    <Clinclude include="include\contextpath.h" />
+    <Clinclude include="include\cppcontextobject.h" />
+    <Clinclude include="include\cure.h" />
+    <Clinclude include="include\delayeddeleter.h" />
+    <Clinclude include="include\driver.h" />
+    <Clinclude include="include\elevator.h" />
+    <Clinclude include="include\floatattribute.h" />
+    <Clinclude include="include\gamemanager.h" />
+    <Clinclude include="include\gameticker.h" />
+    <Clinclude include="include\health.h" />
+    <Clinclude include="include\hiscoreagent.h" />
+    <Clinclude include="include\intattribute.h" />
+    <Clinclude include="include\networkagent.h" />
+    <Clinclude include="include\networkfreeagent.h" />
+    <Clinclude include="include\packet.h" />
+    <Clinclude include="include\physicssharedresource.h" />
+    <Clinclude include="include\positionaldata.h" />
+    <Clinclude include="include\positionhauler.h" />
+    <Clinclude include="include\remotestatus.h" />
+    <Clinclude include="include\resourcemanager.h" />
+    <Clinclude include="include\runtimevariable.h" />
+    <Clinclude include="include\runtimevariablename.h" />
+    <Clinclude include="include\spawner.h" />
+    <Clinclude include="include\terrainfunctionmanager.h" />
+    <Clinclude include="include\terrainmanager.h" />
+    <Clinclude include="include\terrainpatchloader.h" />
+    <Clinclude include="include\terrainpatchmanager.h" />
+    <Clinclude include="include\timemanager.h" />
+    <Clinclude include="include\networkclient.h" />
+    <Clinclude include="include\networkserver.h" />
+    <Clinclude include="include\socketiohandler.h" />
+    <Clinclude include="include\useraccount.h" />
+    <Clinclude include="include\useraccountmanager.h" />
+    <Clinclude include="include\userconnection.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Include\DelayedDeleter.inl" />
-    <None Include="Include\ResourceManager.inl" />
+    <None include="include\delayeddeleter.inl" />
+    <None include="include\resourcemanager.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

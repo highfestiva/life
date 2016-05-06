@@ -6,13 +6,12 @@
 
 #pragma once
 
-#include "../../UiCure/Include/UiMachine.h"
-#include "../Life.h"
+#include "../../uicure/include/uimachine.h"
+#include "../life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -20,29 +19,28 @@ class Launcher;
 
 
 
-class FastProjectile: public UiCure::Machine
-{
+class FastProjectile: public UiCure::Machine {
 public:
 	typedef UiCure::Machine Parent;
 
-	FastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher);
+	FastProjectile(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, Launcher* launcher);
 	virtual ~FastProjectile();
 
 protected:
 	virtual void OnLoaded();
-	void StartBullet(float pMuzzleVelocity);
-	virtual void OnMicroTick(float pFrameTime);
+	void StartBullet(float muzzle_velocity);
+	virtual void OnMicroTick(float frame_time);
 	virtual void OnTick();
-	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
-	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
+	virtual void OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal);
+	void LoadPlaySound3d(UiCure::UserSound3dResource* sound_resource);
 
-	UiCure::UserSound3dResource* mShreekSound;
-	Launcher* mLauncher;
-	float mMaxVelocity;
-	float mAcceleration;
-	float mExplosiveEnergy;
-	int mTickCount;
-	bool mIsDetonated;
+	UiCure::UserSound3dResource* shreek_sound_;
+	Launcher* launcher_;
+	float max_velocity_;
+	float acceleration_;
+	float explosive_energy_;
+	int tick_count_;
+	bool is_detonated_;
 
 	logclass();
 };

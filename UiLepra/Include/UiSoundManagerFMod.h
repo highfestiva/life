@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,239 +8,220 @@
 
 #if !defined(LEPRA_WITHOUT_FMOD)
 
-#include "../../Lepra/Include/HashTable.h"
-#include "../../Lepra/Include/IdManager.h"
-#include "../../Lepra/Include/String.h"
-#include "../../ThirdParty/fmod/api/inc/fmod.h"
-#include "UiSoundManager.h"
+#include "../../lepra/include/hashtable.h"
+#include "../../lepra/include/idmanager.h"
+#include "../../lepra/include/string.h"
+#include "../../thirdparty/fmod/api/inc/fmod.h"
+#include "uisoundmanager.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-class SoundManagerFMod: public SoundManager
-{
+class SoundManagerFMod: public SoundManager {
 	typedef SoundManager Parent;
 public:
-	SoundManagerFMod(int pMixRate);
+	SoundManagerFMod(int mix_rate);
 	virtual ~SoundManagerFMod();
 
 	virtual float GetMasterVolume() const;
-	virtual void SetMasterVolume(float pVolume);
+	virtual void SetMasterVolume(float volume);
 
-	virtual SoundID LoadSound2D(const str& pFileName, LoopMode pLoopMode, int pPriority);
-	virtual SoundID LoadSound2D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority);
-	virtual SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
-	virtual SoundID LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority);
-	virtual SoundStream* CreateSoundStream(const str& pFileName, LoopMode pLoopMode, int pPriority);
+	virtual SoundID LoadSound2D(const str& file_name, LoopMode loop_mode, int priority);
+	virtual SoundID LoadSound2D(const str& file_name, const void* data, size_t data_size, LoopMode loop_mode, int priority);
+	virtual SoundID LoadSound3D(const str& file_name, LoopMode LoopMode, int priority);
+	virtual SoundID LoadSound3D(const str& file_name, const void* data, size_t data_size, LoopMode loop_mode, int priority);
+	virtual SoundStream* CreateSoundStream(const str& file_name, LoopMode loop_mode, int priority);
 
-	void Release(SoundID pSoundID);
+	void Release(SoundID sound_id);
 
-	double GetStreamTime(SoundID pSoundID);
+	double GetStreamTime(SoundID sound_id);
 
-	SoundInstanceID CreateSoundInstance(SoundID pSoundID);
-	void DeleteSoundInstance(SoundInstanceID pSoundIID);
+	SoundInstanceID CreateSoundInstance(SoundID sound_id);
+	void DeleteSoundInstance(SoundInstanceID sound_iid);
 
-	bool Play(SoundInstanceID pSoundIID,
-			  float pVolume,
-			  float pPitch);
+	bool Play(SoundInstanceID sound_iid,
+			  float volume,
+			  float pitch);
 
-	void Stop(SoundInstanceID pSoundIID);
+	void Stop(SoundInstanceID sound_iid);
 	void StopAll();
-	void TogglePause(SoundInstanceID pSoundIID);
+	void TogglePause(SoundInstanceID sound_iid);
 
-	bool IsPlaying(SoundInstanceID pSoundIID);
-	bool IsPaused(SoundInstanceID pSoundIID);
+	bool IsPlaying(SoundInstanceID sound_iid);
+	bool IsPaused(SoundInstanceID sound_iid);
 
-	void SetPan(SoundInstanceID pSoundIID, float pPan);
-	void SetVolume(SoundInstanceID pSoundIID, float pVolume);
-	void SetPitch(SoundInstanceID pSoundIID, float pPitch);
+	void SetPan(SoundInstanceID sound_iid, float pan);
+	void SetVolume(SoundInstanceID sound_iid, float volume);
+	void SetPitch(SoundInstanceID sound_iid, float pitch);
 
-	void SetFrequency(SoundInstanceID pSoundIID, int pFrequency);
-	int GetFrequency(SoundInstanceID pSoundIID);
+	void SetFrequency(SoundInstanceID sound_iid, int frequency);
+	int GetFrequency(SoundInstanceID sound_iid);
 
-	void SetDopplerFactor(float pFactor);
-	void SetRollOffFactor(float pFactor);
+	void SetDopplerFactor(float factor);
+	void SetRollOffFactor(float factor);
 
-	void SetChorus(SoundInstanceID pSoundIID, 
-				   int pFXIndex,
-				   float pDelay,
-				   float pFeedback,
-				   float pRate,
-				   float pDepth,		// Mod amount...
-				   float pWetness);
+	void SetChorus(SoundInstanceID sound_iid,
+				   int fx_index,
+				   float delay,
+				   float feedback,
+				   float rate,
+				   float depth,		// Mod amount...
+				   float wetness);
 
-	void SetFlanger(SoundInstanceID pSoundIID, 
-					int pFXIndex,
-					float pDelay,
-					float pFeedback,
-					float pRate,
-					float pDepth,		// Mod amount...
-					float pWetness);
+	void SetFlanger(SoundInstanceID sound_iid,
+					int fx_index,
+					float delay,
+					float feedback,
+					float rate,
+					float depth,		// Mod amount...
+					float wetness);
 
-	void SetCompressor(SoundInstanceID pSoundIID, 
-					   int pFXIndex,
-					   float pRatio,
-					   float pThreshold,
-					   float pAttack,
-					   float pRelease);
+	void SetCompressor(SoundInstanceID sound_iid,
+					   int fx_index,
+					   float ratio,
+					   float threshold,
+					   float attack,
+					   float release);
 
-	void SetEcho(SoundInstanceID pSoundIID, 
-				 int pFXIndex,
-				 float pFeedback,
-				 float pDelay,
-				 float pWetness);
+	void SetEcho(SoundInstanceID sound_iid,
+				 int fx_index,
+				 float feedback,
+				 float delay,
+				 float wetness);
 
-	void SetParamEQ(SoundInstanceID pSoundIID, 
-					int pFXIndex,
-					float pCenter,
-					float pBandwidth,
-					float pGain);
+	void SetParamEQ(SoundInstanceID sound_iid,
+					int fx_index,
+					float center,
+					float bandwidth,
+					float gain);
 
-	virtual void SetFileOpener(FileOpener* pOpener);
+	virtual void SetFileOpener(FileOpener* opener);
 
 protected:
-	SoundID LoadSound(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority, int pExtraFlags);
-	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const vec3& pPos, const vec3& pVel);
+	SoundID LoadSound(const str& file_name, const void* data, size_t data_size, LoopMode loop_mode, int priority, int extra_flags);
+	virtual void DoSetSoundPosition(SoundInstanceID sound_iid, const vec3& pos, const vec3& vel);
 
 private:
-	int GetChannel(SoundInstanceID pSoundIID);
+	int GetChannel(SoundInstanceID sound_iid);
 
-	class Sample
-	{
+	class Sample {
 	public:
 		Sample() :
-			mID(INVALID_SOUNDID),
-			mReferenceCount(1),
-			mSample(0),
-			mStream(0)
-		{
+			id_(INVALID_SOUNDID),
+			reference_count_(1),
+			sample_(0),
+			stream_(0) {
 		}
 
-		SoundID mID;
-		int mReferenceCount;
-		str mFileName;
-		FSOUND_SAMPLE* mSample;
-		FSOUND_STREAM* mStream;
+		SoundID id_;
+		int reference_count_;
+		str file_name_;
+		FSOUND_SAMPLE* sample_;
+		FSOUND_STREAM* stream_;
 	};
 
-	class FXHandles
-	{
+	class FXHandles {
 	public:
 		FXHandles() :
-			mNumChannels(0),
-			mNumFX(0),
-			mFXID(0)
-		{
+			num_channels_(0),
+			num_fx_(0),
+			fxid_(0) {
 		}
 
-		FXHandles(int pNumChannels, int pNumFX) :
-			mNumChannels(pNumChannels),
-			mNumFX(pNumFX),
-			mFXID(0)
-		{
-			mFXID = new int*[mNumChannels];
-			for (int i = 0; i < mNumChannels; i++)
-			{
-				mFXID[i] = new int[mNumFX];
+		FXHandles(int num_channels, int num_fx) :
+			num_channels_(num_channels),
+			num_fx_(num_fx),
+			fxid_(0) {
+			fxid_ = new int*[num_channels_];
+			for (int i = 0; i < num_channels_; i++) {
+				fxid_[i] = new int[num_fx_];
 			}
 		}
 
-		virtual ~FXHandles()
-		{
-			for (int i = 0; i < mNumChannels; i++)
-			{
-				delete[] mFXID[i];
+		virtual ~FXHandles() {
+			for (int i = 0; i < num_channels_; i++) {
+				delete[] fxid_[i];
 			}
 
-			if (mFXID != 0)
-				delete[] mFXID;
+			if (fxid_ != 0)
+				delete[] fxid_;
 
-			mFXID = 0;
+			fxid_ = 0;
 		}
 
-		void Reset(int pNumChannels, int pNumFX)
-		{
+		void Reset(int num_channels, int num_fx) {
 			int i;
-			for (i = 0; i < mNumChannels; i++)
-			{
-				delete[] mFXID[i];
+			for (i = 0; i < num_channels_; i++) {
+				delete[] fxid_[i];
 			}
 
-			delete[] mFXID;
+			delete[] fxid_;
 
-			mNumChannels = pNumChannels;
-			mNumFX = pNumFX;
+			num_channels_ = num_channels;
+			num_fx_ = num_fx;
 
-			mFXID = new int*[mNumChannels];
-			for (i = 0; i < mNumChannels; i++)
-			{
-				mFXID[i] = new int[mNumFX];
+			fxid_ = new int*[num_channels_];
+			for (i = 0; i < num_channels_; i++) {
+				fxid_[i] = new int[num_fx_];
 			}
 		}
 
-		void Set(int pChannel, int pFXIndex, int pFXID)
-		{
-			mFXID[pChannel][pFXIndex] = pFXID;
+		void Set(int channel, int fx_index, int fxid) {
+			fxid_[channel][fx_index] = fxid;
 		}
 
-		int Get(int pChannel, int pFXIndex)
-		{
-			if (pChannel < 0 || pChannel >= mNumChannels ||
-			   pFXIndex < 0 || pFXIndex >= mNumFX)
-			{
+		int Get(int channel, int fx_index) {
+			if (channel < 0 || channel >= num_channels_ ||
+			   fx_index < 0 || fx_index >= num_fx_) {
 				return -1;
 			}
 
-			return mFXID[pChannel][pFXIndex];
+			return fxid_[channel][fx_index];
 		}
 
 	private:
-		int mNumChannels;
-		int mNumFX;
-		int** mFXID;
+		int num_channels_;
+		int num_fx_;
+		int** fxid_;
 	};
 
-	class SoundInstance
-	{
+	class SoundInstance {
 	public:
 		inline SoundInstance() :
-			mSoundID((SoundID)-1),
-			mSoundIID((SoundInstanceID)-1),
-			mChannel(-1)
-		{
+			sound_id_((SoundID)-1),
+			sound_iid_((SoundInstanceID)-1),
+			channel_(-1) {
 		}
 
-		SoundID mSoundID;
-		SoundInstanceID mSoundIID;
-		int mChannel;
+		SoundID sound_id_;
+		SoundInstanceID sound_iid_;
+		int channel_;
 	};
 
-	class Channel
-	{
+	class Channel {
 	public:
-		SoundInstance mSoundInstance;
+		SoundInstance sound_instance_;
 	};
 
 	typedef HashTable<str, Sample*> FileNameToSampleTable;
 	typedef HashTable<int, Sample*> IDToSampleTable;
 	typedef HashTable<int, SoundInstance> SoundInstanceTable;
 
-	FileNameToSampleTable mFileNameToSampleTable;
-	IDToSampleTable mIDToSampleTable;
-	SoundInstanceTable mSoundInstanceTable;
+	FileNameToSampleTable file_name_to_sample_table_;
+	IDToSampleTable id_to_sample_table_;
+	SoundInstanceTable sound_instance_table_;
 
-	IdManager<SoundID> mSampleIDManager;
-	IdManager<SoundID> mStreamIDManager;
-	IdManager<SoundInstanceID> mSoundInstanceIDManager;
+	IdManager<SoundID> sample_id_manager_;
+	IdManager<SoundID> stream_id_manager_;
+	IdManager<SoundInstanceID> sound_instance_id_manager_;
 
-	FXHandles mFXHandles;
+	FXHandles fx_handles_;
 
-	Channel* mChannel;
-	int mNumChannels;
+	Channel* channel_;
+	int num_channels_;
 
 	logclass();
 };

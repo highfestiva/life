@@ -1,30 +1,28 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../StuntTrigger.h"
+#include "../stunttrigger.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class BulletTime: public StuntTrigger
-{
+class BulletTime: public StuntTrigger {
 	typedef StuntTrigger Parent;
 public:
-	BulletTime(Cure::ContextManager* pManager);
+	BulletTime(cure::ContextManager* manager);
 	virtual ~BulletTime();
 
 protected:
-	virtual void OnAlarm(int pAlarmId, void* pExtraData);
-	virtual void DidTrigger(Cure::ContextObject* pBody);
+	virtual void OnAlarm(int alarm_id, void* extra_data);
+	virtual void DidTrigger(cure::ContextObject* body);
 
 	logclass();
 };

@@ -12,29 +12,27 @@
 
 #pragma once
 
-#include "LepraTypes.h"
+#include "lepratypes.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class SHA1
-{
+class SHA1 {
 public:
 	SHA1();
-	void Update(const uint8* pData, size_t pDataLength);
-	void Finish(uint8* pHash);
-	static void Hash(const uint8* pData, size_t pDataLength, uint8* pHash);
+	void Update(const uint8* data, size_t data_length);
+	void Finish(uint8* hash);
+	static void Hash(const uint8* data, size_t data_length, uint8* hash);
 
 protected:
-	void Process(const uint8 pData[64]);
+	void Process(const uint8 data[64]);
 
-	uint64 mTotal;
-	uint32 mState[5];
-	uint8 mBuffer[64];
+	uint64 total_;
+	uint32 state_[5];
+	uint8 buffer_[64];
 };
 
 

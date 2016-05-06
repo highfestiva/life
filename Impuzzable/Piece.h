@@ -1,26 +1,24 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
-#include "Impuzzable.h"
+#include "../uicure/include/uimachine.h"
+#include "impuzzable.h"
 
 
 
-namespace Impuzzable
-{
+namespace Impuzzable {
 
 
 
-class Piece: public UiCure::Machine
-{
+class Piece: public UiCure::Machine {
 	typedef UiCure::Machine Parent;
 public:
-	Piece(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Piece(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager);
 	virtual ~Piece();
 	virtual bool TryComplete();
 
@@ -29,22 +27,22 @@ public:
 
 	bool IsDragging() const;
 	float GetDragDepth() const;
-	void SetDragging(bool pIsDragging, float pDepth);
-	Tbc::PhysicsManager::BodyID GetRootBodyId() const;
-	void GetBodyIds(std::vector<Tbc::PhysicsManager::BodyID>& pBodyIds) const;
-	void SetDragPosition(const vec3& pPosition);
+	void SetDragging(bool is_dragging, float depth);
+	tbc::PhysicsManager::BodyID GetRootBodyId() const;
+	void GetBodyIds(std::vector<tbc::PhysicsManager::BodyID>& body_ids) const;
+	void SetDragPosition(const vec3& position);
 	vec3 GetDragPosition() const;
-	void SetMoveTarget(const vec3& pPosition);
+	void SetMoveTarget(const vec3& position);
 	vec3 GetMoveTarget() const;
 
 private:
-	vec3 mDragOffset;
-	vec3 mMoveTarget;
-	vec3 mPreviousPosition;
-	vec3 mPreviousVelocity;
-	float mAverageSpeed;
-	float mDragDepth;
-	bool mIsDragging;
+	vec3 drag_offset_;
+	vec3 move_target_;
+	vec3 previous_position_;
+	vec3 previous_velocity_;
+	float average_speed_;
+	float drag_depth_;
+	bool is_dragging_;
 };
 
 

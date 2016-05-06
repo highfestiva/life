@@ -6,12 +6,12 @@
 
 #pragma once
 
-#include "../Life/LifeApplication.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiLepra/Include/UiTouchDrag.h"
-#include "RtVar.h"
-#include "TrabantSim.h"
-#include "Version.h"
+#include "../life/lifeapplication.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uilepra/include/uitouchdrag.h"
+#include "rtvar.h"
+#include "trabantsim.h"
+#include "version.h"
 
 
 
@@ -20,15 +20,14 @@
 #import <StoreKit/StoreKit.h>
 #import <CoreMotion/CoreMotion.h>
 //#import <iAd/ADInterstitialAd.h>
-#include "ListViewController.h"
+#include "listviewcontroller.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class Canvas;
 }
-using namespace Lepra;
+using namespace lepra;
 
 
 
@@ -42,22 +41,22 @@ using namespace Lepra;
 }
 
 @property (nonatomic, strong) UIWindow* window;
-@property (nonatomic, strong) ListViewController* listController;
+@property (nonatomic, strong) ListViewController* controller;
 @property (nonatomic, strong) UIAlertController* alert;
 @property (nonatomic, strong) UIAlertView* alertView;
 
--(id) init:(Canvas*)pCanvas;
+-(id) init:(Canvas*)canvas;
 -(void) dealloc;
--(void) startTick;
--(void) stopTick;
+-(void) tick_;
+-(void) tick_;
 -(void) pushSimulatorController:(UIViewController*)viewController;
 -(void) pushViewController:(UIViewController*)viewController animated:(BOOL)animated;
 -(void) popViewControllerAnimated:(BOOL)animated;
--(void) popIfGame;
--(bool) showingSimulator;
--(void) handleStdOut:(const str&)pStdOut;
+-(void) if_game;
+-(bool) showingSimulator_;
+-(void) handleStdOut:(const str&)std_out;
 -(void) showNetworkControlFor:(NSString*)hostname;
-//-(void) showAd;
+//-(void) ad_;
 -(void) tick;
 
 /*-(void) startPurchase:(NSString*)productName;
@@ -73,17 +72,15 @@ using namespace Lepra;
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
-class TrabantSim: public Life::Application
-{
-	typedef Life::Application Parent;
+class TrabantSim: public life::Application {
+	typedef life::Application Parent;
 public:
 	static TrabantSim* GetApp();
-	TrabantSim(const strutil::strvec& pArgumentList);
+	TrabantSim(const strutil::strvec& argument_list);
 
 	virtual ~TrabantSim();
 	virtual void Init();
@@ -91,29 +88,29 @@ public:
 	virtual bool MainLoop();
 	virtual bool Tick();
 
-	virtual void Resume(bool pHard);
-	virtual void Suspend(bool pHard);
+	virtual void Resume(bool hard);
+	virtual void Suspend(bool hard);
 	void FoldSimulator();
 	void UnfoldSimulator();
 	void DidSyncFiles();
-	bool ConnectQuery(const str& pHostname);
+	bool ConnectQuery(const str& _hostname);
 
 	void SavePurchase();
 	str GetTypeName() const;
 	str GetVersion() const;
 
-	Cure::ApplicationTicker* CreateTicker() const;
+	cure::ApplicationTicker* CreateTicker() const;
 
-	static TrabantSim* mApp;
+	static TrabantSim* app_;
 #ifdef LEPRA_TOUCH
-	AnimatedApp* mAnimatedApp;
-#endif // Touch
-	int mActiveCounter;
-	bool mIsInTick;
+	AnimatedApp* animated_app_;
+#endif // touch
+	int active_counter_;
+	bool is_in_tick_;
 
-	UiCure::GameUiManager* mUiManager;
-	UiLepra::Touch::DragManager mDragManager;
-		
+	UiCure::GameUiManager* ui_manager_;
+	uilepra::touch::DragManager drag_manager_;
+
 	logclass();
 };
 

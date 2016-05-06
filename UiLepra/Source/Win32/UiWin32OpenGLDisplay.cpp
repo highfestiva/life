@@ -4,42 +4,36 @@
 
 
 #include "pch.h"
-#include "../../Include/Win32/UiWin32OpenGLDisplay.h"
+#include "../../include/win32/uiwin32opengldisplay.h"
 #include <stdio.h>
-#include "../../../Lepra/Include/String.h"
-#include "../../Include/UiLepra.h"
-#include "../../Include/UiOpenGLExtensions.h"
+#include "../../../lepra/include/string.h"
+#include "../../include/uilepra.h"
+#include "../../include/uiopenglextensions.h"
 
 #pragma comment(lib, "opengl32.lib")
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
 Win32OpenGLDisplay::Win32OpenGLDisplay():
-	mDC(0)
-{
+	dc_(0) {
 }
 
-Win32OpenGLDisplay::~Win32OpenGLDisplay()
-{
+Win32OpenGLDisplay::~Win32OpenGLDisplay() {
 	CloseScreen();
 }
 
-void Win32OpenGLDisplay::CloseScreen()
-{
+void Win32OpenGLDisplay::CloseScreen() {
 	Deactivate();
 
-	if (mScreenOpened == false)
-	{
+	if (screen_opened_ == false) {
 		return;
 	}
 
-	if (IsFullScreen() == true)
-	{
+	if (IsFullScreen() == true) {
 		::ChangeDisplaySettings(NULL, 0);
 	}
 
@@ -48,187 +42,155 @@ void Win32OpenGLDisplay::CloseScreen()
 	Win32DisplayManager::CloseScreen();
 }
 
-bool Win32OpenGLDisplay::Activate()
-{
-	if (mDC == 0)
-	{
-		mDC = ::GetDC(mWnd);
+bool Win32OpenGLDisplay::Activate() {
+	if (dc_ == 0) {
+		dc_ = ::GetDC(wnd_);
 	}
-	bool lOk = (::wglMakeCurrent(mDC, msGlContext) != FALSE);
-	return (lOk);
+	bool ok = (::wglMakeCurrent(dc_, gl_context_) != FALSE);
+	return (ok);
 }
 
-void Win32OpenGLDisplay::Deactivate()
-{
+void Win32OpenGLDisplay::Deactivate() {
 	::wglMakeCurrent(0, 0);
-	if (mDC)
-	{
-		::ReleaseDC(mWnd, mDC);
-		mDC = 0;
+	if (dc_) {
+		::ReleaseDC(wnd_, dc_);
+		dc_ = 0;
 		return true;
 	}
 	return false;
 }
 
-bool Win32OpenGLDisplay::UpdateScreen()
-{
-	if (mScreenOpened == false)
-	{
+bool Win32OpenGLDisplay::UpdateScreen() {
+	if (screen_opened_ == false) {
 		return (false);
 	}
 
 	// Disable scissor test to make sure that the entire screen will
 	// be updated.
-	GLboolean lScissorsEnabled = glIsEnabled(GL_SCISSOR_TEST);
+	GLboolean scissors_enabled = glIsEnabled(GL_SCISSOR_TEST);
 	glDisable(GL_SCISSOR_TEST);
 
-	bool lOk = (::SwapBuffers(mDC) != FALSE);
+	bool ok = (::SwapBuffers(dc_) != FALSE);
 
-	if (lScissorsEnabled)
-	{
+	if (scissors_enabled) {
 		glEnable(GL_SCISSOR_TEST);
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool Win32OpenGLDisplay::IsVSyncEnabled() const
-{
+bool Win32OpenGLDisplay::IsVSyncEnabled() const {
 	return OpenGLExtensions::IsVSyncEnabled();
 }
 
-bool Win32OpenGLDisplay::SetVSyncEnabled(bool pEnabled)
-{
-	return (mDC? OpenGLExtensions::SetVSyncEnabled(pEnabled) : false);
+bool Win32OpenGLDisplay::SetVSyncEnabled(bool enabled) {
+	return (dc_? OpenGLExtensions::SetVSyncEnabled(enabled) : false);
 }
 
-DisplayManager::ContextType Win32OpenGLDisplay::GetContextType()
-{
-	return DisplayManager::OPENGL_CONTEXT;
+DisplayManager::ContextType Win32OpenGLDisplay::GetContextType() {
+	return DisplayManager::kOpenglContext;
 }
 
-void Win32OpenGLDisplay::SetFocus(bool pFocus)
-{
-	if (IsFullScreen() == true)
-	{
-		if (pFocus == false)
-		{
+void Win32OpenGLDisplay::SetFocus(bool focus) {
+	if (IsFullScreen() == true) {
+		if (focus == false) {
 			DispatchMinimize();
-		}
-		else
-		{
-			DispatchResize(mDisplayMode.mWidth, mDisplayMode.mHeight);
+		} else {
+			DispatchResize(display_mode_.width_, display_mode_.height_);
 		}
 	}
-	Parent::SetFocus(pFocus);
+	Parent::SetFocus(focus);
 }
 
-void Win32OpenGLDisplay::OnResize(int pWidth, int pHeight)
-{
-	Resize(pWidth, pHeight);
-	::ShowWindow(mWnd, SW_SHOWNORMAL);
+void Win32OpenGLDisplay::OnResize(int width, int height) {
+	Resize(width, height);
+	::ShowWindow(wnd_, SW_SHOWNORMAL);
 	Activate();
 }
 
-void Win32OpenGLDisplay::Resize(int pWidth, int pHeight)
-{
-	if (IsFullScreen() == true)
-	{
+void Win32OpenGLDisplay::Resize(int width, int height) {
+	if (IsFullScreen() == true) {
 		// Since we are in fullscreen mode, we ignore the width and height
 		// given as parameters.
-		if (IsMinimized() == true)
-		{
-			DEVMODE lNewMode;
-			lNewMode.dmBitsPerPel       = mDisplayMode.mBitDepth;
-			lNewMode.dmPelsWidth        = mDisplayMode.mWidth;
-			lNewMode.dmPelsHeight       = mDisplayMode.mHeight;
-			lNewMode.dmDisplayFrequency = mDisplayMode.mRefreshRate;
-			lNewMode.dmFields = DM_BITSPERPEL | 
-					     DM_PELSWIDTH  | 
-					     DM_PELSHEIGHT | 
+		if (IsMinimized() == true) {
+			DEVMODE new_mode;
+			new_mode.dmBitsPerPel       = display_mode_.bit_depth_;
+			new_mode.dmPelsWidth        = display_mode_.width_;
+			new_mode.dmPelsHeight       = display_mode_.height_;
+			new_mode.dmDisplayFrequency = display_mode_.refresh_rate_;
+			new_mode.dmFields = DM_BITSPERPEL |
+					     DM_PELSWIDTH  |
+					     DM_PELSHEIGHT |
 					     DM_DISPLAYFREQUENCY;
 
-			::ChangeDisplaySettings(&lNewMode, CDS_FULLSCREEN);
+			::ChangeDisplaySettings(&new_mode, CDS_FULLSCREEN);
 		}
-	}
-	else
-	{
-		mDisplayMode.mWidth  = pWidth;
-		mDisplayMode.mHeight = pHeight;
+	} else {
+		display_mode_.width_  = width;
+		display_mode_.height_ = height;
 	}
 
-	glViewport(0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight);
+	glViewport(0, 0, display_mode_.width_, display_mode_.height_);
 	UpdateCaption();
 }
 
-void Win32OpenGLDisplay::OnMinimize()
-{
+void Win32OpenGLDisplay::OnMinimize() {
 	Deactivate();
 
-	if (IsFullScreen() == true)
-	{
+	if (IsFullScreen() == true) {
 		::ChangeDisplaySettings(NULL, 0);
 	}
 
-	::ShowWindow(mWnd, SW_MINIMIZE);
+	::ShowWindow(wnd_, SW_MINIMIZE);
 }
 
-void Win32OpenGLDisplay::OnMaximize(int pWidth, int pHeight)
-{
-	Resize(pWidth, pHeight);
-	::ShowWindow(mWnd, SW_SHOWMAXIMIZED);
+void Win32OpenGLDisplay::OnMaximize(int width, int height) {
+	Resize(width, height);
+	::ShowWindow(wnd_, SW_SHOWMAXIMIZED);
 	Activate();
 }
 
-bool Win32OpenGLDisplay::InitScreen()
-{
+bool Win32OpenGLDisplay::InitScreen() {
 	UpdateCaption();
 
-	if (mScreenMode == FULLSCREEN)
-	{
-		DEVMODE lNewMode;
-		lNewMode.dmSize             = sizeof(lNewMode);
-		lNewMode.dmBitsPerPel       = mDisplayMode.mBitDepth;
-		lNewMode.dmPelsWidth        = mDisplayMode.mWidth;
-		lNewMode.dmPelsHeight       = mDisplayMode.mHeight;
-		lNewMode.dmDisplayFrequency = mDisplayMode.mRefreshRate;
-		lNewMode.dmFields = DM_BITSPERPEL | 
-							 DM_PELSWIDTH  | 
-							 DM_PELSHEIGHT | 
+	if (screen_mode_ == kFullscreen) {
+		DEVMODE new_mode;
+		new_mode.dmSize             = sizeof(new_mode);
+		new_mode.dmBitsPerPel       = display_mode_.bit_depth_;
+		new_mode.dmPelsWidth        = display_mode_.width_;
+		new_mode.dmPelsHeight       = display_mode_.height_;
+		new_mode.dmDisplayFrequency = display_mode_.refresh_rate_;
+		new_mode.dmFields = DM_BITSPERPEL |
+							 DM_PELSWIDTH  |
+							 DM_PELSHEIGHT |
 							 DM_DISPLAYFREQUENCY;
 
-		if (::ChangeDisplaySettings(&lNewMode, CDS_FULLSCREEN) !=
-		   DISP_CHANGE_SUCCESSFUL)
-		{
+		if (::ChangeDisplaySettings(&new_mode, CDS_FULLSCREEN) !=
+		   DISP_CHANGE_SUCCESSFUL) {
 			//return false;
 		}
 
-		::MoveWindow(mWnd, 0, 0, mDisplayMode.mWidth, mDisplayMode.mHeight, TRUE);
-	}
-	else if(mScreenMode == DisplayManager::WINDOWED ||
-		mScreenMode == DisplayManager::STATIC_WINDOW)
-	{
+		::MoveWindow(wnd_, 0, 0, display_mode_.width_, display_mode_.height_, TRUE);
+	} else if(screen_mode_ == DisplayManager::kWindowed ||
+		screen_mode_ == DisplayManager::kStaticWindow) {
 		// TODO: This stuff is weird! Sometimes it works, and sometimes
 		// it doesn't.
-		int lWindowWidth  = GetWindowWidth(mDisplayMode.mWidth);
-		int lWindowHeight = GetWindowHeight(mDisplayMode.mHeight);
+		int window_width  = GetWindowWidth(display_mode_.width_);
+		int window_height = GetWindowHeight(display_mode_.height_);
 
-		int lX = GetSystemMetrics(SM_CXSCREEN) / 2 - mDisplayMode.mWidth / 2;
-		int lY = GetSystemMetrics(SM_CYSCREEN) / 2 - mDisplayMode.mHeight / 2;
+		int x = GetSystemMetrics(SM_CXSCREEN) / 2 - display_mode_.width_ / 2;
+		int y = GetSystemMetrics(SM_CYSCREEN) / 2 - display_mode_.height_ / 2;
 
-		::MoveWindow(mWnd, lX, lY, lWindowWidth, lWindowHeight, TRUE);
-	}
-	else
-	{
-		int lX = GetSystemMetrics(SM_CXSCREEN) / 2 - mDisplayMode.mWidth / 2;
-		int lY = GetSystemMetrics(SM_CYSCREEN) / 2 - mDisplayMode.mHeight / 2;
+		::MoveWindow(wnd_, x, y, window_width, window_height, TRUE);
+	} else {
+		int x = GetSystemMetrics(SM_CXSCREEN) / 2 - display_mode_.width_ / 2;
+		int y = GetSystemMetrics(SM_CYSCREEN) / 2 - display_mode_.height_ / 2;
 
-		::MoveWindow(mWnd, lX, lY, mDisplayMode.mWidth, mDisplayMode.mHeight, TRUE);
+		::MoveWindow(wnd_, x, y, display_mode_.width_, display_mode_.height_, TRUE);
 	}
 
-	mDC = ::GetDC(mWnd);
+	dc_ = ::GetDC(wnd_);
 
-	if (!SetGLPixelFormat())
-	{
+	if (!SetGLPixelFormat()) {
 		MessageBox(NULL,
 			   "Unable to setup pixel format, Please install a new OpenGL driver," \
 			   "or try closing other running applications...",
@@ -236,8 +198,7 @@ bool Win32OpenGLDisplay::InitScreen()
 		return false;
 	}
 
-	if (!CreateGLContext())
-	{
+	if (!CreateGLContext()) {
 		MessageBox(NULL,
 			   "Unable to setup OpenGL, Please install a new OpenGL driver," \
 			   "or try closing other running applications...",
@@ -246,8 +207,7 @@ bool Win32OpenGLDisplay::InitScreen()
 	}
 
 	//glEnable(GL_SCISSOR_TEST);
-	if (msContextUserCount == 1)
-	{
+	if (context_user_count_ == 1) {
 		OpenGLExtensions::InitExtensions();
 		::glGetError();	// Clear errors, if any.
 	}
@@ -255,103 +215,92 @@ bool Win32OpenGLDisplay::InitScreen()
 	return true;
 }
 
-void Win32OpenGLDisplay::UpdateCaption()
-{
-	str lString = strutil::Format("Win32OpenGLDisplay (%ix%i %iBit %iHz %s"),
-		mDisplayMode.mWidth, mDisplayMode.mHeight,
-		mDisplayMode.mBitDepth, mDisplayMode.mRefreshRate,
-		 LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT);
-	SetCaption(lString, true);
+void Win32OpenGLDisplay::UpdateCaption() {
+	str s = strutil::Format("Win32OpenGLDisplay (%ix%i %iBit %iHz %s"),
+		display_mode_.width_, display_mode_.height_,
+		display_mode_.bit_depth_, display_mode_.refresh_rate_,
+		 kLepraStringTypeText " " kLepraBuildTypeText);
+	SetCaption(s, true);
 }
 
-bool Win32OpenGLDisplay::CreateGLContext()
-{
-	if (msGlContext == 0)
-	{
-		msGlContext = ::wglCreateContext(mDC);
+bool Win32OpenGLDisplay::CreateGLContext() {
+	if (gl_context_ == 0) {
+		gl_context_ = ::wglCreateContext(dc_);
 	}
 
-	bool lOk = (msGlContext != 0);
-	if (lOk)
-	{
-		++msContextUserCount;
-		lOk = Activate();
+	bool ok = (gl_context_ != 0);
+	if (ok) {
+		++context_user_count_;
+		ok = Activate();
 	}
-	return (lOk);
+	return (ok);
 }
 
-void Win32OpenGLDisplay::DeleteGLContext()
-{
-	if (msContextUserCount >= 1)
-	{
-		--msContextUserCount;
+void Win32OpenGLDisplay::DeleteGLContext() {
+	if (context_user_count_ >= 1) {
+		--context_user_count_;
 	}
-	if (msContextUserCount == 0)
-	{
+	if (context_user_count_ == 0) {
 		::wglMakeCurrent(0, 0);
-		::wglDeleteContext(msGlContext);
-		msGlContext = 0;
+		::wglDeleteContext(gl_context_);
+		gl_context_ = 0;
 	}
 }
 
-bool Win32OpenGLDisplay::SetGLPixelFormat()
-{
-	int	lGLPixelIndex;
-	PIXELFORMATDESCRIPTOR lPixelDesc;
+bool Win32OpenGLDisplay::SetGLPixelFormat() {
+	int	gl_pixel_index;
+	PIXELFORMATDESCRIPTOR pixel_desc;
 
-	lPixelDesc.nSize = sizeof(lPixelDesc);
-	lPixelDesc.nVersion = 1;
+	pixel_desc.nSize = sizeof(pixel_desc);
+	pixel_desc.nVersion = 1;
 
-	lPixelDesc.dwFlags = PFD_DRAW_TO_WINDOW | 
+	pixel_desc.dwFlags = PFD_DRAW_TO_WINDOW |
 			      PFD_SUPPORT_OPENGL |
 			      PFD_DOUBLEBUFFER |
 			      PFD_STEREO_DONTCARE;
 
-	lPixelDesc.iPixelType			= PFD_TYPE_RGBA;
-	lPixelDesc.cColorBits			= (BYTE)mDisplayMode.mBitDepth;
-	lPixelDesc.cRedBits			= 0;
-	lPixelDesc.cRedShift			= 0;
-	lPixelDesc.cGreenBits			= 0;
-	lPixelDesc.cGreenShift			= 0;
-	lPixelDesc.cBlueBits			= 0;
-	lPixelDesc.cBlueShift			= 0;
-	lPixelDesc.cAlphaBits			= 0;
-	lPixelDesc.cAlphaShift			= 0;
-	lPixelDesc.cAccumBits			= 0;	// TODO: Implement accumulation buffer?
-	lPixelDesc.cAccumRedBits		= 0;
-	lPixelDesc.cAccumGreenBits		= 0;
-	lPixelDesc.cAccumBlueBits		= 0;
-	lPixelDesc.cAccumAlphaBits		= 0;
-	lPixelDesc.cDepthBits			= 32;	// Depth buffer.
-	lPixelDesc.cStencilBits			= 8;	// Stencil buffer.
-	lPixelDesc.cAuxBuffers			= 0;
-	lPixelDesc.iLayerType			= PFD_MAIN_PLANE;
-	lPixelDesc.bReserved			= 0;
-	lPixelDesc.dwLayerMask			= 0;
-	lPixelDesc.dwVisibleMask		= 0;
-	lPixelDesc.dwDamageMask			= 0;
+	pixel_desc.iPixelType			= PFD_TYPE_RGBA;
+	pixel_desc.cColorBits			= (BYTE)display_mode_.bit_depth_;
+	pixel_desc.cRedBits			= 0;
+	pixel_desc.cRedShift			= 0;
+	pixel_desc.cGreenBits			= 0;
+	pixel_desc.cGreenShift			= 0;
+	pixel_desc.cBlueBits			= 0;
+	pixel_desc.cBlueShift			= 0;
+	pixel_desc.cAlphaBits			= 0;
+	pixel_desc.cAlphaShift			= 0;
+	pixel_desc.cAccumBits			= 0;	// TODO: Implement accumulation buffer?
+	pixel_desc.cAccumRedBits		= 0;
+	pixel_desc.cAccumGreenBits		= 0;
+	pixel_desc.cAccumBlueBits		= 0;
+	pixel_desc.cAccumAlphaBits		= 0;
+	pixel_desc.cDepthBits			= 32;	// Depth buffer.
+	pixel_desc.cStencilBits			= 8;	// Stencil buffer.
+	pixel_desc.cAuxBuffers			= 0;
+	pixel_desc.iLayerType			= PFD_MAIN_PLANE;
+	pixel_desc.bReserved			= 0;
+	pixel_desc.dwLayerMask			= 0;
+	pixel_desc.dwVisibleMask		= 0;
+	pixel_desc.dwDamageMask			= 0;
 
-	lGLPixelIndex = ::ChoosePixelFormat(mDC, &lPixelDesc);
+	gl_pixel_index = ::ChoosePixelFormat(dc_, &pixel_desc);
 
-	if (lGLPixelIndex == 0) // Choose default
-	{
-		lGLPixelIndex = 1;
+	if (gl_pixel_index == 0) { // Choose default
+		gl_pixel_index = 1;
 
-		if (::DescribePixelFormat(mDC, lGLPixelIndex, sizeof(PIXELFORMATDESCRIPTOR), &lPixelDesc) == false)
-		{
+		if (::DescribePixelFormat(dc_, gl_pixel_index, sizeof(PIXELFORMATDESCRIPTOR), &pixel_desc) == false) {
 			return false;
 		}
 	}
 
-	if (::SetPixelFormat(mDC, lGLPixelIndex, &lPixelDesc) == false)
-	{
+	if (::SetPixelFormat(dc_, gl_pixel_index, &pixel_desc) == false) {
 		return false;
 	}
 
 	return true;
 }
 
-HGLRC Win32OpenGLDisplay::msGlContext = 0;
-int Win32OpenGLDisplay::msContextUserCount = 0;
+HGLRC Win32OpenGLDisplay::gl_context_ = 0;
+int Win32OpenGLDisplay::context_user_count_ = 0;
 
 }

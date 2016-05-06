@@ -1,50 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Workspace Name="Life" Database="">
-  <Project Name="Life" Path="Life.project" Active="No"/>
-  <Project Name="TrabantSim" Path="../TrabantSim/TrabantSim.project" Active="No"/>
-  <Project Name="SlimeVolleyball" Path="../SlimeVolleyball/SlimeVolleyball.project" Active="No"/>
-  <Project Name="Downwash" Path="../Downwash/Downwash.project" Active="No"/>
-  <Project Name="Bound" Path="../Bound/Bound.project" Active="No"/>
-  <Project Name="CureTestApp" Path="../UiCure/CureTestApp/CureTestApp.project" Active="No"/>
-  <Project Name="Push" Path="../Push/Push.project" Active="No"/>
-  <Project Name="KillCutie" Path="../KillCutie/KillCutie.project" Active="No"/>
-  <Project Name="Fire" Path="../Fire/Fire.project" Active="Yes"/>
+<CodeLite_Workspace Name="life" Database="">
+  <Project Name="life" Path="life.project" Active="No"/>
+  <Project Name="trabantsim" Path="../trabantsim/trabantsim.project" Active="Yes"/>
+  <Project Name="slimevolleyball" Path="../slimevolleyball/slimevolleyball.project" Active="No"/>
+  <Project Name="downwash" Path="../downwash/downwash.project" Active="No"/>
+  <Project Name="bound" Path="../bound/bound.project" Active="No"/>
+  <Project Name="curetestapp" Path="../uicure/curetestapp/curetestapp.project" Active="No"/>
+  <Project Name="push" Path="../push/push.project" Active="No"/>
+  <Project Name="killcutie" Path="../killcutie/killcutie.project" Active="No"/>
+  <Project Name="fire" Path="../fire/fire.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
-      <Project Name="Life" ConfigName="Debug"/>
-      <Project Name="TrabantSim" ConfigName="Debug"/>
-      <Project Name="SlimeVolleyball" ConfigName="Debug"/>
-      <Project Name="Downwash" ConfigName="Debug"/>
-      <Project Name="Bound" ConfigName="Debug"/>
-      <Project Name="CureTestApp" ConfigName="Debug"/>
-      <Project Name="Push" ConfigName="Debug"/>
-      <Project Name="KillCutie" ConfigName="Debug"/>
-      <Project Name="Fire" ConfigName="Debug"/>
+      <Project Name="life" ConfigName="Debug"/>
+      <Project Name="trabantsim" ConfigName="Debug"/>
+      <Project Name="slimevolleyball" ConfigName="Debug"/>
+      <Project Name="downwash" ConfigName="Debug"/>
+      <Project Name="bound" ConfigName="Debug"/>
+      <Project Name="curetestapp" ConfigName="Debug"/>
+      <Project Name="push" ConfigName="Debug"/>
+      <Project Name="killcutie" ConfigName="Debug"/>
+      <Project Name="fire" ConfigName="Debug"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
-      <Project Name="TrabantSim" ConfigName="Release"/>
-      <Project Name="Life" ConfigName="Release"/>
-      <Project Name="SlimeVolleyball" ConfigName="Release"/>
-      <Project Name="Downwash" ConfigName="Release"/>
-      <Project Name="Bound" ConfigName="Release"/>
-      <Project Name="CureTestApp" ConfigName="Release"/>
-      <Project Name="Push" ConfigName="Release"/>
-      <Project Name="KillCutie" ConfigName="Release"/>
-      <Project Name="Fire" ConfigName="Release"/>
+      <Project Name="trabantsim" ConfigName="Release"/>
+      <Project Name="life" ConfigName="Release"/>
+      <Project Name="slimevolleyball" ConfigName="Release"/>
+      <Project Name="downwash" ConfigName="Release"/>
+      <Project Name="bound" ConfigName="Release"/>
+      <Project Name="curetestapp" ConfigName="Release"/>
+      <Project Name="push" ConfigName="Release"/>
+      <Project Name="killcutie" ConfigName="Release"/>
+      <Project Name="fire" ConfigName="Release"/>
     </WorkspaceConfiguration>
     <WorkspaceConfiguration Name="Profile" Selected="no">
       <Environment/>
-      <Project Name="TrabantSim" ConfigName="Profile"/>
-      <Project Name="Life" ConfigName="Profile"/>
-      <Project Name="SlimeVolleyball" ConfigName="Profile"/>
-      <Project Name="Downwash" ConfigName="Profile"/>
-      <Project Name="Bound" ConfigName="Profile"/>
-      <Project Name="CureTestApp" ConfigName="Profile"/>
-      <Project Name="Push" ConfigName="Profile"/>
-      <Project Name="KillCutie" ConfigName="Profile"/>
-      <Project Name="Fire" ConfigName="Profile"/>
+      <Project Name="trabantsim" ConfigName="Profile"/>
+      <Project Name="life" ConfigName="Profile"/>
+      <Project Name="slimevolleyball" ConfigName="Profile"/>
+      <Project Name="downwash" ConfigName="Profile"/>
+      <Project Name="bound" ConfigName="Profile"/>
+      <Project Name="curetestapp" ConfigName="Profile"/>
+      <Project Name="push" ConfigName="Profile"/>
+      <Project Name="killcutie" ConfigName="Profile"/>
+      <Project Name="fire" ConfigName="Profile"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

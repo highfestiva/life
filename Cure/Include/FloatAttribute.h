@@ -1,38 +1,36 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "Cure.h"
-#include "ContextObjectAttribute.h"
+#include "cure.h"
+#include "contextobjectattribute.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class FloatAttribute: public ContextObjectAttribute
-{
+class FloatAttribute: public ContextObjectAttribute {
 	typedef ContextObjectAttribute Parent;
 public:
-	FloatAttribute(ContextObject* pContextObject, const str& pName, float pValue);
+	FloatAttribute(ContextObject* context_object, const str& name, float value);
 	virtual ~FloatAttribute();
 
 	float GetValue() const;
-	void SetValue(float pValue);
+	void SetValue(float value);
 
 private:
 	virtual int QuerySend() const;	// Returns number of bytes it needs to send.
-	virtual int Pack(uint8* pDestination);
-	virtual int Unpack(const uint8* pSource, int pMaxSize);	// Retuns number of bytes unpacked, or -1.
+	virtual int Pack(uint8* destination);
+	virtual int Unpack(const uint8* source, int max_size);	// Retuns number of bytes unpacked, or -1.
 
-	bool mIsUpdated;
-	float mValue;
+	bool is_updated_;
+	float value_;
 
 	void operator=(const FloatAttribute&);
 };

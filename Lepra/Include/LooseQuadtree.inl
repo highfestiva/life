@@ -4,189 +4,168 @@
 
 
 
-LQ_TEMPLATE LQ_QUAL::LooseQuadtree(_TObject pErrorObject, _TVarType pTotalTreeSize,_TVarType pMinimumCellSize, _TVarType pK):
-	mErrorObject(pErrorObject)
-{
+LQ_TEMPLATE LQ_QUAL::LooseQuadtree(_TObject error_object, _TVarType total_tree_size,_TVarType minimum_cell_size, _TVarType k):
+	error_object_(error_object) {
 	// Find required root node size.
-	_TVarType lPowOf2 = 2;
-	mMaxTreeDepth = 1;
-	while (pMinimumCellSize * lPowOf2 < pTotalTreeSize)
-	{
-		mMaxTreeDepth++;
-		lPowOf2 *= 2;
+	_TVarType pow_of2 = 2;
+	max_tree_depth_ = 1;
+	while (minimum_cell_size * pow_of2 < total_tree_size) {
+		max_tree_depth_++;
+		pow_of2 *= 2;
 	}
 
-	mK = pK;
-	_TVarType lFixedSizeHalf = pMinimumCellSize * lPowOf2 * (_TVarType)0.5;
-	_TVarType lSizeHalf = lFixedSizeHalf * mK;
+	k_ = k;
+	_TVarType _fixed_size_half = minimum_cell_size * pow_of2 * (_TVarType)0.5;
+	_TVarType size_half = _fixed_size_half * k_;
 
-	mRootNode = new Node(0, 255, lFixedSizeHalf);
+	root_node_ = new Node(0, 255, _fixed_size_half);
 
 	// Tree center at 0,0,0.
-	Vector2D<_TVarType> lSizeHalfVec(lSizeHalf, lSizeHalf);
-	mRootNode->mNodeBox = AABR_(Vector2D<_TVarType>(0, 0), lSizeHalfVec);
+	Vector2D<_TVarType> size_half_vec(size_half, size_half);
+	root_node_->node_box_ = AABR_(Vector2D<_TVarType>(0, 0), size_half_vec);
 
-	mNumObjects = 0;
-	mNumNodes = 1;
+	num_objects_ = 0;
+	num_nodes_ = 1;
 }
 
 
 
 
-LQ_TEMPLATE LQ_QUAL::~LooseQuadtree()
-{
-	delete mRootNode;
-	typename NodeList::iterator lIter;
-	for (lIter = mRecycledNodeList.begin(); lIter != mRecycledNodeList.end(); ++lIter)
-	{
-		delete (*lIter);
+LQ_TEMPLATE LQ_QUAL::~LooseQuadtree() {
+	delete root_node_;
+	typename NodeList::iterator iter;
+	for (iter = recycled_node_list_.begin(); iter != recycled_node_list_.end(); ++iter) {
+		delete (*iter);
 	}
 }
 
 
 
 
-LQ_TEMPLATE void LQ_QUAL::InsertObject(_TKey pKey, LQArea<_TVarType>* pArea, _TObject pObject)
-{
-	if (mNodeTable.Find(pKey) != mNodeTable.End())
-	{
+LQ_TEMPLATE void LQ_QUAL::InsertObject(_TKey key, LQArea<_TVarType>* area, _TObject object) {
+	if (node_table_.Find(key) != node_table_.End()) {
 		//LOG(PHYSIC, ERROR, "LooseQuadtree::InsertObject, object already inserted!");
 		return;
 	}
 
-	InsertObject(pKey, typename Node::Entry(pArea, pObject), mRootNode, 0);
+	InsertObject(key, typename Node::Entry(area, object), root_node_, 0);
 }
 
 
 
 
-LQ_TEMPLATE void LQ_QUAL::InsertObject(_TKey pKey, typename Node::Entry pEntry, Node* pNode, uint16 pDepth)
-{
+LQ_TEMPLATE void LQ_QUAL::InsertObject(_TKey key, typename Node::Entry entry, Node* node, uint16 depth) {
 	// Calculate the position, size and index values of the child node.
-	_TVarType lChildNodeSizeHalf = pNode->GetSizeHalf() * 0.5;
+	_TVarType child_node_size_half = node->GetSizeHalf() * 0.5;
 
-	Vector2D<_TVarType> lChildNodePos;
-	uint8 lChildIndex = GetChild(pEntry.mArea->GetPosition(), pNode, lChildNodePos);
+	Vector2D<_TVarType> child_node_pos;
+	uint8 child_index = GetChild(entry.area_->GetPosition(), node, child_node_pos);
 
 	// Check if the object fits in the child node or not.
-	if (	!pEntry.mArea->IsAABSQEnclosingArea(lChildNodePos, lChildNodeSizeHalf) ||
-		(pDepth == mMaxTreeDepth))
-	{
-		//MATH_ASSERT((pNode->mEntryMap.Find(pKey) == pNode->mEntryMap.End()), "LooseQuadtree::InsertObject: pNode->mEntryMap.Find(pKey) == pNode->mEntryMap.End()");
-		//MATH_ASSERT((mNodeTable.Find(pKey) == mNodeTable.End()), "LooseQuadtree::InsertObject: mNodeTable.Find(pKey) == mNodeTable.End()");
+	if (	!entry.area_->IsAABSQEnclosingArea(child_node_pos, child_node_size_half) ||
+		(depth == max_tree_depth_)) {
+		//MATH_ASSERT((node->mEntryMap.Find(key) == node->mEntryMap.End()), "LooseQuadtree::InsertObject: node->mEntryMap.Find(key) == node->mEntryMap.End()");
+		//MATH_ASSERT((node_table_.Find(key) == node_table_.End()), "LooseQuadtree::InsertObject: node_table_.Find(key) == node_table_.End()");
 
 		// The object doesn't fit in the child node, so put it in the current node...
-		pNode->mEntryTable.Insert(pKey, pEntry);
-		pNode->mObjectCount++;
-		mNodeTable.Insert(pKey, pNode);
-		mNumObjects++;
-	}
-	else
-	{
+		node->entry_table_.Insert(key, entry);
+		node->object_count_++;
+		node_table_.Insert(key, node);
+		num_objects_++;
+	} else {
 		// Insert object in the child node
-		if (pNode->mChildren[lChildIndex] == 0)
-		{
-			Node* lNewChildNode = NewNode(pNode, lChildIndex, pNode->GetFixedSizeHalf() * 0.5);
-			lNewChildNode->mNodeBox.SetPosition(lChildNodePos);
-			lNewChildNode->mNodeBox.SetSize(Vector2D<_TVarType>(lChildNodeSizeHalf, lChildNodeSizeHalf));
-			pNode->mChildMask |= (1 << lChildIndex);
-			mNumNodes++;
-			pNode->mChildren[lChildIndex] = lNewChildNode;
+		if (node->children_[child_index] == 0) {
+			Node* new_child_node = NewNode(node, child_index, node->GetFixedSizeHalf() * 0.5);
+			new_child_node->node_box_.SetPosition(child_node_pos);
+			new_child_node->node_box_.SetSize(Vector2D<_TVarType>(child_node_size_half, child_node_size_half));
+			node->child_mask_ |= (1 << child_index);
+			num_nodes_++;
+			node->children_[child_index] = new_child_node;
 		}
 
-		InsertObject(pKey, pEntry, pNode->mChildren[lChildIndex], pDepth + 1);
+		InsertObject(key, entry, node->children_[child_index], depth + 1);
 	}
 }
 
 
 
-LQ_TEMPLATE _TObject LQ_QUAL::RemoveObject(_TKey pKey)
-{
-	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
-	if (lNodeIter == mNodeTable.End())
-	{
-		return mErrorObject;
+LQ_TEMPLATE _TObject LQ_QUAL::RemoveObject(_TKey key) {
+	typename NodeTable::Iterator _node_iter = node_table_.Find(key);
+	if (_node_iter == node_table_.End()) {
+		return error_object_;
 	}
 
-	return RemoveObject(pKey, lNodeIter).mObject;
+	return RemoveObject(key, _node_iter).object_;
 }
 
 
 
 
-LQ_TEMPLATE typename LQ_QUAL::Node::Entry LQ_QUAL::RemoveObject(_TKey pKey, typename NodeTable::Iterator& pNodeIter)
-{
+LQ_TEMPLATE typename LQ_QUAL::Node::Entry LQ_QUAL::RemoveObject(_TKey key, typename NodeTable::Iterator& node_iter) {
 	// Removes object from the octree and deletes the node if empty.
-	Node* lCurrentNode = *pNodeIter;
+	Node* _current_node = *node_iter;
 
-	typename Node::EntryTable::Iterator lIter = FindObject(pKey, lCurrentNode);
-	typename Node::Entry lEntry = *lIter;
+	typename Node::EntryTable::Iterator iter = FindObject(key, _current_node);
+	typename Node::Entry _entry = *iter;
 
-	lCurrentNode->mEntryTable.Remove(lIter);
-	mNodeTable.Remove(pNodeIter);
-	mNumObjects--;
+	_current_node->entry_table_.Remove(iter);
+	node_table_.Remove(node_iter);
+	num_objects_--;
 
-	while (lCurrentNode != 0 && lCurrentNode->IsEmpty() == true)
-	{
-		Node* lParent = lCurrentNode->mParent;
+	while (_current_node != 0 && _current_node->IsEmpty() == true) {
+		Node* _parent = _current_node->parent_;
 
-		if (lParent != 0)
-		{
-			RecycleNode(lParent->mChildren[lCurrentNode->mIndex]);
-			lParent->mChildren[lCurrentNode->mIndex] = 0;
-			
-			lParent->mChildMask &= (0xFFFFFFFF ^ (1 << lCurrentNode->mIndex));
-			mNumNodes--;
+		if (_parent != 0) {
+			RecycleNode(_parent->children_[_current_node->index_]);
+			_parent->children_[_current_node->index_] = 0;
+
+			_parent->child_mask_ &= (0xFFFFFFFF ^ (1 << _current_node->index_));
+			num_nodes_--;
 		}
 
-		lCurrentNode = lParent;
+		_current_node = _parent;
 	}
 
-	return lEntry;
+	return _entry;
 }
 
 
 
 
-LQ_TEMPLATE _TObject LQ_QUAL::FindObject(_TKey pKey) const
-{
-	typename NodeTable::ConstIterator lNodeIter = mNodeTable.Find(pKey);
-	if (lNodeIter == mNodeTable.End())
-	{
-		return mErrorObject;
+LQ_TEMPLATE _TObject LQ_QUAL::FindObject(_TKey key) const {
+	typename NodeTable::ConstIterator _node_iter = node_table_.Find(key);
+	if (_node_iter == node_table_.End()) {
+		return error_object_;
 	}
 
-	return (*FindObject(pKey, *lNodeIter)).mObject;
+	return (*FindObject(key, *_node_iter)).object_;
 }
 
 
 
 
-LQ_TEMPLATE inline typename LQ_QUAL::Node::EntryTable::Iterator LQ_QUAL::FindObject(_TKey pKey, Node* pObjectNode) const
-{
-	//MATH_ASSERT((pObjectNode != NULL), "LooseQuadtree::FindObject: pObjectNode != NULL");
-	//MATH_ASSERT((pObjectNode->mEntryTable.Find(pKey) != pObjectNode->mEntryTable.End()), "LooseQuadtree::FindObject: pObjectNode->mEntryTable.Find(pKey) != pObjectNode->mEntryTable.End()");
+LQ_TEMPLATE inline typename LQ_QUAL::Node::EntryTable::Iterator LQ_QUAL::FindObject(_TKey key, Node* object_node) const {
+	//MATH_ASSERT((object_node != NULL), "LooseQuadtree::FindObject: object_node != NULL");
+	//MATH_ASSERT((object_node->entry_table_.Find(key) != object_node->entry_table_.End()), "LooseQuadtree::FindObject: object_node->entry_table_.Find(key) != object_node->entry_table_.End()");
 
-	return pObjectNode->mEntryTable.Find(pKey);
+	return object_node->entry_table_.Find(key);
 }
 
 
 
 
-LQ_TEMPLATE bool LQ_QUAL::MoveObject(_TKey pKey, LQArea<_TVarType>* pNewArea)
-{
-	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
-	if (lNodeIter == mNodeTable.End())
-	{
+LQ_TEMPLATE bool LQ_QUAL::MoveObject(_TKey key, LQArea<_TVarType>* new_area) {
+	typename NodeTable::Iterator _node_iter = node_table_.Find(key);
+	if (_node_iter == node_table_.End()) {
 		//LOG(PHYSIC, DEBUG, "LooseQuadtree::MoveObject, trying to move non existing object!");
 		return false;
 	}
-	Node* lNode = *lNodeIter;
+	Node* _node = *_node_iter;
 
-	typename Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
-	(*lEntryIter).mArea = pNewArea;
-	
-	MoveObject(pKey, lNodeIter, lEntryIter);
+	typename Node::EntryTable::Iterator entry_iter = FindObject(key, _node);
+	(*entry_iter).area_ = new_area;
+
+	MoveObject(key, _node_iter, entry_iter);
 
 	return true;
 }
@@ -194,143 +173,123 @@ LQ_TEMPLATE bool LQ_QUAL::MoveObject(_TKey pKey, LQArea<_TVarType>* pNewArea)
 
 
 
-LQ_TEMPLATE _TObject LQ_QUAL::MoveObject(_TKey pKey, const Vector2D<_TVarType>& pToPos)
-{
-	typename NodeTable::Iterator lNodeIter = mNodeTable.Find(pKey);
-	if (lNodeIter == mNodeTable.End())
-	{
+LQ_TEMPLATE _TObject LQ_QUAL::MoveObject(_TKey key, const Vector2D<_TVarType>& to_pos) {
+	typename NodeTable::Iterator _node_iter = node_table_.Find(key);
+	if (_node_iter == node_table_.End()) {
 		//LOG(PHYSIC, DEBUG, "LooseQuadtree::MoveObject, trying to move non existing object!");
 		return _TObject();
 	}
-	Node* lNode = *lNodeIter;
+	Node* _node = *_node_iter;
 
-	typename Node::EntryTable::Iterator lEntryIter = FindObject(pKey, lNode);
-	(*lEntryIter).mArea->SetPosition(pToPos);
+	typename Node::EntryTable::Iterator entry_iter = FindObject(key, _node);
+	(*entry_iter).area_->SetPosition(to_pos);
 
-	return MoveObject(pKey, lNodeIter);
+	return MoveObject(key, _node_iter);
 }
 
-LQ_TEMPLATE _TObject LQ_QUAL::MoveObject(_TKey pKey, typename NodeTable::Iterator& pNodeIter)
-{
-	typename Node::Entry lEntry = RemoveObject(pKey, pNodeIter);
-	InsertObject(pKey, lEntry, mRootNode, 0);
-	return lEntry.mObject;
+LQ_TEMPLATE _TObject LQ_QUAL::MoveObject(_TKey key, typename NodeTable::Iterator& node_iter) {
+	typename Node::Entry _entry = RemoveObject(key, node_iter);
+	InsertObject(key, _entry, root_node_, 0);
+	return _entry.object_;
 }
 
 
 
-LQ_TEMPLATE unsigned LQ_QUAL::GetOverlaps(const Vector2D<_TVarType>& pPosRelParent, 
-				    _TVarType pBoundingRadius, 
-				    _TVarType pChildNodeSize,
-				    _TVarType pParentNodeSize) const
-{
+LQ_TEMPLATE unsigned LQ_QUAL::GetOverlaps(const Vector2D<_TVarType>& pos_rel_parent,
+				    _TVarType bounding_radius,
+				    _TVarType child_node_size,
+				    _TVarType parent_node_size) const {
 	// Suppose that we overlap all nodes.
-	unsigned lOverlapMask	= 0xFFFFFFFF;
-	_TVarType lMinBoxSeparation = pBoundingRadius + pParentNodeSize;
+	unsigned overlap_mask	= 0xFFFFFFFF;
+	_TVarType min_box_separation = bounding_radius + parent_node_size;
 
 	// Test the right portion of the children.
-	if ( ( pPosRelParent.x - pChildNodeSize ) > lMinBoxSeparation ||
-	    ( pChildNodeSize - pPosRelParent.x ) > lMinBoxSeparation)
-	{
+	if ( ( pos_rel_parent.x - child_node_size ) > min_box_separation ||
+	    ( child_node_size - pos_rel_parent.x ) > min_box_separation) {
 		// Remove the two rightmost children.
-		lOverlapMask &= ~(4 + 8);
-		MACRO_LO_GO1_TEST_TOP_AND_BOTTOM
+		overlap_mask &= ~(4 + 8);
+		kMacroLoGo1TestTopAndBottom
 	}
 	// Test the left portion of the children.
-	else if( ( pPosRelParent.x + pChildNodeSize ) > lMinBoxSeparation ||
-		-( pChildNodeSize + pPosRelParent.x ) > lMinBoxSeparation)
-	{
+	else if( ( pos_rel_parent.x + child_node_size ) > min_box_separation ||
+		-( child_node_size + pos_rel_parent.x ) > min_box_separation) {
 		// Remove the two leftmost children.
-		lOverlapMask &= ~(1 + 2);
-		MACRO_LO_GO1_TEST_TOP_AND_BOTTOM
+		overlap_mask &= ~(1 + 2);
+		kMacroLoGo1TestTopAndBottom
 	}
 
-	return lOverlapMask;
+	return overlap_mask;
 }
 
 
 
 
-LQ_TEMPLATE unsigned LQ_QUAL::GetOverlaps( const Vector2D<_TVarType>& pPosRelParent, 
-				     _TVarType pSizeX, 
-				     _TVarType pSizeY, 
-				     _TVarType pChildNodeSize,
-				     _TVarType pParentNodeSize) const
-{
+LQ_TEMPLATE unsigned LQ_QUAL::GetOverlaps( const Vector2D<_TVarType>& pos_rel_parent,
+				     _TVarType size_x,
+				     _TVarType size_y,
+				     _TVarType child_node_size,
+				     _TVarType parent_node_size) const {
 	// Suppose that we overlap all nodes.
-	unsigned lOverlapMask	= 0xFFFFFFFF;
-	_TVarType lMinBoxSeparationX = pSizeX + pParentNodeSize;
-	_TVarType lMinBoxSeparationY = pSizeY + pParentNodeSize;
+	unsigned overlap_mask	= 0xFFFFFFFF;
+	_TVarType min_box_separation_x = size_x + parent_node_size;
+	_TVarType min_box_separation_y = size_y + parent_node_size;
 
 	// Test the right portion of the children.
-	if ( ( pPosRelParent.x - pChildNodeSize ) > lMinBoxSeparationX ||
-		( pChildNodeSize - pPosRelParent.x ) > lMinBoxSeparationX)
-	{
+	if ( ( pos_rel_parent.x - child_node_size ) > min_box_separation_x ||
+		( child_node_size - pos_rel_parent.x ) > min_box_separation_x) {
 		// Remove the two rightmost children.
-		lOverlapMask &= ~(4 + 8);
-		MACRO_LO_GO2_TEST_TOP_AND_BOTTOM
-	}
-	else if( ( pPosRelParent.x + pChildNodeSize ) > lMinBoxSeparationX ||
-		    -( pChildNodeSize + pPosRelParent.x ) > lMinBoxSeparationX)
-	{
+		overlap_mask &= ~(4 + 8);
+		kMacroLoGo2TestTopAndBottom
+	} else if( ( pos_rel_parent.x + child_node_size ) > min_box_separation_x ||
+		    -( child_node_size + pos_rel_parent.x ) > min_box_separation_x) {
 		// Remove the two leftmost children.
-		lOverlapMask &= ~(1 + 2);
-		MACRO_LO_GO2_TEST_TOP_AND_BOTTOM
+		overlap_mask &= ~(1 + 2);
+		kMacroLoGo2TestTopAndBottom
 	}
 
-	return lOverlapMask;
+	return overlap_mask;
 }
 
 
 
 
-LQ_TEMPLATE uint8 LQ_QUAL::GetChild(const Vector2D<_TVarType>& pPos, const Node* pNode)
-{
-	uint8 pIndex = 0;
+LQ_TEMPLATE uint8 LQ_QUAL::GetChild(const Vector2D<_TVarType>& pos, const Node* node) {
+	uint8 index = 0;
 
-	if ( pPos.x > pNode->GetPosition().x )
-	{
-		pIndex |= 2;
+	if ( pos.x > node->GetPosition().x ) {
+		index |= 2;
 	}
 
-	if ( pPos.y > pNode->GetPosition().y )
-	{
-		pIndex |= 1;
+	if ( pos.y > node->GetPosition().y ) {
+		index |= 1;
 	}
 
-	return pIndex;
+	return index;
 }
 
 
 
 
-LQ_TEMPLATE uint8 LQ_QUAL::GetChild(const Vector2D<_TVarType>& pPos, const Node* pNode, Vector2D<_TVarType>& pChildPos)
-{
-	_TVarType lChildUnloosSizeHalf = pNode->GetFixedSizeHalf() * 0.5f;
+LQ_TEMPLATE uint8 LQ_QUAL::GetChild(const Vector2D<_TVarType>& pos, const Node* node, Vector2D<_TVarType>& child_pos) {
+	_TVarType child_unloos_size_half = node->GetFixedSizeHalf() * 0.5f;
 
-	uint8 pIndex = 0;
+	uint8 index = 0;
 
-	if ( pPos.x > pNode->GetPosition().x )
-	{
-		pChildPos.x = pNode->GetPosition().x + lChildUnloosSizeHalf;
-		pIndex |= 2;
-	}
-	else
-	{
-		pChildPos.x = pNode->GetPosition().x - lChildUnloosSizeHalf;
+	if ( pos.x > node->GetPosition().x ) {
+		child_pos.x = node->GetPosition().x + child_unloos_size_half;
+		index |= 2;
+	} else {
+		child_pos.x = node->GetPosition().x - child_unloos_size_half;
 	}
 
-	if ( pPos.y > pNode->GetPosition().y )
-	{
-		pChildPos.y = pNode->GetPosition().y + lChildUnloosSizeHalf;
-		pIndex |= 1;
-	}
-	else
-	{
-		pChildPos.y = pNode->GetPosition().y - lChildUnloosSizeHalf;
+	if ( pos.y > node->GetPosition().y ) {
+		child_pos.y = node->GetPosition().y + child_unloos_size_half;
+		index |= 1;
+	} else {
+		child_pos.y = node->GetPosition().y - child_unloos_size_half;
 	}
 
-	return pIndex;
+	return index;
 }
 
 
@@ -340,56 +299,46 @@ LQ_TEMPLATE uint8 LQ_QUAL::GetChild(const Vector2D<_TVarType>& pPos, const Node*
 
 
 
-LQ_TEMPLATE void LQ_QUAL::GetObjects(ObjectList& pObjects, const BC& pBC)
-{
-	GetObjectsInBC(mRootNode, pObjects, pBC);
+LQ_TEMPLATE void LQ_QUAL::GetObjects(ObjectList& objects, const BC& bc) {
+	GetObjectsInBC(root_node_, objects, bc);
 }
 
-LQ_TEMPLATE void LQ_QUAL::GetObjects(ObjectList& pObjects, const AABR_& pAABR)
-{
-	GetObjectsInAABR(mRootNode, pObjects, pAABR);
+LQ_TEMPLATE void LQ_QUAL::GetObjects(ObjectList& objects, const AABR_& aabr) {
+	GetObjectsInAABR(root_node_, objects, aabr);
 }
 
-LQ_TEMPLATE void LQ_QUAL::GetObjectsInBC(Node* pCurrentNode, ObjectList& pObjects, const BC& pBC)
-{
+LQ_TEMPLATE void LQ_QUAL::GetObjectsInBC(Node* current_node, ObjectList& objects, const BC& bc) {
 	// Insert objects at this node into list.
-	typename Node::EntryTable::Iterator lIter;
-	for (lIter  = pCurrentNode->mEntryTable.First(); 
-		lIter != pCurrentNode->mEntryTable.End(); 
-		++lIter)
-	{
-		const typename Node::Entry& lEntry = *lIter;
+	typename Node::EntryTable::Iterator iter;
+	for (iter  = current_node->entry_table_.First();
+		iter != current_node->entry_table_.End();
+		++iter) {
+		const typename Node::Entry& _entry = *iter;
 
-		if (lEntry.mArea->IsBCOverlappingArea(pBC))
-		{
-			pObjects.push_back(lEntry.mObject);
+		if (_entry.area_->IsBCOverlappingArea(bc)) {
+			objects.push_back(_entry.object_);
 		}
 	}
 
-	unsigned lOverlapMask = GetOverlaps(pBC.GetPosition() - pCurrentNode->GetPosition(), 
-					       pBC.GetRadius(), 
-					       pCurrentNode->GetSizeHalf() * 0.5f, 
-					       pCurrentNode->GetSizeHalf());
+	unsigned overlap_mask = GetOverlaps(bc.GetPosition() - current_node->GetPosition(),
+					       bc.GetRadius(),
+					       current_node->GetSizeHalf() * 0.5f,
+					       current_node->GetSizeHalf());
 
-	lOverlapMask &= pCurrentNode->mChildMask;
+	overlap_mask &= current_node->child_mask_;
 
-	if (lOverlapMask != 0)
-	{
-		if ((lOverlapMask & 1) != 0)
-		{
-			GetObjectsInBC(pCurrentNode->mChildren[0], pObjects, pBC);
+	if (overlap_mask != 0) {
+		if ((overlap_mask & 1) != 0) {
+			GetObjectsInBC(current_node->children_[0], objects, bc);
 		}
-		if ((lOverlapMask & 2) != 0)
-		{
-			GetObjectsInBC(pCurrentNode->mChildren[1], pObjects, pBC);
+		if ((overlap_mask & 2) != 0) {
+			GetObjectsInBC(current_node->children_[1], objects, bc);
 		}
-		if ((lOverlapMask & 4) != 0)
-		{
-			GetObjectsInBC(pCurrentNode->mChildren[2], pObjects, pBC);
+		if ((overlap_mask & 4) != 0) {
+			GetObjectsInBC(current_node->children_[2], objects, bc);
 		}
-		if ((lOverlapMask & 8) != 0)
-		{
-			GetObjectsInBC(pCurrentNode->mChildren[3], pObjects, pBC);
+		if ((overlap_mask & 8) != 0) {
+			GetObjectsInBC(current_node->children_[3], objects, bc);
 		}
 	}
 }
@@ -397,45 +346,37 @@ LQ_TEMPLATE void LQ_QUAL::GetObjectsInBC(Node* pCurrentNode, ObjectList& pObject
 
 
 
-LQ_TEMPLATE void LQ_QUAL::GetObjectsInAABR(Node* pCurrentNode, ObjectList& pObjects, const AABR_& pAABR)
-{
-	typename Node::EntryTable::Iterator lIter;
-	for (lIter = pCurrentNode->mEntryTable.First(); 
-		lIter != pCurrentNode->mEntryTable.End(); 
-		++lIter)
-	{
-		const typename Node::Entry& lEntry = *lIter;
+LQ_TEMPLATE void LQ_QUAL::GetObjectsInAABR(Node* current_node, ObjectList& objects, const AABR_& aabr) {
+	typename Node::EntryTable::Iterator iter;
+	for (iter = current_node->entry_table_.First();
+		iter != current_node->entry_table_.End();
+		++iter) {
+		const typename Node::Entry& _entry = *iter;
 
-		if (lEntry.mArea->IsAABROverlappingArea(pAABR))
-		{
-			pObjects.push_back(lEntry.mObject);
+		if (_entry.area_->IsAABROverlappingArea(aabr)) {
+			objects.push_back(_entry.object_);
 		}
 	}
 
-	unsigned lOverlapMask = GetOverlaps(	pAABR.GetPosition() - pCurrentNode->GetPosition(),
-						pAABR.GetSize().x,
-						pAABR.GetSize().y,
-						pCurrentNode->GetSizeHalf() * 0.5f,
-						pCurrentNode->GetSizeHalf());
-	lOverlapMask &= pCurrentNode->mChildMask;
+	unsigned overlap_mask = GetOverlaps(	aabr.GetPosition() - current_node->GetPosition(),
+						aabr.GetSize().x,
+						aabr.GetSize().y,
+						current_node->GetSizeHalf() * 0.5f,
+						current_node->GetSizeHalf());
+	overlap_mask &= current_node->child_mask_;
 
-	if (lOverlapMask != 0)
-	{
-		if ((lOverlapMask & 1) != 0)
-		{
-			GetObjectsInAABR(pCurrentNode->mChildren[0], pObjects, pAABR);
+	if (overlap_mask != 0) {
+		if ((overlap_mask & 1) != 0) {
+			GetObjectsInAABR(current_node->children_[0], objects, aabr);
 		}
-		if ((lOverlapMask & 2) != 0)
-		{
-			GetObjectsInAABR(pCurrentNode->mChildren[1], pObjects, pAABR);
+		if ((overlap_mask & 2) != 0) {
+			GetObjectsInAABR(current_node->children_[1], objects, aabr);
 		}
-		if ((lOverlapMask & 4) != 0)
-		{
-			GetObjectsInAABR(pCurrentNode->mChildren[2], pObjects, pAABR);
+		if ((overlap_mask & 4) != 0) {
+			GetObjectsInAABR(current_node->children_[2], objects, aabr);
 		}
-		if ((lOverlapMask & 8) != 0)
-		{
-			GetObjectsInAABR(pCurrentNode->mChildren[3], pObjects, pAABR);
+		if ((overlap_mask & 8) != 0) {
+			GetObjectsInAABR(current_node->children_[3], objects, aabr);
 		}
 	}
 }
@@ -443,66 +384,54 @@ LQ_TEMPLATE void LQ_QUAL::GetObjectsInAABR(Node* pCurrentNode, ObjectList& pObje
 
 
 
-LQ_TEMPLATE unsigned LQ_QUAL::GetFullTreeMemSize() const
-{
-	unsigned lNumNodes = 0;
+LQ_TEMPLATE unsigned LQ_QUAL::GetFullTreeMemSize() const {
+	unsigned num_nodes = 0;
 	int i;
 
-	for (i = 1; i <= mMaxTreeDepth; i++)
-	{
-		lNumNodes += (unsigned)pow(8.0f, i);
+	for (i = 1; i <= max_tree_depth_; i++) {
+		num_nodes += (unsigned)pow(8.0f, i);
 	}
 
-	return lNumNodes * sizeof(Node);
+	return num_nodes * sizeof(Node);
 }
 
 
 
 /*
-LQ_TEMPLATE str LQ_QUAL::ToString() const
-{
+LQ_TEMPLATE str LQ_QUAL::ToString() const {
 	std::stringstream lStrm;
-	mRootNode->ToString(lStrm, 0, -1);
+	root_node_->ToString(lStrm, 0, -1);
 	return lStrm.str();
 }
 */
 
 
 
-/*LQ_TEMPLATE void LQ_QUAL::GetNodeBoxes(AABRList& pBoxes) const
-{
-	mRootNode->GetNodeBox(pBoxes);
+/*LQ_TEMPLATE void LQ_QUAL::GetNodeBoxes(AABRList& boxes) const {
+	root_node_->GetNodeBox(boxes);
 }*/
 
 
 
 
-LQ_TEMPLATE void LQ_QUAL::RecycleNode(Node* pNode)
-{
-	if (mRecycledNodeList.size() < MAX_RECYCLED_NODES)
-	{
-		pNode->DeleteChildren(this);
-		mRecycledNodeList.push_back(pNode);
-	}
-	else
-	{
-		delete pNode;
+LQ_TEMPLATE void LQ_QUAL::RecycleNode(Node* node) {
+	if (recycled_node_list_.size() < kMaxRecycledNodes) {
+		node->DeleteChildren(this);
+		recycled_node_list_.push_back(node);
+	} else {
+		delete node;
 	}
 }
 
-LQ_TEMPLATE typename LQ_QUAL::Node* LQ_QUAL::NewNode(Node* pParent, uint8 pIndex, _TVarType pFixedSizeHalf)
-{
-	Node* lNode = 0;
+LQ_TEMPLATE typename LQ_QUAL::Node* LQ_QUAL::NewNode(Node* parent, uint8 index, _TVarType fixed_size_half) {
+	Node* _node = 0;
 
-	if (mRecycledNodeList.empty())
-	{
-		lNode = new Node(pParent, pIndex, pFixedSizeHalf);
+	if (recycled_node_list_.empty()) {
+		_node = new Node(parent, index, fixed_size_half);
+	} else {
+		_node = recycled_node_list_.front();
+		recycled_node_list_.pop_front();
+		_node->Init(parent, index, fixed_size_half);
 	}
-	else
-	{
-		lNode = mRecycledNodeList.front();
-		mRecycledNodeList.pop_front();
-		lNode->Init(pParent, pIndex, pFixedSizeHalf);
-	}
-	return lNode;
+	return _node;
 }

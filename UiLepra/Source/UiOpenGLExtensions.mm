@@ -1,1 +1,1 @@
-#include "UiOpenGLExtensions.cxx"
+#include "uiopenglextensions.cxx"

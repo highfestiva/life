@@ -1,38 +1,36 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/ContextPath.h"
-#include "../Cure/Include/CppContextObject.h"
-#include "FireManager.h"
+#include "../cure/include/contextpath.h"
+#include "../cure/include/cppcontextobject.h"
+#include "firemanager.h"
 
 
 
-namespace Fire
-{
+namespace Fire {
 
 
 
-class AutoPathDriver: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class AutoPathDriver: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	AutoPathDriver(FireManager* pGame, Cure::GameObjectId pVehicleId, const str& pPathName);
+	AutoPathDriver(FireManager* game, cure::GameObjectId vehicle_id, const str& path_name);
 	virtual ~AutoPathDriver();
 
 private:
 	virtual void OnTick();
-	void GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint, float pWantedDistance);
+	void GetClosestPathDistance(const vec3& position, vec3& closest_point, float wanted_distance);
 
-	FireManager* mGame;
-	Cure::GameObjectId mVehicleId;
-	const str mPathName;
-	Cure::ContextPath::SplinePath* mPath;
-	StopWatch mStillTimer;
+	FireManager* game_;
+	cure::GameObjectId vehicle_id_;
+	const str path_name_;
+	cure::ContextPath::SplinePath* path_;
+	StopWatch still_timer_;
 	logclass();
 };
 

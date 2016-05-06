@@ -1,18 +1,17 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../../Lepra/Include/LogListener.h"
-#include "../../Include/UiTbc.h"
+#include "../../../lepra/include/loglistener.h"
+#include "../../include/uitbc.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
@@ -20,21 +19,20 @@ class TextArea;
 
 
 
-class ConsoleLogListener: public InteractiveConsoleLogListener
-{
+class ConsoleLogListener: public InteractiveConsoleLogListener {
 public:
-	ConsoleLogListener(OutputFormat pFormat = FORMAT_PLAIN);
+	ConsoleLogListener(OutputFormat format = kFormatPlain);
 	~ConsoleLogListener();
 
-	void SetOutputComponent(TextArea* pOutputComponent);
+	void SetOutputComponent(TextArea* output_component);
 
 protected:
-	void WriteLog(const str& pFullMessage, LogLevel pLevel);
-	void StepPage(int pPageCount);
-	void OnLogRawMessage(const str& pText);
+	void WriteLog(const str& full_message, LogLevel level);
+	void StepPage(int page_count);
+	void OnLogRawMessage(const str& text);
 
-	TextArea* mOutputComponent;
-	bool mLineFeed;
+	TextArea* output_component_;
+	bool line_feed_;
 };
 
 

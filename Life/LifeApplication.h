@@ -1,37 +1,34 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Lepra/Include/Application.h"
-#include "../ThirdParty/FastDelegate/FastDelegate.h"
-#include "../Lepra/Include/LogListener.h"
-#include "Life.h"
+#include "../lepra/include/application.h"
+#include "../thirdparty/FastDelegate/FastDelegate.h"
+#include "../lepra/include/loglistener.h"
+#include "life.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ApplicationTicker;
 class ResourceManager;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class Application: public Lepra::Application
-{
+class Application: public lepra::Application {
 public:
 	typedef fastdelegate::FastDelegate0<void> ZombieTick;
 
-	Application(const str& pBaseName, const strutil::strvec& pArgumentList);
+	Application(const str& base_name, const strutil::strvec& argument_list);
 	virtual ~Application();
 	virtual void Init();
 	virtual void Destroy();
@@ -41,32 +38,32 @@ public:
 
 	virtual str GetTypeName() const = 0;
 	virtual str GetVersion() const = 0;
-	virtual Cure::ApplicationTicker* CreateTicker() const = 0;
-	Cure::ApplicationTicker* GetTicker() const;
-	void SetZombieTick(const ZombieTick& pZombieTick);
+	virtual cure::ApplicationTicker* CreateTicker() const = 0;
+	cure::ApplicationTicker* GetTicker() const;
+	void SetZombieTick(const ZombieTick& zombie_tick);
 
 	static Application* GetApplication();
-	static str GetIoFile(const str& pName, const str& pExt, bool pAddQuotes = true);
+	static str GetIoFile(const str& name, const str& ext, bool add_quotes = true);
 
 protected:
 	virtual LogListener* CreateConsoleLogListener() const;
 
-	Cure::ResourceManager* mResourceManager;
-	Cure::ApplicationTicker* mGameTicker;
-	LogListener* mConsoleLogger;
+	cure::ResourceManager* resource_manager_;
+	cure::ApplicationTicker* game_ticker_;
+	LogListener* console_logger_;
 
 private:
-	void TickSleep(double pMainLoopTime) const;
+	void TickSleep(double main_loop_time) const;
 	void HandleZombieMode();
 
-	static str mBaseName;
-	ZombieTick mZombieTick;
-	mutable bool mIsPowerSaving;
+	static str base_name_;
+	ZombieTick zombie_tick_;
+	mutable bool is_power_saving_;
 
-	LogListener* mDebugLogger;
-	FileLogListener* mFileLogger;
-	LogListener* mPerformanceLogger;
-	MemFileLogListener* mMemLogger;
+	LogListener* debug_logger_;
+	FileLogListener* file_logger_;
+	LogListener* performance_logger_;
+	MemFileLogListener* mem_logger_;
 
 	logclass();
 };

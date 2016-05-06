@@ -1,106 +1,91 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "ImpuzzableConsoleManager.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Lepra/Include/CyclicArray.h"
-#include "../Lepra/Include/Path.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "ImpuzzableManager.h"
-#include "RtVar.h"
+#include "impuzzableconsolemanager.h"
+#include "../cure/include/contextmanager.h"
+#include "../lepra/include/cyclicarray.h"
+#include "../lepra/include/path.h"
+#include "../lepra/include/systemmanager.h"
+#include "impuzzablemanager.h"
+#include "rtvar.h"
 
 
 
-namespace Impuzzable
-{
+namespace Impuzzable {
 
 
 
 // Must lie before ImpuzzableConsoleManager to compile.
-const ImpuzzableConsoleManager::CommandPair ImpuzzableConsoleManager::mCommandIdList[] =
+const ImpuzzableConsoleManager::CommandPair ImpuzzableConsoleManager::command_id_list_[] =
 {
-	{"step-level", COMMAND_STEP_LEVEL},
+	{"step-level", kCommandStepLevel},
 };
 
 
 
-ImpuzzableConsoleManager::ImpuzzableConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-	UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea):
-	Parent(pResourceManager, pGameManager, pUiManager, pVariableScope, pArea)
-{
+ImpuzzableConsoleManager::ImpuzzableConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+	UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area):
+	Parent(resource_manager, game_manager, ui_manager, variable_scope, area) {
 	InitCommands();
 	SetSecurityLevel(1);
 }
 
-ImpuzzableConsoleManager::~ImpuzzableConsoleManager()
-{
+ImpuzzableConsoleManager::~ImpuzzableConsoleManager() {
 }
 
-bool ImpuzzableConsoleManager::Start()
-{
+bool ImpuzzableConsoleManager::Start() {
 #ifndef LEPRA_TOUCH
 	return Parent::Start();
-#else // Touch
-	return true;	// Touch device don't need an interactive console.
+#else // touch
+	return true;	// touch device don't need an interactive console.
 #endif // Computer / touch
 }
 
 
 
-unsigned ImpuzzableConsoleManager::GetCommandCount() const
-{
-	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(mCommandIdList);
+unsigned ImpuzzableConsoleManager::GetCommandCount() const {
+	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(command_id_list_);
 }
 
-const ImpuzzableConsoleManager::CommandPair& ImpuzzableConsoleManager::GetCommand(unsigned pIndex) const
-{
-	if (pIndex < Parent::GetCommandCount())
-	{
-		return (Parent::GetCommand(pIndex));
+const ImpuzzableConsoleManager::CommandPair& ImpuzzableConsoleManager::GetCommand(unsigned index) const {
+	if (index < Parent::GetCommandCount()) {
+		return (Parent::GetCommand(index));
 	}
-	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
+	return (command_id_list_[index-Parent::GetCommandCount()]);
 }
 
-int ImpuzzableConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
-{
-	int lResult = Parent::OnCommand(pCommand, pParameterVector);
-	if (lResult < 0)
-	{
-		lResult = 0;
+int ImpuzzableConsoleManager::OnCommand(const HashedString& command, const strutil::strvec& parameter_vector) {
+	int result = Parent::OnCommand(command, parameter_vector);
+	if (result < 0) {
+		result = 0;
 
-		CommandClient lCommand = (CommandClient)TranslateCommand(pCommand);
-		switch ((int)lCommand)
-		{
-			case COMMAND_STEP_LEVEL:
-			{
-				int lStep = 0;
-				if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lStep))
-				{
+		CommandClient _command = (CommandClient)TranslateCommand(command);
+		switch ((int)_command) {
+			case kCommandStepLevel: {
+				int step = 0;
+				if (parameter_vector.size() == 1 && strutil::StringToInt(parameter_vector[0], step)) {
 					GetGameManager()->GetTickLock()->Acquire();
-					((ImpuzzableManager*)GetGameManager())->StepLevel(lStep);
+					((ImpuzzableManager*)GetGameManager())->StepLevel(step);
 					GetGameManager()->GetTickLock()->Release();
 					return 0;
 				}
 				return 1;
-			}
-			break;
-			default:
-			{
-				lResult = -1;
-			}
-			break;
+			} break;
+			default: {
+				result = -1;
+			} break;
 		}
 	}
-	return (lResult);
+	return (result);
 }
 
 
 
-loginstance(CONSOLE, ImpuzzableConsoleManager);
+loginstance(kConsole, ImpuzzableConsoleManager);
 
 
 

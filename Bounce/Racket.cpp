@@ -5,44 +5,39 @@
 
 
 #include "pch.h"
-#include "Racket.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ContextPath.h"
-#include "Game.h"
+#include "racket.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/contextpath.h"
+#include "game.h"
 
 
 
-namespace Bounce
-{
+namespace bounce {
 
 
 
-Racket::Racket(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
-	Parent(pResourceManager, pClassId, pUiManager),
-	mPath(0)
-{
+Racket::Racket(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager):
+	Parent(resource_manager, class_id, ui_manager),
+	path_(0) {
 }
 
-Racket::~Racket()
-{
-	mPath = 0;
+Racket::~Racket() {
+	path_ = 0;
 }
 
 
 
-Cure::ContextPath* Racket::QueryPath()
-{
-	if (!mPath)
-	{
-		mPath = new Cure::ContextPath(GetResourceManager(), "ContextPath");
-		GetManager()->AddLocalObject(mPath);
+cure::ContextPath* Racket::QueryPath() {
+	if (!path_) {
+		path_ = new cure::ContextPath(GetResourceManager(), "ContextPath");
+		GetManager()->AddLocalObject(path_);
 	}
-	return mPath;
+	return path_;
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Racket);
+loginstance(kGameContextCpp, Racket);
 
 
 

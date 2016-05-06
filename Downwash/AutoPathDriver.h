@@ -1,38 +1,36 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/ContextPath.h"
-#include "../Cure/Include/CppContextObject.h"
-#include "DownwashManager.h"
+#include "../cure/include/contextpath.h"
+#include "../cure/include/cppcontextobject.h"
+#include "downwashmanager.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-class AutoPathDriver: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class AutoPathDriver: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	AutoPathDriver(DownwashManager* pGame, Cure::GameObjectId pVehicleId, const str& pPathName);
+	AutoPathDriver(DownwashManager* game, cure::GameObjectId vehicle_id, const str& path_name);
 	virtual ~AutoPathDriver();
 
 private:
 	virtual void OnTick();
-	void GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint, float pWantedDistance);
+	void GetClosestPathDistance(const vec3& position, vec3& closest_point, float wanted_distance);
 
-	DownwashManager* mGame;
-	Cure::GameObjectId mVehicleId;
-	const str mPathName;
-	Cure::ContextPath::SplinePath* mPath;
-	StopWatch mStillTimer;
+	DownwashManager* game_;
+	cure::GameObjectId vehicle_id_;
+	const str path_name_;
+	cure::ContextPath::SplinePath* path_;
+	StopWatch still_timer_;
 	logclass();
 };
 

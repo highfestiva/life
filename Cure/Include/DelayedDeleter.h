@@ -1,31 +1,29 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2009, Righteous Games
 
 
 
 #pragma once
 
-#include "CppContextObject.h"
-#include "ContextManager.h"
+#include "cppcontextobject.h"
+#include "contextmanager.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
 template<class _T>
-class DelayedDeleter: public CppContextObject
-{
+class DelayedDeleter: public CppContextObject {
 	typedef CppContextObject Parent;
 public:
-	DelayedDeleter(ResourceManager* pResourceManager, ContextManager* pManager, _T* pObject);
+	DelayedDeleter(ResourceManager* resource_manager, ContextManager* manager, _T* object);
 	virtual ~DelayedDeleter();
 
 protected:
-	_T* mObject;
+	_T* object_;
 
 	logclass();
 };
@@ -36,4 +34,4 @@ protected:
 
 
 
-#include "DelayedDeleter.inl"
+#include "delayeddeleter.inl"

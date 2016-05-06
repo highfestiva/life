@@ -5,18 +5,17 @@
 
 
 #include "pch.h"
-#include "../Include/ChunkyPhysics.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/ListUtil.h"
-#include "../Include/ChunkyBoneGeometry.h"
-#include "../Include/PhysicsEngine.h"
-#include "../Include/PhysicsSpawner.h"
-#include "../Include/PhysicsTrigger.h"
+#include "../include/chunkyphysics.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/listutil.h"
+#include "../include/chunkybonegeometry.h"
+#include "../include/physicsengine.h"
+#include "../include/physicsspawner.h"
+#include "../include/physicstrigger.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
@@ -25,421 +24,346 @@ namespace Tbc
 	const size_t cnt = a.size();						\
 	for (size_t x = 0; x < cnt; ++x)					\
 	{									\
-		a[x]->RelocatePointers(this, &pOriginal, *pOriginal.a[x]);	\
+		a[x]->RelocatePointers(this, &original, *original.a[x]);	\
 	}									\
 }
 
 
 
 
-ChunkyPhysics::ChunkyPhysics(TransformOperation pTransformOperation, PhysicsType pPhysicsType):
-	mTransformOperation(pTransformOperation),
-	mPhysicsType(pPhysicsType),
-	mGuideMode(GUIDE_EXTERNAL),
-	mUniqeGeometryIndex(0)
-{
+ChunkyPhysics::ChunkyPhysics(TransformOperation transform_operation, PhysicsType physics_type):
+	transform_operation_(transform_operation),
+	physics_type_(physics_type),
+	guide_mode_(kGuideExternal),
+	uniqe_geometry_index_(0) {
 }
 
-ChunkyPhysics::ChunkyPhysics(const ChunkyPhysics& pOriginal):
-	Parent(pOriginal)
-{
-	mGuideMode = pOriginal.mGuideMode;
-	mUniqeGeometryIndex = pOriginal.mUniqeGeometryIndex;
-	VectorUtil<ChunkyBoneGeometry>::CloneListFactoryMethod(mGeometryArray, pOriginal.mGeometryArray);
-	TBC_PHYSICS_RELOCATE_POINTERS(mGeometryArray);
-	VectorUtil<PhysicsEngine>::CloneList(mEngineArray, pOriginal.mEngineArray);
-	TBC_PHYSICS_RELOCATE_POINTERS(mEngineArray);
-	VectorUtil<PhysicsTrigger>::CloneList(mTriggerArray, pOriginal.mTriggerArray);
-	TBC_PHYSICS_RELOCATE_POINTERS(mTriggerArray);
-	VectorUtil<PhysicsSpawner>::CloneList(mSpawnerArray, pOriginal.mSpawnerArray);
-	TBC_PHYSICS_RELOCATE_POINTERS(mSpawnerArray);
-	mTransformOperation = pOriginal.mTransformOperation;
-	mPhysicsType = pOriginal.mPhysicsType;
-	mGuideMode = pOriginal.mGuideMode;
-	mUniqeGeometryIndex = pOriginal.mUniqeGeometryIndex;
+ChunkyPhysics::ChunkyPhysics(const ChunkyPhysics& original):
+	Parent(original) {
+	guide_mode_ = original.guide_mode_;
+	uniqe_geometry_index_ = original.uniqe_geometry_index_;
+	VectorUtil<ChunkyBoneGeometry>::CloneListFactoryMethod(geometry_array_, original.geometry_array_);
+	TBC_PHYSICS_RELOCATE_POINTERS(geometry_array_);
+	VectorUtil<PhysicsEngine>::CloneList(engine_array_, original.engine_array_);
+	TBC_PHYSICS_RELOCATE_POINTERS(engine_array_);
+	VectorUtil<PhysicsTrigger>::CloneList(trigger_array_, original.trigger_array_);
+	TBC_PHYSICS_RELOCATE_POINTERS(trigger_array_);
+	VectorUtil<PhysicsSpawner>::CloneList(spawner_array_, original.spawner_array_);
+	TBC_PHYSICS_RELOCATE_POINTERS(spawner_array_);
+	transform_operation_ = original.transform_operation_;
+	physics_type_ = original.physics_type_;
+	guide_mode_ = original.guide_mode_;
+	uniqe_geometry_index_ = original.uniqe_geometry_index_;
 }
 
-ChunkyPhysics::~ChunkyPhysics()
-{
-	//deb_assert(mGeometryArray.empty());	// Ensure all resources has been released prior to delete.
+ChunkyPhysics::~ChunkyPhysics() {
+	//deb_assert(geometry_array_.empty());	// Ensure all resources has been released prior to delete.
 	ClearAll(0);
 }
 
 
 
-void ChunkyPhysics::OnMicroTick(PhysicsManager* pPhysicsManager, float pFrameTime)
-{
-	EngineArray::iterator x = mEngineArray.begin();
-	for (; x != mEngineArray.end(); ++x)
-	{
-		(*x)->OnMicroTick(pPhysicsManager, this, pFrameTime);
+void ChunkyPhysics::OnMicroTick(PhysicsManager* physics_manager, float frame_time) {
+	EngineArray::iterator x = engine_array_.begin();
+	for (; x != engine_array_.end(); ++x) {
+		(*x)->OnMicroTick(physics_manager, this, frame_time);
 	}
 }
 
 
 
-void ChunkyPhysics::SetTransformOperation(TransformOperation pOperation)
-{
-	mTransformOperation = pOperation;
+void ChunkyPhysics::SetTransformOperation(TransformOperation operation) {
+	transform_operation_ = operation;
 }
 
-ChunkyPhysics::PhysicsType ChunkyPhysics::GetPhysicsType() const
-{
-	return (mPhysicsType);
+ChunkyPhysics::PhysicsType ChunkyPhysics::GetPhysicsType() const {
+	return (physics_type_);
 }
 
-void ChunkyPhysics::SetPhysicsType(PhysicsType pPhysicsType)
-{
+void ChunkyPhysics::SetPhysicsType(PhysicsType physics_type) {
 	// TODO: implement change in physics engine.
-	mPhysicsType = pPhysicsType;
+	physics_type_ = physics_type;
 }
 
-ChunkyPhysics::GuideMode ChunkyPhysics::GetGuideMode() const
-{
-	return mGuideMode;
+ChunkyPhysics::GuideMode ChunkyPhysics::GetGuideMode() const {
+	return guide_mode_;
 }
 
-void ChunkyPhysics::SetGuideMode(GuideMode pGuideMode)
-{
-	mGuideMode = pGuideMode;
+void ChunkyPhysics::SetGuideMode(GuideMode guide_mode) {
+	guide_mode_ = guide_mode;
 }
 
-float ChunkyPhysics::QueryTotalMass(PhysicsManager* pPhysicsManager) const
-{
-	float lTotalMass = 0;
-	const int lBoneCount = GetBoneCount();
-	for (int x = 0; x < lBoneCount; ++x)
-	{
-		const Tbc::ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
-		if (lGeometry->GetBodyId())
-		{
-			lTotalMass += pPhysicsManager->GetBodyMass(lGeometry->GetBodyId());
+float ChunkyPhysics::QueryTotalMass(PhysicsManager* physics_manager) const {
+	float total_mass = 0;
+	const int _bone_count = GetBoneCount();
+	for (int x = 0; x < _bone_count; ++x) {
+		const tbc::ChunkyBoneGeometry* _geometry = GetBoneGeometry(x);
+		if (_geometry->GetBodyId()) {
+			total_mass += physics_manager->GetBodyMass(_geometry->GetBodyId());
 		}
 	}
-	if (lTotalMass < 0.01f)
-	{
-		lTotalMass = 0.1f;
+	if (total_mass < 0.01f) {
+		total_mass = 0.1f;
 	}
-	return lTotalMass;
+	return total_mass;
 }
 
 
 
-ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(int pBoneIndex) const
-{
-	deb_assert(pBoneIndex >= 0 && pBoneIndex < GetBoneCount());
-	return ((pBoneIndex < (int)mGeometryArray.size())? mGeometryArray[pBoneIndex] : 0);
+ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(int bone_index) const {
+	deb_assert(bone_index >= 0 && bone_index < GetBoneCount());
+	return ((bone_index < (int)geometry_array_.size())? geometry_array_[bone_index] : 0);
 }
 
-ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(PhysicsManager::BodyID pBodyId) const
-{
-	const int lBoneCount = GetBoneCount();
-	for (int x = 0; x < lBoneCount; ++x)
-	{
-		ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
-		if (lGeometry->GetBodyId() == pBodyId)
-		{
-			return (lGeometry);	// TRICKY: RAII.
+ChunkyBoneGeometry* ChunkyPhysics::GetBoneGeometry(PhysicsManager::BodyID body_id) const {
+	const int _bone_count = GetBoneCount();
+	for (int x = 0; x < _bone_count; ++x) {
+		ChunkyBoneGeometry* _geometry = GetBoneGeometry(x);
+		if (_geometry->GetBodyId() == body_id) {
+			return (_geometry);	// TRICKY: RAII.
 		}
 	}
 	deb_assert(false);
 	return (0);
 }
 
-void ChunkyPhysics::AddBoneGeometry(ChunkyBoneGeometry* pGeometry)
-{
-	deb_assert((int)mGeometryArray.size() < GetBoneCount());
-	mGeometryArray.push_back(pGeometry);
+void ChunkyPhysics::AddBoneGeometry(ChunkyBoneGeometry* geometry) {
+	deb_assert((int)geometry_array_.size() < GetBoneCount());
+	geometry_array_.push_back(geometry);
 }
 
-void ChunkyPhysics::AddBoneGeometry(const xform& pTransformation,
-	ChunkyBoneGeometry* pGeometry, const ChunkyBoneGeometry* pParent)
-{
-	const int lChildIndex = (int)mGeometryArray.size();
-	SetOriginalBoneTransformation(lChildIndex, pTransformation);
-	AddBoneGeometry(pGeometry);
-	if (pParent)
-	{
-		int lParentIndex = GetIndex(pParent);
-		AddChild(lParentIndex, lChildIndex);
+void ChunkyPhysics::AddBoneGeometry(const xform& transformation,
+	ChunkyBoneGeometry* geometry, const ChunkyBoneGeometry* parent) {
+	const int child_index = (int)geometry_array_.size();
+	SetOriginalBoneTransformation(child_index, transformation);
+	AddBoneGeometry(geometry);
+	if (parent) {
+		int parent_index = GetIndex(parent);
+		AddChild(parent_index, child_index);
 	}
 }
 
-PhysicsManager::BodyType ChunkyPhysics::GetBodyType(const ChunkyBoneGeometry* pGeometry) const
-{
-	PhysicsManager::BodyType lBodyType = (mPhysicsType == DYNAMIC)? PhysicsManager::DYNAMIC : PhysicsManager::STATIC;
-	if (pGeometry->GetParent())
-	{
-		if (pGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
-		{
-			lBodyType = PhysicsManager::STATIC;
-		}
-		else
-		{
-			lBodyType = PhysicsManager::DYNAMIC;
+PhysicsManager::BodyType ChunkyPhysics::GetBodyType(const ChunkyBoneGeometry* geometry) const {
+	PhysicsManager::BodyType body_type = (physics_type_ == kDynamic)? PhysicsManager::kDynamic : PhysicsManager::kStatic;
+	if (geometry->GetParent()) {
+		if (geometry->GetJointType() == ChunkyBoneGeometry::kJointExclude) {
+			body_type = PhysicsManager::kStatic;
+		} else {
+			body_type = PhysicsManager::kDynamic;
 		}
 	}
-	return (lBodyType);
+	return (body_type);
 }
 
-int ChunkyPhysics::GetIndex(const ChunkyBoneGeometry* pGeometry) const
-{
-	const int lBoneCount = GetBoneCount();
-	for (int x = 0; x < lBoneCount; ++x)
-	{
-		if (pGeometry == GetBoneGeometry(x))
-		{
+int ChunkyPhysics::GetIndex(const ChunkyBoneGeometry* geometry) const {
+	const int _bone_count = GetBoneCount();
+	for (int x = 0; x < _bone_count; ++x) {
+		if (geometry == GetBoneGeometry(x)) {
 			return (x);
 		}
 	}
 	deb_assert(false);
-	mLog.Error("Trying to get uncontained geometry!");
+	log_.Error("Trying to get uncontained geometry!");
 	return (-1);
 }
 
-const xform& ChunkyPhysics::GetTransformation(const ChunkyBoneGeometry* pGeometry) const
-{
-	return (GetBoneTransformation(GetIndex(pGeometry)));
+const xform& ChunkyPhysics::GetTransformation(const ChunkyBoneGeometry* geometry) const {
+	return (GetBoneTransformation(GetIndex(geometry)));
 }
 
-void ChunkyPhysics::ClearBoneGeometries(PhysicsManager* pPhysics)
-{
-	for (size_t x = 0; x < mGeometryArray.size(); ++x)
-	{
-		ChunkyBoneGeometry* lGeometry = mGeometryArray[x];
-		if (lGeometry)
-		{
-			if (pPhysics)
-			{
-				lGeometry->RemovePhysics(pPhysics);
+void ChunkyPhysics::ClearBoneGeometries(PhysicsManager* physics) {
+	for (size_t x = 0; x < geometry_array_.size(); ++x) {
+		ChunkyBoneGeometry* _geometry = geometry_array_[x];
+		if (_geometry) {
+			if (physics) {
+				_geometry->RemovePhysics(physics);
 			}
-			delete (lGeometry);
-			mGeometryArray[x] = 0;
+			delete (_geometry);
+			geometry_array_[x] = 0;
 		}
 	}
-	mGeometryArray.clear();
-	mUniqeGeometryIndex = 0;
+	geometry_array_.clear();
+	uniqe_geometry_index_ = 0;
 }
 
-void ChunkyPhysics::EnableGravity(PhysicsManager* pPhysicsManager, bool pEnable)
-{
-	for (size_t x = 0; x < mGeometryArray.size(); ++x)
-	{
-		ChunkyBoneGeometry* lGeometry = mGeometryArray[x];
-		if (!lGeometry || GetBodyType(lGeometry) == PhysicsManager::STATIC)
-		{
+void ChunkyPhysics::EnableGravity(PhysicsManager* physics_manager, bool enable) {
+	for (size_t x = 0; x < geometry_array_.size(); ++x) {
+		ChunkyBoneGeometry* _geometry = geometry_array_[x];
+		if (!_geometry || GetBodyType(_geometry) == PhysicsManager::kStatic) {
 			continue;
 		}
-		PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
-		pPhysicsManager->EnableGravity(lBodyId, pEnable);
+		PhysicsManager::BodyID _body_id = _geometry->GetBodyId();
+		physics_manager->EnableGravity(_body_id, enable);
 	}
 }
 
 
-int ChunkyPhysics::GetEngineCount() const
-{
-	return ((int)mEngineArray.size());
+int ChunkyPhysics::GetEngineCount() const {
+	return ((int)engine_array_.size());
 }
 
-PhysicsEngine* ChunkyPhysics::GetEngine(int pEngineIndex) const
-{
-	deb_assert((size_t)pEngineIndex < mEngineArray.size());
-	return (mEngineArray[pEngineIndex]);
+PhysicsEngine* ChunkyPhysics::GetEngine(int engine_index) const {
+	deb_assert((size_t)engine_index < engine_array_.size());
+	return (engine_array_[engine_index]);
 }
 
-int ChunkyPhysics::GetEngineIndexFromControllerIndex(int pStartEngineIndex, int pEngineStep, unsigned pControllerIndex) const
-{
-	for (int x = pStartEngineIndex; x >= 0 && x < (int)mEngineArray.size(); x += pEngineStep)
-	{
-		if (mEngineArray[x]->GetControllerIndex() == pControllerIndex)
-		{
+int ChunkyPhysics::GetEngineIndexFromControllerIndex(int start_engine_index, int engine_step, unsigned controller_index) const {
+	for (int x = start_engine_index; x >= 0 && x < (int)engine_array_.size(); x += engine_step) {
+		if (engine_array_[x]->GetControllerIndex() == controller_index) {
 			return x;
 		}
 	}
 	return -1;
 }
 
-int ChunkyPhysics::GetEngineIndex(const PhysicsEngine* pEngine) const
-{
-	for (size_t x = 0; x < mEngineArray.size(); ++x)
-	{
-		if (mEngineArray[x] == pEngine)
-		{
+int ChunkyPhysics::GetEngineIndex(const PhysicsEngine* engine) const {
+	for (size_t x = 0; x < engine_array_.size(); ++x) {
+		if (engine_array_[x] == engine) {
 			return (int)x;
 		}
 	}
 	return -1;
 }
 
-void ChunkyPhysics::AddEngine(PhysicsEngine* pEngine)
-{
-	mEngineArray.push_back(pEngine);
+void ChunkyPhysics::AddEngine(PhysicsEngine* engine) {
+	engine_array_.push_back(engine);
 }
 
-void ChunkyPhysics::RemoveEngine(PhysicsEngine* pEngine)
-{
-	mEngineArray.erase(std::remove(mEngineArray.begin(), mEngineArray.end(), pEngine), mEngineArray.end());
+void ChunkyPhysics::RemoveEngine(PhysicsEngine* engine) {
+	engine_array_.erase(std::remove(engine_array_.begin(), engine_array_.end(), engine), engine_array_.end());
 }
 
-bool ChunkyPhysics::SetEnginePower(unsigned pAspect, float pPower)
-{
-	bool lOk = false;
-	EngineArray::iterator x = mEngineArray.begin();
-	for (; x != mEngineArray.end(); ++x)
-	{
-		lOk |= (*x)->SetValue(pAspect, pPower);
+bool ChunkyPhysics::SetEnginePower(unsigned aspect, float power) {
+	bool ok = false;
+	EngineArray::iterator x = engine_array_.begin();
+	for (; x != engine_array_.end(); ++x) {
+		ok |= (*x)->SetValue(aspect, power);
 	}
-	return lOk;
+	return ok;
 }
 
-void ChunkyPhysics::ClearEngines()
-{
-	EngineArray::iterator x = mEngineArray.begin();
-	for (; x != mEngineArray.end(); ++x)
-	{
+void ChunkyPhysics::ClearEngines() {
+	EngineArray::iterator x = engine_array_.begin();
+	for (; x != engine_array_.end(); ++x) {
 		delete (*x);
 	}
-	mEngineArray.clear();
+	engine_array_.clear();
 }
 
 
 
-int ChunkyPhysics::GetTriggerCount() const
-{
-	return ((int)mTriggerArray.size());
+int ChunkyPhysics::GetTriggerCount() const {
+	return ((int)trigger_array_.size());
 }
 
-const PhysicsTrigger* ChunkyPhysics::GetTrigger(int pTriggerIndex) const
-{
-	deb_assert((size_t)pTriggerIndex < mTriggerArray.size());
-	return (mTriggerArray[pTriggerIndex]);
+const PhysicsTrigger* ChunkyPhysics::GetTrigger(int trigger_index) const {
+	deb_assert((size_t)trigger_index < trigger_array_.size());
+	return (trigger_array_[trigger_index]);
 }
 
-void ChunkyPhysics::AddTrigger(PhysicsTrigger* pTrigger)
-{
-	mTriggerArray.push_back(pTrigger);
+void ChunkyPhysics::AddTrigger(PhysicsTrigger* trigger) {
+	trigger_array_.push_back(trigger);
 }
 
-void ChunkyPhysics::ClearTriggers()
-{
-	TriggerArray::iterator x = mTriggerArray.begin();
-	for (; x != mTriggerArray.end(); ++x)
-	{
+void ChunkyPhysics::ClearTriggers() {
+	TriggerArray::iterator x = trigger_array_.begin();
+	for (; x != trigger_array_.end(); ++x) {
 		delete (*x);
 	}
-	mTriggerArray.clear();
+	trigger_array_.clear();
 }
 
 
 
-int ChunkyPhysics::GetSpawnerCount() const
-{
-	return (int)mSpawnerArray.size();
+int ChunkyPhysics::GetSpawnerCount() const {
+	return (int)spawner_array_.size();
 }
 
-const PhysicsSpawner* ChunkyPhysics::GetSpawner(int pSpawnerIndex) const
-{
-	deb_assert((size_t)pSpawnerIndex < mSpawnerArray.size());
-	return mSpawnerArray[pSpawnerIndex];
+const PhysicsSpawner* ChunkyPhysics::GetSpawner(int spawner_index) const {
+	deb_assert((size_t)spawner_index < spawner_array_.size());
+	return spawner_array_[spawner_index];
 }
 
-void ChunkyPhysics::AddSpawner(PhysicsSpawner* pSpawner)
-{
-	mSpawnerArray.push_back(pSpawner);
+void ChunkyPhysics::AddSpawner(PhysicsSpawner* spawner) {
+	spawner_array_.push_back(spawner);
 }
 
-void ChunkyPhysics::ClearSpawners()
-{
-	SpawnerArray::iterator x = mSpawnerArray.begin();
-	for (; x != mSpawnerArray.end(); ++x)
-	{
+void ChunkyPhysics::ClearSpawners() {
+	SpawnerArray::iterator x = spawner_array_.begin();
+	for (; x != spawner_array_.end(); ++x) {
 		delete (*x);
 	}
-	mSpawnerArray.clear();
+	spawner_array_.clear();
 }
 
 
 
-void ChunkyPhysics::ClearAll(PhysicsManager* pPhysics)
-{
-	ClearBoneGeometries(pPhysics);
-	BoneHierarchy::ClearAll(pPhysics);
+void ChunkyPhysics::ClearAll(PhysicsManager* physics) {
+	ClearBoneGeometries(physics);
+	BoneHierarchy::ClearAll(physics);
 	ClearEngines();
 	ClearTriggers();
 	ClearSpawners();
 }
 
-void ChunkyPhysics::SetBoneCount(int pBoneCount)
-{
-	BoneHierarchy::SetBoneCount(pBoneCount);
+void ChunkyPhysics::SetBoneCount(int bone_count) {
+	BoneHierarchy::SetBoneCount(bone_count);
 
-	deb_assert(mGeometryArray.empty());
-	mGeometryArray.clear();
+	deb_assert(geometry_array_.empty());
+	geometry_array_.clear();
 
-	mUniqeGeometryIndex = GetBoneCount();
+	uniqe_geometry_index_ = GetBoneCount();
 }
 
-bool ChunkyPhysics::FinalizeInit(PhysicsManager* pPhysics, unsigned pPhysicsFps, const xform* pTransform, int pForceListenerId)
-{
-	bool lOk = ((int)mGeometryArray.size() == GetBoneCount());
-	deb_assert(lOk);
-	if (lOk)
-	{
-		if (pTransform)
-		{
-			const int lRoot = 0;
-			xform lTransformation = GetOriginalBoneTransformation(lRoot);
-			lTransformation = *pTransform * lTransformation;
-			SetOriginalBoneTransformation(lRoot, lTransformation);
+bool ChunkyPhysics::FinalizeInit(PhysicsManager* physics, unsigned physics_fps, const xform* transform, int force_listener_id) {
+	bool ok = ((int)geometry_array_.size() == GetBoneCount());
+	deb_assert(ok);
+	if (ok) {
+		if (transform) {
+			const int root = 0;
+			xform _transformation = GetOriginalBoneTransformation(root);
+			_transformation = *transform * _transformation;
+			SetOriginalBoneTransformation(root, _transformation);
 		}
-		lOk = Parent::FinalizeInit(mTransformOperation);
+		ok = Parent::FinalizeInit(transform_operation_);
 	}
-	if (lOk && pPhysics)
-	{
-		const int lBoneCount = GetBoneCount();
-		for (int x = 0; lOk && x < lBoneCount; ++x)
-		{
-			ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
-			switch (lGeometry->GetBoneType())
-			{
-				case ChunkyBoneGeometry::BONE_BODY:
-				case ChunkyBoneGeometry::BONE_TRIGGER:
-				{
-					const PhysicsManager::BodyType lBodyType = GetBodyType(lGeometry);
-					const xform& lBone = GetBoneTransformation(x);
-					lOk = lGeometry->CreateBody(pPhysics, x == 0, pForceListenerId, lBodyType, lBone);
-					if (lOk)
-					{
-						pPhysics->EnableGravity(lGeometry->GetBodyId(), lGeometry->IsAffectedByGravity());
+	if (ok && physics) {
+		const int _bone_count = GetBoneCount();
+		for (int x = 0; ok && x < _bone_count; ++x) {
+			ChunkyBoneGeometry* _geometry = GetBoneGeometry(x);
+			switch (_geometry->GetBoneType()) {
+				case ChunkyBoneGeometry::kBoneBody:
+				case ChunkyBoneGeometry::kBoneTrigger: {
+					const PhysicsManager::BodyType body_type = GetBodyType(_geometry);
+					const xform& bone = GetBoneTransformation(x);
+					ok = _geometry->CreateBody(physics, x == 0, force_listener_id, body_type, bone);
+					if (ok) {
+						physics->EnableGravity(_geometry->GetBodyId(), _geometry->IsAffectedByGravity());
 					}
-					if (lOk)
-					{
-						pPhysics->EnableCollideWithSelf(lGeometry->GetBodyId(), lGeometry->IsCollideWithSelf());
+					if (ok) {
+						physics->EnableCollideWithSelf(_geometry->GetBodyId(), _geometry->IsCollideWithSelf());
 					}
-				}
-				break;
+				} break;
 			}
 		}
-		for (int x = 0; lOk && x < lBoneCount; ++x)
-		{
-			ChunkyBoneGeometry* lGeometry = GetBoneGeometry(x);
-			lOk = lGeometry->CreateJoint(this, pPhysics, pPhysicsFps);
+		for (int x = 0; ok && x < _bone_count; ++x) {
+			ChunkyBoneGeometry* _geometry = GetBoneGeometry(x);
+			ok = _geometry->CreateJoint(this, physics, physics_fps);
 		}
 	}
-	deb_assert(lOk);
-	return (lOk);
+	deb_assert(ok);
+	return (ok);
 }
 
 
 
-unsigned ChunkyPhysics::GetNextGeometryIndex()
-{
-	return (++mUniqeGeometryIndex);
+unsigned ChunkyPhysics::GetNextGeometryIndex() {
+	return (++uniqe_geometry_index_);
 }
 
 
 
-loginstance(PHYSICS, ChunkyPhysics);
+loginstance(kPhysics, ChunkyPhysics);
 
 
 

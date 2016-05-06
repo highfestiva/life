@@ -5,7 +5,7 @@
 
 	NOTES:
 
-	Materials in Tbc don't work in the same manner as in other 
+	Materials in tbc don't work in the same manner as in other
 	3D-engines I've seen.
 
 	In the 3D-engines I've seen, you create an instance of a material
@@ -19,182 +19,168 @@
 	at a minimum.
 
 	Some engines don't take this into consideration at all, and renders
-	the geometry in random order. Other engines on the other hand take 
+	the geometry in random order. Other engines on the other hand take
 	care of this problem by sorting the geometry in	different ways.
 
-	I decided to render all geometry sorted by material, but without 
+	I decided to render all geometry sorted by material, but without
 	spending any time sorting at all. This is done by taking a somewhat
 	opposite approach.
 
-	In Tbc, you don't add the material to the geometry. You add the
+	In tbc, you don't add the material to the geometry. You add the
 	geometry to the material. All supported materials are then stored
 	in an array in the renderer. Each material is then responsible
 	for rendering all geometry using that material. This approach isn't
 	only smart because of the lack of a sorting routine, it also gives
 	you full control over the rendering process. One example is that
-	you can guarantee that all alpha blended/tested meshes are rendered 
+	you can guarantee that all alpha blended/tested meshes are rendered
 	last.
 */
 
 #pragma once
 
-#include "UiTbc.h"
-#include "UiRenderer.h"
-#include "../../Lepra/Include/HashTable.h"
+#include "uitbc.h"
+#include "uirenderer.h"
+#include "../../lepra/include/hashtable.h"
 #include <list>
 
-namespace Tbc
-{
+namespace tbc {
 class GeometryBase;
 }
 
-namespace UiTbc
-{
+namespace uitbc {
 
 class Material;
 
-class GeometryGroup
-{
+class GeometryGroup {
 public:
-	GeometryGroup(Material* pMaterial, int pAllocSize = 8);
+	GeometryGroup(Material* material, int alloc_size = 8);
 	~GeometryGroup();
 
-	void AddGeometry(Tbc::GeometryBase* pGeometry);
-	bool RemoveGeometry(Tbc::GeometryBase* pGeometry);
+	void AddGeometry(tbc::GeometryBase* geometry);
+	bool RemoveGeometry(tbc::GeometryBase* geometry);
 
 	// Sorting will also calculate the depth's of the geometries
 	// and the group.
 	void F2BSortGroup(); // Front-to-back sort.
 	void B2FSortGroup(); // Back-to-front sort.
 
-	float GetMeanDepth() const { return mMeanDepth; }
-	Renderer::TextureID GetGroupTextureID() const { return mGroupTextureID; }
-	int GetGeometryCount() const { return mGeometryCount; }
-	Tbc::GeometryBase* GetGeometry(int i) { return mGeomArray[i].mGeometry; }
+	float GetMeanDepth() const { return mean_depth_; }
+	Renderer::TextureID GetGroupTextureID() const { return group_texture_id_; }
+	int GetGeometryCount() const { return geometry_count_; }
+	tbc::GeometryBase* GetGeometry(int i) { return geom_array_[i].geometry_; }
 private:
-	int CalculateDepths(bool pF2B);
-	void BubbleSort(int (*Cmp)(const void* pGeom1, const void* pGeom2));
-	static int F2BCompare(const void* pGeom1, const void* pGeom2);
-	static int B2FCompare(const void* pGeom1, const void* pGeom2);
+	int CalculateDepths(bool f2_b);
+	void BubbleSort(int (*Cmp)(const void* geom1, const void* geom2));
+	static int F2BCompare(const void* geom1, const void* geom2);
+	static int B2FCompare(const void* geom1, const void* geom2);
 
-	struct Pair
-	{
-		Tbc::GeometryBase* mGeometry;
-		float mDepth;
+	struct Pair {
+		tbc::GeometryBase* geometry_;
+		float depth_;
 	};
 
-	Material* mParentMaterial;
+	Material* parent_material_;
 
 	// The geometry list contains depth-sorted geometries.
 	// They are usually ordered front-to-back in solid materials
 	// and back-to-front in blended materials.
-	Pair* mGeomArray;
-	int mGeometryCount;
-	int mArrayLength;
+	Pair* geom_array_;
+	int geometry_count_;
+	int array_length_;
 
 	// The group's mean depth-coordinate.
-	float mMeanDepth;
+	float mean_depth_;
 
 	// The texture (color map) that is shared by the group.
-	Renderer::TextureID mGroupTextureID;
+	Renderer::TextureID group_texture_id_;
 };
 
-class Material
-{
+class Material {
 public:
-	enum RemoveStatus
-	{
-		NOT_REMOVED = 0,
-		REMOVED,
-		REMOVED_FROM_FALLBACK,
+	enum RemoveStatus {
+		kNotRemoved = 0,
+		kRemoved,
+		kRemovedFromFallback,
 	};
 
-	enum DepthSortHint
-	{
-		NO_DEPTHSORT = 0,
-		DEPTHSORT_F2B, // Front-to-back
-		DEPTHSORT_B2F,     // Back-to-front
+	enum DepthSortHint {
+		kNoDepthsort = 0,
+		kDepthsortF2B, // Front-to-back
+		kDepthsortB2F,     // Back-to-front
 	};
 
-	Material(Renderer* pRenderer, DepthSortHint pSortHint, Material* pFallBackMaterial);
+	Material(Renderer* renderer, DepthSortHint sort_hint, Material* fall_back_material);
 	virtual ~Material();
 
-	static void EnableWireframe(bool pEnabled);
-	static void SetEnableDepthSorting(bool pEnabled);
-	static void EnableDrawMaterial(bool pEnabled);
+	static void EnableWireframe(bool enabled);
+	static void SetEnableDepthSorting(bool enabled);
+	static void EnableDrawMaterial(bool enabled);
 
 	Renderer* GetRenderer();
 
-	virtual bool AddGeometry(Tbc::GeometryBase* pGeometry);
-	virtual RemoveStatus RemoveGeometry(Tbc::GeometryBase* pGeometry);
+	virtual bool AddGeometry(tbc::GeometryBase* geometry);
+	virtual RemoveStatus RemoveGeometry(tbc::GeometryBase* geometry);
 	virtual void RemoveAllGeometry();
 
-	virtual void SetBasicMaterial(const Tbc::GeometryBase::BasicMaterialSettings& pMaterial) = 0;
+	virtual void SetBasicMaterial(const tbc::GeometryBase::BasicMaterialSettings& material) = 0;
 
 	virtual void PreRender();
 	virtual void PostRender();
 
-	static void RenderAllGeometry(unsigned pCurrentFrame, Material* pGeometryContainer, Material* pRenderer = 0);
-	virtual void RenderGeometry(Tbc::GeometryBase* pGeometry) = 0;
-	virtual void RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex) = 0;
-	virtual void RenderBaseGeometry(Tbc::GeometryBase* pGeometry) = 0;
+	static void RenderAllGeometry(unsigned current_frame, Material* geometry_container, Material* renderer = 0);
+	virtual void RenderGeometry(tbc::GeometryBase* geometry) = 0;
+	virtual void RawRender(tbc::GeometryBase* geometry, int uv_set_index) = 0;
+	virtual void RenderBaseGeometry(tbc::GeometryBase* geometry) = 0;
 
-	Tbc::GeometryBase* GetFirstGeometry();
-	Tbc::GeometryBase* GetNextGeometry();
+	tbc::GeometryBase* GetFirstGeometry();
+	tbc::GeometryBase* GetNextGeometry();
 
-	typedef std::list<Tbc::GeometryBase*> GeometryList;
+	typedef std::list<tbc::GeometryBase*> GeometryList;
 	typedef std::list<GeometryGroup*> GeometryGroupList;
 
-	virtual void RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-	virtual void RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
-	virtual void DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList);
+	virtual void RenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list);
+	virtual void RenderAllBlendedGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list);
+	virtual void DoRenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list);
 
-	Renderer::TextureID GetGroupTextureID(Tbc::GeometryBase* pGeometry) const;
+	Renderer::TextureID GetGroupTextureID(tbc::GeometryBase* geometry) const;
 	const GeometryGroupList& GetGeometryGroupList() const;
 
 protected:
-	static Tbc::GeometryBase::BasicMaterialSettings mCurrentMaterial;
+	static tbc::GeometryBase::BasicMaterialSettings current_material_;
 
-	GeometryGroupList mGeometryGroupList;
+	GeometryGroupList geometry_group_list_;
 
-	Material* mFallBackMaterial;	// If geometry doesn't contain all data needed.
+	Material* fall_back_material_;	// If geometry doesn't contain all data needed.
 
-	Renderer* mRenderer;
-	DepthSortHint mSortHint;
+	Renderer* renderer_;
+	DepthSortHint sort_hint_;
 
 	// Used for iteration.
-	GeometryGroupList::const_iterator mGroupIter;
-	int mIndex;
+	GeometryGroupList::const_iterator group_iter_;
+	int index_;
 
-	static bool mEnableWireframe;
-	static bool mEnableDepthSort;
-	static bool mEnableDrawMaterial;
+	static bool enable_wireframe_;
+	static bool enable_depth_sort_;
+	static bool enable_draw_material_;
 };
 
-class NullMaterial : public Material
-{
+class NullMaterial : public Material {
 public:
-	NullMaterial(Renderer* pListener) :
-	      Material(pListener, Material::NO_DEPTHSORT, 0)
-	{
+	NullMaterial(Renderer* listener) :
+	      Material(listener, Material::kNoDepthsort, 0) {
 	}
 
-	virtual ~NullMaterial()
-	{
+	virtual ~NullMaterial() {
 	}
 
-	void SetBasicMaterial(const Tbc::GeometryBase::BasicMaterialSettings&)
-	{
+	void SetBasicMaterial(const tbc::GeometryBase::BasicMaterialSettings&) {
 	}
 
-	void RenderGeometry(Tbc::GeometryBase* /*pGeometry*/)
-	{
+	void RenderGeometry(tbc::GeometryBase* /*geometry*/) {
 	}
-	void RawRender(Tbc::GeometryBase*, int)
-	{
+	void RawRender(tbc::GeometryBase*, int) {
 	}
-	void RenderBaseGeometry(Tbc::GeometryBase* /*pGeometry*/)
-	{
+	void RenderBaseGeometry(tbc::GeometryBase* /*geometry*/) {
 	}
 };
 

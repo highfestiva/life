@@ -1,63 +1,57 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Level.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ContextPath.h"
-#include "Game.h"
+#include "level.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/contextpath.h"
+#include "game.h"
 
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
-Level::Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Cure::ContextForceListener* pGravelEmitter):
-	Parent(pResourceManager, pClassId, pUiManager),
-	mPath(0),
-	mGravelEmitter(pGravelEmitter)
-{
+Level::Level(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, cure::ContextForceListener* gravel_emitter):
+	Parent(resource_manager, class_id, ui_manager),
+	path_(0),
+	gravel_emitter_(gravel_emitter) {
 }
 
-Level::~Level()
-{
-	delete mGravelEmitter;
-	mGravelEmitter = 0;
-	mPath = 0;
+Level::~Level() {
+	delete gravel_emitter_;
+	gravel_emitter_ = 0;
+	path_ = 0;
 }
 
 
 
-Cure::ContextPath* Level::QueryPath()
-{
-	if (!mPath)
-	{
-		mPath = new Cure::ContextPath(GetResourceManager(), "ContextPath");
-		GetManager()->AddLocalObject(mPath);
+cure::ContextPath* Level::QueryPath() {
+	if (!path_) {
+		path_ = new cure::ContextPath(GetResourceManager(), "ContextPath");
+		GetManager()->AddLocalObject(path_);
 	}
-	return mPath;
+	return path_;
 }
 
 
 
-void Level::OnForceApplied(Cure::ContextObject* pOtherObject,
-	Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-	const vec3& pForce, const vec3& pTorque,
-	const vec3& pPosition, const vec3& pRelativeVelocity)
-{
-	Parent::OnForceApplied(pOtherObject, pOwnBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+void Level::OnForceApplied(cure::ContextObject* other_object,
+	tbc::PhysicsManager::BodyID own_body_id, tbc::PhysicsManager::BodyID other_body_id,
+	const vec3& force, const vec3& torque,
+	const vec3& position, const vec3& relative_velocity) {
+	Parent::OnForceApplied(other_object, own_body_id, other_body_id, force, torque, position, relative_velocity);
 
-	mGravelEmitter->OnForceApplied(this, pOtherObject, pOwnBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+	gravel_emitter_->OnForceApplied(this, other_object, own_body_id, other_body_id, force, torque, position, relative_velocity);
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Level);
+loginstance(kGameContextCpp, Level);
 
 
 

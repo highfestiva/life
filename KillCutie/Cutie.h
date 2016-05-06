@@ -1,33 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
+#include "../uicure/include/uimachine.h"
 
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
-using namespace Lepra;
+using namespace lepra;
 
 
 
-class Cutie: public UiCure::Machine
-{
+class Cutie: public UiCure::Machine {
 public:
 	typedef UiCure::Machine Parent;
 
-	Cutie(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Cutie(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager);
 	virtual ~Cutie();
 
-	void DrainHealth(float pDrain);
+	void DrainHealth(float drain);
 	float GetHealth() const;
 	bool QueryFlip();
 	bool IsUpsideDown() const;
@@ -35,9 +33,9 @@ public:
 private:
 	virtual void OnTick();
 
-	float mHealth;
-	int mKillJointsTickCount;
-	int mWheelExpelTickCount;
+	float health_;
+	int kill_joints_tick_count_;
+	int wheel_expel_tick_count_;
 
 	logclass();
 };

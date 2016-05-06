@@ -1,18 +1,17 @@
 /*
 	Class:  PngLoader
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
 #pragma once
 
-#include "Log.h"
-#include "../../ThirdParty/lpng1212/png.h"
+#include "log.h"
+#include "../../thirdparty/lpng1212/png.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -23,40 +22,38 @@ class Writer;
 
 
 
-class PngLoader
-{
+class PngLoader {
 public:
 
-	enum Status
-	{
-		STATUS_OPEN_ERROR = 0, 
-		STATUS_SUCCESS,
-		STATUS_MEMORY_ERROR,
-		STATUS_READ_HEADER_ERROR,
-		STATUS_READ_INFO_ERROR,
-		STATUS_READ_PALETTE_ERROR,
-		STATUS_READ_PICTURE_ERROR,
-		STATUS_RESOLUTION_ERROR,
-		STATUS_COMPRESSION_ERROR,
+	enum Status {
+		kStatusOpenError = 0,
+		kStatusSuccess,
+		kStatusMemoryError,
+		kStatusReadHeaderError,
+		kStatusReadInfoError,
+		kStatusReadPaletteError,
+		kStatusReadPictureError,
+		kStatusResolutionError,
+		kStatusCompressionError,
 	};
 
-	Status Load(const str& pFileName, Canvas& pCanvas);
-	Status Save(const str& pFileName, const Canvas& pCanvas);
+	Status Load(const str& file_name, Canvas& canvas);
+	Status Save(const str& file_name, const Canvas& canvas);
 
-	Status Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas);
-	Status Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas);
+	Status Load(const str& archive_name, const str& file_name, Canvas& canvas);
+	Status Save(const str& archive_name, const str& file_name, const Canvas& canvas);
 
-	Status Load(Reader& pReader, Canvas& pCanvas);
-	Status Save(Writer& pWriter, const Canvas& pCanvas);
+	Status Load(Reader& reader, Canvas& canvas);
+	Status Save(Writer& writer, const Canvas& canvas);
 
 private:
 	bool CheckIfPNG();
-	static void ReadDataCallback(png_structp pPNG, png_bytep pData, png_size_t pLength);
-	static void WriteDataCallback(png_structp pPNG, png_bytep pData, png_size_t pLength);
-	static void FlushCallback(png_structp pPNG);
+	static void ReadDataCallback(png_structp png, png_bytep data, png_size_t length);
+	static void WriteDataCallback(png_structp png, png_bytep data, png_size_t length);
+	static void FlushCallback(png_structp png);
 
-	Reader* mReader;
-	Writer* mWriter;
+	Reader* reader_;
+	Writer* writer_;
 	logclass();
 };
 

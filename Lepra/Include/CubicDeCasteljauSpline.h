@@ -1,24 +1,24 @@
 /*
 	Class:  CubicDeCasteljauSpline
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
 
 	The de Casteljau algorithm is a general spline algorithm with which
 	you can create a range of popular splines: Bezier, Catmull-Rom and
-	B-splines. 
-	
+	B-splines.
+
 	All that is required of the template argument is that it can be
 	linearily interpolated using Math::Lerp().
 
-	Due to the nature of the algorithm, no values can be sampled from the 
+	Due to the nature of the algorithm, no values can be sampled from the
 	extreme endpoints of the spline. To avoid this problem the array of
 	keyframes will be treated as a cyclic array, and the spline will be
 	looped.
 
 	This requires one extra time tag - the time when the spline is back
-	to the start position. The spline is constructed from 4 points, 2 before 
+	to the start position. The spline is constructed from 4 points, 2 before
 	and 2 after the current	time.
 
 	TODO:
@@ -30,46 +30,43 @@
 
 #pragma once
 
-#include "Lepra.h"
-#include "Math.h"
+#include "lepra.h"
+#include "math.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 template<class T, class TimeType, class TBase = typename T::BaseType>
-class CubicDeCasteljauSpline
-{
+class CubicDeCasteljauSpline {
 public:
-	enum SplineType
-	{
-		TYPE_BEZIER	= 0,
-		TYPE_CATMULLROM	= 1,
-		TYPE_BSPLINE	= 2,
+	enum SplineType {
+		kTypeBezier	= 0,
+		kTypeCatmullrom	= 1,
+		kTypeBspline	= 2,
 	};
 
-	CubicDeCasteljauSpline(T* pKeyFrames,		// pCount + 1 elements.
-			      TimeType* pTimeTags,	// pCount + 1 elements.
-			      int pCount,
-			      SplineType pSplineType = TYPE_BSPLINE,
-			      DataPolicy pPolicy = FULL_COPY);
-	CubicDeCasteljauSpline(const CubicDeCasteljauSpline& pOriginal, DataPolicy pPolicy = COPY_REFERENCE);
+	CubicDeCasteljauSpline(T* key_frames,		// pCount + 1 elements.
+			      TimeType* time_tags,	// count + 1 elements.
+			      int count,
+			      SplineType spline_type = kTypeBspline,
+			      DataPolicy policy = kFullCopy);
+	CubicDeCasteljauSpline(const CubicDeCasteljauSpline& original, DataPolicy policy = kCopyReference);
 	~CubicDeCasteljauSpline();
-	void Set(T* pKeyFrames,		// pCount + 1 elements.
-		TimeType* pTimeTags,	// pCount + 1 elements.
-		int pCount,
-		SplineType pSplineType = TYPE_BSPLINE,
-		DataPolicy pPolicy = FULL_COPY);
+	void Set(T* key_frames,		// pCount + 1 elements.
+		TimeType* time_tags,	// count + 1 elements.
+		int count,
+		SplineType spline_type = kTypeBspline,
+		DataPolicy policy = kFullCopy);
 
-	void EnableModulo(bool pEnable);
-	void StartInterpolation(TimeType pTime);
-	void GotoAbsoluteTime(TimeType pTime);
-	void StepInterpolation(TimeType pTimeStep);
+	void EnableModulo(bool enable);
+	void StartInterpolation(TimeType time);
+	void GotoAbsoluteTime(TimeType time);
+	void StepInterpolation(TimeType time_step);
 	TimeType GetCurrentInterpolationTime() const;
-	TimeType FindNearestTime(TimeType pStepLength, const T& pWhere, TBase& pNearestDistance, T& pNearestPoint, int pSteps);
+	TimeType FindNearestTime(TimeType step_length, const T& where, TBase& nearest_distance, T& nearest_point, int steps);
 
 	// Choose one...
 	T GetValue() const;
@@ -84,7 +81,7 @@ private:
 		   TimeType t123, TimeType t234,
 		   TimeType t) const;
 
-	int FindFrameAtTime(TimeType pTime, int pStartFrame) const;
+	int FindFrameAtTime(TimeType time, int start_frame) const;
 
 	TimeType GetMinimumTime() const;
 	TimeType GetMaximumTime() const;
@@ -93,22 +90,22 @@ private:
 
 	T Lerp(const T& a, const T& b, TimeType t) const;
 
-	T* mKeyFrames;
-	T* mTempBuffer;
-	TimeType* mTimeTags;
-	int mCount;
-	SplineType mSplineType;
-	DataPolicy mPolicy;
+	T* key_frames_;
+	T* temp_buffer_;
+	TimeType* time_tags_;
+	int count_;
+	SplineType spline_type_;
+	DataPolicy policy_;
 
-	TimeType mCurrentTime;
-	int mCurrentFrame[4];
+	TimeType current_time_;
+	int current_frame_[4];
 
-	bool mEnableModulo;
+	bool enable_modulo_;
 };
 
 
 
-#include "CubicDeCasteljauSpline.inl"
+#include "cubicdecasteljauspline.inl"
 
 
 

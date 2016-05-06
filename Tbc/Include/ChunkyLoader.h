@@ -50,15 +50,14 @@
 
 #pragma once
 
-#include "../../Lepra/Include/LepraAssert.h"
+#include "../../lepra/include/lepraassert.h"
 #include <list>
-#include "../../Lepra/Include/File.h"
-#include "Tbc.h"
+#include "../../lepra/include/file.h"
+#include "tbc.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
@@ -72,231 +71,223 @@ class ChunkyWorld;
 #define ENUMROT(c, bits)	(((int)c)<<bits)
 #define ENUMIFY(a, b, c, d)	ENUMROT(a, 24) + ENUMROT(b, 16) + ENUMROT(c, 8) +  ENUMROT(d, 0)
 
-enum ChunkyType
-{
+enum ChunkyType {
 	// File type: mesh. Unly used by graphics applications.
-	CHUNK_MESH                         = ENUMIFY('M','E','S','H'),	// Mesh file type.
-	CHUNK_MESH_VERTICES                = ENUMIFY('M','E','V','X'),	// Mandatory.
-	CHUNK_MESH_NORMALS                 = ENUMIFY('M','E','N','O'),	// Mandatory.
-	CHUNK_MESH_UV                      = ENUMIFY('M','E','U','V'),	// Optional.
-	CHUNK_MESH_UVS_PER_VERTEX          = ENUMIFY('M','E','U','P'),	// Optional.
-	CHUNK_MESH_COLOR                   = ENUMIFY('M','E','C','O'),	// Optional.
-	CHUNK_MESH_COLOR_FORMAT            = ENUMIFY('M','E','C','F'),	// Optional.
-	CHUNK_MESH_TRIANGLES               = ENUMIFY('M','E','T','R'),	// Mandatory, but could mean triangle strip, quad or something else.
-	CHUNK_MESH_PRIMITIVE               = ENUMIFY('M','E','P','R'),	// Optional.
-	CHUNK_MESH_VOLATILITY              = ENUMIFY('M','E','V','O'),	// Optional.
-	CHUNK_MESH_CASTS_SHADOWS           = ENUMIFY('M','E','C','S'),	// Optional.
-	CHUNK_MESH_SHADOW_DEVIATION        = ENUMIFY('M','E','S','D'),	// Optional.
-	CHUNK_MESH_TWO_SIDED               = ENUMIFY('M','E','T','S'),	// Optional.
-	CHUNK_MESH_RECV_NO_SHADOWS         = ENUMIFY('M','E','R','S'),	// Optional.
+	kChunkMesh                         = ENUMIFY('M','E','S','H'),	// Mesh file type.
+	kChunkMeshVertices                = ENUMIFY('M','E','V','X'),	// Mandatory.
+	kChunkMeshNormals                 = ENUMIFY('M','E','N','O'),	// Mandatory.
+	kChunkMeshUv                      = ENUMIFY('M','E','U','V'),	// Optional.
+	kChunkMeshUvsPerVertex          = ENUMIFY('M','E','U','P'),	// Optional.
+	kChunkMeshColor                   = ENUMIFY('M','E','C','O'),	// Optional.
+	kChunkMeshColorFormat            = ENUMIFY('M','E','C','F'),	// Optional.
+	kChunkMeshTriangles               = ENUMIFY('M','E','T','R'),	// Mandatory, but could mean triangle strip, quad or something else.
+	kChunkMeshPrimitive               = ENUMIFY('M','E','P','R'),	// Optional.
+	kChunkMeshVolatility              = ENUMIFY('M','E','V','O'),	// Optional.
+	kChunkMeshCastsShadows           = ENUMIFY('M','E','C','S'),	// Optional.
+	kChunkMeshShadowDeviation        = ENUMIFY('M','E','S','D'),	// Optional.
+	kChunkMeshTwoSided               = ENUMIFY('M','E','T','S'),	// Optional.
+	kChunkMeshRecvNoShadows         = ENUMIFY('M','E','R','S'),	// Optional.
 
 	// File type: skin. Unly used by graphics applications.
-	CHUNK_SKIN                         = ENUMIFY('S','K','I','N'),	// Skin file type.
+	kChunkSkin                         = ENUMIFY('S','K','I','N'),	// Skin file type.
 	// Skin sub element: bone weight group. Used by skinning to determine bone-weight-per-vertex.
-	CHUNK_SKIN_BONE_WEIGHT_GROUP       = ENUMIFY('S','K','W','G'),	// Optional.
-	CHUNK_SKIN_BWG_BONES               = ENUMIFY('S','K','W','B'),	// Sub-object is mandatory if weight group present.
-	CHUNK_SKIN_BWG_VERTICES            = ENUMIFY('S','K','W','V'),	// Sub-object is mandatory if weight group present.
-	CHUNK_SKIN_BWG_WEIGHTS             = ENUMIFY('S','K','W','W'),	// Sub-object is mandatory if weight group present.
+	kChunkSkinBoneWeightGroup       = ENUMIFY('S','K','W','G'),	// Optional.
+	kChunkSkinBwgBones               = ENUMIFY('S','K','W','B'),	// Sub-object is mandatory if weight group present.
+	kChunkSkinBwgVertices            = ENUMIFY('S','K','W','V'),	// Sub-object is mandatory if weight group present.
+	kChunkSkinBwgWeights             = ENUMIFY('S','K','W','W'),	// Sub-object is mandatory if weight group present.
 
 	// File type: animation. Used by both graphics and text applications.
-	CHUNK_ANIMATION                    = ENUMIFY('A','N','I','M'),	// Animation file type.
-	CHUNK_ANIMATION_MODE               = ENUMIFY('A','N','M','O'),	// "Looped" or "play once". Mandatory.
-	CHUNK_ANIMATION_FRAME_COUNT        = ENUMIFY('A','N','F','C'),	// Number of keyframes. Mandatory.
-	CHUNK_ANIMATION_BONE_COUNT         = ENUMIFY('A','N','B','C'),	// Number of bones. Mandatory.
-	CHUNK_ANIMATION_USE_SPLINES        = ENUMIFY('A','N','U','S'),	// Hehe, love the abbreviation... Mandatory.
-	CHUNK_ANIMATION_TIME               = ENUMIFY('A','N','T','I'),	// Animation length in seconds. Mandatory.
-	CHUNK_ANIMATION_ROOT_NODE          = ENUMIFY('A','N','R','N'),	// A single NAME that corresponds to the start node in the physics hierarchy. Mandatory.
+	kChunkAnimation                    = ENUMIFY('A','N','I','M'),	// Animation file type.
+	kChunkAnimationMode               = ENUMIFY('A','N','M','O'),	// "Looped" or "play once". Mandatory.
+	kChunkAnimationFrameCount        = ENUMIFY('A','N','F','C'),	// Number of keyframes. Mandatory.
+	kChunkAnimationBoneCount         = ENUMIFY('A','N','B','C'),	// Number of bones. Mandatory.
+	kChunkAnimationUseSplines        = ENUMIFY('A','N','U','S'),	// Hehe, love the abbreviation... Mandatory.
+	kChunkAnimationTime               = ENUMIFY('A','N','T','I'),	// Animation length in seconds. Mandatory.
+	kChunkAnimationRootNode          = ENUMIFY('A','N','R','N'),	// A single NAME that corresponds to the start node in the physics hierarchy. Mandatory.
 	// Animation sub element: keyframe.
-	CHUNK_ANIMATION_KEYFRAME           = ENUMIFY('A','N','K','A'),	// A keyframe and its transformations. Means "duck" in swedish. Mandatory.
-	CHUNK_ANIMATION_KEYFRAME_TIME      = ENUMIFY('A','N','T','M'),	// Time for this keyframe. Mandatory.
-	CHUNK_ANIMATION_KEYFRAME_TRANSFORM = ENUMIFY('A','N','K','T'),	// Transformations for this keyframe for all bones in one BLOB. Mandatory.
+	kChunkAnimationKeyframe           = ENUMIFY('A','N','K','A'),	// A keyframe and its transformations. Means "duck" in swedish. Mandatory.
+	kChunkAnimationKeyframeTime      = ENUMIFY('A','N','T','M'),	// Time for this keyframe. Mandatory.
+	kChunkAnimationKeyframeTransform = ENUMIFY('A','N','K','T'),	// Transformations for this keyframe for all bones in one BLOB. Mandatory.
 
 	// File type: physics. Used by both graphics and text applications.
-	CHUNK_PHYSICS                      = ENUMIFY('P','H','Y','S'),	// Physics file type.
-	CHUNK_PHYSICS_BONE_COUNT           = ENUMIFY('P','H','B','C'),	// Number of bones. Mandatory.
-	CHUNK_PHYSICS_PHYSICS_TYPE         = ENUMIFY('P','H','P','T'),	// Physics type: dynamic, static, etc. Mandatory.
-	CHUNK_PHYSICS_PHYSICS_GUIDE_MODE   = ENUMIFY('P','H','G','M'),	// Never, sometimes or always guided. Optional.
-	CHUNK_PHYSICS_ENGINE_COUNT         = ENUMIFY('P','H','E','C'),	// Number of engines. Mandatory.
-	CHUNK_PHYSICS_TRIGGER_COUNT        = ENUMIFY('P','H','T','C'),	// Number of triggers. Mandatory.
-	CHUNK_PHYSICS_SPAWNER_COUNT        = ENUMIFY('P','H','S','C'),	// Number of triggers. Mandatory.
+	kChunkPhysics                      = ENUMIFY('P','H','Y','S'),	// Physics file type.
+	kChunkPhysicsBoneCount           = ENUMIFY('P','H','B','C'),	// Number of bones. Mandatory.
+	kChunkPhysicsPhysicsType         = ENUMIFY('P','H','P','T'),	// Physics type: dynamic, static, etc. Mandatory.
+	kChunkPhysicsPhysicsGuideMode   = ENUMIFY('P','H','G','M'),	// Never, sometimes or always guided. Optional.
+	kChunkPhysicsEngineCount         = ENUMIFY('P','H','E','C'),	// Number of engines. Mandatory.
+	kChunkPhysicsTriggerCount        = ENUMIFY('P','H','T','C'),	// Number of triggers. Mandatory.
+	kChunkPhysicsSpawnerCount        = ENUMIFY('P','H','S','C'),	// Number of triggers. Mandatory.
 	// Physics sub element: bone.
-	CHUNK_PHYSICS_BONE_CONTAINER       = ENUMIFY('P','H','B','O'),	// A bone and its transformation, type. Mandatory.
-	CHUNK_PHYSICS_BONE_CHILD_LIST      = ENUMIFY('P','H','C','L'),	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
-	CHUNK_PHYSICS_BONE_TRANSFORM       = ENUMIFY('P','H','B','T'),	// The transform of this bone. Mandatory.
-	CHUNK_PHYSICS_BONE_SHAPE           = ENUMIFY('P','H','S','H'),	// Bone shape (i.e. capsule, box, sphere, portal...), mandatory with one and one shape only per bone.
+	kChunkPhysicsBoneContainer       = ENUMIFY('P','H','B','O'),	// A bone and its transformation, type. Mandatory.
+	kChunkPhysicsBoneChildList      = ENUMIFY('P','H','C','L'),	// The indices of this bone's children. Optional for bones without children, mandatory otherwise.
+	kChunkPhysicsBoneTransform       = ENUMIFY('P','H','B','T'),	// The transform of this bone. Mandatory.
+	kChunkPhysicsBoneShape           = ENUMIFY('P','H','S','H'),	// Bone shape (i.e. capsule, box, sphere, portal...), mandatory with one and one shape only per bone.
 	// Physics sub element: engine.
-	CHUNK_PHYSICS_ENGINE_CONTAINER     = ENUMIFY('P','H','E','O'),	// Engine array. Mandatory.
-	CHUNK_PHYSICS_ENGINE               = ENUMIFY('P','H','E','N'),	// An engine and its parameters, type. Mandatory.
+	kChunkPhysicsEngineContainer     = ENUMIFY('P','H','E','O'),	// Engine array. Mandatory.
+	kChunkPhysicsEngine               = ENUMIFY('P','H','E','N'),	// An engine and its parameters, type. Mandatory.
 	// Physics sub element: trigger.
-	CHUNK_PHYSICS_TRIGGER_CONTAINER    = ENUMIFY('P','H','T','O'),	// Trigger array. Mandatory.
-	CHUNK_PHYSICS_TRIGGER              = ENUMIFY('P','H','T','R'),	// A trigger and its parameters, type. Mandatory.
+	kChunkPhysicsTriggerContainer    = ENUMIFY('P','H','T','O'),	// Trigger array. Mandatory.
+	kChunkPhysicsTrigger              = ENUMIFY('P','H','T','R'),	// A trigger and its parameters, type. Mandatory.
 	// Physics sub element: spawner.
-	CHUNK_PHYSICS_SPAWNER_CONTAINER    = ENUMIFY('P','H','S','O'),	// Spawner array. Mandatory.
-	CHUNK_PHYSICS_SPAWNER              = ENUMIFY('P','H','S','R'),	// A spawner and its parameters, type. Mandatory.
+	kChunkPhysicsSpawnerContainer    = ENUMIFY('P','H','S','O'),	// Spawner array. Mandatory.
+	kChunkPhysicsSpawner              = ENUMIFY('P','H','S','R'),	// A spawner and its parameters, type. Mandatory.
 
 	// File type: class. Used by both graphics and text applications.
-	CHUNK_CLASS                        = ENUMIFY('C','L','A','S'),	// Class file type.
-	CHUNK_CLASS_INHERITANCE_LIST       = ENUMIFY('C','L','I','L'),	// Parent class information. List arranged after parent priority. Optional.
-	CHUNK_CLASS_PHYSICS                = ENUMIFY('C','L','P','H'),	// An physics filename of the physics that forms the shapes of this class. Optional - absent when physics inherited or for abstract nouns ("clan" and "weather").
-	CHUNK_CLASS_SETTINGS               = ENUMIFY('C','L','S','E'),	// str keys and their corresponding default string values. Example "stand_animation":"heavy_walk". Optional.
-	CHUNK_CLASS_MESH_LIST              = ENUMIFY('C','L','M','L'),	// A list of mesh filenames that forms the looks of this class. Only used by graphics applications, and completly ignored by text applications. Optional - absent when using inherited or for abstract nouns.
-	CHUNK_CLASS_PHYS_MESH              = ENUMIFY('C','L','P','M'),	// Physical connection between a bone and a mesh. Mandatory in sub-chunk array.
-	CHUNK_CLASS_TAG_LIST               = ENUMIFY('C','L','T','L'),	// A list of tags (usually for connecting arbitrary engines, bones or mesh nodes). Optional - absent when using inherited or for abstract nouns.
-	CHUNK_CLASS_TAG                    = ENUMIFY('C','L','T','A'),	// Connection between bones, engines and meshes. Mainly used for graphical scripting behavior.
+	kChunkClass                        = ENUMIFY('C','L','A','S'),	// Class file type.
+	kChunkClassInheritanceList       = ENUMIFY('C','L','I','L'),	// Parent class information. List arranged after parent priority. Optional.
+	kChunkClassPhysics                = ENUMIFY('C','L','P','H'),	// An physics filename of the physics that forms the shapes of this class. Optional - absent when physics inherited or for abstract nouns ("clan" and "weather").
+	kChunkClassSettings               = ENUMIFY('C','L','S','E'),	// str keys and their corresponding default string values. Example "stand_animation":"heavy_walk". Optional.
+	kChunkClassMeshList              = ENUMIFY('C','L','M','L'),	// A list of mesh filenames that forms the looks of this class. Only used by graphics applications, and completly ignored by text applications. Optional - absent when using inherited or for abstract nouns.
+	kChunkClassPhysMesh              = ENUMIFY('C','L','P','M'),	// Physical connection between a bone and a mesh. Mandatory in sub-chunk array.
+	kChunkClassTagList               = ENUMIFY('C','L','T','L'),	// A list of tags (usually for connecting arbitrary engines, bones or mesh nodes). Optional - absent when using inherited or for abstract nouns.
+	kChunkClassTag                    = ENUMIFY('C','L','T','A'),	// Connection between bones, engines and meshes. Mainly used for graphical scripting behavior.
 
 	// File type: Group. Used by both graphics and text applications.
-	CHUNK_GROUP_CLASS_LIST             = ENUMIFY('G','C','L','I'),	// A list of class filenames (each with a group-unique NAME) that forms the nouns of this group. Mandatory.
-	CHUNK_GROUP_SETTINGS               = ENUMIFY('G','R','S','E'),	// A list of settings and attachments. A setting/an attachment contains two strings. Example: (groupNAME1.physics_NAME1) and (groupNAME2.physics_NAME2). May override class settings. Optional.
+	kChunkGroupClassList             = ENUMIFY('G','C','L','I'),	// A list of class filenames (each with a group-unique NAME) that forms the nouns of this group. Mandatory.
+	kChunkGroupSettings               = ENUMIFY('G','R','S','E'),	// A list of settings and attachments. A setting/an attachment contains two strings. Example: (groupNAME1.physics_NAME1) and (groupNAME2.physics_NAME2). May override class settings. Optional.
 
 	// File type: world. Used by both graphics and text applications.
-	CHUNK_WORLD_INFO                   = ENUMIFY('W','I','N','F'),	// Global world data, such as pos+size. Mandatory.
-	CHUNK_WORLD_QUAD_LIST              = ENUMIFY('W','Q','U','L'),	// Just a recursive container for a world group list. Container for CHUNK_WORLD_GROUP_LIST. Mandatory.
-	CHUNK_WORLD_GROUP_LIST             = ENUMIFY('W','G','R','L'),	// A list where each element is a group filename and a transformation. Each instance hangs on branches and leafs in the CHUNK_WORLD_QUAD_LIST. Mandatory.
+	kChunkWorldInfo                   = ENUMIFY('W','I','N','F'),	// Global world data, such as pos+size. Mandatory.
+	kChunkWorldQuadList              = ENUMIFY('W','Q','U','L'),	// Just a recursive container for a world group list. Container for kChunkWorldGroupList. Mandatory.
+	kChunkWorldGroupList             = ENUMIFY('W','G','R','L'),	// A list where each element is a group filename and a transformation. Each instance hangs on branches and leafs in the kChunkWorldQuadList. Mandatory.
 };
 
 
 
-class ChunkyLoader
-{
+class ChunkyLoader {
 public:
 	// Used for both loading and saving. Hard-coded to some degree, but I actually find the code more
 	// readable and flexible like this.
-	class ChunkyFileElement
-	{
+	class ChunkyFileElement {
 	public:
 		ChunkyFileElement();
 		// Used for any non-32 bit, statically formed data. Allocates a byte array for each element loaded.
-		// Field sizes are stored in pFieldSize[e], where e is the element index.
-		ChunkyFileElement(ChunkyType pType, void** pPointer, uint32* pFieldSize, int pElementCount = 1);
-		// Used for 32-bits (floats may use them too). Does not allocate. Stores total field size in *pFieldSize.
-		ChunkyFileElement(ChunkyType pType, int32* pInt, uint32* pFieldSize = 0, int pElementCount = 1);
+		// Field sizes are stored in field_size[e], where e is the element index.
+		ChunkyFileElement(ChunkyType type, void** pointer, uint32* field_size, int element_count = 1);
+		// Used for 32-bits (floats may use them too). Does not allocate. Stores total field size in *field_size.
+		ChunkyFileElement(ChunkyType type, int32* i, uint32* field_size = 0, int element_count = 1);
 		// Used for strings.
-		ChunkyFileElement(ChunkyType pType, str* pString, int pElementCount = 1);
+		ChunkyFileElement(ChunkyType type, str* s, int element_count = 1);
 		// Used for receiving callbacks. Will call LoadElementCallback if this chunk type is found.
-		ChunkyFileElement(ChunkyType pType, void* pPointer, int pElementCount = 1);
-		ChunkyFileElement(const ChunkyFileElement& pOriginal);
-		void operator=(const ChunkyFileElement& pOriginal);
+		ChunkyFileElement(ChunkyType type, void* pointer, int element_count = 1);
+		ChunkyFileElement(const ChunkyFileElement& original);
+		void operator=(const ChunkyFileElement& original);
 
-		ChunkyType mType;
-		bool mLoadCallback;
-		int32* mIntPointer;
-		void** mPointer;
-		str* mString;
-		uint32* mFieldSize;
-		int mElementCount;
+		ChunkyType type_;
+		bool load_callback_;
+		int32* int_pointer_;
+		void** pointer_;
+		str* s_;
+		uint32* field_size_;
+		int element_count_;
 
-		bool mIsElementLoaded;
+		bool is_element_loaded_;
 	};
 
 	typedef std::list<ChunkyFileElement> FileElementList;
 
-	ChunkyLoader(File* pFile, bool pIsFileOwner);
+	ChunkyLoader(File* file, bool is_file_owner);
 	virtual ~ChunkyLoader();
 
-	//bool LoadSingleString(ChunkyType pType, str& pString);
+	//bool LoadSingleString(ChunkyType type, str& s);
 	//bool LoadStringList(std::list<str>& pStringList);
-	//bool LoadInt(ChunkyType pType, int32& pInt);
-	bool AllocLoadChunkyList(FileElementList& pLoadList, int64 pChunkEnd);
+	//bool LoadInt(ChunkyType type, int32& i);
+	bool AllocLoadChunkyList(FileElementList& load_list, int64 chunk_end);
 
-	bool SaveSingleString(ChunkyType pType, const str& pString);
-	//bool SaveStringList(const std::list<str>& pStringList, ChunkyType pType);
-	bool SaveInt(ChunkyType pType, int32 pInt);
-	bool SaveChunkyList(const FileElementList& pSaveList);
+	bool SaveSingleString(ChunkyType type, const str& s);
+	//bool SaveStringList(const std::list<str>& pStringList, ChunkyType type);
+	bool SaveInt(ChunkyType type, int32 i);
+	bool SaveChunkyList(const FileElementList& save_list);
 
 protected:
-	virtual bool LoadElementCallback(ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
+	virtual bool LoadElementCallback(ChunkyType type, uint32 size, int64 chunk_end_position, void* storage);
 
-	bool VerifyFileType(ChunkyType pType);
-	bool WriteFileType(ChunkyType pType);
+	bool VerifyFileType(ChunkyType type);
+	bool WriteFileType(ChunkyType type);
 
-	bool LoadHead(ChunkyType& pType, uint32& pSize, int64& pChunkEndPosition);
-	bool LoadRequiredHead(ChunkyType pRequiredType, uint32& pSize, int64& pChunkEndPosition);
-	bool SaveHead(ChunkyType pType, uint32 pSize, int64& pChunkEndPosition);
-	bool RewriteChunkSize(int64 pChunkStartPosition);
+	bool LoadHead(ChunkyType& type, uint32& size, int64& chunk_end_position);
+	bool LoadRequiredHead(ChunkyType required_type, uint32& size, int64& chunk_end_position);
+	bool SaveHead(ChunkyType type, uint32 size, int64& chunk_end_position);
+	bool RewriteChunkSize(int64 chunk_start_position);
 
-	uint32* AllocInitBigEndian(const float* pData, unsigned pCount);
-	uint32* AllocInitBigEndian(const uint32* pData, unsigned pCount);
-	uint32* AllocInitBigEndian(const uint16* pData, unsigned pCount);
+	uint32* AllocInitBigEndian(const float* data, unsigned count);
+	uint32* AllocInitBigEndian(const uint32* data, unsigned count);
+	uint32* AllocInitBigEndian(const uint16* data, unsigned count);
 
-	File* mFile;
-	bool mIsFileOwner;
+	File* file_;
+	bool is_file_owner_;
 
 	logclass();
 };
 
 
 
-class ChunkyAnimationLoader: public ChunkyLoader	// For bone animations.
-{
+class ChunkyAnimationLoader: public ChunkyLoader {	// For bone animations.
 	typedef ChunkyLoader Parent;
 public:
-	ChunkyAnimationLoader(File* pFile, bool pIsFileOwner);
+	ChunkyAnimationLoader(File* file, bool is_file_owner);
 	virtual ~ChunkyAnimationLoader();
-	virtual bool Load(BoneAnimation* pAnimation);
-	virtual bool Save(const BoneAnimation* pAnimation);
+	virtual bool Load(BoneAnimation* animation);
+	virtual bool Save(const BoneAnimation* animation);
 
 private:
-	bool LoadElementCallback(Tbc::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
+	bool LoadElementCallback(tbc::ChunkyType type, uint32 size, int64 chunk_end_position, void* storage);
 
-	int32 mKeyframeCount;
-	int32 mBoneCount;
-	int32 mCurrentKeyframe;
+	int32 keyframe_count_;
+	int32 bone_count_;
+	int32 current_keyframe_;
 
 	logclass();
 };
 
-class ChunkyPhysicsLoader: public ChunkyLoader	// For physics and skinning. Loads the bone hierachy.
-{
+class ChunkyPhysicsLoader: public ChunkyLoader {	// For physics and skinning. Loads the bone hierachy.
 	typedef ChunkyLoader Parent;
 public:
-	ChunkyPhysicsLoader(File* pFile, bool pIsFileOwner);
+	ChunkyPhysicsLoader(File* file, bool is_file_owner);
 	virtual ~ChunkyPhysicsLoader();
-	virtual bool Load(ChunkyPhysics* pData);
-	virtual bool Save(const ChunkyPhysics* pData);
+	virtual bool Load(ChunkyPhysics* data);
+	virtual bool Save(const ChunkyPhysics* data);
 
 private:
-	bool LoadElementCallback(Tbc::ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
-	void SetBoneChildren(int pBoneIndex);
+	bool LoadElementCallback(tbc::ChunkyType type, uint32 size, int64 chunk_end_position, void* storage);
+	void SetBoneChildren(int bone_index);
 
-	int32 mCurrentBoneIndex;
+	int32 current_bone_index_;
 
 	logclass();
 };
 
-// Contans information on physics and animation names. Derived class handles UI: mesh, materials, sounds, etc.
-class ChunkyClassLoader: public ChunkyLoader
-{
+// Contans information on physics and animation names. Derived class handles kUi: mesh, materials, sounds, etc.
+class ChunkyClassLoader: public ChunkyLoader {
 	typedef ChunkyLoader Parent;
 public:
-	ChunkyClassLoader(File* pFile, bool pIsFileOwner);
+	ChunkyClassLoader(File* file, bool is_file_owner);
 	virtual ~ChunkyClassLoader();
-	virtual bool Load(ChunkyClass* pData);
+	virtual bool Load(ChunkyClass* data);
 
 protected:
-	virtual void AddLoadElements(FileElementList& pElementList, ChunkyClass* pData);
-	bool LoadElementCallback(ChunkyType pType, uint32 pSize, int64 pChunkEndPosition, void* pStorage);
+	virtual void AddLoadElements(FileElementList& element_list, ChunkyClass* data);
+	bool LoadElementCallback(ChunkyType type, uint32 size, int64 chunk_end_position, void* storage);
 
 private:
 	logclass();
 };
 
 /*// Contains class/group objects and links between them.
-class ChunkyGroupLoader: public ChunkyLoader
-{
+class ChunkyGroupLoader: public ChunkyLoader {
 public:
-	ChunkyGroupLoader(File* pFile, bool pIsFileOwner);
+	ChunkyGroupLoader(File* file, bool is_file_owner);
 	virtual ~ChunkyGroupLoader();
-	virtual bool Load(ChunkyGroup* pData);
-	virtual bool Save(const ChunkyGroup* pData);
+	virtual bool Load(ChunkyGroup* data);
+	virtual bool Save(const ChunkyGroup* data);
 };
 
-class ChunkyWorldLoader: public ChunkyLoader	// Contains groups and terrain. A bit bold at this point? :)
-{
+class ChunkyWorldLoader: public ChunkyLoader {	// Contains groups and terrain. A bit bold at this point? :)
 public:
-	ChunkyWorldLoader(File* pFile, bool pIsFileOwner);
+	ChunkyWorldLoader(File* file, bool is_file_owner);
 	virtual ~ChunkyWorldLoader();
-	virtual bool Load(ChunkyWorld* pData);
-	virtual bool Save(const ChunkyWorld* pData);
+	virtual bool Load(ChunkyWorld* data);
+	virtual bool Save(const ChunkyWorld* data);
 };*/
 
 

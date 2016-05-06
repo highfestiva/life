@@ -1,40 +1,37 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Lepra/Include/HiResTimer.h"
-#include "../UiTbc/Include/UiRenderer.h"
-#include "TrabantSim.h"
+#include "../lepra/include/hirestimer.h"
+#include "../uitbc/include/uirenderer.h"
+#include "trabantsim.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 class GameUiManager;
 }
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
-class Light
-{
+class Light {
 public:
-	Light(UiCure::GameUiManager* pUiManager);
+	Light(UiCure::GameUiManager* ui_manager);
 	virtual ~Light();
-	void Tick(const quat& pCameraOrientation);
+	void Tick(const quat& camera_orientation);
 
 private:
-	UiCure::GameUiManager* mUiManager;
-	UiTbc::Renderer::LightID mLightId;
-    vec3 mLightAverageDirection;
+	UiCure::GameUiManager* ui_manager_;
+	uitbc::Renderer::LightID light_id_;
+    vec3 light_average_direction_;
 };
 
 

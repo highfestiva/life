@@ -1,6 +1,6 @@
 /*
 	Class:  TgaLoader
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -10,12 +10,11 @@
 
 #pragma once
 
-#include "String.h"
+#include "string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -27,97 +26,89 @@ class Writer;
 
 
 
-class TgaLoader
-{
+class TgaLoader {
 public:
 
-	enum Status
-	{
-		STATUS_OPEN_ERROR = 0, 
-		STATUS_SUCCESS,
-		STATUS_MEMORY_ERROR,
-		STATUS_READ_HEADER_ERROR,
-		STATUS_READ_INFO_ERROR,
-		STATUS_READ_PALETTE_ERROR,
-		STATUS_READ_PICTURE_ERROR,
-		STATUS_RESOLUTION_ERROR,
-		STATUS_COMPRESSION_ERROR,
-		STATUS_UNKNOWNFILESIZE_ERROR,
-		STATUS_READSTREAM_ERROR,
+	enum Status {
+		kStatusOpenError = 0,
+		kStatusSuccess,
+		kStatusMemoryError,
+		kStatusReadHeaderError,
+		kStatusReadInfoError,
+		kStatusReadPaletteError,
+		kStatusReadPictureError,
+		kStatusResolutionError,
+		kStatusCompressionError,
+		kStatusUnknownfilesizeError,
+		kStatusReadstreamError,
 	};
 
-	Status Load(const str& pFileName, Canvas& pCanvas);
-	Status Save(const str& pFileName, const Canvas& pCanvas);
+	Status Load(const str& file_name, Canvas& canvas);
+	Status Save(const str& file_name, const Canvas& canvas);
 
-	Status Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas);
-	Status Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas);
+	Status Load(const str& archive_name, const str& file_name, Canvas& canvas);
+	Status Save(const str& archive_name, const str& file_name, const Canvas& canvas);
 
-	Status Load(Reader& pReader, Canvas& pCanvas);
-	Status Save(Writer& pWriter, const Canvas& pCanvas);
+	Status Load(Reader& reader, Canvas& canvas);
+	Status Save(Writer& writer, const Canvas& canvas);
 
 private:
 
-	enum TGAFormat
-	{
-		ORIGINAL_TGA_FORMAT = 0,
-		NEW_TGA_FORMAT,
+	enum TGAFormat {
+		kOriginalTgaFormat = 0,
+		kNewTgaFormat,
 	};
 
-	enum ImageType
-	{
-		NO_IMAGE_MAP				= 0,
-		UNCOMPRESSED_COLORMAP_IMAGE		= 1,
-		UNCOMPRESSED_TRUECOLOR_IMAGE		= 2,
-		UNCOMPRESSED_BLACKANDWHITE_IMAGE	= 3,
-		RLE_COLORMAPPED_IMAGE			= 9,
-		RLE_TRUECOLOR_IMAGE			= 10,
-		RLE_BLACKANDWHITE_IMAGE			= 11,
+	enum ImageType {
+		kNoImageMap				= 0,
+		kUncompressedColormapImage		= 1,
+		kUncompressedTruecolorImage		= 2,
+		kUncompressedBlackandwhiteImage	= 3,
+		kRleColormappedImage			= 9,
+		kRleTruecolorImage			= 10,
+		kRleBlackandwhiteImage			= 11,
 	};
 
-	struct ColorMapSpecification
-	{
-		uint16 mFirstEntryIndex;
-		uint16 mColorMapLength;
-		uint8  mColorMapEntrySize; // 15, 16, 24 or 32-bit.
+	struct ColorMapSpecification {
+		uint16 first_entry_index_;
+		uint16 color_map_length_;
+		uint8  color_map_entry_size_; // 15, 16, 24 or 32-bit.
 	};
 
-	struct ImageSpecification
-	{
-		uint16 mXOrigin;
-		uint16 mYOrigin;
-		uint16 mImageWidth;
-		uint16 mImageHeight;
-		uint8  mPixelDepth; // Number of bits per pixel. 8, 16, 24 or 32 are common.
-		uint8  mImageDescriptor; // Flags.
+	struct ImageSpecification {
+		uint16 x_origin_;
+		uint16 y_origin_;
+		uint16 image_width_;
+		uint16 image_height_;
+		uint8  pixel_depth_; // Number of bits per pixel. 8, 16, 24 or 32 are common.
+		uint8  image_descriptor_; // Flags.
 	};
 
-	struct TGAFileHeader
-	{
-		uint8 mIDLength;
-		uint8 mColorMapType; // Boolean value, 1 or 0, true or false. ColorMap = Palette.
-		uint8 mImageType;
-		ColorMapSpecification mColorMapSpec;
-		ImageSpecification mImageSpec;
+	struct TGAFileHeader {
+		uint8 id_length_;
+		uint8 color_map_type_; // Boolean value, 1 or 0, true or false. ColorMap = Palette.
+		uint8 image_type_;
+		ColorMapSpecification color_map_spec_;
+		ImageSpecification image_spec_;
 	};
 
 	// 26 byte file footer.
-	struct FileFooter
-	{
-		unsigned mExtensionAreaOffset;
-		unsigned mDeveloperDirectoryOffset;
-		char mSignature[18]; // "TRUEVISION-XFILE." with a terminating null-character.
+	struct FileFooter {
+		unsigned extension_area_offset_;
+		unsigned developer_directory_offset_;
+		char signature_[18]; // "TRUEVISION-XFILE." with a terminating null-character.
 	};
 
-	Status Load(File& pFile, Canvas& pCanvas);
+	Status Load(File& file, Canvas& canvas);
 
-	Status LoadUncompressedColorMapImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile, Color* pPalette);
-	Status LoadUncompressedTrueColorImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile);
-	Status LoadUncompressedBlackAndWhiteImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile);
-	Status LoadRLEColorMapImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile, Color* pPalette);
-	Status LoadRLETrueColorImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile);
-	Status LoadRLEBlackAndWhiteImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile);
+	Status LoadUncompressedColorMapImage(Canvas& canvas, TGAFileHeader& file_header, File& file, Color* palette);
+	Status LoadUncompressedTrueColorImage(Canvas& canvas, TGAFileHeader& file_header, File& file);
+	Status LoadUncompressedBlackAndWhiteImage(Canvas& canvas, TGAFileHeader& file_header, File& file);
+	Status LoadRLEColorMapImage(Canvas& canvas, TGAFileHeader& file_header, File& file, Color* palette);
+	Status LoadRLETrueColorImage(Canvas& canvas, TGAFileHeader& file_header, File& file);
+	Status LoadRLEBlackAndWhiteImage(Canvas& canvas, TGAFileHeader& file_header, File& file);
 
-	static const char* smTruevisionXFile;
+	static const char* truevision_x_file_;
 };
 
 

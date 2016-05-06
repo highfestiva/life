@@ -1,89 +1,79 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Object.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../UiTbc/Include/UiTriangleBasedGeometry.h"
+#include "object.h"
+#include "../cure/include/contextmanager.h"
+#include "../uitbc/include/uitrianglebasedgeometry.h"
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
-Object::Object(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
-	Parent(pResourceManager, pClassId, pUiManager),
-	mGeneratedPhysics(0),
-	mClass(new UiTbc::ChunkyClass),
-	mGfxMesh(0),
-	mGfxMeshId(0)
-{
+Object::Object(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager):
+	Parent(resource_manager, class_id, ui_manager),
+	generated_physics_(0),
+	clazz_(new uitbc::ChunkyClass),
+	gfx_mesh_(0),
+	gfx_mesh_id_(0) {
 }
 
-Object::~Object()
-{
-	delete mGeneratedPhysics;
-	delete mClass;
+Object::~Object() {
+	delete generated_physics_;
+	delete clazz_;
 }
 
 
 
-const Tbc::ChunkyClass* Object::GetClass() const
-{
-	return mClass;
+const tbc::ChunkyClass* Object::GetClass() const {
+	return clazz_;
 }
 
-UiTbc::TriangleBasedGeometry* Object::CreateGfxMesh(const std::vector<float>& pVertices, const std::vector<int>& pIndices, const vec3& pColor, float pAlpha, bool pIsSmooth)
-{
-	if (pVertices.empty() || pIndices.empty())
-	{
+uitbc::TriangleBasedGeometry* Object::CreateGfxMesh(const std::vector<float>& vertices, const std::vector<int>& indices, const vec3& color, float alpha, bool is_smooth) {
+	if (vertices.empty() || indices.empty()) {
 		return 0;
 	}
-	UiTbc::TriangleBasedGeometry* lGfxMesh = new UiTbc::TriangleBasedGeometry(&pVertices[0], 0, 0, 0, UiTbc::TriangleBasedGeometry::COLOR_RGB, (const uint32*)&pIndices[0],
-			pVertices.size()/3, pIndices.size(), Tbc::GeometryBase::TRIANGLES, Tbc::GeometryBase::GEOM_STATIC);
-	if (!pIsSmooth)
-	{
-		lGfxMesh->SplitVertices();
-		lGfxMesh->ClearVertexNormalData();
-		lGfxMesh->ClearSurfaceNormalData();
+	uitbc::TriangleBasedGeometry* gfx_mesh = new uitbc::TriangleBasedGeometry(&vertices[0], 0, 0, 0, uitbc::TriangleBasedGeometry::kColorRgb, (const uint32*)&indices[0],
+			vertices.size()/3, indices.size(), tbc::GeometryBase::kTriangles, tbc::GeometryBase::kGeomStatic);
+	if (!is_smooth) {
+		gfx_mesh->SplitVertices();
+		gfx_mesh->ClearVertexNormalData();
+		gfx_mesh->ClearSurfaceNormalData();
 	}
-	lGfxMesh->GetBasicMaterialSettings().mDiffuse	= pColor;
-	lGfxMesh->GetBasicMaterialSettings().mSpecular	= vec3();
-	lGfxMesh->GetBasicMaterialSettings().mShininess	= !pIsSmooth;
-	lGfxMesh->GetBasicMaterialSettings().mSmooth	= pIsSmooth;
-	lGfxMesh->GetBasicMaterialSettings().mAlpha	= pAlpha;
-	lGfxMesh->SetGeometryVolatility(Tbc::GeometryBase::GEOM_SEMI_STATIC);
-	return lGfxMesh;
+	gfx_mesh->GetBasicMaterialSettings().diffuse_	= color;
+	gfx_mesh->GetBasicMaterialSettings().specular_	= vec3();
+	gfx_mesh->GetBasicMaterialSettings().shininess_	= !is_smooth;
+	gfx_mesh->GetBasicMaterialSettings().smooth_	= is_smooth;
+	gfx_mesh->GetBasicMaterialSettings().alpha_	= alpha;
+	gfx_mesh->SetGeometryVolatility(tbc::GeometryBase::kGeomSemiStatic);
+	return gfx_mesh;
 }
 
-void Object::AddMeshInfo(const str& pMeshName, const str& pShader, const str& pTexture, const vec3& pColor, float pAlpha, bool pIsSmooth)
-{
-	mClass->AddMesh(0, pMeshName, xform(), 1);
-	UiTbc::ChunkyClass::Material lMaterial;
-	lMaterial.mDiffuse = pColor;
-	lMaterial.mShininess = 1;
-	lMaterial.mAlpha = pAlpha;
-	lMaterial.mSmooth = pIsSmooth;
-	lMaterial.mResizeHint = Canvas::RESIZE_FAST;
-	lMaterial.mTextureList.push_back(pTexture);
-	lMaterial.mShaderName = pShader;
-	mClass->SetLastMeshMaterial(lMaterial);
+void Object::AddMeshInfo(const str& mesh_name, const str& shader, const str& texture, const vec3& color, float alpha, bool is_smooth) {
+	clazz_->AddMesh(0, mesh_name, xform(), 1);
+	uitbc::ChunkyClass::Material material;
+	material.diffuse_ = color;
+	material.shininess_ = 1;
+	material.alpha_ = alpha;
+	material.smooth_ = is_smooth;
+	material.resize_hint_ = Canvas::kResizeFast;
+	material.texture_list_.push_back(texture);
+	material.shader_name_ = shader;
+	clazz_->SetLastMeshMaterial(material);
 }
 
 
 
-void Object::OnLoaded()
-{
+void Object::OnLoaded() {
 	Parent::OnLoaded();
-	const UiTbc::ChunkyClass::Material& lMaterial = mClass->GetMaterial(0);
-	GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lMaterial.mDiffuse;
-	if (GetPhysics()->GetPhysicsType() == Tbc::ChunkyPhysics::STATIC)
-	{
+	const uitbc::ChunkyClass::Material& material = clazz_->GetMaterial(0);
+	GetMesh(0)->GetBasicMaterialSettings().diffuse_ = material.diffuse_;
+	if (GetPhysics()->GetPhysicsType() == tbc::ChunkyPhysics::kStatic) {
 		GetManager()->DisableTickCallback(this);
 	}
 }

@@ -1,34 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Cure/Include/GameTicker.h"
-#include "../../Lepra/Include/Thread.h"
-#include "../../UiCure/Include/UiLineGraph2d.h"
-#include "../../UiTbc/Include/UiFontManager.h"
-#include "../../UiTbc/Include/UiRenderer.h"
-#include "InputObserver.h"
-#include "ScreenPart.h"
+#include "../../cure/include/gameticker.h"
+#include "../../lepra/include/thread.h"
+#include "../../uicure/include/uilinegraph2d.h"
+#include "../../uitbc/include/uifontmanager.h"
+#include "../../uitbc/include/uirenderer.h"
+#include "inputobserver.h"
+#include "screenpart.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class NetworkFreeAgent;
 }
-namespace UiCure
-{
+namespace UiCure {
 class GameUiManager;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -40,21 +37,20 @@ class UiGameServerManager;
 
 
 
-class GameClientMasterTicker: public Cure::GameTicker, public InputObserver, public ScreenPart
-{
-	typedef Cure::GameTicker Parent;
+class GameClientMasterTicker: public cure::GameTicker, public InputObserver, public ScreenPart {
+	typedef cure::GameTicker Parent;
 public:
-	GameClientMasterTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
+	GameClientMasterTicker(UiCure::GameUiManager* ui_manager, cure::ResourceManager* resource_manager, float physics_radius, int physics_levels, float physics_sensitivity);
 	virtual ~GameClientMasterTicker();
 
-	virtual void AddBackedRtvar(const str& pRtvarName);
-	virtual void Resume(bool pHard);
-	virtual void Suspend(bool pHard);
-	virtual void LoadRtvars(Cure::RuntimeVariableScope* pScope);
-	virtual void SaveRtvars(Cure::RuntimeVariableScope* pScope);
+	virtual void AddBackedRtvar(const str& rtvar_name);
+	virtual void Resume(bool hard);
+	virtual void Suspend(bool hard);
+	virtual void LoadRtvars(cure::RuntimeVariableScope* scope);
+	virtual void SaveRtvars(cure::RuntimeVariableScope* scope);
 
 	MasterServerConnection* GetMasterServerConnection() const;
-	void SetMasterServerConnection(MasterServerConnection* pConnection);
+	void SetMasterServerConnection(MasterServerConnection* connection);
 
 	virtual bool CreateSlave() = 0;
 	virtual void PrepareQuit();
@@ -66,102 +62,102 @@ public:
 	bool StartResetUi();
 	bool WaitResetUi();
 
-	bool IsFirstSlave(const GameClientSlaveManager* pSlave) const;
-	void GetSlaveInfo(const GameClientSlaveManager* pSlave, int& pIndex, int& pCount) const;
-	GameClientSlaveManager* GetSlave(int pIndex) const;
-	bool IsLocalObject(Cure::GameObjectId pInstanceId) const;
+	bool IsFirstSlave(const GameClientSlaveManager* slave) const;
+	void GetSlaveInfo(const GameClientSlaveManager* slave, int& index, int& count) const;
+	GameClientSlaveManager* GetSlave(int index) const;
+	bool IsLocalObject(cure::GameObjectId instance_id) const;
 
 	virtual PixelRect GetRenderArea() const;
-	virtual float UpdateFrustum(float pFov);
+	virtual float UpdateFrustum(float fov);
 
-	void PreLogin(const str& pServerAddress);
+	void PreLogin(const str& server_address);
 	bool IsLocalServer() const;
 	UiGameServerManager* GetLocalServer() const;
 	void OnExit();
-	void OnSetPlayerCount(int pPlayerCount);
+	void OnSetPlayerCount(int player_count);
 
 	void DownloadServerList();
 
 protected:
 	typedef GameClientSlaveManager* (*SlaveFactoryMethod)(GameClientMasterTicker* pMaster,
-		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-		int pSlaveIndex, const PixelRect& pRenderArea);
+		cure::TimeManager* time, cure::RuntimeVariableScope* variable_scope,
+		cure::ResourceManager* resource_manager, UiCure::GameUiManager* ui_manager,
+		int slave_index, const PixelRect& render_area);
 
-	bool CreateSlave(SlaveFactoryMethod pCreate);
+	bool CreateSlave(SlaveFactoryMethod create);
 	virtual void OnSlavesKilled() = 0;
-	virtual void OnServerCreated(Life::UiGameServerManager* pServer) = 0;
+	virtual void OnServerCreated(life::UiGameServerManager* server) = 0;
 
-	Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName);
-	void AddSlave(GameClientSlaveManager* pSlave);
-	void DeleteSlave(GameClientSlaveManager* pSlave, bool pAllowMainMenu);
+	cure::ContextObjectAttribute* CreateObjectAttribute(cure::ContextObject* object, const str& attribute_name);
+	void AddSlave(GameClientSlaveManager* slave);
+	void DeleteSlave(GameClientSlaveManager* slave, bool allow_main_menu);
 	void DeleteServer();
 
 	virtual bool Initialize();
 	virtual bool Reinitialize();
-	virtual bool OpenSlave(GameClientSlaveManager* pSlave);
+	virtual bool OpenSlave(GameClientSlaveManager* slave);
 	virtual bool OpenUiManager();
 	void Repair();
 	void UpdateSlaveLayout();
 	void SlideSlaveLayout();
-	int GetSlaveAnimationTarget(int pSlaveIndex) const;
+	int GetSlaveAnimationTarget(int slave_index) const;
 	float GetSlavesVerticalAnimationTarget() const;
 	void MeasureLoad();
 	void Profile();
 	virtual void PhysicsTick();
-	virtual void WillMicroTick(float pTimeDelta);
+	virtual void WillMicroTick(float time_delta);
 	virtual void DidPhysicsTick();
-	virtual void BeginRender(vec3& pColor);
+	virtual void BeginRender(vec3& color);
 	void DrawDebugData() const;
 	void DrawPerformanceLineGraph2d() const;
 
 	virtual float GetTickTimeReduction() const;
 	virtual float GetPowerSaveAmount() const;
 
-	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
-	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-		const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity);
+	virtual void OnTrigger(tbc::PhysicsManager::BodyID trigger, int trigger_listener_id, int other_object_id, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal);
+	virtual void OnForceApplied(int object_id, int other_object_id, tbc::PhysicsManager::BodyID body_id, tbc::PhysicsManager::BodyID other_body_id,
+		const vec3& force, const vec3& torque, const vec3& position, const vec3& relative_velocity);
 
-	int OnCommandLocal(const str& pCommand, const strutil::strvec& pParameterVector);
-	void OnCommandError(const str& pCommand, const strutil::strvec& pParameterVector, int pResult);
+	int OnCommandLocal(const str& command, const strutil::strvec& parameter_vector);
+	void OnCommandError(const str& command, const strutil::strvec& parameter_vector, int result);
 
-	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
-	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
-	virtual void OnInput(UiLepra::InputElement* pElement);
+	virtual bool OnKeyDown(uilepra::InputManager::KeyCode key_code);
+	virtual bool OnKeyUp(uilepra::InputManager::KeyCode key_code);
+	virtual void OnInput(uilepra::InputElement* element);
 
 	virtual void CloseMainMenu() = 0;
 
 	bool ApplyCalibration();
 	void StashCalibration();
 
-	typedef UiLepra::TInputFunctor<GameClientMasterTicker> MasterInputFunctor;
+	typedef uilepra::TInputFunctor<GameClientMasterTicker> MasterInputFunctor;
 	typedef std::vector<GameClientSlaveManager*> SlaveArray;
 
-	Lock mLock;
-	UiCure::GameUiManager* mUiManager;
-	Cure::ResourceManager* mResourceManager;
+	Lock lock_;
+	UiCure::GameUiManager* ui_manager_;
+	cure::ResourceManager* resource_manager_;
 
-	UiGameServerManager* mServer;
-	MasterServerConnection* mMasterConnection;
-	Cure::NetworkFreeAgent* mFreeNetworkAgent;
+	UiGameServerManager* server_;
+	MasterServerConnection* master_connection_;
+	cure::NetworkFreeAgent* free_network_agent_;
 
-	strutil::strvec mRtvars;
+	strutil::strvec rtvars_;
 
-	ConsoleManager* mConsole;
-	bool mRestartUi;
-	bool mInitialized;
-	unsigned mActiveWidth;
-	unsigned mActiveHeight;
-	SlaveArray mSlaveArray;
-	int mActiveSlaveCount;
-	float mSlaveTopSplit;
-	float mSlaveBottomSplit;
-	float mSlaveVSplit;
-	float mSlaveFade;
-	int mPerformanceAdjustmentTicks;
-	UiTbc::FontManager::FontId mDebugFontId;
-	std::vector<UiCure::LineGraph2d> mPerformanceGraphList;
-	std::unordered_set<Cure::GameObjectId> mLocalObjectSet;
+	ConsoleManager* console_;
+	bool restart_ui_;
+	bool initialized_;
+	unsigned active_width_;
+	unsigned active_height_;
+	SlaveArray slave_array_;
+	int active_slave_count_;
+	float slave_top_split_;
+	float slave_bottom_split_;
+	float slave_v_split_;
+	float slave_fade_;
+	int performance_adjustment_ticks_;
+	uitbc::FontManager::FontId debug_font_id_;
+	std::vector<UiCure::LineGraph2d> performance_graph_list_;
+	std::unordered_set<cure::GameObjectId> local_object_set_;
 
 	logclass();
 };

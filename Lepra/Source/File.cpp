@@ -1,99 +1,82 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/File.h"
-#include "../Include/Random.h"
+#include "../include/file.h"
+#include "../include/random.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-File::File(Endian::EndianType pReaderEndian, Endian::EndianType pWriterEndian,
-	InputStream* pIn, OutputStream* pOut):
-	Reader(pIn, pReaderEndian),
-	Writer(pOut, pWriterEndian),
-	mModeFlags(0)
-{
+File::File(Endian::EndianType reader_endian, Endian::EndianType writer_endian,
+	InputStream* in, OutputStream* out):
+	Reader(in, reader_endian),
+	Writer(out, writer_endian),
+	mode_flags_(0) {
 }
 
-File::~File()
-{
+File::~File() {
 }
 
-void File::Close()
-{
+void File::Close() {
 }
 
-void File::SetMode(unsigned pMode)
-{
-	mModeFlags |= pMode;
+void File::SetMode(unsigned mode) {
+	mode_flags_ |= mode;
 }
 
-void File::ClearMode(unsigned pMode)
-{
-	mModeFlags &= ~pMode;
+void File::ClearMode(unsigned mode) {
+	mode_flags_ &= ~mode;
 }
 
-void File::SetEndian(Endian::EndianType pEndian)
-{
-	Reader::SetReaderEndian(pEndian);
-	Writer::SetWriterEndian(pEndian);
+void File::SetEndian(Endian::EndianType endian) {
+	Reader::SetReaderEndian(endian);
+	Writer::SetWriterEndian(endian);
 }
 
-IOError File::Skip(size_t pSize)
-{
-	IOError lStatus = IO_OK;
-	int64 lTargetPos = Tell() + pSize;
-	if (SeekCur(pSize) != lTargetPos)
-	{
-		lStatus = IO_ERROR_READING_FROM_STREAM;
+IOError File::Skip(size_t size) {
+	IOError status = kIoOk;
+	int64 target_pos = Tell() + size;
+	if (SeekCur(size) != target_pos) {
+		status = kIoErrorReadingFromStream;
 	}
-	return (lStatus);
+	return (status);
 }
 
-int64 File::SeekSet(int64 pOffset)
-{
-	return (Seek(pOffset, FSEEK_SET));
+int64 File::SeekSet(int64 offset) {
+	return (Seek(offset, kFseekSet));
 }
 
-int64 File::SeekCur(int64 pOffset)
-{
-	return (Seek(pOffset, FSEEK_CUR));
+int64 File::SeekCur(int64 offset) {
+	return (Seek(offset, kFseekCur));
 }
 
-int64 File::SeekEnd(int64 pOffset)
-{
-	return (Seek(pOffset, FSEEK_END));
+int64 File::SeekEnd(int64 offset) {
+	return (Seek(offset, kFseekEnd));
 }
 
-bool File::IsInMode(unsigned pMode) const
-{
-	return (mModeFlags & pMode) != 0;
+bool File::IsInMode(unsigned mode) const {
+	return (mode_flags_ & mode) != 0;
 }
 
-bool File::HasSameContent(File& pOtherFile, int64 pLength)
-{
-	char lThisChar;
-	char lOtherChar;
-	for (int64 x = 0; x < pLength; ++x)
-	{
-		if (Read(lThisChar) != IO_OK || pOtherFile.Read(lOtherChar) != IO_OK)
-		{
+bool File::HasSameContent(File& other_file, int64 length) {
+	char this_char;
+	char other_char;
+	for (int64 x = 0; x < length; ++x) {
+		if (Read(this_char) != kIoOk || other_file.Read(other_char) != kIoOk) {
 			return (false);
 		}
-		if (lThisChar != lOtherChar)
-		{
+		if (this_char != other_char) {
 			return (false);
 		}
 	}
-	return ((Read(lThisChar) != IO_OK) == (pOtherFile.Read(lOtherChar) != IO_OK));
+	return ((Read(this_char) != kIoOk) == (other_file.Read(other_char) != kIoOk));
 }
 
 

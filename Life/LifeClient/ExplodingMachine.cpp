@@ -1,80 +1,69 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "ExplodingMachine.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/Health.h"
-#include "../ProjectileUtil.h"
+#include "explodingmachine.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/gamemanager.h"
+#include "../../cure/include/health.h"
+#include "../projectileutil.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-ExplodingMachine::ExplodingMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher):
-	Parent(pResourceManager, pClassId, pUiManager),
-	mLauncher(pLauncher),
-	mTriggerDeathFrame(-1),
-	mDeathFrameDelay(1),
-	mDisappearAfterDeathDelay(-1),
-	mIsDetonated(false),
-	mExplosiveStrength(2)
-{
+ExplodingMachine::ExplodingMachine(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, Launcher* launcher):
+	Parent(resource_manager, class_id, ui_manager),
+	launcher_(launcher),
+	trigger_death_frame_(-1),
+	death_frame_delay_(1),
+	disappear_after_death_delay_(-1),
+	is_detonated_(false),
+	explosive_strength_(2) {
 }
 
-ExplodingMachine::~ExplodingMachine()
-{
+ExplodingMachine::~ExplodingMachine() {
 }
 
 
 
-void ExplodingMachine::SetExplosiveStrength(float pExplosiveStrength)
-{
-	mExplosiveStrength = pExplosiveStrength;
+void ExplodingMachine::SetExplosiveStrength(float explosive_strength) {
+	explosive_strength_ = explosive_strength;
 }
 
-void ExplodingMachine::SetDeathFrameDelay(int pDeathFrameDelay)
-{
-	mDeathFrameDelay = pDeathFrameDelay;
+void ExplodingMachine::SetDeathFrameDelay(int death_frame_delay) {
+	death_frame_delay_ = death_frame_delay;
 }
 
-void ExplodingMachine::SetDisappearAfterDeathDelay(float pDisappearDelay)
-{
-	mDisappearAfterDeathDelay = pDisappearDelay;
+void ExplodingMachine::SetDisappearAfterDeathDelay(float disappear_delay) {
+	disappear_after_death_delay_ = disappear_delay;
 }
 
-void ExplodingMachine::OnTick()
-{
+void ExplodingMachine::OnTick() {
 	Parent::OnTick();
 
-	if (Cure::Health::Get(this, 1) <= 0 && mTriggerDeathFrame < 0)
-	{
-		mTriggerDeathFrame = 0;
+	if (cure::Health::Get(this, 1) <= 0 && trigger_death_frame_ < 0) {
+		trigger_death_frame_ = 0;
 	}
-	if (mTriggerDeathFrame >= 0)
-	{
-		if (++mTriggerDeathFrame > mDeathFrameDelay)
-		{
+	if (trigger_death_frame_ >= 0) {
+		if (++trigger_death_frame_ > death_frame_delay_) {
 			OnDie();
 		}
 	}
 }
 
-void ExplodingMachine::OnDie()
-{
-	ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), vec3(), mExplosiveStrength, mDisappearAfterDeathDelay);
+void ExplodingMachine::OnDie() {
+	ProjectileUtil::Detonate(this, &is_detonated_, launcher_, GetPosition(), GetVelocity(), vec3(), explosive_strength_, disappear_after_death_delay_);
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, ExplodingMachine);
+loginstance(kGameContextCpp, ExplodingMachine);
 
 
 

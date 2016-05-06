@@ -1,23 +1,22 @@
 
-// Author: Jonas Bystršm
+// Author: Jonas BystrÂšm
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiLepra.h"
+#include "../uilepra.h"
 #ifndef LEPRA_IOS
-#include "../UiInput.h"
+#include "../uiinput.h"
 #import <AppKit/AppKit.h>
 #include <HID_Utilities.h>
 #include <HID_Queue_Utilities.h>
-#import "UiMacDisplayManager.h"
+#import "uimacdisplaymanager.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
@@ -25,34 +24,31 @@ class MacInputDevice;
 
 
 
-class MacInputElement: public InputElement
-{
+class MacInputElement: public InputElement {
 	typedef InputElement Parent;
 public:
-	MacInputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
-		MacInputDevice* pParentDevice, pRecElement pElement);
+	MacInputElement(InputElement::Type type, Interpretation interpretation, int type_index,
+		MacInputDevice* parent_device, pRecElement element);
 	virtual ~MacInputElement();
 
 	pRecElement GetNativeElement() const;
 
 private:
-	enum
-	{
-		MAX_INT = 0x7FFFFFFF,
-		MIN_INT  = 0x80000000,
+	enum {
+		kMaxInt = 0x7FFFFFFF,
+		kMinInt  = 0x80000000,
 	};
 
-	pRecElement mElement;
+	pRecElement element_;
 
 	logclass();
 };
 
 
 
-class MacInputDevice: public InputDevice
-{
+class MacInputDevice: public InputDevice {
 public:
-	MacInputDevice(pRecDevice pNativeDevice, InputManager* pManager);
+	MacInputDevice(pRecDevice native_device, InputManager* manager);
 	virtual ~MacInputDevice();
 
 	virtual void Activate();
@@ -64,26 +60,25 @@ protected:
 private:
 	void EnumElements();
 
-	pRecDevice mNativeDevice;
+	pRecDevice native_device_;
 
-	int mRelAxisCount;
-	int mAbsAxisCount;
-	int mAnalogueCount;
-	int mButtonCount;
+	int rel_axis_count_;
+	int abs_axis_count_;
+	int analogue_count_;
+	int button_count_;
 
 	logclass();
 };
 
 
 
-class MacInputManager: public InputManager, public MacObserver
-{
+class MacInputManager: public InputManager, public MacObserver {
 	typedef InputManager Parent;
 public:
 	// Declared as friend in order to get access to screen width and height.
 	friend class MacInputElement;
 
-	MacInputManager(MacDisplayManager* pDisplayManager);
+	MacInputManager(MacDisplayManager* display_manager);
 	virtual ~MacInputManager();
 
 	bool IsInitialized();
@@ -98,48 +93,48 @@ public:
 	virtual const InputDevice* GetMouse() const;
 	virtual InputDevice* GetMouse();
 
-	virtual void SetCursorVisible(bool pVisible);
+	virtual void SetCursorVisible(bool visible);
 
 	virtual float GetCursorX();
 	virtual float GetCursorY();
 	virtual void SetMousePosition(int x, int y);
 
-	static KeyCode ConvertMacKeyCodeToKeyCode(unsigned pMacKeyCode);
-	static unichar ConvertChar(unichar pChar);
-	static KeyCode ConvertCharToKeyCode(unichar pChar, bool pIsNumpad, bool& pIsChar);
+	static KeyCode ConvertMacKeyCodeToKeyCode(unsigned mac_key_code);
+	static unichar ConvertChar(unichar c);
+	static KeyCode ConvertCharToKeyCode(unichar c, bool is_numpad, bool& is_char);
 
 protected:
-	virtual void OnEvent(NSEvent* pEvent);
-	//void SetKey(KeyCode pWParam, long pLParam, bool pIsDown);
+	virtual void OnEvent(NSEvent* event);
+	//void SetKey(KeyCode w_param, long l_param, bool is_down);
 
 private:
 	// The DirectInput device enumeration callback.
-	//static BOOL CALLBACK EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID pvRef);
+	//static BOOL CALLBACK EnumDeviceCallback(LPCDIDEVICEINSTANCE lpddi, LPVOID ref);
 
 	void EnumDevices();
 
 	void AddObserver();
 	void RemoveObserver();
 
-	MacDisplayManager* mDisplayManager;
+	MacDisplayManager* display_manager_;
 
-	bool mEnumError;
-	bool mInitialized;
+	bool enum_error_;
+	bool initialized_;
 
-	NSUInteger mKeyModifiers;
+	NSUInteger key_modifiers_;
 
 	// The entire display area (not just the user's window).
-	int mScreenWidth;
-	int mScreenHeight;
+	int screen_width_;
+	int screen_height_;
 
 	// Mouse related stuff.
-	float mCursorX;
-	float mCursorY;
+	float cursor_x_;
+	float cursor_y_;
 
 	// Default devices.
-	InputDevice* mKeyboard;
-	InputDevice* mMouse;
-	int mTypeCount[InputDevice::TYPE_COUNT];
+	InputDevice* keyboard_;
+	InputDevice* mouse_;
+	int type_count_[InputDevice::kTypeCount];
 
 	logclass();
 };

@@ -1,90 +1,90 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ConsoleManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="consolemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Life.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="life.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="LifeApplication.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="lifeapplication.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="RaceScore.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="racescore.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProjectileUtil.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="projectileutil.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Explosion.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="explosion.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Spawner.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="spawner.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="StuntTrigger.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="stunttrigger.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="SystemUtil.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile include="systemutil.cxx">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ConsoleManager.h">
+    <Clinclude include="consolemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Life.h">
+    <Clinclude include="life.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LifeApplication.h">
+    <Clinclude include="lifeapplication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LifeString.h">
+    <Clinclude include="lifestring.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RaceScore.h">
+    <Clinclude include="racescore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RtVar.h">
+    <Clinclude include="rtvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ServerInfo.h">
+    <Clinclude include="serverinfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ProjectileUtil.h">
+    <Clinclude include="projectileutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Explosion.h">
+    <Clinclude include="explosion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Launcher.h">
+    <Clinclude include="launcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Spawner.h">
+    <Clinclude include="spawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StuntTrigger.h">
+    <Clinclude include="stunttrigger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SystemUtil.h">
+    <Clinclude include="systemutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Life.sln" />
-    <None Include="Life.vcproj" />
-    <None Include="SystemUtil.mm">
-      <Filter>Source Files</Filter>
+    <None include="Life.sln" />
+    <None include="Life.vcproj" />
+    <None include="systemutil.mm">
+      <Filter>src Files</Filter>
     </None>
   </ItemGroup>
 </Project>

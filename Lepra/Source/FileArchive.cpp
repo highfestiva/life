@@ -6,850 +6,726 @@
 
 #include "pch.h"
 #include <ctype.h>
-#include "../Include/FileArchive.h"
-#include "../Include/ProgressCallback.h"
-#include "../Include/String.h"
-#include "../Include/StringUtility.h"
+#include "../include/filearchive.h"
+#include "../include/progresscallback.h"
+#include "../include/string.h"
+#include "../include/stringutility.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 FileArchive::FileArchive() :
-	mArchiveFileName(),
-	mTempFileName(),
-	mIOType(READ_ONLY),
-	mCurrentFindIndex(0),
-	mCurrentWriteFile(0),
-	mFileHandleCounter(0),
-	mWriteBuffer(0),
-	mWriteBufferSize(2 * 1024 * 1024),
-	mWriteBufferPos(0),
-	mCurrentWritePos(0),
-	mCallback(0)
-{
+	archive_file_name_(),
+	temp_file_name_(),
+	io_type_(kReadOnly),
+	current_find_index_(0),
+	current_write_file_(0),
+	file_handle_counter_(0),
+	write_buffer_(0),
+	write_buffer_size_(2 * 1024 * 1024),
+	write_buffer_pos_(0),
+	current_write_pos_(0),
+	callback_(0) {
 }
 
-FileArchive::~FileArchive()
-{
+FileArchive::~FileArchive() {
 	CloseArchive();
 }
 
-IOError FileArchive::OpenArchive(const str& pArchiveFileName, IOType pIOType)
-{
+IOError FileArchive::OpenArchive(const str& archive_file_name, IOType io_type) {
 	CloseArchive();
 
-	mArchiveFileName = pArchiveFileName;
+	archive_file_name_ = archive_file_name;
 
-	str lTempFileName(pArchiveFileName + ".tmp");
+	str temp_file_name(archive_file_name + ".tmp");
 
-	mIOType = pIOType;
+	io_type_ = io_type;
 
-	switch(mIOType)
-	{
-	case READ_ONLY:
+	switch(io_type_) {
+	case kReadOnly:
 
-		if (mArchiveFile.Open(mArchiveFileName, DiskFile::MODE_READ, false, Endian::TYPE_LITTLE_ENDIAN) == false)
-		{
-			return IO_FILE_NOT_FOUND;
+		if (archive_file_.Open(archive_file_name_, DiskFile::kModeRead, false, Endian::kTypeLittleEndian) == false) {
+			return kIoFileNotFound;
 		}
 
 		return ReadHeader();
 
 		break;
-	case WRITE_ONLY:
+	case kWriteOnly:
 
-		if (mArchiveFile.Open(lTempFileName, DiskFile::MODE_WRITE, false, Endian::TYPE_LITTLE_ENDIAN) == false)
-		{
-			return IO_ERROR_WRITING_TO_STREAM;
+		if (archive_file_.Open(temp_file_name, DiskFile::kModeWrite, false, Endian::kTypeLittleEndian) == false) {
+			return kIoErrorWritingToStream;
 		}
 
-		mWriteBuffer = new uint8[mWriteBufferSize];
-		mWriteBufferPos = 0;
-		mCurrentWritePos = 0;
+		write_buffer_ = new uint8[write_buffer_size_];
+		write_buffer_pos_ = 0;
+		current_write_pos_ = 0;
 
 		break;
-	case WRITE_APPEND:
-		if (mArchiveFile.Open(mArchiveFileName, DiskFile::MODE_READ, false, Endian::TYPE_LITTLE_ENDIAN) == false)
-		{
-			return IO_FILE_NOT_FOUND;
+	case kWriteAppend:
+		if (archive_file_.Open(archive_file_name_, DiskFile::kModeRead, false, Endian::kTypeLittleEndian) == false) {
+			return kIoFileNotFound;
 		}
 
-		int64 lHeaderOffset = 0;
-		IOError lError = ReadHeader(&lHeaderOffset, true);
+		int64 _header_offset = 0;
+		IOError error = ReadHeader(&_header_offset, true);
 
-		mArchiveFile.Close();
+		archive_file_.Close();
 
-		if (lError != IO_OK)
-		{
-			return lError;
+		if (error != kIoOk) {
+			return error;
 		}
 
-		if (mArchiveFile.Open(mArchiveFileName, DiskFile::MODE_WRITE_APPEND, false, Endian::TYPE_LITTLE_ENDIAN) == false)
-		{
-			return IO_ERROR_WRITING_TO_STREAM;
+		if (archive_file_.Open(archive_file_name_, DiskFile::kModeWriteAppend, false, Endian::kTypeLittleEndian) == false) {
+			return kIoErrorWritingToStream;
 		}
 
-		mArchiveFile.SeekSet(lHeaderOffset);
+		archive_file_.SeekSet(_header_offset);
 
-		mWriteBuffer = new uint8[mWriteBufferSize];
-		mWriteBufferPos = 0;
-		mCurrentWritePos = lHeaderOffset;
+		write_buffer_ = new uint8[write_buffer_size_];
+		write_buffer_pos_ = 0;
+		current_write_pos_ = _header_offset;
 		break;
 	};
 
-	return IO_OK;
+	return kIoOk;
 }
 
-void FileArchive::CloseArchive()
-{
-	if (mIOType == READ_ONLY)
-	{
-		if (mArchiveFile.IsOpen())
-		{
-			mArchiveFile.Close();
+void FileArchive::CloseArchive() {
+	if (io_type_ == kReadOnly) {
+		if (archive_file_.IsOpen()) {
+			archive_file_.Close();
 		}
-	}
-	else if(mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
-	{
-		if (mArchiveFile.IsOpen())
-		{
-			if (mWriteBufferPos != 0)
-			{
-				mArchiveFile.WriteData(mWriteBuffer, mWriteBufferPos);
-				mWriteBufferPos = 0;
+	} else if(io_type_ == kWriteOnly || io_type_ == kWriteAppend) {
+		if (archive_file_.IsOpen()) {
+			if (write_buffer_pos_ != 0) {
+				archive_file_.WriteData(write_buffer_, write_buffer_pos_);
+				write_buffer_pos_ = 0;
 			}
 
 			WriteHeader();
 
-			mArchiveFile.Close();
+			archive_file_.Close();
 
-			if (mIOType == WRITE_ONLY)
-			{
+			if (io_type_ == kWriteOnly) {
 				// Replace the original file with the temp file.
-				remove(mArchiveFileName.c_str());
-				rename(mTempFileName.c_str(), mArchiveFileName.c_str());
+				remove(archive_file_name_.c_str());
+				rename(temp_file_name_.c_str(), archive_file_name_.c_str());
 			}
 		}
 	}
 
-	if (mWriteBuffer != 0)
-	{
-		delete[] mWriteBuffer;
-		mWriteBuffer = 0;
-		mWriteBufferPos = 0;
+	if (write_buffer_ != 0) {
+		delete[] write_buffer_;
+		write_buffer_ = 0;
+		write_buffer_pos_ = 0;
 	}
 
-	mArchiveFileName = "";
-	mTempFileName = "";
+	archive_file_name_ = "";
+	temp_file_name_ = "";
 
-	mOpenFileTable.RemoveAll();
+	open_file_table_.RemoveAll();
 
-	FileNameTable::Iterator lIter = mFileNameTable.First();
-	while (lIter != mFileNameTable.End())
-	{
-/*		if (mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
-		{
-			// Delete filename, since it was allocated and inserted 
+	FileNameTable::Iterator iter = file_name_table_.First();
+	while (iter != file_name_table_.End()) {
+/*		if (io_type_ == kWriteOnly || io_type_ == kWriteAppend) {
+			// Delete filename, since it was allocated and inserted
 			// in FileOpen().
-			char* lFileName = (char*)lIter.GetKey();
-			delete[] lFileName;
+			char* _file_name = (char*)iter.GetKey();
+			delete[] _file_name;
 		}
 */
-		FileArchiveFile* lFile = *lIter;
-		mFileNameTable.Remove(lIter++);
+		FileArchiveFile* file = *iter;
+		file_name_table_.Remove(iter++);
 
-		delete lFile;
+		delete file;
 	}
 
-	mFileNameList.clear();
+	file_name_list_.clear();
 }
 
-void FileArchive::CloseAndRemoveArchive()
-{
-	mArchiveFile.Close();
+void FileArchive::CloseAndRemoveArchive() {
+	archive_file_.Close();
 
-	if (mIOType == READ_ONLY)
-	{
+	if (io_type_ == kReadOnly) {
 #ifdef LEPRA_POSIX
-		::remove(mArchiveFileName.c_str()); // TODO: Find a unicode-version of this.
+		::remove(archive_file_name_.c_str()); // TODO: Find a unicode-version of this.
 #else
-		::_wremove(wstrutil::Encode(mArchiveFileName).c_str());
+		::_wremove(wstrutil::Encode(archive_file_name_).c_str());
 #endif
-	}
-	else
-	{
+	} else {
 #ifdef LEPRA_POSIX
-		::remove(mTempFileName.c_str()); // TODO: Find a unicode-version of this.
+		::remove(temp_file_name_.c_str()); // TODO: Find a unicode-version of this.
 #else
-		::_wremove(wstrutil::Encode(mTempFileName).c_str());
+		::_wremove(wstrutil::Encode(temp_file_name_).c_str());
 #endif
 	}
 
-	if (mWriteBuffer != 0)
-	{
-		delete[] mWriteBuffer;
-		mWriteBuffer = 0;
-		mWriteBufferPos = 0;
+	if (write_buffer_ != 0) {
+		delete[] write_buffer_;
+		write_buffer_ = 0;
+		write_buffer_pos_ = 0;
 	}
 
-	mArchiveFileName = "";
-	mTempFileName = "";
+	archive_file_name_ = "";
+	temp_file_name_ = "";
 
-	mOpenFileTable.RemoveAll();
+	open_file_table_.RemoveAll();
 
-	FileNameTable::Iterator lIter = mFileNameTable.First();
-	while (lIter != mFileNameTable.End())
-	{
+	FileNameTable::Iterator iter = file_name_table_.First();
+	while (iter != file_name_table_.End()) {
 		/* JB: using strings instead of char*.
-		if (mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
-		{
-			// Delete filename, since it was allocated and inserted 
+		if (io_type_ == kWriteOnly || io_type_ == kWriteAppend) {
+			// Delete filename, since it was allocated and inserted
 			// in FileOpen().
-			str& lFileName = lIter.GetKey();
-			delete[] lFileName;
+			str& _file_name = iter.GetKey();
+			delete[] _file_name;
 		}*/
 
-		FileArchiveFile* lFile = *lIter;
-		mFileNameTable.Remove(lIter++);
-		delete (lFile);
+		FileArchiveFile* file = *iter;
+		file_name_table_.Remove(iter++);
+		delete (file);
 	}
 
-    mFileNameList.clear();
+    file_name_list_.clear();
 }
 
-IOError FileArchive::ReadHeader(int64* pHeaderOffset, bool pFillFileNameList)
-{
-	char lData[8];
+IOError FileArchive::ReadHeader(int64* header_offset, bool fill_file_name_list) {
+	char data[8];
 
-	int lTailSize = 4 + sizeof(int64);
-	mArchiveFile.SeekEnd(-lTailSize);
+	int tail_size = 4 + sizeof(int64);
+	archive_file_.SeekEnd(-tail_size);
 
-	mArchiveFile.ReadData(lData, lTailSize);
+	archive_file_.ReadData(data, tail_size);
 
-	if (lData[lTailSize - 4] == 'B' &&
-	   lData[lTailSize - 3] == 'U' &&
-	   lData[lTailSize - 2] == 'N' &&
-	   lData[lTailSize - 1] == 'T')
-	{
-		int64 lHeaderOffset = ((int64*)lData)[0];
-		mArchiveFile.SeekSet(lHeaderOffset);
+	if (data[tail_size - 4] == 'B' &&
+	   data[tail_size - 3] == 'U' &&
+	   data[tail_size - 2] == 'N' &&
+	   data[tail_size - 1] == 'T') {
+		int64 _header_offset = ((int64*)data)[0];
+		archive_file_.SeekSet(_header_offset);
 
-		if (pHeaderOffset != 0)
-		{
-			*pHeaderOffset = lHeaderOffset;
+		if (header_offset != 0) {
+			*header_offset = _header_offset;
 		}
 
-		int lFileCount;
-		mArchiveFile.ReadData(&lFileCount, sizeof(lFileCount));
+		int file_count;
+		archive_file_.ReadData(&file_count, sizeof(file_count));
 
-		for (int i = 0; i < lFileCount; i++)
-		{
-			str lFileName;
-			mArchiveFile.ReadLine(lFileName);
-			strutil::ToLower(lFileName);
+		for (int i = 0; i < file_count; i++) {
+			str _file_name;
+			archive_file_.ReadLine(_file_name);
+			strutil::ToLower(_file_name);
 
-			FileArchiveFile* lFile = new FileArchiveFile(lFileName);
+			FileArchiveFile* file = new FileArchiveFile(_file_name);
 
-			mArchiveFile.ReadData(&lFile->mSize, sizeof(lFile->mSize));
-			mArchiveFile.ReadData(&lFile->mStartOffset, sizeof(lFile->mStartOffset));
+			archive_file_.ReadData(&file->size_, sizeof(file->size_));
+			archive_file_.ReadData(&file->start_offset_, sizeof(file->start_offset_));
 
-			lFile->mCurrentPos = 0;
+			file->current_pos_ = 0;
 
-			mFileNameTable.Insert(lFile->mFileName, lFile);
+			file_name_table_.Insert(file->file_name_, file);
 
-			if (pFillFileNameList == true)
-			{
-				mFileNameList.push_back(lFile);
+			if (fill_file_name_list == true) {
+				file_name_list_.push_back(file);
 			}
 		}
 
-		return IO_OK;
+		return kIoOk;
 	}
 
-	return IO_INVALID_FORMAT;
+	return kIoInvalidFormat;
 }
 
-IOError FileArchive::WriteHeader()
-{
-	int64 lHeaderOffset = mArchiveFile.Tell();
+IOError FileArchive::WriteHeader() {
+	int64 _header_offset = archive_file_.Tell();
 
-	int lFileCount = (int)mFileNameList.size();
+	int file_count = (int)file_name_list_.size();
 
-	mArchiveFile.WriteData(&lFileCount, sizeof(lFileCount));
+	archive_file_.WriteData(&file_count, sizeof(file_count));
 
-	FileList::iterator lIter;
+	FileList::iterator iter;
 
-	for (lIter = mFileNameList.begin();
-		lIter != mFileNameList.end();
-		++lIter)
-	{
-		FileArchiveFile* lFile = *lIter;
+	for (iter = file_name_list_.begin();
+		iter != file_name_list_.end();
+		++iter) {
+		FileArchiveFile* file = *iter;
 
 		// Check for illegal '\n'
-		if (lFile->mFileName.find('\n', 0) != str::npos)
-		{
-			return IO_INVALID_FILENAME;
+		if (file->file_name_.find('\n', 0) != str::npos) {
+			return kIoInvalidFilename;
 		}
 
-		mArchiveFile.WriteString(lFile->mFileName);
-		mArchiveFile.Write('\n');
+		archive_file_.WriteString(file->file_name_);
+		archive_file_.Write('\n');
 
-		mArchiveFile.WriteData(&lFile->mSize, sizeof(lFile->mSize));
-		mArchiveFile.WriteData(&lFile->mStartOffset, sizeof(lFile->mStartOffset));
+		archive_file_.WriteData(&file->size_, sizeof(file->size_));
+		archive_file_.WriteData(&file->start_offset_, sizeof(file->start_offset_));
 	}
 
-	mArchiveFile.WriteData(&lHeaderOffset, sizeof(lHeaderOffset));
-	mArchiveFile.WriteString("BUNT");
+	archive_file_.WriteData(&_header_offset, sizeof(_header_offset));
+	archive_file_.WriteString("BUNT");
 
-	return IO_OK;
+	return kIoOk;
 }
 
-int FileArchive::GetFileCount()
-{
-	return mFileNameTable.GetCount();
+int FileArchive::GetFileCount() {
+	return file_name_table_.GetCount();
 }
 
-str FileArchive::FileFindFirst()
-{
-	str lFileName;
+str FileArchive::FileFindFirst() {
+	str _file_name;
 
-	if (mIOType == READ_ONLY)
-	{
-		FileNameTable::Iterator lIter;
-		lIter = mFileNameTable.First();
+	if (io_type_ == kReadOnly) {
+		FileNameTable::Iterator iter;
+		iter = file_name_table_.First();
 
-		if (lIter != mFileNameTable.End())
-		{
-			mCurrentFindIterator = lIter;
-			lFileName = (*lIter)->mFileName;
+		if (iter != file_name_table_.End()) {
+			current_find_iterator_ = iter;
+			_file_name = (*iter)->file_name_;
 		}
 	}
 
-	return lFileName;
+	return _file_name;
 }
 
-str FileArchive::FileFindNext()
-{
-	str lFileName;
+str FileArchive::FileFindNext() {
+	str _file_name;
 
-	if (mIOType == READ_ONLY)
-	{
-		++mCurrentFindIterator;
+	if (io_type_ == kReadOnly) {
+		++current_find_iterator_;
 
-		if (mCurrentFindIterator != mFileNameTable.End())
-		{
-			lFileName = (*mCurrentFindIterator)->mFileName;
+		if (current_find_iterator_ != file_name_table_.End()) {
+			_file_name = (*current_find_iterator_)->file_name_;
 		}
 	}
 
-	return lFileName;
+	return _file_name;
 }
 
-int FileArchive::FileOpen(const str& pFileName)
-{
-	if (pFileName == "" ||
-	   mIOType == INSERT_ONLY ||
-	   mArchiveFile.IsOpen() == false)
-	{
+int FileArchive::FileOpen(const str& file_name) {
+	if (file_name == "" ||
+	   io_type_ == kInsertOnly ||
+	   archive_file_.IsOpen() == false) {
 		return 0;
 	}
 
-	str lFileName(pFileName);
-	strutil::ToLower(lFileName);
+	str _file_name(file_name);
+	strutil::ToLower(_file_name);
 
 	// Find the file...
-	FileNameTable::Iterator lIter = mFileNameTable.First();
-	FileArchiveFile* lFile = 0;
-	while (lIter != mFileNameTable.End())
-	{
-		FileArchiveFile* lTempFile = *lIter;
+	FileNameTable::Iterator iter = file_name_table_.First();
+	FileArchiveFile* file = 0;
+	while (iter != file_name_table_.End()) {
+		FileArchiveFile* temp_file = *iter;
 
-		if (strutil::CompareIgnoreCase(lFileName, lTempFile->mFileName) == 0)
-		{
-			lFile = lTempFile;
+		if (strutil::CompareIgnoreCase(_file_name, temp_file->file_name_) == 0) {
+			file = temp_file;
 			break;
 		}
 
-		++lIter;
+		++iter;
 	}
 
-	switch(mIOType)
-	{
-	case READ_ONLY:
-		{
+	switch(io_type_) {
+	case kReadOnly: {
 			// TODO: Is it possible to optimize this?
-    
+
 			// File must exist.
-			if (lFile != 0)
-			{
-				lFile->mCurrentPos = 0;
+			if (file != 0) {
+				file->current_pos_ = 0;
 
-				mFileHandleCounter++;
-				mOpenFileTable.Insert(mFileHandleCounter, lFile);
+				file_handle_counter_++;
+				open_file_table_.Insert(file_handle_counter_, file);
 
-				return mFileHandleCounter;
+				return file_handle_counter_;
 			}
-		}
-		break;
-	case WRITE_ONLY:
-	case WRITE_APPEND:
-		{
+		} break;
+	case kWriteOnly:
+	case kWriteAppend: {
 			// File mustn't exist.
-			if (lFile == 0)
-			{
+			if (file == 0) {
 				// Close the possibly opened file...
-				if (mCurrentWriteFile != 0)
-				{
-					mCurrentWriteFile->mSize = mCurrentWritePos - mCurrentWriteFile->mStartOffset;
-					mCurrentWriteFile = 0;
+				if (current_write_file_ != 0) {
+					current_write_file_->size_ = current_write_pos_ - current_write_file_->start_offset_;
+					current_write_file_ = 0;
 				}
 
-				lFile = new FileArchiveFile(lFileName);
-				lFile->mStartOffset = mCurrentWritePos;
-				lFile->mCurrentPos = 0;
-				lFile->mSize = 0;
+				file = new FileArchiveFile(_file_name);
+				file->start_offset_ = current_write_pos_;
+				file->current_pos_ = 0;
+				file->size_ = 0;
 
-				mCurrentWriteFile = lFile;
+				current_write_file_ = file;
 
 				// Inserting filename as a key... Deleting it in CloseArchive().
-				mFileNameTable.Insert(lFileName, lFile);
-				mFileNameList.push_back(lFile);
+				file_name_table_.Insert(_file_name, file);
+				file_name_list_.push_back(file);
 
 				return 1;
 			}
-		}
-		break;
+		} break;
 	};
 
 	return 0;
 }
 
-void FileArchive::FileClose(int pFileHandle)
-{
-	if (mIOType == READ_ONLY)
-	{
-		mOpenFileTable.Remove(pFileHandle);
-	}
-	else if(mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
-	{
-		if (mCurrentWriteFile != 0)
-		{
-			mCurrentWriteFile->mSize = mCurrentWritePos - mCurrentWriteFile->mStartOffset;
-			mCurrentWriteFile = 0;
+void FileArchive::FileClose(int file_handle) {
+	if (io_type_ == kReadOnly) {
+		open_file_table_.Remove(file_handle);
+	} else if(io_type_ == kWriteOnly || io_type_ == kWriteAppend) {
+		if (current_write_file_ != 0) {
+			current_write_file_->size_ = current_write_pos_ - current_write_file_->start_offset_;
+			current_write_file_ = 0;
 		}
 	}
 }
 
-bool FileArchive::FileExist(const str& pFileName)
-{
-	str lFileName(pFileName);
-	strutil::ToLower(lFileName);
+bool FileArchive::FileExist(const str& file_name) {
+	str _file_name(file_name);
+	strutil::ToLower(_file_name);
 
-	return mFileNameTable.Find(lFileName) != mFileNameTable.End();
+	return file_name_table_.Find(_file_name) != file_name_table_.End();
 }
 
-IOError FileArchive::FileRead(void* pDest, int pSize, int pFileHandle)
-{
-	if (mArchiveFile.IsOpen() == false)
-	{
-		return IO_PACKAGE_NOT_OPEN;
+IOError FileArchive::FileRead(void* dest, int _size, int file_handle) {
+	if (archive_file_.IsOpen() == false) {
+		return kIoPackageNotOpen;
 	}
 
-	if (mIOType == READ_ONLY)
-	{
-		FileArchiveFile* lFile = GetFile(pFileHandle);
+	if (io_type_ == kReadOnly) {
+		FileArchiveFile* file = GetFile(file_handle);
 
-		if (lFile != 0)
-		{
+		if (file != 0) {
 			// Trying to read outside the file?
-			if (lFile->mCurrentPos + pSize > lFile->mSize)
-			{
-				return IO_ERROR_READING_FROM_STREAM;
+			if (file->current_pos_ + _size > file->size_) {
+				return kIoErrorReadingFromStream;
 			}
 
-			mArchiveFile.SeekSet(lFile->mStartOffset + lFile->mCurrentPos);
-			if (mArchiveFile.ReadData(pDest, pSize) == false)
-			{
-				return IO_ERROR_READING_FROM_STREAM;
+			archive_file_.SeekSet(file->start_offset_ + file->current_pos_);
+			if (archive_file_.ReadData(dest, _size) == false) {
+				return kIoErrorReadingFromStream;
 			}
 
-			lFile->mCurrentPos += pSize;
+			file->current_pos_ += _size;
+		} else {
+			return kIoStreamNotOpen;
 		}
-		else
-		{
-			return IO_STREAM_NOT_OPEN;
-		}
-	}
-	else
-	{
-		return IO_ERROR_READING_FROM_STREAM;
+	} else {
+		return kIoErrorReadingFromStream;
 	}
 
-	return IO_OK;
+	return kIoOk;
 }
 
-IOError FileArchive::FileWrite(void* pSource, int pSize)
-{
-	if (mArchiveFile.IsOpen() == false)
-	{
-		return IO_PACKAGE_NOT_OPEN;
+IOError FileArchive::FileWrite(void* source, int _size) {
+	if (archive_file_.IsOpen() == false) {
+		return kIoPackageNotOpen;
 	}
 
-	if (mIOType == WRITE_ONLY || mIOType == WRITE_APPEND)
-	{
-		// While pSize is larger than what's left in the write buffer,
+	if (io_type_ == kWriteOnly || io_type_ == kWriteAppend) {
+		// While _size is larger than what's left in the write buffer,
 		// or the write buffer itself.
-		int lWriteSize = pSize;
+		int write_size = _size;
 
-		while (((int64)mWriteBufferPos + lWriteSize) > (int64)mWriteBufferSize)
-		{
+		while (((int64)write_buffer_pos_ + write_size) > (int64)write_buffer_size_) {
 			// Make sure the write buffer is filled to every byte...
-			int lRest = mWriteBufferSize - mWriteBufferPos;
-			if (lRest > 0)
-			{
-				::memcpy(mWriteBuffer + mWriteBufferPos, (const char*)pSource + (pSize - lWriteSize), (size_t)lRest);
-				lWriteSize -= lRest;
+			int rest = write_buffer_size_ - write_buffer_pos_;
+			if (rest > 0) {
+				::memcpy(write_buffer_ + write_buffer_pos_, (const char*)source + (_size - write_size), (size_t)rest);
+				write_size -= rest;
 			}
 
 			// Write the whole buffer to disc.
-			mArchiveFile.WriteData(mWriteBuffer, mWriteBufferSize);
-			mWriteBufferPos = 0;
-			
+			archive_file_.WriteData(write_buffer_, write_buffer_size_);
+			write_buffer_pos_ = 0;
+
 			// Update the file position...
-			mCurrentWritePos += lRest;
+			current_write_pos_ += rest;
 		}
 
 		// Write whatever is left from the previous check.
-		::memcpy(mWriteBuffer + mWriteBufferPos, (const char*)pSource + (pSize - lWriteSize), (size_t)lWriteSize);
-		mWriteBufferPos += lWriteSize;
-		mCurrentWritePos += lWriteSize;
-	}
-	else
-	{
-		return IO_ERROR_WRITING_TO_STREAM;
+		::memcpy(write_buffer_ + write_buffer_pos_, (const char*)source + (_size - write_size), (size_t)write_size);
+		write_buffer_pos_ += write_size;
+		current_write_pos_ += write_size;
+	} else {
+		return kIoErrorWritingToStream;
 	}
 
-	return IO_OK;
+	return kIoOk;
 }
 
-int64 FileArchive::FileSize(int pFileHandle)
-{
-	if (mArchiveFile.IsOpen() == false ||
-	   mIOType != READ_ONLY)
-	{
+int64 FileArchive::FileSize(int file_handle) {
+	if (archive_file_.IsOpen() == false ||
+	   io_type_ != kReadOnly) {
 		return -1;
 	}
 
-	FileArchiveFile* lFile = GetFile(pFileHandle);
-	if (lFile != 0)
-	{
-		return lFile->mSize;
+	FileArchiveFile* file = GetFile(file_handle);
+	if (file != 0) {
+		return file->size_;
 	}
 
 	return 0;
 }
 
-FileArchive::FileArchiveFile* FileArchive::GetFile(int pFileHandle)
-{
-	if (mIOType == READ_ONLY)
-	{
-		FileTable::Iterator lIter = mOpenFileTable.Find(pFileHandle);
+FileArchive::FileArchiveFile* FileArchive::GetFile(int file_handle) {
+	if (io_type_ == kReadOnly) {
+		FileTable::Iterator iter = open_file_table_.Find(file_handle);
 
-		if (lIter != mOpenFileTable.End())
-		{
-			return *lIter;
+		if (iter != open_file_table_.End()) {
+			return *iter;
 		}
 	}
 
 	return 0;
 }
 
-void FileArchive::FileSeek(int64 pOffset, FileOrigin pOrigin, int pFileHandle)
-{
-	if (mArchiveFile.IsOpen() == false ||
-	   mIOType != READ_ONLY)
-	{
+void FileArchive::FileSeek(int64 offset, FileOrigin origin, int file_handle) {
+	if (archive_file_.IsOpen() == false ||
+	   io_type_ != kReadOnly) {
 		return;
 	}
 
-	FileArchiveFile* lFile = GetFile(pFileHandle);
-	if (lFile != 0)
-	{
-		switch(pOrigin)
-		{
-		case FSEEK_SET:
-			lFile->mCurrentPos = pOffset;
+	FileArchiveFile* file = GetFile(file_handle);
+	if (file != 0) {
+		switch(origin) {
+		case kFseekSet:
+			file->current_pos_ = offset;
 			break;
-		case FSEEK_CUR:
-			lFile->mCurrentPos += pOffset;
+		case kFseekCur:
+			file->current_pos_ += offset;
 			break;
-		case FSEEK_END:
-			lFile->mCurrentPos = (lFile->mSize + pOffset) - 1;
+		case kFseekEnd:
+			file->current_pos_ = (file->size_ + offset) - 1;
 			break;
 		};
 
-		if (lFile->mCurrentPos < 0)
-		{
-			lFile->mCurrentPos = 0;
+		if (file->current_pos_ < 0) {
+			file->current_pos_ = 0;
 		}
 
-		if (lFile->mCurrentPos > lFile->mSize)
-		{
-			lFile->mCurrentPos = lFile->mSize;
+		if (file->current_pos_ > file->size_) {
+			file->current_pos_ = file->size_;
 		}
 	}
 }
 
-IOError FileArchive::InsertArchive(const str& pArchiveFileName)
-{
+IOError FileArchive::InsertArchive(const str& archive_file_name) {
 /*
-	if (mCallback)
-	{
-		mCallback->SetProgressMax(files)
+	if (callback_) {
+		callback_->SetProgressMax(files)
 	}
-	for (file = 0; file < files; file++)
-	{
+	for (file = 0; file < files; file++) {
 		...
 	...
 */
-	const int lChunkSize = 1024*1024; // 1 MB
+	const int chunk_size = 1024*1024; // 1 kMb
 
-	if (mIOType == INSERT_ONLY)
-	{
-		IOError lError;
+	if (io_type_ == kInsertOnly) {
+		IOError error;
 
-		lError = OpenArchive(mArchiveFileName, READ_ONLY);
-		if (lError != IO_OK)
-		{
-			return lError;
+		error = OpenArchive(archive_file_name_, kReadOnly);
+		if (error != kIoOk) {
+			return error;
 		}
 
-		FileArchive lInsertArchive;
-		lError = lInsertArchive.OpenArchive(pArchiveFileName, READ_ONLY);
-		if (lError != IO_OK)
-		{
-			return lError;
+		FileArchive insert_archive;
+		error = insert_archive.OpenArchive(archive_file_name, kReadOnly);
+		if (error != kIoOk) {
+			return error;
 		}
 
 		// Writing is done using the temp file name...
-		FileArchive lOutArchive;
-		lOutArchive.OpenArchive(mArchiveFileName, WRITE_ONLY);
+		FileArchive out_archive;
+		out_archive.OpenArchive(archive_file_name_, kWriteOnly);
 
-		int lProgress = 0;
-		if (mCallback != 0)
-		{
-			int lFiles = lInsertArchive.GetFileCount() + GetFileCount();
-			mCallback->SetProgressPos(lProgress);
-			mCallback->SetProgressMax(lFiles);
+		int progress = 0;
+		if (callback_ != 0) {
+			int files = insert_archive.GetFileCount() + GetFileCount();
+			callback_->SetProgressPos(progress);
+			callback_->SetProgressMax(files);
 		}
 
 		// Iterate through all files in "this"...
-		FileNameTable::Iterator lIterator;
-		for (lIterator = mFileNameTable.First();
-			lIterator != mFileNameTable.End();
-			++lIterator)
-		{
-			FileNameTable::Iterator lFindIter =
-				lInsertArchive.mFileNameTable.Find((*lIterator)->mFileName);
+		FileNameTable::Iterator __iterator;
+		for (__iterator = file_name_table_.First();
+			__iterator != file_name_table_.End();
+			++__iterator) {
+			FileNameTable::Iterator find_iter =
+				insert_archive.file_name_table_.Find((*__iterator)->file_name_);
 
-			// For each file in "this" that doesn't exist in pArchive, write.
-			if (lFindIter == lInsertArchive.mFileNameTable.End())
-			{
+			// For each file in "this" that doesn't exist in archive, write.
+			if (find_iter == insert_archive.file_name_table_.End()) {
 				// Open the source file.
-				int lFileHandle = FileOpen((*lIterator)->mFileName);
-				int64 lFileSize = FileSize(lFileHandle);
+				int _file_handle = FileOpen((*__iterator)->file_name_);
+				int64 file_size = FileSize(_file_handle);
 
 				// Open the file to write.
-				lOutArchive.FileOpen((*lIterator)->mFileName);
+				out_archive.FileOpen((*__iterator)->file_name_);
 
-				int64 lNumChunks = lFileSize / (int64)lChunkSize;
-				int lRest = (int)(lFileSize % (int64)lChunkSize);
+				int64 num_chunks = file_size / (int64)chunk_size;
+				int rest = (int)(file_size % (int64)chunk_size);
 
-				uint8* lData = new uint8[lChunkSize];
+				uint8* data = new uint8[chunk_size];
 
 				// Copy the file chunkwise.
-				for (int64 i = 0; i < lNumChunks; i++)
-				{
-					FileRead(lData, lChunkSize, lFileHandle);
-					lOutArchive.FileWrite(lData, lChunkSize);
+				for (int64 i = 0; i < num_chunks; i++) {
+					FileRead(data, chunk_size, _file_handle);
+					out_archive.FileWrite(data, chunk_size);
 				}
 
-				if (lRest != 0)
-				{
-					FileRead(lData, lRest, lFileHandle);
-					lOutArchive.FileWrite(lData, lRest);
+				if (rest != 0) {
+					FileRead(data, rest, _file_handle);
+					out_archive.FileWrite(data, rest);
 				}
 
-				lOutArchive.FileClose(0);
+				out_archive.FileClose(0);
 
-				delete[] lData;
+				delete[] data;
 
-				FileClose(lFileHandle);
+				FileClose(_file_handle);
 			}
 
-			if (mCallback != 0)
-			{
-				mCallback->SetProgressPos(++lProgress);
+			if (callback_ != 0) {
+				callback_->SetProgressPos(++progress);
 			}
 		}
 
-		// Iterate through all files in pArchive...
-		for (lIterator = lInsertArchive.mFileNameTable.First();
-			lIterator != lInsertArchive.mFileNameTable.End();
-			++lIterator)
-		{
+		// Iterate through all files in archive...
+		for (__iterator = insert_archive.file_name_table_.First();
+			__iterator != insert_archive.file_name_table_.End();
+			++__iterator) {
 			// Open the source file.
-			int lFileHandle = lInsertArchive.FileOpen((*lIterator)->mFileName);
-			int64 lFileSize = lInsertArchive.FileSize(lFileHandle);
+			int _file_handle = insert_archive.FileOpen((*__iterator)->file_name_);
+			int64 file_size = insert_archive.FileSize(_file_handle);
 
 			// Open the file to write.
-			lOutArchive.FileOpen((*lIterator)->mFileName);
+			out_archive.FileOpen((*__iterator)->file_name_);
 
-			int64 lNumChunks = lFileSize / (int64)lChunkSize;
-			int lRest = (int)(lFileSize % (int64)lChunkSize);
+			int64 num_chunks = file_size / (int64)chunk_size;
+			int rest = (int)(file_size % (int64)chunk_size);
 
-			uint8* lData = new uint8[lChunkSize];
+			uint8* data = new uint8[chunk_size];
 
 			// Copy the file chunkwise.
-			for (int64 i = 0; i < lNumChunks; i++)
-			{
-				lInsertArchive.FileRead(lData, lChunkSize, lFileHandle);
-				lOutArchive.FileWrite(lData, lChunkSize);
+			for (int64 i = 0; i < num_chunks; i++) {
+				insert_archive.FileRead(data, chunk_size, _file_handle);
+				out_archive.FileWrite(data, chunk_size);
 			}
 
-			if (lRest != 0)
-			{
-				lInsertArchive.FileRead(lData, lRest, lFileHandle);
-				lOutArchive.FileWrite(lData, lRest);
+			if (rest != 0) {
+				insert_archive.FileRead(data, rest, _file_handle);
+				out_archive.FileWrite(data, rest);
 			}
 
-			lOutArchive.FileClose(0);
+			out_archive.FileClose(0);
 
-			delete[] lData;
+			delete[] data;
 
-			lInsertArchive.FileClose(lFileHandle);
+			insert_archive.FileClose(_file_handle);
 
-			if (mCallback != 0)
-			{
-				mCallback->SetProgressPos(++lProgress);
+			if (callback_ != 0) {
+				callback_->SetProgressPos(++progress);
 			}
 		}
 
-		lInsertArchive.CloseArchive();
+		insert_archive.CloseArchive();
 		CloseArchive();
 
-		lOutArchive.CloseArchive();
+		out_archive.CloseArchive();
 
-		return IO_OK;
+		return kIoOk;
 	}
 
-	return IO_INVALID_MODE;
+	return kIoInvalidMode;
 }
 
 
 
-void FileArchive::SetProgressCallback(ProgressCallback* pCallback)
-{
-	mCallback = pCallback;
+void FileArchive::SetProgressCallback(ProgressCallback* callback) {
+	callback_ = callback;
 }
 
-bool FileArchive::AddFile(const str& pFileName, const str& pDestFileName, 
-						  int pBufferSize, SizeUnit pUnit)
-{
-	if (mIOType != WRITE_ONLY && mIOType != WRITE_APPEND)
-	{
+bool FileArchive::AddFile(const str& file_name, const str& dest_file_name,
+						  int buffer_size, SizeUnit unit) {
+	if (io_type_ != kWriteOnly && io_type_ != kWriteAppend) {
 		return false;
 	}
 
-	DiskFile lFile;
-	if (lFile.Open(pFileName, DiskFile::MODE_READ, false, Endian::TYPE_LITTLE_ENDIAN) == true)
-	{
-		int lBufferSize = (int)pBufferSize * (int)pUnit;
-		int64 lDataSize   = lFile.GetSize();
-		uint8* lBuffer = new uint8[(unsigned)lBufferSize];
+	DiskFile file;
+	if (file.Open(file_name, DiskFile::kModeRead, false, Endian::kTypeLittleEndian) == true) {
+		int _buffer_size = (int)buffer_size * (int)unit;
+		int64 data_size   = file.GetSize();
+		uint8* buffer = new uint8[(unsigned)_buffer_size];
 
-		int64 lNumChunks = lDataSize / lBufferSize;
-		int lRest      = (int)(lDataSize % (int64)lBufferSize);
+		int64 num_chunks = data_size / _buffer_size;
+		int rest      = (int)(data_size % (int64)_buffer_size);
 
-		FileOpen(pDestFileName);
+		FileOpen(dest_file_name);
 
-		for (int64 i = 0; i < lNumChunks; i++)
-		{
-			lFile.ReadData(lBuffer, lBufferSize);
-			FileWrite(lBuffer, lBufferSize);
+		for (int64 i = 0; i < num_chunks; i++) {
+			file.ReadData(buffer, _buffer_size);
+			FileWrite(buffer, _buffer_size);
 		}
 
-		if (lRest != 0)
-		{
-			lFile.ReadData(lBuffer, lRest);
-			FileWrite(lBuffer, lRest);
+		if (rest != 0) {
+			file.ReadData(buffer, rest);
+			FileWrite(buffer, rest);
 		}
 
-		lFile.Close();
+		file.Close();
 		FileClose(0);
 
-		delete[] lBuffer;
+		delete[] buffer;
 
 		return true;
-	}
-	else
-	{
+	} else {
 		return false;
 	}
 }
 
-bool FileArchive::ExtractFile(const str& pFileName, const str& pDestFileName,
-							  int pBufferSize, SizeUnit pUnit)
-{
-	if (mIOType != READ_ONLY)
-	{
+bool FileArchive::ExtractFile(const str& file_name, const str& dest_file_name,
+							  int buffer_size, SizeUnit unit) {
+	if (io_type_ != kReadOnly) {
 		return false;
 	}
 
-	int lHandle = FileOpen(pFileName);
+	int handle = FileOpen(file_name);
 
-	if (lHandle != 0)
-	{
-		DiskFile lFile;
-		if (lFile.Open(pDestFileName, DiskFile::MODE_WRITE, true, Endian::TYPE_LITTLE_ENDIAN) == true)
-		{
-			int lBufferSize = (int)pBufferSize * (int)pUnit;
-			int64 lDataSize   = FileSize(lHandle);
-			uint8* lBuffer = new uint8[(unsigned)lBufferSize];
+	if (handle != 0) {
+		DiskFile file;
+		if (file.Open(dest_file_name, DiskFile::kModeWrite, true, Endian::kTypeLittleEndian) == true) {
+			int _buffer_size = (int)buffer_size * (int)unit;
+			int64 data_size   = FileSize(handle);
+			uint8* buffer = new uint8[(unsigned)_buffer_size];
 
-			int64 lNumChunks = lDataSize / lBufferSize;
-			int lRest      = (int)(lDataSize % (int64)lBufferSize);
+			int64 num_chunks = data_size / _buffer_size;
+			int rest      = (int)(data_size % (int64)_buffer_size);
 
-			for (int64 i = 0; i < lNumChunks; i++)
-			{
-				FileRead(lBuffer, lBufferSize, lHandle);
-				lFile.WriteData(lBuffer, lBufferSize);
+			for (int64 i = 0; i < num_chunks; i++) {
+				FileRead(buffer, _buffer_size, handle);
+				file.WriteData(buffer, _buffer_size);
 			}
 
-			if (lRest != 0)
-			{
-				FileRead(lBuffer, lRest, lHandle);
-				lFile.WriteData(lBuffer, lRest);
+			if (rest != 0) {
+				FileRead(buffer, rest, handle);
+				file.WriteData(buffer, rest);
 			}
 
-			FileClose(lHandle);
-			lFile.Close();
+			FileClose(handle);
+			file.Close();
 
-			delete[] lBuffer;
+			delete[] buffer;
 
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
-	}
-	else
-	{
+	} else {
 		return false;
 	}
 }

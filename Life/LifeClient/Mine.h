@@ -1,18 +1,17 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life.h"
-#include "ExplodingMachine.h"
+#include "../life.h"
+#include "explodingmachine.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -20,19 +19,18 @@ class Launcher;
 
 
 
-class Mine: public ExplodingMachine
-{
+class Mine: public ExplodingMachine {
 public:
 	typedef ExplodingMachine Parent;
 
-	Mine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher);
+	Mine(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, Launcher* launcher);
 	virtual ~Mine();
 
-	void EnableDeleteDetonation(bool pEnable);
+	void EnableDeleteDetonation(bool enable);
 	virtual void OnDie();
 
 private:
-	bool mEnableDeleteDetonation;
+	bool enable_delete_detonation_;
 
 	logclass();
 };

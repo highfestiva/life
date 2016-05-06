@@ -5,70 +5,66 @@
 
 
 #include "pch.h"
-#include "../Include/Application.h"
-#include "../Include/Log.h"
-#include "../Include/LogListener.h"
-#include "../Include/String.h"
-#include "../Include/Thread.h"
+#include "../include/application.h"
+#include "../include/log.h"
+#include "../include/loglistener.h"
+#include "../include/string.h"
+#include "../include/thread.h"
 
 
 
 bool TestLepra();
-void ShowTestResult(const Lepra::LogDecorator& pAccount, bool pTestOk);
+void ShowTestResult(const lepra::LogDecorator& account, bool test_ok);
 
 
 
-class LepraTestApplication: public Lepra::Application
-{
+class LepraTestApplication: public lepra::Application {
 public:
-	LepraTestApplication(const Lepra::strutil::strvec& pArgumentVector);
+	LepraTestApplication(const lepra::strutil::strvec& argument_vector);
 	virtual void Init();
 	virtual int Run();
 
 private:
-	static Lepra::LogDecorator mLog;
+	static lepra::LogDecorator log_;
 };
 
-LEPRA_RUN_APPLICATION(LepraTestApplication, Lepra::Main);
+LEPRA_RUN_APPLICATION(LepraTestApplication, lepra::Main);
 
-LepraTestApplication::LepraTestApplication(const Lepra::strutil::strvec& pArgumentVector):
-	Lepra::Application(pArgumentVector)
-{
+LepraTestApplication::LepraTestApplication(const lepra::strutil::strvec& argument_vector):
+	lepra::Application(argument_vector) {
 };
 
-void LepraTestApplication::Init()
-{
+void LepraTestApplication::Init() {
 }
 
-int LepraTestApplication::Run()
-{
-	Lepra::Init();
+int LepraTestApplication::Run() {
+	lepra::Init();
 
 	// We like to be on a single CPU on the time measuring thread, due to QueryPerformanceCounter()
 	// and RDTSC core differences. Several seconds can differ between different CPUs.
-	Lepra::Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
+	lepra::Thread::GetCurrentThread()->SetCpuAffinityMask(0x0001);
 
-	Lepra::ConsoleLogListener* lConsoleLogPointer = 0;
+	lepra::ConsoleLogListener* console_log_pointer = 0;
 #ifdef LEPRA_CONSOLE
-	Lepra::ConsoleLogListener lConsoleLogger;
-	lConsoleLogPointer = &lConsoleLogger;
+	lepra::ConsoleLogListener console_logger;
+	console_log_pointer = &console_logger;
 #endif // LEPRA_CONSOLE
-	Lepra::FileLogListener lFileLogger(_TEXT_ALTERNATIVE("LepraTestApp.log", L"LepraUnicodeTestApp.log"));
-	Lepra::FileLogListener lPerformanceLogger(_TEXT_ALTERNATIVE("LepraPerformance.log", L"LepraUnicodePerformance.log"));
-	Lepra::MemFileLogListener lMemLogger;
-	Lepra::Log::GetLog()->SetupStandardLogging(Lepra::Log::LEVEL_LOWEST_TYPE,
-		lConsoleLogPointer, &lFileLogger, &lPerformanceLogger, &lMemLogger);
+	lepra::FileLogListener file_logger(_TEXT_ALTERNATIVE("LepraTestApp.log", L"LepraUnicodeTestApp.log"));
+	lepra::FileLogListener performance_logger(_TEXT_ALTERNATIVE("LepraPerformance.log", L"LepraUnicodePerformance.log"));
+	lepra::MemFileLogListener mem_logger;
+	lepra::Log::GetLog()->SetupStandardLogging(lepra::Log::kLevelLowestType,
+		console_log_pointer, &file_logger, &performance_logger, &mem_logger);
 
-	Lepra::Log::GetLog()->Print("LepraTestApp/main", "\n\n--- Build type: " LEPRA_STRING_TYPE_TEXT " " LEPRA_BUILD_TYPE_TEXT " ---\n", Lepra::Log::LEVEL_ERROR);
-	lPerformanceLogger.LogListener::OnLogMessage("LepraTestApp/main", "\n\n---\n", Lepra::Log::LEVEL_ERROR);
-	lMemLogger.Clear();
+	lepra::Log::GetLog()->Print("LepraTestApp/main", "\n\n--- Build type: " kLepraStringTypeText " " kLepraBuildTypeText " ---\n", lepra::Log::kLevelError);
+	performance_logger.LogListener::OnLogMessage("LepraTestApp/main", "\n\n---\n", lepra::Log::kLevelError);
+	mem_logger.Clear();
 
-	bool lTestOk = TestLepra();
-	ShowTestResult(mLog, lTestOk);
+	bool _test_ok = TestLepra();
+	ShowTestResult(log_, _test_ok);
 
-	lMemLogger.DumpToFile(_TEXT_ALTERNATIVE("Temp.log", L"TempUnicode.log"));
+	mem_logger.DumpToFile(_TEXT_ALTERNATIVE("Temp.log", L"TempUnicode.log"));
 
 	return (0);
 }
 
-Lepra::LogDecorator LepraTestApplication::mLog(typeid(LepraTestApplication));
+lepra::LogDecorator LepraTestApplication::log_(typeid(LepraTestApplication));

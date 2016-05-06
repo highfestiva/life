@@ -5,119 +5,97 @@
 
 
 #include "pch.h"
-#include "ServerListView.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Cure/Include/UserAccount.h"
-#include "../Lepra/Include/Network.h"
-#include "../Lepra/Include/Number.h"
-#include "../UiTbc/Include/GUI/UiCaption.h"
-#include "../UiTbc/Include/GUI/UiCenterLayout.h"
-#include "../UiTbc/Include/GUI/UiTextField.h"
-#include "RtVar.h"
+#include "serverlistview.h"
+#include "../cure/include/runtimevariable.h"
+#include "../cure/include/useraccount.h"
+#include "../lepra/include/network.h"
+#include "../lepra/include/number.h"
+#include "../uitbc/include/gui/uicaption.h"
+#include "../uitbc/include/gui/uicenterlayout.h"
+#include "../uitbc/include/gui/uitextfield.h"
+#include "rtvar.h"
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
-ServerListView::ServerListView(ServerSelectObserver* pSelectObserver):
-	View(L"Join Online Game", new UiTbc::GridLayout(11, 1)),
-	mSelectObserver(pSelectObserver),
-	mIsMasterConnectError(false)
-{
-	mServerList.push_back(Life::ServerInfo());
+ServerListView::ServerListView(ServerSelectObserver* select_observer):
+	View(L"Join Online Game", new uitbc::GridLayout(11, 1)),
+	select_observer_(select_observer),
+	is_master_connect_error_(false) {
+	server_list_.push_back(life::ServerInfo());
 
 	SetPreferredSize(500, 350);
 
-	UiTbc::Component* lRowLayer = AddRow(Color(0, 0, 0), 4);
-	AddLabel(L"Server Name", WHITE, 250, lRowLayer);
-	AddLabel(L"Players", WHITE, 0, lRowLayer);
-	AddLabel(L"Ping (ms)", WHITE, 0, lRowLayer);
-	AddLabel(L"Select", WHITE, 0, lRowLayer);
+	uitbc::Component* row_layer = AddRow(Color(0, 0, 0), 4);
+	AddLabel(L"Server Name", WHITE, 250, row_layer);
+	AddLabel(L"Players", WHITE, 0, row_layer);
+	AddLabel(L"Ping (ms)", WHITE, 0, row_layer);
+	AddLabel(L"Select", WHITE, 0, row_layer);
 
-	CreateLayer(new UiTbc::CenterLayout);
+	CreateLayer(new uitbc::CenterLayout);
 }
 
-void ServerListView::Tick()
-{
+void ServerListView::Tick() {
 	// TRICKY! Gaah! Code is worse than it looks.
-	if (!mSelectObserver->UpdateServerList(mServerList))
-	{
-		if (!mIsMasterConnectError && mSelectObserver->IsMasterServerConnectError())
-		{
-			mIsMasterConnectError = true;
-			mServerList.clear();
-			ReplaceLayer(1, new UiTbc::CenterLayout);
+	if (!select_observer_->UpdateServerList(server_list_)) {
+		if (!is_master_connect_error_ && select_observer_->IsMasterServerConnectError()) {
+			is_master_connect_error_ = true;
+			server_list_.clear();
+			ReplaceLayer(1, new uitbc::CenterLayout);
 			AddLabel(L"Problem connecting to master server.\nCheck your network cable and/or firewall settings.", RED, 0, this, 1)->SetPreferredSize(0, 0, true);
 		}
-		if (mSelectObserver->IsMasterServerConnectError() == mIsMasterConnectError)
-		{
+		if (select_observer_->IsMasterServerConnectError() == is_master_connect_error_) {
 			return;
 		}
 	}
-	if (!mSelectObserver->IsMasterServerConnectError())
-	{
-		mIsMasterConnectError = false;
+	if (!select_observer_->IsMasterServerConnectError()) {
+		is_master_connect_error_ = false;
 
-		if (mServerList.size() == 0)	// No response yet!
-		{
-			ReplaceLayer(1, new UiTbc::CenterLayout);
+		if (server_list_.size() == 0) {	// No response yet!
+			ReplaceLayer(1, new uitbc::CenterLayout);
 			AddLabel(L"Please wait while refreshing list...", GRAY, 0, this, 1)->SetAdaptive(true);
-		}
-		else if (mServerList.size() == 1)	// Only the status message, no servers online!
-		{
-			ReplaceLayer(1, new UiTbc::CenterLayout);
+		} else if (server_list_.size() == 1) {	// Only the status message, no servers online!
+			ReplaceLayer(1, new uitbc::CenterLayout);
 			AddLabel(L"I'm sorry, but no-one else seems to be running a public server.\n"
 				L"Perhaps you would like to be the first to start one? Click here and there...", GRAY, 0, this, 1)->SetPreferredSize(0, 0, true);
-		}
-		else if (mServerList.size() > 1)
-		{
+		} else if (server_list_.size() > 1) {
 			DeleteLayer(1);
 		}
 	}
 
-	const int lServerCount = (int)mServerList.size() - 1;	// Ignore the status message.
+	const int server_count = (int)server_list_.size() - 1;	// Ignore the status message.
 
-	const UiTbc::GridLayout* lGrid = (UiTbc::GridLayout*)GetClientRectComponent()->GetLayout();
-	for (int x = 1; x < 1+10; ++x)
-	{
-		UiTbc::RectComponent* lRowLayer = (UiTbc::RectComponent*)lGrid->GetComponentAt(x, 0);
-		if (lRowLayer)
-		{
-			lRowLayer->DeleteChildrenInLayer(0);
+	const uitbc::GridLayout* grid = (uitbc::GridLayout*)GetClientRectComponent()->GetLayout();
+	for (int x = 1; x < 1+10; ++x) {
+		uitbc::RectComponent* row_layer = (uitbc::RectComponent*)grid->GetComponentAt(x, 0);
+		if (row_layer) {
+			row_layer->DeleteChildrenInLayer(0);
+		} else {
+			row_layer = AddRow(DARK_GRAY, 4);
 		}
-		else
-		{
-			lRowLayer = AddRow(DARK_GRAY, 4);
+		const bool more_servers = (x-1 < server_count);
+		if (!more_servers) {
+			row_layer->SetIsHollow(true);
+		} else if (x&1) {
+			row_layer->SetColor(Color(90, 90, 90));
+			row_layer->SetIsHollow(false);
+		} else {
+			row_layer->SetColor(Color(96, 96, 96));
+			row_layer->SetIsHollow(false);
 		}
-		const bool lMoreServers = (x-1 < lServerCount);
-		if (!lMoreServers)
-		{
-			lRowLayer->SetIsHollow(true);
-		}
-		else if (x&1)
-		{
-			lRowLayer->SetColor(Color(90, 90, 90));
-			lRowLayer->SetIsHollow(false);
-		}
-		else
-		{
-			lRowLayer->SetColor(Color(96, 96, 96));
-			lRowLayer->SetIsHollow(false);
-		}
-		if (lMoreServers)
-		{
-			const Life::ServerInfo& lServer = mServerList[x-1];
-			AddLabel(wstrutil::Encode(lServer.mName), GRAY, 250, lRowLayer)->SetAdaptive(false);
-			AddLabel(wstrutil::IntToString(lServer.mPlayerCount, 10), GRAY, 0, lRowLayer);
-			const str lPing = (lServer.mPing > 0)? Number::ConvertToPostfixNumber(lServer.mPing, 0)+"s" : "";
-			AddLabel(wstrutil::Encode(lPing), GRAY, 0, lRowLayer);
-			UiTbc::RectComponent* lCenterLayer = AddCentering(0, lRowLayer);
-			UiTbc::Button* lButton = AddButton(L"Pick", (void*)(x-1), lCenterLayer);
-			lButton->SetOnClick(ServerListView, OnSelect);
-			lButton->SetPreferredSize(100, 23, false);
+		if (more_servers) {
+			const life::ServerInfo& server = server_list_[x-1];
+			AddLabel(wstrutil::Encode(server.name_), GRAY, 250, row_layer)->SetAdaptive(false);
+			AddLabel(wstrutil::IntToString(server.player_count_, 10), GRAY, 0, row_layer);
+			const str ping = (server.ping_ > 0)? Number::ConvertToPostfixNumber(server.ping_, 0)+"s" : "";
+			AddLabel(wstrutil::Encode(ping), GRAY, 0, row_layer);
+			uitbc::RectComponent* center_layer = AddCentering(0, row_layer);
+			uitbc::Button* _button = AddButton(L"Pick", (void*)(x-1), center_layer);
+			_button->SetOnClick(ServerListView, OnSelect);
+			_button->SetPreferredSize(100, 23, false);
 		}
 	}
 
@@ -127,18 +105,15 @@ void ServerListView::Tick()
 
 
 
-void ServerListView::OnExit()
-{
-	mSelectObserver->OnCancelJoinServer();
+void ServerListView::OnExit() {
+	select_observer_->OnCancelJoinServer();
 }
 
-void ServerListView::OnSelect(UiTbc::Button* pButton)
-{
-	const size_t lServerIndex = (intptr_t)pButton->GetExtraData();
-	if (lServerIndex < mServerList.size())
-	{
-		mSelectObserver->OnRequestJoinServer(mServerList[lServerIndex].mGivenIpAddress +
-			strutil::Format(":%i", mServerList[lServerIndex].mGivenPort));
+void ServerListView::OnSelect(uitbc::Button* button) {
+	const size_t server_index = (intptr_t)button->GetExtraData();
+	if (server_index < server_list_.size()) {
+		select_observer_->OnRequestJoinServer(server_list_[server_index].given_ip_address_ +
+			strutil::Format(":%i", server_list_[server_index].given_port_));
 	}
 }
 

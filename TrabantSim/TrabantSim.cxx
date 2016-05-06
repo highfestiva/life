@@ -5,351 +5,312 @@
 
 
 #include "pch.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Lepra/Include/LepraOS.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "../Life/LifeClient/GameClientSlaveManager.h"
-#include "../Life/LifeServer/MasterServerConnection.h"
-#include "../Life/LifeApplication.h"
-#include "../UiCure/Include/UiCure.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiLepra/Include/UiCore.h"
-#include "../UiLepra/Include/UiSoundManager.h"
-#include "../UiLepra/Include/UiTouchDrag.h"
+#include "../cure/include/runtimevariable.h"
+#include "../lepra/include/lepraos.h"
+#include "../lepra/include/systemmanager.h"
+#include "../life/lifeclient/gameclientslavemanager.h"
+#include "../life/lifeserver/masterserverconnection.h"
+#include "../life/lifeapplication.h"
+#include "../uicure/include/uicure.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uilepra/include/uicore.h"
+#include "../uilepra/include/uisoundmanager.h"
+#include "../uilepra/include/uitouchdrag.h"
 #ifdef LEPRA_IOS
-#include "../UiLepra/Include/Mac/EAGLView.h"
-#include "../UiLepra/Include/Mac/RotatingController.h"
-#include "../UiLepra/Include/Mac/UiMacDisplayManager.h"
-#include "../Lepra/Include/Posix/MacLog.h"
-#include "PythonRunner.h"
+#include "../uilepra/include/mac/eaglview.h"
+#include "../uilepra/include/mac/rotatingcontroller.h"
+#include "../uilepra/include/mac/uimacdisplaymanager.h"
+#include "../lepra/include/posix/maclog.h"
+#include "pythonrunner.h"
 #endif // iOS
-#include "../UiTbc/Include/UiTbc.h"
-#include "AnimatedApp.h"
-#include "TrabantSimTicker.h"
-#include "RtVar.h"
-#include "Version.h"
+#include "../uitbc/include/uitbc.h"
+#include "animatedapp.h"
+#include "trabantsimticker.h"
+#include "rtvar.h"
+#include "version.h"
 
 
 
-LEPRA_RUN_APPLICATION(TrabantSim::TrabantSim, UiLepra::UiMain);
+LEPRA_RUN_APPLICATION(TrabantSim::TrabantSim, uilepra::UiMain);
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
-void FoldSuspendSimulator()
-{
-	TrabantSim::mApp->FoldSimulator();
-	TrabantSim::mApp->Suspend(false);
+void FoldSuspendSimulator() {
+	TrabantSim::app_->FoldSimulator();
+	TrabantSim::app_->Suspend(false);
 }
 
-void FoldSimulator()
-{
-	TrabantSim::mApp->FoldSimulator();
+void FoldSimulator() {
+	TrabantSim::app_->FoldSimulator();
 }
 
-void UnfoldSimulator()
-{
-	TrabantSim::mApp->UnfoldSimulator();
-}
-	
-void DidSyncFiles()
-{
-	TrabantSim::mApp->DidSyncFiles();
+void UnfoldSimulator() {
+	TrabantSim::app_->UnfoldSimulator();
 }
 
-bool ConnectQuery(const str& pHostname)
-{
-	return TrabantSim::mApp->ConnectQuery(pHostname);
+void DidSyncFiles() {
+	TrabantSim::app_->DidSyncFiles();
+}
+
+bool ConnectQuery(const str& hostname) {
+	return TrabantSim::app_->ConnectQuery(hostname);
 }
 
 
-TrabantSim* TrabantSim::GetApp()
-{
-	return mApp;
+TrabantSim* TrabantSim::GetApp() {
+	return app_;
 }
 
 
 
-TrabantSim::TrabantSim(const strutil::strvec& pArgumentList):
-	Parent("Trabant", pArgumentList),
-	mUiManager(0),
-	mActiveCounter(-100),
-	mIsInTick(false)
-{
-	mApp = this;
+TrabantSim::TrabantSim(const strutil::strvec& argument_list):
+	Parent("Trabant", argument_list),
+	ui_manager_(0),
+	active_counter_(-100),
+	is_in_tick_(false) {
+	app_ = this;
 }
 
-TrabantSim::~TrabantSim()
-{
+TrabantSim::~TrabantSim() {
 	Destroy();
 
 	UiCure::Shutdown();
-	UiTbc::Shutdown();
-	UiLepra::Shutdown();
+	uitbc::Shutdown();
+	uilepra::Shutdown();
 }
 
-void TrabantSim::Init()
-{
-	UiLepra::Init();
-	UiTbc::Init();
+void TrabantSim::Init() {
+	uilepra::Init();
+	uitbc::Init();
 	UiCure::Init();
 
 #if defined(LEPRA_IOS)
-	CGSize lSize = [UIScreen mainScreen].bounds.size;
-	int lScale = [[UIScreen mainScreen] scale];
-	int lDisplayWidth = lSize.width * lScale;
-	int lDisplayHeight = lSize.height * lScale;
-	if (lDisplayHeight > lDisplayWidth)
-	{
+	CGSize __size = [UIScreen mainScreen].bounds.size;
+	int __scale = [[UIScreen mainScreen] scale];
+	int display_width = __size.width * __scale;
+	int display_height = __size.height * __scale;
+	if (display_height > display_width) {
 		// Phone might start up in portrait, but our game will always be in landscape mode.
-		std::swap(lDisplayWidth, lDisplayHeight);
+		std::swap(display_width, display_height);
 	}
-	const double lFontHeight = 30.0*lScale;
+	const double font_height = 30.0*__scale;
 #else // Computer L&F
-	const int lDisplayWidth = 760;
-	const int lDisplayHeight = 524;
-	const double lFontHeight = 30.0;
-#endif // Touch / Computer L&F
-	v_override(UiCure::GetSettings(), RTVAR_UI_2D_FONTHEIGHT, lFontHeight);
-	int lDisplayBpp = 0;
-	int lDisplayFrequency = 0;
-	bool lDisplayFullScreen = false;
-	double lPhysicalScreenSize = 24.0;	// An average computer's physical screen size (inches across).
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_RENDERENGINE, "OpenGL");
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ORIENTATION, "AllowUpsideDown");
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_PHYSICALSIZE, lPhysicalScreenSize);
+	const int display_width = 760;
+	const int display_height = 524;
+	const double font_height = 30.0;
+#endif // touch / Computer L&F
+	v_override(UiCure::GetSettings(), kRtvarUi2DFontheight, font_height);
+	int display_bpp = 0;
+	int display_frequency = 0;
+	bool display_full_screen = false;
+	double physical_screen_size = 24.0;	// An average computer's physical screen size (inches across).
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayRenderengine, "OpenGL");
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayWidth, display_width);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayHeight, display_height);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayBitsperpixel, display_bpp);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayFrequency, display_frequency);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayFullscreen, display_full_screen);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayOrientation, "AllowUpsideDown");
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayPhysicalsize, physical_screen_size);
 
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ENGINE, "OpenAL");
+	v_override(UiCure::GetSettings(), kRtvarUiSoundEngine, "OpenAL");
 
-	v_override(UiCure::GetSettings(), RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLECLEAR, true);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_PIXELSHADERS, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLELIGHTS, true);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_ENABLEMIPMAPPING, false);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_FOV, 20.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPNEAR, 0.1);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLIPFAR, 20.0);
-	//v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "None");
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_SHADOWS, "Force:Volumes");
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARRED, 0.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARGREEN, 0.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_CLEARBLUE, 0.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTRED, 0.4);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTGREEN, 0.4);
-	v_override(UiCure::GetSettings(), RTVAR_UI_3D_AMBIENTBLUE, 0.4);
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_ROLLOFF, 0.1);
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_DOPPLER, 1.0);
-	v_override(UiCure::GetSettings(), RTVAR_UI_SOUND_MUSICVOLUME, 0.6);
+	v_override(UiCure::GetSettings(), kRtvarUiDisplayEnablevsync, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnableclear, true);
+	v_override(UiCure::GetSettings(), kRtvarUi3DPixelshaders, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablelights, true);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnabletrilinearfiltering, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablebilinearfiltering, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DEnablemipmapping, false);
+	v_override(UiCure::GetSettings(), kRtvarUi3DFov, 20.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DClipnear, 0.1);
+	v_override(UiCure::GetSettings(), kRtvarUi3DClipfar, 20.0);
+	//v_override(UiCure::GetSettings(), kRtvarUi3DShadows, "None");
+	v_override(UiCure::GetSettings(), kRtvarUi3DShadows, "Force:Volumes");
+	v_override(UiCure::GetSettings(), kRtvarUi3DClearred, 0.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DCleargreen, 0.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DClearblue, 0.0);
+	v_override(UiCure::GetSettings(), kRtvarUi3DAmbientred, 0.4);
+	v_override(UiCure::GetSettings(), kRtvarUi3DAmbientgreen, 0.4);
+	v_override(UiCure::GetSettings(), kRtvarUi3DAmbientblue, 0.4);
+	v_override(UiCure::GetSettings(), kRtvarUiSoundRolloff, 0.1);
+	v_override(UiCure::GetSettings(), kRtvarUiSoundDoppler, 1.0);
+	v_override(UiCure::GetSettings(), kRtvarUiSoundMusicvolume, 0.6);
 
-	v_override(UiCure::GetSettings(), RTVAR_CTRL_EMULATETOUCH, true);
+	v_override(UiCure::GetSettings(), kRtvarCtrlEmulatetouch, true);
 
 	// This sets the default settings for client-specific rtvars. Note that these should not be removed,
 	// since that causes the client to start without defaults.
-	v_override(UiCure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, false);
-	v_override(UiCure::GetSettings(), RTVAR_NETWORK_CONNECT_TIMEOUT, 4.0);
-	v_override(UiCure::GetSettings(), RTVAR_NETWORK_LOGIN_TIMEOUT, 4.0);
+	v_override(UiCure::GetSettings(), kRtvarNetworkEnableopenserver, false);
+	v_override(UiCure::GetSettings(), kRtvarNetworkConnectTimeout, 4.0);
+	v_override(UiCure::GetSettings(), kRtvarNetworkLoginTimeout, 4.0);
 
-	mUiManager = new UiCure::GameUiManager(UiCure::GetSettings(), &mDragManager);
+	ui_manager_ = new UiCure::GameUiManager(UiCure::GetSettings(), &drag_manager_);
 
 	Parent::Init();
 }
 
-void TrabantSim::Destroy()
-{
+void TrabantSim::Destroy() {
 	Parent::Destroy();
-	delete mUiManager;
-	mUiManager = 0;
+	delete ui_manager_;
+	ui_manager_ = 0;
 }
 
-bool TrabantSim::MainLoop()
-{
+bool TrabantSim::MainLoop() {
 #ifndef LEPRA_IOS
-	mActiveCounter = 1;
+	active_counter_ = 1;
 	return Parent::MainLoop();
 #else // iOS
 	// iOS has uses timer callbacks instead of a main loop.
-	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
+	animated_app_ = [[AnimatedApp alloc] init:ui_manager_->GetCanvas()];
 	return true;
 #endif // !iOS/iOS
 }
 
-bool TrabantSim::Tick()
-{
-	if (mActiveCounter > 0)
-	{
-		mIsInTick = true;
-		const bool lOk = Parent::Tick();
-		mIsInTick = false;
-		if (mActiveCounter <= 0)
-		{
-			const int c = mActiveCounter;
-			mActiveCounter = 1;
+bool TrabantSim::Tick() {
+	if (active_counter_ > 0) {
+		is_in_tick_ = true;
+		const bool ok = Parent::Tick();
+		is_in_tick_ = false;
+		if (active_counter_ <= 0) {
+			const int c = active_counter_;
+			active_counter_ = 1;
 			Suspend(false);
-			mActiveCounter = c;
+			active_counter_ = c;
 		}
-		return lOk;
+		return ok;
 	}
 	return true;
 }
 
 
 
-void TrabantSim::Resume(bool pHard)
-{
-	if (pHard)
-	{
+void TrabantSim::Resume(bool hard) {
+	if (hard) {
 		// If we're only coming back from background all we don't
 		// want to start ticking the simulator.
-		mGameTicker->Resume(true);	// Resume's hard/soft has no effect.
-		mActiveCounter = 0;
+		game_ticker_->Resume(true);	// Resume's hard/soft has no effect.
+		active_counter_ = 0;
 		return;
 	}
 
-	if (++mActiveCounter != 1)
-	{
+	if (++active_counter_ != 1) {
 		return;
 	}
 
-	mGameTicker->Resume(false);	// Resume sets some internal states of the simulator state machine.
+	game_ticker_->Resume(false);	// Resume sets some internal states of the simulator state machine.
 #ifdef LEPRA_IOS
-	[mAnimatedApp startTick];
+	[animated_app_ tick_];
 #endif // iOS
-	mUiManager->GetSoundManager()->Resume();
+	ui_manager_->GetSoundManager()->Resume();
 }
 
-void TrabantSim::Suspend(bool pHard)
-{
-	if (mActiveCounter == 0 && !pHard)
-	{
+void TrabantSim::Suspend(bool hard) {
+	if (active_counter_ == 0 && !hard) {
 		return;
 	}
-	mActiveCounter = 0;
-	if (mIsInTick && !pHard)
-	{
+	active_counter_ = 0;
+	if (is_in_tick_ && !hard) {
 		return;
 	}
 #ifdef LEPRA_IOS
-	const bool lIsRunningLocally = PythonRunner::IsRunning();
+	const bool is_running_locally = PythonRunner::IsRunning();
 #endif // iOS
-	mGameTicker->Suspend(pHard);	// Hard means cut the chord, soft just sends "disconnect" to remote end.
-	mUiManager->GetSoundManager()->Suspend();
+	game_ticker_->Suspend(hard);	// Hard means cut the chord, soft just sends "disconnect" to remote end.
+	ui_manager_->GetSoundManager()->Suspend();
 #ifdef LEPRA_IOS
-	[mAnimatedApp stopTick];
-	if (!lIsRunningLocally)
-	{
+	[animated_app_ tick_];
+	if (!is_running_locally) {
 		FoldSimulator();
 	}
 #endif // iOS
 }
 
-void TrabantSim::FoldSimulator()
-{
+void TrabantSim::FoldSimulator() {
 #ifdef LEPRA_IOS
 	dispatch_block_t Fold = ^
 	{
-		const int lWasActive = mActiveCounter;
-		str lStdOut = PythonRunner::GetStdOut();
+		const int was_active = active_counter_;
+		str std_out = PythonRunner::GetStdOut();
 		Suspend(false);
-		//UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
+		//UIWindow* window = ((uilepra::MacDisplayManager*)TrabantSim::TrabantSim::app_->ui_manager_->GetDisplayManager())->GetWindow();
 		//[window setHidden:YES];
 		[[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];
-		//[TrabantSim::TrabantSim::mApp->mAnimatedApp.window makeKeyAndVisible];
+		//[TrabantSim::TrabantSim::app_->animated_app_.window makeKeyAndVisible];
 		PythonRunner::Break();
-		if (!lStdOut.empty() && lWasActive > 0)
-		{
-			[TrabantSim::TrabantSim::mApp->mAnimatedApp handleStdOut:lStdOut];
-		}
-		else
-		{
-			[TrabantSim::TrabantSim::mAnimatedApp popIfGame];
+		if (!std_out.empty() && was_active > 0) {
+			[TrabantSim::TrabantSim::app_->animated_app_ handleStdOut:std_out];
+		} else {
+			[TrabantSim::TrabantSim::animated_app_ if_game];
 		}
 	};
-	if ([NSThread isMainThread])
-	{
+	if ([NSThread isMainThread]) {
 		Fold();
-	}
-	else
-	{
+	} else {
 		dispatch_sync(dispatch_get_main_queue(), Fold);
 	}
 #endif // iOS
 }
 
-void TrabantSim::UnfoldSimulator()
-{
+void TrabantSim::UnfoldSimulator() {
 #ifdef LEPRA_IOS
-	if ([TrabantSim::TrabantSim::mApp->mAnimatedApp showingSimulator])
-	{
+	if ([TrabantSim::TrabantSim::app_->animated_app_ showingSimulator_]) {
 		return;
 	}
 
 	dispatch_block_t Unfold = ^
 	{
-		//[TrabantSim::TrabantSim::mAnimatedApp.window setHidden:YES];
-		//UIWindow* window = ((UiLepra::MacDisplayManager*)TrabantSim::TrabantSim::mApp->mUiManager->GetDisplayManager())->GetWindow();
+		//[TrabantSim::TrabantSim::animated_app_.window setHidden:YES];
+		//UIWindow* window = ((uilepra::MacDisplayManager*)TrabantSim::TrabantSim::app_->ui_manager_->GetDisplayManager())->GetWindow();
 		//if (!window.rootViewController)
 		UIViewController* controller = [[UIViewController alloc] init];
-		controller.view = [EAGLView sharedView];
+		controller.view = [EAGLView sharedView_];
 		//window.rootViewController = controller;
-		[TrabantSim::TrabantSim::mApp->mAnimatedApp pushSimulatorController:controller];
+		[TrabantSim::TrabantSim::app_->animated_app_ pushSimulatorController:controller];
 		//[window makeKeyAndVisible];
-		TrabantSim::TrabantSim::mApp->mActiveCounter = 0;	// Make sure no lost event causes a halt.
-		TrabantSim::TrabantSim::mApp->Resume(false);
+		TrabantSim::TrabantSim::app_->active_counter_ = 0;	// Make sure no lost event causes a halt.
+		TrabantSim::TrabantSim::app_->Resume(false);
 		//[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationNone];
 		PythonRunner::ClearStdOut();
 	};
-	if ([NSThread isMainThread])
-	{
+	if ([NSThread isMainThread]) {
 		Unfold();
-	}
-	else
-	{
+	} else {
 		dispatch_sync(dispatch_get_main_queue(), Unfold);
 	}
 #endif // iOS
 }
 
-void TrabantSim::DidSyncFiles()
-{
+void TrabantSim::DidSyncFiles() {
 #ifdef LEPRA_IOS
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[TrabantSim::TrabantSim::mAnimatedApp.listController reloadPrototypes];
+		[TrabantSim::TrabantSim::animated_app_.__controller reloadPrototypes];
 	});
 #endif // iOS
 }
 
-bool TrabantSim::ConnectQuery(const str& pHostname)
-{
-	(void)pHostname;
+bool TrabantSim::ConnectQuery(const str& hostname) {
+	(void)hostname;
 #ifdef LEPRA_IOS
-	str lDeniedHosts;
-	v_get(lDeniedHosts, =, UiCure::GetSettings(), "Simulator.DeniedHosts", "");
-	strutil::strvec lHosts = strutil::Split(lDeniedHosts, ":");
-	if (std::find(lHosts.begin(), lHosts.end(), pHostname) != lHosts.end())
-	{
+	str denied_hosts;
+	v_get(denied_hosts, =, UiCure::GetSettings(), "Simulator.DeniedHosts", "");
+	strutil::strvec hosts = strutil::Split(denied_hosts, ":");
+	if (std::find(hosts.begin(), hosts.end(), hostname) != hosts.end()) {
 		return false;
 	}
-	str lAllowedHosts;
-	v_get(lAllowedHosts, =, UiCure::GetSettings(), "Simulator.AllowedHosts", "");
-	lHosts = strutil::Split(lAllowedHosts, ":");
-	if (std::find(lHosts.begin(), lHosts.end(), pHostname) != lHosts.end())
-	{
+	str allowed_hosts;
+	v_get(allowed_hosts, =, UiCure::GetSettings(), "Simulator.AllowedHosts", "");
+	hosts = strutil::Split(allowed_hosts, ":");
+	if (std::find(hosts.begin(), hosts.end(), hostname) != hosts.end()) {
 		return true;
 	}
 	// TODO: check if address already present in registered hosts.
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[TrabantSim::TrabantSim::mAnimatedApp showNetworkControlFor:MacLog::Encode(pHostname)];
+		[TrabantSim::TrabantSim::animated_app_ showNetworkControlFor:MacLog::Encode(hostname)];
 	});
 	return false;
 #else // !iOS
@@ -357,31 +318,27 @@ bool TrabantSim::ConnectQuery(const str& pHostname)
 #endif // iOS
 }
 
-	void TrabantSim::SavePurchase()
-{
+	void TrabantSim::SavePurchase() {
 }
 
 
 
-str TrabantSim::GetTypeName() const
-{
+str TrabantSim::GetTypeName() const {
 	return "Simulator";
 }
 
-str TrabantSim::GetVersion() const
-{
-	return TRABANT_VERSION;
+str TrabantSim::GetVersion() const {
+	return kTrabantVersion;
 }
 
-Cure::ApplicationTicker* TrabantSim::CreateTicker() const
-{
-	return new TrabantSimTicker(mUiManager, mResourceManager, 200, 5, 5);
+cure::ApplicationTicker* TrabantSim::CreateTicker() const {
+	return new TrabantSimTicker(ui_manager_, resource_manager_, 200, 5, 5);
 }
 
 
 
-TrabantSim* TrabantSim::mApp;
-loginstance(GAME, TrabantSim);
+TrabantSim* TrabantSim::app_;
+loginstance(kGame, TrabantSim);
 
 
 

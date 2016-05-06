@@ -1,40 +1,35 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life/LifeClient/GameClientSlaveManager.h"
-#include "../Life/LifeClient/Menu.h"
-#include "../UiCure/Include/UiResourceManager.h"
-#include "Impuzzable.h"
+#include "../life/lifeclient/gameclientslavemanager.h"
+#include "../life/lifeclient/menu.h"
+#include "../uicure/include/uiresourcemanager.h"
+#include "impuzzable.h"
 
 
 
-namespace UiLepra
-{
-namespace Touch
-{
+namespace uilepra {
+namespace touch {
 struct Drag;
 class TouchstickInputDevice;
 }
 }
-namespace UiCure
-{
+namespace UiCure {
 class CollisionSoundManager;
 class CppContextObject;
 class SoundReleaser;
 }
-namespace UiTbc
-{
+namespace uitbc {
 class Button;
 }
 
 
-namespace Impuzzable
-{
+namespace Impuzzable {
 
 
 
@@ -44,20 +39,18 @@ class Sunlight;
 
 
 
-class ImpuzzableManager: public Life::GameClientSlaveManager
-{
-	typedef Life::GameClientSlaveManager Parent;
+class ImpuzzableManager: public life::GameClientSlaveManager {
+	typedef life::GameClientSlaveManager Parent;
 public:
-	typedef enum CutMode
-	{
-		CUT_NORMAL,
-		CUT_ADD_WINDOW,
-		CUT_WINDOW_ITSELF,
+	typedef enum CutMode {
+		kCutNormal,
+		kCutAddWindow,
+		kCutWindowItself,
 	};
 
-	ImpuzzableManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+	ImpuzzableManager(life::GameClientMasterTicker* pMaster, const cure::TimeManager* time,
+		cure::RuntimeVariableScope* variable_scope, cure::ResourceManager* resource_manager,
+		UiCure::GameUiManager* ui_manager, int slave_index, const PixelRect& render_area);
 	virtual ~ImpuzzableManager();
 	virtual void Suspend();
 	virtual void LoadSettings();
@@ -65,81 +58,81 @@ public:
 	virtual bool Open();
 	virtual void Close();
 	virtual void SetIsQuitting();
-	virtual void SetFade(float pFadeAmount);
+	virtual void SetFade(float fade_amount);
 
 	virtual bool Render();
 	void RenderBackground();
 	virtual bool Paint();
 
 	void HandleDrag();
-	Piece* PickPiece(UiLepra::Touch::Drag& pDrag, int pRadius);
-	Piece* GetDraggedPiece(UiLepra::Touch::Drag& pDrag);
-	void DragPiece(Piece* pPiece, const PixelCoord& pScreenPoint);
-	vec3 To3dPoint(const PixelCoord& pCoord, float pDepth) const;
+	Piece* PickPiece(uilepra::touch::Drag& drag, int radius);
+	Piece* GetDraggedPiece(uilepra::touch::Drag& drag);
+	void DragPiece(Piece* piece, const PixelCoord& screen_point);
+	vec3 To3dPoint(const PixelCoord& coord, float depth) const;
 
 	virtual bool DidFinishLevel();
-	virtual int StepLevel(int pCount);
+	virtual int StepLevel(int count);
 
-	Cure::RuntimeVariableScope* GetVariableScope() const;
+	cure::RuntimeVariableScope* GetVariableScope() const;
 
 protected:
-	typedef UiLepra::Touch::TouchstickInputDevice Touchstick;
+	typedef uilepra::touch::TouchstickInputDevice Touchstick;
 
 	virtual bool InitializeUniverse();
 	virtual void TickInput();
 	virtual void TickUiInput();
 	virtual void TickUiUpdate();
-	virtual void SetLocalRender(bool pRender);
+	virtual void SetLocalRender(bool render);
 
-	void CreatePiece(int pIndex, const vec3* pPosition);
-	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
-	//virtual Cure::ContextObject* CreateLogicHandler(const str& pType);
-	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
-		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
+	void CreatePiece(int index, const vec3* position);
+	virtual cure::ContextObject* CreateContextObject(const str& class_id) const;
+	//virtual cure::ContextObject* CreateLogicHandler(const str& type);
+	virtual void OnLoadCompleted(cure::ContextObject* object, bool ok);
+	void OnCollision(const vec3& force, const vec3& torque, const vec3& position,
+		cure::ContextObject* object1, cure::ContextObject* object2,
+		tbc::PhysicsManager::BodyID body1_id, tbc::PhysicsManager::BodyID body2_id);
 
 	void ShowInstruction();
-	void OnPauseButton(UiTbc::Button*);
-	void OnMenuAlternative(UiTbc::Button* pButton);
+	void OnPauseButton(uitbc::Button*);
+	void OnMenuAlternative(uitbc::Button* button);
 
 	virtual void ScriptPhysicsTick();
 	virtual void HandleWorldImpuzzablearies();
-	virtual void MoveCamera(float pFrameTime);
-	virtual void UpdateCameraPosition(bool pUpdateMicPosition);
+	virtual void MoveCamera(float frame_time);
+	virtual void UpdateCameraPosition(bool update_mic_position);
 
 	void PrintText(const str& s, int x, int y) const;
-	void DrawImage(UiTbc::Painter::ImageID pImageId, float cx, float cy, float w, float h, float pAngle) const;
+	void DrawImage(uitbc::Painter::ImageID image_id, float cx, float cy, float w, float h, float angle) const;
 
-	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
+	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* resource);
 
-	UiCure::CollisionSoundManager* mCollisionSoundManager;
-	Level* mLevel;
-	std::vector<float> mCutVertices;
-	std::vector<float> mCutWindowVertices;
-	std::vector<uint8> mCutColors;
-	bool mForceCutWindow;
-	std::vector<Piece*> mPieces;
-	Life::Menu* mMenu;
-	StopWatch mNextLevelTimer;
-	Sunlight* mSunlight;
-	float mCameraAngle;
-	float mCameraRotateSpeed;
-	xform mCameraTransform;
-	float mPercentDone;
-	bool mLevelCompleted;
-	UiTbc::Button* mPauseButton;
-	bool mIsCutting;
-	bool mIsShaking;
-	int mCutsLeft;
-	int mShakesLeft;
-	StopWatch mShakeTimer;
-	CutMode mLastCutMode;
-	HiResTimer mCutTimer;
-	float mCutSoundPitch;
-	int mQuickCutCount;
-	float mLevelScore;
-	UiCure::SoundReleaser* mShakeSound;
+	UiCure::CollisionSoundManager* collision_sound_manager_;
+	Level* level_;
+	std::vector<float> cut_vertices_;
+	std::vector<float> cut_window_vertices_;
+	std::vector<uint8> cut_colors_;
+	bool force_cut_window_;
+	std::vector<Piece*> pieces_;
+	life::Menu* menu_;
+	StopWatch next_level_timer_;
+	Sunlight* sunlight_;
+	float camera_angle_;
+	float camera_rotate_speed_;
+	xform camera_transform_;
+	float percent_done_;
+	bool level_completed_;
+	uitbc::Button* pause_button_;
+	bool is_cutting_;
+	bool is_shaking_;
+	int cuts_left_;
+	int shakes_left_;
+	StopWatch shake_timer_;
+	CutMode last_cut_mode_;
+	HiResTimer cut_timer_;
+	float cut_sound_pitch_;
+	int quick_cut_count_;
+	float level_score_;
+	UiCure::SoundReleaser* shake_sound_;
 	logclass();
 };
 

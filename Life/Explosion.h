@@ -6,37 +6,33 @@
 
 #pragma once
 
-#include "../Lepra/Include/Vector3D.h"
-#include "Life.h"
+#include "../lepra/include/vector3d.h"
+#include "life.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class CppContextObject;
 }
-namespace Tbc
-{
+namespace tbc {
 class PhysicsManager;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class Explosion
-{
+class Explosion {
 public:
-	static float CalculateForce(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const vec3& pPosition, float pStrength);
-	static float PushObject(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const vec3& pPosition, float pStrength, float pTimeFactor);
-	static void FallApart(Tbc::PhysicsManager* pPhysicsManager, Cure::CppContextObject* pObject, bool pIncludeFixed);
-	static void Freeze(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject);
+	static float CalculateForce(tbc::PhysicsManager* physics_manager, const cure::ContextObject* object, const vec3& position, float strength);
+	static float PushObject(tbc::PhysicsManager* physics_manager, const cure::ContextObject* object, const vec3& position, float strength, float time_factor);
+	static void FallApart(tbc::PhysicsManager* physics_manager, cure::CppContextObject* object, bool include_fixed);
+	static void Freeze(tbc::PhysicsManager* physics_manager, const cure::ContextObject* object);
 
 private:
-	static float Force(Tbc::PhysicsManager* pPhysicsManager, const Cure::ContextObject* pObject, const vec3& pPosition, float pStrength, float pTimeFactor);
+	static float Force(tbc::PhysicsManager* physics_manager, const cure::ContextObject* object, const vec3& position, float strength, float time_factor);
 
 	logclass();
 };

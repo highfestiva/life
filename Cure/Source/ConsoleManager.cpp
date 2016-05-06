@@ -5,93 +5,79 @@
 
 
 #include "pch.h"
-#include "../Include/ConsoleManager.h"
-#include "../../Lepra/Include/LogListener.h"
-#include "../../Lepra/Include/SystemManager.h"
-#include "../Include/Cure.h"
-#include "../Include/RuntimeVariable.h"
+#include "../include/consolemanager.h"
+#include "../../lepra/include/loglistener.h"
+#include "../../lepra/include/systemmanager.h"
+#include "../include/cure.h"
+#include "../include/runtimevariable.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-ConsoleManager::ConsoleManager(RuntimeVariableScope* pVariableScope, InteractiveConsoleLogListener* pConsoleLogger,
-	ConsolePrompt* pConsolePrompt):
-	mVariableScope(pVariableScope),
-	mConsoleLogger(pConsoleLogger),
-	mConsolePrompt(pConsolePrompt),
-	mConsoleCommandManager(0),
-	mConsoleThread(0),
-	mHistorySilentUntilNextExecute(false)
-{
+ConsoleManager::ConsoleManager(RuntimeVariableScope* variable_scope, InteractiveConsoleLogListener* console_logger,
+	ConsolePrompt* console_prompt):
+	variable_scope_(variable_scope),
+	console_logger_(console_logger),
+	console_prompt_(console_prompt),
+	console_command_manager_(0),
+	console_thread_(0),
+	history_silent_until_next_execute_(false) {
 }
 
-ConsoleManager::~ConsoleManager()
-{
+ConsoleManager::~ConsoleManager() {
 	Join();
-	mConsoleLogger = 0;
-	delete mConsolePrompt;
-	mConsolePrompt = 0;
-	mVariableScope = 0;
-	delete mConsoleCommandManager;
-	mConsoleCommandManager = 0;
+	console_logger_ = 0;
+	delete console_prompt_;
+	console_prompt_ = 0;
+	variable_scope_ = 0;
+	delete console_command_manager_;
+	console_command_manager_ = 0;
 };
 
-void ConsoleManager::SetConsoleLogger(InteractiveConsoleLogListener* pLogger)
-{
-	mConsoleLogger = pLogger;
+void ConsoleManager::SetConsoleLogger(InteractiveConsoleLogListener* logger) {
+	console_logger_ = logger;
 }
 
-bool ConsoleManager::Start()
-{
-	if (!mConsoleThread)
-	{
-		mConsoleThread = new MemberThread<ConsoleManager>("ConsoleThread");
+bool ConsoleManager::Start() {
+	if (!console_thread_) {
+		console_thread_ = new MemberThread<ConsoleManager>("ConsoleThread");
 	}
-	return (mConsoleThread->Start(this, &ConsoleManager::ConsoleThreadEntry));
+	return (console_thread_->Start(this, &ConsoleManager::ConsoleThreadEntry));
 }
 
-void ConsoleManager::Join()
-{
-	if (mConsoleThread && mConsoleThread->IsRunning())
-	{
-		mConsoleThread->RequestStop();
+void ConsoleManager::Join() {
+	if (console_thread_ && console_thread_->IsRunning()) {
+		console_thread_->RequestStop();
 	}
 
 	{
 		// Join forks.
-		ScopeLock lLock(&mLock);
-		ForkList::iterator x = mForkList.begin();
-		for (; x != mForkList.end(); ++x)
-		{
+		ScopeLock lock(&lock_);
+		ForkList::iterator x = fork_list_.begin();
+		for (; x != fork_list_.end(); ++x) {
 			(*x)->RequestStop();
 		}
 	}
-	if (mConsolePrompt)
-	{
-		mConsolePrompt->ReleaseWaitCharThread();
+	if (console_prompt_) {
+		console_prompt_->ReleaseWaitCharThread();
 	}
-	if (Thread::GetCurrentThread() != mConsoleThread && mConsoleThread)
-	{
-		if (mConsoleThread->IsRunning())
-		{
-			mConsoleThread->Join(0.5);
-			mConsoleThread->Kill();
-			delete mConsoleThread;
-			mConsoleThread = 0;
+	if (Thread::GetCurrentThread() != console_thread_ && console_thread_) {
+		if (console_thread_->IsRunning()) {
+			console_thread_->Join(0.5);
+			console_thread_->Kill();
+			delete console_thread_;
+			console_thread_ = 0;
 		}
 	}
 
 	// Wait for forks.
-	for (int x = 0; x < 1000; ++x)
-	{
+	for (int x = 0; x < 1000; ++x) {
 		{
-			ScopeLock lLock(&mLock);
-			if (mForkList.empty())
-			{
+			ScopeLock lock(&lock_);
+			if (fork_list_.empty()) {
 				break;
 			}
 		}
@@ -99,10 +85,9 @@ void ConsoleManager::Join()
 	}
 	{
 		// Kill forks.
-		ScopeLock lLock(&mLock);
-		ForkList::iterator x = mForkList.begin();
-		for (; x != mForkList.end(); ++x)
-		{
+		ScopeLock lock(&lock_);
+		ForkList::iterator x = fork_list_.begin();
+		for (; x != fork_list_.end(); ++x) {
 			(*x)->Kill();
 		}
 	}
@@ -110,402 +95,322 @@ void ConsoleManager::Join()
 
 
 
-void ConsoleManager::PushYieldCommand(const str& pCommand)
-{
-	ScopeLock lLock(&mLock);
-	mYieldCommandList.push_back(pCommand);
+void ConsoleManager::PushYieldCommand(const str& command) {
+	ScopeLock lock(&lock_);
+	yield_command_list_.push_back(command);
 }
 
-int ConsoleManager::ExecuteCommand(const str& pCommand)
-{
-	return (mConsoleCommandManager->Execute(pCommand, false));
+int ConsoleManager::ExecuteCommand(const str& command) {
+	return (console_command_manager_->Execute(command, false));
 }
 
-int ConsoleManager::ExecuteYieldCommand()
-{
-	str lYieldCommand;
+int ConsoleManager::ExecuteYieldCommand() {
+	str yield_command;
 	{
-		ScopeLock lLock(&mLock);
-		if (!mYieldCommandList.empty())
-		{
-			lYieldCommand = mYieldCommandList.front();
-			mYieldCommandList.pop_front();
+		ScopeLock lock(&lock_);
+		if (!yield_command_list_.empty()) {
+			yield_command = yield_command_list_.front();
+			yield_command_list_.pop_front();
 		}
 	}
-	if (!lYieldCommand.empty())
-	{
-		return (mConsoleCommandManager->Execute(lYieldCommand, false));
+	if (!yield_command.empty()) {
+		return (console_command_manager_->Execute(yield_command, false));
 	}
 	return (-1);
 }
 
-ConsoleCommandManager* ConsoleManager::GetConsoleCommandManager() const
-{
-	return (mConsoleCommandManager);
+ConsoleCommandManager* ConsoleManager::GetConsoleCommandManager() const {
+	return (console_command_manager_);
 }
 
 
 
-LogDecorator& ConsoleManager::GetLogger() const
-{
-	return (mLog);
+LogDecorator& ConsoleManager::GetLogger() const {
+	return (log_);
 }
 
 
 
-void ConsoleManager::AddFork(Thread* pThread)
-{
-	ScopeLock lLock(&mLock);
-	mForkList.push_back(pThread);
+void ConsoleManager::AddFork(Thread* thread) {
+	ScopeLock lock(&lock_);
+	fork_list_.push_back(thread);
 }
 
-void ConsoleManager::RemoveFork(Thread* pThread)
-{
-	ScopeLock lLock(&mLock);
-	mForkList.remove(pThread);
-}
-
-
-
-InteractiveConsoleLogListener* ConsoleManager::GetConsoleLogger() const
-{
-	return (mConsoleLogger);
-}
-
-ConsolePrompt* ConsoleManager::GetConsolePrompt() const
-{
-	return (mConsolePrompt);
-}
-
-RuntimeVariableScope* ConsoleManager::GetVariableScope() const
-{
-	return (mVariableScope);
+void ConsoleManager::RemoveFork(Thread* thread) {
+	ScopeLock lock(&lock_);
+	fork_list_.remove(thread);
 }
 
 
 
-bool ConsoleManager::ForkExecuteCommand(const str& pCommand)
-{
-	class ForkThread: public Thread
-	{
+InteractiveConsoleLogListener* ConsoleManager::GetConsoleLogger() const {
+	return (console_logger_);
+}
+
+ConsolePrompt* ConsoleManager::GetConsolePrompt() const {
+	return (console_prompt_);
+}
+
+RuntimeVariableScope* ConsoleManager::GetVariableScope() const {
+	return (variable_scope_);
+}
+
+
+
+bool ConsoleManager::ForkExecuteCommand(const str& command) {
+	class ForkThread: public Thread {
 	public:
-		ForkThread(ConsoleManager* pConsole, const str& pCommand):
+		ForkThread(ConsoleManager* console, const str& command):
 			Thread("ConsoleFork"),
-			mConsole(pConsole),
-			mCommand(pCommand)
-		{
+			console_(console),
+			command_(command) {
 		}
 	private:
-		void Run()
-		{
-			log_volatile(mConsole->GetLogger().Debug("ForkThread: started."));
-			if (mConsole->ExecuteCommand(mCommand) != 0)
-			{
-				mConsole->GetLogger().Error("ForkThread: execution resulted in an error.");
+		void Run() {
+			log_volatile(console_->GetLogger().Debug("ForkThread: started."));
+			if (console_->ExecuteCommand(command_) != 0) {
+				console_->GetLogger().Error("ForkThread: execution resulted in an error.");
 			}
-			log_volatile(mConsole->GetLogger().Debug("ForkThread: ended."));
-			mConsole->RemoveFork(this);
+			log_volatile(console_->GetLogger().Debug("ForkThread: ended."));
+			console_->RemoveFork(this);
 		}
-		ConsoleManager* mConsole;
-		str mCommand;
+		ConsoleManager* console_;
+		str command_;
 		void operator=(const ForkThread&) {};
 	};
-	if (SystemManager::GetQuitRequest())
-	{
+	if (SystemManager::GetQuitRequest()) {
 		return false;
 	}
-	ForkThread* lExecutor = new ForkThread(this, pCommand);
-	AddFork(lExecutor);
-	lExecutor->RequestSelfDestruct();
-	return (lExecutor->Start());
+	ForkThread* executor = new ForkThread(this, command);
+	AddFork(executor);
+	executor->RequestSelfDestruct();
+	return (executor->Start());
 }
 
 
 
-void ConsoleManager::InitCommands()
-{
-	mConsoleCommandManager = new ConsoleCommandManager();
-	mConsoleCommandManager->AddExecutor(new ConsoleExecutor<ConsoleManager>(this, &ConsoleManager::OnCommandLocal, &ConsoleManager::OnCommandError));
+void ConsoleManager::InitCommands() {
+	console_command_manager_ = new ConsoleCommandManager();
+	console_command_manager_->AddExecutor(new ConsoleExecutor<ConsoleManager>(this, &ConsoleManager::OnCommandLocal, &ConsoleManager::OnCommandError));
 	AddCommands();
 }
 
-std::list<str> ConsoleManager::GetCommandList() const
-{
-	str lDummy;
-	std::list<str> lCommandList = mConsoleCommandManager->GetCommandCompletionList("", lDummy);
-	return (lCommandList);
+std::list<str> ConsoleManager::GetCommandList() const {
+	str dummy;
+	std::list<str> _command_list = console_command_manager_->GetCommandCompletionList("", dummy);
+	return (_command_list);
 }
 
-int ConsoleManager::TranslateCommand(const HashedString& pCommand) const
-{
-	CommandLookupMap::const_iterator x = mCommandLookup.find(pCommand);
-	if (x != mCommandLookup.end())
-	{
+int ConsoleManager::TranslateCommand(const HashedString& command) const {
+	CommandLookupMap::const_iterator x = command_lookup_.find(command);
+	if (x != command_lookup_.end()) {
 		return x->second;
 	}
 	return -1;
 }
 
-void ConsoleManager::PrintCommandList(const std::list<str>& pCommandList)
-{
-	std::list<str>::const_iterator x = pCommandList.begin();
-	int lSpacing;
-	v_get(lSpacing, =, mVariableScope, RTVAR_CONSOLE_COLUMNSPACING, 2);
-	size_t lLongestCommand = 10;
-	for (; x != pCommandList.end(); ++x)
-	{
-		
-		const size_t lLength = x->length()+lSpacing;
-		lLongestCommand = (lLength > lLongestCommand)? lLength : lLongestCommand;
+void ConsoleManager::PrintCommandList(const std::list<str>& command_list) {
+	std::list<str>::const_iterator x = command_list.begin();
+	int spacing;
+	v_get(spacing, =, variable_scope_, kRtvarConsoleColumnspacing, 2);
+	size_t longest_command = 10;
+	for (; x != command_list.end(); ++x) {
+
+		const size_t __length = x->length()+spacing;
+		longest_command = (__length > longest_command)? __length : longest_command;
 	}
-	size_t lIndent = 0;
-	str lFormat = strutil::Format("%%-%is", lLongestCommand);
-	for (x = pCommandList.begin(); x != pCommandList.end(); ++x)
-	{
-		str lCommand = strutil::Format(lFormat.c_str(), x->c_str());
-		mConsoleLogger->OnLogRawMessage(lCommand);
-		lIndent += lCommand.length();
-		int lConsoleWidth;
-		v_get(lConsoleWidth, =, GetVariableScope(), RTVAR_CONSOLE_CHARACTERWIDTH, 80);
-		if ((int)(lIndent+lLongestCommand) >= lConsoleWidth)
-		{
-			mConsoleLogger->OnLogRawMessage("\n");
-			lIndent = 0;
+	size_t indent = 0;
+	str format = strutil::Format("%%-%is", longest_command);
+	for (x = command_list.begin(); x != command_list.end(); ++x) {
+		str _command = strutil::Format(format.c_str(), x->c_str());
+		console_logger_->OnLogRawMessage(_command);
+		indent += _command.length();
+		int console_width;
+		v_get(console_width, =, GetVariableScope(), kRtvarConsoleCharacterwidth, 80);
+		if ((int)(indent+longest_command) >= console_width) {
+			console_logger_->OnLogRawMessage("\n");
+			indent = 0;
 		}
 	}
-	if (!pCommandList.empty() && lIndent != 0)
-	{
-		mConsoleLogger->OnLogRawMessage("\n");
+	if (!command_list.empty() && indent != 0) {
+		console_logger_->OnLogRawMessage("\n");
 	}
 }
 
 
 
-void ConsoleManager::AddCommands()
-{
-	for (unsigned x = 0; x < GetCommandCount(); ++x)
-	{
-		const CommandPair& lCommand = GetCommand(x);
-		HashedString lName(lCommand.mCommandName);
-		mConsoleCommandManager->AddCommand(lName);
-		mCommandLookup.insert(CommandLookupMap::value_type(lName, lCommand.mCommandId));
+void ConsoleManager::AddCommands() {
+	for (unsigned x = 0; x < GetCommandCount(); ++x) {
+		const CommandPair& _command = GetCommand(x);
+		HashedString name(_command.command_name_);
+		console_command_manager_->AddCommand(name);
+		command_lookup_.insert(CommandLookupMap::value_type(name, _command.command_id_));
 	}
 }
 
-void ConsoleManager::ConsoleThreadEntry()
-{
+void ConsoleManager::ConsoleThreadEntry() {
 	// Main console IO loop.
-	const str lPrompt(">");
-	wstr lInputText;
-	size_t lEditIndex = 0;
-	while (!SystemManager::GetQuitRequest() && mConsoleThread && !mConsoleThread->GetStopRequest())
-	{
+	const str prompt(">");
+	wstr input_text;
+	size_t edit_index = 0;
+	while (!SystemManager::GetQuitRequest() && console_thread_ && !console_thread_->GetStopRequest()) {
 		// Execute any pending yield command.
-		if (lInputText.empty())
-		{
-			if (ExecuteYieldCommand() >= 0)
-			{
+		if (input_text.empty()) {
+			if (ExecuteYieldCommand() >= 0) {
 				continue;
 			}
 		}
 
-		mConsolePrompt->PrintPrompt(lPrompt, strutil::Encode(lInputText), lEditIndex);
+		console_prompt_->PrintPrompt(prompt, strutil::Encode(input_text), edit_index);
 
-		mConsoleLogger->SetAutoPrompt(lPrompt + strutil::Encode(lInputText));
-		int c = mConsolePrompt->WaitChar();
-		mConsoleLogger->SetAutoPrompt("");
+		console_logger_->SetAutoPrompt(prompt + strutil::Encode(input_text));
+		int c = console_prompt_->WaitChar();
+		console_logger_->SetAutoPrompt("");
 
-		str lWordDelimitorsUtf8;
-		int lKeyCompletion;
-		int lKeyEnter;
-		int lKeySilent;
-		int lKeyBackspace;
-		int lKeyDelete;
-		int lKeyCtrlLeft;
-		int lKeyCtrlRight;
-		int lKeyHome;
-		int lKeyEnd;
-		int lKeyUp;
-		int lKeyDown;
-		int lKeyLeft;
-		int lKeyRight;
-		int lKeyEsc;
-		int lKeyPgUp;
-		int lKeyPgDn;
-		v_get(lWordDelimitorsUtf8, =, mVariableScope, RTVAR_CONSOLE_CHARACTERDELIMITORS, " ");
-		v_get(lKeyCompletion, =, mVariableScope, RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t');
-		v_get(lKeyEnter, =, mVariableScope, RTVAR_CONSOLE_KEY_ENTER, (int)'\r');
-		v_get(lKeySilent, =, mVariableScope, RTVAR_CONSOLE_KEY_SILENT, (int)'\v');
-		v_get(lKeyBackspace, =, mVariableScope, RTVAR_CONSOLE_KEY_BACKSPACE, (int)'\b');
-		v_get(lKeyDelete, =, mVariableScope, RTVAR_CONSOLE_KEY_DELETE, ConsolePrompt::CON_KEY_DELETE);
-		v_get(lKeyCtrlLeft, =, mVariableScope, RTVAR_CONSOLE_KEY_CTRLLEFT, ConsolePrompt::CON_KEY_CTRL_LEFT);
-		v_get(lKeyCtrlRight, =, mVariableScope, RTVAR_CONSOLE_KEY_CTRLRIGHT, ConsolePrompt::CON_KEY_CTRL_RIGHT);
-		v_get(lKeyHome, =, mVariableScope, RTVAR_CONSOLE_KEY_HOME, ConsolePrompt::CON_KEY_HOME);
-		v_get(lKeyEnd, =, mVariableScope, RTVAR_CONSOLE_KEY_END, ConsolePrompt::CON_KEY_END);
-		v_get(lKeyUp, =, mVariableScope, RTVAR_CONSOLE_KEY_UP, ConsolePrompt::CON_KEY_UP);
-		v_get(lKeyDown, =, mVariableScope, RTVAR_CONSOLE_KEY_DOWN, ConsolePrompt::CON_KEY_DOWN);
-		v_get(lKeyLeft, =, mVariableScope, RTVAR_CONSOLE_KEY_LEFT, ConsolePrompt::CON_KEY_LEFT);
-		v_get(lKeyRight, =, mVariableScope, RTVAR_CONSOLE_KEY_RIGHT, ConsolePrompt::CON_KEY_RIGHT);
-		v_get(lKeyEsc, =, mVariableScope, RTVAR_CONSOLE_KEY_ESC, ConsolePrompt::CON_KEY_ESCAPE);
-		v_get(lKeyPgUp, =, mVariableScope, RTVAR_CONSOLE_KEY_PAGEUP, ConsolePrompt::CON_KEY_PAGE_UP);
-		v_get(lKeyPgDn, =, mVariableScope, RTVAR_CONSOLE_KEY_PAGEDOWN, ConsolePrompt::CON_KEY_PAGE_DOWN);
-		const wstr lWordDelimitors = wstrutil::Encode(lWordDelimitorsUtf8);
+		str word_delimitors_utf8;
+		int key_completion;
+		int key_enter;
+		int key_silent;
+		int key_backspace;
+		int key_delete;
+		int key_ctrl_left;
+		int key_ctrl_right;
+		int key_home;
+		int key_end;
+		int key_up;
+		int key_down;
+		int key_left;
+		int key_right;
+		int key_esc;
+		int key_pg_up;
+		int key_pg_dn;
+		v_get(word_delimitors_utf8, =, variable_scope_, kRtvarConsoleCharacterdelimitors, " ");
+		v_get(key_completion, =, variable_scope_, kRtvarConsoleKeyCompletion, (int)'\t');
+		v_get(key_enter, =, variable_scope_, kRtvarConsoleKeyEnter, (int)'\r');
+		v_get(key_silent, =, variable_scope_, kRtvarConsoleKeySilent, (int)'\v');
+		v_get(key_backspace, =, variable_scope_, kRtvarConsoleKeyBackspace, (int)'\b');
+		v_get(key_delete, =, variable_scope_, kRtvarConsoleKeyDelete, ConsolePrompt::kConKeyDelete);
+		v_get(key_ctrl_left, =, variable_scope_, kRtvarConsoleKeyCtrlleft, ConsolePrompt::kConKeyCtrlLeft);
+		v_get(key_ctrl_right, =, variable_scope_, kRtvarConsoleKeyCtrlright, ConsolePrompt::kConKeyCtrlRight);
+		v_get(key_home, =, variable_scope_, kRtvarConsoleKeyHome, ConsolePrompt::kConKeyHome);
+		v_get(key_end, =, variable_scope_, kRtvarConsoleKeyEnd, ConsolePrompt::kConKeyEnd);
+		v_get(key_up, =, variable_scope_, kRtvarConsoleKeyUp, ConsolePrompt::kConKeyUp);
+		v_get(key_down, =, variable_scope_, kRtvarConsoleKeyDown, ConsolePrompt::kConKeyDown);
+		v_get(key_left, =, variable_scope_, kRtvarConsoleKeyLeft, ConsolePrompt::kConKeyLeft);
+		v_get(key_right, =, variable_scope_, kRtvarConsoleKeyRight, ConsolePrompt::kConKeyRight);
+		v_get(key_esc, =, variable_scope_, kRtvarConsoleKeyEsc, ConsolePrompt::kConKeyEscape);
+		v_get(key_pg_up, =, variable_scope_, kRtvarConsoleKeyPageup, ConsolePrompt::kConKeyPageUp);
+		v_get(key_pg_dn, =, variable_scope_, kRtvarConsoleKeyPagedown, ConsolePrompt::kConKeyPageDown);
+		const wstr word_delimitors = wstrutil::Encode(word_delimitors_utf8);
 
-		if (c == lKeyCompletion)
-		{
-			str lBestCompletionString;
-			std::list<str> lCompletions =
-				mConsoleCommandManager->GetCommandCompletionList(strutil::Encode(lInputText), lBestCompletionString);
+		if (c == key_completion) {
+			str best_completion_string;
+			std::list<str> completions =
+				console_command_manager_->GetCommandCompletionList(strutil::Encode(input_text), best_completion_string);
 			// Print command completion list.
-			if (lCompletions.size() > 1)
-			{
-				mConsoleLogger->OnLogRawMessage("\n");
-				PrintCommandList(lCompletions);
+			if (completions.size() > 1) {
+				console_logger_->OnLogRawMessage("\n");
+				PrintCommandList(completions);
 			}
-			lInputText = wstrutil::Encode(lBestCompletionString);
-			lEditIndex = lInputText.length();
-			if (lCompletions.size() == 1)
-			{
-				lInputText += ' ';
-				++lEditIndex;
+			input_text = wstrutil::Encode(best_completion_string);
+			edit_index = input_text.length();
+			if (completions.size() == 1) {
+				input_text += ' ';
+				++edit_index;
 			}
-		}
-		else if (c == lKeyEnter)
-		{
-			mConsoleLogger->OnLogRawMessage("\r" + lPrompt + strutil::Encode(lInputText) + "\n");
-			mConsoleCommandManager->Execute(strutil::Encode(lInputText), !mHistorySilentUntilNextExecute);
-			mHistorySilentUntilNextExecute = false;
-			lInputText = L"";
-			lEditIndex = 0;
-		}
-		else if (c == lKeySilent)
-		{
-			mHistorySilentUntilNextExecute = true;
-		}
-		else if (c == lKeyBackspace)
-		{
-			if (lEditIndex > 0)
-			{
+		} else if (c == key_enter) {
+			console_logger_->OnLogRawMessage("\r" + prompt + strutil::Encode(input_text) + "\n");
+			console_command_manager_->Execute(strutil::Encode(input_text), !history_silent_until_next_execute_);
+			history_silent_until_next_execute_ = false;
+			input_text = L"";
+			edit_index = 0;
+		} else if (c == key_silent) {
+			history_silent_until_next_execute_ = true;
+		} else if (c == key_backspace) {
+			if (edit_index > 0) {
 				// Reset index in console history.
-				mConsoleCommandManager->SetCurrentHistoryIndex((int)mConsoleCommandManager->GetHistoryCount());
+				console_command_manager_->SetCurrentHistoryIndex((int)console_command_manager_->GetHistoryCount());
 
-				--lEditIndex;
-				mConsolePrompt->Backspace(1);
-				mConsolePrompt->EraseText(lInputText.length()-lEditIndex);
-				wstr lNewInputText = lInputText.substr(0, lEditIndex) + lInputText.substr(lEditIndex+1);
-				lInputText = lNewInputText;
+				--edit_index;
+				console_prompt_->Backspace(1);
+				console_prompt_->EraseText(input_text.length()-edit_index);
+				wstr new_input_text = input_text.substr(0, edit_index) + input_text.substr(edit_index+1);
+				input_text = new_input_text;
 			}
-		}
-		else if (c == lKeyDelete)
-		{
-			if (lEditIndex < lInputText.length())
-			{
+		} else if (c == key_delete) {
+			if (edit_index < input_text.length()) {
 				// Reset index in console history.
-				mConsoleCommandManager->SetCurrentHistoryIndex((int)mConsoleCommandManager->GetHistoryCount());
+				console_command_manager_->SetCurrentHistoryIndex((int)console_command_manager_->GetHistoryCount());
 
-				mConsolePrompt->EraseText(lInputText.length()-lEditIndex);
-				wstr lNewInputText = lInputText.substr(0, lEditIndex) + lInputText.substr(lEditIndex+1);
-				lInputText = lNewInputText;
+				console_prompt_->EraseText(input_text.length()-edit_index);
+				wstr new_input_text = input_text.substr(0, edit_index) + input_text.substr(edit_index+1);
+				input_text = new_input_text;
 			}
-		}
-		else if (c == lKeyCtrlLeft)
-		{
-			lEditIndex = wstrutil::FindPreviousWord(lInputText, lWordDelimitors, lEditIndex);
-		}
-		else if (c == lKeyCtrlRight)
-		{
-			lEditIndex = wstrutil::FindNextWord(lInputText, lWordDelimitors, lEditIndex);
-		}
-		else if (c == lKeyHome)
-		{
-			lEditIndex = 0;
-		}
-		else if (c == lKeyEnd)
-		{
-			lEditIndex = lInputText.length();
-		}
-		else if (c == lKeyUp || c == lKeyDown)
-		{
+		} else if (c == key_ctrl_left) {
+			edit_index = wstrutil::FindPreviousWord(input_text, word_delimitors, edit_index);
+		} else if (c == key_ctrl_right) {
+			edit_index = wstrutil::FindNextWord(input_text, word_delimitors, edit_index);
+		} else if (c == key_home) {
+			edit_index = 0;
+		} else if (c == key_end) {
+			edit_index = input_text.length();
+		} else if (c == key_up || c == key_down) {
 			// Erase current text.
-			mConsolePrompt->Backspace(lEditIndex);
-			mConsolePrompt->EraseText(lInputText.length());
-			int lDesiredHistoryIndex = mConsoleCommandManager->GetCurrentHistoryIndex();
-			if (c == lKeyUp)
-			{
+			console_prompt_->Backspace(edit_index);
+			console_prompt_->EraseText(input_text.length());
+			int desired_history_index = console_command_manager_->GetCurrentHistoryIndex();
+			if (c == key_up) {
 				// History->previous.
-				--lDesiredHistoryIndex;
-			}
-			else if (c == lKeyDown)
-			{
+				--desired_history_index;
+			} else if (c == key_down) {
 				// History->next.
-				++lDesiredHistoryIndex;
+				++desired_history_index;
 			}
-			mConsoleCommandManager->SetCurrentHistoryIndex(lDesiredHistoryIndex);
-			lDesiredHistoryIndex = mConsoleCommandManager->GetCurrentHistoryIndex();
-			lInputText = wstrutil::Encode(mConsoleCommandManager->GetHistory(lDesiredHistoryIndex));
-			lEditIndex = lInputText.length();
-		}
-		else if (c == lKeyLeft)
-		{
-			if (lEditIndex > 0)
-			{
-				--lEditIndex;
+			console_command_manager_->SetCurrentHistoryIndex(desired_history_index);
+			desired_history_index = console_command_manager_->GetCurrentHistoryIndex();
+			input_text = wstrutil::Encode(console_command_manager_->GetHistory(desired_history_index));
+			edit_index = input_text.length();
+		} else if (c == key_left) {
+			if (edit_index > 0) {
+				--edit_index;
 			}
-		}
-		else if (c == lKeyRight)
-		{
-			if (lEditIndex < lInputText.length())
-			{
-				++lEditIndex;
+		} else if (c == key_right) {
+			if (edit_index < input_text.length()) {
+				++edit_index;
 			}
-		}
-		else if (c == lKeyEsc)
-		{
-			mConsolePrompt->Backspace(lEditIndex);
-			mConsolePrompt->EraseText(lInputText.length());
-			lInputText = L"";
-			lEditIndex = 0;
-		}
-		else if (c == lKeyPgUp)
-		{
-			mConsoleLogger->StepPage(-1);
-		}
-		else if (c == lKeyPgDn)
-		{
-			mConsoleLogger->StepPage(+1);
-		}
-		else if (c < 0)
-		{
-		}
-		else
-		{
-			const wstr lChar(1, c);
-			lInputText.insert(lEditIndex, lChar);
-			++lEditIndex;
+		} else if (c == key_esc) {
+			console_prompt_->Backspace(edit_index);
+			console_prompt_->EraseText(input_text.length());
+			input_text = L"";
+			edit_index = 0;
+		} else if (c == key_pg_up) {
+			console_logger_->StepPage(-1);
+		} else if (c == key_pg_dn) {
+			console_logger_->StepPage(+1);
+		} else if (c < 0) {
+		} else {
+			const wstr __c(1, c);
+			input_text.insert(edit_index, __c);
+			++edit_index;
 		}
 	}
 }
 
-int ConsoleManager::OnCommandLocal(const str& pCommand, const strutil::strvec& pParameterVector)
-{
-	return (OnCommand(pCommand, pParameterVector));
+int ConsoleManager::OnCommandLocal(const str& command, const strutil::strvec& parameter_vector) {
+	return (OnCommand(command, parameter_vector));
 }
 
-void ConsoleManager::OnCommandError(const str& pCommand, const strutil::strvec&, int pResult)
-{
-	if (pResult < 0)
-	{
-		mLog.Warningf("Unknown command: \"%s\". Type 'help' for more info.", pCommand.c_str());
-	}
-	else
-	{
-		mLog.Warningf("Command error: \"%s\" returned error code %i.", pCommand.c_str(), pResult);
+void ConsoleManager::OnCommandError(const str& command, const strutil::strvec&, int result) {
+	if (result < 0) {
+		log_.Warningf("Unknown command: \"%s\". Type 'help' for more info.", command.c_str());
+	} else {
+		log_.Warningf("Command error: \"%s\" returned error code %i.", command.c_str(), result);
 	}
 }
 
 
 
-loginstance(CONSOLE, ConsoleManager);
+loginstance(kConsole, ConsoleManager);
 
 
 

@@ -1,150 +1,133 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Level.h"
-#include "../Lepra/Include/CyclicArray.h"
-#include "../Lepra/Include/Plane.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiTbc/Include/UiBasicMeshCreator.h"
-#include "../UiTbc/Include/UiTriangleBasedGeometry.h"
-#include "RtVar.h"
+#include "level.h"
+#include "../lepra/include/cyclicarray.h"
+#include "../lepra/include/plane.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uitbc/include/uibasicmeshcreator.h"
+#include "../uitbc/include/uitrianglebasedgeometry.h"
+#include "rtvar.h"
 
 
 
-namespace Bound
-{
+namespace Bound {
 
 
 
-Level::Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
-	Parent(pResourceManager, pClassId, pUiManager),
-	mGfxMesh(0),
-	mGfxWindowMesh(0),
-	mGfxMeshId(0),
-	mGfxWindowMeshId(0),
-	mPhysMeshBodyId(0),
-	mBodyIndexData(0),
-	mLevel(0),
-	mOriginalVolume(1),
-	mVolume(1)
-{
+Level::Level(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager):
+	Parent(resource_manager, class_id, ui_manager),
+	gfx_mesh_(0),
+	gfx_window_mesh_(0),
+	gfx_mesh_id_(0),
+	gfx_window_mesh_id_(0),
+	phys_mesh_body_id_(0),
+	body_index_data_(0),
+	level_(0),
+	original_volume_(1),
+	volume_(1) {
 }
 
-Level::~Level()
-{
+Level::~Level() {
 }
 
 
 
-void Level::GenerateLevel(Tbc::PhysicsManager* pPhysicsManager, bool pVaryShapes, int pLevel)
-{
-	(void)pLevel;
+void Level::GenerateLevel(tbc::PhysicsManager* physics_manager, bool vary_shapes, int level) {
+	(void)level;
 
-	if (mGfxMeshId)
-	{
-		mUiManager->GetRenderer()->RemoveGeometry(mGfxMeshId);
-		mGfxMeshId = 0;
+	if (gfx_mesh_id_) {
+		ui_manager_->GetRenderer()->RemoveGeometry(gfx_mesh_id_);
+		gfx_mesh_id_ = 0;
 	}
-	if (mGfxWindowMeshId)
-	{
-		mUiManager->GetRenderer()->RemoveGeometry(mGfxWindowMeshId);
-		mGfxWindowMeshId = 0;
+	if (gfx_window_mesh_id_) {
+		ui_manager_->GetRenderer()->RemoveGeometry(gfx_window_mesh_id_);
+		gfx_window_mesh_id_ = 0;
 	}
 
-	CreateMesh(pVaryShapes, pLevel, 4.5f, 4.5f, 3);
-	mGfxMesh->GetBasicMaterialSettings().mDiffuse	= vec3(0.5f,0.5f,0.5f);
-	mGfxMesh->GetBasicMaterialSettings().mSpecular	= vec3(0,0,0);
-	mGfxMesh->GetBasicMaterialSettings().mShininess	= false;
-	mGfxMesh->GetBasicMaterialSettings().mSmooth	= false;
-	mGfxMesh->SetGeometryVolatility(Tbc::GeometryBase::GEOM_SEMI_STATIC);
-	mGfxMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::FORCE_NO_SHADOWS);
+	CreateMesh(vary_shapes, level, 4.5f, 4.5f, 3);
+	gfx_mesh_->GetBasicMaterialSettings().diffuse_	= vec3(0.5f,0.5f,0.5f);
+	gfx_mesh_->GetBasicMaterialSettings().specular_	= vec3(0,0,0);
+	gfx_mesh_->GetBasicMaterialSettings().shininess_	= false;
+	gfx_mesh_->GetBasicMaterialSettings().smooth_	= false;
+	gfx_mesh_->SetGeometryVolatility(tbc::GeometryBase::kGeomSemiStatic);
+	gfx_mesh_id_ = ui_manager_->GetRenderer()->AddGeometry(gfx_mesh_, uitbc::Renderer::kMatVertexColorSolid, uitbc::Renderer::kForceNoShadows);
 
-	delete mGfxWindowMesh;
-	mGfxWindowMesh = 0;
+	delete gfx_window_mesh_;
+	gfx_window_mesh_ = 0;
 
-	CreatePhysicsMesh(pPhysicsManager);
-	DeleteWindowBoxes(pPhysicsManager);
+	CreatePhysicsMesh(physics_manager);
+	DeleteWindowBoxes(physics_manager);
 
-	mOriginalVolume = CalculateVolume();
-	mVolume = mOriginalVolume;
+	original_volume_ = CalculateVolume();
+	volume_ = original_volume_;
 }
 
-const UiTbc::TriangleBasedGeometry* Level::GetMesh() const
-{
-	return mGfxMesh;
+const uitbc::TriangleBasedGeometry* Level::GetMesh() const {
+	return gfx_mesh_;
 }
 
-const UiTbc::TriangleBasedGeometry* Level::GetWindowMesh() const
-{
-	return mGfxWindowMesh;
+const uitbc::TriangleBasedGeometry* Level::GetWindowMesh() const {
+	return gfx_window_mesh_;
 }
 
-float Level::GetVolumePart() const
-{
-	return mVolume / mOriginalVolume;
+float Level::GetVolumePart() const {
+	return volume_ / original_volume_;
 }
 
-void Level::SetTriangles(Tbc::PhysicsManager* pPhysicsManager, const std::vector<float>& pVertices, const std::vector<uint8>& pColors)
-{
-	mUiManager->GetRenderer()->RemoveGeometry(mGfxMeshId);
+void Level::SetTriangles(tbc::PhysicsManager* physics_manager, const std::vector<float>& vertices, const std::vector<uint8>& colors) {
+	ui_manager_->GetRenderer()->RemoveGeometry(gfx_mesh_id_);
 
-	SetVertices(mGfxMesh, &pVertices[0], pVertices.size()/3, &pColors[0]);
-	mGfxMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxMesh, UiTbc::Renderer::MAT_VERTEX_COLOR_SOLID, UiTbc::Renderer::FORCE_NO_SHADOWS);
-	CreatePhysicsMesh(pPhysicsManager);
+	SetVertices(gfx_mesh_, &vertices[0], vertices.size()/3, &colors[0]);
+	gfx_mesh_id_ = ui_manager_->GetRenderer()->AddGeometry(gfx_mesh_, uitbc::Renderer::kMatVertexColorSolid, uitbc::Renderer::kForceNoShadows);
+	CreatePhysicsMesh(physics_manager);
 
-	mVolume = CalculateVolume();
+	volume_ = CalculateVolume();
 }
 
-void Level::SetWindowTriangles(const std::vector<float>& pVertices)
-{
-	if (mGfxWindowMeshId)
-	{
-		mUiManager->GetRenderer()->RemoveGeometry(mGfxWindowMeshId);
+void Level::SetWindowTriangles(const std::vector<float>& vertices) {
+	if (gfx_window_mesh_id_) {
+		ui_manager_->GetRenderer()->RemoveGeometry(gfx_window_mesh_id_);
 	}
 
-	SetVertices(mGfxWindowMesh, pVertices.empty()? 0 : &pVertices[0], pVertices.size()/3, 0);
-	mGfxWindowMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxWindowMesh, UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED, UiTbc::Renderer::FORCE_NO_SHADOWS);
+	SetVertices(gfx_window_mesh_, vertices.empty()? 0 : &vertices[0], vertices.size()/3, 0);
+	gfx_window_mesh_id_ = ui_manager_->GetRenderer()->AddGeometry(gfx_window_mesh_, uitbc::Renderer::kMatSingleColorBlended, uitbc::Renderer::kForceNoShadows);
 }
 
-void Level::AddCutPlane(Tbc::PhysicsManager* pPhysicsManager, const Plane& pWindowPlane, const std::vector<float>& pVertices, const Color& pColor)
-{
-	if (mGfxWindowMeshId)
-	{
-		mUiManager->GetRenderer()->RemoveGeometry(mGfxWindowMeshId);
+void Level::AddCutPlane(tbc::PhysicsManager* physics_manager, const Plane& window_plane, const std::vector<float>& vertices, const Color& color) {
+	if (gfx_window_mesh_id_) {
+		ui_manager_->GetRenderer()->RemoveGeometry(gfx_window_mesh_id_);
 	}
 
-	if (!mGfxWindowMesh)
-	{
-		mGfxWindowMesh = new UiTbc::TriangleBasedGeometry;
+	if (!gfx_window_mesh_) {
+		gfx_window_mesh_ = new uitbc::TriangleBasedGeometry;
 	}
-	mGfxWindowMesh->GetBasicMaterialSettings().mDiffuse	= vec3(pColor.mRed/255.0f, pColor.mGreen/255.0f, pColor.mBlue/255.0f);
-	mGfxWindowMesh->GetBasicMaterialSettings().mSpecular	= vec3(1,1,1);
-	mGfxWindowMesh->GetBasicMaterialSettings().mAlpha	= pColor.mAlpha/255.0f;
-	mGfxWindowMesh->GetBasicMaterialSettings().mShininess	= true;
-	mGfxWindowMesh->GetBasicMaterialSettings().mSmooth	= false;
+	gfx_window_mesh_->GetBasicMaterialSettings().diffuse_	= vec3(color.red_/255.0f, color.green_/255.0f, color.blue_/255.0f);
+	gfx_window_mesh_->GetBasicMaterialSettings().specular_	= vec3(1,1,1);
+	gfx_window_mesh_->GetBasicMaterialSettings().alpha_	= color.alpha_/255.0f;
+	gfx_window_mesh_->GetBasicMaterialSettings().shininess_	= true;
+	gfx_window_mesh_->GetBasicMaterialSettings().smooth_	= false;
 
-	std::vector<float> lVertices(pVertices);
-	const float* v = mGfxWindowMesh->GetVertexData();
-	int vc = mGfxWindowMesh->GetVertexCount()*3;
-	for (int x = 0; x < vc; ++x)
-	{
-		lVertices.push_back(v[x]);
+	std::vector<float> _vertices(vertices);
+	const float* v = gfx_window_mesh_->GetVertexData();
+	int vc = gfx_window_mesh_->GetVertexCount()*3;
+	for (int x = 0; x < vc; ++x) {
+		_vertices.push_back(v[x]);
 	}
-	SetVertices(mGfxWindowMesh, &lVertices[0], lVertices.size()/3, 0);
-	mGfxWindowMeshId = mUiManager->GetRenderer()->AddGeometry(mGfxWindowMesh, UiTbc::Renderer::MAT_SINGLE_COLOR_BLENDED, UiTbc::Renderer::FORCE_NO_SHADOWS);
+	SetVertices(gfx_window_mesh_, &_vertices[0], _vertices.size()/3, 0);
+	gfx_window_mesh_id_ = ui_manager_->GetRenderer()->AddGeometry(gfx_window_mesh_, uitbc::Renderer::kMatSingleColorBlended, uitbc::Renderer::kForceNoShadows);
 
-	AddPhysicsWindowBox(pPhysicsManager, pWindowPlane);
+	AddPhysicsWindowBox(physics_manager, window_plane);
 }
 
-void Level::RenderOutline()
-{
-	const float x = mSize.x / 2;
-	const float y = mSize.y / 2;
-	const float z = mSize.z / 2;
+void Level::RenderOutline() {
+	const float x = size_.x / 2;
+	const float y = size_.y / 2;
+	const float z = size_.z / 2;
 	static const vec3 v[] =
 	{
 		vec3(-x, +y, +z), vec3(+x, +y, +z),
@@ -163,142 +146,124 @@ void Level::RenderOutline()
 		vec3(+x, -y, -z), vec3(+x, +y, -z),
 	};
 	const int cnt = LEPRA_ARRAY_COUNT(v)/2;
-	for (int i = 0; i < cnt; ++i)
-	{
-		mUiManager->GetRenderer()->DrawLine(v[i*2+0], v[i*2+1]-v[i*2+0], ORANGE);
+	for (int i = 0; i < cnt; ++i) {
+		ui_manager_->GetRenderer()->DrawLine(v[i*2+0], v[i*2+1]-v[i*2+0], ORANGE);
 	}
 }
 
 
 
-UiTbc::TriangleBasedGeometry* Level::CreateMesh(bool pVaryShapes, int pLevel, float x, float y, float z)
-{
-	if (mGfxMesh)
-	{
-		delete mGfxMesh;
+uitbc::TriangleBasedGeometry* Level::CreateMesh(bool vary_shapes, int level, float x, float y, float z) {
+	if (gfx_mesh_) {
+		delete gfx_mesh_;
 	}
-	float lMoveZ = 0;
-	const int lShape = pVaryShapes? pLevel%4 : 0;
-	switch (lShape)
-	{
+	float move_z = 0;
+	const int shape = vary_shapes? level%4 : 0;
+	switch (shape) {
 		case 0:
-			mGfxMesh = UiTbc::BasicMeshCreator::CreateFlatBox(x, y, z, 1, 1, 1);
-			mSize = vec3(x,y,z);
+			gfx_mesh_ = uitbc::BasicMeshCreator::CreateFlatBox(x, y, z, 1, 1, 1);
+			size_ = vec3(x,y,z);
 		break;
 		case 1:
-			mGfxMesh = UiTbc::BasicMeshCreator::CreateEllipsoid(x*0.75f, y*0.75f, z*0.7f, 14, 14);
-			mSize = vec3(x*1.5f,y*1.5f,z*1.4f);
+			gfx_mesh_ = uitbc::BasicMeshCreator::CreateEllipsoid(x*0.75f, y*0.75f, z*0.7f, 14, 14);
+			size_ = vec3(x*1.5f,y*1.5f,z*1.4f);
 		break;
 		case 2:
-			mGfxMesh = UiTbc::BasicMeshCreator::CreateCone((x+y)/2*0.6f, z*1.4f, 16);
-			mSize = vec3(x*1.2f,y*1.2f,z*1.125f);
-			lMoveZ = -z*1.1f/2;
+			gfx_mesh_ = uitbc::BasicMeshCreator::CreateCone((x+y)/2*0.6f, z*1.4f, 16);
+			size_ = vec3(x*1.2f,y*1.2f,z*1.125f);
+			move_z = -z*1.1f/2;
 		break;
 		case 3:
-			mGfxMesh = UiTbc::BasicMeshCreator::CreateCylinder(z*0.6f, z*0.6f, (x+y)/2*1.2f, 14);
-			mSize = vec3(x*1.2f,z*1.2f,z*1.2f);
+			gfx_mesh_ = uitbc::BasicMeshCreator::CreateCylinder(z*0.6f, z*0.6f, (x+y)/2*1.2f, 14);
+			size_ = vec3(x*1.2f,z*1.2f,z*1.2f);
 		break;
 	}
 	// Create unique vertices for each triangle to simplify cutting.
 	std::vector<float> nv;
-	const float* v = mGfxMesh->GetVertexData();
-	const int tc = mGfxMesh->GetTriangleCount();
-	const vtx_idx_t* lIndices = mGfxMesh->GetIndexData();
-	for (int t = 0; t < tc*3; ++t)
-	{
-		nv.push_back(v[lIndices[t]*3+0]);
-		nv.push_back(v[lIndices[t]*3+1]);
-		nv.push_back(v[lIndices[t]*3+2] + lMoveZ);
+	const float* v = gfx_mesh_->GetVertexData();
+	const int tc = gfx_mesh_->GetTriangleCount();
+	const vtx_idx_t* indices = gfx_mesh_->GetIndexData();
+	for (int t = 0; t < tc*3; ++t) {
+		nv.push_back(v[indices[t]*3+0]);
+		nv.push_back(v[indices[t]*3+1]);
+		nv.push_back(v[indices[t]*3+2] + move_z);
 	}
 
-	Color lColors[] = { RED, GREEN, MAGENTA, BLUE, YELLOW, DARK_GRAY, };
-	const int lColorCount = LEPRA_ARRAY_COUNT(lColors);
+	Color _colors[] = { RED, GREEN, MAGENTA, BLUE, YELLOW, DARK_GRAY, };
+	const int color_count = LEPRA_ARRAY_COUNT(_colors);
 	const int vc = (int)nv.size()/3;
-	std::vector<uint8> lColorData;
-	for (int x = 0; x < vc; ++x)
-	{
-		const int c = x / 6 % lColorCount;
-		Color& lColor = lColors[c];
-		lColorData.push_back(lColor.mRed);
-		lColorData.push_back(lColor.mGreen);
-		lColorData.push_back(lColor.mBlue);
-		lColorData.push_back(255);
+	std::vector<uint8> _color_data;
+	for (int x = 0; x < vc; ++x) {
+		const int c = x / 6 % color_count;
+		Color& _color = _colors[c];
+		_color_data.push_back(_color.red_);
+		_color_data.push_back(_color.green_);
+		_color_data.push_back(_color.blue_);
+		_color_data.push_back(255);
 	}
 
-	SetVertices(mGfxMesh, &nv[0], vc, &lColorData[0]);
-	return mGfxMesh;
+	SetVertices(gfx_mesh_, &nv[0], vc, &_color_data[0]);
+	return gfx_mesh_;
 }
 
-void Level::SetVertices(UiTbc::TriangleBasedGeometry* pGfxMesh, const float* v, size_t vc, const uint8* pColorData)
-{
+void Level::SetVertices(uitbc::TriangleBasedGeometry* gfx_mesh, const float* v, size_t vc, const uint8* color_data) {
 	std::vector<uint32> ni;
-	for (size_t x = 0; x < vc; ++x)
-	{
+	for (size_t x = 0; x < vc; ++x) {
 		ni.push_back(x);
 	}
 
-	pGfxMesh->Set(v, 0, 0, pColorData, Tbc::GeometryBase::COLOR_RGBA, ni.empty()? 0 : &ni[0], vc, vc, Tbc::GeometryBase::TRIANGLES, Tbc::GeometryBase::GEOM_SEMI_STATIC);
-	FlipTriangles(pGfxMesh);
-	pGfxMesh->SetAlwaysVisible(true);
+	gfx_mesh->Set(v, 0, 0, color_data, tbc::GeometryBase::kColorRgba, ni.empty()? 0 : &ni[0], vc, vc, tbc::GeometryBase::kTriangles, tbc::GeometryBase::kGeomSemiStatic);
+	FlipTriangles(gfx_mesh);
+	gfx_mesh->SetAlwaysVisible(true);
 }
 
-void Level::FlipTriangles(UiTbc::TriangleBasedGeometry* pMesh)
-{
-	vtx_idx_t* lTriangles = pMesh->GetIndexData();
-	const int tc = pMesh->GetTriangleCount();
-	for (int x = 0; x < tc; ++x)
-	{
-		std::swap(lTriangles[x*3+1], lTriangles[x*3+2]);
+void Level::FlipTriangles(uitbc::TriangleBasedGeometry* mesh) {
+	vtx_idx_t* triangles = mesh->GetIndexData();
+	const int tc = mesh->GetTriangleCount();
+	for (int x = 0; x < tc; ++x) {
+		std::swap(triangles[x*3+1], triangles[x*3+2]);
 	}
 }
 
-void Level::CreatePhysicsMesh(Tbc::PhysicsManager* pPhysicsManager)
-{
-	if (mPhysMeshBodyId)
-	{
-		pPhysicsManager->DeleteBody(mPhysMeshBodyId);
+void Level::CreatePhysicsMesh(tbc::PhysicsManager* physics_manager) {
+	if (phys_mesh_body_id_) {
+		physics_manager->DeleteBody(phys_mesh_body_id_);
 	}
 
-	const float lFriction = 0.7f;
-	const float lBounce = 1.0f;
-	const int ic = mGfxMesh->GetIndexCount();
-	delete[] mBodyIndexData;
-	mBodyIndexData = new uint32[ic];
-	for (int x = 0; x < ic; ++x)
-	{
-		mBodyIndexData[x] = mGfxMesh->GetIndexData()[x];
+	const float friction = 0.7f;
+	const float bounce = 1.0f;
+	const int ic = gfx_mesh_->GetIndexCount();
+	delete[] body_index_data_;
+	body_index_data_ = new uint32[ic];
+	for (int x = 0; x < ic; ++x) {
+		body_index_data_[x] = gfx_mesh_->GetIndexData()[x];
 	}
-	mPhysMeshBodyId = pPhysicsManager->CreateTriMesh(true, mGfxMesh->GetVertexCount(), mGfxMesh->GetVertexData(),
-		mGfxMesh->GetTriangleCount(), mBodyIndexData, xform(), 0, Tbc::PhysicsManager::STATIC, lFriction, lBounce, GetInstanceId());
+	phys_mesh_body_id_ = physics_manager->CreateTriMesh(true, gfx_mesh_->GetVertexCount(), gfx_mesh_->GetVertexData(),
+		gfx_mesh_->GetTriangleCount(), body_index_data_, xform(), 0, tbc::PhysicsManager::kStatic, friction, bounce, GetInstanceId());
 }
 
-void Level::AddPhysicsWindowBox(Tbc::PhysicsManager* pPhysicsManager, const Plane& pPlane)
-{
-	xform lTransform(pPlane.GetOrientation(), pPlane.n*pPlane.d);
-	const float lFriction = 0.7f;
-	const float lBounce = 1.0f;
-	Tbc::PhysicsManager::BodyID lPhysWindowId = pPhysicsManager->CreateBox(true, lTransform, 0, vec3(20,20,0.1f),
-		Tbc::PhysicsManager::STATIC, lFriction, lBounce, GetInstanceId());
-	mPhysWindowBoxIds.push_back(lPhysWindowId);
+void Level::AddPhysicsWindowBox(tbc::PhysicsManager* physics_manager, const Plane& plane) {
+	xform transform(plane.GetOrientation(), plane.n*plane.d);
+	const float friction = 0.7f;
+	const float bounce = 1.0f;
+	tbc::PhysicsManager::BodyID phys_window_id = physics_manager->CreateBox(true, transform, 0, vec3(20,20,0.1f),
+		tbc::PhysicsManager::kStatic, friction, bounce, GetInstanceId());
+	phys_window_box_ids_.push_back(phys_window_id);
 }
 
-void Level::DeleteWindowBoxes(Tbc::PhysicsManager* pPhysicsManager)
-{
-	std::vector<Tbc::PhysicsManager::BodyID>::iterator x = mPhysWindowBoxIds.begin();
-	for (; x != mPhysWindowBoxIds.end(); ++x)
-	{
-		pPhysicsManager->DeleteBody(*x);
+void Level::DeleteWindowBoxes(tbc::PhysicsManager* physics_manager) {
+	std::vector<tbc::PhysicsManager::BodyID>::iterator x = phys_window_box_ids_.begin();
+	for (; x != phys_window_box_ids_.end(); ++x) {
+		physics_manager->DeleteBody(*x);
 	}
-	mPhysWindowBoxIds.clear();
+	phys_window_box_ids_.clear();
 }
 
-float Level::CalculateVolume() const
-{
-	float lVolume = 0;
-	const int tc = mGfxMesh->GetVertexCount()/3;
-	const float* v = mGfxMesh->GetVertexData();
-	for (int x = 0; x < tc; ++x)
-	{
+float Level::CalculateVolume() const {
+	float volume = 0;
+	const int tc = gfx_mesh_->GetVertexCount()/3;
+	const float* v = gfx_mesh_->GetVertexData();
+	for (int x = 0; x < tc; ++x) {
 		float Px = v[x*9+0];
 		float Py = v[x*9+1];
 		float Pz = v[x*9+2];
@@ -308,16 +273,16 @@ float Level::CalculateVolume() const
 		float Rx = v[x*9+6];
 		float Ry = v[x*9+7];
 		float Rz = v[x*9+8];
-		lVolume += Px*Qy*Rz + Py*Qz*Rx + Pz*Qx*Ry - Px*Qz*Ry - Py*Qx*Rz - Pz*Qy*Rx;
+		volume += Px*Qy*Rz + Py*Qz*Rx + Pz*Qx*Ry - Px*Qz*Ry - Py*Qx*Rz - Pz*Qy*Rx;
 		/*vec3 p0(v[x*9+0], v[x*9+1], v[x*9+2]);
 		vec3 p1(v[x*9+3], v[x*9+4], v[x*9+5]);
 		vec3 p2(v[x*9+6], v[x*9+7], v[x*9+8]);
 		p0.x += 100;
 		p1.x += 100;
 		p2.x += 100;
-		lVolume += p0 * p1.Cross(p2);*/
+		volume += p0 * p1.Cross(p2);*/
 	}
-	return std::abs(lVolume) / 6;
+	return std::abs(volume) / 6;
 }
 
 

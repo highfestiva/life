@@ -4,7 +4,7 @@
 
 
 
-#include "../../Include/Mac/UiMacFontManager.h"
+#include "../../include/mac/uimacfontmanager.h"
 #ifdef LEPRA_IOS
 #import <UIKit/UIKit.h>
 #define TBC_APPLE_FONT UIFont
@@ -12,8 +12,8 @@
 #import <Cocoa/Cocoa.h>
 #define TBC_APPLE_FONT NSFont
 #endif // iOS/!iOS
-#include "../../../UiLepra/Include/Mac/UiMacDisplayManager.h"
-#include "../../../Lepra/Include/Posix/MacLog.h"
+#include "../../../uilepra/include/mac/uimacdisplaymanager.h"
+#include "../../../lepra/include/posix/maclog.h"
 
 
 
@@ -21,99 +21,89 @@
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-FontManager* FontManager::Create(UiLepra::DisplayManager* pDisplayManager)
-{
-	return (new MacFontManager((UiLepra::MacDisplayManager*)pDisplayManager));
+FontManager* FontManager::Create(uilepra::DisplayManager* display_manager) {
+	return (new MacFontManager((uilepra::MacDisplayManager*)display_manager));
 }
 
 
 
-MacFontManager::MacFontManager(UiLepra::MacDisplayManager* pDisplayManager):
-	mDisplayManager(pDisplayManager)
-{
+MacFontManager::MacFontManager(uilepra::MacDisplayManager* display_manager):
+	display_manager_(display_manager) {
 }
 
-MacFontManager::~MacFontManager()
-{
-	FontTable::iterator x = mFontTable.begin();
-	if (x != mFontTable.end())
-	{
-		MacFont* lFont = (MacFont*)x->second;
-		delete (lFont);
+MacFontManager::~MacFontManager() {
+	FontTable::iterator x = font_table_.begin();
+	if (x != font_table_.end()) {
+		MacFont* font = (MacFont*)x->second;
+		delete (font);
 	}
-	mFontTable.clear();
+	font_table_.clear();
 
-	mDisplayManager = 0;
+	display_manager_ = 0;
 }
 
 
 
-MacFontManager::FontId MacFontManager::AddFont(const str& pFontName, double pSize, int pFlags)
-{
-	FontId lId = INVALID_FONTID;
+MacFontManager::FontId MacFontManager::AddFont(const str& font_name, double _size, int flags) {
+	FontId id = kInvalidFontid;
 	{
-		MacFont* lFont = new MacFont();
-		lFont->mName = pFontName;
-		lFont->mSize = pSize;
-		lFont->mActualSize = pSize * FONT_SIZE_FACTOR;
-		lFont->mFlags = pFlags;
-		if (!InternalAddFont(lFont))
-		{
-			delete (lFont);
-		}
-		else
-		{
-			lId = lFont->mFontId;
+		MacFont* font = new MacFont();
+		font->name_ = font_name;
+		font->size_ = _size;
+		font->actual_size_ = _size * FONT_SIZE_FACTOR;
+		font->flags_ = flags;
+		if (!InternalAddFont(font)) {
+			delete (font);
+		} else {
+			id = font->font_id_;
 		}
 	}
 
-	return lId;
+	return id;
 }
 
-bool MacFontManager::RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect& pRect)
-{
-	pImage.Reset(pRect.GetWidth(), pRect.GetHeight(), Canvas::BITDEPTH_32_BIT);
-	pImage.CreateBuffer();
-	::memset(pImage.GetBuffer(), 0, pImage.GetWidth()*pImage.GetPixelByteSize()*pImage.GetHeight());
+bool MacFontManager::RenderGlyph(wchar_t c, Canvas& image, const PixelRect& _rect) {
+	image.Reset(_rect.GetWidth(), _rect.GetHeight(), Canvas::kBitdepth32Bit);
+	image.CreateBuffer();
+	::memset(image.GetBuffer(), 0, image.GetWidth()*image.GetPixelByteSize()*image.GetHeight());
 
-	const float lCorrectedFontSize = ((MacFont*)mCurrentFont)->mActualSize;	// Similar to other platforms...
+	const float corrected_font_size = ((MacFont*)current_font_)->actual_size_;	// Similar to other platforms...
 	CGContextRef textcontext; // This is our rendering context.
 	CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB(); // We need some colorspace.
 	// Create a bitmap context.
-	textcontext = CGBitmapContextCreate(pImage.GetBuffer(), pImage.GetWidth(), pImage.GetHeight(), 8,
-		pImage.GetWidth()*pImage.GetPixelByteSize(), colorspace, kCGImageAlphaPremultipliedLast);
-	CGFloat rect[4] = { (CGFloat)pRect.mLeft, (CGFloat)pRect.mTop, (CGFloat)pRect.mRight, (CGFloat)pRect.mBottom };
+	textcontext = CGBitmapContextCreate(image.GetBuffer(), image.GetWidth(), image.GetHeight(), 8,
+		image.GetWidth()*image.GetPixelByteSize(), colorspace, kCGImageAlphaPremultipliedLast);
+	CGFloat rect[4] = { (CGFloat)_rect.left_, (CGFloat)_rect.top_, (CGFloat)_rect.right_, (CGFloat)_rect.bottom_ };
 	CGFloat transparent[4] = { 1, 1, 1, 0 };
 	CGFloat text_color[4] = { 1, 1, 1, 1 };
 	// if you do this a lot store the color somewhere and release it when you are done with it.
 	CGColorRef backgroundColor = CGColorCreate(colorspace, transparent);
-	CGContextSetFillColorWithColor(textcontext, backgroundColor); 
+	CGContextSetFillColorWithColor(textcontext, backgroundColor);
 	CGContextFillRect(textcontext, *(CGRect*)rect);
 	CGColorRef foregroundColor = CGColorCreate(colorspace, text_color);
 	CGContextSetFillColorWithColor(textcontext, foregroundColor);
-	CGContextSelectFont(textcontext, mCurrentFont->mName.c_str(), lCorrectedFontSize, kCGEncodingMacRoman);
+	CGContextSelectFont(textcontext, current_font_->name_.c_str(), corrected_font_size, kCGEncodingMacRoman);
 	CGContextSetLineWidth(textcontext, 0.3);
 	CGContextSetTextDrawingMode(textcontext, kCGTextFillStroke);
 	CGContextSetRGBStrokeColor(textcontext, 1,1,1,0.5);
 #ifdef LEPRA_IOS
-	int y = (pRect.GetHeight() - ((MacFont*)mCurrentFont)->mActualSize) / 8;
+	int y = (_rect.GetHeight() - ((MacFont*)current_font_)->actual_size_) / 8;
 	UIGraphicsPushContext(textcontext);
-	char lTmpString[2] = {pChar, 0};
-	NSString* lChar = MacLog::Encode(lTmpString);
-	NSString* lFontName = MacLog::Encode(mCurrentFont->mName);
-	[lChar drawAtPoint:CGPointMake(0, y) withFont:[TBC_APPLE_FONT fontWithName:lFontName size:lCorrectedFontSize]];
+	char tmp_string[2] = {c, 0};
+	NSString* _c = MacLog::Encode(tmp_string);
+	NSString* _font_name = MacLog::Encode(current_font_->name_);
+	[_c drawAtPoint:CGPointMake(0, y) withFont:[TBC_APPLE_FONT fontWithName:_font_name size:corrected_font_size]];
 	CGContextFlush(textcontext);
 	UIGraphicsPopContext();
 #else // !iOS
-	int y = pRect.GetHeight() - ((MacFont*)mCurrentFont)->mActualSize;
-	CGContextShowTextAtPoint(textcontext, 0, y, &pChar, 1);
+	int y = _rect.GetHeight() - ((MacFont*)current_font_)->actual_size_;
+	CGContextShowTextAtPoint(textcontext, 0, y, &c, 1);
 	CGContextFlush(textcontext);
-	pImage.FlipVertical();
+	image.FlipVertical();
 #endif // iOS / Mac
 	CFRelease(backgroundColor);
 	CFRelease(foregroundColor);
@@ -121,33 +111,25 @@ bool MacFontManager::RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect&
 	CFRelease(textcontext);
 
 	// Strengthen the colors!
-	for (int y = 0; y < (int)pImage.GetHeight(); ++y)
-	{
-		for (int x = 0; x < (int)pImage.GetWidth(); ++x)
-		{
-			Color lColor = pImage.GetPixelColor(x, y);
-			if (lColor.mAlpha)
-			{
-				lColor.mRed	= 255;
-				lColor.mGreen	= 255;
-				lColor.mBlue	= 255;
-				pImage.SetPixelColor(x, y, lColor);
+	for (int y = 0; y < (int)image.GetHeight(); ++y) {
+		for (int x = 0; x < (int)image.GetWidth(); ++x) {
+			Color color = image.GetPixelColor(x, y);
+			if (color.alpha_) {
+				color.red_	= 255;
+				color.green_	= 255;
+				color.blue_	= 255;
+				image.SetPixelColor(x, y, color);
 			}
 		}
 	}
 
-	/*printf("Rendering glyph '%c' (height=%i):\n", pChar, pImage.GetHeight());
-	for (int y = 0; y < (int)pImage.GetHeight(); ++y)
-	{
-		for (int x = 0; x < (int)pImage.GetWidth(); ++x)
-		{
-			if (pImage.GetPixelColor(x, y).To32() == 0)
-			{
+	/*printf("Rendering glyph '%c' (height=%i):\n", c, image.GetHeight());
+	for (int y = 0; y < (int)image.GetHeight(); ++y) {
+		for (int x = 0; x < (int)image.GetWidth(); ++x) {
+			if (image.GetPixelColor(x, y).To32() == 0) {
 				printf("         ");
-			}
-			else
-			{
-				printf("%8.8X ", pImage.GetPixelColor(x, y).To32());
+			} else {
+				printf("%8.8X ", image.GetPixelColor(x, y).To32());
 			}
 		}
 		printf("\n");
@@ -158,27 +140,25 @@ bool MacFontManager::RenderGlyph(wchar_t pChar, Canvas& pImage, const PixelRect&
 
 
 
-int MacFontManager::GetCharWidth(wchar_t pChar) const
-{
-	NSString* lFontName = MacLog::Encode(mCurrentFont->mName);
-	const float lCorrectedFontSize = ((MacFont*)mCurrentFont)->mActualSize;	// Similar to other platforms...
-	TBC_APPLE_FONT* lFont = [TBC_APPLE_FONT fontWithName:lFontName size:lCorrectedFontSize];
+int MacFontManager::GetCharWidth(wchar_t c) const {
+	NSString* _font_name = MacLog::Encode(current_font_->name_);
+	const float corrected_font_size = ((MacFont*)current_font_)->actual_size_;	// Similar to other platforms...
+	TBC_APPLE_FONT* font = [TBC_APPLE_FONT fontWithName:_font_name size:corrected_font_size];
 #ifdef LEPRA_IOS
-	wchar_t lTempBigString[2] = {(wchar_t)pChar, 0};
-	NSString* tmpString = MacLog::Encode(wstr(lTempBigString));
-	CGSize lSize = [tmpString sizeWithFont:lFont];
-	--lSize.width;
+	wchar_t temp_big_string[2] = {(wchar_t)c, 0};
+	NSString* tmpString = MacLog::Encode(wstr(temp_big_string));
+	CGSize __size = [tmpString sizeWithFont:font];
+	--__size.width;
 #else // !iOS
-	UniChar lTempBigString[2] = {(UniChar)pChar, 0};
-	CGGlyph lGlyph;
-	CTFontGetGlyphsForCharacters((CTFontRef)lFont, lTempBigString, &lGlyph, 1);
-	NSSize lSize = [lFont advancementForGlyph:lGlyph];
+	UniChar temp_big_string[2] = {(UniChar)c, 0};
+	CGGlyph glyph;
+	CTFontGetGlyphsForCharacters((CTFontRef)font, temp_big_string, &glyph, 1);
+	NSSize __size = [font advancementForGlyph:glyph];
 #endif // iOS/!iOS
-	return lSize.width+1;
+	return __size.width+1;
 }
 
-int MacFontManager::GetCharOffset(wchar_t pChar) const
-{
+int MacFontManager::GetCharOffset(wchar_t c) const {
 	return 0;	// TODO: implement! I.e. "j" should return a negative offset, since only the bottom bend of sans serifs goes left.
 }
 

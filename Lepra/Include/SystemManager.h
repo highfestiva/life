@@ -6,21 +6,19 @@
 
 #pragma once
 
-#include "../../ThirdParty/FastDelegate/FastDelegate.h"
-#include "LepraOS.h"
-#include "LepraTypes.h"
-#include "Log.h"
-#include "String.h"
+#include "../../thirdparty/FastDelegate/FastDelegate.h"
+#include "lepraos.h"
+#include "lepratypes.h"
+#include "log.h"
+#include "string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class SystemManager
-{
+class SystemManager {
 public:
 	typedef fastdelegate::FastDelegate1<int, void> QuitRequestCallback;
 
@@ -28,7 +26,7 @@ public:
 	static void Shutdown();
 	static void ResetTerminal();
 
-	static void SetArgumentVector(const strutil::strvec& pArgumentVector);
+	static void SetArgumentVector(const strutil::strvec& argument_vector);
 	static const strutil::strvec& GetArgumentVector();
 	static str GetDataDirectory();
 	// Get root directory ( '/', 'C:\', 'Macintosh HD', etc..).
@@ -36,19 +34,19 @@ public:
 	static str GetCurrentDirectory();
 	static str GetUserDirectory();
 	static str GetDocumentsDirectory();
-	static str GetIoDirectory(const str& pAppName);
-	static str GetDataDirectoryFromPath(const str& pArgv0);
+	static str GetIoDirectory(const str& app_name);
+	static str GetDataDirectoryFromPath(const str& argv0);
 	static str GetLoginName();
 	static str QueryFullUserName();
 	static str GetRandomId();
 	static str GetSystemPseudoId();
 
-	static void WebBrowseTo(const str& pUrl);
-	static void EmailTo(const str& pTo, const str& pSubject, const str& pBody);
+	static void WebBrowseTo(const str& url);
+	static void EmailTo(const str& to, const str& subject, const str& body);
 
 	static str GetUniqueHardwareString();
 
-	// The Cpu frequency may be an approximation, which means that it may vary 
+	// The Cpu frequency may be an approximation, which means that it may vary
 	// from call to call.
 	static uint64 QueryCpuFrequency();
 	static inline uint64 GetCpuTick();
@@ -66,29 +64,28 @@ public:
 	static double GetSleepResolution();
 
 	static int GetQuitRequest();
-	static void AddQuitRequest(int pValue);
-	static void SetQuitRequestCallback(const QuitRequestCallback& pCallback);
-	static void ExitProcess(int pExitCode);	// Exit this application NOW.
+	static void AddQuitRequest(int value);
+	static void SetQuitRequestCallback(const QuitRequestCallback& callback);
+	static void ExitProcess(int exit_code);	// Exit this application NOW.
 
 private:
 	static uint64 SingleCpuTest();
 	static inline unsigned SingleMipsTest();
-	static inline void BOGOMIPSDelay(unsigned pLoopCount);
+	static inline void BOGOMIPSDelay(unsigned loop_count);
 
-	static strutil::strvec mArgumentVector;
+	static strutil::strvec argument_vector_;
 
-	static int mQuitRequest;
-	static QuitRequestCallback mQuitRequestCallback;
+	static int quit_request_;
+	static QuitRequestCallback quit_request_callback_;
 
-	static double mSleepResolution;
+	static double sleep_resolution_;
 
 	logclass();
 };
 
 
 
-inline uint64 SystemManager::GetCpuTick()
-{
+inline uint64 SystemManager::GetCpuTick() {
 #ifdef LEPRA_MSVC_X86
 	__asm rdtsc;
 #elif defined(LEPRA_GCC_X86_32)
@@ -112,9 +109,9 @@ inline uint64 SystemManager::GetCpuTick()
 	);
 	return (((uint64)upper)<<32 | lower)*75;
 #elif defined(LEPRA_GCC_ARM)
-        timeval lTimeValue;
-        ::gettimeofday(&lTimeValue, 0);
-	return ((uint64)lTimeValue.tv_sec*1000000 + lTimeValue.tv_usec);
+        timeval time_value;
+        ::gettimeofday(&time_value, 0);
+	return ((uint64)time_value.tv_sec*1000000 + time_value.tv_usec);
 #else
 #error "GetCpuTick() not yet implemented on this platform."
 #endif // Platform.

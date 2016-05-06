@@ -9,8 +9,8 @@
 
 
 
-#include "LepraTarget.h"
-#include "String.h"
+#include "lepratarget.h"
+#include "string.h"
 
 
 
@@ -32,15 +32,15 @@ EXTERN_HINSTANCE;	\
 int main(int argc, const char* argv[])	\
 {	\
 	FETCH_HINSTANCE();	\
-	Lepra::strutil::strvec lArguments;	\
+	lepra::strutil::strvec arguments;	\
 	for (int x = 0; x < argc; ++x)	\
 	{	\
-		lArguments.push_back(Lepra::str(argv[x]));	\
+		arguments.push_back(lepra::str(argv[x]));	\
 	}	\
-	ClassName* lApplication = new ClassName(lArguments);	\
-	const int lStatus = Method(*lApplication);	\
-	delete lApplication;	\
-	return lStatus;	\
+	ClassName* _application = new ClassName(arguments);	\
+	const int status = Method(*_application);	\
+	delete _application;	\
+	return status;	\
 }
 #else // !LEPRA_CONSOLE (Let's assume it's M$Win, shall we?)
 #ifdef LEPRA_UNICODE
@@ -53,37 +53,35 @@ extern HINSTANCE ghInstance;	\
 int WINAPI LEPRA_WINMAIN(HINSTANCE hInstance, HINSTANCE, PTSTR, int)	\
 {	\
 	ghInstance = hInstance;	\
-	Lepra::strutil::strvec lArguments(Lepra::strutil::BlockSplit(::GetCommandLine(), " \t\v\r\n", false, false));	\
-	ClassName* lApplication = new ClassName(lArguments);	\
-	const int lStatus = Method(*lApplication);	\
-	delete lApplication;	\
-	return lStatus;	\
+	lepra::strutil::strvec arguments(lepra::strutil::BlockSplit(::GetCommandLine(), " \t\v\r\n", false, false));	\
+	ClassName* _application = new ClassName(arguments);	\
+	const int status = Method(*_application);	\
+	delete _application;	\
+	return status;	\
 }
 #endif // LEPRA_CONSOLE/!LEPRA_CONSOLE
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class Application
-{
+class Application {
 public:
-	Application(const strutil::strvec& pArgumentVector);
+	Application(const strutil::strvec& argument_vector);
 	virtual ~Application();
 	virtual void Init() = 0;
 
 	virtual int Run() = 0;
 
-	virtual void Resume(bool pHard);
-	virtual void Suspend(bool pHard);
+	virtual void Resume(bool hard);
+	virtual void Suspend(bool hard);
 };
 
 
 
-int Main(Application& pApplication);
+int Main(Application& application);
 
 
 

@@ -1,29 +1,26 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
-#include "../../Lepra/Include/Vector2D.h"
-#include "UiCure.h"
+#include "../../lepra/include/vector2d.h"
+#include "uicure.h"
 
-#define STICK_RESOLUTION	10
+#define kStickResolution	10
 
 
 
-namespace UiLepra
-{
-namespace Touch
-{
+namespace uilepra {
+namespace touch {
 class TouchstickInputDevice;
 }
 }
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
@@ -31,32 +28,31 @@ class GameUiManager;
 
 
 
-class DebugStick
-{
+class DebugStick {
 public:
-	static void Init(GameUiManager* pUiManager);
+	static void Init(GameUiManager* ui_manager);
 	static void Draw();
 	static bool IsUpdated();
 
 	DebugStick();
-	DebugStick(int pPosX, int pPosY);
-	void Place(int pPosX, int pPosY);
+	DebugStick(int pos_x, int pos_y);
+	void Place(int pos_x, int pos_y);
 	void SetDefaultValue(float x, float y);
 
-	vec2 mValue;
+	vec2 value_;
 
 private:
 	void InitStick();
 
-	int mStickX;
-	int mStickY;
+	int stick_x_;
+	int stick_y_;
 
-	static GameUiManager* mUiManager;
-	static UiLepra::Touch::TouchstickInputDevice* mTouchSticks[STICK_RESOLUTION][STICK_RESOLUTION];
-	static vec2 mPreviousValues[STICK_RESOLUTION][STICK_RESOLUTION];
-	static bool mIsDefaultValueSet[STICK_RESOLUTION][STICK_RESOLUTION];
-	static bool mIsInitialized;
-	static bool mIsUpdated;
+	static GameUiManager* ui_manager_;
+	static uilepra::touch::TouchstickInputDevice* touch_sticks_[kStickResolution][kStickResolution];
+	static vec2 previous_values_[kStickResolution][kStickResolution];
+	static bool is_default_value_set_[kStickResolution][kStickResolution];
+	static bool is_initialized_;
+	static bool is_updated_;
 };
 
 

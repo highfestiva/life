@@ -1,25 +1,23 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "Life.h"
+#include "life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class SystemUtil
-{
+class SystemUtil {
 public:
-	static void SaveRtvar(Cure::RuntimeVariableScope* pScope, const str& pRtvarName);
-	static void LoadRtvar(Cure::RuntimeVariableScope* pScope, const str& pRtvarName);
+	static void SaveRtvar(cure::RuntimeVariableScope* scope, const str& rtvar_name);
+	static void LoadRtvar(cure::RuntimeVariableScope* scope, const str& rtvar_name);
 };
 
 

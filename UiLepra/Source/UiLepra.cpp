@@ -1,32 +1,29 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiCore.h"
-#include "../Include/UiInput.h"
-#include "../Include/UiLepra.h"
-#include "../Include/UiSoundManager.h"
+#include "../include/uicore.h"
+#include "../include/uiinput.h"
+#include "../include/uilepra.h"
+#include "../include/uisoundmanager.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-void Init()
-{
-	Lepra::Init();
+void Init() {
+	lepra::Init();
 	Core::Init();
 }
 
-void Shutdown()
-{
+void Shutdown() {
 	Core::Shutdown();
-	Lepra::Shutdown();
+	lepra::Shutdown();
 }
 
 

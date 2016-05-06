@@ -1,9 +1,9 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#define MASTER_SERVER_PORT	"35749"
+#define kMasterServerPort	"35749"

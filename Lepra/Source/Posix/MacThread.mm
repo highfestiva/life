@@ -2,7 +2,7 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
-#include "../../Include/LepraOS.h"
+#include "../../include/lepraos.h"
 #ifdef LEPRA_IOS
 #import <UIKit/UIKit.h>
 #else // !iOS
@@ -11,4 +11,4 @@
 
 
 
-#include "PosixThread.cxx"
+#include "posixthread.cxx"

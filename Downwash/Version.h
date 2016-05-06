@@ -1,14 +1,14 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Lepra/Include/LepraTypes.h"
+#include "../lepra/include/lepratypes.h"
 
-#define PLATFORM_VERSION	"0.8"
+#define kPlatformVersion	"0.8"
 
 #ifndef LEPRA_TOUCH
 //#define EMULATE_TOUCH	1

@@ -23,7 +23,7 @@
 //  THE SOFTWARE.
 //
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../lepra/include/lepratarget.h"
 #ifdef LEPRA_IOS
 
 #import "BackButtonHandler.h"
@@ -40,13 +40,13 @@
 		return YES;
 	}
 
-	BOOL shouldPop = YES;
+	BOOL shouldPop_ = YES;
 	UIViewController* vc = [self topViewController];
 	if([vc respondsToSelector:@selector(navigationShouldPopOnBackButton)]) {
-		shouldPop = [vc navigationShouldPopOnBackButton];
+		shouldPop_ = [vc navigationShouldPopOnBackButton];
 	}
 
-	if(shouldPop) {
+	if(shouldPop_) {
 		dispatch_async(dispatch_get_main_queue(), ^{
 			[self popViewControllerAnimated:YES];
 		});

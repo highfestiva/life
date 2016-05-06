@@ -1,63 +1,54 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
 template<class ResourceType>
-UserUiTypeResource<ResourceType>::UserUiTypeResource(GameUiManager* pUiManager):
-	UiResource(pUiManager)
-{
+UserUiTypeResource<ResourceType>::UserUiTypeResource(GameUiManager* ui_manager):
+	UiResource(ui_manager) {
 }
 
 template<class ResourceType>
-UserUiTypeResource<ResourceType>::~UserUiTypeResource()
-{
+UserUiTypeResource<ResourceType>::~UserUiTypeResource() {
 }
 
 template<class ResourceType>
-Cure::Resource* UserUiTypeResource<ResourceType>::CreateResource(
-	Cure::ResourceManager* pManager, const str& pName) const
-{
-	return (new ResourceType(GetUiManager(), pManager, pName));
+cure::Resource* UserUiTypeResource<ResourceType>::CreateResource(
+	cure::ResourceManager* manager, const str& name) const {
+	return (new ResourceType(GetUiManager(), manager, name));
 }
 
 
 
 template<class ResourceType, class SubtypeExtraType>
-UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::UserUiExtraTypeResource(GameUiManager* pUiManager, const ExtraType& pExtraData):
-	UiResource(pUiManager),
-	mExtraData(pExtraData)
-{
+UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::UserUiExtraTypeResource(GameUiManager* ui_manager, const ExtraType& extra_data):
+	UiResource(ui_manager),
+	extra_data_(extra_data) {
 }
 
 template<class ResourceType, class SubtypeExtraType>
-UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::~UserUiExtraTypeResource()
-{
+UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::~UserUiExtraTypeResource() {
 }
 
 template<class ResourceType, class SubtypeExtraType>
-Cure::Resource* UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::CreateResource(
-	Cure::ResourceManager* pManager, const str& pName) const
-{
-	return (new ResourceType(GetUiManager(), pManager, pName, GetExtraData()));
+cure::Resource* UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::CreateResource(
+	cure::ResourceManager* manager, const str& name) const {
+	return (new ResourceType(GetUiManager(), manager, name, GetExtraData()));
 }
 
 template<class ResourceType, class SubtypeExtraType>
-SubtypeExtraType& UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::GetExtraData() const
-{
-	return (mExtraData);
+SubtypeExtraType& UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::GetExtraData() const {
+	return (extra_data_);
 }
 
 template<class ResourceType, class SubtypeExtraType>
-void UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::SetExtraData(const SubtypeExtraType& pExtraData)
-{
-	mExtraData = pExtraData;
+void UserUiExtraTypeResource<ResourceType, SubtypeExtraType>::SetExtraData(const SubtypeExtraType& extra_data) {
+	extra_data_ = extra_data;
 }
 
 

@@ -1,24 +1,22 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "String.h"
+#include "string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class Number
-{
+class Number {
 public:
-	static str ConvertToPostfixNumber(double pNumber, unsigned decimals);
+	static str ConvertToPostfixNumber(double number, unsigned decimals);
 };
 
 

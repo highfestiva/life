@@ -1,86 +1,72 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/Model.h"
+#include "../include/model.h"
 #include <math.h>
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-Model::Model()
-{
+Model::Model() {
 }
 
-Model::~Model()
-{
+Model::~Model() {
 }
 
-void Model::RemoveAll()
-{
-	AnimatorTable::Iterator x = mAnimatorTable.First();
-	for (; x != mAnimatorTable.End(); ++x)
-	{
-		BoneAnimator* lAnimator = *x;
-		delete (lAnimator);
+void Model::RemoveAll() {
+	AnimatorTable::Iterator x = animator_table_.First();
+	for (; x != animator_table_.End(); ++x) {
+		BoneAnimator* animator = *x;
+		delete (animator);
 	}
-	mAnimatorTable.RemoveAll();
+	animator_table_.RemoveAll();
 }
 
-void Model::AddAnimator(const str& pName, BoneAnimator* pBonesAnimator)
-{
-	mAnimatorTable.Insert(pName, pBonesAnimator);
+void Model::AddAnimator(const str& name, BoneAnimator* bones_animator) {
+	animator_table_.Insert(name, bones_animator);
 }
 
-BoneAnimator* Model::GetAnimator(const str& pName)
-{
-	BoneAnimator* lAnimator = 0;
-	AnimatorTable::Iterator x = mAnimatorTable.Find(pName);
-	if (x != mAnimatorTable.End())
-	{
-		lAnimator = *x;
+BoneAnimator* Model::GetAnimator(const str& name) {
+	BoneAnimator* animator = 0;
+	AnimatorTable::Iterator x = animator_table_.Find(name);
+	if (x != animator_table_.End()) {
+		animator = *x;
 	}
 
-	return lAnimator;
+	return animator;
 }
 
-void Model::StartAnimation(const str& pAnimName, float pBlendingTime, BoneAnimation::Mode pMode)
-{
+void Model::StartAnimation(const str& anim_name, float blending_time, BoneAnimation::Mode mode) {
 	AnimatorTable::Iterator x;
-	for (x = mAnimatorTable.First(); x != mAnimatorTable.End(); ++x)
-	{
-		BoneAnimator* lAnimator = *x;
-		lAnimator->StartAnimation(pAnimName, pBlendingTime, pMode);
+	for (x = animator_table_.First(); x != animator_table_.End(); ++x) {
+		BoneAnimator* animator = *x;
+		animator->StartAnimation(anim_name, blending_time, mode);
 	}
 }
 
-void Model::Update(double pDeltaTime)
-{
-	AnimatorTable::Iterator lAIter;
-	for (lAIter = mAnimatorTable.First(); lAIter != mAnimatorTable.End(); ++lAIter)
-	{
-		BoneAnimator* lAnimator = *lAIter;
-		lAnimator->Step((float)pDeltaTime);
+void Model::Update(double delta_time) {
+	AnimatorTable::Iterator a_iter;
+	for (a_iter = animator_table_.First(); a_iter != animator_table_.End(); ++a_iter) {
+		BoneAnimator* animator = *a_iter;
+		animator->Step((float)delta_time);
 	}
 }
 
 
 
-void Model::SetTransformation(const xform& pTransformation)
-{
-	mTransformation = pTransformation;
+void Model::SetTransformation(const xform& transformation) {
+	transformation_ = transformation;
 }
 
-const xform& Model::GetTransformation() const
-{
-	return (mTransformation);
+const xform& Model::GetTransformation() const {
+	return (transformation_);
 }
 
 

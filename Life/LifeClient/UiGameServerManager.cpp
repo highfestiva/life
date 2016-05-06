@@ -1,118 +1,103 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "UiGameServerManager.h"
-#include "../../UiCure/Include/UiCppContextObject.h"
-#include "GameClientMasterTicker.h"
-#include "UiServerConsoleManager.h"
-#include "UiConsole.h"
+#include "uigameservermanager.h"
+#include "../../uicure/include/uicppcontextobject.h"
+#include "gameclientmasterticker.h"
+#include "uiserverconsolemanager.h"
+#include "uiconsole.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-UiGameServerManager::UiGameServerManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-	Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, const PixelRect& pArea):
-	Parent(pTime, pVariableScope, pResourceManager),
-	mUiManager(pUiManager),
-	mRenderArea(pArea),
-	mOptions(pVariableScope, 0),
-	mConsoleActive(false)
-{
+UiGameServerManager::UiGameServerManager(const cure::TimeManager* time, cure::RuntimeVariableScope* variable_scope,
+	cure::ResourceManager* resource_manager, UiCure::GameUiManager* ui_manager, const PixelRect& area):
+	Parent(time, variable_scope, resource_manager),
+	ui_manager_(ui_manager),
+	render_area_(area),
+	options_(variable_scope, 0),
+	console_active_(false) {
 	GetContext()->GetObjectTable();
 }
 
-UiGameServerManager::~UiGameServerManager()
-{
-	mUiManager = 0;
+UiGameServerManager::~UiGameServerManager() {
+	ui_manager_ = 0;
 }
 
-void UiGameServerManager::SetRenderArea(const PixelRect& pRenderArea)
-{
-	mRenderArea = pRenderArea;
-	if (GetConsoleManager())
-	{
-		((UiServerConsoleManager*)GetConsoleManager())->GetUiConsole()->SetRenderArea(pRenderArea);
+void UiGameServerManager::SetRenderArea(const PixelRect& render_area) {
+	render_area_ = render_area;
+	if (GetConsoleManager()) {
+		((UiServerConsoleManager*)GetConsoleManager())->GetUiConsole()->SetRenderArea(render_area);
 	}
 }
 
 
 
-void UiGameServerManager::StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt)
-{
-	SetConsoleManager(new UiServerConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea,
-		pConsoleLogger, pConsolePrompt));
+void UiGameServerManager::StartConsole(InteractiveConsoleLogListener* console_logger, ConsolePrompt* console_prompt) {
+	SetConsoleManager(new UiServerConsoleManager(GetResourceManager(), this, ui_manager_, GetVariableScope(), render_area_,
+		console_logger, console_prompt));
 	Parent::StartConsole(0, 0);
 }
 
-void UiGameServerManager::ToggleConsole()
-{
-	mConsoleActive = ((UiServerConsoleManager*)GetConsoleManager())->ToggleVisible();
+void UiGameServerManager::ToggleConsole() {
+	console_active_ = ((UiServerConsoleManager*)GetConsoleManager())->ToggleVisible();
 }
 
 
 
-bool UiGameServerManager::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	mOptions.RefreshConfiguration();
+bool UiGameServerManager::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
+	options_.RefreshConfiguration();
 
-	mOptions.UpdateInput(pKeyCode, true);
-	if (mOptions.IsToggleConsole())
-	{
-		mOptions.ResetToggles();
+	options_.UpdateInput(key_code, true);
+	if (options_.IsToggleConsole()) {
+		options_.ResetToggles();
 		ToggleConsole();
 		return (true);	// This key ends here.
 	}
 	return (false);
 }
 
-bool UiGameServerManager::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	mOptions.UpdateInput(pKeyCode, false);
+bool UiGameServerManager::OnKeyUp(uilepra::InputManager::KeyCode key_code) {
+	options_.UpdateInput(key_code, false);
 	return (false);
 }
 
-void UiGameServerManager::OnInput(UiLepra::InputElement* pElement)
-{
-	mOptions.RefreshConfiguration();
+void UiGameServerManager::OnInput(uilepra::InputElement* element) {
+	options_.RefreshConfiguration();
 
-	mOptions.UpdateInput(pElement);
-	if (mOptions.IsToggleConsole())
-	{
-		mOptions.ResetToggles();
+	options_.UpdateInput(element);
+	if (options_.IsToggleConsole()) {
+		options_.ResetToggles();
 		ToggleConsole();
 	}
 }
 
 
 
-void UiGameServerManager::TickInput()
-{
+void UiGameServerManager::TickInput() {
 	((UiServerConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 	Parent::TickInput();
 }
 
 
 
-void UiGameServerManager::StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement)
-{
-	const GameClientMasterTicker* lTicker = (const GameClientMasterTicker*)GetTicker();
-	if (!lTicker->IsLocalObject(pMovement->GetObjectId()))
-	{
-		Parent::StoreMovement(pClientFrameIndex, pMovement);
+void UiGameServerManager::StoreMovement(int client_frame_index, cure::MessageObjectMovement* movement) {
+	const GameClientMasterTicker* ticker = (const GameClientMasterTicker*)GetTicker();
+	if (!ticker->IsLocalObject(movement->GetObjectId())) {
+		Parent::StoreMovement(client_frame_index, movement);
 	}
 }
 
 
 
-loginstance(GAME, UiGameServerManager);
+loginstance(kGame, UiGameServerManager);
 
 
 

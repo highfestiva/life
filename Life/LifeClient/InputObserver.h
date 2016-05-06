@@ -1,24 +1,22 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../UiLepra/Include/UiInput.h"
+#include "../../uilepra/include/uiinput.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class InputObserver: public UiLepra::KeyCodeInputObserver
-{
+class InputObserver: public uilepra::KeyCodeInputObserver {
 public:
-	virtual void OnInput(UiLepra::InputElement* pElement) = 0;
+	virtual void OnInput(uilepra::InputElement* element) = 0;
 };
 
 

@@ -5,195 +5,169 @@
 
 
 #include "pch.h"
-#include "Autopilot.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/Health.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "DownwashManager.h"
-#include "Level.h"
+#include "autopilot.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/health.h"
+#include "../cure/include/runtimevariable.h"
+#include "downwashmanager.h"
+#include "level.h"
 
 #define AIM_DISTANCE			2.0f
 #define AHEAD_TIME			0.5f
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-Autopilot::Autopilot(DownwashManager* pGame):
-	Parent(pGame->GetResourceManager(), "Autopilot"),
-	mGame(pGame),
-	mClosestPathDistance(5.0f),
-	mPath(0)
-{
-	mGame->GetContext()->AddLocalObject(this);
+Autopilot::Autopilot(DownwashManager* game):
+	Parent(game->GetResourceManager(), "Autopilot"),
+	game_(game),
+	closest_path_distance_(5.0f),
+	path_(0) {
+	game_->GetContext()->AddLocalObject(this);
 }
 
-Autopilot::~Autopilot()
-{
-	delete mPath;
-	mPath = 0;
+Autopilot::~Autopilot() {
+	delete path_;
+	path_ = 0;
 }
 
 
 
-void Autopilot::Reset()
-{
-	Level* lLevel = mGame->GetLevel();
-	if (!lLevel || lLevel->QueryPath()->GetPathCount() < 1)
-	{
+void Autopilot::Reset() {
+	Level* level = game_->GetLevel();
+	if (!level || level->QueryPath()->GetPathCount() < 1) {
 		return;
 	}
-	delete mPath;
-	mPath = new Cure::ContextPath::SplinePath(*mGame->GetLevel()->QueryPath()->GetPath("player_path"));
-	mPath->StartInterpolation(0);
-	mStalledRotorTimer.Stop();
+	delete path_;
+	path_ = new cure::ContextPath::SplinePath(*game_->GetLevel()->QueryPath()->GetPath("player_path"));
+	path_->StartInterpolation(0);
+	stalled_rotor_timer_.Stop();
 }
 
-vec3 Autopilot::GetSteering()
-{
-	Level* lLevel = mGame->GetLevel();
-	if (!lLevel || lLevel->QueryPath()->GetPathCount() < 1)
-	{
+vec3 Autopilot::GetSteering() {
+	Level* level = game_->GetLevel();
+	if (!level || level->QueryPath()->GetPathCount() < 1) {
 		return vec3();
 	}
-	Cure::ContextObject* lChopper = mGame->GetAvatar();
-	if (!lChopper || !lChopper->IsLoaded() || lChopper->GetPhysics()->GetEngineCount() < 3)
-	{
-		mPath->GotoAbsoluteTime(0);
+	cure::ContextObject* _chopper = game_->GetAvatar();
+	if (!_chopper || !_chopper->IsLoaded() || _chopper->GetPhysics()->GetEngineCount() < 3) {
+		path_->GotoAbsoluteTime(0);
 		return vec3();
 	}
 
-	CheckStalledRotor(lChopper);
+	CheckStalledRotor(_chopper);
 
-	mLastAvatarPosition = lChopper->GetPosition();
-	const vec3 lVelocity = lChopper->GetVelocity();
-	const vec3 lUp = lChopper->GetOrientation() * vec3(0,0,1);
-	const vec3 lTowards = mLastAvatarPosition + lVelocity*AHEAD_TIME;
+	last_avatar_position_ = _chopper->GetPosition();
+	const vec3 velocity = _chopper->GetVelocity();
+	const vec3 up = _chopper->GetOrientation() * vec3(0,0,1);
+	const vec3 towards = last_avatar_position_ + velocity*AHEAD_TIME;
 
-	mClosestPathDistance = GetClosestPathDistance(lTowards, mClosestPathPosition);
-	vec3 lAim = mClosestPathPosition - lTowards;
-	vec3 lAimNear(0, 0, ::std::max(lAim.z, 0.0f));
-	const bool lGoingWrongWay = (lVelocity*lAim <= 0);
-	const float lSpeedLimit = (lGoingWrongWay || mPath->GetDistanceLeft() < 20.0f) ? 4.0f : 60.0f;
-	if (!lGoingWrongWay)
-	{
-		lAimNear.x = lAim.x;
+	closest_path_distance_ = GetClosestPathDistance(towards, closest_path_position_);
+	vec3 aim = closest_path_position_ - towards;
+	vec3 aim_near(0, 0, ::std::max(aim.z, 0.0f));
+	const bool going_wrong_way = (velocity*aim <= 0);
+	const float speed_limit = (going_wrong_way || path_->GetDistanceLeft() < 20.0f) ? 4.0f : 60.0f;
+	if (!going_wrong_way) {
+		aim_near.x = aim.x;
 	}
-	lAim = Math::Lerp(lAim, lAimNear-lVelocity, std::min(1.0f, lVelocity.GetLength()/lSpeedLimit));
+	aim = Math::Lerp(aim, aim_near-velocity, std::min(1.0f, velocity.GetLength()/speed_limit));
 
 	// Brake before upcoming drops.
-	if (mClosestPathDistance < 20)
-	{
-		const float lTime = mPath->GetCurrentInterpolationTime();
-		GetClosestPathDistance(mLastAvatarPosition + lVelocity*AHEAD_TIME*20, mClosestPathPosition);
-		const vec3 lUpcomingSlope = mPath->GetSlope().GetNormalized();
-		mPath->GotoAbsoluteTime(lTime);
-		lAim.x += Math::Lerp(-15.0f, -50.0f, ::fabs(lUpcomingSlope.z)) * lUp.x;
+	if (closest_path_distance_ < 20) {
+		const float time = path_->GetCurrentInterpolationTime();
+		GetClosestPathDistance(last_avatar_position_ + velocity*AHEAD_TIME*20, closest_path_position_);
+		const vec3 upcoming_slope = path_->GetSlope().GetNormalized();
+		path_->GotoAbsoluteTime(time);
+		aim.x += Math::Lerp(-15.0f, -50.0f, ::fabs(upcoming_slope.z)) * up.x;
 	}
 	// End braking before drops.
 
-	lAim.x = Math::Clamp(lAim.x, -0.9f, +0.9f);
-	lAim.z = Math::Clamp(lAim.z, -0.0f, +1.0f);
-	lAim.z = Math::Lerp(0.05f, 0.9f, lAim.z);
-	return lAim;
+	aim.x = Math::Clamp(aim.x, -0.9f, +0.9f);
+	aim.z = Math::Clamp(aim.z, -0.0f, +1.0f);
+	aim.z = Math::Lerp(0.05f, 0.9f, aim.z);
+	return aim;
 }
 
-void Autopilot::AttemptCloserPathDistance()
-{
-	float lStartTime = mPath->GetCurrentInterpolationTime();
-	float lShortestTime = lStartTime;
-	float lShortestDistance = mPath->GetValue().GetDistanceSquared(mLastAvatarPosition);
-	for (float x = 0; x < 1; x += 0.05f)
-	{
-		const float lTime = fmod(lStartTime + x, 1.0f);
-		mPath->GotoAbsoluteTime(lTime);
-		const float lDistance = mPath->GetValue().GetDistanceSquared(mLastAvatarPosition);
-		if (lDistance < lShortestDistance)
-		{
-			lShortestTime = lTime;
-			lShortestDistance = lDistance;
+void Autopilot::AttemptCloserPathDistance() {
+	float start_time = path_->GetCurrentInterpolationTime();
+	float shortest_time = start_time;
+	float shortest_distance = path_->GetValue().GetDistanceSquared(last_avatar_position_);
+	for (float x = 0; x < 1; x += 0.05f) {
+		const float time = fmod(start_time + x, 1.0f);
+		path_->GotoAbsoluteTime(time);
+		const float distance = path_->GetValue().GetDistanceSquared(last_avatar_position_);
+		if (distance < shortest_distance) {
+			shortest_time = time;
+			shortest_distance = distance;
 		}
 	}
-	mPath->GotoAbsoluteTime(lShortestTime);
+	path_->GotoAbsoluteTime(shortest_time);
 }
 
-float Autopilot::GetClosestPathDistance() const
-{
-	return mClosestPathDistance;
+float Autopilot::GetClosestPathDistance() const {
+	return closest_path_distance_;
 }
 
-vec3 Autopilot::GetClosestPathVector() const
-{
-	return mClosestPathPosition-mLastAvatarPosition;
+vec3 Autopilot::GetClosestPathVector() const {
+	return closest_path_position_-last_avatar_position_;
 }
 
-vec3 Autopilot::GetLastAvatarPosition() const
-{
-	return mLastAvatarPosition;
+vec3 Autopilot::GetLastAvatarPosition() const {
+	return last_avatar_position_;
 }
 
-float Autopilot::GetRotorSpeed(const Cure::ContextObject* pChopper) const
-{
-	if (pChopper->GetPhysics()->GetEngineCount() < 3)
-	{
+float Autopilot::GetRotorSpeed(const cure::ContextObject* chopper) const {
+	if (chopper->GetPhysics()->GetEngineCount() < 3) {
 		return 0;
 	}
-	const int lRotorIndex = pChopper->GetPhysics()->GetChildIndex(0, 0);
-	Tbc::ChunkyBoneGeometry* lBone = pChopper->GetPhysics()->GetBoneGeometry(lRotorIndex);
-	vec3 lRotorSpeed;
-	mGame->GetPhysicsManager()->GetBodyAngularVelocity(lBone->GetBodyId(), lRotorSpeed);
-	return lRotorSpeed.GetLength();
+	const int rotor_index = chopper->GetPhysics()->GetChildIndex(0, 0);
+	tbc::ChunkyBoneGeometry* bone = chopper->GetPhysics()->GetBoneGeometry(rotor_index);
+	vec3 rotor_speed;
+	game_->GetPhysicsManager()->GetBodyAngularVelocity(bone->GetBodyId(), rotor_speed);
+	return rotor_speed.GetLength();
 }
 
-void Autopilot::CheckStalledRotor(Cure::ContextObject* pChopper)
-{
-	const float lRotorSpeed = GetRotorSpeed(pChopper);
-	if (lRotorSpeed < 6.0f*Lepra::GameTimer::GetRealTimeRatio())
-	{
-		mStalledRotorTimer.TryStart();
-		if (mStalledRotorTimer.QueryTimeDiff() > 3.0f)
-		{
-			Cure::Health::Add(pChopper, -0.02f, true);
+void Autopilot::CheckStalledRotor(cure::ContextObject* chopper) {
+	const float rotor_speed = GetRotorSpeed(chopper);
+	if (rotor_speed < 6.0f*lepra::GameTimer::GetRealTimeRatio()) {
+		stalled_rotor_timer_.TryStart();
+		if (stalled_rotor_timer_.QueryTimeDiff() > 3.0f) {
+			cure::Health::Add(chopper, -0.02f, true);
 		}
-	}
-	else
-	{
-		mStalledRotorTimer.Stop();
+	} else {
+		stalled_rotor_timer_.Stop();
 	}
 }
 
-float Autopilot::GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint) const
-{
-	const float lCurrentTime = mPath->GetCurrentInterpolationTime();
+float Autopilot::GetClosestPathDistance(const vec3& position, vec3& closest_point) const {
+	const float current_time = path_->GetCurrentInterpolationTime();
 
-	float lNearestDistance;
-	const float lSearchStepLength = 0.06f;
-	const int lSearchSteps = 3;
-	mPath->FindNearestTime(lSearchStepLength, pPosition, lNearestDistance, pClosestPoint, lSearchSteps);
+	float nearest_distance;
+	const float search_step_length = 0.06f;
+	const int search_steps = 3;
+	path_->FindNearestTime(search_step_length, position, nearest_distance, closest_point, search_steps);
 
 	{
-		const float lWantedDistance = AIM_DISTANCE;
-		float lDeltaTime = lWantedDistance * mPath->GetDistanceNormal();
-		if (lCurrentTime+lDeltaTime < 0.965f)	// Only move forward if we stay within the curve; otherwise we would loop.
-		{
-			if (lCurrentTime+lDeltaTime < 0)
-			{
-				lDeltaTime = -lCurrentTime;
+		const float wanted_distance = AIM_DISTANCE;
+		float delta_time = wanted_distance * path_->GetDistanceNormal();
+		if (current_time+delta_time < 0.965f) {	// Only move forward if we stay within the curve; otherwise we would loop.
+			if (current_time+delta_time < 0) {
+				delta_time = -current_time;
 			}
-			mPath->StepInterpolation(lDeltaTime);
-			pClosestPoint = mPath->GetValue();
+			path_->StepInterpolation(delta_time);
+			closest_point = path_->GetValue();
 		}
 	}
 
-	return lNearestDistance;
+	return nearest_distance;
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Autopilot);
+loginstance(kGameContextCpp, Autopilot);
 
 
 

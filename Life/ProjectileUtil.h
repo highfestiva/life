@@ -6,13 +6,12 @@
 
 #pragma once
 
-#include "../Lepra/Include/Transformation.h"
-#include "Life.h"
+#include "../lepra/include/transformation.h"
+#include "life.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ContextManager;
 class ContextObject;
 class CppContextObject;
@@ -21,8 +20,7 @@ class GameManager;
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -30,18 +28,17 @@ class Launcher;
 
 
 
-class ProjectileUtil
-{
+class ProjectileUtil {
 public:
-	static bool GetBarrel(Cure::ContextObject* pProjectile, xform& pTransform, vec3& pVelocity);
-	static bool GetBarrelByShooter(Cure::CppContextObject* pShooter, xform& pTransform, vec3& pVelocity);
-	static void StartBullet(Cure::ContextObject* pBullet, float pMuzzleVelocity, bool pUseBarrel);
-	static void BulletMicroTick(Cure::ContextObject* pBullet, float pFrameTime, float pMaxVelocity, float pAcceleration);
-	static void Detonate(Cure::ContextObject* pGrenade, bool* pIsDetonated, Launcher* pLauncher, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength, float pDeleteDelay);
-	static void OnBulletHit(Cure::ContextObject* pBullet, bool* pIsDetonated, Launcher* pLauncher, Cure::ContextObject* pTarget);
-	static float GetShotSounds(Cure::ContextManager* pManager, const strutil::strvec& pSoundNames, str& pLaunchSoundName, str& pShreekSoundName);
+	static bool GetBarrel(cure::ContextObject* projectile, xform& transform, vec3& velocity);
+	static bool GetBarrelByShooter(cure::CppContextObject* shooter, xform& transform, vec3& velocity);
+	static void StartBullet(cure::ContextObject* bullet, float muzzle_velocity, bool use_barrel);
+	static void BulletMicroTick(cure::ContextObject* bullet, float frame_time, float max_velocity, float acceleration);
+	static void Detonate(cure::ContextObject* grenade, bool* is_detonated, Launcher* launcher, const vec3& position, const vec3& velocity, const vec3& normal, float strength, float delete_delay);
+	static void OnBulletHit(cure::ContextObject* bullet, bool* is_detonated, Launcher* launcher, cure::ContextObject* target);
+	static float GetShotSounds(cure::ContextManager* manager, const strutil::strvec& sound_names, str& launch_sound_name, str& shreek_sound_name);
 
-	static vec3 CalculateInitialProjectileDirection(const vec3& pDistance, float pAcceleration, float pTerminalSpeed, const vec3& pGravity, float pAccelerationGravityRecip);
+	static vec3 CalculateInitialProjectileDirection(const vec3& distance, float acceleration, float terminal_speed, const vec3& gravity, float acceleration_gravity_recip);
 private:
 	logclass();
 };

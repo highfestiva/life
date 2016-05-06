@@ -1,13 +1,13 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/LepraOS.h"
-#include "../Include/Application.h"
-#include "../Include/SystemManager.h"
+#include "../include/lepraos.h"
+#include "../include/application.h"
+#include "../include/systemmanager.h"
 
 
 
@@ -17,36 +17,30 @@ HINSTANCE ghInstance = 0;
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-Application::Application(const strutil::strvec& pArgumentVector)
-{
-	SystemManager::SetArgumentVector(pArgumentVector);
+Application::Application(const strutil::strvec& argument_vector) {
+	SystemManager::SetArgumentVector(argument_vector);
 }
 
-Application::~Application()
-{
+Application::~Application() {
 }
 
-void Application::Resume(bool pHard)
-{
-	(void)pHard;
+void Application::Resume(bool hard) {
+	(void)hard;
 }
 
-void Application::Suspend(bool pHard)
-{
-	(void)pHard;
+void Application::Suspend(bool hard) {
+	(void)hard;
 }
 
 
 
-int Main(Application& pApplication)
-{
-	pApplication.Init();
-	return pApplication.Run();
+int Main(Application& application) {
+	application.Init();
+	return application.Run();
 }
 
 

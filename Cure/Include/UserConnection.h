@@ -6,46 +6,43 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Socket.h"
-#include "../../Lepra/Include/String.h"
-#include "NetworkAgent.h"
-#include "UserAccount.h"
+#include "../../lepra/include/socket.h"
+#include "../../lepra/include/string.h"
+#include "networkagent.h"
+#include "useraccount.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class UserConnection
-{
+class UserConnection {
 public:
 	UserConnection();
 	virtual ~UserConnection();
 
 	const str& GetLoginName() const;
-	void SetLoginName(const str& pName);
+	void SetLoginName(const str& name);
 	UserAccount::AccountId GetAccountId() const;
-	void SetAccountId(UserAccount::AccountId pId);
+	void SetAccountId(UserAccount::AccountId id);
 	NetworkAgent::VSocket* GetSocket() const;
-	void SetSocket(NetworkAgent::VSocket* pSocket);
+	void SetSocket(NetworkAgent::VSocket* socket);
 
 private:
-	str mName;
-	UserAccount::AccountId mAccountId;
-	NetworkAgent::VSocket* mSocket;
+	str name_;
+	UserAccount::AccountId account_id_;
+	NetworkAgent::VSocket* socket_;
 };
 
 
 
-class UserConnectionFactory
-{
+class UserConnectionFactory {
 public:
 	UserConnectionFactory();
 	~UserConnectionFactory();
 	UserConnection* AllocateUserConnection();
-	void FreeUserConnection(UserConnection* pUserConnection);
+	void FreeUserConnection(UserConnection* user_connection);
 };
 
 

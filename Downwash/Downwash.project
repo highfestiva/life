@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="Downwash" InternalType="Console">
+<CodeLite_Project Name="downwash" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00010001N0005Debug000000000000]]>
@@ -35,47 +35,47 @@
  }]]]>
     </Plugin>
   </Plugins>
-  <VirtualDirectory Name="Source">
-    <File Name="AirBalloonPilot.cpp"/>
-    <File Name="AirBalloonPilot.h"/>
-    <File Name="Automan.cpp"/>
-    <File Name="Automan.h"/>
-    <File Name="AutoPathDriver.cpp"/>
-    <File Name="AutoPathDriver.h"/>
-    <File Name="Autopilot.cpp"/>
-    <File Name="Autopilot.h"/>
-    <File Name="BaseMachine.cpp"/>
-    <File Name="BaseMachine.h"/>
-    <File Name="CanonDriver.cpp"/>
-    <File Name="CanonDriver.h"/>
-    <File Name="CenteredMachine.cpp"/>
-    <File Name="CenteredMachine.h"/>
-    <File Name="Downwash.cxx"/>
-    <File Name="Downwash.h"/>
-    <File Name="Downwash.rc" ExcludeProjConfig=""/>
-    <File Name="DownwashConsoleManager.cpp"/>
-    <File Name="DownwashConsoleManager.h"/>
-    <File Name="DownwashManager.cpp"/>
-    <File Name="DownwashManager.h"/>
-    <File Name="DownwashTicker.cpp"/>
-    <File Name="DownwashTicker.h"/>
-    <File Name="Eater.cpp"/>
-    <File Name="Eater.h"/>
-    <File Name="LandingTrigger.cpp"/>
-    <File Name="LandingTrigger.h"/>
-    <File Name="Level.cpp"/>
-    <File Name="Level.h"/>
+  <VirtualDirectory Name="src">
+    <File Name="airballoonpilot.cpp"/>
+    <File Name="airballoonpilot.h"/>
+    <File Name="automan.cpp"/>
+    <File Name="automan.h"/>
+    <File Name="autopathdriver.cpp"/>
+    <File Name="autopathdriver.h"/>
+    <File Name="autopilot.cpp"/>
+    <File Name="autopilot.h"/>
+    <File Name="basemachine.cpp"/>
+    <File Name="basemachine.h"/>
+    <File Name="canondriver.cpp"/>
+    <File Name="canondriver.h"/>
+    <File Name="centeredmachine.cpp"/>
+    <File Name="centeredmachine.h"/>
+    <File Name="downwash.cxx"/>
+    <File Name="downwash.h"/>
+    <File Name="downwash.rc" ExcludeProjConfig=""/>
+    <File Name="downwashconsolemanager.cpp"/>
+    <File Name="downwashconsolemanager.h"/>
+    <File Name="downwashmanager.cpp"/>
+    <File Name="downwashmanager.h"/>
+    <File Name="downwashticker.cpp"/>
+    <File Name="downwashticker.h"/>
+    <File Name="eater.cpp"/>
+    <File Name="eater.h"/>
+    <File Name="landingtrigger.cpp"/>
+    <File Name="landingtrigger.h"/>
+    <File Name="level.cpp"/>
+    <File Name="level.h"/>
     <File Name="pch.h"/>
-    <File Name="RtVar.h"/>
-    <File Name="SimulatorDriver.cpp"/>
-    <File Name="SimulatorDriver.h"/>
-    <File Name="Sunlight.cpp"/>
-    <File Name="Sunlight.h"/>
-    <File Name="ToDo.txt" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="Version.h"/>
+    <File Name="rtvar.h"/>
+    <File Name="simulatordriver.cpp"/>
+    <File Name="simulatordriver.h"/>
+    <File Name="sunlight.cpp"/>
+    <File Name="sunlight.h"/>
+    <File Name="todo.txt" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="version.h"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="Mac">
-    <File Name="Downwash.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+  <VirtualDirectory Name="mac">
+    <File Name="downwash.mm" ExcludeProjConfig="Debug;Profile;Release"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -92,14 +92,14 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Debug"/>
+        <LibraryPath Value="../life/Debug"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -139,14 +139,14 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="-pg" Required="yes">
-        <LibraryPath Value="../Life/Profile"/>
+        <LibraryPath Value="../life/Profile"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Profile" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -187,14 +187,14 @@
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Release"/>
+        <LibraryPath Value="../life/Release"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -231,12 +231,12 @@
     </Configuration>
   </Settings>
   <Dependencies Name="Debug">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
   <Dependencies Name="Profile">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
   <Dependencies Name="Release">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
 </CodeLite_Project>

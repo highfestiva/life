@@ -1,48 +1,42 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/PhysicsManager.h"
+#include "../include/physicsmanager.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
 PhysicsManager::PhysicsManager():
-	mTriggerCallback(0),
-	mForceFeedbackCallback(0)
-{
+	trigger_callback_(0),
+	force_feedback_callback_(0) {
 }
 
-PhysicsManager::~PhysicsManager()
-{
-}
-
-
-
-void PhysicsManager::SetTriggerListener(TriggerListener* pTriggerCallback)
-{
-	mTriggerCallback = pTriggerCallback;
-}
-
-void PhysicsManager::SetForceFeedbackListener(ForceFeedbackListener* pForceFeedbackCallback)
-{
-	mForceFeedbackCallback = pForceFeedbackCallback;
+PhysicsManager::~PhysicsManager() {
 }
 
 
 
-int PhysicsManager::QueryRayCollisionAgainst(const xform& pRayTransform, float pLength, BodyID pBody,
-	vec3* pCollisionPoints, int pMaxCollisionCount)
-{
-	vec3 lDir = pRayTransform.GetOrientation() * vec3(0, 0, 1);
-	return QueryRayCollisionAgainst(pRayTransform.GetPosition(), lDir, pLength, pBody, pCollisionPoints, pMaxCollisionCount);
+void PhysicsManager::SetTriggerListener(TriggerListener* trigger_callback) {
+	trigger_callback_ = trigger_callback;
+}
+
+void PhysicsManager::SetForceFeedbackListener(ForceFeedbackListener* force_feedback_callback) {
+	force_feedback_callback_ = force_feedback_callback;
+}
+
+
+
+int PhysicsManager::QueryRayCollisionAgainst(const xform& ray_transform, float length, BodyID body,
+	vec3* collision_points, int max_collision_count) {
+	vec3 dir = ray_transform.GetOrientation() * vec3(0, 0, 1);
+	return QueryRayCollisionAgainst(ray_transform.GetPosition(), dir, length, body, collision_points, max_collision_count);
 }
 
 

@@ -1,124 +1,107 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiBillboardGeometry.h"
-#include "../../Lepra/Include/CyclicArray.h"
+#include "../include/uibillboardgeometry.h"
+#include "../../lepra/include/cyclicarray.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-BillboardGeometry::BillboardGeometry(float pAspectRatio, unsigned pUVSetCount):
-	mUVSetCount(pUVSetCount)
-{
+BillboardGeometry::BillboardGeometry(float aspect_ratio, unsigned uv_set_count):
+	uv_set_count_(uv_set_count) {
 	SetAlwaysVisible(false);
-	SetPrimitiveType(TRIANGLE_STRIP);
+	SetPrimitiveType(kTriangleStrip);
 
-	const float lTriStrip[] =
+	const float tri_strip[] =
 	{
-		-1,0,+1/pAspectRatio,
-		+1,0,+1/pAspectRatio,
-		-1,0,-1/pAspectRatio,
-		+1,0,-1/pAspectRatio,
+		-1,0,+1/aspect_ratio,
+		+1,0,+1/aspect_ratio,
+		-1,0,-1/aspect_ratio,
+		+1,0,-1/aspect_ratio,
 	};
-	::memcpy(mVertexData, lTriStrip, sizeof(mVertexData));
-	mIndexData[0] = 0;
-	mIndexData[1] = 1;
-	mIndexData[2] = 2;
-	mIndexData[3] = 3;
+	::memcpy(vertex_data_, tri_strip, sizeof(vertex_data_));
+	index_data_[0] = 0;
+	index_data_[1] = 1;
+	index_data_[2] = 2;
+	index_data_[3] = 3;
 
-	mUVData = new float[2*4*mUVSetCount];
-	const float lWidth = 1.0f/mUVSetCount;
-	const float lMarginX = 1/256.0;
-	const float lUvTriStripData[] =
+	uv_data_ = new float[2*4*uv_set_count_];
+	const float width = 1.0f/uv_set_count_;
+	const float margin_x = 1/256.0;
+	const float uv_tri_strip_data[] =
 	{
-		lMarginX,   0,
-		1-lMarginX, 0,
-		lMarginX,   1,
-		1-lMarginX, 1,
+		margin_x,   0,
+		1-margin_x, 0,
+		margin_x,   1,
+		1-margin_x, 1,
 	};
-	for (unsigned x = 0; x < mUVSetCount; ++x)
-	{
-		const float x0 = lWidth*x;
-		int lBase = x*4*2;
-		for (int y = 0; y < 4; ++y)
-		{
-			mUVData[lBase+y*2+0] = lUvTriStripData[y*2+0]*lWidth + x0;	// x
-			mUVData[lBase+y*2+1] = lUvTriStripData[y*2+1];	// y
+	for (unsigned x = 0; x < uv_set_count_; ++x) {
+		const float x0 = width*x;
+		int base = x*4*2;
+		for (int y = 0; y < 4; ++y) {
+			uv_data_[base+y*2+0] = uv_tri_strip_data[y*2+0]*width + x0;	// x
+			uv_data_[base+y*2+1] = uv_tri_strip_data[y*2+1];	// y
 		}
 	}
 }
 
-BillboardGeometry::~BillboardGeometry()
-{
-	delete mUVData;
-	mUVData = 0;
+BillboardGeometry::~BillboardGeometry() {
+	delete uv_data_;
+	uv_data_ = 0;
 }
 
-unsigned BillboardGeometry::GetMaxVertexCount() const
-{
-	return LEPRA_ARRAY_COUNT(mVertexData) / 3;
+unsigned BillboardGeometry::GetMaxVertexCount() const {
+	return LEPRA_ARRAY_COUNT(vertex_data_) / 3;
 }
 
-unsigned BillboardGeometry::GetMaxIndexCount() const
-{
-	return LEPRA_ARRAY_COUNT(mIndexData);
+unsigned BillboardGeometry::GetMaxIndexCount() const {
+	return LEPRA_ARRAY_COUNT(index_data_);
 }
 
-unsigned BillboardGeometry::GetVertexCount() const
-{
-	return LEPRA_ARRAY_COUNT(mVertexData) / 3;
+unsigned BillboardGeometry::GetVertexCount() const {
+	return LEPRA_ARRAY_COUNT(vertex_data_) / 3;
 }
 
-unsigned BillboardGeometry::GetIndexCount() const
-{
-	return LEPRA_ARRAY_COUNT(mIndexData);
+unsigned BillboardGeometry::GetIndexCount() const {
+	return LEPRA_ARRAY_COUNT(index_data_);
 }
 
-unsigned BillboardGeometry::GetUVSetCount() const
-{
-	return mUVSetCount;
+unsigned BillboardGeometry::GetUVSetCount() const {
+	return uv_set_count_;
 }
 
-float* BillboardGeometry::GetVertexData() const
-{
-	return (float*)&mVertexData[0];
+float* BillboardGeometry::GetVertexData() const {
+	return (float*)&vertex_data_[0];
 }
 
-void BillboardGeometry::SetVertexData(const float pVertexData[12])
-{
-	::memcpy(mVertexData, pVertexData, sizeof(mVertexData));
+void BillboardGeometry::SetVertexData(const float vertex_data[12]) {
+	::memcpy(vertex_data_, vertex_data, sizeof(vertex_data_));
 }
 
-float* BillboardGeometry::GetUVData(unsigned pUVSet) const
-{
-	return &mUVData[pUVSet*2*4];
+float* BillboardGeometry::GetUVData(unsigned uv_set) const {
+	return &uv_data_[uv_set*2*4];
 }
 
-vtx_idx_t* BillboardGeometry::GetIndexData() const
-{
-	return (vtx_idx_t*)&mIndexData[0];
+vtx_idx_t* BillboardGeometry::GetIndexData() const {
+	return (vtx_idx_t*)&index_data_[0];
 }
 
-uint8* BillboardGeometry::GetColorData() const
-{
+uint8* BillboardGeometry::GetColorData() const {
 	return 0;
 }
 
-Tbc::GeometryBase::GeometryVolatility BillboardGeometry::GetGeometryVolatility() const
-{
-	return GEOM_STATIC;
+tbc::GeometryBase::GeometryVolatility BillboardGeometry::GetGeometryVolatility() const {
+	return kGeomStatic;
 }
 
-void BillboardGeometry::SetGeometryVolatility(Tbc::GeometryBase::GeometryVolatility)
-{
+void BillboardGeometry::SetGeometryVolatility(tbc::GeometryBase::GeometryVolatility) {
 }
 
 

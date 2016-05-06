@@ -5,128 +5,106 @@
 
 
 #include "pch.h"
-#include "../Include/Writer.h"
-#include "../Include/OutputStream.h"
+#include "../include/writer.h"
+#include "../include/outputstream.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-Writer::Writer(Endian::EndianType pEndian):
-	mOutStream(0),
-	mWriterEndian(pEndian)
-{
+Writer::Writer(Endian::EndianType endian):
+	out_stream_(0),
+	writer_endian_(endian) {
 }
 
-Writer::Writer(OutputStream* pOut, Endian::EndianType pEndian):
-	mOutStream(pOut),
-	mWriterEndian(pEndian)
-{
+Writer::Writer(OutputStream* out, Endian::EndianType endian):
+	out_stream_(out),
+	writer_endian_(endian) {
 }
 
-Writer::~Writer()
-{
+Writer::~Writer() {
 }
 
-IOError Writer::WriteData(const void* pBuffer, size_t pSize)
-{
-	return mOutStream->WriteRaw(pBuffer, pSize);
+IOError Writer::WriteData(const void* buffer, size_t size) {
+	return out_stream_->WriteRaw(buffer, size);
 }
 
-const str& Writer::GetStreamName()
-{
-	return mOutStream->GetName();
+const str& Writer::GetStreamName() {
+	return out_stream_->GetName();
 }
 
-IOError Writer::Write(const char& pData)
-{
-	return (WriteData(&pData, sizeof(pData)));
+IOError Writer::Write(const char& data) {
+	return (WriteData(&data, sizeof(data)));
 }
 
-IOError Writer::Write(const wchar_t& pData)
-{
-	return (WriteData(&pData, sizeof(pData)));
+IOError Writer::Write(const wchar_t& data) {
+	return (WriteData(&data, sizeof(data)));
 }
 
-IOError Writer::Write(const int8& pData)
-{
-	return WriteData(&pData, sizeof(int8));
+IOError Writer::Write(const int8& data) {
+	return WriteData(&data, sizeof(int8));
 }
 
-IOError Writer::Write(const uint8& pData)
-{
-	return WriteData(&pData, sizeof(uint8));
+IOError Writer::Write(const uint8& data) {
+	return WriteData(&data, sizeof(uint8));
 }
 
-IOError Writer::Write(const int16& pData)
-{
-	int16 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(int16));
+IOError Writer::Write(const int16& data) {
+	int16 _data = Endian::HostTo(writer_endian_, data);
+	return WriteData(&_data, sizeof(int16));
 }
 
-IOError Writer::Write(const uint16& pData)
-{
-	uint16 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(uint16));
+IOError Writer::Write(const uint16& data) {
+	uint16 _data = Endian::HostTo(writer_endian_, data);
+	return WriteData(&_data, sizeof(uint16));
 }
 
-IOError Writer::Write(const int32& pData)
-{
-	int lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(int));
+IOError Writer::Write(const int32& data) {
+	int _data = Endian::HostTo(writer_endian_, data);
+	return WriteData(&_data, sizeof(int));
 }
 
-IOError Writer::Write(const uint32& pData)
-{
-	unsigned lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(unsigned));
+IOError Writer::Write(const uint32& data) {
+	unsigned _data = Endian::HostTo(writer_endian_, data);
+	return WriteData(&_data, sizeof(unsigned));
 }
 
-IOError Writer::Write(const int64& pData)
-{
-	int64 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(int64));
+IOError Writer::Write(const int64& data) {
+	int64 _data = Endian::HostTo(writer_endian_, data);
+	return WriteData(&_data, sizeof(int64));
 }
 
-IOError Writer::Write(const uint64& pData)
-{
-	uint64 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(uint64));
+IOError Writer::Write(const uint64& data) {
+	uint64 _data = Endian::HostTo(writer_endian_, data);
+	return WriteData(&_data, sizeof(uint64));
 }
 
-IOError Writer::Write(const float32& pData)
-{
-	float32 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(float32));
+IOError Writer::Write(const float32& data) {
+	float32 _data = Endian::HostTo(writer_endian_, data);
+	return WriteData(&_data, sizeof(float32));
 }
 
-IOError Writer::Write(const float64& pData)
-{
-	float64 lData = Endian::HostTo(mWriterEndian, pData);
-	return WriteData(&lData, sizeof(float64));
+IOError Writer::Write(const float64& data) {
+	float64 _data = Endian::HostTo(writer_endian_, data);
+	return WriteData(&_data, sizeof(float64));
 }
 
-void Writer::SetWriterEndian(Endian::EndianType pWriterEndian)
-{
-	mWriterEndian = pWriterEndian;
+void Writer::SetWriterEndian(Endian::EndianType writer_endian) {
+	writer_endian_ = writer_endian;
 }
 
-Endian::EndianType Writer::GetWriterEndian() const
-{
-	return mWriterEndian;
+Endian::EndianType Writer::GetWriterEndian() const {
+	return writer_endian_;
 }
 
-IOError Writer::WriteString(const str& pString)
-{
-	return (WriteData(pString.c_str(), (unsigned)pString.length()));
+IOError Writer::WriteString(const str& s) {
+	return (WriteData(s.c_str(), (unsigned)s.length()));
 }
 
-void Writer::SetOutputStream(OutputStream* pOutStream)
-{
-	mOutStream = pOutStream;
+void Writer::SetOutputStream(OutputStream* out_stream) {
+	out_stream_ = out_stream;
 }
 
 

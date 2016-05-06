@@ -1,38 +1,36 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Life/LifeServer/MasterServerConnection.h"
-#include "../../Life/LifeApplication.h"
-#include "../HoverTankMaster/MasterServerPort.h"
-#include "../HoverTank.h"
-#include "../RtVar.h"
-#include "../Version.h"
-#include "HoverTankServerTicker.h"
+#include "../../cure/include/runtimevariable.h"
+#include "../../life/lifeserver/masterserverconnection.h"
+#include "../../life/lifeapplication.h"
+#include "../hovertankmaster/masterserverport.h"
+#include "../hovertank.h"
+#include "../rtvar.h"
+#include "../version.h"
+#include "hovertankserverticker.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-class HoverTankServer: public Life::Application
-{
-	typedef Life::Application Parent;
+class HoverTankServer: public life::Application {
+	typedef life::Application Parent;
 public:
-	HoverTankServer(const strutil::strvec& pArgumentList);
+	HoverTankServer(const strutil::strvec& argument_list);
 	virtual ~HoverTankServer();
 	virtual void Init();
 
 private:
 	str GetTypeName() const;
 	str GetVersion() const;
-	Cure::ApplicationTicker* CreateTicker() const;
+	cure::ApplicationTicker* CreateTicker() const;
 	LogListener* CreateConsoleLogListener() const;
 };
 
@@ -42,58 +40,50 @@ private:
 
 
 
-LEPRA_RUN_APPLICATION(HoverTank::HoverTankServer, Lepra::Main);
+LEPRA_RUN_APPLICATION(HoverTank::HoverTankServer, lepra::Main);
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-HoverTankServer::HoverTankServer(const strutil::strvec& pArgumentList):
-	Parent(HT_APPLICATION_NAME, pArgumentList)
-{
+HoverTankServer::HoverTankServer(const strutil::strvec& argument_list):
+	Parent(kHtApplicationName, argument_list) {
 }
 
-HoverTankServer::~HoverTankServer()
-{
+HoverTankServer::~HoverTankServer() {
 	Destroy();
 
-	Cure::Shutdown();
-	Tbc::Shutdown();
-	Lepra::Shutdown();
+	cure::Shutdown();
+	tbc::Shutdown();
+	lepra::Shutdown();
 };
 
-void HoverTankServer::Init()
-{
-	Lepra::Init();
-	Tbc::Init();
-	Cure::Init();
+void HoverTankServer::Init() {
+	lepra::Init();
+	tbc::Init();
+	cure::Init();
 
 	Parent::Init();
 }
 
-str HoverTankServer::GetTypeName() const
-{
+str HoverTankServer::GetTypeName() const {
 	return "Server";
 }
 
-str HoverTankServer::GetVersion() const
-{
-	return PLATFORM_VERSION;
+str HoverTankServer::GetVersion() const {
+	return kPlatformVersion;
 }
 
-Cure::ApplicationTicker* HoverTankServer::CreateTicker() const
-{
-	Life::GameServerTicker* lTicker = new HoverTankServerTicker(mResourceManager, 2000, 7, 1);
-	lTicker->StartConsole((InteractiveStdioConsoleLogListener*)mConsoleLogger);
-	lTicker->SetMasterServerConnection(new Life::MasterServerConnection(MASTER_SERVER_ADDRESS ":" MASTER_SERVER_PORT));
-	return lTicker;
+cure::ApplicationTicker* HoverTankServer::CreateTicker() const {
+	life::GameServerTicker* ticker = new HoverTankServerTicker(resource_manager_, 2000, 7, 1);
+	ticker->StartConsole((InteractiveStdioConsoleLogListener*)console_logger_);
+	ticker->SetMasterServerConnection(new life::MasterServerConnection(kMasterServerAddress ":" kMasterServerPort));
+	return ticker;
 }
 
-LogListener* HoverTankServer::CreateConsoleLogListener() const
-{
+LogListener* HoverTankServer::CreateConsoleLogListener() const {
 	return (new InteractiveStdioConsoleLogListener());
 }
 

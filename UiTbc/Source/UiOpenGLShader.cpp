@@ -6,69 +6,58 @@
 
 #define GL_GLEXT_PROTOTYPES
 #include "pch.h"
-#include "../Include/UiOpenGLShader.h"
+#include "../include/uiopenglshader.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
 UiOpenGLShader::UiOpenGLShader():
-	mFragmentShader(0),
-	mVertexShader(0),
-	mShaderProgram(0)
-{
+	fragment_shader_(0),
+	vertex_shader_(0),
+	shader_program_(0) {
 }
 
-UiOpenGLShader::~UiOpenGLShader()
-{
+UiOpenGLShader::~UiOpenGLShader() {
 	Release();
 }
 
-void UiOpenGLShader::Release()
-{
-	if (mVertexShader)
-	{
-		::glDeleteShader(mVertexShader);
-		mVertexShader = 0;
+void UiOpenGLShader::Release() {
+	if (vertex_shader_) {
+		::glDeleteShader(vertex_shader_);
+		vertex_shader_ = 0;
 	}
-	if (mFragmentShader)
-	{
-		::glDeleteShader(mFragmentShader);
-		mFragmentShader = 0;
+	if (fragment_shader_) {
+		::glDeleteShader(fragment_shader_);
+		fragment_shader_ = 0;
 	}
-	if (mShaderProgram)
-	{
-		::glDeleteProgram(mShaderProgram);
-		mShaderProgram = 0;
+	if (shader_program_) {
+		::glDeleteProgram(shader_program_);
+		shader_program_ = 0;
 	}
 }
 
-unsigned UiOpenGLShader::GetProgram() const
-{
-	return mShaderProgram;
+unsigned UiOpenGLShader::GetProgram() const {
+	return shader_program_;
 }
 
-bool UiOpenGLShader::Build(const str& pVertexShaderSource, const str& pFragmentShaderSource)
-{
-	mShaderProgram = ::glCreateProgram();
+bool UiOpenGLShader::Build(const str& vertex_shader_source, const str& fragment_shader_source) {
+	shader_program_ = ::glCreateProgram();
 
-	mVertexShader = Compile(GL_VERTEX_SHADER, pVertexShaderSource);
-	mFragmentShader = Compile(GL_FRAGMENT_SHADER, pFragmentShaderSource);
-	if (mVertexShader == 0 || mFragmentShader == 0)
-	{
-		mLog.Error("Error while compiling shaders");
+	vertex_shader_ = Compile(GL_VERTEX_SHADER, vertex_shader_source);
+	fragment_shader_ = Compile(GL_FRAGMENT_SHADER, fragment_shader_source);
+	if (vertex_shader_ == 0 || fragment_shader_ == 0) {
+		log_.Error("Error while compiling shaders");
 		Release();
 		return false;
 	}
 
-	::glAttachShader(mShaderProgram, mVertexShader);
-	::glAttachShader(mShaderProgram, mFragmentShader);
+	::glAttachShader(shader_program_, vertex_shader_);
+	::glAttachShader(shader_program_, fragment_shader_);
 
-	if (!Link())
-	{
+	if (!Link()) {
 		Release();
 		return false;
 	}
@@ -76,55 +65,49 @@ bool UiOpenGLShader::Build(const str& pVertexShaderSource, const str& pFragmentS
 	return true;
 }
 
-unsigned UiOpenGLShader::Compile(GLenum type, const str& pSource)
-{
-	if (pSource.empty())
-	{
-		mLog.Errorf("Shader source '%s' is empty!", pSource.c_str());
+unsigned UiOpenGLShader::Compile(GLenum type, const str& source) {
+	if (source.empty()) {
+		log_.Errorf("Shader source '%s' is empty!", source.c_str());
 		return 0;
 	}
 
-	GLuint lShader = ::glCreateShader(type);
-	str lAnsiSource = pSource;
-	const char* lRawSource = lAnsiSource.c_str();
-	::glShaderSource(lShader, 1, &lRawSource, 0);
-	::glCompileShader(lShader);
-	GLint lStatus;
-	::glGetShaderiv(lShader, GL_COMPILE_STATUS, &lStatus);
-	if (!lStatus)
-	{
-		mLog.Errorf("Failed to compile shader with contents: '%s'", pSource.c_str());
-		GLint lLogLength;
-		::glGetShaderiv(lShader, GL_INFO_LOG_LENGTH, &lLogLength);
-		if (lLogLength > 0)
-		{
-			unsigned char* lRawLog = new unsigned char[lLogLength];
-			::glGetShaderInfoLog(lShader, lLogLength, &lLogLength, (GLchar*)&lRawLog[0]);
-			str lCharLog((char*)lRawLog);
-			str lLog = lCharLog;
-			mLog.Error(lLog);
-			delete lRawLog;
+	GLuint shader = ::glCreateShader(type);
+	str ansi_source = source;
+	const char* raw_source = ansi_source.c_str();
+	::glShaderSource(shader, 1, &raw_source, 0);
+	::glCompileShader(shader);
+	GLint status;
+	::glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+	if (!status) {
+		log_.Errorf("Failed to compile shader with contents: '%s'", source.c_str());
+		GLint log_length;
+		::glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
+		if (log_length > 0) {
+			unsigned char* raw_log = new unsigned char[log_length];
+			::glGetShaderInfoLog(shader, log_length, &log_length, (GLchar*)&raw_log[0]);
+			str char_log((char*)raw_log);
+			str log = char_log;
+			log_.Error(log);
+			delete raw_log;
 		}
 		return 0;
 	}
-	return lShader;
+	return shader;
 }
 
-bool UiOpenGLShader::Link()
-{
-	::glLinkProgram(mShaderProgram);
-	GLint lStatus;
-	::glGetProgramiv(mShaderProgram, GL_LINK_STATUS, &lStatus);
-	if (!lStatus)
-	{
-		mLog.Error("Failed to link shader program");
+bool UiOpenGLShader::Link() {
+	::glLinkProgram(shader_program_);
+	GLint status;
+	::glGetProgramiv(shader_program_, GL_LINK_STATUS, &status);
+	if (!status) {
+		log_.Error("Failed to link shader program");
 	}
-	return lStatus? true : false;
+	return status? true : false;
 }
 
 
 
-loginstance(UI_GFX_3D, UiOpenGLShader);
+loginstance(kUiGfx3D, UiOpenGLShader);
 
 
 

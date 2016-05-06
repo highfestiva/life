@@ -1,27 +1,25 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "Impuzzable.h"
+#include "impuzzable.h"
 
 
 
-namespace Impuzzable
-{
+namespace Impuzzable {
 
 
 
-struct PieceInfo
-{
+struct PieceInfo {
 	PieceInfo();
 	virtual ~PieceInfo();
 
-	str mGfxMesh;
-	strutil::strvec mPhysGeometries;
+	str gfx_mesh_;
+	strutil::strvec phys_geometries_;
 };
 
 

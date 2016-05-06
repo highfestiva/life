@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,27 +8,23 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 // Simple data storage, used with both UDP and TCP protocol.
-class Datagram
-{
+class Datagram {
 public:
-	enum
-	{
-		BUFFER_SIZE = 1024,
+	enum {
+		kBufferSize = 1024,
 	};
 
-	inline void Init()
-	{
-		mDataSize = 0;
+	inline void Init() {
+		data_size_ = 0;
 	}
 
-	uint8 mDataBuffer[BUFFER_SIZE];
-	int mDataSize;
+	uint8 data_buffer_[kBufferSize];
+	int data_size_;
 };
 
 

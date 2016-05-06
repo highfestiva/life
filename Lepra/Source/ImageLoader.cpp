@@ -1,162 +1,121 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/ImageLoader.h"
-#include "../Include/LepraAssert.h"
-#include "../Include/BmpLoader.h"
-#include "../Include/DiskFile.h"
-#include "../Include/JpegLoader.h"
-#include "../Include/Path.h"
-#include "../Include/PngLoader.h"
-#include "../Include/String.h"
-#include "../Include/TgaLoader.h"
-#include "../Include/TiffLoader.h"
+#include "../include/imageloader.h"
+#include "../include/lepraassert.h"
+#include "../include/bmploader.h"
+#include "../include/diskfile.h"
+#include "../include/jpegloader.h"
+#include "../include/path.h"
+#include "../include/pngloader.h"
+#include "../include/string.h"
+#include "../include/tgaloader.h"
+#include "../include/tiffloader.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-ImageLoader::ImageLoader()
-{
+ImageLoader::ImageLoader() {
 }
 
-ImageLoader::~ImageLoader()
-{
+ImageLoader::~ImageLoader() {
 }
 
 
 
-ImageLoader::FileType ImageLoader::GetFileTypeFromName(const str& pFilename)
-{
-	str lFileExtension = Path::GetExtension(pFilename);
-	strutil::ToLower(lFileExtension);
-	if (lFileExtension == "bmp")
-	{
-		return BMP;
-	}
-	else if (lFileExtension ==  "tga")
-	{
-		return TGA;
-	}
-	else if (lFileExtension == "tif" || lFileExtension == "tiff")
-	{
-		return TIF;
-	}
-	else if (lFileExtension == "jpg" || lFileExtension == "jpeg")
-	{
-		return JPG;
-	}
-	else if (lFileExtension == "png")
-	{
+ImageLoader::FileType ImageLoader::GetFileTypeFromName(const str& filename) {
+	str file_extension = Path::GetExtension(filename);
+	strutil::ToLower(file_extension);
+	if (file_extension == "bmp") {
+		return kBmp;
+	} else if (file_extension ==  "tga") {
+		return kTga;
+	} else if (file_extension == "tif" || file_extension == "tiff") {
+		return kTif;
+	} else if (file_extension == "jpg" || file_extension == "jpeg") {
+		return kJpg;
+	} else if (file_extension == "png") {
 		return PNG;
 	}
-	return UNKNOWN;
+	return kUnknown;
 }
 
 
 
-bool ImageLoader::Load(const str& pFileName, Canvas& pCanvas)
-{
-	DiskFile lFile;
-	if (!lFile.Open(pFileName, DiskFile::MODE_READ))
-	{
+bool ImageLoader::Load(const str& file_name, Canvas& canvas) {
+	DiskFile file;
+	if (!file.Open(file_name, DiskFile::kModeRead)) {
 		return false;
 	}
-	return Load(GetFileTypeFromName(pFileName), lFile, pCanvas);
+	return Load(GetFileTypeFromName(file_name), file, canvas);
 }
 
-bool ImageLoader::Save(const str& pFileName, const Canvas& pCanvas)
-{
-	DiskFile lFile;
-	if (!lFile.Open(pFileName, DiskFile::MODE_WRITE))
-	{
+bool ImageLoader::Save(const str& file_name, const Canvas& canvas) {
+	DiskFile file;
+	if (!file.Open(file_name, DiskFile::kModeWrite)) {
 		return false;
 	}
-	return Save(GetFileTypeFromName(pFileName), lFile, pCanvas);
+	return Save(GetFileTypeFromName(file_name), file, canvas);
 }
 
 
 
-bool ImageLoader::Load(FileType pFileType, Reader& pReader, Canvas& pCanvas)
-{
-	switch (pFileType)
-	{
-		case BMP:
-		{
-			BmpLoader lBmpLoader;
-			return lBmpLoader.Load(pReader, pCanvas) == BmpLoader::STATUS_SUCCESS;
-		}
-		break;
-		case TGA:
-		{
-			TgaLoader lTgaLoader;
-			return lTgaLoader.Load(pReader, pCanvas) == TgaLoader::STATUS_SUCCESS;
-		}
-		break;
-		case TIF:
-		{
-			TiffLoader lTiffLoader;
-			return lTiffLoader.Load(pReader, pCanvas) == TiffLoader::STATUS_SUCCESS;
-		}
-		break;
-		case JPG:
-		{
-			JpegLoader lJpegLoader;
-			return lJpegLoader.Load(pReader, pCanvas) == JpegLoader::STATUS_SUCCESS;
-		}
-		break;
-		case PNG:
-		{
-			PngLoader lPngLoader;
-			return lPngLoader.Load(pReader, pCanvas) == PngLoader::STATUS_SUCCESS;
-		}
-		break;
+bool ImageLoader::Load(FileType file_type, Reader& reader, Canvas& canvas) {
+	switch (file_type) {
+		case kBmp: {
+			BmpLoader bmp_loader;
+			return bmp_loader.Load(reader, canvas) == BmpLoader::kStatusSuccess;
+		} break;
+		case kTga: {
+			TgaLoader tga_loader;
+			return tga_loader.Load(reader, canvas) == TgaLoader::kStatusSuccess;
+		} break;
+		case kTif: {
+			TiffLoader tiff_loader;
+			return tiff_loader.Load(reader, canvas) == TiffLoader::kStatusSuccess;
+		} break;
+		case kJpg: {
+			JpegLoader jpeg_loader;
+			return jpeg_loader.Load(reader, canvas) == JpegLoader::kStatusSuccess;
+		} break;
+		case PNG: {
+			PngLoader png_loader;
+			return png_loader.Load(reader, canvas) == PngLoader::kStatusSuccess;
+		} break;
 		default:
 		return false;
 	}
 }
 
-bool ImageLoader::Save(FileType pFileType, Writer& pWriter, const Canvas& pCanvas)
-{
-	switch(pFileType)
-	{
-		case BMP:
-		{
-			BmpLoader lBmpLoader;
-			return lBmpLoader.Save(pWriter, pCanvas) == BmpLoader::STATUS_SUCCESS;
-		}
-		break;
-		case TGA:
-		{
-			TgaLoader lTgaLoader;
-			return lTgaLoader.Save(pWriter, pCanvas) == TgaLoader::STATUS_SUCCESS;
-		}
-		break;
-		case TIF:
-		{
-			TiffLoader lTiffLoader;
-			return lTiffLoader.Save(pWriter, pCanvas) == TiffLoader::STATUS_SUCCESS;
-		}
-		break;
-		case JPG:
-		{
-			JpegLoader lJpegLoader;
-			return lJpegLoader.Save(pWriter, pCanvas) == JpegLoader::STATUS_SUCCESS;
-		}
-		break;
-		case PNG:
-		{
-			PngLoader lPngLoader;
-			return lPngLoader.Save(pWriter, pCanvas) == PngLoader::STATUS_SUCCESS;
-		}
-		break;
+bool ImageLoader::Save(FileType file_type, Writer& writer, const Canvas& canvas) {
+	switch(file_type) {
+		case kBmp: {
+			BmpLoader bmp_loader;
+			return bmp_loader.Save(writer, canvas) == BmpLoader::kStatusSuccess;
+		} break;
+		case kTga: {
+			TgaLoader tga_loader;
+			return tga_loader.Save(writer, canvas) == TgaLoader::kStatusSuccess;
+		} break;
+		case kTif: {
+			TiffLoader tiff_loader;
+			return tiff_loader.Save(writer, canvas) == TiffLoader::kStatusSuccess;
+		} break;
+		case kJpg: {
+			JpegLoader jpeg_loader;
+			return jpeg_loader.Save(writer, canvas) == JpegLoader::kStatusSuccess;
+		} break;
+		case PNG: {
+			PngLoader png_loader;
+			return png_loader.Save(writer, canvas) == PngLoader::kStatusSuccess;
+		} break;
 	}
 	return false;
 }

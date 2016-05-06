@@ -5,227 +5,192 @@
 
 
 #include "pch.h"
-#include "../Include/Posix/MacLog.h"
-#include "../Include/LepraAssert.h"
-#include "../Include/LepraOS.h"
-#include "../Include/LogListener.h"
-#include "../Include/Time.h"
+#include "../include/posix/maclog.h"
+#include "../include/lepraassert.h"
+#include "../include/lepraos.h"
+#include "../include/loglistener.h"
+#include "../include/time.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-LogListener::LogListener(str pName, OutputFormat pFormat):
-	mLog(0),
-	mName(pName),
-	mLevel(LEVEL_LOWEST_TYPE),
-	mFormat(pFormat),
-	mLogCount(1)
-{
+LogListener::LogListener(str name, OutputFormat format):
+	log_(0),
+	name_(name),
+	level_(kLevelLowestType),
+	format_(format),
+	log_count_(1) {
 }
 
-LogListener::~LogListener()
-{
+LogListener::~LogListener() {
 	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 }
 
-void LogListener::AddLog(Logger* pLog)
-{
-	deb_assert(mLog == 0 || mLog == pLog);
-	if (mLog == 0 || mLog == pLog)
-	{
-		mLog = pLog;
+void LogListener::AddLog(Logger* log) {
+	deb_assert(log_ == 0 || log_ == log);
+	if (log_ == 0 || log_ == log) {
+		log_ = log;
 	}
 }
 
-void LogListener::RemoveLog(Logger* pLog)
-{
-	deb_assert(mLog == pLog);
-	if (mLog == pLog)
-	{
-		mLog = 0;
+void LogListener::RemoveLog(Logger* log) {
+	deb_assert(log_ == log);
+	if (log_ == log) {
+		log_ = 0;
 	}
 }
 
-void LogListener::KillSelf()
-{
-	if (mLog)
-	{
-		mLog->RemoveListener(this);
-		deb_assert(mLog == 0);
+void LogListener::KillSelf() {
+	if (log_) {
+		log_->RemoveListener(this);
+		deb_assert(log_ == 0);
 	}
 }
 
-void LogListener::OnLog(const Logger* pOriginator, const str& pAccount, const str& pMessage, LogLevel pLevel)
-{
-	if (mFormat & FORMAT_CLASS)
-	{
-		OnLog(pOriginator, pAccount+": "+pMessage+"\n", pLevel);
-	}
-	else
-	{
-		OnLog(pOriginator, pMessage+"\n", pLevel);
+void LogListener::OnLog(const Logger* originator, const str& account, const str& message, LogLevel level) {
+	if (format_ & kFormatClass) {
+		OnLog(originator, account+": "+message+"\n", level);
+	} else {
+		OnLog(originator, message+"\n", level);
 	}
 }
 
-void LogListener::OnLog(const Logger* pOriginator, const str& pMessage, LogLevel pLevel)
-{
-	if (pLevel < mLevel)
-	{
+void LogListener::OnLog(const Logger* originator, const str& message, LogLevel level) {
+	if (level < level_) {
 		return;	// TRICKY: optimization by early return.
 	}
 
-	str lOutputString;
+	str output_string;
 
-	if (mFormat & FORMAT_LOGCOUNT)
-	{
-		lOutputString = strutil::Format("%.5i. ", mLogCount);
+	if (format_ & kFormatLogcount) {
+		output_string = strutil::Format("%.5i. ", log_count_);
 	}
-	++mLogCount;
+	++log_count_;
 
-	if (mFormat & FORMAT_TYPE)
-	{
-		switch(pLevel)
-		{
-			case LEVEL_TRACE:	lOutputString += "TRACE:       ";	break;
-			case LEVEL_DEBUG:	lOutputString += "DEBUG:       ";	break;
-			case LEVEL_PERFORMANCE:	lOutputString += "PERFORMANCE: ";	break;
-			case LEVEL_INFO:	lOutputString += "INFO:        ";	break;
-			case LEVEL_HEADLINE:	lOutputString += "HEADLINE:    ";	break;
-			case LEVEL_WARNING:	lOutputString += "WARNING:     ";	break;
-			case LEVEL_ERROR:	lOutputString += "ERROR:       ";	break;
+	if (format_ & kFormatType) {
+		switch(level) {
+			case kLevelTrace:	output_string += "TRACE:       ";	break;
+			case kLevelDebug:	output_string += "DEBUG:       ";	break;
+			case kLevelPerformance:	output_string += "PERFORMANCE: ";	break;
+			case kLevelInfo:	output_string += "INFO:        ";	break;
+			case kLevelHeadline:	output_string += "HEADLINE:    ";	break;
+			case kLevelWarning:	output_string += "WARNING:     ";	break;
+			case kLevelError:	output_string += "ERROR:       ";	break;
 			default:	// Fall through.
-			case LEVEL_FATAL:		lOutputString += "FATAL:       ";	break;
+			case kLevelFatal:		output_string += "FATAL:       ";	break;
 		}
 	}
 
-	if (mFormat & FORMAT_SUBSYSTEM)
-	{
-		lOutputString += pOriginator->GetName();
+	if (format_ & kFormatSubsystem) {
+		output_string += originator->GetName();
 	}
 
-	if (mFormat & FORMAT_TIME)
-	{
-		static const str lPre("(");
-		static const str lPost(") ");
-		lOutputString += lPre + Time().GetDateTimeAsString() + lPost;
+	if (format_ & kFormatTime) {
+		static const str pre("(");
+		static const str post(") ");
+		output_string += pre + Time().GetDateTimeAsString() + post;
 	}
 
-	if (mFormat & FORMAT_THREAD)
-	{
-		Thread* lThread = Thread::GetCurrentThread();
-		if (lThread)
-		{
-			lOutputString += strutil::Format("%10s: ", lThread->GetThreadName().c_str());
+	if (format_ & kFormatThread) {
+		Thread* thread = Thread::GetCurrentThread();
+		if (thread) {
+			output_string += strutil::Format("%10s: ", thread->GetThreadName().c_str());
 		}
 	}
 
-	lOutputString += pMessage;
+	output_string += message;
 
-	WriteLog(lOutputString, pLevel);
+	WriteLog(output_string, level);
 }
 
-LogLevel LogListener::GetLevelThreashold() const
-{
-	return (mLevel);
+LogLevel LogListener::GetLevelThreashold() const {
+	return (level_);
 }
 
-void LogListener::SetLevelThreashold(LogLevel pLevel)
-{
-	mLevel = pLevel;
+void LogListener::SetLevelThreashold(LogLevel level) {
+	level_ = level;
 }
 
-const str& LogListener::GetName() const
-{
-	return (mName);
+const str& LogListener::GetName() const {
+	return (name_);
 }
 
 
 
-StdioConsoleLogListener::StdioConsoleLogListener(OutputFormat pFormat):
-	LogListener("console", pFormat)
-{
+StdioConsoleLogListener::StdioConsoleLogListener(OutputFormat format):
+	LogListener("console", format) {
 }
 
-StdioConsoleLogListener::~StdioConsoleLogListener()
-{
+StdioConsoleLogListener::~StdioConsoleLogListener() {
 	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 }
 
-void StdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
-{
+void StdioConsoleLogListener::WriteLog(const str& full_message, LogLevel level) {
 #if defined(LEPRA_WINDOWS)
-	HANDLE lStdOut = ::GetStdHandle(STD_OUTPUT_HANDLE);
+	HANDLE std_out = ::GetStdHandle(STD_OUTPUT_HANDLE);
 
 	// Set console text color. Default color is light gray.
-	WORD lAttributes;
-	switch(pLevel)
-	{
-		case LEVEL_TRACE:	// Fall through.
-		case LEVEL_DEBUG:	lAttributes = FOREGROUND_BLUE;									break;
-		case LEVEL_INFO:	lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;				break;
-		case LEVEL_PERFORMANCE:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_GREEN;						break;
-		case LEVEL_HEADLINE:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;	break;
-		case LEVEL_WARNING:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;				break;
-		case LEVEL_ERROR:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED;						break;
+	WORD attributes;
+	switch(level) {
+		case kLevelTrace:	// Fall through.
+		case kLevelDebug:	attributes = FOREGROUND_BLUE;									break;
+		case kLevelInfo:	attributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;				break;
+		case kLevelPerformance:	attributes = FOREGROUND_INTENSITY | FOREGROUND_GREEN;						break;
+		case kLevelHeadline:	attributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;	break;
+		case kLevelWarning:	attributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN;				break;
+		case kLevelError:	attributes = FOREGROUND_INTENSITY | FOREGROUND_RED;						break;
 		default:	// Fall through.
-		case LEVEL_FATAL:	lAttributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED;	break;
+		case kLevelFatal:	attributes = FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_INTENSITY | BACKGROUND_RED;	break;
 	}
-	::SetConsoleTextAttribute(lStdOut, lAttributes);
-	DWORD lCharsWritten = 0;
+	::SetConsoleTextAttribute(std_out, attributes);
+	DWORD chars_written = 0;
 #ifdef LEPRA_UTF32
-	::WriteConsoleW(lStdOut, pFullMessage.c_str(), (DWORD)pFullMessage.length(), &lCharsWritten, NULL);
+	::WriteConsoleW(std_out, full_message.c_str(), (DWORD)full_message.length(), &chars_written, NULL);
 #else
-	const wstr w = wstrutil::Encode(pFullMessage);
-	::WriteConsoleW(lStdOut, w.c_str(), (DWORD)w.length(), &lCharsWritten, NULL);
+	const wstr w = wstrutil::Encode(full_message);
+	::WriteConsoleW(std_out, w.c_str(), (DWORD)w.length(), &chars_written, NULL);
 #endif // UTF-16/UTF-8
 
 	// Restore normal text color.
-	lAttributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
-	::SetConsoleTextAttribute(lStdOut, lAttributes);
+	attributes = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+	::SetConsoleTextAttribute(std_out, attributes);
 #else // !LEPRA_WINDOWS
-	::printf("%s", pFullMessage.c_str());
+	::printf("%s", full_message.c_str());
 #endif // LEPRA_WINDOWS/!LEPRA_WINDOWS
 }
 
 
 
-InteractiveConsoleLogListener::InteractiveConsoleLogListener(OutputFormat pFormat):
-	LogListener("i-console", pFormat)
-{
+InteractiveConsoleLogListener::InteractiveConsoleLogListener(OutputFormat format):
+	LogListener("i-console", format) {
 }
 
-void InteractiveConsoleLogListener::SetAutoPrompt(const str& pAutoPrompt)
-{
-	ScopeLock lLock(&mLock);
-	mAutoPrompt = pAutoPrompt;
+void InteractiveConsoleLogListener::SetAutoPrompt(const str& auto_prompt) {
+	ScopeLock lock(&lock_);
+	auto_prompt_ = auto_prompt;
 }
 
-void InteractiveConsoleLogListener::StepPage(int)
-{
+void InteractiveConsoleLogListener::StepPage(int) {
 	// Default is a dummy, used in graphical applications.
 }
 
 
-InteractiveStdioConsoleLogListener::InteractiveStdioConsoleLogListener()
-{
+InteractiveStdioConsoleLogListener::InteractiveStdioConsoleLogListener() {
 }
 
-InteractiveStdioConsoleLogListener::~InteractiveStdioConsoleLogListener()
-{
+InteractiveStdioConsoleLogListener::~InteractiveStdioConsoleLogListener() {
 	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 }
 
-void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
-{
-	ScopeLock lLock(&mLock);
+void InteractiveStdioConsoleLogListener::WriteLog(const str& full_message, LogLevel level) {
+	ScopeLock lock(&lock_);
 
 #ifdef LEPRA_WINDOWS
-	CONSOLE_SCREEN_BUFFER_INFO lConsoleInfo;
-	::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE), &lConsoleInfo);
+	CONSOLE_SCREEN_BUFFER_INFO console_info;
+	::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE), &console_info);
 #elif defined(LEPRA_POSIX)
 	::printf("\033[s");	// Store position.
 #else // !known
@@ -233,21 +198,19 @@ void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLe
 #endif // Windows / POSIX / ?
 
 	::printf("\r");
-	mStdioLogListener.WriteLog(pFullMessage, pLevel);
+	stdio_log_listener_.WriteLog(full_message, level);
 
-	::printf("%s", mAutoPrompt.c_str());
+	::printf("%s", auto_prompt_.c_str());
 
 #ifdef LEPRA_WINDOWS
-	SHORT x = lConsoleInfo.dwCursorPosition.X;
-	::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE), &lConsoleInfo);
-	lConsoleInfo.dwCursorPosition.X = x;
-	::SetConsoleCursorPosition(::GetStdHandle(STD_OUTPUT_HANDLE), lConsoleInfo.dwCursorPosition);
+	SHORT x = console_info.dwCursorPosition.X;
+	::GetConsoleScreenBufferInfo(::GetStdHandle(STD_OUTPUT_HANDLE), &console_info);
+	console_info.dwCursorPosition.X = x;
+	::SetConsoleCursorPosition(::GetStdHandle(STD_OUTPUT_HANDLE), console_info.dwCursorPosition);
 #elif defined(LEPRA_POSIX)
 	::printf("\033[u");	// Pop position.
-	for (size_t x = 0; x < pFullMessage.length(); ++x)
-	{
-		if (pFullMessage[x] == '\n')
-		{
+	for (size_t x = 0; x < full_message.length(); ++x) {
+		if (full_message[x] == '\n') {
 			::printf("\033[B");	// Move down.
 		}
 	}
@@ -257,162 +220,136 @@ void InteractiveStdioConsoleLogListener::WriteLog(const str& pFullMessage, LogLe
 #endif // Windows / Posix / ?
 }
 
-void InteractiveStdioConsoleLogListener::OnLogRawMessage(const str& pText)
-{
-	::printf("%s", pText.c_str());
+void InteractiveStdioConsoleLogListener::OnLogRawMessage(const str& text) {
+	::printf("%s", text.c_str());
 }
 
 
 
-DebuggerLogListener::DebuggerLogListener(OutputFormat pFormat):
-	LogListener("debug", pFormat)
-{
+DebuggerLogListener::DebuggerLogListener(OutputFormat format):
+	LogListener("debug", format) {
 }
 
-DebuggerLogListener::~DebuggerLogListener()
-{
+DebuggerLogListener::~DebuggerLogListener() {
 	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 }
 
-void DebuggerLogListener::WriteLog(const str& pFullMessage, LogLevel)
-{
+void DebuggerLogListener::WriteLog(const str& full_message, LogLevel) {
 #if !defined(NO_LOG_DEBUG_INFO)
 #if defined(LEPRA_WINDOWS)
 #ifdef LEPRA_UTF32
-	OutputDebugStringW((L">>>"+pFullMessage).c_str());
+	OutputDebugStringW((L">>>"+full_message).c_str());
 #else
-	const wstr w = wstrutil::Encode(">>>"+pFullMessage);
+	const wstr w = wstrutil::Encode(">>>"+full_message);
 	OutputDebugStringW(w.c_str());
 #endif // UTF-16/UTF-8
 #elif defined(LEPRA_MAC)
-	MacLog::Write(">>>"+pFullMessage);
+	MacLog::Write(">>>"+full_message);
 #else // !Windows
 	// Usually "console" is equivalent to "debug console" on other systems.
 #endif // Windows/!Windows
 #else // Logging debug info
-	pFullMessage;
+	full_message;
 #endif // Not logging debug info / logging debug info.
 }
 
 
 
-FileLogListener::FileLogListener(const str& pFilename, OutputFormat pFormat):
-	LogListener("file", pFormat)
-{
-	mFile.Open(pFilename, DiskFile::MODE_TEXT_WRITE_APPEND);
-	if (mFile.GetSize() > 3*1024*1024)	// If the log starts getting big, do something about it.
-	{
-		mFile.Open(pFilename, DiskFile::MODE_TEXT_WRITE);
+FileLogListener::FileLogListener(const str& filename, OutputFormat format):
+	LogListener("file", format) {
+	file_.Open(filename, DiskFile::kModeTextWriteAppend);
+	if (file_.GetSize() > 3*1024*1024) {	// If the log starts getting big, do something about it.
+		file_.Open(filename, DiskFile::kModeTextWrite);
 	}
 }
 
-FileLogListener::~FileLogListener()
-{
+FileLogListener::~FileLogListener() {
 	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
-	mFile.Close();
+	file_.Close();
 }
 
-File& FileLogListener::GetFile()
-{
-	return (mFile);
+File& FileLogListener::GetFile() {
+	return (file_);
 }
 
-void FileLogListener::WriteLog(const str& pFullMessage, LogLevel)
-{
-	mFile.WriteString(pFullMessage);
-	mFile.Flush();
+void FileLogListener::WriteLog(const str& full_message, LogLevel) {
+	file_.WriteString(full_message);
+	file_.Flush();
 }
 
 
 
-MemFileLogListener::MemFileLogListener(uint64 pMaxSize, OutputFormat pFormat):
-	LogListener("memory", pFormat),
-	mFile(),
-	mMaxSize(pMaxSize)
-{
+MemFileLogListener::MemFileLogListener(uint64 max_size, OutputFormat format):
+	LogListener("memory", format),
+	file_(),
+	max_size_(max_size) {
 }
 
-MemFileLogListener::~MemFileLogListener()
-{
+MemFileLogListener::~MemFileLogListener() {
 	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
-	mFile.Close();
+	file_.Close();
 }
 
-void MemFileLogListener::Clear()
-{
-	mFile.Clear();
+void MemFileLogListener::Clear() {
+	file_.Clear();
 }
 
-bool MemFileLogListener::Dump(const str& pFilename)
-{
-	DiskFile lFile;
-	bool lOk = lFile.Open(pFilename, DiskFile::MODE_WRITE_APPEND);
-	if (lOk)
-	{
-		lOk = Dump(lFile);
+bool MemFileLogListener::Dump(const str& filename) {
+	DiskFile _file;
+	bool ok = _file.Open(filename, DiskFile::kModeWriteAppend);
+	if (ok) {
+		ok = Dump(_file);
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool MemFileLogListener::Dump(File& pFile)
-{
-	return (Dump(&pFile, 0, LEVEL_LOWEST_TYPE));
+bool MemFileLogListener::Dump(File& file) {
+	return (Dump(&file, 0, kLevelLowestType));
 }
 
-bool MemFileLogListener::Dump(LogListener& pLogListener, LogLevel pLevel)
-{
-	return (Dump(0, &pLogListener, pLevel));
+bool MemFileLogListener::Dump(LogListener& log_listener, LogLevel level) {
+	return (Dump(0, &log_listener, level));
 }
 
-bool MemFileLogListener::Dump(File* pFile, LogListener* pLogListener, LogLevel pLevel)
-{
-	IOError lStatus = IO_OK;
-	str lLine;
-	int64 lPosition = mFile.Tell();
-	mFile.SeekSet(0);
-	while (lStatus == IO_OK)
-	{
-		lStatus = mFile.ReadLine(lLine);
-		if (lStatus == IO_OK || lStatus == IO_BUFFER_UNDERFLOW)
-		{
-			if (pFile)
-			{
-				IOError lWriteStatus = pFile->WriteString("  >>  "+lLine+"\n");
-				if (lWriteStatus != IO_OK)
-				{
-					lStatus = (lWriteStatus == IO_BUFFER_UNDERFLOW)? IO_ERROR_WRITING_TO_STREAM : lWriteStatus;
+bool MemFileLogListener::Dump(File* file, LogListener* log_listener, LogLevel level) {
+	IOError status = kIoOk;
+	str line;
+	int64 position = file_.Tell();
+	file_.SeekSet(0);
+	while (status == kIoOk) {
+		status = file_.ReadLine(line);
+		if (status == kIoOk || status == kIoBufferUnderflow) {
+			if (file) {
+				IOError write_status = file->WriteString("  >>  "+line+"\n");
+				if (write_status != kIoOk) {
+					status = (write_status == kIoBufferUnderflow)? kIoErrorWritingToStream : write_status;
 				}
 			}
-			if (pLogListener)
-			{
-				pLogListener->WriteLog("  >>  "+lLine+"\n", pLevel);
+			if (log_listener) {
+				log_listener->WriteLog("  >>  "+line+"\n", level);
 			}
 		}
 	}
-	mFile.SeekSet(lPosition);
-	if (pFile)
-	{
-		pFile->Flush();
+	file_.SeekSet(position);
+	if (file) {
+		file->Flush();
 	}
-	return (lStatus == IO_OK || lStatus == IO_BUFFER_UNDERFLOW);
+	return (status == kIoOk || status == kIoBufferUnderflow);
 }
 
-void MemFileLogListener::WriteLog(const str& pFullMessage, LogLevel pLogLevel)
-{
-	mFile.WriteString(pFullMessage);
+void MemFileLogListener::WriteLog(const str& full_message, LogLevel log_level) {
+	file_.WriteString(full_message);
 
 #ifndef NO_ASSERT_ON_LOG_FLOOD
-	if (pLogLevel >= LEVEL_INFO)
-	{
-		static size_t lSessionLogSize = 0;
-		lSessionLogSize += pFullMessage.length();
-		deb_assert(lSessionLogSize < 4*1024*1024);	// TODO: something smarter using time as well (checking rate, opposed to size).
+	if (log_level >= kLevelInfo) {
+		static size_t session_log_size = 0;
+		session_log_size += full_message.length();
+		deb_assert(session_log_size < 4*1024*1024);	// TODO: something smarter using time as well (checking rate, opposed to size).
 	}
 #endif // NO_ASSERT_ON_LOG_FLOOD
 
-	if ((uint64)mFile.GetSize() > mMaxSize)
-	{
-		mFile.CropHead((unsigned)(mMaxSize*0.8));
+	if ((uint64)file_.GetSize() > max_size_) {
+		file_.CropHead((unsigned)(max_size_*0.8));
 	}
 }
 

@@ -5,83 +5,72 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiConsoleLogListener.h"
-#include "../../../Lepra/Include/Math.h"
-#include "../../Include/GUI/UiTextArea.h"
+#include "../../include/gui/uiconsoleloglistener.h"
+#include "../../../lepra/include/math.h"
+#include "../../include/gui/uitextarea.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-ConsoleLogListener::ConsoleLogListener(OutputFormat pFormat):
-	InteractiveConsoleLogListener(pFormat),
-	mOutputComponent(0),
-	mLineFeed(false)
-{
+ConsoleLogListener::ConsoleLogListener(OutputFormat format):
+	InteractiveConsoleLogListener(format),
+	output_component_(0),
+	line_feed_(false) {
 }
 
-ConsoleLogListener::~ConsoleLogListener()
-{
+ConsoleLogListener::~ConsoleLogListener() {
 	KillSelf();	// TRICKY: has to be done in own destructor to avoid purecalls.
 }
 
 
 
-void ConsoleLogListener::SetOutputComponent(TextArea* pOutputComponent)
-{
-	mOutputComponent = pOutputComponent;
+void ConsoleLogListener::SetOutputComponent(TextArea* output_component) {
+	output_component_ = output_component;
 }
 
 
 
-void ConsoleLogListener::WriteLog(const str& pFullMessage, LogLevel pLevel)
-{
-	if (mOutputComponent)
-	{
-		Color lColor;
-		switch(pLevel)
-		{
-			case LEVEL_TRACE:	// Fall through.
-			case LEVEL_DEBUG:		lColor.Set(0.2f, 0.2f, 0.7f, 1.0f);	break;
-			case LEVEL_INFO:		lColor.Set(0.7f, 0.7f, 0.7f, 1.0f);	break;
-			case LEVEL_PERFORMANCE:	lColor.Set(0.0f, 1.0f, 0.0f, 1.0f);	break;
-			case LEVEL_HEADLINE:	lColor.Set(1.0f, 1.0f, 1.0f, 1.0f);	break;
-			case LEVEL_WARNING:	lColor.Set(1.0f, 1.0f, 0.0f, 1.0f);	break;
-			case LEVEL_ERROR:		lColor.Set(1.0f, 0.0f, 0.0f, 1.0f);	break;
+void ConsoleLogListener::WriteLog(const str& full_message, LogLevel level) {
+	if (output_component_) {
+		Color color;
+		switch(level) {
+			case kLevelTrace:	// Fall through.
+			case kLevelDebug:		color.Set(0.2f, 0.2f, 0.7f, 1.0f);	break;
+			case kLevelInfo:		color.Set(0.7f, 0.7f, 0.7f, 1.0f);	break;
+			case kLevelPerformance:	color.Set(0.0f, 1.0f, 0.0f, 1.0f);	break;
+			case kLevelHeadline:	color.Set(1.0f, 1.0f, 1.0f, 1.0f);	break;
+			case kLevelWarning:	color.Set(1.0f, 1.0f, 0.0f, 1.0f);	break;
+			case kLevelError:		color.Set(1.0f, 0.0f, 0.0f, 1.0f);	break;
 			default:	// Fall through.
-			case LEVEL_FATAL:		lColor.Set(1.0f, 0.5f, 0.0f, 1.0f);	break;
+			case kLevelFatal:		color.Set(1.0f, 0.5f, 0.0f, 1.0f);	break;
 		}
-		str lText(pFullMessage);
-		if (mLineFeed)
-		{
-			lText = "\n"+lText;
-			mLineFeed = false;
+		str _text(full_message);
+		if (line_feed_) {
+			_text = "\n"+_text;
+			line_feed_ = false;
 		}
-		if (lText.length() > 0 && lText[lText.length()-1] == '\n')
-		{
-			lText.resize(lText.length()-1);
-			mLineFeed = true;
+		if (_text.length() > 0 && _text[_text.length()-1] == '\n') {
+			_text.resize(_text.length()-1);
+			line_feed_ = true;
 		}
-		mOutputComponent->AddText(wstrutil::Encode(lText), &lColor);
+		output_component_->AddText(wstrutil::Encode(_text), &color);
 	}
 }
 
-void ConsoleLogListener::StepPage(int pPageCount)
-{
-	int lFirstVisibleLine = mOutputComponent->GetFirstVisibleLineIndex();
-	const int lVisibleLineCount = mOutputComponent->GetVisibleLineCount();
-	const int lLineCount = mOutputComponent->GetLineCount();
-	const int lStepSign = Math::Clamp(pPageCount, -1, 1);
-	lFirstVisibleLine = Math::Clamp(lFirstVisibleLine+lVisibleLineCount*pPageCount-lStepSign, 0, lLineCount);
-	mOutputComponent->SetFirstVisibleLineIndex(lFirstVisibleLine);
+void ConsoleLogListener::StepPage(int page_count) {
+	int first_visible_line = output_component_->GetFirstVisibleLineIndex();
+	const int visible_line_count = output_component_->GetVisibleLineCount();
+	const int line_count = output_component_->GetLineCount();
+	const int step_sign = Math::Clamp(page_count, -1, 1);
+	first_visible_line = Math::Clamp(first_visible_line+visible_line_count*page_count-step_sign, 0, line_count);
+	output_component_->SetFirstVisibleLineIndex(first_visible_line);
 }
 
-void ConsoleLogListener::OnLogRawMessage(const str& pText)
-{
-	WriteLog(pText, LEVEL_INFO);
+void ConsoleLogListener::OnLogRawMessage(const str& text) {
+	WriteLog(text, kLevelInfo);
 }
 
 

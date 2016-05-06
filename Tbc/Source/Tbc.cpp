@@ -1,26 +1,23 @@
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/Tbc.h"
+#include "../include/tbc.h"
 #include <ode/ode.h>
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-void Init()
-{
+void Init() {
 	::dInitODE2(0);
 }
 
-void Shutdown()
-{
+void Shutdown() {
 	::dCloseODE();
 }
 

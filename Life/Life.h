@@ -1,33 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/Cure.h"
+#include "../cure/include/cure.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ContextObject;
 class ContextObjectAttribute;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-using namespace Lepra;
+using namespace lepra;
 
-const int PHYSICS_FPS = CURE_STANDARD_FRAME_RATE;	// TODO: REMOVE ME!!!
+const int PHYSICS_FPS = kCureStandardFrameRate;	// TODO: REMOVE ME!!!
 
-Cure::ContextObjectAttribute* CreateObjectAttribute(Cure::ContextObject* pObject, const str& pAttributeName);
+cure::ContextObjectAttribute* CreateObjectAttribute(cure::ContextObject* object, const str& attribute_name);
 
 
 

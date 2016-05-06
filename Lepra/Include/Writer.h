@@ -6,15 +6,14 @@
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "String.h"
-#include "Endian.h"
-#include "IOError.h"
+#include "lepratypes.h"
+#include "string.h"
+#include "endian.h"
+#include "ioerror.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -22,48 +21,47 @@ class OutputStream;
 
 
 
-class Writer
-{
+class Writer {
 public:
 
 	friend class DiskFile;
 	friend class ArchiveFile;
 	friend class MemFile;
 
-	Writer(Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
-	Writer(OutputStream* pOut, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
+	Writer(Endian::EndianType endian = Endian::kTypeBigEndian);
+	Writer(OutputStream* out, Endian::EndianType endian = Endian::kTypeBigEndian);
 	virtual ~Writer();
 
-	IOError Write(const char& pData);
-	IOError Write(const wchar_t& pData);
-	IOError Write(const int8& pData);
-	IOError Write(const uint8& pData);
-	IOError Write(const int16& pData);
-	IOError Write(const uint16& pData);
-	IOError Write(const int32& pData);
-	IOError Write(const uint32& pData);
-	IOError Write(const int64& pData);
-	IOError Write(const uint64& pData);
-	IOError Write(const float32& pData);
-	IOError Write(const float64& pData);
+	IOError Write(const char& data);
+	IOError Write(const wchar_t& data);
+	IOError Write(const int8& data);
+	IOError Write(const uint8& data);
+	IOError Write(const int16& data);
+	IOError Write(const uint16& data);
+	IOError Write(const int32& data);
+	IOError Write(const uint32& data);
+	IOError Write(const int64& data);
+	IOError Write(const uint64& data);
+	IOError Write(const float32& data);
+	IOError Write(const float64& data);
 
-	virtual IOError WriteData(const void* pBuffer, size_t pSize);
+	virtual IOError WriteData(const void* buffer, size_t size);
 
-	void SetWriterEndian(Endian::EndianType pWriterEndian);
+	void SetWriterEndian(Endian::EndianType writer_endian);
 	Endian::EndianType GetWriterEndian() const;
-	
+
 	const str& GetStreamName();
-	
+
 	// Writes the length of the string (excluding the implicit null-character).
-	IOError WriteString(const str& pString);
+	IOError WriteString(const str& s);
 
 protected:
-	void SetOutputStream(OutputStream* pOutStream);
+	void SetOutputStream(OutputStream* out_stream);
 
 private:
 
-	OutputStream* mOutStream;
-	Endian::EndianType mWriterEndian;
+	OutputStream* out_stream_;
+	Endian::EndianType writer_endian_;
 };
 
 

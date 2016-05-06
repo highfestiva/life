@@ -1,74 +1,74 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{7623DE3A-5C5F-11E3-93FD-0019213B7B87}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{7623DE3B-5C5F-11E3-91DF-0019213B7B87}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Bound.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile include="bound.cxx">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="BoundConsoleManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="boundconsolemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="BoundManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="boundmanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="BoundTicker.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="boundticker.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sunlight.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="sunlight.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Level.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="level.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ball.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="ball.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Bound.mm">
-      <Filter>Source Files</Filter>
+    <ClCompile include="bound.mm">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Bound.h">
+    <Clinclude include="bound.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BoundConsoleManager.h">
+    <Clinclude include="boundconsolemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BoundManager.h">
+    <Clinclude include="boundmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BoundTicker.h">
+    <Clinclude include="boundticker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RtVar.h">
+    <Clinclude include="rtvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sunlight.h">
+    <Clinclude include="sunlight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Version.h">
+    <Clinclude include="version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Level.h">
+    <Clinclude include="level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Ball.h">
+    <Clinclude include="ball.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Bound.rc" />
+    <ResourceCompile include="bound.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ToDo.txt" />
+    <None include="todo.txt" />
   </ItemGroup>
 </Project>

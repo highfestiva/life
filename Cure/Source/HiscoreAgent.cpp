@@ -5,476 +5,401 @@
 
 
 #include "pch.h"
-#include "../Include/HiscoreAgent.h"
-#include "../../Lepra/Include/LepraAssert.h"
+#include "../include/hiscoreagent.h"
+#include "../../lepra/include/lepraassert.h"
 #include <happyhttp.h>
-#include "../../Lepra/Include/Obfuxator.h"
-#include "../../Lepra/Include/JsonString.h"
-#include "../../Lepra/Include/SHA1.h"
-#include "../../Tbc/Include/ChunkyBoneGeometry.h"
+#include "../../lepra/include/obfuxator.h"
+#include "../../lepra/include/jsonstring.h"
+#include "../../lepra/include/sha1.h"
+#include "../../tbc/include/chunkybonegeometry.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-HiscoreAgent::HiscoreAgent(const str& pHost, const int pPort, const str& pGameName):
-	mServerHost(pHost),
-	mServerPort(pPort),
-	mConnection(0),
-	mGameName(pGameName),
-	mAction(ACTION_NONE),
-	mConnectorThread("sxnt")
-{
+HiscoreAgent::HiscoreAgent(const str& host, const int port, const str& game_name):
+	server_host_(host),
+	server_port_(port),
+	connection_(0),
+	game_name_(game_name),
+	action_(kActionNone),
+	connector_thread_("sxnt") {
 	Close();
 }
 
-HiscoreAgent::~HiscoreAgent()
-{
+HiscoreAgent::~HiscoreAgent() {
 	Close();
 }
 
-void HiscoreAgent::Close()
-{
+void HiscoreAgent::Close() {
 	log_debug("Closing and resetting state.");
-	delete mConnection;
-	mConnection = 0;
+	delete connection_;
+	connection_ = 0;
 
-	mLoadState = RESOURCE_UNLOADED;
-	mDownloadedList.mOffset = -1;
-	mDownloadedList.mTotalCount = -1;
-	mDownloadedList.mEntryList.clear();
-	mUploadedPlace = -1;
-	mResponseData.clear();
+	load_state_ = kResourceUnloaded;
+	downloaded_list_.offset_ = -1;
+	downloaded_list_.total_count_ = -1;
+	downloaded_list_.entry_list_.clear();
+	uploaded_place_ = -1;
+	response_data_.clear();
 }
 
-ResourceLoadState HiscoreAgent::Poll()
-{
-	if (mConnectorThread.IsRunning())
-	{
+ResourceLoadState HiscoreAgent::Poll() {
+	if (connector_thread_.IsRunning()) {
 		// Still connecting.
-		return RESOURCE_LOAD_IN_PROGRESS;
+		return kResourceLoadInProgress;
 	}
-	if (!mConnection)
-	{
+	if (!connection_) {
 		// Connector thread had some problem.
-		return RESOURCE_LOAD_ERROR;
+		return kResourceLoadError;
 	}
 
 	log_debug("Polling connection.");
-	if (GetLoadState() == RESOURCE_LOAD_IN_PROGRESS && mConnection->outstanding())
-	{
-		try
-		{
-			mConnection->pump();
-		}
-		catch (happyhttp::Wobbly& e)
-		{
+	if (GetLoadState() == kResourceLoadInProgress && connection_->outstanding()) {
+		try {
+			connection_->pump();
+		} catch (happyhttp::Wobbly& e) {
 			(void)e;
-			log_volatile(mLog.Warning(str("Problem polling connection: ") + e.what()));
-			SetLoadState(RESOURCE_LOAD_ERROR);
+			log_volatile(log_.Warning(str("Problem polling connection: ") + e.what()));
+			SetLoadState(kResourceLoadError);
 		}
 	}
-	if (GetLoadState() == RESOURCE_LOAD_ERROR && mConnection)
-	{
+	if (GetLoadState() == kResourceLoadError && connection_) {
 		// Bail if something trashed us earlier.
 		Close();
-		SetLoadState(RESOURCE_LOAD_ERROR);	// Reset load state after close.
+		SetLoadState(kResourceLoadError);	// Reset load state after close.
 	}
 	return GetLoadState();
 }
 
 
 
-ResourceLoadState HiscoreAgent::GetLoadState() const
-{
-	return mLoadState;
+ResourceLoadState HiscoreAgent::GetLoadState() const {
+	return load_state_;
 }
 
-HiscoreAgent::Action HiscoreAgent::GetAction() const
-{
-	return mAction;
+HiscoreAgent::Action HiscoreAgent::GetAction() const {
+	return action_;
 }
 
-void HiscoreAgent::SetLoadState(ResourceLoadState pLoadState)
-{
-	mLoadState = pLoadState;
+void HiscoreAgent::SetLoadState(ResourceLoadState load_state) {
+	load_state_ = load_state;
 }
 
-bool HiscoreAgent::StartDownloadingList(const str& pPlatform, const str& pLevel, const str& pAvatar, int pOffset, int pLimit)
-{
-	if (!mConnectorThread.Join(0.1))
-	{
+bool HiscoreAgent::StartDownloadingList(const str& platform, const str& level, const str& avatar, int offset, int limit) {
+	if (!connector_thread_.Join(0.1)) {
 		deb_assert(false);
 		return false;
 	}
-	const str lFormat = _O("o@y+_.R2=*8/,1ay+x2&9(92Qay+x=(=*=,ayL+x/8e8+9*ay5x2515&*ay5g", "/%s?platform=%s&level=%s&avatar=%s&offset=%i&limit=%i");
-	mConnectorPath = strutil::Format(lFormat.c_str(),
-		mGameName.c_str(), pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), pOffset, pLimit);
-	return mConnectorThread.Start(this, &HiscoreAgent::DownloadThreadEntry);
+	const str format = _O("o@y+_.R2=*8/,1ay+x2&9(92Qay+x=(=*=,ayL+x/8e8+9*ay5x2515&*ay5g", "/%s?platform=%s&level=%s&avatar=%s&offset=%i&limit=%i");
+	connector_path_ = strutil::Format(format.c_str(),
+		game_name_.c_str(), platform.c_str(), level.c_str(), avatar.c_str(), offset, limit);
+	return connector_thread_.Start(this, &HiscoreAgent::DownloadThreadEntry);
 }
 
-const HiscoreAgent::List& HiscoreAgent::GetDownloadedList() const
-{
-	return mDownloadedList;
+const HiscoreAgent::List& HiscoreAgent::GetDownloadedList() const {
+	return downloaded_list_;
 }
 
-bool HiscoreAgent::StartUploadingScore(const str& pPlatform, const str& pLevel, const str& pAvatar, const str& pName, int pScore)
-{
-	if (!mConnectorThread.Join(0.1))
-	{
+bool HiscoreAgent::StartUploadingScore(const str& platform, const str& level, const str& avatar, const str& name, int score) {
+	if (!connector_thread_.Join(0.1)) {
 		deb_assert(false);
 		return false;
 	}
-	str lJsonName = JsonString::ToJson(pName);
-	if (lJsonName.empty())
-	{
+	str json_name = JsonString::ToJson(name);
+	if (json_name.empty()) {
 		deb_assert(false);
 		return false;
 	}
-	lJsonName = lJsonName.substr(1, lJsonName.length()-2);
-	const int lTimeStamp = (int32)::time(0);
-	mConnectorHash = Hypnotize(pPlatform, pLevel, pAvatar, lJsonName, pScore, lTimeStamp);
-	const str lFormat = _O(".}2=*8?/,1ay+x29(92-ay+x(=(=*=,ay+x0=,19ayw+x+;/,9ay5x* 519apy5", "platform=%s&level=%s&avatar=%s&name=%s&score=%i&time=%i");
-	lJsonName = JsonString::UrlEncode(lJsonName);
-	mConnectorBody = strutil::Format(lFormat.c_str(),
-		pPlatform.c_str(), pLevel.c_str(), pAvatar.c_str(), lJsonName.c_str(), pScore, lTimeStamp);
-	mConnectorPath = _O("oe=::?`90*,%o", "/add_entry/") + mGameName;
-	return mConnectorThread.Start(this, &HiscoreAgent::UploadThreadEntry);
+	json_name = json_name.substr(1, json_name.length()-2);
+	const int _time_stamp = (int32)::time(0);
+	connector_hash_ = Hypnotize(platform, level, avatar, json_name, score, _time_stamp);
+	const str format = _O(".}2=*8?/,1ay+x29(92-ay+x(=(=*=,ay+x0=,19ayw+x+;/,9ay5x* 519apy5", "platform=%s&level=%s&avatar=%s&name=%s&score=%i&time=%i");
+	json_name = JsonString::UrlEncode(json_name);
+	connector_body_ = strutil::Format(format.c_str(),
+		platform.c_str(), level.c_str(), avatar.c_str(), json_name.c_str(), score, _time_stamp);
+	connector_path_ = _O("oe=::?`90*,%o", "/add_entry/") + game_name_;
+	return connector_thread_.Start(this, &HiscoreAgent::UploadThreadEntry);
 }
 
-int HiscoreAgent::GetUploadedPlace() const
-{
-	return mUploadedPlace;
+int HiscoreAgent::GetUploadedPlace() const {
+	return uploaded_place_;
 }
 
 
 
-bool HiscoreAgent::ParseList(str& pData)
-{
+bool HiscoreAgent::ParseList(str& data) {
 	// Well, hrm... parse the JSON. Quick and dirty was the theme of the day.
-	mLoadState = RESOURCE_LOAD_ERROR;
-	log_debug("Parsing downloaded list: " + pData);
-	if (pData.length() < 10 || pData[0] != '{' || pData[pData.length()-1] != '}')
-	{
-		log_volatile(mLog.Warning("Problem parsing list, not our JSON: " + pData));
+	load_state_ = kResourceLoadError;
+	log_debug("Parsing downloaded list: " + data);
+	if (data.length() < 10 || data[0] != '{' || data[data.length()-1] != '}') {
+		log_volatile(log_.Warning("Problem parsing list, not our JSON: " + data));
 		return false;
 	}
-	pData.resize(pData.length()-1);
-	str lData = pData.substr(1);
+	data.resize(data.length()-1);
+	str _data = data.substr(1);
 	size_t p;
-	if ((p = lData.find("[]")) != str::npos)
-	{
+	if ((p = _data.find("[]")) != str::npos) {
 		// Check for [] (empty list) and add a space for lousy parsing.
-		lData.replace(p, 2, "[ ]", 3);
+		_data.replace(p, 2, "[ ]", 3);
 	}
-	str lList;
+	str list;
 	typedef strutil::strvec sv;
-	sv lStrings = strutil::BlockSplit(lData, "[]", true, true);
-	str lOther;
-	for (sv::iterator x = lStrings.begin(); x != lStrings.end(); ++x)
-	{
-		lOther += *x;
+	sv strings = strutil::BlockSplit(_data, "[]", true, true);
+	str other;
+	for (sv::iterator x = strings.begin(); x != strings.end(); ++x) {
+		other += *x;
 		size_t y = strutil::FindPreviousWord(*x, "\": ,", x->length()-1);
-		if (x->substr(y, 4) == "list")
-		{
+		if (x->substr(y, 4) == "list") {
 			++x;
-			lList = *x;
+			list = *x;
 		}
 	}
-	if (lOther.empty() || lList.empty())
-	{
-		log_volatile(mLog.Warning("Problem parsing list; list or other data missing: " + lData));
+	if (other.empty() || list.empty()) {
+		log_volatile(log_.Warning("Problem parsing list; list or other data missing: " + _data));
 		return false;
 	}
-	lStrings = strutil::BlockSplit(lOther, ",", true, true);
-	for (sv::iterator x = lStrings.begin(); x != lStrings.end(); ++x)
-	{
-		sv lTagValue = strutil::BlockSplit(*x, ": \t\r\n", true, true);
-		const size_t lBase = lTagValue[0].empty()? 1 : 0;
-		if (lTagValue.size() < lBase+2)
-		{
+	strings = strutil::BlockSplit(other, ",", true, true);
+	for (sv::iterator x = strings.begin(); x != strings.end(); ++x) {
+		sv tag_value = strutil::BlockSplit(*x, ": \t\r\n", true, true);
+		const size_t base = tag_value[0].empty()? 1 : 0;
+		if (tag_value.size() < base+2) {
 			continue;
 		}
-		if (lTagValue[lBase+0] == "\"offset\"")
-		{
-			if (!strutil::StringToInt(lTagValue[lBase+1], mDownloadedList.mOffset))
-			{
-				log_volatile(mLog.Warning("Problem parsing download list offset (int): " + lTagValue[lBase+1]));
+		if (tag_value[base+0] == "\"offset\"") {
+			if (!strutil::StringToInt(tag_value[base+1], downloaded_list_.offset_)) {
+				log_volatile(log_.Warning("Problem parsing download list offset (int): " + tag_value[base+1]));
 				return false;
 			}
-		}
-		else if (lTagValue[lBase+0] == "\"total_count\"")
-		{
-			if (!strutil::StringToInt(lTagValue[lBase+1], mDownloadedList.mTotalCount))
-			{
-				log_volatile(mLog.Warning("Problem parsing download list total_count (int): " + lTagValue[lBase+1]));
+		} else if (tag_value[base+0] == "\"total_count\"") {
+			if (!strutil::StringToInt(tag_value[base+1], downloaded_list_.total_count_)) {
+				log_volatile(log_.Warning("Problem parsing download list total_count (int): " + tag_value[base+1]));
 				return false;
 			}
 		}
 	}
-	Entry lEntry;
-	int lFlags = 0;
-	lStrings = strutil::BlockSplit(lList, "{},", true, true);
-	for (sv::iterator x = lStrings.begin(); x != lStrings.end(); ++x)
-	{
-		sv lTagValue = strutil::BlockSplit(*x, ": \t\r\n", true, true);
-		if (lTagValue.size() < 2)
-		{
+	Entry entry;
+	int flags = 0;
+	strings = strutil::BlockSplit(list, "{},", true, true);
+	for (sv::iterator x = strings.begin(); x != strings.end(); ++x) {
+		sv tag_value = strutil::BlockSplit(*x, ": \t\r\n", true, true);
+		if (tag_value.size() < 2) {
 			continue;
 		}
-		const size_t lBase = lTagValue[0].empty()? 1 : 0;
-		if (lTagValue[lBase+0] == "\"name\"")
-		{
-			if (lTagValue[lBase+1].empty())
-			{
-				log_volatile(mLog.Warning("Problem parsing download list name (empty)."));
+		const size_t base = tag_value[0].empty()? 1 : 0;
+		if (tag_value[base+0] == "\"name\"") {
+			if (tag_value[base+1].empty()) {
+				log_volatile(log_.Warning("Problem parsing download list name (empty)."));
 				return false;
 			}
-			lEntry.mName = JsonString::FromJson(lTagValue[lBase+1]);
-			lFlags |= 1;
-		}
-		else if (lTagValue[lBase+0] == "\"score\"")
-		{
-			if (!strutil::StringToInt(lTagValue[lBase+1], lEntry.mScore))
-			{
-				log_volatile(mLog.Warning("Problem parsing download list score (int): " + lTagValue[lBase+1]));
+			entry.name_ = JsonString::FromJson(tag_value[base+1]);
+			flags |= 1;
+		} else if (tag_value[base+0] == "\"score\"") {
+			if (!strutil::StringToInt(tag_value[base+1], entry.score_)) {
+				log_volatile(log_.Warning("Problem parsing download list score (int): " + tag_value[base+1]));
 				return false;
 			}
-			lFlags |= 2;
+			flags |= 2;
 		}
-		if ((lFlags&3) == 3)
-		{
-			mDownloadedList.mEntryList.push_back(lEntry);
-			lFlags = 0;
+		if ((flags&3) == 3) {
+			downloaded_list_.entry_list_.push_back(entry);
+			flags = 0;
 		}
 	}
-	if (mDownloadedList.mOffset < 0 ||
-		mDownloadedList.mTotalCount < 0 ||
-		(int)mDownloadedList.mEntryList.size() > mDownloadedList.mOffset+mDownloadedList.mTotalCount)
-	{
-		log_volatile(mLog.Warning("Problem parsing hiscore list data: " + lData));
+	if (downloaded_list_.offset_ < 0 ||
+		downloaded_list_.total_count_ < 0 ||
+		(int)downloaded_list_.entry_list_.size() > downloaded_list_.offset_+downloaded_list_.total_count_) {
+		log_volatile(log_.Warning("Problem parsing hiscore list data: " + _data));
 		return false;
 	}
-	mLoadState = RESOURCE_LOAD_COMPLETE;
-	log_volatile(mLog.Info("Hiscore list data parsed OK."));
+	load_state_ = kResourceLoadComplete;
+	log_volatile(log_.Info("Hiscore list data parsed OK."));
 	return true;
 }
 
-bool HiscoreAgent::ParseScore(str& pData)
-{
-	mLoadState = RESOURCE_LOAD_ERROR;
-	log_debug("Parsing uploaded score: " + pData);
-	if (pData.length() < 10 || pData[0] != '{' || pData[pData.length()-1] != '}')
-	{
-		log_volatile(mLog.Warning("Problem parsing uploaded score, not our JSON: " + pData));
+bool HiscoreAgent::ParseScore(str& data) {
+	load_state_ = kResourceLoadError;
+	log_debug("Parsing uploaded score: " + data);
+	if (data.length() < 10 || data[0] != '{' || data[data.length()-1] != '}') {
+		log_volatile(log_.Warning("Problem parsing uploaded score, not our JSON: " + data));
 		return false;
 	}
-	pData.resize(pData.length()-1);
-	str lData = pData.substr(1);
+	data.resize(data.length()-1);
+	str _data = data.substr(1);
 	typedef strutil::strvec sv;
-	sv lStrings = strutil::BlockSplit(lData, ",", true, true);
-	for (sv::iterator x = lStrings.begin(); x != lStrings.end(); ++x)
-	{
-		sv lTagValue = strutil::BlockSplit(*x, ": \t\r\n", true, true);
-		const size_t lBase = lTagValue[0].empty()? 1 : 0;
-		if (lTagValue.size() < 2)
-		{
-			log_volatile(mLog.Warning("Problem parsing tags of uploaded score: " + lData));
+	sv strings = strutil::BlockSplit(_data, ",", true, true);
+	for (sv::iterator x = strings.begin(); x != strings.end(); ++x) {
+		sv tag_value = strutil::BlockSplit(*x, ": \t\r\n", true, true);
+		const size_t base = tag_value[0].empty()? 1 : 0;
+		if (tag_value.size() < 2) {
+			log_volatile(log_.Warning("Problem parsing tags of uploaded score: " + _data));
 			return false;
 		}
-		if (lTagValue[lBase+0] == "\"offset\"")
-		{
-			if (!strutil::StringToInt(lTagValue[lBase+1], mUploadedPlace))
-			{
-				log_volatile(mLog.Warning("Problem parsing uploaded score offset (int): " + lTagValue[lBase+1]));
+		if (tag_value[base+0] == "\"offset\"") {
+			if (!strutil::StringToInt(tag_value[base+1], uploaded_place_)) {
+				log_volatile(log_.Warning("Problem parsing uploaded score offset (int): " + tag_value[base+1]));
 				return false;
 			}
 		}
 	}
-	if (mUploadedPlace < 0)
-	{
-		log_volatile(mLog.Warning("Problem parsing own placement when uploaded score: " + lData));
+	if (uploaded_place_ < 0) {
+		log_volatile(log_.Warning("Problem parsing own placement when uploaded score: " + _data));
 		return false;
 	}
-	mLoadState = RESOURCE_LOAD_COMPLETE;
-	log_volatile(mLog.Info("Hiscore list data parsed OK."));
+	load_state_ = kResourceLoadComplete;
+	log_volatile(log_.Info("Hiscore list data parsed OK."));
 	return true;
 }
 
 
 
-void HiscoreAgent::Reopen()
-{
+void HiscoreAgent::Reopen() {
 	Close();
 	log_debug("Reopening connection.");
-	mConnection = new happyhttp::Connection(mServerHost.c_str(), mServerPort);
-	mLoadState = RESOURCE_LOAD_IN_PROGRESS;
+	connection_ = new happyhttp::Connection(server_host_.c_str(), server_port_);
+	load_state_ = kResourceLoadInProgress;
 }
 
-void HiscoreAgent::AppendData(const str& pData)
-{
-	mResponseData += pData;
+void HiscoreAgent::AppendData(const str& data) {
+	response_data_ += data;
 }
 
-bool HiscoreAgent::CompleteList()
-{
-	return ParseList(mResponseData);
+bool HiscoreAgent::CompleteList() {
+	return ParseList(response_data_);
 }
 
-bool HiscoreAgent::CompleteScore()
-{
+bool HiscoreAgent::CompleteScore() {
 	// Well, hrm... parse the JSON. Quick and dirty was the theme of the day.
-	return ParseScore(mResponseData);
+	return ParseScore(response_data_);
 }
 
-void HiscoreAgent::OnData(const happyhttp::Response* pResponse, void* pUserData, const unsigned char* pData, int pByteCount)
-{
-	HiscoreAgent* lThis = (HiscoreAgent*)pUserData;
-	if (pResponse->getstatus() != 200)
-	{
-		log_volatile(mLog.Warningf("HTTP error %i when receiving data.", pResponse->getstatus()));
-		lThis->SetLoadState(RESOURCE_LOAD_ERROR);
+void HiscoreAgent::OnData(const happyhttp::Response* response, void* user_data, const unsigned char* data, int byte_count) {
+	HiscoreAgent* value = (HiscoreAgent*)user_data;
+	if (response->getstatus() != 200) {
+		log_volatile(log_.Warningf("HTTP error %i when receiving data.", response->getstatus()));
+		value->SetLoadState(kResourceLoadError);
 		return;
 	}
-	lThis->AppendData(str((const char*)pData, pByteCount));
+	value->AppendData(str((const char*)data, byte_count));
 }
 
-void HiscoreAgent::OnListComplete(const happyhttp::Response* pResponse, void* pUserData)
-{
-	HiscoreAgent* lThis = (HiscoreAgent*)pUserData;
-	if (pResponse->getstatus() != 200)
-	{
-		log_volatile(mLog.Warningf("HTTP error %i when completing download list data reception.", pResponse->getstatus()));
-		lThis->SetLoadState(RESOURCE_LOAD_ERROR);
+void HiscoreAgent::OnListComplete(const happyhttp::Response* response, void* user_data) {
+	HiscoreAgent* value = (HiscoreAgent*)user_data;
+	if (response->getstatus() != 200) {
+		log_volatile(log_.Warningf("HTTP error %i when completing download list data reception.", response->getstatus()));
+		value->SetLoadState(kResourceLoadError);
 		return;
 	}
-	lThis->CompleteList();
+	value->CompleteList();
 }
 
-void HiscoreAgent::OnScoreComplete(const happyhttp::Response* pResponse, void* pUserData)
-{
-	HiscoreAgent* lThis = (HiscoreAgent*)pUserData;
-	if (pResponse->getstatus() != 200)
-	{
-		log_volatile(mLog.Warningf("HTTP error %i when completing upload score data reception.", pResponse->getstatus()));
-		lThis->SetLoadState(RESOURCE_LOAD_ERROR);
+void HiscoreAgent::OnScoreComplete(const happyhttp::Response* response, void* user_data) {
+	HiscoreAgent* value = (HiscoreAgent*)user_data;
+	if (response->getstatus() != 200) {
+		log_volatile(log_.Warningf("HTTP error %i when completing upload score data reception.", response->getstatus()));
+		value->SetLoadState(kResourceLoadError);
 		return;
 	}
-	lThis->CompleteScore();
+	value->CompleteScore();
 }
 
-str HiscoreAgent::Hypnotize(const str& pPlatform, const str& pLevel, const str& pAvatar, const str& pName, int pScore, int pTimeStamp)
-{
-	const str lFormat = _O("vF|}XV^^y5y+ y+?y+?Uy+??ry+qy5q={9w1:Ci7", "(\"!FH@%i%s~%s_%s_%s__%s-%i-a#e'md5g");
-	str lOrigin = strutil::Format(lFormat.c_str(),
-		pTimeStamp+1, mGameName.c_str(), pPlatform.c_str(),
-		pLevel.c_str(), pAvatar.c_str(), pName.c_str(), pScore-1);
-	mLog.Infof("data = %s", lOrigin.c_str());
-	str lUtfString = lOrigin;
-	//::memset((void*)lOrigin.c_str(), 0, lOrigin.size()*sizeof(char));
-	uint8 lSha1Hash[20];
-	SHA1::Hash((const uint8*)lUtfString.c_str(), lUtfString.length(), lSha1Hash);
-	//::memset((void*)lUtfString.c_str(), 0, lUtfString.length());
-	str lInputHexdigest = strutil::DumpData(lSha1Hash, sizeof(lSha1Hash));
-	strutil::ToLower(lInputHexdigest);
-	//mLog.Infof("sha1 = %s", lInputHexdigest.c_str());
+str HiscoreAgent::Hypnotize(const str& platform, const str& level, const str& avatar, const str& name, int score, int time_stamp) {
+	const str format = _O("vF|}XV^^y5y+ y+?y+?Uy+??ry+qy5q={9w1:Ci7", "(\"!FH@%i%s~%s_%s_%s__%s-%i-a#e'md5g");
+	str origin = strutil::Format(format.c_str(),
+		time_stamp+1, game_name_.c_str(), platform.c_str(),
+		level.c_str(), avatar.c_str(), name.c_str(), score-1);
+	log_.Infof("data = %s", origin.c_str());
+	str utf_string = origin;
+	//::memset((void*)origin.c_str(), 0, origin.size()*sizeof(char));
+	uint8 sha1_hash[20];
+	SHA1::Hash((const uint8*)utf_string.c_str(), utf_string.length(), sha1_hash);
+	//::memset((void*)utf_string.c_str(), 0, utf_string.length());
+	str input_hexdigest = strutil::DumpData(sha1_hash, sizeof(sha1_hash));
+	strutil::ToLower(input_hexdigest);
+	//log_.Infof("sha1 = %s", input_hexdigest.c_str());
 
 	// Shuffle:
 	//input_hexdigest = list(input_hexdigest)
 	int i = 0;
-	int j = lInputHexdigest.length()-2;
+	int j = input_hexdigest.length()-2;
 	int chk = (int)'B';
-	while (i < j)
-	{
-		std::swap(lInputHexdigest[i], lInputHexdigest[j]);
-		chk ^= (int)lInputHexdigest[i] + j;
+	while (i < j) {
+		std::swap(input_hexdigest[i], input_hexdigest[j]);
+		chk ^= (int)input_hexdigest[i] + j;
 		i += 3;
 		j -= 5;
 	}
 	chk = (chk % 25) + (int)'a';
-	lInputHexdigest = lInputHexdigest.substr(0, 15) + (char)chk + lInputHexdigest.substr(15) + (char)(chk+1);
+	input_hexdigest = input_hexdigest.substr(0, 15) + (char)chk + input_hexdigest.substr(15) + (char)(chk+1);
 	int ints[] = { 0, 0, 0, 0, 0, 0, 0 };
-	for (int x = 0; x < 6; ++x)
-	{
-		for (int y = 0; y < 7; ++y)
-		{
-			ints[y] += (int)lInputHexdigest[x*7+y] - 73 - y - x*5;
+	for (int x = 0; x < 6; ++x) {
+		for (int y = 0; y < 7; ++y) {
+			ints[y] += (int)input_hexdigest[x*7+y] - 73 - y - x*5;
 		}
 	}
-	str lShuffledHash;
-	for (int y = 0; y < 7; ++y)
-	{
-		lShuffledHash += strutil::IntToString(::abs(ints[y]), (y&1)? 9 : 10);
+	str shuffled_hash;
+	for (int y = 0; y < 7; ++y) {
+		shuffled_hash += strutil::IntToString(::abs(ints[y]), (y&1)? 9 : 10);
 	}
-	mLog.Infof("output hash = %s", lShuffledHash.c_str());
-	return lShuffledHash;
+	log_.Infof("output hash = %s", shuffled_hash.c_str());
+	return shuffled_hash;
 }
 
-void HiscoreAgent::DownloadThreadEntry()
-{
-	try
-	{
-		mAction = ACTION_DOWNLOAD_LIST;
+void HiscoreAgent::DownloadThreadEntry() {
+	try {
+		action_ = kActionDownloadList;
 		Reopen();
-		mConnection->setcallbacks(0, &HiscoreAgent::OnData, &HiscoreAgent::OnListComplete, this);
-		str lMethod = _OA("WzYJ", "GET");
-		str lAPath = mConnectorPath;
-		mConnection->request(lMethod.c_str(), lAPath.c_str());
-		log_volatile(mLog.Info("Downloading highscore list."));
-	}
-	catch (happyhttp::Wobbly& e)
-	{
+		connection_->setcallbacks(0, &HiscoreAgent::OnData, &HiscoreAgent::OnListComplete, this);
+		str method = _OA("WzYJ", "GET");
+		str a_path = connector_path_;
+		connection_->request(method.c_str(), a_path.c_str());
+		log_volatile(log_.Info("Downloading highscore list."));
+	} catch (happyhttp::Wobbly& e) {
 		(void)e;
-		log_volatile(mLog.Warning(str("Problem retrieving list: ") + e.what()));
-		delete mConnection;
-		mConnection = 0;
+		log_volatile(log_.Warning(str("Problem retrieving list: ") + e.what()));
+		delete connection_;
+		connection_ = 0;
 	}
 }
 
-void HiscoreAgent::UploadThreadEntry()
-{
-	try
-	{
-		mAction = ACTION_UPLOAD_SCORE;
+void HiscoreAgent::UploadThreadEntry() {
+	try {
+		action_ = kActionUploadScore;
 		Reopen();
-		mConnection->setcallbacks(0, &HiscoreAgent::OnData, &HiscoreAgent::OnScoreComplete, this);
-		const str lClient = _OA("[\"RUYP_J", "CLIENT");
-		const str lHash = mConnectorHash;
-		const str lAccept = _OA("]x;;9.$*", "Accept");
-		const str lPlain = _OA("*{9&*o&.2=50", "text/plain");
-		const char* lHeaders[] = 
+		connection_->setcallbacks(0, &HiscoreAgent::OnData, &HiscoreAgent::OnScoreComplete, this);
+		const str client = _OA("[\"RUYP_J", "CLIENT");
+		const str hash = connector_hash_;
+		const str accept = _OA("]x;;9.$*", "Accept");
+		const str plain = _OA("*{9&*o&.2=50", "text/plain");
+		const char* headers[] =
 		{
-			lClient.c_str(), lHash.c_str(),
-			lAccept.c_str(), lPlain.c_str(),
+			client.c_str(), hash.c_str(),
+			accept.c_str(), plain.c_str(),
 			0
 		};
-		const str lMethod = _OA("NaOKJ", "POST");
-		const str lUtf8Body = strutil::ReplaceAll(mConnectorBody, "\\", "%5C");
-		mConnection->request(lMethod.c_str(), mConnectorPath.c_str(), lHeaders, (const unsigned char*)lUtf8Body.c_str(), lUtf8Body.length());
-		log_volatile(mLog.Info("Uploading score."));
-	}
-	catch (happyhttp::Wobbly& e)
-	{
+		const str method = _OA("NaOKJ", "POST");
+		const str utf8_body = strutil::ReplaceAll(connector_body_, "\\", "%5C");
+		connection_->request(method.c_str(), connector_path_.c_str(), headers, (const unsigned char*)utf8_body.c_str(), utf8_body.length());
+		log_volatile(log_.Info("Uploading score."));
+	} catch (happyhttp::Wobbly& e) {
 		(void)e;
-		log_volatile(mLog.Warning(str("Problem uploading score: ") + e.what()));
-		delete mConnection;
-		mConnection = 0;
+		log_volatile(log_.Warning(str("Problem uploading score: ") + e.what()));
+		delete connection_;
+		connection_ = 0;
 	}
 }
 
 
 
-void HiscoreAgent::operator=(const HiscoreAgent&)
-{
+void HiscoreAgent::operator=(const HiscoreAgent&) {
 	deb_assert(false);
 }
 
 
 
-loginstance(NETWORK_CLIENT, HiscoreAgent);
+loginstance(kNetworkClient, HiscoreAgent);
 
 
 

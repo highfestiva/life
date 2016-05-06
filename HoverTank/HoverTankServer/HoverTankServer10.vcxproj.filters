@@ -1,90 +1,90 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{04018145-1cd5-4b77-a5ad-4d7f73718596}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Util">
+    <Filter include="util">
       <UniqueIdentifier>{8723b11e-5c5a-4bb1-991e-9ae15246334d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="HoverTankServer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="hovertankserver.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="HoverTankServerMessageProcessor.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="hovertankservermessageprocessor.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="HoverTankServerTicker.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="hovertankserverticker.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Explosion.cpp">
-      <Filter>Util</Filter>
+    <ClCompile include="..\explosion.cpp">
+      <Filter>util</Filter>
     </ClCompile>
-    <ClCompile Include="HoverTankServerDelegate.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="hovertankserverdelegate.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="BombPlane.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="bombplane.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameServerLogic.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="gameserverlogic.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Npc.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="npc.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="HoverTankServerConsole.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="hovertankserverconsole.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="ServerFastProjectile.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="serverfastprojectile.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="ServerMine.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="servermine.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="ServerProjectile.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="serverprojectile.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="HoverTankServerMessageProcessor.h">
+    <Clinclude include="hovertankservermessageprocessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HoverTankServerTicker.h">
+    <Clinclude include="hovertankserverticker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ServerLauncher.h">
+    <Clinclude include="ServerLauncher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Explosion.h">
-      <Filter>Util</Filter>
+    <Clinclude include="..\explosion.h">
+      <Filter>util</Filter>
     </ClInclude>
-    <ClInclude Include="BombPlane.h">
+    <Clinclude include="bombplane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameServerLogic.h">
+    <Clinclude include="gameserverlogic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Npc.h">
+    <Clinclude include="npc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HoverTankServerConsole.h">
+    <Clinclude include="hovertankserverconsole.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HoverTankServerDelegate.h">
+    <Clinclude include="hovertankserverdelegate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ServerFastProjectile.h">
+    <Clinclude include="serverfastprojectile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ServerMine.h">
+    <Clinclude include="servermine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ServerProjectile.h">
+    <Clinclude include="serverprojectile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

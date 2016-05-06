@@ -1,55 +1,52 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiCppContextObject.h"
+#include "uicppcontextobject.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-class Props: public CppContextObject
-{
+class Props: public CppContextObject {
 public:
 	typedef CppContextObject Parent;
 
-	enum ParticleType
-	{
-		PARTICLE_NONE = 1,
-		PARTICLE_SOLID,
-		PARTICLE_GAS,
+	enum ParticleType {
+		kParticleNone = 1,
+		kParticleSolid,
+		kParticleGas,
 	};
 
-	Props(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
+	Props(cure::ResourceManager* resource_manager, const str& class_id, GameUiManager* ui_manager);
 	virtual ~Props();
 
-	void SetOpacity(float pOpacity);
-	void StartParticle(ParticleType pParticleType, const vec3& pStartVelocity, float pScale, float pAngularRange, float pTime);
-	void SetFadeOutTime(float pTime);
+	void SetOpacity(float opacity);
+	void StartParticle(ParticleType particle_type, const vec3& start_velocity, float scale, float angular_range, float time);
+	void SetFadeOutTime(float time);
 
 protected:
-	void DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource);
+	void DispatchOnLoadMesh(UserGeometryReferenceResource* mesh_resource);
 	virtual void TryAddTexture();
 	void OnTick();
-	void OnAlarm(int pAlarmId, void* pExtraData);
+	void OnAlarm(int alarm_id, void* extra_data);
 
 private:
-	vec3 mVelocity;
-	ParticleType mParticleType;
-	float mScale;
-	float mTime;
-	float mLifeTime;
-	float mFadeOutTime;
-	float mOpacity;
-	bool mIsFadingOut;
-	vec3 mAngularVelocity;
+	vec3 velocity_;
+	ParticleType particle_type_;
+	float scale_;
+	float time_;
+	float life_time_;
+	float fade_out_time_;
+	float opacity_;
+	bool is_fading_out_;
+	vec3 angular_velocity_;
 
 	logclass();
 };

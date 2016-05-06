@@ -8,61 +8,58 @@
 	ASE = Ascii Scene Export.
 
 	ASE is a common 3D file format which is native to 3D Studio MAX, but
-	supported by most 3D-rendering software, except Lightwave perhaps. 
+	supported by most 3D-rendering software, except Lightwave perhaps.
 	Maya, ActorX and UnrealEd, just to mention a few.
 
 	Two sites that cover parts of the ASE file format are (2007-07-24):
 	http://www.unrealwiki.com/wiki/ASE_File_Format
 	http://www.solosnake.com/main/ase.htm
 
-	The best way to understand this file format is to learn how 3DSMAX 
-	works. The data stored in an ASE-file (and the data structures 
+	The best way to understand this file format is to learn how 3DSMAX
+	works. The data stored in an ASE-file (and the data structures
 	within) seems to reflect the internal datastructures of 3DSMAX
 	quite well.
 
 	Obviously, this format is not well suited for games. The data needs to
-	be converted into something more appropriate. The loading procedure is 
+	be converted into something more appropriate. The loading procedure is
 	therefore divided into two parts:
 
-	1. First parse the file, and read the data without modification 
-	into a bunch of data structures (see the subclasses of ASELoader). 
+	1. First parse the file, and read the data without modification
+	into a bunch of data structures (see the subclasses of ASELoader).
 	TODO: There are more tags to implement. Bones for instance...
 
-	2. The user can choose between interpreting this data himself or 
+	2. The user can choose between interpreting this data himself or
 	to call the default conversion methods.
 */
 
 #pragma once
 
-#include "../../Lepra/Include/String.h"
-#include "../../Lepra/Include/HashTable.h"
-#include "../../Lepra/Include/Reader.h"
-#include "../../Lepra/Include/Writer.h"
-#include "../../Lepra/Include/RotationMatrix.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../../Lepra/Include/Transformation.h"
-#include "UiRenderer.h"
+#include "../../lepra/include/string.h"
+#include "../../lepra/include/hashtable.h"
+#include "../../lepra/include/reader.h"
+#include "../../lepra/include/writer.h"
+#include "../../lepra/include/rotationmatrix.h"
+#include "../../lepra/include/vector3d.h"
+#include "../../lepra/include/transformation.h"
+#include "uirenderer.h"
 #include <list>
 
-namespace UiTbc
-{
+namespace uitbc {
 
 class TriangleBasedGeometry;
 class Texture;
 
-class ASELoader
-{
+class ASELoader {
 public:
 	class ASEData;
 
 	ASELoader();
 
-	bool Load(ASEData& pASEData, const Lepra::String& pFileName);
-	bool Load(ASEData& pASEData, Lepra::Reader& pReader);
-	// bool Save(const GeometryList& pGeometryList, const Lepra::AnsiString& pFileName);
+	bool Load(ASEData& ase_data, const lepra::String& file_name);
+	bool Load(ASEData& ase_data, lepra::Reader& reader);
+	// bool Save(const GeometryList& geometry_list, const lepra::AnsiString& file_name);
 
-	class Scene
-	{
+	class Scene {
 	public:
 		Scene();
 		~Scene();
@@ -71,187 +68,180 @@ public:
 
 		// All fields in this struct may be ignored.
 
-		Lepra::AnsiString mFilename; // Orignal .max file name that this ASE was generated from.
-		Lepra::AnsiString mComment;
-		int mFirstFrame;	// First frame of animation?
-		int mLastFrame;	// Last frame of animation?
-		int mFrameSpeed;	// FPS?
-		int mTicksPerFrame;	// Unknown.
+		lepra::AnsiString filename_; // Orignal .max file name that this ASE was generated from.
+		lepra::AnsiString comment_;
+		int first_frame_;	// First frame of animation?
+		int last_frame_;	// Last frame of animation?
+		int frame_speed_;	// kFps?
+		int ticks_per_frame_;	// Unknown.
 		// Color vectors.
-		double mBackgroundStatic[3]; // Background color.
-		double mAmbientStatic[3]; // Ambient light.
+		double background_static_[3]; // Background color.
+		double ambient_static_[3]; // Ambient light.
 	};
 
-	class Map
-	{
+	class Map {
 	public:
 		Map();
 		~Map();
 
 		void Init();
 
-		Lepra::AnsiString mName;
-		Lepra::AnsiString mClass;
-		Lepra::AnsiString mComment;
+		lepra::AnsiString name_;
+		lepra::AnsiString clazz_;
+		lepra::AnsiString comment_;
 
-		int mSubNo; // Unknown.
+		int sub_no_; // Unknown.
 
-		double mAmount; // Unknown. Presumed to be a global alpha value for this map.
+		double amount_; // Unknown. Presumed to be a global alpha value for this map.
 
-		Lepra::AnsiString mBitmapPath; // Path to texture file.
+		lepra::AnsiString bitmap_path_; // Path to texture file.
 
-		Lepra::AnsiString mType; // Unknown. Observed value is "Screen" (without quotes).
+		lepra::AnsiString type_; // Unknown. Observed value is "Screen" (without quotes).
 
-		double mUOffset;
-		double mVOffset;
-		double mUTiling;
-		double mVTiling;
-		double mUVWAngle;
-		double mUVWBlur;
-		double mUVWBlurOffset;
-		double mUVWNoiseAmt;
-		double mUVWNoiseSize;
-		int mUVWNoiseLevel;
-		double mUVWNoisePhase;
+		double u_offset_;
+		double v_offset_;
+		double u_tiling_;
+		double v_tiling_;
+		double uvw_angle_;
+		double uvw_blur_;
+		double uvw_blur_offset_;
+		double uvw_noise_amt_;
+		double uvw_noise_size_;
+		int uvw_noise_level_;
+		double uvw_noise_phase_;
 
-		Lepra::AnsiString mBitmapFilter; // Ignore. Observer value is "Pyramidal" (without quotes).
+		lepra::AnsiString bitmap_filter_; // Ignore. Observer value is "Pyramidal" (without quotes).
 	};
 
-	class Material
-	{
+	class Material {
 	public:
 		Material();
 		~Material();
 
 		void Init();
 
-		bool LoadAsTexture(Texture& pTexture);
+		bool LoadAsTexture(Texture& texture);
 		Renderer::MaterialType GetRecommendedMaterial();
 
-		Lepra::AnsiString mName;  // Ignore.
-		Lepra::AnsiString mClass; // Ignore.
-		Lepra::AnsiString mComment;
+		lepra::AnsiString name_;  // Ignore.
+		lepra::AnsiString clazz_; // Ignore.
+		lepra::AnsiString comment_;
 
 		// Ambient glow. Unknown if this adds to or overrides *SCENE_AMBIENT_STATIC.
-		double mAmbient[3];
-		double mDiffuse[3]; // Diffuse color of the material.
-		double mSpecular[3]; // Specular color... Should always be the same as the diffuse.
-		double mShine; // Specifies how focused the specular highlight is. Ignore.
-		double mShineStrength; // Unknown. Ignore.
-		double mTransparency;
-		double mWireSize;
+		double ambient_[3];
+		double diffuse_[3]; // Diffuse color of the material.
+		double specular_[3]; // Specular color... Should always be the same as the diffuse.
+		double shine_; // Specifies how focused the specular highlight is. Ignore.
+		double shine_strength_; // Unknown. Ignore.
+		double transparency_;
+		double wire_size_;
 
 		typedef std::list<Material*> MaterialList;
-		MaterialList mSubMaterialList;
+		MaterialList sub_material_list_;
 
-		Lepra::AnsiString mShading; // Blinn or Phong. More possibilities (not observed though) could be
+		lepra::AnsiString shading_; // Blinn or Phong. More possibilities (not observed though) could be
 					 // Anisotropoc, Metal, Multi-Layer, Oren-Nayar-Blinn, Strauss, Sat or None.
-		double mXPFalloff; // Some kind of exponential falloff. But of what?
-		double mSelfIllum; // Self illumination.
+		double xp_falloff_; // Some kind of exponential falloff. But of what?
+		double self_illum_; // Self illumination.
 
 		// Unknown. Observed value is "In" (without quotes).
-		Lepra::AnsiString mFalloff; 
+		lepra::AnsiString falloff_;
 
 		// Unknown. Observed value is "Filter" (without quotes).
-		Lepra::AnsiString mXPType;
+		lepra::AnsiString xp_type_;
 
 		// The maps are stored in lists since a test scene showed that several
 		// refract maps can occur in the same material. So to keep things
 		// consistent, all maps are stored in lists. The common case is that
 		// each list contain zero or one map each.
 		typedef std::list<Map*> MapList;
-		MapList mAmbientMapList;
-		MapList mDiffuseMapList; // Standard texture.
-		MapList mSpecularMapList;// Specular color. Ignore.
-		MapList mShineMapList;   // Specularity per texel.
-		MapList mShineStrengthMapList;
-		MapList mSelfIllumMapList;
-		MapList mOpacityMapList;
-		MapList mFilterColorMapList;
-		MapList mBumpMapList;
-		MapList mReflectMapList;
-		MapList mRefractMapList;
+		MapList ambient_map_list_;
+		MapList diffuse_map_list_; // Standard texture.
+		MapList specular_map_list_;// Specular color. Ignore.
+		MapList shine_map_list_;   // Specularity per texel.
+		MapList shine_strength_map_list_;
+		MapList self_illum_map_list_;
+		MapList opacity_map_list_;
+		MapList filter_color_map_list_;
+		MapList bump_map_list_;
+		MapList reflect_map_list_;
+		MapList refract_map_list_;
 	};
 
 	// TM = Transformation Matrix.
-	class NodeTM
-	{
+	class NodeTM {
 	public:
 		NodeTM();
 		~NodeTM();
 
 		void Init();
-		void GetRotationMatrix(Lepra::RotationMatrixF& pRotMtx);
-		void GetRotationMatrix(Lepra::RotationMatrixD& pRotMtx);
-		void GetPosition(Lepra::Vector3DF& pPos);
-		void GetPosition(Lepra::Vector3DD& pPos);
-		void GetTransformation(Lepra::TransformationF& pTransform);
-		void GetTransformation(Lepra::TransformationD& pTransform);
+		void GetRotationMatrix(lepra::RotationMatrixF& rot_mtx);
+		void GetRotationMatrix(lepra::RotationMatrixD& rot_mtx);
+		void GetPosition(lepra::Vector3DF& pos);
+		void GetPosition(lepra::Vector3DD& pos);
+		void GetTransformation(lepra::TransformationF& transform);
+		void GetTransformation(lepra::TransformationD& transform);
 
-		Lepra::AnsiString mNodeName; // Same as GeomObject::mNodeName.
-		Lepra::AnsiString mComment;
-		int mInheritPos[3]; // Unknown. May be ignored.
-		int mInheritRot[3]; // Unknown. May be ignored.
-		int mInheritScl[3]; // Unknown. May be ignored.
-		double mTMRow0[3]; // First row of transform matrix.
-		double mTMRow1[3]; // Second row...
-		double mTMRow2[3]; // Third row...
-		double mTMRow3[3]; // Fourth row, same as mTMPos.
-		double mTMPos[3]; // The position.
+		lepra::AnsiString node_name_; // Same as GeomObject::node_name_.
+		lepra::AnsiString comment_;
+		int inherit_pos_[3]; // Unknown. May be ignored.
+		int inherit_rot_[3]; // Unknown. May be ignored.
+		int inherit_scl_[3]; // Unknown. May be ignored.
+		double tm_row0_[3]; // First row of transform matrix.
+		double tm_row1_[3]; // Second row...
+		double tm_row2_[3]; // Third row...
+		double tm_row3_[3]; // Fourth row, same as tm_pos_.
+		double tm_pos_[3]; // The position.
                 // Another way to represent rotation:
-		double mTMRotAxis[3]; // Axis of rotation. Not needed if you use the matrix.
-		double mTMRotAngle; // Angle of rotation around the rotation axis. 
+		double tm_rot_axis_[3]; // Axis of rotation. Not needed if you use the matrix.
+		double tm_rot_angle_; // Angle of rotation around the rotation axis.
 
-		double mTMScale[3]; // Scale of the transformation. This info is already 
+		double tm_scale_[3]; // Scale of the transformation. This info is already
 		                     // embedded in the matrix. May be ignored.
-		double mTMScaleAxis[3]; // Axis of scaling, whatever that is. Ignore this
+		double tm_scale_axis_[3]; // Axis of scaling, whatever that is. Ignore this
 					 // and just go with the matrix.
-		double mTMScaleAxisAng; // Ditto.
+		double tm_scale_axis_ang_; // Ditto.
 	};
 
-	class ControlPosSample
-	{
+	class ControlPosSample {
 	public:
 		ControlPosSample();
 		~ControlPosSample();
 
 		void Init();
 
-		int mTimeValue;
-		double mPos[3];
+		int time_value_;
+		double pos_[3];
 	};
 
-	class ControlRotSample
-	{
+	class ControlRotSample {
 	public:
 		ControlRotSample();
 		~ControlRotSample();
 
 		void Init();
 
-		int mTimeValue;
-		double mRot[4];
+		int time_value_;
+		double rot_[4];
 	};
 
-	class TMAnimation
-	{
+	class TMAnimation {
 	public:
 		TMAnimation();
 		~TMAnimation();
 
 		void Init();
 
-		Lepra::AnsiString mNodeName; // Same as GeomObject::mNodeName.
-		Lepra::AnsiString mComment;
+		lepra::AnsiString node_name_; // Same as GeomObject::node_name_.
+		lepra::AnsiString comment_;
 
 		typedef std::list<ControlPosSample*> ControlPosSampleList;
 		typedef std::list<ControlRotSample*> ControlRotSampleList;
-		ControlPosSampleList mControlPosTrack;
-		ControlRotSampleList mControlRotTrack;
+		ControlPosSampleList control_pos_track_;
+		ControlRotSampleList control_rot_track_;
 	};
 
-	class MappingChannel
-	{
+	class MappingChannel {
 	public:
 		MappingChannel();
 		~MappingChannel();
@@ -261,18 +251,17 @@ public:
 		void AllocVertexArray();
 		void AllocFaceArray();
 
-		Lepra::AnsiString mComment;
-		// Number of texture coordinates. Doesn't equal mNumVertex.
+		lepra::AnsiString comment_;
+		// Number of texture coordinates. Doesn't equal num_vertex_.
 		// Texture coordinates are per triangle, not per vertex.
-		int mNumTVertex; 
-		float* mTVertex; // Texture coordinates UVW. U and V are the only ones needed.
+		int num_t_vertex_;
+		float* t_vertex_; // Texture coordinates UVW. U and V are the only ones needed.
 
-		int mNumTVFaces; // Must equal mNumFaces.
-		int* mTVFace; // Stores indices into mTVertex.
+		int num_tv_faces_; // Must equal num_faces_.
+		int* tv_face_; // Stores indices into t_vertex_.
 	};
 
-	class Mesh
-	{
+	class Mesh {
 	public:
 		Mesh();
 		~Mesh();
@@ -285,69 +274,66 @@ public:
 		void AllocCFaceArray();
 		void AllocNormalArrays();
 
-		void GetGeometry(std::list<TriangleBasedGeometry*>& pGeometryList);
+		void GetGeometry(std::list<TriangleBasedGeometry*>& geometry_list);
 
-		Lepra::AnsiString mComment;
-		int mTimeValue; // Time tag of animation.
-		int mNumVertex;
-		int mNumFaces;
-		float* mVertex;
-		int* mFace; // Only stores indices.
-		bool* mFaceEdgeVisible; // 3 bools per face, telling if the edge should
+		lepra::AnsiString comment_;
+		int time_value_; // Time tag of animation.
+		int num_vertex_;
+		int num_faces_;
+		float* vertex_;
+		int* face_; // Only stores indices.
+		bool* face_edge_visible_; // 3 bools per face, telling if the edge should
 					  // be rendered or not. Ignore this.
 
 		// Smoothing groups per face.
-		std::list<int>* mSmoothingGroupList;
-		int* mSubMaterial; // Sub material per face.
+		std::list<int>* smoothing_group_list_;
+		int* sub_material_; // Sub material per face.
 
 		// All UV-sets.
-		bool mHaveDefaultUVSet;
+		bool have_default_uv_set_;
 		typedef std::list<MappingChannel*> MappingChannelList;
-		MappingChannelList mMappingChannelList;
+		MappingChannelList mapping_channel_list_;
 
-		float* mFaceNormals;
-		float* mVertexNormals;
+		float* face_normals_;
+		float* vertex_normals_;
 
-		int mNumCVertex; // Number of vertex colors.
-		float* mCVertex; // Vertex colors.
-		int mNumCVFaces; // Must equal mNumFaces.
-		int* mCFace; // Vertex colors per face.
+		int num_c_vertex_; // Number of vertex colors.
+		float* c_vertex_; // Vertex colors.
+		int num_cv_faces_; // Must equal num_faces_.
+		int* c_face_; // Vertex colors per face.
 	private:
 		// Used in GetGeometry().
-		class FaceVertex
-		{
+		class FaceVertex {
 		public:
-			int mVIndex; // Vertex index.
-			int mCIndex; // Color index.
-			int* mTIndex; // Texture coordinate index per UV-set.
-			int mNumUVSets;
+			int v_index_; // Vertex index.
+			int c_index_; // Color index.
+			int* t_index_; // Texture coordinate index per UV-set.
+			int num_uv_sets_;
 
 			FaceVertex();
-			FaceVertex(const FaceVertex& pOther);
+			FaceVertex(const FaceVertex& other);
 			~FaceVertex();
 
-			void SetNumUVSets(int pNumUVSets);
-			static size_t GetHashCode(const FaceVertex& pKey);
-			bool operator== (const FaceVertex& pOther) const;
-			FaceVertex& operator= (const FaceVertex& pOther);
+			void SetNumUVSets(int num_uv_sets);
+			static size_t GetHashCode(const FaceVertex& key);
+			bool operator== (const FaceVertex& other) const;
+			FaceVertex& operator= (const FaceVertex& other);
 		};
 
-		class Face
-		{
+		class Face {
 		public:
 			Face();
 			~Face();
-			int mSubMaterial;
-			FaceVertex mVertex[3];
+			int sub_material_;
+			FaceVertex vertex_[3];
 		};
 
 		typedef std::list<Face*> FaceList;
-		typedef Lepra::HashTable<int, FaceList*> FaceListTable;
-		void SetupFaceListTable(Face* pFaceArray, FaceListTable& pFaceListTable);
+		typedef lepra::HashTable<int, FaceList*> FaceListTable;
+		void SetupFaceListTable(Face* face_array, FaceListTable& face_list_table);
 	};
 
-	class GeomObject
-	{
+	class GeomObject {
 	public:
 		GeomObject();
 		~GeomObject();
@@ -355,40 +341,38 @@ public:
 		void Init();
 		void AllocTMAnimation();
 
-		void GetGeometry(std::list<TriangleBasedGeometry*>& pGeometryList);
+		void GetGeometry(std::list<TriangleBasedGeometry*>& geometry_list);
 
-		Lepra::AnsiString mNodeName;
-		// TODO: Add Lepra::AnsiString mNodeParent;
-		Lepra::AnsiString mComment;
+		lepra::AnsiString node_name_;
+		// TODO: Add lepra::AnsiString mNodeParent;
+		lepra::AnsiString comment_;
 		typedef std::list<NodeTM*> NodeTMList;
 		typedef std::list<Mesh*> MeshList;
-		NodeTMList mNodeTMList;
-		MeshList mMeshList;
-		bool mMotionBlur; // Ignore.
-		bool mCastShadow;
-		bool mRecvShadow; // Ignore.
-		TMAnimation* mTMAnimation;
-		int mMaterialRef; // Default material index for those faces (triangles)
+		NodeTMList node_tm_list_;
+		MeshList mesh_list_;
+		bool motion_blur_; // Ignore.
+		bool cast_shadow_;
+		bool recv_shadow_; // Ignore.
+		TMAnimation* tm_animation_;
+		int material_ref_; // Default material index for those faces (triangles)
 				    // that doesn't have a MTLID tag.
 	};
 
-	class CameraSettings
-	{
+	class CameraSettings {
 	public:
 		CameraSettings();
 		~CameraSettings();
 
 		void Init();
 
-		int mTimeValue;
-		double mNear;
-		double mFar;
-		double mFOV;
-		double mTDist;
+		int time_value_;
+		double near_;
+		double far_;
+		double fov_;
+		double t_dist_;
 	};
 
-	class CameraObject
-	{
+	class CameraObject {
 	public:
 		CameraObject();
 		~CameraObject();
@@ -397,38 +381,36 @@ public:
 		void AllocCameraSettings();
 		void AllocTMAnimation();
 
-		Lepra::AnsiString mNodeName;
-		Lepra::AnsiString mComment;
-		Lepra::AnsiString mCameraType; // Observed values: Target...
+		lepra::AnsiString node_name_;
+		lepra::AnsiString comment_;
+		lepra::AnsiString camera_type_; // Observed values: Target...
 		typedef std::list<NodeTM*> NodeTMList;
-		NodeTMList mNodeTMList;
-		TMAnimation* mTMAnimation;
-		CameraSettings* mSettings;
+		NodeTMList node_tm_list_;
+		TMAnimation* tm_animation_;
+		CameraSettings* settings_;
 	};
 
-	class LightSettings
-	{
+	class LightSettings {
 	public:
 		LightSettings();
 		~LightSettings();
 
 		void Init();
 
-		int mTimeValue;
-		double mColor[3];
-		double mIntens;
-		double mAspect;
-		double mHotSpot;
-		double mFalloff;
-		double mTDist;
-		double mMapBias;
-		double mMapRange;
-		double mMapSize;
-		double mRayBias;
+		int time_value_;
+		double color_[3];
+		double intens_;
+		double aspect_;
+		double hot_spot_;
+		double falloff_;
+		double t_dist_;
+		double map_bias_;
+		double map_range_;
+		double map_size_;
+		double ray_bias_;
 	};
 
-	class LightObject
-	{
+	class LightObject {
 	public:
 		LightObject();
 		~LightObject();
@@ -437,82 +419,81 @@ public:
 		void AllocLightSettings();
 		void AllocTMAnimation();
 
-		Lepra::AnsiString mNodeName;
-		Lepra::AnsiString mComment;
-		Lepra::AnsiString mLightType; // Observed values: Target...
+		lepra::AnsiString node_name_;
+		lepra::AnsiString comment_;
+		lepra::AnsiString light_type_; // Observed values: Target...
 		typedef std::list<NodeTM*> NodeTMList;
-		NodeTMList mNodeTMList;
+		NodeTMList node_tm_list_;
 
-		Lepra::AnsiString mShadows;
-		bool mUseLight;
-		Lepra::AnsiString mSpotShape;
-		bool mUseGlobal;
-		bool mAbsMapBias;
-		bool mOverShoot;
-		LightSettings* mSettings;
-		TMAnimation* mTMAnimation;
+		lepra::AnsiString shadows_;
+		bool use_light_;
+		lepra::AnsiString spot_shape_;
+		bool use_global_;
+		bool abs_map_bias_;
+		bool over_shoot_;
+		LightSettings* settings_;
+		TMAnimation* tm_animation_;
 	};
 
-	class ASEData
-	{
+	class ASEData {
 	public:
 		ASEData();
 		~ASEData();
 
 		void Init();
 
-		int m3DSMaxAsciiExport; // = 200
-		Lepra::AnsiString mComment;
-	
-		Scene* mScene;
+		int m3DSMaxAsciiExport_; // = 200
+		lepra::AnsiString comment_;
+
+		Scene* scene_;
 
 		typedef std::list<Material*> MaterialList;
 		typedef std::list<GeomObject*> GeomObjectList;
 		typedef std::list<CameraObject*> CameraObjectList;
 		typedef std::list<LightObject*> LightObjectList;
-		MaterialList mMaterialList;
-		GeomObjectList mGeomList;
-		CameraObjectList mCamList;
-		LightObjectList mLightList;
+		MaterialList material_list_;
+		GeomObjectList geom_list_;
+		CameraObjectList cam_list_;
+		LightObjectList light_list_;
 	};
 
 private:
 
-	bool Parse(ASEData& pASEData, const Lepra::AnsiString& pDataString);
+	bool Parse(ASEData& ase_data, const lepra::AnsiString& data_string);
 
-	bool ReadQuotedString(Lepra::AnsiString& pString, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadUnquotedString(Lepra::AnsiString& pString, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadInt(int& pInt, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadIntVec(int* pInt, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadFloat(double& pFloat, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadFloatVec(double* pFloat, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadBool(bool& pBool, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
+	bool ReadQuotedString(lepra::AnsiString& s, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadUnquotedString(lepra::AnsiString& s, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadInt(int& i, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadIntVec(int* i, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadFloat(double& f, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadFloatVec(double* f, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadBool(bool& _bool, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
 
-	// Vertex lists look the same, and all "lightweight" face lists 
-	// (MESH_FACE_LIST is the only exception) look the same. Thus, 
+	// Vertex lists look the same, and all "lightweight" face lists
+	// (MESH_FACE_LIST is the only exception) look the same. Thus,
 	// we don't need to implement a unique function for each type.
-	bool ReadVertexList(float* pVertex, int pNumVertex, char* pVertexIdentifier, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadFaceList(int* pFace, int pNumFaces, char* pFaceIdentifier, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
+	bool ReadVertexList(float* vertex, int num_vertex, char* vertex_identifier, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadFaceList(int* face, int num_faces, char* face_identifier, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
 
-	bool ReadSCENE(ASEData& pASEData, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadMATERIAL_LIST(ASEData& pASEData, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadMATERIAL(Material* pMaterial, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadMAP(std::list<Map*>& pMapList, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadGEOMOBJECT(GeomObject* pGeomObj, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadCAMERAOBJECT(CameraObject* pCamObj, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadLIGHTOBJECT(LightObject* pLightObj, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadCAMERA_SETTINGS(CameraSettings* pCamSettings, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadLIGHT_SETTINGS(LightSettings* pLightSettings, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadNODE_TM(NodeTM* pNodeTM, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadTM_ANIMATION(TMAnimation* pTMAnimation, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadCONTROL_POS_TRACK(TMAnimation* pTMAnimation, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadCONTROL_ROT_TRACK(TMAnimation* pTMAnimation, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadCONTROL_POS_SAMPLE(ControlPosSample* pControlPosSample, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadCONTROL_ROT_SAMPLE(ControlRotSample* pControlRotSample, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadMESH(Mesh* pMesh, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadMESH_FACE_LIST(Mesh* pMesh, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadMESH_NORMALS(Mesh* pMesh, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
-	bool ReadMESH_MAPPINGCHANNEL(Mesh* pMesh, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens);
+	bool ReadSCENE(ASEData& ase_data, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadMATERIAL_LIST(ASEData& ase_data, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadMATERIAL(Material* material, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadMAP(std::list<Map*>& map_list, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadGEOMOBJECT(GeomObject* geom_obj, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadCAMERAOBJECT(CameraObject* cam_obj, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadLIGHTOBJECT(LightObject* light_obj, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadCAMERA_SETTINGS(CameraSettings* cam_settings, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadLIGHT_SETTINGS(LightSettings* light_settings, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadNODE_TM(NodeTM* node_tm, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadTM_ANIMATION(TMAnimation* tm_animation, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadCONTROL_POS_TRACK(TMAnimation* tm_animation, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadCONTROL_ROT_TRACK(TMAnimation* tm_animation, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadCONTROL_POS_SAMPLE(ControlPosSample* control_pos_sample, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadCONTROL_ROT_SAMPLE(ControlRotSample* control_rot_sample, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadMESH(Mesh* mesh, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadMESH_FACE_LIST(Mesh* mesh, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadMESH_NORMALS(Mesh* mesh, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
+	bool ReadMESH_MAPPINGCHANNEL(Mesh* mesh, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens);
 };
 
 }

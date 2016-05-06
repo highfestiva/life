@@ -1,12 +1,12 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "Math.h"
+#include "math.h"
 
 
 
@@ -23,13 +23,11 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-template<class _T, int _Count> class CyclicArray
-{
+template<class _T, int _Count> class CyclicArray {
 public:
 	CyclicArray();
 
@@ -37,92 +35,78 @@ public:
 
 	int GetCount() const;
 
-	void PushFront(_T& pElement);
-	void PushBack(_T& pElement);
+	void PushFront(_T& element);
+	void PushBack(_T& element);
 	void PopFront();
 	void PopBack();
 
 	// Returns the element at the relative index.
-	const _T& operator[](unsigned pIndex) const;
+	const _T& operator[](unsigned index) const;
 
 private:
-	int mFirstElement;
-	int mElementCount;
-	_T mArray[_Count];
+	int first_element_;
+	int element_count_;
+	_T array_[_Count];
 };
 
 
 
-template<class _T, int _Count> 
+template<class _T, int _Count>
 CyclicArray<_T, _Count>::CyclicArray():
-	mFirstElement(0),
-	mElementCount(0)
-{
+	first_element_(0),
+	element_count_(0) {
 }
 
-template<class _T, int _Count> 
-void CyclicArray<_T, _Count>::Clear()
-{
-	mElementCount = 0;
+template<class _T, int _Count>
+void CyclicArray<_T, _Count>::Clear() {
+	element_count_ = 0;
 }
 
-template<class _T, int _Count> 
-int CyclicArray<_T, _Count>::GetCount() const
-{
-	return mElementCount;
+template<class _T, int _Count>
+int CyclicArray<_T, _Count>::GetCount() const {
+	return element_count_;
 }
 
-template<class _T, int _Count> 
-void CyclicArray<_T, _Count>::PushFront(_T& pElement)
-{
-	mFirstElement = Math::Mod(mFirstElement - 1, _Count);
-	mArray[mFirstElement] = pElement;
+template<class _T, int _Count>
+void CyclicArray<_T, _Count>::PushFront(_T& element) {
+	first_element_ = Math::Mod(first_element_ - 1, _Count);
+	array_[first_element_] = element;
 
-	if (mElementCount < _Count)
-	{
-		++mElementCount;
+	if (element_count_ < _Count) {
+		++element_count_;
 	}
 }
 
-template<class _T, int _Count> 
-void CyclicArray<_T, _Count>::PushBack(_T& pElement)
-{
-	mArray[(mFirstElement + mElementCount) % _Count] = pElement;
+template<class _T, int _Count>
+void CyclicArray<_T, _Count>::PushBack(_T& element) {
+	array_[(first_element_ + element_count_) % _Count] = element;
 
-	if (mElementCount < _Count)
-	{
-		++mElementCount;
-	}
-	else
-	{
+	if (element_count_ < _Count) {
+		++element_count_;
+	} else {
 		// We have overwritten the first element. Point to the next one.
-		mFirstElement = (mFirstElement + 1) % _Count;
+		first_element_ = (first_element_ + 1) % _Count;
 	}
 }
 
-template<class _T, int _Count> 
-void CyclicArray<_T, _Count>::PopFront()
-{
-	if (mElementCount > 0)
-	{
-		mFirstElement = Math::Mod(mFirstElement + 1, _Count);
-		--mElementCount;
+template<class _T, int _Count>
+void CyclicArray<_T, _Count>::PopFront() {
+	if (element_count_ > 0) {
+		first_element_ = Math::Mod(first_element_ + 1, _Count);
+		--element_count_;
 	}
 }
 
-template<class _T, int _Count> 
-void CyclicArray<_T, _Count>::PopBack()
-{
-	if (mElementCount > 0)
-	{
-		--mElementCount;
+template<class _T, int _Count>
+void CyclicArray<_T, _Count>::PopBack() {
+	if (element_count_ > 0) {
+		--element_count_;
 	}
 }
 
-template<class _T, int _Count> 
-const _T& CyclicArray<_T, _Count>::operator[](unsigned pIndex) const
-{
-	return mArray[(mFirstElement + pIndex) % _Count];
+template<class _T, int _Count>
+const _T& CyclicArray<_T, _Count>::operator[](unsigned index) const {
+	return array_[(first_element_ + index) % _Count];
 }
 
 

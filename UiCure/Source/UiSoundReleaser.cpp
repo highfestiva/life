@@ -1,99 +1,84 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiSoundReleaser.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../Include/UiGameUiManager.h"
+#include "../include/uisoundreleaser.h"
+#include "../../cure/include/contextmanager.h"
+#include "../include/uigameuimanager.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-SoundReleaser::SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, Cure::ContextManager* pManager,
-	const str& pSoundName, UiCure::UserSound3dResource* pSound, const vec3& pPosition, const vec3& pVelocity,
-	float pVolume, float pPitch):
-	Parent(pResourceManager, "SoundReleaser", pUiManager),
-	mSound3d(pSound),
-	mSound2d(0),
-	mPosition(pPosition),
-	mVelocity(pVelocity),
-	mVolume(pVolume),
-	mPitch(pPitch)
-{
-	pManager->AddLocalObject(this);
+SoundReleaser::SoundReleaser(cure::ResourceManager* resource_manager, GameUiManager* ui_manager, cure::ContextManager* manager,
+	const str& sound_name, UiCure::UserSound3dResource* sound, const vec3& position, const vec3& velocity,
+	float volume, float pitch):
+	Parent(resource_manager, "SoundReleaser", ui_manager),
+	sound3d_(sound),
+	sound2d_(0),
+	position_(position),
+	velocity_(velocity),
+	volume_(volume),
+	pitch_(pitch) {
+	manager->AddLocalObject(this);
 
-	mSound3d->Load(GetResourceManager(), pSoundName,
+	sound3d_->Load(GetResourceManager(), sound_name,
 		UiCure::UserSound3dResource::TypeLoadCallback(this, &SoundReleaser::LoadPlaySound3d));
 }
 
-SoundReleaser::SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, Cure::ContextManager* pManager,
-	const str& pSoundName, UiCure::UserSound2dResource* pSound, float pVolume, float pPitch):
-	Parent(pResourceManager, "SoundReleaser", pUiManager),
-	mSound3d(0),
-	mSound2d(pSound),
-	mVolume(pVolume),
-	mPitch(pPitch)
-{
-	pManager->AddLocalObject(this);
+SoundReleaser::SoundReleaser(cure::ResourceManager* resource_manager, GameUiManager* ui_manager, cure::ContextManager* manager,
+	const str& sound_name, UiCure::UserSound2dResource* sound, float volume, float pitch):
+	Parent(resource_manager, "SoundReleaser", ui_manager),
+	sound3d_(0),
+	sound2d_(sound),
+	volume_(volume),
+	pitch_(pitch) {
+	manager->AddLocalObject(this);
 
-	mSound2d->Load(GetResourceManager(), pSoundName,
+	sound2d_->Load(GetResourceManager(), sound_name,
 		UiCure::UserSound2dResource::TypeLoadCallback(this, &SoundReleaser::LoadPlaySound2d));
 }
 
-SoundReleaser::~SoundReleaser()
-{
-	delete mSound3d;
-	mSound3d = 0;
-	delete mSound2d;
-	mSound2d = 0;
+SoundReleaser::~SoundReleaser() {
+	delete sound3d_;
+	sound3d_ = 0;
+	delete sound2d_;
+	sound2d_ = 0;
 }
 
-void SoundReleaser::OnTick()
-{
-	if (mSound3d && !mUiManager->GetSoundManager()->IsPlaying(mSound3d->GetData()))
-	{
+void SoundReleaser::OnTick() {
+	if (sound3d_ && !ui_manager_->GetSoundManager()->IsPlaying(sound3d_->GetData())) {
 		GetManager()->PostKillObject(GetInstanceId());
 	}
-	if (mSound2d && !mUiManager->GetSoundManager()->IsPlaying(mSound2d->GetData()))
-	{
+	if (sound2d_ && !ui_manager_->GetSoundManager()->IsPlaying(sound2d_->GetData())) {
 		GetManager()->PostKillObject(GetInstanceId());
 	}
 }
 
-void SoundReleaser::LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource)
-{
-	//deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
-	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		mUiManager->GetSoundManager()->SetSoundPosition(pSoundResource->GetData(), mPosition, mVelocity);
-		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), mVolume, mPitch);
+void SoundReleaser::LoadPlaySound3d(UiCure::UserSound3dResource* sound_resource) {
+	//deb_assert(sound_resource->GetLoadState() == cure::kResourceLoadComplete);
+	if (sound_resource->GetLoadState() == cure::kResourceLoadComplete) {
+		ui_manager_->GetSoundManager()->SetSoundPosition(sound_resource->GetData(), position_, velocity_);
+		ui_manager_->GetSoundManager()->Play(sound_resource->GetData(), volume_, pitch_);
 		GetManager()->EnableTickCallback(this);
-	}
-	else
-	{
+	} else {
 		//deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 
 	}
 }
 
-void SoundReleaser::LoadPlaySound2d(UiCure::UserSound2dResource* pSoundResource)
-{
-	deb_assert(pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
-	if (pSoundResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		mUiManager->GetSoundManager()->Play(pSoundResource->GetData(), mVolume, mPitch);
+void SoundReleaser::LoadPlaySound2d(UiCure::UserSound2dResource* sound_resource) {
+	deb_assert(sound_resource->GetLoadState() == cure::kResourceLoadComplete);
+	if (sound_resource->GetLoadState() == cure::kResourceLoadComplete) {
+		ui_manager_->GetSoundManager()->Play(sound_resource->GetData(), volume_, pitch_);
 		GetManager()->EnableTickCallback(this);
-	}
-	else
-	{
+	} else {
 		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 	}

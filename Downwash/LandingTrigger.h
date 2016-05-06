@@ -1,30 +1,28 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life/StuntTrigger.h"
+#include "../life/stunttrigger.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-class LandingTrigger: public Life::StuntTrigger
-{
+class LandingTrigger: public life::StuntTrigger {
 	typedef StuntTrigger Parent;
 public:
-	LandingTrigger(Cure::ContextManager* pManager);
+	LandingTrigger(cure::ContextManager* manager);
 	virtual ~LandingTrigger();
 
 protected:
-	virtual void DidTrigger(Cure::ContextObject* pBody);
-	virtual void OnAlarm(int pAlarmId, void* pExtraData);
+	virtual void DidTrigger(cure::ContextObject* body);
+	virtual void OnAlarm(int alarm_id, void* extra_data);
 
 	logclass();
 };

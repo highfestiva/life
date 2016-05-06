@@ -1,42 +1,40 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "Vector3D.h"
-#include "RotationMatrix.h"
-#include "Quaternion.h"
+#include "lepratypes.h"
+#include "vector3d.h"
+#include "rotationmatrix.h"
+#include "quaternion.h"
 
 #define TEMPLATE template<class _TVarType>
 #define QUAL Transformation<_TVarType>
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 TEMPLATE
-class Transformation
-{
+class Transformation {
 public:
 	typedef _TVarType BaseType;
 
-	Quaternion<_TVarType> mOrientation;
-	Vector3D<_TVarType> mPosition;
+	Quaternion<_TVarType> orientation_;
+	Vector3D<_TVarType> position_;
 
 	Transformation();
-	Transformation(const RotationMatrix<_TVarType>& pOrientation,
-						  const Vector3D<_TVarType>& pPosition);
-	Transformation(const Quaternion<_TVarType>& pOrientation,
-						  const Vector3D<_TVarType>& pPosition);
-	Transformation(const _TVarType pData[7]);
-	Transformation(const Transformation& pTransformation);
+	Transformation(const RotationMatrix<_TVarType>& orientation,
+						  const Vector3D<_TVarType>& position);
+	Transformation(const Quaternion<_TVarType>& orientation,
+						  const Vector3D<_TVarType>& position);
+	Transformation(const _TVarType data[7]);
+	Transformation(const Transformation& transformation);
 
 	void SetIdentity();
 
@@ -46,77 +44,77 @@ public:
 	Quaternion<_TVarType>& GetOrientation();
 	Vector3D<_TVarType>& GetPosition();
 
-	void SetPosition(const Vector3D<_TVarType>& pPosition);
-	void SetOrientation(const RotationMatrix<_TVarType>& pOrientation);
-	void SetOrientation(const Quaternion<_TVarType>& pOrientation);
+	void SetPosition(const Vector3D<_TVarType>& position);
+	void SetOrientation(const RotationMatrix<_TVarType>& orientation);
+	void SetOrientation(const Quaternion<_TVarType>& orientation);
 
 	// Relative to self.
-	void MoveForward(_TVarType pDistance);
-	void MoveRight(_TVarType pDistance);
-	void MoveUp(_TVarType pDistance);
+	void MoveForward(_TVarType distance);
+	void MoveRight(_TVarType distance);
+	void MoveUp(_TVarType distance);
 
-	void MoveBackward(_TVarType pDistance);
-	void MoveLeft(_TVarType pDistance);
-	void MoveDown(_TVarType pDistance);
+	void MoveBackward(_TVarType distance);
+	void MoveLeft(_TVarType distance);
+	void MoveDown(_TVarType distance);
 
-	void RotateAroundAnchor(const Vector3D<_TVarType>& pAnchor, const Vector3D<_TVarType>& pAxis, _TVarType pAngle);
+	void RotateAroundAnchor(const Vector3D<_TVarType>& anchor, const Vector3D<_TVarType>& axis, _TVarType angle);
 
-	void RotateYaw(_TVarType pAngle);
-	void RotatePitch(_TVarType pAngle);
-	void RotateRoll(_TVarType pAngle);
+	void RotateYaw(_TVarType angle);
+	void RotatePitch(_TVarType angle);
+	void RotateRoll(_TVarType angle);
 
 	// Relative to world.
-	void MoveNorth(_TVarType pDistance);
-	void MoveEast(_TVarType pDistance);
-	void MoveWorldUp(_TVarType pDistance);
+	void MoveNorth(_TVarType distance);
+	void MoveEast(_TVarType distance);
+	void MoveWorldUp(_TVarType distance);
 
-	void MoveSouth(_TVarType pDistance);
-	void MoveWest(_TVarType pDistance);
-	void MoveWorldDown(_TVarType pDistance);
+	void MoveSouth(_TVarType distance);
+	void MoveWest(_TVarType distance);
+	void MoveWorldDown(_TVarType distance);
 
-	void RotateWorldX(_TVarType pAngle); // Pitch
-	void RotateWorldY(_TVarType pAngle); // Yaw
-	void RotateWorldZ(_TVarType pAngle); // Roll
+	void RotateWorldX(_TVarType angle); // Pitch
+	void RotateWorldY(_TVarType angle); // Yaw
+	void RotateWorldZ(_TVarType angle); // Roll
 
-	void Get(_TVarType pMatrix[7]) const;
-	void GetAs4x4Matrix(_TVarType pMatrix[16]) const;
-	void GetAs4x4TransposeMatrix(_TVarType pMatrix[16]) const;
-	void GetAs4x4TransposeMatrix(_TVarType pScale, _TVarType pMatrix[16]) const;
-	void GetAs4x4InverseMatrix(_TVarType pMatrix[16]) const;
-	void GetAs4x4InverseTransposeMatrix(_TVarType pMatrix[16]) const;
+	void Get(_TVarType matrix[7]) const;
+	void GetAs4x4Matrix(_TVarType matrix[16]) const;
+	void GetAs4x4TransposeMatrix(_TVarType matrix[16]) const;
+	void GetAs4x4TransposeMatrix(_TVarType scale, _TVarType matrix[16]) const;
+	void GetAs4x4InverseMatrix(_TVarType matrix[16]) const;
+	void GetAs4x4InverseTransposeMatrix(_TVarType matrix[16]) const;
 
-	void GetAs4x4OrientationMatrix(_TVarType pMatrix[16]) const;
-	void GetAs4x4InverseOrientationMatrix(_TVarType pMatrix[16]) const;
+	void GetAs4x4OrientationMatrix(_TVarType matrix[16]) const;
+	void GetAs4x4InverseOrientationMatrix(_TVarType matrix[16]) const;
 
-	Vector3D<_TVarType> Transform(const Vector3D<_TVarType>& pVector) const;
-	Vector3D<_TVarType> InverseTransform(const Vector3D<_TVarType>& pVector) const;
+	Vector3D<_TVarType> Transform(const Vector3D<_TVarType>& vector) const;
+	Vector3D<_TVarType> InverseTransform(const Vector3D<_TVarType>& vector) const;
 
-	Transformation Transform(const Transformation& pTransformation) const;
-	Transformation InverseTransform(const Transformation& pTransformation) const;
-	void FastInverseTransform(const Transformation& pFrom, const quat pInverse, const Transformation& pTo);
+	Transformation Transform(const Transformation& transformation) const;
+	Transformation InverseTransform(const Transformation& transformation) const;
+	void FastInverseTransform(const Transformation& from, const quat inverse, const Transformation& to);
 
 	Transformation Inverse() const;
 
-	void Interpolate(const Transformation& pStart,
-					 const Transformation& pEnd,
-					 _TVarType pTime);
+	void Interpolate(const Transformation& start,
+					 const Transformation& end,
+					 _TVarType time);
 
-	bool operator == (const Transformation& pTransformation);
-	bool operator != (const Transformation& pTransformation);
+	bool operator == (const Transformation& transformation);
+	bool operator != (const Transformation& transformation);
 
-	Transformation& operator = (const Transformation& pTransformation);
+	Transformation& operator = (const Transformation& transformation);
 
-	Transformation& operator += (const Vector3D<_TVarType>& pVector);
-	Transformation  operator +  (const Vector3D<_TVarType>& pVector) const;
+	Transformation& operator += (const Vector3D<_TVarType>& vector);
+	Transformation  operator +  (const Vector3D<_TVarType>& vector) const;
 
-	Transformation& operator *= (const Transformation& pTransformation);
-	Transformation  operator *  (const Transformation& pTransformation) const;
+	Transformation& operator *= (const Transformation& transformation);
+	Transformation  operator *  (const Transformation& transformation) const;
 
-	Transformation& operator /= (const Transformation& pTransformation);
-	Transformation  operator /  (const Transformation& pTransformation) const;
+	Transformation& operator /= (const Transformation& transformation);
+	Transformation  operator /  (const Transformation& transformation) const;
 
 	// T * V
-	Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector) const;
+	Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& vector) const;
 
 	Transformation<float> ToFloat() const;
 	Transformation<double> ToDouble() const;
@@ -124,20 +122,20 @@ public:
 
 
 
-TEMPLATE inline Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const Transformation<_TVarType>& pTransformation);
-TEMPLATE inline const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const Transformation<_TVarType>& pTransformation);
+TEMPLATE inline Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& vector, const Transformation<_TVarType>& transformation);
+TEMPLATE inline const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& vector, const Transformation<_TVarType>& transformation);
 
 
 
-#include "Transformation.inl"
+#include "transformation.inl"
 
 
 
 typedef Transformation<float> xform;
 typedef Transformation<double> TransformationD;
 
-extern const xform gIdentityTransformationF;
-extern const TransformationD gIdentityTransformationD;
+extern const xform kIdentityTransformationF;
+extern const TransformationD kIdentityTransformationD;
 
 #undef TEMPLATE
 #undef QUAL

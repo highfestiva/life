@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "UiLepra.h"
+#include "uilepra.h"
 #if defined(LEPRA_MAC)
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
@@ -13,22 +13,20 @@
 #include <AL/al.h>
 #endif // Mac/!Mac
 #include <vorbis/vorbisfile.h>
-#include "UiLepra.h"
-#include "UiSoundStream.h"
+#include "uilepra.h"
+#include "uisoundstream.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-class OggAlStream: public SoundStream
-{
+class OggAlStream: public SoundStream {
 public:
 	typedef SoundStream Parent;
 
-	OggAlStream(SoundManager* pSoundManager, const str& pFilename, bool pLoop);
+	OggAlStream(SoundManager* sound_manager, const str& filename, bool loop);
 	virtual ~OggAlStream();
 	virtual bool Playback();		// play the Ogg stream
 	virtual bool Rewind();
@@ -38,20 +36,20 @@ public:
 	virtual bool Update();			// update the stream if necessary
 
 protected:
-	bool Open(const str& pFilename);	// obtain a handle to the file
+	bool Open(const str& filename);	// obtain a handle to the file
 	bool Release();				// release the file handle
 	bool Stream(ALuint buffer);		// reloads a buffer
 	bool Clear();				// empties the queue
 	void TimeoutAutoResume();		// If too high latencies between updates, OpenAL stops playing. This resumes.
 
 private:
-	FILE*		mOggFile;		// file handle
-	OggVorbis_File	mOggStream;		// stream handle
-	vorbis_info*	mVorbisInfo;		// some formatting data
+	FILE*		ogg_file_;		// file handle
+	OggVorbis_File	ogg_stream_;		// stream handle
+	vorbis_info*	vorbis_info_;		// some formatting data
 
-	ALuint mAlBuffers[2];			// front and back buffers
-	ALuint mAlSource;			// audio source
-	ALenum mAlFormat;			// internal format
+	ALuint al_buffers_[2];			// front and back buffers
+	ALuint al_source_;			// audio source
+	ALenum al_format_;			// internal format
 };
 
 

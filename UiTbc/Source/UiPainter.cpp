@@ -5,234 +5,184 @@
 
 
 #include "pch.h"
-#include "../Include/UiPainter.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/Canvas.h"
-#include "../Include/UiFontManager.h"
+#include "../include/uipainter.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/canvas.h"
+#include "../include/uifontmanager.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
 Painter::Painter() :
-	mFontManager(0),
-	mDisplayListIDManager(1, 100000, 0),
-	mCurrentDisplayList(0),
-	mRenderMode(RM_NORMAL),
-	mOrigoX(0),
-	mOrigoY(0),
-	mXDir(X_RIGHT),
-	mYDir(Y_DOWN),
-	mCanvas(0),
-	mAlphaValue(255),
-	mTabSize(0)
-{
-	mDefaultDisplayList = NewDisplayList();
+	font_manager_(0),
+	display_list_id_manager_(1, 100000, 0),
+	current_display_list_(0),
+	render_mode_(kRmNormal),
+	origo_x_(0),
+	origo_y_(0),
+	x_dir_(kXRight),
+	y_dir_(kYDown),
+	canvas_(0),
+	alpha_value_(255),
+	tab_size_(0) {
+	default_display_list_ = NewDisplayList();
 }
 
-Painter::~Painter()
-{
-	DeleteDisplayList(mDefaultDisplayList);
-	mFontManager = 0;
+Painter::~Painter() {
+	DeleteDisplayList(default_display_list_);
+	font_manager_ = 0;
 }
 
-void Painter::DefineCoordinates(int pOrigoX, int pOrigoY, XDir pXDir, YDir pYDir)
-{
-	mOrigoX = pOrigoX;
-	mOrigoY = pOrigoY;
-	mXDir = pXDir;
-	mYDir = pYDir;
+void Painter::DefineCoordinates(int origo_x, int origo_y, XDir x_dir, YDir y_dir) {
+	origo_x_ = origo_x;
+	origo_y_ = origo_y;
+	x_dir_ = x_dir;
+	y_dir_ = y_dir;
 }
 
-void Painter::SetDestCanvas(Canvas* pCanvas)
-{
-	mCanvas = pCanvas;
+void Painter::SetDestCanvas(Canvas* canvas) {
+	canvas_ = canvas;
 }
 
-bool Painter::PushAttrib(unsigned pAttrib)
-{
-	bool pReturnValue = true;
+bool Painter::PushAttrib(unsigned attrib) {
+	bool return_value = true;
 
-	const size_t lMaxCount = 1024;
+	const size_t max_count = 1024;
 
-	if ((pAttrib & ATTR_RENDERMODE) != 0)
-	{
-		mAttribRMStack.push_back(mRenderMode);
-		if (mAttribRMStack.size() > lMaxCount)
-		{
-			mAttribRMStack.pop_front();
-			pReturnValue = false;
+	if ((attrib & kAttrRendermode) != 0) {
+		attrib_rm_stack_.push_back(render_mode_);
+		if (attrib_rm_stack_.size() > max_count) {
+			attrib_rm_stack_.pop_front();
+			return_value = false;
 		}
 	}
 
-	if ((pAttrib & ATTR_ALPHAVALUE) != 0)
-	{
-		mAttribAlphaStack.push_back(GetAlphaValue());
-		if (mAttribAlphaStack.size() > lMaxCount)
-		{
-			mAttribAlphaStack.pop_front();
-			pReturnValue = false;
+	if ((attrib & kAttrAlphavalue) != 0) {
+		attrib_alpha_stack_.push_back(GetAlphaValue());
+		if (attrib_alpha_stack_.size() > max_count) {
+			attrib_alpha_stack_.pop_front();
+			return_value = false;
 		}
 	}
 
-	if ((pAttrib & ATTR_COLOR0) != 0)
-	{
-		mAttribColor0Stack.push_back(GetColor(0));
-		if (mAttribColor0Stack.size() > lMaxCount)
-		{
-			mAttribColor0Stack.pop_front();
-			pReturnValue = false;
+	if ((attrib & kAttrColor0) != 0) {
+		attrib_color0_stack_.push_back(GetColor(0));
+		if (attrib_color0_stack_.size() > max_count) {
+			attrib_color0_stack_.pop_front();
+			return_value = false;
 		}
 	}
 
-	if ((pAttrib & ATTR_COLOR1) != 0)
-	{
-		mAttribColor1Stack.push_back(GetColor(1));
-		if (mAttribColor1Stack.size() > lMaxCount)
-		{
-			mAttribColor1Stack.pop_front();
-			pReturnValue = false;
+	if ((attrib & kAttrColor1) != 0) {
+		attrib_color1_stack_.push_back(GetColor(1));
+		if (attrib_color1_stack_.size() > max_count) {
+			attrib_color1_stack_.pop_front();
+			return_value = false;
 		}
 	}
 
-	if ((pAttrib & ATTR_COLOR2) != 0)
-	{
-		mAttribColor2Stack.push_back(GetColor(2));
-		if (mAttribColor2Stack.size() > lMaxCount)
-		{
-			mAttribColor2Stack.pop_front();
-			pReturnValue = false;
+	if ((attrib & kAttrColor2) != 0) {
+		attrib_color2_stack_.push_back(GetColor(2));
+		if (attrib_color2_stack_.size() > max_count) {
+			attrib_color2_stack_.pop_front();
+			return_value = false;
 		}
 	}
 
-	if ((pAttrib & ATTR_COLOR3) != 0)
-	{
-		mAttribColor3Stack.push_back(GetColor(3));
-		if (mAttribColor3Stack.size() > lMaxCount)
-		{
-			mAttribColor3Stack.pop_front();
-			pReturnValue = false;
+	if ((attrib & kAttrColor3) != 0) {
+		attrib_color3_stack_.push_back(GetColor(3));
+		if (attrib_color3_stack_.size() > max_count) {
+			attrib_color3_stack_.pop_front();
+			return_value = false;
 		}
 	}
 
-	if ((pAttrib & ATTR_CLIPRECT) != 0)
-	{
-		PixelRect lClippingRect;
-		GetClippingRect(lClippingRect);
-		mAttribClipRectStack.push_back(lClippingRect);
-		if (mAttribClipRectStack.size() > lMaxCount)
-		{
-			mAttribClipRectStack.pop_front();
-			pReturnValue = false;
+	if ((attrib & kAttrCliprect) != 0) {
+		PixelRect _clipping_rect;
+		GetClippingRect(_clipping_rect);
+		attrib_clip_rect_stack_.push_back(_clipping_rect);
+		if (attrib_clip_rect_stack_.size() > max_count) {
+			attrib_clip_rect_stack_.pop_front();
+			return_value = false;
 		}
 	}
 
-	mAttribStack.push_back(pAttrib);
+	attrib_stack_.push_back(attrib);
 
-	return pReturnValue;
+	return return_value;
 }
 
-bool Painter::PopAttrib()
-{
-	if (mAttribStack.empty())
-	{
+bool Painter::PopAttrib() {
+	if (attrib_stack_.empty()) {
 		return false;
 	}
 
-	unsigned lAttrib = mAttribStack.back();
-	mAttribStack.pop_back();
+	unsigned _attrib = attrib_stack_.back();
+	attrib_stack_.pop_back();
 
-	if ((lAttrib & ATTR_RENDERMODE) != 0)
-	{
-		if (!mAttribRMStack.empty())
-		{
-			SetRenderMode(mAttribRMStack.back());
-			mAttribRMStack.pop_back();
-		}
-		else
-		{
+	if ((_attrib & kAttrRendermode) != 0) {
+		if (!attrib_rm_stack_.empty()) {
+			SetRenderMode(attrib_rm_stack_.back());
+			attrib_rm_stack_.pop_back();
+		} else {
 			return false;
 		}
 	}
 
-	if ((lAttrib & ATTR_ALPHAVALUE) != 0)
-	{
-		if (!mAttribAlphaStack.empty())
-		{
-			SetAlphaValue(mAttribAlphaStack.back());
-			mAttribAlphaStack.pop_back();
-		}
-		else
-		{
+	if ((_attrib & kAttrAlphavalue) != 0) {
+		if (!attrib_alpha_stack_.empty()) {
+			SetAlphaValue(attrib_alpha_stack_.back());
+			attrib_alpha_stack_.pop_back();
+		} else {
 			return false;
 		}
 	}
 
-	if ((lAttrib & ATTR_COLOR0) != 0)
-	{
-		if (!mAttribColor0Stack.empty())
-		{
-			SetColor(mAttribColor0Stack.back(), 0);
-			mAttribColor0Stack.pop_back();
-		}
-		else
-		{
+	if ((_attrib & kAttrColor0) != 0) {
+		if (!attrib_color0_stack_.empty()) {
+			SetColor(attrib_color0_stack_.back(), 0);
+			attrib_color0_stack_.pop_back();
+		} else {
 			return false;
 		}
 	}
 
-	if ((lAttrib & ATTR_COLOR1) != 0)
-	{
-		if (!mAttribColor1Stack.empty())
-		{
-			SetColor(mAttribColor1Stack.back(), 1);
-			mAttribColor1Stack.pop_back();
-		}
-		else
-		{
+	if ((_attrib & kAttrColor1) != 0) {
+		if (!attrib_color1_stack_.empty()) {
+			SetColor(attrib_color1_stack_.back(), 1);
+			attrib_color1_stack_.pop_back();
+		} else {
 			return false;
 		}
 	}
 
-	if ((lAttrib & ATTR_COLOR2) != 0)
-	{
-		if (!mAttribColor2Stack.empty())
-		{
-			SetColor(mAttribColor2Stack.back(), 2);
-			mAttribColor2Stack.pop_back();
-		}
-		else
-		{
+	if ((_attrib & kAttrColor2) != 0) {
+		if (!attrib_color2_stack_.empty()) {
+			SetColor(attrib_color2_stack_.back(), 2);
+			attrib_color2_stack_.pop_back();
+		} else {
 			return false;
 		}
 	}
 
-	if ((lAttrib & ATTR_COLOR3) != 0)
-	{
-		if (!mAttribColor3Stack.empty())
-		{
-			SetColor(mAttribColor3Stack.back(), 3);
-			mAttribColor3Stack.pop_back();
-		}
-		else
-		{
+	if ((_attrib & kAttrColor3) != 0) {
+		if (!attrib_color3_stack_.empty()) {
+			SetColor(attrib_color3_stack_.back(), 3);
+			attrib_color3_stack_.pop_back();
+		} else {
 			return false;
 		}
 	}
 
-	if ((lAttrib & ATTR_CLIPRECT) != 0)
-	{
-		if (!mAttribClipRectStack.empty())
-		{
-			PixelRect lRect = mAttribClipRectStack.back();
-			mAttribClipRectStack.pop_back();
-			SetClippingRect(lRect.mLeft, lRect.mTop, lRect.mRight, lRect.mBottom);
-		}
-		else
-		{
+	if ((_attrib & kAttrCliprect) != 0) {
+		if (!attrib_clip_rect_stack_.empty()) {
+			PixelRect _rect = attrib_clip_rect_stack_.back();
+			attrib_clip_rect_stack_.pop_back();
+			SetClippingRect(_rect.left_, _rect.top_, _rect.right_, _rect.bottom_);
+		} else {
 			return false;
 		}
 	}
@@ -240,317 +190,274 @@ bool Painter::PopAttrib()
 	return true;
 }
 
-void Painter::SetRenderMode(RenderMode pRM)
-{
-	mRenderMode = pRM;
+void Painter::SetRenderMode(RenderMode rm) {
+	render_mode_ = rm;
 }
 
-void Painter::SetAlphaValue(uint8 pAlpha)
-{
-	mAlphaValue = pAlpha;
+void Painter::SetAlphaValue(uint8 alpha) {
+	alpha_value_ = alpha;
 }
 
-void Painter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom)
-{
-	mClippingRect.Set(pLeft, pTop, pRight, pBottom);
+void Painter::SetClippingRect(int left, int top, int right, int bottom) {
+	clipping_rect_.Set(left, top, right, bottom);
 }
 
-void Painter::ReduceClippingRect(int pLeft, int pTop, int pRight, int pBottom)
-{
-	PixelRect lClippingRect(mClippingRect);
+void Painter::ReduceClippingRect(int left, int top, int right, int bottom) {
+	PixelRect _clipping_rect(clipping_rect_);
 
-	if (XLT(lClippingRect.mLeft, pLeft) == true)
-	{
-		lClippingRect.mLeft = pLeft;
+	if (XLT(_clipping_rect.left_, left) == true) {
+		_clipping_rect.left_ = left;
 	}
 
-	if (XGT(lClippingRect.mRight, pRight) == true)
-	{
-		lClippingRect.mRight = pRight;
+	if (XGT(_clipping_rect.right_, right) == true) {
+		_clipping_rect.right_ = right;
 	}
 
-	if (YLT(lClippingRect.mTop, pTop) == true)
-	{
-		lClippingRect.mTop = pTop;
+	if (YLT(_clipping_rect.top_, top) == true) {
+		_clipping_rect.top_ = top;
 	}
 
-	if (YGT(lClippingRect.mBottom, pBottom) == true)
-	{
-		lClippingRect.mBottom = pBottom;
+	if (YGT(_clipping_rect.bottom_, bottom) == true) {
+		_clipping_rect.bottom_ = bottom;
 	}
 
-	SetClippingRect(lClippingRect);
+	SetClippingRect(_clipping_rect);
 }
 
-void Painter::SetColor(const Color& pColor, unsigned pColorIndex)
-{
-	mColor[pColorIndex] = pColor;
+void Painter::SetColor(const Color& color, unsigned color_index) {
+	color_[color_index] = color;
 }
 
-void Painter::SetFontManager(FontManager* pFontManager)
-{
-	mFontManager = pFontManager;
+void Painter::SetFontManager(FontManager* font_manager) {
+	font_manager_ = font_manager;
 }
 
-FontManager* Painter::GetFontManager() const
-{
-	deb_assert(mFontManager);
-	return (mFontManager);
+FontManager* Painter::GetFontManager() const {
+	deb_assert(font_manager_);
+	return (font_manager_);
 }
 
-int Painter::GetStringWidth(const wstr& pString) const
-{
-	if (!mFontManager)
-	{
+int Painter::GetStringWidth(const wstr& s) const {
+	if (!font_manager_) {
 		return (0);
 	}
-	return (mFontManager->GetStringWidth(pString));
+	return (font_manager_->GetStringWidth(s));
 }
 
-int Painter::GetFontHeight() const
-{
-	if (!mFontManager)
-	{
+int Painter::GetFontHeight() const {
+	if (!font_manager_) {
 		return (0);
 	}
-	return (mFontManager->GetFontHeight());
+	return (font_manager_->GetFontHeight());
 }
 
-int Painter::GetLineHeight() const
-{
-	if (!mFontManager)
-	{
+int Painter::GetLineHeight() const {
+	if (!font_manager_) {
 		return (0);
 	}
-	return (mFontManager->GetLineHeight());
+	return (font_manager_->GetLineHeight());
 }
 
-int Painter::GetTabSize() const
-{
-	return mTabSize;
+int Painter::GetTabSize() const {
+	return tab_size_;
 }
 
-void Painter::SetTabSize(int pSize)
-{
-	mTabSize = pSize;
+void Painter::SetTabSize(int _size) {
+	tab_size_ = _size;
 }
 
-Painter::DisplayListID Painter::NewDisplayList()
-{
-	int lID = mDisplayListIDManager.GetFreeId();
-	if(lID != mDisplayListIDManager.GetInvalidId())
-	{
-		mDisplayListMap.insert(DisplayListMap::value_type(lID, new std::vector<DisplayEntity*>));
+Painter::DisplayListID Painter::NewDisplayList() {
+	int id = display_list_id_manager_.GetFreeId();
+	if(id != display_list_id_manager_.GetInvalidId()) {
+		display_list_map_.insert(DisplayListMap::value_type(id, new std::vector<DisplayEntity*>));
 	}
-	return (DisplayListID)lID;
+	return (DisplayListID)id;
 }
 
-void Painter::DeleteDisplayList(DisplayListID pDisplayListID)
-{
-	DisplayListMap::iterator it = mDisplayListMap.find(pDisplayListID);
-	if(it != mDisplayListMap.end())
-	{
-		std::vector<DisplayEntity*>* lDisplayList = (*it).second;
-		mDisplayListMap.erase(it);
+void Painter::DeleteDisplayList(DisplayListID display_list_id) {
+	DisplayListMap::iterator it = display_list_map_.find(display_list_id);
+	if(it != display_list_map_.end()) {
+		std::vector<DisplayEntity*>* display_list = (*it).second;
+		display_list_map_.erase(it);
 
-		std::vector<DisplayEntity*>::iterator lListIter;
-		for(lListIter = lDisplayList->begin(); lListIter != lDisplayList->end(); ++lListIter)
-		{
-			delete *lListIter;
+		std::vector<DisplayEntity*>::iterator list_iter;
+		for(list_iter = display_list->begin(); list_iter != display_list->end(); ++list_iter) {
+			delete *list_iter;
 		}
-		delete lDisplayList;
+		delete display_list;
 	}
 }
 
-void Painter::BeginDisplayList(DisplayListID pDisplayListID)
-{
-	DisplayListMap::iterator it = mDisplayListMap.find(pDisplayListID);
-	if (it != mDisplayListMap.end())
-	{
-		mCurrentDisplayList = (*it).second;
-		mDisplayListIter = mCurrentDisplayList->begin();
+void Painter::BeginDisplayList(DisplayListID display_list_id) {
+	DisplayListMap::iterator it = display_list_map_.find(display_list_id);
+	if (it != display_list_map_.end()) {
+		current_display_list_ = (*it).second;
+		display_list_iter_ = current_display_list_->begin();
 	}
 }
 
-void Painter::EndDisplayList()
-{
-	if (mCurrentDisplayList)
-	{
-		std::vector<DisplayEntity*>::iterator lListIter;
-		for (lListIter = mCurrentDisplayList->begin(); lListIter != mCurrentDisplayList->end(); ++lListIter)
-		{
-			DisplayEntity* lEntity = *lListIter;
-			lEntity->mGeometry.Reset();
+void Painter::EndDisplayList() {
+	if (current_display_list_) {
+		std::vector<DisplayEntity*>::iterator list_iter;
+		for (list_iter = current_display_list_->begin(); list_iter != current_display_list_->end(); ++list_iter) {
+			DisplayEntity* entity = *list_iter;
+			entity->geometry_.Reset();
 		}
-		mDisplayListIter = mCurrentDisplayList->begin();
-		mCurrentDisplayList = 0;
+		display_list_iter_ = current_display_list_->begin();
+		current_display_list_ = 0;
 	}
 }
 
-void Painter::RenderDisplayList(DisplayListID pDisplayListID)
-{
-	DisplayListMap::iterator it = mDisplayListMap.find(pDisplayListID);
-	if(it != mDisplayListMap.end())
-	{
-		std::vector<DisplayEntity*>* lDisplayList = (*it).second;
-		DoRenderDisplayList(lDisplayList);
+void Painter::RenderDisplayList(DisplayListID display_list_id) {
+	DisplayListMap::iterator it = display_list_map_.find(display_list_id);
+	if(it != display_list_map_.end()) {
+		std::vector<DisplayEntity*>* display_list = (*it).second;
+		DoRenderDisplayList(display_list);
 	}
 }
 
-void Painter::ClearFontBuffers()
-{
+void Painter::ClearFontBuffers() {
 }
 
-Geometry2D* Painter::FetchDisplayEntity(unsigned pVertexFormat, ImageID pImageID)
-{
-	AdjustVertexFormat(pVertexFormat);
+Geometry2D* Painter::FetchDisplayEntity(unsigned vertex_format, ImageID image_id) {
+	AdjustVertexFormat(vertex_format);
 
-	DisplayEntity* lEntity = 0;
-	if(mDisplayListIter != mCurrentDisplayList->end())
-	{
-		lEntity = *mDisplayListIter;
+	DisplayEntity* entity = 0;
+	if(display_list_iter_ != current_display_list_->end()) {
+		entity = *display_list_iter_;
 	}
 
-	PixelRect lClippingRect;
-	GetClippingRect(lClippingRect);
-	if(lEntity == 0 ||
-	   lEntity->mRM != mRenderMode ||
-	   lEntity->mGeometry.GetVertexFormat() != pVertexFormat ||
-	   lEntity->mAlpha != GetAlphaValue() ||
-	   lEntity->mImageID != pImageID ||
-	   lEntity->mClippingRect.mTop != lClippingRect.mTop ||
-	   lEntity->mClippingRect.mBottom != lClippingRect.mBottom ||
-	   lEntity->mClippingRect.mLeft != lClippingRect.mLeft ||
-	   lEntity->mClippingRect.mRight != lClippingRect.mRight)
-	{
-		if(mDisplayListIter != mCurrentDisplayList->end())
-			++mDisplayListIter;
-		if(mDisplayListIter != mCurrentDisplayList->end())
-		{
-			lEntity = *mDisplayListIter;
-			lEntity->Init(mRenderMode, GetAlphaValue(), pImageID, lClippingRect, pVertexFormat);
-		}
-		else
-		{
-			lEntity = new DisplayEntity(mRenderMode, GetAlphaValue(), pImageID, lClippingRect, pVertexFormat);
-			mCurrentDisplayList->push_back(lEntity);
-			mDisplayListIter = mCurrentDisplayList->end();
-			--mDisplayListIter;
+	PixelRect _clipping_rect;
+	GetClippingRect(_clipping_rect);
+	if(entity == 0 ||
+	   entity->rm_ != render_mode_ ||
+	   entity->geometry_.GetVertexFormat() != vertex_format ||
+	   entity->alpha_ != GetAlphaValue() ||
+	   entity->image_id_ != image_id ||
+	   entity->clipping_rect_.top_ != _clipping_rect.top_ ||
+	   entity->clipping_rect_.bottom_ != _clipping_rect.bottom_ ||
+	   entity->clipping_rect_.left_ != _clipping_rect.left_ ||
+	   entity->clipping_rect_.right_ != _clipping_rect.right_) {
+		if(display_list_iter_ != current_display_list_->end())
+			++display_list_iter_;
+		if(display_list_iter_ != current_display_list_->end()) {
+			entity = *display_list_iter_;
+			entity->Init(render_mode_, GetAlphaValue(), image_id, _clipping_rect, vertex_format);
+		} else {
+			entity = new DisplayEntity(render_mode_, GetAlphaValue(), image_id, _clipping_rect, vertex_format);
+			current_display_list_->push_back(entity);
+			display_list_iter_ = current_display_list_->end();
+			--display_list_iter_;
 		}
 	}
-	return &lEntity->mGeometry;
+	return &entity->geometry_;
 }
 
-void Painter::CreateLine(int pX1, int pY1, int pX2, int pY2)
-{
-	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_RGB);
+void Painter::CreateLine(int _x1, int _y1, int _x2, int _y2) {
+	Geometry2D* geometry = FetchDisplayEntity(Geometry2D::kVtxRgb);
 
-	float lX1 = (float)pX1 - 0.5f;
-	float lY1 = (float)pY1 - 0.5f;
-	float lX2 = (float)pX2 - 0.5f;
-	float lY2 = (float)pY2 - 0.5f;
+	float __x1 = (float)_x1 - 0.5f;
+	float __y1 = (float)_y1 - 0.5f;
+	float __x2 = (float)_x2 - 0.5f;
+	float __y2 = (float)_y2 - 0.5f;
 
-	float r = (float)mColor[0].mRed / 255.0f;
-	float g = (float)mColor[0].mGreen / 255.0f;
-	float b = (float)mColor[0].mBlue / 255.0f;
+	float r = (float)color_[0].red_ / 255.0f;
+	float g = (float)color_[0].green_ / 255.0f;
+	float b = (float)color_[0].blue_ / 255.0f;
 
-	vec2 lNormal(lY2 - lY1, lX1 - lX2);
-	lNormal.Normalize();
+	vec2 normal(__y2 - __y1, __x1 - __x2);
+	normal.Normalize();
 
-	uint32 lV0 = lGeometry->SetVertex(lX1 - lNormal.x, lY1 - lNormal.y, r, g, b);
-	uint32 lV1 = lGeometry->SetVertex(lX1 + lNormal.x, lY1 + lNormal.y, r, g, b);
-	uint32 lV2 = lGeometry->SetVertex(lX2 + lNormal.x, lY2 + lNormal.y, r, g, b);
-	uint32 lV3 = lGeometry->SetVertex(lX2 - lNormal.x, lY2 - lNormal.y, r, g, b);
+	uint32 v0 = geometry->SetVertex(__x1 - normal.x, __y1 - normal.y, r, g, b);
+	uint32 _v1 = geometry->SetVertex(__x1 + normal.x, __y1 + normal.y, r, g, b);
+	uint32 _v2 = geometry->SetVertex(__x2 + normal.x, __y2 + normal.y, r, g, b);
+	uint32 _v3 = geometry->SetVertex(__x2 - normal.x, __y2 - normal.y, r, g, b);
 
-	lGeometry->SetTriangle(lV0, lV1, lV2);
-	lGeometry->SetTriangle(lV0, lV2, lV3);
+	geometry->SetTriangle(v0, _v1, _v2);
+	geometry->SetTriangle(v0, _v2, _v3);
 }
 
-void Painter::CreateRectFrame(int pLeft, int pTop, int pRight, int pBottom, int pWidth)
-{
-	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_RGB);
+void Painter::CreateRectFrame(int left, int top, int right, int bottom, int width) {
+	Geometry2D* geometry = FetchDisplayEntity(Geometry2D::kVtxRgb);
 
-	float lLeft   = (float)pLeft - 0.5f;
-	float lRight  = (float)pRight - 0.5f;
-	float lTop    = (float)pTop - 0.5f;
-	float lBottom = (float)pBottom - 0.5f;
+	float _left   = (float)left - 0.5f;
+	float _right  = (float)right - 0.5f;
+	float _top    = (float)top - 0.5f;
+	float _bottom = (float)bottom - 0.5f;
 
-	float r = (float)mColor[0].mRed / 255.0f;
-	float g = (float)mColor[0].mGreen / 255.0f;
-	float b = (float)mColor[0].mBlue / 255.0f;
+	float r = (float)color_[0].red_ / 255.0f;
+	float g = (float)color_[0].green_ / 255.0f;
+	float b = (float)color_[0].blue_ / 255.0f;
 
-	uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r, g, b);     // Outer top left.
-	uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r, g, b);    // Outer top right.
-	uint32 lV2 = lGeometry->SetVertex(lRight, lBottom, r, g, b); // Outer bottom right.
-	uint32 lV3 = lGeometry->SetVertex(lLeft, lBottom, r, g, b);  // Outer bottom left.
+	uint32 v0 = geometry->SetVertex(_left, _top, r, g, b);     // Outer top left.
+	uint32 _v1 = geometry->SetVertex(_right, _top, r, g, b);    // Outer top right.
+	uint32 _v2 = geometry->SetVertex(_right, _bottom, r, g, b); // Outer bottom right.
+	uint32 _v3 = geometry->SetVertex(_left, _bottom, r, g, b);  // Outer bottom left.
 
-	lLeft += pWidth;
-	lTop += pWidth;
-	lRight -= pWidth;
-	lBottom -= pWidth;
+	_left += width;
+	_top += width;
+	_right -= width;
+	_bottom -= width;
 
-	uint32 lV4 = lGeometry->SetVertex(lLeft, lTop, r, g, b);     // Inner top left.
-	uint32 lV5 = lGeometry->SetVertex(lRight, lTop, r, g, b);    // Inner top right.
-	uint32 lV6 = lGeometry->SetVertex(lRight, lBottom, r, g, b); // Inner bottom right.
-	uint32 lV7 = lGeometry->SetVertex(lLeft, lBottom, r, g, b);  // Inner bottom left.
+	uint32 v4 = geometry->SetVertex(_left, _top, r, g, b);     // Inner top left.
+	uint32 v5 = geometry->SetVertex(_right, _top, r, g, b);    // Inner top right.
+	uint32 v6 = geometry->SetVertex(_right, _bottom, r, g, b); // Inner bottom right.
+	uint32 v7 = geometry->SetVertex(_left, _bottom, r, g, b);  // Inner bottom left.
 
-	lGeometry->SetTriangle(lV0, lV4, lV7);
-	lGeometry->SetTriangle(lV0, lV7, lV3);
-	lGeometry->SetTriangle(lV0, lV1, lV5);
-	lGeometry->SetTriangle(lV0, lV5, lV4);
-	lGeometry->SetTriangle(lV1, lV2, lV6);
-	lGeometry->SetTriangle(lV1, lV6, lV5);
-	lGeometry->SetTriangle(lV7, lV6, lV2);
-	lGeometry->SetTriangle(lV7, lV2, lV3);
+	geometry->SetTriangle(v0, v4, v7);
+	geometry->SetTriangle(v0, v7, _v3);
+	geometry->SetTriangle(v0, _v1, v5);
+	geometry->SetTriangle(v0, v5, v4);
+	geometry->SetTriangle(_v1, _v2, v6);
+	geometry->SetTriangle(_v1, v6, v5);
+	geometry->SetTriangle(v7, v6, _v2);
+	geometry->SetTriangle(v7, _v2, _v3);
 }
 
-void Painter::Create3DRectFrame(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken)
-{
-	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_RGB);
+void Painter::Create3DRectFrame(int left, int top, int right, int bottom, int width, bool sunken) {
+	Geometry2D* geometry = FetchDisplayEntity(Geometry2D::kVtxRgb);
 
-	float lLeft   = (float)pLeft - 0.5f;
-	float lRight  = (float)pRight - 0.5f;
-	float lTop    = (float)pTop - 0.5f;
-	float lBottom = (float)pBottom - 0.5f;
+	float _left   = (float)left - 0.5f;
+	float _right  = (float)right - 0.5f;
+	float _top    = (float)top - 0.5f;
+	float _bottom = (float)bottom - 0.5f;
 
 	float r[4];
 	float g[4];
 	float b[4];
-	int lI[4] = {0, 1, 2, 3};
-	
-	if(pSunken)
-	{
-		lI[0] = 1;
-		lI[1] = 0;
-		lI[2] = 3;
-		lI[3] = 2;
-	}
-	
-	for(int i = 0; i < 4; i++)
-	{
-		r[i] = (float)mColor[lI[i]].mRed / 255.0f;
-		g[i] = (float)mColor[lI[i]].mGreen / 255.0f;
-		b[i] = (float)mColor[lI[i]].mBlue / 255.0f;
+	int __i[4] = {0, 1, 2, 3};
+
+	if(sunken) {
+		__i[0] = 1;
+		__i[1] = 0;
+		__i[2] = 3;
+		__i[3] = 2;
 	}
 
-	uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r[0], g[0], b[0]);     // Outer top left.
-	uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r[0], g[0], b[0]);    // Outer top right #1.
-	uint32 lV2 = lGeometry->SetVertex(lRight, lTop, r[1], g[1], b[1]);    // Outer top right #2.
-	uint32 lV3 = lGeometry->SetVertex(lRight, lBottom, r[1], g[1], b[1]); // Outer bottom right.
-	uint32 lV4 = lGeometry->SetVertex(lLeft, lBottom, r[0], g[0], b[0]);  // Outer bottom left #1.
-	uint32 lV5 = lGeometry->SetVertex(lLeft, lBottom, r[1], g[1], b[1]);  // Outer bottom left #2.
+	for(int i = 0; i < 4; i++) {
+		r[i] = (float)color_[__i[i]].red_ / 255.0f;
+		g[i] = (float)color_[__i[i]].green_ / 255.0f;
+		b[i] = (float)color_[__i[i]].blue_ / 255.0f;
+	}
 
-	lLeft += pWidth;
-	lTop += pWidth;
-	lRight -= pWidth;
-	lBottom -= pWidth;
+	uint32 v0 = geometry->SetVertex(_left, _top, r[0], g[0], b[0]);     // Outer top left.
+	uint32 _v1 = geometry->SetVertex(_right, _top, r[0], g[0], b[0]);    // Outer top right #1.
+	uint32 _v2 = geometry->SetVertex(_right, _top, r[1], g[1], b[1]);    // Outer top right #2.
+	uint32 _v3 = geometry->SetVertex(_right, _bottom, r[1], g[1], b[1]); // Outer bottom right.
+	uint32 v4 = geometry->SetVertex(_left, _bottom, r[0], g[0], b[0]);  // Outer bottom left #1.
+	uint32 v5 = geometry->SetVertex(_left, _bottom, r[1], g[1], b[1]);  // Outer bottom left #2.
 
-	uint32 lV6 = lGeometry->SetVertex(lLeft, lTop, r[2], g[2], b[2]);     // Inner top left.
-	uint32 lV7 = lGeometry->SetVertex(lRight, lTop, r[2], g[2], b[2]);    // Inner top right #1.
-	uint32 lV8 = lGeometry->SetVertex(lRight, lTop, r[3], g[3], b[3]);    // Inner top right #2.
-	uint32 lV9 = lGeometry->SetVertex(lRight, lBottom, r[3], g[3], b[3]); // Inner bottom right.
-	uint32 lV10 = lGeometry->SetVertex(lLeft, lBottom, r[2], g[2], b[2]);  // Inner bottom left #1.
-	uint32 lV11 = lGeometry->SetVertex(lLeft, lBottom, r[3], g[3], b[3]);  // Inner bottom left #2.
+	_left += width;
+	_top += width;
+	_right -= width;
+	_bottom -= width;
+
+	uint32 v6 = geometry->SetVertex(_left, _top, r[2], g[2], b[2]);     // Inner top left.
+	uint32 v7 = geometry->SetVertex(_right, _top, r[2], g[2], b[2]);    // Inner top right #1.
+	uint32 v8 = geometry->SetVertex(_right, _top, r[3], g[3], b[3]);    // Inner top right #2.
+	uint32 v9 = geometry->SetVertex(_right, _bottom, r[3], g[3], b[3]); // Inner bottom right.
+	uint32 v10 = geometry->SetVertex(_left, _bottom, r[2], g[2], b[2]);  // Inner bottom left #1.
+	uint32 v11 = geometry->SetVertex(_left, _bottom, r[3], g[3], b[3]);  // Inner bottom left #2.
 
 	//     0--------------------------1,2
 	//     |                           |
@@ -566,683 +473,591 @@ void Painter::Create3DRectFrame(int pLeft, int pTop, int pRight, int pBottom, in
 	//     |                           |
 	//    4,5--------------------------3
 
-	lGeometry->SetTriangle(lV0, lV1, lV7);  // Top
-	lGeometry->SetTriangle(lV0, lV7, lV6);  // ...
-	lGeometry->SetTriangle(lV0, lV6, lV10); // Left
-	lGeometry->SetTriangle(lV0, lV10, lV4); // ...
-	lGeometry->SetTriangle(lV8, lV2, lV3);  // Right
-	lGeometry->SetTriangle(lV8, lV3, lV9);  // ...
-	lGeometry->SetTriangle(lV11, lV9, lV3); // Bottom
-	lGeometry->SetTriangle(lV11, lV3, lV5); // ...
+	geometry->SetTriangle(v0, _v1, v7);  // Top
+	geometry->SetTriangle(v0, v7, v6);  // ...
+	geometry->SetTriangle(v0, v6, v10); // Left
+	geometry->SetTriangle(v0, v10, v4); // ...
+	geometry->SetTriangle(v8, _v2, _v3);  // Right
+	geometry->SetTriangle(v8, _v3, v9);  // ...
+	geometry->SetTriangle(v11, v9, _v3); // Bottom
+	geometry->SetTriangle(v11, _v3, v5); // ...
 }
 
-void Painter::CreateRect(int pLeft, int pTop, int pRight, int pBottom)
-{
-	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_RGB);
+void Painter::CreateRect(int left, int top, int right, int bottom) {
+	Geometry2D* geometry = FetchDisplayEntity(Geometry2D::kVtxRgb);
 
-	float lLeft   = (float)pLeft - 0.5f;
-	float lRight  = (float)pRight - 0.5f;
-	float lTop    = (float)pTop - 0.5f;
-	float lBottom = (float)pBottom - 0.5f;
+	float _left   = (float)left - 0.5f;
+	float _right  = (float)right - 0.5f;
+	float _top    = (float)top - 0.5f;
+	float _bottom = (float)bottom - 0.5f;
 
-	float r = (float)mColor[0].mRed / 255.0f;
-	float g = (float)mColor[0].mGreen / 255.0f;
-	float b = (float)mColor[0].mBlue / 255.0f;
+	float r = (float)color_[0].red_ / 255.0f;
+	float g = (float)color_[0].green_ / 255.0f;
+	float b = (float)color_[0].blue_ / 255.0f;
 
-	uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r, g, b);
-	uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r, g, b);
-	uint32 lV2 = lGeometry->SetVertex(lRight, lBottom, r, g, b);
-	uint32 lV3 = lGeometry->SetVertex(lLeft, lBottom, r, g, b);
+	uint32 v0 = geometry->SetVertex(_left, _top, r, g, b);
+	uint32 _v1 = geometry->SetVertex(_right, _top, r, g, b);
+	uint32 _v2 = geometry->SetVertex(_right, _bottom, r, g, b);
+	uint32 _v3 = geometry->SetVertex(_left, _bottom, r, g, b);
 
-	lGeometry->SetTriangle(lV0, lV1, lV2);
-	lGeometry->SetTriangle(lV0, lV2, lV3);
+	geometry->SetTriangle(v0, _v1, _v2);
+	geometry->SetTriangle(v0, _v2, _v3);
 }
 
-void Painter::CreateShadedRect(int pLeft, int pTop, int pRight, int pBottom)
-{
-	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_RGB);
+void Painter::CreateShadedRect(int left, int top, int right, int bottom) {
+	Geometry2D* geometry = FetchDisplayEntity(Geometry2D::kVtxRgb);
 
-	float lLeft   = (float)pLeft - 0.5f;
-	float lRight  = (float)pRight - 0.5f;
-	float lTop    = (float)pTop - 0.5f;
-	float lBottom = (float)pBottom - 0.5f;
+	float _left   = (float)left - 0.5f;
+	float _right  = (float)right - 0.5f;
+	float _top    = (float)top - 0.5f;
+	float _bottom = (float)bottom - 0.5f;
 
 	float r[4];
 	float g[4];
 	float b[4];
-	for(int i = 0; i < 4; i++)
-	{
-		r[i] = (float)mColor[i].mRed / 255.0f;
-		g[i] = (float)mColor[i].mGreen / 255.0f;
-		b[i] = (float)mColor[i].mBlue / 255.0f;
+	for(int i = 0; i < 4; i++) {
+		r[i] = (float)color_[i].red_ / 255.0f;
+		g[i] = (float)color_[i].green_ / 255.0f;
+		b[i] = (float)color_[i].blue_ / 255.0f;
 	}
 
-	uint32 lV0 = lGeometry->SetVertex(lLeft, lTop, r[0], g[0], b[0]);
-	uint32 lV1 = lGeometry->SetVertex(lRight, lTop, r[1], g[1], b[1]);
-	uint32 lV2 = lGeometry->SetVertex(lRight, lBottom, r[2], g[2], b[2]);
-	uint32 lV3 = lGeometry->SetVertex(lLeft, lBottom, r[3], g[3], b[3]);
-	uint32 lV4 = lGeometry->SetVertex((lLeft + lRight) * 0.5f, (lTop + lBottom) * 0.5f, 
-		(r[0] + r[1] + r[2] + r[3]) * 0.25f, 
+	uint32 v0 = geometry->SetVertex(_left, _top, r[0], g[0], b[0]);
+	uint32 _v1 = geometry->SetVertex(_right, _top, r[1], g[1], b[1]);
+	uint32 _v2 = geometry->SetVertex(_right, _bottom, r[2], g[2], b[2]);
+	uint32 _v3 = geometry->SetVertex(_left, _bottom, r[3], g[3], b[3]);
+	uint32 v4 = geometry->SetVertex((_left + _right) * 0.5f, (_top + _bottom) * 0.5f,
+		(r[0] + r[1] + r[2] + r[3]) * 0.25f,
 		(g[0] + g[1] + g[2] + g[3]) * 0.25f,
 		(b[0] + b[1] + b[2] + b[3]) * 0.25f);
 
-	lGeometry->SetTriangle(lV0, lV1, lV4);
-	lGeometry->SetTriangle(lV1, lV2, lV4);
-	lGeometry->SetTriangle(lV2, lV3, lV4);
-	lGeometry->SetTriangle(lV3, lV0, lV4);
+	geometry->SetTriangle(v0, _v1, v4);
+	geometry->SetTriangle(_v1, _v2, v4);
+	geometry->SetTriangle(_v2, _v3, v4);
+	geometry->SetTriangle(_v3, v0, v4);
 }
 
-void Painter::CreateTriangle(float pX1, float pY1, float pX2, float pY2, float pX3, float pY3)
-{
-	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_RGB);
+void Painter::CreateTriangle(float _x1, float _y1, float _x2, float _y2, float x3, float y3) {
+	Geometry2D* geometry = FetchDisplayEntity(Geometry2D::kVtxRgb);
 
-	float r = (float)mColor[0].mRed / 255.0f;
-	float g = (float)mColor[0].mGreen / 255.0f;
-	float b = (float)mColor[0].mBlue / 255.0f;
-	
-	uint32 lV0 = lGeometry->SetVertex(pX1, pY1, r, g, b);
-	uint32 lV1 = lGeometry->SetVertex(pX2, pY2, r, g, b);
-	uint32 lV2 = lGeometry->SetVertex(pX3, pY3, r, g, b);
-	lGeometry->SetTriangle(lV0, lV1, lV2);
+	float r = (float)color_[0].red_ / 255.0f;
+	float g = (float)color_[0].green_ / 255.0f;
+	float b = (float)color_[0].blue_ / 255.0f;
+
+	uint32 v0 = geometry->SetVertex(_x1, _y1, r, g, b);
+	uint32 _v1 = geometry->SetVertex(_x2, _y2, r, g, b);
+	uint32 _v2 = geometry->SetVertex(x3, y3, r, g, b);
+	geometry->SetTriangle(v0, _v1, _v2);
 }
 
-void Painter::CreateShadedTriangle(float pX1, float pY1, float pX2, float pY2, float pX3, float pY3)
-{
-	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_RGB);
+void Painter::CreateShadedTriangle(float _x1, float _y1, float _x2, float _y2, float x3, float y3) {
+	Geometry2D* geometry = FetchDisplayEntity(Geometry2D::kVtxRgb);
 
 	float r[3];
 	float g[3];
 	float b[3];
-	for(int i = 0; i < 3; i++)
-	{
-		r[i] = (float)mColor[i].mRed / 255.0f;
-		g[i] = (float)mColor[i].mGreen / 255.0f;
-		b[i] = (float)mColor[i].mBlue / 255.0f;
+	for(int i = 0; i < 3; i++) {
+		r[i] = (float)color_[i].red_ / 255.0f;
+		g[i] = (float)color_[i].green_ / 255.0f;
+		b[i] = (float)color_[i].blue_ / 255.0f;
 	}
 
-	uint32 lV0 = lGeometry->SetVertex(pX1, pY1, r[0], g[0], b[0]);
-	uint32 lV1 = lGeometry->SetVertex(pX2, pY2, r[1], g[1], b[1]);
-	uint32 lV2 = lGeometry->SetVertex(pX3, pY3, r[2], g[2], b[2]);
-	lGeometry->SetTriangle(lV0, lV1, lV2);
+	uint32 v0 = geometry->SetVertex(_x1, _y1, r[0], g[0], b[0]);
+	uint32 _v1 = geometry->SetVertex(_x2, _y2, r[1], g[1], b[1]);
+	uint32 _v2 = geometry->SetVertex(x3, y3, r[2], g[2], b[2]);
+	geometry->SetTriangle(v0, _v1, _v2);
 }
 
-void Painter::CreateTriangle(float pX1, float pY1, float pU1, float pV1,
-                             float pX2, float pY2, float pU2, float pV2,
-                             float pX3, float pY3, float pU3, float pV3,
-                             ImageID pImageID)
-{
-	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_UV, pImageID);
+void Painter::CreateTriangle(float _x1, float _y1, float u1, float v1,
+                             float _x2, float _y2, float u2, float v2,
+                             float x3, float y3, float u3, float v3,
+                             ImageID image_id) {
+	Geometry2D* geometry = FetchDisplayEntity(Geometry2D::kVtxUv, image_id);
 
-	uint32 lV0 = lGeometry->SetVertex(pX1, pY1, pU1, pV1);
-	uint32 lV1 = lGeometry->SetVertex(pX2, pY2, pU2, pV2);
-	uint32 lV2 = lGeometry->SetVertex(pX3, pY3, pU3, pV3);
-	lGeometry->SetTriangle(lV0, lV1, lV2);
+	uint32 v0 = geometry->SetVertex(_x1, _y1, u1, v1);
+	uint32 _v1 = geometry->SetVertex(_x2, _y2, u2, v2);
+	uint32 _v2 = geometry->SetVertex(x3, y3, u3, v3);
+	geometry->SetTriangle(v0, _v1, _v2);
 }
 
-void Painter::CreateImage(ImageID pImageID, int x, int y)
-{
+void Painter::CreateImage(ImageID image_id, int x, int y) {
 	int w;
 	int h;
-	GetImageSize(pImageID, w, h);
+	GetImageSize(image_id, w, h);
 
-	PixelRect lRect(x, y, x + w, y + h);
-	PixelRect lSubpatchRect(0, 0, w, h);
-	CreateImage(pImageID, lRect, lSubpatchRect);
+	PixelRect _rect(x, y, x + w, y + h);
+	PixelRect _subpatch_rect(0, 0, w, h);
+	CreateImage(image_id, _rect, _subpatch_rect);
 }
 
-void Painter::CreateImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect)
-{
-	PixelRect lRect(x, y, x + pSubpatchRect.GetWidth(), y + pSubpatchRect.GetHeight());
-	CreateImage(pImageID, lRect, pSubpatchRect);
+void Painter::CreateImage(ImageID image_id, int x, int y, const PixelRect& subpatch_rect) {
+	PixelRect _rect(x, y, x + subpatch_rect.GetWidth(), y + subpatch_rect.GetHeight());
+	CreateImage(image_id, _rect, subpatch_rect);
 }
 
-void Painter::CreateImage(ImageID pImageID, const PixelRect& pRect)
-{
-	PixelRect lSubpatchRect(0, 0, 0, 0);
-	GetImageSize(pImageID, lSubpatchRect.mRight, lSubpatchRect.mBottom);
-	CreateImage(pImageID, pRect, lSubpatchRect);
+void Painter::CreateImage(ImageID image_id, const PixelRect& rect) {
+	PixelRect _subpatch_rect(0, 0, 0, 0);
+	GetImageSize(image_id, _subpatch_rect.right_, _subpatch_rect.bottom_);
+	CreateImage(image_id, rect, _subpatch_rect);
 }
 
-void Painter::CreateImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect)
-{
-	Geometry2D* lGeometry = FetchDisplayEntity(Geometry2D::VTX_UV, pImageID);
+void Painter::CreateImage(ImageID image_id, const PixelRect& rect, const PixelRect& subpatch_rect) {
+	Geometry2D* geometry = FetchDisplayEntity(Geometry2D::kVtxUv, image_id);
 
-	float lLeft   = (float)pRect.mLeft - 0.5f;
-	float lRight  = (float)pRect.mRight - 0.5f;
-	float lTop    = (float)pRect.mTop - 0.5f;
-	float lBottom = (float)pRect.mBottom - 0.5f;
+	float _left   = (float)rect.left_ - 0.5f;
+	float _right  = (float)rect.right_ - 0.5f;
+	float _top    = (float)rect.top_ - 0.5f;
+	float _bottom = (float)rect.bottom_ - 0.5f;
 
-	int lWidth;
-	int lHeight;
-	GetImageSize(pImageID, lWidth, lHeight);
+	int _width;
+	int height;
+	GetImageSize(image_id, _width, height);
 
-	float lU1 = (float)pSubpatchRect.mLeft / (float)lWidth;
-	float lV1 = (float)pSubpatchRect.mTop / (float)lHeight;
-	float lU2 = (float)pSubpatchRect.mRight / (float)lWidth;
-	float lV2 = (float)pSubpatchRect.mBottom / (float)lHeight;
+	float _u1 = (float)subpatch_rect.left_ / (float)_width;
+	float _v1 = (float)subpatch_rect.top_ / (float)height;
+	float _u2 = (float)subpatch_rect.right_ / (float)_width;
+	float _v2 = (float)subpatch_rect.bottom_ / (float)height;
 
-	uint32 lVtx0 = lGeometry->SetVertex(lLeft, lTop, lU1, lV1);
-	uint32 lVtx1 = lGeometry->SetVertex(lRight, lTop, lU2, lV1);
-	uint32 lVtx2 = lGeometry->SetVertex(lRight, lBottom, lU2, lV2);
-	uint32 lVtx3 = lGeometry->SetVertex(lLeft, lBottom, lU1, lV2);
+	uint32 vtx0 = geometry->SetVertex(_left, _top, _u1, _v1);
+	uint32 vtx1 = geometry->SetVertex(_right, _top, _u2, _v1);
+	uint32 vtx2 = geometry->SetVertex(_right, _bottom, _u2, _v2);
+	uint32 vtx3 = geometry->SetVertex(_left, _bottom, _u1, _v2);
 
-	lGeometry->SetTriangle(lVtx0, lVtx1, lVtx2);
-	lGeometry->SetTriangle(lVtx0, lVtx2, lVtx3);	
+	geometry->SetTriangle(vtx0, vtx1, vtx2);
+	geometry->SetTriangle(vtx0, vtx2, vtx3);
 }
 
-unsigned Painter::GetClosestPowerOf2(unsigned pNumber, bool pGreater)
-{
-	if (pNumber == 0)
-	{
+unsigned Painter::GetClosestPowerOf2(unsigned number, bool greater) {
+	if (number == 0) {
 		return 0;
 	}
 
-	unsigned lExp = GetExponent(pNumber);
-	unsigned lPow = 1 << lExp;
-	
-	if(pGreater && lPow < pNumber)
-		return (lPow << 1);
+	unsigned exp = GetExponent(number);
+	unsigned pow = 1 << exp;
+
+	if(greater && pow < number)
+		return (pow << 1);
 	else
-		return lPow;
+		return pow;
 }
 
-unsigned Painter::GetExponent(unsigned pPowerOf2)
-{
-	if (pPowerOf2 == 0)
-	{
+unsigned Painter::GetExponent(unsigned power_of2) {
+	if (power_of2 == 0) {
 		// Error.
 		return (unsigned)-1;
 	}
 
-	unsigned lExp = 0;
-	
-	while ((pPowerOf2 >> lExp) > 1)
-	{
-		lExp++;
+	unsigned exp = 0;
+
+	while ((power_of2 >> exp) > 1) {
+		exp++;
 	}
 
-	return lExp;
+	return exp;
 }
 
-uint8 Painter::FindMatchingColor(const Color& pColor)
-{
-	long lTargetR = pColor.mRed;
-	long lTargetG = pColor.mGreen;
-	long lTargetB = pColor.mBlue;
+uint8 Painter::FindMatchingColor(const Color& color) {
+	long target_r = color.red_;
+	long target_g = color.green_;
+	long target_b = color.blue_;
 
-	long lMinError = 0x7FFFFFFF;
-	uint8 lBestMatch = 0;
+	long min_error = 0x7FFFFFFF;
+	uint8 best_match = 0;
 
-	const Color* lPalette = GetCanvas()->GetPalette();
+	const Color* palette = GetCanvas()->GetPalette();
 
-	for (int i = 0; i < 256; i++)
-	{
-		long lDR = lTargetR - lPalette[i].mRed;
-		long lDG = lTargetG - lPalette[i].mGreen;
-		long lDB = lTargetB - lPalette[i].mBlue;
+	for (int i = 0; i < 256; i++) {
+		long dr = target_r - palette[i].red_;
+		long dg = target_g - palette[i].green_;
+		long db = target_b - palette[i].blue_;
 
-		long lError = lDR * lDR + lDG * lDG + lDB * lDB;
+		long error = dr * dr + dg * dg + db * db;
 
-		if (i == 0 || lError < lMinError)
-		{
-			lMinError = lError;
-			lBestMatch = (uint8)i;
+		if (i == 0 || error < min_error) {
+			min_error = error;
+			best_match = (uint8)i;
 		}
 	}
 
-	return lBestMatch;
+	return best_match;
 }
 
-void Painter::GetScreenCoordClippingRect(PixelRect& pClippingRect) const
-{
-	pClippingRect = mClippingRect;
-	ToScreenCoords(pClippingRect.mLeft, pClippingRect.mTop);
-	ToScreenCoords(pClippingRect.mRight, pClippingRect.mBottom);
+void Painter::GetScreenCoordClippingRect(PixelRect& clipping_rect) const {
+	clipping_rect = clipping_rect_;
+	ToScreenCoords(clipping_rect.left_, clipping_rect.top_);
+	ToScreenCoords(clipping_rect.right_, clipping_rect.bottom_);
 }
 
-void Painter::AdjustVertexFormat(unsigned&)
-{
+void Painter::AdjustVertexFormat(unsigned&) {
 	// Default behaviour. Do nothing.
 }
 
 
-int Painter::GetOrigoX() const
-{
-	return mOrigoX;
+int Painter::GetOrigoX() const {
+	return origo_x_;
 }
 
-int Painter::GetOrigoY() const
-{
-	return mOrigoY;
+int Painter::GetOrigoY() const {
+	return origo_y_;
 }
 
-Painter::XDir Painter::GetXDir() const
-{
-	return mXDir;
+Painter::XDir Painter::GetXDir() const {
+	return x_dir_;
 }
 
-Painter::YDir Painter::GetYDir() const
-{
-	return mYDir;
+Painter::YDir Painter::GetYDir() const {
+	return y_dir_;
 }
 
-Canvas* Painter::GetCanvas() const
-{
-	return mCanvas;
+Canvas* Painter::GetCanvas() const {
+	return canvas_;
 }
 
-Painter::RenderMode Painter::GetRenderMode() const
-{
-	return mRenderMode;
+Painter::RenderMode Painter::GetRenderMode() const {
+	return render_mode_;
 }
 
-uint8 Painter::GetAlphaValue() const
-{
-	return mAlphaValue;
+uint8 Painter::GetAlphaValue() const {
+	return alpha_value_;
 }
 
-void Painter::SetClippingRect(const PixelRect& pClippingRect)
-{
-	SetClippingRect(pClippingRect.mLeft, pClippingRect.mTop, pClippingRect.mRight, pClippingRect.mBottom);
+void Painter::SetClippingRect(const PixelRect& clipping_rect) {
+	SetClippingRect(clipping_rect.left_, clipping_rect.top_, clipping_rect.right_, clipping_rect.bottom_);
 }
 
-void Painter::ReduceClippingRect(const PixelRect& pClippingRect)
-{
-	ReduceClippingRect(pClippingRect.mLeft, pClippingRect.mTop, pClippingRect.mRight, pClippingRect.mBottom);
+void Painter::ReduceClippingRect(const PixelRect& clipping_rect) {
+	ReduceClippingRect(clipping_rect.left_, clipping_rect.top_, clipping_rect.right_, clipping_rect.bottom_);
 }
 
-void Painter::GetClippingRect(PixelRect& pClippingRect) const
-{
-	pClippingRect = mClippingRect;
+void Painter::GetClippingRect(PixelRect& clipping_rect) const {
+	clipping_rect = clipping_rect_;
 }
 
-void Painter::SetColor(uint8 pRed, uint8 pGreen, uint8 pBlue, uint8 pPaletteIndex, unsigned pColorIndex)
-{
-	SetColor(Color(pRed, pGreen, pBlue, pPaletteIndex), pColorIndex);
+void Painter::SetColor(uint8 red, uint8 green, uint8 blue, uint8 palette_index, unsigned color_index) {
+	SetColor(Color(red, green, blue, palette_index), color_index);
 }
 
-Color Painter::GetColor(unsigned pColorIndex) const
-{
-	return mColor[pColorIndex];
+Color Painter::GetColor(unsigned color_index) const {
+	return color_[color_index];
 }
 
-void Painter::DrawPixel(int x, int y)
-{
-	if(mCurrentDisplayList == 0)
+void Painter::DrawPixel(int x, int y) {
+	if(current_display_list_ == 0)
 		DoDrawPixel(x, y);
 	else
 		CreateRect(x, y, x, y);
 }
 
-void Painter::DrawPixel(const PixelCoord& pCoords)
-{
-	DrawPixel(pCoords.x, pCoords.y);
+void Painter::DrawPixel(const PixelCoord& coords) {
+	DrawPixel(coords.x, coords.y);
 }
 
-void Painter::DrawLine(int pX1, int pY1, int pX2, int pY2)
-{
-	if(mCurrentDisplayList == 0)
-		DoDrawLine(pX1, pY1, pX2, pY2);
+void Painter::DrawLine(int _x1, int _y1, int _x2, int _y2) {
+	if(current_display_list_ == 0)
+		DoDrawLine(_x1, _y1, _x2, _y2);
 	else
-		CreateLine(pX1, pY1, pX2, pY2);
+		CreateLine(_x1, _y1, _x2, _y2);
 }
 
-void Painter::DrawLine(const PixelCoord& pPoint1, const PixelCoord& pPoint2)
-{
-	DrawLine(pPoint1.x, pPoint1.y, pPoint2.x, pPoint2.y);
+void Painter::DrawLine(const PixelCoord& point1, const PixelCoord& point2) {
+	DrawLine(point1.x, point1.y, point2.x, point2.y);
 }
 
-void Painter::DrawRect(const PixelRect& pRect)
-{
-	if(mCurrentDisplayList == 0)
-		DoDrawRect(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom);
+void Painter::DrawRect(const PixelRect& rect) {
+	if(current_display_list_ == 0)
+		DoDrawRect(rect.left_, rect.top_, rect.right_, rect.bottom_);
 	else
-		CreateRectFrame(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom, 1);
+		CreateRectFrame(rect.left_, rect.top_, rect.right_, rect.bottom_, 1);
 }
 
-void Painter::FillRect(int pLeft, int pTop, int pRight, int pBottom)
-{
-	if(mCurrentDisplayList == 0)
-		DoFillRect(pLeft, pTop, pRight, pBottom);
+void Painter::FillRect(int left, int top, int right, int bottom) {
+	if(current_display_list_ == 0)
+		DoFillRect(left, top, right, bottom);
 	else
-		CreateRect(pLeft, pTop, pRight, pBottom);
+		CreateRect(left, top, right, bottom);
 }
 
-void Painter::FillRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight)
-{
-	FillRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y);
+void Painter::FillRect(const PixelCoord& top_left, const PixelCoord& bottom_right) {
+	FillRect(top_left.x, top_left.y, bottom_right.x, bottom_right.y);
 }
 
-void Painter::FillRect(const PixelRect& pRect)
-{
-	FillRect(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom);
+void Painter::FillRect(const PixelRect& rect) {
+	FillRect(rect.left_, rect.top_, rect.right_, rect.bottom_);
 }
 
-void Painter::Draw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken)
-{
-	//if(mCurrentDisplayList == 0)
-		DoDraw3DRect(pLeft, pTop, pRight, pBottom, pWidth, pSunken);
+void Painter::Draw3DRect(int left, int top, int right, int bottom, int width, bool sunken) {
+	//if(current_display_list_ == 0)
+		DoDraw3DRect(left, top, right, bottom, width, sunken);
 	//else
-	//	Create3DRectFrame(pLeft, pTop, pRight, pBottom, pWidth, pSunken);
+	//	Create3DRectFrame(left, top, right, bottom, width, sunken);
 }
 
-void Painter::Draw3DRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight, int pWidth, bool pSunken)
-{
-	Draw3DRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y, pWidth, pSunken);
+void Painter::Draw3DRect(const PixelCoord& top_left, const PixelCoord& bottom_right, int width, bool sunken) {
+	Draw3DRect(top_left.x, top_left.y, bottom_right.x, bottom_right.y, width, sunken);
 }
 
-void Painter::Draw3DRect(const PixelRect& pRect, int pWidth, bool pSunken)
-{
-	Draw3DRect(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom, pWidth, pSunken);
+void Painter::Draw3DRect(const PixelRect& rect, int width, bool sunken) {
+	Draw3DRect(rect.left_, rect.top_, rect.right_, rect.bottom_, width, sunken);
 }
 
-void Painter::FillShadedRect(int pLeft, int pTop, int pRight, int pBottom)
-{
-	if(mCurrentDisplayList == 0)
-		DoFillShadedRect(pLeft, pTop, pRight, pBottom);
+void Painter::FillShadedRect(int left, int top, int right, int bottom) {
+	if(current_display_list_ == 0)
+		DoFillShadedRect(left, top, right, bottom);
 	else
-		CreateShadedRect(pLeft, pTop, pRight, pBottom);
+		CreateShadedRect(left, top, right, bottom);
 }
 
-void Painter::FillShadedRect(const PixelCoord& pTopLeft, const PixelCoord& pBottomRight)
-{
-	FillShadedRect(pTopLeft.x, pTopLeft.y, pBottomRight.x, pBottomRight.y);
+void Painter::FillShadedRect(const PixelCoord& top_left, const PixelCoord& bottom_right) {
+	FillShadedRect(top_left.x, top_left.y, bottom_right.x, bottom_right.y);
 }
 
-void Painter::FillShadedRect(const PixelRect& pRect)
-{
-	FillShadedRect(pRect.mLeft, pRect.mTop, pRect.mRight, pRect.mBottom);
+void Painter::FillShadedRect(const PixelRect& rect) {
+	FillShadedRect(rect.left_, rect.top_, rect.right_, rect.bottom_);
 }
 
-void Painter::FillTriangle(float pX1, float pY1,
-			   float pX2, float pY2,
-			   float pX3, float pY3)
-{
-	if(mCurrentDisplayList == 0)
-		DoFillTriangle(pX1, pY1, pX2, pY2, pX3, pY3);
+void Painter::FillTriangle(float _x1, float _y1,
+			   float _x2, float _y2,
+			   float x3, float y3) {
+	if(current_display_list_ == 0)
+		DoFillTriangle(_x1, _y1, _x2, _y2, x3, y3);
 	else
-		CreateTriangle(pX1, pY1, pX2, pY2, pX3, pY3);
+		CreateTriangle(_x1, _y1, _x2, _y2, x3, y3);
 }
 
-void Painter::FillTriangle(const PixelCoord& pPoint1,
-			   const PixelCoord& pPoint2,
-			   const PixelCoord& pPoint3)
-{
-	FillTriangle((float)pPoint1.x, (float)pPoint1.y,
-	             (float)pPoint2.x, (float)pPoint2.y,
-	             (float)pPoint3.x, (float)pPoint3.y);
+void Painter::FillTriangle(const PixelCoord& point1,
+			   const PixelCoord& point2,
+			   const PixelCoord& point3) {
+	FillTriangle((float)point1.x, (float)point1.y,
+	             (float)point2.x, (float)point2.y,
+	             (float)point3.x, (float)point3.y);
 }
 
-void Painter::FillShadedTriangle(float pX1, float pY1,
-				 float pX2, float pY2,
-				 float pX3, float pY3)
-{
-	if(mCurrentDisplayList == 0)
-		DoFillShadedTriangle(pX1, pY1, pX2, pY2, pX3, pY3);
+void Painter::FillShadedTriangle(float _x1, float _y1,
+				 float _x2, float _y2,
+				 float x3, float y3) {
+	if(current_display_list_ == 0)
+		DoFillShadedTriangle(_x1, _y1, _x2, _y2, x3, y3);
 	else
-		CreateShadedTriangle(pX1, pY1, pX2, pY2, pX3, pY3);
+		CreateShadedTriangle(_x1, _y1, _x2, _y2, x3, y3);
 }
 
-void Painter::FillShadedTriangle(const PixelCoord& pPoint1,
-			         const PixelCoord& pPoint2,
-			         const PixelCoord& pPoint3)
-{
-	FillShadedTriangle((float)pPoint1.x, (float)pPoint1.y, 
-	                   (float)pPoint2.x, (float)pPoint2.y, 
-	                   (float)pPoint3.x, (float)pPoint3.y);
+void Painter::FillShadedTriangle(const PixelCoord& point1,
+			         const PixelCoord& point2,
+			         const PixelCoord& point3) {
+	FillShadedTriangle((float)point1.x, (float)point1.y,
+	                   (float)point2.x, (float)point2.y,
+	                   (float)point3.x, (float)point3.y);
 }
 
-void Painter::FillTriangle(float pX1, float pY1, float pU1, float pV1,
-			   float pX2, float pY2, float pU2, float pV2,
-			   float pX3, float pY3, float pU3, float pV3,
-			   ImageID pImageID)
-{
-	if(mCurrentDisplayList == 0)
-		DoFillTriangle(pX1, pY1, pU1, pV1, pX2, pY2, pU2, pV2, pX3, pY3, pU3, pV3, pImageID);
+void Painter::FillTriangle(float _x1, float _y1, float u1, float v1,
+			   float _x2, float _y2, float u2, float v2,
+			   float x3, float y3, float u3, float v3,
+			   ImageID image_id) {
+	if(current_display_list_ == 0)
+		DoFillTriangle(_x1, _y1, u1, v1, _x2, _y2, u2, v2, x3, y3, u3, v3, image_id);
 	else
-		CreateTriangle(pX1, pY1, pU1, pV1, pX2, pY2, pU2, pV2, pX3, pY3, pU3, pV3, pImageID);
+		CreateTriangle(_x1, _y1, u1, v1, _x2, _y2, u2, v2, x3, y3, u3, v3, image_id);
 }
 
-void Painter::FillTriangle(const PixelCoord& pPoint1, float pU1, float pV1,
-			   const PixelCoord& pPoint2, float pU2, float pV2,
-			   const PixelCoord& pPoint3, float pU3, float pV3,
-			   ImageID pImageID)
-{
-	FillTriangle((float)pPoint1.x, (float)pPoint1.y, pU1, pV1, 
-	             (float)pPoint2.x, (float)pPoint2.y, pU2, pV2, 
-	             (float)pPoint3.x, (float)pPoint3.y, pU3, pV3, pImageID);
+void Painter::FillTriangle(const PixelCoord& point1, float u1, float v1,
+			   const PixelCoord& point2, float u2, float v2,
+			   const PixelCoord& point3, float u3, float v3,
+			   ImageID image_id) {
+	FillTriangle((float)point1.x, (float)point1.y, u1, v1,
+	             (float)point2.x, (float)point2.y, u2, v2,
+	             (float)point3.x, (float)point3.y, u3, v3, image_id);
 }
 
-void Painter::AddRadius(std::vector<vec2>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle)
-{
-	const float lAngleDiff = pEndAngle-pStartAngle;
-	const int lCount = (int)(r * ::fabs(lAngleDiff) * 0.256f) + 3;
-	const float lAngleStep = lAngleDiff/(lCount-1);
-	float a = pStartAngle;
-	for (int i = 0; i < lCount; ++i, a+=lAngleStep)
-	{
-		pVertexList.push_back(vec2(x-r*::sin(a), y-r*::cos(a)));
+void Painter::AddRadius(std::vector<vec2>& vertex_list, int x, int y, int r, float start_angle, float end_angle) {
+	const float angle_diff = end_angle-start_angle;
+	const int count = (int)(r * ::fabs(angle_diff) * 0.256f) + 3;
+	const float angle_step = angle_diff/(count-1);
+	float a = start_angle;
+	for (int i = 0; i < count; ++i, a+=angle_step) {
+		vertex_list.push_back(vec2(x-r*::sin(a), y-r*::cos(a)));
 	}
 }
 
-void Painter::TryAddRadius(std::vector<vec2>& pVertexList, int x, int y, int r, float pStartAngle, float pEndAngle, int pCurrentCornerBit, int pCornerMask)
-{
-	if (pCornerMask&pCurrentCornerBit)
-	{
-		AddRadius(pVertexList, x, y, r, pStartAngle, pEndAngle);
-	}
-	else
-	{
-		switch (pCurrentCornerBit)
-		{
+void Painter::TryAddRadius(std::vector<vec2>& vertex_list, int x, int y, int r, float start_angle, float end_angle, int current_corner_bit, int corner_mask) {
+	if (corner_mask&current_corner_bit) {
+		AddRadius(vertex_list, x, y, r, start_angle, end_angle);
+	} else {
+		switch (current_corner_bit) {
 			case 1:	x -= r;	y -= r;	break;
 			case 2:	x += r;	y -= r;	break;
 			case 4:	x += r;	y += r;	break;
 			case 8:	x -= r;	y += r;	break;
 		}
-		pVertexList.push_back(vec2((float)x, (float)y));
+		vertex_list.push_back(vec2((float)x, (float)y));
 	}
 }
 
-void Painter::DrawArc(int x, int y, int dx, int dy, int a1, int a2, bool pFill)
-{
-	if (dx <= 0 || dy <= 0)
-	{
+void Painter::DrawArc(int x, int y, int dx, int dy, int a1, int a2, bool fill) {
+	if (dx <= 0 || dy <= 0) {
 		return;
 	}
-	const size_t lCurveCount = ((dx*2 + dy*2) / 20 + std::abs(a1-a2)/20 + 12) & (~7);
-	std::vector<vec2> lCoords;
-	const float lXRadius = dx*0.5f;
-	const float lYRadius = dy*0.5f;
-	const float lMidX = x + dx*0.5f;
-	const float lMidY = y + dy*0.5f;
-	if (pFill)
-	{
-		lCoords.push_back(vec2(lMidX, lMidY));
+	const size_t curve_count = ((dx*2 + dy*2) / 20 + std::abs(a1-a2)/20 + 12) & (~7);
+	std::vector<vec2> _coords;
+	const float x_radius = dx*0.5f;
+	const float y_radius = dy*0.5f;
+	const float mid_x = x + dx*0.5f;
+	const float mid_y = y + dy*0.5f;
+	if (fill) {
+		_coords.push_back(vec2(mid_x, mid_y));
 	}
-	const float lStartAngle = Lepra::Math::Deg2Rad((float)a1);
-	const float lEndAngle = Lepra::Math::Deg2Rad((float)a2);
-	const float lDeltaAngle = (lEndAngle-lStartAngle)/(lCurveCount-1);
-	float lAngle = lStartAngle;
-	for (size_t i = 0; i < lCurveCount; ++i)
-	{
-		lCoords.push_back(vec2(
-			lMidX + cos(lAngle)*lXRadius,
-			lMidY - sin(lAngle)*lYRadius));
-		lAngle += lDeltaAngle;
+	const float _start_angle = lepra::Math::Deg2Rad((float)a1);
+	const float _end_angle = lepra::Math::Deg2Rad((float)a2);
+	const float delta_angle = (_end_angle-_start_angle)/(curve_count-1);
+	float angle = _start_angle;
+	for (size_t i = 0; i < curve_count; ++i) {
+		_coords.push_back(vec2(
+			mid_x + cos(angle)*x_radius,
+			mid_y - sin(angle)*y_radius));
+		angle += delta_angle;
 	}
-	DrawFan(lCoords, pFill);
+	DrawFan(_coords, fill);
 }
 
-void Painter::DrawRoundedRect(const PixelRect& pRect, int pRadius, int pCornerMask, bool pFill)
-{
-	const int x = pRect.GetCenterX();
-	const int y = pRect.GetCenterY();
-	const int dx = pRect.GetWidth()/2;
-	const int dy = pRect.GetHeight()/2;
-	std::vector<vec2> lCoords;
-	lCoords.push_back(vec2((float)x, (float)y));
-	TryAddRadius(lCoords, x-dx+pRadius, y-dy+pRadius, pRadius, +PIF/2, 0,      0x1, pCornerMask);
-	TryAddRadius(lCoords, x+dx-pRadius, y-dy+pRadius, pRadius, 0,      -PIF/2, 0x2, pCornerMask);
-	TryAddRadius(lCoords, x+dx-pRadius, y+dy-pRadius, pRadius, -PIF/2, -PIF,   0x4, pCornerMask);
-	TryAddRadius(lCoords, x-dx+pRadius, y+dy-pRadius, pRadius, +PIF,   +PIF/2, 0x8, pCornerMask);
+void Painter::DrawRoundedRect(const PixelRect& rect, int radius, int corner_mask, bool fill) {
+	const int x = rect.GetCenterX();
+	const int y = rect.GetCenterY();
+	const int dx = rect.GetWidth()/2;
+	const int dy = rect.GetHeight()/2;
+	std::vector<vec2> _coords;
+	_coords.push_back(vec2((float)x, (float)y));
+	TryAddRadius(_coords, x-dx+radius, y-dy+radius, radius, +PIF/2, 0,      0x1, corner_mask);
+	TryAddRadius(_coords, x+dx-radius, y-dy+radius, radius, 0,      -PIF/2, 0x2, corner_mask);
+	TryAddRadius(_coords, x+dx-radius, y+dy-radius, radius, -PIF/2, -PIF,   0x4, corner_mask);
+	TryAddRadius(_coords, x-dx+radius, y+dy-radius, radius, +PIF,   +PIF/2, 0x8, corner_mask);
 	// Back to start.
-	lCoords.push_back(lCoords[1]);
-	DrawFan(lCoords, pFill);
+	_coords.push_back(_coords[1]);
+	DrawFan(_coords, fill);
 }
 
-void Painter::DrawImage(ImageID pImageID, int x, int y)
-{
-	if(mCurrentDisplayList == 0)
-		DoDrawImage(pImageID, x, y);
+void Painter::DrawImage(ImageID image_id, int x, int y) {
+	if(current_display_list_ == 0)
+		DoDrawImage(image_id, x, y);
 	else
-		CreateImage(pImageID, x, y);
+		CreateImage(image_id, x, y);
 }
 
-void Painter::DrawImage(ImageID pImageID, const PixelCoord& pTopLeft)
-{
-	DrawImage(pImageID, pTopLeft.x, pTopLeft.y);
+void Painter::DrawImage(ImageID image_id, const PixelCoord& top_left) {
+	DrawImage(image_id, top_left.x, top_left.y);
 }
 
-void Painter::DrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect)
-{
-	if(mCurrentDisplayList == 0)
-		DoDrawImage(pImageID, x, y, pSubpatchRect);
+void Painter::DrawImage(ImageID image_id, int x, int y, const PixelRect& subpatch_rect) {
+	if(current_display_list_ == 0)
+		DoDrawImage(image_id, x, y, subpatch_rect);
 	else
-		CreateImage(pImageID, x, y, pSubpatchRect);
+		CreateImage(image_id, x, y, subpatch_rect);
 }
 
-void Painter::DrawImage(ImageID pImageID, const PixelCoord& pTopLeft, const PixelRect& pSubpatchRect)
-{
-	DrawImage(pImageID, pTopLeft.x, pTopLeft.y, pSubpatchRect);
+void Painter::DrawImage(ImageID image_id, const PixelCoord& top_left, const PixelRect& subpatch_rect) {
+	DrawImage(image_id, top_left.x, top_left.y, subpatch_rect);
 }
 
-void Painter::DrawImage(ImageID pImageID, const PixelRect& pRect)
-{
-	if(mCurrentDisplayList == 0)
-		DoDrawImage(pImageID, pRect);
+void Painter::DrawImage(ImageID image_id, const PixelRect& rect) {
+	if(current_display_list_ == 0)
+		DoDrawImage(image_id, rect);
 	else
-		CreateImage(pImageID, pRect);
+		CreateImage(image_id, rect);
 }
 
-void Painter::DrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect)
-{
-	if(mCurrentDisplayList == 0)
-		DoDrawImage(pImageID, pRect, pSubpatchRect);
+void Painter::DrawImage(ImageID image_id, const PixelRect& rect, const PixelRect& subpatch_rect) {
+	if(current_display_list_ == 0)
+		DoDrawImage(image_id, rect, subpatch_rect);
 	else
-		CreateImage(pImageID, pRect, pSubpatchRect);
+		CreateImage(image_id, rect, subpatch_rect);
 }
 
-void Painter::DrawAlphaImage(ImageID pImageID, int x, int y)
-{
-	if(mCurrentDisplayList == 0)
-		DoDrawAlphaImage(pImageID, x, y);
+void Painter::DrawAlphaImage(ImageID image_id, int x, int y) {
+	if(current_display_list_ == 0)
+		DoDrawAlphaImage(image_id, x, y);
 	else
-		CreateImage(pImageID, x, y);
+		CreateImage(image_id, x, y);
 }
 
-void Painter::DrawAlphaImage(ImageID pImageID, const PixelCoord& pTopLeft)
-{
-	DrawAlphaImage(pImageID, pTopLeft.x, pTopLeft.y);
+void Painter::DrawAlphaImage(ImageID image_id, const PixelCoord& top_left) {
+	DrawAlphaImage(image_id, top_left.x, top_left.y);
 }
 
-Painter::RenderMode Painter::DisplayEntity::GetRenderMode() const
-{
-	return mRM;
+Painter::RenderMode Painter::DisplayEntity::GetRenderMode() const {
+	return rm_;
 }
 
-uint8 Painter::DisplayEntity::GetAlpha() const
-{
-	return mAlpha;
+uint8 Painter::DisplayEntity::GetAlpha() const {
+	return alpha_;
 }
 
-Painter::ImageID Painter::DisplayEntity::GetImageID() const
-{
-	return mImageID;
+Painter::ImageID Painter::DisplayEntity::GetImageID() const {
+	return image_id_;
 }
 
-const PixelRect& Painter::DisplayEntity::GetClippingRect() const
-{
-	return mClippingRect;
+const PixelRect& Painter::DisplayEntity::GetClippingRect() const {
+	return clipping_rect_;
 }
 
-Geometry2D& Painter::DisplayEntity::GetGeometry()
-{
-	return mGeometry;
+Geometry2D& Painter::DisplayEntity::GetGeometry() {
+	return geometry_;
 }
 
-bool Painter::IsPowerOf2(unsigned pNumber)
-{
-	return (pNumber == GetClosestPowerOf2(pNumber));
+bool Painter::IsPowerOf2(unsigned number) {
+	return (number == GetClosestPowerOf2(number));
 }
 
-void Painter::ToScreenCoords(int& x, int& y) const
-{
-	x = x * (int)mXDir + mOrigoX;
-	y = y * (int)mYDir + mOrigoY;
+void Painter::ToScreenCoords(int& x, int& y) const {
+	x = x * (int)x_dir_ + origo_x_;
+	y = y * (int)y_dir_ + origo_y_;
 }
 
-void Painter::ToUserCoords(int& x, int& y) const
-{
-	x = (x - mOrigoX) * (int)mXDir;
-	y = (y - mOrigoY) * (int)mYDir;
+void Painter::ToUserCoords(int& x, int& y) const {
+	x = (x - origo_x_) * (int)x_dir_;
+	y = (y - origo_y_) * (int)y_dir_;
 }
 
-void Painter::ToScreenCoords(float& x, float& y) const
-{
-	x = x * (float)mXDir + (float)mOrigoX;
-	y = y * (float)mYDir + (float)mOrigoY;
+void Painter::ToScreenCoords(float& x, float& y) const {
+	x = x * (float)x_dir_ + (float)origo_x_;
+	y = y * (float)y_dir_ + (float)origo_y_;
 }
 
-void Painter::ToUserCoords(float& x, float& y) const
-{
-	x = (x - (float)mOrigoX) * (float)mXDir;
-	y = (y - (float)mOrigoY) * (float)mYDir;
+void Painter::ToUserCoords(float& x, float& y) const {
+	x = (x - (float)origo_x_) * (float)x_dir_;
+	y = (y - (float)origo_y_) * (float)y_dir_;
 }
 
-bool Painter::XLT(int x1, int x2)
-{
-	return (x1 * (int)mXDir) <  (x2 * (int)mXDir);
+bool Painter::XLT(int x1, int x2) {
+	return (x1 * (int)x_dir_) <  (x2 * (int)x_dir_);
 }
 
-bool Painter::XLE(int x1, int x2)
-{
-	return (x1 * (int)mXDir) <= (x2 * (int)mXDir);
+bool Painter::XLE(int x1, int x2) {
+	return (x1 * (int)x_dir_) <= (x2 * (int)x_dir_);
 }
 
-bool Painter::XGT(int x1, int x2)
-{
-	return (x1 * (int)mXDir) >  (x2 * (int)mXDir);
+bool Painter::XGT(int x1, int x2) {
+	return (x1 * (int)x_dir_) >  (x2 * (int)x_dir_);
 }
 
-bool Painter::XGE(int x1, int x2)
-{
-	return (x1 * (int)mXDir) >= (x2 * (int)mXDir);
+bool Painter::XGE(int x1, int x2) {
+	return (x1 * (int)x_dir_) >= (x2 * (int)x_dir_);
 }
 
-bool Painter::YLT(int y1, int y2)
-{
-	return (y1 * (int)mYDir) <  (y2 * (int)mYDir);
+bool Painter::YLT(int y1, int y2) {
+	return (y1 * (int)y_dir_) <  (y2 * (int)y_dir_);
 }
 
-bool Painter::YLE(int y1, int y2)
-{
-	return (y1 * (int)mYDir) <= (y2 * (int)mYDir);
+bool Painter::YLE(int y1, int y2) {
+	return (y1 * (int)y_dir_) <= (y2 * (int)y_dir_);
 }
 
-bool Painter::YGT(int y1, int y2)
-{
-	return (y1 * (int)mYDir) >  (y2 * (int)mYDir);
+bool Painter::YGT(int y1, int y2) {
+	return (y1 * (int)y_dir_) >  (y2 * (int)y_dir_);
 }
 
-bool Painter::YGE(int y1, int y2)
-{
-	return (y1 * (int)mYDir) >= (y2 * (int)mYDir);
+bool Painter::YGE(int y1, int y2) {
+	return (y1 * (int)y_dir_) >= (y2 * (int)y_dir_);
 }
 
-Color& Painter::GetColorInternal(int pColorIndex)
-{
-	return mColor[pColorIndex];
+Color& Painter::GetColorInternal(int color_index) {
+	return color_[color_index];
 }
 
 

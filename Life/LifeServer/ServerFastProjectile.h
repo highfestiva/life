@@ -6,13 +6,12 @@
 
 #pragma once
 
-#include "../../Cure/Include/CppContextObject.h"
-#include "../Life.h"
+#include "../../cure/include/cppcontextobject.h"
+#include "../life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -20,24 +19,23 @@ class Launcher;
 
 
 
-class ServerFastProjectile: public Cure::CppContextObject
-{
+class ServerFastProjectile: public cure::CppContextObject {
 public:
-	typedef Cure::CppContextObject Parent;
+	typedef cure::CppContextObject Parent;
 
-	ServerFastProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, Launcher* pLauncher);
+	ServerFastProjectile(cure::ResourceManager* resource_manager, const str& class_id, Launcher* launcher);
 	virtual ~ServerFastProjectile();
 
 private:
 	virtual void OnLoaded();
-	virtual void OnMicroTick(float pFrameTime);
-	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pBody, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
+	virtual void OnMicroTick(float frame_time);
+	virtual void OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* body, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal);
 
-	Launcher* mLauncher;
-	float mMaxVelocity;
-	float mAcceleration;
-	float mExplosiveEnergy;
-	bool mIsDetonated;
+	Launcher* launcher_;
+	float max_velocity_;
+	float acceleration_;
+	float explosive_energy_;
+	bool is_detonated_;
 
 	logclass();
 };

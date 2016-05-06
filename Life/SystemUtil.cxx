@@ -1,48 +1,43 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "SystemUtil.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Lepra/Include/Posix/MacLog.h"
+#include "systemutil.h"
+#include "../cure/include/runtimevariable.h"
+#include "../lepra/include/posix/maclog.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-void SystemUtil::SaveRtvar(Cure::RuntimeVariableScope* pScope, const str& pRtvarName)
-{
-	if (!pScope->IsDefined(pRtvarName))
-	{
+void SystemUtil::SaveRtvar(cure::RuntimeVariableScope* scope, const str& rtvar_name) {
+	if (!scope->IsDefined(rtvar_name)) {
 		return;
 	}
 #ifdef LEPRA_IOS
-	const str lValue = pScope->GetUntypedDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, pRtvarName);
-	NSString* key = MacLog::Encode(pRtvarName);
-	NSString* object = MacLog::Encode(lValue);
+	const str __value = scope->GetUntypedDefaultValue(cure::RuntimeVariableScope::kReadOnly, rtvar_name);
+	NSString* key = MacLog::Encode(rtvar_name);
+	NSString* object = MacLog::Encode(__value);
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	[defaults setObject:object forKey:key];
 #endif // iOS
 }
 
-void SystemUtil::LoadRtvar(Cure::RuntimeVariableScope* pScope, const str& pRtvarName)
-{
-	(void)pScope;
-	(void)pRtvarName;
+void SystemUtil::LoadRtvar(cure::RuntimeVariableScope* scope, const str& rtvar_name) {
+	(void)scope;
+	(void)rtvar_name;
 #ifdef LEPRA_IOS
-	NSString* key = MacLog::Encode(pRtvarName);
+	NSString* key = MacLog::Encode(rtvar_name);
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	NSString* value = [defaults stringForKey:key];
-	if (value != nil)
-	{
-		const str lValue = MacLog::Decode(value);
-		pScope->SetUntypedValue(Cure::RuntimeVariable::USAGE_SYS_OVERRIDE, pRtvarName, lValue);
+	if (value != nil) {
+		const str __value = MacLog::Decode(value);
+		scope->SetUntypedValue(cure::RuntimeVariable::kUsageSysOverride, rtvar_name, __value);
 	}
 #endif // iOS
 }

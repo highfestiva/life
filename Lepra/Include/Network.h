@@ -1,33 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "IPAddress.h"
-#include "Log.h"
+#include "ipaddress.h"
+#include "log.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class Network
-{
+class Network {
 public:
 	static bool Start();
 	static bool Stop();
 	static str GetHostname();
-	static bool ResolveHostname(const str& pHostname, IPAddress& pIPAddress);
-	static bool ResolveIp(const IPAddress& pIpAddress, str& pHostname);
-	static bool IsLocalAddress(const str& pAddress);
+	static bool ResolveHostname(const str& hostname, IPAddress& ip_address);
+	static bool ResolveIp(const IPAddress& ip_address, str& hostname);
+	static bool IsLocalAddress(const str& address);
 
 private:
-	static bool mStarted;
+	static bool started_;
 	logclass();
 };
 

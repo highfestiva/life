@@ -5,9 +5,9 @@
 
 
 #include "pch.h"
-#include "../Include/UiParticleRenderer.h"
-#include "../../Lepra/Include/Random.h"
-#include "../Include/UiBillboardGeometry.h"
+#include "../include/uiparticlerenderer.h"
+#include "../../lepra/include/random.h"
+#include "../include/uibillboardgeometry.h"
 
 #define RNDCOL(col, lo, hi)		vec3(Random::Uniform(col.x*lo, col.x*hi), Random::Uniform(col.y*lo, col.y*hi), Random::Uniform(col.z*lo, col.z*hi))
 #define OPACITY_FADE_IN_TIME_OFFSET	(PIF*0.25f + 0.03f)
@@ -15,370 +15,322 @@
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-ParticleRenderer::ParticleRenderer(Renderer* pRenderer, int pMaxLightCount):
-	Parent(pRenderer),
-	mLock(new Lock),
-	mGravity(0,0,-9.8f),
-	mMaxLightCount(pMaxLightCount),
-	mGasTextureCount(1),
-	mTotalTextureCount(1),
-	mBillboardGas(0),
-	mBillboardShrapnel(0),
-	mBillboardSpark(0),
-	mBillboardGlow(0)
-{
+ParticleRenderer::ParticleRenderer(Renderer* renderer, int max_light_count):
+	Parent(renderer),
+	lock_(new Lock),
+	gravity_(0,0,-9.8f),
+	max_light_count_(max_light_count),
+	gas_texture_count_(1),
+	total_texture_count_(1),
+	billboard_gas_(0),
+	billboard_shrapnel_(0),
+	billboard_spark_(0),
+	billboard_glow_(0) {
 }
 
-ParticleRenderer::~ParticleRenderer()
-{
-	delete mBillboardGas;
-	mBillboardGas = 0;
-	delete mBillboardShrapnel;
-	mBillboardShrapnel = 0;
-	delete mBillboardSpark;
-	mBillboardSpark = 0;
-	delete mBillboardGlow;
-	mBillboardGlow = 0;
-	delete mLock;
-	mLock = 0;
+ParticleRenderer::~ParticleRenderer() {
+	delete billboard_gas_;
+	billboard_gas_ = 0;
+	delete billboard_shrapnel_;
+	billboard_shrapnel_ = 0;
+	delete billboard_spark_;
+	billboard_spark_ = 0;
+	delete billboard_glow_;
+	billboard_glow_ = 0;
+	delete lock_;
+	lock_ = 0;
 }
 
 
 
-void ParticleRenderer::SetGravity(vec3 pGravity)
-{
-	mGravity = pGravity;
+void ParticleRenderer::SetGravity(vec3 gravity) {
+	gravity_ = gravity;
 }
 
-void ParticleRenderer::SetData(int pGasTextureCount, int pTotalTextureCount, BillboardGeometry* pGas, BillboardGeometry* pShrapnel, BillboardGeometry* pSpark, BillboardGeometry* pGlow)
-{
-	mGasTextureCount = pGasTextureCount;
-	mTotalTextureCount = pTotalTextureCount;
-	deb_assert(mTotalTextureCount >= mGasTextureCount);
-	deb_assert(mTotalTextureCount > 0);
-	mBillboardGas = pGas;
-	mBillboardShrapnel = pShrapnel;
-	mBillboardSpark = pSpark;
-	mBillboardGlow = pGlow;
+void ParticleRenderer::SetData(int gas_texture_count, int total_texture_count, BillboardGeometry* gas, BillboardGeometry* shrapnel, BillboardGeometry* spark, BillboardGeometry* glow) {
+	gas_texture_count_ = gas_texture_count;
+	total_texture_count_ = total_texture_count;
+	deb_assert(total_texture_count_ >= gas_texture_count_);
+	deb_assert(total_texture_count_ > 0);
+	billboard_gas_ = gas;
+	billboard_shrapnel_ = shrapnel;
+	billboard_spark_ = spark;
+	billboard_glow_ = glow;
 }
 
-void ParticleRenderer::Render()
-{
-	if (!mBillboardGas)
-	{
+void ParticleRenderer::Render() {
+	if (!billboard_gas_) {
 		return;
 	}
 
-	ScopeLock lLock(mLock);
+	ScopeLock lock(lock_);
 
 	const float q = 1;
 	BillboardArray::iterator x;
-	BillboardRenderInfoArray lBillboards;
-	x = mSmokes.begin();
-	for (; x != mSmokes.end(); ++x)
-	{
-		const float s = (q + x->mOpacityTime) * x->mSizeFactor;
-		const float r = Math::Lerp(x->mStartColor.x, x->mColor.x, x->mOpacityTime/PARTICLE_TIME);
-		const float g = Math::Lerp(x->mStartColor.y, x->mColor.y, x->mOpacityTime/PARTICLE_TIME);
-		const float b = Math::Lerp(x->mStartColor.z, x->mColor.z, x->mOpacityTime/PARTICLE_TIME);
-		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, s, vec3(r, g, b), x->mOpacity, x->mTextureIndex));
+	BillboardRenderInfoArray _billboards;
+	x = smokes_.begin();
+	for (; x != smokes_.end(); ++x) {
+		const float s = (q + x->opacity_time_) * x->size_factor_;
+		const float r = Math::Lerp(x->start_color_.x, x->color_.x, x->opacity_time_/PARTICLE_TIME);
+		const float g = Math::Lerp(x->start_color_.y, x->color_.y, x->opacity_time_/PARTICLE_TIME);
+		const float b = Math::Lerp(x->start_color_.z, x->color_.z, x->opacity_time_/PARTICLE_TIME);
+		_billboards.push_back(BillboardRenderInfo(x->angle_, x->position_, s, vec3(r, g, b), x->opacity_, x->texture_index_));
 	}
-	mRenderer->RenderBillboards(mBillboardGas, true, false, lBillboards);
+	renderer_->RenderBillboards(billboard_gas_, true, false, _billboards);
 
-	lBillboards.clear();
-	x = mShrapnels.begin();
-	for (; x != mShrapnels.end(); ++x)
-	{
-		const float s = x->mSizeFactor;
-		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, s, x->mColor, x->mOpacity, x->mTextureIndex));
+	_billboards.clear();
+	x = shrapnels_.begin();
+	for (; x != shrapnels_.end(); ++x) {
+		const float s = x->size_factor_;
+		_billboards.push_back(BillboardRenderInfo(x->angle_, x->position_, s, x->color_, x->opacity_, x->texture_index_));
 	}
-	mRenderer->RenderBillboards(mBillboardShrapnel, false, false, lBillboards);
+	renderer_->RenderBillboards(billboard_shrapnel_, false, false, _billboards);
 
-	lBillboards.clear();
-	const quat& lCamOrientationInverse = mRenderer->GetCameraOrientationInverse();
-	const vec3 lCameraXZPlane(0,1,0);	// In cam space, that is.
-	x = mSparks.begin();
-	for (; x != mSparks.end(); ++x)
-	{
-		const vec3 lAngleVector = (lCamOrientationInverse * x->mVelocity).ProjectOntoPlane(lCameraXZPlane);
-		const float lAngle = PIF/2 - lAngleVector.GetPolarCoordAngleY();
-		const float s = x->mSizeFactor;
-		const float r  = Math::Lerp(1.0f, 0.6f, x->mOpacityTime/PARTICLE_TIME);
-		const float gb = Math::Lerp(1.0f, 0.3f, x->mOpacityTime/PARTICLE_TIME);
-		lBillboards.push_back(BillboardRenderInfo(lAngle, x->mPosition, s, vec3(r, gb, gb), x->mOpacity, x->mTextureIndex));
+	_billboards.clear();
+	const quat& cam_orientation_inverse = renderer_->GetCameraOrientationInverse();
+	const vec3 camera_xz_plane(0,1,0);	// In cam space, that is.
+	x = sparks_.begin();
+	for (; x != sparks_.end(); ++x) {
+		const vec3 angle_vector = (cam_orientation_inverse * x->velocity_).ProjectOntoPlane(camera_xz_plane);
+		const float _angle = PIF/2 - angle_vector.GetPolarCoordAngleY();
+		const float s = x->size_factor_;
+		const float r  = Math::Lerp(1.0f, 0.6f, x->opacity_time_/PARTICLE_TIME);
+		const float gb = Math::Lerp(1.0f, 0.3f, x->opacity_time_/PARTICLE_TIME);
+		_billboards.push_back(BillboardRenderInfo(_angle, x->position_, s, vec3(r, gb, gb), x->opacity_, x->texture_index_));
 	}
-	mRenderer->RenderBillboards(mBillboardSpark, false, true, lBillboards);
+	renderer_->RenderBillboards(billboard_spark_, false, true, _billboards);
 
-	lBillboards.clear();
-	x = mFires.begin();
-	for (; x != mFires.end(); ++x)
-	{
-		const float s = (q + x->mOpacityTime) * x->mSizeFactor;
-		const float r = Math::Lerp(x->mStartColor.x, x->mColor.x, x->mOpacityTime/PARTICLE_TIME);
-		const float g = Math::Lerp(x->mStartColor.y, x->mColor.y, x->mOpacityTime/PARTICLE_TIME);
-		const float b = Math::Lerp(x->mStartColor.z, x->mColor.z, x->mOpacityTime/PARTICLE_TIME);
-		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, s, vec3(r, g, b), x->mOpacity, x->mTextureIndex));
+	_billboards.clear();
+	x = fires_.begin();
+	for (; x != fires_.end(); ++x) {
+		const float s = (q + x->opacity_time_) * x->size_factor_;
+		const float r = Math::Lerp(x->start_color_.x, x->color_.x, x->opacity_time_/PARTICLE_TIME);
+		const float g = Math::Lerp(x->start_color_.y, x->color_.y, x->opacity_time_/PARTICLE_TIME);
+		const float b = Math::Lerp(x->start_color_.z, x->color_.z, x->opacity_time_/PARTICLE_TIME);
+		_billboards.push_back(BillboardRenderInfo(x->angle_, x->position_, s, vec3(r, g, b), x->opacity_, x->texture_index_));
 	}
-	mRenderer->RenderBillboards(mBillboardGas, true, true, lBillboards);
+	renderer_->RenderBillboards(billboard_gas_, true, true, _billboards);
 
-	lBillboards.clear();
-	x = mTempFires.begin();
-	for (; x != mTempFires.end(); ++x)
-	{
-		lBillboards.push_back(BillboardRenderInfo(x->mAngle, x->mPosition, x->mSizeFactor, x->mColor, x->mOpacity, x->mTextureIndex));
+	_billboards.clear();
+	x = temp_fires_.begin();
+	for (; x != temp_fires_.end(); ++x) {
+		_billboards.push_back(BillboardRenderInfo(x->angle_, x->position_, x->size_factor_, x->color_, x->opacity_, x->texture_index_));
 	}
-	mRenderer->RenderBillboards(mBillboardGlow, true, true, lBillboards);
+	renderer_->RenderBillboards(billboard_glow_, true, true, _billboards);
 
 	// Update lights.
-	LightArray::iterator y = mLights.begin();
-	for (; y < mLights.end(); ++y)
-	{
-		if (y->mRenderLightId != Renderer::INVALID_LIGHT)
-		{
-			mRenderer->SetLightPosition(y->mRenderLightId, y->mPosition);
-			mRenderer->SetLightColor(y->mRenderLightId, vec3(0.6f, 0.4f, 0.2f) * y->mStrength * 30.0f);
-			deb_assert(y->mStrength >= 0 && y->mStrength < 1000);
+	LightArray::iterator y = lights_.begin();
+	for (; y < lights_.end(); ++y) {
+		if (y->render_light_id_ != Renderer::INVALID_LIGHT) {
+			renderer_->SetLightPosition(y->render_light_id_, y->position_);
+			renderer_->SetLightColor(y->render_light_id_, vec3(0.6f, 0.4f, 0.2f) * y->strength_ * 30.0f);
+			deb_assert(y->strength_ >= 0 && y->strength_ < 1000);
 		}
 	}
 }
 
-void ParticleRenderer::Tick(float pTime)
-{
-	ScopeLock lLock(mLock);
+void ParticleRenderer::Tick(float time) {
+	ScopeLock lock(lock_);
 
-	StepLights(pTime, 6);
+	StepLights(time, 6);
 
-	StepBillboards(mFires, pTime, 6);
-	StepBillboards(mSmokes, pTime, 5);
-	StepBillboards(mSparks, pTime, -0.4f);
-	StepBillboards(mShrapnels, pTime, -0.2f);
-	mTempFires.clear();
+	StepBillboards(fires_, time, 6);
+	StepBillboards(smokes_, time, 5);
+	StepBillboards(sparks_, time, -0.4f);
+	StepBillboards(shrapnels_, time, -0.2f);
+	temp_fires_.clear();
 }
 
-void ParticleRenderer::CreateFlare(const vec3& pColor, float pStrength, float pTimeFactor, const vec3& pPosition, const vec3& pVelocity)
-{
-	ScopeLock lLock(mLock);
-	CreateTempLight(pColor, pStrength, pPosition, pVelocity, pVelocity, pTimeFactor);
+void ParticleRenderer::CreateFlare(const vec3& color, float strength, float time_factor, const vec3& position, const vec3& velocity) {
+	ScopeLock lock(lock_);
+	CreateTempLight(color, strength, position, velocity, velocity, time_factor);
 }
 
-void ParticleRenderer::CreateExplosion(const vec3& pPosition, float pStrength, const vec3& pVelocity, float pFalloff, float pTime, const vec3& pStartFireColor, const vec3& pFireColor,
-	const vec3& pStartSmokeColor, const vec3& pSmokeColor, const vec3& pSharpnelColor, int pFires, int pSmokes, int pSparks, int pShrapnels)
-{
-	ScopeLock lLock(mLock);
+void ParticleRenderer::CreateExplosion(const vec3& position, float strength, const vec3& velocity, float falloff, float time, const vec3& start_fire_color, const vec3& fire_color,
+	const vec3& start_smoke_color, const vec3& smoke_color, const vec3& sharpnel_color, int fires, int smokes, int sparks, int shrapnels) {
+	ScopeLock lock(lock_);
 
-	const float lRandomXYEndSpeed = 1.0f;
-	const float lStrength2 = (pStrength>1)? ::sqrt(pStrength) : pStrength*pStrength;
-	const float lParticleSize = lStrength2*0.5f;
-	const float lSpeed = pVelocity.GetLength() * 0.01f;
-	CreateBillboards(pPosition,  7*lStrength2+ 1*lSpeed,      pVelocity, Math::Lerp(pVelocity,mGravity*-0.2f,pFalloff), lRandomXYEndSpeed, 5.3f/pTime, lParticleSize,      pStartFireColor, pFireColor, mFires, pFires);
-	CreateBillboards(pPosition,  8*lStrength2+ 1*lSpeed,      pVelocity, Math::Lerp(pVelocity,mGravity*+0.2f,pFalloff), lRandomXYEndSpeed,    3/pTime, lParticleSize*2,    pStartSmokeColor, pSmokeColor, mSmokes, pSmokes);
-	CreateBillboards(pPosition, 20*lStrength2+20*lSpeed, 1.2f*pVelocity, Math::Lerp(pVelocity,mGravity*+0.8f,pFalloff), lRandomXYEndSpeed, 4.5f/pTime, lParticleSize*0.4f, vec3(), vec3(), mSparks, pSparks);
-	CreateBillboards(pPosition,  9*lStrength2+10*lSpeed, 1.1f*pVelocity, Math::Lerp(pVelocity,mGravity*+1.1f,pFalloff), lRandomXYEndSpeed, 1.1f/pTime, lParticleSize*0.5f, pSharpnelColor, pSharpnelColor, mShrapnels, pShrapnels);
+	const float random_xy_end_speed = 1.0f;
+	const float strength2 = (strength>1)? ::sqrt(strength) : strength*strength;
+	const float particle_size = strength2*0.5f;
+	const float speed = velocity.GetLength() * 0.01f;
+	CreateBillboards(position,  7*strength2+ 1*speed,      velocity, Math::Lerp(velocity,gravity_*-0.2f,falloff), random_xy_end_speed, 5.3f/time, particle_size,      start_fire_color, fire_color, fires_, fires);
+	CreateBillboards(position,  8*strength2+ 1*speed,      velocity, Math::Lerp(velocity,gravity_*+0.2f,falloff), random_xy_end_speed,    3/time, particle_size*2,    start_smoke_color, smoke_color, smokes_, smokes);
+	CreateBillboards(position, 20*strength2+20*speed, 1.2f*velocity, Math::Lerp(velocity,gravity_*+0.8f,falloff), random_xy_end_speed, 4.5f/time, particle_size*0.4f, vec3(), vec3(), sparks_, sparks);
+	CreateBillboards(position,  9*strength2+10*speed, 1.1f*velocity, Math::Lerp(velocity,gravity_*+1.1f,falloff), random_xy_end_speed, 1.1f/time, particle_size*0.5f, sharpnel_color, sharpnel_color, shrapnels_, shrapnels);
 
-	const float lMinSparkVelocity2 = lStrength2*100;
-	const vec3 lCamPlane = mRenderer->GetCameraTransformation().GetOrientation() * vec3(0,1,0);
-	BillboardArray::reverse_iterator x = mSparks.rbegin();
-	for (int y = 0; y < pSparks; ++y, ++x)
-	{
-		x->mVelocity = x->mVelocity.ProjectOntoPlane(lCamPlane);
-		float lSpeed2 = x->mVelocity.GetLengthSquared();
-		if (lSpeed2 < lMinSparkVelocity2)
-		{
-			x->mVelocity.Mul(::sqrt(lMinSparkVelocity2/lSpeed2));
+	const float min_spark_velocity2 = strength2*100;
+	const vec3 cam_plane = renderer_->GetCameraTransformation().GetOrientation() * vec3(0,1,0);
+	BillboardArray::reverse_iterator x = sparks_.rbegin();
+	for (int y = 0; y < sparks; ++y, ++x) {
+		x->velocity_ = x->velocity_.ProjectOntoPlane(cam_plane);
+		float speed2 = x->velocity_.GetLengthSquared();
+		if (speed2 < min_spark_velocity2) {
+			x->velocity_.Mul(::sqrt(min_spark_velocity2/speed2));
 		}
 	}
 
-	if (pFires > 0)
-	{
-		const Billboard& lFire = mFires.back();
-		CreateTempLight(pFireColor, pStrength, lFire.mPosition, lFire.mVelocity, lFire.mTargetVelocity, lFire.mTimeFactor);
+	if (fires > 0) {
+		const Billboard& fire = fires_.back();
+		CreateTempLight(fire_color, strength, fire.position_, fire.velocity_, fire.target_velocity_, fire.time_factor_);
 	}
 }
 
-void ParticleRenderer::CreatePebble(float pTime, float pScale, float pAngularVelocity, const vec3& pColor, const vec3& pPosition, const vec3& pVelocity)
-{
-	const float lTimeFactor = PARTICLE_TIME*0.5f/pTime;	// Split in two, as we're only using latter half of sine curve (don't fade into existance).
-	const float lRandomXYEndSpeed = 1.0f;
+void ParticleRenderer::CreatePebble(float time, float scale, float angular_velocity, const vec3& color, const vec3& position, const vec3& velocity) {
+	const float _time_factor = PARTICLE_TIME*0.5f/time;	// Split in two, as we're only using latter half of sine curve (don't fade into existance).
+	const float random_xy_end_speed = 1.0f;
 
-	ScopeLock lLock(mLock);
+	ScopeLock lock(lock_);
 
-	CreateBillboards(pPosition, 0, vec3(), vec3(0,0,-10), lRandomXYEndSpeed, lTimeFactor, pScale*0.1f, vec3(), pColor, mShrapnels, 1);
-	Billboard& lPebbleBillboard = mShrapnels.back();
-	lPebbleBillboard.mVelocity = pVelocity;
-	lPebbleBillboard.mAngularVelocity = Random::Uniform(-pAngularVelocity, +pAngularVelocity);
-	lPebbleBillboard.mOpacity = 1;
-	lPebbleBillboard.mOpacityTime += PIF/2;	// Move to "fully opaque" time in sine curve.
+	CreateBillboards(position, 0, vec3(), vec3(0,0,-10), random_xy_end_speed, _time_factor, scale*0.1f, vec3(), color, shrapnels_, 1);
+	Billboard& pebble_billboard = shrapnels_.back();
+	pebble_billboard.velocity_ = velocity;
+	pebble_billboard.angular_velocity_ = Random::Uniform(-angular_velocity, +angular_velocity);
+	pebble_billboard.opacity_ = 1;
+	pebble_billboard.opacity_time_ += PIF/2;	// Move to "fully opaque" time in sine curve.
 }
 
-void ParticleRenderer::CreateFume(float pTime, float pScale, float pAngularVelocity, float pOpacity, const vec3& pPosition, const vec3& pVelocity)
-{
-	const float lTimeFactor = PARTICLE_TIME/pTime;
-	const float lRandomXYEndSpeed = 0.5f;
+void ParticleRenderer::CreateFume(float time, float scale, float angular_velocity, float opacity, const vec3& position, const vec3& velocity) {
+	const float _time_factor = PARTICLE_TIME/time;
+	const float random_xy_end_speed = 0.5f;
 
-	ScopeLock lLock(mLock);
+	ScopeLock lock(lock_);
 
-	CreateBillboards(pPosition, 0, vec3(), vec3(0,0,2), lRandomXYEndSpeed, lTimeFactor, pScale*0.1f, vec3(0.4f,0.4f,0.4f), vec3(), mSmokes, 1);
-	Billboard& lPebbleBillboard = mSmokes.back();
-	lPebbleBillboard.mVelocity = pVelocity;
-	lPebbleBillboard.mAngularVelocity = Random::Uniform(-pAngularVelocity, +pAngularVelocity);
-	lPebbleBillboard.mOpacityFactor = pOpacity;
-	//lPebbleBillboard.mOpacityTime += OPACITY_FADE_IN_TIME_OFFSET * 0.5f;	// Move forward some in time to ensure that we're very visible when we come out of the pipe.
+	CreateBillboards(position, 0, vec3(), vec3(0,0,2), random_xy_end_speed, _time_factor, scale*0.1f, vec3(0.4f,0.4f,0.4f), vec3(), smokes_, 1);
+	Billboard& pebble_billboard = smokes_.back();
+	pebble_billboard.velocity_ = velocity;
+	pebble_billboard.angular_velocity_ = Random::Uniform(-angular_velocity, +angular_velocity);
+	pebble_billboard.opacity_factor_ = opacity;
+	//pebble_billboard.opacity_time_ += OPACITY_FADE_IN_TIME_OFFSET * 0.5f;	// Move forward some in time to ensure that we're very visible when we come out of the pipe.
 }
 
-void ParticleRenderer::CreateGlow(float pTime, float pScale, const vec3& pStartColor, const vec3& pColor, float pOpacity, const vec3& pPosition, const vec3& pVelocity)
-{
-	ScopeLock lLock(mLock);
+void ParticleRenderer::CreateGlow(float time, float scale, const vec3& start_color, const vec3& color, float opacity, const vec3& position, const vec3& velocity) {
+	ScopeLock lock(lock_);
 
-	const float lTimeFactor = PARTICLE_TIME/pTime;
-	CreateBillboards(pPosition, 0, vec3(), vec3(), 0, lTimeFactor, pScale, pStartColor, pColor, mFires, 1);
-	Billboard& lGlowBillboard = mFires.back();
-	lGlowBillboard.mOpacityFactor = pOpacity;
-	lGlowBillboard.mVelocity = pVelocity;
-	lGlowBillboard.mTargetVelocity = pVelocity;
+	const float _time_factor = PARTICLE_TIME/time;
+	CreateBillboards(position, 0, vec3(), vec3(), 0, _time_factor, scale, start_color, color, fires_, 1);
+	Billboard& glow_billboard = fires_.back();
+	glow_billboard.opacity_factor_ = opacity;
+	glow_billboard.velocity_ = velocity;
+	glow_billboard.target_velocity_ = velocity;
 }
 
-void ParticleRenderer::RenderFireBillboard(float pAngle, float pSize, const vec3& pColor, float pOpacity, const vec3& pPosition)
-{
-	ScopeLock lLock(mLock);
+void ParticleRenderer::RenderFireBillboard(float angle, float _size, const vec3& color, float opacity, const vec3& position) {
+	ScopeLock lock(lock_);
 
-	mTempFires.push_back(Billboard());
-	Billboard& lBillboard = mTempFires.back();
-	lBillboard.mPosition = pPosition;
-	lBillboard.mColor = pColor;
-	lBillboard.mTextureIndex = mTotalTextureCount-1;
-	lBillboard.mDepth = 1000.0f;
-	lBillboard.mSizeFactor = pSize;
-	lBillboard.mAngle = pAngle;
-	lBillboard.mOpacity = pOpacity;
+	temp_fires_.push_back(Billboard());
+	Billboard& billboard = temp_fires_.back();
+	billboard.position_ = position;
+	billboard.color_ = color;
+	billboard.texture_index_ = total_texture_count_-1;
+	billboard.depth_ = 1000.0f;
+	billboard.size_factor_ = _size;
+	billboard.angle_ = angle;
+	billboard.opacity_ = opacity;
 }
 
 
 
-void ParticleRenderer::CreateTempLight(const vec3& pColor, float pStrength, const vec3& pPosition, const vec3& pVelocity, const vec3& pTargetVelocity, float pTimeFactor)
-{
-	if (mLights.size() < mMaxLightCount)
-	{
-		mLights.push_back(Light(pColor, pStrength, pPosition, pVelocity, pTargetVelocity, pTimeFactor));
-		//mLog.Infof("Creating new light with strength %f", pStrength);
-	}
-	else
-	{
-		int lDarkestLightIndex = -1;
-		float lDarkestLightStrength = 1e15f;
+void ParticleRenderer::CreateTempLight(const vec3& color, float strength, const vec3& position, const vec3& velocity, const vec3& target_velocity, float time_factor) {
+	if (lights_.size() < max_light_count_) {
+		lights_.push_back(Light(color, strength, position, velocity, target_velocity, time_factor));
+		//log_.Infof("Creating new light with strength %f", strength);
+	} else {
+		int darkest_light_index = -1;
+		float darkest_light_strength = 1e15f;
 		int i = 0;
-		LightArray::iterator x = mLights.begin();
-		for (; x < mLights.end(); ++x, ++i)
-		{
-			if (x->mStrength < lDarkestLightStrength)
-			{
-				lDarkestLightIndex = i;
-				lDarkestLightStrength = x->mStrength;
+		LightArray::iterator x = lights_.begin();
+		for (; x < lights_.end(); ++x, ++i) {
+			if (x->strength_ < darkest_light_strength) {
+				darkest_light_index = i;
+				darkest_light_strength = x->strength_;
 			}
 		}
-		if (pStrength >= lDarkestLightStrength && lDarkestLightIndex >= 0)
-		{
+		if (strength >= darkest_light_strength && darkest_light_index >= 0) {
 			//mLog.Infof("Overtaking light with render ID %i (had strength %f, got strength %f"), mLights[lDarkestLightIndex].mRenderLightId, mLights[lDarkestLightIndex].mStrength, pStrength);
 			// TRICKY: don't overwrite! We must not leak the previosly allocated hardware light!
-			mLights[lDarkestLightIndex].mColor = pColor;
-			mLights[lDarkestLightIndex].mStrength = pStrength;
-			mLights[lDarkestLightIndex].mPosition = pPosition;
-			mLights[lDarkestLightIndex].mVelocity = pVelocity;
-			mLights[lDarkestLightIndex].mTargetVelocity = pTargetVelocity;
-			mLights[lDarkestLightIndex].mTimeFactor = pTimeFactor;
+			lights_[darkest_light_index].color_ = color;
+			lights_[darkest_light_index].strength_ = strength;
+			lights_[darkest_light_index].position_ = position;
+			lights_[darkest_light_index].velocity_ = velocity;
+			lights_[darkest_light_index].target_velocity_ = target_velocity;
+			lights_[darkest_light_index].time_factor_ = time_factor;
 		}
 	}
 }
 
-void ParticleRenderer::StepLights(float pTime, float pFriction)
-{
-	(void)pFriction;
+void ParticleRenderer::StepLights(float time, float friction) {
+	(void)friction;
 
-	LightArray::iterator x = mLights.begin();
-	while (x != mLights.end())
-	{
-		x->mVelocity = Math::Lerp(x->mVelocity, x->mTargetVelocity, pFriction*pTime);
-		x->mPosition += x->mVelocity * pTime;
+	LightArray::iterator x = lights_.begin();
+	while (x != lights_.end()) {
+		x->velocity_ = Math::Lerp(x->velocity_, x->target_velocity_, friction*time);
+		x->position_ += x->velocity_ * time;
 
-		x->mStrength -= pTime * x->mTimeFactor * 2 / PIF;
-		if (x->mStrength <= 0.1f)
-		{
-			if (x->mRenderLightId != Renderer::INVALID_LIGHT)
-			{
-				//mLog.Infof("Dropping light with render ID %i.", x->mRenderLightId);
-				mRenderer->RemoveLight(x->mRenderLightId);
+		x->strength_ -= time * x->time_factor_ * 2 / PIF;
+		if (x->strength_ <= 0.1f) {
+			if (x->render_light_id_ != Renderer::INVALID_LIGHT) {
+				//log_.Infof("Dropping light with render ID %i.", x->render_light_id_);
+				renderer_->RemoveLight(x->render_light_id_);
 			}
-			x = mLights.erase(x);
-		}
-		else
-		{
-			if (x->mRenderLightId == Renderer::INVALID_LIGHT)
-			{
-				x->mRenderLightId = mRenderer->AddPointLight(Renderer::LIGHT_MOVABLE, x->mPosition, x->mColor*x->mStrength*10, x->mStrength*10, 0);
-				//mLog.Infof("Creating render ID %i for light with strength %f", x->mRenderLightId, x->mStrength);
+			x = lights_.erase(x);
+		} else {
+			if (x->render_light_id_ == Renderer::INVALID_LIGHT) {
+				x->render_light_id_ = renderer_->AddPointLight(Renderer::kLightMovable, x->position_, x->color_*x->strength_*10, x->strength_*10, 0);
+				//log_.Infof("Creating render ID %i for light with strength %f", x->render_light_id_, x->strength_);
 			}
 			++x;
 		}
 	}
 }
 
-void ParticleRenderer::CreateBillboards(const vec3& pPosition, float pStrength, const vec3& pVelocity, const vec3& pTargetVelocity,
-	float pEndTurbulence, float pTimeFactor, float pSizeFactor, const vec3& pStartColor, const vec3& pColor, BillboardArray& pBillboards, int pCount)
-{
-	for (int x = 0; x < pCount; ++x)
-	{
-		pBillboards.push_back(Billboard());
-		Billboard& lBillboard = pBillboards.back();
-		lBillboard.mVelocity = pVelocity + RNDVEC(pStrength);
-		const vec3 lThisParticlesTargetVelocity = Math::Lerp(pTargetVelocity*0.8f, pTargetVelocity, Random::Uniform(0.0f, 2.0f));
-		lBillboard.mTargetVelocity = RNDVEC(pEndTurbulence) + lThisParticlesTargetVelocity;
-		lBillboard.mPosition = pPosition;
-		lBillboard.mStartColor = RNDCOL(pStartColor, 0.9f, 1.1f);
-		lBillboard.mColor = RNDCOL(pColor, 0.7f, 1.3f);
-		lBillboard.mTextureIndex = Random::GetRandomNumber() % mGasTextureCount;
-		lBillboard.mDepth = 1000.0f;
-		lBillboard.mSizeFactor = Random::Uniform(pSizeFactor*0.7f, pSizeFactor*1.4f);
-		lBillboard.mAngle = Random::Uniform(0.0f, 2*PIF);
-		lBillboard.mAngularVelocity = Random::Uniform(-5.0f, +5.0f);
-		lBillboard.mOpacity = 0;
-		lBillboard.mOpacityFactor = 1;
-		lBillboard.mOpacityTime = Random::Uniform(0.0f, 0.3f);
-		deb_assert(pTimeFactor > 0);
-		lBillboard.mTimeFactor = Random::Uniform(pTimeFactor*0.7f, pTimeFactor*1.3f);
+void ParticleRenderer::CreateBillboards(const vec3& position, float strength, const vec3& velocity, const vec3& target_velocity,
+	float end_turbulence, float time_factor, float size_factor, const vec3& start_color, const vec3& color, BillboardArray& billboards, int count) {
+	for (int x = 0; x < count; ++x) {
+		billboards.push_back(Billboard());
+		Billboard& billboard = billboards.back();
+		billboard.velocity_ = velocity + RNDVEC(strength);
+		const vec3 this_particles_target_velocity = Math::Lerp(target_velocity*0.8f, target_velocity, Random::Uniform(0.0f, 2.0f));
+		billboard.target_velocity_ = RNDVEC(end_turbulence) + this_particles_target_velocity;
+		billboard.position_ = position;
+		billboard.start_color_ = RNDCOL(start_color, 0.9f, 1.1f);
+		billboard.color_ = RNDCOL(color, 0.7f, 1.3f);
+		billboard.texture_index_ = Random::GetRandomNumber() % gas_texture_count_;
+		billboard.depth_ = 1000.0f;
+		billboard.size_factor_ = Random::Uniform(size_factor*0.7f, size_factor*1.4f);
+		billboard.angle_ = Random::Uniform(0.0f, 2*PIF);
+		billboard.angular_velocity_ = Random::Uniform(-5.0f, +5.0f);
+		billboard.opacity_ = 0;
+		billboard.opacity_factor_ = 1;
+		billboard.opacity_time_ = Random::Uniform(0.0f, 0.3f);
+		deb_assert(time_factor > 0);
+		billboard.time_factor_ = Random::Uniform(time_factor*0.7f, time_factor*1.3f);
 	}
 }
 
-void ParticleRenderer::StepBillboards(BillboardArray& pBillboards, float pTime, float pFriction)
-{
-	BillboardArray::iterator x = pBillboards.begin();
-	while (x != pBillboards.end())
-	{
-		if (pFriction > 0)
-		{
-			x->mVelocity = Math::Lerp(x->mVelocity, x->mTargetVelocity, pFriction*pTime);
-			x->mAngularVelocity = Math::Lerp(x->mAngularVelocity, x->mAngularVelocity * 0.7f, pFriction*pTime);
+void ParticleRenderer::StepBillboards(BillboardArray& billboards, float time, float friction) {
+	BillboardArray::iterator x = billboards.begin();
+	while (x != billboards.end()) {
+		if (friction > 0) {
+			x->velocity_ = Math::Lerp(x->velocity_, x->target_velocity_, friction*time);
+			x->angular_velocity_ = Math::Lerp(x->angular_velocity_, x->angular_velocity_ * 0.7f, friction*time);
+		} else {
+			x->velocity_ *= 1 + friction*time;
+			x->velocity_ += x->target_velocity_ * time;
 		}
-		else
-		{
-			x->mVelocity *= 1 + pFriction*pTime;
-			x->mVelocity += x->mTargetVelocity * pTime;
-		}
-		x->mPosition += x->mVelocity * pTime;
-		x->mAngle += x->mAngularVelocity * pTime;
+		x->position_ += x->velocity_ * time;
+		x->angle_ += x->angular_velocity_ * time;
 
-		x->mOpacityTime += pTime * x->mTimeFactor;
-		x->mOpacity = (::sin(x->mOpacityTime) + 0.7f) * x->mOpacityFactor;
-		if (x->mOpacity <= 0.0f || x->mOpacityTime > PARTICLE_TIME)
-		{
-			//deb_assert(x->mOpacityTime > PIF);	// Verify that the particle was visible at all, or the algo's wrong.
-			x = pBillboards.erase(x);
-		}
-		else
-		{
+		x->opacity_time_ += time * x->time_factor_;
+		x->opacity_ = (::sin(x->opacity_time_) + 0.7f) * x->opacity_factor_;
+		if (x->opacity_ <= 0.0f || x->opacity_time_ > PARTICLE_TIME) {
+			//deb_assert(x->opacity_time_ > PIF);	// Verify that the particle was visible at all, or the algo's wrong.
+			x = billboards.erase(x);
+		} else {
 			++x;
 		}
 	}
@@ -386,7 +338,7 @@ void ParticleRenderer::StepBillboards(BillboardArray& pBillboards, float pTime, 
 
 
 
-loginstance(UI_GFX_3D, ParticleRenderer);
+loginstance(kUiGfx3D, ParticleRenderer);
 
 
 

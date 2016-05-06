@@ -1,44 +1,41 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life/LifeClient/ClientConsoleManager.h"
-#include "Push.h"
+#include "../life/lifeclient/clientconsolemanager.h"
+#include "push.h"
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
-class PushConsoleManager: public Life::ClientConsoleManager
-{
-	typedef Life::ClientConsoleManager Parent;
+class PushConsoleManager: public life::ClientConsoleManager {
+	typedef life::ClientConsoleManager Parent;
 public:
-	PushConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-		UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea);
+	PushConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+		UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area);
 	virtual ~PushConsoleManager();
 
 protected:
-	enum CommandClient
-	{
-		COMMAND_SET_AVATAR = Parent::COMMAND_COUNT_LIFE_CLIENT,
-		COMMAND_SET_AVATAR_ENGINE_POWER,
+	enum CommandClient {
+		kCommandSetAvatar = Parent::kCommandCountLifeClient,
+		kCommandSetAvatarEnginePower,
 #if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS)
-		COMMAND_BUILD_DATA,
+		kCommandBuildData,
 #endif // Debug & Windows
 	};
 
 	virtual unsigned GetCommandCount() const;
-	virtual const CommandPair& GetCommand(unsigned pIndex) const;
-	virtual int OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector);
+	virtual const CommandPair& GetCommand(unsigned index) const;
+	virtual int OnCommand(const HashedString& command, const strutil::strvec& parameter_vector);
 
-	static const CommandPair mCommandIdList[];
+	static const CommandPair command_id_list_[];
 	logclass();
 };
 

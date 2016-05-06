@@ -5,11 +5,11 @@
 
 
 #include "pch.h"
-#include "../Include/DiskFile.h"
-#include "../Include/FileArchive.h"
-#include "../Include/Path.h"
-#include "../Include/Random.h"
-#include "../Include/String.h"
+#include "../include/diskfile.h"
+#include "../include/filearchive.h"
+#include "../include/path.h"
+#include "../include/random.h"
+#include "../include/string.h"
 
 #include <string.h>
 #include <errno.h>
@@ -24,398 +24,324 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 DiskFile::DiskFile() :
-	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
-	mFile(0),
-	mFileName(""),
-	mPath(""),
-	mFileSize(0),
-	mWriter(0),
-	mReader(0),
-	mMode(MODE_READ)
-{
+	File(Endian::kTypeBigEndian, Endian::kTypeBigEndian, 0, 0),
+	file_(0),
+	file_name_(""),
+	path_(""),
+	file_size_(0),
+	writer_(0),
+	reader_(0),
+	mode_(kModeRead) {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
 }
 
-DiskFile::DiskFile(Reader* pReader) :
-	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
-	mFile(0),
-	mFileName(""),
-	mPath(""),
-	mFileSize(0),
-	mWriter(0),
-	mReader(pReader),
-	mMode(MODE_READ)
-{
+DiskFile::DiskFile(Reader* reader) :
+	File(Endian::kTypeBigEndian, Endian::kTypeBigEndian, 0, 0),
+	file_(0),
+	file_name_(""),
+	path_(""),
+	file_size_(0),
+	writer_(0),
+	reader_(reader),
+	mode_(kModeRead) {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
 
-	if (mReader != 0)
-	{
-		mReader->SetInputStream(this);
+	if (reader_ != 0) {
+		reader_->SetInputStream(this);
 	}
 }
 
-DiskFile::DiskFile(Writer* pWriter) :
-	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
-	mFile(0),
-	mFileName(""),
-	mPath(""),
-	mFileSize(0),
-	mWriter(pWriter),
-	mReader(0),
-	mMode(MODE_READ)
-{
+DiskFile::DiskFile(Writer* writer) :
+	File(Endian::kTypeBigEndian, Endian::kTypeBigEndian, 0, 0),
+	file_(0),
+	file_name_(""),
+	path_(""),
+	file_size_(0),
+	writer_(writer),
+	reader_(0),
+	mode_(kModeRead) {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
 
-	if (mWriter != 0)
-	{
-		mWriter->SetOutputStream(this);
+	if (writer_ != 0) {
+		writer_->SetOutputStream(this);
 	}
 }
 
-DiskFile::DiskFile(Reader* pReader, Writer* pWriter) :
-	File(Endian::TYPE_BIG_ENDIAN, Endian::TYPE_BIG_ENDIAN, 0, 0),
-	mFile(0),
-	mFileName(""),
-	mPath(""),
-	mFileSize(0),
-	mWriter(pWriter),
-	mReader(pReader),
-	mMode(MODE_READ)
-{
+DiskFile::DiskFile(Reader* reader, Writer* writer) :
+	File(Endian::kTypeBigEndian, Endian::kTypeBigEndian, 0, 0),
+	file_(0),
+	file_name_(""),
+	path_(""),
+	file_size_(0),
+	writer_(writer),
+	reader_(reader),
+	mode_(kModeRead) {
 	Reader::SetInputStream(this);
 	Writer::SetOutputStream(this);
 
-	if (mReader != 0)
-	{
-		mReader->SetInputStream(this);
+	if (reader_ != 0) {
+		reader_->SetInputStream(this);
 	}
 
-	if (mWriter != 0)
-	{
-		mWriter->SetOutputStream(this);
+	if (writer_ != 0) {
+		writer_->SetOutputStream(this);
 	}
 }
 
-DiskFile::~DiskFile()
-{
+DiskFile::~DiskFile() {
 	Close();
 }
 
-void DiskFile::ExtractPathAndFileName(const str& pFileName)
-{
-	Path::SplitPath(pFileName, mPath, mFileName);
-	InputStream::SetName(mFileName);
-	OutputStream::SetName(mFileName);
+void DiskFile::ExtractPathAndFileName(const str& file_name) {
+	Path::SplitPath(file_name, path_, file_name_);
+	InputStream::SetName(file_name_);
+	OutputStream::SetName(file_name_);
 }
 
-FILE* DiskFile::FileOpen(const str& pFileName, const str& pMode)
-{
-	FILE* lFile = 0;
+FILE* DiskFile::FileOpen(const str& file_name, const str& mode) {
+	FILE* file = 0;
 
 #if _MSC_VER > 1310	// MS compiler version 13 1.0 = 2003 .NET.
 #ifdef LEPRA_UNICODE
-	if (::_wfopen_s(&lFile, pFileName.c_str(), pMode.c_str()) != 0)
+	if (::_wfopen_s(&file, file_name.c_str(), mode.c_str()) != 0)
 #else // ANSI
-	if (::fopen_s(&lFile, pFileName.c_str(), pMode.c_str()) != 0)
+	if (::fopen_s(&file, file_name.c_str(), mode.c_str()) != 0)
 #endif // Unicode / ANSI.
 	{
-		lFile = 0;
+		file = 0;
 	}
 #else // _MSC_VER <= 1310
-	lFile = fopen(pFileName.c_str(), pMode.c_str());
+	file = fopen(file_name.c_str(), mode.c_str());
 #endif // _MSC_VER > 1310 / _MSC_VER <= 1310
 
-	return (lFile);
+	return (file);
 }
 
-bool DiskFile::Open(const str& pFileName, OpenMode pMode, bool pCreatePath, Endian::EndianType pEndian)
-{
+bool DiskFile::Open(const str& file_name, OpenMode mode, bool create_path, Endian::EndianType endian) {
 	Close();
 
-	SetEndian(pEndian);
+	SetEndian(endian);
 
-	bool lOk = true;
+	bool ok = true;
 
-	Parent::ClearMode(Parent::READ_MODE);
-	Parent::ClearMode(Parent::WRITE_MODE);
-	if (pMode&MODE_READ)
-	{
-		Parent::SetMode(Parent::READ_MODE);
+	Parent::ClearMode(Parent::kReadMode);
+	Parent::ClearMode(Parent::kWriteMode);
+	if (mode&kModeRead) {
+		Parent::SetMode(Parent::kReadMode);
 	}
-	if (pMode&(MODE_WRITE|MODE_WRITE_APPEND))
-	{
-		Parent::SetMode(Parent::WRITE_MODE);
+	if (mode&(kModeWrite|kModeWriteAppend)) {
+		Parent::SetMode(Parent::kWriteMode);
 	}
-	if (!(pMode&(MODE_WRITE|MODE_WRITE_APPEND|MODE_READ)))
-	{
-		lOk = false;
+	if (!(mode&(kModeWrite|kModeWriteAppend|kModeRead))) {
+		ok = false;
 	}
 
-	if (lOk)
-	{
-		ExtractPathAndFileName(pFileName);
-		if(pMode&(MODE_WRITE|MODE_WRITE_APPEND))
-		{
-			if (pCreatePath == true && CreateSubDirs() == false)
-			{
-				lOk = false;
+	if (ok) {
+		ExtractPathAndFileName(file_name);
+		if(mode&(kModeWrite|kModeWriteAppend)) {
+			if (create_path == true && CreateSubDirs() == false) {
+				ok = false;
 			}
 		}
 	}
 
-	str lModeString;
-	if (lOk)
-	{
-		if ((pMode&(MODE_READ|MODE_WRITE|MODE_WRITE_APPEND)) == MODE_READ)
-		{
-			lModeString = "r";
-		}
-		else if ((pMode&(MODE_READ|MODE_WRITE|MODE_WRITE_APPEND)) == MODE_WRITE)
-		{
-			lModeString = "w";
-		}
-		else if ((pMode&(MODE_READ|MODE_WRITE_APPEND)) == MODE_WRITE_APPEND)
-		{
-			lModeString = "a";
-		}
-		else if ((pMode&(MODE_READ|MODE_WRITE|MODE_WRITE_APPEND)) == (MODE_READ|MODE_WRITE))
-		{
-			lModeString = "r+";
-		}
-		else if ((pMode&(MODE_READ|MODE_WRITE_APPEND)) == (MODE_READ|MODE_WRITE_APPEND))
-		{
-			lModeString = "a+";
-		}
-		else
-		{
-			lOk = false;
+	str mode_string;
+	if (ok) {
+		if ((mode&(kModeRead|kModeWrite|kModeWriteAppend)) == kModeRead) {
+			mode_string = "r";
+		} else if ((mode&(kModeRead|kModeWrite|kModeWriteAppend)) == kModeWrite) {
+			mode_string = "w";
+		} else if ((mode&(kModeRead|kModeWriteAppend)) == kModeWriteAppend) {
+			mode_string = "a";
+		} else if ((mode&(kModeRead|kModeWrite|kModeWriteAppend)) == (kModeRead|kModeWrite)) {
+			mode_string = "r+";
+		} else if ((mode&(kModeRead|kModeWriteAppend)) == (kModeRead|kModeWriteAppend)) {
+			mode_string = "a+";
+		} else {
+			ok = false;
 		}
 	}
-	if (lOk)
-	{
+	if (ok) {
 
-		if (pMode&MODE_TEXT)
-		{
-			lModeString += "t";
+		if (mode&kModeText) {
+			mode_string += "t";
+		} else {
+			mode_string += "b";
 		}
-		else
-		{
-			lModeString += "b";
-		}
-		mFile = FileOpen(pFileName, lModeString);
+		file_ = FileOpen(file_name, mode_string);
 	}
 
-	if (lOk)
-	{
-		mMode = pMode;
+	if (ok) {
+		mode_ = mode;
 
-		if (mFile != 0)
-		{
+		if (file_ != 0) {
 			// Get the file size.
-			long lPosition = ::ftell(mFile);
-			::fseek(mFile, 0, SEEK_END);
-			mFileSize = (int64)::ftell(mFile);
-			if (!(pMode&MODE_WRITE_APPEND))
-			{
-				::fseek(mFile, lPosition, SEEK_SET);
+			long position = ::ftell(file_);
+			::fseek(file_, 0, SEEK_END);
+			file_size_ = (int64)::ftell(file_);
+			if (!(mode&kModeWriteAppend)) {
+				::fseek(file_, position, SEEK_SET);
 			}
-		}
-		else
-		{
-			lOk = false;
+		} else {
+			ok = false;
 		}
 	}
 
-	return lOk;
+	return ok;
 }
 
-void DiskFile::Close()
-{
-	if (mFile != 0)
-	{
-		fclose(mFile);
-		mFile = 0;
+void DiskFile::Close() {
+	if (file_ != 0) {
+		fclose(file_);
+		file_ = 0;
 	}
 
-	mFileName = "";
-	mPath = "";
+	file_name_ = "";
+	path_ = "";
 }
 
-void DiskFile::SetEndian(Endian::EndianType pEndian)
-{
-	Parent::SetEndian(pEndian);
-	if (mReader)
-	{
-		mReader->SetReaderEndian(pEndian);
+void DiskFile::SetEndian(Endian::EndianType endian) {
+	Parent::SetEndian(endian);
+	if (reader_) {
+		reader_->SetReaderEndian(endian);
 	}
-	if (mWriter)
-	{
-		mWriter->SetWriterEndian(pEndian);
+	if (writer_) {
+		writer_->SetWriterEndian(endian);
 	}
 }
 
-str DiskFile::GetFullName() const
-{
-	return mPath + "/" + mFileName;
+str DiskFile::GetFullName() const {
+	return path_ + "/" + file_name_;
 }
 
-str DiskFile::GetName() const
-{
-	return mFileName;
+str DiskFile::GetName() const {
+	return file_name_;
 }
 
-str DiskFile::GetPath() const
-{
-	return mPath;
+str DiskFile::GetPath() const {
+	return path_;
 }
 
-IOError DiskFile::ReadRaw(void* pBuffer, size_t pSize)
-{
-	IOError lError = IO_OK;
+IOError DiskFile::ReadRaw(void* buffer, size_t _size) {
+	IOError error = kIoOk;
 
-	if (mFile == 0)
-	{
-		lError = IO_STREAM_NOT_OPEN;
+	if (file_ == 0) {
+		error = kIoStreamNotOpen;
 	}
 
-	if (lError == IO_OK && !(mMode&MODE_READ))
-	{
-		lError = IO_INVALID_OPERATION;
+	if (error == kIoOk && !(mode_&kModeRead)) {
+		error = kIoInvalidOperation;
 	}
 
-	if (lError == IO_OK)
-	{
-		if (::fread(pBuffer, (size_t)pSize, 1, mFile) != 1)
-		{
-			lError = IO_ERROR_READING_FROM_STREAM;
+	if (error == kIoOk) {
+		if (::fread(buffer, (size_t)_size, 1, file_) != 1) {
+			error = kIoErrorReadingFromStream;
 		}
 	}
 
-	return lError;
+	return error;
 }
 
-IOError DiskFile::Skip(size_t pSize)
-{
-	return (Parent::Skip(pSize));
+IOError DiskFile::Skip(size_t _size) {
+	return (Parent::Skip(_size));
 }
 
-IOError DiskFile::WriteRaw(const void* pBuffer, size_t pSize)
-{
-	IOError lError = IO_OK;
+IOError DiskFile::WriteRaw(const void* buffer, size_t _size) {
+	IOError error = kIoOk;
 
-	if (mFile == 0)
-	{
-		lError = IO_STREAM_NOT_OPEN;
+	if (file_ == 0) {
+		error = kIoStreamNotOpen;
 	}
 
-	if (lError == IO_OK && !(mMode&(MODE_WRITE|MODE_WRITE_APPEND)))
-	{
-		lError = IO_INVALID_OPERATION;
+	if (error == kIoOk && !(mode_&(kModeWrite|kModeWriteAppend))) {
+		error = kIoInvalidOperation;
 	}
 
-	if (lError == IO_OK)
-	{
-		if (::fwrite(pBuffer, (size_t)pSize, 1, mFile) != 1)
-		{
-			lError = IO_ERROR_WRITING_TO_STREAM;
+	if (error == kIoOk) {
+		if (::fwrite(buffer, (size_t)_size, 1, file_) != 1) {
+			error = kIoErrorWritingToStream;
 		}
 	}
 
-	return lError;
+	return error;
 }
 
-IOError DiskFile::ReadData(void* pBuffer, size_t pSize)
-{
-	IOError lError;
-	if (mReader != 0)
-	{
-		lError = mReader->ReadData(pBuffer, pSize);
-	}
-	else
-	{
-		lError = Reader::ReadData(pBuffer, pSize);
+IOError DiskFile::ReadData(void* buffer, size_t _size) {
+	IOError error;
+	if (reader_ != 0) {
+		error = reader_->ReadData(buffer, _size);
+	} else {
+		error = Reader::ReadData(buffer, _size);
 	}
 
-	return lError;
+	return error;
 }
 
-IOError DiskFile::WriteData(const void* pBuffer, size_t pSize)
-{
-	IOError lError;
-	if (mWriter != 0)
-	{
-		lError = mWriter->WriteData(pBuffer, pSize);
+IOError DiskFile::WriteData(const void* buffer, size_t _size) {
+	IOError error;
+	if (writer_ != 0) {
+		error = writer_->WriteData(buffer, _size);
+	} else {
+		error = Writer::WriteData(buffer, _size);
 	}
-	else
-	{
-		lError = Writer::WriteData(pBuffer, pSize);
-	}
-	return lError;
+	return error;
 }
 
-int64 DiskFile::Tell() const
-{
+int64 DiskFile::Tell() const {
 #ifdef LEPRA_MSVC
-	return (int64)::_ftelli64(mFile);
+	return (int64)::_ftelli64(file_);
 #elif defined(LEPRA_MAC)
-	return (int64)::ftell(mFile);
+	return (int64)::ftell(file_);
 #else
-	return (int64)::ftello64(mFile);
+	return (int64)::ftello64(file_);
 #endif
 }
 
-int64 DiskFile::Seek(int64 pOffset, FileOrigin pFrom)
-{
-	if (!IsOpen())
-	{
+int64 DiskFile::Seek(int64 offset, FileOrigin from) {
+	if (!IsOpen()) {
 		return (-1);
 	}
 
-	int lOrigin;
-	
-	switch (pFrom)
-	{
-		case FSEEK_CUR:
-		{
-			lOrigin = SEEK_CUR;
+	int origin;
+
+	switch (from) {
+		case kFseekCur: {
+			origin = SEEK_CUR;
 			break;
 		}
-		case FSEEK_END:
-		{
-			lOrigin = SEEK_END;
+		case kFseekEnd: {
+			origin = SEEK_END;
 			break;
 		}
-		case FSEEK_SET:
-		default:
-		{
-			lOrigin = SEEK_SET;
+		case kFseekSet:
+		default: {
+			origin = SEEK_SET;
 			break;
 		}
 	}
 
-	int64 lPos = -1;
+	int64 pos = -1;
 
 #if defined(LEPRA_MSVC)
-	if (::_fseeki64(mFile, pOffset, lOrigin) == 0)
+	if (::_fseeki64(file_, offset, origin) == 0)
 #elif defined(LEPRA_MAC)
-	if (::fseek(mFile, pOffset, lOrigin) == 0)
+	if (::fseek(file_, offset, origin) == 0)
 #else
-	if (::fseeko64(mFile, pOffset, lOrigin) == 0)
+	if (::fseeko64(file_, offset, origin) == 0)
 #endif
 	{
-		lPos = Tell();
+		pos = Tell();
 	}
 
-	return lPos;
+	return pos;
 }
 
 
@@ -424,251 +350,215 @@ int64 DiskFile::Seek(int64 pOffset, FileOrigin pFrom)
 // Static functions.
 //
 
-IOError DiskFile::Load(const str& pFilename, void** pData, int64& pDataSize)
-{
-	DiskFile lFile;
-	bool lOk = false;
-	for (int x = 0; !lOk && x < 3; ++x)
-	{
-		lOk = lFile.Open(pFilename, DiskFile::MODE_READ);
+IOError DiskFile::Load(const str& filename, void** data, int64& data_size) {
+	DiskFile file;
+	bool ok = false;
+	for (int x = 0; !ok && x < 3; ++x) {
+		ok = file.Open(filename, DiskFile::kModeRead);
 	}
-	if (lOk)
-	{
-		pDataSize = lFile.GetSize();
-		return lFile.AllocReadData(pData, (size_t)pDataSize);
+	if (ok) {
+		data_size = file.GetSize();
+		return file.AllocReadData(data, (size_t)data_size);
 	}
-	return IO_FILE_NOT_FOUND;
+	return kIoFileNotFound;
 }
 
-bool DiskFile::Exists(const str& pFileName)
-{
-	FILE* lFile = FileOpen(pFileName, "rb");
+bool DiskFile::Exists(const str& file_name) {
+	FILE* file = FileOpen(file_name, "rb");
 
-	bool lOk = false;
-	if (lFile != 0)
-	{
-		::fclose(lFile);
-		lOk = true;
+	bool ok = false;
+	if (file != 0) {
+		::fclose(file);
+		ok = true;
 	}
 
-	return lOk;
+	return ok;
 }
 
-bool DiskFile::PathExists(const str& pPathName)
-{
-	char lCurrentDir[300];
+bool DiskFile::PathExists(const str& path_name) {
+	char current_dir[300];
 
 #ifdef LEPRA_WINDOWS // Hugge/TRICKY: Should we check for Visual Studio instead?
-	::_getcwd(lCurrentDir, 299);
-	bool lSuccess = _chdir(pPathName.c_str()) == 0;
-	::_chdir(lCurrentDir);
+	::_getcwd(current_dir, 299);
+	bool success = _chdir(path_name.c_str()) == 0;
+	::_chdir(current_dir);
 #else
-	::getcwd(lCurrentDir, 299);
-	bool lSuccess = ::chdir(pPathName.c_str()) == 0;
-	::chdir(lCurrentDir);
+	::getcwd(current_dir, 299);
+	bool success = ::chdir(path_name.c_str()) == 0;
+	::chdir(current_dir);
 #endif
 
-	return lSuccess;
+	return success;
 }
 
-bool DiskFile::Delete(const str& pFileName)
-{
-	return (::remove(pFileName.c_str()) == 0);
+bool DiskFile::Delete(const str& file_name) {
+	return (::remove(file_name.c_str()) == 0);
 }
 
-bool DiskFile::Rename(const str& pOldFileName, const str& pNewFileName)
-{
-	return (::rename(pOldFileName.c_str(), pNewFileName.c_str()) == 0);
+bool DiskFile::Rename(const str& old_file_name, const str& new_file_name) {
+	return (::rename(old_file_name.c_str(), new_file_name.c_str()) == 0);
 }
 
-bool DiskFile::CreateDir(const str& pPathName)
-{
-#ifdef LEPRA_POSIX 
-	return ::mkdir(pPathName.c_str(), 0775) != -1;
+bool DiskFile::CreateDir(const str& path_name) {
+#ifdef LEPRA_POSIX
+	return ::mkdir(path_name.c_str(), 0775) != -1;
 #else
-	return ::_mkdir(pPathName.c_str()) != -1;
+	return ::_mkdir(path_name.c_str()) != -1;
 #endif
 }
 
-bool DiskFile::RemoveDir(const str& pPathName)
-{
+bool DiskFile::RemoveDir(const str& path_name) {
 #ifdef LEPRA_WINDOWS // Hugge/TRICKY: Should we check for Visual Studio instead?
-	return ::_rmdir(pPathName.c_str()) == 0;
+	return ::_rmdir(path_name.c_str()) == 0;
 #else
-	return ::rmdir(pPathName.c_str()) == 0;
+	return ::rmdir(path_name.c_str()) == 0;
 #endif
 }
 
-bool DiskFile::CreateSubDirs()
-{
-	str lDirectory = Path::GetDirectory(mPath);
-	strutil::strvec lDirectoryArray = Path::SplitNodes(lDirectory);
+bool DiskFile::CreateSubDirs() {
+	str directory = Path::GetDirectory(path_);
+	strutil::strvec directory_array = Path::SplitNodes(directory);
 
-	bool lOk = true;
-	str lNewPath;
-	for (size_t x = 0; x < lDirectoryArray.size(); ++x)
-	{
-		lNewPath += lDirectoryArray[x];
-		if (CreateDir(lNewPath) != 0)
-		{
+	bool ok = true;
+	str new_path;
+	for (size_t x = 0; x < directory_array.size(); ++x) {
+		new_path += directory_array[x];
+		if (CreateDir(new_path) != 0) {
 			// errno is a global variable defined in errno.h
-			if (errno == ENOENT)
-			{
-				lOk = false;
+			if (errno == ENOENT) {
+				ok = false;
 				break;
 			}
 		}
-		lNewPath += "/";
+		new_path += "/";
 	}
 
-	return lOk;
+	return ok;
 }
 
-bool DiskFile::FindFirst(const str& pFileSpec, FindData& pFindData)
-{
-	pFindData.Clear();
-	bool lOk = true;
+bool DiskFile::FindFirst(const str& file_spec, FindData& find_data) {
+	find_data.Clear();
+	bool ok = true;
 
-	pFindData.mFileSpec = pFileSpec;
+	find_data.file_spec_ = file_spec;
 #if defined LEPRA_WINDOWS
-	_finddata_t lData;
-	pFindData.mFindHandle = _findfirst(pFileSpec.c_str(), &lData);
-	if (pFindData.mFindHandle == -1)
-	{
-		lOk = false;
+	_finddata_t _data;
+	find_data.find_handle_ = _findfirst(file_spec.c_str(), &_data);
+	if (find_data.find_handle_ == -1) {
+		ok = false;
 	}
-	if (lOk == true)
-	{
-		str lPath = Path::SplitPath(pFileSpec)[0];
-		pFindData.mName = Path::JoinPath(lPath, str(lData.name));	// TODO: needs real Unicode findxxx().
-		pFindData.mSize = lData.size;
+	if (ok == true) {
+		str _path = Path::SplitPath(file_spec)[0];
+		find_data.name_ = Path::JoinPath(_path, str(_data.name));	// TODO: needs real Unicode findxxx().
+		find_data.size_ = _data.size;
 
-		if ((lData.attrib & _A_SUBDIR) != 0)
-		{
-			pFindData.mSubDir = true;
+		if ((_data.attrib & _A_SUBDIR) != 0) {
+			find_data.sub_dir_ = true;
 		}
 
-		pFindData.mTime  = lData.time_write;
+		find_data.time_  = _data.time_write;
 	}
 #elif defined LEPRA_POSIX
-	pFindData.mGlobList.gl_offs = 0;
-	::glob(pFileSpec.c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &pFindData.mGlobList);
-	if (pFindData.mGlobList.gl_pathc >= 1)
-	{
-		pFindData.mName = pFindData.mGlobList.gl_pathv[0];
-		struct stat lFileInfo;
-		::stat(pFindData.mGlobList.gl_pathv[1], &lFileInfo);	// TODO: error check.
-		pFindData.mSize = lFileInfo.st_size;
-		pFindData.mSubDir = (S_ISDIR(lFileInfo.st_mode) != 0);
-		pFindData.mTime = lFileInfo.st_mtime;
-		pFindData.mGlobIndex = 2;
-	}
-	else
-	{
-		lOk = false;
-		pFindData.mGlobIndex = 0xffff;
+	find_data.glob_list_.gl_offs = 0;
+	::glob(file_spec.c_str(), GLOB_DOOFFS|GLOB_MARK, 0, &find_data.glob_list_);
+	if (find_data.glob_list_.gl_pathc >= 1) {
+		find_data.name_ = find_data.glob_list_.gl_pathv[0];
+		struct stat file_info;
+		::stat(find_data.glob_list_.gl_pathv[1], &file_info);	// TODO: error check.
+		find_data.size_ = file_info.st_size;
+		find_data.sub_dir_ = (S_ISDIR(file_info.st_mode) != 0);
+		find_data.time_ = file_info.st_mtime;
+		find_data.glob_index_ = 2;
+	} else {
+		ok = false;
+		find_data.glob_index_ = 0xffff;
 	}
 #else
 #error DiskFile::FindFirst() not implemented on this platform!
 #endif
 
-	return lOk;
+	return ok;
 }
 
-bool DiskFile::FindNext(FindData& pFindData)
-{
-	bool lOk = true;
+bool DiskFile::FindNext(FindData& find_data) {
+	bool ok = true;
 
 #ifdef LEPRA_WINDOWS
-	_finddata_t lData;
-	if (_findnext(pFindData.mFindHandle, &lData) != 0)
-	{
-		lOk = false;
+	_finddata_t _data;
+	if (_findnext(find_data.find_handle_, &_data) != 0) {
+		ok = false;
 	}
-	if (lOk == true)
-	{
-		str lPath = Path::SplitPath(pFindData.mFileSpec)[0];
-		pFindData.mName = Path::JoinPath(lPath, str(lData.name));	// TODO: needs real Unicode findxxx()!
-		pFindData.mSize = lData.size;
-		pFindData.mSubDir = ((lData.attrib & _A_SUBDIR) != 0);
-		pFindData.mTime  = lData.time_write;
+	if (ok == true) {
+		str _path = Path::SplitPath(find_data.file_spec_)[0];
+		find_data.name_ = Path::JoinPath(_path, str(_data.name));	// TODO: needs real Unicode findxxx()!
+		find_data.size_ = _data.size;
+		find_data.sub_dir_ = ((_data.attrib & _A_SUBDIR) != 0);
+		find_data.time_  = _data.time_write;
 	}
 #elif defined LEPRA_POSIX
-	lOk = false;
-	if (pFindData.mGlobIndex < pFindData.mGlobList.gl_pathc)
-	{
-		lOk = true;
-		pFindData.mName = pFindData.mGlobList.gl_pathv[pFindData.mGlobIndex];
-		struct stat lFileInfo;
-		::stat(pFindData.mGlobList.gl_pathv[pFindData.mGlobIndex], &lFileInfo);	// TODO: error check.
-		pFindData.mSize = lFileInfo.st_size;
-		pFindData.mSubDir = (S_ISDIR(lFileInfo.st_mode) != 0);
-		pFindData.mTime = lFileInfo.st_mtime;
-		++pFindData.mGlobIndex;
-	}
-	else if (pFindData.mGlobIndex != 0xffff)
-	{
-		::globfree(&pFindData.mGlobList);
-		pFindData.mGlobIndex = 0xffff;
+	ok = false;
+	if (find_data.glob_index_ < find_data.glob_list_.gl_pathc) {
+		ok = true;
+		find_data.name_ = find_data.glob_list_.gl_pathv[find_data.glob_index_];
+		struct stat file_info;
+		::stat(find_data.glob_list_.gl_pathv[find_data.glob_index_], &file_info);	// TODO: error check.
+		find_data.size_ = file_info.st_size;
+		find_data.sub_dir_ = (S_ISDIR(file_info.st_mode) != 0);
+		find_data.time_ = file_info.st_mtime;
+		++find_data.glob_index_;
+	} else if (find_data.glob_index_ != 0xffff) {
+		::globfree(&find_data.glob_list_);
+		find_data.glob_index_ = 0xffff;
 	}
 #else
 #error DiskFile::FindNext() not implemented on this platform!
 #endif
 
-	if (!lOk)
-	{
-		pFindData.Clear();
+	if (!ok) {
+		find_data.Clear();
 	}
 
-	return lOk;
+	return ok;
 }
 
-str DiskFile::GenerateUniqueFileName(const str& pPath)
-{
-	str lPath(pPath);
-	lPath += '/';
+str DiskFile::GenerateUniqueFileName(const str& path) {
+	str _path(path);
+	_path += '/';
 
-	int64 lRandomNumber = (int64)Random::GetRandomNumber64();
-	if (lRandomNumber < 0)
-		lRandomNumber = -lRandomNumber;
+	int64 random_number = (int64)Random::GetRandomNumber64();
+	if (random_number < 0)
+		random_number = -random_number;
 
-	str lName = strutil::IntToString(lRandomNumber, 16);
+	str __name = strutil::IntToString(random_number, 16);
 
-	while (Exists(pPath + lName) == true)
-	{
-		lRandomNumber = (int64)Random::GetRandomNumber64();
-		if (lRandomNumber < 0)
-		{
-			lRandomNumber = -lRandomNumber;
+	while (Exists(path + __name) == true) {
+		random_number = (int64)Random::GetRandomNumber64();
+		if (random_number < 0) {
+			random_number = -random_number;
 		}
-		lName = strutil::IntToString(lRandomNumber, 16);
+		__name = strutil::IntToString(random_number, 16);
 	}
 
-	return pPath + lName;
+	return path + __name;
 }
 
-void DiskFile::operator=(const DiskFile&)
-{
+void DiskFile::operator=(const DiskFile&) {
 }
 
-bool DiskFile::IsOpen() const
-{
-	return (mFile != 0);
+bool DiskFile::IsOpen() const {
+	return (file_ != 0);
 }
 
-int64 DiskFile::GetSize() const
-{
-	return mFileSize;
+int64 DiskFile::GetSize() const {
+	return file_size_;
 }
 
-int64 DiskFile::GetAvailable() const
-{
-	return (mFileSize - Tell());
+int64 DiskFile::GetAvailable() const {
+	return (file_size_ - Tell());
 }
 
-void DiskFile::Flush()
-{
-	::fflush(mFile);
+void DiskFile::Flush() {
+	::fflush(file_);
 }
 
 

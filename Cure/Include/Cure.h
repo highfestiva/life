@@ -1,28 +1,27 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Lepra/Include/LepraTypes.h"
-#include "../../Lepra/Include/Log.h"
+#include "../../lepra/include/lepratypes.h"
+#include "../../lepra/include/log.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-using namespace Lepra;
+using namespace lepra;
 
 class RuntimeVariableScope;
 
 void Init();
 void Shutdown();
-void SetDefault(RuntimeVariableScope* pSettings);
+void SetDefault(RuntimeVariableScope* settings);
 RuntimeVariableScope* GetSettings();
 
 
@@ -36,34 +35,31 @@ typedef uint32 GameObjectId;
 
 
 
-enum NetworkObjectType
-{
-	NETWORK_OBJECT_LOCAL_ONLY		= 0,	// Only on the local computer.
-	NETWORK_OBJECT_LOCALLY_CONTROLLED	= 1,	// Present on local and remote computer, controlled locally.
-	NETWORK_OBJECT_REMOTE_CONTROLLED	= 2,	// Present on local and remote computer, controlled remotely.
+enum NetworkObjectType {
+	kNetworkObjectLocalOnly		= 0,	// Only on the local computer.
+	kNetworkObjectLocallyControlled	= 1,	// Present on local and remote computer, controlled locally.
+	kNetworkObjectRemoteControlled	= 2,	// Present on local and remote computer, controlled remotely.
 };
 
 
 
-enum ResourceLoadState
-{
-	RESOURCE_UNLOADED		= 1,
-	RESOURCE_LOAD_IN_PROGRESS	= 2,
-	RESOURCE_LOAD_COMPLETE		= 3,
-	RESOURCE_LOAD_ERROR		= 4,
+enum ResourceLoadState {
+	kResourceUnloaded		= 1,
+	kResourceLoadInProgress	= 2,
+	kResourceLoadComplete		= 3,
+	kResourceLoadError		= 4,
 };
 
-enum PhysicsOverride
-{
-	PHYSICS_OVERRIDE_NORMAL = 1,
-	PHYSICS_OVERRIDE_STATIC,
-	PHYSICS_OVERRIDE_DYNAMIC,
-	PHYSICS_OVERRIDE_BONES,
+enum PhysicsOverride {
+	kPhysicsOverrideNormal = 1,
+	kPhysicsOverrideStatic,
+	kPhysicsOverrideDynamic,
+	kPhysicsOverrideBones,
 };
 
 
 
-#define CURE_STANDARD_FRAME_RATE	30
+#define kCureStandardFrameRate	30
 
 
 

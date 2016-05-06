@@ -1,53 +1,48 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Cure/Include/CppContextObject.h"
-#include "../../ThirdParty/FastDelegate/FastDelegate.h"
-#include "UiResourceManager.h"
-#include "UiCure.h"
+#include "../../cure/include/cppcontextobject.h"
+#include "../../thirdparty/FastDelegate/FastDelegate.h"
+#include "uiresourcemanager.h"
+#include "uicure.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 class GeometryBase;
 }
-namespace Cure
-{
+namespace cure {
 class ResourceManager;
 }
-namespace UiTbc
-{
+namespace uitbc {
 class ChunkyClass;
 }
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-class CppContextObject: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class CppContextObject: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
 	typedef fastdelegate::FastDelegate1<UserGeometryReferenceResource*, void> PostLoadMaterialDelegate;
 
-	CppContextObject(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
+	CppContextObject(cure::ResourceManager* resource_manager, const str& class_id, GameUiManager* ui_manager);
 	virtual ~CppContextObject();
 
-	void EnableUi(bool pEnable);
-	void EnableRootShadow(bool pEnable);
-	void SetUseDefaultTexture(bool pUseDefaultTexture);
-	void EnablePixelShader(bool pEnable);
-	void EnableMeshMove(bool pEnable);
-	void EnableMeshSlide(bool pEnable);
+	void EnableUi(bool enable);
+	void EnableRootShadow(bool enable);
+	void SetUseDefaultTexture(bool use_default_texture);
+	void EnablePixelShader(bool enable);
+	void EnableMeshMove(bool enable);
+	void EnableMeshSlide(bool enable);
 	void SetPositionFinalized();
 
 	virtual void StartLoading();
@@ -55,38 +50,37 @@ public:
 	void OnTick();
 	virtual void UiMove();
 	void ActivateLerp();
-	void SetSinking(float pSinkSpeed);
-	void ShrinkMeshBigOrientationThreshold(float pThreshold);
+	void SetSinking(float sink_speed);
+	void ShrinkMeshBigOrientationThreshold(float threshold);
 
-	Tbc::GeometryBase* GetMesh(int pIndex) const;
-	UserGeometryReferenceResource* GetMeshResource(int pIndex) const;
-	void AddMeshResource(Tbc::GeometryBase* pMesh, int pCastsShadows);
-	void AddMeshResourceRef(const str& pMeshName, int pCastsShadows);
+	tbc::GeometryBase* GetMesh(int index) const;
+	UserGeometryReferenceResource* GetMeshResource(int index) const;
+	void AddMeshResource(tbc::GeometryBase* mesh, int casts_shadows);
+	void AddMeshResourceRef(const str& mesh_name, int casts_shadows);
 	void CenterMeshes();
-	void LoadTexture(const str& pName, Canvas::ResizeHint pResizeHint=Canvas::RESIZE_FAST);
-	virtual void UpdateMaterial(int pMeshIndex);
-	void SetPostLoadMaterialDelegate(const PostLoadMaterialDelegate& pDelegate);
+	void LoadTexture(const str& name, Canvas::ResizeHint resize_hint=Canvas::kResizeFast);
+	virtual void UpdateMaterial(int mesh_index);
+	void SetPostLoadMaterialDelegate(const PostLoadMaterialDelegate& delegate);
 
-	virtual void ReplaceTexture(int pTextureIndex, const str& pNewTextureName);
+	virtual void ReplaceTexture(int texture_index, const str& new_texture_name);
 
 	GameUiManager* GetUiManager() const;
-	virtual const Tbc::ChunkyClass* GetClass() const;
+	virtual const tbc::ChunkyClass* GetClass() const;
 
 protected:
-	enum MeshSlideMode
-	{
-		LERP_STOP,
-		LERP_START,
-		LERP_RUN,
+	enum MeshSlideMode {
+		kLerpStop,
+		kLerpStart,
+		kLerpRun,
 	};
 
-	void DoAddMeshResource(const str& pMeshName, Tbc::GeometryBase* pMesh, int pCastsShadows);
+	void DoAddMeshResource(const str& mesh_name, tbc::GeometryBase* mesh, int casts_shadows);
 
-	void OnLoadClass(UserClassResource* pClassResource);
+	void OnLoadClass(UserClassResource* class_resource);
 	virtual void LoadTextures();
-	void OnLoadMesh(UserGeometryReferenceResource* pMeshResource);
-	virtual void DispatchOnLoadMesh(UserGeometryReferenceResource* pMeshResource);
-	void OnLoadTexture(UserRendererImageResource* pTextureResource);
+	void OnLoadMesh(UserGeometryReferenceResource* mesh_resource);
+	virtual void DispatchOnLoadMesh(UserGeometryReferenceResource* mesh_resource);
+	void OnLoadTexture(UserRendererImageResource* texture_resource);
 	virtual void TryAddTexture();
 	virtual bool TryComplete();
 	virtual str GetMeshInstanceId() const;
@@ -94,23 +88,23 @@ protected:
 	typedef std::vector<UserGeometryReferenceResource*> MeshArray;
 	typedef std::vector<UserRendererImageResource*> TextureArray;
 
-	GameUiManager* mUiManager;
-	UserClassResource* mUiClassResource;
-	bool mEnableUi;
-	bool mAllowRootShadow;
-	bool mUseDefaultTexture;
-	bool mEnablePixelShader;
-	bool mEnableMeshMove;
-	bool mEnableMeshSlide;
-	float mSinkSpeed;
-	float mSinkOffset;
-	MeshArray mMeshResourceArray;
-	size_t mMeshLoadCount;
-	TextureArray mTextureResourceArray;
-	size_t mTextureLoadCount;
-	xform mLerpOffset;
-	MeshSlideMode mLerpMode;
-	PostLoadMaterialDelegate mPostLoadMaterialDelegate;
+	GameUiManager* ui_manager_;
+	UserClassResource* ui_class_resource_;
+	bool enable_ui_;
+	bool allow_root_shadow_;
+	bool use_default_texture_;
+	bool enable_pixel_shader_;
+	bool enable_mesh_move_;
+	bool enable_mesh_slide_;
+	float sink_speed_;
+	float sink_offset_;
+	MeshArray mesh_resource_array_;
+	size_t mesh_load_count_;
+	TextureArray texture_resource_array_;
+	size_t texture_load_count_;
+	xform lerp_offset_;
+	MeshSlideMode lerp_mode_;
+	PostLoadMaterialDelegate post_load_material_delegate_;
 
 	logclass();
 };

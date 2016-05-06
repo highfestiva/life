@@ -1,109 +1,95 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Vehicle.h"
-#include "../Lepra/Include/Math.h"
-#include "../Tbc/Include/ChunkyBoneGeometry.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "Game.h"
+#include "vehicle.h"
+#include "../lepra/include/math.h"
+#include "../tbc/include/chunkybonegeometry.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/runtimevariable.h"
+#include "game.h"
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 
-Vehicle::Vehicle(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
-	Parent(pResourceManager, pClassId, pUiManager),
-	mHealth(1),
-	mKillJointsTickCount(2),
-	mWheelExpelTickCount(3)
-{
+Vehicle::Vehicle(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager):
+	Parent(resource_manager, class_id, ui_manager),
+	health_(1),
+	kill_joints_tick_count_(2),
+	wheel_expel_tick_count_(3) {
 }
 
-Vehicle::~Vehicle()
-{
+Vehicle::~Vehicle() {
 }
 
 
 
-void Vehicle::DrainHealth(float pDrain)
-{
-	if (!mHealth)	// Already killed?
-	{
+void Vehicle::DrainHealth(float drain) {
+	if (!health_) {	// Already killed?
 		return;
 	}
-	mHealth = Math::Clamp(mHealth-pDrain, 0.0f, 1.0f);
-	if (mHealth)
-	{
+	health_ = Math::Clamp(health_-drain, 0.0f, 1.0f);
+	if (health_) {
 		return;
 	}
 
 	// Was killed. Drop all wheels! :)
-	mKillJointsTickCount = 2;
-	mWheelExpelTickCount = 3;
-	float lRealTimeRatio;
-	v_get(lRealTimeRatio, =(float), Cure::GetSettings(), RTVAR_PHYSICS_RTR, 1.0);
-	mWheelExpelTickCount = (int)(mWheelExpelTickCount/lRealTimeRatio);
-	if (GetPhysics())
-	{
+	kill_joints_tick_count_ = 2;
+	wheel_expel_tick_count_ = 3;
+	float real_time_ratio;
+	v_get(real_time_ratio, =(float), cure::GetSettings(), kRtvarPhysicsRtr, 1.0);
+	wheel_expel_tick_count_ = (int)(wheel_expel_tick_count_/real_time_ratio);
+	if (GetPhysics()) {
 		GetPhysics()->ClearEngines();
 	}
-	/*Tbc::ChunkyClass* lClass = (Tbc::ChunkyClass*)GetClass();
-	size_t lTagCount = lClass->GetTagCount();
-	for (size_t x = 0; x < lTagCount;)
-	{
-		lClass->RemoveTag(x);
-		--lTagCount;
+	/*tbc::ChunkyClass* clazz = (tbc::ChunkyClass*)GetClass();
+	size_t tag_count = clazz->GetTagCount();
+	for (size_t x = 0; x < tag_count;) {
+		clazz->RemoveTag(x);
+		--tag_count;
 	}
 	DeleteEngineSounds();*/
 }
 
-float Vehicle::GetHealth() const
-{
-	return mHealth;
+float Vehicle::GetHealth() const {
+	return health_;
 }
 
-bool Vehicle::QueryFlip()
-{
-	if (!mHealth || !IsUpsideDown())
-	{
+bool Vehicle::QueryFlip() {
+	if (!health_ || !IsUpsideDown()) {
 		return false;
 	}
 
 	// Reset vehicle in the direction it was heading.
-	const Cure::ObjectPositionalData* lOriginalPositionData;
-	if (UpdateFullPosition(lOriginalPositionData))
-	{
-		Cure::ObjectPositionalData lPositionData;
-		lPositionData.CopyData(lOriginalPositionData);
-		lPositionData.Stop();
-		xform& lTransform = lPositionData.mPosition.mTransformation;
-		lTransform.SetPosition(GetPosition() + vec3(0, 0, 1.5f));
-		vec3 lEulerAngles;
-		GetOrientation().GetEulerAngles(lEulerAngles);
-		lTransform.GetOrientation().SetEulerAngles(lEulerAngles.x, 0, 0);
-		lTransform.GetOrientation() *= GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
-		SetFullPosition(lPositionData, 0);
+	const cure::ObjectPositionalData* original_position_data;
+	if (UpdateFullPosition(original_position_data)) {
+		cure::ObjectPositionalData position_data;
+		position_data.CopyData(original_position_data);
+		position_data.Stop();
+		xform& transform = position_data.position_.transformation_;
+		transform.SetPosition(GetPosition() + vec3(0, 0, 1.5f));
+		vec3 euler_angles;
+		GetOrientation().GetEulerAngles(euler_angles);
+		transform.GetOrientation().SetEulerAngles(euler_angles.x, 0, 0);
+		transform.GetOrientation() *= GetPhysics()->GetOriginalBoneTransformation(0).GetOrientation();
+		SetFullPosition(position_data, 0);
 		return true;
 	}
 	return false;
 }
 
-bool Vehicle::IsUpsideDown() const
-{
-	vec3 lUp(0, 0, 1);
-	lUp = GetOrientation() * lUp;
-	if (lUp.z > 0.4f ||
+bool Vehicle::IsUpsideDown() const {
+	vec3 up(0, 0, 1);
+	up = GetOrientation() * up;
+	if (up.z > 0.4f ||
 		GetVelocity().GetLengthSquared() > 0.1f ||
-		GetAngularVelocity().GetLengthSquared() > 0.1f)
-	{
+		GetAngularVelocity().GetLengthSquared() > 0.1f) {
 		// Nope, still standing, or at least moving. Might be drunken style,
 		// but at least not on it's head yet.
 		return false;
@@ -113,85 +99,71 @@ bool Vehicle::IsUpsideDown() const
 
 
 
-void Vehicle::OnTick()
-{
+void Vehicle::OnTick() {
 	Parent::OnTick();
 
 	// If killed: check if we should expel wheels! :)
-	if (mHealth)
-	{
+	if (health_) {
 		return;
 	}
-	if (mWheelExpelTickCount <= 0)
-	{
+	if (wheel_expel_tick_count_ <= 0) {
 		return;
 	}
-	--mKillJointsTickCount;
-	--mWheelExpelTickCount;
-	if (mKillJointsTickCount <= 0)
-	{
-		mKillJointsTickCount = 0x7FFFFFFF;
+	--kill_joints_tick_count_;
+	--wheel_expel_tick_count_;
+	if (kill_joints_tick_count_ <= 0) {
+		kill_joints_tick_count_ = 0x7FFFFFFF;
 		// Remove the joints, but don't allow collisions with body yet.
-		const vec3 lPosition = GetPosition();
-		const int lBoneCount = GetPhysics()->GetBoneCount();
-		for (int x = 0; x < lBoneCount; ++x)
-		{
-			Tbc::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
-			if (lWheel->GetJointType() != Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE)
-			{
-				GetManager()->GetGameManager()->GetPhysicsManager()->DeleteJoint(lWheel->GetJointId());
-				lWheel->ResetJointId();
+		const vec3 position = GetPosition();
+		const int bone_count = GetPhysics()->GetBoneCount();
+		for (int x = 0; x < bone_count; ++x) {
+			tbc::ChunkyBoneGeometry* wheel = GetPhysics()->GetBoneGeometry(x);
+			if (wheel->GetJointType() != tbc::ChunkyBoneGeometry::kJointExclude) {
+				GetManager()->GetGameManager()->GetPhysicsManager()->DeleteJoint(wheel->GetJointId());
+				wheel->ResetJointId();
 				// Push the wheel away somewhat, not too much.
-				const int lPushFactor = 200;
-				const vec3 lWheelPosition = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lWheel->GetBodyId());
-				const vec3 lForce = (lWheelPosition-lPosition).GetNormalized()*lPushFactor*lWheel->GetMass();
-				GetManager()->GetGameManager()->GetPhysicsManager()->AddForce(lWheel->GetBodyId(), lForce);
+				const int push_factor = 200;
+				const vec3 wheel_position = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(wheel->GetBodyId());
+				const vec3 force = (wheel_position-position).GetNormalized()*push_factor*wheel->GetMass();
+				GetManager()->GetGameManager()->GetPhysicsManager()->AddForce(wheel->GetBodyId(), force);
 			}
 		}
 	}
-	if (mWheelExpelTickCount > 0)
-	{
+	if (wheel_expel_tick_count_ > 0) {
 		return;
 	}
 	// Allow collisions with body.
-	const vec3 lPosition = GetPosition();
-	const int lBoneCount = GetPhysics()->GetBoneCount();
-	for (int x = 0; x < lBoneCount; ++x)
-	{
-		Tbc::ChunkyBoneGeometry* lWheel = GetPhysics()->GetBoneGeometry(x);
-		if (lWheel->GetJointType() == Tbc::ChunkyBoneGeometry::JOINT_EXCLUDE ||
-			!GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListenerId(lWheel->GetBodyId()))
-		{
+	const vec3 position = GetPosition();
+	const int bone_count = GetPhysics()->GetBoneCount();
+	for (int x = 0; x < bone_count; ++x) {
+		tbc::ChunkyBoneGeometry* wheel = GetPhysics()->GetBoneGeometry(x);
+		if (wheel->GetJointType() == tbc::ChunkyBoneGeometry::kJointExclude ||
+			!GetManager()->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListenerId(wheel->GetBodyId())) {
 			continue;
 		}
-		vec3 lWheelPosition = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lWheel->GetBodyId());
-		bool lFarAway = (lPosition.GetDistanceSquared(lWheelPosition) >= 5*5);
-		if (!lFarAway)
-		{
-			const quat lCarInverse = GetOrientation().GetInverse();
-			lWheelPosition = lCarInverse * (lWheelPosition - lPosition);
-			const float lMinDistance = lWheel->GetShapeSize().x * 0.5f;
-			if (::fabs(lWheelPosition.x) > ::fabs(GetPhysics()->GetOriginalBoneTransformation(x).GetPosition().x) + lMinDistance)
-			{
-				lFarAway = true;
+		vec3 wheel_position = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(wheel->GetBodyId());
+		bool far_away = (position.GetDistanceSquared(wheel_position) >= 5*5);
+		if (!far_away) {
+			const quat car_inverse = GetOrientation().GetInverse();
+			wheel_position = car_inverse * (wheel_position - position);
+			const float min_distance = wheel->GetShapeSize().x * 0.5f;
+			if (::fabs(wheel_position.x) > ::fabs(GetPhysics()->GetOriginalBoneTransformation(x).GetPosition().x) + min_distance) {
+				far_away = true;
 			}
 		}
-		if (lFarAway)
-		{
-			GetManager()->RemovePhysicsBody(lWheel->GetBodyId());
-			GetManager()->GetGameManager()->GetPhysicsManager()->SetForceFeedbackListener(lWheel->GetBodyId(), 0);
-		}
-		else
-		{
+		if (far_away) {
+			GetManager()->RemovePhysicsBody(wheel->GetBodyId());
+			GetManager()->GetGameManager()->GetPhysicsManager()->SetForceFeedbackListener(wheel->GetBodyId(), 0);
+		} else {
 			// Come back later for this one.
-			mWheelExpelTickCount = 1;
+			wheel_expel_tick_count_ = 1;
 		}
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Vehicle);
+loginstance(kGameContextCpp, Vehicle);
 
 
 

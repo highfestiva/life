@@ -3,18 +3,16 @@
 // Copyright (c) PixelDoctrin
 
 #pragma once
-#include "String.h"
+#include "string.h"
 
-namespace Lepra
-{
+namespace lepra {
 
 class File;
 
-class FileOpener
-{
+class FileOpener {
 public:
 	virtual ~FileOpener() {};
-	virtual File* Open(const str& pFilename) = 0;
+	virtual File* Open(const str& filename) = 0;
 };
 
 }

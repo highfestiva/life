@@ -1,11 +1,11 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Lepra/Include/LepraTypes.h"
+#include "../lepra/include/lepratypes.h"
 
-#define GAME_VERSION "0.8"
+#define kGameVersion "0.8"

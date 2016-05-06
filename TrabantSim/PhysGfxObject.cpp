@@ -1,64 +1,56 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "PhysGfxObject.h"
+#include "physgfxobject.h"
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
-PlacedObject::PlacedObject(const quat& pOrientation, const vec3& pPos):
-	mOrientation(pOrientation),
-	mPos(pPos)
-{
+PlacedObject::PlacedObject(const quat& orientation, const vec3& pos):
+	orientation_(orientation),
+	pos_(pos) {
 }
 
-PlacedObject::~PlacedObject()
-{
+PlacedObject::~PlacedObject() {
 }
 
 
 
-BoxObject::BoxObject(const quat& pQuat, const vec3& pPos, const vec3& pSize):
-	Parent(pQuat,pPos),
-	mSize(pSize)
-{
+BoxObject::BoxObject(const quat& _quat, const vec3& pos, const vec3& size):
+	Parent(_quat,pos),
+	size_(size) {
 }
 
 
 
-SphereObject::SphereObject(const quat& pQuat, const vec3& pPos, float pRadius):
-	Parent(pQuat,pPos),
-	mRadius(pRadius)
-{
+SphereObject::SphereObject(const quat& _quat, const vec3& pos, float radius):
+	Parent(_quat,pos),
+	radius_(radius) {
 }
 
 
 
-CapsuleObject::CapsuleObject(const quat& pQuat, const vec3& pPos, float pRadius, float pLength):
-	Parent(pQuat,pPos),
-	mRadius(pRadius),
-	mLength(pLength)
-{
+CapsuleObject::CapsuleObject(const quat& _quat, const vec3& pos, float radius, float length):
+	Parent(_quat,pos),
+	radius_(radius),
+	length_(length) {
 }
 
 
 
 MeshObject::MeshObject():
-	Parent(quat(), vec3())
-{
+	Parent(quat(), vec3()) {
 }
 
-MeshObject::MeshObject(const quat& pQuat, const vec3& pPos):
-	Parent(pQuat,pPos)
-{
+MeshObject::MeshObject(const quat& _quat, const vec3& pos):
+	Parent(_quat,pos) {
 }
 
 

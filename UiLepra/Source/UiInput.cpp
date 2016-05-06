@@ -5,201 +5,166 @@
 
 
 #include "pch.h"
-#include "../Include/UiInput.h"
-#include "../../Lepra/Include/Math.h"
+#include "../include/uiinput.h"
+#include "../../lepra/include/math.h"
 #include <math.h>
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-InputElement::InputElement(Type pType, Interpretation pInterpretation, int pTypeIndex, InputDevice* pParentDevice):
-	mValue(0),
-	mType(pType),
-	mInterpretation(pInterpretation),
-	mTypeIndex(pTypeIndex),
-	mParentDevice(pParentDevice),
-	mMin(+1),
-	mMax(-1)
-{
+InputElement::InputElement(Type type, Interpretation interpretation, int type_index, InputDevice* parent_device):
+	value_(0),
+	type_(type),
+	interpretation_(interpretation),
+	type_index_(type_index),
+	parent_device_(parent_device),
+	min_(+1),
+	max_(-1) {
 }
 
-InputElement::~InputElement()
-{
+InputElement::~InputElement() {
 	ClearFunctors();
 }
 
-InputElement::Type InputElement::GetType() const
-{
-	return (mType);
+InputElement::Type InputElement::GetType() const {
+	return (type_);
 }
 
-InputElement::Interpretation InputElement::GetInterpretation() const
-{
-	return (mInterpretation);
+InputElement::Interpretation InputElement::GetInterpretation() const {
+	return (interpretation_);
 }
 
-int InputElement::GetTypeIndex() const
-{
-	return (mTypeIndex);
+int InputElement::GetTypeIndex() const {
+	return (type_index_);
 }
 
-InputDevice* InputElement::GetParentDevice() const
-{
-	return (mParentDevice);
+InputDevice* InputElement::GetParentDevice() const {
+	return (parent_device_);
 }
 
-bool InputElement::GetBooleanValue(float pThreshold) const
-{
-	return (mValue >= pThreshold);
+bool InputElement::GetBooleanValue(float threshold) const {
+	return (value_ >= threshold);
 }
 
-float InputElement::GetValue() const
-{
-	return mValue;
+float InputElement::GetValue() const {
+	return value_;
 }
 
 
-void InputElement::SetValue(float pNewValue)
-{
-	static const float lInputEpsilon = 0.02f;
-	if (mInterpretation == RELATIVE_AXIS || ::fabs(pNewValue - mValue) > lInputEpsilon)
-	{
-		//::printf("%s(%i) = %f\n", GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
+void InputElement::SetValue(float new_value) {
+	static const float input_epsilon = 0.02f;
+	if (interpretation_ == kRelativeAxis || ::fabs(new_value - value_) > input_epsilon) {
+		//::printf("%s(%i) = %f\n", GetIdentifier().c_str(), GetTypeIndex(), new_value);
 		//mLog.Infof("%s(%i = %f\n"), GetIdentifier().c_str(), GetTypeIndex(), pNewValue);
 
-		mValue = pNewValue;
+		value_ = new_value;
 
 		TriggerFunctors();
 	}
 }
 
-void InputElement::SetValue(int pValue)
-{
+void InputElement::SetValue(int value) {
 	// Calibrate...
-	if (pValue < mMin)
-	{
-		mMin = pValue;
+	if (value < min_) {
+		min_ = value;
 	}
-	if (pValue > mMax)
-	{
-		mMax = pValue;
+	if (value > max_) {
+		max_ = value;
 	}
 
 	// Center relative axis.
-	if (GetInterpretation() == RELATIVE_AXIS)
-	{
-		if (mMax > -mMin)
-		{
-			mMin = -mMax;
+	if (GetInterpretation() == kRelativeAxis) {
+		if (max_ > -min_) {
+			min_ = -max_;
 		}
-		if (mMax < -mMin)
-		{
-			mMax = -mMin;
+		if (max_ < -min_) {
+			max_ = -min_;
 		}
 	}
 
-	if (GetType() == DIGITAL)
-	{
-		SetValue((float)pValue);
-	}
-	else if (mMin < mMax)
-	{
+	if (GetType() == kDigital) {
+		SetValue((float)value);
+	} else if (min_ < max_) {
 		// Scale to +-1.
-		SetValue((pValue*2.0f-(mMax+mMin)) / (float)(mMax-mMin));
+		SetValue((value*2.0f-(max_+min_)) / (float)(max_-min_));
 	}
 }
 
-void InputElement::AddValue(int pValue)
-{
-	const int lPrevValue = (mValue*(mMax-mMin) + (mMax+mMin)) / 2.0f;
-	SetValue(lPrevValue + pValue);
+void InputElement::AddValue(int value) {
+	const int prev_value = (value_*(max_-min_) + (max_+min_)) / 2.0f;
+	SetValue(prev_value + value);
 }
 
-const str& InputElement::GetIdentifier() const
-{
-	return mIdentifier;
+const str& InputElement::GetIdentifier() const {
+	return identifier_;
 }
 
-str InputElement::GetFullName() const
-{
-	str lId = GetIdentifier();
-	lId = strutil::ReplaceAll(lId, ' ', '_');
-	lId = strutil::ReplaceAll(lId, '-', '_');
-	return GetParentDevice()->GetUniqueIdentifier() + "." + lId;
+str InputElement::GetFullName() const {
+	str id = GetIdentifier();
+	id = strutil::ReplaceAll(id, ' ', '_');
+	id = strutil::ReplaceAll(id, '-', '_');
+	return GetParentDevice()->GetUniqueIdentifier() + "." + id;
 }
 
-str InputElement::GetName() const
-{
-	str lName;
-	switch (GetInterpretation())
-	{
-		case InputElement::ABSOLUTE_AXIS:	lName += "AbsoluteAxis";	break;
-		case InputElement::RELATIVE_AXIS:	lName += "RelativeAxis";	break;
-		default:				lName += "Button";		break;
+str InputElement::GetName() const {
+	str __name;
+	switch (GetInterpretation()) {
+		case InputElement::kAbsoluteAxis:	__name += "AbsoluteAxis";	break;
+		case InputElement::kRelativeAxis:	__name += "RelativeAxis";	break;
+		default:				__name += "Button";		break;
 	}
-	lName += strutil::IntToString(GetTypeIndex(), 10);
-	return (lName);
+	__name += strutil::IntToString(GetTypeIndex(), 10);
+	return (__name);
 }
 
-void InputElement::SetIdentifier(const str& pIdentifier)
-{
-	mIdentifier = pIdentifier;
+void InputElement::SetIdentifier(const str& identifier) {
+	identifier_ = identifier;
 }
 
-void InputElement::AddFunctor(InputFunctor* pFunctor)
-{
-	mFunctorArray.push_back(pFunctor);
+void InputElement::AddFunctor(InputFunctor* functor) {
+	functor_array_.push_back(functor);
 }
 
-void InputElement::ClearFunctors()
-{
-	for (FunctorArray::iterator x = mFunctorArray.begin(); x != mFunctorArray.end(); ++x)
-	{
+void InputElement::ClearFunctors() {
+	for (FunctorArray::iterator x = functor_array_.begin(); x != functor_array_.end(); ++x) {
 		delete (*x);
 	}
-	mFunctorArray.clear();
+	functor_array_.clear();
 }
 
-const InputElement::FunctorArray& InputElement::GetFunctorArray() const
-{
-	return mFunctorArray;
+const InputElement::FunctorArray& InputElement::GetFunctorArray() const {
+	return functor_array_;
 }
 
-void InputElement::TriggerFunctors()
-{
-	for (FunctorArray::iterator x = mFunctorArray.begin(); x != mFunctorArray.end(); ++x)
-	{
+void InputElement::TriggerFunctors() {
+	for (FunctorArray::iterator x = functor_array_.begin(); x != functor_array_.end(); ++x) {
 		(*x)->Call(this);
 	}
 }
 
-str InputElement::GetCalibration() const
-{
-	str lData;
-	lData += strutil::IntToString(mMin, 10);
-	lData += ", ";
-	lData += strutil::IntToString(mMax, 10);
-	return (lData);
+str InputElement::GetCalibration() const {
+	str _data;
+	_data += strutil::IntToString(min_, 10);
+	_data += ", ";
+	_data += strutil::IntToString(max_, 10);
+	return (_data);
 }
 
-bool InputElement::SetCalibration(const str& pData)
-{
-	bool lOk = false;
-	strutil::strvec lData = strutil::Split(pData, ", ");
-	if (lData.size() >= 2)
-	{
-		lOk = true;
-		lOk &= strutil::StringToInt(lData[0], mMin, 10);
-		lOk &= strutil::StringToInt(lData[1], mMax, 10);
+bool InputElement::SetCalibration(const str& data) {
+	bool ok = false;
+	strutil::strvec _data = strutil::Split(data, ", ");
+	if (_data.size() >= 2) {
+		ok = true;
+		ok &= strutil::StringToInt(_data[0], min_, 10);
+		ok &= strutil::StringToInt(_data[1], max_, 10);
 	}
-	return (lOk);
+	return (ok);
 }
 
-loginstance(UI_INPUT, InputElement);
+loginstance(kUiInput, InputElement);
 
 
 
@@ -207,149 +172,120 @@ loginstance(UI_INPUT, InputElement);
 
 
 
-InputDevice::InputDevice(InputManager* pManager):
-	mManager(pManager),
-	mInterpretation(TYPE_OTHER),
-	mTypeIndex(-1),
-	mNumDigitalElements(-1),
-	mNumAnalogueElements(-1),
-	mActive(false)
-{
+InputDevice::InputDevice(InputManager* manager):
+	manager_(manager),
+	interpretation_(kTypeOther),
+	type_index_(-1),
+	num_digital_elements_(-1),
+	num_analogue_elements_(-1),
+	active_(false) {
 }
 
-InputDevice::~InputDevice()
-{
+InputDevice::~InputDevice() {
 	ElementArray::const_iterator x;
-	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
-	{
-		InputElement* lElement = *x;
-		delete lElement;
+	for (x = element_array_.begin(); x != element_array_.end(); ++x) {
+		InputElement* _element = *x;
+		delete _element;
 	}
-	mElementArray.clear();
+	element_array_.clear();
 }
 
-bool InputDevice::IsOwnedByManager() const
-{
+bool InputDevice::IsOwnedByManager() const {
 	return true;
 }
 
-InputDevice::Interpretation InputDevice::GetInterpretation() const
-{
-	return (mInterpretation);
+InputDevice::Interpretation InputDevice::GetInterpretation() const {
+	return (interpretation_);
 }
 
-int InputDevice::GetTypeIndex() const
-{
-	return (mTypeIndex);
+int InputDevice::GetTypeIndex() const {
+	return (type_index_);
 }
 
-void InputDevice::SetInterpretation(Interpretation pInterpretation, int pTypeIndex)
-{
-	mInterpretation = pInterpretation;
-	mTypeIndex = pTypeIndex;
+void InputDevice::SetInterpretation(Interpretation interpretation, int type_index) {
+	interpretation_ = interpretation;
+	type_index_ = type_index;
 }
 
-InputManager* InputDevice::GetManager() const
-{
-	return (mManager);
+InputManager* InputDevice::GetManager() const {
+	return (manager_);
 }
 
-bool InputDevice::IsActive()
-{
-	return mActive;
+bool InputDevice::IsActive() {
+	return active_;
 }
 
-void InputDevice::SetActive(bool pActive)
-{
-	mActive = pActive;
+void InputDevice::SetActive(bool active) {
+	active_ = active;
 }
 
-const InputDevice::ElementArray& InputDevice::GetElements() const
-{
-	return mElementArray;
+const InputDevice::ElementArray& InputDevice::GetElements() const {
+	return element_array_;
 }
 
-InputElement* InputDevice::GetElement(unsigned pElementIndex) const
-{
-	return mElementArray[pElementIndex];
+InputElement* InputDevice::GetElement(unsigned element_index) const {
+	return element_array_[element_index];
 }
 
-unsigned InputDevice::GetNumElements() const
-{
-	return ((unsigned)mElementArray.size());
+unsigned InputDevice::GetNumElements() const {
+	return ((unsigned)element_array_.size());
 }
 
-unsigned InputDevice::GetNumDigitalElements() const
-{
-	if (mNumDigitalElements == -1)
-	{
+unsigned InputDevice::GetNumDigitalElements() const {
+	if (num_digital_elements_ == -1) {
 		CountElements();
 	}
-	return mNumDigitalElements;
+	return num_digital_elements_;
 }
 
-unsigned InputDevice::GetNumAnalogueElements() const
-{
-	if (mNumAnalogueElements == -1)
-	{
+unsigned InputDevice::GetNumAnalogueElements() const {
+	if (num_analogue_elements_ == -1) {
 		CountElements();
 	}
-	return mNumAnalogueElements;
+	return num_analogue_elements_;
 }
 
-void InputDevice::CountElements() const
-{
-	mNumDigitalElements  = 0;
-	mNumAnalogueElements = 0;
+void InputDevice::CountElements() const {
+	num_digital_elements_  = 0;
+	num_analogue_elements_ = 0;
 
 	ElementArray::const_iterator x;
-	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
-	{
-		InputElement* lElement = *x;
+	for (x = element_array_.begin(); x != element_array_.end(); ++x) {
+		InputElement* _element = *x;
 
-		if (lElement->GetType() == InputElement::DIGITAL)
-		{
-			mNumDigitalElements++;
-		}
-		else if(lElement->GetType() == InputElement::ANALOGUE)
-		{
-			mNumAnalogueElements++;
+		if (_element->GetType() == InputElement::kDigital) {
+			num_digital_elements_++;
+		} else if(_element->GetType() == InputElement::kAnalogue) {
+			num_analogue_elements_++;
 		}
 	}
 }
 
-void InputDevice::SetIdentifier(const str& pIdentifier)
-{
-	mIdentifier = pIdentifier;
-	mUniqueIdentifier = mIdentifier + strutil::IntToString(GetManager()->QueryIdentifierCount(mIdentifier), 10);
-	mUniqueIdentifier = strutil::ReplaceAll(mUniqueIdentifier, ' ', '_');
-	mUniqueIdentifier = strutil::ReplaceAll(mUniqueIdentifier, '-', '_');
+void InputDevice::SetIdentifier(const str& identifier) {
+	identifier_ = identifier;
+	unique_identifier_ = identifier_ + strutil::IntToString(GetManager()->QueryIdentifierCount(identifier_), 10);
+	unique_identifier_ = strutil::ReplaceAll(unique_identifier_, ' ', '_');
+	unique_identifier_ = strutil::ReplaceAll(unique_identifier_, '-', '_');
 }
 
-void InputDevice::SetUniqueIdentifier(const str& pIdentifier)
-{
-	mUniqueIdentifier = pIdentifier;
+void InputDevice::SetUniqueIdentifier(const str& identifier) {
+	unique_identifier_ = identifier;
 }
 
-const str& InputDevice::GetIdentifier() const
-{
-	return mIdentifier;
+const str& InputDevice::GetIdentifier() const {
+	return identifier_;
 }
 
-const str& InputDevice::GetUniqueIdentifier() const
-{
-	return mUniqueIdentifier;
+const str& InputDevice::GetUniqueIdentifier() const {
+	return unique_identifier_;
 }
 
-const InputElement* InputDevice::GetElement(const str& pIdentifier) const
-{
+const InputElement* InputDevice::GetElement(const str& identifier) const {
 	ElementArray::const_iterator x;
-	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
-	{
-		InputElement* lElement = *x;
-		if (lElement->GetIdentifier() == pIdentifier)
-		{
-			return lElement;
+	for (x = element_array_.begin(); x != element_array_.end(); ++x) {
+		InputElement* _element = *x;
+		if (_element->GetIdentifier() == identifier) {
+			return _element;
 		}
 	}
 
@@ -357,36 +293,30 @@ const InputElement* InputDevice::GetElement(const str& pIdentifier) const
 }
 
 
-InputElement* InputDevice::GetElement(const str& pIdentifier)
-{
+InputElement* InputDevice::GetElement(const str& identifier) {
 	ElementArray::iterator x;
 
-	for (x = mElementArray.begin();
-		x != mElementArray.end();
-		++x)
-	{
-		InputElement* lElement = *x;
-		if (lElement->GetIdentifier() == pIdentifier)
-		{
-			return lElement;
+	for (x = element_array_.begin();
+		x != element_array_.end();
+		++x) {
+		InputElement* _element = *x;
+		if (_element->GetIdentifier() == identifier) {
+			return _element;
 		}
 	}
 
 	return 0;
 }
 
-unsigned InputDevice::GetElementIndex(InputElement* pElement) const
-{
+unsigned InputDevice::GetElementIndex(InputElement* element) const {
 	ElementArray::const_iterator x;
 
 	int i = 0;
-	for (x = mElementArray.begin();
-		x != mElementArray.end();
-		++x)
-	{
-		InputElement* lElement = *x;
-		if (lElement == pElement)
-		{
+	for (x = element_array_.begin();
+		x != element_array_.end();
+		++x) {
+		InputElement* _element = *x;
+		if (_element == element) {
 			return i;
 		}
 		i++;
@@ -395,46 +325,38 @@ unsigned InputDevice::GetElementIndex(InputElement* pElement) const
 	return ((unsigned)-1);
 }
 
-InputElement* InputDevice::GetButton(unsigned pButtonIndex) const
-{
+InputElement* InputDevice::GetButton(unsigned button_index) const {
 	ElementArray::const_iterator x;
 
-	unsigned lCurrentButton = 0;
-	for (x = mElementArray.begin();
-		x != mElementArray.end();
-		++x)
-	{
-		InputElement* lElement = *x;
-		if (lElement->GetType() == InputElement::DIGITAL)
-		{
-			if (lCurrentButton == pButtonIndex)
-			{
-				return lElement;
+	unsigned current_button = 0;
+	for (x = element_array_.begin();
+		x != element_array_.end();
+		++x) {
+		InputElement* _element = *x;
+		if (_element->GetType() == InputElement::kDigital) {
+			if (current_button == button_index) {
+				return _element;
 			}
-			++lCurrentButton;
+			++current_button;
 		}
 	}
 
 	return 0;
 }
 
-InputElement* InputDevice::GetAxis(unsigned pAxisIndex) const
-{
+InputElement* InputDevice::GetAxis(unsigned axis_index) const {
 	ElementArray::const_iterator x;
 
-	unsigned lCurrentAxis = 0;
-	for (x = mElementArray.begin();
-		x != mElementArray.end();
-		++x)
-	{
-		InputElement* lElement = *x;
-		if (lElement->GetType() == InputElement::ANALOGUE)
-		{
-			if (lCurrentAxis == pAxisIndex)
-			{
-				return lElement;
+	unsigned current_axis = 0;
+	for (x = element_array_.begin();
+		x != element_array_.end();
+		++x) {
+		InputElement* _element = *x;
+		if (_element->GetType() == InputElement::kAnalogue) {
+			if (current_axis == axis_index) {
+				return _element;
 			}
-			++lCurrentAxis;
+			++current_axis;
 		}
 	}
 
@@ -443,63 +365,52 @@ InputElement* InputDevice::GetAxis(unsigned pAxisIndex) const
 
 
 
-void InputDevice::AddFunctor(InputFunctor* pFunctor)
-{
+void InputDevice::AddFunctor(InputFunctor* functor) {
 	ElementArray::iterator x;
-	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
-	{
-		InputElement* lElement = *x;
-		lElement->AddFunctor(pFunctor->CreateCopy());
+	for (x = element_array_.begin(); x != element_array_.end(); ++x) {
+		InputElement* _element = *x;
+		_element->AddFunctor(functor->CreateCopy());
 	}
-	delete (pFunctor);
+	delete (functor);
 }
 
-void InputDevice::ClearFunctors()
-{
+void InputDevice::ClearFunctors() {
 	ElementArray::iterator x;
-	for (x = mElementArray.begin(); x != mElementArray.end(); ++x)
-	{
-		InputElement* lElement = *x;
-		lElement->ClearFunctors();
+	for (x = element_array_.begin(); x != element_array_.end(); ++x) {
+		InputElement* _element = *x;
+		_element->ClearFunctors();
 	}
 }
 
-InputDevice::CalibrationData InputDevice::GetCalibration() const
-{
-	CalibrationData lData;
-	ElementArray::const_iterator x = mElementArray.begin();
-	for (; x != mElementArray.end(); ++x)
-	{
-		InputElement* lElement = *x;
-		if (lElement->GetInterpretation() == InputElement::ABSOLUTE_AXIS)
-		{
-			lData.push_back(CalibrationElement(lElement->GetName(), lElement->GetCalibration()));
+InputDevice::CalibrationData InputDevice::GetCalibration() const {
+	CalibrationData _data;
+	ElementArray::const_iterator x = element_array_.begin();
+	for (; x != element_array_.end(); ++x) {
+		InputElement* _element = *x;
+		if (_element->GetInterpretation() == InputElement::kAbsoluteAxis) {
+			_data.push_back(CalibrationElement(_element->GetName(), _element->GetCalibration()));
 		}
 	}
-	return (lData);
+	return (_data);
 }
 
-bool InputDevice::SetCalibration(const CalibrationData& pData)
-{
-	bool lOk = true;
-	CalibrationData::const_iterator y = pData.begin();
-	for (; y != pData.end(); ++y)
-	{
-		const CalibrationElement& lCalibration = *y;
-		ElementArray::iterator x = mElementArray.begin();
-		for (; x != mElementArray.end(); ++x)
-		{
-			InputElement* lElement = *x;
-			if (lElement->GetName() == lCalibration.first)
-			{
-				lOk &= lElement->SetCalibration(lCalibration.second);
+bool InputDevice::SetCalibration(const CalibrationData& data) {
+	bool ok = true;
+	CalibrationData::const_iterator y = data.begin();
+	for (; y != data.end(); ++y) {
+		const CalibrationElement& calibration = *y;
+		ElementArray::iterator x = element_array_.begin();
+		for (; x != element_array_.end(); ++x) {
+			InputElement* _element = *x;
+			if (_element->GetName() == calibration.first) {
+				ok &= _element->SetCalibration(calibration.second);
 			}
 		}
 	}
-	return (lOk);
+	return (ok);
 }
 
-loginstance(UI_INPUT, InputDevice);
+loginstance(kUiInput, InputDevice);
 
 
 
@@ -507,169 +418,145 @@ loginstance(UI_INPUT, InputDevice);
 
 
 
-InputManager::InputManager()
-{
-	::memset(mKeyDown, 0, sizeof(mKeyDown));
-	mMouseX = 0;
-	mMouseY = 0;
-	mIsCursorVisible = true;
+InputManager::InputManager() {
+	::memset(key_down_, 0, sizeof(key_down_));
+	mouse_x_ = 0;
+	mouse_y_ = 0;
+	is_cursor_visible_ = true;
 }
 
-InputManager::~InputManager()
-{
+InputManager::~InputManager() {
 	DeviceList::iterator x;
-	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
-	{
-		InputDevice* lDevice = *x;
-		if (lDevice->IsOwnedByManager())
-		{
-			delete lDevice;
+	for (x = device_list_.begin(); x != device_list_.end(); ++x) {
+		InputDevice* _device = *x;
+		if (_device->IsOwnedByManager()) {
+			delete _device;
 		}
 	}
-	mDeviceList.clear();
+	device_list_.clear();
 }
 
-const InputManager::DeviceList& InputManager::GetDeviceList() const
-{
-	return (mDeviceList);
+const InputManager::DeviceList& InputManager::GetDeviceList() const {
+	return (device_list_);
 }
 
-void InputManager::AddTextInputObserver(TextInputObserver* pListener)
-{
-	mTextObserverList.insert(pListener);
+void InputManager::AddTextInputObserver(TextInputObserver* listener) {
+	text_observer_list_.insert(listener);
 }
 
-void InputManager::RemoveTextInputObserver(TextInputObserver* pListener)
-{
-	mTextObserverList.erase(pListener);
+void InputManager::RemoveTextInputObserver(TextInputObserver* listener) {
+	text_observer_list_.erase(listener);
 }
 
-void InputManager::AddKeyCodeInputObserver(KeyCodeInputObserver* pListener)
-{
-	mKeyCodeObserverList.insert(pListener);
+void InputManager::AddKeyCodeInputObserver(KeyCodeInputObserver* listener) {
+	key_code_observer_list_.insert(listener);
 }
 
-void InputManager::RemoveKeyCodeInputObserver(KeyCodeInputObserver* pListener)
-{
-	mKeyCodeObserverList.erase(pListener);
+void InputManager::RemoveKeyCodeInputObserver(KeyCodeInputObserver* listener) {
+	key_code_observer_list_.erase(listener);
 }
 
-void InputManager::AddMouseInputObserver(MouseInputObserver* pListener)
-{
-	mMouseObserverList.insert(pListener);
+void InputManager::AddMouseInputObserver(MouseInputObserver* listener) {
+	mouse_observer_list_.insert(listener);
 }
 
-void InputManager::RemoveMouseInputObserver(MouseInputObserver* pListener)
-{
-	mMouseObserverList.erase(pListener);
+void InputManager::RemoveMouseInputObserver(MouseInputObserver* listener) {
+	mouse_observer_list_.erase(listener);
 }
 
-void InputManager::GetMousePosition(int& x, int& y) const
-{
-	x = mMouseX;
-	y = mMouseY;
+void InputManager::GetMousePosition(int& x, int& y) const {
+	x = mouse_x_;
+	y = mouse_y_;
 }
 
-void InputManager::SetMousePosition(int x, int y)
-{
-	mMouseX = x;
-	mMouseY = y;
+void InputManager::SetMousePosition(int x, int y) {
+	mouse_x_ = x;
+	mouse_y_ = y;
 }
 
-bool InputManager::NotifyOnChar(wchar_t pChar)
-{
-	bool lConsumed = false;
-	TextObserverList::iterator x = mTextObserverList.begin();
-	for (; !lConsumed && x != mTextObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnChar(pChar);
+bool InputManager::NotifyOnChar(wchar_t c) {
+	bool consumed = false;
+	TextObserverList::iterator x = text_observer_list_.begin();
+	for (; !consumed && x != text_observer_list_.end(); ++x) {
+		consumed = (*x)->OnChar(c);
 	}
-	return (lConsumed);
+	return (consumed);
 }
 
-bool InputManager::NotifyOnKeyDown(KeyCode pKeyCode)
-{
-	bool lConsumed = false;
-	KeyCodeObserverList::iterator x = mKeyCodeObserverList.begin();
-	for (; !lConsumed && x != mKeyCodeObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnKeyDown(pKeyCode);
+bool InputManager::NotifyOnKeyDown(KeyCode key_code) {
+	bool consumed = false;
+	KeyCodeObserverList::iterator x = key_code_observer_list_.begin();
+	for (; !consumed && x != key_code_observer_list_.end(); ++x) {
+		consumed = (*x)->OnKeyDown(key_code);
 	}
-	return (lConsumed);
+	return (consumed);
 }
 
-bool InputManager::NotifyOnKeyUp(KeyCode pKeyCode)
-{
-	bool lConsumed = false;
-	KeyCodeObserverList::iterator x = mKeyCodeObserverList.begin();
-	for (; !lConsumed && x != mKeyCodeObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnKeyUp(pKeyCode);
+bool InputManager::NotifyOnKeyUp(KeyCode key_code) {
+	bool consumed = false;
+	KeyCodeObserverList::iterator x = key_code_observer_list_.begin();
+	for (; !consumed && x != key_code_observer_list_.end(); ++x) {
+		consumed = (*x)->OnKeyUp(key_code);
 	}
-	return (lConsumed);
+	return (consumed);
 }
 
-bool InputManager::NotifyMouseDoubleClick()
-{
-	bool lConsumed = false;
-	MouseObserverList::iterator x = mMouseObserverList.begin();
-	for (; !lConsumed && x != mMouseObserverList.end(); ++x)
-	{
-		lConsumed = (*x)->OnDoubleClick();
+bool InputManager::NotifyMouseDoubleClick() {
+	bool consumed = false;
+	MouseObserverList::iterator x = mouse_observer_list_.begin();
+	for (; !consumed && x != mouse_observer_list_.end(); ++x) {
+		consumed = (*x)->OnDoubleClick();
 	}
-	return (lConsumed);
+	return (consumed);
 }
 
-bool InputManager::ReadKey(KeyCode pKeyCode)
-{
-	return (mKeyDown[(int)pKeyCode]);
+bool InputManager::ReadKey(KeyCode key_code) {
+	return (key_down_[(int)key_code]);
 }
 
-str InputManager::GetKeyName(KeyCode pKeyCode)
-{
-	const char* lKeyName = 0;
-#define X(name)	case IN_KBD_##name:	lKeyName = #name;	break
-	switch (pKeyCode)
-	{
-		X(BACKSPACE);
-		X(TAB);
-		X(ENTER);
-		X(LSHIFT);
-		X(LCTRL);
-		X(LALT);
-		X(PAUSE);
-		X(CAPS_LOCK);
-		X(ESC);
-		X(SPACE);
-		X(PGUP);
-		X(PGDOWN);
-		X(END);
-		X(HOME);
-		X(LEFT);
-		X(UP);
-		X(RIGHT);
-		X(DOWN);
-		X(PRINT_SCREEN);
-		X(INSERT);
-		X(DEL);
-		X(LOS);
-		X(ROS);
-		X(CONTEXT_MENU);
-		X(NUMPAD_0);
-		X(NUMPAD_1);
-		X(NUMPAD_2);
-		X(NUMPAD_3);
-		X(NUMPAD_4);
-		X(NUMPAD_5);
-		X(NUMPAD_6);
-		X(NUMPAD_7);
-		X(NUMPAD_8);
-		X(NUMPAD_9);
-		X(NUMPAD_MUL);
-		X(NUMPAD_PLUS);
-		X(NUMPAD_MINUS);
-		X(NUMPAD_DOT);
-		X(NUMPAD_DIV);
+str InputManager::GetKeyName(KeyCode key_code) {
+	const char* key_name = 0;
+#define X(name)	case kInKbd##name:	key_name = #name;	break
+	switch (key_code) {
+		X(Backspace);
+		X(Tab);
+		X(Enter);
+		X(Lshift);
+		X(Lctrl);
+		X(Lalt);
+		X(Pause);
+		X(CapsLock);
+		X(Esc);
+		X(Space);
+		X(Pgup);
+		X(Pgdown);
+		X(End);
+		X(Home);
+		X(Left);
+		X(Up);
+		X(Right);
+		X(Down);
+		X(PrintScreen);
+		X(Insert);
+		X(Del);
+		X(Los);
+		X(Ros);
+		X(ContextMenu);
+		X(Numpad0);
+		X(Numpad1);
+		X(Numpad2);
+		X(Numpad3);
+		X(Numpad4);
+		X(Numpad5);
+		X(Numpad6);
+		X(Numpad7);
+		X(Numpad8);
+		X(Numpad9);
+		X(NumpadMul);
+		X(NumpadPlus);
+		X(NumpadMinus);
+		X(NumpadDot);
+		X(NumpadDiv);
 		X(F1);
 		X(F2);
 		X(F3);
@@ -682,176 +569,147 @@ str InputManager::GetKeyName(KeyCode pKeyCode)
 		X(F10);
 		X(F11);
 		X(F12);
-		X(NUM_LOCK);
-		X(SCROLL_LOCK);
-		X(QUICK_BACK);
-		X(QUICK_FORWARD);
-		X(QUICK_REFRESH);
-		X(QUICK_STOP);
-		X(QUICK_SEARCH);
-		X(QUICK_FAVORITES);
-		X(QUICK_WEB_HOME);
-		X(QUICK_SOUND_MUTE);
-		X(QUICK_DECR_VOLUME);
-		X(QUICK_INCR_VOLUME);
-		X(QUICK_NAV_RIGHT);
-		X(QUICK_NAV_LEFT);
-		X(QUICK_NAV_STOP);
-		X(QUICK_NAV_PLAYPAUSE);
-		X(QUICK_MAIL);
-		X(QUICK_MEDIA);
-		X(QUICK_MY_COMPUTER);
-		X(QUICK_CALCULATOR);
-		X(DIAERESIS);
-		X(PLUS);
-		X(COMMA);
-		X(MINUS);
-		X(DOT);
-		X(APOSTROPHE);
-		X(ACUTE);
-		X(PARAGRAPH);
-		X(COMPARE);
-		X(RSHIFT);
-		X(RCTRL);
-		X(RALT);
+		X(NumLock);
+		X(ScrollLock);
+		X(QuickBack);
+		X(QuickForward);
+		X(QuickRefresh);
+		X(QuickStop);
+		X(QuickSearch);
+		X(QuickFavorites);
+		X(QuickWebHome);
+		X(QuickSoundMute);
+		X(QuickDecrVolume);
+		X(QuickIncrVolume);
+		X(QuickNavRight);
+		X(QuickNavLeft);
+		X(QuickNavStop);
+		X(QuickNavPlaypause);
+		X(QuickMail);
+		X(QuickMedia);
+		X(QuickMyComputer);
+		X(QuickCalculator);
+		X(Diaeresis);
+		X(Plus);
+		X(Comma);
+		X(Minus);
+		X(Dot);
+		X(Apostrophe);
+		X(Acute);
+		X(Paragraph);
+		X(Compare);
+		X(Rshift);
+		X(Rctrl);
+		X(Ralt);
 		default: break;
 	}
 #undef X
-	if (lKeyName)
-	{
-		return (lKeyName);
+	if (key_name) {
+		return (key_name);
 	}
-	return (str(1, (char)pKeyCode));
+	return (str(1, (char)key_code));
 }
 
-void InputManager::SetKey(KeyCode pKeyCode, bool pValue)
-{
-	mKeyDown[(unsigned char)pKeyCode] = pValue;
+void InputManager::SetKey(KeyCode key_code, bool value) {
+	key_down_[(unsigned char)key_code] = value;
 }
 
-void InputManager::PreProcessEvents()
-{
+void InputManager::PreProcessEvents() {
 }
 
-void InputManager::PollEvents()
-{
+void InputManager::PollEvents() {
 	DeviceList::iterator x;
-	for (x = mDeviceList.begin(); 
-		x != mDeviceList.end(); 
-		++x)
-	{
-		InputDevice* lDevice = *x;
-		lDevice->PollEvents();
+	for (x = device_list_.begin();
+		x != device_list_.end();
+		++x) {
+		InputDevice* _device = *x;
+		_device->PollEvents();
 	}
 }
 
-void InputManager::AddFunctor(InputFunctor* pFunctor)
-{
+void InputManager::AddFunctor(InputFunctor* functor) {
 	DeviceList::iterator x;
-	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
-	{
-		InputDevice* lDevice = *x;
-		lDevice->AddFunctor(pFunctor->CreateCopy());
+	for (x = device_list_.begin(); x != device_list_.end(); ++x) {
+		InputDevice* _device = *x;
+		_device->AddFunctor(functor->CreateCopy());
 	}
-	delete (pFunctor);
+	delete (functor);
 }
 
-void InputManager::ClearFunctors()
-{
+void InputManager::ClearFunctors() {
 	DeviceList::iterator x;
-	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
-	{
-		InputDevice* lDevice = *x;
-		lDevice->ClearFunctors();
+	for (x = device_list_.begin(); x != device_list_.end(); ++x) {
+		InputDevice* _device = *x;
+		_device->ClearFunctors();
 	}
 }
 
-void InputManager::AddInputDevice(InputDevice* pDevice)
-{
+void InputManager::AddInputDevice(InputDevice* device) {
 	// Clone the functors if any are present already.
 	DeviceList::iterator x;
-	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
-	{
-		const InputDevice* lDevice = *x;
-		if (lDevice->GetNumElements() <= 0)
-		{
+	for (x = device_list_.begin(); x != device_list_.end(); ++x) {
+		const InputDevice* _device = *x;
+		if (_device->GetNumElements() <= 0) {
 			continue;
 		}
-		const InputElement* lElement = lDevice->GetElement(0);
-		if (lElement)
-		{
+		const InputElement* _element = _device->GetElement(0);
+		if (_element) {
 			InputElement::FunctorArray::const_iterator z;
-			const InputElement::FunctorArray& lFunctorArray = lElement->GetFunctorArray();
-			for (z = lFunctorArray.begin(); z != lFunctorArray.end(); ++z)
-			{
-				pDevice->AddFunctor((*z)->CreateCopy());
-			}
-			break;
+			const InputElement::FunctorArray& functor_array = _element->GetFunctorArray();
+			for (z = functor_array.begin(); z != functor_array.end(); ++z) {
+				device->AddFunctor((*z)->CreateCopy());
+			} break;
 		}
 	}
 
-	mDeviceList.push_back(pDevice);
+	device_list_.push_back(device);
 }
 
-void InputManager::RemoveInputDevice(InputDevice* pDevice)
-{
-	mDeviceList.remove(pDevice);
+void InputManager::RemoveInputDevice(InputDevice* device) {
+	device_list_.remove(device);
 }
 
-void InputManager::ActivateAll()
-{
+void InputManager::ActivateAll() {
 	DeviceList::iterator x;
-	for (x = mDeviceList.begin(); x != mDeviceList.end(); ++x)
-	{
-		InputDevice* lDevice = *x;
-		lDevice->Activate();
+	for (x = device_list_.begin(); x != device_list_.end(); ++x) {
+		InputDevice* _device = *x;
+		_device->Activate();
 	}
 }
 
-void InputManager::ReleaseAll()
-{
+void InputManager::ReleaseAll() {
 	DeviceList::iterator x;
-	for (x = mDeviceList.begin(); 
-		x != mDeviceList.end(); 
-		++x)
-	{
-		InputDevice* lDevice = *x;
-		lDevice->Release();
+	for (x = device_list_.begin();
+		x != device_list_.end();
+		++x) {
+		InputDevice* _device = *x;
+		_device->Release();
 	}
 }
 
-void InputManager::ActivateKeyboard()
-{
+void InputManager::ActivateKeyboard() {
 }
 
-void InputManager::ReleaseKeyboard()
-{
+void InputManager::ReleaseKeyboard() {
 }
 
-bool InputManager::IsCursorVisible() const
-{
-	return mIsCursorVisible;
+bool InputManager::IsCursorVisible() const {
+	return is_cursor_visible_;
 }
 
-InputDevice* InputManager::FindDevice(const str& pDeviceIdentifier, int pN)
-{
-	int lN = 0;
+InputDevice* InputManager::FindDevice(const str& device_identifier, int n) {
+	int _n = 0;
 
 	DeviceList::iterator x;
-	for (x = mDeviceList.begin(); 
-		x != mDeviceList.end(); 
-		++x)
-	{
-		InputDevice* lDevice = *x;
-		if (pDeviceIdentifier == lDevice->GetIdentifier())
-		{
-			if (lN == pN)
-			{
-				return lDevice;
-			}
-			else
-			{
-				lN++;
+	for (x = device_list_.begin();
+		x != device_list_.end();
+		++x) {
+		InputDevice* _device = *x;
+		if (device_identifier == _device->GetIdentifier()) {
+			if (_n == n) {
+				return _device;
+			} else {
+				_n++;
 			}
 		}
 	}
@@ -859,47 +717,40 @@ InputDevice* InputManager::FindDevice(const str& pDeviceIdentifier, int pN)
 	return 0;
 }
 
-int InputManager::QueryIdentifierCount(const str& pDeviceIdentifier) const
-{
-	int lCount = 0;
-	DeviceList::const_iterator x = mDeviceList.begin();
-	for (; x != mDeviceList.end(); ++x)
-	{
-		InputDevice* lDevice = *x;
-		if (pDeviceIdentifier == lDevice->GetIdentifier())
-		{
-			++lCount;
+int InputManager::QueryIdentifierCount(const str& device_identifier) const {
+	int count = 0;
+	DeviceList::const_iterator x = device_list_.begin();
+	for (; x != device_list_.end(); ++x) {
+		InputDevice* _device = *x;
+		if (device_identifier == _device->GetIdentifier()) {
+			++count;
 		}
 	}
 
-	return lCount;
+	return count;
 }
 
-unsigned InputManager::GetDeviceIndex(InputDevice* pDevice) const
-{
-	int lCount = 0;
+unsigned InputManager::GetDeviceIndex(InputDevice* device) const {
+	int count = 0;
 
 	DeviceList::const_iterator x;
-	for (x = mDeviceList.begin(); 
-		x != mDeviceList.end(); 
-		++x)
-	{
-		InputDevice* lDevice = *x;
-		if (pDevice->GetIdentifier() == lDevice->GetIdentifier())
-		{
-			if (pDevice == lDevice)
-			{
-				return lCount;
+	for (x = device_list_.begin();
+		x != device_list_.end();
+		++x) {
+		InputDevice* _device = *x;
+		if (device->GetIdentifier() == _device->GetIdentifier()) {
+			if (device == _device) {
+				return count;
 			}
 
-			lCount++;
+			count++;
 		}
 	}
 
 	return 0;
 }
 
-loginstance(UI_INPUT, InputManager);
+loginstance(kUiInput, InputManager);
 
 
 

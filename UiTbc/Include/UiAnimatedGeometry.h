@@ -6,47 +6,43 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Vector3D.h"
-#include "../../Tbc/Include/GeometryBase.h"
-#include "UiTbc.h"
+#include "../../lepra/include/vector3d.h"
+#include "../../tbc/include/geometrybase.h"
+#include "uitbc.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 class BoneHierarchy;
 }
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
-class AnimatedGeometry : public Tbc::GeometryBase
-{
+class AnimatedGeometry : public tbc::GeometryBase {
 public:
-	struct BoneWeightGroup
-	{
+	struct BoneWeightGroup {
 		static const int MAX_BONES_PER_VERTEX = 4;	// TODO: move this constant out, make it more global.
-		int mBoneCount;
-		int mBoneIndexArray[MAX_BONES_PER_VERTEX];
-		int mVectorIndexCount;		// Used both for vertices and normals.
-		int* mVectorIndexArray;	// Used both for vertices and normals.
-		float* mVectorWeightArray;	// Used both for vertices and normals.
+		int bone_count_;
+		int bone_index_array_[MAX_BONES_PER_VERTEX];
+		int vector_index_count_;		// Used both for vertices and normals.
+		int* vector_index_array_;	// Used both for vertices and normals.
+		float* vector_weight_array_;	// Used both for vertices and normals.
 	};
 
 	AnimatedGeometry();
 	virtual ~AnimatedGeometry();
 
-	void SetGeometry(Tbc::GeometryBase* pGeometry);
+	void SetGeometry(tbc::GeometryBase* geometry);
 
 	// Takes ownership of the allocated indices and weights.
-	void AddBoneWeights(BoneWeightGroup& pWeights);
+	void AddBoneWeights(BoneWeightGroup& weights);
 	void FreeAllBoneWeights();
 	int GetBoneWeightGroupCount() const;
-	const BoneWeightGroup& GetBoneWeightGroup(int pBoneWeightGroupIndex) const;
+	const BoneWeightGroup& GetBoneWeightGroup(int bone_weight_group_index) const;
 
-	void SetBoneHierarchy(Tbc::BoneHierarchy* pBones);	// TODO: replace this with user resource object?
+	void SetBoneHierarchy(tbc::BoneHierarchy* bones);	// TODO: replace this with user resource object?
 
 	void UpdateAnimatedGeometry();
 
@@ -61,26 +57,26 @@ public:
 	unsigned int GetUVSetCount()    const;
 
 	float*         GetVertexData() const;
-	float*         GetUVData(unsigned int pUVSet) const;
+	float*         GetUVData(unsigned int uv_set) const;
 	vtx_idx_t*     GetIndexData() const;
 	uint8*         GetColorData() const;
 	float*         GetNormalData() const;
 
 	ColorFormat GetColorFormat() const;
 
-	Tbc::GeometryBase* GetOriginalGeometry();
+	tbc::GeometryBase* GetOriginalGeometry();
 
 protected:
 private:
-	Tbc::GeometryBase* mOriginalGeometry;
+	tbc::GeometryBase* original_geometry_;
 
-	Tbc::BoneHierarchy* mBones;
+	tbc::BoneHierarchy* bones_;
 
-	int mVertexCount;
-	float* mVertexData;
-	float* mNormalData;
-	int mBoneWeightGroupCount;
-	BoneWeightGroup* mBoneWeightGroupArray;
+	int vertex_count_;
+	float* vertex_data_;
+	float* normal_data_;
+	int bone_weight_group_count_;
+	BoneWeightGroup* bone_weight_group_array_;
 };
 
 

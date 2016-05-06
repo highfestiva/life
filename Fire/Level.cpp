@@ -1,67 +1,56 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Level.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ContextPath.h"
-#include "../Cure/Include/GameManager.h"
+#include "level.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/contextpath.h"
+#include "../cure/include/gamemanager.h"
 
 
 
-namespace Fire
-{
+namespace Fire {
 
 
 
-Level::Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Cure::ContextForceListener* pGravelEmitter):
-	Parent(pResourceManager, pClassId, pUiManager, pGravelEmitter),
-	mPath(0),
-	mLevelSpeed(1)
-{
+Level::Level(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, cure::ContextForceListener* gravel_emitter):
+	Parent(resource_manager, class_id, ui_manager, gravel_emitter),
+	path_(0),
+	level_speed_(1) {
 }
 
-Level::~Level()
-{
+Level::~Level() {
 }
 
-void Level::OnLoaded()
-{
+void Level::OnLoaded() {
 	Parent::OnLoaded();
 
-	const Tbc::ChunkyClass::Tag* lSpeedTag = FindTag("driver", 1, 0);
-	if (lSpeedTag)
-	{
-		mLevelSpeed = lSpeedTag->mFloatValueList[0];
+	const tbc::ChunkyClass::Tag* speed_tag = FindTag("driver", 1, 0);
+	if (speed_tag) {
+		level_speed_ = speed_tag->float_value_list_[0];
 	}
-	const Tbc::ChunkyClass::Tag* lGravityTag = FindTag("behavior", 3, 0);
-	if (lGravityTag)
-	{
-		vec3 lGravity(lGravityTag->mFloatValueList[0], lGravityTag->mFloatValueList[1], lGravityTag->mFloatValueList[2]);
-		mManager->GetGameManager()->GetPhysicsManager()->SetGravity(lGravity);
-	}
-	else
-	{
+	const tbc::ChunkyClass::Tag* gravity_tag = FindTag("behavior", 3, 0);
+	if (gravity_tag) {
+		vec3 gravity(gravity_tag->float_value_list_[0], gravity_tag->float_value_list_[1], gravity_tag->float_value_list_[2]);
+		manager_->GetGameManager()->GetPhysicsManager()->SetGravity(gravity);
+	} else {
 		deb_assert(false);
 	}
 }
 
-Cure::ContextPath* Level::QueryPath()
-{
-	if (!mPath)
-	{
-		mPath = new Cure::ContextPath(GetResourceManager(), "ContextPath");
-		GetManager()->AddLocalObject(mPath);
+cure::ContextPath* Level::QueryPath() {
+	if (!path_) {
+		path_ = new cure::ContextPath(GetResourceManager(), "ContextPath");
+		GetManager()->AddLocalObject(path_);
 	}
-	return mPath;
+	return path_;
 }
 
-float Level::GetLevelSpeed() const
-{
-	return mLevelSpeed;
+float Level::GetLevelSpeed() const {
+	return level_speed_;
 }
 
 

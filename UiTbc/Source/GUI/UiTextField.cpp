@@ -5,128 +5,120 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiTextField.h"
-#include "../../Include/GUI/UiDesktopWindow.h"
-#include "../../Include/GUI/UiPopupList.h"
-#include "../../Include/GUI/UiFloatingLayout.h"
-#include "../../../UiLepra/Include/UiInput.h"
+#include "../../include/gui/uitextfield.h"
+#include "../../include/gui/uidesktopwindow.h"
+#include "../../include/gui/uipopuplist.h"
+#include "../../include/gui/uifloatinglayout.h"
+#include "../../../uilepra/include/uiinput.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-TextField::TextField(Component* pTopParent):
+TextField::TextField(Component* top_parent):
 	Window(),
-	mIsReadOnly(false),
-	mPasswordCharacter(0),
-	mTextX(0),
-	mMarkerID(Painter::INVALID_IMAGEID),
-	mMarkerPos(0),
-	mMarkerVisible(false),
-	mMarkerVisibleTime(0.5),
-	mMarkerInvisibleTime(0.5),
-	mUpdateMarkerPosOnNextRepaint(false),
-	mClickX(0),
-	mTopParent(pTopParent),
-	mDesktopWindow(0),
-	mListLayer(0),
-	mListControl(0),
-	mDeleteListControl(false)
-{
+	is_read_only_(false),
+	password_character_(0),
+	text_x_(0),
+	marker_id_(Painter::kInvalidImageid),
+	marker_pos_(0),
+	marker_visible_(false),
+	marker_visible_time_(0.5),
+	marker_invisible_time_(0.5),
+	update_marker_pos_on_next_repaint_(false),
+	click_x_(0),
+	top_parent_(top_parent),
+	desktop_window_(0),
+	list_layer_(0),
+	list_control_(0),
+	delete_list_control_(false) {
 	Init();
 }
 
-TextField::TextField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, const Color& pColor):
-	Window(pBorderStyle, pBorderWidth, pColor),
-	mIsReadOnly(false),
-	mPasswordCharacter(0),
-	mTextX(0),
-	mMarkerID(Painter::INVALID_IMAGEID),
-	mMarkerPos(0),
-	mMarkerVisible(false),
-	mMarkerVisibleTime(0.5),
-	mMarkerInvisibleTime(0.5),
-	mUpdateMarkerPosOnNextRepaint(false),
-	mClickX(0),
-	mTopParent(pTopParent),
-	mDesktopWindow(0),
-	mListLayer(0),
-	mListControl(0),
-	mDeleteListControl(false)
-{
+TextField::TextField(Component* top_parent, unsigned border_style, int border_width, const Color& color):
+	Window(border_style, border_width, color),
+	is_read_only_(false),
+	password_character_(0),
+	text_x_(0),
+	marker_id_(Painter::kInvalidImageid),
+	marker_pos_(0),
+	marker_visible_(false),
+	marker_visible_time_(0.5),
+	marker_invisible_time_(0.5),
+	update_marker_pos_on_next_repaint_(false),
+	click_x_(0),
+	top_parent_(top_parent),
+	desktop_window_(0),
+	list_layer_(0),
+	list_control_(0),
+	delete_list_control_(false) {
 	Init();
 }
 
-TextField::TextField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID) :
-	Window(pBorderStyle, pBorderWidth, pImageID),
-	mIsReadOnly(false),
-	mPasswordCharacter(0),
-	mTextX(0),
-	mMarkerID(Painter::INVALID_IMAGEID),
-	mMarkerPos(0),
-	mMarkerVisible(false),
-	mMarkerVisibleTime(0.5),
-	mMarkerInvisibleTime(0.5),
-	mUpdateMarkerPosOnNextRepaint(false),
-	mClickX(0),
-	mTopParent(pTopParent),
-	mDesktopWindow(0),
-	mListLayer(0),
-	mListControl(0),
-	mDeleteListControl(false)
-{
+TextField::TextField(Component* top_parent, unsigned border_style, int border_width, Painter::ImageID image_id) :
+	Window(border_style, border_width, image_id),
+	is_read_only_(false),
+	password_character_(0),
+	text_x_(0),
+	marker_id_(Painter::kInvalidImageid),
+	marker_pos_(0),
+	marker_visible_(false),
+	marker_visible_time_(0.5),
+	marker_invisible_time_(0.5),
+	update_marker_pos_on_next_repaint_(false),
+	click_x_(0),
+	top_parent_(top_parent),
+	desktop_window_(0),
+	list_layer_(0),
+	list_control_(0),
+	delete_list_control_(false) {
 	Init();
 }
 
-TextField::TextField(Component* pTopParent, const Color& pColor) :
-	Window(pColor),
-	mIsReadOnly(false),
-	mPasswordCharacter(0),
-	mTextX(0),
-	mMarkerID(Painter::INVALID_IMAGEID),
-	mMarkerPos(0),
-	mMarkerVisible(false),
-	mMarkerVisibleTime(0.5),
-	mMarkerInvisibleTime(0.5),
-	mUpdateMarkerPosOnNextRepaint(false),
-	mClickX(0),
-	mTopParent(pTopParent),
-	mDesktopWindow(0),
-	mListLayer(0),
-	mListControl(0),
-	mDeleteListControl(false)
-{
+TextField::TextField(Component* top_parent, const Color& color) :
+	Window(color),
+	is_read_only_(false),
+	password_character_(0),
+	text_x_(0),
+	marker_id_(Painter::kInvalidImageid),
+	marker_pos_(0),
+	marker_visible_(false),
+	marker_visible_time_(0.5),
+	marker_invisible_time_(0.5),
+	update_marker_pos_on_next_repaint_(false),
+	click_x_(0),
+	top_parent_(top_parent),
+	desktop_window_(0),
+	list_layer_(0),
+	list_control_(0),
+	delete_list_control_(false) {
 	Init();
 }
 
-TextField::TextField(Component* pTopParent, Painter::ImageID pImageID):
-	Window(pImageID),
-	mIsReadOnly(false),
-	mPasswordCharacter(0),
-	mTextX(0),
-	mMarkerID(Painter::INVALID_IMAGEID),
-	mMarkerPos(0),
-	mMarkerVisible(false),
-	mMarkerVisibleTime(0.5),
-	mMarkerInvisibleTime(0.5),
-	mUpdateMarkerPosOnNextRepaint(false),
-	mClickX(0),
-	mTopParent(pTopParent),
-	mDesktopWindow(0),
-	mListLayer(0),
-	mListControl(0),
-	mDeleteListControl(false)
-{
+TextField::TextField(Component* top_parent, Painter::ImageID image_id):
+	Window(image_id),
+	is_read_only_(false),
+	password_character_(0),
+	text_x_(0),
+	marker_id_(Painter::kInvalidImageid),
+	marker_pos_(0),
+	marker_visible_(false),
+	marker_visible_time_(0.5),
+	marker_invisible_time_(0.5),
+	update_marker_pos_on_next_repaint_(false),
+	click_x_(0),
+	top_parent_(top_parent),
+	desktop_window_(0),
+	list_layer_(0),
+	list_control_(0),
+	delete_list_control_(false) {
 	Init();
 }
 
-TextField::~TextField()
-{
-	if (mDesktopWindow != 0)
-	{
+TextField::~TextField() {
+	if (desktop_window_ != 0) {
 		// We are still registered as a subscriber...
 		ReleaseKeyboardFocus();
 	}
@@ -134,597 +126,480 @@ TextField::~TextField()
 	// The list control is deleted when the top parent is deleted.
 }
 
-Component* TextField::GetTopParent() const
-{
-	return mTopParent;
+Component* TextField::GetTopParent() const {
+	return top_parent_;
 }
 
-void TextField::SetTopParent(Component* pTopParent)
-{
-	mTopParent = pTopParent;
+void TextField::SetTopParent(Component* top_parent) {
+	top_parent_ = top_parent;
 }
 
-PopupList* TextField::CreatePopupList()
-{
+PopupList* TextField::CreatePopupList() {
 	return 0;
 }
 
-void TextField::SpawnPopupList()
-{
-	if (mListControl == 0)
-	{
-		if (mTopParent != 0)
-		{
-			mListControl = CreatePopupList();
+void TextField::SpawnPopupList() {
+	if (list_control_ == 0) {
+		if (top_parent_ != 0) {
+			list_control_ = CreatePopupList();
 		}
-	
-		if (mListControl != 0)
-		{
-			PixelRect lScreenRect(GetScreenRect());
-			PixelRect lClientScreenRect(mTopParent->GetScreenRect());
 
-			PixelRect lRect(mTopParent->ScreenToWindow(GetScreenRect()));
+		if (list_control_ != 0) {
+			PixelRect screen_rect(GetScreenRect());
+			PixelRect client_screen_rect(top_parent_->GetScreenRect());
 
-			mListControl->UpdateLayout();
-			int lHeight = (int)std::min(mListControl->GetPreferredHeight(), std::min(mListControl->GetContentSize().y, lClientScreenRect.mBottom - lScreenRect.mBottom));
+			PixelRect rect(top_parent_->ScreenToWindow(GetScreenRect()));
 
-			mListControl->SetPreferredSize(GetSize().x, lHeight);
+			list_control_->UpdateLayout();
+			int _height = (int)std::min(list_control_->GetPreferredHeight(), std::min(list_control_->GetContentSize().y, client_screen_rect.bottom_ - screen_rect.bottom_));
 
-			if (mListLayer == 0)
-			{
-				mListLayer = mTopParent->CreateLayer(new FloatingLayout());
+			list_control_->SetPreferredSize(GetSize().x, _height);
+
+			if (list_layer_ == 0) {
+				list_layer_ = top_parent_->CreateLayer(new FloatingLayout());
 			}
-			mTopParent->AddChild(mListControl, 0, 0, mListLayer);
-			mTopParent->RequestRepaint();
+			top_parent_->AddChild(list_control_, 0, 0, list_layer_);
+			top_parent_->RequestRepaint();
 
-			mListControl->SetPos(lRect.mLeft, lRect.mBottom);
+			list_control_->SetPos(rect.left_, rect.bottom_);
 
 			// Select the first item in the list.
-			//mListControl->SetKeyboardFocus();
-			mListControl->AddListener(this);
-			mListControl->SetItemSelected(0, true);
-			mListControl->RequestRepaint();
+			//list_control_->SetKeyboardFocus();
+			list_control_->AddListener(this);
+			list_control_->SetItemSelected(0, true);
+			list_control_->RequestRepaint();
 			Parent::SetKeyboardFocus();
 		}
 	}
 }
 
-void TextField::DestroyPopupList()
-{
+void TextField::DestroyPopupList() {
 	// The list is destroyed with the layer.
-	mTopParent->DeleteLayer(mListLayer);
-	mTopParent->RequestRepaint();
-	mListLayer = 0;
-	mListControl = 0;
+	top_parent_->DeleteLayer(list_layer_);
+	top_parent_->RequestRepaint();
+	list_layer_ = 0;
+	list_control_ = 0;
 }
 
-PopupList* TextField::GetPopupList() const
-{
-	return mListControl;
+PopupList* TextField::GetPopupList() const {
+	return list_control_;
 }
 
-void TextField::SetIsReadOnly(bool pIsReadOnly)
-{
-	mIsReadOnly = pIsReadOnly;
+void TextField::SetIsReadOnly(bool is_read_only) {
+	is_read_only_ = is_read_only;
 }
 
-void TextField::SetPasswordCharacter(char pCharacter)
-{
-	mPasswordCharacter = pCharacter;
+void TextField::SetPasswordCharacter(char character) {
+	password_character_ = character;
 }
 
-wstr TextField::GetVisibleText() const
-{
-	wstr lText;
-	if (mPasswordCharacter)
-	{
-		lText.assign(mText.length(), mPasswordCharacter);
+wstr TextField::GetVisibleText() const {
+	wstr _text;
+	if (password_character_) {
+		_text.assign(text_.length(), password_character_);
+	} else {
+		_text = text_;
 	}
-	else
-	{
-		lText = mText;
-	}
-	return (lText);
+	return (_text);
 }
 
-void TextField::SetText(const wstr& pText)
-{
-	mText = pText;
-	mTextX = 0;
-	SetMarkerPosition(pText.length());
+void TextField::SetText(const wstr& text) {
+	text_ = text;
+	text_x_ = 0;
+	SetMarkerPosition(text.length());
 	SetNeedsRepaint(true);
 }
 
-const wstr& TextField::GetText() const
-{
-	return mText;
+const wstr& TextField::GetText() const {
+	return text_;
 }
 
-void TextField::SetMarker(Painter::ImageID pImageID)
-{
-	mMarkerID = pImageID;
+void TextField::SetMarker(Painter::ImageID image_id) {
+	marker_id_ = image_id;
 	SetNeedsRepaint(true);
 }
 
-void TextField::SetMarkerBlinkRate(float64 pVisibleTime, float64 pInvisibleTime)
-{
-	mMarkerVisibleTime = pVisibleTime;
-	mMarkerInvisibleTime = pInvisibleTime;
+void TextField::SetMarkerBlinkRate(float64 visible_time, float64 invisible_time) {
+	marker_visible_time_ = visible_time;
+	marker_invisible_time_ = invisible_time;
 }
 
-void TextField::SetMarkerPosition(size_t pIndex)
-{
-	if (pIndex <= mText.size())
-	{
-		mMarkerPos = pIndex;
+void TextField::SetMarkerPosition(size_t index) {
+	if (index <= text_.size()) {
+		marker_pos_ = index;
 		SetNeedsRepaint(true);
 	}
 }
 
-bool TextField::OnChar(wchar_t pChar)
-{
-	Parent::OnChar(pChar);
-	if (mIsReadOnly)
-	{
+bool TextField::OnChar(wchar_t c) {
+	Parent::OnChar(c);
+	if (is_read_only_) {
 		return (false);	// RAII simplifies here.
 	}
 
-	bool lRegenerateList = false;
+	bool regenerate_list = false;
 
-	if (pChar == '\b')
-	{
-		if (mMarkerPos > 0)
-		{
-			SetMarkerPosition(mMarkerPos-1);
-			mText.erase(mMarkerPos, 1);
+	if (c == '\b') {
+		if (marker_pos_ > 0) {
+			SetMarkerPosition(marker_pos_-1);
+			text_.erase(marker_pos_, 1);
 			SetNeedsRepaint(true);
-			lRegenerateList = true;
+			regenerate_list = true;
 		}
-	}
-	else if (pChar != '\r' && pChar != '\n' && pChar != 27)
-	{
-		mText.insert(mMarkerPos, 1, pChar);
-		SetMarkerPosition(mMarkerPos+1);
+	} else if (c != '\r' && c != '\n' && c != 27) {
+		text_.insert(marker_pos_, 1, c);
+		SetMarkerPosition(marker_pos_+1);
 		SetNeedsRepaint(true);
-		lRegenerateList = true;
+		regenerate_list = true;
 	}
 
-	if (lRegenerateList == true && mListControl != 0)
-	{
+	if (regenerate_list == true && list_control_ != 0) {
 		DestroyPopupList();
 		SpawnPopupList();
 	}
 	return (false);
 }
 
-bool TextField::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	Parent::OnKeyDown(pKeyCode);
-	if (mIsReadOnly)
-	{
+bool TextField::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
+	Parent::OnKeyDown(key_code);
+	if (is_read_only_) {
 		return (false);	// RAII simplifies here.
 	}
 
 	// TODO: Implement popup menu and marker control
-	bool lResetMarker = false;
+	bool reset_marker = false;
 
-	const DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(Component::DESKTOPWINDOW);
-	UiLepra::InputManager* lInputManager = lDesktopWindow->GetInputManager();
+	const DesktopWindow* desktop_window = (DesktopWindow*)GetParentOfType(Component::kDesktopwindow);
+	uilepra::InputManager* input_manager = desktop_window->GetInputManager();
 
-	bool lCtrlDown = lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LCTRL) ||
-		lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RCTRL);
-	const wstr lDelimitors = L" \t";
+	bool ctrl_down = input_manager->ReadKey(uilepra::InputManager::kInKbdLctrl) ||
+		input_manager->ReadKey(uilepra::InputManager::kInKbdRctrl);
+	const wstr delimitors = L" \t";
 
 
-	switch(pKeyCode)
-	{
-		case UiLepra::InputManager::IN_KBD_LEFT:
-		{
-			if (mMarkerPos > 0)
-			{
-				if (lCtrlDown == true)
-				{
-					mMarkerPos = wstrutil::FindPreviousWord(GetVisibleText(), lDelimitors, mMarkerPos);
-				}
-				else
-				{
-					mMarkerPos--;
+	switch(key_code) {
+		case uilepra::InputManager::kInKbdLeft: {
+			if (marker_pos_ > 0) {
+				if (ctrl_down == true) {
+					marker_pos_ = wstrutil::FindPreviousWord(GetVisibleText(), delimitors, marker_pos_);
+				} else {
+					marker_pos_--;
 				}
 
-				lResetMarker = true;
+				reset_marker = true;
 			}
-		}
-		break;
-		case UiLepra::InputManager::IN_KBD_RIGHT:
-		{
-			if (mMarkerPos < mText.length())
-			{
-				if (lCtrlDown == true)
-				{
-					size_t lIndex = GetVisibleText().find_first_not_of(lDelimitors, mMarkerPos);
-					lIndex = GetVisibleText().find_first_of(lDelimitors, lIndex);
-					if (lIndex == wstr::npos)
-					{
+		} break;
+		case uilepra::InputManager::kInKbdRight: {
+			if (marker_pos_ < text_.length()) {
+				if (ctrl_down == true) {
+					size_t _index = GetVisibleText().find_first_not_of(delimitors, marker_pos_);
+					_index = GetVisibleText().find_first_of(delimitors, _index);
+					if (_index == wstr::npos) {
 						// We have reached the end.
-						mMarkerPos = mText.length();
+						marker_pos_ = text_.length();
+					} else {
+						marker_pos_ = _index;
 					}
-					else
-					{
-						mMarkerPos = lIndex;
-					}
+				} else {
+					marker_pos_++;
 				}
-				else
-				{
-					mMarkerPos++;
-				}
-				lResetMarker = true;
+				reset_marker = true;
 			}
-		}
-		break;
-		case UiLepra::InputManager::IN_KBD_HOME:
-		{
-			mMarkerPos = 0;
-			lResetMarker = true;
-		}
-		break;
-		case UiLepra::InputManager::IN_KBD_END:
-		{
-			mMarkerPos = mText.length();
-			lResetMarker = true;
-		}
-		break;
-		case UiLepra::InputManager::IN_KBD_DOWN:
-		{
-			if (mListControl == 0)
-			{
+		} break;
+		case uilepra::InputManager::kInKbdHome: {
+			marker_pos_ = 0;
+			reset_marker = true;
+		} break;
+		case uilepra::InputManager::kInKbdEnd: {
+			marker_pos_ = text_.length();
+			reset_marker = true;
+		} break;
+		case uilepra::InputManager::kInKbdDown: {
+			if (list_control_ == 0) {
 				SpawnPopupList();
-			}
-			else
-			{
-				mListControl->OnKeyDown(pKeyCode);
+			} else {
+				list_control_->OnKeyDown(key_code);
 				Parent::SetKeyboardFocus();
 			}
-		}
-		break;
-		case UiLepra::InputManager::IN_KBD_UP:
-		{
-			if (mListControl != 0)
-			{
-				mListControl->OnKeyDown(pKeyCode);
+		} break;
+		case uilepra::InputManager::kInKbdUp: {
+			if (list_control_ != 0) {
+				list_control_->OnKeyDown(key_code);
 				Parent::SetKeyboardFocus();
 			}
-		}
-		break;
-		case UiLepra::InputManager::IN_KBD_DEL:
-		{
-			if (mMarkerPos < mText.length())
-			{
-				mText.erase(mMarkerPos, 1);
-				lResetMarker = true;
+		} break;
+		case uilepra::InputManager::kInKbdDel: {
+			if (marker_pos_ < text_.length()) {
+				text_.erase(marker_pos_, 1);
+				reset_marker = true;
 			}
-		}
-		 break;
-		case UiLepra::InputManager::IN_KBD_ESC:
-		{
-			if (mListControl != 0)
-			{
+		} break;
+		case uilepra::InputManager::kInKbdEsc: {
+			if (list_control_ != 0) {
 				DestroyPopupList();
 				Parent::SetKeyboardFocus();
 			}
-		}
-		break;
+		} break;
 		default: break;
 	}
 
-	if (lResetMarker == true)
-	{
-		mMarkerTimer.ClearTimeDiff();
-		mMarkerVisible = true;
+	if (reset_marker == true) {
+		marker_timer_.ClearTimeDiff();
+		marker_visible_ = true;
 		SetNeedsRepaint(true);
 	}
 	return (false);
 }
 
-void TextField::OnIdle()
-{
+void TextField::OnIdle() {
 	Parent::OnIdle();
 
-	mMarkerTimer.UpdateTimer();
+	marker_timer_.UpdateTimer();
 
-	bool lOldState = mMarkerVisible;
-	bool lLoop = true;
+	bool old_state = marker_visible_;
+	bool loop = true;
 
 	// Loop and consume the time difference in case the program has freezed
 	// for a while.
-	while (lLoop == true)
-	{
-		lLoop = false;
+	while (loop == true) {
+		loop = false;
 
-		if (mMarkerVisible == true && mMarkerTimer.GetTimeDiff() > mMarkerVisibleTime)
-		{
-			mMarkerVisible = false;
-			mMarkerTimer.ReduceTimeDiff(mMarkerVisibleTime);
-			lLoop = true;
+		if (marker_visible_ == true && marker_timer_.GetTimeDiff() > marker_visible_time_) {
+			marker_visible_ = false;
+			marker_timer_.ReduceTimeDiff(marker_visible_time_);
+			loop = true;
 		}
 
-		if (mMarkerVisible == false && mMarkerTimer.GetTimeDiff() > mMarkerInvisibleTime)
-		{
-			mMarkerVisible = true;
-			mMarkerTimer.ReduceTimeDiff(mMarkerInvisibleTime);
-			lLoop = true;
+		if (marker_visible_ == false && marker_timer_.GetTimeDiff() > marker_invisible_time_) {
+			marker_visible_ = true;
+			marker_timer_.ReduceTimeDiff(marker_invisible_time_);
+			loop = true;
 		}
 	}
 
-	if (lOldState != mMarkerVisible)
-	{
+	if (old_state != marker_visible_) {
 		SetNeedsRepaint(true);
 	}
 }
 
-bool TextField::OnLButtonDown(int pMouseX, int pMouseY)
-{
+bool TextField::OnLButtonDown(int mouse_x, int mouse_y) {
 	SetKeyboardFocus();
 
 	// The coordinate relative to the start of the text string's x-coordinate.
-	mUpdateMarkerPosOnNextRepaint = true;
-	mClickX = pMouseX;
+	update_marker_pos_on_next_repaint_ = true;
+	click_x_ = mouse_x;
 
-	return Parent::OnLButtonDown(pMouseX, pMouseY);
+	return Parent::OnLButtonDown(mouse_x, mouse_y);
 }
 
-bool TextField::OnLButtonUp(int pMouseX, int pMouseY)
-{
-	return Parent::OnLButtonUp(pMouseX, pMouseY);
+bool TextField::OnLButtonUp(int mouse_x, int mouse_y) {
+	return Parent::OnLButtonUp(mouse_x, mouse_y);
 }
 
-bool TextField::OnMouseMove(int, int, int, int)
-{
+bool TextField::OnMouseMove(int, int, int, int) {
 	// TODO: set mouse cursor: text.
 	return true;
 }
 
-void TextField::SetKeyboardFocus()
-{
+void TextField::SetKeyboardFocus() {
 	Parent::SetKeyboardFocus();
 	SetupMarkerBlink();
 }
 
-void TextField::SetKeyboardFocus(Component* pChild)
-{
-	Parent::SetKeyboardFocus(pChild);
+void TextField::SetKeyboardFocus(Component* child) {
+	Parent::SetKeyboardFocus(child);
 	SetupMarkerBlink();
 }
 
-void TextField::SetupMarkerBlink()
-{
-	DesktopWindow* lDesktopWin = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-	if (lDesktopWin != 0)
-	{
-		lDesktopWin->AddIdleSubscriber(this);
-		lDesktopWin->ActivateKeyboard();
-		mMarkerTimer.PopTimeDiff();
-		mMarkerVisible = true;
+void TextField::SetupMarkerBlink() {
+	DesktopWindow* desktop_win = (DesktopWindow*)GetParentOfType(kDesktopwindow);
+	if (desktop_win != 0) {
+		desktop_win->AddIdleSubscriber(this);
+		desktop_win->ActivateKeyboard();
+		marker_timer_.PopTimeDiff();
+		marker_visible_ = true;
 		SetNeedsRepaint(true);
 
 		// Store the pointer to the desktop window in case the
 		// TextField is deleted before the keyboard focus is released.
-		mDesktopWindow = lDesktopWin;
+		desktop_window_ = desktop_win;
 	}
 }
 
-void TextField::ReleaseKeyboardFocus(RecurseDir pDir, Component* pFocusedComponent)
-{
-	Parent::ReleaseKeyboardFocus(pDir, pFocusedComponent);
+void TextField::ReleaseKeyboardFocus(RecurseDir dir, Component* focused_component) {
+	Parent::ReleaseKeyboardFocus(dir, focused_component);
 
-	if (mDesktopWindow != 0)
-	{
-		mDesktopWindow->RemoveIdleSubscriber(this);
-		mDesktopWindow->DeactivateKeyboard();
-		if (mMarkerVisible == true)
-		{
+	if (desktop_window_ != 0) {
+		desktop_window_->RemoveIdleSubscriber(this);
+		desktop_window_->DeactivateKeyboard();
+		if (marker_visible_ == true) {
 			SetNeedsRepaint(true);
 		}
-		mMarkerVisible = false;
+		marker_visible_ = false;
 
-		mDesktopWindow = 0;
+		desktop_window_ = 0;
 	}
 }
 
-void TextField::SetCaption(Caption*)
-{
+void TextField::SetCaption(Caption*) {
 	// Do nothing. TextField can't have a caption.
 }
 
-void TextField::AddChild(Component*, int, int, int)
-{
+void TextField::AddChild(Component*, int, int, int) {
 	// Do nothing. TextField can't have children.
 }
 
-void TextField::DoSetPos(int x, int y)
-{
+void TextField::DoSetPos(int x, int y) {
 	Parent::DoSetPos(x, y);
-	if (mListControl != 0)
-	{
-		PixelRect lRect(mTopParent->ScreenToWindow(GetScreenRect()));
-		mListControl->SetPos(lRect.mLeft, lRect.mBottom);
+	if (list_control_ != 0) {
+		PixelRect rect(top_parent_->ScreenToWindow(GetScreenRect()));
+		list_control_->SetPos(rect.left_, rect.bottom_);
 	}
 }
 
-void TextField::DoSetSize(int pWidth, int pHeight)
-{
-	Parent::DoSetSize(pWidth, pHeight);
-	if (mListControl != 0)
-	{
-		mListControl->SetPreferredWidth(pWidth);
+void TextField::DoSetSize(int width, int height) {
+	Parent::DoSetSize(width, height);
+	if (list_control_ != 0) {
+		list_control_->SetPreferredWidth(width);
 	}
 }
 
-void TextField::Repaint(Painter* pPainter)
-{
-	ActivateFont(pPainter);
+void TextField::Repaint(Painter* painter) {
+	ActivateFont(painter);
 
-	Parent::Repaint(pPainter);
+	Parent::Repaint(painter);
 
-	if (mUpdateMarkerPosOnNextRepaint == true)
-	{
-		UpdateMarkerPos(pPainter);
-		mUpdateMarkerPosOnNextRepaint = false;
+	if (update_marker_pos_on_next_repaint_ == true) {
+		UpdateMarkerPos(painter);
+		update_marker_pos_on_next_repaint_ = false;
 	}
 
-	int lTextHeight = pPainter->GetLineHeight();
+	int text_height = painter->GetLineHeight();
 
-	pPainter->PushAttrib(Painter::ATTR_ALL);
+	painter->PushAttrib(Painter::kAttrAll);
 
-	const PixelRect lRect(GetClientRect());
+	const PixelRect rect(GetClientRect());
 #ifndef LEPRA_TOUCH
-	pPainter->ReduceClippingRect(lRect);
-#endif // !Touch
+	painter->ReduceClippingRect(rect);
+#endif // !touch
 
-	int lMarkerX  = mTextX + mHorizontalMargin + pPainter->GetStringWidth(GetVisibleText().substr(0, mMarkerPos));
-	int lMarkerWidth = 1;
+	int marker_x  = text_x_ + horizontal_margin_ + painter->GetStringWidth(GetVisibleText().substr(0, marker_pos_));
+	int marker_width = 1;
 
-	if (mMarkerID != Painter::INVALID_IMAGEID)
-	{
-		lMarkerWidth = GetImageManager()->GetImageSize(mMarkerID).x;
+	if (marker_id_ != Painter::kInvalidImageid) {
+		marker_width = GetImageManager()->GetImageSize(marker_id_).x;
 	}
 
-	int lMaxX = lRect.GetWidth() - lMarkerWidth;
-	if (lMarkerX > lMaxX)
-	{
-		mTextX += lMaxX - lMarkerX;
-		lMarkerX = lMaxX;
+	int max_x = rect.GetWidth() - marker_width;
+	if (marker_x > max_x) {
+		text_x_ += max_x - marker_x;
+		marker_x = max_x;
 	}
-	if (lMarkerX < 0)
-	{
-		mTextX += -lMarkerX;
-		lMarkerX = 0;
+	if (marker_x < 0) {
+		text_x_ += -marker_x;
+		marker_x = 0;
 	}
 
-	int lTextX = lRect.mLeft + mTextX + mHorizontalMargin;
-	int lTextY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
+	int text_x = rect.left_ + text_x_ + horizontal_margin_;
+	int text_y = rect.top_ + (rect.GetHeight() - text_height) / 2;
 
-	PrintTextDeactivate(pPainter, GetVisibleText(), lTextX, lTextY);
+	PrintTextDeactivate(painter, GetVisibleText(), text_x, text_y);
 
-	if (mMarkerVisible == true)
-	{
-		//pPainter->PushAttrib(Painter::ATTR_RENDERMODE);
-		//pPainter->SetRenderMode(Painter::RM_XOR);
-		if (mMarkerID != Painter::INVALID_IMAGEID)
-		{
-			GetImageManager()->DrawImage(mMarkerID, lRect.mLeft + lMarkerX, lRect.mTop);
+	if (marker_visible_ == true) {
+		//painter->PushAttrib(Painter::kAttrRendermode);
+		//painter->SetRenderMode(Painter::kRmXor);
+		if (marker_id_ != Painter::kInvalidImageid) {
+			GetImageManager()->DrawImage(marker_id_, rect.left_ + marker_x, rect.top_);
+		} else {
+			const int marker_y = rect.top_ + (rect.GetHeight() - text_height) / 2;
+			painter->DrawLine(rect.left_ + marker_x, marker_y, rect.left_ + marker_x, marker_y + text_height);
 		}
-		else
-		{
-			const int lMarkerY = lRect.mTop + (lRect.GetHeight() - lTextHeight) / 2;
-			pPainter->DrawLine(lRect.mLeft + lMarkerX, lMarkerY, lRect.mLeft + lMarkerX, lMarkerY + lTextHeight);
-		}
-		//pPainter->PopAttrib();
+		//painter->PopAttrib();
 	}
 
-	pPainter->PopAttrib();
+	painter->PopAttrib();
 }
 
-Component::StateComponentList TextField::GetStateList(ComponentState pState)
-{
-	StateComponentList lList;
-	if (pState == STATE_FOCUSABLE)
-	{
-		int lState = 0;
-		if (IsDispatcher())
-		{
-			lState = 2;
+Component::StateComponentList TextField::GetStateList(ComponentState state) {
+	StateComponentList list;
+	if (state == kStateFocusable) {
+		int _state = 0;
+		if (IsDispatcher()) {
+			_state = 2;
+		} else if (HasKeyboardFocus()) {
+			_state = 1;
 		}
-		else if (HasKeyboardFocus())
-		{
-			lState = 1;
-		}
-		lList.push_back(StateComponent(lState, (Component*)this));
+		list.push_back(StateComponent(_state, (Component*)this));
 	}
-	return (lList);
+	return (list);
 }
 
-void TextField::UpdateMarkerPos(Painter* pPainter)
-{
-	PixelRect lRect(GetClientRect());
-	int lTextX = (mClickX - lRect.mLeft) - mTextX - mHorizontalMargin;
+void TextField::UpdateMarkerPos(Painter* painter) {
+	PixelRect rect(GetClientRect());
+	int text_x = (click_x_ - rect.left_) - text_x_ - horizontal_margin_;
 
 	// Search for the correct marker position using binary search.
-	size_t lMin = 0;
-	size_t lMax = mText.length();
+	size_t __min = 0;
+	size_t max = text_.length();
 
-	int lLeft = 0;
-	int lRight = 0;
+	int left = 0;
+	int right = 0;
 
-	while (lMax - lMin > 1)
-	{
-		size_t lMid = (lMin + lMax) / 2;
-		int lStringWidth = pPainter->GetStringWidth(GetVisibleText().substr(0, lMid));
+	while (max - __min > 1) {
+		size_t mid = (__min + max) / 2;
+		int string_width = painter->GetStringWidth(GetVisibleText().substr(0, mid));
 
-		if (lStringWidth < lTextX)
-		{
-			lMin = lMid;
-			lLeft = lTextX - lStringWidth;
-		}
-		else if (lStringWidth >= lTextX)
-		{
-			lMax = lMid;
-			lRight = lStringWidth - lTextX;
+		if (string_width < text_x) {
+			__min = mid;
+			left = text_x - string_width;
+		} else if (string_width >= text_x) {
+			max = mid;
+			right = string_width - text_x;
 		}
 	}
 
-	if (lLeft < lRight)
-	{
-		mMarkerPos = lMin;
-	}
-	else
-	{
-		mMarkerPos = lMax;
+	if (left < right) {
+		marker_pos_ = __min;
+	} else {
+		marker_pos_ = max;
 	}
 
-	mMarkerTimer.ClearTimeDiff();
-	mMarkerVisible = true;
+	marker_timer_.ClearTimeDiff();
+	marker_visible_ = true;
 }
 
-void TextField::SetMarkerPos(size_t pPos)
-{
-	if (pPos <= mText.length())
-	{
-		mMarkerPos = pPos;
-		mMarkerTimer.ClearTimeDiff();
-		mMarkerVisible = true;
+void TextField::SetMarkerPos(size_t pos) {
+	if (pos <= text_.length()) {
+		marker_pos_ = pos;
+		marker_timer_.ClearTimeDiff();
+		marker_visible_ = true;
 		SetNeedsRepaint(true);
 	}
 }
 
-void TextField::ForceRepaint()
-{
+void TextField::ForceRepaint() {
 	SetNeedsRepaint(true);
 }
 
-bool TextField::NotifySetKeyboardFocus(PopupList*)
-{
+bool TextField::NotifySetKeyboardFocus(PopupList*) {
 	Parent::SetKeyboardFocus();
 	return true;
 }
 
-bool TextField::NotifyReleaseKeyboardFocus(PopupList*, Component*)
-{
+bool TextField::NotifyReleaseKeyboardFocus(PopupList*, Component*) {
 	return true;
 }
 
-bool TextField::NotifyKeyDown(PopupList*, UiLepra::InputManager::KeyCode)
-{
+bool TextField::NotifyKeyDown(PopupList*, uilepra::InputManager::KeyCode) {
 	return true;
 }
 
-bool TextField::NotifyLButtonDown(PopupList*, int, int)
-{
+bool TextField::NotifyLButtonDown(PopupList*, int, int) {
 	Parent::SetKeyboardFocus();
-	return true;	
+	return true;
 }
 
-bool TextField::NotifyDoubleClick(PopupList*, int, int)
-{
+bool TextField::NotifyDoubleClick(PopupList*, int, int) {
 	// Let the subclass take care of this.
 	return true;
 }

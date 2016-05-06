@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,21 +8,19 @@
 
 
 
-#include "../../Life/LifeServer/GameServerTicker.h"
-#include "../Push.h"
+#include "../../life/lifeserver/gameserverticker.h"
+#include "../push.h"
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
-class PushServerTicker: public Life::GameServerTicker
-{
-	typedef Life::GameServerTicker Parent;
+class PushServerTicker: public life::GameServerTicker {
+	typedef life::GameServerTicker Parent;
 public:
-	PushServerTicker(Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
+	PushServerTicker(cure::ResourceManager* resource_manager, float physics_radius, int physics_levels, float physics_sensitivity);
 	virtual ~PushServerTicker();
 };
 

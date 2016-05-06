@@ -1,71 +1,58 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2012, Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../../Include/Win32/UiWin32GDIDisplay.h"
+#include "../../include/win32/uiwin32gdidisplay.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-Win32GDIDisplay::Win32GDIDisplay()
-{
+Win32GDIDisplay::Win32GDIDisplay() {
 }
 
-Win32GDIDisplay::~Win32GDIDisplay()
-{
+Win32GDIDisplay::~Win32GDIDisplay() {
 }
 
-Win32GDIDisplay::ContextType Win32GDIDisplay::GetContextType()
-{
-	return OPENGL_CONTEXT;
+Win32GDIDisplay::ContextType Win32GDIDisplay::GetContextType() {
+	return kOpenglContext;
 }
 
-bool Win32GDIDisplay::Activate()
-{
+bool Win32GDIDisplay::Activate() {
 	return true;
 }
 
-bool Win32GDIDisplay::UpdateScreen()
-{
+bool Win32GDIDisplay::UpdateScreen() {
 	return true;
 }
 
-bool Win32GDIDisplay::IsVSyncEnabled() const
-{
+bool Win32GDIDisplay::IsVSyncEnabled() const {
 	return false;
 }
 
-bool Win32GDIDisplay::SetVSyncEnabled(bool)
-{
+bool Win32GDIDisplay::SetVSyncEnabled(bool) {
 	return false;
 }
 
-void Win32GDIDisplay::OnResize(int, int)
-{
+void Win32GDIDisplay::OnResize(int, int) {
 }
 
-void Win32GDIDisplay::OnMinimize()
-{
+void Win32GDIDisplay::OnMinimize() {
 }
 
-void Win32GDIDisplay::OnMaximize(int, int)
-{
+void Win32GDIDisplay::OnMaximize(int, int) {
 }
 
-bool Win32GDIDisplay::InitScreen()
-{
+bool Win32GDIDisplay::InitScreen() {
 	return true;
 }
 
-void Win32GDIDisplay::SetFocus(bool)
-{
+void Win32GDIDisplay::SetFocus(bool) {
 }
 
 

@@ -1,37 +1,35 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life/LifeClient/ExplodingMachine.h"
-#include "Fire.h"
+#include "../life/lifeclient/explodingmachine.h"
+#include "fire.h"
 
 
 
-namespace Fire
-{
+namespace Fire {
 
 
 
-class BaseMachine: public Life::ExplodingMachine
-{
-	typedef Life::ExplodingMachine Parent;
+class BaseMachine: public life::ExplodingMachine {
+	typedef life::ExplodingMachine Parent;
 public:
-	BaseMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher);
+	BaseMachine(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, life::Launcher* launcher);
 	virtual ~BaseMachine();
 
-	void AddPanic(float pPanic);
-	float mLevelSpeed;
-	float mPanicLevel;
-	str mVillain;
-	float mDangerousness;
-	bool mDidGetToTown;
+	void AddPanic(float panic);
+	float level_speed_;
+	float panic_level_;
+	str villain_;
+	float dangerousness_;
+	bool did_get_to_town_;
 
 protected:
-	virtual void OnAlarm(int pAlarmId, void* pExtraData);
+	virtual void OnAlarm(int alarm_id, void* extra_data);
 	virtual void OnDie();
 };
 

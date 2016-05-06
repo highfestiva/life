@@ -1,38 +1,35 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Lepra/Include/HiResTimer.h"
-#include "../UiTbc/Include/UiRenderer.h"
-#include "Downwash.h"
+#include "../lepra/include/hirestimer.h"
+#include "../uitbc/include/uirenderer.h"
+#include "downwash.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 class GameUiManager;
 }
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-class Sunlight
-{
+class Sunlight {
 public:
-	Sunlight(UiCure::GameUiManager* pUiManager);
+	Sunlight(UiCure::GameUiManager* ui_manager);
 	virtual ~Sunlight();
 
 private:
-	UiCure::GameUiManager* mUiManager;
-	UiTbc::Renderer::LightID mLightId;
+	UiCure::GameUiManager* ui_manager_;
+	uitbc::Renderer::LightID light_id_;
 };
 
 

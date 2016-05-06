@@ -1,28 +1,26 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Lepra/Include/AABR.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../../Lepra/Include/LooseQuadtree.h"
-#include "../Include/Cure.h"
+#include "../../lepra/include/aabr.h"
+#include "../../lepra/include/vector3d.h"
+#include "../../lepra/include/loosequadtree.h"
+#include "../include/cure.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 class TerrainFunction;
 class TerrainPatch;
 }
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
@@ -31,8 +29,7 @@ namespace Cure
 // terrain functions must be avoided by this class, since the generated
 // patches are handled by the resource system, which implicitly makes
 // such a cache redundant.
-class TerrainFunctionManager
-{
+class TerrainFunctionManager {
 public:
 	typedef AABR<float> FunctionArea;
 
@@ -40,24 +37,24 @@ public:
 	virtual ~TerrainFunctionManager();
 	void Clear();
 
-	void LoadFunctions(const FunctionArea& pArea, float pLod);
-	Tbc::TerrainPatch* GeneratePatchMesh(const FunctionArea& pArea, float pLod);
+	void LoadFunctions(const FunctionArea& area, float lod);
+	tbc::TerrainPatch* GeneratePatchMesh(const FunctionArea& area, float lod);
 
 	void MarkAllDirty();
-	void MarkInUse(const vec3& pPosition, float pRadius);
+	void MarkInUse(const vec3& position, float radius);
 	void DeleteDirty();
 
 private:
-	void Delete(bool pDirtyOnly);
+	void Delete(bool dirty_only);
 
 	// TODO: move to some game logic file!
-	static const int msTerrainFunctionSize = (int)1e6;
+	static const int terrain_function_size_ = (int)1e6;
 
-	typedef LooseQuadtree<Tbc::TerrainFunction*, Tbc::TerrainFunction*, float> FunctionTree;
-	FunctionTree* mFunctionTree;
+	typedef LooseQuadtree<tbc::TerrainFunction*, tbc::TerrainFunction*, float> FunctionTree;
+	FunctionTree* function_tree_;
 
 	// TODO: remove the dummy!
-	Tbc::TerrainFunction* mDummyTerrainFunction;
+	tbc::TerrainFunction* dummy_terrain_function_;
 
 	logclass();
 };

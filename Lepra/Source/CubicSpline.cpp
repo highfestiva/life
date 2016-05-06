@@ -1,170 +1,144 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/Math.h"
-#include "../Include/CubicSpline.h"
+#include "../include/math.h"
+#include "../include/cubicspline.h"
 
 #include <math.h>
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-void CubicSpline::Init(int pNumPoints, int pNumValuesPerPoint)
-{
-	mNumPoints = pNumPoints;
-	mNumValuesPerPoint = pNumValuesPerPoint;
+void CubicSpline::Init(int num_points, int num_values_per_point) {
+	num_points_ = num_points;
+	num_values_per_point_ = num_values_per_point;
 
-	if (mPoint != 0)
-		delete[] mPoint;
+	if (point_ != 0)
+		delete[] point_;
 
-	if (mSegment != 0)
-		delete[] mSegment;
+	if (segment_ != 0)
+		delete[] segment_;
 
-	if (mModularValue != 0)
-		delete[] mModularValue;
+	if (modular_value_ != 0)
+		delete[] modular_value_;
 
-	if (mMinModValue != 0)
-		delete[] mMinModValue;
+	if (min_mod_value_ != 0)
+		delete[] min_mod_value_;
 
-	if (mMaxModValue != 0)
-		delete[] mMaxModValue;
+	if (max_mod_value_ != 0)
+		delete[] max_mod_value_;
 
-	mPoint   = new Point[mNumPoints];
-	mSegment = new Segment[mNumPoints];
+	point_   = new Point[num_points_];
+	segment_ = new Segment[num_points_];
 
-	mModularValue = new bool[pNumValuesPerPoint];
-	mMinModValue  = new float[pNumValuesPerPoint];
-	mMaxModValue  = new float[pNumValuesPerPoint];
+	modular_value_ = new bool[num_values_per_point];
+	min_mod_value_  = new float[num_values_per_point];
+	max_mod_value_  = new float[num_values_per_point];
 
 	int i;
-	for (i = 0; i < mNumPoints; i++)
-	{
-		mPoint[i].Init(mNumValuesPerPoint);
-		mSegment[i].Init(mNumValuesPerPoint);
+	for (i = 0; i < num_points_; i++) {
+		point_[i].Init(num_values_per_point_);
+		segment_[i].Init(num_values_per_point_);
 	}
 
-	for (i = 0; i < mNumValuesPerPoint; i++)
-	{
-		mModularValue[i] = false;
-		mMinModValue[i] = 0.0f;
-		mMaxModValue[i] = 0.0f;
+	for (i = 0; i < num_values_per_point_; i++) {
+		modular_value_[i] = false;
+		min_mod_value_[i] = 0.0f;
+		max_mod_value_[i] = 0.0f;
 	}
 }
 
-bool CubicSpline::SetPointValues(int pPointIndex, float pTimeTag, const float* pValue)
-{
-	mPoint[pPointIndex].mT = pTimeTag;
-	mPoint[pPointIndex].mValues.Set(pValue);
-	mInitialized = false;
+bool CubicSpline::SetPointValues(int point_index, float time_tag, const float* value) {
+	point_[point_index].t_ = time_tag;
+	point_[point_index].values_.Set(value);
+	initialized_ = false;
 
 	return true;
 }
 
-void CubicSpline::SetModValue(int pValueIndex, float pMinModValue, float pMaxModValue)
-{
-	mModularValue[pValueIndex] = true;
-	mMinModValue[pValueIndex] = pMinModValue;
-	mMaxModValue[pValueIndex] = pMaxModValue;
-	mInitialized = false;
+void CubicSpline::SetModValue(int value_index, float min_mod_value, float max_mod_value) {
+	modular_value_[value_index] = true;
+	min_mod_value_[value_index] = min_mod_value;
+	max_mod_value_[value_index] = max_mod_value;
+	initialized_ = false;
 }
 
-void CubicSpline::StartInterpolation(float pTime)
-{
-	StartInterpolation(pTime, IM_ONCE, 0, 0);
+void CubicSpline::StartInterpolation(float time) {
+	StartInterpolation(time, kImOnce, 0, 0);
 	//CalcABCD();
 }
 
-void CubicSpline::StartInterpolation(float pTime, const float* pStartSlope, const float* pEndSlope)
-{
-	Values lStartSlope(mNumValuesPerPoint);
-	Values lEndSlope(mNumValuesPerPoint);
+void CubicSpline::StartInterpolation(float time, const float* start_slope, const float* end_slope) {
+	Values _start_slope(num_values_per_point_);
+	Values _end_slope(num_values_per_point_);
 
-	lStartSlope.Set(pStartSlope);
-	lEndSlope.Set(pEndSlope);
+	_start_slope.Set(start_slope);
+	_end_slope.Set(end_slope);
 
-	StartInterpolation(pTime, IM_ONCE, &lStartSlope, &lEndSlope);
+	StartInterpolation(time, kImOnce, &_start_slope, &_end_slope);
 }
 
-void CubicSpline::StartLoopedInterpolation(float pTime, float pExtraTimeTag)
-{
-	mExtraTimeTag = pExtraTimeTag;
-	StartInterpolation(pTime, IM_LOOP, 0, 0);
+void CubicSpline::StartLoopedInterpolation(float time, float extra_time_tag) {
+	extra_time_tag_ = extra_time_tag;
+	StartInterpolation(time, kImLoop, 0, 0);
 	//CalcABCD();
 }
 
-void CubicSpline::StartInterpolation(float pTime, InterpolationMode pMode, Values* pStartSlope, Values* pEndSlope)
-{
-	ReInitialize(pMode, pStartSlope, pEndSlope);
+void CubicSpline::StartInterpolation(float time, InterpolationMode mode, Values* start_slope, Values* end_slope) {
+	ReInitialize(mode, start_slope, end_slope);
 
-	mCurrentTime = pTime;
+	current_time_ = time;
 
-	mCurrentPoint = 0;
+	current_point_ = 0;
 	StepForwardToCurrentFrame();
 }
 
-void CubicSpline::ReInitialize(InterpolationMode pMode, Values* pStartSlope, Values* pEndSlope)
-{
-	if (pMode != mMode)
-	{
-		mMode = pMode;
-		mInitialized = false;
+void CubicSpline::ReInitialize(InterpolationMode mode, Values* start_slope, Values* end_slope) {
+	if (mode != mode_) {
+		mode_ = mode;
+		initialized_ = false;
 	}
 
-	if (mInitialized == false)
-	{
-		if (mMode == IM_ONCE)
-		{
-			InitNaturalCubic(pStartSlope, pEndSlope, (pStartSlope != 0 && pEndSlope != 0));
-		}
-		else
-		{
+	if (initialized_ == false) {
+		if (mode_ == kImOnce) {
+			InitNaturalCubic(start_slope, end_slope, (start_slope != 0 && end_slope != 0));
+		} else {
 			InitNaturalCubicClosed();
 		}
 
-		mInitialized = true;
+		initialized_ = true;
 	}
 }
 
-void CubicSpline::StepInterpolation(float pDeltaTime)
-{
-	if (pDeltaTime == 0)
-	{
+void CubicSpline::StepInterpolation(float delta_time) {
+	if (delta_time == 0) {
 		return;	// TRICKY: optimization.
 	}
 
-	mCurrentTime += pDeltaTime;
+	current_time_ += delta_time;
 
-	if (mMode == IM_ONCE)
-	{
-		if (mCurrentTime > GetMaxTime())
-		{
-			mCurrentTime = GetMaxTime();
+	if (mode_ == kImOnce) {
+		if (current_time_ > GetMaxTime()) {
+			current_time_ = GetMaxTime();
+		} else if (current_time_ < GetMinTime()) {
+			current_time_ = GetMinTime();
 		}
-		else if (mCurrentTime < GetMinTime())
-		{
-			mCurrentTime = GetMinTime();
-		}
-	}
-	else
-	{
-		float lPrevTime = mCurrentTime;
-		mCurrentTime = Math::Mod(mCurrentTime, GetMinTime(), mExtraTimeTag);
-		pDeltaTime = mCurrentTime-lPrevTime;	// Used for stepping backwards.
+	} else {
+		float prev_time = current_time_;
+		current_time_ = Math::Mod(current_time_, GetMinTime(), extra_time_tag_);
+		delta_time = current_time_-prev_time;	// Used for stepping backwards.
 	}
 
-	if (pDeltaTime < 0.0f)
-	{
-		while (mCurrentPoint > 0 && mPoint[mCurrentPoint].mT > mCurrentTime)
-		{
-			mCurrentPoint--;
+	if (delta_time < 0.0f) {
+		while (current_point_ > 0 && point_[current_point_].t_ > current_time_) {
+			current_point_--;
 		}
 	}
 	StepForwardToCurrentFrame();
@@ -172,443 +146,365 @@ void CubicSpline::StepInterpolation(float pDeltaTime)
 	//CalcABCD();
 }
 
-void CubicSpline::GotoAbsoluteTime(float pTime)
-{
-	StepInterpolation(pTime-mCurrentTime);
+void CubicSpline::GotoAbsoluteTime(float time) {
+	StepInterpolation(time-current_time_);
 }
 
-float CubicSpline::FindNearestTime(float pStepLength, const float* pWhere, float& pNearestDistance, float* pNearestPoint)
-{
+float CubicSpline::FindNearestTime(float step_length, const float* where, float& nearest_distance, float* nearest_point) {
 	// Ugly search algorithm. Looks in the step direction until the distance becomes greater than
 	// the starting distance. Then turns around and looks in the other direction at half the velocity.
 	// And so forth. This could probably be optimized using Newton-Raphson.
-	float lNearestDistance[4];
-	float lNewNearestDistance[4];
-	float lDistance2 = 0;
+	float _nearest_distance[4];
+	float new_nearest_distance[4];
+	float distance2 = 0;
 	int x;
-	for (x = 0; x < mNumValuesPerPoint; ++x)
-	{
-		lNearestDistance[x] = GetValue(x)-pWhere[x];
-		lDistance2 += lNearestDistance[x]*lNearestDistance[x];
+	for (x = 0; x < num_values_per_point_; ++x) {
+		_nearest_distance[x] = GetValue(x)-where[x];
+		distance2 += _nearest_distance[x]*_nearest_distance[x];
 	}
-	for (int y = 0; y < 20; ++y)
-	{
+	for (int y = 0; y < 20; ++y) {
 		const int zc = 8;
 		int z;
-		for (z = 0; z < zc; ++z)
-		{
-			StepInterpolation(pStepLength);
-			float lNewDistance2 = 0;
-			for (int x = 0; x < mNumValuesPerPoint; ++x)
-			{
-				lNewNearestDistance[x] = GetValue(x)-pWhere[x];
-				lNewDistance2 += lNewNearestDistance[x]*lNewNearestDistance[x];
+		for (z = 0; z < zc; ++z) {
+			StepInterpolation(step_length);
+			float new_distance2 = 0;
+			for (int x = 0; x < num_values_per_point_; ++x) {
+				new_nearest_distance[x] = GetValue(x)-where[x];
+				new_distance2 += new_nearest_distance[x]*new_nearest_distance[x];
 			}
-			if (lNewDistance2 >= lDistance2)
-			{
-				StepInterpolation(-pStepLength);	// Go back to previous point.
-				pStepLength = pStepLength*-0.5f;	// Change search direction; increase granularity.
-				if ((mCurrentTime == GetMinTime() && pStepLength < 0) ||
-					(mCurrentTime == GetMaxTime() && pStepLength > 0))
-				{
-					pStepLength = -pStepLength;
+			if (new_distance2 >= distance2) {
+				StepInterpolation(-step_length);	// Go back to previous point.
+				step_length = step_length*-0.5f;	// Change search direction; increase granularity.
+				if ((current_time_ == GetMinTime() && step_length < 0) ||
+					(current_time_ == GetMaxTime() && step_length > 0)) {
+					step_length = -step_length;
 				}
-			}
-			else
-			{
-				lDistance2 = lNewDistance2;
-				for (int x = 0; x < mNumValuesPerPoint; ++x)
-				{
-					lNearestDistance[x] = lNewNearestDistance[x];
-				}
-				break;
+			} else {
+				distance2 = new_distance2;
+				for (int x = 0; x < num_values_per_point_; ++x) {
+					_nearest_distance[x] = new_nearest_distance[x];
+				} break;
 			}
 		}
-		if (z == zc)	// Nothing new found in a few loops - might as well give up.
-		{
+		if (z == zc) {	// Nothing new found in a few loops - might as well give up.
 			break;
 		}
-		pStepLength *= 0.7f;	// Increase granularity when we've found a closer spot.
+		step_length *= 0.7f;	// Increase granularity when we've found a closer spot.
 	}
 
 	// Fill in our output values.
-	pNearestDistance = ::sqrt(lDistance2);
-	for (x = 0; x < mNumValuesPerPoint; ++x)
-	{
-		pNearestPoint[x] = lNearestDistance[x]+pWhere[x];
+	nearest_distance = ::sqrt(distance2);
+	for (x = 0; x < num_values_per_point_; ++x) {
+		nearest_point[x] = _nearest_distance[x]+where[x];
 	}
-	return (mCurrentTime);
+	return (current_time_);
 }
 
-void CubicSpline::StepForwardToCurrentFrame()
-{
-	if (mMode == IM_ONCE)
-	{
-		while (mCurrentPoint < (mNumPoints - 2) &&
-			mPoint[mCurrentPoint + 1].mT < mCurrentTime)
-		{
-			mCurrentPoint++;
+void CubicSpline::StepForwardToCurrentFrame() {
+	if (mode_ == kImOnce) {
+		while (current_point_ < (num_points_ - 2) &&
+			point_[current_point_ + 1].t_ < current_time_) {
+			current_point_++;
 		}
-	}
-	else
-	{
-		while (mCurrentPoint < (mNumPoints - 1) &&
-			mPoint[mCurrentPoint + 1].mT < mCurrentTime)
-		{
-			mCurrentPoint++;
+	} else {
+		while (current_point_ < (num_points_ - 1) &&
+			point_[current_point_ + 1].t_ < current_time_) {
+			current_point_++;
 		}
 	}
 
-	if (mCurrentPoint != mNumPoints - 1)
-	{
-		mCurrentSegmentTime = (mCurrentTime - mPoint[mCurrentPoint].mT) /
-								(mPoint[mCurrentPoint + 1].mT - mPoint[mCurrentPoint].mT);
-	}
-	else
-	{
-		mCurrentSegmentTime = (mCurrentTime - mPoint[mCurrentPoint].mT) /
-								(mExtraTimeTag - mPoint[mCurrentPoint].mT);
+	if (current_point_ != num_points_ - 1) {
+		current_segment_time_ = (current_time_ - point_[current_point_].t_) /
+								(point_[current_point_ + 1].t_ - point_[current_point_].t_);
+	} else {
+		current_segment_time_ = (current_time_ - point_[current_point_].t_) /
+								(extra_time_tag_ - point_[current_point_].t_);
 	}
 }
 
-void CubicSpline::InitNaturalCubic(Values* pStartSlope, Values* pEndSlope, bool pUseSlopes)
-{
+void CubicSpline::InitNaturalCubic(Values* start_slope, Values* end_slope, bool use_slopes) {
 	InitModValues();
 
-	int lN = mNumPoints - 1;
+	int n = num_points_ - 1;
 
-	Values* lGamma = new Values[mNumPoints];
-	Values* lDelta = new Values[mNumPoints];
-	Values* lD     = new Values[mNumPoints];
+	Values* gamma = new Values[num_points_];
+	Values* delta = new Values[num_points_];
+	Values* __d     = new Values[num_points_];
 	int i, j;
 
-	for (i = 0; i < mNumPoints; i++)
-	{
-		lGamma[i].Init(mNumValuesPerPoint);
-		lDelta[i].Init(mNumValuesPerPoint);
-		lD[i].Init(mNumValuesPerPoint);
+	for (i = 0; i < num_points_; i++) {
+		gamma[i].Init(num_values_per_point_);
+		delta[i].Init(num_values_per_point_);
+		__d[i].Init(num_values_per_point_);
 	}
 
-	lGamma[0] = 0.5f;
-	for (i = 1; i < lN; i++)
-	{
-		for (j = 0; j < mNumValuesPerPoint; j++)
-		{
-			lGamma[i][j] = 1.0f / (4.0f - lGamma[i - 1][j]);
-		}
-	}
-	
-	for (j = 0; j < mNumValuesPerPoint; j++)
-	{
-		lGamma[lN][j] = 1.0f / (2.0f - lGamma[lN - 1][j]);
-		lDelta[0][j] = 3.0f * (mPoint[1].mValues[j] - mPoint[0].mValues[j]) * lGamma[0][j];
-	}
-
-	float lRef = mPoint[1].mT - mPoint[0].mT;
-	float lFactor;
-
-	for (i = 1; i < lN; i++)
-	{
-		lFactor = (mPoint[i + 1].mT - mPoint[i - 1].mT) / (2.0f * lRef);
-		for (j = 0; j < mNumValuesPerPoint; j++)
-		{
-			lDelta[i][j] = (3.0f * (mPoint[i + 1].mValues[j] - mPoint[i - 1].mValues[j]) * lFactor - lDelta[i - 1][j]) * lGamma[i][j];
+	gamma[0] = 0.5f;
+	for (i = 1; i < n; i++) {
+		for (j = 0; j < num_values_per_point_; j++) {
+			gamma[i][j] = 1.0f / (4.0f - gamma[i - 1][j]);
 		}
 	}
 
-	lFactor = (mPoint[lN].mT - mPoint[lN - 1].mT) / lRef;
-	for (j = 0; j < mNumValuesPerPoint; j++)
-	{
-		lDelta[lN][j] = (3.0f * (mPoint[lN].mValues[j] - mPoint[lN - 1].mValues[j]) * lFactor - lDelta[lN - 1][j]) * lGamma[lN][j];
+	for (j = 0; j < num_values_per_point_; j++) {
+		gamma[n][j] = 1.0f / (2.0f - gamma[n - 1][j]);
+		delta[0][j] = 3.0f * (point_[1].values_[j] - point_[0].values_[j]) * gamma[0][j];
 	}
 
-	if (pUseSlopes == false)
-	{
-		lD[lN] = lDelta[lN];
-	}
-	else
-	{
-		lD[lN].Set(pEndSlope->mValue);
+	float ref = point_[1].t_ - point_[0].t_;
+	float factor;
+
+	for (i = 1; i < n; i++) {
+		factor = (point_[i + 1].t_ - point_[i - 1].t_) / (2.0f * ref);
+		for (j = 0; j < num_values_per_point_; j++) {
+			delta[i][j] = (3.0f * (point_[i + 1].values_[j] - point_[i - 1].values_[j]) * factor - delta[i - 1][j]) * gamma[i][j];
+		}
 	}
 
-	for (i = lN - 1; i >= 0; i--)
-	{
-		if (i != 0)
-		{
-			for (j = 0; j < mNumValuesPerPoint; j++)
-			{
-				lD[i][j] = lDelta[i][j] - lGamma[i][j] * lD[i + 1][j];
+	factor = (point_[n].t_ - point_[n - 1].t_) / ref;
+	for (j = 0; j < num_values_per_point_; j++) {
+		delta[n][j] = (3.0f * (point_[n].values_[j] - point_[n - 1].values_[j]) * factor - delta[n - 1][j]) * gamma[n][j];
+	}
+
+	if (use_slopes == false) {
+		__d[n] = delta[n];
+	} else {
+		__d[n].Set(end_slope->value_);
+	}
+
+	for (i = n - 1; i >= 0; i--) {
+		if (i != 0) {
+			for (j = 0; j < num_values_per_point_; j++) {
+				__d[i][j] = delta[i][j] - gamma[i][j] * __d[i + 1][j];
 			}
-		}
-		else
-		{
-			if (pUseSlopes == false)
-			{
-				for (j = 0; j < mNumValuesPerPoint; j++)
-				{
-					lD[i][j] = lDelta[i][j] - lGamma[i][j] * lD[i + 1][j];
+		} else {
+			if (use_slopes == false) {
+				for (j = 0; j < num_values_per_point_; j++) {
+					__d[i][j] = delta[i][j] - gamma[i][j] * __d[i + 1][j];
 				}
-			}
-			else
-			{
-				lD[i].Set(pStartSlope->mValue);
+			} else {
+				__d[i].Set(start_slope->value_);
 			}
 		}
 	}
 
-	float lRefT = GetMeanTDiff();
-	for (i = 0; i < lN; i++)
-	{
-		float lScaleFactor = (mPoint[i + 1].mT - mPoint[i].mT) / lRefT;
+	float ref_t = GetMeanTDiff();
+	for (i = 0; i < n; i++) {
+		float scale_factor = (point_[i + 1].t_ - point_[i].t_) / ref_t;
 
-		for (j = 0; j < mNumValuesPerPoint; j++)
-		{
-			mSegment[i].a.Set(mPoint[i].mValues.mValue);
-			mSegment[i].b[j] = lD[i][j] * lScaleFactor;
-			mSegment[i].c[j] = (3.0f * (mPoint[i + 1].mValues[j] - mPoint[i].mValues[j]) -
-								   2.0f * lD[i][j] * lScaleFactor - lD[i + 1][j] * lScaleFactor);
-			mSegment[i].d[j] = (2.0f * (mPoint[i].mValues[j] - mPoint[i + 1].mValues[j]) +
-								   lD[i][j] * lScaleFactor + lD[i + 1][j] * lScaleFactor);
+		for (j = 0; j < num_values_per_point_; j++) {
+			segment_[i].a.Set(point_[i].values_.value_);
+			segment_[i].b[j] = __d[i][j] * scale_factor;
+			segment_[i].c[j] = (3.0f * (point_[i + 1].values_[j] - point_[i].values_[j]) -
+								   2.0f * __d[i][j] * scale_factor - __d[i + 1][j] * scale_factor);
+			segment_[i].d[j] = (2.0f * (point_[i].values_[j] - point_[i + 1].values_[j]) +
+								   __d[i][j] * scale_factor + __d[i + 1][j] * scale_factor);
 		}
 	}
 
-	delete[] lGamma;
-	delete[] lDelta;
-	delete[] lD;
+	delete[] gamma;
+	delete[] delta;
+	delete[] __d;
 }
 
-void CubicSpline::InitNaturalCubicClosed()
-{
+void CubicSpline::InitNaturalCubicClosed() {
 	InitModValues();
 
-	int lN = mNumPoints - 1;
+	int n = num_points_ - 1;
 
-	Values* lW = new Values[mNumPoints];
-	Values* lV = new Values[mNumPoints];
-	Values* lY = new Values[mNumPoints];
-	Values* lD = new Values[mNumPoints];
-	Values lZ(mNumValuesPerPoint);
-	Values lH(mNumValuesPerPoint);
-	Values lG(mNumValuesPerPoint);
-	Values lF(mNumValuesPerPoint);
+	Values* w = new Values[num_points_];
+	Values* v = new Values[num_points_];
+	Values* __y = new Values[num_points_];
+	Values* __d = new Values[num_points_];
+	Values __z(num_values_per_point_);
+	Values __h(num_values_per_point_);
+	Values g(num_values_per_point_);
+	Values __f(num_values_per_point_);
 	int i, j;
 
-	for (i = 0; i < mNumPoints; i++)
-	{
-		lW[i].Init(mNumValuesPerPoint);
-		lV[i].Init(mNumValuesPerPoint);
-		lY[i].Init(mNumValuesPerPoint);
-		lD[i].Init(mNumValuesPerPoint);
+	for (i = 0; i < num_points_; i++) {
+		w[i].Init(num_values_per_point_);
+		v[i].Init(num_values_per_point_);
+		__y[i].Init(num_values_per_point_);
+		__d[i].Init(num_values_per_point_);
 	}
 
-	lW[1] = lV[1] = lZ = 0.25f;
+	w[1] = v[1] = __z = 0.25f;
 
-	for (j = 0; j < mNumValuesPerPoint; j++)
-	{
-		lY[0][j] = lZ[j] * 3.0f * (mPoint[1].mValues[j] - mPoint[lN].mValues[j]);
-		lF[j] = 3.0f * (mPoint[0].mValues[j] - mPoint[lN - 1].mValues[j]);
+	for (j = 0; j < num_values_per_point_; j++) {
+		__y[0][j] = __z[j] * 3.0f * (point_[1].values_[j] - point_[n].values_[j]);
+		__f[j] = 3.0f * (point_[0].values_[j] - point_[n - 1].values_[j]);
 	}
 
-	lH = 4.0f;
-	lG = 1.0f;
+	__h = 4.0f;
+	g = 1.0f;
 
-	for (i = 1; i < lN; i++)
-	{
-		for (j = 0; j < mNumValuesPerPoint; j++)
-		{
-			lV[i + 1][j] = lZ[j] = 1.0f / (4.0f - lV[i][j]);
-			lW[i + 1][j] = -lZ[j] * lW[i][j];
-			lY[i][j] = lZ[j] * (3.0f * (mPoint[i + 1].mValues[j] - mPoint[i - 1].mValues[j]) - lY[i - 1][j]);
-			lH[j] -= lG[j] * lW[i][j];
-			lF[j] -= lG[j] * lY[i - 1][j];
-			lG[j] *= -lV[i][j];
+	for (i = 1; i < n; i++) {
+		for (j = 0; j < num_values_per_point_; j++) {
+			v[i + 1][j] = __z[j] = 1.0f / (4.0f - v[i][j]);
+			w[i + 1][j] = -__z[j] * w[i][j];
+			__y[i][j] = __z[j] * (3.0f * (point_[i + 1].values_[j] - point_[i - 1].values_[j]) - __y[i - 1][j]);
+			__h[j] -= g[j] * w[i][j];
+			__f[j] -= g[j] * __y[i - 1][j];
+			g[j] *= -v[i][j];
 		}
 	}
 
-	for (j = 0; j < mNumValuesPerPoint; j++)
-	{
-		lH[j] -= (lG[j] + 1) * (lV[lN][j] + lW[lN][j]);
-		lY[lN][j] = lF[j] - (lG[j] + 1) * lY[lN - 1][j];
+	for (j = 0; j < num_values_per_point_; j++) {
+		__h[j] -= (g[j] + 1) * (v[n][j] + w[n][j]);
+		__y[n][j] = __f[j] - (g[j] + 1) * __y[n - 1][j];
 
-		lD[lN][j]     = lY[lN][j] / lH[j];
-		lD[lN - 1][j] = lY[lN - 1][j] - (lV[lN][j] + lW[lN][j]) * lD[lN][j];
+		__d[n][j]     = __y[n][j] / __h[j];
+		__d[n - 1][j] = __y[n - 1][j] - (v[n][j] + w[n][j]) * __d[n][j];
 	}
 
-	for (i = lN - 2; i >= 0; i--)
-	{
-		for (j = 0; j < mNumValuesPerPoint; j++)
-		{
-			lD[i][j] = lY[i][j] - lV[i + 1][j] * lD[i + 1][j] - lW[i + 1][j] * lD[lN][j];
+	for (i = n - 2; i >= 0; i--) {
+		for (j = 0; j < num_values_per_point_; j++) {
+			__d[i][j] = __y[i][j] - v[i + 1][j] * __d[i + 1][j] - w[i + 1][j] * __d[n][j];
 		}
 	}
 
-	float lRefT = GetMeanTDiff();
-	float lScaleFactor;
-	for (i = 0; i < lN; i++)
-	{
-		lScaleFactor = (mPoint[i + 1].mT - mPoint[i].mT) / lRefT;
-		mSegment[i].a.Set(mPoint[i].mValues.mValue);
+	float ref_t = GetMeanTDiff();
+	float scale_factor;
+	for (i = 0; i < n; i++) {
+		scale_factor = (point_[i + 1].t_ - point_[i].t_) / ref_t;
+		segment_[i].a.Set(point_[i].values_.value_);
 
-		for (j = 0; j < mNumValuesPerPoint; j++)
-		{
-			mSegment[i].b[j] = lD[i][j] * lScaleFactor;
-			mSegment[i].c[j] = (3.0f * (mPoint[i + 1].mValues[j] - mPoint[i].mValues[j]) -
-									2.0f * lD[i][j] * lScaleFactor - lD[i + 1][j] * lScaleFactor);
-			mSegment[i].d[j] = (2.0f * (mPoint[i].mValues[j] - mPoint[i + 1].mValues[j]) +
-									lD[i][j] * lScaleFactor + lD[i + 1][j] * lScaleFactor);
+		for (j = 0; j < num_values_per_point_; j++) {
+			segment_[i].b[j] = __d[i][j] * scale_factor;
+			segment_[i].c[j] = (3.0f * (point_[i + 1].values_[j] - point_[i].values_[j]) -
+									2.0f * __d[i][j] * scale_factor - __d[i + 1][j] * scale_factor);
+			segment_[i].d[j] = (2.0f * (point_[i].values_[j] - point_[i + 1].values_[j]) +
+									__d[i][j] * scale_factor + __d[i + 1][j] * scale_factor);
 		}
 	}
 
-	lScaleFactor = (mExtraTimeTag - mPoint[lN].mT) / lRefT;
+	scale_factor = (extra_time_tag_ - point_[n].t_) / ref_t;
 
-	for (i = 0; i < mNumValuesPerPoint; i++)
-	{
-		mSegment[lN].a[i] = mPoint[lN].mValues[i];
-		mSegment[lN].b[i] = lD[lN][i] * lScaleFactor;
+	for (i = 0; i < num_values_per_point_; i++) {
+		segment_[n].a[i] = point_[n].values_[i];
+		segment_[n].b[i] = __d[n][i] * scale_factor;
 
-		if (mModularValue[i] == false)
-		{
-			mSegment[lN].c[i] = (3.0f * (mPoint[0].mValues[i] - mPoint[lN].mValues[i]) -
-									   2.0f * lD[lN][i] * lScaleFactor - lD[0][i] * lScaleFactor);
-			mSegment[lN].d[i] = (2.0f * (mPoint[lN].mValues[i] - mPoint[0].mValues[i]) +
-									   lD[lN][i] * lScaleFactor + lD[0][i] * lScaleFactor);
-		}
-		else
-		{
-			float lValue = GetClosestEquivalentModValue(mPoint[lN].mValues[i],
-														  mPoint[0].mValues[i],
-														  mMinModValue[i],
-														  mMaxModValue[i]);
-			mSegment[lN].c[i] = (3.0f * (lValue - mPoint[lN].mValues[i]) -
-									   2.0f * lD[lN][i] * lScaleFactor - lD[0][i] * lScaleFactor);
-			mSegment[lN].d[i] = (2.0f * (mPoint[lN].mValues[i] - lValue) +
-									   lD[lN][i] * lScaleFactor + lD[0][i] * lScaleFactor);
+		if (modular_value_[i] == false) {
+			segment_[n].c[i] = (3.0f * (point_[0].values_[i] - point_[n].values_[i]) -
+									   2.0f * __d[n][i] * scale_factor - __d[0][i] * scale_factor);
+			segment_[n].d[i] = (2.0f * (point_[n].values_[i] - point_[0].values_[i]) +
+									   __d[n][i] * scale_factor + __d[0][i] * scale_factor);
+		} else {
+			float _value = GetClosestEquivalentModValue(point_[n].values_[i],
+														  point_[0].values_[i],
+														  min_mod_value_[i],
+														  max_mod_value_[i]);
+			segment_[n].c[i] = (3.0f * (_value - point_[n].values_[i]) -
+									   2.0f * __d[n][i] * scale_factor - __d[0][i] * scale_factor);
+			segment_[n].d[i] = (2.0f * (point_[n].values_[i] - _value) +
+									   __d[n][i] * scale_factor + __d[0][i] * scale_factor);
 /*
-			float lNewValue;
-			if (OptimizeLastSegment(i, lNewValue) == true)
-			{
-				mSegment[lN].c[i] = (3.0f * (lNewValue - mPoint[lN].mValues[i]) -
-										   2.0f * lD[lN][i] * lScaleFactor - lD[0][i] * lScaleFactor);
-				mSegment[lN].d[i] = (2.0f * (mPoint[lN].mValues[i] - lNewValue) +
-										   lD[lN][i] * lScaleFactor + lD[0][i] * lScaleFactor);
+			float new_value;
+			if (OptimizeLastSegment(i, new_value) == true) {
+				segment_[n].c[i] = (3.0f * (new_value - point_[n].values_[i]) -
+										   2.0f * __d[n][i] * scale_factor - __d[0][i] * scale_factor);
+				segment_[n].d[i] = (2.0f * (point_[n].values_[i] - new_value) +
+										   __d[n][i] * scale_factor + __d[0][i] * scale_factor);
 			}
 */
 		}
 	}
 
-	delete[] lW;
-	delete[] lV;
-	delete[] lY;
-	delete[] lD;
+	delete[] w;
+	delete[] v;
+	delete[] __y;
+	delete[] __d;
 }
 
-float CubicSpline::GetValue(int pValueIndex)
-{
-	// mCurrentPoint is also the current segment.
-	float lY = mSegment[mCurrentPoint].GetValue(pValueIndex, mCurrentSegmentTime);
+float CubicSpline::GetValue(int value_index) {
+	// current_point_ is also the current segment.
+	float __y = segment_[current_point_].GetValue(value_index, current_segment_time_);
 
-	if (mModularValue[pValueIndex] == true)
-	{
-		return Math::Mod(lY, mMinModValue[pValueIndex], mMaxModValue[pValueIndex]);
-	}
-	else
-	{
-		return lY;
+	if (modular_value_[value_index] == true) {
+		return Math::Mod(__y, min_mod_value_[value_index], max_mod_value_[value_index]);
+	} else {
+		return __y;
 	}
 }
 
-float CubicSpline::GetSlope(int pValueIndex)
-{
-	return mSegment[mCurrentPoint].GetSlope(pValueIndex, mCurrentSegmentTime);
+float CubicSpline::GetSlope(int value_index) {
+	return segment_[current_point_].GetSlope(value_index, current_segment_time_);
 }
 
-float CubicSpline::GetSlopeChange(int pValueIndex)
-{
-	return mSegment[mCurrentPoint].GetSlopeChange(pValueIndex, mCurrentSegmentTime);
+float CubicSpline::GetSlopeChange(int value_index) {
+	return segment_[current_point_].GetSlopeChange(value_index, current_segment_time_);
 }
 
-float CubicSpline::GetClosestEquivalentModValue(float pPreviousValue,
-											  float pCurrentValue,
-											  float pMinMod,
-											  float pMaxMod)
-{
-	float lPrev  = Math::Mod(pPreviousValue, pMinMod, pMaxMod);
-	float lValue = Math::Mod(pCurrentValue, pMinMod, pMaxMod);
+float CubicSpline::GetClosestEquivalentModValue(float previous_value,
+											  float current_value,
+											  float min_mod,
+											  float max_mod) {
+	float prev  = Math::Mod(previous_value, min_mod, max_mod);
+	float _value = Math::Mod(current_value, min_mod, max_mod);
 
-	float lDown = lValue - lPrev;
-	float lUp   = (lPrev - pMinMod) + (pMaxMod - lValue);
+	float down = _value - prev;
+	float up   = (prev - min_mod) + (max_mod - _value);
 
-	if (lValue < lPrev)
-		lUp = -((lValue - pMinMod) + (pMaxMod - lPrev));
+	if (_value < prev)
+		up = -((_value - min_mod) + (max_mod - prev));
 
-	if (fabs(lDown) < fabs(lUp))
-		return (pPreviousValue + lDown);
+	if (fabs(down) < fabs(up))
+		return (previous_value + down);
 	else
-		return (pPreviousValue - lUp);
+		return (previous_value - up);
 }
 /*
-void CubicSpline::CalcABCD()
-{
-	float lDX;
+void CubicSpline::CalcABCD() {
+	float dx;
 	float lDT;
 
-	if (mCurrentPoint == mNumPoints - 1)
-	{
-		lDX = mExtraTimeTag - mPoint[mCurrentPoint].mT;
-		lDT = mExtraTimeTag - mCurrentTime;
-	}
-	else
-	{
-		lDX = mPoint[mCurrentPoint + 1].mT - mPoint[mCurrentPoint].mT;
-		lDT = mPoint[mCurrentPoint + 1].mT - mCurrentTime;
+	if (current_point_ == num_points_ - 1) {
+		dx = extra_time_tag_ - point_[current_point_].t_;
+		lDT = extra_time_tag_ - current_time_;
+	} else {
+		dx = point_[current_point_ + 1].t_ - point_[current_point_].t_;
+		lDT = point_[current_point_ + 1].t_ - current_time_;
 	}
 
-	float lDX2 = lDX * lDX;
+	float lDX2 = dx * dx;
 
-	a = lDT / lDX;
+	a = lDT / dx;
 	b = 1.0f - a;
 	c = (a * a * a - a) * lDX2 * (1.0f / 6.0f);
 	d = (b * b * b - b) * lDX2 * (1.0f / 6.0f);
 }
 */
 
-float CubicSpline::GetMeanTDiff()
-{
-	int lN = mNumPoints - 1;
+float CubicSpline::GetMeanTDiff() {
+	int n = num_points_ - 1;
 
-	float lMeanTDiff = 0.0f;
-	for (int i = 0; i < lN; i++)
-	{
-		lMeanTDiff += mPoint[i + 1].mT - mPoint[i].mT;
+	float mean_t_diff = 0.0f;
+	for (int i = 0; i < n; i++) {
+		mean_t_diff += point_[i + 1].t_ - point_[i].t_;
 	}
 
-	lMeanTDiff /= (float)lN;
+	mean_t_diff /= (float)n;
 
-	return lMeanTDiff;
+	return mean_t_diff;
 }
 
-void CubicSpline::InitModValues()
-{
-	for (int j = 0; j < mNumValuesPerPoint; j++)
-	{
-		if (mModularValue[j] == true)
-		{
-			float lPrevValue = 0.0f;
+void CubicSpline::InitModValues() {
+	for (int j = 0; j < num_values_per_point_; j++) {
+		if (modular_value_[j] == true) {
+			float prev_value = 0.0f;
 
-			for (int i = 0; i < mNumPoints; i++)
-			{
-				mPoint[i].mValues[j] = GetClosestEquivalentModValue(lPrevValue,
-																	   mPoint[i].mValues[j],
-																	   mMinModValue[j], 
-																	   mMaxModValue[j]);
-				lPrevValue = mPoint[i].mValues[j];
+			for (int i = 0; i < num_points_; i++) {
+				point_[i].values_[j] = GetClosestEquivalentModValue(prev_value,
+																	   point_[i].values_[j],
+																	   min_mod_value_[j],
+																	   max_mod_value_[j]);
+				prev_value = point_[i].values_[j];
 			}
 		}
 	}
 }
 
-bool CubicSpline::OptimizeLastSegment(int pValueIndex, float& pValue)
-{
+bool CubicSpline::OptimizeLastSegment(int value_index, float& value) {
 	// This function is only used in combination with modular values and
 	// closed cubic splines. It checks wether the last segment (the one
 	// that connects the last point with the first one) is a detour and can
@@ -616,46 +512,39 @@ bool CubicSpline::OptimizeLastSegment(int pValueIndex, float& pValue)
 	// the segment's derivative is zero, and by checking if this value is
 	// closer to the destination than the segment's starting value.
 
-	Segment* lSeg = &mSegment[mNumPoints - 1];
+	Segment* seg = &segment_[num_points_ - 1];
 
-	int i = pValueIndex;
+	int i = value_index;
 
-	if (mModularValue[i] == true)
-	{
-		float lP = (lSeg->c[i] / lSeg->d[i]) * (2.0f / 3.0f);
-		float lQ = (lSeg->b[i] / lSeg->d[i]) * (1.0f / 3.0f);
-		float lS = (lP * lP * 0.25f) - lQ;
+	if (modular_value_[i] == true) {
+		float p = (seg->c[i] / seg->d[i]) * (2.0f / 3.0f);
+		float q = (seg->b[i] / seg->d[i]) * (1.0f / 3.0f);
+		float s = (p * p * 0.25f) - q;
 
-		if (lS > 0.0f)
-		{
-			float lX1 = -lP * 0.5f + sqrt(lS);
-			float lX2 = -lP * 0.5f - sqrt(lS);
-			float lX = lX1;	// TODO: Assign correct data. Assignment missing prior to 2006-10-19.
-			bool lValidX = false;
+		if (s > 0.0f) {
+			float x1 = -p * 0.5f + sqrt(s);
+			float x2 = -p * 0.5f - sqrt(s);
+			float __x = x1;	// TODO: Assign correct data. Assignment missing prior to 2006-10-19.
+			bool valid_x = false;
 
-			if (lX1 >= 0.0f && lX1 <= 1.0f)
-			{
-				lX = lX1;
-				lValidX = true;
+			if (x1 >= 0.0f && x1 <= 1.0f) {
+				__x = x1;
+				valid_x = true;
 
-				if (lX2 >= 0.0f && lX2 <= 1.0f && lX2 < lX1)
-				{
-					lX = lX2;
+				if (x2 >= 0.0f && x2 <= 1.0f && x2 < x1) {
+					__x = x2;
 				}
-			}
-			else if(lX2 >= 0.0f && lX2 <= 1.0f)
-			{
-				lX = lX2;
-				lValidX = true;
+			} else if(x2 >= 0.0f && x2 <= 1.0f) {
+				__x = x2;
+				valid_x = true;
 			}
 
-			if (lValidX == true)
-			{
-				float lValue = lSeg->GetValue(i, lX);
-				pValue = GetClosestEquivalentModValue(lValue,
-														mPoint[0].mValues[i],
-														mMinModValue[i], 
-														mMaxModValue[i]);
+			if (valid_x == true) {
+				float _value = seg->GetValue(i, __x);
+				value = GetClosestEquivalentModValue(_value,
+														point_[0].values_[i],
+														min_mod_value_[i],
+														max_mod_value_[i]);
 				return true;
 			}
 		}

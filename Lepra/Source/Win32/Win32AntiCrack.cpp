@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // Anti-cracking techniques. Warning: may contain unreadable code.
@@ -7,15 +7,13 @@
 
 
 #include "pch.h"
-#include "../../Include/AntiCrack.h"
+#include "../../include/anticrack.h"
 
 
 
-AntiCrack::AntiCrack()
-{
-	BOOL lPresent = FALSE;
-	if (CheckRemoteDebuggerPresent(GetCurrentProcess(), &lPresent) && lPresent)
-	{
+AntiCrack::AntiCrack() {
+	BOOL present = FALSE;
+	if (CheckRemoteDebuggerPresent(GetCurrentProcess(), &present) && present) {
 		// TODO: enable when shipping something really commercially viable.
 		//SetBsodOnProcessExit();
 	}
@@ -23,49 +21,44 @@ AntiCrack::AntiCrack()
 
 
 
-void AntiCrack::SetBsodOnProcessExit()
-{
+void AntiCrack::SetBsodOnProcessExit() {
 	EnableCriticalPrivileges(SE_DEBUG_NAME);
 
-	HANDLE lDllHandle = LoadLibraryA("ntdll.dll");
+	HANDLE dll_handle = LoadLibraryA("ntdll.dll");
 	#define RtlSetProcessIsCriticalProc	p
 	#define RtlSetProcessIsCritical		pq
-	typedef VOID (_stdcall *RtlSetProcessIsCriticalProc) (IN BOOLEAN NewValue, OUT PBOOLEAN OldValue, IN BOOLEAN IsWinlogon); 
+	typedef VOID (_stdcall *RtlSetProcessIsCriticalProc) (IN BOOLEAN NewValue, OUT PBOOLEAN OldValue, IN BOOLEAN IsWinlogon);
 	RtlSetProcessIsCriticalProc RtlSetProcessIsCritical =
-		(RtlSetProcessIsCriticalProc)::GetProcAddress((HINSTANCE)lDllHandle, "RtlSetProcessIsCritical");
-	if (RtlSetProcessIsCritical)
-	{
+		(RtlSetProcessIsCriticalProc)::GetProcAddress((HINSTANCE)dll_handle, "RtlSetProcessIsCritical");
+	if (RtlSetProcessIsCritical) {
 // Only include BSOD in the final product. Note that debugging will have to happen in the release candidate,
 // which essentially is a final build with debug information.
 #ifdef LEPRA_FINAL
-		RtlSetProcessIsCritical(TRUE, 0, 0); 
+		RtlSetProcessIsCritical(TRUE, 0, 0);
 #else // Debug+Release Candidate
-		RtlSetProcessIsCritical(FALSE, 0, 0); 
+		RtlSetProcessIsCritical(FALSE, 0, 0);
 #endif // Final / Debug+Release Candidate.
 	}
 }
 
-bool AntiCrack::EnableCriticalPrivileges(LPCTSTR pPrivilegeName) // by Napalm
-{
-	HANDLE lTokenHandle;
-	if(!::OpenProcessToken(GetCurrentProcess(), (TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY), &lTokenHandle))
-	{
+bool AntiCrack::EnableCriticalPrivileges(LPCTSTR privilege_name) { // by Napalm
+	HANDLE token_handle;
+	if(!::OpenProcessToken(GetCurrentProcess(), (TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY), &token_handle)) {
 		return (false);
 	}
 
-	LUID lLuid;
-	if(!::LookupPrivilegeValue(NULL, pPrivilegeName, &lLuid))
-	{
-		::CloseHandle(lTokenHandle);
+	LUID luid;
+	if(!::LookupPrivilegeValue(NULL, privilege_name, &luid)) {
+		::CloseHandle(token_handle);
 		return (false);
 	}
 
-	TOKEN_PRIVILEGES lTokenPrivileges;
-	::ZeroMemory(&lTokenPrivileges, sizeof(lTokenPrivileges));
-	lTokenPrivileges.PrivilegeCount = 1;
-	lTokenPrivileges.Privileges[0].Luid = lLuid;
-	lTokenPrivileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	BOOL lAdjustedPrivileges = ::AdjustTokenPrivileges(lTokenHandle, FALSE, &lTokenPrivileges, sizeof(lTokenPrivileges), NULL, NULL);
-	::CloseHandle(lTokenHandle);
-	return (!!lAdjustedPrivileges);
+	TOKEN_PRIVILEGES token_privileges;
+	::ZeroMemory(&token_privileges, sizeof(token_privileges));
+	token_privileges.PrivilegeCount = 1;
+	token_privileges.Privileges[0].Luid = luid;
+	token_privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	BOOL adjusted_privileges = ::AdjustTokenPrivileges(token_handle, FALSE, &token_privileges, sizeof(token_privileges), NULL, NULL);
+	::CloseHandle(token_handle);
+	return (!!adjusted_privileges);
 }

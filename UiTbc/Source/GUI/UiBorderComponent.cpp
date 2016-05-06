@@ -5,542 +5,468 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiBorderComponent.h"
+#include "../../include/gui/uibordercomponent.h"
 #include <math.h>
-#include "../../Include/GUI/UiDesktopWindow.h"
+#include "../../include/gui/uidesktopwindow.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-BorderComponent::BorderComponent(BorderPart pPart, const Color& pColor, BorderShadeFunc pShadeFunc):
-	RectComponent(pColor),
-	mImageBorder(false),
-	mResizable(false),
-	mResizing(false),
-	mPart(pPart),
-	mShading(pShadeFunc),
-	mBodyColor(pColor)
-{
-	Set(pColor, pShadeFunc);
+BorderComponent::BorderComponent(BorderPart part, const Color& color, BorderShadeFunc shade_func):
+	RectComponent(color),
+	image_border_(false),
+	resizable_(false),
+	resizing_(false),
+	part_(part),
+	shading_(shade_func),
+	body_color_(color) {
+	Set(color, shade_func);
 }
 
-BorderComponent::BorderComponent(BorderPart pPart, Painter::ImageID pImageID):
-	RectComponent(pImageID),
-	mImageBorder(true),
-	mResizable(false),
-	mResizing(false),
-	mPart(pPart),
-	mShading(LINEAR)
-{
-	GUIImageManager* lIMan = GetImageManager();
-	PixelCoord lImageSize(lIMan->GetImageSize(pImageID));
+BorderComponent::BorderComponent(BorderPart part, Painter::ImageID image_id):
+	RectComponent(image_id),
+	image_border_(true),
+	resizable_(false),
+	resizing_(false),
+	part_(part),
+	shading_(kLinear) {
+	GUIImageManager* i_man = GetImageManager();
+	PixelCoord image_size(i_man->GetImageSize(image_id));
 
-	switch(mPart)
-	{
-	case TOPLEFT_CORNER:
-	case TOPRIGHT_CORNER:
-	case BOTTOMRIGHT_CORNER:
-	case BOTTOMLEFT_CORNER:
-		SetPreferredSize(lImageSize.x, lImageSize.y);
+	switch(part_) {
+	case kTopleftCorner:
+	case kToprightCorner:
+	case kBottomrightCorner:
+	case kBottomleftCorner:
+		SetPreferredSize(image_size.x, image_size.y);
 		break;
-	case TOP_BORDER:
-	case BOTTOM_BORDER:
-		SetPreferredSize(0, lImageSize.y);
+	case kTopBorder:
+	case kBottomBorder:
+		SetPreferredSize(0, image_size.y);
 		break;
-	case LEFT_BORDER:
-	case RIGHT_BORDER:
-		SetPreferredSize(lImageSize.x, 0);
+	case kLeftBorder:
+	case kRightBorder:
+		SetPreferredSize(image_size.x, 0);
 		break;
 	}
 }
 
-BorderComponent::~BorderComponent()
-{
+BorderComponent::~BorderComponent() {
 }
 
-void BorderComponent::SetSunken(bool pSunken)
-{
+void BorderComponent::SetSunken(bool sunken) {
 	CalcColors();
-	if (pSunken == true)
-	{
-		Color lTemp(mLightColor);
-		mLightColor = mDarkColor;
-		mDarkColor = lTemp;
+	if (sunken == true) {
+		Color temp(light_color_);
+		light_color_ = dark_color_;
+		dark_color_ = temp;
 	}
 }
 
-void BorderComponent::Set(const Color& pColor, BorderShadeFunc pShadeFunc)
-{
-	mBodyColor = pColor;
-	mShading = pShadeFunc;
+void BorderComponent::Set(const Color& color, BorderShadeFunc shade_func) {
+	body_color_ = color;
+	shading_ = shade_func;
 
 	CalcColors();
-	RectComponent::SetColor(pColor);
+	RectComponent::SetColor(color);
 
-	mImageBorder = false;
+	image_border_ = false;
 }
 
-void BorderComponent::Set(Painter::ImageID pImageID)
-{
-	RectComponent::SetImage(pImageID);
-	mImageBorder = true;
+void BorderComponent::Set(Painter::ImageID image_id) {
+	RectComponent::SetImage(image_id);
+	image_border_ = true;
 }
 
-void BorderComponent::CalcColors()
-{
-	mLightColor = mBodyColor + Color(
-		(uint8)((256-(int)mBodyColor.mRed)/2),
-		(uint8)((256-(int)mBodyColor.mGreen)/2),
-		(uint8)((256-(int)mBodyColor.mBlue)/2),
-		mBodyColor.mAlpha) + 8;
-	mDarkColor = mBodyColor / 3.0f;
+void BorderComponent::CalcColors() {
+	light_color_ = body_color_ + Color(
+		(uint8)((256-(int)body_color_.red_)/2),
+		(uint8)((256-(int)body_color_.green_)/2),
+		(uint8)((256-(int)body_color_.blue_)/2),
+		body_color_.alpha_) + 8;
+	dark_color_ = body_color_ / 3.0f;
 }
 
-void BorderComponent::Repaint(Painter* pPainter)
-{
-	if (mImageBorder == true)
-	{
-		Parent::Repaint(pPainter);
-	}
-	else
-	{
-		PixelRect lRect(GetScreenPos(), GetScreenPos() + GetSize());
+void BorderComponent::Repaint(Painter* painter) {
+	if (image_border_ == true) {
+		Parent::Repaint(painter);
+	} else {
+		PixelRect rect(GetScreenPos(), GetScreenPos() + GetSize());
 
-		pPainter->PushAttrib(Painter::ATTR_ALL);
-		pPainter->SetAlphaValue(mBodyColor.mAlpha);
+		painter->PushAttrib(Painter::kAttrAll);
+		painter->SetAlphaValue(body_color_.alpha_);
 
-		switch(mPart)
-		{
-			case TOPLEFT_CORNER:
-			{
-				PixelCoord lTopLeft(lRect.mLeft, lRect.mTop);
-				PixelCoord lTopRight(lRect.mRight, lRect.mTop);
-				PixelCoord lBottomLeft(lRect.mLeft, lRect.mBottom);
-				PixelCoord lBottomRight(lRect.mRight, lRect.mBottom);
+		switch(part_) {
+			case kTopleftCorner: {
+				PixelCoord top_left(rect.left_, rect.top_);
+				PixelCoord top_right(rect.right_, rect.top_);
+				PixelCoord bottom_left(rect.left_, rect.bottom_);
+				PixelCoord bottom_right(rect.right_, rect.bottom_);
 
-				if (mShading == LINEAR)
-				{
-					pPainter->SetColor(mLightColor, 0);
-					pPainter->SetColor(mLightColor, 1);
-					pPainter->SetColor(mBodyColor, 2);
-					pPainter->FillShadedTriangle(lTopLeft, lTopRight, lBottomRight);
-					pPainter->FillShadedTriangle(lBottomLeft, lTopLeft, lBottomRight);
+				if (shading_ == kLinear) {
+					painter->SetColor(light_color_, 0);
+					painter->SetColor(light_color_, 1);
+					painter->SetColor(body_color_, 2);
+					painter->FillShadedTriangle(top_left, top_right, bottom_right);
+					painter->FillShadedTriangle(bottom_left, top_left, bottom_right);
+				} else {
+					PixelCoord middle(rect.GetCenterX(), rect.GetCenterY());
+					PixelCoord middle_bottom(rect.GetCenterX(), rect.bottom_);
+					PixelCoord middle_right(rect.right_, rect.GetCenterY());
+
+					painter->SetColor(body_color_, 0);
+					painter->SetColor(body_color_, 1);
+					painter->SetColor(light_color_, 2);
+
+					painter->FillShadedTriangle(bottom_left, top_left, middle);
+					painter->FillShadedTriangle(top_left, top_right, middle);
+
+					painter->SetColor(light_color_, 1);
+
+					painter->FillShadedTriangle(bottom_left, middle, middle_bottom);
+					painter->FillShadedTriangle(top_right, middle_right, middle);
+					painter->FillShadedTriangle(bottom_right, middle, middle_right);
+					painter->FillShadedTriangle(bottom_right, middle_bottom, middle);
 				}
-				else
-				{
-					PixelCoord lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
-					PixelCoord lMiddleBottom(lRect.GetCenterX(), lRect.mBottom);
-					PixelCoord lMiddleRight(lRect.mRight, lRect.GetCenterY());
+			} break;
+			case kToprightCorner: {
+				PixelCoord top_left(rect.left_, rect.top_);
+				PixelCoord top_right(rect.right_, rect.top_);
+				PixelCoord bottom_left(rect.left_, rect.bottom_);
+				PixelCoord bottom_right(rect.right_, rect.bottom_);
 
-					pPainter->SetColor(mBodyColor, 0);
-					pPainter->SetColor(mBodyColor, 1);
-					pPainter->SetColor(mLightColor, 2);
+				if (shading_ == kLinear) {
+					painter->SetColor(light_color_, 0);
+					painter->SetColor(light_color_, 1);
+					painter->SetColor(body_color_, 2);
+					painter->FillShadedTriangle(top_left, top_right, bottom_left);
 
-					pPainter->FillShadedTriangle(lBottomLeft, lTopLeft, lMiddle);
-					pPainter->FillShadedTriangle(lTopLeft, lTopRight, lMiddle);
+					painter->SetColor(dark_color_, 0);
+					painter->SetColor(dark_color_, 1);
+					painter->FillShadedTriangle(top_right, bottom_right, bottom_left);
+				} else {
+					PixelCoord middle(rect.GetCenterX(), rect.GetCenterY());
+					PixelCoord middle_bottom(rect.GetCenterX(), rect.bottom_);
+					PixelCoord middle_left(rect.left_, rect.GetCenterY());
 
-					pPainter->SetColor(mLightColor, 1);
+					painter->SetColor(body_color_, 0);
+					painter->SetColor(body_color_, 1);
+					painter->SetColor(light_color_, 2);
 
-					pPainter->FillShadedTriangle(lBottomLeft, lMiddle, lMiddleBottom);
-					pPainter->FillShadedTriangle(lTopRight, lMiddleRight, lMiddle);
-					pPainter->FillShadedTriangle(lBottomRight, lMiddle, lMiddleRight);
-					pPainter->FillShadedTriangle(lBottomRight, lMiddleBottom, lMiddle);
+					painter->FillShadedTriangle(top_left, top_right, middle);
+
+					painter->SetColor(dark_color_, 2);
+					painter->FillShadedTriangle(top_right, bottom_right, middle);
+
+					painter->SetColor(dark_color_, 1);
+
+					painter->FillShadedTriangle(bottom_right, middle_bottom, middle);
+					painter->FillShadedTriangle(bottom_left, middle, middle_bottom);
+
+					painter->SetColor(light_color_, 1);
+					painter->SetColor(light_color_, 2);
+					painter->FillShadedTriangle(bottom_left, middle_left, middle);
+					painter->FillShadedTriangle(top_left, middle, middle_left);
 				}
-			}
-			break;
-			case TOPRIGHT_CORNER:
-			{
-				PixelCoord lTopLeft(lRect.mLeft, lRect.mTop);
-				PixelCoord lTopRight(lRect.mRight, lRect.mTop);
-				PixelCoord lBottomLeft(lRect.mLeft, lRect.mBottom);
-				PixelCoord lBottomRight(lRect.mRight, lRect.mBottom);
+			} break;
+			case kBottomrightCorner: {
+				PixelCoord top_left(rect.left_, rect.top_);
+				PixelCoord top_right(rect.right_, rect.top_);
+				PixelCoord bottom_left(rect.left_, rect.bottom_);
+				PixelCoord bottom_right(rect.right_, rect.bottom_);
 
-				if (mShading == LINEAR)
-				{
-					pPainter->SetColor(mLightColor, 0);
-					pPainter->SetColor(mLightColor, 1);
-					pPainter->SetColor(mBodyColor, 2);
-					pPainter->FillShadedTriangle(lTopLeft, lTopRight, lBottomLeft);
+				if (shading_ == kLinear) {
+					painter->SetColor(dark_color_, 0);
+					painter->SetColor(dark_color_, 1);
+					painter->SetColor(body_color_, 2);
+					painter->FillShadedTriangle(bottom_right, bottom_left, top_left);
+					painter->FillShadedTriangle(top_right, bottom_right, top_left);
+				} else {
+					PixelCoord middle(rect.GetCenterX(), rect.GetCenterY());
+					PixelCoord middle_top(rect.GetCenterX(), rect.top_);
+					PixelCoord middle_left(rect.left_, rect.GetCenterY());
 
-					pPainter->SetColor(mDarkColor, 0);
-					pPainter->SetColor(mDarkColor, 1);
-					pPainter->FillShadedTriangle(lTopRight, lBottomRight, lBottomLeft);
+					painter->SetColor(body_color_, 0);
+					painter->SetColor(body_color_, 1);
+					painter->SetColor(dark_color_, 2);
+
+					painter->FillShadedTriangle(bottom_right, bottom_left, middle);
+					painter->FillShadedTriangle(top_right, bottom_right, middle);
+
+					painter->SetColor(dark_color_, 1);
+
+					painter->FillShadedTriangle(bottom_left, middle_left, middle);
+					painter->FillShadedTriangle(top_left, middle, middle_left);
+					painter->FillShadedTriangle(top_left, middle_top, middle);
+					painter->FillShadedTriangle(top_right, middle, middle_top);
 				}
-				else
-				{
-					PixelCoord lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
-					PixelCoord lMiddleBottom(lRect.GetCenterX(), lRect.mBottom);
-					PixelCoord lMiddleLeft(lRect.mLeft, lRect.GetCenterY());
+			} break;
+			case kBottomleftCorner: {
+				PixelCoord top_left(rect.left_, rect.top_);
+				PixelCoord top_right(rect.right_, rect.top_);
+				PixelCoord bottom_left(rect.left_, rect.bottom_);
+				PixelCoord bottom_right(rect.right_, rect.bottom_);
 
-					pPainter->SetColor(mBodyColor, 0);
-					pPainter->SetColor(mBodyColor, 1);
-					pPainter->SetColor(mLightColor, 2);
+				if (shading_ == kLinear) {
+					painter->SetColor(light_color_, 0);
+					painter->SetColor(light_color_, 1);
+					painter->SetColor(body_color_, 2);
+					painter->FillShadedTriangle(bottom_left, top_left, top_right);
 
-					pPainter->FillShadedTriangle(lTopLeft, lTopRight, lMiddle);
+					painter->SetColor(dark_color_, 0);
+					painter->SetColor(dark_color_, 1);
+					painter->FillShadedTriangle(bottom_right, bottom_left, top_right);
+				} else {
+					PixelCoord middle(rect.GetCenterX(), rect.GetCenterY());
+					PixelCoord middle_top(rect.GetCenterX(), rect.top_);
+					PixelCoord middle_right(rect.right_, rect.GetCenterY());
 
-					pPainter->SetColor(mDarkColor, 2);
-					pPainter->FillShadedTriangle(lTopRight, lBottomRight, lMiddle);
+					painter->SetColor(body_color_, 0);
+					painter->SetColor(body_color_, 1);
+					painter->SetColor(light_color_, 2);
 
-					pPainter->SetColor(mDarkColor, 1);
+					painter->FillShadedTriangle(bottom_left, top_left, middle);
 
-					pPainter->FillShadedTriangle(lBottomRight, lMiddleBottom, lMiddle);
-					pPainter->FillShadedTriangle(lBottomLeft, lMiddle, lMiddleBottom);
+					painter->SetColor(dark_color_, 2);
+					painter->FillShadedTriangle(bottom_right, bottom_left, middle);
 
-					pPainter->SetColor(mLightColor, 1);
-					pPainter->SetColor(mLightColor, 2);
-					pPainter->FillShadedTriangle(lBottomLeft, lMiddleLeft, lMiddle);
-					pPainter->FillShadedTriangle(lTopLeft, lMiddle, lMiddleLeft);
+					painter->SetColor(dark_color_, 1);
+
+					painter->FillShadedTriangle(bottom_right, middle, middle_right);
+					painter->FillShadedTriangle(top_right, middle_right, middle);
+
+					painter->SetColor(light_color_, 1);
+					painter->SetColor(light_color_, 2);
+					painter->FillShadedTriangle(top_left, middle_top, middle);
+					painter->FillShadedTriangle(top_right, middle, middle_top);
 				}
-			}
-			break;
-			case BOTTOMRIGHT_CORNER:
-			{
-				PixelCoord lTopLeft(lRect.mLeft, lRect.mTop);
-				PixelCoord lTopRight(lRect.mRight, lRect.mTop);
-				PixelCoord lBottomLeft(lRect.mLeft, lRect.mBottom);
-				PixelCoord lBottomRight(lRect.mRight, lRect.mBottom);
+			} break;
+			case kTopBorder: {
+				if (shading_ == kLinear) {
+					painter->SetColor(light_color_, 0);
+					painter->SetColor(light_color_, 1);
+					painter->SetColor(body_color_, 2);
+					painter->SetColor(body_color_, 3);
+					painter->FillShadedRect(rect);
+				} else {
+					int middle_y = rect.GetCenterY();
+					PixelRect top_rect(rect.left_, rect.top_, rect.right_, middle_y);
+					PixelRect bottom_rect(rect.left_, middle_y, rect.right_, rect.bottom_);
 
-				if (mShading == LINEAR)
-				{
-					pPainter->SetColor(mDarkColor, 0);
-					pPainter->SetColor(mDarkColor, 1);
-					pPainter->SetColor(mBodyColor, 2);
-					pPainter->FillShadedTriangle(lBottomRight, lBottomLeft, lTopLeft);
-					pPainter->FillShadedTriangle(lTopRight, lBottomRight, lTopLeft);
+					painter->SetColor(body_color_, 0);
+					painter->SetColor(body_color_, 1);
+					painter->SetColor(light_color_, 2);
+					painter->SetColor(light_color_, 3);
+					painter->FillShadedRect(top_rect);
+
+					painter->SetColor(light_color_, 0);
+					painter->SetColor(light_color_, 1);
+					painter->SetColor(body_color_, 2);
+					painter->SetColor(body_color_, 3);
+					painter->FillShadedRect(bottom_rect);
 				}
-				else
-				{
-					PixelCoord lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
-					PixelCoord lMiddleTop(lRect.GetCenterX(), lRect.mTop);
-					PixelCoord lMiddleLeft(lRect.mLeft, lRect.GetCenterY());
+			} break;
+			case kBottomBorder: {
+				if (shading_ == kLinear) {
+					painter->SetColor(body_color_, 0);
+					painter->SetColor(body_color_, 1);
+					painter->SetColor(dark_color_, 2);
+					painter->SetColor(dark_color_, 3);
+					painter->FillShadedRect(rect);
+				} else {
+					int middle_y = rect.GetCenterY();
+					PixelRect top_rect(rect.left_, rect.top_, rect.right_, middle_y);
+					PixelRect bottom_rect(rect.left_, middle_y, rect.right_, rect.bottom_);
 
-					pPainter->SetColor(mBodyColor, 0);
-					pPainter->SetColor(mBodyColor, 1);
-					pPainter->SetColor(mDarkColor, 2);
+					painter->SetColor(body_color_, 0);
+					painter->SetColor(body_color_, 1);
+					painter->SetColor(dark_color_, 2);
+					painter->SetColor(dark_color_, 3);
+					painter->FillShadedRect(top_rect);
 
-					pPainter->FillShadedTriangle(lBottomRight, lBottomLeft, lMiddle);
-					pPainter->FillShadedTriangle(lTopRight, lBottomRight, lMiddle);
-
-					pPainter->SetColor(mDarkColor, 1);
-
-					pPainter->FillShadedTriangle(lBottomLeft, lMiddleLeft, lMiddle);
-					pPainter->FillShadedTriangle(lTopLeft, lMiddle, lMiddleLeft);
-					pPainter->FillShadedTriangle(lTopLeft, lMiddleTop, lMiddle);
-					pPainter->FillShadedTriangle(lTopRight, lMiddle, lMiddleTop);
+					painter->SetColor(dark_color_, 0);
+					painter->SetColor(dark_color_, 1);
+					painter->SetColor(body_color_, 2);
+					painter->SetColor(body_color_, 3);
+					painter->FillShadedRect(bottom_rect);
 				}
-			}
-			break;
-			case BOTTOMLEFT_CORNER:
-			{
-				PixelCoord lTopLeft(lRect.mLeft, lRect.mTop);
-				PixelCoord lTopRight(lRect.mRight, lRect.mTop);
-				PixelCoord lBottomLeft(lRect.mLeft, lRect.mBottom);
-				PixelCoord lBottomRight(lRect.mRight, lRect.mBottom);
+			} break;
+			case kLeftBorder: {
+				if (shading_ == kLinear) {
+					painter->SetColor(light_color_, 0);
+					painter->SetColor(body_color_, 1);
+					painter->SetColor(body_color_, 2);
+					painter->SetColor(light_color_, 3);
+					painter->FillShadedRect(rect);
+				} else {
+					int middle_x = rect.GetCenterX();
+					PixelRect left_rect(rect.left_, rect.top_, middle_x, rect.bottom_);
+					PixelRect right_rect(middle_x, rect.top_, rect.right_, rect.bottom_);
 
-				if (mShading == LINEAR)
-				{
-					pPainter->SetColor(mLightColor, 0);
-					pPainter->SetColor(mLightColor, 1);
-					pPainter->SetColor(mBodyColor, 2);
-					pPainter->FillShadedTriangle(lBottomLeft, lTopLeft, lTopRight);
+					painter->SetColor(body_color_, 0);
+					painter->SetColor(light_color_, 1);
+					painter->SetColor(light_color_, 2);
+					painter->SetColor(body_color_, 3);
+					painter->FillShadedRect(left_rect);
 
-					pPainter->SetColor(mDarkColor, 0);
-					pPainter->SetColor(mDarkColor, 1);
-					pPainter->FillShadedTriangle(lBottomRight, lBottomLeft, lTopRight);
+					painter->SetColor(light_color_, 0);
+					painter->SetColor(body_color_, 1);
+					painter->SetColor(body_color_, 2);
+					painter->SetColor(light_color_, 3);
+					painter->FillShadedRect(right_rect);
 				}
-				else
-				{
-					PixelCoord lMiddle(lRect.GetCenterX(), lRect.GetCenterY());
-					PixelCoord lMiddleTop(lRect.GetCenterX(), lRect.mTop);
-					PixelCoord lMiddleRight(lRect.mRight, lRect.GetCenterY());
+			} break;
+			case kRightBorder: {
+				if (shading_ == kLinear) {
+					painter->SetColor(body_color_, 0);
+					painter->SetColor(dark_color_, 1);
+					painter->SetColor(dark_color_, 2);
+					painter->SetColor(body_color_, 3);
+					painter->FillShadedRect(rect);
+				} else {
+					int middle_x = rect.GetCenterX();
+					PixelRect left_rect(rect.left_, rect.top_, middle_x, rect.bottom_);
+					PixelRect right_rect(middle_x, rect.top_, rect.right_, rect.bottom_);
 
-					pPainter->SetColor(mBodyColor, 0);
-					pPainter->SetColor(mBodyColor, 1);
-					pPainter->SetColor(mLightColor, 2);
+					painter->SetColor(body_color_, 0);
+					painter->SetColor(dark_color_, 1);
+					painter->SetColor(dark_color_, 2);
+					painter->SetColor(body_color_, 3);
+					painter->FillShadedRect(left_rect);
 
-					pPainter->FillShadedTriangle(lBottomLeft, lTopLeft, lMiddle);
-
-					pPainter->SetColor(mDarkColor, 2);
-					pPainter->FillShadedTriangle(lBottomRight, lBottomLeft, lMiddle);
-
-					pPainter->SetColor(mDarkColor, 1);
-
-					pPainter->FillShadedTriangle(lBottomRight, lMiddle, lMiddleRight);
-					pPainter->FillShadedTriangle(lTopRight, lMiddleRight, lMiddle);
-
-					pPainter->SetColor(mLightColor, 1);
-					pPainter->SetColor(mLightColor, 2);
-					pPainter->FillShadedTriangle(lTopLeft, lMiddleTop, lMiddle);
-					pPainter->FillShadedTriangle(lTopRight, lMiddle, lMiddleTop);
+					painter->SetColor(dark_color_, 0);
+					painter->SetColor(body_color_, 1);
+					painter->SetColor(body_color_, 2);
+					painter->SetColor(dark_color_, 3);
+					painter->FillShadedRect(right_rect);
 				}
-			}
-			break;
-			case TOP_BORDER:
-			{
-				if (mShading == LINEAR)
-				{
-					pPainter->SetColor(mLightColor, 0);
-					pPainter->SetColor(mLightColor, 1);
-					pPainter->SetColor(mBodyColor, 2);
-					pPainter->SetColor(mBodyColor, 3);
-					pPainter->FillShadedRect(lRect);
-				}
-				else
-				{
-					int lMiddleY = lRect.GetCenterY();
-					PixelRect lTopRect(lRect.mLeft, lRect.mTop, lRect.mRight, lMiddleY);
-					PixelRect lBottomRect(lRect.mLeft, lMiddleY, lRect.mRight, lRect.mBottom);
-
-					pPainter->SetColor(mBodyColor, 0);
-					pPainter->SetColor(mBodyColor, 1);
-					pPainter->SetColor(mLightColor, 2);
-					pPainter->SetColor(mLightColor, 3);
-					pPainter->FillShadedRect(lTopRect);
-
-					pPainter->SetColor(mLightColor, 0);
-					pPainter->SetColor(mLightColor, 1);
-					pPainter->SetColor(mBodyColor, 2);
-					pPainter->SetColor(mBodyColor, 3);
-					pPainter->FillShadedRect(lBottomRect);
-				}
-			}
-			break;
-			case BOTTOM_BORDER:
-			{
-				if (mShading == LINEAR)
-				{
-					pPainter->SetColor(mBodyColor, 0);
-					pPainter->SetColor(mBodyColor, 1);
-					pPainter->SetColor(mDarkColor, 2);
-					pPainter->SetColor(mDarkColor, 3);
-					pPainter->FillShadedRect(lRect);
-				}
-				else
-				{
-					int lMiddleY = lRect.GetCenterY();
-					PixelRect lTopRect(lRect.mLeft, lRect.mTop, lRect.mRight, lMiddleY);
-					PixelRect lBottomRect(lRect.mLeft, lMiddleY, lRect.mRight, lRect.mBottom);
-
-					pPainter->SetColor(mBodyColor, 0);
-					pPainter->SetColor(mBodyColor, 1);
-					pPainter->SetColor(mDarkColor, 2);
-					pPainter->SetColor(mDarkColor, 3);
-					pPainter->FillShadedRect(lTopRect);
-
-					pPainter->SetColor(mDarkColor, 0);
-					pPainter->SetColor(mDarkColor, 1);
-					pPainter->SetColor(mBodyColor, 2);
-					pPainter->SetColor(mBodyColor, 3);
-					pPainter->FillShadedRect(lBottomRect);
-				}
-			}
-			break;
-			case LEFT_BORDER:
-			{
-				if (mShading == LINEAR)
-				{
-					pPainter->SetColor(mLightColor, 0);
-					pPainter->SetColor(mBodyColor, 1);
-					pPainter->SetColor(mBodyColor, 2);
-					pPainter->SetColor(mLightColor, 3);
-					pPainter->FillShadedRect(lRect);
-				}
-				else
-				{
-					int lMiddleX = lRect.GetCenterX();
-					PixelRect lLeftRect(lRect.mLeft, lRect.mTop, lMiddleX, lRect.mBottom);
-					PixelRect lRightRect(lMiddleX, lRect.mTop, lRect.mRight, lRect.mBottom);
-
-					pPainter->SetColor(mBodyColor, 0);
-					pPainter->SetColor(mLightColor, 1);
-					pPainter->SetColor(mLightColor, 2);
-					pPainter->SetColor(mBodyColor, 3);
-					pPainter->FillShadedRect(lLeftRect);
-
-					pPainter->SetColor(mLightColor, 0);
-					pPainter->SetColor(mBodyColor, 1);
-					pPainter->SetColor(mBodyColor, 2);
-					pPainter->SetColor(mLightColor, 3);
-					pPainter->FillShadedRect(lRightRect);
-				}
-			}
-			break;
-			case RIGHT_BORDER:
-			{
-				if (mShading == LINEAR)
-				{
-					pPainter->SetColor(mBodyColor, 0);
-					pPainter->SetColor(mDarkColor, 1);
-					pPainter->SetColor(mDarkColor, 2);
-					pPainter->SetColor(mBodyColor, 3);
-					pPainter->FillShadedRect(lRect);
-				}
-				else
-				{
-					int lMiddleX = lRect.GetCenterX();
-					PixelRect lLeftRect(lRect.mLeft, lRect.mTop, lMiddleX, lRect.mBottom);
-					PixelRect lRightRect(lMiddleX, lRect.mTop, lRect.mRight, lRect.mBottom);
-
-					pPainter->SetColor(mBodyColor, 0);
-					pPainter->SetColor(mDarkColor, 1);
-					pPainter->SetColor(mDarkColor, 2);
-					pPainter->SetColor(mBodyColor, 3);
-					pPainter->FillShadedRect(lLeftRect);
-
-					pPainter->SetColor(mDarkColor, 0);
-					pPainter->SetColor(mBodyColor, 1);
-					pPainter->SetColor(mBodyColor, 2);
-					pPainter->SetColor(mDarkColor, 3);
-					pPainter->FillShadedRect(lRightRect);
-				}
-			}
-			break;
+			} break;
 		}
 
-		pPainter->PopAttrib();
+		painter->PopAttrib();
 
 		SetNeedsRepaint(false);
 	}
 }
 
-bool BorderComponent::OnLButtonDown(int pMouseX, int pMouseY)
-{
-	if (mResizable == true && IsOver(pMouseX, pMouseY) == true)
-	{
-		mResizing = true;
+bool BorderComponent::OnLButtonDown(int mouse_x, int mouse_y) {
+	if (resizable_ == true && IsOver(mouse_x, mouse_y) == true) {
+		resizing_ = true;
 		SetMouseFocus();
 		return true;
-	}
-	else
-	{
-		return Parent::OnLButtonDown(pMouseX, pMouseY);
+	} else {
+		return Parent::OnLButtonDown(mouse_x, mouse_y);
 	}
 }
 
-bool BorderComponent::OnLButtonUp(int pMouseX, int pMouseY)
-{
-	if (mResizing == true)
-	{
-		mResizing = false;
+bool BorderComponent::OnLButtonUp(int mouse_x, int mouse_y) {
+	if (resizing_ == true) {
+		resizing_ = false;
 		ReleaseMouseFocus();
 
-		Component* lDWin = GetParentOfType(DESKTOPWINDOW);
-		if (lDWin != 0)
-		{
+		Component* d_win = GetParentOfType(kDesktopwindow);
+		if (d_win != 0) {
 			// Call OnMouseMove() to update the mouse cursor icon.
-			lDWin->OnMouseMove(pMouseX, pMouseY, 0, 0);
+			d_win->OnMouseMove(mouse_x, mouse_y, 0, 0);
 		}
 	}
 
-	return Parent::OnLButtonUp(pMouseX, pMouseY);
+	return Parent::OnLButtonUp(mouse_x, mouse_y);
 }
 
-bool BorderComponent::OnMouseMove(int /*pMouseX*/, int /*pMouseY*/, int pMouseDX, int pMouseDY)
-{
-	if (mResizing == true)
-	{
-		Component* lWin = GetParentOfType(WINDOW);
-		PixelCoord lSize(lWin->GetSize());
-		PixelCoord lMinSize(lWin->GetMinSize());
-		PixelCoord lNewSize(lSize);
-		PixelCoord lMove(0, 0);
+bool BorderComponent::OnMouseMove(int /*mouse_x*/, int /*mouse_y*/, int mouse_dx, int mouse_dy) {
+	if (resizing_ == true) {
+		Component* win = GetParentOfType(kWindow);
+		PixelCoord size(win->GetSize());
+		PixelCoord min_size(win->GetMinSize());
+		PixelCoord new_size(size);
+		PixelCoord move(0, 0);
 
-		if (lWin != 0)
-		{
-			switch(mPart)
-			{
-			case TOPLEFT_CORNER:
-				lNewSize += PixelCoord(-pMouseDX, -pMouseDY);
-				lMove.x = pMouseDX;
-				lMove.y = pMouseDY;
+		if (win != 0) {
+			switch(part_) {
+			case kTopleftCorner:
+				new_size += PixelCoord(-mouse_dx, -mouse_dy);
+				move.x = mouse_dx;
+				move.y = mouse_dy;
 				break;
-			case BOTTOMRIGHT_CORNER:
-				lNewSize += PixelCoord(pMouseDX, pMouseDY);
+			case kBottomrightCorner:
+				new_size += PixelCoord(mouse_dx, mouse_dy);
 				break;
-			case BOTTOMLEFT_CORNER:
-				lNewSize += PixelCoord(-pMouseDX, pMouseDY);
-				lMove.x = pMouseDX;
+			case kBottomleftCorner:
+				new_size += PixelCoord(-mouse_dx, mouse_dy);
+				move.x = mouse_dx;
 				break;
-			case TOPRIGHT_CORNER:
-				lNewSize += PixelCoord(pMouseDX, -pMouseDY);
-				lMove.y = pMouseDY;
+			case kToprightCorner:
+				new_size += PixelCoord(mouse_dx, -mouse_dy);
+				move.y = mouse_dy;
 				break;
-			case TOP_BORDER:
-				lNewSize += PixelCoord(0, -pMouseDY);
-				lMove.y = pMouseDY;
+			case kTopBorder:
+				new_size += PixelCoord(0, -mouse_dy);
+				move.y = mouse_dy;
 				break;
-			case BOTTOM_BORDER:
-				lNewSize += PixelCoord(0, pMouseDY);
+			case kBottomBorder:
+				new_size += PixelCoord(0, mouse_dy);
 				break;
-			case LEFT_BORDER:
-				lNewSize += PixelCoord(-pMouseDX, 0);
-				lMove.x = pMouseDX;
+			case kLeftBorder:
+				new_size += PixelCoord(-mouse_dx, 0);
+				move.x = mouse_dx;
 				break;
-			case RIGHT_BORDER:
-				lNewSize += PixelCoord(pMouseDX, 0);
+			case kRightBorder:
+				new_size += PixelCoord(mouse_dx, 0);
 				break;
 			default:
 				break;
 			};
 
-			if (lNewSize.x < lMinSize.x)
-			{
-				if (lMove.x > 0)
-				{
-					lMove.x -= (lMinSize.x - lNewSize.x);
+			if (new_size.x < min_size.x) {
+				if (move.x > 0) {
+					move.x -= (min_size.x - new_size.x);
 				}
 
-				lNewSize.x = lMinSize.x;
+				new_size.x = min_size.x;
 			}
 
-			if (lNewSize.y < lMinSize.y)
-			{
-				if (lMove.y > 0)
-				{
-					lMove.y -= (lMinSize.y - lNewSize.y);
+			if (new_size.y < min_size.y) {
+				if (move.y > 0) {
+					move.y -= (min_size.y - new_size.y);
 				}
 
-				lNewSize.y = lMinSize.y;
+				new_size.y = min_size.y;
 			}
 
-			lWin->SetPos(lWin->GetPos() + lMove);
-			lWin->SetPreferredSize(lNewSize, false);
+			win->SetPos(win->GetPos() + move);
+			win->SetPreferredSize(new_size, false);
 		}
 
 		return true;
-	}
-	else if(mResizable == true)
-	{
+	} else if(resizable_ == true) {
 		// TODO: set mouse cursor:
-		//switch(mPart)
+		//switch(part_)
 		//{
-		//case TOPLEFT_CORNER:
-		//case BOTTOMRIGHT_CORNER:
+		//case kTopleftCorner:
+		//case kBottomrightCorner:
 		//	lMTheme->LoadDiagonal1ResizeCursor();
 		//	break;
-		//case BOTTOMLEFT_CORNER:
-		//case TOPRIGHT_CORNER:
+		//case kBottomleftCorner:
+		//case kToprightCorner:
 		//	lMTheme->LoadDiagonal2ResizeCursor();
 		//	break;
-		//case TOP_BORDER:
-		//case BOTTOM_BORDER:
+		//case kTopBorder:
+		//case kBottomBorder:
 		//	lMTheme->LoadVResizeCursor();
 		//	break;
-		//case LEFT_BORDER:
-		//case RIGHT_BORDER:
+		//case kLeftBorder:
+		//case kRightBorder:
 		//	lMTheme->LoadHResizeCursor();
 		//	break;
 		//default:
 		//	lMTheme->LoadArrowCursor();
 		//};
 		return true;
-	}
-	else
-	{
+	} else {
 		return false;
 	}
 }

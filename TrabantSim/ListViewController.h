@@ -4,14 +4,14 @@
 
 
 #pragma once
-#import "EditViewController.h"
+#import "editviewcontroller.h"
 #import "SettingsViewController.h"
 
 @interface ListViewController : UIViewController <UIPopoverControllerDelegate>
 @property (nonatomic, strong) EditViewController* editController;
-@property (nonatomic, strong) SettingsViewController* settingsController;
+@property (nonatomic, strong) SettingsViewController* settingsController_;
 -(void) reloadPrototypes;
 -(void) popCreateNew:(NSString*)filename;
--(void) popDeleteFile;
+-(void) delete_file;
 -(void) updateLoc;
 @end

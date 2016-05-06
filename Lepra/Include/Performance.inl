@@ -4,62 +4,52 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-template<class _Data> SequencialPerformanceData<_Data>::SequencialPerformanceData()
-{
+template<class _Data> SequencialPerformanceData<_Data>::SequencialPerformanceData() {
 	Clear();
 }
 
-template<class _Data> void SequencialPerformanceData<_Data>::Clear()
-{
+template<class _Data> void SequencialPerformanceData<_Data>::Clear() {
 	Set(0, 0, 0, 0);
 }
 
-template<class _Data> void SequencialPerformanceData<_Data>::Set(double pMinimum, double pThis, double pMaximum, _Data pPreviousValue)
-{
-	mPreviousValue = pPreviousValue;
-	Parent::Set(pMinimum, pThis, pMaximum);
+template<class _Data> void SequencialPerformanceData<_Data>::Set(double minimum, double value, double maximum, _Data previous_value) {
+	previous_value_ = previous_value;
+	Parent::Set(minimum, value, maximum);
 }
 
-template<class _Data> void SequencialPerformanceData<_Data>::Append(double pTime, double pStartTime, _Data pValue)
-{
-	deb_assert (pTime >= 0);
-	if (pTime > 0)
-	{
-		double lPeriodValue = (pValue-mPreviousValue)/pTime;
-		mPreviousValue = pValue;
-		Parent::Append(lPeriodValue, pStartTime);
+template<class _Data> void SequencialPerformanceData<_Data>::Append(double time, double start_time, _Data value) {
+	deb_assert (time >= 0);
+	if (time > 0) {
+		double period_value = (value-previous_value_)/time;
+		previous_value_ = value;
+		Parent::Append(period_value, start_time);
 	}
 }
 
 
 
 template<class _T> BasicScopeTimer<_T>::BasicScopeTimer():
-	mTime(false)
-{
+	time_(false) {
 }
 
-template<class _T> BasicScopeTimer<_T>::BasicScopeTimer(_T* pData):
-	mTime(false),
-	mData(pData)
-{
+template<class _T> BasicScopeTimer<_T>::BasicScopeTimer(_T* data):
+	time_(false),
+	data_(data) {
 }
 
-template<class _T> BasicScopeTimer<_T>::~BasicScopeTimer()
-{
-	const double lStart = mTime.GetTime();
-	const double lDelta = mTime.PopTimeDiff();
-	mData->Append(lDelta, lStart);
-	mData = 0;
+template<class _T> BasicScopeTimer<_T>::~BasicScopeTimer() {
+	const double start = time_.GetTime();
+	const double delta = time_.PopTimeDiff();
+	data_->Append(delta, start);
+	data_ = 0;
 }
 
-template<class _T> void BasicScopeTimer<_T>::Attach(_T* pData)
-{
-	mData = pData;
+template<class _T> void BasicScopeTimer<_T>::Attach(_T* data) {
+	data_ = data;
 }
 
 

@@ -1,24 +1,22 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "Thread.h"
-#include "LepraAssert.h"
-#include "BusLock.h"
+#include "thread.h"
+#include "lepraassert.h"
+#include "buslock.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class SpinLock: public OwnedLock
-{
+class SpinLock: public OwnedLock {
 public:
 	inline SpinLock();
 	inline ~SpinLock();
@@ -30,108 +28,89 @@ public:
 
 private:
 
-	enum
-	{
-		UNLOCKED = 0,
-		LOCKED,
+	enum {
+		kUnlocked = 0,
+		kLocked,
 	};
 
-	int32 mLocked;
+	int32 locked_;
 };
 
 inline SpinLock::SpinLock():
-	mLocked(UNLOCKED)
-{
+	locked_(kUnlocked) {
 }
 
-inline SpinLock::~SpinLock()
-{
+inline SpinLock::~SpinLock() {
 }
 
-inline void SpinLock::Acquire()
-{
+inline void SpinLock::Acquire() {
 	deb_assert(!IsOwner());
 	UncheckedAcquire();
 }
 
-inline void SpinLock::UncheckedAcquire()
-{
-	bool lAcquired = BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
-	while (!lAcquired)
-	{
-		for (int x = 0; x < 4000 && !lAcquired; ++x)
-		{
-			lAcquired = BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
+inline void SpinLock::UncheckedAcquire() {
+	bool acquired = BusLock::CompareAndSwap(&locked_, kLocked, kUnlocked);
+	while (!acquired) {
+		for (int x = 0; x < 4000 && !acquired; ++x) {
+			acquired = BusLock::CompareAndSwap(&locked_, kLocked, kUnlocked);
 		}
-		if (!lAcquired)
-		{
+		if (!acquired) {
 			Thread::YieldCpu();
 		}
 	}
 	Reference();
 }
 
-inline bool SpinLock::TryAcquire()
-{
+inline bool SpinLock::TryAcquire() {
 	deb_assert(!IsOwner());
-	bool lAcquired = BusLock::CompareAndSwap(&mLocked, LOCKED, UNLOCKED);
-	if (lAcquired)
-	{
+	bool acquired = BusLock::CompareAndSwap(&locked_, kLocked, kUnlocked);
+	if (acquired) {
 		Reference();
 	}
-	return (lAcquired);
+	return (acquired);
 }
 
-inline void SpinLock::Release()
-{
+inline void SpinLock::Release() {
 	Dereference();
-	deb_assert(mLocked == LOCKED);
-	BusLock::CompareAndSwap(&mLocked, UNLOCKED, LOCKED);
+	deb_assert(locked_ == kLocked);
+	BusLock::CompareAndSwap(&locked_, kUnlocked, kLocked);
 }
 
 
 
-class ScopeSpinLock
-{
+class ScopeSpinLock {
 public:
-	inline ScopeSpinLock(SpinLock* pLock, bool pAcquire = true):
-		mLock(pLock)
-	{
-		if (pAcquire)
-		{
-			mLock->Acquire();
+	inline ScopeSpinLock(SpinLock* _lock, bool acquire = true):
+		lock_(_lock) {
+		if (acquire) {
+			lock_->Acquire();
 		}
 	}
-	inline ~ScopeSpinLock()
-	{
-		mLock->Release();
+	inline ~ScopeSpinLock() {
+		lock_->Release();
 	}
 
 protected:
-	SpinLock* mLock;
+	SpinLock* lock_;
 };
 
 
 
-class VerifySoleAccessor: public ScopeSpinLock
-{
+class VerifySoleAccessor: public ScopeSpinLock {
 public:
-	inline VerifySoleAccessor(SpinLock* pLock):
-		ScopeSpinLock(pLock, false)
-	{
-		bool lLock = mLock->TryAcquire();
-		if (!lLock)
-		{
-			OnError(mLock->GetOwner());
+	inline VerifySoleAccessor(SpinLock* _lock):
+		ScopeSpinLock(_lock, false) {
+		bool __lock = lock_->TryAcquire();
+		if (!__lock) {
+			OnError(lock_->GetOwner());
 		}
 	}
-	inline ~VerifySoleAccessor()
-	{
-		mLock->Release();
+	inline ~VerifySoleAccessor() {
+		lock_->Release();
 	}
 
 protected:
-	void OnError(const Thread* pOwner);
+	void OnError(const Thread* owner);
 
 	logclass();
 };

@@ -1,6 +1,6 @@
 /*
 	Class:  DirectX9Painter
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 */
@@ -11,52 +11,49 @@
 
 #include <d3d9.h>
 #include <list>
-#include "../UiTbc.h"
-#include "../../../Lepra/Include/Graphics2D.h"
-#include "../../../Lepra/Include/Canvas.h"
-#include "../../../Lepra/Include/HashTable.h"
-#include "../../../Lepra/Include/String.h"
-#include "../../../Lepra/Include/IdManager.h"
-#include "../UiPainter.h"
+#include "../uitbc.h"
+#include "../../../lepra/include/graphics2d.h"
+#include "../../../lepra/include/canvas.h"
+#include "../../../lepra/include/hashtable.h"
+#include "../../../lepra/include/string.h"
+#include "../../../lepra/include/idmanager.h"
+#include "../uipainter.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 class DisplayManager;
 }
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class DirectX9Painter: public Painter
-{
+class DirectX9Painter: public Painter {
 public:
-	DirectX9Painter(UiLepra::DisplayManager* pDisplayManager);
+	DirectX9Painter(uilepra::DisplayManager* display_manager);
 	virtual ~DirectX9Painter();
 
-	void SetDestCanvas(Canvas* pCanvas);
-	void SetRenderMode(RenderMode pRM);
-	virtual void Clear(const Color& pColor);
-	virtual void PrePaint(bool pClearDepthBuffer);
+	void SetDestCanvas(Canvas* canvas);
+	void SetRenderMode(RenderMode rm);
+	virtual void Clear(const Color& color);
+	virtual void PrePaint(bool clear_depth_buffer);
 
-	void SetAlphaValue(uint8 pAlpha);
+	void SetAlphaValue(uint8 alpha);
 
 	void ResetClippingRect();
-	void SetClippingRect(int pLeft, int pTop, int pRight, int pBottom);
+	void SetClippingRect(int left, int top, int right, int bottom);
 
-	ImageID AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer);
-	void UpdateImage(ImageID pImageID, 
-			 const Canvas* pImage, 
-			 const Canvas* pAlphaBuffer,
-			 UpdateHint pHint = UPDATE_ACCURATE);
-	void RemoveImage(ImageID pImageID);
+	ImageID AddImage(const Canvas* image, const Canvas* alpha_buffer);
+	void UpdateImage(ImageID image_id,
+			 const Canvas* image,
+			 const Canvas* alpha_buffer,
+			 UpdateHint hint = kUpdateAccurate);
+	void RemoveImage(ImageID image_id);
 
-	void ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect);
+	void ReadPixels(Canvas& dest_canvas, const PixelRect& rect);
 
 	RGBOrder GetRGBOrder() const;
 
@@ -64,58 +61,56 @@ protected:
 	void DoSetRenderMode() const;
 
 	void DoDrawPixel(int x, int y);
-	void DoDrawLine(int pX1, int pY1, int pX2, int pY2);
-	void DoDrawRect(int pLeft, int pTop, int pRight, int pBottom);
-	void DoFillRect(int pLeft, int pTop, int pRight, int pBottom);
-	void DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken);
-	void DoFillShadedRect(int pLeft, int pTop, int pRight, int pBottom);
-	void DoFillTriangle(float pX1, float pY1,
-			  float pX2, float pY2,
-			  float pX3, float pY3);
-	void DoFillShadedTriangle(float pX1, float pY1,
-				float pX2, float pY2,
-				float pX3, float pY3);
-	void DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
-			  float pX2, float pY2, float pU2, float pV2,
-			  float pX3, float pY3, float pU3, float pV3,
-			  ImageID pImageID);
-	void DrawFan(const std::vector<vec2>& pCoords, bool pFill);
-	void DoDrawImage(ImageID pImageID, int x, int y);
-	void DoDrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect);
-	void DoDrawImage(ImageID pImageID, const PixelRect& pRect);
-	void DoDrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect);
-	void DoDrawAlphaImage(ImageID pImageID, int x, int y);
+	void DoDrawLine(int x1, int y1, int x2, int y2);
+	void DoDrawRect(int left, int top, int right, int bottom);
+	void DoFillRect(int left, int top, int right, int bottom);
+	void DoDraw3DRect(int left, int top, int right, int bottom, int width, bool sunken);
+	void DoFillShadedRect(int left, int top, int right, int bottom);
+	void DoFillTriangle(float x1, float y1,
+			  float x2, float y2,
+			  float x3, float y3);
+	void DoFillShadedTriangle(float x1, float y1,
+				float x2, float y2,
+				float x3, float y3);
+	void DoFillTriangle(float x1, float y1, float u1, float v1,
+			  float x2, float y2, float u2, float v2,
+			  float x3, float y3, float u3, float v3,
+			  ImageID image_id);
+	void DrawFan(const std::vector<vec2>& coords, bool fill);
+	void DoDrawImage(ImageID image_id, int x, int y);
+	void DoDrawImage(ImageID image_id, int x, int y, const PixelRect& subpatch_rect);
+	void DoDrawImage(ImageID image_id, const PixelRect& rect);
+	void DoDrawImage(ImageID image_id, const PixelRect& rect, const PixelRect& subpatch_rect);
+	void DoDrawAlphaImage(ImageID image_id, int x, int y);
 
-	void DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList);
+	void DoRenderDisplayList(std::vector<DisplayEntity*>* display_list);
 private:
-	class Texture
-	{
+	class Texture {
 	public:
 		Texture() :
-			mWidth(0),
-			mHeight(0),
-			mD3DTexture(0)
-		{
+			width_(0),
+			height_(0),
+			d3_d_texture_(0) {
 		}
 
-		int mWidth;
-		int mHeight;
-		IDirect3DTexture9* mD3DTexture;
+		int width_;
+		int height_;
+		IDirect3DTexture9* d3_d_texture_;
 	};
 
 	typedef HashTable<int, Texture*> TextureTable;
 
-	void GetImageSize(ImageID pImageID, int& pWidth, int& pHeight) const;
-	void PrintText(const str& pString, int x, int y);
-	void SetFontSmoothness(bool pSmooth);
+	void GetImageSize(ImageID image_id, int& width, int& height) const;
+	void PrintText(const str& s, int x, int y);
+	void SetFontSmoothness(bool smooth);
 
-	void AdjustVertexFormat(uint16& pVertexFormat);
+	void AdjustVertexFormat(uint16& vertex_format);
 
-	IdManager<int> mTextureIDManager;
-	TextureTable mTextureTable;
+	IdManager<int> texture_id_manager_;
+	TextureTable texture_table_;
 
-	IDirect3DDevice9* mD3DDevice;
-	IDirect3DTexture9* mD3DDefaultMouseCursor;
+	IDirect3DDevice9* d3_d_device_;
+	IDirect3DTexture9* d3_d_default_mouse_cursor_;
 
 	logclass();
 };

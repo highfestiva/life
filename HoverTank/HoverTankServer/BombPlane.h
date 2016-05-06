@@ -1,46 +1,43 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Cure/Include/CppContextObject.h"
-#include "../HoverTank.h"
+#include "../../cure/include/cppcontextobject.h"
+#include "../hovertank.h"
 
 
 
-namespace Life
-{
+namespace life {
 class Launcher;
 }
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-class BombPlane: public Cure::CppContextObject
-{
+class BombPlane: public cure::CppContextObject {
 public:
-	typedef Cure::CppContextObject Parent;
+	typedef cure::CppContextObject Parent;
 
-	BombPlane(Cure::ResourceManager* pResourceManager, const str& pClassId, Life::Launcher* pLauncher, const vec3& pTarget);
+	BombPlane(cure::ResourceManager* resource_manager, const str& class_id, life::Launcher* launcher, const vec3& target);
 	virtual ~BombPlane();
 
 private:
 	virtual void OnLoaded();
 	virtual void OnTick();
 
-	Life::Launcher* mLauncher;
-	vec3 mTarget;
-	int mLastBombTick;
-	float mBombingRadiusSquared;
-	float mDropInterval;
-	bool mIsDetonated;
+	life::Launcher* launcher_;
+	vec3 target_;
+	int last_bomb_tick_;
+	float bombing_radius_squared_;
+	float drop_interval_;
+	bool is_detonated_;
 
 	logclass();
 };

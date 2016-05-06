@@ -1,19 +1,18 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../ThirdParty/FastDelegate/FastDelegate.h"
-#include "../../Lepra/Include/Socket.h"
-#include "Cure.h"
+#include "../../thirdparty/FastDelegate/FastDelegate.h"
+#include "../../lepra/include/socket.h"
+#include "cure.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class UdpMuxSocket;
 class UdpVSocket;
 class DualMuxSocket;
@@ -22,13 +21,11 @@ class DualSocket;
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class SocketIoHandler
-{
+class SocketIoHandler {
 public:
 	//typedef DualSocket VIoSocket;
 	//typedef DualMuxSocket MuxIoSocket;
@@ -37,9 +34,9 @@ public:
 	typedef fastdelegate::FastDelegate1<VIoSocket*, void> DropFilterCallback;
 
 	virtual MuxIoSocket* GetMuxIoSocket() const = 0;
-	virtual void AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback) = 0;
+	virtual void AddFilterIoSocket(VIoSocket* socket, const DropFilterCallback& on_drop_callback) = 0;
 	virtual void RemoveAllFilterIoSockets() = 0;
-	virtual void KillIoSocket(VIoSocket* pSocket) = 0;
+	virtual void KillIoSocket(VIoSocket* socket) = 0;
 };
 
 

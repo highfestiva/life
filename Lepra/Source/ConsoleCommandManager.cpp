@@ -5,9 +5,9 @@
 
 
 #include "pch.h"
-#include "../Include/ConsoleCommandManager.h"
-#include "../Include/LepraOS.h"
-#include "../Include/SystemManager.h"
+#include "../include/consolecommandmanager.h"
+#include "../include/lepraos.h"
+#include "../include/systemmanager.h"
 #ifdef LEPRA_WINDOWS
 #include <conio.h>
 #elif defined(LEPRA_POSIX)
@@ -16,432 +16,354 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 #if defined(LEPRA_POSIX)
-int Getc(float pTimeout)
-{
+int Getc(float timeout) {
 	const int fn = fileno(stdin);
-	fd_set lCharSet;
-	FD_ZERO(&lCharSet);
-	FD_SET(fn, &lCharSet);
-	timeval* lTime = 0;
-	timeval lCharTimeout;
-	if (pTimeout >= 0)
-	{
-		lTime = &lCharTimeout;
-		lCharTimeout.tv_sec = (int)pTimeout;
-		pTimeout -= lCharTimeout.tv_sec;
-		lCharTimeout.tv_usec = (int)(pTimeout*1000*1000);
+	fd_set char_set;
+	FD_ZERO(&char_set);
+	FD_SET(fn, &char_set);
+	timeval* time = 0;
+	timeval char_timeout;
+	if (timeout >= 0) {
+		time = &char_timeout;
+		char_timeout.tv_sec = (int)timeout;
+		timeout -= char_timeout.tv_sec;
+		char_timeout.tv_usec = (int)(timeout*1000*1000);
 	}
-	int lResult = -1;
-	if (::select(fn+1, &lCharSet, 0, 0, lTime) > 0)
-	{
+	int result = -1;
+	if (::select(fn+1, &char_set, 0, 0, time) > 0) {
 		unsigned char c;
-		if (::read(fn, &c, 1) == 1)
-		{
-			lResult = c;
+		if (::read(fn, &c, 1) == 1) {
+			result = c;
 		}
 	}
-	return (lResult);
+	return (result);
 }
 #endif // Posix.
 
 
 
-CommandCompleter::CommandCompleter()
-{
+CommandCompleter::CommandCompleter() {
 }
 
-CommandCompleter::~CommandCompleter()
-{
+CommandCompleter::~CommandCompleter() {
 }
 
 
 
-ConsoleCommandExecutor::ConsoleCommandExecutor()
-{
+ConsoleCommandExecutor::ConsoleCommandExecutor() {
 }
 
-ConsoleCommandExecutor::~ConsoleCommandExecutor()
-{
+ConsoleCommandExecutor::~ConsoleCommandExecutor() {
 }
 
 
 
 ConsoleCommandManager::ConsoleCommandManager():
-	mCurrentHistoryIndex(0)
-{
+	current_history_index_(0) {
 	AddCompleter(this);
 }
 
-ConsoleCommandManager::~ConsoleCommandManager()
-{
-	CommandExecutorSet::iterator e = mCommandExecutorSet.begin();
-	for (; e != mCommandExecutorSet.end(); ++e)
-	{
-		ConsoleCommandExecutor* lExecutor = *e;
-		delete (lExecutor);
+ConsoleCommandManager::~ConsoleCommandManager() {
+	CommandExecutorSet::iterator e = command_executor_set_.begin();
+	for (; e != command_executor_set_.end(); ++e) {
+		ConsoleCommandExecutor* executor = *e;
+		delete (executor);
 	}
-	mCommandExecutorSet.clear();
+	command_executor_set_.clear();
 
 	RemoveCompleter(this);
-	CommandCompleterSet::iterator x = mCommandCompleterList.begin();
-	for (; x != mCommandCompleterList.end(); ++x)
-	{
-		CommandCompleter* lCompleter = *x;
-		delete (lCompleter);
+	CommandCompleterSet::iterator x = command_completer_list_.begin();
+	for (; x != command_completer_list_.end(); ++x) {
+		CommandCompleter* _completer = *x;
+		delete (_completer);
 	}
-	mCommandCompleterList.clear();
+	command_completer_list_.clear();
 }
 
 
 
-void ConsoleCommandManager::AddExecutor(ConsoleCommandExecutor* lExecutor)
-{
-	mCommandExecutorSet.insert(lExecutor);
+void ConsoleCommandManager::AddExecutor(ConsoleCommandExecutor* executor) {
+	command_executor_set_.insert(executor);
 }
 
-void ConsoleCommandManager::DeleteExecutor(ConsoleCommandExecutor* lExecutor)
-{
-	mCommandExecutorSet.erase(lExecutor);
-	delete (lExecutor);
+void ConsoleCommandManager::DeleteExecutor(ConsoleCommandExecutor* executor) {
+	command_executor_set_.erase(executor);
+	delete (executor);
 }
 
 
 
-void ConsoleCommandManager::SetComment(const str& pComment)
-{
-	mComment = pComment;
+void ConsoleCommandManager::SetComment(const str& comment) {
+	comment_ = comment;
 }
 
-bool ConsoleCommandManager::AddCommand(const str& pCommand)
-{
-	return mCommandSet.insert(pCommand).second;
+bool ConsoleCommandManager::AddCommand(const str& command) {
+	return command_set_.insert(command).second;
 }
 
-bool ConsoleCommandManager::RemoveCommand(const str& pCommand)
-{
-	return (mCommandSet.erase(pCommand) != 0);
+bool ConsoleCommandManager::RemoveCommand(const str& command) {
+	return (command_set_.erase(command) != 0);
 }
 
-int ConsoleCommandManager::Execute(const str& pCommand, bool pAppendToHistory)
-{
-	int lExecutionResult = 0;
-	str lCommandDelimitors(" \t\v\r\n");
+int ConsoleCommandManager::Execute(const str& command, bool append_to_history) {
+	int execution_result = 0;
+	str command_delimitors(" \t\v\r\n");
 
-	str lInCommand(pCommand);
-	if (!mComment.empty())
-	{
+	str in_command(command);
+	if (!comment_.empty()) {
 		// Drop comments (ignore if inside string).
-		lInCommand = lInCommand.substr(0, lInCommand.find(mComment, 0));
+		in_command = in_command.substr(0, in_command.find(comment_, 0));
 	}
 
-	strutil::strvec lCommandList;
-	lCommandList.reserve(10);
-	strutil::FastBlockSplit(lCommandList, lInCommand, ";", true, true);
+	strutil::strvec command_list;
+	command_list.reserve(10);
+	strutil::FastBlockSplit(command_list, in_command, ";", true, true);
 
-	if (lCommandList.size() == 0)
-	{
+	if (command_list.size() == 0) {
 		// We will execute nothing.
-	}
-	else if (pAppendToHistory)
-	{
-		AppendHistory(pCommand);
+	} else if (append_to_history) {
+		AppendHistory(command);
 	}
 
-	strutil::strvec lCommandTokenList;
-	lCommandTokenList.reserve(2);
-	strutil::strvec lParameterTokenList;
-	lParameterTokenList.reserve(128);
-	const size_t lSize = lCommandList.size();
-	for (size_t lCommandIndex = 0; lExecutionResult == 0 && lCommandIndex < lSize; ++lCommandIndex)
-	{
-		const str& lTempCommand = lCommandList[lCommandIndex];
-		str lCommand = strutil::StripLeft(lTempCommand, lCommandDelimitors);
-		lCommandTokenList.clear();
-		strutil::FastBlockSplit(lCommandTokenList, lCommand, lCommandDelimitors, false, true, 1);
-		if (lCommandTokenList.size() > 0)
-		{
-			lCommand = lCommandTokenList[0];
-			lParameterTokenList.clear();
-			if (lCommandTokenList.size() > 1)
-			{
-				str lParameters = lCommandTokenList[1];
-				lParameters = strutil::StripLeft(lParameters, lCommandDelimitors);
-				strutil::FastBlockSplit(lParameterTokenList, lParameters, lCommandDelimitors, false, true);
+	strutil::strvec command_token_list;
+	command_token_list.reserve(2);
+	strutil::strvec parameter_token_list;
+	parameter_token_list.reserve(128);
+	const size_t __size = command_list.size();
+	for (size_t command_index = 0; execution_result == 0 && command_index < __size; ++command_index) {
+		const str& temp_command = command_list[command_index];
+		str _command = strutil::StripLeft(temp_command, command_delimitors);
+		command_token_list.clear();
+		strutil::FastBlockSplit(command_token_list, _command, command_delimitors, false, true, 1);
+		if (command_token_list.size() > 0) {
+			_command = command_token_list[0];
+			parameter_token_list.clear();
+			if (command_token_list.size() > 1) {
+				str parameters = command_token_list[1];
+				parameters = strutil::StripLeft(parameters, command_delimitors);
+				strutil::FastBlockSplit(parameter_token_list, parameters, command_delimitors, false, true);
 			}
 
-			bool lExecutedOk = false;
-			lExecutionResult = -2;
-			CommandExecutorSet::iterator x = mCommandExecutorSet.begin();
-			for (; x != mCommandExecutorSet.end() && lExecutionResult < 0; ++x)
-			{
-				lExecutionResult = (*x)->Execute(lCommand, lParameterTokenList);
-				if (lExecutionResult == 0)
-				{
-					lExecutedOk = true;
+			bool executed_ok = false;
+			execution_result = -2;
+			CommandExecutorSet::iterator x = command_executor_set_.begin();
+			for (; x != command_executor_set_.end() && execution_result < 0; ++x) {
+				execution_result = (*x)->Execute(_command, parameter_token_list);
+				if (execution_result == 0) {
+					executed_ok = true;
 				}
 			}
-			if (!lExecutedOk)
-			{
-				x = mCommandExecutorSet.begin();
-				for (; x != mCommandExecutorSet.end() && lExecutionResult < 0; ++x)
-				{
-					(*x)->OnExecutionError(lCommand, lParameterTokenList, lExecutionResult);
+			if (!executed_ok) {
+				x = command_executor_set_.begin();
+				for (; x != command_executor_set_.end() && execution_result < 0; ++x) {
+					(*x)->OnExecutionError(_command, parameter_token_list, execution_result);
 				}
 			}
 		}
 	}
-	return (lExecutionResult);
+	return (execution_result);
 }
 
-void ConsoleCommandManager::AddCompleter(CommandCompleter* pCompleter)
-{
-	mCommandCompleterList.insert(pCompleter);
+void ConsoleCommandManager::AddCompleter(CommandCompleter* completer) {
+	command_completer_list_.insert(completer);
 }
 
-void ConsoleCommandManager::RemoveCompleter(CommandCompleter* pCompleter)
-{
-	mCommandCompleterList.erase(pCompleter);
+void ConsoleCommandManager::RemoveCompleter(CommandCompleter* completer) {
+	command_completer_list_.erase(completer);
 }
 
 ConsoleCommandManager::CommandList ConsoleCommandManager::GetCommandCompletionList(
-	const str& pPartialCommand, str& pCompleted) const
-{
+	const str& partial_command, str& completed) const {
 	// Pick partial command.
-	const str lCommandDelimitors(" \t\v\r\n");
-	const str lPartialCommand = strutil::StripLeft(pPartialCommand, lCommandDelimitors);
-	pCompleted = lPartialCommand;
+	const str command_delimitors(" \t\v\r\n");
+	const str _partial_command = strutil::StripLeft(partial_command, command_delimitors);
+	completed = _partial_command;
 
 	// Complete partial command.
-	CommandList lCompletionList;
-	CommandCompleterSet::const_iterator x = mCommandCompleterList.begin();
-	for (; x != mCommandCompleterList.end(); ++x)
-	{
-		CommandList lTempCompletions = (*x)->CompleteCommand(lPartialCommand);
-		lCompletionList.splice(lCompletionList.end(), lTempCompletions);
+	CommandList completion_list;
+	CommandCompleterSet::const_iterator x = command_completer_list_.begin();
+	for (; x != command_completer_list_.end(); ++x) {
+		CommandList temp_completions = (*x)->CompleteCommand(_partial_command);
+		completion_list.splice(completion_list.end(), temp_completions);
 	}
-	lCompletionList.sort();
+	completion_list.sort();
 
 	// Find lest common denominator (=best completion).
-	size_t lCompletionLetterCount = 1000;
-	CommandList::const_iterator y = lCompletionList.begin();
-	for (; y != lCompletionList.end(); ++y)
-	{
-		const str& lCompletion = *y;
+	size_t completion_letter_count = 1000;
+	CommandList::const_iterator y = completion_list.begin();
+	for (; y != completion_list.end(); ++y) {
+		const str& completion = *y;
 		// Trim completed string, depending on completion matching.
-		if (lCompletion.length() < lCompletionLetterCount)
-		{
-			lCompletionLetterCount = lCompletion.length();
+		if (completion.length() < completion_letter_count) {
+			completion_letter_count = completion.length();
 		}
 		size_t y;
-		for (y = lPartialCommand.length(); y < lCompletionLetterCount; ++y)
-		{
-			if (y >= pCompleted.length())
-			{
+		for (y = _partial_command.length(); y < completion_letter_count; ++y) {
+			if (y >= completed.length()) {
 				// Add more text (more completed).
-				pCompleted += lCompletion[y];
-			}
-			else if (lCompletion[y] != pCompleted[y])
-			{
+				completed += completion[y];
+			} else if (completion[y] != completed[y]) {
 				// Cut completion, since this command is shorter.
-				lCompletionLetterCount = y;
+				completion_letter_count = y;
 			}
 		}
-		pCompleted.resize(lCompletionLetterCount);
+		completed.resize(completion_letter_count);
 	}
-	return (lCompletionList);
+	return (completion_list);
 }
 
-std::list<str> ConsoleCommandManager::CompleteCommand(const str& pPartialCommand) const
-{
-	std::list<str> lCompletionList;
-	CommandSet::const_iterator x = mCommandSet.begin();
-	for (; x != mCommandSet.end(); ++x)
-	{
-		const str& lCompletion = *x;
-		if (strutil::StartsWith(lCompletion, pPartialCommand))
-		{
+std::list<str> ConsoleCommandManager::CompleteCommand(const str& partial_command) const {
+	std::list<str> completion_list;
+	CommandSet::const_iterator x = command_set_.begin();
+	for (; x != command_set_.end(); ++x) {
+		const str& completion = *x;
+		if (strutil::StartsWith(completion, partial_command)) {
 			// Add to list.
-			lCompletionList.push_back(lCompletion);
+			completion_list.push_back(completion);
 		}
 	}
-	return (lCompletionList);
+	return (completion_list);
 }
 
-unsigned ConsoleCommandManager::GetHistoryCount() const
-{
-	return ((unsigned)mHistoryVector.size());
+unsigned ConsoleCommandManager::GetHistoryCount() const {
+	return ((unsigned)history_vector_.size());
 }
 
-void ConsoleCommandManager::SetCurrentHistoryIndex(int pIndex)
-{
-	if (pIndex < 0)
-	{
-		pIndex = 0;
+void ConsoleCommandManager::SetCurrentHistoryIndex(int index) {
+	if (index < 0) {
+		index = 0;
+	} else if (index > (int)GetHistoryCount()) {
+		index = GetHistoryCount();
 	}
-	else if (pIndex > (int)GetHistoryCount())
-	{
-		pIndex = GetHistoryCount();
+	current_history_index_ = index;
+}
+
+int ConsoleCommandManager::GetCurrentHistoryIndex() const {
+	return (current_history_index_);
+}
+
+str ConsoleCommandManager::GetHistory(int index) const {
+	str history;
+	if (index >= 0 && index < (int)history_vector_.size()) {
+		history = history_vector_[index];
 	}
-	mCurrentHistoryIndex = pIndex;
+	return (history);
 }
 
-int ConsoleCommandManager::GetCurrentHistoryIndex() const
-{
-	return (mCurrentHistoryIndex);
-}
-
-str ConsoleCommandManager::GetHistory(int pIndex) const
-{
-	str lHistory;
-	if (pIndex >= 0 && pIndex < (int)mHistoryVector.size())
-	{
-		lHistory = mHistoryVector[pIndex];
-	}
-	return (lHistory);
-}
-
-void ConsoleCommandManager::AppendHistory(const str& pCommand)
-{
+void ConsoleCommandManager::AppendHistory(const str& command) {
 	// Only append if this isn't exactly the same as the last command.
-	if (mHistoryVector.size() == 0 || (pCommand != mHistoryVector.back()))
-	{
-		mHistoryVector.push_back(pCommand);
+	if (history_vector_.size() == 0 || (command != history_vector_.back())) {
+		history_vector_.push_back(command);
 	}
-	mCurrentHistoryIndex = GetHistoryCount();
+	current_history_index_ = GetHistoryCount();
 }
 
 
 
-ConsolePrompt::ConsolePrompt()
-{
+ConsolePrompt::ConsolePrompt() {
 }
 
-ConsolePrompt::~ConsolePrompt()
-{
+ConsolePrompt::~ConsolePrompt() {
 }
 
 
 
-StdioConsolePrompt::StdioConsolePrompt()
-{
+StdioConsolePrompt::StdioConsolePrompt() {
 }
 
-StdioConsolePrompt::~StdioConsolePrompt()
-{
+StdioConsolePrompt::~StdioConsolePrompt() {
 }
 
-void StdioConsolePrompt::SetFocus(bool)
-{
+void StdioConsolePrompt::SetFocus(bool) {
 	// Nothing to do, always focused.
 }
 
-int StdioConsolePrompt::WaitChar()
-{
-	if (SystemManager::GetQuitRequest())
-	{
+int StdioConsolePrompt::WaitChar() {
+	if (SystemManager::GetQuitRequest()) {
 		return (-1);	// TRICKY: RAII simplifies platform-dependant code.
 	}
 
 #ifdef LEPRA_WINDOWS
 	int c = _getch_nolock();
-	if (c == 27)
-	{
-		c = CON_KEY_ESCAPE;
-	}
-	else if (c == 224)
-	{
+	if (c == 27) {
+		c = kConKeyEscape;
+	} else if (c == 224) {
 		c = ::_getch_nolock();
-		switch (c)
-		{
-			case 72:	c = CON_KEY_UP;		break;
-			case 80:	c = CON_KEY_DOWN;	break;
-			case 75:	c = CON_KEY_LEFT;	break;
-			case 77:	c = CON_KEY_RIGHT;	break;
-			case 73:	c = CON_KEY_PAGE_DOWN;	break;
-			case 81:	c = CON_KEY_PAGE_UP;	break;
-			case 71:	c = CON_KEY_HOME;	break;
-			case 79:	c = CON_KEY_END;	break;
-			case 82:	c = CON_KEY_INSERT;	break;
-			case 83:	c = CON_KEY_DELETE;	break;
-			case 133:	c = CON_KEY_F11;	break;
-			case 134:	c = CON_KEY_F12;	break;
-			case 115:	c = CON_KEY_CTRL_LEFT;	break;
-			case 116:	c = CON_KEY_CTRL_RIGHT;	break;
-			case 141:	c = CON_KEY_CTRL_UP;	break;
-			case 145:	c = CON_KEY_CTRL_DOWN;	break;
-			case 119:	c = CON_KEY_CTRL_HOME;	break;
-			case 117:	c = CON_KEY_CTRL_END;	break;
+		switch (c) {
+			case 72:	c = kConKeyUp;		break;
+			case 80:	c = kConKeyDown;	break;
+			case 75:	c = kConKeyLeft;	break;
+			case 77:	c = kConKeyRight;	break;
+			case 73:	c = kConKeyPageDown;	break;
+			case 81:	c = kConKeyPageUp;	break;
+			case 71:	c = kConKeyHome;	break;
+			case 79:	c = kConKeyEnd;	break;
+			case 82:	c = kConKeyInsert;	break;
+			case 83:	c = kConKeyDelete;	break;
+			case 133:	c = kConKeyF11;	break;
+			case 134:	c = kConKeyF12;	break;
+			case 115:	c = kConKeyCtrlLeft;	break;
+			case 116:	c = kConKeyCtrlRight;	break;
+			case 141:	c = kConKeyCtrlUp;	break;
+			case 145:	c = kConKeyCtrlDown;	break;
+			case 119:	c = kConKeyCtrlHome;	break;
+			case 117:	c = kConKeyCtrlEnd;	break;
 		}
-	}
-	else if (c == 0)
-	{
+	} else if (c == 0) {
 		c = ::_getch_nolock();
-		switch (c)
-		{
-			case 59:	c = CON_KEY_F1;		break;
-			case 60:	c = CON_KEY_F2;		break;
-			case 61:	c = CON_KEY_F3;		break;
-			case 62:	c = CON_KEY_F4;		break;
-			case 63:	c = CON_KEY_F5;		break;
-			case 64:	c = CON_KEY_F6;		break;
-			case 65:	c = CON_KEY_F7;		break;
-			case 66:	c = CON_KEY_F8;		break;
-			case 67:	c = CON_KEY_F9;		break;
-			case 68:	c = CON_KEY_F10;	break;
+		switch (c) {
+			case 59:	c = kConKeyF1;		break;
+			case 60:	c = kConKeyF2;		break;
+			case 61:	c = kConKeyF3;		break;
+			case 62:	c = kConKeyF4;		break;
+			case 63:	c = kConKeyF5;		break;
+			case 64:	c = kConKeyF6;		break;
+			case 65:	c = kConKeyF7;		break;
+			case 66:	c = kConKeyF8;		break;
+			case 67:	c = kConKeyF9;		break;
+			case 68:	c = kConKeyF10;	break;
 		}
 	}
 #elif defined(LEPRA_POSIX)
 	::fflush(stdout);
 	int c = Getc(-1.0f);
-	if (c == 27)
-	{
-		c = CON_KEY_ESCAPE;
+	if (c == 27) {
+		c = kConKeyEscape;
 		int c2 = Getc(0.5f);
-		if (c2 == '[')
-		{
+		if (c2 == '[') {
 			c = '?';
-			wstr lSequence;
-			for (int x = 0; x < 30 && c2 > 0 && c2 != '~'; ++x)
-			{
+			wstr sequence;
+			for (int x = 0; x < 30 && c2 > 0 && c2 != '~'; ++x) {
 				c2 = Getc(0.5f);
-				lSequence.push_back(c2);
-				if (lSequence == L"A")		{ c = CON_KEY_UP;	break; }
-				else if (lSequence == L"B")	{ c = CON_KEY_DOWN;	break; }
-				else if (lSequence == L"C")	{ c = CON_KEY_RIGHT;	break; }
-				else if (lSequence == L"D")	{ c = CON_KEY_LEFT;	break; }
-				else if (lSequence == L"1~")	c = CON_KEY_HOME;
-				else if (lSequence == L"2~")	c = CON_KEY_INSERT;
-				else if (lSequence == L"3~")	c = CON_KEY_DELETE;
-				else if (lSequence == L"4~")	c = CON_KEY_END;
-				else if (lSequence == L"5~")	c = CON_KEY_PAGE_UP;
-				else if (lSequence == L"6~")	c = CON_KEY_PAGE_DOWN;
-				else if (lSequence == L"11~")	c = CON_KEY_F1;
-				else if (lSequence == L"12~")	c = CON_KEY_F2;
-				else if (lSequence == L"13~")	c = CON_KEY_F3;
-				else if (lSequence == L"14~")	c = CON_KEY_F4;
-				else if (lSequence == L"15~")	c = CON_KEY_F5;
-				else if (lSequence == L"17~")	c = CON_KEY_F6;
-				else if (lSequence == L"18~")	c = CON_KEY_F7;
-				else if (lSequence == L"19~")	c = CON_KEY_F8;
-				else if (lSequence == L"20~")	c = CON_KEY_F9;
-				else if (lSequence == L"21~")	c = CON_KEY_F10;
-				else if (lSequence == L"23~")	c = CON_KEY_F11;
-				else if (lSequence == L"24~")	c = CON_KEY_F12;
+				sequence.push_back(c2);
+				if (sequence == L"A")		{ c = kConKeyUp;	break; } else if (sequence == L"B")	{ c = kConKeyDown;	break; } else if (sequence == L"C")	{ c = kConKeyRight;	break; } else if (sequence == L"D")	{ c = kConKeyLeft;	break; } else if (sequence == L"1~")	c = kConKeyHome;
+				else if (sequence == L"2~")	c = kConKeyInsert;
+				else if (sequence == L"3~")	c = kConKeyDelete;
+				else if (sequence == L"4~")	c = kConKeyEnd;
+				else if (sequence == L"5~")	c = kConKeyPageUp;
+				else if (sequence == L"6~")	c = kConKeyPageDown;
+				else if (sequence == L"11~")	c = kConKeyF1;
+				else if (sequence == L"12~")	c = kConKeyF2;
+				else if (sequence == L"13~")	c = kConKeyF3;
+				else if (sequence == L"14~")	c = kConKeyF4;
+				else if (sequence == L"15~")	c = kConKeyF5;
+				else if (sequence == L"17~")	c = kConKeyF6;
+				else if (sequence == L"18~")	c = kConKeyF7;
+				else if (sequence == L"19~")	c = kConKeyF8;
+				else if (sequence == L"20~")	c = kConKeyF9;
+				else if (sequence == L"21~")	c = kConKeyF10;
+				else if (sequence == L"23~")	c = kConKeyF11;
+				else if (sequence == L"24~")	c = kConKeyF12;
 			}
 		}
-	}
-	else if (c == '\n')
-	{
+	} else if (c == '\n') {
 		c = '\r';
-	}
-	else if (c == 127)
-	{
+	} else if (c == 127) {
 		c = '\b';
 	}
 #else
@@ -450,8 +372,7 @@ int StdioConsolePrompt::WaitChar()
 	return (c);
 }
 
-void StdioConsolePrompt::ReleaseWaitCharThread()
-{
+void StdioConsolePrompt::ReleaseWaitCharThread() {
 #ifdef LEPRA_WINDOWS
 	::_ungetch_nolock(-100);
 #elif defined(LEPRA_POSIX)
@@ -461,29 +382,23 @@ void StdioConsolePrompt::ReleaseWaitCharThread()
 #endif // LEPRA_WINDOWS
 }
 
-void StdioConsolePrompt::Backspace(size_t pCount)
-{
-	for (size_t x = 0; x < pCount; ++x)
-	{
+void StdioConsolePrompt::Backspace(size_t count) {
+	for (size_t x = 0; x < count; ++x) {
 		::printf("\b");
 	}
 }
 
-void StdioConsolePrompt::EraseText(size_t pCount)
-{
-	for (size_t x = 0; x < pCount; ++x)
-	{
+void StdioConsolePrompt::EraseText(size_t count) {
+	for (size_t x = 0; x < count; ++x) {
 		::printf(" ");
 	}
-	Backspace(pCount);
+	Backspace(count);
 }
 
-void StdioConsolePrompt::PrintPrompt(const str& pPrompt, const str& pInputText, size_t pEditIndex)
-{
-	::printf("\r%s%s", pPrompt.c_str(), pInputText.c_str());
+void StdioConsolePrompt::PrintPrompt(const str& prompt, const str& input_text, size_t edit_index) {
+	::printf("\r%s%s", prompt.c_str(), input_text.c_str());
 	// Back up to edit index.
-	for (size_t x = pInputText.length(); x > pEditIndex; --x)
-	{
+	for (size_t x = input_text.length(); x > edit_index; --x) {
 		::printf("\b");
 	}
 	::fflush(stdout);

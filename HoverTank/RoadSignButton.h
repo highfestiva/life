@@ -1,85 +1,81 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiCure/Include/UiCppContextObject.h"
-#include "../UiTbc/Include/GUI/UiCustomButton.h"
-#include "HoverTank.h"
+#include "../uicure/include/uicppcontextobject.h"
+#include "../uitbc/include/gui/uicustombutton.h"
+#include "hovertank.h"
 
 
 
-namespace Life
-{
+namespace life {
 class ScreenPart;
 }
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-class RoadSignButton: public UiCure::CppContextObject
-{
+class RoadSignButton: public UiCure::CppContextObject {
 	typedef UiCure::CppContextObject Parent;
 public:
-	enum Shape
-	{
-		SHAPE_BOX = 1,
-		SHAPE_ROUND,
+	enum Shape {
+		kShapeBox = 1,
+		kShapeRound,
 	};
 
-	RoadSignButton(Life::ScreenPart* pScreenPart, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, const str& pName, const str& pClassResourceName,
-		const str& pTextureResourceName, Shape pShape);
+	RoadSignButton(life::ScreenPart* screen_part, cure::ResourceManager* resource_manager,
+		UiCure::GameUiManager* ui_manager, const str& name, const str& class_resource_name,
+		const str& texture_resource_name, Shape shape);
 	virtual ~RoadSignButton();
 
-	UiTbc::CustomButton& GetButton();
-	void SetTrajectory(const vec2& pEndPoint, float pEndDistance);
-	void SetTrajectoryAngle(float pAngle);
-	void SetOrientation(const quat& pOrientation);
-	void SetIsMovingIn(bool pIsMovingIn);
+	uitbc::CustomButton& GetButton();
+	void SetTrajectory(const vec2& end_point, float end_distance);
+	void SetTrajectoryAngle(float angle);
+	void SetOrientation(const quat& orientation);
+	void SetIsMovingIn(bool is_moving_in);
 
-	void MoveSign(const float pFrameTime);
+	void MoveSign(const float frame_time);
 
 protected:
 	void OnTick();
-	void RenderButton(UiTbc::CustomButton*);
-	bool IsOverButton(UiTbc::CustomButton* pButton, int x, int y);
+	void RenderButton(uitbc::CustomButton*);
+	bool IsOverButton(uitbc::CustomButton* button, int x, int y);
 	virtual void LoadTextures();
-	virtual void DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
-	void OnLoadTexture(UiCure::UserRendererImageResource* pTextureResource);
+	virtual void DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* mesh_resource);
+	void OnLoadTexture(UiCure::UserRendererImageResource* texture_resource);
 	virtual str GetMeshInstanceId() const;
 
 	vec2 Get2dProjectionPosition(const vec3& p3dPosition, float& p2dRadius) const;
-	vec2 GetAspectRatio(bool pInverse) const;
+	vec2 GetAspectRatio(bool inverse) const;
 
 private:
-	void SetInitialPosition(Tbc::GeometryBase* pGeometry) const;
+	void SetInitialPosition(tbc::GeometryBase* geometry) const;
 	float GetTargetAngle() const;
 
-	Life::ScreenPart* mScreenPart;
-	UiTbc::CustomButton mButton;
-	Shape mShape;
-	bool mActive;
-	float mMeshRadius;
-	float mAnglePart;
-	float mAngleTime;
-	float mAngle;
-	bool mIsMovingIn;
-	vec3 mCurrentOffset;
-	float mTrajectoryEndDistance;
-	vec2 mTrajectoryEndPoint;
-	float mTrajectoryAngle;
-	float mFov;
-	quat mOriginalOrientation;
-	quat mOrientation;
-	bool mIsOriginalOrientationSet;
+	life::ScreenPart* screen_part_;
+	uitbc::CustomButton button_;
+	Shape shape_;
+	bool active_;
+	float mesh_radius_;
+	float angle_part_;
+	float angle_time_;
+	float angle_;
+	bool is_moving_in_;
+	vec3 current_offset_;
+	float trajectory_end_distance_;
+	vec2 trajectory_end_point_;
+	float trajectory_angle_;
+	float fov_;
+	quat original_orientation_;
+	quat orientation_;
+	bool is_original_orientation_set_;
 
 	logclass();
 };

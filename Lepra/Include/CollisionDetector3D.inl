@@ -1,19 +1,17 @@
 /*
 	Class:  CollisionDetector3D
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
 template<class _TVarType>
-CollisionDetector3D<_TVarType>::CollisionDetector3D()
-{
-	mOBBCollisionData = new OBBCollisionData<_TVarType>;
+CollisionDetector3D<_TVarType>::CollisionDetector3D() {
+	obb_collision_data_ = new OBBCollisionData<_TVarType>;
 }
 
 template<class _TVarType>
-CollisionDetector3D<_TVarType>::~CollisionDetector3D()
-{
-	delete mOBBCollisionData;
+CollisionDetector3D<_TVarType>::~CollisionDetector3D() {
+	delete obb_collision_data_;
 }
 
 
@@ -24,79 +22,68 @@ CollisionDetector3D<_TVarType>::~CollisionDetector3D()
 //////////////////////////////////////////////////////////////////////////////
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsSphereEnclosingPoint(const Sphere<_TVarType>& pSphere,
-							    const Vector3D<_TVarType>& pPoint)
-{
-	_TVarType lDistSquared = pSphere.GetPosition().GetDistanceSquared(pPoint);
-	return (lDistSquared < pSphere.GetRadiusSquared());
+bool CollisionDetector3D<_TVarType>::IsSphereEnclosingPoint(const Sphere<_TVarType>& sphere,
+							    const Vector3D<_TVarType>& point) {
+	_TVarType dist_squared = sphere.GetPosition().GetDistanceSquared(point);
+	return (dist_squared < sphere.GetRadiusSquared());
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsAABBEnclosingPoint(const AABB<_TVarType>& pAABB, 
-							  const Vector3D<_TVarType>& pPoint)
-{
-	Vector3D<_TVarType> lMin(pAABB.GetPosition() - pAABB.GetSize());
-	Vector3D<_TVarType> lMax(pAABB.GetPosition() + pAABB.GetSize());
+bool CollisionDetector3D<_TVarType>::IsAABBEnclosingPoint(const AABB<_TVarType>& aabb,
+							  const Vector3D<_TVarType>& point) {
+	Vector3D<_TVarType> __min(aabb.GetPosition() - aabb.GetSize());
+	Vector3D<_TVarType> __max(aabb.GetPosition() + aabb.GetSize());
 
-	return (lMin.x <= pPoint.x && lMax.x > pPoint.x &&
-		lMin.y <= pPoint.y && lMax.y > pPoint.y &&
-		lMin.z <= pPoint.z && lMax.z > pPoint.z);
+	return (__min.x <= point.x && __max.x > point.x &&
+		__min.y <= point.y && __max.y > point.y &&
+		__min.z <= point.z && __max.z > point.z);
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsOBBEnclosingPoint(const OBB<_TVarType>& pOBB, 
-							 const Vector3D<_TVarType>& pPoint)
-{
-	Vector3D<_TVarType> lPosDiff(pPoint - pOBB.GetPosition());
-	const Vector3D<_TVarType>& lOBBSize = pOBB.GetSize();
+bool CollisionDetector3D<_TVarType>::IsOBBEnclosingPoint(const OBB<_TVarType>& obb,
+							 const Vector3D<_TVarType>& point) {
+	Vector3D<_TVarType> pos_diff(point - obb.GetPosition());
+	const Vector3D<_TVarType>& obb_size = obb.GetSize();
 
-	_TVarType lD = lPosDiff.Dot(pOBB.GetRotation().GetAxisX());
-	if(lD > lOBBSize.x || lD < -lOBBSize.x)
-		return false;
-	
-	lD = lPosDiff.Dot(pOBB.GetRotation().GetAxisY());
-	if(lD > lOBBSize.y || lD < -lOBBSize.y)
+	_TVarType d = pos_diff.Dot(obb.GetRotation().GetAxisX());
+	if(d > obb_size.x || d < -obb_size.x)
 		return false;
 
-	lD = lPosDiff.Dot(pOBB.GetRotation().GetAxisZ());
-	if(lD > lOBBSize.z || lD < -lOBBSize.z)
+	d = pos_diff.Dot(obb.GetRotation().GetAxisY());
+	if(d > obb_size.y || d < -obb_size.y)
+		return false;
+
+	d = pos_diff.Dot(obb.GetRotation().GetAxisZ());
+	if(d > obb_size.z || d < -obb_size.z)
 		return false;
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsAACylinderEnclosingPoint(const Cylinder<_TVarType>& pAACylinder,
-								const Vector3D<_TVarType>& pPoint)
-{
-	Vector3D<_TVarType> lPosDiff(pPoint - pAACylinder.GetPosition());
+bool CollisionDetector3D<_TVarType>::IsAACylinderEnclosingPoint(const Cylinder<_TVarType>& aa_cylinder,
+								const Vector3D<_TVarType>& point) {
+	Vector3D<_TVarType> pos_diff(point - aa_cylinder.GetPosition());
 
-	switch(pAACylinder.GetAlignment())
-	{
-		case Cylinder<_TVarType>::ALIGN_X:
-		{
-			_TVarType lDistSquared = lPosDiff.y * lPosDiff.y + lPosDiff.z * lPosDiff.z;
-			if(lDistSquared < pAACylinder.GetRadiusSquared() &&
-			   lPosDiff.x > -pAACylinder.GetLength() && lPosDiff.x < pAACylinder.GetLength())
-			{
+	switch(aa_cylinder.GetAlignment()) {
+		case Cylinder<_TVarType>::kAlignX: {
+			_TVarType dist_squared = pos_diff.y * pos_diff.y + pos_diff.z * pos_diff.z;
+			if(dist_squared < aa_cylinder.GetRadiusSquared() &&
+			   pos_diff.x > -aa_cylinder.GetLength() && pos_diff.x < aa_cylinder.GetLength()) {
 				return true;
 			}
 		}
-		case Cylinder<_TVarType>::ALIGN_Y:
-		{
-			_TVarType lDistSquared = lPosDiff.x * lPosDiff.x + lPosDiff.z * lPosDiff.z;
-			if(lDistSquared < pAACylinder.GetRadiusSquared() &&
-			   lPosDiff.y > -pAACylinder.GetLength() && lPosDiff.y < pAACylinder.GetLength())
-			{
+		case Cylinder<_TVarType>::kAlignY: {
+			_TVarType dist_squared = pos_diff.x * pos_diff.x + pos_diff.z * pos_diff.z;
+			if(dist_squared < aa_cylinder.GetRadiusSquared() &&
+			   pos_diff.y > -aa_cylinder.GetLength() && pos_diff.y < aa_cylinder.GetLength()) {
 				return true;
 			}
 		}
-		case Cylinder<_TVarType>::ALIGN_Z:
-		{
-			_TVarType lDistSquared = lPosDiff.x * lPosDiff.x + lPosDiff.y * lPosDiff.y;
-			if(lDistSquared < pAACylinder.GetRadiusSquared() &&
-			   lPosDiff.z > -pAACylinder.GetLength() && lPosDiff.z < pAACylinder.GetLength())
-			{
+		case Cylinder<_TVarType>::kAlignZ: {
+			_TVarType dist_squared = pos_diff.x * pos_diff.x + pos_diff.y * pos_diff.y;
+			if(dist_squared < aa_cylinder.GetRadiusSquared() &&
+			   pos_diff.z > -aa_cylinder.GetLength() && pos_diff.z < aa_cylinder.GetLength()) {
 				return true;
 			}
 		}
@@ -105,37 +92,29 @@ bool CollisionDetector3D<_TVarType>::IsAACylinderEnclosingPoint(const Cylinder<_
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsCylinderEnclosingPoint(const Cylinder<_TVarType>& pCylinder,
-							      const Vector3D<_TVarType>& pPoint)
-{
-	Vector3D<_TVarType> lRelativePos(pCylinder.GetRotation().GetInverseRotatedVector(pPoint - pCylinder.GetPosition()));
-	
-	switch(pCylinder.GetAlignment())
-	{
-		case Cylinder<_TVarType>::ALIGN_X:
-		{
-			_TVarType lDistSquared = lRelativePos.y * lRelativePos.y + lRelativePos.z * lRelativePos.z;
-			if(lDistSquared < pCylinder.GetRadiusSquared() &&
-			   lRelativePos.x > -pCylinder.GetLength() && lRelativePos.x < pCylinder.GetLength())
-			{
+bool CollisionDetector3D<_TVarType>::IsCylinderEnclosingPoint(const Cylinder<_TVarType>& cylinder,
+							      const Vector3D<_TVarType>& point) {
+	Vector3D<_TVarType> relative_pos(cylinder.GetRotation().GetInverseRotatedVector(point - cylinder.GetPosition()));
+
+	switch(cylinder.GetAlignment()) {
+		case Cylinder<_TVarType>::kAlignX: {
+			_TVarType dist_squared = relative_pos.y * relative_pos.y + relative_pos.z * relative_pos.z;
+			if(dist_squared < cylinder.GetRadiusSquared() &&
+			   relative_pos.x > -cylinder.GetLength() && relative_pos.x < cylinder.GetLength()) {
 				return true;
 			}
 		}
-		case Cylinder<_TVarType>::ALIGN_Y:
-		{
-			_TVarType lDistSquared = lRelativePos.x * lRelativePos.x + lRelativePos.z * lRelativePos.z;
-			if(lDistSquared < pCylinder.GetRadiusSquared() &&
-			   lRelativePos.y > -pCylinder.GetLength() && lRelativePos.y < pCylinder.GetLength())
-			{
+		case Cylinder<_TVarType>::kAlignY: {
+			_TVarType dist_squared = relative_pos.x * relative_pos.x + relative_pos.z * relative_pos.z;
+			if(dist_squared < cylinder.GetRadiusSquared() &&
+			   relative_pos.y > -cylinder.GetLength() && relative_pos.y < cylinder.GetLength()) {
 				return true;
 			}
 		}
-		case Cylinder<_TVarType>::ALIGN_Z:
-		{
-			_TVarType lDistSquared = lRelativePos.x * lRelativePos.x + lRelativePos.y * lRelativePos.y;
-			if(lDistSquared < pCylinder.GetRadiusSquared() &&
-			   lRelativePos.z > -pCylinder.GetLength() && lRelativePos.z < pCylinder.GetLength())
-			{
+		case Cylinder<_TVarType>::kAlignZ: {
+			_TVarType dist_squared = relative_pos.x * relative_pos.x + relative_pos.y * relative_pos.y;
+			if(dist_squared < cylinder.GetRadiusSquared() &&
+			   relative_pos.z > -cylinder.GetLength() && relative_pos.z < cylinder.GetLength()) {
 				return true;
 			}
 		}
@@ -152,9 +131,8 @@ bool CollisionDetector3D<_TVarType>::IsCylinderEnclosingPoint(const Cylinder<_TV
 //////////////////////////////////////////////////////////////////////////////
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsSphere1EnclosingSphere2(const Sphere<_TVarType>& pSphere1,
-							       const Sphere<_TVarType>& pSphere2)
-{
+bool CollisionDetector3D<_TVarType>::IsSphere1EnclosingSphere2(const Sphere<_TVarType>& sphere1,
+							       const Sphere<_TVarType>& sphere2) {
 	// Can't optimize using the squared distance here. The reason is the expression
 	// in the if-statement:
 	//
@@ -166,224 +144,207 @@ bool CollisionDetector3D<_TVarType>::IsSphere1EnclosingSphere2(const Sphere<_TVa
 	//
 	// ...which still requires that we know the actual distance.
 
-	_TVarType lDistance = pSphere1.GetPosition().GetDistance(pSphere2.GetPosition());
-	return ((lDistance + pSphere2.GetRadius()) <= pSphere1.GetRadius());
+	_TVarType distance = sphere1.GetPosition().GetDistance(sphere2.GetPosition());
+	return ((distance + sphere2.GetRadius()) <= sphere1.GetRadius());
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsAABB1EnclosingAABB2(const AABB<_TVarType>& pAABB1,
-							   const AABB<_TVarType>& pAABB2)
-{
-	Vector3D<_TVarType> lMin1(pAABB1.GetPosition() - pAABB1.GetSize());
-	Vector3D<_TVarType> lMax1(pAABB1.GetPosition() + pAABB1.GetSize());
-	Vector3D<_TVarType> lMin2(pAABB2.GetPosition() - pAABB2.GetSize());
-	Vector3D<_TVarType> lMax2(pAABB2.GetPosition() - pAABB2.GetSize());
+bool CollisionDetector3D<_TVarType>::IsAABB1EnclosingAABB2(const AABB<_TVarType>& aab_b1,
+							   const AABB<_TVarType>& aab_b2) {
+	Vector3D<_TVarType> min1(aab_b1.GetPosition() - aab_b1.GetSize());
+	Vector3D<_TVarType> max1(aab_b1.GetPosition() + aab_b1.GetSize());
+	Vector3D<_TVarType> min2(aab_b2.GetPosition() - aab_b2.GetSize());
+	Vector3D<_TVarType> max2(aab_b2.GetPosition() - aab_b2.GetSize());
 
-	return(lMax1.x >= lMax2.x && lMin1.x <= lMin2.x && 
-	       lMax1.y >= lMax2.y && lMin1.y <= lMin2.y && 
-	       lMax1.z >= lMax2.z && lMin1.z <= lMin2.z);
+	return(max1.x >= max2.x && min1.x <= min2.x &&
+	       max1.y >= max2.y && min1.y <= min2.y &&
+	       max1.z >= max2.z && min1.z <= min2.z);
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsOBB1EnclosingOBB2(const OBB<_TVarType>& pOBB1,
-							 const OBB<_TVarType>& pOBB2)
-{
+bool CollisionDetector3D<_TVarType>::IsOBB1EnclosingOBB2(const OBB<_TVarType>& ob_b1,
+							 const OBB<_TVarType>& ob_b2) {
 	// OBB2 is only enclosed if all it's vertices are enclosed.
-	Vector3D<_TVarType> lXExt(pOBB2.GetRotation().GetAxisX() * pOBB2.GetSize().x);
-	Vector3D<_TVarType> lYExt(pOBB2.GetRotation().GetAxisY() * pOBB2.GetSize().y);
-	Vector3D<_TVarType> lZExt(pOBB2.GetRotation().GetAxisZ() * pOBB2.GetSize().z);
-	Vector3D<_TVarType> lV(pOBB2.GetPosition() - lXExt - lYExt - lZExt);
+	Vector3D<_TVarType> x_ext(ob_b2.GetRotation().GetAxisX() * ob_b2.GetSize().x);
+	Vector3D<_TVarType> y_ext(ob_b2.GetRotation().GetAxisY() * ob_b2.GetSize().y);
+	Vector3D<_TVarType> z_ext(ob_b2.GetRotation().GetAxisZ() * ob_b2.GetSize().z);
+	Vector3D<_TVarType> v(ob_b2.GetPosition() - x_ext - y_ext - z_ext);
 
-	if(IsOBBEnclosingPoint(pOBB1, lV) == false)
+	if(IsOBBEnclosingPoint(ob_b1, v) == false)
 		return false;
 
-	lXExt *= 2;
-	lV += lXExt;
-	if(IsOBBEnclosingPoint(pOBB1, lV) == false)
+	x_ext *= 2;
+	v += x_ext;
+	if(IsOBBEnclosingPoint(ob_b1, v) == false)
 		return false;
 
-	lYExt *= 2;
-	lV += lYExt;
-	if(IsOBBEnclosingPoint(pOBB1, lV) == false)
+	y_ext *= 2;
+	v += y_ext;
+	if(IsOBBEnclosingPoint(ob_b1, v) == false)
 		return false;
 
-	lZExt *= 2;
-	lV += lZExt;
-	if(IsOBBEnclosingPoint(pOBB1, lV) == false)
+	z_ext *= 2;
+	v += z_ext;
+	if(IsOBBEnclosingPoint(ob_b1, v) == false)
 		return false;
 
-	lV -= lYExt;
-	if(IsOBBEnclosingPoint(pOBB1, lV) == false)
+	v -= y_ext;
+	if(IsOBBEnclosingPoint(ob_b1, v) == false)
 		return false;
 
-	lV -= lXExt;
-	if(IsOBBEnclosingPoint(pOBB1, lV) == false)
+	v -= x_ext;
+	if(IsOBBEnclosingPoint(ob_b1, v) == false)
 		return false;
 
-	lV += lYExt;
-	if(IsOBBEnclosingPoint(pOBB1, lV) == false)
+	v += y_ext;
+	if(IsOBBEnclosingPoint(ob_b1, v) == false)
 		return false;
 
-	lV -= lZExt;
-	if(IsOBBEnclosingPoint(pOBB1, lV) == false)
+	v -= z_ext;
+	if(IsOBBEnclosingPoint(ob_b1, v) == false)
 		return false;
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsAACylinder1EnclosingAACylinder2(const Cylinder<_TVarType>& pCylinder1,
-									const Cylinder<_TVarType>& pCylinder2)
-{
-	deb_assert(pCylinder1.GetAlignment() == pCylinder2.GetAlignment());
+bool CollisionDetector3D<_TVarType>::IsAACylinder1EnclosingAACylinder2(const Cylinder<_TVarType>& cylinder1,
+									const Cylinder<_TVarType>& cylinder2) {
+	deb_assert(cylinder1.GetAlignment() == cylinder2.GetAlignment());
 
 	// It's impossible for a smaller cylinder to enclose a larger one.
-	if(pCylinder1.GetRadius() < pCylinder2.GetRadius())
+	if(cylinder1.GetRadius() < cylinder2.GetRadius())
 		return false;
 
-	Vector3D<_TVarType> lD(pCylinder2.GetPosition() - pCylinder1.GetPosition());
-	_TVarType lCoordToTest;
+	Vector3D<_TVarType> d(cylinder2.GetPosition() - cylinder1.GetPosition());
+	_TVarType coord_to_test;
 
-	switch(pCylinder1.GetAlignment())
-	{
-		case Cylinder<_TVarType>::ALIGN_X: lCoordToTest = lD.x; break;
-		case Cylinder<_TVarType>::ALIGN_Y: lCoordToTest = lD.y; break;
-		case Cylinder<_TVarType>::ALIGN_Z: lCoordToTest = lD.z; break;
+	switch(cylinder1.GetAlignment()) {
+		case Cylinder<_TVarType>::kAlignX: coord_to_test = d.x; break;
+		case Cylinder<_TVarType>::kAlignY: coord_to_test = d.y; break;
+		case Cylinder<_TVarType>::kAlignZ: coord_to_test = d.z; break;
 	}
 
-	if((lCoordToTest + pCylinder2.GetLength()) > pCylinder1.GetLength())
+	if((coord_to_test + cylinder2.GetLength()) > cylinder1.GetLength())
 		return false;
-	if((lCoordToTest - pCylinder2.GetLength()) < -pCylinder1.GetLength())
+	if((coord_to_test - cylinder2.GetLength()) < -cylinder1.GetLength())
 		return false;
 
-	_TVarType lDistSquared;
-	switch(pCylinder1.GetAlignment())
-	{
-		case Cylinder<_TVarType>::ALIGN_X: lDistSquared = lD.y*lD.y + lD.z*lD.z; break;
-		case Cylinder<_TVarType>::ALIGN_Y: lDistSquared = lD.x*lD.x + lD.z*lD.z; break;
-		case Cylinder<_TVarType>::ALIGN_Z: lDistSquared = lD.x*lD.x + lD.y*lD.y; break;
+	_TVarType dist_squared;
+	switch(cylinder1.GetAlignment()) {
+		case Cylinder<_TVarType>::kAlignX: dist_squared = d.y*d.y + d.z*d.z; break;
+		case Cylinder<_TVarType>::kAlignY: dist_squared = d.x*d.x + d.z*d.z; break;
+		case Cylinder<_TVarType>::kAlignZ: dist_squared = d.x*d.x + d.y*d.y; break;
 	}
 
-	if((lDistSquared + pCylinder2.GetRadiusSquared()) > pCylinder1.GetRadiusSquared())
+	if((dist_squared + cylinder2.GetRadiusSquared()) > cylinder1.GetRadiusSquared())
 		return false;
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsSphereEnclosingAABB(const Sphere<_TVarType>& pSphere,
-							   const AABB<_TVarType>& pAABB)
-{
+bool CollisionDetector3D<_TVarType>::IsSphereEnclosingAABB(const Sphere<_TVarType>& sphere,
+							   const AABB<_TVarType>& aabb) {
 	// This test is similar to the enclosing sphere to sphere test.
-	_TVarType lAABBRadius = pAABB.GetSize().GetLength();
-	_TVarType lDist = pSphere.GetPosition().GetDistance(pAABB.GetPosition());
-	return ((lDist + lAABBRadius) <= pSphere.GetRadius());
+	_TVarType aabb_radius = aabb.GetSize().GetLength();
+	_TVarType dist = sphere.GetPosition().GetDistance(aabb.GetPosition());
+	return ((dist + aabb_radius) <= sphere.GetRadius());
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsAABBEnclosingSphere(const AABB<_TVarType>& pAABB,
-							   const Sphere<_TVarType>& pSphere)
-{
-	Vector3D<_TVarType> lMin(pAABB.GetPosition() - pAABB.GetSize());
-	Vector3D<_TVarType> lMax(pAABB.GetPosition() + pAABB.GetSize());
-	Vector3D<_TVarType> lR(pSphere.GetRadius(), pSphere.GetRadius(), pSphere.GetRadius());
-	Vector3D<_TVarType> lSMin(pSphere.GetPosition() - lR);
-	Vector3D<_TVarType> lSMax(pSphere.GetPosition() + lR);
+bool CollisionDetector3D<_TVarType>::IsAABBEnclosingSphere(const AABB<_TVarType>& aabb,
+							   const Sphere<_TVarType>& sphere) {
+	Vector3D<_TVarType> __min(aabb.GetPosition() - aabb.GetSize());
+	Vector3D<_TVarType> __max(aabb.GetPosition() + aabb.GetSize());
+	Vector3D<_TVarType> r(sphere.GetRadius(), sphere.GetRadius(), sphere.GetRadius());
+	Vector3D<_TVarType> s_min(sphere.GetPosition() - r);
+	Vector3D<_TVarType> s_max(sphere.GetPosition() + r);
 
-	return (lMin.x < lSMin.x && lMax.x > lSMax.x &&
-	        lMin.y < lSMin.y && lMax.y > lSMax.y &&
-	        lMin.z < lSMin.z && lMax.z > lSMax.z);
+	return (__min.x < s_min.x && __max.x > s_max.x &&
+	        __min.y < s_min.y && __max.y > s_max.y &&
+	        __min.z < s_min.z && __max.z > s_max.z);
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsOBBEnclosingSphere(const OBB<_TVarType>& pOBB,
-							  const Sphere<_TVarType>& pSphere)
-{
-	Vector3D<_TVarType> lRelativePos(pOBB.GetRotation().GetInverseRotatedVector(pSphere.GetPosition() - pOBB.GetPosition()));
-	Vector3D<_TVarType> lR(pSphere.GetRadius(), pSphere.GetRadius(), pSphere.GetRadius());
-	Vector3D<_TVarType> lSMin(lRelativePos - lR);
-	Vector3D<_TVarType> lSMax(lRelativePos + lR);
+bool CollisionDetector3D<_TVarType>::IsOBBEnclosingSphere(const OBB<_TVarType>& obb,
+							  const Sphere<_TVarType>& sphere) {
+	Vector3D<_TVarType> relative_pos(obb.GetRotation().GetInverseRotatedVector(sphere.GetPosition() - obb.GetPosition()));
+	Vector3D<_TVarType> r(sphere.GetRadius(), sphere.GetRadius(), sphere.GetRadius());
+	Vector3D<_TVarType> s_min(relative_pos - r);
+	Vector3D<_TVarType> s_max(relative_pos + r);
 
-	return (-pOBB.GetSize().x < lSMin.x && pOBB.GetSize().x > lSMax.x &&
-	        -pOBB.GetSize().y < lSMin.y && pOBB.GetSize().y > lSMax.y &&
-	        -pOBB.GetSize().z < lSMin.z && pOBB.GetSize().z > lSMax.z);
+	return (-obb.GetSize().x < s_min.x && obb.GetSize().x > s_max.x &&
+	        -obb.GetSize().y < s_min.y && obb.GetSize().y > s_max.y &&
+	        -obb.GetSize().z < s_min.z && obb.GetSize().z > s_max.z);
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsAABBEnclosingOBB(const AABB<_TVarType>& pAABB,
-							const OBB<_TVarType>& pOBB)
-{
-	Vector3D<_TVarType> lMin(pAABB.GetPosition() - pAABB.GetSize());
-	Vector3D<_TVarType> lMax(pAABB.GetPosition() + pAABB.GetSize());
+bool CollisionDetector3D<_TVarType>::IsAABBEnclosingOBB(const AABB<_TVarType>& aabb,
+							const OBB<_TVarType>& obb) {
+	Vector3D<_TVarType> __min(aabb.GetPosition() - aabb.GetSize());
+	Vector3D<_TVarType> __max(aabb.GetPosition() + aabb.GetSize());
 
-	Vector3D<_TVarType> lXExt(pOBB.GetRotation().GetAxisX() * pOBB.GetSize().x);
-	Vector3D<_TVarType> lYExt(pOBB.GetRotation().GetAxisY() * pOBB.GetSize().y);
-	Vector3D<_TVarType> lZExt(pOBB.GetRotation().GetAxisZ() * pOBB.GetSize().z);
-	Vector3D<_TVarType> lV(pOBB.GetPosition() - lXExt - lYExt - lZExt);
+	Vector3D<_TVarType> x_ext(obb.GetRotation().GetAxisX() * obb.GetSize().x);
+	Vector3D<_TVarType> y_ext(obb.GetRotation().GetAxisY() * obb.GetSize().y);
+	Vector3D<_TVarType> z_ext(obb.GetRotation().GetAxisZ() * obb.GetSize().z);
+	Vector3D<_TVarType> v(obb.GetPosition() - x_ext - y_ext - z_ext);
 
-	if(lV.x < lMin.x || lV.x > lMax.x ||
-	   lV.y < lMin.y || lV.y > lMax.y ||
-	   lV.z < lMin.z || lV.z > lMax.z)
-	{
+	if(v.x < __min.x || v.x > __max.x ||
+	   v.y < __min.y || v.y > __max.y ||
+	   v.z < __min.z || v.z > __max.z) {
 		return false;
 	}
 
-	lXExt *= 2;
-	lV += lXExt;
-	if(lV.x < lMin.x || lV.x > lMax.x ||
-	   lV.y < lMin.y || lV.y > lMax.y ||
-	   lV.z < lMin.z || lV.z > lMax.z)
-	{
+	x_ext *= 2;
+	v += x_ext;
+	if(v.x < __min.x || v.x > __max.x ||
+	   v.y < __min.y || v.y > __max.y ||
+	   v.z < __min.z || v.z > __max.z) {
 		return false;
 	}
 
-	lYExt *= 2;
-	lV += lYExt;
-	if(lV.x < lMin.x || lV.x > lMax.x ||
-	   lV.y < lMin.y || lV.y > lMax.y ||
-	   lV.z < lMin.z || lV.z > lMax.z)
-	{
+	y_ext *= 2;
+	v += y_ext;
+	if(v.x < __min.x || v.x > __max.x ||
+	   v.y < __min.y || v.y > __max.y ||
+	   v.z < __min.z || v.z > __max.z) {
 		return false;
 	}
 
-	lZExt *= 2;
-	lV += lZExt;
-	if(lV.x < lMin.x || lV.x > lMax.x ||
-	   lV.y < lMin.y || lV.y > lMax.y ||
-	   lV.z < lMin.z || lV.z > lMax.z)
-	{
+	z_ext *= 2;
+	v += z_ext;
+	if(v.x < __min.x || v.x > __max.x ||
+	   v.y < __min.y || v.y > __max.y ||
+	   v.z < __min.z || v.z > __max.z) {
 		return false;
 	}
 
-	lV -= lYExt;
-	if(lV.x < lMin.x || lV.x > lMax.x ||
-	   lV.y < lMin.y || lV.y > lMax.y ||
-	   lV.z < lMin.z || lV.z > lMax.z)
-	{
+	v -= y_ext;
+	if(v.x < __min.x || v.x > __max.x ||
+	   v.y < __min.y || v.y > __max.y ||
+	   v.z < __min.z || v.z > __max.z) {
 		return false;
 	}
 
-	lV -= lXExt;
-	if(lV.x < lMin.x || lV.x > lMax.x ||
-	   lV.y < lMin.y || lV.y > lMax.y ||
-	   lV.z < lMin.z || lV.z > lMax.z)
-	{
+	v -= x_ext;
+	if(v.x < __min.x || v.x > __max.x ||
+	   v.y < __min.y || v.y > __max.y ||
+	   v.z < __min.z || v.z > __max.z) {
 		return false;
 	}
 
-	lV += lYExt;
-	if(lV.x < lMin.x || lV.x > lMax.x ||
-	   lV.y < lMin.y || lV.y > lMax.y ||
-	   lV.z < lMin.z || lV.z > lMax.z)
-	{
+	v += y_ext;
+	if(v.x < __min.x || v.x > __max.x ||
+	   v.y < __min.y || v.y > __max.y ||
+	   v.z < __min.z || v.z > __max.z) {
 		return false;
 	}
 
-	lV -= lZExt;
-	if(lV.x < lMin.x || lV.x > lMax.x ||
-	   lV.y < lMin.y || lV.y > lMax.y ||
-	   lV.z < lMin.z || lV.z > lMax.z)
-	{
+	v -= z_ext;
+	if(v.x < __min.x || v.x > __max.x ||
+	   v.y < __min.y || v.y > __max.y ||
+	   v.z < __min.z || v.z > __max.z) {
 		return false;
 	}
 
@@ -391,17 +352,16 @@ bool CollisionDetector3D<_TVarType>::IsAABBEnclosingOBB(const AABB<_TVarType>& p
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsOBBEnclosingAABB(const OBB<_TVarType>& pOBB,
-							const AABB<_TVarType>& pAABB)
-{
+bool CollisionDetector3D<_TVarType>::IsOBBEnclosingAABB(const OBB<_TVarType>& obb,
+							const AABB<_TVarType>& aabb) {
 	// Invert the situation and test the opposite (if AABB is enclosing OBB).
-	// This way if more optimal with 9 muls in this function (vector rotation), 
-	// and 9 more in IsAABBEnclosingOBB(), than testing each vertex of the AABB 
+	// This way if more optimal with 9 muls in this function (vector rotation),
+	// and 9 more in IsAABBEnclosingOBB(), than testing each vertex of the AABB
 	// against the OBB, which would require 72 muls (9 per vertex).
-	Vector3D<_TVarType> lRotatedPos(pOBB.GetRotation().GetInverseRotatedVector(pAABB.GetPosition() - pOBB.GetPosition()) + pOBB.GetPosition());
-	AABB<_TVarType> lAABB(pOBB.GetPosition(), pOBB.GetSize());
-	OBB<_TVarType> lOBB(lRotatedPos, pOBB.GetSize(), pOBB.GetRotation().GetInverse());
-	return IsAABBEnclosingOBB(lAABB, lOBB);
+	Vector3D<_TVarType> rotated_pos(obb.GetRotation().GetInverseRotatedVector(aabb.GetPosition() - obb.GetPosition()) + obb.GetPosition());
+	AABB<_TVarType> _aabb(obb.GetPosition(), obb.GetSize());
+	OBB<_TVarType> _obb(rotated_pos, obb.GetSize(), obb.GetRotation().GetInverse());
+	return IsAABBEnclosingOBB(_aabb, _obb);
 }
 
 
@@ -413,79 +373,67 @@ bool CollisionDetector3D<_TVarType>::IsOBBEnclosingAABB(const OBB<_TVarType>& pO
 //////////////////////////////////////////////////////////////////////////////
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsAABBOverlappingAABB(const AABB<_TVarType>& pAABB1,
-							   const AABB<_TVarType>& pAABB2,
-							   CollisionInfo* pCollisionInfo)
-{
-	Vector3D<_TVarType> lMinDist(pAABB1.GetSize() + pAABB2.GetSize());
-	Vector3D<_TVarType> lDist(pAABB1.GetPosition() - pAABB2.GetPosition());
+bool CollisionDetector3D<_TVarType>::IsAABBOverlappingAABB(const AABB<_TVarType>& aab_b1,
+							   const AABB<_TVarType>& aab_b2,
+							   CollisionInfo* collision_info) {
+	Vector3D<_TVarType> min_dist(aab_b1.GetSize() + aab_b2.GetSize());
+	Vector3D<_TVarType> dist(aab_b1.GetPosition() - aab_b2.GetPosition());
 
-	if(lDist.x < 0.0f)
-		lDist.x = -lDist.x;
-	if(lDist.y < 0.0f)
-		lDist.y = -lDist.y;
-	if(lDist.z < 0.0f)
-		lDist.z = -lDist.z;
+	if(dist.x < 0.0f)
+		dist.x = -dist.x;
+	if(dist.y < 0.0f)
+		dist.y = -dist.y;
+	if(dist.z < 0.0f)
+		dist.z = -dist.z;
 
-	if(lDist.x > lMinDist.x || lDist.y > lMinDist.y || lDist.z > lMinDist.z)
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(dist.x > min_dist.x || dist.y > min_dist.y || dist.z > min_dist.z) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		Vector3D<_TVarType> lBox1Min(pAABB1.GetPosition() - pAABB1.GetSize());
-		Vector3D<_TVarType> lBox1Max(pAABB1.GetPosition() + pAABB1.GetSize());
-		Vector3D<_TVarType> lBox2Min(pAABB2.GetPosition() - pAABB2.GetSize());
-		Vector3D<_TVarType> lBox2Max(pAABB2.GetPosition() + pAABB2.GetSize());
+	if(collision_info != 0) {
+		Vector3D<_TVarType> box1_min(aab_b1.GetPosition() - aab_b1.GetSize());
+		Vector3D<_TVarType> box1_max(aab_b1.GetPosition() + aab_b1.GetSize());
+		Vector3D<_TVarType> box2_min(aab_b2.GetPosition() - aab_b2.GetSize());
+		Vector3D<_TVarType> box2_max(aab_b2.GetPosition() + aab_b2.GetSize());
 
-		Vector3D<_TVarType> lOverlapMin(std::max(lBox1Min.x, lBox2Min.x), std::max(lBox1Min.y, lBox2Min.y), std::max(lBox1Min.z, lBox2Min.z));
-		Vector3D<_TVarType> lOverlapMax(std::min(lBox1Max.x, lBox2Max.x), std::min(lBox1Max.y, lBox2Max.y), std::min(lBox1Max.z, lBox2Max.z));
+		Vector3D<_TVarType> overlap_min(std::max(box1_min.x, box2_min.x), std::max(box1_min.y, box2_min.y), std::max(box1_min.z, box2_min.z));
+		Vector3D<_TVarType> overlap_max(std::min(box1_max.x, box2_max.x), std::min(box1_max.y, box2_max.y), std::min(box1_max.z, box2_max.z));
 
-		pCollisionInfo->mTimeToCollision = 0;
-		pCollisionInfo->mPointOfCollision = (lOverlapMin + lOverlapMax) * (_TVarType)0.5;
+		collision_info->time_to_collision_ = 0;
+		collision_info->point_of_collision_ = (overlap_min + overlap_max) * (_TVarType)0.5;
 
 		//Always positive.
-		Vector3D<_TVarType> lDiff(lMinDist - lDist);
+		Vector3D<_TVarType> diff(min_dist - dist);
 
-		if(lDiff.x < lDiff.y)
-		{
-			if(lDiff.x < lDiff.z)
-			{
-				if(pAABB1.GetPosition().x > pAABB2.GetPosition().x)
-					pCollisionInfo->mNormal.Set(1, 0, 0);
+		if(diff.x < diff.y) {
+			if(diff.x < diff.z) {
+				if(aab_b1.GetPosition().x > aab_b2.GetPosition().x)
+					collision_info->normal_.Set(1, 0, 0);
 				else
-					pCollisionInfo->mNormal.Set(-1, 0, 0);
-				pCollisionInfo->mSeparationDistance = lDiff.x;
+					collision_info->normal_.Set(-1, 0, 0);
+				collision_info->separation_distance_ = diff.x;
+			} else {
+				if(aab_b1.GetPosition().z > aab_b2.GetPosition().z)
+					collision_info->normal_.Set(0, 0, 1);
+				else
+					collision_info->normal_.Set(0, 0, -1);
+				collision_info->separation_distance_ = diff.z;
 			}
-			else
-			{
-				if(pAABB1.GetPosition().z > pAABB2.GetPosition().z)
-					pCollisionInfo->mNormal.Set(0, 0, 1);
+		} else {
+			if(diff.y < diff.z) {
+				if(aab_b1.GetPosition().y > aab_b2.GetPosition().y)
+					collision_info->normal_.Set(0, 1, 0);
 				else
-					pCollisionInfo->mNormal.Set(0, 0, -1);
-				pCollisionInfo->mSeparationDistance = lDiff.z;
-			}
-		}
-		else
-		{
-			if(lDiff.y < lDiff.z)
-			{
-				if(pAABB1.GetPosition().y > pAABB2.GetPosition().y)
-					pCollisionInfo->mNormal.Set(0, 1, 0);
+					collision_info->normal_.Set(0, -1, 0);
+				collision_info->separation_distance_ = diff.y;
+			} else {
+				if(aab_b1.GetPosition().z > aab_b2.GetPosition().z)
+					collision_info->normal_.Set(0, 0, 1);
 				else
-					pCollisionInfo->mNormal.Set(0, -1, 0);
-				pCollisionInfo->mSeparationDistance = lDiff.y;
-			}
-			else
-			{
-				if(pAABB1.GetPosition().z > pAABB2.GetPosition().z)
-					pCollisionInfo->mNormal.Set(0, 0, 1);
-				else
-					pCollisionInfo->mNormal.Set(0, 0, -1);
-				pCollisionInfo->mSeparationDistance = lDiff.z;
+					collision_info->normal_.Set(0, 0, -1);
+				collision_info->separation_distance_ = diff.z;
 			}
 		}
 	}
@@ -494,133 +442,120 @@ bool CollisionDetector3D<_TVarType>::IsAABBOverlappingAABB(const AABB<_TVarType>
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBB(const OBB<_TVarType>& pOBB1,
-							 const OBB<_TVarType>& pOBB2,
-							 CollisionInfo* pCollisionInfo)
-{
-	if(pCollisionInfo)
-		return IsOBBOverlappingOBB(pOBB1, pOBB2, *pCollisionInfo);
+bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBB(const OBB<_TVarType>& ob_b1,
+							 const OBB<_TVarType>& ob_b2,
+							 CollisionInfo* collision_info) {
+	if(collision_info)
+		return IsOBBOverlappingOBB(ob_b1, ob_b2, *collision_info);
 	else
-		return IsOBBOverlappingOBBOptimized(pOBB1, pOBB2);
+		return IsOBBOverlappingOBBOptimized(ob_b1, ob_b2);
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsSphereOverlappingSphere(const Sphere<_TVarType>& pSphere1,
-							       const Sphere<_TVarType>& pSphere2,
-							       CollisionInfo* pCollisionInfo)
-{
-	Vector3D<_TVarType> lDist(pSphere1.GetPosition() - pSphere2.GetPosition());
-	_TVarType lMinDistance = (pSphere1.GetRadius() + pSphere2.GetRadius());
+bool CollisionDetector3D<_TVarType>::IsSphereOverlappingSphere(const Sphere<_TVarType>& sphere1,
+							       const Sphere<_TVarType>& sphere2,
+							       CollisionInfo* collision_info) {
+	Vector3D<_TVarType> dist(sphere1.GetPosition() - sphere2.GetPosition());
+	_TVarType min_distance = (sphere1.GetRadius() + sphere2.GetRadius());
 
-	if(lDist.GetLengthSquared() > (lMinDistance * lMinDistance))
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(dist.GetLengthSquared() > (min_distance * min_distance)) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		_TVarType lLength = lDist.GetLength();
-		pCollisionInfo->mNormal = lDist;
-		pCollisionInfo->mNormal /= lLength; // Normalize
-		pCollisionInfo->mSeparationDistance = (_TVarType)(lMinDistance - lLength);
-		pCollisionInfo->mPointOfCollision = pSphere2.GetPosition() + pCollisionInfo->mNormal * (pSphere2.GetRadius() - pCollisionInfo->mSeparationDistance * (_TVarType)0.5);
-		pCollisionInfo->mTimeToCollision = 0;
+	if(collision_info != 0) {
+		_TVarType length = dist.GetLength();
+		collision_info->normal_ = dist;
+		collision_info->normal_ /= length; // Normalize
+		collision_info->separation_distance_ = (_TVarType)(min_distance - length);
+		collision_info->point_of_collision_ = sphere2.GetPosition() + collision_info->normal_ * (sphere2.GetRadius() - collision_info->separation_distance_ * (_TVarType)0.5);
+		collision_info->time_to_collision_ = 0;
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsAABBOverlappingOBB(const AABB<_TVarType>& pAABB,
-							  const OBB<_TVarType>& pOBB,
-							  CollisionInfo* pCollisionInfo)
-{
-	OBB<_TVarType> lOBB(pAABB.GetPosition(), pAABB.GetSize(), RotationMatrix<_TVarType>());
-	if(pCollisionInfo)
-		return IsOBBOverlappingOBB(lOBB, pOBB, *pCollisionInfo);
+bool CollisionDetector3D<_TVarType>::IsAABBOverlappingOBB(const AABB<_TVarType>& aabb,
+							  const OBB<_TVarType>& obb,
+							  CollisionInfo* collision_info) {
+	OBB<_TVarType> _obb(aabb.GetPosition(), aabb.GetSize(), RotationMatrix<_TVarType>());
+	if(collision_info)
+		return IsOBBOverlappingOBB(_obb, obb, *collision_info);
 	else
-		return IsOBBOverlappingOBB(lOBB, pOBB);
+		return IsOBBOverlappingOBB(_obb, obb);
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsAABBOverlappingSphere(const AABB<_TVarType>& pAABB,
-							     const Sphere<_TVarType>& pSphere,
-							     CollisionInfo* pCollisionInfo)
-{
-	Vector3D<_TVarType> lMin(pAABB.GetPosition() - pAABB.GetSize());
-	Vector3D<_TVarType> lMax(pAABB.GetPosition() + pAABB.GetSize());
-	Vector3D<_TVarType> lPointOnBox(0, 0, 0);
+bool CollisionDetector3D<_TVarType>::IsAABBOverlappingSphere(const AABB<_TVarType>& aabb,
+							     const Sphere<_TVarType>& sphere,
+							     CollisionInfo* collision_info) {
+	Vector3D<_TVarType> __min(aabb.GetPosition() - aabb.GetSize());
+	Vector3D<_TVarType> __max(aabb.GetPosition() + aabb.GetSize());
+	Vector3D<_TVarType> point_on_box(0, 0, 0);
 
-	if(pSphere.GetPosition().x < lMin.x)
-		lPointOnBox.x = lMin.x;
-	else if(pSphere.GetPosition().x > lMax.x)
-		lPointOnBox.x = lMax.x;
+	if(sphere.GetPosition().x < __min.x)
+		point_on_box.x = __min.x;
+	else if(sphere.GetPosition().x > __max.x)
+		point_on_box.x = __max.x;
 	else
-		lPointOnBox.x = pSphere.GetPosition().x;
+		point_on_box.x = sphere.GetPosition().x;
 
-	if(pSphere.GetPosition().y < lMin.y)
-		lPointOnBox.y = lMin.y;
-	else if(pSphere.GetPosition().y > lMax.y)
-		lPointOnBox.y = lMax.y;
+	if(sphere.GetPosition().y < __min.y)
+		point_on_box.y = __min.y;
+	else if(sphere.GetPosition().y > __max.y)
+		point_on_box.y = __max.y;
 	else
-		lPointOnBox.y = pSphere.GetPosition().y;
+		point_on_box.y = sphere.GetPosition().y;
 
-	if(pSphere.GetPosition().z < lMin.z)
-		lPointOnBox.z = lMin.z;
-	else if(pSphere.GetPosition().z > lMax.z)
-		lPointOnBox.z = lMax.z;
+	if(sphere.GetPosition().z < __min.z)
+		point_on_box.z = __min.z;
+	else if(sphere.GetPosition().z > __max.z)
+		point_on_box.z = __max.z;
 	else
-		lPointOnBox.z = pSphere.GetPosition().z;
+		point_on_box.z = sphere.GetPosition().z;
 
-	Vector3D<_TVarType> lDist(lPointOnBox - pSphere.GetPosition());
-	_TVarType lDistanceSquared = lDist.GetLengthSquared();
+	Vector3D<_TVarType> dist(point_on_box - sphere.GetPosition());
+	_TVarType distance_squared = dist.GetLengthSquared();
 
-	if(lDistanceSquared > pSphere.GetRadiusSquared())
-	{
-		if(pCollisionInfo != 0)
-			pCollisionInfo->mTimeToCollision = 1;
+	if(distance_squared > sphere.GetRadiusSquared()) {
+		if(collision_info != 0)
+			collision_info->time_to_collision_ = 1;
 		return false;
 	}
 
-	if(pCollisionInfo != 0)
-	{
-		pCollisionInfo->mTimeToCollision = 0;
-		pCollisionInfo->mNormal = lDist;
-		_TVarType lLength = lDist.GetLength();
-		pCollisionInfo->mNormal /= lLength; // Normalize.
-		pCollisionInfo->mSeparationDistance = pSphere.GetRadius() - lLength;
-		pCollisionInfo->mPointOfCollision = pSphere.GetPosition() + pCollisionInfo->mNormal * ((pSphere.GetRadius() + lLength) * (_TVarType)0.5);
+	if(collision_info != 0) {
+		collision_info->time_to_collision_ = 0;
+		collision_info->normal_ = dist;
+		_TVarType length = dist.GetLength();
+		collision_info->normal_ /= length; // Normalize.
+		collision_info->separation_distance_ = sphere.GetRadius() - length;
+		collision_info->point_of_collision_ = sphere.GetPosition() + collision_info->normal_ * ((sphere.GetRadius() + length) * (_TVarType)0.5);
 	}
 
 	return true;
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsOBBOverlappingSphere(const OBB<_TVarType>& pOBB,
-							    const Sphere<_TVarType>& pSphere,
-							    CollisionInfo* pCollisionInfo)
-{
-	Vector3D<_TVarType> lPosDiff(pSphere.GetPosition() - pOBB.GetPosition());
-	Vector3D<_TVarType> lRotPos(pOBB.GetRotation().GetInverseRotatedVector(lPosDiff) + pOBB.GetPosition());
+bool CollisionDetector3D<_TVarType>::IsOBBOverlappingSphere(const OBB<_TVarType>& obb,
+							    const Sphere<_TVarType>& sphere,
+							    CollisionInfo* collision_info) {
+	Vector3D<_TVarType> pos_diff(sphere.GetPosition() - obb.GetPosition());
+	Vector3D<_TVarType> rot_pos(obb.GetRotation().GetInverseRotatedVector(pos_diff) + obb.GetPosition());
 
-	AABB<_TVarType> lAABB(pOBB.GetPosition(), pOBB.GetSize());
-	Sphere<_TVarType> lSphere(lRotPos, pSphere.GetRadius());
+	AABB<_TVarType> _aabb(obb.GetPosition(), obb.GetSize());
+	Sphere<_TVarType> _sphere(rot_pos, sphere.GetRadius());
 
-	if(pCollisionInfo)
-	{
-		bool lOverlapping = IsAABBOverlappingSphere(lAABB, pSphere, *pCollisionInfo);
-		if(lOverlapping)
-		{
-			pCollisionInfo->mPointOfCollision = pOBB.GetRotation().GetRotatedVector(pCollisionInfo->mPointOfCollision - pOBB.GetPosition()) + pOBB.GetPosition();
-			pCollisionInfo->mNormal = pOBB.GetRotation().GetRotatedVector(pCollisionInfo->mNormal);
+	if(collision_info) {
+		bool overlapping = IsAABBOverlappingSphere(_aabb, sphere, *collision_info);
+		if(overlapping) {
+			collision_info->point_of_collision_ = obb.GetRotation().GetRotatedVector(collision_info->point_of_collision_ - obb.GetPosition()) + obb.GetPosition();
+			collision_info->normal_ = obb.GetRotation().GetRotatedVector(collision_info->normal_);
 		}
-		return lOverlapping;
-	}
-	else
-	{
-		return IsAABBOverlappingSphere(lAABB, pSphere);
+		return overlapping;
+	} else {
+		return IsAABBOverlappingSphere(_aabb, sphere);
 	}
 }
 
@@ -631,124 +566,116 @@ bool CollisionDetector3D<_TVarType>::IsOBBOverlappingSphere(const OBB<_TVarType>
 //////////////////////////////////////////////////////////////////////////////
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBBOptimized(const OBB<_TVarType>& pOBB1,
-								  const OBB<_TVarType>& pOBB2)
-{
-	_TVarType lEpsilon = MathTraits<_TVarType>::Eps();
-	Vector3D<_TVarType> lDistance(pOBB2.GetPosition() - pOBB1.GetPosition());
+bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBBOptimized(const OBB<_TVarType>& ob_b1,
+								  const OBB<_TVarType>& ob_b2) {
+	_TVarType epsilon = MathTraits<_TVarType>::Eps();
+	Vector3D<_TVarType> distance(ob_b2.GetPosition() - ob_b1.GetPosition());
 
-	Vector3D<_TVarType> lXAxis1(pOBB1.GetRotation().GetAxisX());
-	Vector3D<_TVarType> lYAxis1(pOBB1.GetRotation().GetAxisY());
-	Vector3D<_TVarType> lZAxis1(pOBB1.GetRotation().GetAxisZ());
+	Vector3D<_TVarType> x_axis1(ob_b1.GetRotation().GetAxisX());
+	Vector3D<_TVarType> y_axis1(ob_b1.GetRotation().GetAxisY());
+	Vector3D<_TVarType> z_axis1(ob_b1.GetRotation().GetAxisZ());
 
-	Vector3D<_TVarType> lXAxis2(pOBB2.GetRotation().GetAxisX());
-	Vector3D<_TVarType> lYAxis2(pOBB2.GetRotation().GetAxisY());
-	Vector3D<_TVarType> lZAxis2(pOBB2.GetRotation().GetAxisZ());
+	Vector3D<_TVarType> x_axis2(ob_b2.GetRotation().GetAxisX());
+	Vector3D<_TVarType> y_axis2(ob_b2.GetRotation().GetAxisY());
+	Vector3D<_TVarType> z_axis2(ob_b2.GetRotation().GetAxisZ());
 
-	_TVarType lAxisDot[9];
-	_TVarType lAbsAxisDot[9];
-	_TVarType lDistDot[3];
-	_TVarType lProjectedDistance;
-	_TVarType lProjectedSize1;
-	_TVarType lProjectedSize2;
-	_TVarType lProjectedSizeSum;
+	_TVarType axis_dot[9];
+	_TVarType abs_axis_dot[9];
+	_TVarType dist_dot[3];
+	_TVarType projected_distance;
+	_TVarType projected_size1;
+	_TVarType projected_size2;
+	_TVarType projected_size_sum;
 
 	// Box1's X-Axis.
-	lAxisDot[0] = lXAxis1.Dot(lXAxis2);
-	lAxisDot[1] = lXAxis1.Dot(lYAxis2);
-	lAxisDot[2] = lXAxis1.Dot(lZAxis2);
-	lDistDot[0] = lXAxis1.Dot(lDistance);
-	lAbsAxisDot[0] = abs(lAxisDot[0]);
-	lAbsAxisDot[1] = abs(lAxisDot[1]);
-	lAbsAxisDot[2] = abs(lAxisDot[2]);
-	lProjectedDistance = abs(lDistDot[0]);
-	lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[0] +
-	                  pOBB2.GetSize().y * lAbsAxisDot[1] + 
-	                  pOBB2.GetSize().z * lAbsAxisDot[2];
-	lProjectedSizeSum = lProjectedSize2 + pOBB1.GetSize().x;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	axis_dot[0] = x_axis1.Dot(x_axis2);
+	axis_dot[1] = x_axis1.Dot(y_axis2);
+	axis_dot[2] = x_axis1.Dot(z_axis2);
+	dist_dot[0] = x_axis1.Dot(distance);
+	abs_axis_dot[0] = abs(axis_dot[0]);
+	abs_axis_dot[1] = abs(axis_dot[1]);
+	abs_axis_dot[2] = abs(axis_dot[2]);
+	projected_distance = abs(dist_dot[0]);
+	projected_size2 = ob_b2.GetSize().x * abs_axis_dot[0] +
+	                  ob_b2.GetSize().y * abs_axis_dot[1] +
+	                  ob_b2.GetSize().z * abs_axis_dot[2];
+	projected_size_sum = projected_size2 + ob_b1.GetSize().x;
+	if(projected_distance > projected_size_sum) {
 		return false;
 	}
 
 	// Box1's Y-Axis.
-	lAxisDot[3] = lYAxis1.Dot(lXAxis2);
-	lAxisDot[4] = lYAxis1.Dot(lYAxis2);
-	lAxisDot[5] = lYAxis1.Dot(lZAxis2);
-	lDistDot[1] = lYAxis1.Dot(lDistance);
-	lAbsAxisDot[3] = abs(lAxisDot[3]);
-	lAbsAxisDot[4] = abs(lAxisDot[4]);
-	lAbsAxisDot[5] = abs(lAxisDot[5]);
-	lProjectedDistance = abs(lDistDot[1]);
-	lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[3] +
-	                  pOBB2.GetSize().y * lAbsAxisDot[4] + 
-	                  pOBB2.GetSize().z * lAbsAxisDot[5];
-	lProjectedSizeSum = lProjectedSize2 + pOBB1.GetSize().y;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	axis_dot[3] = y_axis1.Dot(x_axis2);
+	axis_dot[4] = y_axis1.Dot(y_axis2);
+	axis_dot[5] = y_axis1.Dot(z_axis2);
+	dist_dot[1] = y_axis1.Dot(distance);
+	abs_axis_dot[3] = abs(axis_dot[3]);
+	abs_axis_dot[4] = abs(axis_dot[4]);
+	abs_axis_dot[5] = abs(axis_dot[5]);
+	projected_distance = abs(dist_dot[1]);
+	projected_size2 = ob_b2.GetSize().x * abs_axis_dot[3] +
+	                  ob_b2.GetSize().y * abs_axis_dot[4] +
+	                  ob_b2.GetSize().z * abs_axis_dot[5];
+	projected_size_sum = projected_size2 + ob_b1.GetSize().y;
+	if(projected_distance > projected_size_sum) {
 		return false;
 	}
 
 	// Box1's Z-Axis.
-	lAxisDot[6] = lZAxis1.Dot(lXAxis2);
-	lAxisDot[7] = lZAxis1.Dot(lYAxis2);
-	lAxisDot[8] = lZAxis1.Dot(lZAxis2);
-	lDistDot[2] = lZAxis1.Dot(lDistance);
-	lAbsAxisDot[6] = abs(lAxisDot[6]);
-	lAbsAxisDot[7] = abs(lAxisDot[7]);
-	lAbsAxisDot[8] = abs(lAxisDot[8]);
-	lProjectedDistance = abs(lDistDot[2]);
-	lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[6] +
-	                  pOBB2.GetSize().y * lAbsAxisDot[7] + 
-	                  pOBB2.GetSize().z * lAbsAxisDot[8];
-	lProjectedSizeSum = lProjectedSize2 + pOBB1.GetSize().z;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	axis_dot[6] = z_axis1.Dot(x_axis2);
+	axis_dot[7] = z_axis1.Dot(y_axis2);
+	axis_dot[8] = z_axis1.Dot(z_axis2);
+	dist_dot[2] = z_axis1.Dot(distance);
+	abs_axis_dot[6] = abs(axis_dot[6]);
+	abs_axis_dot[7] = abs(axis_dot[7]);
+	abs_axis_dot[8] = abs(axis_dot[8]);
+	projected_distance = abs(dist_dot[2]);
+	projected_size2 = ob_b2.GetSize().x * abs_axis_dot[6] +
+	                  ob_b2.GetSize().y * abs_axis_dot[7] +
+	                  ob_b2.GetSize().z * abs_axis_dot[8];
+	projected_size_sum = projected_size2 + ob_b1.GetSize().z;
+	if(projected_distance > projected_size_sum) {
 		return false;
 	}
 
 	// Box2's X-Axis
-	lProjectedDistance = abs(lXAxis2.Dot(lDistance));
-	lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[0] +
-	                  pOBB1.GetSize().y * lAbsAxisDot[3] +
-	                  pOBB1.GetSize().z * lAbsAxisDot[6];
-	lProjectedSizeSum = lProjectedSize1 + pOBB2.GetSize().x;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	projected_distance = abs(x_axis2.Dot(distance));
+	projected_size1 = ob_b1.GetSize().x * abs_axis_dot[0] +
+	                  ob_b1.GetSize().y * abs_axis_dot[3] +
+	                  ob_b1.GetSize().z * abs_axis_dot[6];
+	projected_size_sum = projected_size1 + ob_b2.GetSize().x;
+	if(projected_distance > projected_size_sum) {
 		return false;
 	}
 
 	// Box2's Y-Axis
-	lProjectedDistance = abs(lYAxis2.Dot(lDistance));
-	lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[1] +
-	                  pOBB1.GetSize().y * lAbsAxisDot[4] +
-	                  pOBB1.GetSize().z * lAbsAxisDot[7];
-	lProjectedSizeSum = lProjectedSize1 + pOBB2.GetSize().y;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	projected_distance = abs(y_axis2.Dot(distance));
+	projected_size1 = ob_b1.GetSize().x * abs_axis_dot[1] +
+	                  ob_b1.GetSize().y * abs_axis_dot[4] +
+	                  ob_b1.GetSize().z * abs_axis_dot[7];
+	projected_size_sum = projected_size1 + ob_b2.GetSize().y;
+	if(projected_distance > projected_size_sum) {
 		return false;
 	}
 
 	// Box2's Z-Axis
-	lProjectedDistance = abs(lZAxis2.Dot(lDistance));
-	lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[2] +
-						pOBB1.GetSize().y * lAbsAxisDot[5] +
-						pOBB1.GetSize().z * lAbsAxisDot[8];
-	lProjectedSizeSum = lProjectedSize1 + pOBB2.GetSize().z;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	projected_distance = abs(z_axis2.Dot(distance));
+	projected_size1 = ob_b1.GetSize().x * abs_axis_dot[2] +
+						ob_b1.GetSize().y * abs_axis_dot[5] +
+						ob_b1.GetSize().z * abs_axis_dot[8];
+	projected_size_sum = projected_size1 + ob_b2.GetSize().z;
+	if(projected_distance > projected_size_sum) {
 		return false;
 	}
 	// A little check to avoid bugs when the boxes are rotated exactly 90 degrees to each other,
 	// making them parallel, and the cross products = (0, 0, 0).
-	if(lAbsAxisDot[1] > lEpsilon ||
-	   lAbsAxisDot[2] > lEpsilon ||
-	   lAbsAxisDot[3] > lEpsilon ||
-	   lAbsAxisDot[6] > lEpsilon)
-	{
+	if(abs_axis_dot[1] > epsilon ||
+	   abs_axis_dot[2] > epsilon ||
+	   abs_axis_dot[3] > epsilon ||
+	   abs_axis_dot[6] > epsilon) {
 		//
 		// This is the first cross product to test as a separating plane.
-		// It is quite optimized (as you can see, the crossproduct is never calculated). 
+		// It is quite optimized (as you can see, the crossproduct is never calculated).
 		// I'm going to try to explain the math behind this optimization...
 		// ** is the dot product, x is the cross product, and * is a regular scalar multiplication.
 		//
@@ -760,22 +687,22 @@ bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBBOptimized(const OBB<_TVa
 		// If C = AX x BX then:
 		//
 		// lPS = pOBB1.GetSize().x * AX ** C +           1)
-		//		   pOBB1.GetSize().y * AY ** C + 
-		//		   pOBB1.GetSize().z * AZ ** C;
+		//		   ob_b1.GetSize().y * AY ** C +
+		//		   ob_b1.GetSize().z * AZ ** C;
 		//
 		// ...which is the "real" way to project OBB1's extents on the axis C.
 		//
-		// The first product (pOBB1.GetSize().x * AX ** C) is always 0.0 though, 
-		// because C is perpendicular to AX (and the dot product between two perpendicular vectors is 0.0), 
+		// The first product (ob_b1.GetSize().x * AX ** C) is always 0.0 though,
+		// because C is perpendicular to AX (and the dot product between two perpendicular vectors is 0.0),
 		// which leaves us with:
 		//
 		// lPS = pOBB1.GetSize().y * AY ** C +              2)
-		//		   pOBB1.GetSize().z * AZ ** C;
+		//		   ob_b1.GetSize().z * AZ ** C;
 		//
 		// Substitute C with AX x BX in 2):
 		//
 		// lPS = pOBB1.GetSize().y * AY ** (AX x BX) +      3)
-		//		   pOBB1.GetSize().z * AZ ** (AX x BX);
+		//		   ob_b1.GetSize().z * AZ ** (AX x BX);
 		//
 		// Applying the rule:
 		// U ** (V x W) = (U x V) ** W
@@ -783,7 +710,7 @@ bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBBOptimized(const OBB<_TVa
 		// on 3) gives
 		//
 		// lPS = pOBB1.GetSize().y * (AY x AX) ** BX +      4)
-		//		   pOBB1.GetSize().z * (AZ x AX) ** BX;
+		//		   ob_b1.GetSize().z * (AZ x AX) ** BX;
 		//
 		// We know that:
 		//
@@ -793,144 +720,127 @@ bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBBOptimized(const OBB<_TVa
 		// ...and we finally have:
 
 		// lPS = pOBB1.GetSize().y * AZ ** BX +			  5)
-		//		   pOBB1.GetSize().z * AY ** BX;
+		//		   ob_b1.GetSize().z * AY ** BX;
 		//
 
 		// XAxis1 cross XAxis2
-		lProjectedDistance = abs(lDistDot[2] * lAxisDot[3] - lDistDot[1] * lAxisDot[6]);
-		lProjectedSize1 = pOBB1.GetSize().y * lAbsAxisDot[6] + pOBB1.GetSize().z * lAbsAxisDot[3];
-		lProjectedSize2 = pOBB2.GetSize().y * lAbsAxisDot[2] + pOBB2.GetSize().z * lAbsAxisDot[1];
-		lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-		if(lProjectedDistance > lProjectedSizeSum)
-		{
+		projected_distance = abs(dist_dot[2] * axis_dot[3] - dist_dot[1] * axis_dot[6]);
+		projected_size1 = ob_b1.GetSize().y * abs_axis_dot[6] + ob_b1.GetSize().z * abs_axis_dot[3];
+		projected_size2 = ob_b2.GetSize().y * abs_axis_dot[2] + ob_b2.GetSize().z * abs_axis_dot[1];
+		projected_size_sum = projected_size1 + projected_size2;
+		if(projected_distance > projected_size_sum) {
 			return false;
 		}
 	}
 
-	if(lAbsAxisDot[0] > lEpsilon ||
-	   lAbsAxisDot[2] > lEpsilon ||
-	   lAbsAxisDot[4] > lEpsilon ||
-	   lAbsAxisDot[7] > lEpsilon)
-	{
+	if(abs_axis_dot[0] > epsilon ||
+	   abs_axis_dot[2] > epsilon ||
+	   abs_axis_dot[4] > epsilon ||
+	   abs_axis_dot[7] > epsilon) {
 		// XAxis1 cross YAxis2
-		lProjectedDistance = abs(lDistDot[2] * lAxisDot[4] - lDistDot[1] * lAxisDot[7]);
-		lProjectedSize1 = pOBB1.GetSize().y * lAbsAxisDot[7] + pOBB1.GetSize().z * lAbsAxisDot[4];
-		lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[2] + pOBB2.GetSize().z * lAbsAxisDot[0];
-		lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-		if(lProjectedDistance > lProjectedSizeSum)
-		{
+		projected_distance = abs(dist_dot[2] * axis_dot[4] - dist_dot[1] * axis_dot[7]);
+		projected_size1 = ob_b1.GetSize().y * abs_axis_dot[7] + ob_b1.GetSize().z * abs_axis_dot[4];
+		projected_size2 = ob_b2.GetSize().x * abs_axis_dot[2] + ob_b2.GetSize().z * abs_axis_dot[0];
+		projected_size_sum = projected_size1 + projected_size2;
+		if(projected_distance > projected_size_sum) {
 			return false;
 		}
 	}
 
-	if(lAbsAxisDot[0] > lEpsilon ||
-	   lAbsAxisDot[1] > lEpsilon ||
-	   lAbsAxisDot[5] > lEpsilon ||
-	   lAbsAxisDot[8] > lEpsilon)
-	{
+	if(abs_axis_dot[0] > epsilon ||
+	   abs_axis_dot[1] > epsilon ||
+	   abs_axis_dot[5] > epsilon ||
+	   abs_axis_dot[8] > epsilon) {
 		// XAxis1 cross ZAxis2
-		lProjectedDistance = abs(lDistDot[2] * lAxisDot[5] - lDistDot[1] * lAxisDot[8]);
-		lProjectedSize1 = pOBB1.GetSize().y * lAbsAxisDot[8] + pOBB1.GetSize().z * lAbsAxisDot[5];
-		lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[1] + pOBB2.GetSize().y * lAbsAxisDot[0];
-		lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-		if(lProjectedDistance > lProjectedSizeSum)
-		{
+		projected_distance = abs(dist_dot[2] * axis_dot[5] - dist_dot[1] * axis_dot[8]);
+		projected_size1 = ob_b1.GetSize().y * abs_axis_dot[8] + ob_b1.GetSize().z * abs_axis_dot[5];
+		projected_size2 = ob_b2.GetSize().x * abs_axis_dot[1] + ob_b2.GetSize().y * abs_axis_dot[0];
+		projected_size_sum = projected_size1 + projected_size2;
+		if(projected_distance > projected_size_sum) {
 			return false;
 		}
 	}
 
-	if(lAbsAxisDot[0] > lEpsilon ||
-	   lAbsAxisDot[4] > lEpsilon ||
-	   lAbsAxisDot[5] > lEpsilon ||
-	   lAbsAxisDot[6] > lEpsilon)
-	{
+	if(abs_axis_dot[0] > epsilon ||
+	   abs_axis_dot[4] > epsilon ||
+	   abs_axis_dot[5] > epsilon ||
+	   abs_axis_dot[6] > epsilon) {
 		// YAxis1 cross XAxis2
-		lProjectedDistance = abs(lDistDot[0] * lAxisDot[6] - lDistDot[2] * lAxisDot[0]);
-		lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[6] + pOBB1.GetSize().z * lAbsAxisDot[0];
-		lProjectedSize2 = pOBB2.GetSize().y * lAbsAxisDot[5] + pOBB2.GetSize().z * lAbsAxisDot[4];
-		lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-		if(lProjectedDistance > lProjectedSizeSum)
-		{
+		projected_distance = abs(dist_dot[0] * axis_dot[6] - dist_dot[2] * axis_dot[0]);
+		projected_size1 = ob_b1.GetSize().x * abs_axis_dot[6] + ob_b1.GetSize().z * abs_axis_dot[0];
+		projected_size2 = ob_b2.GetSize().y * abs_axis_dot[5] + ob_b2.GetSize().z * abs_axis_dot[4];
+		projected_size_sum = projected_size1 + projected_size2;
+		if(projected_distance > projected_size_sum) {
 			return false;
 		}
 	}
 
-	if(lAbsAxisDot[1] > lEpsilon ||
-	   lAbsAxisDot[3] > lEpsilon ||
-	   lAbsAxisDot[5] > lEpsilon ||
-	   lAbsAxisDot[7] > lEpsilon)
-	{
+	if(abs_axis_dot[1] > epsilon ||
+	   abs_axis_dot[3] > epsilon ||
+	   abs_axis_dot[5] > epsilon ||
+	   abs_axis_dot[7] > epsilon) {
 		// YAxis1 cross YAxis2
-		lProjectedDistance = abs(lDistDot[0] * lAxisDot[7] - lDistDot[2] * lAxisDot[1]);
-		lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[7] + pOBB1.GetSize().z * lAbsAxisDot[1];
-		lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[5] + pOBB2.GetSize().z * lAbsAxisDot[3];
-		lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-		if(lProjectedDistance > lProjectedSizeSum)
-		{
+		projected_distance = abs(dist_dot[0] * axis_dot[7] - dist_dot[2] * axis_dot[1]);
+		projected_size1 = ob_b1.GetSize().x * abs_axis_dot[7] + ob_b1.GetSize().z * abs_axis_dot[1];
+		projected_size2 = ob_b2.GetSize().x * abs_axis_dot[5] + ob_b2.GetSize().z * abs_axis_dot[3];
+		projected_size_sum = projected_size1 + projected_size2;
+		if(projected_distance > projected_size_sum) {
 			return false;
 		}
 	}
 
-	if(lAbsAxisDot[2] > lEpsilon ||
-	   lAbsAxisDot[3] > lEpsilon ||
-	   lAbsAxisDot[4] > lEpsilon ||
-	   lAbsAxisDot[8] > lEpsilon)
-	{
+	if(abs_axis_dot[2] > epsilon ||
+	   abs_axis_dot[3] > epsilon ||
+	   abs_axis_dot[4] > epsilon ||
+	   abs_axis_dot[8] > epsilon) {
 		// YAxis1 cross ZAxis2
-		lProjectedDistance = abs(lDistDot[0] * lAxisDot[8] - lDistDot[2] * lAxisDot[2]);
-		lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[8] + pOBB1.GetSize().z * lAbsAxisDot[2];
-		lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[4] + pOBB2.GetSize().y * lAbsAxisDot[3];
-		lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-		if(lProjectedDistance > lProjectedSizeSum)
-		{
+		projected_distance = abs(dist_dot[0] * axis_dot[8] - dist_dot[2] * axis_dot[2]);
+		projected_size1 = ob_b1.GetSize().x * abs_axis_dot[8] + ob_b1.GetSize().z * abs_axis_dot[2];
+		projected_size2 = ob_b2.GetSize().x * abs_axis_dot[4] + ob_b2.GetSize().y * abs_axis_dot[3];
+		projected_size_sum = projected_size1 + projected_size2;
+		if(projected_distance > projected_size_sum) {
 			return false;
 		}
 	}
 
-	if(lAbsAxisDot[0] > lEpsilon ||
-	   lAbsAxisDot[3] > lEpsilon ||
-	   lAbsAxisDot[7] > lEpsilon ||
-	   lAbsAxisDot[8] > lEpsilon)
-	{
+	if(abs_axis_dot[0] > epsilon ||
+	   abs_axis_dot[3] > epsilon ||
+	   abs_axis_dot[7] > epsilon ||
+	   abs_axis_dot[8] > epsilon) {
 		// ZAxis1 cross XAxis2
-		lProjectedDistance = abs(lDistDot[1] * lAxisDot[0] - lDistDot[0] * lAxisDot[3]);
-		lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[3] + pOBB1.GetSize().y * lAbsAxisDot[0];
-		lProjectedSize2 = pOBB2.GetSize().y * lAbsAxisDot[8] + pOBB2.GetSize().z * lAbsAxisDot[7];
-		lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-		if(lProjectedDistance > lProjectedSizeSum)
-		{
+		projected_distance = abs(dist_dot[1] * axis_dot[0] - dist_dot[0] * axis_dot[3]);
+		projected_size1 = ob_b1.GetSize().x * abs_axis_dot[3] + ob_b1.GetSize().y * abs_axis_dot[0];
+		projected_size2 = ob_b2.GetSize().y * abs_axis_dot[8] + ob_b2.GetSize().z * abs_axis_dot[7];
+		projected_size_sum = projected_size1 + projected_size2;
+		if(projected_distance > projected_size_sum) {
 			return false;
 		}
 	}
 
-	if(lAbsAxisDot[1] > lEpsilon ||
-	   lAbsAxisDot[4] > lEpsilon ||
-	   lAbsAxisDot[6] > lEpsilon ||
-	   lAbsAxisDot[8] > lEpsilon)
-	{
+	if(abs_axis_dot[1] > epsilon ||
+	   abs_axis_dot[4] > epsilon ||
+	   abs_axis_dot[6] > epsilon ||
+	   abs_axis_dot[8] > epsilon) {
 		// ZAxis1 cross YAxis2
-		lProjectedDistance = abs(lDistDot[1] * lAxisDot[1] - lDistDot[0] * lAxisDot[4]);
-		lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[4] + pOBB1.GetSize().y * lAbsAxisDot[1];
-		lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[8] + pOBB2.GetSize().z * lAbsAxisDot[6];
-		lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-		if(lProjectedDistance > lProjectedSizeSum)
-		{
+		projected_distance = abs(dist_dot[1] * axis_dot[1] - dist_dot[0] * axis_dot[4]);
+		projected_size1 = ob_b1.GetSize().x * abs_axis_dot[4] + ob_b1.GetSize().y * abs_axis_dot[1];
+		projected_size2 = ob_b2.GetSize().x * abs_axis_dot[8] + ob_b2.GetSize().z * abs_axis_dot[6];
+		projected_size_sum = projected_size1 + projected_size2;
+		if(projected_distance > projected_size_sum) {
 			return false;
 		}
 	}
 
-	if(lAbsAxisDot[2] > lEpsilon ||
-	   lAbsAxisDot[5] > lEpsilon ||
-	   lAbsAxisDot[6] > lEpsilon ||
-	   lAbsAxisDot[7] > lEpsilon)
-	{
+	if(abs_axis_dot[2] > epsilon ||
+	   abs_axis_dot[5] > epsilon ||
+	   abs_axis_dot[6] > epsilon ||
+	   abs_axis_dot[7] > epsilon) {
 		// ZAxis1 cross ZAxis2
-		lProjectedDistance = abs(lDistDot[1] * lAxisDot[2] - lDistDot[0] * lAxisDot[5]);
-		lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[5] + pOBB1.GetSize().y * lAbsAxisDot[2];
-		lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[7] + pOBB2.GetSize().y * lAbsAxisDot[6];
-		lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-		if(lProjectedDistance > lProjectedSizeSum)
-		{
+		projected_distance = abs(dist_dot[1] * axis_dot[2] - dist_dot[0] * axis_dot[5]);
+		projected_size1 = ob_b1.GetSize().x * abs_axis_dot[5] + ob_b1.GetSize().y * abs_axis_dot[2];
+		projected_size2 = ob_b2.GetSize().x * abs_axis_dot[7] + ob_b2.GetSize().y * abs_axis_dot[6];
+		projected_size_sum = projected_size1 + projected_size2;
+		if(projected_distance > projected_size_sum) {
 			return false;
 		}
 	}
@@ -944,163 +854,144 @@ bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBBOptimized(const OBB<_TVa
 //////////////////////////////////////////////////////////////////////////////
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBB(const OBB<_TVarType>& pOBB1,
-							 const OBB<_TVarType>& pOBB2,
-							 CollisionInfo& pCollisionInfo)
-{
+bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBB(const OBB<_TVarType>& ob_b1,
+							 const OBB<_TVarType>& ob_b2,
+							 CollisionInfo& collision_info) {
 	// Almost the same as the IsOBBOverlappingOBB() function...
-	pCollisionInfo.mTimeToCollision = 1;
+	collision_info.time_to_collision_ = 1;
 
-	_TVarType lEps = MathTraits<_TVarType>::Eps();
+	_TVarType eps = MathTraits<_TVarType>::Eps();
 
-	Vector3D<_TVarType> lDistance(pOBB2.GetPosition() - pOBB1.GetPosition());
+	Vector3D<_TVarType> distance(ob_b2.GetPosition() - ob_b1.GetPosition());
 
-	Vector3D<_TVarType> lAxis1[3];
-	Vector3D<_TVarType> lAxis2[3];
-	
-	lAxis1[0] = pOBB1.GetRotation().GetAxisX();
-	lAxis1[1] = pOBB1.GetRotation().GetAxisY();
-	lAxis1[2] = pOBB1.GetRotation().GetAxisZ();
-	lAxis2[0] = pOBB2.GetRotation().GetAxisX();
-	lAxis2[1] = pOBB2.GetRotation().GetAxisY();
-	lAxis2[2] = pOBB2.GetRotation().GetAxisZ();
+	Vector3D<_TVarType> axis1[3];
+	Vector3D<_TVarType> axis2[3];
 
-	_TVarType lAxisDot[9];
-	_TVarType lAbsAxisDot[9];
-	_TVarType lDistDot[3];
-	_TVarType lProjectedDistance;
-	_TVarType lProjectedSize1;
-	_TVarType lProjectedSize2;
-	_TVarType lProjectedSizeSum;
+	axis1[0] = ob_b1.GetRotation().GetAxisX();
+	axis1[1] = ob_b1.GetRotation().GetAxisY();
+	axis1[2] = ob_b1.GetRotation().GetAxisZ();
+	axis2[0] = ob_b2.GetRotation().GetAxisX();
+	axis2[1] = ob_b2.GetRotation().GetAxisY();
+	axis2[2] = ob_b2.GetRotation().GetAxisZ();
 
-	AxisID lMinOverlapAxis = AXIS_NONE;
-	_TVarType lMinOverlapDist = 0.0f;
-	Vector3D<_TVarType> lMinOverlapVector;
+	_TVarType axis_dot[9];
+	_TVarType abs_axis_dot[9];
+	_TVarType dist_dot[3];
+	_TVarType projected_distance;
+	_TVarType projected_size1;
+	_TVarType projected_size2;
+	_TVarType projected_size_sum;
+
+	AxisID min_overlap_axis = kAxisNone;
+	_TVarType min_overlap_dist = 0.0f;
+	Vector3D<_TVarType> min_overlap_vector;
 
 	// Box1's X-Axis.
-	lAxisDot[0] = lAxis1[0].Dot(lAxis2[0]);
-	lAxisDot[1] = lAxis1[0].Dot(lAxis2[1]);
-	lAxisDot[2] = lAxis1[0].Dot(lAxis2[2]);
-	lDistDot[0] = lAxis1[0].Dot(lDistance);
-	lAbsAxisDot[0] = abs(lAxisDot[0]);
-	lAbsAxisDot[1] = abs(lAxisDot[1]);
-	lAbsAxisDot[2] = abs(lAxisDot[2]);
-	lProjectedDistance = abs(lDistDot[0]);
-	lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[0] +
-	                  pOBB2.GetSize().y * lAbsAxisDot[1] + 
-	                  pOBB2.GetSize().z * lAbsAxisDot[2];
-	lProjectedSizeSum = lProjectedSize2 + pOBB1.GetSize().x;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	axis_dot[0] = axis1[0].Dot(axis2[0]);
+	axis_dot[1] = axis1[0].Dot(axis2[1]);
+	axis_dot[2] = axis1[0].Dot(axis2[2]);
+	dist_dot[0] = axis1[0].Dot(distance);
+	abs_axis_dot[0] = abs(axis_dot[0]);
+	abs_axis_dot[1] = abs(axis_dot[1]);
+	abs_axis_dot[2] = abs(axis_dot[2]);
+	projected_distance = abs(dist_dot[0]);
+	projected_size2 = ob_b2.GetSize().x * abs_axis_dot[0] +
+	                  ob_b2.GetSize().y * abs_axis_dot[1] +
+	                  ob_b2.GetSize().z * abs_axis_dot[2];
+	projected_size_sum = projected_size2 + ob_b1.GetSize().x;
+	if(projected_distance > projected_size_sum) {
 		return false;
-	}
-	else //if(lMinOverlapAxis == AXIS_NONE || lMinOverlapDist > (lProjectedSizeSum - lProjectedDistance))
-	{
-		lMinOverlapAxis = AXIS_X1;
-		lMinOverlapDist = lProjectedSizeSum - lProjectedDistance;
-		lMinOverlapVector = lAxis1[0];
+	} else { //if(min_overlap_axis == kAxisNone || min_overlap_dist > (projected_size_sum - projected_distance))
+		min_overlap_axis = kAxisX1;
+		min_overlap_dist = projected_size_sum - projected_distance;
+		min_overlap_vector = axis1[0];
 	}
 
 	// Box1's Y-Axis.
-	lAxisDot[3] = lAxis1[1].Dot(lAxis2[0]);
-	lAxisDot[4] = lAxis1[1].Dot(lAxis2[1]);
-	lAxisDot[5] = lAxis1[1].Dot(lAxis2[2]);
-	lDistDot[1] = lAxis1[1].Dot(lDistance);
-	lAbsAxisDot[3] = abs(lAxisDot[3]);
-	lAbsAxisDot[4] = abs(lAxisDot[4]);
-	lAbsAxisDot[5] = abs(lAxisDot[5]);
-	lProjectedDistance = abs(lDistDot[1]);
-	lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[3] +
-	                  pOBB2.GetSize().y * lAbsAxisDot[4] + 
-	                  pOBB2.GetSize().z * lAbsAxisDot[5];
-	lProjectedSizeSum = lProjectedSize2 + pOBB1.GetSize().y;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	axis_dot[3] = axis1[1].Dot(axis2[0]);
+	axis_dot[4] = axis1[1].Dot(axis2[1]);
+	axis_dot[5] = axis1[1].Dot(axis2[2]);
+	dist_dot[1] = axis1[1].Dot(distance);
+	abs_axis_dot[3] = abs(axis_dot[3]);
+	abs_axis_dot[4] = abs(axis_dot[4]);
+	abs_axis_dot[5] = abs(axis_dot[5]);
+	projected_distance = abs(dist_dot[1]);
+	projected_size2 = ob_b2.GetSize().x * abs_axis_dot[3] +
+	                  ob_b2.GetSize().y * abs_axis_dot[4] +
+	                  ob_b2.GetSize().z * abs_axis_dot[5];
+	projected_size_sum = projected_size2 + ob_b1.GetSize().y;
+	if(projected_distance > projected_size_sum) {
 		return false;
-	}
-	else if(lMinOverlapAxis == AXIS_NONE || lMinOverlapDist > (lProjectedSizeSum - lProjectedDistance))
-	{
-		lMinOverlapAxis = AXIS_Y1;
-		lMinOverlapDist = lProjectedSizeSum - lProjectedDistance;
-		lMinOverlapVector = lAxis1[1];
+	} else if(min_overlap_axis == kAxisNone || min_overlap_dist > (projected_size_sum - projected_distance)) {
+		min_overlap_axis = kAxisY1;
+		min_overlap_dist = projected_size_sum - projected_distance;
+		min_overlap_vector = axis1[1];
 	}
 
 	// Box1's Z-Axis.
-	lAxisDot[6] = lAxis1[2].Dot(lAxis2[0]);
-	lAxisDot[7] = lAxis1[2].Dot(lAxis2[1]);
-	lAxisDot[8] = lAxis1[2].Dot(lAxis2[2]);
-	lDistDot[2] = lAxis1[2].Dot(lDistance);
-	lAbsAxisDot[6] = abs(lAxisDot[6]);
-	lAbsAxisDot[7] = abs(lAxisDot[7]);
-	lAbsAxisDot[8] = abs(lAxisDot[8]);
-	lProjectedDistance = abs(lDistDot[2]);
-	lProjectedSize2 = pOBB2.GetSize().x * lAbsAxisDot[6] +
-	                  pOBB2.GetSize().y * lAbsAxisDot[7] + 
-	                  pOBB2.GetSize().z * lAbsAxisDot[8];
-	lProjectedSizeSum = lProjectedSize2 + pOBB1.GetSize().z;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	axis_dot[6] = axis1[2].Dot(axis2[0]);
+	axis_dot[7] = axis1[2].Dot(axis2[1]);
+	axis_dot[8] = axis1[2].Dot(axis2[2]);
+	dist_dot[2] = axis1[2].Dot(distance);
+	abs_axis_dot[6] = abs(axis_dot[6]);
+	abs_axis_dot[7] = abs(axis_dot[7]);
+	abs_axis_dot[8] = abs(axis_dot[8]);
+	projected_distance = abs(dist_dot[2]);
+	projected_size2 = ob_b2.GetSize().x * abs_axis_dot[6] +
+	                  ob_b2.GetSize().y * abs_axis_dot[7] +
+	                  ob_b2.GetSize().z * abs_axis_dot[8];
+	projected_size_sum = projected_size2 + ob_b1.GetSize().z;
+	if(projected_distance > projected_size_sum) {
 		return false;
-	}
-	else if(lMinOverlapAxis == AXIS_NONE || lMinOverlapDist > (lProjectedSizeSum - lProjectedDistance))
-	{
-		lMinOverlapAxis = AXIS_Z1;
-		lMinOverlapDist = lProjectedSizeSum - lProjectedDistance;
-		lMinOverlapVector = lAxis1[2];
+	} else if(min_overlap_axis == kAxisNone || min_overlap_dist > (projected_size_sum - projected_distance)) {
+		min_overlap_axis = kAxisZ1;
+		min_overlap_dist = projected_size_sum - projected_distance;
+		min_overlap_vector = axis1[2];
 	}
 
 	// Box2's X-Axis
-	_TVarType lDistDotTemp = lAxis2[0].Dot(lDistance);
-	lProjectedDistance = abs(lDistDotTemp);
-	lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[0] +
-	                  pOBB1.GetSize().y * lAbsAxisDot[3] +
-	                  pOBB1.GetSize().z * lAbsAxisDot[6];
-	lProjectedSizeSum = lProjectedSize1 + pOBB2.GetSize().x;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	_TVarType dist_dot_temp = axis2[0].Dot(distance);
+	projected_distance = abs(dist_dot_temp);
+	projected_size1 = ob_b1.GetSize().x * abs_axis_dot[0] +
+	                  ob_b1.GetSize().y * abs_axis_dot[3] +
+	                  ob_b1.GetSize().z * abs_axis_dot[6];
+	projected_size_sum = projected_size1 + ob_b2.GetSize().x;
+	if(projected_distance > projected_size_sum) {
 		return false;
-	}
-	else if(lMinOverlapAxis == AXIS_NONE || lMinOverlapDist > (lProjectedSizeSum - lProjectedDistance))
-	{
-		lMinOverlapAxis = AXIS_X2;
-		lMinOverlapDist = lProjectedSizeSum - lProjectedDistance;
-		lMinOverlapVector = lAxis2[0];
+	} else if(min_overlap_axis == kAxisNone || min_overlap_dist > (projected_size_sum - projected_distance)) {
+		min_overlap_axis = kAxisX2;
+		min_overlap_dist = projected_size_sum - projected_distance;
+		min_overlap_vector = axis2[0];
 	}
 
 	// Box2's Y-Axis
-	lDistDotTemp = lAxis2[1].Dot(lDistance);
-	lProjectedDistance = abs(lDistDotTemp);
-	lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[1] +
-	                  pOBB1.GetSize().y * lAbsAxisDot[4] +
-	                  pOBB1.GetSize().z * lAbsAxisDot[7];
-	lProjectedSizeSum = lProjectedSize1 + pOBB2.GetSize().y;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	dist_dot_temp = axis2[1].Dot(distance);
+	projected_distance = abs(dist_dot_temp);
+	projected_size1 = ob_b1.GetSize().x * abs_axis_dot[1] +
+	                  ob_b1.GetSize().y * abs_axis_dot[4] +
+	                  ob_b1.GetSize().z * abs_axis_dot[7];
+	projected_size_sum = projected_size1 + ob_b2.GetSize().y;
+	if(projected_distance > projected_size_sum) {
 		return false;
-	}
-	else if(lMinOverlapAxis == AXIS_NONE || lMinOverlapDist > (lProjectedSizeSum - lProjectedDistance))
-	{
-		lMinOverlapAxis = AXIS_Y2;
-		lMinOverlapDist = lProjectedSizeSum - lProjectedDistance;
-		lMinOverlapVector = lAxis2[1];
+	} else if(min_overlap_axis == kAxisNone || min_overlap_dist > (projected_size_sum - projected_distance)) {
+		min_overlap_axis = kAxisY2;
+		min_overlap_dist = projected_size_sum - projected_distance;
+		min_overlap_vector = axis2[1];
 	}
 
 	// Box2's Z-Axis
-	lDistDotTemp = lAxis2[2].Dot(lDistance);
-	lProjectedDistance = abs(lDistDotTemp);
-	lProjectedSize1 = pOBB1.GetSize().x * lAbsAxisDot[2] +
-	                  pOBB1.GetSize().y * lAbsAxisDot[5] +
-	                  pOBB1.GetSize().z * lAbsAxisDot[8];
-	lProjectedSizeSum = lProjectedSize1 + pOBB2.GetSize().z;
-	if(lProjectedDistance > lProjectedSizeSum)
-	{
+	dist_dot_temp = axis2[2].Dot(distance);
+	projected_distance = abs(dist_dot_temp);
+	projected_size1 = ob_b1.GetSize().x * abs_axis_dot[2] +
+	                  ob_b1.GetSize().y * abs_axis_dot[5] +
+	                  ob_b1.GetSize().z * abs_axis_dot[8];
+	projected_size_sum = projected_size1 + ob_b2.GetSize().z;
+	if(projected_distance > projected_size_sum) {
 		return false;
-	}
-	else if(lMinOverlapAxis == AXIS_NONE || lMinOverlapDist > (lProjectedSizeSum - lProjectedDistance))
-	{
-		lMinOverlapAxis = AXIS_Z2;
-		lMinOverlapDist = lProjectedSizeSum - lProjectedDistance;
-		lMinOverlapVector = lAxis2[2];
+	} else if(min_overlap_axis == kAxisNone || min_overlap_dist > (projected_size_sum - projected_distance)) {
+		min_overlap_axis = kAxisZ2;
+		min_overlap_dist = projected_size_sum - projected_distance;
+		min_overlap_vector = axis2[2];
 	}
 
 
@@ -1108,60 +999,53 @@ bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBB(const OBB<_TVarType>& p
 	// And now all the cross products...
 	//
 
-	Vector3D<_TVarType> lC;
-	_TVarType lCLength;
+	Vector3D<_TVarType> c;
+	_TVarType c_length;
 
-	unsigned int lCurrentAxis = (unsigned int)AXIS_X1xX2;
+	unsigned int current_axis = (unsigned int)AXIS_X1xX2;
 	int i, j;
 
-	for(i = 0; i < 3; i++)
-	{
-		for(j = 0; j < 3; j++)
-		{
-			lC.Cross(lAxis1[i], lAxis2[j]);
-			lCLength = lC.GetLength();
+	for(i = 0; i < 3; i++) {
+		for(j = 0; j < 3; j++) {
+			c.Cross(axis1[i], axis2[j]);
+			c_length = c.GetLength();
 
-			if(lCLength > lEps)
-			{
-				lC.Normalize();
+			if(c_length > eps) {
+				c.Normalize();
 
-				lProjectedDistance = abs(lC.Dot(lDistance));
+				projected_distance = abs(c.Dot(distance));
 
-				lProjectedSize1 = pOBB1.GetSize().x * abs(lC.Dot(lAxis1[0])) + 
-				                  pOBB1.GetSize().y * abs(lC.Dot(lAxis1[1])) + 
-				                  pOBB1.GetSize().z * abs(lC.Dot(lAxis1[2]));
+				projected_size1 = ob_b1.GetSize().x * abs(c.Dot(axis1[0])) +
+				                  ob_b1.GetSize().y * abs(c.Dot(axis1[1])) +
+				                  ob_b1.GetSize().z * abs(c.Dot(axis1[2]));
 
-				lProjectedSize2 = pOBB2.GetSize().x * abs(lC.Dot(lAxis2[0])) + 
-				                  pOBB2.GetSize().y * abs(lC.Dot(lAxis2[1])) + 
-				                  pOBB2.GetSize().z * abs(lC.Dot(lAxis2[2]));
+				projected_size2 = ob_b2.GetSize().x * abs(c.Dot(axis2[0])) +
+				                  ob_b2.GetSize().y * abs(c.Dot(axis2[1])) +
+				                  ob_b2.GetSize().z * abs(c.Dot(axis2[2]));
 
-				lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-				if(lProjectedDistance > lProjectedSizeSum)
-				{
+				projected_size_sum = projected_size1 + projected_size2;
+				if(projected_distance > projected_size_sum) {
 					return false;
-				}
-				else if(lMinOverlapAxis == AXIS_NONE || lMinOverlapDist > (lProjectedSizeSum - lProjectedDistance))
-				{
-					lMinOverlapAxis = (AxisID)lCurrentAxis;
-					lMinOverlapDist = lProjectedSizeSum - lProjectedDistance;
-					lMinOverlapVector = lC;
+				} else if(min_overlap_axis == kAxisNone || min_overlap_dist > (projected_size_sum - projected_distance)) {
+					min_overlap_axis = (AxisID)current_axis;
+					min_overlap_dist = projected_size_sum - projected_distance;
+					min_overlap_vector = c;
 				}
 			}
 
-			lCurrentAxis++;
+			current_axis++;
 		}
 	}
 
-	// Check if lMinOverlapVector has to be flipped.
-	if(lDistance.Dot(lMinOverlapVector) > 0.0f)
-	{
-		lMinOverlapVector *= -1.0f;
+	// Check if min_overlap_vector has to be flipped.
+	if(distance.Dot(min_overlap_vector) > 0.0f) {
+		min_overlap_vector *= -1.0f;
 	}
 
-	lMinOverlapVector.Normalize();
-	pCollisionInfo.mNormal = lMinOverlapVector;
-	pCollisionInfo.mSeparationDistance = lMinOverlapDist;
-	pCollisionInfo.mTimeToCollision = 0;
+	min_overlap_vector.Normalize();
+	collision_info.normal_ = min_overlap_vector;
+	collision_info.separation_distance_ = min_overlap_dist;
+	collision_info.time_to_collision_ = 0;
 
 	return true;
 }
@@ -1173,13 +1057,12 @@ bool CollisionDetector3D<_TVarType>::IsOBBOverlappingOBB(const OBB<_TVarType>& p
 //////////////////////////////////////////////////////////////////////////////
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::AreMovingOBBsColliding(_TVarType pTimeDelta,
-							    const OBB<_TVarType>& pOBB1,
-							    const Vector3D<_TVarType>& pOBB1Velocity,
-							    const OBB<_TVarType>& pOBB2,
-							    const Vector3D<_TVarType>& pOBB2Velocity,
-							    CollisionInfo& pCollisionInfo)
-{
+bool CollisionDetector3D<_TVarType>::AreMovingOBBsColliding(_TVarType time_delta,
+							    const OBB<_TVarType>& ob_b1,
+							    const Vector3D<_TVarType>& ob_b1_velocity,
+							    const OBB<_TVarType>& ob_b2,
+							    const Vector3D<_TVarType>& ob_b2_velocity,
+							    CollisionInfo& collision_info) {
 	// How this algorithm works:
 	//
 	// Try if there is any axis that can separate the boxes, just like
@@ -1205,15 +1088,15 @@ bool CollisionDetector3D<_TVarType>::AreMovingOBBsColliding(_TVarType pTimeDelta
 	// B = Projected (half) size of OBB2 on OBB1's axisX.
 	//
 	// if(A + B < D) then the boxes are not colliding (OBB1's axis separates the boxes).
-	// 
+	//
 	// In this example we are going to check if OBB1's x-axis can separate the boxes.
 	// First we project the distance between the boxes BEFORE movement (like the picture above),
 	// and then we do the same for the distance AFTER the movement.
 	//
 	// If both distance vectors (before and after movement) are pointing in the same direction,
-	// and the boxes don't overlap, the boxes will not collide during their movement, and then we 
-	// can return from this function and stop testing any further. In the picture above distance 
-	// D0 is the distance before movement, and is pointing to the right. If the distance after 
+	// and the boxes don't overlap, the boxes will not collide during their movement, and then we
+	// can return from this function and stop testing any further. In the picture above distance
+	// D0 is the distance before movement, and is pointing to the right. If the distance after
 	// movement (D1) is also pointing to the right, and the boxes don't overlap, we have no collision.
 	//
 	// If we DO have a collision on this axis, it doesn't mean that the boxes are actually
@@ -1223,7 +1106,7 @@ bool CollisionDetector3D<_TVarType>::AreMovingOBBsColliding(_TVarType pTimeDelta
 	// After testing all axes, how do we calculate the TTC (time to collision)?
 	// It is calculated like this (per axis):
 	//
-	// TTC = pTime * (D0 - (A + B)) / (D0 - D1);
+	// TTC = time * (D0 - (A + B)) / (D0 - D1);
 	//
 	// If the collision is immediate (TTC = 0), D0 = (A + B), otherwise D0 > (A + B).
 	// The change in distance is D0 - D1, and the collision occurs after moving as far as
@@ -1235,315 +1118,315 @@ bool CollisionDetector3D<_TVarType>::AreMovingOBBsColliding(_TVarType pTimeDelta
 	// actually occurs, and is the correct TTC to return. All code for the testing and calculation
 	// of the TTC is within the macros:
 	// TSPMACRO_TEST_MOVING_OBB_COLLISION_0 and TSPMACRO_TEST_MOVING_OBB_COLLISION_1.
-	// 
+	//
 
-	const _TVarType lEpsilon = MathTraits<_TVarType>::Eps();
+	const _TVarType epsilon = MathTraits<_TVarType>::Eps();
 
-	mOBBCollisionData->Reset();
-	//JB: not a clue...	mCollisionInfo.mTimeToCollision = 0.0f;	// Reset to minimum.
+	obb_collision_data_->Reset();
+	//JB: not a clue...	mCollisionInfo.time_to_collision_ = 0.0f;	// Reset to minimum.
 
-	mOBBCollisionData->mOBB1RotAxis[0] = pOBB1.GetRotation().GetAxisX();
-	mOBBCollisionData->mOBB1RotAxis[1] = pOBB1.GetRotation().GetAxisY();
-	mOBBCollisionData->mOBB1RotAxis[2] = pOBB1.GetRotation().GetAxisZ();
-	mOBBCollisionData->mOBB2RotAxis[0] = pOBB2.GetRotation().GetAxisX();
-	mOBBCollisionData->mOBB2RotAxis[1] = pOBB2.GetRotation().GetAxisY();
-	mOBBCollisionData->mOBB2RotAxis[2] = pOBB2.GetRotation().GetAxisZ();
+	obb_collision_data_->ob_b1_rot_axis_[0] = ob_b1.GetRotation().GetAxisX();
+	obb_collision_data_->ob_b1_rot_axis_[1] = ob_b1.GetRotation().GetAxisY();
+	obb_collision_data_->ob_b1_rot_axis_[2] = ob_b1.GetRotation().GetAxisZ();
+	obb_collision_data_->ob_b2_rot_axis_[0] = ob_b2.GetRotation().GetAxisX();
+	obb_collision_data_->ob_b2_rot_axis_[1] = ob_b2.GetRotation().GetAxisY();
+	obb_collision_data_->ob_b2_rot_axis_[2] = ob_b2.GetRotation().GetAxisZ();
 
-	Vector3D<_TVarType>* lOBB1RotAxis[3];
-	Vector3D<_TVarType>* lOBB2RotAxis[3];
-	lOBB1RotAxis[0] = &mOBBCollisionData->mOBB1RotAxis[0];
-	lOBB1RotAxis[1] = &mOBBCollisionData->mOBB1RotAxis[1];
-	lOBB1RotAxis[2] = &mOBBCollisionData->mOBB1RotAxis[2];
-	lOBB2RotAxis[0] = &mOBBCollisionData->mOBB2RotAxis[0];
-	lOBB2RotAxis[1] = &mOBBCollisionData->mOBB2RotAxis[1];
-	lOBB2RotAxis[2] = &mOBBCollisionData->mOBB2RotAxis[2];
+	Vector3D<_TVarType>* ob_b1_rot_axis[3];
+	Vector3D<_TVarType>* ob_b2_rot_axis[3];
+	ob_b1_rot_axis[0] = &obb_collision_data_->ob_b1_rot_axis_[0];
+	ob_b1_rot_axis[1] = &obb_collision_data_->ob_b1_rot_axis_[1];
+	ob_b1_rot_axis[2] = &obb_collision_data_->ob_b1_rot_axis_[2];
+	ob_b2_rot_axis[0] = &obb_collision_data_->ob_b2_rot_axis_[0];
+	ob_b2_rot_axis[1] = &obb_collision_data_->ob_b2_rot_axis_[1];
+	ob_b2_rot_axis[2] = &obb_collision_data_->ob_b2_rot_axis_[2];
 
-	const Vector3D<_TVarType>& lOBB1Size = pOBB1.GetSize();
-	const Vector3D<_TVarType>& lOBB2Size = pOBB2.GetSize();
+	const Vector3D<_TVarType>& ob_b1_size = ob_b1.GetSize();
+	const Vector3D<_TVarType>& ob_b2_size = ob_b2.GetSize();
 
-	Vector3D<_TVarType> lRelativeVelocity(pOBB2Velocity - pOBB1Velocity);
+	Vector3D<_TVarType> relative_velocity(ob_b2_velocity - ob_b1_velocity);
 
 	// Compute difference of box centers at time 0 and given time.
-	Vector3D<_TVarType> lDistance0(pOBB2.GetPosition() - pOBB1.GetPosition());
-	Vector3D<_TVarType> lDistance1(lDistance0 + lRelativeVelocity * pTimeDelta);
+	Vector3D<_TVarType> distance0(ob_b2.GetPosition() - ob_b1.GetPosition());
+	Vector3D<_TVarType> distance1(distance0 + relative_velocity * time_delta);
 
-	_TVarType lOBB1D0[3];	// Projected lDistance0 on OBB1's axes.
-	_TVarType lOBB1D1[3];	// Projected lDistance1 on OBB1's axes.
-	_TVarType lOBB2D0[3];	// Projected lDistance0 on OBB2's axes.
-	_TVarType lOBB2D1[3];	// Projected lDistance1 on OBB2's axes.
+	_TVarType ob_b1_d0[3];	// Projected distance0 on OBB1's axes.
+	_TVarType ob_b1_d1[3];	// Projected distance1 on OBB1's axes.
+	_TVarType ob_b2_d0[3];	// Projected distance0 on OBB2's axes.
+	_TVarType ob_b2_d1[3];	// Projected distance1 on OBB2's axes.
 
-	_TVarType* lC = mOBBCollisionData->mC;
-	_TVarType* lAbsC = mOBBCollisionData->mAbsC;
+	_TVarType* c = obb_collision_data_->c_;
+	_TVarType* abs_c = obb_collision_data_->abs_c_;
 
-	_TVarType lProjectedSize1;
-	_TVarType lProjectedSize2;
-	_TVarType lProjectedSizeSum;
-	_TVarType lProjectedDist;
+	_TVarType projected_size1;
+	_TVarType projected_size2;
+	_TVarType projected_size_sum;
+	_TVarType projected_dist;
 
 	// 1. OBB1RotAxisX
-	lOBB1D0[0] = lOBB1RotAxis[0]->Dot(lDistance0);
-	lOBB1D1[0] = lOBB1RotAxis[0]->Dot(lDistance1);
-	lC[0] = lOBB1RotAxis[0]->Dot(*lOBB2RotAxis[0]);
-	lC[1] = lOBB1RotAxis[0]->Dot(*lOBB2RotAxis[1]);
-	lC[2] = lOBB1RotAxis[0]->Dot(*lOBB2RotAxis[2]);
-	lAbsC[0] = abs(lC[0]);
-	lAbsC[1] = abs(lC[1]);
-	lAbsC[2] = abs(lC[2]);
-	lProjectedSize2 = lOBB2Size.x * lAbsC[0] + 
-	                  lOBB2Size.y * lAbsC[1] + 
-	                  lOBB2Size.z * lAbsC[2];
-	lProjectedSizeSum = lProjectedSize2 + pOBB1.GetSize().x;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(lOBB1D0[0],
-					     lOBB1D1[0],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
-					     AXIS_X1);
+	ob_b1_d0[0] = ob_b1_rot_axis[0]->Dot(distance0);
+	ob_b1_d1[0] = ob_b1_rot_axis[0]->Dot(distance1);
+	c[0] = ob_b1_rot_axis[0]->Dot(*ob_b2_rot_axis[0]);
+	c[1] = ob_b1_rot_axis[0]->Dot(*ob_b2_rot_axis[1]);
+	c[2] = ob_b1_rot_axis[0]->Dot(*ob_b2_rot_axis[2]);
+	abs_c[0] = abs(c[0]);
+	abs_c[1] = abs(c[1]);
+	abs_c[2] = abs(c[2]);
+	projected_size2 = ob_b2_size.x * abs_c[0] +
+	                  ob_b2_size.y * abs_c[1] +
+	                  ob_b2_size.z * abs_c[2];
+	projected_size_sum = projected_size2 + ob_b1.GetSize().x;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(ob_b1_d0[0],
+					     ob_b1_d1[0],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
+					     kAxisX1);
 
 	// 2. OBB1RotAxisY
-	lOBB1D0[1] = lOBB1RotAxis[1]->Dot(lDistance0);
-	lOBB1D1[1] = lOBB1RotAxis[1]->Dot(lDistance1);
-	lC[3] = lOBB1RotAxis[1]->Dot(*lOBB2RotAxis[0]);
-	lC[4] = lOBB1RotAxis[1]->Dot(*lOBB2RotAxis[1]);
-	lC[5] = lOBB1RotAxis[1]->Dot(*lOBB2RotAxis[2]);
-	lAbsC[3] = abs(lC[3]);
-	lAbsC[4] = abs(lC[4]);
-	lAbsC[5] = abs(lC[5]);
-	lProjectedSize2 = lOBB2Size.x * lAbsC[3] + 
-	                  lOBB2Size.y * lAbsC[4] + 
-	                  lOBB2Size.z * lAbsC[5];
-	lProjectedSizeSum = lProjectedSize2 + pOBB1.GetSize().y;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(lOBB1D0[1],
-					     lOBB1D1[1],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
-					     AXIS_Y1);
+	ob_b1_d0[1] = ob_b1_rot_axis[1]->Dot(distance0);
+	ob_b1_d1[1] = ob_b1_rot_axis[1]->Dot(distance1);
+	c[3] = ob_b1_rot_axis[1]->Dot(*ob_b2_rot_axis[0]);
+	c[4] = ob_b1_rot_axis[1]->Dot(*ob_b2_rot_axis[1]);
+	c[5] = ob_b1_rot_axis[1]->Dot(*ob_b2_rot_axis[2]);
+	abs_c[3] = abs(c[3]);
+	abs_c[4] = abs(c[4]);
+	abs_c[5] = abs(c[5]);
+	projected_size2 = ob_b2_size.x * abs_c[3] +
+	                  ob_b2_size.y * abs_c[4] +
+	                  ob_b2_size.z * abs_c[5];
+	projected_size_sum = projected_size2 + ob_b1.GetSize().y;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(ob_b1_d0[1],
+					     ob_b1_d1[1],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
+					     kAxisY1);
 
 	// 3. OBB1RotAxisZ
-	lOBB1D0[2] = lOBB1RotAxis[2]->Dot(lDistance0);
-	lOBB1D1[2] = lOBB1RotAxis[2]->Dot(lDistance1);
-	lC[6] = lOBB1RotAxis[2]->Dot(*lOBB2RotAxis[0]);
-	lC[7] = lOBB1RotAxis[2]->Dot(*lOBB2RotAxis[1]);
-	lC[8] = lOBB1RotAxis[2]->Dot(*lOBB2RotAxis[2]);
-	lAbsC[6] = abs(lC[6]);
-	lAbsC[7] = abs(lC[7]);
-	lAbsC[8] = abs(lC[8]);
-	lProjectedSize2 = lOBB2Size.x * lAbsC[6] + 
-	                  lOBB2Size.y * lAbsC[7] + 
-	                  lOBB2Size.z * lAbsC[8];
-	lProjectedSizeSum = lProjectedSize2 + pOBB1.GetSize().z;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(lOBB1D0[2],
-					     lOBB1D1[2],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
-					     AXIS_Z1);
+	ob_b1_d0[2] = ob_b1_rot_axis[2]->Dot(distance0);
+	ob_b1_d1[2] = ob_b1_rot_axis[2]->Dot(distance1);
+	c[6] = ob_b1_rot_axis[2]->Dot(*ob_b2_rot_axis[0]);
+	c[7] = ob_b1_rot_axis[2]->Dot(*ob_b2_rot_axis[1]);
+	c[8] = ob_b1_rot_axis[2]->Dot(*ob_b2_rot_axis[2]);
+	abs_c[6] = abs(c[6]);
+	abs_c[7] = abs(c[7]);
+	abs_c[8] = abs(c[8]);
+	projected_size2 = ob_b2_size.x * abs_c[6] +
+	                  ob_b2_size.y * abs_c[7] +
+	                  ob_b2_size.z * abs_c[8];
+	projected_size_sum = projected_size2 + ob_b1.GetSize().z;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(ob_b1_d0[2],
+					     ob_b1_d1[2],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
+					     kAxisZ1);
 	// 4. OBB2RotAxisX
-	lOBB2D0[0] = lOBB2RotAxis[0]->Dot(lDistance0);
-	lOBB2D1[0] = lOBB2RotAxis[0]->Dot(lDistance1);
-	lProjectedSize1 = lOBB1Size.x * lAbsC[0] + 
-	                  lOBB1Size.y * lAbsC[3] + 
-	                  lOBB1Size.z * lAbsC[6];
-	lProjectedSizeSum = lProjectedSize1 + lOBB2Size.x;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(lOBB2D0[0],
-					     lOBB2D1[0],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
-					     AXIS_X2);
+	ob_b2_d0[0] = ob_b2_rot_axis[0]->Dot(distance0);
+	ob_b2_d1[0] = ob_b2_rot_axis[0]->Dot(distance1);
+	projected_size1 = ob_b1_size.x * abs_c[0] +
+	                  ob_b1_size.y * abs_c[3] +
+	                  ob_b1_size.z * abs_c[6];
+	projected_size_sum = projected_size1 + ob_b2_size.x;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(ob_b2_d0[0],
+					     ob_b2_d1[0],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
+					     kAxisX2);
 
 	// 5. OBB2RotAxisY
-	lOBB2D0[1] = lOBB2RotAxis[1]->Dot(lDistance0);
-	lOBB2D1[1] = lOBB2RotAxis[1]->Dot(lDistance1);
-	lProjectedSize1 = lOBB1Size.x * lAbsC[1] + 
-	                  lOBB1Size.y * lAbsC[4] + 
-	                  lOBB1Size.z * lAbsC[7];
-	lProjectedSizeSum = lProjectedSize1 + lOBB2Size.y;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(lOBB2D0[1],
-					     lOBB2D1[1],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
-					     AXIS_Y2);
+	ob_b2_d0[1] = ob_b2_rot_axis[1]->Dot(distance0);
+	ob_b2_d1[1] = ob_b2_rot_axis[1]->Dot(distance1);
+	projected_size1 = ob_b1_size.x * abs_c[1] +
+	                  ob_b1_size.y * abs_c[4] +
+	                  ob_b1_size.z * abs_c[7];
+	projected_size_sum = projected_size1 + ob_b2_size.y;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(ob_b2_d0[1],
+					     ob_b2_d1[1],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
+					     kAxisY2);
 
 	// 6. OBB2RotAxisZ
-	lOBB2D0[2] = lOBB2RotAxis[2]->Dot(lDistance0);
-	lOBB2D1[2] = lOBB2RotAxis[2]->Dot(lDistance1);
-	lProjectedSize1 = lOBB1Size.x * lAbsC[2] + 
-	                  lOBB1Size.y * lAbsC[5] + 
-	                  lOBB1Size.z * lAbsC[8];
-	lProjectedSizeSum = lProjectedSize1 + lOBB2Size.z;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(lOBB2D0[2],
-					     lOBB2D1[2],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
-					     AXIS_Z2);
+	ob_b2_d0[2] = ob_b2_rot_axis[2]->Dot(distance0);
+	ob_b2_d1[2] = ob_b2_rot_axis[2]->Dot(distance1);
+	projected_size1 = ob_b1_size.x * abs_c[2] +
+	                  ob_b1_size.y * abs_c[5] +
+	                  ob_b1_size.z * abs_c[8];
+	projected_size_sum = projected_size1 + ob_b2_size.z;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_0(ob_b2_d0[2],
+					     ob_b2_d1[2],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
+					     kAxisZ2);
 
 	// 7. OBB1RotAxisX x OBB2RotAxisX
-	lProjectedSize1 = lOBB1Size.y * lAbsC[6] + lOBB1Size.z * lAbsC[3];
-	lProjectedSize2 = lOBB2Size.y * lAbsC[2] + lOBB2Size.z * lAbsC[1];
-	lProjectedDist = lOBB1D0[2] * lC[3] - lOBB1D0[1] * lC[6];
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(lProjectedDist,
-					     lOBB1D1[2],
-					     lC[3],
-					     lOBB1D1[1],
-					     lC[6],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
+	projected_size1 = ob_b1_size.y * abs_c[6] + ob_b1_size.z * abs_c[3];
+	projected_size2 = ob_b2_size.y * abs_c[2] + ob_b2_size.z * abs_c[1];
+	projected_dist = ob_b1_d0[2] * c[3] - ob_b1_d0[1] * c[6];
+	projected_size_sum = projected_size1 + projected_size2;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(projected_dist,
+					     ob_b1_d1[2],
+					     c[3],
+					     ob_b1_d1[1],
+					     c[6],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
 					     AXIS_X1xX2);
 
 	// 8. OBB1RotAxisX x OBB2RotAxisY
-	lProjectedSize1 = lOBB1Size.y * lAbsC[7] + lOBB1Size.z * lAbsC[4];
-	lProjectedSize2 = lOBB2Size.x * lAbsC[2] + lOBB2Size.z * lAbsC[0];
-	lProjectedDist = lOBB1D0[2] * lC[4] - lOBB1D0[1] * lC[7];
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(lProjectedDist,
-					     lOBB1D1[2],
-					     lC[4],
-					     lOBB1D1[1],
-					     lC[7],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
+	projected_size1 = ob_b1_size.y * abs_c[7] + ob_b1_size.z * abs_c[4];
+	projected_size2 = ob_b2_size.x * abs_c[2] + ob_b2_size.z * abs_c[0];
+	projected_dist = ob_b1_d0[2] * c[4] - ob_b1_d0[1] * c[7];
+	projected_size_sum = projected_size1 + projected_size2;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(projected_dist,
+					     ob_b1_d1[2],
+					     c[4],
+					     ob_b1_d1[1],
+					     c[7],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
 					     AXIS_X1xY2);
 
 	// 9. OBB1RotAxisX x OBB2RotAxisZ
-	lProjectedSize1 = lOBB1Size.y * lAbsC[8] + lOBB1Size.z * lAbsC[5];
-	lProjectedSize2 = lOBB2Size.x * lAbsC[1] + lOBB2Size.y * lAbsC[0];
-	lProjectedDist = lOBB1D0[2] * lC[5] - lOBB1D0[1] * lC[8];
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(lProjectedDist,
-					     lOBB1D1[2],
-					     lC[5],
-					     lOBB1D1[1],
-					     lC[8],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
+	projected_size1 = ob_b1_size.y * abs_c[8] + ob_b1_size.z * abs_c[5];
+	projected_size2 = ob_b2_size.x * abs_c[1] + ob_b2_size.y * abs_c[0];
+	projected_dist = ob_b1_d0[2] * c[5] - ob_b1_d0[1] * c[8];
+	projected_size_sum = projected_size1 + projected_size2;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(projected_dist,
+					     ob_b1_d1[2],
+					     c[5],
+					     ob_b1_d1[1],
+					     c[8],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
 					     AXIS_X1xZ2);
 
 	// 10. OBB1RotAxisY x OBB2RotAxisX
-	lProjectedSize1 = lOBB1Size.x * lAbsC[6] + lOBB1Size.z * lAbsC[0];
-	lProjectedSize2 = lOBB2Size.y * lAbsC[5] + lOBB2Size.z * lAbsC[4];
-	lProjectedDist = lOBB1D0[0] * lC[6] - lOBB1D0[2] * lC[0];
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(lProjectedDist,
-					     lOBB1D1[0],
-					     lC[6],
-					     lOBB1D1[2],
-					     lC[0],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
+	projected_size1 = ob_b1_size.x * abs_c[6] + ob_b1_size.z * abs_c[0];
+	projected_size2 = ob_b2_size.y * abs_c[5] + ob_b2_size.z * abs_c[4];
+	projected_dist = ob_b1_d0[0] * c[6] - ob_b1_d0[2] * c[0];
+	projected_size_sum = projected_size1 + projected_size2;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(projected_dist,
+					     ob_b1_d1[0],
+					     c[6],
+					     ob_b1_d1[2],
+					     c[0],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
 					     AXIS_Y1xX2);
 
 	// 11. OBB1RotAxisY x OBB2RotAxisY
-	lProjectedSize1 = lOBB1Size.x * lAbsC[7] + lOBB1Size.z * lAbsC[1];
-	lProjectedSize2 = lOBB2Size.x * lAbsC[5] + lOBB2Size.z * lAbsC[3];
-	lProjectedDist = lOBB1D0[0] * lC[7] - lOBB1D0[2] * lC[1];
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(lProjectedDist,
-					     lOBB1D1[0],
-					     lC[7],
-					     lOBB1D1[2],
-					     lC[1],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
+	projected_size1 = ob_b1_size.x * abs_c[7] + ob_b1_size.z * abs_c[1];
+	projected_size2 = ob_b2_size.x * abs_c[5] + ob_b2_size.z * abs_c[3];
+	projected_dist = ob_b1_d0[0] * c[7] - ob_b1_d0[2] * c[1];
+	projected_size_sum = projected_size1 + projected_size2;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(projected_dist,
+					     ob_b1_d1[0],
+					     c[7],
+					     ob_b1_d1[2],
+					     c[1],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
 					     AXIS_Y1xY2);
 
 	// 12. OBB1RotAxisY x OBB2RotAxisZ
-	lProjectedSize1 = lOBB1Size.x * lAbsC[8] + lOBB1Size.z * lAbsC[2];
-	lProjectedSize2 = lOBB2Size.x * lAbsC[4] + lOBB2Size.y * lAbsC[3];
-	lProjectedDist = lOBB1D0[0] * lC[8] - lOBB1D0[2] * lC[2];
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(lProjectedDist,
-					     lOBB1D1[0],
-					     lC[8],
-					     lOBB1D1[2],
-					     lC[2],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
+	projected_size1 = ob_b1_size.x * abs_c[8] + ob_b1_size.z * abs_c[2];
+	projected_size2 = ob_b2_size.x * abs_c[4] + ob_b2_size.y * abs_c[3];
+	projected_dist = ob_b1_d0[0] * c[8] - ob_b1_d0[2] * c[2];
+	projected_size_sum = projected_size1 + projected_size2;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(projected_dist,
+					     ob_b1_d1[0],
+					     c[8],
+					     ob_b1_d1[2],
+					     c[2],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
 					     AXIS_Y1xZ2);
 
 	// 13. OBB1RotAxisZ x OBB2RotAxisX
-	lProjectedSize1 = lOBB1Size.x * lAbsC[3] + lOBB1Size.y * lAbsC[0];
-	lProjectedSize2 = lOBB2Size.y * lAbsC[8] + lOBB2Size.z * lAbsC[7];
-	lProjectedDist = lOBB1D0[1] * lC[0] - lOBB1D0[0] * lC[3];
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(lProjectedDist,
-					     lOBB1D1[1],
-					     lC[0],
-					     lOBB1D1[0],
-					     lC[3],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
+	projected_size1 = ob_b1_size.x * abs_c[3] + ob_b1_size.y * abs_c[0];
+	projected_size2 = ob_b2_size.y * abs_c[8] + ob_b2_size.z * abs_c[7];
+	projected_dist = ob_b1_d0[1] * c[0] - ob_b1_d0[0] * c[3];
+	projected_size_sum = projected_size1 + projected_size2;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(projected_dist,
+					     ob_b1_d1[1],
+					     c[0],
+					     ob_b1_d1[0],
+					     c[3],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
 					     AXIS_Z1xX2);
 
 	// 14. OBB1RotAxisZ x OBB2RotAxisY
-	lProjectedSize1 = lOBB1Size.x * lAbsC[4] + lOBB1Size.y * lAbsC[1];
-	lProjectedSize2 = lOBB2Size.x * lAbsC[8] + lOBB2Size.z * lAbsC[6];
-	lProjectedDist = lOBB1D0[1] * lC[1] - lOBB1D0[0] * lC[4];
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(lProjectedDist,
-					     lOBB1D1[1],
-					     lC[1],
-					     lOBB1D1[0],
-					     lC[4],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
+	projected_size1 = ob_b1_size.x * abs_c[4] + ob_b1_size.y * abs_c[1];
+	projected_size2 = ob_b2_size.x * abs_c[8] + ob_b2_size.z * abs_c[6];
+	projected_dist = ob_b1_d0[1] * c[1] - ob_b1_d0[0] * c[4];
+	projected_size_sum = projected_size1 + projected_size2;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(projected_dist,
+					     ob_b1_d1[1],
+					     c[1],
+					     ob_b1_d1[0],
+					     c[4],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
 					     AXIS_Z1xY2);
 
 	// 15. OBB1RotAxisZ x OBB2RotAxisZ
-	lProjectedSize1 = lOBB1Size.x * lAbsC[5] + lOBB1Size.y * lAbsC[2];
-	lProjectedSize2 = lOBB2Size.x * lAbsC[7] + lOBB2Size.y * lAbsC[6];
-	lProjectedDist = lOBB1D0[1] * lC[2] - lOBB1D0[0] * lC[5];
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(lProjectedDist,
-					     lOBB1D1[1],
-					     lC[2],
-					     lOBB1D1[0],
-					     lC[5],
-					     lProjectedSizeSum,
-					     pTimeDelta,
-					     pCollisionInfo.mTimeToCollision,
-					     mOBBCollisionData->mAxisID,
-					     mOBBCollisionData->mSide,
+	projected_size1 = ob_b1_size.x * abs_c[5] + ob_b1_size.y * abs_c[2];
+	projected_size2 = ob_b2_size.x * abs_c[7] + ob_b2_size.y * abs_c[6];
+	projected_dist = ob_b1_d0[1] * c[2] - ob_b1_d0[0] * c[5];
+	projected_size_sum = projected_size1 + projected_size2;
+	TSPMACRO_TEST_MOVING_OBB_COLLISION_1(projected_dist,
+					     ob_b1_d1[1],
+					     c[2],
+					     ob_b1_d1[0],
+					     c[5],
+					     projected_size_sum,
+					     time_delta,
+					     collision_info.time_to_collision_,
+					     obb_collision_data_->axis_id_,
+					     obb_collision_data_->side_,
 					     AXIS_Z1xZ2);
 
 	// At this point none of the 15 axes separate the boxes. It is still
@@ -1552,254 +1435,233 @@ bool CollisionDetector3D<_TVarType>::AreMovingOBBsColliding(_TVarType pTimeDelta
 	// projected boxes are hexagons. This requires three separating axis
 	// tests per box.
 
-	Vector3D<_TVarType> lVelxDist(lRelativeVelocity, lDistance0);
-	_TVarType lWOBB1[3];
-	_TVarType lWOBB2[3];
+	Vector3D<_TVarType> velx_dist(relative_velocity, distance0);
+	_TVarType wob_b1[3];
+	_TVarType wob_b2[3];
 
 	// 16. W x OBB1AxisX
-	lWOBB1[1] = lRelativeVelocity.Dot(*lOBB1RotAxis[1]);
-	TSPMACRO_SNAP_TO_ZERO(lWOBB1[1], lEpsilon);
-	lWOBB1[2] = lRelativeVelocity.Dot(*lOBB1RotAxis[2]);
-	TSPMACRO_SNAP_TO_ZERO(lWOBB1[2], lEpsilon);
+	wob_b1[1] = relative_velocity.Dot(*ob_b1_rot_axis[1]);
+	TSPMACRO_SNAP_TO_ZERO(wob_b1[1], epsilon);
+	wob_b1[2] = relative_velocity.Dot(*ob_b1_rot_axis[2]);
+	TSPMACRO_SNAP_TO_ZERO(wob_b1[2], epsilon);
 
-	lProjectedDist = abs(lOBB1RotAxis[0]->Dot(lVelxDist));
-	TSPMACRO_SNAP_TO_ZERO(lProjectedDist, lEpsilon);
+	projected_dist = abs(ob_b1_rot_axis[0]->Dot(velx_dist));
+	TSPMACRO_SNAP_TO_ZERO(projected_dist, epsilon);
 
-	lProjectedSize1 = lOBB1Size.y * abs(lWOBB1[2]) + lOBB1Size.z * abs(lWOBB1[1]);
-	lProjectedSize2 = lOBB2Size.x * abs(lC[3] * lWOBB1[2] - lC[6] * lWOBB1[1]) +
-	                  lOBB2Size.y * abs(lC[4] * lWOBB1[2] - lC[7] * lWOBB1[1]) +
-	                  lOBB2Size.z * abs(lC[5] * lWOBB1[2] - lC[8] * lWOBB1[1]);
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	if(lProjectedDist > lProjectedSizeSum)
-	{
-		pCollisionInfo.mTimeToCollision = pTimeDelta;
+	projected_size1 = ob_b1_size.y * abs(wob_b1[2]) + ob_b1_size.z * abs(wob_b1[1]);
+	projected_size2 = ob_b2_size.x * abs(c[3] * wob_b1[2] - c[6] * wob_b1[1]) +
+	                  ob_b2_size.y * abs(c[4] * wob_b1[2] - c[7] * wob_b1[1]) +
+	                  ob_b2_size.z * abs(c[5] * wob_b1[2] - c[8] * wob_b1[1]);
+	projected_size_sum = projected_size1 + projected_size2;
+	if(projected_dist > projected_size_sum) {
+		collision_info.time_to_collision_ = time_delta;
 		return false;	// No collision.
 	}
 
 	// 17. W x OBB1AxisY
-	lWOBB1[0] = lRelativeVelocity.Dot(*lOBB1RotAxis[0]);
-	TSPMACRO_SNAP_TO_ZERO(lWOBB1[0], lEpsilon);
+	wob_b1[0] = relative_velocity.Dot(*ob_b1_rot_axis[0]);
+	TSPMACRO_SNAP_TO_ZERO(wob_b1[0], epsilon);
 
-	lProjectedDist = abs(lOBB1RotAxis[1]->Dot(lVelxDist));
-	TSPMACRO_SNAP_TO_ZERO(lProjectedDist, lEpsilon);
+	projected_dist = abs(ob_b1_rot_axis[1]->Dot(velx_dist));
+	TSPMACRO_SNAP_TO_ZERO(projected_dist, epsilon);
 
-	lProjectedSize1 = lOBB1Size.z * abs(lWOBB1[0]) + lOBB1Size.x * abs(lWOBB1[2]);
-	lProjectedSize2 = lOBB2Size.x * abs(lC[6] * lWOBB1[0] - lC[0] * lWOBB1[2]) +
-	                  lOBB2Size.y * abs(lC[7] * lWOBB1[0] - lC[1] * lWOBB1[2]) +
-	                  lOBB2Size.z * abs(lC[8] * lWOBB1[0] - lC[2] * lWOBB1[2]);
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	if(lProjectedDist > lProjectedSizeSum)
-	{
-		pCollisionInfo.mTimeToCollision = pTimeDelta;
+	projected_size1 = ob_b1_size.z * abs(wob_b1[0]) + ob_b1_size.x * abs(wob_b1[2]);
+	projected_size2 = ob_b2_size.x * abs(c[6] * wob_b1[0] - c[0] * wob_b1[2]) +
+	                  ob_b2_size.y * abs(c[7] * wob_b1[0] - c[1] * wob_b1[2]) +
+	                  ob_b2_size.z * abs(c[8] * wob_b1[0] - c[2] * wob_b1[2]);
+	projected_size_sum = projected_size1 + projected_size2;
+	if(projected_dist > projected_size_sum) {
+		collision_info.time_to_collision_ = time_delta;
 		return false; // No collision.
 	}
 
 	// 18. W x OBB1AxisZ
-	lProjectedDist = abs(lOBB1RotAxis[2]->Dot(lVelxDist));
-	TSPMACRO_SNAP_TO_ZERO(lProjectedDist, lEpsilon);
+	projected_dist = abs(ob_b1_rot_axis[2]->Dot(velx_dist));
+	TSPMACRO_SNAP_TO_ZERO(projected_dist, epsilon);
 
-	lProjectedSize1 = lOBB1Size.x * abs(lWOBB1[1]) + lOBB1Size.y * abs(lWOBB1[0]);
-	lProjectedSize2 = lOBB2Size.x * abs(lC[0] * lWOBB1[1] - lC[3] * lWOBB1[0]) +
-	                  lOBB2Size.y * abs(lC[1] * lWOBB1[1] - lC[4] * lWOBB1[0]) +
-	                  lOBB2Size.z * abs(lC[2] * lWOBB1[1] - lC[5] * lWOBB1[0]);
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	if(lProjectedDist > lProjectedSizeSum)
-	{
-		pCollisionInfo.mTimeToCollision = pTimeDelta;
+	projected_size1 = ob_b1_size.x * abs(wob_b1[1]) + ob_b1_size.y * abs(wob_b1[0]);
+	projected_size2 = ob_b2_size.x * abs(c[0] * wob_b1[1] - c[3] * wob_b1[0]) +
+	                  ob_b2_size.y * abs(c[1] * wob_b1[1] - c[4] * wob_b1[0]) +
+	                  ob_b2_size.z * abs(c[2] * wob_b1[1] - c[5] * wob_b1[0]);
+	projected_size_sum = projected_size1 + projected_size2;
+	if(projected_dist > projected_size_sum) {
+		collision_info.time_to_collision_ = time_delta;
 		return false; // No collision.
 	}
 
 	// 19. W x OBB2AxisX
-	lWOBB2[1] = lRelativeVelocity.Dot(*lOBB2RotAxis[1]);
-	TSPMACRO_SNAP_TO_ZERO(lWOBB2[1], lEpsilon);
-	lWOBB2[2] = lRelativeVelocity.Dot(*lOBB2RotAxis[2]);
-	TSPMACRO_SNAP_TO_ZERO(lWOBB2[2], lEpsilon);
+	wob_b2[1] = relative_velocity.Dot(*ob_b2_rot_axis[1]);
+	TSPMACRO_SNAP_TO_ZERO(wob_b2[1], epsilon);
+	wob_b2[2] = relative_velocity.Dot(*ob_b2_rot_axis[2]);
+	TSPMACRO_SNAP_TO_ZERO(wob_b2[2], epsilon);
 
-	lProjectedDist = abs(lOBB2RotAxis[0]->Dot(lVelxDist));
-	TSPMACRO_SNAP_TO_ZERO(lProjectedDist, lEpsilon);
+	projected_dist = abs(ob_b2_rot_axis[0]->Dot(velx_dist));
+	TSPMACRO_SNAP_TO_ZERO(projected_dist, epsilon);
 
-	lProjectedSize1 = lOBB1Size.x * abs(lC[1] * lWOBB2[2] - lC[2] * lWOBB2[1]) +
-	                  lOBB1Size.y * abs(lC[4] * lWOBB2[2] - lC[5] * lWOBB2[1]) +
-	                  lOBB1Size.z * abs(lC[7] * lWOBB2[2] - lC[8] * lWOBB2[1]);
-	lProjectedSize2 = lOBB2Size.y * abs(lWOBB2[2]) + lOBB2Size.z * abs(lWOBB2[1]);
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	if(lProjectedDist > lProjectedSizeSum)
-	{
-		pCollisionInfo.mTimeToCollision = pTimeDelta;
+	projected_size1 = ob_b1_size.x * abs(c[1] * wob_b2[2] - c[2] * wob_b2[1]) +
+	                  ob_b1_size.y * abs(c[4] * wob_b2[2] - c[5] * wob_b2[1]) +
+	                  ob_b1_size.z * abs(c[7] * wob_b2[2] - c[8] * wob_b2[1]);
+	projected_size2 = ob_b2_size.y * abs(wob_b2[2]) + ob_b2_size.z * abs(wob_b2[1]);
+	projected_size_sum = projected_size1 + projected_size2;
+	if(projected_dist > projected_size_sum) {
+		collision_info.time_to_collision_ = time_delta;
 		return false; // No collision.
 	}
 
 	// 20. W x OBB2AxisY
-	lWOBB2[0] = lRelativeVelocity.Dot(*lOBB2RotAxis[0]);
-	TSPMACRO_SNAP_TO_ZERO(lWOBB2[0], lEpsilon);
+	wob_b2[0] = relative_velocity.Dot(*ob_b2_rot_axis[0]);
+	TSPMACRO_SNAP_TO_ZERO(wob_b2[0], epsilon);
 
-	lProjectedDist = abs(lOBB2RotAxis[1]->Dot(lVelxDist));
-	TSPMACRO_SNAP_TO_ZERO(lProjectedDist, lEpsilon);
+	projected_dist = abs(ob_b2_rot_axis[1]->Dot(velx_dist));
+	TSPMACRO_SNAP_TO_ZERO(projected_dist, epsilon);
 
-	lProjectedSize1 = lOBB1Size.x * abs(lC[2] * lWOBB2[0] - lC[0] * lWOBB2[2]) +
-	                  lOBB1Size.y * abs(lC[5] * lWOBB2[0] - lC[3] * lWOBB2[2]) +
-	                  lOBB1Size.z * abs(lC[8] * lWOBB2[0] - lC[6] * lWOBB2[2]);
-	lProjectedSize2 = lOBB2Size.z * abs(lWOBB2[0]) + lOBB2Size.x * abs(lWOBB2[2]);
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	if(lProjectedDist > lProjectedSizeSum)
-	{
-		pCollisionInfo.mTimeToCollision = pTimeDelta;
+	projected_size1 = ob_b1_size.x * abs(c[2] * wob_b2[0] - c[0] * wob_b2[2]) +
+	                  ob_b1_size.y * abs(c[5] * wob_b2[0] - c[3] * wob_b2[2]) +
+	                  ob_b1_size.z * abs(c[8] * wob_b2[0] - c[6] * wob_b2[2]);
+	projected_size2 = ob_b2_size.z * abs(wob_b2[0]) + ob_b2_size.x * abs(wob_b2[2]);
+	projected_size_sum = projected_size1 + projected_size2;
+	if(projected_dist > projected_size_sum) {
+		collision_info.time_to_collision_ = time_delta;
 		return false; // No collision.
 	}
 
 	// 21. W x OBB2AxisZ
-	lProjectedDist = abs(lOBB2RotAxis[2]->Dot(lVelxDist));
-	TSPMACRO_SNAP_TO_ZERO(lProjectedDist, lEpsilon);
+	projected_dist = abs(ob_b2_rot_axis[2]->Dot(velx_dist));
+	TSPMACRO_SNAP_TO_ZERO(projected_dist, epsilon);
 
-	lProjectedSize1 = lOBB1Size.x * abs(lC[0] * lWOBB2[1] - lC[1] * lWOBB2[0]) +
-	                  lOBB1Size.y * abs(lC[3] * lWOBB2[1] - lC[4] * lWOBB2[0]) +
-	                  lOBB1Size.z * abs(lC[6] * lWOBB2[1] - lC[7] * lWOBB2[0]);
-	lProjectedSize2 = lOBB2Size.x * abs(lWOBB2[1]) + lOBB2Size.y * abs(lWOBB2[0]);
-	lProjectedSizeSum = lProjectedSize1 + lProjectedSize2;
-	if(lProjectedDist > lProjectedSizeSum)
-	{
-		pCollisionInfo.mTimeToCollision = pTimeDelta;
+	projected_size1 = ob_b1_size.x * abs(c[0] * wob_b2[1] - c[1] * wob_b2[0]) +
+	                  ob_b1_size.y * abs(c[3] * wob_b2[1] - c[4] * wob_b2[0]) +
+	                  ob_b1_size.z * abs(c[6] * wob_b2[1] - c[7] * wob_b2[0]);
+	projected_size2 = ob_b2_size.x * abs(wob_b2[1]) + ob_b2_size.y * abs(wob_b2[0]);
+	projected_size_sum = projected_size1 + projected_size2;
+	if(projected_dist > projected_size_sum) {
+		collision_info.time_to_collision_ = time_delta;
 		return false; // No collision.
 	}
 
 	// If we get here, there is a collision. Now we have to find the appropriate collision
 	// normal.
-	mOBBCollisionData->mValidCollision = true;
+	obb_collision_data_->valid_collision_ = true;
 
-	switch(mOBBCollisionData->mAxisID)
-	{
-		case AXIS_X1:
-		case AXIS_Y1:
-		case AXIS_Z1:
-		{
-			pCollisionInfo.mNormal = *lOBB1RotAxis[(int)mOBBCollisionData->mAxisID - 1];
+	switch(obb_collision_data_->axis_id_) {
+		case kAxisX1:
+		case kAxisY1:
+		case kAxisZ1: {
+			collision_info.normal_ = *ob_b1_rot_axis[(int)obb_collision_data_->axis_id_ - 1];
 		} break;
-		case AXIS_X2:
-		case AXIS_Y2:
-		case AXIS_Z2:
-		{
-			pCollisionInfo.mNormal = *lOBB2RotAxis[(int)mOBBCollisionData->mAxisID - 4];
+		case kAxisX2:
+		case kAxisY2:
+		case kAxisZ2: {
+			collision_info.normal_ = *ob_b2_rot_axis[(int)obb_collision_data_->axis_id_ - 4];
 		} break;
 		case AXIS_X1xX2:
 		case AXIS_X1xY2:
-		case AXIS_X1xZ2:
-		{
-			pCollisionInfo.mNormal.Cross(*lOBB1RotAxis[0], *lOBB2RotAxis[(int)mOBBCollisionData->mAxisID - 7]);
+		case AXIS_X1xZ2: {
+			collision_info.normal_.Cross(*ob_b1_rot_axis[0], *ob_b2_rot_axis[(int)obb_collision_data_->axis_id_ - 7]);
 			// The Normalize() function will check if the vector magnitude is >0.
-			pCollisionInfo.mNormal.Normalize();
+			collision_info.normal_.Normalize();
 		} break;
 		case AXIS_Y1xX2:
 		case AXIS_Y1xY2:
-		case AXIS_Y1xZ2:
-		{
-			pCollisionInfo.mNormal.Cross(*lOBB1RotAxis[1], *lOBB2RotAxis[(int)mOBBCollisionData->mAxisID - 10]);
+		case AXIS_Y1xZ2: {
+			collision_info.normal_.Cross(*ob_b1_rot_axis[1], *ob_b2_rot_axis[(int)obb_collision_data_->axis_id_ - 10]);
 			// The Normalize() function will check if the vector magnitude is >0.
-			pCollisionInfo.mNormal.Normalize();
+			collision_info.normal_.Normalize();
 		} break;
 		case AXIS_Z1xX2:
 		case AXIS_Z1xY2:
-		case AXIS_Z1xZ2:
-		{
-			pCollisionInfo.mNormal.Cross(*lOBB1RotAxis[2], *lOBB2RotAxis[(int)mOBBCollisionData->mAxisID - 13]);
+		case AXIS_Z1xZ2: {
+			collision_info.normal_.Cross(*ob_b1_rot_axis[2], *ob_b2_rot_axis[(int)obb_collision_data_->axis_id_ - 13]);
 			// The Normalize() function will check if the vector magnitude is >0.
-			pCollisionInfo.mNormal.Normalize();
+			collision_info.normal_.Normalize();
 		} break;
 	};
 
-	mOBBCollisionData->mAxis = pCollisionInfo.mNormal;
+	obb_collision_data_->axis_ = collision_info.normal_;
 
 	// Check if the CollisionNormal has to be flipped.
-	mOBBCollisionData->mOBB1CollisionPos = pOBB1.GetPosition() + pOBB1Velocity * pCollisionInfo.mTimeToCollision;
-	mOBBCollisionData->mOBB2CollisionPos = pOBB2.GetPosition() + pOBB2Velocity * pCollisionInfo.mTimeToCollision;
-	Vector3D<_TVarType> lCollisionPosDiff(mOBBCollisionData->mOBB2CollisionPos - mOBBCollisionData->mOBB1CollisionPos);
+	obb_collision_data_->ob_b1_collision_pos_ = ob_b1.GetPosition() + ob_b1_velocity * collision_info.time_to_collision_;
+	obb_collision_data_->ob_b2_collision_pos_ = ob_b2.GetPosition() + ob_b2_velocity * collision_info.time_to_collision_;
+	Vector3D<_TVarType> collision_pos_diff(obb_collision_data_->ob_b2_collision_pos_ - obb_collision_data_->ob_b1_collision_pos_);
 
-	if(pCollisionInfo.mNormal.Dot(lCollisionPosDiff) > 0.0f)
-	{
-		pCollisionInfo.mNormal *= -1.0f;
+	if(collision_info.normal_.Dot(collision_pos_diff) > 0.0f) {
+		collision_info.normal_ *= -1.0f;
 	}
 
-	mOBBCollisionData->mOBB1Size[0] = lOBB1Size.x;
-	mOBBCollisionData->mOBB1Size[1] = lOBB1Size.y;
-	mOBBCollisionData->mOBB1Size[2] = lOBB1Size.z;
-	mOBBCollisionData->mOBB2Size[0] = lOBB2Size.x;
-	mOBBCollisionData->mOBB2Size[1] = lOBB2Size.y;
-	mOBBCollisionData->mOBB2Size[2] = lOBB2Size.z;
+	obb_collision_data_->ob_b1_size_[0] = ob_b1_size.x;
+	obb_collision_data_->ob_b1_size_[1] = ob_b1_size.y;
+	obb_collision_data_->ob_b1_size_[2] = ob_b1_size.z;
+	obb_collision_data_->ob_b2_size_[0] = ob_b2_size.x;
+	obb_collision_data_->ob_b2_size_[1] = ob_b2_size.y;
+	obb_collision_data_->ob_b2_size_[2] = ob_b2_size.z;
 
 	// There is no separation distance.
-	pCollisionInfo.mSeparationDistance = 0;
+	collision_info.separation_distance_ = 0;
 	return true;
 }
 
 template<class _TVarType>
-typename CollisionDetector3D<_TVarType>::CollisionType CollisionDetector3D<_TVarType>::GetOBBCollisionType()
-{
-	const _TVarType lEpsilon = MathTraits<_TVarType>::Eps();
-	const _TVarType lOneCmp = 1.0f - lEpsilon;
+typename CollisionDetector3D<_TVarType>::CollisionType CollisionDetector3D<_TVarType>::GetOBBCollisionType() {
+	const _TVarType epsilon = MathTraits<_TVarType>::Eps();
+	const _TVarType one_cmp = 1.0f - epsilon;
 
-	// We have to figure out what kind of collision we have here... 
+	// We have to figure out what kind of collision we have here...
 	// Point, edge or surface.
 
 	// To accomplish this, we first have to check if any of the boxes have an edge
-	// aligned with the collision normal (the axis stored in mOBBCollisionData).
-	// While doing that, save all relevant values in mOBBCollisionData
+	// aligned with the collision normal (the axis stored in obb_collision_data_).
+	// While doing that, save all relevant values in obb_collision_data_
 	// used to get the intersection later on.
-	bool lTestOBB1 = true;
-	bool lTestOBB2 = true;
-	bool lQuickTest = false;
-	int lAlignedBox = 0;
+	bool test_ob_b1 = true;
+	bool test_ob_b2 = true;
+	bool quick_test = false;
+	int aligned_box = 0;
 
-	int lCIndexStart = 0;
-	int lCIndexStep = 1;
-	switch(mOBBCollisionData->mAxisID)
-	{
-	        case AXIS_X1:
-		case AXIS_X2:
-		{
-			lCIndexStart = 0;
+	int c_index_start = 0;
+	int c_index_step = 1;
+	switch(obb_collision_data_->axis_id_) {
+	        case kAxisX1:
+		case kAxisX2: {
+			c_index_start = 0;
 		} break;
-		case AXIS_Y1:
-		case AXIS_Y2:
-		{
-			lCIndexStart = 1;
+		case kAxisY1:
+		case kAxisY2: {
+			c_index_start = 1;
 		} break;
-		case AXIS_Z1:
-		case AXIS_Z2:
-		{
-			lCIndexStart = 2;
+		case kAxisZ1:
+		case kAxisZ2: {
+			c_index_start = 2;
 		} break;
 	};
 
 	// First a quick check.
-	switch(mOBBCollisionData->mAxisID)
-	{
-		case AXIS_X1:
-		case AXIS_Y1:
-		case AXIS_Z1:
-		{
+	switch(obb_collision_data_->axis_id_) {
+		case kAxisX1:
+		case kAxisY1:
+		case kAxisZ1: {
 			// This is all that is needed to get the collision type...
-			lAlignedBox = 1;
-			lTestOBB1 = false;
+			aligned_box = 1;
+			test_ob_b1 = false;
 
-			mOBBCollisionData->mBoxWithSeparatingPlane = 0;
-			mOBBCollisionData->mBox1NormalIndex = (int)mOBBCollisionData->mAxisID - (int)AXIS_X1;
-			mOBBCollisionData->mBox1Side = mOBBCollisionData->mSide;
+			obb_collision_data_->box_with_separating_plane_ = 0;
+			obb_collision_data_->box1_normal_index_ = (int)obb_collision_data_->axis_id_ - (int)kAxisX1;
+			obb_collision_data_->box1_side_ = obb_collision_data_->side_;
 
-			lQuickTest = true;
+			quick_test = true;
 		} break;
-		case AXIS_X2:
-		case AXIS_Y2:
-		case AXIS_Z2:
-		{
+		case kAxisX2:
+		case kAxisY2:
+		case kAxisZ2: {
 			// This is all that is needed to get the collision type...
-			lAlignedBox = 2;
-			lTestOBB2 = false;
+			aligned_box = 2;
+			test_ob_b2 = false;
 
-			mOBBCollisionData->mBoxWithSeparatingPlane = 1;
-			mOBBCollisionData->mBox2NormalIndex = (int)mOBBCollisionData->mAxisID - (int)AXIS_X2;
-			mOBBCollisionData->mBox2Side = -mOBBCollisionData->mSide;
+			obb_collision_data_->box_with_separating_plane_ = 1;
+			obb_collision_data_->box2_normal_index_ = (int)obb_collision_data_->axis_id_ - (int)kAxisX2;
+			obb_collision_data_->box2_side_ = -obb_collision_data_->side_;
 
-			lCIndexStep = 3;
-			lQuickTest = true;
+			c_index_step = 3;
+			quick_test = true;
 		} break;
 	};
 
@@ -1809,59 +1671,47 @@ typename CollisionDetector3D<_TVarType>::CollisionType CollisionDetector3D<_TVar
 	// Check OBB1.
 	//
 
-	if(lTestOBB1 == true)
-	{
-		if(lQuickTest == true)
-		{
+	if(test_ob_b1 == true) {
+		if(quick_test == true) {
 			// Quicktest means that we don't need to calculate the dot product,
-			// we can just get it from the mOBBCollisionData->mC - array.
+			// we can just get it from the obb_collision_data_->c_ - array.
 
-			int lCIndex = lCIndexStart;
-			for(int i = 0; i < 3; i++)
-			{
-				_TVarType lAbsDot = mOBBCollisionData->mAbsC[lCIndex];
-				if(lAbsDot >= lOneCmp)
-				{
-					lAlignedBox += 1;
-					mOBBCollisionData->mBox1NormalIndex = i;
+			int c_index = c_index_start;
+			for(int i = 0; i < 3; i++) {
+				_TVarType abs_dot = obb_collision_data_->abs_c_[c_index];
+				if(abs_dot >= one_cmp) {
+					aligned_box += 1;
+					obb_collision_data_->box1_normal_index_ = i;
 
-					_TVarType lDot = mOBBCollisionData->mC[lCIndex];
-					mOBBCollisionData->mBox1Side = lDot > 0.0f ?
-						mOBBCollisionData->mSide :
-						-mOBBCollisionData->mSide;
-				}
-				else if(lAbsDot < lEpsilon)
-				{
-					mOBBCollisionData->mBox1EdgeIndex = i;
+					_TVarType dot = obb_collision_data_->c_[c_index];
+					obb_collision_data_->box1_side_ = dot > 0.0f ?
+						obb_collision_data_->side_ :
+						-obb_collision_data_->side_;
+				} else if(abs_dot < epsilon) {
+					obb_collision_data_->box1_edge_index_ = i;
 				}
 
-				lCIndex += lCIndexStep;
+				c_index += c_index_step;
 			}
-		}
-		else
-		{
+		} else {
 			// Normal check. We have to calculate the dot product.
-			for(int i = 0; i < 3; i++)
-			{
-				_TVarType lDot = mOBBCollisionData->mAxis.Dot(mOBBCollisionData->mOBB1RotAxis[i]);
-				_TVarType lAbsDot = (_TVarType)fabs(lDot);
+			for(int i = 0; i < 3; i++) {
+				_TVarType dot = obb_collision_data_->axis_.Dot(obb_collision_data_->ob_b1_rot_axis_[i]);
+				_TVarType abs_dot = (_TVarType)fabs(dot);
 
 				// If the dot product if very close to 1.0.
-				if(lAbsDot >= lOneCmp)
-				{
-					lAlignedBox += 1;
+				if(abs_dot >= one_cmp) {
+					aligned_box += 1;
 
-					mOBBCollisionData->mBoxWithSeparatingPlane = 0;
-					mOBBCollisionData->mBox1NormalIndex = i;
+					obb_collision_data_->box_with_separating_plane_ = 0;
+					obb_collision_data_->box1_normal_index_ = i;
 
-					mOBBCollisionData->mBox1Side = lDot > 0.0f ?
-						mOBBCollisionData->mSide :
-						-mOBBCollisionData->mSide;
+					obb_collision_data_->box1_side_ = dot > 0.0f ?
+						obb_collision_data_->side_ :
+						-obb_collision_data_->side_;
 					break;
-				}
-				else if(lAbsDot < lEpsilon)
-				{
-					mOBBCollisionData->mBox1EdgeIndex = i;
+				} else if(abs_dot < epsilon) {
+					obb_collision_data_->box1_edge_index_ = i;
 				}
 			}
 		}
@@ -1873,134 +1723,114 @@ typename CollisionDetector3D<_TVarType>::CollisionType CollisionDetector3D<_TVar
 	// Check OBB2.
 	//
 
-	if(lTestOBB2 == true)
-	{
-		if(lQuickTest == true)
-		{
+	if(test_ob_b2 == true) {
+		if(quick_test == true) {
 			// Quicktest means that we don't need to calculate the dot product,
-			// we can just get it from the mOBBCollisionData->mC - array.
+			// we can just get it from the obb_collision_data_->c_ - array.
 
-			int lCIndex = lCIndexStart;
-			for(int i = 0; i < 3; i++)
-			{
-				_TVarType lAbsDot = mOBBCollisionData->mAbsC[lCIndex];
-				if(lAbsDot >= lOneCmp)
-				{
-					lAlignedBox += 2;
-					mOBBCollisionData->mBox2NormalIndex = i;
+			int c_index = c_index_start;
+			for(int i = 0; i < 3; i++) {
+				_TVarType abs_dot = obb_collision_data_->abs_c_[c_index];
+				if(abs_dot >= one_cmp) {
+					aligned_box += 2;
+					obb_collision_data_->box2_normal_index_ = i;
 
-					_TVarType lDot = mOBBCollisionData->mC[lCIndex];
-					mOBBCollisionData->mBox2Side = lDot > 0.0f ?
-						-mOBBCollisionData->mSide :
-						mOBBCollisionData->mSide;
-				}
-				else if(lAbsDot < lEpsilon)
-				{
-					mOBBCollisionData->mBox2EdgeIndex = i;
+					_TVarType dot = obb_collision_data_->c_[c_index];
+					obb_collision_data_->box2_side_ = dot > 0.0f ?
+						-obb_collision_data_->side_ :
+						obb_collision_data_->side_;
+				} else if(abs_dot < epsilon) {
+					obb_collision_data_->box2_edge_index_ = i;
 				}
 
-				lCIndex += 3;
+				c_index += 3;
 			}
-		}
-		else
-		{
+		} else {
 			// Normal check. We have to calculate the dot product.
-			for(int i = 0; i < 3; i++)
-			{
-				_TVarType lDot = mOBBCollisionData->mAxis.Dot(mOBBCollisionData->mOBB2RotAxis[i]);
-				_TVarType lAbsDot = (_TVarType)fabs(lDot);
+			for(int i = 0; i < 3; i++) {
+				_TVarType dot = obb_collision_data_->axis_.Dot(obb_collision_data_->ob_b2_rot_axis_[i]);
+				_TVarType abs_dot = (_TVarType)fabs(dot);
 
 				// If the dot product if very close to 1.0.
-				if(lAbsDot >= lOneCmp)
-				{
-					lAlignedBox += 2;
+				if(abs_dot >= one_cmp) {
+					aligned_box += 2;
 
-					mOBBCollisionData->mBoxWithSeparatingPlane = 1;
-					mOBBCollisionData->mBox2NormalIndex = i;
+					obb_collision_data_->box_with_separating_plane_ = 1;
+					obb_collision_data_->box2_normal_index_ = i;
 
-					mOBBCollisionData->mBox2Side = lDot > 0.0f ?
-						-mOBBCollisionData->mSide :
-						mOBBCollisionData->mSide;
+					obb_collision_data_->box2_side_ = dot > 0.0f ?
+						-obb_collision_data_->side_ :
+						obb_collision_data_->side_;
 					break;
-				}
-				else if(lAbsDot < lEpsilon)
-				{
-					mOBBCollisionData->mBox2EdgeIndex = i;
+				} else if(abs_dot < epsilon) {
+					obb_collision_data_->box2_edge_index_ = i;
 				}
 			}
 		}
 	}
 
-	if(lAlignedBox == 3)
-	{
+	if(aligned_box == 3) {
 		// Both boxes are aligned... This makes it a surface to surface collision.
-		return SURFACE_COLLISION;
-	}
-	else if(lAlignedBox == 0)
-	{
+		return kSurfaceCollision;
+	} else if(aligned_box == 0) {
 		// None of the boxes are aligned. This makes it a point collision.
-		return POINT_COLLISION;
+		return kPointCollision;
 	}
 
 	// One box axis is aligned... Check if the other box has an edge perpendicualar to the
 	// collision normal. In that case it is an edge collision, otherwise it is a point collision.
-	if((lAlignedBox == 1 && mOBBCollisionData->mBox2EdgeIndex != -1) ||
-	   (lAlignedBox == 2 && mOBBCollisionData->mBox1EdgeIndex != -1))
-	{
-		return EDGE_COLLISION;
+	if((aligned_box == 1 && obb_collision_data_->box2_edge_index_ != -1) ||
+	   (aligned_box == 2 && obb_collision_data_->box1_edge_index_ != -1)) {
+		return kEdgeCollision;
 	}
 
-	return POINT_COLLISION;
+	return kPointCollision;
 }
 
 template<class _TVarType>
-void CollisionDetector3D<_TVarType>::GetOBBToOBBIntersection(Vector3D<_TVarType> pPoint[8], int &pNumPoints)
-{
-	if(mOBBCollisionData->mValidCollision == false)
-	{
-		pNumPoints = 0;
+void CollisionDetector3D<_TVarType>::GetOBBToOBBIntersection(Vector3D<_TVarType> point[8], int &num_points) {
+	if(obb_collision_data_->valid_collision_ == false) {
+		num_points = 0;
 		return;
 	}
 
-	const _TVarType lEpsilon = MathTraits<_TVarType>::Eps();
-	CollisionType lCollisionType = GetOBBCollisionType();
+	const _TVarType epsilon = MathTraits<_TVarType>::Eps();
+	CollisionType _collision_type = GetOBBCollisionType();
 
-	switch(lCollisionType)
-	{
-	case POINT_COLLISION:
-		GetOBBPointIntersection(pPoint, pNumPoints);
+	switch(_collision_type) {
+	case kPointCollision:
+		GetOBBPointIntersection(point, num_points);
 		break;
-	case EDGE_COLLISION:
-	case SURFACE_COLLISION:
-		GetOBBEdgeSurfaceIntersection(pPoint, pNumPoints, lCollisionType);
+	case kEdgeCollision:
+	case kSurfaceCollision:
+		GetOBBEdgeSurfaceIntersection(point, num_points, _collision_type);
 		break;
 	};
 }
 
 template<class _TVarType>
-void CollisionDetector3D<_TVarType>::GetOBBPointIntersection(Vector3D<_TVarType> pPoint[8], int &pNumPoints)
-{
+void CollisionDetector3D<_TVarType>::GetOBBPointIntersection(Vector3D<_TVarType> point[8], int &num_points) {
     // Determine the point of intersection
-	const _TVarType lEpsilon = MathTraits<_TVarType>::Eps();
+	const _TVarType epsilon = MathTraits<_TVarType>::Eps();
 
-	pNumPoints = 1;
+	num_points = 1;
 
-	_TVarType lOBB1SignedExtents[3];
-	_TVarType lOBB2SignedExtents[3];
+	_TVarType ob_b1_signed_extents[3];
+	_TVarType ob_b2_signed_extents[3];
 	Vector3D<_TVarType> P;
 
-	// The values in mOBBCollisionData->mC will be used to check
-	// the alignment of the boxes, and chooses the first sign if mC[x] > 0
-	// and the second sign if mC[x] is < 0.
+	// The values in obb_collision_data_->c_ will be used to check
+	// the alignment of the boxes, and chooses the first sign if c_[x] > 0
+	// and the second sign if c_[x] is < 0.
 
-	// Here I'll explain the math behind finding the point of intersection when 
+	// Here I'll explain the math behind finding the point of intersection when
 	// the axis is one of the cross products.
 	//
-	// The cross-product-axes will only be the case when the boxes have collided edge to edge. 
-	// In the case where an edge or a corner collides with a surface, the surface itself 
+	// The cross-product-axes will only be the case when the boxes have collided edge to edge.
+	// In the case where an edge or a corner collides with a surface, the surface itself
 	// is the separating plane. And the surface is of course one side of one of the boxes.
-	// Corner to corner and corner to edge are both cases that so rare they will probably never 
-	// happen. And if they do (applying Murphys law), the result will be the same when handling 
+	// Corner to corner and corner to edge are both cases that so rare they will probably never
+	// happen. And if they do (applying Murphys law), the result will be the same when handling
 	// it as a corner to a surface case anyway. That leaves us with the edge to edge case.
 	//
 	// Let's look at the case with AXIS_X1xX2.
@@ -2020,12 +1850,12 @@ void CollisionDetector3D<_TVarType>::GetOBBPointIntersection(Vector3D<_TVarType>
 	// ---------------       \  /
 	//
 	// In the case above, OBB2's x-axis is perpendicular to OBB1's x-axis, and the
-	// distance between the two boxes is a vector perpendicular to OBB1's and OBB2's x-axis 
+	// distance between the two boxes is a vector perpendicular to OBB1's and OBB2's x-axis
 	// as well. We are now going to find the point on OBB1 where OBB2 intersects.
 	// Using the macro TSPMACRO_GET_CORNER_POINT() will give us one of the corners of OBB1,
 	// if all extents are as they should be (and of course they are).
 	//
-	// To get a corner of the box, all you have to do is to start from the 
+	// To get a corner of the box, all you have to do is to start from the
 	// center of the box and add or subtract the box's axes and multiply them with their
 	// corresponding extent. Whether you should add or subtract the axes depends on which
 	// corner you want. Since the axes are normalized (have a length of 1.0), you have
@@ -2033,45 +1863,45 @@ void CollisionDetector3D<_TVarType>::GetOBBPointIntersection(Vector3D<_TVarType>
 	// to the actual corner.
 	//
 	// In our case above we can start by subtracting the y-axis of OBB1 and we will get
-	// to its bottom side (the right side from the viewers perspective), where the intersection 
+	// to its bottom side (the right side from the viewers perspective), where the intersection
 	// occurs. If we add or subtract the z-axis as well we will get to the actual edge.
 	//
 	// The problem now is the x-axis. From the center of the box, we don't want to step
 	// to the actual corner, we only want to step a fraction of the x-axis total length.
-	// Since the intersection in the picture above is already in the center, we don't want 
+	// Since the intersection in the picture above is already in the center, we don't want
 	// to go anywhere.
 	//
 	// What we can do to make TSPMACRO_GET_CORNER_POINT() give us the correct point is to
 	// temporarily change the OBB1's x-extent. In the case above we can just set it to 0, but
 	// this is due to the fact that OBB2 is rotated exactly a multiple of 45 degrees around its
-	// x-axis. I can't draw an arbitrarily rotated box using ascii-graphics, so you have to 
-	// imagine it... 
-	// 
+	// x-axis. I can't draw an arbitrarily rotated box using ascii-graphics, so you have to
+	// imagine it...
+	//
 	// Ok, 0 is in the middle. If you project OBB2's y- and z-axis on OBB1's x-axis, and multiply
-	// them with their corresponding extents, and add them together, you will actually get the 
+	// them with their corresponding extents, and add them together, you will actually get the
 	// correct extent! In the case above, the projection of the z-axis will be a positive number
-	// (cosine of 45 degrees actually), and the projection of the y-axis will be negative by the 
+	// (cosine of 45 degrees actually), and the projection of the y-axis will be negative by the
 	// same amount, (cosine of -45 degrees). Adding them together will result in 0, in this case.
-	// 
+	//
 	// Projecting a vector on another vector is done using the dot product. All the dot products
-	// we need are actually already calculated and stored in mOBBCollisionData->mC.
+	// we need are actually already calculated and stored in obb_collision_data_->c_.
 	// The result so far will look like this:
 	//
-	// _TVarType lOBB1XExtent = mOBBCollisionData->mC[1] * lOBB2SignedExtents[1] + 
-	//                        mOBBCollisionData->mC[2] * lOBB2SignedExtents[2];
+	// _TVarType lOBB1XExtent = obb_collision_data_->c_[1] * ob_b2_signed_extents[1] +
+	//                        obb_collision_data_->c_[2] * ob_b2_signed_extents[2];
 	//
 	// But what happens if the boxes centers aren't ligned up as nice as in the picture above?
 	// What shall we do when the boxes centers are offset in OBB1's x-axis direction? Well, that's
 	// an easy one. Just project the vector between the centers of the boxes and add this one too:
 	//
-	// Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos - 
+	// Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos -
 	//                                    mOBBCollisionData->mOBB1CollisionPos);
 	//
-	// _TVarType lX1CD = mOBBCollisionData->mOBB1RotAxis[0].Dot(lCollisionDist);
-	// 
-	// _TVarType lOBB1XExtent = lX1CD +
-	//                        mOBBCollisionData->mC[1] * lOBB2SignedExtents[1] + 
-	//                        mOBBCollisionData->mC[2] * lOBB2SignedExtents[2];
+	// _TVarType x1_cd = obb_collision_data_->ob_b1_rot_axis_[0].Dot(collision_dist);
+	//
+	// _TVarType lOBB1XExtent = x1_cd +
+	//                        obb_collision_data_->c_[1] * ob_b2_signed_extents[1] +
+	//                        obb_collision_data_->c_[2] * ob_b2_signed_extents[2];
 	//
 	// Now, if the boxes are rotated a little bit relative to each other as if OBB2 was
 	// rotated around OBB1's y-axis, we've got some more trouble to take care of... There will
@@ -2083,832 +1913,757 @@ void CollisionDetector3D<_TVarType>::GetOBBPointIntersection(Vector3D<_TVarType>
 	// try playing around with a pair of boxes IRL (in real life) to get the picture of it.
 	//
 	// What we have to do is to do exactly the same calculations that we've already done,
-	// but the other way around, for OBB2 instead. Since the lCollisionDist vector is
+	// but the other way around, for OBB2 instead. Since the collision_dist vector is
 	// pointing in the wrong direction, we have to subtract its projection instead of adding it:
 	//
-	// _TVarType lX2CD = mOBBCollisionData->mOBB2RotAxis[0].Dot(lCollisionDist);
-	// 
-	// _TVarType lOBB2XExtent = mOBBCollisionData->mC[3] * lOBB1SignedExtents[1] + 
-	//                        mOBBCollisionData->mC[6] * lOBB1SignedExtents[2] -
-	//                        lX2CD;
+	// _TVarType x2_cd = obb_collision_data_->ob_b2_rot_axis_[0].Dot(collision_dist);
+	//
+	// _TVarType lOBB2XExtent = obb_collision_data_->c_[3] * ob_b1_signed_extents[1] +
+	//                        obb_collision_data_->c_[6] * ob_b1_signed_extents[2] -
+	//                        x2_cd;
 	//
 	// Now all we have to do is to project lOBB2XExtent onto OBB1's x-axis, and put it into
 	// the formula. The whole thing now looks like this:
-	// 
-	// Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos - 
+	//
+	// Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos -
 	//                                    mOBBCollisionData->mOBB1CollisionPos);
 	//
-	// _TVarType lX1CD = mOBBCollisionData->mOBB1RotAxis[0].Dot(lCollisionDist);
-	// _TVarType lX2CD = mOBBCollisionData->mOBB2RotAxis[0].Dot(lCollisionDist);
-	// 
-	// _TVarType lOBB2XExtent = mOBBCollisionData->mC[3] * lOBB1SignedExtents[1] + 
-	//                        mOBBCollisionData->mC[6] * lOBB1SignedExtents[2] -
-	//                        lX2CD;
+	// _TVarType x1_cd = obb_collision_data_->ob_b1_rot_axis_[0].Dot(collision_dist);
+	// _TVarType x2_cd = obb_collision_data_->ob_b2_rot_axis_[0].Dot(collision_dist);
 	//
-	// _TVarType lOBB1XExtent = lX1CD +
-	//                        mOBBCollisionData->mC[0] * lOBB2XExtent +
-	//                        mOBBCollisionData->mC[1] * lOBB2SignedExtents[1] + 
-	//                        mOBBCollisionData->mC[2] * lOBB2SignedExtents[2];
+	// _TVarType lOBB2XExtent = obb_collision_data_->c_[3] * ob_b1_signed_extents[1] +
+	//                        obb_collision_data_->c_[6] * ob_b1_signed_extents[2] -
+	//                        x2_cd;
+	//
+	// _TVarType lOBB1XExtent = x1_cd +
+	//                        obb_collision_data_->c_[0] * lOBB2XExtent +
+	//                        obb_collision_data_->c_[1] * ob_b2_signed_extents[1] +
+	//                        obb_collision_data_->c_[2] * ob_b2_signed_extents[2];
 
 
-	switch(mOBBCollisionData->mAxisID)
-	{
-		case AXIS_X1:
-		case AXIS_Y1:
-		case AXIS_Z1:
-		{
-			int i = ((int)mOBBCollisionData->mAxisID - 1) * 3;
-			for(int j = 0; j < 3; j++, i++)
-			{
-				TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[j], -, +, 
-							   mOBBCollisionData->mSide,
-							   mOBBCollisionData->mC[i],
-							   mOBBCollisionData->mOBB2Size[j]);
+	switch(obb_collision_data_->axis_id_) {
+		case kAxisX1:
+		case kAxisY1:
+		case kAxisZ1: {
+			int i = ((int)obb_collision_data_->axis_id_ - 1) * 3;
+			for(int j = 0; j < 3; j++, i++) {
+				TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[j], -, +,
+							   obb_collision_data_->side_,
+							   obb_collision_data_->c_[i],
+							   obb_collision_data_->ob_b2_size_[j]);
 			}
-			TSPMACRO_GET_CORNER_POINT(pPoint[0],
-						  mOBBCollisionData->mOBB2RotAxis, 
-						  mOBBCollisionData->mOBB2CollisionPos, 
-						  lOBB2SignedExtents);
+			TSPMACRO_GET_CORNER_POINT(point[0],
+						  obb_collision_data_->ob_b2_rot_axis_,
+						  obb_collision_data_->ob_b2_collision_pos_,
+						  ob_b2_signed_extents);
 			return;
 		}
-		case AXIS_X2:
-		case AXIS_Y2:
-		case AXIS_Z2:
-		{
-			int i = (int)mOBBCollisionData->mAxisID - 4;
-			for(int j = 0; j < 3; j++, i += 3)
-			{
-				TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[j], +, -, 
-				                           mOBBCollisionData->mSide,
-				                           mOBBCollisionData->mC[i],
-				                           mOBBCollisionData->mOBB1Size[j]);
+		case kAxisX2:
+		case kAxisY2:
+		case kAxisZ2: {
+			int i = (int)obb_collision_data_->axis_id_ - 4;
+			for(int j = 0; j < 3; j++, i += 3) {
+				TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[j], +, -,
+				                           obb_collision_data_->side_,
+				                           obb_collision_data_->c_[i],
+				                           obb_collision_data_->ob_b1_size_[j]);
 			}
-			TSPMACRO_GET_CORNER_POINT(pPoint[0],
-			                          mOBBCollisionData->mOBB1RotAxis,
-			                          mOBBCollisionData->mOBB1CollisionPos,
-			                          lOBB1SignedExtents);
+			TSPMACRO_GET_CORNER_POINT(point[0],
+			                          obb_collision_data_->ob_b1_rot_axis_,
+			                          obb_collision_data_->ob_b1_collision_pos_,
+			                          ob_b1_signed_extents);
 			return;
 		}
-		case AXIS_X1xX2:
-		{
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[1], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[6], // OBB1AxisZ * OBB2AxisX
-			                           mOBBCollisionData->mOBB1Size[1]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[2], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[3], // OBB1AxisY * OBB2AxisX
-			                           mOBBCollisionData->mOBB1Size[2]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[1], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[2], // OBB1AxisX * OBB2AxisZ
-			                           mOBBCollisionData->mOBB2Size[1]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[2], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[1], // OBB1AxisX * OBB2AxisY
-			                           mOBBCollisionData->mOBB2Size[2]);
+		case AXIS_X1xX2: {
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[1], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[6], // OBB1AxisZ * OBB2AxisX
+			                           obb_collision_data_->ob_b1_size_[1]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[2], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[3], // OBB1AxisY * OBB2AxisX
+			                           obb_collision_data_->ob_b1_size_[2]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[1], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[2], // OBB1AxisX * OBB2AxisZ
+			                           obb_collision_data_->ob_b2_size_[1]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[2], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[1], // OBB1AxisX * OBB2AxisY
+			                           obb_collision_data_->ob_b2_size_[2]);
 
-			_TVarType lDiv = 1.0f - mOBBCollisionData->mC[0] * mOBBCollisionData->mC[0];
+			_TVarType div = 1.0f - obb_collision_data_->c_[0] * obb_collision_data_->c_[0];
 
-			if(abs(lDiv) > lEpsilon)
-			{
-				Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos - 
-				                                   mOBBCollisionData->mOBB1CollisionPos);
+			if(abs(div) > epsilon) {
+				Vector3D<_TVarType> collision_dist(obb_collision_data_->ob_b2_collision_pos_ -
+				                                   obb_collision_data_->ob_b1_collision_pos_);
 
-				_TVarType lX1CD = mOBBCollisionData->mOBB1RotAxis[0].Dot(lCollisionDist);
-				_TVarType lX2CD = mOBBCollisionData->mOBB2RotAxis[0].Dot(lCollisionDist);
-				_TVarType* lC = mOBBCollisionData->mC;
+				_TVarType x1_cd = obb_collision_data_->ob_b1_rot_axis_[0].Dot(collision_dist);
+				_TVarType x2_cd = obb_collision_data_->ob_b2_rot_axis_[0].Dot(collision_dist);
+				_TVarType* c = obb_collision_data_->c_;
 
-				_TVarType lTemp = lC[3] * lOBB1SignedExtents[1] + 
-				                  lC[6] * lOBB1SignedExtents[2] - lX2CD;
-				lOBB1SignedExtents[0] = (lX1CD + 
-					lC[0] * lTemp + 
-					lC[1] * lOBB2SignedExtents[1] + 
-					lC[2] * lOBB2SignedExtents[2]) / lDiv;
+				_TVarType temp = c[3] * ob_b1_signed_extents[1] +
+				                  c[6] * ob_b1_signed_extents[2] - x2_cd;
+				ob_b1_signed_extents[0] = (x1_cd +
+					c[0] * temp +
+					c[1] * ob_b2_signed_extents[1] +
+					c[2] * ob_b2_signed_extents[2]) / div;
+			} else {
+				ob_b1_signed_extents[0] = 0.0f;
 			}
-			else
-			{
-				lOBB1SignedExtents[0] = 0.0f;
-			}
-			TSPMACRO_GET_CORNER_POINT(pPoint[0],
-			                          mOBBCollisionData->mOBB1RotAxis,
-			                          mOBBCollisionData->mOBB1CollisionPos,
-			                          lOBB1SignedExtents);
+			TSPMACRO_GET_CORNER_POINT(point[0],
+			                          obb_collision_data_->ob_b1_rot_axis_,
+			                          obb_collision_data_->ob_b1_collision_pos_,
+			                          ob_b1_signed_extents);
 			return;
 		}
-		case AXIS_X1xY2:
-		{
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[1], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[7], // OBB1AxisZ * OBB2AxisY
-			                           mOBBCollisionData->mOBB1Size[1]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[2], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[4], // OBB1AxisY * OBB2AxisY
-			                           mOBBCollisionData->mOBB1Size[2]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[0], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[2], // OBB1AxisX * OBB2AxisZ
-			                           mOBBCollisionData->mOBB2Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[2], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[0], // OBB1AxisX * OBB2AxisX
-			                           mOBBCollisionData->mOBB2Size[2]);
+		case AXIS_X1xY2: {
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[1], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[7], // OBB1AxisZ * OBB2AxisY
+			                           obb_collision_data_->ob_b1_size_[1]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[2], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[4], // OBB1AxisY * OBB2AxisY
+			                           obb_collision_data_->ob_b1_size_[2]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[0], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[2], // OBB1AxisX * OBB2AxisZ
+			                           obb_collision_data_->ob_b2_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[2], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[0], // OBB1AxisX * OBB2AxisX
+			                           obb_collision_data_->ob_b2_size_[2]);
 
-			_TVarType lDiv = 1.0f - mOBBCollisionData->mC[1] * mOBBCollisionData->mC[1];
+			_TVarType div = 1.0f - obb_collision_data_->c_[1] * obb_collision_data_->c_[1];
 
-			if(abs(lDiv) > lEpsilon)
-			{
-				Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos - 
-				                                   mOBBCollisionData->mOBB1CollisionPos);
+			if(abs(div) > epsilon) {
+				Vector3D<_TVarType> collision_dist(obb_collision_data_->ob_b2_collision_pos_ -
+				                                   obb_collision_data_->ob_b1_collision_pos_);
 
-				_TVarType lX1CD = mOBBCollisionData->mOBB1RotAxis[0].Dot(lCollisionDist);
-				_TVarType lY2CD = mOBBCollisionData->mOBB2RotAxis[1].Dot(lCollisionDist);
-				_TVarType* lC = mOBBCollisionData->mC;
+				_TVarType x1_cd = obb_collision_data_->ob_b1_rot_axis_[0].Dot(collision_dist);
+				_TVarType y2_cd = obb_collision_data_->ob_b2_rot_axis_[1].Dot(collision_dist);
+				_TVarType* c = obb_collision_data_->c_;
 
-				_TVarType lTemp = lC[4] * lOBB1SignedExtents[1] + 
-				                  lC[7] * lOBB1SignedExtents[2] - lY2CD;
-				lOBB1SignedExtents[0] = (lX1CD + 
-					lC[1] * lTemp + 
-					lC[0] * lOBB2SignedExtents[0] + 
-					lC[2] * lOBB2SignedExtents[2]) / lDiv;
+				_TVarType temp = c[4] * ob_b1_signed_extents[1] +
+				                  c[7] * ob_b1_signed_extents[2] - y2_cd;
+				ob_b1_signed_extents[0] = (x1_cd +
+					c[1] * temp +
+					c[0] * ob_b2_signed_extents[0] +
+					c[2] * ob_b2_signed_extents[2]) / div;
+			} else {
+				ob_b1_signed_extents[0] = 0.0f;
 			}
-			else
-			{
-				lOBB1SignedExtents[0] = 0.0f;
-			}
-			TSPMACRO_GET_CORNER_POINT(pPoint[0],
-			                          mOBBCollisionData->mOBB1RotAxis,
-			                          mOBBCollisionData->mOBB1CollisionPos,
-			                          lOBB1SignedExtents);
+			TSPMACRO_GET_CORNER_POINT(point[0],
+			                          obb_collision_data_->ob_b1_rot_axis_,
+			                          obb_collision_data_->ob_b1_collision_pos_,
+			                          ob_b1_signed_extents);
 			return;
 		}
-		case AXIS_X1xZ2:
-		{
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[1], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[8], // OBB1AxisZ * OBB2AxisZ
-			                           mOBBCollisionData->mOBB1Size[1]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[2], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[5], // OBB1AxisY * OBB2AxisZ
-			                           mOBBCollisionData->mOBB1Size[2]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[0], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[1], // OBB1AxisX * OBB2AxisY
-			                           mOBBCollisionData->mOBB2Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[1], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[0], // OBB1AxisX * OBB2AxisX
-			                           mOBBCollisionData->mOBB2Size[1]);
+		case AXIS_X1xZ2: {
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[1], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[8], // OBB1AxisZ * OBB2AxisZ
+			                           obb_collision_data_->ob_b1_size_[1]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[2], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[5], // OBB1AxisY * OBB2AxisZ
+			                           obb_collision_data_->ob_b1_size_[2]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[0], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[1], // OBB1AxisX * OBB2AxisY
+			                           obb_collision_data_->ob_b2_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[1], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[0], // OBB1AxisX * OBB2AxisX
+			                           obb_collision_data_->ob_b2_size_[1]);
 
-			_TVarType lDiv = 1.0f - mOBBCollisionData->mC[2] * mOBBCollisionData->mC[2];
+			_TVarType div = 1.0f - obb_collision_data_->c_[2] * obb_collision_data_->c_[2];
 
-			if(abs(lDiv) > lEpsilon)
-			{
-				Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos - 
-				                                   mOBBCollisionData->mOBB1CollisionPos);
+			if(abs(div) > epsilon) {
+				Vector3D<_TVarType> collision_dist(obb_collision_data_->ob_b2_collision_pos_ -
+				                                   obb_collision_data_->ob_b1_collision_pos_);
 
-				_TVarType lX1CD = mOBBCollisionData->mOBB1RotAxis[0].Dot(lCollisionDist);
-				_TVarType lZ2CD = mOBBCollisionData->mOBB2RotAxis[2].Dot(lCollisionDist);
-				_TVarType* lC = mOBBCollisionData->mC;
+				_TVarType x1_cd = obb_collision_data_->ob_b1_rot_axis_[0].Dot(collision_dist);
+				_TVarType z2_cd = obb_collision_data_->ob_b2_rot_axis_[2].Dot(collision_dist);
+				_TVarType* c = obb_collision_data_->c_;
 
-				_TVarType lTemp = lC[5] * lOBB1SignedExtents[1] + 
-				                  lC[8] * lOBB1SignedExtents[2] - lZ2CD;
-				lOBB1SignedExtents[0] = (lX1CD + 
-					lC[2] * lTemp + 
-					lC[0] * lOBB2SignedExtents[0] + 
-					lC[1] * lOBB2SignedExtents[1]) / lDiv;
+				_TVarType temp = c[5] * ob_b1_signed_extents[1] +
+				                  c[8] * ob_b1_signed_extents[2] - z2_cd;
+				ob_b1_signed_extents[0] = (x1_cd +
+					c[2] * temp +
+					c[0] * ob_b2_signed_extents[0] +
+					c[1] * ob_b2_signed_extents[1]) / div;
+			} else {
+				ob_b1_signed_extents[0] = 0.0f;
 			}
-			else
-			{
-				lOBB1SignedExtents[0] = 0.0f;
-			}
-			TSPMACRO_GET_CORNER_POINT(pPoint[0],
-			                          mOBBCollisionData->mOBB1RotAxis,
-			                          mOBBCollisionData->mOBB1CollisionPos,
-			                          lOBB1SignedExtents);
+			TSPMACRO_GET_CORNER_POINT(point[0],
+			                          obb_collision_data_->ob_b1_rot_axis_,
+			                          obb_collision_data_->ob_b1_collision_pos_,
+			                          ob_b1_signed_extents);
 			return;
 		}
-		case AXIS_Y1xX2:
-		{
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[0], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[6], // OBB1AxisZ * OBB2AxisX
-			                           mOBBCollisionData->mOBB1Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[2], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[0], // OBB1AxisX * OBB2AxisX
-			                           mOBBCollisionData->mOBB1Size[2]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[1], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[5], // OBB1AxisY * OBB2AxisZ
-			                           mOBBCollisionData->mOBB2Size[1]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[2], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[4], // OBB1AxisY * OBB2AxisY
-			                           mOBBCollisionData->mOBB2Size[2]);
+		case AXIS_Y1xX2: {
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[0], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[6], // OBB1AxisZ * OBB2AxisX
+			                           obb_collision_data_->ob_b1_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[2], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[0], // OBB1AxisX * OBB2AxisX
+			                           obb_collision_data_->ob_b1_size_[2]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[1], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[5], // OBB1AxisY * OBB2AxisZ
+			                           obb_collision_data_->ob_b2_size_[1]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[2], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[4], // OBB1AxisY * OBB2AxisY
+			                           obb_collision_data_->ob_b2_size_[2]);
 
-			_TVarType lDiv = 1.0f - mOBBCollisionData->mC[3] * mOBBCollisionData->mC[3];
+			_TVarType div = 1.0f - obb_collision_data_->c_[3] * obb_collision_data_->c_[3];
 
-			if(abs(lDiv) > lEpsilon)
-			{
-				Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos - 
-				                                   mOBBCollisionData->mOBB1CollisionPos);
+			if(abs(div) > epsilon) {
+				Vector3D<_TVarType> collision_dist(obb_collision_data_->ob_b2_collision_pos_ -
+				                                   obb_collision_data_->ob_b1_collision_pos_);
 
-				_TVarType lY1CD = mOBBCollisionData->mOBB1RotAxis[1].Dot(lCollisionDist);
-				_TVarType lX2CD = mOBBCollisionData->mOBB2RotAxis[0].Dot(lCollisionDist);
-				_TVarType* lC = mOBBCollisionData->mC;
+				_TVarType y1_cd = obb_collision_data_->ob_b1_rot_axis_[1].Dot(collision_dist);
+				_TVarType x2_cd = obb_collision_data_->ob_b2_rot_axis_[0].Dot(collision_dist);
+				_TVarType* c = obb_collision_data_->c_;
 
-				_TVarType lTemp = lC[0] * lOBB1SignedExtents[0] + 
-				                  lC[6] * lOBB1SignedExtents[2] - lX2CD;
-				lOBB1SignedExtents[1] = (lY1CD + 
-					lC[3] * lTemp + 
-					lC[4] * lOBB2SignedExtents[1] + 
-					lC[5] * lOBB2SignedExtents[2]) / lDiv;
+				_TVarType temp = c[0] * ob_b1_signed_extents[0] +
+				                  c[6] * ob_b1_signed_extents[2] - x2_cd;
+				ob_b1_signed_extents[1] = (y1_cd +
+					c[3] * temp +
+					c[4] * ob_b2_signed_extents[1] +
+					c[5] * ob_b2_signed_extents[2]) / div;
+			} else {
+				ob_b1_signed_extents[1] = 0.0f;
 			}
-			else
-			{
-				lOBB1SignedExtents[1] = 0.0f;
-			}
-			TSPMACRO_GET_CORNER_POINT(pPoint[0],
-			                          mOBBCollisionData->mOBB1RotAxis,
-			                          mOBBCollisionData->mOBB1CollisionPos,
-			                          lOBB1SignedExtents);
+			TSPMACRO_GET_CORNER_POINT(point[0],
+			                          obb_collision_data_->ob_b1_rot_axis_,
+			                          obb_collision_data_->ob_b1_collision_pos_,
+			                          ob_b1_signed_extents);
 			return;
 		}
-		case AXIS_Y1xY2:
-		{
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[0], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[7], // OBB1AxisZ * OBB2AxisY
-			                           mOBBCollisionData->mOBB1Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[2], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[1], // OBB1AxisX * OBB2AxisY
-			                           mOBBCollisionData->mOBB1Size[2]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[0], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[5], // OBB1AxisY * OBB2AxisZ
-			                           mOBBCollisionData->mOBB2Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[2], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[3], // OBB1AxisY * OBB2AxisX
-			                           mOBBCollisionData->mOBB2Size[2]);
+		case AXIS_Y1xY2: {
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[0], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[7], // OBB1AxisZ * OBB2AxisY
+			                           obb_collision_data_->ob_b1_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[2], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[1], // OBB1AxisX * OBB2AxisY
+			                           obb_collision_data_->ob_b1_size_[2]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[0], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[5], // OBB1AxisY * OBB2AxisZ
+			                           obb_collision_data_->ob_b2_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[2], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[3], // OBB1AxisY * OBB2AxisX
+			                           obb_collision_data_->ob_b2_size_[2]);
 
-			_TVarType lDiv = 1.0f - mOBBCollisionData->mC[4] * mOBBCollisionData->mC[4];
+			_TVarType div = 1.0f - obb_collision_data_->c_[4] * obb_collision_data_->c_[4];
 
-			if(abs(lDiv) > lEpsilon)
-			{
-				Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos - 
-				                                   mOBBCollisionData->mOBB1CollisionPos);
+			if(abs(div) > epsilon) {
+				Vector3D<_TVarType> collision_dist(obb_collision_data_->ob_b2_collision_pos_ -
+				                                   obb_collision_data_->ob_b1_collision_pos_);
 
-				_TVarType lY1CD = mOBBCollisionData->mOBB1RotAxis[1].Dot(lCollisionDist);
-				_TVarType lY2CD = mOBBCollisionData->mOBB2RotAxis[1].Dot(lCollisionDist);
-				_TVarType* lC = mOBBCollisionData->mC;
+				_TVarType y1_cd = obb_collision_data_->ob_b1_rot_axis_[1].Dot(collision_dist);
+				_TVarType y2_cd = obb_collision_data_->ob_b2_rot_axis_[1].Dot(collision_dist);
+				_TVarType* c = obb_collision_data_->c_;
 
-				_TVarType lTemp = lC[1] * lOBB1SignedExtents[0] + 
-				                  lC[7] * lOBB1SignedExtents[2] - lY2CD;
-				lOBB1SignedExtents[1] = (lY1CD + 
-					lC[4] * lTemp + 
-					lC[3] * lOBB2SignedExtents[0] + 
-					lC[5] * lOBB2SignedExtents[2]) / lDiv;
+				_TVarType temp = c[1] * ob_b1_signed_extents[0] +
+				                  c[7] * ob_b1_signed_extents[2] - y2_cd;
+				ob_b1_signed_extents[1] = (y1_cd +
+					c[4] * temp +
+					c[3] * ob_b2_signed_extents[0] +
+					c[5] * ob_b2_signed_extents[2]) / div;
+			} else {
+				ob_b1_signed_extents[1] = 0.0f;
 			}
-			else
-			{
-				lOBB1SignedExtents[1] = 0.0f;
-			}
-			TSPMACRO_GET_CORNER_POINT(pPoint[0],
-			                          mOBBCollisionData->mOBB1RotAxis,
-			                          mOBBCollisionData->mOBB1CollisionPos,
-			                          lOBB1SignedExtents);
+			TSPMACRO_GET_CORNER_POINT(point[0],
+			                          obb_collision_data_->ob_b1_rot_axis_,
+			                          obb_collision_data_->ob_b1_collision_pos_,
+			                          ob_b1_signed_extents);
 
 			return;
 		}
-		case AXIS_Y1xZ2:
-		{
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[0], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[8], // OBB1AxisZ * OBB2AxisZ
-			                           mOBBCollisionData->mOBB1Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[2], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[2], // OBB1AxisX * OBB2AxisZ
-			                           mOBBCollisionData->mOBB1Size[2]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[0], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[4], // OBB1AxisY * OBB2AxisY
-			                           mOBBCollisionData->mOBB2Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[1], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[3], // OBB1AxisY * OBB2AxisX
-			                           mOBBCollisionData->mOBB2Size[1]);
+		case AXIS_Y1xZ2: {
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[0], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[8], // OBB1AxisZ * OBB2AxisZ
+			                           obb_collision_data_->ob_b1_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[2], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[2], // OBB1AxisX * OBB2AxisZ
+			                           obb_collision_data_->ob_b1_size_[2]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[0], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[4], // OBB1AxisY * OBB2AxisY
+			                           obb_collision_data_->ob_b2_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[1], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[3], // OBB1AxisY * OBB2AxisX
+			                           obb_collision_data_->ob_b2_size_[1]);
 
-			_TVarType lDiv = 1.0f - mOBBCollisionData->mC[5] * mOBBCollisionData->mC[5];
+			_TVarType div = 1.0f - obb_collision_data_->c_[5] * obb_collision_data_->c_[5];
 
-			if(abs(lDiv) > lEpsilon)
-			{
-				Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos - 
-				                                   mOBBCollisionData->mOBB1CollisionPos);
+			if(abs(div) > epsilon) {
+				Vector3D<_TVarType> collision_dist(obb_collision_data_->ob_b2_collision_pos_ -
+				                                   obb_collision_data_->ob_b1_collision_pos_);
 
-				_TVarType lY1CD = mOBBCollisionData->mOBB1RotAxis[1].Dot(lCollisionDist);
-				_TVarType lZ2CD = mOBBCollisionData->mOBB2RotAxis[2].Dot(lCollisionDist);
-				_TVarType* lC = mOBBCollisionData->mC;
+				_TVarType y1_cd = obb_collision_data_->ob_b1_rot_axis_[1].Dot(collision_dist);
+				_TVarType z2_cd = obb_collision_data_->ob_b2_rot_axis_[2].Dot(collision_dist);
+				_TVarType* c = obb_collision_data_->c_;
 
-				_TVarType lTemp = lC[2] * lOBB1SignedExtents[0] + 
-				                  lC[8] * lOBB1SignedExtents[2] - lZ2CD;
-				lOBB1SignedExtents[1] = (lY1CD + 
-					lC[5] * lTemp + 
-					lC[3] * lOBB2SignedExtents[0] + 
-					lC[4] * lOBB2SignedExtents[1]) / lDiv;
+				_TVarType temp = c[2] * ob_b1_signed_extents[0] +
+				                  c[8] * ob_b1_signed_extents[2] - z2_cd;
+				ob_b1_signed_extents[1] = (y1_cd +
+					c[5] * temp +
+					c[3] * ob_b2_signed_extents[0] +
+					c[4] * ob_b2_signed_extents[1]) / div;
+			} else {
+				ob_b1_signed_extents[1] = 0.0f;
 			}
-			else
-			{
-				lOBB1SignedExtents[1] = 0.0f;
-			}
-			TSPMACRO_GET_CORNER_POINT(pPoint[0],
-			                          mOBBCollisionData->mOBB1RotAxis,
-			                          mOBBCollisionData->mOBB1CollisionPos,
-			                          lOBB1SignedExtents);
+			TSPMACRO_GET_CORNER_POINT(point[0],
+			                          obb_collision_data_->ob_b1_rot_axis_,
+			                          obb_collision_data_->ob_b1_collision_pos_,
+			                          ob_b1_signed_extents);
 			return;
 		}
-		case AXIS_Z1xX2:
-		{
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[0], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[3], // OBB1AxisY * OBB2AxisX
-			                           mOBBCollisionData->mOBB1Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[1], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[0], // OBB1AxisX * OBB2AxisX
-			                           mOBBCollisionData->mOBB1Size[1]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[1], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[8], // OBB1AxisZ * OBB2AxisZ
-			                           mOBBCollisionData->mOBB2Size[1]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[2], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[7], // OBB1AxisZ * OBB2AxisY
-			                           mOBBCollisionData->mOBB2Size[2]);
+		case AXIS_Z1xX2: {
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[0], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[3], // OBB1AxisY * OBB2AxisX
+			                           obb_collision_data_->ob_b1_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[1], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[0], // OBB1AxisX * OBB2AxisX
+			                           obb_collision_data_->ob_b1_size_[1]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[1], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[8], // OBB1AxisZ * OBB2AxisZ
+			                           obb_collision_data_->ob_b2_size_[1]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[2], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[7], // OBB1AxisZ * OBB2AxisY
+			                           obb_collision_data_->ob_b2_size_[2]);
 
-			_TVarType lDiv = 1.0f - mOBBCollisionData->mC[6] * mOBBCollisionData->mC[6];
+			_TVarType div = 1.0f - obb_collision_data_->c_[6] * obb_collision_data_->c_[6];
 
-			if(abs(lDiv) > lEpsilon)
-			{
-				Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos - 
-				                                   mOBBCollisionData->mOBB1CollisionPos);
+			if(abs(div) > epsilon) {
+				Vector3D<_TVarType> collision_dist(obb_collision_data_->ob_b2_collision_pos_ -
+				                                   obb_collision_data_->ob_b1_collision_pos_);
 
-				_TVarType lZ1CD = mOBBCollisionData->mOBB1RotAxis[2].Dot(lCollisionDist);
-				_TVarType lX2CD = mOBBCollisionData->mOBB2RotAxis[0].Dot(lCollisionDist);
-				_TVarType* lC = mOBBCollisionData->mC;
+				_TVarType z1_cd = obb_collision_data_->ob_b1_rot_axis_[2].Dot(collision_dist);
+				_TVarType x2_cd = obb_collision_data_->ob_b2_rot_axis_[0].Dot(collision_dist);
+				_TVarType* c = obb_collision_data_->c_;
 
-				_TVarType lTemp = lC[0] * lOBB1SignedExtents[0] + 
-				                  lC[3] * lOBB1SignedExtents[1] - lX2CD;
-				lOBB1SignedExtents[2] = (lZ1CD + 
-					lC[6] * lTemp + 
-					lC[7] * lOBB2SignedExtents[1] + 
-					lC[8] * lOBB2SignedExtents[2]) / lDiv;
+				_TVarType temp = c[0] * ob_b1_signed_extents[0] +
+				                  c[3] * ob_b1_signed_extents[1] - x2_cd;
+				ob_b1_signed_extents[2] = (z1_cd +
+					c[6] * temp +
+					c[7] * ob_b2_signed_extents[1] +
+					c[8] * ob_b2_signed_extents[2]) / div;
+			} else {
+				ob_b1_signed_extents[2] = 0.0f;
 			}
-			else
-			{
-				lOBB1SignedExtents[2] = 0.0f;
-			}
-			TSPMACRO_GET_CORNER_POINT(pPoint[0],
-			                          mOBBCollisionData->mOBB1RotAxis,
-			                          mOBBCollisionData->mOBB1CollisionPos,
-			                          lOBB1SignedExtents);
+			TSPMACRO_GET_CORNER_POINT(point[0],
+			                          obb_collision_data_->ob_b1_rot_axis_,
+			                          obb_collision_data_->ob_b1_collision_pos_,
+			                          ob_b1_signed_extents);
 			return;
 		}
-		case AXIS_Z1xY2:
-		{
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[0], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[4], // OBB1AxisY * OBB2AxisY
-			                           mOBBCollisionData->mOBB1Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[1], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[1], // OBB1AxisX * OBB2AxisY
-			                           mOBBCollisionData->mOBB1Size[1]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[0], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[8], // OBB1AxisZ * OBB2AxisZ
-			                           mOBBCollisionData->mOBB2Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[2], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[6], // OBB1AxisZ * OBB2AxisX
-			                           mOBBCollisionData->mOBB2Size[2]);
+		case AXIS_Z1xY2: {
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[0], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[4], // OBB1AxisY * OBB2AxisY
+			                           obb_collision_data_->ob_b1_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[1], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[1], // OBB1AxisX * OBB2AxisY
+			                           obb_collision_data_->ob_b1_size_[1]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[0], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[8], // OBB1AxisZ * OBB2AxisZ
+			                           obb_collision_data_->ob_b2_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[2], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[6], // OBB1AxisZ * OBB2AxisX
+			                           obb_collision_data_->ob_b2_size_[2]);
 
-			_TVarType lDiv = 1.0f - mOBBCollisionData->mC[7] * mOBBCollisionData->mC[7];
+			_TVarType div = 1.0f - obb_collision_data_->c_[7] * obb_collision_data_->c_[7];
 
-			if(abs(lDiv) > lEpsilon)
-			{
-				Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos - 
-				                                   mOBBCollisionData->mOBB1CollisionPos);
+			if(abs(div) > epsilon) {
+				Vector3D<_TVarType> collision_dist(obb_collision_data_->ob_b2_collision_pos_ -
+				                                   obb_collision_data_->ob_b1_collision_pos_);
 
-				_TVarType lZ1CD = mOBBCollisionData->mOBB1RotAxis[2].Dot(lCollisionDist);
-				_TVarType lY2CD = mOBBCollisionData->mOBB2RotAxis[1].Dot(lCollisionDist);
-				_TVarType* lC = mOBBCollisionData->mC;
+				_TVarType z1_cd = obb_collision_data_->ob_b1_rot_axis_[2].Dot(collision_dist);
+				_TVarType y2_cd = obb_collision_data_->ob_b2_rot_axis_[1].Dot(collision_dist);
+				_TVarType* c = obb_collision_data_->c_;
 
-				_TVarType lTemp = lC[1] * lOBB1SignedExtents[0] + 
-				                  lC[4] * lOBB1SignedExtents[1] - lY2CD;
-				lOBB1SignedExtents[2] = (lZ1CD + 
-					lC[7] * lTemp + 
-					lC[6] * lOBB2SignedExtents[0] + 
-					lC[8] * lOBB2SignedExtents[2]) / lDiv;
+				_TVarType temp = c[1] * ob_b1_signed_extents[0] +
+				                  c[4] * ob_b1_signed_extents[1] - y2_cd;
+				ob_b1_signed_extents[2] = (z1_cd +
+					c[7] * temp +
+					c[6] * ob_b2_signed_extents[0] +
+					c[8] * ob_b2_signed_extents[2]) / div;
+			} else {
+				ob_b1_signed_extents[2] = 0.0f;
 			}
-			else
-			{
-				lOBB1SignedExtents[2] = 0.0f;
-			}
-			TSPMACRO_GET_CORNER_POINT(pPoint[0],
-			                          mOBBCollisionData->mOBB1RotAxis,
-			                          mOBBCollisionData->mOBB1CollisionPos,
-			                          lOBB1SignedExtents);
+			TSPMACRO_GET_CORNER_POINT(point[0],
+			                          obb_collision_data_->ob_b1_rot_axis_,
+			                          obb_collision_data_->ob_b1_collision_pos_,
+			                          ob_b1_signed_extents);
 			return;
 		}
-		case AXIS_Z1xZ2:
-		{
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[0], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[5], // OBB1AxisY * OBB2AxisZ
-			                           mOBBCollisionData->mOBB1Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB1SignedExtents[1], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[2], // OBB1AxisX * OBB2AxisZ
-			                           mOBBCollisionData->mOBB1Size[1]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[0], -, +, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[7], // OBB1AxisZ * OBB2AxisY
-			                           mOBBCollisionData->mOBB2Size[0]);
-			TSPMACRO_GET_SIGNED_EXTENT(lOBB2SignedExtents[1], +, -, 
-			                           mOBBCollisionData->mSide,
-			                           mOBBCollisionData->mC[6], // OBB1AxisZ * OBB2AxisX
-			                           mOBBCollisionData->mOBB2Size[1]);
+		case AXIS_Z1xZ2: {
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[0], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[5], // OBB1AxisY * OBB2AxisZ
+			                           obb_collision_data_->ob_b1_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b1_signed_extents[1], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[2], // OBB1AxisX * OBB2AxisZ
+			                           obb_collision_data_->ob_b1_size_[1]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[0], -, +,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[7], // OBB1AxisZ * OBB2AxisY
+			                           obb_collision_data_->ob_b2_size_[0]);
+			TSPMACRO_GET_SIGNED_EXTENT(ob_b2_signed_extents[1], +, -,
+			                           obb_collision_data_->side_,
+			                           obb_collision_data_->c_[6], // OBB1AxisZ * OBB2AxisX
+			                           obb_collision_data_->ob_b2_size_[1]);
 
-			_TVarType lDiv = 1.0f - mOBBCollisionData->mC[8] * mOBBCollisionData->mC[8];
+			_TVarType div = 1.0f - obb_collision_data_->c_[8] * obb_collision_data_->c_[8];
 
-			if(abs(lDiv) > lEpsilon)
-			{
-				Vector3D<_TVarType> lCollisionDist(mOBBCollisionData->mOBB2CollisionPos - 
-				                                   mOBBCollisionData->mOBB1CollisionPos);
+			if(abs(div) > epsilon) {
+				Vector3D<_TVarType> collision_dist(obb_collision_data_->ob_b2_collision_pos_ -
+				                                   obb_collision_data_->ob_b1_collision_pos_);
 
-				_TVarType lZ1CD = mOBBCollisionData->mOBB1RotAxis[2].Dot(lCollisionDist);
-				_TVarType lZ2CD = mOBBCollisionData->mOBB2RotAxis[2].Dot(lCollisionDist);
-				_TVarType* lC = mOBBCollisionData->mC;
+				_TVarType z1_cd = obb_collision_data_->ob_b1_rot_axis_[2].Dot(collision_dist);
+				_TVarType z2_cd = obb_collision_data_->ob_b2_rot_axis_[2].Dot(collision_dist);
+				_TVarType* c = obb_collision_data_->c_;
 
-				_TVarType lTemp = lC[2] * lOBB1SignedExtents[0] + 
-				                  lC[5] * lOBB1SignedExtents[1] - lZ2CD;
-				lOBB1SignedExtents[2] = (lZ1CD + 
-					lC[8] * lTemp + 
-					lC[6] * lOBB2SignedExtents[0] + 
-					lC[7] * lOBB2SignedExtents[1]) / lDiv;
+				_TVarType temp = c[2] * ob_b1_signed_extents[0] +
+				                  c[5] * ob_b1_signed_extents[1] - z2_cd;
+				ob_b1_signed_extents[2] = (z1_cd +
+					c[8] * temp +
+					c[6] * ob_b2_signed_extents[0] +
+					c[7] * ob_b2_signed_extents[1]) / div;
+			} else {
+				ob_b1_signed_extents[2] = 0.0f;
 			}
-			else
-			{
-				lOBB1SignedExtents[2] = 0.0f;
-			}
-			TSPMACRO_GET_CORNER_POINT(pPoint[0],
-			                          mOBBCollisionData->mOBB1RotAxis,
-			                          mOBBCollisionData->mOBB1CollisionPos,
-			                          lOBB1SignedExtents);
+			TSPMACRO_GET_CORNER_POINT(point[0],
+			                          obb_collision_data_->ob_b1_rot_axis_,
+			                          obb_collision_data_->ob_b1_collision_pos_,
+			                          ob_b1_signed_extents);
 			return;
 		}
 	};
 }
 
 template<class _TVarType>
-void CollisionDetector3D<_TVarType>::GetOBBEdgeSurfaceIntersection(Vector3D<_TVarType> pPoint[8], int &pNumPoints, CollisionType pCollisionType)
-{
+void CollisionDetector3D<_TVarType>::GetOBBEdgeSurfaceIntersection(Vector3D<_TVarType> point[8], int &num_points, CollisionType collision_type) {
 	// The intersection is either a vector (edge-to-surface collision) or an area (surface-to-surface).
 	// Determine the area of intersection.
 
-	pNumPoints = 0;
+	num_points = 0;
 
-	const _TVarType lEpsilon = MathTraits<_TVarType>::Eps();
-	const _TVarType lOneCmp = 1.0f - lEpsilon;
+	const _TVarType epsilon = MathTraits<_TVarType>::Eps();
+	const _TVarType one_cmp = 1.0f - epsilon;
 
 	//
-	// Step 1: The setup. To make things easier, setup the following arrays to make 
+	// Step 1: The setup. To make things easier, setup the following arrays to make
 	//                    the box with the separating plane become the box with index = 0.
 	//
-	Vector3D<_TVarType>* lBoxOrientation[2];
-	Vector3D<_TVarType>* lBoxCenter[2];
-	Vector3D<_TVarType>  lPlaneNormal[2];
+	Vector3D<_TVarType>* _box_orientation[2];
+	Vector3D<_TVarType>* _box_center[2];
+	Vector3D<_TVarType>  _plane_normal[2];
 
-	int lBoxNormalIndex[2];
-	int lBoxEdgeIndex[2];
-	_TVarType lBoxSide[2];
-	_TVarType* lBoxExtents[2];
+	int box_normal_index[2];
+	int box_edge_index[2];
+	_TVarType box_side[2];
+	_TVarType* _box_extents[2];
 
-	int lBox0;
-	int lBox1;
+	int box0;
+	int box1;
 
-	switch(mOBBCollisionData->mBoxWithSeparatingPlane)
-	{
-		case 0:
-		{
-			lBox0 = 0;
-			lBox1 = 1;
+	switch(obb_collision_data_->box_with_separating_plane_) {
+		case 0: {
+			box0 = 0;
+			box1 = 1;
 		} break;
-		case 1:
-		{
-			lBox0 = 1;
-			lBox1 = 0;
+		case 1: {
+			box0 = 1;
+			box1 = 0;
 		} break;
 		default: // Error...
 		return;
 	}
 
-	lBoxNormalIndex[lBox0] = mOBBCollisionData->mBox1NormalIndex;
-	lBoxEdgeIndex  [lBox0] = mOBBCollisionData->mBox1EdgeIndex;
-	lBoxCenter     [lBox0] = &mOBBCollisionData->mOBB1CollisionPos;
-	lBoxOrientation[lBox0] = mOBBCollisionData->mOBB1RotAxis;
-	lBoxExtents    [lBox0] = mOBBCollisionData->mOBB1Size;
-	lBoxSide       [lBox0] = mOBBCollisionData->mBox1Side;
-	lPlaneNormal   [lBox0] = (lBoxOrientation[lBox0][lBoxNormalIndex[lBox0]] * lBoxSide[lBox0]);
+	box_normal_index[box0] = obb_collision_data_->box1_normal_index_;
+	box_edge_index  [box0] = obb_collision_data_->box1_edge_index_;
+	_box_center     [box0] = &obb_collision_data_->ob_b1_collision_pos_;
+	_box_orientation[box0] = obb_collision_data_->ob_b1_rot_axis_;
+	_box_extents    [box0] = obb_collision_data_->ob_b1_size_;
+	box_side       [box0] = obb_collision_data_->box1_side_;
+	_plane_normal   [box0] = (_box_orientation[box0][box_normal_index[box0]] * box_side[box0]);
 
-	lBoxNormalIndex[lBox1] = mOBBCollisionData->mBox2NormalIndex;
-	lBoxEdgeIndex  [lBox1] = mOBBCollisionData->mBox2EdgeIndex;
-	lBoxCenter     [lBox1] = &mOBBCollisionData->mOBB2CollisionPos;
-	lBoxOrientation[lBox1] = mOBBCollisionData->mOBB2RotAxis;
-	lBoxExtents    [lBox1] = mOBBCollisionData->mOBB2Size;
-	lBoxSide       [lBox1] = mOBBCollisionData->mBox2Side;
-	lPlaneNormal   [lBox1] = (lBoxOrientation[lBox1][lBoxNormalIndex[lBox1]] * lBoxSide[lBox1]);
+	box_normal_index[box1] = obb_collision_data_->box2_normal_index_;
+	box_edge_index  [box1] = obb_collision_data_->box2_edge_index_;
+	_box_center     [box1] = &obb_collision_data_->ob_b2_collision_pos_;
+	_box_orientation[box1] = obb_collision_data_->ob_b2_rot_axis_;
+	_box_extents    [box1] = obb_collision_data_->ob_b2_size_;
+	box_side       [box1] = obb_collision_data_->box2_side_;
+	_plane_normal   [box1] = (_box_orientation[box1][box_normal_index[box1]] * box_side[box1]);
 
 	//
 	// Step 3: Get the vertices. Determine the points of the edge/surfaces.
 	//
 
-	Vector3D<_TVarType> lOBB1SideVertices[4];
-	Vector3D<_TVarType> lOBB2SideVertices[4];
-	Vector3D<_TVarType> lOBB2EdgeVertices[2];
-	int lOBB1EdgeIndex[2];
-	int lOBB2EdgeIndex[2];
+	Vector3D<_TVarType> ob_b1_side_vertices[4];
+	Vector3D<_TVarType> ob_b2_side_vertices[4];
+	Vector3D<_TVarType> ob_b2_edge_vertices[2];
+	int ob_b1_edge_index[2];
+	int ob_b2_edge_index[2];
 
 	// Get the vertices and stuff of the side that is the separating plane...
-	SetupBoxSide(*lBoxCenter[0],
-		lBoxOrientation[0],
-		lBoxExtents[0],
-		lBoxNormalIndex[0],
-		lPlaneNormal[0],
-		lOBB1EdgeIndex[0], // Return parameter.
-		lOBB1EdgeIndex[1], // Return parameter.
-		lOBB1SideVertices);// Return parameter.
+	SetupBoxSide(*_box_center[0],
+		_box_orientation[0],
+		_box_extents[0],
+		box_normal_index[0],
+		_plane_normal[0],
+		ob_b1_edge_index[0], // Return parameter.
+		ob_b1_edge_index[1], // Return parameter.
+		ob_b1_side_vertices);// Return parameter.
 
 	// The normals of the planes that makes the sides of the separating plane surface.
-	Vector3D<_TVarType> lNormals[4];
-	lNormals[0] = lBoxOrientation[0][lOBB1EdgeIndex[1]] * -1.0f;
-	lNormals[1] = lBoxOrientation[0][lOBB1EdgeIndex[0]];
-	lNormals[2] = lBoxOrientation[0][lOBB1EdgeIndex[1]];
-	lNormals[3] = lBoxOrientation[0][lOBB1EdgeIndex[0]] * -1.0f;
+	Vector3D<_TVarType> normals[4];
+	normals[0] = _box_orientation[0][ob_b1_edge_index[1]] * -1.0f;
+	normals[1] = _box_orientation[0][ob_b1_edge_index[0]];
+	normals[2] = _box_orientation[0][ob_b1_edge_index[1]];
+	normals[3] = _box_orientation[0][ob_b1_edge_index[0]] * -1.0f;
 
-	if(pCollisionType == EDGE_COLLISION)
-	{
-		if(lBoxNormalIndex[0] == -1)
-		{
+	if(collision_type == kEdgeCollision) {
+		if(box_normal_index[0] == -1) {
 			// Error, Box0 can't be anything else but parallel to itself.
 			return;
 		}
 
 		// Setup a side that is perpendicular to the separating plane.
-		SetupBoxSide(*lBoxCenter[1],
-			lBoxOrientation[1],
-			lBoxExtents[1],
-			lBoxEdgeIndex[1],
-			-lBoxOrientation[1][lBoxEdgeIndex[1]],
-			lOBB2EdgeIndex[0], // Return parameter.
-			lOBB2EdgeIndex[1], // Return parameter.
-			lOBB2SideVertices);// Return parameter.
+		SetupBoxSide(*_box_center[1],
+			_box_orientation[1],
+			_box_extents[1],
+			box_edge_index[1],
+			-_box_orientation[1][box_edge_index[1]],
+			ob_b2_edge_index[0], // Return parameter.
+			ob_b2_edge_index[1], // Return parameter.
+			ob_b2_side_vertices);// Return parameter.
 
 		//
 		// Get the edge by finding the vertex that is closest to the separating plane.
 		//
-		_TVarType lMinDistance;
+		_TVarType min_distance;
 		int i;
 
 		// Loop over the vertices...
-		for(i = 0; i < 4; i++)
-		{
+		for(i = 0; i < 4; i++) {
 			// The vector between the vertex and box0's center.
-			Vector3D<_TVarType> lDelta(lOBB2SideVertices[i] - *lBoxCenter[0]);
+			Vector3D<_TVarType> delta(ob_b2_side_vertices[i] - *_box_center[0]);
 
 			// Project it on the separating axis.
-			_TVarType lDot = lBoxOrientation[0][lBoxNormalIndex[0]].Dot(lDelta);
+			_TVarType dot = _box_orientation[0][box_normal_index[0]].Dot(delta);
 
 			// Get the distance from the separating plane.
-			_TVarType lDistance = (_TVarType)fabs((_TVarType)fabs(lDot) - lBoxExtents[0][lBoxNormalIndex[0]]);
+			_TVarType distance = (_TVarType)fabs((_TVarType)fabs(dot) - _box_extents[0][box_normal_index[0]]);
 
 			// Store the closest one.
-			if(i == 0 || lDistance < lMinDistance)
-			{
-				lMinDistance = lDistance;
+			if(i == 0 || distance < min_distance) {
+				min_distance = distance;
 
-				lOBB2EdgeVertices[0] = lOBB2SideVertices[i];
-				lOBB2EdgeVertices[1] = lOBB2SideVertices[i] + 
-					lBoxOrientation[1][lBoxEdgeIndex[1]] * 
-					lBoxExtents[1][lBoxEdgeIndex[1]] * 2.0f;
+				ob_b2_edge_vertices[0] = ob_b2_side_vertices[i];
+				ob_b2_edge_vertices[1] = ob_b2_side_vertices[i] +
+					_box_orientation[1][box_edge_index[1]] *
+					_box_extents[1][box_edge_index[1]] * 2.0f;
 			}
 		}
 
 		// Now clip the edge against the sides of the separating plane surface.
-		for(i = 0; i < 4; i++)
-		{
-			ClipVectorWithPlane(lOBB1SideVertices[i], 
-				lNormals[i], 
-				lOBB2EdgeVertices[0], 
-				lOBB2EdgeVertices[1]);
+		for(i = 0; i < 4; i++) {
+			ClipVectorWithPlane(ob_b1_side_vertices[i],
+				normals[i],
+				ob_b2_edge_vertices[0],
+				ob_b2_edge_vertices[1]);
 		}
 
-		pPoint[0] = lOBB2EdgeVertices[0];
-		pPoint[1] = lOBB2EdgeVertices[1];
-		pNumPoints = 2;
-		
+		point[0] = ob_b2_edge_vertices[0];
+		point[1] = ob_b2_edge_vertices[1];
+		num_points = 2;
+
 		return;
-	}
-	else
-	{
+	} else {
 		// Surface to surface collision. We've already got what we want (the planes):
-		SetupBoxSide(*lBoxCenter[1],
-			lBoxOrientation[1],
-			lBoxExtents[1],
-			lBoxNormalIndex[1],
-			lPlaneNormal[1],
-			lOBB2EdgeIndex[0],	// Return parameter.
-			lOBB2EdgeIndex[1],	// Return parameter.
-			lOBB2SideVertices);	// Return parameter.
+		SetupBoxSide(*_box_center[1],
+			_box_orientation[1],
+			_box_extents[1],
+			box_normal_index[1],
+			_plane_normal[1],
+			ob_b2_edge_index[0],	// Return parameter.
+			ob_b2_edge_index[1],	// Return parameter.
+			ob_b2_side_vertices);	// Return parameter.
 
 		// At least 4 points...
-		pNumPoints = 4;
+		num_points = 4;
 
 		int i;
-		for(i = 0; i < 4; i++)
-		{
-			pPoint[i] = lOBB2SideVertices[i];
+		for(i = 0; i < 4; i++) {
+			point[i] = ob_b2_side_vertices[i];
 		}
 
-		int lStartPoint = 3;
-		int lEndPoint = 0;
-		int lPointCount = 0;
+		int start_point = 3;
+		int end_point = 0;
+		int point_count = 0;
 
-		Vector3D<_TVarType> lClippedPoints[8];
-		Vector3D<_TVarType> lP1;
-		Vector3D<_TVarType> lP2;
+		Vector3D<_TVarType> clipped_points[8];
+		Vector3D<_TVarType> p1;
+		Vector3D<_TVarType> p2;
 
-		for(int j = 0; j < 4; j++)
-		{
-			for(i = 0; i < pNumPoints; i++)
-			{
-				lP1 = pPoint[lStartPoint];
-				lP2 = pPoint[lEndPoint];
-				int lResult = ClipVectorWithPlane(lOBB1SideVertices[j], 
-													lNormals[j], lP1, lP2);
-				switch(lResult)
-				{
-					case 1:
-					{
-						lClippedPoints[lPointCount++] = lP1;
+		for(int j = 0; j < 4; j++) {
+			for(i = 0; i < num_points; i++) {
+				p1 = point[start_point];
+				p2 = point[end_point];
+				int result = ClipVectorWithPlane(ob_b1_side_vertices[j],
+													normals[j], p1, p2);
+				switch(result) {
+					case 1: {
+						clipped_points[point_count++] = p1;
 					} // TRICKY: Fallthrough!
-					case 2:
-					{
-						lClippedPoints[lPointCount++] = lP2;
+					case 2: {
+						clipped_points[point_count++] = p2;
 					} break;
-					case 3:
-					{
-						lClippedPoints[lPointCount++] = lP2;
+					case 3: {
+						clipped_points[point_count++] = p2;
 					} break;
 				}
 
-				lStartPoint = lEndPoint;
-				lEndPoint++;
+				start_point = end_point;
+				end_point++;
 			}
 
-			for(i = 0; i < lPointCount; i++)
-			{
-				pPoint[i] = lClippedPoints[i];
+			for(i = 0; i < point_count; i++) {
+				point[i] = clipped_points[i];
 			}
 
-			pNumPoints = lPointCount;
+			num_points = point_count;
 
 			// Reset...
-			lStartPoint = lPointCount - 1;
-			lEndPoint = 0;
-			lPointCount = 0;
+			start_point = point_count - 1;
+			end_point = 0;
+			point_count = 0;
 		}
 	}
 }
 
 template<class _TVarType>
-void CollisionDetector3D<_TVarType>::SetupBoxSide(Vector3D<_TVarType> pBoxCenter, 
-						  Vector3D<_TVarType> pBoxOrientation[3], 
-						  _TVarType pBoxExtents[3], 
-						  int pNormalIndex,
-						  Vector3D<_TVarType> pNormal,
-						  int& pRetEdgeIndex1,	// One of the edges that is not parallel to the normal.
-						  int& pRetEdgeIndex2,	// One of the edges that is not parallel to the normal.
-						  Vector3D<_TVarType> pRetSideVertices[4])
-{
+void CollisionDetector3D<_TVarType>::SetupBoxSide(Vector3D<_TVarType> box_center,
+						  Vector3D<_TVarType> box_orientation[3],
+						  _TVarType box_extents[3],
+						  int normal_index,
+						  Vector3D<_TVarType> normal,
+						  int& ret_edge_index1,	// One of the edges that is not parallel to the normal.
+						  int& ret_edge_index2,	// One of the edges that is not parallel to the normal.
+						  Vector3D<_TVarType> ret_side_vertices[4]) {
 	// First find the correct edge indices.
-	switch(pNormalIndex)
-	{
-		case 0:			// Normal is x-axis.
-		{
-			pRetEdgeIndex1 = 1;	// Y-axis.
-			pRetEdgeIndex2 = 2;	// Z-axis.
+	switch(normal_index) {
+		case 0: {			// Normal is x-axis.
+			ret_edge_index1 = 1;	// Y-axis.
+			ret_edge_index2 = 2;	// Z-axis.
 		} break;
-		case 1:			// Normal is y-axis.
-		{
-			pRetEdgeIndex1 = 0;	// X-axis.
-			pRetEdgeIndex2 = 2;	// Z-axis.
+		case 1: {			// Normal is y-axis.
+			ret_edge_index1 = 0;	// X-axis.
+			ret_edge_index2 = 2;	// Z-axis.
 		} break;
-		case 2:			// Normal is z-axis.
-		{
-			pRetEdgeIndex1 = 0;	// X-axis.
-			pRetEdgeIndex2 = 1;	// Y-axis.
+		case 2: {			// Normal is z-axis.
+			ret_edge_index1 = 0;	// X-axis.
+			ret_edge_index2 = 1;	// Y-axis.
 		} break;
 	};
 
-	Vector3D<_TVarType> lBox[3];
-	lBox[pNormalIndex]   = pNormal * pBoxExtents[pNormalIndex];
-	lBox[pRetEdgeIndex1] = pBoxOrientation[pRetEdgeIndex1] * pBoxExtents[pRetEdgeIndex1];
-	lBox[pRetEdgeIndex2] = pBoxOrientation[pRetEdgeIndex2] * pBoxExtents[pRetEdgeIndex2];
+	Vector3D<_TVarType> box[3];
+	box[normal_index]   = normal * box_extents[normal_index];
+	box[ret_edge_index1] = box_orientation[ret_edge_index1] * box_extents[ret_edge_index1];
+	box[ret_edge_index2] = box_orientation[ret_edge_index2] * box_extents[ret_edge_index2];
 
-	pRetSideVertices[0] = pBoxCenter + lBox[0] + lBox[1] + lBox[2];
-	pRetSideVertices[1] = pRetSideVertices[0] - lBox[pRetEdgeIndex1] * 2.0f;
-	pRetSideVertices[2] = pRetSideVertices[1] - lBox[pRetEdgeIndex2] * 2.0f;
-	pRetSideVertices[3] = pRetSideVertices[2] + lBox[pRetEdgeIndex1] * 2.0f;
+	ret_side_vertices[0] = box_center + box[0] + box[1] + box[2];
+	ret_side_vertices[1] = ret_side_vertices[0] - box[ret_edge_index1] * 2.0f;
+	ret_side_vertices[2] = ret_side_vertices[1] - box[ret_edge_index2] * 2.0f;
+	ret_side_vertices[3] = ret_side_vertices[2] + box[ret_edge_index1] * 2.0f;
 }
 
 template<class _TVarType>
-int CollisionDetector3D<_TVarType>::ClipVectorWithPlane(Vector3D<_TVarType> pPlanePoint, 
-							Vector3D<_TVarType> pPlaneNormal,
-							Vector3D<_TVarType>& pVectorPoint1, 
-							Vector3D<_TVarType>& pVectorPoint2)
-{
-	_TVarType lSide1;
-	_TVarType lSide2;
-	_TVarType lTime;
+int CollisionDetector3D<_TVarType>::ClipVectorWithPlane(Vector3D<_TVarType> plane_point,
+							Vector3D<_TVarType> plane_normal,
+							Vector3D<_TVarType>& vector_point1,
+							Vector3D<_TVarType>& vector_point2) {
+	_TVarType side1;
+	_TVarType side2;
+	_TVarType time;
 
-	lSide1 = PlaneEquation(pPlanePoint, pPlaneNormal, pVectorPoint1);
-	lSide2 = PlaneEquation(pPlanePoint, pPlaneNormal, pVectorPoint2);
+	side1 = PlaneEquation(plane_point, plane_normal, vector_point1);
+	side2 = PlaneEquation(plane_point, plane_normal, vector_point2);
 
-	if(lSide1 >= 0.0f && lSide2 >= 0.0f)
-	{
+	if(side1 >= 0.0f && side2 >= 0.0f) {
 		return 3;
-	}
-	else if(lSide1 <= 0.0f && lSide2 <= 0.0f)
-	{
+	} else if(side1 <= 0.0f && side2 <= 0.0f) {
 		return 0;
-	}
-	else if(lSide1 >= 0.0f && lSide2 <= 0.0f)
-	{
+	} else if(side1 >= 0.0f && side2 <= 0.0f) {
 		// Point2 is moved to a clipped position.
-		Vector3D<_TVarType> lDirection(pVectorPoint2 - pVectorPoint1);
+		Vector3D<_TVarType> direction(vector_point2 - vector_point1);
 
-		GetTimeOfVectorPlaneIntersection(pPlanePoint,
-						 pPlaneNormal,
-						 pVectorPoint1,
-						 lDirection,
-						 lTime);
-		
-		pVectorPoint2 = pVectorPoint1 + lDirection * lTime;
+		GetTimeOfVectorPlaneIntersection(plane_point,
+						 plane_normal,
+						 vector_point1,
+						 direction,
+						 time);
+
+		vector_point2 = vector_point1 + direction * time;
 
 		return 2;
-	}
-	else
-	{
+	} else {
 		// Point1 is moved to a clipped position.
-		Vector3D<_TVarType> lDirection(pVectorPoint2 - pVectorPoint1);
+		Vector3D<_TVarType> direction(vector_point2 - vector_point1);
 
-		GetTimeOfVectorPlaneIntersection(pPlanePoint, 
-						 pPlaneNormal, 
-						 pVectorPoint1,
-						 lDirection,
-						 lTime);
-		
-		pVectorPoint1 = pVectorPoint1 + lDirection * lTime;
+		GetTimeOfVectorPlaneIntersection(plane_point,
+						 plane_normal,
+						 vector_point1,
+						 direction,
+						 time);
+
+		vector_point1 = vector_point1 + direction * time;
 
 		return 1;
 	}
 }
 
 template<class _TVarType>
-bool CollisionDetector3D<_TVarType>::GetTimeOfVectorPlaneIntersection(const Vector3D<_TVarType>& pPlanePoint,
-														  const Vector3D<_TVarType>& pPlaneNormal,
-														  const Vector3D<_TVarType>& pVectorPoint,
-														  const Vector3D<_TVarType>& pVectorDirection,
-														  _TVarType& pReturnTime)
-{
-	_TVarType lD = -(pPlaneNormal * pPlanePoint);
-	_TVarType lDivider = pPlaneNormal * pVectorDirection;
+bool CollisionDetector3D<_TVarType>::GetTimeOfVectorPlaneIntersection(const Vector3D<_TVarType>& plane_point,
+														  const Vector3D<_TVarType>& plane_normal,
+														  const Vector3D<_TVarType>& vector_point,
+														  const Vector3D<_TVarType>& vector_direction,
+														  _TVarType& return_time) {
+	_TVarType d = -(plane_normal * plane_point);
+	_TVarType divider = plane_normal * vector_direction;
 
-	if(lDivider == 0.0f)
-	{
+	if(divider == 0.0f) {
 		return false;
 	}
 
-	_TVarType lDividend = -(pPlaneNormal * pVectorPoint + lD);
+	_TVarType dividend = -(plane_normal * vector_point + d);
 
-	pReturnTime = lDividend / lDivider;
+	return_time = dividend / divider;
 
 	return true;
 }

@@ -6,60 +6,57 @@
 
 #pragma once
 
-#include "../../UiCure/Include/UiResourceManager.h"
-#include "../../UiTbc/Include/GUI/UiButton.h"
-#include "../../UiTbc/Include/GUI/UiDialog.h"
-#include "../Life.h"
+#include "../../uicure/include/uiresourcemanager.h"
+#include "../../uitbc/include/gui/uibutton.h"
+#include "../../uitbc/include/gui/uidialog.h"
+#include "../life.h"
 
-#define ICONBTN(i,n)		new UiCure::IconButton(mUiManager, GetResourceManager(), i, n)
+#define ICONBTN(i,n)		new UiCure::IconButton(ui_manager_, GetResourceManager(), i, n)
 #define ICONBTNA(i,n)		ICONBTN(i, n)
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 class GameUiManager;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class Menu
-{
+class Menu {
 public:
-	typedef UiTbc::Dialog::Action ButtonAction;
+	typedef uitbc::Dialog::Action ButtonAction;
 
-	Menu(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager);
+	Menu(UiCure::GameUiManager* ui_manager, cure::ResourceManager* resource_manager);
 	virtual ~Menu();
 
-	void SetButtonTapSound(const str& pSoundName, float pTapVolume, float pTapPitchOffset);
+	void SetButtonTapSound(const str& sound_name, float tap_volume, float tap_pitch_offset);
 
-	UiTbc::Dialog* CreateTestDialog(const ButtonAction& pAction);
-	UiTbc::Dialog* CreateTbcDialog(const ButtonAction& pAction, float pWidth, float pHeight);
-	UiTbc::Button* CreateButton(const wstr& pText, const Color& pColor) const;
-	void InitButton(UiTbc::Button* pButton) const;
+	uitbc::Dialog* CreateTestDialog(const ButtonAction& action);
+	uitbc::Dialog* CreateTbcDialog(const ButtonAction& action, float width, float height);
+	uitbc::Button* CreateButton(const wstr& text, const Color& color) const;
+	void InitButton(uitbc::Button* button) const;
 	void DismissDialog();
-	UiTbc::Dialog* GetDialog();
+	uitbc::Dialog* GetDialog();
 
-	Cure::ResourceManager* GetResourceManager() const;
+	cure::ResourceManager* GetResourceManager() const;
 
-	void OnAction(UiTbc::Button* pButton);
-	void OnTapSound(UiTbc::Button* pButton);
+	void OnAction(uitbc::Button* button);
+	void OnTapSound(uitbc::Button* button);
 
-	void SoundLoadCallback(UiCure::UserSound2dResource* pResource);
+	void SoundLoadCallback(UiCure::UserSound2dResource* resource);
 
 protected:
-	UiCure::GameUiManager* mUiManager;
-	Cure::ResourceManager* mResourceManager;
-	UiTbc::Dialog* mDialog;
-	UiTbc::Dialog::Action mButtonDelegate;
-	UiCure::UserSound2dResource* mTapClick;
-	float mTapVolume;
-	float mTapPitchOffset;
+	UiCure::GameUiManager* ui_manager_;
+	cure::ResourceManager* resource_manager_;
+	uitbc::Dialog* dialog_;
+	uitbc::Dialog::Action button_delegate_;
+	UiCure::UserSound2dResource* tap_click_;
+	float tap_volume_;
+	float tap_pitch_offset_;
 };
 
 

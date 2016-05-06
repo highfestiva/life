@@ -1,34 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/PhysicsManagerFactory.h"
-#include "../Include/PhysicsManagerODE.h"
+#include "../include/physicsmanagerfactory.h"
+#include "../include/physicsmanagerode.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-PhysicsManager* PhysicsManagerFactory::Create(Engine pEngine, float pRadius, int pLevels, float pSensitivity)
-{
-	PhysicsManager* lEngine = 0;
-	switch (pEngine)
-	{
-		case ENGINE_ODE:	lEngine = new PhysicsManagerODE(pRadius, pLevels, pSensitivity);	break;
-		default:		mLog.Error("Physics type not supported.");				break;
+PhysicsManager* PhysicsManagerFactory::Create(Engine engine, float radius, int levels, float sensitivity) {
+	PhysicsManager* _engine = 0;
+	switch (engine) {
+		case kEngineOde:	_engine = new PhysicsManagerODE(radius, levels, sensitivity);	break;
+		default:		log_.Error("Physics type not supported.");				break;
 	}
-	return (lEngine);
+	return (_engine);
 }
 
 
 
-loginstance(PHYSICS, PhysicsManagerFactory);
+loginstance(kPhysics, PhysicsManagerFactory);
 
 
 

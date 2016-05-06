@@ -5,7 +5,7 @@
 
 
 #import <UIKit/UIKit.h>
-#import "ListViewController.h"
+#import "listviewcontroller.h"
 
 @interface CreateNewViewController : UIViewController <UITextFieldDelegate>
 @property (nonatomic, strong) ListViewController* parent;

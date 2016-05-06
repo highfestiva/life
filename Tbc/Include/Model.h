@@ -13,18 +13,16 @@
 
 #pragma once
 
-#include "Bones.h"
+#include "bones.h"
 #include <list>
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-class Model
-{
+class Model {
 public:
 	Model();
 	virtual ~Model();
@@ -32,16 +30,16 @@ public:
 	void RemoveAll();
 
 	// Bones and animations all come with the animator.
-	void AddAnimator(const str& pName, BoneAnimator* pBoneAnimator);
-	BoneAnimator* GetAnimator(const str& pName);
+	void AddAnimator(const str& name, BoneAnimator* bone_animator);
+	BoneAnimator* GetAnimator(const str& name);
 
-	void StartAnimation(const str& pAnimName, float pBlendingTime, BoneAnimation::Mode pMode = BoneAnimation::MODE_PLAY_DEFAULT);
+	void StartAnimation(const str& anim_name, float blending_time, BoneAnimation::Mode mode = BoneAnimation::kModePlayDefault);
 
 	// Updates animations.
-	virtual void Update(double pDeltaTime);
+	virtual void Update(double delta_time);
 
 	// Sets and gets the transformation of the entire model.
-	void SetTransformation(const xform& pTransformation);
+	void SetTransformation(const xform& transformation);
 	const xform& GetTransformation() const;
 
 protected:
@@ -49,34 +47,32 @@ protected:
 	// TODO: Implement the following somewhere closer to the physical
 	// elements of the Structure.
 /*
-	class PhysicsFrame
-	{
+	class PhysicsFrame {
 	public:
 		PhysicsFrame() {}
-		PhysicsFrame(const xform& pTransformation,
-			     const vec3& pVelocity,
+		PhysicsFrame(const xform& transformation,
+			     const vec3& velocity,
 			     const vec3& pRotationalVelocity,
-			     const vec3& pAcceleration,
+			     const vec3& acceleration,
 			     const vec3& pRotationalAcceleration,
 			     int pFrame) :
-			mTransformation(pTransformation),
-			mVelocity(pVelocity),
+			transformation_(transformation),
+			velocity_(velocity),
 			mRotationalVelocity(pRotationalVelocity),
-			mAcceleration(pAcceleration),
+			acceleration_(acceleration),
 			mRotationalAcceleration(pRotationalAcceleration),
-			mFrame(pFrame)
-		{	
+			frame_(pFrame) {
 		}
 
-		xform mTransformation;
+		xform transformation_;
 
-		vec3 mVelocity;
+		vec3 velocity_;
 		vec3 mRotationalVelocity;
 
-		vec3 mAcceleration;
+		vec3 acceleration_;
 		vec3 mRotationalAcceleration;
 
-		int mFrame;
+		int frame_;
 	};
 
 	// Cyclic array of frames.
@@ -86,11 +82,11 @@ protected:
 */
 	typedef HashTable<str, BoneAnimator*, std::hash<str> , 16> AnimatorTable;
 
-	AnimatorTable mAnimatorTable;
+	AnimatorTable animator_table_;
 
 	// This is the transformation of the entire model. Transform animations
 	// are relative to this.
-	xform mTransformation;
+	xform transformation_;
 };
 
 

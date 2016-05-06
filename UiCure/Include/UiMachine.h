@@ -1,19 +1,18 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiCppContextObject.h"
-#include "../../Lepra/Include/GameTimer.h"
-#include "../../UiTbc/Include/UiChunkyClass.h"
+#include "uicppcontextobject.h"
+#include "../../lepra/include/gametimer.h"
+#include "../../uitbc/include/uichunkyclass.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
@@ -23,16 +22,15 @@ class JetEngineEmitter;
 
 
 
-class Machine: public CppContextObject
-{
+class Machine: public CppContextObject {
 public:
 	typedef CppContextObject Parent;
 
-	Machine(Cure::ResourceManager* pResourceManager, const str& pClassId, GameUiManager* pUiManager);
+	Machine(cure::ResourceManager* resource_manager, const str& class_id, GameUiManager* ui_manager);
 	virtual ~Machine();
-	void SetJetEngineEmitter(JetEngineEmitter* pEmitter);
-	void SetExhaustEmitter(ExhaustEmitter* pEmitter);
-	void SetBurnEmitter(BurnEmitter* pEmitter);
+	void SetJetEngineEmitter(JetEngineEmitter* emitter);
+	void SetExhaustEmitter(ExhaustEmitter* emitter);
+	void SetBurnEmitter(BurnEmitter* emitter);
 	BurnEmitter* GetBurnEmitter() const;
 	void DeleteEngineSounds();
 
@@ -40,34 +38,34 @@ protected:
 	void OnTick();
 
 private:
-	void HandleTagAmbientSounds(const UiTbc::ChunkyClass::Tag& pTag, float pRealTimeRatio);
-	void HandleTagEye(const UiTbc::ChunkyClass::Tag& pTag, const Tbc::PhysicsManager* pPhysicsManager, bool pIsChild);
-	void HandleTagBrakeLight(const UiTbc::ChunkyClass::Tag& pTag);
-	void HandleTagEngineLight(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
-	void HandleTagBlinkLight(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
-	void HandleTagEngineSound(const UiTbc::ChunkyClass::Tag& pTag, const Tbc::PhysicsManager* pPhysicsManager, const vec3& pVelocity,
-		float pFrameTime, float pRealTimeRatio, size_t& pEngineSoundIndex);
-	void HandleTagEngineMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
-	void HandleTagMeshOffset(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
-	void HandleTagMeshRotate(const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
+	void HandleTagAmbientSounds(const uitbc::ChunkyClass::Tag& tag, float real_time_ratio);
+	void HandleTagEye(const uitbc::ChunkyClass::Tag& tag, const tbc::PhysicsManager* physics_manager, bool is_child);
+	void HandleTagBrakeLight(const uitbc::ChunkyClass::Tag& tag);
+	void HandleTagEngineLight(const uitbc::ChunkyClass::Tag& tag, float frame_time);
+	void HandleTagBlinkLight(const uitbc::ChunkyClass::Tag& tag, float frame_time);
+	void HandleTagEngineSound(const uitbc::ChunkyClass::Tag& tag, const tbc::PhysicsManager* physics_manager, const vec3& velocity,
+		float frame_time, float real_time_ratio, size_t& engine_sound_index);
+	void HandleTagEngineMeshOffset(const uitbc::ChunkyClass::Tag& tag, float frame_time);
+	void HandleTagMeshOffset(const uitbc::ChunkyClass::Tag& tag, float frame_time);
+	void HandleTagMeshRotate(const uitbc::ChunkyClass::Tag& tag, float frame_time);
 
-	float CalculateMeshOffset(const str& pFunction, float lStartTime, float pDuration, float pFrequency, float pFrameTime, float& pMeshTime) const;
+	float CalculateMeshOffset(const str& function, float start_time, float duration, float frequency, float frame_time, float& mesh_time) const;
 
-	void LoadPlaySound3d(UserSound3dResource* pSoundResource);
+	void LoadPlaySound3d(UserSound3dResource* sound_resource);
 
-	typedef std::unordered_map<const UiTbc::ChunkyClass::Tag*, UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
+	typedef std::unordered_map<const uitbc::ChunkyClass::Tag*, UserSound3dResource*, LEPRA_VOIDP_HASHER> TagSoundTable;
 	typedef std::vector<float> TagSoundIntensityArray;
 
-	JetEngineEmitter* mJetEngineEmitter;
-	ExhaustEmitter* mExhaustEmitter;
-	BurnEmitter* mBurnEmitter;
-	TagSoundTable mEngineSoundTable;
-	TagSoundIntensityArray mEngineSoundIntensity;
-	GameTimer mAmbientSoundTimer;
-	float mBlinkTime;
-	float mMeshOffsetTime;
-	float mMeshRotateTime;
-	bool mPreventEngineSounds;
+	JetEngineEmitter* jet_engine_emitter_;
+	ExhaustEmitter* exhaust_emitter_;
+	BurnEmitter* burn_emitter_;
+	TagSoundTable engine_sound_table_;
+	TagSoundIntensityArray engine_sound_intensity_;
+	GameTimer ambient_sound_timer_;
+	float blink_time_;
+	float mesh_offset_time_;
+	float mesh_rotate_time_;
+	bool prevent_engine_sounds_;
 
 	logclass();
 };

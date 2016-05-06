@@ -1,38 +1,36 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/CppContextObject.h"
-#include "../Lepra/Include/HiResTimer.h"
-#include "Game.h"
+#include "../cure/include/cppcontextobject.h"
+#include "../lepra/include/hirestimer.h"
+#include "game.h"
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 
-class Goal: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class Goal: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	Goal(Cure::ContextManager* pManager);
+	Goal(cure::ContextManager* manager);
 	virtual ~Goal();
 
 	vec3 GetPosition() const;
 	bool IsTriggered() const;
 
 private:
-	virtual void FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger);
-	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
+	virtual void FinalizeTrigger(const tbc::PhysicsTrigger* trigger);
+	virtual void OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal);
 
-	const Tbc::PhysicsTrigger* mTrigger;
-	bool mIsTriggered;
+	const tbc::PhysicsTrigger* trigger_;
+	bool is_triggered_;
 
 	logclass();
 };

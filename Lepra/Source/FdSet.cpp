@@ -5,27 +5,25 @@
 
 
 #include "pch.h"
-#include "../Include/FdSet.h"
+#include "../include/fdset.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-int FdSetHelper::Copy(FdSet& pDestination, const FdSet& pSource)
-{
+int FdSetHelper::Copy(FdSet& destination, const FdSet& source) {
 #if defined(LEPRA_WINDOWS)
-	const size_t lCountAndPad = ((const char*)pSource.fd_array)-((const char*)(&pSource.fd_count));
-	::memcpy(&pDestination, &pSource, lCountAndPad + pSource.fd_count*sizeof(pSource.fd_array[0]));
-	return (pSource.fd_count);
+	const size_t count_and_pad = ((const char*)source.fd_array)-((const char*)(&source.fd_count));
+	::memcpy(&destination, &source, count_and_pad + source.fd_count*sizeof(source.fd_array[0]));
+	return (source.fd_count);
 #elif defined(LEPRA_POSIX)
-	LEPRA_FD_ZERO(&pDestination);
-	::memcpy(&pDestination.mFdSet, &pSource.mFdSet, pSource.mMaxHandle/8+1);	// Copy exact amount of data (!).
-	pDestination.mSocketArray = pSource.mSocketArray;
-	pDestination.mMaxHandle = pSource.mMaxHandle;
-	return ((int)pSource.mSocketArray.size());
+	LEPRA_FD_ZERO(&destination);
+	::memcpy(&destination.fd_set_, &source.fd_set_, source.max_handle_/8+1);	// Copy exact amount of data (!).
+	destination.socket_array_ = source.socket_array_;
+	destination.max_handle_ = source.max_handle_;
+	return ((int)source.socket_array_.size());
 #else // Unknown
 #error "Can't handle unknown fd_set struct."
 #endif // Windows / Posix / other

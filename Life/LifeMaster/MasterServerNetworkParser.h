@@ -6,13 +6,12 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Socket.h"
-#include "../Life.h"
+#include "../../lepra/include/socket.h"
+#include "../life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -20,13 +19,12 @@ struct ServerInfo;
 
 
 
-class MasterServerNetworkParser
-{
+class MasterServerNetworkParser {
 public:
-	static unsigned StrToRaw(uint8* pRawData, const str& pStr);
-	static bool RawToStr(str& pStr, const uint8* pRawData, unsigned pRawLength);
+	static unsigned StrToRaw(uint8* raw_data, const str& s);
+	static bool RawToStr(str& s, const uint8* raw_data, unsigned raw_length);
 
-	static bool ExtractServerInfo(const str& pServerString, ServerInfo& pInfo, const SocketAddress* pRemoteAddress);
+	static bool ExtractServerInfo(const str& server_string, ServerInfo& info, const SocketAddress* remote_address);
 
 	logclass();
 };

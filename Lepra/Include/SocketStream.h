@@ -5,41 +5,38 @@
 	Copyright (c) Pixel Doctrine
 */
 
-#include "InputStream.h"
-#include "OutputStream.h"
+#include "inputstream.h"
+#include "outputstream.h"
 
-namespace Lepra
-{
+namespace lepra {
 
 class TcpSocket;
 
-class SocketInputStream : public InputStream
-{
+class SocketInputStream : public InputStream {
 public:
-	SocketInputStream(TcpSocket* pSocket);
+	SocketInputStream(TcpSocket* socket);
 	virtual ~SocketInputStream();
 
 	virtual void Close();
 	virtual int64 GetAvailable() const;
-	virtual IOError ReadRaw(void* pData, size_t pLength);
-	virtual IOError Skip(size_t pLength);
+	virtual IOError ReadRaw(void* data, size_t length);
+	virtual IOError Skip(size_t length);
 protected:
 private:
-	TcpSocket* mSocket;
+	TcpSocket* socket_;
 };
 
-class SocketOutputStream : public OutputStream
-{
+class SocketOutputStream : public OutputStream {
 public:
-	SocketOutputStream(TcpSocket* pSocket);
+	SocketOutputStream(TcpSocket* socket);
 	virtual ~SocketOutputStream();
 
 	virtual void Close();
 	virtual void Flush();
-	virtual IOError WriteRaw(const void* pData, size_t pLength);
+	virtual IOError WriteRaw(const void* data, size_t length);
 protected:
 private:
-	TcpSocket* mSocket;
+	TcpSocket* socket_;
 };
 
 }

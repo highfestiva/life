@@ -1,38 +1,36 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "String.h"
+#include "lepratypes.h"
+#include "string.h"
 
-namespace Lepra
-{
+namespace lepra {
 
-class IPAddress
-{
+class IPAddress {
 public:
 	IPAddress();
-	IPAddress(const IPAddress& pIPAddress);
-	IPAddress(unsigned pIP4Address);
-	IPAddress(const uint8* pIPAddress, int pNumBytes);
-	IPAddress(const str& pIPv4Address);
+	IPAddress(const IPAddress& ip_address);
+	IPAddress(unsigned i_p4_address);
+	IPAddress(const uint8* ip_address, int num_bytes);
+	IPAddress(const str& i_pv4_address);
 	~IPAddress();
 
-	void Set(const uint8* pIPAddress, int pNumBytes);
-	inline void Set(const IPAddress& pIP);
+	void Set(const uint8* ip_address, int num_bytes);
+	inline void Set(const IPAddress& ip);
 
-	void Get(uint8* pIPAddress) const;
+	void Get(uint8* ip_address) const;
 	inline int GetNumBytes() const;
-	inline uint8 Read(int pIndex);
+	inline uint8 Read(int index);
 
 	str GetAsString() const;
 
-	inline size_t operator() (const IPAddress& pAddr) const;
+	inline size_t operator() (const IPAddress& addr) const;
 
-	inline bool operator== (const IPAddress& pIP) const;
-	inline bool operator!= (const IPAddress& pIP) const;
+	inline bool operator== (const IPAddress& ip) const;
+	inline bool operator!= (const IPAddress& ip) const;
 
 protected:
 private:
@@ -40,38 +38,31 @@ private:
 	void CalcHashCode() const;
 
 	// 16 bytes to support IPv6.
-	uint8 mAddress[16];
-	int mByteCount;
-	mutable unsigned mHashCode;
-	bool mIsHashValid;
+	uint8 address_[16];
+	int byte_count_;
+	mutable unsigned hash_code_;
+	bool is_hash_valid_;
 };
 
-int IPAddress::GetNumBytes() const
-{
-	return mByteCount;
+int IPAddress::GetNumBytes() const {
+	return byte_count_;
 }
 
-uint8 IPAddress::Read(int pIndex)
-{
-	return mAddress[pIndex];
+uint8 IPAddress::Read(int index) {
+	return address_[index];
 }
 
-void IPAddress::Set(const IPAddress& pIP)
-{
-	Set(pIP.mAddress, pIP.mByteCount);
+void IPAddress::Set(const IPAddress& ip) {
+	Set(ip.address_, ip.byte_count_);
 }
 
-bool IPAddress::operator== (const IPAddress& pIP) const
-{
-	if (mByteCount != pIP.mByteCount)
-	{
+bool IPAddress::operator== (const IPAddress& ip) const {
+	if (byte_count_ != ip.byte_count_) {
 		return false;
 	}
 
-	for (int i = 0; i < mByteCount; i++)
-	{
-		if (mAddress[i] != pIP.mAddress[i])
-		{
+	for (int i = 0; i < byte_count_; i++) {
+		if (address_[i] != ip.address_[i]) {
 			return false;
 		}
 	}
@@ -79,18 +70,15 @@ bool IPAddress::operator== (const IPAddress& pIP) const
 	return true;
 }
 
-bool IPAddress::operator!= (const IPAddress& pIP) const
-{
-	return !(*this == pIP);
+bool IPAddress::operator!= (const IPAddress& ip) const {
+	return !(*this == ip);
 }
 
-size_t IPAddress::operator() (const IPAddress& pAddr) const
-{
-	if (!pAddr.mIsHashValid)
-	{
-		((IPAddress&)pAddr).CalcHashCode();
+size_t IPAddress::operator() (const IPAddress& addr) const {
+	if (!addr.is_hash_valid_) {
+		((IPAddress&)addr).CalcHashCode();
 	}
-	return (pAddr.mHashCode);
+	return (addr.hash_code_);
 }
 
 }

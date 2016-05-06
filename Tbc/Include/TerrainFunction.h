@@ -18,26 +18,24 @@
 
 #pragma once
 
-#include "../../Lepra/Include/CubicDeCasteljauSpline.h"
-#include "../../Lepra/Include/Vector2D.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "TerrainPatch.h"
-#include "Tbc.h"
+#include "../../lepra/include/cubicdecasteljauspline.h"
+#include "../../lepra/include/vector2d.h"
+#include "../../lepra/include/vector3d.h"
+#include "terrainpatch.h"
+#include "tbc.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 // The underlying function does generally not generate a hightfield, but instead a plain mesh.
 // The whole terrain system is built around meshes, not hightfields.
-class TerrainFunction : public TerrainPatch::Modifier
-{
+class TerrainFunction : public TerrainPatch::Modifier {
 public:
-	TerrainFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius);
+	TerrainFunction(float amplitude, const vec2& position, float inner_radius, float outer_radius);
 	virtual ~TerrainFunction();
 
-	void AddFunction(TerrainPatch& pPatch) const;
+	void AddFunction(TerrainPatch& patch) const;
 
 	float GetAmplitude() const;
 	const vec2& GetPosition() const;
@@ -45,137 +43,128 @@ public:
 	float GetOuterRadius() const;
 
 	// From TerrainPatch::Modifier
-	void ModifyVertex(const vec2& pWorldFlatPos, vec3& pVertex) const;
+	void ModifyVertex(const vec2& world_flat_pos, vec3& vertex) const;
 
-	// Parameters pRelativeNormalizedX, pRelativeNormalizedY and pScale have been scaled to inclusive range [0,1].
-	virtual void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const = 0;
+	// Parameters relative_normalized_x, relative_normalized_y and scale have been scaled to inclusive range [0,1].
+	virtual void AddPoint(float relative_normalized_x, float relative_normalized_y, float scale, float absolute_xy_distance, vec3& point) const = 0;
 
 protected:
-	float mAmplitude;
-	vec2 mPosition;
-	float mInnerRadius;
-	float mOuterRadius;
+	float amplitude_;
+	vec2 position_;
+	float inner_radius_;
+	float outer_radius_;
 };
 
-class TerrainFunctionGroup : public TerrainPatch::Modifier
-{
+class TerrainFunctionGroup : public TerrainPatch::Modifier {
 public:
 	// TODO: Add a linked list version?
-	TerrainFunctionGroup(TerrainFunction** pTFArray, int pCount, 
-		DataPolicy pArrayPolicy = FULL_COPY,
-		SubDataPolicy pTFPolicy = KEEP_REFERENCE);
+	TerrainFunctionGroup(TerrainFunction** tf_array, int count,
+		DataPolicy array_policy = kFullCopy,
+		SubDataPolicy tf_policy = kKeepReference);
 	~TerrainFunctionGroup();
 
 	// Adds all functions at once.
-	void AddFunctions(TerrainPatch& pPatch) const;
+	void AddFunctions(TerrainPatch& patch) const;
 
-	void ModifyVertex(const vec2& pWorldFlatPos, vec3& pVertex) const;
+	void ModifyVertex(const vec2& world_flat_pos, vec3& vertex) const;
 
 private:
-	TerrainFunction** mTFArray;
-	int mCount;
-	DataPolicy mArrayPolicy;
-	SubDataPolicy mTFPolicy;
+	TerrainFunction** tf_array_;
+	int count_;
+	DataPolicy array_policy_;
+	SubDataPolicy tf_policy_;
 };
 
 // Generates a cone without hang over (hehe), but using strech.
-class TerrainConeFunction: public TerrainFunction
-{
+class TerrainConeFunction: public TerrainFunction {
 public:
-	TerrainConeFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius);
+	TerrainConeFunction(float amplitude, const vec2& position, float inner_radius, float outer_radius);
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
+	void AddPoint(float relative_normalized_x, float relative_normalized_y, float scale, float absolute_xy_distance, vec3& point) const;
 
-	float mRadiusDifferance;
-	float mSlopeLength;
-	float mProfileLength;
-	float mPlateauPart;
+	float radius_differance_;
+	float slope_length_;
+	float profile_length_;
+	float plateau_part_;
 };
 
 // Generates a hemisphere without hang over, but using strech.
-class TerrainHemisphereFunction: public TerrainFunction
-{
+class TerrainHemisphereFunction: public TerrainFunction {
 public:
-	TerrainHemisphereFunction(float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius);
+	TerrainHemisphereFunction(float amplitude, const vec2& position, float inner_radius, float outer_radius);
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
+	void AddPoint(float relative_normalized_x, float relative_normalized_y, float scale, float absolute_xy_distance, vec3& point) const;
 };
 
 // Generates a dune (from -X to +X) which is really a spline profile (in the XZ-plane).
-class TerrainDuneFunction: public TerrainFunction
-{
+class TerrainDuneFunction: public TerrainFunction {
 public:
-	TerrainDuneFunction(float pWidthProportion, float pCurvature, float pAmplitude, const vec2& pPosition, float pInnerRadius, float pOuterRadius);
+	TerrainDuneFunction(float width_proportion, float curvature, float amplitude, const vec2& position, float inner_radius, float outer_radius);
 	virtual ~TerrainDuneFunction();
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
+	void AddPoint(float relative_normalized_x, float relative_normalized_y, float scale, float absolute_xy_distance, vec3& point) const;
 
-	CubicDeCasteljauSpline<vec2, float>* mProfileSpline;
-	float mWidthProportion;
+	CubicDeCasteljauSpline<vec2, float>* profile_spline_;
+	float width_proportion_;
 };
 
 // Decorator design pattern. Used for inheritance.
-class TerrainDecorator
-{
+class TerrainDecorator {
 public:
-	TerrainDecorator(TerrainFunction* pFunction);
+	TerrainDecorator(TerrainFunction* function);
 	virtual ~TerrainDecorator();
 
 protected:
-	TerrainFunction* mFunction;
+	TerrainFunction* function_;
 };
 
 // Decorator design pattern. Multiplies with the underlying function (from -Y to +Y) with a one-dimensional spline (in the YZ-plane).
-class TerrainAmplitudeFunction: public TerrainFunction, protected TerrainDecorator
-{
+class TerrainAmplitudeFunction: public TerrainFunction, protected TerrainDecorator {
 public:
-	TerrainAmplitudeFunction(const float* pAmplitudeVector, unsigned pAmplitudeVectorLength, TerrainFunction* pFunction);
+	TerrainAmplitudeFunction(const float* amplitude_vector, unsigned amplitude_vector_length, TerrainFunction* function);
 	virtual ~TerrainAmplitudeFunction();
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
+	void AddPoint(float relative_normalized_x, float relative_normalized_y, float scale, float absolute_xy_distance, vec3& point) const;
 
-	CubicDeCasteljauSpline<float, float, float>* mAmplitudeSpline;
+	CubicDeCasteljauSpline<float, float, float>* amplitude_spline_;
 };
 
 // Decorator design pattern. Compresses/streches the decorated function along the X-axis.
-class TerrainWidthFunction: public TerrainFunction, protected TerrainDecorator
-{
+class TerrainWidthFunction: public TerrainFunction, protected TerrainDecorator {
 public:
-	TerrainWidthFunction(float pWidthFactor, TerrainFunction* pFunction);
+	TerrainWidthFunction(float width_factor, TerrainFunction* function);
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
+	void AddPoint(float relative_normalized_x, float relative_normalized_y, float scale, float absolute_xy_distance, vec3& point) const;
 
-	float mWidthFactor;
+	float width_factor_;
 };
 
 // Decorator design pattern. Multiplies with the underlying function (from -Y to +Y) with a one-dimensional spline (in the YZ-plane).
-class TerrainPushFunction: public TerrainFunction, protected TerrainDecorator
-{
+class TerrainPushFunction: public TerrainFunction, protected TerrainDecorator {
 public:
-	TerrainPushFunction(const float* pPushVector, unsigned pPushVectorLength, TerrainFunction* pFunction);
+	TerrainPushFunction(const float* push_vector, unsigned push_vector_length, TerrainFunction* function);
 	virtual ~TerrainPushFunction();
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
+	void AddPoint(float relative_normalized_x, float relative_normalized_y, float scale, float absolute_xy_distance, vec3& point) const;
 
-	CubicDeCasteljauSpline<float, float, float>* mPushSpline;
+	CubicDeCasteljauSpline<float, float, float>* push_spline_;
 };
 
 // Decorator design pattern. Transforms the underlying function (in the XY-plane) along a two-dimensional spline (in the XY-plane).
-class TerrainRotateFunction: public TerrainFunction, protected TerrainDecorator
-{
+class TerrainRotateFunction: public TerrainFunction, protected TerrainDecorator {
 public:
-	TerrainRotateFunction(float pAngle, TerrainFunction* pFunction);
+	TerrainRotateFunction(float angle, TerrainFunction* function);
 
 private:
-	void AddPoint(float pRelativeNormalizedX, float pRelativeNormalizedY, float pScale, float pAbsoluteXyDistance, vec3& pPoint) const;
+	void AddPoint(float relative_normalized_x, float relative_normalized_y, float scale, float absolute_xy_distance, vec3& point) const;
 
-	float mAngle;
+	float angle_;
 };
 
 

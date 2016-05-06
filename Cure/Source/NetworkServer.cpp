@@ -1,646 +1,527 @@
 
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
- 
+
 
 
 #include "pch.h"
-#include "../Include/NetworkServer.h"
-#include "../../Lepra/Include/Endian.h"
-#include "../../Lepra/Include/HashUtil.h"
-#include "../../Lepra/Include/Log.h"
-#include "../Include/ContextObject.h"
-#include "../Include/Packet.h"
-#include "../Include/RuntimeVariable.h"
-#include "../Include/UserConnection.h"
+#include "../include/networkserver.h"
+#include "../../lepra/include/endian.h"
+#include "../../lepra/include/hashutil.h"
+#include "../../lepra/include/log.h"
+#include "../include/contextobject.h"
+#include "../include/packet.h"
+#include "../include/runtimevariable.h"
+#include "../include/userconnection.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-NetworkServer::LoginListener::LoginListener()
-{
+NetworkServer::LoginListener::LoginListener() {
 }
 
-NetworkServer::LoginListener::~LoginListener()
-{
+NetworkServer::LoginListener::~LoginListener() {
 }
 
 
 
-NetworkServer::NetworkServer(RuntimeVariableScope* pVariableScope, LoginListener* pLoginListener):
-	NetworkAgent(pVariableScope),
-	mUserConnectionFactory(new UserConnectionFactory()),
-	mLoginListener(pLoginListener)
-{
+NetworkServer::NetworkServer(RuntimeVariableScope* variable_scope, LoginListener* login_listener):
+	NetworkAgent(variable_scope),
+	user_connection_factory_(new UserConnectionFactory()),
+	login_listener_(login_listener) {
 }
 
-NetworkServer::~NetworkServer()
-{
+NetworkServer::~NetworkServer() {
 	Stop();
 
-	mLoginListener = 0;	// TRICKY: caller owns login listener.
-	delete (mUserConnectionFactory);
-	mUserConnectionFactory = 0;
+	login_listener_ = 0;	// TRICKY: caller owns login listener.
+	delete (user_connection_factory_);
+	user_connection_factory_ = 0;
 }
 
-bool NetworkServer::Start(const str& pHostAddress)
-{
-	bool lOk = true;
-	SocketAddress lAddress;
-	if (lOk)
-	{
-		lOk = lAddress.Resolve(pHostAddress);
+bool NetworkServer::Start(const str& host_address) {
+	bool ok = true;
+	SocketAddress address;
+	if (ok) {
+		ok = address.Resolve(host_address);
 	}
-	if (lOk)
-	{
-		mLog.Info("Server listening to address " + lAddress.GetAsString() + ".");
-		ScopeLock lLock(&mLock);
-		SetMuxSocket(new MuxSocket("Srv ", lAddress, true, 100, 1000));
-		lOk = mMuxSocket->IsOpen();
+	if (ok) {
+		log_.Info("Server listening to address " + address.GetAsString() + ".");
+		ScopeLock lock(&lock_);
+		SetMuxSocket(new MuxSocket("Srv ", address, true, 100, 1000));
+		ok = mux_socket_->IsOpen();
 	}
-	return (lOk);
+	return (ok);
 }
 
-void NetworkServer::Stop()
-{
-	ScopeLock lLock(&mLock);
-	while (!mLoggedInIdUserTable.empty())
-	{
-		LoggedInIdUserTable::iterator x = mLoggedInIdUserTable.begin();
-		UserConnection* lUser = x->second;
-		RemoveUser(lUser->GetAccountId(), true);
+void NetworkServer::Stop() {
+	ScopeLock lock(&lock_);
+	while (!logged_in_id_user_table_.empty()) {
+		LoggedInIdUserTable::iterator x = logged_in_id_user_table_.begin();
+		UserConnection* _user = x->second;
+		RemoveUser(_user->GetAccountId(), true);
 	}
-	while (!mSocketReceiveFilterTable.empty())
-	{
-		VSocket* lSocket = mSocketReceiveFilterTable.begin()->first;
-		DropSocket(lSocket);
+	while (!socket_receive_filter_table_.empty()) {
+		VSocket* _socket = socket_receive_filter_table_.begin()->first;
+		DropSocket(_socket);
 	}
 	Parent::Stop();
 }
 
 
 
-void NetworkServer::Disconnect(UserAccount::AccountId pAccountId, const str& pReason, bool pSendDisconnect)
-{
-	UserConnection* lUser = GetUser(pAccountId);
-	if (lUser)
-	{
-		if (pSendDisconnect)
-		{
-			Cure::Packet* lPacket = GetPacketFactory()->Allocate();
-			Parent::SendStatusMessage(lUser->GetSocket(), 0, Cure::REMOTE_NO_CONNECTION,
-				Cure::MessageStatus::INFO_LOGIN, pReason, lPacket);
-			GetPacketFactory()->Release(lPacket);
+void NetworkServer::Disconnect(UserAccount::AccountId account_id, const str& reason, bool send_disconnect) {
+	UserConnection* _user = GetUser(account_id);
+	if (_user) {
+		if (send_disconnect) {
+			cure::Packet* _packet = GetPacketFactory()->Allocate();
+			Parent::SendStatusMessage(_user->GetSocket(), 0, cure::kRemoteNoConnection,
+				cure::MessageStatus::kInfoLogin, reason, _packet);
+			GetPacketFactory()->Release(_packet);
+		} else if (_user->GetSocket()) {
+			_user->GetSocket()->ClearOutputData();
 		}
-		else if (lUser->GetSocket())
-		{
-			lUser->GetSocket()->ClearOutputData();
-		}
-		RemoveUser(pAccountId, true);
+		RemoveUser(account_id, true);
 	}
 }
 
 
 
-bool NetworkServer::PlaceInSendBuffer(bool pSafe, Packet* pPacket, UserAccount::AccountId pAccountId)
-{
-	bool lOk = false;
-	bool lRemoveUser = false;
-	UserConnection* lUser = GetUser(pAccountId);
-	if (lUser)
-	{
-		lOk = Parent::PlaceInSendBuffer(pSafe, lUser->GetSocket(), pPacket);
-		lRemoveUser = !lOk;
+bool NetworkServer::PlaceInSendBuffer(bool safe, Packet* packet, UserAccount::AccountId account_id) {
+	bool ok = false;
+	bool remove_user = false;
+	UserConnection* _user = GetUser(account_id);
+	if (_user) {
+		ok = Parent::PlaceInSendBuffer(safe, _user->GetSocket(), packet);
+		remove_user = !ok;
 	}
-	if (lRemoveUser)
-	{
-		RemoveUser(pAccountId, true);
+	if (remove_user) {
+		RemoveUser(account_id, true);
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool NetworkServer::SendAll()
-{
-	bool lAllSendsOk = true;
-	VSocket* lSocket;
-	while ((lSocket = mMuxSocket->PopSenderSocket()) != 0)
-	{
-		int lSendCount = lSocket->SendBuffer();
-		bool lOk = (lSendCount > 0);
-		if (!lOk)
-		{
-			lAllSendsOk = false;
-			if (lSendCount == 0)
-			{
-				mLog.Warning("Disconnecting socket since no data available for sending, though listed as such.");
-			}
-			else
-			{
-				mLog.Warning("Disconnecting socket since send failed.");
+bool NetworkServer::SendAll() {
+	bool all_sends_ok = true;
+	VSocket* _socket;
+	while ((_socket = mux_socket_->PopSenderSocket()) != 0) {
+		int send_count = _socket->SendBuffer();
+		bool ok = (send_count > 0);
+		if (!ok) {
+			all_sends_ok = false;
+			if (send_count == 0) {
+				log_.Warning("Disconnecting socket since no data available for sending, though listed as such.");
+			} else {
+				log_.Warning("Disconnecting socket since send failed.");
 			}
 
 			// Socket disconnected: drop user or socket.
-			UserConnection* lUser;
+			UserConnection* _user;
 			{
-				lUser = HashUtil::FindMapObject(mSocketUserTable, lSocket);
+				_user = HashUtil::FindMapObject(socket_user_table_, _socket);
 			}
-			if (lUser)
-			{
-				RemoveUser(lUser->GetAccountId(), true);
-			}
-			else
-			{
+			if (_user) {
+				RemoveUser(_user->GetAccountId(), true);
+			} else {
 				// A pending login or similar.
-				DropSocket(lSocket);
+				DropSocket(_socket);
 			}
 		}
 	}
-	return (lAllSendsOk);
+	return (all_sends_ok);
 }
 
-NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* pPacket, UserAccount::AccountId& pAccountId)
-{
-	if (!mMuxSocket)
-	{
-		return RECEIVE_CONNECTION_BROKEN;
+NetworkServer::ReceiveStatus NetworkServer::ReceiveFirstPacket(Packet* packet, UserAccount::AccountId& account_id) {
+	if (!mux_socket_) {
+		return kReceiveConnectionBroken;
 	}
 
 	PollAccept();
 	KillDeadSockets();
 
-	ReceiveStatus lStatus = RECEIVE_NO_DATA;
-	VSocket* lSocket;
-	while ((lSocket = mMuxSocket->PopReceiverSocket()) != 0)
-	{
-		if (mSocketReceiveFilterTable.find(lSocket) != mSocketReceiveFilterTable.end())
-		{
+	ReceiveStatus _status = kReceiveNoData;
+	VSocket* _socket;
+	while ((_socket = mux_socket_->PopReceiverSocket()) != 0) {
+		if (socket_receive_filter_table_.find(_socket) != socket_receive_filter_table_.end()) {
 			continue;
 		}
-		int lDataLength = lSocket->Receive(pPacket->GetWriteBuffer(), pPacket->GetBufferSize());
-		UserConnection* lUser;
+		int _data_length = _socket->Receive(packet->GetWriteBuffer(), packet->GetBufferSize());
+		UserConnection* _user;
 		{
-			lUser = HashUtil::FindMapObject(mSocketUserTable, lSocket);
-			if (lUser)
-			{
-				pAccountId = lUser->GetAccountId();
+			_user = HashUtil::FindMapObject(socket_user_table_, _socket);
+			if (_user) {
+				account_id = _user->GetAccountId();
 			}
 		}
-		if (lDataLength == 0)
-		{
-			log_volatile(mLog.Debug("Got zero-length packet from "+
-				lSocket->GetTargetAddress().GetAsString()));
-			lStatus = RECEIVE_NO_DATA;
+		if (_data_length == 0) {
+			log_volatile(log_.Debug("Got zero-length packet from "+
+				_socket->GetTargetAddress().GetAsString()));
+			_status = kReceiveNoData;
 			// TRICKY: no break here, but in sibling scopes.
-		}
-		else if (lDataLength > 0)
-		{
-			pPacket->SetPacketSize(lDataLength);
-			if (pPacket->Parse() == Packet::PARSE_OK)
-			{
-				lStatus = RECEIVE_OK;
+		} else if (_data_length > 0) {
+			packet->SetPacketSize(_data_length);
+			if (packet->Parse() == Packet::kParseOk) {
+				_status = kReceiveOk;
 
 				// Good boy, you will not be kicked this run!
-				mSocketTimeoutTable.erase(lSocket);
-			}
-			else
-			{
-				lStatus = RECEIVE_PARSE_ERROR;
-				mLog.Warningf("Got bad data from %s on %s.",
-					lUser? ("logged in user "+lUser->GetLoginName()).c_str() :
+				socket_timeout_table_.erase(_socket);
+			} else {
+				_status = kReceiveParseError;
+				log_.Warningf("Got bad data from %s on %s.",
+					_user? ("logged in user "+_user->GetLoginName()).c_str() :
 						"not logged in user",
-					lSocket->GetTargetAddress().GetAsString().c_str());
+					_socket->GetTargetAddress().GetAsString().c_str());
 				// TODO: take action on bad network data?
 			}
-			lSocket->TryAddReceiverSocket();
+			_socket->TryAddReceiverSocket();
 			// TRICKY: break here, but not in all sibling scopes.
-			if (lUser)
-			{
+			if (_user) {
 				break;	// We have parsed towards a logged-in user. Done.
 			}
-		}
-		else
-		{
-			lStatus = RECEIVE_CONNECTION_BROKEN;
-			log_volatile(mLog.Debug("Got broken pipe from "+
-				lSocket->GetTargetAddress().GetAsString()));
+		} else {
+			_status = kReceiveConnectionBroken;
+			log_volatile(log_.Debug("Got broken pipe from "+
+				_socket->GetTargetAddress().GetAsString()));
 			// TRICKY: break here, but not in all sibling scopes.
-			if (lUser)
-			{
+			if (_user) {
 				break;	// We have broken pipe towards a logged-in user. Done.
 			}
 		}
-		if (!lUser)
-		{
-			TryLogin(lSocket, pPacket, lDataLength);
-			pPacket->Release();
-			lStatus = RECEIVE_NO_DATA;
+		if (!_user) {
+			TryLogin(_socket, packet, _data_length);
+			packet->Release();
+			_status = kReceiveNoData;
 		}
 	}
-	if (lStatus == RECEIVE_CONNECTION_BROKEN)
-	{
-		RemoveUser(pAccountId, true);
+	if (_status == kReceiveConnectionBroken) {
+		RemoveUser(account_id, true);
 	}
-	return (lStatus);
+	return (_status);
 }
 
-NetworkServer::ReceiveStatus NetworkServer::ReceiveMore(UserAccount::AccountId pAccountId, Packet* pPacket)
-{
-	if (!mMuxSocket)
-	{
-		return RECEIVE_CONNECTION_BROKEN;
+NetworkServer::ReceiveStatus NetworkServer::ReceiveMore(UserAccount::AccountId account_id, Packet* packet) {
+	if (!mux_socket_) {
+		return kReceiveConnectionBroken;
 	}
 
-	ScopeLock lLock(&mLock);
-	UserConnection* lUser = HashUtil::FindMapObject(mLoggedInIdUserTable, pAccountId);
-	if (!lUser)
-	{
-		return RECEIVE_CONNECTION_BROKEN;
+	ScopeLock lock(&lock_);
+	UserConnection* _user = HashUtil::FindMapObject(logged_in_id_user_table_, account_id);
+	if (!_user) {
+		return kReceiveConnectionBroken;
 	}
-	VSocket* lSocket = lUser->GetSocket();
-	if (!lSocket)
-	{
-		return RECEIVE_CONNECTION_BROKEN;
+	VSocket* _socket = _user->GetSocket();
+	if (!_socket) {
+		return kReceiveConnectionBroken;
 	}
 
-	ReceiveStatus lResult = RECEIVE_CONNECTION_BROKEN;
-	const int lDataLength = lSocket->Receive(true, pPacket->GetWriteBuffer() + pPacket->GetPacketSize(),
-		pPacket->GetBufferSize() - pPacket->GetPacketSize());
-	if (lDataLength == 0)
-	{
-		lResult = RECEIVE_NO_DATA;
+	ReceiveStatus result = kReceiveConnectionBroken;
+	const int _data_length = _socket->Receive(true, packet->GetWriteBuffer() + packet->GetPacketSize(),
+		packet->GetBufferSize() - packet->GetPacketSize());
+	if (_data_length == 0) {
+		result = kReceiveNoData;
+	} else if (_data_length > 0) {
+		packet->SetPacketSize(packet->GetPacketSize() + _data_length);
+		result = kReceiveOk;
 	}
-	else if (lDataLength > 0)
-	{
-		pPacket->SetPacketSize(pPacket->GetPacketSize() + lDataLength);
-		lResult = RECEIVE_OK;
-	}
-	return lResult;
+	return result;
 }
 
 
 
-void NetworkServer::PollAccept()
-{
-	if (mPendingLoginTable.size() < 1000)
-	{
-		VSocket* lSocket = mMuxSocket->PollAccept();
+void NetworkServer::PollAccept() {
+	if (pending_login_table_.size() < 1000) {
+		VSocket* _socket = mux_socket_->PollAccept();
 		// TODO: add banning techniques to avoid DoS attacks.
-		if (lSocket)
-		{
-			mPendingLoginTable.insert(lSocket);
+		if (_socket) {
+			pending_login_table_.insert(_socket);
 		}
 	}
 }
 
-void NetworkServer::TryLogin(VSocket* pSocket, Packet* pPacket, int pDataLength)
-{
+void NetworkServer::TryLogin(VSocket* socket, Packet* packet, int data_length) {
 	{
-		PendingSocketTable::iterator x = mPendingLoginTable.find(pSocket);
-		if (x == mPendingLoginTable.end())
-		{
+		PendingSocketTable::iterator x = pending_login_table_.find(socket);
+		if (x == pending_login_table_.end()) {
 			// If user hasn't connected properly, we just cut the line.
-			DropSocket(pSocket);
+			DropSocket(socket);
 			return;	// TRICKY: returning here simplifies.
 		}
-		mPendingLoginTable.erase(x);
+		pending_login_table_.erase(x);
 	}
 
-	if (pDataLength >= 1+4)
-	{
-		if (pPacket->GetMessageCount() == 1)
-		{
-			if (pPacket->GetMessageAt(0)->GetType() == MESSAGE_TYPE_LOGIN_REQUEST)
-			{
-				ManageLogin(pSocket, pPacket);
-			}
-			else
-			{
+	if (data_length >= 1+4) {
+		if (packet->GetMessageCount() == 1) {
+			if (packet->GetMessageAt(0)->GetType() == kMessageTypeLoginRequest) {
+				ManageLogin(socket, packet);
+			} else {
 				// This login packet was shit. Ignore it.
-				mLog.Warning("Yucky hack packet from "+
-					pSocket->GetTargetAddress().GetAsString()+".");
-				DropSocket(pSocket);
+				log_.Warning("Yucky hack packet from "+
+					socket->GetTargetAddress().GetAsString()+".");
+				DropSocket(socket);
 			}
-		}
-		else
-		{
+		} else {
 			// Too many login packets. Throo avaj.
-			mLog.Warning("Too many (login?) packets or crappy data from "+
-				pSocket->GetTargetAddress().GetAsString()+".");
-			DropSocket(pSocket);
+			log_.Warning("Too many (login?) packets or crappy data from "+
+				socket->GetTargetAddress().GetAsString()+".");
+			DropSocket(socket);
 		}
-	}
-	else if (pDataLength != 0)
-	{
-		mLog.Error("Login connection broken to "+
-			pSocket->GetTargetAddress().GetAsString()+".");
-		DropSocket(pSocket);
+	} else if (data_length != 0) {
+		log_.Error("Login connection broken to "+
+			socket->GetTargetAddress().GetAsString()+".");
+		DropSocket(socket);
 	}
 	// TODO: add timeout for sockets in pending state.
 }
 
-RemoteStatus NetworkServer::ManageLogin(VSocket* pSocket, Packet* pPacket)
-{
-	Message* lMessage = pPacket->GetMessageAt(0);
-	MessageLoginRequest* lLoginMessage = (MessageLoginRequest*)lMessage;
-	str lLoginName;
-	lLoginMessage->GetLoginName(lLoginName);
-	UserAccount::AccountId lAccountId;
-	RemoteStatus lStatus = QueryLogin(lLoginName, lLoginMessage, lAccountId);
-	switch (lStatus)
-	{
-		case REMOTE_OK:
-		{
-			mLog.Info("Logging in user "+lLoginName+".");
-			Login(lLoginName, lAccountId, pSocket, pPacket);
-		}
-		break;
-		case REMOTE_LOGIN_ALREADY:
-		{
-			mLog.Warning("User "+lLoginName+" already logged in.");
-			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
-				"You have already been logged in.", pPacket);
-			DropSocket(pSocket);
-		}
-		break;
-		case REMOTE_LOGIN_ERRONOUS_DATA:
-		{
-			mLog.Warning("User "+lLoginName+" attempted with wrong username or password.");
-			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
-				"Wrong username or password. Try again.", pPacket);
-			DropSocket(pSocket);
-		}
-		break;
-		case REMOTE_LOGIN_BAN:
-		{
-			mLog.Warning("User "+lLoginName+" tried logging in, but was banned.");
-			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
-				"Sorry, you are banned. Try again later.", pPacket);
-			DropSocket(pSocket);
-		}
-		break;
-		case REMOTE_NO_CONNECTION:	// TODO: check me out!
-		case REMOTE_UNKNOWN:
-		{
-			mLog.Error("An unknown error occurred when user "+lLoginName+" tried logging in.");
-			Parent::SendStatusMessage(pSocket, 0, lStatus, Cure::MessageStatus::INFO_LOGIN,
-				"Unknown login error, please contact support.", pPacket);
-			DropSocket(pSocket);
-		}
-		break;
+RemoteStatus NetworkServer::ManageLogin(VSocket* socket, Packet* packet) {
+	Message* _message = packet->GetMessageAt(0);
+	MessageLoginRequest* login_message = (MessageLoginRequest*)_message;
+	str _login_name;
+	login_message->GetLoginName(_login_name);
+	UserAccount::AccountId _account_id;
+	RemoteStatus _status = QueryLogin(_login_name, login_message, _account_id);
+	switch (_status) {
+		case kRemoteOk: {
+			log_.Info("Logging in user "+_login_name+".");
+			Login(_login_name, _account_id, socket, packet);
+		} break;
+		case kRemoteLoginAlready: {
+			log_.Warning("User "+_login_name+" already logged in.");
+			Parent::SendStatusMessage(socket, 0, _status, cure::MessageStatus::kInfoLogin,
+				"You have already been logged in.", packet);
+			DropSocket(socket);
+		} break;
+		case kRemoteLoginErronousData: {
+			log_.Warning("User "+_login_name+" attempted with wrong username or password.");
+			Parent::SendStatusMessage(socket, 0, _status, cure::MessageStatus::kInfoLogin,
+				"Wrong username or password. Try again.", packet);
+			DropSocket(socket);
+		} break;
+		case kRemoteLoginBan: {
+			log_.Warning("User "+_login_name+" tried logging in, but was banned.");
+			Parent::SendStatusMessage(socket, 0, _status, cure::MessageStatus::kInfoLogin,
+				"Sorry, you are banned. Try again later.", packet);
+			DropSocket(socket);
+		} break;
+		case kRemoteNoConnection:	// TODO: check me out!
+		case kRemoteUnknown: {
+			log_.Error("An unknown error occurred when user "+_login_name+" tried logging in.");
+			Parent::SendStatusMessage(socket, 0, _status, cure::MessageStatus::kInfoLogin,
+				"Unknown login error, please contact support.", packet);
+			DropSocket(socket);
+		} break;
 	}
-	return (lStatus);
+	return (_status);
 }
 
-RemoteStatus NetworkServer::QueryLogin(const str& pLoginName, MessageLoginRequest* pLoginRequest, UserAccount::AccountId& pAccountId)
-{
-	RemoteStatus lLoginResult = REMOTE_UNKNOWN;
+RemoteStatus NetworkServer::QueryLogin(const str& login_name, MessageLoginRequest* login_request, UserAccount::AccountId& account_id) {
+	RemoteStatus login_result = kRemoteUnknown;
 
-	UserConnection* lAccount = HashUtil::FindMapObject(mLoggedInNameUserTable, pLoginName);
-	if (lAccount == 0)
-	{
-		MangledPassword lMangledPassword = pLoginRequest->GetPassword();
-		LoginId lLoginId(pLoginName, lMangledPassword);
-		UserAccount::Availability lStatus = mLoginListener->QueryLogin(lLoginId, pAccountId);
-		switch (lStatus)
-		{
-			case UserAccount::STATUS_OK:
-			{
-				lLoginResult = REMOTE_OK;
-			}
-			break;
-			case UserAccount::STATUS_NOT_PRESENT:
-			{
+	UserConnection* account = HashUtil::FindMapObject(logged_in_name_user_table_, login_name);
+	if (account == 0) {
+		MangledPassword mangled_password = login_request->GetPassword();
+		LoginId login_id(login_name, mangled_password);
+		UserAccount::Availability _status = login_listener_->QueryLogin(login_id, account_id);
+		switch (_status) {
+			case UserAccount::kStatusOk: {
+				login_result = kRemoteOk;
+			} break;
+			case UserAccount::kStatusNotPresent: {
 				// Wrong username or password.
-				lLoginResult = REMOTE_LOGIN_ERRONOUS_DATA;
-			}
-			break;
-			case UserAccount::STATUS_BANNED:
-			case UserAccount::STATUS_TEMPORARY_BANNED:
-			{
+				login_result = kRemoteLoginErronousData;
+			} break;
+			case UserAccount::kStatusBanned:
+			case UserAccount::kStatusTemporaryBanned: {
 				// Banned for now or forever.
-				lLoginResult = REMOTE_LOGIN_BAN;
-			}
-			break;
+				login_result = kRemoteLoginBan;
+			} break;
 		}
-	}
-	else
-	{
+	} else {
 		// User already logged in.
-		lLoginResult = REMOTE_LOGIN_ALREADY;
+		login_result = kRemoteLoginAlready;
 	}
 
-	return (lLoginResult);
+	return (login_result);
 }
 
-void NetworkServer::Login(const str& pLoginName, UserAccount::AccountId pAccountId, VSocket* pSocket, Packet* pPacket)
-{
-	UserConnection* lUser = mUserConnectionFactory->AllocateUserConnection();
-	lUser->SetLoginName(pLoginName);
-	lUser->SetAccountId(pAccountId);
-	lUser->SetSocket(pSocket);
+void NetworkServer::Login(const str& login_name, UserAccount::AccountId account_id, VSocket* socket, Packet* packet) {
+	UserConnection* _user = user_connection_factory_->AllocateUserConnection();
+	_user->SetLoginName(login_name);
+	_user->SetAccountId(account_id);
+	_user->SetSocket(socket);
 
-	AddUser(lUser, pAccountId);
+	AddUser(_user, account_id);
 
-	mLog.Infof("Sending login OK with account ID %i", pAccountId);
-	SendStatusMessage(pAccountId, pAccountId, REMOTE_OK, Cure::MessageStatus::INFO_LOGIN, "Welcome.", pPacket);
+	log_.Infof("Sending login OK with account ID %i", account_id);
+	SendStatusMessage(account_id, account_id, kRemoteOk, cure::MessageStatus::kInfoLogin, "Welcome.", packet);
 
-	mLoginListener->OnLogin(lUser);
+	login_listener_->OnLogin(_user);
 }
 
-void NetworkServer::AddUser(UserConnection* pUser, UserAccount::AccountId& pAccountId)
-{
-	ScopeLock lLock(&mLock);
-	mLoggedInIdUserTable.insert(LoggedInIdUserTable::value_type(pAccountId, pUser));
-	mLoggedInNameUserTable.insert(LoggedInNameUserTable::value_type(pUser->GetLoginName(), pUser));
-	mSocketUserTable.insert(SocketUserTable::value_type(pUser->GetSocket(), pUser));
+void NetworkServer::AddUser(UserConnection* user, UserAccount::AccountId& account_id) {
+	ScopeLock lock(&lock_);
+	logged_in_id_user_table_.insert(LoggedInIdUserTable::value_type(account_id, user));
+	logged_in_name_user_table_.insert(LoggedInNameUserTable::value_type(user->GetLoginName(), user));
+	socket_user_table_.insert(SocketUserTable::value_type(user->GetSocket(), user));
 }
 
-bool NetworkServer::RemoveUser(UserAccount::AccountId pAccountId, bool pDestroy)
-{
-	UserConnection* lUser = 0;
+bool NetworkServer::RemoveUser(UserAccount::AccountId account_id, bool destroy) {
+	UserConnection* _user = 0;
 	{
-		ScopeLock lLock(&mLock);
-		LoggedInIdUserTable::iterator x = mLoggedInIdUserTable.find(pAccountId);
-		if (x != mLoggedInIdUserTable.end())
-		{
-			lUser = x->second;
-			if (pDestroy)
-			{
-				mLoggedInIdUserTable.erase(x);
-				mLoggedInNameUserTable.erase(lUser->GetLoginName());
+		ScopeLock lock(&lock_);
+		LoggedInIdUserTable::iterator x = logged_in_id_user_table_.find(account_id);
+		if (x != logged_in_id_user_table_.end()) {
+			_user = x->second;
+			if (destroy) {
+				logged_in_id_user_table_.erase(x);
+				logged_in_name_user_table_.erase(_user->GetLoginName());
 			}
-			mSocketUserTable.erase(lUser->GetSocket());
-			mSocketTimeoutTable.erase(lUser->GetSocket());
+			socket_user_table_.erase(_user->GetSocket());
+			socket_timeout_table_.erase(_user->GetSocket());
 		}
 	}
-	if (lUser)
-	{
-		VSocket* lSocket = lUser->GetSocket();
-		if (lSocket)
-		{
-			lUser->SetSocket(0);
-			DropSocket(lSocket);
+	if (_user) {
+		VSocket* _socket = _user->GetSocket();
+		if (_socket) {
+			_user->SetSocket(0);
+			DropSocket(_socket);
 		}
-		if (pDestroy)
-		{
-			mLoginListener->OnLogout(lUser);
-			mUserConnectionFactory->FreeUserConnection(lUser);
+		if (destroy) {
+			login_listener_->OnLogout(_user);
+			user_connection_factory_->FreeUserConnection(_user);
 		}
 	}
-	return (lUser != 0);
+	return (_user != 0);
 }
 
-void NetworkServer::KillDeadSockets()
-{
+void NetworkServer::KillDeadSockets() {
 	{
-		ScopeLock lLock(&mLock);
-		AccountIdSet::iterator x = mDropUserList.begin();
-		for (; x != mDropUserList.end(); ++x)
-		{
-			UserAccount::AccountId lUserAccountId = *x;
-			mLog.Infof("Kicking user ID %i in drop zone silently.", lUserAccountId);
-			Disconnect(lUserAccountId, EmptyString, false);
+		ScopeLock lock(&lock_);
+		AccountIdSet::iterator x = drop_user_list_.begin();
+		for (; x != drop_user_list_.end(); ++x) {
+			UserAccount::AccountId user_account_id = *x;
+			log_.Infof("Kicking user ID %i in drop zone silently.", user_account_id);
+			Disconnect(user_account_id, EmptyString, false);
 		}
-		mDropUserList.clear();
+		drop_user_list_.clear();
 	}
 
-	double lKillInterval;
-	v_get(lKillInterval, =, mVariableScope, RTVAR_NETWORK_KEEPALIVE_KILLINTERVAL, 20.0);
-	mKeepaliveTimer.UpdateTimer();
-	if (mKeepaliveTimer.GetTimeDiff() >= lKillInterval)
-	{
+	double kill_interval;
+	v_get(kill_interval, =, variable_scope_, kRtvarNetworkKeepaliveKillinterval, 20.0);
+	keepalive_timer_.UpdateTimer();
+	if (keepalive_timer_.GetTimeDiff() >= kill_interval) {
 		// Reset the keepalive timer.
-		mKeepaliveTimer.ClearTimeDiff();
+		keepalive_timer_.ClearTimeDiff();
 
 		// Kill all old and dead connections.
-		while (!mSocketTimeoutTable.empty())
-		{
-			VSocket* lSocket = *mSocketTimeoutTable.begin();
-			SocketUserTable::iterator y = mSocketUserTable.find(lSocket);
-			if (y != mSocketUserTable.end())
-			{
-				UserConnection* lUser = y->second;
-				UserAccount::AccountId lUserAccountId = lUser->GetAccountId();
-				mLog.Infof("Dropping user %s (ID %i) due to network keepalive timeout.",
-					lUser->GetLoginName().c_str(), lUserAccountId);
-				Disconnect(lUserAccountId, "Network timeout", true);
-			}
-			else
-			{
+		while (!socket_timeout_table_.empty()) {
+			VSocket* _socket = *socket_timeout_table_.begin();
+			SocketUserTable::iterator y = socket_user_table_.find(_socket);
+			if (y != socket_user_table_.end()) {
+				UserConnection* _user = y->second;
+				UserAccount::AccountId user_account_id = _user->GetAccountId();
+				log_.Infof("Dropping user %s (ID %i) due to network keepalive timeout.",
+					_user->GetLoginName().c_str(), user_account_id);
+				Disconnect(user_account_id, "Network timeout", true);
+			} else {
 				// A not-logged-in pending socket. Probably just a spoofer or similar. Close silently.
-				mLog.Infof("Dropping connected, but not logged in socket on %s due to network keepalive timeout.",
-					lSocket->GetTargetAddress().GetAsString().c_str());
-				DropSocket(lSocket);
+				log_.Infof("Dropping connected, but not logged in socket on %s due to network keepalive timeout.",
+					_socket->GetTargetAddress().GetAsString().c_str());
+				DropSocket(_socket);
 			}
 		}
 
 		// Put all current connections in the "old and dead" bin. If they won't talk within the given
 		// keepalive timeout, we kill them off.
 		// First copy all pending connections.
-		mSocketTimeoutTable.clear();
-		mSocketTimeoutTable.insert(mPendingLoginTable.begin(), mPendingLoginTable.end());
+		socket_timeout_table_.clear();
+		socket_timeout_table_.insert(pending_login_table_.begin(), pending_login_table_.end());
 		// Then extend with established user connections.
-		SocketUserTable::iterator y = mSocketUserTable.begin();
-		for (; y != mSocketUserTable.end(); ++y)
-		{
-			mSocketTimeoutTable.insert(y->second->GetSocket());
+		SocketUserTable::iterator y = socket_user_table_.begin();
+		for (; y != socket_user_table_.end(); ++y) {
+			socket_timeout_table_.insert(y->second->GetSocket());
 		}
 	}
 }
 
-void NetworkServer::DropSocket(VSocket* pSocket)
-{
-	ScopeLock lLock(&mLock);
-	if (pSocket)
-	{
-		pSocket->SendBuffer();
-		mSocketTimeoutTable.erase(pSocket);
-		mPendingLoginTable.erase(pSocket);
+void NetworkServer::DropSocket(VSocket* socket) {
+	ScopeLock lock(&lock_);
+	if (socket) {
+		socket->SendBuffer();
+		socket_timeout_table_.erase(socket);
+		pending_login_table_.erase(socket);
 	}
-	SocketReceiveFilterTable::iterator x = mSocketReceiveFilterTable.find(pSocket);
-	if (x != mSocketReceiveFilterTable.end())
-	{
+	SocketReceiveFilterTable::iterator x = socket_receive_filter_table_.find(socket);
+	if (x != socket_receive_filter_table_.end()) {
 		x->second(x->first);
-		mSocketReceiveFilterTable.erase(x);
+		socket_receive_filter_table_.erase(x);
 	}
-	if (pSocket)
-	{
-		mMuxSocket->CloseSocket(pSocket);
+	if (socket) {
+		mux_socket_->CloseSocket(socket);
 	}
 }
 
-UserConnection* NetworkServer::GetUser(UserAccount::AccountId pAccountId)
-{
-	ScopeLock lLock(&mLock);
-	UserConnection* lUser = HashUtil::FindMapObject(mLoggedInIdUserTable, pAccountId);
-	return (lUser);
-}
-
-
-
-bool NetworkServer::SendStatusMessage(UserAccount::AccountId pAccountId, int32 pInteger, RemoteStatus pStatus,
-	MessageStatus::InfoType pInfoType, str pMessage, Packet* pPacket)
-{
-	pPacket->Release();
-	MessageStatus* lStatus = (MessageStatus*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_STATUS);
-	pPacket->AddMessage(lStatus);
-	lStatus->Store(pPacket, pStatus, pInfoType, pInteger, pMessage);
-	bool lOk = PlaceInSendBuffer(true, pPacket, pAccountId);
-	return (lOk);
+UserConnection* NetworkServer::GetUser(UserAccount::AccountId account_id) {
+	ScopeLock lock(&lock_);
+	UserConnection* _user = HashUtil::FindMapObject(logged_in_id_user_table_, account_id);
+	return (_user);
 }
 
 
 
-/*void NetworkServer::OnCloseSocket(VSocket* pSocket)
-{
-	ScopeLock lLock(&mLock);
-	SocketUserTable::iterator x = mSocketUserTable.find(pSocket);
-	if (x != mSocketUserTable.end())
-	{
-		UserConnection* lUser = x->second;
-		UserAccount::AccountId lUserAccountId = lUser->GetAccountId();
-		mLog.Infof("Placing user %s (ID %i in drop zone (due to OOB? kill). Will drop next frame."),
-			lUser->GetLoginName().c_str(), lUserAccountId);
-		RemoveUser(lUserAccountId, false);
-		mDropUserList.insert(lUserAccountId);
-	}
-	else
-	{
-		mLog.Infof("Network drop (OOB? of socket on %s."),
-			pSocket->GetTargetAddress().GetAsString().c_str());
-		DropSocket(pSocket);
+bool NetworkServer::SendStatusMessage(UserAccount::AccountId account_id, int32 integer, RemoteStatus status,
+	MessageStatus::InfoType info_type, str message, Packet* packet) {
+	packet->Release();
+	MessageStatus* _status = (MessageStatus*)packet_factory_->GetMessageFactory()->Allocate(kMessageTypeStatus);
+	packet->AddMessage(_status);
+	_status->Store(packet, status, info_type, integer, message);
+	bool ok = PlaceInSendBuffer(true, packet, account_id);
+	return (ok);
+}
+
+
+
+/*void NetworkServer::OnCloseSocket(VSocket* socket) {
+	ScopeLock lock(&lock_);
+	SocketUserTable::iterator x = socket_user_table_.find(socket);
+	if (x != socket_user_table_.end()) {
+		UserConnection* _user = x->second;
+		UserAccount::AccountId user_account_id = _user->GetAccountId();
+		log_.Infof("Placing user %s (ID %i in drop zone (due to OOB? kill). Will drop next frame."),
+			_user->GetLoginName().c_str(), user_account_id);
+		RemoveUser(user_account_id, false);
+		drop_user_list_.insert(user_account_id);
+	} else {
+		log_.Infof("Network drop (OOB? of socket on %s."),
+			socket->GetTargetAddress().GetAsString().c_str());
+		DropSocket(socket);
 	}
 }*/
 
 
 
-NetworkServer::MuxIoSocket* NetworkServer::GetMuxIoSocket() const
-{
-	return mMuxSocket;
+NetworkServer::MuxIoSocket* NetworkServer::GetMuxIoSocket() const {
+	return mux_socket_;
 }
 
-void NetworkServer::AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback)
-{
-	mSocketReceiveFilterTable.insert(SocketReceiveFilterTable::value_type(pSocket, pOnDropCallback));
+void NetworkServer::AddFilterIoSocket(VIoSocket* socket, const DropFilterCallback& on_drop_callback) {
+	socket_receive_filter_table_.insert(SocketReceiveFilterTable::value_type(socket, on_drop_callback));
 }
 
-void NetworkServer::RemoveAllFilterIoSockets()
-{
-	mSocketReceiveFilterTable.clear();
+void NetworkServer::RemoveAllFilterIoSockets() {
+	socket_receive_filter_table_.clear();
 }
 
-void NetworkServer::KillIoSocket(VIoSocket* pSocket)
-{
-	DropSocket(pSocket);
+void NetworkServer::KillIoSocket(VIoSocket* socket) {
+	DropSocket(socket);
 }
 
 
 
-loginstance(NETWORK_SERVER, NetworkServer);
+loginstance(kNetworkServer, NetworkServer);
 
 
 

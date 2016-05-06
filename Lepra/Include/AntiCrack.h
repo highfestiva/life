@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,7 +7,7 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT	0x0510
 #endif // _WIN32_WINNT
-#include "LepraOS.h"
+#include "lepraos.h"
 
 #pragma once
 
@@ -23,13 +23,12 @@
 
 
 
-class AntiCrack
-{
+class AntiCrack {
 public:
 	AntiCrack();
 
 #ifdef LEPRA_WINDOWS
 	void SetBsodOnProcessExit();
-	bool EnableCriticalPrivileges(LPCTSTR pPrivilegeName);
+	bool EnableCriticalPrivileges(LPCTSTR privilege_name);
 #endif // Windows
 };

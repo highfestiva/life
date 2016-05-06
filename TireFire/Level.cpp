@@ -1,48 +1,43 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Level.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ContextPath.h"
-#include "Game.h"
+#include "level.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/contextpath.h"
+#include "game.h"
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 
-Level::Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
-	Parent(pResourceManager, pClassId, pUiManager),
-	mPath(0)
-{
+Level::Level(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager):
+	Parent(resource_manager, class_id, ui_manager),
+	path_(0) {
 }
 
-Level::~Level()
-{
-	mPath = 0;
+Level::~Level() {
+	path_ = 0;
 }
 
 
 
-Cure::ContextPath* Level::QueryPath()
-{
-	if (!mPath)
-	{
-		mPath = new Cure::ContextPath(GetResourceManager(), "ContextPath");
-		GetManager()->AddLocalObject(mPath);
+cure::ContextPath* Level::QueryPath() {
+	if (!path_) {
+		path_ = new cure::ContextPath(GetResourceManager(), "ContextPath");
+		GetManager()->AddLocalObject(path_);
 	}
-	return mPath;
+	return path_;
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Level);
+loginstance(kGameContextCpp, Level);
 
 
 

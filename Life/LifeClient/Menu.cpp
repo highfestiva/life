@@ -5,15 +5,14 @@
 
 
 #include "pch.h"
-#include "Menu.h"
-#include "../../Lepra/Include/Random.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
+#include "menu.h"
+#include "../../lepra/include/random.h"
+#include "../../uicure/include/uigameuimanager.h"
+#include "../../uitbc/include/gui/uidesktopwindow.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -22,41 +21,35 @@ namespace Life
 
 
 
-Menu::Menu(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager):
-	mUiManager(pUiManager),
-	mResourceManager(pResourceManager),
-	mDialog(0),
-	mTapClick(0),
-	mTapVolume(1),
-	mTapPitchOffset(0)
-{
+Menu::Menu(UiCure::GameUiManager* ui_manager, cure::ResourceManager* resource_manager):
+	ui_manager_(ui_manager),
+	resource_manager_(resource_manager),
+	dialog_(0),
+	tap_click_(0),
+	tap_volume_(1),
+	tap_pitch_offset_(0) {
 }
 
-Menu::~Menu()
-{
-	delete mDialog;
-	mDialog = 0;
-	mResourceManager = 0;
-	mUiManager = 0;
+Menu::~Menu() {
+	delete dialog_;
+	dialog_ = 0;
+	resource_manager_ = 0;
+	ui_manager_ = 0;
 }
 
-void Menu::SetButtonTapSound(const str& pSoundName, float pTapVolume, float pTapPitchOffset)
-{
-	if (mTapClick)
-	{
-		delete mTapClick;
+void Menu::SetButtonTapSound(const str& sound_name, float tap_volume, float tap_pitch_offset) {
+	if (tap_click_) {
+		delete tap_click_;
 	}
-	mTapVolume = pTapVolume;
-	mTapPitchOffset = pTapPitchOffset;
-	mTapClick = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-	mTapClick->Load(mResourceManager, pSoundName, UiCure::UserSound2dResource::TypeLoadCallback(this, &Menu::SoundLoadCallback));
+	tap_volume_ = tap_volume;
+	tap_pitch_offset_ = tap_pitch_offset;
+	tap_click_ = new UiCure::UserSound2dResource(ui_manager_, uilepra::SoundManager::kLoopNone);
+	tap_click_->Load(resource_manager_, sound_name, UiCure::UserSound2dResource::TypeLoadCallback(this, &Menu::SoundLoadCallback));
 }
 
-UiTbc::Dialog* Menu::CreateTestDialog(const ButtonAction& pAction)
-{
-	UiTbc::Dialog* d = CreateTbcDialog(pAction, 0.8f, 0.8f);
-	if (!d)
-	{
+uitbc::Dialog* Menu::CreateTestDialog(const ButtonAction& action) {
+	uitbc::Dialog* d = CreateTbcDialog(action, 0.8f, 0.8f);
+	if (!d) {
 		return 0;
 	}
 	d->AddButton(1, CreateButton(L"Test", Color(40, 210, 40)), false);
@@ -65,80 +58,67 @@ UiTbc::Dialog* Menu::CreateTestDialog(const ButtonAction& pAction)
 	return d;
 }
 
-UiTbc::Dialog* Menu::CreateTbcDialog(const ButtonAction& pAction, float pWidth, float pHeight)
-{
-	if (mDialog)
-	{
+uitbc::Dialog* Menu::CreateTbcDialog(const ButtonAction& action, float width, float height) {
+	if (dialog_) {
 		return 0;
 	}
-	mButtonDelegate = pAction;
-	UiTbc::Dialog* d = new UiTbc::Dialog(mUiManager->GetDesktopWindow(), UiTbc::Dialog::Action(this, &Menu::OnAction));
-	d->SetPostClickTarget(UiTbc::Dialog::Action(this, &Menu::OnTapSound));
-	d->SetSize((int)(pWidth*mUiManager->GetCanvas()->GetWidth()), (int)(pHeight*mUiManager->GetCanvas()->GetHeight()));
+	button_delegate_ = action;
+	uitbc::Dialog* d = new uitbc::Dialog(ui_manager_->GetDesktopWindow(), uitbc::Dialog::Action(this, &Menu::OnAction));
+	d->SetPostClickTarget(uitbc::Dialog::Action(this, &Menu::OnTapSound));
+	d->SetSize((int)(width*ui_manager_->GetCanvas()->GetWidth()), (int)(height*ui_manager_->GetCanvas()->GetHeight()));
 	d->SetPreferredSize(d->GetSize());
 	d->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);
 	d->SetCornerRadius(d->GetSize().y/6);
-	mDialog = d;
+	dialog_ = d;
 	return d;
 }
 
-UiTbc::Button* Menu::CreateButton(const wstr& pText, const Color& pColor) const
-{
-	UiTbc::Button* lButton = new UiTbc::Button(pColor, pText);
-	//lButton->SetText(pText);
-	InitButton(lButton);
-	return lButton;
+uitbc::Button* Menu::CreateButton(const wstr& text, const Color& color) const {
+	uitbc::Button* _button = new uitbc::Button(color, text);
+	//_button->SetText(text);
+	InitButton(_button);
+	return _button;
 }
 
-void Menu::InitButton(UiTbc::Button* pButton) const
-{
-	const int w = mDialog->GetSize().x*3/4;
-	const int h = mDialog->GetSize().y/5;
-	pButton->SetPreferredSize(w, h);
-	pButton->SetRoundedRadius(h/3);
-	pButton->UpdateLayout();
+void Menu::InitButton(uitbc::Button* button) const {
+	const int w = dialog_->GetSize().x*3/4;
+	const int h = dialog_->GetSize().y/5;
+	button->SetPreferredSize(w, h);
+	button->SetRoundedRadius(h/3);
+	button->UpdateLayout();
 }
 
-void Menu::DismissDialog()
-{
-	if (mDialog)
-	{
-		mDialog->Dismiss();
-		mDialog = 0;
+void Menu::DismissDialog() {
+	if (dialog_) {
+		dialog_->Dismiss();
+		dialog_ = 0;
 	}
 }
 
-UiTbc::Dialog* Menu::GetDialog()
-{
-	return mDialog;
+uitbc::Dialog* Menu::GetDialog() {
+	return dialog_;
 }
 
-Cure::ResourceManager* Menu::GetResourceManager() const
-{
-	return mResourceManager;
+cure::ResourceManager* Menu::GetResourceManager() const {
+	return resource_manager_;
 }
 
-void Menu::OnAction(UiTbc::Button* pButton)
-{
-	UiTbc::Dialog* d = mDialog;
-	mButtonDelegate(pButton);
-	if (d == mDialog && d->IsAutoDismissButton(pButton))
-	{
-		mButtonDelegate.clear();
-		mDialog = 0;
+void Menu::OnAction(uitbc::Button* button) {
+	uitbc::Dialog* d = dialog_;
+	button_delegate_(button);
+	if (d == dialog_ && d->IsAutoDismissButton(button)) {
+		button_delegate_.clear();
+		dialog_ = 0;
 	}
 }
 
-void Menu::OnTapSound(UiTbc::Button*)
-{
-	if (mTapClick && mTapClick->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		mUiManager->GetSoundManager()->Play(mTapClick->GetData(), mTapVolume, Random::Uniform(1-mTapPitchOffset, 1+mTapPitchOffset));
+void Menu::OnTapSound(uitbc::Button*) {
+	if (tap_click_ && tap_click_->GetLoadState() == cure::kResourceLoadComplete) {
+		ui_manager_->GetSoundManager()->Play(tap_click_->GetData(), tap_volume_, Random::Uniform(1-tap_pitch_offset_, 1+tap_pitch_offset_));
 	}
 }
 
-void Menu::SoundLoadCallback(UiCure::UserSound2dResource*)
-{
+void Menu::SoundLoadCallback(UiCure::UserSound2dResource*) {
 }
 
 

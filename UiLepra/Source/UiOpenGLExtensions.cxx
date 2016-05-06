@@ -3,87 +3,73 @@
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
-#include "../Include/UiOpenGLExtensions.h"
+#include "../include/uiopenglextensions.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-bool OpenGLExtensions::IsExtensionSupported(const char* pExtension)
-{
-	str lExtension(pExtension);
-	strutil::StripAllWhiteSpaces(lExtension);
+bool OpenGLExtensions::IsExtensionSupported(const char* extension) {
+	str _extension(extension);
+	strutil::StripAllWhiteSpaces(_extension);
 
-	if (lExtension.length() == 0)
+	if (_extension.length() == 0)
 		return false;
 
-	str lGLExtensions((char*)glGetString(GL_EXTENSIONS));
-	return (lGLExtensions.find(lExtension.c_str(), 0) != str::npos);
+	str gl_extensions((char*)glGetString(GL_EXTENSIONS));
+	return (gl_extensions.find(_extension.c_str(), 0) != str::npos);
 }
 
 #if defined(LEPRA_MAC)
 #define GET_EXTENSION_POINTER(f) (&::f)
 #else
 #define GET_EXTENSION_POINTER(f) GetExtensionPointer(#f)
-void* OpenGLExtensions::GetExtensionPointer(const char* pFunctionName)
-{
+void* OpenGLExtensions::GetExtensionPointer(const char* function_name) {
 #if defined(LEPRA_WINDOWS)
-	return (void*)wglGetProcAddress(pFunctionName);
+	return (void*)wglGetProcAddress(function_name);
 #elif defined(LEPRA_POSIX)
-	return ((void*)glXGetProcAddress((const GLubyte*)pFunctionName));
+	return ((void*)glXGetProcAddress((const GLubyte*)function_name));
 #else // Unkonwn platform
 #error "WTF! Waco platform!"
 #endif // Win / Posix
 }
 #endif // Mac / !Mac
 
-void OpenGLExtensions::InitExtensions()
-{
+void OpenGLExtensions::InitExtensions() {
 	// Check OpenGL version.
-	const GLubyte* lVersion = glGetString(GL_VERSION);
-	if (lVersion[0] == '1')
-	{
-		if (lVersion[1] == '.' && 
-		   lVersion[2] >= '5' && 
-		   lVersion[2] <= '9')
-		{
-			mIsGLVersion14 = true;
-			mIsGLVersion15 = true;
+	const GLubyte* version = glGetString(GL_VERSION);
+	if (version[0] == '1') {
+		if (version[1] == '.' &&
+		   version[2] >= '5' &&
+		   version[2] <= '9') {
+			is_gl_version14_ = true;
+			is_gl_version15_ = true;
+		} else if(version[1] == '.' &&
+			version[2] >= '4' &&
+			version[2] <= '9') {
+			is_gl_version14_ = true;
 		}
-		else if(lVersion[1] == '.' && 
-			lVersion[2] >= '4' && 
-			lVersion[2] <= '9')
-		{
-			mIsGLVersion14 = true;
-		}
-	}
-	else if (lVersion[0] >= '2' && lVersion[0] <= '9')
-	{
+	} else if (version[0] >= '2' && version[0] <= '9') {
 		// This must be an OpenGL version way higher than the versions
 		// that existed when this was written. Assume backward compatibility.
-		mIsGLVersion14 = true;
-		mIsGLVersion15 = true;
-	}
-	else if (lVersion[0] < '0' || lVersion[0] > '9')
-	{
+		is_gl_version14_ = true;
+		is_gl_version15_ = true;
+	} else if (version[0] < '0' || version[0] > '9') {
 		// NaN hopefully means some extremely well developed system.
-		mIsGLVersion14 = true;
-		mIsGLVersion15 = true;
+		is_gl_version14_ = true;
+		is_gl_version15_ = true;
 	}
 
 
 #ifndef LEPRA_GL_ES_1
 	// Init Frame Buffer Objects...
-	if (IsExtensionSupported("GL_EXT_framebuffer_object"))
-	{
-		mIsFrameBufferObjectsSupported = true;
+	if (IsExtensionSupported("GL_EXT_framebuffer_object")) {
+		is_frame_buffer_objects_supported_ = true;
 	}
 
-	if (mIsFrameBufferObjectsSupported)
-	{
+	if (is_frame_buffer_objects_supported_) {
 		glIsRenderbufferEXT                      = (PFNGLISRENDERBUFFEREXTPROC)                      GET_EXTENSION_POINTER(glIsRenderbufferEXT);
 		glBindRenderbufferEXT                    = (PFNGLBINDRENDERBUFFEREXTPROC)                    GET_EXTENSION_POINTER(glBindRenderbufferEXT);
 		glDeleteRenderbuffersEXT                 = (PFNGLDELETERENDERBUFFERSEXTPROC)                 GET_EXTENSION_POINTER(glDeleteRenderbuffersEXT);
@@ -102,22 +88,19 @@ void OpenGLExtensions::InitExtensions()
 		glGetFramebufferAttachmentParameterivEXT = (PFNGLGETFRAMEBUFFERATTACHMENTPARAMETERIVEXTPROC) GET_EXTENSION_POINTER(glGetFramebufferAttachmentParameterivEXT);
 		glGenerateMipmapEXT                      = (PFNGLGENERATEMIPMAPEXTPROC)                      GET_EXTENSION_POINTER(glGenerateMipmapEXT);
 
-		if (!CheckFrameBufferObjectFunctions())
-		{
+		if (!CheckFrameBufferObjectFunctions()) {
 			ClearFrameBufferObjectFunctions();
-			mIsFrameBufferObjectsSupported = false;
+			is_frame_buffer_objects_supported_ = false;
 		}
 	}
 #endif // !ES1
 
 	// Init buffer objects.
-	if (mIsGLVersion15 || IsExtensionSupported("GL_ARB_vertex_buffer_object"))
-	{
-		mIsBufferObjectsSupported = true;
+	if (is_gl_version15_ || IsExtensionSupported("GL_ARB_vertex_buffer_object")) {
+		is_buffer_objects_supported_ = true;
 	}
 
-	if (mIsGLVersion15)
-	{
+	if (is_gl_version15_) {
 		glBindBuffer    = (PFNGLBINDBUFFERPROC)   GET_EXTENSION_POINTER(glBindBuffer);
 		glBufferData    = (PFNGLBUFFERDATAPROC)   GET_EXTENSION_POINTER(glBufferData);
 		glBufferSubData = (PFNGLBUFFERSUBDATAPROC)GET_EXTENSION_POINTER(glBufferSubData);
@@ -133,8 +116,7 @@ void OpenGLExtensions::InitExtensions()
 	}
 
 #ifndef LEPRA_GL_ES_1
-	if(mIsBufferObjectsSupported && !CheckBufferObjectFunctions())
-	{
+	if(is_buffer_objects_supported_ && !CheckBufferObjectFunctions()) {
 		// Retry with the ARB version...
 		glBindBuffer    = (PFNGLBINDBUFFERPROC)   GET_EXTENSION_POINTER(glBindBufferARB);
 		glBufferData    = (PFNGLBUFFERDATAPROC)   GET_EXTENSION_POINTER(glBufferDataARB);
@@ -146,35 +128,30 @@ void OpenGLExtensions::InitExtensions()
 	}
 #endif // !ES1
 
-	if (mIsBufferObjectsSupported)
-	{
-		if (!CheckBufferObjectFunctions())
-		{
+	if (is_buffer_objects_supported_) {
+		if (!CheckBufferObjectFunctions()) {
 			ClearBufferObjectFunctions();
-			mIsBufferObjectsSupported = false;
+			is_buffer_objects_supported_ = false;
 		}
 	}
 
 #ifndef LEPRA_GL_ES_1
 	// Init anisotropic filtering...
-	if (IsExtensionSupported("GL_EXT_texture_filter_anisotropic"))
-	{
-		mIsAnisotropicFilteringSupported = true;
-		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &mMaxAnisotropy);
+	if (IsExtensionSupported("GL_EXT_texture_filter_anisotropic")) {
+		is_anisotropic_filtering_supported_ = true;
+		glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_anisotropy_);
 	}
 
 	// Init texture compression.
-	if (IsExtensionSupported("GL_ARB_texture_compression"))
-	{
-		mIsCompressedTexturesSupported = true;
+	if (IsExtensionSupported("GL_ARB_texture_compression")) {
+		is_compressed_textures_supported_ = true;
 		glHint(GL_TEXTURE_COMPRESSION_HINT, GL_NICEST);
 	}
 #endif // !ES1
 
 #ifdef LEPRA_WINDOWS
 	// Init vsync on/off.
-	if (IsExtensionSupported("WGL_EXT_swap"))
-	{
+	if (IsExtensionSupported("WGL_EXT_swap")) {
 		wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)GET_EXTENSION_POINTER(wglSwapIntervalEXT);
 		wglGetSwapIntervalEXT = (PFNWGLGETSWAPINTERVALEXTPROC)GET_EXTENSION_POINTER(wglGetSwapIntervalEXT);
 	}
@@ -184,9 +161,8 @@ void OpenGLExtensions::InitExtensions()
 
 #ifndef LEPRA_GL_ES_1
 	// Init multi texture support.
-	if (IsExtensionSupported("GL_ARB_multitexture"))
-	{
-		mIsMultiTextureSupported = true;
+	if (IsExtensionSupported("GL_ARB_multitexture")) {
+		is_multi_texture_supported_ = true;
 
 		glActiveTexture       = (PFNGLACTIVETEXTUREPROC)       GET_EXTENSION_POINTER(glActiveTextureARB);
 		glClientActiveTexture = (PFNGLCLIENTACTIVETEXTUREPROC) GET_EXTENSION_POINTER(glClientActiveTexture);
@@ -223,18 +199,16 @@ void OpenGLExtensions::InitExtensions()
 		glMultiTexCoord4s     = (PFNGLMULTITEXCOORD4SPROC)     GET_EXTENSION_POINTER(glMultiTexCoord4sARB);
 		glMultiTexCoord4sv    = (PFNGLMULTITEXCOORD4SVPROC)    GET_EXTENSION_POINTER(glMultiTexCoord4svARB);
 
-		if (!CheckMultiTextureFunctions())
-		{
-			mIsMultiTextureSupported = false;
+		if (!CheckMultiTextureFunctions()) {
+			is_multi_texture_supported_ = false;
 			ClearMultiTextureFunctions();
 		}
 	}
 
 	// Init vertex and pixel shader support.
 	if (IsExtensionSupported("GL_ARB_vertex_program") &&
-	   IsExtensionSupported("GL_ARB_fragment_program"))
-	{
-		mIsShaderAsmProgramsSupported = true;
+	   IsExtensionSupported("GL_ARB_fragment_program")) {
+		is_shader_asm_programs_supported_ = true;
 
 		glGenProgramsARB                = (PFNGLGENPROGRAMSARBPROC)                GET_EXTENSION_POINTER(glGenProgramsARB);
 		glBindProgramARB                = (PFNGLBINDPROGRAMARBPROC)                GET_EXTENSION_POINTER(glBindProgramARB);
@@ -299,9 +273,8 @@ void OpenGLExtensions::InitExtensions()
 		glVertexAttrib4uivARB           = (PFNGLVERTEXATTRIB4UIVARBPROC)           GET_EXTENSION_POINTER(glVertexAttrib4uivARB);
 		glVertexAttrib4usvARB           = (PFNGLVERTEXATTRIB4USVARBPROC)           GET_EXTENSION_POINTER(glVertexAttrib4usvARB);
 
-		if (!CheckShaderProgramFunctions())
-		{
-			mIsShaderAsmProgramsSupported = false;
+		if (!CheckShaderProgramFunctions()) {
+			is_shader_asm_programs_supported_ = false;
 			ClearShaderProgramFunctions();
 		}
 	}
@@ -309,9 +282,8 @@ void OpenGLExtensions::InitExtensions()
 	if (IsExtensionSupported("GL_ARB_vertex_shader")        &&
 	   IsExtensionSupported("GL_ARB_fragment_shader")      &&
 	   IsExtensionSupported("GL_ARB_shader_objects")       &&
-	   IsExtensionSupported("GL_ARB_shading_language_100"))
-	{
-		mIsShaderCProgramsSupported = true;
+	   IsExtensionSupported("GL_ARB_shading_language_100")) {
+		is_shader_c_programs_supported_ = true;
 
 		glDeleteObjectARB               = (PFNGLDELETEOBJECTARBPROC)         GET_EXTENSION_POINTER(glDeleteObjectARB);
 		glGetHandleARB                  = (PFNGLGETHANDLEARBPROC)            GET_EXTENSION_POINTER(glGetHandleARB);
@@ -353,97 +325,81 @@ void OpenGLExtensions::InitExtensions()
 		glGetUniformivARB               = (PFNGLGETUNIFORMIVARBPROC)         GET_EXTENSION_POINTER(glGetUniformivARB);
 		glGetShaderSourceARB            = (PFNGLGETSHADERSOURCEARBPROC)      GET_EXTENSION_POINTER(glGetShaderSourceARB);
 
-		if (!CheckShaderFunctions())
-		{
-			mIsShaderCProgramsSupported = false;
+		if (!CheckShaderFunctions()) {
+			is_shader_c_programs_supported_ = false;
 			ClearShaderFunctions();
 		}
 	}
 #endif // !ES1
 }
 
-bool OpenGLExtensions::IsFrameBufferObjectsSupported()
-{
-	return mIsFrameBufferObjectsSupported;
+bool OpenGLExtensions::IsFrameBufferObjectsSupported() {
+	return is_frame_buffer_objects_supported_;
 }
 
-bool OpenGLExtensions::IsBufferObjectsSupported()
-{
-	return mIsBufferObjectsSupported;
+bool OpenGLExtensions::IsBufferObjectsSupported() {
+	return is_buffer_objects_supported_;
 }
 
-bool OpenGLExtensions::IsAnisotropicFilteringSupported()
-{
-	return mIsAnisotropicFilteringSupported;
+bool OpenGLExtensions::IsAnisotropicFilteringSupported() {
+	return is_anisotropic_filtering_supported_;
 }
 
-bool OpenGLExtensions::IsCompressedTexturesSupported()
-{
-	return mIsCompressedTexturesSupported;
+bool OpenGLExtensions::IsCompressedTexturesSupported() {
+	return is_compressed_textures_supported_;
 }
 
-bool OpenGLExtensions::IsMultiTextureSupported()
-{
-	return mIsMultiTextureSupported;
+bool OpenGLExtensions::IsMultiTextureSupported() {
+	return is_multi_texture_supported_;
 }
 
-bool OpenGLExtensions::IsShadowMapsSupported()
-{
-	return mIsGLVersion14;
+bool OpenGLExtensions::IsShadowMapsSupported() {
+	return is_gl_version14_;
 }
 
-bool OpenGLExtensions::IsShaderAsmProgramsSupported()
-{
-	return mIsShaderAsmProgramsSupported;
+bool OpenGLExtensions::IsShaderAsmProgramsSupported() {
+	return is_shader_asm_programs_supported_;
 }
 
-bool OpenGLExtensions::IsShaderCProgramsSupported()
-{
-	return mIsShaderCProgramsSupported;
+bool OpenGLExtensions::IsShaderCProgramsSupported() {
+	return is_shader_c_programs_supported_;
 }
 
-float OpenGLExtensions::GetMaxAnisotropy()
-{
-	return mMaxAnisotropy;
+float OpenGLExtensions::GetMaxAnisotropy() {
+	return max_anisotropy_;
 }
 
-void OpenGLExtensions::SetAnisotropy(float pAmountAnisotropy)
-{
-	if (mIsAnisotropicFilteringSupported)
-	{
-		glTexParameterf(GL_TEXTURE_2D, GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, pAmountAnisotropy);
+void OpenGLExtensions::SetAnisotropy(float amount_anisotropy) {
+	if (is_anisotropic_filtering_supported_) {
+		glTexParameterf(GL_TEXTURE_2D, GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, amount_anisotropy);
 	}
 }
 
-bool OpenGLExtensions::IsVSyncEnabled()
-{
+bool OpenGLExtensions::IsVSyncEnabled() {
 #ifdef LEPRA_WINDOWS
-	if (wglGetSwapIntervalEXT != 0)
-	{
+	if (wglGetSwapIntervalEXT != 0) {
 		return (wglGetSwapIntervalEXT() > 0);
 	}
 #elif defined(LEPRA_MAC) && !defined(LEPRA_IOS)
-	CGLContextObj lContext = CGLGetCurrentContext();
-	GLint lSwapInterval = 0;
-	CGLGetParameter(lContext, kCGLCPSwapInterval, &lSwapInterval);
-	return lSwapInterval != 0;
+	CGLContextObj context = CGLGetCurrentContext();
+	GLint swap_interval = 0;
+	CGLGetParameter(context, kCGLCPSwapInterval, &swap_interval);
+	return swap_interval != 0;
 #else
 #pragma message("Warning: OpenGLExtensions::IsVSyncEnabled() is using default behaviour.")
 #endif
 	return true;
 }
 
-bool OpenGLExtensions::SetVSyncEnabled(bool pEnabled)
-{
+bool OpenGLExtensions::SetVSyncEnabled(bool enabled) {
 #ifdef LEPRA_WINDOWS
-	if (wglSwapIntervalEXT != 0)
-	{
-		return (wglSwapIntervalEXT(pEnabled ? 1 : 0) != FALSE);
+	if (wglSwapIntervalEXT != 0) {
+		return (wglSwapIntervalEXT(enabled ? 1 : 0) != FALSE);
 	}
 #elif defined(LEPRA_MAC) && !defined(LEPRA_IOS)
-	CGLContextObj lContext = CGLGetCurrentContext();
-	GLint lSwapInterval = pEnabled? 1 : 0;
-	CGLSetParameter(lContext, kCGLCPSwapInterval, &lSwapInterval);
+	CGLContextObj context = CGLGetCurrentContext();
+	GLint swap_interval = enabled? 1 : 0;
+	CGLSetParameter(context, kCGLCPSwapInterval, &swap_interval);
 #else
 #pragma message("Warning: OpenGLExtensions::SetVSyncEnabled() is not implemented.")
 #endif
@@ -452,8 +408,7 @@ bool OpenGLExtensions::SetVSyncEnabled(bool pEnabled)
 
 
 
-void OpenGLExtensions::ClearFrameBufferObjectFunctions()
-{
+void OpenGLExtensions::ClearFrameBufferObjectFunctions() {
 #ifndef LEPRA_GL_ES_1
 	glIsRenderbufferEXT                      = 0;
 	glBindRenderbufferEXT                    = 0;
@@ -475,8 +430,7 @@ void OpenGLExtensions::ClearFrameBufferObjectFunctions()
 #endif // !ES1
 }
 
-void OpenGLExtensions::ClearBufferObjectFunctions()
-{
+void OpenGLExtensions::ClearBufferObjectFunctions() {
 	glBindBuffer    = 0;
 	glBufferData    = 0;
 	glBufferSubData = 0;
@@ -486,8 +440,7 @@ void OpenGLExtensions::ClearBufferObjectFunctions()
 	glUnmapBuffer   = 0;
 }
 
-void OpenGLExtensions::ClearMultiTextureFunctions()
-{
+void OpenGLExtensions::ClearMultiTextureFunctions() {
 #ifndef LEPRA_GL_ES_1
 	glActiveTexture       = 0;
 	glClientActiveTexture = 0;
@@ -526,8 +479,7 @@ void OpenGLExtensions::ClearMultiTextureFunctions()
 #endif // !ES1
 }
 
-void OpenGLExtensions::ClearShaderProgramFunctions()
-{
+void OpenGLExtensions::ClearShaderProgramFunctions() {
 #ifndef LEPRA_GL_ES_1
 	glGenProgramsARB                = 0;
 	glBindProgramARB                = 0;
@@ -594,8 +546,7 @@ void OpenGLExtensions::ClearShaderProgramFunctions()
 #endif // !ES1
 }
 
-void OpenGLExtensions::ClearShaderFunctions()
-{
+void OpenGLExtensions::ClearShaderFunctions() {
 #ifndef LEPRA_GL_ES_1
 	glDeleteObjectARB               = 0;
 	glGetHandleARB                  = 0;
@@ -639,8 +590,7 @@ void OpenGLExtensions::ClearShaderFunctions()
 #endif // !ES1
 }
 
-bool OpenGLExtensions::CheckFrameBufferObjectFunctions()
-{
+bool OpenGLExtensions::CheckFrameBufferObjectFunctions() {
 #ifndef LEPRA_GL_ES_1
 	return (glIsRenderbufferEXT                      != 0 &&
 		glBindRenderbufferEXT                    != 0 &&
@@ -664,8 +614,7 @@ bool OpenGLExtensions::CheckFrameBufferObjectFunctions()
 #endif // ES1/!ES1
 }
 
-bool OpenGLExtensions::CheckBufferObjectFunctions()
-{
+bool OpenGLExtensions::CheckBufferObjectFunctions() {
 	return (glBindBuffer    != 0 &&
 		glBufferData    != 0 &&
 		glBufferSubData != 0 &&
@@ -675,8 +624,7 @@ bool OpenGLExtensions::CheckBufferObjectFunctions()
 		glUnmapBuffer   != 0);
 }
 
-bool OpenGLExtensions::CheckMultiTextureFunctions()
-{
+bool OpenGLExtensions::CheckMultiTextureFunctions() {
 #ifndef LEPRA_GL_ES_1
 	return (glActiveTexture       != 0 &&
 		glClientActiveTexture != 0 &&
@@ -717,8 +665,7 @@ bool OpenGLExtensions::CheckMultiTextureFunctions()
 #endif // ES1/!ES1
 }
 
-bool OpenGLExtensions::CheckShaderProgramFunctions()
-{
+bool OpenGLExtensions::CheckShaderProgramFunctions() {
 #ifndef LEPRA_GL_ES_1
 	return (glGenProgramsARB                != 0 &&
 		glBindProgramARB                != 0 &&
@@ -787,8 +734,7 @@ bool OpenGLExtensions::CheckShaderProgramFunctions()
 #endif // ES1/!ES1
 }
 
-bool OpenGLExtensions::CheckShaderFunctions()
-{
+bool OpenGLExtensions::CheckShaderFunctions() {
 #ifndef LEPRA_GL_ES_1
 	return (glDeleteObjectARB               != 0 &&
 		glGetHandleARB                  != 0 &&
@@ -836,16 +782,16 @@ bool OpenGLExtensions::CheckShaderFunctions()
 
 
 
-bool OpenGLExtensions::mIsGLVersion14			= false;
-bool OpenGLExtensions::mIsGLVersion15			= false;
-bool OpenGLExtensions::mIsFrameBufferObjectsSupported	= false;
-bool OpenGLExtensions::mIsBufferObjectsSupported	= false;
-bool OpenGLExtensions::mIsAnisotropicFilteringSupported	= false;
-bool OpenGLExtensions::mIsCompressedTexturesSupported	= false;
-bool OpenGLExtensions::mIsMultiTextureSupported		= false;
-bool OpenGLExtensions::mIsShaderAsmProgramsSupported	= false;
-bool OpenGLExtensions::mIsShaderCProgramsSupported	= false;
-float OpenGLExtensions::mMaxAnisotropy			= 1.0f;
+bool OpenGLExtensions::is_gl_version14_			= false;
+bool OpenGLExtensions::is_gl_version15_			= false;
+bool OpenGLExtensions::is_frame_buffer_objects_supported_	= false;
+bool OpenGLExtensions::is_buffer_objects_supported_	= false;
+bool OpenGLExtensions::is_anisotropic_filtering_supported_	= false;
+bool OpenGLExtensions::is_compressed_textures_supported_	= false;
+bool OpenGLExtensions::is_multi_texture_supported_		= false;
+bool OpenGLExtensions::is_shader_asm_programs_supported_	= false;
+bool OpenGLExtensions::is_shader_c_programs_supported_	= false;
+float OpenGLExtensions::max_anisotropy_			= 1.0f;
 
 // Declare functions.
 

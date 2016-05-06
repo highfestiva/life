@@ -1,27 +1,25 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2012, Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Tbc/Include/PhysicsManager.h"
+#include "../../tbc/include/physicsmanager.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class ContextForceListener
-{
+class ContextForceListener {
 public:
-	virtual void OnForceApplied(Cure::ContextObject* pObject, Cure::ContextObject* pOtherObject,
-		Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-		const vec3& pForce, const vec3& pTorque,
-		const vec3& pPosition, const vec3& pRelativeVelocity) = 0;
+	virtual void OnForceApplied(cure::ContextObject* object, cure::ContextObject* other_object,
+		tbc::PhysicsManager::BodyID own_body_id, tbc::PhysicsManager::BodyID other_body_id,
+		const vec3& force, const vec3& torque,
+		const vec3& position, const vec3& relative_velocity) = 0;
 };
 
 

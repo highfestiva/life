@@ -5,571 +5,472 @@
 */
 
 #include "pch.h"
-#include "../../Include/GUI/UiDesktopWindow.h"
-#include "../../Include/GUI/UiListControl.h"
-#include "../../../UiLepra/Include/UiInput.h"
+#include "../../include/gui/uidesktopwindow.h"
+#include "../../include/gui/uilistcontrol.h"
+#include "../../../uilepra/include/uiinput.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, const Color& pColor, ListLayout::ListType pListType):
-	Window(pBorderStyle, pBorderWidth, pColor, new GridLayout(2, 2)),
-	mStyle(SINGLE_SELECT),
-	mHScrollBar(0),
-	mVScrollBar(0),
-	mListRect(0),
-	mCornerRect(0),
-	mLastSelected(0)
-{
-	Init(pListType);
+ListControl::ListControl(unsigned border_style, int border_width, const Color& color, ListLayout::ListType list_type):
+	Window(border_style, border_width, color, new GridLayout(2, 2)),
+	style_(kSingleSelect),
+	h_scroll_bar_(0),
+	v_scroll_bar_(0),
+	list_rect_(0),
+	corner_rect_(0),
+	last_selected_(0) {
+	Init(list_type);
 }
 
-ListControl::ListControl(unsigned pBorderStyle, int pBorderWidth, Painter::ImageID pImageID, ListLayout::ListType pListType):
-	Window(pBorderStyle, pBorderWidth, pImageID, new GridLayout(2, 2)),
-	mStyle(SINGLE_SELECT),
-	mHScrollBar(0),
-	mVScrollBar(0),
-	mListRect(0),
-	mCornerRect(0),
-	mLastSelected(0)
-{
-	Init(pListType);
+ListControl::ListControl(unsigned border_style, int border_width, Painter::ImageID image_id, ListLayout::ListType list_type):
+	Window(border_style, border_width, image_id, new GridLayout(2, 2)),
+	style_(kSingleSelect),
+	h_scroll_bar_(0),
+	v_scroll_bar_(0),
+	list_rect_(0),
+	corner_rect_(0),
+	last_selected_(0) {
+	Init(list_type);
 }
 
-ListControl::ListControl(const Color& pColor, ListLayout::ListType pListType):
-	Window(pColor, new GridLayout(2, 2)),
-	mStyle(SINGLE_SELECT),
-	mHScrollBar(0),
-	mVScrollBar(0),
-	mListRect(0),
-	mCornerRect(0),
-	mLastSelected(0)
-{
-	Init(pListType);
+ListControl::ListControl(const Color& color, ListLayout::ListType list_type):
+	Window(color, new GridLayout(2, 2)),
+	style_(kSingleSelect),
+	h_scroll_bar_(0),
+	v_scroll_bar_(0),
+	list_rect_(0),
+	corner_rect_(0),
+	last_selected_(0) {
+	Init(list_type);
 }
 
-ListControl::ListControl(Painter::ImageID pImageID, ListLayout::ListType pListType):
-	Window(pImageID, new GridLayout(2, 2)),
-	mStyle(SINGLE_SELECT),
-	mHScrollBar(0),
-	mVScrollBar(0),
-	mListRect(0),
-	mCornerRect(0),
-	mLastSelected(0)
-{
-	Init(pListType);
+ListControl::ListControl(Painter::ImageID image_id, ListLayout::ListType list_type):
+	Window(image_id, new GridLayout(2, 2)),
+	style_(kSingleSelect),
+	h_scroll_bar_(0),
+	v_scroll_bar_(0),
+	list_rect_(0),
+	corner_rect_(0),
+	last_selected_(0) {
+	Init(list_type);
 }
 
-ListControl::~ListControl()
-{
+ListControl::~ListControl() {
 }
 
-void ListControl::Init(ListLayout::ListType pListType)
-{
-	mHScrollBar = new ScrollBar(ScrollBar::HORIZONTAL);
-	mVScrollBar = new ScrollBar(ScrollBar::VERTICAL);
-	mListRect   = new RectComponent(new ListLayout(pListType));
-	mCornerRect = new RectComponent(Color(192, 192, 192));
+void ListControl::Init(ListLayout::ListType list_type) {
+	h_scroll_bar_ = new ScrollBar(ScrollBar::kHorizontal);
+	v_scroll_bar_ = new ScrollBar(ScrollBar::kVertical);
+	list_rect_   = new RectComponent(new ListLayout(list_type));
+	corner_rect_ = new RectComponent(Color(192, 192, 192));
 
-	mHScrollBar->SetPreferredSize(0, 16, false);
-	mVScrollBar->SetPreferredSize(16, 0, false);
-	mCornerRect->SetPreferredSize(16, 16, false);
-	mCornerRect->SetMinSize(16, 16);
+	h_scroll_bar_->SetPreferredSize(0, 16, false);
+	v_scroll_bar_->SetPreferredSize(16, 0, false);
+	corner_rect_->SetPreferredSize(16, 16, false);
+	corner_rect_->SetMinSize(16, 16);
 
-	mHScrollBar->SetOwner(mListRect);
-	mVScrollBar->SetOwner(mListRect);
+	h_scroll_bar_->SetOwner(list_rect_);
+	v_scroll_bar_->SetOwner(list_rect_);
 
-	PixelCoord lVSBMinSize(mVScrollBar->GetMinSize());
-	PixelCoord lHSBMinSize(mHScrollBar->GetMinSize());
-	PixelCoord lCMinSize(mCornerRect->GetMinSize());
-	PixelCoord lMinSize(lCMinSize.x + lHSBMinSize.x + GetTotalBorderWidth(),
-				     lCMinSize.y + lVSBMinSize.y + GetTotalBorderWidth());
-	SetMinSize(lMinSize);
+	PixelCoord vsb_min_size(v_scroll_bar_->GetMinSize());
+	PixelCoord hsb_min_size(h_scroll_bar_->GetMinSize());
+	PixelCoord c_min_size(corner_rect_->GetMinSize());
+	PixelCoord min_size(c_min_size.x + hsb_min_size.x + GetTotalBorderWidth(),
+				     c_min_size.y + vsb_min_size.y + GetTotalBorderWidth());
+	SetMinSize(min_size);
 
-	mHScrollBar->SetVisible(false);
-	mVScrollBar->SetVisible(false);
-	mCornerRect->SetVisible(false);
+	h_scroll_bar_->SetVisible(false);
+	v_scroll_bar_->SetVisible(false);
+	corner_rect_->SetVisible(false);
 
-	Parent::AddChild(mListRect, 0, 0);
-	Parent::AddChild(mHScrollBar, 1, 0);
-	Parent::AddChild(mVScrollBar, 0, 1);
-	Parent::AddChild(mCornerRect, 1, 1);
+	Parent::AddChild(list_rect_, 0, 0);
+	Parent::AddChild(h_scroll_bar_, 1, 0);
+	Parent::AddChild(v_scroll_bar_, 0, 1);
+	Parent::AddChild(corner_rect_, 1, 1);
 
 	Parent::Init();
 }
 
-void ListControl::SetScrollBars(ScrollBar* pHScrollBar,
-				ScrollBar* pVScrollBar,
-				RectComponent* pCornerRect)
-{
-	if (pHScrollBar != 0)
-	{
-		Parent::RemoveChild(mHScrollBar, 0);
-		delete mHScrollBar;
-		mHScrollBar = pHScrollBar;
-		mHScrollBar->SetOwner(mListRect);
-		Parent::AddChild(mHScrollBar, 1, 0);
+void ListControl::SetScrollBars(ScrollBar* h_scroll_bar,
+				ScrollBar* v_scroll_bar,
+				RectComponent* corner_rect) {
+	if (h_scroll_bar != 0) {
+		Parent::RemoveChild(h_scroll_bar_, 0);
+		delete h_scroll_bar_;
+		h_scroll_bar_ = h_scroll_bar;
+		h_scroll_bar_->SetOwner(list_rect_);
+		Parent::AddChild(h_scroll_bar_, 1, 0);
 	}
 
-	if (pVScrollBar != 0)
-	{
-		Parent::RemoveChild(mVScrollBar, 0);
-		delete mVScrollBar;
-		mVScrollBar = pVScrollBar;
-		mVScrollBar->SetOwner(mListRect);
-		Parent::AddChild(mVScrollBar, 0, 1);
+	if (v_scroll_bar != 0) {
+		Parent::RemoveChild(v_scroll_bar_, 0);
+		delete v_scroll_bar_;
+		v_scroll_bar_ = v_scroll_bar;
+		v_scroll_bar_->SetOwner(list_rect_);
+		Parent::AddChild(v_scroll_bar_, 0, 1);
 	}
 
-	if (pCornerRect != 0)
-	{
-		Parent::RemoveChild(mCornerRect, 0);
-		delete mCornerRect;
-		mCornerRect = pCornerRect;
-		Parent::AddChild(mCornerRect, 1, 1);
+	if (corner_rect != 0) {
+		Parent::RemoveChild(corner_rect_, 0);
+		delete corner_rect_;
+		corner_rect_ = corner_rect;
+		Parent::AddChild(corner_rect_, 1, 1);
 
-		mCornerRect->SetMinSize(mCornerRect->GetPreferredSize());
+		corner_rect_->SetMinSize(corner_rect_->GetPreferredSize());
 	}
 
-	PixelCoord lVSBMinSize(mVScrollBar->GetMinSize());
-	PixelCoord lHSBMinSize(mHScrollBar->GetMinSize());
-	PixelCoord lCMinSize(mCornerRect->GetMinSize());
-	PixelCoord lMinSize(lCMinSize.x + lVSBMinSize.x, 
-				     lCMinSize.y + lHSBMinSize.y);
-	SetMinSize(lMinSize);
+	PixelCoord vsb_min_size(v_scroll_bar_->GetMinSize());
+	PixelCoord hsb_min_size(h_scroll_bar_->GetMinSize());
+	PixelCoord c_min_size(corner_rect_->GetMinSize());
+	PixelCoord min_size(c_min_size.x + vsb_min_size.x,
+				     c_min_size.y + hsb_min_size.y);
+	SetMinSize(min_size);
 
 }
 
-void ListControl::AddChild(Component* pChild, int pParam1, int pParam2, int pLayer)
-{
-	mListRect->AddChild(pChild, pParam1, pParam2, pLayer);
+void ListControl::AddChild(Component* child, int param1, int param2, int layer) {
+	list_rect_->AddChild(child, param1, param2, layer);
 
-	if (mLastSelected == 0)
-	{
-		mLastSelected = pChild;
+	if (last_selected_ == 0) {
+		last_selected_ = child;
 	}
 }
 
-void ListControl::AddChildAfter(Component* pChild, Component* pAfterThis, int pIndentationLevel)
-{
-	((ListLayout*)mListRect->GetLayout())->AddChildAfter(pChild, pAfterThis, pIndentationLevel);
+void ListControl::AddChildAfter(Component* child, Component* after_this, int indentation_level) {
+	((ListLayout*)list_rect_->GetLayout())->AddChildAfter(child, after_this, indentation_level);
 
-	pChild->SetParent(mListRect);
+	child->SetParent(list_rect_);
 
-	if (mLastSelected == 0)
-	{
-		mLastSelected = pChild;
+	if (last_selected_ == 0) {
+		last_selected_ = child;
 	}
 }
 
-void ListControl::AddChildrenAfter(std::list<Component*>& pChildList, Component* pAfterThis, int pIndentationLevel)
-{
-	((ListLayout*)mListRect->GetLayout())->AddChildrenAfter(pChildList, pAfterThis, pIndentationLevel);
+void ListControl::AddChildrenAfter(std::list<Component*>& child_list, Component* after_this, int indentation_level) {
+	((ListLayout*)list_rect_->GetLayout())->AddChildrenAfter(child_list, after_this, indentation_level);
 
-	std::list<Component*>::iterator lIter;
-	for (lIter = pChildList.begin(); lIter != pChildList.end(); ++lIter)
-	{
-		(*lIter)->SetParent(mListRect);
+	std::list<Component*>::iterator iter;
+	for (iter = child_list.begin(); iter != child_list.end(); ++iter) {
+		(*iter)->SetParent(list_rect_);
 	}
 
-	if (mLastSelected == 0 && pChildList.empty() == false)
-	{
-		mLastSelected = *(--pChildList.end());
+	if (last_selected_ == 0 && child_list.empty() == false) {
+		last_selected_ = *(--child_list.end());
 	}
 
 	SetNeedsRepaint(true);
 }
 
-void ListControl::RemoveChild(Component* pChild, int pLayer)
-{
-	mListRect->RemoveChild(pChild, pLayer);
+void ListControl::RemoveChild(Component* child, int layer) {
+	list_rect_->RemoveChild(child, layer);
 }
 
-int ListControl::GetNumChildren() const
-{
-	return mListRect->GetNumChildren();
+int ListControl::GetNumChildren() const {
+	return list_rect_->GetNumChildren();
 }
 
-Component* ListControl::GetFirstSelectedItem()
-{
-	Layout* lLayout = mListRect->GetLayout();
-	Component* lItem = lLayout->GetFirst();
+Component* ListControl::GetFirstSelectedItem() {
+	Layout* layout = list_rect_->GetLayout();
+	Component* item = layout->GetFirst();
 
-	while (lItem != 0 && lItem->GetSelected() == false)
-	{
-		lItem = lLayout->GetNext();
+	while (item != 0 && item->GetSelected() == false) {
+		item = layout->GetNext();
 	}
 
-	return lItem;
+	return item;
 }
 
-Component* ListControl::GetNextSelectedItem()
-{
-	Layout* lLayout = mListRect->GetLayout();
-	Component* lItem = lLayout->GetNext();
+Component* ListControl::GetNextSelectedItem() {
+	Layout* layout = list_rect_->GetLayout();
+	Component* item = layout->GetNext();
 
-	while (lItem != 0 && lItem->GetSelected() == false)
-	{
-		lItem = lLayout->GetNext();
+	while (item != 0 && item->GetSelected() == false) {
+		item = layout->GetNext();
 	}
 
-	return lItem;
+	return item;
 }
 
-bool ListControl::OnLButtonDown(int pMouseX, int pMouseY)
-{
-	if (mListRect->IsOver(pMouseX, pMouseY) == true)
-	{
-		ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
+bool ListControl::OnLButtonDown(int mouse_x, int mouse_y) {
+	if (list_rect_->IsOver(mouse_x, mouse_y) == true) {
+		ListLayout* layout = (ListLayout*)list_rect_->GetLayout();
 
-		if (lLayout->IsEmpty() == true)
-		{
+		if (layout->IsEmpty() == true) {
 			return true;
 		}
 
-		Select(lLayout->Find(lLayout->GetListType() == ListLayout::COLUMN ? pMouseY : pMouseX), pMouseX, pMouseY);
+		Select(layout->Find(layout->GetListType() == ListLayout::kColumn ? mouse_y : mouse_x), mouse_x, mouse_y);
 	}
 
-	return Parent::OnLButtonDown(pMouseX, pMouseY);
+	return Parent::OnLButtonDown(mouse_x, mouse_y);
 }
 
-bool ListControl::OnLButtonUp(int pMouseX, int pMouseY)
-{
-	return Parent::OnLButtonUp(pMouseX, pMouseY);
+bool ListControl::OnLButtonUp(int mouse_x, int mouse_y) {
+	return Parent::OnLButtonUp(mouse_x, mouse_y);
 }
 
-bool ListControl::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
-{
-	if (mStyle == MENU_SELECT)
-	{
+bool ListControl::OnMouseMove(int mouse_x, int mouse_y, int delta_x, int delta_y) {
+	if (style_ == kMenuSelect) {
 		DeselectAll();
-		ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
-		SetSelected(lLayout->Find(pMouseY), true);
+		ListLayout* layout = (ListLayout*)list_rect_->GetLayout();
+		SetSelected(layout->Find(mouse_y), true);
 	}
-	return (Parent::OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY));
+	return (Parent::OnMouseMove(mouse_x, mouse_y, delta_x, delta_y));
 }
 
-bool ListControl::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	Parent::OnKeyDown(pKeyCode);
+bool ListControl::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
+	Parent::OnKeyDown(key_code);
 
-	ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
+	ListLayout* layout = (ListLayout*)list_rect_->GetLayout();
 
-	Component* lChildToSelect = 0;
+	Component* child_to_select = 0;
 
-	if (lLayout->GetListType() == ListLayout::COLUMN)
-	{
-		if (pKeyCode == UiLepra::InputManager::IN_KBD_DOWN)
-		{
-			lChildToSelect = lLayout->GetNext(mLastSelected);
+	if (layout->GetListType() == ListLayout::kColumn) {
+		if (key_code == uilepra::InputManager::kInKbdDown) {
+			child_to_select = layout->GetNext(last_selected_);
 		}
-		if (pKeyCode == UiLepra::InputManager::IN_KBD_UP)
-		{
-			lChildToSelect = lLayout->GetPrev(mLastSelected);
+		if (key_code == uilepra::InputManager::kInKbdUp) {
+			child_to_select = layout->GetPrev(last_selected_);
 		}
-	}
-	else //if (lLayout->GetListType() == ListLayout::ROW)
-	{
-		if (pKeyCode == UiLepra::InputManager::IN_KBD_RIGHT)
-		{
-			lChildToSelect = lLayout->GetNext(mLastSelected);
+	} else { //if (layout->GetListType() == ListLayout::kRow)
+		if (key_code == uilepra::InputManager::kInKbdRight) {
+			child_to_select = layout->GetNext(last_selected_);
 		}
-		if (pKeyCode == UiLepra::InputManager::IN_KBD_LEFT)
-		{
-			lChildToSelect = lLayout->GetPrev(mLastSelected);
+		if (key_code == uilepra::InputManager::kInKbdLeft) {
+			child_to_select = layout->GetPrev(last_selected_);
 		}
 	}
 
-	if (lChildToSelect != 0)
-	{
-		PixelRect lRect(lChildToSelect->GetScreenRect());
-		Select(lChildToSelect, lRect.GetCenterX(), lRect.GetCenterY());
+	if (child_to_select != 0) {
+		PixelRect rect(child_to_select->GetScreenRect());
+		Select(child_to_select, rect.GetCenterX(), rect.GetCenterY());
 	}
 	return (false);
 }
 
-bool ListControl::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	return (Parent::OnKeyUp(pKeyCode));
+bool ListControl::OnKeyUp(uilepra::InputManager::KeyCode key_code) {
+	return (Parent::OnKeyUp(key_code));
 }
 
-void ListControl::OnItemSelected(Component* /*pItem*/)
-{
+void ListControl::OnItemSelected(Component* /*item*/) {
 	// This is a dummy implementation, do nothing.
 }
 
-void ListControl::Select(Component* pChild, int pSelectedX, int pSelectedY)
-{
-	if (pChild != 0)
-	{
-		ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
+void ListControl::Select(Component* child, int selected_x, int selected_y) {
+	if (child != 0) {
+		ListLayout* layout = (ListLayout*)list_rect_->GetLayout();
 
-		if (mStyle == MULTI_SELECT)
-		{
-			const DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-			UiLepra::InputManager* lInputManager = lDesktopWindow->GetInputManager();
-			bool lCTRL  = lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LCTRL) || lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RCTRL);
-			bool lShift = lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_LSHIFT) || lInputManager->ReadKey(UiLepra::InputManager::IN_KBD_RSHIFT);
+		if (style_ == kMultiSelect) {
+			const DesktopWindow* desktop_window = (DesktopWindow*)GetParentOfType(kDesktopwindow);
+			uilepra::InputManager* input_manager = desktop_window->GetInputManager();
+			bool ctrl  = input_manager->ReadKey(uilepra::InputManager::kInKbdLctrl) || input_manager->ReadKey(uilepra::InputManager::kInKbdRctrl);
+			bool shift = input_manager->ReadKey(uilepra::InputManager::kInKbdLshift) || input_manager->ReadKey(uilepra::InputManager::kInKbdRshift);
 
-			if (lCTRL == false && lShift == false)
-			{
+			if (ctrl == false && shift == false) {
 				DeselectAll();
 			}
 
-			if (lShift == true)
-			{
-				if (mLastSelected == 0)
-				{
-					mLastSelected = lLayout->GetFirst();
+			if (shift == true) {
+				if (last_selected_ == 0) {
+					last_selected_ = layout->GetFirst();
 				}
 
-				ListLayout::ComponentList lList;
-				PixelRect lRect(mLastSelected->GetScreenRect());
+				ListLayout::ComponentList __list;
+				PixelRect rect(last_selected_->GetScreenRect());
 
-				if (lLayout->GetListType() == ListLayout::COLUMN)
-				{
-					lLayout->Find(lList, lRect.GetCenterY(), pSelectedY);
-				}
-				else
-				{
-					lLayout->Find(lList, lRect.GetCenterX(), pSelectedX);
+				if (layout->GetListType() == ListLayout::kColumn) {
+					layout->Find(__list, rect.GetCenterY(), selected_y);
+				} else {
+					layout->Find(__list, rect.GetCenterX(), selected_x);
 				}
 
-				ListLayout::ComponentList::iterator lIter;
+				ListLayout::ComponentList::iterator iter;
 
-				if (pChild->GetSelected() == false)
-				{
-					for (lIter = lList.begin(); lIter != lList.end(); ++lIter)
-					{
-						SetSelected(*lIter, true);
+				if (child->GetSelected() == false) {
+					for (iter = __list.begin(); iter != __list.end(); ++iter) {
+						SetSelected(*iter, true);
+					}
+				} else {
+					for (iter = __list.begin(); iter != __list.end(); ++iter) {
+						SetSelected(*iter, false);
 					}
 				}
-				else
-				{
-					for (lIter = lList.begin(); lIter != lList.end(); ++lIter)
-					{
-						SetSelected(*lIter, false);
-					}
+			} else {
+				if (child->GetSelected() == true) {
+					SetSelected(child, false);
+				} else {
+					SetSelected(child, true);
+					OnItemSelected(child);
 				}
 			}
-			else
-			{
-				if (pChild->GetSelected() == true)
-				{
-					SetSelected(pChild, false);
-				}
-				else
-				{
-					SetSelected(pChild, true);
-					OnItemSelected(pChild);
-				}
-			}
-		}
-		else
-		{
+		} else {
 			DeselectAll();
-			SetSelected(pChild, true);
-			OnItemSelected(pChild);
+			SetSelected(child, true);
+			OnItemSelected(child);
 		}
 
-		mLastSelected = pChild;
-		pChild->SetKeyboardFocus();
+		last_selected_ = child;
+		child->SetKeyboardFocus();
 
-		ScrollToChild(mLastSelected);
+		ScrollToChild(last_selected_);
 	}
 }
 
-void ListControl::SetSelected(Component* pChild, bool pSelected)
-{
-	if (pSelected == true)
-	{
-		if (pChild != 0 && pChild->GetSelected() == false)
-		{
-			pChild->SetSelected(true);
-			mSelectedList.push_back(pChild);
+void ListControl::SetSelected(Component* child, bool selected) {
+	if (selected == true) {
+		if (child != 0 && child->GetSelected() == false) {
+			child->SetSelected(true);
+			selected_list_.push_back(child);
 		}
-	}
-	else
-	{
-		if (pChild != 0 && pChild->GetSelected() == true)
-		{
-			pChild->SetSelected(false);
-			mSelectedList.remove(pChild);
+	} else {
+		if (child != 0 && child->GetSelected() == true) {
+			child->SetSelected(false);
+			selected_list_.remove(child);
 		}
 	}
 }
 
-void ListControl::SetItemSelected(int pItemIndex, bool pSelected)
-{
-	if (pItemIndex >= 0 && pItemIndex < GetNumChildren())
-	{
-		Component* lChild = ((ListLayout*)mListRect->GetLayout())->FindIndex(pItemIndex);
-		SetSelected(lChild, pSelected);
+void ListControl::SetItemSelected(int item_index, bool selected) {
+	if (item_index >= 0 && item_index < GetNumChildren()) {
+		Component* _child = ((ListLayout*)list_rect_->GetLayout())->FindIndex(item_index);
+		SetSelected(_child, selected);
 	}
 }
 
 
-void ListControl::DeselectAll()
-{
-	ComponentList::iterator lIter;
-	
-	for (lIter = mSelectedList.begin(); lIter != mSelectedList.end(); ++lIter)
-	{
-		(*lIter)->SetSelected(false);
+void ListControl::DeselectAll() {
+	ComponentList::iterator iter;
+
+	for (iter = selected_list_.begin(); iter != selected_list_.end(); ++iter) {
+		(*iter)->SetSelected(false);
 	}
 
-	mSelectedList.clear();
+	selected_list_.clear();
 }
 
-void ListControl::UpdateScrollPos()
-{
-	int lHOffset;
-	int lVOffset;
+void ListControl::UpdateScrollPos() {
+	int h_offset;
+	int v_offset;
 
-	GetScrollOffsets(lHOffset, lVOffset);
+	GetScrollOffsets(h_offset, v_offset);
 
-	ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
-	lLayout->SetPosOffset(lHOffset, lVOffset);
+	ListLayout* layout = (ListLayout*)list_rect_->GetLayout();
+	layout->SetPosOffset(h_offset, v_offset);
 
 	SetNeedsRepaint(true);
 }
 
-void ListControl::GetScrollOffsets(int& pHorizontalOffset, int& pVerticalOffset) const
-{
-	ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
-	PixelCoord lSizeDiff = mListRect->GetSize() - lLayout->GetContentSize();
+void ListControl::GetScrollOffsets(int& horizontal_offset, int& vertical_offset) const {
+	ListLayout* layout = (ListLayout*)list_rect_->GetLayout();
+	PixelCoord size_diff = list_rect_->GetSize() - layout->GetContentSize();
 
-	pHorizontalOffset = (int)(mHScrollBar->GetScrollPos() * lSizeDiff.x);
-	pVerticalOffset = (int)(mVScrollBar->GetScrollPos() * lSizeDiff.y);
+	horizontal_offset = (int)(h_scroll_bar_->GetScrollPos() * size_diff.x);
+	vertical_offset = (int)(v_scroll_bar_->GetScrollPos() * size_diff.y);
 
-	if (pHorizontalOffset > 0)
-	{
-		pHorizontalOffset = 0;
+	if (horizontal_offset > 0) {
+		horizontal_offset = 0;
 	}
 
-	if (pVerticalOffset > 0)
-	{
-		pVerticalOffset = 0;
+	if (vertical_offset > 0) {
+		vertical_offset = 0;
 	}
 }
 
-void ListControl::SetScrollOffsets(int pHorizontalOffset, int pVerticalOffset)
-{
-	ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
-	PixelCoord lSizeDiff = mListRect->GetSize() - lLayout->GetContentSize();
+void ListControl::SetScrollOffsets(int horizontal_offset, int vertical_offset) {
+	ListLayout* layout = (ListLayout*)list_rect_->GetLayout();
+	PixelCoord size_diff = list_rect_->GetSize() - layout->GetContentSize();
 
-	mHScrollBar->SetScrollPos((float64)pHorizontalOffset / (float64)lSizeDiff.x);
-	mVScrollBar->SetScrollPos((float64)pVerticalOffset / (float64)lSizeDiff.y);
+	h_scroll_bar_->SetScrollPos((float64)horizontal_offset / (float64)size_diff.x);
+	v_scroll_bar_->SetScrollPos((float64)vertical_offset / (float64)size_diff.y);
 
-	lLayout->SetPosOffset(pHorizontalOffset, pVerticalOffset);
+	layout->SetPosOffset(horizontal_offset, vertical_offset);
 }
 
-void ListControl::ScrollToChild(Component* pChild)
-{
-	if (pChild != 0)
-	{
-		ListLayout* lLayout = (ListLayout*)mListRect->GetLayout();
+void ListControl::ScrollToChild(Component* child) {
+	if (child != 0) {
+		ListLayout* layout = (ListLayout*)list_rect_->GetLayout();
 
-		PixelRect lRect(pChild->GetScreenRect());
-		PixelRect lClientRect(mListRect->GetScreenRect());
-		PixelCoord lSizeDiff = lLayout->GetContentSize() - 
-			PixelCoord(lClientRect.GetWidth(), lClientRect.GetHeight());
+		PixelRect rect(child->GetScreenRect());
+		PixelRect client_rect(list_rect_->GetScreenRect());
+		PixelCoord size_diff = layout->GetContentSize() -
+			PixelCoord(client_rect.GetWidth(), client_rect.GetHeight());
 
-		if (lLayout->GetListType() == ListLayout::COLUMN)
-		{
+		if (layout->GetListType() == ListLayout::kColumn) {
 			// Check if we need to scroll down.
-			if (lRect.mBottom > lClientRect.mBottom)
-			{
-				float64 lDY = (float64)(lRect.mBottom - lClientRect.mBottom) / (float64)lSizeDiff.y;
-				mVScrollBar->SetScrollPos(mVScrollBar->GetScrollPos() + lDY);
+			if (rect.bottom_ > client_rect.bottom_) {
+				float64 dy = (float64)(rect.bottom_ - client_rect.bottom_) / (float64)size_diff.y;
+				v_scroll_bar_->SetScrollPos(v_scroll_bar_->GetScrollPos() + dy);
 			}
 
 			// Check if we need to scroll up.
-			if (lRect.mTop < lClientRect.mTop)
-			{
-				float64 lDY = (float64)(lRect.mTop - lClientRect.mTop) / (float64)lSizeDiff.y;
-				mVScrollBar->SetScrollPos(mVScrollBar->GetScrollPos() + lDY);
+			if (rect.top_ < client_rect.top_) {
+				float64 dy = (float64)(rect.top_ - client_rect.top_) / (float64)size_diff.y;
+				v_scroll_bar_->SetScrollPos(v_scroll_bar_->GetScrollPos() + dy);
 			}
-		}
-		else
-		{
+		} else {
 			// Check if we need to scroll right.
-			if (lRect.mRight > lClientRect.mRight)
-			{
-				float64 lDX = (float64)(lRect.mRight - lClientRect.mRight) / (float64)lSizeDiff.x;
-				mHScrollBar->SetScrollPos(mHScrollBar->GetScrollPos() + lDX);
+			if (rect.right_ > client_rect.right_) {
+				float64 dx = (float64)(rect.right_ - client_rect.right_) / (float64)size_diff.x;
+				h_scroll_bar_->SetScrollPos(h_scroll_bar_->GetScrollPos() + dx);
 			}
 
 			// Check if we need to scroll up.
-			if (lRect.mLeft < lClientRect.mLeft)
-			{
-				float64 lDX = (float64)(lRect.mLeft - lClientRect.mLeft) / (float64)lSizeDiff.x;
-				mHScrollBar->SetScrollPos(mHScrollBar->GetScrollPos() + lDX);
+			if (rect.left_ < client_rect.left_) {
+				float64 dx = (float64)(rect.left_ - client_rect.left_) / (float64)size_diff.x;
+				h_scroll_bar_->SetScrollPos(h_scroll_bar_->GetScrollPos() + dx);
 			}
 		}
 	}
 }
 
-void ListControl::DoSetMinSize(int pWidth, int pHeight)
-{
-	Parent::DoSetMinSize(pWidth, pHeight);
+void ListControl::DoSetMinSize(int width, int height) {
+	Parent::DoSetMinSize(width, height);
 }
 
-void ListControl::UpdateLayout()
-{
+void ListControl::UpdateLayout() {
 	Parent::UpdateLayout();
 
-	float64 lAverage = ((ListLayout*)mListRect->GetLayout())->GetAverageComponentHW();
+	float64 average = ((ListLayout*)list_rect_->GetLayout())->GetAverageComponentHW();
 
-	bool lChanged;
+	bool changed;
 
-	do
-	{
-		lChanged = false;
+	do {
+		changed = false;
 
-		PixelCoord lContentSize(mListRect->GetLayout()->GetContentSize());
-		PixelCoord lSize(mListRect->GetSize());
-		
-		mHScrollBar->SetScrollRatio((float64)lSize.x / lAverage, (float64)lContentSize.x / lAverage);
-		mVScrollBar->SetScrollRatio((float64)lSize.y / lAverage, (float64)lContentSize.y / lAverage);
+		PixelCoord content_size(list_rect_->GetLayout()->GetContentSize());
+		PixelCoord size(list_rect_->GetSize());
 
-		if (lContentSize.x > lSize.x)
-		{
-			lChanged = lChanged || !mHScrollBar->IsVisible();
-			mHScrollBar->SetVisible(true);
-		}
-		else
-		{
-			lChanged = lChanged || mHScrollBar->IsVisible();
-			mHScrollBar->SetVisible(false);
-			mHScrollBar->SetScrollPos(0);
+		h_scroll_bar_->SetScrollRatio((float64)size.x / average, (float64)content_size.x / average);
+		v_scroll_bar_->SetScrollRatio((float64)size.y / average, (float64)content_size.y / average);
+
+		if (content_size.x > size.x) {
+			changed = changed || !h_scroll_bar_->IsVisible();
+			h_scroll_bar_->SetVisible(true);
+		} else {
+			changed = changed || h_scroll_bar_->IsVisible();
+			h_scroll_bar_->SetVisible(false);
+			h_scroll_bar_->SetScrollPos(0);
 		}
 
-		if (lContentSize.y > lSize.y)
-		{
-			lChanged = lChanged || !mVScrollBar->IsVisible();
-			mVScrollBar->SetVisible(true);
-		}
-		else
-		{
-			lChanged = lChanged || mVScrollBar->IsVisible();
-			mVScrollBar->SetVisible(false);
-			mVScrollBar->SetScrollPos(0);
+		if (content_size.y > size.y) {
+			changed = changed || !v_scroll_bar_->IsVisible();
+			v_scroll_bar_->SetVisible(true);
+		} else {
+			changed = changed || v_scroll_bar_->IsVisible();
+			v_scroll_bar_->SetVisible(false);
+			v_scroll_bar_->SetScrollPos(0);
 		}
 
-		if (mVScrollBar->IsVisible() == true &&
-		   mHScrollBar->IsVisible() == true)
-		{
-			mCornerRect->SetVisible(true);
-		}
-		else
-		{
-			mCornerRect->SetVisible(false);
+		if (v_scroll_bar_->IsVisible() == true &&
+		   h_scroll_bar_->IsVisible() == true) {
+			corner_rect_->SetVisible(true);
+		} else {
+			corner_rect_->SetVisible(false);
 		}
 
 		// Update the layout one more time.
 		Parent::UpdateLayout();
-	}
-	while(lChanged == true);
+	} while(changed == true);
 
 	UpdateScrollPos();
 	Parent::UpdateLayout();

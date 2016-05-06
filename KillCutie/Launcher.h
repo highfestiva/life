@@ -1,43 +1,41 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiCure/Include/UiProps.h"
-#include "Game.h"
+#include "../uicure/include/uiprops.h"
+#include "game.h"
 
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
-class Launcher: public UiCure::Props
-{
+class Launcher: public UiCure::Props {
 	typedef UiCure::Props Parent;
 public:
-	Launcher(Game* pGame);
+	Launcher(Game* game);
 	virtual ~Launcher();
 
-	void SetBarrelAngle(float pYaw, float pPitch);
+	void SetBarrelAngle(float yaw, float pitch);
 
-	void GetAngles(const Cure::ContextObject* pTarget, float& pPitch, float& pGuidePitch,
-		float& pYaw, float& pGuideYaw) const;
-	void GetAngles(const vec3& pTargetPosition, const vec3& pTargetVelocity,
-		float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const;
+	void GetAngles(const cure::ContextObject* target, float& pitch, float& guide_pitch,
+		float& yaw, float& guide_yaw) const;
+	void GetAngles(const vec3& target_position, const vec3& target_velocity,
+		float& pitch, float& guide_pitch, float& yaw, float& guide_yaw) const;
 
 	void CreateEngines();
 
 private:
-	void GetBallisticData(const vec3& pPosition1, const vec3& pPosition2,
-		float pPitch, float& pGuidePitch, float& pGuideYaw, float &pTime) const;
-	void DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource);
+	void GetBallisticData(const vec3& position1, const vec3& position2,
+		float pitch, float& guide_pitch, float& guide_yaw, float &time) const;
+	void DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* mesh_resource);
 
-	Game* mGame;
+	Game* game_;
 };
 
 

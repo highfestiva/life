@@ -6,23 +6,20 @@
 
 #pragma once
 
-#include "../ConsoleManager.h"
+#include "../consolemanager.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class PixelRect;
 };
-namespace UiCure
-{
+namespace UiCure {
 class GameUiManager;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -30,12 +27,11 @@ class UiConsole;
 
 
 
-class ClientConsoleManager: public ConsoleManager
-{
+class ClientConsoleManager: public ConsoleManager {
 	typedef ConsoleManager Parent;
 public:
-	ClientConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-		UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea);
+	ClientConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+		UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area);
 	virtual ~ClientConsoleManager();
 
 	virtual bool Start();
@@ -44,37 +40,36 @@ public:
 	bool ToggleVisible();
 	UiConsole* GetUiConsole() const;
 
-	int FilterExecuteCommand(const str& pCommand);
+	int FilterExecuteCommand(const str& command);
 
 protected:
-	enum CommandClient
-	{
-		COMMAND_QUIT = COMMAND_COUNT_COMMON,
-		COMMAND_BYE,
-		COMMAND_ZOMBIE,
-		COMMAND_ECHO_MSGBOX,
-		COMMAND_START_LOGIN,
-		COMMAND_WAIT_LOGIN,
-		COMMAND_LOGOUT,
-		COMMAND_START_RESET_UI,
-		COMMAND_WAIT_RESET_UI,
-		COMMAND_ADD_PLAYER,
-		COMMAND_SET_MESH_VISIBLE,
+	enum CommandClient {
+		kCommandQuit = kCommandCountCommon,
+		kCommandBye,
+		kCommandZombie,
+		kCommandEchoMsgbox,
+		kCommandStartLogin,
+		kCommandWaitLogin,
+		kCommandLogout,
+		kCommandStartResetUi,
+		kCommandWaitResetUi,
+		kCommandAddPlayer,
+		kCommandSetMeshVisible,
 
-		COMMAND_COUNT_LIFE_CLIENT
+		kCommandCountLifeClient
 	};
 
-	bool SaveApplicationConfigFile(File* pFile, const str& pUserConfig);
+	bool SaveApplicationConfigFile(File* file, const str& user_config);
 
 	virtual unsigned GetCommandCount() const;
-	virtual const CommandPair& GetCommand(unsigned pIndex) const;
-	virtual int OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector);
+	virtual const CommandPair& GetCommand(unsigned index) const;
+	virtual int OnCommand(const HashedString& command, const strutil::strvec& parameter_vector);
 
 	void HeadlessTick();
 
-	static const CommandPair mCommandIdList[];
-	UiConsole* mUiConsole;
-	bool mWasCursorVisible;
+	static const CommandPair command_id_list_[];
+	UiConsole* ui_console_;
+	bool was_cursor_visible_;
 	logclass();
 };
 

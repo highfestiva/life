@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // This class constitutes a portal/cell graph which can be used to
@@ -8,27 +8,26 @@
 
 // All portals are convex polygons. Concave polygons will result in errors.
 
-// Performance hint: Keep the number of portals per cell as low as 
-// possible. All portals in a cell are tested for collision when 
+// Performance hint: Keep the number of portals per cell as low as
+// possible. All portals in a cell are tested for collision when
 // calling TestPortalCollision().
 
 
 
 #pragma once
 
-#include "Tbc.h"
-#include "../../Lepra/Include/Graphics2D.h"
-#include "../../Lepra/Include/HashSet.h"
-#include "../../Lepra/Include/HashTable.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../../Lepra/Include/String.h"
-#include "../../Lepra/Include/String.h"
+#include "tbc.h"
+#include "../../lepra/include/graphics2d.h"
+#include "../../lepra/include/hashset.h"
+#include "../../lepra/include/hashtable.h"
+#include "../../lepra/include/vector3d.h"
+#include "../../lepra/include/string.h"
+#include "../../lepra/include/string.h"
 #include <list>
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
@@ -36,8 +35,7 @@ class GeometryBase;
 
 
 
-class PortalManager
-{
+class PortalManager {
 public:
 
 	friend class GeometryBase;
@@ -51,123 +49,121 @@ public:
 	void ClearAll();
 
 	// Creates a new empty cell with the given ID.
-	bool AddCell(const str& pCellID, const str& pCellDescription);
+	bool AddCell(const str& cell_id, const str& cell_description);
 
 	// Adds a portal. Both cells must exist. Cell1 is the cell "in front" of the portal -
 	// in the direction of the surface normal.
-	bool AddPortal(int pNumVertices,
-			   vec3* pVertex,
-			   const str& pCellID1,
-			   const str& pCellID2);
+	bool AddPortal(int num_vertices,
+			   vec3* vertex,
+			   const str& cell_i_d1,
+			   const str& cell_i_d2);
 
 	// Adds the geometry to the given cell.
-	bool AddGeometry(GeometryBase* pGeometry, const str& pParentCellID);
-	void RemoveGeometry(GeometryBase* pGeometry);
+	bool AddGeometry(GeometryBase* geometry, const str& parent_cell_id);
+	void RemoveGeometry(GeometryBase* geometry);
 
-	str GetParentCellID(GeometryBase* pGeometry);
+	str GetParentCellID(GeometryBase* geometry);
 
 	// Test collision against portals in the geometry's parent cell.
-	// Testing as if moving from pFromPos to pToPos (both given in world 
-	// coordinates), and updates the geometry's parent cell if a collision 
+	// Testing as if moving from pFromPos to pToPos (both given in world
+	// coordinates), and updates the geometry's parent cell if a collision
 	// occurs. Returns the ID of the geometry's parent cell after collision.
-	str TestPortalCollision(const vec3& pFromPos,
-					   const vec3& pToPos,
-					   GeometryBase* pGeometry);
+	str TestPortalCollision(const vec3& from_pos,
+					   const vec3& to_pos,
+					   GeometryBase* geometry);
 
 	// Test collision against portals in the cell with the given ID.
 	// Testing as if moving from pFromPos to pToPos (both given in world
 	// coordinates). Returns the ID of the cell after collision.
-	str TestPortalCollision(const vec3& pFromPos,
-					   const vec3& pToPos,
-					   const str& pCellID);
+	str TestPortalCollision(const vec3& from_pos,
+					   const vec3& to_pos,
+					   const str& cell_id);
 
 	// This function is implemented in UiPortalManager.
-	// void TraverseGraph(Renderer* pRenderer, const str& pCellID);
+	// void TraverseGraph(Renderer* renderer, const str& cell_id);
 
 protected:
 
 	class Cell;
-	class Portal
-	{
+	class Portal {
 	public:
-		Portal(int pNumVertices,
-		       vec3* pVertex,
-		       Cell* pCell1,
-		       Cell* pCell2);
+		Portal(int num_vertices,
+		       vec3* vertex,
+		       Cell* cell1,
+		       Cell* cell2);
 		virtual ~Portal();
 
 		// Returns "true" on collision and the time to collision.
-		bool TestCollision(const vec3& pFromPos,
-						   const vec3& pToPos,
-						   Cell* pFrom,
-						   float& pTimeToCollision);
+		bool TestCollision(const vec3& from_pos,
+						   const vec3& to_pos,
+						   Cell* from,
+						   float& time_to_collision);
 
-		Cell* GetOtherCell(Cell* pCell);
+		Cell* GetOtherCell(Cell* cell);
 
 	protected:
-		int mNumVertices;
+		int num_vertices_;
 
-		vec3* mVertex;
+		vec3* vertex_;
 		// Generated normals which all point towards the center of the portal.
-		vec3* mEdgeNormal;
-		float* mEdgeD; // The fourth constant in the plane equation.
+		vec3* edge_normal_;
+		float* edge_d_; // The fourth constant in the plane equation.
 
-		Cell* mCell1;
-		Cell* mCell2;
+		Cell* cell1_;
+		Cell* cell2_;
 
-		vec3 mNormal;
-		float mD;
+		vec3 normal_;
+		float d_;
 	};
 
-	class Cell
-	{
+	class Cell {
 	public:
 
-		Cell(const str& pCellID, const str& pCellDescription, PortalManager* pPortalManager);
+		Cell(const str& cell_id, const str& cell_description, PortalManager* portal_manager);
 		virtual ~Cell();
 
 		const str& GetID();
 		const str& GetDescription();
 
-		void AddPortal(Portal* pPortal);
-		void RemovePortal(Portal* pPortal);
+		void AddPortal(Portal* portal);
+		void RemovePortal(Portal* portal);
 
-		void AddGeometry(GeometryBase* pGeometry);
-		void RemoveGeometry(GeometryBase* pGeometry);
+		void AddGeometry(GeometryBase* geometry);
+		void RemoveGeometry(GeometryBase* geometry);
 
-		Cell* TestPortalCollision(const vec3& pFromPos,
-					  const vec3& pToPos,
-					  float& pTimeToCollision);
+		Cell* TestPortalCollision(const vec3& from_pos,
+					  const vec3& to_pos,
+					  float& time_to_collision);
 	protected:
 
 		typedef HashSet<GeometryBase*, LEPRA_VOIDP_HASHER> GeomSet;
 		typedef std::list<Portal*> PortalList;
 
-		GeomSet mGeomSet;
-		PortalList mPortalList;
-		str mCellID;
-		str mCellDescription;
-		PortalManager* mPortalManager;
+		GeomSet geom_set_;
+		PortalList portal_list_;
+		str cell_id_;
+		str cell_description_;
+		PortalManager* portal_manager_;
 	};
 
 	typedef HashSet<GeometryBase*, LEPRA_VOIDP_HASHER> GeomSet;
 	typedef HashTable<str, Cell*> CellTable;
 	typedef std::list<Portal*> PortalList;
 
-	virtual Portal* NewPortal(int pNumVertices,
-				 vec3* pVertex,
-				 Cell* pCell1,
-				 Cell* pCell2);
-	virtual Cell* NewCell(const str& pCellID, 
-			      const str& pCellDescription,
-			      PortalManager* pPortalManager);
+	virtual Portal* NewPortal(int num_vertices,
+				 vec3* vertex,
+				 Cell* cell1,
+				 Cell* cell2);
+	virtual Cell* NewCell(const str& cell_id,
+			      const str& cell_description,
+			      PortalManager* portal_manager);
 
-	GeomSet mGeomSet;
-	CellTable mCellTable;
-	PortalList mPortalList;
+	GeomSet geom_set_;
+	CellTable cell_table_;
+	PortalList portal_list_;
 
-	// Initialized in Tbc::Init().
-	static str* smInvalidCellID;
+	// Initialized in tbc::Init().
+	static str* invalid_cell_id_;
 
 	logclass();
 };

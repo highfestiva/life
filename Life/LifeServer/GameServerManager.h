@@ -8,23 +8,21 @@
 
 
 
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/NetworkServer.h"
-#include "Client.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/gamemanager.h"
+#include "../../cure/include/networkserver.h"
+#include "client.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class InteractiveConsoleLogListener;
 class ConsolePrompt;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -35,107 +33,106 @@ class ServerMessageProcessor;
 
 
 
-class GameServerManager: public Cure::GameManager, public Cure::NetworkServer::LoginListener
-{
+class GameServerManager: public cure::GameManager, public cure::NetworkServer::LoginListener {
 public:
-	typedef Cure::GameManager Parent;
-	typedef Cure::ContextManager::ContextObjectTable ContextTable;
-	typedef HashTable<Cure::UserAccount::AccountId, Client*> AccountClientTable;
+	typedef cure::GameManager Parent;
+	typedef cure::ContextManager::ContextObjectTable ContextTable;
+	typedef HashTable<cure::UserAccount::AccountId, Client*> AccountClientTable;
 
-	GameServerManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager);
+	GameServerManager(const cure::TimeManager* time, cure::RuntimeVariableScope* variable_scope,
+		cure::ResourceManager* resource_manager);
 	virtual ~GameServerManager();
 
 	virtual bool BeginTick();
 	virtual void PreEndTick();
 
-	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
-	bool Initialize(MasterServerConnection* pMasterConnection, const str& pAddress);
+	virtual void StartConsole(InteractiveConsoleLogListener* console_logger, ConsolePrompt* console_prompt);
+	bool Initialize(MasterServerConnection* master_connection, const str& address);
 	float GetPowerSaveAmount() const;
 
-	LEPRA_DEBUG_CODE(virtual Tbc::PhysicsManager* GetPhysicsManager() const);
+	LEPRA_DEBUG_CODE(virtual tbc::PhysicsManager* GetPhysicsManager() const);
 
-	virtual void DeleteContextObject(Cure::GameObjectId pInstanceId);
+	virtual void DeleteContextObject(cure::GameObjectId instance_id);
 
 	ServerDelegate* GetDelegate() const;
-	void SetDelegate(ServerDelegate* pDelegate);
-	void SetMessageProcessor(ServerMessageProcessor* pMessageProcessor);
-	void AdjustClientSimulationSpeed(Client* pClient, int pClientFrameIndex);
-	virtual void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
-	void OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId);
-	void LoanObject(Client* pClient, Cure::GameObjectId pInstanceId);
+	void SetDelegate(ServerDelegate* delegate);
+	void SetMessageProcessor(ServerMessageProcessor* message_processor);
+	void AdjustClientSimulationSpeed(Client* client, int client_frame_index);
+	virtual void StoreMovement(int client_frame_index, cure::MessageObjectMovement* movement);
+	void OnSelectAvatar(Client* client, const cure::UserAccount::AvatarId& avatar_id);
+	void LoanObject(Client* client, cure::GameObjectId instance_id);
 	strutil::strvec ListUsers();
-	Cure::NetworkServer* GetNetworkServer() const;
-	void SendObjects(Client* pClient, bool pCreate, const ContextTable& pObjectTable);
-	void BroadcastCreateObject(Cure::GameObjectId pInstanceId, const xform& pTransform, const str& pClassId, Cure::GameObjectId pOwnerInstanceId);
-	void BroadcastObjectPosition(Cure::GameObjectId pInstanceId, const Cure::ObjectPositionalData& pPosition,
-		Client* pExcludeClient, bool pSafe);
-	bool BroadcastChatMessage(const str& pMessage);
-	bool BroadcastStatusMessage(Cure::MessageStatus::InfoType pType, const str& pString);
-	void BroadcastNumberMessage(Client* pExcludeClient, bool pSafe, Cure::MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat);
-	bool SendChatMessage(const str& pClientUserName, const str& pMessage);
-	void IndicatePosition(const vec3 pPosition, float pTime);
+	cure::NetworkServer* GetNetworkServer() const;
+	void SendObjects(Client* client, bool create, const ContextTable& object_table);
+	void BroadcastCreateObject(cure::GameObjectId instance_id, const xform& transform, const str& class_id, cure::GameObjectId owner_instance_id);
+	void BroadcastObjectPosition(cure::GameObjectId instance_id, const cure::ObjectPositionalData& position,
+		Client* exclude_client, bool safe);
+	bool BroadcastChatMessage(const str& message);
+	bool BroadcastStatusMessage(cure::MessageStatus::InfoType type, const str& s);
+	void BroadcastNumberMessage(Client* exclude_client, bool safe, cure::MessageNumber::InfoType info, int32 integer, float32 f);
+	bool SendChatMessage(const str& client_user_name, const str& message);
+	void IndicatePosition(const vec3 position, float time);
 
 	int GetLoggedInClientCount() const;
-	Client* GetClientByAccount(Cure::UserAccount::AccountId pAccountId) const;
-	Client* GetClientByObject(Cure::ContextObject*& pObject) const;
+	Client* GetClientByAccount(cure::UserAccount::AccountId account_id) const;
+	Client* GetClientByObject(cure::ContextObject*& object) const;
 	const AccountClientTable& GetAccountClientTable() const;	// Use with caution!
 
-	void Build(const str& pWhat);
+	void Build(const str& what);
 
 	void TickInput();
 
 protected:
-	void Logout(Cure::UserAccount::AccountId pAccountId, const str& pReason);
+	void Logout(cure::UserAccount::AccountId account_id, const str& reason);
 	void DeleteAllClients();
 
-	Cure::UserAccount::Availability QueryLogin(const Cure::LoginId& pLoginId, Cure::UserAccount::AccountId& pAccountId);
-	void OnLogin(Cure::UserConnection* pUserConnection);
-	void OnLogout(Cure::UserConnection* pUserConnection);
+	cure::UserAccount::Availability QueryLogin(const cure::LoginId& login_id, cure::UserAccount::AccountId& account_id);
+	void OnLogin(cure::UserConnection* user_connection);
+	void OnLogout(cure::UserConnection* user_connection);
 
-	void DeleteMovements(Cure::GameObjectId pInstanceId);
+	void DeleteMovements(cure::GameObjectId instance_id);
 	void ApplyStoredMovement();
 
-	void BroadcastAvatar(Client* pClient);
+	void BroadcastAvatar(Client* client);
 
-	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
-	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
-	void OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
-		Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-		Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id);
-	void FlipCheck(Cure::ContextObject* pObject) const;
-	virtual bool OnPhysicsSend(Cure::ContextObject* pObject);
-	virtual bool OnAttributeSend(Cure::ContextObject* pObject);
+	virtual cure::ContextObject* CreateContextObject(const str& class_id) const;
+	virtual void OnLoadCompleted(cure::ContextObject* object, bool ok);
+	void OnCollision(const vec3& force, const vec3& torque, const vec3& position,
+		cure::ContextObject* object1, cure::ContextObject* object2,
+		tbc::PhysicsManager::BodyID body1_id, tbc::PhysicsManager::BodyID body2_id);
+	void FlipCheck(cure::ContextObject* object) const;
+	virtual bool OnPhysicsSend(cure::ContextObject* object);
+	virtual bool OnAttributeSend(cure::ContextObject* object);
 	bool IsServer();
-	void SendAttach(Cure::ContextObject* pObject1, unsigned pId1, Cure::ContextObject* pObject2, unsigned pId2);
-	void SendDetach(Cure::ContextObject* pObject1, Cure::ContextObject* pObject2);
-	void OnIdOwnershipExpired(int, Cure::ContextObject* pObject, void*);
+	void SendAttach(cure::ContextObject* object1, unsigned id1, cure::ContextObject* object2, unsigned id2);
+	void SendDetach(cure::ContextObject* object1, cure::ContextObject* object2);
+	void OnIdOwnershipExpired(int, cure::ContextObject* object, void*);
 	virtual void HandleWorldBoundaries();
 
-	virtual Cure::ContextObject* CreateLogicHandler(const str& pType);
+	virtual cure::ContextObject* CreateLogicHandler(const str& type);
 
-	void BroadcastCreateObject(Cure::ContextObject* pObject);
-	void BroadcastDeleteObject(Cure::GameObjectId pInstanceId);
-	void BroadcastPacket(const Client* pExcludeClient, Cure::Packet* pPacket, bool pSafe);
+	void BroadcastCreateObject(cure::ContextObject* object);
+	void BroadcastDeleteObject(cure::GameObjectId instance_id);
+	void BroadcastPacket(const Client* exclude_client, cure::Packet* packet, bool safe);
 
 	void TickMasterServer();
-	bool HandleMasterCommand(const ServerInfo& pServerInfo);
+	bool HandleMasterCommand(const ServerInfo& server_info);
 	void MonitorRtvars();
 
 private:
-	typedef std::list<Cure::MessageObjectMovement*> MovementList;
+	typedef std::list<cure::MessageObjectMovement*> MovementList;
 	typedef std::vector<MovementList> MovementArrayList;
 
-	Cure::UserAccountManager* mUserAccountManager;
-	AccountClientTable mAccountClientTable;
-	ServerDelegate* mDelegate;
-	ServerMessageProcessor* mMessageProcessor;
-	MovementArrayList mMovementArrayList;
-	mutable Timer mPowerSaveTimer;
-	MasterServerConnection* mMasterConnection;
-	int mPhysicsFpsShadow;
-	float mPhysicsRtrShadow;
-	bool mPhysicsHaltShadow;
+	cure::UserAccountManager* user_account_manager_;
+	AccountClientTable account_client_table_;
+	ServerDelegate* delegate_;
+	ServerMessageProcessor* message_processor_;
+	MovementArrayList movement_array_list_;
+	mutable Timer power_save_timer_;
+	MasterServerConnection* master_connection_;
+	int physics_fps_shadow_;
+	float physics_rtr_shadow_;
+	bool physics_halt_shadow_;
 
 	logclass();
 };

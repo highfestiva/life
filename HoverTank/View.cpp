@@ -1,108 +1,92 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "View.h"
-#include "../UiTbc/Include/GUI/UiCaption.h"
-#include "../UiTbc/Include/GUI/UiCenterLayout.h"
-#include "../UiTbc/Include/GUI/UiTextField.h"
-#include "RtVar.h"
+#include "view.h"
+#include "../uitbc/include/gui/uicaption.h"
+#include "../uitbc/include/gui/uicenterlayout.h"
+#include "../uitbc/include/gui/uitextfield.h"
+#include "rtvar.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-View::View(const str& pTitle, UiTbc::Layout* pLayout):
-	UiTbc::Window(UiTbc::Window::BORDER_LINEARSHADING, 2, DARK_GRAY, pTitle, pLayout)
-{
+View::View(const str& title, uitbc::Layout* layout):
+	uitbc::Window(uitbc::Window::kBorderLinearshading, 2, DARK_GRAY, title, layout) {
 	Init();
-	UiTbc::Caption* lCaption = new UiTbc::Caption(DARK_GRAY, GRAY, GRAY, LIGHT_GRAY,
+	uitbc::Caption* caption = new uitbc::Caption(DARK_GRAY, GRAY, GRAY, LIGHT_GRAY,
 		BLACK, DARK_GRAY, DARK_GRAY, GRAY, 20);
-	lCaption->SetText(pTitle, WHITE, BLACK, GRAY, BLACK);
-	SetCaption(lCaption);
+	caption->SetText(title, WHITE, BLACK, GRAY, BLACK);
+	SetCaption(caption);
 
-	UiTbc::Button* lCloseButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 1, LIGHT_RED, pTitle);
-	//lCloseButton->SetText("x", RED, BLACK);
-	lCloseButton->SetPreferredSize(10, 10);
-	lCloseButton->SetMinSize(10, 10);
-	lCloseButton->SetOnClick(View, OnExit);
-	lCaption->SetRightButton(lCloseButton);
+	uitbc::Button* close_button = new uitbc::Button(uitbc::BorderComponent::kZigzag, 1, LIGHT_RED, title);
+	//close_button->SetText("x", RED, BLACK);
+	close_button->SetPreferredSize(10, 10);
+	close_button->SetMinSize(10, 10);
+	close_button->SetOnClick(View, OnExit);
+	caption->SetRightButton(close_button);
 }
 
 
 
-UiTbc::RectComponent* View::AddRow(const Color& pColor, int pColumnCount)
-{
-	UiTbc::RectComponent* lRowLayer = new UiTbc::RectComponent(pColor, "Row", new UiTbc::GridLayout(1, pColumnCount));
-	lRowLayer->SetIsHollow(false);
-	AddChild(lRowLayer);
-	return lRowLayer;
+uitbc::RectComponent* View::AddRow(const Color& color, int column_count) {
+	uitbc::RectComponent* row_layer = new uitbc::RectComponent(color, "Row", new uitbc::GridLayout(1, column_count));
+	row_layer->SetIsHollow(false);
+	AddChild(row_layer);
+	return row_layer;
 }
 
-UiTbc::RectComponent* View::AddCentering(int pLayer, UiTbc::Component* pParent)
-{
-	UiTbc::RectComponent* lCenterLayer = new UiTbc::RectComponent("Centering", new UiTbc::CenterLayout);
-	pParent->AddChild(lCenterLayer, 0, 0, pLayer);
-	return lCenterLayer;
+uitbc::RectComponent* View::AddCentering(int layer, uitbc::Component* parent) {
+	uitbc::RectComponent* center_layer = new uitbc::RectComponent("Centering", new uitbc::CenterLayout);
+	parent->AddChild(center_layer, 0, 0, layer);
+	return center_layer;
 }
 
-UiTbc::Label* View::AddLabel(const str& pText, const Color& pColor, int pPreferredWidth, UiTbc::Component* pParent, int pLayer)
-{
-	UiTbc::Label* lLabel = new UiTbc::Label(pColor, pText);
-	lLabel->SetIsHollow(true);
-	lLabel->SetPreferredSize(pPreferredWidth, 24, (pPreferredWidth == 0)? false : true);
-	if (pParent)
-	{
-		pParent->AddChild(lLabel, 0, 0, pLayer);
+uitbc::Label* View::AddLabel(const str& text, const Color& color, int preferred_width, uitbc::Component* parent, int layer) {
+	uitbc::Label* label = new uitbc::Label(color, text);
+	label->SetIsHollow(true);
+	label->SetPreferredSize(preferred_width, 24, (preferred_width == 0)? false : true);
+	if (parent) {
+		parent->AddChild(label, 0, 0, layer);
+	} else if (layer) {
+		Component::AddChild(label, 0, 0, layer);
+	} else {
+		AddChild(label);
 	}
-	else if (pLayer)
-	{
-		Component::AddChild(lLabel, 0, 0, pLayer);
-	}
-	else
-	{
-		AddChild(lLabel);
-	}
-	return (lLabel);
+	return (label);
 }
 
-UiTbc::TextField* View::AddTextField(const str& pDefaultText, const str& pName)
-{
-	UiTbc::TextField* lTextField = new UiTbc::TextField(GetClientRectComponent(), UiTbc::Window::BORDER_SUNKEN | UiTbc::Window::BORDER_LINEARSHADING,
-		3, BLACK, pName);
-	lTextField->SetPreferredSize(0, 24);
-	lTextField->SetFontColor(WHITE);
-	lTextField->SetText(pDefaultText);
-	AddChild(lTextField);
-	return (lTextField);
+uitbc::TextField* View::AddTextField(const str& default_text, const str& name) {
+	uitbc::TextField* text_field = new uitbc::TextField(GetClientRectComponent(), uitbc::Window::kBorderSunken | uitbc::Window::kBorderLinearshading,
+		3, BLACK, name);
+	text_field->SetPreferredSize(0, 24);
+	text_field->SetFontColor(WHITE);
+	text_field->SetText(default_text);
+	AddChild(text_field);
+	return (text_field);
 }
 
-UiTbc::Button* View::AddButton(const str& pText, void* pExtraData, UiTbc::Component* pParent)
-{
-	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::ZIGZAG, 3, LIGHT_GRAY, pText);
-	lButton->SetText(pText, OFF_BLACK, LIGHT_RED);
-	lButton->SetPreferredSize(0, 24);
-	lButton->SetMinSize(50, 10);
-	lButton->SetExtraData(pExtraData);
-	if (pParent)
-	{
-		pParent->AddChild(lButton);
+uitbc::Button* View::AddButton(const str& text, void* extra_data, uitbc::Component* parent) {
+	uitbc::Button* button = new uitbc::Button(uitbc::BorderComponent::kZigzag, 3, LIGHT_GRAY, text);
+	button->SetText(text, OFF_BLACK, LIGHT_RED);
+	button->SetPreferredSize(0, 24);
+	button->SetMinSize(50, 10);
+	button->SetExtraData(extra_data);
+	if (parent) {
+		parent->AddChild(button);
+	} else {
+		AddChild(button);
 	}
-	else
-	{
-		AddChild(lButton);
-	}
-	return (lButton);
+	return (button);
 }
 
-void View::OnExit(UiTbc::Button*)
-{
+void View::OnExit(uitbc::Button*) {
 	OnExit();
 }
 

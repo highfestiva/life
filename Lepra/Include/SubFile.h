@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // A subfile takes an OPEN file and allows you to work an a PART of that file.
@@ -10,38 +10,36 @@
 
 #pragma once
 
-#include "../Include/File.h"
-#include "../Include/InputStream.h"
-#include "../Include/OutputStream.h"
+#include "../include/file.h"
+#include "../include/inputstream.h"
+#include "../include/outputstream.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class SubFile: public File, protected InputStream, protected OutputStream
-{
+class SubFile: public File, protected InputStream, protected OutputStream {
 public:
-	SubFile(File* pMasterFile, int64 pFileSize);
+	SubFile(File* master_file, int64 file_size);
 	virtual ~SubFile();
 
 	void Flush();
 	void Close();	// Dummy.
 	int64 GetAvailable() const;
-	IOError Skip(size_t pLength);
-	IOError ReadRaw(void* pData, size_t pLength);
-	IOError WriteRaw(const void* pData, size_t pLength);
+	IOError Skip(size_t length);
+	IOError ReadRaw(void* data, size_t length);
+	IOError WriteRaw(const void* data, size_t length);
 
 	int64 GetSize() const;
 	int64 Tell() const;
-	int64 Seek(int64 pOffset, FileOrigin pFrom);
+	int64 Seek(int64 offset, FileOrigin from);
 
 private:
-	File* mMasterFile;
-	int64 mFileStart;
-	int64 mFileSize;
+	File* master_file_;
+	int64 file_start_;
+	int64 file_size_;
 };
 
 

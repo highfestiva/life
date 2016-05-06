@@ -1,19 +1,19 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Life/LifeClient/RtVar.h"
-#include "../UiCure/Include/UiRuntimeVariableName.h"
+#include "../cure/include/runtimevariable.h"
+#include "../life/lifeclient/rtvar.h"
+#include "../uicure/include/uiruntimevariablename.h"
 
 
 
-#define RTVAR_GAME_FIRSTTIME		"Game.FirstTime"
-#define RTVAR_GAME_LEVEL		"Game.Level"
-#define RTVAR_GAME_LEVELSHAPEALTERNATE	"Game.LevelShapeAlternate"
-#define RTVAR_GAME_RUNADS		"Game.RunAds"
-#define RTVAR_GAME_SCORE		"Game.Score"
+#define kRtvarGameFirsttime		"Game.FirstTime"
+#define kRtvarGameLevel		"Game.Level"
+#define kRtvarGameLevelshapealternate	"Game.LevelShapeAlternate"
+#define kRtvarGameRunads		"Game.RunAds"
+#define kRtvarGameScore		"Game.Score"

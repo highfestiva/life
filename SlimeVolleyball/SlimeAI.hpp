@@ -1,10 +1,9 @@
 #pragma once
-#include "Slime.hpp"
+#include "slime.hpp"
 
 
 
-namespace Slime
-{
+namespace slime {
 
 
 
@@ -12,8 +11,7 @@ class SlimeVolleyball;
 
 
 
-class SlimeAI
-{
+class SlimeAI {
 	protected: int ballX;
 	protected: int ballY;
 	protected: int ballVX;
@@ -29,7 +27,7 @@ class SlimeAI
 	protected: bool p1Fire;
 	protected: bool p2Fire;
 	protected: int team;
-	protected: int mPercent;
+	protected: int percent_;
 	private: int player;
 	private: SlimeVolleyball* app;
 	public: static const int LEFT = 0;
@@ -39,16 +37,16 @@ class SlimeAI
 
 	public: SlimeAI();
 
-	public: virtual int init(SlimeVolleyball* paramSlime1P, int paramInt);
+	public: virtual int init(SlimeVolleyball* slime1_p, int i);
 
-	public: virtual void saveVars(int paramArrayOfInt[], bool paramBoolean1, bool paramBoolean2);
+	public: virtual void saveVars(int array_of_int[], bool boolean1, bool boolean2);
 
 	public: virtual void moveSlime() = 0;
 
-	protected: virtual void move(int paramInt);
+	protected: virtual void move(int i);
 
-	protected: int square(int paramInt) {
-		return paramInt * paramInt;
+	protected: int square(int i) {
+		return i * i;
 	}
 };
 

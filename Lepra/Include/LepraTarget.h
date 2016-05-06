@@ -39,7 +39,7 @@
 #define LEPRA_ANSI
 #endif // UNICODE/<ANSI>
 
-#if defined(CONSOLE) || defined(_CONSOLE)
+#if defined(kConsole) || defined(_CONSOLE)
 #define LEPRA_CONSOLE
 #endif // UNICODE
 
@@ -106,33 +106,33 @@
 
 
 #if defined(LEPRA_DEBUG)
-#define LEPRA_BUILD_TYPE_TEXT	"Debug"
+#define kLepraBuildTypeText	"Debug"
 #define LEPRA_INFO_PERFORMANCE
 #define LEPRA_DEBUG_CODE(x)		x
 #elif !defined(NO_LOG_DEBUG_INFO)
 #define LEPRA_RELEASE_CANDIDATE
-#define LEPRA_BUILD_TYPE_TEXT	"Release Candidate"
+#define kLepraBuildTypeText	"Release Candidate"
 #define LEPRA_INFO_PERFORMANCE
 #define LEPRA_DEBUG_CODE(x)
 #else // FINAL
 #define LEPRA_FINAL
-#define LEPRA_BUILD_TYPE_TEXT	"Final"
+#define kLepraBuildTypeText	"Final"
 #define LEPRA_DEBUG_CODE(x)
 #endif // _DEBUG/!NO_LOG_DEBUG_INFO/FINAL
 
 #if defined(LEPRA_UTF32)
-#define LEPRA_STRING_TYPE_TEXT	"Unicode"
+#define kLepraStringTypeText	"Unicode"
 #else // LEPRA_ANSI
-#define LEPRA_STRING_TYPE_TEXT	"Ansi"
+#define kLepraStringTypeText	"Ansi"
 #endif
 
 #if defined(LEPRA_IOS)
 #define LEPRA_TOUCH
-#endif // Touch device
+#endif // touch device
 
 
 // We keep some graphics stuff here, since primitives are defined
-// in Lepra, not in UiLepra (only drawing there).
+// in lepra, not in uilepra (only drawing there).
 #if defined(LEPRA_IOS)
 typedef unsigned short vtx_idx_t;
 #else // !iOS

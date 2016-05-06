@@ -1,612 +1,522 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "HoverTankServerDelegate.h"
-#include "../../Cure/Include/ConsoleManager.h"
-#include "../../Cure/Include/Health.h"
-#include "../../Cure/Include/FloatAttribute.h"
-#include "../../Cure/Include/IntAttribute.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Cure/Include/TimeManager.h"
-#include "../../Cure/Include/Spawner.h"
-#include "../../Lepra/Include/Random.h"
-#include "../../Life/LifeServer/GameServerManager.h"
-#include "../../Life/LifeServer/ServerFastProjectile.h"
-#include "../../Life/LifeServer/ServerMine.h"
-#include "../../Life/LifeServer/ServerProjectile.h"
-#include "../../Life/Explosion.h"
-#include "../../Life/ProjectileUtil.h"
-#include "../RtVar.h"
-#include "../RtVar.h"
-#include "../Version.h"
-#include "BombPlane.h"
-#include "Npc.h"
-#include "HoverTankServerConsole.h"
+#include "hovertankserverdelegate.h"
+#include "../../cure/include/consolemanager.h"
+#include "../../cure/include/health.h"
+#include "../../cure/include/floatattribute.h"
+#include "../../cure/include/intattribute.h"
+#include "../../cure/include/runtimevariable.h"
+#include "../../cure/include/timemanager.h"
+#include "../../cure/include/spawner.h"
+#include "../../lepra/include/random.h"
+#include "../../life/lifeserver/gameservermanager.h"
+#include "../../life/lifeserver/serverfastprojectile.h"
+#include "../../life/lifeserver/servermine.h"
+#include "../../life/lifeserver/serverprojectile.h"
+#include "../../life/explosion.h"
+#include "../../life/projectileutil.h"
+#include "../rtvar.h"
+#include "../rtvar.h"
+#include "../version.h"
+#include "bombplane.h"
+#include "npc.h"
+#include "hovertankserverconsole.h"
 
-#define KILLS	"int_kills:"
-#define DEATHS	"int_deaths:"
-#define PING	"int_ping:"
-
-
-
-namespace HoverTank
-{
+#define kKills	"int_kills:"
+#define kDeaths	"int_deaths:"
+#define kPing	"int_ping:"
 
 
 
-HoverTankServerDelegate::HoverTankServerDelegate(Life::GameServerManager* pGameServerManager):
-	Parent(pGameServerManager),
-	mLevelId(0),
-	mScoreInfoId(0)
-{
-	v_set(mGameServerManager->GetVariableScope(), RTVAR_GAME_NPCSKILL, 0.5);
-	v_set(mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
+namespace HoverTank {
+
+
+
+HoverTankServerDelegate::HoverTankServerDelegate(life::GameServerManager* game_server_manager):
+	Parent(game_server_manager),
+	level_id_(0),
+	score_info_id_(0) {
+	v_set(game_server_manager_->GetVariableScope(), kRtvarGameNpcskill, 0.5);
+	v_set(game_server_manager_->GetVariableScope(), kRtvarDebugServerindicatehit, 0.0);
 }
 
-HoverTankServerDelegate::~HoverTankServerDelegate()
-{
-	mScoreInfoId = 0;
-	mLevelId = 0;
+HoverTankServerDelegate::~HoverTankServerDelegate() {
+	score_info_id_ = 0;
+	level_id_ = 0;
 }
 
 
 
-void HoverTankServerDelegate::SetLevel(const str& pLevelName)
-{
-	ScopeLock lLock(mGameServerManager->GetTickLock());
-	if (mLevelId)
-	{
-		mGameServerManager->DeleteContextObject(mLevelId);
+void HoverTankServerDelegate::SetLevel(const str& level_name) {
+	ScopeLock lock(game_server_manager_->GetTickLock());
+	if (level_id_) {
+		game_server_manager_->DeleteContextObject(level_id_);
 	}
 
-	Cure::ContextObject* lLevel = mGameServerManager->GameManager::CreateContextObject(pLevelName, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-	mLevelId = lLevel->GetInstanceId();
-	lLevel->StartLoading();
+	cure::ContextObject* level = game_server_manager_->GameManager::CreateContextObject(level_name, cure::kNetworkObjectLocallyControlled);
+	level_id_ = level->GetInstanceId();
+	level->StartLoading();
 }
 
 
 
-Cure::ContextObject* HoverTankServerDelegate::CreateContextObject(const str& pClassId) const
-{
-	if (strutil::StartsWith(pClassId, "mine_"))
-	{
-		return new Life::ServerMine(mGameServerManager->GetResourceManager(), pClassId, (HoverTankServerDelegate*)this);
+cure::ContextObject* HoverTankServerDelegate::CreateContextObject(const str& class_id) const {
+	if (strutil::StartsWith(class_id, "mine_")) {
+		return new life::ServerMine(game_server_manager_->GetResourceManager(), class_id, (HoverTankServerDelegate*)this);
+	} else if (strutil::StartsWith(class_id, "deltawing")) {
+		return new BombPlane(game_server_manager_->GetResourceManager(), class_id, (HoverTankServerDelegate*)this, vec3());
 	}
-	else if (strutil::StartsWith(pClassId, "deltawing"))
-	{
-		return new BombPlane(mGameServerManager->GetResourceManager(), pClassId, (HoverTankServerDelegate*)this, vec3());
-	}
-	return new Cure::CppContextObject(mGameServerManager->GetResourceManager(), pClassId);
+	return new cure::CppContextObject(game_server_manager_->GetResourceManager(), class_id);
 }
 
-void HoverTankServerDelegate::OnOpen()
-{
-	new HoverTankServerConsole(this, mGameServerManager->GetConsoleManager()->GetConsoleCommandManager());
+void HoverTankServerDelegate::OnOpen() {
+	new HoverTankServerConsole(this, game_server_manager_->GetConsoleManager()->GetConsoleCommandManager());
 
 	SetLevel("level_02");
 
-	Cure::ContextObject* lScoreInfo = mGameServerManager->GameManager::CreateContextObject("score_info", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-	mScoreInfoId = lScoreInfo->GetInstanceId();
-	lScoreInfo->SetLoadResult(true);
+	cure::ContextObject* score_info = game_server_manager_->GameManager::CreateContextObject("score_info", cure::kNetworkObjectLocallyControlled);
+	score_info_id_ = score_info->GetInstanceId();
+	score_info->SetLoadResult(true);
 }
 
-void HoverTankServerDelegate::OnLogin(Life::Client* pClient)
-{
+void HoverTankServerDelegate::OnLogin(life::Client* client) {
 #ifdef LEPRA_DEBUG
-	if (mGameServerManager->GetLoggedInClientCount() == 1)
-	{
-		deb_assert(mNpcSet.empty());
+	if (game_server_manager_->GetLoggedInClientCount() == 1) {
+		deb_assert(npc_set_.empty());
 	}
 #endif // Debug
 
 	// Create scores.
-	const str lLoginName = pClient->GetUserConnection(->GetLoginName());
-	CreateScore(lLoginName, true);
+	const str login_name = client->GetUserConnection(->GetLoginName());
+	CreateScore(login_name, true);
 
 	// Create another computer opponent, to balance teams.
 	CreateNpc();
 }
 
-void HoverTankServerDelegate::OnLogout(Life::Client* pClient)
-{
+void HoverTankServerDelegate::OnLogout(life::Client* client) {
 	// Drop scores.
-	const str lLoginName = pClient->GetUserConnection(->GetLoginName());
-	DeleteScore(lLoginName);
+	const str login_name = client->GetUserConnection(->GetLoginName());
+	DeleteScore(login_name);
 
 	// Drop a computer opponent, to balance teams.
 	DeleteNpc();
 
 #ifdef LEPRA_DEBUG
-	if (mGameServerManager->GetLoggedInClientCount() == 0)
-	{
-		deb_assert(mNpcSet.empty());
+	if (game_server_manager_->GetLoggedInClientCount() == 0) {
+		deb_assert(npc_set_.empty());
 	}
 #endif // Debug
 }
 
 
 
-void HoverTankServerDelegate::OnSelectAvatar(Life::Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId)
-{
-	const Cure::GameObjectId lPreviousAvatarId = pClient->GetAvatarId();
-	if (lPreviousAvatarId)
-	{
-		mLog.Info("User "+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+" had an avatar, replacing it.");
-		pClient->SetAvatarId(0);
-		Cure::ContextObject* lObject = mGameServerManager->GetContext()->GetObject(lPreviousAvatarId);
-		if (lObject)
-		{
-			xform lTransform;
-			lTransform.SetPosition(lObject->GetPosition());
-			lTransform.GetPosition() += vec3(0, 0, 2);
-			vec3 lEulerAngles;
-			lObject->GetOrientation().GetEulerAngles(lEulerAngles);
+void HoverTankServerDelegate::OnSelectAvatar(life::Client* client, const cure::UserAccount::AvatarId& avatar_id) {
+	const cure::GameObjectId previous_avatar_id = client->GetAvatarId();
+	if (previous_avatar_id) {
+		log_.Info("User "+strutil::Encode(client->GetUserConnection()->GetLoginName())+" had an avatar, replacing it.");
+		client->SetAvatarId(0);
+		cure::ContextObject* _object = game_server_manager_->GetContext()->GetObject(previous_avatar_id);
+		if (_object) {
+			xform transform;
+			transform.SetPosition(_object->GetPosition());
+			transform.GetPosition() += vec3(0, 0, 2);
+			vec3 euler_angles;
+			_object->GetOrientation().GetEulerAngles(euler_angles);
 			quat q;
-			q.SetEulerAngles(lEulerAngles.x, 0, 0);
-			lTransform.SetOrientation(q * lTransform.GetOrientation());
+			q.SetEulerAngles(euler_angles.x, 0, 0);
+			transform.SetOrientation(q * transform.GetOrientation());
 		}
-		mGameServerManager->DeleteContextObject(lPreviousAvatarId);
+		game_server_manager_->DeleteContextObject(previous_avatar_id);
 	}
 
-	Cure::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
-	if (!lSpawner)
-	{
-		mLog.AError("No player spawner in level!");
+	cure::Spawner* spawner = game_server_manager_->GetAvatarSpawner(level_id_);
+	if (!spawner) {
+		log_.AError("No player spawner in level!");
 		return;
 	}
-	mLog.Info("Loading avatar '"+pAvatarId+"' for user "+strutil::Encode(pClient->GetUserConnection()->GetLoginName())+".");
-	Cure::ContextObject* lObject = mGameServerManager->GameServerManager::Parent::CreateContextObject(pAvatarId, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED);
-	lSpawner->PlaceObject(lObject, -1);
-	pClient->SetAvatarId(lObject->GetInstanceId());
-	lObject->SetExtraData((void*)(intptr_t)pClient->GetUserConnection()->GetAccountId());
-	lObject->StartLoading();
+	log_.Info("Loading avatar '"+avatar_id+"' for user "+strutil::Encode(client->GetUserConnection()->GetLoginName())+".");
+	cure::ContextObject* _object = game_server_manager_->GameServerManager::Parent::CreateContextObject(avatar_id, cure::kNetworkObjectRemoteControlled);
+	spawner->PlaceObject(_object, -1);
+	client->SetAvatarId(_object->GetInstanceId());
+	_object->SetExtraData((void*)(intptr_t)client->GetUserConnection()->GetAccountId());
+	_object->StartLoading();
 }
 
-void HoverTankServerDelegate::OnLoadAvatar(Life::Client* pClient, Cure::ContextObject* pAvatar)
-{
-	Cure::Health::Set(pAvatar, 1);
-	if (pClient)
-	{
+void HoverTankServerDelegate::OnLoadAvatar(life::Client* client, cure::ContextObject* avatar) {
+	cure::Health::Set(avatar, 1);
+	if (client) {
 		// User avatar.
-		AddAvatarToTeam(pAvatar, 0);
-	}
-	else
-	{
+		AddAvatarToTeam(avatar, 0);
+	} else {
 		// NPC avatar.
-		AddAvatarToTeam(pAvatar, 1);
+		AddAvatarToTeam(avatar, 1);
 	}
 }
 
-void HoverTankServerDelegate::OnLoadObject(Cure::ContextObject* pObject)
-{
-	(void)pObject;
+void HoverTankServerDelegate::OnLoadObject(cure::ContextObject* object) {
+	(void)object;
 }
 
-void HoverTankServerDelegate::OnDeleteObject(Cure::ContextObject* pObject)
-{
-	if (pObject)
-	{
-		RemoveAvatar(pObject);
+void HoverTankServerDelegate::OnDeleteObject(cure::ContextObject* object) {
+	if (object) {
+		RemoveAvatar(object);
 	}
 }
 
 
 
-bool HoverTankServerDelegate::IsObjectLendable(Life::Client* pClient, Cure::ContextObject* pObject)
-{
-	(void)pClient;
-	return !strutil::StartsWith(pObject->GetClassId(), "hover_tank");
+bool HoverTankServerDelegate::IsObjectLendable(life::Client* client, cure::ContextObject* object) {
+	(void)client;
+	return !strutil::StartsWith(object->GetClassId(), "hover_tank");
 }
 
 
 
-void HoverTankServerDelegate::PreEndTick()
-{
+void HoverTankServerDelegate::PreEndTick() {
 	TickNpcGhosts();
 
-	if (mPingUpdateTimer.QueryTimeDiff() > 5.0)
-	{
-		mPingUpdateTimer.ClearTimeDiff();
+	if (ping_update_timer_.QueryTimeDiff() > 5.0) {
+		ping_update_timer_.ClearTimeDiff();
 		UpdatePing();
 	}
 }
 
 
 
-void HoverTankServerDelegate::OrderAirStrike(const vec3& pPosition, float pFlyInAngle)
-{
-	const float lPlaneDistance = 1000;
+void HoverTankServerDelegate::OrderAirStrike(const vec3& position, float fly_in_angle) {
+	const float plane_distance = 1000;
 
-	Cure::ContextObject* lPlane = new BombPlane(mGameServerManager->GetResourceManager(), "deltawing", this, pPosition);
-	mGameServerManager->AddContextObject(lPlane, Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED, 0);
+	cure::ContextObject* plane = new BombPlane(game_server_manager_->GetResourceManager(), "deltawing", this, position);
+	game_server_manager_->AddContextObject(plane, cure::kNetworkObjectLocallyControlled, 0);
 	xform t;
-	t.GetPosition().Set(lPlaneDistance*::sin(pFlyInAngle), lPlaneDistance*::cos(pFlyInAngle), 30);
-	t.GetPosition().x += pPosition.x;
-	t.GetPosition().y += pPosition.y;
+	t.GetPosition().Set(plane_distance*::sin(fly_in_angle), plane_distance*::cos(fly_in_angle), 30);
+	t.GetPosition().x += position.x;
+	t.GetPosition().y += position.y;
 	t.GetOrientation().RotateAroundOwnX(PIF/2);
-	t.GetOrientation().RotateAroundWorldZ(-pFlyInAngle);
-	lPlane->SetInitialTransform(t);
-	lPlane->StartLoading();
+	t.GetOrientation().RotateAroundWorldZ(-fly_in_angle);
+	plane->SetInitialTransform(t);
+	plane->StartLoading();
 }
 
 
 
-void HoverTankServerDelegate::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
-{
-	str lAmmo;
-	bool lIsFast = true;
-	Cure::NetworkObjectType lNetworkType = Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED;
-	switch (pWeapon)
-	{
-		case 0:		lAmmo = "bullet";	lNetworkType = Cure::NETWORK_OBJECT_LOCAL_ONLY;	break;
-		case 1:		lAmmo = "grenade";							break;
-		case 2:		lAmmo = "rocket";							break;
-		case -10:	lAmmo = "bomb";	lIsFast = false;				break;
+void HoverTankServerDelegate::Shoot(cure::ContextObject* avatar, int weapon) {
+	str ammo;
+	bool is_fast = true;
+	cure::NetworkObjectType network_type = cure::kNetworkObjectLocallyControlled;
+	switch (weapon) {
+		case 0:		ammo = "bullet";	network_type = cure::kNetworkObjectLocalOnly;	break;
+		case 1:		ammo = "grenade";							break;
+		case 2:		ammo = "rocket";							break;
+		case -10:	ammo = "bomb";	is_fast = false;				break;
 		default: deb_assert(false); return;
 	}
-	Cure::ContextObject* lProjectile;
-	if (lIsFast)
-	{
-		lProjectile = new Life::ServerFastProjectile(mGameServerManager->GetResourceManager(), lAmmo, this);
+	cure::ContextObject* projectile;
+	if (is_fast) {
+		projectile = new life::ServerFastProjectile(game_server_manager_->GetResourceManager(), ammo, this);
+	} else {
+		projectile = new life::ServerProjectile(game_server_manager_->GetResourceManager(), ammo, 0, this);
 	}
-	else
-	{
-		lProjectile = new Life::ServerProjectile(mGameServerManager->GetResourceManager(), lAmmo, 0, this);
-	}
-	mGameServerManager->AddContextObject(lProjectile, lNetworkType, 0);
-	log_volatile(mLog.Debugf("Shooting projectile with ID %i!", (int)lProjectile->GetInstanceId()));
-	lProjectile->SetOwnerInstanceId(pAvatar->GetInstanceId());
+	game_server_manager_->AddContextObject(projectile, network_type, 0);
+	log_volatile(log_.Debugf("Shooting projectile with ID %i!", (int)projectile->GetInstanceId()));
+	projectile->SetOwnerInstanceId(avatar->GetInstanceId());
 	xform t;
 	vec3 v;
-	if (Life::ProjectileUtil::GetBarrel(lProjectile, t, v))
-	{
-		lProjectile->SetInitialTransform(t);
-		lProjectile->StartLoading();
+	if (life::ProjectileUtil::GetBarrel(projectile, t, v)) {
+		projectile->SetInitialTransform(t);
+		projectile->StartLoading();
 	}
 
-	if (lNetworkType == Cure::NETWORK_OBJECT_LOCAL_ONLY)
-	{
+	if (network_type == cure::kNetworkObjectLocalOnly) {
 		// Transmit the shoot event rather than the projectile itself.
-		Life::Client* lClient = mGameServerManager->GetClientByObject(pAvatar);
-		mGameServerManager->BroadcastNumberMessage(lClient, false, Cure::MessageNumber::INFO_TOOL_0, pAvatar->GetInstanceId(), (float)pWeapon);
+		life::Client* _client = game_server_manager_->GetClientByObject(avatar);
+		game_server_manager_->BroadcastNumberMessage(_client, false, cure::MessageNumber::kInfoTool0, avatar->GetInstanceId(), (float)weapon);
 	}
 }
 
-void HoverTankServerDelegate::Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength)
-{
-	(void)pExplosiveGeometry;
-	(void)pVelocity;
-	(void)pNormal;
+void HoverTankServerDelegate::Detonate(cure::ContextObject* explosive, const tbc::ChunkyBoneGeometry* explosive_geometry, const vec3& position, const vec3& velocity, const vec3& normal, float strength) {
+	(void)explosive_geometry;
+	(void)velocity;
+	(void)normal;
 
-	float lIndicateHit;
-	v_get(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
-	mGameServerManager->IndicatePosition(pPosition, lIndicateHit);
+	float indicate_hit;
+	v_get(indicate_hit, =(float), game_server_manager_->GetVariableScope(), kRtvarDebugServerindicatehit, 0.0);
+	game_server_manager_->IndicatePosition(position, indicate_hit);
 
-	ScopeLock lLock(mGameServerManager->GetTickLock());
-	Tbc::PhysicsManager* lPhysicsManager = mGameServerManager->GetPhysicsManager();
-	Cure::ContextManager::ContextObjectTable lObjectTable = mGameServerManager->GetContext()->GetObjectTable();
-	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
-	for (; x != lObjectTable.end(); ++x)
-	{
-		Cure::ContextObject* lObject = x->second;
-		if (!lObject->IsLoaded())
-		{
+	ScopeLock lock(game_server_manager_->GetTickLock());
+	tbc::PhysicsManager* physics_manager = game_server_manager_->GetPhysicsManager();
+	cure::ContextManager::ContextObjectTable object_table = game_server_manager_->GetContext()->GetObjectTable();
+	cure::ContextManager::ContextObjectTable::iterator x = object_table.begin();
+	for (; x != object_table.end(); ++x) {
+		cure::ContextObject* _object = x->second;
+		if (!_object->IsLoaded()) {
 			continue;
 		}
-		const str& lClassId = lObject->GetClassId();
-		if (strutil::StartsWith(lClassId, "bomb"))	// Prevent bombs from hover_tanking each other away from the target!
-		{
+		const str& _class_id = _object->GetClassId();
+		if (strutil::StartsWith(_class_id, "bomb")) {	// Prevent bombs from hover_tanking each other away from the target!
 			continue;
 		}
-		float lEnduranceReciproc = 1;
-		if (strutil::StartsWith(lClassId, "deltawing"))	// Prevent bombers from getting their noses hover_tanked upwards when bombs go off!
-		{
-			lEnduranceReciproc = 0.1f;
+		float endurance_reciproc = 1;
+		if (strutil::StartsWith(_class_id, "deltawing")) {	// Prevent bombers from getting their noses hover_tanked upwards when bombs go off!
+			endurance_reciproc = 0.1f;
 		}
-		const float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc);
-		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
-		{
-			Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(lObject);
-			if (lHealth)
-			{
-				DrainHealth(pExplosive, lObject, lHealth, lForce*Random::Normal(0.51f, 0.05f, 0.3f, 0.5f));
+		const float force = life::Explosion::CalculateForce(physics_manager, _object, position, strength * endurance_reciproc);
+		if (force > 0 && _object->GetNetworkObjectType() != cure::kNetworkObjectLocalOnly) {
+			cure::FloatAttribute* _health = cure::Health::GetAttribute(_object);
+			if (_health) {
+				DrainHealth(explosive, _object, _health, force*Random::Normal(0.51f, 0.05f, 0.3f, 0.5f));
 			}
 			x->second->ForceSend();
 		}
-		Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength * lEnduranceReciproc, 1);
+		life::Explosion::PushObject(physics_manager, _object, position, strength * endurance_reciproc, 1);
 	}
 }
 
-void HoverTankServerDelegate::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject)
-{
-	float lIndicateHit;
-	v_get(lIndicateHit, =(float), mGameServerManager->GetVariableScope(), RTVAR_DEBUG_SERVERINDICATEHIT, 0.0);
-	mGameServerManager->IndicatePosition(pBullet->GetPosition(), lIndicateHit);
+void HoverTankServerDelegate::OnBulletHit(cure::ContextObject* bullet, cure::ContextObject* hit_object) {
+	float indicate_hit;
+	v_get(indicate_hit, =(float), game_server_manager_->GetVariableScope(), kRtvarDebugServerindicatehit, 0.0);
+	game_server_manager_->IndicatePosition(bullet->GetPosition(), indicate_hit);
 
-	Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(pHitObject);
-	if (lHealth)
-	{
-		DrainHealth(pBullet, pHitObject, lHealth, Random::Normal(0.17f, 0.01f, 0.1f, 0.3f));
-		const float lIncomingAngle = 2*PIF * Random::Uniform(0.0f, 1.0f);
-		OrderAirStrike(pHitObject->GetPosition(), lIncomingAngle);
-		vec3 v(27*::sin(lIncomingAngle), 27*::cos(lIncomingAngle), 2);
+	cure::FloatAttribute* _health = cure::Health::GetAttribute(hit_object);
+	if (_health) {
+		DrainHealth(bullet, hit_object, _health, Random::Normal(0.17f, 0.01f, 0.1f, 0.3f));
+		const float incoming_angle = 2*PIF * Random::Uniform(0.0f, 1.0f);
+		OrderAirStrike(hit_object->GetPosition(), incoming_angle);
+		vec3 v(27*::sin(incoming_angle), 27*::cos(incoming_angle), 2);
 		quat q = quat();
 		q.RotateAroundWorldZ(PIF/4);
 		const vec3 r = RNDVEC(3.0f);
-		OrderAirStrike(pHitObject->GetPosition() + q*v+r, lIncomingAngle);
+		OrderAirStrike(hit_object->GetPosition() + q*v+r, incoming_angle);
 		q.RotateAroundWorldZ(-PIF/2);
-		OrderAirStrike(pHitObject->GetPosition() + q*v+r, lIncomingAngle);
+		OrderAirStrike(hit_object->GetPosition() + q*v+r, incoming_angle);
 	}
 }
 
 
 
-Cure::ContextObject* HoverTankServerDelegate::CreateAvatarForNpc(Npc* pNpc)
-{
-	double lSpawnPart;
-	v_get(lSpawnPart, =, mGameServerManager->GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
-	if (Random::Uniform(0.0, 0.999) >= lSpawnPart)
-	{
+cure::ContextObject* HoverTankServerDelegate::CreateAvatarForNpc(Npc* npc) {
+	double spawn_part;
+	v_get(spawn_part, =, game_server_manager_->GetVariableScope(), kRtvarGameSpawnpart, 1.0);
+	if (Random::Uniform(0.0, 0.999) >= spawn_part) {
 		return 0;
 	}
 
-	Cure::Spawner* lSpawner = mGameServerManager->GetAvatarSpawner(mLevelId);
-	if (!lSpawner)
-	{
-		mLog.AError("No NPC spawner in level!");
+	cure::Spawner* spawner = game_server_manager_->GetAvatarSpawner(level_id_);
+	if (!spawner) {
+		log_.AError("No NPC spawner in level!");
 		return 0;
 	}
 
-	Cure::ContextObject* lAvatar = mGameServerManager->GameManager::CreateContextObject("hover_tank_01", Cure::NETWORK_OBJECT_LOCALLY_CONTROLLED);
-	lSpawner->PlaceObject(lAvatar, -1);
-	lAvatar->SetExtraData((void*)-1);
-	lAvatar->StartLoading();
-	pNpc->SetAvatarId(lAvatar->GetInstanceId());
-	return lAvatar;
+	cure::ContextObject* _avatar = game_server_manager_->GameManager::CreateContextObject("hover_tank_01", cure::kNetworkObjectLocallyControlled);
+	spawner->PlaceObject(_avatar, -1);
+	_avatar->SetExtraData((void*)-1);
+	_avatar->StartLoading();
+	npc->SetAvatarId(_avatar->GetInstanceId());
+	return _avatar;
 }
 
-void HoverTankServerDelegate::AddAvatarToTeam(Cure::ContextObject* pAvatar, int pTeam)
-{
-	deb_assert(pAvatar);
-	deb_assert(pTeam == 0 || pTeam == 1);
-	deb_assert(!IsAvatarObject(pAvatar));
-	mAvatarTeamSets[pTeam].insert(pAvatar->GetInstanceId());
-	Cure::IntAttribute* lTeam = (Cure::IntAttribute*)pAvatar->GetAttribute("int_team");
-	if (lTeam)
-	{
-		lTeam->SetValue(pTeam);
-	}
-	else
-	{
-		new Cure::IntAttribute(pAvatar, "int_team", pTeam);
+void HoverTankServerDelegate::AddAvatarToTeam(cure::ContextObject* avatar, int team) {
+	deb_assert(avatar);
+	deb_assert(team == 0 || team == 1);
+	deb_assert(!IsAvatarObject(avatar));
+	avatar_team_sets_[team].insert(avatar->GetInstanceId());
+	cure::IntAttribute* _team = (cure::IntAttribute*)avatar->GetAttribute("int_team");
+	if (_team) {
+		_team->SetValue(team);
+	} else {
+		new cure::IntAttribute(avatar, "int_team", team);
 	}
 }
 
-void HoverTankServerDelegate::RemoveAvatar(Cure::ContextObject* pAvatar)
-{
+void HoverTankServerDelegate::RemoveAvatar(cure::ContextObject* avatar) {
 	AvatarIdSet::iterator x;
-	bool lFound0 = ((x = mAvatarTeamSets[0].find(pAvatar->GetInstanceId())) != mAvatarTeamSets[0].end());
-	if (lFound0)
-	{
-		mAvatarTeamSets[0].erase(x);
+	bool found0 = ((x = avatar_team_sets_[0].find(avatar->GetInstanceId())) != avatar_team_sets_[0].end());
+	if (found0) {
+		avatar_team_sets_[0].erase(x);
 	}
-	bool lFound1 = ((x = mAvatarTeamSets[1].find(pAvatar->GetInstanceId())) != mAvatarTeamSets[1].end());
-	if (lFound1)
-	{
-		mAvatarTeamSets[1].erase(x);
+	bool found1 = ((x = avatar_team_sets_[1].find(avatar->GetInstanceId())) != avatar_team_sets_[1].end());
+	if (found1) {
+		avatar_team_sets_[1].erase(x);
 	}
-	if (!lFound0 && !lFound1)
-	{
+	if (!found0 && !found1) {
 		return;
 	}
 
 
-	Npc* lNpc = GetNpcByAvatar(pAvatar->GetInstanceId());
-	if (lNpc)
-	{
-			lNpc->SetAvatarId(0);
+	Npc* _npc = GetNpcByAvatar(avatar->GetInstanceId());
+	if (_npc) {
+			_npc->SetAvatarId(0);
 	}
 }
 
-const HoverTankServerDelegate::AvatarIdSet& HoverTankServerDelegate::GetAvatarsInTeam(int pTeam)
-{
-	deb_assert(pTeam == 0 || pTeam == 1);
-	return mAvatarTeamSets[pTeam];
+const HoverTankServerDelegate::AvatarIdSet& HoverTankServerDelegate::GetAvatarsInTeam(int team) {
+	deb_assert(team == 0 || team == 1);
+	return avatar_team_sets_[team];
 }
 
 
 
-void HoverTankServerDelegate::CreateNpc()
-{
-	Npc* lNpc = new Npc(this);
-	mGameServerManager->GetContext()->AddLocalObject(lNpc);
-	mNpcSet.insert(lNpc->GetInstanceId());
-	lNpc->StartCreateAvatar(0.1f);
+void HoverTankServerDelegate::CreateNpc() {
+	Npc* _npc = new Npc(this);
+	game_server_manager_->GetContext()->AddLocalObject(_npc);
+	npc_set_.insert(_npc->GetInstanceId());
+	_npc->StartCreateAvatar(0.1f);
 
-	const str lPlayerName = strutil::Format("NPC %u", lNpc->GetInstanceId());
-	CreateScore(lPlayerName, false);
+	const str _player_name = strutil::Format("NPC %u", _npc->GetInstanceId());
+	CreateScore(_player_name, false);
 }
 
-void HoverTankServerDelegate::DeleteNpc()
-{
-	deb_assert(!mNpcSet.empty());
-	AvatarIdSet::iterator x = mNpcSet.begin();
-	mLog.Headlinef("Deleting NPC %u.", *x);
-	mGameServerManager->GetContext()->PostKillObject(*x);
+void HoverTankServerDelegate::DeleteNpc() {
+	deb_assert(!npc_set_.empty());
+	AvatarIdSet::iterator x = npc_set_.begin();
+	log_.Headlinef("Deleting NPC %u.", *x);
+	game_server_manager_->GetContext()->PostKillObject(*x);
 
-	const str lPlayerName = strutil::Format("NPC %u", *x);
-	DeleteScore(lPlayerName);
+	const str _player_name = strutil::Format("NPC %u", *x);
+	DeleteScore(_player_name);
 
-	mNpcSet.erase(x);
+	npc_set_.erase(x);
 }
 
-Npc* HoverTankServerDelegate::GetNpcByAvatar(Cure::GameObjectId pAvatarId) const
-{
-	for (AvatarIdSet::const_iterator x = mNpcSet.begin(); x != mNpcSet.end(); ++x)
-	{
-		Npc* lNpc = (Npc*)mGameServerManager->GetContext()->GetObject(*x);
-		if (lNpc && lNpc->GetAvatarId() == pAvatarId)
-		{
-			return lNpc;
+Npc* HoverTankServerDelegate::GetNpcByAvatar(cure::GameObjectId avatar_id) const {
+	for (AvatarIdSet::const_iterator x = npc_set_.begin(); x != npc_set_.end(); ++x) {
+		Npc* _npc = (Npc*)game_server_manager_->GetContext()->GetObject(*x);
+		if (_npc && _npc->GetAvatarId() == avatar_id) {
+			return _npc;
 		}
 	}
 	return 0;
 }
 
-void HoverTankServerDelegate::CreateScore(const str& pPlayerName, bool pCreatePing)
-{
-	deb_assert(mScoreInfoId);
-	Cure::ContextObject* lScoreInfo = mGameServerManager->GetContext()->GetObject(mScoreInfoId);
-	deb_assert(lScoreInfo);
-	new Cure::IntAttribute(lScoreInfo, KILLS + pPlayerName, 0);
-	new Cure::IntAttribute(lScoreInfo, DEATHS + pPlayerName, 0);
-	if (pCreatePing)
-	{
-		new Cure::IntAttribute(lScoreInfo, PING + pPlayerName, 0);
+void HoverTankServerDelegate::CreateScore(const str& player_name, bool create_ping) {
+	deb_assert(score_info_id_);
+	cure::ContextObject* score_info = game_server_manager_->GetContext()->GetObject(score_info_id_);
+	deb_assert(score_info);
+	new cure::IntAttribute(score_info, kKills + player_name, 0);
+	new cure::IntAttribute(score_info, kDeaths + player_name, 0);
+	if (create_ping) {
+		new cure::IntAttribute(score_info, kPing + player_name, 0);
 	}
 }
 
-void HoverTankServerDelegate::DeleteScore(const str& pPlayerName)
-{
-	deb_assert(mScoreInfoId);
-	Cure::ContextObject* lScoreInfo = mGameServerManager->GetContext()->GetObject(mScoreInfoId);
-	deb_assert(lScoreInfo);
-	lScoreInfo->DeleteAttribute(KILLS + pPlayerName);
-	lScoreInfo->DeleteAttribute(DEATHS + pPlayerName);
-	lScoreInfo->DeleteAttribute(PING + pPlayerName);
+void HoverTankServerDelegate::DeleteScore(const str& player_name) {
+	deb_assert(score_info_id_);
+	cure::ContextObject* score_info = game_server_manager_->GetContext()->GetObject(score_info_id_);
+	deb_assert(score_info);
+	score_info->DeleteAttribute(kKills + player_name);
+	score_info->DeleteAttribute(kDeaths + player_name);
+	score_info->DeleteAttribute(kPing + player_name);
 }
 
-void HoverTankServerDelegate::UpdatePing()
-{
-	const Cure::TimeManager* lTimeManager = mGameServerManager->GetTimeManager();
-	typedef Life::GameServerManager::AccountClientTable ClientTable;
-	const ClientTable& lClients = mGameServerManager->GetAccountClientTable();
-	ClientTable::ConstIterator x = lClients.First();
-	for (; x != lClients.End(); ++x)
-	{
-		int lPing = (int)(lTimeManager->ConvertPhysicsFramesToSeconds((int)x.GetObject()->GetPhysicsFrameAheadCount()) * 1000);
-		lPing = std::abs(lPing) * 2;
-		SetPoints(PING, x.GetObject(), lPing);
+void HoverTankServerDelegate::UpdatePing() {
+	const cure::TimeManager* time_manager = game_server_manager_->GetTimeManager();
+	typedef life::GameServerManager::AccountClientTable ClientTable;
+	const ClientTable& clients = game_server_manager_->GetAccountClientTable();
+	ClientTable::ConstIterator x = clients.First();
+	for (; x != clients.End(); ++x) {
+		int ping = (int)(time_manager->ConvertPhysicsFramesToSeconds((int)x.GetObject()->GetPhysicsFrameAheadCount()) * 1000);
+		ping = std::abs(ping) * 2;
+		SetPoints(kPing, x.GetObject(), ping);
 	}
 }
 
-void HoverTankServerDelegate::AddPoint(const str& pPrefix, const Cure::ContextObject* pAvatar, int pPoints)
-{
-	if (!pAvatar)
-	{
+void HoverTankServerDelegate::AddPoint(const str& prefix, const cure::ContextObject* avatar, int points) {
+	if (!avatar) {
 		return;
 	}
-	Cure::ContextObject* lAvatar = (Cure::ContextObject*)pAvatar;
-	Life::Client* lClient = mGameServerManager->GetClientByObject(lAvatar);
-	str lPlayerName;
-	if (lClient)
-	{
-		lPlayerName = lClient->GetUserConnection(->GetLoginName());
-	}
-	else
-	{
-		Npc* lNpc = GetNpcByAvatar(pAvatar->GetInstanceId());
-		if (!lNpc)
-		{
+	cure::ContextObject* _avatar = (cure::ContextObject*)avatar;
+	life::Client* _client = game_server_manager_->GetClientByObject(_avatar);
+	str _player_name;
+	if (_client) {
+		_player_name = _client->GetUserConnection(->GetLoginName());
+	} else {
+		Npc* _npc = GetNpcByAvatar(avatar->GetInstanceId());
+		if (!_npc) {
 			return;
 		}
-		lPlayerName = strutil::Format("NPC %u", lNpc->GetInstanceId());
+		_player_name = strutil::Format("NPC %u", _npc->GetInstanceId());
 	}
-	deb_assert(mScoreInfoId);
-	Cure::ContextObject* lScoreInfo = mGameServerManager->GetContext()->GetObject(mScoreInfoId);
-	deb_assert(lScoreInfo);
-	Cure::IntAttribute* lAttribute = (Cure::IntAttribute*)lScoreInfo->GetAttribute(pPrefix+lPlayerName);
-	if (lAttribute)
-	{
-		lAttribute->SetValue(lAttribute->GetValue() + pPoints);
-	}
-}
-
-void HoverTankServerDelegate::SetPoints(const str& pPrefix, const Life::Client* pClient, int pPoints)
-{
-	const str lPlayerName = pClient->GetUserConnection(->GetLoginName());
-	deb_assert(mScoreInfoId);
-	Cure::ContextObject* lScoreInfo = mGameServerManager->GetContext()->GetObject(mScoreInfoId);
-	deb_assert(lScoreInfo);
-	Cure::IntAttribute* lAttribute = (Cure::IntAttribute*)lScoreInfo->GetAttribute(pPrefix+lPlayerName);
-	deb_assert(lAttribute);
-	if (lAttribute)
-	{
-		lAttribute->SetValue(pPoints);
+	deb_assert(score_info_id_);
+	cure::ContextObject* score_info = game_server_manager_->GetContext()->GetObject(score_info_id_);
+	deb_assert(score_info);
+	cure::IntAttribute* attribute = (cure::IntAttribute*)score_info->GetAttribute(prefix+_player_name);
+	if (attribute) {
+		attribute->SetValue(attribute->GetValue() + points);
 	}
 }
 
-void HoverTankServerDelegate::DrainHealth(Cure::ContextObject* pExplosive, Cure::ContextObject* pObject, Cure::FloatAttribute* pHealth, float pDamage)
-{
-	deb_assert(pHealth);
-	const float lPriorHealth = pHealth->GetValue();
-	float lRemainingHealth = lPriorHealth - pDamage;
-	if (lPriorHealth > 0)
-	{
-		pHealth->SetValue(lRemainingHealth);
+void HoverTankServerDelegate::SetPoints(const str& prefix, const life::Client* client, int points) {
+	const str _player_name = client->GetUserConnection(->GetLoginName());
+	deb_assert(score_info_id_);
+	cure::ContextObject* score_info = game_server_manager_->GetContext()->GetObject(score_info_id_);
+	deb_assert(score_info);
+	cure::IntAttribute* attribute = (cure::IntAttribute*)score_info->GetAttribute(prefix+_player_name);
+	deb_assert(attribute);
+	if (attribute) {
+		attribute->SetValue(points);
 	}
-	if (lPriorHealth > 0 && lRemainingHealth <= 0 && IsAvatarObject(pObject))
-	{
-		Cure::ContextObject* lAvatar = pObject;
-		AddPoint(DEATHS, lAvatar, +1);
-		if (pExplosive->GetOwnerInstanceId())
-		{
-			const int lPoints = (pExplosive->GetOwnerInstanceId() == lAvatar->GetInstanceId()) ? -1 : +1;	// Kills oneself?
-			AddPoint(KILLS, mGameServerManager->GetContext()->GetObject(pExplosive->GetOwnerInstanceId()), lPoints);
+}
+
+void HoverTankServerDelegate::DrainHealth(cure::ContextObject* explosive, cure::ContextObject* object, cure::FloatAttribute* health, float damage) {
+	deb_assert(health);
+	const float prior_health = health->GetValue();
+	float remaining_health = prior_health - damage;
+	if (prior_health > 0) {
+		health->SetValue(remaining_health);
+	}
+	if (prior_health > 0 && remaining_health <= 0 && IsAvatarObject(object)) {
+		cure::ContextObject* _avatar = object;
+		AddPoint(kDeaths, _avatar, +1);
+		if (explosive->GetOwnerInstanceId()) {
+			const int _points = (explosive->GetOwnerInstanceId() == _avatar->GetInstanceId()) ? -1 : +1;	// Kills oneself?
+			AddPoint(kKills, game_server_manager_->GetContext()->GetObject(explosive->GetOwnerInstanceId()), _points);
 		}
-		Die(lAvatar);
+		Die(_avatar);
 	}
 }
 
-void HoverTankServerDelegate::Die(Cure::ContextObject* pAvatar)
-{
-	Life::Explosion::FallApart(mGameServerManager->GetPhysicsManager(), (Cure::CppContextObject*)pAvatar);
-	mGameServerManager->GetContext()->DelayKillObject(pAvatar, 2);
-	mGameServerManager->BroadcastNumberMessage(0, true, Cure::MessageNumber::INFO_FALL_APART, pAvatar->GetInstanceId(), 0);
+void HoverTankServerDelegate::Die(cure::ContextObject* avatar) {
+	life::Explosion::FallApart(game_server_manager_->GetPhysicsManager(), (cure::CppContextObject*)avatar);
+	game_server_manager_->GetContext()->DelayKillObject(avatar, 2);
+	game_server_manager_->BroadcastNumberMessage(0, true, cure::MessageNumber::kInfoFallApart, avatar->GetInstanceId(), 0);
 }
 
-bool HoverTankServerDelegate::IsAvatarObject(const Cure::ContextObject* pObject) const
-{
-	return mAvatarTeamSets[0].find(pObject->GetInstanceId()) != mAvatarTeamSets[0].end() ||
-		mAvatarTeamSets[1].find(pObject->GetInstanceId()) != mAvatarTeamSets[1].end();
+bool HoverTankServerDelegate::IsAvatarObject(const cure::ContextObject* object) const {
+	return avatar_team_sets_[0].find(object->GetInstanceId()) != avatar_team_sets_[0].end() ||
+		avatar_team_sets_[1].find(object->GetInstanceId()) != avatar_team_sets_[1].end();
 }
 
-void HoverTankServerDelegate::TickNpcGhosts()
-{
-	ScopeLock lLock(mGameServerManager->GetTickLock());
-	const Cure::ContextManager* lContextManager = mGameServerManager->GetContext();
-	const int lStepCount = mGameServerManager->GetTimeManager()->GetAffordedPhysicsStepCount();
-	const float lPhysicsFrameTime = mGameServerManager->GetTimeManager()->GetAffordedPhysicsStepTime();
-	for (int lTeam = 0; lTeam <= 1; ++lTeam)
-	{
-		AvatarIdSet::iterator x = mAvatarTeamSets[lTeam].begin();
-		for (; x != mAvatarTeamSets[lTeam].end(); ++x)
-		{
-			Cure::ContextObject* lAvatar = lContextManager->GetObject(*x);
-			if (lAvatar && lAvatar->GetExtraData() == 0)	// Exists && NPC check.
-			{
-				lAvatar->GetNetworkOutputGhost()->GhostStep(lStepCount, lPhysicsFrameTime);
-				const Cure::ObjectPositionalData* lPositionalData = 0;
-				if (!lAvatar->UpdateFullPosition(lPositionalData))
-				{
+void HoverTankServerDelegate::TickNpcGhosts() {
+	ScopeLock lock(game_server_manager_->GetTickLock());
+	const cure::ContextManager* context_manager = game_server_manager_->GetContext();
+	const int step_count = game_server_manager_->GetTimeManager()->GetAffordedPhysicsStepCount();
+	const float physics_frame_time = game_server_manager_->GetTimeManager()->GetAffordedPhysicsStepTime();
+	for (int _team = 0; _team <= 1; ++_team) {
+		AvatarIdSet::iterator x = avatar_team_sets_[_team].begin();
+		for (; x != avatar_team_sets_[_team].end(); ++x) {
+			cure::ContextObject* _avatar = context_manager->GetObject(*x);
+			if (_avatar && _avatar->GetExtraData() == 0) {	// Exists && NPC check.
+				_avatar->GetNetworkOutputGhost()->GhostStep(step_count, physics_frame_time);
+				const cure::ObjectPositionalData* positional_data = 0;
+				if (!_avatar->UpdateFullPosition(positional_data)) {
 					continue;
 				}
-				if (!lPositionalData->IsSameStructure(*lAvatar->GetNetworkOutputGhost()))
-				{
-					lAvatar->GetNetworkOutputGhost()->CopyData(lPositionalData);
+				if (!positional_data->IsSameStructure(*_avatar->GetNetworkOutputGhost())) {
+					_avatar->GetNetworkOutputGhost()->CopyData(positional_data);
 					continue;
 				}
-				float lResyncOnDiff;
-				v_get(lResyncOnDiff, =(float), mGameServerManager->GetVariableScope(), RTVAR_NETPHYS_RESYNCONDIFFGT, 0.2);
-				if (lPositionalData->GetScaledDifference(lAvatar->GetNetworkOutputGhost()) > lResyncOnDiff)
-				{
-					log_volatile(mLog.Debugf("NPC avatar %s (%u sending pos due to deviation."), lAvatar->GetClassId().c_str(), lAvatar->GetInstanceId()));
-					lAvatar->GetNetworkOutputGhost()->CopyData(lPositionalData);
-					mGameServerManager->GetContext()->AddPhysicsSenderObject(lAvatar);
+				float resync_on_diff;
+				v_get(resync_on_diff, =(float), game_server_manager_->GetVariableScope(), kRtvarNetphysResyncondiffgt, 0.2);
+				if (positional_data->GetScaledDifference(_avatar->GetNetworkOutputGhost()) > resync_on_diff) {
+					log_volatile(log_.Debugf("NPC avatar %s (%u sending pos due to deviation."), _avatar->GetClassId().c_str(), _avatar->GetInstanceId()));
+					_avatar->GetNetworkOutputGhost()->CopyData(positional_data);
+					game_server_manager_->GetContext()->AddPhysicsSenderObject(_avatar);
 				}
 			}
 		}
@@ -615,7 +525,7 @@ void HoverTankServerDelegate::TickNpcGhosts()
 
 
 
-loginstance(GAME, HoverTankServerDelegate);
+loginstance(kGame, HoverTankServerDelegate);
 
 
 

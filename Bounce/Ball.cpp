@@ -5,59 +5,53 @@
 
 
 #include "pch.h"
-#include "Ball.h"
-#include "../Cure/Include/ContextManager.h"
+#include "ball.h"
+#include "../cure/include/contextmanager.h"
 
 
 
-namespace Bounce
-{
+namespace bounce {
 
 
 
-Ball::Ball(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager):
-	Parent(pResourceManager, pClassId, pUiManager)
-{
+Ball::Ball(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager):
+	Parent(resource_manager, class_id, ui_manager) {
 }
 
-Ball::~Ball()
-{
+Ball::~Ball() {
 }
 
 
 
-void Ball::OnMicroTick(float pFrameTime)
-{
-	Parent::OnMicroTick(pFrameTime);
+void Ball::OnMicroTick(float frame_time) {
+	Parent::OnMicroTick(frame_time);
 
-	if (!IsLoaded())
-	{
+	if (!IsLoaded()) {
 		return;
 	}
-	Tbc::PhysicsManager* lPhysicsManager = GetManager()->GetGameManager()->GetPhysicsManager();
-	vec3 lVelocity;
-	lPhysicsManager->GetBodyVelocity(
+	tbc::PhysicsManager* physics_manager = GetManager()->GetGameManager()->GetPhysicsManager();
+	vec3 velocity;
+	physics_manager->GetBodyVelocity(
 		GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
-		lVelocity);
-	float lAirForce = lVelocity.GetLength();
-	lAirForce *= lAirForce * -0.002f;
-	lVelocity.x *= lAirForce;
-	lVelocity.y *= lAirForce;
-	lVelocity.z *= lAirForce * 0.09f;
-	lPhysicsManager->AddForce(
+		velocity);
+	float air_force = velocity.GetLength();
+	air_force *= air_force * -0.002f;
+	velocity.x *= air_force;
+	velocity.y *= air_force;
+	velocity.z *= air_force * 0.09f;
+	physics_manager->AddForce(
 		GetPhysics()->GetBoneGeometry(0)->GetBodyId(),
-		lVelocity);
+		velocity);
 }
 
-void Ball::OnLoaded()
-{
+void Ball::OnLoaded() {
 	GetManager()->EnableMicroTickCallback(this);
 	Parent::OnLoaded();
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Ball);
+loginstance(kGameContextCpp, Ball);
 
 
 

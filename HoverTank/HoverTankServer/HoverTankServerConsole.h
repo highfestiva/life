@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,13 +8,12 @@
 
 
 
-#include "../../Cure/Include/ConsoleManager.h"
-#include "../HoverTank.h"
+#include "../../cure/include/consolemanager.h"
+#include "../hovertank.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
@@ -22,17 +21,16 @@ class HoverTankServerDelegate;
 
 
 
-class HoverTankServerConsole: public Cure::ConsoleCommandExecutor
-{
+class HoverTankServerConsole: public cure::ConsoleCommandExecutor {
 public:
-	HoverTankServerConsole(HoverTankServerDelegate* pDelegate, Cure::ConsoleCommandManager* pCommandManager);
+	HoverTankServerConsole(HoverTankServerDelegate* delegate, cure::ConsoleCommandManager* command_manager);
 	virtual ~HoverTankServerConsole();
 
 private:
-	virtual int Execute(const str& pCommand, const strutil::strvec& pParameterList);
-	virtual void OnExecutionError(const str& pCommand, const strutil::strvec& pParameterList, int pResult);
+	virtual int Execute(const str& command, const strutil::strvec& parameter_list);
+	virtual void OnExecutionError(const str& command, const strutil::strvec& parameter_list, int result);
 
-	HoverTankServerDelegate* mDelegate;
+	HoverTankServerDelegate* delegate_;
 
 	logclass();
 };

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="KillCutie" InternalType="Console">
+<CodeLite_Project Name="killcutie" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00010001N0005Debug000000000000]]>
@@ -35,39 +35,39 @@
  }]]]>
     </Plugin>
   </Plugins>
-  <VirtualDirectory Name="Source">
-    <File Name="App.cxx"/>
-    <File Name="Ctf.cpp"/>
-    <File Name="Ctf.h"/>
-    <File Name="Cutie.cpp"/>
-    <File Name="Cutie.h"/>
-    <File Name="CutieElevator.cpp"/>
-    <File Name="CutieElevator.h"/>
-    <File Name="Game.cpp"/>
-    <File Name="Game.h"/>
-    <File Name="Grenade.cpp"/>
-    <File Name="Grenade.h"/>
-    <File Name="GrenadeRun.rc" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="Launcher.cpp"/>
-    <File Name="Launcher.h"/>
-    <File Name="LauncherAi.cpp"/>
-    <File Name="LauncherAi.h"/>
-    <File Name="Level.cpp"/>
-    <File Name="Level.h"/>
+  <VirtualDirectory Name="src">
+    <File Name="app.cxx"/>
+    <File Name="ctf.cpp"/>
+    <File Name="ctf.h"/>
+    <File Name="cutie.cpp"/>
+    <File Name="cutie.h"/>
+    <File Name="cutieelevator.cpp"/>
+    <File Name="cutieelevator.h"/>
+    <File Name="game.cpp"/>
+    <File Name="game.h"/>
+    <File Name="grenade.cpp"/>
+    <File Name="grenade.h"/>
+    <File Name="grenaderun.rc" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="launcher.cpp"/>
+    <File Name="launcher.h"/>
+    <File Name="launcherai.cpp"/>
+    <File Name="launcherai.h"/>
+    <File Name="level.cpp"/>
+    <File Name="level.h"/>
     <File Name="pch.h"/>
-    <File Name="RoboBall.cpp"/>
-    <File Name="RoboBall.h"/>
-    <File Name="ScoreCounting.txt" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="SeeThrough.cpp"/>
-    <File Name="SeeThrough.h"/>
-    <File Name="Spawner.cpp"/>
-    <File Name="Spawner.h"/>
-    <File Name="ToDo.txt" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="VehicleAi.cpp"/>
-    <File Name="VehicleAi.h"/>
+    <File Name="roboball.cpp"/>
+    <File Name="roboball.h"/>
+    <File Name="scorecounting.txt" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="seethrough.cpp"/>
+    <File Name="seethrough.h"/>
+    <File Name="spawner.cpp"/>
+    <File Name="spawner.h"/>
+    <File Name="todo.txt" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="vehicleai.cpp"/>
+    <File Name="vehicleai.h"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="Mac">
-    <File Name="App.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+  <VirtualDirectory Name="mac">
+    <File Name="app.mm" ExcludeProjConfig="Debug;Profile;Release"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -84,14 +84,14 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Debug"/>
+        <LibraryPath Value="../life/Debug"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -131,14 +131,14 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="-pg" Required="yes">
-        <LibraryPath Value="../Life/Profile"/>
+        <LibraryPath Value="../life/Profile"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Profile" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -179,14 +179,14 @@
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Release"/>
+        <LibraryPath Value="../life/Release"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -223,12 +223,12 @@
     </Configuration>
   </Settings>
   <Dependencies Name="Debug">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
   <Dependencies Name="Profile">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
   <Dependencies Name="Release">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
 </CodeLite_Project>

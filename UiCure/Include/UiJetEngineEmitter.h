@@ -1,34 +1,32 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiCppContextObject.h"
+#include "uicppcontextobject.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-class JetEngineEmitter
-{
+class JetEngineEmitter {
 public:
-	JetEngineEmitter(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager);
+	JetEngineEmitter(cure::ResourceManager* resource_manager, GameUiManager* ui_manager);
 	virtual ~JetEngineEmitter();
 
-	void EmitFromTag(const CppContextObject* pObject, const UiTbc::ChunkyClass::Tag& pTag, float pFrameTime);
+	void EmitFromTag(const CppContextObject* object, const uitbc::ChunkyClass::Tag& tag, float frame_time);
 
 private:
-	void DrawOvershoot(const vec3& pPosition, float pDistanceScaleFactor, const vec3& pRadius, const vec3& pColor, float pOpacity, const vec3& pCameraDirection);
+	void DrawOvershoot(const vec3& position, float distance_scale_factor, const vec3& radius, const vec3& color, float opacity, const vec3& camera_direction);
 
-	Cure::ResourceManager* mResourceManager;
-	GameUiManager* mUiManager;
-	float mInterleaveTimeout;
+	cure::ResourceManager* resource_manager_;
+	GameUiManager* ui_manager_;
+	float interleave_timeout_;
 
 	logclass();
 };

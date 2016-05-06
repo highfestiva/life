@@ -1,48 +1,46 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../LifeServer/GameServerManager.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiLepra/Include/UiInput.h"
-#include "OptionsManager.h"
+#include "../lifeserver/gameservermanager.h"
+#include "../../uicure/include/uigameuimanager.h"
+#include "../../uilepra/include/uiinput.h"
+#include "optionsmanager.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class UiGameServerManager: public GameServerManager
-{
+class UiGameServerManager: public GameServerManager {
 	typedef GameServerManager Parent;
 public:
-	UiGameServerManager(const Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager, const PixelRect& pArea);
+	UiGameServerManager(const cure::TimeManager* time, cure::RuntimeVariableScope* variable_scope,
+		cure::ResourceManager* resource_manager, UiCure::GameUiManager* ui_manager, const PixelRect& area);
 	virtual ~UiGameServerManager();
-	void SetRenderArea(const PixelRect& pRenderArea);
+	void SetRenderArea(const PixelRect& render_area);
 
-	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
+	virtual void StartConsole(InteractiveConsoleLogListener* console_logger, ConsolePrompt* console_prompt);
 	void ToggleConsole();
 
-	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
-	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
-	virtual void OnInput(UiLepra::InputElement* pElement);
+	virtual bool OnKeyDown(uilepra::InputManager::KeyCode key_code);
+	virtual bool OnKeyUp(uilepra::InputManager::KeyCode key_code);
+	virtual void OnInput(uilepra::InputElement* element);
 
 private:
 	virtual void TickInput();
 
-	virtual void StoreMovement(int pClientFrameIndex, Cure::MessageObjectMovement* pMovement);
+	virtual void StoreMovement(int client_frame_index, cure::MessageObjectMovement* movement);
 
-	UiCure::GameUiManager* mUiManager;
-	PixelRect mRenderArea;
-	Options::OptionsManager mOptions;
-	bool mConsoleActive;
+	UiCure::GameUiManager* ui_manager_;
+	PixelRect render_area_;
+	options::OptionsManager options_;
+	bool console_active_;
 
 	logclass();
 };

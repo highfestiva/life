@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // The sole purpose of this file is to not have to include ode.h, PhysX.h
@@ -10,13 +10,12 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Log.h"
-#include "../Include/Tbc.h"
+#include "../../lepra/include/log.h"
+#include "../include/tbc.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
@@ -24,20 +23,18 @@ class PhysicsManager;
 
 
 
-class PhysicsManagerFactory
-{
+class PhysicsManagerFactory {
 public:
-	enum Engine
-	{
-		ENGINE_ODE = 1,
-		ENGINE_PHYSX = 2,
-		ENGINE_BULLET = 3,
+	enum Engine {
+		kEngineOde = 1,
+		kEnginePhysx = 2,
+		kEngineBullet = 3,
 	};
 
 	// Radius says how large area around origin you want to use, levels is how many hierarchical levels
 	// you'll allow in the collision tree; sensitivity tells the engine what threshold to use to determine
 	// what objects are still (= auto disabled in ODE).
-	static PhysicsManager* Create(Engine pEngine, float pRadius, int pLevels, float pSensitivity);
+	static PhysicsManager* Create(Engine engine, float radius, int levels, float sensitivity);
 
 	logclass();
 };

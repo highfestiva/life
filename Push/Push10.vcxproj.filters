@@ -1,115 +1,115 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{C734F7F1-C7A5-4376-A066-2A32FFD752A2}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{93959380-89BD-4b04-88EB-625FBEBFB52E}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Server">
+    <Filter include="Server">
       <UniqueIdentifier>{8edadcec-85bc-4565-8c57-b84342043eb7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Master">
+    <Filter include="Master">
       <UniqueIdentifier>{1792974f-1bf0-4b18-955d-5d696e11d68b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Life\LifeMaster\MasterServerNetworkParser.cpp">
+    <ClCompile include="..\life\lifemaster\masterservernetworkparser.cpp">
       <Filter>Master</Filter>
     </ClCompile>
-    <ClCompile Include="View.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="view.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="LoginView.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="loginview.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Push.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile include="push.cxx">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="PushConsoleManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="pushconsolemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="PushDemo.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="pushdemo.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="PushManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="pushmanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="PushTicker.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="pushticker.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="PushViewer.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="pushviewer.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="RoadSignButton.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="roadsignbutton.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="ServerListView.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="serverlistview.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sunlight.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="sunlight.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="PushServer\PushServerDelegate.cpp">
+    <ClCompile include="pushserver\pushserverdelegate.cpp">
       <Filter>Server</Filter>
     </ClCompile>
-    <ClCompile Include="Push.mm">
-      <Filter>Source Files</Filter>
+    <ClCompile include="push.mm">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Life\LifeMaster\MasterServer.h">
+    <Clinclude include="..\life\lifemaster\masterserver.h">
       <Filter>Master</Filter>
     </ClInclude>
-    <ClInclude Include="..\Life\LifeMaster\MasterServerNetworkParser.h">
+    <Clinclude include="..\life\lifemaster\masterservernetworkparser.h">
       <Filter>Master</Filter>
     </ClInclude>
-    <ClInclude Include="PushMaster\MasterServerPort.h">
+    <Clinclude include="pushmaster\masterserverport.h">
       <Filter>Master</Filter>
     </ClInclude>
-    <ClInclude Include="View.h">
+    <Clinclude include="view.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LoginView.h">
+    <Clinclude include="loginview.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Push.h">
+    <Clinclude include="push.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PushConsoleManager.h">
+    <Clinclude include="pushconsolemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PushDemo.h">
+    <Clinclude include="pushdemo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PushManager.h">
+    <Clinclude include="pushmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PushTicker.h">
+    <Clinclude include="pushticker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PushViewer.h">
+    <Clinclude include="pushviewer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RoadSignButton.h">
+    <Clinclude include="roadsignbutton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RtVar.h">
+    <Clinclude include="rtvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ServerListView.h">
+    <Clinclude include="serverlistview.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sunlight.h">
+    <Clinclude include="sunlight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Version.h">
+    <Clinclude include="version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PushServer\PushServerDelegate.h">
+    <Clinclude include="pushserver\pushserverdelegate.h">
       <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>

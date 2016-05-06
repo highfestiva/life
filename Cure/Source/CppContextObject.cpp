@@ -1,114 +1,99 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/CppContextObject.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/DiskFile.h"
-#include "../../Lepra/Include/HashUtil.h"
-#include "../../Tbc/Include/ChunkyPhysics.h"
-#include "../../Tbc/Include/PhysicsEngine.h"
-#include "../../Tbc/Include/PhysicsTrigger.h"
-#include "../Include/ContextManager.h"
-#include "../Include/GameManager.h"
-#include "../Include/GameTicker.h"
-#include "../Include/RuntimeVariable.h"
-#include "../Include/TimeManager.h"
+#include "../include/cppcontextobject.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/diskfile.h"
+#include "../../lepra/include/hashutil.h"
+#include "../../tbc/include/chunkyphysics.h"
+#include "../../tbc/include/physicsengine.h"
+#include "../../tbc/include/physicstrigger.h"
+#include "../include/contextmanager.h"
+#include "../include/gamemanager.h"
+#include "../include/gameticker.h"
+#include "../include/runtimevariable.h"
+#include "../include/timemanager.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-CppContextObject::CppContextObject(ResourceManager* pResourceManager, const str& pClassId):
-	ContextObject(pResourceManager, pClassId),
-	mClassResource(0),
-	mPhysicsResource(0),
-	mAllowNetworkLogic(true),
-	mForceLoadUnique(false)
-{
+CppContextObject::CppContextObject(ResourceManager* resource_manager, const str& class_id):
+	ContextObject(resource_manager, class_id),
+	class_resource_(0),
+	physics_resource_(0),
+	allow_network_logic_(true),
+	force_load_unique_(false) {
 }
 
-CppContextObject::~CppContextObject()
-{
+CppContextObject::~CppContextObject() {
 	ClearPhysics();
-	delete (mPhysicsResource);
-	mPhysicsResource = 0;
-	delete (mClassResource);
-	mClassResource = 0;
+	delete (physics_resource_);
+	physics_resource_ = 0;
+	delete (class_resource_);
+	class_resource_ = 0;
 }
 
 
 
-Tbc::ChunkyPhysics::GuideMode CppContextObject::GetGuideMode() const
-{
-	if (GetPhysics())
-	{
+tbc::ChunkyPhysics::GuideMode CppContextObject::GetGuideMode() const {
+	if (GetPhysics()) {
 		return GetPhysics()->GetGuideMode();
 	}
-	return Tbc::ChunkyPhysics::GUIDE_EXTERNAL;
+	return tbc::ChunkyPhysics::kGuideExternal;
 }
 
-void CppContextObject::StabilizeTick()
-{
-	const Tbc::ChunkyPhysics* lPhysics = GetPhysics();
-	const Tbc::ChunkyClass* lClass = GetClass();
-	if (!lPhysics || !lClass)
-	{
+void CppContextObject::StabilizeTick() {
+	const tbc::ChunkyPhysics* _physics = GetPhysics();
+	const tbc::ChunkyClass* clazz = GetClass();
+	if (!_physics || !clazz) {
 		return;
 	}
-	bool lIsPhysicsStopped;
-	v_get(lIsPhysicsStopped, =, GetSettings(), RTVAR_PHYSICS_HALT, false);
-	if (lIsPhysicsStopped)
-	{
+	bool is_physics_stopped;
+	v_get(is_physics_stopped, =, GetSettings(), kRtvarPhysicsHalt, false);
+	if (is_physics_stopped) {
 		return;
 	}
-	if (lPhysics->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC && lPhysics->GetGuideMode() >= Tbc::ChunkyPhysics::GUIDE_EXTERNAL)
-	{
-		float lStabilityFactor = 1;
-		int lBodyIndex = 0;
-		const float lMicroStepFactor = mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps() / 18.0f;
-		for (size_t x = 0; x < lClass->GetTagCount(); ++x)
-		{
-			const Tbc::ChunkyClass::Tag& lTag = lClass->GetTag(x);
-			if (lTag.mTagName == "upright_stabilizer")
-			{
-				if (lTag.mFloatValueList.size() != 1 ||
-					lTag.mStringValueList.size() != 0 ||
-					lTag.mBodyIndexList.size() != 1 ||
-					lTag.mEngineIndexList.size() != 0 ||
-					lTag.mMeshIndexList.size() != 0)
-				{
-					mLog.Errorf("The upright_stabilizer tag '%s' has the wrong # of parameters.", lTag.mTagName.c_str());
+	if (_physics->GetPhysicsType() == tbc::ChunkyPhysics::kDynamic && _physics->GetGuideMode() >= tbc::ChunkyPhysics::kGuideExternal) {
+		float stability_factor = 1;
+		int body_index = 0;
+		const float micro_step_factor = manager_->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps() / 18.0f;
+		for (size_t x = 0; x < clazz->GetTagCount(); ++x) {
+			const tbc::ChunkyClass::Tag& tag = clazz->GetTag(x);
+			if (tag.tag_name_ == "upright_stabilizer") {
+				if (tag.float_value_list_.size() != 1 ||
+					tag.string_value_list_.size() != 0 ||
+					tag.body_index_list_.size() != 1 ||
+					tag.engine_index_list_.size() != 0 ||
+					tag.mesh_index_list_.size() != 0) {
+					log_.Errorf("The upright_stabilizer tag '%s' has the wrong # of parameters.", tag.tag_name_.c_str());
 					deb_assert(false);
 					return;
 				}
-				lStabilityFactor = lTag.mFloatValueList[0];
-				lBodyIndex = lTag.mBodyIndexList[0];
-				Tbc::PhysicsEngine::UprightStabilize(mManager->GetGameManager()->GetPhysicsManager(),
-					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*lMicroStepFactor, 1);
-			}
-			else if (lTag.mTagName == "forward_stabilizer")
-			{
-				if (lTag.mFloatValueList.size() != 1 ||
-					lTag.mStringValueList.size() != 0 ||
-					lTag.mBodyIndexList.size() != 1 ||
-					lTag.mEngineIndexList.size() != 0 ||
-					lTag.mMeshIndexList.size() != 0)
-				{
-					mLog.Errorf("The forward_stabilizer tag '%s' has the wrong # of parameters.", lTag.mTagName.c_str());
+				stability_factor = tag.float_value_list_[0];
+				body_index = tag.body_index_list_[0];
+				tbc::PhysicsEngine::UprightStabilize(manager_->GetGameManager()->GetPhysicsManager(),
+					_physics, _physics->GetBoneGeometry(body_index), GetMass()*stability_factor*micro_step_factor, 1);
+			} else if (tag.tag_name_ == "forward_stabilizer") {
+				if (tag.float_value_list_.size() != 1 ||
+					tag.string_value_list_.size() != 0 ||
+					tag.body_index_list_.size() != 1 ||
+					tag.engine_index_list_.size() != 0 ||
+					tag.mesh_index_list_.size() != 0) {
+					log_.Errorf("The forward_stabilizer tag '%s' has the wrong # of parameters.", tag.tag_name_.c_str());
 					deb_assert(false);
 					return;
 				}
-				lStabilityFactor = lTag.mFloatValueList[0];
-				lBodyIndex = lTag.mBodyIndexList[0];
-				Tbc::PhysicsEngine::ForwardStabilize(mManager->GetGameManager()->GetPhysicsManager(),
-					lPhysics, lPhysics->GetBoneGeometry(lBodyIndex), GetMass()*lStabilityFactor*lMicroStepFactor, 1);
+				stability_factor = tag.float_value_list_[0];
+				body_index = tag.body_index_list_[0];
+				tbc::PhysicsEngine::ForwardStabilize(manager_->GetGameManager()->GetPhysicsManager(),
+					_physics, _physics->GetBoneGeometry(body_index), GetMass()*stability_factor*micro_step_factor, 1);
 			}
 		}
 	}
@@ -116,312 +101,259 @@ void CppContextObject::StabilizeTick()
 
 
 
-void CppContextObject::StartLoading()
-{
-	deb_assert(mClassResource == 0);
-	mClassResource = new UserClassResource();
-	const str lAssetName = GetClassId()+".class";
-	mClassResource->Load(GetResourceManager(), lAssetName,
+void CppContextObject::StartLoading() {
+	deb_assert(class_resource_ == 0);
+	class_resource_ = new UserClassResource();
+	const str asset_name = GetClassId()+".class";
+	class_resource_->Load(GetResourceManager(), asset_name,
 		UserClassResource::TypeLoadCallback(this, &CppContextObject::OnLoadClass));
 }
 
 
 
-void CppContextObject::SetAllowNetworkLogic(bool pAllow)
-{
-	mAllowNetworkLogic = pAllow;
+void CppContextObject::SetAllowNetworkLogic(bool allow) {
+	allow_network_logic_ = allow;
 }
 
 
 
-Tbc::ChunkyPhysics* CppContextObject::GetPhysics() const
-{
-	if (mPhysicsResource && mPhysicsResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		return (mPhysicsResource->GetData());
+tbc::ChunkyPhysics* CppContextObject::GetPhysics() const {
+	if (physics_resource_ && physics_resource_->GetLoadState() == cure::kResourceLoadComplete) {
+		return (physics_resource_->GetData());
 	}
 	return (0);
 }
 
-UserPhysicsReferenceResource* CppContextObject::GetPhysicsResource() const
-{
-	return mPhysicsResource;
+UserPhysicsReferenceResource* CppContextObject::GetPhysicsResource() const {
+	return physics_resource_;
 }
 
-void CppContextObject::CreatePhysics(Tbc::ChunkyPhysics* pPhysics)
-{
-	deb_assert(mPhysicsResource == 0);
-	static int lPhysicsCounter = 0;
-	const str lPhysicsName = strutil::Format("RawPhys%i.phys", ++lPhysicsCounter);
-	const str lPhysicsRefName = strutil::Format("%s;%i", lPhysicsName.c_str(), GetInstanceId());
-	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPosition.mPosition.mVelocity, mPhysicsOverride,
-		((Cure::GameTicker*)mManager->GetGameManager()->GetTicker())->GetPhysicsLock(), mManager->GetGameManager()->GetPhysicsManager(),
-		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
-	mPhysicsResource = new UserPhysicsReferenceResource(lInitData);
-	UserPhysicsReferenceResource* lPhysicsRef = mPhysicsResource;
-	PhysicsSharedResource* lPhysicsRefResource = (PhysicsSharedResource*)lPhysicsRef->CreateResource(GetResourceManager(), lPhysicsRefName);
-	lPhysicsRef->SetResource(lPhysicsRefResource);
-	Cure::UserResource::LoadCallback lCallbackCast;
-	lCallbackCast.SetMemento(UserPhysicsReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics).GetMemento());
-	lPhysicsRefResource->AddCaller(lPhysicsRef, lCallbackCast);
-	PhysicsSharedResource::ClassResource* lPhysics = lPhysicsRefResource->GetParent();
-	PhysicsResource* lPhysicsResource = (PhysicsResource*)lPhysics->CreateResource(GetResourceManager(), lPhysicsName);
-	lPhysicsResource->SetIsUnique(true);
-	lPhysicsRefResource->SetIsUnique(true);
-	lPhysics->SetResource(lPhysicsResource);
-	lPhysicsResource->SetRamDataType(pPhysics);
-	Tbc::ChunkyPhysics* lCopy = new Tbc::ChunkyPhysics(*pPhysics);
-	lPhysicsRefResource->SetRamDataType(lCopy);
-	lPhysicsResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// Handle pushing to physics engine in postprocessing by some other thread at a later stage.
-	lPhysicsRefResource->SetLoadState(Cure::RESOURCE_LOAD_IN_PROGRESS);	// We're waiting for the root resource to get loaded.
-	GetResourceManager()->AddLoaded(lPhysics);
-	GetResourceManager()->AddLoaded(lPhysicsRef);
+void CppContextObject::CreatePhysics(tbc::ChunkyPhysics* physics) {
+	deb_assert(physics_resource_ == 0);
+	static int physics_counter = 0;
+	const str _physics_name = strutil::Format("RawPhys%i.phys", ++physics_counter);
+	const str physics_ref_name = strutil::Format("%s;%i", _physics_name.c_str(), GetInstanceId());
+	PhysicsSharedInitData init_data(position_.position_.transformation_, position_.position_.velocity_, physics_override_,
+		((cure::GameTicker*)manager_->GetGameManager()->GetTicker())->GetPhysicsLock(), manager_->GetGameManager()->GetPhysicsManager(),
+		manager_->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
+	physics_resource_ = new UserPhysicsReferenceResource(init_data);
+	UserPhysicsReferenceResource* physics_ref = physics_resource_;
+	PhysicsSharedResource* physics_ref_resource = (PhysicsSharedResource*)physics_ref->CreateResource(GetResourceManager(), physics_ref_name);
+	physics_ref->SetResource(physics_ref_resource);
+	cure::UserResource::LoadCallback callback_cast;
+	callback_cast.SetMemento(UserPhysicsReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics).GetMemento());
+	physics_ref_resource->AddCaller(physics_ref, callback_cast);
+	PhysicsSharedResource::ClassResource* _physics = physics_ref_resource->GetParent();
+	PhysicsResource* _physics_resource = (PhysicsResource*)_physics->CreateResource(GetResourceManager(), _physics_name);
+	_physics_resource->SetIsUnique(true);
+	physics_ref_resource->SetIsUnique(true);
+	_physics->SetResource(_physics_resource);
+	_physics_resource->SetRamDataType(physics);
+	tbc::ChunkyPhysics* copy = new tbc::ChunkyPhysics(*physics);
+	physics_ref_resource->SetRamDataType(copy);
+	_physics_resource->SetLoadState(cure::kResourceLoadInProgress);	// Handle pushing to physics engine in postprocessing by some other thread at a later stage.
+	physics_ref_resource->SetLoadState(cure::kResourceLoadInProgress);	// We're waiting for the root resource to get loaded.
+	GetResourceManager()->AddLoaded(_physics);
+	GetResourceManager()->AddLoaded(physics_ref);
 }
 
-void CppContextObject::CreatePhysicsRef(const str& pName)
-{
-	StartLoadingPhysics(pName);
+void CppContextObject::CreatePhysicsRef(const str& name) {
+	StartLoadingPhysics(name);
 }
 
-const Tbc::ChunkyClass* CppContextObject::GetClass() const
-{
-	if (mClassResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		return (mClassResource->GetRamData());
+const tbc::ChunkyClass* CppContextObject::GetClass() const {
+	if (class_resource_->GetLoadState() == cure::kResourceLoadComplete) {
+		return (class_resource_->GetRamData());
 	}
 	return (0);
 }
 
-const Tbc::ChunkyClass::Tag* CppContextObject::FindTag(const str& pTagType, int pFloatValueCount, int pStringValueCount, const std::vector<int>* pTriggerIndexArray) const
-{
-	const Tbc::ChunkyClass* lClass = GetClass();
-	for (size_t x = 0; x < lClass->GetTagCount(); ++x)
-	{
-		const Tbc::ChunkyClass::Tag& lTag = lClass->GetTag(x);
-		if (lTag.mTagName == pTagType &&
-			(pFloatValueCount < 0 || lTag.mFloatValueList.size() == (size_t)pFloatValueCount) &&
-			(pStringValueCount < 0 || lTag.mStringValueList.size() == (size_t)pStringValueCount) &&
-			(!pTriggerIndexArray || (lTag.mBodyIndexList.size() == pTriggerIndexArray->size() &&
-				std::equal(lTag.mBodyIndexList.begin(), lTag.mBodyIndexList.end(), pTriggerIndexArray->begin()))))
-		{
-			return &lTag;
+const tbc::ChunkyClass::Tag* CppContextObject::FindTag(const str& tag_type, int float_value_count, int string_value_count, const std::vector<int>* trigger_index_array) const {
+	const tbc::ChunkyClass* clazz = GetClass();
+	for (size_t x = 0; x < clazz->GetTagCount(); ++x) {
+		const tbc::ChunkyClass::Tag& tag = clazz->GetTag(x);
+		if (tag.tag_name_ == tag_type &&
+			(float_value_count < 0 || tag.float_value_list_.size() == (size_t)float_value_count) &&
+			(string_value_count < 0 || tag.string_value_list_.size() == (size_t)string_value_count) &&
+			(!trigger_index_array || (tag.body_index_list_.size() == trigger_index_array->size() &&
+				std::equal(tag.body_index_list_.begin(), tag.body_index_list_.end(), trigger_index_array->begin())))) {
+			return &tag;
 		}
 	}
 	return 0;
 }
 
-void CppContextObject::SetTagIndex(int pIndex)
-{
-	(void)pIndex;
+void CppContextObject::SetTagIndex(int index) {
+	(void)index;
 }
 
 
 
-void CppContextObject::SetForceLoadUnique(bool pLoadUnique)
-{
-	mForceLoadUnique = pLoadUnique;
+void CppContextObject::SetForceLoadUnique(bool load_unique) {
+	force_load_unique_ = load_unique;
 }
 
-void CppContextObject::StartLoadingPhysics(const str& pPhysicsName)
-{
-	deb_assert(mPhysicsResource == 0);
-	const str lInstanceId = strutil::IntToString(GetInstanceId(), 10);
-	const str lAssetName = pPhysicsName + ".phys;" + lInstanceId.c_str();
-	PhysicsSharedInitData lInitData(mPosition.mPosition.mTransformation, mPosition.mPosition.mVelocity, mPhysicsOverride,
-		((Cure::GameTicker*)mManager->GetGameManager()->GetTicker())->GetPhysicsLock(), mManager->GetGameManager()->GetPhysicsManager(),
-		mManager->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
-	mPhysicsResource = new UserPhysicsReferenceResource(lInitData);
-	if (!mForceLoadUnique)
-	{
-		mPhysicsResource->Load(GetResourceManager(), lAssetName,
+void CppContextObject::StartLoadingPhysics(const str& physics_name) {
+	deb_assert(physics_resource_ == 0);
+	const str instance_id = strutil::IntToString(GetInstanceId(), 10);
+	const str asset_name = physics_name + ".phys;" + instance_id.c_str();
+	PhysicsSharedInitData init_data(position_.position_.transformation_, position_.position_.velocity_, physics_override_,
+		((cure::GameTicker*)manager_->GetGameManager()->GetTicker())->GetPhysicsLock(), manager_->GetGameManager()->GetPhysicsManager(),
+		manager_->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
+	physics_resource_ = new UserPhysicsReferenceResource(init_data);
+	if (!force_load_unique_) {
+		physics_resource_->Load(GetResourceManager(), asset_name,
 			UserPhysicsReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics), false);
-	}
-	else
-	{
-		mPhysicsResource->LoadUnique(GetResourceManager(), lAssetName,
+	} else {
+		physics_resource_->LoadUnique(GetResourceManager(), asset_name,
 			UserPhysicsReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics));
 	}
 }
 
-bool CppContextObject::TryComplete()
-{
-	if (!mPhysicsResource || IsLoaded())
-	{
+bool CppContextObject::TryComplete() {
+	if (!physics_resource_ || IsLoaded()) {
 		return (false);
 	}
 
 	// This is the way to post-process physics (create physical bodies) only after the rest have been created, so
 	// that they are not created on different frames.
-	if (mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
-	{
-		PhysicsSharedResource* lPhysicsResource = (PhysicsSharedResource*)mPhysicsResource->GetConstResource();
-		if (lPhysicsResource->InjectPostProcess() == RESOURCE_LOAD_COMPLETE)
-		{
-			SetPhysics(mPhysicsResource->GetData());
-			if (GetAllowNetworkLogic())
-			{
+	if (physics_resource_->GetLoadState() == kResourceLoadComplete) {
+		PhysicsSharedResource* _physics_resource = (PhysicsSharedResource*)physics_resource_->GetConstResource();
+		if (_physics_resource->InjectPostProcess() == kResourceLoadComplete) {
+			SetPhysics(physics_resource_->GetData());
+			if (GetAllowNetworkLogic()) {
 				SetupChildHandlers();
 			}
 		}
 	}
 
-	if (mPhysicsResource->GetLoadState() == RESOURCE_LOAD_COMPLETE)
-	{
-		for (Array::iterator x = mChildArray.begin(); x != mChildArray.end(); ++x)
-		{
-			CppContextObject* lChild = (CppContextObject*)*x;
-			lChild->TryComplete();
+	if (physics_resource_->GetLoadState() == kResourceLoadComplete) {
+		for (Array::iterator x = child_array_.begin(); x != child_array_.end(); ++x) {
+			CppContextObject* child = (CppContextObject*)*x;
+			child->TryComplete();
 		}
-		if (GetPhysics() && GetPhysics()->GetEngineCount() > 0 && GetManager())
-		{
+		if (GetPhysics() && GetPhysics()->GetEngineCount() > 0 && GetManager()) {
 			GetManager()->EnableMicroTickCallback(this);	// Used for engine force applications each micro frame.
 		}
 		SetLoadResult(true);
 		return (true);
-	}
-	else if (mPhysicsResource->GetLoadState() != RESOURCE_LOAD_IN_PROGRESS)
-	{
+	} else if (physics_resource_->GetLoadState() != kResourceLoadInProgress) {
 		SetLoadResult(false);
 		return (true);
 	}
 	return (false);
 }
 
-void CppContextObject::SetupChildHandlers()
-{
+void CppContextObject::SetupChildHandlers() {
 	Parent::SetupChildHandlers();
 
-	if (!GetClass())
-	{
+	if (!GetClass()) {
 		return;
 	}
-	const int lTagCount = GetClass()->GetTagCount();
-	for (int x = 0; x < lTagCount; ++x)
-	{
-		const Tbc::ChunkyClass::Tag& lTag = GetClass()->GetTag(x);
-		CppContextObject* lHandlerChild = (CppContextObject*)GetManager()->GetGameManager()->CreateLogicHandler(lTag.mTagName);
-		if (!lHandlerChild)
-		{
+	const int tag_count = GetClass()->GetTagCount();
+	for (int x = 0; x < tag_count; ++x) {
+		const tbc::ChunkyClass::Tag& tag = GetClass()->GetTag(x);
+		CppContextObject* handler_child = (CppContextObject*)GetManager()->GetGameManager()->CreateLogicHandler(tag.tag_name_);
+		if (!handler_child) {
 			continue;
 		}
-		AddChild(lHandlerChild);
-		lHandlerChild->SetTagIndex(x);
+		AddChild(handler_child);
+		handler_child->SetTagIndex(x);
 	}
 }
 
 
 
-void CppContextObject::OnMicroTick(float pFrameTime)
-{
-	if (mPhysics && GetManager())
-	{
-		const bool lNeedsSteeringHelp = (GetAttributeFloatValue("float_is_child") > 0.75f);
-		int lAccIndex = GetPhysics()->GetEngineIndexFromControllerIndex(GetPhysics()->GetEngineCount()-1, -1, 0);
-		const int lTurnIndex = GetPhysics()->GetEngineIndexFromControllerIndex(0, 1, 1);
-		if (lNeedsSteeringHelp && lAccIndex >= 0 && lTurnIndex >= 0)
-		{
+void CppContextObject::OnMicroTick(float frame_time) {
+	if (physics_ && GetManager()) {
+		const bool needs_steering_help = (GetAttributeFloatValue("float_is_child") > 0.75f);
+		int acc_index = GetPhysics()->GetEngineIndexFromControllerIndex(GetPhysics()->GetEngineCount()-1, -1, 0);
+		const int turn_index = GetPhysics()->GetEngineIndexFromControllerIndex(0, 1, 1);
+		if (needs_steering_help && acc_index >= 0 && turn_index >= 0) {
 			// Young children have the possibility of just pressing left/right which will cause
 			// a forward motion in the currently used vehicle.
-			Tbc::PhysicsEngine* lAcc = GetPhysics()->GetEngine(lAccIndex);
-			const Tbc::PhysicsEngine* lTurn = GetPhysics()->GetEngine(lTurnIndex);
-			const float lPowerFwdRev = lAcc->GetValue();
-			const float lPowerLR = lTurn->GetValue();
-			float lAutoTurnAccValue = 0;
-			if (Math::IsEpsEqual(lPowerFwdRev, 0.0f, 0.05f) && !Math::IsEpsEqual(lPowerLR, 0.0f, 0.05f))
-			{
-				const float lIntensity = lAcc->GetIntensity();
-				lAutoTurnAccValue = Math::Clamp(10.0f*(0.2f-lIntensity), 0.0f, 1.0f);
+			tbc::PhysicsEngine* acc = GetPhysics()->GetEngine(acc_index);
+			const tbc::PhysicsEngine* turn = GetPhysics()->GetEngine(turn_index);
+			const float power_fwd_rev = acc->GetValue();
+			const float power_lr = turn->GetValue();
+			float auto_turn_acc_value = 0;
+			if (Math::IsEpsEqual(power_fwd_rev, 0.0f, 0.05f) && !Math::IsEpsEqual(power_lr, 0.0f, 0.05f)) {
+				const float intensity = acc->GetIntensity();
+				auto_turn_acc_value = Math::Clamp(10.0f*(0.2f-intensity), 0.0f, 1.0f);
 			}
 			// Throttle up all relevant acc engines.
-			for (;;)
-			{
-				lAcc->ForceSetValue(Tbc::PhysicsEngine::ASPECT_LOCAL_PRIMARY, lAutoTurnAccValue);
-				lAccIndex = GetPhysics()->GetEngineIndexFromControllerIndex(lAccIndex-1, -1, 0);
-				if (lAccIndex < 0)
-				{
+			for (;;) {
+				acc->ForceSetValue(tbc::PhysicsEngine::kAspectLocalPrimary, auto_turn_acc_value);
+				acc_index = GetPhysics()->GetEngineIndexFromControllerIndex(acc_index-1, -1, 0);
+				if (acc_index < 0) {
 					break;
 				}
-				lAcc = GetPhysics()->GetEngine(lAccIndex);
+				acc = GetPhysics()->GetEngine(acc_index);
 			}
 		}
-		mPhysics->OnMicroTick(GetManager()->GetGameManager()->GetPhysicsManager(), pFrameTime);
+		physics_->OnMicroTick(GetManager()->GetGameManager()->GetPhysicsManager(), frame_time);
 	}
 }
 
-void CppContextObject::OnAlarm(int /*pAlarmId*/, void* /*pExtraData*/)
-{
+void CppContextObject::OnAlarm(int /*alarm_id*/, void* /*extra_data*/) {
 }
 
-void CppContextObject::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
-{
-	if (!GetAllowNetworkLogic())
-	{
+void CppContextObject::OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
+	if (!GetAllowNetworkLogic()) {
 		return;
 	}
 
-	ContextObject* lChild = (ContextObject*)GetTrigger(pTriggerId);
-	if (lChild)
-	{
-		lChild->OnTrigger(pTriggerId, pOtherObject, pBodyId, pPosition, pNormal);
-	}
-	else
-	{
-		//mLog.Errorf("Physical trigger not configured for logical trigging on %s.", GetClassId().c_str());
+	ContextObject* child = (ContextObject*)GetTrigger(trigger_id);
+	if (child) {
+		child->OnTrigger(trigger_id, other_object, body_id, position, normal);
+	} else {
+		//log_.Errorf("Physical trigger not configured for logical trigging on %s.", GetClassId().c_str());
 	}
 
 	/*
 	TODO: put this back when attaching objects to each other is working.
-	ContextObject* lObject2 = mManager->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListenerId(pBody2);
-	if (mManager->GetGameManager()->IsServer() && lObject2)
-	{
-		AttachToObject(pBody1, lObject2, pBody2);
+	ContextObject* object2 = manager_->GetGameManager()->GetPhysicsManager()->GetForceFeedbackListenerId(body2);
+	if (manager_->GetGameManager()->IsServer() && object2) {
+		AttachToObject(body1, object2, body2);
 	}*/
 }
 
 
 
-void CppContextObject::OnForceApplied(ContextObject* pOtherObject,
-	Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-	const vec3& pForce, const vec3& pTorque,
-	const vec3& pPosition, const vec3& pRelativeVelocity)
-{
-	(void)pPosition;
-	(void)pRelativeVelocity;
+void CppContextObject::OnForceApplied(ContextObject* other_object,
+	tbc::PhysicsManager::BodyID own_body_id, tbc::PhysicsManager::BodyID other_body_id,
+	const vec3& force, const vec3& torque,
+	const vec3& position, const vec3& relative_velocity) {
+	(void)position;
+	(void)relative_velocity;
 
-	if (!IsAttachedTo((ContextObject*)pOtherObject))
-	{
+	if (!IsAttachedTo((ContextObject*)other_object)) {
 		// TODO: replace by sensible values. Like dividing by mass, for instance.
-		//if (pForce.GetLengthSquared() > 100 || pTorque.GetLengthSquared() > 10)
+		//if (force.GetLengthSquared() > 100 || torque.GetLengthSquared() > 10)
 		{
-			mManager->GetGameManager()->OnCollision(pForce, pTorque, pPosition, this, (ContextObject*)pOtherObject,
-				pOwnBodyId, pOtherBodyId);
+			manager_->GetGameManager()->OnCollision(force, torque, position, this, (ContextObject*)other_object,
+				own_body_id, other_body_id);
 		}
 	}
 }
 
 
 
-void CppContextObject::OnLoadClass(UserClassResource* pClassResource)
-{
-	Tbc::ChunkyClass* lClass = pClassResource->GetData();
-	if (pClassResource->GetLoadState() != Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		mLog.Errorf("Could not load class '%s'.", pClassResource->GetName().c_str());
+void CppContextObject::OnLoadClass(UserClassResource* class_resource) {
+	tbc::ChunkyClass* clazz = class_resource->GetData();
+	if (class_resource->GetLoadState() != cure::kResourceLoadComplete) {
+		log_.Errorf("Could not load class '%s'.", class_resource->GetName().c_str());
 		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
-	}
-	else
-	{
-		StartLoadingPhysics(lClass->GetPhysicsBaseName());
+	} else {
+		StartLoadingPhysics(clazz->GetPhysicsBaseName());
 	}
 }
 
-void CppContextObject::OnLoadPhysics(UserPhysicsReferenceResource* pPhysicsResource)
-{
-	if (pPhysicsResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
-	{
-		mLog.Errorf("Could not load physics class '%s'.", pPhysicsResource->GetName().c_str());
+void CppContextObject::OnLoadPhysics(UserPhysicsReferenceResource* physics_resource) {
+	if (physics_resource->GetLoadState() != kResourceLoadComplete) {
+		log_.Errorf("Could not load physics class '%s'.", physics_resource->GetName().c_str());
 		deb_assert(false);
 		GetManager()->PostKillObject(GetInstanceId());
 		return;
@@ -432,14 +364,13 @@ void CppContextObject::OnLoadPhysics(UserPhysicsReferenceResource* pPhysicsResou
 
 
 
-bool CppContextObject::GetAllowNetworkLogic() const
-{
-	return mAllowNetworkLogic;
+bool CppContextObject::GetAllowNetworkLogic() const {
+	return allow_network_logic_;
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, CppContextObject);
+loginstance(kGameContextCpp, CppContextObject);
 
 
 

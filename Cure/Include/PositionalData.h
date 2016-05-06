@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,176 +7,168 @@
 #pragma once
 
 #include <vector>
-#include "../../Lepra/Include/Log.h"
-#include "../../Lepra/Include/Transformation.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../Include/Cure.h"
+#include "../../lepra/include/log.h"
+#include "../../lepra/include/transformation.h"
+#include "../../lepra/include/vector3d.h"
+#include "../include/cure.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class PositionalData
-{
+class PositionalData {
 public:
-	enum Type
-	{
-		TYPE_LOWEST	= 1,
-		TYPE_OBJECT	= TYPE_LOWEST,
-		TYPE_POSITION_6,
-		TYPE_POSITION_3,
-		TYPE_POSITION_2,
-		TYPE_POSITION_1,
-		TYPE_REAL_3,
-		TYPE_REAL_1,
-		TYPE_COUNT
+	enum Type {
+		kTypeLowest	= 1,
+		kTypeObject	= kTypeLowest,
+		kTypePosition6,
+		kTypePosition3,
+		kTypePosition2,
+		kTypePosition1,
+		kTypeReal3,
+		kTypeReal1,
+		kTypeCount
 	};
 
 	PositionalData();
 	virtual ~PositionalData();
 	virtual int GetPackSize() const = 0;
-	virtual int Pack(uint8* pData) const = 0;
-	virtual int Unpack(const uint8* pData, int pSize) = 0;
-	float GetScaledDifference(const PositionalData* pReference) const;
-	void SetScale(float pScale);
+	virtual int Pack(uint8* data) const = 0;
+	virtual int Unpack(const uint8* data, int size) = 0;
+	float GetScaledDifference(const PositionalData* reference) const;
+	void SetScale(float scale);
 	virtual Type GetType() const = 0;
-	virtual void CopyData(const PositionalData* pData) = 0;
+	virtual void CopyData(const PositionalData* data) = 0;
 	virtual PositionalData* Clone() const = 0;
 
 	virtual void Stop();
 
 protected:
-	virtual float GetBiasedDifference(const PositionalData* pReference) const = 0;
+	virtual float GetBiasedDifference(const PositionalData* reference) const = 0;
 
 private:
-	float mSubHierarchyScale;
+	float sub_hierarchy_scale_;
 };
 
 // Six degrees of freedom in position, velocity and acceleration.
-class PositionalData6: public PositionalData
-{
+class PositionalData6: public PositionalData {
 public:
-	xform mTransformation;
-	vec3 mVelocity;
-	vec3 mAcceleration;
-	vec3 mAngularVelocity;
-	vec3 mAngularAcceleration;
+	xform transformation_;
+	vec3 velocity_;
+	vec3 acceleration_;
+	vec3 angular_velocity_;
+	vec3 angular_acceleration_;
 
 	static int GetStaticPackSize();
 	int GetPackSize() const;
-	int Pack(uint8* pData) const;
-	int Unpack(const uint8* pData, int pSize);
-	float GetBiasedDifference(const PositionalData* pReference) const;
+	int Pack(uint8* data) const;
+	int Unpack(const uint8* data, int size);
+	float GetBiasedDifference(const PositionalData* reference) const;
 
 	virtual void Stop();
 
 private:
-	static float GetDifference(const quat& pQ1, const quat& pQ2);
-	static float GetDifference(const vec3& pV1, const vec3& pV2);
+	static float GetDifference(const quat& q1, const quat& q2);
+	static float GetDifference(const vec3& v1, const vec3& v2);
 
 	Type GetType() const;
-	void CopyData(const PositionalData* pData);
+	void CopyData(const PositionalData* data);
 	PositionalData* Clone() const;
 
 	logclass();
 };
 
 // Three degrees of freedom in position, velocity and acceleration.
-class PositionalData3: public PositionalData
-{
+class PositionalData3: public PositionalData {
 public:
-	float mTransformation[3];
-	float mVelocity[3];
-	float mAcceleration[3];
+	float transformation_[3];
+	float velocity_[3];
+	float acceleration_[3];
 
 	int GetPackSize() const;
-	int Pack(uint8* pData) const;
-	int Unpack(const uint8* pData, int pSize);
-	float GetBiasedDifference(const PositionalData* pReference) const;
+	int Pack(uint8* data) const;
+	int Unpack(const uint8* data, int size);
+	float GetBiasedDifference(const PositionalData* reference) const;
 
 	Type GetType() const;
-	void CopyData(const PositionalData* pData);
+	void CopyData(const PositionalData* data);
 	PositionalData* Clone() const;
 
 	virtual void Stop();
 };
 
 // Two degrees of freedom in position, velocity and acceleration.
-class PositionalData2: public PositionalData
-{
+class PositionalData2: public PositionalData {
 public:
-	float mTransformation[2];
-	float mVelocity[2];
-	float mAcceleration[2];
+	float transformation_[2];
+	float velocity_[2];
+	float acceleration_[2];
 
 	int GetPackSize() const;
-	int Pack(uint8* pData) const;
-	int Unpack(const uint8* pData, int pSize);
-	float GetBiasedDifference(const PositionalData* pReference) const;
+	int Pack(uint8* data) const;
+	int Unpack(const uint8* data, int size);
+	float GetBiasedDifference(const PositionalData* reference) const;
 
 	Type GetType() const;
-	void CopyData(const PositionalData* pData);
+	void CopyData(const PositionalData* data);
 	PositionalData* Clone() const;
 
 	virtual void Stop();
 };
 
 // One degree of freedom in position, velocity and acceleration.
-class PositionalData1: public PositionalData
-{
+class PositionalData1: public PositionalData {
 public:
-	float mTransformation;
-	float mVelocity;
-	float mAcceleration;
+	float transformation_;
+	float velocity_;
+	float acceleration_;
 
 	int GetPackSize() const;
-	int Pack(uint8* pData) const;
-	int Unpack(const uint8* pData, int pSize);
-	float GetBiasedDifference(const PositionalData* pReference) const;
+	int Pack(uint8* data) const;
+	int Unpack(const uint8* data, int size);
+	float GetBiasedDifference(const PositionalData* reference) const;
 
 	Type GetType() const;
-	void CopyData(const PositionalData* pData);
+	void CopyData(const PositionalData* data);
 	PositionalData* Clone() const;
 
 	virtual void Stop();
 };
 
 // A container with it's own positional info.
-class ObjectPositionalData: public PositionalData
-{
+class ObjectPositionalData: public PositionalData {
 public:
-	PositionalData6 mPosition;
+	PositionalData6 position_;
 
 	typedef std::vector<PositionalData*> BodyPositionArray;
-	BodyPositionArray mBodyPositionArray;
+	BodyPositionArray body_position_array_;
 
 	ObjectPositionalData();
 	virtual ~ObjectPositionalData();
 
 	/// Step forward to compensate for lag. Used for network ghosts.
-	void GhostStep(int pStepCount, float pFrameTime);
+	void GhostStep(int step_count, float frame_time);
 
 	void Clear();
 	int GetPackSize() const;
-	int Pack(uint8* pData) const;
-	int Unpack(const uint8* pData, int pSize);
-	float GetBiasedDifference(const PositionalData* pReference) const;
-	float GetBiasedTypeDifference(const PositionalData* pReference, bool pPositionOnly) const;
+	int Pack(uint8* data) const;
+	int Unpack(const uint8* data, int size);
+	float GetBiasedDifference(const PositionalData* reference) const;
+	float GetBiasedTypeDifference(const PositionalData* reference, bool position_only) const;
 
-	PositionalData* GetAt(size_t pIndex) const;
-	void SetAt(size_t pIndex, PositionalData* pData);
-	void Trunkate(size_t pSize);
+	PositionalData* GetAt(size_t index) const;
+	void SetAt(size_t index, PositionalData* data);
+	void Trunkate(size_t size);
 
 	Type GetType() const;
-	void CopyData(const PositionalData* pData);
+	void CopyData(const PositionalData* data);
 	PositionalData* Clone() const;
 
 	virtual void Stop();
 
-	bool IsSameStructure(const ObjectPositionalData& pCopy) const;
+	bool IsSameStructure(const ObjectPositionalData& copy) const;
 
 private:
 	ObjectPositionalData(const ObjectPositionalData&);
@@ -185,33 +177,31 @@ private:
 	logclass();
 };
 
-class RealData3: public PositionalData
-{
+class RealData3: public PositionalData {
 public:
-	float mValue[3];
+	float value_[3];
 
 	int GetPackSize() const;
-	int Pack(uint8* pData) const;
-	int Unpack(const uint8* pData, int pSize);
-	float GetBiasedDifference(const PositionalData* pReference) const;
+	int Pack(uint8* data) const;
+	int Unpack(const uint8* data, int size);
+	float GetBiasedDifference(const PositionalData* reference) const;
 
 	Type GetType() const;
-	void CopyData(const PositionalData* pData);
+	void CopyData(const PositionalData* data);
 	PositionalData* Clone() const;
 };
 
-class RealData1: public PositionalData
-{
+class RealData1: public PositionalData {
 public:
-	float mValue;
+	float value_;
 
 	int GetPackSize() const;
-	int Pack(uint8* pData) const;
-	int Unpack(const uint8* pData, int pSize);
-	float GetBiasedDifference(const PositionalData* pReference) const;
+	int Pack(uint8* data) const;
+	int Unpack(const uint8* data, int size);
+	float GetBiasedDifference(const PositionalData* reference) const;
 
 	Type GetType() const;
-	void CopyData(const PositionalData* pData);
+	void CopyData(const PositionalData* data);
 	PositionalData* Clone() const;
 };
 

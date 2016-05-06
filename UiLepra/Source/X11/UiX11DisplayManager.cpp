@@ -5,620 +5,509 @@
 
 
 #include "pch.h"
-#include "../../Include/X11/UiX11DisplayManager.h"
-#include "../../../Lepra/Include/CyclicArray.h"
-#include "../../../Lepra/Include/Log.h"
-#include "../../../Lepra/Include/String.h"
-#include "../../../Lepra/Include/SystemManager.h"
-#include "../../Include/UiLepra.h"
-#include "../../Include/X11/UiX11OpenGLDisplay.h"
+#include "../../include/x11/uix11displaymanager.h"
+#include "../../../lepra/include/cyclicarray.h"
+#include "../../../lepra/include/log.h"
+#include "../../../lepra/include/string.h"
+#include "../../../lepra/include/systemmanager.h"
+#include "../../include/uilepra.h"
+#include "../../include/x11/uix11opengldisplay.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-DisplayManager* DisplayManager::CreateDisplayManager(ContextType pCT)
-{
-	DisplayManager* lDisplayManager = 0;
-	switch(pCT)
-	{
-		case DisplayManager::OPENGL_CONTEXT:	lDisplayManager = new X11OpenGLDisplay;				break;
-		default:				mLog.Error("Invalid context type in CreateDisplayManager().");	break;
+DisplayManager* DisplayManager::CreateDisplayManager(ContextType ct) {
+	DisplayManager* display_manager = 0;
+	switch(ct) {
+		case DisplayManager::kOpenglContext:	display_manager = new X11OpenGLDisplay;				break;
+		default:				log_.Error("Invalid context type in CreateDisplayManager().");	break;
 	}
-	return (lDisplayManager);
+	return (display_manager);
 }
 
-void DisplayManager::EnableScreensaver(bool pEnable)
-{
-	//BOOL lOldValue;
-	//::SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, pEnable, &lOldValue, 0);
+void DisplayManager::EnableScreensaver(bool enable) {
+	//BOOL old_value;
+	//::SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, enable, &old_value, 0);
 }
 
 
 
 X11DisplayManager::X11DisplayManager() :
-	mDisplay(0),
-	mWnd(0),
-	mIsScreenOpen(false),
-	mIsHidden(true),
-	mMinimized(false),
-	mMaximized(false),
-	mNormalWidth(0),
-	mNormalHeight(0),
-	mWindowX(0),
-	mWindowY(0),
-	mCaptionSet(false)
-{
-	mDisplay = ::XOpenDisplay(0);
-	if (mDisplay)
-	{
-		++mDisplayUseCount;
-		Screen* lScreen = DefaultScreenOfDisplay(mDisplay);
-		mEnumeratedDisplayModeCount = 1;
-		mEnumeratedDisplayMode = new DisplayMode[mEnumeratedDisplayModeCount];
-		mEnumeratedDisplayMode[0].mWidth = WidthOfScreen(lScreen);
-		mEnumeratedDisplayMode[0].mHeight = HeightOfScreen(lScreen);
-		mEnumeratedDisplayMode[0].mBitDepth = DefaultDepthOfScreen(lScreen);
-		mEnumeratedDisplayMode[0].mRefreshRate = 0;
+	display_(0),
+	wnd_(0),
+	is_screen_open_(false),
+	is_hidden_(true),
+	minimized_(false),
+	maximized_(false),
+	normal_width_(0),
+	normal_height_(0),
+	window_x_(0),
+	window_y_(0),
+	caption_set_(false) {
+	display_ = ::XOpenDisplay(0);
+	if (display_) {
+		++display_use_count_;
+		Screen* __screen = DefaultScreenOfDisplay(display_);
+		enumerated_display_mode_count_ = 1;
+		enumerated_display_mode_ = new DisplayMode[enumerated_display_mode_count_];
+		enumerated_display_mode_[0].width_ = WidthOfScreen(__screen);
+		enumerated_display_mode_[0].height_ = HeightOfScreen(__screen);
+		enumerated_display_mode_[0].bit_depth_ = DefaultDepthOfScreen(__screen);
+		enumerated_display_mode_[0].refresh_rate_ = 0;
 	}
 }
 
-X11DisplayManager::~X11DisplayManager()
-{
+X11DisplayManager::~X11DisplayManager() {
 	CloseScreen();
 
-	delete[] mEnumeratedDisplayMode;
-	mEnumeratedDisplayMode = 0;
-	mEnumeratedDisplayModeCount = 0;
+	delete[] enumerated_display_mode_;
+	enumerated_display_mode_ = 0;
+	enumerated_display_mode_count_ = 0;
 
-	ObserverSetTable::Iterator lTIter;
-	for (lTIter = mObserverSetTable.First();
-		lTIter != mObserverSetTable.End();
-		++lTIter)
-	{
-		ObserverSet* lSet = *lTIter;
-		delete (lSet);
+	ObserverSetTable::Iterator t_iter;
+	for (t_iter = observer_set_table_.First();
+		t_iter != observer_set_table_.End();
+		++t_iter) {
+		ObserverSet* set = *t_iter;
+		delete (set);
 	}
 }
 
-void X11DisplayManager::SetFocus(bool pFocus)
-{
-	if (pFocus)
-	{
-		::XSetInputFocus(mDisplay, pFocus, RevertToNone, CurrentTime);
+void X11DisplayManager::SetFocus(bool focus) {
+	if (focus) {
+		::XSetInputFocus(display_, focus, RevertToNone, CurrentTime);
 	}
 }
 
-unsigned X11DisplayManager::GetWidth() const
-{
-	return mDisplayMode.mWidth;
+unsigned X11DisplayManager::GetWidth() const {
+	return display_mode_.width_;
 }
 
-unsigned X11DisplayManager::GetHeight() const
-{
-	return mDisplayMode.mHeight;
+unsigned X11DisplayManager::GetHeight() const {
+	return display_mode_.height_;
 }
 
-unsigned X11DisplayManager::GetBitDepth() const
-{
-	return mDisplayMode.mBitDepth;
+unsigned X11DisplayManager::GetBitDepth() const {
+	return display_mode_.bit_depth_;
 }
 
-unsigned X11DisplayManager::GetRefreshRate() const
-{
-	return mDisplayMode.mRefreshRate;
+unsigned X11DisplayManager::GetRefreshRate() const {
+	return display_mode_.refresh_rate_;
 }
 
-bool X11DisplayManager::IsFullScreen() const
-{
-	return (mScreenMode == DisplayManager::FULLSCREEN);
+bool X11DisplayManager::IsFullScreen() const {
+	return (screen_mode_ == DisplayManager::kFullscreen);
 }
 
-double X11DisplayManager::GetPhysicalScreenSize() const
-{
+double X11DisplayManager::GetPhysicalScreenSize() const {
 	return 23.000;	// Estimated average user's screen size at time of playing any one of my games. Extremely accurate.
 }
 
-void X11DisplayManager::SetCaption(const str& pCaption)
-{
-	SetCaption(pCaption, false);
+void X11DisplayManager::SetCaption(const str& caption) {
+	SetCaption(caption, false);
 }
 
-void X11DisplayManager::SetCaption(const str& pCaption, bool pInternalCall)
-{
-	if (pInternalCall == false)
-	{
-		mCaptionSet = true;
+void X11DisplayManager::SetCaption(const str& caption, bool internal_call) {
+	if (internal_call == false) {
+		caption_set_ = true;
 	}
 
-	if (pInternalCall == false || mCaptionSet == false)
-	{
-		::XStoreName(GetDisplay(), GetWindow(), pCaption.c_str());
+	if (internal_call == false || caption_set_ == false) {
+		::XStoreName(GetDisplay(), GetWindow(), caption.c_str());
 	}
 }
 
-bool X11DisplayManager::OpenScreen(const DisplayMode& pDisplayMode, ScreenMode pScreenMode, Orientation pOrientation)
-{
-	bool lOk = true;
+bool X11DisplayManager::OpenScreen(const DisplayMode& display_mode, ScreenMode screen_mode, Orientation orientation) {
+	bool ok = true;
 
-	if (mIsScreenOpen)
-	{
-		mLog.Warning("OpenScreen() - Screen already opened.");
-		lOk = false;
-	}
-	else if(pDisplayMode.IsValid() == false && pScreenMode == FULLSCREEN)
-	{
-		mLog.Error("OpenScreen() - Invalid display mode.");
-		lOk = false;
+	if (is_screen_open_) {
+		log_.Warning("OpenScreen() - Screen already opened.");
+		ok = false;
+	} else if(display_mode.IsValid() == false && screen_mode == kFullscreen) {
+		log_.Error("OpenScreen() - Invalid display mode.");
+		ok = false;
 	}
 
-	if (lOk)
-	{
-		mScreenMode = pScreenMode;
-		mOrientation = pOrientation;
+	if (ok) {
+		screen_mode_ = screen_mode;
+		orientation_ = orientation;
 
-		if (mScreenMode == DisplayManager::FULLSCREEN)
-		{
-			bool lSupportedMode = false;
+		if (screen_mode_ == DisplayManager::kFullscreen) {
+			bool supported_mode = false;
 
-			// We can't trust that the user actually knows what he or she is doing, 
+			// We can't trust that the user actually knows what he or she is doing,
 			// so check if the mode is actually supported.
-			if (pDisplayMode.mBitDepth == 0)
-			{
-				lSupportedMode = FindDisplayMode(mDisplayMode,
-								pDisplayMode.mWidth,
-								pDisplayMode.mHeight);
-			}
-			else if(pDisplayMode.mRefreshRate == 0)
-			{
-				lSupportedMode = FindDisplayMode(mDisplayMode,
-								pDisplayMode.mWidth,
-								pDisplayMode.mHeight,
-								pDisplayMode.mBitDepth);
-			}
-			else
-			{
-				lSupportedMode = FindDisplayMode(mDisplayMode,
-								pDisplayMode.mWidth,
-								pDisplayMode.mHeight,
-								pDisplayMode.mBitDepth,
-								pDisplayMode.mRefreshRate);
+			if (display_mode.bit_depth_ == 0) {
+				supported_mode = FindDisplayMode(display_mode_,
+								display_mode.width_,
+								display_mode.height_);
+			} else if(display_mode.refresh_rate_ == 0) {
+				supported_mode = FindDisplayMode(display_mode_,
+								display_mode.width_,
+								display_mode.height_,
+								display_mode.bit_depth_);
+			} else {
+				supported_mode = FindDisplayMode(display_mode_,
+								display_mode.width_,
+								display_mode.height_,
+								display_mode.bit_depth_,
+								display_mode.refresh_rate_);
 			}
 
-			if (lSupportedMode == false)
-			{
-				str lErr(strutil::Format("OpenScreen - Display mode %i-bit %ix%i at %i Hz is not supported!",
-						 pDisplayMode.mBitDepth, 
-						 pDisplayMode.mWidth, 
-						 pDisplayMode.mHeight, 
-						 pDisplayMode.mRefreshRate));
+			if (supported_mode == false) {
+				str err(strutil::Format("OpenScreen - Display mode %i-bit %ix%i at %i Hz is not supported!",
+						 display_mode.bit_depth_,
+						 display_mode.width_,
+						 display_mode.height_,
+						 display_mode.refresh_rate_));
 
-				mLog.Error(lErr);
-				lOk = false;
+				log_.Error(err);
+				ok = false;
 			}
-		}
-		else
-		{
-			mDisplayMode = pDisplayMode;
+		} else {
+			display_mode_ = display_mode;
 		}
 	}
 
-	if (lOk)
-	{
-		lOk = InitWindow();
+	if (ok) {
+		ok = InitWindow();
 	}
 
-	if (lOk)
-	{
-		lOk = mIsScreenOpen = InitScreen();
-		if (lOk)
-		{
+	if (ok) {
+		ok = is_screen_open_ = InitScreen();
+		if (ok) {
 			AddObserver(ConfigureNotify, this);
 			AddObserver(ClientMessage, this);
 		}
 	}
 
-	return lOk;
+	return ok;
 }
 
-void X11DisplayManager::CloseScreen()
-{
-	if (mIsScreenOpen)
-	{
-		mIsScreenOpen = false;
+void X11DisplayManager::CloseScreen() {
+	if (is_screen_open_) {
+		is_screen_open_ = false;
 		X11Core::RemoveDisplayManager(this);
 		RemoveObserver(this);
 
 		HideWindow(true);
-		::XDestroyWindow(mDisplay, mWnd);
-		mWnd = 0;
+		::XDestroyWindow(display_, wnd_);
+		wnd_ = 0;
 
 		ProcessMessages();
 
-		if (--mDisplayUseCount == 0)
-		{
-			::XCloseDisplay(mDisplay);
+		if (--display_use_count_ == 0) {
+			::XCloseDisplay(display_);
 		}
-		mDisplay = 0;
+		display_ = 0;
 	}
 }
 
-bool X11DisplayManager::IsVisible() const
-{
-	return !IsMinimized() && !mIsHidden;
+bool X11DisplayManager::IsVisible() const {
+	return !IsMinimized() && !is_hidden_;
 }
 
-bool X11DisplayManager::IsFocused() const
-{
-	Window lFocused;
-	int lRevertTo;
-	::XGetInputFocus(mDisplay, &lFocused, &lRevertTo);
-	return IsVisible() && (lFocused == mWnd);
+bool X11DisplayManager::IsFocused() const {
+	Window focused;
+	int revert_to;
+	::XGetInputFocus(display_, &focused, &revert_to);
+	return IsVisible() && (focused == wnd_);
 }
 
-void X11DisplayManager::HideWindow(bool pHide)
-{
-	if (mIsHidden == pHide)
-	{
+void X11DisplayManager::HideWindow(bool hide) {
+	if (is_hidden_ == hide) {
 		return;
 	}
 
-	if (pHide)
-	{
-		Window lChild;
-		::XTranslateCoordinates(mDisplay, mWnd, ::XDefaultRootWindow(mDisplay), 0, 0, &mWindowX, &mWindowY, &lChild);
-		XWindowAttributes lWndAttr;
-		::XGetWindowAttributes(mDisplay, mWnd, &lWndAttr);
-		mWindowX -= lWndAttr.x;
-		mWindowY -= lWndAttr.y;
-		::XUnmapWindow(mDisplay, mWnd);
+	if (hide) {
+		Window child;
+		::XTranslateCoordinates(display_, wnd_, ::XDefaultRootWindow(display_), 0, 0, &window_x_, &window_y_, &child);
+		XWindowAttributes wnd_attr;
+		::XGetWindowAttributes(display_, wnd_, &wnd_attr);
+		window_x_ -= wnd_attr.x;
+		window_y_ -= wnd_attr.y;
+		::XUnmapWindow(display_, wnd_);
+	} else {
+		::XMapWindow(display_, wnd_);
+		::XMoveWindow(display_, wnd_, window_x_, window_y_);
 	}
-	else
-	{
-		::XMapWindow(mDisplay, mWnd);
-		::XMoveWindow(mDisplay, mWnd, mWindowX, mWindowY);
-	}
-	mIsHidden = pHide;
+	is_hidden_ = hide;
 }
 
-bool X11DisplayManager::InitWindow()
-{
-	bool lOk = true;
+bool X11DisplayManager::InitWindow() {
+	bool ok = true;
 
-	if (lOk && !mDisplay)
-	{
-		mLog.Error("Display not opened. X started?");
-		lOk = false;
+	if (ok && !display_) {
+		log_.Error("Display not opened. X started?");
+		ok = false;
 	}
 
-	if (lOk && !mWnd)
-	{
-		XVisualInfo* lVisualInfo = GetVisualInfo();
-		Screen* lScreen = DefaultScreenOfDisplay(mDisplay);
-		const int lScreenWidth  = WidthOfScreen(lScreen);
-		const int lScreenHeight = HeightOfScreen(lScreen);
+	if (ok && !wnd_) {
+		XVisualInfo* visual_info = GetVisualInfo();
+		Screen* __screen = DefaultScreenOfDisplay(display_);
+		const int screen_width  = WidthOfScreen(__screen);
+		const int screen_height = HeightOfScreen(__screen);
 
-		if (mDisplayMode.mWidth == 0 || mDisplayMode.mHeight == 0) 
-		{
-			mDisplayMode.mWidth  = lScreenWidth;
-			mDisplayMode.mHeight = lScreenHeight;
+		if (display_mode_.width_ == 0 || display_mode_.height_ == 0) {
+			display_mode_.width_  = screen_width;
+			display_mode_.height_ = screen_height;
 		}
 
-		int lWindowWidth  = mDisplayMode.mWidth;
-		int lWindowHeight = mDisplayMode.mHeight;
+		int _window_width  = display_mode_.width_;
+		int _window_height = display_mode_.height_;
 
-		switch(mScreenMode)
-		{
-			case DisplayManager::WINDOWED:
-			case DisplayManager::STATIC_WINDOW:
-			{
-				
-				lWindowWidth = GetWindowWidth(lWindowWidth);
-				lWindowHeight = GetWindowHeight(lWindowHeight);
+		switch(screen_mode_) {
+			case DisplayManager::kWindowed:
+			case DisplayManager::kStaticWindow: {
+
+				_window_width = GetWindowWidth(_window_width);
+				_window_height = GetWindowHeight(_window_height);
 			}
 			// TRICKY: fall through!
-			case DisplayManager::FULLSCREEN:
-			case DisplayManager::SPLASH_WINDOW:
-			{
-				Colormap lColMap = ::XCreateColormap(mDisplay, RootWindow(mDisplay, lVisualInfo->screen), lVisualInfo->visual, AllocNone);
-				XSetWindowAttributes lWinAttr;
-				lWinAttr.colormap = lColMap;
-				lWinAttr.border_pixel = 0;
-				lWinAttr.event_mask = StructureNotifyMask |
+			case DisplayManager::kFullscreen:
+			case DisplayManager::kSplashWindow: {
+				Colormap col_map = ::XCreateColormap(display_, RootWindow(display_, visual_info->screen), visual_info->visual, AllocNone);
+				XSetWindowAttributes win_attr;
+				win_attr.colormap = col_map;
+				win_attr.border_pixel = 0;
+				win_attr.event_mask = StructureNotifyMask |
 							FocusChangeMask | EnterWindowMask | LeaveWindowMask |
 							KeyPressMask | KeyReleaseMask |
 							ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
 							Button1MotionMask | Button2MotionMask | Button3MotionMask;
-				mWindowX = lScreenWidth/2 - lWindowWidth/2;
-				mWindowY = lScreenHeight/2 - lWindowHeight/2;
-				mWnd = ::XCreateWindow(
-					mDisplay,
-					RootWindow(mDisplay, lVisualInfo->screen),
-					mWindowX,
-					mWindowY,
-					lWindowWidth,
-					lWindowHeight,
+				window_x_ = screen_width/2 - _window_width/2;
+				window_y_ = screen_height/2 - _window_height/2;
+				wnd_ = ::XCreateWindow(
+					display_,
+					RootWindow(display_, visual_info->screen),
+					window_x_,
+					window_y_,
+					_window_width,
+					_window_height,
 					0,
-					lVisualInfo->depth,
+					visual_info->depth,
 					InputOutput,
-					lVisualInfo->visual,
+					visual_info->visual,
 					CWBorderPixel | CWColormap | CWEventMask,
-					&lWinAttr
+					&win_attr
 				);
 
-				if (mWnd)
-				{
+				if (wnd_) {
 					// Don't delete without telling.
-					Atom lDeleteWindow = XInternAtom(mDisplay, "WM_DELETE_WINDOW", False);
-					XSetWMProtocols(mDisplay, mWnd, &lDeleteWindow, 1);
+					Atom delete_window = XInternAtom(display_, "WM_DELETE_WINDOW", False);
+					XSetWMProtocols(display_, wnd_, &delete_window, 1);
 
 					HideWindow(false);
-					XEvent lEvent;
-					::XIfEvent(mDisplay, &lEvent, WaitForNotify, (char*)mWnd);
+					XEvent _event;
+					::XIfEvent(display_, &_event, WaitForNotify, (char*)wnd_);
 				}
-			}
-			break;
+			} break;
 			default:
 			break;
 		}
 
-		mMinimized = false;
-		mMaximized = false;
+		minimized_ = false;
+		maximized_ = false;
 
-		lOk = (mWnd != 0);
+		ok = (wnd_ != 0);
 
-		if (!lOk)
-		{
-			mLog.Error("InitWindow() - Failed to create window.");
+		if (!ok) {
+			log_.Error("InitWindow() - Failed to create window.");
 		}
 	}
 
-	if (lOk)
-	{
+	if (ok) {
 		X11Core::AddDisplayManager(this);
 	}
 
-	return lOk;
+	return ok;
 }
 
-void X11DisplayManager::GetBorderSize(int& pSizeX, int& pSizeY)
-{
-	if (mScreenMode == FULLSCREEN || mScreenMode == SPLASH_WINDOW)
-	{
-		pSizeX = 0;
-		pSizeY = 0;
-	}
-	else if(mWnd != 0)
-	{
+void X11DisplayManager::GetBorderSize(int& size_x, int& size_y) {
+	if (screen_mode_ == kFullscreen || screen_mode_ == kSplashWindow) {
+		size_x = 0;
+		size_y = 0;
+	} else if(wnd_ != 0) {
 		// Use the safest way there is... Taking the difference between
 		// the size of the window and the size of the client area.
 		// These numbers can't lie.
-		XWindowAttributes lWndAttr;
-		::XGetWindowAttributes(mDisplay, mWnd, &lWndAttr);
-		pSizeX = lWndAttr.border_width * 2;
-		pSizeY = lWndAttr.border_width * 3 + 20;	// TODO!
-	}
-	else
-	{
+		XWindowAttributes wnd_attr;
+		::XGetWindowAttributes(display_, wnd_, &wnd_attr);
+		size_x = wnd_attr.border_width * 2;
+		size_y = wnd_attr.border_width * 3 + 20;	// TODO!
+	} else {
 		// TODO
-		pSizeX = 5*2;
-		pSizeY = 3*3+20;
+		size_x = 5*2;
+		size_y = 3*3+20;
 	}
 }
 
-int X11DisplayManager::GetWindowWidth(int pClientWidth)
-{
-	int lBorderSizeX;
-	int lBorderSizeY;
-	GetBorderSize(lBorderSizeX, lBorderSizeY);
-	return pClientWidth + lBorderSizeX;
+int X11DisplayManager::GetWindowWidth(int client_width) {
+	int border_size_x;
+	int border_size_y;
+	GetBorderSize(border_size_x, border_size_y);
+	return client_width + border_size_x;
 }
 
-int X11DisplayManager::GetWindowHeight(int pClientHeight)
-{
-	int lBorderSizeX;
-	int lBorderSizeY;
-	GetBorderSize(lBorderSizeX, lBorderSizeY);
-	return pClientHeight + lBorderSizeY;
+int X11DisplayManager::GetWindowHeight(int client_height) {
+	int border_size_x;
+	int border_size_y;
+	GetBorderSize(border_size_x, border_size_y);
+	return client_height + border_size_y;
 }
 
-int X11DisplayManager::GetClientWidth(int pWindowWidth)
-{
-	int lBorderSizeX;
-	int lBorderSizeY;
-	GetBorderSize(lBorderSizeX, lBorderSizeY);
-	return pWindowWidth - lBorderSizeX;
+int X11DisplayManager::GetClientWidth(int window_width) {
+	int border_size_x;
+	int border_size_y;
+	GetBorderSize(border_size_x, border_size_y);
+	return window_width - border_size_x;
 }
 
-int X11DisplayManager::GetClientHeight(int pWindowHeight)
-{
-	int lBorderSizeX;
-	int lBorderSizeY;
-	GetBorderSize(lBorderSizeX, lBorderSizeY);
-	return pWindowHeight - lBorderSizeY;
+int X11DisplayManager::GetClientHeight(int window_height) {
+	int border_size_x;
+	int border_size_y;
+	GetBorderSize(border_size_x, border_size_y);
+	return window_height - border_size_y;
 }
 
-Display* X11DisplayManager::GetDisplay() const
-{
-	return mDisplay;
+Display* X11DisplayManager::GetDisplay() const {
+	return display_;
 }
 
-Window X11DisplayManager::GetWindow() const
-{
-	return mWnd;
+Window X11DisplayManager::GetWindow() const {
+	return wnd_;
 }
 
-void X11DisplayManager::ProcessMessages()
-{
-	if (!mDisplay)
-	{
+void X11DisplayManager::ProcessMessages() {
+	if (!display_) {
 		return;
 	}
 
-	while (::XPending(mDisplay) > 0)
-	{
-		XEvent lEvent;
-		::XNextEvent(mDisplay, &lEvent);
-		if (!SystemManager::GetQuitRequest())
-		{
-			DispatchMessage(lEvent);
+	while (::XPending(display_) > 0) {
+		XEvent _event;
+		::XNextEvent(display_, &_event);
+		if (!SystemManager::GetQuitRequest()) {
+			DispatchMessage(_event);
 		}
 	}
 }
 
-void X11DisplayManager::AddObserver(unsigned pMessage, X11Observer* pObserver)
-{
-	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pMessage);
-	ObserverSet* lSet = 0;
+void X11DisplayManager::AddObserver(unsigned message, X11Observer* observer) {
+	ObserverSetTable::Iterator t_iter = observer_set_table_.Find(message);
+	ObserverSet* set = 0;
 
-	if (lTIter == mObserverSetTable.End())
-	{
-		lSet = new ObserverSet;
-		mObserverSetTable.Insert(pMessage, lSet);
-	}
-	else
-	{
-		lSet = *lTIter;
+	if (t_iter == observer_set_table_.End()) {
+		set = new ObserverSet;
+		observer_set_table_.Insert(message, set);
+	} else {
+		set = *t_iter;
 	}
 
-	ObserverSet::iterator lLIter = lSet->find(pObserver);
-	if (lLIter == lSet->end())
-	{
-		lSet->insert(pObserver);
+	ObserverSet::iterator l_iter = set->find(observer);
+	if (l_iter == set->end()) {
+		set->insert(observer);
 	}
 }
 
-void X11DisplayManager::RemoveObserver(unsigned pMessage, X11Observer* pObserver)
-{
-	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pMessage);
+void X11DisplayManager::RemoveObserver(unsigned message, X11Observer* observer) {
+	ObserverSetTable::Iterator t_iter = observer_set_table_.Find(message);
 
-	if (lTIter != mObserverSetTable.End())
-	{
-		ObserverSet* lSet = *lTIter;
-		lSet->erase(pObserver);
-		if (lSet->empty())
-		{
-			mObserverSetTable.Remove(lTIter);
-			delete (lSet);
+	if (t_iter != observer_set_table_.End()) {
+		ObserverSet* set = *t_iter;
+		set->erase(observer);
+		if (set->empty()) {
+			observer_set_table_.Remove(t_iter);
+			delete (set);
 		}
 	}
 }
 
-void X11DisplayManager::RemoveObserver(X11Observer* pObserver)
-{
-	ObserverSetTable::Iterator lTIter = mObserverSetTable.First();
+void X11DisplayManager::RemoveObserver(X11Observer* observer) {
+	ObserverSetTable::Iterator t_iter = observer_set_table_.First();
 
-	while (lTIter != mObserverSetTable.End())
-	{
-		ObserverSet* lSet = *lTIter;
-		ObserverSet::iterator lLIter = lSet->find(pObserver);
-		if (lLIter != lSet->end())
-		{
-			lSet->erase(lLIter);
-			if (lSet->empty())
-			{
-				mObserverSetTable.Remove(lTIter++);
-				delete (lSet);
+	while (t_iter != observer_set_table_.End()) {
+		ObserverSet* set = *t_iter;
+		ObserverSet::iterator l_iter = set->find(observer);
+		if (l_iter != set->end()) {
+			set->erase(l_iter);
+			if (set->empty()) {
+				observer_set_table_.Remove(t_iter++);
+				delete (set);
+			} else {
+				++t_iter;
 			}
-			else
-			{
-				++lTIter;
-			}
-		}
-		else
-		{
-			++lTIter;
+		} else {
+			++t_iter;
 		}
 	}
 }
 
-void X11DisplayManager::ShowMessageBox(const str& pMsg, const str& pCaption)
-{
-	//::MessageBox(mWnd, pMsg.c_str(), pCaption.c_str(), MB_OK);
+void X11DisplayManager::ShowMessageBox(const str& msg, const str& caption) {
+	//::MessageBox(wnd_, msg.c_str(), caption.c_str(), MB_OK);
 }
 
-bool X11DisplayManager::OnMessage(const XEvent& pEvent)
-{
-	switch(pEvent.type)
-	{
-		case ConfigureNotify:
-		{
-			const XConfigureEvent& lConfigEvent = (const XConfigureEvent&)pEvent;
-			if (lConfigEvent.width != mDisplayMode.mWidth || lConfigEvent.height != mDisplayMode.mHeight)
-			{
-				DispatchResize(lConfigEvent.width, lConfigEvent.height);
+bool X11DisplayManager::OnMessage(const XEvent& event) {
+	switch(event.type) {
+		case ConfigureNotify: {
+			const XConfigureEvent& config_event = (const XConfigureEvent&)event;
+			if (config_event.width != display_mode_.width_ || config_event.height != display_mode_.height_) {
+				DispatchResize(config_event.width, config_event.height);
 			}
 
-			/*switch(pwParam)
-			{
-				case SIZE_MINIMIZED:
-				{
+			/*switch(param) {
+				case SIZE_MINIMIZED: {
 					DispatchMinimize();
-					mMinimized = true;
-					mMaximized = false;
-				}
-				break;
-				case SIZE_MAXIMIZED:
-				{
-					mNormalWidth  = mDisplayMode.mWidth;
-					mNormalHeight = mDisplayMode.mHeight;
-					DispatchMaximize((int)LOWORD(plParam), (int)HIWORD(plParam));
-					mMaximized = true;
-					mMinimized = false;
-				}
-				break;
-				case SIZE_RESTORED:
-				{
-					DispatchResize((int)LOWORD(plParam), (int)HIWORD(plParam));
-					mMinimized = false;
-					mMaximized = false;
-				}
-				break;
+					minimized_ = true;
+					maximized_ = false;
+				} break;
+				case SIZE_MAXIMIZED: {
+					normal_width_  = display_mode_.width_;
+					normal_height_ = display_mode_.height_;
+					DispatchMaximize((int)LOWORD(param), (int)HIWORD(param));
+					maximized_ = true;
+					minimized_ = false;
+				} break;
+				case SIZE_RESTORED: {
+					DispatchResize((int)LOWORD(param), (int)HIWORD(param));
+					minimized_ = false;
+					maximized_ = false;
+				} break;
 			}*/
-		}
-		break;
-		case ClientMessage:
-		{
-			if(pEvent.xclient.data.l[0] == XInternAtom(mDisplay, "WM_DELETE_WINDOW", False))
-			{
+		} break;
+		case ClientMessage: {
+			if(event.xclient.data.l[0] == XInternAtom(display_, "WM_DELETE_WINDOW", False)) {
 				SystemManager::AddQuitRequest(1);
 			}
-		}
-		break;
+		} break;
 	}
 
 	return false;
 }
 
-bool X11DisplayManager::DispatchMessage(const XEvent& pEvent)
-{
-	//mLog.Infof("X message: %i", pEvent.type);
+bool X11DisplayManager::DispatchMessage(const XEvent& event) {
+	//log_.Infof("X message: %i", event.type);
 
-	bool lConsumed = false;
-	ObserverSetTable::Iterator lTIter = mObserverSetTable.Find(pEvent.type);
-	if (lTIter != mObserverSetTable.End())
-	{
-		ObserverSet* lSet = *lTIter;
-		ObserverSet::iterator lLIter;
-		for (lLIter = lSet->begin(); lLIter != lSet->end(); ++lLIter)
-		{
-			lConsumed |= (*lLIter)->OnMessage(pEvent);
+	bool consumed = false;
+	ObserverSetTable::Iterator t_iter = observer_set_table_.Find(event.type);
+	if (t_iter != observer_set_table_.End()) {
+		ObserverSet* set = *t_iter;
+		ObserverSet::iterator l_iter;
+		for (l_iter = set->begin(); l_iter != set->end(); ++l_iter) {
+			consumed |= (*l_iter)->OnMessage(event);
 		}
 	}
-	return lConsumed;
+	return consumed;
 }
 
-Bool X11DisplayManager::WaitForNotify(Display* d, XEvent* e, char* arg)
-{
+Bool X11DisplayManager::WaitForNotify(Display* d, XEvent* e, char* arg) {
 	return((e->type == MapNotify) && (e->xmap.window == (::Window)arg));
 }
 
-XVisualInfo* X11DisplayManager::GetVisualInfo() const
-{
-	int lX11AttributeList[] =
+XVisualInfo* X11DisplayManager::GetVisualInfo() const {
+	int x11_attribute_list[] =
 	{
 			GLX_RGBA,
 			GLX_RED_SIZE, 1,
@@ -629,14 +518,12 @@ XVisualInfo* X11DisplayManager::GetVisualInfo() const
 			GLX_STENCIL_SIZE, 8,
 			None
 	};
-	int lAttributeOffsets[] = {12, 10, 8, 7, 1, 0};
-	for (int x = 0; x < LEPRA_ARRAY_COUNT(lAttributeOffsets); ++x)
-	{
-		lX11AttributeList[lAttributeOffsets[x]] = None;
-		XVisualInfo* lVisual = ::glXChooseVisual(mDisplay, DefaultScreen(mDisplay), lX11AttributeList);
-		if (lVisual)
-		{
-			return lVisual;
+	int attribute_offsets[] = {12, 10, 8, 7, 1, 0};
+	for (int x = 0; x < LEPRA_ARRAY_COUNT(attribute_offsets); ++x) {
+		x11_attribute_list[attribute_offsets[x]] = None;
+		XVisualInfo* __visual = ::glXChooseVisual(display_, DefaultScreen(display_), x11_attribute_list);
+		if (__visual) {
+			return __visual;
 		}
 	}
 	return 0;
@@ -644,8 +531,8 @@ XVisualInfo* X11DisplayManager::GetVisualInfo() const
 
 
 
-int X11DisplayManager::mDisplayUseCount = 0;
-loginstance(UI_GFX, X11DisplayManager);
+int X11DisplayManager::display_use_count_ = 0;
+loginstance(kUiGfx, X11DisplayManager);
 
 
 

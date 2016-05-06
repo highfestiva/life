@@ -1,29 +1,29 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Life/LifeClient/RtVar.h"
-#include "../Life/LifeServer/RtVar.h"
-#include "../UiCure/Include/UiRuntimeVariableName.h"
+#include "../cure/include/runtimevariable.h"
+#include "../life/lifeclient/rtvar.h"
+#include "../life/lifeserver/rtvar.h"
+#include "../uicure/include/uiruntimevariablename.h"
 
 
 
-#define RTVAR_GAME_ALLOWTOYMODE		"Game.AllowToyMode"
-#define RTVAR_GAME_LEVELCOUNT		"Game.LevelCount"
-#define RTVAR_GAME_PERSONALRECORD_LEVEL	"Game.PersonalRecord.Level"
-#define RTVAR_GAME_STARTLEVEL		"Game.StartLevel"
-#define RTVAR_GAME_WORLDRECORD_LEVEL	"Game.WorldRecord.Level"
-#define RTVAR_GAME_PILOTNAME		"Game.PilotName"
+#define kRtvarGameAllowtoymode		"Game.AllowToyMode"
+#define kRtvarGameLevelcount		"Game.LevelCount"
+#define kRtvarGamePersonalrecordLevel	"Game.PersonalRecord.Level"
+#define kRtvarGameStartlevel		"Game.StartLevel"
+#define kRtvarGameWorldrecordLevel	"Game.WorldRecord.Level"
+#define kRtvarGamePilotname		"Game.PilotName"
 
-#define RTVAR_PHYSICS_RTR_OFFSET	"Physics.RTR.Offset"
+#define kRtvarPhysicsRtrOffset	"Physics.RTR.Offset"
 
-#define RTVAR_UI_3D_CAMDISTANCE		"Ui.3D.CamDistance"
-#define RTVAR_UI_3D_CAMXOFFSET		"Ui.3D.CamXOffset"
-#define RTVAR_UI_3D_CAMYOFFSET		"Ui.3D.CamYOffset"
-#define RTVAR_UI_3D_CAMZOFFSET		"Ui.3D.CamZOffset"
-#define RTVAR_UI_3D_CAMXANGLE		"Ui.3D.CamXAngle"
+#define kRtvarUi3DCamdistance		"Ui.3D.CamDistance"
+#define kRtvarUi3DCamxoffset		"Ui.3D.CamXOffset"
+#define kRtvarUi3DCamyoffset		"Ui.3D.CamYOffset"
+#define kRtvarUi3DCamzoffset		"Ui.3D.CamZOffset"
+#define kRtvarUi3DCamxangle		"Ui.3D.CamXAngle"

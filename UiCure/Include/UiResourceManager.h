@@ -1,25 +1,24 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-, Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Cure/Include/ResourceManager.h"
-#include "../../Lepra/Include/Canvas.h"
-#include "../../Tbc/Include/GeometryReference.h"
-#include "../../UiLepra/Include/UiSoundManager.h"
-#include "../../UiTbc/Include/UiChunkyClass.h"
-#include "../../UiTbc/Include/UiChunkyLoader.h"
-#include "../../UiTbc/Include/UiPainter.h"
-#include "../../UiTbc/Include/UiRenderer.h"
-#include "UiCure.h"
+#include "../../cure/include/resourcemanager.h"
+#include "../../lepra/include/canvas.h"
+#include "../../tbc/include/geometryreference.h"
+#include "../../uilepra/include/uisoundmanager.h"
+#include "../../uitbc/include/uichunkyclass.h"
+#include "../../uitbc/include/uichunkyloader.h"
+#include "../../uitbc/include/uipainter.h"
+#include "../../uitbc/include/uirenderer.h"
+#include "uicure.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
@@ -27,122 +26,112 @@ class GameUiManager;
 
 
 
-class UiResource
-{
+class UiResource {
 protected:
-	UiResource(GameUiManager* pUiManager);
+	UiResource(GameUiManager* ui_manager);
 	virtual ~UiResource();
 
 	GameUiManager* GetUiManager() const;
 
 private:
-	GameUiManager* mUiManager;
+	GameUiManager* ui_manager_;
 };
 
 
 
 template<class ResourceType>
-class UserUiTypeResource: public Cure::UserTypeResourceBase<UserUiTypeResource<ResourceType>, ResourceType>,
-	public UiResource
-{
+class UserUiTypeResource: public cure::UserTypeResourceBase<UserUiTypeResource<ResourceType>, ResourceType>,
+	public UiResource {
 public:
-	UserUiTypeResource(GameUiManager* pUiManager);
+	UserUiTypeResource(GameUiManager* ui_manager);
 	virtual ~UserUiTypeResource();
 
-	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const str& pName) const;
+	cure::Resource* CreateResource(cure::ResourceManager* manager, const str& name) const;
 };
 
 
 
 template<class ResourceType, class SubtypeExtraType>
 class UserUiExtraTypeResource:
-	public Cure::UserTypeResourceBase<UserUiExtraTypeResource<ResourceType, SubtypeExtraType>, ResourceType>,
-	public UiResource
-{
+	public cure::UserTypeResourceBase<UserUiExtraTypeResource<ResourceType, SubtypeExtraType>, ResourceType>,
+	public UiResource {
 public:
 	typedef SubtypeExtraType ExtraType;
 
-	UserUiExtraTypeResource(GameUiManager* pUiManager, const ExtraType& pExtraData);
+	UserUiExtraTypeResource(GameUiManager* ui_manager, const ExtraType& extra_data);
 	virtual ~UserUiExtraTypeResource();
 
 	ExtraType& GetExtraData() const;
-	void SetExtraData(const ExtraType& pExtraData);
+	void SetExtraData(const ExtraType& extra_data);
 
-	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const str& pName) const;
+	cure::Resource* CreateResource(cure::ResourceManager* manager, const str& name) const;
 
 private:
-	mutable ExtraType mExtraData;
+	mutable ExtraType extra_data_;
 };
 
 
 
-class PainterImageResource: public Cure::OptimizedResource<Canvas*, UiTbc::Painter::ImageID>, public UiResource
-{
-	typedef Cure::OptimizedResource<Canvas*, UiTbc::Painter::ImageID> Parent;
+class PainterImageResource: public cure::OptimizedResource<Canvas*, uitbc::Painter::ImageID>, public UiResource {
+	typedef cure::OptimizedResource<Canvas*, uitbc::Painter::ImageID> Parent;
 public:
-	enum ImageReleaseMode
-	{
-		RELEASE_DELETE = 1,
-		RELEASE_FREE_BUFFER,
-		RELEASE_NONE,
+	enum ImageReleaseMode {
+		kReleaseDelete = 1,
+		kReleaseFreeBuffer,
+		kReleaseNone,
 	};
-	typedef UiTbc::Painter::ImageID UserData;
+	typedef uitbc::Painter::ImageID UserData;
 
-	PainterImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
-	PainterImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName, ImageReleaseMode pReleaseMode);
+	PainterImageResource(GameUiManager* ui_manager, cure::ResourceManager* manager, const str& name);
+	PainterImageResource(GameUiManager* ui_manager, cure::ResourceManager* manager, const str& name, ImageReleaseMode release_mode);
 	virtual ~PainterImageResource();
 	const str GetType() const;
-	UserData GetUserData(const Cure::UserResource* pUserResource) const;
+	UserData GetUserData(const cure::UserResource* user_resource) const;
 	bool Load();
-	Cure::ResourceLoadState PostProcess();
+	cure::ResourceLoadState PostProcess();
 
 private:
-	ImageReleaseMode mReleaseMode;
+	ImageReleaseMode release_mode_;
 };
 
 
 
-class RendererImageBaseResource: public Cure::OptimizedResource<UiTbc::Texture*, UiTbc::Renderer::TextureID>, public UiResource
-{
-	typedef Cure::OptimizedResource<UiTbc::Texture*, UiTbc::Renderer::TextureID> Parent;
+class RendererImageBaseResource: public cure::OptimizedResource<uitbc::Texture*, uitbc::Renderer::TextureID>, public UiResource {
+	typedef cure::OptimizedResource<uitbc::Texture*, uitbc::Renderer::TextureID> Parent;
 public:
-	typedef UiTbc::Renderer::TextureID UserData;
+	typedef uitbc::Renderer::TextureID UserData;
 
-	UserData GetUserData(const Cure::UserResource* pUserResource) const;
+	UserData GetUserData(const cure::UserResource* user_resource) const;
 
-	Cure::ResourceLoadState PostProcess();
+	cure::ResourceLoadState PostProcess();
 
 protected:
-	RendererImageBaseResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
+	RendererImageBaseResource(GameUiManager* ui_manager, cure::ResourceManager* manager, const str& name);
 	virtual ~RendererImageBaseResource();
 };
 
-struct ImageProcessSettings
-{
-	Canvas::ResizeHint mResizeHint;
-	bool mMipMap;
-	inline ImageProcessSettings(Canvas::ResizeHint pResizeHint, bool pMipMap):
-		mResizeHint(pResizeHint),
-		mMipMap(pMipMap)
-	{
+struct ImageProcessSettings {
+	Canvas::ResizeHint resize_hint_;
+	bool mip_map_;
+	inline ImageProcessSettings(Canvas::ResizeHint resize_hint, bool mip_map):
+		resize_hint_(resize_hint),
+		mip_map_(mip_map) {
 	}
 };
 
-class RendererImageResource: public RendererImageBaseResource
-{
+class RendererImageResource: public RendererImageBaseResource {
 public:
-	RendererImageResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName, const ImageProcessSettings& pLoadSettings);
+	RendererImageResource(GameUiManager* ui_manager, cure::ResourceManager* manager, const str& name, const ImageProcessSettings& load_settings);
 	virtual ~RendererImageResource();
 	const str GetType() const;
 	bool Load();
 
-	ImageProcessSettings mSettings;
+	ImageProcessSettings settings_;
 };
 
-/*class TextureResource: public RendererImageBaseResource
-{
+/*class TextureResource: public RendererImageBaseResource {
 public:
-	TextureResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
+	TextureResource(GameUiManager* ui_manager, cure::ResourceManager* manager, const str& name);
 	virtual ~TextureResource();
 	const str GetType() const;
 	bool Load();
@@ -150,26 +139,25 @@ public:
 
 
 
-class GeometryResource: public Cure::OptimizedResource<Tbc::GeometryBase*, UiTbc::Renderer::GeometryID>, public UiResource
-{
-	typedef Cure::OptimizedResource<Tbc::GeometryBase*, UiTbc::Renderer::GeometryID> Parent;
+class GeometryResource: public cure::OptimizedResource<tbc::GeometryBase*, uitbc::Renderer::GeometryID>, public UiResource {
+	typedef cure::OptimizedResource<tbc::GeometryBase*, uitbc::Renderer::GeometryID> Parent;
 public:
-	typedef UiTbc::Renderer::GeometryID UserData;
+	typedef uitbc::Renderer::GeometryID UserData;
 
-	GeometryResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
+	GeometryResource(GameUiManager* ui_manager, cure::ResourceManager* manager, const str& name);
 	virtual ~GeometryResource();
 	void ReleaseGeometry();
 	const str GetType() const;
 
-	UserData GetUserData(const Cure::UserResource*) const;
+	UserData GetUserData(const cure::UserResource*) const;
 	bool Load();
-	Cure::ResourceLoadState PostProcess();
+	cure::ResourceLoadState PostProcess();
 
 	int GetCastsShadows() const;
-	void SetCastsShadows(int pCastsShadows);
+	void SetCastsShadows(int casts_shadows);
 
 protected:
-	int mCastsShadows;
+	int casts_shadows_;
 
 private:
 	logclass();
@@ -177,13 +165,12 @@ private:
 
 
 
-class GeometryReferenceResource: public GeometryResource
-{
+class GeometryReferenceResource: public GeometryResource {
 	typedef GeometryResource Parent;
 public:
 	typedef UserUiTypeResource<GeometryResource> ClassResource;
 
-	GeometryReferenceResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
+	GeometryReferenceResource(GameUiManager* ui_manager, cure::ResourceManager* manager, const str& name);
 	virtual ~GeometryReferenceResource();
 	void ReleaseGeometry();
 	const str GetType() const;
@@ -192,118 +179,108 @@ public:
 	ClassResource* GetParent() const;
 
 	bool Load();
-	Cure::ResourceLoadState PostProcess();
-	Cure::ResourceLoadState CreateInstance();
+	cure::ResourceLoadState PostProcess();
+	cure::ResourceLoadState CreateInstance();
 
 private:
 	void Resume();
 	void Suspend();
 
 	void OnLoadClass(ClassResource*);
-	ClassResource* mClassResource;
+	ClassResource* class_resource_;
 
 	logclass();
 };
 
-struct GeometryOffset
-{
-	GeometryOffset(unsigned pPhysicsNodeId):
-		mGeometryIndex(pPhysicsNodeId),
-		mScale(1)
-	{
+struct GeometryOffset {
+	GeometryOffset(unsigned physics_node_id):
+		geometry_index_(physics_node_id),
+		scale_(1) {
 	}
-	GeometryOffset(unsigned pPhysicsNodeId, vec3 pOffset):
-		mGeometryIndex(pPhysicsNodeId),
-		mScale(1)
-	{
-		mOffset.SetPosition(pOffset);
+	GeometryOffset(unsigned physics_node_id, vec3 offset):
+		geometry_index_(physics_node_id),
+		scale_(1) {
+		offset_.SetPosition(offset);
 	}
-	GeometryOffset(unsigned pPhysicsNodeId, xform pOffset, float pScale):
-		mGeometryIndex(pPhysicsNodeId),
-		mOffset(pOffset),
-		mScale(pScale)
-	{
+	GeometryOffset(unsigned physics_node_id, xform offset, float scale):
+		geometry_index_(physics_node_id),
+		offset_(offset),
+		scale_(scale) {
 	}
 
-	unsigned mGeometryIndex;
-	xform mOffset;
-	float mScale;
+	unsigned geometry_index_;
+	xform offset_;
+	float scale_;
 };
 
 
 
-class UserGeometryReferenceResource: public Cure::UserTypeResourceBase<
-	UserGeometryReferenceResource, GeometryReferenceResource>, public UiResource
-{
-	typedef Cure::UserTypeResourceBase<UserGeometryReferenceResource, GeometryReferenceResource> Parent;
+class UserGeometryReferenceResource: public cure::UserTypeResourceBase<
+	UserGeometryReferenceResource, GeometryReferenceResource>, public UiResource {
+	typedef cure::UserTypeResourceBase<UserGeometryReferenceResource, GeometryReferenceResource> Parent;
 public:
-	UserGeometryReferenceResource(GameUiManager* pUiManager, const GeometryOffset& pOffset = GeometryOffset(0));
+	UserGeometryReferenceResource(GameUiManager* ui_manager, const GeometryOffset& offset = GeometryOffset(0));
 	virtual ~UserGeometryReferenceResource();
 
 	const GeometryOffset& GetOffset() const;
 
-	Cure::Resource* CreateResource(Cure::ResourceManager* pManager, const str& pName) const;
+	cure::Resource* CreateResource(cure::ResourceManager* manager, const str& name) const;
 
-	GeometryOffset mOffset;
+	GeometryOffset offset_;
 	logclass();
 };
 
 
 
-class SoundResource: public Cure::DiversifiedResource<UiLepra::SoundManager::SoundID, UiLepra::SoundManager::SoundInstanceID>, public UiResource
-{
-	typedef Cure::DiversifiedResource<UiLepra::SoundManager::SoundID, UiLepra::SoundManager::SoundInstanceID> Parent;
+class SoundResource: public cure::DiversifiedResource<uilepra::SoundManager::SoundID, uilepra::SoundManager::SoundInstanceID>, public UiResource {
+	typedef cure::DiversifiedResource<uilepra::SoundManager::SoundID, uilepra::SoundManager::SoundInstanceID> Parent;
 public:
-	enum SoundDimension
-	{
-		DIMENSION_2D = 1,
-		DIMENSION_3D = 2,
+	enum SoundDimension {
+		kDimension2D = 1,
+		kDimension3D = 2,
 	};
-	typedef UiLepra::SoundManager::SoundInstanceID UserData;
-	typedef UiLepra::SoundManager::LoopMode LoopMode;
+	typedef uilepra::SoundManager::SoundInstanceID UserData;
+	typedef uilepra::SoundManager::LoopMode LoopMode;
 
 	void Release();
 	bool Load();
 	virtual UserData CreateDiversifiedData() const;
-	virtual void ReleaseDiversifiedData(UserData pData) const;
+	virtual void ReleaseDiversifiedData(UserData data) const;
 
 protected:
-	SoundResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName,
-		SoundDimension pDimension, LoopMode pLoopMode);
+	SoundResource(GameUiManager* ui_manager, cure::ResourceManager* manager, const str& name,
+		SoundDimension dimension, LoopMode loop_mode);
 	virtual ~SoundResource();
 
-	virtual void PatchInfo(Cure::ResourceInfo& pInfo) const;
+	virtual void PatchInfo(cure::ResourceInfo& info) const;
 
 private:
-	SoundDimension mDimension;
-	LoopMode mLoopMode;
+	SoundDimension dimension_;
+	LoopMode loop_mode_;
 
 	logclass();
 };
 
-class SoundResource2d: public SoundResource
-{
+class SoundResource2d: public SoundResource {
 public:
-	SoundResource2d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName,
-		LoopMode pLoopMode);
+	SoundResource2d(GameUiManager* ui_manager, cure::ResourceManager* manager, const str& name,
+		LoopMode loop_mode);
 	const str GetType() const;
 };
 
-class SoundResource3d: public SoundResource
-{
+class SoundResource3d: public SoundResource {
 public:
-	SoundResource3d(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName,
-		LoopMode pLoopMode);
+	SoundResource3d(GameUiManager* ui_manager, cure::ResourceManager* manager, const str& name,
+		LoopMode loop_mode);
 	const str GetType() const;
 };
 
 
 
-class ClassResource: public Cure::ClassResourceBase<UiTbc::ChunkyClass, UiTbc::ChunkyClassLoader>, public UiResource
-{
-	typedef Cure::ClassResourceBase<UiTbc::ChunkyClass, UiTbc::ChunkyClassLoader> Parent;
+class ClassResource: public cure::ClassResourceBase<uitbc::ChunkyClass, uitbc::ChunkyClassLoader>, public UiResource {
+	typedef cure::ClassResourceBase<uitbc::ChunkyClass, uitbc::ChunkyClassLoader> Parent;
 public:
-	ClassResource(GameUiManager* pUiManager, Cure::ResourceManager* pManager, const str& pName);
+	ClassResource(GameUiManager* ui_manager, cure::ResourceManager* manager, const str& name);
 	virtual ~ClassResource();
 
 	virtual bool Load();
@@ -316,7 +293,7 @@ public:
 public:
 	typedef void* UserData;
 
-	AnimationResource(const str& pName);
+	AnimationResource(const str& name);
 
 	bool Load();
 };*/
@@ -326,7 +303,7 @@ public:
 /*class TerrainResource: public ???Resource<void*>	// ???
 {
 public:
-	TerrainResource(const str& pName);
+	TerrainResource(const str& name);
 
 	bool Load();
 };*/
@@ -340,9 +317,9 @@ typedef UserUiExtraTypeResource<RendererImageResource, ImageProcessSettings>			U
 typedef UserUiExtraTypeResource<SoundResource2d, SoundResource::LoopMode>			UserSound2dResource;
 typedef UserUiExtraTypeResource<SoundResource3d, SoundResource::LoopMode>			UserSound3dResource;
 typedef UserUiTypeResource<ClassResource>							UserClassResource;
-//typedef Cure::UserTypeResource<Tbc::...>							UserPhysicsResource;
-//typedef UserUiTypeResource<Tbc::...>								UserAnimationResource;
-//typedef Cure::UserTypeResource<...>								UserTerrainResource;
+//typedef cure::UserTypeResource<tbc::...>							UserPhysicsResource;
+//typedef UserUiTypeResource<tbc::...>								UserAnimationResource;
+//typedef cure::UserTypeResource<...>								UserTerrainResource;
 
 
 
@@ -350,4 +327,4 @@ typedef UserUiTypeResource<ClassResource>							UserClassResource;
 
 
 
-#include "UiResourceManager.inl"
+#include "uiresourcemanager.inl"

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // JB 2008-07-15: totally rewrote from scratch. Reduced the number of lines by 76 %!
@@ -15,7 +15,7 @@
 
 
 #include <list>
-#include "String.h"
+#include "string.h"
 
 
 
@@ -24,54 +24,50 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 ID_TEMPLATE
-class IdManager
-{
+class IdManager {
 public:
-	// pMinId and pMaxId defines the valid Id-range [pMinId, pMaxId].
-	// pInvalidId mustn't be a part of this range. Thus, the expression:
+	// min_id and max_id defines the valid Id-range [min_id, max_id].
+	// invalid_id mustn't be a part of this range. Thus, the expression:
 	// "pInvalidId < pMinId or pInvalidId > pMaxId"
 	// must be true.
-	IdManager(_TInt pMinId, _TInt pMaxId, _TInt pInvalidId);
+	IdManager(_TInt min_id, _TInt max_id, _TInt invalid_id);
 
 	inline _TInt GetMinId() const;
 	inline _TInt GetMaxId() const;
 	inline _TInt GetInvalidId() const;
 
-	bool IsIdFree(_TInt pId) const;
+	bool IsIdFree(_TInt id) const;
 	_TInt GetFreeId();
-	bool ReserveId(_TInt pId);
-	bool RecycleId(_TInt pId);
+	bool ReserveId(_TInt id);
+	bool RecycleId(_TInt id);
 
 	str GetDebugState() const;
 
 private:
-	struct AllocFreeSegment
-	{
-		AllocFreeSegment(_TInt pFirstAlloc, _TInt pFirstFree, _TInt pLastFree):
-			mFirstAllocId(pFirstAlloc),
-			mFirstFreeId(pFirstFree),
-			mLastFreeId(pLastFree)
-		{
+	struct AllocFreeSegment {
+		AllocFreeSegment(_TInt first_alloc, _TInt first_free, _TInt last_free):
+			first_alloc_id_(first_alloc),
+			first_free_id_(first_free),
+			last_free_id_(last_free) {
 		}
-		_TInt mFirstAllocId;
-		_TInt mFirstFreeId;
-		_TInt mLastFreeId;
+		_TInt first_alloc_id_;
+		_TInt first_free_id_;
+		_TInt last_free_id_;
 	};
 
 	typedef std::list<AllocFreeSegment> IdSegmentList;
 
-	void AllocateIdOnSegment(_TInt pId, const typename IdSegmentList::iterator& x);
-	void FreeIdOnSegment(_TInt pId, const typename IdSegmentList::iterator& x);
+	void AllocateIdOnSegment(_TInt id, const typename IdSegmentList::iterator& x);
+	void FreeIdOnSegment(_TInt id, const typename IdSegmentList::iterator& x);
 
-	IdSegmentList mIdSegmentList;
+	IdSegmentList id_segment_list_;
 
-	_TInt mInvalidId;
+	_TInt invalid_id_;
 };
 
 
@@ -80,7 +76,7 @@ private:
 
 
 
-#include "IdManager.inl"
+#include "idmanager.inl"
 
 
 

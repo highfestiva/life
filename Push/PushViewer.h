@@ -1,30 +1,28 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "PushManager.h"
-#include "RoadSignButton.h"
-#include "ServerListView.h"
+#include "pushmanager.h"
+#include "roadsignbutton.h"
+#include "serverlistview.h"
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
 // This is just a simple viewer that shows a background for menus and shows off in demo mode.
-class PushViewer: public PushManager, public ServerSelectObserver
-{
+class PushViewer: public PushManager, public ServerSelectObserver {
 	typedef PushManager Parent;
 public:
-	PushViewer(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
-		Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-		UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea);
+	PushViewer(life::GameClientMasterTicker* pMaster, const cure::TimeManager* time,
+		cure::RuntimeVariableScope* variable_scope, cure::ResourceManager* resource_manager,
+		UiCure::GameUiManager* ui_manager, int slave_index, const PixelRect& render_area);
 	virtual ~PushViewer();
 
 private:
@@ -35,16 +33,16 @@ private:
 	virtual void TickUiUpdate();
 	virtual void CreateLoginView();
 	virtual bool InitializeUniverse();
-	virtual void OnLoadCompleted(Cure::ContextObject* pObject, bool pOk);
+	virtual void OnLoadCompleted(cure::ContextObject* object, bool ok);
 	virtual void OnCancelJoinServer();
-	virtual void OnRequestJoinServer(const str& pServerAddress);
-	virtual bool UpdateServerList(Life::ServerInfoList& pServerList) const;
+	virtual void OnRequestJoinServer(const str& server_address);
+	virtual bool UpdateServerList(life::ServerInfoList& server_list) const;
 	virtual bool IsMasterServerConnectError() const;
 	void CloseJoinServerView();
-	RoadSignButton* CreateButton(float x, float y, float z, const str& pName, const str& pClass, const str& pTexture, RoadSignButton::Shape pShape);
-	void OnButtonClick(UiTbc::Button* pButton);
+	RoadSignButton* CreateButton(float x, float y, float z, const str& name, const str& clazz, const str& texture, RoadSignButton::Shape shape);
+	void OnButtonClick(uitbc::Button* button);
 
-	ServerListView* mServerListView;
+	ServerListView* server_list_view_;
 
 	logclass();
 };

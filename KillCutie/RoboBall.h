@@ -6,31 +6,29 @@
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
-#include "Game.h"
+#include "../uicure/include/uimachine.h"
+#include "game.h"
 
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
-class RoboBall: public UiCure::Machine
-{
+class RoboBall: public UiCure::Machine {
 public:
 	typedef UiCure::Machine Parent;
 
-	RoboBall(const Game* pGame, const str& pClassId);
+	RoboBall(const Game* game, const str& class_id);
 	virtual ~RoboBall();
 
 private:
 	void OnTick();
 
-	const Game* mGame;
-	HiResTimer mHeadAwayTimer;
-	UiCure::UserSound3dResource* mSound;
-	int mBadSpeedCounter;
+	const Game* game_;
+	HiResTimer head_away_timer_;
+	UiCure::UserSound3dResource* sound_;
+	int bad_speed_counter_;
 
 	logclass();
 };

@@ -1,180 +1,154 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Npc.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/IntAttribute.h"
-#include "../RtVar.h"
-#include "GameServerLogic.h"
+#include "npc.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/gamemanager.h"
+#include "../../cure/include/intattribute.h"
+#include "../rtvar.h"
+#include "gameserverlogic.h"
 
 #define AMMO_VELOCITY_M_PER_S	500.0f	// TODO: remove hard-coding!
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-Npc::Npc(GameServerLogic* pLogic):
+Npc::Npc(GameServerLogic* logic):
 	Parent(0, "npc"),
-	mLogic(pLogic),
-	mIntelligence(0.5f),
-	mAvatarId(0)
-{
+	logic_(logic),
+	intelligence_(0.5f),
+	avatar_id_(0) {
 	SetLoadResult(true);
 }
 
-Npc::~Npc()
-{
-	if (mAvatarId)
-	{
-		GetManager()->PostKillObject(mAvatarId);
-		mAvatarId = 0;
+Npc::~Npc() {
+	if (avatar_id_) {
+		GetManager()->PostKillObject(avatar_id_);
+		avatar_id_ = 0;
 	}
 }
 
 
 
-Cure::GameObjectId Npc::GetAvatarId() const
-{
-	return mAvatarId;
+cure::GameObjectId Npc::GetAvatarId() const {
+	return avatar_id_;
 }
 
-void Npc::SetAvatarId(Cure::GameObjectId pAvatarId)
-{
-	mAvatarId = pAvatarId;
-	if (mAvatarId)
-	{
+void Npc::SetAvatarId(cure::GameObjectId avatar_id) {
+	avatar_id_ = avatar_id;
+	if (avatar_id_) {
 		GetManager()->EnableTickCallback(this);
-	}
-	else
-	{
+	} else {
 		StartCreateAvatar(10.0f);
 	}
 }
 
-void Npc::StartCreateAvatar(float pTime)
-{
+void Npc::StartCreateAvatar(float time) {
 	GetManager()->DisableTickCallback(this);
-	GetManager()->AddGameAlarmCallback(this, 5, pTime, 0);
+	GetManager()->AddGameAlarmCallback(this, 5, time, 0);
 }
 
 
 
-void Npc::OnTick()
-{
+void Npc::OnTick() {
 	Parent::OnTick();
 
-	if (!mAvatarId)
-	{
+	if (!avatar_id_) {
 		return;
 	}
-	Cure::ContextObject* lMyAvatar = GetManager()->GetObject(mAvatarId);
-	if (!lMyAvatar)
-	{
+	cure::ContextObject* my_avatar = GetManager()->GetObject(avatar_id_);
+	if (!my_avatar) {
 		return;
 	}
-	Cure::IntAttribute* lTeam = (Cure::IntAttribute*)lMyAvatar->GetAttribute("int_team");
-	if (!lTeam)
-	{
+	cure::IntAttribute* team = (cure::IntAttribute*)my_avatar->GetAttribute("int_team");
+	if (!team) {
 		return;
 	}
 
-	const int lOtherTeam = lTeam->GetValue()? 0 : 1;
-	const GameServerLogic::AvatarIdSet lAvatarIdSet = mLogic->GetAvatarsInTeam(lOtherTeam);
-	Cure::ContextObject* lTarget = 0;
-	if (!lAvatarIdSet.empty())
-	{
-		lTarget = GetManager()->GetObject(*lAvatarIdSet.begin());
+	const int other_team = team->GetValue()? 0 : 1;
+	const GameServerLogic::AvatarIdSet avatar_id_set = logic_->GetAvatarsInTeam(other_team);
+	cure::ContextObject* target = 0;
+	if (!avatar_id_set.empty()) {
+		target = GetManager()->GetObject(*avatar_id_set.begin());
 	}
-	float lFwd = 0;
-	float lRight = 0;
-	float lPhi = 0;
-	bool lCanShoot = false;
-	vec3 lUp(0, 0, 1);
-	lUp = lMyAvatar->GetOrientation() * lUp;
-	if (lTarget && lUp.z > 0.2f)	// Just steer+shoot if we're "standing up".
-	{
-		vec3 lDiff = lTarget->GetPosition() - lMyAvatar->GetPosition();
-		float lDistance = lDiff.GetLength();
-		const float lTimeUntilHit = mIntelligence * lDistance / AMMO_VELOCITY_M_PER_S;
-		lDiff = (lTarget->GetPosition() + lTarget->GetVelocity()*lTimeUntilHit) - (lMyAvatar->GetPosition() + lMyAvatar->GetVelocity()*lTimeUntilHit);
+	float fwd = 0;
+	float right = 0;
+	float phi = 0;
+	bool can_shoot = false;
+	vec3 up(0, 0, 1);
+	up = my_avatar->GetOrientation() * up;
+	if (target && up.z > 0.2f) {	// Just steer+shoot if we're "standing up".
+		vec3 diff = target->GetPosition() - my_avatar->GetPosition();
+		float distance = diff.GetLength();
+		const float time_until_hit = intelligence_ * distance / AMMO_VELOCITY_M_PER_S;
+		diff = (target->GetPosition() + target->GetVelocity()*time_until_hit) - (my_avatar->GetPosition() + my_avatar->GetVelocity()*time_until_hit);
 
 		float _;
-		lDiff.GetSphericalAngles(_, lPhi);
-		lPhi += PIF/2;
-		float lYaw;
-		lMyAvatar->GetOrientation().GetEulerAngles(lYaw, _, _);
-		lYaw -= PIF;
-		Math::RangeAngles(lPhi, lYaw);
-		lPhi -= lYaw;
-		lPhi = -lPhi;
-		const float lRotation = lPhi;
-		if (std::abs(lPhi) < 0.02f)
-		{
-			lPhi = 0;
+		diff.GetSphericalAngles(_, phi);
+		phi += PIF/2;
+		float yaw;
+		my_avatar->GetOrientation().GetEulerAngles(yaw, _, _);
+		yaw -= PIF;
+		Math::RangeAngles(phi, yaw);
+		phi -= yaw;
+		phi = -phi;
+		const float rotation = phi;
+		if (std::abs(phi) < 0.02f) {
+			phi = 0;
 		}
-		lPhi *= 4.0f;
-		lPhi *= std::abs(lPhi);
+		phi *= 4.0f;
+		phi *= std::abs(phi);
 
-		lDistance = lDiff.GetLength();
-		if (lDistance > 15 && std::abs(lDiff.z) < 2)	// TODO: implement different shooting pattern for other weapons.
-		{
-			lCanShoot = true;	// Allow grenade shooting if out of range.
+		distance = diff.GetLength();
+		if (distance > 15 && std::abs(diff.z) < 2) {	// TODO: implement different shooting pattern for other weapons.
+			can_shoot = true;	// Allow grenade shooting if out of range.
 		}
-		if (lDistance > 100 && std::abs(lRotation) < 0.4f)
-		{
-			lFwd = +1.0f;	// Head towards the target if too far away.
+		if (distance > 100 && std::abs(rotation) < 0.4f) {
+			fwd = +1.0f;	// Head towards the target if too far away.
+		} else if (distance < 30 && std::abs(rotation) < 0.4f) {
+			fwd = -1.0f;	// Move away if too close.
 		}
-		else if (lDistance < 30 && std::abs(lRotation) < 0.4f)
-		{
-			lFwd = -1.0f;	// Move away if too close.
+		if (rotation != 0) {
+			right = 5.0f * rotation;	// Strafe if slightly off.
+			right *= (std::abs(rotation) < 0.4f)? 1 : -1;
 		}
-		if (lRotation != 0)
-		{
-			lRight = 5.0f * lRotation;	// Strafe if slightly off.
-			lRight *= (std::abs(lRotation) < 0.4f)? 1 : -1;
-		}
-		const float lSteeringPower = std::abs(Math::Clamp(lFwd, -1.0f, +1.0f));
-		lPhi *= Math::Lerp(0.8f, 2.0f, lSteeringPower);
+		const float steering_power = std::abs(Math::Clamp(fwd, -1.0f, +1.0f));
+		phi *= Math::Lerp(0.8f, 2.0f, steering_power);
 
-		lFwd *= mIntelligence;
-		lRight *= mIntelligence;
-		lPhi /= mIntelligence;
+		fwd *= intelligence_;
+		right *= intelligence_;
+		phi /= intelligence_;
 	}
-	deb_assert(lPhi >= -10000);
-	deb_assert(lPhi <= +10000);
-	lMyAvatar->SetEnginePower(0, Math::Clamp(lFwd-lPhi, -1.0f, +1.0f));
-	lMyAvatar->SetEnginePower(1, Math::Clamp(lRight, -1.0f, +1.0f));
-	lMyAvatar->SetEnginePower(4, Math::Clamp(lFwd+lPhi, -1.0f, +1.0f));
-	lMyAvatar->SetEnginePower(5, Math::Clamp(lRight, -1.0f, +1.0f));
-	lMyAvatar->SetEnginePower(8, Math::Clamp(+lPhi, -1.0f, +1.0f));
+	deb_assert(phi >= -10000);
+	deb_assert(phi <= +10000);
+	my_avatar->SetEnginePower(0, Math::Clamp(fwd-phi, -1.0f, +1.0f));
+	my_avatar->SetEnginePower(1, Math::Clamp(right, -1.0f, +1.0f));
+	my_avatar->SetEnginePower(4, Math::Clamp(fwd+phi, -1.0f, +1.0f));
+	my_avatar->SetEnginePower(5, Math::Clamp(right, -1.0f, +1.0f));
+	my_avatar->SetEnginePower(8, Math::Clamp(+phi, -1.0f, +1.0f));
 
-	if (lCanShoot &&
-		std::abs(lPhi) < Math::Lerp(0.1f, 0.015f, mIntelligence) &&
-		mShootWait.QueryTimeDiff() > Math::Lerp(10.0, 0.3, mIntelligence))
-	{
-		mShootWait.ClearTimeDiff();
-		mLogic->Shoot(lMyAvatar, 1);
+	if (can_shoot &&
+		std::abs(phi) < Math::Lerp(0.1f, 0.015f, intelligence_) &&
+		shoot_wait_.QueryTimeDiff() > Math::Lerp(10.0, 0.3, intelligence_)) {
+		shoot_wait_.ClearTimeDiff();
+		logic_->Shoot(my_avatar, 1);
 	}
 }
 
-void Npc::OnAlarm(int pAlarmId, void* pExtraData)
-{
-	(void)pExtraData;
+void Npc::OnAlarm(int alarm_id, void* extra_data) {
+	(void)extra_data;
 
-	if (pAlarmId == 5)
-	{
-		v_get(mIntelligence, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_NPCSKILL, 0.5f);
-		mIntelligence = Math::Clamp(mIntelligence, 0.1f, 1.0f);
-		if (!mLogic->CreateAvatarForNpc(this))
-		{
+	if (alarm_id == 5) {
+		v_get(intelligence_, =(float), GetManager()->GetGameManager()->GetVariableScope(), kRtvarGameNpcskill, 0.5f);
+		intelligence_ = Math::Clamp(intelligence_, 0.1f, 1.0f);
+		if (!logic_->CreateAvatarForNpc(this)) {
 			StartCreateAvatar(10.0f);
 		}
 	}
@@ -182,7 +156,7 @@ void Npc::OnAlarm(int pAlarmId, void* pExtraData)
 
 
 
-loginstance(GAME_CONTEXT_CPP, Npc);
+loginstance(kGameContextCpp, Npc);
 
 
 

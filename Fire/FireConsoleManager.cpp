@@ -1,129 +1,108 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "FireConsoleManager.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Lepra/Include/CyclicArray.h"
-#include "../Lepra/Include/Path.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "FireManager.h"
-#include "RtVar.h"
+#include "fireconsolemanager.h"
+#include "../cure/include/contextmanager.h"
+#include "../lepra/include/cyclicarray.h"
+#include "../lepra/include/path.h"
+#include "../lepra/include/systemmanager.h"
+#include "firemanager.h"
+#include "rtvar.h"
 
 
 
-namespace Fire
-{
+namespace Fire {
 
 
 
 // Must lie before FireConsoleManager to compile.
-const FireConsoleManager::CommandPair FireConsoleManager::mCommandIdList[] =
+const FireConsoleManager::CommandPair FireConsoleManager::command_id_list_[] =
 {
-	{"prev-level", COMMAND_PREV_LEVEL},
-	{"next-level", COMMAND_NEXT_LEVEL},
-	{"set-level-index", COMMAND_SET_LEVEL_INDEX},
+	{"prev-level", kCommandPrevLevel},
+	{"next-level", kCommandNextLevel},
+	{"set-level-index", kCommandSetLevelIndex},
 };
 
 
 
-FireConsoleManager::FireConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-	UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea):
-	Parent(pResourceManager, pGameManager, pUiManager, pVariableScope, pArea)
-{
+FireConsoleManager::FireConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+	UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area):
+	Parent(resource_manager, game_manager, ui_manager, variable_scope, area) {
 	InitCommands();
 	SetSecurityLevel(1);
 }
 
-FireConsoleManager::~FireConsoleManager()
-{
+FireConsoleManager::~FireConsoleManager() {
 }
 
-bool FireConsoleManager::Start()
-{
+bool FireConsoleManager::Start() {
 #ifndef LEPRA_TOUCH
 	return Parent::Start();
-#else // Touch
-	return true;	// Touch device don't need an interactive console.
+#else // touch
+	return true;	// touch device don't need an interactive console.
 #endif // Computer / touch
 }
 
 
 
-unsigned FireConsoleManager::GetCommandCount() const
-{
-	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(mCommandIdList);
+unsigned FireConsoleManager::GetCommandCount() const {
+	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(command_id_list_);
 }
 
-const FireConsoleManager::CommandPair& FireConsoleManager::GetCommand(unsigned pIndex) const
-{
-	if (pIndex < Parent::GetCommandCount())
-	{
-		return (Parent::GetCommand(pIndex));
+const FireConsoleManager::CommandPair& FireConsoleManager::GetCommand(unsigned index) const {
+	if (index < Parent::GetCommandCount()) {
+		return (Parent::GetCommand(index));
 	}
-	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
+	return (command_id_list_[index-Parent::GetCommandCount()]);
 }
 
-int FireConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
-{
-	int lResult = Parent::OnCommand(pCommand, pParameterVector);
-	if (lResult < 0)
-	{
-		lResult = 0;
+int FireConsoleManager::OnCommand(const HashedString& command, const strutil::strvec& parameter_vector) {
+	int result = Parent::OnCommand(command, parameter_vector);
+	if (result < 0) {
+		result = 0;
 
-		CommandClient lCommand = (CommandClient)TranslateCommand(pCommand);
-		switch ((int)lCommand)
-		{
-			case COMMAND_PREV_LEVEL:
-			{
+		CommandClient _command = (CommandClient)TranslateCommand(command);
+		switch ((int)_command) {
+			case kCommandPrevLevel: {
 				GetGameManager()->GetTickLock()->Acquire();
 				((FireManager*)GetGameManager())->StepLevel(-1);
 				GetGameManager()->GetTickLock()->Release();
 				return 0;
-			}
-			break;
-			case COMMAND_NEXT_LEVEL:
-			{
+			} break;
+			case kCommandNextLevel: {
 				GetGameManager()->GetTickLock()->Acquire();
 				((FireManager*)GetGameManager())->StepLevel(+1);
 				GetGameManager()->GetTickLock()->Release();
 				return 0;
-			}
-			break;
-			case COMMAND_SET_LEVEL_INDEX:
-			{
-				int lTargetLevelIndex = -1;
-				if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lTargetLevelIndex))
-				{
+			} break;
+			case kCommandSetLevelIndex: {
+				int target_level_index = -1;
+				if (parameter_vector.size() == 1 && strutil::StringToInt(parameter_vector[0], target_level_index)) {
 					GetGameManager()->GetTickLock()->Acquire();
-					const int lLevelDelta = lTargetLevelIndex - ((FireManager*)GetGameManager())->GetCurrentLevelNumber();
-					((FireManager*)GetGameManager())->StepLevel(lLevelDelta);
+					const int level_delta = target_level_index - ((FireManager*)GetGameManager())->GetCurrentLevelNumber();
+					((FireManager*)GetGameManager())->StepLevel(level_delta);
 					GetGameManager()->GetTickLock()->Release();
 					return 0;
+				} else {
+					log_.Warningf("usage: %s <index>", command.c_str());
+					result = 1;
 				}
-				else
-				{
-					mLog.Warningf("usage: %s <index>", pCommand.c_str());
-					lResult = 1;
-				}
-			}
-			break;
-			default:
-			{
-				lResult = -1;
-			}
-			break;
+			} break;
+			default: {
+				result = -1;
+			} break;
 		}
 	}
-	return (lResult);
+	return (result);
 }
 
 
 
-loginstance(CONSOLE, FireConsoleManager);
+loginstance(kConsole, FireConsoleManager);
 
 
 

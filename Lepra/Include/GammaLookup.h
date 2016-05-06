@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 //
 // Must be quick for image resizes.
@@ -8,49 +8,44 @@
 
 #pragma once
 
-#include "LepraTypes.h"
+#include "lepratypes.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class GammaLookup
-{
+class GammaLookup {
 public:
 	static void Initialize();
 
-	static inline int GammaToLinear(uint8 pGammaValue);
-	static inline float GammaToLinearFloat(uint8 pGammaValue);
-	static inline uint8 LinearToGamma(int pLinearValue);
+	static inline int GammaToLinear(uint8 gamma_value);
+	static inline float GammaToLinearFloat(uint8 gamma_value);
+	static inline uint8 LinearToGamma(int linear_value);
 
 	// These are slow... Not using lookup tables.
-	static float GammaToLinearF(float pGammaValue);
-	static float LinearToGammaF(float pLinearValue);
+	static float GammaToLinearF(float gamma_value);
+	static float LinearToGammaF(float linear_value);
 
 private:
-	static int smGammaToLinearInt[256];
-	static float smGammaToLinearFloat[256];
-	static uint8 smLinearToGammaInt[65536];
+	static int gamma_to_linear_int_[256];
+	static float gamma_to_linear_float_[256];
+	static uint8 linear_to_gamma_int_[65536];
 };
 
 
 
-int GammaLookup::GammaToLinear(uint8 pGammaValue)
-{
-	return smGammaToLinearInt[pGammaValue];
+int GammaLookup::GammaToLinear(uint8 gamma_value) {
+	return gamma_to_linear_int_[gamma_value];
 }
 
-float GammaLookup::GammaToLinearFloat(uint8 pGammaValue)
-{
-	return smGammaToLinearFloat[pGammaValue];
+float GammaLookup::GammaToLinearFloat(uint8 gamma_value) {
+	return gamma_to_linear_float_[gamma_value];
 }
 
-uint8 GammaLookup::LinearToGamma(int pLinearValue)
-{
-	return smLinearToGammaInt[pLinearValue];
+uint8 GammaLookup::LinearToGamma(int linear_value) {
+	return linear_to_gamma_int_[linear_value];
 }
 
 

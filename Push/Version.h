@@ -1,18 +1,18 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Lepra/Include/LepraTypes.h"
+#include "../lepra/include/lepratypes.h"
 
-#define PUSH_APPLICATION_NAME	"Push"
-//#define MASTER_SERVER_ADDRESS	"pixeldoctrine.dyndns.org"
-#define MASTER_SERVER_ADDRESS	"192.168.2.4"
-//#define MASTER_SERVER_ADDRESS	"localhost"
-#define PLATFORM_VERSION	"0.1"
+#define kPushApplicationName	"Push"
+//#define kMasterServerAddress	"pixeldoctrine.dyndns.org"
+#define kMasterServerAddress	"192.168.2.4"
+//#define kMasterServerAddress	"localhost"
+#define kPlatformVersion	"0.1"
 
 #ifndef LEPRA_TOUCH
 //#define EMULATE_TOUCH	1

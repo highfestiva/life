@@ -6,32 +6,30 @@
 
 #pragma once
 
-#include "UiOpenGLRenderer.h"
+#include "uiopenglrenderer.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class UiOpenGLShader
-{
+class UiOpenGLShader {
 public:
     UiOpenGLShader();
     ~UiOpenGLShader();
 
-    bool Build(const str& pVertexShaderSource, const str& pFragmentShaderSource);
+    bool Build(const str& vertex_shader_source, const str& fragment_shader_source);
     unsigned GetProgram() const;
 
 private:
     void Release();
-    static unsigned Compile(GLenum type, const str& pFilename);
+    static unsigned Compile(GLenum type, const str& filename);
     bool Link();
 
-    unsigned mFragmentShader;
-    unsigned mVertexShader;
-    unsigned mShaderProgram;
+    unsigned fragment_shader_;
+    unsigned vertex_shader_;
+    unsigned shader_program_;
 
 	logclass();
 };

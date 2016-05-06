@@ -1,37 +1,34 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiTbc.h"
-#include "../../Lepra/Include/Canvas.h"
-#include "../../Lepra/Include/Transformation.h"
-#include "../../Tbc/Include/ChunkyClass.h"
+#include "uitbc.h"
+#include "../../lepra/include/canvas.h"
+#include "../../lepra/include/transformation.h"
+#include "../../tbc/include/chunkyclass.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class ChunkyClass: public Tbc::ChunkyClass
-{
+class ChunkyClass: public tbc::ChunkyClass {
 public:
-	struct Material
-	{
-		vec3 mAmbient;
-		vec3 mDiffuse;
-		vec3 mSpecular;
-		float mShininess;
-		float mAlpha;
-		bool mSmooth;
-		Canvas::ResizeHint mResizeHint;
-		std::vector<str> mTextureList;
-		str mShaderName;
+	struct Material {
+		vec3 ambient_;
+		vec3 diffuse_;
+		vec3 specular_;
+		float shininess_;
+		float alpha_;
+		bool smooth_;
+		Canvas::ResizeHint resize_hint_;
+		std::vector<str> texture_list_;
+		str shader_name_;
 
 		Material();
 	};
@@ -39,31 +36,29 @@ public:
 	ChunkyClass();
 	virtual ~ChunkyClass();
 
-	void AddMesh(int pPhysIndex, const str& pMeshBaseName, const xform& pTransform, float pScale);
+	void AddMesh(int phys_index, const str& mesh_base_name, const xform& transform, float scale);
 	size_t GetMeshCount() const;
-	void GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName, xform& pTransform, float& pScale) const;
-	void SetLastMeshMaterial(const Material& pMaterial);
-	const Material& GetMaterial(size_t pMeshIndex) const;
+	void GetMesh(size_t index, int& phys_index, str& mesh_base_name, xform& transform, float& scale) const;
+	void SetLastMeshMaterial(const Material& material);
+	const Material& GetMaterial(size_t mesh_index) const;
 
 private:
-	struct PhysMeshEntry
-	{
-		PhysMeshEntry(int pPhysIndex, const str& pMeshBaseName,
-			const xform& pTransform, float pScale):
-			mPhysIndex(pPhysIndex),
-			mMeshBaseName(pMeshBaseName),
-			mTransform(pTransform),
-			mScale(pScale)
-		{
+	struct PhysMeshEntry {
+		PhysMeshEntry(int phys_index, const str& mesh_base_name,
+			const xform& transform, float scale):
+			phys_index_(phys_index),
+			mesh_base_name_(mesh_base_name),
+			transform_(transform),
+			scale_(scale) {
 		}
-		int mPhysIndex;
-		str mMeshBaseName;
-		xform mTransform;
-		float mScale;
-		Material mMaterial;
+		int phys_index_;
+		str mesh_base_name_;
+		xform transform_;
+		float scale_;
+		Material material_;
 	};
 	typedef std::vector<PhysMeshEntry> PhysMeshArray;
-	PhysMeshArray mMeshArray;
+	PhysMeshArray mesh_array_;
 
 	logclass();
 };

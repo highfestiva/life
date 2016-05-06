@@ -7,30 +7,27 @@
 #pragma once
 #pragma warning(disable: 4505)	// Crappy warning from STL/MSVC.
 
-#include "../../Lepra/Include/HashTable.h"
-#include "../../Lepra/Include/MemberThread.h"
-#include "../../Lepra/Include/OrderedMap.h"
-#include "../../Tbc/Include/ChunkyClass.h"
-#include "../../Tbc/Include/ChunkyLoader.h"
-#include "../../ThirdParty/FastDelegate/FastDelegate.h"
-#include "Cure.h"
+#include "../../lepra/include/hashtable.h"
+#include "../../lepra/include/memberthread.h"
+#include "../../lepra/include/orderedmap.h"
+#include "../../tbc/include/chunkyclass.h"
+#include "../../tbc/include/chunkyloader.h"
+#include "../../thirdparty/FastDelegate/FastDelegate.h"
+#include "cure.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class Canvas;
 class ZipArchive;
 }
-namespace Tbc
-{
+namespace tbc {
 class TerrainPatch;
 }
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
@@ -40,26 +37,24 @@ class TerrainFunctionManager;
 
 
 
-struct ResourceInfo
-{
-	str mName;
-	str mType;
-	int mReferenceCount;
+struct ResourceInfo {
+	str name_;
+	str type_;
+	int reference_count_;
 };
 
 
 
-class UserResource
-{
+class UserResource {
 public:
 	typedef fastdelegate::FastDelegate1<UserResource*, void> LoadCallback;
 
 	UserResource();
 	virtual ~UserResource();
-	void SafeRelease(ResourceManager* pManager);
+	void SafeRelease(ResourceManager* manager);
 
-	void SetParentResource(UserResource* pResource);
-	void CallbackParent(ResourceLoadState pChildLoadState);
+	void SetParentResource(UserResource* resource);
+	void CallbackParent(ResourceLoadState child_load_state);
 	void IncreaseCallbackBlockCount();
 	int DecreaseCallbackBlockCount();
 
@@ -69,22 +64,21 @@ public:
 	const Resource* GetConstResource() const;
 
 	Resource* GetResource() const;
-	void SetResource(Resource* pResource);
+	void SetResource(Resource* resource);
 	virtual void PostProcess();
 	virtual void FinalizeLoad();
-	virtual Resource* CreateResource(ResourceManager* pManager, const str& pName) const = 0;
+	virtual Resource* CreateResource(ResourceManager* manager, const str& name) const = 0;
 
 private:
-	Resource* mResource;
-	UserResource* mParentResource;
-	int mCallbackBlockCount;
+	Resource* resource_;
+	UserResource* parent_resource_;
+	int callback_block_count_;
 };
 
 
 
 template<class UserResourceType, class ResourceType>
-class UserTypeResourceBase: public UserResource
-{
+class UserTypeResourceBase: public UserResource {
 public:
 	typedef UserResourceType TypeUserResourceType;
 	typedef ResourceType TypeResourceType;
@@ -93,8 +87,8 @@ public:
 	UserTypeResourceBase();
 	virtual ~UserTypeResourceBase();
 
-	void Load(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback, bool pKeep = true);
-	void LoadUnique(ResourceManager* pResourceManager, const str& pName, TypeLoadCallback pCallback);
+	void Load(ResourceManager* resource_manager, const str& name, TypeLoadCallback callback, bool keep = true);
+	void LoadUnique(ResourceManager* resource_manager, const str& name, TypeLoadCallback callback);
 
 	virtual void FinalizeLoad();
 
@@ -111,7 +105,7 @@ public:
 	UserTypeResource();
 	virtual ~UserTypeResource();
 
-	virtual Resource* CreateResource(ResourceManager* pManager, const str& pName) const;
+	virtual Resource* CreateResource(ResourceManager* manager, const str& name) const;
 };
 
 
@@ -123,39 +117,37 @@ class UserExtraTypeResource: public UserTypeResourceBase<
 public:
 	typedef SubtypeExtraType ExtraType;
 
-	UserExtraTypeResource(const ExtraType& pExtraData);
+	UserExtraTypeResource(const ExtraType& extra_data);
 	virtual ~UserExtraTypeResource();
 
 	ExtraType& GetExtraData() const;
-	void SetExtraData(const ExtraType& pExtraData);
+	void SetExtraData(const ExtraType& extra_data);
 
-	virtual Resource* CreateResource(ResourceManager* pManager, const str& pName) const;
+	virtual Resource* CreateResource(ResourceManager* manager, const str& name) const;
 
 private:
-	mutable ExtraType mExtraData;
+	mutable ExtraType extra_data_;
 };
 
 
 
 template<class _UserResourceType>
-class UserResourceOwner
-{
+class UserResourceOwner {
 public:
-	UserResourceOwner(_UserResourceType* pUserResource, Cure::ResourceManager* pManager, const str& pName);
+	UserResourceOwner(_UserResourceType* user_resource, cure::ResourceManager* manager, const str& name);
 	virtual ~UserResourceOwner();
 
 protected:
-	void OnLoadCallback(_UserResourceType* pUserResource);
+	void OnLoadCallback(_UserResourceType* user_resource);
 
-	_UserResourceType* mUserResource;
+	_UserResourceType* user_resource_;
 };
 
 
 
-class Resource
-{
+class Resource {
 public:
-	Resource(ResourceManager* pManager, const str& pName);
+	Resource(ResourceManager* manager, const str& name);
 	virtual ~Resource();
 
 	ResourceManager* GetManager() const;
@@ -169,14 +161,14 @@ public:
 	virtual void Resume();	// Resource goes from cache -> live.
 	virtual void Suspend();	// Resource enters cache.
 	bool IsUnique() const;
-	void SetIsUnique(bool pIsUnique);
+	void SetIsUnique(bool is_unique);
 	virtual bool IsReferenceType() const;
 
 	ResourceLoadState GetLoadState() const;
-	void SetLoadState(ResourceLoadState pState);
+	void SetLoadState(ResourceLoadState state);
 
-	void AddCaller(UserResource* pUserResource, const UserResource::LoadCallback& pCallback);
-	void RemoveCaller(UserResource* pUserResource);
+	void AddCaller(UserResource* user_resource, const UserResource::LoadCallback& callback);
+	void RemoveCaller(UserResource* user_resource);
 
 	virtual bool Load() = 0;
 	virtual ResourceLoadState PostProcess();
@@ -185,31 +177,28 @@ public:
 	virtual void FreeDiversified(UserResource*);
 	UserResource* GetFirstUserResource() const;
 
-	virtual void PatchInfo(ResourceInfo& pInfo) const;
+	virtual void PatchInfo(ResourceInfo& info) const;
 
 private:
-	struct UserResourceCallbackInfo
-	{
-		UserResourceCallbackInfo()
-		{
+	struct UserResourceCallbackInfo {
+		UserResourceCallbackInfo() {
 		}
-		UserResourceCallbackInfo(UserResource* pUserResource, UserResource::LoadCallback pCallback):
-			mUserResource(pUserResource),
-			mCallback(pCallback)
-		{
+		UserResourceCallbackInfo(UserResource* user_resource, UserResource::LoadCallback callback):
+			user_resource_(user_resource),
+			callback_(callback) {
 		}
-		UserResource* mUserResource;
-		UserResource::LoadCallback mCallback;
+		UserResource* user_resource_;
+		UserResource::LoadCallback callback_;
 	};
 
-	ResourceManager* mManager;
-	const str mName;
-	int mReferenceCount;
-	ResourceLoadState mState;
+	ResourceManager* manager_;
+	const str name_;
+	int reference_count_;
+	ResourceLoadState state_;
 	typedef std::list<UserResourceCallbackInfo> CallbackList;
-	CallbackList mLoadCallbackList;
-	bool mIsUnique;
-	static Lock mMutex;
+	CallbackList load_callback_list_;
+	bool is_unique_;
+	static Lock mutex_;
 
 	logclass();
 
@@ -218,23 +207,22 @@ private:
 
 
 template<class RamData>
-class RamResource: public Resource
-{
+class RamResource: public Resource {
 	typedef Resource Parent;
 public:
 	typedef RamData UserRamData;
 
 	UserRamData GetRamData() const;
-	void SetRamDataType(RamData pData);
+	void SetRamDataType(RamData data);
 
 protected:
-	RamResource(ResourceManager* pManager, const str& pName);
+	RamResource(ResourceManager* manager, const str& name);
 	virtual ~RamResource();
 
-	void SetRamData(RamData pData);
+	void SetRamData(RamData data);
 
 private:
-	RamData mRamData;
+	RamData ram_data_;
 };
 
 
@@ -245,13 +233,13 @@ template<class RamData, class OptimizedData>
 class OptimizedResource: public RamResource<RamData>
 {
 public:
-	OptimizedResource(ResourceManager* pManager, const str& pName);
+	OptimizedResource(ResourceManager* manager, const str& name);
 	virtual ~OptimizedResource();
 
-	void SetOptimizedData(OptimizedData pData);
+	void SetOptimizedData(OptimizedData data);
 
 protected:
-	OptimizedData mOptimizedData;
+	OptimizedData optimized_data_;
 };
 
 
@@ -264,36 +252,36 @@ class DiversifiedResource: public RamResource<RamData>
 public:
 	typedef std::unordered_map<const UserResource*, DiversifiedData, LEPRA_VOIDP_HASHER> UserDataTable;
 
-	DiversifiedResource(ResourceManager* pManager, const str& pName);
+	DiversifiedResource(ResourceManager* manager, const str& name);
 	virtual ~DiversifiedResource();
 
-	DiversifiedData GetUserData(const UserResource* pUserResource);
-	void FreeDiversified(UserResource* pUserResource);
+	DiversifiedData GetUserData(const UserResource* user_resource);
+	void FreeDiversified(UserResource* user_resource);
 
 	const UserDataTable& GetDiversifiedData() const;
 
 protected:
 	virtual DiversifiedData CreateDiversifiedData() const = 0;
-	virtual void ReleaseDiversifiedData(DiversifiedData pData) const = 0;
+	virtual void ReleaseDiversifiedData(DiversifiedData data) const = 0;
 
-	Lock mLock;
-	UserDataTable mUserDiversifiedTable;
+	Lock lock_;
+	UserDataTable user_diversified_table_;
 };
 
 
 
-class PhysicsResource: public RamResource<Tbc::ChunkyPhysics*>
+class PhysicsResource: public RamResource<tbc::ChunkyPhysics*>
 {
-	typedef RamResource<Tbc::ChunkyPhysics*> Parent;
+	typedef RamResource<tbc::ChunkyPhysics*> Parent;
 public:
-	typedef Tbc::ChunkyPhysics* UserData;
+	typedef tbc::ChunkyPhysics* UserData;
 
-	PhysicsResource(ResourceManager* pManager, const str& pName);
+	PhysicsResource(ResourceManager* manager, const str& name);
 	virtual ~PhysicsResource();
 	const str GetType() const;
 	UserData GetUserData(const UserResource*) const;
 	bool Load();
-	bool LoadName(const str& pName);
+	bool LoadName(const str& name);
 
 private:
 	logclass();
@@ -306,7 +294,7 @@ private:
 public:
 	typedef void* UserData;
 
-	AnimationResource(const str& pName);
+	AnimationResource(const str& name);
 
 	bool Load();
 };*/
@@ -320,34 +308,34 @@ class ClassResourceBase: public RamResource<_Class*>
 public:
 	typedef _Class* UserData;
 
-	ClassResourceBase(ResourceManager* pManager, const str& pName);
+	ClassResourceBase(ResourceManager* manager, const str& name);
 	virtual ~ClassResourceBase();
 	const str GetType() const;
 	UserData GetUserData(const UserResource*) const;
 	bool Load();
-	bool LoadWithName(const str& pName);
+	bool LoadWithName(const str& name);
 
 private:
 	logclass();
 };
 
-class ClassResource: public ClassResourceBase<Tbc::ChunkyClass, Tbc::ChunkyClassLoader>
+class ClassResource: public ClassResourceBase<tbc::ChunkyClass, tbc::ChunkyClassLoader>
 {
-	typedef ClassResourceBase<Tbc::ChunkyClass, Tbc::ChunkyClassLoader> Parent;
+	typedef ClassResourceBase<tbc::ChunkyClass, tbc::ChunkyClassLoader> Parent;
 public:
-	ClassResource(ResourceManager* pManager, const str& pName);
+	ClassResource(ResourceManager* manager, const str& name);
 	virtual ~ClassResource();
 };
 
 
 
-class PhysicalTerrainResource: public RamResource<Tbc::TerrainPatch*>
+class PhysicalTerrainResource: public RamResource<tbc::TerrainPatch*>
 {
-	typedef RamResource<Tbc::TerrainPatch*> Parent;
+	typedef RamResource<tbc::TerrainPatch*> Parent;
 public:
-	typedef Tbc::TerrainPatch* UserData;
+	typedef tbc::TerrainPatch* UserData;
 
-	PhysicalTerrainResource(ResourceManager* pManager, const str& pName);
+	PhysicalTerrainResource(ResourceManager* manager, const str& name);
 	virtual ~PhysicalTerrainResource();
 	const str GetType() const;
 	UserData GetUserData(const UserResource*) const;
@@ -365,7 +353,7 @@ class RamImageResource: public RamResource<Canvas*>
 public:
 	typedef Canvas* UserData;
 
-	RamImageResource(Cure::ResourceManager* pManager, const str& pName);
+	RamImageResource(cure::ResourceManager* manager, const str& name);
 	virtual ~RamImageResource();
 	const str GetType() const;
 	UserData GetUserData(const UserResource*) const;
@@ -376,77 +364,75 @@ public:
 
 typedef UserTypeResource<PhysicsResource>		UserPhysicsResource;
 typedef UserTypeResource<ClassResource>			UserClassResource;
-//typedef UserTypeResource<Tbc::...>			UserAnimationResource;
+//typedef UserTypeResource<tbc::...>			UserAnimationResource;
 typedef UserTypeResource<PhysicalTerrainResource>	UserPhysicalTerrainResource;
 typedef UserTypeResource<RamImageResource>		UserRamImageResource;
 
 
 
-class ResourceManager
-{
+class ResourceManager {
 public:
 	typedef std::list<ResourceInfo> ResourceInfoList;
 	typedef std::list<Resource*> ResourceList;
 
-	ResourceManager(unsigned pLoaderThreadCount);
+	ResourceManager(unsigned loader_thread_count);
 	virtual ~ResourceManager();
 	bool InitDefault();
 	void StopClear();
-	void SetLoadIntermission(double pLoadIntermission);
-	void SetInjectTimeLimit(double pInjectTimeLimit);
+	void SetLoadIntermission(double load_intermission);
+	void SetInjectTimeLimit(double inject_time_limit);
 
-	File* QueryFile(const str& pFilename);
-	bool QueryFileExists(const str& pFilename);
-	strutil::strvec ListFiles(const str& pWildcard);
+	File* QueryFile(const str& filename);
+	bool QueryFileExists(const str& filename);
+	strutil::strvec ListFiles(const str& wildcard);
 
 	TerrainFunctionManager* GetTerrainFunctionManager() const;
-	void SetTerrainFunctionManager(TerrainFunctionManager* pTerrainFunctionManager);	// May not be changed while its resources are loaded.
+	void SetTerrainFunctionManager(TerrainFunctionManager* terrain_function_manager);	// May not be changed while its resources are loaded.
 
 	// Note that a specific resource NAME may only be loaded as one TYPE, but
 	// it may be loaded as many times as you wish. For instance: loading an
 	// image as a painter resource and at the same time loading the same image
 	// name as a renderer resource is an error with undefined behaviour.
-	void Load(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
-	void LoadUnique(const str& pName, UserResource* pUserResource, UserResource::LoadCallback pCallback);
-	void AddLoaded(UserResource* pUserResource);
-	void SafeRelease(UserResource* pUserResource);
-	void Release(Resource* pResource);
+	void Load(const str& name, UserResource* user_resource, UserResource::LoadCallback callback);
+	void LoadUnique(const str& name, UserResource* user_resource, UserResource::LoadCallback callback);
+	void AddLoaded(UserResource* user_resource);
+	void SafeRelease(UserResource* user_resource);
+	void Release(Resource* resource);
 	bool IsLoading();
 	bool WaitLoading();
 
 	void Tick();	// Call often, preferably every frame.
 	unsigned ForceFreeCache();	// Called to force immediate freeing of all cached resources.
-	unsigned ForceFreeCache(const strutil::strvec& pResourceTypeList);	// Empty type list = all.
+	unsigned ForceFreeCache(const strutil::strvec& resource_type_list);	// Empty type list = all.
 
 	size_t QueryResourceCount() const;
 	size_t QueryCachedResourceCount() const;
 	ResourceInfoList QueryResourceNames();
 
-	ResourceList HookAllResourcesOfType(const str& pType);	// Be cautious!
-	void UnhookResources(ResourceList& pResourceList);
+	ResourceList HookAllResourcesOfType(const str& type);	// Be cautious!
+	void UnhookResources(ResourceList& resource_list);
 
 protected:
-	Resource* GetAddCachedResource(const str& pName, UserResource* pUserResource, bool& pMustLoad);
-	void StartLoad(Resource* pResource);
+	Resource* GetAddCachedResource(const str& name, UserResource* user_resource, bool& must_load);
+	void StartLoad(Resource* resource);
 
 	// Called by Tick (main thread) to push objects into the active table, optimize them and callback waiters.
 	void InjectResourceLoop();
-	bool InjectSingleResource(Resource* pResource);
+	bool InjectSingleResource(Resource* resource);
 
 	void FreeCache();	// Called by Tick (main thread) to delete old/large resources.
 
 	void ThreadLoaderLoop();	// Called by worker thread to load objects asynchronously.
 	void SynchronousLoadLoop();	// Called by main thread to load all requested resources.
-	bool PrepareRemoveInLoadProgress(Resource* pResource);	// Drops the resource from the load list.
+	bool PrepareRemoveInLoadProgress(Resource* resource);	// Drops the resource from the load list.
 	void LoadSingleResource();
 
-	inline void AssertIsMutexOwner()
-	{
-		deb_assert(mThreadLock.IsOwner());
+	inline void AssertIsMutexOwner() {
+		deb_assert(thread_lock_.IsOwner());
 	}
 
-	Resource* CreateResource(UserResource* pUserResource, const str& pName);
-	void DeleteResource(Resource* pResource);
+	Resource* CreateResource(UserResource* user_resource, const str& name);
+	void DeleteResource(Resource* resource);
 
 private:
 	typedef std::unordered_map<str, Resource*> ResourceTable;
@@ -455,23 +441,23 @@ private:
 	typedef std::unordered_set<Resource*, LEPRA_VOIDP_HASHER> ResourceSet;
 	typedef std::vector<Resource*> ResourceArray;
 
-	TerrainFunctionManager* mTerrainFunctionManager;
+	TerrainFunctionManager* terrain_function_manager_;
 
-	unsigned mLoaderThreadCount;
-	const str mPathPrefix;
-	MemberThread<ResourceManager> mLoaderThread;
-	Semaphore mLoadSemaphore;
-	mutable Lock mThreadLock;
-	ResourceTable mActiveResourceTable;	// In use. Holds non-unique resources.
-	ResourceTable mCachedResourceTable;	// On the way out. Holds non-unique resources.
-	ResourceMapList mRequestLoadList;	// Under way to be loaded by worker thread. TODO: priority map thingie!
-	ResourceMapList mLoadedList;		// Loaded by worker thread, worker thread will injected into the system at end of tick.
-	ResourceArray mPostLoadDeleteArray;	// Currently loading, or probably loading, worker thread will delete on next iteration.
-	ResourceSet mResourceSafeLookup;	// Data owner for Resource*.
-	Lock mZipLock;
-	ZipArchive* mZipFile;
-	double mInjectTimeLimit;
-	double mLoadIntermission;
+	unsigned loader_thread_count_;
+	const str path_prefix_;
+	MemberThread<ResourceManager> loader_thread_;
+	Semaphore load_semaphore_;
+	mutable Lock thread_lock_;
+	ResourceTable active_resource_table_;	// In use. Holds non-unique resources.
+	ResourceTable cached_resource_table_;	// On the way out. Holds non-unique resources.
+	ResourceMapList request_load_list_;	// Under way to be loaded by worker thread. TODO: priority map thingie!
+	ResourceMapList loaded_list_;		// Loaded by worker thread, worker thread will injected into the system at end of tick.
+	ResourceArray post_load_delete_array_;	// Currently loading, or probably loading, worker thread will delete on next iteration.
+	ResourceSet resource_safe_lookup_;	// Data owner for Resource*.
+	Lock zip_lock_;
+	ZipArchive* zip_file_;
+	double inject_time_limit_;
+	double load_intermission_;
 
 	logclass();
 };
@@ -482,4 +468,4 @@ private:
 
 
 
-#include "ResourceManager.inl"
+#include "resourcemanager.inl"

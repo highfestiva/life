@@ -1,39 +1,34 @@
 
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiSoundStream.h"
+#include "../include/uisoundstream.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-SoundStream::SoundStream(SoundManager* pSoundManager):
-	mSoundManager(pSoundManager),
-	mIsOpen(false),
-	mIsLooping(false),
-	mVolume(1)
-{
+SoundStream::SoundStream(SoundManager* sound_manager):
+	sound_manager_(sound_manager),
+	is_open_(false),
+	is_looping_(false),
+	volume_(1) {
 }
 
-SoundStream::~SoundStream()
-{
+SoundStream::~SoundStream() {
 }
 
-bool SoundStream::IsOpen() const
-{
-	return mIsOpen;
+bool SoundStream::IsOpen() const {
+	return is_open_;
 }
 
-void SoundStream::SetVolume(float pVolume)
-{
-	mVolume = pVolume;
+void SoundStream::SetVolume(float volume) {
+	volume_ = volume;
 }
 
 

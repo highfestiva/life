@@ -6,14 +6,13 @@
 
 #pragma once
 
-#include "UiTbc.h"
-#include "../../Lepra/Include/Unordered.h"
-#include "../../Lepra/Include/Canvas.h"
+#include "uitbc.h"
+#include "../../lepra/include/unordered.h"
+#include "../../lepra/include/canvas.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 class FontManager;
@@ -22,16 +21,15 @@ class FontManager;
 
 
 // Stores glyphs in a texture along side each other. All glyphs appear at y=0.
-class FontTexture
-{
+class FontTexture {
 public:
-	FontTexture(uint32 pFontHash, int pFontHeight);
+	FontTexture(uint32 font_hash, int font_height);
 	virtual ~FontTexture();
 
 	uint32 GetFontHash() const;
 
-	void StoreGlyph(wchar_t pChar, FontManager* pFontManager);
-	bool GetGlyphX(wchar_t pChar, int& pX, int& pWidth, int& pPlacementOffset) const;
+	void StoreGlyph(wchar_t c, FontManager* font_manager);
+	bool GetGlyphX(wchar_t c, int& x, int& width, int& placement_offset) const;
 
 	bool IsUpdated() const;
 	void ResetIsUpdated();
@@ -41,19 +39,18 @@ public:
 	void* GetBuffer() const;
 
 private:
-	struct GlyphX
-	{
-		int mStartX;
-		int mWidth;
-		int mPlacementOffset;
+	struct GlyphX {
+		int start_x_;
+		int width_;
+		int placement_offset_;
 	};
 	typedef std::unordered_map<int32, GlyphX> GlyphXMap;
-	GlyphXMap mGlyphXOffsetMap;
+	GlyphXMap glyph_x_offset_map_;
 
-	Canvas mCanvas;
-	uint32 mFontHash;
-	int mFreeXOffset;
-	bool mIsUpdated;
+	Canvas canvas_;
+	uint32 font_hash_;
+	int free_x_offset_;
+	bool is_updated_;
 };
 
 

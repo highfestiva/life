@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,99 +7,95 @@
 #pragma once
 
 #include <list>
-#include "../../Cure/Include/SocketIoHandler.h"
-#include "../../Lepra/Include/HiResTimer.h"
-#include "../../Lepra/Include/MemberThread.h"
-#include "../ServerInfo.h"
+#include "../../cure/include/socketiohandler.h"
+#include "../../lepra/include/hirestimer.h"
+#include "../../lepra/include/memberthread.h"
+#include "../serverinfo.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class MasterServerConnection
-{
+class MasterServerConnection {
 public:
-	enum FirewallStatus
-	{
-		FIREWALL_ERROR,
-		FIREWALL_OPENED,
-		FIREWALL_USE_LAN,
+	enum FirewallStatus {
+		kFirewallError,
+		kFirewallOpened,
+		kFirewallUseLan,
 	};
 
-	MasterServerConnection(const str& pMasterAddress);
+	MasterServerConnection(const str& master_address);
 	virtual ~MasterServerConnection();
 	const str& GetMasterAddress() const;
 
-	void SetSocketInfo(Cure::SocketIoHandler* pMuxSocket, double pConnectTimeout);
+	void SetSocketInfo(cure::SocketIoHandler* mux_socket, double connect_timeout);
 
-	void SendLocalInfo(const str& pLocalServerInfo);
-	void AppendLocalInfo(const str& pExtraServerInfo);
-	void RequestServerList(const str& pCriterias);
-	void RequestOpenFirewall(const str& pGameServerConnectAddress);
-	bool UpdateServerList(ServerInfoList& pServerList) const;
+	void SendLocalInfo(const str& local_server_info);
+	void AppendLocalInfo(const str& extra_server_info);
+	void RequestServerList(const str& criterias);
+	void RequestOpenFirewall(const str& game_server_connect_address);
+	bool UpdateServerList(ServerInfoList& server_list) const;
 	str GetServerListAsText() const;
 	bool IsConnectError() const;
 	FirewallStatus GetFirewallOpenStatus() const;
 	const str& GetLanServerConnectAddress() const;
-	double WaitUntilDone(double pTimeout, bool pAllowReconnect);
-	void GraceClose(double pTimeout, bool pWaitUntilDone);
+	double WaitUntilDone(double timeout, bool allow_reconnect);
+	void GraceClose(double timeout, bool wait_until_done);
 	bool CloseUnlessUploaded();
 	void Tick();
-	bool TickReceive(ServerInfo& pServerInfo);
+	bool TickReceive(ServerInfo& server_info);
 
 private:
-	enum State
-	{
-		CONNECT,
-		CONNECTED,
-		UPLOAD_INFO,
-		DOWNLOAD_LIST,
-		OPEN_FIREWALL,
-		DISCONNECTED,
-		CONNECTING,
+	enum State {
+		kConnect,
+		kConnected,
+		kUploadInfo,
+		kDownloadList,
+		kOpenFirewall,
+		kDisconnected,
+		kConnecting,
 	};
 
-	void QueryAddState(State pState);
+	void QueryAddState(State state);
 	void TriggerConnectTimer();
 	void StepState();
 	void ConnectEntry();
 	bool UploadServerInfo();
 	bool DownloadServerList();
 	FirewallStatus OpenFirewall();
-	bool SendAndAck(const str& pData);
-	bool SendAndRecv(const str& pData, str& pReply);
-	bool Send(const str& pData);
-	bool Receive(str& pData);
-	void Close(bool pError);
+	bool SendAndAck(const str& data);
+	bool SendAndRecv(const str& data, str& reply);
+	bool Send(const str& data);
+	bool Receive(str& data);
+	void Close(bool error);
 	bool QueryMuxValid();
 
-	void OnDropSocket(Cure::SocketIoHandler::VIoSocket* pSocket);
+	void OnDropSocket(cure::SocketIoHandler::VIoSocket* socket);
 
-	str mMasterServerAddress;
-	State mState;
-	std::list<State> mStateList;
-	str mLocalServerInfo;
-	str mUploadedServerInfo;
-	str mServerSortCriterias;
-	str mServerList;
-	str mGameServerConnectAddress;
-	str mLanGameServerAddress;
-	double mConnectTimeout;
-	Cure::SocketIoHandler* mSocketIoHandler;
-	Cure::SocketIoHandler::MuxIoSocket* mMuxSocket;
-	Cure::SocketIoHandler::VIoSocket* mVSocket;
-	MemberThread<MasterServerConnection>* mConnecter;
-	volatile int mDisconnectCounter;
-	HiResTimer mIdleTimer;
-	HiResTimer mUploadTimeout;
-	bool mIsConnectError;
-	FirewallStatus mLastFirewallOpenStatus;
-	const static double mConnectedIdleTimeout;
-	const static double mDisconnectedIdleTimeout;
-	const static double mServerInfoTimeout;
+	str master_server_address_;
+	State state_;
+	std::list<State> state_list_;
+	str local_server_info_;
+	str uploaded_server_info_;
+	str server_sort_criterias_;
+	str server_list_;
+	str game_server_connect_address_;
+	str lan_game_server_address_;
+	double connect_timeout_;
+	cure::SocketIoHandler* socket_io_handler_;
+	cure::SocketIoHandler::MuxIoSocket* mux_socket_;
+	cure::SocketIoHandler::VIoSocket* v_socket_;
+	MemberThread<MasterServerConnection>* connecter_;
+	volatile int disconnect_counter_;
+	HiResTimer idle_timer_;
+	HiResTimer upload_timeout_;
+	bool is_connect_error_;
+	FirewallStatus last_firewall_open_status_;
+	const static double connected_idle_timeout_;
+	const static double disconnected_idle_timeout_;
+	const static double server_info_timeout_;
 
 	logclass();
 };

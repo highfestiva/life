@@ -1,86 +1,86 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{74FFE958-57D9-11E4-A545-BCEE7B8C67B1}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{75001068-57D9-11E4-9058-BCEE7B8C67B1}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Impuzzable.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile include="impuzzable.cxx">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImpuzzableConsoleManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="impuzzableconsolemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImpuzzableManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="impuzzablemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImpuzzableTicker.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="impuzzableticker.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sunlight.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="sunlight.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Level.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="level.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Impuzzable.mm">
-      <Filter>Source Files</Filter>
+    <ClCompile include="impuzzable.mm">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Piece.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="piece.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="PieceInfo.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="pieceinfo.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="AsciiLoader.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="asciiloader.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Impuzzable.h">
+    <Clinclude include="impuzzable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ImpuzzableConsoleManager.h">
+    <Clinclude include="impuzzableconsolemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ImpuzzableManager.h">
+    <Clinclude include="impuzzablemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ImpuzzableTicker.h">
+    <Clinclude include="impuzzableticker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RtVar.h">
+    <Clinclude include="rtvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sunlight.h">
+    <Clinclude include="sunlight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Version.h">
+    <Clinclude include="version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Level.h">
+    <Clinclude include="level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Piece.h">
+    <Clinclude include="piece.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Grid.h">
+    <Clinclude include="grid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PieceInfo.h">
+    <Clinclude include="pieceinfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AsciiLoader.h">
+    <Clinclude include="asciiloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Impuzzable.rc" />
+    <ResourceCompile include="impuzzable.rc" />
   </ItemGroup>
 </Project>

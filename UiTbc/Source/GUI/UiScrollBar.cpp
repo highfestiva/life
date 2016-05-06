@@ -5,21 +5,20 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiScrollBar.h"
-#include "../../Include/GUI/UiGridLayout.h"
-#include "../../Include/GUI/UiButton.h"
-#include "../../Include/GUI/UiDesktopWindow.h"
-#include "../../../Lepra/Include/Log.h"
+#include "../../include/gui/uiscrollbar.h"
+#include "../../include/gui/uigridlayout.h"
+#include "../../include/gui/uibutton.h"
+#include "../../include/gui/uidesktopwindow.h"
+#include "../../../lepra/include/log.h"
 #include <math.h>
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-uint8 ScrollBar::smIconArrowLeft[] = 
+uint8 ScrollBar::icon_arrow_left_[] =
 
 {	0  , 0  ,0  , 0  , 0  , 255, 0  , 0  ,
 	0  , 0  ,0  , 0  , 255, 255, 0  , 0  ,
@@ -31,7 +30,7 @@ uint8 ScrollBar::smIconArrowLeft[] =
 	0  , 0  ,0  , 0  , 0  , 0  , 0  , 0  ,
 };
 
-uint8 ScrollBar::smIconArrowRight[] = 
+uint8 ScrollBar::icon_arrow_right_[] =
 
 {	 0  , 0  ,255, 0  , 0  , 0  , 0  , 0  ,
 	 0  , 0  ,255, 255, 0  , 0  , 0  , 0  ,
@@ -43,7 +42,7 @@ uint8 ScrollBar::smIconArrowRight[] =
 	 0  , 0  ,0  , 0  , 0  , 0  , 0  , 0  ,
 };
 
-uint8 ScrollBar::smIconArrowUp[] = 
+uint8 ScrollBar::icon_arrow_up_[] =
 
 {	0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
 	0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
@@ -55,7 +54,7 @@ uint8 ScrollBar::smIconArrowUp[] =
 	0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
 };
 
-uint8 ScrollBar::smIconArrowDown[] = 
+uint8 ScrollBar::icon_arrow_down_[] =
 
 {	0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
 	0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
@@ -67,41 +66,40 @@ uint8 ScrollBar::smIconArrowDown[] =
 	0  , 0  , 0  , 0  , 0  , 0  , 0  , 0  ,
 };
 
-Painter::ImageID ScrollBar::smIconLeftID  = Painter::INVALID_IMAGEID;
-Painter::ImageID ScrollBar::smIconRightID = Painter::INVALID_IMAGEID;
-Painter::ImageID ScrollBar::smIconUpID    = Painter::INVALID_IMAGEID;
-Painter::ImageID ScrollBar::smIconDownID  = Painter::INVALID_IMAGEID;
+Painter::ImageID ScrollBar::icon_left_id_  = Painter::kInvalidImageid;
+Painter::ImageID ScrollBar::icon_right_id_ = Painter::kInvalidImageid;
+Painter::ImageID ScrollBar::icon_up_id_    = Painter::kInvalidImageid;
+Painter::ImageID ScrollBar::icon_down_id_  = Painter::kInvalidImageid;
 
-Painter* ScrollBar::smPrevPainter = 0;
-ScrollBar::ScrollbarCleaner* ScrollBar::smCleaner = 0;
+Painter* ScrollBar::prev_painter_ = 0;
+ScrollBar::ScrollbarCleaner* ScrollBar::cleaner_ = 0;
 
-ScrollBar::ScrollBar(Style pStyle, int pSize,  int pButtonSize, const Color& pBodyColor,
-	const Color& pBackgColor, BorderComponent::BorderShadeFunc pBorderShadeFunc,
-	int pBorderWidth):
-	RectComponent(pBackgColor, CreateLayout(pStyle)),
-	mStyle(pStyle),
-	mUserDefinedGfx(false),
-	mBackgImageID(Painter::INVALID_IMAGEID),
-	mTLButton(0),
-	mBRButton(0),
-	mScrollerButton(0),
-	mTLRect(0),
-	mBRRect(0),
-	mBodyColor(pBodyColor),
-	mVisible(1.0),
-	mMax(1.0),
-	mPos(0.0),
-	mScrollSpeed(0),
-	mFirstDelay(0.5),
-	mDelay(0.08),
-	mFirstDelayDone(false),
-	mSize(pSize),
-	mButtonSize(pButtonSize),
-	mScrollerSize(0),
-	mBorderShadeFunc(pBorderShadeFunc),
-	mBorderWidth(pBorderWidth),
-	mOwner(0)
-{
+ScrollBar::ScrollBar(Style style, int size,  int button_size, const Color& body_color,
+	const Color& backg_color, BorderComponent::BorderShadeFunc border_shade_func,
+	int border_width):
+	RectComponent(backg_color, CreateLayout(style)),
+	style_(style),
+	user_defined_gfx_(false),
+	backg_image_id_(Painter::kInvalidImageid),
+	tl_button_(0),
+	br_button_(0),
+	scroller_button_(0),
+	tl_rect_(0),
+	br_rect_(0),
+	body_color_(body_color),
+	visible_(1.0),
+	max_(1.0),
+	pos_(0.0),
+	scroll_speed_(0),
+	first_delay_(0.5),
+	delay_(0.08),
+	first_delay_done_(false),
+	size_(size),
+	button_size_(button_size),
+	scroller_size_(0),
+	border_shade_func_(border_shade_func),
+	border_width_(border_width),
+	owner_(0) {
 	InitPreferredSize();
 
 	LoadIcons();
@@ -114,32 +112,31 @@ ScrollBar::ScrollBar(Style pStyle, int pSize,  int pButtonSize, const Color& pBo
 	UpdateLayout();
 }
 
-ScrollBar::ScrollBar(Style pStyle, Painter::ImageID pBackgImageID, Button* pTopLeftButton,
-	Button* pBottomRightButton, Button* pScrollerButton):
-	RectComponent(pBackgImageID, CreateLayout(pStyle)),
-	mStyle(pStyle),
-	mUserDefinedGfx(true),
-	mBackgImageID(pBackgImageID),
-	mTLButton(pTopLeftButton),
-	mBRButton(pBottomRightButton),
-	mScrollerButton(pScrollerButton),
-	mTLRect(0),
-	mBRRect(0),
-	mBodyColor(0, 0, 0),
-	mVisible(1.0),
-	mMax(1.0),
-	mPos(0.0),
-	mScrollSpeed(0),
-	mFirstDelay(0.5),
-	mDelay(0.08),
-	mFirstDelayDone(false),
-	mSize(0),
-	mButtonSize(0),
-	mScrollerSize(0),
-	mBorderShadeFunc(BorderComponent::LINEAR),
-	mBorderWidth(3),
-	mOwner(0)
-{
+ScrollBar::ScrollBar(Style style, Painter::ImageID backg_image_id, Button* top_left_button,
+	Button* bottom_right_button, Button* scroller_button):
+	RectComponent(backg_image_id, CreateLayout(style)),
+	style_(style),
+	user_defined_gfx_(true),
+	backg_image_id_(backg_image_id),
+	tl_button_(top_left_button),
+	br_button_(bottom_right_button),
+	scroller_button_(scroller_button),
+	tl_rect_(0),
+	br_rect_(0),
+	body_color_(0, 0, 0),
+	visible_(1.0),
+	max_(1.0),
+	pos_(0.0),
+	scroll_speed_(0),
+	first_delay_(0.5),
+	delay_(0.08),
+	first_delay_done_(false),
+	size_(0),
+	button_size_(0),
+	scroller_size_(0),
+	border_shade_func_(BorderComponent::kLinear),
+	border_width_(3),
+	owner_(0) {
 	SetupScrollButton();
 	CheckAndSetSize();
 	InitPreferredSize();
@@ -147,53 +144,37 @@ ScrollBar::ScrollBar(Style pStyle, Painter::ImageID pBackgImageID, Button* pTopL
 	UpdateLayout();
 }
 
-GridLayout* ScrollBar::CreateLayout(Style pStyle)
-{
-	if (pStyle == HORIZONTAL)
-	{
+GridLayout* ScrollBar::CreateLayout(Style style) {
+	if (style == kHorizontal) {
 		return new GridLayout(1, 5);
-	}
-	else
-	{
+	} else {
 		return new GridLayout(5, 1);
 	}
 }
 
 
 
-void ScrollBar::Repaint(Painter* pPainter)
-{
+void ScrollBar::Repaint(Painter* painter) {
 	DoLayout();
-	Parent::Repaint(pPainter);
+	Parent::Repaint(painter);
 }
 
-void ScrollBar::SetScrollRatio(float64 pVisible, float64 pMax)
-{
-	if (pMax > 0.0)
-	{
-		mMax = pMax;
-		mVisible = pVisible < 0 ? 0 : (pVisible > mMax ? mMax : pVisible);
+void ScrollBar::SetScrollRatio(float64 visible, float64 max) {
+	if (max > 0.0) {
+		max_ = max;
+		visible_ = visible < 0 ? 0 : (visible > max_ ? max_ : visible);
 
-		if (mStyle == HORIZONTAL)
-		{
-			if (mScrollerSize == 0)
-			{
-				SetMinSize(2 * mButtonSize + (int)((float64)mBorderWidth * 2.0), mSize);
+		if (style_ == kHorizontal) {
+			if (scroller_size_ == 0) {
+				SetMinSize(2 * button_size_ + (int)((float64)border_width_ * 2.0), size_);
+			} else {
+				SetMinSize(2 * button_size_ + scroller_size_, size_);
 			}
-			else
-			{
-				SetMinSize(2 * mButtonSize + mScrollerSize, mSize);
-			}
-		}
-		else
-		{
-			if (mScrollerSize == 0)
-			{
-				SetMinSize(mSize, 2 * mButtonSize + (int)((float64)mBorderWidth * 2.0));
-			}
-			else
-			{
-				SetMinSize(mSize, 2 * mButtonSize + mScrollerSize);
+		} else {
+			if (scroller_size_ == 0) {
+				SetMinSize(size_, 2 * button_size_ + (int)((float64)border_width_ * 2.0));
+			} else {
+				SetMinSize(size_, 2 * button_size_ + scroller_size_);
 			}
 		}
 	}
@@ -201,470 +182,373 @@ void ScrollBar::SetScrollRatio(float64 pVisible, float64 pMax)
 	SetNeedsRepaint(true);
 }
 
-float64 ScrollBar::GetScrollRatioVisible() const
-{
-	return mVisible;
+float64 ScrollBar::GetScrollRatioVisible() const {
+	return visible_;
 }
 
-float64 ScrollBar::GetScrollRatioMax() const
-{
-	return mMax;
+float64 ScrollBar::GetScrollRatioMax() const {
+	return max_;
 }
 
-void ScrollBar::SetScrollPos(float64 pPos)
-{
-	mPos = pPos < 0 ? 0 : (pPos > 1 ? 1 : pPos);
+void ScrollBar::SetScrollPos(float64 pos) {
+	pos_ = pos < 0 ? 0 : (pos > 1 ? 1 : pos);
 	SetNeedsRepaint(true);
-	if (mOwner != 0)
-	{
-		mOwner->UpdateLayout();
+	if (owner_ != 0) {
+		owner_->UpdateLayout();
 	}
 }
 
-void ScrollBar::DoSetSize(int pWidth, int pHeight)
-{
-	Parent::DoSetSize(pWidth, pHeight);
+void ScrollBar::DoSetSize(int width, int height) {
+	Parent::DoSetSize(width, height);
 	DoLayout();
 }
 
-void ScrollBar::LoadIcons()
-{
-	if (mStyle == HORIZONTAL)
-	{
-		AddImage(smIconLeftID, smIconArrowLeft, 8);
-		AddImage(smIconRightID, smIconArrowRight, 8);
-	}
-	else
-	{
-		AddImage(smIconUpID, smIconArrowUp, 8);
-		AddImage(smIconDownID, smIconArrowDown, 8);
+void ScrollBar::LoadIcons() {
+	if (style_ == kHorizontal) {
+		AddImage(icon_left_id_, icon_arrow_left_, 8);
+		AddImage(icon_right_id_, icon_arrow_right_, 8);
+	} else {
+		AddImage(icon_up_id_, icon_arrow_up_, 8);
+		AddImage(icon_down_id_, icon_arrow_down_, 8);
 	}
 }
 
-void ScrollBar::AddImage(Painter::ImageID& pImageID, uint8 pImage[], int pDim)
-{
-	GUIImageManager* lIMan = GetImageManager();
+void ScrollBar::AddImage(Painter::ImageID& image_id, uint8 image[], int dim) {
+	GUIImageManager* i_man = GetImageManager();
 
-	if (smPrevPainter != lIMan->GetPainter())
-	{
-		smIconLeftID  = Painter::INVALID_IMAGEID;
-		smIconRightID = Painter::INVALID_IMAGEID;
-		smIconUpID    = Painter::INVALID_IMAGEID;
-		smIconDownID  = Painter::INVALID_IMAGEID;
-		smPrevPainter = lIMan->GetPainter();
+	if (prev_painter_ != i_man->GetPainter()) {
+		icon_left_id_  = Painter::kInvalidImageid;
+		icon_right_id_ = Painter::kInvalidImageid;
+		icon_up_id_    = Painter::kInvalidImageid;
+		icon_down_id_  = Painter::kInvalidImageid;
+		prev_painter_ = i_man->GetPainter();
 	}
 
-	if (pImageID == Painter::INVALID_IMAGEID)
-	{
-		Canvas lCanvas(pDim, pDim, Canvas::BITDEPTH_8_BIT);
-		lCanvas.SetBuffer(pImage);
-		Canvas lAlpha(lCanvas, true);
-		lCanvas.ConvertTo32BitWithAlpha(lAlpha);
-		pImageID = lIMan->AddImage(lCanvas, GUIImageManager::CENTERED, GUIImageManager::ALPHATEST, 128);
+	if (image_id == Painter::kInvalidImageid) {
+		Canvas canvas(dim, dim, Canvas::kBitdepth8Bit);
+		canvas.SetBuffer(image);
+		Canvas alpha(canvas, true);
+		canvas.ConvertTo32BitWithAlpha(alpha);
+		image_id = i_man->AddImage(canvas, GUIImageManager::kCentered, GUIImageManager::kAlphatest, 128);
 	}
 }
 
-void ScrollBar::SetupScrollButton()
-{
-	if (mScrollerButton == 0)
-	{
-		if (mStyle == HORIZONTAL)
-			mScrollerButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
+void ScrollBar::SetupScrollButton() {
+	if (scroller_button_ == 0) {
+		if (style_ == kHorizontal)
+			scroller_button_ = new Button(border_shade_func_, border_width_, body_color_, L"");
 		else
-			mScrollerButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
+			scroller_button_ = new Button(border_shade_func_, border_width_, body_color_, L"");
 	}
 
-	if (mStyle == HORIZONTAL)
-		AddChild(mScrollerButton, 0, 2);
+	if (style_ == kHorizontal)
+		AddChild(scroller_button_, 0, 2);
 	else
-		AddChild(mScrollerButton, 2, 0);
+		AddChild(scroller_button_, 2, 0);
 
-	mScrollerButton->SetOnPress(ScrollBar, OnScrollerDown);
-	mScrollerButton->SetOnDrag(ScrollBar, OnScrollerDragged);
+	scroller_button_->SetOnPress(ScrollBar, OnScrollerDown);
+	scroller_button_->SetOnDrag(ScrollBar, OnScrollerDragged);
 }
 
-void ScrollBar::LoadButtons()
-{
-	if (mTLButton == 0)
-	{
-		if (mStyle == HORIZONTAL)
-		{
-			mTLButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
-			mTLButton->SetIcon(smIconLeftID, Button::ICON_CENTER);
-		}
-		else
-		{
-			mTLButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
-			mTLButton->SetIcon(smIconUpID, Button::ICON_CENTER);
+void ScrollBar::LoadButtons() {
+	if (tl_button_ == 0) {
+		if (style_ == kHorizontal) {
+			tl_button_ = new Button(border_shade_func_, border_width_, body_color_, L"");
+			tl_button_->SetIcon(icon_left_id_, Button::kIconCenter);
+		} else {
+			tl_button_ = new Button(border_shade_func_, border_width_, body_color_, L"");
+			tl_button_->SetIcon(icon_up_id_, Button::kIconCenter);
 		}
 	}
 
-	if (mStyle == HORIZONTAL)
-		AddChild(mTLButton, 0, 0);
+	if (style_ == kHorizontal)
+		AddChild(tl_button_, 0, 0);
 	else
-		AddChild(mTLButton, 0, 0);
+		AddChild(tl_button_, 0, 0);
 
-	if (mBRButton == 0)
-	{
-		if (mStyle == HORIZONTAL)
-		{
-			mBRButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
-			mBRButton->SetIcon(smIconRightID, Button::ICON_CENTER);
-		}
-		else
-		{
-			mBRButton = new Button(mBorderShadeFunc, mBorderWidth, mBodyColor, L"");
-			mBRButton->SetIcon(smIconDownID, Button::ICON_CENTER);
+	if (br_button_ == 0) {
+		if (style_ == kHorizontal) {
+			br_button_ = new Button(border_shade_func_, border_width_, body_color_, L"");
+			br_button_->SetIcon(icon_right_id_, Button::kIconCenter);
+		} else {
+			br_button_ = new Button(border_shade_func_, border_width_, body_color_, L"");
+			br_button_->SetIcon(icon_down_id_, Button::kIconCenter);
 		}
 	}
 
-	if (mStyle == HORIZONTAL)
-		AddChild(mBRButton, 0, 4);
+	if (style_ == kHorizontal)
+		AddChild(br_button_, 0, 4);
 	else
-		AddChild(mBRButton, 4, 0);
+		AddChild(br_button_, 4, 0);
 
 	// Finally add the two dummy rects.
-	mTLRect = new RectComponent;
-	mBRRect = new RectComponent;
-	
-	if (mStyle == HORIZONTAL)
-	{
-		AddChild(mTLRect, 0, 1);
-		AddChild(mBRRect, 0, 3);
+	tl_rect_ = new RectComponent;
+	br_rect_ = new RectComponent;
 
-		SetMinSize(2 * mButtonSize + mBorderWidth * 2, mSize);
-	}
-	else
-	{
-		AddChild(mTLRect, 1, 0);
-		AddChild(mBRRect, 3, 0);
+	if (style_ == kHorizontal) {
+		AddChild(tl_rect_, 0, 1);
+		AddChild(br_rect_, 0, 3);
 
-		SetMinSize(mSize, 2 * mButtonSize + mBorderWidth * 2);
+		SetMinSize(2 * button_size_ + border_width_ * 2, size_);
+	} else {
+		AddChild(tl_rect_, 1, 0);
+		AddChild(br_rect_, 3, 0);
+
+		SetMinSize(size_, 2 * button_size_ + border_width_ * 2);
 	}
 
-	mTLButton->SetOnPress(ScrollBar, OnScrollTL);
-	mBRButton->SetOnPress(ScrollBar, OnScrollBR);
-	mTLButton->SetOnRelease(ScrollBar, OnStopScroll);
-	mBRButton->SetOnRelease(ScrollBar, OnStopScroll);
+	tl_button_->SetOnPress(ScrollBar, OnScrollTL);
+	br_button_->SetOnPress(ScrollBar, OnScrollBR);
+	tl_button_->SetOnRelease(ScrollBar, OnStopScroll);
+	br_button_->SetOnRelease(ScrollBar, OnStopScroll);
 }
 
-void ScrollBar::CheckButtonSize(Button* pButton)
-{
-	if (pButton != 0)
-	{
-		if (mStyle == HORIZONTAL)
-		{
-			if (pButton->GetPreferredHeight() > mSize)
-			{
-				mSize = pButton->GetPreferredHeight();
+void ScrollBar::CheckButtonSize(Button* button) {
+	if (button != 0) {
+		if (style_ == kHorizontal) {
+			if (button->GetPreferredHeight() > size_) {
+				size_ = button->GetPreferredHeight();
 			}
 
-			if (pButton->GetPreferredWidth() > mButtonSize)
-			{
-				mButtonSize = pButton->GetPreferredWidth();
+			if (button->GetPreferredWidth() > button_size_) {
+				button_size_ = button->GetPreferredWidth();
 			}
-		}
-		else
-		{
-			if (pButton->GetPreferredWidth() > mSize)
-			{
-				mSize = pButton->GetPreferredWidth();
+		} else {
+			if (button->GetPreferredWidth() > size_) {
+				size_ = button->GetPreferredWidth();
 			}
 
-			if (pButton->GetPreferredHeight() > mButtonSize)
-			{
-				mButtonSize = pButton->GetPreferredHeight();
+			if (button->GetPreferredHeight() > button_size_) {
+				button_size_ = button->GetPreferredHeight();
 			}
 		}
 	}
 }
 
-void ScrollBar::CheckAndSetSize()
-{
+void ScrollBar::CheckAndSetSize() {
 	SetBehaveSolid(true);
-	CheckButtonSize(mTLButton);
-	CheckButtonSize(mBRButton);
+	CheckButtonSize(tl_button_);
+	CheckButtonSize(br_button_);
 
-	if (mScrollerButton != 0)
-	{
-		if (mStyle == HORIZONTAL)
-		{
-			if (mScrollerButton->GetPreferredHeight() > mSize)
-			{
-				mSize = mScrollerButton->GetPreferredHeight();
+	if (scroller_button_ != 0) {
+		if (style_ == kHorizontal) {
+			if (scroller_button_->GetPreferredHeight() > size_) {
+				size_ = scroller_button_->GetPreferredHeight();
 			}
-		}
-		else
-		{
-			if (mScrollerButton->GetPreferredWidth() > mSize)
-			{
-				mSize = mScrollerButton->GetPreferredWidth();
+		} else {
+			if (scroller_button_->GetPreferredWidth() > size_) {
+				size_ = scroller_button_->GetPreferredWidth();
 			}
 		}
 	}
 
-	if (mSize == 0)
-	{
-		mSize = 16;
+	if (size_ == 0) {
+		size_ = 16;
 	}
-	if (mButtonSize == 0)
-	{
-		mButtonSize = 16;
+	if (button_size_ == 0) {
+		button_size_ = 16;
 	}
 }
 
-void ScrollBar::InitPreferredSize()
-{
-	if (mStyle == HORIZONTAL)
-	{
-		if (mTLButton != 0)
-		{
-			mTLButton->SetPreferredSize(mButtonSize, mSize);
+void ScrollBar::InitPreferredSize() {
+	if (style_ == kHorizontal) {
+		if (tl_button_ != 0) {
+			tl_button_->SetPreferredSize(button_size_, size_);
 		}
 
-		if (mBRButton != 0)
-		{
-			mBRButton->SetPreferredSize(mButtonSize, mSize);
+		if (br_button_ != 0) {
+			br_button_->SetPreferredSize(button_size_, size_);
 		}
 
-		if (mScrollerButton != 0)
-		{
-			mScrollerButton->SetPreferredSize(GetSize().x - 2 * mButtonSize, mSize);
+		if (scroller_button_ != 0) {
+			scroller_button_->SetPreferredSize(GetSize().x - 2 * button_size_, size_);
 		}
-	}
-	else
-	{
-		if (mTLButton != 0)
-		{
-			mTLButton->SetPreferredSize(mSize, mButtonSize);
+	} else {
+		if (tl_button_ != 0) {
+			tl_button_->SetPreferredSize(size_, button_size_);
 		}
 
-		if (mBRButton != 0)
-		{
-			mBRButton->SetPreferredSize(mSize, mButtonSize);
+		if (br_button_ != 0) {
+			br_button_->SetPreferredSize(size_, button_size_);
 		}
 
-		if (mScrollerButton != 0)
-		{
-			mScrollerButton->SetPreferredSize(mSize, GetSize().y - 2 * mButtonSize);
+		if (scroller_button_ != 0) {
+			scroller_button_->SetPreferredSize(size_, GetSize().y - 2 * button_size_);
 		}
 	}
 
-	if (mTLRect != 0)
-	{
-		mTLRect->SetPreferredSize(0, 0);
+	if (tl_rect_ != 0) {
+		tl_rect_->SetPreferredSize(0, 0);
 	}
-	
-	if (mBRRect != 0)
-	{
-		mBRRect->SetPreferredSize(0, 0);
+
+	if (br_rect_ != 0) {
+		br_rect_->SetPreferredSize(0, 0);
 	}
 }
 
-void ScrollBar::DoLayout()
-{
-	PixelRect lRect(Parent::GetScreenRect());
-	float64 lRatio = mVisible / mMax;
+void ScrollBar::DoLayout() {
+	PixelRect rect(Parent::GetScreenRect());
+	float64 ratio = visible_ / max_;
 
-	PixelCoord lMinSize(GetMinSize());
+	PixelCoord min_size(GetMinSize());
 
-	if (mStyle == HORIZONTAL)
-	{
+	if (style_ == kHorizontal) {
 		/* TODO: complete intention.
-		if (lRect.GetWidth() < lMinSize.x)
-		{
+		if (rect.GetWidth() < min_size.x) {
 			int stophere = 0;
 		}*/
 
-		int lWidth = lRect.GetWidth();
-		if (mTLRect)
-		{
-			lWidth -= mButtonSize * 2;
+		int _width = rect.GetWidth();
+		if (tl_rect_) {
+			_width -= button_size_ * 2;
 		}
-		int lScrollerWidth = (int)floor(((float64)lWidth * lRatio));
+		int scroller_width = (int)floor(((float64)_width * ratio));
 
-		if (mScrollerSize != 0)
-		{
-			lScrollerWidth = mScrollerSize;
-		}
-		else if(lScrollerWidth < mScrollerButton->GetMinSize().x)
-		{
-			lScrollerWidth = mScrollerButton->GetMinSize().x;
+		if (scroller_size_ != 0) {
+			scroller_width = scroller_size_;
+		} else if(scroller_width < scroller_button_->GetMinSize().x) {
+			scroller_width = scroller_button_->GetMinSize().x;
 		}
 
-		int lRest = lWidth - lScrollerWidth;
-		int lScrollPos = (int)floor((float64)lRest * mPos);
+		int rest = _width - scroller_width;
+		int scroll_pos = (int)floor((float64)rest * pos_);
 
-		mScrollerButton->SetPos(lScrollPos, 0);
-		mScrollerButton->SetPreferredSize(lScrollerWidth, mSize);
-		mScrollerButton->SetSize(lScrollerWidth, mSize);
+		scroller_button_->SetPos(scroll_pos, 0);
+		scroller_button_->SetPreferredSize(scroller_width, size_);
+		scroller_button_->SetSize(scroller_width, size_);
 
-		if (mTLRect)
-		{
-			mTLRect->SetPreferredSize(lScrollPos, mSize);
-			if (lScrollPos == 0)
-			{
-				mBRRect->SetPreferredSize(lRest - lScrollPos, mSize);
-			}
-			else
-			{
-				mBRRect->SetPreferredSize(0, mSize);
+		if (tl_rect_) {
+			tl_rect_->SetPreferredSize(scroll_pos, size_);
+			if (scroll_pos == 0) {
+				br_rect_->SetPreferredSize(rest - scroll_pos, size_);
+			} else {
+				br_rect_->SetPreferredSize(0, size_);
 			}
 
-			mTLButton->SetPreferredSize(mButtonSize, mSize);
-			mBRButton->SetPreferredSize(mButtonSize, mSize);
+			tl_button_->SetPreferredSize(button_size_, size_);
+			br_button_->SetPreferredSize(button_size_, size_);
 		}
-	}
-	else
-	{
-		int lHeight = lRect.GetHeight();
-		if (mTLRect)
-		{
-			lHeight -= mButtonSize * 2;
+	} else {
+		int _height = rect.GetHeight();
+		if (tl_rect_) {
+			_height -= button_size_ * 2;
 		}
-		int lScrollerHeight = (int)floor(((float64)lHeight * lRatio));
+		int scroller_height = (int)floor(((float64)_height * ratio));
 
-		if (mScrollerSize != 0)
-		{
-			lScrollerHeight = mScrollerSize;
-		}
-		else if(lScrollerHeight < mScrollerButton->GetMinSize().y)
-		{
-			lScrollerHeight = mScrollerButton->GetMinSize().y;
+		if (scroller_size_ != 0) {
+			scroller_height = scroller_size_;
+		} else if(scroller_height < scroller_button_->GetMinSize().y) {
+			scroller_height = scroller_button_->GetMinSize().y;
 		}
 
-		int lRest = lHeight - lScrollerHeight;
-		int lScrollPos = (int)floor((float64)lRest * mPos);
+		int rest = _height - scroller_height;
+		int scroll_pos = (int)floor((float64)rest * pos_);
 
-		mScrollerButton->SetPos(0, lScrollPos);
-		mScrollerButton->SetPreferredSize(mSize, lScrollerHeight);
-		mScrollerButton->SetSize(mSize, lScrollerHeight);
+		scroller_button_->SetPos(0, scroll_pos);
+		scroller_button_->SetPreferredSize(size_, scroller_height);
+		scroller_button_->SetSize(size_, scroller_height);
 
-		if (mTLRect)
-		{
-			mTLRect->SetPreferredSize(mSize, lScrollPos);
-			mBRRect->SetPreferredSize(mSize, lRest - lScrollPos);
+		if (tl_rect_) {
+			tl_rect_->SetPreferredSize(size_, scroll_pos);
+			br_rect_->SetPreferredSize(size_, rest - scroll_pos);
 
-			mTLButton->SetPreferredSize(mSize, mButtonSize);
-			mBRButton->SetPreferredSize(mSize, mButtonSize);
+			tl_button_->SetPreferredSize(size_, button_size_);
+			br_button_->SetPreferredSize(size_, button_size_);
 		}
 	}
 }
 
-void ScrollBar::OnScrollTL(Button* /*pButton*/)
-{
-	mScrollSpeed = -1.0 / (mMax - mVisible);
-	SetScrollPos(GetScrollPos() + mScrollSpeed);
-	mTimer.UpdateTimer();
-	mTimer.ClearTimeDiff();
-	mFirstDelayDone = false;
+void ScrollBar::OnScrollTL(Button* /*button*/) {
+	scroll_speed_ = -1.0 / (max_ - visible_);
+	SetScrollPos(GetScrollPos() + scroll_speed_);
+	timer_.UpdateTimer();
+	timer_.ClearTimeDiff();
+	first_delay_done_ = false;
 
-	DesktopWindow* lDWin = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-	lDWin->AddIdleSubscriber(this);
+	DesktopWindow* d_win = (DesktopWindow*)GetParentOfType(kDesktopwindow);
+	d_win->AddIdleSubscriber(this);
 }
 
-void ScrollBar::OnScrollBR(Button* /*pButton*/)
-{
-	mScrollSpeed = 1.0 / (mMax - mVisible);
-	SetScrollPos(GetScrollPos() + mScrollSpeed);
-	mTimer.UpdateTimer();
-	mTimer.ClearTimeDiff();
-	mFirstDelayDone = false;
-	DesktopWindow* lDWin = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-	lDWin->AddIdleSubscriber(this);
+void ScrollBar::OnScrollBR(Button* /*button*/) {
+	scroll_speed_ = 1.0 / (max_ - visible_);
+	SetScrollPos(GetScrollPos() + scroll_speed_);
+	timer_.UpdateTimer();
+	timer_.ClearTimeDiff();
+	first_delay_done_ = false;
+	DesktopWindow* d_win = (DesktopWindow*)GetParentOfType(kDesktopwindow);
+	d_win->AddIdleSubscriber(this);
 }
 
-void ScrollBar::OnStopScroll(Button* /*pButton*/)
-{
-	mScrollSpeed = 0;
-	mFirstDelayDone = false;
-	DesktopWindow* lDWin = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-	lDWin->RemoveIdleSubscriber(this);
+void ScrollBar::OnStopScroll(Button* /*button*/) {
+	scroll_speed_ = 0;
+	first_delay_done_ = false;
+	DesktopWindow* d_win = (DesktopWindow*)GetParentOfType(kDesktopwindow);
+	d_win->RemoveIdleSubscriber(this);
 }
 
-void ScrollBar::OnScrollerDown(Button* pButton)
-{
-	if (mUserDefinedGfx == false)
-	{
-		unsigned lStyle = pButton->GetBorderStyle();
-		lStyle &= ~Window::BORDER_SUNKEN;
-		pButton->SetBorder(lStyle, pButton->GetBorderWidth());
+void ScrollBar::OnScrollerDown(Button* button) {
+	if (user_defined_gfx_ == false) {
+		unsigned _style = button->GetBorderStyle();
+		_style &= ~Window::kBorderSunken;
+		button->SetBorder(_style, button->GetBorderWidth());
 	}
 }
 
-bool ScrollBar::OnScrollerDragged(Button* pButton, int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
-{
+bool ScrollBar::OnScrollerDragged(Button* button, int mouse_x, int mouse_y, int delta_x, int delta_y) {
 
-	PixelRect lRect(GetScreenRect());
-	PixelCoord lScrollerSize(mScrollerButton->GetSize());
+	PixelRect rect(GetScreenRect());
+	PixelCoord _scroller_size(scroller_button_->GetSize());
 
-	if (mTLRect)
-	{
-		float64 lDeltaPos;
-		if (mStyle == HORIZONTAL)
-		{
-			lDeltaPos = (float64)pDeltaX / (float64)(lRect.GetWidth() - (lScrollerSize.x + 2 * mButtonSize));
+	if (tl_rect_) {
+		float64 delta_pos;
+		if (style_ == kHorizontal) {
+			delta_pos = (float64)delta_x / (float64)(rect.GetWidth() - (_scroller_size.x + 2 * button_size_));
+		} else {
+			delta_pos = (float64)delta_y / (float64)(rect.GetHeight() - (_scroller_size.y + 2 * button_size_));
 		}
-		else
-		{
-			lDeltaPos = (float64)pDeltaY / (float64)(lRect.GetHeight() - (lScrollerSize.y + 2 * mButtonSize));
+		SetScrollPos(GetScrollPos() + delta_pos);
+	} else {
+		float64 _pos;
+		if (style_ == kHorizontal) {
+			_pos = (mouse_x - rect.left_ - size_/2.0f) / (rect.GetWidth() - size_ - 2.0f);
+		} else {
+			_pos = (mouse_y - rect.top_ - size_/2.0f) / (rect.GetHeight() - size_ - 2.0f);
 		}
-		SetScrollPos(GetScrollPos() + lDeltaPos);
-	}
-	else
-	{
-		float64 lPos;
-		if (mStyle == HORIZONTAL)
-		{
-			lPos = (pMouseX - lRect.mLeft - mSize/2.0f) / (lRect.GetWidth() - mSize - 2.0f);
-		}
-		else
-		{
-			lPos = (pMouseY - lRect.mTop - mSize/2.0f) / (lRect.GetHeight() - mSize - 2.0f);
-		}
-		SetScrollPos(lPos);
+		SetScrollPos(_pos);
 	}
 
-	if (mUserDefinedGfx == false)
-	{
-		unsigned lStyle = pButton->GetBorderStyle();
-		lStyle &= ~Window::BORDER_SUNKEN;
-		pButton->SetBorder(lStyle, pButton->GetBorderWidth());
+	if (user_defined_gfx_ == false) {
+		unsigned _style = button->GetBorderStyle();
+		_style &= ~Window::kBorderSunken;
+		button->SetBorder(_style, button->GetBorderWidth());
 	}
 	return (false);
 }
 
-void ScrollBar::OnConnectedToDesktopWindow()
-{
-	if(smCleaner == 0)
-	{
-		DesktopWindow* lDesktopWindow = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-		if(lDesktopWindow != 0)
-		{
-			smCleaner = new ScrollbarCleaner();
-			lDesktopWindow->AddCleaner(smCleaner);
+void ScrollBar::OnConnectedToDesktopWindow() {
+	if(cleaner_ == 0) {
+		DesktopWindow* desktop_window = (DesktopWindow*)GetParentOfType(kDesktopwindow);
+		if(desktop_window != 0) {
+			cleaner_ = new ScrollbarCleaner();
+			desktop_window->AddCleaner(cleaner_);
 		}
 	}
 }
 
-void ScrollBar::OnIdle()
-{
-	if (mScrollSpeed != 0)
-	{
-		mTimer.UpdateTimer();
-		float64 lDelay = mFirstDelay;
+void ScrollBar::OnIdle() {
+	if (scroll_speed_ != 0) {
+		timer_.UpdateTimer();
+		float64 _delay = first_delay_;
 
-		if (mFirstDelayDone == true)
-		{
-			lDelay = mDelay;
+		if (first_delay_done_ == true) {
+			_delay = delay_;
 		}
 
-		while (mTimer.GetTimeDiff() > lDelay)
-		{
-			SetScrollPos(GetScrollPos() + mScrollSpeed);
-			mTimer.ReduceTimeDiff(lDelay);
-			mFirstDelayDone = true;
-			lDelay = mDelay;
+		while (timer_.GetTimeDiff() > _delay) {
+			SetScrollPos(GetScrollPos() + scroll_speed_);
+			timer_.ReduceTimeDiff(_delay);
+			first_delay_done_ = true;
+			_delay = delay_;
 		}
 
 		SetNeedsRepaint(true);
@@ -673,31 +557,26 @@ void ScrollBar::OnIdle()
 
 
 
-float64 ScrollBar::GetScrollPos()
-{
-	return mPos;
+float64 ScrollBar::GetScrollPos() {
+	return pos_;
 }
 
-void ScrollBar::SetScrollDelay(float64 pFirstDelay, float64 pDelay)
-{
-	mFirstDelay = pFirstDelay;
-	mDelay = pDelay;
+void ScrollBar::SetScrollDelay(float64 first_delay, float64 delay) {
+	first_delay_ = first_delay;
+	delay_ = delay;
 }
 
-void ScrollBar::SetStaticScrollerSize(int pScrollerSize)
-{
-	mScrollerSize = pScrollerSize;
+void ScrollBar::SetStaticScrollerSize(int scroller_size) {
+	scroller_size_ = scroller_size;
 	SetNeedsRepaint(true);
 }
 
-Component::Type ScrollBar::GetType() const
-{
-	return Component::SCROLLBAR;
+Component::Type ScrollBar::GetType() const {
+	return Component::kScrollbar;
 }
 
-void ScrollBar::SetOwner(Component* pOwner)
-{
-	mOwner = pOwner;
+void ScrollBar::SetOwner(Component* owner) {
+	owner_ = owner;
 }
 
 

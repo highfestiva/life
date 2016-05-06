@@ -5,362 +5,323 @@
 */
 
 #include "pch.h"
-#include "../../Include/GUI/UiCaption.h"
-#include "../../Include/GUI/UiCenterLayout.h"
-#include "../../Include/GUI/UiStackLayout.h"
+#include "../../include/gui/uicaption.h"
+#include "../../include/gui/uicenterlayout.h"
+#include "../../include/gui/uistacklayout.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-Caption::Caption(const Color& pActiveColor, const Color& pInactiveColor, int pHeight) :
-	RectComponent(pActiveColor, new StackLayout(1)),
-	mLabel(0),
-	mCaptionRect(0),
-	mButtonRect(0),
-	mLeftImageRect(0),
-	mCenterImageRect(0),
-	mRightImageRect(0),
-	mLeftButton(0),
-	mRightButton(0),
-	mMiddleButton(0),
-	mActiveTLColor(pActiveColor),
-	mActiveTRColor(pActiveColor),
-	mActiveBLColor(pActiveColor),
-	mActiveBRColor(pActiveColor),
-	mInactiveTLColor(pInactiveColor),
-	mInactiveTRColor(pInactiveColor),
-	mInactiveBLColor(pInactiveColor),
-	mInactiveBRColor(pInactiveColor),
-	mActiveLeftImageID(Painter::INVALID_IMAGEID),
-	mActiveRightImageID(Painter::INVALID_IMAGEID),
-	mActiveCenterImageID(Painter::INVALID_IMAGEID),
-	mInactiveLeftImageID(Painter::INVALID_IMAGEID),
-	mInactiveRightImageID(Painter::INVALID_IMAGEID),
-	mInactiveCenterImageID(Painter::INVALID_IMAGEID),
-	mText(),
-	mActiveTextBackgColor(255, 255, 255),
-	mInactiveTextColor(0, 0, 0),
-	mInactiveTextBackgColor(255, 255, 255),
-	mMovingWindow(false),
-	mActive(true),
-	mStyle(SINGLECOLOR_STYLE)
-{
+Caption::Caption(const Color& active_color, const Color& inactive_color, int height) :
+	RectComponent(active_color, new StackLayout(1)),
+	label_(0),
+	caption_rect_(0),
+	button_rect_(0),
+	left_image_rect_(0),
+	center_image_rect_(0),
+	right_image_rect_(0),
+	left_button_(0),
+	right_button_(0),
+	middle_button_(0),
+	active_tl_color_(active_color),
+	active_tr_color_(active_color),
+	active_bl_color_(active_color),
+	active_br_color_(active_color),
+	inactive_tl_color_(inactive_color),
+	inactive_tr_color_(inactive_color),
+	inactive_bl_color_(inactive_color),
+	inactive_br_color_(inactive_color),
+	active_left_image_id_(Painter::kInvalidImageid),
+	active_right_image_id_(Painter::kInvalidImageid),
+	active_center_image_id_(Painter::kInvalidImageid),
+	inactive_left_image_id_(Painter::kInvalidImageid),
+	inactive_right_image_id_(Painter::kInvalidImageid),
+	inactive_center_image_id_(Painter::kInvalidImageid),
+	text_(),
+	active_text_backg_color_(255, 255, 255),
+	inactive_text_color_(0, 0, 0),
+	inactive_text_backg_color_(255, 255, 255),
+	moving_window_(false),
+	active_(true),
+	style_(kSinglecolorStyle) {
 	SetFontColor(OFF_BLACK);
 
-	SetMinSize(0, pHeight);
-	SetPreferredSize(PixelCoord(0, pHeight));
+	SetMinSize(0, height);
+	SetPreferredSize(PixelCoord(0, height));
 
-	mLabel = new Label(GetTextColor(), mText);
-	mLabel->SetPreferredHeight(pHeight);
+	label_ = new Label(GetTextColor(), text_);
+	label_->SetPreferredHeight(height);
 
-	RectComponent* lTopLayer = new RectComponent(new GridLayout(1, 2));
-	lTopLayer->SetPreferredSize(0, 0);
-	AddChild(lTopLayer);
+	RectComponent* top_layer = new RectComponent(new GridLayout(1, 2));
+	top_layer->SetPreferredSize(0, 0);
+	AddChild(top_layer);
 
-	mCaptionRect = new RectComponent(new GridLayout(1, 1));
-	mCaptionRect->AddChild(mLabel);
-	lTopLayer->AddChild(mCaptionRect);
+	caption_rect_ = new RectComponent(new GridLayout(1, 1));
+	caption_rect_->AddChild(label_);
+	top_layer->AddChild(caption_rect_);
 
-	RectComponent* lButtonRect = new RectComponent(new CenterLayout);
-	lButtonRect->SetPreferredSize(0, 0);
-	lTopLayer->AddChild(lButtonRect);
+	RectComponent* button_rect = new RectComponent(new CenterLayout);
+	button_rect->SetPreferredSize(0, 0);
+	top_layer->AddChild(button_rect);
 
-	mButtonRect = new RectComponent(Color(255, 255, 255), new GridLayout(1, 3));
-	mButtonRect->SetPreferredSize(1, 0);
-	lButtonRect->AddChild(mButtonRect);
+	button_rect_ = new RectComponent(Color(255, 255, 255), new GridLayout(1, 3));
+	button_rect_->SetPreferredSize(1, 0);
+	button_rect->AddChild(button_rect_);
 }
 
-Caption::Caption(const Color& pActiveTopLeftColor, const Color& pActiveTopRightColor,
-	const Color& pActiveBottomLeftColor, const Color& pActiveBottomRightColor,
-	const Color& pInactiveTopLeftColor, const Color& pInactiveTopRightColor,
-	const Color& pInactiveBottomLeftColor, const Color& pInactiveBottomRightColor,
-	int pHeight) :
-	RectComponent(pActiveTopLeftColor, pActiveTopRightColor, pActiveBottomRightColor, pActiveBottomLeftColor, new StackLayout(1)),
-	mLabel(0),
-	mCaptionRect(0),
-	mButtonRect(0),
-	mLeftImageRect(0),
-	mCenterImageRect(0),
-	mRightImageRect(0),
-	mLeftButton(0),
-	mRightButton(0),
-	mMiddleButton(0),
-	mActiveTLColor(pActiveTopLeftColor),
-	mActiveTRColor(pActiveTopRightColor),
-	mActiveBLColor(pActiveBottomLeftColor),
-	mActiveBRColor(pActiveBottomRightColor),
-	mInactiveTLColor(pInactiveTopLeftColor),
-	mInactiveTRColor(pInactiveTopRightColor),
-	mInactiveBLColor(pInactiveBottomLeftColor),
-	mInactiveBRColor(pInactiveBottomRightColor),
-	mActiveLeftImageID(Painter::INVALID_IMAGEID),
-	mActiveRightImageID(Painter::INVALID_IMAGEID),
-	mActiveCenterImageID(Painter::INVALID_IMAGEID),
-	mInactiveLeftImageID(Painter::INVALID_IMAGEID),
-	mInactiveRightImageID(Painter::INVALID_IMAGEID),
-	mInactiveCenterImageID(Painter::INVALID_IMAGEID),
-	mText(),
-	mActiveTextBackgColor(255, 255, 255),
-	mInactiveTextColor(0, 0, 0),
-	mInactiveTextBackgColor(255, 255, 255),
-	mMovingWindow(false),
-	mActive(true),
-	mStyle(MULTICOLOR_STYLE)
-{
+Caption::Caption(const Color& active_top_left_color, const Color& active_top_right_color,
+	const Color& active_bottom_left_color, const Color& active_bottom_right_color,
+	const Color& inactive_top_left_color, const Color& inactive_top_right_color,
+	const Color& inactive_bottom_left_color, const Color& inactive_bottom_right_color,
+	int height) :
+	RectComponent(active_top_left_color, active_top_right_color, active_bottom_right_color, active_bottom_left_color, new StackLayout(1)),
+	label_(0),
+	caption_rect_(0),
+	button_rect_(0),
+	left_image_rect_(0),
+	center_image_rect_(0),
+	right_image_rect_(0),
+	left_button_(0),
+	right_button_(0),
+	middle_button_(0),
+	active_tl_color_(active_top_left_color),
+	active_tr_color_(active_top_right_color),
+	active_bl_color_(active_bottom_left_color),
+	active_br_color_(active_bottom_right_color),
+	inactive_tl_color_(inactive_top_left_color),
+	inactive_tr_color_(inactive_top_right_color),
+	inactive_bl_color_(inactive_bottom_left_color),
+	inactive_br_color_(inactive_bottom_right_color),
+	active_left_image_id_(Painter::kInvalidImageid),
+	active_right_image_id_(Painter::kInvalidImageid),
+	active_center_image_id_(Painter::kInvalidImageid),
+	inactive_left_image_id_(Painter::kInvalidImageid),
+	inactive_right_image_id_(Painter::kInvalidImageid),
+	inactive_center_image_id_(Painter::kInvalidImageid),
+	text_(),
+	active_text_backg_color_(255, 255, 255),
+	inactive_text_color_(0, 0, 0),
+	inactive_text_backg_color_(255, 255, 255),
+	moving_window_(false),
+	active_(true),
+	style_(kMulticolorStyle) {
 	SetFontColor(OFF_BLACK);
 
-	SetMinSize(0, pHeight);
-	SetPreferredSize(PixelCoord(0, pHeight));
+	SetMinSize(0, height);
+	SetPreferredSize(PixelCoord(0, height));
 
-	mLabel = new Label(GetTextColor(), mText);
-	mLabel->SetPreferredHeight(pHeight);
+	label_ = new Label(GetTextColor(), text_);
+	label_->SetPreferredHeight(height);
 
-	RectComponent* lTopLayer = new RectComponent(new GridLayout(1, 2));
-	AddChild(lTopLayer);
+	RectComponent* top_layer = new RectComponent(new GridLayout(1, 2));
+	AddChild(top_layer);
 
-	mCaptionRect = new RectComponent(new GridLayout(1, 1));
-	mCaptionRect->AddChild(mLabel);
-	lTopLayer->AddChild(mCaptionRect);
+	caption_rect_ = new RectComponent(new GridLayout(1, 1));
+	caption_rect_->AddChild(label_);
+	top_layer->AddChild(caption_rect_);
 
-	RectComponent* lButtonRect = new RectComponent(new CenterLayout);
-	lButtonRect->SetPreferredSize(0, 0);
-	lTopLayer->AddChild(lButtonRect);
+	RectComponent* button_rect = new RectComponent(new CenterLayout);
+	button_rect->SetPreferredSize(0, 0);
+	top_layer->AddChild(button_rect);
 
-	mButtonRect = new RectComponent(Color(255, 255, 255), new GridLayout(1, 3));
-	mButtonRect->SetPreferredSize(1, 0);
-	lButtonRect->AddChild(mButtonRect);
+	button_rect_ = new RectComponent(Color(255, 255, 255), new GridLayout(1, 3));
+	button_rect_->SetPreferredSize(1, 0);
+	button_rect->AddChild(button_rect_);
 }
 
-Caption::Caption(Painter::ImageID pActiveLeftImageID, Painter::ImageID pActiveRightImageID,
-	Painter::ImageID pActiveCenterImageID, Painter::ImageID pInactiveLeftImageID,
-	Painter::ImageID pInactiveRightImageID, Painter::ImageID pInactiveCenterImageID,
-	int pHeight) :
+Caption::Caption(Painter::ImageID active_left_image_id, Painter::ImageID active_right_image_id,
+	Painter::ImageID active_center_image_id, Painter::ImageID inactive_left_image_id,
+	Painter::ImageID inactive_right_image_id, Painter::ImageID inactive_center_image_id,
+	int height) :
 	RectComponent(new StackLayout(2)),
-	mLabel(0),
-	mCaptionRect(0),
-	mButtonRect(0),
-	mLeftImageRect(0),
-	mCenterImageRect(0),
-	mRightImageRect(0),
-	mLeftButton(0),
-	mRightButton(0),
-	mMiddleButton(0),
-	mActiveTLColor(0, 0, 0),
-	mActiveTRColor(0, 0, 0),
-	mActiveBLColor(0, 0, 0),
-	mActiveBRColor(0, 0, 0),
-	mInactiveTLColor(0, 0, 0),
-	mInactiveTRColor(0, 0, 0),
-	mInactiveBLColor(0, 0, 0),
-	mInactiveBRColor(0, 0, 0),
-	mActiveLeftImageID(pActiveLeftImageID),
-	mActiveRightImageID(pActiveRightImageID),
-	mActiveCenterImageID(pActiveCenterImageID),
-	mInactiveLeftImageID(pInactiveLeftImageID),
-	mInactiveRightImageID(pInactiveRightImageID),
-	mInactiveCenterImageID(pInactiveCenterImageID),
-	mText(),
-	mActiveTextBackgColor(255, 255, 255),
-	mInactiveTextColor(0, 0, 0),
-	mInactiveTextBackgColor(255, 255, 255),
-	mMovingWindow(false),
-	mActive(true),
-	mStyle(IMAGE_STYLE)
-{
+	label_(0),
+	caption_rect_(0),
+	button_rect_(0),
+	left_image_rect_(0),
+	center_image_rect_(0),
+	right_image_rect_(0),
+	left_button_(0),
+	right_button_(0),
+	middle_button_(0),
+	active_tl_color_(0, 0, 0),
+	active_tr_color_(0, 0, 0),
+	active_bl_color_(0, 0, 0),
+	active_br_color_(0, 0, 0),
+	inactive_tl_color_(0, 0, 0),
+	inactive_tr_color_(0, 0, 0),
+	inactive_bl_color_(0, 0, 0),
+	inactive_br_color_(0, 0, 0),
+	active_left_image_id_(active_left_image_id),
+	active_right_image_id_(active_right_image_id),
+	active_center_image_id_(active_center_image_id),
+	inactive_left_image_id_(inactive_left_image_id),
+	inactive_right_image_id_(inactive_right_image_id),
+	inactive_center_image_id_(inactive_center_image_id),
+	text_(),
+	active_text_backg_color_(255, 255, 255),
+	inactive_text_color_(0, 0, 0),
+	inactive_text_backg_color_(255, 255, 255),
+	moving_window_(false),
+	active_(true),
+	style_(kImageStyle) {
 	SetFontColor(OFF_BLACK);
 
-	GUIImageManager* lIMan = GetImageManager();
+	GUIImageManager* i_man = GetImageManager();
 
-	PixelCoord lLeftImageSize(lIMan->GetImageSize(pActiveLeftImageID));
-	PixelCoord lRightImageSize(lIMan->GetImageSize(pActiveRightImageID));
-	PixelCoord lCenterImageSize(lIMan->GetImageSize(pActiveCenterImageID));
+	PixelCoord left_image_size(i_man->GetImageSize(active_left_image_id));
+	PixelCoord right_image_size(i_man->GetImageSize(active_right_image_id));
+	PixelCoord center_image_size(i_man->GetImageSize(active_center_image_id));
 
-	SetMinSize(lLeftImageSize.x + lRightImageSize.x, pHeight);
-	SetPreferredSize(0, pHeight);
+	SetMinSize(left_image_size.x + right_image_size.x, height);
+	SetPreferredSize(0, height);
 
-	mLabel = new Label(GetTextColor(), mText);
-	mLabel->SetPreferredHeight(pHeight);
+	label_ = new Label(GetTextColor(), text_);
+	label_->SetPreferredHeight(height);
 
-	RectComponent* lBottomLayer = new RectComponent(new GridLayout(1, 3));
-	lBottomLayer->SetPreferredSize(0, 0);
-	AddChild(lBottomLayer);
+	RectComponent* bottom_layer = new RectComponent(new GridLayout(1, 3));
+	bottom_layer->SetPreferredSize(0, 0);
+	AddChild(bottom_layer);
 
-	RectComponent* lTopLayer = new RectComponent(new GridLayout(1, 2));
-	lTopLayer->SetPreferredSize(0, 0);
-	AddChild(lTopLayer);
+	RectComponent* top_layer = new RectComponent(new GridLayout(1, 2));
+	top_layer->SetPreferredSize(0, 0);
+	AddChild(top_layer);
 
-	mCaptionRect = new RectComponent(new GridLayout(1, 1));
-	mCaptionRect->AddChild(mLabel);
-	lTopLayer->AddChild(mCaptionRect);
+	caption_rect_ = new RectComponent(new GridLayout(1, 1));
+	caption_rect_->AddChild(label_);
+	top_layer->AddChild(caption_rect_);
 
-	RectComponent* lButtonRect = new RectComponent(new CenterLayout);
-	lButtonRect->SetPreferredSize(0, 0);
-	lTopLayer->AddChild(lButtonRect);
+	RectComponent* button_rect = new RectComponent(new CenterLayout);
+	button_rect->SetPreferredSize(0, 0);
+	top_layer->AddChild(button_rect);
 
-	mButtonRect = new RectComponent(new GridLayout(1, 3));
-	mButtonRect->SetPreferredSize(1, 0);
-	lButtonRect->AddChild(mButtonRect);
+	button_rect_ = new RectComponent(new GridLayout(1, 3));
+	button_rect_->SetPreferredSize(1, 0);
+	button_rect->AddChild(button_rect_);
 
-	mLeftImageRect = new RectComponent(pActiveLeftImageID);
-	mLeftImageRect->SetPreferredSize(lLeftImageSize);
-	lBottomLayer->AddChild(mLeftImageRect, 0, 0);
+	left_image_rect_ = new RectComponent(active_left_image_id);
+	left_image_rect_->SetPreferredSize(left_image_size);
+	bottom_layer->AddChild(left_image_rect_, 0, 0);
 
-	mCenterImageRect = new RectComponent(pActiveCenterImageID);
-	mCenterImageRect->SetPreferredSize(0, lCenterImageSize.y, false);
-	lBottomLayer->AddChild(mCenterImageRect, 0, 1);
+	center_image_rect_ = new RectComponent(active_center_image_id);
+	center_image_rect_->SetPreferredSize(0, center_image_size.y, false);
+	bottom_layer->AddChild(center_image_rect_, 0, 1);
 
-	mRightImageRect = new RectComponent(pActiveRightImageID);
-	mRightImageRect->SetPreferredSize(lRightImageSize);
-	lBottomLayer->AddChild(mRightImageRect, 0, 2);
+	right_image_rect_ = new RectComponent(active_right_image_id);
+	right_image_rect_->SetPreferredSize(right_image_size);
+	bottom_layer->AddChild(right_image_rect_, 0, 2);
 }
 
-Caption::~Caption()
-{
+Caption::~Caption() {
 }
 
-void Caption::InitCaption()
-{
+void Caption::InitCaption() {
 }
 
-Button* Caption::SetLeftButton(Button* pButton)
-{
-	return SetButton(mLeftButton, pButton);
+Button* Caption::SetLeftButton(Button* button) {
+	return SetButton(left_button_, button);
 }
 
-Button* Caption::SetRightButton(Button* pButton)
-{
-	return SetButton(mRightButton, pButton);
+Button* Caption::SetRightButton(Button* button) {
+	return SetButton(right_button_, button);
 }
 
-Button* Caption::SetMiddleButton(Button* pButton)
-{
-	return SetButton(mMiddleButton, pButton);
+Button* Caption::SetMiddleButton(Button* button) {
+	return SetButton(middle_button_, button);
 }
 
-Button* Caption::SetButton(Button*& pMemberButton, Button* pNewButton)
-{
-	Button* lOld = pMemberButton;
+Button* Caption::SetButton(Button*& member_button, Button* new_button) {
+	Button* old = member_button;
 
-	if (pMemberButton != 0)
-	{
-		mButtonRect->RemoveChild(pMemberButton, 0);
-		if (mButtonRect->GetNumChildren() == 0)
-		{
-			mButtonRect->SetPreferredSize(1, 0, true);
+	if (member_button != 0) {
+		button_rect_->RemoveChild(member_button, 0);
+		if (button_rect_->GetNumChildren() == 0) {
+			button_rect_->SetPreferredSize(1, 0, true);
 		}
 	}
 
-	pMemberButton = pNewButton;
+	member_button = new_button;
 
-	if (pMemberButton != 0)
-	{
-		mButtonRect->AddChild(pMemberButton, 0, 1);
-		mButtonRect->SetPreferredSize(0, 0, true);
-		const int lGapPixels = 4;
-		mButtonRect->GetParent()->SetPreferredWidth(mButtonRect->GetMinSize().x +
-			mButtonRect->GetNumChildren() * lGapPixels);
+	if (member_button != 0) {
+		button_rect_->AddChild(member_button, 0, 1);
+		button_rect_->SetPreferredSize(0, 0, true);
+		const int gap_pixels = 4;
+		button_rect_->GetParent()->SetPreferredWidth(button_rect_->GetMinSize().x +
+			button_rect_->GetNumChildren() * gap_pixels);
 	}
 
-	return lOld;
+	return old;
 }
 
-void Caption::ForceRepaint()
-{
+void Caption::ForceRepaint() {
 	SetNeedsRepaint(true);
 }
 
-void Caption::SetActive(bool pActive)
-{
-	if (mActive == pActive)
-	{
+void Caption::SetActive(bool active) {
+	if (active_ == active) {
 		return;	// TRICKY: RAII simplifies.
 	}
 
-	mActive = pActive;
+	active_ = active;
 
-	GUIImageManager* lIMan = GetImageManager();
+	GUIImageManager* i_man = GetImageManager();
 
-	switch(mStyle)
-	{
-	case SINGLECOLOR_STYLE:
-		if (mActive == true)
-		{
-			RectComponent::SetColor(mActiveTLColor);
-		}
-		else
-		{
-			RectComponent::SetColor(mInactiveTLColor);
-		}
-		break;
-	case MULTICOLOR_STYLE:
-		if (mActive == true)
-		{
-			RectComponent::SetColor(mActiveTLColor, mActiveTRColor, mActiveBRColor, mActiveBLColor);
-		}
-		else
-		{
-			RectComponent::SetColor(mInactiveTLColor, mInactiveTRColor, mInactiveBRColor, mInactiveBLColor);
-		}
-		break;
-	case IMAGE_STYLE:
-	{
-		if (mActive == true)
-		{
-			mLeftImageRect->SetImage(mActiveLeftImageID);
-			mCenterImageRect->SetImage(mActiveCenterImageID);
-			mRightImageRect->SetImage(mActiveRightImageID);
-		}
-		else
-		{
-			mLeftImageRect->SetImage(mInactiveLeftImageID);
-			mCenterImageRect->SetImage(mInactiveCenterImageID);
-			mRightImageRect->SetImage(mInactiveRightImageID);
+	switch(style_) {
+	case kSinglecolorStyle:
+		if (active_ == true) {
+			RectComponent::SetColor(active_tl_color_);
+		} else {
+			RectComponent::SetColor(inactive_tl_color_);
+		} break;
+	case kMulticolorStyle:
+		if (active_ == true) {
+			RectComponent::SetColor(active_tl_color_, active_tr_color_, active_br_color_, active_bl_color_);
+		} else {
+			RectComponent::SetColor(inactive_tl_color_, inactive_tr_color_, inactive_br_color_, inactive_bl_color_);
+		} break;
+	case kImageStyle: {
+		if (active_ == true) {
+			left_image_rect_->SetImage(active_left_image_id_);
+			center_image_rect_->SetImage(active_center_image_id_);
+			right_image_rect_->SetImage(active_right_image_id_);
+		} else {
+			left_image_rect_->SetImage(inactive_left_image_id_);
+			center_image_rect_->SetImage(inactive_center_image_id_);
+			right_image_rect_->SetImage(inactive_right_image_id_);
 		}
 
-		PixelCoord lLeftImageSize(lIMan->GetImageSize(mActiveLeftImageID));
-		PixelCoord lRightImageSize(lIMan->GetImageSize(mActiveRightImageID));
-		PixelCoord lCenterImageSize(lIMan->GetImageSize(mActiveCenterImageID));
+		PixelCoord left_image_size(i_man->GetImageSize(active_left_image_id_));
+		PixelCoord right_image_size(i_man->GetImageSize(active_right_image_id_));
+		PixelCoord center_image_size(i_man->GetImageSize(active_center_image_id_));
 
-		mLeftImageRect->SetPreferredSize(lLeftImageSize);
-		mCenterImageRect->SetPreferredSize(0, lCenterImageSize.y);
-		mRightImageRect->SetPreferredSize(lRightImageSize);
-	}
-		break;
+		left_image_rect_->SetPreferredSize(left_image_size);
+		center_image_rect_->SetPreferredSize(0, center_image_size.y);
+		right_image_rect_->SetPreferredSize(right_image_size);
+	} break;
 	}
 
-	if (mActive == true)
-	{
-		mLabel->SetFontColor(GetTextColor());
-	}
-	else
-	{
-		mLabel->SetFontColor(mInactiveTextColor);
+	if (active_ == true) {
+		label_->SetFontColor(GetTextColor());
+	} else {
+		label_->SetFontColor(inactive_text_color_);
 	}
 }
 
-bool Caption::OnLButtonDown(int pMouseX, int pMouseY)
-{
-	Component::OnLButtonDown(pMouseX, pMouseY);
-	Component* lChild = GetChild(pMouseX, pMouseY);
+bool Caption::OnLButtonDown(int mouse_x, int mouse_y) {
+	Component::OnLButtonDown(mouse_x, mouse_y);
+	Component* child = GetChild(mouse_x, mouse_y);
 
-	while (lChild != 0 &&
-		  lChild != mLeftButton && 
-		  lChild != mRightButton && 
-		  lChild != mMiddleButton)
-	{
-		lChild = lChild->GetChild(pMouseX, pMouseY);
+	while (child != 0 &&
+		  child != left_button_ &&
+		  child != right_button_ &&
+		  child != middle_button_) {
+		child = child->GetChild(mouse_x, mouse_y);
 	}
 
-	if (lChild == 0)
-	{
-		if (IsOver(pMouseX, pMouseY) == true)
-		{
-			mMovingWindow = true;
+	if (child == 0) {
+		if (IsOver(mouse_x, mouse_y) == true) {
+			moving_window_ = true;
 			SetMouseFocus();
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}
@@ -368,65 +329,54 @@ bool Caption::OnLButtonDown(int pMouseX, int pMouseY)
 	return true;
 }
 
-bool Caption::OnLButtonUp(int pMouseX, int pMouseY)
-{
-	mMovingWindow = false;
+bool Caption::OnLButtonUp(int mouse_x, int mouse_y) {
+	moving_window_ = false;
 	ReleaseMouseFocus();
-	return Component::OnLButtonUp(pMouseX, pMouseY);
+	return Component::OnLButtonUp(mouse_x, mouse_y);
 }
 
-bool Caption::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
-{
-	if (mMovingWindow == true)
-	{
-		Window* lParentWindow = (Window*)Component::GetParentOfType(WINDOW);
+bool Caption::OnMouseMove(int mouse_x, int mouse_y, int delta_x, int delta_y) {
+	if (moving_window_ == true) {
+		Window* parent_window = (Window*)Component::GetParentOfType(kWindow);
 
-		if (lParentWindow != 0)
-		{
-			lParentWindow->SetPos(lParentWindow->GetPos() + PixelCoord(pDeltaX, pDeltaY));
+		if (parent_window != 0) {
+			parent_window->SetPos(parent_window->GetPos() + PixelCoord(delta_x, delta_y));
 		}
 
 		return true;
-	}
-	else
-	{
-		return Component::OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
+	} else {
+		return Component::OnMouseMove(mouse_x, mouse_y, delta_x, delta_y);
 	}
 }
 
-void Caption::SetIcon(Painter::ImageID pIconID)
-{
-	mLabel->SetIcon(pIconID, Label::ICON_LEFT);
+void Caption::SetIcon(Painter::ImageID icon_id) {
+	label_->SetIcon(icon_id, Label::kIconLeft);
 }
 
-void Caption::SetText(const wstr& pText,
-					  const Color& pActiveTextColor,
-					  const Color& pActiveBackgColor,
-					  const Color& pInactiveTextColor,
-					  const Color& pInactiveBackgColor)
-{
-	mText                   = pText;
-	mActiveTextBackgColor   = pActiveBackgColor;
-	mInactiveTextColor      = pInactiveTextColor;
-	mInactiveTextBackgColor = pInactiveBackgColor;
-	SetFontColor(pActiveTextColor);
+void Caption::SetText(const wstr& text,
+					  const Color& active_text_color,
+					  const Color& active_backg_color,
+					  const Color& inactive_text_color,
+					  const Color& inactive_backg_color) {
+	text_                   = text;
+	active_text_backg_color_   = active_backg_color;
+	inactive_text_color_      = inactive_text_color;
+	inactive_text_backg_color_ = inactive_backg_color;
+	SetFontColor(active_text_color);
 
-	mLabel->SetText(mText);
+	label_->SetText(text_);
 }
 
-bool Caption::Check(unsigned pFlags, unsigned pFlag)
-{
-	return ((pFlags & pFlag) != 0);
+bool Caption::Check(unsigned flags, unsigned pFlag) {
+	return ((flags & pFlag) != 0);
 }
 
-Component::Type Caption::GetType() const
-{
-	return Component::CAPTION;
+Component::Type Caption::GetType() const {
+	return Component::kCaption;
 }
 
-bool Caption::GetActive() const
-{
-	return mActive;
+bool Caption::GetActive() const {
+	return active_;
 }
 
 

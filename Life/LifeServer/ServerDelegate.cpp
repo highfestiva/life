@@ -1,27 +1,24 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "ServerDelegate.h"
+#include "serverdelegate.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-ServerDelegate::ServerDelegate(GameServerManager* pGameServerManager):
-	mGameServerManager(pGameServerManager)
-{
+ServerDelegate::ServerDelegate(GameServerManager* game_server_manager):
+	game_server_manager_(game_server_manager) {
 }
 
-ServerDelegate::~ServerDelegate()
-{
-	mGameServerManager = 0;
+ServerDelegate::~ServerDelegate() {
+	game_server_manager_ = 0;
 }
 
 

@@ -1,67 +1,60 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Goal.h"
-#include "../Cure/Include/CppContextObject.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Tbc/Include/PhysicsTrigger.h"
-#include "../UiCure/Include/UiCppContextObject.h"
+#include "goal.h"
+#include "../cure/include/cppcontextobject.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/runtimevariable.h"
+#include "../tbc/include/physicstrigger.h"
+#include "../uicure/include/uicppcontextobject.h"
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 
-Goal::Goal(Cure::ContextManager* pManager):
-	Parent(pManager->GetGameManager()->GetResourceManager(), "Goal"),
-	mTrigger(0),
-	mIsTriggered(false)
-{
-	pManager->AddLocalObject(this);
+Goal::Goal(cure::ContextManager* manager):
+	Parent(manager->GetGameManager()->GetResourceManager(), "Goal"),
+	trigger_(0),
+	is_triggered_(false) {
+	manager->AddLocalObject(this);
 	GetManager()->EnableTickCallback(this);
 }
 
-Goal::~Goal()
-{
+Goal::~Goal() {
 }
 
 
 
-bool Goal::IsTriggered() const
-{
-	return mIsTriggered;
+bool Goal::IsTriggered() const {
+	return is_triggered_;
 }
 
-vec3 Goal::GetPosition() const
-{
-	const Tbc::ChunkyBoneGeometry* lGoalGeometry = mTrigger->GetTriggerGeometry(0);
-	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(lGoalGeometry->GetBodyId());
+vec3 Goal::GetPosition() const {
+	const tbc::ChunkyBoneGeometry* goal_geometry = trigger_->GetTriggerGeometry(0);
+	return GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(goal_geometry->GetBodyId());
 }
 
-void Goal::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
-{
-	mTrigger = pTrigger;
+void Goal::FinalizeTrigger(const tbc::PhysicsTrigger* trigger) {
+	trigger_ = trigger;
 }
 
-void Goal::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
-{
-	(void)pTriggerId;
-	(void)pOtherObject;
-	(void)pBodyId;
-	(void)pNormal;
-	mIsTriggered = true;
+void Goal::OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
+	(void)trigger_id;
+	(void)other_object;
+	(void)body_id;
+	(void)normal;
+	is_triggered_ = true;
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Goal);
+loginstance(kGameContextCpp, Goal);
 
 
 

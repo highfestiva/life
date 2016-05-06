@@ -5,101 +5,95 @@
 
 
 #include "pch.h"
-#include "ConsoleManager.h"
+#include "consolemanager.h"
 #include <algorithm>
-#include "../Cure/Include/GameManager.h"
-#include "../Cure/Include/ResourceManager.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Cure/Include/TimeManager.h"
-#include "../Lepra/Include/CyclicArray.h"
-#include "../Lepra/Include/LepraOS.h"
-#include "../Lepra/Include/LogListener.h"
-#include "../Lepra/Include/Number.h"
-#include "../Lepra/Include/ResourceTracker.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "../UiTbc/Include/GUI/UiConsolePrompt.h"
+#include "../cure/include/gamemanager.h"
+#include "../cure/include/resourcemanager.h"
+#include "../cure/include/runtimevariable.h"
+#include "../cure/include/timemanager.h"
+#include "../lepra/include/cyclicarray.h"
+#include "../lepra/include/lepraos.h"
+#include "../lepra/include/loglistener.h"
+#include "../lepra/include/number.h"
+#include "../lepra/include/resourcetracker.h"
+#include "../lepra/include/systemmanager.h"
+#include "../uitbc/include/gui/uiconsoleprompt.h"
 
 
 
-#define USER_SECTION_MARK	"//!MARK!//"
+#define kUserSectionMark	"//!MARK!//"
 
 
 
-namespace
-{
-bool is_invalid_char(char c)
-{
+namespace {
+bool is_invalid_char(char c) {
 	return !isalnum(c) && c != '-' && c != '#' && c != '.';
 }
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
 // Must lie before ConsoleManager to compile.
-const ConsoleManager::CommandPair ConsoleManager::mCommandIdList[] =
+const ConsoleManager::CommandPair ConsoleManager::command_id_list_[] =
 {
 	// IO.
-	{"alias", COMMAND_ALIAS},
-	{"bind-key", COMMAND_BIND_KEY},
-	{"echo", COMMAND_ECHO},
-	{"execute-file", COMMAND_EXECUTE_FILE},
-	{"execute-variable", COMMAND_EXECUTE_VARIABLE},
-	{"fork", COMMAND_FORK},
-	{"nop", COMMAND_NOP},
-	{"list-active-resources", COMMAND_LIST_ACTIVE_RESOURCES},
-	{"push", COMMAND_PUSH},
-	{"repeat", COMMAND_REPEAT},
-	{"save-system-config-file", COMMAND_SAVE_SYSTEM_CONFIG_FILE},
-	{"save-application-config-file", COMMAND_SAVE_APPLICATION_CONFIG_FILE},
-	{"set-default-config", COMMAND_SET_DEFAULT_CONFIG},
-	{"set-stdout-log-level", COMMAND_SET_STDOUT_LOG_LEVEL},
-	{"set-subsystem-log-level", COMMAND_SET_SUBSYSTEM_LOG_LEVEL},
-	{"sleep", COMMAND_SLEEP},
-	{"wait-loaded", COMMAND_WAIT_LOADED},
+	{"alias", kCommandAlias},
+	{"bind-key", kCommandBindKey},
+	{"echo", kCommandEcho},
+	{"execute-file", kCommandExecuteFile},
+	{"execute-variable", kCommandExecuteVariable},
+	{"fork", kCommandFork},
+	{"nop", kCommandNop},
+	{"list-active-resources", kCommandListActiveResources},
+	{"push", kCommandPush},
+	{"repeat", kCommandRepeat},
+	{"save-system-config-file", kCommandSaveSystemConfigFile},
+	{"save-application-config-file", kCommandSaveApplicationConfigFile},
+	{"set-default-config", kCommandSetDefaultConfig},
+	{"set-stdout-log-level", kCommandSetStdoutLogLevel},
+	{"set-subsystem-log-level", kCommandSetSubsystemLogLevel},
+	{"sleep", kCommandSleep},
+	{"wait-loaded", kCommandWaitLoaded},
 
 	// Info/debug stuff.
-	{"clear-performance-info", COMMAND_CLEAR_PERFORMANCE_INFO},
-	{"debug-break", COMMAND_DEBUG_BREAK},
-	{"dump-performance-info", COMMAND_DUMP_PERFORMANCE_INFO},
-	{"help", COMMAND_HELP},
-	{"shell-execute", COMMAND_SHELL_EXECUTE},
-	{"system-info", COMMAND_SHOW_SYSTEM_INFO},
-	{"game-info", COMMAND_SHOW_GAME_INFO},
-	{"game-hang", COMMAND_HANG_GAME},
-	{"game-unhang", COMMAND_UNHANG_GAME},
+	{"clear-performance-info", kCommandClearPerformanceInfo},
+	{"debug-break", kCommandDebugBreak},
+	{"dump-performance-info", kCommandDumpPerformanceInfo},
+	{"help", kCommandHelp},
+	{"shell-execute", kCommandShellExecute},
+	{"system-info", kCommandShowSystemInfo},
+	{"game-info", kCommandShowGameInfo},
+	{"game-hang", kCommandHangGame},
+	{"game-unhang", kCommandUnhangGame},
 };
 
 
 
-ConsoleManager::ConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-	Cure::RuntimeVariableScope* pVariableScope, InteractiveConsoleLogListener* pConsoleLogger,
-	ConsolePrompt* pConsolePrompt):
-	Cure::ConsoleManager(pVariableScope, pConsoleLogger, pConsolePrompt),
-	mSecurityLevel(0),
-	mGameManager(pGameManager),
-	mResourceManager(pResourceManager),
-	mLogger(0)
-{
+ConsoleManager::ConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+	cure::RuntimeVariableScope* variable_scope, InteractiveConsoleLogListener* console_logger,
+	ConsolePrompt* console_prompt):
+	cure::ConsoleManager(variable_scope, console_logger, console_prompt),
+	security_level_(0),
+	game_manager_(game_manager),
+	resource_manager_(resource_manager),
+	logger_(0) {
 }
 
-ConsoleManager::~ConsoleManager()
-{
+ConsoleManager::~ConsoleManager() {
 }
 
 
 
-void ConsoleManager::InitCommands()
-{
+void ConsoleManager::InitCommands() {
 	Parent::InitCommands();
 	GetConsoleCommandManager()->SetComment("//");
-	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(GetVariableScope(), "#"));
-	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(Cure::GetSettings(), "#/"));
-	GetConsoleCommandManager()->AddCompleter(new Cure::RuntimeVariableCompleter(GetVariableScope(), "#."));
+	GetConsoleCommandManager()->AddCompleter(new cure::RuntimeVariableCompleter(GetVariableScope(), "#"));
+	GetConsoleCommandManager()->AddCompleter(new cure::RuntimeVariableCompleter(cure::GetSettings(), "#/"));
+	GetConsoleCommandManager()->AddCompleter(new cure::RuntimeVariableCompleter(GetVariableScope(), "#."));
 
 	ExecuteCommand("alias trace-log-level \"set-stdout-log-level 0; set-subsystem-log-level 0\"");
 	ExecuteCommand("alias debug-log-level \"set-stdout-log-level 1; set-subsystem-log-level 1\"");
@@ -113,189 +107,138 @@ void ConsoleManager::InitCommands()
 
 
 
-void ConsoleManager::SetSecurityLevel(int pLevel)
-{
-	mSecurityLevel = pLevel;
+void ConsoleManager::SetSecurityLevel(int level) {
+	security_level_ = level;
 }
 
-int ConsoleManager::GetSecurityLevel() const
-{
-	return mSecurityLevel;
-}
-
-
-
-Cure::GameManager* ConsoleManager::GetGameManager() const
-{
-	return (mGameManager);
-}
-
-void ConsoleManager::SetGameManager(Cure::GameManager* pGameManager)
-{
-	mGameManager = pGameManager;
+int ConsoleManager::GetSecurityLevel() const {
+	return security_level_;
 }
 
 
 
-void ConsoleManager::OnKey(const str& pKeyName)
-{
-	KeyMap::iterator x = mKeyMap.find(pKeyName);
-	if (x != mKeyMap.end())
-	{
+cure::GameManager* ConsoleManager::GetGameManager() const {
+	return (game_manager_);
+}
+
+void ConsoleManager::SetGameManager(cure::GameManager* game_manager) {
+	game_manager_ = game_manager;
+}
+
+
+
+void ConsoleManager::OnKey(const str& key_name) {
+	KeyMap::iterator x = key_map_.find(key_name);
+	if (x != key_map_.end()) {
 		PushYieldCommand(x->second);
 		// Make console thread run it.
-		((UiTbc::ConsolePrompt*)mConsolePrompt)->OnChar(' ');
-		((UiTbc::ConsolePrompt*)mConsolePrompt)->OnChar('\b');
+		((uitbc::ConsolePrompt*)console_prompt_)->OnChar(' ');
+		((uitbc::ConsolePrompt*)console_prompt_)->OnChar('\b');
 	}
 }
 
 
 
-unsigned ConsoleManager::GetCommandCount() const
-{
-	return LEPRA_ARRAY_COUNT(mCommandIdList);
+unsigned ConsoleManager::GetCommandCount() const {
+	return LEPRA_ARRAY_COUNT(command_id_list_);
 }
 
-const ConsoleManager::CommandPair& ConsoleManager::GetCommand(unsigned pIndex) const
-{
-	return (mCommandIdList[pIndex]);
+const ConsoleManager::CommandPair& ConsoleManager::GetCommand(unsigned index) const {
+	return (command_id_list_[index]);
 }
 
-int ConsoleManager::TranslateCommand(const HashedString& pCommand) const
-{
-	int lTranslation = Parent::TranslateCommand(pCommand);
-	if (lTranslation == -1)
-	{
-		if (mAliasMap.find(pCommand) != mAliasMap.end())
-		{
-			lTranslation = COMMAND_ALIAS_VALUE;
+int ConsoleManager::TranslateCommand(const HashedString& command) const {
+	int translation = Parent::TranslateCommand(command);
+	if (translation == -1) {
+		if (alias_map_.find(command) != alias_map_.end()) {
+			translation = kCommandAliasValue;
 		}
 	}
-	return (lTranslation);
+	return (translation);
 }
 
-int ConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
-{
-	int lResult = 0;
-	CommandCommon lCommand = (CommandCommon)TranslateCommand(pCommand);
-	switch (lCommand)
-	{
-		case COMMAND_ALIAS:
-		{
-			//bool lUsage = false;
-			if (pParameterVector.size() >= 2)
-			{
-				GetConsoleCommandManager()->RemoveCommand(pParameterVector[0]);
-				strutil::strvec lArgs(pParameterVector);
-				lArgs.erase(lArgs.begin());
-				if (lArgs.size() > 1)
-				{
-					for (size_t x = 0; x < lArgs.size(); ++x)
-					{
-						if (lArgs[x].find(" ") != str::npos)
-						{
-							lArgs[x] = "\"" + lArgs[x] + "\"";
+int ConsoleManager::OnCommand(const HashedString& command, const strutil::strvec& parameter_vector) {
+	int result = 0;
+	CommandCommon _command = (CommandCommon)TranslateCommand(command);
+	switch (_command) {
+		case kCommandAlias: {
+			//bool usage = false;
+			if (parameter_vector.size() >= 2) {
+				GetConsoleCommandManager()->RemoveCommand(parameter_vector[0]);
+				strutil::strvec args(parameter_vector);
+				args.erase(args.begin());
+				if (args.size() > 1) {
+					for (size_t x = 0; x < args.size(); ++x) {
+						if (args[x].find(" ") != str::npos) {
+							args[x] = "\"" + args[x] + "\"";
 						}
 					}
 				}
-				mAliasMap[pParameterVector[0]] = strutil::Join(lArgs, " ");;
-				GetConsoleCommandManager()->AddCommand(pParameterVector[0]);
-			}
-			else if (pParameterVector.size() == 1)
-			{
-				mAliasMap.erase(pParameterVector[0]);
-				GetConsoleCommandManager()->RemoveCommand(pParameterVector[0]);
-			}
-			else
-			{
-				mLog.Info("List of aliases:");
-				for (AliasMap::iterator x = mAliasMap.begin(); x != mAliasMap.end(); ++x)
-				{
-					mLog.Infof("  %s -> %s", x->first.c_str(), x->second.c_str());
+				alias_map_[parameter_vector[0]] = strutil::Join(args, " ");;
+				GetConsoleCommandManager()->AddCommand(parameter_vector[0]);
+			} else if (parameter_vector.size() == 1) {
+				alias_map_.erase(parameter_vector[0]);
+				GetConsoleCommandManager()->RemoveCommand(parameter_vector[0]);
+			} else {
+				log_.Info("List of aliases:");
+				for (AliasMap::iterator x = alias_map_.begin(); x != alias_map_.end(); ++x) {
+					log_.Infof("  %s -> %s", x->first.c_str(), x->second.c_str());
 				}
 			}
-			/*if (lUsage)
-			{
-				mLog.Warningf("usage: %s <alias_name> [<command>]", pCommand.c_str());
-				mLog.Warning("Adds a new alias, or removes one if <command is left out.");
-				lResult = 1;
+			/*if (usage) {
+				log_.Warningf("usage: %s <alias_name> [<command>]", command.c_str());
+				log_.Warning("Adds a new alias, or removes one if <command is left out.");
+				result = 1;
 			}*/
-		}
-		break;
-		case COMMAND_ALIAS_VALUE:
-		{
-			AliasMap::iterator x = mAliasMap.find(pCommand);
-			if (x != mAliasMap.end())
-			{
-				lResult = ExecuteCommand(x->second + " " + strutil::Join(pParameterVector, " "));
+		} break;
+		case kCommandAliasValue: {
+			AliasMap::iterator x = alias_map_.find(command);
+			if (x != alias_map_.end()) {
+				result = ExecuteCommand(x->second + " " + strutil::Join(parameter_vector, " "));
+			} else {
+				log_.Warningf("Alias %s is removed.", command.c_str());
+				result = 1;
 			}
-			else
-			{
-				mLog.Warningf("Alias %s is removed.", pCommand.c_str());
-				lResult = 1;
-			}
-		}
-		break;
-		case COMMAND_BIND_KEY:
-		{
-			if (pParameterVector.size() == 2)
-			{
-				mKeyMap[pParameterVector[0]] = pParameterVector[1];
-			}
-			else if (pParameterVector.size() == 1)
-			{
-				mKeyMap.erase(pParameterVector[0]);
-			}
-			else
-			{
-				mLog.Info("List of keys:");
-				for (KeyMap::iterator x = mKeyMap.begin(); x != mKeyMap.end(); ++x)
-				{
-					mLog.Infof("  %s -> %s", x->first.c_str(), x->second.c_str());
+		} break;
+		case kCommandBindKey: {
+			if (parameter_vector.size() == 2) {
+				key_map_[parameter_vector[0]] = parameter_vector[1];
+			} else if (parameter_vector.size() == 1) {
+				key_map_.erase(parameter_vector[0]);
+			} else {
+				log_.Info("List of keys:");
+				for (KeyMap::iterator x = key_map_.begin(); x != key_map_.end(); ++x) {
+					log_.Infof("  %s -> %s", x->first.c_str(), x->second.c_str());
 				}
 			}
-		}
-		break;
-		case COMMAND_ECHO:
-		{
-			bool lUsage = false;
-			if (pParameterVector.size() >= 2)
-			{
-				int lLogLevel = 0;
-				if (strutil::StringToInt(pParameterVector[0], lLogLevel))
-				{
-					const str lCMessage = strutil::Join(pParameterVector, " ", 1);
-					str lMessage;
-					if (strutil::CStringToString(lCMessage, lMessage))
-					{
-						mLog.Print((LogLevel)lLogLevel, lMessage+'\n');
+		} break;
+		case kCommandEcho: {
+			bool usage = false;
+			if (parameter_vector.size() >= 2) {
+				int log_level = 0;
+				if (strutil::StringToInt(parameter_vector[0], log_level)) {
+					const str c_message = strutil::Join(parameter_vector, " ", 1);
+					str message;
+					if (strutil::CStringToString(c_message, message)) {
+						log_.Print((LogLevel)log_level, message+'\n');
+					} else {
+						log_.Warning("Invalid message C-string.");
 					}
-					else
-					{
-						mLog.Warning("Invalid message C-string.");
-					}
+				} else {
+					usage = true;
 				}
-				else
-				{
-					lUsage = true;
-				}
+			} else {
+				usage = true;
 			}
-			else
-			{
-				lUsage = true;
+			if (usage) {
+				log_.Warningf("usage: %s <log_level> <text to log>", command.c_str());
+				log_.Warning("Prints to <text to log> on all loggers at <log_level> (integer).");
+				result = 1;
 			}
-			if (lUsage)
-			{
-				mLog.Warningf("usage: %s <log_level> <text to log>", pCommand.c_str());
-				mLog.Warning("Prints to <text to log> on all loggers at <log_level> (integer).");
-				lResult = 1;
-			}
-		}
-		break;
-		case COMMAND_DEBUG_BREAK:
-		{
+		} break;
+		case kCommandDebugBreak: {
 #ifdef LEPRA_DEBUG
-			mLog.Warningf("Debug break.");
+			log_.Warningf("Debug break.");
 #ifdef LEPRA_MSVC
 			::DebugBreak();
 #else // Other compilers
@@ -304,645 +247,468 @@ int ConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strve
 #else // Release
 			log_trace("debug break is not available in non-debug builds.");
 #endif // Debug / Release
-		}
-		break;
-		case COMMAND_HELP:
-		{
-			if (GetConsoleLogger())
-			{
+		} break;
+		case kCommandHelp: {
+			if (GetConsoleLogger()) {
 				GetConsoleLogger()->OnLogRawMessage("These are the available commands:\n");
-				std::list<str> lCommandList = GetCommandList();
-				PrintCommandList(lCommandList);
+				std::list<str> command_list = GetCommandList();
+				PrintCommandList(command_list);
 			}
-		}
-		break;
-		case COMMAND_SET_STDOUT_LOG_LEVEL:
-		{
-			int lLogLevel = 0;
-			if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lLogLevel))
-			{
-				const char* lListenerNameArray[] = { "console", "i-console", "file", };
-				for (size_t x = 0; x < LEPRA_ARRAY_COUNT(lListenerNameArray); ++x)
-				{
-					LogListener* lLogger = LogType::GetLogger(LogType::ROOT)->GetListener(lListenerNameArray[x]);
-					if (lLogger)
-					{
-						lLogger->SetLevelThreashold((LogLevel)lLogLevel);
-						LogLevel lNewLogLevel = lLogger->GetLevelThreashold();
-						if (lNewLogLevel != lLogLevel)
-						{
-							mLog.Infof("Listener '%s' log level clamped to %i.", lListenerNameArray[x], lNewLogLevel);
+		} break;
+		case kCommandSetStdoutLogLevel: {
+			int log_level = 0;
+			if (parameter_vector.size() == 1 && strutil::StringToInt(parameter_vector[0], log_level)) {
+				const char* listener_name_array[] = { "console", "i-console", "file", };
+				for (size_t x = 0; x < LEPRA_ARRAY_COUNT(listener_name_array); ++x) {
+					LogListener* logger = LogType::GetLogger(LogType::kRoot)->GetListener(listener_name_array[x]);
+					if (logger) {
+						logger->SetLevelThreashold((LogLevel)log_level);
+						LogLevel new_log_level = logger->GetLevelThreashold();
+						if (new_log_level != log_level) {
+							log_.Infof("Listener '%s' log level clamped to %i.", listener_name_array[x], new_log_level);
 						}
 					}
 				}
+			} else {
+				log_.Warningf("usage: %s <log level>", command.c_str());
+				log_.Warningf("where log level is 0=trace, 1=debug... %i=only fatal errors", kLevelTypeCount-1);
+				result = 1;
 			}
-			else
-			{
-				mLog.Warningf("usage: %s <log level>", pCommand.c_str());
-				mLog.Warningf("where log level is 0=trace, 1=debug... %i=only fatal errors", LEVEL_TYPE_COUNT-1);
-				lResult = 1;
-			}
-		}
-		break;
-		case COMMAND_SET_SUBSYSTEM_LOG_LEVEL:
-		{
-			int lLogLevel = 0;
-			if (pParameterVector.size() == 2 && strutil::StringToInt(pParameterVector[1], lLogLevel))
-			{
-				Logger* lLog = LogType::GetLogger(pParameterVector[0]);
-				if (lLog)
-				{
-					lLog->SetLevelThreashold((LogLevel)lLogLevel);
-					LogLevel lNewLogLevel = lLog->GetLevelThreashold();
-					mLog.Infof("Logger level for subsystem '%s' set to %i.", pParameterVector[0].c_str(), lNewLogLevel);
+		} break;
+		case kCommandSetSubsystemLogLevel: {
+			int log_level = 0;
+			if (parameter_vector.size() == 2 && strutil::StringToInt(parameter_vector[1], log_level)) {
+				Logger* log = LogType::GetLogger(parameter_vector[0]);
+				if (log) {
+					log->SetLevelThreashold((LogLevel)log_level);
+					LogLevel new_log_level = log->GetLevelThreashold();
+					log_.Infof("Logger level for subsystem '%s' set to %i.", parameter_vector[0].c_str(), new_log_level);
+				} else {
+					log_.Infof("Unknown log \"%s\".", parameter_vector[0].c_str());
 				}
-				else
-				{
-					mLog.Infof("Unknown log \"%s\".", pParameterVector[0].c_str());
+			} else if (parameter_vector.size() == 1 && strutil::StringToInt(parameter_vector[0], log_level)) {
+				const std::vector<Logger*> log_array = LogType::GetLoggers();
+				std::vector<Logger*>::const_iterator x = log_array.begin();
+				LogLevel new_log_level = kLevelLowestType;
+				for (; x != log_array.end(); ++x) {
+					(*x)->SetLevelThreashold((LogLevel)log_level);
+					new_log_level = (*x)->GetLevelThreashold();
 				}
+				log_.Infof("All logs levels' set to %i.", new_log_level);
+			} else {
+				log_.Warningf("usage: %s [<subsystem>] <log level>", command.c_str());
+				log_.Warningf("where subsystem is Root, Network, Game, UI...");
+				log_.Warningf("where log level is 0=trace, 1=debug... %i=only fatal errors", kLevelTypeCount-1);
+				result = 1;
 			}
-			else if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lLogLevel))
-			{
-				const std::vector<Logger*> lLogArray = LogType::GetLoggers();
-				std::vector<Logger*>::const_iterator x = lLogArray.begin();
-				LogLevel lNewLogLevel = LEVEL_LOWEST_TYPE;
-				for (; x != lLogArray.end(); ++x)
-				{
-					(*x)->SetLevelThreashold((LogLevel)lLogLevel);
-					lNewLogLevel = (*x)->GetLevelThreashold();
-				}
-				mLog.Infof("All logs levels' set to %i.", lNewLogLevel);
+		} break;
+		case kCommandDumpPerformanceInfo: {
+			if (game_manager_) {
+				game_manager_->UpdateReportPerformance(true, 0);
+			} else {
+				log_.Error("Can not dump performance info, since game manager not present in this context.");
 			}
-			else
-			{
-				mLog.Warningf("usage: %s [<subsystem>] <log level>", pCommand.c_str());
-				mLog.Warningf("where subsystem is Root, Network, Game, UI...");
-				mLog.Warningf("where log level is 0=trace, 1=debug... %i=only fatal errors", LEVEL_TYPE_COUNT-1);
-				lResult = 1;
-			}
-		}
-		break;
-		case COMMAND_DUMP_PERFORMANCE_INFO:
-		{
-			if (mGameManager)
-			{
-				mGameManager->UpdateReportPerformance(true, 0);
-			}
-			else
-			{
-				mLog.Error("Can not dump performance info, since game manager not present in this context.");
-			}
-		}
-		break;
-		case COMMAND_CLEAR_PERFORMANCE_INFO:
-		{
-			if (mGameManager)
-			{
+		} break;
+		case kCommandClearPerformanceInfo: {
+			if (game_manager_) {
 				log_performance("Clearing performance data.");
-				mGameManager->ClearPerformanceData();
+				game_manager_->ClearPerformanceData();
+			} else {
+				log_.Error("Can not clear performance info, since game manager not present in this context.");
 			}
-			else
-			{
-				mLog.Error("Can not clear performance info, since game manager not present in this context.");
-			}
-		}
-		break;
-		case COMMAND_SHELL_EXECUTE:
-		{
-			if (pParameterVector.size() == 1)
-			{
-				const int lErrorCode = ::system(pParameterVector[0].c_str());
-				if (lErrorCode != 0)
-				{
-					mLog.Errorf("Program '%s' returned error code %i.", pParameterVector[0].c_str(), lErrorCode);
-					lResult = 1;
+		} break;
+		case kCommandShellExecute: {
+			if (parameter_vector.size() == 1) {
+				const int error_code = ::system(parameter_vector[0].c_str());
+				if (error_code != 0) {
+					log_.Errorf("Program '%s' returned error code %i.", parameter_vector[0].c_str(), error_code);
+					result = 1;
 				}
+			} else {
+				log_.Warningf("usage: %s <shell command line>", command.c_str());
+				result = 1;
 			}
-			else
-			{
-				mLog.Warningf("usage: %s <shell command line>", pCommand.c_str());
-				lResult = 1;
+		} break;
+		case kCommandShowSystemInfo: {
+			log_.Infof("Login:            %s", SystemManager::GetLoginName().c_str());
+			log_.Infof("Full name:        %s", SystemManager::QueryFullUserName().c_str());
+			log_.Infof("OS:               %s", SystemManager::GetOsName().c_str());
+			log_.Infof("CPU:              %s at %sHz", SystemManager::GetCpuName().c_str(), Number::ConvertToPostfixNumber((double)SystemManager::QueryCpuFrequency(), 1).c_str());
+			log_.Infof("CPU count:        %u physical, %u cores, %u logical", SystemManager::GetPhysicalCpuCount(), SystemManager::GetCoreCount(), SystemManager::GetLogicalCpuCount());
+			log_.Infof("Physical RAM:     %sB", Number::ConvertToPostfixNumber((double)SystemManager::GetAmountRam(), 1).c_str());
+			log_.Infof("Available RAM:    %sB", Number::ConvertToPostfixNumber((double)SystemManager::GetAvailRam(), 1).c_str());
+			log_.Infof("Sleep resolution: %f s", SystemManager::GetSleepResolution());
+		} break;
+		case kCommandShowGameInfo: {
+			int target_fps;
+			v_get(target_fps, =, GetVariableScope(), kRtvarPhysicsFps, 2);
+			log_.Infof("Target frame rate:     %i", target_fps);
+			if (game_manager_) {
+				log_.Infof("Current frame rate:    %g", 1/game_manager_->GetTimeManager()->GetRealNormalFrameTime());
+				log_.Infof("Absolute time:	      %g", game_manager_->GetTimeManager()->GetAbsoluteTime());
+				log_.Infof("Current physics frame: %i", game_manager_->GetTimeManager()->GetCurrentPhysicsFrame());
 			}
-		}
-		break;
-		case COMMAND_SHOW_SYSTEM_INFO:
-		{
-			mLog.Infof("Login:            %s", SystemManager::GetLoginName().c_str());
-			mLog.Infof("Full name:        %s", SystemManager::QueryFullUserName().c_str());
-			mLog.Infof("OS:               %s", SystemManager::GetOsName().c_str());
-			mLog.Infof("CPU:              %s at %sHz", SystemManager::GetCpuName().c_str(), Number::ConvertToPostfixNumber((double)SystemManager::QueryCpuFrequency(), 1).c_str());
-			mLog.Infof("CPU count:        %u physical, %u cores, %u logical", SystemManager::GetPhysicalCpuCount(), SystemManager::GetCoreCount(), SystemManager::GetLogicalCpuCount());
-			mLog.Infof("Physical RAM:     %sB", Number::ConvertToPostfixNumber((double)SystemManager::GetAmountRam(), 1).c_str());
-			mLog.Infof("Available RAM:    %sB", Number::ConvertToPostfixNumber((double)SystemManager::GetAvailRam(), 1).c_str());
-			mLog.Infof("Sleep resolution: %f s", SystemManager::GetSleepResolution());
-		}
-		break;
-		case COMMAND_SHOW_GAME_INFO:
-		{
-			int lTargetFps;
-			v_get(lTargetFps, =, GetVariableScope(), RTVAR_PHYSICS_FPS, 2);
-			mLog.Infof("Target frame rate:     %i", lTargetFps);
-			if (mGameManager)
-			{
-				mLog.Infof("Current frame rate:    %g", 1/mGameManager->GetTimeManager()->GetRealNormalFrameTime());
-				mLog.Infof("Absolute time:	      %g", mGameManager->GetTimeManager()->GetAbsoluteTime());
-				mLog.Infof("Current physics frame: %i", mGameManager->GetTimeManager()->GetCurrentPhysicsFrame());
+		} break;
+		case kCommandHangGame: {
+			if (game_manager_) {
+				game_manager_->GetTickLock()->Acquire();
 			}
-		}
-		break;
-		case COMMAND_HANG_GAME:
-		{
-			if (mGameManager)
-			{
-				mGameManager->GetTickLock()->Acquire();
+		} break;
+		case kCommandUnhangGame: {
+			if (game_manager_) {
+				game_manager_->GetTickLock()->Release();
 			}
-		}
-		break;
-		case COMMAND_UNHANG_GAME:
-		{
-			if (mGameManager)
-			{
-				mGameManager->GetTickLock()->Release();
-			}
-		}
-		break;
-		case COMMAND_FORK:
-		{
-			if (pParameterVector.size() >= 1)
-			{
-				if (!ForkExecuteCommand(strutil::Join(pParameterVector, " ")))
-				{
-					mLog.Error("Could not start fork!");
+		} break;
+		case kCommandFork: {
+			if (parameter_vector.size() >= 1) {
+				if (!ForkExecuteCommand(strutil::Join(parameter_vector, " "))) {
+					log_.Error("Could not start fork!");
 				}
+			} else {
+				log_.Warningf("usage: %s <command> [<arg> ...]", command.c_str());
+				log_.Warning("Creates a new thread and executes <command> asynchronously.");
+				result = 1;
 			}
-			else
-			{
-				mLog.Warningf("usage: %s <command> [<arg> ...]", pCommand.c_str());
-				mLog.Warning("Creates a new thread and executes <command> asynchronously.");
-				lResult = 1;
-			}
-		}
-		break;
-		case COMMAND_NOP:
-		{
+		} break;
+		case kCommandNop: {
 			// Mhm...
-		}
-		break;
-		case COMMAND_EXECUTE_VARIABLE:
-		{
-			if (pParameterVector.size() == 1)
-			{
-				str lValue = GetVariableScope()->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, pParameterVector[0]);
-				if (ExecuteCommand(lValue) == 0)
-				{
-					mLog.Infof("Variable %s executed OK.", pParameterVector[0].c_str());
+		} break;
+		case kCommandExecuteVariable: {
+			if (parameter_vector.size() == 1) {
+				str value = GetVariableScope()->GetDefaultValue(cure::RuntimeVariableScope::kReadOnly, parameter_vector[0]);
+				if (ExecuteCommand(value) == 0) {
+					log_.Infof("Variable %s executed OK.", parameter_vector[0].c_str());
+				} else if (!Thread::GetCurrentThread()->GetStopRequest()) {
+					log_.Errorf("Variable %s was NOT sucessfully executed.", parameter_vector[0].c_str());
+					result = 1;
 				}
-				else if (!Thread::GetCurrentThread()->GetStopRequest())
-				{
-					mLog.Errorf("Variable %s was NOT sucessfully executed.", pParameterVector[0].c_str());
-					lResult = 1;
-				}
+			} else {
+				log_.Warningf("usage: %s <variable_name>", command.c_str());
+				log_.Warning("Executes contents of <variable_name>.");
+				result = 1;
 			}
-			else
-			{
-				mLog.Warningf("usage: %s <variable_name>", pCommand.c_str());
-				mLog.Warning("Executes contents of <variable_name>.");
-				lResult = 1;
-			}
-		}
-		break;
-		case COMMAND_EXECUTE_FILE:
-		{
+		} break;
+		case kCommandExecuteFile: {
 #ifndef LEPRA_TOUCH	// Only default parameters are good enough for touch devices.
-			size_t lFilenameIndex = 0;
-			bool lIgnoreIfMissing = false;
-			if (pParameterVector[0] == "-i")
-			{
-				lIgnoreIfMissing = true;
-				++lFilenameIndex;
+			size_t filename_index = 0;
+			bool ignore_if_missing = false;
+			if (parameter_vector[0] == "-i") {
+				ignore_if_missing = true;
+				++filename_index;
 			}
-			if (lFilenameIndex < pParameterVector.size())
-			{
-				DiskFile lFile;
-				if (lFile.Open(pParameterVector[lFilenameIndex], DiskFile::MODE_TEXT_READ))
-				{
-					str lLine;
-					int lLineNumber = 1;
-					Thread* lSelf = Thread::GetCurrentThread();
-					for (; lResult == 0 && lFile.ReadLine(lLine) == IO_OK && !lSelf->GetStopRequest(); ++lLineNumber)
-					{
-						const str lConvertedLine = lLine;
-						lResult = ExecuteCommand(lConvertedLine);
+			if (filename_index < parameter_vector.size()) {
+				DiskFile _file;
+				if (_file.Open(parameter_vector[filename_index], DiskFile::kModeTextRead)) {
+					str line;
+					int line_number = 1;
+					Thread* self = Thread::GetCurrentThread();
+					for (; result == 0 && _file.ReadLine(line) == kIoOk && !self->GetStopRequest(); ++line_number) {
+						const str converted_line = line;
+						result = ExecuteCommand(converted_line);
 					}
-					if (lResult == 0)
-					{
-						//mLog.Infof("File %s executed OK.", pParameterVector[0].c_str());
-					}
-					else
-					{
-						if (!lSelf->GetStopRequest())
-						{
-							mLog.Errorf("File %s was NOT sucessfully executed; error in line %i.", pParameterVector[0].c_str(), lLineNumber);
-							lResult += 100;
-						}
-						else
-						{
-							lResult = 0;	// Problem probably caused by termination. Ignore it.
+					if (result == 0) {
+						//log_.Infof("File %s executed OK.", parameter_vector[0].c_str());
+					} else {
+						if (!self->GetStopRequest()) {
+							log_.Errorf("File %s was NOT sucessfully executed; error in line %i.", parameter_vector[0].c_str(), line_number);
+							result += 100;
+						} else {
+							result = 0;	// Problem probably caused by termination. Ignore it.
 						}
 					}
+				} else if (!ignore_if_missing) {
+					log_.Errorf("File %s did not open for reading.", parameter_vector[0].c_str());
+					result = 2;
 				}
-				else if (!lIgnoreIfMissing)
-				{
-					mLog.Errorf("File %s did not open for reading.", pParameterVector[0].c_str());
-					lResult = 2;
-				}
-			}
-			else
-			{
-				mLog.Warningf("usage: %s [-i] <file_name>", pCommand.c_str());
-				mLog.Warning("Executes contents of <file_name>.");
-				mLog.Warning("  -i   Ignores non-existing shell file.");
-				lResult = 1;
+			} else {
+				log_.Warningf("usage: %s [-i] <file_name>", command.c_str());
+				log_.Warning("Executes contents of <file_name>.");
+				log_.Warning("  -i   Ignores non-existing shell file.");
+				result = 1;
 			}
 #endif // Not for touch devices
-		}
-		break;
-		case COMMAND_LIST_ACTIVE_RESOURCES:
-		{
-			typedef Cure::ResourceManager::ResourceInfoList ResourceInfoList;
-			ResourceInfoList lNameTypeList = mResourceManager->QueryResourceNames();
-			mLog.Infof("Currently %u active resources:", lNameTypeList.size());
-			for (ResourceInfoList::iterator x = lNameTypeList.begin(); x != lNameTypeList.end(); ++x)
-			{
-				mLog.Info(strutil::Format("  %s [%s] acquired %i times", x->mName.c_str(), x->mType.c_str(), x->mReferenceCount));
+		} break;
+		case kCommandListActiveResources: {
+			typedef cure::ResourceManager::ResourceInfoList ResourceInfoList;
+			ResourceInfoList name_type_list = resource_manager_->QueryResourceNames();
+			log_.Infof("Currently %u active resources:", name_type_list.size());
+			for (ResourceInfoList::iterator x = name_type_list.begin(); x != name_type_list.end(); ++x) {
+				log_.Info(strutil::Format("  %s [%s] acquired %i times", x->name_.c_str(), x->type_.c_str(), x->reference_count_));
 			}
 
-			ResourceTracker::CounterMap lResourceMap = gResourceTracker.GetAll();
-			mLog.Infof("Currently %u resource trackers:", lResourceMap.size());
-			ResourceTracker::CounterMap::iterator y = lResourceMap.begin();
-			for (; y != lResourceMap.end(); ++y)
-			{
-				mLog.Info(strutil::Format("  %s acquired %i times", y->first.c_str(), y->second));
+			ResourceTracker::CounterMap resource_map = g_resource_tracker.GetAll();
+			log_.Infof("Currently %u resource trackers:", resource_map.size());
+			ResourceTracker::CounterMap::iterator y = resource_map.begin();
+			for (; y != resource_map.end(); ++y) {
+				log_.Info(strutil::Format("  %s acquired %i times", y->first.c_str(), y->second));
 			}
-		}
-		break;
-		case COMMAND_SLEEP:
-		{
-			double lTime = -1;
-			if (pParameterVector.size() == 1 && strutil::StringToDouble(pParameterVector[0], lTime))
-			{
-				while (lTime > 0.5f && !Thread::GetCurrentThread()->GetStopRequest())
-				{
+		} break;
+		case kCommandSleep: {
+			double time = -1;
+			if (parameter_vector.size() == 1 && strutil::StringToDouble(parameter_vector[0], time)) {
+				while (time > 0.5f && !Thread::GetCurrentThread()->GetStopRequest()) {
 					Thread::Sleep(0.5f);
-					lTime -= 0.5f;
+					time -= 0.5f;
 				}
-				if (lTime > 0 && !Thread::GetCurrentThread()->GetStopRequest())
-				{
-					Thread::Sleep(lTime);
+				if (time > 0 && !Thread::GetCurrentThread()->GetStopRequest()) {
+					Thread::Sleep(time);
 				}
+			} else {
+				log_.Warningf("usage: %s <secs>", command.c_str());
+				log_.Warning("Sleeps <secs> where secs is a decimal number, e.g. 0.001.");
+				result = 1;
 			}
-			else
-			{
-				mLog.Warningf("usage: %s <secs>", pCommand.c_str());
-				mLog.Warning("Sleeps <secs> where secs is a decimal number, e.g. 0.001.");
-				lResult = 1;
-			}
-		}
-		break;
-		case COMMAND_WAIT_LOADED:
-		{
-			mLog.Info("Waiting for resource pump to complete loading...");
+		} break;
+		case kCommandWaitLoaded: {
+			log_.Info("Waiting for resource pump to complete loading...");
 			// Start out by waiting for the game manager, if we don't have one yet.
-			for (int x = 0; !mGameManager && x < 200; ++x)
-			{
+			for (int x = 0; !game_manager_ && x < 200; ++x) {
 				Thread::Sleep(0.1);
 			}
-			if (mResourceManager->WaitLoading())
-			{
-				mLog.Info("Everything loaded.");
+			if (resource_manager_->WaitLoading()) {
+				log_.Info("Everything loaded.");
+			} else {
+				log_.Error("Load not completed in time!");
+				result = 1;
 			}
-			else
-			{
-				mLog.Error("Load not completed in time!");
-				lResult = 1;
+		} break;
+		case kCommandPush: {
+			if (parameter_vector.size() >= 1) {
+				PushYieldCommand(strutil::Join(parameter_vector, " "));
+			} else {
+				log_.Warningf("usage: %s command [arg [arg ...]]", command.c_str());
+				log_.Warning("Pushes a command to be executed next time the shell is idle.");
+				result = 1;
 			}
-		}
-		break;
-		case COMMAND_PUSH:
-		{
-			if (pParameterVector.size() >= 1)
-			{
-				PushYieldCommand(strutil::Join(pParameterVector, " "));
-			}
-			else
-			{
-				mLog.Warningf("usage: %s command [arg [arg ...]]", pCommand.c_str());
-				mLog.Warning("Pushes a command to be executed next time the shell is idle.");
-				lResult = 1;
-			}
-		}
-		break;
-		case COMMAND_REPEAT:
-		{
-			bool lUsage = false;
-			if (pParameterVector.size() >= 2)
-			{
-				int lRepeatCount = 0;
-				if (strutil::StringToInt(pParameterVector[0], lRepeatCount))
-				{
-					const str lCommand = strutil::Join(pParameterVector, " ", 1);
-					for (int x = 0; x < lRepeatCount; ++x)
-					{
-						ExecuteCommand(lCommand);
+		} break;
+		case kCommandRepeat: {
+			bool usage = false;
+			if (parameter_vector.size() >= 2) {
+				int repeat_count = 0;
+				if (strutil::StringToInt(parameter_vector[0], repeat_count)) {
+					const str _command = strutil::Join(parameter_vector, " ", 1);
+					for (int x = 0; x < repeat_count; ++x) {
+						ExecuteCommand(_command);
 					}
+				} else {
+					usage = true;
 				}
-				else
-				{
-					lUsage = true;
-				}
+			} else {
+				usage = true;
 			}
-			else
-			{
-				lUsage = true;
+			if (usage) {
+				log_.Warningf("usage: %s <count> command [arg [arg ...]]", command.c_str());
+				log_.Warning("Repeats a command <count> times.");
+				result = 1;
 			}
-			if (lUsage)
-			{
-				mLog.Warningf("usage: %s <count> command [arg [arg ...]]", pCommand.c_str());
-				mLog.Warning("Repeats a command <count> times.");
-				lResult = 1;
-			}
-		}
-		break;
-		case COMMAND_SET_DEFAULT_CONFIG:
-		{
-			Cure::Init();
-		}
-		break;
-		case COMMAND_SAVE_SYSTEM_CONFIG_FILE:
-		case COMMAND_SAVE_APPLICATION_CONFIG_FILE:
-		{
+		} break;
+		case kCommandSetDefaultConfig: {
+			cure::Init();
+		} break;
+		case kCommandSaveSystemConfigFile:
+		case kCommandSaveApplicationConfigFile: {
 #ifndef LEPRA_TOUCH	// Only default parameters are good enough for touch devices.
-			bool lUsage = false;
-			if (pParameterVector.size() >= 1 && pParameterVector.size() <= 3)
-			{
-				size_t lFilenameIndex = 0;
-				bool lIgnoreIfExists = false;
-				if (pParameterVector[0] == "-i")
-				{
-					lIgnoreIfExists = true;
-					++lFilenameIndex;
+			bool usage = false;
+			if (parameter_vector.size() >= 1 && parameter_vector.size() <= 3) {
+				size_t filename_index = 0;
+				bool ignore_if_exists = false;
+				if (parameter_vector[0] == "-i") {
+					ignore_if_exists = true;
+					++filename_index;
 				}
-				if (lCommand == COMMAND_SAVE_SYSTEM_CONFIG_FILE)
-				{
-					++lFilenameIndex;
+				if (_command == kCommandSaveSystemConfigFile) {
+					++filename_index;
 				}
-				int lScopeSkipCount = 0;
-				if (lFilenameIndex < pParameterVector.size() &&
-					((lCommand == COMMAND_SAVE_SYSTEM_CONFIG_FILE &&
-					strutil::StringToInt(pParameterVector[lFilenameIndex-1], lScopeSkipCount))
+				int _scope_skip_count = 0;
+				if (filename_index < parameter_vector.size() &&
+					((_command == kCommandSaveSystemConfigFile &&
+					strutil::StringToInt(parameter_vector[filename_index-1], _scope_skip_count))
 					||
-					(lCommand == COMMAND_SAVE_APPLICATION_CONFIG_FILE &&
-					lFilenameIndex < pParameterVector.size())))
-				{
-					str lFilename = pParameterVector[lFilenameIndex];
-					if (!lIgnoreIfExists || !DiskFile::Exists(lFilename))
-					{
-						str lUserConfig;
-						DiskFile lDiskFile;
-						if (lDiskFile.Open(lFilename, DiskFile::MODE_TEXT_READ))
-						{
-							lUserConfig = LoadUserConfig(&lDiskFile);
+					(_command == kCommandSaveApplicationConfigFile &&
+					filename_index < parameter_vector.size()))) {
+					str filename = parameter_vector[filename_index];
+					if (!ignore_if_exists || !DiskFile::Exists(filename)) {
+						str _user_config;
+						DiskFile disk_file;
+						if (disk_file.Open(filename, DiskFile::kModeTextRead)) {
+							_user_config = LoadUserConfig(&disk_file);
 						}
-						MemFile lMemFile;
-						bool lStoreResult;
-						if (lCommand == COMMAND_SAVE_SYSTEM_CONFIG_FILE)
-						{
-							lStoreResult = SaveSystemConfigFile(lScopeSkipCount, &lMemFile, lUserConfig);
+						MemFile mem_file;
+						bool store_result;
+						if (_command == kCommandSaveSystemConfigFile) {
+							store_result = SaveSystemConfigFile(_scope_skip_count, &mem_file, _user_config);
+						} else {
+							store_result = SaveApplicationConfigFile(&mem_file, _user_config);
 						}
-						else
-						{
-							lStoreResult = SaveApplicationConfigFile(&lMemFile, lUserConfig);
-						}
-						lDiskFile.SeekSet(0);
-						lMemFile.SeekSet(0);
-						if (lDiskFile.HasSameContent(lMemFile, lMemFile.GetSize()))
-						{
+						disk_file.SeekSet(0);
+						mem_file.SeekSet(0);
+						if (disk_file.HasSameContent(mem_file, mem_file.GetSize())) {
 							// Skip silently, there is no need to rewrite the file on disk.
-						}
-						else if (lDiskFile.Open(lFilename, DiskFile::MODE_TEXT_WRITE))
-						{
-							lStoreResult = (lDiskFile.WriteData(lMemFile.GetBuffer(), (size_t)lMemFile.GetSize()) == IO_OK);
-							//lStoreResult = (lDiskFile.WriteData("HEJSAN!\n", (size_t)8) == IO_OK);
-							if (lStoreResult)
-							{
-								mLog.Infof("Successfully wrote script %s to disk.", lFilename.c_str());
+						} else if (disk_file.Open(filename, DiskFile::kModeTextWrite)) {
+							store_result = (disk_file.WriteData(mem_file.GetBuffer(), (size_t)mem_file.GetSize()) == kIoOk);
+							//store_result = (disk_file.WriteData("HEJSAN!\n", (size_t)8) == kIoOk);
+							if (store_result) {
+								log_.Infof("Successfully wrote script %s to disk.", filename.c_str());
+							} else {
+								log_.Errorf("Script %s was NOT sucessfully saved; error writing to disk.", filename.c_str());
+								result = 2;
 							}
-							else
-							{
-								mLog.Errorf("Script %s was NOT sucessfully saved; error writing to disk.", lFilename.c_str());
-								lResult = 2;
-							}
+						} else {
+							log_.Errorf("Script %s was NOT sucessfully saved; error opening for writing.", filename.c_str());
+							result = 2;
 						}
-						else
-						{
-							mLog.Errorf("Script %s was NOT sucessfully saved; error opening for writing.", lFilename.c_str());
-							lResult = 2;
-						}
+					} else {
+						log_.Infof("Script %s not written; already exists.", filename.c_str());
 					}
-					else
-					{
-						mLog.Infof("Script %s not written; already exists.", lFilename.c_str());
-					}
+				} else {
+					usage = true;
 				}
-				else
-				{
-					lUsage = true;
-				}
+			} else {
+				usage = true;
 			}
-			else
-			{
-				lUsage = true;
-			}
-			if (lUsage)
-			{
-				mLog.Warningf("usage: %s [<-i>] {skip_scope_count} <file_name>", pCommand.c_str());
-				mLog.Warning("Saves settings to <file_name>.");
-				mLog.Warning("  {skip_scope_count}  How many variable scopes to skip before writing. Not valid for all cmds.");
-				mLog.Warning("  -i                  Skips overwriting in case of already existing file.");
-				lResult = 1;
+			if (usage) {
+				log_.Warningf("usage: %s [<-i>] {skip_scope_count} <file_name>", command.c_str());
+				log_.Warning("Saves settings to <file_name>.");
+				log_.Warning("  {skip_scope_count}  How many variable scopes to skip before writing. Not valid for all cmds.");
+				log_.Warning("  -i                  Skips overwriting in case of already existing file.");
+				result = 1;
 			}
 #endif // Not for touch devices
-		}
-		break;
-		default:
-		{
-			if (!pCommand.empty() && pCommand[0] == '#')
-			{
-				char lLevel = pCommand[1];
-				const int lVariableNameIndex = (lLevel == '/' || lLevel == '.')? 2 : 1;
-				typedef Cure::RuntimeVariable RtVar;
-				typedef Cure::RuntimeVariableScope RtScope;
-				RtScope* lScope = (lLevel == '/')? Cure::GetSettings() : GetVariableScope();
-				const str lVariable = pCommand.substr(lVariableNameIndex);
-				if (pParameterVector.size() == 0)
-				{
-					if (lScope->IsDefined(lVariable))
-					{
-						str lValue = lScope->GetUntypedDefaultValue(RtScope::READ_ONLY, lVariable);
-						lValue = strutil::StringToCString(lValue);
-						mLog.Infof("%s %s", lVariable.c_str(), lValue.c_str());
+		} break;
+		default: {
+			if (!command.empty() && command[0] == '#') {
+				char _level = command[1];
+				const int variable_name_index = (_level == '/' || _level == '.')? 2 : 1;
+				typedef cure::RuntimeVariable RtVar;
+				typedef cure::RuntimeVariableScope RtScope;
+				RtScope* scope = (_level == '/')? cure::GetSettings() : GetVariableScope();
+				const str variable = command.substr(variable_name_index);
+				if (parameter_vector.size() == 0) {
+					if (scope->IsDefined(variable)) {
+						str value = scope->GetUntypedDefaultValue(RtScope::kReadOnly, variable);
+						value = strutil::StringToCString(value);
+						log_.Infof("%s %s", variable.c_str(), value.c_str());
+					} else {
+						log_.Warningf("Variable %s not defined.", variable.c_str());
+						result = 1;
 					}
-					else
-					{
-						mLog.Warningf("Variable %s not defined.", lVariable.c_str());
-						lResult = 1;
+				} else if (parameter_vector.size() == 1) {
+					str value;
+					strutil::CStringToString(parameter_vector[0], value);
+					RtScope::SetMode mode = (_level == '.')? RtVar::kUsageUserOverride : RtVar::kUsageNormal;
+					bool ok = true;
+					cure::GameManager* manager = GetGameManager();
+					if (manager) {
+						ok = manager->ValidateVariable(security_level_, variable, value);
+						manager->GetTickLock()->Acquire();
 					}
+					if (ok) {
+						ok = scope->SetUntypedValue(mode, variable, value);
+					}
+					if (manager) {
+						manager->GetTickLock()->Release();
+					}
+					if (!ok) {
+						result = 1;
+					}
+				} else {
+					log_.Warningf("usage: #<variable_name> [<value>]", command.c_str());
+					log_.Warning("Prints variable_name or sets it to <value>.");
+					result = 1;
 				}
-				else if (pParameterVector.size() == 1)
-				{
-					str lValue;
-					strutil::CStringToString(pParameterVector[0], lValue);
-					RtScope::SetMode lMode = (lLevel == '.')? RtVar::USAGE_USER_OVERRIDE : RtVar::USAGE_NORMAL;
-					bool lOk = true;
-					Cure::GameManager* lManager = GetGameManager();
-					if (lManager)
-					{
-						lOk = lManager->ValidateVariable(mSecurityLevel, lVariable, lValue);
-						lManager->GetTickLock()->Acquire();
-					}
-					if (lOk)
-					{
-						lOk = lScope->SetUntypedValue(lMode, lVariable, lValue);
-					}
-					if (lManager)
-					{
-						lManager->GetTickLock()->Release();
-					}
-					if (!lOk)
-					{
-						lResult = 1;
-					}
-				}
-				else
-				{
-					mLog.Warningf("usage: #<variable_name> [<value>]", pCommand.c_str());
-					mLog.Warning("Prints variable_name or sets it to <value>.");
-					lResult = 1;
-				}
+			} else {
+				result = -1;
 			}
-			else
-			{
-				lResult = -1;
-			}
-		}
-		break;
+		} break;
 	}
-	return (lResult);
+	return (result);
 }
 
 
 
-bool ConsoleManager::SaveApplicationConfigFile(File* pFile, const str& pUserConfig)
-{
-	pFile->WriteString("// Generated application shell script section.\n");
-	std::list<str> lVariableList = GetVariableScope()->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_EXPORTABLE, 0, 0);
-	bool lSaved = SaveConfigFile(pFile, str("."), lVariableList, pUserConfig);
-	return (lSaved);
+bool ConsoleManager::SaveApplicationConfigFile(File* file, const str& user_config) {
+	file->WriteString("// Generated application shell script section.\n");
+	std::list<str> _variable_list = GetVariableScope()->GetVariableNameList(cure::RuntimeVariableScope::kSearchExportable, 0, 0);
+	bool saved = SaveConfigFile(file, str("."), _variable_list, user_config);
+	return (saved);
 }
 
-Cure::ResourceManager* ConsoleManager::GetResourceManager() const
-{
-	return mResourceManager;
+cure::ResourceManager* ConsoleManager::GetResourceManager() const {
+	return resource_manager_;
 }
 
 
 
-str ConsoleManager::LoadUserConfig(File* pFile)
-{
-	str lUserConfig;
-	str lLine;
-	for (bool lInUserConfig = false; pFile->ReadLine(lLine) == IO_OK; )
-	{
-		if (lInUserConfig)
-		{
-			lUserConfig += lLine + "\n";
-		}
-		else if (lLine.find(USER_SECTION_MARK) != str::npos)
-		{
-			lInUserConfig = true;
+str ConsoleManager::LoadUserConfig(File* file) {
+	str _user_config;
+	str line;
+	for (bool in_user_config = false; file->ReadLine(line) == kIoOk; ) {
+		if (in_user_config) {
+			_user_config += line + "\n";
+		} else if (line.find(kUserSectionMark) != str::npos) {
+			in_user_config = true;
 		}
 	}
-	return lUserConfig;
+	return _user_config;
 }
 
-bool ConsoleManager::SaveSystemConfigFile(int pScopeSkipCount, File* pFile, const str& pUserConfig)
-{
-	pFile->WriteString("// Generated system shell script section.\n");
-	std::list<str> lVariableList = GetVariableScope()->GetVariableNameList(Cure::RuntimeVariableScope::SEARCH_EXPORTABLE, pScopeSkipCount);
-	return (SaveConfigFile(pFile, str("/"), lVariableList, pUserConfig));
+bool ConsoleManager::SaveSystemConfigFile(int scope_skip_count, File* file, const str& user_config) {
+	file->WriteString("// Generated system shell script section.\n");
+	std::list<str> _variable_list = GetVariableScope()->GetVariableNameList(cure::RuntimeVariableScope::kSearchExportable, scope_skip_count);
+	return (SaveConfigFile(file, str("/"), _variable_list, user_config));
 }
 
-bool ConsoleManager::SaveConfigFile(File* pFile, const str& pPrefix, std::list<str>& pVariableList, const str& pUserConfig)
-{
-	pFile->WriteString("// Only change variable values below - use user section for all else.\n");
-	pFile->WriteString("set-stdout-log-level 4\n");
+bool ConsoleManager::SaveConfigFile(File* file, const str& prefix, std::list<str>& variable_list, const str& user_config) {
+	file->WriteString("// Only change variable values below - use user section for all else.\n");
+	file->WriteString("set-stdout-log-level 4\n");
 
-	pVariableList.sort();
-	str lLastGroup;
-	str lGroupDelimitors;
-	v_get(lGroupDelimitors, =, GetVariableScope(), RTVAR_CONSOLE_CHARACTERDELIMITORS, " ");
-	std::list<str>::const_iterator x = pVariableList.begin();
-	for (; x != pVariableList.end(); ++x)
-	{
-		const str& lVariable = *x;
-		const str lGroup = strutil::Split(lVariable, lGroupDelimitors, 1)[0];
-		if (lLastGroup != lGroup)
-		{
-			pFile->WriteString("\n");
-			lLastGroup = lGroup;
+	variable_list.sort();
+	str last_group;
+	str group_delimitors;
+	v_get(group_delimitors, =, GetVariableScope(), kRtvarConsoleCharacterdelimitors, " ");
+	std::list<str>::const_iterator x = variable_list.begin();
+	for (; x != variable_list.end(); ++x) {
+		const str& variable = *x;
+		const str group = strutil::Split(variable, group_delimitors, 1)[0];
+		if (last_group != group) {
+			file->WriteString("\n");
+			last_group = group;
 		}
-		str lValue = GetVariableScope()->GetUntypedDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, lVariable);
-		lValue = strutil::StringToCString(lValue);
-		if (GetVariableScope()->GetUntypedType(lValue) == Cure::RuntimeVariable::DATATYPE_STRING)
-		{
-			lValue = '"'+lValue+'"';
+		str value = GetVariableScope()->GetUntypedDefaultValue(cure::RuntimeVariableScope::kReadOnly, variable);
+		value = strutil::StringToCString(value);
+		if (GetVariableScope()->GetUntypedType(value) == cure::RuntimeVariable::kDatatypeString) {
+			value = '"'+value+'"';
 		}
-		str lDefaultValue = GetVariableScope()->GetUntypedDefaultValue(Cure::RuntimeVariableScope::READ_DEFAULT, lVariable);
-		lDefaultValue = strutil::StringToCString(lDefaultValue);
-		if (GetVariableScope()->GetUntypedType(lDefaultValue) == Cure::RuntimeVariable::DATATYPE_STRING)
-		{
-			lDefaultValue = '"'+lDefaultValue+'"';
+		str default_value = GetVariableScope()->GetUntypedDefaultValue(cure::RuntimeVariableScope::kReadDefault, variable);
+		default_value = strutil::StringToCString(default_value);
+		if (GetVariableScope()->GetUntypedType(default_value) == cure::RuntimeVariable::kDatatypeString) {
+			default_value = '"'+default_value+'"';
 		}
-		lDefaultValue = (lValue != lDefaultValue)? "\t// Default is "+lDefaultValue+".\n" : "\n";
-		pFile->WriteString("#"+pPrefix+lVariable+" "+lValue+lDefaultValue);
+		default_value = (value != default_value)? "\t// Default is "+default_value+".\n" : "\n";
+		file->WriteString("#"+prefix+variable+" "+value+default_value);
 	}
 
-	pFile->WriteString("\n");
-	for (AliasMap::iterator x = mAliasMap.begin(); x != mAliasMap.end(); ++x)
-	{
-		pFile->WriteString("alias " + GetQuoted(x->first) + " " + GetQuoted(x->second) + "\n");
+	file->WriteString("\n");
+	for (AliasMap::iterator x = alias_map_.begin(); x != alias_map_.end(); ++x) {
+		file->WriteString("alias " + GetQuoted(x->first) + " " + GetQuoted(x->second) + "\n");
 	}
 
-	pFile->WriteString("\n");
-	for (KeyMap::iterator x = mKeyMap.begin(); x != mKeyMap.end(); ++x)
-	{
-		pFile->WriteString("bind-key " + GetQuoted(x->first) + " " + GetQuoted(x->second) + "\n");
+	file->WriteString("\n");
+	for (KeyMap::iterator x = key_map_.begin(); x != key_map_.end(); ++x) {
+		file->WriteString("bind-key " + GetQuoted(x->first) + " " + GetQuoted(x->second) + "\n");
 	}
 
-	pFile->WriteString("\nset-stdout-log-level 1\n");
-	pFile->WriteString("\n" USER_SECTION_MARK " -- User config. Everything but variable values will be overwritten above this section!\n");
-	pFile->WriteString(pUserConfig);
+	file->WriteString("\nset-stdout-log-level 1\n");
+	file->WriteString("\n" kUserSectionMark " -- User config. Everything but variable values will be overwritten above this section!\n");
+	file->WriteString(user_config);
 	return (true);	// TODO: check if all writes went well.
 }
 
-str ConsoleManager::GetQuoted(const str& s)
-{
-	if (std::find_if(s.begin(), s.end(), is_invalid_char) == s.end())
-	{
+str ConsoleManager::GetQuoted(const str& s) {
+	if (std::find_if(s.begin(), s.end(), is_invalid_char) == s.end()) {
 		return s;
 	}
-	if (s.find("\"") != str::npos)	// Partially quoted strings as is.
-	{
+	if (s.find("\"") != str::npos) {	// Partially quoted strings as is.
 		return s;
 	}
 	return "\"" + s + "\"";
@@ -950,7 +716,7 @@ str ConsoleManager::GetQuoted(const str& s)
 
 
 
-loginstance(CONSOLE, ConsoleManager);
+loginstance(kConsole, ConsoleManager);
 
 
 

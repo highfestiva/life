@@ -1,74 +1,66 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Level.h"
+#include "level.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-Level::Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Cure::ContextForceListener* pGravelEmitter):
-	Parent(pResourceManager, pClassId, pUiManager),
-	mGravelEmitter(pGravelEmitter)
-{
+Level::Level(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, cure::ContextForceListener* gravel_emitter):
+	Parent(resource_manager, class_id, ui_manager),
+	gravel_emitter_(gravel_emitter) {
 }
 
-Level::~Level()
-{
-	delete mGravelEmitter;
-	mGravelEmitter = 0;
+Level::~Level() {
+	delete gravel_emitter_;
+	gravel_emitter_ = 0;
 }
 
-void Level::OnLoaded()
-{
+void Level::OnLoaded() {
 	Parent::OnLoaded();
 
-	const Tbc::ChunkyClass::Tag* lTag = FindTag("mass_objects", -1, -1);
-	if (lTag)
-	{
-		deb_assert(lTag->mStringValueList.size() == lTag->mFloatValueList.size());
-		deb_assert(lTag->mStringValueList.size() == lTag->mBodyIndexList.size());
-		const size_t lCount = lTag->mBodyIndexList.size();
-		for (size_t x = 0; x < lCount; ++x)
-		{
-			MassObjectInfo lInfo;
-			lInfo.mClassId = lTag->mStringValueList[x];
-			lInfo.mGroundBodyIndex = lTag->mBodyIndexList[x];
-			lInfo.mCount = (int)lTag->mFloatValueList[x];
-			mMassObjects.push_back(lInfo);
+	const tbc::ChunkyClass::Tag* tag = FindTag("mass_objects", -1, -1);
+	if (tag) {
+		deb_assert(tag->string_value_list_.size() == tag->float_value_list_.size());
+		deb_assert(tag->string_value_list_.size() == tag->body_index_list_.size());
+		const size_t count = tag->body_index_list_.size();
+		for (size_t x = 0; x < count; ++x) {
+			MassObjectInfo info;
+			info.class_id_ = tag->string_value_list_[x];
+			info.ground_body_index_ = tag->body_index_list_[x];
+			info.count_ = (int)tag->float_value_list_[x];
+			mass_objects_.push_back(info);
 		}
 	}
 }
 
 
 
-Level::MassObjectList Level::GetMassObjects() const
-{
-	return mMassObjects;
+Level::MassObjectList Level::GetMassObjects() const {
+	return mass_objects_;
 }
 
 
 
-void Level::OnForceApplied(Cure::ContextObject* pOtherObject,
-	Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-	const vec3& pForce, const vec3& pTorque,
-	const vec3& pPosition, const vec3& pRelativeVelocity)
-{
-	Parent::OnForceApplied(pOtherObject, pOwnBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+void Level::OnForceApplied(cure::ContextObject* other_object,
+	tbc::PhysicsManager::BodyID own_body_id, tbc::PhysicsManager::BodyID other_body_id,
+	const vec3& force, const vec3& torque,
+	const vec3& position, const vec3& relative_velocity) {
+	Parent::OnForceApplied(other_object, own_body_id, other_body_id, force, torque, position, relative_velocity);
 
-	mGravelEmitter->OnForceApplied(this, pOtherObject, pOwnBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+	gravel_emitter_->OnForceApplied(this, other_object, own_body_id, other_body_id, force, torque, position, relative_velocity);
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, Level);
+loginstance(kGameContextCpp, Level);
 
 
 

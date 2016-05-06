@@ -6,149 +6,120 @@
 
 #include "pch.h"
 //#include "../Include/NetworkManager.h"
-#include "../Include/PythonContextManager.h"
-#include "../Include/PythonContextObject.h"
-#include "../Include/PythonInterface.h"
+#include "../include/pythoncontextmanager.h"
+#include "../include/pythoncontextobject.h"
+#include "../include/pythoninterface.h"
 
 
 
 #if 0
-namespace Cure
-{
+namespace cure {
 
 
 
-PythonContextObject::PythonContextObject(GameObjectId pId, PyObject* pInstance, PythonInterface::PythonObjectBase* pCppInstance):
-	ContextObject(pId),
-	mInstance(pInstance),
-	mCppInstance(pCppInstance)
-{
-	Py_XINCREF(mInstance);
-	if (mCppInstance)
-	{
-		mCppInstance->SetContextObject(this);
+PythonContextObject::PythonContextObject(GameObjectId id, PyObject* instance, pythoninterface::PythonObjectBase* cpp_instance):
+	ContextObject(id),
+	instance_(instance),
+	cpp_instance_(cpp_instance) {
+	Py_XINCREF(instance_);
+	if (cpp_instance_) {
+		cpp_instance_->SetContextObject(this);
 	}
 }
 
-PythonContextObject::~PythonContextObject()
-{
+PythonContextObject::~PythonContextObject() {
 	Clear();
 }
 
-PythonContextObject* PythonContextObject::Load(bool pCppInterface, const Lepra::String& pPythonName, PyObject* pArguments)
-{
-	PythonContextObject* lContextObject = 0;
-	PyObject* lPythonInstance = LoadNative(pPythonName, pArguments);
-	if (lPythonInstance != 0)
-	{
-		PythonInterface::PythonObjectWrapper* lCppInstance = 0;
-		if (pCppInterface)
-		{
-			lCppInstance = boost::python::extract<PythonInterface::PythonObjectWrapper*>(lPythonInstance);
+PythonContextObject* PythonContextObject::Load(bool cpp_interface, const lepra::String& python_name, PyObject* arguments) {
+	PythonContextObject* context_object = 0;
+	PyObject* python_instance = LoadNative(python_name, arguments);
+	if (python_instance != 0) {
+		pythoninterface::PythonObjectWrapper* _cpp_instance = 0;
+		if (cpp_interface) {
+			_cpp_instance = boost::python::extract<pythoninterface::PythonObjectWrapper*>(python_instance);
 		}
-		GameObjectId lId = ContextManager::Get()->GetNetworkManager()->GetNewGameObjectId();
-		lContextObject = new PythonContextObject(lId, lPythonInstance, lCppInstance);
+		GameObjectId _id = ContextManager::Get()->GetNetworkManager()->GetNewGameObjectId();
+		context_object = new PythonContextObject(_id, python_instance, _cpp_instance);
 	}
-	return (lContextObject);
+	return (context_object);
 }
 
 
 
-void PythonContextObject::Clear()
-{
-	if (mCppInstance)
-	{
-		mCppInstance->Clear();
-		mCppInstance = 0;	// TODO: verify freeing of memory.
+void PythonContextObject::Clear() {
+	if (cpp_instance_) {
+		cpp_instance_->Clear();
+		cpp_instance_ = 0;	// TODO: verify freeing of memory.
 	}
-	Py_XDECREF(mInstance);
-	mInstance = 0;
+	Py_XDECREF(instance_);
+	instance_ = 0;
 }
 
-PyObject* PythonContextObject::GetInstance() const
-{
-	return (mInstance);
+PyObject* PythonContextObject::GetInstance() const {
+	return (instance_);
 }
 
-PythonInterface::PythonObjectBase* PythonContextObject::GetCppInstance() const
-{
-	return (mCppInstance);
+pythoninterface::PythonObjectBase* PythonContextObject::GetCppInstance() const {
+	return (cpp_instance_);
 }
 
 
 
-void PythonContextObject::OnTick(double pFrameTime)
-{
-	if (mCppInstance)
-	{
-		mCppInstance->OnTick(pFrameTime);
+void PythonContextObject::OnTick(double frame_time) {
+	if (cpp_instance_) {
+		cpp_instance_->OnTick(frame_time);
 	}
 }
 
-void PythonContextObject::OnAlarm(int pAlarmId)
-{
-	mCppInstance->OnAlarm(pAlarmId);
+void PythonContextObject::OnAlarm(int alarm_id) {
+	cpp_instance_->OnAlarm(alarm_id);
 }
 
 
 
-PyObject* PythonContextObject::LoadNative(const Lepra::String& pPythonName, PyObject* pArguments)
-{
-	Lepra::String lModuleName;
-	Lepra::AnsiString lClassName;
-	int lIndex = pPythonName.Find('.');
-	if (lIndex < 0)
-	{
-		lModuleName = pPythonName;
+PyObject* PythonContextObject::LoadNative(const lepra::String& python_name, PyObject* arguments) {
+	lepra::String module_name;
+	lepra::AnsiString class_name;
+	int index = python_name.Find('.');
+	if (index < 0) {
+		module_name = python_name;
+	} else {
+		module_name = python_name.Left(index);
+		class_name = python_name.Mid(index+1).ToAnsi();
 	}
-	else
-	{
-		lModuleName = pPythonName.Left(lIndex);
-		lClassName = pPythonName.Mid(lIndex+1).ToAnsi();
-	}
-	PyObject* lInstance = 0;
-	PyObject* lModule = ((PythonContextManager*)ContextManager::Get())->ImportModule(lModuleName);
-	if (lModule)
-	{
+	PyObject* _instance = 0;
+	PyObject* module = ((PythonContextManager*)ContextManager::Get())->ImportModule(module_name);
+	if (module) {
 		// Here we either 1) settle with loading the module, or 2) create a new instance.
-		if (lClassName.GetLength() > 0)
-		{
-			PyObject* lModuleDictionary = PyModule_GetDict(lModule);
-			PyObject* lClass = PyDict_GetItemString(lModuleDictionary, lClassName);
-			if (lClass)
-			{
-				lInstance = PyObject_CallObject(lClass, pArguments);
-				Py_DECREF(lModule);
-				if (!lInstance)
-				{
+		if (class_name.GetLength() > 0) {
+			PyObject* module_dictionary = PyModule_GetDict(module);
+			PyObject* clazz = PyDict_GetItemString(module_dictionary, class_name);
+			if (clazz) {
+				_instance = PyObject_CallObject(clazz, arguments);
+				Py_DECREF(module);
+				if (!_instance) {
 					PyErr_Print();
 					PyErr_Clear();
 				}
+			} else {
+				Py_DECREF(module);
+				perror((const char*)("bad class name: "+class_name));
 			}
-			else
-			{
-				Py_DECREF(lModule);
-				perror((const char*)("bad class name: "+lClassName));
-			}
-		}
-		else
-		{
+		} else {
 			// Everything OK, module object is requested and returned.
-			lInstance = lModule;
+			_instance = module;
 		}
-	}
-	else
-	{
+	} else {
 		PyErr_Print();
 		PyErr_Clear();
 	}
-	return (lInstance);
+	return (_instance);
 }
 
-void PythonContextObject::OnForceApplied(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque)
-{
-	pTorque;
-	mCppInstance->OnCollision(boost::python::make_tuple(0, 0, 0), boost::python::make_tuple(pForce.x, pForce.y, pForce.z), 1, *Py_None);
+void PythonContextObject::OnForceApplied(const lepra::Vector3DF& force, const lepra::Vector3DF& torque) {
+	torque;
+	cpp_instance_->OnCollision(boost::python::make_tuple(0, 0, 0), boost::python::make_tuple(force.x, force.y, force.z), 1, *Py_None);
 }
 
 

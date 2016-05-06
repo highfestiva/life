@@ -5,11 +5,11 @@
 */
 
 #include "pch.h"
-#include "../Include/PngLoader.h"
-#include "../Include/Graphics2D.h"
-#include "../Include/Canvas.h"
-#include "../Include/MetaFile.h"
-#include "../Include/ArchiveFile.h"
+#include "../include/pngloader.h"
+#include "../include/graphics2d.h"
+#include "../include/canvas.h"
+#include "../include/metafile.h"
+#include "../include/archivefile.h"
 
 #ifdef LEPRA_MSVC
 // Disable warning about functions that include catch which may not support C++ semantics. PNG loader
@@ -27,413 +27,359 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-PngLoader::Status PngLoader::Load(const str& pFileName, Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	MetaFile lFile;
+PngLoader::Status PngLoader::Load(const str& file_name, Canvas& canvas) {
+	Status status = kStatusSuccess;
+	MetaFile file;
 
-	if (lFile.Open(pFileName, MetaFile::READ_ONLY) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, MetaFile::kReadOnly) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		lStatus = Load(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		status = Load(file, canvas);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-PngLoader::Status PngLoader::Save(const str& pFileName, const Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	DiskFile lFile;
+PngLoader::Status PngLoader::Save(const str& file_name, const Canvas& canvas) {
+	Status status = kStatusSuccess;
+	DiskFile file;
 
-	if (lFile.Open(pFileName, DiskFile::MODE_WRITE) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, DiskFile::kModeWrite) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		lStatus = Save(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		status = Save(file, canvas);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-PngLoader::Status PngLoader::Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	ArchiveFile lFile(pArchiveName);
+PngLoader::Status PngLoader::Load(const str& archive_name, const str& file_name, Canvas& canvas) {
+	Status status = kStatusSuccess;
+	ArchiveFile file(archive_name);
 
-	if (lFile.Open(pFileName, ArchiveFile::READ_ONLY) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, ArchiveFile::kReadOnly) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		lStatus = Load(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		status = Load(file, canvas);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-PngLoader::Status PngLoader::Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	ArchiveFile lFile(pArchiveName);
+PngLoader::Status PngLoader::Save(const str& archive_name, const str& file_name, const Canvas& canvas) {
+	Status status = kStatusSuccess;
+	ArchiveFile file(archive_name);
 
-	if (lFile.Open(pFileName, ArchiveFile::WRITE_ONLY) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, ArchiveFile::kWriteOnly) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		lStatus = Save(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		status = Save(file, canvas);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-PngLoader::Status PngLoader::Load(Reader& pReader, Canvas& pCanvas)
-{
-	mReader = &pReader;
+PngLoader::Status PngLoader::Load(Reader& reader, Canvas& canvas) {
+	reader_ = &reader;
 
-	if (CheckIfPNG() == false)
-	{
-		mLog.Warning("PNG header error!");
-		return STATUS_READ_HEADER_ERROR;
+	if (CheckIfPNG() == false) {
+		log_.Warning("PNG header error!");
+		return kStatusReadHeaderError;
 	}
 
-	png_structp lPNG = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
-	if (lPNG == 0)
-	{
-		mLog.Error("PNG reader runs out of memory!");
-		return STATUS_MEMORY_ERROR;
+	png_structp _png = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+	if (_png == 0) {
+		log_.Error("PNG reader runs out of memory!");
+		return kStatusMemoryError;
 	}
 
-	png_infop lInfo = png_create_info_struct(lPNG);
-	if (lInfo == 0)
-	{
-		mLog.Error("PNG reader runs out of memory!");
-		png_destroy_read_struct(&lPNG, png_infopp_NULL, png_infopp_NULL);
-		return STATUS_MEMORY_ERROR;
+	png_infop info = png_create_info_struct(_png);
+	if (info == 0) {
+		log_.Error("PNG reader runs out of memory!");
+		png_destroy_read_struct(&_png, png_infopp_NULL, png_infopp_NULL);
+		return kStatusMemoryError;
 	}
 
-	if (setjmp(png_jmpbuf(lPNG)))
-	{
-		mLog.Error("PNG reader runs out of memory!");
-		png_destroy_read_struct(&lPNG, &lInfo, png_infopp_NULL);
-		return STATUS_MEMORY_ERROR;
+	if (setjmp(png_jmpbuf(_png))) {
+		log_.Error("PNG reader runs out of memory!");
+		png_destroy_read_struct(&_png, &info, png_infopp_NULL);
+		return kStatusMemoryError;
 	}
 
-	png_set_read_fn(lPNG, (void*)this, ReadDataCallback);
-	png_set_sig_bytes(lPNG, 8);
-	png_read_png(lPNG, lInfo, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING, 0);
+	png_set_read_fn(_png, (void*)this, ReadDataCallback);
+	png_set_sig_bytes(_png, 8);
+	png_read_png(_png, info, PNG_TRANSFORM_STRIP_16 | PNG_TRANSFORM_PACKING, 0);
 
-	const int lWidth = png_get_image_width(lPNG, lInfo);
-	const int lHeight = png_get_image_height(lPNG, lInfo);
+	const int width = png_get_image_width(_png, info);
+	const int height = png_get_image_height(_png, info);
 	int i;
-	switch(png_get_color_type(lPNG, lInfo))
-	{
-	case PNG_COLOR_TYPE_GRAY:
-		{
-			pCanvas.Reset(lWidth, lHeight, Canvas::BITDEPTH_8_BIT);
-			pCanvas.CreateBuffer();
-			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
-			const int lPixelByteSize = pCanvas.GetPixelByteSize();
-			const int lPitch = pCanvas.GetPitch();
+	switch(png_get_color_type(_png, info)) {
+	case PNG_COLOR_TYPE_GRAY: {
+			canvas.Reset(width, height, Canvas::kBitdepth8Bit);
+			canvas.CreateBuffer();
+			uint8* buffer = (uint8*)canvas.GetBuffer();
+			const int pixel_byte_size = canvas.GetPixelByteSize();
+			const int pitch = canvas.GetPitch();
 
-			Color lPalette[256];
-			for (i = 0; i < 256; i++)
-			{
-				lPalette[i].mRed   = (uint8)i;
-				lPalette[i].mGreen = (uint8)i;
-				lPalette[i].mBlue  = (uint8)i;
-				lPalette[i].mAlpha = 255;
+			Color palette[256];
+			for (i = 0; i < 256; i++) {
+				palette[i].red_   = (uint8)i;
+				palette[i].green_ = (uint8)i;
+				palette[i].blue_  = (uint8)i;
+				palette[i].alpha_ = 255;
 			}
 
-			pCanvas.SetPalette(lPalette);
+			canvas.SetPalette(palette);
 
-			uint8** lRow = png_get_rows(lPNG, lInfo);
-			for (i = 0; i < (int)lHeight; i++)
-			{
-				memcpy(&lBuffer[i * lPitch * lPixelByteSize], lRow[i], lWidth * lPixelByteSize);
+			uint8** row = png_get_rows(_png, info);
+			for (i = 0; i < (int)height; i++) {
+				memcpy(&buffer[i * pitch * pixel_byte_size], row[i], width * pixel_byte_size);
 			}
-		}
-		break;
-	case PNG_COLOR_TYPE_GRAY_ALPHA:
-		{
-			pCanvas.Reset(lWidth, lHeight, Canvas::BITDEPTH_32_BIT);
-			pCanvas.CreateBuffer();
-			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
-			const int lPixelByteSize = pCanvas.GetPixelByteSize();
-			const int lPitch = pCanvas.GetPitch();
+		} break;
+	case PNG_COLOR_TYPE_GRAY_ALPHA: {
+			canvas.Reset(width, height, Canvas::kBitdepth32Bit);
+			canvas.CreateBuffer();
+			uint8* buffer = (uint8*)canvas.GetBuffer();
+			const int pixel_byte_size = canvas.GetPixelByteSize();
+			const int pitch = canvas.GetPitch();
 
-			Color lPalette[256];
-			for (i = 0; i < 256; i++)
-			{
-				lPalette[i].mRed   = (uint8)i;
-				lPalette[i].mGreen = (uint8)i;
-				lPalette[i].mBlue  = (uint8)i;
-				lPalette[i].mAlpha = 255;
+			Color palette[256];
+			for (i = 0; i < 256; i++) {
+				palette[i].red_   = (uint8)i;
+				palette[i].green_ = (uint8)i;
+				palette[i].blue_  = (uint8)i;
+				palette[i].alpha_ = 255;
 			}
 
-			pCanvas.SetPalette(lPalette);
+			canvas.SetPalette(palette);
 
-			uint8** lRow = png_get_rows(lPNG, lInfo);
-			for (int y = 0; y < (int)lHeight; y++)
-			{
-				uint8* lDstRow = &lBuffer[y * lPitch * lPixelByteSize];
-				for (int x = 0; x < (int)lWidth; x++)
-				{
-					int lIndex = x * lPixelByteSize;
-					lDstRow[lIndex + 0] = lRow[y][x * 2 + 0];
-					lDstRow[lIndex + 1] = lRow[y][x * 2 + 0];
-					lDstRow[lIndex + 2] = lRow[y][x * 2 + 0];
-					lDstRow[lIndex + 3] = lRow[y][x * 2 + 1];
+			uint8** row = png_get_rows(_png, info);
+			for (int y = 0; y < (int)height; y++) {
+				uint8* dst_row = &buffer[y * pitch * pixel_byte_size];
+				for (int x = 0; x < (int)width; x++) {
+					int __index = x * pixel_byte_size;
+					dst_row[__index + 0] = row[y][x * 2 + 0];
+					dst_row[__index + 1] = row[y][x * 2 + 0];
+					dst_row[__index + 2] = row[y][x * 2 + 0];
+					dst_row[__index + 3] = row[y][x * 2 + 1];
 				}
 			}
-		}
-		break;
-	case PNG_COLOR_TYPE_PALETTE:
-		{
-			pCanvas.Reset(lWidth, lHeight, Canvas::BITDEPTH_8_BIT);
-			pCanvas.CreateBuffer();
-			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
-			const int lPixelByteSize = pCanvas.GetPixelByteSize();
-			const int lPitch = pCanvas.GetPitch();
+		} break;
+	case PNG_COLOR_TYPE_PALETTE: {
+			canvas.Reset(width, height, Canvas::kBitdepth8Bit);
+			canvas.CreateBuffer();
+			uint8* buffer = (uint8*)canvas.GetBuffer();
+			const int pixel_byte_size = canvas.GetPixelByteSize();
+			const int pitch = canvas.GetPitch();
 
 			int i;
-			int lNumEntries;
-			png_color* lPngPalette;
-			png_get_PLTE(lPNG, lInfo, &lPngPalette, &lNumEntries);
-			Color lPalette[256];
-			for (i = 0; i < lNumEntries; i++)
-			{
-				lPalette[i].mRed   = lPngPalette[i].red;
-				lPalette[i].mGreen = lPngPalette[i].green;
-				lPalette[i].mBlue  = lPngPalette[i].blue;
-				lPalette[i].mAlpha = 255;
+			int num_entries;
+			png_color* png_palette;
+			png_get_PLTE(_png, info, &png_palette, &num_entries);
+			Color palette[256];
+			for (i = 0; i < num_entries; i++) {
+				palette[i].red_   = png_palette[i].red;
+				palette[i].green_ = png_palette[i].green;
+				palette[i].blue_  = png_palette[i].blue;
+				palette[i].alpha_ = 255;
 			}
 
-			png_bytep lTrans;
-			png_color_16p lTransValues;
-			png_get_tRNS(lPNG, lInfo, &lTrans, &lNumEntries, &lTransValues);
-			for (i = 0; i < lNumEntries; i++)
-			{
-				// Is lTransValues[i].index == lTrans[i]?
-				lPalette[lTransValues[i].index].mAlpha = 0;
+			png_bytep trans;
+			png_color_16p trans_values;
+			png_get_tRNS(_png, info, &trans, &num_entries, &trans_values);
+			for (i = 0; i < num_entries; i++) {
+				// Is trans_values[i].index == trans[i]?
+				palette[trans_values[i].index].alpha_ = 0;
 			}
 
-			pCanvas.SetPalette(lPalette);
+			canvas.SetPalette(palette);
 
-			uint8** lRow = png_get_rows(lPNG, lInfo);
-			for (int i = 0; i < (int)lHeight; i++)
-			{
-				memcpy(&lBuffer[i * lPitch * lPixelByteSize], lRow[i], lWidth * lPixelByteSize);
+			uint8** row = png_get_rows(_png, info);
+			for (int i = 0; i < (int)height; i++) {
+				memcpy(&buffer[i * pitch * pixel_byte_size], row[i], width * pixel_byte_size);
 			}
-		}
-		break;
-	case PNG_COLOR_TYPE_RGB:
-		{
-			pCanvas.Reset(lWidth, lHeight, Canvas::BITDEPTH_24_BIT);
-			pCanvas.CreateBuffer();
-			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
-			const int lPixelByteSize = pCanvas.GetPixelByteSize();
-			const int lPitch = pCanvas.GetPitch();
+		} break;
+	case PNG_COLOR_TYPE_RGB: {
+			canvas.Reset(width, height, Canvas::kBitdepth24Bit);
+			canvas.CreateBuffer();
+			uint8* buffer = (uint8*)canvas.GetBuffer();
+			const int pixel_byte_size = canvas.GetPixelByteSize();
+			const int pitch = canvas.GetPitch();
 
-			uint8** lRow = png_get_rows(lPNG, lInfo);
-			for (i = 0; i < (int)lHeight; i++)
-			{
-				memcpy(&lBuffer[i * lPitch * lPixelByteSize], lRow[i], lWidth * lPixelByteSize);
+			uint8** row = png_get_rows(_png, info);
+			for (i = 0; i < (int)height; i++) {
+				memcpy(&buffer[i * pitch * pixel_byte_size], row[i], width * pixel_byte_size);
 			}
-		}
-		break;
-	case PNG_COLOR_TYPE_RGB_ALPHA:
-		{
-			pCanvas.Reset(lWidth, lHeight, Canvas::BITDEPTH_32_BIT);
-			pCanvas.CreateBuffer();
-			uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
-			const int lPixelByteSize = pCanvas.GetPixelByteSize();
-			const int lPitch = pCanvas.GetPitch();
+		} break;
+	case PNG_COLOR_TYPE_RGB_ALPHA: {
+			canvas.Reset(width, height, Canvas::kBitdepth32Bit);
+			canvas.CreateBuffer();
+			uint8* buffer = (uint8*)canvas.GetBuffer();
+			const int pixel_byte_size = canvas.GetPixelByteSize();
+			const int pitch = canvas.GetPitch();
 
-			uint8** lRow = png_get_rows(lPNG, lInfo);
-			for (i = 0; i < (int)lHeight; i++)
-			{
-				memcpy(&lBuffer[i * lPitch * lPixelByteSize], lRow[i], lWidth * lPixelByteSize);
+			uint8** row = png_get_rows(_png, info);
+			for (i = 0; i < (int)height; i++) {
+				memcpy(&buffer[i * pitch * pixel_byte_size], row[i], width * pixel_byte_size);
 			}
-		}
-		break;
+		} break;
 	default:
-		mLog.Error("PNG is of unknown type!");
-		png_destroy_read_struct(&lPNG, &lInfo, 0);
-		return STATUS_READ_INFO_ERROR;
+		log_.Error("PNG is of unknown type!");
+		png_destroy_read_struct(&_png, &info, 0);
+		return kStatusReadInfoError;
 	}
 
-	png_destroy_read_struct(&lPNG, &lInfo, 0);
+	png_destroy_read_struct(&_png, &info, 0);
 
-	pCanvas.SwapRGBOrder();
+	canvas.SwapRGBOrder();
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-PngLoader::Status PngLoader::Save(Writer& pWriter, const Canvas& pCanvas)
-{
-	mWriter = &pWriter;
+PngLoader::Status PngLoader::Save(Writer& writer, const Canvas& canvas) {
+	writer_ = &writer;
 
-	png_structp lPNG = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+	png_structp _png = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
 
-	if (lPNG == 0)
-	{
-		return STATUS_MEMORY_ERROR;
+	if (_png == 0) {
+		return kStatusMemoryError;
 	}
 
-	png_infop lInfo = png_create_info_struct(lPNG);
+	png_infop info = png_create_info_struct(_png);
 
-	if (lInfo == 0)
-	{
-		png_destroy_write_struct(&lPNG, 0);
-		return STATUS_MEMORY_ERROR;
+	if (info == 0) {
+		png_destroy_write_struct(&_png, 0);
+		return kStatusMemoryError;
 	}
 
-	if (setjmp(png_jmpbuf(lPNG)))
-	{
-		png_destroy_write_struct(&lPNG, &lInfo);
-		return STATUS_MEMORY_ERROR;
+	if (setjmp(png_jmpbuf(_png))) {
+		png_destroy_write_struct(&_png, &info);
+		return kStatusMemoryError;
 	}
 
-	png_set_write_fn(lPNG, (void*)this, WriteDataCallback, FlushCallback);
+	png_set_write_fn(_png, (void*)this, WriteDataCallback, FlushCallback);
 
 	// Copy the image and convert it to an appropriate bit depth.
-	Canvas lImage(pCanvas, true);
-	int lColorType = 0;
-	int lBitDepth = 0;
-	switch(lImage.GetBitDepth())
-	{
-	case Canvas::BITDEPTH_8_BIT:
-		lColorType = PNG_COLOR_TYPE_PALETTE;
-		lBitDepth = 8;
+	Canvas image(canvas, true);
+	int color_type = 0;
+	int bit_depth = 0;
+	switch(image.GetBitDepth()) {
+	case Canvas::kBitdepth8Bit:
+		color_type = PNG_COLOR_TYPE_PALETTE;
+		bit_depth = 8;
 		break;
-	case Canvas::BITDEPTH_15_BIT:
-	case Canvas::BITDEPTH_16_BIT:
-		lImage.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
-	case Canvas::BITDEPTH_24_BIT:
-		lColorType = PNG_COLOR_TYPE_RGB;
-		lBitDepth = 8;
+	case Canvas::kBitdepth15Bit:
+	case Canvas::kBitdepth16Bit:
+		image.ConvertBitDepth(Canvas::kBitdepth24Bit);
+	case Canvas::kBitdepth24Bit:
+		color_type = PNG_COLOR_TYPE_RGB;
+		bit_depth = 8;
 		break;
-	case Canvas::BITDEPTH_32_BIT:
-		lColorType = PNG_COLOR_TYPE_RGBA;
-		lBitDepth = 8;
+	case Canvas::kBitdepth32Bit:
+		color_type = PNG_COLOR_TYPE_RGBA;
+		bit_depth = 8;
 		break;
-	case Canvas::BITDEPTH_32_BIT_PER_CHANNEL:
-		lImage.ConvertBitDepth(Canvas::BITDEPTH_16_BIT_PER_CHANNEL);
-	case Canvas::BITDEPTH_16_BIT_PER_CHANNEL:
-		lColorType = PNG_COLOR_TYPE_RGB;
-		lBitDepth = 16;
+	case Canvas::kBitdepth32BitPerChannel:
+		image.ConvertBitDepth(Canvas::kBitdepth16BitPerChannel);
+	case Canvas::kBitdepth16BitPerChannel:
+		color_type = PNG_COLOR_TYPE_RGB;
+		bit_depth = 16;
 		break;
 	}
 
 	// Set image header.
-	png_set_IHDR(lPNG, lInfo, 
-				 lImage.GetWidth(), lImage.GetHeight(), 
-				 lBitDepth,
-				 lColorType,
+	png_set_IHDR(_png, info,
+				 image.GetWidth(), image.GetHeight(),
+				 bit_depth,
+				 color_type,
 				 PNG_INTERLACE_NONE,
-				 PNG_COMPRESSION_TYPE_BASE, 
+				 PNG_COMPRESSION_TYPE_BASE,
 				 PNG_FILTER_TYPE_BASE);
 
 	// Set palette if needed.
-	png_colorp lPalette = 0;
-	if (lImage.GetBitDepth() == Canvas::BITDEPTH_8_BIT)
-	{
-		lPalette = (png_colorp)png_malloc(lPNG, PNG_MAX_PALETTE_LENGTH * png_sizeof(png_color));
+	png_colorp palette = 0;
+	if (image.GetBitDepth() == Canvas::kBitdepth8Bit) {
+		palette = (png_colorp)png_malloc(_png, PNG_MAX_PALETTE_LENGTH * png_sizeof(png_color));
 
-		const Color* lSrcPlt = lImage.GetPalette();
+		const Color* src_plt = image.GetPalette();
 		int i;
-		for (i = 0; i < 256 && i < PNG_MAX_PALETTE_LENGTH; i++)
-		{
-		   lPalette[i].red   = lSrcPlt[i].mRed;
-		   lPalette[i].green = lSrcPlt[i].mGreen;
-		   lPalette[i].blue  = lSrcPlt[i].mBlue;
+		for (i = 0; i < 256 && i < PNG_MAX_PALETTE_LENGTH; i++) {
+		   palette[i].red   = src_plt[i].red_;
+		   palette[i].green = src_plt[i].green_;
+		   palette[i].blue  = src_plt[i].blue_;
 		}
 
-		png_set_PLTE(lPNG, lInfo, lPalette, PNG_MAX_PALETTE_LENGTH);
+		png_set_PLTE(_png, info, palette, PNG_MAX_PALETTE_LENGTH);
 	}
 
-	png_write_info(lPNG, lInfo);
+	png_write_info(_png, info);
 
-	if (Endian::GetSystemEndian() == Endian::TYPE_LITTLE_ENDIAN)
-	{
+	if (Endian::GetSystemEndian() == Endian::kTypeLittleEndian) {
 		// The byte order must be big endian.
-		png_set_swap(lPNG);
+		png_set_swap(_png);
 	}
 
 	int i;
-	png_bytep* lRow = new png_bytep[lImage.GetHeight()];
-	for (i = 0; i < (int)lImage.GetHeight(); i++)
-	{
-		lRow[i] = &((png_bytep)lImage.GetBuffer())[i * lImage.GetPitch() * lImage.GetPixelByteSize()];
+	png_bytep* row = new png_bytep[image.GetHeight()];
+	for (i = 0; i < (int)image.GetHeight(); i++) {
+		row[i] = &((png_bytep)image.GetBuffer())[i * image.GetPitch() * image.GetPixelByteSize()];
 	}
 
-	png_write_image(lPNG, lRow);
-	png_write_end(lPNG, lInfo);
+	png_write_image(_png, row);
+	png_write_end(_png, info);
 
-	delete[] lRow;
+	delete[] row;
 
-	if (lPalette != 0)
-	{
-		png_free(lPNG, lPalette);
+	if (palette != 0) {
+		png_free(_png, palette);
 	}
 
-	png_destroy_write_struct(&lPNG, &lInfo);
+	png_destroy_write_struct(&_png, &info);
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-bool PngLoader::CheckIfPNG()
-{
-	uint8 lBuffer[8];
-	if (mReader->ReadData(lBuffer, 8) != IO_OK)
-	{
+bool PngLoader::CheckIfPNG() {
+	uint8 buffer[8];
+	if (reader_->ReadData(buffer, 8) != kIoOk) {
 		return false;
 	}
 
-	return (png_sig_cmp(lBuffer, (png_size_t)0, 8) == 0);
+	return (png_sig_cmp(buffer, (png_size_t)0, 8) == 0);
 }
 
-void PngLoader::ReadDataCallback(png_structp pPNG, png_bytep pData, png_size_t pLength)
-{
-    PngLoader* lThis = (PngLoader*)png_get_io_ptr(pPNG);
-	lThis->mReader->ReadData(pData, (unsigned)pLength);
+void PngLoader::ReadDataCallback(png_structp png, png_bytep data, png_size_t length) {
+    PngLoader* value = (PngLoader*)png_get_io_ptr(png);
+	value->reader_->ReadData(data, (unsigned)length);
 }
 
-void PngLoader::WriteDataCallback(png_structp pPNG, png_bytep pData, png_size_t pLength)
-{
-    PngLoader* lThis = (PngLoader*)png_get_io_ptr(pPNG);
-	lThis->mWriter->WriteData(pData, (unsigned)pLength);
+void PngLoader::WriteDataCallback(png_structp png, png_bytep data, png_size_t length) {
+    PngLoader* value = (PngLoader*)png_get_io_ptr(png);
+	value->writer_->WriteData(data, (unsigned)length);
 }
 
-void PngLoader::FlushCallback(png_structp /*pPNG*/)
-{
+void PngLoader::FlushCallback(png_structp /*png*/) {
 }
 
 
 
-loginstance(UI_GFX_2D, PngLoader);
+loginstance(kUiGfx2D, PngLoader);
 
 
 

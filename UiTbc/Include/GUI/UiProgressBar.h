@@ -6,76 +6,70 @@
 
 #pragma once
 
-#include "UiWindow.h"
-#include "../../../Lepra/Include/ProgressCallback.h"
+#include "uiwindow.h"
+#include "../../../lepra/include/progresscallback.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-class ProgressBar: public Window, public ProgressCallback
-{
+class ProgressBar: public Window, public ProgressCallback {
 	typedef Window Parent;
 public:
 
-	enum Style
-	{
-		STYLE_NORMAL = 0,
-		STYLE_BOXES,
+	enum Style {
+		kStyleNormal = 0,
+		kStyleBoxes,
 	};
 
 
-	ProgressBar(Style pStyle = STYLE_NORMAL,
-				const Color& pBodyColor = Color(192, 192, 192),
-				const Color& pProgressColorLeft  = Color(0, 0, 255),
-				const Color& pProgressColorRight = Color(0, 0, 255));
+	ProgressBar(Style style = kStyleNormal,
+				const Color& body_color = Color(192, 192, 192),
+				const Color& progress_color_left  = Color(0, 0, 255),
+				const Color& progress_color_right = Color(0, 0, 255));
 
-	ProgressBar(Style pStyle,
-				Painter::ImageID pBackgroundImageID,
-				Painter::ImageID pProgressImageID);
+	ProgressBar(Style style,
+				Painter::ImageID background_image_id,
+				Painter::ImageID progress_image_id);
 
 	inline Style GetStyle();
 
 	inline int GetBoxSize();
-	inline void SetBoxSize(int pBoxSize);
+	inline void SetBoxSize(int box_size);
 
-	virtual void   SetProgressMax(int pMax);
+	virtual void   SetProgressMax(int max);
 	virtual int  GetProgressMax();
-	virtual void   SetProgressPos(int pPos);
+	virtual void   SetProgressPos(int pos);
 	virtual int  GetProgressPos();
 	virtual int  Step();
-	virtual int  Step(int pSteps);
+	virtual int  Step(int steps);
 
-	virtual void Repaint(Painter* pPainter);
+	virtual void Repaint(Painter* painter);
 
 protected:
 private:
 
-	Style mStyle;
-	int mBoxSize;
-	int mMax;
-	int mPos;
+	Style style_;
+	int box_size_;
+	int max_;
+	int pos_;
 
-	bool mUserDefinedGfx;
+	bool user_defined_gfx_;
 
-	Color mProgressColorLeft;
-	Color mProgressColorRight;
+	Color progress_color_left_;
+	Color progress_color_right_;
 
-	Painter::ImageID mProgressImageID;
+	Painter::ImageID progress_image_id_;
 };
 
-ProgressBar::Style ProgressBar::GetStyle()
-{
-	return mStyle;
+ProgressBar::Style ProgressBar::GetStyle() {
+	return style_;
 }
 
-int ProgressBar::GetBoxSize()
-{
-	return mBoxSize;
+int ProgressBar::GetBoxSize() {
+	return box_size_;
 }
 
-void ProgressBar::SetBoxSize(int pBoxSize)
-{
-	mBoxSize = pBoxSize;
+void ProgressBar::SetBoxSize(int box_size) {
+	box_size_ = box_size;
 }
 
 }

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,20 +8,18 @@
 
 
 
-#include "../../Cure/Include/UserAccount.h"
-#include "../Life.h"
+#include "../../cure/include/useraccount.h"
+#include "../life.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ContextObject;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -30,29 +28,28 @@ class GameServerManager;
 
 
 
-class ServerDelegate
-{
+class ServerDelegate {
 public:
-	ServerDelegate(GameServerManager* pGameServerManager);
+	ServerDelegate(GameServerManager* game_server_manager);
 	virtual ~ServerDelegate();
 
-	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const = 0;
+	virtual cure::ContextObject* CreateContextObject(const str& class_id) const = 0;
 
 	virtual void OnOpen() = 0;
-	virtual void OnLogin(Client* pClient) = 0;
-	virtual void OnLogout(Client* pClient) = 0;
+	virtual void OnLogin(Client* client) = 0;
+	virtual void OnLogout(Client* client) = 0;
 
-	virtual void OnSelectAvatar(Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId) = 0;
-	virtual void OnLoadAvatar(Client* pClient, Cure::ContextObject* pAvatar) = 0;
-	virtual void OnLoadObject(Cure::ContextObject* pObject) = 0;
-	virtual void OnDeleteObject(Cure::ContextObject* pObject) = 0;
+	virtual void OnSelectAvatar(Client* client, const cure::UserAccount::AvatarId& avatar_id) = 0;
+	virtual void OnLoadAvatar(Client* client, cure::ContextObject* avatar) = 0;
+	virtual void OnLoadObject(cure::ContextObject* object) = 0;
+	virtual void OnDeleteObject(cure::ContextObject* object) = 0;
 
-	virtual bool IsObjectLendable(Client* pClient, Cure::ContextObject* pObject) = 0;
+	virtual bool IsObjectLendable(Client* client, cure::ContextObject* object) = 0;
 
 	virtual void PreEndTick() = 0;
 
 protected:
-	GameServerManager* mGameServerManager;
+	GameServerManager* game_server_manager_;
 
 	logclass();
 };

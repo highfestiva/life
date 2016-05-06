@@ -1,12 +1,12 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiSoundManager.h"
+#include "uisoundmanager.h"
 #if defined(LEPRA_MAC)
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
@@ -14,21 +14,19 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #endif
-#include "../../Lepra/Include/Unordered.h"
-#include "../../Lepra/Include/String.h"
+#include "../../lepra/include/unordered.h"
+#include "../../lepra/include/string.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-class SoundManagerOpenAL: public SoundManager
-{
+class SoundManagerOpenAL: public SoundManager {
 	typedef SoundManager Parent;
 public:
-	SoundManagerOpenAL(int pMixRate);
+	SoundManagerOpenAL(int mix_rate);
 	virtual ~SoundManagerOpenAL();
 	virtual bool Open();
 	virtual void Close();
@@ -37,88 +35,88 @@ public:
 	virtual bool IsIrreparableErrorState() const;
 
 	virtual float GetMasterVolume() const;
-	virtual void SetMasterVolume(float pVolume);
+	virtual void SetMasterVolume(float volume);
 	virtual float GetMusicVolume() const;
-	virtual void SetMusicVolume(float pVolume);
+	virtual void SetMusicVolume(float volume);
 
-	virtual SoundID LoadSound2D(const str& pFileName, LoopMode LoopMode, int pPriority);
-	virtual SoundID LoadSound2D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority);
-	virtual SoundID LoadSound3D(const str& pFileName, LoopMode LoopMode, int pPriority);
-	virtual SoundID LoadSound3D(const str& pFileName, const void* pData, size_t pDataSize, LoopMode pLoopMode, int pPriority);
-	virtual SoundStream* CreateSoundStream(const str& pFileName, LoopMode pLoopMode, int pPriority);
+	virtual SoundID LoadSound2D(const str& file_name, LoopMode LoopMode, int priority);
+	virtual SoundID LoadSound2D(const str& file_name, const void* data, size_t data_size, LoopMode loop_mode, int priority);
+	virtual SoundID LoadSound3D(const str& file_name, LoopMode LoopMode, int priority);
+	virtual SoundID LoadSound3D(const str& file_name, const void* data, size_t data_size, LoopMode loop_mode, int priority);
+	virtual SoundStream* CreateSoundStream(const str& file_name, LoopMode loop_mode, int priority);
 
-	void Release(SoundID pSoundID);
+	void Release(SoundID sound_id);
 
-	double GetStreamTime(SoundID pSoundID);
+	double GetStreamTime(SoundID sound_id);
 
-	SoundInstanceID CreateSoundInstance(SoundID pSoundID);
-	void DeleteSoundInstance(SoundInstanceID pSoundIID);
+	SoundInstanceID CreateSoundInstance(SoundID sound_id);
+	void DeleteSoundInstance(SoundInstanceID sound_iid);
 
-	bool Play(SoundInstanceID pSoundIID,
-			  float pVolume,
-			  float pPitch);
+	bool Play(SoundInstanceID sound_iid,
+			  float volume,
+			  float pitch);
 
-	void Stop(SoundInstanceID pSoundIID);
+	void Stop(SoundInstanceID sound_iid);
 	void StopAll();
-	void TogglePause(SoundInstanceID pSoundIID);
+	void TogglePause(SoundInstanceID sound_iid);
 
-	bool IsPlaying(SoundInstanceID pSoundIID);
-	bool IsPaused(SoundInstanceID pSoundIID);
+	bool IsPlaying(SoundInstanceID sound_iid);
+	bool IsPaused(SoundInstanceID sound_iid);
 
-	void SetPan(SoundInstanceID pSoundIID, float pPan);
-	void SetVolume(SoundInstanceID pSoundIID, float pVolume);
-	void SetPitch(SoundInstanceID pSoundIID, float pPitch);
+	void SetPan(SoundInstanceID sound_iid, float pan);
+	void SetVolume(SoundInstanceID sound_iid, float volume);
+	void SetPitch(SoundInstanceID sound_iid, float pitch);
 
-	void SetFrequency(SoundInstanceID pSoundIID, int pFrequency);
-	int GetFrequency(SoundInstanceID pSoundIID);
+	void SetFrequency(SoundInstanceID sound_iid, int frequency);
+	int GetFrequency(SoundInstanceID sound_iid);
 
-	void SetListenerPosition(const vec3& pPos, const vec3& pVel,
-		const vec3& pUp, const vec3& pForward);
+	void SetListenerPosition(const vec3& pos, const vec3& vel,
+		const vec3& up, const vec3& forward);
 
-	void SetDopplerFactor(float pFactor);
-	void SetRollOffFactor(float pFactor);
+	void SetDopplerFactor(float factor);
+	void SetRollOffFactor(float factor);
 
-	int GetChannel(SoundInstanceID pSoundIID);
+	int GetChannel(SoundInstanceID sound_iid);
 
-	void SetChorus(SoundInstanceID pSoundIID,
-				   int pFXIndex,
-				   float pDelay,
-				   float pFeedback,
-				   float pRate,
-				   float pDepth,		// Mod amount...
-				   float pWetness);
+	void SetChorus(SoundInstanceID sound_iid,
+				   int fx_index,
+				   float delay,
+				   float feedback,
+				   float rate,
+				   float depth,		// Mod amount...
+				   float wetness);
 
-	void SetFlanger(SoundInstanceID pSoundIID,
-					int pFXIndex,
-					float pDelay,
-					float pFeedback,
-					float pRate,
-					float pDepth,		// Mod amount...
-					float pWetness);
+	void SetFlanger(SoundInstanceID sound_iid,
+					int fx_index,
+					float delay,
+					float feedback,
+					float rate,
+					float depth,		// Mod amount...
+					float wetness);
 
-	void SetCompressor(SoundInstanceID pSoundIID,
-					   int pFXIndex,
-					   float pRatio,
-					   float pThreshold,
-					   float pAttack,
-					   float pRelease);
+	void SetCompressor(SoundInstanceID sound_iid,
+					   int fx_index,
+					   float ratio,
+					   float threshold,
+					   float attack,
+					   float release);
 
-	void SetEcho(SoundInstanceID pSoundIID,
-				 int pFXIndex,
-				 float pFeedback,
-				 float pDelay,
-				 float pWetness);
+	void SetEcho(SoundInstanceID sound_iid,
+				 int fx_index,
+				 float feedback,
+				 float delay,
+				 float wetness);
 
-	void SetParamEQ(SoundInstanceID pSoundIID,
-					int pFXIndex,
-					float pCenter,
-					float pBandwidth,
-					float pGain);
+	void SetParamEQ(SoundInstanceID sound_iid,
+					int fx_index,
+					float center,
+					float bandwidth,
+					float gain);
 
-	virtual void SetFileOpener(FileOpener* pOpener);
+	virtual void SetFileOpener(FileOpener* opener);
 
 protected:
-	virtual void DoSetSoundPosition(SoundInstanceID pSoundIID, const vec3& pPos, const vec3& pVel);
+	virtual void DoSetSoundPosition(SoundInstanceID sound_iid, const vec3& pos, const vec3& vel);
 
 private:
 	struct Sample;
@@ -127,43 +125,41 @@ private:
 	Sample* GetSample(SoundID) const;
 	Source* GetSource(SoundInstanceID) const;
 
-	struct Sample
-	{
-		Sample(bool pLooping, int pPriority);
+	struct Sample {
+		Sample(bool looping, int priority);
 		~Sample();
-		bool Load(const str& pFileName);
-		bool Load(const void* pData, size_t pDataSize);
+		bool Load(const str& file_name);
+		bool Load(const void* data, size_t data_size);
 
-		ALuint mBuffer;
-		bool mIsLooping;
-		int mPriority;
-		bool mIsAmbient;
-		std::unordered_set<Source*, LEPRA_VOIDP_HASHER> mSourceList;
+		ALuint buffer_;
+		bool is_looping_;
+		int priority_;
+		bool is_ambient_;
+		std::unordered_set<Source*, LEPRA_VOIDP_HASHER> source_list_;
 	};
 
-	struct Source
-	{
+	struct Source {
 		Source();
 		~Source();
-		bool SetSample(Sample* pSample, float pRollOffFactor);
+		bool SetSample(Sample* sample, float roll_off_factor);
 
-		Sample* mSample;
-		ALuint mSid;
+		Sample* sample_;
+		ALuint sid_;
 	};
 
 	typedef std::unordered_set<Sample*, LEPRA_VOIDP_HASHER> SampleSet;
 	typedef std::unordered_set<Source*, LEPRA_VOIDP_HASHER> SourceSet;
 
-	ALCdevice* mDevice;
-	ALCcontext* mContext;
-	float mRollOffFactor;
-	float mMasterVolume;
-	float mMusicVolume;
-	int mMixRate;
-	bool mIsIrreparableErrorState;
+	ALCdevice* device_;
+	ALCcontext* context_;
+	float roll_off_factor_;
+	float master_volume_;
+	float music_volume_;
+	int mix_rate_;
+	bool is_irreparable_error_state_;
 
-	SampleSet mSampleSet;
-	SourceSet mSourceSet;
+	SampleSet sample_set_;
+	SourceSet source_set_;
 
 	logclass();
 };

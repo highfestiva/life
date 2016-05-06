@@ -1,41 +1,36 @@
 
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/TimeLogger.h"
+#include "../include/timelogger.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-TimeLogger::TimeLogger(LogDecorator* pLog, const str& pPrefix):
-	mLog(pLog),
-	mPrefix(pPrefix),
-	mTimer(false)
-{
+TimeLogger::TimeLogger(LogDecorator* log, const str& prefix):
+	log_(log),
+	prefix_(prefix),
+	timer_(false) {
 }
 
-TimeLogger::~TimeLogger()
-{
+TimeLogger::~TimeLogger() {
 	Log();
 }
 
-void TimeLogger::Transfer(const str& pPrefix)
-{
+void TimeLogger::Transfer(const str& prefix) {
 	Log();
-	mPrefix = pPrefix;
+	prefix_ = prefix;
 }
 
-void TimeLogger::Log()
-{
-	mLog->Infof((mPrefix+": %g").c_str(), mTimer.PopTimeDiff());
+void TimeLogger::Log() {
+	log_->Infof((prefix_+": %g").c_str(), timer_.PopTimeDiff());
 }
 
 

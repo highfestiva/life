@@ -5,12 +5,11 @@
 
 
 #pragma once
-#include "../UiFontManager.h"
+#include "../uifontmanager.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
@@ -18,46 +17,43 @@ class Painter;
 
 
 
-class TextComponent
-{
+class TextComponent {
 public:
-	enum IconAlignment
-	{
-		ICON_LEFT = 0,
-		ICON_CENTER,
-		ICON_RIGHT,
+	enum IconAlignment {
+		kIconLeft = 0,
+		kIconCenter,
+		kIconRight,
 	};
-	enum VAlign
-	{
-		VALIGN_TOP,
-		VALIGN_CENTER,
-		VALIGN_BOTTOM,
+	enum VAlign {
+		kValignTop,
+		kValignCenter,
+		kValignBottom,
 	};
 
 	TextComponent();
 	virtual ~TextComponent();
 
-	void SetFontColor(const Color& pTextColor);
-	void SetFontId(const FontManager::FontId& pFontId);
+	void SetFontColor(const Color& text_color);
+	void SetFontId(const FontManager::FontId& font_id);
 	FontManager::FontId GetFontId() const;
-	void ActivateFont(Painter* pPainter);
-	void DeactivateFont(Painter* pPainter);
-	void SetHorizontalMargin(int pHorizontalMargin);
-	void SetVericalAlignment(VAlign pAlignment);
+	void ActivateFont(Painter* painter);
+	void DeactivateFont(Painter* painter);
+	void SetHorizontalMargin(int horizontal_margin);
+	void SetVericalAlignment(VAlign alignment);
 
 protected:
 	virtual void ForceRepaint() = 0;
 
-	void DoPrintText(Painter* pPainter, const wstr& pText, int x, int y);
-	void PrintTextDeactivate(Painter* pPainter, const wstr& pText, int x, int y);
+	void DoPrintText(Painter* painter, const wstr& text, int x, int y);
+	void PrintTextDeactivate(Painter* painter, const wstr& text, int x, int y);
 	Color GetTextColor() const;
 	VAlign GetVAlign() const;
 
-	Color mTextColor;
-	bool mIsFontActive;
-	FontManager::FontId mFontId;
-	int mHorizontalMargin;
-	VAlign mVAlignment;
+	Color text_color_;
+	bool is_font_active_;
+	FontManager::FontId font_id_;
+	int horizontal_margin_;
+	VAlign v_alignment_;
 };
 
 

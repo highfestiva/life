@@ -6,16 +6,14 @@
 
 #pragma once
 
-#include "UiWin32DisplayManager.h"
+#include "uiwin32displaymanager.h"
 #include <D3d9.h>
 
-namespace UiLepra
-{
+namespace uilepra {
 
-class Win32DirectXDisplay : public Win32DisplayManager
-{
+class Win32DirectXDisplay : public Win32DisplayManager {
 public:
-	
+
 	Win32DirectXDisplay();
 	virtual ~Win32DirectXDisplay();
 
@@ -25,40 +23,38 @@ public:
 	virtual bool UpdateScreen();
 
 	bool IsVSyncEnabled() const;
-	bool SetVSyncEnabled(bool pEnabled);
+	bool SetVSyncEnabled(bool enabled);
 
 	inline ContextType GetContextType();
 
 	inline IDirect3DDevice9* GetD3DDevice();
 
 protected:
-	void OnResize(int pWidth, int pHeight);
+	void OnResize(int width, int height);
 	void OnMinimize();
-	void OnMaximize(int pWidth, int pHeight);
+	void OnMaximize(int width, int height);
 
 	bool InitScreen();
-	void SetFocus(bool pFocus);
+	void SetFocus(bool focus);
 
 private:
-	void Resize(int pWidth, int pHeight);
+	void Resize(int width, int height);
 	void UpdateCaption();
 
-	void InitD3DPresentParams(D3DPRESENT_PARAMETERS& pParams);
+	void InitD3DPresentParams(D3DPRESENT_PARAMETERS& params);
 
-	LPDIRECT3D9 mD3D;
-	IDirect3DDevice9* mD3DDevice;
+	LPDIRECT3D9 d3_d_;
+	IDirect3DDevice9* d3_d_device_;
 
-	bool mVSyncEnabled;
+	bool v_sync_enabled_;
 };
 
-DisplayManager::ContextType Win32DirectXDisplay::GetContextType()
-{
-	return DisplayManager::DIRECTX_CONTEXT;
+DisplayManager::ContextType Win32DirectXDisplay::GetContextType() {
+	return DisplayManager::kDirectxContext;
 }
 
-IDirect3DDevice9* Win32DirectXDisplay::GetD3DDevice()
-{
-	return mD3DDevice;
+IDirect3DDevice9* Win32DirectXDisplay::GetD3DDevice() {
+	return d3_d_device_;
 }
 
 }

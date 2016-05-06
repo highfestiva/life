@@ -1,29 +1,27 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Lepra/Include/Graphics2D.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../../Lepra/Include/Vector2D.h"
-#include "../../Tbc/Include/GeometryBase.h"
-#include "UiTbc.h"
+#include "../../lepra/include/graphics2d.h"
+#include "../../lepra/include/vector3d.h"
+#include "../../lepra/include/vector2d.h"
+#include "../../tbc/include/geometrybase.h"
+#include "uitbc.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
 // If a billboard uses texture variations, they should be layed out equidistant horizontally on the same map.
-class BillboardGeometry: public Tbc::GeometryBase
-{
+class BillboardGeometry: public tbc::GeometryBase {
 public:
-	BillboardGeometry(float pAspectRatio, unsigned pUVSetCount);
+	BillboardGeometry(float aspect_ratio, unsigned uv_set_count);
 	virtual ~BillboardGeometry();
 
 	virtual unsigned GetMaxVertexCount() const;
@@ -34,20 +32,20 @@ public:
 	virtual unsigned GetUVSetCount() const;
 
 	virtual float* GetVertexData() const;
-	void SetVertexData(const float pVertexData[12]);
-	virtual float* GetUVData(unsigned pUVSet = 0) const;
+	void SetVertexData(const float vertex_data[12]);
+	virtual float* GetUVData(unsigned uv_set = 0) const;
 	virtual vtx_idx_t* GetIndexData() const;
 	virtual uint8* GetColorData() const;
 
-	// Overloads from Tbc::GeometryBase.
+	// Overloads from tbc::GeometryBase.
 	GeometryVolatility GetGeometryVolatility() const;
-	void SetGeometryVolatility(GeometryVolatility pVolatility);
+	void SetGeometryVolatility(GeometryVolatility volatility);
 
 private:
-	float mVertexData[12];	// Quadruplets of (x, y, z).
-	float* mUVData;		// Doublets of (u, v).
-	unsigned mUVSetCount;
-	vtx_idx_t mIndexData[4];
+	float vertex_data_[12];	// Quadruplets of (x, y, z).
+	float* uv_data_;		// Doublets of (u, v).
+	unsigned uv_set_count_;
+	vtx_idx_t index_data_[4];
 };
 
 

@@ -1,94 +1,85 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "BombPlane.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/Health.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/TimeManager.h"
-#include "../../Lepra/Include/Random.h"
-#include "../../Life/Launcher.h"
-#include "../../Life/ProjectileUtil.h"
+#include "bombplane.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/health.h"
+#include "../../cure/include/gamemanager.h"
+#include "../../cure/include/timemanager.h"
+#include "../../lepra/include/random.h"
+#include "../../life/launcher.h"
+#include "../../life/projectileutil.h"
 
 #define BOMBING_RADIUS 80.0f
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-BombPlane::BombPlane(Cure::ResourceManager* pResourceManager, const str& pClassId, Life::Launcher* pLauncher, const vec3& pTarget):
-	Parent(pResourceManager, pClassId),
-	mLauncher(pLauncher),
-	mTarget(pTarget),
-	mLastBombTick(0),
-	mIsDetonated(false)
-{
-	Cure::Health::Set(this, 0.1f);	// Partially excempted in explosion logic, so definitely higher in practice.
+BombPlane::BombPlane(cure::ResourceManager* resource_manager, const str& class_id, life::Launcher* launcher, const vec3& target):
+	Parent(resource_manager, class_id),
+	launcher_(launcher),
+	target_(target),
+	last_bomb_tick_(0),
+	is_detonated_(false) {
+	cure::Health::Set(this, 0.1f);	// Partially excempted in explosion logic, so definitely higher in practice.
 
 	// Randomize so bombers won't have perfect (robotic) synchronization.
-	mBombingRadiusSquared = BOMBING_RADIUS*BOMBING_RADIUS * Random::Uniform(0.6f, 1.7f);
-	mDropInterval = Random::Uniform(0.5f, 0.8f);
+	bombing_radius_squared_ = BOMBING_RADIUS*BOMBING_RADIUS * Random::Uniform(0.6f, 1.7f);
+	drop_interval_ = Random::Uniform(0.5f, 0.8f);
 }
 
-BombPlane::~BombPlane()
-{
+BombPlane::~BombPlane() {
 }
 
 
 
-void BombPlane::OnLoaded()
-{
+void BombPlane::OnLoaded() {
 	SetEnginePower(0, 1.0f);	// Jet.
 	SetEnginePower(4, 1.0f);	// Hoover.
 
 	Parent::OnLoaded();
 }
 
-void BombPlane::OnTick()
-{
-	const float lHealth = Cure::Health::Get(this);
-	if (lHealth <= 0)
-	{
-		Life::ProjectileUtil::Detonate(this, &mIsDetonated, mLauncher, GetPosition(), GetVelocity(), vec3(), 1, 5);
+void BombPlane::OnTick() {
+	const float health = cure::Health::Get(this);
+	if (health <= 0) {
+		life::ProjectileUtil::Detonate(this, &is_detonated_, launcher_, GetPosition(), GetVelocity(), vec3(), 1, 5);
 	}
 
-	const Cure::TimeManager* lTimeManager = GetManager()->GetGameManager()->GetTimeManager();
-	if (lTimeManager->ConvertPhysicsFramesToSeconds(lTimeManager->GetCurrentPhysicsFrameDelta(mLastBombTick)) < mDropInterval)
-	{
+	const cure::TimeManager* time_manager = GetManager()->GetGameManager()->GetTimeManager();
+	if (time_manager->ConvertPhysicsFramesToSeconds(time_manager->GetCurrentPhysicsFrameDelta(last_bomb_tick_)) < drop_interval_) {
 		return;
 	}
 
-	const vec3 lPosition = GetPosition();
-	const vec3 lVelocity = GetVelocity();
+	const vec3 position = GetPosition();
+	const vec3 velocity = GetVelocity();
 
 	// g*t^2/2 - v0*t + h = 0
 	const float g2 = +9.82f/2;	// Positive.
-	const float v0 = 0;//lVelocity.z;
-	const float h = mTarget.z - lPosition.z;	// Negative.
+	const float v0 = 0;//velocity.z;
+	const float h = target_.z - position.z;	// Negative.
 	float t1;
 	float t2;
-	if (Math::CalculateRoot(g2, v0, h, t1, t2))
-	{
-		vec3 lHorizontalProjectedTarget(mTarget.x, mTarget.y, lPosition.z);
-		const float d = lHorizontalProjectedTarget.GetDistanceSquared(lPosition + lVelocity*t1);
-		if (d < mBombingRadiusSquared)
-		{
-			mLastBombTick = lTimeManager->GetCurrentPhysicsFrame();
-			mLauncher->Shoot(this, -10);
+	if (Math::CalculateRoot(g2, v0, h, t1, t2)) {
+		vec3 horizontal_projected_target(target_.x, target_.y, position.z);
+		const float d = horizontal_projected_target.GetDistanceSquared(position + velocity*t1);
+		if (d < bombing_radius_squared_) {
+			last_bomb_tick_ = time_manager->GetCurrentPhysicsFrame();
+			launcher_->Shoot(this, -10);
 		}
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, BombPlane);
+loginstance(kGameContextCpp, BombPlane);
 
 
 

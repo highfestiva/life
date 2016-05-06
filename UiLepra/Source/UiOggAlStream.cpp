@@ -4,225 +4,189 @@
 
 
 #include "pch.h"
-#include "../Include/UiOggAlStream.h"
+#include "../include/uioggalstream.h"
 #include <ogg/ogg.h>
-#include "../Include/UiSoundManager.h"
+#include "../include/uisoundmanager.h"
 
 #ifdef LEPRA_MSVC
 #pragma warning(disable: 4996)	// fopen unsafe.
 #endif // Visual
-#define BUFFER_SIZE	(4096 * 8)
+#define kBufferSize	(4096 * 8)
 #define AL_CHECK()	if (alGetError() != AL_NO_ERROR) return false;
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-OggAlStream::OggAlStream(SoundManager* pSoundManager, const str& pFilename, bool pLoop):
-	Parent(pSoundManager)
-{
-	mIsLooping = pLoop;
-	Open(pFilename);
+OggAlStream::OggAlStream(SoundManager* sound_manager, const str& filename, bool loop):
+	Parent(sound_manager) {
+	is_looping_ = loop;
+	Open(filename);
 }
 
-OggAlStream::~OggAlStream()
-{
+OggAlStream::~OggAlStream() {
 	Release();
 }
 
-bool OggAlStream::Playback()
-{
-	if (IsPlaying())
-	{
+bool OggAlStream::Playback() {
+	if (IsPlaying()) {
 		return true;
 	}
 
-	if (!Stream(mAlBuffers[0]) || !Stream(mAlBuffers[1]))
-	{
+	if (!Stream(al_buffers_[0]) || !Stream(al_buffers_[1])) {
 		return false;
 	}
 
-	alSourceQueueBuffers(mAlSource, 2, mAlBuffers);
-	alSourcef(mAlSource, AL_GAIN, mVolume * mSoundManager->GetMusicVolume());
-	alSourcePlay(mAlSource);
+	alSourceQueueBuffers(al_source_, 2, al_buffers_);
+	alSourcef(al_source_, AL_GAIN, volume_ * sound_manager_->GetMusicVolume());
+	alSourcePlay(al_source_);
 	return true;
 }
 
-bool OggAlStream::Rewind()
-{
-	return (ov_raw_seek(&mOggStream, 0) == 0);
+bool OggAlStream::Rewind() {
+	return (ov_raw_seek(&ogg_stream_, 0) == 0);
 }
 
-bool OggAlStream::IsPlaying() const
-{
+bool OggAlStream::IsPlaying() const {
 	ALenum state;
-	alGetSourcei(mAlSource, AL_SOURCE_STATE, &state);
+	alGetSourcei(al_source_, AL_SOURCE_STATE, &state);
 	return (state == AL_PLAYING);
 }
 
-bool OggAlStream::Stop()
-{
+bool OggAlStream::Stop() {
 	Pause();
 	return Rewind();
 }
 
-bool OggAlStream::Pause()
-{
-	alSourceStop(mAlSource);
+bool OggAlStream::Pause() {
+	alSourceStop(al_source_);
 	return Clear();
 }
 
-bool OggAlStream::Update()
-{
-	bool lIsActive = true;
-	int lProcessedBufferCount;
-	alGetSourcei(mAlSource, AL_BUFFERS_PROCESSED, &lProcessedBufferCount);
-	alSourcef(mAlSource, AL_GAIN, mVolume * mSoundManager->GetMusicVolume());
+bool OggAlStream::Update() {
+	bool is_active = true;
+	int processed_buffer_count;
+	alGetSourcei(al_source_, AL_BUFFERS_PROCESSED, &processed_buffer_count);
+	alSourcef(al_source_, AL_GAIN, volume_ * sound_manager_->GetMusicVolume());
 	AL_CHECK();
-	while (lProcessedBufferCount--)
-	{
+	while (processed_buffer_count--) {
 		ALuint buffer;
-		alSourceUnqueueBuffers(mAlSource, 1, &buffer);
+		alSourceUnqueueBuffers(al_source_, 1, &buffer);
 		AL_CHECK();
 
-		lIsActive = Stream(buffer);
+		is_active = Stream(buffer);
 
-		alSourceQueueBuffers(mAlSource, 1, &buffer);
+		alSourceQueueBuffers(al_source_, 1, &buffer);
 		AL_CHECK();
 	}
-	if (!lIsActive)
-	{
-		if (mIsLooping)
-		{
+	if (!is_active) {
+		if (is_looping_) {
 			Clear();
-			lIsActive = Rewind();
+			is_active = Rewind();
 			TimeoutAutoResume();
-		}
-		else
-		{
+		} else {
 			Stop();
 		}
-	}
-	else
-	{
+	} else {
 		TimeoutAutoResume();
 	}
-	return lIsActive;
+	return is_active;
 }
 
-bool OggAlStream::Open(const str& pFilename)
-{
+bool OggAlStream::Open(const str& filename) {
 	Release();
 
-	if ((mOggFile = fopen(pFilename.c_str(), "rb")) == 0)
-	{
-		return mIsOpen;
+	if ((ogg_file_ = fopen(filename.c_str(), "rb")) == 0) {
+		return is_open_;
 	}
 
-	int lResult;
-	if ((lResult = ov_open(mOggFile, &mOggStream, NULL, 0)) < 0)	// Ogg/Vorbis takes ownership of file.
-	{
-		fclose(mOggFile);
-		mOggFile = 0;
-		return mIsOpen;
+	int result;
+	if ((result = ov_open(ogg_file_, &ogg_stream_, NULL, 0)) < 0) {	// Ogg/Vorbis takes ownership of file.
+		fclose(ogg_file_);
+		ogg_file_ = 0;
+		return is_open_;
 	}
 
-	mVorbisInfo = ov_info(&mOggStream, -1);
+	vorbis_info_ = ov_info(&ogg_stream_, -1);
 
-	mAlFormat = (mVorbisInfo->channels == 1)? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+	al_format_ = (vorbis_info_->channels == 1)? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
 
-	alGenBuffers(2, mAlBuffers);
+	alGenBuffers(2, al_buffers_);
 	AL_CHECK();
-	alGenSources(1, &mAlSource);
+	alGenSources(1, &al_source_);
 	AL_CHECK();
 
-	alSource3f(mAlSource, AL_POSITION,		0.0, 0.0, 0.0);
-	alSource3f(mAlSource, AL_VELOCITY,		0.0, 0.0, 0.0);
-	alSource3f(mAlSource, AL_DIRECTION,		0.0, 0.0, 0.0);
-	alSourcef (mAlSource, AL_ROLLOFF_FACTOR,	0.0);
-	alSourcei (mAlSource, AL_SOURCE_RELATIVE,	AL_TRUE);
-	mIsOpen = true;
-	return mIsOpen;
+	alSource3f(al_source_, AL_POSITION,		0.0, 0.0, 0.0);
+	alSource3f(al_source_, AL_VELOCITY,		0.0, 0.0, 0.0);
+	alSource3f(al_source_, AL_DIRECTION,		0.0, 0.0, 0.0);
+	alSourcef (al_source_, AL_ROLLOFF_FACTOR,	0.0);
+	alSourcei (al_source_, AL_SOURCE_RELATIVE,	AL_TRUE);
+	is_open_ = true;
+	return is_open_;
 }
 
-bool OggAlStream::Release()
-{
-	if (!mIsOpen)
-	{
+bool OggAlStream::Release() {
+	if (!is_open_) {
 		return false;
 	}
 
-	alSourceStop(mAlSource);
-	if (!Clear())
-	{
+	alSourceStop(al_source_);
+	if (!Clear()) {
 		return false;
 	}
 
-	alDeleteSources(1, &mAlSource);
+	alDeleteSources(1, &al_source_);
 	AL_CHECK();
-	alDeleteBuffers(1, mAlBuffers);
+	alDeleteBuffers(1, al_buffers_);
 	AL_CHECK();
 
-	ov_clear(&mOggStream);
-	mIsOpen = false;
+	ov_clear(&ogg_stream_);
+	is_open_ = false;
 	return true;
 }
 
-bool OggAlStream::Stream(ALuint buffer)
-{
-	char lData[BUFFER_SIZE];
-	int lSize = 0;
-	while (lSize < BUFFER_SIZE)
-	{
-		int lSection;
-		int lResult = ov_read(&mOggStream, lData + lSize, BUFFER_SIZE - lSize, 0, 2, 1, & lSection);
-		if (lResult > 0)
-		{
-			lSize += lResult;
-		}
-		else if (lResult < 0)
-		{
+bool OggAlStream::Stream(ALuint buffer) {
+	char data[kBufferSize];
+	int size = 0;
+	while (size < kBufferSize) {
+		int section;
+		int result = ov_read(&ogg_stream_, data + size, kBufferSize - size, 0, 2, 1, & section);
+		if (result > 0) {
+			size += result;
+		} else if (result < 0) {
 			return false;
-		}
-		else
-		{
+		} else {
 			break;
 		}
 	}
 
-	if (lSize == 0)
-	{
+	if (size == 0) {
 		return false;
 	}
 
-	alBufferData(buffer, mAlFormat, lData, lSize, mVorbisInfo->rate);
+	alBufferData(buffer, al_format_, data, size, vorbis_info_->rate);
 	AL_CHECK();
 	return true;
 }
 
-bool OggAlStream::Clear()
-{
-	int lQueuedBufferCount = 0;
-	alGetSourcei(mAlSource, AL_BUFFERS_QUEUED, &lQueuedBufferCount);
-	while (lQueuedBufferCount--)
-	{
+bool OggAlStream::Clear() {
+	int queued_buffer_count = 0;
+	alGetSourcei(al_source_, AL_BUFFERS_QUEUED, &queued_buffer_count);
+	while (queued_buffer_count--) {
 		ALuint buffer;
-		alSourceUnqueueBuffers(mAlSource, 1, &buffer);
+		alSourceUnqueueBuffers(al_source_, 1, &buffer);
 		AL_CHECK();
 	}
 	return true;
 }
 
-void OggAlStream::TimeoutAutoResume()
-{
+void OggAlStream::TimeoutAutoResume() {
 	ALenum state;
-	alGetSourcei(mAlSource, AL_SOURCE_STATE, &state);
-	if (state == AL_STOPPED)
-	{
-		alSourcePlay(mAlSource);
+	alGetSourcei(al_source_, AL_SOURCE_STATE, &state);
+	if (state == AL_STOPPED) {
+		alSourcePlay(al_source_);
 	}
 }
 

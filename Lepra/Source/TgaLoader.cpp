@@ -1,1186 +1,966 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/TgaLoader.h"
-#include "../Include/Graphics2D.h"
-#include "../Include/Canvas.h"
-#include "../Include/DiskFile.h"
-#include "../Include/MetaFile.h"
-#include "../Include/MemFile.h"
-#include "../Include/ArchiveFile.h"
+#include "../include/tgaloader.h"
+#include "../include/graphics2d.h"
+#include "../include/canvas.h"
+#include "../include/diskfile.h"
+#include "../include/metafile.h"
+#include "../include/memfile.h"
+#include "../include/archivefile.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-TgaLoader::Status TgaLoader::Load(const str& pFileName, Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	MetaFile lFile;
-	if (lFile.Open(pFileName, MetaFile::READ_ONLY, false, Endian::TYPE_LITTLE_ENDIAN) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+TgaLoader::Status TgaLoader::Load(const str& file_name, Canvas& canvas) {
+	Status status = kStatusSuccess;
+	MetaFile _file;
+	if (_file.Open(file_name, MetaFile::kReadOnly, false, Endian::kTypeLittleEndian) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		lStatus = Load(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		status = Load(_file, canvas);
+		_file.Close();
 	}
-	return lStatus;
+	return status;
 }
 
-TgaLoader::Status TgaLoader::Save(const str& pFileName, const Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	DiskFile lFile;
-	if (lFile.Open(pFileName, DiskFile::MODE_WRITE, false, Endian::TYPE_LITTLE_ENDIAN) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+TgaLoader::Status TgaLoader::Save(const str& file_name, const Canvas& canvas) {
+	Status status = kStatusSuccess;
+	DiskFile _file;
+	if (_file.Open(file_name, DiskFile::kModeWrite, false, Endian::kTypeLittleEndian) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		lStatus = Save(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		status = Save(_file, canvas);
+		_file.Close();
 	}
-	return lStatus;
+	return status;
 }
 
-TgaLoader::Status TgaLoader::Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	ArchiveFile lFile(pArchiveName);
-	if (lFile.Open(pFileName, ArchiveFile::READ_ONLY, Endian::TYPE_LITTLE_ENDIAN) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+TgaLoader::Status TgaLoader::Load(const str& archive_name, const str& file_name, Canvas& canvas) {
+	Status status = kStatusSuccess;
+	ArchiveFile _file(archive_name);
+	if (_file.Open(file_name, ArchiveFile::kReadOnly, Endian::kTypeLittleEndian) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		lStatus = Load(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		status = Load(_file, canvas);
+		_file.Close();
 	}
-	return lStatus;
+	return status;
 }
 
-TgaLoader::Status TgaLoader::Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	ArchiveFile lFile(pArchiveName);
-	if (lFile.Open(pFileName, ArchiveFile::WRITE_ONLY, Endian::TYPE_LITTLE_ENDIAN) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+TgaLoader::Status TgaLoader::Save(const str& archive_name, const str& file_name, const Canvas& canvas) {
+	Status status = kStatusSuccess;
+	ArchiveFile _file(archive_name);
+	if (_file.Open(file_name, ArchiveFile::kWriteOnly, Endian::kTypeLittleEndian) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		lStatus = Save(lFile, pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		status = Save(_file, canvas);
+		_file.Close();
 	}
-	return lStatus;
+	return status;
 }
 
-TgaLoader::Status TgaLoader::Load(Reader& pReader, Canvas& pCanvas)
-{
-	int64 lFileSize = pReader.GetAvailable();
-	if (lFileSize <= 0)
-	{
-		return STATUS_UNKNOWNFILESIZE_ERROR;
+TgaLoader::Status TgaLoader::Load(Reader& reader, Canvas& canvas) {
+	int64 file_size = reader.GetAvailable();
+	if (file_size <= 0) {
+		return kStatusUnknownfilesizeError;
 	}
 
-	enum
-	{
-		BUFFER_SIZE = 512,
+	enum {
+		kBufferSize = 512,
 	};
 
 	//
 	// Read the entire file into memory.
 	//
-	MemFile lMemFile;
+	MemFile mem_file;
 
-	uint8* lBuffer[BUFFER_SIZE];
-	unsigned lNumChunks = (unsigned)lFileSize / BUFFER_SIZE;
-	unsigned lRest = (unsigned)lFileSize % BUFFER_SIZE;
+	uint8* buffer[kBufferSize];
+	unsigned num_chunks = (unsigned)file_size / kBufferSize;
+	unsigned rest = (unsigned)file_size % kBufferSize;
 	unsigned i;
 
-	for (i = 0; i < lNumChunks; i++)
-	{
-		if (pReader.ReadData(lBuffer, BUFFER_SIZE) != IO_OK)
-			return STATUS_READSTREAM_ERROR;
-		lMemFile.WriteData(lBuffer, BUFFER_SIZE);
+	for (i = 0; i < num_chunks; i++) {
+		if (reader.ReadData(buffer, kBufferSize) != kIoOk)
+			return kStatusReadstreamError;
+		mem_file.WriteData(buffer, kBufferSize);
 	}
 
-	if (lRest > 0)
-	{
-		if (pReader.ReadData(lBuffer, lRest) != IO_OK)
-			return STATUS_READSTREAM_ERROR;
-		lMemFile.WriteData(lBuffer, lRest);
+	if (rest > 0) {
+		if (reader.ReadData(buffer, rest) != kIoOk)
+			return kStatusReadstreamError;
+		mem_file.WriteData(buffer, rest);
 	}
 
 	// Now actually load the file.
-	return Load(lMemFile, pCanvas);
+	return Load(mem_file, canvas);
 }
 
-TgaLoader::Status TgaLoader::Load(File& pFile, Canvas& pCanvas)
-{
+TgaLoader::Status TgaLoader::Load(File& file, Canvas& canvas) {
 	// Determine the file format by reading the file footer.
-	FileFooter lFooter;
-	pFile.SeekEnd(-26);
-	pFile.Read(lFooter.mExtensionAreaOffset);
-	pFile.Read(lFooter.mDeveloperDirectoryOffset);
-	pFile.ReadData(lFooter.mSignature, 18);
-	pFile.SeekSet(0);
+	FileFooter footer;
+	file.SeekEnd(-26);
+	file.Read(footer.extension_area_offset_);
+	file.Read(footer.developer_directory_offset_);
+	file.ReadData(footer.signature_, 18);
+	file.SeekSet(0);
 
-	TGAFormat lFormat = ORIGINAL_TGA_FORMAT;
-	if (strcmp(lFooter.mSignature, smTruevisionXFile) == 0)
-	{
-		lFormat = NEW_TGA_FORMAT;
+	TGAFormat format = kOriginalTgaFormat;
+	if (strcmp(footer.signature_, truevision_x_file_) == 0) {
+		format = kNewTgaFormat;
 	}
 
 	// Read the file header.
-	TGAFileHeader lFileHeader;
-	pFile.Read(lFileHeader.mIDLength);
-	pFile.Read(lFileHeader.mColorMapType);
-	pFile.Read(lFileHeader.mImageType);
-	pFile.Read(lFileHeader.mColorMapSpec.mFirstEntryIndex);
-	pFile.Read(lFileHeader.mColorMapSpec.mColorMapLength);
-	pFile.Read(lFileHeader.mColorMapSpec.mColorMapEntrySize);
-	pFile.Read(lFileHeader.mImageSpec.mXOrigin);
-	pFile.Read(lFileHeader.mImageSpec.mYOrigin);
-	pFile.Read(lFileHeader.mImageSpec.mImageWidth);
-	pFile.Read(lFileHeader.mImageSpec.mImageHeight);
-	pFile.Read(lFileHeader.mImageSpec.mPixelDepth);
-	pFile.Read(lFileHeader.mImageSpec.mImageDescriptor);
+	TGAFileHeader _file_header;
+	file.Read(_file_header.id_length_);
+	file.Read(_file_header.color_map_type_);
+	file.Read(_file_header.image_type_);
+	file.Read(_file_header.color_map_spec_.first_entry_index_);
+	file.Read(_file_header.color_map_spec_.color_map_length_);
+	file.Read(_file_header.color_map_spec_.color_map_entry_size_);
+	file.Read(_file_header.image_spec_.x_origin_);
+	file.Read(_file_header.image_spec_.y_origin_);
+	file.Read(_file_header.image_spec_.image_width_);
+	file.Read(_file_header.image_spec_.image_height_);
+	file.Read(_file_header.image_spec_.pixel_depth_);
+	file.Read(_file_header.image_spec_.image_descriptor_);
 
-	if (lFileHeader.mIDLength != 0)
-	{
+	if (_file_header.id_length_ != 0) {
 		// Skip image ID. This is just identification info about the image.
-		pFile.SeekCur((int64)lFileHeader.mIDLength);
+		file.SeekCur((int64)_file_header.id_length_);
 	}
 
 	// Read the palette, if any.
-	Color* lPalette = 0;
-	if (lFileHeader.mColorMapType != 0)
-	{
+	Color* _palette = 0;
+	if (_file_header.color_map_type_ != 0) {
 		// Don't allow less than 256 entries in the palette.
-		int lPaletteEntries = lFileHeader.mColorMapSpec.mColorMapLength >= 256 ? lFileHeader.mColorMapSpec.mColorMapLength : 256;
-		lPalette = new Color[lPaletteEntries];
+		int palette_entries = _file_header.color_map_spec_.color_map_length_ >= 256 ? _file_header.color_map_spec_.color_map_length_ : 256;
+		_palette = new Color[palette_entries];
 
-		switch(lFileHeader.mColorMapSpec.mColorMapEntrySize)
-		{
+		switch(_file_header.color_map_spec_.color_map_entry_size_) {
 		case 15:
-		case 16:	// If 16-bit, it's still stored as 15-bit, according to the manual...
-			{
-				for (int i = lFileHeader.mColorMapSpec.mFirstEntryIndex;
-					i < lFileHeader.mColorMapSpec.mColorMapLength;
-					i++)
-				{
-					uint16 lColor;
-					pFile.Read(lColor);
+		case 16: {	// If 16-bit, it's still stored as 15-bit, according to the manual...
+				for (int i = _file_header.color_map_spec_.first_entry_index_;
+					i < _file_header.color_map_spec_.color_map_length_;
+					i++) {
+					uint16 color;
+					file.Read(color);
 
-					lPalette[i].mRed   = (uint8)(((lColor >> 10) & 31) << 3);
-					lPalette[i].mGreen = (uint8)(((lColor >> 5) & 31) << 3);
-					lPalette[i].mBlue  = (uint8)((lColor & 31) << 3);
+					_palette[i].red_   = (uint8)(((color >> 10) & 31) << 3);
+					_palette[i].green_ = (uint8)(((color >> 5) & 31) << 3);
+					_palette[i].blue_  = (uint8)((color & 31) << 3);
 				}
-			}
-			break;
-		case 24:
-			{
-				for (int i = lFileHeader.mColorMapSpec.mFirstEntryIndex;
-					i < lFileHeader.mColorMapSpec.mColorMapLength;
-					i++)
-				{
-					pFile.Read(lPalette[i].mBlue);
-					pFile.Read(lPalette[i].mGreen);
-					pFile.Read(lPalette[i].mRed);
+			} break;
+		case 24: {
+				for (int i = _file_header.color_map_spec_.first_entry_index_;
+					i < _file_header.color_map_spec_.color_map_length_;
+					i++) {
+					file.Read(_palette[i].blue_);
+					file.Read(_palette[i].green_);
+					file.Read(_palette[i].red_);
 				}
-			}
-			break;
-		case 32:
-			{
-				for (int i = lFileHeader.mColorMapSpec.mFirstEntryIndex;
-					i < lFileHeader.mColorMapSpec.mColorMapLength;
-					i++)
-				{
-					pFile.Read(lPalette[i].mBlue);
-					pFile.Read(lPalette[i].mGreen);
-					pFile.Read(lPalette[i].mRed);
-					pFile.Read(lPalette[i].mAlpha);
+			} break;
+		case 32: {
+				for (int i = _file_header.color_map_spec_.first_entry_index_;
+					i < _file_header.color_map_spec_.color_map_length_;
+					i++) {
+					file.Read(_palette[i].blue_);
+					file.Read(_palette[i].green_);
+					file.Read(_palette[i].red_);
+					file.Read(_palette[i].alpha_);
 				}
-			}
-			break;
+			} break;
 		default:
-			delete[] lPalette;
-			return STATUS_READ_PALETTE_ERROR;
+			delete[] _palette;
+			return kStatusReadPaletteError;
 			break;
 		};
 	}
 
 	// And now it's time for the image data itself.
 
-	Status lReturnValue = STATUS_READ_PICTURE_ERROR;
+	Status return_value = kStatusReadPictureError;
 
-	switch(lFileHeader.mImageType)
-	{
-	case UNCOMPRESSED_COLORMAP_IMAGE:
-		lReturnValue = LoadUncompressedColorMapImage(pCanvas, lFileHeader, pFile, lPalette);
+	switch(_file_header.image_type_) {
+	case kUncompressedColormapImage:
+		return_value = LoadUncompressedColorMapImage(canvas, _file_header, file, _palette);
 		break;
-	case UNCOMPRESSED_TRUECOLOR_IMAGE:
-		lReturnValue = LoadUncompressedTrueColorImage(pCanvas, lFileHeader, pFile);
+	case kUncompressedTruecolorImage:
+		return_value = LoadUncompressedTrueColorImage(canvas, _file_header, file);
 		break;
-	case UNCOMPRESSED_BLACKANDWHITE_IMAGE:
-		lReturnValue = LoadUncompressedBlackAndWhiteImage(pCanvas, lFileHeader, pFile);
+	case kUncompressedBlackandwhiteImage:
+		return_value = LoadUncompressedBlackAndWhiteImage(canvas, _file_header, file);
 		break;
-	case RLE_COLORMAPPED_IMAGE:
-		lReturnValue = LoadRLEColorMapImage(pCanvas, lFileHeader, pFile, lPalette);
+	case kRleColormappedImage:
+		return_value = LoadRLEColorMapImage(canvas, _file_header, file, _palette);
 		break;
-	case RLE_TRUECOLOR_IMAGE:
-		lReturnValue = LoadRLETrueColorImage(pCanvas, lFileHeader, pFile);
+	case kRleTruecolorImage:
+		return_value = LoadRLETrueColorImage(canvas, _file_header, file);
 		break;
-	case RLE_BLACKANDWHITE_IMAGE:
-		lReturnValue = LoadRLEBlackAndWhiteImage(pCanvas, lFileHeader, pFile);
+	case kRleBlackandwhiteImage:
+		return_value = LoadRLEBlackAndWhiteImage(canvas, _file_header, file);
 		break;
 	};
 
-	if (lPalette != 0)
-	{
-		delete[] lPalette;
+	if (_palette != 0) {
+		delete[] _palette;
 	}
 
-	return lReturnValue;
+	return return_value;
 }
 
-TgaLoader::Status TgaLoader::Save(Writer& pFile, const Canvas& pCanvas)
-{
+TgaLoader::Status TgaLoader::Save(Writer& file, const Canvas& canvas) {
 	// Write the file header.
-	TGAFileHeader lFileHeader;
-	lFileHeader.mIDLength = 0;
-	lFileHeader.mColorMapType = (pCanvas.GetBitDepth() == Canvas::BITDEPTH_8_BIT) ? 1 : 0;
-	lFileHeader.mImageType = (uint8)(pCanvas.GetBitDepth() == Canvas::BITDEPTH_8_BIT ? UNCOMPRESSED_COLORMAP_IMAGE : UNCOMPRESSED_TRUECOLOR_IMAGE);
-	lFileHeader.mColorMapSpec.mFirstEntryIndex = 0;
-	lFileHeader.mColorMapSpec.mColorMapLength = (pCanvas.GetBitDepth() == Canvas::BITDEPTH_8_BIT) ? 256 : 0;
-	lFileHeader.mColorMapSpec.mColorMapEntrySize = (pCanvas.GetBitDepth() == Canvas::BITDEPTH_8_BIT) ? 24 : 0;
-	lFileHeader.mImageSpec.mXOrigin = 0;
-	lFileHeader.mImageSpec.mYOrigin = 0;
-	lFileHeader.mImageSpec.mImageWidth = (uint16)pCanvas.GetWidth();
-	lFileHeader.mImageSpec.mImageHeight = (uint16)pCanvas.GetHeight();
-	lFileHeader.mImageSpec.mPixelDepth = (uint8)Canvas::BitDepthToInt(pCanvas.GetBitDepth());
-	lFileHeader.mImageSpec.mImageDescriptor = 0;
+	TGAFileHeader _file_header;
+	_file_header.id_length_ = 0;
+	_file_header.color_map_type_ = (canvas.GetBitDepth() == Canvas::kBitdepth8Bit) ? 1 : 0;
+	_file_header.image_type_ = (uint8)(canvas.GetBitDepth() == Canvas::kBitdepth8Bit ? kUncompressedColormapImage : kUncompressedTruecolorImage);
+	_file_header.color_map_spec_.first_entry_index_ = 0;
+	_file_header.color_map_spec_.color_map_length_ = (canvas.GetBitDepth() == Canvas::kBitdepth8Bit) ? 256 : 0;
+	_file_header.color_map_spec_.color_map_entry_size_ = (canvas.GetBitDepth() == Canvas::kBitdepth8Bit) ? 24 : 0;
+	_file_header.image_spec_.x_origin_ = 0;
+	_file_header.image_spec_.y_origin_ = 0;
+	_file_header.image_spec_.image_width_ = (uint16)canvas.GetWidth();
+	_file_header.image_spec_.image_height_ = (uint16)canvas.GetHeight();
+	_file_header.image_spec_.pixel_depth_ = (uint8)Canvas::BitDepthToInt(canvas.GetBitDepth());
+	_file_header.image_spec_.image_descriptor_ = 0;
 
-	if (lFileHeader.mImageSpec.mPixelDepth == 15)
-	{
-		lFileHeader.mImageSpec.mPixelDepth = 16;
+	if (_file_header.image_spec_.pixel_depth_ == 15) {
+		_file_header.image_spec_.pixel_depth_ = 16;
 	}
 
-	pFile.Write(lFileHeader.mIDLength);
-	pFile.Write(lFileHeader.mColorMapType);
-	pFile.Write(lFileHeader.mImageType);
-	pFile.Write(lFileHeader.mColorMapSpec.mFirstEntryIndex);
-	pFile.Write(lFileHeader.mColorMapSpec.mColorMapLength);
-	pFile.Write(lFileHeader.mColorMapSpec.mColorMapEntrySize);
-	pFile.Write(lFileHeader.mImageSpec.mXOrigin);
-	pFile.Write(lFileHeader.mImageSpec.mYOrigin);
-	pFile.Write(lFileHeader.mImageSpec.mImageWidth);
-	pFile.Write(lFileHeader.mImageSpec.mImageHeight);
-	pFile.Write(lFileHeader.mImageSpec.mPixelDepth);
-	pFile.Write(lFileHeader.mImageSpec.mImageDescriptor);
+	file.Write(_file_header.id_length_);
+	file.Write(_file_header.color_map_type_);
+	file.Write(_file_header.image_type_);
+	file.Write(_file_header.color_map_spec_.first_entry_index_);
+	file.Write(_file_header.color_map_spec_.color_map_length_);
+	file.Write(_file_header.color_map_spec_.color_map_entry_size_);
+	file.Write(_file_header.image_spec_.x_origin_);
+	file.Write(_file_header.image_spec_.y_origin_);
+	file.Write(_file_header.image_spec_.image_width_);
+	file.Write(_file_header.image_spec_.image_height_);
+	file.Write(_file_header.image_spec_.pixel_depth_);
+	file.Write(_file_header.image_spec_.image_descriptor_);
 
 	// Write the palette.
-	if (pCanvas.GetBitDepth() == Canvas::BITDEPTH_8_BIT)
-	{
-		for (int i = 0; i < 256; i++)
-		{
-			pFile.Write(pCanvas.GetPalette()[i].mBlue);
-			pFile.Write(pCanvas.GetPalette()[i].mGreen);
-			pFile.Write(pCanvas.GetPalette()[i].mRed);
+	if (canvas.GetBitDepth() == Canvas::kBitdepth8Bit) {
+		for (int i = 0; i < 256; i++) {
+			file.Write(canvas.GetPalette()[i].blue_);
+			file.Write(canvas.GetPalette()[i].green_);
+			file.Write(canvas.GetPalette()[i].red_);
 		}
 	}
 
-	if (pCanvas.GetBitDepth() == Canvas::BITDEPTH_16_BIT)
-	{
+	if (canvas.GetBitDepth() == Canvas::kBitdepth16Bit) {
 		// We have to convert it to 15 bit (well, at least that's what Adobe Photoshop expects).
-		Canvas lCanvas(pCanvas, true);
-		lCanvas.ConvertBitDepth(Canvas::BITDEPTH_15_BIT);
+		Canvas _canvas(canvas, true);
+		_canvas.ConvertBitDepth(Canvas::kBitdepth15Bit);
 
 		// Write the image data.
-		for (int y = pCanvas.GetHeight() - 1; y >= 0; y--)
-		{
-			int lYOffset = y * lCanvas.GetPitch() * lCanvas.GetPixelByteSize();
-			pFile.WriteData(((uint8*)lCanvas.GetBuffer()) + lYOffset, lCanvas.GetWidth() * lCanvas.GetPixelByteSize());
+		for (int y = canvas.GetHeight() - 1; y >= 0; y--) {
+			int y_offset = y * _canvas.GetPitch() * _canvas.GetPixelByteSize();
+			file.WriteData(((uint8*)_canvas.GetBuffer()) + y_offset, _canvas.GetWidth() * _canvas.GetPixelByteSize());
 		}
-	}
-	else
-	{
+	} else {
 		// Write the image data.
-		for (int y = pCanvas.GetHeight() - 1; y >= 0; y--)
-		{
-			int lYOffset = y * pCanvas.GetPitch() * pCanvas.GetPixelByteSize();
-			pFile.WriteData(((uint8*)pCanvas.GetBuffer()) + lYOffset, pCanvas.GetWidth() * pCanvas.GetPixelByteSize());
+		for (int y = canvas.GetHeight() - 1; y >= 0; y--) {
+			int y_offset = y * canvas.GetPitch() * canvas.GetPixelByteSize();
+			file.WriteData(((uint8*)canvas.GetBuffer()) + y_offset, canvas.GetWidth() * canvas.GetPixelByteSize());
 		}
 	}
 
-	FileFooter lFooter;
-	lFooter.mExtensionAreaOffset = 0;
-	lFooter.mDeveloperDirectoryOffset = 0;
+	FileFooter footer;
+	footer.extension_area_offset_ = 0;
+	footer.developer_directory_offset_ = 0;
 
-	pFile.Write(lFooter.mExtensionAreaOffset);
-	pFile.Write(lFooter.mDeveloperDirectoryOffset);
-	pFile.WriteData(smTruevisionXFile, (unsigned)::strlen(smTruevisionXFile) + 1);
+	file.Write(footer.extension_area_offset_);
+	file.Write(footer.developer_directory_offset_);
+	file.WriteData(truevision_x_file_, (unsigned)::strlen(truevision_x_file_) + 1);
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-TgaLoader::Status TgaLoader::LoadUncompressedColorMapImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile, Color* pPalette)
-{
-	if (pPalette == 0)
-	{
-		return STATUS_READ_PALETTE_ERROR;
+TgaLoader::Status TgaLoader::LoadUncompressedColorMapImage(Canvas& canvas, TGAFileHeader& file_header, File& file, Color* palette) {
+	if (palette == 0) {
+		return kStatusReadPaletteError;
 	}
 
-	bool lLeftToRight = (pFileHeader.mImageSpec.mImageDescriptor & 16) == 0;
-	bool lTopToBottom = (pFileHeader.mImageSpec.mImageDescriptor & 32) != 0;
+	bool left_to_right = (file_header.image_spec_.image_descriptor_ & 16) == 0;
+	bool top_to_bottom = (file_header.image_spec_.image_descriptor_ & 32) != 0;
 
-	if (pFileHeader.mColorMapSpec.mColorMapLength <= 256)
-	{
-		pCanvas.Reset(pFileHeader.mImageSpec.mImageWidth,
-					   pFileHeader.mImageSpec.mImageHeight,
-					   Canvas::IntToBitDepth(pFileHeader.mImageSpec.mPixelDepth));
-		pCanvas.SetPalette(pPalette);
-	}
-	else
-	{
+	if (file_header.color_map_spec_.color_map_length_ <= 256) {
+		canvas.Reset(file_header.image_spec_.image_width_,
+					   file_header.image_spec_.image_height_,
+					   Canvas::IntToBitDepth(file_header.image_spec_.pixel_depth_));
+		canvas.SetPalette(palette);
+	} else {
 		// Reset image to same pixel depth as the palette, if there are more than 256 colors.
-		pCanvas.Reset(pFileHeader.mImageSpec.mImageWidth,
-					   pFileHeader.mImageSpec.mImageHeight,
-					   Canvas::IntToBitDepth(pFileHeader.mColorMapSpec.mColorMapEntrySize));
+		canvas.Reset(file_header.image_spec_.image_width_,
+					   file_header.image_spec_.image_height_,
+					   Canvas::IntToBitDepth(file_header.color_map_spec_.color_map_entry_size_));
 	}
 
-	pCanvas.CreateBuffer();
+	canvas.CreateBuffer();
 
-	switch(pFileHeader.mImageSpec.mPixelDepth)
-	{
-	case 8:
-		{
-			uint8* lData = (uint8*)pCanvas.GetBuffer();
+	switch(file_header.image_spec_.pixel_depth_) {
+	case 8: {
+			uint8* data = (uint8*)canvas.GetBuffer();
 
 			int y;
-			for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-			{
-				int lYOffset = 0;
-				if (lTopToBottom == true)
-				{
-					lYOffset = y * pFileHeader.mImageSpec.mImageWidth;
-				}
-				else
-				{
-					lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth;
+			for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+				int y_offset = 0;
+				if (top_to_bottom == true) {
+					y_offset = y * file_header.image_spec_.image_width_;
+				} else {
+					y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_;
 				}
 
-				if (lLeftToRight == true)
-				{
-					pFile.ReadData(lData + lYOffset, pFileHeader.mImageSpec.mImageWidth);
-				}
-				else
-				{
-					for (int x = pFileHeader.mImageSpec.mImageWidth - 1; x >= 0; x--)
-					{
-						pFile.Read(lData[lYOffset + x]);
+				if (left_to_right == true) {
+					file.ReadData(data + y_offset, file_header.image_spec_.image_width_);
+				} else {
+					for (int x = file_header.image_spec_.image_width_ - 1; x >= 0; x--) {
+						file.Read(data[y_offset + x]);
 					}
 				}
 			}
-		}
-		break;
+		} break;
 	case 15:
-	case 16:
-		{
-			switch(pCanvas.GetBitDepth())
-			{
-			case Canvas::BITDEPTH_15_BIT:
-			case Canvas::BITDEPTH_16_BIT:
-			case Canvas::BITDEPTH_24_BIT:
-			case Canvas::BITDEPTH_32_BIT:
+	case 16: {
+			switch(canvas.GetBitDepth()) {
+			case Canvas::kBitdepth15Bit:
+			case Canvas::kBitdepth16Bit:
+			case Canvas::kBitdepth24Bit:
+			case Canvas::kBitdepth32Bit:
 				// OK...
 				break;
 			default:
-				return STATUS_READ_PALETTE_ERROR;
+				return kStatusReadPaletteError;
 			};
-		
-			uint16* lData = new uint16[pFileHeader.mImageSpec.mImageWidth * pFileHeader.mImageSpec.mImageHeight];
+
+			uint16* data = new uint16[file_header.image_spec_.image_width_ * file_header.image_spec_.image_height_];
 
 			int y;
-			for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-			{
-				int lYOffset = 0;
-				if (lTopToBottom == true)
-				{
-					lYOffset = y * pFileHeader.mImageSpec.mImageWidth;
-				}
-				else
-				{
-					lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth;
+			for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+				int y_offset = 0;
+				if (top_to_bottom == true) {
+					y_offset = y * file_header.image_spec_.image_width_;
+				} else {
+					y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_;
 				}
 
-				if (lLeftToRight == true)
-				{
-					for (int x = 0; x < pFileHeader.mImageSpec.mImageWidth; x++)
-					{
-						pFile.Read(lData[lYOffset + x]);
+				if (left_to_right == true) {
+					for (int x = 0; x < file_header.image_spec_.image_width_; x++) {
+						file.Read(data[y_offset + x]);
 					}
-				}
-				else
-				{
-					for (int x = pFileHeader.mImageSpec.mImageWidth - 1; x >= 0; x--)
-					{
-						pFile.Read(lData[lYOffset + x]);
+				} else {
+					for (int x = file_header.image_spec_.image_width_ - 1; x >= 0; x--) {
+						file.Read(data[y_offset + x]);
 					}
 				}
 			}
 
 			// Convert this image to a "true color image".
-			int lImageSize = pFileHeader.mImageSpec.mImageWidth * pFileHeader.mImageSpec.mImageHeight;
-			for (int i = 0; i < lImageSize; i++)
-			{
-				uint16 lIndex = lData[i];
-				unsigned r = (unsigned)pPalette[lIndex].mRed;
-				unsigned g = (unsigned)pPalette[lIndex].mGreen;
-				unsigned b = (unsigned)pPalette[lIndex].mBlue;
+			int image_size = file_header.image_spec_.image_width_ * file_header.image_spec_.image_height_;
+			for (int i = 0; i < image_size; i++) {
+				uint16 index = data[i];
+				unsigned r = (unsigned)palette[index].red_;
+				unsigned g = (unsigned)palette[index].green_;
+				unsigned b = (unsigned)palette[index].blue_;
 
 				// Write one pixel.
-				switch(pCanvas.GetBitDepth())
-				{
-				case Canvas::BITDEPTH_15_BIT:
-					{
-						uint16 lColor = (uint16)(((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3));
-						((uint16*)pCanvas.GetBuffer())[i] = lColor;
-					}
-					break;
-				case Canvas::BITDEPTH_16_BIT:
-					{
-						uint16 lColor = (uint16)(((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3));
-						((uint16*)pCanvas.GetBuffer())[i] = lColor;
-					}
-					break;
-				case Canvas::BITDEPTH_24_BIT:
-					{
-						((uint8*)pCanvas.GetBuffer())[i * 3 + 0] = (uint8)b;
-						((uint8*)pCanvas.GetBuffer())[i * 3 + 1] = (uint8)g;
-						((uint8*)pCanvas.GetBuffer())[i * 3 + 2] = (uint8)r;
-					}
-					break;
-				case Canvas::BITDEPTH_32_BIT:
-						((uint8*)pCanvas.GetBuffer())[i * 4 + 0] = (uint8)b;
-						((uint8*)pCanvas.GetBuffer())[i * 4 + 1] = (uint8)g;
-						((uint8*)pCanvas.GetBuffer())[i * 4 + 2] = (uint8)r;
-						((uint8*)pCanvas.GetBuffer())[i * 4 + 3] = 0;
+				switch(canvas.GetBitDepth()) {
+				case Canvas::kBitdepth15Bit: {
+						uint16 color = (uint16)(((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3));
+						((uint16*)canvas.GetBuffer())[i] = color;
+					} break;
+				case Canvas::kBitdepth16Bit: {
+						uint16 color = (uint16)(((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3));
+						((uint16*)canvas.GetBuffer())[i] = color;
+					} break;
+				case Canvas::kBitdepth24Bit: {
+						((uint8*)canvas.GetBuffer())[i * 3 + 0] = (uint8)b;
+						((uint8*)canvas.GetBuffer())[i * 3 + 1] = (uint8)g;
+						((uint8*)canvas.GetBuffer())[i * 3 + 2] = (uint8)r;
+					} break;
+				case Canvas::kBitdepth32Bit:
+						((uint8*)canvas.GetBuffer())[i * 4 + 0] = (uint8)b;
+						((uint8*)canvas.GetBuffer())[i * 4 + 1] = (uint8)g;
+						((uint8*)canvas.GetBuffer())[i * 4 + 2] = (uint8)r;
+						((uint8*)canvas.GetBuffer())[i * 4 + 3] = 0;
 					break;
 				}
 			}
 
-			delete[] lData;
-		}
-		break;
+			delete[] data;
+		} break;
 	default:
-		return STATUS_READ_PICTURE_ERROR;
+		return kStatusReadPictureError;
 	};
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-TgaLoader::Status TgaLoader::LoadUncompressedTrueColorImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile)
-{
-	bool lLeftToRight = (pFileHeader.mImageSpec.mImageDescriptor & 16) == 0;
-	bool lTopToBottom = (pFileHeader.mImageSpec.mImageDescriptor & 32) != 0;
+TgaLoader::Status TgaLoader::LoadUncompressedTrueColorImage(Canvas& canvas, TGAFileHeader& file_header, File& file) {
+	bool left_to_right = (file_header.image_spec_.image_descriptor_ & 16) == 0;
+	bool top_to_bottom = (file_header.image_spec_.image_descriptor_ & 32) != 0;
 
-	int lPixelDepth = pFileHeader.mImageSpec.mPixelDepth;
-	if (lPixelDepth == 16)
-	{
+	int pixel_depth = file_header.image_spec_.pixel_depth_;
+	if (pixel_depth == 16) {
 		// Change this to 15 bit, since that's what Adobe Photoshop _means_ with "16".
-		lPixelDepth = 15;
+		pixel_depth = 15;
 	}
 
-	pCanvas.Reset(pFileHeader.mImageSpec.mImageWidth,
-				   pFileHeader.mImageSpec.mImageHeight,
-				   Canvas::IntToBitDepth(lPixelDepth));
-	pCanvas.CreateBuffer();
+	canvas.Reset(file_header.image_spec_.image_width_,
+				   file_header.image_spec_.image_height_,
+				   Canvas::IntToBitDepth(pixel_depth));
+	canvas.CreateBuffer();
 
-	switch(pFileHeader.mImageSpec.mPixelDepth)
-	{
+	switch(file_header.image_spec_.pixel_depth_) {
 	case 8:
 	case 24:
-	case 32:
-		{
-			uint8* lData = (uint8*)pCanvas.GetBuffer();
+	case 32: {
+			uint8* data = (uint8*)canvas.GetBuffer();
 
 			int y;
-			for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-			{
-				int lYOffset = 0;
-				if (lTopToBottom == true)
-				{
-					lYOffset = y * pFileHeader.mImageSpec.mImageWidth * pCanvas.GetPixelByteSize();
-				}
-				else
-				{
-					lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth * pCanvas.GetPixelByteSize();
+			for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+				int y_offset = 0;
+				if (top_to_bottom == true) {
+					y_offset = y * file_header.image_spec_.image_width_ * canvas.GetPixelByteSize();
+				} else {
+					y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_ * canvas.GetPixelByteSize();
 				}
 
-				if (lLeftToRight == true)
-				{
-					pFile.ReadData(lData + lYOffset, pFileHeader.mImageSpec.mImageWidth * pCanvas.GetPixelByteSize());
-				}
-				else
-				{
-					for (int x = pFileHeader.mImageSpec.mImageWidth - 1; x >= 0; x--)
-					{
-						pFile.ReadData(lData + lYOffset + x * pCanvas.GetPixelByteSize(), pCanvas.GetPixelByteSize());
+				if (left_to_right == true) {
+					file.ReadData(data + y_offset, file_header.image_spec_.image_width_ * canvas.GetPixelByteSize());
+				} else {
+					for (int x = file_header.image_spec_.image_width_ - 1; x >= 0; x--) {
+						file.ReadData(data + y_offset + x * canvas.GetPixelByteSize(), canvas.GetPixelByteSize());
 					}
 				}
 			}
-		}
-		break;
+		} break;
 	case 15:
 	case 16:
-			uint16* lData = (uint16*)pCanvas.GetBuffer();
+			uint16* data = (uint16*)canvas.GetBuffer();
 
 			int y;
-			for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-			{
-				int lYOffset = 0;
-				if (lTopToBottom == true)
-				{
-					lYOffset = y * pFileHeader.mImageSpec.mImageWidth;
-				}
-				else
-				{
-					lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth;
+			for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+				int y_offset = 0;
+				if (top_to_bottom == true) {
+					y_offset = y * file_header.image_spec_.image_width_;
+				} else {
+					y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_;
 				}
 
-				if (lLeftToRight == true)
-				{
-					for (int x = 0; x < pFileHeader.mImageSpec.mImageWidth; x++)
-					{
-						pFile.Read(lData[lYOffset + x]);
+				if (left_to_right == true) {
+					for (int x = 0; x < file_header.image_spec_.image_width_; x++) {
+						file.Read(data[y_offset + x]);
+					}
+				} else {
+					for (int x = file_header.image_spec_.image_width_ - 1; x >= 0; x--) {
+						file.Read(data[y_offset + x]);
 					}
 				}
-				else
-				{
-					for (int x = pFileHeader.mImageSpec.mImageWidth - 1; x >= 0; x--)
-					{
-						pFile.Read(lData[lYOffset + x]);
-					}
-				}
-			}
-		break;
+			} break;
 	};
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-TgaLoader::Status TgaLoader::LoadUncompressedBlackAndWhiteImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile)
-{
-	if (pFileHeader.mImageSpec.mPixelDepth != 8)
-	{
-		return STATUS_READ_PICTURE_ERROR;
+TgaLoader::Status TgaLoader::LoadUncompressedBlackAndWhiteImage(Canvas& canvas, TGAFileHeader& file_header, File& file) {
+	if (file_header.image_spec_.pixel_depth_ != 8) {
+		return kStatusReadPictureError;
 	}
 
-	pCanvas.Reset(pFileHeader.mImageSpec.mImageWidth,
-				   pFileHeader.mImageSpec.mImageHeight,
-				   Canvas::BITDEPTH_8_BIT);
+	canvas.Reset(file_header.image_spec_.image_width_,
+				   file_header.image_spec_.image_height_,
+				   Canvas::kBitdepth8Bit);
 
-	pCanvas.CreateBuffer();
+	canvas.CreateBuffer();
 
-	Color lPalette[256];
-	for (int i = 0; i < 256; i++)
-	{
-		lPalette[i].mRed   = (uint8)i;
-		lPalette[i].mGreen = (uint8)i;
-		lPalette[i].mBlue  = (uint8)i;
-		lPalette[i].mAlpha = (uint8)i;
+	Color _palette[256];
+	for (int i = 0; i < 256; i++) {
+		_palette[i].red_   = (uint8)i;
+		_palette[i].green_ = (uint8)i;
+		_palette[i].blue_  = (uint8)i;
+		_palette[i].alpha_ = (uint8)i;
 	}
-	pCanvas.SetPalette(lPalette);
+	canvas.SetPalette(_palette);
 
-	bool lLeftToRight = (pFileHeader.mImageSpec.mImageDescriptor & 16) == 0;
-	bool lTopToBottom = (pFileHeader.mImageSpec.mImageDescriptor & 32) != 0;
+	bool left_to_right = (file_header.image_spec_.image_descriptor_ & 16) == 0;
+	bool top_to_bottom = (file_header.image_spec_.image_descriptor_ & 32) != 0;
 
-	uint8* lData = (uint8*)pCanvas.GetBuffer();
+	uint8* data = (uint8*)canvas.GetBuffer();
 
 	int y;
-	for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-	{
-		int lYOffset = 0;
-		if (lTopToBottom == true)
-		{
-			lYOffset = y * pFileHeader.mImageSpec.mImageWidth;
-		}
-		else
-		{
-			lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth;
+	for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+		int y_offset = 0;
+		if (top_to_bottom == true) {
+			y_offset = y * file_header.image_spec_.image_width_;
+		} else {
+			y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_;
 		}
 
-		if (lLeftToRight == true)
-		{
-			pFile.ReadData(lData + lYOffset, pFileHeader.mImageSpec.mImageWidth);
-		}
-		else
-		{
-			for (int x = pFileHeader.mImageSpec.mImageWidth - 1; x >= 0; x--)
-			{
-				pFile.ReadData(lData + lYOffset + x, 1);
+		if (left_to_right == true) {
+			file.ReadData(data + y_offset, file_header.image_spec_.image_width_);
+		} else {
+			for (int x = file_header.image_spec_.image_width_ - 1; x >= 0; x--) {
+				file.ReadData(data + y_offset + x, 1);
 			}
 		}
 	}
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-TgaLoader::Status TgaLoader::LoadRLEColorMapImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile, Color* pPalette)
-{
-	if (pPalette == 0)
-	{
-		return STATUS_READ_PALETTE_ERROR;
+TgaLoader::Status TgaLoader::LoadRLEColorMapImage(Canvas& canvas, TGAFileHeader& file_header, File& file, Color* palette) {
+	if (palette == 0) {
+		return kStatusReadPaletteError;
 	}
 
-	bool lLeftToRight = (pFileHeader.mImageSpec.mImageDescriptor & 16) == 0;
-	bool lTopToBottom = (pFileHeader.mImageSpec.mImageDescriptor & 32) != 0;
+	bool left_to_right = (file_header.image_spec_.image_descriptor_ & 16) == 0;
+	bool top_to_bottom = (file_header.image_spec_.image_descriptor_ & 32) != 0;
 
-	if (pFileHeader.mColorMapSpec.mColorMapLength <= 256)
-	{
-		pCanvas.Reset(pFileHeader.mImageSpec.mImageWidth,
-					   pFileHeader.mImageSpec.mImageHeight,
-					   Canvas::IntToBitDepth(pFileHeader.mImageSpec.mPixelDepth));
-		pCanvas.SetPalette(pPalette);
-	}
-	else
-	{
+	if (file_header.color_map_spec_.color_map_length_ <= 256) {
+		canvas.Reset(file_header.image_spec_.image_width_,
+					   file_header.image_spec_.image_height_,
+					   Canvas::IntToBitDepth(file_header.image_spec_.pixel_depth_));
+		canvas.SetPalette(palette);
+	} else {
 		// Reset image to same pixel depth as the palette, if there are more than 256 colors.
-		pCanvas.Reset(pFileHeader.mImageSpec.mImageWidth,
-					   pFileHeader.mImageSpec.mImageHeight,
-					   Canvas::IntToBitDepth(pFileHeader.mColorMapSpec.mColorMapEntrySize));
+		canvas.Reset(file_header.image_spec_.image_width_,
+					   file_header.image_spec_.image_height_,
+					   Canvas::IntToBitDepth(file_header.color_map_spec_.color_map_entry_size_));
 	}
 
-	pCanvas.CreateBuffer();
+	canvas.CreateBuffer();
 
-	switch(pFileHeader.mImageSpec.mPixelDepth)
-	{
-	case 8:
-		{
-			uint8* lData = (uint8*)pCanvas.GetBuffer();
+	switch(file_header.image_spec_.pixel_depth_) {
+	case 8: {
+			uint8* data = (uint8*)canvas.GetBuffer();
 
 			int y;
-			for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-			{
-				int lYOffset = 0;
-				if (lTopToBottom == true)
-				{
-					lYOffset = y * pFileHeader.mImageSpec.mImageWidth;
-				}
-				else
-				{
-					lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth;
+			for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+				int y_offset = 0;
+				if (top_to_bottom == true) {
+					y_offset = y * file_header.image_spec_.image_width_;
+				} else {
+					y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_;
 				}
 
-				int lXAdd = (lLeftToRight == true) ? 1 : -1;
-				for (int x = (lLeftToRight == true) ? 0 : (pFileHeader.mImageSpec.mImageWidth - 1);
-					(lLeftToRight == true) ? (x < pFileHeader.mImageSpec.mImageWidth) : x >= 0;)
-				{
-					uint8 lRepetitionCount;
-					pFile.Read(lRepetitionCount);
+				int x_add = (left_to_right == true) ? 1 : -1;
+				for (int x = (left_to_right == true) ? 0 : (file_header.image_spec_.image_width_ - 1);
+					(left_to_right == true) ? (x < file_header.image_spec_.image_width_) : x >= 0;) {
+					uint8 repetition_count;
+					file.Read(repetition_count);
 
-					bool lRLEPacket = (lRepetitionCount & 0x80) != 0;
-					lRepetitionCount &= 0x7F;
-					lRepetitionCount++;
+					bool rle_packet = (repetition_count & 0x80) != 0;
+					repetition_count &= 0x7F;
+					repetition_count++;
 
-					if (lRLEPacket == true)
-					{
+					if (rle_packet == true) {
 						// RLE packet.
-						uint8 lPixelValue;
-						pFile.Read(lPixelValue);
+						uint8 pixel_value;
+						file.Read(pixel_value);
 
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							lData[lYOffset + x] = lPixelValue;
-							x += lXAdd;
+						for (int count = 0; count < (int)repetition_count; count++) {
+							data[y_offset + x] = pixel_value;
+							x += x_add;
 						}
-					}
-					else
-					{
+					} else {
 						// Raw packet.
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							pFile.Read(lData[lYOffset + x]);
-							x += lXAdd;
+						for (int count = 0; count < (int)repetition_count; count++) {
+							file.Read(data[y_offset + x]);
+							x += x_add;
 						}
 					}
 				}
 			}
-		}
-		break;
+		} break;
 	case 15:
-	case 16:
-		{
-			switch(pCanvas.GetBitDepth())
-			{
-			case Canvas::BITDEPTH_15_BIT:
-			case Canvas::BITDEPTH_16_BIT:
-			case Canvas::BITDEPTH_24_BIT:
-			case Canvas::BITDEPTH_32_BIT:
+	case 16: {
+			switch(canvas.GetBitDepth()) {
+			case Canvas::kBitdepth15Bit:
+			case Canvas::kBitdepth16Bit:
+			case Canvas::kBitdepth24Bit:
+			case Canvas::kBitdepth32Bit:
 				// OK...
 				break;
 			default:
-				return STATUS_READ_PALETTE_ERROR;
+				return kStatusReadPaletteError;
 			};
-		
-			uint16* lData = new uint16[pFileHeader.mImageSpec.mImageWidth * pFileHeader.mImageSpec.mImageHeight];
+
+			uint16* data = new uint16[file_header.image_spec_.image_width_ * file_header.image_spec_.image_height_];
 
 			int y;
-			for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-			{
-				int lYOffset = 0;
-				if (lTopToBottom == true)
-				{
-					lYOffset = y * pFileHeader.mImageSpec.mImageWidth;
-				}
-				else
-				{
-					lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth;
+			for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+				int y_offset = 0;
+				if (top_to_bottom == true) {
+					y_offset = y * file_header.image_spec_.image_width_;
+				} else {
+					y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_;
 				}
 
-				int lXAdd = (lLeftToRight == true) ? 1 : -1;
-				for (int x = (lLeftToRight == true) ? 0 : (pFileHeader.mImageSpec.mImageWidth - 1);
-					(lLeftToRight == true) ? (x < pFileHeader.mImageSpec.mImageWidth) : x >= 0;)
-				{
-					uint8 lRepetitionCount;
-					pFile.Read(lRepetitionCount);
+				int x_add = (left_to_right == true) ? 1 : -1;
+				for (int x = (left_to_right == true) ? 0 : (file_header.image_spec_.image_width_ - 1);
+					(left_to_right == true) ? (x < file_header.image_spec_.image_width_) : x >= 0;) {
+					uint8 repetition_count;
+					file.Read(repetition_count);
 
-					bool lRLEPacket = (lRepetitionCount & 0x80) != 0;
-					lRepetitionCount &= 0x7F;
-					lRepetitionCount++;
+					bool rle_packet = (repetition_count & 0x80) != 0;
+					repetition_count &= 0x7F;
+					repetition_count++;
 
-					if (lRLEPacket == true)
-					{
+					if (rle_packet == true) {
 						// RLE packet.
-						uint16 lPixelValue;
-						pFile.Read(lPixelValue);
+						uint16 pixel_value;
+						file.Read(pixel_value);
 
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							lData[lYOffset + x] = lPixelValue;
-							x += lXAdd;
+						for (int count = 0; count < (int)repetition_count; count++) {
+							data[y_offset + x] = pixel_value;
+							x += x_add;
 						}
-					}
-					else
-					{
+					} else {
 						// Raw packet.
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							pFile.Read(lData[lYOffset + x]);
-							x += lXAdd;
+						for (int count = 0; count < (int)repetition_count; count++) {
+							file.Read(data[y_offset + x]);
+							x += x_add;
 						}
 					}
 				}
 			}
 
 			// Convert this image to a "true color image".
-			int lImageSize = pFileHeader.mImageSpec.mImageWidth * pFileHeader.mImageSpec.mImageHeight;
-			for (int i = 0; i < lImageSize; i++)
-			{
-				uint16 lIndex = lData[i];
-				unsigned r = (unsigned)pPalette[lIndex].mRed;
-				unsigned g = (unsigned)pPalette[lIndex].mGreen;
-				unsigned b = (unsigned)pPalette[lIndex].mBlue;
+			int image_size = file_header.image_spec_.image_width_ * file_header.image_spec_.image_height_;
+			for (int i = 0; i < image_size; i++) {
+				uint16 index = data[i];
+				unsigned r = (unsigned)palette[index].red_;
+				unsigned g = (unsigned)palette[index].green_;
+				unsigned b = (unsigned)palette[index].blue_;
 
 				// Write one pixel.
-				switch(pCanvas.GetBitDepth())
-				{
-				case Canvas::BITDEPTH_15_BIT:
-					{
-						uint16 lColor = (uint16)(((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3));
-						((uint16*)pCanvas.GetBuffer())[i] = lColor;
-					}
-					break;
-				case Canvas::BITDEPTH_16_BIT:
-					{
-						uint16 lColor = (uint16)(((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3));
-						((uint16*)pCanvas.GetBuffer())[i] = lColor;
-					}
-					break;
-				case Canvas::BITDEPTH_24_BIT:
-					{
-						((uint8*)pCanvas.GetBuffer())[i * 3 + 0] = (uint8)b;
-						((uint8*)pCanvas.GetBuffer())[i * 3 + 1] = (uint8)g;
-						((uint8*)pCanvas.GetBuffer())[i * 3 + 2] = (uint8)r;
-					}
-					break;
-				case Canvas::BITDEPTH_32_BIT:
-						((uint8*)pCanvas.GetBuffer())[i * 4 + 0] = (uint8)b;
-						((uint8*)pCanvas.GetBuffer())[i * 4 + 1] = (uint8)g;
-						((uint8*)pCanvas.GetBuffer())[i * 4 + 2] = (uint8)r;
-						((uint8*)pCanvas.GetBuffer())[i * 4 + 3] = 0;
+				switch(canvas.GetBitDepth()) {
+				case Canvas::kBitdepth15Bit: {
+						uint16 color = (uint16)(((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3));
+						((uint16*)canvas.GetBuffer())[i] = color;
+					} break;
+				case Canvas::kBitdepth16Bit: {
+						uint16 color = (uint16)(((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3));
+						((uint16*)canvas.GetBuffer())[i] = color;
+					} break;
+				case Canvas::kBitdepth24Bit: {
+						((uint8*)canvas.GetBuffer())[i * 3 + 0] = (uint8)b;
+						((uint8*)canvas.GetBuffer())[i * 3 + 1] = (uint8)g;
+						((uint8*)canvas.GetBuffer())[i * 3 + 2] = (uint8)r;
+					} break;
+				case Canvas::kBitdepth32Bit:
+						((uint8*)canvas.GetBuffer())[i * 4 + 0] = (uint8)b;
+						((uint8*)canvas.GetBuffer())[i * 4 + 1] = (uint8)g;
+						((uint8*)canvas.GetBuffer())[i * 4 + 2] = (uint8)r;
+						((uint8*)canvas.GetBuffer())[i * 4 + 3] = 0;
 					break;
 				}
 			}
 
-			delete[] lData;
-		}
-		break;
+			delete[] data;
+		} break;
 	default:
-		return STATUS_READ_PICTURE_ERROR;
+		return kStatusReadPictureError;
 	};
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-TgaLoader::Status TgaLoader::LoadRLETrueColorImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile)
-{
-	bool lLeftToRight = (pFileHeader.mImageSpec.mImageDescriptor & 16) == 0;
-	bool lTopToBottom = (pFileHeader.mImageSpec.mImageDescriptor & 32) != 0;
+TgaLoader::Status TgaLoader::LoadRLETrueColorImage(Canvas& canvas, TGAFileHeader& file_header, File& file) {
+	bool left_to_right = (file_header.image_spec_.image_descriptor_ & 16) == 0;
+	bool top_to_bottom = (file_header.image_spec_.image_descriptor_ & 32) != 0;
 
-	int lPixelDepth = pFileHeader.mImageSpec.mPixelDepth;
-	if (lPixelDepth == 16)
-	{
+	int pixel_depth = file_header.image_spec_.pixel_depth_;
+	if (pixel_depth == 16) {
 		// Change this to 15 bit, since that's what Adobe Photoshop _means_ with "16".
-		lPixelDepth = 15;
+		pixel_depth = 15;
 	}
 
-	pCanvas.Reset(pFileHeader.mImageSpec.mImageWidth,
-				   pFileHeader.mImageSpec.mImageHeight,
-				   Canvas::IntToBitDepth(lPixelDepth));
-	pCanvas.CreateBuffer();
+	canvas.Reset(file_header.image_spec_.image_width_,
+				   file_header.image_spec_.image_height_,
+				   Canvas::IntToBitDepth(pixel_depth));
+	canvas.CreateBuffer();
 
-	switch(pFileHeader.mImageSpec.mPixelDepth)
-	{
-	case 8:
-		{
-			uint8* lData = (uint8*)pCanvas.GetBuffer();
+	switch(file_header.image_spec_.pixel_depth_) {
+	case 8: {
+			uint8* data = (uint8*)canvas.GetBuffer();
 
 			int y;
-			for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-			{
-				int lYOffset = 0;
-				if (lTopToBottom == true)
-				{
-					lYOffset = y * pFileHeader.mImageSpec.mImageWidth;
-				}
-				else
-				{
-					lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth;
+			for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+				int y_offset = 0;
+				if (top_to_bottom == true) {
+					y_offset = y * file_header.image_spec_.image_width_;
+				} else {
+					y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_;
 				}
 
-				int lXAdd = (lLeftToRight == true) ? 1 : -1;
-				for (int x = (lLeftToRight == true) ? 0 : (pFileHeader.mImageSpec.mImageWidth - 1);
-					(lLeftToRight == true) ? (x < pFileHeader.mImageSpec.mImageWidth) : x >= 0;)
-				{
-					uint8 lRepetitionCount;
-					pFile.Read(lRepetitionCount);
+				int x_add = (left_to_right == true) ? 1 : -1;
+				for (int x = (left_to_right == true) ? 0 : (file_header.image_spec_.image_width_ - 1);
+					(left_to_right == true) ? (x < file_header.image_spec_.image_width_) : x >= 0;) {
+					uint8 repetition_count;
+					file.Read(repetition_count);
 
-					bool lRLEPacket = (lRepetitionCount & 0x80) != 0;
-					lRepetitionCount &= 0x7F;
-					lRepetitionCount++;
+					bool rle_packet = (repetition_count & 0x80) != 0;
+					repetition_count &= 0x7F;
+					repetition_count++;
 
-					if (lRLEPacket == true)
-					{
+					if (rle_packet == true) {
 						// RLE packet.
-						uint8 lPixelValue;
-						pFile.Read(lPixelValue);
+						uint8 pixel_value;
+						file.Read(pixel_value);
 
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							lData[lYOffset + x] = lPixelValue;
-							x += lXAdd;
+						for (int count = 0; count < (int)repetition_count; count++) {
+							data[y_offset + x] = pixel_value;
+							x += x_add;
 						}
-					}
-					else
-					{
+					} else {
 						// Raw packet.
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							if (pFile.Read(lData[lYOffset + x]) != IO_OK)
-							{
-								return (STATUS_READSTREAM_ERROR);	// TRICKY: RAII!
+						for (int count = 0; count < (int)repetition_count; count++) {
+							if (file.Read(data[y_offset + x]) != kIoOk) {
+								return (kStatusReadstreamError);	// TRICKY: RAII!
 							}
-							x += lXAdd;
+							x += x_add;
 						}
 					}
 				}
 			}
-		}
-		break;
+		} break;
 	case 15:
-	case 16:
-		{
-			uint16* lData = (uint16*)pCanvas.GetBuffer();
+	case 16: {
+			uint16* data = (uint16*)canvas.GetBuffer();
 
 			int y;
-			for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-			{
-				int lYOffset = 0;
-				if (lTopToBottom == true)
-				{
-					lYOffset = y * pFileHeader.mImageSpec.mImageWidth;
-				}
-				else
-				{
-					lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth;
+			for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+				int y_offset = 0;
+				if (top_to_bottom == true) {
+					y_offset = y * file_header.image_spec_.image_width_;
+				} else {
+					y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_;
 				}
 
-				int lXAdd = (lLeftToRight == true) ? 1 : -1;
-				for (int x = (lLeftToRight == true) ? 0 : (pFileHeader.mImageSpec.mImageWidth - 1);
-					(lLeftToRight == true) ? (x < pFileHeader.mImageSpec.mImageWidth) : x >= 0;)
-				{
-					uint8 lRepetitionCount;
-					pFile.Read(lRepetitionCount);
+				int x_add = (left_to_right == true) ? 1 : -1;
+				for (int x = (left_to_right == true) ? 0 : (file_header.image_spec_.image_width_ - 1);
+					(left_to_right == true) ? (x < file_header.image_spec_.image_width_) : x >= 0;) {
+					uint8 repetition_count;
+					file.Read(repetition_count);
 
-					bool lRLEPacket = (lRepetitionCount & 0x80) != 0;
-					lRepetitionCount &= 0x7F;
-					lRepetitionCount++;
+					bool rle_packet = (repetition_count & 0x80) != 0;
+					repetition_count &= 0x7F;
+					repetition_count++;
 
-					if (lRLEPacket == true)
-					{
+					if (rle_packet == true) {
 						// RLE packet.
-						uint16 lPixelValue;
-						pFile.Read(lPixelValue);
+						uint16 pixel_value;
+						file.Read(pixel_value);
 
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							lData[lYOffset + x] = lPixelValue;
-							x += lXAdd;
+						for (int count = 0; count < (int)repetition_count; count++) {
+							data[y_offset + x] = pixel_value;
+							x += x_add;
 						}
-					}
-					else
-					{
+					} else {
 						// Raw packet.
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							if (pFile.Read(lData[lYOffset + x]) != IO_OK)
-							{
-								return (STATUS_READSTREAM_ERROR);	// TRICKY: RAII!
+						for (int count = 0; count < (int)repetition_count; count++) {
+							if (file.Read(data[y_offset + x]) != kIoOk) {
+								return (kStatusReadstreamError);	// TRICKY: RAII!
 							}
-							x += lXAdd;
+							x += x_add;
 						}
 					}
 				}
 			}
-		}
-		break;
-	case 24:
-		{
-			uint8* lData = (uint8*)pCanvas.GetBuffer();
+		} break;
+	case 24: {
+			uint8* data = (uint8*)canvas.GetBuffer();
 
 			int y;
-			for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-			{
-				int lYOffset = 0;
-				if (lTopToBottom == true)
-				{
-					lYOffset = y * pFileHeader.mImageSpec.mImageWidth * 3;
-				}
-				else
-				{
-					lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth * 3;
+			for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+				int y_offset = 0;
+				if (top_to_bottom == true) {
+					y_offset = y * file_header.image_spec_.image_width_ * 3;
+				} else {
+					y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_ * 3;
 				}
 
-				int lXAdd = (lLeftToRight == true) ? 1 : -1;
-				for (int x = (lLeftToRight == true) ? 0 : (pFileHeader.mImageSpec.mImageWidth - 1);
-					(lLeftToRight == true) ? (x < pFileHeader.mImageSpec.mImageWidth) : x >= 0;)
-				{
-					uint8 lRepetitionCount;
-					pFile.Read(lRepetitionCount);
+				int x_add = (left_to_right == true) ? 1 : -1;
+				for (int x = (left_to_right == true) ? 0 : (file_header.image_spec_.image_width_ - 1);
+					(left_to_right == true) ? (x < file_header.image_spec_.image_width_) : x >= 0;) {
+					uint8 repetition_count;
+					file.Read(repetition_count);
 
-					bool lRLEPacket = (lRepetitionCount & 0x80) != 0;
-					lRepetitionCount &= 0x7F;
-					lRepetitionCount++;
+					bool rle_packet = (repetition_count & 0x80) != 0;
+					repetition_count &= 0x7F;
+					repetition_count++;
 
-					if (lRLEPacket == true)
-					{
+					if (rle_packet == true) {
 						// RLE packet.
-						uint8 lPixelValue[3];
-						pFile.ReadData(&lPixelValue, 3);
+						uint8 pixel_value[3];
+						file.ReadData(&pixel_value, 3);
 
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							lData[lYOffset + x * 3 + 0] = lPixelValue[0];
-							lData[lYOffset + x * 3 + 1] = lPixelValue[1];
-							lData[lYOffset + x * 3 + 2] = lPixelValue[2];
+						for (int count = 0; count < (int)repetition_count; count++) {
+							data[y_offset + x * 3 + 0] = pixel_value[0];
+							data[y_offset + x * 3 + 1] = pixel_value[1];
+							data[y_offset + x * 3 + 2] = pixel_value[2];
 
-							x += lXAdd;
+							x += x_add;
 						}
-					}
-					else
-					{
+					} else {
 						// Raw packet.
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							if (pFile.ReadData(&lData[lYOffset + x * 3], 3) != IO_OK)
-							{
-								return (STATUS_READSTREAM_ERROR);	// TRICKY: RAII!
+						for (int count = 0; count < (int)repetition_count; count++) {
+							if (file.ReadData(&data[y_offset + x * 3], 3) != kIoOk) {
+								return (kStatusReadstreamError);	// TRICKY: RAII!
 							}
-							x += lXAdd;
+							x += x_add;
 						}
 					}
 				}
 			}
-		}
-		break;
-	case 32:
-		{
-			uint8* lData = (uint8*)pCanvas.GetBuffer();
+		} break;
+	case 32: {
+			uint8* data = (uint8*)canvas.GetBuffer();
 
 			int y;
-			for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-			{
-				int lYOffset = 0;
-				if (lTopToBottom == true)
-				{
-					lYOffset = y * pFileHeader.mImageSpec.mImageWidth * 4;
-				}
-				else
-				{
-					lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth * 4;
+			for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+				int y_offset = 0;
+				if (top_to_bottom == true) {
+					y_offset = y * file_header.image_spec_.image_width_ * 4;
+				} else {
+					y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_ * 4;
 				}
 
-				int lXAdd = (lLeftToRight == true) ? 1 : -1;
-				for (int x = (lLeftToRight == true) ? 0 : (pFileHeader.mImageSpec.mImageWidth - 1);
-					(lLeftToRight == true) ? (x < pFileHeader.mImageSpec.mImageWidth) : x >= 0;)
-				{
-					uint8 lRepetitionCount;
-					pFile.Read(lRepetitionCount);
+				int x_add = (left_to_right == true) ? 1 : -1;
+				for (int x = (left_to_right == true) ? 0 : (file_header.image_spec_.image_width_ - 1);
+					(left_to_right == true) ? (x < file_header.image_spec_.image_width_) : x >= 0;) {
+					uint8 repetition_count;
+					file.Read(repetition_count);
 
-					bool lRLEPacket = (lRepetitionCount & 0x80) != 0;
-					lRepetitionCount &= 0x7F;
-					lRepetitionCount++;
+					bool rle_packet = (repetition_count & 0x80) != 0;
+					repetition_count &= 0x7F;
+					repetition_count++;
 
-					if (lRLEPacket == true)
-					{
+					if (rle_packet == true) {
 						// RLE packet.
-						uint8 lBGRA[4];
-						pFile.ReadData(&lBGRA, 4);
+						uint8 bgra[4];
+						file.ReadData(&bgra, 4);
 
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							// Jonte: RLE stores color as BGR.
-							lData[lYOffset + x * 4 + 0] = lBGRA[2];
-							lData[lYOffset + x * 4 + 1] = lBGRA[1];
-							lData[lYOffset + x * 4 + 2] = lBGRA[0];
-							lData[lYOffset + x * 4 + 3] = lBGRA[3];
+						for (int count = 0; count < (int)repetition_count; count++) {
+							// Jonte: RLE stores color as kBgr.
+							data[y_offset + x * 4 + 0] = bgra[2];
+							data[y_offset + x * 4 + 1] = bgra[1];
+							data[y_offset + x * 4 + 2] = bgra[0];
+							data[y_offset + x * 4 + 3] = bgra[3];
 
-							x += lXAdd;
+							x += x_add;
 						}
-					}
-					else
-					{
+					} else {
 						// Raw packet.
-						for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-						{
-							uint8 lBGRA[4];
-							if (pFile.ReadData(lBGRA, sizeof(lBGRA)) != IO_OK)
-							{
-								return (STATUS_READSTREAM_ERROR);	// TRICKY: RAII!
+						for (int count = 0; count < (int)repetition_count; count++) {
+							uint8 bgra[4];
+							if (file.ReadData(bgra, sizeof(bgra)) != kIoOk) {
+								return (kStatusReadstreamError);	// TRICKY: RAII!
 							}
-							lData[lYOffset + x * 4 + 0] = lBGRA[2];
-							lData[lYOffset + x * 4 + 1] = lBGRA[1];
-							lData[lYOffset + x * 4 + 2] = lBGRA[0];
-							lData[lYOffset + x * 4 + 3] = lBGRA[3];
-							x += lXAdd;
+							data[y_offset + x * 4 + 0] = bgra[2];
+							data[y_offset + x * 4 + 1] = bgra[1];
+							data[y_offset + x * 4 + 2] = bgra[0];
+							data[y_offset + x * 4 + 3] = bgra[3];
+							x += x_add;
 						}
 					}
 				}
 			}
-		}
-		break;
+		} break;
 	};
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-TgaLoader::Status TgaLoader::LoadRLEBlackAndWhiteImage(Canvas& pCanvas, TGAFileHeader& pFileHeader, File& pFile)
-{
-	if (pFileHeader.mImageSpec.mPixelDepth != 8)
-	{
-		return STATUS_READ_PICTURE_ERROR;
+TgaLoader::Status TgaLoader::LoadRLEBlackAndWhiteImage(Canvas& canvas, TGAFileHeader& file_header, File& file) {
+	if (file_header.image_spec_.pixel_depth_ != 8) {
+		return kStatusReadPictureError;
 	}
 
-	pCanvas.Reset(pFileHeader.mImageSpec.mImageWidth,
-				   pFileHeader.mImageSpec.mImageHeight,
-				   Canvas::BITDEPTH_8_BIT);
-	pCanvas.CreateBuffer();
+	canvas.Reset(file_header.image_spec_.image_width_,
+				   file_header.image_spec_.image_height_,
+				   Canvas::kBitdepth8Bit);
+	canvas.CreateBuffer();
 
-	Color lPalette[256];
-	for (int i = 0; i < 256; i++)
-	{
-		lPalette[i].mRed   = (uint8)i;
-		lPalette[i].mGreen = (uint8)i;
-		lPalette[i].mBlue  = (uint8)i;
-		lPalette[i].mAlpha = (uint8)i;
+	Color _palette[256];
+	for (int i = 0; i < 256; i++) {
+		_palette[i].red_   = (uint8)i;
+		_palette[i].green_ = (uint8)i;
+		_palette[i].blue_  = (uint8)i;
+		_palette[i].alpha_ = (uint8)i;
 	}
-	pCanvas.SetPalette(lPalette);
+	canvas.SetPalette(_palette);
 
-	bool lLeftToRight = (pFileHeader.mImageSpec.mImageDescriptor & 16) == 0;
-	bool lTopToBottom = (pFileHeader.mImageSpec.mImageDescriptor & 32) != 0;
+	bool left_to_right = (file_header.image_spec_.image_descriptor_ & 16) == 0;
+	bool top_to_bottom = (file_header.image_spec_.image_descriptor_ & 32) != 0;
 
-	uint8* lData = (uint8*)pCanvas.GetBuffer();
+	uint8* data = (uint8*)canvas.GetBuffer();
 
 	int y;
-	for (y = 0; y < pFileHeader.mImageSpec.mImageHeight; y++)
-	{
-		int lYOffset = 0;
-		if (lTopToBottom == true)
-		{
-			lYOffset = y * pFileHeader.mImageSpec.mImageWidth;
-		}
-		else
-		{
-			lYOffset = (pFileHeader.mImageSpec.mImageHeight - (y + 1)) * pFileHeader.mImageSpec.mImageWidth;
+	for (y = 0; y < file_header.image_spec_.image_height_; y++) {
+		int y_offset = 0;
+		if (top_to_bottom == true) {
+			y_offset = y * file_header.image_spec_.image_width_;
+		} else {
+			y_offset = (file_header.image_spec_.image_height_ - (y + 1)) * file_header.image_spec_.image_width_;
 		}
 
-		int lXAdd = (lLeftToRight == true) ? 1 : -1;
-		for (int x = (lLeftToRight == true) ? 0 : (pFileHeader.mImageSpec.mImageWidth - 1);
-			(lLeftToRight == true) ? (x < pFileHeader.mImageSpec.mImageWidth) : x >= 0;)
-		{
-			uint8 lRepetitionCount;
-			pFile.Read(lRepetitionCount);
+		int x_add = (left_to_right == true) ? 1 : -1;
+		for (int x = (left_to_right == true) ? 0 : (file_header.image_spec_.image_width_ - 1);
+			(left_to_right == true) ? (x < file_header.image_spec_.image_width_) : x >= 0;) {
+			uint8 repetition_count;
+			file.Read(repetition_count);
 
-			bool lRLEPacket = (lRepetitionCount & 0x80) != 0;
-			lRepetitionCount &= 0x7F;
-			lRepetitionCount++;
+			bool rle_packet = (repetition_count & 0x80) != 0;
+			repetition_count &= 0x7F;
+			repetition_count++;
 
-			if (lRLEPacket == true)
-			{
+			if (rle_packet == true) {
 				// RLE packet.
-				uint8 lPixelValue;
-				pFile.Read(lPixelValue);
+				uint8 pixel_value;
+				file.Read(pixel_value);
 
-				for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-				{
-					lData[lYOffset + x] = lPixelValue;
-					x += lXAdd;
+				for (int count = 0; count < (int)repetition_count; count++) {
+					data[y_offset + x] = pixel_value;
+					x += x_add;
 				}
-			}
-			else
-			{
+			} else {
 				// Raw packet.
-				for (int lCount = 0; lCount < (int)lRepetitionCount; lCount++)
-				{
-					pFile.Read(lData[lYOffset + x]);
-					x += lXAdd;
+				for (int count = 0; count < (int)repetition_count; count++) {
+					file.Read(data[y_offset + x]);
+					x += x_add;
 				}
 			}
 		}
 	}
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
 
 
-const char* TgaLoader::smTruevisionXFile = "TRUEVISION-XFILE.";
+const char* TgaLoader::truevision_x_file_ = "TRUEVISION-XFILE.";
 
 
 

@@ -1,32 +1,30 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../UiCure/Include/UiMachine.h"
-#include "Bound.h"
+#include "../uicure/include/uimachine.h"
+#include "bound.h"
 
 
 
-namespace Bound
-{
+namespace Bound {
 
 
 
-class Ball: public UiCure::Machine
-{
+class Ball: public UiCure::Machine {
 	typedef UiCure::Machine Parent;
 public:
-	Ball(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager);
+	Ball(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager);
 	virtual ~Ball();
 
 	virtual void OnTick();
 
 private:
-	float mAverageSpeed;
+	float average_speed_;
 };
 
 

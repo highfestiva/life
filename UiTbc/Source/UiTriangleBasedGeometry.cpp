@@ -1,1215 +1,1074 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiTriangleBasedGeometry.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/ResourceTracker.h"
+#include "../include/uitrianglebasedgeometry.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/resourcetracker.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
 TriangleBasedGeometry::TriangleBasedGeometry() :
-	mVertexCount(0),
-	mIndexCount(0),
-	mMaxIndexCount(0),
-	mUVSetCount(0),
-	mVertexData(0),
-	mUVData(0),
-	mColorData(0),
-	mIndexData(0),
-	mColorFormat(COLOR_RGB),
-	mGeometryVolatility(Tbc::GeometryBase::GEOM_STATIC)
-{
+	vertex_count_(0),
+	index_count_(0),
+	max_index_count_(0),
+	uv_set_count_(0),
+	vertex_data_(0),
+	uv_data_(0),
+	color_data_(0),
+	index_data_(0),
+	color_format_(kColorRgb),
+	geometry_volatility_(tbc::GeometryBase::kGeomStatic) {
 	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
-	SetPrimitiveType(Tbc::GeometryBase::TRIANGLES);
+	SetPrimitiveType(tbc::GeometryBase::kTriangles);
 }
 
-TriangleBasedGeometry::TriangleBasedGeometry(const TriangleBasedGeometry& pGeometry) :
-	mVertexCount(0),
-	mIndexCount(0),
-	mMaxIndexCount(0),
-	mUVSetCount(0),
-	mVertexData(0),
-	mUVData(0),
-	mColorData(0),
-	mIndexData(0),
-	mColorFormat(COLOR_RGB),
-	mGeometryVolatility(Tbc::GeometryBase::GEOM_STATIC)
-{
+TriangleBasedGeometry::TriangleBasedGeometry(const TriangleBasedGeometry& geometry) :
+	vertex_count_(0),
+	index_count_(0),
+	max_index_count_(0),
+	uv_set_count_(0),
+	vertex_data_(0),
+	uv_data_(0),
+	color_data_(0),
+	index_data_(0),
+	color_format_(kColorRgb),
+	geometry_volatility_(tbc::GeometryBase::kGeomStatic) {
 	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
-	SetPrimitiveType(Tbc::GeometryBase::TRIANGLES);
-	Copy(pGeometry);
+	SetPrimitiveType(tbc::GeometryBase::kTriangles);
+	Copy(geometry);
 }
 
-TriangleBasedGeometry::TriangleBasedGeometry(const vec3* pVertices,
-                                             const vec3* pVertexNormals,
-                                             const Vector2D<float>* pUV,
-                                             const Color* pColor,
-                                             ColorFormat pColorFormat,
-                                             const uint32* pIndices,
-                                             unsigned int pVertexCount,
-                                             unsigned int pIndexCount,
-					     Tbc::GeometryBase::PrimitiveType pPrimitiveType,
-                                             Tbc::GeometryBase::GeometryVolatility pGeomType) :
-	mVertexCount(0),
-	mIndexCount(0),
-	mMaxIndexCount(0),
-	mUVSetCount(0),
-	mVertexData(0),
-	mUVData(0),
-	mColorData(0),
-	mIndexData(0),
-	mColorFormat(COLOR_RGB),
-	mGeometryVolatility(Tbc::GeometryBase::GEOM_STATIC)
-{
+TriangleBasedGeometry::TriangleBasedGeometry(const vec3* vertices,
+                                             const vec3* vertex_normals,
+                                             const Vector2D<float>* uv,
+                                             const Color* color,
+                                             ColorFormat color_format,
+                                             const uint32* indices,
+                                             unsigned int vertex_count,
+                                             unsigned int index_count,
+					     tbc::GeometryBase::PrimitiveType primitive_type,
+                                             tbc::GeometryBase::GeometryVolatility geom_type) :
+	vertex_count_(0),
+	index_count_(0),
+	max_index_count_(0),
+	uv_set_count_(0),
+	vertex_data_(0),
+	uv_data_(0),
+	color_data_(0),
+	index_data_(0),
+	color_format_(kColorRgb),
+	geometry_volatility_(tbc::GeometryBase::kGeomStatic) {
 	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
 
-	Set(pVertices,
-		pVertexNormals,
-		pUV,
-		pColor,
-		pColorFormat,
-		pIndices,
-		pVertexCount,
-		pIndexCount,
-		pPrimitiveType,
-		pGeomType);
+	Set(vertices,
+		vertex_normals,
+		uv,
+		color,
+		color_format,
+		indices,
+		vertex_count,
+		index_count,
+		primitive_type,
+		geom_type);
 }
 
-TriangleBasedGeometry::TriangleBasedGeometry(const float* pVertexData,
-                                             const float* pVertexNormals,
-                                             const float* pUVData,
-                                             const uint8* pColorData,
-                                             ColorFormat pColorFormat,
-                                             const uint32* pIndices,
-                                             unsigned int pVertexCount,
-                                             unsigned int pIndexCount,
-					     Tbc::GeometryBase::PrimitiveType pPrimitiveType,
-                                             Tbc::GeometryBase::GeometryVolatility pGeomType) :
-	mVertexCount(0),
-	mIndexCount(0),
-	mMaxIndexCount(0),
-	mUVSetCount(0),
-	mVertexData(0),
-	mUVData(0),
-	mColorData(0),
-	mIndexData(0),
-	mColorFormat(COLOR_RGB),
-	mGeometryVolatility(Tbc::GeometryBase::GEOM_STATIC)
-{
+TriangleBasedGeometry::TriangleBasedGeometry(const float* vertex_data,
+                                             const float* vertex_normals,
+                                             const float* uv_data,
+                                             const uint8* color_data,
+                                             ColorFormat color_format,
+                                             const uint32* indices,
+                                             unsigned int vertex_count,
+                                             unsigned int index_count,
+					     tbc::GeometryBase::PrimitiveType primitive_type,
+                                             tbc::GeometryBase::GeometryVolatility geom_type) :
+	vertex_count_(0),
+	index_count_(0),
+	max_index_count_(0),
+	uv_set_count_(0),
+	vertex_data_(0),
+	uv_data_(0),
+	color_data_(0),
+	index_data_(0),
+	color_format_(kColorRgb),
+	geometry_volatility_(tbc::GeometryBase::kGeomStatic) {
 	LEPRA_ACQUIRE_RESOURCE(TriangleBasedGeometry);
 
-	Set(pVertexData,
-		pVertexNormals,
-		pUVData,
-		pColorData,
-		pColorFormat,
-		pIndices,
-		pVertexCount,
-		pIndexCount,
-		pPrimitiveType,
-		pGeomType);
+	Set(vertex_data,
+		vertex_normals,
+		uv_data,
+		color_data,
+		color_format,
+		indices,
+		vertex_count,
+		index_count,
+		primitive_type,
+		geom_type);
 }
 
-void TriangleBasedGeometry::Set(const vec3* pVertices,
-                                const vec3* pVertexNormals,
-                                const Vector2D<float>* pUV,
-                                const Color* pColor,
-                                ColorFormat pColorFormat,
-                                const uint32* pIndices,
-                                unsigned int pVertexCount,
-                                unsigned int pIndexCount,
-				Tbc::GeometryBase::PrimitiveType pPrimitiveType,
-                                Tbc::GeometryBase::GeometryVolatility pGeomType)
-{
+void TriangleBasedGeometry::Set(const vec3* vertices,
+                                const vec3* vertex_normals,
+                                const Vector2D<float>* uv,
+                                const Color* color,
+                                ColorFormat color_format,
+                                const uint32* indices,
+                                unsigned int vertex_count,
+                                unsigned int index_count,
+				tbc::GeometryBase::PrimitiveType primitive_type,
+                                tbc::GeometryBase::GeometryVolatility geom_type) {
 	ClearAll();
 
-	SetPrimitiveType(pPrimitiveType);
-	mGeometryVolatility = pGeomType;
+	SetPrimitiveType(primitive_type);
+	geometry_volatility_ = geom_type;
 
-	if (pVertexCount > 0 && pVertices != 0)
-	{
+	if (vertex_count > 0 && vertices != 0) {
 		unsigned int i;
-		int lIndex;
+		int index;
 
-		mVertexCount = pVertexCount;
-		mIndexCount = pIndexCount;
-		mMaxIndexCount = pIndexCount;
+		vertex_count_ = vertex_count;
+		index_count_ = index_count;
+		max_index_count_ = index_count;
 
 		// Copy vertex data.
-		mVertexData = new float[mVertexCount * 3];
-		for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += 3)
-		{
-			mVertexData[lIndex + 0] = pVertices[i].x;
-			mVertexData[lIndex + 1] = pVertices[i].y;
-			mVertexData[lIndex + 2] = pVertices[i].z;
+		vertex_data_ = new float[vertex_count_ * 3];
+		for (i = 0, index = 0; i < vertex_count_; i++, index += 3) {
+			vertex_data_[index + 0] = vertices[i].x;
+			vertex_data_[index + 1] = vertices[i].y;
+			vertex_data_[index + 2] = vertices[i].z;
 		}
 
-		if (pVertexNormals != 0)
-		{
+		if (vertex_normals != 0) {
 			// Copy normal data.
-			Tbc::GeometryBase::AllocVertexNormalData();
-			float* lVertexNormalData = Tbc::GeometryBase::GetNormalData();
-			for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += 3)
-			{
-				lVertexNormalData[lIndex + 0] = pVertexNormals[i].x;
-				lVertexNormalData[lIndex + 1] = pVertexNormals[i].y;
-				lVertexNormalData[lIndex + 2] = pVertexNormals[i].z;
+			tbc::GeometryBase::AllocVertexNormalData();
+			float* vertex_normal_data = tbc::GeometryBase::GetNormalData();
+			for (i = 0, index = 0; i < vertex_count_; i++, index += 3) {
+				vertex_normal_data[index + 0] = vertex_normals[i].x;
+				vertex_normal_data[index + 1] = vertex_normals[i].y;
+				vertex_normal_data[index + 2] = vertex_normals[i].z;
 			}
 		}
 
-		if (pUV != 0)
-		{
-			AddUVSet(pUV);
+		if (uv != 0) {
+			AddUVSet(uv);
 		}
 
-		if (pColor != 0)
-		{
+		if (color != 0) {
 			// Copy color data.
-			mColorFormat = pColorFormat;
+			color_format_ = color_format;
 
-			int lSize = 4;
-			if (mColorFormat == COLOR_RGB)
-				lSize = 3;
+			int size = 4;
+			if (color_format_ == kColorRgb)
+				size = 3;
 
-			mColorData = new uint8[mVertexCount * lSize];
-			for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += lSize)
-			{
-				mColorData[lIndex + 0] = pColor[i].mRed;
-				mColorData[lIndex + 1] = pColor[i].mGreen;
-				mColorData[lIndex + 2] = pColor[i].mBlue;
+			color_data_ = new uint8[vertex_count_ * size];
+			for (i = 0, index = 0; i < vertex_count_; i++, index += size) {
+				color_data_[index + 0] = color[i].red_;
+				color_data_[index + 1] = color[i].green_;
+				color_data_[index + 2] = color[i].blue_;
 
-				if (mColorFormat == COLOR_RGBA)
-					mColorData[lIndex + 3] = pColor[i].mAlpha;
+				if (color_format_ == kColorRgba)
+					color_data_[index + 3] = color[i].alpha_;
 			}
 		}
 
-		if (pIndices != 0)
-		{
+		if (indices != 0) {
 			// Copy index data.
-			mIndexData = new vtx_idx_t[mIndexCount];
-			for (i = 0; i < mIndexCount; i++)
-			{
-				mIndexData[i] = (vtx_idx_t)pIndices[i];
+			index_data_ = new vtx_idx_t[index_count_];
+			for (i = 0; i < index_count_; i++) {
+				index_data_[i] = (vtx_idx_t)indices[i];
 			}
 		}
 	}
 
-	Tbc::GeometryBase::CalculateBoundingRadius();
+	tbc::GeometryBase::CalculateBoundingRadius();
 }
 
-void TriangleBasedGeometry::Set(const float* pVertexData,
-                                const float* pVertexNormals,
-                                const float* pUVData,
-                                const uint8* pColorData,
-                                ColorFormat pColorFormat,
-                                const uint32* pIndices,
-                                unsigned int pVertexCount,
-                                unsigned int pIndexCount,
-				Tbc::GeometryBase::PrimitiveType pPrimitiveType,
-                                Tbc::GeometryBase::GeometryVolatility pGeomType)
-{
+void TriangleBasedGeometry::Set(const float* vertex_data,
+                                const float* vertex_normals,
+                                const float* uv_data,
+                                const uint8* color_data,
+                                ColorFormat color_format,
+                                const uint32* indices,
+                                unsigned int vertex_count,
+                                unsigned int index_count,
+				tbc::GeometryBase::PrimitiveType primitive_type,
+                                tbc::GeometryBase::GeometryVolatility geom_type) {
 	ClearAll();
 
-	SetPrimitiveType(pPrimitiveType);
-	mGeometryVolatility = pGeomType;
+	SetPrimitiveType(primitive_type);
+	geometry_volatility_ = geom_type;
 
-	if (pVertexCount > 0 && pVertexData != 0)
-	{
+	if (vertex_count > 0 && vertex_data != 0) {
 		unsigned int i;
-		int lIndex;
+		int index;
 
-		mVertexCount = pVertexCount;
-		mIndexCount = pIndexCount;
-		mMaxIndexCount = pIndexCount;
+		vertex_count_ = vertex_count;
+		index_count_ = index_count;
+		max_index_count_ = index_count;
 
 		// Copy vertex data.
-		mVertexData = new float[mVertexCount * 3];
-		for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += 3)
-		{
-			mVertexData[lIndex + 0] = pVertexData[lIndex + 0];
-			mVertexData[lIndex + 1] = pVertexData[lIndex + 1];
-			mVertexData[lIndex + 2] = pVertexData[lIndex + 2];
+		vertex_data_ = new float[vertex_count_ * 3];
+		for (i = 0, index = 0; i < vertex_count_; i++, index += 3) {
+			vertex_data_[index + 0] = vertex_data[index + 0];
+			vertex_data_[index + 1] = vertex_data[index + 1];
+			vertex_data_[index + 2] = vertex_data[index + 2];
 		}
 
-		if (pVertexNormals != 0)
-		{
+		if (vertex_normals != 0) {
 			// Copy normal data.
-			SetVertexNormalData(pVertexNormals, mVertexCount);
+			SetVertexNormalData(vertex_normals, vertex_count_);
 		}
 
-		if (pUVData != 0)
-		{
-			AddUVSet(pUVData);
+		if (uv_data != 0) {
+			AddUVSet(uv_data);
 		}
 
-		if (pColorData != 0)
-		{
+		if (color_data != 0) {
 			// Copy color data.
-			mColorFormat = pColorFormat;
+			color_format_ = color_format;
 
-			int lSize = 4;
-			if (mColorFormat == COLOR_RGB)
-				lSize = 3;
+			int size = 4;
+			if (color_format_ == kColorRgb)
+				size = 3;
 
-			mColorData = new uint8[mVertexCount * lSize];
+			color_data_ = new uint8[vertex_count_ * size];
 
-			for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += lSize)
-			{
-				mColorData[lIndex + 0] = pColorData[lIndex + 0];
-				mColorData[lIndex + 1] = pColorData[lIndex + 1];
-				mColorData[lIndex + 2] = pColorData[lIndex + 2];
+			for (i = 0, index = 0; i < vertex_count_; i++, index += size) {
+				color_data_[index + 0] = color_data[index + 0];
+				color_data_[index + 1] = color_data[index + 1];
+				color_data_[index + 2] = color_data[index + 2];
 
-				if (mColorFormat == COLOR_RGBA)
-					mColorData[lIndex + 3] = pColorData[lIndex + 3];
+				if (color_format_ == kColorRgba)
+					color_data_[index + 3] = color_data[index + 3];
 			}
 		}
 
-		if (pIndices != 0)
-		{
+		if (indices != 0) {
 			// Copy index data.
-			mIndexData = new vtx_idx_t[mIndexCount];
-			for (i = 0; i < mIndexCount; i++)
-			{
-				mIndexData[i] = pIndices[i];
+			index_data_ = new vtx_idx_t[index_count_];
+			for (i = 0; i < index_count_; i++) {
+				index_data_[i] = indices[i];
 			}
 		}
 	}
 
-	Tbc::GeometryBase::CalculateBoundingRadius();
+	tbc::GeometryBase::CalculateBoundingRadius();
 }
 
-void TriangleBasedGeometry::Copy(const TriangleBasedGeometry& pGeometry)
-{
+void TriangleBasedGeometry::Copy(const TriangleBasedGeometry& geometry) {
 	ClearAll();
 
-	if (pGeometry.mVertexCount > 0 && pGeometry.mVertexData != 0)
-	{
+	if (geometry.vertex_count_ > 0 && geometry.vertex_data_ != 0) {
 		unsigned int i;
-		int lIndex;
+		int index;
 
-		TriangleBasedGeometry& lGeometry = (TriangleBasedGeometry&)pGeometry;
+		TriangleBasedGeometry& _geometry = (TriangleBasedGeometry&)geometry;
 
-		mVertexCount = pGeometry.GetVertexCount();
-		mIndexCount = pGeometry.GetIndexCount();
-		mMaxIndexCount = pGeometry.GetMaxIndexCount();
+		vertex_count_ = geometry.GetVertexCount();
+		index_count_ = geometry.GetIndexCount();
+		max_index_count_ = geometry.GetMaxIndexCount();
 
-		mGeometryVolatility = pGeometry.GetGeometryVolatility();
+		geometry_volatility_ = geometry.GetGeometryVolatility();
 
-		Tbc::GeometryBase::SetBasicMaterialSettings(pGeometry.GetBasicMaterialSettings());
+		tbc::GeometryBase::SetBasicMaterialSettings(geometry.GetBasicMaterialSettings());
 
-		Tbc::GeometryBase::SetBoundingRadius(pGeometry.GetBoundingRadius());
+		tbc::GeometryBase::SetBoundingRadius(geometry.GetBoundingRadius());
 
 		// Copy vertex data.
-		const float* lVertexData = lGeometry.GetVertexData();
-		mVertexData = new float[mVertexCount * 3];
-		for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += 3)
-		{
-			mVertexData[lIndex + 0] = lVertexData[lIndex + 0];
-			mVertexData[lIndex + 1] = lVertexData[lIndex + 1];
-			mVertexData[lIndex + 2] = lVertexData[lIndex + 2];
+		const float* _vertex_data = _geometry.GetVertexData();
+		vertex_data_ = new float[vertex_count_ * 3];
+		for (i = 0, index = 0; i < vertex_count_; i++, index += 3) {
+			vertex_data_[index + 0] = _vertex_data[index + 0];
+			vertex_data_[index + 1] = _vertex_data[index + 1];
+			vertex_data_[index + 2] = _vertex_data[index + 2];
 		}
 
-		if (lGeometry.GetNormalData() != 0)
-		{
+		if (_geometry.GetNormalData() != 0) {
 			// Copy normal data.
-			Tbc::GeometryBase::SetVertexNormalData(lGeometry.GetNormalData(), mVertexCount);
+			tbc::GeometryBase::SetVertexNormalData(_geometry.GetNormalData(), vertex_count_);
 		}
 
-		if (lGeometry.GetSurfaceNormalData() != 0)
-		{
-			Tbc::GeometryBase::SetSurfaceNormalData(lGeometry.GetSurfaceNormalData());
+		if (_geometry.GetSurfaceNormalData() != 0) {
+			tbc::GeometryBase::SetSurfaceNormalData(_geometry.GetSurfaceNormalData());
 		}
 
-		if (lGeometry.GetUVData() != 0)
-		{
-			mUVData = new float*[lGeometry.GetUVSetCount()];
-			const int lUVCountPerVertex = lGeometry.GetUVCountPerVertex();
-			
-			for (unsigned int j = 0; j < lGeometry.GetUVSetCount(); j++)
-			{
+		if (_geometry.GetUVData() != 0) {
+			uv_data_ = new float*[_geometry.GetUVSetCount()];
+			const int uv_count_per_vertex = _geometry.GetUVCountPerVertex();
+
+			for (unsigned int j = 0; j < _geometry.GetUVSetCount(); j++) {
 				// Copy UV data.
-				mUVData[j] = new float[mVertexCount * lUVCountPerVertex];
-				::memcpy(mUVData[j], lGeometry.GetUVData(j), mVertexCount*lUVCountPerVertex*sizeof(float));
+				uv_data_[j] = new float[vertex_count_ * uv_count_per_vertex];
+				::memcpy(uv_data_[j], _geometry.GetUVData(j), vertex_count_*uv_count_per_vertex*sizeof(float));
 			}
 		}
 
-		if (lGeometry.GetColorData() != 0)
-		{
+		if (_geometry.GetColorData() != 0) {
 			// Copy color data.
-			mColorFormat = lGeometry.GetColorFormat();
+			color_format_ = _geometry.GetColorFormat();
 
-			int lSize = 4;
-			if (mColorFormat == COLOR_RGB)
-				lSize = 3;
+			int size = 4;
+			if (color_format_ == kColorRgb)
+				size = 3;
 
-			const uint8* lColorData = lGeometry.GetColorData();
-			mColorData = new uint8[mVertexCount * lSize];
-			for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += lSize)
-			{
-				mColorData[lIndex + 0] = lColorData[lIndex + 0];
-				mColorData[lIndex + 1] = lColorData[lIndex + 1];
-				mColorData[lIndex + 2] = lColorData[lIndex + 2];
+			const uint8* _color_data = _geometry.GetColorData();
+			color_data_ = new uint8[vertex_count_ * size];
+			for (i = 0, index = 0; i < vertex_count_; i++, index += size) {
+				color_data_[index + 0] = _color_data[index + 0];
+				color_data_[index + 1] = _color_data[index + 1];
+				color_data_[index + 2] = _color_data[index + 2];
 
-				if (mColorFormat == COLOR_RGBA)
-					mColorData[lIndex + 3] = lColorData[lIndex + 3];
+				if (color_format_ == kColorRgba)
+					color_data_[index + 3] = _color_data[index + 3];
 			}
 		}
 
-		if (lGeometry.GetIndexData() != 0)
-		{
+		if (_geometry.GetIndexData() != 0) {
 			// Copy index data.
-			const vtx_idx_t* lIndices = lGeometry.GetIndexData();
-			mIndexData = new vtx_idx_t[mMaxIndexCount];
-			for (i = 0; i < mMaxIndexCount; i++)
-			{
-				mIndexData[i] = lIndices[i];
+			const vtx_idx_t* _indices = _geometry.GetIndexData();
+			index_data_ = new vtx_idx_t[max_index_count_];
+			for (i = 0; i < max_index_count_; i++) {
+				index_data_[i] = _indices[i];
 			}
 		}
 
-		Tbc::GeometryBase::Copy(&lGeometry);
+		tbc::GeometryBase::Copy(&_geometry);
 	}
 }
 
-TriangleBasedGeometry::~TriangleBasedGeometry()
-{
+TriangleBasedGeometry::~TriangleBasedGeometry() {
 	LEPRA_RELEASE_RESOURCE(TriangleBasedGeometry);
 
 	ClearAll();
 }
 
-void TriangleBasedGeometry::ClearAll()
-{
-	if (mVertexData != 0)
-	{
-		delete[] mVertexData;
-		mVertexData = 0;
+void TriangleBasedGeometry::ClearAll() {
+	if (vertex_data_ != 0) {
+		delete[] vertex_data_;
+		vertex_data_ = 0;
 	}
 
-	Tbc::GeometryBase::ClearSurfaceNormalData();
-	Tbc::GeometryBase::ClearVertexNormalData();
+	tbc::GeometryBase::ClearSurfaceNormalData();
+	tbc::GeometryBase::ClearVertexNormalData();
 
-	if (mUVSetCount > 0)
-	{
-		for (unsigned int i = 0; i < mUVSetCount; i++)
-		{
-			delete[] mUVData[i];
+	if (uv_set_count_ > 0) {
+		for (unsigned int i = 0; i < uv_set_count_; i++) {
+			delete[] uv_data_[i];
 		}
-		delete[] mUVData;
-		mUVData = 0;
+		delete[] uv_data_;
+		uv_data_ = 0;
 	}
 
-	if (mColorData != 0)
-	{
-		delete[] mColorData;
-		mColorData = 0;
+	if (color_data_ != 0) {
+		delete[] color_data_;
+		color_data_ = 0;
 	}
 
-	if (mIndexData != 0)
-	{
-		delete[] mIndexData;
-		mIndexData = 0;
+	if (index_data_ != 0) {
+		delete[] index_data_;
+		index_data_ = 0;
 	}
 
-	mVertexCount = 0;
-	mIndexCount = 0;
-	mMaxIndexCount = 0;
+	vertex_count_ = 0;
+	index_count_ = 0;
+	max_index_count_ = 0;
 
-	Tbc::GeometryBase::ClearAll();
+	tbc::GeometryBase::ClearAll();
 	SetVertexDataChanged(true);
 	SetUVDataChanged(true);
 	SetColorDataChanged(true);
 	SetIndexDataChanged(true);
 }
 
-void TriangleBasedGeometry::SetIndexData(vtx_idx_t* pIndexData, unsigned pIndexCount, unsigned pMaxIndexCount)
-{
-	mIndexData = pIndexData;
-	mIndexCount = pIndexCount;
-	mMaxIndexCount = pMaxIndexCount;
+void TriangleBasedGeometry::SetIndexData(vtx_idx_t* index_data, unsigned index_count, unsigned max_index_count) {
+	index_data_ = index_data;
+	index_count_ = index_count;
+	max_index_count_ = max_index_count;
 }
 
-void TriangleBasedGeometry::SetPolygon(vec3* pVertices, unsigned int pVertexCount)
-{
+void TriangleBasedGeometry::SetPolygon(vec3* vertices, unsigned int vertex_count) {
 	ClearAll();
-	mVertexData = new float[pVertexCount * 3];
+	vertex_data_ = new float[vertex_count * 3];
 
-	for (unsigned int i = 0; i < pVertexCount; i++)
-	{
-		mVertexData[i * 3 + 0] = pVertices[i].x;
-		mVertexData[i * 3 + 1] = pVertices[i].y;
-		mVertexData[i * 3 + 2] = pVertices[i].z;
+	for (unsigned int i = 0; i < vertex_count; i++) {
+		vertex_data_[i * 3 + 0] = vertices[i].x;
+		vertex_data_[i * 3 + 1] = vertices[i].y;
+		vertex_data_[i * 3 + 2] = vertices[i].z;
 	}
 
-	mVertexCount = pVertexCount;
+	vertex_count_ = vertex_count;
 
-	Tbc::GeometryBase::CalculateBoundingRadius();
+	tbc::GeometryBase::CalculateBoundingRadius();
 }
 
-int TriangleBasedGeometry::AddUVSet(const float* pUVData)
-{
-	unsigned int lUVSetCount = mUVSetCount + 1;
-	float** lUVData = new float*[lUVSetCount];
+int TriangleBasedGeometry::AddUVSet(const float* uv_data) {
+	unsigned int uv_set_count = uv_set_count_ + 1;
+	float** _uv_data = new float*[uv_set_count];
 
-	unsigned int lUVSetIndex;
+	unsigned int uv_set_index;
 
 	// Copy present data.
-	for (lUVSetIndex = 0; lUVSetIndex < mUVSetCount; lUVSetIndex++)
-	{
-		lUVData[lUVSetIndex] = new float[mVertexCount * GetUVCountPerVertex()];
-		::memcpy(lUVData[lUVSetIndex], mUVData[lUVSetIndex], mVertexCount*GetUVCountPerVertex()*sizeof(float));
-		delete[] mUVData[lUVSetIndex];
+	for (uv_set_index = 0; uv_set_index < uv_set_count_; uv_set_index++) {
+		_uv_data[uv_set_index] = new float[vertex_count_ * GetUVCountPerVertex()];
+		::memcpy(_uv_data[uv_set_index], uv_data_[uv_set_index], vertex_count_*GetUVCountPerVertex()*sizeof(float));
+		delete[] uv_data_[uv_set_index];
 	}
 
-	delete[] mUVData;
+	delete[] uv_data_;
 
-	lUVData[lUVSetIndex] = new float[mVertexCount * GetUVCountPerVertex()];
+	_uv_data[uv_set_index] = new float[vertex_count_ * GetUVCountPerVertex()];
 
-	// Add new data at lUVSetIndex.
-	::memcpy(lUVData[lUVSetIndex], pUVData, mVertexCount*GetUVCountPerVertex()*sizeof(float));
+	// Add new data at uv_set_index.
+	::memcpy(_uv_data[uv_set_index], uv_data, vertex_count_*GetUVCountPerVertex()*sizeof(float));
 
-	mUVData = lUVData;
-	mUVSetCount = lUVSetCount;
+	uv_data_ = _uv_data;
+	uv_set_count_ = uv_set_count;
 
-	return mUVSetCount - 1;
+	return uv_set_count_ - 1;
 }
 
-int TriangleBasedGeometry::AddUVSet(const Vector2D<float>* pUVData)
-{
-	unsigned int lUVSetCount = mUVSetCount + 1;
-	float** lUVData = new float*[lUVSetCount];
+int TriangleBasedGeometry::AddUVSet(const Vector2D<float>* uv_data) {
+	unsigned int uv_set_count = uv_set_count_ + 1;
+	float** _uv_data = new float*[uv_set_count];
 
-	unsigned int lUVSetIndex;
+	unsigned int uv_set_index;
 	unsigned int i;
 
 	// Copy present data.
-	const int lUVCountPerVertex = GetUVCountPerVertex();
-	for (lUVSetIndex = 0; lUVSetIndex < mUVSetCount; lUVSetIndex++)
-	{
-		lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
-		::memcpy(lUVData[lUVSetIndex], mUVData[lUVSetIndex], mVertexCount*lUVCountPerVertex*sizeof(float));
-		delete[] mUVData[lUVSetIndex];
+	const int uv_count_per_vertex = GetUVCountPerVertex();
+	for (uv_set_index = 0; uv_set_index < uv_set_count_; uv_set_index++) {
+		_uv_data[uv_set_index] = new float[vertex_count_ * uv_count_per_vertex];
+		::memcpy(_uv_data[uv_set_index], uv_data_[uv_set_index], vertex_count_*uv_count_per_vertex*sizeof(float));
+		delete[] uv_data_[uv_set_index];
 	}
 
-	delete[] mUVData;
+	delete[] uv_data_;
 
-	lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
-	::memset(lUVData[lUVSetIndex], 0, mVertexCount*lUVCountPerVertex*sizeof(float));
+	_uv_data[uv_set_index] = new float[vertex_count_ * uv_count_per_vertex];
+	::memset(_uv_data[uv_set_index], 0, vertex_count_*uv_count_per_vertex*sizeof(float));
 
-	// Add new data at lUVSetIndex.
-	for (i = 0; i < mVertexCount; i++)
-	{
-		lUVData[lUVSetIndex][i * lUVCountPerVertex + 0] = pUVData[i].x;
-		lUVData[lUVSetIndex][i * lUVCountPerVertex + 1] = pUVData[i].y;
+	// Add new data at uv_set_index.
+	for (i = 0; i < vertex_count_; i++) {
+		_uv_data[uv_set_index][i * uv_count_per_vertex + 0] = uv_data[i].x;
+		_uv_data[uv_set_index][i * uv_count_per_vertex + 1] = uv_data[i].y;
 	}
 
-	mUVData = lUVData;
-	mUVSetCount = lUVSetCount;
+	uv_data_ = _uv_data;
+	uv_set_count_ = uv_set_count;
 
-	return mUVSetCount - 1;
+	return uv_set_count_ - 1;
 }
 
-int TriangleBasedGeometry::AddEmptyUVSet()
-{
-	unsigned int lUVSetCount = mUVSetCount + 1;
-	float** lUVData = new float*[lUVSetCount];
+int TriangleBasedGeometry::AddEmptyUVSet() {
+	unsigned int uv_set_count = uv_set_count_ + 1;
+	float** _uv_data = new float*[uv_set_count];
 
-	unsigned int lUVSetIndex;
+	unsigned int uv_set_index;
 
 	// Copy present data.
-	const int lUVCountPerVertex = GetUVCountPerVertex();
-	for (lUVSetIndex = 0; lUVSetIndex < mUVSetCount; lUVSetIndex++)
-	{
-		lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
-		::memcpy(lUVData[lUVSetIndex], mUVData[lUVSetIndex], mVertexCount*lUVCountPerVertex*sizeof(float));
-		delete[] mUVData[lUVSetIndex];
+	const int uv_count_per_vertex = GetUVCountPerVertex();
+	for (uv_set_index = 0; uv_set_index < uv_set_count_; uv_set_index++) {
+		_uv_data[uv_set_index] = new float[vertex_count_ * uv_count_per_vertex];
+		::memcpy(_uv_data[uv_set_index], uv_data_[uv_set_index], vertex_count_*uv_count_per_vertex*sizeof(float));
+		delete[] uv_data_[uv_set_index];
 	}
 
-	delete[] mUVData;
+	delete[] uv_data_;
 
-	lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
-	::memset(lUVData[lUVSetIndex], 0, mVertexCount*lUVCountPerVertex*sizeof(float));
+	_uv_data[uv_set_index] = new float[vertex_count_ * uv_count_per_vertex];
+	::memset(_uv_data[uv_set_index], 0, vertex_count_*uv_count_per_vertex*sizeof(float));
 
-	mUVData = lUVData;
-	mUVSetCount = lUVSetCount;
+	uv_data_ = _uv_data;
+	uv_set_count_ = uv_set_count;
 
-	return mUVSetCount - 1;
+	return uv_set_count_ - 1;
 }
 
-int TriangleBasedGeometry::DupUVSet(int pUVSet)
-{
-	int lNewUVSet = -1;
-	if (pUVSet >= 0 && pUVSet < (int)mUVSetCount)
-	{
-		unsigned int lUVSetCount = mUVSetCount + 1;
-		float** lUVData = new float*[lUVSetCount];
+int TriangleBasedGeometry::DupUVSet(int uv_set) {
+	int new_uv_set = -1;
+	if (uv_set >= 0 && uv_set < (int)uv_set_count_) {
+		unsigned int uv_set_count = uv_set_count_ + 1;
+		float** _uv_data = new float*[uv_set_count];
 
-		unsigned int lUVSetIndex;
+		unsigned int uv_set_index;
 
 		// Copy present data.
-		const int lUVCountPerVertex = GetUVCountPerVertex();
-		for (lUVSetIndex = 0; lUVSetIndex < mUVSetCount; lUVSetIndex++)
-		{
-			lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
-			::memcpy(lUVData[lUVSetIndex], mUVData[lUVSetIndex], mVertexCount*lUVCountPerVertex*sizeof(float));
-			delete[] mUVData[lUVSetIndex];
+		const int uv_count_per_vertex = GetUVCountPerVertex();
+		for (uv_set_index = 0; uv_set_index < uv_set_count_; uv_set_index++) {
+			_uv_data[uv_set_index] = new float[vertex_count_ * uv_count_per_vertex];
+			::memcpy(_uv_data[uv_set_index], uv_data_[uv_set_index], vertex_count_*uv_count_per_vertex*sizeof(float));
+			delete[] uv_data_[uv_set_index];
 		}
 
-		delete[] mUVData;
+		delete[] uv_data_;
 
-		lUVData[lUVSetIndex] = new float[mVertexCount * lUVCountPerVertex];
-		::memcpy(lUVData[lUVSetIndex], lUVData[pUVSet], mVertexCount*lUVCountPerVertex*sizeof(float));
+		_uv_data[uv_set_index] = new float[vertex_count_ * uv_count_per_vertex];
+		::memcpy(_uv_data[uv_set_index], _uv_data[uv_set], vertex_count_*uv_count_per_vertex*sizeof(float));
 
-		mUVData = lUVData;
-		mUVSetCount = lUVSetCount;
+		uv_data_ = _uv_data;
+		uv_set_count_ = uv_set_count;
 
-		return mUVSetCount - 1;
+		return uv_set_count_ - 1;
 	}
-	return lNewUVSet;
+	return new_uv_set;
 }
 
-int TriangleBasedGeometry::PopUVSet()
-{
-	deb_assert(mUVSetCount > 0);
-	if (mUVSetCount > 0)
-	{
-		--mUVSetCount;
-		delete[] mUVData[mUVSetCount];
-		mUVData[mUVSetCount] = 0;
-		if (mUVSetCount == 0)
-		{
-			delete[] mUVData;
-			mUVData = 0;
+int TriangleBasedGeometry::PopUVSet() {
+	deb_assert(uv_set_count_ > 0);
+	if (uv_set_count_ > 0) {
+		--uv_set_count_;
+		delete[] uv_data_[uv_set_count_];
+		uv_data_[uv_set_count_] = 0;
+		if (uv_set_count_ == 0) {
+			delete[] uv_data_;
+			uv_data_ = 0;
 		}
 	}
-	return mUVSetCount;
+	return uv_set_count_;
 }
 
-void TriangleBasedGeometry::SetColorData(uint8* pColorData, ColorFormat pColorFormat)
-{
-	if (mColorData != 0)
-	{
-		delete[] mColorData;
-		mColorData = 0;
+void TriangleBasedGeometry::SetColorData(uint8* color_data, ColorFormat color_format) {
+	if (color_data_ != 0) {
+		delete[] color_data_;
+		color_data_ = 0;
 	}
 
-	if (pColorData != 0)
-	{
+	if (color_data != 0) {
 		// Copy color data.
-		mColorFormat = pColorFormat;
+		color_format_ = color_format;
 
-		int lSize = 4;
-		if (mColorFormat == COLOR_RGB)
-			lSize = 3;
+		int size = 4;
+		if (color_format_ == kColorRgb)
+			size = 3;
 
-		mColorData = new uint8[mVertexCount * lSize];
+		color_data_ = new uint8[vertex_count_ * size];
 
 		unsigned int i;
-		unsigned int lIndex;
-		for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += lSize)
-		{
-			mColorData[lIndex + 0] = pColorData[lIndex + 0];
-			mColorData[lIndex + 1] = pColorData[lIndex + 1];
-			mColorData[lIndex + 2] = pColorData[lIndex + 2];
+		unsigned int index;
+		for (i = 0, index = 0; i < vertex_count_; i++, index += size) {
+			color_data_[index + 0] = color_data[index + 0];
+			color_data_[index + 1] = color_data[index + 1];
+			color_data_[index + 2] = color_data[index + 2];
 
-			if (mColorFormat == COLOR_RGBA)
-				mColorData[lIndex + 3] = pColorData[lIndex + 3];
+			if (color_format_ == kColorRgba)
+				color_data_[index + 3] = color_data[index + 3];
 		}
 	}
 }
 
-void TriangleBasedGeometry::ConvertColorData(ColorFormat pColorFormat, uint8 pAlpha)
-{
-	if (mColorFormat != pColorFormat)
-	{
-		int lSize = 4;
-		if (pColorFormat == COLOR_RGB)
-			lSize = 3;
+void TriangleBasedGeometry::ConvertColorData(ColorFormat color_format, uint8 alpha) {
+	if (color_format_ != color_format) {
+		int size = 4;
+		if (color_format == kColorRgb)
+			size = 3;
 
-		uint8* lColorData = new uint8[mVertexCount * lSize];
+		uint8* _color_data = new uint8[vertex_count_ * size];
 		unsigned int i;
-		unsigned int lIndex;
-		for (i = 0, lIndex = 0; i < mVertexCount; i++, lIndex += lSize)
-		{
-			lColorData[lIndex + 0] = mColorData[lIndex + 0];
-			lColorData[lIndex + 1] = mColorData[lIndex + 1];
-			lColorData[lIndex + 2] = mColorData[lIndex + 2];
+		unsigned int index;
+		for (i = 0, index = 0; i < vertex_count_; i++, index += size) {
+			_color_data[index + 0] = color_data_[index + 0];
+			_color_data[index + 1] = color_data_[index + 1];
+			_color_data[index + 2] = color_data_[index + 2];
 
-			if (pColorFormat == COLOR_RGBA)
-				lColorData[lIndex + 3] = pAlpha;
+			if (color_format == kColorRgba)
+				_color_data[index + 3] = alpha;
 		}
 
-		if (mColorData != 0)
-			delete[] mColorData;
+		if (color_data_ != 0)
+			delete[] color_data_;
 
-		mColorData = lColorData;
+		color_data_ = _color_data;
 
-		mColorFormat = pColorFormat;
+		color_format_ = color_format;
 	}
 }
 
-void TriangleBasedGeometry::FlipTriangles()
-{
-	if (mIndexData != 0)
-	{
-		if (mPrimitiveType == Tbc::GeometryBase::TRIANGLES)
-		{
-			for (unsigned int i = 0; i < mIndexCount; i += 3)
-			{
-				vtx_idx_t lTemp = mIndexData[i + 0];
-				mIndexData[i + 0] = mIndexData[i + 1];
-				mIndexData[i + 1] = lTemp;
+void TriangleBasedGeometry::FlipTriangles() {
+	if (index_data_ != 0) {
+		if (primitive_type_ == tbc::GeometryBase::kTriangles) {
+			for (unsigned int i = 0; i < index_count_; i += 3) {
+				vtx_idx_t temp = index_data_[i + 0];
+				index_data_[i + 0] = index_data_[i + 1];
+				index_data_[i + 1] = temp;
 			}
-		}
-		else if (mPrimitiveType == Tbc::GeometryBase::TRIANGLE_STRIP && mIndexCount > 2)
-		{
+		} else if (primitive_type_ == tbc::GeometryBase::kTriangleStrip && index_count_ > 2) {
 			// We only need to flip the first one, and the rest will follow.
-			vtx_idx_t lTemp = mIndexData[1];
-			mIndexData[1] = mIndexData[2];
-			mIndexData[2] = lTemp;
-		}
-		else
-		{
+			vtx_idx_t temp = index_data_[1];
+			index_data_[1] = index_data_[2];
+			index_data_[2] = temp;
+		} else {
 			deb_assert(false);
 		}
 	}
 
-	Tbc::GeometryBase::SetConvexVolumeCheckValid(false);
+	tbc::GeometryBase::SetConvexVolumeCheckValid(false);
 }
 
-void TriangleBasedGeometry::FlipTriangle(int pTriangleIndex)
-{
-	if (mPrimitiveType == Tbc::GeometryBase::TRIANGLES &&
-	    mIndexData != 0 &&
-	    pTriangleIndex >= 0 &&
-	    pTriangleIndex < (int)GetTriangleCount())
-	{
-		int i = pTriangleIndex * 3;
+void TriangleBasedGeometry::FlipTriangle(int triangle_index) {
+	if (primitive_type_ == tbc::GeometryBase::kTriangles &&
+	    index_data_ != 0 &&
+	    triangle_index >= 0 &&
+	    triangle_index < (int)GetTriangleCount()) {
+		int i = triangle_index * 3;
 
-		vtx_idx_t lTemp = mIndexData[i + 0];
-		mIndexData[i + 0] = mIndexData[i + 1];
-		mIndexData[i + 1] = lTemp;
+		vtx_idx_t temp = index_data_[i + 0];
+		index_data_[i + 0] = index_data_[i + 1];
+		index_data_[i + 1] = temp;
 
-		Tbc::GeometryBase::SetConvexVolumeCheckValid(false);
-	}
-	else
-	{
+		tbc::GeometryBase::SetConvexVolumeCheckValid(false);
+	} else {
 		deb_assert(false);
 	}
 }
 
-void TriangleBasedGeometry::SplitVertices()
-{
-	if (mIndexData != 0)
-	{
-		const Tbc::GeometryBase::BasicMaterialSettings& lMaterial = GetBasicMaterialSettings();
-		bool lSmooth = lMaterial.mSmooth;
-		float* lOriginalNormalData = 0;
-		if (lSmooth == true)
-		{
+void TriangleBasedGeometry::SplitVertices() {
+	if (index_data_ != 0) {
+		const tbc::GeometryBase::BasicMaterialSettings& material = GetBasicMaterialSettings();
+		bool smooth = material.smooth_;
+		float* original_normal_data = 0;
+		if (smooth == true) {
 			GenerateVertexNormalData();
-			lOriginalNormalData = GetNormalData();
-		}
-		else
-		{
+			original_normal_data = GetNormalData();
+		} else {
 			GenerateSurfaceNormalData();
-			lOriginalNormalData = GetSurfaceNormalData();
+			original_normal_data = GetSurfaceNormalData();
 		}
-		
+
 		//
 		// First allocate new memory for everything.
 		//
 
-		unsigned int lVertexCount = GetTriangleCount() * 3;
-		unsigned int lUVSetCount = GetUVSetCount();
-		uint32* lIndices = new uint32[lVertexCount];
-		float* lVertexData = new float[lVertexCount * 3];
-		float* lNormalData = new float[lVertexCount * 3];
-		float** lUVData = 0;
-		uint8* lColorData = 0;
+		unsigned int _vertex_count = GetTriangleCount() * 3;
+		unsigned int uv_set_count = GetUVSetCount();
+		uint32* _indices = new uint32[_vertex_count];
+		float* _vertex_data = new float[_vertex_count * 3];
+		float* normal_data = new float[_vertex_count * 3];
+		float** _uv_data = 0;
+		uint8* _color_data = 0;
 		unsigned int i;
-		
-		if (lUVSetCount > 0)
-		{
-			lUVData = new float*[lUVSetCount];
-			for (i = 0; i < lUVSetCount; i++)
-			{
-				lUVData[i] = new float[lVertexCount * 2];
+
+		if (uv_set_count > 0) {
+			_uv_data = new float*[uv_set_count];
+			for (i = 0; i < uv_set_count; i++) {
+				_uv_data[i] = new float[_vertex_count * 2];
 			}
 		}
 
-		int lColorSize = (mColorFormat == COLOR_RGB ? 3 : 4);
-		if (mColorData != 0)
-		{
-			lColorData = new uint8[lVertexCount * lColorSize];
+		int color_size = (color_format_ == kColorRgb ? 3 : 4);
+		if (color_data_ != 0) {
+			_color_data = new uint8[_vertex_count * color_size];
 		}
 
 		//
 		// Second, copy & set everything...
 		//
 
-		int lVIndex  = 0;
-		int lUVIndex = 0;
-		int lColorIndex = 0;
+		int v_index  = 0;
+		int uv_index = 0;
+		int color_index = 0;
 
-		for (i = 0; i < GetTriangleCount(); i++)
-		{
-			unsigned long lT = i * 3;
+		for (i = 0; i < GetTriangleCount(); i++) {
+			unsigned long t = i * 3;
 
-			lIndices[lT + 0] = lT + 0;
-			lIndices[lT + 1] = lT + 1;
-			lIndices[lT + 2] = lT + 2;
+			_indices[t + 0] = t + 0;
+			_indices[t + 1] = t + 1;
+			_indices[t + 2] = t + 2;
 
-			unsigned long lV1 = mIndexData[lT + 0];
-			unsigned long lV2 = mIndexData[lT + 1];
-			unsigned long lV3 = mIndexData[lT + 2];
+			unsigned long v1 = index_data_[t + 0];
+			unsigned long v2 = index_data_[t + 1];
+			unsigned long v3 = index_data_[t + 2];
 
-			unsigned long lV1I = lV1 * 3;
-			unsigned long lV2I = lV2 * 3;
-			unsigned long lV3I = lV3 * 3;
+			unsigned long v1_i = v1 * 3;
+			unsigned long v2_i = v2 * 3;
+			unsigned long v3_i = v3 * 3;
 
-			unsigned long lC1I = lV1 * lColorSize;
-			unsigned long lC2I = lV2 * lColorSize;
-			unsigned long lC3I = lV3 * lColorSize;
+			unsigned long c1_i = v1 * color_size;
+			unsigned long c2_i = v2 * color_size;
+			unsigned long c3_i = v3 * color_size;
 
 			// Copy vertex coordinates for 3 vertices.
-			lVertexData[lVIndex + 0] = mVertexData[lV1I + 0];
-			lVertexData[lVIndex + 1] = mVertexData[lV1I + 1];
-			lVertexData[lVIndex + 2] = mVertexData[lV1I + 2];
-			lVertexData[lVIndex + 3] = mVertexData[lV2I + 0];
-			lVertexData[lVIndex + 4] = mVertexData[lV2I + 1];
-			lVertexData[lVIndex + 5] = mVertexData[lV2I + 2];
-			lVertexData[lVIndex + 6] = mVertexData[lV3I + 0];
-			lVertexData[lVIndex + 7] = mVertexData[lV3I + 1];
-			lVertexData[lVIndex + 8] = mVertexData[lV3I + 2];
+			_vertex_data[v_index + 0] = vertex_data_[v1_i + 0];
+			_vertex_data[v_index + 1] = vertex_data_[v1_i + 1];
+			_vertex_data[v_index + 2] = vertex_data_[v1_i + 2];
+			_vertex_data[v_index + 3] = vertex_data_[v2_i + 0];
+			_vertex_data[v_index + 4] = vertex_data_[v2_i + 1];
+			_vertex_data[v_index + 5] = vertex_data_[v2_i + 2];
+			_vertex_data[v_index + 6] = vertex_data_[v3_i + 0];
+			_vertex_data[v_index + 7] = vertex_data_[v3_i + 1];
+			_vertex_data[v_index + 8] = vertex_data_[v3_i + 2];
 
-			if (lSmooth == true)
-			{
+			if (smooth == true) {
 				// Copy vertex normals...
-				lNormalData[lVIndex + 0] = lOriginalNormalData[lV1I + 0];
-				lNormalData[lVIndex + 1] = lOriginalNormalData[lV1I + 1];
-				lNormalData[lVIndex + 2] = lOriginalNormalData[lV1I + 2];
-				lNormalData[lVIndex + 3] = lOriginalNormalData[lV2I + 0];
-				lNormalData[lVIndex + 4] = lOriginalNormalData[lV2I + 1];
-				lNormalData[lVIndex + 5] = lOriginalNormalData[lV2I + 2];
-				lNormalData[lVIndex + 6] = lOriginalNormalData[lV3I + 0];
-				lNormalData[lVIndex + 7] = lOriginalNormalData[lV3I + 1];
-				lNormalData[lVIndex + 8] = lOriginalNormalData[lV3I + 2];
-			}
-			else
-			{
+				normal_data[v_index + 0] = original_normal_data[v1_i + 0];
+				normal_data[v_index + 1] = original_normal_data[v1_i + 1];
+				normal_data[v_index + 2] = original_normal_data[v1_i + 2];
+				normal_data[v_index + 3] = original_normal_data[v2_i + 0];
+				normal_data[v_index + 4] = original_normal_data[v2_i + 1];
+				normal_data[v_index + 5] = original_normal_data[v2_i + 2];
+				normal_data[v_index + 6] = original_normal_data[v3_i + 0];
+				normal_data[v_index + 7] = original_normal_data[v3_i + 1];
+				normal_data[v_index + 8] = original_normal_data[v3_i + 2];
+			} else {
 				// Copy surface normals...
-				lNormalData[lVIndex + 0] = lOriginalNormalData[lT + 0];
-				lNormalData[lVIndex + 1] = lOriginalNormalData[lT + 1];
-				lNormalData[lVIndex + 2] = lOriginalNormalData[lT + 2];
-				lNormalData[lVIndex + 3] = lOriginalNormalData[lT + 0];
-				lNormalData[lVIndex + 4] = lOriginalNormalData[lT + 1];
-				lNormalData[lVIndex + 5] = lOriginalNormalData[lT + 2];
-				lNormalData[lVIndex + 6] = lOriginalNormalData[lT + 0];
-				lNormalData[lVIndex + 7] = lOriginalNormalData[lT + 1];
-				lNormalData[lVIndex + 8] = lOriginalNormalData[lT + 2];
+				normal_data[v_index + 0] = original_normal_data[t + 0];
+				normal_data[v_index + 1] = original_normal_data[t + 1];
+				normal_data[v_index + 2] = original_normal_data[t + 2];
+				normal_data[v_index + 3] = original_normal_data[t + 0];
+				normal_data[v_index + 4] = original_normal_data[t + 1];
+				normal_data[v_index + 5] = original_normal_data[t + 2];
+				normal_data[v_index + 6] = original_normal_data[t + 0];
+				normal_data[v_index + 7] = original_normal_data[t + 1];
+				normal_data[v_index + 8] = original_normal_data[t + 2];
 			}
 
-			if (mColorData != 0)
-			{
-				lColorData[lColorIndex++] = mColorData[lC1I + 0];
-				lColorData[lColorIndex++] = mColorData[lC1I + 1];
-				lColorData[lColorIndex++] = mColorData[lC1I + 2];
-				if (lColorSize == 4)
-					lColorData[lColorIndex++] = mColorData[lC1I + 3];
-				lColorData[lColorIndex++] = mColorData[lC2I + 0];
-				lColorData[lColorIndex++] = mColorData[lC2I + 1];
-				lColorData[lColorIndex++] = mColorData[lC2I + 2];
-				if (lColorSize == 4)
-					lColorData[lColorIndex++] = mColorData[lC2I + 3];
-				lColorData[lColorIndex++] = mColorData[lC3I + 0];
-				lColorData[lColorIndex++] = mColorData[lC3I + 1];
-				lColorData[lColorIndex++] = mColorData[lC3I + 2];
-				if (lColorSize == 4)
-					lColorData[lColorIndex++] = mColorData[lC3I + 3];
+			if (color_data_ != 0) {
+				_color_data[color_index++] = color_data_[c1_i + 0];
+				_color_data[color_index++] = color_data_[c1_i + 1];
+				_color_data[color_index++] = color_data_[c1_i + 2];
+				if (color_size == 4)
+					_color_data[color_index++] = color_data_[c1_i + 3];
+				_color_data[color_index++] = color_data_[c2_i + 0];
+				_color_data[color_index++] = color_data_[c2_i + 1];
+				_color_data[color_index++] = color_data_[c2_i + 2];
+				if (color_size == 4)
+					_color_data[color_index++] = color_data_[c2_i + 3];
+				_color_data[color_index++] = color_data_[c3_i + 0];
+				_color_data[color_index++] = color_data_[c3_i + 1];
+				_color_data[color_index++] = color_data_[c3_i + 2];
+				if (color_size == 4)
+					_color_data[color_index++] = color_data_[c3_i + 3];
 			}
 
-			lV1I = lV1 * 2;
-			lV2I = lV2 * 2;
-			lV3I = lV3 * 2;
-			for (unsigned int j = 0; j < lUVSetCount; j++)
-			{
-				lUVData[j][lUVIndex + 0] = mUVData[j][lV1 + 0];
-				lUVData[j][lUVIndex + 1] = mUVData[j][lV1 + 1];
-				lUVData[j][lUVIndex + 2] = mUVData[j][lV2 + 0];
-				lUVData[j][lUVIndex + 3] = mUVData[j][lV2 + 1];
-				lUVData[j][lUVIndex + 4] = mUVData[j][lV3 + 0];
-				lUVData[j][lUVIndex + 5] = mUVData[j][lV3 + 1];
+			v1_i = v1 * 2;
+			v2_i = v2 * 2;
+			v3_i = v3 * 2;
+			for (unsigned int j = 0; j < uv_set_count; j++) {
+				_uv_data[j][uv_index + 0] = uv_data_[j][v1 + 0];
+				_uv_data[j][uv_index + 1] = uv_data_[j][v1 + 1];
+				_uv_data[j][uv_index + 2] = uv_data_[j][v2 + 0];
+				_uv_data[j][uv_index + 3] = uv_data_[j][v2 + 1];
+				_uv_data[j][uv_index + 4] = uv_data_[j][v3 + 0];
+				_uv_data[j][uv_index + 5] = uv_data_[j][v3 + 1];
 			}
 
-			lVIndex += 9;
-			lUVIndex += 6;
+			v_index += 9;
+			uv_index += 6;
 		}
 
-		float* lUVSet = 0;
-		if (lUVSetCount > 0)
-			lUVSet = lUVData[0];
+		float* _uv_set = 0;
+		if (uv_set_count > 0)
+			_uv_set = _uv_data[0];
 
 		//
 		// Third, update the geometry.
 		//
 
-		Set(lVertexData,
-		    lNormalData,
-		    lUVSet,
-		    lColorData,
-		    mColorFormat,
-		    lIndices,
-		    lVertexCount,
-		    lVertexCount,
-		    Tbc::GeometryBase::TRIANGLES,
-		    mGeometryVolatility);
+		Set(_vertex_data,
+		    normal_data,
+		    _uv_set,
+		    _color_data,
+		    color_format_,
+		    _indices,
+		    _vertex_count,
+		    _vertex_count,
+		    tbc::GeometryBase::kTriangles,
+		    geometry_volatility_);
 
-		for (i = 1; i < lUVSetCount; i++)
-		{
-			AddUVSet(lUVData[i]);
+		for (i = 1; i < uv_set_count; i++) {
+			AddUVSet(_uv_data[i]);
 		}
 
 		//
 		// Fourth, deallocate all memory.
 		//
-		delete[] lIndices;
-		delete[] lVertexData;
-		delete[] lNormalData;
+		delete[] _indices;
+		delete[] _vertex_data;
+		delete[] normal_data;
 
-		if (lUVSetCount > 0)
-		{
-			for (i = 0; i < lUVSetCount; i++)
-			{
-				delete[] lUVData[i];
+		if (uv_set_count > 0) {
+			for (i = 0; i < uv_set_count; i++) {
+				delete[] _uv_data[i];
 			}
-			delete[] lUVData;
+			delete[] _uv_data;
 		}
-		
-		if (lColorData != 0)
-		{
-			delete[] lColorData;
-		}
-	}
-	
-}
 
-void TriangleBasedGeometry::Translate(const vec3& pPositionOffset)
-{
-	if (mVertexData != 0 && mVertexCount > 0)
-	{
-		const int lMaxCount = mVertexCount * 3;
-		for (int i = 0; i < lMaxCount; i += 3)
-		{
-			mVertexData[i + 0] += pPositionOffset.x;
-			mVertexData[i + 1] += pPositionOffset.y;
-			mVertexData[i + 2] += pPositionOffset.z;
+		if (_color_data != 0) {
+			delete[] _color_data;
 		}
 	}
 
-	Tbc::GeometryBase::CalculateBoundingRadius();
 }
 
-void TriangleBasedGeometry::Rotate(const RotationMatrix<float>& pRotation)
-{
-	vec3 lAxisX(pRotation.GetInverseAxisX());
-	vec3 lAxisY(pRotation.GetInverseAxisY());
-	vec3 lAxisZ(pRotation.GetInverseAxisZ());
+void TriangleBasedGeometry::Translate(const vec3& position_offset) {
+	if (vertex_data_ != 0 && vertex_count_ > 0) {
+		const int max_count = vertex_count_ * 3;
+		for (int i = 0; i < max_count; i += 3) {
+			vertex_data_[i + 0] += position_offset.x;
+			vertex_data_[i + 1] += position_offset.y;
+			vertex_data_[i + 2] += position_offset.z;
+		}
+	}
 
-	if (mVertexCount > 0)
-	{
-		const int lMaxCount = mVertexCount * 3;
+	tbc::GeometryBase::CalculateBoundingRadius();
+}
 
-		if (mVertexData != 0)
-		{
-			for (int i = 0; i < lMaxCount; i += 3)
-			{
-				float lX = mVertexData[i + 0];
-				float lY = mVertexData[i + 1];
-				float lZ = mVertexData[i + 2];
+void TriangleBasedGeometry::Rotate(const RotationMatrix<float>& rotation) {
+	vec3 axis_x(rotation.GetInverseAxisX());
+	vec3 axis_y(rotation.GetInverseAxisY());
+	vec3 axis_z(rotation.GetInverseAxisZ());
 
-				float lRotX = lAxisX.x * lX + lAxisX.y * lY + lAxisX.z * lZ;
-				float lRotY = lAxisY.x * lX + lAxisY.y * lY + lAxisY.z * lZ;
-				float lRotZ = lAxisZ.x * lX + lAxisZ.y * lY + lAxisZ.z * lZ;
+	if (vertex_count_ > 0) {
+		const int max_count = vertex_count_ * 3;
 
-				mVertexData[i + 0] = lRotX;
-				mVertexData[i + 1] = lRotY;
-				mVertexData[i + 2] = lRotZ;
+		if (vertex_data_ != 0) {
+			for (int i = 0; i < max_count; i += 3) {
+				float __x = vertex_data_[i + 0];
+				float __y = vertex_data_[i + 1];
+				float __z = vertex_data_[i + 2];
+
+				float rot_x = axis_x.x * __x + axis_x.y * __y + axis_x.z * __z;
+				float rot_y = axis_y.x * __x + axis_y.y * __y + axis_y.z * __z;
+				float rot_z = axis_z.x * __x + axis_z.y * __y + axis_z.z * __z;
+
+				vertex_data_[i + 0] = rot_x;
+				vertex_data_[i + 1] = rot_y;
+				vertex_data_[i + 2] = rot_z;
 			}
 		}
 
 		GenerateVertexNormalData();
-		float* lVertexNormalData = GetNormalData();
-		if (lVertexNormalData != 0)
-		{
-			for (int i = 0; i < lMaxCount; i += 3)
-			{
-				float lX = lVertexNormalData[i + 0];
-				float lY = lVertexNormalData[i + 1];
-				float lZ = lVertexNormalData[i + 2];
+		float* vertex_normal_data = GetNormalData();
+		if (vertex_normal_data != 0) {
+			for (int i = 0; i < max_count; i += 3) {
+				float __x = vertex_normal_data[i + 0];
+				float __y = vertex_normal_data[i + 1];
+				float __z = vertex_normal_data[i + 2];
 
-				float lRotX = lAxisX.x * lX + lAxisX.y * lY + lAxisX.z * lZ;
-				float lRotY = lAxisY.x * lX + lAxisY.y * lY + lAxisY.z * lZ;
-				float lRotZ = lAxisZ.x * lX + lAxisZ.y * lY + lAxisZ.z * lZ;
+				float rot_x = axis_x.x * __x + axis_x.y * __y + axis_x.z * __z;
+				float rot_y = axis_y.x * __x + axis_y.y * __y + axis_y.z * __z;
+				float rot_z = axis_z.x * __x + axis_z.y * __y + axis_z.z * __z;
 
-				lVertexNormalData[i + 0] = lRotX;
-				lVertexNormalData[i + 1] = lRotY;
-				lVertexNormalData[i + 2] = lRotZ;
+				vertex_normal_data[i + 0] = rot_x;
+				vertex_normal_data[i + 1] = rot_y;
+				vertex_normal_data[i + 2] = rot_z;
 			}
 		}
 	}
 
-	if (GetTriangleCount() > 0 && Tbc::GeometryBase::GetSurfaceNormalData() != 0)
-	{
-		const int lMaxCount = GetTriangleCount() * 3;
-		float* lSurfaceNormalData = Tbc::GeometryBase::GetSurfaceNormalData();
+	if (GetTriangleCount() > 0 && tbc::GeometryBase::GetSurfaceNormalData() != 0) {
+		const int max_count = GetTriangleCount() * 3;
+		float* surface_normal_data = tbc::GeometryBase::GetSurfaceNormalData();
 
-		for (int i = 0; i < lMaxCount; i += 3)
-		{
-			float lX = lSurfaceNormalData[i + 0];
-			float lY = lSurfaceNormalData[i + 1];
-			float lZ = lSurfaceNormalData[i + 2];
+		for (int i = 0; i < max_count; i += 3) {
+			float __x = surface_normal_data[i + 0];
+			float __y = surface_normal_data[i + 1];
+			float __z = surface_normal_data[i + 2];
 
-			float lRotX = lAxisX.x * lX + lAxisX.y * lY + lAxisX.z * lZ;
-			float lRotY = lAxisY.x * lX + lAxisY.y * lY + lAxisY.z * lZ;
-			float lRotZ = lAxisZ.x * lX + lAxisZ.y * lY + lAxisZ.z * lZ;
+			float rot_x = axis_x.x * __x + axis_x.y * __y + axis_x.z * __z;
+			float rot_y = axis_y.x * __x + axis_y.y * __y + axis_y.z * __z;
+			float rot_z = axis_z.x * __x + axis_z.y * __y + axis_z.z * __z;
 
-			lSurfaceNormalData[i + 0] = lRotX;
-			lSurfaceNormalData[i + 1] = lRotY;
-			lSurfaceNormalData[i + 2] = lRotZ;
+			surface_normal_data[i + 0] = rot_x;
+			surface_normal_data[i + 1] = rot_y;
+			surface_normal_data[i + 2] = rot_z;
 		}
 	}
 }
 
-void TriangleBasedGeometry::AddGeometry(TriangleBasedGeometry* pGeometry)
-{
-	if (mPrimitiveType != TRIANGLES)
-	{
+void TriangleBasedGeometry::AddGeometry(TriangleBasedGeometry* geometry) {
+	if (primitive_type_ != kTriangles) {
 		deb_assert(false);
 		return;
 	}
 
-	bool lGenerateEdgeData = false;
+	bool generate_edge_data = false;
 
-	Tbc::GeometryBase::ClearSurfaceNormalData();
-	Tbc::GeometryBase::ClearVertexNormalData();
+	tbc::GeometryBase::ClearSurfaceNormalData();
+	tbc::GeometryBase::ClearVertexNormalData();
 
-	if (Tbc::GeometryBase::GetEdgeData() != 0)
-	{
-		lGenerateEdgeData = true;
-		Tbc::GeometryBase::ClearEdgeData();
+	if (tbc::GeometryBase::GetEdgeData() != 0) {
+		generate_edge_data = true;
+		tbc::GeometryBase::ClearEdgeData();
 	}
 
-	unsigned int lVertexCount = mVertexCount + pGeometry->mVertexCount;
-	unsigned int lNumTriangles = GetTriangleCount() + pGeometry->GetTriangleCount();
+	unsigned int _vertex_count = vertex_count_ + geometry->vertex_count_;
+	unsigned int num_triangles = GetTriangleCount() + geometry->GetTriangleCount();
 
-	float* lVertexData = new float[lVertexCount * 3];
-	vtx_idx_t* lIndices = new vtx_idx_t[lNumTriangles * 3];
+	float* _vertex_data = new float[_vertex_count * 3];
+	vtx_idx_t* _indices = new vtx_idx_t[num_triangles * 3];
 
 	unsigned int i;
-	int lIndex = 0;
-	for (i = 0; i < mVertexCount; i++, lIndex += 3)
-	{
-		lVertexData[lIndex + 0] = mVertexData[lIndex + 0];
-		lVertexData[lIndex + 1] = mVertexData[lIndex + 1];
-		lVertexData[lIndex + 2] = mVertexData[lIndex + 2];
+	int index = 0;
+	for (i = 0; i < vertex_count_; i++, index += 3) {
+		_vertex_data[index + 0] = vertex_data_[index + 0];
+		_vertex_data[index + 1] = vertex_data_[index + 1];
+		_vertex_data[index + 2] = vertex_data_[index + 2];
 	}
-	int lSrcIndex = 0;
-	for (i = 0; i < pGeometry->mVertexCount; i++, lIndex += 3, lSrcIndex += 3)
-	{
-		lVertexData[lIndex + 0] = pGeometry->mVertexData[lSrcIndex + 0];
-		lVertexData[lIndex + 1] = pGeometry->mVertexData[lSrcIndex + 1];
-		lVertexData[lIndex + 2] = pGeometry->mVertexData[lSrcIndex + 2];
+	int src_index = 0;
+	for (i = 0; i < geometry->vertex_count_; i++, index += 3, src_index += 3) {
+		_vertex_data[index + 0] = geometry->vertex_data_[src_index + 0];
+		_vertex_data[index + 1] = geometry->vertex_data_[src_index + 1];
+		_vertex_data[index + 2] = geometry->vertex_data_[src_index + 2];
 	}
 
-	lIndex = 0;
-	for (i = 0; i < GetTriangleCount(); i++, lIndex += 3)
-	{
-		lIndices[lIndex + 0] = mIndexData[lIndex + 0];
-		lIndices[lIndex + 1] = mIndexData[lIndex + 1];
-		lIndices[lIndex + 2] = mIndexData[lIndex + 2];
+	index = 0;
+	for (i = 0; i < GetTriangleCount(); i++, index += 3) {
+		_indices[index + 0] = index_data_[index + 0];
+		_indices[index + 1] = index_data_[index + 1];
+		_indices[index + 2] = index_data_[index + 2];
 	}
 
-	for (i = 0; i < pGeometry->GetTriangleCount(); i++, lIndex += 3)
-	{
-		uint32 lTriIndex[4];
-		pGeometry->GetTriangleIndices(i, lTriIndex);
+	for (i = 0; i < geometry->GetTriangleCount(); i++, index += 3) {
+		uint32 tri_index[4];
+		geometry->GetTriangleIndices(i, tri_index);
 
-		lIndices[lIndex + 0] = lTriIndex[0] + mVertexCount;
-		lIndices[lIndex + 1] = lTriIndex[1] + mVertexCount;
-		lIndices[lIndex + 2] = lTriIndex[2] + mVertexCount;
+		_indices[index + 0] = tri_index[0] + vertex_count_;
+		_indices[index + 1] = tri_index[1] + vertex_count_;
+		_indices[index + 2] = tri_index[2] + vertex_count_;
 	}
 
-	delete[] mVertexData;
-	delete[] mIndexData;
+	delete[] vertex_data_;
+	delete[] index_data_;
 
-	mVertexData = lVertexData;
-	mIndexData = lIndices;
+	vertex_data_ = _vertex_data;
+	index_data_ = _indices;
 
-	mVertexCount = lVertexCount;
-	mIndexCount = lNumTriangles * 3;
-	mMaxIndexCount = lNumTriangles * 3;
+	vertex_count_ = _vertex_count;
+	index_count_ = num_triangles * 3;
+	max_index_count_ = num_triangles * 3;
 
-	if (mUVData != 0)
-	{
-		float** lUVData = new float*[mUVSetCount];
-		for (unsigned int lUVSet = 0; lUVSet < mUVSetCount; lUVSet++)
-		{
-			lUVData[lUVSet] = new float[mVertexCount * 2];
+	if (uv_data_ != 0) {
+		float** _uv_data = new float*[uv_set_count_];
+		for (unsigned int _uv_set = 0; _uv_set < uv_set_count_; _uv_set++) {
+			_uv_data[_uv_set] = new float[vertex_count_ * 2];
 
-			lIndex = 0;
-			for (i = 0; i < mVertexCount; i++, lIndex += 2)
-			{
-				lUVData[lUVSet][lIndex + 0] = mUVData[lUVSet][lIndex + 0];
-				lUVData[lUVSet][lIndex + 1] = mUVData[lUVSet][lIndex + 1];
+			index = 0;
+			for (i = 0; i < vertex_count_; i++, index += 2) {
+				_uv_data[_uv_set][index + 0] = uv_data_[_uv_set][index + 0];
+				_uv_data[_uv_set][index + 1] = uv_data_[_uv_set][index + 1];
 			}
-			lSrcIndex = 0;
+			src_index = 0;
 
-			if (lUVSet < pGeometry->mUVSetCount)
-			{
-				for (i = 0; i < pGeometry->mVertexCount; i++, lIndex += 2, lSrcIndex += 2)
-				{
-					lUVData[lUVSet][lIndex + 0] = pGeometry->mUVData[lUVSet][lSrcIndex + 0];
-					lUVData[lUVSet][lIndex + 1] = pGeometry->mUVData[lUVSet][lSrcIndex + 1];
+			if (_uv_set < geometry->uv_set_count_) {
+				for (i = 0; i < geometry->vertex_count_; i++, index += 2, src_index += 2) {
+					_uv_data[_uv_set][index + 0] = geometry->uv_data_[_uv_set][src_index + 0];
+					_uv_data[_uv_set][index + 1] = geometry->uv_data_[_uv_set][src_index + 1];
+				}
+			} else {
+				for (i = 0; i < geometry->vertex_count_; i++, index += 2) {
+					_uv_data[_uv_set][index + 0] = 0;
+					_uv_data[_uv_set][index + 1] = 0;
 				}
 			}
-			else
-			{
-				for (i = 0; i < pGeometry->mVertexCount; i++, lIndex += 2)
-				{
-					lUVData[lUVSet][lIndex + 0] = 0;
-					lUVData[lUVSet][lIndex + 1] = 0;
-				}
-			}
-	
-			delete[] mUVData[lUVSet];
+
+			delete[] uv_data_[_uv_set];
 		}
-		delete[] mUVData;
-		mUVData = lUVData;
+		delete[] uv_data_;
+		uv_data_ = _uv_data;
 	}
 
-	if (mColorData != 0)
-	{
-		uint8* lColorData = new uint8[mVertexCount * 3];
+	if (color_data_ != 0) {
+		uint8* _color_data = new uint8[vertex_count_ * 3];
 
-		lIndex = 0;
-		for (i = 0; i < mVertexCount; i++, lIndex += 3)
-		{
-			lColorData[lIndex + 0] = mColorData[lIndex + 0];
-			lColorData[lIndex + 1] = mColorData[lIndex + 1];
-			lColorData[lIndex + 2] = mColorData[lIndex + 2];
+		index = 0;
+		for (i = 0; i < vertex_count_; i++, index += 3) {
+			_color_data[index + 0] = color_data_[index + 0];
+			_color_data[index + 1] = color_data_[index + 1];
+			_color_data[index + 2] = color_data_[index + 2];
 		}
-		lSrcIndex = 0;
+		src_index = 0;
 
-		if (pGeometry->mColorData != 0)
-		{
-			for (i = 0; i < pGeometry->mVertexCount; i++, lIndex += 3, lSrcIndex += 3)
-			{
-				lColorData[lIndex + 0] = pGeometry->mColorData[lSrcIndex + 0];
-				lColorData[lIndex + 1] = pGeometry->mColorData[lSrcIndex + 1];
-				lColorData[lIndex + 2] = pGeometry->mColorData[lSrcIndex + 2];
+		if (geometry->color_data_ != 0) {
+			for (i = 0; i < geometry->vertex_count_; i++, index += 3, src_index += 3) {
+				_color_data[index + 0] = geometry->color_data_[src_index + 0];
+				_color_data[index + 1] = geometry->color_data_[src_index + 1];
+				_color_data[index + 2] = geometry->color_data_[src_index + 2];
 			}
-		}
-		else
-		{
-			for (i = 0; i < pGeometry->mVertexCount; i++, lIndex += 3)
-			{
-				lColorData[lIndex + 0] = 255;
-				lColorData[lIndex + 1] = 255;
-				lColorData[lIndex + 2] = 255;
+		} else {
+			for (i = 0; i < geometry->vertex_count_; i++, index += 3) {
+				_color_data[index + 0] = 255;
+				_color_data[index + 1] = 255;
+				_color_data[index + 2] = 255;
 			}
 		}
 
-		delete[] mColorData;
-		mColorData = lColorData;
+		delete[] color_data_;
+		color_data_ = _color_data;
 	}
 
 	GenerateVertexNormalData();
 
-	if (lGenerateEdgeData == true)
-	{
-		Tbc::GeometryBase::GenerateEdgeData();
+	if (generate_edge_data == true) {
+		tbc::GeometryBase::GenerateEdgeData();
 	}
 
-	Tbc::GeometryBase::SetSolidVolumeCheckValid(false);
-	Tbc::GeometryBase::SetSingleObjectCheckValid(false);
-	Tbc::GeometryBase::SetConvexVolumeCheckValid(false);
+	tbc::GeometryBase::SetSolidVolumeCheckValid(false);
+	tbc::GeometryBase::SetSingleObjectCheckValid(false);
+	tbc::GeometryBase::SetConvexVolumeCheckValid(false);
 
-	Tbc::GeometryBase::CalculateBoundingRadius();
+	tbc::GeometryBase::CalculateBoundingRadius();
 }
 
-unsigned int TriangleBasedGeometry::GetMaxVertexCount() const
-{
-	return mVertexCount;
+unsigned int TriangleBasedGeometry::GetMaxVertexCount() const {
+	return vertex_count_;
 }
 
-unsigned int TriangleBasedGeometry::GetMaxIndexCount() const
-{
-	return mMaxIndexCount;
+unsigned int TriangleBasedGeometry::GetMaxIndexCount() const {
+	return max_index_count_;
 }
 
-unsigned int TriangleBasedGeometry::GetVertexCount() const
-{
-	return mVertexCount;
+unsigned int TriangleBasedGeometry::GetVertexCount() const {
+	return vertex_count_;
 }
 
-unsigned int TriangleBasedGeometry::GetIndexCount() const
-{
-	return mIndexCount;
+unsigned int TriangleBasedGeometry::GetIndexCount() const {
+	return index_count_;
 }
 
-unsigned int TriangleBasedGeometry::GetUVSetCount() const
-{
-	return mUVSetCount;
+unsigned int TriangleBasedGeometry::GetUVSetCount() const {
+	return uv_set_count_;
 }
 
-float* TriangleBasedGeometry::GetVertexData() const
-{
-	return mVertexData;
+float* TriangleBasedGeometry::GetVertexData() const {
+	return vertex_data_;
 }
 
-float* TriangleBasedGeometry::GetUVData(unsigned int pUVSet) const
-{
-	if (mUVData == 0)
+float* TriangleBasedGeometry::GetUVData(unsigned int uv_set) const {
+	if (uv_data_ == 0)
 		return 0;
 
-	return mUVData[pUVSet];
+	return uv_data_[uv_set];
 }
 
-uint8* TriangleBasedGeometry::GetColorData() const
-{
-	return mColorData;
+uint8* TriangleBasedGeometry::GetColorData() const {
+	return color_data_;
 }
 
-vtx_idx_t* TriangleBasedGeometry::GetIndexData() const
-{
-	return mIndexData;
+vtx_idx_t* TriangleBasedGeometry::GetIndexData() const {
+	return index_data_;
 }
 
-Tbc::GeometryBase::GeometryVolatility TriangleBasedGeometry::GetGeometryVolatility() const
-{
-	//deb_assert(mGeometryVolatility == GEOM_STATIC);
-	return (mGeometryVolatility);
+tbc::GeometryBase::GeometryVolatility TriangleBasedGeometry::GetGeometryVolatility() const {
+	//deb_assert(geometry_volatility_ == kGeomStatic);
+	return (geometry_volatility_);
 }
 
-void TriangleBasedGeometry::SetGeometryVolatility(Tbc::GeometryBase::GeometryVolatility pVolatility)
-{
-	mGeometryVolatility = pVolatility;
-	//deb_assert(mGeometryVolatility == GEOM_STATIC);
+void TriangleBasedGeometry::SetGeometryVolatility(tbc::GeometryBase::GeometryVolatility volatility) {
+	geometry_volatility_ = volatility;
+	//deb_assert(geometry_volatility_ == kGeomStatic);
 }
 
-TriangleBasedGeometry::ColorFormat TriangleBasedGeometry::GetColorFormat() const
-{
-	deb_assert(mColorFormat == COLOR_RGB || mColorFormat == COLOR_RGBA);
-	return mColorFormat;
+TriangleBasedGeometry::ColorFormat TriangleBasedGeometry::GetColorFormat() const {
+	deb_assert(color_format_ == kColorRgb || color_format_ == kColorRgba);
+	return color_format_;
 }
 
 

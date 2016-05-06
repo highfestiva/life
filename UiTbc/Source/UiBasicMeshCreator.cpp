@@ -1,752 +1,688 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiBasicMeshCreator.h"
-#include "../../Lepra/Include/LepraAssert.h"
+#include "../include/uibasicmeshcreator.h"
+#include "../../lepra/include/lepraassert.h"
 #include <algorithm>
 #include <list>
-#include "../../Lepra/Include/Math.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../Include/UiAnimatedGeometry.h"
-#include "../Include/UiTbc.h"
-#include "../Include/UiTriangleBasedGeometry.h"
+#include "../../lepra/include/math.h"
+#include "../../lepra/include/vector3d.h"
+#include "../include/uianimatedgeometry.h"
+#include "../include/uitbc.h"
+#include "../include/uitrianglebasedgeometry.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float pXSize, float pYSize, float pZSize,
-						   unsigned pXSegments,
-						   unsigned pYSegments,
-						   unsigned pZSegments)
-{
-	int lVertexCount = (pXSegments + 1) * (pYSegments + 1) * 2 +  // Top & bottom plane.
-			    (pXSegments + 1) * (pZSegments + 1) * 2 +  // Front and back plane.
-			    (pYSegments + 1) * (pZSegments + 1) * 2;   // Left and right plane.
+TriangleBasedGeometry* BasicMeshCreator::CreateFlatBox(float x_size, float y_size, float z_size,
+						   unsigned x_segments,
+						   unsigned y_segments,
+						   unsigned z_segments) {
+	int vertex_count = (x_segments + 1) * (y_segments + 1) * 2 +  // Top & bottom plane.
+			    (x_segments + 1) * (z_segments + 1) * 2 +  // Front and back plane.
+			    (y_segments + 1) * (z_segments + 1) * 2;   // Left and right plane.
 
-	int lNumTriangles = pXSegments * pYSegments * 4 +
-			     pXSegments * pZSegments * 4 +
-			     pYSegments * pZSegments * 4;
+	int num_triangles = x_segments * y_segments * 4 +
+			     x_segments * z_segments * 4 +
+			     y_segments * z_segments * 4;
 
-	vec3* lV = new vec3[lVertexCount];
-	vec3* lN = new vec3[lVertexCount];
-	uint32* lIndices = new uint32[lNumTriangles * 3];
+	vec3* __v = new vec3[vertex_count];
+	vec3* __n = new vec3[vertex_count];
+	uint32* indices = new uint32[num_triangles * 3];
 
-	::memset(lIndices, 0, lNumTriangles * 3 * sizeof(uint32));
+	::memset(indices, 0, num_triangles * 3 * sizeof(uint32));
 
-	float lXStep = pXSize / (float)pXSegments;
-	float lYStep = pYSize / (float)pYSegments;
-	float lZStep = pZSize / (float)pZSegments;
+	float x_step = x_size / (float)x_segments;
+	float y_step = y_size / (float)y_segments;
+	float z_step = z_size / (float)z_segments;
 
-	float lHalfXSize = pXSize * 0.5f;
-	float lHalfYSize = pYSize * 0.5f;
-	float lHalfZSize = pZSize * 0.5f;
+	float half_x_size = x_size * 0.5f;
+	float half_y_size = y_size * 0.5f;
+	float half_z_size = z_size * 0.5f;
 
-	float lX, lY, lZ;
+	float __x, __y, __z;
 	unsigned x, y, z;
 
-	int lVIndex = 0;
-	int lTIndex = 0;
+	int v_index = 0;
+	int t_index = 0;
 
 	// TOP AND BOTTOM PLANES.
-	int lVIndexOffset = (pXSegments + 1) * (pYSegments  + 1);
-	lY = -lHalfYSize;
-	for (y = 0; y < pYSegments + 1; y++)
-	{
-		lX = -lHalfXSize;
-		for (x = 0; x < pXSegments + 1; x++)
-		{
+	int v_index_offset = (x_segments + 1) * (y_segments  + 1);
+	__y = -half_y_size;
+	for (y = 0; y < y_segments + 1; y++) {
+		__x = -half_x_size;
+		for (x = 0; x < x_segments + 1; x++) {
 			// Top plane vertex and normal.
-			lV[lVIndex].Set(lX, lY, lHalfZSize);
-			lN[lVIndex].Set(0, 0, 1);
+			__v[v_index].Set(__x, __y, half_z_size);
+			__n[v_index].Set(0, 0, 1);
 
 			// Bottom plane vertex and normal.
-			lV[lVIndex + lVIndexOffset].Set(lX, lY, -lHalfZSize);
-			lN[lVIndex + lVIndexOffset].Set(0, 0, -1);
+			__v[v_index + v_index_offset].Set(__x, __y, -half_z_size);
+			__n[v_index + v_index_offset].Set(0, 0, -1);
 
-			lVIndex++;
-			lX += lXStep;
+			v_index++;
+			__x += x_step;
 		}
-		lY += lYStep;
+		__y += y_step;
 	}
-	int lBottomPlaneIndexOffset = lVIndex;
-	lVIndex += lVIndexOffset;
+	int bottom_plane_index_offset = v_index;
+	v_index += v_index_offset;
 
 	// FRONT AND BACK PLANES.
-	int lFrontPlaneIndexOffset = lVIndex;
-	lVIndexOffset = (pXSegments + 1) * (pZSegments + 1);
-	lZ = -lHalfZSize;
-	for (z = 0; z < pZSegments + 1; z++)
-	{
-		lX = -lHalfXSize;
-		for (x = 0; x < pXSegments + 1; x++)
-		{
+	int front_plane_index_offset = v_index;
+	v_index_offset = (x_segments + 1) * (z_segments + 1);
+	__z = -half_z_size;
+	for (z = 0; z < z_segments + 1; z++) {
+		__x = -half_x_size;
+		for (x = 0; x < x_segments + 1; x++) {
 			// Front plane vertex and normal.
-			lV[lVIndex].Set(lX, -lHalfYSize, lZ);
-			lN[lVIndex].Set(0, -1, 0);
+			__v[v_index].Set(__x, -half_y_size, __z);
+			__n[v_index].Set(0, -1, 0);
 
 			// Back plane vertex and normal.
-			lV[lVIndex + lVIndexOffset].Set(lX, lHalfYSize, lZ);
-			lN[lVIndex + lVIndexOffset].Set(0, 1, 0);
+			__v[v_index + v_index_offset].Set(__x, half_y_size, __z);
+			__n[v_index + v_index_offset].Set(0, 1, 0);
 
-			lVIndex++;
-			lX += lXStep;
+			v_index++;
+			__x += x_step;
 		}
-		lZ += lZStep;
+		__z += z_step;
 	}
-	int lBackPlaneIndexOffset = lVIndex;
-	lVIndex += lVIndexOffset;
+	int back_plane_index_offset = v_index;
+	v_index += v_index_offset;
 
 	// LEFT AND RIGHT PLANES.
-	int lLeftPlaneIndexOffset = lVIndex;
-	lVIndexOffset = (pYSegments + 1) * (pZSegments + 1);
-	lZ = -lHalfZSize;
-	for (z = 0; z < pZSegments + 1; z++)
-	{
-		lY = -lHalfYSize;
-		for (y = 0; y < pYSegments + 1; y++)
-		{
+	int left_plane_index_offset = v_index;
+	v_index_offset = (y_segments + 1) * (z_segments + 1);
+	__z = -half_z_size;
+	for (z = 0; z < z_segments + 1; z++) {
+		__y = -half_y_size;
+		for (y = 0; y < y_segments + 1; y++) {
 			// Left plane vertex and normal.
-			lV[lVIndex].Set(-lHalfXSize, lY, lZ);
-			lN[lVIndex].Set(-1, 0, 0);
+			__v[v_index].Set(-half_x_size, __y, __z);
+			__n[v_index].Set(-1, 0, 0);
 
 			// Right plane vertex and normal.
-			lV[lVIndex + lVIndexOffset].Set(lHalfXSize, lY, lZ);
-			lN[lVIndex + lVIndexOffset].Set(1, 0, 0);
+			__v[v_index + v_index_offset].Set(half_x_size, __y, __z);
+			__n[v_index + v_index_offset].Set(1, 0, 0);
 
-			lVIndex++;
-			lY += lYStep;
+			v_index++;
+			__y += y_step;
 		}
-		lZ += lZStep;
+		__z += z_step;
 	}
-	int lRightPlaneIndexOffset = lVIndex;
-	lVIndex += lVIndexOffset;
+	int right_plane_index_offset = v_index;
+	v_index += v_index_offset;
 
 	// Setup top plane triangles.
-	for (y = 0; y < pYSegments; y++)
-	{
-		for (x = 0; x < pXSegments; x++)
-		{
+	for (y = 0; y < y_segments; y++) {
+		for (x = 0; x < x_segments; x++) {
 			// First triangle.
-			lIndices[lTIndex++] = (y + 0) * (pXSegments + 1) + x + 0;
-			lIndices[lTIndex++] = (y + 0) * (pXSegments + 1) + x + 1;
-			lIndices[lTIndex++] = (y + 1) * (pXSegments + 1) + x + 1;
+			indices[t_index++] = (y + 0) * (x_segments + 1) + x + 0;
+			indices[t_index++] = (y + 0) * (x_segments + 1) + x + 1;
+			indices[t_index++] = (y + 1) * (x_segments + 1) + x + 1;
 
 			// Second triangle.
-			lIndices[lTIndex++] = (y + 1) * (pXSegments + 1) + x + 0;
-			lIndices[lTIndex++] = (y + 0) * (pXSegments + 1) + x + 0;
-			lIndices[lTIndex++] = (y + 1) * (pXSegments + 1) + x + 1;
+			indices[t_index++] = (y + 1) * (x_segments + 1) + x + 0;
+			indices[t_index++] = (y + 0) * (x_segments + 1) + x + 0;
+			indices[t_index++] = (y + 1) * (x_segments + 1) + x + 1;
 
-			deb_assert(lTIndex <= lNumTriangles * 3);
+			deb_assert(t_index <= num_triangles * 3);
 		}
 	}
 
 	// Setup bottom plane triangles.
-	for (z = 0; z < pYSegments; z++)
-	{
-		for (x = 0; x < pXSegments; x++)
-		{
+	for (z = 0; z < y_segments; z++) {
+		for (x = 0; x < x_segments; x++) {
 			// First triangle.
-			lIndices[lTIndex++] = (z + 0) * (pXSegments + 1) + x + 1 + lBottomPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 0) * (pXSegments + 1) + x + 0 + lBottomPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 1 + lBottomPlaneIndexOffset;
+			indices[t_index++] = (z + 0) * (x_segments + 1) + x + 1 + bottom_plane_index_offset;
+			indices[t_index++] = (z + 0) * (x_segments + 1) + x + 0 + bottom_plane_index_offset;
+			indices[t_index++] = (z + 1) * (x_segments + 1) + x + 1 + bottom_plane_index_offset;
 
 			// Second triangle.
-			lIndices[lTIndex++] = (z + 0) * (pXSegments + 1) + x + 0 + lBottomPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 0 + lBottomPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 1 + lBottomPlaneIndexOffset;
+			indices[t_index++] = (z + 0) * (x_segments + 1) + x + 0 + bottom_plane_index_offset;
+			indices[t_index++] = (z + 1) * (x_segments + 1) + x + 0 + bottom_plane_index_offset;
+			indices[t_index++] = (z + 1) * (x_segments + 1) + x + 1 + bottom_plane_index_offset;
 
-			deb_assert(lTIndex <= lNumTriangles * 3);
+			deb_assert(t_index <= num_triangles * 3);
 		}
 	}
 
 	// Setup front plane triangles.
-	for (z = 0; z < pZSegments; z++)
-	{
-		for (x = 0; x < pXSegments; x++)
-		{
+	for (z = 0; z < z_segments; z++) {
+		for (x = 0; x < x_segments; x++) {
 			// First triangle.
-			lIndices[lTIndex++] = (z + 0) * (pXSegments + 1) + x + 0 + lFrontPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 0) * (pXSegments + 1) + x + 1 + lFrontPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 1 + lFrontPlaneIndexOffset;
+			indices[t_index++] = (z + 0) * (x_segments + 1) + x + 0 + front_plane_index_offset;
+			indices[t_index++] = (z + 0) * (x_segments + 1) + x + 1 + front_plane_index_offset;
+			indices[t_index++] = (z + 1) * (x_segments + 1) + x + 1 + front_plane_index_offset;
 
 			// Second triangle.
-			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 0 + lFrontPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 0) * (pXSegments + 1) + x + 0 + lFrontPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 1 + lFrontPlaneIndexOffset;
+			indices[t_index++] = (z + 1) * (x_segments + 1) + x + 0 + front_plane_index_offset;
+			indices[t_index++] = (z + 0) * (x_segments + 1) + x + 0 + front_plane_index_offset;
+			indices[t_index++] = (z + 1) * (x_segments + 1) + x + 1 + front_plane_index_offset;
 
-			deb_assert(lTIndex <= lNumTriangles * 3);
+			deb_assert(t_index <= num_triangles * 3);
 		}
 	}
 
 	// Setup back plane triangles.
-	for (z = 0; z < pZSegments; z++)
-	{
-		for (x = 0; x < pXSegments; x++)
-		{
+	for (z = 0; z < z_segments; z++) {
+		for (x = 0; x < x_segments; x++) {
 			// First triangle.
-			lIndices[lTIndex++] = (z + 0) * (pXSegments + 1) + x + 1 + lBackPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 0) * (pXSegments + 1) + x + 0 + lBackPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 1 + lBackPlaneIndexOffset;
+			indices[t_index++] = (z + 0) * (x_segments + 1) + x + 1 + back_plane_index_offset;
+			indices[t_index++] = (z + 0) * (x_segments + 1) + x + 0 + back_plane_index_offset;
+			indices[t_index++] = (z + 1) * (x_segments + 1) + x + 1 + back_plane_index_offset;
 
 			// Second triangle.
-			lIndices[lTIndex++] = (z + 0) * (pXSegments + 1) + x + 0 + lBackPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 0 + lBackPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pXSegments + 1) + x + 1 + lBackPlaneIndexOffset;
+			indices[t_index++] = (z + 0) * (x_segments + 1) + x + 0 + back_plane_index_offset;
+			indices[t_index++] = (z + 1) * (x_segments + 1) + x + 0 + back_plane_index_offset;
+			indices[t_index++] = (z + 1) * (x_segments + 1) + x + 1 + back_plane_index_offset;
 
-			deb_assert(lTIndex <= lNumTriangles * 3);
+			deb_assert(t_index <= num_triangles * 3);
 		}
 	}
 
 	// Setup left plane triangles.
-	for (z = 0; z < pZSegments; z++)
-	{
-		for (y = 0; y < pYSegments; y++)
-		{
+	for (z = 0; z < z_segments; z++) {
+		for (y = 0; y < y_segments; y++) {
 			// First triangle.
-			lIndices[lTIndex++] = (z + 0) * (pYSegments + 1) + y + 1 + lLeftPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 0) * (pYSegments + 1) + y + 0 + lLeftPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pYSegments + 1) + y + 1 + lLeftPlaneIndexOffset;
+			indices[t_index++] = (z + 0) * (y_segments + 1) + y + 1 + left_plane_index_offset;
+			indices[t_index++] = (z + 0) * (y_segments + 1) + y + 0 + left_plane_index_offset;
+			indices[t_index++] = (z + 1) * (y_segments + 1) + y + 1 + left_plane_index_offset;
 
 			// Second triangle.
-			lIndices[lTIndex++] = (z + 0) * (pYSegments + 1) + y + 0 + lLeftPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pYSegments + 1) + y + 0 + lLeftPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pYSegments + 1) + y + 1 + lLeftPlaneIndexOffset;
+			indices[t_index++] = (z + 0) * (y_segments + 1) + y + 0 + left_plane_index_offset;
+			indices[t_index++] = (z + 1) * (y_segments + 1) + y + 0 + left_plane_index_offset;
+			indices[t_index++] = (z + 1) * (y_segments + 1) + y + 1 + left_plane_index_offset;
 
-			deb_assert(lTIndex <= lNumTriangles * 3);
+			deb_assert(t_index <= num_triangles * 3);
 		}
 	}
 
 	// Setup right plane triangles.
-	for (z = 0; z < pZSegments; z++)
-	{
-		for (y = 0; y < pYSegments; y++)
-		{
+	for (z = 0; z < z_segments; z++) {
+		for (y = 0; y < y_segments; y++) {
 			// First triangle.
-			lIndices[lTIndex++] = (z + 0) * (pYSegments + 1) + y + 0 + lRightPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 0) * (pYSegments + 1) + y + 1 + lRightPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pYSegments + 1) + y + 1 + lRightPlaneIndexOffset;
+			indices[t_index++] = (z + 0) * (y_segments + 1) + y + 0 + right_plane_index_offset;
+			indices[t_index++] = (z + 0) * (y_segments + 1) + y + 1 + right_plane_index_offset;
+			indices[t_index++] = (z + 1) * (y_segments + 1) + y + 1 + right_plane_index_offset;
 
 			// Second triangle.
-			lIndices[lTIndex++] = (z + 1) * (pYSegments + 1) + y + 0 + lRightPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 0) * (pYSegments + 1) + y + 0 + lRightPlaneIndexOffset;
-			lIndices[lTIndex++] = (z + 1) * (pYSegments + 1) + y + 1 + lRightPlaneIndexOffset;
+			indices[t_index++] = (z + 1) * (y_segments + 1) + y + 0 + right_plane_index_offset;
+			indices[t_index++] = (z + 0) * (y_segments + 1) + y + 0 + right_plane_index_offset;
+			indices[t_index++] = (z + 1) * (y_segments + 1) + y + 1 + right_plane_index_offset;
 
-			deb_assert(lTIndex <= lNumTriangles * 3);
+			deb_assert(t_index <= num_triangles * 3);
 		}
 	}
 
-	TriangleBasedGeometry* lGeometry;
-	lGeometry = new TriangleBasedGeometry(lV, lN, 0, 0,
-					    TriangleBasedGeometry::COLOR_RGB,
-					    lIndices, lVertexCount, lNumTriangles * 3,
-					    Tbc::GeometryBase::TRIANGLES,
-					    Tbc::GeometryBase::GEOM_STATIC);
+	TriangleBasedGeometry* _geometry;
+	_geometry = new TriangleBasedGeometry(__v, __n, 0, 0,
+					    TriangleBasedGeometry::kColorRgb,
+					    indices, vertex_count, num_triangles * 3,
+					    tbc::GeometryBase::kTriangles,
+					    tbc::GeometryBase::kGeomStatic);
 
-	delete[] lV;
-	delete[] lN;
-	delete[] lIndices;
+	delete[] __v;
+	delete[] __n;
+	delete[] indices;
 
-	return lGeometry;
+	return _geometry;
 }
 
-TriangleBasedGeometry* BasicMeshCreator::CreateEllipsoid(float pXRadius,
-							 float pYRadius, 
-							 float pZRadius,
-							 unsigned pNumLatitudeSegments,
-							 unsigned pNumLongitudeSegments)
-{
-	int lVertexCount = pNumLongitudeSegments * (pNumLatitudeSegments - 1) + 2;
-	int lNumTriangles = pNumLongitudeSegments * (pNumLatitudeSegments - 2) * 2 + pNumLongitudeSegments * 2;
+TriangleBasedGeometry* BasicMeshCreator::CreateEllipsoid(float x_radius,
+							 float y_radius,
+							 float z_radius,
+							 unsigned num_latitude_segments,
+							 unsigned num_longitude_segments) {
+	int vertex_count = num_longitude_segments * (num_latitude_segments - 1) + 2;
+	int num_triangles = num_longitude_segments * (num_latitude_segments - 2) * 2 + num_longitude_segments * 2;
 
-	Vector3D<float>* lV = new Vector3D<float>[lVertexCount];
-	Vector3D<float>* lN = new Vector3D<float>[lVertexCount];
-	uint32* lI = new uint32[lNumTriangles * 3];
+	Vector3D<float>* __v = new Vector3D<float>[vertex_count];
+	Vector3D<float>* __n = new Vector3D<float>[vertex_count];
+	uint32* __i = new uint32[num_triangles * 3];
 
-	const float lLatAngleStep = PIF / (float)pNumLatitudeSegments;
-	const float lLongAngleStep = PIF * 2.0f / (float)pNumLongitudeSegments;
+	const float lat_angle_step = PIF / (float)num_latitude_segments;
+	const float long_angle_step = PIF * 2.0f / (float)num_longitude_segments;
 
 	// Setup top and bottom vertex.
-	lV[0].Set(0, pYRadius, 0);
-	lV[1].Set(0, -pYRadius, 0);
-	lN[0].Set(0, 1.0f, 0);
-	lN[1].Set(0, -1.0f, 0);
+	__v[0].Set(0, y_radius, 0);
+	__v[1].Set(0, -y_radius, 0);
+	__n[0].Set(0, 1.0f, 0);
+	__n[1].Set(0, -1.0f, 0);
 
 	// Setup the rest of the vertices.
-	int lIndex = 2;
-	float lLatAngle = lLatAngleStep;
-	unsigned lLatSegmentCount;
-	for (lLatSegmentCount = 1; lLatSegmentCount < pNumLatitudeSegments; lLatSegmentCount++)
-	{
-		float lCircleRadius = (float)sin(lLatAngle);
-		float lY = (float)cos(lLatAngle) * pYRadius;
-		float lNormY = (float)cos(lLatAngle) / pYRadius;
+	int index = 2;
+	float lat_angle = lat_angle_step;
+	unsigned lat_segment_count;
+	for (lat_segment_count = 1; lat_segment_count < num_latitude_segments; lat_segment_count++) {
+		float circle_radius = (float)sin(lat_angle);
+		float __y = (float)cos(lat_angle) * y_radius;
+		float norm_y = (float)cos(lat_angle) / y_radius;
 
-		float lLongAngle = 0.0f;
-		unsigned lLongSegmentCount;
-		for (lLongSegmentCount = 0; lLongSegmentCount < pNumLongitudeSegments; lLongSegmentCount++)
-		{
-			float lCosA = (float)cos(lLongAngle) * lCircleRadius;
-			float lSinA = (float)sin(lLongAngle) * lCircleRadius;
+		float long_angle = 0.0f;
+		unsigned long_segment_count;
+		for (long_segment_count = 0; long_segment_count < num_longitude_segments; long_segment_count++) {
+			float cos_a = (float)cos(long_angle) * circle_radius;
+			float sin_a = (float)sin(long_angle) * circle_radius;
 
-			lV[lIndex].x = lCosA * pXRadius;
-			lV[lIndex].y = lY;
-			lV[lIndex].z = lSinA * pZRadius;
+			__v[index].x = cos_a * x_radius;
+			__v[index].y = __y;
+			__v[index].z = sin_a * z_radius;
 
-			lN[lIndex].x = lCosA / pXRadius;
-			lN[lIndex].y = lNormY;
-			lN[lIndex].z = lSinA / pZRadius;
-			lN[lIndex].Normalize();
+			__n[index].x = cos_a / x_radius;
+			__n[index].y = norm_y;
+			__n[index].z = sin_a / z_radius;
+			__n[index].Normalize();
 
-			lLongAngle += lLongAngleStep;
-			lIndex++;
+			long_angle += long_angle_step;
+			index++;
 		}
 
-		lLatAngle += lLatAngleStep;
+		lat_angle += lat_angle_step;
 	}
 
 	// Setup "middle" triangles.
-	lIndex = 0;
-	for (lLatSegmentCount = 1; lLatSegmentCount < pNumLatitudeSegments - 1; lLatSegmentCount++)
-	{
-		unsigned lLatOffset0 = (lLatSegmentCount - 1) * pNumLongitudeSegments;
-		unsigned lLatOffset1 = lLatOffset0 + pNumLongitudeSegments;
+	index = 0;
+	for (lat_segment_count = 1; lat_segment_count < num_latitude_segments - 1; lat_segment_count++) {
+		unsigned lat_offset0 = (lat_segment_count - 1) * num_longitude_segments;
+		unsigned lat_offset1 = lat_offset0 + num_longitude_segments;
 
-		unsigned lLongSegmentCount;
-		for (lLongSegmentCount = 0; lLongSegmentCount < pNumLongitudeSegments; lLongSegmentCount++)
-		{
-			lI[lIndex + 0] = 2 + lLatOffset0 + lLongSegmentCount;
-			lI[lIndex + 1] = 2 + lLatOffset0 + (lLongSegmentCount + 1) % pNumLongitudeSegments;
-			lI[lIndex + 2] = 2 + lLatOffset1 + (lLongSegmentCount + 1) % pNumLongitudeSegments;
-			lI[lIndex + 3] = 2 + lLatOffset0 + lLongSegmentCount;
-			lI[lIndex + 4] = 2 + lLatOffset1 + (lLongSegmentCount + 1) % pNumLongitudeSegments;
-			lI[lIndex + 5] = 2 + lLatOffset1 + lLongSegmentCount;
+		unsigned long_segment_count;
+		for (long_segment_count = 0; long_segment_count < num_longitude_segments; long_segment_count++) {
+			__i[index + 0] = 2 + lat_offset0 + long_segment_count;
+			__i[index + 1] = 2 + lat_offset0 + (long_segment_count + 1) % num_longitude_segments;
+			__i[index + 2] = 2 + lat_offset1 + (long_segment_count + 1) % num_longitude_segments;
+			__i[index + 3] = 2 + lat_offset0 + long_segment_count;
+			__i[index + 4] = 2 + lat_offset1 + (long_segment_count + 1) % num_longitude_segments;
+			__i[index + 5] = 2 + lat_offset1 + long_segment_count;
 
-			lIndex += 6;
+			index += 6;
 		}
 	}
 
 	// Setup "top" triangles.
-	unsigned lLongSegmentCount;
-	for (lLongSegmentCount = 0; lLongSegmentCount < pNumLongitudeSegments; lLongSegmentCount++)
-	{
-		lI[lIndex + 0] = 0;
-		lI[lIndex + 1] = 2 + (lLongSegmentCount + 1) % pNumLongitudeSegments;
-		lI[lIndex + 2] = 2 + lLongSegmentCount;
+	unsigned long_segment_count;
+	for (long_segment_count = 0; long_segment_count < num_longitude_segments; long_segment_count++) {
+		__i[index + 0] = 0;
+		__i[index + 1] = 2 + (long_segment_count + 1) % num_longitude_segments;
+		__i[index + 2] = 2 + long_segment_count;
 
-		lIndex += 3;
+		index += 3;
 	}
 
 	// Setup "bottom" triangles.
-	unsigned lOffset = 2 + (pNumLatitudeSegments - 2) * pNumLongitudeSegments;
-	for (lLongSegmentCount = 0; lLongSegmentCount < pNumLongitudeSegments; lLongSegmentCount++)
-	{
-		lI[lIndex + 0] = 1;
-		lI[lIndex + 1] = lOffset + lLongSegmentCount;
-		lI[lIndex + 2] = lOffset + (lLongSegmentCount + 1) % pNumLongitudeSegments;
+	unsigned offset = 2 + (num_latitude_segments - 2) * num_longitude_segments;
+	for (long_segment_count = 0; long_segment_count < num_longitude_segments; long_segment_count++) {
+		__i[index + 0] = 1;
+		__i[index + 1] = offset + long_segment_count;
+		__i[index + 2] = offset + (long_segment_count + 1) % num_longitude_segments;
 
-		lIndex += 3;
+		index += 3;
 	}
 
-	TriangleBasedGeometry* lEllipsoid = 
-		new TriangleBasedGeometry(lV, lN, 0, 0,
-					  TriangleBasedGeometry::COLOR_RGB,
-					  lI, lVertexCount, lNumTriangles * 3, 
-					  Tbc::GeometryBase::TRIANGLES,
-					  Tbc::GeometryBase::GEOM_STATIC);
-	delete[] lV;
-	delete[] lN;
-	delete[] lI;
+	TriangleBasedGeometry* ellipsoid =
+		new TriangleBasedGeometry(__v, __n, 0, 0,
+					  TriangleBasedGeometry::kColorRgb,
+					  __i, vertex_count, num_triangles * 3,
+					  tbc::GeometryBase::kTriangles,
+					  tbc::GeometryBase::kGeomStatic);
+	delete[] __v;
+	delete[] __n;
+	delete[] __i;
 
-	return lEllipsoid;
+	return ellipsoid;
 }
 
-TriangleBasedGeometry* BasicMeshCreator::CreateCone(float pBaseRadius, 
-						    float pHeight, 
-						    unsigned pNumSegments)
-{
-	int lVertexCount = pNumSegments + 1 + 1;
-	int lNumTriangles = pNumSegments * 2;
+TriangleBasedGeometry* BasicMeshCreator::CreateCone(float base_radius,
+						    float height,
+						    unsigned num_segments) {
+	int vertex_count = num_segments + 1 + 1;
+	int num_triangles = num_segments * 2;
 
-	Vector3D<float>* lV = new Vector3D<float>[lVertexCount];
-	Vector3D<float>* lN = new Vector3D<float>[lVertexCount];
-	uint32* lI = new uint32[lNumTriangles * 3];
+	Vector3D<float>* __v = new Vector3D<float>[vertex_count];
+	Vector3D<float>* __n = new Vector3D<float>[vertex_count];
+	uint32* __i = new uint32[num_triangles * 3];
 
 	// Set the top vertex.
-	lV[0].Set(0, 0, pHeight);
-	lN[0].Set(0, 0, 1.0f);
+	__v[0].Set(0, 0, height);
+	__n[0].Set(0, 0, 1.0f);
 
-	const float lAngleStep = (2.0f * PIF) / (float)pNumSegments;
-	float lAngle = 0.0f;
+	const float angle_step = (2.0f * PIF) / (float)num_segments;
+	float angle = 0.0f;
 
-	int lIndex = 0;
+	int index = 0;
 	unsigned i;
-	for (i = 0; i < pNumSegments; i++, lIndex += 3)
-	{
-		float lCosA = (float)cos(lAngle);
-		float lSinA = -(float)sin(lAngle);
+	for (i = 0; i < num_segments; i++, index += 3) {
+		float cos_a = (float)cos(angle);
+		float sin_a = -(float)sin(angle);
 
 		// Setup vertex
-		lV[i + 1].x = lCosA * pBaseRadius;
-		lV[i + 1].y = lSinA * pBaseRadius;
-		lV[i + 1].z = 0.0f;
+		__v[i + 1].x = cos_a * base_radius;
+		__v[i + 1].y = sin_a * base_radius;
+		__v[i + 1].z = 0.0f;
 
 		// Setup normal
-		lN[i + 1].x = lCosA;
-		if (pBaseRadius > pHeight)
-		{
-			lN[i + 1].z = ((float)cos(atan(pHeight / pBaseRadius)) - 1.0f) * 0.5f;
-		}
-		else
-		{
-			lN[i + 1].z = ((float)sin(atan(pBaseRadius / pHeight)) - 1.0f) * 0.5f;
+		__n[i + 1].x = cos_a;
+		if (base_radius > height) {
+			__n[i + 1].z = ((float)cos(atan(height / base_radius)) - 1.0f) * 0.5f;
+		} else {
+			__n[i + 1].z = ((float)sin(atan(base_radius / height)) - 1.0f) * 0.5f;
 		}
 
-		lN[i + 1].y = lSinA;
-		lN[i + 1].Normalize();
+		__n[i + 1].y = sin_a;
+		__n[i + 1].Normalize();
 
 		// Setup triangle index.
-		lI[lIndex + 0] = i + 1;
-		lI[lIndex + 1] = 0;
-		lI[lIndex + 2] = ((i + 1) % pNumSegments) + 1;
+		__i[index + 0] = i + 1;
+		__i[index + 1] = 0;
+		__i[index + 2] = ((i + 1) % num_segments) + 1;
 
-		lAngle += lAngleStep;
+		angle += angle_step;
 	}
 	// Bottom vertex.
-	const int lBottomIndex = i+1;
-	lV[lBottomIndex].Set(0, 0, 0);
-	lN[lBottomIndex].Set(0, 0, -1.0f);
+	const int bottom_index = i+1;
+	__v[bottom_index].Set(0, 0, 0);
+	__n[bottom_index].Set(0, 0, -1.0f);
 
 	// Setup the bottom triangles...
-	for (i = 0; i < pNumSegments; i++, lIndex += 3)
-	{
-		lI[lIndex + 0] = (i+1)%pNumSegments + 1;
-		lI[lIndex + 1] = lBottomIndex;
-		lI[lIndex + 2] = i+1;
+	for (i = 0; i < num_segments; i++, index += 3) {
+		__i[index + 0] = (i+1)%num_segments + 1;
+		__i[index + 1] = bottom_index;
+		__i[index + 2] = i+1;
 	}
 
-	TriangleBasedGeometry* lCone = 
-		new TriangleBasedGeometry(lV, lN, 0, 0,
-					  TriangleBasedGeometry::COLOR_RGB,
-					  lI, lVertexCount, lNumTriangles * 3,
-					  Tbc::GeometryBase::TRIANGLES,
-					  Tbc::GeometryBase::GEOM_STATIC);
+	TriangleBasedGeometry* cone =
+		new TriangleBasedGeometry(__v, __n, 0, 0,
+					  TriangleBasedGeometry::kColorRgb,
+					  __i, vertex_count, num_triangles * 3,
+					  tbc::GeometryBase::kTriangles,
+					  tbc::GeometryBase::kGeomStatic);
 
-	delete[] lV;
-	delete[] lN;
-	delete[] lI;
+	delete[] __v;
+	delete[] __n;
+	delete[] __i;
 
-	return lCone;
+	return cone;
 }
 
-TriangleBasedGeometry* BasicMeshCreator::CreateCylinder(float pBaseRadius,
-							float pTopRadius,
-							float pHeight,
-							unsigned pNumSegments)
-{
-	int lVertexCount = pNumSegments * 2 + 2;
-	int lNumTriangles = pNumSegments * 2 + pNumSegments * 2;
+TriangleBasedGeometry* BasicMeshCreator::CreateCylinder(float base_radius,
+							float top_radius,
+							float height,
+							unsigned num_segments) {
+	int vertex_count = num_segments * 2 + 2;
+	int num_triangles = num_segments * 2 + num_segments * 2;
 
-	Vector3D<float>* lV = new Vector3D<float>[lVertexCount];
-	Vector3D<float>* lN = new Vector3D<float>[lVertexCount];
-	uint32* lI = new uint32[lNumTriangles * 3];
+	Vector3D<float>* __v = new Vector3D<float>[vertex_count];
+	Vector3D<float>* __n = new Vector3D<float>[vertex_count];
+	uint32* __i = new uint32[num_triangles * 3];
 
-	const float lAngleStep = (2.0f * PIF) / (float)pNumSegments;
-	float lAngle = 0.0f;
+	const float angle_step = (2.0f * PIF) / (float)num_segments;
+	float angle = 0.0f;
 
-	float lRadiusDiff = pBaseRadius - pTopRadius;
-	float lNormYAdd;
+	float radius_diff = base_radius - top_radius;
+	float norm_y_add;
 
-	if (fabs(lRadiusDiff) > pHeight)
-	{
-		if (lRadiusDiff > 0.0f)
-		{
-			lNormYAdd = (float)cos(atan(pHeight / lRadiusDiff));
+	if (fabs(radius_diff) > height) {
+		if (radius_diff > 0.0f) {
+			norm_y_add = (float)cos(atan(height / radius_diff));
+		} else {
+			norm_y_add = -(float)cos(atan(height / radius_diff));
 		}
-		else
-		{
-			lNormYAdd = -(float)cos(atan(pHeight / lRadiusDiff));
-		}
-	}
-	else
-	{
-		lNormYAdd = (float)sin(atan(lRadiusDiff / pHeight));
+	} else {
+		norm_y_add = (float)sin(atan(radius_diff / height));
 	}
 
 	// Setup cylindrical vertices.
 	unsigned i;
-	for (i = 0; i < pNumSegments; i++)
-	{
-		float lCosA = (float)cos(lAngle);
-		float lSinA = (float)sin(lAngle);
+	for (i = 0; i < num_segments; i++) {
+		float cos_a = (float)cos(angle);
+		float sin_a = (float)sin(angle);
 
-		lV[i].x = lCosA * pTopRadius;
-		lV[i].y = pHeight * 0.5f;
-		lV[i].z = lSinA * pTopRadius;
+		__v[i].x = cos_a * top_radius;
+		__v[i].y = height * 0.5f;
+		__v[i].z = sin_a * top_radius;
 
-		lN[i].x = lCosA;
-		lN[i].y = 1.0f + lNormYAdd;
-		lN[i].z = lSinA;
-		lN[i].Normalize();
+		__n[i].x = cos_a;
+		__n[i].y = 1.0f + norm_y_add;
+		__n[i].z = sin_a;
+		__n[i].Normalize();
 
-		lV[pNumSegments + i].x = lCosA * pBaseRadius;
-		lV[pNumSegments + i].y = -pHeight * 0.5f;
-		lV[pNumSegments + i].z = lSinA * pBaseRadius;
+		__v[num_segments + i].x = cos_a * base_radius;
+		__v[num_segments + i].y = -height * 0.5f;
+		__v[num_segments + i].z = sin_a * base_radius;
 
-		lN[pNumSegments + i].x = lCosA;
-		lN[pNumSegments + i].y = -(1.0f - lNormYAdd);
-		lN[pNumSegments + i].z = lSinA;
-		lN[pNumSegments + i].Normalize();
+		__n[num_segments + i].x = cos_a;
+		__n[num_segments + i].y = -(1.0f - norm_y_add);
+		__n[num_segments + i].z = sin_a;
+		__n[num_segments + i].Normalize();
 
-		lAngle += lAngleStep;
+		angle += angle_step;
 	}
 	// Set the top and bottom vertices.
-	const int lTopVertex = pNumSegments*2;
-	const int lBottomVertex = lTopVertex+1;
-	lV[lTopVertex].Set(0, pHeight*0.5f, 0);
-	lN[lTopVertex].Set(0, 1.0f, 0);
-	lV[lBottomVertex].Set(0, -pHeight*0.5f, 0);
-	lN[lBottomVertex].Set(0, -1.0f, 0);
+	const int top_vertex = num_segments*2;
+	const int bottom_vertex = top_vertex+1;
+	__v[top_vertex].Set(0, height*0.5f, 0);
+	__n[top_vertex].Set(0, 1.0f, 0);
+	__v[bottom_vertex].Set(0, -height*0.5f, 0);
+	__n[bottom_vertex].Set(0, -1.0f, 0);
 
 	// Setup triangles.
-	int lIndex = 0;
-	for (i = 0; i < pNumSegments; i++)
-	{
-		lI[lIndex + 0] = i;
-		lI[lIndex + 1] = (i + 1) % pNumSegments;
-		lI[lIndex + 2] = (i + 1) % pNumSegments + pNumSegments;
-		lI[lIndex + 3] = i;
-		lI[lIndex + 4] = (i + 1) % pNumSegments + pNumSegments;
-		lI[lIndex + 5] = i + pNumSegments;
-		
-		lIndex += 6;
+	int index = 0;
+	for (i = 0; i < num_segments; i++) {
+		__i[index + 0] = i;
+		__i[index + 1] = (i + 1) % num_segments;
+		__i[index + 2] = (i + 1) % num_segments + num_segments;
+		__i[index + 3] = i;
+		__i[index + 4] = (i + 1) % num_segments + num_segments;
+		__i[index + 5] = i + num_segments;
+
+		index += 6;
 	}
 
 	// Setup top triangles.
-	for (i = 0; i < pNumSegments; i++)
-	{
-		lI[lIndex + 0] = lTopVertex;
-		lI[lIndex + 1] = (i+1) % pNumSegments;
-		lI[lIndex + 2] = i;
-		lIndex += 3;
+	for (i = 0; i < num_segments; i++) {
+		__i[index + 0] = top_vertex;
+		__i[index + 1] = (i+1) % num_segments;
+		__i[index + 2] = i;
+		index += 3;
 	}
 
 	// Setup bottom triangles.
-	for (i = 0; i < pNumSegments; i++)
-	{
-		lI[lIndex + 0] = lBottomVertex;
-		lI[lIndex + 1] = pNumSegments + i;
-		lI[lIndex + 2] = pNumSegments + (i+1) % pNumSegments;
-		lIndex += 3;
+	for (i = 0; i < num_segments; i++) {
+		__i[index + 0] = bottom_vertex;
+		__i[index + 1] = num_segments + i;
+		__i[index + 2] = num_segments + (i+1) % num_segments;
+		index += 3;
 	}
 
-	TriangleBasedGeometry* lCylinder = 
-		new TriangleBasedGeometry(lV, lN, 0, 0,
-					  TriangleBasedGeometry::COLOR_RGB,
-					  lI, lVertexCount, lNumTriangles * 3,
-					  Tbc::GeometryBase::TRIANGLES,
-					  Tbc::GeometryBase::GEOM_STATIC);
+	TriangleBasedGeometry* cylinder =
+		new TriangleBasedGeometry(__v, __n, 0, 0,
+					  TriangleBasedGeometry::kColorRgb,
+					  __i, vertex_count, num_triangles * 3,
+					  tbc::GeometryBase::kTriangles,
+					  tbc::GeometryBase::kGeomStatic);
 
-	delete[] lV;
-	delete[] lN;
-	delete[] lI;
+	delete[] __v;
+	delete[] __n;
+	delete[] __i;
 
-	return lCylinder;
+	return cylinder;
 }
 
-TriangleBasedGeometry* BasicMeshCreator::CreateTorus(float pRadius, 
-						     float pRingRadiusX,
-						     float pRingRadiusY,
-						     unsigned pNumSegments,
-						     unsigned pNumRingSegments)
-{
-	int lVertexCount = pNumSegments * pNumRingSegments;
-	int lNumTriangles = pNumSegments * pNumRingSegments * 2;
+TriangleBasedGeometry* BasicMeshCreator::CreateTorus(float radius,
+						     float ring_radius_x,
+						     float ring_radius_y,
+						     unsigned num_segments,
+						     unsigned num_ring_segments) {
+	int vertex_count = num_segments * num_ring_segments;
+	int num_triangles = num_segments * num_ring_segments * 2;
 
-	Vector3D<float>* lV = new Vector3D<float>[lVertexCount];
-	Vector3D<float>* lN = new Vector3D<float>[lVertexCount];
-	uint32* lI = new uint32[lNumTriangles * 3];
+	Vector3D<float>* __v = new Vector3D<float>[vertex_count];
+	Vector3D<float>* __n = new Vector3D<float>[vertex_count];
+	uint32* __i = new uint32[num_triangles * 3];
 
-	const float lAngleStep = 2.0f * PIF / (float)pNumSegments;
-	const float lRingAngleStep = 2.0f * PIF / (float)pNumRingSegments;
+	const float angle_step = 2.0f * PIF / (float)num_segments;
+	const float ring_angle_step = 2.0f * PIF / (float)num_ring_segments;
 
-	float lAngle = 0.0f;
+	float angle = 0.0f;
 
-	int lIndex = 0;
+	int index = 0;
 	unsigned i;
-	for (i = 0; i < pNumSegments; i++)
-	{
-		float lCosA = (float)cos(lAngle);
-		float lSinA = (float)sin(lAngle);
+	for (i = 0; i < num_segments; i++) {
+		float cos_a = (float)cos(angle);
+		float sin_a = (float)sin(angle);
 
-		float lRingAngle = 0.0f;
-		for (unsigned j = 0; j < pNumRingSegments; j++)
-		{
-			float lCosRingA = (float)cos(lRingAngle);
-			float lSinRingA = (float)sin(lRingAngle);
+		float ring_angle = 0.0f;
+		for (unsigned j = 0; j < num_ring_segments; j++) {
+			float cos_ring_a = (float)cos(ring_angle);
+			float sin_ring_a = (float)sin(ring_angle);
 
-			float lX = lCosRingA * pRingRadiusX;
+			float __x = cos_ring_a * ring_radius_x;
 
-			lV[lIndex].x = lCosA * (lX + pRadius);
-			lV[lIndex].y = lSinRingA * pRingRadiusY;
-			lV[lIndex].z = lSinA * (lX + pRadius);
+			__v[index].x = cos_a * (__x + radius);
+			__v[index].y = sin_ring_a * ring_radius_y;
+			__v[index].z = sin_a * (__x + radius);
 
-			lN[lIndex].x = lCosRingA * lCosA;
-			lN[lIndex].y = lSinRingA;
-			lN[lIndex].z = lCosRingA * lSinA;
-			//lN[lIndex].Normalize();
+			__n[index].x = cos_ring_a * cos_a;
+			__n[index].y = sin_ring_a;
+			__n[index].z = cos_ring_a * sin_a;
+			//__n[index].Normalize();
 
-			lRingAngle += lRingAngleStep;
-			lIndex++;
+			ring_angle += ring_angle_step;
+			index++;
 		}
 
-		lAngle += lAngleStep;
+		angle += angle_step;
 	}
 
-	lIndex = 0;
-	for (i = 0; i < pNumSegments; i++)
-	{
-		unsigned lOffset0 = i * pNumRingSegments;
-		unsigned lOffset1 = ((i + 1) % pNumSegments) * pNumRingSegments;
+	index = 0;
+	for (i = 0; i < num_segments; i++) {
+		unsigned offset0 = i * num_ring_segments;
+		unsigned offset1 = ((i + 1) % num_segments) * num_ring_segments;
 
-		for (unsigned j = 0; j < pNumRingSegments; j++)
-		{
-			lI[lIndex + 0] = lOffset0 + j;
-			lI[lIndex + 1] = lOffset0 + (j + 1) % pNumRingSegments;
-			lI[lIndex + 2] = lOffset1 + (j + 1) % pNumRingSegments;
-			lI[lIndex + 3] = lOffset0 + j;
-			lI[lIndex + 4] = lOffset1 + (j + 1) % pNumRingSegments;
-			lI[lIndex + 5] = lOffset1 + j;
+		for (unsigned j = 0; j < num_ring_segments; j++) {
+			__i[index + 0] = offset0 + j;
+			__i[index + 1] = offset0 + (j + 1) % num_ring_segments;
+			__i[index + 2] = offset1 + (j + 1) % num_ring_segments;
+			__i[index + 3] = offset0 + j;
+			__i[index + 4] = offset1 + (j + 1) % num_ring_segments;
+			__i[index + 5] = offset1 + j;
 
-			lIndex += 6;
+			index += 6;
 		}
 	}
 
-	TriangleBasedGeometry* lTorus = 
-		new TriangleBasedGeometry(lV, lN, 0, 0,
-					  TriangleBasedGeometry::COLOR_RGB,
-					  lI, lVertexCount, lNumTriangles * 3,
-					  Tbc::GeometryBase::TRIANGLES,
-					  Tbc::GeometryBase::GEOM_STATIC);
+	TriangleBasedGeometry* torus =
+		new TriangleBasedGeometry(__v, __n, 0, 0,
+					  TriangleBasedGeometry::kColorRgb,
+					  __i, vertex_count, num_triangles * 3,
+					  tbc::GeometryBase::kTriangles,
+					  tbc::GeometryBase::kGeomStatic);
 
-	delete[] lV;
-	delete[] lN;
-	delete[] lI;
+	delete[] __v;
+	delete[] __n;
+	delete[] __i;
 
-	return lTorus;
+	return torus;
 }
 
-void BasicMeshCreator::CreateYBonedSkin(float pStartY, float pEndY, const TriangleBasedGeometry* pGeometry,
-	AnimatedGeometry* pSkin, int pBoneCount, float pBoneStiffness)
-{
+void BasicMeshCreator::CreateYBonedSkin(float start_y, float end_y, const TriangleBasedGeometry* geometry,
+	AnimatedGeometry* skin, int bone_count, float bone_stiffness) {
 	// Collect the Y minimas and maximas.
-	std::list<int> lMinimaList;
-	std::list<int> lMaximaList;
+	std::list<int> minima_list;
+	std::list<int> maxima_list;
 	unsigned v;
-	for (v = 0; v < pGeometry->GetVertexCount(); ++v)
-	{
-		float y = pGeometry->GetVertexData()[v*3+1];
-		if (y <= pStartY+eps_f)
-		{
-			lMinimaList.push_back(v);
-		}
-		else if (y >= pEndY-eps_f)
-		{
-			lMaximaList.push_back(v);
+	for (v = 0; v < geometry->GetVertexCount(); ++v) {
+		float y = geometry->GetVertexData()[v*3+1];
+		if (y <= start_y+eps_f) {
+			minima_list.push_back(v);
+		} else if (y >= end_y-eps_f) {
+			maxima_list.push_back(v);
 		}
 	}
 
-	UiTbc::AnimatedGeometry::BoneWeightGroup lWeightGroup;
+	uitbc::AnimatedGeometry::BoneWeightGroup weight_group;
 
-	if (!lMinimaList.empty())
-	{
+	if (!minima_list.empty()) {
 		// Create weights for proximal end cap of skinned mesh.
-		lWeightGroup.mBoneCount = 1;
-		lWeightGroup.mBoneIndexArray[0] = 0;
-		lWeightGroup.mVectorIndexCount = (int)lMinimaList.size();
-		lWeightGroup.mVectorIndexArray = new int[lWeightGroup.mVectorIndexCount];
-		lWeightGroup.mVectorWeightArray = new float[lWeightGroup.mVectorIndexCount*lWeightGroup.mBoneCount];
-		std::list<int>::iterator i = lMinimaList.begin();
-		for (v = 0; i != lMinimaList.end(); ++i, ++v)
-		{
-			lWeightGroup.mVectorIndexArray[v] = *i;
-			lWeightGroup.mVectorWeightArray[v] = 1;
+		weight_group.bone_count_ = 1;
+		weight_group.bone_index_array_[0] = 0;
+		weight_group.vector_index_count_ = (int)minima_list.size();
+		weight_group.vector_index_array_ = new int[weight_group.vector_index_count_];
+		weight_group.vector_weight_array_ = new float[weight_group.vector_index_count_*weight_group.bone_count_];
+		std::list<int>::iterator i = minima_list.begin();
+		for (v = 0; i != minima_list.end(); ++i, ++v) {
+			weight_group.vector_index_array_[v] = *i;
+			weight_group.vector_weight_array_[v] = 1;
 		}
-		pSkin->AddBoneWeights(lWeightGroup);
+		skin->AddBoneWeights(weight_group);
 	}
 
 	// The middle part. Segment the geometry into (bone count - 1) groups; i.e. two bones per vertex.
-	const int lSegments = pBoneCount-1;
-	for (int y = 0; y < lSegments; ++y)
-	{
-		const float lPartMin = Math::Lerp(pStartY, pEndY, (float)y/lSegments);
-		const float lPartMax = Math::Lerp(pStartY, pEndY, (float)(y+1)/lSegments);
-		std::list<int> lSegmentList;
-		for (v = 0; v < pGeometry->GetVertexCount(); ++v)
-		{
-			float yp = pGeometry->GetVertexData()[v*3+1];
-			if (yp >= lPartMin && yp < lPartMax)
-			{
+	const int segments = bone_count-1;
+	for (int y = 0; y < segments; ++y) {
+		const float part_min = Math::Lerp(start_y, end_y, (float)y/segments);
+		const float part_max = Math::Lerp(start_y, end_y, (float)(y+1)/segments);
+		std::list<int> segment_list;
+		for (v = 0; v < geometry->GetVertexCount(); ++v) {
+			float yp = geometry->GetVertexData()[v*3+1];
+			if (yp >= part_min && yp < part_max) {
 				// Make sure it's not part of the caps.
-				if (std::find(lMinimaList.begin(), lMinimaList.end(), (int)v) == lMinimaList.end() &&
-					std::find(lMaximaList.begin(), lMaximaList.end(), (int)v) == lMaximaList.end())
-				{
-					lSegmentList.push_back(v);
+				if (std::find(minima_list.begin(), minima_list.end(), (int)v) == minima_list.end() &&
+					std::find(maxima_list.begin(), maxima_list.end(), (int)v) == maxima_list.end()) {
+					segment_list.push_back(v);
 				}
 			}
 		}
-		if (!lSegmentList.empty())
-		{
-			lWeightGroup.mBoneCount = 2;
-			lWeightGroup.mBoneIndexArray[0] = y;
-			lWeightGroup.mBoneIndexArray[1] = y+1;
-			lWeightGroup.mVectorIndexCount = (int)lSegmentList.size();
-			lWeightGroup.mVectorIndexArray = new int[lWeightGroup.mVectorIndexCount];
-			lWeightGroup.mVectorWeightArray = new float[lWeightGroup.mVectorIndexCount*lWeightGroup.mBoneCount];
-			std::list<int>::iterator i = lSegmentList.begin();
-			for (v = 0; i != lSegmentList.end(); ++i, ++v)
-			{
+		if (!segment_list.empty()) {
+			weight_group.bone_count_ = 2;
+			weight_group.bone_index_array_[0] = y;
+			weight_group.bone_index_array_[1] = y+1;
+			weight_group.vector_index_count_ = (int)segment_list.size();
+			weight_group.vector_index_array_ = new int[weight_group.vector_index_count_];
+			weight_group.vector_weight_array_ = new float[weight_group.vector_index_count_*weight_group.bone_count_];
+			std::list<int>::iterator i = segment_list.begin();
+			for (v = 0; i != segment_list.end(); ++i, ++v) {
 				int idx = *i;
-				lWeightGroup.mVectorIndexArray[v] = idx;
-				float yp = pGeometry->GetVertexData()[idx*3+1];
+				weight_group.vector_index_array_[v] = idx;
+				float yp = geometry->GetVertexData()[idx*3+1];
 				// Scale down to [0, 1].
-				yp = (yp-lPartMin)/(lPartMax-lPartMin);
+				yp = (yp-part_min)/(part_max-part_min);
 				// Scale up to [0, 2];
 				yp *= 2;
 				// Move by the power of n towards the closest part.
-				const float n = pBoneStiffness;
+				const float n = bone_stiffness;
 				yp = ::pow(yp, n);
 				// Scale down to [0, 1] again.
 				yp /= ::pow(2, n);
-				lWeightGroup.mVectorWeightArray[v*2+0] = 1-yp;
-				lWeightGroup.mVectorWeightArray[v*2+1] = yp;
+				weight_group.vector_weight_array_[v*2+0] = 1-yp;
+				weight_group.vector_weight_array_[v*2+1] = yp;
 			}
-			pSkin->AddBoneWeights(lWeightGroup);
+			skin->AddBoneWeights(weight_group);
 		}
-	}	
+	}
 
-	if (!lMaximaList.empty())
-	{
+	if (!maxima_list.empty()) {
 		// Create weights for distal end cap of skinned mesh.
-		lWeightGroup.mBoneCount = 1;
-		lWeightGroup.mBoneIndexArray[0] = pBoneCount-1;
-		lWeightGroup.mVectorIndexCount = (int)lMaximaList.size();
-		lWeightGroup.mVectorIndexArray = new int[lWeightGroup.mVectorIndexCount];
-		lWeightGroup.mVectorWeightArray = new float[lWeightGroup.mVectorIndexCount*lWeightGroup.mBoneCount];
-		std::list<int>::iterator i = lMaximaList.begin();
-		for (v = 0; i != lMaximaList.end(); ++i, ++v)
-		{
-			lWeightGroup.mVectorIndexArray[v] = *i;
-			lWeightGroup.mVectorWeightArray[v] = 1;
+		weight_group.bone_count_ = 1;
+		weight_group.bone_index_array_[0] = bone_count-1;
+		weight_group.vector_index_count_ = (int)maxima_list.size();
+		weight_group.vector_index_array_ = new int[weight_group.vector_index_count_];
+		weight_group.vector_weight_array_ = new float[weight_group.vector_index_count_*weight_group.bone_count_];
+		std::list<int>::iterator i = maxima_list.begin();
+		for (v = 0; i != maxima_list.end(); ++i, ++v) {
+			weight_group.vector_index_array_[v] = *i;
+			weight_group.vector_weight_array_[v] = 1;
 		}
-		pSkin->AddBoneWeights(lWeightGroup);
+		skin->AddBoneWeights(weight_group);
 	}
 }
 

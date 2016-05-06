@@ -5,1682 +5,1439 @@
 */
 
 #include "pch.h"
-#include "../../Lepra/Include/ImageLoader.h"
-#include "../../Lepra/Include/Canvas.h"
-#include "../../Lepra/Include/DiskFile.h"
-#include "../../Lepra/Include/Params.h"
-#include "../../Lepra/Include/HashTable.h"
-#include "../../Lepra/Include/Vector2D.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../Include/UiASELoader.h"
-#include "../Include/UiTexture.h"
-#include "../Include/UiTriangleBasedGeometry.h"
+#include "../../lepra/include/imageloader.h"
+#include "../../lepra/include/canvas.h"
+#include "../../lepra/include/diskfile.h"
+#include "../../lepra/include/Params.h"
+#include "../../lepra/include/hashtable.h"
+#include "../../lepra/include/vector2d.h"
+#include "../../lepra/include/vector3d.h"
+#include "../include/uiaseloader.h"
+#include "../include/uitexture.h"
+#include "../include/uitrianglebasedgeometry.h"
 #include <list>
 
-namespace UiTbc
-{
+namespace uitbc {
 
-ASELoader::ASELoader()
-{
+ASELoader::ASELoader() {
 }
 
 
-bool ASELoader::Load(ASEData& pASEData, const Lepra::String& pFileName)
-{
-	bool lOk = false;
-	Lepra::DiskFile lFile;
-	if (lFile.Open(pFileName, Lepra::DiskFile::MODE_READ) == true)
-	{
-		lOk = Load(pASEData, lFile);
-		lFile.Close();
+bool ASELoader::Load(ASEData& ase_data, const lepra::String& file_name) {
+	bool ok = false;
+	lepra::DiskFile file;
+	if (file.Open(file_name, lepra::DiskFile::kModeRead) == true) {
+		ok = Load(ase_data, file);
+		file.Close();
 	}
 
-	return lOk;
+	return ok;
 }
 
-bool ASELoader::Load(ASEData& pASEData, Lepra::Reader& pReader)
-{
-	pASEData.Init();
+bool ASELoader::Load(ASEData& ase_data, lepra::Reader& reader) {
+	ase_data.Init();
 
 	//
 	// Read the file into an AnsiString.
 	//
 
-	bool lStatusOk = true;
-	unsigned int lSize = (unsigned int)pReader.GetAvailable();
-	char* lData = new char[lSize + 1];
-	lStatusOk = pReader.ReadData(lData, (unsigned int)pReader.GetAvailable()) == Lepra::IO_OK;
-	lData[lSize] = 0;
+	bool status_ok = true;
+	unsigned int size = (unsigned int)reader.GetAvailable();
+	char* data = new char[size + 1];
+	status_ok = reader.ReadData(data, (unsigned int)reader.GetAvailable()) == lepra::kIoOk;
+	data[size] = 0;
 
-	Lepra::AnsiString lDataString;
-	if (lStatusOk == true)
-	{
-		lDataString = lData;
+	lepra::AnsiString _data_string;
+	if (status_ok == true) {
+		_data_string = data;
 	}
-	delete[] lData;
+	delete[] data;
 
 	//
 	// Parse the file.
 	//
 
-	if (lStatusOk)
-	{
-		lStatusOk = Parse(pASEData, lDataString);
+	if (status_ok) {
+		status_ok = Parse(ase_data, _data_string);
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::Parse(ASEData& pASEData, const Lepra::AnsiString& pDataString)
-{
+bool ASELoader::Parse(ASEData& ase_data, const lepra::AnsiString& data_string) {
 	//
 	// Setup special tokens.
 	//
 
-	Lepra::AnsiString lSpecialTokens;
-	lSpecialTokens.AddToken("*");
-	lSpecialTokens.AddToken("{");
-	lSpecialTokens.AddToken("}");
-	lSpecialTokens.AddToken("\"");
-	lSpecialTokens.AddToken(",");
+	lepra::AnsiString _special_tokens;
+	_special_tokens.AddToken("*");
+	_special_tokens.AddToken("{");
+	_special_tokens.AddToken("}");
+	_special_tokens.AddToken("\"");
+	_special_tokens.AddToken(",");
 
-	static char* slDelimitors = " \t\v\b\r\n";
+	static char* delimitors_ = " \t\v\b\r\n";
 
-	int lIndex = 0;
-	bool lStatusOk = true;
-	bool lDone = false;
-	Lepra::AnsiString lToken;
-	while (lStatusOk && !lDone)
-	{
-		lIndex = pDataString.GetToken(lToken, lIndex, " \t\v\b\r\n", lSpecialTokens);
-		lDone = lIndex < 0;
-		lStatusOk = (lToken == "*") && lIndex > 0 || lDone;
+	int _index = 0;
+	bool status_ok = true;
+	bool done = false;
+	lepra::AnsiString token;
+	while (status_ok && !done) {
+		_index = data_string.GetToken(token, _index, " \t\v\b\r\n", _special_tokens);
+		done = _index < 0;
+		status_ok = (token == "*") && _index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			lIndex = pDataString.GetToken(lToken, lIndex, " \t\v\b\r\n", lSpecialTokens);
-			if (lToken == "3DSMAX_ASCIIEXPORT")
-				lStatusOk = ReadInt(pASEData.m3DSMaxAsciiExport, pDataString, lIndex, lSpecialTokens);
-			else if(lToken == "COMMENT")
-				lStatusOk = ReadQuotedString(pASEData.mComment, pDataString, lIndex, lSpecialTokens);
-			else if(lToken == "SCENE")
-				lStatusOk = ReadSCENE(pASEData, pDataString, lIndex, lSpecialTokens);
-			else if(lToken == "MATERIAL_LIST")
-				lStatusOk = ReadMATERIAL_LIST(pASEData, pDataString, lIndex, lSpecialTokens);
-			else if(lToken == "GEOMOBJECT")
-			{
-				GeomObject* lGeomObj = new GeomObject;
-				lStatusOk = ReadGEOMOBJECT(lGeomObj, pDataString, lIndex, lSpecialTokens);
+		if (status_ok && !done) {
+			_index = data_string.GetToken(token, _index, " \t\v\b\r\n", _special_tokens);
+			if (token == "3DSMAX_ASCIIEXPORT")
+				status_ok = ReadInt(ase_data.m3DSMaxAsciiExport_, data_string, _index, _special_tokens);
+			else if(token == "COMMENT")
+				status_ok = ReadQuotedString(ase_data.comment_, data_string, _index, _special_tokens);
+			else if(token == "SCENE")
+				status_ok = ReadSCENE(ase_data, data_string, _index, _special_tokens);
+			else if(token == "MATERIAL_LIST")
+				status_ok = ReadMATERIAL_LIST(ase_data, data_string, _index, _special_tokens);
+			else if(token == "GEOMOBJECT") {
+				GeomObject* _geom_obj = new GeomObject;
+				status_ok = ReadGEOMOBJECT(_geom_obj, data_string, _index, _special_tokens);
 
-				if (lStatusOk)
-				{
-					pASEData.mGeomList.PushBack(lGeomObj);
+				if (status_ok) {
+					ase_data.geom_list_.PushBack(_geom_obj);
+				} else {
+					delete _geom_obj;
 				}
-				else
-				{
-					delete lGeomObj;
-				}
-			}
-			else if(lToken == "CAMERAOBJECT")
-			{
-				CameraObject* lCamObj = new CameraObject;
-				lStatusOk = ReadCAMERAOBJECT(lCamObj, pDataString, lIndex, lSpecialTokens);
+			} else if(token == "CAMERAOBJECT") {
+				CameraObject* _cam_obj = new CameraObject;
+				status_ok = ReadCAMERAOBJECT(_cam_obj, data_string, _index, _special_tokens);
 
-				if (lStatusOk)
-				{
-					pASEData.mCamList.PushBack(lCamObj);
+				if (status_ok) {
+					ase_data.cam_list_.PushBack(_cam_obj);
+				} else {
+					delete _cam_obj;
 				}
-				else
-				{
-					delete lCamObj;
-				}
-			}
-			else if(lToken == "LIGHTOBJECT")
-			{
-				LightObject* lLightObj = new LightObject;
-				lStatusOk = ReadLIGHTOBJECT(lLightObj, pDataString, lIndex, lSpecialTokens);
+			} else if(token == "LIGHTOBJECT") {
+				LightObject* _light_obj = new LightObject;
+				status_ok = ReadLIGHTOBJECT(_light_obj, data_string, _index, _special_tokens);
 
-				if (lStatusOk)
-				{
-					pASEData.mLightList.PushBack(lLightObj);
+				if (status_ok) {
+					ase_data.light_list_.PushBack(_light_obj);
+				} else {
+					delete _light_obj;
 				}
-				else
-				{
-					delete lLightObj;
-				}
-			}
-			else
-				lStatusOk = false;
+			} else
+				status_ok = false;
 		}
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadQuotedString(Lepra::AnsiString& pString, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadQuotedString(lepra::AnsiString& s, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the first quote.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "\"" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "\"" && index > 0;
 	}
-	if (lStatusOk)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, "", pSpecialTokens);
+	if (status_ok) {
+		index = data_string.GetToken(token, index, "", special_tokens);
 	}
 
-	if (lToken == "\"")
-	{
-		pString = "";
-	}
-	else
-	{
-		pString = lToken;
+	if (token == "\"") {
+		s = "";
+	} else {
+		s = token;
 
-		lStatusOk = pIndex > 0;
-		if (lStatusOk)
-		{
+		status_ok = index > 0;
+		if (status_ok) {
 			// Read the final quote.
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			lStatusOk = lToken == "\"";
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			status_ok = token == "\"";
 		}
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadUnquotedString(Lepra::AnsiString& pString, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadUnquotedString(lepra::AnsiString& s, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	if (lStatusOk)
-	{
-		pIndex = pDataString.GetToken(pString, pIndex, " \t\v\b\r\n:", pSpecialTokens);
+	if (status_ok) {
+		index = data_string.GetToken(s, index, " \t\v\b\r\n:", special_tokens);
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadInt(int& pInt, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
-	if (lStatusOk)
-	{
+bool ASELoader::ReadInt(int& _i, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
+	if (status_ok) {
 		// Read the integer.
-		Lepra::AnsiString lToken;
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n:", pSpecialTokens);
-		lStatusOk = Lepra::AnsiStringUtility::StringToInt(lToken, pInt);
+		lepra::AnsiString token;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n:", special_tokens);
+		status_ok = lepra::AnsiStringUtility::StringToInt(token, _i);
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadIntVec(int* pInt, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
-	if (lStatusOk)
-		lStatusOk = ReadInt(pInt[0], pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-		lStatusOk = ReadInt(pInt[1], pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-		lStatusOk = ReadInt(pInt[2], pDataString, pIndex, pSpecialTokens);
+bool ASELoader::ReadIntVec(int* _i, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
+	if (status_ok)
+		status_ok = ReadInt(_i[0], data_string, index, special_tokens);
+	if (status_ok)
+		status_ok = ReadInt(_i[1], data_string, index, special_tokens);
+	if (status_ok)
+		status_ok = ReadInt(_i[2], data_string, index, special_tokens);
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadFloat(double& pFloat, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = (pIndex > 0);
-	if (lStatusOk)
-	{
+bool ASELoader::ReadFloat(double& _f, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = (index > 0);
+	if (status_ok) {
 		// Read the float value.
-		Lepra::AnsiString lToken;
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n:", pSpecialTokens);
-		lStatusOk = Lepra::AnsiStringUtility::StringToDouble(lToken, pFloat);
+		lepra::AnsiString token;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n:", special_tokens);
+		status_ok = lepra::AnsiStringUtility::StringToDouble(token, _f);
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadFloatVec(double* pFloat, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
-	if (lStatusOk)
-		lStatusOk = ReadFloat(pFloat[0], pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-		lStatusOk = ReadFloat(pFloat[1], pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-		lStatusOk = ReadFloat(pFloat[2], pDataString, pIndex, pSpecialTokens);
+bool ASELoader::ReadFloatVec(double* _f, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
+	if (status_ok)
+		status_ok = ReadFloat(_f[0], data_string, index, special_tokens);
+	if (status_ok)
+		status_ok = ReadFloat(_f[1], data_string, index, special_tokens);
+	if (status_ok)
+		status_ok = ReadFloat(_f[2], data_string, index, special_tokens);
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadBool(bool& pBool, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	int lInt = -1;
-	bool lStatusOk = ReadInt(lInt, pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-	{
-		switch(lInt)
-		{
+bool ASELoader::ReadBool(bool& _bool, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	int __i = -1;
+	bool status_ok = ReadInt(__i, data_string, index, special_tokens);
+	if (status_ok) {
+		switch(__i) {
 		case 0:
-			pBool = false;
+			_bool = false;
 			break;
 		case 1:
-			pBool = true;
+			_bool = true;
 			break;
 		default:
-			lStatusOk = false;
+			status_ok = false;
 		}
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadVertexList(float* pVertex, int pNumVertex, char* pVertexIdentifier, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadVertexList(float* vertex, int num_vertex, char* vertex_identifier, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	if (lStatusOk)
-	{
+	if (status_ok) {
 		int i;
-		for (i = 0; lStatusOk && i < pNumVertex; i++)
-		{
-			if (lStatusOk)
-			{
+		for (i = 0; status_ok && i < num_vertex; i++) {
+			if (status_ok) {
 				// Read the '*'.
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = lToken == "*" && pIndex > 0;
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = token == "*" && index > 0;
 			}
 
-			if (lStatusOk)
-			{
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = lToken == pVertexIdentifier && pIndex > 0;
+			if (status_ok) {
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = token == vertex_identifier && index > 0;
 			}
 
 			// Read vertex index. Must equal 'i'.
-			int lVIndex = -1;
-			if (lStatusOk)
-			{
-				lStatusOk = ReadInt(lVIndex, pDataString, pIndex, pSpecialTokens);
+			int v_index = -1;
+			if (status_ok) {
+				status_ok = ReadInt(v_index, data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
-				lStatusOk = (lVIndex == i);
+			if (status_ok) {
+				status_ok = (v_index == i);
 			}
 
-			double lVertex[3];
-			if (lStatusOk)
-			{
+			double _vertex[3];
+			if (status_ok) {
 				// Read the vector...
-				lStatusOk = ReadFloatVec(lVertex, pDataString, pIndex, pSpecialTokens);
+				status_ok = ReadFloatVec(_vertex, data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Type cast.
-				pVertex[lVIndex * 3 + 0] = (float)lVertex[0];
-				pVertex[lVIndex * 3 + 1] = (float)lVertex[1];
-				pVertex[lVIndex * 3 + 2] = (float)lVertex[2];
+				vertex[v_index * 3 + 0] = (float)_vertex[0];
+				vertex[v_index * 3 + 1] = (float)_vertex[1];
+				vertex[v_index * 3 + 2] = (float)_vertex[2];
 			}
 		}
 	}
 
-	if (lStatusOk)
-	{
+	if (status_ok) {
 		// Read the end brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "}" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "}" && index > 0;
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadFaceList(int* pFace, int pNumFaces, char* pFaceIdentifier, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadFaceList(int* face, int num_faces, char* face_identifier, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	if (lStatusOk)
-	{
+	if (status_ok) {
 		int i;
-		for (i = 0; lStatusOk && i < pNumFaces; i++)
-		{
-			if (lStatusOk)
-			{
+		for (i = 0; status_ok && i < num_faces; i++) {
+			if (status_ok) {
 				// Read the '*'.
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = lToken == "*" && pIndex > 0;
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = token == "*" && index > 0;
 			}
 
-			if (lStatusOk)
-			{
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = lToken == pFaceIdentifier && pIndex > 0;
+			if (status_ok) {
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = token == face_identifier && index > 0;
 			}
 
 			// Read face index. Must equal 'i'.
-			int lFIndex = -1;
-			if (lStatusOk)
-			{
-				lStatusOk = ReadInt(lFIndex, pDataString, pIndex, pSpecialTokens);
+			int f_index = -1;
+			if (status_ok) {
+				status_ok = ReadInt(f_index, data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
-				lStatusOk = (lFIndex == i);
+			if (status_ok) {
+				status_ok = (f_index == i);
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read the face...
-				lStatusOk = ReadIntVec(&pFace[lFIndex * 3], pDataString, pIndex, pSpecialTokens);
+				status_ok = ReadIntVec(&face[f_index * 3], data_string, index, special_tokens);
 			}
 		}
 	}
 
-	if (lStatusOk)
-	{
+	if (status_ok) {
 		// Read the end brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "}" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "}" && index > 0;
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadSCENE(ASEData& pASEData, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	if (pASEData.mScene == 0)
-	{
-		pASEData.mScene = new Scene;
-	}
-	else
-	{
-		pASEData.mScene->Init();
+bool ASELoader::ReadSCENE(ASEData& ase_data, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	if (ase_data.scene_ == 0) {
+		ase_data.scene_ = new Scene;
+	} else {
+		ase_data.scene_->Init();
 	}
 
-	bool lStatusOk = pIndex > 0;
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "SCENE_FILENAME")
-				lStatusOk = ReadQuotedString(pASEData.mScene->mFilename, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "COMMENT")
-				lStatusOk = ReadQuotedString(pASEData.mScene->mComment, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "SCENE_FIRSTFRAME")
-				lStatusOk = ReadInt(pASEData.mScene->mFirstFrame, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "SCENE_LASTFRAME")
-				lStatusOk = ReadInt(pASEData.mScene->mLastFrame, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "SCENE_FRAMESPEED")
-				lStatusOk = ReadInt(pASEData.mScene->mFrameSpeed, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "SCENE_TICKSPERFRAME")
-				lStatusOk = ReadInt(pASEData.mScene->mTicksPerFrame, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "SCENE_BACKGROUND_STATIC")
-				lStatusOk = ReadFloatVec(pASEData.mScene->mBackgroundStatic, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "SCENE_AMBIENT_STATIC")
-				lStatusOk = ReadFloatVec(pASEData.mScene->mAmbientStatic, pDataString, pIndex, pSpecialTokens);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "SCENE_FILENAME")
+				status_ok = ReadQuotedString(ase_data.scene_->filename_, data_string, index, special_tokens);
+			else if(token == "COMMENT")
+				status_ok = ReadQuotedString(ase_data.scene_->comment_, data_string, index, special_tokens);
+			else if(token == "SCENE_FIRSTFRAME")
+				status_ok = ReadInt(ase_data.scene_->first_frame_, data_string, index, special_tokens);
+			else if(token == "SCENE_LASTFRAME")
+				status_ok = ReadInt(ase_data.scene_->last_frame_, data_string, index, special_tokens);
+			else if(token == "SCENE_FRAMESPEED")
+				status_ok = ReadInt(ase_data.scene_->frame_speed_, data_string, index, special_tokens);
+			else if(token == "SCENE_TICKSPERFRAME")
+				status_ok = ReadInt(ase_data.scene_->ticks_per_frame_, data_string, index, special_tokens);
+			else if(token == "SCENE_BACKGROUND_STATIC")
+				status_ok = ReadFloatVec(ase_data.scene_->background_static_, data_string, index, special_tokens);
+			else if(token == "SCENE_AMBIENT_STATIC")
+				status_ok = ReadFloatVec(ase_data.scene_->ambient_static_, data_string, index, special_tokens);
 			else
-				lStatusOk = false;
+				status_ok = false;
 		}
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadMATERIAL_LIST(ASEData& pASEData, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadMATERIAL_LIST(ASEData& ase_data, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	if (lStatusOk)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	if (status_ok) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 	}
-	if (lStatusOk && !lDone)
-	{
+	if (status_ok && !done) {
 		// Read tag name. Should be MATERIAL_COUNT.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "MATERIAL_COUNT" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "MATERIAL_COUNT" && index > 0;
 	}
 
-	int mMaterialCount = 0;
-	if (lStatusOk && !lDone)
-	{
+	int material_count_ = 0;
+	if (status_ok && !done) {
 		// Read the material count.
-		lStatusOk = ReadInt(mMaterialCount, pDataString, pIndex, pSpecialTokens);
+		status_ok = ReadInt(material_count_, data_string, index, special_tokens);
 	}
 
-	if (lStatusOk && !lDone)
-	{
-		for (int i = 0; i < mMaterialCount && lStatusOk; i++)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			lStatusOk = (lToken == "*") && pIndex > 0;
+	if (status_ok && !done) {
+		for (int i = 0; i < material_count_ && status_ok; i++) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			status_ok = (token == "*") && index > 0;
 
-			if (lStatusOk)
-			{
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = (lToken == "MATERIAL") && pIndex > 0;
+			if (status_ok) {
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = (token == "MATERIAL") && index > 0;
 			}
 
-			int lMaterialIndex = -1;
-			if (lStatusOk)
-			{
-				lStatusOk = ReadInt(lMaterialIndex, pDataString, pIndex, pSpecialTokens);
+			int material_index = -1;
+			if (status_ok) {
+				status_ok = ReadInt(material_index, data_string, index, special_tokens);
 			}
-			if (lStatusOk)
-			{
-				lStatusOk = (lMaterialIndex == i);
+			if (status_ok) {
+				status_ok = (material_index == i);
 			}
 
-			Material* lMaterial = 0;
-			if (lStatusOk)
-			{
-				lMaterial = new Material;
-				lStatusOk = ReadMATERIAL(lMaterial, pDataString, pIndex, pSpecialTokens);
+			Material* _material = 0;
+			if (status_ok) {
+				_material = new Material;
+				status_ok = ReadMATERIAL(_material, data_string, index, special_tokens);
 
-				if (lStatusOk)
-					pASEData.mMaterialList.PushBack(lMaterial);
+				if (status_ok)
+					ase_data.material_list_.PushBack(_material);
 				else
-					delete lMaterial;
+					delete _material;
 			}
 		}
 	}
 
-	if (lStatusOk && !lDone)
-	{
+	if (status_ok && !done) {
 		// The block must end with a brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = (lToken == "}") && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = (token == "}") && index > 0;
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadMATERIAL(Material* pMaterial, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadMATERIAL(Material* material, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "MATERIAL_NAME")
-				lStatusOk = ReadQuotedString(pMaterial->mName, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "COMMENT")
-				lStatusOk = ReadQuotedString(pMaterial->mComment, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_CLASS")
-				lStatusOk = ReadQuotedString(pMaterial->mClass, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_AMBIENT")
-				lStatusOk = ReadFloatVec(pMaterial->mAmbient, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_DIFFUSE")
-				lStatusOk = ReadFloatVec(pMaterial->mDiffuse, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_SPECULAR")
-				lStatusOk = ReadFloatVec(pMaterial->mSpecular, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_SHINE")
-				lStatusOk = ReadFloat(pMaterial->mShine, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_SHINESTRENGTH")
-				lStatusOk = ReadFloat(pMaterial->mShineStrength, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_TRANSPARENCY")
-				lStatusOk = ReadFloat(pMaterial->mTransparency, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_WIRESIZE")
-				lStatusOk = ReadFloat(pMaterial->mWireSize, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_SHADING")
-				lStatusOk = ReadUnquotedString(pMaterial->mShading, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_XP_FALLOFF")
-				lStatusOk = ReadFloat(pMaterial->mXPFalloff, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_SELFILLUM")
-				lStatusOk = ReadFloat(pMaterial->mSelfIllum, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_FALLOFF")
-				lStatusOk = ReadUnquotedString(pMaterial->mFalloff, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MATERIAL_XP_TYPE")
-				lStatusOk = ReadUnquotedString(pMaterial->mXPType, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_AMBIENT")
-				lStatusOk = ReadMAP(pMaterial->mAmbientMapList, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_DIFFUSE")
-				lStatusOk = ReadMAP(pMaterial->mDiffuseMapList, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_SPECULAR")
-				lStatusOk = ReadMAP(pMaterial->mSpecularMapList, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_SHINE")
-				lStatusOk = ReadMAP(pMaterial->mShineMapList, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_SHINESTRENGTH")
-				lStatusOk = ReadMAP(pMaterial->mShineStrengthMapList, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_SELFILLUM")
-				lStatusOk = ReadMAP(pMaterial->mSelfIllumMapList, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_OPACITY")
-				lStatusOk = ReadMAP(pMaterial->mOpacityMapList, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_FILTERCOLOR")
-				lStatusOk = ReadMAP(pMaterial->mFilterColorMapList, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_BUMP")
-				lStatusOk = ReadMAP(pMaterial->mBumpMapList, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_REFLECT")
-				lStatusOk = ReadMAP(pMaterial->mReflectMapList, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_REFRACT")
-				lStatusOk = ReadMAP(pMaterial->mRefractMapList, pDataString, pIndex, pSpecialTokens);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "MATERIAL_NAME")
+				status_ok = ReadQuotedString(material->name_, data_string, index, special_tokens);
+			else if(token == "COMMENT")
+				status_ok = ReadQuotedString(material->comment_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_CLASS")
+				status_ok = ReadQuotedString(material->clazz_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_AMBIENT")
+				status_ok = ReadFloatVec(material->ambient_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_DIFFUSE")
+				status_ok = ReadFloatVec(material->diffuse_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_SPECULAR")
+				status_ok = ReadFloatVec(material->specular_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_SHINE")
+				status_ok = ReadFloat(material->shine_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_SHINESTRENGTH")
+				status_ok = ReadFloat(material->shine_strength_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_TRANSPARENCY")
+				status_ok = ReadFloat(material->transparency_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_WIRESIZE")
+				status_ok = ReadFloat(material->wire_size_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_SHADING")
+				status_ok = ReadUnquotedString(material->shading_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_XP_FALLOFF")
+				status_ok = ReadFloat(material->xp_falloff_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_SELFILLUM")
+				status_ok = ReadFloat(material->self_illum_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_FALLOFF")
+				status_ok = ReadUnquotedString(material->falloff_, data_string, index, special_tokens);
+			else if(token == "MATERIAL_XP_TYPE")
+				status_ok = ReadUnquotedString(material->xp_type_, data_string, index, special_tokens);
+			else if(token == "MAP_AMBIENT")
+				status_ok = ReadMAP(material->ambient_map_list_, data_string, index, special_tokens);
+			else if(token == "MAP_DIFFUSE")
+				status_ok = ReadMAP(material->diffuse_map_list_, data_string, index, special_tokens);
+			else if(token == "MAP_SPECULAR")
+				status_ok = ReadMAP(material->specular_map_list_, data_string, index, special_tokens);
+			else if(token == "MAP_SHINE")
+				status_ok = ReadMAP(material->shine_map_list_, data_string, index, special_tokens);
+			else if(token == "MAP_SHINESTRENGTH")
+				status_ok = ReadMAP(material->shine_strength_map_list_, data_string, index, special_tokens);
+			else if(token == "MAP_SELFILLUM")
+				status_ok = ReadMAP(material->self_illum_map_list_, data_string, index, special_tokens);
+			else if(token == "MAP_OPACITY")
+				status_ok = ReadMAP(material->opacity_map_list_, data_string, index, special_tokens);
+			else if(token == "MAP_FILTERCOLOR")
+				status_ok = ReadMAP(material->filter_color_map_list_, data_string, index, special_tokens);
+			else if(token == "MAP_BUMP")
+				status_ok = ReadMAP(material->bump_map_list_, data_string, index, special_tokens);
+			else if(token == "MAP_REFLECT")
+				status_ok = ReadMAP(material->reflect_map_list_, data_string, index, special_tokens);
+			else if(token == "MAP_REFRACT")
+				status_ok = ReadMAP(material->refract_map_list_, data_string, index, special_tokens);
 			else
-				lStatusOk = false;
+				status_ok = false;
 		}
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadMAP(std::list<Map*>& pMapList, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	Map* lMap = new Map;
+bool ASELoader::ReadMAP(std::list<Map*>& map_list, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	Map* map = new Map;
 
-	bool lStatusOk = pIndex > 0;
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "MAP_NAME")
-				lStatusOk = ReadQuotedString(lMap->mName, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "COMMENCT")
-				lStatusOk = ReadQuotedString(lMap->mComment, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_CLASS")
-				lStatusOk = ReadQuotedString(lMap->mClass, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_SUBNO")
-				lStatusOk = ReadInt(lMap->mSubNo, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_AMOUNT")
-				lStatusOk = ReadFloat(lMap->mAmount, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MAP_TYPE")
-				lStatusOk = ReadUnquotedString(lMap->mType, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "BITMAP")
-				lStatusOk = ReadQuotedString(lMap->mBitmapPath, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "BITMAP_FILTER")
-				lStatusOk = ReadUnquotedString(lMap->mBitmapFilter, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "UVW_U_OFFSET")
-				lStatusOk = ReadFloat(lMap->mUOffset, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "UVW_V_OFFSET")
-				lStatusOk = ReadFloat(lMap->mVOffset, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "UVW_U_TILING")
-				lStatusOk = ReadFloat(lMap->mUTiling, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "UVW_V_TILING")
-				lStatusOk = ReadFloat(lMap->mVTiling, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "UVW_ANGLE")
-				lStatusOk = ReadFloat(lMap->mUVWAngle, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "UVW_BLUR")
-				lStatusOk = ReadFloat(lMap->mUVWBlur, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "UVW_BLUR_OFFSET")
-				lStatusOk = ReadFloat(lMap->mUVWBlurOffset, pDataString, pIndex, pSpecialTokens);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "MAP_NAME")
+				status_ok = ReadQuotedString(map->name_, data_string, index, special_tokens);
+			else if(token == "COMMENCT")
+				status_ok = ReadQuotedString(map->comment_, data_string, index, special_tokens);
+			else if(token == "MAP_CLASS")
+				status_ok = ReadQuotedString(map->clazz_, data_string, index, special_tokens);
+			else if(token == "MAP_SUBNO")
+				status_ok = ReadInt(map->sub_no_, data_string, index, special_tokens);
+			else if(token == "MAP_AMOUNT")
+				status_ok = ReadFloat(map->amount_, data_string, index, special_tokens);
+			else if(token == "MAP_TYPE")
+				status_ok = ReadUnquotedString(map->type_, data_string, index, special_tokens);
+			else if(token == "BITMAP")
+				status_ok = ReadQuotedString(map->bitmap_path_, data_string, index, special_tokens);
+			else if(token == "BITMAP_FILTER")
+				status_ok = ReadUnquotedString(map->bitmap_filter_, data_string, index, special_tokens);
+			else if(token == "UVW_U_OFFSET")
+				status_ok = ReadFloat(map->u_offset_, data_string, index, special_tokens);
+			else if(token == "UVW_V_OFFSET")
+				status_ok = ReadFloat(map->v_offset_, data_string, index, special_tokens);
+			else if(token == "UVW_U_TILING")
+				status_ok = ReadFloat(map->u_tiling_, data_string, index, special_tokens);
+			else if(token == "UVW_V_TILING")
+				status_ok = ReadFloat(map->v_tiling_, data_string, index, special_tokens);
+			else if(token == "UVW_ANGLE")
+				status_ok = ReadFloat(map->uvw_angle_, data_string, index, special_tokens);
+			else if(token == "UVW_BLUR")
+				status_ok = ReadFloat(map->uvw_blur_, data_string, index, special_tokens);
+			else if(token == "UVW_BLUR_OFFSET")
+				status_ok = ReadFloat(map->uvw_blur_offset_, data_string, index, special_tokens);
 			// Yeah, I know... "NOUSE" should be "NOISE". But don't correct this! It is correct.
-			else if(lToken == "UVW_NOUSE_AMT") 
-				lStatusOk = ReadFloat(lMap->mUVWNoiseAmt, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "UVW_NOISE_SIZE") 
-				lStatusOk = ReadFloat(lMap->mUVWNoiseSize, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "UVW_NOISE_LEVEL")
-				lStatusOk = ReadInt(lMap->mUVWNoiseLevel, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "UVW_NOISE_PHASE")
-				lStatusOk = ReadFloat(lMap->mUVWNoisePhase, pDataString, pIndex, pSpecialTokens);
+			else if(token == "UVW_NOUSE_AMT")
+				status_ok = ReadFloat(map->uvw_noise_amt_, data_string, index, special_tokens);
+			else if(token == "UVW_NOISE_SIZE")
+				status_ok = ReadFloat(map->uvw_noise_size_, data_string, index, special_tokens);
+			else if(token == "UVW_NOISE_LEVEL")
+				status_ok = ReadInt(map->uvw_noise_level_, data_string, index, special_tokens);
+			else if(token == "UVW_NOISE_PHASE")
+				status_ok = ReadFloat(map->uvw_noise_phase_, data_string, index, special_tokens);
 			else
-				lStatusOk = false;
+				status_ok = false;
 		}
 	}
 
-	if (lStatusOk)
-	{
-		pMapList.PushBack(lMap);
-	}
-	else
-	{
-		delete lMap;
+	if (status_ok) {
+		map_list.PushBack(map);
+	} else {
+		delete map;
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadGEOMOBJECT(GeomObject* pGeomObj, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadGEOMOBJECT(GeomObject* geom_obj, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "NODE_NAME")
-				lStatusOk = ReadQuotedString(pGeomObj->mNodeName, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "COMMENT")
-				lStatusOk = ReadQuotedString(pGeomObj->mComment, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "NODE_TM")
-			{
-				NodeTM* lNodeTM = new NodeTM;
-				lStatusOk = ReadNODE_TM(lNodeTM, pDataString, pIndex, pSpecialTokens);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "NODE_NAME")
+				status_ok = ReadQuotedString(geom_obj->node_name_, data_string, index, special_tokens);
+			else if(token == "COMMENT")
+				status_ok = ReadQuotedString(geom_obj->comment_, data_string, index, special_tokens);
+			else if(token == "NODE_TM") {
+				NodeTM* _node_tm = new NodeTM;
+				status_ok = ReadNODE_TM(_node_tm, data_string, index, special_tokens);
 
-				if (lStatusOk)
-					pGeomObj->mNodeTMList.PushBack(lNodeTM);
+				if (status_ok)
+					geom_obj->node_tm_list_.PushBack(_node_tm);
 				else
-					delete lNodeTM;
-			}
-			else if(lToken == "MESH")
-			{
-				Mesh* lMesh = new Mesh;
-				lStatusOk = ReadMESH(lMesh, pDataString, pIndex, pSpecialTokens);
+					delete _node_tm;
+			} else if(token == "MESH") {
+				Mesh* _mesh = new Mesh;
+				status_ok = ReadMESH(_mesh, data_string, index, special_tokens);
 
-				if (lStatusOk)
-					pGeomObj->mMeshList.PushBack(lMesh);
+				if (status_ok)
+					geom_obj->mesh_list_.PushBack(_mesh);
 				else
-					delete lMesh;
-			}
-			else if(lToken == "PROP_MOTIONBLUR")
-				lStatusOk = ReadBool(pGeomObj->mMotionBlur, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "PROP_CASTSHADOW")
-				lStatusOk = ReadBool(pGeomObj->mCastShadow, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "PROP_RECVSHADOW")
-				lStatusOk = ReadBool(pGeomObj->mRecvShadow, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TM_ANIMATION")
-			{
-				pGeomObj->AllocTMAnimation();
-				lStatusOk = ReadTM_ANIMATION(pGeomObj->mTMAnimation, pDataString, pIndex, pSpecialTokens);
-			}
-			else if(lToken == "MATERIAL_REF")
-				lStatusOk = ReadInt(pGeomObj->mMaterialRef, pDataString, pIndex, pSpecialTokens);
+					delete _mesh;
+			} else if(token == "PROP_MOTIONBLUR")
+				status_ok = ReadBool(geom_obj->motion_blur_, data_string, index, special_tokens);
+			else if(token == "PROP_CASTSHADOW")
+				status_ok = ReadBool(geom_obj->cast_shadow_, data_string, index, special_tokens);
+			else if(token == "PROP_RECVSHADOW")
+				status_ok = ReadBool(geom_obj->recv_shadow_, data_string, index, special_tokens);
+			else if(token == "TM_ANIMATION") {
+				geom_obj->AllocTMAnimation();
+				status_ok = ReadTM_ANIMATION(geom_obj->tm_animation_, data_string, index, special_tokens);
+			} else if(token == "MATERIAL_REF")
+				status_ok = ReadInt(geom_obj->material_ref_, data_string, index, special_tokens);
 			else
-				lStatusOk = false;
+				status_ok = false;
 		}
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadCAMERAOBJECT(CameraObject* pCamObj, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadCAMERAOBJECT(CameraObject* cam_obj, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "NODE_NAME")
-				lStatusOk = ReadQuotedString(pCamObj->mNodeName, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "COMMENT")
-				lStatusOk = ReadQuotedString(pCamObj->mComment, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "CAMERA_TYPE")
-				lStatusOk = ReadUnquotedString(pCamObj->mCameraType, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "NODE_TM")
-			{
-				NodeTM* lNodeTM = new NodeTM;
-				lStatusOk = ReadNODE_TM(lNodeTM, pDataString, pIndex, pSpecialTokens);
-				if (lStatusOk)
-					pCamObj->mNodeTMList.PushBack(lNodeTM);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "NODE_NAME")
+				status_ok = ReadQuotedString(cam_obj->node_name_, data_string, index, special_tokens);
+			else if(token == "COMMENT")
+				status_ok = ReadQuotedString(cam_obj->comment_, data_string, index, special_tokens);
+			else if(token == "CAMERA_TYPE")
+				status_ok = ReadUnquotedString(cam_obj->camera_type_, data_string, index, special_tokens);
+			else if(token == "NODE_TM") {
+				NodeTM* _node_tm = new NodeTM;
+				status_ok = ReadNODE_TM(_node_tm, data_string, index, special_tokens);
+				if (status_ok)
+					cam_obj->node_tm_list_.PushBack(_node_tm);
 				else
-					delete lNodeTM;
+					delete _node_tm;
 
-			}
-			else if(lToken == "CAMERA_SETTINGS")
-			{
-				pCamObj->AllocCameraSettings();
-				lStatusOk = ReadCAMERA_SETTINGS(pCamObj->mSettings, pDataString, pIndex, pSpecialTokens);
-			}
-			else if(lToken == "TM_ANIMATION")
-			{
-				pCamObj->AllocTMAnimation();
-				lStatusOk = ReadTM_ANIMATION(pCamObj->mTMAnimation, pDataString, pIndex, pSpecialTokens);
-			}
-			else
-				lStatusOk = false;
+			} else if(token == "CAMERA_SETTINGS") {
+				cam_obj->AllocCameraSettings();
+				status_ok = ReadCAMERA_SETTINGS(cam_obj->settings_, data_string, index, special_tokens);
+			} else if(token == "TM_ANIMATION") {
+				cam_obj->AllocTMAnimation();
+				status_ok = ReadTM_ANIMATION(cam_obj->tm_animation_, data_string, index, special_tokens);
+			} else
+				status_ok = false;
 		}
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadLIGHTOBJECT(LightObject* pLightObj, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadLIGHTOBJECT(LightObject* light_obj, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "NODE_NAME")
-				lStatusOk = ReadQuotedString(pLightObj->mNodeName, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "COMMENT")
-				lStatusOk = ReadQuotedString(pLightObj->mComment, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_TYPE")
-				lStatusOk = ReadUnquotedString(pLightObj->mLightType, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "NODE_TM")
-			{
-				NodeTM* lNodeTM = new NodeTM;
-				lStatusOk = ReadNODE_TM(lNodeTM, pDataString, pIndex, pSpecialTokens);
-				if (lStatusOk)
-					pLightObj->mNodeTMList.PushBack(lNodeTM);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "NODE_NAME")
+				status_ok = ReadQuotedString(light_obj->node_name_, data_string, index, special_tokens);
+			else if(token == "COMMENT")
+				status_ok = ReadQuotedString(light_obj->comment_, data_string, index, special_tokens);
+			else if(token == "LIGHT_TYPE")
+				status_ok = ReadUnquotedString(light_obj->light_type_, data_string, index, special_tokens);
+			else if(token == "NODE_TM") {
+				NodeTM* _node_tm = new NodeTM;
+				status_ok = ReadNODE_TM(_node_tm, data_string, index, special_tokens);
+				if (status_ok)
+					light_obj->node_tm_list_.PushBack(_node_tm);
 				else
-					delete lNodeTM;
+					delete _node_tm;
 
-			}
-			else if(lToken == "LIGHT_SHADOWS")
-				lStatusOk = ReadUnquotedString(pLightObj->mShadows, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_USELIGHT")
-				lStatusOk = ReadBool(pLightObj->mUseLight, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_SPOTSHAPE")
-				lStatusOk = ReadUnquotedString(pLightObj->mSpotShape, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_USEGLOBAL")
-				lStatusOk = ReadBool(pLightObj->mUseGlobal, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_ABSMAPBIAS")
-				lStatusOk = ReadBool(pLightObj->mAbsMapBias, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_OVERSHOOT")
-				lStatusOk = ReadBool(pLightObj->mOverShoot, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_SETTINGS")
-			{
-				pLightObj->AllocLightSettings();
-				lStatusOk = ReadLIGHT_SETTINGS(pLightObj->mSettings, pDataString, pIndex, pSpecialTokens);
-			}
-			else if(lToken == "TM_ANIMATION")
-			{
-				pLightObj->AllocTMAnimation();
-				lStatusOk = ReadTM_ANIMATION(pLightObj->mTMAnimation, pDataString, pIndex, pSpecialTokens);
-			}
-			else
-				lStatusOk = false;
+			} else if(token == "LIGHT_SHADOWS")
+				status_ok = ReadUnquotedString(light_obj->shadows_, data_string, index, special_tokens);
+			else if(token == "LIGHT_USELIGHT")
+				status_ok = ReadBool(light_obj->use_light_, data_string, index, special_tokens);
+			else if(token == "LIGHT_SPOTSHAPE")
+				status_ok = ReadUnquotedString(light_obj->spot_shape_, data_string, index, special_tokens);
+			else if(token == "LIGHT_USEGLOBAL")
+				status_ok = ReadBool(light_obj->use_global_, data_string, index, special_tokens);
+			else if(token == "LIGHT_ABSMAPBIAS")
+				status_ok = ReadBool(light_obj->abs_map_bias_, data_string, index, special_tokens);
+			else if(token == "LIGHT_OVERSHOOT")
+				status_ok = ReadBool(light_obj->over_shoot_, data_string, index, special_tokens);
+			else if(token == "LIGHT_SETTINGS") {
+				light_obj->AllocLightSettings();
+				status_ok = ReadLIGHT_SETTINGS(light_obj->settings_, data_string, index, special_tokens);
+			} else if(token == "TM_ANIMATION") {
+				light_obj->AllocTMAnimation();
+				status_ok = ReadTM_ANIMATION(light_obj->tm_animation_, data_string, index, special_tokens);
+			} else
+				status_ok = false;
 		}
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadCAMERA_SETTINGS(CameraSettings* pCameraSettings, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadCAMERA_SETTINGS(CameraSettings* camera_settings, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "TIMEVALUE")
-				lStatusOk = ReadInt(pCameraSettings->mTimeValue, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "CAMERA_NEAR")
-				lStatusOk = ReadFloat(pCameraSettings->mNear, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "CAMERA_FAR")
-				lStatusOk = ReadFloat(pCameraSettings->mFar, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "CAMERA_FOV")
-				lStatusOk = ReadFloat(pCameraSettings->mFOV, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "CAMERA_TDIST")
-				lStatusOk = ReadFloat(pCameraSettings->mTDist, pDataString, pIndex, pSpecialTokens);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "TIMEVALUE")
+				status_ok = ReadInt(camera_settings->time_value_, data_string, index, special_tokens);
+			else if(token == "CAMERA_NEAR")
+				status_ok = ReadFloat(camera_settings->near_, data_string, index, special_tokens);
+			else if(token == "CAMERA_FAR")
+				status_ok = ReadFloat(camera_settings->far_, data_string, index, special_tokens);
+			else if(token == "CAMERA_FOV")
+				status_ok = ReadFloat(camera_settings->fov_, data_string, index, special_tokens);
+			else if(token == "CAMERA_TDIST")
+				status_ok = ReadFloat(camera_settings->t_dist_, data_string, index, special_tokens);
 			else
-				lStatusOk = false;
+				status_ok = false;
 		}
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadLIGHT_SETTINGS(LightSettings* pLightSettings, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadLIGHT_SETTINGS(LightSettings* light_settings, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "TIMEVALUE")
-				lStatusOk = ReadInt(pLightSettings->mTimeValue, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_COLOR")
-				lStatusOk = ReadFloatVec(pLightSettings->mColor, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_INTENS")
-				lStatusOk = ReadFloat(pLightSettings->mIntens, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_ASPECT")
-				lStatusOk = ReadFloat(pLightSettings->mAspect, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_HOTSPOT")
-				lStatusOk = ReadFloat(pLightSettings->mHotSpot, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_FALLOFF")
-				lStatusOk = ReadFloat(pLightSettings->mFalloff, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_TDIST")
-				lStatusOk = ReadFloat(pLightSettings->mTDist, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_MAPBIAS")
-				lStatusOk = ReadFloat(pLightSettings->mMapBias, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_MAPRANGE")
-				lStatusOk = ReadFloat(pLightSettings->mMapRange, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_MAPSIZE")
-				lStatusOk = ReadFloat(pLightSettings->mMapSize, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "LIGHT_RAYBIAS")
-				lStatusOk = ReadFloat(pLightSettings->mRayBias, pDataString, pIndex, pSpecialTokens);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "TIMEVALUE")
+				status_ok = ReadInt(light_settings->time_value_, data_string, index, special_tokens);
+			else if(token == "LIGHT_COLOR")
+				status_ok = ReadFloatVec(light_settings->color_, data_string, index, special_tokens);
+			else if(token == "LIGHT_INTENS")
+				status_ok = ReadFloat(light_settings->intens_, data_string, index, special_tokens);
+			else if(token == "LIGHT_ASPECT")
+				status_ok = ReadFloat(light_settings->aspect_, data_string, index, special_tokens);
+			else if(token == "LIGHT_HOTSPOT")
+				status_ok = ReadFloat(light_settings->hot_spot_, data_string, index, special_tokens);
+			else if(token == "LIGHT_FALLOFF")
+				status_ok = ReadFloat(light_settings->falloff_, data_string, index, special_tokens);
+			else if(token == "LIGHT_TDIST")
+				status_ok = ReadFloat(light_settings->t_dist_, data_string, index, special_tokens);
+			else if(token == "LIGHT_MAPBIAS")
+				status_ok = ReadFloat(light_settings->map_bias_, data_string, index, special_tokens);
+			else if(token == "LIGHT_MAPRANGE")
+				status_ok = ReadFloat(light_settings->map_range_, data_string, index, special_tokens);
+			else if(token == "LIGHT_MAPSIZE")
+				status_ok = ReadFloat(light_settings->map_size_, data_string, index, special_tokens);
+			else if(token == "LIGHT_RAYBIAS")
+				status_ok = ReadFloat(light_settings->ray_bias_, data_string, index, special_tokens);
 			else
-				lStatusOk = false;
+				status_ok = false;
 		}
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadNODE_TM(NodeTM* pNodeTM, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadNODE_TM(NodeTM* node_tm, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "NODE_NAME")
-				lStatusOk = ReadQuotedString(pNodeTM->mNodeName, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "COMMENT")
-				lStatusOk = ReadQuotedString(pNodeTM->mComment, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "INHERIT_POS")
-				lStatusOk = ReadIntVec(pNodeTM->mInheritPos, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "INHERIT_ROT")
-				lStatusOk = ReadIntVec(pNodeTM->mInheritRot, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "INHERIT_SCL")
-				lStatusOk = ReadIntVec(pNodeTM->mInheritScl, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TM_ROW0")
-				lStatusOk = ReadFloatVec(pNodeTM->mTMRow0, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TM_ROW1")
-				lStatusOk = ReadFloatVec(pNodeTM->mTMRow1, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TM_ROW2")
-				lStatusOk = ReadFloatVec(pNodeTM->mTMRow2, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TM_ROW3")
-				lStatusOk = ReadFloatVec(pNodeTM->mTMRow3, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TM_POS")
-				lStatusOk = ReadFloatVec(pNodeTM->mTMPos, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TM_ROTAXIS")
-				lStatusOk = ReadFloatVec(pNodeTM->mTMRotAxis, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TM_ROTANGLE")
-				lStatusOk = ReadFloat(pNodeTM->mTMRotAngle, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TM_SCALE")
-				lStatusOk = ReadFloatVec(pNodeTM->mTMScale, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TM_SCALEAXIS")
-				lStatusOk = ReadFloatVec(pNodeTM->mTMScaleAxis, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TM_SCALEAXISANG")
-				lStatusOk = ReadFloat(pNodeTM->mTMScaleAxisAng, pDataString, pIndex, pSpecialTokens);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "NODE_NAME")
+				status_ok = ReadQuotedString(node_tm->node_name_, data_string, index, special_tokens);
+			else if(token == "COMMENT")
+				status_ok = ReadQuotedString(node_tm->comment_, data_string, index, special_tokens);
+			else if(token == "INHERIT_POS")
+				status_ok = ReadIntVec(node_tm->inherit_pos_, data_string, index, special_tokens);
+			else if(token == "INHERIT_ROT")
+				status_ok = ReadIntVec(node_tm->inherit_rot_, data_string, index, special_tokens);
+			else if(token == "INHERIT_SCL")
+				status_ok = ReadIntVec(node_tm->inherit_scl_, data_string, index, special_tokens);
+			else if(token == "TM_ROW0")
+				status_ok = ReadFloatVec(node_tm->tm_row0_, data_string, index, special_tokens);
+			else if(token == "TM_ROW1")
+				status_ok = ReadFloatVec(node_tm->tm_row1_, data_string, index, special_tokens);
+			else if(token == "TM_ROW2")
+				status_ok = ReadFloatVec(node_tm->tm_row2_, data_string, index, special_tokens);
+			else if(token == "TM_ROW3")
+				status_ok = ReadFloatVec(node_tm->tm_row3_, data_string, index, special_tokens);
+			else if(token == "TM_POS")
+				status_ok = ReadFloatVec(node_tm->tm_pos_, data_string, index, special_tokens);
+			else if(token == "TM_ROTAXIS")
+				status_ok = ReadFloatVec(node_tm->tm_rot_axis_, data_string, index, special_tokens);
+			else if(token == "TM_ROTANGLE")
+				status_ok = ReadFloat(node_tm->tm_rot_angle_, data_string, index, special_tokens);
+			else if(token == "TM_SCALE")
+				status_ok = ReadFloatVec(node_tm->tm_scale_, data_string, index, special_tokens);
+			else if(token == "TM_SCALEAXIS")
+				status_ok = ReadFloatVec(node_tm->tm_scale_axis_, data_string, index, special_tokens);
+			else if(token == "TM_SCALEAXISANG")
+				status_ok = ReadFloat(node_tm->tm_scale_axis_ang_, data_string, index, special_tokens);
 			else
-				lStatusOk = false;
+				status_ok = false;
 		}
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadTM_ANIMATION(TMAnimation* pTMAnimation, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadTM_ANIMATION(TMAnimation* tm_animation, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "NODE_NAME")
-				lStatusOk = ReadQuotedString(pTMAnimation->mNodeName, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "COMMENT")
-				lStatusOk = ReadQuotedString(pTMAnimation->mComment, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "CONTROL_POS_TRACK")
-				lStatusOk = ReadCONTROL_POS_TRACK(pTMAnimation, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "CONTROL_ROT_TRACK")
-				lStatusOk = ReadCONTROL_ROT_TRACK(pTMAnimation, pDataString, pIndex, pSpecialTokens);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "NODE_NAME")
+				status_ok = ReadQuotedString(tm_animation->node_name_, data_string, index, special_tokens);
+			else if(token == "COMMENT")
+				status_ok = ReadQuotedString(tm_animation->comment_, data_string, index, special_tokens);
+			else if(token == "CONTROL_POS_TRACK")
+				status_ok = ReadCONTROL_POS_TRACK(tm_animation, data_string, index, special_tokens);
+			else if(token == "CONTROL_ROT_TRACK")
+				status_ok = ReadCONTROL_ROT_TRACK(tm_animation, data_string, index, special_tokens);
 			else
-				lStatusOk = false;
+				status_ok = false;
 		}
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadCONTROL_POS_TRACK(TMAnimation* pTMAnimation, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadCONTROL_POS_TRACK(TMAnimation* tm_animation, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "CONTROL_POS_SAMPLE")
-			{
-				ControlPosSample* lSample = new ControlPosSample;
-				lStatusOk = ReadCONTROL_POS_SAMPLE(lSample, pDataString, pIndex, pSpecialTokens);
-				if (lStatusOk)
-				{
-					pTMAnimation->mControlPosTrack.PushBack(lSample);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "CONTROL_POS_SAMPLE") {
+				ControlPosSample* sample = new ControlPosSample;
+				status_ok = ReadCONTROL_POS_SAMPLE(sample, data_string, index, special_tokens);
+				if (status_ok) {
+					tm_animation->control_pos_track_.PushBack(sample);
+				} else {
+					delete sample;
 				}
-				else
-				{
-					delete lSample;
-				}
-			}
-			else
-			{
-				lStatusOk = false;
+			} else {
+				status_ok = false;
 			}
 		}
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadCONTROL_ROT_TRACK(TMAnimation* pTMAnimation, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadCONTROL_ROT_TRACK(TMAnimation* tm_animation, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "CONTROL_ROT_SAMPLE")
-			{
-				ControlRotSample* lSample = new ControlRotSample;
-				lStatusOk = ReadCONTROL_ROT_SAMPLE(lSample, pDataString, pIndex, pSpecialTokens);
-				if (lStatusOk)
-				{
-					pTMAnimation->mControlRotTrack.PushBack(lSample);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "CONTROL_ROT_SAMPLE") {
+				ControlRotSample* sample = new ControlRotSample;
+				status_ok = ReadCONTROL_ROT_SAMPLE(sample, data_string, index, special_tokens);
+				if (status_ok) {
+					tm_animation->control_rot_track_.PushBack(sample);
+				} else {
+					delete sample;
 				}
-				else
-				{
-					delete lSample;
-				}
-			}
-			else
-			{
-				lStatusOk = false;
+			} else {
+				status_ok = false;
 			}
 		}
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadCONTROL_POS_SAMPLE(ControlPosSample* pControlPosSample, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
-	if (lStatusOk)
-		lStatusOk = ReadInt(pControlPosSample->mTimeValue, pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-		lStatusOk = ReadFloat(pControlPosSample->mPos[0], pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-		lStatusOk = ReadFloat(pControlPosSample->mPos[1], pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-		lStatusOk = ReadFloat(pControlPosSample->mPos[2], pDataString, pIndex, pSpecialTokens);
-	return lStatusOk;
+bool ASELoader::ReadCONTROL_POS_SAMPLE(ControlPosSample* control_pos_sample, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
+	if (status_ok)
+		status_ok = ReadInt(control_pos_sample->time_value_, data_string, index, special_tokens);
+	if (status_ok)
+		status_ok = ReadFloat(control_pos_sample->pos_[0], data_string, index, special_tokens);
+	if (status_ok)
+		status_ok = ReadFloat(control_pos_sample->pos_[1], data_string, index, special_tokens);
+	if (status_ok)
+		status_ok = ReadFloat(control_pos_sample->pos_[2], data_string, index, special_tokens);
+	return status_ok;
 }
 
-bool ASELoader::ReadCONTROL_ROT_SAMPLE(ControlRotSample* pControlRotSample, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
-	if (lStatusOk)
-		lStatusOk = ReadInt(pControlRotSample->mTimeValue, pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-		lStatusOk = ReadFloat(pControlRotSample->mRot[0], pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-		lStatusOk = ReadFloat(pControlRotSample->mRot[1], pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-		lStatusOk = ReadFloat(pControlRotSample->mRot[2], pDataString, pIndex, pSpecialTokens);
-	if (lStatusOk)
-		lStatusOk = ReadFloat(pControlRotSample->mRot[3], pDataString, pIndex, pSpecialTokens);
-	return lStatusOk;
+bool ASELoader::ReadCONTROL_ROT_SAMPLE(ControlRotSample* control_rot_sample, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
+	if (status_ok)
+		status_ok = ReadInt(control_rot_sample->time_value_, data_string, index, special_tokens);
+	if (status_ok)
+		status_ok = ReadFloat(control_rot_sample->rot_[0], data_string, index, special_tokens);
+	if (status_ok)
+		status_ok = ReadFloat(control_rot_sample->rot_[1], data_string, index, special_tokens);
+	if (status_ok)
+		status_ok = ReadFloat(control_rot_sample->rot_[2], data_string, index, special_tokens);
+	if (status_ok)
+		status_ok = ReadFloat(control_rot_sample->rot_[3], data_string, index, special_tokens);
+	return status_ok;
 }
 
-bool ASELoader::ReadMESH(Mesh* pMesh, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadMESH(Mesh* mesh, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "COMMENT")
-				lStatusOk = ReadQuotedString(pMesh->mComment, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "TIMEVALUE")
-				lStatusOk = ReadInt(pMesh->mTimeValue, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_NUMVERTEX")
-				lStatusOk = ReadInt(pMesh->mNumVertex, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_NUMFACES")
-				lStatusOk = ReadInt(pMesh->mNumFaces, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_VERTEX_LIST")
-			{
-				pMesh->AllocVertexArray();
-				lStatusOk = ReadVertexList(pMesh->mVertex, pMesh->mNumVertex, "MESH_VERTEX", pDataString, pIndex, pSpecialTokens);
-			}
-			else if(lToken == "MESH_FACE_LIST")
-				lStatusOk = ReadMESH_FACE_LIST(pMesh, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_NUMTVERTEX")
-				lStatusOk = ReadInt(pMesh->GetDefaultMappingChannel()->mNumTVertex, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_TVERTLIST")
-			{
-				MappingChannel* lMappingChannel = pMesh->GetDefaultMappingChannel();
-				lMappingChannel->AllocVertexArray();
-				lStatusOk = ReadVertexList(lMappingChannel->mTVertex, lMappingChannel->mNumTVertex, "MESH_TVERT", pDataString, pIndex, pSpecialTokens);
-			}
-			else if(lToken == "MESH_NUMTVFACES")
-				lStatusOk = ReadInt(pMesh->GetDefaultMappingChannel()->mNumTVFaces, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_TFACELIST")
-			{
-				MappingChannel* lMappingChannel = pMesh->GetDefaultMappingChannel();
-				lMappingChannel->AllocFaceArray();
-				lStatusOk = ReadFaceList(lMappingChannel->mTVFace, lMappingChannel->mNumTVFaces, "MESH_TFACE", pDataString, pIndex, pSpecialTokens);
-			}
-			else if(lToken == "MESH_NUMCVERTEX")
-				lStatusOk = ReadInt(pMesh->mNumCVertex, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_CVERTLIST")
-			{
-				pMesh->AllocCVertexArray();
-				lStatusOk = ReadVertexList(pMesh->mCVertex, pMesh->mNumCVertex, "MESH_VERTCOL", pDataString, pIndex, pSpecialTokens);
-			}
-			else if(lToken == "MESH_NUMCVFACES")
-				lStatusOk = ReadInt(pMesh->mNumCVFaces, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_CFACELIST")
-			{
-				pMesh->AllocCFaceArray();
-				lStatusOk = ReadFaceList(pMesh->mCFace, pMesh->mNumCVFaces, "MESH_CFACE", pDataString, pIndex, pSpecialTokens);
-			}
-			else if(lToken == "MESH_NORMALS")
-				lStatusOk = ReadMESH_NORMALS(pMesh, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_MAPPINGCHANNEL")
-				lStatusOk = ReadMESH_MAPPINGCHANNEL(pMesh, pDataString, pIndex, pSpecialTokens);
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "COMMENT")
+				status_ok = ReadQuotedString(mesh->comment_, data_string, index, special_tokens);
+			else if(token == "TIMEVALUE")
+				status_ok = ReadInt(mesh->time_value_, data_string, index, special_tokens);
+			else if(token == "MESH_NUMVERTEX")
+				status_ok = ReadInt(mesh->num_vertex_, data_string, index, special_tokens);
+			else if(token == "MESH_NUMFACES")
+				status_ok = ReadInt(mesh->num_faces_, data_string, index, special_tokens);
+			else if(token == "MESH_VERTEX_LIST") {
+				mesh->AllocVertexArray();
+				status_ok = ReadVertexList(mesh->vertex_, mesh->num_vertex_, "MESH_VERTEX", data_string, index, special_tokens);
+			} else if(token == "MESH_FACE_LIST")
+				status_ok = ReadMESH_FACE_LIST(mesh, data_string, index, special_tokens);
+			else if(token == "MESH_NUMTVERTEX")
+				status_ok = ReadInt(mesh->GetDefaultMappingChannel()->num_t_vertex_, data_string, index, special_tokens);
+			else if(token == "MESH_TVERTLIST") {
+				MappingChannel* mapping_channel = mesh->GetDefaultMappingChannel();
+				mapping_channel->AllocVertexArray();
+				status_ok = ReadVertexList(mapping_channel->t_vertex_, mapping_channel->num_t_vertex_, "MESH_TVERT", data_string, index, special_tokens);
+			} else if(token == "MESH_NUMTVFACES")
+				status_ok = ReadInt(mesh->GetDefaultMappingChannel()->num_tv_faces_, data_string, index, special_tokens);
+			else if(token == "MESH_TFACELIST") {
+				MappingChannel* mapping_channel = mesh->GetDefaultMappingChannel();
+				mapping_channel->AllocFaceArray();
+				status_ok = ReadFaceList(mapping_channel->tv_face_, mapping_channel->num_tv_faces_, "MESH_TFACE", data_string, index, special_tokens);
+			} else if(token == "MESH_NUMCVERTEX")
+				status_ok = ReadInt(mesh->num_c_vertex_, data_string, index, special_tokens);
+			else if(token == "MESH_CVERTLIST") {
+				mesh->AllocCVertexArray();
+				status_ok = ReadVertexList(mesh->c_vertex_, mesh->num_c_vertex_, "MESH_VERTCOL", data_string, index, special_tokens);
+			} else if(token == "MESH_NUMCVFACES")
+				status_ok = ReadInt(mesh->num_cv_faces_, data_string, index, special_tokens);
+			else if(token == "MESH_CFACELIST") {
+				mesh->AllocCFaceArray();
+				status_ok = ReadFaceList(mesh->c_face_, mesh->num_cv_faces_, "MESH_CFACE", data_string, index, special_tokens);
+			} else if(token == "MESH_NORMALS")
+				status_ok = ReadMESH_NORMALS(mesh, data_string, index, special_tokens);
+			else if(token == "MESH_MAPPINGCHANNEL")
+				status_ok = ReadMESH_MAPPINGCHANNEL(mesh, data_string, index, special_tokens);
 			else
-				lStatusOk = false;
+				status_ok = false;
 		}
 	}
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadMESH_FACE_LIST(Mesh* pMesh, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadMESH_FACE_LIST(Mesh* mesh, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	if (lStatusOk)
-	{
-		pMesh->AllocFaceArray();
+	if (status_ok) {
+		mesh->AllocFaceArray();
 
 		int i;
-		for (i = 0; lStatusOk && i < pMesh->mNumFaces; i++)
-		{
-			if (lStatusOk)
-			{
+		for (i = 0; status_ok && i < mesh->num_faces_; i++) {
+			if (status_ok) {
 				// Read the '*'.
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = lToken == "*" && pIndex > 0;
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = token == "*" && index > 0;
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read 'MESH_FACE'.
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = lToken == "MESH_FACE" && pIndex > 0;
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = token == "MESH_FACE" && index > 0;
 			}
 
 			// Read face index. Must equal 'i'.
-			int lFIndex = -1;
-			if (lStatusOk)
-			{
-				lStatusOk = ReadInt(lFIndex, pDataString, pIndex, pSpecialTokens);
+			int f_index = -1;
+			if (status_ok) {
+				status_ok = ReadInt(f_index, data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
-				lStatusOk = (lFIndex == i);
+			if (status_ok) {
+				status_ok = (f_index == i);
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read an 'A'.
-				lStatusOk = ReadUnquotedString(lToken, pDataString, pIndex, pSpecialTokens);
-				if (lStatusOk)
-				{
-					lStatusOk = lToken == "A";
+				status_ok = ReadUnquotedString(token, data_string, index, special_tokens);
+				if (status_ok) {
+					status_ok = token == "A";
 				}
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read the first index.
-				lStatusOk = ReadInt(pMesh->mFace[lFIndex * 3 + 0], pDataString, pIndex, pSpecialTokens);
+				status_ok = ReadInt(mesh->face_[f_index * 3 + 0], data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Check constraints.
-				lStatusOk = pMesh->mFace[lFIndex * 3 + 0] >= 0 && 
-					      pMesh->mFace[lFIndex * 3 + 0] < pMesh->mNumFaces;
+				status_ok = mesh->face_[f_index * 3 + 0] >= 0 &&
+					      mesh->face_[f_index * 3 + 0] < mesh->num_faces_;
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read a 'B'.
-				lStatusOk = ReadUnquotedString(lToken, pDataString, pIndex, pSpecialTokens);
-				if (lStatusOk)
-				{
-					lStatusOk = lToken == "B";
+				status_ok = ReadUnquotedString(token, data_string, index, special_tokens);
+				if (status_ok) {
+					status_ok = token == "B";
 				}
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read the second index.
-				lStatusOk = ReadInt(pMesh->mFace[lFIndex * 3 + 1], pDataString, pIndex, pSpecialTokens);
+				status_ok = ReadInt(mesh->face_[f_index * 3 + 1], data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Check constraints.
-				lStatusOk = pMesh->mFace[lFIndex * 3 + 1] >= 0 && 
-					      pMesh->mFace[lFIndex * 3 + 1] < pMesh->mNumFaces;
+				status_ok = mesh->face_[f_index * 3 + 1] >= 0 &&
+					      mesh->face_[f_index * 3 + 1] < mesh->num_faces_;
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read a 'C'.
-				lStatusOk = ReadUnquotedString(lToken, pDataString, pIndex, pSpecialTokens);
-				if (lStatusOk)
-				{
-					lStatusOk = lToken == "C";
+				status_ok = ReadUnquotedString(token, data_string, index, special_tokens);
+				if (status_ok) {
+					status_ok = token == "C";
 				}
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read the third index.
-				lStatusOk = ReadInt(pMesh->mFace[lFIndex * 3 + 2], pDataString, pIndex, pSpecialTokens);
+				status_ok = ReadInt(mesh->face_[f_index * 3 + 2], data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Check constraints.
-				lStatusOk = pMesh->mFace[lFIndex * 3 + 2] >= 0 && 
-					      pMesh->mFace[lFIndex * 3 + 2] < pMesh->mNumFaces;
+				status_ok = mesh->face_[f_index * 3 + 2] >= 0 &&
+					      mesh->face_[f_index * 3 + 2] < mesh->num_faces_;
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read 'AB'.
-				lStatusOk = ReadUnquotedString(lToken, pDataString, pIndex, pSpecialTokens);
-				if (lStatusOk)
-				{
-					lStatusOk = lToken == "AB";
+				status_ok = ReadUnquotedString(token, data_string, index, special_tokens);
+				if (status_ok) {
+					status_ok = token == "AB";
 				}
 			}
 
-			if (lStatusOk)
-			{
-				lStatusOk = ReadBool(pMesh->mFaceEdgeVisible[lFIndex * 3 + 0], pDataString, pIndex, pSpecialTokens);
+			if (status_ok) {
+				status_ok = ReadBool(mesh->face_edge_visible_[f_index * 3 + 0], data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read 'BC'.
-				lStatusOk = ReadUnquotedString(lToken, pDataString, pIndex, pSpecialTokens);
-				if (lStatusOk)
-				{
-					lStatusOk = lToken == "BC";
+				status_ok = ReadUnquotedString(token, data_string, index, special_tokens);
+				if (status_ok) {
+					status_ok = token == "BC";
 				}
 			}
 
-			if (lStatusOk)
-			{
-				lStatusOk = ReadBool(pMesh->mFaceEdgeVisible[lFIndex * 3 + 1], pDataString, pIndex, pSpecialTokens);
+			if (status_ok) {
+				status_ok = ReadBool(mesh->face_edge_visible_[f_index * 3 + 1], data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read 'CA'.
-				lStatusOk = ReadUnquotedString(lToken, pDataString, pIndex, pSpecialTokens);
-				if (lStatusOk)
-				{
-					lStatusOk = lToken == "CA";
+				status_ok = ReadUnquotedString(token, data_string, index, special_tokens);
+				if (status_ok) {
+					status_ok = token == "CA";
 				}
 			}
 
-			if (lStatusOk)
-			{
-				lStatusOk = ReadBool(pMesh->mFaceEdgeVisible[lFIndex * 3 + 2], pDataString, pIndex, pSpecialTokens);
+			if (status_ok) {
+				status_ok = ReadBool(mesh->face_edge_visible_[f_index * 3 + 2], data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read '*'.
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = lToken == "*" && pIndex > 0;
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = token == "*" && index > 0;
 			}
-			
-			if (lStatusOk)
-			{
+
+			if (status_ok) {
 				// Read 'MESH_SMOOTHING'.
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = lToken == "MESH_SMOOTHING" && pIndex > 0;
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = token == "MESH_SMOOTHING" && index > 0;
 			}
 
-			bool lDone = false;
-			while (lStatusOk && !lDone)
-			{
-				int lSmoothingGroup;
-				lStatusOk = ReadInt(lSmoothingGroup, pDataString, pIndex, pSpecialTokens);
+			bool done = false;
+			while (status_ok && !done) {
+				int smoothing_group;
+				status_ok = ReadInt(smoothing_group, data_string, index, special_tokens);
 
-				if (lStatusOk)
-				{
-					pMesh->mSmoothingGroupList[i].PushBack(lSmoothingGroup);
+				if (status_ok) {
+					mesh->smoothing_group_list_[i].PushBack(smoothing_group);
 
 					// Read comma or '*'...
-					pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-					lDone = lToken == "*";
-					lStatusOk = (lToken == ",") || lDone && pIndex > 0;
+					index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+					done = token == "*";
+					status_ok = (token == ",") || done && index > 0;
 				}
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read 'MESH_MTLID'.
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = lToken == "MESH_MTLID" && pIndex > 0;
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = token == "MESH_MTLID" && index > 0;
 			}
 
-			if (lStatusOk)
-			{
-				lStatusOk = ReadInt(pMesh->mSubMaterial[i], pDataString, pIndex, pSpecialTokens);
+			if (status_ok) {
+				status_ok = ReadInt(mesh->sub_material_[i], data_string, index, special_tokens);
 			}
 		}
 	}
 
-	if (lStatusOk)
-	{
+	if (status_ok) {
 		// Read the end brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "}" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "}" && index > 0;
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadMESH_NORMALS(Mesh* pMesh, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	pMesh->AllocNormalArrays();
+bool ASELoader::ReadMESH_NORMALS(Mesh* mesh, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	mesh->AllocNormalArrays();
 
-	bool lStatusOk = pIndex > 0;
+	bool status_ok = index > 0;
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	if (lStatusOk)
-	{
+	if (status_ok) {
 		// Normals are stored in a "per face"-order.
-		for (int i = 0; lStatusOk && i < pMesh->mNumFaces; i++)
-		{
-			if (lStatusOk)
-			{
+		for (int i = 0; status_ok && i < mesh->num_faces_; i++) {
+			if (status_ok) {
 				// Read '*'.
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = lToken == "*" && pIndex > 0;
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = token == "*" && index > 0;
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Read 'MESH_FACENORMAL'.
-				pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-				lStatusOk = lToken == "MESH_FACENORMAL" && pIndex > 0;
+				index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+				status_ok = token == "MESH_FACENORMAL" && index > 0;
 			}
 
-			int lFIndex = -1;
-			if (lStatusOk)
-			{
+			int f_index = -1;
+			if (status_ok) {
 				// Read face index.
-				lStatusOk = ReadInt(lFIndex, pDataString, pIndex, pSpecialTokens);
+				status_ok = ReadInt(f_index, data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Check constraints.
-				lStatusOk = lFIndex >= 0 && lFIndex < pMesh->mNumFaces;
+				status_ok = f_index >= 0 && f_index < mesh->num_faces_;
 			}
 
-			double lFaceNormal[3];
-			if (lStatusOk)
-			{
+			double face_normal[3];
+			if (status_ok) {
 				// Read the face normal.
-				lStatusOk = ReadFloatVec(lFaceNormal, pDataString, pIndex, pSpecialTokens);
+				status_ok = ReadFloatVec(face_normal, data_string, index, special_tokens);
 			}
 
-			if (lStatusOk)
-			{
+			if (status_ok) {
 				// Type cast.
-				pMesh->mFaceNormals[lFIndex * 3 + 0] = (float)lFaceNormal[0];
-				pMesh->mFaceNormals[lFIndex * 3 + 1] = (float)lFaceNormal[1];
-				pMesh->mFaceNormals[lFIndex * 3 + 2] = (float)lFaceNormal[2];
+				mesh->face_normals_[f_index * 3 + 0] = (float)face_normal[0];
+				mesh->face_normals_[f_index * 3 + 1] = (float)face_normal[1];
+				mesh->face_normals_[f_index * 3 + 2] = (float)face_normal[2];
 			}
 
-			// Read the face's 3 vertex normals. 
-			// Alex: This redundancy is such a total waste of disk 
+			// Read the face's 3 vertex normals.
+			// Alex: This redundancy is such a total waste of disk
 			//       space. Well well... It's not my file format anyway.
-			for (int j = 0; lStatusOk && j < 3; j++)
-			{
-				if (lStatusOk)
-				{
+			for (int j = 0; status_ok && j < 3; j++) {
+				if (status_ok) {
 					// Read '*'.
-					pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-					lStatusOk = lToken == "*" && pIndex > 0;
+					index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+					status_ok = token == "*" && index > 0;
 				}
 
-				if (lStatusOk)
-				{
+				if (status_ok) {
 					// Read 'MESH_VERTEXNORMAL'.
-					pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-					lStatusOk = lToken == "MESH_VERTEXNORMAL" && pIndex > 0;
+					index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+					status_ok = token == "MESH_VERTEXNORMAL" && index > 0;
 				}
 
-				int lVIndex = -1;
-				if (lStatusOk)
-				{
+				int v_index = -1;
+				if (status_ok) {
 					// Read vertex index.
-					lStatusOk = ReadInt(lVIndex, pDataString, pIndex, pSpecialTokens);
+					status_ok = ReadInt(v_index, data_string, index, special_tokens);
 				}
 
-				if (lStatusOk)
-				{
+				if (status_ok) {
 					// Check constraints.
-					lStatusOk = lVIndex >= 0 && lVIndex < pMesh->mNumVertex;
+					status_ok = v_index >= 0 && v_index < mesh->num_vertex_;
 				}
 
-				double lVertexNormal[3];
-				if (lStatusOk)
-				{
+				double vertex_normal[3];
+				if (status_ok) {
 					// Read the vertex normal.
-					lStatusOk = ReadFloatVec(lVertexNormal, pDataString, pIndex, pSpecialTokens);
+					status_ok = ReadFloatVec(vertex_normal, data_string, index, special_tokens);
 				}
 
-				if (lStatusOk)
-				{
+				if (status_ok) {
 					// Type cast.
-					pMesh->mVertexNormals[lVIndex * 3 + 0] = (float)lVertexNormal[0];
-					pMesh->mVertexNormals[lVIndex * 3 + 1] = (float)lVertexNormal[1];
-					pMesh->mVertexNormals[lVIndex * 3 + 2] = (float)lVertexNormal[2];
+					mesh->vertex_normals_[v_index * 3 + 0] = (float)vertex_normal[0];
+					mesh->vertex_normals_[v_index * 3 + 1] = (float)vertex_normal[1];
+					mesh->vertex_normals_[v_index * 3 + 2] = (float)vertex_normal[2];
 				}
 			}
 		}
 	}
 
-	if (lStatusOk)
-	{
+	if (status_ok) {
 		// Read the end brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "}" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "}" && index > 0;
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-bool ASELoader::ReadMESH_MAPPINGCHANNEL(Mesh* pMesh, const Lepra::AnsiString& pDataString, int& pIndex, const Lepra::AnsiString& pSpecialTokens)
-{
-	bool lStatusOk = pIndex > 0;
+bool ASELoader::ReadMESH_MAPPINGCHANNEL(Mesh* mesh, const lepra::AnsiString& data_string, int& index, const lepra::AnsiString& special_tokens) {
+	bool status_ok = index > 0;
 
-	MappingChannel* lMappingChannel = new MappingChannel;
-	int lMappingChannelIndex;
+	MappingChannel* mapping_channel = new MappingChannel;
+	int mapping_channel_index;
 
-	if (lStatusOk)
-	{
+	if (status_ok) {
 		// Read the mapping channel index.
-		lStatusOk = ReadInt(lMappingChannelIndex, pDataString, pIndex, pSpecialTokens);
+		status_ok = ReadInt(mapping_channel_index, data_string, index, special_tokens);
 	}
 
-	Lepra::AnsiString lToken;
-	if (lStatusOk)
-	{
+	lepra::AnsiString token;
+	if (status_ok) {
 		// Read the start brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "{" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "{" && index > 0;
 	}
 
-	bool lDone = false;
-	while (lStatusOk && !lDone)
-	{
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lDone = lToken == "}";
-		lStatusOk = (lToken == "*") && pIndex > 0 || lDone;
+	bool done = false;
+	while (status_ok && !done) {
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		done = token == "}";
+		status_ok = (token == "*") && index > 0 || done;
 
-		if (lStatusOk && !lDone)
-		{
-			pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-			if (lToken == "COMMENT")
-				lStatusOk = ReadQuotedString(lMappingChannel->mComment, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_NUMTVERTEX")
-				lStatusOk = ReadInt(lMappingChannel->mNumTVertex, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_TVERTLIST")
-			{
-				lMappingChannel->AllocVertexArray();
-				lStatusOk = ReadVertexList(lMappingChannel->mTVertex, lMappingChannel->mNumTVertex, "MESH_TVERT", pDataString, pIndex, pSpecialTokens);
-			}
-			else if(lToken == "MESH_NUMTVFACES")
-				lStatusOk = ReadInt(lMappingChannel->mNumTVFaces, pDataString, pIndex, pSpecialTokens);
-			else if(lToken == "MESH_TFACELIST")
-			{
-				lMappingChannel->AllocFaceArray();
-				lStatusOk = ReadFaceList(lMappingChannel->mTVFace, lMappingChannel->mNumTVFaces, "MESH_TFACE", pDataString, pIndex, pSpecialTokens);
-			}
-			else
-				lStatusOk = false;
+		if (status_ok && !done) {
+			index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+			if (token == "COMMENT")
+				status_ok = ReadQuotedString(mapping_channel->comment_, data_string, index, special_tokens);
+			else if(token == "MESH_NUMTVERTEX")
+				status_ok = ReadInt(mapping_channel->num_t_vertex_, data_string, index, special_tokens);
+			else if(token == "MESH_TVERTLIST") {
+				mapping_channel->AllocVertexArray();
+				status_ok = ReadVertexList(mapping_channel->t_vertex_, mapping_channel->num_t_vertex_, "MESH_TVERT", data_string, index, special_tokens);
+			} else if(token == "MESH_NUMTVFACES")
+				status_ok = ReadInt(mapping_channel->num_tv_faces_, data_string, index, special_tokens);
+			else if(token == "MESH_TFACELIST") {
+				mapping_channel->AllocFaceArray();
+				status_ok = ReadFaceList(mapping_channel->tv_face_, mapping_channel->num_tv_faces_, "MESH_TFACE", data_string, index, special_tokens);
+			} else
+				status_ok = false;
 		}
 	}
 
-	if (lStatusOk)
-	{
+	if (status_ok) {
 		// Read the end brace.
-		pIndex = pDataString.GetToken(lToken, pIndex, " \t\v\b\r\n", pSpecialTokens);
-		lStatusOk = lToken == "}" && pIndex > 0;
+		index = data_string.GetToken(token, index, " \t\v\b\r\n", special_tokens);
+		status_ok = token == "}" && index > 0;
 	}
 
-	if (lStatusOk)
-	{
-		pMesh->mMappingChannelList.PushBack(lMappingChannel);
-	}
-	else
-	{
-		delete lMappingChannel;
+	if (status_ok) {
+		mesh->mapping_channel_list_.PushBack(mapping_channel);
+	} else {
+		delete mapping_channel;
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-// bool ASELoader::Save(const GeometryList& pGeometryList, const Lepra::AnsiString& pFileName);
+// bool ASELoader::Save(const GeometryList& geometry_list, const lepra::AnsiString& file_name);
 
 
 
@@ -1688,972 +1445,827 @@ bool ASELoader::ReadMESH_MAPPINGCHANNEL(Mesh* pMesh, const Lepra::AnsiString& pD
 
 
 ASELoader::Scene::Scene() :
-	mFirstFrame(0),
-	mLastFrame(0),
-	mFrameSpeed(0),
-	mTicksPerFrame(0)
-{
-	mBackgroundStatic[0] = 0;
-	mBackgroundStatic[1] = 0;
-	mBackgroundStatic[2] = 0;
-	mAmbientStatic[0] = 0;
-	mAmbientStatic[1] = 0;
-	mAmbientStatic[2] = 0;
+	first_frame_(0),
+	last_frame_(0),
+	frame_speed_(0),
+	ticks_per_frame_(0) {
+	background_static_[0] = 0;
+	background_static_[1] = 0;
+	background_static_[2] = 0;
+	ambient_static_[0] = 0;
+	ambient_static_[1] = 0;
+	ambient_static_[2] = 0;
 }
 
-ASELoader::Scene::~Scene()
-{
+ASELoader::Scene::~Scene() {
 }
 
-void ASELoader::Scene::Init()
-{
-	mFilename = "";
-	mComment = "";
-	mFirstFrame = 0;
-	mLastFrame = 0;
-	mFrameSpeed = 0;
-	mTicksPerFrame = 0;
-	mBackgroundStatic[0] = 0;
-	mBackgroundStatic[1] = 0;
-	mBackgroundStatic[2] = 0;
-	mAmbientStatic[0] = 0;
-	mAmbientStatic[1] = 0;
-	mAmbientStatic[2] = 0;
+void ASELoader::Scene::Init() {
+	filename_ = "";
+	comment_ = "";
+	first_frame_ = 0;
+	last_frame_ = 0;
+	frame_speed_ = 0;
+	ticks_per_frame_ = 0;
+	background_static_[0] = 0;
+	background_static_[1] = 0;
+	background_static_[2] = 0;
+	ambient_static_[0] = 0;
+	ambient_static_[1] = 0;
+	ambient_static_[2] = 0;
 }
 
 
 
 ASELoader::Map::Map() :
-	mSubNo(0),
-	mAmount(0),
-	mUOffset(0),
-	mVOffset(0),
-	mUTiling(0),
-	mVTiling(0),
-	mUVWAngle(0),
-	mUVWBlur(0),
-	mUVWBlurOffset(0),
-	mUVWNoiseAmt(0),
-	mUVWNoiseSize(0),
-	mUVWNoiseLevel(0),
-	mUVWNoisePhase(0)
-{
+	sub_no_(0),
+	amount_(0),
+	u_offset_(0),
+	v_offset_(0),
+	u_tiling_(0),
+	v_tiling_(0),
+	uvw_angle_(0),
+	uvw_blur_(0),
+	uvw_blur_offset_(0),
+	uvw_noise_amt_(0),
+	uvw_noise_size_(0),
+	uvw_noise_level_(0),
+	uvw_noise_phase_(0) {
 }
 
-ASELoader::Map::~Map()
-{
+ASELoader::Map::~Map() {
 }
 
-void ASELoader::Map::Init()
-{
-	mName = "";
-	mClass = "";
-	mComment = "";
-	mSubNo = 0;
-	mAmount = 0;
-	mBitmapPath = "";
-	mType = "";
-	mUOffset = 0;
-	mVOffset = 0;
-	mUTiling = 0;
-	mVTiling = 0;
-	mUVWAngle = 0;
-	mUVWBlur = 0;
-	mUVWBlurOffset = 0;
-	mUVWNoiseAmt = 0;
-	mUVWNoiseSize = 0;
-	mUVWNoiseLevel = 0;
-	mUVWNoisePhase = 0;
-	mBitmapFilter = "";
+void ASELoader::Map::Init() {
+	name_ = "";
+	clazz_ = "";
+	comment_ = "";
+	sub_no_ = 0;
+	amount_ = 0;
+	bitmap_path_ = "";
+	type_ = "";
+	u_offset_ = 0;
+	v_offset_ = 0;
+	u_tiling_ = 0;
+	v_tiling_ = 0;
+	uvw_angle_ = 0;
+	uvw_blur_ = 0;
+	uvw_blur_offset_ = 0;
+	uvw_noise_amt_ = 0;
+	uvw_noise_size_ = 0;
+	uvw_noise_level_ = 0;
+	uvw_noise_phase_ = 0;
+	bitmap_filter_ = "";
 }
 
 
 
 ASELoader::Material::Material() :
-	mShine(0),
-	mShineStrength(0),
-	mTransparency(0),
-	mWireSize(0),
-	mXPFalloff(0),
-	mSelfIllum(0)
-{
-	mAmbient[0] = 0;
-	mAmbient[1] = 0;
-	mAmbient[2] = 0;
-	mDiffuse[0] = 0;
-	mDiffuse[1] = 0;
-	mDiffuse[2] = 0;
-	mSpecular[0] = 0;
-	mSpecular[1] = 0;
-	mSpecular[2] = 0;
+	shine_(0),
+	shine_strength_(0),
+	transparency_(0),
+	wire_size_(0),
+	xp_falloff_(0),
+	self_illum_(0) {
+	ambient_[0] = 0;
+	ambient_[1] = 0;
+	ambient_[2] = 0;
+	diffuse_[0] = 0;
+	diffuse_[1] = 0;
+	diffuse_[2] = 0;
+	specular_[0] = 0;
+	specular_[1] = 0;
+	specular_[2] = 0;
 }
 
-ASELoader::Material::~Material()
-{
+ASELoader::Material::~Material() {
 	Init();
 }
 
-void ASELoader::Material::Init()
-{
-	mName = "";
-	mClass = "";
-	mComment = "";
-	mShine = 0;
-	mShineStrength = 0;
-	mTransparency = 0;
-	mWireSize = 0;
-	mShading = "";
-	mXPFalloff = 0;
-	mSelfIllum = 0;
-	mFalloff = "";
-	mXPType = "";
+void ASELoader::Material::Init() {
+	name_ = "";
+	clazz_ = "";
+	comment_ = "";
+	shine_ = 0;
+	shine_strength_ = 0;
+	transparency_ = 0;
+	wire_size_ = 0;
+	shading_ = "";
+	xp_falloff_ = 0;
+	self_illum_ = 0;
+	falloff_ = "";
+	xp_type_ = "";
 
-	mAmbientMapList.DeleteAll();
-	mDiffuseMapList.DeleteAll();
-	mSpecularMapList.DeleteAll();
-	mShineMapList.DeleteAll();
-	mShineStrengthMapList.DeleteAll();
-	mSelfIllumMapList.DeleteAll();
-	mOpacityMapList.DeleteAll();
-	mFilterColorMapList.DeleteAll();
-	mBumpMapList.DeleteAll();
-	mReflectMapList.DeleteAll();
-	mRefractMapList.DeleteAll();
+	ambient_map_list_.DeleteAll();
+	diffuse_map_list_.DeleteAll();
+	specular_map_list_.DeleteAll();
+	shine_map_list_.DeleteAll();
+	shine_strength_map_list_.DeleteAll();
+	self_illum_map_list_.DeleteAll();
+	opacity_map_list_.DeleteAll();
+	filter_color_map_list_.DeleteAll();
+	bump_map_list_.DeleteAll();
+	reflect_map_list_.DeleteAll();
+	refract_map_list_.DeleteAll();
 
-	mSubMaterialList.DeleteAll();
+	sub_material_list_.DeleteAll();
 }
 
-bool ASELoader::Material::LoadAsTexture(Texture& pTexture)
-{
-	Lepra::ImageLoader lLoader;
-	Lepra::Canvas lColorMap;
-	Lepra::Canvas lAlphaMap;
-	Lepra::Canvas lNormalMap;
-	Lepra::Canvas lSpecularMap;
-	Lepra::Canvas* lAlphaMap = 0;
-	Lepra::Canvas* lNormalMap = 0;
-	Lepra::Canvas* lSpecularMap = 0;
+bool ASELoader::Material::LoadAsTexture(Texture& texture) {
+	lepra::ImageLoader loader;
+	lepra::Canvas color_map;
+	lepra::Canvas alpha_map;
+	lepra::Canvas normal_map;
+	lepra::Canvas specular_map;
+	lepra::Canvas* alpha_map = 0;
+	lepra::Canvas* normal_map = 0;
+	lepra::Canvas* specular_map = 0;
 
-	bool lStatusOk = !mDiffuseMapList.IsEmpty();
+	bool status_ok = !diffuse_map_list_.IsEmpty();
 
-	if (lStatusOk)
-	{
-		Map* lDiffuseMap = *mDiffuseMapList.First();
-		lStatusOk = lLoader.Load(lDiffuseMap->mBitmapPath.ToCurrentCode(), lColorMap);
+	if (status_ok) {
+		Map* diffuse_map = *diffuse_map_list_.First();
+		status_ok = loader.Load(diffuse_map->bitmap_path_.ToCurrentCode(), color_map);
 	}
 
-	if (lStatusOk && mOpacityMapList.IsEmpty() == false)
-	{
-		Map* lOpacityMap = *mOpacityMapList.First();
-		lStatusOk = lLoader.Load(lOpacityMap->mBitmapPath.ToCurrentCode(), lAlphaMap);
-		if (lStatusOk)
-		{
-			lAlphaMap.ConvertToGrayscale();
-			lAlphaMap = &lAlphaMap;
+	if (status_ok && opacity_map_list_.IsEmpty() == false) {
+		Map* opacity_map = *opacity_map_list_.First();
+		status_ok = loader.Load(opacity_map->bitmap_path_.ToCurrentCode(), alpha_map);
+		if (status_ok) {
+			alpha_map.ConvertToGrayscale();
+			alpha_map = &alpha_map;
 		}
 	}
 
-	if (lStatusOk && mBumpMapList.IsEmpty() == false)
-	{
+	if (status_ok && bump_map_list_.IsEmpty() == false) {
 		// TODO: Verify that the map is a normal map, and not a bump map.
-		Map* lBumpMap = *mBumpMapList.First();
-		lStatusOk = lLoader.Load(lBumpMap->mBitmapPath.ToCurrentCode(), lNormalMap);
-		if (lStatusOk)
-		{
-			lNormalMap = &lNormalMap;
+		Map* bump_map = *bump_map_list_.First();
+		status_ok = loader.Load(bump_map->bitmap_path_.ToCurrentCode(), normal_map);
+		if (status_ok) {
+			normal_map = &normal_map;
 		}
 	}
 
-	if (lStatusOk && mShineMapList.IsEmpty() == false)
-	{
-		Map* lShineMap = *mShineMapList.First();
-		lStatusOk = lLoader.Load(lShineMap->mBitmapPath.ToCurrentCode(), lSpecularMap);
-		if (lStatusOk)
-		{
-			lSpecularMap.ConvertToGrayscale();
-			lSpecularMap = &lSpecularMap;
+	if (status_ok && shine_map_list_.IsEmpty() == false) {
+		Map* shine_map = *shine_map_list_.First();
+		status_ok = loader.Load(shine_map->bitmap_path_.ToCurrentCode(), specular_map);
+		if (status_ok) {
+			specular_map.ConvertToGrayscale();
+			specular_map = &specular_map;
 		}
 	}
 
-	if (lStatusOk)
-	{
-		pTexture.Set(lColorMap, lAlphaMap, lNormalMap, lSpecularMap);
+	if (status_ok) {
+		texture.Set(color_map, alpha_map, normal_map, specular_map);
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
-Renderer::MaterialType ASELoader::Material::GetRecommendedMaterial()
-{
-	bool lDiffuse  = !mDiffuseMapList.IsEmpty();
-	bool lSpecular = !mShineMapList.IsEmpty();
-	bool lAlpha    = !mOpacityMapList.IsEmpty();
-	bool lBump     = !mBumpMapList.IsEmpty();
-	bool lLight    = !mSelfIllumMapList.IsEmpty() || !mAmbientMapList.IsEmpty();
+Renderer::MaterialType ASELoader::Material::GetRecommendedMaterial() {
+	bool diffuse  = !diffuse_map_list_.IsEmpty();
+	bool specular = !shine_map_list_.IsEmpty();
+	bool alpha    = !opacity_map_list_.IsEmpty();
+	bool bump     = !bump_map_list_.IsEmpty();
+	bool light    = !self_illum_map_list_.IsEmpty() || !ambient_map_list_.IsEmpty();
 
-	Renderer::MaterialType lMaterialType = Renderer::MAT_SINGLE_COLOR_SOLID;
+	Renderer::MaterialType material_type = Renderer::kMatSingleColorSolid;
 
-	if (!lDiffuse)
-	{
+	if (!diffuse) {
 		// Single color or vertex color.
-	}
-	else if(lBump && lSpecular)
-	{
-		lMaterialType = Renderer::MAT_TEXTURE_SBMAP_PXS;
-	}
-	else if(lBump && !lSpecular)
-	{
-		lMaterialType = Renderer::MAT_TEXTURE_AND_DIFFUSE_BUMPMAP_PXS;
-	}
-	else if(lAlpha)
-	{
-		lMaterialType = Renderer::MAT_SINGLE_TEXTURE_BLENDED;
-	}
-	else if(lLight)
-	{
-		if (mShading == "Phong")
-		{
-			lMaterialType = Renderer::MAT_TEXTURE_AND_LIGHTMAP_PXS;
+	} else if(bump && specular) {
+		material_type = Renderer::kMatTextureSbmapPxs;
+	} else if(bump && !specular) {
+		material_type = Renderer::kMatTextureAndDiffuseBumpmapPxs;
+	} else if(alpha) {
+		material_type = Renderer::kMatSingleTextureBlended;
+	} else if(light) {
+		if (shading_ == "Phong") {
+			material_type = Renderer::kMatTextureAndLightmapPxs;
+		} else {
+			material_type = Renderer::kMatTextureAndLightmap;
 		}
-		else
-		{
-			lMaterialType = Renderer::MAT_TEXTURE_AND_LIGHTMAP;
-		}
-	}
-	else
-	{
-		if (mShading == "Phong")
-		{
-			lMaterialType = Renderer::MAT_SINGLE_TEXTURE_SOLID_PXS;
-		}
-		else
-		{
-			lMaterialType = Renderer::MAT_SINGLE_TEXTURE_SOLID;
+	} else {
+		if (shading_ == "Phong") {
+			material_type = Renderer::kMatSingleTextureSolidPxs;
+		} else {
+			material_type = Renderer::kMatSingleTextureSolid;
 		}
 	}
 
-	return lMaterialType;
+	return material_type;
 }
 
 
 
-ASELoader::NodeTM::NodeTM()
-{
+ASELoader::NodeTM::NodeTM() {
 	Init();
 }
 
-ASELoader::NodeTM::~NodeTM()
-{
+ASELoader::NodeTM::~NodeTM() {
 }
 
-void ASELoader::NodeTM::Init()
-{
-	mNodeName = "";
-	mComment = "";
-	mTMRotAngle = 0;
-	mInheritPos[0] = 0;
-	mInheritPos[1] = 0;
-	mInheritPos[2] = 0;
-	mInheritRot[0] = 0;
-	mInheritRot[1] = 0;
-	mInheritRot[2] = 0;
-	mInheritScl[0] = 0;
-	mInheritScl[1] = 0;
-	mInheritScl[2] = 0;
-	mTMRow0[0] = 1;
-	mTMRow0[1] = 0;
-	mTMRow0[2] = 0;
-	mTMRow1[0] = 0;
-	mTMRow1[1] = 1;
-	mTMRow1[2] = 0;
-	mTMRow2[0] = 0;
-	mTMRow2[1] = 0;
-	mTMRow2[2] = 1;
-	mTMRow3[0] = 0;
-	mTMRow3[1] = 0;
-	mTMRow3[2] = 0;
-	mTMPos[0] = 0;
-	mTMPos[1] = 0;
-	mTMPos[2] = 0;
-	mTMRotAxis[0] = 0;
-	mTMRotAxis[1] = 0;
-	mTMRotAxis[2] = 0;
-	mTMScale[0] = 1;
-	mTMScale[1] = 1;
-	mTMScale[2] = 1;
-	mTMScaleAxis[0] = 0;
-	mTMScaleAxis[1] = 0;
-	mTMScaleAxis[2] = 0;
-	mTMScaleAxisAng = 0;
+void ASELoader::NodeTM::Init() {
+	node_name_ = "";
+	comment_ = "";
+	tm_rot_angle_ = 0;
+	inherit_pos_[0] = 0;
+	inherit_pos_[1] = 0;
+	inherit_pos_[2] = 0;
+	inherit_rot_[0] = 0;
+	inherit_rot_[1] = 0;
+	inherit_rot_[2] = 0;
+	inherit_scl_[0] = 0;
+	inherit_scl_[1] = 0;
+	inherit_scl_[2] = 0;
+	tm_row0_[0] = 1;
+	tm_row0_[1] = 0;
+	tm_row0_[2] = 0;
+	tm_row1_[0] = 0;
+	tm_row1_[1] = 1;
+	tm_row1_[2] = 0;
+	tm_row2_[0] = 0;
+	tm_row2_[1] = 0;
+	tm_row2_[2] = 1;
+	tm_row3_[0] = 0;
+	tm_row3_[1] = 0;
+	tm_row3_[2] = 0;
+	tm_pos_[0] = 0;
+	tm_pos_[1] = 0;
+	tm_pos_[2] = 0;
+	tm_rot_axis_[0] = 0;
+	tm_rot_axis_[1] = 0;
+	tm_rot_axis_[2] = 0;
+	tm_scale_[0] = 1;
+	tm_scale_[1] = 1;
+	tm_scale_[2] = 1;
+	tm_scale_axis_[0] = 0;
+	tm_scale_axis_[1] = 0;
+	tm_scale_axis_[2] = 0;
+	tm_scale_axis_ang_ = 0;
 }
 
-void ASELoader::NodeTM::GetRotationMatrix(Lepra::RotationMatrixF& pRotMtx)
-{
+void ASELoader::NodeTM::GetRotationMatrix(lepra::RotationMatrixF& rot_mtx) {
 	// TODO: Verify this. We may need to take the transpose instead.
-	pRotMtx.Set((float)mTMRow0[0], (float)mTMRow0[1], (float)mTMRow0[2],
-		     (float)mTMRow1[0], (float)mTMRow1[1], (float)mTMRow1[2],
-		     (float)mTMRow2[0], (float)mTMRow2[1], (float)mTMRow2[2]);
+	rot_mtx.Set((float)tm_row0_[0], (float)tm_row0_[1], (float)tm_row0_[2],
+		     (float)tm_row1_[0], (float)tm_row1_[1], (float)tm_row1_[2],
+		     (float)tm_row2_[0], (float)tm_row2_[1], (float)tm_row2_[2]);
 }
 
-void ASELoader::NodeTM::GetRotationMatrix(Lepra::RotationMatrixD& pRotMtx)
-{
+void ASELoader::NodeTM::GetRotationMatrix(lepra::RotationMatrixD& rot_mtx) {
 	// TODO: Verify this. We may need to take the transpose instead.
-	pRotMtx.Set(mTMRow0[0], mTMRow0[1], mTMRow0[2],
-		     mTMRow1[0], mTMRow1[1], mTMRow1[2],
-		     mTMRow2[0], mTMRow2[1], mTMRow2[2]);
+	rot_mtx.Set(tm_row0_[0], tm_row0_[1], tm_row0_[2],
+		     tm_row1_[0], tm_row1_[1], tm_row1_[2],
+		     tm_row2_[0], tm_row2_[1], tm_row2_[2]);
 }
 
-void ASELoader::NodeTM::GetPosition(Lepra::Vector3DF& pPos)
-{
-	pPos.Set((float)mTMPos[0], (float)mTMPos[1], (float)mTMPos[2]);
+void ASELoader::NodeTM::GetPosition(lepra::Vector3DF& pos) {
+	pos.Set((float)tm_pos_[0], (float)tm_pos_[1], (float)tm_pos_[2]);
 }
 
-void ASELoader::NodeTM::GetPosition(Lepra::Vector3DD& pPos)
-{
-	pPos.Set(mTMPos[0], mTMPos[1], mTMPos[2]);
+void ASELoader::NodeTM::GetPosition(lepra::Vector3DD& pos) {
+	pos.Set(tm_pos_[0], tm_pos_[1], tm_pos_[2]);
 }
 
-void ASELoader::NodeTM::GetTransformation(Lepra::TransformationF& pTransform)
-{
-	// Since pTransform.GetPosition() returns a reference, the following works.
-	GetPosition(pTransform.GetPosition());
+void ASELoader::NodeTM::GetTransformation(lepra::TransformationF& transform) {
+	// Since transform.GetPosition() returns a reference, the following works.
+	GetPosition(transform.GetPosition());
 
-	Lepra::RotationMatrixF lRotMtx;
-	GetRotationMatrix(lRotMtx);
-	lRotMtx.Reorthogonalize();
-	pTransform.SetOrientation(lRotMtx);
+	lepra::RotationMatrixF _rot_mtx;
+	GetRotationMatrix(_rot_mtx);
+	_rot_mtx.Reorthogonalize();
+	transform.SetOrientation(_rot_mtx);
 }
 
-void ASELoader::NodeTM::GetTransformation(Lepra::TransformationD& pTransform)
-{
-	// Since pTransform.GetPosition() returns a reference, the following works.
-	GetPosition(pTransform.GetPosition());
+void ASELoader::NodeTM::GetTransformation(lepra::TransformationD& transform) {
+	// Since transform.GetPosition() returns a reference, the following works.
+	GetPosition(transform.GetPosition());
 
-	Lepra::RotationMatrixD lRotMtx;
-	GetRotationMatrix(lRotMtx);
-	lRotMtx.Reorthogonalize();
-	pTransform.SetOrientation(lRotMtx);
+	lepra::RotationMatrixD _rot_mtx;
+	GetRotationMatrix(_rot_mtx);
+	_rot_mtx.Reorthogonalize();
+	transform.SetOrientation(_rot_mtx);
 }
 
 
 
 
 ASELoader::ControlPosSample::ControlPosSample() :
-	mTimeValue(0)
-{
-	mPos[0] = 0;
-	mPos[1] = 0;
-	mPos[2] = 0;
+	time_value_(0) {
+	pos_[0] = 0;
+	pos_[1] = 0;
+	pos_[2] = 0;
 }
 
-ASELoader::ControlPosSample::~ControlPosSample()
-{
+ASELoader::ControlPosSample::~ControlPosSample() {
 }
 
-void ASELoader::ControlPosSample::Init()
-{
-	mTimeValue = 0;
-	mPos[0] = 0;
-	mPos[1] = 0;
-	mPos[2] = 0;
+void ASELoader::ControlPosSample::Init() {
+	time_value_ = 0;
+	pos_[0] = 0;
+	pos_[1] = 0;
+	pos_[2] = 0;
 }
 
 ASELoader::ControlRotSample::ControlRotSample() :
-	mTimeValue(0)
-{
-	mRot[0] = 0;
-	mRot[1] = 0;
-	mRot[2] = 0;
-	mRot[3] = 0;
+	time_value_(0) {
+	rot_[0] = 0;
+	rot_[1] = 0;
+	rot_[2] = 0;
+	rot_[3] = 0;
 }
 
-ASELoader::ControlRotSample::~ControlRotSample()
-{
+ASELoader::ControlRotSample::~ControlRotSample() {
 }
 
-void ASELoader::ControlRotSample::Init()
-{
-	mTimeValue = 0;
-	mRot[0] = 0;
-	mRot[1] = 0;
-	mRot[2] = 0;
-	mRot[3] = 0;
+void ASELoader::ControlRotSample::Init() {
+	time_value_ = 0;
+	rot_[0] = 0;
+	rot_[1] = 0;
+	rot_[2] = 0;
+	rot_[3] = 0;
 }
 
-ASELoader::TMAnimation::TMAnimation()
-{
+ASELoader::TMAnimation::TMAnimation() {
 }
 
-ASELoader::TMAnimation::~TMAnimation()
-{
+ASELoader::TMAnimation::~TMAnimation() {
 	Init();
 }
 
-void ASELoader::TMAnimation::Init()
-{
-	mNodeName = "";
-	mComment = "";
-	mControlPosTrack.DeleteAll();
-	mControlRotTrack.DeleteAll();
+void ASELoader::TMAnimation::Init() {
+	node_name_ = "";
+	comment_ = "";
+	control_pos_track_.DeleteAll();
+	control_rot_track_.DeleteAll();
 }
 
 
 
 ASELoader::MappingChannel::MappingChannel() :
-	mComment(""),
-	mNumTVertex(0),
-	mTVertex(0),
-	mNumTVFaces(0),
-	mTVFace(0)
-{
+	comment_(""),
+	num_t_vertex_(0),
+	t_vertex_(0),
+	num_tv_faces_(0),
+	tv_face_(0) {
 }
 
-ASELoader::MappingChannel::~MappingChannel()
-{
+ASELoader::MappingChannel::~MappingChannel() {
 	Init();
 }
 
-void ASELoader::MappingChannel::Init()
-{
-	mComment = "";
-	mNumTVertex = 0;
-	if (mTVertex != 0)
-	{
-		delete[] mTVertex;
-		mTVertex = 0;
+void ASELoader::MappingChannel::Init() {
+	comment_ = "";
+	num_t_vertex_ = 0;
+	if (t_vertex_ != 0) {
+		delete[] t_vertex_;
+		t_vertex_ = 0;
 	}
-	mNumTVFaces = 0;
-	if (mTVFace != 0)
-	{
-		delete[] mTVFace;
-		mTVFace = 0;
+	num_tv_faces_ = 0;
+	if (tv_face_ != 0) {
+		delete[] tv_face_;
+		tv_face_ = 0;
 	}
 }
 
-void ASELoader::MappingChannel::AllocVertexArray()
-{
-	if (mTVertex != 0)
-	{
-		delete[] mTVertex;
-		mTVertex = 0;
+void ASELoader::MappingChannel::AllocVertexArray() {
+	if (t_vertex_ != 0) {
+		delete[] t_vertex_;
+		t_vertex_ = 0;
 	}
 
-	if (mNumTVertex > 0)
-	{
-		mTVertex = new float[mNumTVertex * 3];
+	if (num_t_vertex_ > 0) {
+		t_vertex_ = new float[num_t_vertex_ * 3];
 	}
 }
 
-void ASELoader::MappingChannel::AllocFaceArray()
-{
-	if (mTVFace != 0)
-	{
-		delete[] mTVFace;
-		mTVFace = 0;
+void ASELoader::MappingChannel::AllocFaceArray() {
+	if (tv_face_ != 0) {
+		delete[] tv_face_;
+		tv_face_ = 0;
 	}
 
-	if (mNumTVFaces > 0)
-	{
-		mTVFace = new int[mNumTVFaces * 3];
+	if (num_tv_faces_ > 0) {
+		tv_face_ = new int[num_tv_faces_ * 3];
 	}
 }
 
 
 
 ASELoader::Mesh::Mesh() :
-	mComment(""),
-	mTimeValue(0),
-	mNumVertex(0),
-	mNumFaces(0),
-	mVertex(0),
-	mFace(0),
-	mFaceEdgeVisible(0),
-	mSmoothingGroupList(0),
-	mSubMaterial(0),
-	mHaveDefaultUVSet(false),
-	mFaceNormals(0),
-	mVertexNormals(0),
-	mNumCVertex(0),
-	mCVertex(0),
-	mNumCVFaces(0),
-	mCFace(0)
-{
+	comment_(""),
+	time_value_(0),
+	num_vertex_(0),
+	num_faces_(0),
+	vertex_(0),
+	face_(0),
+	face_edge_visible_(0),
+	smoothing_group_list_(0),
+	sub_material_(0),
+	have_default_uv_set_(false),
+	face_normals_(0),
+	vertex_normals_(0),
+	num_c_vertex_(0),
+	c_vertex_(0),
+	num_cv_faces_(0),
+	c_face_(0) {
 }
 
-ASELoader::Mesh::~Mesh()
-{
+ASELoader::Mesh::~Mesh() {
 	Init();
 }
 
-void ASELoader::Mesh::Init()
-{
-	mComment = "";
-	mTimeValue = 0;
-	mNumVertex = 0;
-	mNumFaces = 0;
-	mHaveDefaultUVSet = false;
+void ASELoader::Mesh::Init() {
+	comment_ = "";
+	time_value_ = 0;
+	num_vertex_ = 0;
+	num_faces_ = 0;
+	have_default_uv_set_ = false;
 
-	if (mVertex != 0)
-	{
-		delete[] mVertex;
-		mVertex = 0;
+	if (vertex_ != 0) {
+		delete[] vertex_;
+		vertex_ = 0;
 	}
-	if (mFace != 0)
-	{
-		delete[] mFace;
-		mFace = 0;
+	if (face_ != 0) {
+		delete[] face_;
+		face_ = 0;
 	}
-	if (mFaceEdgeVisible != 0)
-	{
-		delete[] mFaceEdgeVisible;
-		mFaceEdgeVisible = 0;
+	if (face_edge_visible_ != 0) {
+		delete[] face_edge_visible_;
+		face_edge_visible_ = 0;
 	}
-	if (mSmoothingGroupList != 0)
-	{
-		delete[] mSmoothingGroupList;
-		mSmoothingGroupList = 0;
+	if (smoothing_group_list_ != 0) {
+		delete[] smoothing_group_list_;
+		smoothing_group_list_ = 0;
 	}
-	if (mSubMaterial != 0)
-	{
-		delete[] mSubMaterial;
-		mSubMaterial = 0;
+	if (sub_material_ != 0) {
+		delete[] sub_material_;
+		sub_material_ = 0;
 	}
-	if (mFaceNormals != 0)
-	{
-		delete[] mFaceNormals;
-		mFaceNormals = 0;
+	if (face_normals_ != 0) {
+		delete[] face_normals_;
+		face_normals_ = 0;
 	}
-	if (mVertexNormals != 0)
-	{
-		delete[] mVertexNormals;
-		mVertexNormals = 0;
+	if (vertex_normals_ != 0) {
+		delete[] vertex_normals_;
+		vertex_normals_ = 0;
 	}
-	mNumCVertex = 0;
-	if (mCVertex != 0)
-	{
-		delete[] mCVertex;
-		mCVertex = 0;
+	num_c_vertex_ = 0;
+	if (c_vertex_ != 0) {
+		delete[] c_vertex_;
+		c_vertex_ = 0;
 	}
-	mNumCVFaces = 0;
-	if (mCFace != 0)
-	{
-		delete[] mCFace;
-		mCFace = 0;
+	num_cv_faces_ = 0;
+	if (c_face_ != 0) {
+		delete[] c_face_;
+		c_face_ = 0;
 	}
 
-	mMappingChannelList.DeleteAll();
+	mapping_channel_list_.DeleteAll();
 }
 
-ASELoader::MappingChannel* ASELoader::Mesh::GetDefaultMappingChannel()
-{
-	MappingChannel* lMappingChannel;
-	if (mMappingChannelList.IsEmpty() || mHaveDefaultUVSet == false)
-	{
-		lMappingChannel = new MappingChannel;
-		mMappingChannelList.PushFront(lMappingChannel);
-		mHaveDefaultUVSet = true;
+ASELoader::MappingChannel* ASELoader::Mesh::GetDefaultMappingChannel() {
+	MappingChannel* mapping_channel;
+	if (mapping_channel_list_.IsEmpty() || have_default_uv_set_ == false) {
+		mapping_channel = new MappingChannel;
+		mapping_channel_list_.PushFront(mapping_channel);
+		have_default_uv_set_ = true;
+	} else {
+		mapping_channel = *mapping_channel_list_.First();
 	}
-	else
-	{
-		lMappingChannel = *mMappingChannelList.First();
-	}
-	return lMappingChannel;
+	return mapping_channel;
 }
 
-void ASELoader::Mesh::AllocVertexArray()
-{
-	if (mVertex != 0)
-	{
-		delete[] mVertex;
-		mVertex = 0;
+void ASELoader::Mesh::AllocVertexArray() {
+	if (vertex_ != 0) {
+		delete[] vertex_;
+		vertex_ = 0;
 	}
 
-	if (mNumVertex > 0)
-	{
-		mVertex = new float[mNumVertex * 3];
+	if (num_vertex_ > 0) {
+		vertex_ = new float[num_vertex_ * 3];
 	}
 }
 
-void ASELoader::Mesh::AllocFaceArray()
-{
-	if (mFace != 0)
-	{
-		delete[] mFace;
-		mFace = 0;
+void ASELoader::Mesh::AllocFaceArray() {
+	if (face_ != 0) {
+		delete[] face_;
+		face_ = 0;
 	}
 
-	if (mFaceEdgeVisible != 0)
-	{
-		delete[] mFaceEdgeVisible;
-		mFaceEdgeVisible = 0;
+	if (face_edge_visible_ != 0) {
+		delete[] face_edge_visible_;
+		face_edge_visible_ = 0;
 	}
 
-	if (mSmoothingGroupList != 0)
-	{
-		delete[] mSmoothingGroupList;
-		mSmoothingGroupList = 0;
+	if (smoothing_group_list_ != 0) {
+		delete[] smoothing_group_list_;
+		smoothing_group_list_ = 0;
 	}
 
-	if (mSubMaterial != 0)
-	{
-		delete[] mSubMaterial;
-		mSubMaterial = 0;
+	if (sub_material_ != 0) {
+		delete[] sub_material_;
+		sub_material_ = 0;
 	}
 
-	if (mNumFaces > 0)
-	{
-		mFace = new int[mNumFaces * 3];
-		mFaceEdgeVisible = new bool[mNumFaces * 3];
-		mSmoothingGroupList = new std::list<int>[mNumFaces];
-		mSubMaterial = new int[mNumFaces];
+	if (num_faces_ > 0) {
+		face_ = new int[num_faces_ * 3];
+		face_edge_visible_ = new bool[num_faces_ * 3];
+		smoothing_group_list_ = new std::list<int>[num_faces_];
+		sub_material_ = new int[num_faces_];
 	}
 }
 
-void ASELoader::Mesh::AllocCVertexArray()
-{
-	if (mCVertex != 0)
-	{
-		delete[] mCVertex;
-		mCVertex = 0;
+void ASELoader::Mesh::AllocCVertexArray() {
+	if (c_vertex_ != 0) {
+		delete[] c_vertex_;
+		c_vertex_ = 0;
 	}
 
-	if (mNumCVertex > 0)
-	{
-		mCVertex = new float[mNumCVertex * 3];
+	if (num_c_vertex_ > 0) {
+		c_vertex_ = new float[num_c_vertex_ * 3];
 	}
 }
 
-void ASELoader::Mesh::AllocCFaceArray()
-{
-	if (mCFace != 0)
-	{
-		delete[] mCFace;
-		mCFace = 0;
+void ASELoader::Mesh::AllocCFaceArray() {
+	if (c_face_ != 0) {
+		delete[] c_face_;
+		c_face_ = 0;
 	}
 
-	if (mNumCVFaces > 0)
-	{
-		mCFace = new int[mNumCVFaces * 3];
+	if (num_cv_faces_ > 0) {
+		c_face_ = new int[num_cv_faces_ * 3];
 	}
 }
 
-void ASELoader::Mesh::AllocNormalArrays()
-{
-	if (mFaceNormals != 0)
-	{
-		delete[] mFaceNormals;
-		mFaceNormals = 0;
+void ASELoader::Mesh::AllocNormalArrays() {
+	if (face_normals_ != 0) {
+		delete[] face_normals_;
+		face_normals_ = 0;
 	}
 
-	if (mVertexNormals != 0)
-	{
-		delete[] mVertexNormals;
-		mVertexNormals = 0;
+	if (vertex_normals_ != 0) {
+		delete[] vertex_normals_;
+		vertex_normals_ = 0;
 	}
 
-	if (mNumFaces > 0)
-	{
-		mFaceNormals = new float[mNumFaces * 3];
+	if (num_faces_ > 0) {
+		face_normals_ = new float[num_faces_ * 3];
 	}
 
-	if (mNumVertex > 0)
-	{
-		mVertexNormals = new float[mNumVertex * 3];
+	if (num_vertex_ > 0) {
+		vertex_normals_ = new float[num_vertex_ * 3];
 	}
 }
 
-void ASELoader::Mesh::GetGeometry(std::list<TriangleBasedGeometry*>& pGeometryList)
-{
-	int lNumUVSets = mMappingChannelList.GetCount();
+void ASELoader::Mesh::GetGeometry(std::list<TriangleBasedGeometry*>& geometry_list) {
+	int _num_uv_sets = mapping_channel_list_.GetCount();
 
-	Face* lFace = new Face[mNumFaces];
-	FaceListTable lFaceListTable;
-	SetupFaceListTable(lFace, lFaceListTable);
+	Face* _face = new Face[num_faces_];
+	FaceListTable _face_list_table;
+	SetupFaceListTable(_face, _face_list_table);
 
 	// For each submaterial, build one TriangleBasedGeometry.
-	FaceListTable::Iterator lIter;
-	for (lIter = lFaceListTable.First(); lIter != lFaceListTable.End(); ++lIter)
-	{
+	FaceListTable::Iterator iter;
+	for (iter = _face_list_table.First(); iter != _face_list_table.End(); ++iter) {
 		// Create the vertex lookup table. This table maps a FaceVertex (the "old" vertex) to
 		// an index into the newly created vertex list (see further down).
-		typedef Lepra::HashTable<FaceVertex, int, FaceVertex> VertexLookupTable;
-		VertexLookupTable mVertexLookupTable;
+		typedef lepra::HashTable<FaceVertex, int, FaceVertex> VertexLookupTable;
+		VertexLookupTable vertex_lookup_table_;
 
-		FaceList* lFaceList = *lIter;
+		FaceList* face_list = *iter;
 
 		// The vertex list, vertex color list and lists for all UV-sets.
-		std::list<Lepra::Vector3DF> lVertexList;
-		std::list<Lepra::Vector3DF> lVertexColorList;
-		std::list<Lepra::Vector2DF>* lUVList = 0;
+		std::list<lepra::Vector3DF> vertex_list;
+		std::list<lepra::Vector3DF> vertex_color_list;
+		std::list<lepra::Vector2DF>* uv_list = 0;
 
-		if (lNumUVSets > 0)
-		{
-			lUVList = new std::list<Lepra::Vector2DF>[lNumUVSets];
+		if (_num_uv_sets > 0) {
+			uv_list = new std::list<lepra::Vector2DF>[_num_uv_sets];
 		}
 
-		Lepra::uint32* lIndex = new Lepra::uint32[lFaceList->GetCount() * 3];
+		lepra::uint32* _index = new lepra::uint32[face_list->GetCount() * 3];
 
-		FaceList::Iterator lFaceIter;
-		int lFace = 0;
-		for (lFaceIter = lFaceList->First(); lFaceIter != lFaceList->End(); ++lFaceIter, ++lFace)
-		{
-			Face* lFace = *lFaceIter;
-			
+		FaceList::Iterator face_iter;
+		int _face = 0;
+		for (face_iter = face_list->First(); face_iter != face_list->End(); ++face_iter, ++_face) {
+			Face* _face = *face_iter;
+
 			// For each of the face's vertices.
 			int i;
-			for (i = 0; i < 3; i++)
-			{
+			for (i = 0; i < 3; i++) {
 				// Check if we have a new vertex.
-				VertexLookupTable::Iterator lVIter = mVertexLookupTable.Find(lFace->mVertex[i]);
+				VertexLookupTable::Iterator v_iter = vertex_lookup_table_.Find(_face->vertex_[i]);
 
-				if (lVIter == mVertexLookupTable.End())
-				{
+				if (v_iter == vertex_lookup_table_.End()) {
 					// This is a new vertex. Update the lookup table and store it.
-					mVertexLookupTable.Insert(lFace->mVertex[i], lVertexList.GetCount());
+					vertex_lookup_table_.Insert(_face->vertex_[i], vertex_list.GetCount());
 
-					int lVIndex = lFace->mVertex[i].mVIndex;
+					int v_index = _face->vertex_[i].v_index_;
 
-					Lepra::Vector3DF lVertex(mVertex[lVIndex * 3 + 0],
-								  mVertex[lVIndex * 3 + 1],
-								  mVertex[lVIndex * 3 + 2]);
-					lVertexList.PushBack(lVertex);
+					lepra::Vector3DF _vertex(vertex_[v_index * 3 + 0],
+								  vertex_[v_index * 3 + 1],
+								  vertex_[v_index * 3 + 2]);
+					vertex_list.PushBack(_vertex);
 
 					// Store vertex color.
-					if (mNumCVFaces > 0)
-					{
-						int lCIndex = lFace->mVertex[i].mCIndex;
-						Lepra::Vector3DF lVertexColor(mCVertex[lCIndex * 3 + 0],
-									       mCVertex[lCIndex * 3 + 1],
-									       mCVertex[lCIndex * 3 + 2]);
-						lVertexColorList.PushBack(lVertexColor);
+					if (num_cv_faces_ > 0) {
+						int c_index = _face->vertex_[i].c_index_;
+						lepra::Vector3DF vertex_color(c_vertex_[c_index * 3 + 0],
+									       c_vertex_[c_index * 3 + 1],
+									       c_vertex_[c_index * 3 + 2]);
+						vertex_color_list.PushBack(vertex_color);
 					}
 
 					// Store UV coordinates.
-					MappingChannelList::Iterator lMIter = mMappingChannelList.First();
-					for (int j = 0; j < lNumUVSets; ++j, ++lMIter)
-					{
-						MappingChannel* lMappingChannel = *lMIter;
-						int lTIndex = lFace->mVertex[i].mTIndex[j];
-						Lepra::Vector2DF lUVCoords(lMappingChannel->mTVertex[lTIndex * 3 + 0],
-									    lMappingChannel->mTVertex[lTIndex * 3 + 1]);
-						lUVList[j].PushBack(lUVCoords);
+					MappingChannelList::Iterator m_iter = mapping_channel_list_.First();
+					for (int j = 0; j < _num_uv_sets; ++j, ++m_iter) {
+						MappingChannel* mapping_channel = *m_iter;
+						int t_index = _face->vertex_[i].t_index_[j];
+						lepra::Vector2DF uv_coords(mapping_channel->t_vertex_[t_index * 3 + 0],
+									    mapping_channel->t_vertex_[t_index * 3 + 1]);
+						uv_list[j].PushBack(uv_coords);
 					}
 				}
 
-				lIndex[lFace * 3 + i] = *mVertexLookupTable.Find(lFace->mVertex[i]);
+				_index[_face * 3 + i] = *vertex_lookup_table_.Find(_face->vertex_[i]);
 			}
 		}
 
 		// Finally, setup the necessary arrays and create a TriangleBasedGeometry.
-		float* lVertex = new float[lVertexList.GetCount() * 3];
-		std::list<Lepra::Vector3DF>::Iterator lVIter;
+		float* _vertex = new float[vertex_list.GetCount() * 3];
+		std::list<lepra::Vector3DF>::Iterator v_iter;
 		int i;
-		for (lVIter = lVertexList.First(), i = 0; lVIter != lVertexList.End(); ++lVIter, i+=3)
-		{
-			lVertex[i + 0] = (*lVIter).x;
-			lVertex[i + 1] = (*lVIter).y;
-			lVertex[i + 2] = (*lVIter).z;
+		for (v_iter = vertex_list.First(), i = 0; v_iter != vertex_list.End(); ++v_iter, i+=3) {
+			_vertex[i + 0] = (*v_iter).x;
+			_vertex[i + 1] = (*v_iter).y;
+			_vertex[i + 2] = (*v_iter).z;
 		}
 
-		Lepra::uint8* lVertexColor = 0;
-		if (lVertexColorList.IsEmpty() == false)
-		{
-			lVertexColor = new Lepra::uint8[lVertexColorList.GetCount() * 3];
-			for (lVIter = lVertexColorList.First(), i = 0; lVIter != lVertexColorList.End(); ++lVIter, i+=3)
-			{
-				lVertexColor[i + 0] = (Lepra::uint8)((*lVIter).x * 255.0f);
-				lVertexColor[i + 1] = (Lepra::uint8)((*lVIter).y * 255.0f);
-				lVertexColor[i + 2] = (Lepra::uint8)((*lVIter).z * 255.0f);
+		lepra::uint8* vertex_color = 0;
+		if (vertex_color_list.IsEmpty() == false) {
+			vertex_color = new lepra::uint8[vertex_color_list.GetCount() * 3];
+			for (v_iter = vertex_color_list.First(), i = 0; v_iter != vertex_color_list.End(); ++v_iter, i+=3) {
+				vertex_color[i + 0] = (lepra::uint8)((*v_iter).x * 255.0f);
+				vertex_color[i + 1] = (lepra::uint8)((*v_iter).y * 255.0f);
+				vertex_color[i + 2] = (lepra::uint8)((*v_iter).z * 255.0f);
 			}
 		}
 
-		float** lUVData = 0;
-		if (lNumUVSets > 0)
-		{
-			lUVData = new float*[lNumUVSets];
-			for (i = 0; i < lNumUVSets; i++)
-			{
-				lUVData[i] = new float[lUVList[i].GetCount() * 2];
-				std::list<Lepra::Vector2DF>::Iterator lUVIter;
+		float** uv_data = 0;
+		if (_num_uv_sets > 0) {
+			uv_data = new float*[_num_uv_sets];
+			for (i = 0; i < _num_uv_sets; i++) {
+				uv_data[i] = new float[uv_list[i].GetCount() * 2];
+				std::list<lepra::Vector2DF>::Iterator uv_iter;
 				int j;
-				for (lUVIter = lUVList[i].First(), j = 0; lUVIter != lUVList[i].End(); ++lUVIter, j+=2)
-				{
-					lUVData[i][j + 0] = (*lUVIter).x;
-					lUVData[i][j + 1] = (*lUVIter).y;
+				for (uv_iter = uv_list[i].First(), j = 0; uv_iter != uv_list[i].End(); ++uv_iter, j+=2) {
+					uv_data[i][j + 0] = (*uv_iter).x;
+					uv_data[i][j + 1] = (*uv_iter).y;
 				}
 			}
 		}
 
-		float* lUVData = 0;
-		if (lUVData != 0)
-			lUVData = lUVData[0];
-		TriangleBasedGeometry* lGeometry = new TriangleBasedGeometry(lVertex, 0, lUVData, lVertexColor, Tbc::GeometryBase::COLOR_RGB, lIndex, lVertexList.GetCount(), lFaceList->GetCount(), Tbc::GeometryBase::TRIANGLES, Tbc::GeometryBase::GEOM_STATIC);
+		float* uv_data = 0;
+		if (uv_data != 0)
+			uv_data = uv_data[0];
+		TriangleBasedGeometry* geometry = new TriangleBasedGeometry(_vertex, 0, uv_data, vertex_color, tbc::GeometryBase::kColorRgb, _index, vertex_list.GetCount(), face_list->GetCount(), tbc::GeometryBase::kTriangles, tbc::GeometryBase::kGeomStatic);
 
-		for (i = 1; i < lNumUVSets; i++)
-		{
-			lGeometry->AddUVSet(lUVData[i]);
+		for (i = 1; i < _num_uv_sets; i++) {
+			geometry->AddUVSet(uv_data[i]);
 		}
 
-		pGeometryList.PushBack(lGeometry);
+		geometry_list.PushBack(geometry);
 
-		delete[] lVertex;
-		delete[] lIndex;
-		if (lVertexColor != 0)
-		{
-			delete[] lVertexColor;
+		delete[] _vertex;
+		delete[] _index;
+		if (vertex_color != 0) {
+			delete[] vertex_color;
 		}
-		if (lNumUVSets > 0)
-		{
-			for (i = 0; i < lNumUVSets; i++)
-			{
-				delete[] lUVData[i];
+		if (_num_uv_sets > 0) {
+			for (i = 0; i < _num_uv_sets; i++) {
+				delete[] uv_data[i];
 			}
-			delete[] lUVData;
+			delete[] uv_data;
 		}
-		
-		if (lUVList != 0)
-		{
-			delete[] lUVList;
+
+		if (uv_list != 0) {
+			delete[] uv_list;
 		}
-		delete lFaceList;
+		delete face_list;
 	}
 
-	delete[] lFace;
+	delete[] _face;
 }
 
-void ASELoader::Mesh::SetupFaceListTable(Face* pFace, FaceListTable& pFaceListTable)
-{
+void ASELoader::Mesh::SetupFaceListTable(Face* face, FaceListTable& face_list_table) {
 	// Setup all faces and put them in the list that corresponds to their material.
 	int i;
-	int lNumUVSets = mMappingChannelList.GetCount();
-	for (i = 0; i < mNumFaces; i++)
-	{
-		pFace[i].mVertex[0].mVIndex = mFace[i * 3 + 0];
-		pFace[i].mVertex[1].mVIndex = mFace[i * 3 + 1];
-		pFace[i].mVertex[2].mVIndex = mFace[i * 3 + 2];
-		pFace[i].mSubMaterial = mSubMaterial[i];
+	int _num_uv_sets = mapping_channel_list_.GetCount();
+	for (i = 0; i < num_faces_; i++) {
+		face[i].vertex_[0].v_index_ = face_[i * 3 + 0];
+		face[i].vertex_[1].v_index_ = face_[i * 3 + 1];
+		face[i].vertex_[2].v_index_ = face_[i * 3 + 2];
+		face[i].sub_material_ = sub_material_[i];
 
-		if (mNumCVFaces > 0)
-		{
-			pFace[i].mVertex[0].mCIndex = mCFace[i * 3 + 0];
-			pFace[i].mVertex[1].mCIndex = mCFace[i * 3 + 1];
-			pFace[i].mVertex[2].mCIndex = mCFace[i * 3 + 2];
+		if (num_cv_faces_ > 0) {
+			face[i].vertex_[0].c_index_ = c_face_[i * 3 + 0];
+			face[i].vertex_[1].c_index_ = c_face_[i * 3 + 1];
+			face[i].vertex_[2].c_index_ = c_face_[i * 3 + 2];
 		}
 
-		if (lNumUVSets > 0)
-		{
+		if (_num_uv_sets > 0) {
 			// Allocate memory for all uv sets.
-			pFace[i].mVertex[0].SetNumUVSets(lNumUVSets);
-			pFace[i].mVertex[1].SetNumUVSets(lNumUVSets);
-			pFace[i].mVertex[2].SetNumUVSets(lNumUVSets);
+			face[i].vertex_[0].SetNumUVSets(_num_uv_sets);
+			face[i].vertex_[1].SetNumUVSets(_num_uv_sets);
+			face[i].vertex_[2].SetNumUVSets(_num_uv_sets);
 
 			int j;
-			std::list<MappingChannel*>::Iterator lIter = mMappingChannelList.First();
-			for (j = 0; j < lNumUVSets; ++j, ++lIter)
-			{
-				MappingChannel* lMappingChannel = *lIter;
-				pFace[i].mVertex[0].mTIndex[j] = lMappingChannel->mTVFace[i * 3 + 0];
-				pFace[i].mVertex[1].mTIndex[j] = lMappingChannel->mTVFace[i * 3 + 1];
-				pFace[i].mVertex[2].mTIndex[j] = lMappingChannel->mTVFace[i * 3 + 2];
+			std::list<MappingChannel*>::Iterator iter = mapping_channel_list_.First();
+			for (j = 0; j < _num_uv_sets; ++j, ++iter) {
+				MappingChannel* mapping_channel = *iter;
+				face[i].vertex_[0].t_index_[j] = mapping_channel->tv_face_[i * 3 + 0];
+				face[i].vertex_[1].t_index_[j] = mapping_channel->tv_face_[i * 3 + 1];
+				face[i].vertex_[2].t_index_[j] = mapping_channel->tv_face_[i * 3 + 2];
 			}
 		}
 
-		FaceListTable::Iterator lX = pFaceListTable.Find(pFace[i].mSubMaterial);
-		if (lX == pFaceListTable.End())
-		{
-			FaceList* lFaceList = new FaceList;
-			lFaceList->PushBack(&pFace[i]);
-			pFaceListTable.Insert(pFace[i].mSubMaterial, lFaceList);
-		}
-		else
-		{
-			(*lX)->PushBack(&pFace[i]);
+		FaceListTable::Iterator __x = face_list_table.Find(face[i].sub_material_);
+		if (__x == face_list_table.End()) {
+			FaceList* face_list = new FaceList;
+			face_list->PushBack(&face[i]);
+			face_list_table.Insert(face[i].sub_material_, face_list);
+		} else {
+			(*__x)->PushBack(&face[i]);
 		}
 	}
 }
 
-ASELoader::Mesh::Face::Face()
-{
+ASELoader::Mesh::Face::Face() {
 }
 
-ASELoader::Mesh::Face::~Face()
-{
+ASELoader::Mesh::Face::~Face() {
 }
 
 ASELoader::Mesh::FaceVertex::FaceVertex() :
-	mVIndex(0),
-	mCIndex(0),
-	mTIndex(0),
-	mNumUVSets(0)
-{
+	v_index_(0),
+	c_index_(0),
+	t_index_(0),
+	num_uv_sets_(0) {
 }
 
-	ASELoader::Mesh::FaceVertex::FaceVertex(const FaceVertex& pOther)
-{
-	*this = pOther;
+	ASELoader::Mesh::FaceVertex::FaceVertex(const FaceVertex& other) {
+	*this = other;
 }
 
-ASELoader::Mesh::FaceVertex::~FaceVertex()
-{
-	if (mTIndex != 0)
-	{
-		delete[] mTIndex;
+ASELoader::Mesh::FaceVertex::~FaceVertex() {
+	if (t_index_ != 0) {
+		delete[] t_index_;
 	}
 }
 
-void ASELoader::Mesh::FaceVertex::SetNumUVSets(int pNumUVSets)
-{
-	if (mTIndex != 0)
-	{
-		delete[] mTIndex;
-		mTIndex = 0;
+void ASELoader::Mesh::FaceVertex::SetNumUVSets(int num_uv_sets) {
+	if (t_index_ != 0) {
+		delete[] t_index_;
+		t_index_ = 0;
 	}
-	
-	mNumUVSets = pNumUVSets;
 
-	if (mNumUVSets > 0)
-	{
-		mTIndex = new int[mNumUVSets];
+	num_uv_sets_ = num_uv_sets;
+
+	if (num_uv_sets_ > 0) {
+		t_index_ = new int[num_uv_sets_];
 	}
 }
 
-size_t ASELoader::Mesh::FaceVertex::GetHashCode(const FaceVertex& pKey)
-{
-	return (size_t)(pKey.mVIndex * 100 + pKey.mCIndex);
+size_t ASELoader::Mesh::FaceVertex::GetHashCode(const FaceVertex& key) {
+	return (size_t)(key.v_index_ * 100 + key.c_index_);
 }
 
-bool ASELoader::Mesh::FaceVertex::operator== (const FaceVertex& pOther) const
-{
-	bool lOk = (mVIndex == pOther.mVIndex && mCIndex == pOther.mCIndex && mNumUVSets == pOther.mNumUVSets);
-	if (lOk)
-	{
-		for (int i = 0; lOk && i < mNumUVSets; i++)
-		{
-			lOk = (mTIndex[i] == pOther.mTIndex[i]);
+bool ASELoader::Mesh::FaceVertex::operator== (const FaceVertex& other) const {
+	bool ok = (v_index_ == other.v_index_ && c_index_ == other.c_index_ && num_uv_sets_ == other.num_uv_sets_);
+	if (ok) {
+		for (int i = 0; ok && i < num_uv_sets_; i++) {
+			ok = (t_index_[i] == other.t_index_[i]);
 		}
 	}
-	return lOk;
+	return ok;
 }
 
-ASELoader::Mesh::FaceVertex& ASELoader::Mesh::FaceVertex::operator= (const FaceVertex& pOther)
-{
-	mVIndex = pOther.mVIndex;
-	mCIndex = pOther.mCIndex;
+ASELoader::Mesh::FaceVertex& ASELoader::Mesh::FaceVertex::operator= (const FaceVertex& other) {
+	v_index_ = other.v_index_;
+	c_index_ = other.c_index_;
 
-	if (mTIndex != 0)
-	{
-		delete[] mTIndex;
-		mTIndex = 0;
+	if (t_index_ != 0) {
+		delete[] t_index_;
+		t_index_ = 0;
 	}
-	
-	mNumUVSets = pOther.mNumUVSets;
 
-	if (mNumUVSets > 0)
-	{
-		mTIndex = new int[mNumUVSets];
-		for (int i = 0; i < mNumUVSets; i++)
-		{
-			mTIndex[i] = pOther.mTIndex[i];
+	num_uv_sets_ = other.num_uv_sets_;
+
+	if (num_uv_sets_ > 0) {
+		t_index_ = new int[num_uv_sets_];
+		for (int i = 0; i < num_uv_sets_; i++) {
+			t_index_[i] = other.t_index_[i];
 		}
 	}
 
@@ -2663,272 +2275,228 @@ ASELoader::Mesh::FaceVertex& ASELoader::Mesh::FaceVertex::operator= (const FaceV
 
 
 ASELoader::GeomObject::GeomObject() :
-	mNodeName(""),
-	mComment(""),
-	mMotionBlur(false),
-	mCastShadow(false),
-	mRecvShadow(false),
-	mTMAnimation(0),
-	mMaterialRef(0)
-{
+	node_name_(""),
+	comment_(""),
+	motion_blur_(false),
+	cast_shadow_(false),
+	recv_shadow_(false),
+	tm_animation_(0),
+	material_ref_(0) {
 }
 
-ASELoader::GeomObject::~GeomObject()
-{
+ASELoader::GeomObject::~GeomObject() {
 	Init();
 }
 
-void ASELoader::GeomObject::Init()
-{
-	mNodeName = "";
-	mComment = "";
-	mNodeTMList.DeleteAll();
-	mMotionBlur = false;
-	mCastShadow = false;
-	mRecvShadow = false;
-	if (mTMAnimation != 0)
-	{
-		delete mTMAnimation;
-		mTMAnimation = 0;
+void ASELoader::GeomObject::Init() {
+	node_name_ = "";
+	comment_ = "";
+	node_tm_list_.DeleteAll();
+	motion_blur_ = false;
+	cast_shadow_ = false;
+	recv_shadow_ = false;
+	if (tm_animation_ != 0) {
+		delete tm_animation_;
+		tm_animation_ = 0;
 	}
-	mMaterialRef = 0;
+	material_ref_ = 0;
 
-	mMeshList.DeleteAll();
+	mesh_list_.DeleteAll();
 }
 
-void ASELoader::GeomObject::AllocTMAnimation()
-{
-	if (mTMAnimation == 0)
-	{
-		mTMAnimation = new TMAnimation;
-	}
-	else
-	{
-		mTMAnimation->Init();
+void ASELoader::GeomObject::AllocTMAnimation() {
+	if (tm_animation_ == 0) {
+		tm_animation_ = new TMAnimation;
+	} else {
+		tm_animation_->Init();
 	}
 }
 
 
 
 ASELoader::CameraSettings::CameraSettings() :
-	mTimeValue(0),
-	mNear(0),
-	mFar(0),
-	mFOV(0),
-	mTDist(0)
-{
+	time_value_(0),
+	near_(0),
+	far_(0),
+	fov_(0),
+	t_dist_(0) {
 }
 
-ASELoader::CameraSettings::~CameraSettings()
-{
+ASELoader::CameraSettings::~CameraSettings() {
 }
 
-void ASELoader::CameraSettings::Init()
-{
-	mTimeValue = 0;
-	mNear = 0;
-	mFar = 0;
-	mFOV = 0;
-	mTDist = 0;
+void ASELoader::CameraSettings::Init() {
+	time_value_ = 0;
+	near_ = 0;
+	far_ = 0;
+	fov_ = 0;
+	t_dist_ = 0;
 }
 
 ASELoader::CameraObject::CameraObject() :
-	mNodeName(""),
-	mComment(""),
-	mCameraType(""),
-	mSettings(0),
-	mTMAnimation(0)
-{
+	node_name_(""),
+	comment_(""),
+	camera_type_(""),
+	settings_(0),
+	tm_animation_(0) {
 }
 
-ASELoader::CameraObject::~CameraObject()
-{
+ASELoader::CameraObject::~CameraObject() {
 	Init();
 }
 
-void ASELoader::CameraObject::Init()
-{
-	mNodeName = "";
-	mComment = "";
-	mCameraType = "";
-	mNodeTMList.DeleteAll();
+void ASELoader::CameraObject::Init() {
+	node_name_ = "";
+	comment_ = "";
+	camera_type_ = "";
+	node_tm_list_.DeleteAll();
 
-	if (mSettings != 0)
-	{
-		delete mSettings;
-		mSettings = 0;
+	if (settings_ != 0) {
+		delete settings_;
+		settings_ = 0;
 	}
 
-	if (mTMAnimation != 0)
-	{
-		delete mTMAnimation;
-		mTMAnimation = 0;
+	if (tm_animation_ != 0) {
+		delete tm_animation_;
+		tm_animation_ = 0;
 	}
 }
 
-void ASELoader::CameraObject::AllocCameraSettings()
-{
-	if (mSettings == 0)
-	{
-		mSettings = new CameraSettings;
-	}
-	else
-	{
-		mSettings->Init();
+void ASELoader::CameraObject::AllocCameraSettings() {
+	if (settings_ == 0) {
+		settings_ = new CameraSettings;
+	} else {
+		settings_->Init();
 	}
 }
 
-void ASELoader::CameraObject::AllocTMAnimation()
-{
-	if (mTMAnimation == 0)
-	{
-		mTMAnimation = new TMAnimation;
-	}
-	else
-	{
-		mTMAnimation->Init();
+void ASELoader::CameraObject::AllocTMAnimation() {
+	if (tm_animation_ == 0) {
+		tm_animation_ = new TMAnimation;
+	} else {
+		tm_animation_->Init();
 	}
 }
 
 
 
 ASELoader::LightSettings::LightSettings() :
-	mTimeValue(0),
-	mIntens(0),
-	mAspect(0),
-	mHotSpot(0),
-	mFalloff(0),
-	mTDist(0),
-	mMapBias(0),
-	mMapRange(0),
-	mMapSize(0),
-	mRayBias(0)
-{
-	mColor[0] = 0;
-	mColor[1] = 0;
-	mColor[2] = 0;
+	time_value_(0),
+	intens_(0),
+	aspect_(0),
+	hot_spot_(0),
+	falloff_(0),
+	t_dist_(0),
+	map_bias_(0),
+	map_range_(0),
+	map_size_(0),
+	ray_bias_(0) {
+	color_[0] = 0;
+	color_[1] = 0;
+	color_[2] = 0;
 }
 
-ASELoader::LightSettings::~LightSettings()
-{
+ASELoader::LightSettings::~LightSettings() {
 }
 
-void ASELoader::LightSettings::Init()
-{
-	mTimeValue = 0;
-	mColor[0] = 0;
-	mColor[1] = 0;
-	mColor[2] = 0;
-	mIntens = 0;
-	mAspect = 0;
-	mHotSpot = 0;
-	mFalloff = 0;
-	mTDist = 0;
-	mMapBias = 0;
-	mMapRange = 0;
-	mMapSize = 0;
-	mRayBias = 0;
+void ASELoader::LightSettings::Init() {
+	time_value_ = 0;
+	color_[0] = 0;
+	color_[1] = 0;
+	color_[2] = 0;
+	intens_ = 0;
+	aspect_ = 0;
+	hot_spot_ = 0;
+	falloff_ = 0;
+	t_dist_ = 0;
+	map_bias_ = 0;
+	map_range_ = 0;
+	map_size_ = 0;
+	ray_bias_ = 0;
 }
 
 ASELoader::LightObject::LightObject() :
-	mNodeName(""),
-	mComment(""),
-	mLightType(""),
-	mShadows(""),
-	mUseLight(false),
-	mSpotShape(""),
-	mUseGlobal(false),
-	mAbsMapBias(false),
-	mOverShoot(false),
-	mSettings(0),
-	mTMAnimation(0)
-{
+	node_name_(""),
+	comment_(""),
+	light_type_(""),
+	shadows_(""),
+	use_light_(false),
+	spot_shape_(""),
+	use_global_(false),
+	abs_map_bias_(false),
+	over_shoot_(false),
+	settings_(0),
+	tm_animation_(0) {
 }
 
-ASELoader::LightObject::~LightObject()
-{
+ASELoader::LightObject::~LightObject() {
 	Init();
 }
 
-void ASELoader::LightObject::Init()
-{
-	mNodeName = "";
-	mComment = "";
-	mLightType = "";
-	mNodeTMList.DeleteAll();
+void ASELoader::LightObject::Init() {
+	node_name_ = "";
+	comment_ = "";
+	light_type_ = "";
+	node_tm_list_.DeleteAll();
 
-	mShadows = "";
-	mUseLight = false;
-	mSpotShape = "";
-	mUseGlobal = false;
-	mAbsMapBias = false;
-	mOverShoot = false;
+	shadows_ = "";
+	use_light_ = false;
+	spot_shape_ = "";
+	use_global_ = false;
+	abs_map_bias_ = false;
+	over_shoot_ = false;
 
-	if (mSettings != 0)
-	{
-		delete mSettings;
-		mSettings = 0;
+	if (settings_ != 0) {
+		delete settings_;
+		settings_ = 0;
 	}
 
-	if (mTMAnimation != 0)
-	{
-		delete mTMAnimation;
-		mTMAnimation = 0;
+	if (tm_animation_ != 0) {
+		delete tm_animation_;
+		tm_animation_ = 0;
 	}
 }
 
-void ASELoader::LightObject::AllocLightSettings()
-{
-	if (mSettings == 0)
-	{
-		mSettings = new LightSettings;
-	}
-	else
-	{
-		mSettings->Init();
+void ASELoader::LightObject::AllocLightSettings() {
+	if (settings_ == 0) {
+		settings_ = new LightSettings;
+	} else {
+		settings_->Init();
 	}
 }
 
-void ASELoader::LightObject::AllocTMAnimation()
-{
-	if (mTMAnimation == 0)
-	{
-		mTMAnimation = new TMAnimation;
-	}
-	else
-	{
-		mTMAnimation->Init();
+void ASELoader::LightObject::AllocTMAnimation() {
+	if (tm_animation_ == 0) {
+		tm_animation_ = new TMAnimation;
+	} else {
+		tm_animation_->Init();
 	}
 }
 
 
 
 ASELoader::ASEData::ASEData() :
-	m3DSMaxAsciiExport(0),
-	mComment(""),
-	mScene(0)
-{
+	m3DSMaxAsciiExport_(0),
+	comment_(""),
+	scene_(0) {
 }
 
-ASELoader::ASEData::~ASEData()
-{
+ASELoader::ASEData::~ASEData() {
 	Init();
 }
 
-void ASELoader::ASEData::Init()
-{
-	m3DSMaxAsciiExport = 0;
-	mComment = "";
-	if (mScene != 0)
-	{
-		delete mScene;
-		mScene = 0;
+void ASELoader::ASEData::Init() {
+	m3DSMaxAsciiExport_ = 0;
+	comment_ = "";
+	if (scene_ != 0) {
+		delete scene_;
+		scene_ = 0;
 	}
 
-	mMaterialList.DeleteAll();
-	mGeomList.DeleteAll();
-	mCamList.DeleteAll();
-	mLightList.DeleteAll();
+	material_list_.DeleteAll();
+	geom_list_.DeleteAll();
+	cam_list_.DeleteAll();
+	light_list_.DeleteAll();
 }
 
 

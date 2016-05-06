@@ -29,15 +29,14 @@
 #define LEPRA_HEAP_CHECK()
 
 #define WIDE_SPRINTF(buf, size, fmt, arg)	::vswprintf(buf, size, fmt, arg)
-#define WIDE_ATOI(str)				{wchar_t* lTemp = 0; (int)::wcstol(str, &lTemp, 10);}
+#define WIDE_ATOI(str)				{wchar_t* temp = 0; (int)::wcstol(str, &temp, 10);}
 
 #define SOCKET_LAST_ERROR()			errno
 
 
 
 #if defined(__cplusplus)
-namespace Lepra
-{
+namespace lepra {
 	// OS types.
 	typedef	int sys_socket;
 }

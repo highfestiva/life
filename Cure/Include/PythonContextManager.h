@@ -8,28 +8,26 @@
 
 #if 0
 #include <Python.h>
-#include "ContextManager.h"
+#include "contextmanager.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class PythonContextManager: public ContextManager
-{
+class PythonContextManager: public ContextManager {
 public:
 	static void OpenPythonEngine(int argc, char* argv[]);
 	static void ClosePythonEngine();
 
-	PythonContextManager(double pFixedFrameRate);
+	PythonContextManager(double fixed_frame_rate);
 	virtual ~PythonContextManager();
 
-	static PyObject* ImportModule(const Lepra::String& pModule);
-	static int RunModule(const Lepra::String& pModule);
+	static PyObject* ImportModule(const lepra::String& module);
+	static int RunModule(const lepra::String& module);
 
-	ContextObject* CreateObject(const Lepra::String& pType);
+	ContextObject* CreateObject(const lepra::String& type);
 };
 
 

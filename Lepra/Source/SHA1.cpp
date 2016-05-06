@@ -1,6 +1,6 @@
 /*
 	Class:  SHA1
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
@@ -8,12 +8,11 @@
 
 #include "pch.h"
 #include <memory.h>
-#include "../Include/SHA1.h"
+#include "../include/sha1.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -21,114 +20,105 @@ namespace Lepra
 #define PUT_UINT32(u32, array, idx)	(array)[(idx)+0] = (uint8)((u32)>>24); (array)[(idx)+1] = (uint8)((u32)>>16); (array)[(idx)+2] = (uint8)((u32)>>8); (array)[(idx)+3] = (uint8)(u32)
 
 
-	
-SHA1::SHA1()
-{
-	mTotal = 0;
 
-	mState[0] = 0x67452301;
-	mState[1] = 0xEFCDAB89;
-	mState[2] = 0x98BADCFE;
-	mState[3] = 0x10325476;
-	mState[4] = 0xC3D2E1F0;
+SHA1::SHA1() {
+	total_ = 0;
+
+	state_[0] = 0x67452301;
+	state_[1] = 0xEFCDAB89;
+	state_[2] = 0x98BADCFE;
+	state_[3] = 0x10325476;
+	state_[4] = 0xC3D2E1F0;
 }
 
-void SHA1::Update(const uint8* pData, size_t pDataLength)
-{
-	size_t lLeft = (size_t)mTotal&0x3F;
-	size_t lFill = 64-lLeft;
-	mTotal += pDataLength;
-	if (lLeft && pDataLength >= lFill)
-	{
-		::memcpy(mBuffer+lLeft, pData, lFill);
-		Process(mBuffer);
-		pDataLength -= lFill;
-		pData += lFill;
-		lLeft = 0;
+void SHA1::Update(const uint8* data, size_t data_length) {
+	size_t left = (size_t)total_&0x3F;
+	size_t fill = 64-left;
+	total_ += data_length;
+	if (left && data_length >= fill) {
+		::memcpy(buffer_+left, data, fill);
+		Process(buffer_);
+		data_length -= fill;
+		data += fill;
+		left = 0;
 	}
-	while (pDataLength >= 64)
-	{
-		Process(pData);
-		pDataLength -= 64;
-		pData  += 64;
+	while (data_length >= 64) {
+		Process(data);
+		data_length -= 64;
+		data  += 64;
 	}
-	if (pDataLength)
-	{
-		memcpy(mBuffer+lLeft, pData, pDataLength);
+	if (data_length) {
+		memcpy(buffer_+left, data, data_length);
 	}
 }
 
-void SHA1::Finish(uint8* pHash)
-{
-	uint32 lHigh = (unsigned)(mTotal>>29);
-	uint32 lLow  = (unsigned)mTotal<<3;
-	uint8 lLengthHash[8];
-	PUT_UINT32(lHigh, lLengthHash, 0);
-	PUT_UINT32(lLow, lLengthHash, 4);
+void SHA1::Finish(uint8* hash) {
+	uint32 high = (unsigned)(total_>>29);
+	uint32 low  = (unsigned)total_<<3;
+	uint8 length_hash[8];
+	PUT_UINT32(high, length_hash, 0);
+	PUT_UINT32(low, length_hash, 4);
 
-	size_t lLast = (size_t)mTotal&0x3F;
-	size_t lPadLength = (lLast<56)? 56-lLast : 120-lLast;
-	static uint8 lSha1Padding[64] =
+	size_t last = (size_t)total_&0x3F;
+	size_t pad_length = (last<56)? 56-last : 120-last;
+	static uint8 sha1_padding[64] =
 	{
 		0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	};
-	Update(lSha1Padding, lPadLength);
-	Update(lLengthHash, 8);
+	Update(sha1_padding, pad_length);
+	Update(length_hash, 8);
 
-	for (size_t u = 0; u < 5; ++u)
-	{
-		PUT_UINT32(mState[u], pHash, u<<2);
+	for (size_t u = 0; u < 5; ++u) {
+		PUT_UINT32(state_[u], hash, u<<2);
 	}
 }
 
-void SHA1::Hash(const uint8* pData, size_t pDataLength, uint8* pHash)
-{
-	SHA1 lSha1;
-	lSha1.Update(pData, pDataLength);
-	lSha1.Finish(pHash);
+void SHA1::Hash(const uint8* data, size_t data_length, uint8* hash) {
+	SHA1 sha1;
+	sha1.Update(data, data_length);
+	sha1.Finish(hash);
 }
 
 
-void SHA1::Process(const uint8 pData[64])
-{
+void SHA1::Process(const uint8 data[64]) {
 	uint32 W[16];
 
-	GET_UINT32(W[0], pData, 0);
-	GET_UINT32(W[1], pData, 4);
-	GET_UINT32(W[2], pData, 8);
-	GET_UINT32(W[3], pData, 12);
-	GET_UINT32(W[4], pData, 16);
-	GET_UINT32(W[5], pData, 20);
-	GET_UINT32(W[6], pData, 24);
-	GET_UINT32(W[7], pData, 28);
-	GET_UINT32(W[8], pData, 32);
-	GET_UINT32(W[9], pData, 36);
-	GET_UINT32(W[10], pData, 40);
-	GET_UINT32(W[11], pData, 44);
-	GET_UINT32(W[12], pData, 48);
-	GET_UINT32(W[13], pData, 52);
-	GET_UINT32(W[14], pData, 56);
-	GET_UINT32(W[15], pData, 60);
+	GET_UINT32(W[0], data, 0);
+	GET_UINT32(W[1], data, 4);
+	GET_UINT32(W[2], data, 8);
+	GET_UINT32(W[3], data, 12);
+	GET_UINT32(W[4], data, 16);
+	GET_UINT32(W[5], data, 20);
+	GET_UINT32(W[6], data, 24);
+	GET_UINT32(W[7], data, 28);
+	GET_UINT32(W[8], data, 32);
+	GET_UINT32(W[9], data, 36);
+	GET_UINT32(W[10], data, 40);
+	GET_UINT32(W[11], data, 44);
+	GET_UINT32(W[12], data, 48);
+	GET_UINT32(W[13], data, 52);
+	GET_UINT32(W[14], data, 56);
+	GET_UINT32(W[15], data, 60);
 
 	#define S(x,n) ((x << n) | ((x & 0xFFFFFFFF) >> (32 - n)))
 
-	uint32 lTemp;
+	uint32 temp;
 	#define R(t)									\
 	(										\
-		lTemp = W[(t-3)&0x0F] ^ W[(t-8)&0x0F] ^ W[(t-14)&0x0F]^W[t&0x0F],	\
-		(W[t&0x0F] = S(lTemp,1))							\
+		temp = W[(t-3)&0x0F] ^ W[(t-8)&0x0F] ^ W[(t-14)&0x0F]^W[t&0x0F],	\
+		(W[t&0x0F] = S(temp,1))							\
 	)
 
 	#define P(a,b,c,d,e,x)	e += S(a,5) + F(b,c,d) + K + x; b = S(b,30);
 
-	uint32 A = mState[0];
-	uint32 B = mState[1];
-	uint32 C = mState[2];
-	uint32 D = mState[3];
-	uint32 E = mState[4];
+	uint32 A = state_[0];
+	uint32 B = state_[1];
+	uint32 C = state_[2];
+	uint32 D = state_[3];
+	uint32 E = state_[4];
 
 	#define F(x,y,z) (z ^ (x & (y ^ z)))
 	#define K 0x5A827999
@@ -238,11 +228,11 @@ void SHA1::Process(const uint8 pData[64])
 	#undef K
 	#undef F
 
-	mState[0] += A;
-	mState[1] += B;
-	mState[2] += C;
-	mState[3] += D;
-	mState[4] += E;
+	state_[0] += A;
+	state_[1] += B;
+	state_[2] += C;
+	state_[3] += D;
+	state_[4] += E;
 }
 
 

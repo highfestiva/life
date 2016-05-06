@@ -1,87 +1,85 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
 #include <list>
-#include "../Cure/Include/HiscoreAgent.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Cure/Include/TimeManager.h"
-#include "../Lepra/Include/Application.h"
-#include "../Lepra/Include/CyclicArray.h"
-#include "../Lepra/Include/FileOpener.h"
-#include "../Lepra/Include/LogListener.h"
-#include "../Lepra/Include/Network.h"
-#include "../Lepra/Include/Obfuxator.h"
-#include "../Lepra/Include/Random.h"
-#include "../Lepra/Include/Path.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "../Tbc/Include/PhysicsEngine.h"
-#include "../UiCure/Include/UiCppContextObject.h"
-#include "../UiCure/Include/UiCure.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiCure/Include/UiIconButton.h"
-#include "../UiCure/Include/UiMusicPlayer.h"
-#include "../UiCure/Include/UiRuntimeVariableName.h"
-#include "../UiCure/Include/UiSound.h"
-#include "../UiLepra/Include/Mac/UiIosInput.h"
-#include "../UiLepra/Include/UiCore.h"
-#include "../UiLepra/Include/UiDisplayManager.h"
-#include "../UiLepra/Include/UiInput.h"
-#include "../UiLepra/Include/UiOpenGLExtensions.h"	// Included to get the gl-headers.
-#include "../UiLepra/Include/UiSoundManager.h"
-#include "../UiLepra/Include/UiSoundStream.h"
-#include "../UiTbc/Include/GUI/UiCustomButton.h"
-#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
-#include "../UiTbc/Include/GUI/UiMessageDialog.h"
-#include "../UiTbc/Include/GUI/UiScrollBar.h"
-#include "../UiTbc/Include/GUI/UiTextField.h"
-#include "../UiTbc/Include/UiFontManager.h"
-#include "Vehicle.h"
-#include "Game.h"
+#include "../cure/include/hiscoreagent.h"
+#include "../cure/include/runtimevariable.h"
+#include "../cure/include/timemanager.h"
+#include "../lepra/include/application.h"
+#include "../lepra/include/cyclicarray.h"
+#include "../lepra/include/fileopener.h"
+#include "../lepra/include/loglistener.h"
+#include "../lepra/include/network.h"
+#include "../lepra/include/obfuxator.h"
+#include "../lepra/include/random.h"
+#include "../lepra/include/path.h"
+#include "../lepra/include/systemmanager.h"
+#include "../tbc/include/physicsengine.h"
+#include "../uicure/include/uicppcontextobject.h"
+#include "../uicure/include/uicure.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uicure/include/uiiconbutton.h"
+#include "../uicure/include/uimusicplayer.h"
+#include "../uicure/include/uiruntimevariablename.h"
+#include "../uicure/include/uisound.h"
+#include "../uilepra/include/mac/uiiosinput.h"
+#include "../uilepra/include/uicore.h"
+#include "../uilepra/include/uidisplaymanager.h"
+#include "../uilepra/include/uiinput.h"
+#include "../uilepra/include/uiopenglextensions.h"	// Included to get the gl-headers.
+#include "../uilepra/include/uisoundmanager.h"
+#include "../uilepra/include/uisoundstream.h"
+#include "../uitbc/include/gui/uicustombutton.h"
+#include "../uitbc/include/gui/uidesktopwindow.h"
+#include "../uitbc/include/gui/uimessagedialog.h"
+#include "../uitbc/include/gui/uiscrollbar.h"
+#include "../uitbc/include/gui/uitextfield.h"
+#include "../uitbc/include/uifontmanager.h"
+#include "vehicle.h"
+#include "game.h"
 #ifdef LEPRA_MAC
-#include "../Lepra/Include/Posix/MacLog.h"
+#include "../lepra/include/posix/maclog.h"
 #endif // iOS
 
 
 
-#define UIKEY(name)			UiLepra::InputManager::IN_KBD_##name
+#define UIKEY(name)			uilepra::InputManager::IN_KBD_##name
 #define BGCOLOR_DIALOG			Color(5, 20, 30, 192)
 #define FGCOLOR_DIALOG			Color(170, 170, 170, 255)
-#define ICONBTN(i,n)			new UiCure::IconButton(mUiManager, mResourceManager, i, n)
+#define ICONBTN(i,n)			new UiCure::IconButton(ui_manager_, resource_manager_, i, n)
 #define ICONBTNA(i,n)			ICONBTN(i, n)
-#define CONTENT_LEVELS			"levels"
-#define CONTENT_VEHICLES		"vehicles"
-#define RTVAR_CONTENT_LEVELS		"Content.Levels"
-#define RTVAR_CONTENT_VEHICLES		"Content.Vehicles"
-#define RTVAR_HISCORE_NAME		"Hiscore.Name"	// Last entered name.
+#define kContentLevels			"levels"
+#define kContentVehicles		"vehicles"
+#define kRtvarContentLevels		"Content.Levels"
+#define kRtvarContentVehicles		"Content.Vehicles"
+#define kRtvarHiscoreName		"Hiscore.Name"	// Last entered name.
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 
-FingerMoveList gFingerMoveList;
+FingerMoveList g_finger_move_list;
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-const str gPlatform = "touch";
+const str kPlatform = "touch";
 #else // Computer.
-const str gPlatform = "computer";
-#endif // Touch / computer.
+const str kPlatform = "computer";
+#endif // touch / computer.
 
 
 
 class HiscoreTextField;
 
-class App: public Application, public UiLepra::DisplayResizeObserver, public UiLepra::KeyCodeInputObserver
-{
+class App: public Application, public uilepra::DisplayResizeObserver, public uilepra::KeyCodeInputObserver {
 public:
 	typedef Application Parent;
 
-	App(const strutil::strvec& pArgumentList);
+	App(const strutil::strvec& argument_list);
 	virtual ~App();
 
 	static App* GetApp();
@@ -93,134 +91,126 @@ public:
 	void DisplayLogo();
 	bool Poll();
 	void PollTaps();
-	void PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const;
+	void PrintText(const str& text, float angle, int center_x, int center_y) const;
 	void Layout();
 	void MainMenu();
-	void UpdateHiscore(bool pError);
-	void HiscoreMenu(int pDirection);
-	void EnterHiscore(const str& pMessage, const Color& pColor);
+	void UpdateHiscore(bool error);
+	void HiscoreMenu(int direction);
+	void EnterHiscore(const str& message, const Color& color);
 	void SuperReset();
 	void CreateHiscoreAgent();
-	void Purchase(const str& pProductName);
-	void SetIsPurchasing(bool pIsPurchasing);
+	void Purchase(const str& product_name);
+	void SetIsPurchasing(bool is_purchasing);
 
 	virtual void Suspend();
 	virtual void Resume();
 
-	bool Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor);
-	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
-	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
+	bool Steer(uilepra::InputManager::KeyCode key_code, float factor);
+	virtual bool OnKeyDown(uilepra::InputManager::KeyCode key_code);
+	virtual bool OnKeyUp(uilepra::InputManager::KeyCode key_code);
 #if !defined(LEPRA_TOUCH) && defined(LEPRA_TOUCH_LOOKANDFEEL)
-	void OnMouseInput(UiLepra::InputElement* pElement);
-	bool mIsMouseDown;
+	void OnMouseInput(uilepra::InputElement* element);
+	bool is_mouse_down_;
 #endif // Computer emulating touch device
-	virtual int PollTap(FingerMovement& pMovement);
+	virtual int PollTap(FingerMovement& movement);
 
-	void OnResize(int pWidth, int pHeight);
+	void OnResize(int _width, int _height);
 	void OnMinimize();
-	void OnMaximize(int pWidth, int pHeight);
+	void OnMaximize(int _width, int _height);
 
-	void OnAction(UiTbc::Button* pButton);
-	void OnTapSound(UiTbc::Button* pButton);
-	void OnOk(UiTbc::Button* pButton);
-	void OnMainMenuAction(UiTbc::Button* pButton);
-	void OnEnterHiscoreAction(UiTbc::Button* pButton);
-	void OnLevelAction(UiTbc::Button* pButton);
-	void OnVehicleAction(UiTbc::Button* pButton);
-	void OnHiscoreAction(UiTbc::Button* pButton);
-	void OnPreHiscoreAction(UiTbc::Button* pButton);
-	void OnPreEnterAction(UiTbc::Button* pButton);
-	void OnCreditsAction(UiTbc::Button* pButton);
+	void OnAction(uitbc::Button* button);
+	void OnTapSound(uitbc::Button* button);
+	void OnOk(uitbc::Button* button);
+	void OnMainMenuAction(uitbc::Button* button);
+	void OnEnterHiscoreAction(uitbc::Button* button);
+	void OnLevelAction(uitbc::Button* button);
+	void OnVehicleAction(uitbc::Button* button);
+	void OnHiscoreAction(uitbc::Button* button);
+	void OnPreHiscoreAction(uitbc::Button* button);
+	void OnPreEnterAction(uitbc::Button* button);
+	void OnCreditsAction(uitbc::Button* button);
 	void DoPause();
-	void OnPauseClickWithSound(UiTbc::Button* pButton);
-	void OnPauseAction(UiTbc::Button* pButton);
-	void OnGetiPhoneClick(UiTbc::Button*);
-	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource);
-	void SoundLoadCallback(UiCure::UserSound2dResource* pResource);
+	void OnPauseClickWithSound(uitbc::Button* button);
+	void OnPauseAction(uitbc::Button* button);
+	void OnGetiPhoneClick(uitbc::Button*);
+	void PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* resource);
+	void SoundLoadCallback(UiCure::UserSound2dResource* resource);
 
-	typedef void (App::*ButtonAction)(UiTbc::Button*);
-	UiTbc::Dialog* CreateTbcDialog(ButtonAction pAction);
-	static UiTbc::Button* CreateButton(const str& pText, const Color& pColor, UiTbc::Component* pParent);
-	void Transpose(int& x, int& y, float& pAngle) const;
-	void Transpose(float& x, float& y, float& pAngle) const;
-	static str Int2Str(int pNumber);
+	typedef void (App::*ButtonAction)(uitbc::Button*);
+	uitbc::Dialog* CreateTbcDialog(ButtonAction action);
+	static uitbc::Button* CreateButton(const str& text, const Color& color, uitbc::Component* parent);
+	void Transpose(int& x, int& y, float& angle) const;
+	void Transpose(float& x, float& y, float& angle) const;
+	static str Int2Str(int number);
 
-	StdioConsoleLogListener mConsoleLogger;
-	DebuggerLogListener mDebugLogger;
+	StdioConsoleLogListener console_logger_;
+	DebuggerLogListener debug_logger_;
 
-	static App* mApp;
+	static App* app_;
 #ifdef LEPRA_TOUCH
-	AnimatedApp* mAnimatedApp;
-#endif // Touch
-	Game* mGame;
+	AnimatedApp* animated_app_;
+#endif // touch
+	Game* game_;
 
 
-	double mAverageLoopTime;
-	double mAverageFastLoopTime;
-	HiResTimer mLoopTimer;
+	double average_loop_time_;
+	double average_fast_loop_time_;
+	HiResTimer loop_timer_;
 
-	struct InfoTextData
-	{
-		str mText;
-		vec2 mCoord;
-		float mAngle;
+	struct InfoTextData {
+		str text_;
+		vec2 coord_;
+		float angle_;
 	};
 
-	bool mIsLoaded;
-	bool mDoLayout;
-	Cure::ResourceManager* mResourceManager;
-	Cure::RuntimeVariableScope* mVariableScope;
-	UiCure::GameUiManager* mUiManager;
-	UiCure::MusicPlayer* mMusicPlayer;
-	UiTbc::FontManager::FontId mBigFontId;
-	UiTbc::FontManager::FontId mMonospacedFontId;
-	float mReverseAndBrake;
-	UiTbc::Dialog::Action mButtonDelegate;
-	UiTbc::Dialog* mDialog;
-	mutable StopWatch mStartTimer;
-	mutable StopWatch mGameOverTimer;
-	bool mFlipDraw;
-	HiResTimer mBootLogoTimer;
-	int mHiscoreLevelIndex;
-	int mHiscoreVehicleIndex;
-	HiscoreTextField* mHiscoreTextField;
-	Cure::HiscoreAgent* mHiscoreAgent;
-	bool mIsPurchasing;
-	bool mIsMoneyIconAdded;
-	UiCure::UserSound2dResource* mTapClick;
-	int mMyHiscoreIndex;
-	unsigned mFrameCounter;
+	bool is_loaded_;
+	bool do_layout_;
+	cure::ResourceManager* resource_manager_;
+	cure::RuntimeVariableScope* variable_scope_;
+	UiCure::GameUiManager* ui_manager_;
+	UiCure::MusicPlayer* music_player_;
+	uitbc::FontManager::FontId big_font_id_;
+	uitbc::FontManager::FontId monospaced_font_id_;
+	float reverse_and_brake_;
+	uitbc::Dialog::Action button_delegate_;
+	uitbc::Dialog* dialog_;
+	mutable StopWatch start_timer_;
+	mutable StopWatch game_over_timer_;
+	bool flip_draw_;
+	HiResTimer boot_logo_timer_;
+	int hiscore_level_index_;
+	int hiscore_vehicle_index_;
+	HiscoreTextField* hiscore_text_field_;
+	cure::HiscoreAgent* hiscore_agent_;
+	bool is_purchasing_;
+	bool is_money_icon_added_;
+	UiCure::UserSound2dResource* tap_click_;
+	int my_hiscore_index_;
+	unsigned frame_counter_;
 
 	logclass();
 };
 
-class HiscoreTextField: public UiTbc::TextField
-{
+class HiscoreTextField: public uitbc::TextField {
 public:
-	typedef UiTbc::TextField Parent;
-	App* mApp;
-	HiscoreTextField(Component* pTopParent, unsigned pBorderStyle, int pBorderWidth,
-		const Color& pColor, const str& pName):
-		Parent(pTopParent, pBorderStyle, pBorderWidth, pColor, pName)
-	{
+	typedef uitbc::TextField Parent;
+	App* app_;
+	HiscoreTextField(Component* top_parent, unsigned border_style, int border_width,
+		const Color& color, const str& _name):
+		Parent(top_parent, border_style, border_width, color, _name) {
 	}
-	virtual bool OnChar(tchar pChar)
-	{
+	virtual bool OnChar(tchar _c) {
 		bool b = false;
-		if (GetText().length() < 13 || pChar < ' ')	// Limit character length.
-		{
-			b = Parent::OnChar(pChar);
-			if (GetText().length() > 13)	// Shouln't happen...
-			{
+		if (GetText().length() < 13 || _c < ' ') {	// Limit character length.
+			b = Parent::OnChar(_c);
+			if (GetText().length() > 13) {	// Shouln't happen...
 				SetText(GetText().substr(0, 13));
 			}
 		}
-		if (pChar == '\r' || pChar == '\n')
-		{
-			const str lText = strutil::Strip(GetText(), " \t\v\r\n");
-			if (!lText.empty())
-			{
-				mApp->mDialog->Dismiss();
+		if (_c == '\r' || _c == '\n') {
+			const str _text = strutil::Strip(GetText(), " \t\v\r\n");
+			if (!_text.empty()) {
+				app_->dialog_->Dismiss();
 				b = true;
 			}
 		}
@@ -230,11 +220,10 @@ public:
 
 
 
-struct IsPressing
-{
-	IsPressing(int pTag): mTag(pTag) {}
-	bool operator()(const FingerMovement& pTouch) { return (pTouch.mTag == mTag); }
-	int mTag;
+struct IsPressing {
+	IsPressing(int tag): tag_(tag) {}
+	bool operator()(const FingerMovement& touch) { return (touch.tag_ == tag_); }
+	int tag_;
 };
 
 
@@ -243,220 +232,203 @@ struct IsPressing
 
 
 
-LEPRA_RUN_APPLICATION(TireFire::App, UiLepra::UiMain);
+LEPRA_RUN_APPLICATION(tirefire::App, uilepra::UiMain);
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 
-App::App(const strutil::strvec& pArgumentList):
-	Application(pArgumentList),
-	mGame(0),
-	mVariableScope(0),
-	mAverageLoopTime(1.0/(FPS+1)),
-	mAverageFastLoopTime(1.0/(FPS+1)),
-	mIsLoaded(false),
-	mDoLayout(true),
-	mMusicPlayer(0),
-	mBigFontId(UiTbc::FontManager::INVALID_FONTID),
-	mMonospacedFontId(UiTbc::FontManager::INVALID_FONTID),
-	mReverseAndBrake(0),
-	mDialog(0),
-	mFlipDraw(false),
-	mHiscoreLevelIndex(0),
-	mHiscoreVehicleIndex(0),
-	mHiscoreTextField(0),
-	mHiscoreAgent(0),
-	mIsPurchasing(false),
-	mIsMoneyIconAdded(false),
-	mMyHiscoreIndex(0),
-	mFrameCounter(0)
-{
-	mApp = this;
+App::App(const strutil::strvec& argument_list):
+	Application(argument_list),
+	game_(0),
+	variable_scope_(0),
+	average_loop_time_(1.0/(kFps+1)),
+	average_fast_loop_time_(1.0/(kFps+1)),
+	is_loaded_(false),
+	do_layout_(true),
+	music_player_(0),
+	big_font_id_(uitbc::FontManager::kInvalidFontid),
+	monospaced_font_id_(uitbc::FontManager::kInvalidFontid),
+	reverse_and_brake_(0),
+	dialog_(0),
+	flip_draw_(false),
+	hiscore_level_index_(0),
+	hiscore_vehicle_index_(0),
+	hiscore_text_field_(0),
+	hiscore_agent_(0),
+	is_purchasing_(false),
+	is_money_icon_added_(false),
+	my_hiscore_index_(0),
+	frame_counter_(0) {
+	app_ = this;
 }
 
-App::~App()
-{
-	delete mHiscoreAgent;
-	mHiscoreAgent = 0;
-	mVariableScope = 0;
+App::~App() {
+	delete hiscore_agent_;
+	hiscore_agent_ = 0;
+	variable_scope_ = 0;
 	UiCure::Shutdown();
-	UiTbc::Shutdown();
-	UiLepra::Shutdown();
+	uitbc::Shutdown();
+	uilepra::Shutdown();
 }
 
-App* App::GetApp()
-{
-	return mApp;
+App* App::GetApp() {
+	return app_;
 }
 
-bool App::Open()
-{
+bool App::Open() {
 #ifdef LEPRA_TOUCH
-	CGSize lSize = [UIScreen mainScreen].bounds.size;
-	const int lDisplayWidth = lSize.height;
-	const int lDisplayHeight = lSize.width;
-	bool lDisplayFullScreen = true;
-#else // !Touch
+	CGSize __size = [UIScreen mainScreen].bounds.size;
+	const int display_width = __size.height;
+	const int display_height = __size.width;
+	bool display_full_screen = true;
+#else // !touch
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-	const int lDisplayWidth = 480;
-	const int lDisplayHeight = 320;
-#else // !Touch L&F
-	const int lDisplayWidth = 760;
-	const int lDisplayHeight = 524;
-#endif // Touch / Computer L&F
-	bool lDisplayFullScreen = false;
-#endif // Touch/!Touch
-	int lDisplayBpp = 0;
-	int lDisplayFrequency = 0;
-	v_set(mVariableScope, RTVAR_UI_DISPLAY_RENDERENGINE, "OpenGL");
-	v_set(mVariableScope, RTVAR_UI_DISPLAY_WIDTH, lDisplayWidth);
-	v_set(mVariableScope, RTVAR_UI_DISPLAY_HEIGHT, lDisplayHeight);
-	v_set(mVariableScope, RTVAR_UI_DISPLAY_BITSPERPIXEL, lDisplayBpp);
-	v_set(mVariableScope, RTVAR_UI_DISPLAY_FREQUENCY, lDisplayFrequency);
-	v_set(mVariableScope, RTVAR_UI_DISPLAY_FULLSCREEN, lDisplayFullScreen);
-	v_set(mVariableScope, RTVAR_UI_DISPLAY_ORIENTATION, "AllowUpsideDown");
+	const int display_width = 480;
+	const int display_height = 320;
+#else // !touch L&F
+	const int display_width = 760;
+	const int display_height = 524;
+#endif // touch / Computer L&F
+	bool display_full_screen = false;
+#endif // touch/!touch
+	int display_bpp = 0;
+	int display_frequency = 0;
+	v_set(variable_scope_, kRtvarUiDisplayRenderengine, "OpenGL");
+	v_set(variable_scope_, kRtvarUiDisplayWidth, display_width);
+	v_set(variable_scope_, kRtvarUiDisplayHeight, display_height);
+	v_set(variable_scope_, kRtvarUiDisplayBitsperpixel, display_bpp);
+	v_set(variable_scope_, kRtvarUiDisplayFrequency, display_frequency);
+	v_set(variable_scope_, kRtvarUiDisplayFullscreen, display_full_screen);
+	v_set(variable_scope_, kRtvarUiDisplayOrientation, "AllowUpsideDown");
 
-	v_set(mVariableScope, RTVAR_UI_SOUND_ENGINE, "OpenAL");
+	v_set(variable_scope_, kRtvarUiSoundEngine, "OpenAL");
 
-	v_set(mVariableScope, RTVAR_UI_DISPLAY_ENABLEVSYNC, false);
-	v_set(mVariableScope, RTVAR_UI_3D_PIXELSHADERS, false);
-	v_set(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, true);
-	v_set(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, false);
-	v_set(mVariableScope, RTVAR_UI_3D_ENABLEBILINEARFILTERING, false);
-	v_set(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, false);
-	v_set(mVariableScope, RTVAR_UI_3D_FOV, 60.0);
-	v_set(mVariableScope, RTVAR_UI_3D_CLIPNEAR, 1.0);
-	v_set(mVariableScope, RTVAR_UI_3D_CLIPFAR, 1000.0);
-	v_set(mVariableScope, RTVAR_UI_3D_SHADOWS, "None");
-	v_set(mVariableScope, RTVAR_UI_3D_AMBIENTRED, 0.5);
-	v_set(mVariableScope, RTVAR_UI_3D_AMBIENTGREEN, 0.5);
-	v_set(mVariableScope, RTVAR_UI_3D_AMBIENTBLUE, 0.5);
-	v_set(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.7);
-	v_set(mVariableScope, RTVAR_UI_SOUND_DOPPLER, 1.0);
+	v_set(variable_scope_, kRtvarUiDisplayEnablevsync, false);
+	v_set(variable_scope_, kRtvarUi3DPixelshaders, false);
+	v_set(variable_scope_, kRtvarUi3DEnablelights, true);
+	v_set(variable_scope_, kRtvarUi3DEnabletrilinearfiltering, false);
+	v_set(variable_scope_, kRtvarUi3DEnablebilinearfiltering, false);
+	v_set(variable_scope_, kRtvarUi3DEnablemipmapping, false);
+	v_set(variable_scope_, kRtvarUi3DFov, 60.0);
+	v_set(variable_scope_, kRtvarUi3DClipnear, 1.0);
+	v_set(variable_scope_, kRtvarUi3DClipfar, 1000.0);
+	v_set(variable_scope_, kRtvarUi3DShadows, "None");
+	v_set(variable_scope_, kRtvarUi3DAmbientred, 0.5);
+	v_set(variable_scope_, kRtvarUi3DAmbientgreen, 0.5);
+	v_set(variable_scope_, kRtvarUi3DAmbientblue, 0.5);
+	v_set(variable_scope_, kRtvarUiSoundRolloff, 0.7);
+	v_set(variable_scope_, kRtvarUiSoundDoppler, 1.0);
 
 #ifndef LEPRA_TOUCH_LOOKANDFEEL
-	v_set(mVariableScope, RTVAR_UI_3D_PIXELSHADERS, true);
-	v_set(mVariableScope, RTVAR_UI_SOUND_ROLLOFF, 0.5);
-	v_set(mVariableScope, RTVAR_UI_3D_ENABLETRILINEARFILTERING, true);
-	v_set(mVariableScope, RTVAR_UI_3D_ENABLEMIPMAPPING, true);
-	v_set(mVariableScope, RTVAR_UI_3D_SHADOWS, "Force:Volume");	
-#endif // !Touch
+	v_set(variable_scope_, kRtvarUi3DPixelshaders, true);
+	v_set(variable_scope_, kRtvarUiSoundRolloff, 0.5);
+	v_set(variable_scope_, kRtvarUi3DEnabletrilinearfiltering, true);
+	v_set(variable_scope_, kRtvarUi3DEnablemipmapping, true);
+	v_set(variable_scope_, kRtvarUi3DShadows, "Force:Volume");
+#endif // !touch
 
-	v_set(mVariableScope, RTVAR_CONTENT_LEVELS, false);
-	v_set(mVariableScope, RTVAR_CONTENT_VEHICLES, false);
+	v_set(variable_scope_, kRtvarContentLevels, false);
+	v_set(variable_scope_, kRtvarContentVehicles, false);
 #ifdef LEPRA_IOS
 	[AnimatedApp updateContent];
 #endif // iOS
 
-	mUiManager = new UiCure::GameUiManager(mVariableScope, 0);
-	bool lOk = mUiManager->OpenDraw();
-	if (lOk)
-	{
-		UiLepra::Core::ProcessMessages();
-		mUiManager->GetPainter()->ResetClippingRect();
-		mUiManager->GetPainter()->Clear(BLACK);
+	ui_manager_ = new UiCure::GameUiManager(variable_scope_, 0);
+	bool ok = ui_manager_->OpenDraw();
+	if (ok) {
+		uilepra::Core::ProcessMessages();
+		ui_manager_->GetPainter()->ResetClippingRect();
+		ui_manager_->GetPainter()->Clear(BLACK);
 		DisplayLogo();
-		mBootLogoTimer.PopTimeDiff();
+		boot_logo_timer_.PopTimeDiff();
 	}
-	if (lOk)
-	{
-		lOk = mUiManager->OpenRest();
+	if (ok) {
+		ok = ui_manager_->OpenRest();
 	}
-	if (lOk)
-	{
-		mUiManager->GetDisplayManager()->SetCaption("Tire Fire");
-		mUiManager->GetDisplayManager()->AddResizeObserver(this);
-		mUiManager->GetInputManager()->AddKeyCodeInputObserver(this);
+	if (ok) {
+		ui_manager_->GetDisplayManager()->SetCaption("Tire Fire");
+		ui_manager_->GetDisplayManager()->AddResizeObserver(this);
+		ui_manager_->GetInputManager()->AddKeyCodeInputObserver(this);
 #if !defined(LEPRA_TOUCH) && defined(LEPRA_TOUCH_LOOKANDFEEL)
-		mIsMouseDown = false;
-		mUiManager->GetInputManager()->GetMouse()->AddFunctor(new UiLepra::TInputFunctor<App>(this, &App::OnMouseInput));
+		is_mouse_down_ = false;
+		ui_manager_->GetInputManager()->GetMouse()->AddFunctor(new uilepra::TInputFunctor<App>(this, &App::OnMouseInput));
 #endif // Computer emulating touch
 	}
-	if (lOk)
-	{
-		UiTbc::FontManager::FontId lDefaultFontId = mUiManager->GetFontManager()->GetActiveFontId();
-		mBigFontId = mUiManager->GetFontManager()->QueryAddFont("Helvetica", 24);
-		mMonospacedFontId = mUiManager->GetFontManager()->QueryAddFont("Courier New", 14);
-		mUiManager->GetFontManager()->SetActiveFont(lDefaultFontId);
+	if (ok) {
+		uitbc::FontManager::FontId default_font_id = ui_manager_->GetFontManager()->GetActiveFontId();
+		big_font_id_ = ui_manager_->GetFontManager()->QueryAddFont("Helvetica", 24);
+		monospaced_font_id_ = ui_manager_->GetFontManager()->QueryAddFont("Courier New", 14);
+		ui_manager_->GetFontManager()->SetActiveFont(default_font_id);
 	}
-	if (lOk)
-	{
-		/*mMusicPlayer = new UiCure::MusicPlayer(mUiManager->GetSoundManager());
-		mMusicPlayer->SetVolume(0.5f);
-		mMusicPlayer->SetSongPauseTime(9, 15);
-		mMusicPlayer->AddSong("ButterflyRide.xm");
-		mMusicPlayer->AddSong("BehindTheFace.xm");
-		mMusicPlayer->AddSong("BrittiskBensin.xm");
-		mMusicPlayer->AddSong("DontYouWantMe'97.xm");
-		mMusicPlayer->AddSong("CloseEncounters.xm");
-		mMusicPlayer->Shuffle();
-		lOk = mMusicPlayer->Playback();*/
+	if (ok) {
+		/*music_player_ = new UiCure::MusicPlayer(ui_manager_->GetSoundManager());
+		music_player_->SetVolume(0.5f);
+		music_player_->SetSongPauseTime(9, 15);
+		music_player_->AddSong("ButterflyRide.xm");
+		music_player_->AddSong("BehindTheFace.xm");
+		music_player_->AddSong("BrittiskBensin.xm");
+		music_player_->AddSong("DontYouWantMe'97.xm");
+		music_player_->AddSong("CloseEncounters.xm");
+		music_player_->Shuffle();
+		ok = music_player_->Playback();*/
 	}
-	if (lOk)
-	{
-		struct ResourceOpener: public FileOpener
-		{
-			Cure::ResourceManager* mResourceManager;
+	if (ok) {
+		struct ResourceOpener: public FileOpener {
+			cure::ResourceManager* resource_manager_;
 
-			ResourceOpener(Cure::ResourceManager* pResourceManager):
-				mResourceManager(pResourceManager)
-			{
+			ResourceOpener(cure::ResourceManager* resource_manager):
+				resource_manager_(resource_manager) {
 			}
 
-			virtual File* Open(const str& pFilename)
-			{
-				return mResourceManager->QueryFile(pFilename);
+			virtual File* Open(const str& filename) {
+				return resource_manager_->QueryFile(filename);
 			}
 		};
-		mUiManager->GetSoundManager()->SetFileOpener(new ResourceOpener(mResourceManager));
+		ui_manager_->GetSoundManager()->SetFileOpener(new ResourceOpener(resource_manager_));
 	}
-	if (lOk)
-	{
-		mTapClick = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-		mTapClick->Load(mResourceManager, "tap.wav",
+	if (ok) {
+		tap_click_ = new UiCure::UserSound2dResource(ui_manager_, uilepra::SoundManager::kLoopNone);
+		tap_click_->Load(resource_manager_, "tap.wav",
 			UiCure::UserSound2dResource::TypeLoadCallback(this, &App::SoundLoadCallback));
 	}
 
-	UiLepra::Core::ProcessMessages();
-	return (lOk);
+	uilepra::Core::ProcessMessages();
+	return (ok);
 }
 
-void App::Close()
-{
-	mUiManager->GetInputManager()->RemoveKeyCodeInputObserver(this);
-	mUiManager->GetDisplayManager()->RemoveResizeObserver(this);
+void App::Close() {
+	ui_manager_->GetInputManager()->RemoveKeyCodeInputObserver(this);
+	ui_manager_->GetDisplayManager()->RemoveResizeObserver(this);
 
 	// Poll system to let go of old windows.
-	UiLepra::Core::ProcessMessages();
+	uilepra::Core::ProcessMessages();
 	Thread::Sleep(0.05);
-	UiLepra::Core::ProcessMessages();
+	uilepra::Core::ProcessMessages();
 
-	delete mMusicPlayer;
-	mMusicPlayer = 0;
+	delete music_player_;
+	music_player_ = 0;
 
-	delete mGame;
-	mGame = 0;
+	delete game_;
+	game_ = 0;
 
-	mUiManager->DeleteDesktopWindow();
+	ui_manager_->DeleteDesktopWindow();
 
-	delete mResourceManager;	// Resource manager lives long enough for all volontary resources to disappear.
-	mResourceManager = 0;
+	delete resource_manager_;	// Resource manager lives long enough for all volontary resources to disappear.
+	resource_manager_ = 0;
 
-	delete mUiManager;
-	mUiManager = 0;
+	delete ui_manager_;
+	ui_manager_ = 0;
 
 	// Poll system to let go of old windows.
-	UiLepra::Core::ProcessMessages();
+	uilepra::Core::ProcessMessages();
 	Thread::Sleep(0.05);
-	UiLepra::Core::ProcessMessages();
+	uilepra::Core::ProcessMessages();
 }
 
-void App::Init()
-{
+void App::Init() {
 	deb_assert(Int2Str(-123) == "-123");
 	deb_assert(Int2Str(-1234) == "-1,234");
 	deb_assert(Int2Str(-12345) == "-12,345");
@@ -470,905 +442,736 @@ void App::Init()
 }
 
 
-int App::Run()
-{
-	UiLepra::Init();
-	UiTbc::Init();
+int App::Run() {
+	uilepra::Init();
+	uitbc::Init();
 	UiCure::Init();
 	Network::Start();
 
-	const str lLogName = Path::JoinPath(SystemManager::GetIoDirectory("TireFire"), "log", "txt");
-	FileLogListener lFileLogger(lLogName);
+	const str log_name = Path::JoinPath(SystemManager::GetIoDirectory("TireFire"), "log", "txt");
+	FileLogListener file_logger(log_name);
 	{
-		LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(&mConsoleLogger, &mDebugLogger, &lFileLogger, 0, 0);
-		const std::vector<Logger*> lLogArray = LogType::GetLoggers();
-		std::vector<Logger*>::const_iterator x = lLogArray.begin();
-		for (; x != lLogArray.end(); ++x)
-		{
-			(*x)->SetLevelThreashold(LEVEL_INFO);
+		LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(&console_logger_, &debug_logger_, &file_logger, 0, 0);
+		const std::vector<Logger*> log_array = LogType::GetLoggers();
+		std::vector<Logger*>::const_iterator x = log_array.begin();
+		for (; x != log_array.end(); ++x) {
+			(*x)->SetLevelThreashold(kLevelInfo);
 		}
 	}
 
-	bool lOk = true;
-	if (lOk)
-	{
-		mVariableScope = UiCure::GetSettings();
-		v_set(mVariableScope, RTVAR_PHYSICS_PARALLEL, false);	// Let's do it same on all platforms, so we can render stuff from physics data.
-		v_set(mVariableScope, RTVAR_PHYSICS_MICROSTEPS, 15);
-		v_set(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
-		v_set(mVariableScope, RTVAR_PHYSICS_ISFIXEDFPS, true);
-		//v_set(mVariableScope, RTVAR_UI_3D_ENABLELIGHTS, false);
+	bool ok = true;
+	if (ok) {
+		variable_scope_ = UiCure::GetSettings();
+		v_set(variable_scope_, kRtvarPhysicsParallel, false);	// Let's do it same on all platforms, so we can render stuff from physics data.
+		v_set(variable_scope_, kRtvarPhysicsMicrosteps, 15);
+		v_set(variable_scope_, kRtvarPhysicsFps, kFps);
+		v_set(variable_scope_, kRtvarPhysicsIsfixedfps, true);
+		//v_set(variable_scope_, kRtvarUi3DEnablelights, false);
 	}
-	if (lOk)
-	{
-		mResourceManager = new Cure::ResourceManager(1);
+	if (ok) {
+		resource_manager_ = new cure::ResourceManager(1);
 	}
-	if (lOk)
-	{
-		lOk = Open();
+	if (ok) {
+		ok = Open();
 	}
-	if (lOk)
-	{
-		mGame = new Game(mUiManager, mVariableScope, mResourceManager);
-		lOk = mGame->SetLevelName("level_1");
+	if (ok) {
+		game_ = new Game(ui_manager_, variable_scope_, resource_manager_);
+		ok = game_->SetLevelName("level_1");
 	}
-	if (lOk)
-	{
-		mGame->Cure::GameTicker::GetTimeManager()->Tick();
-		mGame->Cure::GameTicker::GetTimeManager()->Clear(1);
-		lOk = mResourceManager->InitDefault();
+	if (ok) {
+		game_->cure::GameTicker::GetTimeManager()->Tick();
+		game_->cure::GameTicker::GetTimeManager()->Clear(1);
+		ok = resource_manager_->InitDefault();
 	}
-	if (lOk)
-	{
-		mBootLogoTimer.EnableShadowCounter(true);
-		mLoopTimer.EnableShadowCounter(true);
-		mGameOverTimer.EnableShadowCounter(true);
-		mStartTimer.EnableShadowCounter(true);
+	if (ok) {
+		boot_logo_timer_.EnableShadowCounter(true);
+		loop_timer_.EnableShadowCounter(true);
+		game_over_timer_.EnableShadowCounter(true);
+		start_timer_.EnableShadowCounter(true);
 	}
-	mLoopTimer.PopTimeDiff();
+	loop_timer_.PopTimeDiff();
 #ifndef LEPRA_IOS
-	bool lQuit = (SystemManager::GetQuitRequest() != 0);
-	while (!lQuit)
-	{
-		lQuit = !Poll();
+	bool quit = (SystemManager::GetQuitRequest() != 0);
+	while (!quit) {
+		quit = !Poll();
 	}
 	Close();
 	return 0;
 #else // iOS
-	mAnimatedApp = [[AnimatedApp alloc] init:mUiManager->GetCanvas()];
+	animated_app_ = [[AnimatedApp alloc] init:ui_manager_->GetCanvas()];
 	return 0;
 #endif // !iOS/iOS
 }
 
-void App::DisplayLogo()
-{
-	UiCure::PainterImageResource* lLogo = new UiCure::PainterImageResource(mUiManager, mResourceManager, "logo.png", UiCure::PainterImageResource::RELEASE_FREE_BUFFER);
-	if (lLogo->Load())
-	{
-		if (lLogo->PostProcess() == Cure::RESOURCE_LOAD_COMPLETE)
-		{
-			//mUiManager->BeginRender(vec3(0, 1, 0));
-			mUiManager->PreparePaint(true);
-			const Canvas* lCanvas = mUiManager->GetCanvas();
-			const Canvas* lImage = lLogo->GetRamData();
-			mUiManager->GetPainter()->DrawImage(lLogo->GetUserData(0), lCanvas->GetWidth()/2 - lImage->GetWidth()/2, lCanvas->GetHeight()/2 - lImage->GetHeight()/2);
-			mUiManager->GetDisplayManager()->UpdateScreen();
+void App::DisplayLogo() {
+	UiCure::PainterImageResource* logo = new UiCure::PainterImageResource(ui_manager_, resource_manager_, "logo.png", UiCure::PainterImageResource::kReleaseFreeBuffer);
+	if (logo->Load()) {
+		if (logo->PostProcess() == cure::kResourceLoadComplete) {
+			//ui_manager_->BeginRender(vec3(0, 1, 0));
+			ui_manager_->PreparePaint(true);
+			const Canvas* canvas = ui_manager_->GetCanvas();
+			const Canvas* image = logo->GetRamData();
+			ui_manager_->GetPainter()->DrawImage(logo->GetUserData(0), canvas->GetWidth()/2 - image->GetWidth()/2, canvas->GetHeight()/2 - image->GetHeight()/2);
+			ui_manager_->GetDisplayManager()->UpdateScreen();
 		}
 	}
-	delete lLogo;
+	delete logo;
 }
 
-bool App::Poll()
-{
-	bool lOk = true;
-	if (lOk)
-	{
+bool App::Poll() {
+	bool ok = true;
+	if (ok) {
 		HiResTimer::StepCounterShadow();
 	}
-	if (lOk)
-	{
-		if (2.0 - mBootLogoTimer.QueryTimeDiff() > 0)
-		{
+	if (ok) {
+		if (2.0 - boot_logo_timer_.QueryTimeDiff() > 0) {
 			Thread::Sleep(0.1);
-			UiLepra::Core::ProcessMessages();
-			mResourceManager->Tick();
+			uilepra::Core::ProcessMessages();
+			resource_manager_->Tick();
 			return true;
 		}
 	}
-	if (lOk)
-	{
-		const double lInstantLoopTime = mLoopTimer.QueryTimeDiff();
-		if (++mFrameCounter > 2)
-		{
+	if (ok) {
+		const double instant_loop_time = loop_timer_.QueryTimeDiff();
+		if (++frame_counter_ > 2) {
 			// Adjust frame rate, or it will be hopelessly high... on most reasonable platforms.
-			mAverageLoopTime = Lepra::Math::Lerp(mAverageLoopTime, lInstantLoopTime, 0.05);
-			mAverageFastLoopTime = Lepra::Math::Lerp(mAverageFastLoopTime, lInstantLoopTime, 0.7);
+			average_loop_time_ = lepra::Math::Lerp(average_loop_time_, instant_loop_time, 0.05);
+			average_fast_loop_time_ = lepra::Math::Lerp(average_fast_loop_time_, instant_loop_time, 0.7);
 		}
-		const double lDelayTime = 1.0/FPS - mAverageLoopTime;
-		if (lDelayTime > 0)
-		{
-			Thread::Sleep(lDelayTime-0.001);
-			UiLepra::Core::ProcessMessages();
+		const double delay_time = 1.0/kFps - average_loop_time_;
+		if (delay_time > 0) {
+			Thread::Sleep(delay_time-0.001);
+			uilepra::Core::ProcessMessages();
 		}
-		mLoopTimer.PopTimeDiff();
-		if (lInstantLoopTime >= 1.0/FPS && mAverageFastLoopTime > 1.0/FPS)
-		{
+		loop_timer_.PopTimeDiff();
+		if (instant_loop_time >= 1.0/kFps && average_fast_loop_time_ > 1.0/kFps) {
 			// This should be a temporary slow-down, due to something like rendering of
 			// lots of transparent OpenGL triangles.
-			int lFrameRate = (int)(1.0/mAverageFastLoopTime);
-			if (lFrameRate < 10)
-			{
-				lFrameRate = 10;
+			int frame_rate = (int)(1.0/average_fast_loop_time_);
+			if (frame_rate < 10) {
+				frame_rate = 10;
 			}
-			v_set(mVariableScope, RTVAR_PHYSICS_FPS, lFrameRate);
-		}
-		else
-		{
-			v_set(mVariableScope, RTVAR_PHYSICS_FPS, FPS);
-			mAverageFastLoopTime = lInstantLoopTime;	// Immediately drop back sliding average to current value when FPS is normal again.
+			v_set(variable_scope_, kRtvarPhysicsFps, frame_rate);
+		} else {
+			v_set(variable_scope_, kRtvarPhysicsFps, kFps);
+			average_fast_loop_time_ = instant_loop_time;	// Immediately drop back sliding average to current value when kFps is normal again.
 		}
 
 	}
-	if (lOk)
-	{
+	if (ok) {
 		// Download any pending hiscore request.
-		if (mHiscoreAgent)
-		{
-			Cure::ResourceLoadState lLoadState = mHiscoreAgent->Poll();
-			if (lLoadState != Cure::RESOURCE_LOAD_IN_PROGRESS)
-			{
-				switch (mHiscoreAgent->GetAction())
-				{
-					case Cure::HiscoreAgent::ACTION_DOWNLOAD_LIST:
-					{
-						UpdateHiscore(lLoadState != Cure::RESOURCE_LOAD_COMPLETE);
-						delete mHiscoreAgent;
-						mHiscoreAgent = 0;
-					}
-					break;
-					case Cure::HiscoreAgent::ACTION_UPLOAD_SCORE:
-					{
-						mMyHiscoreIndex = mHiscoreAgent->GetUploadedPlace();
-						delete mHiscoreAgent;
-						mHiscoreAgent = 0;
-						if (lLoadState == Cure::RESOURCE_LOAD_COMPLETE)
-						{
+		if (hiscore_agent_) {
+			cure::ResourceLoadState load_state = hiscore_agent_->Poll();
+			if (load_state != cure::kResourceLoadInProgress) {
+				switch (hiscore_agent_->GetAction()) {
+					case cure::HiscoreAgent::kActionDownloadList: {
+						UpdateHiscore(load_state != cure::kResourceLoadComplete);
+						delete hiscore_agent_;
+						hiscore_agent_ = 0;
+					} break;
+					case cure::HiscoreAgent::kActionUploadScore: {
+						my_hiscore_index_ = hiscore_agent_->GetUploadedPlace();
+						delete hiscore_agent_;
+						hiscore_agent_ = 0;
+						if (load_state == cure::kResourceLoadComplete) {
 							HiscoreMenu(+1);
-						}
-						else
-						{
+						} else {
 							EnterHiscore("Please retry; score server obstipated", LIGHT_RED);
 						}
-					}
-					break;
-					default:
-					{
-						delete mHiscoreAgent;
-						mHiscoreAgent = 0;
-						mLog.AError("Oops! Completed hiscore communication, but something went wrong.");
+					} break;
+					default: {
+						delete hiscore_agent_;
+						hiscore_agent_ = 0;
+						log_.AError("Oops! Completed hiscore communication, but something went wrong.");
 						deb_assert(false);
 						MainMenu();	// Well... assume some super-shitty state...
-					}
-					break;
+					} break;
 				}
 			}
 		}
 	}
-	if (lOk)
-	{
+	if (ok) {
 		// Take care of the "brake and reverse" steering.
-		if (mGame->GetVehicle() && mGame->GetVehicle()->IsLoaded())
-		{
-			const bool lIsMovingForward = (mGame->GetVehicle()->GetForwardSpeed() > 3.0f*SCALE_FACTOR);
-			if (mReverseAndBrake)
-			{
-				mGame->GetVehicle()->SetEnginePower(0, lIsMovingForward? 0 : -1*mReverseAndBrake);	// Reverse.
-				mGame->GetVehicle()->SetEnginePower(2, lIsMovingForward? +1*mReverseAndBrake : 0);	// Brake.
+		if (game_->GetVehicle() && game_->GetVehicle()->IsLoaded()) {
+			const bool is_moving_forward = (game_->GetVehicle()->GetForwardSpeed() > 3.0f*SCALE_FACTOR);
+			if (reverse_and_brake_) {
+				game_->GetVehicle()->SetEnginePower(0, is_moving_forward? 0 : -1*reverse_and_brake_);	// Reverse.
+				game_->GetVehicle()->SetEnginePower(2, is_moving_forward? +1*reverse_and_brake_ : 0);	// Brake.
 			}
 		}
 	}
-	if (lOk)
-	{
-		lOk = (SystemManager::GetQuitRequest() == 0);
+	if (ok) {
+		ok = (SystemManager::GetQuitRequest() == 0);
 	}
-	if (!mIsLoaded && mResourceManager->IsLoading())
-	{
-		mResourceManager->Tick();
-		return lOk;
+	if (!is_loaded_ && resource_manager_->IsLoading()) {
+		resource_manager_->Tick();
+		return ok;
 	}
-	mIsLoaded = true;
-	if (lOk && mDoLayout)
-	{
+	is_loaded_ = true;
+	if (ok && do_layout_) {
 		Layout();
 	}
-	if (lOk)
-	{
+	if (ok) {
 		float r, g, b;
-		v_get(r, =(float), mVariableScope, RTVAR_UI_3D_CLEARRED, 0.75);
-		v_get(g, =(float), mVariableScope, RTVAR_UI_3D_CLEARGREEN, 0.80);
-		v_get(b, =(float), mVariableScope, RTVAR_UI_3D_CLEARBLUE, 0.85);
-		vec3 lColor(r, g, b);
-		mUiManager->BeginRender(lColor);
+		v_get(r, =(float), variable_scope_, kRtvarUi3DClearred, 0.75);
+		v_get(g, =(float), variable_scope_, kRtvarUi3DCleargreen, 0.80);
+		v_get(b, =(float), variable_scope_, kRtvarUi3DClearblue, 0.85);
+		vec3 _color(r, g, b);
+		ui_manager_->BeginRender(_color);
 	}
-	if (lOk)
-	{
-		mUiManager->InputTick();
+	if (ok) {
+		ui_manager_->InputTick();
 		PollTaps();
 	}
-	if (lOk)
-	{
-		if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE)
-		{
-			mGame->AddScore(+3);
+	if (ok) {
+		if (game_->GetFlybyMode() == Game::kFlybyInactive) {
+			game_->AddScore(+3);
 		}
-		mGame->BeginTick();
+		game_->BeginTick();
 	}
-	bool lRender = false;
-	if (lOk)
-	{
-		lRender = mUiManager->CanRender();
+	bool render = false;
+	if (ok) {
+		render = ui_manager_->CanRender();
 	}
-	if (lOk && lRender)
-	{
-		lOk = mGame->Render();
+	if (ok && render) {
+		ok = game_->Render();
 	}
-	if (lOk && lRender)
-	{
-		if (mDialog)
-		{
-			mUiManager->PreparePaint(false);
-		}
-		else
-		{
-			mUiManager->Paint(false);
+	if (ok && render) {
+		if (dialog_) {
+			ui_manager_->PreparePaint(false);
+		} else {
+			ui_manager_->Paint(false);
 		}
 
-		if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE &&
-			mGame->IsScoreCountingEnabled())
-		{
-			mUiManager->GetPainter()->SetColor(WHITE);
-			const str lScore = "Score: " + Int2Str((int)mGame->GetScore());
-			int sy = 8 + mUiManager->GetPainter()->GetFontHeight()/2;
-			const int sx = mUiManager->GetCanvas()->GetWidth()/2;
-			PrintText(lScore, 0, sx, sy);
+		if (game_->GetFlybyMode() == Game::kFlybyInactive &&
+			game_->IsScoreCountingEnabled()) {
+			ui_manager_->GetPainter()->SetColor(WHITE);
+			const str score = "Score: " + Int2Str((int)game_->GetScore());
+			int sy = 8 + ui_manager_->GetPainter()->GetFontHeight()/2;
+			const int sx = ui_manager_->GetCanvas()->GetWidth()/2;
+			PrintText(score, 0, sx, sy);
 		}
 
-		mGame->Paint();
+		game_->Paint();
 
-		if (mDialog)
-		{
-			mUiManager->Paint(false);
+		if (dialog_) {
+			ui_manager_->Paint(false);
 		}
 
-		if (mIsPurchasing || mHiscoreAgent)
-		{
-			mUiManager->GetPainter()->SetColor(WHITE, 0);
-			const str lInfo = mIsPurchasing? "Communicating with App Store..." : "Speaking to score server";
-			PrintText(lInfo, 0, 
-				mUiManager->GetCanvas()->GetWidth()/2,
-				mUiManager->GetCanvas()->GetHeight() - mUiManager->GetPainter()->GetFontHeight());
+		if (is_purchasing_ || hiscore_agent_) {
+			ui_manager_->GetPainter()->SetColor(WHITE, 0);
+			const str info = is_purchasing_? "Communicating with App Store..." : "Speaking to score server";
+			PrintText(info, 0,
+				ui_manager_->GetCanvas()->GetWidth()/2,
+				ui_manager_->GetCanvas()->GetHeight() - ui_manager_->GetPainter()->GetFontHeight());
 		}
 	}
-	if (lOk)
-	{
-		mGame->PreEndTick();
-		mGame->WaitPhysicsTick();
-		lOk = mGame->EndTick();
+	if (ok) {
+		game_->PreEndTick();
+		game_->WaitPhysicsTick();
+		ok = game_->EndTick();
 	}
-	if (lOk)
-	{
-		lOk = mGame->Tick();
+	if (ok) {
+		ok = game_->Tick();
 	}
-	mResourceManager->Tick();
-	mUiManager->EndRender(1.0f/FPS);
+	resource_manager_->Tick();
+	ui_manager_->EndRender(1.0f/kFps);
 
-	if (mMusicPlayer)
-	{
-		mMusicPlayer->Update();
+	if (music_player_) {
+		music_player_->Update();
 	}
 
-	if (mGameOverTimer.IsStarted())
-	{
-		if (mGameOverTimer.QueryTimeDiff() > 11.0)
-		{
-			if (mGame->GetScore() >= 1000.0)		// Negative score isn't any good - at least be positive.
-			{
+	if (game_over_timer_.IsStarted()) {
+		if (game_over_timer_.QueryTimeDiff() > 11.0) {
+			if (game_->GetScore() >= 1000.0) {		// Negative score isn't any good - at least be positive.
 				EnterHiscore(str(), FGCOLOR_DIALOG);
-			}
-			else
-			{
+			} else {
 				// Score wasn't high enough, not allowed in on hiscore list.
 				SuperReset();
 			}
 		}
 	}
 
-	return lOk;
+	return ok;
 }
 
-void App::PollTaps()
-{
-	if (mIsPurchasing)
-	{
-		gFingerMoveList.clear();
+void App::PollTaps() {
+	if (is_purchasing_) {
+		g_finger_move_list.clear();
 		return;
 	}
 
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-	UiCure::CppContextObject* lVehicle = mGame->GetVehicle();
-	if (!lVehicle || !lVehicle->IsLoaded())
-	{
+	UiCure::CppContextObject* vehicle = game_->GetVehicle();
+	if (!vehicle || !vehicle->IsLoaded()) {
 		return;
 	}
-	FingerMoveList::iterator x = gFingerMoveList.begin();
-	float lThrottle = 0;
-	for (; x != gFingerMoveList.end();)
-	{
-		x->mTag = PollTap(*x);
-		if (x->mTag > 0)
-		{
+	FingerMoveList::iterator x = g_finger_move_list.begin();
+	float throttle = 0;
+	for (; x != g_finger_move_list.end();) {
+		x->tag_ = PollTap(*x);
+		if (x->tag_ > 0) {
 			++x;
-			lThrottle = 1;
-		}
-		else
-		{
-			gFingerMoveList.erase(x++);
+			throttle = 1;
+		} else {
+			g_finger_move_list.erase(x++);
 		}
 	}
-	if (lVehicle->GetPhysics()->GetEngineCount() >= 3)
-	{
-		mGame->SetThrottle(lThrottle);
+	if (vehicle->GetPhysics()->GetEngineCount() >= 3) {
+		game_->SetThrottle(throttle);
 	}
 #ifndef LEPRA_TOUCH
 	// Test code.
-	if (!gFingerMoveList.empty() && !gFingerMoveList.back().mIsPress)
-	{
-		gFingerMoveList.clear();
+	if (!g_finger_move_list.empty() && !g_finger_move_list.back().is_press_) {
+		g_finger_move_list.clear();
 	}
 #endif // Computer
-#endif // Touch L&F
+#endif // touch L&F
 }
 
-void App::PrintText(const str& pText, float pAngle, int pCenterX, int pCenterY) const
-{
-	if (pAngle)
-	{
+void App::PrintText(const str& text, float angle, int center_x, int center_y) const {
+	if (angle) {
 		::glMatrixMode(GL_PROJECTION);
 		::glPushMatrix();
-		::glRotatef(pAngle*180/PIF, 0, 0, 1);
+		::glRotatef(angle*180/PIF, 0, 0, 1);
 	}
-	const int cx = (int)(pCenterX*cos(pAngle) + pCenterY*sin(pAngle));
-	const int cy = (int)(pCenterY*cos(pAngle) - pCenterX*sin(pAngle));
-	const int w = mUiManager->GetPainter()->GetStringWidth(pText);
-	const int h = mUiManager->GetPainter()->GetFontHeight();
-	mUiManager->GetPainter()->PrintText(pText, cx-w/2, cy-h/2);
-	if (pAngle)
-	{
+	const int cx = (int)(center_x*cos(angle) + center_y*sin(angle));
+	const int cy = (int)(center_y*cos(angle) - center_x*sin(angle));
+	const int w = ui_manager_->GetPainter()->GetStringWidth(text);
+	const int h = ui_manager_->GetPainter()->GetFontHeight();
+	ui_manager_->GetPainter()->PrintText(text, cx-w/2, cy-h/2);
+	if (angle) {
 		::glPopMatrix();
 		::glMatrixMode(GL_MODELVIEW);
 	}
 }
 
 
-void App::Layout()
-{
-	if (mDialog)
-	{
-		mDialog->Center();
+void App::Layout() {
+	if (dialog_) {
+		dialog_->Center();
 	}
 }
 
 
 
-void App::Suspend()
-{
-	if (mMusicPlayer)
-	{
-		mMusicPlayer->Pause();
+void App::Suspend() {
+	if (music_player_) {
+		music_player_->Pause();
 	}
 	DoPause();
 #ifdef LEPRA_IOS
-	[mAnimatedApp stopTick];
+	[animated_app_ tick_];
 #endif // iOS
 }
 
-void App::Resume()
-{
+void App::Resume() {
 #ifdef LEPRA_IOS
-	[mAnimatedApp startTick];
+	[animated_app_ tick_];
 #endif // iOS
 	HiResTimer::StepCounterShadow();
-	mLoopTimer.PopTimeDiff();
-	if (mMusicPlayer)
-	{
-		mMusicPlayer->Stop();
-		mMusicPlayer->Playback();
+	loop_timer_.PopTimeDiff();
+	if (music_player_) {
+		music_player_->Stop();
+		music_player_->Playback();
 	}
 }
 
 
-bool App::Steer(UiLepra::InputManager::KeyCode pKeyCode, float pFactor)
-{
-	if (!mGame || mGame->GetFlybyMode() != Game::FLYBY_INACTIVE || mDialog)
-	{
+bool App::Steer(uilepra::InputManager::KeyCode key_code, float factor) {
+	if (!game_ || game_->GetFlybyMode() != Game::kFlybyInactive || dialog_) {
 		return false;
 	}
-	UiCure::CppContextObject* lVehicle = mGame->GetVehicle();
-	if (!lVehicle || !lVehicle->IsLoaded())
-	{
+	UiCure::CppContextObject* vehicle = game_->GetVehicle();
+	if (!vehicle || !vehicle->IsLoaded()) {
 		return false;
 	}
-	enum Directive
-	{
-		DIRECTIVE_NONE,
-		DIRECTIVE_UP,
-		DIRECTIVE_DOWN,
-		DIRECTIVE_LEFT,
-		DIRECTIVE_RIGHT,
-		DIRECTIVE_FUNCTION,
+	enum Directive {
+		kDirectiveNone,
+		kDirectiveUp,
+		kDirectiveDown,
+		kDirectiveLeft,
+		kDirectiveRight,
+		kDirectiveFunction,
 	};
-	Directive lDirective = DIRECTIVE_NONE;
-	switch (pKeyCode)
-	{
+	Directive directive = kDirectiveNone;
+	switch (key_code) {
 		case UIKEY(UP):
-		case UIKEY(NUMPAD_8):	lDirective = DIRECTIVE_UP;		break;
-		case UIKEY(W):		lDirective = DIRECTIVE_UP;		break;
+		case UIKEY(NUMPAD_8):	directive = kDirectiveUp;		break;
+		case UIKEY(W):		directive = kDirectiveUp;		break;
 		case UIKEY(DOWN):
 		case UIKEY(NUMPAD_2):
-		case UIKEY(NUMPAD_5):	lDirective = DIRECTIVE_DOWN;		break;
-		case UIKEY(S):		lDirective = DIRECTIVE_DOWN;		break;
+		case UIKEY(NUMPAD_5):	directive = kDirectiveDown;		break;
+		case UIKEY(S):		directive = kDirectiveDown;		break;
 		case UIKEY(LEFT):
-		case UIKEY(NUMPAD_4):	lDirective = DIRECTIVE_LEFT;		break;
-		case UIKEY(A):		lDirective = DIRECTIVE_LEFT;		break;
+		case UIKEY(NUMPAD_4):	directive = kDirectiveLeft;		break;
+		case UIKEY(A):		directive = kDirectiveLeft;		break;
 		case UIKEY(RIGHT):
-		case UIKEY(NUMPAD_6):	lDirective = DIRECTIVE_RIGHT;		break;
-		case UIKEY(D):		lDirective = DIRECTIVE_RIGHT;		break;
+		case UIKEY(NUMPAD_6):	directive = kDirectiveRight;		break;
+		case UIKEY(D):		directive = kDirectiveRight;		break;
 		case UIKEY(LCTRL):
 		case UIKEY(RCTRL):
 		case UIKEY(INSERT):
-		case UIKEY(NUMPAD_0):	lDirective = DIRECTIVE_FUNCTION;	break;
+		case UIKEY(NUMPAD_0):	directive = kDirectiveFunction;	break;
 		case UIKEY(E):
-		case UIKEY(F):		lDirective = DIRECTIVE_FUNCTION;	break;
+		case UIKEY(F):		directive = kDirectiveFunction;	break;
 
 #ifdef LEPRA_DEBUG
-		case UIKEY(0):
-		{
-			if (!pFactor)
-			{
-				mDoLayout = true;
+		case UIKEY(0): {
+			if (!factor) {
+				do_layout_ = true;
 			}
-		}
-		break;
-		case UIKEY(PLUS):
-		{
-			if (!pFactor)
-			{
-				const Cure::ObjectPositionalData* lPosition = 0;
-				lVehicle->UpdateFullPosition(lPosition);
-				if (lPosition)
-				{
-					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
-					lNewPlacement->mPosition.mTransformation.GetPosition().x -= 10;
-					lVehicle->SetFullPosition(*lNewPlacement, 0);
+		} break;
+		case UIKEY(PLUS): {
+			if (!factor) {
+				const cure::ObjectPositionalData* position = 0;
+				vehicle->UpdateFullPosition(position);
+				if (position) {
+					cure::ObjectPositionalData* new_placement = (cure::ObjectPositionalData*)position->Clone();
+					new_placement->position_.transformation_.GetPosition().x -= 10;
+					vehicle->SetFullPosition(*new_placement, 0);
 				}
 			}
-		}
-		break;
-		case UIKEY(9):
-		{
-			if (!pFactor)
-			{
-				const Cure::ObjectPositionalData* lPosition = 0;
-				lVehicle->UpdateFullPosition(lPosition);
-				if (lPosition)
-				{
-					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
-					lNewPlacement->mPosition.mTransformation.GetOrientation().RotateAroundOwnY(PIF*0.4f);
-					lVehicle->SetFullPosition(*lNewPlacement, 0);
+		} break;
+		case UIKEY(9): {
+			if (!factor) {
+				const cure::ObjectPositionalData* position = 0;
+				vehicle->UpdateFullPosition(position);
+				if (position) {
+					cure::ObjectPositionalData* new_placement = (cure::ObjectPositionalData*)position->Clone();
+					new_placement->position_.transformation_.GetOrientation().RotateAroundOwnY(PIF*0.4f);
+					vehicle->SetFullPosition(*new_placement, 0);
 				}
 			}
-		}
-		break;
-		case UIKEY(8):
-		{
-			if (!pFactor)
-			{
-				mGame->FlipRenderSides();
+		} break;
+		case UIKEY(8): {
+			if (!factor) {
+				game_->FlipRenderSides();
 			}
-		}
-		break;
-		case UIKEY(7):
-		{
-			mGame->GetVehicle()->DrainHealth(1);
-		}
-		break;
-		case UIKEY(6):
-		{
-			if (!pFactor)
-			{
-				const Cure::ObjectPositionalData* lPosition = 0;
-				lVehicle->UpdateFullPosition(lPosition);
-				if (lPosition)
-				{
-					Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPosition->Clone();
-					lNewPlacement->mPosition.mTransformation.GetPosition().x += 30;
-					lNewPlacement->mPosition.mTransformation.GetPosition().y += 20;
-					lNewPlacement->mPosition.mTransformation.GetPosition().z += 15;
-					lVehicle->SetFullPosition(*lNewPlacement, 0);
+		} break;
+		case UIKEY(7): {
+			game_->GetVehicle()->DrainHealth(1);
+		} break;
+		case UIKEY(6): {
+			if (!factor) {
+				const cure::ObjectPositionalData* position = 0;
+				vehicle->UpdateFullPosition(position);
+				if (position) {
+					cure::ObjectPositionalData* new_placement = (cure::ObjectPositionalData*)position->Clone();
+					new_placement->position_.transformation_.GetPosition().x += 30;
+					new_placement->position_.transformation_.GetPosition().y += 20;
+					new_placement->position_.transformation_.GetPosition().z += 15;
+					vehicle->SetFullPosition(*new_placement, 0);
 				}
 			}
-		}
-		break;
-		case UIKEY(4):
-		{
-			if (!pFactor)
-			{
-				if (mUiManager->GetCanvas()->GetDeviceOutputRotation() == 0)
-				{
-					mUiManager->GetCanvas()->SetOutputRotation(180);
-				}
-				else
-				{
-					mUiManager->GetCanvas()->SetOutputRotation(0);
+		} break;
+		case UIKEY(4): {
+			if (!factor) {
+				if (ui_manager_->GetCanvas()->GetDeviceOutputRotation() == 0) {
+					ui_manager_->GetCanvas()->SetOutputRotation(180);
+				} else {
+					ui_manager_->GetCanvas()->SetOutputRotation(0);
 				}
 			}
-		}
-		break;
-		case UIKEY(3):
-		{
-			if (!pFactor)
-			{
-				delete mDialog;
-				mDialog = 0;
-				mGame->AddScore(Random::Uniform(500.0f, 5000.0f));
+		} break;
+		case UIKEY(3): {
+			if (!factor) {
+				delete dialog_;
+				dialog_ = 0;
+				game_->AddScore(Random::Uniform(500.0f, 5000.0f));
 				EnterHiscore(str(), WHITE);
 			}
-		}
-		break;
+		} break;
 #endif // Debug
 	}
 
-	switch (lDirective)
-	{
-		case DIRECTIVE_NONE:
-		{
-		}
-		break;
-		case DIRECTIVE_UP:
-		{
-			lVehicle->SetEnginePower(0, +1*pFactor);
-		}
-		break;
-		case DIRECTIVE_DOWN:
-		{
-			mReverseAndBrake = pFactor;
-			if (!mReverseAndBrake)
-			{
-				lVehicle->SetEnginePower(0, 0);
-				lVehicle->SetEnginePower(2, 0);
+	switch (directive) {
+		case kDirectiveNone: {
+		} break;
+		case kDirectiveUp: {
+			vehicle->SetEnginePower(0, +1*factor);
+		} break;
+		case kDirectiveDown: {
+			reverse_and_brake_ = factor;
+			if (!reverse_and_brake_) {
+				vehicle->SetEnginePower(0, 0);
+				vehicle->SetEnginePower(2, 0);
 			}
-		}
-		break;
-		case DIRECTIVE_LEFT:
-		{
-			lVehicle->SetEnginePower(1, -1*pFactor);
-		}
-		break;
-		case DIRECTIVE_RIGHT:
-		{
-			lVehicle->SetEnginePower(1, +1*pFactor);
-		}
-		break;
-		case DIRECTIVE_FUNCTION:
-		{
-			//mGame->Shoot();
-		}
-		break;
+		} break;
+		case kDirectiveLeft: {
+			vehicle->SetEnginePower(1, -1*factor);
+		} break;
+		case kDirectiveRight: {
+			vehicle->SetEnginePower(1, +1*factor);
+		} break;
+		case kDirectiveFunction: {
+			//game_->Shoot();
+		} break;
 	}
 	return false;
 }
 
-bool App::OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	return Steer(pKeyCode, 1);
+bool App::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
+	return Steer(key_code, 1);
 }
 
-bool App::OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	return Steer(pKeyCode, 0);
+bool App::OnKeyUp(uilepra::InputManager::KeyCode key_code) {
+	return Steer(key_code, 0);
 }
 
 #if !defined(LEPRA_TOUCH) && defined(LEPRA_TOUCH_LOOKANDFEEL)
-void App::OnMouseInput(UiLepra::InputElement* pElement)
-{
-	if (pElement->GetType() == UiLepra::InputElement::DIGITAL)
-	{
-		mIsMouseDown = pElement->GetBooleanValue();
+void App::OnMouseInput(uilepra::InputElement* element) {
+	if (element->GetType() == uilepra::InputElement::kDigital) {
+		is_mouse_down_ = element->GetBooleanValue();
 	}
-	UiLepra::InputManager* lInput = mUiManager->GetInputManager();
-	if (mIsMouseDown)
-	{
-		const int y = (int)((1+lInput->GetCursorX())*mUiManager->GetCanvas()->GetWidth()/2);
-		const int x = (int)((1-lInput->GetCursorY())*mUiManager->GetCanvas()->GetHeight()/2);
-		if (gFingerMoveList.empty())
-		{
-			gFingerMoveList.push_back(FingerMovement(x, y));
+	uilepra::InputManager* input = ui_manager_->GetInputManager();
+	if (is_mouse_down_) {
+		const int y = (int)((1+input->GetCursorX())*ui_manager_->GetCanvas()->GetWidth()/2);
+		const int x = (int)((1-input->GetCursorY())*ui_manager_->GetCanvas()->GetHeight()/2);
+		if (g_finger_move_list.empty()) {
+			g_finger_move_list.push_back(FingerMovement(x, y));
 		}
-		FingerMovement& lMovement = gFingerMoveList.back();
-		lMovement.Update(lMovement.mLastX, lMovement.mLastY, x, y);
-	}
-	else
-	{
-		FingerMovement& lMovement = gFingerMoveList.back();
-		lMovement.mIsPress = false;
+		FingerMovement& _movement = g_finger_move_list.back();
+		_movement.Update(_movement.last_x_, _movement.last_y_, x, y);
+	} else {
+		FingerMovement& _movement = g_finger_move_list.back();
+		_movement.is_press_ = false;
 	}
 }
 #endif // Computer emulating touch device.
 
-int App::PollTap(FingerMovement& pMovement)
-{
+int App::PollTap(FingerMovement& movement) {
 #ifdef LEPRA_TOUCH
-	mUiManager->GetInputManager()->SetMousePosition(pMovement.mLastY, pMovement.mLastX);
-	if (pMovement.mIsPress)
-	{
-		mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(1);
-	}
-	else
-	{
+	ui_manager_->GetInputManager()->SetMousePosition(movement.last_y_, movement.last_x_);
+	if (movement.is_press_) {
+		ui_manager_->GetInputManager()->GetMouse()->GetButton(0)->SetValue(1);
+	} else {
 		// If releasing, we click-release to make sure we don't miss anything.
-		mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(1);
-		mUiManager->GetInputManager()->GetMouse()->GetButton(0)->SetValue(0);
+		ui_manager_->GetInputManager()->GetMouse()->GetButton(0)->SetValue(1);
+		ui_manager_->GetInputManager()->GetMouse()->GetButton(0)->SetValue(0);
 	}
-	mUiManager->GetInputManager()->GetMouse()->GetAxis(0)->SetValue(pMovement.mLastX);
-	mUiManager->GetInputManager()->GetMouse()->GetAxis(1)->SetValue(pMovement.mLastY);
-#endif // Touch
+	ui_manager_->GetInputManager()->GetMouse()->GetAxis(0)->SetValue(movement.last_x_);
+	ui_manager_->GetInputManager()->GetMouse()->GetAxis(1)->SetValue(movement.last_y_);
+#endif // touch
 
-	if (!mGame || mGame->GetFlybyMode() != Game::FLYBY_INACTIVE)
-	{
+	if (!game_ || game_->GetFlybyMode() != Game::kFlybyInactive) {
 		return 0;
 	}
 
-	return pMovement.mIsPress? 1 : 0;
+	return movement.is_press_? 1 : 0;
 }
 
 
 
-void App::MainMenu()
-{
+void App::MainMenu() {
 	// TRICKY: leave these here, since this call comes from >1 place.
-	mGameOverTimer.Stop();
-	mGame->EnableScoreCounting(false);
-	mGame->SetFlybyMode(Game::FLYBY_PAUSE);
+	game_over_timer_.Stop();
+	game_->EnableScoreCounting(false);
+	game_->SetFlybyMode(Game::kFlybyPause);
 	// TRICKY-END!
 
-	UiTbc::Dialog* d = CreateTbcDialog(&App::OnMainMenuAction);
+	uitbc::Dialog* d = CreateTbcDialog(&App::OnMainMenuAction);
 	d->AddButton(1, ICONBTNA("btn_1p.png", "Single player"), true);
 	d->AddButton(2, ICONBTNA("btn_2p.png", "Two players"), true);
 	d->AddButton(3, ICONBTNA("btn_hiscore.png", "Hiscore"), true);
 	d->AddButton(4, ICONBTNA("btn_credits.png", "Credits"), true);
 }
 
-void App::UpdateHiscore(bool pError)
-{
-	if (!mDialog)
-	{
+void App::UpdateHiscore(bool error) {
+	if (!dialog_) {
 		return;
 	}
-	if (pError)
-	{
-		UiTbc::Label* lText = new UiTbc::Label(LIGHT_RED, "Network problem, try again l8r.");
-		lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
-		mDialog->AddChild(lText, 135, 75);
+	if (error) {
+		uitbc::Label* _text = new uitbc::Label(LIGHT_RED, "Network problem, try again l8r.");
+		_text->SetVericalAlignment(uitbc::Label::kValignTop);
+		dialog_->AddChild(_text, 135, 75);
 		return;
 	}
-	str lLastHiscoreName;
-	v_get(lLastHiscoreName, =, mVariableScope, RTVAR_HISCORE_NAME, "");
-	typedef Cure::HiscoreAgent::Entry HiscoreEntry;
-	typedef Cure::HiscoreAgent::List HiscoreList;
-	const HiscoreList& lHiscoreList = mHiscoreAgent->GetDownloadedList();
-	str lHiscore;
-	const int lBasePlace = lHiscoreList.mOffset;
-	const int lEntryCount = 10;
-	const double lLogExponent = ::log10((double)(lBasePlace+lEntryCount)) + 1e-12;
-	const int lPositionDigits = (int)::floor(lLogExponent) + 1;
-	for (int x = 0; x < (int)lHiscoreList.mEntryList.size() && x < lEntryCount; ++x)
-	{
-		const int lPlace = x + 1 + lBasePlace;
-		const HiscoreEntry& lEntry = lHiscoreList.mEntryList[x];
-		const str lScore = Int2Str(lEntry.mScore);
-		char lPointer = ' ';
-		char lPointer2 = ' ';
-		if (lLastHiscoreName == lEntry.mName)
-		{
-			lPointer  = '>';
-			lPointer2 = '<';
+	str last_hiscore_name;
+	v_get(last_hiscore_name, =, variable_scope_, kRtvarHiscoreName, "");
+	typedef cure::HiscoreAgent::Entry HiscoreEntry;
+	typedef cure::HiscoreAgent::List HiscoreList;
+	const HiscoreList& hiscore_list = hiscore_agent_->GetDownloadedList();
+	str hiscore;
+	const int base_place = hiscore_list.offset_;
+	const int entry_count = 10;
+	const double log_exponent = ::log10((double)(base_place+entry_count)) + 1e-12;
+	const int position_digits = (int)::floor(log_exponent) + 1;
+	for (int x = 0; x < (int)hiscore_list.entry_list_.size() && x < entry_count; ++x) {
+		const int place = x + 1 + base_place;
+		const HiscoreEntry& entry = hiscore_list.entry_list_[x];
+		const str score = Int2Str(entry.score_);
+		char pointer = ' ';
+		char pointer2 = ' ';
+		if (last_hiscore_name == entry.name_) {
+			pointer  = '>';
+			pointer2 = '<';
 		}
-		const str lFormatPlace = strutil::Format("%i", lPositionDigits);
+		const str format_place = strutil::Format("%i", position_digits);
 		// TRICKY: ugly circumvention for string that won't vswprintf()!
-		str lName = lEntry.mName;
-		if (lName.size() < 13)
-		{
-			lName.append(13-lName.size(), ' ');
+		str __name = entry.name_;
+		if (__name.size() < 13) {
+			__name.append(13-__name.size(), ' ');
 		}
-		const str lFormat1 = "%c%" + lFormatPlace + "i ";
-		const str lFormat2 = " %10s%c\n";
-		lHiscore += strutil::Format(lFormat1.c_str(), lPointer, lPlace) +
-			lName +
-			strutil::Format(lFormat2.c_str(), lScore.c_str(), lPointer2);
+		const str format1 = "%c%" + format_place + "i ";
+		const str format2 = " %10s%c\n";
+		hiscore += strutil::Format(format1.c_str(), pointer, place) +
+			__name +
+			strutil::Format(format2.c_str(), score.c_str(), pointer2);
 	}
-	if (lHiscore.empty())
-	{
-		lHiscore = "No score entered. Yet.";
+	if (hiscore.empty()) {
+		hiscore = "No score entered. Yet.";
 	}
-	UiTbc::Label* lText = new UiTbc::Label(FGCOLOR_DIALOG, lHiscore);
-	lText->SetFontId(mMonospacedFontId);
-	lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
-	const UiTbc::FontManager::FontId lPreviousFontId = mUiManager->GetFontManager()->GetActiveFontId();
-	mUiManager->GetFontManager()->SetActiveFont(mMonospacedFontId);
-	const int lCharWidth = mUiManager->GetFontManager()->GetStringWidth(" ");
-	mUiManager->GetFontManager()->SetActiveFont(lPreviousFontId);
-	mDialog->AddChild(lText, 110 - lPositionDigits/2 * lCharWidth, 75);
+	uitbc::Label* _text = new uitbc::Label(FGCOLOR_DIALOG, hiscore);
+	_text->SetFontId(monospaced_font_id_);
+	_text->SetVericalAlignment(uitbc::Label::kValignTop);
+	const uitbc::FontManager::FontId previous_font_id = ui_manager_->GetFontManager()->GetActiveFontId();
+	ui_manager_->GetFontManager()->SetActiveFont(monospaced_font_id_);
+	const int char_width = ui_manager_->GetFontManager()->GetStringWidth(" ");
+	ui_manager_->GetFontManager()->SetActiveFont(previous_font_id);
+	dialog_->AddChild(_text, 110 - position_digits/2 * char_width, 75);
 }
 
-void App::HiscoreMenu(int pDirection)
-{
+void App::HiscoreMenu(int direction) {
 	// Start downloading the highscore.
 	CreateHiscoreAgent();
-	const str lLevelName = "any";
-	const str lVehicleName = "monster_01";
-	const int lOffset = std::max(0, mMyHiscoreIndex-5);
-	if (!mHiscoreAgent->StartDownloadingList(gPlatform, lLevelName, lVehicleName, lOffset, 10))
-	{
-		delete mHiscoreAgent;
-		mHiscoreAgent = 0;
+	const str level_name = "any";
+	const str vehicle_name = "monster_01";
+	const int offset = std::max(0, my_hiscore_index_-5);
+	if (!hiscore_agent_->StartDownloadingList(kPlatform, level_name, vehicle_name, offset, 10)) {
+		delete hiscore_agent_;
+		hiscore_agent_ = 0;
 	}
-	mMyHiscoreIndex = 0;
+	my_hiscore_index_ = 0;
 
-	UiTbc::Dialog* d = CreateTbcDialog(&App::OnHiscoreAction);
-	d->SetPreClickTarget(UiTbc::Dialog::Action(this, &App::OnPreHiscoreAction));
-	d->SetDirection(pDirection, true);
+	uitbc::Dialog* d = CreateTbcDialog(&App::OnHiscoreAction);
+	d->SetPreClickTarget(uitbc::Dialog::Action(this, &App::OnPreHiscoreAction));
+	d->SetDirection(direction, true);
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel("Hiscore " + lLevelName + "/" + lVehicleName, mBigFontId);
-	UiTbc::Button* lMainMenuButton = ICONBTNA("btn_back.png", "");
-	lMainMenuButton->SetPreferredSize(d->GetPreferredWidth() / 2, d->GetPreferredHeight());
-	d->AddButton(-1, lMainMenuButton, true);
-	lMainMenuButton->SetPos(d->GetPreferredWidth()/4, 0);
-	if (!mHiscoreAgent)
-	{
+	d->SetQueryLabel("Hiscore " + level_name + "/" + vehicle_name, big_font_id_);
+	uitbc::Button* main_menu_button = ICONBTNA("btn_back.png", "");
+	main_menu_button->SetPreferredSize(d->GetPreferredWidth() / 2, d->GetPreferredHeight());
+	d->AddButton(-1, main_menu_button, true);
+	main_menu_button->SetPos(d->GetPreferredWidth()/4, 0);
+	if (!hiscore_agent_) {
 		UpdateHiscore(true);
 	}
 }
 
-void App::EnterHiscore(const str& pMessage, const Color& pColor)
-{
-	mGameOverTimer.Stop();
+void App::EnterHiscore(const str& message, const Color& color) {
+	game_over_timer_.Stop();
 
-	UiTbc::Dialog* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
-	d->SetPreClickTarget(UiTbc::Dialog::Action(this, &App::OnPreEnterAction));
+	uitbc::Dialog* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
+	d->SetPreClickTarget(uitbc::Dialog::Action(this, &App::OnPreEnterAction));
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel("Enter hiscore name ("+Int2Str((int)mGame->GetScore())+" points", mBigFontId);
-	if (!pMessage.empty())
-	{
-		UiTbc::Label* lMessage = new UiTbc::Label(pColor, pMessage);
-		const int lStringWidth = mUiManager->GetPainter()->GetStringWidth(pMessage);
-		d->AddChild(lMessage, d->GetSize().x/2 - lStringWidth/2, 80);
+	d->SetQueryLabel("Enter hiscore name ("+Int2Str((int)game_->GetScore())+" points", big_font_id_);
+	if (!message.empty()) {
+		uitbc::Label* _message = new uitbc::Label(color, message);
+		const int string_width = ui_manager_->GetPainter()->GetStringWidth(message);
+		d->AddChild(_message, d->GetSize().x/2 - string_width/2, 80);
 	}
-	mHiscoreTextField = new HiscoreTextField(d, UiTbc::TextField::BORDER_SUNKEN, 2, WHITE, "hiscore");
-	mHiscoreTextField->mApp = this;
-	mHiscoreTextField->SetText(v_slowget(mVariableScope, RTVAR_HISCORE_NAME, ""));
-	mHiscoreTextField->SetPreferredSize(205, 25, false);
+	hiscore_text_field_ = new HiscoreTextField(d, uitbc::TextField::kBorderSunken, 2, WHITE, "hiscore");
+	hiscore_text_field_->app_ = this;
+	hiscore_text_field_->SetText(v_slowget(variable_scope_, kRtvarHiscoreName, ""));
+	hiscore_text_field_->SetPreferredSize(205, 25, false);
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
-	d->AddChild(mHiscoreTextField, 70, 97);
+	d->AddChild(hiscore_text_field_, 70, 97);
 #else // Computer
-	d->AddChild(mHiscoreTextField, 70, 130);
-#endif // Touch / computer
-	mHiscoreTextField->SetKeyboardFocus();	// TRICKY: focus after adding.
-	UiTbc::Button* lCancelButton = new UiTbc::Button("cancel");
+	d->AddChild(hiscore_text_field_, 70, 130);
+#endif // touch / computer
+	hiscore_text_field_->SetKeyboardFocus();	// TRICKY: focus after adding.
+	uitbc::Button* cancel_button = new uitbc::Button("cancel");
 	Color c = Color(180, 50, 40);
-	lCancelButton->SetBaseColor(c);
-	lCancelButton->SetText("Cancel", FGCOLOR_DIALOG, CLEAR_COLOR);
-	lCancelButton->SetRoundedRadius(8);
-	lCancelButton->SetPreferredSize(300-mHiscoreTextField->GetPreferredWidth()-8, mHiscoreTextField->GetPreferredHeight()+1);
-	d->AddButton(-1, lCancelButton, true);
-	lCancelButton->SetPos(mHiscoreTextField->GetPos().x+mHiscoreTextField->GetPreferredWidth()+8, mHiscoreTextField->GetPos().y);
+	cancel_button->SetBaseColor(c);
+	cancel_button->SetText("Cancel", FGCOLOR_DIALOG, CLEAR_COLOR);
+	cancel_button->SetRoundedRadius(8);
+	cancel_button->SetPreferredSize(300-hiscore_text_field_->GetPreferredWidth()-8, hiscore_text_field_->GetPreferredHeight()+1);
+	d->AddButton(-1, cancel_button, true);
+	cancel_button->SetPos(hiscore_text_field_->GetPos().x+hiscore_text_field_->GetPreferredWidth()+8, hiscore_text_field_->GetPos().y);
 }
 
-void App::SuperReset()
-{
-	mGameOverTimer.Stop();
+void App::SuperReset() {
+	game_over_timer_.Stop();
 
-	mGame->EndSlowmo();
+	game_->EndSlowmo();
 
-	mGame->ResetScore();
+	game_->ResetScore();
 
-	mGame->SetVehicleName(mGame->GetVehicleName());
-	mResourceManager->Tick();
-	strutil::strvec lResourceTypes;
-	lResourceTypes.push_back("RenderImg");
-	lResourceTypes.push_back("Geometry");
-	lResourceTypes.push_back("GeometryRef");
-	lResourceTypes.push_back("Physics");
-	lResourceTypes.push_back("PhysicsShared");
-	lResourceTypes.push_back("RamImg");
-	mResourceManager->ForceFreeCache(lResourceTypes);
-	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
+	game_->SetVehicleName(game_->GetVehicleName());
+	resource_manager_->Tick();
+	strutil::strvec resource_types;
+	resource_types.push_back("RenderImg");
+	resource_types.push_back("Geometry");
+	resource_types.push_back("GeometryRef");
+	resource_types.push_back("Physics");
+	resource_types.push_back("PhysicsShared");
+	resource_types.push_back("RamImg");
+	resource_manager_->ForceFreeCache(resource_types);
+	resource_manager_->ForceFreeCache(resource_types);	// Call again to release any dependent resources.
 
-	//mIsLoaded = false;
-	mDoLayout = true;
+	//is_loaded_ = false;
+	do_layout_ = true;
 }
 
-void App::CreateHiscoreAgent()
-{
-	delete mHiscoreAgent;
-	const str lHost = _O("7y=196h5+;/,9p.5&92r:/;*(,509p;/1", "gamehiscore.pixeldoctrine.com");
-	mHiscoreAgent = new Cure::HiscoreAgent(lHost, 80, "tire_fire");
-	//mHiscoreAgent = new Cure::HiscoreAgent("localhost", 8080, "tire_fire");
+void App::CreateHiscoreAgent() {
+	delete hiscore_agent_;
+	const str host = _O("7y=196h5+;/,9p.5&92r:/;*(,509p;/1", "gamehiscore.pixeldoctrine.com");
+	hiscore_agent_ = new cure::HiscoreAgent(host, 80, "tire_fire");
+	//hiscore_agent_ = new cure::HiscoreAgent("localhost", 8080, "tire_fire");
 }
 
-void App::Purchase(const str& pProductName)
-{
+void App::Purchase(const str& product_name) {
 #ifdef LEPRA_IOS
-	[mAnimatedApp startPurchase:MacLog::Encode(pProductName)];
+	[animated_app_ startPurchase:MacLog::Encode(product_name)];
 #else // !iOS
-	(void)pProductName;
-	mButtonDelegate = UiTbc::Dialog::Action(this, &App::OnOk);
-	UiTbc::MessageDialog* lMessage = new UiTbc::MessageDialog(mUiManager->GetDesktopWindow(), mButtonDelegate,
+	(void)product_name;
+	button_delegate_ = uitbc::Dialog::Action(this, &App::OnOk);
+	uitbc::MessageDialog* _message = new uitbc::MessageDialog(ui_manager_->GetDesktopWindow(), button_delegate_,
 		"Content purchase not yet implemented on this platform.");
-	lMessage->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);
-	lMessage->AddButton(+10, "OK", true);
-	lMessage->AddButton(+33, "Nooo!", true);
-	mDialog = lMessage;
+	_message->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);
+	_message->AddButton(+10, "OK", true);
+	_message->AddButton(+33, "Nooo!", true);
+	dialog_ = _message;
 #endif // iOS
 }
 
-void App::SetIsPurchasing(bool pIsPurchasing)
-{
-	mIsPurchasing = pIsPurchasing;
-	if (!mIsPurchasing && !mDialog)
-	{
+void App::SetIsPurchasing(bool is_purchasing) {
+	is_purchasing_ = is_purchasing;
+	if (!is_purchasing_ && !dialog_) {
 		MainMenu();
 	}
 }
 
-void App::OnResize(int /*pWidth*/, int /*pHeight*/)
-{
-	mDoLayout = true;
-	mBootLogoTimer.ReduceTimeDiff(-10);
+void App::OnResize(int /*_width*/, int /*_height*/) {
+	do_layout_ = true;
+	boot_logo_timer_.ReduceTimeDiff(-10);
 }
 
-void App::OnMinimize()
-{
+void App::OnMinimize() {
 }
 
-void App::OnMaximize(int pWidth, int pHeight)
-{
-	OnResize(pWidth, pHeight);
+void App::OnMaximize(int _width, int _height) {
+	OnResize(_width, _height);
 }
 
-void App::OnAction(UiTbc::Button* pButton)
-{
-	mDoLayout = true;
-	UiTbc::Dialog* d = mDialog;
-	mButtonDelegate(pButton);
-	if (mDialog == d)	// No news? Just drop it.
-	{
-		mButtonDelegate.clear();
-		mDialog = 0;
+void App::OnAction(uitbc::Button* button) {
+	do_layout_ = true;
+	uitbc::Dialog* d = dialog_;
+	button_delegate_(button);
+	if (dialog_ == d) {	// No news? Just drop it.
+		button_delegate_.clear();
+		dialog_ = 0;
 	}
 }
 
-void App::OnTapSound(UiTbc::Button*)
-{
-	if (mTapClick->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		mUiManager->GetSoundManager()->Play(mTapClick->GetData(), 1, Random::Uniform(0.7f, 1.4f));
+void App::OnTapSound(uitbc::Button*) {
+	if (tap_click_->GetLoadState() == cure::kResourceLoadComplete) {
+		ui_manager_->GetSoundManager()->Play(tap_click_->GetData(), 1, Random::Uniform(0.7f, 1.4f));
 	}
 }
 
-void App::OnOk(UiTbc::Button* pButton)
-{
-	if (pButton->GetTag() == 33)
-	{
+void App::OnOk(uitbc::Button* button) {
+	if (button->GetTag() == 33) {
 		SystemManager::EmailTo(
 			"info@pixeldoctrine.com",
 			"I want the complete game!",
@@ -1380,31 +1183,23 @@ void App::OnOk(UiTbc::Button* pButton)
 	MainMenu();
 }
 
-void App::OnMainMenuAction(UiTbc::Button* pButton)
-{
-	switch (pButton->GetTag())
-	{
-		case 1:
-		{
+void App::OnMainMenuAction(uitbc::Button* button) {
+	switch (button->GetTag()) {
+		case 1: {
 			// 1P
-		}
-		break;
-		case 2:
-		{
+		} break;
+		case 2: {
 			// 2P
-		}
-		break;
-		case 3:
-		{
+		} break;
+		case 3: {
 			HiscoreMenu(+1);
 			//EnterHiscore("Press enter when you're done", FGCOLOR_DIALOG);
 		}
 		return;
-		case 4:
-		{
-			UiTbc::Dialog* d = CreateTbcDialog(&App::OnCreditsAction);
+		case 4: {
+			uitbc::Dialog* d = CreateTbcDialog(&App::OnCreditsAction);
 			d->SetOffset(PixelCoord(0, -30));
-			d->SetQueryLabel("Credits", mBigFontId);
+			d->SetQueryLabel("Credits", big_font_id_);
 			str s =	"Game    Pixel Doctrine\n"
 				"Music   Jonas Kapla\n"
 				"Thanks  ODE, STLport, ChibiXM, Ogg/Vorbis, OpenAL, ALUT\n"
@@ -1413,271 +1208,222 @@ void App::OnMainMenuAction(UiTbc::Button* pButton)
 				"\n"
 				"Idiots kill civilians for real. Visit Avaaz.org if you\n"
 				"too belive media attention eventually can crush tyrants.";
-			UiTbc::Label* lText = new UiTbc::Label(FGCOLOR_DIALOG, s);
-			lText->SetFontId(mMonospacedFontId);
-			lText->SetVericalAlignment(UiTbc::Label::VALIGN_TOP);
-			d->AddChild(lText, 25, 85);
-			UiTbc::Button* lBackButton = new UiTbc::CustomButton("back");
-			lBackButton->SetPreferredSize(d->GetPreferredSize());
-			d->AddButton(-1, lBackButton, true);
-			lBackButton->SetPos(0, 0);
+			uitbc::Label* _text = new uitbc::Label(FGCOLOR_DIALOG, s);
+			_text->SetFontId(monospaced_font_id_);
+			_text->SetVericalAlignment(uitbc::Label::kValignTop);
+			d->AddChild(_text, 25, 85);
+			uitbc::Button* back_button = new uitbc::CustomButton("back");
+			back_button->SetPreferredSize(d->GetPreferredSize());
+			d->AddButton(-1, back_button, true);
+			back_button->SetPos(0, 0);
 		}
 		return;
 	}
-	/*UiTbc::Dialog* d = CreateTbcDialog(&App::OnLevelAction);
-	d->SetQueryLabel("Select level", mBigFontId);
+	/*uitbc::Dialog* d = CreateTbcDialog(&App::OnLevelAction);
+	d->SetQueryLabel("Select level", big_font_id_);
 	d->AddButton(1, ICONBTN("btn_tutorial.png", "Tutorial"));
-	d->AddButton(2, ICONBTN("btn_lvl2.png", gLevels[0]));
-	d->AddButton(3, ICONBTN("btn_lvl3.png", gLevels[1]));
-	d->AddButton(4, ICONBTN("btn_lvl4.png", gLevels[2]));
-	if (mIsMoneyIconAdded && !v_slowget(mVariableScope, RTVAR_CONTENT_LEVELS, false))
-	{
-		AddCostIcon(gLevels[1]);
-		AddCostIcon(gLevels[2]);
+	d->AddButton(2, ICONBTN("btn_lvl2.png", kLevels[0]));
+	d->AddButton(3, ICONBTN("btn_lvl3.png", kLevels[1]));
+	d->AddButton(4, ICONBTN("btn_lvl4.png", kLevels[2]));
+	if (is_money_icon_added_ && !v_slowget(variable_scope_, kRtvarContentLevels, false)) {
+		AddCostIcon(kLevels[1]);
+		AddCostIcon(kLevels[2]);
 	}*/
 }
 
-void App::OnEnterHiscoreAction(UiTbc::Button* pButton)
-{
-	if (!pButton)
-	{
-		str lLastHiscoreName = strutil::Strip(mHiscoreTextField->GetText(), " \t\v\r\n");
-		mHiscoreTextField = 0;
-		if (!lLastHiscoreName.empty())
-		{
-			v_set(mVariableScope, RTVAR_HISCORE_NAME, lLastHiscoreName);
+void App::OnEnterHiscoreAction(uitbc::Button* button) {
+	if (!button) {
+		str last_hiscore_name = strutil::Strip(hiscore_text_field_->GetText(), " \t\v\r\n");
+		hiscore_text_field_ = 0;
+		if (!last_hiscore_name.empty()) {
+			v_set(variable_scope_, kRtvarHiscoreName, last_hiscore_name);
 #ifdef LEPRA_IOS
-			[AnimatedApp storeHiscoreName];
+			[AnimatedApp hiscore_name_];
 #endif // iOS
-			const str lLevelName = "any";
-			const str lVehicleName = "any";
+			const str level_name = "any";
+			const str vehicle_name = "any";
 			CreateHiscoreAgent();
-			if (!mHiscoreAgent->StartUploadingScore(gPlatform, lLevelName, lVehicleName, lLastHiscoreName, (int)Math::Round(mGame->GetScore())))
-			{
-				delete mHiscoreAgent;
-				mHiscoreAgent = 0;
+			if (!hiscore_agent_->StartUploadingScore(kPlatform, level_name, vehicle_name, last_hiscore_name, (int)Math::Round(game_->GetScore()))) {
+				delete hiscore_agent_;
+				hiscore_agent_ = 0;
 			}
-		}
-		else
-		{
+		} else {
 			MainMenu();
 		}
-	}
-	else if (pButton->GetTag() == -1)
-	{
+	} else if (button->GetTag() == -1) {
 		MainMenu();
 	}
 }
-	
-void App::OnLevelAction(UiTbc::Button* pButton)
-{
-	if (pButton->GetTag() >= 3 && !v_slowget(mVariableScope, RTVAR_CONTENT_LEVELS, false))
-	{
-		Purchase(CONTENT_LEVELS);
+
+void App::OnLevelAction(uitbc::Button* button) {
+	if (button->GetTag() >= 3 && !v_slowget(variable_scope_, kRtvarContentLevels, false)) {
+		Purchase(kContentLevels);
 		return;
 	}
 
-	str lLevel = "level_2";
-	switch (pButton->GetTag())
-	{
-		case 1:	lLevel = "level_2";			mHiscoreLevelIndex = 0;	break;
-		case 2:	lLevel = "level_2";			mHiscoreLevelIndex = 0;	break;
-		case 3:	lLevel = "level_elevate";		mHiscoreLevelIndex = 1;	break;
-		case 4:	lLevel = "level_balls_castle";	mHiscoreLevelIndex = 2;	break;
+	str level = "level_2";
+	switch (button->GetTag()) {
+		case 1:	level = "level_2";			hiscore_level_index_ = 0;	break;
+		case 2:	level = "level_2";			hiscore_level_index_ = 0;	break;
+		case 3:	level = "level_elevate";		hiscore_level_index_ = 1;	break;
+		case 4:	level = "level_balls_castle";	hiscore_level_index_ = 2;	break;
 	}
-	if (mGame->GetLevelName() != lLevel)
-	{
-		mGame->SetLevelName(lLevel);
+	if (game_->GetLevelName() != level) {
+		game_->SetLevelName(level);
 	}
-	if (pButton->GetTag() == 1)
-	{
+	if (button->GetTag() == 1) {
 		// Tutorial.
-		mGameOverTimer.Stop();
-		mGame->EnableScoreCounting(true);
-		mGame->SetFlybyMode(Game::FLYBY_INTRODUCTION);
-		mGame->SetVehicleName("monster_01");
+		game_over_timer_.Stop();
+		game_->EnableScoreCounting(true);
+		game_->SetFlybyMode(Game::kFlybyIntroduction);
+		game_->SetVehicleName("monster_01");
 		// If all else fails, fall thru add keep going. Makes more sense to the user than
 		// a tutorial without any instructions.
 	}
-	if (mIsMoneyIconAdded && !v_slowget(mVariableScope, RTVAR_CONTENT_VEHICLES, false))
-	{
-		/*AddCostIcon(gVehicles[1]);
-		AddCostIcon(gVehicles[2]);
-		AddCostIcon(gVehicles[3]);*/
+	if (is_money_icon_added_ && !v_slowget(variable_scope_, kRtvarContentVehicles, false)) {
+		/*AddCostIcon(kVehicles[1]);
+		AddCostIcon(kVehicles[2]);
+		AddCostIcon(kVehicles[3]);*/
 	}
-	/*if (mGame->GetComputerIndex() != -1)
-	{
+	/*if (game_->GetComputerIndex() != -1) {
 		d->SetOffset(PixelCoord(0, -40));
 		d->UpdateLayout();
 	}*/
 
-	strutil::strvec lResourceTypes;
-	lResourceTypes.push_back("RenderImg");
-	lResourceTypes.push_back("Geometry");
-	lResourceTypes.push_back("GeometryRef");
-	lResourceTypes.push_back("Physics");
-	lResourceTypes.push_back("PhysicsShared");
-	lResourceTypes.push_back("RamImg");
-	mResourceManager->ForceFreeCache(lResourceTypes);
-	mResourceManager->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
+	strutil::strvec resource_types;
+	resource_types.push_back("RenderImg");
+	resource_types.push_back("Geometry");
+	resource_types.push_back("GeometryRef");
+	resource_types.push_back("Physics");
+	resource_types.push_back("PhysicsShared");
+	resource_types.push_back("RamImg");
+	resource_manager_->ForceFreeCache(resource_types);
+	resource_manager_->ForceFreeCache(resource_types);	// Call again to release any dependent resources.
 }
 
-void App::OnHiscoreAction(UiTbc::Button* /*pButton*/)
-{
-	delete mHiscoreAgent;
-	mHiscoreAgent = 0;
+void App::OnHiscoreAction(uitbc::Button* /*button*/) {
+	delete hiscore_agent_;
+	hiscore_agent_ = 0;
 	MainMenu();
 }
 
-void App::OnPreHiscoreAction(UiTbc::Button* pButton)
-{
-	OnTapSound(pButton);
-	switch (pButton->GetTag())
-	{
-		case -1:
-		{
-			mDialog->SetDirection(+1, false);
-		}
-		break;
+void App::OnPreHiscoreAction(uitbc::Button* button) {
+	OnTapSound(button);
+	switch (button->GetTag()) {
+		case -1: {
+			dialog_->SetDirection(+1, false);
+		} break;
 		case -2:
-		case -4:
-		{
-			mDialog->SetDirection(-1, false);
-		}
-		break;
+		case -4: {
+			dialog_->SetDirection(-1, false);
+		} break;
 		case -3:
-		case -5:
-		{
-			mDialog->SetDirection(+1, false);
-		}
-		break;
+		case -5: {
+			dialog_->SetDirection(+1, false);
+		} break;
 	}
 }
 
-void App::OnPreEnterAction(UiTbc::Button* pButton)
-{
-	OnTapSound(pButton);
+void App::OnPreEnterAction(uitbc::Button* button) {
+	OnTapSound(button);
 }
 
-void App::OnCreditsAction(UiTbc::Button* /*pButton*/)
-{
+void App::OnCreditsAction(uitbc::Button* /*button*/) {
 	MainMenu();
 }
 
-void App::DoPause()
-{
-	if (mDialog)
-	{
+void App::DoPause() {
+	if (dialog_) {
 		return;
 	}
-	UiTbc::Dialog* d = CreateTbcDialog(&App::OnPauseAction);
+	uitbc::Dialog* d = CreateTbcDialog(&App::OnPauseAction);
 	d->AddButton(1, ICONBTNA("btn_resume.png", "Resume"), true);
-	if (mGame->GetFlybyMode() == Game::FLYBY_INACTIVE)	// Restart not available in tutorial mode.
-	{
+	if (game_->GetFlybyMode() == Game::kFlybyInactive) {	// Restart not available in tutorial mode.
 		d->AddButton(2, ICONBTNA("btn_restart.png", "Restart"), true);
 	}
 	d->AddButton(3, ICONBTNA("btn_main_menu.png", "Main menu"), true);
 }
 
-void App::OnPauseClickWithSound(UiTbc::Button* pButton)
-{
-	if (mDialog)
-	{
+void App::OnPauseClickWithSound(uitbc::Button* button) {
+	if (dialog_) {
 		return;
 	}
-	OnTapSound(pButton);
+	OnTapSound(button);
 	DoPause();
 }
 
-void App::OnPauseAction(UiTbc::Button* pButton)
-{
-	if (pButton->GetTag() == 2)
-	{
+void App::OnPauseAction(uitbc::Button* button) {
+	if (button->GetTag() == 2) {
 		SuperReset();
-	}
-	else if (pButton->GetTag() == 3)
-	{
+	} else if (button->GetTag() == 3) {
 		MainMenu();
 	}
 }
 
-void App::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource)
-{
-	(void)pResource;
+void App::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* resource) {
+	(void)resource;
 }
 
-void App::SoundLoadCallback(UiCure::UserSound2dResource* pResource)
-{
-	(void)pResource;
+void App::SoundLoadCallback(UiCure::UserSound2dResource* resource) {
+	(void)resource;
 }
 
-UiTbc::Dialog* App::CreateTbcDialog(ButtonAction pAction)
-{
-	mButtonDelegate = UiTbc::Dialog::Action(this, pAction);
-	UiTbc::Dialog* d = new UiTbc::Dialog(mUiManager->GetDesktopWindow(), UiTbc::Dialog::Action(this, &App::OnAction));
-	d->SetPreClickTarget(UiTbc::Dialog::Action(this, &App::OnTapSound));
+uitbc::Dialog* App::CreateTbcDialog(ButtonAction action) {
+	button_delegate_ = uitbc::Dialog::Action(this, action);
+	uitbc::Dialog* d = new uitbc::Dialog(ui_manager_->GetDesktopWindow(), uitbc::Dialog::Action(this, &App::OnAction));
+	d->SetPreClickTarget(uitbc::Dialog::Action(this, &App::OnTapSound));
 	d->SetSize(440, 280);
 	d->SetPreferredSize(440, 280);
 	d->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);
-	mDialog = d;
+	dialog_ = d;
 	return d;
 }
 
-UiTbc::Button* App::CreateButton(const str& pText, const Color& pColor, UiTbc::Component* pParent)
-{
-	UiTbc::Button* lButton = new UiTbc::Button(UiTbc::BorderComponent::LINEAR, 6, pColor, "");
-	lButton->SetText(pText);
-	lButton->SetPreferredSize(44, 44);
-	pParent->AddChild(lButton);
-	lButton->SetVisible(false);
-	lButton->UpdateLayout();
-	return lButton;
+uitbc::Button* App::CreateButton(const str& text, const Color& color, uitbc::Component* parent) {
+	uitbc::Button* _button = new uitbc::Button(uitbc::BorderComponent::kLinear, 6, color, "");
+	_button->SetText(text);
+	_button->SetPreferredSize(44, 44);
+	parent->AddChild(_button);
+	_button->SetVisible(false);
+	_button->UpdateLayout();
+	return _button;
 }
 
-void App::Transpose(int& x, int& y, float& pAngle) const
-{
+void App::Transpose(int& x, int& y, float& angle) const {
 	float fx = (float)x;
 	float fy = (float)y;
-	Transpose(fx, fy, pAngle);
+	Transpose(fx, fy, angle);
 	x = (int)fx;
 	y = (int)fy;
 }
 
-void App::Transpose(float& x, float& y, float& pAngle) const
-{
-	if (mFlipDraw)
-	{
-		const int w = mUiManager->GetCanvas()->GetWidth();
+void App::Transpose(float& x, float& y, float& angle) const {
+	if (flip_draw_) {
+		const int w = ui_manager_->GetCanvas()->GetWidth();
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 		x = w - x;
-		y = mUiManager->GetCanvas()->GetHeight() - y;
-		pAngle += PIF;
+		y = ui_manager_->GetCanvas()->GetHeight() - y;
+		angle += PIF;
 #else // Computer
 		(void)y;
-		(void)pAngle;
+		(void)angle;
 		const int w2 = w/2;
-		if (x < w2)
-		{
+		if (x < w2) {
 			x += w2;
-		}
-		else
-		{
+		} else {
 			x -= w2;
 		}
-#endif // Touch / Computer
+#endif // touch / Computer
 	}
 }
 
-str App::Int2Str(int pNumber)
-{
-	str s = strutil::IntToString(pNumber, 10);
+str App::Int2Str(int number) {
+	str s = strutil::IntToString(number, 10);
 	size_t l = s.length();
-	if (pNumber < 0)
-	{
+	if (number < 0) {
 		--l;
 	}
-	for (size_t y = 3; y < l; y += 4)
-	{
+	for (size_t y = 3; y < l; y += 4) {
 		s.insert(s.length()-y, 1, ',');
 		++l;
 	}
@@ -1686,8 +1432,8 @@ str App::Int2Str(int pNumber)
 
 
 
-App* App::mApp = 0;
-loginstance(GAME, App);
+App* App::app_ = 0;
+loginstance(kGame, App);
 
 
 

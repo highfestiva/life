@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,14 +7,14 @@
 #pragma once
 
 #include <list>
-#include "CyclicArray.h"
-#include "Datagram.h"
-#include "HashSet.h"
-#include "HashTable.h"
-#include "InputStream.h"
-#include "OutputStream.h"
-#include "SocketAddress.h"
-#include "Thread.h"
+#include "cyclicarray.h"
+#include "datagram.h"
+#include "hashset.h"
+#include "hashtable.h"
+#include "inputstream.h"
+#include "outputstream.h"
+#include "socketaddress.h"
+#include "thread.h"
 
 #ifdef LEPRA_WINDOWS
 typedef intptr_t s_socket;
@@ -24,8 +24,7 @@ typedef int s_socket;
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -33,28 +32,25 @@ class TcpSocket;
 
 
 // Base class for all sockets.
-class SocketBase
-{
+class SocketBase {
 public:
-	enum
-	{
-		BUFFER_SIZE = 1024,
+	enum {
+		kBufferSize = 1024,
 	};
 
-	enum ShutdownFlag
-	{
-		SHUTDOWN_NONE = 0,
-		SHUTDOWN_RECV = 1,
-		SHUTDOWN_SEND = 2,
-		SHUTDOWN_BOTH  = (SHUTDOWN_RECV|SHUTDOWN_SEND)
+	enum ShutdownFlag {
+		kShutdownNone = 0,
+		kShutdownRecv = 1,
+		kShutdownSend = 2,
+		kShutdownBoth  = (kShutdownRecv|kShutdownSend)
 	};
 
-	static s_socket InitSocket(s_socket pSocket, int pSize, bool pReuse);
+	static s_socket InitSocket(s_socket socket, int size, bool reuse);
 	static s_socket CreateTcpSocket();
 	static s_socket CreateUdpSocket();
-	static void CloseSysSocket(s_socket pSocket);
+	static void CloseSysSocket(s_socket socket);
 
-	SocketBase(s_socket pSocket = ~0);	// INVALID_SOCKET
+	SocketBase(s_socket socket = ~0);	// INVALID_SOCKET
 	virtual ~SocketBase();
 	void Close();
 	void CloseKeepHandle();
@@ -64,7 +60,7 @@ public:
 	void MakeBlocking();
 	void MakeNonBlocking();
 
-	void Shutdown(ShutdownFlag pHow);
+	void Shutdown(ShutdownFlag how);
 
 	int ClearErrors() const;
 
@@ -72,25 +68,24 @@ public:
 	uint64 GetReceivedByteCount() const;
 
 protected:
-	s_socket mSocket;
-	uint64 mSentByteCount;
-	uint64 mReceivedByteCount;
+	s_socket socket_;
+	uint64 sent_byte_count_;
+	uint64 received_byte_count_;
 };
 
 
 // Base class for socket classes with an Id.
-class ConnectionWithId
-{
+class ConnectionWithId {
 public:
 	ConnectionWithId();
 	virtual ~ConnectionWithId();
 
-	void SetConnectionId(const std::string& pConnectionId);
+	void SetConnectionId(const std::string& connection_id);
 	void ClearConnectionId();
 	const std::string& GetConnectionId() const;
 
 private:
-	std::string mConnectionId;
+	std::string connection_id_;
 };
 
 
@@ -98,20 +93,19 @@ private:
 class BufferedIo;
 
 // Base class of TcpMuxSocket and UdpMuxSocket.
-class MuxIo
-{
+class MuxIo {
 public:
-	MuxIo(unsigned pMaxPendingConnectionCount, unsigned pMaxConnectionCount);
+	MuxIo(unsigned max_pending_connection_count, unsigned max_connection_count);
 	virtual ~MuxIo();
 
-	void AddSender(BufferedIo* pSender);
-	void RemoveSenderNoLock(BufferedIo* pSender);
-	bool IsSender(BufferedIo* pSender) const;
+	void AddSender(BufferedIo* sender);
+	void RemoveSenderNoLock(BufferedIo* sender);
+	bool IsSender(BufferedIo* sender) const;
 
-	void AddReceiver(BufferedIo* pReceiver);
-	void AddReceiverNoLock(BufferedIo* pReceiver);
-	void RemoveReceiverNoLock(BufferedIo* pReceiver);
-	bool IsReceiverNoLock(BufferedIo* pReceiver) const;
+	void AddReceiver(BufferedIo* receiver);
+	void AddReceiverNoLock(BufferedIo* receiver);
+	void RemoveReceiverNoLock(BufferedIo* receiver);
+	bool IsReceiverNoLock(BufferedIo* receiver) const;
 
 	virtual void ReleaseSocketThreads();
 
@@ -121,59 +115,57 @@ protected:
 
 	typedef HashSet<IPAddress, IPAddress> IPSet;
 
-	mutable Lock mIoLock;
-	IPSet mBannedIPTable;
-	Semaphore mAcceptSemaphore;
+	mutable Lock io_lock_;
+	IPSet banned_ip_table_;
+	Semaphore accept_semaphore_;
 
-	const unsigned mMaxPendingConnectionCount;
-	const unsigned mMaxConnectionCount;
+	const unsigned max_pending_connection_count_;
+	const unsigned max_connection_count_;
 
-	static const char mConnectionString[27];
-	static const uint8 mAcceptionString[15];
+	static const char connection_string_[27];
+	static const uint8 acception_string_[15];
 
 private:
 	typedef std::unordered_set<BufferedIo*, LEPRA_VOIDP_HASHER> IoSet;
 
-	IoSet mSenderSet;
-	IoSet mReceiverSet;
+	IoSet sender_set_;
+	IoSet receiver_set_;
 };
 
 
 
-// Base class of UdpVSocket and TcpVSocket. In the output case (as a "sender") it 
-// is used to fill a datagram with packets until there is no room left (max limit 
-// is defined by UdpMuxSocket). When the buffer is full it will be sent by calling 
+// Base class of UdpVSocket and TcpVSocket. In the output case (as a "sender") it
+// is used to fill a datagram with packets until there is no room left (max limit
+// is defined by UdpMuxSocket). When the buffer is full it will be sent by calling
 // SendBuffer(). This reduces overhead in both UDP and TCP.
-class BufferedIo
-{
+class BufferedIo {
 public:
 	BufferedIo();
 	virtual ~BufferedIo();
 
 	void ClearOutputData();
 	Datagram& GetSendBuffer() const;
-	IOError AppendSendBuffer(const void* pData, int pLength);
+	IOError AppendSendBuffer(const void* data, int length);
 	bool HasSendData() const;
 
-	// Sets/Gets mInSendBuffer. Used to keep track on whether this is added
+	// Sets/Gets in_send_buffer_. Used to keep track on whether this is added
 	// to MuxIo's sender list.
-	void SetInSenderList(bool pInSendBuffer);
+	void SetInSenderList(bool in_send_buffer);
 	bool GetInSenderList() const;
 
 	virtual int SendBuffer() = 0;
 
 protected:
-	MuxIo* mMuxIo;
-	Datagram mSendBuffer;
-	bool mInSendBuffer;
+	MuxIo* mux_io_;
+	Datagram send_buffer_;
+	bool in_send_buffer_;
 };
 
 
 
-class DatagramReceiver
-{
+class DatagramReceiver {
 public:
-	virtual int Receive(TcpSocket* pSocket, void* pBuffer, int pMaxSize) = 0;
+	virtual int Receive(TcpSocket* socket, void* buffer, int max_size) = 0;
 };
 
 
@@ -182,12 +174,11 @@ public:
 // A socket that listens to port specified in the constructor, on the interface
 // defined by the given IP-address. A "TcpServerSocket" using Java language...
 //
-class TcpListenerSocket: public SocketBase
-{
+class TcpListenerSocket: public SocketBase {
 public:
 	friend class TcpSocket;
 
-	TcpListenerSocket(const SocketAddress& pLocalAddress, bool pIsServer);
+	TcpListenerSocket(const SocketAddress& local_address, bool is_server);
 	virtual ~TcpListenerSocket();
 
 	// Waits for connection, and returns the connected socket.
@@ -199,36 +190,35 @@ public:
 	const SocketAddress& GetLocalAddress() const;
 	unsigned GetConnectionCount() const;
 
-	void SetDatagramReceiver(DatagramReceiver* pReceiver);
+	void SetDatagramReceiver(DatagramReceiver* receiver);
 
 protected:
 	DatagramReceiver* GetDatagramReceiver() const;
 	typedef TcpSocket* (*SocketFactory)(s_socket, const SocketAddress&, TcpListenerSocket*, DatagramReceiver*);
-	TcpSocket* Accept(SocketFactory pSocketFactory);
+	TcpSocket* Accept(SocketFactory socket_factory);
 
 private:
-	static TcpSocket* CreateSocket(s_socket pSocket, const SocketAddress& pTargetAddress,
-		TcpListenerSocket* pServerSocket, DatagramReceiver* pReceiver);
+	static TcpSocket* CreateSocket(s_socket socket, const SocketAddress& target_address,
+		TcpListenerSocket* server_socket, DatagramReceiver* receiver);
 
 	void DecNumConnections();
 
-	int mConnectionCount;
-	SocketAddress mLocalAddress;
-	DatagramReceiver* mReceiver;
+	int connection_count_;
+	SocketAddress local_address_;
+	DatagramReceiver* receiver_;
 
 	logclass();
 };
 
 
 // A regular Tcp socket.
-class TcpSocket: public SocketBase
-{
+class TcpSocket: public SocketBase {
 public:
-	TcpSocket(DatagramReceiver* pReceiver);
-	TcpSocket(const SocketAddress& pLocalAddress);
+	TcpSocket(DatagramReceiver* receiver);
+	TcpSocket(const SocketAddress& local_address);
 	virtual ~TcpSocket();
 
-	bool Connect(const SocketAddress& pTargetAddress);
+	bool Connect(const SocketAddress& target_address);
 	void Disconnect();
 
 	// Nagle's algorithm is used in the Tcp protocol to reduce overhead when
@@ -237,25 +227,25 @@ public:
 
 	const SocketAddress& GetTargetAddress() const;
 
-	int Send(const void* pData, int pSize);
-	int Receive(void* pData, int pMaxSize);
-	int Receive(void* pData, int pMaxSize, double pTimeout);
-	bool Unreceive(void* pData, int pByteCount);
+	int Send(const void* data, int size);
+	int Receive(void* data, int max_size);
+	int Receive(void* data, int max_size, double timeout);
+	bool Unreceive(void* data, int byte_count);
 
-	void SetDatagramReceiver(DatagramReceiver* pReceiver);
-	int ReceiveDatagram(void* pData, int pMaxSize);
+	void SetDatagramReceiver(DatagramReceiver* receiver);
+	int ReceiveDatagram(void* data, int max_size);
 
 protected:
 	friend class TcpListenerSocket;
 
-	TcpSocket(s_socket pSocket, const SocketAddress& pTargetAddress, TcpListenerSocket* pServerSocket, DatagramReceiver* pReceiver);
+	TcpSocket(s_socket socket, const SocketAddress& target_address, TcpListenerSocket* server_socket, DatagramReceiver* receiver);
 
 private:
-	DatagramReceiver* mReceiver;
-	uint8 mUnreceivedArray[16];
-	int mUnreceivedByteCount;
-	SocketAddress mTargetAddress;
-	TcpListenerSocket* mServerSocket;
+	DatagramReceiver* receiver_;
+	uint8 unreceived_array_[16];
+	int unreceived_byte_count_;
+	SocketAddress target_address_;
+	TcpListenerSocket* server_socket_;
 
 	logclass();
 };
@@ -266,21 +256,20 @@ private:
 // Represents a regular UDP socket, which is inconvenient to use compared to
 // the next class below...
 //
-class UdpSocket: public SocketBase
-{
+class UdpSocket: public SocketBase {
 public:
-	UdpSocket(const SocketAddress& pLocalAddress, bool pIsServer);
-	UdpSocket(const UdpSocket& pSocket);
+	UdpSocket(const SocketAddress& local_address, bool is_server);
+	UdpSocket(const UdpSocket& socket);
 	virtual ~UdpSocket();
 
 	const SocketAddress& GetLocalAddress() const;
 
-	virtual int SendTo(const uint8* pData, unsigned pSize, const SocketAddress& pTargetAddress);
-	virtual int ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSourceAddress);
-	virtual int ReceiveFrom(uint8* pData, unsigned pMaxSize, SocketAddress& pSourceAddress, double pTimeout);
+	virtual int SendTo(const uint8* data, unsigned size, const SocketAddress& target_address);
+	virtual int ReceiveFrom(uint8* data, unsigned max_size, SocketAddress& source_address);
+	virtual int ReceiveFrom(uint8* data, unsigned max_size, SocketAddress& source_address, double timeout);
 
 private:
-	SocketAddress mLocalAddress;
+	SocketAddress local_address_;
 
 	logclass();
 };
@@ -288,39 +277,38 @@ private:
 
 
 //
-// A multiplexing UDP socket, which routes the incoming datagrams to 
-// the correct virtual socket (UdpVSocket). 
+// A multiplexing UDP socket, which routes the incoming datagrams to
+// the correct virtual socket (UdpVSocket).
 //
 
 class UdpVSocket;
 
-class UdpMuxSocket: public MuxIo, protected Thread, public UdpSocket
-{
+class UdpMuxSocket: public MuxIo, protected Thread, public UdpSocket {
 public:
 	friend class UdpVSocket;
 
-	UdpMuxSocket(const str& pName, const SocketAddress& pLocalAddress, bool pIsServer,
-		unsigned pMaxPendingConnectionCount = 16, unsigned pMaxConnectionCount = 1024);
+	UdpMuxSocket(const str& name, const SocketAddress& local_address, bool is_server,
+		unsigned max_pending_connection_count = 16, unsigned max_connection_count = 1024);
 	virtual ~UdpMuxSocket();
 
 	// The sockets returned by these functions should be released using
 	// CloseSocket(). Do not delete the socket!
-	UdpVSocket* Connect(const SocketAddress& pTargetAddress, const std::string& pConnectionId, double pTimeout);
+	UdpVSocket* Connect(const SocketAddress& target_address, const std::string& connection_id, double timeout);
 	UdpVSocket* Accept();
 	UdpVSocket* PollAccept();
-	void CloseSocket(UdpVSocket* pSocket);
+	void CloseSocket(UdpVSocket* socket);
 	unsigned GetConnectionCount() const;
 
 	UdpVSocket* PopReceiverSocket();
 	UdpVSocket* PopSenderSocket();
-	UdpVSocket* GetVSocket(const SocketAddress& pTargetAddress);
+	UdpVSocket* GetVSocket(const SocketAddress& target_address);
 
-	bool SendOpenFirewallData(const SocketAddress& pTargetAddress);
+	bool SendOpenFirewallData(const SocketAddress& target_address);
 
 protected:
 	void Run();
 
-	void RecycleBuffer(Datagram* pBuffer);
+	void RecycleBuffer(Datagram* buffer);
 
 private:
 	typedef HashTable<SocketAddress, UdpVSocket*, SocketAddress> SocketTable;
@@ -329,14 +317,14 @@ private:
 	typedef FastAllocator<UdpVSocket> SocketAllocator;
 	typedef FastAllocator<Datagram> BufferAllocator;
 
-	SocketAllocator mSocketAllocator;
-	BufferAllocator mBufferAllocator;
+	SocketAllocator socket_allocator_;
+	BufferAllocator buffer_allocator_;
 
-	SocketTable mSocketTable;
-	SocketTable mAcceptTable;
-	SocketList mAcceptList;
+	SocketTable socket_table_;
+	SocketTable accept_table_;
+	SocketList accept_list_;
 
-	static const uint8 mOpenFirewallString[27];
+	static const uint8 open_firewall_string_[27];
 
 	logclass();
 };
@@ -345,36 +333,35 @@ private:
 
 // A virtual socket; data is delegated here (upon receive) from the MUX
 // socket, and passed through the MUX socket (on send).
-class UdpVSocket: public BufferedIo, public InputStream, public OutputStream, public ConnectionWithId
-{
+class UdpVSocket: public BufferedIo, public InputStream, public OutputStream, public ConnectionWithId {
 public:
 	UdpVSocket();
 	virtual ~UdpVSocket();
-	void Init(UdpMuxSocket& pSocket, const SocketAddress& pTargetAddress, const std::string& pConnectionId);
+	void Init(UdpMuxSocket& socket, const SocketAddress& target_address, const std::string& connection_id);
 
 	void ClearAll();
 
-	int Receive(bool pSafe, void* pData, int pLength);	// ::recv() return value.
-	int Receive(void* pData, int pLength);	// ::recv() return value.
+	int Receive(bool safe, void* data, int length);	// ::recv() return value.
+	int Receive(void* data, int length);	// ::recv() return value.
 	int SendBuffer();	// ::send() return value.
-	int DirectSend(const void* pData, int pLength);	// Writes buffer, flushes.
+	int DirectSend(const void* data, int length);	// Writes buffer, flushes.
 
 	const SocketAddress& GetLocalAddress() const;
 	const SocketAddress& GetTargetAddress() const;
 
 	void TryAddReceiverSocket();
-	void AddInputBuffer(Datagram* pBuffer);
+	void AddInputBuffer(Datagram* buffer);
 	bool NeedInputPeek() const;
-	void SetReceiverFollowupActive(bool pActive);
+	void SetReceiverFollowupActive(bool active);
 
-	bool WaitAvailable(double pTime);
+	bool WaitAvailable(double time);
 
 	// Stream interface.
 	void Close();
 	int64 GetAvailable() const;
-	IOError ReadRaw(void* pData, size_t pLength);
-	IOError Skip(size_t pLength);
-	IOError WriteRaw(const void* pData, size_t pLength);
+	IOError ReadRaw(void* data, size_t length);
+	IOError Skip(size_t length);
+	IOError WriteRaw(const void* data, size_t length);
 	void Flush();
 
 	void SetSafeSend(bool);
@@ -384,13 +371,13 @@ private:
 
 	typedef CyclicArray<Datagram*, MAX_INPUT_BUFFERS> BufferList;
 
-	SocketAddress mTargetAddress;
+	SocketAddress target_address_;
 
-	mutable Lock mLock;
+	mutable Lock lock_;
 
-	BufferList mReceiveBufferList;
-	unsigned mRawReadBufferIndex;
-	bool mReceiverFollowupActive;
+	BufferList receive_buffer_list_;
+	unsigned raw_read_buffer_index_;
+	bool receiver_followup_active_;
 
 	logclass();
 };

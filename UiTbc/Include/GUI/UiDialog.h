@@ -5,61 +5,59 @@
 
 
 #pragma once
-#include "UiButton.h"
-#include "UiFloatingLayout.h"
-#include "UiLabel.h"
+#include "uibutton.h"
+#include "uifloatinglayout.h"
+#include "uilabel.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class Dialog: public RectComponent
-{
+class Dialog: public RectComponent {
 	typedef RectComponent Parent;
 public:
 	typedef Button::Delegate Action;
 
-	Dialog(Component* pParent, Action pTarget);
+	Dialog(Component* parent, Action target);
 	virtual ~Dialog();
 	void Dismiss();
 
-	virtual void SetColor(const Color& pTopLeftColor, const Color& pTopRightColor, const Color& pBottomRightColor, const Color& pBottomLeftColor);
-	void SetDirection(int pDirection, bool pSetPos);
-	void SetPreClickTarget(Action pPreClickTarget);
-	void SetPostClickTarget(Action pPostClickTarget);
+	virtual void SetColor(const Color& top_left_color, const Color& top_right_color, const Color& bottom_right_color, const Color& bottom_left_color);
+	void SetDirection(int direction, bool set_pos);
+	void SetPreClickTarget(Action pre_click_target);
+	void SetPostClickTarget(Action post_click_target);
 	virtual void Center();
-	Label* SetQueryLabel(const wstr& pText, UiTbc::FontManager::FontId pFontId);
-	void SetQueryLabel(Label* pLabel);
-	void UpdateQueryLabel(const wstr& pText, const Color& pColor);
-	void AddButton(int pTag, const wstr& pText, bool pAutoDismiss);	// Tag < 0 to layout yourself.
-	void AddButton(int pTag, Button* pButton, bool pAutoDismiss);	// Tag < 0 to layout yourself.
-	void SetButtonHandler(int pTag, Button* pButton, bool pAutoDismiss);	// Tag < 0 to layout yourself.
-	bool IsAutoDismissButton(Button* pButton) const;
-	void SetOffset(PixelCoord pOffset);
+	Label* SetQueryLabel(const wstr& text, uitbc::FontManager::FontId font_id);
+	void SetQueryLabel(Label* label);
+	void UpdateQueryLabel(const wstr& text, const Color& color);
+	void AddButton(int tag, const wstr& text, bool auto_dismiss);	// Tag < 0 to layout yourself.
+	void AddButton(int tag, Button* button, bool auto_dismiss);	// Tag < 0 to layout yourself.
+	void SetButtonHandler(int tag, Button* button, bool auto_dismiss);	// Tag < 0 to layout yourself.
+	bool IsAutoDismissButton(Button* button) const;
+	void SetOffset(PixelCoord offset);
 	virtual void UpdateLayout();
 
-	virtual void Repaint(Painter* pPainter);
+	virtual void Repaint(Painter* painter);
 	void Animate();
-	void OnDismissClick(Button* pButton);
-	void OnClick(Button* pButton);
-	void DoClick(Button* pButton);
+	void OnDismissClick(Button* button);
+	void OnClick(Button* button);
+	void DoClick(Button* button);
 
 protected:
 	typedef std::vector<Button*> ButtonList;
 
-	PixelCoord mOffset;
-	Label* mLabel;
-	Action mTarget;
-	Action mPreClickTarget;
-	Action mPostClickTarget;
-	ButtonList mButtonList;
-	Button* mClickedButton;
-	bool mIsClosing;
-	int mAnimationStep;
-	int mDirection;
+	PixelCoord offset_;
+	Label* label_;
+	Action target_;
+	Action pre_click_target_;
+	Action post_click_target_;
+	ButtonList button_list_;
+	Button* clicked_button_;
+	bool is_closing_;
+	int animation_step_;
+	int direction_;
 };
 
 

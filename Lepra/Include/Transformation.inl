@@ -1,480 +1,417 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
-TEMPLATE QUAL::Transformation()
-{
+TEMPLATE QUAL::Transformation() {
 }
 
-TEMPLATE QUAL::Transformation(const RotationMatrix<_TVarType>& pOrientation,
-			      const Vector3D<_TVarType>& pPosition) :
-	mOrientation(pOrientation),
-	mPosition(pPosition)
-{
+TEMPLATE QUAL::Transformation(const RotationMatrix<_TVarType>& orientation,
+			      const Vector3D<_TVarType>& position) :
+	orientation_(orientation),
+	position_(position) {
 }
 
-TEMPLATE QUAL::Transformation(const Quaternion<_TVarType>& pOrientation,
-			      const Vector3D<_TVarType>& pPosition) :
-	mOrientation(pOrientation),
-	mPosition(pPosition)
-{
+TEMPLATE QUAL::Transformation(const Quaternion<_TVarType>& orientation,
+			      const Vector3D<_TVarType>& position) :
+	orientation_(orientation),
+	position_(position) {
 }
 
-TEMPLATE QUAL::Transformation(const _TVarType pData[7]) :
-	mOrientation(pData[0], pData[1], pData[2], pData[3]),
-	mPosition(pData[4], pData[5], pData[6])
-{
+TEMPLATE QUAL::Transformation(const _TVarType data[7]) :
+	orientation_(data[0], data[1], data[2], data[3]),
+	position_(data[4], data[5], data[6]) {
 }
 
-TEMPLATE QUAL::Transformation(const Transformation& pTransformation) :
-	mOrientation(pTransformation.mOrientation),
-	mPosition(pTransformation.mPosition)
-{
+TEMPLATE QUAL::Transformation(const Transformation& transformation) :
+	orientation_(transformation.orientation_),
+	position_(transformation.position_) {
 }
 
-TEMPLATE void QUAL::SetIdentity()
-{
-	mOrientation.SetIdentity();
-	mPosition.Set(0, 0, 0);
+TEMPLATE void QUAL::SetIdentity() {
+	orientation_.SetIdentity();
+	position_.Set(0, 0, 0);
 }
 
-TEMPLATE RotationMatrix<_TVarType> QUAL::GetOrientationAsMatrix() const
-{
-	return mOrientation.GetAsRotationMatrix();
+TEMPLATE RotationMatrix<_TVarType> QUAL::GetOrientationAsMatrix() const {
+	return orientation_.GetAsRotationMatrix();
 }
 
-TEMPLATE const Quaternion<_TVarType>& QUAL::GetOrientation() const
-{
-	return mOrientation;
+TEMPLATE const Quaternion<_TVarType>& QUAL::GetOrientation() const {
+	return orientation_;
 }
 
-TEMPLATE const Vector3D<_TVarType>& QUAL::GetPosition() const
-{
-	return mPosition;
+TEMPLATE const Vector3D<_TVarType>& QUAL::GetPosition() const {
+	return position_;
 }
 
-TEMPLATE Quaternion<_TVarType>& QUAL::GetOrientation()
-{
-	return mOrientation;
+TEMPLATE Quaternion<_TVarType>& QUAL::GetOrientation() {
+	return orientation_;
 }
 
-TEMPLATE Vector3D<_TVarType>& QUAL::GetPosition()
-{
-	return mPosition;
+TEMPLATE Vector3D<_TVarType>& QUAL::GetPosition() {
+	return position_;
 }
 
-TEMPLATE void QUAL::SetPosition(const Vector3D<_TVarType>& pPosition)
-{
-	mPosition = pPosition;
+TEMPLATE void QUAL::SetPosition(const Vector3D<_TVarType>& position) {
+	position_ = position;
 }
 
-TEMPLATE void QUAL::SetOrientation(const RotationMatrix<_TVarType>& pOrientation)
-{
-	mOrientation = pOrientation;
+TEMPLATE void QUAL::SetOrientation(const RotationMatrix<_TVarType>& orientation) {
+	orientation_ = orientation;
 }
 
-TEMPLATE void QUAL::SetOrientation(const Quaternion<_TVarType>& pOrientation)
-{
-	mOrientation = pOrientation;
+TEMPLATE void QUAL::SetOrientation(const Quaternion<_TVarType>& orientation) {
+	orientation_ = orientation;
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::Transform(const Vector3D<_TVarType>& pVector) const
-{
-	return mOrientation.GetRotatedVector(pVector) + mPosition;
+TEMPLATE Vector3D<_TVarType> QUAL::Transform(const Vector3D<_TVarType>& vector) const {
+	return orientation_.GetRotatedVector(vector) + position_;
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::InverseTransform(const Vector3D<_TVarType>& pVector) const
-{
-	return mOrientation.GetInverseRotatedVector(pVector - mPosition);
+TEMPLATE Vector3D<_TVarType> QUAL::InverseTransform(const Vector3D<_TVarType>& vector) const {
+	return orientation_.GetInverseRotatedVector(vector - position_);
 }
 
-TEMPLATE Transformation<_TVarType> QUAL::Transform(const Transformation& pTransformation) const
-{
-	Transformation lTransformation(mOrientation * pTransformation.mOrientation,
-					mOrientation.GetRotatedVector(pTransformation.mPosition) + mPosition);
-	return lTransformation;
+TEMPLATE Transformation<_TVarType> QUAL::Transform(const Transformation& transformation) const {
+	Transformation _transformation(orientation_ * transformation.orientation_,
+					orientation_.GetRotatedVector(transformation.position_) + position_);
+	return _transformation;
 }
 
-TEMPLATE Transformation<_TVarType> QUAL::InverseTransform(const Transformation& pTransformation) const
-{
+TEMPLATE Transformation<_TVarType> QUAL::InverseTransform(const Transformation& transformation) const {
 	// The division is defined as O / T = O' * T.
-	Transformation lTransformation(mOrientation,
-		mOrientation.GetInverseRotatedVector(pTransformation.mPosition - mPosition));
-	lTransformation.GetOrientation().InvAMulB(pTransformation.mOrientation);
-	return (lTransformation);
+	Transformation _transformation(orientation_,
+		orientation_.GetInverseRotatedVector(transformation.position_ - position_));
+	_transformation.GetOrientation().InvAMulB(transformation.orientation_);
+	return (_transformation);
 }
 
-TEMPLATE void QUAL::FastInverseTransform(const Transformation& pFrom, const quat pInverse, const Transformation& pTo)
-{
-	mOrientation = pFrom.mOrientation;
-	mOrientation.FastInverseRotatedVector(pInverse, mPosition, pTo.mPosition - pFrom.mPosition);
-	mOrientation.FastInvAMulB(pTo.mOrientation.a, pTo.mOrientation.b, pTo.mOrientation.c, pTo.mOrientation.d);
+TEMPLATE void QUAL::FastInverseTransform(const Transformation& from, const quat inverse, const Transformation& to) {
+	orientation_ = from.orientation_;
+	orientation_.FastInverseRotatedVector(inverse, position_, to.position_ - from.position_);
+	orientation_.FastInvAMulB(to.orientation_.a, to.orientation_.b, to.orientation_.c, to.orientation_.d);
 }
 
-TEMPLATE Transformation<_TVarType> QUAL::Inverse() const
-{
-	Transformation lTransformation(mOrientation.GetInverse(), -mPosition);
-	return lTransformation;
+TEMPLATE Transformation<_TVarType> QUAL::Inverse() const {
+	Transformation _transformation(orientation_.GetInverse(), -position_);
+	return _transformation;
 }
 
-TEMPLATE void QUAL::MoveForward(_TVarType pDistance)
-{
-	mPosition += mOrientation.GetAxisY() * pDistance;
+TEMPLATE void QUAL::MoveForward(_TVarType distance) {
+	position_ += orientation_.GetAxisY() * distance;
 }
 
-TEMPLATE void QUAL::MoveRight(_TVarType pDistance)
-{
-	mPosition += mOrientation.GetAxisX() * pDistance;
+TEMPLATE void QUAL::MoveRight(_TVarType distance) {
+	position_ += orientation_.GetAxisX() * distance;
 }
 
-TEMPLATE void QUAL::MoveUp(_TVarType pDistance)
-{
-	mPosition += mOrientation.GetAxisZ() * pDistance;
+TEMPLATE void QUAL::MoveUp(_TVarType distance) {
+	position_ += orientation_.GetAxisZ() * distance;
 }
 
-TEMPLATE void QUAL::MoveBackward(_TVarType pDistance)
-{
-	mPosition -= mOrientation.GetAxisY() * pDistance;
+TEMPLATE void QUAL::MoveBackward(_TVarType distance) {
+	position_ -= orientation_.GetAxisY() * distance;
 }
 
-TEMPLATE void QUAL::MoveLeft(_TVarType pDistance)
-{
-	mPosition -= mOrientation.GetAxisX() * pDistance;
+TEMPLATE void QUAL::MoveLeft(_TVarType distance) {
+	position_ -= orientation_.GetAxisX() * distance;
 }
 
-TEMPLATE void QUAL::MoveDown(_TVarType pDistance)
-{
-	mPosition -= mOrientation.GetAxisZ() * pDistance;
+TEMPLATE void QUAL::MoveDown(_TVarType distance) {
+	position_ -= orientation_.GetAxisZ() * distance;
 }
 
-TEMPLATE void QUAL::RotateAroundAnchor(const Vector3D<_TVarType>& pAnchor,
-	const Vector3D<_TVarType>& pAxis, _TVarType pAngle)
-{
-	mPosition -= pAnchor;
-	Quaternion<_TVarType> lRotation;
-	lRotation.RotateAroundVector(pAxis, pAngle);
-	mPosition *= lRotation;
-	mPosition += pAnchor;
-	mOrientation = lRotation*mOrientation;
+TEMPLATE void QUAL::RotateAroundAnchor(const Vector3D<_TVarType>& anchor,
+	const Vector3D<_TVarType>& axis, _TVarType angle) {
+	position_ -= anchor;
+	Quaternion<_TVarType> rotation;
+	rotation.RotateAroundVector(axis, angle);
+	position_ *= rotation;
+	position_ += anchor;
+	orientation_ = rotation*orientation_;
 }
 
-TEMPLATE void QUAL::RotateYaw(_TVarType pAngle)
-{
-	mOrientation.RotateAroundOwnZ(pAngle);
+TEMPLATE void QUAL::RotateYaw(_TVarType angle) {
+	orientation_.RotateAroundOwnZ(angle);
 }
 
-TEMPLATE void QUAL::RotatePitch(_TVarType pAngle)
-{
-	mOrientation.RotateAroundOwnX(pAngle);
+TEMPLATE void QUAL::RotatePitch(_TVarType angle) {
+	orientation_.RotateAroundOwnX(angle);
 }
 
-TEMPLATE void QUAL::RotateRoll(_TVarType pAngle)
-{
-	mOrientation.RotateAroundOwnY(pAngle);
+TEMPLATE void QUAL::RotateRoll(_TVarType angle) {
+	orientation_.RotateAroundOwnY(angle);
 }
 
-TEMPLATE void QUAL::MoveNorth(_TVarType pDistance)
-{
-	mPosition += Vector3D<_TVarType>(0, 0, pDistance);
+TEMPLATE void QUAL::MoveNorth(_TVarType distance) {
+	position_ += Vector3D<_TVarType>(0, 0, distance);
 }
 
-TEMPLATE void QUAL::MoveEast(_TVarType pDistance)
-{
-	mPosition += Vector3D<_TVarType>(pDistance, 0, 0);
+TEMPLATE void QUAL::MoveEast(_TVarType distance) {
+	position_ += Vector3D<_TVarType>(distance, 0, 0);
 }
 
-TEMPLATE void QUAL::MoveWorldUp(_TVarType pDistance)
-{
-	mPosition += Vector3D<_TVarType>(0, pDistance, 0);
+TEMPLATE void QUAL::MoveWorldUp(_TVarType distance) {
+	position_ += Vector3D<_TVarType>(0, distance, 0);
 }
 
-TEMPLATE void QUAL::MoveSouth(_TVarType pDistance)
-{
-	mPosition -= Vector3D<_TVarType>(0, 0, pDistance);
+TEMPLATE void QUAL::MoveSouth(_TVarType distance) {
+	position_ -= Vector3D<_TVarType>(0, 0, distance);
 }
 
-TEMPLATE void QUAL::MoveWest(_TVarType pDistance)
-{
-	mPosition -= Vector3D<_TVarType>(pDistance, 0, 0);
+TEMPLATE void QUAL::MoveWest(_TVarType distance) {
+	position_ -= Vector3D<_TVarType>(distance, 0, 0);
 }
 
-TEMPLATE void QUAL::MoveWorldDown(_TVarType pDistance)
-{
-	mPosition -= Vector3D<_TVarType>(0, pDistance, 0);
+TEMPLATE void QUAL::MoveWorldDown(_TVarType distance) {
+	position_ -= Vector3D<_TVarType>(0, distance, 0);
 }
 
-TEMPLATE void QUAL::RotateWorldX(_TVarType pAngle)
-{
-	mOrientation.RotateAroundWorldX(pAngle);
+TEMPLATE void QUAL::RotateWorldX(_TVarType angle) {
+	orientation_.RotateAroundWorldX(angle);
 }
 
-TEMPLATE void QUAL::RotateWorldY(_TVarType pAngle)
-{
-	mOrientation.RotateAroundWorldY(pAngle);
+TEMPLATE void QUAL::RotateWorldY(_TVarType angle) {
+	orientation_.RotateAroundWorldY(angle);
 }
 
-TEMPLATE void QUAL::RotateWorldZ(_TVarType pAngle)
-{
-	mOrientation.RotateAroundWorldZ(pAngle);
+TEMPLATE void QUAL::RotateWorldZ(_TVarType angle) {
+	orientation_.RotateAroundWorldZ(angle);
 }
 
-TEMPLATE bool QUAL::operator == (const Transformation& pTransformation)
-{
-	return (mPosition == pTransformation.mPosition &&
-		mOrientation == pTransformation.mOrientation);
+TEMPLATE bool QUAL::operator == (const Transformation& transformation) {
+	return (position_ == transformation.position_ &&
+		orientation_ == transformation.orientation_);
 }
 
-TEMPLATE bool QUAL::operator != (const Transformation& pTransformation)
-{
-	return (mPosition != pTransformation.mPosition ||
-		mOrientation != pTransformation.mOrientation);
+TEMPLATE bool QUAL::operator != (const Transformation& transformation) {
+	return (position_ != transformation.position_ ||
+		orientation_ != transformation.orientation_);
 }
 
-TEMPLATE Transformation<_TVarType>& QUAL::operator = (const Transformation& pTransformation)
-{
-	mPosition = pTransformation.mPosition;
-	mOrientation = pTransformation.mOrientation;
+TEMPLATE Transformation<_TVarType>& QUAL::operator = (const Transformation& transformation) {
+	position_ = transformation.position_;
+	orientation_ = transformation.orientation_;
 	return *this;
 }
 
-TEMPLATE Transformation<_TVarType>& QUAL::operator += (const Vector3D<_TVarType>& pVector)
-{
-	mPosition += pVector;
+TEMPLATE Transformation<_TVarType>& QUAL::operator += (const Vector3D<_TVarType>& vector) {
+	position_ += vector;
 	return *this;
 }
 
-TEMPLATE Transformation<_TVarType> QUAL::operator +  (const Vector3D<_TVarType>& pVector) const
-{
-	return Transformation(mOrientation, mPosition + pVector);
+TEMPLATE Transformation<_TVarType> QUAL::operator +  (const Vector3D<_TVarType>& vector) const {
+	return Transformation(orientation_, position_ + vector);
 }
 
-TEMPLATE Transformation<_TVarType>& QUAL::operator *= (const Transformation& pTransformation)
-{
-	mPosition = mPosition + mOrientation.GetRotatedVector(pTransformation.mPosition);
-	mOrientation *= pTransformation.mOrientation;
+TEMPLATE Transformation<_TVarType>& QUAL::operator *= (const Transformation& transformation) {
+	position_ = position_ + orientation_.GetRotatedVector(transformation.position_);
+	orientation_ *= transformation.orientation_;
 	return *this;
 }
 
-TEMPLATE Transformation<_TVarType> QUAL::operator * (const Transformation& pTransformation) const
-{
-	return (Transform(pTransformation));
+TEMPLATE Transformation<_TVarType> QUAL::operator * (const Transformation& transformation) const {
+	return (Transform(transformation));
 }
 
-TEMPLATE Transformation<_TVarType>& QUAL::operator /= (const Transformation& pTransformation)
-{
-	mPosition = mOrientation.GetInverseRotatedVector(pTransformation.mPosition - mPosition);
-	mOrientation /= pTransformation.mOrientation;
+TEMPLATE Transformation<_TVarType>& QUAL::operator /= (const Transformation& transformation) {
+	position_ = orientation_.GetInverseRotatedVector(transformation.position_ - position_);
+	orientation_ /= transformation.orientation_;
 	return *this;
 }
 
-TEMPLATE Transformation<_TVarType> QUAL::operator / (const Transformation& pTransformation) const
-{
-	return Transformation(mOrientation / pTransformation.mOrientation,
-			      mOrientation.GetInverseRotatedVector(pTransformation.mPosition - mPosition));
+TEMPLATE Transformation<_TVarType> QUAL::operator / (const Transformation& transformation) const {
+	return Transformation(orientation_ / transformation.orientation_,
+			      orientation_.GetInverseRotatedVector(transformation.position_ - position_));
 }
 
-TEMPLATE Vector3D<_TVarType> QUAL::operator * (const Vector3D<_TVarType>& pVector) const
-{
-	return mOrientation.GetInverseRotatedVector(pVector - mPosition);
+TEMPLATE Vector3D<_TVarType> QUAL::operator * (const Vector3D<_TVarType>& vector) const {
+	return orientation_.GetInverseRotatedVector(vector - position_);
 }
 
-TEMPLATE inline Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& pVector, const Transformation<_TVarType>& pTransformation)
-{
-	return pTransformation.mOrientation.GetRotatedVector(pVector) + pTransformation.mPosition;
+TEMPLATE inline Vector3D<_TVarType> operator * (const Vector3D<_TVarType>& vector, const Transformation<_TVarType>& transformation) {
+	return transformation.orientation_.GetRotatedVector(vector) + transformation.position_;
 }
 
-TEMPLATE inline const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& pVector, const Transformation<_TVarType>& pTransformation)
-{
-	pVector = pTransformation.mOrientation.GetRotatedVector(pVector) + pTransformation.mPosition;
-	return pVector;
+TEMPLATE inline const Vector3D<_TVarType>& operator *= (Vector3D<_TVarType>& vector, const Transformation<_TVarType>& transformation) {
+	vector = transformation.orientation_.GetRotatedVector(vector) + transformation.position_;
+	return vector;
 }
 
-TEMPLATE void QUAL::Get(_TVarType pData[7]) const
-{
-	pData[0] = mOrientation.a;
-	pData[1] = mOrientation.b;
-	pData[2] = mOrientation.c;
-	pData[3] = mOrientation.d;
-	pData[4] = mPosition.x;
-	pData[5] = mPosition.y;
-	pData[6] = mPosition.z;
+TEMPLATE void QUAL::Get(_TVarType data[7]) const {
+	data[0] = orientation_.a;
+	data[1] = orientation_.b;
+	data[2] = orientation_.c;
+	data[3] = orientation_.d;
+	data[4] = position_.x;
+	data[5] = position_.y;
+	data[6] = position_.z;
 }
 
-TEMPLATE void QUAL::GetAs4x4Matrix(_TVarType pMatrix[16]) const
-{
-	RotationMatrix<_TVarType> lOrientation(mOrientation.GetAsRotationMatrix());
+TEMPLATE void QUAL::GetAs4x4Matrix(_TVarType matrix[16]) const {
+	RotationMatrix<_TVarType> _orientation(orientation_.GetAsRotationMatrix());
 
-	pMatrix[0]  = lOrientation.GetElement(0);
-	pMatrix[1]  = lOrientation.GetElement(1);
-	pMatrix[2]  = lOrientation.GetElement(2);
-	pMatrix[3]  = mPosition.x;
+	matrix[0]  = _orientation.GetElement(0);
+	matrix[1]  = _orientation.GetElement(1);
+	matrix[2]  = _orientation.GetElement(2);
+	matrix[3]  = position_.x;
 
-	pMatrix[4]  = lOrientation.GetElement(3);
-	pMatrix[5]  = lOrientation.GetElement(4);
-	pMatrix[6]  = lOrientation.GetElement(5);
-	pMatrix[7]  = mPosition.y;
+	matrix[4]  = _orientation.GetElement(3);
+	matrix[5]  = _orientation.GetElement(4);
+	matrix[6]  = _orientation.GetElement(5);
+	matrix[7]  = position_.y;
 
-	pMatrix[8]  = lOrientation.GetElement(6);
-	pMatrix[9]  = lOrientation.GetElement(7);
-	pMatrix[10] = lOrientation.GetElement(8);
-	pMatrix[11] = mPosition.z;
+	matrix[8]  = _orientation.GetElement(6);
+	matrix[9]  = _orientation.GetElement(7);
+	matrix[10] = _orientation.GetElement(8);
+	matrix[11] = position_.z;
 
-	pMatrix[12] = 0;
-	pMatrix[13] = 0;
-	pMatrix[14] = 0;
-	pMatrix[15] = 1;
+	matrix[12] = 0;
+	matrix[13] = 0;
+	matrix[14] = 0;
+	matrix[15] = 1;
 }
 
-TEMPLATE void QUAL::GetAs4x4TransposeMatrix(_TVarType pMatrix[16]) const
-{
-	GetAs4x4TransposeMatrix(1, pMatrix);
+TEMPLATE void QUAL::GetAs4x4TransposeMatrix(_TVarType matrix[16]) const {
+	GetAs4x4TransposeMatrix(1, matrix);
 }
 
-TEMPLATE void QUAL::GetAs4x4TransposeMatrix(_TVarType pScale, _TVarType pMatrix[16]) const
-{
-	RotationMatrix<_TVarType> lOrientation(mOrientation.GetAsRotationMatrix());
-	if (pScale != 1)
-	{
-		lOrientation *= pScale;
+TEMPLATE void QUAL::GetAs4x4TransposeMatrix(_TVarType scale, _TVarType matrix[16]) const {
+	RotationMatrix<_TVarType> _orientation(orientation_.GetAsRotationMatrix());
+	if (scale != 1) {
+		_orientation *= scale;
 	}
 
-	pMatrix[0]  = lOrientation.GetElement(0);
-	pMatrix[1]  = lOrientation.GetElement(3);
-	pMatrix[2]  = lOrientation.GetElement(6);
-	pMatrix[3]  = 0;
+	matrix[0]  = _orientation.GetElement(0);
+	matrix[1]  = _orientation.GetElement(3);
+	matrix[2]  = _orientation.GetElement(6);
+	matrix[3]  = 0;
 
-	pMatrix[4]  = lOrientation.GetElement(1);
-	pMatrix[5]  = lOrientation.GetElement(4);
-	pMatrix[6]  = lOrientation.GetElement(7);
-	pMatrix[7]  = 0;
+	matrix[4]  = _orientation.GetElement(1);
+	matrix[5]  = _orientation.GetElement(4);
+	matrix[6]  = _orientation.GetElement(7);
+	matrix[7]  = 0;
 
-	pMatrix[8]  = lOrientation.GetElement(2);
-	pMatrix[9]  = lOrientation.GetElement(5);
-	pMatrix[10] = lOrientation.GetElement(8);
-	pMatrix[11] = 0;
+	matrix[8]  = _orientation.GetElement(2);
+	matrix[9]  = _orientation.GetElement(5);
+	matrix[10] = _orientation.GetElement(8);
+	matrix[11] = 0;
 
-	pMatrix[12] = mPosition.x;
-	pMatrix[13] = mPosition.y;
-	pMatrix[14] = mPosition.z;
-	pMatrix[15] = 1;
+	matrix[12] = position_.x;
+	matrix[13] = position_.y;
+	matrix[14] = position_.z;
+	matrix[15] = 1;
 }
 
-TEMPLATE void QUAL::GetAs4x4InverseMatrix(_TVarType pMatrix[16]) const
-{
-	RotationMatrix<_TVarType> lOrientation(mOrientation.GetAsRotationMatrix());
+TEMPLATE void QUAL::GetAs4x4InverseMatrix(_TVarType matrix[16]) const {
+	RotationMatrix<_TVarType> _orientation(orientation_.GetAsRotationMatrix());
 
-	pMatrix[0]  = lOrientation.GetElement(0);
-	pMatrix[1]  = lOrientation.GetElement(3);
-	pMatrix[2]  = lOrientation.GetElement(6);
-	pMatrix[3]  = -mPosition.x;
+	matrix[0]  = _orientation.GetElement(0);
+	matrix[1]  = _orientation.GetElement(3);
+	matrix[2]  = _orientation.GetElement(6);
+	matrix[3]  = -position_.x;
 
-	pMatrix[4]  = lOrientation.GetElement(1);
-	pMatrix[5]  = lOrientation.GetElement(4);
-	pMatrix[6]  = lOrientation.GetElement(7);
-	pMatrix[7]  = -mPosition.y;
+	matrix[4]  = _orientation.GetElement(1);
+	matrix[5]  = _orientation.GetElement(4);
+	matrix[6]  = _orientation.GetElement(7);
+	matrix[7]  = -position_.y;
 
-	pMatrix[8]  = lOrientation.GetElement(2);
-	pMatrix[9]  = lOrientation.GetElement(5);
-	pMatrix[10] = lOrientation.GetElement(8);
-	pMatrix[11] = -mPosition.z;
+	matrix[8]  = _orientation.GetElement(2);
+	matrix[9]  = _orientation.GetElement(5);
+	matrix[10] = _orientation.GetElement(8);
+	matrix[11] = -position_.z;
 
-	pMatrix[12] = 0;
-	pMatrix[13] = 0;
-	pMatrix[14] = 0;
-	pMatrix[15] = 1;
+	matrix[12] = 0;
+	matrix[13] = 0;
+	matrix[14] = 0;
+	matrix[15] = 1;
 }
 
-TEMPLATE void QUAL::GetAs4x4InverseTransposeMatrix(_TVarType pMatrix[16]) const
-{
-	RotationMatrix<_TVarType> lOrientation(mOrientation.GetAsRotationMatrix());
+TEMPLATE void QUAL::GetAs4x4InverseTransposeMatrix(_TVarType matrix[16]) const {
+	RotationMatrix<_TVarType> _orientation(orientation_.GetAsRotationMatrix());
 
-	pMatrix[0]  = lOrientation.GetElement(0);
-	pMatrix[1]  = lOrientation.GetElement(1);
-	pMatrix[2]  = lOrientation.GetElement(2);
-	pMatrix[3]  = 0;
+	matrix[0]  = _orientation.GetElement(0);
+	matrix[1]  = _orientation.GetElement(1);
+	matrix[2]  = _orientation.GetElement(2);
+	matrix[3]  = 0;
 
-	pMatrix[4]  = lOrientation.GetElement(3);
-	pMatrix[5]  = lOrientation.GetElement(4);
-	pMatrix[6]  = lOrientation.GetElement(5);
-	pMatrix[7]  = 0;
+	matrix[4]  = _orientation.GetElement(3);
+	matrix[5]  = _orientation.GetElement(4);
+	matrix[6]  = _orientation.GetElement(5);
+	matrix[7]  = 0;
 
-	pMatrix[8]  = lOrientation.GetElement(6);
-	pMatrix[9]  = lOrientation.GetElement(7);
-	pMatrix[10] = lOrientation.GetElement(8);
-	pMatrix[11] = 0;
+	matrix[8]  = _orientation.GetElement(6);
+	matrix[9]  = _orientation.GetElement(7);
+	matrix[10] = _orientation.GetElement(8);
+	matrix[11] = 0;
 
-	pMatrix[12] = -mPosition.x;
-	pMatrix[13] = -mPosition.y;
-	pMatrix[14] = -mPosition.z;
-	pMatrix[15] = 1;
+	matrix[12] = -position_.x;
+	matrix[13] = -position_.y;
+	matrix[14] = -position_.z;
+	matrix[15] = 1;
 }
 
-TEMPLATE void QUAL::GetAs4x4OrientationMatrix(_TVarType pMatrix[16]) const
-{
-	RotationMatrix<_TVarType> lOrientation(mOrientation.GetAsRotationMatrix());
+TEMPLATE void QUAL::GetAs4x4OrientationMatrix(_TVarType matrix[16]) const {
+	RotationMatrix<_TVarType> _orientation(orientation_.GetAsRotationMatrix());
 
-	pMatrix[0]  = lOrientation.GetElement(0);
-	pMatrix[1]  = lOrientation.GetElement(1);
-	pMatrix[2]  = lOrientation.GetElement(2);
-	pMatrix[3]  = 0;
+	matrix[0]  = _orientation.GetElement(0);
+	matrix[1]  = _orientation.GetElement(1);
+	matrix[2]  = _orientation.GetElement(2);
+	matrix[3]  = 0;
 
-	pMatrix[4]  = lOrientation.GetElement(3);
-	pMatrix[5]  = lOrientation.GetElement(4);
-	pMatrix[6]  = lOrientation.GetElement(5);
-	pMatrix[7]  = 0;
+	matrix[4]  = _orientation.GetElement(3);
+	matrix[5]  = _orientation.GetElement(4);
+	matrix[6]  = _orientation.GetElement(5);
+	matrix[7]  = 0;
 
-	pMatrix[8]  = lOrientation.GetElement(6);
-	pMatrix[9]  = lOrientation.GetElement(7);
-	pMatrix[10] = lOrientation.GetElement(8);
-	pMatrix[11] = 0;
+	matrix[8]  = _orientation.GetElement(6);
+	matrix[9]  = _orientation.GetElement(7);
+	matrix[10] = _orientation.GetElement(8);
+	matrix[11] = 0;
 
-	pMatrix[12] = 0;
-	pMatrix[13] = 0;
-	pMatrix[14] = 0;
-	pMatrix[15] = 1;
+	matrix[12] = 0;
+	matrix[13] = 0;
+	matrix[14] = 0;
+	matrix[15] = 1;
 }
 
-TEMPLATE void QUAL::GetAs4x4InverseOrientationMatrix(_TVarType pMatrix[16]) const
-{
-	RotationMatrix<_TVarType> lOrientation(mOrientation.GetAsRotationMatrix());
+TEMPLATE void QUAL::GetAs4x4InverseOrientationMatrix(_TVarType matrix[16]) const {
+	RotationMatrix<_TVarType> _orientation(orientation_.GetAsRotationMatrix());
 
-	pMatrix[0]  = lOrientation.GetElement(0);
-	pMatrix[1]  = lOrientation.GetElement(3);
-	pMatrix[2]  = lOrientation.GetElement(6);
-	pMatrix[3]  = 0;
+	matrix[0]  = _orientation.GetElement(0);
+	matrix[1]  = _orientation.GetElement(3);
+	matrix[2]  = _orientation.GetElement(6);
+	matrix[3]  = 0;
 
-	pMatrix[4]  = lOrientation.GetElement(1);
-	pMatrix[5]  = lOrientation.GetElement(4);
-	pMatrix[6]  = lOrientation.GetElement(7);
-	pMatrix[7]  = 0;
+	matrix[4]  = _orientation.GetElement(1);
+	matrix[5]  = _orientation.GetElement(4);
+	matrix[6]  = _orientation.GetElement(7);
+	matrix[7]  = 0;
 
-	pMatrix[8]  = lOrientation.GetElement(2);
-	pMatrix[9]  = lOrientation.GetElement(5);
-	pMatrix[10] = lOrientation.GetElement(8);
-	pMatrix[11] = 0;
+	matrix[8]  = _orientation.GetElement(2);
+	matrix[9]  = _orientation.GetElement(5);
+	matrix[10] = _orientation.GetElement(8);
+	matrix[11] = 0;
 
-	pMatrix[12] = 0;
-	pMatrix[13] = 0;
-	pMatrix[14] = 0;
-	pMatrix[15] = 1;
+	matrix[12] = 0;
+	matrix[13] = 0;
+	matrix[14] = 0;
+	matrix[15] = 1;
 }
 
-TEMPLATE void QUAL::Interpolate(const Transformation& pStart,
-				const Transformation& pEnd,
-				_TVarType pTime)
-{
-	mOrientation.Slerp(pStart.mOrientation, pEnd.mOrientation, pTime);
-	mPosition = pStart.mPosition + (pEnd.mPosition - pStart.mPosition) * pTime;
+TEMPLATE void QUAL::Interpolate(const Transformation& start,
+				const Transformation& end,
+				_TVarType time) {
+	orientation_.Slerp(start.orientation_, end.orientation_, time);
+	position_ = start.position_ + (end.position_ - start.position_) * time;
 }
 
-TEMPLATE Transformation<float> QUAL::ToFloat() const
-{
-	return Transformation<float>(mOrientation.ToFloat(), mPosition.ToFloat());
+TEMPLATE Transformation<float> QUAL::ToFloat() const {
+	return Transformation<float>(orientation_.ToFloat(), position_.ToFloat());
 }
 
-TEMPLATE Transformation<double> QUAL::ToDouble() const
-{
-	return Transformation<double>(mOrientation.ToDouble(), mPosition.ToDouble());
+TEMPLATE Transformation<double> QUAL::ToDouble() const {
+	return Transformation<double>(orientation_.ToDouble(), position_.ToDouble());
 }

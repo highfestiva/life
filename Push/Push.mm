@@ -4,24 +4,22 @@
 
 
 
-#include "../Lepra/Include/LepraOS.h"
+#include "../lepra/include/lepraos.h"
 #ifdef LEPRA_IOS
 #import <StoreKit/StoreKit.h>
 #endif // iOS
 
 
-namespace Lepra
-{
+namespace lepra {
 class Canvas;
 }
-using namespace Lepra;
+using namespace lepra;
 
 
 
 #ifdef LEPRA_IOS
 //@interface AnimatedApp: UIResponder <SKProductsRequestDelegate, SKPaymentTransactionObserver, UIAlertViewDelegate>
-@interface AnimatedApp: UIResponder
-{
+@interface AnimatedApp: UIResponder {
 @private
 	Canvas* _canvas;
 	NSTimer* _animationTimer;
@@ -31,11 +29,11 @@ using namespace Lepra;
 //@property(nonatomic, retain) SKProduct* requestedProduct;
 
 +(void) updateContent;
-+(void) storeHiscoreName;
--(id) init:(Canvas*)pCanvas;
++(void) hiscore_name_;
+-(id) init:(Canvas*)_canvas;
 -(void) dealloc;
--(void) startTick;
--(void) stopTick;
+-(void) tick_;
+-(void) tick_;
 -(void) tick;
 
 //-(void) startPurchase:(NSString*)productName;
@@ -48,13 +46,13 @@ using namespace Lepra;
 
 
 
-#include "Push.cxx"
+#include "push.cxx"
 
 
 
 #ifdef LEPRA_IOS
 
-#import "../UiLepra/Include/Mac/EAGLView.h"
+#import "../uilepra/include/mac/eaglview.h"
 
 //#define HISCORE_NAME_KEY @"HiscoreName"
 
@@ -62,114 +60,102 @@ using namespace Lepra;
 
 //@synthesize requestedProduct = _requestedProduct;
 
-+(void) updateContent
-{
++(void) updateContent {
 	//NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 
-	//NSInteger hasLevels = [defaults integerForKey:@ CONTENT_LEVELS];
-	//v_set(Push::Push::GetApp()->mVariableScope, RTVAR_CONTENT_LEVELS, (hasLevels == 1));
+	//NSInteger hasLevels = [defaults integerForKey:@ kContentLevels];
+	//v_set(Push::Push::GetApp()->variable_scope_, kRtvarContentLevels, (hasLevels == 1));
 
-	//NSInteger hasVehicles = [defaults integerForKey:@ CONTENT_VEHICLES];
-	//v_set(Push::Push::GetApp()->mVariableScope, RTVAR_CONTENT_VEHICLES, (hasVehicles == 1));
+	//NSInteger hasVehicles = [defaults integerForKey:@ kContentVehicles];
+	//v_set(Push::Push::GetApp()->variable_scope_, kRtvarContentVehicles, (hasVehicles == 1));
 
 	//NSString* objcHiscoreName = [defaults stringForKey:HISCORE_NAME_KEY];
 	//const str hiscoreName = MacLog::Decode(objcHiscoreName);
-	//v_set(Push::Push::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, hiscoreName);
+	//v_set(Push::Push::GetApp()->variable_scope_, kRtvarHiscoreName, hiscoreName);
 }
 
-+(void) storeHiscoreName
++(void) hiscore_name_
 {
-	//str lLastHiscoreName;
-	//v_get(lLastHiscoreName, =, Push::Push::GetApp()->mVariableScope, RTVAR_HISCORE_NAME, "");
-	//NSString* name = [MacLog::Encode(lLastHiscoreName) retain];
+	//str last_hiscore_name;
+	//v_get(last_hiscore_name, =, Push::Push::GetApp()->variable_scope_, kRtvarHiscoreName, "");
+	//NSString* name = [MacLog::Encode(last_hiscore_name) retain];
 	//NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	//[defaults setObject:name forKey:HISCORE_NAME_KEY];
 	//[name release];
 }
 
--(id) init:(Canvas*)pCanvas
-{
-	[UIApplication sharedApplication].statusBarOrientation = UIInterfaceOrientationLandscapeRight;
-	_canvas = pCanvas;
+-(id) init:(Canvas*)_canvas {
+	[UIApplication sharedApplication].statusBarOrientation_ = UIInterfaceOrientationLandscapeRight;
+	_canvas = _canvas;
 	_animationTimer = nil;
 	//[[SKPaymentQueue defaultQueue] addTransactionObserver:self];
 	return self;
 }
 
--(void) dealloc
-{
+-(void) dealloc {
 	//self.requestedProduct = nil;
         [super dealloc];
 }
 
--(void) startTick
+-(void) tick_
 {
 	_animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.0001 target:self selector:@selector(tick) userInfo:nil repeats:YES];
-	[EAGLView sharedView].responder = self;
-	[[EAGLView sharedView] powerUpAcc];
+	[EAGLView sharedView_].responder = self;
+	[[EAGLView sharedView_] up_acc];
 }
 
--(void) stopTick
+-(void) tick_
 {
-	[[EAGLView sharedView] powerDownAcc];
+	[[EAGLView sharedView_] down_acc];
 	[_animationTimer invalidate];
 	_animationTimer = nil;
 }
 
--(void) tick
-{
-	EAGLView* lGlView = [EAGLView sharedView];
-	if (!lGlView.isOpen)
-	{
-		[lGlView setFramebuffer];
-	}
-	else
-	{
-		lGlView.canvas = _canvas;
+-(void) tick {
+	EAGLView* gl_view = [EAGLView sharedView_];
+	if (!gl_view.isOpen) {
+		[gl_view framebuffer_];
+	} else {
+		gl_view.canvas = _canvas;
 		Push::Push::GetApp()->Tick();
 	}
 }
 
-//-(CGPoint) xform:(const CGPoint&)pLocation
+//-(CGPoint) xform:(const CGPoint&)location
 //{
 //	if (_canvas->GetDeviceOutputRotation() == 90)
 //	{
-//		return pLocation;
+//		return location;
 //	}
-//	CGPoint lLocation;
-//	const CGSize& lSize = [UIScreen mainScreen].bounds.size;
-//	lLocation.x = lSize.width  - pLocation.x;
-//	lLocation.y = lSize.height - pLocation.y;
-//	return lLocation;
+//	CGPoint location;
+//	const CGSize& size = [UIScreen mainScreen].bounds.size;
+//	location.x = size.width  - location.x;
+//	location.y = size.height - location.y;
+//	return location;
 //}
 
--(void) touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
-{
+-(void) touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event {
 	NSEnumerator* e = [touches objectEnumerator];
-	UITouch* lTouch;
-	while ((lTouch = (UITouch*)[e nextObject]))
-	{
-		CGPoint lTapPosition = [lTouch locationInView:nil];
-		CGPoint lPrevTapPosition = [lTouch previousLocationInView:nil];
-		bool lIsPressed = (lTouch.phase != UITouchPhaseEnded && lTouch.phase != UITouchPhaseCancelled);
-		PixelCoord lPreviousTap(lPrevTapPosition.y, _canvas->GetActualWidth() - lPrevTapPosition.x);
-		PixelCoord lThisTap(lTapPosition.y, _canvas->GetActualWidth() - lTapPosition.x);
-		if (_canvas && _canvas->GetDeviceOutputRotation() != 90)
-		{
-			lPreviousTap = PixelCoord(_canvas->GetActualHeight() - lPrevTapPosition.y, lPrevTapPosition.x);
-			lThisTap = PixelCoord(_canvas->GetActualHeight() - lTapPosition.y, lTapPosition.x);
+	UITouch* touch;
+	while ((touch = (UITouch*)[e nextObject])) {
+		CGPoint tap_position = [touch locationInView:nil];
+		CGPoint prev_tap_position = [touch previousLocationInView:nil];
+		bool is_pressed = (touch.phase != UITouchPhaseEnded && touch.phase != UITouchPhaseCancelled);
+		PixelCoord previous_tap(prev_tap_position.y, _canvas->GetActualWidth() - prev_tap_position.x);
+		PixelCoord this_tap(tap_position.y, _canvas->GetActualWidth() - tap_position.x);
+		if (_canvas && _canvas->GetDeviceOutputRotation() != 90) {
+			previous_tap = PixelCoord(_canvas->GetActualHeight() - prev_tap_position.y, prev_tap_position.x);
+			this_tap = PixelCoord(_canvas->GetActualHeight() - tap_position.y, tap_position.x);
 		}
-		Push::Push::GetApp()->mDragManager.UpdateDrag(lPreviousTap, lThisTap, lIsPressed, lIsPressed? 1 : 0);
+		Push::Push::GetApp()->drag_manager_.UpdateDrag(previous_tap, this_tap, is_pressed, is_pressed? 1 : 0);
 	}
 }
 
--(void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
-{
+-(void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 	[self touchesMoved:touches withEvent:event];
 }
 
--(void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
-{
+-(void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
 	[self touchesMoved:touches withEvent:event];
 }
 
@@ -197,11 +183,11 @@ using namespace Lepra;
 //	NSArray* products = response.products;
 //	self.requestedProduct = [products objectAtIndex:0];
 //
-//	NSNumberFormatter* priceFormatter = [[NSNumberFormatter alloc] init];
-//	[priceFormatter setFormatterBehavior:NSNumberFormatterBehavior10_4];
-//	[priceFormatter setNumberStyle:NSNumberFormatterCurrencyStyle];
-//	[priceFormatter setLocale:self.requestedProduct.priceLocale];
-//	NSString* price = [priceFormatter stringFromNumber:self.requestedProduct.price];
+//	NSNumberFormatter* formatter = [[NSNumberFormatter alloc] init];
+//	[formatter setFormatterBehavior:NSNumberFormatterBehavior10_4];
+//	[formatter setNumberStyle:NSNumberFormatterCurrencyStyle];
+//	[formatter setLocale:self.requestedProduct.priceLocale];
+//	NSString* price = [formatter stringFromNumber:self.requestedProduct.price];
 //	NSString* message = [self.requestedProduct.localizedDescription stringByAppendingFormat:@"\n\n%@\n\nInterested?", price];
 //
 //	UIAlertView* alertView = [[UIAlertView alloc] initWithTitle:self.requestedProduct.localizedTitle
@@ -262,8 +248,8 @@ using namespace Lepra;
 //
 //-(void) provideContent:(NSString*)productIdentifier confirm:(BOOL)confirm
 //{
-//	NSUserDefaults* lDefaults = [NSUserDefaults standardUserDefaults];
-//	[lDefaults setInteger:1 forKey:productIdentifier];
+//	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+//	[defaults setInteger:1 forKey:productIdentifier];
 //	[AnimatedApp updateContent];
 //
 //	if (confirm)

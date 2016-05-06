@@ -6,40 +6,35 @@
 
 
 #include "pch.h"
-#include "../Include/HiResTimer.h"
-#include "../Include/Time.h"
+#include "../include/hirestimer.h"
+#include "../include/time.h"
 #include <time.h>
 #pragma warning(disable: 4996)	// Deprecated functions are not to be used, as they may be removed in future versions. Circumvent problem instead.
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-Time::Time()
-{
+Time::Time() {
 	UpdateTime();
 }
 
-Time::Time(const Time& pTime)
-{
-	mYear        = pTime.mYear;
-	mMonth       = pTime.mMonth;
-	mDay         = pTime.mDay;
-	mWeekDay     = pTime.mWeekDay;
-	mHour        = pTime.mHour;
-	mMinute      = pTime.mMinute;
-	mSecond      = pTime.mSecond;
-	mMillis      = pTime.mMillis;
-	mDaylightSavingTime = pTime.mDaylightSavingTime;
+Time::Time(const Time& _time) {
+	year_        = _time.year_;
+	month_       = _time.month_;
+	day_         = _time.day_;
+	week_day_     = _time.week_day_;
+	hour_        = _time.hour_;
+	minute_      = _time.minute_;
+	second_      = _time.second_;
+	millis_      = _time.millis_;
+	daylight_saving_time_ = _time.daylight_saving_time_;
 }
 
-int Time::GetDaysInMonth() const
-{
-	switch(mMonth)
-	{
+int Time::GetDaysInMonth() const {
+	switch(month_) {
 	case 0:		// January
 	case 2:		// March
 	case 4:		// May
@@ -49,12 +44,9 @@ int Time::GetDaysInMonth() const
 	case 11:	// December
 		return 31;
 	case 1:		// February
-		if (IsLeapYear())
-		{
+		if (IsLeapYear()) {
 			return 29;
-		}
-		else
-		{
+		} else {
 			return 28;
 		}
 	case 3:		// April
@@ -67,299 +59,252 @@ int Time::GetDaysInMonth() const
 	}
 }
 
-void Time::UpdateTime()
-{
-	time_t lTime = time(NULL);
-	tm* lTM = localtime(&lTime);
+void Time::UpdateTime() {
+	time_t __time = time(NULL);
+	tm* __tm = localtime(&__time);
 	const double s = HiResTimer(false).GetTime();
 
-	mYear        = (int)lTM->tm_year + 1900;
-	mMonth       = (int)lTM->tm_mon + 1;
-	mDay         = (int)lTM->tm_mday;
-	mWeekDay     = (int)lTM->tm_wday;
-	mHour        = (int)lTM->tm_hour;
-	mMinute      = (int)lTM->tm_min;
-	mSecond      = (int)lTM->tm_sec;
-	mMillis      = int((s-int(s))*1000);
+	year_        = (int)__tm->tm_year + 1900;
+	month_       = (int)__tm->tm_mon + 1;
+	day_         = (int)__tm->tm_mday;
+	week_day_     = (int)__tm->tm_wday;
+	hour_        = (int)__tm->tm_hour;
+	minute_      = (int)__tm->tm_min;
+	second_      = (int)__tm->tm_sec;
+	millis_      = int((s-int(s))*1000);
 
-	mDaylightSavingTime = ((int)lTM->tm_isdst > 0);
+	daylight_saving_time_ = ((int)__tm->tm_isdst > 0);
 }
 
-Time& Time::operator += (const Time& pTime)
-{
-	mYear        += pTime.mYear;
-	mMonth       += pTime.mMonth;
-	mDay         += pTime.mDay;
-	mWeekDay     += pTime.mWeekDay;
-	mHour        += pTime.mHour;
-	mMinute      += pTime.mMinute;
-	mSecond      += pTime.mSecond;
-	mMillis      += pTime.mMillis;
+Time& Time::operator += (const Time& _time) {
+	year_        += _time.year_;
+	month_       += _time.month_;
+	day_         += _time.day_;
+	week_day_     += _time.week_day_;
+	hour_        += _time.hour_;
+	minute_      += _time.minute_;
+	second_      += _time.second_;
+	millis_      += _time.millis_;
 
-	mSecond += mMillis / 1000;
-	mMillis %= 1000;
+	second_ += millis_ / 1000;
+	millis_ %= 1000;
 
-	mMinute += mSecond / 60;
-	mSecond %= 60;
+	minute_ += second_ / 60;
+	second_ %= 60;
 
-	mHour += mMinute / 60;
-	mMinute %= 60;
+	hour_ += minute_ / 60;
+	minute_ %= 60;
 
-	mDay += mHour / 24;
-	mWeekDay = (mWeekDay + mHour / 24) % 7;
-	mHour %= 24;
+	day_ += hour_ / 24;
+	week_day_ = (week_day_ + hour_ / 24) % 7;
+	hour_ %= 24;
 
-	int lDaysInMonth = GetDaysInMonth();
-	while (mDay > lDaysInMonth)
-	{
-		mMonth++;
+	int days_in_month = GetDaysInMonth();
+	while (day_ > days_in_month) {
+		month_++;
 
-		if (mMonth > 12)
-		{
-			mYear++;
-			mMonth -= 12;
+		if (month_ > 12) {
+			year_++;
+			month_ -= 12;
 		}
 
-		mDay -= lDaysInMonth;
-		lDaysInMonth = GetDaysInMonth();
+		day_ -= days_in_month;
+		days_in_month = GetDaysInMonth();
 	}
 
 	return *this;
 }
 
-Time& Time::operator -= (const Time& pTime)
-{
-	mYear        -= pTime.mYear;
-	mMonth       -= pTime.mMonth;
-	mDay         -= pTime.mDay;
-	mWeekDay     -= pTime.mWeekDay;
-	mHour        -= pTime.mHour;
-	mMinute      -= pTime.mMinute;
-	mSecond      -= pTime.mSecond;
-	mMillis      -= pTime.mMillis;
+Time& Time::operator -= (const Time& _time) {
+	year_        -= _time.year_;
+	month_       -= _time.month_;
+	day_         -= _time.day_;
+	week_day_     -= _time.week_day_;
+	hour_        -= _time.hour_;
+	minute_      -= _time.minute_;
+	second_      -= _time.second_;
+	millis_      -= _time.millis_;
 
-	if (mMillis < 0)
-	{
-		mSecond += (mMillis-1000-1) / 1000;
-		mMillis = (1000+mMillis) % 1000;
+	if (millis_ < 0) {
+		second_ += (millis_-1000-1) / 1000;
+		millis_ = (1000+millis_) % 1000;
 	}
-	if (mSecond < 0)
-	{
-		mMinute += (mSecond-60-1) / 60;
-		mSecond  = (60+mSecond) % 60;
+	if (second_ < 0) {
+		minute_ += (second_-60-1) / 60;
+		second_  = (60+second_) % 60;
 	}
-	if (mMinute < 0)
-	{
-		mHour  += (mMinute-60-1) / 60;
-		mMinute = (60+mMinute) % 60;
+	if (minute_ < 0) {
+		hour_  += (minute_-60-1) / 60;
+		minute_ = (60+minute_) % 60;
 	}
-	if (mHour < 0)
-	{
-		mDay += (mHour-24-1) / 24;
-		mHour = (24+mHour) % 24;
+	if (hour_ < 0) {
+		day_ += (hour_-24-1) / 24;
+		hour_ = (24+hour_) % 24;
 	}
 
-	int lDaysInMonth = GetDaysInMonth();
-	while (mDay <= 0)
-	{
-		mMonth--;
+	int days_in_month = GetDaysInMonth();
+	while (day_ <= 0) {
+		month_--;
 
-		if (mMonth <= 0)
-		{
-			mYear--;
-			mMonth += 12;
+		if (month_ <= 0) {
+			year_--;
+			month_ += 12;
 		}
 
-		mDay += lDaysInMonth;
-		lDaysInMonth = GetDaysInMonth();
+		day_ += days_in_month;
+		days_in_month = GetDaysInMonth();
 	}
 	return *this;
 }
 
-str Time::GetDateTimeAsString() const
-{
+str Time::GetDateTimeAsString() const {
 	return strutil::Format("%i-%.2i-%.2i %.2i:%.2i:%.2i,%.3i", GetYear(), GetMonth(), GetDay(), GetHour(), GetMinute(), GetSecond(), GetMillisecond());
 }
 
-bool Time::operator < (const Time& pTime) const
-{
-	if (mYear != pTime.mYear)
-	{
-		return mYear < pTime.mYear;
+bool Time::operator < (const Time& _time) const {
+	if (year_ != _time.year_) {
+		return year_ < _time.year_;
 	}
-	if (mMonth != pTime.mMonth)
-	{
-		return mMonth < pTime.mMonth;
+	if (month_ != _time.month_) {
+		return month_ < _time.month_;
 	}
-	if (mDay != pTime.mDay)
-	{
-		return mDay < pTime.mDay;
+	if (day_ != _time.day_) {
+		return day_ < _time.day_;
 	}
-	if (mHour != pTime.mHour)
-	{
-		return mHour < pTime.mHour;
+	if (hour_ != _time.hour_) {
+		return hour_ < _time.hour_;
 	}
-	if (mMinute != pTime.mMinute)
-	{
-		return mMinute < pTime.mMinute;
+	if (minute_ != _time.minute_) {
+		return minute_ < _time.minute_;
 	}
-	if (mSecond != pTime.mSecond)
-	{
-		return mSecond < pTime.mSecond;
+	if (second_ != _time.second_) {
+		return second_ < _time.second_;
 	}
-	if (mMillis != pTime.mMillis)
-	{
-		return mMillis < pTime.mMillis;
+	if (millis_ != _time.millis_) {
+		return millis_ < _time.millis_;
 	}
 	return false;
 }
 
-bool Time::operator >  (const Time& pTime) const
-{
-	if (mYear != pTime.mYear)
-	{
-		return mYear > pTime.mYear;
+bool Time::operator >  (const Time& _time) const {
+	if (year_ != _time.year_) {
+		return year_ > _time.year_;
 	}
-	if (mMonth != pTime.mMonth)
-	{
-		return mMonth > pTime.mMonth;
+	if (month_ != _time.month_) {
+		return month_ > _time.month_;
 	}
-	if (mDay != pTime.mDay)
-	{
-		return mDay > pTime.mDay;
+	if (day_ != _time.day_) {
+		return day_ > _time.day_;
 	}
-	if (mHour != pTime.mHour)
-	{
-		return mHour > pTime.mHour;
+	if (hour_ != _time.hour_) {
+		return hour_ > _time.hour_;
 	}
-	if (mMinute != pTime.mMinute)
-	{
-		return mMinute > pTime.mMinute;
+	if (minute_ != _time.minute_) {
+		return minute_ > _time.minute_;
 	}
-	if (mSecond != pTime.mSecond)
-	{
-		return mSecond > pTime.mSecond;
+	if (second_ != _time.second_) {
+		return second_ > _time.second_;
 	}
-	if (mMillis != pTime.mMillis)
-	{
-		return mMillis > pTime.mMillis;
+	if (millis_ != _time.millis_) {
+		return millis_ > _time.millis_;
 	}
 	return false;
 }
 
-const Time& Time::operator = (const Time& pTime)
-{
-	mYear        = pTime.mYear;
-	mMonth       = pTime.mMonth;
-	mDay         = pTime.mDay;
-	mWeekDay     = pTime.mWeekDay;
-	mHour        = pTime.mHour;
-	mMinute      = pTime.mMinute;
-	mSecond      = pTime.mSecond;
-	mMillis      = pTime.mMillis;
-	mDaylightSavingTime = pTime.mDaylightSavingTime;
+const Time& Time::operator = (const Time& _time) {
+	year_        = _time.year_;
+	month_       = _time.month_;
+	day_         = _time.day_;
+	week_day_     = _time.week_day_;
+	hour_        = _time.hour_;
+	minute_      = _time.minute_;
+	second_      = _time.second_;
+	millis_      = _time.millis_;
+	daylight_saving_time_ = _time.daylight_saving_time_;
 	return *this;
 }
 
 
-int Time::GetYear() const
-{
-	return mYear;
+int Time::GetYear() const {
+	return year_;
 }
 
-int Time::GetMonth() const
-{
-	return mMonth;
+int Time::GetMonth() const {
+	return month_;
 }
 
-int Time::GetDay() const
-{
-	return mDay;
+int Time::GetDay() const {
+	return day_;
 }
 
-int Time::GetWeekDay() const
-{
-	return mWeekDay;
+int Time::GetWeekDay() const {
+	return week_day_;
 }
 
-int Time::GetHour() const
-{
-	return mHour;
+int Time::GetHour() const {
+	return hour_;
 }
 
-int Time::GetMinute() const
-{
-	return mMinute;
+int Time::GetMinute() const {
+	return minute_;
 }
 
-int Time::GetSecond() const
-{
-	return mSecond;
+int Time::GetSecond() const {
+	return second_;
 }
 
-int Time::GetMillisecond() const
-{
-	return mMillis;
+int Time::GetMillisecond() const {
+	return millis_;
 }
 
-bool Time::IsLeapYear() const
-{
-	return (mYear % 4 == 0 && (mYear % 100 != 0 || mYear % 400 == 0));
+bool Time::IsLeapYear() const {
+	return (year_ % 4 == 0 && (year_ % 100 != 0 || year_ % 400 == 0));
 }
 
-bool Time::operator == (const Time& pTime) const
-{
-	if (mYear        == pTime.mYear   &&
-	   mMonth       == pTime.mMonth  &&
-	   mDay         == pTime.mDay    &&
-	   mHour        == pTime.mHour   &&
-	   mMinute      == pTime.mMinute &&
-	   mSecond      == pTime.mSecond &&
-	   mMillis      == pTime.mMillis)
-	{
+bool Time::operator == (const Time& _time) const {
+	if (year_        == _time.year_   &&
+	   month_       == _time.month_  &&
+	   day_         == _time.day_    &&
+	   hour_        == _time.hour_   &&
+	   minute_      == _time.minute_ &&
+	   second_      == _time.second_ &&
+	   millis_      == _time.millis_) {
 		return true;
 	}
 
 	return false;
 }
 
-bool Time::operator != (const Time& pTime) const
-{
-	return !((*this) == pTime);
+bool Time::operator != (const Time& _time) const {
+	return !((*this) == _time);
 }
 
-bool Time::operator <= (const Time& pTime) const
-{
-	if ((*this) == pTime)
-	{
+bool Time::operator <= (const Time& _time) const {
+	if ((*this) == _time) {
 		return true;
 	}
 
-	return (*this) < pTime;
+	return (*this) < _time;
 }
 
-bool Time::operator >= (const Time& pTime) const
-{
-	if ((*this) == pTime)
-	{
+bool Time::operator >= (const Time& _time) const {
+	if ((*this) == _time) {
 		return true;
 	}
 
-	return (*this) > pTime;
+	return (*this) > _time;
 }
 
-Time operator + (const Time& pLeft, const Time& pRight)
-{
-	Time lTime(pLeft);
-	lTime += pRight;
-	return lTime;
+Time operator + (const Time& left, const Time& right) {
+	Time __time(left);
+	__time += right;
+	return __time;
 }
 
-Time operator - (const Time& pLeft, const Time& pRight)
-{
-	Time lTime(pLeft);
-	lTime -= pRight;
-	return lTime;
+Time operator - (const Time& left, const Time& right) {
+	Time __time(left);
+	__time -= right;
+	return __time;
 }
 
 

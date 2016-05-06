@@ -5,60 +5,49 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiCheckButton.h"
+#include "../../include/gui/uicheckbutton.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-CheckButton::CheckButton(const Color& pBodyColor, const wstr& pText):
-	Parent(pBodyColor, pText),
-	mCheckedIconId(Painter::INVALID_IMAGEID)
-{
+CheckButton::CheckButton(const Color& body_color, const wstr& text):
+	Parent(body_color, text),
+	checked_icon_id_(Painter::kInvalidImageid) {
 }
 
-CheckButton::~CheckButton()
-{
+CheckButton::~CheckButton() {
 }
 
-void CheckButton::Repaint(Painter* pPainter)
-{
-	Parent::Repaint(pPainter);
+void CheckButton::Repaint(Painter* painter) {
+	Parent::Repaint(painter);
 }
 
-bool CheckButton::OnLButtonUp(int pMouseX, int pMouseY)
-{
-	if (IsOver(pMouseX, pMouseY) == true)
-	{
-		switch(GetState())
-		{
-		case RELEASING:
+bool CheckButton::OnLButtonUp(int mouse_x, int mouse_y) {
+	if (IsOver(mouse_x, mouse_y) == true) {
+		switch(GetState()) {
+		case kReleasing:
 			SetPressed(false);
 			break;
-		case PRESSING:
+		case kPressing:
 			SetPressed(true);
 			break;
 		default:
 			break;
 		}
-		if (mOnClick != 0)
-		{
-			(*mOnClick)(this);
+		if (on_click_ != 0) {
+			(*on_click_)(this);
 		}
-	}
-	else
-	{
+	} else {
 		// Go back to previous state.
-		switch(GetState())
-		{
-		case RELEASING:
-			SetState(PRESSED);
+		switch(GetState()) {
+		case kReleasing:
+			SetState(kPressed);
 			break;
-		case PRESSING:
-			SetState(RELEASED);
+		case kPressing:
+			SetState(kReleased);
 			break;
 		default:
 			break;
@@ -69,17 +58,14 @@ bool CheckButton::OnLButtonUp(int pMouseX, int pMouseY)
 	return true;
 }
 
-void CheckButton::SetCheckedIcon(Painter::ImageID pIconId)
-{
-	mCheckedIconId = pIconId;
+void CheckButton::SetCheckedIcon(Painter::ImageID icon_id) {
+	checked_icon_id_ = icon_id;
 }
 
-Painter::ImageID CheckButton::GetCurrentIcon() const
-{
-	State lState = GetState();
-	if (mCheckedIconId != Painter::INVALID_IMAGEID && (lState == PRESSED || lState == PRESSED_HOOVER))
-	{
-		return mCheckedIconId;
+Painter::ImageID CheckButton::GetCurrentIcon() const {
+	State state = GetState();
+	if (checked_icon_id_ != Painter::kInvalidImageid && (state == kPressed || state == kPressedHoover)) {
+		return checked_icon_id_;
 	}
 	return Parent::GetCurrentIcon();
 }

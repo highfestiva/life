@@ -4,54 +4,44 @@
 
 
 
-#include "LepraAssert.h"
+#include "lepraassert.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 ID_TEMPLATE
-ID_QUAL::IdManager(_TInt pMinId, _TInt pMaxId, _TInt pInvalidId):
-	mInvalidId(pInvalidId)
-{
-	deb_assert(pMaxId+1 > pMaxId);	// Our ID segmentation model assumes that ID doesn't wrap on max+1.
-	mIdSegmentList.push_back(AllocFreeSegment(pMinId, pMinId, pMaxId));
+ID_QUAL::IdManager(_TInt min_id, _TInt max_id, _TInt invalid_id):
+	invalid_id_(invalid_id) {
+	deb_assert(max_id+1 > max_id);	// Our ID segmentation model assumes that ID doesn't wrap on max+1.
+	id_segment_list_.push_back(AllocFreeSegment(min_id, min_id, max_id));
 }
 
 ID_TEMPLATE
-_TInt ID_QUAL::GetMinId() const
-{
-	return (mIdSegmentList.front().mFirstAllocId);
+_TInt ID_QUAL::GetMinId() const {
+	return (id_segment_list_.front().first_alloc_id_);
 }
 
 ID_TEMPLATE
-_TInt ID_QUAL::GetMaxId() const
-{
-	return (mIdSegmentList.back().mLastFreeId);
+_TInt ID_QUAL::GetMaxId() const {
+	return (id_segment_list_.back().last_free_id_);
 }
 
 ID_TEMPLATE
-_TInt ID_QUAL::GetInvalidId() const
-{
-	return (mInvalidId);
+_TInt ID_QUAL::GetInvalidId() const {
+	return (invalid_id_);
 }
 
 ID_TEMPLATE
-bool ID_QUAL::IsIdFree(_TInt pId) const
-{
-	typename IdSegmentList::const_iterator x = mIdSegmentList.begin();
-	for (; x != mIdSegmentList.end(); ++x)
-	{
-		if (pId >= x->mFirstFreeId && pId <= x->mLastFreeId)
-		{
+bool ID_QUAL::IsIdFree(_TInt id) const {
+	typename IdSegmentList::const_iterator x = id_segment_list_.begin();
+	for (; x != id_segment_list_.end(); ++x) {
+		if (id >= x->first_free_id_ && id <= x->last_free_id_) {
 			// We found our range. Would allocate it here.
 			return (true);	// TRICKY: RAII allow less code and less error-prone code here.
-		}
-		else if (pId >= x->mFirstAllocId && pId < x->mFirstFreeId)
-		{
+		} else if (id >= x->first_alloc_id_ && id < x->first_free_id_) {
 			// Number already taken.
 			break;
 		}
@@ -60,41 +50,30 @@ bool ID_QUAL::IsIdFree(_TInt pId) const
 }
 
 ID_TEMPLATE
-_TInt ID_QUAL::GetFreeId()
-{
-	typename IdSegmentList::iterator x = mIdSegmentList.begin();
-	if (x->mFirstFreeId <= x->mLastFreeId)
-	{
+_TInt ID_QUAL::GetFreeId() {
+	typename IdSegmentList::iterator x = id_segment_list_.begin();
+	if (x->first_free_id_ <= x->last_free_id_) {
 		// TRICKY: fall through.
-	}
-	else if (++x != mIdSegmentList.end())	// We must be able to allocate on next (otherwise it would not be there == end of valid range).
-	{
+	} else if (++x != id_segment_list_.end()) {	// We must be able to allocate on next (otherwise it would not be there == end of valid range).
 		// TRICKY: fall through.
-	}
-	else
-	{
+	} else {
 		// TRICKY: RAII allow less code and less error-prone code here.
 		return (GetInvalidId());
 	}
-	_TInt lId = x->mFirstFreeId;
-	AllocateIdOnSegment(lId, x);
-	return (lId);
+	_TInt _id = x->first_free_id_;
+	AllocateIdOnSegment(_id, x);
+	return (_id);
 }
 
 ID_TEMPLATE
-bool ID_QUAL::ReserveId(_TInt pId)
-{
-	typename IdSegmentList::iterator x = mIdSegmentList.begin();
-	for (; x != mIdSegmentList.end(); ++x)
-	{
-		if (pId >= x->mFirstFreeId && pId <= x->mLastFreeId)
-		{
+bool ID_QUAL::ReserveId(_TInt id) {
+	typename IdSegmentList::iterator x = id_segment_list_.begin();
+	for (; x != id_segment_list_.end(); ++x) {
+		if (id >= x->first_free_id_ && id <= x->last_free_id_) {
 			// We found our range. Allocate here.
-			AllocateIdOnSegment(pId, x);
+			AllocateIdOnSegment(id, x);
 			return (true);	// TRICKY: RAII allow less code and less error-prone code here.
-		}
-		else if (pId >= x->mFirstAllocId && pId < x->mFirstFreeId)
-		{
+		} else if (id >= x->first_alloc_id_ && id < x->first_free_id_) {
 			// Number already taken.
 			break;
 		}
@@ -103,19 +82,14 @@ bool ID_QUAL::ReserveId(_TInt pId)
 }
 
 ID_TEMPLATE
-bool ID_QUAL::RecycleId(_TInt pId)
-{
-	typename IdSegmentList::iterator x = mIdSegmentList.begin();
-	for (; x != mIdSegmentList.end(); ++x)
-	{
-		if (pId >= x->mFirstAllocId && pId < x->mFirstFreeId)
-		{
+bool ID_QUAL::RecycleId(_TInt id) {
+	typename IdSegmentList::iterator x = id_segment_list_.begin();
+	for (; x != id_segment_list_.end(); ++x) {
+		if (id >= x->first_alloc_id_ && id < x->first_free_id_) {
 			// We found our range. Free here.
-			FreeIdOnSegment(pId, x);
+			FreeIdOnSegment(id, x);
 			return (true);	// TRICKY: RAII allow less code and less error-prone code here.
-		}
-		else if (pId >= x->mFirstFreeId && pId <= x->mLastFreeId)
-		{
+		} else if (id >= x->first_free_id_ && id <= x->last_free_id_) {
 			// Number already free.
 			break;
 		}
@@ -124,107 +98,84 @@ bool ID_QUAL::RecycleId(_TInt pId)
 }
 
 ID_TEMPLATE
-str ID_QUAL::GetDebugState() const
-{
-	str lDebugState;
-	typename IdSegmentList::const_iterator x = mIdSegmentList.begin();
-	for (; x != mIdSegmentList.end(); ++x)
-	{
-		lDebugState += strutil::Format("%i-%i, %i-%i,\n", x->mFirstAllocId, x->mFirstFreeId-1, x->mFirstFreeId, x->mLastFreeId);
+str ID_QUAL::GetDebugState() const {
+	str debug_state;
+	typename IdSegmentList::const_iterator x = id_segment_list_.begin();
+	for (; x != id_segment_list_.end(); ++x) {
+		debug_state += strutil::Format("%i-%i, %i-%i,\n", x->first_alloc_id_, x->first_free_id_-1, x->first_free_id_, x->last_free_id_);
 	}
-	return (lDebugState);
+	return (debug_state);
 }
 
 
 
 ID_TEMPLATE
-void ID_QUAL::AllocateIdOnSegment(_TInt pId, const typename IdSegmentList::iterator& x)
-{
-	if (pId == x->mFirstFreeId)	// Place in front of current free range?
-	{
+void ID_QUAL::AllocateIdOnSegment(_TInt id, const typename IdSegmentList::iterator& x) {
+	if (id == x->first_free_id_) {	// Place in front of current free range?
 		// Just decrease our "free count" by increasing this segment's "first free"  by one.
-		++(x->mFirstFreeId);
+		++(x->first_free_id_);
 		// Check if we have no more free IDs left; in that case we join with next segment.
 		typename IdSegmentList::iterator z = x;
 		++z;
-		if (z != mIdSegmentList.end() && x->mFirstFreeId > x->mLastFreeId)
-		{
+		if (z != id_segment_list_.end() && x->first_free_id_ > x->last_free_id_) {
 			// Drop the segment with no free IDs in.
-			z->mFirstAllocId = x->mFirstAllocId;
-			mIdSegmentList.erase(x);
+			z->first_alloc_id_ = x->first_alloc_id_;
+			id_segment_list_.erase(x);
 		}
-	}
-	else if (pId == x->mLastFreeId)	// Place in back of current free range?
-	{
-		if (pId == GetMaxId())
-		{
+	} else if (id == x->last_free_id_) {	// Place in back of current free range?
+		if (id == GetMaxId()) {
 			// Insert a free segment with a single free number in it at the end.
-			mIdSegmentList.insert(mIdSegmentList.end(), AllocFreeSegment(pId, pId+1, pId));
-			--(x->mLastFreeId);
-		}
-		else
-		{
+			id_segment_list_.insert(id_segment_list_.end(), AllocFreeSegment(id, id+1, id));
+			--(x->last_free_id_);
+		} else {
 			// "Strech" the next segment's alloc range down by decreasing it by one.
-			--(x->mLastFreeId);
+			--(x->last_free_id_);
 			typename IdSegmentList::iterator z = x;
 			++z;
-			--(z->mFirstAllocId);
+			--(z->first_alloc_id_);
 		}
-	}
-	else	// Split current segment in two. Place new number on the second segment.
-	{
+	} else {	// Split current segment in two. Place new number on the second segment.
 		typename IdSegmentList::iterator z = x;
 		++z;
 		// Create new segment to hold this ID.
-		z = mIdSegmentList.insert(z, AllocFreeSegment(pId, pId+1, x->mLastFreeId));
+		z = id_segment_list_.insert(z, AllocFreeSegment(id, id+1, x->last_free_id_));
 		// Cut the first of the two segments short.
-		x->mLastFreeId = pId-1;
+		x->last_free_id_ = id-1;
 	}
 }
 
 ID_TEMPLATE
-void ID_QUAL::FreeIdOnSegment(_TInt pId, const typename IdSegmentList::iterator& x)
-{
-	if (pId == x->mFirstFreeId-1)	// Drop from back of current alloc range?
-	{
+void ID_QUAL::FreeIdOnSegment(_TInt id, const typename IdSegmentList::iterator& x) {
+	if (id == x->first_free_id_-1) {	// Drop from back of current alloc range?
 		// Just decrease our "alloc count" by decreasing this segment's "last alloc"  by one.
-		--(x->mFirstFreeId);
+		--(x->first_free_id_);
 		// Check if we have no more allocated IDs left; in that case we join with previous segment.
-		if (x != mIdSegmentList.begin())
-		{
+		if (x != id_segment_list_.begin()) {
 			typename IdSegmentList::iterator z = x;
 			--z;
-			if (x->mFirstAllocId >= x->mFirstFreeId)
-			{
+			if (x->first_alloc_id_ >= x->first_free_id_) {
 				// Drop the segment with no allocated IDs in.
-				z->mLastFreeId = x->mLastFreeId;
-				mIdSegmentList.erase(x);
+				z->last_free_id_ = x->last_free_id_;
+				id_segment_list_.erase(x);
 			}
 		}
-	}
-	else if (pId == x->mFirstAllocId)	// Drop from front of current alloc range?
-	{
-		if (pId == GetMinId())
-		{
+	} else if (id == x->first_alloc_id_) {	// Drop from front of current alloc range?
+		if (id == GetMinId()) {
 			// Insert a free segment with a single free number in it at the front.
-			mIdSegmentList.insert(x, AllocFreeSegment(pId, pId, pId));
-			++(x->mFirstAllocId);
-		}
-		else
-		{
+			id_segment_list_.insert(x, AllocFreeSegment(id, id, id));
+			++(x->first_alloc_id_);
+		} else {
 			// "Strech" the previous segment's free range up by increasing it by one.
-			++(x->mFirstAllocId);
+			++(x->first_alloc_id_);
 			typename IdSegmentList::iterator z = x;
 			--z;
-			++(z->mLastFreeId);
+			++(z->last_free_id_);
 		}
-	}
-	else	// Split current segment in two. Place free number on the first segment.
-	{
+	} else {	// Split current segment in two. Place free number on the first segment.
 		// Create new segment to hold this ID.
-		mIdSegmentList.insert(x, AllocFreeSegment(x->mFirstAllocId, pId, pId));
+		id_segment_list_.insert(x, AllocFreeSegment(x->first_alloc_id_, id, id));
 		// Cut the second of the two segments short.
-		x->mFirstAllocId = pId-1;
+		x->first_alloc_id_ = id-1;
 	}
 }
 

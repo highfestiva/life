@@ -4,13 +4,13 @@
 
 
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../lepra/include/lepratarget.h"
 #ifdef LEPRA_IOS
-#import "ListViewController.h"
-#include "../UiCure/Include/UiCure.h"
-#include "../Cure/Include/RuntimeVariable.h"
+#import "listviewcontroller.h"
+#include "../uicure/include/uicure.h"
+#include "../cure/include/runtimevariable.h"
 #import "CreateNewViewController.h"
-#import "EditViewController.h"
+#import "editviewcontroller.h"
 #import "FileHelper.h"
 #import "SettingsViewController.h"
 
@@ -35,17 +35,16 @@
 
 #pragma mark - View Lifecycle
 
-- (void)viewDidLoad
-{
+- (void)viewDidLoad {
 	[super viewDidLoad];
 
 	_allowUpdateSelection = true;
 
-	UIBarButtonItem* settingsButton = [[UIBarButtonItem alloc] initWithTitle:@"\u2699" style:UIBarButtonItemStylePlain target:self action:@selector(settings)];
+	UIBarButtonItem* settingsButton_ = [[UIBarButtonItem alloc] initWithTitle:@"\u2699" style:UIBarButtonItemStylePlain target:self action:@selector(settings)];
 	UIFont* cogWheelFont = [UIFont fontWithName:@"Helvetica" size:24.0];
 	NSDictionary* fontDict = @{NSFontAttributeName: cogWheelFont};
-	[settingsButton setTitleTextAttributes:fontDict forState:UIControlStateNormal];
-	[self.navigationItem setLeftBarButtonItem:settingsButton];
+	[settingsButton_ setTitleTextAttributes:fontDict forState:UIControlStateNormal];
+	[self.navigationItem setLeftBarButtonItem:settingsButton_];
 	UIBarButtonItem* createButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCompose target:self action:@selector(createNew)];
 	[self.navigationItem setRightBarButtonItem:createButton];
 
@@ -61,8 +60,7 @@
 	[self reloadPrototypes];
 }
 
-- (void) viewWillAppear:(BOOL)animated
-{
+- (void) viewWillAppear:(BOOL)animated {
 	NSIndexPath* indexPath = [self.tableView indexPathForSelectedRow];
 	if (indexPath) {
 		NSString* loc = [FileHelper countLoc:self.editController.title];
@@ -70,8 +68,7 @@
 		[self.tableView deselectRowAtIndexPath:indexPath animated:YES];
  	}
 
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
-	{
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
 		self.editController = nil;
 	}
 }
@@ -83,8 +80,7 @@
 - (UITableViewCell*) tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath*)indexPath {
 	static NSString* identifier = @"CellId";
 	UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:identifier];
-	if (cell == nil)
-	{
+	if (cell == nil) {
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:identifier];
 	}
 	cell.textLabel.text = [self.files objectAtIndex:indexPath.row];
@@ -92,32 +88,26 @@
 	return cell;
 }
 
--(void) tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath
-{
+-(void) tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
 	[self showFile:[self.files objectAtIndex:indexPath.row]];
 }
 
--(void) showFile:(NSString*)filename
-{
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-	{
+-(void) showFile:(NSString*)filename {
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
 		_allowUpdateSelection = false;
-		[self.editController saveIfChanged];
+		[self.editController if_changed_];
 		_allowUpdateSelection = true;
 		self.editController.title = filename;
 		[self.editController updateEditor];
-	}
-	else
-	{
+	} else {
 		self.editController = [EditViewController new];
 		self.editController.title = filename;
-		self.editController.listController = self;
+		self.editController.controller = self;
 		[self.navigationController pushViewController:self.editController animated:YES];
 	}
 }
 
--(void) reloadPrototypes
-{
+-(void) reloadPrototypes {
 	[self doReloadPrototypes];
 	if ([self.files count] == 0) {
 		[FileHelper copySamples];
@@ -125,40 +115,30 @@
 	}
 }
 
--(void) popCreateNew:(NSString*)filename
-{
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-	{
+-(void) popCreateNew:(NSString*)filename {
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
 		[self.createNewPopover dismissPopoverAnimated:YES];
 		self.createNewPopover = nil;
-	}
-	else
-	{
+	} else {
 		[self.navigationController popViewControllerAnimated:(filename==nil)];
 	}
-	if (filename != nil)
-	{
+	if (filename != nil) {
 		[self showFile:filename];
 	}
-	NSUInteger lFileIndex = [self.files indexOfObject:self.editController.title];
-	[self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:lFileIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
+	NSUInteger file_index = [self.files indexOfObject:self.editController.title];
+	[self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:file_index inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
 }
 
--(void) popDeleteFile
-{
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-	{
+-(void) delete_file {
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
 		[self.createNewPopover dismissPopoverAnimated:YES];
 		self.createNewPopover = nil;
-	}
-	else
-	{
+	} else {
 		[self.navigationController popViewControllerAnimated:YES];
 	}
 }
 
--(void) doReloadPrototypes
-{
+-(void) doReloadPrototypes {
 	self.files = [NSMutableArray new];
 	self.loc = [NSMutableArray new];
 	NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
@@ -172,85 +152,70 @@
 		[dirEnum skipDescendents];
 	}
 	[self.tableView reloadData];
-	if (self.editController && [self.editController.title length] > 0)
-	{
+	if (self.editController && [self.editController.title length] > 0) {
 		[self.editController updateEditor];
-		if ([self.editController.title length] > 0)
-		{
-			NSUInteger lFileIndex = [self.files indexOfObject:self.editController.title];
-			[self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:lFileIndex inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
+		if ([self.editController.title length] > 0) {
+			NSUInteger file_index = [self.files indexOfObject:self.editController.title];
+			[self.tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:file_index inSection:0] animated:NO scrollPosition:UITableViewScrollPositionNone];
 		}
 	}
 }
 
--(void) updateLoc
-{
-	if (!self.editController || [self.editController.title length] <= 0)
-	{
+-(void) updateLoc {
+	if (!self.editController || [self.editController.title length] <= 0) {
 		return;
 	}
 	NSString* loc = [FileHelper countLoc:self.editController.title];
-	NSUInteger lFileIndex = [self.files indexOfObject:self.editController.title];
-	[self.loc setObject:loc atIndexedSubscript:lFileIndex];
-	NSIndexPath* indexPath = [NSIndexPath indexPathForRow:lFileIndex inSection:0];
+	NSUInteger file_index = [self.files indexOfObject:self.editController.title];
+	[self.loc setObject:loc atIndexedSubscript:file_index];
+	NSIndexPath* indexPath = [NSIndexPath indexPathForRow:file_index inSection:0];
 	[self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationBottom];
-	if (_allowUpdateSelection)
-	{
+	if (_allowUpdateSelection) {
 		[self.tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
 	}
 }
 
--(void) popoverControllerDidDismissPopover:(UIPopoverController*)popoverController
-{
-	const bool lAllowRemoteSync = self.settingsController.allowRemote.isOn;
-	v_override(UiCure::GetSettings(), "Simulator.AllowRemoteSync", lAllowRemoteSync);
+-(void) popoverControllerDidDismissPopover:(UIPopoverController*)popoverController {
+	const bool allow_remote_sync = self.settingsController_.allowRemote.isOn;
+	v_override(UiCure::GetSettings(), "Simulator.AllowRemoteSync", allow_remote_sync);
 	self.createNewPopover = nil;
-	self.settingsController = nil;
+	self.settingsController_ = nil;
 }
 
--(void) doneiPhoneSettings
-{
-	const bool lAllowRemoteSync = self.settingsController.allowRemote.isOn;
-	v_override(UiCure::GetSettings(), "Simulator.AllowRemoteSync", lAllowRemoteSync);
+-(void) doneiPhoneSettings {
+	const bool allow_remote_sync = self.settingsController_.allowRemote.isOn;
+	v_override(UiCure::GetSettings(), "Simulator.AllowRemoteSync", allow_remote_sync);
 	[self.navigationController dismissViewControllerAnimated:YES completion:nil];
-	self.settingsController = nil;
+	self.settingsController_ = nil;
 }
 
-- (void)settings
-{
-	self.settingsController = [SettingsViewController new];
-	self.settingsController.title = @"Settings";
-	UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.settingsController];
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-	{
+- (void)settings {
+	self.settingsController_ = [SettingsViewController new];
+	self.settingsController_.title = @"Settings";
+	UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:self.settingsController_];
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
 		self.createNewPopover = [[UIPopoverController alloc] initWithContentViewController:nav];
 		self.createNewPopover.popoverContentSize = CGSizeMake(320,280);
 		self.createNewPopover.delegate = self;
 		[self.createNewPopover presentPopoverFromBarButtonItem:self.navigationItem.leftBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-	}
-	else
-	{
+	} else {
 		UIBarButtonItem* doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneiPhoneSettings)];
-		self.settingsController.navigationItem.rightBarButtonItem = doneButton;
-		nav.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+		self.settingsController_.navigationItem.rightBarButtonItem = doneButton;
+		nav.transition_style_ = UIModalTransitionStyleFlipHorizontal;
 		[self.navigationController presentViewController:nav animated:YES completion:nil];
 	}
 }
 
-- (void)createNew
-{
+- (void)createNew {
 	CreateNewViewController* newController = [CreateNewViewController new];
 	newController.title = @"New Prototype";
 	newController.parent = self;
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-	{
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
 		UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:newController];
 		self.createNewPopover = [[UIPopoverController alloc] initWithContentViewController:nav];
 		self.createNewPopover.popoverContentSize = CGSizeMake(320,216);
 		[self.createNewPopover presentPopoverFromBarButtonItem:self.navigationItem.rightBarButtonItem permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
-	}
-	else
-	{
+	} else {
 		[self.navigationController pushViewController:newController animated:YES];
 	}
 }

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2007, Righteous Games
 
 
@@ -7,331 +7,268 @@
 #include "pch.h"
 #if 0
 #include <stdexcept>
-#include "../../Lepra/Include/PerformanceScope.h"
-#include "../Include/PythonContextManager.h"
-#include "../Include/PythonContextObject.h"
-#include "../Include/PythonInterface.h"
-#include "../Include/TerrainManager.h"
+#include "../../lepra/include/PerformanceScope.h"
+#include "../include/pythoncontextmanager.h"
+#include "../include/pythoncontextobject.h"
+#include "../include/pythoninterface.h"
+#include "../include/terrainmanager.h"
 
 
 
-BOOST_PYTHON_MODULE(cure)
-{
-	boost::python::class_<Cure::PythonInterface::TerrainPatch, boost::noncopyable>("TerrainPatch")
-		.def("create", &Cure::PythonInterface::TerrainPatch::Create)
-		.def("clear", &Cure::PythonInterface::TerrainPatch::Clear)
-		.def("setSurfaceCoordinates", &Cure::PythonInterface::TerrainPatch::SetSurfaceCoordinates)
-		.def("getResolution", &Cure::PythonInterface::TerrainPatch::GetResolution)
+BOOST_PYTHON_MODULE(cure) {
+	boost::python::class_<cure::pythoninterface::TerrainPatch, boost::noncopyable>("TerrainPatch")
+		.def("create", &cure::pythoninterface::TerrainPatch::Create)
+		.def("clear", &cure::pythoninterface::TerrainPatch::Clear)
+		.def("setSurfaceCoordinates", &cure::pythoninterface::TerrainPatch::SetSurfaceCoordinates)
+		.def("getResolution", &cure::pythoninterface::TerrainPatch::GetResolution)
 		.staticmethod("getResolution")
 	;
 
-	boost::python::class_<Cure::PythonInterface::PythonObjectWrapper, boost::noncopyable>("ContextObject")
-		.def("enableTick", &Cure::PythonInterface::PythonObjectWrapper::EnableTick)
-		.def("disableTick", &Cure::PythonInterface::PythonObjectWrapper::DisableTick)
-		.def("setAlarm", &Cure::PythonInterface::PythonObjectWrapper::SetAlarm)
-		.def("setPosition", &Cure::PythonInterface::PythonObjectWrapper::SetPosition)
-		.def("getPosition", &Cure::PythonInterface::PythonObjectWrapper::GetPosition)
-		.def("setOrientation", &Cure::PythonInterface::PythonObjectWrapper::SetOrientation)
-		.def("getOrientation", &Cure::PythonInterface::PythonObjectWrapper::GetOrientation)
-		.def("applyForce", &Cure::PythonInterface::PythonObjectWrapper::ApplyForce)
-		.def("applyTransformedForce", &Cure::PythonInterface::PythonObjectWrapper::ApplyTransformedForce)
-		.def("loadGroup", &Cure::PythonInterface::PythonObjectWrapper::LoadGroup)
-		.def("onCreate", boost::python::pure_virtual(&Cure::PythonInterface::PythonObjectWrapper::OnCreate))
-		.def("onTick", boost::python::pure_virtual(&Cure::PythonInterface::PythonObjectWrapper::OnTick))
-		.def("onAlarm", boost::python::pure_virtual(&Cure::PythonInterface::PythonObjectWrapper::OnAlarm))
-		.def("onCollision", boost::python::pure_virtual(&Cure::PythonInterface::PythonObjectWrapper::OnCollision))
+	boost::python::class_<cure::pythoninterface::PythonObjectWrapper, boost::noncopyable>("ContextObject")
+		.def("enableTick", &cure::pythoninterface::PythonObjectWrapper::EnableTick)
+		.def("disableTick", &cure::pythoninterface::PythonObjectWrapper::DisableTick)
+		.def("setAlarm", &cure::pythoninterface::PythonObjectWrapper::SetAlarm)
+		.def("setPosition", &cure::pythoninterface::PythonObjectWrapper::SetPosition)
+		.def("getPosition", &cure::pythoninterface::PythonObjectWrapper::GetPosition)
+		.def("setOrientation", &cure::pythoninterface::PythonObjectWrapper::SetOrientation)
+		.def("getOrientation", &cure::pythoninterface::PythonObjectWrapper::GetOrientation)
+		.def("applyForce", &cure::pythoninterface::PythonObjectWrapper::ApplyForce)
+		.def("applyTransformedForce", &cure::pythoninterface::PythonObjectWrapper::ApplyTransformedForce)
+		.def("loadGroup", &cure::pythoninterface::PythonObjectWrapper::LoadGroup)
+		.def("onCreate", boost::python::pure_virtual(&cure::pythoninterface::PythonObjectWrapper::OnCreate))
+		.def("onTick", boost::python::pure_virtual(&cure::pythoninterface::PythonObjectWrapper::OnTick))
+		.def("onAlarm", boost::python::pure_virtual(&cure::pythoninterface::PythonObjectWrapper::OnAlarm))
+		.def("onCollision", boost::python::pure_virtual(&cure::pythoninterface::PythonObjectWrapper::OnCollision))
 	;
 
-	boost::python::def("createPythonObject", &Cure::PythonInterface::CreatePythonObject);
+	boost::python::def("createPythonObject", &cure::pythoninterface::CreatePythonObject);
 }
 
 
 
-namespace Cure
-{
-namespace PythonInterface
-{
+namespace cure {
+namespace pythoninterface {
 
 
 
 TerrainPatch::TerrainPatch():
-	mTerrainId(0x7FFFFFFF)
-{
+	terrain_id_(0x7FFFFFFF) {
 }
 
-TerrainPatch::~TerrainPatch()
-{
+TerrainPatch::~TerrainPatch() {
 	Clear();
 }
 
-void TerrainPatch::Create(int x, int y)
-{
+void TerrainPatch::Create(int x, int y) {
 	Clear();
-	mTerrainId = ContextManager::Get()->GetTerrainManager()->CreatePatch(x, y);
+	terrain_id_ = ContextManager::Get()->GetTerrainManager()->CreatePatch(x, y);
 }
 
-void TerrainPatch::Clear()
-{
-	if (mTerrainId != 0x7FFFFFFF)
-	{
-		ContextManager::Get()->GetTerrainManager()->DeletePatch(mTerrainId);
-		mTerrainId = 0x7FFFFFFF;
+void TerrainPatch::Clear() {
+	if (terrain_id_ != 0x7FFFFFFF) {
+		ContextManager::Get()->GetTerrainManager()->DeletePatch(terrain_id_);
+		terrain_id_ = 0x7FFFFFFF;
 	}
 }
 
-void TerrainPatch::SetSurfaceCoordinates(const tuple& pSurfaceCoordinates) const
-{
-	const int lCount = (int)PyObject_Length(pSurfaceCoordinates.ptr());
-	if (lCount != GetResolution()*GetResolution()*3)
-	{
+void TerrainPatch::SetSurfaceCoordinates(const tuple& surface_coordinates) const {
+	const int count = (int)PyObject_Length(surface_coordinates.ptr());
+	if (count != GetResolution()*GetResolution()*3) {
 		throw (std::exception("Cure: setSurfaceCoordinates() fails with wrong number of coordinates"));
 	}
-	if (mTerrainId == 0x7FFFFFFF)
-	{
+	if (terrain_id_ == 0x7FFFFFFF) {
 		throw (std::exception("Cure: setSurfaceCoordinates() must be preceded by create()"));
 	}
 
-	float* lCoordinates = new float[lCount];
-	for (int x = 0; x < lCount; ++x)
-	{
-		lCoordinates[x] = (float)boost::python::extract<double>(pSurfaceCoordinates[x]);
+	float* coordinates = new float[count];
+	for (int x = 0; x < count; ++x) {
+		coordinates[x] = (float)boost::python::extract<double>(surface_coordinates[x]);
 	}
-	ContextManager::Get()->GetTerrainManager()->SetSurfaceCoordinates(mTerrainId, lCoordinates);
-	delete (lCoordinates);
+	ContextManager::Get()->GetTerrainManager()->SetSurfaceCoordinates(terrain_id_, coordinates);
+	delete (coordinates);
 }
 
-int TerrainPatch::GetResolution()
-{
+int TerrainPatch::GetResolution() {
 	return (TerrainManager::GetResolution());
 }
 
 
 
 PythonObjectBase::PythonObjectBase():
-	mContextObject(0)
-{
+	context_object_(0) {
 }
 
-PythonObjectBase::PythonObjectBase(const PythonObjectBase& pObject):
-	mContextObject(pObject.mContextObject)
-{
+PythonObjectBase::PythonObjectBase(const PythonObjectBase& object):
+	context_object_(object.context_object_) {
 }
 
-PythonObjectBase::~PythonObjectBase()
-{
+PythonObjectBase::~PythonObjectBase() {
 	// TODO: add smart pointer references to context object?
-	mContextObject = 0;
+	context_object_ = 0;
 }
 
-void PythonObjectBase::operator=(const PythonObjectBase& pObject)
-{
+void PythonObjectBase::operator=(const PythonObjectBase& object) {
 	assert(false);
-	mContextObject = pObject.mContextObject;
+	context_object_ = object.context_object_;
 }
 
-void PythonObjectBase::SetContextObject(PythonContextObject* pContextObject)
-{
-	mContextObject = pContextObject;
+void PythonObjectBase::SetContextObject(PythonContextObject* context_object) {
+	context_object_ = context_object;
 }
 
-PythonContextObject* PythonObjectBase::GetContextObject() const
-{
-	return (mContextObject);
+PythonContextObject* PythonObjectBase::GetContextObject() const {
+	return (context_object_);
 }
 
-void PythonObjectBase::Clear()
-{
-	mContextObject = 0;
+void PythonObjectBase::Clear() {
+	context_object_ = 0;
 }
 
 
 
-void PythonObjectBase::EnableTick()
-{
-	if (mContextObject)
-	{
-		ContextManager::Get()->EnableTick(mContextObject);
-	}
-	else
-	{
+void PythonObjectBase::EnableTick() {
+	if (context_object_) {
+		ContextManager::Get()->EnableTick(context_object_);
+	} else {
 		throw (std::exception("Cure: setAlarm() fails for instance with no context object"));
 	}
 }
 
-void PythonObjectBase::DisableTick()
-{
-	if (mContextObject)
-	{
-		ContextManager::Get()->DisableTick(mContextObject);
-	}
-	else
-	{
+void PythonObjectBase::DisableTick() {
+	if (context_object_) {
+		ContextManager::Get()->DisableTick(context_object_);
+	} else {
 		throw (std::exception("Cure: disableTick() fails for instance with no context object"));
 	}
 }
 
-void PythonObjectBase::SetAlarm(int pAlarmId, double pSeconds)
-{
-	if (mContextObject)
-	{
-		ContextManager::Get()->SetAlarm(mContextObject, pAlarmId, pSeconds);
-	}
-	else
-	{
+void PythonObjectBase::SetAlarm(int alarm_id, double seconds) {
+	if (context_object_) {
+		ContextManager::Get()->SetAlarm(context_object_, alarm_id, seconds);
+	} else {
 		throw (std::exception("Cure: setAlarm() fails on instance with no context object"));
 	}
 }
 
-void PythonObjectBase::SetPosition(double pX, double pY, double pZ)
-{
-	mContextObject->SetPosition(Lepra::Vector3DD(pX, pY, pZ));
+void PythonObjectBase::SetPosition(double _x, double _y, double _z) {
+	context_object_->SetPosition(lepra::Vector3DD(_x, _y, _z));
 }
 
-tuple PythonObjectBase::GetPosition() const
-{
-	Lepra::Vector3DD lPosition = mContextObject->GetPosition();
-	return (boost::python::make_tuple(lPosition.x, lPosition.y, lPosition.z));
+tuple PythonObjectBase::GetPosition() const {
+	lepra::Vector3DD position = context_object_->GetPosition();
+	return (boost::python::make_tuple(position.x, position.y, position.z));
 }
 
-void PythonObjectBase::SetOrientation(double pTheta, double pPhi, double pGimbal)
-{
-	mContextObject->SetOrientation(Lepra::Vector3DD(pTheta, pPhi, pGimbal));
+void PythonObjectBase::SetOrientation(double theta, double phi, double gimbal) {
+	context_object_->SetOrientation(lepra::Vector3DD(theta, phi, gimbal));
 }
 
-tuple PythonObjectBase::GetOrientation() const
-{
-	Lepra::Vector3DD lOrientation = mContextObject->GetPosition();
-	return (boost::python::make_tuple(lOrientation.x, lOrientation.y, lOrientation.z));
+tuple PythonObjectBase::GetOrientation() const {
+	lepra::Vector3DD orientation = context_object_->GetPosition();
+	return (boost::python::make_tuple(orientation.x, orientation.y, orientation.z));
 }
 
-void PythonObjectBase::ApplyForce(double pForce, double pTheta, double pPhi, double pXOffset, double pYOffset, double pZOffset)
-{
-	mContextObject->ApplyForce(Lepra::Vector3DD(pForce, pTheta, pPhi), Lepra::Vector3DD(pXOffset, pYOffset, pZOffset));
+void PythonObjectBase::ApplyForce(double force, double theta, double phi, double x_offset, double y_offset, double z_offset) {
+	context_object_->ApplyForce(lepra::Vector3DD(force, theta, phi), lepra::Vector3DD(x_offset, y_offset, z_offset));
 }
 
-void PythonObjectBase::ApplyTransformedForce(double pForce, double pTheta, double pPhi, double pXOffset, double pYOffset, double pZOffset)
-{
-	mContextObject->ApplyTransformedForce(Lepra::Vector3DD(pForce, pTheta, pPhi), Lepra::Vector3DD(pXOffset, pYOffset, pZOffset));
+void PythonObjectBase::ApplyTransformedForce(double force, double theta, double phi, double x_offset, double y_offset, double z_offset) {
+	context_object_->ApplyTransformedForce(lepra::Vector3DD(force, theta, phi), lepra::Vector3DD(x_offset, y_offset, z_offset));
 }
 
-void PythonObjectBase::LoadGroup(double pScale, const char* pModel)
-{
-	Lepra::AnsiString lModelName(pModel);
-	mContextObject->LoadGroup(pScale, lModelName.ToCurrentCode());
+void PythonObjectBase::LoadGroup(double scale, const char* model) {
+	lepra::AnsiString model_name(model);
+	context_object_->LoadGroup(scale, model_name.ToCurrentCode());
 
 }
 
 
 
-PythonObjectWrapper::PythonObjectWrapper()
-{
+PythonObjectWrapper::PythonObjectWrapper() {
 }
 
-PythonObjectWrapper::PythonObjectWrapper(const PythonObjectBase& pObject):
-	PythonObjectBase(pObject)
-{
+PythonObjectWrapper::PythonObjectWrapper(const PythonObjectBase& object):
+	PythonObjectBase(object) {
 }
 
-PythonObjectWrapper::PythonObjectWrapper(const PythonObjectWrapper& pObject):
-	PythonObjectBase(pObject)
-{
+PythonObjectWrapper::PythonObjectWrapper(const PythonObjectWrapper& object):
+	PythonObjectBase(object) {
 }
 
-PythonObjectWrapper::~PythonObjectWrapper()
-{
+PythonObjectWrapper::~PythonObjectWrapper() {
 }
 
-void PythonObjectWrapper::operator=(const PythonObjectWrapper& pObject)
-{
-	(*(PythonObjectBase*)this) = (const PythonObjectBase&)pObject;
+void PythonObjectWrapper::operator=(const PythonObjectWrapper& object) {
+	(*(PythonObjectBase*)this) = (const PythonObjectBase&)object;
 }
 
-PythonObjectWrapper::operator const PythonObjectBase&()
-{
+PythonObjectWrapper::operator const PythonObjectBase&() {
 	return (*this);
 }
 
 
-void PythonObjectWrapper::OnCreate() const
-{
-	boost::python::override lOverrideMethod = get_override("onCreate");
-	if (lOverrideMethod)
-	{
-		lOverrideMethod();
+void PythonObjectWrapper::OnCreate() const {
+	boost::python::override override_method = get_override("onCreate");
+	if (override_method) {
+		override_method();
 	}
 }
 
-void PythonObjectWrapper::OnTick(double pFrameTime) const
-{
-	boost::python::override lOverrideMethod = get_override("onTick");
-	if (lOverrideMethod)
-	{
-		lOverrideMethod(pFrameTime);
+void PythonObjectWrapper::OnTick(double frame_time) const {
+	boost::python::override override_method = get_override("onTick");
+	if (override_method) {
+		override_method(frame_time);
 	}
-	if (PyErr_Occurred())
-	{
+	if (PyErr_Occurred()) {
 		PyErr_Print();
 		PyErr_Clear();
 	}
 }
 
-void PythonObjectWrapper::OnAlarm(int pAlarmId) const
-{
-	boost::python::override lOverrideMethod = get_override("onAlarm");
-	if (lOverrideMethod)
-	{
-		lOverrideMethod(pAlarmId);
+void PythonObjectWrapper::OnAlarm(int alarm_id) const {
+	boost::python::override override_method = get_override("onAlarm");
+	if (override_method) {
+		override_method(alarm_id);
 	}
-	if (PyErr_Occurred())
-	{
+	if (PyErr_Occurred()) {
 		PyErr_Print();
 		PyErr_Clear();
 	}
 }
 
-void PythonObjectWrapper::OnCollision(const tuple& pCoordinate, const tuple& pForceDirection, double pArea, PyObject& pPythonObject) const
-{
+void PythonObjectWrapper::OnCollision(const tuple& coordinate, const tuple& force_direction, double area, PyObject& python_object) const {
 	LEPRA_INFO_PERFORMANCE_SCOPE("Py:onCollision");
 
-	pPythonObject;
-	boost::python::override lOverrideMethod = get_override("onCollision");
-	if (lOverrideMethod)
-	{
-		try
-		{
-			lOverrideMethod(pCoordinate, pForceDirection, pArea);
-		}
-		catch (...)
-		{
+	python_object;
+	boost::python::override override_method = get_override("onCollision");
+	if (override_method) {
+		try {
+			override_method(coordinate, force_direction, area);
+		} catch (...) {
 		}
 	}
-	if (PyErr_Occurred())
-	{
+	if (PyErr_Occurred()) {
 		PyErr_Print();
 		PyErr_Clear();
 	}
 }
 
 
-PyObject* CreatePythonObject(const char* pPythonName, const tuple& pArguments, bool pReplicated)
-{
+PyObject* CreatePythonObject(const char* python_name, const tuple& arguments, bool replicated) {
 	LEPRA_INFO_PERFORMANCE_SCOPE("CreatePythonObject");
 
-	Lepra::String lPythonName(Lepra::AnsiString(pPythonName).ToCurrentCode());
-	PythonContextObject* lContextObject = PythonContextObject::Load(true, lPythonName, pArguments.ptr());
-	if (lContextObject)
-	{
-		ContextManager::Get()->AddObject(lContextObject, pReplicated? NETWORK_OBJECT_REMOTE_CONTROLLED : NETWORK_OBJECT_LOCAL_ONLY);
+	lepra::String _python_name(lepra::AnsiString(python_name).ToCurrentCode());
+	PythonContextObject* _context_object = PythonContextObject::Load(true, _python_name, arguments.ptr());
+	if (_context_object) {
+		ContextManager::Get()->AddObject(_context_object, replicated? kNetworkObjectRemoteControlled : kNetworkObjectLocalOnly);
 
 		LEPRA_INFO_PERFORMANCE_SCOPE("onCreate");
 
-		lContextObject->GetCppInstance()->OnCreate();
+		_context_object->GetCppInstance()->OnCreate();
+	} else {
+		throw (std::exception("Cure: could not create instance from "+_python_name.ToAnsi()));
 	}
-	else
-	{
-		throw (std::exception("Cure: could not create instance from "+lPythonName.ToAnsi()));
-	}
-	return (lContextObject->GetInstance());
+	return (_context_object->GetInstance());
 }
 
 

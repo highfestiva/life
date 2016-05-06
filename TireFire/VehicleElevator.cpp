@@ -1,56 +1,49 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "VehicleElevator.h"
-#include "../Tbc/Include/PhysicsTrigger.h"
-#include "Vehicle.h"
-#include "Game.h"
+#include "vehicleelevator.h"
+#include "../tbc/include/physicstrigger.h"
+#include "vehicle.h"
+#include "game.h"
 
 
 
-namespace TireFire
-{
+namespace tirefire {
 
 
 
-VehicleElevator::VehicleElevator(Game* pGame):
-	Parent(pGame->GetContext()),
-	mGame(pGame)
-{
+VehicleElevator::VehicleElevator(Game* game):
+	Parent(game->GetContext()),
+	game_(game) {
 }
 
-VehicleElevator::~VehicleElevator()
-{
+VehicleElevator::~VehicleElevator() {
 }
 
-void VehicleElevator::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
-{
-	const Tbc::PhysicsTrigger* lTrigger = (const Tbc::PhysicsTrigger*)GetTrigger(pTriggerId);
-	deb_assert(lTrigger);
-	if (lTrigger->GetPriority() > -100)
-	{
-		Parent::OnTrigger(pTriggerId, pOtherObject, pBodyId, pPosition, pNormal);
+void VehicleElevator::OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
+	const tbc::PhysicsTrigger* trigger = (const tbc::PhysicsTrigger*)GetTrigger(trigger_id);
+	deb_assert(trigger);
+	if (trigger->GetPriority() > -100) {
+		Parent::OnTrigger(trigger_id, other_object, body_id, position, normal);
 		return;
 	}
-	if (!pOtherObject || !mGame->GetVehicle())
-	{
+	if (!other_object || !game_->GetVehicle()) {
 		return;
 	}
 	// We have ourselves a conditional: only Vehicle allowed to open.
-	Cure::ContextObject* lObject = (Cure::ContextObject*)pOtherObject;
-	if (lObject->GetInstanceId() == mGame->GetVehicle()->GetInstanceId())
-	{
-		Parent::OnTrigger(pTriggerId, pOtherObject, pBodyId, pPosition, pNormal);
+	cure::ContextObject* object = (cure::ContextObject*)other_object;
+	if (object->GetInstanceId() == game_->GetVehicle()->GetInstanceId()) {
+		Parent::OnTrigger(trigger_id, other_object, body_id, position, normal);
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, VehicleElevator);
+loginstance(kGameContextCpp, VehicleElevator);
 
 
 

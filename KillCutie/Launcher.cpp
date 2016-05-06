@@ -5,112 +5,100 @@
 
 
 #include "pch.h"
-#include "Launcher.h"
-#include "../Tbc/Include/PhysicsEngine.h"
-#include "../UiCure/Include/UiGameUiManager.h"
+#include "launcher.h"
+#include "../tbc/include/physicsengine.h"
+#include "../uicure/include/uigameuimanager.h"
 
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
-Launcher::Launcher(Game* pGame):
-	Parent(pGame->GetResourceManager(), "launcher", pGame->GetUiManager()),
-	mGame(pGame)
-{
+Launcher::Launcher(Game* game):
+	Parent(game->GetResourceManager(), "launcher", game->GetUiManager()),
+	game_(game) {
 	SetForceLoadUnique(true);	// Needs to be unique as we set unique engines per view.
 }
 
-Launcher::~Launcher()
-{
+Launcher::~Launcher() {
 }
 
 
 
-void Launcher::SetBarrelAngle(float pYaw, float pPitch)
-{
-	quat lQuaternion;
-	lQuaternion.RotateAroundWorldZ(pYaw);
-	lQuaternion.RotateAroundOwnX(pPitch);
-	SetRootOrientation(lQuaternion);
+void Launcher::SetBarrelAngle(float yaw, float pitch) {
+	quat quaternion;
+	quaternion.RotateAroundWorldZ(yaw);
+	quaternion.RotateAroundOwnX(pitch);
+	SetRootOrientation(quaternion);
 
 	// Keep supportive thingie on ground.
-	Tbc::GeometryReference* lMesh = (Tbc::GeometryReference*)GetMesh(1);
-	static bool lHasStoredTransformation = false;
-	static quat lOriginalOrientation;
-	if (!lHasStoredTransformation)
-	{
-		lOriginalOrientation = lMesh->GetOffsetTransformation().GetOrientation();
-		lHasStoredTransformation = true;
+	tbc::GeometryReference* mesh = (tbc::GeometryReference*)GetMesh(1);
+	static bool has_stored_transformation = false;
+	static quat original_orientation;
+	if (!has_stored_transformation) {
+		original_orientation = mesh->GetOffsetTransformation().GetOrientation();
+		has_stored_transformation = true;
 	}
-	lQuaternion = lOriginalOrientation;
-	lQuaternion.RotateAroundOwnX(-pPitch);
-	xform lTransform = lMesh->GetOffsetTransformation();
-	lTransform.SetOrientation(lQuaternion);
-	lMesh->SetOffsetTransformation(lTransform);
+	quaternion = original_orientation;
+	quaternion.RotateAroundOwnX(-pitch);
+	xform transform = mesh->GetOffsetTransformation();
+	transform.SetOrientation(quaternion);
+	mesh->SetOffsetTransformation(transform);
 }
 
 
 
-void Launcher::GetAngles(const Cure::ContextObject* pTarget, float& pPitch, float& pGuidePitch,
-	float& pYaw, float& pGuideYaw) const
-{
-	GetAngles(pTarget->GetPosition(), pTarget->GetVelocity(), pPitch, pGuidePitch, pYaw, pGuideYaw);
+void Launcher::GetAngles(const cure::ContextObject* target, float& pitch, float& guide_pitch,
+	float& yaw, float& guide_yaw) const {
+	GetAngles(target->GetPosition(), target->GetVelocity(), pitch, guide_pitch, yaw, guide_yaw);
 }
 
-void Launcher::GetAngles(const vec3& pTargetPosition, const vec3& pTargetVelocity,
-	float& pPitch, float& pGuidePitch, float& pYaw, float& pGuideYaw) const
-{
+void Launcher::GetAngles(const vec3& target_position, const vec3& target_velocity,
+	float& pitch, float& guide_pitch, float& yaw, float& guide_yaw) const {
 	// GetBallisticData calculates the trajectory by polynome approximation (don't remember
 	// the math any more), but calling it twice gets us pretty close to the sweet spot.
-	vec3 lPosition1 = pTargetPosition;
-	const vec3 lPosition2 = this->GetPosition();
-	float lRoll;
-	this->GetOrientation().GetEulerAngles(pYaw, pPitch, lRoll);
-	float lTime = 10.0f;
-	GetBallisticData(lPosition1, lPosition2, pPitch, pGuidePitch, pGuideYaw, lTime);
-	float lBetterPitch = pGuidePitch;
+	vec3 _position1 = target_position;
+	const vec3 _position2 = this->GetPosition();
+	float roll;
+	this->GetOrientation().GetEulerAngles(yaw, pitch, roll);
+	float _time = 10.0f;
+	GetBallisticData(_position1, _position2, pitch, guide_pitch, guide_yaw, _time);
+	float better_pitch = guide_pitch;
 	{
-		vec3 p = lPosition1 + pTargetVelocity * lTime;
-		GetBallisticData(p, lPosition2, lBetterPitch, pGuidePitch, pGuideYaw, lTime);
+		vec3 p = _position1 + target_velocity * _time;
+		GetBallisticData(p, _position2, better_pitch, guide_pitch, guide_yaw, _time);
 	}
-	lBetterPitch = pGuidePitch;
-	lPosition1 = lPosition1 + pTargetVelocity * lTime;
-	GetBallisticData(lPosition1, lPosition2, lBetterPitch, pGuidePitch, pGuideYaw, lTime);
-	pGuidePitch = Math::Clamp(pGuidePitch, -PIF/2, 0.0f);
-	//pGuideYaw = Math::Clamp(pGuideYaw, -PIF/2, PIF/2);
-	const float lYawDelta = pGuideYaw - pYaw;
-	if (lYawDelta > +PIF)
-	{
-		pGuideYaw -= 2*PIF;
-	}
-	else if (lYawDelta < -PIF)
-	{
-		pGuideYaw += 2*PIF;
+	better_pitch = guide_pitch;
+	_position1 = _position1 + target_velocity * _time;
+	GetBallisticData(_position1, _position2, better_pitch, guide_pitch, guide_yaw, _time);
+	guide_pitch = Math::Clamp(guide_pitch, -PIF/2, 0.0f);
+	//guide_yaw = Math::Clamp(guide_yaw, -PIF/2, PIF/2);
+	const float yaw_delta = guide_yaw - yaw;
+	if (yaw_delta > +PIF) {
+		guide_yaw -= 2*PIF;
+	} else if (yaw_delta < -PIF) {
+		guide_yaw += 2*PIF;
 	}
 }
 
-void Launcher::CreateEngines()
-{
+void Launcher::CreateEngines() {
 	deb_assert(GetPhysics()->GetEngineCount() == 0);
-	Tbc::PhysicsEngine* lPitchEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_ROTOR_TILT, 1, 1, 1, 1, 0);
-	GetPhysics()->AddEngine(lPitchEngine);
-	Tbc::PhysicsEngine* lYawEngine = new Tbc::PhysicsEngine(Tbc::PhysicsEngine::ENGINE_HINGE_ROLL, 1, 1, 1, 1, 1);
-	GetPhysics()->AddEngine(lYawEngine);
+	tbc::PhysicsEngine* pitch_engine = new tbc::PhysicsEngine(tbc::PhysicsEngine::kEngineRotorTilt, 1, 1, 1, 1, 0);
+	GetPhysics()->AddEngine(pitch_engine);
+	tbc::PhysicsEngine* yaw_engine = new tbc::PhysicsEngine(tbc::PhysicsEngine::kEngineHingeRoll, 1, 1, 1, 1, 1);
+	GetPhysics()->AddEngine(yaw_engine);
 }
 
-void Launcher::GetBallisticData(const vec3& pPosition1, const vec3& pPosition2,
-	float pPitch, float& pGuidePitch, float& pGuideYaw, float &pTime) const
-{
-	const vec3 lDelta = pPosition1 - pPosition2;
-	const vec2 lYawVector(lDelta.x, lDelta.y);
-	pGuideYaw = vec2(0, 1).GetAngle(lYawVector);
+void Launcher::GetBallisticData(const vec3& position1, const vec3& position2,
+	float pitch, float& guide_pitch, float& guide_yaw, float &time) const {
+	const vec3 delta = position1 - position2;
+	const vec2 yaw_vector(delta.x, delta.y);
+	guide_yaw = vec2(0, 1).GetAngle(yaw_vector);
 
-	const float h = lDelta.z;
-	const float v = mGame->GetMuzzleVelocity();
-	const float vup = v * ::cos(pPitch);
+	const float h = delta.z;
+	const float v = game_->GetMuzzleVelocity();
+	const float vup = v * ::cos(pitch);
 	// g*t^2/2 - vup*t + h = 0
 	//
 	// Quaderatic formula:
@@ -124,30 +112,25 @@ void Launcher::GetBallisticData(const vec3& pPosition1, const vec3& pPosition2,
 	const float c = +h;
 	const float b2 = b*b;
 	const float _4ac = 4*a*c;
-	if (b2 < _4ac)	// Does not compute.
-	{
-		pGuidePitch = -PIF/4;
-	}
-	else
-	{
+	if (b2 < _4ac) {	// Does not compute.
+		guide_pitch = -PIF/4;
+	} else {
 		const float t = (-b + sqrt(b2 - _4ac)) / (2*a);
 		//deb_assert(t > 0);
-		pTime = t;
-		const float vfwd = lYawVector.GetLength() / t;
-		pGuidePitch = -::atan(vfwd/vup);
-		if (pGuidePitch < pPitch)	// Aiming downwards?
-		{
-			pGuidePitch += (pGuidePitch-pPitch);	// Tss! Homebrew... seems to be working somewhat! :)
+		time = t;
+		const float vfwd = yaw_vector.GetLength() / t;
+		guide_pitch = -::atan(vfwd/vup);
+		if (guide_pitch < pitch) {	// Aiming downwards?
+			guide_pitch += (guide_pitch-pitch);	// Tss! Homebrew... seems to be working somewhat! :)
 		}
 	}
 }
 
 
 
-void Launcher::DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* pMeshResource)
-{
-	mUiManager->GetRenderer()->SetShadows(pMeshResource->GetData(), UiTbc::Renderer::FORCE_NO_SHADOWS);
-	Parent::DispatchOnLoadMesh(pMeshResource);
+void Launcher::DispatchOnLoadMesh(UiCure::UserGeometryReferenceResource* mesh_resource) {
+	ui_manager_->GetRenderer()->SetShadows(mesh_resource->GetData(), uitbc::Renderer::kForceNoShadows);
+	Parent::DispatchOnLoadMesh(mesh_resource);
 }
 
 

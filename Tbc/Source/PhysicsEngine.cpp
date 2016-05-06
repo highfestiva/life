@@ -5,354 +5,295 @@
 
 
 #include "pch.h"
-#include "../Include/PhysicsEngine.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/Endian.h"
-#include "../../Lepra/Include/Math.h"
-#include "../../Lepra/Include/Vector2D.h"
-#include "../Include/ChunkyBoneGeometry.h"
-#include "../Include/ChunkyPhysics.h"
+#include "../include/physicsengine.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/endian.h"
+#include "../../lepra/include/math.h"
+#include "../../lepra/include/vector2d.h"
+#include "../include/chunkybonegeometry.h"
+#include "../include/chunkyphysics.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-#define MAX_ASPECT_INDEX	400
+#define kMaxAspectIndex	400
 
 
 
-PhysicsEngine::PhysicsEngine(EngineType pEngineType, float pStrength, float pMaxSpeed,
-	float pMaxSpeed2, float pFriction, unsigned pControllerIndex):
-	mEngineType(pEngineType),
-	mStrength(pStrength),
-	mMaxSpeed(pMaxSpeed),
-	mMaxSpeed2(pMaxSpeed2),
-	mFriction(pFriction),
-	mControllerIndex(pControllerIndex),
-	mIntensity(0)
-{
-	::memset(mValue, 0, sizeof(mValue));
-	::memset(mSmoothValue, 0, sizeof(mSmoothValue));
+PhysicsEngine::PhysicsEngine(EngineType engine_type, float strength, float max_speed,
+	float max_speed2, float friction, unsigned controller_index):
+	engine_type_(engine_type),
+	strength_(strength),
+	max_speed_(max_speed),
+	max_speed2_(max_speed2),
+	friction_(friction),
+	controller_index_(controller_index),
+	intensity_(0) {
+	::memset(value_, 0, sizeof(value_));
+	::memset(smooth_value_, 0, sizeof(smooth_value_));
 }
 
-PhysicsEngine::~PhysicsEngine()
-{
+PhysicsEngine::~PhysicsEngine() {
 }
 
-void PhysicsEngine::RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsEngine& pOriginal)
-{
-	const size_t cnt = mEngineNodeArray.size();
-	for (size_t x = 0; x < cnt; ++x)
-	{
-		const int lBoneIndex = pSource->GetIndex(pOriginal.mEngineNodeArray[x].mGeometry);
-		deb_assert(lBoneIndex >= 0);
-		mEngineNodeArray[x].mGeometry = pTarget->GetBoneGeometry(lBoneIndex);
+void PhysicsEngine::RelocatePointers(const ChunkyPhysics* target, const ChunkyPhysics* source, const PhysicsEngine& original) {
+	const size_t cnt = engine_node_array_.size();
+	for (size_t x = 0; x < cnt; ++x) {
+		const int bone_index = source->GetIndex(original.engine_node_array_[x].geometry_);
+		deb_assert(bone_index >= 0);
+		engine_node_array_[x].geometry_ = target->GetBoneGeometry(bone_index);
 	}
 }
 
 
 
-PhysicsEngine* PhysicsEngine::Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount)
-{
-	const uint32* lData = (const uint32*)pData;
-	if (pByteCount != sizeof(uint32)*7 + Endian::BigToHost(lData[6])*sizeof(uint32)*3)
-	{
-		mLog.Error("Could not load; wrong data size.");
+PhysicsEngine* PhysicsEngine::Load(ChunkyPhysics* structure, const void* data, unsigned byte_count) {
+	const uint32* _data = (const uint32*)data;
+	if (byte_count != sizeof(uint32)*7 + Endian::BigToHost(_data[6])*sizeof(uint32)*3) {
+		log_.Error("Could not load; wrong data size.");
 		deb_assert(false);
 		return (0);
 	}
 
-	PhysicsEngine* lEngine = new PhysicsEngine(ENGINE_WALK, 0, 0, 0, 0, 0);
-	lEngine->LoadChunkyData(pStructure, pData);
-	if (lEngine->GetChunkySize() != pByteCount)
-	{
+	PhysicsEngine* engine = new PhysicsEngine(kEngineWalk, 0, 0, 0, 0, 0);
+	engine->LoadChunkyData(structure, data);
+	if (engine->GetChunkySize() != byte_count) {
 		deb_assert(false);
-		mLog.Error("Corrupt data or error in loading algo.");
-		delete (lEngine);
-		lEngine = 0;
+		log_.Error("Corrupt data or error in loading algo.");
+		delete (engine);
+		engine = 0;
 	}
-	return (lEngine);
+	return (engine);
 }
 
 
 
-PhysicsEngine::EngineType PhysicsEngine::GetEngineType() const
-{
-	return (mEngineType);
+PhysicsEngine::EngineType PhysicsEngine::GetEngineType() const {
+	return (engine_type_);
 }
 
 
 
-void PhysicsEngine::AddControlledGeometry(ChunkyBoneGeometry* pGeometry, float pScale, EngineMode pMode)
-{
-	mEngineNodeArray.push_back(EngineNode(pGeometry, pScale, pMode));
+void PhysicsEngine::AddControlledGeometry(ChunkyBoneGeometry* geometry, float scale, EngineMode mode) {
+	engine_node_array_.push_back(EngineNode(geometry, scale, mode));
 }
 
-void PhysicsEngine::RemoveControlledGeometry(ChunkyBoneGeometry* pGeometry)
-{
-	EngineNodeArray::iterator i = mEngineNodeArray.begin();
-	for (; i != mEngineNodeArray.end(); ++i)
-	{
-		if (i->mGeometry == pGeometry)
-		{
-			mEngineNodeArray.erase(i);
+void PhysicsEngine::RemoveControlledGeometry(ChunkyBoneGeometry* geometry) {
+	EngineNodeArray::iterator i = engine_node_array_.begin();
+	for (; i != engine_node_array_.end(); ++i) {
+		if (i->geometry_ == geometry) {
+			engine_node_array_.erase(i);
 			return;
 		}
 	}
 }
 
-PhysicsEngine::GeometryList PhysicsEngine::GetControlledGeometryList() const
-{
-	GeometryList lList;
-	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
-	for (; i != mEngineNodeArray.end(); ++i)
-	{
-		lList.push_back(i->mGeometry);
+PhysicsEngine::GeometryList PhysicsEngine::GetControlledGeometryList() const {
+	GeometryList list;
+	EngineNodeArray::const_iterator i = engine_node_array_.begin();
+	for (; i != engine_node_array_.end(); ++i) {
+		list.push_back(i->geometry_);
 	}
-	return lList;
+	return list;
 }
 
-void PhysicsEngine::SetStrength(float pStrength)
-{
-	mStrength = pStrength;
+void PhysicsEngine::SetStrength(float strength) {
+	strength_ = strength;
 }
 
-bool PhysicsEngine::SetValue(unsigned pAspect, float pValue)
-{
-	deb_assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
-	deb_assert(pValue >= -10000);
-	deb_assert(pValue <= +10000);
+bool PhysicsEngine::SetValue(unsigned aspect, float value) {
+	deb_assert(controller_index_ >= 0 && controller_index_ < kMaxAspectIndex);
+	deb_assert(value >= -10000);
+	deb_assert(value <= +10000);
 
-	switch (mEngineType)
-	{
-		case ENGINE_WALK:
-		case ENGINE_PUSH_RELATIVE:
-		case ENGINE_PUSH_ABSOLUTE:
-		case ENGINE_PUSH_TURN_RELATIVE:
-		case ENGINE_PUSH_TURN_ABSOLUTE:
-		{
-			const unsigned lControlledAspects = 3;
-			if (pAspect >= mControllerIndex+0 && pAspect <= mControllerIndex+lControlledAspects)
-			{
-				switch (pAspect - mControllerIndex)
-				{
-					case 0:	mValue[ASPECT_PRIMARY]    = pValue;	break;
-					case 2:	mValue[ASPECT_PRIMARY]   += pValue;	break;	// Handbrake.
-					case 1:	mValue[ASPECT_SECONDARY]  = pValue;	break;
-					case 3:	mValue[ASPECT_TERTIARY]	  = pValue;	break;
+	switch (engine_type_) {
+		case kEngineWalk:
+		case kEnginePushRelative:
+		case kEnginePushAbsolute:
+		case kEnginePushTurnRelative:
+		case kEnginePushTurnAbsolute: {
+			const unsigned controlled_aspects = 3;
+			if (aspect >= controller_index_+0 && aspect <= controller_index_+controlled_aspects) {
+				switch (aspect - controller_index_) {
+					case 0:	value_[kAspectPrimary]    = value;	break;
+					case 2:	value_[kAspectPrimary]   += value;	break;	// Handbrake.
+					case 1:	value_[kAspectSecondary]  = value;	break;
+					case 3:	value_[kAspectTertiary]	  = value;	break;
 				}
 				return (true);
 			}
-		}
-		break;
-		case ENGINE_HOVER:
-		case ENGINE_HINGE_ROLL:
-		case ENGINE_HINGE_GYRO:
-		case ENGINE_HINGE_BRAKE:
-		case ENGINE_HINGE_TORQUE:
-		case ENGINE_HINGE2_TURN:
-		case ENGINE_ROTOR:
-		case ENGINE_ROTOR_TILT:
-		case ENGINE_JET:
-		case ENGINE_SLIDER_FORCE:
-		case ENGINE_YAW_BRAKE:
-		case ENGINE_AIR_BRAKE:
-		{
-			if (pAspect == mControllerIndex)
-			{
-				mValue[ASPECT_PRIMARY] = pValue;
+		} break;
+		case kEngineHover:
+		case kEngineHingeRoll:
+		case kEngineHingeGyro:
+		case kEngineHingeBrake:
+		case kEngineHingeTorque:
+		case kEngineHinge2Turn:
+		case kEngineRotor:
+		case kEngineRotorTilt:
+		case kEngineJet:
+		case kEngineSliderForce:
+		case kEngineYawBrake:
+		case kEngineAirBrake: {
+			if (aspect == controller_index_) {
+				value_[kAspectPrimary] = value;
 				return (true);
 			}
-		}
-		break;
-		case ENGINE_GLUE:
-		case ENGINE_BALL_BRAKE:
-		{
+		} break;
+		case kEngineGlue:
+		case kEngineBallBrake: {
 			// Fixed mode "engine".
-		}
-		break;
-		default:
-		{
+		} break;
+		default: {
 			deb_assert(false);
-		}
-		break;
+		} break;
 	}
 	return (false);
 }
 
-void PhysicsEngine::ForceSetValue(unsigned pAspect, float pValue)
-{
-	deb_assert(pValue >= -1 && pValue <= +1);
-	mValue[pAspect] = pValue;
+void PhysicsEngine::ForceSetValue(unsigned aspect, float value) {
+	deb_assert(value >= -1 && value <= +1);
+	value_[aspect] = value;
 }
 
 
 
-void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure, float pFrameTime) const
-{
-	const float lLimitedFrameTime = std::min(pFrameTime, 0.1f);
-	const float lNormalizedFrameTime = lLimitedFrameTime * 90;
-	const float lPrimaryForce = (mValue[ASPECT_LOCAL_PRIMARY] > std::abs(mValue[ASPECT_PRIMARY]))? mValue[ASPECT_LOCAL_PRIMARY] : mValue[ASPECT_PRIMARY];
-	mIntensity = 0;
-	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
-	for (; i != mEngineNodeArray.end(); ++i)
-	{
-		const EngineNode& lEngineNode = *i;
-		ChunkyBoneGeometry* lGeometry = lEngineNode.mGeometry;
-		const float lScale = lEngineNode.mScale;
-		if (!lGeometry)
-		{
-			mLog.Error("Missing node!");
+void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhysics* structure, float frame_time) const {
+	const float limited_frame_time = std::min(frame_time, 0.1f);
+	const float normalized_frame_time = limited_frame_time * 90;
+	const float primary_force = (value_[kAspectLocalPrimary] > std::abs(value_[kAspectPrimary]))? value_[kAspectLocalPrimary] : value_[kAspectPrimary];
+	intensity_ = 0;
+	EngineNodeArray::const_iterator i = engine_node_array_.begin();
+	for (; i != engine_node_array_.end(); ++i) {
+		const EngineNode& _engine_node = *i;
+		ChunkyBoneGeometry* _geometry = _engine_node.geometry_;
+		const float _scale = _engine_node.scale_;
+		if (!_geometry) {
+			log_.Error("Missing node!");
 			continue;
 		}
-		switch (mEngineType)
-		{
-			case ENGINE_WALK:
-			case ENGINE_PUSH_RELATIVE:
-			case ENGINE_PUSH_ABSOLUTE:
-			{
-				vec3 lAxis[3] = {vec3(0, 1, 0),
+		switch (engine_type_) {
+			case kEngineWalk:
+			case kEnginePushRelative:
+			case kEnginePushAbsolute: {
+				vec3 axis[3] = {vec3(0, 1, 0),
 					vec3(1, 0, 0), vec3(0, 0, 1)};
-				if (mEngineType == ENGINE_PUSH_RELATIVE)
-				{
-					const ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(0);
-					const quat lOrientation =
-						pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
-						pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
-					lAxis[0] = lOrientation*lAxis[0];
-					lAxis[1] = lOrientation*lAxis[1];
-					lAxis[2] = lOrientation*lAxis[2];
+				if (engine_type_ == kEnginePushRelative) {
+					const ChunkyBoneGeometry* root_geometry = structure->GetBoneGeometry(0);
+					const quat orientation =
+						physics_manager->GetBodyOrientation(root_geometry->GetBodyId()) *
+						structure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
+					axis[0] = orientation*axis[0];
+					axis[1] = orientation*axis[1];
+					axis[2] = orientation*axis[2];
 				}
-				vec3 lOffset;
-				while (lGeometry->GetJointType() == ChunkyBoneGeometry::JOINT_EXCLUDE)
-				{
-					ChunkyBoneGeometry* lParent = lGeometry->GetParent();
-					if (!lParent)
-					{
+				vec3 offset;
+				while (_geometry->GetJointType() == ChunkyBoneGeometry::kJointExclude) {
+					ChunkyBoneGeometry* parent = _geometry->GetParent();
+					if (!parent) {
 						break;
 					}
-					vec3 lMayaOffset = lGeometry->GetOriginalOffset();
-					std::swap(lMayaOffset.y, lMayaOffset.z);
-					lMayaOffset.y = -lMayaOffset.y;
-					lOffset += lMayaOffset;
-					lGeometry = lParent;
+					vec3 maya_offset = _geometry->GetOriginalOffset();
+					std::swap(maya_offset.y, maya_offset.z);
+					maya_offset.y = -maya_offset.y;
+					offset += maya_offset;
+					_geometry = parent;
 				}
-				vec3 lPushVector;
-				for (int i = ASPECT_PRIMARY; i <= ASPECT_TERTIARY; ++i)
-				{
-					lPushVector += mValue[i] * lAxis[i];
+				vec3 push_vector;
+				for (int i = kAspectPrimary; i <= kAspectTertiary; ++i) {
+					push_vector += value_[i] * axis[i];
 				}
-				const float lPushForce = lPushVector.GetLength();
-				if (lPushForce > 0.1f || mFriction)
-				{
-					if (mFriction)
-					{
-						vec3 lVelocityVector;
-						pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocityVector);
-						lVelocityVector /= mMaxSpeed;
-						if (mEngineType == ENGINE_WALK)
-						{
-							lVelocityVector.z = 0;	// When walking we won't apply brakes in Z.
+				const float push_force = push_vector.GetLength();
+				if (push_force > 0.1f || friction_) {
+					if (friction_) {
+						vec3 velocity_vector;
+						physics_manager->GetBodyVelocity(_geometry->GetBodyId(), velocity_vector);
+						velocity_vector /= max_speed_;
+						if (engine_type_ == kEngineWalk) {
+							velocity_vector.z = 0;	// When walking we won't apply brakes in Z.
 						}
-						vec3 f = (lVelocityVector-lPushVector) * (0.5f*mFriction);
-						lPushVector -= f;
+						vec3 f = (velocity_vector-push_vector) * (0.5f*friction_);
+						push_vector -= f;
 					}
-					pPhysicsManager->AddForceAtRelPos(lGeometry->GetBodyId(), lPushVector*mStrength*lScale, lOffset);
+					physics_manager->AddForceAtRelPos(_geometry->GetBodyId(), push_vector*strength_*_scale, offset);
 				}
-				mIntensity += Math::Lerp(Math::Clamp(mFriction,0.1f,0.5f), 1.0f, lPushForce);
-			}
-			break;
-			case ENGINE_PUSH_TURN_RELATIVE:
-			case ENGINE_PUSH_TURN_ABSOLUTE:
-			{
-				vec3 lAxis[3] = {vec3(0, 0, 1), vec3(1, 0, 0), vec3(0, 1, 0)};
-				if (mEngineType == ENGINE_PUSH_TURN_RELATIVE)
-				{
-					const ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(0);
-					const quat lOrientation =
-						pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
-						pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
-					lAxis[0] = lOrientation*lAxis[0];
-					lAxis[1] = lOrientation*lAxis[1];
-					lAxis[2] = lOrientation*lAxis[2];
+				intensity_ += Math::Lerp(Math::Clamp(friction_,0.1f,0.5f), 1.0f, push_force);
+			} break;
+			case kEnginePushTurnRelative:
+			case kEnginePushTurnAbsolute: {
+				vec3 axis[3] = {vec3(0, 0, 1), vec3(1, 0, 0), vec3(0, 1, 0)};
+				if (engine_type_ == kEnginePushTurnRelative) {
+					const ChunkyBoneGeometry* root_geometry = structure->GetBoneGeometry(0);
+					const quat orientation =
+						physics_manager->GetBodyOrientation(root_geometry->GetBodyId()) *
+						structure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
+					axis[0] = orientation*axis[0];
+					axis[1] = orientation*axis[1];
+					axis[2] = orientation*axis[2];
 				}
-				vec3 lPushVector;
-				for (int i = ASPECT_PRIMARY; i <= ASPECT_TERTIARY; ++i)
-				{
-					lPushVector += mValue[i] * lAxis[i];
+				vec3 push_vector;
+				for (int i = kAspectPrimary; i <= kAspectTertiary; ++i) {
+					push_vector += value_[i] * axis[i];
 				}
-				const float lPushForce = lPushVector.GetLength();
-				if (lPushForce > 0.1f || mFriction != 0)
-				{
-					if (mFriction)
-					{
-						vec3 lAngularVelocityVector;
-						pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetBodyId(), lAngularVelocityVector);
-						lAngularVelocityVector /= mMaxSpeed;
-						vec3 f = (lAngularVelocityVector-lPushVector) * (0.5f*mFriction);
-						lPushVector -= f;
+				const float push_force = push_vector.GetLength();
+				if (push_force > 0.1f || friction_ != 0) {
+					if (friction_) {
+						vec3 angular_velocity_vector;
+						physics_manager->GetBodyAngularVelocity(_geometry->GetBodyId(), angular_velocity_vector);
+						angular_velocity_vector /= max_speed_;
+						vec3 f = (angular_velocity_vector-push_vector) * (0.5f*friction_);
+						push_vector -= f;
 					}
-					pPhysicsManager->AddTorque(lGeometry->GetBodyId(), lPushVector*mStrength*lScale);
+					physics_manager->AddTorque(_geometry->GetBodyId(), push_vector*strength_*_scale);
 				}
-				mIntensity += Math::Lerp(Math::Clamp(mFriction,0.1f,0.5f), 1.0f, lPushForce);
-			}
-			break;
-			case ENGINE_HOVER:
-			{
-				if (lPrimaryForce != 0 || mValue[ASPECT_SECONDARY] != 0)
-				{
+				intensity_ += Math::Lerp(Math::Clamp(friction_,0.1f,0.5f), 1.0f, push_force);
+			} break;
+			case kEngineHover: {
+				if (primary_force != 0 || value_[kAspectSecondary] != 0) {
 					// Arcade stabilization for lifter (typically hovercraft, elevator or similar vehicle).
-					vec3 lLiftPivot = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId()) + vec3(0,0,1)*mFriction*lScale;
+					vec3 lift_pivot = physics_manager->GetBodyPosition(_geometry->GetBodyId()) + vec3(0,0,1)*friction_*_scale;
 
-					const vec3 lLiftForce = vec3(0,0,1)*mStrength*lScale;
-					pPhysicsManager->AddForceAtPos(lGeometry->GetBodyId(), lLiftForce, lLiftPivot);
+					const vec3 lift_force = vec3(0,0,1)*strength_*_scale;
+					physics_manager->AddForceAtPos(_geometry->GetBodyId(), lift_force, lift_pivot);
 				}
-			}
-			break;
-			case ENGINE_HINGE_GYRO:
-			{
+			} break;
+			case kEngineHingeGyro: {
 				// Apply a fake gyro torque to parent in order to emulate a heavier gyro than
 				// it actually is. The gyro must be light weight, or physics simulation will be
 				// unstable when rolling bodies around any other axis than the hinge one.
-				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
-				if (lGeometry->GetJointId() != INVALID_JOINT && mFriction >= 0)
-				{
-					vec3 lAxis;
-					pPhysicsManager->GetAxis1(lGeometry->GetJointId(), lAxis);
-					vec3 lY;
-					vec3 lZ;
-					lAxis.GetNormalized().GetOrthogonals(lY, lZ);
-					const float lStrength = 3 * lPrimaryForce * mStrength;
-					lZ *= lStrength;
-					vec3 lPos;
-					pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lPos);
-					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lZ, lPos+lY);
-					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), -lZ, lPos-lY);
+				deb_assert(_geometry->GetJointId() != INVALID_JOINT);
+				if (_geometry->GetJointId() != INVALID_JOINT && friction_ >= 0) {
+					vec3 axis;
+					physics_manager->GetAxis1(_geometry->GetJointId(), axis);
+					vec3 __y;
+					vec3 __z;
+					axis.GetNormalized().GetOrthogonals(__y, __z);
+					const float _strength = 3 * primary_force * strength_;
+					__z *= _strength;
+					vec3 pos;
+					physics_manager->GetAnchorPos(_geometry->GetJointId(), pos);
+					physics_manager->AddForceAtPos(_geometry->GetParent()->GetBodyId(), __z, pos+__y);
+					physics_manager->AddForceAtPos(_geometry->GetParent()->GetBodyId(), -__z, pos-__y);
 				}
 			}
 			// TRICKY: fall through.
-			case ENGINE_HINGE_ROLL:
-			{
-				//deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
-				if (lGeometry->GetJointId() != INVALID_JOINT)
-				{
-					float lValue = lPrimaryForce;
-					float lDirectionalMaxSpeed = ((lValue >= 0)? mMaxSpeed : -mMaxSpeed2) * lValue;
-					float lRotationSpeed;
-					pPhysicsManager->GetAngleRate2(lGeometry->GetJointId(), lRotationSpeed);
-					const float lIntensity = lRotationSpeed / mMaxSpeed;
-					mIntensity += std::abs(lIntensity);
-					if (mEngineType == ENGINE_HINGE_GYRO)
-					{
-						lValue = (lValue+1)*0.5f;
-						lDirectionalMaxSpeed = lValue * (mMaxSpeed - mMaxSpeed2) + mMaxSpeed2;
-					}
-					else if (mEngineType == ENGINE_HINGE_ROLL)
-					{
-						//if (lValue > 0)
+			case kEngineHingeRoll: {
+				//deb_assert(_geometry->GetJointId() != INVALID_JOINT);
+				if (_geometry->GetJointId() != INVALID_JOINT) {
+					float _value = primary_force;
+					float directional_max_speed = ((_value >= 0)? max_speed_ : -max_speed2_) * _value;
+					float rotation_speed;
+					physics_manager->GetAngleRate2(_geometry->GetJointId(), rotation_speed);
+					const float intensity = rotation_speed / max_speed_;
+					intensity_ += std::abs(intensity);
+					if (engine_type_ == kEngineHingeGyro) {
+						_value = (_value+1)*0.5f;
+						directional_max_speed = _value * (max_speed_ - max_speed2_) + max_speed2_;
+					} else if (engine_type_ == kEngineHingeRoll) {
+						//if (_value > 0)
 						{
 							// Torque curve approximation, (tested it out, looks ok to me):
 							//   -8*(x-0.65)^2*(x-0.02) + 1
@@ -360,372 +301,304 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* pPhysicsManager, const ChunkyPhy
 							// Starts at about 100 % strength at 0 RPM, local strength minimum of approximately 75 %
 							// at about 25 % RPM, maximum (in range) of 100 % strength at 65 % RPM, and drops to close
 							// to 0 % strength at 100 % RPM.
-							const float lSquare = lIntensity - 0.65f;
-							lValue *= -8 * lSquare * lSquare * (lIntensity-0.02f) + 1;
+							const float square = intensity - 0.65f;
+							_value *= -8 * square * square * (intensity-0.02f) + 1;
 						}
 					}
-					const float lUsedStrength = mStrength*(std::abs(lValue) + std::abs(mFriction));
-					float lPreviousStrength = 0;
-					float lPreviousTargetSpeed = 0;
-					pPhysicsManager->GetAngularMotorRoll(lGeometry->GetJointId(), lPreviousStrength, lPreviousTargetSpeed);
-					const float lTargetSpeed = Math::Lerp(lPreviousTargetSpeed, lDirectionalMaxSpeed*lScale, 0.5f);
-					const float lTargetStrength = Math::Lerp(lPreviousStrength, lUsedStrength, 0.5f);
-					pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lTargetStrength, lTargetSpeed);
+					const float used_strength = strength_*(std::abs(_value) + std::abs(friction_));
+					float previous_strength = 0;
+					float previous_target_speed = 0;
+					physics_manager->GetAngularMotorRoll(_geometry->GetJointId(), previous_strength, previous_target_speed);
+					const float target_speed = Math::Lerp(previous_target_speed, directional_max_speed*_scale, 0.5f);
+					const float target_strength = Math::Lerp(previous_strength, used_strength, 0.5f);
+					physics_manager->SetAngularMotorRoll(_geometry->GetJointId(), target_strength, target_speed);
+				} else {
+					log_.Error("Missing roll joint!");
 				}
-				else
-				{
-					mLog.Error("Missing roll joint!");
-				}
-			}
-			break;
-			case ENGINE_HINGE_BRAKE:
-			{
-				//deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
-				if (lGeometry->GetJointId() != INVALID_JOINT)
-				{
+			} break;
+			case kEngineHingeBrake: {
+				//deb_assert(_geometry->GetJointId() != INVALID_JOINT);
+				if (_geometry->GetJointId() != INVALID_JOINT) {
 					// "Max speed" used as a type of "break threashold", so that a joystick or similar
 					// won't start breaking on the tiniest movement. "Scaling" here determines part of
 					// functionality (such as only affecting some wheels), may be positive or negative.
-					const float lAbsValue = std::abs(lPrimaryForce);
-					if (lAbsValue > mMaxSpeed && lPrimaryForce < lScale)
-					{
-						const float lBreakForceUsed = mStrength*lAbsValue;
-						lGeometry->SetExtraData(1);
-						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), lBreakForceUsed, 0);
+					const float abs_value = std::abs(primary_force);
+					if (abs_value > max_speed_ && primary_force < _scale) {
+						const float break_force_used = strength_*abs_value;
+						_geometry->SetExtraData(1);
+						physics_manager->SetAngularMotorRoll(_geometry->GetJointId(), break_force_used, 0);
+					} else if (_geometry->GetExtraData()) {
+						_geometry->SetExtraData(0);
+						physics_manager->SetAngularMotorRoll(_geometry->GetJointId(), 0, 0);
 					}
-					else if (lGeometry->GetExtraData())
-					{
-						lGeometry->SetExtraData(0);
-						pPhysicsManager->SetAngularMotorRoll(lGeometry->GetJointId(), 0, 0);
-					}
+				} else {
+					log_.Error("Missing break joint!");
 				}
-				else
-				{
-					mLog.Error("Missing break joint!");
-				}
-			}
-			break;
-			case ENGINE_HINGE_TORQUE:
-			case ENGINE_HINGE2_TURN:
-			{
-				ApplyTorque(pPhysicsManager, lLimitedFrameTime, lGeometry, lEngineNode);
-			}
-			break;
-			case ENGINE_ROTOR:
-			{
-				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
-				if (lGeometry->GetJointId() != INVALID_JOINT)
-				{
-					const vec3 lRotorForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode);
-					vec3 lLiftForce = lRotorForce * lPrimaryForce;
-					const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
-					const quat lOrientation =
-						pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
-						pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse();
+			} break;
+			case kEngineHingeTorque:
+			case kEngineHinge2Turn: {
+				ApplyTorque(physics_manager, limited_frame_time, _geometry, _engine_node);
+			} break;
+			case kEngineRotor: {
+				deb_assert(_geometry->GetJointId() != INVALID_JOINT);
+				if (_geometry->GetJointId() != INVALID_JOINT) {
+					const vec3 rotor_force = GetRotorLiftForce(physics_manager, _geometry, _engine_node);
+					vec3 lift_force = rotor_force * primary_force;
+					const int parent_bone = structure->GetIndex(_geometry->GetParent());
+					const quat orientation =
+						physics_manager->GetBodyOrientation(_geometry->GetParent()->GetBodyId()) *
+						structure->GetOriginalBoneTransformation(parent_bone).GetOrientation().GetInverse();
 
-					vec3 lRotorPivot;
-					pPhysicsManager->GetAnchorPos(lGeometry->GetJointId(), lRotorPivot);
-					const vec3 lOffset = lOrientation * vec3(0, 0, mMaxSpeed*lScale);
-					lRotorPivot += lOffset;
+					vec3 rotor_pivot;
+					physics_manager->GetAnchorPos(_geometry->GetJointId(), rotor_pivot);
+					const vec3 offset = orientation * vec3(0, 0, max_speed_*_scale);
+					rotor_pivot += offset;
 
-					if (mMaxSpeed2)
-					{
+					if (max_speed2_) {
 						// Arcade stabilization for VTOL rotor.
-						vec3 lParentAngularVelocity;
-						pPhysicsManager->GetBodyAngularVelocity(lGeometry->GetParent()->GetBodyId(), lParentAngularVelocity);
-						lParentAngularVelocity = lOrientation.GetInverse() * lParentAngularVelocity;
-						const vec3 lParentAngle = lOrientation.GetInverse() * vec3(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
-						const float lStabilityX = -lParentAngle.x * 0.5f + lParentAngularVelocity.y * mMaxSpeed2;
-						const float lStabilityY = -lParentAngle.y * 0.5f - lParentAngularVelocity.x * mMaxSpeed2;
-						lRotorPivot += lOrientation * vec3(lStabilityX, lStabilityY, 0);
+						vec3 parent_angular_velocity;
+						physics_manager->GetBodyAngularVelocity(_geometry->GetParent()->GetBodyId(), parent_angular_velocity);
+						parent_angular_velocity = orientation.GetInverse() * parent_angular_velocity;
+						const vec3 parent_angle = orientation.GetInverse() * vec3(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
+						const float stability_x = -parent_angle.x * 0.5f + parent_angular_velocity.y * max_speed2_;
+						const float stability_y = -parent_angle.y * 0.5f - parent_angular_velocity.x * max_speed2_;
+						rotor_pivot += orientation * vec3(stability_x, stability_y, 0);
 					}
 
 					// Smooth rotor force - for digital controls and to make acceleration seem more realistic.
-					const float lSmooth = lNormalizedFrameTime * 0.05f * lEngineNode.mScale;
-					lLiftForce.x = mSmoothValue[ASPECT_PRIMARY] = Math::Lerp(mSmoothValue[ASPECT_PRIMARY], lLiftForce.x, lSmooth);
-					lLiftForce.y = mSmoothValue[ASPECT_SECONDARY] = Math::Lerp(mSmoothValue[ASPECT_SECONDARY], lLiftForce.y, lSmooth);
-					lLiftForce.z = mSmoothValue[ASPECT_TERTIARY] = Math::Lerp(mSmoothValue[ASPECT_TERTIARY], lLiftForce.z, lSmooth);
+					const float smooth = normalized_frame_time * 0.05f * _engine_node.scale_;
+					lift_force.x = smooth_value_[kAspectPrimary] = Math::Lerp(smooth_value_[kAspectPrimary], lift_force.x, smooth);
+					lift_force.y = smooth_value_[kAspectSecondary] = Math::Lerp(smooth_value_[kAspectSecondary], lift_force.y, smooth);
+					lift_force.z = smooth_value_[kAspectTertiary] = Math::Lerp(smooth_value_[kAspectTertiary], lift_force.z, smooth);
 
 					// Counteract rotor's movement through perpendicular air.
-					vec3 lDragForce;
-					pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lDragForce);
-					lDragForce = ((-lDragForce*lRotorForce.GetNormalized()) * mFriction * lNormalizedFrameTime) * lRotorForce;
+					vec3 drag_force;
+					physics_manager->GetBodyVelocity(_geometry->GetBodyId(), drag_force);
+					drag_force = ((-drag_force*rotor_force.GetNormalized()) * friction_ * normalized_frame_time) * rotor_force;
 
-					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce + lDragForce, lRotorPivot);
+					physics_manager->AddForceAtPos(_geometry->GetParent()->GetBodyId(), lift_force + drag_force, rotor_pivot);
+				} else {
+					log_.Error("Missing rotor joint!");
 				}
-				else
-				{
-					mLog.Error("Missing rotor joint!");
-				}
-			}
-			break;
-			case ENGINE_ROTOR_TILT:
-			{
-				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
-				if (lGeometry->GetJointId() != INVALID_JOINT)
-				{
-					const vec3 lLiftForce = GetRotorLiftForce(pPhysicsManager, lGeometry, lEngineNode) * std::abs(lPrimaryForce);
-					const int lParentBone = pStructure->GetIndex(lGeometry->GetParent());
-					const float lPlacement = (lPrimaryForce >= 0)? 1.0f : -1.0f;
-					const vec3 lOffset =
-						pPhysicsManager->GetBodyOrientation(lGeometry->GetParent()->GetBodyId()) *
-						pStructure->GetOriginalBoneTransformation(lParentBone).GetOrientation().GetInverse() *
-						vec3(lPlacement*mMaxSpeed, -lPlacement*mMaxSpeed2, 0);
-					const vec3 lWorldPos = lOffset + pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
-					pPhysicsManager->AddForceAtPos(lGeometry->GetParent()->GetBodyId(), lLiftForce, lWorldPos);
+			} break;
+			case kEngineRotorTilt: {
+				deb_assert(_geometry->GetJointId() != INVALID_JOINT);
+				if (_geometry->GetJointId() != INVALID_JOINT) {
+					const vec3 lift_force = GetRotorLiftForce(physics_manager, _geometry, _engine_node) * std::abs(primary_force);
+					const int parent_bone = structure->GetIndex(_geometry->GetParent());
+					const float placement = (primary_force >= 0)? 1.0f : -1.0f;
+					const vec3 offset =
+						physics_manager->GetBodyOrientation(_geometry->GetParent()->GetBodyId()) *
+						structure->GetOriginalBoneTransformation(parent_bone).GetOrientation().GetInverse() *
+						vec3(placement*max_speed_, -placement*max_speed2_, 0);
+					const vec3 world_pos = offset + physics_manager->GetBodyPosition(_geometry->GetBodyId());
+					physics_manager->AddForceAtPos(_geometry->GetParent()->GetBodyId(), lift_force, world_pos);
 					//{
 					//	static int cnt = 0;
 					//	if ((++cnt)%300 == 0)
 					//	{
-					//		//vec3 r = pPhysicsManager->GetBodyOrientation(lGeometry->GetBodyId()).GetInverse() * lRelPos;
-					//		//vec3 r = lRelPos;
-					//		vec3 r = lOffset;
-					//		vec3 w = pPhysicsManager->GetBodyPosition(lGeometry->GetBodyId());
+					//		//vec3 r = physics_manager->GetBodyOrientation(_geometry->GetBodyId()).GetInverse() * rel_pos;
+					//		//vec3 r = rel_pos;
+					//		vec3 r = offset;
+					//		vec3 w = physics_manager->GetBodyPosition(_geometry->GetBodyId());
 					//		mLog.Infof("Got pos (%f, %f, %f - world pos is (%f, %f, %f)."), r.x, r.y, r.z, w.x, w.y, w.z);
 					//	}
 					//}
+				} else {
+					log_.Error("Missing rotor joint!");
 				}
-				else
-				{
-					mLog.Error("Missing rotor joint!");
-				}
-			}
-			break;
-			case ENGINE_JET:
-			{
+			} break;
+			case kEngineJet: {
 				deb_assert(false);	// TODO: use relative push instead!
-				ChunkyBoneGeometry* lRootGeometry = pStructure->GetBoneGeometry(0);
-				vec3 lVelocity;
-				pPhysicsManager->GetBodyVelocity(lRootGeometry->GetBodyId(), lVelocity);
-				if (lPrimaryForce != 0 && lVelocity.GetLengthSquared() < mMaxSpeed*mMaxSpeed)
-				{
-					const quat lOrientation =
-						pPhysicsManager->GetBodyOrientation(lRootGeometry->GetBodyId()) *
-						pStructure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
-					const vec3 lPushForce = lOrientation * vec3(0, lPrimaryForce*mStrength, 0);
-					pPhysicsManager->AddForce(lGeometry->GetBodyId(), lPushForce);
+				ChunkyBoneGeometry* root_geometry = structure->GetBoneGeometry(0);
+				vec3 velocity;
+				physics_manager->GetBodyVelocity(root_geometry->GetBodyId(), velocity);
+				if (primary_force != 0 && velocity.GetLengthSquared() < max_speed_*max_speed_) {
+					const quat orientation =
+						physics_manager->GetBodyOrientation(root_geometry->GetBodyId()) *
+						structure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
+					const vec3 push_force = orientation * vec3(0, primary_force*strength_, 0);
+					physics_manager->AddForce(_geometry->GetBodyId(), push_force);
 				}
-				mIntensity += lPrimaryForce;
-			}
-			break;
-			case ENGINE_SLIDER_FORCE:
-			{
-				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
-				if (lGeometry->GetJointId() != INVALID_JOINT)
-				{
-					if (!lPrimaryForce && lEngineNode.mMode == MODE_NORMAL)	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
-					{
-						float lPosition;
-						pPhysicsManager->GetSliderPos(lGeometry->GetJointId(), lPosition);
-						if (!Math::IsEpsEqual(lPosition, 0.0f, 0.1f))
-						{
-							float lValue = -lPosition*std::abs(lScale);
-							lValue = (lValue > 0)? lValue*mMaxSpeed : lValue*mMaxSpeed2;
-							pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue);
+				intensity_ += primary_force;
+			} break;
+			case kEngineSliderForce: {
+				deb_assert(_geometry->GetJointId() != INVALID_JOINT);
+				if (_geometry->GetJointId() != INVALID_JOINT) {
+					if (!primary_force && _engine_node.mode_ == kModeNormal) {	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
+						float position;
+						physics_manager->GetSliderPos(_geometry->GetJointId(), position);
+						if (!Math::IsEpsEqual(position, 0.0f, 0.1f)) {
+							float _value = -position*std::abs(_scale);
+							_value = (_value > 0)? _value*max_speed_ : _value*max_speed2_;
+							physics_manager->SetMotorTarget(_geometry->GetJointId(), strength_, _value);
 						}
+					} else if (!primary_force && _engine_node.mode_ == kModeRelease) {	// Release slider behavior just lets go.
+						physics_manager->SetMotorTarget(_geometry->GetJointId(), 0, 0);
+					} else {
+						const float _value = (primary_force > 0)? primary_force*max_speed_ : primary_force*max_speed2_;
+						physics_manager->SetMotorTarget(_geometry->GetJointId(), strength_, _value*_scale);
 					}
-					else if (!lPrimaryForce && lEngineNode.mMode == MODE_RELEASE)	// Release slider behavior just lets go.
-					{
-						pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), 0, 0);
-					}
-					else
-					{
-						const float lValue = (lPrimaryForce > 0)? lPrimaryForce*mMaxSpeed : lPrimaryForce*mMaxSpeed2;
-						pPhysicsManager->SetMotorTarget(lGeometry->GetJointId(), mStrength, lValue*lScale);
-					}
-					float lSpeed = 0;
-					pPhysicsManager->GetSliderSpeed(lGeometry->GetJointId(), lSpeed);
-					mIntensity += std::abs(lSpeed) / mMaxSpeed;
+					float speed = 0;
+					physics_manager->GetSliderSpeed(_geometry->GetJointId(), speed);
+					intensity_ += std::abs(speed) / max_speed_;
 				}
-			}
-			break;
-			case ENGINE_GLUE:
-			case ENGINE_BALL_BRAKE:
-			{
-				deb_assert(lGeometry->GetJointId() != INVALID_JOINT);
-				if (lGeometry->GetJointId() != INVALID_JOINT)
-				{
-					pPhysicsManager->StabilizeJoint(lGeometry->GetJointId());
+			} break;
+			case kEngineGlue:
+			case kEngineBallBrake: {
+				deb_assert(_geometry->GetJointId() != INVALID_JOINT);
+				if (_geometry->GetJointId() != INVALID_JOINT) {
+					physics_manager->StabilizeJoint(_geometry->GetJointId());
 				}
-			}
-			break;
-			case ENGINE_YAW_BRAKE:
-			{
-				const Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
-				vec3 lAngularVelocity;
-				pPhysicsManager->GetBodyAngularVelocity(lBodyId, lAngularVelocity);
+			} break;
+			case kEngineYawBrake: {
+				const tbc::PhysicsManager::BodyID body_id = _geometry->GetBodyId();
+				vec3 angular_velocity;
+				physics_manager->GetBodyAngularVelocity(body_id, angular_velocity);
 				// Reduce rotation of craft.
-				lAngularVelocity.z *= mFriction;
-				const float lLowAngularVelocity = mMaxSpeed;
-				if (Math::IsEpsEqual(lPrimaryForce, 0.0f) && std::abs(lAngularVelocity.z) < lLowAngularVelocity)
-				{
+				angular_velocity.z *= friction_;
+				const float low_angular_velocity = max_speed_;
+				if (Math::IsEpsEqual(primary_force, 0.0f) && std::abs(angular_velocity.z) < low_angular_velocity) {
 					// Seriously kill speed depending on strength.
-					lAngularVelocity.z *= 1/mStrength;
+					angular_velocity.z *= 1/strength_;
 				}
-				pPhysicsManager->SetBodyAngularVelocity(lBodyId, lAngularVelocity);
-			}
-			break;
-			case ENGINE_AIR_BRAKE:
-			{
+				physics_manager->SetBodyAngularVelocity(body_id, angular_velocity);
+			} break;
+			case kEngineAirBrake: {
 				//      1
 				// F =  - pv^2 C  A
 				//  D   2       d
-				const float pCdA = 0.5f * 1.225f * mFriction;	// Density of air multiplied with friction coefficient and area (the two latter combined in mFriction).
-				const Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
-				vec3 lVelocity;
-				pPhysicsManager->GetBodyVelocity(lBodyId, lVelocity);
-				const float lSpeed = lVelocity.GetLength();
-				const vec3 lDrag = lVelocity * -lSpeed * pCdA;
-				pPhysicsManager->AddForce(lBodyId, lDrag);
-			}
-			break;
-			default:
-			{
+				const float cd_a = 0.5f * 1.225f * friction_;	// Density of air multiplied with friction coefficient and area (the two latter combined in friction_).
+				const tbc::PhysicsManager::BodyID body_id = _geometry->GetBodyId();
+				vec3 velocity;
+				physics_manager->GetBodyVelocity(body_id, velocity);
+				const float speed = velocity.GetLength();
+				const vec3 drag = velocity * -speed * cd_a;
+				physics_manager->AddForce(body_id, drag);
+			} break;
+			default: {
 				deb_assert(false);
-			}
-			break;
+			} break;
 		}
 	}
-	if (mIntensity)
-	{
-		mIntensity /= mEngineNodeArray.size();
+	if (intensity_) {
+		intensity_ /= engine_node_array_.size();
 	}
 }
 
-vec3 PhysicsEngine::GetCurrentMaxSpeed(const PhysicsManager* pPhysicsManager) const
-{
-	vec3 lMaxVelocity;
-	float lMaxSpeed = 0;
-	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
-	for (; i != mEngineNodeArray.end(); ++i)
-	{
-		const EngineNode& lEngineNode = *i;
-		ChunkyBoneGeometry* lGeometry = lEngineNode.mGeometry;
-		vec3 lVelocity;
-		pPhysicsManager->GetBodyVelocity(lGeometry->GetBodyId(), lVelocity);
-		const float lSpeed = lVelocity.GetLengthSquared();
-		if (lSpeed > lMaxSpeed)
-		{
-			lMaxSpeed = lSpeed;
-			lMaxVelocity = lVelocity;
+vec3 PhysicsEngine::GetCurrentMaxSpeed(const PhysicsManager* physics_manager) const {
+	vec3 max_velocity;
+	float _max_speed = 0;
+	EngineNodeArray::const_iterator i = engine_node_array_.begin();
+	for (; i != engine_node_array_.end(); ++i) {
+		const EngineNode& _engine_node = *i;
+		ChunkyBoneGeometry* _geometry = _engine_node.geometry_;
+		vec3 velocity;
+		physics_manager->GetBodyVelocity(_geometry->GetBodyId(), velocity);
+		const float speed = velocity.GetLengthSquared();
+		if (speed > _max_speed) {
+			_max_speed = speed;
+			max_velocity = velocity;
 		}
 	}
-	return lMaxVelocity;
+	return max_velocity;
 }
 
 
 
-void PhysicsEngine::UprightStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
-	const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction)
-{
-	const int lRootBone = 0;	// Use root bone for fetching original transform, or "up" will be off.
-	const quat lOrientation =
-		pPhysicsManager->GetBodyOrientation(pGeometry->GetBodyId()) *
-		pStructure->GetOriginalBoneTransformation(lRootBone).GetOrientation().GetInverse();
+void PhysicsEngine::UprightStabilize(PhysicsManager* physics_manager, const ChunkyPhysics* structure,
+	const ChunkyBoneGeometry* geometry, float strength, float friction) {
+	const int root_bone = 0;	// Use root bone for fetching original transform, or "up" will be off.
+	const quat orientation =
+		physics_manager->GetBodyOrientation(geometry->GetBodyId()) *
+		structure->GetOriginalBoneTransformation(root_bone).GetOrientation().GetInverse();
 	// 1st: angular velocity damping (skipping z).
-	vec3 lAngular;
-	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lAngular);
-	lAngular = lOrientation.GetInverse() * lAngular;
-	lAngular.z = 0;
-	lAngular *= -pFriction;
-	vec3 lTorque = lOrientation * lAngular;
+	vec3 angular;
+	physics_manager->GetBodyAngularVelocity(geometry->GetBodyId(), angular);
+	angular = orientation.GetInverse() * angular;
+	angular.z = 0;
+	angular *= -friction;
+	vec3 torque = orientation * angular;
 	// 2nd: strive towards straight.
-	lAngular = lOrientation * vec3(0, 0, 1);
-	lTorque += vec3(+lAngular.y * pFriction*5, -lAngular.x * pFriction*5, 0);
-	pPhysicsManager->AddTorque(pGeometry->GetBodyId(), lTorque*pStrength);
+	angular = orientation * vec3(0, 0, 1);
+	torque += vec3(+angular.y * friction*5, -angular.x * friction*5, 0);
+	physics_manager->AddTorque(geometry->GetBodyId(), torque*strength);
 }
 
-void PhysicsEngine::ForwardStabilize(PhysicsManager* pPhysicsManager, const ChunkyPhysics* pStructure,
-	const ChunkyBoneGeometry* pGeometry, float pStrength, float pFriction)
-{
-	const int lBone = pStructure->GetIndex(pGeometry);
-	const quat lOrientation =
-		pPhysicsManager->GetBodyOrientation(pGeometry->GetBodyId()) *
-		pStructure->GetOriginalBoneTransformation(lBone).GetOrientation().GetInverse();
+void PhysicsEngine::ForwardStabilize(PhysicsManager* physics_manager, const ChunkyPhysics* structure,
+	const ChunkyBoneGeometry* geometry, float strength, float friction) {
+	const int bone = structure->GetIndex(geometry);
+	const quat orientation =
+		physics_manager->GetBodyOrientation(geometry->GetBodyId()) *
+		structure->GetOriginalBoneTransformation(bone).GetOrientation().GetInverse();
 	// 1st: angular velocity damping in Z-axis.
-	vec3 lVelocity3d;
-	pPhysicsManager->GetBodyAngularVelocity(pGeometry->GetBodyId(), lVelocity3d);
-	const float lAngularVelocity = lVelocity3d.z;
+	vec3 velocity3d;
+	physics_manager->GetBodyAngularVelocity(geometry->GetBodyId(), velocity3d);
+	const float angular_velocity = velocity3d.z;
 	// 2nd: strive towards straight towards where we're heading.
-	pPhysicsManager->GetBodyVelocity(pGeometry->GetBodyId(), lVelocity3d);
-	vec2 lVelocity2d(lVelocity3d.x, lVelocity3d.y);
-	const vec3 lForward3d = lOrientation * vec3(0, 1, 0);
-	vec2 lForward2d(lForward3d.x, lForward3d.y);
-	if (lForward2d.GetLengthSquared() > 0.1f && lVelocity2d.GetLengthSquared() > 0.3f)
-	{
-		float lAngle = lForward2d.GetAngle(lVelocity2d);
-		if (lAngle > PIF)
-		{
-			lAngle -= 2*PIF;
+	physics_manager->GetBodyVelocity(geometry->GetBodyId(), velocity3d);
+	vec2 velocity2d(velocity3d.x, velocity3d.y);
+	const vec3 forward3d = orientation * vec3(0, 1, 0);
+	vec2 forward2d(forward3d.x, forward3d.y);
+	if (forward2d.GetLengthSquared() > 0.1f && velocity2d.GetLengthSquared() > 0.3f) {
+		float angle = forward2d.GetAngle(velocity2d);
+		if (angle > PIF) {
+			angle -= 2*PIF;
+		} else if (angle < -PIF) {
+			angle += 2*PIF;
 		}
-		else if (lAngle < -PIF)
-		{
-			lAngle += 2*PIF;
-		}
-		lVelocity3d.Set(0, 0, (6*lAngle - lAngularVelocity*pFriction*1.5f) * pStrength);
-		pPhysicsManager->AddTorque(pGeometry->GetBodyId(), lVelocity3d);
+		velocity3d.Set(0, 0, (6*angle - angular_velocity*friction*1.5f) * strength);
+		physics_manager->AddTorque(geometry->GetBodyId(), velocity3d);
 	}
 }
 
 
 
-unsigned PhysicsEngine::GetControllerIndex() const
-{
-	return (mControllerIndex);
+unsigned PhysicsEngine::GetControllerIndex() const {
+	return (controller_index_);
 }
 
-float PhysicsEngine::GetValue() const
-{
-	deb_assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
-	if (mEngineType == ENGINE_WALK || mEngineType == ENGINE_PUSH_RELATIVE || mEngineType == ENGINE_PUSH_ABSOLUTE)
-	{
-		const float a = std::abs(mValue[ASPECT_PRIMARY]);
-		const float b = std::abs(mValue[ASPECT_SECONDARY]);
-		const float c = std::abs(mValue[ASPECT_TERTIARY]);
-		if (a > b && a > c)
-		{
-			return mValue[ASPECT_PRIMARY];
+float PhysicsEngine::GetValue() const {
+	deb_assert(controller_index_ >= 0 && controller_index_ < kMaxAspectIndex);
+	if (engine_type_ == kEngineWalk || engine_type_ == kEnginePushRelative || engine_type_ == kEnginePushAbsolute) {
+		const float a = std::abs(value_[kAspectPrimary]);
+		const float b = std::abs(value_[kAspectSecondary]);
+		const float c = std::abs(value_[kAspectTertiary]);
+		if (a > b && a > c) {
+			return value_[kAspectPrimary];
 		}
-		if (b > c)
-		{
-			return mValue[ASPECT_SECONDARY];
+		if (b > c) {
+			return value_[kAspectSecondary];
 		}
-		return mValue[ASPECT_TERTIARY];
+		return value_[kAspectTertiary];
 	}
-	return mValue[ASPECT_PRIMARY];
+	return value_[kAspectPrimary];
 }
 
-const float* PhysicsEngine::GetValues() const
-{
-	return mValue;
+const float* PhysicsEngine::GetValues() const {
+	return value_;
 }
 
-float PhysicsEngine::GetIntensity() const
-{
-	return (mIntensity);
+float PhysicsEngine::GetIntensity() const {
+	return (intensity_);
 }
 
-float PhysicsEngine::GetMaxSpeed() const
-{
-	return (mMaxSpeed);
+float PhysicsEngine::GetMaxSpeed() const {
+	return (max_speed_);
 }
 
-float PhysicsEngine::GetLerpThrottle(float pUp, float pDown, bool pAbs) const
-{
-	float& lLerpShadow = pAbs? mSmoothValue[ASPECT_LOCAL_SHADOW] : mSmoothValue[ASPECT_LOCAL_SHADOW_ABS];
-	float lValue = GetPrimaryValue();
-	lValue = pAbs? std::abs(lValue) : lValue;
-	lLerpShadow = Math::Lerp(lLerpShadow, lValue, (lValue > lLerpShadow)? pUp : pDown);
-	return lLerpShadow;
+float PhysicsEngine::GetLerpThrottle(float up, float down, bool _abs) const {
+	float& lerp_shadow = _abs? smooth_value_[kAspectLocalShadow] : smooth_value_[kAspectLocalShadowAbs];
+	float _value = GetPrimaryValue();
+	_value = _abs? std::abs(_value) : _value;
+	lerp_shadow = Math::Lerp(lerp_shadow, _value, (_value > lerp_shadow)? up : down);
+	return lerp_shadow;
 }
 
-bool PhysicsEngine::HasEngineMode(EngineMode pMode) const
-{
-	EngineNodeArray::const_iterator i = mEngineNodeArray.begin();
-	for (; i != mEngineNodeArray.end(); ++i)
-	{
-		if (i->mMode == pMode)
-		{
+bool PhysicsEngine::HasEngineMode(EngineMode mode) const {
+	EngineNodeArray::const_iterator i = engine_node_array_.begin();
+	for (; i != engine_node_array_.end(); ++i) {
+		if (i->mode_ == mode) {
 			return true;
 		}
 	}
@@ -734,197 +607,168 @@ bool PhysicsEngine::HasEngineMode(EngineMode pMode) const
 
 
 
-unsigned PhysicsEngine::GetChunkySize() const
-{
+unsigned PhysicsEngine::GetChunkySize() const {
 	return ((unsigned)(sizeof(uint32)*6 +
-		sizeof(uint32) + sizeof(uint32)*3*mEngineNodeArray.size()));
+		sizeof(uint32) + sizeof(uint32)*3*engine_node_array_.size()));
 }
 
-void PhysicsEngine::SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const
-{
-	uint32* lData = (uint32*)pData;
-	lData[0] = Endian::HostToBig(GetEngineType());
-	lData[1] = Endian::HostToBigF(mStrength);
-	lData[2] = Endian::HostToBigF(mMaxSpeed);
-	lData[3] = Endian::HostToBigF(mMaxSpeed2);
-	lData[4] = Endian::HostToBigF(mFriction);
-	lData[5] = Endian::HostToBig(mControllerIndex);
-	lData[6] = Endian::HostToBig((uint32)mEngineNodeArray.size());
+void PhysicsEngine::SaveChunkyData(const ChunkyPhysics* structure, void* data) const {
+	uint32* _data = (uint32*)data;
+	_data[0] = Endian::HostToBig(GetEngineType());
+	_data[1] = Endian::HostToBigF(strength_);
+	_data[2] = Endian::HostToBigF(max_speed_);
+	_data[3] = Endian::HostToBigF(max_speed2_);
+	_data[4] = Endian::HostToBigF(friction_);
+	_data[5] = Endian::HostToBig(controller_index_);
+	_data[6] = Endian::HostToBig((uint32)engine_node_array_.size());
 	int x;
-	for (x = 0; x < (int)mEngineNodeArray.size(); ++x)
-	{
-		const EngineNode& lControlledNode = mEngineNodeArray[x];
-		lData[7+x*3] = Endian::HostToBig(pStructure->GetIndex(lControlledNode.mGeometry));
-		lData[8+x*3] = Endian::HostToBigF(lControlledNode.mScale);
-		lData[9+x*3] = Endian::HostToBig(lControlledNode.mMode);
+	for (x = 0; x < (int)engine_node_array_.size(); ++x) {
+		const EngineNode& controlled_node = engine_node_array_[x];
+		_data[7+x*3] = Endian::HostToBig(structure->GetIndex(controlled_node.geometry_));
+		_data[8+x*3] = Endian::HostToBigF(controlled_node.scale_);
+		_data[9+x*3] = Endian::HostToBig(controlled_node.mode_);
 	}
 }
 
 
 
-float PhysicsEngine::GetPrimaryValue() const
-{
-	const float lForce = GetValue();
-	const float lPrimaryForce = (mValue[ASPECT_LOCAL_PRIMARY] > std::abs(lForce))? mValue[ASPECT_LOCAL_PRIMARY] : lForce;
-	return lPrimaryForce;
+float PhysicsEngine::GetPrimaryValue() const {
+	const float force = GetValue();
+	const float primary_force = (value_[kAspectLocalPrimary] > std::abs(force))? value_[kAspectLocalPrimary] : force;
+	return primary_force;
 }
 
 
 
-void PhysicsEngine::LoadChunkyData(ChunkyPhysics* pStructure, const void* pData)
-{
-	const uint32* lData = (const uint32*)pData;
+void PhysicsEngine::LoadChunkyData(ChunkyPhysics* structure, const void* data) {
+	const uint32* _data = (const uint32*)data;
 
-	mEngineType = (EngineType)Endian::BigToHost(lData[0]);
-	mStrength = Endian::BigToHostF(lData[1]);
-	mMaxSpeed = Endian::BigToHostF(lData[2]);
-	mMaxSpeed2 = Endian::BigToHostF(lData[3]);
-	mFriction = Endian::BigToHostF(lData[4]);
-	mControllerIndex = Endian::BigToHost(lData[5]);
-	deb_assert(mControllerIndex >= 0 && mControllerIndex < MAX_ASPECT_INDEX);
-	const int lControlledNodeCount = Endian::BigToHost(lData[6]);
+	engine_type_ = (EngineType)Endian::BigToHost(_data[0]);
+	strength_ = Endian::BigToHostF(_data[1]);
+	max_speed_ = Endian::BigToHostF(_data[2]);
+	max_speed2_ = Endian::BigToHostF(_data[3]);
+	friction_ = Endian::BigToHostF(_data[4]);
+	controller_index_ = Endian::BigToHost(_data[5]);
+	deb_assert(controller_index_ >= 0 && controller_index_ < kMaxAspectIndex);
+	const int controlled_node_count = Endian::BigToHost(_data[6]);
 	int x;
-	for (x = 0; x < lControlledNodeCount; ++x)
-	{
-		ChunkyBoneGeometry* lGeometry = pStructure->GetBoneGeometry(Endian::BigToHost(lData[7+x*3]));
-		deb_assert(lGeometry);
-		float lScale = Endian::BigToHostF(lData[8+x*3]);
-		EngineMode lMode = (EngineMode)Endian::BigToHost(lData[9+x*3]);
-		AddControlledGeometry(lGeometry, lScale, lMode);
+	for (x = 0; x < controlled_node_count; ++x) {
+		ChunkyBoneGeometry* _geometry = structure->GetBoneGeometry(Endian::BigToHost(_data[7+x*3]));
+		deb_assert(_geometry);
+		float _scale = Endian::BigToHostF(_data[8+x*3]);
+		EngineMode _mode = (EngineMode)Endian::BigToHost(_data[9+x*3]);
+		AddControlledGeometry(_geometry, _scale, _mode);
 	}
 }
 
 
 
-vec3 PhysicsEngine::GetRotorLiftForce(PhysicsManager* pPhysicsManager, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const
-{
-	vec3 lAxis;
-	pPhysicsManager->GetAxis1(pGeometry->GetJointId(), lAxis);
-	float lAngularRotorSpeed = 0;
-	pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lAngularRotorSpeed);
-	const float lLiftForce = lAngularRotorSpeed*lAngularRotorSpeed*mStrength*pEngineNode.mScale;
-	return (lAxis*lLiftForce);
+vec3 PhysicsEngine::GetRotorLiftForce(PhysicsManager* physics_manager, ChunkyBoneGeometry* geometry, const EngineNode& engine_node) const {
+	vec3 axis;
+	physics_manager->GetAxis1(geometry->GetJointId(), axis);
+	float angular_rotor_speed = 0;
+	physics_manager->GetAngleRate1(geometry->GetJointId(), angular_rotor_speed);
+	const float lift_force = angular_rotor_speed*angular_rotor_speed*strength_*engine_node.scale_;
+	return (axis*lift_force);
 }
 
-void PhysicsEngine::ApplyTorque(PhysicsManager* pPhysicsManager, float pFrameTime, ChunkyBoneGeometry* pGeometry, const EngineNode& pEngineNode) const
-{
-	pFrameTime;
+void PhysicsEngine::ApplyTorque(PhysicsManager* physics_manager, float frame_time, ChunkyBoneGeometry* geometry, const EngineNode& engine_node) const {
+	frame_time;
 
-	//deb_assert(pGeometry->GetJointId() != INVALID_JOINT);
-	if (pGeometry->GetJointId() == INVALID_JOINT)
-	{
-		mLog.Error("Missing torque joint!");
+	//deb_assert(geometry->GetJointId() != INVALID_JOINT);
+	if (geometry->GetJointId() == INVALID_JOINT) {
+		log_.Error("Missing torque joint!");
 		return;
 	}
 
-	float lForce = GetPrimaryValue();
+	float force = GetPrimaryValue();
 
-	const float lScale = pEngineNode.mScale;
-	//const float lReverseScale = (lScale + 1) * 0.5f;	// Move towards linear scaling.
-	float lLoStop;
-	float lHiStop;
-	float lBounce;
-	pPhysicsManager->GetJointParams(pGeometry->GetJointId(), lLoStop, lHiStop, lBounce);
-	//const float lMiddle = (lLoStop+lHiStop)*0.5f;
-	const float lTarget = 0;
-	if (lLoStop < -1000 || lHiStop > 1000)
-	{
+	const float _scale = engine_node.scale_;
+	//const float lReverseScale = (_scale + 1) * 0.5f;	// Move towards linear scaling.
+	float lo_stop;
+	float hi_stop;
+	float bounce;
+	physics_manager->GetJointParams(geometry->GetJointId(), lo_stop, hi_stop, bounce);
+	//const float middle = (lo_stop+hi_stop)*0.5f;
+	const float _target = 0;
+	if (lo_stop < -1000 || hi_stop > 1000) {
 		// Open interval -> relative torque.
-		const float lTargetSpeed = lForce*lScale*mMaxSpeed;
-		pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
-		float lActualSpeed = 0;
-		pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lActualSpeed);
-		mIntensity += std::abs(lTargetSpeed - lActualSpeed) / mMaxSpeed;
+		const float target_speed = force*_scale*max_speed_;
+		physics_manager->SetAngularMotorTurn(geometry->GetJointId(), strength_, target_speed);
+		float actual_speed = 0;
+		physics_manager->GetAngleRate2(geometry->GetJointId(), actual_speed);
+		intensity_ += std::abs(target_speed - actual_speed) / max_speed_;
 		return;
 	}
 
-	float lIrlAngle;
-	if (!pPhysicsManager->GetAngle1(pGeometry->GetJointId(), lIrlAngle))
-	{
-		mLog.Error("Bad joint angle!");
+	float irl_angle;
+	if (!physics_manager->GetAngle1(geometry->GetJointId(), irl_angle)) {
+		log_.Error("Bad joint angle!");
 		return;
 	}
 	// Flip angle if parent is "world".
-	if (pPhysicsManager->IsStaticBody(pGeometry->GetParent()->GetBodyId()))
-	{
-		lIrlAngle = -lIrlAngle;
+	if (physics_manager->IsStaticBody(geometry->GetParent()->GetBodyId())) {
+		irl_angle = -irl_angle;
 	}
-	const float lIrlAngleDirection = (lHiStop < lLoStop)? -lIrlAngle : lIrlAngle;
+	const float irl_angle_direction = (hi_stop < lo_stop)? -irl_angle : irl_angle;
 
-	if (pEngineNode.mMode == MODE_HALF_LOCK)
-	{
-		if ((lForce < 0.02f && lIrlAngleDirection < lTarget) ||
-			(lForce > -0.02f && lIrlAngleDirection > lTarget))
-		{
-			if (std::abs(lForce) > 0.02)
-			{
-				pEngineNode.mLock = lForce;
+	if (engine_node.mode_ == kModeHalfLock) {
+		if ((force < 0.02f && irl_angle_direction < _target) ||
+			(force > -0.02f && irl_angle_direction > _target)) {
+			if (std::abs(force) > 0.02) {
+				engine_node.lock_ = force;
+			} else {
+				force = engine_node.lock_;
 			}
-			else
-			{
-				lForce = pEngineNode.mLock;
-			}
-		}
-		else
-		{
-			pEngineNode.mLock = 0;
+		} else {
+			engine_node.lock_ = 0;
 		}
 	}
-	if (mFriction)
-	{
+	if (friction_) {
 		// Wants us to scale (down) rotation angle depending on vehicle speed. Otherwise most vehicles
 		// quickly flips, not yeilding very fun gameplay. Plus, it's more like real racing cars! :)
-		vec3 lParentVelocity;
-		pPhysicsManager->GetBodyVelocity(pGeometry->GetParent()->GetBodyId(), lParentVelocity);
-		const float lRangeFactor = ::pow(mFriction, lParentVelocity.GetLength());
-		lHiStop *= lRangeFactor;
-		lLoStop *= lRangeFactor;
+		vec3 parent_velocity;
+		physics_manager->GetBodyVelocity(geometry->GetParent()->GetBodyId(), parent_velocity);
+		const float range_factor = ::pow(friction_, parent_velocity.GetLength());
+		hi_stop *= range_factor;
+		lo_stop *= range_factor;
 	}
-	const float lAngleSpan = (lHiStop-lLoStop)*0.9f;
-	const float lTargetAngle = Math::Lerp(lLoStop, lHiStop, lScale*lForce*0.5f+0.5f);
-	const float lDiff = (lTargetAngle-lIrlAngle);
-	const float lAbsDiff = std::abs(lDiff);
-	float lTargetSpeed;
-	const float lAbsBigDiff = std::abs(lAngleSpan/7);
-	const bool lCloseToGoal = (lAbsDiff < lAbsBigDiff);
-	if (!lCloseToGoal)
-	{
-		lTargetSpeed = (lDiff > 0)? mMaxSpeed : -mMaxSpeed;
+	const float angle_span = (hi_stop-lo_stop)*0.9f;
+	const float target_angle = Math::Lerp(lo_stop, hi_stop, _scale*force*0.5f+0.5f);
+	const float diff = (target_angle-irl_angle);
+	const float abs_diff = std::abs(diff);
+	float target_speed;
+	const float abs_big_diff = std::abs(angle_span/7);
+	const bool close_to_goal = (abs_diff < abs_big_diff);
+	if (!close_to_goal) {
+		target_speed = (diff > 0)? max_speed_ : -max_speed_;
+	} else {
+		target_speed = max_speed_*diff/abs_big_diff;
 	}
-	else
-	{
-		lTargetSpeed = mMaxSpeed*lDiff/lAbsBigDiff;
-	}
-	//lTargetSpeed *= (lForce > 0)? lScale : lReverseScale;
+	//target_speed *= (force > 0)? _scale : lReverseScale;
 	// If we're far from the desired target speed, we speed up.
-	float lCurrentSpeed = 0;
-	if (mEngineType == ENGINE_HINGE2_TURN)
-	{
-		pPhysicsManager->GetAngleRate2(pGeometry->GetJointId(), lCurrentSpeed);
-		if (!lCloseToGoal)
-		{
-			lTargetSpeed *= 1+std::abs(lCurrentSpeed)/30;
+	float current_speed = 0;
+	if (engine_type_ == kEngineHinge2Turn) {
+		physics_manager->GetAngleRate2(geometry->GetJointId(), current_speed);
+		if (!close_to_goal) {
+			target_speed *= 1+std::abs(current_speed)/30;
+		}
+	} else {
+		physics_manager->GetAngleRate1(geometry->GetJointId(), current_speed);
+		if (!close_to_goal) {
+			target_speed += (target_speed-current_speed) * std::abs(_scale);
 		}
 	}
-	else
-	{
-		pPhysicsManager->GetAngleRate1(pGeometry->GetJointId(), lCurrentSpeed);
-		if (!lCloseToGoal)
-		{
-			lTargetSpeed += (lTargetSpeed-lCurrentSpeed) * std::abs(lScale);
-		}
-	}
-	/*if (Math::IsEpsEqual(lTargetSpeed, 0.0f, 0.01f))	// Stop when almost already at a halt.
-	{
-		lTargetSpeed = 0;
+	/*if (Math::IsEpsEqual(target_speed, 0.0f, 0.01f)) {	// Stop when almost already at a halt.
+		target_speed = 0;
 	}*/
-	pPhysicsManager->SetAngularMotorTurn(pGeometry->GetJointId(), mStrength, lTargetSpeed);
-	mIntensity += std::abs(lTargetSpeed / (mMaxSpeed * lScale));
+	physics_manager->SetAngularMotorTurn(geometry->GetJointId(), strength_, target_speed);
+	intensity_ += std::abs(target_speed / (max_speed_ * _scale));
 }
 
 
 
-loginstance(PHYSICS, PhysicsEngine);
+loginstance(kPhysics, PhysicsEngine);
 
 
 

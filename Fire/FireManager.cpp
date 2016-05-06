@@ -5,90 +5,88 @@
 
 
 #include "pch.h"
-#include "FireManager.h"
+#include "firemanager.h"
 #include <algorithm>
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ContextPath.h"
-#include "../Cure/Include/Driver.h"
-#include "../Cure/Include/Elevator.h"
-#include "../Cure/Include/Health.h"
-#include "../Cure/Include/HiscoreAgent.h"
-#include "../Cure/Include/FloatAttribute.h"
-#include "../Cure/Include/IntAttribute.h"
-#include "../Cure/Include/NetworkClient.h"
-#include "../Cure/Include/Spawner.h"
-#include "../Cure/Include/TimeManager.h"
-#include "../Lepra/Include/Math.h"
-#include "../Lepra/Include/Obfuxator.h"
-#include "../Lepra/Include/Random.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "../Lepra/Include/Time.h"
-#include "../Life/LifeClient/ExplodingMachine.h"
-//#include "../Life/LifeClient/FastProjectile.h"
-//#include "../Life/LifeClient/HomingProjectile.h"
-#include "../Life/LifeClient/Level.h"
-#include "../Life/LifeClient/MassObject.h"
-#include "../Life/LifeClient/Menu.h"
-#include "../Life/LifeClient/Mine.h"
-#include "../Life/LifeClient/Projectile.h"
-#include "../Life/LifeClient/UiConsole.h"
-#include "../Life/Explosion.h"
-#include "../Life/ProjectileUtil.h"
-#include "../Life/Spawner.h"
-#include "../Tbc/Include/PhysicsTrigger.h"
-#include "../UiCure/Include/UiBurnEmitter.h"
-#include "../UiCure/Include/UiCollisionSoundManager.h"
-#include "../UiCure/Include/UiDebugRenderer.h"
-#include "../UiCure/Include/UiExhaustEmitter.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiCure/Include/UiIconButton.h"
-#include "../UiCure/Include/UiJetEngineEmitter.h"
-#include "../UiCure/Include/UiGravelEmitter.h"
-#include "../UiCure/Include/UiSoundReleaser.h"
-#include "../UiLepra/Include/UiTouchDrag.h"
-//#include "../UiLepra/Include/UiOpenGLExtensions.h"
-#include "../UiTbc/Include/GUI/UiCheckButton.h"
-#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
-#include "../UiTbc/Include/GUI/UiFixedLayouter.h"
-#include "../UiTbc/Include/GUI/UiRadioButton.h"
-#include "../UiTbc/Include/GUI/UiTextArea.h"
-#include "../UiTbc/Include/GUI/UiTextField.h"
-#include "../UiTbc/Include/UiBillboardGeometry.h"
-#include "../UiTbc/Include/UiParticleRenderer.h"
-#include "../UiTbc/Include/UiRenderer.h"
-#include "../UiTbc/Include/UiTriangleBasedGeometry.h"
-#include "AutoPathDriver.h"
-#include "BaseMachine.h"
-#include "Fire.h"
-#include "FireConsoleManager.h"
-#include "FireTicker.h"
-#include "Level.h"
-#include "RtVar.h"
-#include "Eater.h"
-#include "Sunlight.h"
-#include "Version.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/contextpath.h"
+#include "../cure/include/driver.h"
+#include "../cure/include/elevator.h"
+#include "../cure/include/health.h"
+#include "../cure/include/hiscoreagent.h"
+#include "../cure/include/floatattribute.h"
+#include "../cure/include/intattribute.h"
+#include "../cure/include/networkclient.h"
+#include "../cure/include/spawner.h"
+#include "../cure/include/timemanager.h"
+#include "../lepra/include/math.h"
+#include "../lepra/include/obfuxator.h"
+#include "../lepra/include/random.h"
+#include "../lepra/include/systemmanager.h"
+#include "../lepra/include/time.h"
+#include "../life/lifeclient/explodingmachine.h"
+//#include "../life/lifeclient/fastprojectile.h"
+//#include "../life/lifeclient/homingprojectile.h"
+#include "../life/lifeclient/level.h"
+#include "../life/lifeclient/massobject.h"
+#include "../life/lifeclient/menu.h"
+#include "../life/lifeclient/mine.h"
+#include "../life/lifeclient/projectile.h"
+#include "../life/lifeclient/uiconsole.h"
+#include "../life/explosion.h"
+#include "../life/projectileutil.h"
+#include "../life/spawner.h"
+#include "../tbc/include/physicstrigger.h"
+#include "../uicure/include/uiburnemitter.h"
+#include "../uicure/include/uicollisionsoundmanager.h"
+#include "../uicure/include/uidebugrenderer.h"
+#include "../uicure/include/uiexhaustemitter.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uicure/include/uiiconbutton.h"
+#include "../uicure/include/uijetengineemitter.h"
+#include "../uicure/include/uigravelemitter.h"
+#include "../uicure/include/uisoundreleaser.h"
+#include "../uilepra/include/uitouchdrag.h"
+//#include "../uilepra/include/uiopenglextensions.h"
+#include "../uitbc/include/gui/uicheckbutton.h"
+#include "../uitbc/include/gui/uidesktopwindow.h"
+#include "../uitbc/include/gui/uifixedlayouter.h"
+#include "../uitbc/include/gui/uiradiobutton.h"
+#include "../uitbc/include/gui/uitextarea.h"
+#include "../uitbc/include/gui/uitextfield.h"
+#include "../uitbc/include/uibillboardgeometry.h"
+#include "../uitbc/include/uiparticlerenderer.h"
+#include "../uitbc/include/uirenderer.h"
+#include "../uitbc/include/uitrianglebasedgeometry.h"
+#include "autopathdriver.h"
+#include "basemachine.h"
+#include "fire.h"
+#include "fireconsolemanager.h"
+#include "fireticker.h"
+#include "level.h"
+#include "rtvar.h"
+#include "eater.h"
+#include "sunlight.h"
+#include "version.h"
 
 
 
-namespace Fire
-{
+namespace Fire {
 
 
 
-#define DRAG_FLAG	UiLepra::Touch::DRAG_USER
+#define DRAG_FLAG	uilepra::touch::kDragUser
 #define BG_COLOR Color(40, 40, 40, 160)
 const float hp = 768/1024.0f;
-const int gLevels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
-const float gRollOutTime = 1.5f;
-const float gTargetInfoDelay = 0.1f;
-struct VillainTypes
-{
-	str mName;
-	int mCount;
+const int kLevels[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+const float kRollOutTime = 1.5f;
+const float kTargetInfoDelay = 0.1f;
+struct VillainTypes {
+	str name_;
+	int count_;
 };
 #define PERSONS_INNOCENT_PART 0.40f
-int gPersonalityCount = 0;
-const VillainTypes gVillainTypes[] =
+int g_personality_count = 0;
+const VillainTypes kVillainTypes[] =
 {
 	{_O("JI9,,/0,5+*~29=:9,", "Terrorist leader"), 331},
 	{_O("Jg9,,/-,5+*", "Terrorist"), 1502},
@@ -110,796 +108,686 @@ const VillainTypes gVillainTypes[] =
 
 
 
-FireManager::FireManager(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
-	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
-	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
-	mCollisionSoundManager(0),
-	mMenu(0),
-	mLevel(0),
-	mSteppedLevel(false),
-	mSunlight(0),
-	mCameraTransform(quat(), vec3()),
-	mPauseButton(0),
-	mBombButton(0),
-	//mCheckIcon(0),
-	mKills(0),
-	mKillLimit(0),
-	mLevelTotalKills(0)
-{
-	mFireDelayTimer.Start();
+FireManager::FireManager(life::GameClientMasterTicker* pMaster, const cure::TimeManager* time,
+	cure::RuntimeVariableScope* variable_scope, cure::ResourceManager* resource_manager,
+	UiCure::GameUiManager* ui_manager, int slave_index, const PixelRect& render_area):
+	Parent(pMaster, time, variable_scope, resource_manager, ui_manager, slave_index, render_area),
+	collision_sound_manager_(0),
+	menu_(0),
+	level_(0),
+	stepped_level_(false),
+	sunlight_(0),
+	camera_transform_(quat(), vec3()),
+	pause_button_(0),
+	bomb_button_(0),
+	//check_icon_(0),
+	kills_(0),
+	kill_limit_(0),
+	level_total_kills_(0) {
+	fire_delay_timer_.Start();
 
-	mCollisionSoundManager = new UiCure::CollisionSoundManager(this, pUiManager);
-	mCollisionSoundManager->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
-	mCollisionSoundManager->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
-	mCollisionSoundManager->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
-	mCollisionSoundManager->PreLoadSound("explosion");
+	collision_sound_manager_ = new UiCure::CollisionSoundManager(this, ui_manager);
+	collision_sound_manager_->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.4f, 0));
+	collision_sound_manager_->AddSound("small_metal",	UiCure::CollisionSoundManager::SoundResourceInfo(0.2f, 0.4f, 0));
+	collision_sound_manager_->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	collision_sound_manager_->AddSound("wood",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.5f, 0));
+	collision_sound_manager_->PreLoadSound("explosion");
 
-	SetConsoleManager(new FireConsoleManager(GetResourceManager(), this, mUiManager, GetVariableScope(), mRenderArea));
+	SetConsoleManager(new FireConsoleManager(GetResourceManager(), this, ui_manager_, GetVariableScope(), render_area_));
 
 	GetPhysicsManager()->SetSimulationParameters(0.0f, 0.03f, 0.2f);
 
-	Tbc::GeometryBase::SetDefaultFlags(Tbc::GeometryBase::EXCLUDE_CULLING);	// Save some math during rendering, as most objects are on stage in this game.
+	tbc::GeometryBase::SetDefaultFlags(tbc::GeometryBase::kExcludeCulling);	// Save some math during rendering, as most objects are on stage in this game.
 
-	v_set(GetVariableScope(), RTVAR_GAME_EXPLOSIVESTRENGTH, 1.0);
-	v_set(GetVariableScope(), RTVAR_GAME_FIRSTRUN, true);
-	v_set(GetVariableScope(), RTVAR_GAME_FIREDELAY, 1.0);
-	v_set(GetVariableScope(), RTVAR_GAME_STARTLEVEL, "lvl00");
-	v_set(GetVariableScope(), RTVAR_GAME_VEHICLEREMOVEDELAY, 25.0);
+	v_set(GetVariableScope(), kRtvarGameExplosivestrength, 1.0);
+	v_set(GetVariableScope(), kRtvarGameFirstrun, true);
+	v_set(GetVariableScope(), kRtvarGameFiredelay, 1.0);
+	v_set(GetVariableScope(), kRtvarGameStartlevel, "lvl00");
+	v_set(GetVariableScope(), kRtvarGameVehicleremovedelay, 25.0);
 }
 
-FireManager::~FireManager()
-{
+FireManager::~FireManager() {
 	Close();
 
-	delete mCollisionSoundManager;
-	mCollisionSoundManager = 0;
+	delete collision_sound_manager_;
+	collision_sound_manager_ = 0;
 }
 
-void FireManager::Suspend(bool pHard)
-{
-	if (!mMenu->GetDialog())
-	{
-		mPauseButton->SetVisible(false);
+void FireManager::Suspend(bool hard) {
+	if (!menu_->GetDialog()) {
+		pause_button_->SetVisible(false);
 		OnPauseButton(0);
 	}
 }
 
-void FireManager::LoadSettings()
-{
-	v_set(GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
-	v_set(GetVariableScope(), RTVAR_UI_2D_FONT, "Verdana");
-	v_set(GetVariableScope(), RTVAR_UI_3D_FOV, 38.8);
+void FireManager::LoadSettings() {
+	v_set(GetVariableScope(), kRtvarGameSpawnpart, 1.0);
+	v_set(GetVariableScope(), kRtvarUi2DFont, "Verdana");
+	v_set(GetVariableScope(), kRtvarUi3DFov, 38.8);
 
 	Parent::LoadSettings();
-	v_slowget(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, 1.0);
+	v_slowget(GetVariableScope(), kRtvarUiSoundMastervolume, 1.0);
 
-	v_set(GetVariableScope(), RTVAR_PHYSICS_NOCLIP, false);
-	v_set(GetVariableScope(), RTVAR_CTRL_EMULATETOUCH, true);
+	v_set(GetVariableScope(), kRtvarPhysicsNoclip, false);
+	v_set(GetVariableScope(), kRtvarCtrlEmulatetouch, true);
 
 	GetConsoleManager()->ExecuteCommand("bind-key F2 prev-level");
 	GetConsoleManager()->ExecuteCommand("bind-key F3 next-level");
 }
 
-void FireManager::SaveSettings()
-{
+void FireManager::SaveSettings() {
 	GetConsoleManager()->ExecuteCommand("save-application-config-file "+GetApplicationCommandFilename());
 }
 
-void FireManager::SetRenderArea(const PixelRect& pRenderArea)
-{
-	Parent::SetRenderArea(pRenderArea);
+void FireManager::SetRenderArea(const PixelRect& render_area) {
+	Parent::SetRenderArea(render_area);
 }
 
-bool FireManager::Open()
-{
-	bool lOk = Parent::Open();
-	if (lOk)
-	{
-		mUiManager->GetDisplayManager()->SetCaption("NSAgent");
+bool FireManager::Open() {
+	bool _ok = Parent::Open();
+	if (_ok) {
+		ui_manager_->GetDisplayManager()->SetCaption("NSAgent");
 	}
-	if (lOk)
-	{
-		mPauseButton = ICONBTNA("btn_pause.png", L"");
+	if (_ok) {
+		pause_button_ = ICONBTNA("btn_pause.png", L"");
 		int x = 12;
 		int y = 12;
-		mUiManager->GetDesktopWindow()->AddChild(mPauseButton, x, y);
-		mPauseButton->SetVisible(true);
-		mPauseButton->SetOnClick(FireManager, OnPauseButton);
+		ui_manager_->GetDesktopWindow()->AddChild(pause_button_, x, y);
+		pause_button_->SetVisible(true);
+		pause_button_->SetOnClick(FireManager, OnPauseButton);
 	}
-	if (lOk)
-	{
-		mBombButton = ICONBTNA("btn_bomb.png", L"");
+	if (_ok) {
+		bomb_button_ = ICONBTNA("btn_bomb.png", L"");
 		int x = 12;
 		int y = 12*2+64;
-		mUiManager->GetDesktopWindow()->AddChild(mBombButton, x, y);
-		mBombButton->SetVisible(false);
-		mBombButton->SetOnClick(FireManager, OnBombButton);
+		ui_manager_->GetDesktopWindow()->AddChild(bomb_button_, x, y);
+		bomb_button_->SetVisible(false);
+		bomb_button_->SetOnClick(FireManager, OnBombButton);
 	}
-	if (lOk)
-	{
-		mMenu = new Life::Menu(mUiManager, GetResourceManager());
-		mMenu->SetButtonTapSound("tap.wav", 1, 0.3f);
+	if (_ok) {
+		menu_ = new life::Menu(ui_manager_, GetResourceManager());
+		menu_->SetButtonTapSound("tap.wav", 1, 0.3f);
 	}
-	return lOk;
+	return _ok;
 }
 
-void FireManager::Close()
-{
-	ScopeLock lLock(GetTickLock());
-	delete mBombButton;
-	mBombButton = 0;
-	delete mPauseButton;
-	mPauseButton = 0;
-	delete mMenu;
-	mMenu = 0;
-	delete mSunlight;
-	mSunlight = 0;
+void FireManager::Close() {
+	ScopeLock lock(GetTickLock());
+	delete bomb_button_;
+	bomb_button_ = 0;
+	delete pause_button_;
+	pause_button_ = 0;
+	delete menu_;
+	menu_ = 0;
+	delete sunlight_;
+	sunlight_ = 0;
 
 	Parent::Close();
 }
 
-void FireManager::SetIsQuitting()
-{
+void FireManager::SetIsQuitting() {
 	((FireConsoleManager*)GetConsoleManager())->GetUiConsole()->SetVisible(false);
 	Parent::SetIsQuitting();
 }
 
-void FireManager::SetFade(float pFadeAmount)
-{
-	(void)pFadeAmount;
+void FireManager::SetFade(float fade_amount) {
+	(void)fade_amount;
 }
 
 
 
-PixelRect FireManager::GetRenderableArea() const
-{
-	PixelRect lRenderArea;
-	const int w = (int)(mRenderArea.GetHeight()/hp);
-	lRenderArea.Set(mRenderArea.GetCenterX()-w/2, mRenderArea.mTop, mRenderArea.GetCenterX()+w/2, mRenderArea.mBottom);
-	lRenderArea.mLeft = std::max(lRenderArea.mLeft, mRenderArea.mLeft);
-	lRenderArea.mRight = std::min(lRenderArea.mRight, mRenderArea.mRight);
-	return lRenderArea;
+PixelRect FireManager::GetRenderableArea() const {
+	PixelRect _render_area;
+	const int w = (int)(render_area_.GetHeight()/hp);
+	_render_area.Set(render_area_.GetCenterX()-w/2, render_area_.top_, render_area_.GetCenterX()+w/2, render_area_.bottom_);
+	_render_area.left_ = std::max(_render_area.left_, render_area_.left_);
+	_render_area.right_ = std::min(_render_area.right_, render_area_.right_);
+	return _render_area;
 }
 
-bool FireManager::Render()
-{
-	PixelRect lRenderArea = GetRenderableArea();
+bool FireManager::Render() {
+	PixelRect _render_area = GetRenderableArea();
 	// If we're 1024x768 (iPad), we don't need to clear.
-	const bool lNeedSizeClear = (lRenderArea.GetWidth() <= mRenderArea.GetWidth()-1);
-	const bool lNeedLevelClear = (!mLevel || !mLevel->IsLoaded());
-	v_set(GetVariableScope(), RTVAR_UI_3D_ENABLECLEAR, (lNeedSizeClear||lNeedLevelClear));
+	const bool need_size_clear = (_render_area.GetWidth() <= render_area_.GetWidth()-1);
+	const bool need_level_clear = (!level_ || !level_->IsLoaded());
+	v_set(GetVariableScope(), kRtvarUi3DEnableclear, (need_size_clear||need_level_clear));
 
-	const PixelRect lFullRenderArea = mRenderArea;
-	mRenderArea = lRenderArea;
-	bool lOk = Parent::Render();
-	mRenderArea = lFullRenderArea;
+	const PixelRect full_render_area = render_area_;
+	render_area_ = _render_area;
+	bool _ok = Parent::Render();
+	render_area_ = full_render_area;
 
-	return lOk;
+	return _ok;
 }
 
-static bool SortVillainsPredicate(const FireManager::VillainPair& a, const FireManager::VillainPair& b)
-{
-	return a.second.mScale < b.second.mScale;
+static bool SortVillainsPredicate(const FireManager::VillainPair& a, const FireManager::VillainPair& b) {
+	return a.second.scale_ < b.second.scale_;
 }
 
-bool FireManager::Paint()
-{
-	if (!Parent::Paint())
-	{
+bool FireManager::Paint() {
+	if (!Parent::Paint()) {
 		return false;
 	}
 
-	if (mMenu->GetDialog() || !mLevel || !mLevel->IsLoaded())
-	{
+	if (menu_->GetDialog() || !level_ || !level_->IsLoaded()) {
 		return true;	// Don't draw our terrorist indicators any more when the user is looking at a dialog.
 	}
 
-	UiTbc::Painter* lPainter = mUiManager->GetPainter();
-	wstr lScore = wstrutil::Format(L"Score: %i/%i", mKills, mKillLimit);
-	lPainter->SetColor(WHITE);
-	lPainter->PrintText(lScore, 100, 21);
+	uitbc::Painter* painter = ui_manager_->GetPainter();
+	wstr score = wstrutil::Format(L"Score: %i/%i", kills_, kill_limit_);
+	painter->SetColor(WHITE);
+	painter->PrintText(score, 100, 21);
 
-	const int lUnit = std::max(8, mRenderArea.GetHeight()/50);
-	mUiManager->SetScaleFont(-lUnit*1.4f);
+	const int unit = std::max(8, render_area_.GetHeight()/50);
+	ui_manager_->SetScaleFont(-unit*1.4f);
 	const int r = 5;
-	VillainArray lSortedVillains;
-	lSortedVillains.assign(mVillainMap.begin(), mVillainMap.end());
-	std::sort(lSortedVillains.begin(), lSortedVillains.end(), SortVillainsPredicate);
-	VillainArray::iterator x = lSortedVillains.begin();
-	for (; x != lSortedVillains.end(); ++x)
-	{
-		if (x->second.mTime < gTargetInfoDelay)
-		{
+	VillainArray sorted_villains;
+	sorted_villains.assign(villain_map_.begin(), villain_map_.end());
+	std::sort(sorted_villains.begin(), sorted_villains.end(), SortVillainsPredicate);
+	VillainArray::iterator x = sorted_villains.begin();
+	for (; x != sorted_villains.end(); ++x) {
+		if (x->second.time_ < kTargetInfoDelay) {
 			continue;	// If we've unrolled the indicator completely, paint no more.
 		}
 		const PixelCoord xy = x->second.xy;
-		const float lTimePart = (x->second.mTime-gTargetInfoDelay)/gRollOutTime;
-		const float lArcEndPart = 0.3f;
-		const float lDiagonalEndPart = 0.48f;
-		const int lArcEnd = (int)std::min(360.0f, lTimePart/lArcEndPart*360.0f);
-		Color lColor;
-		if (x->second.mDangerousness > 0.5f)
-		{
-			lColor = Color(RED, DARK_RED, (x->second.mDangerousness-0.5f)*2);
+		const float time_part = (x->second.time_-kTargetInfoDelay)/kRollOutTime;
+		const float arc_end_part = 0.3f;
+		const float diagonal_end_part = 0.48f;
+		const int arc_end = (int)std::min(360.0f, time_part/arc_end_part*360.0f);
+		Color color;
+		if (x->second.dangerousness_ > 0.5f) {
+			color = Color(RED, DARK_RED, (x->second.dangerousness_-0.5f)*2);
+		} else {
+			color = Color(YELLOW, RED, x->second.dangerousness_/0.5f);
 		}
-		else
-		{
-			lColor = Color(YELLOW, RED, x->second.mDangerousness/0.5f);
-		}
-		const int lInfoBubbleRadius = 5;
-		if (lTimePart > lArcEndPart)
-		{
-			const float lLinePart = std::min(1.0f, (lTimePart-lArcEndPart)/(lDiagonalEndPart-lArcEndPart));
+		const int info_bubble_radius = 5;
+		if (time_part > arc_end_part) {
+			const float line_part = std::min(1.0f, (time_part-arc_end_part)/(diagonal_end_part-arc_end_part));
 			const int s1 = (int)(r/1.41421356f);	// Diagonal radius and sqrt(2).
-			const int lAxisLength = (int)((lUnit*2-s1-lInfoBubbleRadius)*lLinePart);
-			lPainter->SetColor(Color(30, 30, 30, 110));
-			lPainter->SetAlphaValue(110);
-			lPainter->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
-			lPainter->DrawLine(xy.x+s1, xy.y-s1+1, xy.x+s1+lAxisLength, xy.y-s1-1-lAxisLength);
-			lPainter->SetColor(lColor);
-			lPainter->SetRenderMode(UiTbc::Painter::RM_NORMAL);
-			lPainter->DrawLine(xy.x+s1, xy.y-s1+1, xy.x+s1+lAxisLength, xy.y-s1-1-lAxisLength);
+			const int axis_length = (int)((unit*2-s1-info_bubble_radius)*line_part);
+			painter->SetColor(Color(30, 30, 30, 110));
+			painter->SetAlphaValue(110);
+			painter->SetRenderMode(uitbc::Painter::kRmAlphablend);
+			painter->DrawLine(xy.x+s1, xy.y-s1+1, xy.x+s1+axis_length, xy.y-s1-1-axis_length);
+			painter->SetColor(color);
+			painter->SetRenderMode(uitbc::Painter::kRmNormal);
+			painter->DrawLine(xy.x+s1, xy.y-s1+1, xy.x+s1+axis_length, xy.y-s1-1-axis_length);
 		}
-		lPainter->SetColor(Color(30, 30, 30, 150));
-		lPainter->SetAlphaValue(150);
-		lPainter->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
-		lPainter->DrawArc(xy.x-r+1, xy.y-r+1, r*2, r*2, 45, 45-lArcEnd, true);
-		lPainter->SetColor(lColor);
-		lPainter->SetRenderMode(UiTbc::Painter::RM_NORMAL);
-		lPainter->DrawArc(xy.x-r, xy.y-r, r*2, r*2, 45, 45-lArcEnd, true);
-		if (lTimePart > lDiagonalEndPart)
-		{
+		painter->SetColor(Color(30, 30, 30, 150));
+		painter->SetAlphaValue(150);
+		painter->SetRenderMode(uitbc::Painter::kRmAlphablend);
+		painter->DrawArc(xy.x-r+1, xy.y-r+1, r*2, r*2, 45, 45-arc_end, true);
+		painter->SetColor(color);
+		painter->SetRenderMode(uitbc::Painter::kRmNormal);
+		painter->DrawArc(xy.x-r, xy.y-r, r*2, r*2, 45, 45-arc_end, true);
+		if (time_part > diagonal_end_part) {
 			// Cut using rect, so text will appear smoothly.
-			const int r  = lInfoBubbleRadius;
-			const int xl = xy.x+lUnit*2-r;
-			const int yl = xy.y-lUnit*2+r;
-			const int yt = yl-lPainter->GetFontHeight()-2*r;
-			const wstr lVillain = wstrutil::Encode(x->second.mVillain);
-			const int wl = lPainter->GetFontManager()->GetStringWidth(lVillain)+2+2*r;
-			if (lTimePart < 1)
-			{
-				const float lTextPart = std::min(1.0f, (lTimePart-lDiagonalEndPart)/(1.0f-lDiagonalEndPart));
-				PixelRect lRect(xl-1, yt-1, xl+1+(int)(wl*lTextPart), yl+2);
-				lPainter->SetClippingRect(lRect);
+			const int r  = info_bubble_radius;
+			const int xl = xy.x+unit*2-r;
+			const int yl = xy.y-unit*2+r;
+			const int yt = yl-painter->GetFontHeight()-2*r;
+			const wstr villain = wstrutil::Encode(x->second.villain_);
+			const int wl = painter->GetFontManager()->GetStringWidth(villain)+2+2*r;
+			if (time_part < 1) {
+				const float text_part = std::min(1.0f, (time_part-diagonal_end_part)/(1.0f-diagonal_end_part));
+				PixelRect rect(xl-1, yt-1, xl+1+(int)(wl*text_part), yl+2);
+				painter->SetClippingRect(rect);
 			}
-			lPainter->SetAlphaValue(150);
-			lPainter->SetRenderMode(UiTbc::Painter::RM_ALPHABLEND);
-			lPainter->DrawRoundedRect(PixelRect(xl, yt, xl+wl, yl), r, 0x7, true);
-			lPainter->SetColor(Color(30, 30, 30, 150));
-			lPainter->SetAlphaValue(150);
-			lPainter->PrintText(lVillain, xl+r+2, yt+r+1);
-			lPainter->SetRenderMode(UiTbc::Painter::RM_NORMAL);
-			lPainter->SetColor(WHITE);
-			lPainter->PrintText(lVillain, xl+r+1, yt+r);
-			if (lTimePart < 1)
-			{
-				lPainter->SetClippingRect(mRenderArea);	// Restore for next loop.
+			painter->SetAlphaValue(150);
+			painter->SetRenderMode(uitbc::Painter::kRmAlphablend);
+			painter->DrawRoundedRect(PixelRect(xl, yt, xl+wl, yl), r, 0x7, true);
+			painter->SetColor(Color(30, 30, 30, 150));
+			painter->SetAlphaValue(150);
+			painter->PrintText(villain, xl+r+2, yt+r+1);
+			painter->SetRenderMode(uitbc::Painter::kRmNormal);
+			painter->SetColor(WHITE);
+			painter->PrintText(villain, xl+r+1, yt+r);
+			if (time_part < 1) {
+				painter->SetClippingRect(render_area_);	// Restore for next loop.
 			}
 		}
 	}
 
-	mUiManager->SetMasterFont();
+	ui_manager_->SetMasterFont();
 	return true;
 }
 
-void FireManager::DrawSyncDebugInfo()
-{
-	PixelRect lRenderArea;
-	const int w = (int)(mRenderArea.GetHeight()/hp);
-	lRenderArea.Set(mRenderArea.GetCenterX()-w/2, mRenderArea.mTop, mRenderArea.GetCenterX()+w/2, mRenderArea.mBottom);
-	lRenderArea.mLeft = std::max(lRenderArea.mLeft, mRenderArea.mLeft);
-	lRenderArea.mRight = std::min(lRenderArea.mRight, mRenderArea.mRight);
-	const PixelRect lFullRenderArea = mRenderArea;
-	mRenderArea = lRenderArea;
+void FireManager::DrawSyncDebugInfo() {
+	PixelRect _render_area;
+	const int w = (int)(render_area_.GetHeight()/hp);
+	_render_area.Set(render_area_.GetCenterX()-w/2, render_area_.top_, render_area_.GetCenterX()+w/2, render_area_.bottom_);
+	_render_area.left_ = std::max(_render_area.left_, render_area_.left_);
+	_render_area.right_ = std::min(_render_area.right_, render_area_.right_);
+	const PixelRect full_render_area = render_area_;
+	render_area_ = _render_area;
 
 	Parent::DrawSyncDebugInfo();
 
-	ScopeLock lLock(GetTickLock());
-	if (GetLevel() && GetLevel()->QueryPath()->GetPath(0))
-	{
-		UiCure::DebugRenderer lDebugRenderer(GetVariableScope(), mUiManager, GetContext(), 0, GetTickLock());
-		for (int x = 0; x < 20; ++x)
-		{
-			Cure::ContextPath::SplinePath* lPath = GetLevel()->QueryPath()->GetPath(x);
-			if (!lPath)
-			{
+	ScopeLock lock(GetTickLock());
+	if (GetLevel() && GetLevel()->QueryPath()->GetPath(0)) {
+		UiCure::DebugRenderer debug_renderer(GetVariableScope(), ui_manager_, GetContext(), 0, GetTickLock());
+		for (int x = 0; x < 20; ++x) {
+			cure::ContextPath::SplinePath* path = GetLevel()->QueryPath()->GetPath(x);
+			if (!path) {
 				break;
 			}
-			lDebugRenderer.RenderSpline(mUiManager, lPath);
+			debug_renderer.RenderSpline(ui_manager_, path);
 		}
 	}
 
-	mRenderArea = lFullRenderArea;
+	render_area_ = full_render_area;
 }
 
 
 
-bool FireManager::IsObjectRelevant(const vec3& pPosition, float pDistance) const
-{
-	return (pPosition.GetDistanceSquared(mCameraTransform.GetPosition()) <= pDistance*pDistance);
+bool FireManager::IsObjectRelevant(const vec3& position, float distance) const {
+	return (position.GetDistanceSquared(camera_transform_.GetPosition()) <= distance*distance);
 }
 
 
 
-void FireManager::Shoot(Cure::ContextObject* pAvatar, int pWeapon)
-{
-	(void)pAvatar;
-	(void)pWeapon;
+void FireManager::Shoot(cure::ContextObject* avatar, int weapon) {
+	(void)avatar;
+	(void)weapon;
 
-	double lFireDelay;
-	v_get(lFireDelay, =, GetVariableScope(), RTVAR_GAME_FIREDELAY, 1.5);
-	if (!mLevel->IsLoaded() || mFireDelayTimer.QueryTimeDiff() < lFireDelay)
-	{
+	double fire_delay;
+	v_get(fire_delay, =, GetVariableScope(), kRtvarGameFiredelay, 1.5);
+	if (!level_->IsLoaded() || fire_delay_timer_.QueryTimeDiff() < fire_delay) {
 		return;
 	}
-	mFireDelayTimer.Start();
-	vec3 lTargetPosition;
-	if (GetPhysicsManager()->QueryRayCollisionAgainst(mCameraTransform.GetPosition(), mShootDirection, 1000.0f, mLevel->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), &lTargetPosition, 1) < 1)
-	{
+	fire_delay_timer_.Start();
+	vec3 target_position;
+	if (GetPhysicsManager()->QueryRayCollisionAgainst(camera_transform_.GetPosition(), shoot_direction_, 1000.0f, level_->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), &target_position, 1) < 1) {
 		// User aiming above ground. Find vehicle closest to that position, and adjust target range thereafter.
-		float lDistance = 350.0;
-		float lClosestRayDistance2 = 150.0f * 150.0f;
-		Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
-		Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
-		for (; x != lObjectTable.end(); ++x)
-		{
-			Cure::ContextObject* lObject = x->second;
-			Tbc::ChunkyPhysics* lPhysics = lObject->ContextObject::GetPhysics();
-			if (!lObject->IsLoaded() || !lPhysics)
-			{
+		float _distance = 350.0;
+		float closest_ray_distance2 = 150.0f * 150.0f;
+		cure::ContextManager::ContextObjectTable object_table = GetContext()->GetObjectTable();
+		cure::ContextManager::ContextObjectTable::iterator x = object_table.begin();
+		for (; x != object_table.end(); ++x) {
+			cure::ContextObject* _object = x->second;
+			tbc::ChunkyPhysics* physics = _object->ContextObject::GetPhysics();
+			if (!_object->IsLoaded() || !physics) {
 				continue;
 			}
-			const vec3 lVehiclePosition = lObject->GetPosition();
-			if (lVehiclePosition.y < 30.0f || Cure::Health::Get(lObject) <= 0)
-			{
+			const vec3 vehicle_position = _object->GetPosition();
+			if (vehicle_position.y < 30.0f || cure::Health::Get(_object) <= 0) {
 				continue;
 			}
-			const vec3 lRayRelativePosition = lVehiclePosition.ProjectOntoPlane(mShootDirection);
-			const float lDistance2 = lRayRelativePosition.GetLengthSquared();
-			if (lDistance2 < lClosestRayDistance2)
-			{
-				lClosestRayDistance2 = lDistance2;
-				lDistance = lVehiclePosition * mShootDirection;
+			const vec3 ray_relative_position = vehicle_position.ProjectOntoPlane(shoot_direction_);
+			const float distance2 = ray_relative_position.GetLengthSquared();
+			if (distance2 < closest_ray_distance2) {
+				closest_ray_distance2 = distance2;
+				_distance = vehicle_position * shoot_direction_;
 			}
 		}
-		lTargetPosition = mShootDirection * lDistance;
-	}
-	else
-	{
-		Cure::ContextObject* lObject = Parent::CreateContextObject("indicator", Cure::NETWORK_OBJECT_LOCAL_ONLY);
-		lObject->SetInitialTransform(xform(gIdentityQuaternionF, lTargetPosition));
-		lObject->StartLoading();
-		GetContext()->DelayKillObject(lObject, 1.5f);
+		target_position = shoot_direction_ * _distance;
+	} else {
+		cure::ContextObject* _object = Parent::CreateContextObject("indicator", cure::kNetworkObjectLocalOnly);
+		_object->SetInitialTransform(xform(kIdentityQuaternionF, target_position));
+		_object->StartLoading();
+		GetContext()->DelayKillObject(_object, 1.5f);
 	}
 
-	Life::Projectile* lProjectile = new Life::Projectile(GetResourceManager(), "rocket", mUiManager, this);
-	lProjectile->EnableRootShadow(true);
-	AddContextObject(lProjectile, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-	lProjectile->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), mUiManager));
-	lProjectile->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
-	xform t(mCameraTransform);
+	life::Projectile* projectile = new life::Projectile(GetResourceManager(), "rocket", ui_manager_, this);
+	projectile->EnableRootShadow(true);
+	AddContextObject(projectile, cure::kNetworkObjectLocalOnly, 0);
+	projectile->SetJetEngineEmitter(new UiCure::JetEngineEmitter(GetResourceManager(), ui_manager_));
+	projectile->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), ui_manager_));
+	xform t(camera_transform_);
 	t.GetPosition().x += 0.7f;
 	t.GetPosition().y += 1.0f;
 	t.GetPosition().z += 0.1f;
 	t.GetOrientation().RotateAroundWorldX(-PIF/2);	// Tilt rocket.
-	float lAcceleration = 150;
-	float lTerminalVelocity = 300;
-	float lGravityEffect = 1.15f;
-	float lAimAbove = 1.5f;
-	float lSomeRocketLength = 9.0;
-	float lUpDownEffect = -0.1f;
-	/*v_tryget(lAcceleration, =(float), GetVariableScope(), "shot.acceleration", 150.0);
-	v_tryget(lTerminalVelocity, =(float), GetVariableScope(), "shot.terminalvelocity", 300.0);
-	v_tryget(lGravityEffect, =(float), GetVariableScope(), "shot.gravityeffect", 1.15);
-	v_tryget(lAimAbove, =(float), GetVariableScope(), "shot.aimabove", 1.5);
-	v_tryget(lSomeRocketLength, =(float), GetVariableScope(), "shot.rocketlength", 9.0);
-	v_tryget(lUpDownEffect, =(float), GetVariableScope(), "shot.updowneffect", -0.1);*/
-	vec3 lDistance = lTargetPosition - t.GetPosition();
-	lAimAbove = Math::Lerp(0.0f, lAimAbove, std::min(100.0f, lDistance.GetLength())/100.0f);
-	lDistance.z += lAimAbove;
-	const vec3 lShootDirectionEulerAngles = Life::ProjectileUtil::CalculateInitialProjectileDirection(lDistance, lAcceleration, lTerminalVelocity, GetPhysicsManager()->GetGravity()*lGravityEffect, lUpDownEffect);
-	t.GetOrientation().RotateAroundWorldX(lShootDirectionEulerAngles.y);
-	t.GetOrientation().RotateAroundWorldZ(lShootDirectionEulerAngles.x);
-	t.mPosition.x -= lSomeRocketLength*sin(lShootDirectionEulerAngles.x);
-	t.mPosition.z += lSomeRocketLength*sin(lShootDirectionEulerAngles.y);
-	lProjectile->SetInitialTransform(t);
-	lProjectile->StartLoading();
+	float acceleration = 150;
+	float terminal_velocity = 300;
+	float gravity_effect = 1.15f;
+	float aim_above = 1.5f;
+	float some_rocket_length = 9.0;
+	float up_down_effect = -0.1f;
+	/*v_tryget(acceleration, =(float), GetVariableScope(), "shot.acceleration", 150.0);
+	v_tryget(terminal_velocity, =(float), GetVariableScope(), "shot.terminalvelocity", 300.0);
+	v_tryget(gravity_effect, =(float), GetVariableScope(), "shot.gravityeffect", 1.15);
+	v_tryget(aim_above, =(float), GetVariableScope(), "shot.aimabove", 1.5);
+	v_tryget(some_rocket_length, =(float), GetVariableScope(), "shot.rocketlength", 9.0);
+	v_tryget(up_down_effect, =(float), GetVariableScope(), "shot.updowneffect", -0.1);*/
+	vec3 _distance = target_position - t.GetPosition();
+	aim_above = Math::Lerp(0.0f, aim_above, std::min(100.0f, _distance.GetLength())/100.0f);
+	_distance.z += aim_above;
+	const vec3 shoot_direction_euler_angles = life::ProjectileUtil::CalculateInitialProjectileDirection(_distance, acceleration, terminal_velocity, GetPhysicsManager()->GetGravity()*gravity_effect, up_down_effect);
+	t.GetOrientation().RotateAroundWorldX(shoot_direction_euler_angles.y);
+	t.GetOrientation().RotateAroundWorldZ(shoot_direction_euler_angles.x);
+	t.position_.x -= some_rocket_length*sin(shoot_direction_euler_angles.x);
+	t.position_.z += some_rocket_length*sin(shoot_direction_euler_angles.y);
+	projectile->SetInitialTransform(t);
+	projectile->StartLoading();
 }
 
-void FireManager::Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength)
-{
-	float lVolumeFactor = 1;
-	const bool lIsRocket = (pExplosive->GetClassId() == "rocket");
-	if (lIsRocket)
-	{
-		float lExplosiveStrength;
-		v_get(lExplosiveStrength, =(float), GetVariableScope(), RTVAR_GAME_EXPLOSIVESTRENGTH, 1.0);
-		pStrength *= lExplosiveStrength;
-		v_set(GetVariableScope(), RTVAR_GAME_EXPLOSIVESTRENGTH, 1.0);	// Reset to normal strength.
-		lVolumeFactor *= (lExplosiveStrength>1)? 4 : 1;
+void FireManager::Detonate(cure::ContextObject* explosive, const tbc::ChunkyBoneGeometry* explosive_geometry, const vec3& position, const vec3& velocity, const vec3& normal, float strength) {
+	float volume_factor = 1;
+	const bool is_rocket = (explosive->GetClassId() == "rocket");
+	if (is_rocket) {
+		float explosive_strength;
+		v_get(explosive_strength, =(float), GetVariableScope(), kRtvarGameExplosivestrength, 1.0);
+		strength *= explosive_strength;
+		v_set(GetVariableScope(), kRtvarGameExplosivestrength, 1.0);	// Reset to normal strength.
+		volume_factor *= (explosive_strength>1)? 4 : 1;
 	}
-	const float lCubicStrength = 4*(::pow(pStrength+1, 1/3.0f) - 1);	// Reduce by 3D volume. Explosion spreads in all directions.
-	if (!lIsRocket && !mMenu->GetDialog())
-	{
-		BaseMachine* lMachine = dynamic_cast<BaseMachine*>(pExplosive);
-		lMachine->DeleteEngineSounds();	// Stop makin em.
-		mKills += lMachine->mVillain.empty()? -1 : +1;
-		++mLevelTotalKills;
+	const float cubic_strength = 4*(::pow(strength+1, 1/3.0f) - 1);	// Reduce by 3D volume. Explosion spreads in all directions.
+	if (!is_rocket && !menu_->GetDialog()) {
+		BaseMachine* machine = dynamic_cast<BaseMachine*>(explosive);
+		machine->DeleteEngineSounds();	// Stop makin em.
+		kills_ += machine->villain_.empty()? -1 : +1;
+		++level_total_kills_;
 		// Logic for showing super bomb icon.
-		const int lShowBombLimit = 10 + GetCurrentLevelNumber();
-		if (mLevelTotalKills%lShowBombLimit == 0 && mKills < mKillLimit)
-		{
-			if (!mBombButton->IsVisible())
-			{
-				mBombButton->SetVisible(true);
-				UiCure::UserSound2dResource* lSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-				new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "great.wav", lSound, 1, 1);
+		const int show_bomb_limit = 10 + GetCurrentLevelNumber();
+		if (level_total_kills_%show_bomb_limit == 0 && kills_ < kill_limit_) {
+			if (!bomb_button_->IsVisible()) {
+				bomb_button_->SetVisible(true);
+				UiCure::UserSound2dResource* sound = new UiCure::UserSound2dResource(ui_manager_, uilepra::SoundManager::kLoopNone);
+				new UiCure::SoundReleaser(GetResourceManager(), ui_manager_, GetContext(), "great.wav", sound, 1, 1);
 			}
 		}
 	}
 
-	mCollisionSoundManager->OnCollision(pStrength*lVolumeFactor, pPosition, pExplosiveGeometry, "explosion");
+	collision_sound_manager_->OnCollision(strength*volume_factor, position, explosive_geometry, "explosion");
 
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
-	const float lKeepOnGoingFactor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
-	vec3 u = pVelocity.ProjectOntoPlane(pNormal) * (1+lKeepOnGoingFactor);
-	u -= pVelocity;	// Mirror and inverse.
+	uitbc::ParticleRenderer* particle_renderer = (uitbc::ParticleRenderer*)ui_manager_->GetRenderer()->GetDynamicRenderer("particle");
+	const float keep_on_going_factor = 0.5f;	// How much of the velocity energy, [0;1], should be transferred to the explosion particles.
+	vec3 u = velocity.ProjectOntoPlane(normal) * (1+keep_on_going_factor);
+	u -= velocity;	// Mirror and inverse.
 	u.Normalize();
-	const int lParticles = Math::Lerp(6, 10, lCubicStrength * 0.3f);
-	vec3 lStartFireColor(1.0f, 1.0f, 0.6f);
-	vec3 lFireColor(0.6f, 0.4f, 0.2f);
-	vec3 lStartSmokeColor(0.4f, 0.4f, 0.4f);
-	vec3 lSmokeColor(0.2f, 0.2f, 0.2f);
-	vec3 lShrapnelColor(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
-	vec3 lSpritesPosition(pPosition*0.98f-pPosition.GetNormalized(2.0f));	// We just move it closer to make it less likely to be cut off by ground.
-	lParticleRenderer->CreateExplosion(lSpritesPosition, lCubicStrength, u, 1, 1.5f, lStartFireColor, lFireColor, lStartSmokeColor, lSmokeColor, lShrapnelColor, lParticles, lParticles, lParticles/2, lParticles/2);
+	const int particles = Math::Lerp(6, 10, cubic_strength * 0.3f);
+	vec3 start_fire_color(1.0f, 1.0f, 0.6f);
+	vec3 fire_color(0.6f, 0.4f, 0.2f);
+	vec3 start_smoke_color(0.4f, 0.4f, 0.4f);
+	vec3 smoke_color(0.2f, 0.2f, 0.2f);
+	vec3 shrapnel_color(0.3f, 0.3f, 0.3f);	// Default debris color is gray.
+	vec3 sprites_position(position*0.98f-position.GetNormalized(2.0f));	// We just move it closer to make it less likely to be cut off by ground.
+	particle_renderer->CreateExplosion(sprites_position, cubic_strength, u, 1, 1.5f, start_fire_color, fire_color, start_smoke_color, smoke_color, shrapnel_color, particles, particles, particles/2, particles/2);
 
 	// Slowmo check.
-	bool lNormalDeath = true;
-	if (!lIsRocket && Cure::Health::Get(pExplosive) < -5500)
-	{
-		if (Random::Uniform(0.0f, 1.0f) > 0.7f)
-		{
-			lNormalDeath = false;
-			mSlowmoTimer.TryStart();
+	bool normal_death = true;
+	if (!is_rocket && cure::Health::Get(explosive) < -5500) {
+		if (Random::Uniform(0.0f, 1.0f) > 0.7f) {
+			normal_death = false;
+			slowmo_timer_.TryStart();
 		}
 	}
 
 	// Shove!
-	ScopeLock lLock(GetTickLock());
-	Tbc::PhysicsManager* lPhysicsManager = GetPhysicsManager();
-	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
-	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
-	for (; x != lObjectTable.end(); ++x)
-	{
-		Cure::ContextObject* lObject = x->second;
-		if (!lObject->IsLoaded())
-		{
+	ScopeLock lock(GetTickLock());
+	tbc::PhysicsManager* physics_manager = GetPhysicsManager();
+	cure::ContextManager::ContextObjectTable object_table = GetContext()->GetObjectTable();
+	cure::ContextManager::ContextObjectTable::iterator x = object_table.begin();
+	for (; x != object_table.end(); ++x) {
+		cure::ContextObject* _object = x->second;
+		if (!_object->IsLoaded()) {
 			continue;
 		}
-		float lForce = Life::Explosion::CalculateForce(lPhysicsManager, lObject, pPosition, pStrength);
-		if (lForce > 0 && lObject->GetNetworkObjectType() != Cure::NETWORK_OBJECT_LOCAL_ONLY)
-		{
-			Cure::FloatAttribute* lHealth = Cure::Health::GetAttribute(lObject);
-			if (lHealth)
-			{
-				const float lValue = lHealth->GetValue() - lForce*Random::Normal(1.01f, 0.1f, 0.7f, 1.0f);
-				lHealth->SetValue(lValue);
+		float _force = life::Explosion::CalculateForce(physics_manager, _object, position, strength);
+		if (_force > 0 && _object->GetNetworkObjectType() != cure::kNetworkObjectLocalOnly) {
+			cure::FloatAttribute* health = cure::Health::GetAttribute(_object);
+			if (health) {
+				const float value = health->GetValue() - _force*Random::Normal(1.01f, 0.1f, 0.7f, 1.0f);
+				health->SetValue(value);
 			}
 			x->second->ForceSend();
-			Life::Explosion::PushObject(lPhysicsManager, lObject, pPosition, pStrength, GetTimeManager()->GetNormalFrameTime());
+			life::Explosion::PushObject(physics_manager, _object, position, strength, GetTimeManager()->GetNormalFrameTime());
 		}
-		BaseMachine* lMachine = dynamic_cast<BaseMachine*>(lObject);
-		if (lMachine && lMachine->GetPosition().GetDistanceSquared(pPosition) < 150*150)
-		{
-			lMachine->AddPanic((lForce > 0.1f)? 1.0f : 0.45f);
+		BaseMachine* machine = dynamic_cast<BaseMachine*>(_object);
+		if (machine && machine->GetPosition().GetDistanceSquared(position) < 150*150) {
+			machine->AddPanic((_force > 0.1f)? 1.0f : 0.45f);
 		}
 	}
 }
 
-void FireManager::OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject)
-{
-	(void)pBullet;
-	(void)pHitObject;
+void FireManager::OnBulletHit(cure::ContextObject* bullet, cure::ContextObject* hit_object) {
+	(void)bullet;
+	(void)hit_object;
 }
 
-void FireManager::OnLetThroughTerrorist(BaseMachine* pTerrorist)
-{
-	(void)pTerrorist;
-	if (mMenu->GetDialog())
-	{
+void FireManager::OnLetThroughTerrorist(BaseMachine* terrorist) {
+	(void)terrorist;
+	if (menu_->GetDialog()) {
 		return;
 	}
 
-	--mKills;
-	UiCure::UserSound2dResource* lSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-	new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "bad.wav", lSound, 1, 1);
+	--kills_;
+	UiCure::UserSound2dResource* sound = new UiCure::UserSound2dResource(ui_manager_, uilepra::SoundManager::kLoopNone);
+	new UiCure::SoundReleaser(GetResourceManager(), ui_manager_, GetContext(), "bad.wav", sound, 1, 1);
 }
 
 
 
-bool FireManager::DidFinishLevel()
-{
-	mLog.Headlinef("Level %s done!", mLevel->GetClassId().c_str());
+bool FireManager::DidFinishLevel() {
+	log_.Headlinef("Level %s done!", level_->GetClassId().c_str());
 	return true;
 }
 
-str FireManager::StepLevel(int pCount)
-{
-	mKills = 0;
-	mLevelTotalKills = 0;
-	int lLevelNumber = GetCurrentLevelNumber();
-	lLevelNumber += pCount;
-	str lNewLevelName = StoreLevelIndex(lLevelNumber);
-	GetContext()->PostKillObject(mLevel->GetInstanceId());
+str FireManager::StepLevel(int count) {
+	kills_ = 0;
+	level_total_kills_ = 0;
+	int _level_number = GetCurrentLevelNumber();
+	_level_number += count;
+	str new_level_name = StoreLevelIndex(_level_number);
+	GetContext()->PostKillObject(level_->GetInstanceId());
 	{
-		ScopeLock lLock(GetTickLock());
-		mKillLimit = 4+4*lLevelNumber;
-		mLevel = (Level*)Parent::CreateContextObject(lNewLevelName, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		mLevel->StartLoading();
+		ScopeLock lock(GetTickLock());
+		kill_limit_ = 4+4*_level_number;
+		level_ = (Level*)Parent::CreateContextObject(new_level_name, cure::kNetworkObjectLocalOnly, 0);
+		level_->StartLoading();
 	}
-	mSteppedLevel = true;
-	return lNewLevelName;
+	stepped_level_ = true;
+	return new_level_name;
 }
 
-str FireManager::StoreLevelIndex(int pLevelNumber)
-{
-	const int lLevelCount = LEPRA_ARRAY_COUNT(gLevels);
-	if (pLevelNumber < 0)
-	{
-		pLevelNumber = lLevelCount-1;
+str FireManager::StoreLevelIndex(int level_number) {
+	const int level_count = LEPRA_ARRAY_COUNT(kLevels);
+	if (level_number < 0) {
+		level_number = level_count-1;
+	} else if (level_number >= level_count) {
+		level_number = 0;
 	}
-	else if (pLevelNumber >= lLevelCount)
-	{
-		pLevelNumber = 0;
-	}
-	str lNewLevelName = strutil::Format("lvl%2.2i", pLevelNumber);
-	v_set(GetVariableScope(), RTVAR_GAME_STARTLEVEL, lNewLevelName);
-	return lNewLevelName;
+	str new_level_name = strutil::Format("lvl%2.2i", level_number);
+	v_set(GetVariableScope(), kRtvarGameStartlevel, new_level_name);
+	return new_level_name;
 }
 
 
-Level* FireManager::GetLevel() const
-{
-	if (mLevel && mLevel->IsLoaded())
-	{
-		return mLevel;
+Level* FireManager::GetLevel() const {
+	if (level_ && level_->IsLoaded()) {
+		return level_;
 	}
 	return 0;
 }
 
-int FireManager::GetCurrentLevelNumber() const
-{
-	int lLevelNumber = 0;
-	strutil::StringToInt(mLevel->GetClassId().substr(3), lLevelNumber);
-	return lLevelNumber;
+int FireManager::GetCurrentLevelNumber() const {
+	int _level_number = 0;
+	strutil::StringToInt(level_->GetClassId().substr(3), _level_number);
+	return _level_number;
 }
 
 
 
-Cure::RuntimeVariableScope* FireManager::GetVariableScope() const
-{
+cure::RuntimeVariableScope* FireManager::GetVariableScope() const {
 	return (Parent::GetVariableScope());
 }
 
 
 
-bool FireManager::InitializeUniverse()
-{
-	mUiManager->GetRenderer()->SetLineWidth(1);
-	mUiManager->UpdateSettings();
+bool FireManager::InitializeUniverse() {
+	ui_manager_->GetRenderer()->SetLineWidth(1);
+	ui_manager_->UpdateSettings();
 
 	// Create dummy explosion to ensure all geometries loaded and ready, to avoid LAAAG when first exploading.
-	UiTbc::ParticleRenderer* lParticleRenderer = (UiTbc::ParticleRenderer*)mUiManager->GetRenderer()->GetDynamicRenderer("particle");
+	uitbc::ParticleRenderer* particle_renderer = (uitbc::ParticleRenderer*)ui_manager_->GetRenderer()->GetDynamicRenderer("particle");
 	const vec3 v;
-	lParticleRenderer->CreateExplosion(vec3(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
+	particle_renderer->CreateExplosion(vec3(0,0,-2000), 1, v, 1, 1, v, v, v, v, v, 1, 1, 1, 1);
 
-	str lStartLevel;
-	v_get(lStartLevel, =, GetVariableScope(), RTVAR_GAME_STARTLEVEL, "lvl00");
+	str start_level;
+	v_get(start_level, =, GetVariableScope(), kRtvarGameStartlevel, "lvl00");
 	{
-		ScopeLock lLock(GetTickLock());
-		int lLevelIndex = 0;
-		strutil::StringToInt(lStartLevel.substr(3), lLevelIndex);
-		mKillLimit = 4+4*lLevelIndex;
-		mLevel = (Level*)Parent::CreateContextObject(lStartLevel, Cure::NETWORK_OBJECT_LOCAL_ONLY, 0);
-		mLevel->StartLoading();
+		ScopeLock lock(GetTickLock());
+		int level_index = 0;
+		strutil::StringToInt(start_level.substr(3), level_index);
+		kill_limit_ = 4+4*level_index;
+		level_ = (Level*)Parent::CreateContextObject(start_level, cure::kNetworkObjectLocalOnly, 0);
+		level_->StartLoading();
 	}
-	mSunlight = new Sunlight(mUiManager);
+	sunlight_ = new Sunlight(ui_manager_);
 	return true;
 }
 
-void FireManager::ScriptPhysicsTick()
-{
-	const float lPhysicsTime = GetTimeManager()->GetAffordedPhysicsTotalTime();
-	if (lPhysicsTime > 1e-5)
-	{
+void FireManager::ScriptPhysicsTick() {
+	const float physics_time = GetTimeManager()->GetAffordedPhysicsTotalTime();
+	if (physics_time > 1e-5) {
 		MoveCamera();
 		UpdateCameraPosition(false);
 		HandleShooting();
-		HandleTargets(lPhysicsTime);
+		HandleTargets(physics_time);
 	}
 
-	if (mKills >= mKillLimit)
-	{
+	if (kills_ >= kill_limit_) {
 		CreateNextLevelDialog();
 	}
 
-	if (mSteppedLevel && !GetResourceManager()->IsLoading())
-	{
-		mSteppedLevel = false;
-		mAllLoadedTimer.TryStart();
+	if (stepped_level_ && !GetResourceManager()->IsLoading()) {
+		stepped_level_ = false;
+		all_loaded_timer_.TryStart();
 	}
-	if (mAllLoadedTimer.QuerySplitTime() > 10.0)
-	{
-		mAllLoadedTimer.Stop();
-		mAllLoadedTimer.ClearTimeDiff();
-		strutil::strvec lResourceTypes;
-		lResourceTypes.push_back("RenderImg");
-		lResourceTypes.push_back("Geometry");
-		lResourceTypes.push_back("GeometryRef");
-		lResourceTypes.push_back("Physics");
-		lResourceTypes.push_back("PhysicsShared");
-		lResourceTypes.push_back("RamImg");
-		lResourceTypes.push_back("Sound3D");
-		lResourceTypes.push_back("Sound2D");
-		GetResourceManager()->ForceFreeCache(lResourceTypes);
-		GetResourceManager()->ForceFreeCache(lResourceTypes);	// Call again to release any dependent resources.
+	if (all_loaded_timer_.QuerySplitTime() > 10.0) {
+		all_loaded_timer_.Stop();
+		all_loaded_timer_.ClearTimeDiff();
+		strutil::strvec resource_types;
+		resource_types.push_back("RenderImg");
+		resource_types.push_back("Geometry");
+		resource_types.push_back("GeometryRef");
+		resource_types.push_back("Physics");
+		resource_types.push_back("PhysicsShared");
+		resource_types.push_back("RamImg");
+		resource_types.push_back("Sound3D");
+		resource_types.push_back("Sound2D");
+		GetResourceManager()->ForceFreeCache(resource_types);
+		GetResourceManager()->ForceFreeCache(resource_types);	// Call again to release any dependent resources.
 	}
 
-	if (mSlowmoTimer.IsStarted())
-	{
-		if (mSlowmoTimer.QueryTimeDiff() < 3.5f)
-		{
-			v_set(GetVariableScope(), RTVAR_PHYSICS_RTR, 0.3);
-		}
-		else
-		{
-			v_set(GetVariableScope(), RTVAR_PHYSICS_RTR, 1.0);
-			mSlowmoTimer.Stop();
+	if (slowmo_timer_.IsStarted()) {
+		if (slowmo_timer_.QueryTimeDiff() < 3.5f) {
+			v_set(GetVariableScope(), kRtvarPhysicsRtr, 0.3);
+		} else {
+			v_set(GetVariableScope(), kRtvarPhysicsRtr, 1.0);
+			slowmo_timer_.Stop();
 		}
 	}
 
 	Parent::ScriptPhysicsTick();
 }
 
-void FireManager::HandleWorldBoundaries()
-{
-	std::vector<Cure::GameObjectId> lLostObjectArray;
-	typedef Cure::ContextManager::ContextObjectTable ContextTable;
-	const ContextTable& lObjectTable = GetContext()->GetObjectTable();
-	ContextTable::const_iterator x = lObjectTable.begin();
-	for (; x != lObjectTable.end(); ++x)
-	{
-		Cure::ContextObject* lObject = x->second;
-		if (lObject->IsLoaded() && lObject->GetPhysics())
-		{
-			const vec3 lPosition = lObject->GetPosition();
-			if (!Math::IsInRange(lPosition.x, -250.0f, +250.0f) ||
-				!Math::IsInRange(lPosition.y, -100.0f, +550.0f) ||
-				!Math::IsInRange(lPosition.z, -250.0f, +250.0f))
-			{
-				lLostObjectArray.push_back(lObject->GetInstanceId());
+void FireManager::HandleWorldBoundaries() {
+	std::vector<cure::GameObjectId> lost_object_array;
+	typedef cure::ContextManager::ContextObjectTable ContextTable;
+	const ContextTable& object_table = GetContext()->GetObjectTable();
+	ContextTable::const_iterator x = object_table.begin();
+	for (; x != object_table.end(); ++x) {
+		cure::ContextObject* _object = x->second;
+		if (_object->IsLoaded() && _object->GetPhysics()) {
+			const vec3 _position = _object->GetPosition();
+			if (!Math::IsInRange(_position.x, -250.0f, +250.0f) ||
+				!Math::IsInRange(_position.y, -100.0f, +550.0f) ||
+				!Math::IsInRange(_position.z, -250.0f, +250.0f)) {
+				lost_object_array.push_back(_object->GetInstanceId());
 			}
 		}
 	}
-	if (!lLostObjectArray.empty())
-	{
-		ScopeLock lLock(GetTickLock());
-		std::vector<Cure::GameObjectId>::const_iterator y = lLostObjectArray.begin();
-		for (; y != lLostObjectArray.end(); ++y)
-		{
+	if (!lost_object_array.empty()) {
+		ScopeLock lock(GetTickLock());
+		std::vector<cure::GameObjectId>::const_iterator y = lost_object_array.begin();
+		for (; y != lost_object_array.end(); ++y) {
 			DeleteContextObject(*y);
 		}
 	}
 }
 
-void FireManager::MoveCamera()
-{
+void FireManager::MoveCamera() {
 }
 
-void FireManager::UpdateCameraPosition(bool pUpdateMicPosition)
-{
-	mUiManager->SetCameraPosition(mCameraTransform);
-	if (pUpdateMicPosition)
-	{
-		mUiManager->SetMicrophonePosition(mCameraTransform, vec3());
+void FireManager::UpdateCameraPosition(bool update_mic_position) {
+	ui_manager_->SetCameraPosition(camera_transform_);
+	if (update_mic_position) {
+		ui_manager_->SetMicrophonePosition(camera_transform_, vec3());
 	}
 }
 
-void FireManager::HandleShooting()
-{
-	if (mUiManager->CanRender())
-	{
-		float lFOV;
-		v_get(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.8);
-		UpdateFrustum(lFOV);
+void FireManager::HandleShooting() {
+	if (ui_manager_->CanRender()) {
+		float fov;
+		v_get(fov, =(float), GetVariableScope(), kRtvarUi3DFov, 38.8);
+		UpdateFrustum(fov);
 	}
 
-	typedef UiLepra::Touch::DragManager::DragList DragList;
-	DragList lDragList = mUiManager->GetDragManager()->GetDragList();
-	for (DragList::iterator x = lDragList.begin(); x != lDragList.end(); ++x)
-	{
-		if (x->mIsPress && (x->mFlags&DRAG_FLAG) == 0 && !mMenu->GetDialog())
-		{
-			x->mFlags |= DRAG_FLAG;
-			mShootDirection = mUiManager->GetRenderer()->ScreenCoordToVector(x->mLast);
+	typedef uilepra::touch::DragManager::DragList DragList;
+	DragList drag_list = ui_manager_->GetDragManager()->GetDragList();
+	for (DragList::iterator x = drag_list.begin(); x != drag_list.end(); ++x) {
+		if (x->is_press_ && (x->flags_&DRAG_FLAG) == 0 && !menu_->GetDialog()) {
+			x->flags_ |= DRAG_FLAG;
+			shoot_direction_ = ui_manager_->GetRenderer()->ScreenCoordToVector(x->last_);
 			Shoot(0, 0);
 		}
 	}
 }
 
-void FireManager::HandleTargets(float pTime)
-{
-	VillainMap::iterator y = mVillainMap.begin();
-	for (; y != mVillainMap.end(); ++y)
-	{
-		y->second.mIsActive = false;
+void FireManager::HandleTargets(float time) {
+	VillainMap::iterator y = villain_map_.begin();
+	for (; y != villain_map_.end(); ++y) {
+		y->second.is_active_ = false;
 	}
 
-	PixelRect lRenderArea = GetRenderableArea();
-	lRenderArea.mLeft -= 30;	// Don't drop target info indicator just because the car wobbles slightly off left side of screen.
-	Cure::ContextManager::ContextObjectTable lObjectTable = GetContext()->GetObjectTable();
-	Cure::ContextManager::ContextObjectTable::iterator x = lObjectTable.begin();
-	for (; x != lObjectTable.end(); ++x)
-	{
-		Cure::ContextObject* lObject = x->second;
-		if (lObject->GetClassId().find("lvl") == 0 || lObject->GetClassId() == "indicator")
-		{
+	PixelRect _render_area = GetRenderableArea();
+	_render_area.left_ -= 30;	// Don't drop target info indicator just because the car wobbles slightly off left side of screen.
+	cure::ContextManager::ContextObjectTable object_table = GetContext()->GetObjectTable();
+	cure::ContextManager::ContextObjectTable::iterator x = object_table.begin();
+	for (; x != object_table.end(); ++x) {
+		cure::ContextObject* _object = x->second;
+		if (_object->GetClassId().find("lvl") == 0 || _object->GetClassId() == "indicator") {
 			continue;
 		}
-		BaseMachine* lMachine = dynamic_cast<BaseMachine*>(lObject);
-		if (!lMachine || lMachine->mVillain.empty())
-		{
+		BaseMachine* machine = dynamic_cast<BaseMachine*>(_object);
+		if (!machine || machine->villain_.empty()) {
 			continue;
 		}
-		const vec3 lPosition = lMachine->GetPosition();
-		if (lPosition.y < 35 || lPosition.y > 350.0f)
-		{
+		const vec3 _position = machine->GetPosition();
+		if (_position.y < 35 || _position.y > 350.0f) {
 			continue;
 		}
-		const vec2 lCoord = mUiManager->GetRenderer()->PositionToScreenCoord(lPosition, 0);
-		const PixelCoord xy((int)lCoord.x, (int)lCoord.y);
-		if (!lRenderArea.IsInside(xy.x, xy.y))
-		{
+		const vec2 coord = ui_manager_->GetRenderer()->PositionToScreenCoord(_position, 0);
+		const PixelCoord xy((int)coord.x, (int)coord.y);
+		if (!_render_area.IsInside(xy.x, xy.y)) {
 			continue;
 		}
-		const float lScale = std::min(1.0f, 100.0f/lPosition.y);
-		TargetInfo lTargetInfo(lMachine->mVillain, xy, lMachine->mDangerousness, lScale);
-		VillainMap::iterator y = mVillainMap.find(lMachine);
-		if (y == mVillainMap.end())
-		{
-			mVillainMap.insert(VillainMap::value_type(lMachine, lTargetInfo));
-		}
-		else
-		{
+		const float scale = std::min(1.0f, 100.0f/_position.y);
+		TargetInfo target_info(machine->villain_, xy, machine->dangerousness_, scale);
+		VillainMap::iterator y = villain_map_.find(machine);
+		if (y == villain_map_.end()) {
+			villain_map_.insert(VillainMap::value_type(machine, target_info));
+		} else {
 			y->second.xy = xy;
-			y->second.mIsActive = true;
-			y->second.mScale = lScale;
-			if (Cure::Health::Get(lMachine) > 0)
-			{
-				y->second.mTime += pTime;
-			}
-			else
-			{
-				if (y->second.mTime > gTargetInfoDelay+gRollOutTime)
-				{
-					y->second.mTime = gTargetInfoDelay+gRollOutTime;
+			y->second.is_active_ = true;
+			y->second.scale_ = scale;
+			if (cure::Health::Get(machine) > 0) {
+				y->second.time_ += time;
+			} else {
+				if (y->second.time_ > kTargetInfoDelay+kRollOutTime) {
+					y->second.time_ = kTargetInfoDelay+kRollOutTime;
 				}
-				y->second.mTime -= pTime;
+				y->second.time_ -= time;
 			}
 		}
 	}
-	y = mVillainMap.begin();
-	while (y != mVillainMap.end())
-	{
-		if (!y->second.mIsActive)
-		{
-			y = mVillainMap.erase(y);
-		}
-		else
-		{
+	y = villain_map_.begin();
+	while (y != villain_map_.end()) {
+		if (!y->second.is_active_) {
+			y = villain_map_.erase(y);
+		} else {
 			++y;
 		}
 	}
@@ -908,281 +796,233 @@ void FireManager::HandleTargets(float pTime)
 
 
 
-void FireManager::TickInput()
-{
+void FireManager::TickInput() {
 	OnLevelLoadCompleted();
 	TickNetworkInput();
 	TickUiInput();
 }
 
-void FireManager::TickUiInput()
-{
-	mUiManager->GetInputManager()->SetCursorVisible(true);
+void FireManager::TickUiInput() {
+	ui_manager_->GetInputManager()->SetCursorVisible(true);
 
-	const int lPhysicsStepCount = GetTimeManager()->GetAffordedPhysicsStepCount();
-	if (lPhysicsStepCount > 0 && mAllowMovementInput)
-	{
+	const int physics_step_count = GetTimeManager()->GetAffordedPhysicsStepCount();
+	if (physics_step_count > 0 && allow_movement_input_) {
 	}
 }
 
-void FireManager::TickUiUpdate()
-{
+void FireManager::TickUiUpdate() {
 	((FireConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
-	mCollisionSoundManager->Tick(mCameraTransform.GetPosition());
+	collision_sound_manager_->Tick(camera_transform_.GetPosition());
 }
 
-void FireManager::SetLocalRender(bool pRender)
-{
-	(void)pRender;
+void FireManager::SetLocalRender(bool render) {
+	(void)render;
 }
 
 
 
-Cure::ContextObject* FireManager::CreateContextObject(const str& pClassId) const
-{
-	Cure::CppContextObject* lObject;
-	if (strutil::StartsWith(pClassId, "lvl"))
-	{
-		UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
-		Level* lLevel = new Level(GetResourceManager(), pClassId, mUiManager, lGravelParticleEmitter);
-		lLevel->EnableRootShadow(false);
-		lObject = lLevel;
-	}
-	else if (strutil::StartsWith(pClassId, "indicator"))
-	{
-		lObject = new UiCure::Machine(GetResourceManager(), pClassId, mUiManager);
-	}
-	else
-	{
-		BaseMachine* lMachine = new BaseMachine(GetResourceManager(), pClassId, mUiManager, (FireManager*)this);
-		lMachine->mLevelSpeed = mLevel->GetLevelSpeed();
-		//lMachine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), mUiManager));
-		lMachine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), mUiManager));
-		//lMachine->GetBurnEmitter()->SetFreeFlow();
-		lMachine->SetExplosiveStrength(0.6f);
-		const int c = LEPRA_ARRAY_COUNT(gVillainTypes);
-		if (gPersonalityCount <= 0)
-		{
-			gPersonalityCount = 0;
-			for (int x = 0; x < c; ++x)
-			{
-				gPersonalityCount += gVillainTypes[x].mCount;
+cure::ContextObject* FireManager::CreateContextObject(const str& class_id) const {
+	cure::CppContextObject* _object;
+	if (strutil::StartsWith(class_id, "lvl")) {
+		UiCure::GravelEmitter* gravel_particle_emitter = new UiCure::GravelEmitter(GetResourceManager(), ui_manager_, 0.5f, 1, 10, 2);
+		Level* level = new Level(GetResourceManager(), class_id, ui_manager_, gravel_particle_emitter);
+		level->EnableRootShadow(false);
+		_object = level;
+	} else if (strutil::StartsWith(class_id, "indicator")) {
+		_object = new UiCure::Machine(GetResourceManager(), class_id, ui_manager_);
+	} else {
+		BaseMachine* machine = new BaseMachine(GetResourceManager(), class_id, ui_manager_, (FireManager*)this);
+		machine->level_speed_ = level_->GetLevelSpeed();
+		//machine->SetExhaustEmitter(new UiCure::ExhaustEmitter(GetResourceManager(), ui_manager_));
+		machine->SetBurnEmitter(new UiCure::BurnEmitter(GetResourceManager(), ui_manager_));
+		//machine->GetBurnEmitter()->SetFreeFlow();
+		machine->SetExplosiveStrength(0.6f);
+		const int c = LEPRA_ARRAY_COUNT(kVillainTypes);
+		if (g_personality_count <= 0) {
+			g_personality_count = 0;
+			for (int x = 0; x < c; ++x) {
+				g_personality_count += kVillainTypes[x].count_;
 			}
-			gPersonalityCount = (int)(gPersonalityCount/(1-PERSONS_INNOCENT_PART));
+			g_personality_count = (int)(g_personality_count/(1-PERSONS_INNOCENT_PART));
 		}
-		int r = (int)Random::Uniform(0.0f, (float)gPersonalityCount+1);
-		for (int x = 0; x < c; ++x)
-		{
-			r -= gVillainTypes[x].mCount;
-			if (r <= 0)
-			{
-				lMachine->mVillain = gVillainTypes[x].mName;
-				lMachine->mDangerousness = 1-(float)x/(c-1);
+		int r = (int)Random::Uniform(0.0f, (float)g_personality_count+1);
+		for (int x = 0; x < c; ++x) {
+			r -= kVillainTypes[x].count_;
+			if (r <= 0) {
+				machine->villain_ = kVillainTypes[x].name_;
+				machine->dangerousness_ = 1-(float)x/(c-1);
 				break;
 			}
 		}
-		lObject = lMachine;
+		_object = machine;
 	}
-	lObject->SetAllowNetworkLogic(true);
-	return (lObject);
+	_object->SetAllowNetworkLogic(true);
+	return (_object);
 }
 
-Cure::ContextObject* FireManager::CreateLogicHandler(const str& pType)
-{
-	if (pType == "spawner" || pType == "spawner_init")
-	{
-		return new Life::Spawner(GetContext());
-	}
-	else if (pType == "eater")
-	{
+cure::ContextObject* FireManager::CreateLogicHandler(const str& type) {
+	if (type == "spawner" || type == "spawner_init") {
+		return new life::Spawner(GetContext());
+	} else if (type == "eater") {
 		return new Eater(GetContext());
-	}
-	else if (pType == "context_path")
-	{
-		return mLevel->QueryPath();
+	} else if (type == "context_path") {
+		return level_->QueryPath();
 	}
 	return (0);
 }
 
-void FireManager::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
-{
-	if (pOk)
-	{
-		if (pObject == mLevel)
-		{
+void FireManager::OnLoadCompleted(cure::ContextObject* object, bool ok) {
+	if (ok) {
+		if (object == level_) {
 			OnLevelLoadCompleted();
+		} else if (strutil::StartsWith(object->GetClassId(), "rocket")) {
+			object->SetEnginePower(0, 1.0f);
+			//object->SetEnginePower(2, 1.0f);
+		} else if (strutil::StartsWith(object->GetClassId(), "indicator")) {
+		} else {
+			new cure::FloatAttribute(object, "float_childishness", 1);
+			new AutoPathDriver(this, object->GetInstanceId(), "input");
+			vec3 color = RNDPOSVEC();
+			life::ExplodingMachine* machine = (life::ExplodingMachine*)object;
+			machine->GetMesh(0)->GetBasicMaterialSettings().diffuse_ = color;
 		}
-		else if (strutil::StartsWith(pObject->GetClassId(), "rocket"))
-		{
-			pObject->SetEnginePower(0, 1.0f);
-			//pObject->SetEnginePower(2, 1.0f);
-		}
-		else if (strutil::StartsWith(pObject->GetClassId(), "indicator"))
-		{
-		}
-		else
-		{
-			new Cure::FloatAttribute(pObject, "float_childishness", 1);
-			new AutoPathDriver(this, pObject->GetInstanceId(), "input");
-			vec3 lColor = RNDPOSVEC();
-			Life::ExplodingMachine* lMachine = (Life::ExplodingMachine*)pObject;
-			lMachine->GetMesh(0)->GetBasicMaterialSettings().mDiffuse = lColor;
-		}
-		log_volatile(mLog.Tracef("Loaded object %s.", pObject->GetClassId().c_str()));
-		pObject->GetPhysics()->UpdateBonesObjectTransformation(0, gIdentityTransformationF);
-		((UiCure::CppContextObject*)pObject)->UiMove();
-	}
-	else
-	{
-		mLog.Errorf("Could not load object of type %s.", pObject->GetClassId().c_str());
-		GetContext()->PostKillObject(pObject->GetInstanceId());
+		log_volatile(log_.Tracef("Loaded object %s.", object->GetClassId().c_str()));
+		object->GetPhysics()->UpdateBonesObjectTransformation(0, kIdentityTransformationF);
+		((UiCure::CppContextObject*)object)->UiMove();
+	} else {
+		log_.Errorf("Could not load object of type %s.", object->GetClassId().c_str());
+		GetContext()->PostKillObject(object->GetInstanceId());
 	}
 }
 
-void FireManager::OnLevelLoadCompleted()
-{
-	if (!mLevel || !mLevel->IsLoaded())
-	{
+void FireManager::OnLevelLoadCompleted() {
+	if (!level_ || !level_->IsLoaded()) {
 		return;
 	}
 	// Update texture UV coordinates according to FoV.
-	UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
-	float lFOV;
-	v_get(lFOV, =(float), GetVariableScope(), RTVAR_UI_3D_FOV, 38.8);
-	static float lFormerFoV = 0;
-	static unsigned lFormerLevelId = 0;
-	if (lFormerFoV == lFOV && lFormerLevelId == mLevel->GetInstanceId())
-	{
+	uitbc::Renderer* renderer = ui_manager_->GetRenderer();
+	float fov;
+	v_get(fov, =(float), GetVariableScope(), kRtvarUi3DFov, 38.8);
+	static float former_fo_v = 0;
+	static unsigned former_level_id = 0;
+	if (former_fo_v == fov && former_level_id == level_->GetInstanceId()) {
 		return;
 	}
-	mLog.Headlinef("Level %s loaded.", mLevel->GetClassId().c_str());
-	bool lFirstRun;
-	v_get(lFirstRun, =, GetVariableScope(), RTVAR_GAME_FIRSTRUN, false);
-	if (lFirstRun)
-	{
+	log_.Headlinef("Level %s loaded.", level_->GetClassId().c_str());
+	bool first_run;
+	v_get(first_run, =, GetVariableScope(), kRtvarGameFirstrun, false);
+	if (first_run) {
 		CreateNextLevelDialog();
 	}
-	lRenderer->ResetClippingRect();
-	lFormerFoV = lFOV;
-	lFormerLevelId = mLevel->GetInstanceId();
-	const float wf = +1.0f / mUiManager->GetDisplayManager()->GetWidth();
-	const float hf = hp / mUiManager->GetDisplayManager()->GetHeight();
-	const size_t lMeshCount = ((UiTbc::ChunkyClass*)mLevel->GetClass())->GetMeshCount();
-	for (size_t x = 0; x < lMeshCount; ++x)
-	{
-		Tbc::GeometryReference* lMesh = (Tbc::GeometryReference*)mLevel->GetMesh(x);
-		xform lTransform = lMesh->GetTransformation();
-		if (lMesh->GetUVSetCount())
-		{
-			UiTbc::TriangleBasedGeometry* lParent = (UiTbc::TriangleBasedGeometry*)lMesh->GetParentGeometry();
-			deb_assert(lParent->GetUVCountPerVertex() == 4);
-			const float* xyz = lMesh->GetVertexData();
-			const unsigned lVertexCount = lMesh->GetVertexCount();
-			float* uvst = new float[lVertexCount*4];
-			for (unsigned z = 0; z < lVertexCount; ++z)
-			{
-				vec3 lVector(&xyz[z*3]);
-				lVector = lTransform.Transform(lVector);
-				vec2 c = lRenderer->PositionToScreenCoord(lVector, 1/hp);
+	renderer->ResetClippingRect();
+	former_fo_v = fov;
+	former_level_id = level_->GetInstanceId();
+	const float wf = +1.0f / ui_manager_->GetDisplayManager()->GetWidth();
+	const float hf = hp / ui_manager_->GetDisplayManager()->GetHeight();
+	const size_t mesh_count = ((uitbc::ChunkyClass*)level_->GetClass())->GetMeshCount();
+	for (size_t x = 0; x < mesh_count; ++x) {
+		tbc::GeometryReference* mesh = (tbc::GeometryReference*)level_->GetMesh(x);
+		xform transform = mesh->GetTransformation();
+		if (mesh->GetUVSetCount()) {
+			uitbc::TriangleBasedGeometry* parent = (uitbc::TriangleBasedGeometry*)mesh->GetParentGeometry();
+			deb_assert(parent->GetUVCountPerVertex() == 4);
+			const float* xyz = mesh->GetVertexData();
+			const unsigned vertex_count = mesh->GetVertexCount();
+			float* uvst = new float[vertex_count*4];
+			for (unsigned z = 0; z < vertex_count; ++z) {
+				vec3 __vector(&xyz[z*3]);
+				__vector = transform.Transform(__vector);
+				vec2 c = renderer->PositionToScreenCoord(__vector, 1/hp);
 				const float x = c.x * wf;
 				const float y = c.y * hf;
-				uvst[z*4+0] = x*lVector.y;
-				uvst[z*4+1] = y*lVector.y;
+				uvst[z*4+0] = x*__vector.y;
+				uvst[z*4+1] = y*__vector.y;
 				uvst[z*4+2] = 0;
-				uvst[z*4+3] = lVector.y;
+				uvst[z*4+3] = __vector.y;
 			}
-			lParent->PopUVSet();
-			lParent->AddUVSet(uvst);
-			lParent->SetUVDataChanged(true);
-			lMesh->SetUVDataChanged(true);
+			parent->PopUVSet();
+			parent->AddUVSet(uvst);
+			parent->SetUVDataChanged(true);
+			mesh->SetUVDataChanged(true);
 
-			lMesh->SetPreRenderCallback(Tbc::GeometryBase::PreRenderCallback(this, &FireManager::DisableAmbient));
-			lMesh->SetPostRenderCallback(Tbc::GeometryBase::PostRenderCallback(this, &FireManager::EnableAmbient));
+			mesh->SetPreRenderCallback(tbc::GeometryBase::PreRenderCallback(this, &FireManager::DisableAmbient));
+			mesh->SetPostRenderCallback(tbc::GeometryBase::PostRenderCallback(this, &FireManager::EnableAmbient));
 
-			mUiManager->GetRenderer()->UpdateGeometry(((UiCure::GeometryReferenceResource*)mLevel->GetMeshResource(x)->GetConstResource())->GetParent()->GetData(), false);
+			ui_manager_->GetRenderer()->UpdateGeometry(((UiCure::GeometryReferenceResource*)level_->GetMeshResource(x)->GetConstResource())->GetParent()->GetData(), false);
 
 			delete[] uvst;
 		}
 	}
 }
 
-void FireManager::OnCollision(const vec3& pForce, const vec3& pTorque, const vec3& pPosition,
-	Cure::ContextObject* pObject1, Cure::ContextObject* pObject2,
-	Tbc::PhysicsManager::BodyID pBody1Id, Tbc::PhysicsManager::BodyID pBody2Id)
-{
-	(void)pBody2Id;
-	mCollisionSoundManager->OnCollision(pForce, pTorque, pPosition, pObject1, pObject2, pBody1Id, 5000, false);
+void FireManager::OnCollision(const vec3& force, const vec3& torque, const vec3& position,
+	cure::ContextObject* object1, cure::ContextObject* object2,
+	tbc::PhysicsManager::BodyID body1_id, tbc::PhysicsManager::BodyID body2_id) {
+	(void)body2_id;
+	collision_sound_manager_->OnCollision(force, torque, position, object1, object2, body1_id, 5000, false);
 
-	BaseMachine* lMachine1 = dynamic_cast<BaseMachine*>(pObject1);
-	BaseMachine* lMachine2 = dynamic_cast<BaseMachine*>(pObject2);
-	if (lMachine1 && lMachine2)
-	{
-		const vec3 v = (lMachine2->GetPosition() - lMachine1->GetPosition());
-		if (lMachine1->GetForwardDirection()*v > 0.1f)
-		{
-			lMachine2->AddPanic(1.5f);	// 1 drives into 2.
+	BaseMachine* machine1 = dynamic_cast<BaseMachine*>(object1);
+	BaseMachine* machine2 = dynamic_cast<BaseMachine*>(object2);
+	if (machine1 && machine2) {
+		const vec3 v = (machine2->GetPosition() - machine1->GetPosition());
+		if (machine1->GetForwardDirection()*v > 0.1f) {
+			machine2->AddPanic(1.5f);	// 1 drives into 2.
 		}
-		if (lMachine2->GetForwardDirection()*(-v) > 0.1f)
-		{
-			lMachine1->AddPanic(1.5f);	// 2 drives into 1.
+		if (machine2->GetForwardDirection()*(-v) > 0.1f) {
+			machine1->AddPanic(1.5f);	// 2 drives into 1.
 		}
 	}
 }
 
 
 
-void FireManager::OnBombButton(UiTbc::Button* pButton)
-{
-	pButton->SetVisible(false);
-	v_set(GetVariableScope(), RTVAR_GAME_EXPLOSIVESTRENGTH, 10.0);
+void FireManager::OnBombButton(uitbc::Button* button) {
+	button->SetVisible(false);
+	v_set(GetVariableScope(), kRtvarGameExplosivestrength, 10.0);
 }
 
-void FireManager::OnPauseButton(UiTbc::Button* pButton)
-{
-	if (pButton)
-	{
-		mMenu->OnTapSound(pButton);
-		pButton->SetVisible(false);
+void FireManager::OnPauseButton(uitbc::Button* button) {
+	if (button) {
+		menu_->OnTapSound(button);
+		button->SetVisible(false);
 	}
 
-	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &FireManager::OnMenuAlternative), 0.5f, 0.5f);
+	uitbc::Dialog* d = menu_->CreateTbcDialog(life::Menu::ButtonAction(this, &FireManager::OnMenuAlternative), 0.5f, 0.5f);
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
 	d->SetDirection(+1, false);
 
-	UiTbc::FixedLayouter lLayouter(d);
-	lLayouter.SetContentYMargin(d->GetPreferredHeight()/10);
+	uitbc::FixedLayouter layouter(d);
+	layouter.SetContentYMargin(d->GetPreferredHeight()/10);
 
-	UiTbc::Button* lRestartButton = new UiTbc::Button(Color(90, 10, 10), L"Reset game");
-	lLayouter.AddButton(lRestartButton, -8, 0, 2, 0, 1, 1, true);
+	uitbc::Button* restart_button = new uitbc::Button(Color(90, 10, 10), L"Reset game");
+	layouter.AddButton(restart_button, -8, 0, 2, 0, 1, 1, true);
 
-	UiTbc::Button* lRestartLevelButton = new UiTbc::Button(Color(10, 90, 10), L"Restart level");
-	lLayouter.AddButton(lRestartLevelButton, -4, 1, 2, 0, 1, 1, true);
+	uitbc::Button* restart_level_button = new uitbc::Button(Color(10, 90, 10), L"Restart level");
+	layouter.AddButton(restart_level_button, -4, 1, 2, 0, 1, 1, true);
 
-	UiTbc::Button* lCloseButton = new UiTbc::Button(Color(180, 60, 50), L"X");
-	lLayouter.AddCornerButton(lCloseButton, -9);
+	uitbc::Button* close_button = new uitbc::Button(Color(180, 60, 50), L"X");
+	layouter.AddCornerButton(close_button, -9);
 
-	v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, true);
+	v_set(GetVariableScope(), kRtvarPhysicsHalt, true);
 }
 
-void FireManager::CreateNextLevelDialog()
-{
-	if (mMenu->GetDialog())
-	{
+void FireManager::CreateNextLevelDialog() {
+	if (menu_->GetDialog()) {
 		return;
 	}
-	mPauseButton->SetVisible(false);
+	pause_button_->SetVisible(false);
 
-	const int lFinishedLevel = GetCurrentLevelNumber();
-	StoreLevelIndex(lFinishedLevel+1);
+	const int finished_level = GetCurrentLevelNumber();
+	StoreLevelIndex(finished_level+1);
 
-	UiTbc::Dialog* d = mMenu->CreateTbcDialog(Life::Menu::ButtonAction(this, &FireManager::OnMenuAlternative), 0.8f, 0.4f);
+	uitbc::Dialog* d = menu_->CreateTbcDialog(life::Menu::ButtonAction(this, &FireManager::OnMenuAlternative), 0.8f, 0.4f);
 	d->SetColor(BG_COLOR, OFF_BLACK, BLACK, BLACK);
 	d->SetDirection(+1, false);
 
-	UiTbc::FixedLayouter lLayouter(d);
-	lLayouter.SetContentWidthPart(0.85f);
+	uitbc::FixedLayouter layouter(d);
+	layouter.SetContentWidthPart(0.85f);
 
-	static const char* lCongratulations[] =
+	static const char* congratulations[] =
 	{
 		"Well done, agent!\n\nPrepare to protect other people in other parts of the world.",
 		"Great Scott; you are good at this!\n\nRemember to relax between wet jobs.",
@@ -1200,131 +1040,107 @@ void FireManager::CreateNextLevelDialog()
 		"There are almost no terrorists left in the world!\n\nHumanity is relying on you.",
 		"You've done it, the world is cleansed!\n\nHowever, disturbing reports on the outskirts of\nyour home town tells me you should go there again.",
 	};
-	deb_assert(LEPRA_ARRAY_COUNT(lCongratulations) == LEPRA_ARRAY_COUNT(gLevels));
-	deb_assert(lFinishedLevel < LEPRA_ARRAY_COUNT(lCongratulations));
-	str lCongrats = lCongratulations[lFinishedLevel];
-	bool lFirstRun;
-	v_get(lFirstRun, =, GetVariableScope(), RTVAR_GAME_FIRSTRUN, false);
-	if (lFirstRun)
-	{
-		v_set(GetVariableScope(), RTVAR_GAME_FIRSTRUN, false);
-		lCongrats = "Our patented EnemyVisionGoggles(r) indicates villains.\nAvoid collateral damage, when possible.\n\nGood luck agent!";
+	deb_assert(LEPRA_ARRAY_COUNT(congratulations) == LEPRA_ARRAY_COUNT(kLevels));
+	deb_assert(finished_level < LEPRA_ARRAY_COUNT(congratulations));
+	str congrats = congratulations[finished_level];
+	bool first_run;
+	v_get(first_run, =, GetVariableScope(), kRtvarGameFirstrun, false);
+	if (first_run) {
+		v_set(GetVariableScope(), kRtvarGameFirstrun, false);
+		congrats = "Our patented EnemyVisionGoggles(r) indicates villains.\nAvoid collateral damage, when possible.\n\nGood luck agent!";
+	} else {
+		UiCure::UserSound2dResource* sound = new UiCure::UserSound2dResource(ui_manager_, uilepra::SoundManager::kLoopNone);
+		new UiCure::SoundReleaser(GetResourceManager(), ui_manager_, GetContext(), "level_done.wav", sound, 1, 1);
 	}
-	else
-	{
-		UiCure::UserSound2dResource* lSound = new UiCure::UserSound2dResource(mUiManager, UiLepra::SoundManager::LOOP_NONE);
-		new UiCure::SoundReleaser(GetResourceManager(), mUiManager, GetContext(), "level_done.wav", lSound, 1, 1);
-	}
-	UiTbc::Label* lLabel = new UiTbc::Label(LIGHT_GRAY, wstrutil::Encode(lCongrats));
-	lLabel->SetFontId(mUiManager->SetScaleFont(std::min(-14.0f, d->GetPreferredHeight()/-14.0f)));
-	mUiManager->SetMasterFont();
-	//lLabel->SetIcon(UiTbc::Painter::INVALID_IMAGEID, UiTbc::TextComponent::ICON_CENTER);
-	lLabel->SetAdaptive(false);
-	lLayouter.AddComponent(lLabel, 0, 2, 0, 1, 1);
+	uitbc::Label* label = new uitbc::Label(LIGHT_GRAY, wstrutil::Encode(congrats));
+	label->SetFontId(ui_manager_->SetScaleFont(std::min(-14.0f, d->GetPreferredHeight()/-14.0f)));
+	ui_manager_->SetMasterFont();
+	//label->SetIcon(uitbc::Painter::kInvalidImageid, uitbc::TextComponent::kIconCenter);
+	label->SetAdaptive(false);
+	layouter.AddComponent(label, 0, 2, 0, 1, 1);
 
-	if (lFirstRun)
-	{
-		UiTbc::Button* lOkButton = new UiTbc::Button(Color(10, 90, 10), L"OK");
-		lOkButton->SetFontId(lLabel->GetFontId());
-		lLayouter.AddButton(lOkButton, -5, 3, 4, 4, 3, 7, true);
-	}
-	else
-	{
-		UiTbc::Button* lNextLevelButton = new UiTbc::Button(Color(10, 90, 10), L"Next level");
-		lNextLevelButton->SetFontId(lLabel->GetFontId());
-		lLayouter.AddButton(lNextLevelButton, -7, 3, 4, 4, 3, 7, true);
+	if (first_run) {
+		uitbc::Button* ok_button = new uitbc::Button(Color(10, 90, 10), L"OK");
+		ok_button->SetFontId(label->GetFontId());
+		layouter.AddButton(ok_button, -5, 3, 4, 4, 3, 7, true);
+	} else {
+		uitbc::Button* next_level_button = new uitbc::Button(Color(10, 90, 10), L"Next level");
+		next_level_button->SetFontId(label->GetFontId());
+		layouter.AddButton(next_level_button, -7, 3, 4, 4, 3, 7, true);
 
-		UiTbc::Button* lRestartButton = new UiTbc::Button(Color(90, 10, 10), L"Restart from level 1");
-		lRestartButton->SetFontId(lLabel->GetFontId());
-		lLayouter.AddButton(lRestartButton, -8, 3, 4, 0, 3, 7, true);
+		uitbc::Button* restart_button = new uitbc::Button(Color(90, 10, 10), L"Restart from level 1");
+		restart_button->SetFontId(label->GetFontId());
+		layouter.AddButton(restart_button, -8, 3, 4, 0, 3, 7, true);
 	}
 }
 
-void FireManager::OnMenuAlternative(UiTbc::Button* pButton)
-{
-	if (pButton->GetTag() == -5)
-	{
-		mPauseButton->SetVisible(true);
-	}
-	else if (pButton->GetTag() == -6)
-	{
-		double lBedsideVolume = (pButton->GetState() == UiTbc::Button::PRESSED)? 0.02 : 1.0;
-		v_set(GetVariableScope(), RTVAR_UI_SOUND_MASTERVOLUME, lBedsideVolume);
-		mUiManager->GetSoundManager()->SetMasterVolume((float)lBedsideVolume);	// Set right away for button volume.
-	}
-	else if (pButton->GetTag() == -4)
-	{
-		mPauseButton->SetVisible(true);
+void FireManager::OnMenuAlternative(uitbc::Button* button) {
+	if (button->GetTag() == -5) {
+		pause_button_->SetVisible(true);
+	} else if (button->GetTag() == -6) {
+		double bedside_volume = (button->GetState() == uitbc::Button::kPressed)? 0.02 : 1.0;
+		v_set(GetVariableScope(), kRtvarUiSoundMastervolume, bedside_volume);
+		ui_manager_->GetSoundManager()->SetMasterVolume((float)bedside_volume);	// Set right away for button volume.
+	} else if (button->GetTag() == -4) {
+		pause_button_->SetVisible(true);
 		GetConsoleManager()->PushYieldCommand(strutil::Format("set-level-index %i", GetCurrentLevelNumber()));
-		mMenu->DismissDialog();
+		menu_->DismissDialog();
 		HiResTimer::StepCounterShadow();
-		v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
-	}
-	else if (pButton->GetTag() == -7)
-	{
-		mPauseButton->SetVisible(true);
+		v_set(GetVariableScope(), kRtvarPhysicsHalt, false);
+	} else if (button->GetTag() == -7) {
+		pause_button_->SetVisible(true);
 		GetConsoleManager()->PushYieldCommand(strutil::Format("set-level-index %i", GetCurrentLevelNumber()+1));
-		mMenu->DismissDialog();
+		menu_->DismissDialog();
 		HiResTimer::StepCounterShadow();
-		v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
-	}
-	else if (pButton->GetTag() == -8)
-	{
-		mPauseButton->SetVisible(true);
+		v_set(GetVariableScope(), kRtvarPhysicsHalt, false);
+	} else if (button->GetTag() == -8) {
+		pause_button_->SetVisible(true);
 		GetConsoleManager()->PushYieldCommand("set-level-index 0");
-		mMenu->DismissDialog();
+		menu_->DismissDialog();
 		HiResTimer::StepCounterShadow();
-		v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
-	}
-	else if (pButton->GetTag() == -9)
-	{
-		mPauseButton->SetVisible(true);
+		v_set(GetVariableScope(), kRtvarPhysicsHalt, false);
+	} else if (button->GetTag() == -9) {
+		pause_button_->SetVisible(true);
 		HiResTimer::StepCounterShadow();
-		v_set(GetVariableScope(), RTVAR_PHYSICS_HALT, false);
+		v_set(GetVariableScope(), kRtvarPhysicsHalt, false);
 	}
 }
 
 
 
-void FireManager::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* pResource)
-{
-	if (pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		mUiManager->GetDesktopWindow()->GetImageManager()->AddLoadedImage(*pResource->GetRamData(), pResource->GetData(),
-			UiTbc::GUIImageManager::CENTERED, UiTbc::GUIImageManager::ALPHABLEND, 255);
+void FireManager::PainterImageLoadCallback(UiCure::UserPainterKeepImageResource* resource) {
+	if (resource->GetLoadState() == cure::kResourceLoadComplete) {
+		ui_manager_->GetDesktopWindow()->GetImageManager()->AddLoadedImage(*resource->GetRamData(), resource->GetData(),
+			uitbc::GUIImageManager::kCentered, uitbc::GUIImageManager::kAlphablend, 255);
 	}
 }
 
 
 
-bool FireManager::DisableAmbient()
-{
-	UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
-	mStoreLightsEnabled = lRenderer->GetLightsEnabled();
-	if (mStoreLightsEnabled)
-	{
-		lRenderer->GetAmbientLight(mStoreAmbient.x, mStoreAmbient.y, mStoreAmbient.z);
-		lRenderer->SetAmbientLight(1.0f, 1.0f, 1.0f);
-		lRenderer->EnableAllLights(false);
+bool FireManager::DisableAmbient() {
+	uitbc::Renderer* renderer = ui_manager_->GetRenderer();
+	store_lights_enabled_ = renderer->GetLightsEnabled();
+	if (store_lights_enabled_) {
+		renderer->GetAmbientLight(store_ambient_.x, store_ambient_.y, store_ambient_.z);
+		renderer->SetAmbientLight(1.0f, 1.0f, 1.0f);
+		renderer->EnableAllLights(false);
 	}
 	//glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	return true;
 }
 
-void FireManager::EnableAmbient()
-{
-	UiTbc::Renderer* lRenderer = mUiManager->GetRenderer();
-	if (mStoreLightsEnabled)
-	{
-		lRenderer->EnableAllLights(true);
-		lRenderer->SetAmbientLight(mStoreAmbient.x, mStoreAmbient.y, mStoreAmbient.z);
+void FireManager::EnableAmbient() {
+	uitbc::Renderer* renderer = ui_manager_->GetRenderer();
+	if (store_lights_enabled_) {
+		renderer->EnableAllLights(true);
+		renderer->SetAmbientLight(store_ambient_.x, store_ambient_.y, store_ambient_.z);
 	}
 	//glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 }
 
 
 
-loginstance(GAME, FireManager);
+loginstance(kGame, FireManager);
 
 
 

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,19 +8,17 @@
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-enum RemoteStatus
-{
-	REMOTE_OK			= 1,
-	REMOTE_NO_CONNECTION		= 2,
-	REMOTE_UNKNOWN			= 3,
-	REMOTE_LOGIN_ALREADY		= 4,
-	REMOTE_LOGIN_ERRONOUS_DATA	= 5,
-	REMOTE_LOGIN_BAN		= 6,
+enum RemoteStatus {
+	kRemoteOk			= 1,
+	kRemoteNoConnection		= 2,
+	kRemoteUnknown			= 3,
+	kRemoteLoginAlready		= 4,
+	kRemoteLoginErronousData	= 5,
+	kRemoteLoginBan		= 6,
 };
 
 

@@ -4,7 +4,7 @@
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
-	
+
 	The LooseOctree class is used to store objects in three dimensions
 	spatially. It can be used as a loose octree as well as a normal octree.
 	When searching for objects in a volumetric space this is the optimal
@@ -20,14 +20,14 @@
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "Vector3D.h"
-#include "Sphere.h"
-#include "AABB.h"
-#include "CollisionDetector3D.h"
+#include "lepratypes.h"
+#include "vector3d.h"
+#include "sphere.h"
+#include "aabb.h"
+#include "collisiondetector3d.h"
 
 #include <list>
-#include "HashTable.h"
+#include "hashtable.h"
 
 // _TObject is the object class itself.
 // _TVarType is a primitive variable type (i.e. float or double).
@@ -35,20 +35,18 @@
 #define TEMPLATE template<class _TKey, class _TObject, class _TVarType, class _THashFunc>
 #define QUAL LooseOctree<_TKey, _TObject, _TVarType, _THashFunc>
 
-namespace Lepra
-{
+namespace lepra {
 
 template<class _TVarType>
-class LOVolume
-{
+class LOVolume {
 public:
-	virtual bool IsAABBEnclosingVolume(const AABB<_TVarType>& pAABB)   = 0;
-	virtual bool IsAABCEnclosingVolume(const Vector3D<_TVarType>& pAABCCenter,
-						_TVarType pHalfAABCSize)   = 0;
-	virtual bool IsBSOverlappingVolume(const Sphere<_TVarType>& pBS)   = 0;
-	virtual bool IsAABBOverlappingVolume(const AABB<_TVarType>& pAABB) = 0;
+	virtual bool IsAABBEnclosingVolume(const AABB<_TVarType>& aabb)   = 0;
+	virtual bool IsAABCEnclosingVolume(const Vector3D<_TVarType>& aabc_center,
+						_TVarType half_aabc_size)   = 0;
+	virtual bool IsBSOverlappingVolume(const Sphere<_TVarType>& bs)   = 0;
+	virtual bool IsAABBOverlappingVolume(const AABB<_TVarType>& aabb) = 0;
 	virtual Vector3D<_TVarType> GetPosition()                          = 0;
-	virtual void SetPosition(const Vector3D<_TVarType>& pPos)          = 0;
+	virtual void SetPosition(const Vector3D<_TVarType>& pos)          = 0;
 };
 
 // Default area types.
@@ -57,16 +55,16 @@ class LOSphereVolume : public Sphere<_TVarType>, public LOVolume<_TVarType>
 {
 public:
 	LOSphereVolume() {}
-	LOSphereVolume(const Vector3D<_TVarType>& pPosition, _TVarType pRadius) : Sphere<_TVarType>(pPosition, pRadius) {}
+	LOSphereVolume(const Vector3D<_TVarType>& position, _TVarType radius) : Sphere<_TVarType>(position, radius) {}
 
-	bool IsAABBEnclosingVolume(const AABB<_TVarType>& pAABB) { return mCD.IsAABBEnclosingSphere(pAABB, *this); }
-	bool IsAABCEnclosingVolume(const Vector3D<_TVarType>& pAABCCenter, _TVarType pHalfAABCSize) { return mCD.IsAABBEnclosingSphere(AABB<_TVarType>(pAABCCenter, Vector3D<_TVarType>(pHalfAABCSize, pHalfAABCSize, pHalfAABCSize)), *this); }
-	bool IsBSOverlappingVolume(const Sphere<_TVarType>& pBS) { return mCD.IsSphereOverlappingSphere(pBS, *this); }
-	bool IsAABBOverlappingVolume(const AABB<_TVarType>& pAABB) { return mCD.IsAABBOverlappingSphere(pAABB, *this); }
+	bool IsAABBEnclosingVolume(const AABB<_TVarType>& aabb) { return cd_.IsAABBEnclosingSphere(aabb, *this); }
+	bool IsAABCEnclosingVolume(const Vector3D<_TVarType>& aabc_center, _TVarType half_aabc_size) { return cd_.IsAABBEnclosingSphere(AABB<_TVarType>(aabc_center, Vector3D<_TVarType>(half_aabc_size, half_aabc_size, half_aabc_size)), *this); }
+	bool IsBSOverlappingVolume(const Sphere<_TVarType>& bs) { return cd_.IsSphereOverlappingSphere(bs, *this); }
+	bool IsAABBOverlappingVolume(const AABB<_TVarType>& aabb) { return cd_.IsAABBOverlappingSphere(aabb, *this); }
 	Vector3D<_TVarType> GetPosition() { return Sphere<_TVarType>::GetPosition(); }
-	void SetPosition(const Vector3D<_TVarType>& pPos) { Sphere<_TVarType>::SetPosition(pPos); }
+	void SetPosition(const Vector3D<_TVarType>& pos) { Sphere<_TVarType>::SetPosition(pos); }
 private:
-	CollisionDetector3D<_TVarType> mCD;
+	CollisionDetector3D<_TVarType> cd_;
 };
 
 template<class _TVarType>
@@ -74,60 +72,59 @@ class LOAABBVolume : public AABB<_TVarType>, public LOVolume<_TVarType>
 {
 public:
 	LOAABBVolume() {}
-	LOAABBVolume(const Vector3D<_TVarType>& pPosition, const Vector3D<_TVarType>& pSize) : AABB<_TVarType>(pPosition, pSize) {}
+	LOAABBVolume(const Vector3D<_TVarType>& position, const Vector3D<_TVarType>& size) : AABB<_TVarType>(position, size) {}
 
-	bool IsAABBEnclosingVolume(const AABB<_TVarType>& pAABB) { return mCD.IsAABB1EnclosingAABB2(pAABB, *this); }
-	bool IsAABCEnclosingVolume(const Vector3D<_TVarType>& pAABCCenter, _TVarType pHalfAABCSize) { return mCD.IsAABB1EnclosingAABB2(AABB<_TVarType>(pAABCCenter, Vector3D<_TVarType>(pHalfAABCSize, pHalfAABCSize, pHalfAABCSize)), *this); }
-	bool IsBSOverlappingVolume(const Sphere<_TVarType>& pBS) { return mCD.IsAABBOverlappingSphere(*this, pBS); }
-	bool IsAABBOverlappingVolume(const AABB<_TVarType>& pAABB) { return mCD.IsAABBOverlappingAABB(pAABB, *this); }
+	bool IsAABBEnclosingVolume(const AABB<_TVarType>& aabb) { return cd_.IsAABB1EnclosingAABB2(aabb, *this); }
+	bool IsAABCEnclosingVolume(const Vector3D<_TVarType>& aabc_center, _TVarType half_aabc_size) { return cd_.IsAABB1EnclosingAABB2(AABB<_TVarType>(aabc_center, Vector3D<_TVarType>(half_aabc_size, half_aabc_size, half_aabc_size)), *this); }
+	bool IsBSOverlappingVolume(const Sphere<_TVarType>& bs) { return cd_.IsAABBOverlappingSphere(*this, bs); }
+	bool IsAABBOverlappingVolume(const AABB<_TVarType>& aabb) { return cd_.IsAABBOverlappingAABB(aabb, *this); }
 	Vector3D<_TVarType> GetPosition() { return AABB<_TVarType>::GetPosition(); }
-	void SetPosition(const Vector3D<_TVarType>& pPos) { AABB<_TVarType>::SetPosition(pPos); }
+	void SetPosition(const Vector3D<_TVarType>& pos) { AABB<_TVarType>::SetPosition(pos); }
 private:
-	CollisionDetector3D<_TVarType> mCD;
+	CollisionDetector3D<_TVarType> cd_;
 };
 
 
 template<class _TKey, class _TObject, class _TVarType, class _THashFunc = std::hash<_TKey> >
-class LooseOctree
-{
+class LooseOctree {
 public:
 
 	typedef std::list<_TObject>	        ObjectList;
 	typedef std::list<AABB<_TVarType> > AABBList;
 
-	LooseOctree(_TObject pErrorObject,			// An object to return when an error occurs.
-			_TVarType pTotalTreeSize = 65536,	// Length of one dimension the entire 3D-space.
-			_TVarType pMinimumCellSize = 16,	// Length of one dimension of the smallest allowed node.
-			_TVarType pK = 2);			// Node expansion factor.
+	LooseOctree(_TObject error_object,			// An object to return when an error occurs.
+			_TVarType total_tree_size = 65536,	// Length of one dimension the entire 3D-space.
+			_TVarType minimum_cell_size = 16,	// Length of one dimension of the smallest allowed node.
+			_TVarType k = 2);			// Node expansion factor.
 	~LooseOctree();
 
-	void InsertObject(_TKey pKey, LOVolume<_TVarType>* pVolume, _TObject pObject);
-	_TObject RemoveObject(_TKey pKey);
-	_TObject FindObject(_TKey pKey) const;
+	void InsertObject(_TKey key, LOVolume<_TVarType>* volume, _TObject object);
+	_TObject RemoveObject(_TKey key);
+	_TObject FindObject(_TKey key) const;
 
-	bool MoveObject(_TKey pKey, LOVolume<_TVarType>* pNewVolume);
-	_TObject MoveObject(_TKey pKey, const Vector3D<_TVarType>& pToPos); // Slightly slower...
-																					
-	// Get list with objects within the specified volume. The list is not cleared, 
+	bool MoveObject(_TKey key, LOVolume<_TVarType>* new_volume);
+	_TObject MoveObject(_TKey key, const Vector3D<_TVarType>& to_pos); // Slightly slower...
+
+	// Get list with objects within the specified volume. The list is not cleared,
 	// objects are appended.
-	void GetObjects(ObjectList& pObjects, const Sphere<_TVarType>& pBS);
-	void GetObjects(ObjectList& pObjects, const AABB<_TVarType>& pAABB);
+	void GetObjects(ObjectList& objects, const Sphere<_TVarType>& bs);
+	void GetObjects(ObjectList& objects, const AABB<_TVarType>& aabb);
 
 	//
 	// Debug utilities.
 	//
 
-	inline unsigned	GetNumObjects() const {return mNumObjects;}
-	inline unsigned	GetNumNodes() const {return mNumNodes;}
+	inline unsigned	GetNumObjects() const {return num_objects_;}
+	inline unsigned	GetNumNodes() const {return num_nodes_;}
 
 	// Get number of bytes currently allocated by tree (only the nodes, not the objects).
-	inline unsigned	GetMemUsage() const {return mNumNodes * sizeof(Node);}
+	inline unsigned	GetMemUsage() const {return num_nodes_ * sizeof(Node);}
 	// Get number of bytes that the octree would need if all nodes were occupied.
 	// (Only the nodes, not the objects).
 	unsigned GetFullTreeMemSize() const;
 
 	str ToString() const;
-	void GetNodeBoxes(AABBList& pBoxes) const;
+	void GetNodeBoxes(AABBList& boxes) const;
 
 private:
 
@@ -135,155 +132,131 @@ private:
 	// and since the objects are 3D, they take up some space, defined by
 	// the volume. Each object- and volume-pair makes one entry (look at class Entry below).
 	// All entries are stored in a hash table, typedef:ed as EntryTable.
-	class Node
-	{
+	class Node {
 		public:
 
 			// A node entry. Contains the object and its associated volume.
-			class Entry
-			{
+			class Entry {
 				public:
-					inline Entry(LOVolume<_TVarType>* pVolume, const _TObject& pObject) :
-						mVolume(pVolume),
-						mObject(pObject)
-					{
+					inline Entry(LOVolume<_TVarType>* volume, const _TObject& object) :
+						volume_(volume),
+						object_(object) {
 					}
 
-					inline Entry(const Entry& pEntry)	
-					{
-						mVolume = pEntry.mVolume;
-						mObject  = pEntry.mObject;
+					inline Entry(const Entry& entry) {
+						volume_ = entry.volume_;
+						object_  = entry.object_;
 					}
 
-					LOVolume<_TVarType>*	mVolume;
-					_TObject		mObject;
+					LOVolume<_TVarType>*	volume_;
+					_TObject		object_;
 			};
-			
+
 			typedef HashTable<_TKey, Entry, _THashFunc, 32> EntryTable;
 
-			inline Node(Node* pParent, uint8 pIndex, _TVarType pFixedSizeHalf)
-			{
-				Init(pParent, pIndex, pFixedSizeHalf);
+			inline Node(Node* parent, uint8 index, _TVarType fixed_size_half) {
+				Init(parent, index, fixed_size_half);
 			}
 
-			inline ~Node()
-			{
+			inline ~Node() {
 				DeleteChildren(0);
 			}
 
-			void Init(Node* pParent, uint8 pIndex, _TVarType pFixedSizeHalf)
-			{
+			void Init(Node* parent, uint8 index, _TVarType fixed_size_half) {
 				// Half the size of this node, "unloose", which means
 				// that this is the size of the node as it should be in a normal octree.
-				mFixedSizeHalf = pFixedSizeHalf;
+				fixed_size_half_ = fixed_size_half;
 
-				mParent = pParent;
+				parent_ = parent;
 
-				mChildren[0] = 0;
-				mChildren[1] = 0;
-				mChildren[2] = 0;
-				mChildren[3] = 0;
-				mChildren[4] = 0;
-				mChildren[5] = 0;
-				mChildren[6] = 0;
-				mChildren[7] = 0;
+				children_[0] = 0;
+				children_[1] = 0;
+				children_[2] = 0;
+				children_[3] = 0;
+				children_[4] = 0;
+				children_[5] = 0;
+				children_[6] = 0;
+				children_[7] = 0;
 
 				// The index tells us which of the parents children this node is.
-				mIndex = pIndex;
+				index_ = index;
 
 				// Childmask is a bitfield containing 1's where there is a child node,
 				// and 0's where there isn't.
-				mChildMask = 0;
-				mObjectCount = 0;
+				child_mask_ = 0;
+				object_count_ = 0;
 			}
 
-			const Vector3D<_TVarType>& GetPosition() const
-			{
-				return mNodeBox.GetPosition();
+			const Vector3D<_TVarType>& GetPosition() const {
+				return node_box_.GetPosition();
 			}
 
-			_TVarType GetSizeHalf() const
-			{
-				return mNodeBox.GetSize().x;
+			_TVarType GetSizeHalf() const {
+				return node_box_.GetSize().x;
 			}
 
-			_TVarType GetFixedSizeHalf() const
-			{
-				return mFixedSizeHalf;
+			_TVarType GetFixedSizeHalf() const {
+				return fixed_size_half_;
 			}
 
-			inline void DeleteChildren(LooseOctree* pOctree)
-			{
-				for (int i = 0; i < 8; i++)
-				{
-					if (mChildren[i] != 0)
-					{
-						mChildren[i]->DeleteChildren(pOctree);
+			inline void DeleteChildren(LooseOctree* octree) {
+				for (int i = 0; i < 8; i++) {
+					if (children_[i] != 0) {
+						children_[i]->DeleteChildren(octree);
 
-						if (pOctree != 0)
-						{
-							pOctree->RecycleNode(mChildren[i]);
+						if (octree != 0) {
+							octree->RecycleNode(children_[i]);
+						} else {
+							delete children_[i];
 						}
-						else
-						{
-							delete mChildren[i];
-						}
-						mChildren[i] = 0;
+						children_[i] = 0;
 					}
 				}
 			}
 
-			inline bool IsEmpty()
-			{
-				return (mObjectCount == 0 && mChildMask == 0);
+			inline bool IsEmpty() {
+				return (object_count_ == 0 && child_mask_ == 0);
 			}
 
 /*
-			void GetNodeInfoAsText(std::stringstream& pStr, int pLevel, int pIndex) const
-			{
+			void GetNodeInfoAsText(std::stringstream& s, int level, int index) const {
 				int i;
-				for (i = 0; i < pLevel; i++)
-				{
-					pStr << "\t";
+				for (i = 0; i < level; i++) {
+					s << "\t";
 				}
 
-				pStr << "[" << pIndex << "]\t" << mObjectCount << std::endl;
+				s << "[" << index << "]\t" << object_count_ << std::endl;
 
-				for (i = 0; i < 8; i++)
-				{
-					if (mChildren[i] != NULL)
-					{
-						mChildren[i]->GetNodeInfoAsText(pStr, pLevel + 1, i);
+				for (i = 0; i < 8; i++) {
+					if (children_[i] != NULL) {
+						children_[i]->GetNodeInfoAsText(s, level + 1, i);
 					}
 				}
 			}
 */
 
-			void GetNodeBoxRecursive(AABBList& pBoxes) const
-			{
-				pBoxes.PushBack(mNodeBox);
+			void GetNodeBoxRecursive(AABBList& boxes) const {
+				boxes.PushBack(node_box_);
 
-				for (int i = 0; i < 8; i++)
-				{
-					if (mChildren[i] != NULL)
-					{
-						mChildren[i]->GetNodeBoxRecursive(pBoxes);
+				for (int i = 0; i < 8; i++) {
+					if (children_[i] != NULL) {
+						children_[i]->GetNodeBoxRecursive(boxes);
 					}
 				}
 			}
 
-			_TVarType mFixedSizeHalf;
-			AABB<_TVarType>	mNodeBox;
+			_TVarType fixed_size_half_;
+			AABB<_TVarType>	node_box_;
 
-			Node* mParent;
-			Node* mChildren[8];
+			Node* parent_;
+			Node* children_[8];
 
-			uint8 mIndex;
-			
-			uint16 mChildMask;
-			uint16 mObjectCount;
+			uint8 index_;
 
-			EntryTable mEntryTable;
+			uint16 child_mask_;
+			uint16 object_count_;
+
+			EntryTable entry_table_;
 	};
 
 
@@ -295,58 +268,57 @@ private:
 	// Used to quickly find the object that we search for.
 	typedef HashTable<_TKey, Node*, _THashFunc> NodeTable;
 
-	void InsertObject(_TKey pKey,
-			  typename Node::Entry pEntry,
-			  Node* pNode,
-			  uint16 pDepth);
+	void InsertObject(_TKey key,
+			  typename Node::Entry entry,
+			  Node* node,
+			  uint16 depth);
 
-	typename Node::Entry RemoveObject(_TKey pKey, typename NodeTable::Iterator& pNodeIter);
+	typename Node::Entry RemoveObject(_TKey key, typename NodeTable::Iterator& node_iter);
 
-	_TObject MoveObject(_TKey pKey, typename NodeTable::Iterator& pNodeIter);
+	_TObject MoveObject(_TKey key, typename NodeTable::Iterator& node_iter);
 
-	typename Node::EntryTable::Iterator FindObject(_TKey pKey, Node* pObjectNode) const;
+	typename Node::EntryTable::Iterator FindObject(_TKey key, Node* object_node) const;
 
-	inline unsigned GetOverlaps( const Vector3D<_TVarType>& pPosRelParent, 
-				    _TVarType pBoundingRadius, 
-				    _TVarType pChildNodeSize,
-				    _TVarType pParentNodeSize) const;
-	inline unsigned GetOverlaps( const Vector3D<_TVarType>& pPosRelParent, 
-				     _TVarType pSizeX, 
-				     _TVarType pSizeY, 
-				     _TVarType pSizeZ, 
-				     _TVarType pChildNodeSize,
-				     _TVarType pParentNodeSize) const;
+	inline unsigned GetOverlaps( const Vector3D<_TVarType>& pos_rel_parent,
+				    _TVarType bounding_radius,
+				    _TVarType child_node_size,
+				    _TVarType parent_node_size) const;
+	inline unsigned GetOverlaps( const Vector3D<_TVarType>& pos_rel_parent,
+				     _TVarType size_x,
+				     _TVarType size_y,
+				     _TVarType size_z,
+				     _TVarType child_node_size,
+				     _TVarType parent_node_size) const;
 
 	// BS = Bounding Sphere.
-	void GetObjectsInBS(ObjectList& pObjects, const Sphere<_TVarType>& pBS, Node* pNode);
-	void GetObjectsInAABB(ObjectList& pObjects, const AABB<_TVarType>& pAABB, Node* pNode);
+	void GetObjectsInBS(ObjectList& objects, const Sphere<_TVarType>& bs, Node* node);
+	void GetObjectsInAABB(ObjectList& objects, const AABB<_TVarType>& aabb, Node* node);
 
-	uint8 GetChild(const Vector3D<_TVarType>& pPos, const Node* pNode);
-	uint8 GetChild(const Vector3D<_TVarType>& pPos, const Node* pNode, Vector3D<_TVarType>& pChildPos);
-	
-	void RecycleNode(Node* pNode);		// Used to minimize the use of new and delete.
-	Node* NewNode(Node* pParent, uint8 pIndex, _TVarType pFixedSizeHalf);
+	uint8 GetChild(const Vector3D<_TVarType>& pos, const Node* node);
+	uint8 GetChild(const Vector3D<_TVarType>& pos, const Node* node, Vector3D<_TVarType>& child_pos);
+
+	void RecycleNode(Node* node);		// Used to minimize the use of new and delete.
+	Node* NewNode(Node* parent, uint8 index, _TVarType fixed_size_half);
 
 
-	enum
-	{
-		MAX_RECYCLED_NODES = 1024,
+	enum {
+		kMaxRecycledNodes = 1024,
 	};
 
 	typedef std::list<Node*> NodeList;
 
-	NodeList mRecycledNodeList;
-	NodeTable mNodeTable;
+	NodeList recycled_node_list_;
+	NodeTable node_table_;
 
-	Node* mRootNode;
+	Node* root_node_;
 
-	uint16 mMaxTreeDepth;
-	_TVarType mK;				// A constant node scaling factor.
+	uint16 max_tree_depth_;
+	_TVarType k_;				// A constant node scaling factor.
 
-	unsigned mNumObjects;
-	unsigned mNumNodes;
+	unsigned num_objects_;
+	unsigned num_nodes_;
 
-	_TObject mErrorObject;
+	_TObject error_object_;
 };
 
 
@@ -355,89 +327,89 @@ private:
 // LO = LooseOctree
 // GO = GetOverlaps
 
-#define MACRO_LO_GO1_TEST_TOP_AND_BOTTOM	\
+#define kMacroLoGo1TestTopAndBottom	\
 {	\
 	/* Test top. */	\
-	if ( ( pPosRelParent.z - pChildNodeSize ) > lMinBoxSeparation || \
-	    ( pChildNodeSize - pPosRelParent.z ) > lMinBoxSeparation ) \
+	if ( ( pos_rel_parent.z - child_node_size ) > min_box_separation || \
+	    ( child_node_size - pos_rel_parent.z ) > min_box_separation ) \
 	{	\
 		/* Remove top. */	\
-		lOverlapMask &= ~(2 + 8 + 32 + 128);	\
+		overlap_mask &= ~(2 + 8 + 32 + 128);	\
 	}	\
 	/* Test bottom. */	\
-	else if( ( pPosRelParent.z + pChildNodeSize ) > lMinBoxSeparation || \
-		-( pChildNodeSize + pPosRelParent.z ) > lMinBoxSeparation ) \
+	else if( ( pos_rel_parent.z + child_node_size ) > min_box_separation || \
+		-( child_node_size + pos_rel_parent.z ) > min_box_separation ) \
 	{	\
 		/* Remove bottom. */	\
-		lOverlapMask &= ~(1 + 4 + 16 + 64);	\
+		overlap_mask &= ~(1 + 4 + 16 + 64);	\
 	}	\
 }
 
-#define MACRO_LO_GO2_TEST_TOP_AND_BOTTOM	\
+#define kMacroLoGo2TestTopAndBottom	\
 {	\
 	/* Test top. */	\
-	if ( ( pPosRelParent.z - pChildNodeSize ) > lMinBoxSeparationZ || \
-	    ( pChildNodeSize - pPosRelParent.z ) > lMinBoxSeparationZ ) \
+	if ( ( pos_rel_parent.z - child_node_size ) > min_box_separation_z || \
+	    ( child_node_size - pos_rel_parent.z ) > min_box_separation_z ) \
 	{	\
 		/* Remove top. */	\
-		lOverlapMask &= ~(2 + 8 + 32 + 128);	\
+		overlap_mask &= ~(2 + 8 + 32 + 128);	\
 	}	\
 	/* Test bottom. */	\
-	else if( ( pPosRelParent.z + pChildNodeSize ) > lMinBoxSeparationZ || \
-		-( pChildNodeSize + pPosRelParent.z ) > lMinBoxSeparationZ ) \
+	else if( ( pos_rel_parent.z + child_node_size ) > min_box_separation_z || \
+		-( child_node_size + pos_rel_parent.z ) > min_box_separation_z ) \
 	{	\
 		/* Remove bottom. */	\
-		lOverlapMask &= ~(1 + 4 + 16 + 64);	\
+		overlap_mask &= ~(1 + 4 + 16 + 64);	\
 	}	\
 }
 
 
-#define MACRO_LO_GO1_TEST_FRONT_BACK_TOP_BOTTOM	\
+#define kMacroLoGo1TestFrontBackTopBottom	\
 {	\
 	/* Test front. */	\
-	if ( ( pPosRelParent.y - pChildNodeSize ) > lMinBoxSeparation || \
-	    ( pChildNodeSize - pPosRelParent.y ) > lMinBoxSeparation ) \
+	if ( ( pos_rel_parent.y - child_node_size ) > min_box_separation || \
+	    ( child_node_size - pos_rel_parent.y ) > min_box_separation ) \
 	{	\
 		/* Remove front. */	\
-		lOverlapMask &= ~(4 + 8 + 64 + 128);	\
-		MACRO_LO_GO1_TEST_TOP_AND_BOTTOM	\
+		overlap_mask &= ~(4 + 8 + 64 + 128);	\
+		kMacroLoGo1TestTopAndBottom	\
 	}	\
 	/* Test back. */	\
-	else if( ( pPosRelParent.y + pChildNodeSize ) > lMinBoxSeparation || \
-		-( pChildNodeSize + pPosRelParent.y ) > lMinBoxSeparation ) \
+	else if( ( pos_rel_parent.y + child_node_size ) > min_box_separation || \
+		-( child_node_size + pos_rel_parent.y ) > min_box_separation ) \
 	{	\
 		/* Remove back. */	\
-		lOverlapMask &= ~(1 + 2 + 16 + 32);	\
-		MACRO_LO_GO1_TEST_TOP_AND_BOTTOM	\
+		overlap_mask &= ~(1 + 2 + 16 + 32);	\
+		kMacroLoGo1TestTopAndBottom	\
 	}	\
 }
 
 
-#define MACRO_LO_GO2_TEST_FRONT_BACK_TOP_BOTTOM	\
+#define kMacroLoGo2TestFrontBackTopBottom	\
 {	\
 	/* Test front. */	\
-	if ( ( pPosRelParent.y - pChildNodeSize ) > lMinBoxSeparationY || \
-	    ( pChildNodeSize - pPosRelParent.y ) > lMinBoxSeparationY ) \
+	if ( ( pos_rel_parent.y - child_node_size ) > min_box_separation_y || \
+	    ( child_node_size - pos_rel_parent.y ) > min_box_separation_y ) \
 	{	\
 		/* Remove front. */	\
-		lOverlapMask &= ~(4 + 8 + 64 + 128);	\
-		MACRO_LO_GO2_TEST_TOP_AND_BOTTOM	\
+		overlap_mask &= ~(4 + 8 + 64 + 128);	\
+		kMacroLoGo2TestTopAndBottom	\
 	}	\
 	/* Test back. */	\
-	else if( ( pPosRelParent.y + pChildNodeSize ) > lMinBoxSeparationY || \
-		-( pChildNodeSize + pPosRelParent.y ) > lMinBoxSeparationY ) \
+	else if( ( pos_rel_parent.y + child_node_size ) > min_box_separation_y || \
+		-( child_node_size + pos_rel_parent.y ) > min_box_separation_y ) \
 	{	\
 		/* Remove back. */	\
-		lOverlapMask &= ~(1 + 2 + 16 + 32);	\
-		MACRO_LO_GO2_TEST_TOP_AND_BOTTOM	\
+		overlap_mask &= ~(1 + 2 + 16 + 32);	\
+		kMacroLoGo2TestTopAndBottom	\
 	}	\
 }
 
-#include "LooseOctree.inl"
+#include "looseoctree.inl"
 
 }
 
 #undef TEMPLATE
 #undef QUAL
-#undef MACRO_LO_GO1_TEST_TOP_AND_BOTTOM
-#undef MACRO_LO_GO2_TEST_FRONT_BACK_TOP_BOTTOM
+#undef kMacroLoGo1TestTopAndBottom
+#undef kMacroLoGo2TestFrontBackTopBottom

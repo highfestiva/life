@@ -1,27 +1,25 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "String.h"
+#include "string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class JsonString
-{
+class JsonString {
 public:
-	static str ToJson(const str& pString);
-	static str FromJson(const str& pJsonString);
+	static str ToJson(const str& s);
+	static str FromJson(const str& json_string);
 
-	static str UrlEncode(const str& pUrl);
+	static str UrlEncode(const str& url);
 };
 
 

@@ -10,8 +10,8 @@
 
 #include <locale>
 #include <vector>
-#include "String.h"
-#include "LepraAssert.h"
+#include "string.h"
+#include "lepraassert.h"
 
 
 
@@ -19,87 +19,85 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-STR_UTIL_TEMPLATE class StringUtilityTemplate
-{
+STR_UTIL_TEMPLATE class StringUtilityTemplate {
 public:
 	typedef std::vector<_String> strvec;
-	static strvec Split(const _String& pString, const _String& pCharDelimitors, int pSplitMaxCount = 10000);
+	static strvec Split(const _String& s, const _String& char_delimitors, int split_max_count = 10000);
 	// Splits strings, but also keeps track of quotes. Strings within quotes are left untouched from the delimitors.
-	static strvec BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount = 10000);
-	static void FastBlockSplit(strvec& pTokenVector, const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount = 10000);
-	static _String Join(const strvec& pStringVector, const _String& pJoinString, size_t pStartIndex = 0, size_t pEndIndex = _String::npos);
-	static void Append(strvec& pDestination, const strvec& pAppend);
+	static strvec BlockSplit(const _String& s, const _String& char_delimitors, bool keep_quotes, bool is_c_string, int split_max_count = 10000);
+	static void FastBlockSplit(strvec& token_vector, const _String& s, const _String& char_delimitors, bool keep_quotes, bool is_c_string, int split_max_count = 10000);
+	static _String Join(const strvec& string_vector, const _String& join_string, size_t start_index = 0, size_t end_index = _String::npos);
+	static void Append(strvec& destination, const strvec& append);
 
-	static _String StringToCString(const _String& pString);
-	static bool CStringToString(const _String& pCString, _String& _pString);
+	static _String StringToCString(const _String& s);
+	static bool CStringToString(const _String& c_string, _String& _pString);
 
-	static _String StripLeft(const _String& pString, const _String& pCharDelimitors);
-	static _String StripRight(const _String& pString, const _String& pCharDelimitors);
-	static _String Strip(const _String& pString, const _String& pCharDelimitors);
+	static _String StripLeft(const _String& s, const _String& char_delimitors);
+	static _String StripRight(const _String& s, const _String& char_delimitors);
+	static _String Strip(const _String& s, const _String& char_delimitors);
 
-	static _String ReplaceAll(const _String& pString, typename _String::value_type pFromChar, typename _String::value_type pToChar);
-	static _String ReplaceAll(const _String& pString, const _String& pFrom, const _String& pTo);
+	static _String ReplaceAll(const _String& s, typename _String::value_type from_char, typename _String::value_type to_char);
+	static _String ReplaceAll(const _String& s, const _String& from, const _String& to);
 
-	static _String Format(const typename _String::value_type* ppFormat, ...);
-	static _String VFormat(const typename _String::value_type* ppFormat, va_list& pArguments);
+	static _String Format(const typename _String::value_type* format, ...);
+	static _String VFormat(const typename _String::value_type* format, va_list& arguments);
 
-	static bool StringToInt(const _String& pString, int& pValue, int pRadix = 10);
-	static _String IntToString(int64 pValue, int pRadix);
-	static bool StringToDouble(const _String& pString, double& pValue);
-	static void DoubleToString(double pValue, int pNumDecimals, _String& pString);
-	static _String DoubleToString(double pValue, int pNumDecimals);
-	static _String FastDoubleToString(double pValue);
-	static bool StringToBool(const _String& pString, bool& pValue);
-	static _String BoolToString(bool pValue);
+	static bool StringToInt(const _String& s, int& value, int radix = 10);
+	static _String IntToString(int64 value, int radix);
+	static bool StringToDouble(const _String& s, double& value);
+	static void DoubleToString(double value, int num_decimals, _String& s);
+	static _String DoubleToString(double value, int num_decimals);
+	static _String FastDoubleToString(double value);
+	static bool StringToBool(const _String& s, bool& value);
+	static _String BoolToString(bool value);
 
-	static _String Reverse(const _String& pString);
-	static const _String Right(const _String& pString, size_t pCharCount);
-	static bool StartsWith(const _String& pString, const _String& pStart);
-	static bool EndsWith(const _String& pString, const _String& pEnd);
+	static _String Reverse(const _String& s);
+	static const _String Right(const _String& s, size_t char_count);
+	static bool StartsWith(const _String& s, const _String& start);
+	static bool EndsWith(const _String& s, const _String& end);
 
-	static size_t FindPreviousWord(const _String& pLine, const _String& pDelimitors, size_t pStartIndex);
-	static size_t FindNextWord(const _String& pLine, const _String& pDelimitors, size_t pStartIndex);
-	static int FindFirstWhiteSpace(const _String& pString, size_t pOffset, int pSearchDirection);
-	static void StripAllWhiteSpaces(_String& pString);
-	static bool IsWhiteSpace(typename _String::value_type pChar);
-	static _String ReplaceCtrlChars(const _String& pString, typename _String::value_type pReplacement);
-	static _String DumpData(const uint8* pData, size_t pLength);
+	static size_t FindPreviousWord(const _String& line, const _String& delimitors, size_t start_index);
+	static size_t FindNextWord(const _String& line, const _String& delimitors, size_t start_index);
+	static int FindFirstWhiteSpace(const _String& s, size_t offset, int search_direction);
+	static void StripAllWhiteSpaces(_String& s);
+	static bool IsWhiteSpace(typename _String::value_type c);
+	static _String ReplaceCtrlChars(const _String& s, typename _String::value_type replacement);
+	static _String DumpData(const uint8* data, size_t length);
 
-	static const _String Encode(const str& pString);
-	static const _String Encode(const wstr& pString);
+	static const _String Encode(const str& s);
+	static const _String Encode(const wstr& s);
 
-	static void ToLower(_String& pString);
-	static void ToUpper(_String& pString);
+	static void ToLower(_String& s);
+	static void ToUpper(_String& s);
 
-	static int CompareIgnoreCase(const _String& pString1, const _String& pString2);
+	static int CompareIgnoreCase(const _String& string1, const _String& string2);
 
-	static long StrToL(const typename _String::value_type* pString, typename _String::value_type** pEndPtr, int pRadix);
-	static int StrLen(const typename _String::value_type* pString);
-	static int StrCmp(const typename _String::value_type* pString1, const typename _String::value_type* pString2);
-	static int StrCmpI(const typename _String::value_type* pString1, const typename _String::value_type* pString2);
-	static int StrNCmp(const typename _String::value_type* pString1, const typename _String::value_type* pString2, int pMaxCount);
-	static const typename _String::value_type* StrStr(const typename _String::value_type* pString, const typename _String::value_type* pStringSearch);
+	static long StrToL(const typename _String::value_type* s, typename _String::value_type** end_ptr, int radix);
+	static int StrLen(const typename _String::value_type* s);
+	static int StrCmp(const typename _String::value_type* string1, const typename _String::value_type* string2);
+	static int StrCmpI(const typename _String::value_type* string1, const typename _String::value_type* string2);
+	static int StrNCmp(const typename _String::value_type* string1, const typename _String::value_type* string2, int max_count);
+	static const typename _String::value_type* StrStr(const typename _String::value_type* s, const typename _String::value_type* string_search);
 
 private:
-	static std::locale mLocale;
+	static std::locale locale_;
 };
 
 typedef StringUtilityTemplate<str>	strutil;
 typedef StringUtilityTemplate<wstr>	wstrutil;
-extern const str gEmptyAnsiString;
-extern const wstr gEmptyUnicodeString;
+extern const str kEmptyAnsiString;
+extern const wstr kEmptyUnicodeString;
 #ifdef LEPRA_UTF32
-#define EmptyString		gEmptyUnicodeString
+#define EmptyString		kEmptyUnicodeString
 #else // !LEPRA_UTF32
-#define EmptyString		gEmptyAnsiString
+#define EmptyString		kEmptyAnsiString
 #endif // LEPRA_UTF32/!LEPRA_UTF32
-#define EmptyAnsiString		gEmptyAnsiString
-#define EmptyUnicodeString	gEmptyUnicodeString
+#define EmptyAnsiString		kEmptyAnsiString
+#define EmptyUnicodeString	kEmptyUnicodeString
 
 
 
@@ -107,6 +105,6 @@ extern const wstr gEmptyUnicodeString;
 
 
 
-#include "StringUtility.inl"
+#include "stringutility.inl"
 
 #undef STR_UTIL_TEMPLATE

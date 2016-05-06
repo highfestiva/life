@@ -1,32 +1,29 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Sunlight.h"
-#include "../UiCure/Include/UiGameUiManager.h"
+#include "sunlight.h"
+#include "../uicure/include/uigameuimanager.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-Sunlight::Sunlight(UiCure::GameUiManager* pUiManager):
-	mUiManager(pUiManager)
-{
-	const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
-	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
-		UiTbc::Renderer::LIGHT_MOVABLE, vec3(-0.2f, +0.2f, -1),
-		vec3(1,1,1) * (lPixelShadersEnabled? 1.0f : 1.5f), 60);
+Sunlight::Sunlight(UiCure::GameUiManager* ui_manager):
+	ui_manager_(ui_manager) {
+	const bool pixel_shaders_enabled = ui_manager_->GetRenderer()->IsPixelShadersEnabled();
+	light_id_ = ui_manager_->GetRenderer()->AddDirectionalLight(
+		uitbc::Renderer::kLightMovable, vec3(-0.2f, +0.2f, -1),
+		vec3(1,1,1) * (pixel_shaders_enabled? 1.0f : 1.5f), 60);
 }
 
-Sunlight::~Sunlight()
-{
-	mUiManager->GetRenderer()->RemoveLight(mLightId);
+Sunlight::~Sunlight() {
+	ui_manager_->GetRenderer()->RemoveLight(light_id_);
 }
 
 

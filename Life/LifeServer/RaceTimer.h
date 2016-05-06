@@ -1,40 +1,38 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Cure/Include/CppContextObject.h"
-#include "../../Lepra/Include/Unordered.h"
-#include "../../Lepra/Include/Timer.h"
-#include "../Life.h"
+#include "../../cure/include/cppcontextobject.h"
+#include "../../lepra/include/unordered.h"
+#include "../../lepra/include/timer.h"
+#include "../life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class RaceTimer: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class RaceTimer: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	RaceTimer(Cure::ContextManager* pManager);
+	RaceTimer(cure::ContextManager* manager);
 	virtual ~RaceTimer();
 
 private:
-	virtual void FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger);
+	virtual void FinalizeTrigger(const tbc::PhysicsTrigger* trigger);
 	virtual void OnTick();
-	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
+	virtual void OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal);
 
-	typedef std::unordered_map<Cure::GameObjectId, int> DoneMap;
+	typedef std::unordered_map<cure::GameObjectId, int> DoneMap;
 
-	str mAttributeName;
-	unsigned mTriggerCount;
-	DoneMap mDoneMap;
+	str attribute_name_;
+	unsigned trigger_count_;
+	DoneMap done_map_;
 
 	logclass();
 };

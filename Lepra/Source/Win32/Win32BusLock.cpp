@@ -1,45 +1,40 @@
 
-// Author: Jonas Byström, Jonas Byström
+// Author: Jonas BystrÃ¶m, Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../../Include/Win32/Win32Target.h"
-#include "../../Include/BusLock.h"
+#include "../../include/win32/win32target.h"
+#include "../../include/buslock.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-bool BusLock::CompareAndSwap(int32* pDestination, int32 pSource, int32 pComperand)
-{
-	bool lResult = false;
-	__asm
-	{
-		mov		ebx, pDestination	// Load dest address into scratch register ebx.
-		mov		ecx, pSource		// Load source into scratch register ecx.
-		mov		eax, pComperand		// Load comperand into scratch eax.
+bool BusLock::CompareAndSwap(int32* destination, int32 source, int32 comperand) {
+	bool result = false;
+	__asm {
+		mov		ebx, destination	// Load dest address into scratch register ebx.
+		mov		ecx, source		// Load source into scratch register ecx.
+		mov		eax, comperand		// Load comperand into scratch eax.
 		lock cmpxchg	[ebx], ecx		// [ebx] = ecx if [ebx] == eax. Sets ZF.
-		sete		lResult			// Set lResult = 1 if ZF = 1.
+		sete		result			// Set result = 1 if ZF = 1.
 	};
-	return lResult;
-//	return (::InterlockedCompareExchange((volatile LONG*)&pDest, pSrc, pComperand) == pComperand);
+	return result;
+//	return (::InterlockedCompareExchange((volatile LONG*)&dest, src, comperand) == comperand);
 }
 
-void BusLock::Add(int32* pDestination, int32 pAddend)
-{
-	::InterlockedExchangeAdd((volatile long*)pDestination, pAddend);
+void BusLock::Add(int32* destination, int32 addend) {
+	::InterlockedExchangeAdd((volatile long*)destination, addend);
 }
 
-void BusLock::Add(int64* pDestination, int64 pAddend)
-{
+void BusLock::Add(int64* destination, int64 addend) {
 	// TODO: implement correctly!
-	//::InterlockedExchangeAdd64(pDestination, pAddend); <- check how this would be implemented in kernel32.dll (my machine does probably not support an IPF-compliant CPU).
-	*pDestination += pAddend;
+	//::InterlockedExchangeAdd64(destination, addend); <- check how this would be implemented in kernel32.dll (my machine does probably not support an IPF-compliant CPU).
+	*destination += addend;
 }
 
 

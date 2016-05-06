@@ -1,18 +1,17 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Life/LifeServer/ServerMessageProcessor.h"
-#include "../HoverTank.h"
+#include "../../life/lifeserver/servermessageprocessor.h"
+#include "../hovertank.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
@@ -20,17 +19,16 @@ class GameServerLogic;
 
 
 
-class HoverTankServerMessageProcessor: public Life::ServerMessageProcessor
-{
-	typedef Life::ServerMessageProcessor Parent;
+class HoverTankServerMessageProcessor: public life::ServerMessageProcessor {
+	typedef life::ServerMessageProcessor Parent;
 public:
-	HoverTankServerMessageProcessor(Life::GameServerManager* pGameServerManager, GameServerLogic* pLogic);
+	HoverTankServerMessageProcessor(life::GameServerManager* game_server_manager, GameServerLogic* logic);
 	virtual ~HoverTankServerMessageProcessor();
 
 private:
-	virtual void ProcessNumber(Life::Client* pClient, Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat);
+	virtual void ProcessNumber(life::Client* client, cure::MessageNumber::InfoType type, int32 integer, float32 f);
 
-	GameServerLogic* mLogic;
+	GameServerLogic* logic_;
 
 	logclass();
 };

@@ -2,7 +2,7 @@
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
 
-#include "Unordered.h"	// To get ahold of std::hash<>.
+#include "unordered.h"	// To get ahold of std::hash<>.
 
 //#pragma once
 #pragma once
@@ -10,25 +10,21 @@
 // JB: extending STL with const void* hashing. This will probably not work
 // equally well on all STL implementations, so make sure to port it properly.
 #define LEPRA_STD_HASHER hash
-namespace std
-{
+namespace std {
 
 template<> struct LEPRA_STD_HASHER<const void *>
 {
 	enum { bucket_size = 1 };	// MSVC2010 compatibility. (Perhaps some type of optimization, unsure.)
-	union __vp
-	{
+	union __vp {
 		size_t s;
 		const void* p;
 	};
-	size_t operator()(const void *__x) const
-	{
+	size_t operator()(const void *__x) const {
 		__vp vp;
 		vp.p = __x;
 		return (vp.s);
 	}
-	bool operator()(const void* k1, const void* k2) const	// MSVC2010 compatibility. (Perhaps some type of ordering, unsure.)
-	{
+	bool operator()(const void* k1, const void* k2) const {	// MSVC2010 compatibility. (Perhaps some type of ordering, unsure.)
 		return k1 == k2;
 	}
 };

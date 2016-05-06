@@ -6,21 +6,18 @@
 
 #pragma once
 
-#include "OptionsManager.h"
-#include "ClientOptions.h"
+#include "optionsmanager.h"
+#include "clientoptions.h"
 
 
 
-namespace Life
-{
-namespace Options
-{
+namespace life {
+namespace options {
 
 
 
-struct ClientOptionsManager: OptionsManager
-{
-	ClientOptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority);
+struct ClientOptionsManager: OptionsManager {
+	ClientOptionsManager(cure::RuntimeVariableScope* variable_scope, int priority);
 
 	const bool IsEscape() const;
 	const bool GetShowScore() const;
@@ -29,17 +26,17 @@ struct ClientOptionsManager: OptionsManager
 	const FireControl& GetFireControl() const;
 
 	virtual void DoRefreshConfiguration();
-	virtual bool UpdateInput(UiLepra::InputElement* pElement);
+	virtual bool UpdateInput(uilepra::InputElement* element);
 
 private:
-	virtual bool SetDefault(int pPriority);
+	virtual bool SetDefault(int priority);
 
-	float mMouseSensitivity;
-	float mEscape;
-	float mShowScore;
-	Steering mSteeringControl;
-	CamControl mCamControl;
-	FireControl mFireControl;
+	float mouse_sensitivity_;
+	float escape_;
+	float show_score_;
+	Steering steering_control_;
+	CamControl cam_control_;
+	FireControl fire_control_;
 
 	void operator=(const ClientOptionsManager&);
 

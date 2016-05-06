@@ -5,93 +5,77 @@
 
 
 #include "pch.h"
-#include "../Include/UiIconButton.h"
-#include "../Include/UiResourceManager.h"
+#include "../include/uiiconbutton.h"
+#include "../include/uiresourcemanager.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-IconButton::IconButton(GameUiManager* pUiManager, Cure::ResourceManager* pResourceManager,
-		const str& pIconImageName, const wstr& pText):
-	Parent(pText),
-	mIconResource(new UserPainterKeepImageResource(pUiManager, PainterImageResource::RELEASE_NONE)),
-	mHighlightedIconId(UiTbc::Painter::INVALID_IMAGEID)
-{
-	SetText(pText);
-	mIconResource->Load(pResourceManager, pIconImageName,
+IconButton::IconButton(GameUiManager* ui_manager, cure::ResourceManager* resource_manager,
+		const str& icon_image_name, const wstr& text):
+	Parent(text),
+	icon_resource_(new UserPainterKeepImageResource(ui_manager, PainterImageResource::kReleaseNone)),
+	highlighted_icon_id_(uitbc::Painter::kInvalidImageid) {
+	SetText(text);
+	icon_resource_->Load(resource_manager, icon_image_name,
 		UserPainterKeepImageResource::TypeLoadCallback(this, &IconButton::PainterImageLoadCallback));
 	GetClientRectComponent()->SetIsHollow(true);
 }
 
-IconButton::~IconButton()
-{
-	if (mIconResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE &&
-		mIconResource->GetConstResource()->GetReferenceCount() == 1 &&
-		GetImageManager()->HasImage(mIconResource->GetData()))
-	{
-		GetImageManager()->DropImage(mIconResource->GetData());
+IconButton::~IconButton() {
+	if (icon_resource_->GetLoadState() == cure::kResourceLoadComplete &&
+		icon_resource_->GetConstResource()->GetReferenceCount() == 1 &&
+		GetImageManager()->HasImage(icon_resource_->GetData())) {
+		GetImageManager()->DropImage(icon_resource_->GetData());
 	}
-	if (mHighlightedIconId != UiTbc::Painter::INVALID_IMAGEID)
-	{
-		GetImageManager()->RemoveImage(mHighlightedIconId);
+	if (highlighted_icon_id_ != uitbc::Painter::kInvalidImageid) {
+		GetImageManager()->RemoveImage(highlighted_icon_id_);
 	}
-	delete mIconResource;
-	mIconResource = 0;
+	delete icon_resource_;
+	icon_resource_ = 0;
 }
 
 
 
-bool IconButton::IsComplete() const
-{
-	return (mIconResource->GetLoadState() != Cure::RESOURCE_LOAD_IN_PROGRESS);
+bool IconButton::IsComplete() const {
+	return (icon_resource_->GetLoadState() != cure::kResourceLoadInProgress);
 }
 
-void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* pResource)
-{
-	deb_assert(pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE);
-	if (pResource->GetLoadState() == Cure::RESOURCE_LOAD_COMPLETE)
-	{
-		Canvas lCanvas(*pResource->GetRamData(), true);
-		bool lHasTransparent = false;
-		const unsigned w = lCanvas.GetWidth();
-		const unsigned h = lCanvas.GetHeight();
-		const Color lBlendColor(0, 0, 128, 128);
-		for (unsigned y = 0; y < h; ++y)
-		{
-			for (unsigned x = 0; x < w; ++x)
-			{
-				Color c = lCanvas.GetPixelColor(x, y);
-				if (c.mAlpha)
-				{
-					c = Color(c, lBlendColor, 0.5f);
-					lCanvas.SetPixelColor(x, y, c);
-				}
-				else
-				{
-					lHasTransparent = true;
+void IconButton::PainterImageLoadCallback(UserPainterKeepImageResource* resource) {
+	deb_assert(resource->GetLoadState() == cure::kResourceLoadComplete);
+	if (resource->GetLoadState() == cure::kResourceLoadComplete) {
+		Canvas canvas(*resource->GetRamData(), true);
+		bool has_transparent = false;
+		const unsigned w = canvas.GetWidth();
+		const unsigned h = canvas.GetHeight();
+		const Color blend_color(0, 0, 128, 128);
+		for (unsigned y = 0; y < h; ++y) {
+			for (unsigned x = 0; x < w; ++x) {
+				Color c = canvas.GetPixelColor(x, y);
+				if (c.alpha_) {
+					c = Color(c, blend_color, 0.5f);
+					canvas.SetPixelColor(x, y, c);
+				} else {
+					has_transparent = true;
 				}
 			}
 		}
-		const UiTbc::GUIImageManager::BlendFunc lBlendFunc = lHasTransparent? UiTbc::GUIImageManager::ALPHABLEND : UiTbc::GUIImageManager::NO_BLEND;
-		if (!GetImageManager()->HasImage(pResource->GetData()))
-		{
-			GetImageManager()->AddLoadedImage(*pResource->GetRamData(), pResource->GetData(), UiTbc::GUIImageManager::CENTERED, lBlendFunc, 255);
+		const uitbc::GUIImageManager::BlendFunc blend_func = has_transparent? uitbc::GUIImageManager::kAlphablend : uitbc::GUIImageManager::kNoBlend;
+		if (!GetImageManager()->HasImage(resource->GetData())) {
+			GetImageManager()->AddLoadedImage(*resource->GetRamData(), resource->GetData(), uitbc::GUIImageManager::kCentered, blend_func, 255);
 		}
-		mHighlightedIconId = GetImageManager()->AddImage(lCanvas, UiTbc::GUIImageManager::CENTERED, lBlendFunc, 255);
-		//lCanvas.SetBuffer(0);	// Free buffer.
-		PixelCoord lPreferredSize = GetPreferredSize();
-		SetIcon(pResource->GetData(), ICON_CENTER);
-		SetHighlightedIcon(mHighlightedIconId);
-		if (lPreferredSize.x != 0 || lPreferredSize.y != 0)
-		{
-			SetPreferredSize(lPreferredSize, false);
+		highlighted_icon_id_ = GetImageManager()->AddImage(canvas, uitbc::GUIImageManager::kCentered, blend_func, 255);
+		//canvas.SetBuffer(0);	// Free buffer.
+		PixelCoord preferred_size = GetPreferredSize();
+		SetIcon(resource->GetData(), kIconCenter);
+		SetHighlightedIcon(highlighted_icon_id_);
+		if (preferred_size.x != 0 || preferred_size.y != 0) {
+			SetPreferredSize(preferred_size, false);
 		}
-		if (GetParent())
-		{
+		if (GetParent()) {
 			GetParent()->UpdateLayout();
 		}
 	}

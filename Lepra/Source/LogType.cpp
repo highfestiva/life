@@ -5,107 +5,93 @@
 
 
 #include "pch.h"
-#include "../Include/LepraAssert.h"
-#include "../Include/Logger.h"
+#include "../include/lepraassert.h"
+#include "../include/logger.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-void LogType::Init()
-{
-	if (mInitialized)
-	{
+void LogType::Init() {
+	if (initialized_) {
 		return;
 	}
-	mInitialized = true;
+	initialized_ = true;
 
-	::memset(mLoggerArray, 0, sizeof(mLoggerArray));
-	mLoggerArray[ROOT] = new Logger("Root", 0);
-	mLoggerArray[GENERAL] = new Logger("Data", GetLogger(ROOT));
-	mLoggerArray[GENERAL_RESOURCES] = new Logger("Resources", GetLogger(GENERAL));
-	mLoggerArray[NETWORK] = new Logger("Network", GetLogger(ROOT));
-	mLoggerArray[NETWORK_CLIENT] = new Logger("NetClient", GetLogger(NETWORK));
-	mLoggerArray[NETWORK_SERVER] = new Logger("NetServer", GetLogger(NETWORK));
-	mLoggerArray[CONSOLE] = new Logger("Console", GetLogger(ROOT));
-	mLoggerArray[PHYSICS] = new Logger("Physics", GetLogger(ROOT));
-	mLoggerArray[UI] = new Logger("UI", GetLogger(ROOT));
-	mLoggerArray[UI_INPUT] = new Logger("Input", GetLogger(UI));
-	mLoggerArray[UI_SOUND] = new Logger("Sound", GetLogger(UI));
-	mLoggerArray[UI_GFX] = new Logger("Graphics", GetLogger(UI));
-	mLoggerArray[UI_GFX_2D] = new Logger("Gfx2D", GetLogger(UI_GFX));
-	mLoggerArray[UI_GFX_3D] = new Logger("Gfx3D", GetLogger(UI_GFX));
-	mLoggerArray[GAME] = new Logger("Game", GetLogger(ROOT));
-	mLoggerArray[GAME_CONTEXT] = new Logger("Context", GetLogger(GAME));
-	mLoggerArray[GAME_CONTEXT_CPP] = new Logger("C++Obj", GetLogger(GAME_CONTEXT));
-	mLoggerArray[TEST] = new Logger("Test", GetLogger(ROOT));
+	::memset(logger_array_, 0, sizeof(logger_array_));
+	logger_array_[kRoot] = new Logger("Root", 0);
+	logger_array_[kGeneral] = new Logger("Data", GetLogger(kRoot));
+	logger_array_[kGeneralResources] = new Logger("Resources", GetLogger(kGeneral));
+	logger_array_[kNetwork] = new Logger("Network", GetLogger(kRoot));
+	logger_array_[kNetworkClient] = new Logger("NetClient", GetLogger(kNetwork));
+	logger_array_[kNetworkServer] = new Logger("NetServer", GetLogger(kNetwork));
+	logger_array_[kConsole] = new Logger("Console", GetLogger(kRoot));
+	logger_array_[kPhysics] = new Logger("Physics", GetLogger(kRoot));
+	logger_array_[kUi] = new Logger("kUi", GetLogger(kRoot));
+	logger_array_[kUiInput] = new Logger("Input", GetLogger(kUi));
+	logger_array_[kUiSound] = new Logger("Sound", GetLogger(kUi));
+	logger_array_[kUiGfx] = new Logger("Graphics", GetLogger(kUi));
+	logger_array_[kUiGfx2D] = new Logger("Gfx2D", GetLogger(kUiGfx));
+	logger_array_[kUiGfx3D] = new Logger("Gfx3D", GetLogger(kUiGfx));
+	logger_array_[kGame] = new Logger("Game", GetLogger(kRoot));
+	logger_array_[kGameContext] = new Logger("Context", GetLogger(kGame));
+	logger_array_[kGameContextCpp] = new Logger("C++Obj", GetLogger(kGameContext));
+	logger_array_[kTest] = new Logger("Test", GetLogger(kRoot));
 }
 
-void LogType::Close()
-{
-	for (int x = LOWEST_TYPE; x < TYPE_COUNT; ++x)
-	{
-		delete (mLoggerArray[x]);
-		mLoggerArray[x] = 0;
+void LogType::Close() {
+	for (int x = kLowestType; x < kTypeCount; ++x) {
+		delete (logger_array_[x]);
+		logger_array_[x] = 0;
 	}
-	mInitialized = false;
+	initialized_ = false;
 }
 
 
 
-Logger* LogType::GetLogger(Subsystem pSubsystem)
-{
+Logger* LogType::GetLogger(Subsystem subsystem) {
 	Init();
 
-	if (pSubsystem >= LOWEST_TYPE && pSubsystem < TYPE_COUNT)
-	{
-		deb_assert(mLoggerArray[pSubsystem]);
-		return (mLoggerArray[pSubsystem]);
+	if (subsystem >= kLowestType && subsystem < kTypeCount) {
+		deb_assert(logger_array_[subsystem]);
+		return (logger_array_[subsystem]);
 	}
 	deb_assert(false);
-	return (mLoggerArray[0]);
+	return (logger_array_[0]);
 }
 
-Logger* LogType::GetLogger(const str& pName)
-{
+Logger* LogType::GetLogger(const str& name) {
 	Init();
 
-	Logger* lFoundLog = 0;
-	for (int x = LOWEST_TYPE; !lFoundLog && x < TYPE_COUNT; ++x)
-	{
-		if (mLoggerArray[x] && mLoggerArray[x]->GetName() == pName)
-		{
-			lFoundLog = mLoggerArray[x];
+	Logger* found_log = 0;
+	for (int x = kLowestType; !found_log && x < kTypeCount; ++x) {
+		if (logger_array_[x] && logger_array_[x]->GetName() == name) {
+			found_log = logger_array_[x];
 		}
 	}
-	return (lFoundLog);
+	return (found_log);
 }
 
-const std::vector<Logger*> LogType::GetLoggers()
-{
-	std::vector<Logger*> lLogArray;
-	for (int x = LOWEST_TYPE; x < TYPE_COUNT; ++x)
-	{
-		lLogArray.push_back(mLoggerArray[x]);
+const std::vector<Logger*> LogType::GetLoggers() {
+	std::vector<Logger*> log_array;
+	for (int x = kLowestType; x < kTypeCount; ++x) {
+		log_array.push_back(logger_array_[x]);
 	}
-	return lLogArray;
+	return log_array;
 }
 
-void LogType::SetLogLevel(LogLevel pLevel)
-{
-	for (int x = LOWEST_TYPE; x < TYPE_COUNT; ++x)
-	{
-		mLoggerArray[x]->SetLevelThreashold(pLevel);
+void LogType::SetLogLevel(LogLevel level) {
+	for (int x = kLowestType; x < kTypeCount; ++x) {
+		logger_array_[x]->SetLevelThreashold(level);
 	}
 }
 
 
 
-bool LogType::mInitialized = false;
-Logger* LogType::mLoggerArray[TYPE_COUNT];
+bool LogType::initialized_ = false;
+Logger* LogType::logger_array_[kTypeCount];
 
 
 

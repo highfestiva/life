@@ -1,48 +1,46 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "IPAddress.h"
-#include "String.h"
+#include "ipaddress.h"
+#include "string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class SocketAddress
-{
+class SocketAddress {
 public:
 
 	SocketAddress();
-	SocketAddress(const IPAddress& pIP, uint16 pPort);
+	SocketAddress(const IPAddress& ip, uint16 port);
 
-	void Set(const IPAddress& pIP, uint16 pPort);
-	void SetPort(uint16 pPort);
+	void Set(const IPAddress& ip, uint16 port);
+	void SetPort(uint16 port);
 	uint16 GetPort() const;
-	void SetIP(const IPAddress& pIP);
+	void SetIP(const IPAddress& ip);
 	IPAddress GetIP() const;
-	size_t operator() (const SocketAddress& pSocketAddress) const;
-	bool operator==(const SocketAddress& pAddr) const;
-	bool operator!=(const SocketAddress& pAddr) const;
-	void operator=(const SocketAddress& pAddr);
+	size_t operator() (const SocketAddress& socket_address) const;
+	bool operator==(const SocketAddress& addr) const;
+	bool operator!=(const SocketAddress& addr) const;
+	void operator=(const SocketAddress& addr);
 
 	str GetAsString() const;
 	void* GetRawData() const;
 
-	bool Resolve(const str& pAddress);
-	bool ResolveRange(const str& pAddress, uint16& pEndPort);
-	bool ResolveHost(const str& pHostname);	// Only changes address, not port.
-	bool ResolveIpToHostname(str& pHostname) const;
+	bool Resolve(const str& address);
+	bool ResolveRange(const str& address, uint16& end_port);
+	bool ResolveHost(const str& hostname);	// Only changes address, not port.
+	bool ResolveIpToHostname(str& hostname) const;
 
 private:
-	uint8 mSockAddr[64];
+	uint8 sock_addr_[64];
 };
 
 

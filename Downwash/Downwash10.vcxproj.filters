@@ -1,125 +1,125 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{60493D28-2E04-11E3-A1BD-0019213B7B87}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{60493D29-2E04-11E3-A6C3-0019213B7B87}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Autopilot.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="autopilot.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="CenteredMachine.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="centeredmachine.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Downwash.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile include="downwash.cxx">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="DownwashConsoleManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="downwashconsolemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="DownwashManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="downwashmanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="DownwashTicker.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="downwashticker.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="LandingTrigger.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="landingtrigger.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Level.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="level.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sunlight.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="sunlight.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Automan.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="automan.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Eater.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="eater.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="AirBalloonPilot.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="airballoonpilot.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="AutoPathDriver.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="autopathdriver.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="BaseMachine.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="basemachine.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="CanonDriver.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="canondriver.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="SimulatorDriver.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="simulatordriver.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Downwash.mm">
-      <Filter>Source Files</Filter>
+    <ClCompile include="downwash.mm">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Autopilot.h">
+    <Clinclude include="autopilot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CenteredMachine.h">
+    <Clinclude include="centeredmachine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Downwash.h">
+    <Clinclude include="downwash.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DownwashConsoleManager.h">
+    <Clinclude include="downwashconsolemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DownwashManager.h">
+    <Clinclude include="downwashmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DownwashTicker.h">
+    <Clinclude include="downwashticker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LandingTrigger.h">
+    <Clinclude include="landingtrigger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Level.h">
+    <Clinclude include="level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RtVar.h">
+    <Clinclude include="rtvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sunlight.h">
+    <Clinclude include="sunlight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Version.h">
+    <Clinclude include="version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Automan.h">
+    <Clinclude include="automan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Eater.h">
+    <Clinclude include="eater.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AirBalloonPilot.h">
+    <Clinclude include="airballoonpilot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AutoPathDriver.h">
+    <Clinclude include="autopathdriver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BaseMachine.h">
+    <Clinclude include="basemachine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CanonDriver.h">
+    <Clinclude include="canondriver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SimulatorDriver.h">
+    <Clinclude include="simulatordriver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Downwash.rc" />
+    <ResourceCompile include="downwash.rc" />
   </ItemGroup>
 </Project>

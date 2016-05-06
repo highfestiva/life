@@ -1,94 +1,83 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
-#include "../../Cure/Include/Cure.h"
-#include "../../Cure/Include/ResourceManager.h"
-#include "../../Lepra/Include/Application.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/LepraOS.h"
-#include "../../Lepra/Include/LogListener.h"
-#include "../AsciiLoader.h"
+#include "../../cure/include/cure.h"
+#include "../../cure/include/resourcemanager.h"
+#include "../../lepra/include/application.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/lepraos.h"
+#include "../../lepra/include/loglistener.h"
+#include "../asciiloader.h"
 
-using namespace Cure;
-using namespace Lepra;
-
-
-
-namespace Impuzzable
-{
+using namespace cure;
+using namespace lepra;
 
 
 
-void Test2dCube()
-{
+namespace Impuzzable {
+
+
+
+void Test2dCube() {
 	assert(false);
 }
 
-void Test3dCuboid()
-{
+void Test3dCuboid() {
 	assert(false);
 }
 
-void TestRotated2dCube()
-{
+void TestRotated2dCube() {
 	assert(false);
 }
 
-void TestRotated3dCuboid()
-{
+void TestRotated3dCuboid() {
 	assert(false);
 }
 
-void TestSmall2dTriangle()
-{
+void TestSmall2dTriangle() {
 	assert(false);
 }
 
-void TestBig3dTriangle()
-{
+void TestBig3dTriangle() {
 	assert(false);
 }
 
-void TestSimpleShape()
-{
+void TestSimpleShape() {
 	assert(false);
 }
 
-void TestComplexShape()
-{
+void TestComplexShape() {
 	assert(false);
 }
 
-void TestFileLoad()
-{
-	ResourceManager lResourceLoader(0);
-	AsciiLoader lLoader(&lResourceLoader);
-	wstr lAsciiParts = lLoader.Load("parts3.txt");
-	assert(!lAsciiParts.empty());
-	std::vector<PieceInfo> lPiecesInfo;
-	assert(lLoader.ConvertPieces(lAsciiParts, lPiecesInfo));
-	assert(lPiecesInfo.size() == 6);
+void TestFileLoad() {
+	ResourceManager resource_loader(0);
+	AsciiLoader loader(&resource_loader);
+	wstr ascii_parts = loader.Load("parts3.txt");
+	assert(!ascii_parts.empty());
+	std::vector<PieceInfo> pieces_info;
+	assert(loader.ConvertPieces(ascii_parts, pieces_info));
+	assert(pieces_info.size() == 6);
 }
 
 
 
-class ImpuzzableTest: public Application
-{
+class ImpuzzableTest: public Application {
 	typedef Application Parent;
 public:
-	ImpuzzableTest(const strutil::strvec& pArgumentList);
+	ImpuzzableTest(const strutil::strvec& argument_list);
 	virtual ~ImpuzzableTest();
 	virtual void Init();
 	virtual int Run();
 
 	/*str GetTypeName() const;
 	str GetVersion() const;
-	Cure::ApplicationTicker* CreateTicker() const;*/
+	cure::ApplicationTicker* CreateTicker() const;*/
 
-	//static ImpuzzableTest* mApp;
+	//static ImpuzzableTest* app_;
 
 	logclass();
 };
@@ -99,37 +88,32 @@ public:
 
 
 
-LEPRA_RUN_APPLICATION(Impuzzable::ImpuzzableTest, Lepra::Main);
+LEPRA_RUN_APPLICATION(Impuzzable::ImpuzzableTest, lepra::Main);
 
 
 
-namespace Impuzzable
-{
+namespace Impuzzable {
 
 
 
-ImpuzzableTest::ImpuzzableTest(const strutil::strvec& pArgumentList):
-	Parent(pArgumentList)
-{
+ImpuzzableTest::ImpuzzableTest(const strutil::strvec& argument_list):
+	Parent(argument_list) {
 }
 
-ImpuzzableTest::~ImpuzzableTest()
-{
-	Cure::Shutdown();
-	Tbc::Shutdown();
-	Lepra::Shutdown();
+ImpuzzableTest::~ImpuzzableTest() {
+	cure::Shutdown();
+	tbc::Shutdown();
+	lepra::Shutdown();
 }
 
-void ImpuzzableTest::Init()
-{
-	Lepra::Init();
-	Tbc::Init();
-	Cure::Init();
+void ImpuzzableTest::Init() {
+	lepra::Init();
+	tbc::Init();
+	cure::Init();
 	LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(new StdioConsoleLogListener, new DebuggerLogListener, 0, 0, 0);
 }
 
-int ImpuzzableTest::Run()
-{
+int ImpuzzableTest::Run() {
 	Test2dCube();
 	Test3dCuboid();
 	TestRotated2dCube();
@@ -144,7 +128,7 @@ int ImpuzzableTest::Run()
 
 
 
-loginstance(GAME, ImpuzzableTest);
+loginstance(kGame, ImpuzzableTest);
 
 
 

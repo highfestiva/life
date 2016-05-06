@@ -1,212 +1,181 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/HiResTimer.h"
-#include "../Include/LepraOS.h"
+#include "../include/hirestimer.h"
+#include "../include/lepraos.h"
 #ifdef LEPRA_POSIX
 #include <sys/time.h>
 #endif // Posix
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-HiResTimer::HiResTimer(bool pUseShadow):
-	mPrevCounter(0),
-	mCounter(0),
-	mUseShadow(pUseShadow)
-{
+HiResTimer::HiResTimer(bool use_shadow):
+	prev_counter_(0),
+	counter_(0),
+	use_shadow_(use_shadow) {
 	UpdateTimer();
-	mPrevCounter = mCounter;
+	prev_counter_ = counter_;
 }
 
-HiResTimer::HiResTimer(uint64 pCount):
-	mPrevCounter(pCount),
-	mCounter(pCount),
-	mUseShadow(true)
-{
+HiResTimer::HiResTimer(uint64 count):
+	prev_counter_(count),
+	counter_(count),
+	use_shadow_(true) {
 }
 
-HiResTimer::HiResTimer(const HiResTimer& pTimer):
-	mPrevCounter(pTimer.mPrevCounter),
-	mCounter(pTimer.mCounter),
-	mUseShadow(pTimer.mUseShadow)
-{
+HiResTimer::HiResTimer(const HiResTimer& timer):
+	prev_counter_(timer.prev_counter_),
+	counter_(timer.counter_),
+	use_shadow_(timer.use_shadow_) {
 }
 
-HiResTimer::~HiResTimer()
-{
+HiResTimer::~HiResTimer() {
 }
 
-void HiResTimer::EnableShadowCounter(bool pEnable)
-{
-	mUseShadow = pEnable;
+void HiResTimer::EnableShadowCounter(bool enable) {
+	use_shadow_ = enable;
 }
 
-void HiResTimer::StepCounterShadow()
-{
-	mLastSystemCounter = GetSystemCounter();
+void HiResTimer::StepCounterShadow() {
+	last_system_counter_ = GetSystemCounter();
 }
 
-double HiResTimer::PopTimeDiff()
-{
-	double lTime = QueryTimeDiff();
+double HiResTimer::PopTimeDiff() {
+	double __time = QueryTimeDiff();
 	ClearTimeDiff();
-	return (lTime);
+	return (__time);
 }
 
-double HiResTimer::QueryTimeDiff()
-{
+double HiResTimer::QueryTimeDiff() {
 	UpdateTimer();
 	return (GetTimeDiff());
 }
 
-double HiResTimer::GetTime() const
-{
-	return (mCounter*mPeriod);
+double HiResTimer::GetTime() const {
+	return (counter_*period_);
 }
 
-int64 HiResTimer::GetCounter() const
-{
-	return (mCounter);
+int64 HiResTimer::GetCounter() const {
+	return (counter_);
 }
 
-void HiResTimer::UpdateTimer()
-{
-	mCounter = GetSystemCounterShadow();
+void HiResTimer::UpdateTimer() {
+	counter_ = GetSystemCounterShadow();
 }
 
-void HiResTimer::ClearTimeDiff()
-{
-	mPrevCounter = mCounter;
+void HiResTimer::ClearTimeDiff() {
+	prev_counter_ = counter_;
 }
 
-void HiResTimer::ReduceTimeDiff(double pSeconds)
-{
-	mPrevCounter += (int64)(pSeconds * (double)mFrequency);
+void HiResTimer::ReduceTimeDiff(double seconds) {
+	prev_counter_ += (int64)(seconds * (double)frequency_);
 }
 
-double HiResTimer::GetTimeDiff() const
-{
-	return (((int64)(mCounter - mPrevCounter)) * mPeriod);
+double HiResTimer::GetTimeDiff() const {
+	return (((int64)(counter_ - prev_counter_)) * period_);
 }
 
-int64 HiResTimer::GetCounterDiff() const
-{
-	return (mCounter - mPrevCounter);
+int64 HiResTimer::GetCounterDiff() const {
+	return (counter_ - prev_counter_);
 }
 
-const HiResTimer& HiResTimer::operator= (const HiResTimer& pTimer)
-{
-	mPrevCounter = pTimer.mPrevCounter;
-	mCounter = pTimer.mCounter;
-	mFrequency = pTimer.mFrequency;
-	mPeriod = pTimer.mPeriod;
-	return (pTimer);
+const HiResTimer& HiResTimer::operator= (const HiResTimer& timer) {
+	prev_counter_ = timer.prev_counter_;
+	counter_ = timer.counter_;
+	frequency_ = timer.frequency_;
+	period_ = timer.period_;
+	return (timer);
 }
 
-bool HiResTimer::operator <  (const HiResTimer& pTimer) const
-{
-	return (mCounter < pTimer.mCounter);
+bool HiResTimer::operator <  (const HiResTimer& timer) const {
+	return (counter_ < timer.counter_);
 }
 
-bool HiResTimer::operator >  (const HiResTimer& pTimer) const
-{
-	return (mCounter > pTimer.mCounter);
+bool HiResTimer::operator >  (const HiResTimer& timer) const {
+	return (counter_ > timer.counter_);
 }
 
-bool HiResTimer::operator == (const HiResTimer& pTimer) const
-{
-	return (mCounter == pTimer.mCounter);
+bool HiResTimer::operator == (const HiResTimer& timer) const {
+	return (counter_ == timer.counter_);
 }
 
-bool HiResTimer::operator != (const HiResTimer& pTimer) const
-{
-	return (mCounter != pTimer.mCounter);
+bool HiResTimer::operator != (const HiResTimer& timer) const {
+	return (counter_ != timer.counter_);
 }
 
-bool HiResTimer::operator <= (const HiResTimer& pTimer) const
-{
-	return (mCounter <= pTimer.mCounter);
+bool HiResTimer::operator <= (const HiResTimer& timer) const {
+	return (counter_ <= timer.counter_);
 }
 
-bool HiResTimer::operator >= (const HiResTimer& pTimer) const
-{
-	return (mCounter >= pTimer.mCounter);
+bool HiResTimer::operator >= (const HiResTimer& timer) const {
+	return (counter_ >= timer.counter_);
 }
 
-HiResTimer& HiResTimer::operator += (const HiResTimer& pTimer)
-{
-	mCounter += pTimer.mCounter;
+HiResTimer& HiResTimer::operator += (const HiResTimer& timer) {
+	counter_ += timer.counter_;
 	return (*this);
 }
 
-HiResTimer& HiResTimer::operator -= (const HiResTimer& pTimer)
-{
-	mCounter -= pTimer.mCounter;
+HiResTimer& HiResTimer::operator -= (const HiResTimer& timer) {
+	counter_ -= timer.counter_;
 	return (*this);
 }
 
 
 
-uint64 HiResTimer::GetSystemCounterShadow()
-{
-	if (!mUseShadow)
-	{
+uint64 HiResTimer::GetSystemCounterShadow() {
+	if (!use_shadow_) {
 		return GetSystemCounter();
 	}
-	return mLastSystemCounter;
+	return last_system_counter_;
 }
 
 
 
-void HiResTimer::InitFrequency()
-{
+void HiResTimer::InitFrequency() {
 #if defined(LEPRA_WINDOWS)
-	LARGE_INTEGER lFrequency;
-	::QueryPerformanceFrequency(&lFrequency);
-	mFrequency = (int64)lFrequency.QuadPart;
+	LARGE_INTEGER frequency;
+	::QueryPerformanceFrequency(&frequency);
+	frequency_ = (int64)frequency.QuadPart;
 #elif defined(LEPRA_MAC)
-	mFrequency = 1000000;
+	frequency_ = 1000000;
 #elif defined(LEPRA_POSIX)
-	mFrequency = 1000000000;
+	frequency_ = 1000000000;
 #else // <Unknown target>
 #error HiResTimer::InitFrequency() not implemented on this platform!
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
-	mPeriod = 1.0/mFrequency;
+	period_ = 1.0/frequency_;
 }
 
-int64 HiResTimer::GetFrequency()
-{
-	return (mFrequency);
+int64 HiResTimer::GetFrequency() {
+	return (frequency_);
 }
 
-double HiResTimer::GetPeriod()
-{
-	return (mPeriod);
+double HiResTimer::GetPeriod() {
+	return (period_);
 }
 
-uint64 HiResTimer::GetSystemCounter()
-{
+uint64 HiResTimer::GetSystemCounter() {
 #if defined(LEPRA_WINDOWS)
-	LARGE_INTEGER lTimeCounter;
-	::QueryPerformanceCounter(&lTimeCounter);
-	return ((uint64)lTimeCounter.QuadPart);
+	LARGE_INTEGER time_counter;
+	::QueryPerformanceCounter(&time_counter);
+	return ((uint64)time_counter.QuadPart);
 #elif defined(LEPRA_MAC)
-        timeval lTimeValue;
-        ::gettimeofday(&lTimeValue, 0);
-	return ((uint64)lTimeValue.tv_sec*1000000 + lTimeValue.tv_usec);
+        timeval time_value;
+        ::gettimeofday(&time_value, 0);
+	return ((uint64)time_value.tv_sec*1000000 + time_value.tv_usec);
 #elif defined(LEPRA_POSIX)
-	timespec lTimeValue;
-	::clock_gettime(CLOCK_REALTIME, &lTimeValue);
-	return ((uint64)lTimeValue.tv_sec*1000000000+lTimeValue.tv_nsec);
+	timespec time_value;
+	::clock_gettime(CLOCK_REALTIME, &time_value);
+	return ((uint64)time_value.tv_sec*1000000000+time_value.tv_nsec);
 #else // <Unknown target>
 #error HiResTimer::UpdateCounter() not implemented on this platform!
 #endif // LEPRA_WINDOWS/LEPRA_POSIX/<Unknown target>
@@ -216,78 +185,66 @@ uint64 HiResTimer::GetSystemCounter()
 
 StopWatch::StopWatch():
 	Parent((uint64)0),
-	mIsStarted(false),
-	mStartCount(0)
-{
+	is_started_(false),
+	start_count_(0) {
 }
 
-bool StopWatch::TryStart()
-{
-	if (mIsStarted)
-	{
+bool StopWatch::TryStart() {
+	if (is_started_) {
 		return false;
 	}
 	Start();
 	return true;
 }
 
-void StopWatch::Start()
-{
+void StopWatch::Start() {
 	PopTimeDiff();
-	mIsStarted = true;
-	++mStartCount;
+	is_started_ = true;
+	++start_count_;
 }
 
-bool StopWatch::ResumeFromLapTime()
-{
-	if (mIsStarted)
-	{
+bool StopWatch::ResumeFromLapTime() {
+	if (is_started_) {
 		return false;
 	}
-	mIsStarted = true;
-	++mStartCount;
+	is_started_ = true;
+	++start_count_;
 	return true;
 }
 
-bool StopWatch::ResumeFromStop()
-{
-	if (mIsStarted)
-	{
+bool StopWatch::ResumeFromStop() {
+	if (is_started_) {
 		return false;
 	}
-	const uint64 lCounter = mCounter;
+	const uint64 counter = counter_;
 	UpdateTimer();
-	mPrevCounter += mCounter - lCounter;
-	mIsStarted = true;
-	++mStartCount;
+	prev_counter_ += counter_ - counter;
+	is_started_ = true;
+	++start_count_;
 	return true;
 }
 
-void StopWatch::Stop()
-{
-	mIsStarted = false;
+void StopWatch::Stop() {
+	is_started_ = false;
 }
 
-bool StopWatch::IsStarted() const
-{
-	return mIsStarted;
+bool StopWatch::IsStarted() const {
+	return is_started_;
 }
 
-double StopWatch::QuerySplitTime()
-{
-	return mIsStarted? QueryTimeDiff() : GetTimeDiff();
+double StopWatch::QuerySplitTime() {
+	return is_started_? QueryTimeDiff() : GetTimeDiff();
 }
 
-int StopWatch::GetStartCount() const
-{
-	return mStartCount;
+int StopWatch::GetStartCount() const {
+	return start_count_;
 }
 
 
 
-uint64 HiResTimer::mFrequency = 0;
-double HiResTimer::mPeriod = 0;
-uint64 HiResTimer::mLastSystemCounter = 0;
+uint64 HiResTimer::frequency_ = 0;
+double HiResTimer::period_ = 0;
+uint64 HiResTimer::last_system_counter_ = 0;
 
 
 

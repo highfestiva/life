@@ -1,38 +1,36 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "Cure.h"
-#include "ContextObjectAttribute.h"
+#include "cure.h"
+#include "contextobjectattribute.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class IntAttribute: public ContextObjectAttribute
-{
+class IntAttribute: public ContextObjectAttribute {
 	typedef ContextObjectAttribute Parent;
 public:
-	IntAttribute(ContextObject* pContextObject, const str& pName, int pValue);
+	IntAttribute(ContextObject* context_object, const str& name, int value);
 	virtual ~IntAttribute();
 
 	int GetValue() const;
-	void SetValue(int pValue);
+	void SetValue(int value);
 
 private:
 	virtual int QuerySend() const;	// Returns number of bytes it needs to send.
-	virtual int Pack(uint8* pDestination);
-	virtual int Unpack(const uint8* pSource, int pMaxSize);	// Retuns number of bytes unpacked, or -1.
+	virtual int Pack(uint8* destination);
+	virtual int Unpack(const uint8* source, int max_size);	// Retuns number of bytes unpacked, or -1.
 
-	bool mIsUpdated;
-	int mValue;
+	bool is_updated_;
+	int value_;
 
 	void operator=(const IntAttribute&);
 };

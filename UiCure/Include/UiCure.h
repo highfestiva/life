@@ -1,34 +1,32 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Lepra/Include/LepraTypes.h"
-#include "../../Lepra/Include/Log.h"
+#include "../../lepra/include/lepratypes.h"
+#include "../../lepra/include/log.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class RuntimeVariableScope;
 }
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-using namespace Lepra;
+using namespace lepra;
 
 void Init();
 void Shutdown();
-void SetDefault(Cure::RuntimeVariableScope* pSettings);
-Cure::RuntimeVariableScope* GetSettings();
+void SetDefault(cure::RuntimeVariableScope* settings);
+cure::RuntimeVariableScope* GetSettings();
 
 
 

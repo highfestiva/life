@@ -1,95 +1,81 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
- 
+
 
 
 #include "pch.h"
-#include "../Include/NetworkFreeAgent.h"
-#include "../Include/RuntimeVariable.h"
+#include "../include/networkfreeagent.h"
+#include "../include/runtimevariable.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
 NetworkFreeAgent::NetworkFreeAgent():
-	mMuxSocket(0)
-{
+	mux_socket_(0) {
 }
 
-NetworkFreeAgent::~NetworkFreeAgent()
-{
-	delete mMuxSocket;
-	mMuxSocket = 0;
+NetworkFreeAgent::~NetworkFreeAgent() {
+	delete mux_socket_;
+	mux_socket_ = 0;
 }
 
 
 
-bool NetworkFreeAgent::Tick()
-{
-	if (!mMuxSocket)
-	{
-		SocketAddress lAddress;
-		str lStrAddress = "0.0.0.0:12345";
-		if (!lAddress.Resolve(lStrAddress))
-		{
-			mLog.Warningf("Could not resolve address '%s'.", lStrAddress.c_str());
-			lStrAddress = ":12345";
-			if (!lAddress.Resolve(lStrAddress))
-			{
-				mLog.Errorf("Could not resolve address '%s'!", lStrAddress.c_str());
+bool NetworkFreeAgent::Tick() {
+	if (!mux_socket_) {
+		SocketAddress address;
+		str str_address = "0.0.0.0:12345";
+		if (!address.Resolve(str_address)) {
+			log_.Warningf("Could not resolve address '%s'.", str_address.c_str());
+			str_address = ":12345";
+			if (!address.Resolve(str_address)) {
+				log_.Errorf("Could not resolve address '%s'!", str_address.c_str());
 				return false;
 			}
 		}
-		mMuxSocket = new MuxIoSocket("FreeAgent", lAddress, false);
+		mux_socket_ = new MuxIoSocket("FreeAgent", address, false);
 	}
 
-	bool lOk = true;
-	VIoSocket* lSocket;
-	while (mMuxSocket && (lSocket = mMuxSocket->PopSenderSocket()) != 0)
-	{
-		lOk &= (lSocket->SendBuffer() > 0);
+	bool ok = true;
+	VIoSocket* _socket;
+	while (mux_socket_ && (_socket = mux_socket_->PopSenderSocket()) != 0) {
+		ok &= (_socket->SendBuffer() > 0);
 	}
-	return (lOk);
+	return (ok);
 }
 
 
 
-NetworkFreeAgent::MuxIoSocket* NetworkFreeAgent::GetMuxIoSocket() const
-{
-	return mMuxSocket;
+NetworkFreeAgent::MuxIoSocket* NetworkFreeAgent::GetMuxIoSocket() const {
+	return mux_socket_;
 }
 
-void NetworkFreeAgent::AddFilterIoSocket(VIoSocket* pSocket, const DropFilterCallback& pOnDropCallback)
-{
-	mSocketReceiveFilterTable.insert(SocketReceiveFilterTable::value_type(pSocket, pOnDropCallback));
+void NetworkFreeAgent::AddFilterIoSocket(VIoSocket* socket, const DropFilterCallback& on_drop_callback) {
+	socket_receive_filter_table_.insert(SocketReceiveFilterTable::value_type(socket, on_drop_callback));
 }
 
-void NetworkFreeAgent::RemoveAllFilterIoSockets()
-{
-	mSocketReceiveFilterTable.clear();
+void NetworkFreeAgent::RemoveAllFilterIoSockets() {
+	socket_receive_filter_table_.clear();
 }
 
-void NetworkFreeAgent::KillIoSocket(VIoSocket* pSocket)
-{
-	SocketReceiveFilterTable::iterator x = mSocketReceiveFilterTable.find(pSocket);
-	if (x != mSocketReceiveFilterTable.end())
-	{
+void NetworkFreeAgent::KillIoSocket(VIoSocket* socket) {
+	SocketReceiveFilterTable::iterator x = socket_receive_filter_table_.find(socket);
+	if (x != socket_receive_filter_table_.end()) {
 		x->second(x->first);
-		mSocketReceiveFilterTable.erase(x);
+		socket_receive_filter_table_.erase(x);
 	}
-	if (mMuxSocket)
-	{
-		mMuxSocket->CloseSocket(pSocket);
+	if (mux_socket_) {
+		mux_socket_->CloseSocket(socket);
 	}
 }
 
 
 
-loginstance(NETWORK_CLIENT, NetworkFreeAgent);
+loginstance(kNetworkClient, NetworkFreeAgent);
 
 
 

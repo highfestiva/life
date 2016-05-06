@@ -1,41 +1,39 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "GeometryBase.h"
-#include "../../Lepra/Include/Transformation.h"
+#include "geometrybase.h"
+#include "../../lepra/include/transformation.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-class GeometryReference: public GeometryBase
-{
+class GeometryReference: public GeometryBase {
 	typedef GeometryBase Parent;
 public:
-	
-	GeometryReference(GeometryBase* pGeometry);
+
+	GeometryReference(GeometryBase* geometry);
 	virtual ~GeometryReference();
 
 	bool IsGeometryReference();
 
 	const xform& GetOffsetTransformation() const;
-	void SetOffsetTransformation(const xform& pOffset);
-	void AddOffset(const vec3& pOffset);
+	void SetOffsetTransformation(const xform& offset);
+	void AddOffset(const vec3& offset);
 	const xform& GetExtraOffsetTransformation() const;
-	void SetExtraOffsetTransformation(const xform& pOffset);
+	void SetExtraOffsetTransformation(const xform& offset);
 
 	// Overloads from GeometryBase.
 	const xform& GetTransformation();
 	GeometryVolatility GetGeometryVolatility() const;
-	void SetGeometryVolatility(GeometryVolatility pVolatility);
+	void SetGeometryVolatility(GeometryVolatility volatility);
 
 	unsigned int GetMaxVertexCount()  const;
 	unsigned int GetMaxIndexCount() const;
@@ -45,7 +43,7 @@ public:
 	unsigned int GetUVSetCount()    const;
 
 	float*         GetVertexData() const;
-	float*         GetUVData(unsigned int pUVSet) const;
+	float*         GetUVData(unsigned int uv_set) const;
 	vtx_idx_t*     GetIndexData() const;
 	uint8*         GetColorData() const;
 	float*         GetNormalData() const;
@@ -54,11 +52,11 @@ public:
 
 protected:
 private:
-	GeometryBase* mGeometry;
+	GeometryBase* geometry_;
 
-	xform mOriginalOffset;
-	xform mExtraOffset;
-	xform mReturnTransformation;
+	xform original_offset_;
+	xform extra_offset_;
+	xform return_transformation_;
 };
 
 

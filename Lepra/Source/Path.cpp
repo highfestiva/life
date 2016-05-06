@@ -5,72 +5,60 @@
 
 
 #include "pch.h"
-#include "../Include/Path.h"
+#include "../include/path.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-str Path::GetDirectory(const str& pPath)
-{
-	strutil::strvec lPathParts = SplitPath(pPath);
-	return (lPathParts[0]);
+str Path::GetDirectory(const str& path) {
+	strutil::strvec path_parts = SplitPath(path);
+	return (path_parts[0]);
 }
 
-str Path::GetFileBase(const str& pPath)
-{
-	strutil::strvec lPathParts = SplitPath(pPath);
-	return (lPathParts[1]);
+str Path::GetFileBase(const str& path) {
+	strutil::strvec path_parts = SplitPath(path);
+	return (path_parts[1]);
 }
 
-str Path::GetExtension(const str& pPath)
-{
-	strutil::strvec lPathParts = SplitPath(pPath);
-	return (lPathParts[2]);
+str Path::GetExtension(const str& path) {
+	strutil::strvec path_parts = SplitPath(path);
+	return (path_parts[2]);
 }
 
-str Path::GetCompositeFilename(const str& pPath)
-{
-	str lDirectory;
-	str lCompositeFilename;
-	SplitPath(pPath, lDirectory, lCompositeFilename);
-	return (lCompositeFilename);
+str Path::GetCompositeFilename(const str& path) {
+	str _directory;
+	str composite_filename;
+	SplitPath(path, _directory, composite_filename);
+	return (composite_filename);
 }
 
-strutil::strvec Path::SplitPath(const str& pPath)
-{
-	strutil::strvec lPathParts(3);
+strutil::strvec Path::SplitPath(const str& path) {
+	strutil::strvec path_parts(3);
 
 	// Search for extension.
 	int x;
-	for (x = (int)pPath.length()-1; x >= 0; --x)
-	{
-		if (pPath[x] == '.')
-		{
-			lPathParts[2] = pPath.substr(x+1);	// Ext.
+	for (x = (int)path.length()-1; x >= 0; --x) {
+		if (path[x] == '.') {
+			path_parts[2] = path.substr(x+1);	// Ext.
 			--x;
 			break;
-		}
-		else if (IsPathSeparator(pPath[x]))
-		{
+		} else if (IsPathSeparator(path[x])) {
 			// No extension found; extension = "".
-			x = (int)pPath.length()-1;
+			x = (int)path.length()-1;
 			break;
 		}
 	}
 
 	// Search for directory and file.
-	int lFileEnd = x;
-	for (; x >= 0; --x)
-	{
-		if (IsPathSeparator(pPath[x]))
-		{
+	int file_end = x;
+	for (; x >= 0; --x) {
+		if (IsPathSeparator(path[x])) {
 			// No extension found. Extension = "".
-			lPathParts[0] = pPath.substr(0, x+1);	// Dir.
-			lPathParts[1] = pPath.substr(x+1, lFileEnd-x);	// File.
+			path_parts[0] = path.substr(0, x+1);	// Dir.
+			path_parts[1] = path.substr(x+1, file_end-x);	// File.
 			break;
 		}
 	}
@@ -78,207 +66,158 @@ strutil::strvec Path::SplitPath(const str& pPath)
 	// Translate "aaa/.bbb" as file=".bbb", ext="" (not file="", ext=".bbb").
 	// Translate "aaa.bbb" as dir="", file="aaa", ext="bbb".
 	{
-		if (lPathParts[0].empty() && lPathParts[1].empty() && !lPathParts[2].empty())
-		{
-			lPathParts[1] = pPath.substr(0, lFileEnd+1);
-		}
-		else if (lPathParts[1].empty() && !lPathParts[2].empty())
-		{
-			lPathParts[1] = "."+lPathParts[2];
-			lPathParts[2].clear();
+		if (path_parts[0].empty() && path_parts[1].empty() && !path_parts[2].empty()) {
+			path_parts[1] = path.substr(0, file_end+1);
+		} else if (path_parts[1].empty() && !path_parts[2].empty()) {
+			path_parts[1] = "."+path_parts[2];
+			path_parts[2].clear();
 		}
 	}
 
-	return (lPathParts);
+	return (path_parts);
 }
 
-void Path::SplitPath(const str& pPath, str& pDirectory, str& pFilename)
-{
-	strutil::strvec lPathParts = SplitPath(pPath);
-	pDirectory = lPathParts[0];
-	pFilename = JoinPath("", lPathParts[1], lPathParts[2]);
+void Path::SplitPath(const str& path, str& directory, str& filename) {
+	strutil::strvec path_parts = SplitPath(path);
+	directory = path_parts[0];
+	filename = JoinPath("", path_parts[1], path_parts[2]);
 }
 
-strutil::strvec Path::SplitNodes(const str& pDirectory, bool pExcludeLeadingDirectory, bool pExcludeTrailingDirectory)
-{
+strutil::strvec Path::SplitNodes(const str& directory, bool exclude_leading_directory, bool exclude_trailing_directory) {
 #ifdef LEPRA_WINDOWS
-	str lDirectory;
+	str _directory;
 	// Include support for Win32 UNC names.
-	if (pDirectory.substr(0, 4) == "\\\\.\\")
-	{
-		lDirectory = "\\\\.\\"+strutil::ReplaceAll(pDirectory.substr(4), '\\', '/');
-	}
-	else if (pDirectory.substr(0, 2) == "\\\\")
-	{
-		lDirectory = "\\\\"+strutil::ReplaceAll(pDirectory.substr(2), '\\', '/');
-	}
-	else
-	{
-		lDirectory = strutil::ReplaceAll(pDirectory, '\\', '/');
+	if (directory.substr(0, 4) == "\\\\.\\") {
+		_directory = "\\\\.\\"+strutil::ReplaceAll(directory.substr(4), '\\', '/');
+	} else if (directory.substr(0, 2) == "\\\\") {
+		_directory = "\\\\"+strutil::ReplaceAll(directory.substr(2), '\\', '/');
+	} else {
+		_directory = strutil::ReplaceAll(directory, '\\', '/');
 	}
 #else // !LEPRA_WINDOWS
-	str lDirectory = pDirectory;
+	str _directory = directory;
 #endif // LEPRA_WINDOWS / !LEPRA_WINDOWS
-	if (pExcludeLeadingDirectory && !lDirectory.empty() && IsPathSeparator(lDirectory[0]))
-	{
-		lDirectory = lDirectory.substr(1);
+	if (exclude_leading_directory && !_directory.empty() && IsPathSeparator(_directory[0])) {
+		_directory = _directory.substr(1);
 	}
-	if (pExcludeTrailingDirectory && !lDirectory.empty() && IsPathSeparator(lDirectory[lDirectory.length()-1]))
-	{
-		lDirectory.resize(lDirectory.length()-1);
+	if (exclude_trailing_directory && !_directory.empty() && IsPathSeparator(_directory[_directory.length()-1])) {
+		_directory.resize(_directory.length()-1);
 	}
-	return (strutil::Split(lDirectory, "/"));
+	return (strutil::Split(_directory, "/"));
 }
 
-str Path::JoinPath(const str& pDirectory, const str& pFileBase, const str& pExtension)
-{
-	str lFullFilename;
-	if (!pDirectory.empty())
-	{
-		lFullFilename = pDirectory;
-		if (!IsPathSeparator(lFullFilename[lFullFilename.length()-1]))
-		{
-			lFullFilename += '/';
+str Path::JoinPath(const str& directory, const str& file_base, const str& extension) {
+	str full_filename;
+	if (!directory.empty()) {
+		full_filename = directory;
+		if (!IsPathSeparator(full_filename[full_filename.length()-1])) {
+			full_filename += '/';
 		}
 	}
-	lFullFilename += pFileBase;
-	if (!pExtension.empty())	// Only add extension if present (since "file." is different from "file" on some systems).
-	{
-		lFullFilename += "."+pExtension;
+	full_filename += file_base;
+	if (!extension.empty()) {	// Only add extension if present (since "file." is different from "file" on some systems).
+		full_filename += "."+extension;
 	}
-	return (lFullFilename);
+	return (full_filename);
 }
 
-str Path::GetParentDirectory(const str& pDirectory)
-{
-	strutil::strvec lNodes = SplitNodes(pDirectory, false, true);
-	if (lNodes.size() >= 1)
-	{
-		lNodes[lNodes.size()-1].clear();
+str Path::GetParentDirectory(const str& directory) {
+	strutil::strvec nodes = SplitNodes(directory, false, true);
+	if (nodes.size() >= 1) {
+		nodes[nodes.size()-1].clear();
 	}
-	return strutil::Join(lNodes, "/");
+	return strutil::Join(nodes, "/");
 }
 
-bool Path::NormalizePath(const str& pInputPath, str& pOutputPath)
-{
-	strutil::strvec lDirectoryArray = Path::SplitNodes(pInputPath, false, false);
+bool Path::NormalizePath(const str& input_path, str& output_path) {
+	strutil::strvec directory_array = Path::SplitNodes(input_path, false, false);
 	// Drop irrelevant path info such as "./" and "../" (not leading of course).
-	strutil::strvec::iterator y = lDirectoryArray.begin();
-	for (int x = 0; y != lDirectoryArray.end(); ++x)
-	{
-		if (x >= 1 && *y == ".")	// Only drops non-leading "./".
-		{
-			y = lDirectoryArray.erase(y);
+	strutil::strvec::iterator y = directory_array.begin();
+	for (int x = 0; y != directory_array.end(); ++x) {
+		if (x >= 1 && *y == ".") {	// Only drops non-leading "./".
+			y = directory_array.erase(y);
 			--x;
-		}
-		else if (x >= 1 && x < (int)lDirectoryArray.size()-1 && *y == "")	// Only drops non-leading+non-ending "/".
-		{
-			y = lDirectoryArray.erase(y);
+		} else if (x >= 1 && x < (int)directory_array.size()-1 && *y == "") {	// Only drops non-leading+non-ending "/".
+			y = directory_array.erase(y);
 			--x;
-		}
-		else if (x >= 1 && *y == "..")	// Only drops non-leading "../".
-		{
-			if (x == 1 && lDirectoryArray[0] == ".")
-			{
-				lDirectoryArray.erase(lDirectoryArray.begin());	// "./../" -> "../".
-				y = lDirectoryArray.begin();
+		} else if (x >= 1 && *y == "..") {	// Only drops non-leading "../".
+			if (x == 1 && directory_array[0] == ".") {
+				directory_array.erase(directory_array.begin());	// "./../" -> "../".
+				y = directory_array.begin();
 				x = -1;
-			}
-			else
-			{
+			} else {
 				strutil::strvec::iterator z = y-1;
-				if (*z == "")	// "/../" is illegal.
-				{
+				if (*z == "") {	// "/../" is illegal.
 					return false;
 				}
-				if (*z != "..")	// "../../" should remain the same.
-				{
-					lDirectoryArray.erase(z, ++y);	// Drop this and parent directory ("a/../" -> "").
+				if (*z != "..") {	// "../../" should remain the same.
+					directory_array.erase(z, ++y);	// Drop this and parent directory ("a/../" -> "").
 					x -= 2;
-					y = lDirectoryArray.begin() + (x + 1);
-				}
-				else
-				{
+					y = directory_array.begin() + (x + 1);
+				} else {
 					++y;
 				}
 			}
-		}
-		else
-		{
+		} else {
 			++y;
 		}
 	}
-	if (lDirectoryArray.size() == 1 && lDirectoryArray[0] == "")
-	{
-		pOutputPath = "/";
-	}
-	else
-	{
-		pOutputPath = strutil::Join(lDirectoryArray, "/");
+	if (directory_array.size() == 1 && directory_array[0] == "") {
+		output_path = "/";
+	} else {
+		output_path = strutil::Join(directory_array, "/");
 	}
 	return (true);
 }
 
-bool Path::IsPathSeparator(const char pCharacter)
-{
-	return (pCharacter == '/'
+bool Path::IsPathSeparator(const char character) {
+	return (character == '/'
 #ifdef LEPRA_WINDOWS
-		|| pCharacter == '\\'
+		|| character == '\\'
 #endif // LEPRA_WINDOWS
 		);
 }
 
-Path::Wildcard Path::CreateWildcard(const str& pWildcard)
-{
-	return strutil::Split(pWildcard, "*");
+Path::Wildcard Path::CreateWildcard(const str& wildcard) {
+	return strutil::Split(wildcard, "*");
 }
 
-bool Path::IsWildcardMatch(const str& pWildcard, const str& pFilename, bool pScan)
-{
-	return IsWildcardMatch(CreateWildcard(pWildcard), pFilename, pScan);
+bool Path::IsWildcardMatch(const str& wildcard, const str& filename, bool scan) {
+	return IsWildcardMatch(CreateWildcard(wildcard), filename, scan);
 }
 
-bool Path::IsWildcardMatch(const Wildcard& pWildcard, const str& pFilename, bool pScan)
-{
-	bool lHasWildcard = false;
-	Wildcard::const_iterator y = pWildcard.begin();
-	for (; y != pWildcard.end(); ++y)
-	{
-		if (y->empty())
-		{
-			pScan = true;
-			lHasWildcard = true;
+bool Path::IsWildcardMatch(const Wildcard& wildcard, const str& filename, bool scan) {
+	bool has_wildcard = false;
+	Wildcard::const_iterator y = wildcard.begin();
+	for (; y != wildcard.end(); ++y) {
+		if (y->empty()) {
+			scan = true;
+			has_wildcard = true;
 			continue;
 		}
 		size_t x = 0;
-		if (!pScan)
-		{
-			if (pFilename.compare(x, y->size(), *y) == 0)
-			{
+		if (!scan) {
+			if (filename.compare(x, y->size(), *y) == 0) {
 				size_t z = x + y->size();
-				return IsWildcardMatch(Wildcard(++y, pWildcard.end()), pFilename.substr(z), true);
+				return IsWildcardMatch(Wildcard(++y, wildcard.end()), filename.substr(z), true);
 			}
 			return false;
 		}
-		for (; x < pFilename.size(); ++x)
-		{
-			if (pFilename.compare(x, y->size(), *y) == 0)
-			{
+		for (; x < filename.size(); ++x) {
+			if (filename.compare(x, y->size(), *y) == 0) {
 				size_t z = x + y->size();
 				Wildcard::const_iterator u = y;
-				if (IsWildcardMatch(Wildcard(++u, pWildcard.end()), pFilename.substr(z), true))
-				{
+				if (IsWildcardMatch(Wildcard(++u, wildcard.end()), filename.substr(z), true)) {
 					return true;
 				}
 			}
-			if (pFilename[x] == '/')
-			{
+			if (filename[x] == '/') {
 				return false;
 			}
 		}
 		return false;
 	}
-	return pFilename.empty() || (lHasWildcard && pFilename.find('/') == str::npos);
+	return filename.empty() || (has_wildcard && filename.find('/') == str::npos);
 }
 
 

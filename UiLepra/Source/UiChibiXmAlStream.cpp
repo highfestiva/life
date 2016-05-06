@@ -4,23 +4,22 @@
 
 
 #include "pch.h"
-#include "../Include/UiChibiXmAlStream.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/File.h"
-#include "../../Lepra/Include/FileOpener.h"
-#include "../Include/UiSoundManager.h"
+#include "../include/uichibixmalstream.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/file.h"
+#include "../../lepra/include/fileopener.h"
+#include "../include/uisoundmanager.h"
 
 #ifdef LEPRA_MSVC
 #pragma warning(disable: 4996)	// fopen unsafe.
 #endif // Visual
 #define AL_CHECK()	if (alGetError() != AL_NO_ERROR) return false;
-#define SAMPLE_RATE	22050
-#define BUFFER_SIZE	(4096 * 8)
+#define kSampleRate	22050
+#define kBufferSize	(4096 * 8)
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
@@ -43,129 +42,107 @@ static void free_mem(void *p_mem, XM_MemoryAllocType) {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// File System Interface
+// File system Interface
 ///////////////////////////////////////////////////////////////////////////////
-static FileOpener* gFileOpener = 0;
-static File* gFile = 0;
+static FileOpener* g_file_opener = 0;
+static File* g_file = 0;
 
-static xm_bool fileio_in_use()
-{
-	return gFile? xm_true : xm_false;		
+static xm_bool fileio_in_use() {
+	return g_file? xm_true : xm_false;
 }
 
-static XM_FileIOError fileio_open(const char *p_file, xm_bool p_big_endian_mode) 
-{
-	if (gFile)
-	{
+static XM_FileIOError fileio_open(const char *p_file, xm_bool p_big_endian_mode) {
+	if (g_file) {
 		return XM_FILE_ERROR_IN_USE;
 	}
 
-	gFile = gFileOpener->Open(p_file);
-	if (!gFile)
-	{
+	g_file = g_file_opener->Open(p_file);
+	if (!g_file) {
 		return XM_FILE_ERROR_CANT_OPEN;
 	}
 
-	gFile->SetReaderEndian(p_big_endian_mode? Endian::TYPE_BIG_ENDIAN : Endian::TYPE_LITTLE_ENDIAN);
+	g_file->SetReaderEndian(p_big_endian_mode? Endian::kTypeBigEndian : Endian::kTypeLittleEndian);
 
 	return XM_FILE_OK;
 }
 
-static xm_u8 fileio_get_u8() 
-{
-	if (!gFile)
-	{
+static xm_u8 fileio_get_u8() {
+	if (!g_file) {
 		return 0;
 	}
 	xm_u8 b;
-	gFile->Read(b);
+	g_file->Read(b);
 	return b;
 }
 
-static xm_u16 fileio_get_u16() 
-{
-	if (!gFile)
-	{
+static xm_u16 fileio_get_u16() {
+	if (!g_file) {
 		return 0;
 	}
 	xm_u16 w;
-	gFile->Read(w);
+	g_file->Read(w);
 	return w;
 }
 
-static xm_u32 fileio_get_u32() 
-{
-	if (!gFile)
-	{
+static xm_u32 fileio_get_u32() {
+	if (!g_file) {
 		return 0;
 	}
 	xm_u32 dw;
-	gFile->Read(dw);
+	g_file->Read(dw);
 	return dw;
 }
 
-static void fileio_get_byte_array(xm_u8 *p_dst, xm_u32 p_count)
-{
-	if (!gFile)
-	{
+static void fileio_get_byte_array(xm_u8 *p_dst, xm_u32 p_count) {
+	if (!g_file) {
 		return;
 	}
-	gFile->ReadData(p_dst, p_count);
+	g_file->ReadData(p_dst, p_count);
 }
 
-static void fileio_seek_pos(xm_u32 p_offset) 
-{
-	if (!gFile)
-	{
+static void fileio_seek_pos(xm_u32 p_offset) {
+	if (!g_file) {
 		return;
 	}
-	gFile->SeekSet(p_offset);
+	g_file->SeekSet(p_offset);
 }
 
-static xm_u32 fileio_get_pos() 
-{
-	if (!gFile)
-	{
+static xm_u32 fileio_get_pos() {
+	if (!g_file) {
 		return 0;
 	}
-	return (xm_u32)gFile->Tell();
+	return (xm_u32)g_file->Tell();
 }
 
-static xm_bool fileio_eof_reached() 
-{
-	if (!gFile)
-	{
+static xm_bool fileio_eof_reached() {
+	if (!g_file) {
 		return xm_true;
 	}
-	return (gFile->Tell() == gFile->GetSize())? xm_true : xm_false;
+	return (g_file->Tell() == g_file->GetSize())? xm_true : xm_false;
 }
 
-static void fileio_close() 
-{
-	if (gFile)
-	{
-		gFile->Close();
-		delete gFile;
-		gFile = 0;
+static void fileio_close() {
+	if (g_file) {
+		g_file->Close();
+		delete g_file;
+		g_file = 0;
 	}
 }
 
 
 
-void ChibiXmAlStream::SetFileOpener(FileOpener* pOpener)
-{
-	delete gFileOpener;
-	gFileOpener = pOpener;
+void ChibiXmAlStream::SetFileOpener(FileOpener* opener) {
+	delete g_file_opener;
+	g_file_opener = opener;
 }
 
 
 
-ChibiXmAlStream::ChibiXmAlStream(SoundManager* pSoundManager, const str& pFilename, bool pLoop):
-	Parent(pSoundManager)
-{
-	deb_assert(gFileOpener);
+ChibiXmAlStream::ChibiXmAlStream(SoundManager* sound_manager, const str& filename, bool loop):
+	Parent(sound_manager) {
+	deb_assert(g_file_opener);
 
-	mIsLooping = pLoop;
+	is_looping_ = loop;
 
 	// Setup ChibiXM memory & file IO.
 	memset(&s_memory_manager, 0, sizeof(XM_MemoryManager));
@@ -185,221 +162,190 @@ ChibiXmAlStream::ChibiXmAlStream(SoundManager* pSoundManager, const str& pFilena
 	s_file_io.close          = fileio_close;
 	xm_loader_set_fileio(&s_file_io);
 
-	xm_create_software_mixer(SAMPLE_RATE, 32);
+	xm_create_software_mixer(kSampleRate, 32);
 
-	mSong = 0;
+	song_ = 0;
 
-	memset(mAlBuffers, 0, sizeof(mAlBuffers));
-	mAlSource = 0;
-	mAlFormat = AL_FORMAT_MONO8;
+	memset(al_buffers_, 0, sizeof(al_buffers_));
+	al_source_ = 0;
+	al_format_ = AL_FORMAT_MONO8;
 
-	Open(pFilename);
+	Open(filename);
 }
 
-ChibiXmAlStream::~ChibiXmAlStream()
-{
+ChibiXmAlStream::~ChibiXmAlStream() {
 	Release();
 }
 
-bool ChibiXmAlStream::Playback()
-{
-	if (IsPlaying())
-	{
+bool ChibiXmAlStream::Playback() {
+	if (IsPlaying()) {
 		return true;
 	}
 
 	xm_player_play();
 
-	if (!Stream(mAlBuffers[0]) || !Stream(mAlBuffers[1]))
-	{
+	if (!Stream(al_buffers_[0]) || !Stream(al_buffers_[1])) {
 		return false;
 	}
 
-	alSourceQueueBuffers(mAlSource, 2, mAlBuffers);
-	alSourcef(mAlSource, AL_GAIN, mVolume * mSoundManager->GetMusicVolume());
-	alSourcePlay(mAlSource);
+	alSourceQueueBuffers(al_source_, 2, al_buffers_);
+	alSourcef(al_source_, AL_GAIN, volume_ * sound_manager_->GetMusicVolume());
+	alSourcePlay(al_source_);
 	return true;
 }
 
-bool ChibiXmAlStream::Rewind()
-{
-	const bool lIsPlaying = IsPlaying();
+bool ChibiXmAlStream::Rewind() {
+	const bool is_playing = IsPlaying();
 	xm_player_stop();
-	if (lIsPlaying)
-	{
+	if (is_playing) {
 		xm_player_play();
 	}
 	return true;
 }
 
-bool ChibiXmAlStream::IsPlaying() const
-{
+bool ChibiXmAlStream::IsPlaying() const {
 	ALenum state = !AL_PLAYING;
-	alGetSourcei(mAlSource, AL_SOURCE_STATE, &state);
+	alGetSourcei(al_source_, AL_SOURCE_STATE, &state);
 	return (state == AL_PLAYING && xm_player_is_playing());
 }
 
-bool ChibiXmAlStream::Stop()
-{
+bool ChibiXmAlStream::Stop() {
 	Pause();
 	return Rewind();
 }
 
-bool ChibiXmAlStream::Pause()
-{
-	alSourceStop(mAlSource);
+bool ChibiXmAlStream::Pause() {
+	alSourceStop(al_source_);
 	return Clear();
 }
 
-bool ChibiXmAlStream::Update()
-{
-	bool lIsActive = true;
-	int lProcessedBufferCount;
-	alGetSourcei(mAlSource, AL_BUFFERS_PROCESSED, &lProcessedBufferCount);
-	alSourcef(mAlSource, AL_GAIN, mVolume * mSoundManager->GetMusicVolume());
+bool ChibiXmAlStream::Update() {
+	bool is_active = true;
+	int processed_buffer_count;
+	alGetSourcei(al_source_, AL_BUFFERS_PROCESSED, &processed_buffer_count);
+	alSourcef(al_source_, AL_GAIN, volume_ * sound_manager_->GetMusicVolume());
 	AL_CHECK();
-	while (lProcessedBufferCount--)
-	{
+	while (processed_buffer_count--) {
 		ALuint buffer;
-		alSourceUnqueueBuffers(mAlSource, 1, &buffer);
+		alSourceUnqueueBuffers(al_source_, 1, &buffer);
 		AL_CHECK();
 
-		lIsActive &= Stream(buffer);
+		is_active &= Stream(buffer);
 
-		alSourceQueueBuffers(mAlSource, 1, &buffer);
+		alSourceQueueBuffers(al_source_, 1, &buffer);
 		AL_CHECK();
 	}
-	if (!lIsActive && mIsLooping)
-	{
+	if (!is_active && is_looping_) {
 		Clear();
-		lIsActive = Rewind();
+		is_active = Rewind();
 	}
 	TimeoutAutoResume();
-	return lIsActive;
+	return is_active;
 }
 
-bool ChibiXmAlStream::Open(const str& pFilename)
-{
+bool ChibiXmAlStream::Open(const str& filename) {
 	Release();
 
-	mSong = xm_song_alloc();
-	if (xm_loader_open_song(pFilename.c_str(), mSong) != XM_LOADER_OK)
-	{
+	song_ = xm_song_alloc();
+	if (xm_loader_open_song(filename.c_str(), song_) != XM_LOADER_OK) {
 		Release();
 		return false;
 	}
 
-	xm_player_set_song(mSong);
+	xm_player_set_song(song_);
 
-	alGenBuffers(2, mAlBuffers);
+	alGenBuffers(2, al_buffers_);
 	AL_CHECK();
-	alGenSources(1, &mAlSource);
+	alGenSources(1, &al_source_);
 	AL_CHECK();
 
-	alSource3f(mAlSource, AL_POSITION,		0.0, 0.0, 0.0);
-	alSource3f(mAlSource, AL_VELOCITY,		0.0, 0.0, 0.0);
-	alSource3f(mAlSource, AL_DIRECTION,		0.0, 0.0, 0.0);
-	alSourcef (mAlSource, AL_ROLLOFF_FACTOR,	0.0);
-	alSourcei (mAlSource, AL_SOURCE_RELATIVE,	AL_TRUE);
-	mIsOpen = true;
-	return mIsOpen;
+	alSource3f(al_source_, AL_POSITION,		0.0, 0.0, 0.0);
+	alSource3f(al_source_, AL_VELOCITY,		0.0, 0.0, 0.0);
+	alSource3f(al_source_, AL_DIRECTION,		0.0, 0.0, 0.0);
+	alSourcef (al_source_, AL_ROLLOFF_FACTOR,	0.0);
+	alSourcei (al_source_, AL_SOURCE_RELATIVE,	AL_TRUE);
+	is_open_ = true;
+	return is_open_;
 }
 
-bool ChibiXmAlStream::Release()
-{
+bool ChibiXmAlStream::Release() {
 	xm_player_stop();
-	if (mSong)
-	{
-		xm_song_free(mSong);
-		mSong = 0;
+	if (song_) {
+		xm_song_free(song_);
+		song_ = 0;
 	}
 
-	alSourceStop(mAlSource);
-	if (!Clear())
-	{
+	alSourceStop(al_source_);
+	if (!Clear()) {
 		return false;
 	}
 
-	alDeleteSources(1, &mAlSource);
+	alDeleteSources(1, &al_source_);
 	AL_CHECK();
-	alDeleteBuffers(1, mAlBuffers);
+	alDeleteBuffers(1, al_buffers_);
 	AL_CHECK();
 
-	mIsOpen = false;
+	is_open_ = false;
 	return true;
 }
 
-bool ChibiXmAlStream::Stream(ALuint buffer)
-{
-	char lData[BUFFER_SIZE];
-	int lSize = 0;
-	while (lSize < BUFFER_SIZE)
-	{
-		int lResult = XmRead(lData + lSize, BUFFER_SIZE - lSize);
-		if (lResult > 0)
-		{
-			lSize += lResult;
-		}
-		else if (lResult < 0)
-		{
+bool ChibiXmAlStream::Stream(ALuint buffer) {
+	char data[kBufferSize];
+	int size = 0;
+	while (size < kBufferSize) {
+		int result = XmRead(data + size, kBufferSize - size);
+		if (result > 0) {
+			size += result;
+		} else if (result < 0) {
 			return false;
-		}
-		else
-		{
+		} else {
 			break;
 		}
 	}
 
-	if (lSize == 0)
-	{
+	if (size == 0) {
 		return false;
 	}
 
-	alBufferData(buffer, mAlFormat, lData, lSize, SAMPLE_RATE);
+	alBufferData(buffer, al_format_, data, size, kSampleRate);
 	AL_CHECK();
 	return true;
 }
 
-bool ChibiXmAlStream::Clear()
-{
-	int lQueuedBufferCount;
-	alGetSourcei(mAlSource, AL_BUFFERS_QUEUED, &lQueuedBufferCount);
-	while (lQueuedBufferCount--)
-	{
+bool ChibiXmAlStream::Clear() {
+	int queued_buffer_count;
+	alGetSourcei(al_source_, AL_BUFFERS_QUEUED, &queued_buffer_count);
+	while (queued_buffer_count--) {
 		ALuint buffer;
-		alSourceUnqueueBuffers(mAlSource, 1, &buffer);
+		alSourceUnqueueBuffers(al_source_, 1, &buffer);
 		AL_CHECK();
 	}
 	return true;
 }
 
-void ChibiXmAlStream::TimeoutAutoResume()
-{
+void ChibiXmAlStream::TimeoutAutoResume() {
 	ALenum state;
-	alGetSourcei(mAlSource, AL_SOURCE_STATE, &state);
-	if (state == AL_STOPPED)
-	{
-		alSourcePlay(mAlSource);
+	alGetSourcei(al_source_, AL_SOURCE_STATE, &state);
+	if (state == AL_STOPPED) {
+		alSourcePlay(al_source_);
 	}
 }
 
-int ChibiXmAlStream::XmRead(char* pBuffer, int pBufferByteCount)
-{
-	xm_s32 lMixBuffer[BUFFER_SIZE * 2];		// Chibi is always in stereo.
-	::memset(lMixBuffer, 0, sizeof(lMixBuffer));	// Format is stereo-interleaved 32-bit, so multiply by 8.
-	const int lFrameCount = pBufferByteCount;
-	xm_software_mix_to_buffer(lMixBuffer, lFrameCount);
-	for (int x = 0; x < pBufferByteCount; ++x)
-	{
+int ChibiXmAlStream::XmRead(char* _buffer, int buffer_byte_count) {
+	xm_s32 mix_buffer[kBufferSize * 2];		// Chibi is always in stereo.
+	::memset(mix_buffer, 0, sizeof(mix_buffer));	// Format is stereo-interleaved 32-bit, so multiply by 8.
+	const int frame_count = buffer_byte_count;
+	xm_software_mix_to_buffer(mix_buffer, frame_count);
+	for (int x = 0; x < buffer_byte_count; ++x) {
 		// Average stereo into mono.
-		pBuffer[x] = (unsigned char)(unsigned)((((lMixBuffer[x*2+0]>>1) + (lMixBuffer[x*2+1]>>1)) >> 24) + 128);
+		_buffer[x] = (unsigned char)(unsigned)((((mix_buffer[x*2+0]>>1) + (mix_buffer[x*2+1]>>1)) >> 24) + 128);
 	}
-	return pBufferByteCount;
+	return buffer_byte_count;
 }
 
 
 
-loginstance(UI_SOUND, ChibiXmAlStream);
+loginstance(kUiSound, ChibiXmAlStream);
 
 
 

@@ -5,147 +5,127 @@
 
 
 #include "pch.h"
-#include "../../Lepra/Include/Log.h"
-#include "../../Lepra/Include/Math.h"
-#include "../../UiLepra/Include/UiOpenGLExtensions.h"
-#include "../../Tbc/Include/GeometryBase.h"
-#include "../Include/UiOpenGLMaterials.h"
-#include "../Include/UiOpenGLRenderer.h"
+#include "../../lepra/include/log.h"
+#include "../../lepra/include/math.h"
+#include "../../uilepra/include/uiopenglextensions.h"
+#include "../../tbc/include/geometrybase.h"
+#include "../include/uiopenglmaterials.h"
+#include "../include/uiopenglrenderer.h"
 
 
 
 #ifdef LEPRA_DEBUG
-#define OGL_ASSERT()	{ GLenum lGlError = glGetError(); deb_assert(lGlError == GL_NO_ERROR); }
+#define OGL_ASSERT()	{ GLenum gl_error = glGetError(); deb_assert(gl_error == GL_NO_ERROR); }
 #else // !Debug
 #define OGL_ASSERT()
 #endif // Debug / !Debug
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-OpenGLMaterial::OpenGLMaterial(OpenGLRenderer* pRenderer, Material::DepthSortHint pSortHint, Material* pFallBackMaterial) :
-	Material(pRenderer, pSortHint, pFallBackMaterial)
-{
+OpenGLMaterial::OpenGLMaterial(OpenGLRenderer* renderer, Material::DepthSortHint sort_hint, Material* fall_back_material) :
+	Material(renderer, sort_hint, fall_back_material) {
 }
 
-OpenGLMaterial::~OpenGLMaterial()
-{
+OpenGLMaterial::~OpenGLMaterial() {
 }
 
-Material::RemoveStatus OpenGLMaterial::RemoveGeometry(Tbc::GeometryBase* pGeometry)
-{
-	Material::RemoveStatus lStatus = Parent::RemoveGeometry(pGeometry);
-	if (lStatus == Material::NOT_REMOVED && mFallBackMaterial)
-	{
-		lStatus = mFallBackMaterial->RemoveGeometry(pGeometry);
-		if (lStatus == Material::REMOVED)
-		{
-			lStatus = Material::REMOVED_FROM_FALLBACK;
+Material::RemoveStatus OpenGLMaterial::RemoveGeometry(tbc::GeometryBase* geometry) {
+	Material::RemoveStatus status = Parent::RemoveGeometry(geometry);
+	if (status == Material::kNotRemoved && fall_back_material_) {
+		status = fall_back_material_->RemoveGeometry(geometry);
+		if (status == Material::kRemoved) {
+			status = Material::kRemovedFromFallback;
 		}
 	}
-	return lStatus;
+	return status;
 }
 
-void OpenGLMaterial::EnableDisableTexturing()
-{
+void OpenGLMaterial::EnableDisableTexturing() {
 	GetRenderer()->SetTexturingEnabled(GetRenderer()->GetTexturingEnabled());
 }
 
-GLenum OpenGLMaterial::GetGLElementType(Tbc::GeometryBase* pGeometry)
-{
-	switch (pGeometry->GetPrimitiveType())
-	{
-		case Tbc::GeometryBase::TRIANGLES:
-			if (mEnableWireframe)
-			{
+GLenum OpenGLMaterial::GetGLElementType(tbc::GeometryBase* geometry) {
+	switch (geometry->GetPrimitiveType()) {
+		case tbc::GeometryBase::kTriangles:
+			if (enable_wireframe_) {
 				return GL_LINES;
 			}
 			return (GL_TRIANGLES);
-		case Tbc::GeometryBase::TRIANGLE_STRIP:	return (GL_TRIANGLE_STRIP);
-		case Tbc::GeometryBase::LINES:		return (GL_LINES);
-		case Tbc::GeometryBase::LINE_LOOP:	return (GL_LINE_LOOP);
+		case tbc::GeometryBase::kTriangleStrip:	return (GL_TRIANGLE_STRIP);
+		case tbc::GeometryBase::kLines:		return (GL_LINES);
+		case tbc::GeometryBase::kLineLoop:	return (GL_LINE_LOOP);
 #ifndef LEPRA_GL_ES
-		case Tbc::GeometryBase::QUADS:		return (GL_QUADS);
+		case tbc::GeometryBase::kQuads:		return (GL_QUADS);
 #endif // !OpenGL ES
 	}
 	deb_assert(false);
 	return (GL_TRIANGLES);
 }
 
-void OpenGLMaterial::SetBasicMaterial(const Tbc::GeometryBase::BasicMaterialSettings& pMaterial)
-{
-	SetBasicMaterial(pMaterial, GetRenderer());
+void OpenGLMaterial::SetBasicMaterial(const tbc::GeometryBase::BasicMaterialSettings& material) {
+	SetBasicMaterial(material, GetRenderer());
 }
 
-void OpenGLMaterial::SetBasicMaterial(const Tbc::GeometryBase::BasicMaterialSettings& pMaterial, Renderer* pRenderer)
-{
-	mCurrentMaterial = pMaterial;
+void OpenGLMaterial::SetBasicMaterial(const tbc::GeometryBase::BasicMaterialSettings& material, Renderer* renderer) {
+	current_material_ = material;
 
-	const float lAmbient[]  = { pMaterial.mAmbient.x,  pMaterial.mAmbient.y,  pMaterial.mAmbient.z,  pMaterial.mAlpha };
-	const float lDiffuse[]  = { pMaterial.mDiffuse.x,  pMaterial.mDiffuse.y,  pMaterial.mDiffuse.z,  pMaterial.mAlpha };
-	const float lSpecular[] = { pMaterial.mSpecular.x, pMaterial.mSpecular.y, pMaterial.mSpecular.z, pMaterial.mAlpha };
+	const float ambient[]  = { material.ambient_.x,  material.ambient_.y,  material.ambient_.z,  material.alpha_ };
+	const float diffuse[]  = { material.diffuse_.x,  material.diffuse_.y,  material.diffuse_.z,  material.alpha_ };
+	const float specular[] = { material.specular_.x, material.specular_.y, material.specular_.z, material.alpha_ };
 
-	::glColor4f(lDiffuse[0], lDiffuse[1], lDiffuse[2], lDiffuse[3]);
-	::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, lAmbient);
-	::glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, lDiffuse);
-	::glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, lSpecular);
-	::glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, pMaterial.mShininess*0.5f);
-	::glShadeModel(pMaterial.mSmooth ? GL_SMOOTH : GL_FLAT);
+	::glColor4f(diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, diffuse);
+	::glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+	::glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, material.shininess_*0.5f);
+	::glShadeModel(material.smooth_ ? GL_SMOOTH : GL_FLAT);
 	//OGL_ASSERT();
 
-	//pRenderer->SetGlobalMaterialReflectance(pMaterial.mDiffuse.x, pMaterial.mDiffuse.y, pMaterial.mDiffuse.z, pMaterial.mShininess);
+	//renderer->SetGlobalMaterialReflectance(material.diffuse_.x, material.diffuse_.y, material.diffuse_.z, material.shininess_);
 
-	if (pMaterial.mAmbient.x || pMaterial.mAmbient.y || pMaterial.mAmbient.z)
-	{
-		pRenderer->AddAmbience(pMaterial.mAmbient.x, pMaterial.mAmbient.y, pMaterial.mAmbient.z);
+	if (material.ambient_.x || material.ambient_.y || material.ambient_.z) {
+		renderer->AddAmbience(material.ambient_.x, material.ambient_.y, material.ambient_.z);
 	}
 }
 
-void OpenGLMaterial::ResetBasicMaterial(const Tbc::GeometryBase::BasicMaterialSettings& pMaterial)
-{
-	if (pMaterial.mAmbient.x || pMaterial.mAmbient.y || pMaterial.mAmbient.z)
-	{
+void OpenGLMaterial::ResetBasicMaterial(const tbc::GeometryBase::BasicMaterialSettings& material) {
+	if (material.ambient_.x || material.ambient_.y || material.ambient_.z) {
 		GetRenderer()->ResetAmbientLight(true);
 	}
 }
 
 
 
-void OpenGLMaterial::RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
+void OpenGLMaterial::RenderAllBlendedGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
 	::glDepthMask(GL_FALSE);
 	::glDisable(GL_CULL_FACE);
 #ifndef LEPRA_GL_ES
-	GLint lOldFill[2];
-	::glGetIntegerv(GL_POLYGON_MODE, lOldFill);
+	GLint old_fill[2];
+	::glGetIntegerv(GL_POLYGON_MODE, old_fill);
 	::glPolygonMode(GL_FRONT_AND_BACK, GetRenderer()->IsWireframeEnabled()? GL_LINE : GL_FILL);
 #endif // !GLES
-	Parent::RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
+	Parent::RenderAllBlendedGeometry(current_frame, geometry_group_list);
 	::glEnable(GL_CULL_FACE);
 	::glDepthMask(GL_TRUE);
 #ifndef LEPRA_GL_ES
-	::glPolygonMode(GL_FRONT, lOldFill[0]);
-	::glPolygonMode(GL_BACK, lOldFill[1]);
+	::glPolygonMode(GL_FRONT, old_fill[0]);
+	::glPolygonMode(GL_BACK, old_fill[1]);
 #endif // !GLES
 }
 
 
 
-void OpenGLMaterial::UpdateTextureMatrix(Tbc::GeometryBase* pGeometry)
-{
-	if (pGeometry->GetUVAnimator() != 0)
-	{
-		float lUVMatrix[16];
-		pGeometry->GetUVTransform().GetAs4x4TransposeMatrix(lUVMatrix);
+void OpenGLMaterial::UpdateTextureMatrix(tbc::GeometryBase* geometry) {
+	if (geometry->GetUVAnimator() != 0) {
+		float uv_matrix[16];
+		geometry->GetUVTransform().GetAs4x4TransposeMatrix(uv_matrix);
 		glMatrixMode(GL_TEXTURE);
-		glLoadMatrixf(lUVMatrix);
-	}
-	else
-	{
+		glLoadMatrixf(uv_matrix);
+	} else {
 		glMatrixMode(GL_TEXTURE);
 		glLoadIdentity();
 	}
@@ -154,15 +134,13 @@ void OpenGLMaterial::UpdateTextureMatrix(Tbc::GeometryBase* pGeometry)
 
 
 
-void OpenGLMatSingleColorSolid::RenderGeometry(Tbc::GeometryBase* pGeometry)
-{
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-	RawRender(pGeometry, 0);
-	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+void OpenGLMatSingleColorSolid::RenderGeometry(tbc::GeometryBase* geometry) {
+	SetBasicMaterial(geometry->GetBasicMaterialSettings());
+	RawRender(geometry, 0);
+	ResetBasicMaterial(geometry->GetBasicMaterialSettings());
 }
 
-void OpenGLMatSingleColorSolid::PreRender()
-{
+void OpenGLMatSingleColorSolid::PreRender() {
 	::glDisable(GL_ALPHA_TEST);
 	::glDisable(GL_BLEND);
 	//::glDisable(GL_LOGIC_OP);
@@ -178,74 +156,60 @@ void OpenGLMatSingleColorSolid::PreRender()
 #endif // !GLES
 }
 
-void OpenGLMatSingleColorSolid::PostRender()
-{
+void OpenGLMatSingleColorSolid::PostRender() {
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	//::glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void OpenGLMatSingleColorSolid::RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex)
-{
-	(void)pUVSetIndex;
-	RenderBaseGeometry(pGeometry);
+void OpenGLMatSingleColorSolid::RawRender(tbc::GeometryBase* geometry, int uv_set_index) {
+	(void)uv_set_index;
+	RenderBaseGeometry(geometry);
 }
 
-void OpenGLMatSingleColorSolid::RenderBaseGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (pGeometry->GetNormalData() == 0)
-	{
+void OpenGLMatSingleColorSolid::RenderBaseGeometry(tbc::GeometryBase* geometry) {
+	if (geometry->GetNormalData() == 0) {
 		glDisableClientState(GL_NORMAL_ARRAY);
-	}
-	else
-	{
+	} else {
 		glEnableClientState(GL_NORMAL_ARRAY);
 	}
 
-	const int lTypeIndex = mEnableWireframe? 1 : 0;
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
+	const int type_index = enable_wireframe_? 1 : 0;
+	OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		GLuint vertex_buffer_id = (GLuint)_geometry->vertex_buffer_id_;
+		GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
-		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset);
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)_geometry->vertex_offset_);
 
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)_geometry->normal_offset_);
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       lGeometry->mIndexCount[lTypeIndex],
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
-	}
-	else
-	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       lGeometry->mIndexCount[lTypeIndex],
+			       (GLvoid*)_geometry->index_offset_[type_index]);
+	} else {
+		glVertexPointer(3, GL_FLOAT, 0, geometry->GetVertexData());
+		glNormalPointer(GL_FLOAT, 0, geometry->GetNormalData());
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
+			       (char*)geometry->GetIndexData() + _geometry->index_offset_[type_index]);
 	}
 }
 
 
 
-void OpenGLMatSingleColorBlended::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
-	if (mOutline)
-	{
-		DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
-	}
-	else
-	{
-		RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
+void OpenGLMatSingleColorBlended::RenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
+	if (outline_) {
+		DoRenderAllGeometry(current_frame, geometry_group_list);
+	} else {
+		RenderAllBlendedGeometry(current_frame, geometry_group_list);
 	}
 }
 
-void OpenGLMatSingleColorBlended::DoPreRender()
-{
+void OpenGLMatSingleColorBlended::DoPreRender() {
 	::glDisable(GL_ALPHA_TEST);
 	::glEnable(GL_BLEND);
 	::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -257,199 +221,172 @@ void OpenGLMatSingleColorBlended::DoPreRender()
 #endif // !GLES
 }
 
-void OpenGLMatSingleColorBlended::DoPostRender()
-{
+void OpenGLMatSingleColorBlended::DoPostRender() {
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	//::glDisableClientState(GL_VERTEX_ARRAY);
 	::glDisable(GL_BLEND);
 }
 
-void OpenGLMatSingleColorBlended::PreRender()
-{
+void OpenGLMatSingleColorBlended::PreRender() {
 	DoPreRender();
 }
 
-void OpenGLMatSingleColorBlended::PostRender()
-{
+void OpenGLMatSingleColorBlended::PostRender() {
 	DoPostRender();
 }
 
 
 
-bool OpenGLMatVertexColorSolid::AddGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (!pGeometry->GetColorData())
-	{
-		if (mFallBackMaterial)
-		{
-			mLog.Warning("Material \"VertexColorSolid\", passing geometry to fallback material.");
-			return mFallBackMaterial->AddGeometry(pGeometry);
+bool OpenGLMatVertexColorSolid::AddGeometry(tbc::GeometryBase* geometry) {
+	if (!geometry->GetColorData()) {
+		if (fall_back_material_) {
+			log_.Warning("Material \"VertexColorSolid\", passing geometry to fallback material.");
+			return fall_back_material_->AddGeometry(geometry);
 		}
 		return false;
 	}
 
-	return Parent::AddGeometry(pGeometry);
+	return Parent::AddGeometry(geometry);
 }
 
-void OpenGLMatVertexColorSolid::PreRender()
-{
+void OpenGLMatVertexColorSolid::PreRender() {
 	Parent::PreRender();
 	::glEnableClientState(GL_COLOR_ARRAY);
 }
 
-void OpenGLMatVertexColorSolid::RenderGeometry(Tbc::GeometryBase* pGeometry)
-{
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-	RawRender(pGeometry, 0);
-	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+void OpenGLMatVertexColorSolid::RenderGeometry(tbc::GeometryBase* geometry) {
+	SetBasicMaterial(geometry->GetBasicMaterialSettings());
+	RawRender(geometry, 0);
+	ResetBasicMaterial(geometry->GetBasicMaterialSettings());
 }
 
-void OpenGLMatVertexColorSolid::RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex)
-{
-	(void)pUVSetIndex;
+void OpenGLMatVertexColorSolid::RawRender(tbc::GeometryBase* geometry, int uv_set_index) {
+	(void)uv_set_index;
 	OGL_ASSERT();
-	const int lTypeIndex = mEnableWireframe? 1 : 0;
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
+	const int type_index = enable_wireframe_? 1 : 0;
+	OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		GLuint vertex_buffer_id = (GLuint)_geometry->vertex_buffer_id_;
+		GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
 
-		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)_geometry->vertex_offset_);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)_geometry->normal_offset_);
 
-		int lSize = 4;
-		if (pGeometry->GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
-			lSize = 3;
+		int size = 4;
+		if (geometry->GetColorFormat() == tbc::GeometryBase::kColorRgb)
+			size = 3;
 
-		glColorPointer(lSize, GL_UNSIGNED_BYTE, 0, (GLvoid*)lGeometry->mColorOffset);
+		glColorPointer(size, GL_UNSIGNED_BYTE, 0, (GLvoid*)_geometry->color_offset_);
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-			       lGeometry->mIndexCount[lTypeIndex],
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
-	}
-	else
-	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
+			       (GLvoid*)_geometry->index_offset_[type_index]);
+	} else {
+		glVertexPointer(3, GL_FLOAT, 0, geometry->GetVertexData());
+		glNormalPointer(GL_FLOAT, 0, geometry->GetNormalData());
 
-		int lSize = 4;
-		if (pGeometry->GetColorFormat() == Tbc::GeometryBase::COLOR_RGB)
-			lSize = 3;
+		int size = 4;
+		if (geometry->GetColorFormat() == tbc::GeometryBase::kColorRgb)
+			size = 3;
 
-		glColorPointer(lSize, GL_UNSIGNED_BYTE, 0, pGeometry->GetColorData());
+		glColorPointer(size, GL_UNSIGNED_BYTE, 0, geometry->GetColorData());
 
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       lGeometry->mIndexCount[lTypeIndex],
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
+			       (char*)geometry->GetIndexData() + _geometry->index_offset_[type_index]);
 	}
 	OGL_ASSERT();
 }
 
-void OpenGLMatVertexColorBlended::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
-	RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
+void OpenGLMatVertexColorBlended::RenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
+	RenderAllBlendedGeometry(current_frame, geometry_group_list);
 }
 
-void OpenGLMatVertexColorBlended::PreRender()
-{
+void OpenGLMatVertexColorBlended::PreRender() {
 	Parent::PreRender();
 	::glEnable(GL_BLEND);
 }
 
 
 
-bool OpenGLMatSingleTextureSolid::AddGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (pGeometry->GetUVSetCount() == 0)
-	{
-		if (mFallBackMaterial)
-		{
-			mLog.Warning("Material \"SingleTextureSolid\", passing geometry to fallback material.");
-			return mFallBackMaterial->AddGeometry(pGeometry);
+bool OpenGLMatSingleTextureSolid::AddGeometry(tbc::GeometryBase* geometry) {
+	if (geometry->GetUVSetCount() == 0) {
+		if (fall_back_material_) {
+			log_.Warning("Material \"SingleTextureSolid\", passing geometry to fallback material.");
+			return fall_back_material_->AddGeometry(geometry);
 		}
 		return false;
 	}
-	return Parent::AddGeometry(pGeometry);
+	return Parent::AddGeometry(geometry);
 }
 
-void OpenGLMatSingleTextureSolid::DoRawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex)
-{
-	if (!pGeometry->GetPreRenderCallback().empty())
-	{
-		if (!pGeometry->GetPreRenderCallback()())
-		{
+void OpenGLMatSingleTextureSolid::DoRawRender(tbc::GeometryBase* geometry, int uv_set_index) {
+	if (!geometry->GetPreRenderCallback().empty()) {
+		if (!geometry->GetPreRenderCallback()()) {
 			return;
 		}
 	}
 
-	int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
-	const int lTypeIndex = mEnableWireframe? 1 : 0;
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
+	int uv_count_per_vertex = geometry->GetUVCountPerVertex();
+	const int type_index = enable_wireframe_? 1 : 0;
+	OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		GLuint vertex_buffer_id = (GLuint)_geometry->vertex_buffer_id_;
+		GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
 
-		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)_geometry->vertex_offset_);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)_geometry->normal_offset_);
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, (GLvoid*)(_geometry->uv_offset_ + sizeof(float)*uv_count_per_vertex*uv_set_index*geometry->GetMaxVertexCount()));
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
 
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-			       lGeometry->mIndexCount[lTypeIndex],
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
-	}
-	else
-	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex));
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-				lGeometry->mIndexCount[lTypeIndex],
+			       (GLvoid*)_geometry->index_offset_[type_index]);
+	} else {
+		glVertexPointer(3, GL_FLOAT, 0, geometry->GetVertexData());
+		glNormalPointer(GL_FLOAT, 0, geometry->GetNormalData());
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, geometry->GetUVData(uv_set_index));
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+				_geometry->index_count_[type_index],
 				LEPRA_GL_INDEX_TYPE,
-				(char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
+				(char*)geometry->GetIndexData() + _geometry->index_offset_[type_index]);
 	}
 	OGL_ASSERT();
 
-	if (!pGeometry->GetPostRenderCallback().empty())
-	{
-		pGeometry->GetPostRenderCallback()();
+	if (!geometry->GetPostRenderCallback().empty()) {
+		geometry->GetPostRenderCallback()();
 	}
 }
 
-void OpenGLMatSingleTextureSolid::RenderGeometry(Tbc::GeometryBase* pGeometry)
-{
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+void OpenGLMatSingleTextureSolid::RenderGeometry(tbc::GeometryBase* geometry) {
+	SetBasicMaterial(geometry->GetBasicMaterialSettings());
 
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
-	
+	OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
+	BindTexture(_geometry->ta_->maps_[0].map_id_[Texture::kColorMap], _geometry->ta_->maps_[0].mip_map_level_count_[Texture::kColorMap]);
+
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	OpenGLMaterial::UpdateTextureMatrix(lGeometry->mGeometry);
+	OpenGLMaterial::UpdateTextureMatrix(_geometry->geometry_);
 
-	RawRender(pGeometry, 0);
+	RawRender(geometry, 0);
 
-	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+	ResetBasicMaterial(geometry->GetBasicMaterialSettings());
 }
 
-void OpenGLMatSingleTextureSolid::RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex)
-{
-	DoRawRender(pGeometry, pUVSetIndex);
+void OpenGLMatSingleTextureSolid::RawRender(tbc::GeometryBase* geometry, int uv_set_index) {
+	DoRawRender(geometry, uv_set_index);
 }
 
-void OpenGLMatSingleTextureSolid::PreRender()
-{
+void OpenGLMatSingleTextureSolid::PreRender() {
 	::glDisable(GL_ALPHA_TEST);
 	::glDisable(GL_BLEND);
 	//::glDisable(GL_LOGIC_OP);
@@ -465,48 +402,39 @@ void OpenGLMatSingleTextureSolid::PreRender()
 #endif // !GLES
 }
 
-void OpenGLMatSingleTextureSolid::PostRender()
-{
+void OpenGLMatSingleTextureSolid::PostRender() {
 	::glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	::glDisableClientState(GL_NORMAL_ARRAY);
 	//::glDisableClientState(GL_VERTEX_ARRAY);
 	::glDisable(GL_TEXTURE_2D);
 }
 
-void OpenGLMatSingleTextureSolid::BindTexture(int pTextureID, int pMipMapLevelCount)
-{
-	glBindTexture(GL_TEXTURE_2D, pTextureID);
+void OpenGLMatSingleTextureSolid::BindTexture(int texture_id, int mip_map_level_count) {
+	glBindTexture(GL_TEXTURE_2D, texture_id);
 	OGL_ASSERT();
 
-	GLint lTextureParamMin = GL_NEAREST;
-	GLint lTextureParamMag = GL_NEAREST;
+	GLint texture_param_min = GL_NEAREST;
+	GLint texture_param_mag = GL_NEAREST;
 
-	if(((OpenGLRenderer*)GetRenderer())->GetBilinearFilteringEnabled() == true)
-	{
+	if(((OpenGLRenderer*)GetRenderer())->GetBilinearFilteringEnabled() == true) {
 		if (((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true)
-			lTextureParamMin = GL_LINEAR_MIPMAP_NEAREST;
+			texture_param_min = GL_LINEAR_MIPMAP_NEAREST;
 		else
-			lTextureParamMin = GL_LINEAR;
+			texture_param_min = GL_LINEAR;
 
-		lTextureParamMag = GL_LINEAR;
-	}
-	else if (pMipMapLevelCount <= 1 || !((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled())
-	{
+		texture_param_mag = GL_LINEAR;
+	} else if (mip_map_level_count <= 1 || !((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled()) {
 		// Just use plain vanilla.
-	}
-	else if (((OpenGLRenderer*)GetRenderer())->GetTrilinearFilteringEnabled() == true)
-	{
+	} else if (((OpenGLRenderer*)GetRenderer())->GetTrilinearFilteringEnabled() == true) {
 		// The trilinear setting overrides the other ones.
-		lTextureParamMin = GL_LINEAR_MIPMAP_LINEAR;
-		lTextureParamMag = GL_LINEAR;
-	}
-	else if(((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true)
-	{
-		lTextureParamMin = GL_NEAREST_MIPMAP_NEAREST;
+		texture_param_min = GL_LINEAR_MIPMAP_LINEAR;
+		texture_param_mag = GL_LINEAR;
+	} else if(((OpenGLRenderer*)GetRenderer())->GetMipMappingEnabled() == true) {
+		texture_param_min = GL_NEAREST_MIPMAP_NEAREST;
 	}
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, lTextureParamMin);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, lTextureParamMag);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_param_min);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_param_mag);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	OGL_ASSERT();
@@ -514,19 +442,15 @@ void OpenGLMatSingleTextureSolid::BindTexture(int pTextureID, int pMipMapLevelCo
 
 
 
-void OpenGLMatSingleTextureHighlight::PreRender()
-{
+void OpenGLMatSingleTextureHighlight::PreRender() {
 	Parent::PreRender();
-	if (GetRenderer()->GetLightsEnabled())
-	{
+	if (GetRenderer()->GetLightsEnabled()) {
 		::glDisable(GL_LIGHTING);
 	}
 }
 
-void OpenGLMatSingleTextureHighlight::PostRender()
-{
-	if (GetRenderer()->GetLightsEnabled())
-	{
+void OpenGLMatSingleTextureHighlight::PostRender() {
+	if (GetRenderer()->GetLightsEnabled()) {
 		::glEnable(GL_LIGHTING);
 	}
 	Parent::PostRender();
@@ -534,67 +458,56 @@ void OpenGLMatSingleTextureHighlight::PostRender()
 
 
 
-void OpenGLMatSingleTextureBlended::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
-	RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
+void OpenGLMatSingleTextureBlended::RenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
+	RenderAllBlendedGeometry(current_frame, geometry_group_list);
 }
 
-void OpenGLMatSingleTextureBlended::PreRender()
-{
+void OpenGLMatSingleTextureBlended::PreRender() {
 	Parent::PreRender();
 	::glEnable(GL_BLEND);
 }
 
-void OpenGLMatSingleTextureBlended::PostRender()
-{
+void OpenGLMatSingleTextureBlended::PostRender() {
 	::glDisable(GL_BLEND);
 	Parent::PostRender();
 }
 
 
 
-void OpenGLMatSingleTextureAlphaTested::PreRender()
-{
+void OpenGLMatSingleTextureAlphaTested::PreRender() {
 	Parent::PreRender();
 	glEnable(GL_ALPHA_TEST);
 }
 
-void OpenGLMatSingleTextureAlphaTested::PostRender()
-{
+void OpenGLMatSingleTextureAlphaTested::PostRender() {
 	Parent::PostRender();
 	glDisable(GL_ALPHA_TEST);
 }
 
-void OpenGLMatSingleTextureAlphaTested::RenderGeometry(Tbc::GeometryBase* pGeometry)
-{
-	const Tbc::GeometryBase::BasicMaterialSettings& lMatSettings =
-		pGeometry->GetBasicMaterialSettings();
-	glAlphaFunc(GL_GEQUAL, lMatSettings.mAlpha);
+void OpenGLMatSingleTextureAlphaTested::RenderGeometry(tbc::GeometryBase* geometry) {
+	const tbc::GeometryBase::BasicMaterialSettings& mat_settings =
+		geometry->GetBasicMaterialSettings();
+	glAlphaFunc(GL_GEQUAL, mat_settings.alpha_);
 
-	Parent::RenderGeometry(pGeometry);
+	Parent::RenderGeometry(geometry);
 }
 
 
 
-bool OpenGLMatSingleColorEnvMapSolid::AddGeometry(Tbc::GeometryBase* pGeometry)
-{
-	/*if (pGeometry->GetUVSetCount() == 0)
-	{
-		if (mFallBackMaterial)
-		{
-			mLog.Warning("Material \"SingleColorEnvMapSolid\", passing geometry to fallback material.");
-			return mFallBackMaterial->AddGeometry(pGeometry);
+bool OpenGLMatSingleColorEnvMapSolid::AddGeometry(tbc::GeometryBase* geometry) {
+	/*if (geometry->GetUVSetCount() == 0) {
+		if (fall_back_material_) {
+			log_.Warning("Material \"SingleColorEnvMapSolid\", passing geometry to fallback material.");
+			return fall_back_material_->AddGeometry(geometry);
 		}
 		return false;
 	}*/
-	return OpenGLMatSingleColorSolid::AddGeometry(pGeometry);
+	return OpenGLMatSingleColorSolid::AddGeometry(geometry);
 }
 
-void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
-	if (!GetRenderer()->GetEnvTexture())
-	{
-		mFallBackMaterial->DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
+	if (!GetRenderer()->GetEnvTexture()) {
+		fall_back_material_->DoRenderAllGeometry(current_frame, geometry_group_list);
 		return;
 	}
 
@@ -607,22 +520,21 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 #endif // !GLES
 
 	// Pass 1, single color.
-	mSingleColorPass = true;
+	single_color_pass_ = true;
 	::glDisable(GL_TEXTURE_2D);
-	OpenGLMatSingleColorSolid::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	OpenGLMatSingleColorSolid::DoRenderAllGeometry(current_frame, geometry_group_list);
 	::glEnable(GL_TEXTURE_2D);
 
 	// Pass 2, Render the enviroment map.
-	mSingleColorPass = false;
+	single_color_pass_ = false;
 	//::glDepthFunc(GL_LEQUAL);
 	//::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	::glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	BindTexture(GetRenderer()->GetEnvTexture()->mTMapID[Texture::COLOR_MAP], GetRenderer()->GetEnvTexture()->mTMipMapLevelCount[Texture::COLOR_MAP]);
+	BindTexture(GetRenderer()->GetEnvTexture()->t_map_id_[Texture::kColorMap], GetRenderer()->GetEnvTexture()->t_mip_map_level_count_[Texture::kColorMap]);
 
 /*#ifndef LEPRA_GL_ES
-	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
-	{
+	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true) {
 		// Use cube mapping.
 		::glDisable(GL_TEXTURE_2D);
 		::glEnable(GL_TEXTURE_CUBE_MAP);
@@ -637,9 +549,7 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 		::glBindTexture(GL_TEXTURE_CUBE_MAP, lEnvMapID);
 
 		::glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);
-	}
-	else
-	{
+	} else {
 		// Use sphere mapping.
 		::glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
 		::glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
@@ -660,20 +570,17 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 
 	((OpenGLRenderer*)GetRenderer())->AddAmbience(1.0f, 1.0f, 1.0f);
 
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 
 	((OpenGLRenderer*)GetRenderer())->ResetAmbientLight(true);
 
 /*#ifndef LEPRA_GL_ES
-	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
-	{
+	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true) {
 		::glDisable(GL_TEXTURE_GEN_S);
 		::glDisable(GL_TEXTURE_GEN_T);
 		::glDisable(GL_TEXTURE_GEN_R);
 		::glDisable(GL_TEXTURE_CUBE_MAP);
-	}
-	else
-	{
+	} else {
 		::glDisable(GL_TEXTURE_GEN_S);
 		::glDisable(GL_TEXTURE_GEN_T);
 	}
@@ -684,14 +591,10 @@ void OpenGLMatSingleColorEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame
 	::glMatrixMode(GL_MODELVIEW);
 }
 
-void OpenGLMatSingleColorEnvMapSolid::PreRender()
-{
-	if (mSingleColorPass)
-	{
+void OpenGLMatSingleColorEnvMapSolid::PreRender() {
+	if (single_color_pass_) {
 		OpenGLMatSingleColorSolid::PreRender();
-	}
-	else
-	{
+	} else {
 		Parent::PreRender();
 		::glEnable(GL_BLEND);
 		::glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -704,14 +607,10 @@ void OpenGLMatSingleColorEnvMapSolid::PreRender()
 	}
 }
 
-void OpenGLMatSingleColorEnvMapSolid::PostRender()
-{
-	if (mSingleColorPass)
-	{
+void OpenGLMatSingleColorEnvMapSolid::PostRender() {
+	if (single_color_pass_) {
 		OpenGLMatSingleColorSolid::PostRender();
-	}
-	else
-	{
+	} else {
 		Parent::PostRender();
 		::glDisable(GL_BLEND);
 		::glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -720,53 +619,46 @@ void OpenGLMatSingleColorEnvMapSolid::PostRender()
 	}
 }
 
-void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (mSingleColorPass)
-	{
-		SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-		OpenGLMatSingleColorSolid::RawRender(pGeometry, 0);
-		ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-	}
-	else
-	{
+void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(tbc::GeometryBase* geometry) {
+	if (single_color_pass_) {
+		SetBasicMaterial(geometry->GetBasicMaterialSettings());
+		OpenGLMatSingleColorSolid::RawRender(geometry, 0);
+		ResetBasicMaterial(geometry->GetBasicMaterialSettings());
+	} else {
 		::glMatrixMode(GL_TEXTURE);
 		float lTextureMatrix[16];
-		xform lObjectTransform = pGeometry->GetTransformation();
-		lObjectTransform.RotateWorldX(PIF/2);
-		(lObjectTransform.Inverse() * GetRenderer()->GetCameraActualTransformation()).GetAs4x4OrientationMatrix(lTextureMatrix);
+		xform object_transform = geometry->GetTransformation();
+		object_transform.RotateWorldX(PIF/2);
+		(object_transform.Inverse() * GetRenderer()->GetCameraActualTransformation()).GetAs4x4OrientationMatrix(lTextureMatrix);
 		lTextureMatrix[15] *= 3.0f;
 		::glLoadMatrixf(lTextureMatrix);
 
-		const int lTypeIndex = mEnableWireframe? 1 : 0;
-		OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-		{
-			GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
-			GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
+		const int type_index = enable_wireframe_? 1 : 0;
+		OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
+		if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+			GLuint vertex_buffer_id = (GLuint)_geometry->vertex_buffer_id_;
+			GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
 
-			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
+			uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
 
-			glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset);
-			glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
-			glTexCoordPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);	// Use vertex coordinates instead.
+			glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)_geometry->vertex_offset_);
+			glNormalPointer(GL_FLOAT, 0, (GLvoid*)_geometry->normal_offset_);
+			glTexCoordPointer(3, GL_FLOAT, 0, (GLvoid*)_geometry->normal_offset_);	// Use vertex coordinates instead.
 
-			UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
+			uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
 
-			glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-				       lGeometry->mIndexCount[lTypeIndex],
+			glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+				       _geometry->index_count_[type_index],
 				       LEPRA_GL_INDEX_TYPE,
-				       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
-		}
-		else
-		{
-			glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-			glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
-			glTexCoordPointer(3, GL_FLOAT, 0, pGeometry->GetNormalData());	// Use vertex coordinates instead.
-			glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-				       lGeometry->mIndexCount[lTypeIndex],
+				       (GLvoid*)_geometry->index_offset_[type_index]);
+		} else {
+			glVertexPointer(3, GL_FLOAT, 0, geometry->GetVertexData());
+			glNormalPointer(GL_FLOAT, 0, geometry->GetNormalData());
+			glTexCoordPointer(3, GL_FLOAT, 0, geometry->GetNormalData());	// Use vertex coordinates instead.
+			glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+				       _geometry->index_count_[type_index],
 				       LEPRA_GL_INDEX_TYPE,
-				       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
+				       (char*)geometry->GetIndexData() + _geometry->index_offset_[type_index]);
 		}
 		OGL_ASSERT();
 	}
@@ -774,42 +666,31 @@ void OpenGLMatSingleColorEnvMapSolid::RenderGeometry(Tbc::GeometryBase* pGeometr
 
 
 
-void OpenGLMatSingleColorEnvMapBlended::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
-	RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
+void OpenGLMatSingleColorEnvMapBlended::RenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
+	RenderAllBlendedGeometry(current_frame, geometry_group_list);
 }
 
-void OpenGLMatSingleColorEnvMapBlended::PreRender()
-{
-	if (mSingleColorPass)
-	{
+void OpenGLMatSingleColorEnvMapBlended::PreRender() {
+	if (single_color_pass_) {
 		OpenGLMatSingleColorBlended::DoPreRender();
-	}
-	else
-	{
+	} else {
 		Parent::PreRender();
 	}
 }
 
-void OpenGLMatSingleColorEnvMapBlended::PostRender()
-{
-	if (mSingleColorPass)
-	{
+void OpenGLMatSingleColorEnvMapBlended::PostRender() {
+	if (single_color_pass_) {
 		OpenGLMatSingleColorBlended::DoPostRender();
-	}
-	else
-	{
+	} else {
 		::glDisable(GL_BLEND);
 	}
 }
 
 
 
-void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
-	if (!UiLepra::OpenGLExtensions::IsMultiTextureSupported() || !GetRenderer()->GetEnvTexture())
-	{
-		mFallBackMaterial->DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
+	if (!uilepra::OpenGLExtensions::IsMultiTextureSupported() || !GetRenderer()->GetEnvTexture()) {
+		fall_back_material_->DoRenderAllGeometry(current_frame, geometry_group_list);
 		return;
 	}
 
@@ -824,30 +705,28 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 	glDisableClientState(GL_COLOR_ARRAY);
 
 	// Pass 1, single texture.
-	mSingleTexturePass = true;
+	single_texture_pass_ = true;
 	EnableDisableTexturing();
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 
 	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
-	if (!UiLepra::OpenGLExtensions::IsMultiTextureSupported())
-	{
+	if (!uilepra::OpenGLExtensions::IsMultiTextureSupported()) {
 		return;
 	}
 
 	// Pass 2, Render the enviroment map.
-	mSingleTexturePass = false;
+	single_texture_pass_ = false;
 	glEnable(GL_TEXTURE_2D);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-	BindTexture(GetRenderer()->GetEnvTexture()->mTMapID[Texture::COLOR_MAP], GetRenderer()->GetEnvTexture()->mTMipMapLevelCount[Texture::COLOR_MAP]);
+	BindTexture(GetRenderer()->GetEnvTexture()->t_map_id_[Texture::kColorMap], GetRenderer()->GetEnvTexture()->t_mip_map_level_count_[Texture::kColorMap]);
 
 #ifndef LEPRA_GL_ES
-	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
-	{
+	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true) {
 		// Use cube mapping.
 		glDisable(GL_TEXTURE_2D);
 		glEnable(GL_TEXTURE_CUBE_MAP);
@@ -862,9 +741,7 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 		glBindTexture(GL_TEXTURE_CUBE_MAP, lEnvMapID);
 
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_REPEAT);
-	}
-	else
-	{
+	} else {
 		// Use sphere mapping.
 		glEnable(GL_TEXTURE_2D);
 		glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_SPHERE_MAP);
@@ -881,14 +758,14 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 	glLoadMatrixf(lTextureMatrix);
 	glMatrixMode(GL_MODELVIEW);
 
-	float lAmbientRed;
-	float lAmbientGreen;
-	float lAmbientBlue;
-	((OpenGLRenderer*)GetRenderer())->GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+	float ambient_red;
+	float ambient_green;
+	float ambient_blue;
+	((OpenGLRenderer*)GetRenderer())->GetAmbientLight(ambient_red, ambient_green, ambient_blue);
 	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(1.0f, 1.0f, 1.0f);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
 
 	GLboolean lBlendEnabled = glIsEnabled(GL_BLEND);
 
@@ -897,25 +774,22 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 	//
 	// Render the geometry.
 	//
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 
 	if (!lBlendEnabled)
 		glDisable(GL_BLEND);
 
-	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(ambient_red, ambient_green, ambient_blue);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 #ifndef LEPRA_GL_ES
-	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true)
-	{
+	if (((OpenGLRenderer*)GetRenderer())->IsEnvMapCubeMap() == true) {
 		glDisable(GL_TEXTURE_GEN_S);
 		glDisable(GL_TEXTURE_GEN_T);
 		glDisable(GL_TEXTURE_GEN_R);
 		glDisable(GL_TEXTURE_CUBE_MAP);
-	}
-	else
-	{
+	} else {
 		glDisable(GL_TEXTURE_GEN_S);
 		glDisable(GL_TEXTURE_GEN_T);
 		glDisable(GL_TEXTURE_2D);
@@ -926,84 +800,75 @@ void OpenGLMatSingleTextureEnvMapSolid::DoRenderAllGeometry(unsigned pCurrentFra
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void OpenGLMatSingleTextureEnvMapSolid::RenderGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (!UiLepra::OpenGLExtensions::IsMultiTextureSupported())
-	{
-		Parent::RenderGeometry(pGeometry);
+void OpenGLMatSingleTextureEnvMapSolid::RenderGeometry(tbc::GeometryBase* geometry) {
+	if (!uilepra::OpenGLExtensions::IsMultiTextureSupported()) {
+		Parent::RenderGeometry(geometry);
 		return;
 	}
 
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+	SetBasicMaterial(geometry->GetBasicMaterialSettings());
 
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	glBindTexture(GL_TEXTURE_2D, lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP]);
-	OpenGLMaterial::UpdateTextureMatrix(lGeometry->mGeometry);
+	OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
+	glBindTexture(GL_TEXTURE_2D, _geometry->ta_->maps_[0].map_id_[Texture::kColorMap]);
+	OpenGLMaterial::UpdateTextureMatrix(_geometry->geometry_);
 
-	RawRender(pGeometry, 0);
+	RawRender(geometry, 0);
 
-	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+	ResetBasicMaterial(geometry->GetBasicMaterialSettings());
 }
 
-void OpenGLMatSingleTextureEnvMapSolid::RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex)
-{
-	int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
-	const int lTypeIndex = mEnableWireframe? 1 : 0;
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		GLuint lVertexBufferID = (GLuint)lGeometry->mVertexBufferID;
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
+void OpenGLMatSingleTextureEnvMapSolid::RawRender(tbc::GeometryBase* geometry, int uv_set_index) {
+	int uv_count_per_vertex = geometry->GetUVCountPerVertex();
+	const int type_index = enable_wireframe_? 1 : 0;
+	OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		GLuint vertex_buffer_id = (GLuint)_geometry->vertex_buffer_id_;
+		GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, lVertexBufferID);
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
 
-		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)_geometry->vertex_offset_);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)_geometry->normal_offset_);
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, (GLvoid*)(_geometry->uv_offset_ + sizeof(float)*uv_count_per_vertex*uv_set_index*geometry->GetMaxVertexCount()));
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-			       lGeometry->mIndexCount[lTypeIndex],
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
-	}
-	else
-	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex));
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       lGeometry->mIndexCount[lTypeIndex],
+			       (GLvoid*)_geometry->index_offset_[type_index]);
+	} else {
+		glVertexPointer(3, GL_FLOAT, 0, geometry->GetVertexData());
+		glNormalPointer(GL_FLOAT, 0, geometry->GetNormalData());
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, geometry->GetUVData(uv_set_index));
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
+			       (char*)geometry->GetIndexData() + _geometry->index_offset_[type_index]);
 	}
 }
 
-void OpenGLMatSingleTextureEnvMapBlended::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
-	RenderAllBlendedGeometry(pCurrentFrame, pGeometryGroupList);
+void OpenGLMatSingleTextureEnvMapBlended::RenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
+	RenderAllBlendedGeometry(current_frame, geometry_group_list);
 }
 
 
 
-void OpenGLMatTextureAndLightmap::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
+void OpenGLMatTextureAndLightmap::DoRenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
 	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
-	if (!UiLepra::OpenGLExtensions::IsMultiTextureSupported())
-	{
-		Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	if (!uilepra::OpenGLExtensions::IsMultiTextureSupported()) {
+		Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 		return;
 	}
 
 	// The problem here is to render a surface with dynamic lights in the scene
 	// combined with a light map. The formula we want is cout = c(L + lm), where
 	// cout is the output color, c is the color map's color combined with the
-	// surface color, L is the sum of all dynamic lights, and lm is the color of 
+	// surface color, L is the sum of all dynamic lights, and lm is the color of
 	// the light map.
 	//
 	// The following solution is very easy to implement but doesn't give us the
@@ -1012,12 +877,12 @@ void OpenGLMatTextureAndLightmap::DoRenderAllGeometry(unsigned pCurrentFrame, co
 	// 1. Modulate the color map with the surface color. (cout = c).
 	// 2. Modulate the light map on top of the previous result. (cout = c * lm).
 	//
-	// If an area is pitch black, it will still be pitch black even if you add a 
+	// If an area is pitch black, it will still be pitch black even if you add a
 	// one billion megawatt search light to the scene.
 	//
 	// The correct way of doing this can only be done in two rendering passes:
 	//
-	// 1. Render the color map modulated with the light map (requires 2 texture 
+	// 1. Render the color map modulated with the light map (requires 2 texture
 	//    units). Disable all lights and set ambience to (1, 1, 1). (cout = c * lm).
 	// 2. Render the color map with dynamic lights and ADD it to the result from pass 1.
 	//    (cout = c * lm + c * L = c(L + lm).
@@ -1030,145 +895,132 @@ void OpenGLMatTextureAndLightmap::DoRenderAllGeometry(unsigned pCurrentFrame, co
 	// Pass 1.
 	//
 
-	mFirstPass = true;
+	first_pass_ = true;
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
 	glEnable(GL_TEXTURE_2D);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 	glEnable(GL_TEXTURE_2D);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 
-	float lAmbientRed;
-	float lAmbientGreen;
-	float lAmbientBlue;
-	((OpenGLRenderer*)GetRenderer())->GetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+	float ambient_red;
+	float ambient_green;
+	float ambient_blue;
+	((OpenGLRenderer*)GetRenderer())->GetAmbientLight(ambient_red, ambient_green, ambient_blue);
 	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(1.0f, 1.0f, 1.0f);
 
 	glDisable(GL_LIGHTING);
 
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 
 	if (GetRenderer()->GetLightsEnabled())
 		glEnable(GL_LIGHTING);
-	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(lAmbientRed, lAmbientGreen, lAmbientBlue);
+	((OpenGLRenderer*)GetRenderer())->SetAmbientLight(ambient_red, ambient_green, ambient_blue);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 	glDisable(GL_TEXTURE_2D);
 
 	//
 	// Pass 2.
 	//
-	mFirstPass = false;
+	first_pass_ = false;
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
 
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 	glDisable(GL_TEXTURE_2D);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	glDisable(GL_BLEND);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
 }
 
-void OpenGLMatTextureAndLightmap::RenderGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (!UiLepra::OpenGLExtensions::IsMultiTextureSupported() ||
-		pGeometry->GetUVSetCount() < 2)
-	{
-		Parent::RenderGeometry(pGeometry);
+void OpenGLMatTextureAndLightmap::RenderGeometry(tbc::GeometryBase* geometry) {
+	if (!uilepra::OpenGLExtensions::IsMultiTextureSupported() ||
+		geometry->GetUVSetCount() < 2) {
+		Parent::RenderGeometry(geometry);
 		return;
 	}
 
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+	SetBasicMaterial(geometry->GetBasicMaterialSettings());
 
-	RawRender(pGeometry, 0);
+	RawRender(geometry, 0);
 
-	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+	ResetBasicMaterial(geometry->GetBasicMaterialSettings());
 }
 
-void OpenGLMatTextureAndLightmap::RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex)
-{
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
+void OpenGLMatTextureAndLightmap::RawRender(tbc::GeometryBase* geometry, int uv_set_index) {
+	OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
 
 	// Setup the color map in texture unit 0.
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	BindTexture(_geometry->ta_->maps_[0].map_id_[Texture::kColorMap], _geometry->ta_->maps_[0].mip_map_level_count_[Texture::kColorMap]);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
-	const int lTypeIndex = mEnableWireframe? 1 : 0;
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
-	}
-	else
-	{
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex));
+	int uv_count_per_vertex = geometry->GetUVCountPerVertex();
+	const int type_index = enable_wireframe_? 1 : 0;
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)_geometry->vertex_buffer_id_);
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, (GLvoid*)(_geometry->uv_offset_ + sizeof(float)*uv_count_per_vertex*uv_set_index*geometry->GetMaxVertexCount()));
+	} else {
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, geometry->GetUVData(uv_set_index));
 	}
 
-	OpenGLMaterial::UpdateTextureMatrix(lGeometry->mGeometry);
+	OpenGLMaterial::UpdateTextureMatrix(_geometry->geometry_);
 
-	if (mFirstPass == true)
-	{
+	if (first_pass_ == true) {
 		//
 		// Render pass 1 - color map modulated with light map.
 		//
 
 		// Setup the light map in texture unit 1.
-		UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-		UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
-		BindTexture(lGeometry->mTA->mMaps[1].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[1].mMipMapLevelCount[Texture::COLOR_MAP]);
+		uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+		uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+		BindTexture(_geometry->ta_->maps_[1].map_id_[Texture::kColorMap], _geometry->ta_->maps_[1].mip_map_level_count_[Texture::kColorMap]);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
-		if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-		{
-			UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-			glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*(pUVSetIndex+1)*pGeometry->GetMaxVertexCount()));
-		}
-		else
-		{
-			glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex+1));
+		int uv_count_per_vertex = geometry->GetUVCountPerVertex();
+		if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+			uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)_geometry->vertex_buffer_id_);
+			glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, (GLvoid*)(_geometry->uv_offset_ + sizeof(float)*uv_count_per_vertex*(uv_set_index+1)*geometry->GetMaxVertexCount()));
+		} else {
+			glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, geometry->GetUVData(uv_set_index+1));
 		}
 	}
 
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
-		
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
+
 		// Vertex buffer already bound.
-		//OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
+		//OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)_geometry->vertex_buffer_id_);
 
-		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)_geometry->vertex_offset_);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)_geometry->normal_offset_);
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-			       lGeometry->mIndexCount[lTypeIndex],
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
-	}
-	else
-	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       lGeometry->mIndexCount[lTypeIndex],
+			       (GLvoid*)_geometry->index_offset_[type_index]);
+	} else {
+		glVertexPointer(3, GL_FLOAT, 0, geometry->GetVertexData());
+		glNormalPointer(GL_FLOAT, 0, geometry->GetNormalData());
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
+			       (char*)geometry->GetIndexData() + _geometry->index_offset_[type_index]);
 	}
 }
 
@@ -1176,96 +1028,93 @@ void OpenGLMatTextureAndLightmap::RawRender(Tbc::GeometryBase* pGeometry, int pU
 // OpenGLMatPXS
 //
 
-int  OpenGLMatPXS::smProgramCount = 0;
-bool OpenGLMatPXS::smFPLUTInitialized = false;
-int  OpenGLMatPXS::smFPLUT[4][4][4];
+int  OpenGLMatPXS::program_count_ = 0;
+bool OpenGLMatPXS::fplut_initialized_ = false;
+int  OpenGLMatPXS::fplut_[4][4][4];
 
-float OpenGLMatPXS::smLightPos[MAX_SHADER_LIGHTS * 4];
-float OpenGLMatPXS::smLightDir[MAX_SHADER_LIGHTS * 4];
-float OpenGLMatPXS::smLightCol[MAX_SHADER_LIGHTS * 4];
-float OpenGLMatPXS::smLightCut[MAX_SHADER_LIGHTS];
-float OpenGLMatPXS::smLightExp[MAX_SHADER_LIGHTS];
+float OpenGLMatPXS::light_pos_[kMaxShaderLights * 4];
+float OpenGLMatPXS::light_dir_[kMaxShaderLights * 4];
+float OpenGLMatPXS::light_col_[kMaxShaderLights * 4];
+float OpenGLMatPXS::light_cut_[kMaxShaderLights];
+float OpenGLMatPXS::light_exp_[kMaxShaderLights];
 
-Renderer::LightType OpenGLMatPXS::smLightType[MAX_SHADER_LIGHTS];
+Renderer::LightType OpenGLMatPXS::light_type_[kMaxShaderLights];
 
-int OpenGLMatPXS::smNumDirLights = 0;
-int OpenGLMatPXS::smNumPntLights = 0;
-int OpenGLMatPXS::smNumSptLights = 0;
-int OpenGLMatPXS::smLightCount = 0;
+int OpenGLMatPXS::num_dir_lights_ = 0;
+int OpenGLMatPXS::num_pnt_lights_ = 0;
+int OpenGLMatPXS::num_spt_lights_ = 0;
+int OpenGLMatPXS::light_count_ = 0;
 
 
-OpenGLMatPXS::OpenGLMatPXS(const str& pVP, const str pFP[NUM_FP]):
-	mVPID(0)
-{
+OpenGLMatPXS::OpenGLMatPXS(const str& vp, const str fp[kNumFp]):
+	vpid_(0) {
 #ifndef LEPRA_GL_ES
-	::memset(mFPID, 0, sizeof(mFPID));
+	::memset(fpid_, 0, sizeof(fpid_));
 
-	if (smFPLUTInitialized == false)
-	{
+	if (fplut_initialized_ == false) {
 		//
 		// Precalculate the fragment program lookup table.
 		//
 
 		int p, s; // p for point lights, and s for spot lights.
 
-		smFPLUT[0][0][0] = FP_NONE;
-		smFPLUT[0][0][1] = FP_1SPOT;
-		smFPLUT[0][0][2] = FP_2SPOT;
-		smFPLUT[0][0][3] = FP_3SPOT;
+		fplut_[0][0][0] = kFpNone;
+		fplut_[0][0][1] = kFp1Spot;
+		fplut_[0][0][2] = kFp2Spot;
+		fplut_[0][0][3] = kFp3Spot;
 
-		smFPLUT[0][1][0] = FP_1POINT;
-		smFPLUT[0][1][1] = FP_1POINT1SPOT;
-		smFPLUT[0][1][2] = FP_1POINT2SPOT;
-		smFPLUT[0][1][3] = FP_1POINT2SPOT;
+		fplut_[0][1][0] = kFp1Point;
+		fplut_[0][1][1] = kFp1Point1Spot;
+		fplut_[0][1][2] = kFp1Point2Spot;
+		fplut_[0][1][3] = kFp1Point2Spot;
 
-		smFPLUT[0][2][0] = FP_2POINT;
-		smFPLUT[0][2][1] = FP_2POINT1SPOT;
-		smFPLUT[0][2][2] = FP_2POINT1SPOT;
-		smFPLUT[0][2][3] = FP_2POINT1SPOT;
+		fplut_[0][2][0] = kFp2Point;
+		fplut_[0][2][1] = kFp2Point1Spot;
+		fplut_[0][2][2] = kFp2Point1Spot;
+		fplut_[0][2][3] = kFp2Point1Spot;
 
-		smFPLUT[0][3][0] = FP_3POINT;
-		smFPLUT[0][3][1] = FP_3POINT;
-		smFPLUT[0][3][2] = FP_3POINT;
-		smFPLUT[0][3][3] = FP_3POINT;
+		fplut_[0][3][0] = kFp3Point;
+		fplut_[0][3][1] = kFp3Point;
+		fplut_[0][3][2] = kFp3Point;
+		fplut_[0][3][3] = kFp3Point;
 
 
 
-		smFPLUT[1][0][0] = FP_1DIR;
-		smFPLUT[1][0][1] = FP_1DIR1SPOT;
-		smFPLUT[1][0][2] = FP_1DIR2SPOT;
-		smFPLUT[1][0][3] = FP_1DIR2SPOT;
+		fplut_[1][0][0] = kFp1Dir;
+		fplut_[1][0][1] = kFp1Dir1Spot;
+		fplut_[1][0][2] = kFp1Dir2Spot;
+		fplut_[1][0][3] = kFp1Dir2Spot;
 
-		smFPLUT[1][1][0] = FP_1DIR1POINT;
-		smFPLUT[1][1][1] = FP_1DIR1POINT1SPOT;
-		smFPLUT[1][1][2] = FP_1DIR1POINT1SPOT;
-		smFPLUT[1][1][3] = FP_1DIR1POINT1SPOT;
+		fplut_[1][1][0] = kFp1Dir1Point;
+		fplut_[1][1][1] = kFp1Dir1Point1Spot;
+		fplut_[1][1][2] = kFp1Dir1Point1Spot;
+		fplut_[1][1][3] = kFp1Dir1Point1Spot;
 
 		for (p = 2; p < 4; p++)
 			for (s = 0; s < 4; s++)
-				smFPLUT[1][p][s] = FP_1DIR2POINT;
+				fplut_[1][p][s] = kFp1Dir2Point;
 
 
 
-		smFPLUT[2][0][0] = FP_2DIR;
-		smFPLUT[2][0][1] = FP_2DIR1SPOT;
-		smFPLUT[2][0][2] = FP_2DIR1SPOT;
-		smFPLUT[2][0][3] = FP_2DIR1SPOT;
+		fplut_[2][0][0] = kFp2Dir;
+		fplut_[2][0][1] = kFp2Dir1Spot;
+		fplut_[2][0][2] = kFp2Dir1Spot;
+		fplut_[2][0][3] = kFp2Dir1Spot;
 
 		for (p = 1; p < 4; p++)
 			for (s = 0; s < 4; s++)
-				smFPLUT[2][p][s] = FP_2DIR1POINT;
+				fplut_[2][p][s] = kFp2Dir1Point;
 
 
 
 		for (p = 0; p < 4; p++)
 			for (s = 0; s < 4; s++)
-				smFPLUT[3][p][s] = FP_3DIR;
+				fplut_[3][p][s] = kFp3Dir;
 
-		smFPLUTInitialized = true;
+		fplut_initialized_ = true;
 	}
 
-	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
-	{
+	if (uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported()) {
 		int i;
 
 		//
@@ -1274,20 +1123,19 @@ OpenGLMatPXS::OpenGLMatPXS(const str& pVP, const str pFP[NUM_FP]):
 
 		glEnable(GL_VERTEX_PROGRAM_ARB);
 		// Allocate a new ID for this vertex program.
-		mVPID = AllocProgramID();
+		vpid_ = AllocProgramID();
 
-		UiLepra::OpenGLExtensions::glBindProgramARB(GL_VERTEX_PROGRAM_ARB, mVPID);
+		uilepra::OpenGLExtensions::glBindProgramARB(GL_VERTEX_PROGRAM_ARB, vpid_);
 
 		GLint lErrorPos;
-		UiLepra::OpenGLExtensions::glProgramStringARB(GL_VERTEX_PROGRAM_ARB, 
+		uilepra::OpenGLExtensions::glProgramStringARB(GL_VERTEX_PROGRAM_ARB,
 							    GL_PROGRAM_FORMAT_ASCII_ARB,
-							    (GLsizei)pVP.length(),
-							    pVP.c_str());
+							    (GLsizei)vp.length(),
+							    vp.c_str());
 		glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &lErrorPos);
-		if (lErrorPos != -1)
-		{
-			str lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
-			mLog.Errorf("Error in vertex shader at pos %i!\r\n%s\r\n", lErrorPos, lGlError.c_str());
+		if (lErrorPos != -1) {
+			str gl_error((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
+			log_.Errorf("Error in vertex shader at pos %i!\r\n%s\r\n", lErrorPos, gl_error.c_str());
 		}
 		glDisable(GL_VERTEX_PROGRAM_ARB);
 
@@ -1296,24 +1144,22 @@ OpenGLMatPXS::OpenGLMatPXS(const str& pVP, const str pFP[NUM_FP]):
 		//
 
 		glEnable(GL_FRAGMENT_PROGRAM_ARB);
-		for (i = 0; i < NUM_FP; i++)
-		{
+		for (i = 0; i < kNumFp; i++) {
 			// Allocate a new ID for this fragment program.
-			mFPID[i] = AllocProgramID();
+			fpid_[i] = AllocProgramID();
 
-			UiLepra::OpenGLExtensions::glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, mFPID[i]);
+			uilepra::OpenGLExtensions::glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fpid_[i]);
 
 			GLint lErrorPos;
-			UiLepra::OpenGLExtensions::glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB, 
+			uilepra::OpenGLExtensions::glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB,
 								    GL_PROGRAM_FORMAT_ASCII_ARB,
-								    (GLsizei)pFP[i].length(),
-								    pFP[i].c_str());
+								    (GLsizei)fp[i].length(),
+								    fp[i].c_str());
 			glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &lErrorPos);
-			if (lErrorPos != -1)
-			{
-				str lGlError((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
-				mLog.Errorf("Error in fragment shader %i at pos %i!\r\n%s\r\n", i, lErrorPos, lGlError.c_str());
-				mLog.Info("Setting fragment shader to fallback shader.");
+			if (lErrorPos != -1) {
+				str gl_error((const char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
+				log_.Errorf("Error in fragment shader %i at pos %i!\r\n%s\r\n", i, lErrorPos, gl_error.c_str());
+				log_.Info("Setting fragment shader to fallback shader.");
 
 				SetToFallbackFP(i);
 			}
@@ -1323,178 +1169,169 @@ OpenGLMatPXS::OpenGLMatPXS(const str& pVP, const str pFP[NUM_FP]):
 #endif // !GLES
 }
 
-void OpenGLMatPXS::SetToFallbackFP(int pFPType)
-{
+void OpenGLMatPXS::SetToFallbackFP(int fp_type) {
 #ifndef LEPRA_GL_ES
-	int& lDestFP = mFPID[pFPType];
+	int& lDestFP = fpid_[fp_type];
 
-	switch(pFPType)
-	{
-	case FP_NONE:
-		lDestFP = mFPID[FP_NONE];	// There is no fallback on this one.
+	switch(fp_type) {
+	case kFpNone:
+		lDestFP = fpid_[kFpNone];	// There is no fallback on this one.
 		break;
-	case FP_1POINT:
-		lDestFP = mFPID[FP_NONE];
+	case kFp1Point:
+		lDestFP = fpid_[kFpNone];
 		break;
-	case FP_2POINT:
-		lDestFP = mFPID[FP_1POINT];
+	case kFp2Point:
+		lDestFP = fpid_[kFp1Point];
 		break;
-	case FP_3POINT:
-		lDestFP = mFPID[FP_2POINT];
+	case kFp3Point:
+		lDestFP = fpid_[kFp2Point];
 		break;
-	case FP_1DIR:
-		lDestFP = mFPID[FP_NONE];
+	case kFp1Dir:
+		lDestFP = fpid_[kFpNone];
 		break;
-	case FP_2DIR:
-		lDestFP = mFPID[FP_1DIR];
+	case kFp2Dir:
+		lDestFP = fpid_[kFp1Dir];
 		break;
-	case FP_3DIR:
-		lDestFP = mFPID[FP_2DIR];
+	case kFp3Dir:
+		lDestFP = fpid_[kFp2Dir];
 		break;
-	case FP_1SPOT:
-		lDestFP = mFPID[FP_NONE];
+	case kFp1Spot:
+		lDestFP = fpid_[kFpNone];
 		break;
-	case FP_2SPOT:
-		lDestFP = mFPID[FP_1SPOT];
+	case kFp2Spot:
+		lDestFP = fpid_[kFp1Spot];
 		break;
-	case FP_3SPOT:
-		lDestFP = mFPID[FP_2SPOT];
+	case kFp3Spot:
+		lDestFP = fpid_[kFp2Spot];
 		break;
-	case FP_1DIR1POINT:
-		lDestFP = mFPID[FP_1DIR];
+	case kFp1Dir1Point:
+		lDestFP = fpid_[kFp1Dir];
 		break;
-	case FP_1DIR2POINT:
-		lDestFP = mFPID[FP_1DIR1POINT];
+	case kFp1Dir2Point:
+		lDestFP = fpid_[kFp1Dir1Point];
 		break;
-	case FP_2DIR1POINT:
-		lDestFP = mFPID[FP_2DIR];
+	case kFp2Dir1Point:
+		lDestFP = fpid_[kFp2Dir];
 		break;
-	case FP_1DIR1SPOT:
-		lDestFP = mFPID[FP_1DIR];
+	case kFp1Dir1Spot:
+		lDestFP = fpid_[kFp1Dir];
 		break;
-	case FP_1DIR2SPOT:
-		lDestFP = mFPID[FP_1DIR1SPOT];
+	case kFp1Dir2Spot:
+		lDestFP = fpid_[kFp1Dir1Spot];
 		break;
-	case FP_2DIR1SPOT:
-		lDestFP = mFPID[FP_2DIR];
+	case kFp2Dir1Spot:
+		lDestFP = fpid_[kFp2Dir];
 		break;
-	case FP_1POINT1SPOT:
-		lDestFP = mFPID[FP_1POINT];
+	case kFp1Point1Spot:
+		lDestFP = fpid_[kFp1Point];
 		break;
-	case FP_1POINT2SPOT:
-		lDestFP = mFPID[FP_1POINT1SPOT];
+	case kFp1Point2Spot:
+		lDestFP = fpid_[kFp1Point1Spot];
 		break;
-	case FP_2POINT1SPOT:
-		lDestFP = mFPID[FP_2POINT];
+	case kFp2Point1Spot:
+		lDestFP = fpid_[kFp2Point];
 		break;
-	case FP_1DIR1POINT1SPOT:
-		lDestFP = mFPID[FP_1DIR1POINT];
+	case kFp1Dir1Point1Spot:
+		lDestFP = fpid_[kFp1Dir1Point];
 		break;
 	};
 #endif // !GLES
 }
 
-void OpenGLMatPXS::PrepareLights(OpenGLRenderer* pRenderer)
-{
+void OpenGLMatPXS::PrepareLights(OpenGLRenderer* renderer) {
 #ifndef LEPRA_GL_ES
 	//
-	// All pixel shaded materials support up to 3 simultaneous lights. 
+	// All pixel shaded materials support up to 3 simultaneous lights.
 	// The fragment shaders need the lights sorted in the following order:
 	// 1. Directional lights.
 	// 2. Point lights.
 	// 3. Spot lights.
 	//
-	enum
-	{
+	enum {
 		NUM_BUCKETS = 3
 	};
 
 	// One bucket per light type.
-	float lLightPos[NUM_BUCKETS * MAX_SHADER_LIGHTS * 4];
-	float lLightDir[NUM_BUCKETS * MAX_SHADER_LIGHTS * 4];
-	float lLightCol[NUM_BUCKETS * MAX_SHADER_LIGHTS * 4];
+	float light_pos[NUM_BUCKETS * kMaxShaderLights * 4];
+	float light_dir[NUM_BUCKETS * kMaxShaderLights * 4];
+	float lLightCol[NUM_BUCKETS * kMaxShaderLights * 4];
 
-	// Cutoff angle for each light. Assumes that MAX_SHADER_LIGHTS <= 4.
-	float lLightCut[NUM_BUCKETS * MAX_SHADER_LIGHTS];
-	float lLightExp[NUM_BUCKETS * MAX_SHADER_LIGHTS];
+	// Cutoff angle for each light. Assumes that kMaxShaderLights <= 4.
+	float lLightCut[NUM_BUCKETS * kMaxShaderLights];
+	float lLightExp[NUM_BUCKETS * kMaxShaderLights];
 
-	::memset(lLightPos, 0, sizeof(lLightPos));
-	::memset(lLightDir, 0, sizeof(lLightDir));
+	::memset(light_pos, 0, sizeof(light_pos));
+	::memset(light_dir, 0, sizeof(light_dir));
 	::memset(lLightCol, 0, sizeof(lLightCol));
 	::memset(lLightCut, 0, sizeof(lLightCut));
 	::memset(lLightExp, 0, sizeof(lLightExp));
 
-	smNumDirLights = 0;
-	smNumPntLights = 0;
-	smNumSptLights = 0;
+	num_dir_lights_ = 0;
+	num_pnt_lights_ = 0;
+	num_spt_lights_ = 0;
 	int lTotalLightCount = 0;
 	int i;
 
 	// Sorting the lights with respect to the camera.
-	pRenderer->SortLights(pRenderer->GetCameraTransformation().GetPosition());
+	renderer->SortLights(renderer->GetCameraTransformation().GetPosition());
 
 	// Count the number of lights of each type, and get their position/direction and color.
-	for (i = 0; i < pRenderer->GetLightCount() && lTotalLightCount < MAX_SHADER_LIGHTS; ++i)
-	{
-		const Renderer::LightID lLightID = pRenderer->GetClosestLight(i);
-		GLenum lGLLight = GL_LIGHT0 + (int)lLightID;
+	for (i = 0; i < renderer->GetLightCount() && lTotalLightCount < kMaxShaderLights; ++i) {
+		const Renderer::LightID light_id = renderer->GetClosestLight(i);
+		GLenum lGLLight = GL_LIGHT0 + (int)light_id;
 
-		int lLightIndex = 0;
+		int light_index = 0;
 
-		// Check if the light is enabled, if it's not, we are in the 
+		// Check if the light is enabled, if it's not, we are in the
 		// "shadow rendering pass".
-		if (::glIsEnabled(lGLLight) == GL_TRUE)
-		{
+		if (::glIsEnabled(lGLLight) == GL_TRUE) {
 			// Get light type.
-			smLightType[lTotalLightCount] = pRenderer->GetLightType(lLightID);
-			int lBucket = (int)smLightType[lTotalLightCount];
-			int lIndex = 0;
+			light_type_[lTotalLightCount] = renderer->GetLightType(light_id);
+			int lBucket = (int)light_type_[lTotalLightCount];
+			int index = 0;
 
 			// Get light position and direction.
-			switch(smLightType[lTotalLightCount])
-			{
-			case Renderer::LIGHT_DIRECTIONAL:
-			{
-				lIndex = lBucket * MAX_SHADER_LIGHTS * 4 + smNumDirLights * 4;
-				lLightIndex = smNumDirLights;
+			switch(light_type_[lTotalLightCount]) {
+			case Renderer::kLightDirectional: {
+				index = lBucket * kMaxShaderLights * 4 + num_dir_lights_ * 4;
+				light_index = num_dir_lights_;
 
-				glGetLightfv(lGLLight, GL_POSITION, &lLightDir[lIndex]);
+				glGetLightfv(lGLLight, GL_POSITION, &light_dir[index]);
 
-				smNumDirLights++;
+				num_dir_lights_++;
 				break;
 			}
-			case Renderer::LIGHT_POINT:
-				lIndex = lBucket * MAX_SHADER_LIGHTS * 4 + smNumPntLights * 4;
-				lLightIndex = smNumPntLights;
+			case Renderer::kLightPoint:
+				index = lBucket * kMaxShaderLights * 4 + num_pnt_lights_ * 4;
+				light_index = num_pnt_lights_;
 
-				glGetLightfv(lGLLight, GL_POSITION, &lLightPos[lIndex]);
+				glGetLightfv(lGLLight, GL_POSITION, &light_pos[index]);
 
-				smNumPntLights++;
+				num_pnt_lights_++;
 				break;
-			case Renderer::LIGHT_SPOT:
-			{
-				lIndex = lBucket * MAX_SHADER_LIGHTS * 4 + smNumSptLights * 4;
-				lLightIndex = smNumSptLights;
+			case Renderer::kLightSpot: {
+				index = lBucket * kMaxShaderLights * 4 + num_spt_lights_ * 4;
+				light_index = num_spt_lights_;
 
-				glGetLightfv(lGLLight, GL_POSITION, &lLightPos[lIndex]);
-				glGetLightfv(lGLLight, GL_SPOT_DIRECTION, &lLightDir[lIndex]);
+				glGetLightfv(lGLLight, GL_POSITION, &light_pos[index]);
+				glGetLightfv(lGLLight, GL_SPOT_DIRECTION, &light_dir[index]);
 
-				smNumSptLights++;
+				num_spt_lights_++;
 				break;
 			}
 			default: break;
 			}
 
 			// Get light color.
-			const vec3 lLightColor = pRenderer->GetLightColor(lLightID);
-			lLightCol[lIndex + 0] = lLightColor.x;
-			lLightCol[lIndex + 1] = lLightColor.y;
-			lLightCol[lIndex + 2] = lLightColor.z;
+			const vec3 lLightColor = renderer->GetLightColor(light_id);
+			lLightCol[index + 0] = lLightColor.x;
+			lLightCol[index + 1] = lLightColor.y;
+			lLightCol[index + 2] = lLightColor.z;
 
-			float lCutoffAngle = pRenderer->GetLightCutoffAngle(lLightID);
-			lLightCut[lBucket * MAX_SHADER_LIGHTS + lLightIndex] = (float)cos(lCutoffAngle * PIF / 180.0f);
+			float lCutoffAngle = renderer->GetLightCutoffAngle(light_id);
+			lLightCut[lBucket * kMaxShaderLights + light_index] = (float)cos(lCutoffAngle * PIF / 180.0f);
 
-			lLightExp[lBucket * MAX_SHADER_LIGHTS + lLightIndex] = pRenderer->GetLightSpotExponent(lLightID);
+			lLightExp[lBucket * kMaxShaderLights + light_index] = renderer->GetLightSpotExponent(light_id);
 
 			++lTotalLightCount;
 		}
@@ -1503,121 +1340,114 @@ void OpenGLMatPXS::PrepareLights(OpenGLRenderer* pRenderer)
 
 
 	// Set light position, direction and color in sorted order.
-	smLightCount = 0;
+	light_count_ = 0;
 
-	for (i = 0; i < smNumDirLights; i++)
-	{
-		int lIndex = (int)Renderer::LIGHT_DIRECTIONAL * MAX_SHADER_LIGHTS * 4 + i * 4;
-		memcpy(&smLightPos[smLightCount * 4], &lLightPos[lIndex], 4 * sizeof(float));
-		memcpy(&smLightDir[smLightCount * 4], &lLightDir[lIndex], 4 * sizeof(float));
-		memcpy(&smLightCol[smLightCount * 4], &lLightCol[lIndex], 4 * sizeof(float));
+	for (i = 0; i < num_dir_lights_; i++) {
+		int index = (int)Renderer::kLightDirectional * kMaxShaderLights * 4 + i * 4;
+		memcpy(&light_pos_[light_count_ * 4], &light_pos[index], 4 * sizeof(float));
+		memcpy(&light_dir_[light_count_ * 4], &light_dir[index], 4 * sizeof(float));
+		memcpy(&light_col_[light_count_ * 4], &lLightCol[index], 4 * sizeof(float));
 
-		lIndex = (int)Renderer::LIGHT_DIRECTIONAL * MAX_SHADER_LIGHTS + i;
-		smLightCut[smLightCount] = lLightCut[lIndex];
-		smLightExp[smLightCount] = lLightExp[lIndex];
+		index = (int)Renderer::kLightDirectional * kMaxShaderLights + i;
+		light_cut_[light_count_] = lLightCut[index];
+		light_exp_[light_count_] = lLightExp[index];
 
-		smLightCount++;
+		light_count_++;
 	}
 
-	for (i = 0; i < smNumPntLights; i++)
-	{
-		int lIndex = (int)Renderer::LIGHT_POINT * MAX_SHADER_LIGHTS * 4 + i * 4;
-		memcpy(&smLightPos[smLightCount * 4], &lLightPos[lIndex], 4 * sizeof(float));
-		memcpy(&smLightDir[smLightCount * 4], &lLightDir[lIndex], 4 * sizeof(float));
-		memcpy(&smLightCol[smLightCount * 4], &lLightCol[lIndex], 4 * sizeof(float));
+	for (i = 0; i < num_pnt_lights_; i++) {
+		int index = (int)Renderer::kLightPoint * kMaxShaderLights * 4 + i * 4;
+		memcpy(&light_pos_[light_count_ * 4], &light_pos[index], 4 * sizeof(float));
+		memcpy(&light_dir_[light_count_ * 4], &light_dir[index], 4 * sizeof(float));
+		memcpy(&light_col_[light_count_ * 4], &lLightCol[index], 4 * sizeof(float));
 
-		lIndex = (int)Renderer::LIGHT_POINT * MAX_SHADER_LIGHTS + i;
-		smLightCut[smLightCount] = lLightCut[lIndex];
-		smLightExp[smLightCount] = lLightExp[lIndex];
+		index = (int)Renderer::kLightPoint * kMaxShaderLights + i;
+		light_cut_[light_count_] = lLightCut[index];
+		light_exp_[light_count_] = lLightExp[index];
 
-		smLightCount++;
+		light_count_++;
 	}
 
-	for (i = 0; i < smNumSptLights; i++)
-	{
-		int lIndex = (int)Renderer::LIGHT_SPOT * MAX_SHADER_LIGHTS * 4 + i * 4;
-		memcpy(&smLightPos[smLightCount * 4], &lLightPos[lIndex], 4 * sizeof(float));
-		memcpy(&smLightDir[smLightCount * 4], &lLightDir[lIndex], 4 * sizeof(float));
-		memcpy(&smLightCol[smLightCount * 4], &lLightCol[lIndex], 4 * sizeof(float));
+	for (i = 0; i < num_spt_lights_; i++) {
+		int index = (int)Renderer::kLightSpot * kMaxShaderLights * 4 + i * 4;
+		memcpy(&light_pos_[light_count_ * 4], &light_pos[index], 4 * sizeof(float));
+		memcpy(&light_dir_[light_count_ * 4], &light_dir[index], 4 * sizeof(float));
+		memcpy(&light_col_[light_count_ * 4], &lLightCol[index], 4 * sizeof(float));
 
-		lIndex = (int)Renderer::LIGHT_SPOT * MAX_SHADER_LIGHTS + i;
-		smLightCut[smLightCount] = lLightCut[lIndex];
-		smLightExp[smLightCount] = lLightExp[lIndex];
+		index = (int)Renderer::kLightSpot * kMaxShaderLights + i;
+		light_cut_[light_count_] = lLightCut[index];
+		light_exp_[light_count_] = lLightExp[index];
 
-		smLightCount++;
+		light_count_++;
 	}
 #endif // !GLES
 }
 
-void OpenGLMatPXS::CleanupShaderPrograms()
-{
+void OpenGLMatPXS::CleanupShaderPrograms() {
 #ifndef LEPRA_GL_ES
 	glDisable(GL_VERTEX_PROGRAM_ARB);
 	glDisable(GL_FRAGMENT_PROGRAM_ARB);
 #endif // !GLES
 }
 
-void OpenGLMatPXS::SetAmbientLight(OpenGLRenderer* pRenderer, Tbc::GeometryBase* pGeometry)
-{
+void OpenGLMatPXS::SetAmbientLight(OpenGLRenderer* renderer, tbc::GeometryBase* geometry) {
 #ifndef LEPRA_GL_ES
 	float r, g, b;
-	pRenderer->GetAmbientLight(r, g, b);
+	renderer->GetAmbientLight(r, g, b);
 
-	const Tbc::GeometryBase::BasicMaterialSettings& lMat =
-		pGeometry->GetBasicMaterialSettings();
+	const tbc::GeometryBase::BasicMaterialSettings& mat =
+		geometry->GetBasicMaterialSettings();
 
-	r += lMat.mAmbient.x;
-	g += lMat.mAmbient.y;
-	b += lMat.mAmbient.z;
+	r += mat.ambient_.x;
+	g += mat.ambient_.y;
+	b += mat.ambient_.z;
 
-	//if (r > 1.0f) 
+	//if (r > 1.0f)
 	//{
 	//	r = 1.0f;
 	//}
-	//if (g > 1.0f) 
+	//if (g > 1.0f)
 	//{
 	//	g = 1.0f;
 	//}
-	//if (b > 1.0f) 
+	//if (b > 1.0f)
 	//{
 	//	b = 1.0f;
 	//}
 
 	// Set the ambient light.
-	GLfloat lLightAmbient[4];
-	lLightAmbient[0] = (GLfloat)r;
-	lLightAmbient[1] = (GLfloat)g;
-	lLightAmbient[2] = (GLfloat)b;
-	lLightAmbient[3] = 0;
-	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 3, lLightAmbient);
+	GLfloat light_ambient[4];
+	light_ambient[0] = (GLfloat)r;
+	light_ambient[1] = (GLfloat)g;
+	light_ambient[2] = (GLfloat)b;
+	light_ambient[3] = 0;
+	uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 3, light_ambient);
 #endif // !GLES
 }
 
-void OpenGLMatPXS::PrepareShaderPrograms(OpenGLRenderer* /*pRenderer*/)
-{
+void OpenGLMatPXS::PrepareShaderPrograms(OpenGLRenderer* /*renderer*/) {
 #ifndef LEPRA_GL_ES
 	// Lookup which fragment shader to use for this combination of lights.
-	int lSelectedFP = smFPLUT[smNumDirLights][smNumPntLights][smNumSptLights];
+	int selected_fp = fplut_[num_dir_lights_][num_pnt_lights_][num_spt_lights_];
 
 	glEnable(GL_VERTEX_PROGRAM_ARB);
 	glEnable(GL_FRAGMENT_PROGRAM_ARB);
 
-	UiLepra::OpenGLExtensions::glBindProgramARB(GL_VERTEX_PROGRAM_ARB, mVPID);
-	UiLepra::OpenGLExtensions::glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, mFPID[lSelectedFP]);
+	uilepra::OpenGLExtensions::glBindProgramARB(GL_VERTEX_PROGRAM_ARB, vpid_);
+	uilepra::OpenGLExtensions::glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fpid_[selected_fp]);
 
-	for (int i = 0; i < smLightCount; i++)
-	{
-		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, i,  &smLightPos[i * 4]);
-		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 4,  &smLightPos[i * 4]);
-		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 7,  &smLightDir[i * 4]);
-		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 10, &smLightCol[i * 4]);
+	for (int i = 0; i < light_count_; i++) {
+		uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, i,  &light_pos_[i * 4]);
+		uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 4,  &light_pos_[i * 4]);
+		uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 7,  &light_dir_[i * 4]);
+		uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, i + 10, &light_col_[i * 4]);
 		// One extra copy to the vertex shader. Used in bump mapping for instance.
-		UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, i + 3,  &smLightDir[i * 4]);
+		uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_VERTEX_PROGRAM_ARB, i + 3,  &light_dir_[i * 4]);
 	}
 
 	// Set the cutoff angle and spot exponent.
-	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 1, smLightCut);
-	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 2, smLightExp);
+	uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 1, light_cut_);
+	uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 2, light_exp_);
 #endif // !GLES
 }
 
@@ -1625,60 +1455,53 @@ void OpenGLMatPXS::PrepareShaderPrograms(OpenGLRenderer* /*pRenderer*/)
 // OpenGLMatSingleColorSolidPXS
 //
 
-OpenGLMatSingleColorSolidPXS::OpenGLMatSingleColorSolidPXS(OpenGLRenderer* pRenderer, Material* pFallBackMaterial):
-	OpenGLMatSingleColorSolid(pRenderer, pFallBackMaterial),
-	OpenGLMatPXS(smVP, smFP)
-{
+OpenGLMatSingleColorSolidPXS::OpenGLMatSingleColorSolidPXS(OpenGLRenderer* renderer, Material* fall_back_material):
+	OpenGLMatSingleColorSolid(renderer, fall_back_material),
+	OpenGLMatPXS(vp_, fp_) {
 }
 
-OpenGLMatSingleColorSolidPXS::~OpenGLMatSingleColorSolidPXS()
-{
+OpenGLMatSingleColorSolidPXS::~OpenGLMatSingleColorSolidPXS() {
 #ifndef LEPRA_GL_ES
-	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported() == true)
-	{
-		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
-		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);
+	if (uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported() == true) {
+		uilepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&vpid_);
+		uilepra::OpenGLExtensions::glDeleteProgramsARB(kNumFp, (const GLuint*)fpid_);
 	}
 #endif // !GLES
 }
 
-void OpenGLMatSingleColorSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
-	{
-		Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+void OpenGLMatSingleColorSolidPXS::DoRenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
+	if (!GetRenderer()->IsPixelShadersEnabled() || !uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported()) {
+		Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 		return;
 	}
 
 	OpenGLMatPXS::PrepareShaderPrograms((OpenGLRenderer*)GetRenderer());
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 	OpenGLMatPXS::CleanupShaderPrograms();
 }
 
-void OpenGLMatSingleColorSolidPXS::RenderGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
-	{
-		Parent::RenderGeometry(pGeometry);
+void OpenGLMatSingleColorSolidPXS::RenderGeometry(tbc::GeometryBase* geometry) {
+	if (!GetRenderer()->IsPixelShadersEnabled() || !uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported()) {
+		Parent::RenderGeometry(geometry);
 		return;
 	}
 
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
+	SetBasicMaterial(geometry->GetBasicMaterialSettings());
+	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), geometry);
 
 #ifndef LEPRA_GL_ES
-	float lSpecular[4];
-	const Tbc::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
-	lSpecular[0] = lMatSettings.mShininess;
-	lSpecular[1] = lMatSettings.mShininess;
-	lSpecular[2] = lMatSettings.mShininess;
-	lSpecular[3] = lMatSettings.mShininess;
-	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
+	float specular[4];
+	const tbc::GeometryBase::BasicMaterialSettings& mat_settings = geometry->GetBasicMaterialSettings();
+	specular[0] = mat_settings.shininess_;
+	specular[1] = mat_settings.shininess_;
+	specular[2] = mat_settings.shininess_;
+	specular[3] = mat_settings.shininess_;
+	uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, specular);
 #endif // !GLES
 
-	Parent::RawRender(pGeometry, 0);
+	Parent::RawRender(geometry, 0);
 
-	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+	ResetBasicMaterial(geometry->GetBasicMaterialSettings());
 }
 
 
@@ -1688,52 +1511,45 @@ void OpenGLMatSingleColorSolidPXS::RenderGeometry(Tbc::GeometryBase* pGeometry)
 // OpenGLMatSingleTextureSolidPXS
 //
 
-OpenGLMatSingleTextureSolidPXS::OpenGLMatSingleTextureSolidPXS(OpenGLRenderer* pRenderer,
-							   Material* pFallBackMaterial) :
-	OpenGLMatSingleTextureSolid(pRenderer, pFallBackMaterial),
-	OpenGLMatPXS(smVP, smFP)
-{
+OpenGLMatSingleTextureSolidPXS::OpenGLMatSingleTextureSolidPXS(OpenGLRenderer* renderer,
+							   Material* fall_back_material) :
+	OpenGLMatSingleTextureSolid(renderer, fall_back_material),
+	OpenGLMatPXS(vp_, fp_) {
 }
 
-OpenGLMatSingleTextureSolidPXS::~OpenGLMatSingleTextureSolidPXS()
-{
+OpenGLMatSingleTextureSolidPXS::~OpenGLMatSingleTextureSolidPXS() {
 #ifndef LEPRA_GL_ES
-	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
-	{
-		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
-		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);
+	if (uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported()) {
+		uilepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&vpid_);
+		uilepra::OpenGLExtensions::glDeleteProgramsARB(kNumFp, (const GLuint*)fpid_);
 	}
 #endif // !GLES
 }
 
-void OpenGLMatSingleTextureSolidPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
+void OpenGLMatSingleTextureSolidPXS::DoRenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
 	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsMultiTextureSupported())
-	{
-		Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	if (!GetRenderer()->IsPixelShadersEnabled() || !uilepra::OpenGLExtensions::IsMultiTextureSupported()) {
+		Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 		return;
 	}
 
 	OpenGLMatPXS::PrepareShaderPrograms((OpenGLRenderer*)GetRenderer());
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 	OpenGLMatPXS::CleanupShaderPrograms();
 }
 
-void OpenGLMatSingleTextureSolidPXS::RenderGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
-	{
-		Parent::RenderGeometry(pGeometry);
+void OpenGLMatSingleTextureSolidPXS::RenderGeometry(tbc::GeometryBase* geometry) {
+	if (!GetRenderer()->IsPixelShadersEnabled() || !uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported()) {
+		Parent::RenderGeometry(geometry);
 		return;
 	}
 
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
+	OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
+	SetBasicMaterial(geometry->GetBasicMaterialSettings());
+	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), geometry);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
 	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	//glEnable(GL_TEXTURE_2D);
 #ifndef LEPRA_GL_ES
@@ -1741,23 +1557,23 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(Tbc::GeometryBase* pGeometry
 	glDisable(GL_TEXTURE_GEN_T);
 #endif // !GLES
 
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
+	BindTexture(_geometry->ta_->maps_[0].map_id_[Texture::kColorMap], _geometry->ta_->maps_[0].mip_map_level_count_[Texture::kColorMap]);
 
-	OpenGLMaterial::UpdateTextureMatrix(lGeometry->mGeometry);
-	
+	OpenGLMaterial::UpdateTextureMatrix(_geometry->geometry_);
+
 #ifndef LEPRA_GL_ES
-	float lSpecular[4];
-	const Tbc::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
-	lSpecular[0] = lMatSettings.mShininess;
-	lSpecular[1] = lMatSettings.mShininess;
-	lSpecular[2] = lMatSettings.mShininess;
-	lSpecular[3] = lMatSettings.mShininess;
-	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
+	float specular[4];
+	const tbc::GeometryBase::BasicMaterialSettings& mat_settings = geometry->GetBasicMaterialSettings();
+	specular[0] = mat_settings.shininess_;
+	specular[1] = mat_settings.shininess_;
+	specular[2] = mat_settings.shininess_;
+	specular[3] = mat_settings.shininess_;
+	uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, specular);
 #endif // !GLES
 
-	Parent::RawRender(pGeometry, 0);
+	Parent::RawRender(geometry, 0);
 
-	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+	ResetBasicMaterial(geometry->GetBasicMaterialSettings());
 }
 
 
@@ -1766,140 +1582,123 @@ void OpenGLMatSingleTextureSolidPXS::RenderGeometry(Tbc::GeometryBase* pGeometry
 // OpenGLMatTextureAndLightmapPXS
 //
 
-OpenGLMatTextureAndLightmapPXS::OpenGLMatTextureAndLightmapPXS(OpenGLRenderer* pRenderer,
-							       Material* pFallBackMaterial) :
-	Parent(pRenderer, pFallBackMaterial),
-	OpenGLMatPXS(smVP, smFP)
-{
+OpenGLMatTextureAndLightmapPXS::OpenGLMatTextureAndLightmapPXS(OpenGLRenderer* renderer,
+							       Material* fall_back_material) :
+	Parent(renderer, fall_back_material),
+	OpenGLMatPXS(vp_, fp_) {
 }
 
-OpenGLMatTextureAndLightmapPXS::~OpenGLMatTextureAndLightmapPXS()
-{
+OpenGLMatTextureAndLightmapPXS::~OpenGLMatTextureAndLightmapPXS() {
 #ifndef LEPRA_GL_ES
-	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
-	{
-		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
-		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);
+	if (uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported()) {
+		uilepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&vpid_);
+		uilepra::OpenGLExtensions::glDeleteProgramsARB(kNumFp, (const GLuint*)fpid_);
 	}
 #endif // !GLES
 }
 
-void OpenGLMatTextureAndLightmapPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
+void OpenGLMatTextureAndLightmapPXS::DoRenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
 	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsMultiTextureSupported())
-	{
-		Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	if (!GetRenderer()->IsPixelShadersEnabled() || !uilepra::OpenGLExtensions::IsMultiTextureSupported()) {
+		Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 		return;
 	}
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnable(GL_TEXTURE_2D);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnable(GL_TEXTURE_2D);
 
 	OpenGLMatPXS::PrepareShaderPrograms((OpenGLRenderer*)GetRenderer());
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 	OpenGLMatPXS::CleanupShaderPrograms();
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisable(GL_TEXTURE_2D);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
 }
 
-void OpenGLMatTextureAndLightmapPXS::RenderGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
-	{
-		Parent::RenderGeometry(pGeometry);
+void OpenGLMatTextureAndLightmapPXS::RenderGeometry(tbc::GeometryBase* geometry) {
+	if (!GetRenderer()->IsPixelShadersEnabled() || !uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported()) {
+		Parent::RenderGeometry(geometry);
 		return;
 	}
 
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
+	SetBasicMaterial(geometry->GetBasicMaterialSettings());
+	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), geometry);
 
-	RawRender(pGeometry, 0);
+	RawRender(geometry, 0);
 
-	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+	ResetBasicMaterial(geometry->GetBasicMaterialSettings());
 }
 
-void OpenGLMatTextureAndLightmapPXS::RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex)
-{
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
+void OpenGLMatTextureAndLightmapPXS::RawRender(tbc::GeometryBase* geometry, int uv_set_index) {
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
+	BindTexture(_geometry->ta_->maps_[0].map_id_[Texture::kColorMap], _geometry->ta_->maps_[0].mip_map_level_count_[Texture::kColorMap]);
 
-	const int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
-	const int lTypeIndex = mEnableWireframe? 1 : 0;
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
+	const int uv_count_per_vertex = geometry->GetUVCountPerVertex();
+	const int type_index = enable_wireframe_? 1 : 0;
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)_geometry->vertex_buffer_id_);
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, (GLvoid*)(_geometry->uv_offset_ + sizeof(float)*uv_count_per_vertex*uv_set_index*geometry->GetMaxVertexCount()));
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+	} else {
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, geometry->GetUVData(uv_set_index));
 	}
-	else
-	{
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex));
-	}
-	OpenGLMaterial::UpdateTextureMatrix(lGeometry->mGeometry);
+	OpenGLMaterial::UpdateTextureMatrix(_geometry->geometry_);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
-	BindTexture(lGeometry->mTA->mMaps[1].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[1].mMipMapLevelCount[Texture::COLOR_MAP]);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+	BindTexture(_geometry->ta_->maps_[1].map_id_[Texture::kColorMap], _geometry->ta_->maps_[1].mip_map_level_count_[Texture::kColorMap]);
 
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*(pUVSetIndex+1)*pGeometry->GetMaxVertexCount()));
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)_geometry->vertex_buffer_id_);
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, (GLvoid*)(_geometry->uv_offset_ + sizeof(float)*uv_count_per_vertex*(uv_set_index+1)*geometry->GetMaxVertexCount()));
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-	}
-	else
-	{
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex+1));
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+	} else {
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, geometry->GetUVData(uv_set_index+1));
 	}
 
 #ifndef LEPRA_GL_ES
-	float lSpecular[4];
-	const Tbc::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
-	lSpecular[0] = lMatSettings.mShininess;
-	lSpecular[1] = lMatSettings.mShininess;
-	lSpecular[2] = lMatSettings.mShininess;
-	lSpecular[3] = lMatSettings.mShininess;
-	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
+	float specular[4];
+	const tbc::GeometryBase::BasicMaterialSettings& mat_settings = geometry->GetBasicMaterialSettings();
+	specular[0] = mat_settings.shininess_;
+	specular[1] = mat_settings.shininess_;
+	specular[2] = mat_settings.shininess_;
+	specular[3] = mat_settings.shininess_;
+	uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, specular);
 #endif // !GLES
 
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)_geometry->vertex_offset_);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)_geometry->normal_offset_);
 
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-			       lGeometry->mIndexCount[lTypeIndex],
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
-	}
-	else
-	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       lGeometry->mIndexCount[lTypeIndex],
+			       (GLvoid*)_geometry->index_offset_[type_index]);
+	} else {
+		glVertexPointer(3, GL_FLOAT, 0, geometry->GetVertexData());
+		glNormalPointer(GL_FLOAT, 0, geometry->GetNormalData());
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
+			       (char*)geometry->GetIndexData() + _geometry->index_offset_[type_index]);
 	}
 }
 
@@ -1909,205 +1708,182 @@ void OpenGLMatTextureAndLightmapPXS::RawRender(Tbc::GeometryBase* pGeometry, int
 // OpenGLMatTextureSBMapPXS
 //
 
-OpenGLMatTextureSBMapPXS::OpenGLMatTextureSBMapPXS(OpenGLRenderer* pRenderer,
-						   Material* pFallBackMaterial,
-						   const str pVP,
-						   const str* pFP) :
-	OpenGLMatSingleTextureSolid(pRenderer, pFallBackMaterial),
-	OpenGLMatPXS(pVP, pFP)
-{
+OpenGLMatTextureSBMapPXS::OpenGLMatTextureSBMapPXS(OpenGLRenderer* renderer,
+						   Material* fall_back_material,
+						   const str vp,
+						   const str* fp) :
+	OpenGLMatSingleTextureSolid(renderer, fall_back_material),
+	OpenGLMatPXS(vp, fp) {
 }
 
-OpenGLMatTextureSBMapPXS::OpenGLMatTextureSBMapPXS(OpenGLRenderer* pRenderer,
-						   Material* pFallBackMaterial) :
-	OpenGLMatSingleTextureSolid(pRenderer, pFallBackMaterial),
-	OpenGLMatPXS(smVP, smFP)
-{
+OpenGLMatTextureSBMapPXS::OpenGLMatTextureSBMapPXS(OpenGLRenderer* renderer,
+						   Material* fall_back_material) :
+	OpenGLMatSingleTextureSolid(renderer, fall_back_material),
+	OpenGLMatPXS(vp_, fp_) {
 }
 
-OpenGLMatTextureSBMapPXS::~OpenGLMatTextureSBMapPXS()
-{
+OpenGLMatTextureSBMapPXS::~OpenGLMatTextureSBMapPXS() {
 #ifndef LEPRA_GL_ES
-	if (UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
-	{
-		UiLepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&mVPID);
-		UiLepra::OpenGLExtensions::glDeleteProgramsARB(NUM_FP, (const GLuint*)mFPID);
+	if (uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported()) {
+		uilepra::OpenGLExtensions::glDeleteProgramsARB(1, (const GLuint*)&vpid_);
+		uilepra::OpenGLExtensions::glDeleteProgramsARB(kNumFp, (const GLuint*)fpid_);
 	}
 #endif // !GLES
 }
 
-void OpenGLMatTextureSBMapPXS::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
+void OpenGLMatTextureSBMapPXS::DoRenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
 	// Early bail out if no multitexturing support. TODO: fix in cards that don't support!
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsMultiTextureSupported())
-	{
+	if (!GetRenderer()->IsPixelShadersEnabled() || !uilepra::OpenGLExtensions::IsMultiTextureSupported()) {
 		return;
 	}
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnable(GL_TEXTURE_2D);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnable(GL_TEXTURE_2D);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE2);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE2);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE2);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE2);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnable(GL_TEXTURE_2D);
 
 	OpenGLMatPXS::PrepareShaderPrograms((OpenGLRenderer*)GetRenderer());
-	Parent::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	Parent::DoRenderAllGeometry(current_frame, geometry_group_list);
 	OpenGLMatPXS::CleanupShaderPrograms();
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE2);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE2);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE2);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE2);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisable(GL_TEXTURE_2D);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisable(GL_TEXTURE_2D);
 
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
 }
 
-void OpenGLMatTextureSBMapPXS::RenderGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (!GetRenderer()->IsPixelShadersEnabled() || !UiLepra::OpenGLExtensions::IsShaderAsmProgramsSupported())
-	{
-		Parent::RenderGeometry(pGeometry);
+void OpenGLMatTextureSBMapPXS::RenderGeometry(tbc::GeometryBase* geometry) {
+	if (!GetRenderer()->IsPixelShadersEnabled() || !uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported()) {
+		Parent::RenderGeometry(geometry);
 		return;
 	}
 
-	SetBasicMaterial(pGeometry->GetBasicMaterialSettings());
-	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), pGeometry);
+	SetBasicMaterial(geometry->GetBasicMaterialSettings());
+	OpenGLMatPXS::SetAmbientLight((OpenGLRenderer*)GetRenderer(), geometry);
 
-	RawRender(pGeometry, 0);
+	RawRender(geometry, 0);
 
-	ResetBasicMaterial(pGeometry->GetBasicMaterialSettings());
+	ResetBasicMaterial(geometry->GetBasicMaterialSettings());
 }
 
-void OpenGLMatTextureSBMapPXS::RawRender(Tbc::GeometryBase* pGeometry, int pUVSetIndex)
-{
-	OpenGLRenderer::OGLGeometryData* lGeometry = (OpenGLRenderer::OGLGeometryData*)pGeometry->GetRendererData();
+void OpenGLMatTextureSBMapPXS::RawRender(tbc::GeometryBase* geometry, int uv_set_index) {
+	OpenGLRenderer::OGLGeometryData* _geometry = (OpenGLRenderer::OGLGeometryData*)geometry->GetRendererData();
 
-	// Texture unit 0, handles color map and regular 
+	// Texture unit 0, handles color map and regular
 	// texture (UV) coordinates.
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::COLOR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::COLOR_MAP]);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE0);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE0);
+	BindTexture(_geometry->ta_->maps_[0].map_id_[Texture::kColorMap], _geometry->ta_->maps_[0].mip_map_level_count_[Texture::kColorMap]);
 
-	int lUVCountPerVertex = pGeometry->GetUVCountPerVertex();
-	const int lTypeIndex = mEnableWireframe? 1 : 0;
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, (GLvoid*)(lGeometry->mUVOffset + sizeof(float)*lUVCountPerVertex*pUVSetIndex*pGeometry->GetMaxVertexCount()));
+	int uv_count_per_vertex = geometry->GetUVCountPerVertex();
+	const int type_index = enable_wireframe_? 1 : 0;
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)_geometry->vertex_buffer_id_);
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, (GLvoid*)(_geometry->uv_offset_ + sizeof(float)*uv_count_per_vertex*uv_set_index*geometry->GetMaxVertexCount()));
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-	}
-	else
-	{
-		glTexCoordPointer(lUVCountPerVertex, GL_FLOAT, 0, pGeometry->GetUVData(pUVSetIndex));
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+	} else {
+		glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, geometry->GetUVData(uv_set_index));
 	}
 
-	OpenGLMaterial::UpdateTextureMatrix(lGeometry->mGeometry);
+	OpenGLMaterial::UpdateTextureMatrix(_geometry->geometry_);
 
 	// Texture unit 1, handles specular map and tangents.
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::SPECULAR_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::SPECULAR_MAP]);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE1);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
+	BindTexture(_geometry->ta_->maps_[0].map_id_[Texture::kSpecularMap], _geometry->ta_->maps_[0].mip_map_level_count_[Texture::kSpecularMap]);
 
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-		glTexCoordPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mTangentOffset);
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)_geometry->vertex_buffer_id_);
+		glTexCoordPointer(3, GL_FLOAT, 0, (GLvoid*)_geometry->tangent_offset_);
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-	}
-	else
-	{
-		glTexCoordPointer(3, GL_FLOAT, 0, pGeometry->GetTangentData());
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+	} else {
+		glTexCoordPointer(3, GL_FLOAT, 0, geometry->GetTangentData());
 	}
 
 	// Texture unit 2, handles bitangents and normal map.
-	UiLepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE2);
-	UiLepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE2);
-	BindTexture(lGeometry->mTA->mMaps[0].mMapID[Texture::NORMAL_MAP], lGeometry->mTA->mMaps[0].mMipMapLevelCount[Texture::NORMAL_MAP]);
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		GLuint lIndexBufferID  = (GLuint)lGeometry->mIndexBufferID;
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)lGeometry->mVertexBufferID);
-		glTexCoordPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mBitangentOffset);
+	uilepra::OpenGLExtensions::glActiveTexture(GL_TEXTURE2);
+	uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE2);
+	BindTexture(_geometry->ta_->maps_[0].map_id_[Texture::kNormalMap], _geometry->ta_->maps_[0].mip_map_level_count_[Texture::kNormalMap]);
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		GLuint index_buffer_id  = (GLuint)_geometry->index_buffer_id_;
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)_geometry->vertex_buffer_id_);
+		glTexCoordPointer(3, GL_FLOAT, 0, (GLvoid*)_geometry->bitangent_offset_);
 
-		UiLepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lIndexBufferID);
-	}
-	else
-	{
-		glTexCoordPointer(3, GL_FLOAT, 0, pGeometry->GetBitangentData());
+		uilepra::OpenGLExtensions::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer_id);
+	} else {
+		glTexCoordPointer(3, GL_FLOAT, 0, geometry->GetBitangentData());
 	}
 
 #ifndef LEPRA_GL_ES
-	float lSpecular[4];
-	const Tbc::GeometryBase::BasicMaterialSettings& lMatSettings = pGeometry->GetBasicMaterialSettings();
-	lSpecular[0] = lMatSettings.mShininess;
-	lSpecular[1] = lMatSettings.mShininess;
-	lSpecular[2] = lMatSettings.mShininess;
-	lSpecular[3] = lMatSettings.mShininess;
-	UiLepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, lSpecular);
+	float specular[4];
+	const tbc::GeometryBase::BasicMaterialSettings& mat_settings = geometry->GetBasicMaterialSettings();
+	specular[0] = mat_settings.shininess_;
+	specular[1] = mat_settings.shininess_;
+	specular[2] = mat_settings.shininess_;
+	specular[3] = mat_settings.shininess_;
+	uilepra::OpenGLExtensions::glProgramLocalParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, 0, specular);
 #endif // !GLES
 
-	if (UiLepra::OpenGLExtensions::IsBufferObjectsSupported() == true)
-	{
-		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)lGeometry->mVertexOffset);
-		glNormalPointer(GL_FLOAT, 0, (GLvoid*)lGeometry->mNormalOffset);
+	if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
+		glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)_geometry->vertex_offset_);
+		glNormalPointer(GL_FLOAT, 0, (GLvoid*)_geometry->normal_offset_);
 
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry), 
-			       lGeometry->mIndexCount[lTypeIndex],
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (GLvoid*)lGeometry->mIndexOffset[lTypeIndex]);
-	}
-	else
-	{
-		glVertexPointer(3, GL_FLOAT, 0, pGeometry->GetVertexData());
-		glNormalPointer(GL_FLOAT, 0, pGeometry->GetNormalData());
-		glDrawElements(OpenGLMaterial::GetGLElementType(pGeometry),
-			       lGeometry->mIndexCount[lTypeIndex],
+			       (GLvoid*)_geometry->index_offset_[type_index]);
+	} else {
+		glVertexPointer(3, GL_FLOAT, 0, geometry->GetVertexData());
+		glNormalPointer(GL_FLOAT, 0, geometry->GetNormalData());
+		glDrawElements(OpenGLMaterial::GetGLElementType(geometry),
+			       _geometry->index_count_[type_index],
 			       LEPRA_GL_INDEX_TYPE,
-			       (char*)pGeometry->GetIndexData() + lGeometry->mIndexOffset[lTypeIndex]);
+			       (char*)geometry->GetIndexData() + _geometry->index_offset_[type_index]);
 	}
 }
 
-OpenGLMatTextureDiffuseBumpMapPXS::OpenGLMatTextureDiffuseBumpMapPXS(OpenGLRenderer* pRenderer,
-								     Material* pFallBackMaterial) :
-	OpenGLMatTextureSBMapPXS(pRenderer, pFallBackMaterial, smVP, smFP)
-{
+OpenGLMatTextureDiffuseBumpMapPXS::OpenGLMatTextureDiffuseBumpMapPXS(OpenGLRenderer* renderer,
+								     Material* fall_back_material) :
+	OpenGLMatTextureSBMapPXS(renderer, fall_back_material, vp_, fp_) {
 }
 
-OpenGLMatTextureDiffuseBumpMapPXS::~OpenGLMatTextureDiffuseBumpMapPXS()
-{
+OpenGLMatTextureDiffuseBumpMapPXS::~OpenGLMatTextureDiffuseBumpMapPXS() {
 }
 
 
 
-loginstance(UI_GFX_3D, OpenGLMatVertexColorSolid);
-loginstance(UI_GFX_3D, OpenGLMatSingleTextureSolid);
-loginstance(UI_GFX_3D, OpenGLMatSingleColorEnvMapSolid);
-loginstance(UI_GFX_3D, OpenGLMatSingleTextureEnvMapSolid);
-loginstance(UI_GFX_3D, OpenGLMatTextureAndLightmap);
-loginstance(UI_GFX_3D, OpenGLMatPXS);
-loginstance(UI_GFX_3D, OpenGLMatSingleColorSolidPXS);
-loginstance(UI_GFX_3D, OpenGLMatSingleTextureSolidPXS);
-loginstance(UI_GFX_3D, OpenGLMatTextureAndLightmapPXS);
-loginstance(UI_GFX_3D, OpenGLMatTextureSBMapPXS);
+loginstance(kUiGfx3D, OpenGLMatVertexColorSolid);
+loginstance(kUiGfx3D, OpenGLMatSingleTextureSolid);
+loginstance(kUiGfx3D, OpenGLMatSingleColorEnvMapSolid);
+loginstance(kUiGfx3D, OpenGLMatSingleTextureEnvMapSolid);
+loginstance(kUiGfx3D, OpenGLMatTextureAndLightmap);
+loginstance(kUiGfx3D, OpenGLMatPXS);
+loginstance(kUiGfx3D, OpenGLMatSingleColorSolidPXS);
+loginstance(kUiGfx3D, OpenGLMatSingleTextureSolidPXS);
+loginstance(kUiGfx3D, OpenGLMatTextureAndLightmapPXS);
+loginstance(kUiGfx3D, OpenGLMatTextureSBMapPXS);
 
 
 

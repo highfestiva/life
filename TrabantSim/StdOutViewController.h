@@ -10,6 +10,6 @@
 
 @interface StdOutViewController : UIViewController
 @property (nonatomic, strong) PythonTextView* textView;
-@property (nonatomic, strong) UIScrollView* scrollView;
+@property (nonatomic, strong) UIScrollView* scrollView_;
 @property (nonatomic, strong) NSString* text;
 @end

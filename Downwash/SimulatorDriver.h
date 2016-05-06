@@ -1,33 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/CppContextObject.h"
-#include "DownwashManager.h"
+#include "../cure/include/cppcontextobject.h"
+#include "downwashmanager.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-class SimulatorDriver: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class SimulatorDriver: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	SimulatorDriver(Cure::GameManager* pGame, Cure::GameObjectId pSimulatorId);
+	SimulatorDriver(cure::GameManager* game, cure::GameObjectId simulator_id);
 	virtual ~SimulatorDriver();
 
-	virtual void OnAlarm(int pAlarmId, void* pExtraData);
+	virtual void OnAlarm(int alarm_id, void* extra_data);
 
 private:
-	Cure::GameManager* mGame;
-	Cure::GameObjectId mSimulatorId;
+	cure::GameManager* game_;
+	cure::GameObjectId simulator_id_;
 	logclass();
 };
 

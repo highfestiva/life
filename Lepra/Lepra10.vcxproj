@@ -1,68 +1,68 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
+    <ProjectConfiguration include="Debug|win32">
       <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Final|Win32">
+    <ProjectConfiguration include="Final|win32">
       <Configuration>Final</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release Candidate|Win32">
+    <ProjectConfiguration include="Release Candidate|win32">
       <Configuration>Release Candidate</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Unicode Debug|Win32">
+    <ProjectConfiguration include="Unicode Debug|win32">
       <Configuration>Unicode Debug</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Unicode Final|Win32">
+    <ProjectConfiguration include="Unicode Final|win32">
       <Configuration>Unicode Final</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Unicode Release Candidate|Win32">
+    <ProjectConfiguration include="Unicode Release Candidate|win32">
       <Configuration>Unicode Release Candidate</Configuration>
-      <Platform>Win32</Platform>
+      <Platform>win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>Lepra</ProjectName>
+    <ProjectName>lepra</ProjectName>
     <ProjectGuid>{E7DDA722-45E3-45C9-B051-E99288ACCDD2}</ProjectGuid>
-    <RootNamespace>Lepra</RootNamespace>
+    <RootNamespace>lepra</RootNamespace>
     <Keyword>ManagedCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <CLRSupport>false</CLRSupport>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <CLRSupport>false</CLRSupport>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <CLRSupport>false</CLRSupport>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
     <CLRSupport>false</CLRSupport>
@@ -70,50 +70,50 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Final|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(ProjectName)UD</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Final|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Final|win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">$(ProjectName)UD</TargetName>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -130,13 +130,13 @@
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -151,10 +151,10 @@
       <OutputFile>$(TargetPath)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -171,13 +171,13 @@
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -192,13 +192,13 @@
       <OutputFile>$(TargetPath)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|win32'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -214,13 +214,13 @@
       <OutputFile>$(TargetPath)</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>..\ThirdParty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\thirdparty\utf8cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -237,287 +237,287 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Include\AABB.h" />
-    <ClInclude Include="Include\AABR.h" />
-    <ClInclude Include="Include\Alarm.h" />
-    <ClInclude Include="Include\AntiCrack.h" />
-    <ClInclude Include="Include\Application.h" />
-    <ClInclude Include="Include\ArchiveFile.h" />
-    <ClInclude Include="Include\BinTree.h" />
-    <ClInclude Include="Include\BmpLoader.h" />
-    <ClInclude Include="Include\BufferStream.h" />
-    <ClInclude Include="Include\BusLock.h" />
-    <ClInclude Include="Include\Canvas.h" />
-    <ClInclude Include="Include\Checksum.h" />
-    <ClInclude Include="Include\Circle.h" />
-    <ClInclude Include="Include\CollisionDetector2D.h" />
-    <ClInclude Include="Include\CollisionDetector3D.h" />
-    <ClInclude Include="Include\ConsoleCommandManager.h" />
-    <ClInclude Include="Include\CubicDeCasteljauSpline.h" />
-    <ClInclude Include="Include\CubicSpline.h" />
-    <ClInclude Include="Include\CyclicArray.h" />
-    <ClInclude Include="Include\Cylinder.h" />
-    <ClInclude Include="Include\Datagram.h" />
-    <ClInclude Include="Include\DES.h" />
-    <ClInclude Include="Include\DiskFile.h" />
-    <ClInclude Include="Include\Endian.h" />
-    <ClInclude Include="Include\FastAllocator.h" />
-    <ClInclude Include="Include\FdSet.h" />
-    <ClInclude Include="Include\File.h" />
-    <ClInclude Include="Include\FileArchive.h" />
-    <ClInclude Include="Include\FileOpener.h" />
-    <ClInclude Include="Include\GameTimer.h" />
-    <ClInclude Include="Include\GammaLookup.h" />
-    <ClInclude Include="Include\Graphics2D.h" />
-    <ClInclude Include="Include\Hasher.h" />
-    <ClInclude Include="Include\HashSet.h" />
-    <ClInclude Include="Include\HashTable.h" />
-    <ClInclude Include="Include\HashUtil.h" />
-    <ClInclude Include="Include\HiResTimer.h" />
-    <ClInclude Include="Include\IdManager.h" />
-    <ClInclude Include="Include\ImageLoader.h" />
-    <ClInclude Include="Include\InputStream.h" />
-    <ClInclude Include="Include\IOBuffer.h" />
-    <ClInclude Include="Include\IOError.h" />
-    <ClInclude Include="Include\IPAddress.h" />
-    <ClInclude Include="Include\JpegLoader.h" />
-    <ClInclude Include="Include\JsonString.h" />
-    <ClInclude Include="Include\Lepra.h" />
-    <ClInclude Include="Include\LepraOS.h" />
-    <ClInclude Include="Include\LepraTarget.h" />
-    <ClInclude Include="Include\LepraTypes.h" />
-    <ClInclude Include="Include\LepraUndef.h" />
-    <ClInclude Include="Include\ListUtil.h" />
-    <ClInclude Include="Include\FastLock.h" />
-    <ClInclude Include="Include\Log.h" />
-    <ClInclude Include="Include\Logger.h" />
-    <ClInclude Include="Include\LogListener.h" />
-    <ClInclude Include="Include\LogType.h" />
-    <ClInclude Include="Include\LooseBinTree.h" />
-    <ClInclude Include="Include\LooseOctree.h" />
-    <ClInclude Include="Include\LooseQuadtree.h" />
-    <ClInclude Include="Include\Math.h" />
-    <ClInclude Include="Include\MemberThread.h" />
-    <ClInclude Include="Include\MemFile.h" />
-    <ClInclude Include="Include\MemoryLeakTracker.h" />
-    <ClInclude Include="Include\MetaFile.h" />
-    <ClInclude Include="Include\Network.h" />
-    <ClInclude Include="Include\Number.h" />
-    <ClInclude Include="Include\OBB.h" />
-    <ClInclude Include="Include\Obfuxator.h" />
-    <ClInclude Include="Include\OBR.h" />
-    <ClInclude Include="Include\OrderedMap.h" />
-    <ClInclude Include="Include\OutputStream.h" />
-    <ClInclude Include="Include\Packer.h" />
-    <ClInclude Include="Include\Path.h" />
-    <ClInclude Include="Include\Performance.h" />
-    <ClInclude Include="Include\Plane.h" />
-    <ClInclude Include="Include\PngLoader.h" />
-    <ClInclude Include="Include\ProgressCallback.h" />
-    <ClInclude Include="Include\Quaternion.h" />
-    <ClInclude Include="Include\QuickList.h" />
-    <ClInclude Include="Include\Random.h" />
-    <ClInclude Include="Include\Reader.h" />
-    <ClInclude Include="Include\ResourceTracker.h" />
-    <ClInclude Include="Include\RotationMatrix.h" />
-    <ClInclude Include="Include\SocketAddressGetter.h" />
-    <ClInclude Include="Include\TcpMuxSocket.h" />
-    <ClInclude Include="Include\TimeLogger.h" />
-    <ClInclude Include="Include\SHA1.h" />
-    <ClInclude Include="Include\SkipList.h" />
-    <ClInclude Include="Include\SmartPointer.h" />
-    <ClInclude Include="Include\Socket.h" />
-    <ClInclude Include="Include\SocketAddress.h" />
-    <ClInclude Include="Include\SocketStream.h" />
-    <ClInclude Include="Include\Sphere.h" />
-    <ClInclude Include="Include\SpinLock.h" />
-    <ClInclude Include="Include\String.h" />
-    <ClInclude Include="Include\StringUtility.h" />
-    <ClInclude Include="Include\SubFile.h" />
-    <ClInclude Include="Include\SystemManager.h" />
-    <ClInclude Include="Include\TgaLoader.h" />
-    <ClInclude Include="Include\Thread.h" />
-    <ClInclude Include="Include\TiffLoader.h" />
-    <ClInclude Include="Include\Time.h" />
-    <ClInclude Include="Include\Timer.h" />
-    <ClInclude Include="Include\Transformation.h" />
-    <ClInclude Include="Include\Unordered.h" />
-    <ClInclude Include="Include\Vector2D.h" />
-    <ClInclude Include="Include\Vector3D.h" />
-    <ClInclude Include="Include\Writer.h" />
-    <ClInclude Include="Include\ZipArchive.h" />
-    <ClInclude Include="Include\Win32\Win32Target.h" />
-    <ClInclude Include="Include\Win32\Win32Thread.h" />
-    <ClInclude Include="Source\pch.h" />
-    <CustomBuildStep Include="Include\Posix\PosixTarget.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    <Clinclude include="include\aabb.h" />
+    <Clinclude include="include\aabr.h" />
+    <Clinclude include="include\alarm.h" />
+    <Clinclude include="include\anticrack.h" />
+    <Clinclude include="include\application.h" />
+    <Clinclude include="include\archivefile.h" />
+    <Clinclude include="include\bintree.h" />
+    <Clinclude include="include\bmploader.h" />
+    <Clinclude include="include\bufferstream.h" />
+    <Clinclude include="include\buslock.h" />
+    <Clinclude include="include\canvas.h" />
+    <Clinclude include="include\checksum.h" />
+    <Clinclude include="include\circle.h" />
+    <Clinclude include="include\collisiondetector2d.h" />
+    <Clinclude include="include\collisiondetector3d.h" />
+    <Clinclude include="include\consolecommandmanager.h" />
+    <Clinclude include="include\cubicdecasteljauspline.h" />
+    <Clinclude include="include\cubicspline.h" />
+    <Clinclude include="include\cyclicarray.h" />
+    <Clinclude include="include\cylinder.h" />
+    <Clinclude include="include\datagram.h" />
+    <Clinclude include="include\des.h" />
+    <Clinclude include="include\diskfile.h" />
+    <Clinclude include="include\endian.h" />
+    <Clinclude include="include\fastallocator.h" />
+    <Clinclude include="include\fdset.h" />
+    <Clinclude include="include\file.h" />
+    <Clinclude include="include\filearchive.h" />
+    <Clinclude include="include\fileopener.h" />
+    <Clinclude include="include\gametimer.h" />
+    <Clinclude include="include\gammalookup.h" />
+    <Clinclude include="include\graphics2d.h" />
+    <Clinclude include="include\hasher.h" />
+    <Clinclude include="include\hashset.h" />
+    <Clinclude include="include\hashtable.h" />
+    <Clinclude include="include\hashutil.h" />
+    <Clinclude include="include\hirestimer.h" />
+    <Clinclude include="include\idmanager.h" />
+    <Clinclude include="include\imageloader.h" />
+    <Clinclude include="include\inputstream.h" />
+    <Clinclude include="include\iobuffer.h" />
+    <Clinclude include="include\ioerror.h" />
+    <Clinclude include="include\ipaddress.h" />
+    <Clinclude include="include\jpegloader.h" />
+    <Clinclude include="include\jsonstring.h" />
+    <Clinclude include="include\lepra.h" />
+    <Clinclude include="include\lepraos.h" />
+    <Clinclude include="include\lepratarget.h" />
+    <Clinclude include="include\lepratypes.h" />
+    <Clinclude include="include\lepraundef.h" />
+    <Clinclude include="include\listutil.h" />
+    <Clinclude include="include\fastlock.h" />
+    <Clinclude include="include\log.h" />
+    <Clinclude include="include\logger.h" />
+    <Clinclude include="include\loglistener.h" />
+    <Clinclude include="include\logtype.h" />
+    <Clinclude include="include\loosebintree.h" />
+    <Clinclude include="include\looseoctree.h" />
+    <Clinclude include="include\loosequadtree.h" />
+    <Clinclude include="include\math.h" />
+    <Clinclude include="include\memberthread.h" />
+    <Clinclude include="include\memfile.h" />
+    <Clinclude include="include\memoryleaktracker.h" />
+    <Clinclude include="include\metafile.h" />
+    <Clinclude include="include\network.h" />
+    <Clinclude include="include\number.h" />
+    <Clinclude include="include\obb.h" />
+    <Clinclude include="include\obfuxator.h" />
+    <Clinclude include="include\obr.h" />
+    <Clinclude include="include\orderedmap.h" />
+    <Clinclude include="include\outputstream.h" />
+    <Clinclude include="include\packer.h" />
+    <Clinclude include="include\path.h" />
+    <Clinclude include="include\performance.h" />
+    <Clinclude include="include\plane.h" />
+    <Clinclude include="include\pngloader.h" />
+    <Clinclude include="include\progresscallback.h" />
+    <Clinclude include="include\quaternion.h" />
+    <Clinclude include="include\quicklist.h" />
+    <Clinclude include="include\random.h" />
+    <Clinclude include="include\reader.h" />
+    <Clinclude include="include\resourcetracker.h" />
+    <Clinclude include="include\rotationmatrix.h" />
+    <Clinclude include="include\socketaddressgetter.h" />
+    <Clinclude include="include\tcpmuxsocket.h" />
+    <Clinclude include="include\timelogger.h" />
+    <Clinclude include="include\sha1.h" />
+    <Clinclude include="include\skiplist.h" />
+    <Clinclude include="include\smartpointer.h" />
+    <Clinclude include="include\socket.h" />
+    <Clinclude include="include\socketaddress.h" />
+    <Clinclude include="include\socketstream.h" />
+    <Clinclude include="include\sphere.h" />
+    <Clinclude include="include\spinlock.h" />
+    <Clinclude include="include\string.h" />
+    <Clinclude include="include\stringutility.h" />
+    <Clinclude include="include\subfile.h" />
+    <Clinclude include="include\systemmanager.h" />
+    <Clinclude include="include\tgaloader.h" />
+    <Clinclude include="include\thread.h" />
+    <Clinclude include="include\tiffloader.h" />
+    <Clinclude include="include\time.h" />
+    <Clinclude include="include\timer.h" />
+    <Clinclude include="include\transformation.h" />
+    <Clinclude include="include\unordered.h" />
+    <Clinclude include="include\vector2d.h" />
+    <Clinclude include="include\vector3d.h" />
+    <Clinclude include="include\writer.h" />
+    <Clinclude include="include\ziparchive.h" />
+    <Clinclude include="include\win32\win32target.h" />
+    <Clinclude include="include\win32\win32thread.h" />
+    <Clinclude include="src\pch.h" />
+    <CustomBuildStep include="include\posix\posixtarget.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">true</ExcludedFromBuild>
     </CustomBuildStep>
-    <CustomBuildStep Include="Include\Posix\PosixThread.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    <CustomBuildStep include="include\posix\posixthread.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">true</ExcludedFromBuild>
     </CustomBuildStep>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Include\CollisionDetector2D.inl" />
-    <None Include="Include\CollisionDetector3D.inl" />
-    <None Include="Include\ConsoleCommandManager.inl" />
-    <None Include="Include\CubicDeCasteljauSpline.inl" />
-    <None Include="Include\IdManager.inl" />
-    <None Include="Include\LooseBinTree.inl" />
-    <None Include="Include\LooseOctree.inl" />
-    <None Include="Include\LooseQuadtree.inl" />
-    <None Include="Include\Performance.inl" />
-    <None Include="Include\Quaternion.inl" />
-    <None Include="Include\RotationMatrix.inl" />
-    <None Include="Include\StringUtility.inl" />
-    <None Include="Include\Transformation.inl" />
-    <None Include="Include\Vector2D.inl" />
-    <None Include="Include\Vector3D.inl" />
-    <ClCompile Include="Source\GameTimer.cpp" />
-    <ClCompile Include="Source\JsonString.cpp" />
-    <ClCompile Include="Source\Logger.cpp" />
-    <ClCompile Include="Source\Obfuxator.cpp" />
-    <ClCompile Include="Source\Plane.cpp" />
-    <ClCompile Include="Source\Posix\MacLog.mm">
+    <None include="include\collisiondetector2d.inl" />
+    <None include="include\collisiondetector3d.inl" />
+    <None include="include\consolecommandmanager.inl" />
+    <None include="include\cubicdecasteljauspline.inl" />
+    <None include="include\idmanager.inl" />
+    <None include="include\loosebintree.inl" />
+    <None include="include\looseoctree.inl" />
+    <None include="include\loosequadtree.inl" />
+    <None include="include\performance.inl" />
+    <None include="include\quaternion.inl" />
+    <None include="include\rotationmatrix.inl" />
+    <None include="include\stringutility.inl" />
+    <None include="include\transformation.inl" />
+    <None include="include\vector2d.inl" />
+    <None include="include\vector3d.inl" />
+    <ClCompile include="src\gametimer.cpp" />
+    <ClCompile include="src\jsonstring.cpp" />
+    <ClCompile include="src\logger.cpp" />
+    <ClCompile include="src\obfuxator.cpp" />
+    <ClCompile include="src\plane.cpp" />
+    <ClCompile include="src\posix\maclog.mm">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Source\Posix\MacThread.mm">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    <ClCompile include="src\posix\macthread.mm">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">true</ExcludedFromBuild>
       <FileType>Document</FileType>
     </ClCompile>
-    <ClCompile Include="Source\Posix\MacSystemManager.mm">
+    <ClCompile include="src\posix\macsystemmanager.mm">
       <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Alarm.cpp" />
-    <ClCompile Include="Source\Application.cpp" />
-    <ClCompile Include="Source\ArchiveFile.cpp" />
-    <ClCompile Include="Source\BmpLoader.cpp" />
-    <ClCompile Include="Source\BufferStream.cpp" />
-    <ClCompile Include="Source\Canvas.cpp" />
-    <ClCompile Include="Source\Checksum.cpp" />
-    <ClCompile Include="Source\ConsoleCommandManager.cpp" />
-    <ClCompile Include="Source\CubicSpline.cpp" />
-    <ClCompile Include="Source\DES.cpp" />
-    <ClCompile Include="Source\DiskFile.cpp" />
-    <ClCompile Include="Source\Endian.cpp" />
-    <ClCompile Include="Source\FdSet.cpp" />
-    <ClCompile Include="Source\File.cpp" />
-    <ClCompile Include="Source\FileArchive.cpp" />
-    <ClCompile Include="Source\GammaLookup.cpp" />
-    <ClCompile Include="Source\HiResTimer.cpp" />
-    <ClCompile Include="Source\ImageLoader.cpp" />
-    <ClCompile Include="Source\IOBuffer.cpp" />
-    <ClCompile Include="Source\IOError.cpp" />
-    <ClCompile Include="Source\IPAddress.cpp" />
-    <ClCompile Include="Source\JpegLoader.cpp">
-      <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Cdecl</CallingConvention>
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">false</ShowIncludes>
+    <ClCompile include="src\alarm.cpp" />
+    <ClCompile include="src\application.cpp" />
+    <ClCompile include="src\archivefile.cpp" />
+    <ClCompile include="src\bmploader.cpp" />
+    <ClCompile include="src\bufferstream.cpp" />
+    <ClCompile include="src\canvas.cpp" />
+    <ClCompile include="src\checksum.cpp" />
+    <ClCompile include="src\consolecommandmanager.cpp" />
+    <ClCompile include="src\cubicspline.cpp" />
+    <ClCompile include="src\des.cpp" />
+    <ClCompile include="src\diskfile.cpp" />
+    <ClCompile include="src\endian.cpp" />
+    <ClCompile include="src\fdset.cpp" />
+    <ClCompile include="src\file.cpp" />
+    <ClCompile include="src\filearchive.cpp" />
+    <ClCompile include="src\gammalookup.cpp" />
+    <ClCompile include="src\hirestimer.cpp" />
+    <ClCompile include="src\imageloader.cpp" />
+    <ClCompile include="src\iobuffer.cpp" />
+    <ClCompile include="src\ioerror.cpp" />
+    <ClCompile include="src\ipaddress.cpp" />
+    <ClCompile include="src\jpegloader.cpp">
+      <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">Cdecl</CallingConvention>
+      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">false</ShowIncludes>
     </ClCompile>
-    <ClCompile Include="Source\Lepra.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">Create</PrecompiledHeader>
+    <ClCompile include="src\lepra.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Source\Log.cpp" />
-    <ClCompile Include="Source\LogListener.cpp" />
-    <ClCompile Include="Source\LogType.cpp" />
-    <ClCompile Include="Source\Math.cpp" />
-    <ClCompile Include="Source\MemFile.cpp" />
-    <ClCompile Include="Source\MemoryLeakTracker.cpp" />
-    <ClCompile Include="Source\MetaFile.cpp" />
-    <ClCompile Include="Source\Network.cpp" />
-    <ClCompile Include="Source\Number.cpp" />
-    <ClCompile Include="Source\Packer.cpp" />
-    <ClCompile Include="Source\Path.cpp" />
-    <ClCompile Include="Source\Performance.cpp" />
-    <ClCompile Include="Source\PngLoader.cpp" />
-    <ClCompile Include="Source\Posix\PosixThread.cxx">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    <ClCompile include="src\log.cpp" />
+    <ClCompile include="src\loglistener.cpp" />
+    <ClCompile include="src\logtype.cpp" />
+    <ClCompile include="src\math.cpp" />
+    <ClCompile include="src\memfile.cpp" />
+    <ClCompile include="src\memoryleaktracker.cpp" />
+    <ClCompile include="src\metafile.cpp" />
+    <ClCompile include="src\network.cpp" />
+    <ClCompile include="src\number.cpp" />
+    <ClCompile include="src\packer.cpp" />
+    <ClCompile include="src\path.cpp" />
+    <ClCompile include="src\performance.cpp" />
+    <ClCompile include="src\pngloader.cpp" />
+    <ClCompile include="src\posix\posixthread.cxx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Source\ProgressCallback.cpp" />
-    <ClCompile Include="Source\Random.cpp" />
-    <ClCompile Include="Source\Reader.cpp" />
-    <ClCompile Include="Source\ResourceTracker.cpp" />
-    <ClCompile Include="Source\SHA1.cpp" />
-    <ClCompile Include="Source\Socket.cpp" />
-    <ClCompile Include="Source\SocketAddress.cpp" />
-    <ClCompile Include="Source\SocketStream.cpp" />
-    <ClCompile Include="Source\SpinLock.cpp" />
-    <ClCompile Include="Source\StringUtility.cpp" />
-    <ClCompile Include="Source\SubFile.cpp" />
-    <ClCompile Include="Source\SystemManager.cpp" />
-    <ClCompile Include="Source\TcpMuxSocket.cpp" />
-    <ClCompile Include="Source\TgaLoader.cpp" />
-    <ClCompile Include="Source\Thread.cpp" />
-    <ClCompile Include="Source\TiffLoader.cpp" />
-    <ClCompile Include="Source\Time.cpp" />
-    <ClCompile Include="Source\TimeLogger.cpp" />
-    <ClCompile Include="Source\Timer.cpp" />
-    <ClCompile Include="Source\Writer.cpp" />
-    <ClCompile Include="Source\ZipArchive.cpp" />
-    <ClCompile Include="Source\Win32\Win32AntiCrack.cpp" />
-    <ClCompile Include="Source\Win32\Win32BusLock.cpp" />
-    <ClCompile Include="Source\Win32\Win32SystemManager.cpp" />
-    <ClCompile Include="Source\Win32\Win32Thread.cpp" />
-    <ClCompile Include="Source\Posix\PosixAntiCrack.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    <ClCompile include="src\progresscallback.cpp" />
+    <ClCompile include="src\random.cpp" />
+    <ClCompile include="src\reader.cpp" />
+    <ClCompile include="src\resourcetracker.cpp" />
+    <ClCompile include="src\sha1.cpp" />
+    <ClCompile include="src\socket.cpp" />
+    <ClCompile include="src\socketaddress.cpp" />
+    <ClCompile include="src\socketstream.cpp" />
+    <ClCompile include="src\spinlock.cpp" />
+    <ClCompile include="src\stringutility.cpp" />
+    <ClCompile include="src\subfile.cpp" />
+    <ClCompile include="src\systemmanager.cpp" />
+    <ClCompile include="src\tcpmuxsocket.cpp" />
+    <ClCompile include="src\tgaloader.cpp" />
+    <ClCompile include="src\thread.cpp" />
+    <ClCompile include="src\tiffloader.cpp" />
+    <ClCompile include="src\time.cpp" />
+    <ClCompile include="src\timelogger.cpp" />
+    <ClCompile include="src\timer.cpp" />
+    <ClCompile include="src\writer.cpp" />
+    <ClCompile include="src\ziparchive.cpp" />
+    <ClCompile include="src\win32\win32anticrack.cpp" />
+    <ClCompile include="src\win32\win32buslock.cpp" />
+    <ClCompile include="src\win32\win32systemmanager.cpp" />
+    <ClCompile include="src\win32\win32thread.cpp" />
+    <ClCompile include="src\posix\posixanticrack.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Source\Posix\PosixBusLock.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    <ClCompile include="src\posix\posixbuslock.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Source\Posix\PosixSystemManager.cxx">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|Win32'">true</ExcludedFromBuild>
+    <ClCompile include="src\posix\posixsystemmanager.cxx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Final|win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Unicode Release Candidate|win32'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

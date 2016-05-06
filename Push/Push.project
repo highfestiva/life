@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="Push" InternalType="Console">
+<CodeLite_Project Name="push" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00010001N0005Debug000000000000]]>
@@ -35,40 +35,40 @@
  }]]]>
     </Plugin>
   </Plugins>
-  <VirtualDirectory Name="Source">
-    <File Name="LoginView.cpp"/>
-    <File Name="LoginView.h"/>
+  <VirtualDirectory Name="src">
+    <File Name="loginview.cpp"/>
+    <File Name="loginview.h"/>
     <File Name="pch.h"/>
-    <File Name="Push.cxx"/>
-    <File Name="Push.h"/>
-    <File Name="Push.rc" ExcludeProjConfig="Debug;Profile;Release"/>
-    <File Name="PushConsoleManager.cpp"/>
-    <File Name="PushConsoleManager.h"/>
-    <File Name="PushDemo.cpp"/>
-    <File Name="PushDemo.h"/>
-    <File Name="PushManager.cpp"/>
-    <File Name="PushManager.h"/>
-    <File Name="PushTicker.cpp"/>
-    <File Name="PushTicker.h"/>
-    <File Name="PushViewer.cpp"/>
-    <File Name="PushViewer.h"/>
-    <File Name="RoadSignButton.cpp"/>
-    <File Name="RoadSignButton.h"/>
-    <File Name="RtVar.h"/>
-    <File Name="ServerListView.cpp"/>
-    <File Name="ServerListView.h"/>
-    <File Name="Sunlight.cpp"/>
-    <File Name="Sunlight.h"/>
-    <File Name="Version.h"/>
-    <File Name="View.cpp"/>
-    <File Name="View.h"/>
-    <File Name="PushServer/PushServerDelegate.cpp"/>
-    <File Name="PushServer/PushServerDelegate.h"/>
-    <File Name="PushServer/PushServerTicker.cpp"/>
-    <File Name="PushServer/PushServerTicker.h"/>
+    <File Name="push.cxx"/>
+    <File Name="push.h"/>
+    <File Name="push.rc" ExcludeProjConfig="Debug;Profile;Release"/>
+    <File Name="pushconsolemanager.cpp"/>
+    <File Name="pushconsolemanager.h"/>
+    <File Name="pushdemo.cpp"/>
+    <File Name="pushdemo.h"/>
+    <File Name="pushmanager.cpp"/>
+    <File Name="pushmanager.h"/>
+    <File Name="pushticker.cpp"/>
+    <File Name="pushticker.h"/>
+    <File Name="pushviewer.cpp"/>
+    <File Name="pushviewer.h"/>
+    <File Name="roadsignbutton.cpp"/>
+    <File Name="roadsignbutton.h"/>
+    <File Name="rtvar.h"/>
+    <File Name="serverlistview.cpp"/>
+    <File Name="serverlistview.h"/>
+    <File Name="sunlight.cpp"/>
+    <File Name="sunlight.h"/>
+    <File Name="version.h"/>
+    <File Name="view.cpp"/>
+    <File Name="view.h"/>
+    <File Name="pushserver/pushserverdelegate.cpp"/>
+    <File Name="pushserver/pushserverdelegate.h"/>
+    <File Name="pushserver/pushserverticker.cpp"/>
+    <File Name="pushserver/pushserverticker.h"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="Mac">
-    <File Name="Push.mm" ExcludeProjConfig="Debug;Profile;Release"/>
+  <VirtualDirectory Name="mac">
+    <File Name="push.mm" ExcludeProjConfig="Debug;Profile;Release"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -85,14 +85,14 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Debug"/>
+        <LibraryPath Value="../life/Debug"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Debug" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -132,14 +132,14 @@
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="-pg" Required="yes">
-        <LibraryPath Value="../Life/Profile"/>
+        <LibraryPath Value="../life/Profile"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Profile" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -180,14 +180,14 @@
         <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="../Life/Release"/>
+        <LibraryPath Value="../life/Release"/>
         <Library Value="pthread"/>
         <Library Value="X11"/>
         <Library Value="GL"/>
         <Library Value="openal"/>
         <Library Value="alut"/>
         <Library Value="freetype"/>
-        <Library Value="Life"/>
+        <Library Value="life"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
       <General OutputFile="$(IntermediateDirectory)/$(ProjectName)" IntermediateDirectory="./Release" Command="$(ProjectPath)/$(OutputFile)" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
@@ -224,12 +224,12 @@
     </Configuration>
   </Settings>
   <Dependencies Name="Debug">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
   <Dependencies Name="Profile">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
   <Dependencies Name="Release">
-    <Project Name="Life"/>
+    <Project Name="life"/>
   </Dependencies>
 </CodeLite_Project>

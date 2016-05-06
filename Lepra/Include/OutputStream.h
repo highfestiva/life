@@ -5,62 +5,56 @@
 
 	NOTES:
 
-	This is an interface to all classes representing an output stream of 
+	This is an interface to all classes representing an output stream of
 	bytes.
 */
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "IOError.h"
-#include "String.h"
+#include "lepratypes.h"
+#include "ioerror.h"
+#include "string.h"
 
-namespace Lepra
-{
+namespace lepra {
 
-class OutputStream
-{
+class OutputStream {
 public:
-	
+
 	inline OutputStream();
 	inline virtual ~OutputStream();
-	
-	// Closes the stream and releases any system resources associated with 
+
+	// Closes the stream and releases any system resources associated with
 	// this stream.
 	virtual void Close() = 0;
 
-	// Flushes this output stream and forces any buffered output bytes to 
+	// Flushes this output stream and forces any buffered output bytes to
 	// be written out.
 	virtual void Flush() = 0;
 
-	// Writes pLength bytes from the specified byte array to this output 
+	// Writes length bytes from the specified byte array to this output
 	// stream.
-	virtual IOError WriteRaw(const void* pData, size_t pLength) = 0;
+	virtual IOError WriteRaw(const void* data, size_t length) = 0;
 
-	inline void SetName(const str& pName);
+	inline void SetName(const str& name);
 	inline const str& GetName();
 
 protected:
 private:
-	str mName;
+	str name_;
 };
 
-OutputStream::OutputStream()
-{
+OutputStream::OutputStream() {
 }
 
-OutputStream::~OutputStream()
-{
+OutputStream::~OutputStream() {
 }
 
-void OutputStream::SetName(const str& pName)
-{
-	mName = pName;
+void OutputStream::SetName(const str& name) {
+	name_ = name;
 }
 
-const str& OutputStream::GetName()
-{
-	return mName;
+const str& OutputStream::GetName() {
+	return name_;
 }
 
 }

@@ -1,12 +1,12 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "LepraTarget.h"
+#include "lepratarget.h"
 #ifdef LEPRA_IOS
 #include <Availability.h>
 #endif // iOS
@@ -16,8 +16,7 @@
 
 #include <tr1/unordered_map>
 #include <tr1/unordered_set>
-namespace std
-{
+namespace std {
 using namespace tr1;
 }
 

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,17 +8,16 @@
 
 #include <stdio.h>
 
-#include "Lepra.h"
-#include "File.h"
-#include "InputStream.h"
-#include "OutputStream.h"
-#include "../Include/FileArchive.h"
-#include "../Include/ZipArchive.h"
+#include "lepra.h"
+#include "file.h"
+#include "inputstream.h"
+#include "outputstream.h"
+#include "../include/filearchive.h"
+#include "../include/ziparchive.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -26,39 +25,36 @@ class FileArchive;
 
 
 
-class ArchiveFile : public File, protected InputStream, protected OutputStream
-{
+class ArchiveFile : public File, protected InputStream, protected OutputStream {
 	typedef File Parent;
 public:
-	enum OpenMode
-	{
-		READ_ONLY = 0,
-		WRITE_ONLY,
-		WRITE_APPEND,
+	enum OpenMode {
+		kReadOnly = 0,
+		kWriteOnly,
+		kWriteAppend,
 	};
 
-	enum ArchiveType
-	{
-		UNCOMPRESSED = 0,
-		ZIP,
+	enum ArchiveType {
+		kUncompressed = 0,
+		kZip,
 	};
 
-	ArchiveFile(const str& pArchiveName);
-	ArchiveFile(const str& pArchiveName, Reader* pReader);
-	ArchiveFile(const str& pArchiveName, Writer* pWriter);
-	ArchiveFile(const str& pArchiveName, Reader* pReader, Writer* pWriter);
+	ArchiveFile(const str& archive_name);
+	ArchiveFile(const str& archive_name, Reader* reader);
+	ArchiveFile(const str& archive_name, Writer* writer);
+	ArchiveFile(const str& archive_name, Reader* reader, Writer* writer);
 	virtual ~ArchiveFile();
 
-	void SetArchiveType(ArchiveType pType);
+	void SetArchiveType(ArchiveType type);
 
-	bool Open(const str& pFileName, OpenMode pMode, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
+	bool Open(const str& file_name, OpenMode mode, Endian::EndianType endian = Endian::kTypeBigEndian);
 
 	void Close();
 
 	bool IsOpen() const;
 
 	// Use this to change the endian in the middle of a file read/write.
-	void SetEndian(Endian::EndianType pEndian);
+	void SetEndian(Endian::EndianType endian);
 
 	str GetFullName() const;	// Returns path+filename.
 	str GetName() const;		// Returns filename only.
@@ -67,75 +63,75 @@ public:
 	int64 GetSize() const;
 
 	// Overrided from Reader/Writer.
-	IOError ReadData(void* pBuffer, size_t pSize);
-	IOError WriteData(const void* pBuffer, size_t pSize);
+	IOError ReadData(void* buffer, size_t size);
+	IOError WriteData(const void* buffer, size_t size);
 
 	int64 Tell() const;
-	int64 Seek(int64 pOffset, FileOrigin pFrom);
+	int64 Seek(int64 offset, FileOrigin from);
 
-	// OBS! The following functions will overwrite any existing file with the 
-	// name pFileName. If pLocal is set to true, the file will be written
-	// directly in the "current" directory or archive, as a local file. 
+	// OBS! The following functions will overwrite any existing file with the
+	// name file_name. If local is set to true, the file will be written
+	// directly in the "current" directory or archive, as a local file.
 	// With other words, the path is not taken into account.
-	static bool ExtractFileFromArchive(const str& pArchiveName, const str& pFileName, bool pLocal);
-	static bool ExtractFileFromArchive(const str& pArchiveName, const str& pFileName, const str& pExtractedFileName, bool pLocal);
-	static bool InsertFileIntoArchive(const str& pArchiveName, const str& pFileName, bool pLocal);
-	static bool InsertFileIntoArchive(const str& pArchiveName, const str& pFileName, const str& pInsertedFileName, bool pLocal);
+	static bool ExtractFileFromArchive(const str& archive_name, const str& file_name, bool local);
+	static bool ExtractFileFromArchive(const str& archive_name, const str& file_name, const str& extracted_file_name, bool local);
+	static bool InsertFileIntoArchive(const str& archive_name, const str& file_name, bool local);
+	static bool InsertFileIntoArchive(const str& archive_name, const str& file_name, const str& inserted_file_name, bool local);
 
 	// Overrided from InputStream.
 	int64 GetAvailable() const;
-	virtual IOError ReadRaw(void* pBuffer, size_t pSize);
-	IOError Skip(size_t pSize);
+	virtual IOError ReadRaw(void* buffer, size_t size);
+	IOError Skip(size_t size);
 
 	// Overrided from OutputStream.
-	virtual IOError WriteRaw(const void* pBuffer, size_t pSize);
+	virtual IOError WriteRaw(const void* buffer, size_t size);
 	void Flush();
 private:
 
-	bool OpenForReading(const str& pFileName, OpenMode pMode);
-	bool OpenZipForReading(const str& pFileName, OpenMode pMode);
-	bool OpenForWriting(const str& pFileName, OpenMode pMode);
-	bool OpenZipForWriting(const str& pFileName, OpenMode pMode);
+	bool OpenForReading(const str& file_name, OpenMode mode);
+	bool OpenZipForReading(const str& file_name, OpenMode mode);
+	bool OpenForWriting(const str& file_name, OpenMode mode);
+	bool OpenZipForWriting(const str& file_name, OpenMode mode);
 
 	bool FlushDataBuffer();
 	bool RefillDataBuffer();
 
-	void ExtractPathAndFileName(const str& pFileName);
+	void ExtractPathAndFileName(const str& file_name);
 
-	void CopyArchiveFiles(FileArchive& pSource, FileArchive& pDest, const str& pExceptThisFile);
-	void CopyZipArchiveFiles(ZipArchive& pSource, ZipArchive& pDest, const str& pExceptThisFile);
+	void CopyArchiveFiles(FileArchive& source, FileArchive& dest, const str& except_this_file);
+	void CopyZipArchiveFiles(ZipArchive& source, ZipArchive& dest, const str& except_this_file);
 
-	bool CopyFileBetweenArchives(FileArchive& pSource, FileArchive& pDest, const str& pFileName);
-	bool CopyFileBetweenZipArchives(ZipArchive& pSource, ZipArchive& pDest, const str& pFileName);
+	bool CopyFileBetweenArchives(FileArchive& source, FileArchive& dest, const str& file_name);
+	bool CopyFileBetweenZipArchives(ZipArchive& source, ZipArchive& dest, const str& file_name);
 
 	void operator=(const ArchiveFile&);
 
-	Endian::EndianType mFileEndian;
+	Endian::EndianType file_endian_;
 
-	str mArchiveFileName;
-	bool mIsZipArchive;
+	str archive_file_name_;
+	bool is_zip_archive_;
 
-	ZipArchive mZipArchive;
-	FileArchive mArchive;
-	int mFileHandle;
+	ZipArchive zip_archive_;
+	FileArchive archive_;
+	int file_handle_;
 
-	str mFileName;
-	str mPath;
+	str file_name_;
+	str path_;
 
-	int64 mFileSize;
+	int64 file_size_;
 
-	uint8* mDataBuffer;
-	const int mDataBufferSize;	// Size of the data buffer.
-	int mDataSize;				// Size of data in data buffer.
-	int mCurrentDBPos;			// Current position in data buffer.
-	int64 mCurrentPos;
+	uint8* data_buffer_;
+	const int data_buffer_size_;	// Size of the data buffer.
+	int data_size_;				// Size of data in data buffer.
+	int current_db_pos_;			// Current position in data buffer.
+	int64 current_pos_;
 
 	// Usually just NULL. Can be set by the user to redirect the IO
 	// through another reader/writer.
-	Writer* mWriter;
-	Reader* mReader;
+	Writer* writer_;
+	Reader* reader_;
 
-	OpenMode mMode;
+	OpenMode mode_;
 };
 
 

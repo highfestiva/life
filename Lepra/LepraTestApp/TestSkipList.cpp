@@ -1,49 +1,45 @@
 /*
 	File:   TestSkipList.cpp
 	Class:  -
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
 #include "pch.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../Include/Log.h"
-#include "../Include/String.h"
-#include "../Include/SkipList.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../include/log.h"
+#include "../include/string.h"
+#include "../include/skiplist.h"
 
-using namespace Lepra;
+using namespace lepra;
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
+void ReportTestResult(const lepra::LogDecorator& log, const str& test_name, const str& context, bool result);
 
-/*bool TestSkipList(const LogDecorator& pAccount)
-{
-	str lContext;
-	bool lTestOk = true;
+/*bool TestSkipList(const LogDecorator& account) {
+	str _context;
+	bool test_ok = true;
 
 	SkipList<int, int> lSkipList;
-	SkipList<int, int>::Iterator lIter1;
-	SkipList<int, int>::Iterator lIter2;
-	SkipList<int, int>::Iterator lIter3;
+	SkipList<int, int>::Iterator iter1;
+	SkipList<int, int>::Iterator iter2;
+	SkipList<int, int>::Iterator iter3;
 
 	// Test iterator.
-	lIter1 = lSkipList.End();
-	lIter2 = lSkipList.Last();
-	lIter3 = lSkipList.First();
-	if (lIter2 != lSkipList.End())
-	{
-		lIter2++;
+	iter1 = lSkipList.End();
+	iter2 = lSkipList.Last();
+	iter3 = lSkipList.First();
+	if (iter2 != lSkipList.End()) {
+		iter2++;
 	}
-	if (lIter3 != lSkipList.End())
-	{
-		lIter3--;
+	if (iter3 != lSkipList.End()) {
+		iter3--;
 	}
-	if (lTestOk)
-	{
-		lContext = "basic iterator test";
-		lTestOk = !(lIter1 != lSkipList.End() || !(lIter1 == lSkipList.End()) ||
-			lIter2 != lSkipList.End() || !(lIter2 == lSkipList.End()) ||
-			lIter3 != lSkipList.End() || !(lIter3 == lSkipList.End()));
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "basic iterator test";
+		test_ok = !(iter1 != lSkipList.End() || !(iter1 == lSkipList.End()) ||
+			iter2 != lSkipList.End() || !(iter2 == lSkipList.End()) ||
+			iter3 != lSkipList.End() || !(iter3 == lSkipList.End()));
+		deb_assert(test_ok);
 	}
 
 	lSkipList.Insert(1, 20);
@@ -54,134 +50,118 @@ void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, con
 	lSkipList.Insert(6, 15);
 	lSkipList.Insert(7, 14);
 	lSkipList.Insert(8, 13);
-	if (lTestOk)
-	{
-		lContext = "search success test";
-		lTestOk = !(lSkipList.Find(1) == lSkipList.End() || lSkipList.Find(2) == lSkipList.End() ||
+	if (test_ok) {
+		_context = "search success test";
+		test_ok = !(lSkipList.Find(1) == lSkipList.End() || lSkipList.Find(2) == lSkipList.End() ||
 			lSkipList.Find(3) == lSkipList.End() || lSkipList.Find(4) == lSkipList.End() ||
 			lSkipList.Find(5) == lSkipList.End() || lSkipList.Find(6) == lSkipList.End() ||
 			lSkipList.Find(7) == lSkipList.End() || lSkipList.Find(8) == lSkipList.End());
-		deb_assert(lTestOk);
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "search fail test";
-		lTestOk = !(lSkipList.Find(0) != lSkipList.End() || lSkipList.Find(-123) != lSkipList.End() ||
+	if (test_ok) {
+		_context = "search fail test";
+		test_ok = !(lSkipList.Find(0) != lSkipList.End() || lSkipList.Find(-123) != lSkipList.End() ||
 			lSkipList.Find(123) != lSkipList.End() || lSkipList.Find(-34) != lSkipList.End() ||
 			lSkipList.Find(45) != lSkipList.End() || lSkipList.Find(-56) != lSkipList.End() ||
 			lSkipList.Find(67) != lSkipList.End() || lSkipList.Find(-78) != lSkipList.End());
-		deb_assert(lTestOk);
+		deb_assert(test_ok);
 	}
 
-	lIter2 = lSkipList.Last();
-	lIter3 = lSkipList.First();
-	if (lTestOk)
-	{
-		lContext = "iterator test A";
-		lTestOk = !(lIter2 == lSkipList.End() || lIter3 == lSkipList.End());
-		deb_assert(lTestOk);
+	iter2 = lSkipList.Last();
+	iter3 = lSkipList.First();
+	if (test_ok) {
+		_context = "iterator test A";
+		test_ok = !(iter2 == lSkipList.End() || iter3 == lSkipList.End());
+		deb_assert(test_ok);
 	}
 	// These should become end pointers.
-	lIter2++;
-	lIter3--;
-	if (lTestOk)
-	{
-		lContext = "iterator test B";
-		lTestOk = !(lIter2 != lSkipList.End() || lIter3 != lSkipList.End());
-		deb_assert(lTestOk);
+	iter2++;
+	iter3--;
+	if (test_ok) {
+		_context = "iterator test B";
+		test_ok = !(iter2 != lSkipList.End() || iter3 != lSkipList.End());
+		deb_assert(test_ok);
 	}
 
 	// Check iterating.
-	int lCount = 0;
-	for (lIter1 = lSkipList.First(); lIter1 != lSkipList.End(); ++lIter1)
-	{
-		lCount++;
+	int count = 0;
+	for (iter1 = lSkipList.First(); iter1 != lSkipList.End(); ++iter1) {
+		count++;
 	}
 	// Check counting.
-	if (lTestOk)
-	{
-		lContext = "iterator counting";
-		lTestOk = !(lCount != 8 || lCount != lSkipList.GetCount());
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "iterator counting";
+		test_ok = !(count != 8 || count != lSkipList.GetCount());
+		deb_assert(test_ok);
 	}
 
 	// Check if sorted.
-	lCount = 20;
-	for (lIter1 = lSkipList.First(); lIter1 != lSkipList.End(); ++lIter1, --lCount)
-	{
-		if (lTestOk)
-		{
-			lContext = "sorting failed";
-			lTestOk = !((*lIter1) != lCount);
-			deb_assert(lTestOk);
+	count = 20;
+	for (iter1 = lSkipList.First(); iter1 != lSkipList.End(); ++iter1, --count) {
+		if (test_ok) {
+			_context = "sorting failed";
+			test_ok = !((*iter1) != count);
+			deb_assert(test_ok);
 		}
 	}
 
 	// Test remove.
 	lSkipList.Remove(4);
-	if (lTestOk)
-	{
-		lContext = "remove failed";
-		lTestOk = !(lSkipList.Find(1) == lSkipList.End() || lSkipList.Find(2) == lSkipList.End() ||
+	if (test_ok) {
+		_context = "remove failed";
+		test_ok = !(lSkipList.Find(1) == lSkipList.End() || lSkipList.Find(2) == lSkipList.End() ||
 			lSkipList.Find(3) == lSkipList.End() || lSkipList.Find(4) != lSkipList.End() ||
 			lSkipList.Find(5) == lSkipList.End() || lSkipList.Find(6) == lSkipList.End() ||
 			lSkipList.Find(7) == lSkipList.End() || lSkipList.Find(8) == lSkipList.End());
-		deb_assert(lTestOk);
+		deb_assert(test_ok);
 	}
 
 	// Now, do some random input and removal.
 	lSkipList.RemoveAll();
-	lCount = 0;
+	count = 0;
 	int i;
-	for (i = 0; i < 1024; i++)
-	{
-		int lRnd = rand();
-		lSkipList.Insert(lRnd, lRnd);
-		lSkipList.Remove(lRnd);
-		if (lTestOk)
-		{
-			lContext = "random remove failed";
-			lTestOk = !(lSkipList.GetCount() != 0);
-			deb_assert(lTestOk);
+	for (i = 0; i < 1024; i++) {
+		int rnd = rand();
+		lSkipList.Insert(rnd, rnd);
+		lSkipList.Remove(rnd);
+		if (test_ok) {
+			_context = "random remove failed";
+			test_ok = !(lSkipList.GetCount() != 0);
+			deb_assert(test_ok);
 		}
 	}
 
-	for (i = 0; i < 1024; i++)
-	{
-		int lRnd = rand();
-		lSkipList.Insert(lRnd, lRnd);
-		lRnd = rand();
-		lSkipList.Remove(lRnd);
+	for (i = 0; i < 1024; i++) {
+		int rnd = rand();
+		lSkipList.Insert(rnd, rnd);
+		rnd = rand();
+		lSkipList.Remove(rnd);
 	}
 
 	// Try iterating.
-	lCount = 0;
-	for (lIter1 = lSkipList.First(); lIter1 != lSkipList.End(); ++lIter1)
-	{
-		lCount++;
+	count = 0;
+	for (iter1 = lSkipList.First(); iter1 != lSkipList.End(); ++iter1) {
+		count++;
 	}
 	// Check counting again.
-	if (lTestOk)
-	{
-		lContext = "entries failed A";
-		lTestOk = !(lCount != lSkipList.GetCount());
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "entries failed A";
+		test_ok = !(count != lSkipList.GetCount());
+		deb_assert(test_ok);
 	}
 
 	// Remove all, and count again.
 	lSkipList.RemoveAll();
-	lCount = 0;
-	for (lIter1 = lSkipList.First(); lIter1 != lSkipList.End(); ++lIter1)
-	{
-		lCount++;
+	count = 0;
+	for (iter1 = lSkipList.First(); iter1 != lSkipList.End(); ++iter1) {
+		count++;
 	}
-	if (lTestOk)
-	{
-		lContext = "entries found";
-		lTestOk = !(lCount != 0 || lCount != lSkipList.GetCount());
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "entries found";
+		test_ok = !(count != 0 || count != lSkipList.GetCount());
+		deb_assert(test_ok);
 	}
 
-	ReportTestResult(pAccount, "SkipList", lContext, lTestOk);
-	return (lTestOk);
+	ReportTestResult(account, "SkipList", _context, test_ok);
+	return (test_ok);
 }*/

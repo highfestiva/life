@@ -3,12 +3,12 @@
 // Copyright (c) Pixel Doctrine
 
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../lepra/include/lepratarget.h"
 #ifdef LEPRA_IOS
 
-#include "PythonRunner.h"
-#import "AnimatedApp.h"
-#include "TrabantSimTicker.h"
+#include "pythonrunner.h"
+#import "animatedapp.h"
+#include "trabantsimticker.h"
 
 
 
@@ -40,13 +40,11 @@ extern "C" void Py_Jb_ClearPendingCalls(void);
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
-int quit(void*)
-{
+int quit(void*) {
 	PyErr_SetString(PyExc_KeyboardInterrupt, "...");
 	PyErr_SetInterrupt();
 	return -1;
@@ -54,157 +52,139 @@ int quit(void*)
 
 
 
-void PythonRunner::Run(const wchar_t* pDirectory, const wchar_t* pFilename)
-{
+void PythonRunner::Run(const wchar_t* directory, const wchar_t* filename) {
 	Break();
-	mDirectory = pDirectory;
-	mFilename = pFilename;
-	mPythonWorker.Start(&PythonRunner::WorkerEntry, 0);
-	mStdOutReader.Start(&PythonRunner::StdOutReadEntry, 0);
+	directory_ = directory;
+	filename_ = filename;
+	python_worker_.Start(&PythonRunner::WorkerEntry, 0);
+	std_out_reader_.Start(&PythonRunner::StdOutReadEntry, 0);
 }
 
-bool PythonRunner::IsRunning()
-{
-	return mPythonWorker.IsRunning();
+bool PythonRunner::IsRunning() {
+	return python_worker_.IsRunning();
 }
 
-void PythonRunner::Break()
-{
-	if (!mIsStopping && mPythonWorker.IsRunning())
-	{
-		mIsStopping = true;
-		mKillSimulator = false;
-		for (int x = 0; x < 3 && !Py_IsInitialized(); ++x)
-		{
+void PythonRunner::Break() {
+	if (!is_stopping_ && python_worker_.IsRunning()) {
+		is_stopping_ = true;
+		kill_simulator_ = false;
+		for (int x = 0; x < 3 && !Py_IsInitialized(); ++x) {
 			Thread::Sleep(0.1f);
 		}
-		if (Py_IsInitialized())
-		{
+		if (Py_IsInitialized()) {
 			PyGILState_STATE state = PyGILState_Ensure();
 			Py_AddPendingCall(&quit, NULL);
 			PyGILState_Release(state);
-			mPythonWorker.GraceJoin(0.7);
+			python_worker_.GraceJoin(0.7);
 		}
-		if (mPythonWorker.IsRunning())
-		{
+		if (python_worker_.IsRunning()) {
 			printf("Warning: killing python thread!\n");
-			pthread_cancel((pthread_t)mPythonWorker.GetThreadHandle());
-			mPythonWorker.Kill();
+			pthread_cancel((pthread_t)python_worker_.GetThreadHandle());
+			python_worker_.Kill();
 		}
 		Py_Jb_ClearPendingCalls();
-		mKillSimulator = true;
-		mIsStopping = false;
+		kill_simulator_ = true;
+		is_stopping_ = false;
 	}
 }
 
-str PythonRunner::GetStdOut()
-{
-	ScopeLock _(&mStdOutLock);
-	return mStdOut;
+str PythonRunner::GetStdOut() {
+	ScopeLock _(&std_out_lock_);
+	return std_out_;
 }
 
-void PythonRunner::ClearStdOut()
-{
-	if (mStdOutReader.IsRunning())
-	{
-		ScopeLock _(&mStdOutLock);
-		mStdOut.clear();
+void PythonRunner::ClearStdOut() {
+	if (std_out_reader_.IsRunning()) {
+		ScopeLock _(&std_out_lock_);
+		std_out_.clear();
 	}
 }
 
 
 
-void PythonRunner::WorkerEntry(void*)
-{
+void PythonRunner::WorkerEntry(void*) {
 	int _;
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &_);
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &_);
 
-	HiResTimer lTimer(false);
-	str lFullPathname = mFilename;
-	strutil::strvec lParts = strutil::Split(lFullPathname, "/");
-	str lFilename = lParts[lParts.size()-1];
-	FILE* fp = fopen(lFullPathname.c_str(), "r");
-	if (!fp)
-	{
-		printf("Error: could not open file %s!\n", lFilename.c_str());
-		Thread::Sleep(MINIMUM_PYTHON_RUN_TIME-lTimer.QueryTimeDiff());
-		TrabantSim::mApp->FoldSimulator();
-		TrabantSim::mApp->Suspend(false);
+	HiResTimer timer(false);
+	str full_pathname = filename_;
+	strutil::strvec parts = strutil::Split(full_pathname, "/");
+	str _filename = parts[parts.size()-1];
+	FILE* fp = fopen(full_pathname.c_str(), "r");
+	if (!fp) {
+		printf("Error: could not open file %s!\n", _filename.c_str());
+		Thread::Sleep(MINIMUM_PYTHON_RUN_TIME-timer.QueryTimeDiff());
+		TrabantSim::app_->FoldSimulator();
+		TrabantSim::app_->Suspend(false);
 		return;
 	}
-	if (Py_IsInitialized())
-	{
+	if (Py_IsInitialized()) {
 		// Here we try to repair if we had to force-kill the previous thread.
 		PyGILState_Ensure();
 		Py_Finalize();
 	}
-	Py_SetProgramName((wchar_t*)mDirectory.c_str());
+	Py_SetProgramName((wchar_t*)directory_.c_str());
 	Py_OptimizeFlag = 1;
 	//Py_VerboseFlag = 1;
 	Py_Initialize();
 	PyEval_InitThreads();
-	wchar_t* wargv[3] = { (wchar_t*)mFilename.c_str(), (wchar_t*)L"addr=localhost", (wchar_t*)L"osname=ios" };
+	wchar_t* wargv[3] = { (wchar_t*)filename_.c_str(), (wchar_t*)L"addr=localhost", (wchar_t*)L"osname=ios" };
 	PySys_SetArgv(3, wargv);
-	PyRun_SimpleFileEx(fp, lFilename.c_str(), 1);
+	PyRun_SimpleFileEx(fp, _filename.c_str(), 1);
 	Py_Finalize();
 	PyEval_ReleaseLock();
 
-	if (mKillSimulator)
-	{
+	if (kill_simulator_) {
 		// No use showing simulator still frame?
-	 	mIsStopping = true;
-		Thread::Sleep(MINIMUM_PYTHON_RUN_TIME-lTimer.QueryTimeDiff());
-		TrabantSim::mApp->Suspend(false);
-		TrabantSim::mApp->FoldSimulator();
-		mIsStopping = false;
+	 	is_stopping_ = true;
+		Thread::Sleep(MINIMUM_PYTHON_RUN_TIME-timer.QueryTimeDiff());
+		TrabantSim::app_->Suspend(false);
+		TrabantSim::app_->FoldSimulator();
+		is_stopping_ = false;
 	}
 }
 
-void PythonRunner::StdOutReadEntry(void*)
-{
+void PythonRunner::StdOutReadEntry(void*) {
 	int _;
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &_);
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &_);
 
-	static int lPipePair[2];
-	if (pipe(lPipePair) != 0)
-	{
-		mStdOut = "Unable to read stdout.";
+	static int pipe_pair[2];
+	if (pipe(pipe_pair) != 0) {
+		std_out_ = "Unable to read stdout.";
 		return;
 	}
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
-	dup2(lPipePair[1], STDOUT_FILENO);
-	dup2(lPipePair[1], STDERR_FILENO);
-	char* lBuffer = (char*)malloc(100);
-	for (;;)
-	{
-		ssize_t lReadCount = read(lPipePair[0], lBuffer, 10);
-		if (lReadCount > 0)
-		{
-			lBuffer[lReadCount] = 0;
-			ScopeLock _(&mStdOutLock);
-			mStdOut += lBuffer;
+	dup2(pipe_pair[1], STDOUT_FILENO);
+	dup2(pipe_pair[1], STDERR_FILENO);
+	char* buffer = (char*)malloc(100);
+	for (;;) {
+		ssize_t read_count = read(pipe_pair[0], buffer, 10);
+		if (read_count > 0) {
+			buffer[read_count] = 0;
+			ScopeLock _(&std_out_lock_);
+			std_out_ += buffer;
 #ifdef LEPRA_DEBUG
-			//NSLog(@"%s", lBuffer);
+			//NSLog(@"%s", buffer);
 #endif // Debug
 		}
 	}
-	free(lBuffer);
-	mStdOut += "\nBroken pipe, unable to read more of stdout!";
+	free(buffer);
+	std_out_ += "\nBroken pipe, unable to read more of stdout!";
 }
 
 
 
-StaticThread PythonRunner::mPythonWorker("PythonWorker");
-StaticThread PythonRunner::mStdOutReader("StdOutReader");
-Lock PythonRunner::mStdOutLock;
-str PythonRunner::mStdOut;
-wstr PythonRunner::mDirectory;
-wstr PythonRunner::mFilename;
-bool PythonRunner::mKillSimulator = true;
-bool PythonRunner::mIsStopping = false;
+StaticThread PythonRunner::python_worker_("PythonWorker");
+StaticThread PythonRunner::std_out_reader_("StdOutReader");
+Lock PythonRunner::std_out_lock_;
+str PythonRunner::std_out_;
+wstr PythonRunner::directory_;
+wstr PythonRunner::filename_;
+bool PythonRunner::kill_simulator_ = true;
+bool PythonRunner::is_stopping_ = false;
 
 
 

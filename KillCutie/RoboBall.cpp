@@ -5,129 +5,109 @@
 
 
 #include "pch.h"
-#include "RoboBall.h"
-#include "../Tbc/Include/PhysicsEngine.h"
-#include "Cutie.h"
+#include "roboball.h"
+#include "../tbc/include/physicsengine.h"
+#include "cutie.h"
 
 
 
-namespace GrenadeRun
-{
+namespace grenaderun {
 
 
 
-RoboBall::RoboBall(const Game* pGame, const str& pClassId):
-	Parent(pGame->GetResourceManager(), pClassId, pGame->GetUiManager()),
-	mGame(pGame),
-	mSound(0)
-{
-	mHeadAwayTimer.EnableShadowCounter(true);
+RoboBall::RoboBall(const Game* game, const str& class_id):
+	Parent(game->GetResourceManager(), class_id, game->GetUiManager()),
+	game_(game),
+	sound_(0) {
+	head_away_timer_.EnableShadowCounter(true);
 }
 
-RoboBall::~RoboBall()
-{
-	delete mSound;
-	mSound = 0;
-	mGame = 0;
+RoboBall::~RoboBall() {
+	delete sound_;
+	sound_ = 0;
+	game_ = 0;
 }
 
 
 
-void RoboBall::OnTick()
-{
+void RoboBall::OnTick() {
 	Parent::OnTick();
 
-	if (mGame->GetCutie() && mGame->GetCutie()->IsLoaded())
-	{
-		float lStrength = Math::Lerp(0.25f, 1.0f, mGame->GetComputerDifficulty());
-		const vec3 lPosition = GetPosition();
-		const vec3 lCutiePosition = mGame->GetCutie()->GetPosition();
-		const vec3 lDirection = lCutiePosition - lPosition;
-		vec3 lSteerDirection;
-		if (mHeadAwayTimer.QueryTimeDiff() > 2.0)
-		{
-			const vec3 lVelocity = GetVelocity();
-			const vec3 lCutieVelocity = mGame->GetCutie()->GetVelocity();
-			const float lDistance = lPosition.GetDistance(lCutiePosition);
-			const float lSpeed = lVelocity.GetLength();
-			if (lSpeed < 0.1f)
-			{
+	if (game_->GetCutie() && game_->GetCutie()->IsLoaded()) {
+		float strength = Math::Lerp(0.25f, 1.0f, game_->GetComputerDifficulty());
+		const vec3 position = GetPosition();
+		const vec3 cutie_position = game_->GetCutie()->GetPosition();
+		const vec3 direction = cutie_position - position;
+		vec3 steer_direction;
+		if (head_away_timer_.QueryTimeDiff() > 2.0) {
+			const vec3 velocity = GetVelocity();
+			const vec3 cutie_velocity = game_->GetCutie()->GetVelocity();
+			const float distance = position.GetDistance(cutie_position);
+			const float speed = velocity.GetLength();
+			if (speed < 0.1f) {
 				return;
 			}
-			const float lTimeTilImpact = Math::Clamp(lDistance / lSpeed, 0.1f, 3.0f);
-			const float lSpeedDiff2 = lVelocity.GetDistanceSquared(lCutieVelocity);
-			if ((lTimeTilImpact < 1 || lSpeed < 1) &&
-				lDistance < 10 &&
-				lSpeedDiff2 < 1)
-			{
+			const float time_til_impact = Math::Clamp(distance / speed, 0.1f, 3.0f);
+			const float speed_diff2 = velocity.GetDistanceSquared(cutie_velocity);
+			if ((time_til_impact < 1 || speed < 1) &&
+				distance < 10 &&
+				speed_diff2 < 1) {
 				log_debug("Too close and too slow, backing up!");
-				mHeadAwayTimer.PopTimeDiff();
+				head_away_timer_.PopTimeDiff();
 			}
-			const vec3 lFuturePosition = lPosition + lVelocity*lTimeTilImpact;
-			const vec3 lFutureCutiePosition = lCutiePosition + lCutieVelocity*lTimeTilImpact;
-			const vec3 lFutureDirection = lFutureCutiePosition - lFuturePosition;
-			if (lFutureDirection.Dot(lDirection) > 1)
-			{
-				lSteerDirection = lFutureDirection;
-			}
-			else
-			{
+			const vec3 future_position = position + velocity*time_til_impact;
+			const vec3 future_cutie_position = cutie_position + cutie_velocity*time_til_impact;
+			const vec3 future_direction = future_cutie_position - future_position;
+			if (future_direction.Dot(direction) > 1) {
+				steer_direction = future_direction;
+			} else {
 				// Just use the current position, to not get a vector of opposite direction when
 				// the future position indicates we will have passed the target. Which hopefully
 				// ends up in a big crash! :)
-				lSteerDirection = lDirection;
+				steer_direction = direction;
 			}
-			if (lStrength < 0.6f && lDistance > 30.0f && lSpeed < 2)
-			{
-				++mBadSpeedCounter;
+			if (strength < 0.6f && distance > 30.0f && speed < 2) {
+				++bad_speed_counter_;
+			} else {
+				bad_speed_counter_ = 0;
 			}
-			else
-			{
-				mBadSpeedCounter = 0;
-			}
+		} else {
+			steer_direction = vec3(100, 100, 13) - position;
 		}
-		else
-		{
-			lSteerDirection = vec3(100, 100, 13) - lPosition;
+		if (bad_speed_counter_ > 2) {
+			strength = 0.6f;
 		}
-		if (mBadSpeedCounter > 2)
-		{
-			lStrength = 0.6f;
-		}
-		lSteerDirection.z = 0;
-		lSteerDirection.Normalize();
-		GetPhysics()->GetEngine(0)->SetValue(0, lSteerDirection.y * lStrength);
-		GetPhysics()->GetEngine(0)->SetValue(1, lSteerDirection.x * lStrength);
+		steer_direction.z = 0;
+		steer_direction.Normalize();
+		GetPhysics()->GetEngine(0)->SetValue(0, steer_direction.y * strength);
+		GetPhysics()->GetEngine(0)->SetValue(1, steer_direction.x * strength);
 		static int c = 0;
-		if (++c > 20)
-		{
+		if (++c > 20) {
 			c = 0;
-			log_volatile(mLog.Debugf("RoboBall at (%.1f, %.1f, %.1f), heading towards (%.1f, %.1f), diff (%.1f, %.1f, %.1f).",
-				lPosition.x, lPosition.y, lPosition.z,
-				lSteerDirection.x, lSteerDirection.y,
-				lDirection.x, lDirection.y, lDirection.z));
+			log_volatile(log_.Debugf("RoboBall at (%.1f, %.1f, %.1f), heading towards (%.1f, %.1f), diff (%.1f, %.1f, %.1f).",
+				position.x, position.y, position.z,
+				steer_direction.x, steer_direction.y,
+				direction.x, direction.y, direction.z));
 		}
 
 		static int d = 0;
-		if (++d > 20)
-		{
+		if (++d > 20) {
 			d = 0;
-			if (lPosition.z < -50 || lPosition.z > 200)
-			{
-				mLog.Warning("Fell off of playing field, resetting position!");
-				const Cure::ObjectPositionalData* lPlacement;
-				UpdateFullPosition(lPlacement);
-				Cure::ObjectPositionalData* lNewPlacement = (Cure::ObjectPositionalData*)lPlacement->Clone();
-				lNewPlacement->mPosition.mTransformation.GetPosition().Set(0, 0, 30);
-				lNewPlacement->mPosition.mVelocity.Set(0, 0, 0);
-				SetFullPosition(*lNewPlacement, 0);
+			if (position.z < -50 || position.z > 200) {
+				log_.Warning("Fell off of playing field, resetting position!");
+				const cure::ObjectPositionalData* placement;
+				UpdateFullPosition(placement);
+				cure::ObjectPositionalData* new_placement = (cure::ObjectPositionalData*)placement->Clone();
+				new_placement->position_.transformation_.GetPosition().Set(0, 0, 30);
+				new_placement->position_.velocity_.Set(0, 0, 0);
+				SetFullPosition(*new_placement, 0);
 			}
 		}
 	}
 }
 
 
-loginstance(GAME_CONTEXT_CPP, RoboBall);
+loginstance(kGameContextCpp, RoboBall);
 
 
 

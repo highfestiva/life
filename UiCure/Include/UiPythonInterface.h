@@ -13,14 +13,12 @@
 #pragma warning(disable: 4541)	// MSVC: <runtime> used on polymorphic type 'Cure::PythonContextManager' with /GR-; unpredictable behavior may result
 #include <boost/python.hpp>
 #pragma warning(pop)
-#include "../../UiLepra/Include/UiDisplayManager.h"
+#include "../../uilepra/include/uidisplaymanager.h"
 
 
 
-namespace UiCure
-{
-namespace PythonInterface
-{
+namespace UiCure {
+namespace pythoninterface {
 
 
 
@@ -28,53 +26,49 @@ typedef boost::python::tuple tuple;
 
 
 
-class Graphics
-{
+class Graphics {
 public:
 	class Screen;
-	class Viewport
-	{
+	class Viewport {
 	public:
 		Viewport();
-		Viewport(const Viewport& pOriginal);
+		Viewport(const Viewport& original);
 		virtual ~Viewport();
-		const Viewport& operator=(const Viewport& pOriginal);
+		const Viewport& operator=(const Viewport& original);
 		tuple GetClippingRectangle();
-		void SetClippingRectangle(int pX, int pY, int pWidth, int pHeight);
-		void MoveCamera(const tuple& pPosition, const tuple& pOrientation);
+		void SetClippingRectangle(int x, int y, int width, int height);
+		void MoveCamera(const tuple& position, const tuple& orientation);
 		void Render();
-		void PrintText(int pX, int pY, const char* pText);
+		void PrintText(int x, int y, const char* text);
 
 	private:
-		int mX;
-		int mY;
-		int mWidth;
-		int mHeight;
+		int x_;
+		int y_;
+		int width_;
+		int height_;
 	};
-	class Screen: public Viewport
-	{
+	class Screen: public Viewport {
 	public:
 		Screen();
-		Screen(const Screen& pOriginal);
-		Screen(UiLepra::DisplayManager::ContextType pRenderingContext, const tuple& pMode, bool pIsWindowed);
+		Screen(const Screen& original);
+		Screen(uilepra::DisplayManager::ContextType rendering_context, const tuple& mode, bool is_windowed);
 		virtual ~Screen();
-		const Screen& operator=(const Screen& pOriginal);
+		const Screen& operator=(const Screen& original);
 		void UpdateScreen();
-		Viewport CreateViewport(int pX, int pY, int pWidth, int pHeight);
+		Viewport CreateViewport(int x, int y, int width, int height);
 
 	private:
-		static int mReferenceCount;
+		static int reference_count_;
 	};
-	static Screen CreateScreen(UiLepra::DisplayManager::ContextType pRenderingContext, const tuple& pMode, bool pIsWindowed);
+	static Screen CreateScreen(uilepra::DisplayManager::ContextType rendering_context, const tuple& mode, bool is_windowed);
 	static tuple GetFullscreenResolutions();
 };
 
-class Sound
-{
+class Sound {
 public:
-	static void SetMicrophonePosition(float pX, float pY, float pZ);
-	static void SetMicrophoneVelocity(float pVelocityX, float pVelocityY, float pVelocityZ);
-	static void SetMicrophoneOrientation(float pTheta, float pPhi, float pGimbal);
+	static void SetMicrophonePosition(float x, float y, float z);
+	static void SetMicrophoneVelocity(float velocity_x, float velocity_y, float velocity_z);
+	static void SetMicrophoneOrientation(float theta, float phi, float gimbal);
 };
 
 

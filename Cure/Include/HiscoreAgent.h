@@ -4,92 +4,86 @@
 
 #pragma once
 
-#include "Cure.h"
-#include "../../Lepra/Include/MemberThread.h"
+#include "cure.h"
+#include "../../lepra/include/memberthread.h"
 
 
 
-namespace happyhttp
-{
+namespace happyhttp {
 class Connection;
 class Response;
 }
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
 // Interface towards my GAE (Google App Engine) Python 2.5 app called gamehiscore (which can be found at
 // ssh://rg@pixeldoctrine.dyndns.org:2202/~/hiscore.git). The app automagically redirects from
 // gamehiscore.pixeldoctrine.com to some other free hosting site in the cloud.
-class HiscoreAgent
-{
+class HiscoreAgent {
 public:
-	enum Action
-	{
-		ACTION_NONE = 1,
-		ACTION_DOWNLOAD_LIST,
-		ACTION_UPLOAD_SCORE,
+	enum Action {
+		kActionNone = 1,
+		kActionDownloadList,
+		kActionUploadScore,
 	};
 
-	struct Entry
-	{
-		str mName;
-		int mScore;
+	struct Entry {
+		str name_;
+		int score_;
 	};
 
-	struct List
-	{
-		int mOffset;
-		int mTotalCount;
+	struct List {
+		int offset_;
+		int total_count_;
 		typedef std::vector<Entry> EntryList;
-		EntryList mEntryList;
+		EntryList entry_list_;
 	};
 
-	HiscoreAgent(const str& pHost, const int pPort, const str& pGameName);
+	HiscoreAgent(const str& host, const int port, const str& game_name);
 	virtual ~HiscoreAgent();
 	void Close();
 	ResourceLoadState Poll();
 
 	ResourceLoadState GetLoadState() const;
 	Action GetAction() const;
-	void SetLoadState(ResourceLoadState pLoadState);
-	bool StartDownloadingList(const str& pPlatform, const str& pLevel, const str& pAvatar, int pOffset, int pLimit);
+	void SetLoadState(ResourceLoadState load_state);
+	bool StartDownloadingList(const str& platform, const str& level, const str& avatar, int offset, int limit);
 	const List& GetDownloadedList() const;
-	bool StartUploadingScore(const str& pPlatform, const str& pLevel, const str& pAvatar, const str& pName, int pScore);
+	bool StartUploadingScore(const str& platform, const str& level, const str& avatar, const str& name, int score);
 	int GetUploadedPlace() const;
 
-	bool ParseList(str& pData);	// For testing 'JSON parsing'...
-	bool ParseScore(str& pData);	// For testing 'JSON parsing'...
+	bool ParseList(str& data);	// For testing 'JSON parsing'...
+	bool ParseScore(str& data);	// For testing 'JSON parsing'...
 
 private:
 	void Reopen();
-	void AppendData(const str& pData);
+	void AppendData(const str& data);
 	bool CompleteList();
 	bool CompleteScore();
-	static void OnData(const happyhttp::Response* pResponse, void* pUserData, const unsigned char* pData, int pByteCount);
-	static void OnListComplete(const happyhttp::Response* pResponse, void* pUserData);
-	static void OnScoreComplete(const happyhttp::Response* pResponse, void* pUserData);
-	str Hypnotize(const str& pPlatform, const str& pLevel, const str& pAvatar, const str& pName, int pScore, int pTimeStamp);	// A sorta shuffle
+	static void OnData(const happyhttp::Response* response, void* user_data, const unsigned char* data, int byte_count);
+	static void OnListComplete(const happyhttp::Response* response, void* user_data);
+	static void OnScoreComplete(const happyhttp::Response* response, void* user_data);
+	str Hypnotize(const str& platform, const str& level, const str& avatar, const str& name, int score, int time_stamp);	// A sorta shuffle
 	void DownloadThreadEntry();
 	void UploadThreadEntry();
 
-	const str mServerHost;
-	const int mServerPort;
-	happyhttp::Connection* mConnection;
-	const str mGameName;
-	ResourceLoadState mLoadState;
-	List mDownloadedList;
-	int mUploadedPlace;
-	str mResponseData;
-	Action mAction;
-	MemberThread<HiscoreAgent> mConnectorThread;
-	str mConnectorPath;
-	str mConnectorBody;
-	str mConnectorHash;
+	const str server_host_;
+	const int server_port_;
+	happyhttp::Connection* connection_;
+	const str game_name_;
+	ResourceLoadState load_state_;
+	List downloaded_list_;
+	int uploaded_place_;
+	str response_data_;
+	Action action_;
+	MemberThread<HiscoreAgent> connector_thread_;
+	str connector_path_;
+	str connector_body_;
+	str connector_hash_;
 
 	void operator=(const HiscoreAgent&);
 

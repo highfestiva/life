@@ -1,11 +1,11 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Lepra/Include/LepraTypes.h"
+#include "../lepra/include/lepratypes.h"
 
-#define TRABANT_VERSION "0.9"
+#define kTrabantVersion "0.9"

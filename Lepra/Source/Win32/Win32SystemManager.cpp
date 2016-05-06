@@ -5,7 +5,7 @@
 
 
 #include "pch.h"
-#include "../../Include/LepraOS.h"
+#include "../../include/lepraos.h"
 #include <direct.h>
 #include <LM.h>
 #pragma warning(push)
@@ -14,14 +14,14 @@
 #pragma warning(pop)
 #include <ShellAPI.h>
 #include <ShlObj.h>
-#include "../../Include/DiskFile.h"
-#include "../../Include/JsonString.h"
-#include "../../Include/Lepra.h"
-#include "../../Include/Log.h"
-#include "../../Include/Path.h"
-#include "../../Include/String.h"
-#include "../../Include/SystemManager.h"
-#include "../../Include/Thread.h"
+#include "../../include/diskfile.h"
+#include "../../include/jsonstring.h"
+#include "../../include/lepra.h"
+#include "../../include/log.h"
+#include "../../include/path.h"
+#include "../../include/string.h"
+#include "../../include/systemmanager.h"
+#include "../../include/thread.h"
 
 
 
@@ -29,12 +29,11 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-LogDecorator gLog(LogType::GetLogger(LogType::GENERAL), typeid(SystemManager));
+LogDecorator gLog(LogType::GetLogger(LogType::kGeneral), typeid(SystemManager));
 
 
 
@@ -42,59 +41,49 @@ LogDecorator gLog(LogType::GetLogger(LogType::GENERAL), typeid(SystemManager));
 // Helper functions.
 //
 
-static bool IsHyperThreadingSupported()
-{
+static bool IsHyperThreadingSupported() {
 #ifdef LEPRA_MSVC_X86_32
-	int lSupported = 0;
-	__asm
-	{
+	int supported = 0;
+	__asm {
 		mov	eax, 1
 		cpuid
 		shr	edx,28
 		and	edx,1
-		mov	[lSupported],edx
+		mov	[supported],edx
 	}
-	return (lSupported != 0);
+	return (supported != 0);
 #else // <Unimplemented target>
 #error "Only LEPRA_MSVC_X86_32 supports hyper thread checking as of yet."
 #endif // LEPRA_MSVC_X86/<Unimplemented target>
 }
 
-BOOL CtrlCallback(DWORD fdwCtrlType)
-{
-	const bool lNewThread = Thread::QueryInitializeThread();
-	BOOL lHandled = FALSE;
-	switch (fdwCtrlType)
-	{
+BOOL CtrlCallback(DWORD fdwCtrlType) {
+	const bool new_thread = Thread::QueryInitializeThread();
+	BOOL handled = FALSE;
+	switch (fdwCtrlType) {
 		case CTRL_CLOSE_EVENT:
 		case CTRL_SHUTDOWN_EVENT:
 		case CTRL_C_EVENT:
-		case CTRL_BREAK_EVENT:
-		{
+		case CTRL_BREAK_EVENT: {
 			gLog.Info("Setting quit state on console break event.");
-			lHandled = TRUE;
+			handled = TRUE;
 			SystemManager::AddQuitRequest(+1);
-		}
-		break;
+		} break;
 		case CTRL_LOGOFF_EVENT:
-		default:
-		{
+		default: {
 			gLog.Info("Ignoring console break event (i.e. logoff or similar).");
-			lHandled = TRUE;
-		}
-		break;
+			handled = TRUE;
+		} break;
 	}
-	if (lNewThread)
-	{
+	if (new_thread) {
 		delete Thread::GetCurrentThread();
 	}
-	return (lHandled);
+	return (handled);
 }
 
 
 
-void SystemManager::Init()
-{
+void SystemManager::Init() {
 	::SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlCallback, TRUE);
 
 	Thread::InitializeMainThread();
@@ -103,206 +92,173 @@ void SystemManager::Init()
 	::timeBeginPeriod(1);
 }
 
-void SystemManager::Shutdown()
-{
+void SystemManager::Shutdown() {
 	::timeEndPeriod(1);
 }
 
-void SystemManager::ResetTerminal()
-{
+void SystemManager::ResetTerminal() {
 }
 
-str SystemManager::GetRootDirectory()
-{
+str SystemManager::GetRootDirectory() {
 	return (strutil::Format("%c:/", (char)(::_getdrive() + 'A' - 1)));
 }
 
-str SystemManager::GetCurrentDirectory()
-{
-	char lBuffer[2048];
-	lBuffer[0] = 0;
-	if (::_getcwd(lBuffer, sizeof(lBuffer)) == NULL)
-	{
-		mLog.Error("Failed to GetCurrentDirectory()");
+str SystemManager::GetCurrentDirectory() {
+	char buffer[2048];
+	buffer[0] = 0;
+	if (::_getcwd(buffer, sizeof(buffer)) == NULL) {
+		log_.Error("Failed to GetCurrentDirectory()");
 	}
 
-	str lString(str(lBuffer));
-	lString = strutil::ReplaceAll(lString, '\\', '/');
+	str s(str(buffer));
+	s = strutil::ReplaceAll(s, '\\', '/');
 
-	return (lString);
+	return (s);
 }
 
-str SystemManager::GetUserDirectory()
-{
-	char lHomeDir[2048];
-	if (FAILED(::SHGetFolderPath(0, CSIDL_PROFILE, NULL, 0, lHomeDir)))
-	{
-		mLog.Warning("Failed to GetUserDirectory()");
+str SystemManager::GetUserDirectory() {
+	char home_dir[2048];
+	if (FAILED(::SHGetFolderPath(0, CSIDL_PROFILE, NULL, 0, home_dir))) {
+		log_.Warning("Failed to GetUserDirectory()");
 	}
-	str lString(lHomeDir);
-	lString = strutil::ReplaceAll(lString, '\\', '/');
-	return lString;
+	str s(home_dir);
+	s = strutil::ReplaceAll(s, '\\', '/');
+	return s;
 }
 
-str SystemManager::GetDocumentsDirectory()
-{
-	char lDocsDir[2048];
-	if (FAILED(::SHGetFolderPath(0, CSIDL_MYDOCUMENTS, NULL, 0, lDocsDir)))
-	{
-		mLog.Warning("Failed to GetDocumentsDirectory()");
+str SystemManager::GetDocumentsDirectory() {
+	char docs_dir[2048];
+	if (FAILED(::SHGetFolderPath(0, CSIDL_MYDOCUMENTS, NULL, 0, docs_dir))) {
+		log_.Warning("Failed to GetDocumentsDirectory()");
 	}
-	str lString(lDocsDir);
-	lString = strutil::ReplaceAll(lString, '\\', '/');
-	return lString;
+	str s(docs_dir);
+	s = strutil::ReplaceAll(s, '\\', '/');
+	return s;
 }
 
-str SystemManager::GetIoDirectory(const str& pAppName)
-{
-	char lAppDir[2048];
-	if (FAILED(::SHGetFolderPath(0, CSIDL_APPDATA, NULL, 0, lAppDir)))
-	{
-		mLog.Warning("Failed to GetIoDirectory()");
+str SystemManager::GetIoDirectory(const str& app_name) {
+	char app_dir[2048];
+	if (FAILED(::SHGetFolderPath(0, CSIDL_APPDATA, NULL, 0, app_dir))) {
+		log_.Warning("Failed to GetIoDirectory()");
 	}
-	str lIoDir(lAppDir);
-	lIoDir = strutil::ReplaceAll(lIoDir, '\\', '/');
-	lIoDir = Path::JoinPath(lIoDir, pAppName, "");
-	if (!DiskFile::PathExists(lIoDir))
-	{
-		DiskFile::CreateDir(lIoDir);
+	str io_dir(app_dir);
+	io_dir = strutil::ReplaceAll(io_dir, '\\', '/');
+	io_dir = Path::JoinPath(io_dir, app_name, "");
+	if (!DiskFile::PathExists(io_dir)) {
+		DiskFile::CreateDir(io_dir);
 	}
-	return (lIoDir);
+	return (io_dir);
 }
 
-str SystemManager::GetDataDirectoryFromPath(const str& pArgv0)
-{
-	pArgv0;
+str SystemManager::GetDataDirectoryFromPath(const str& argv0) {
+	argv0;
 	return "Data/";
 }
 
 
 
-str SystemManager::GetLoginName()
-{
-	wchar_t lLoginName[128];
-	DWORD lLength = sizeof(lLoginName);
-	::GetUserNameW(lLoginName, &lLength);
-	return strutil::Encode(lLoginName);
+str SystemManager::GetLoginName() {
+	wchar_t login_name[128];
+	DWORD length = sizeof(login_name);
+	::GetUserNameW(login_name, &length);
+	return strutil::Encode(login_name);
 }
 
-str SystemManager::QueryFullUserName()
-{
-	str lFullName(GetLoginName());
-	LPBYTE lDomainControllerName = 0;
-	bool lOk = (::NetGetDCName(0, 0, &lDomainControllerName) == NERR_Success);
-	struct _USER_INFO_2* lUserInfo;
-	//if (lOk)
+str SystemManager::QueryFullUserName() {
+	str full_name(GetLoginName());
+	LPBYTE domain_controller_name = 0;
+	bool ok = (::NetGetDCName(0, 0, &domain_controller_name) == NERR_Success);
+	struct _USER_INFO_2* user_info;
+	//if (ok)
 	{
-		wstr lUnicodeLoginName = wstrutil::Encode(lFullName).c_str();
-		lOk = (::NetUserGetInfo((LPWSTR)lDomainControllerName, lUnicodeLoginName.c_str(), 2, (LPBYTE*)&lUserInfo) == NERR_Success);
-		if (lOk)
-		{
-			if (lUserInfo->usri2_full_name[0])
-			{
-				lFullName = lUserInfo->usri2_full_name;
+		wstr unicode_login_name = wstrutil::Encode(full_name).c_str();
+		ok = (::NetUserGetInfo((LPWSTR)domain_controller_name, unicode_login_name.c_str(), 2, (LPBYTE*)&user_info) == NERR_Success);
+		if (ok) {
+			if (user_info->usri2_full_name[0]) {
+				full_name = user_info->usri2_full_name;
 			}
-			::NetApiBufferFree(lUserInfo);
+			::NetApiBufferFree(user_info);
 		}
 	}
-	if (lDomainControllerName)
-	{
-		::NetApiBufferFree(lDomainControllerName);
+	if (domain_controller_name) {
+		::NetApiBufferFree(domain_controller_name);
 	}
-	return (lFullName);
+	return (full_name);
 }
 
-void SystemManager::WebBrowseTo(const str& pUrl)
-{
-	::ShellExecute(0, "open", pUrl.c_str(), 0, 0, SW_SHOWDEFAULT);
+void SystemManager::WebBrowseTo(const str& url) {
+	::ShellExecute(0, "open", url.c_str(), 0, 0, SW_SHOWDEFAULT);
 }
 
-void SystemManager::EmailTo(const str& pTo, const str& pSubject, const str& pBody)
-{
-	const str lUrlSubject = JsonString::UrlEncode(pSubject);
-	const str lUrlBody = JsonString::UrlEncode(pBody);
-	str lUrl = "mailto:" + pTo + "?subject=" + lUrlSubject + "&body=" + lUrlBody;
-	::ShellExecute(0, "open", lUrl.c_str(), 0, 0, SW_SHOWDEFAULT);
+void SystemManager::EmailTo(const str& to, const str& subject, const str& body) {
+	const str url_subject = JsonString::UrlEncode(subject);
+	const str url_body = JsonString::UrlEncode(body);
+	str _url = "mailto:" + to + "?subject=" + url_subject + "&body=" + url_body;
+	::ShellExecute(0, "open", _url.c_str(), 0, 0, SW_SHOWDEFAULT);
 }
 
-str SystemManager::GetHwName()
-{
+str SystemManager::GetHwName() {
 	return "PC";
 }
 
-unsigned SystemManager::GetLogicalCpuCount()
-{
-	unsigned lLogicalCpuPerPhysicalCpu = 1;
-	if (IsHyperThreadingSupported())
-	{
-		__asm
-		{
+unsigned SystemManager::GetLogicalCpuCount() {
+	unsigned logical_cpu_per_physical_cpu = 1;
+	if (IsHyperThreadingSupported()) {
+		__asm {
 			xor	ebx,ebx
 			mov	eax, 1
 			cpuid
 			shr	ebx,16
 			and	ebx,0xFF
-			mov	[lLogicalCpuPerPhysicalCpu],ebx
+			mov	[logical_cpu_per_physical_cpu],ebx
 		}
 	}
-	return (lLogicalCpuPerPhysicalCpu);
+	return (logical_cpu_per_physical_cpu);
 }
 
-unsigned SystemManager::GetPhysicalCpuCount()
-{
-	SYSTEM_INFO lInfo;
-	::GetSystemInfo(&lInfo);
-	return (lInfo.dwNumberOfProcessors);
+unsigned SystemManager::GetPhysicalCpuCount() {
+	SYSTEM_INFO info;
+	::GetSystemInfo(&info);
+	return (info.dwNumberOfProcessors);
 }
 
-unsigned SystemManager::GetCoreCount()
-{
-	unsigned lCpuCoreCountPerPhysicalProcessor = 1;
-	if (IsHyperThreadingSupported())
-	{
-		__asm
-		{
+unsigned SystemManager::GetCoreCount() {
+	unsigned cpu_core_count_per_physical_processor = 1;
+	if (IsHyperThreadingSupported()) {
+		__asm {
 			xor	ecx,ecx
 			mov	eax,0x80000008
 			cpuid
 			and	ecx,0xFF
 			inc	ecx
-			mov	[lCpuCoreCountPerPhysicalProcessor],ecx
+			mov	[cpu_core_count_per_physical_processor],ecx
 		}
 	}
-	return (lCpuCoreCountPerPhysicalProcessor);
+	return (cpu_core_count_per_physical_processor);
 }
 
-str SystemManager::GetCpuName()
-{
-	char lCpuName[13];
-	__asm
-	{
+str SystemManager::GetCpuName() {
+	char cpu_name[13];
+	__asm {
 		pusha
-		lea	esi,lCpuName	// esi = lCpuName
+		lea	esi,cpu_name	// esi = cpu_name
 		xor	eax,eax		// eax = 0
 		cpuid			// Stores the cpu name into ebx, edx and ecx.
-		mov	[esi],ebx	// Copy bytes to lCpuName.
+		mov	[esi],ebx	// Copy bytes to cpu_name.
 		mov	[esi+4],edx
 		mov	[esi+8],ecx
 		popa
 	}
-	lCpuName[12] = 0;
-	return (str(lCpuName));
+	cpu_name[12] = 0;
+	return (str(cpu_name));
 }
 
-str SystemManager::GetOsName()
-{
-	OSVERSIONINFO lOsVer;
-	lOsVer.dwOSVersionInfoSize = sizeof(lOsVer);
+str SystemManager::GetOsName() {
+	OSVERSIONINFO os_ver;
+	os_ver.dwOSVersionInfoSize = sizeof(os_ver);
 
-	if (::GetVersionEx(&lOsVer))
-	{
-		switch(lOsVer.dwPlatformId)
-		{
+	if (::GetVersionEx(&os_ver)) {
+		switch(os_ver.dwPlatformId) {
 			case VER_PLATFORM_WIN32_NT:
 				return "Windows NT";
 			case VER_PLATFORM_WIN32_WINDOWS:
@@ -312,45 +268,40 @@ str SystemManager::GetOsName()
 	return "Windows";
 }
 
-uint64 SystemManager::GetAmountRam()
-{
-	MEMORYSTATUS lMemStatus;
-	lMemStatus.dwLength = sizeof(lMemStatus);
+uint64 SystemManager::GetAmountRam() {
+	MEMORYSTATUS mem_status;
+	mem_status.dwLength = sizeof(mem_status);
 
-	::GlobalMemoryStatus(&lMemStatus);
-	return (uint64)lMemStatus.dwTotalPhys;
+	::GlobalMemoryStatus(&mem_status);
+	return (uint64)mem_status.dwTotalPhys;
 }
 
-uint64 SystemManager::GetAvailRam()
-{
-	MEMORYSTATUS lMemStatus;
-	lMemStatus.dwLength = sizeof(lMemStatus);
+uint64 SystemManager::GetAvailRam() {
+	MEMORYSTATUS mem_status;
+	mem_status.dwLength = sizeof(mem_status);
 
-	::GlobalMemoryStatus(&lMemStatus);
-	return (uint64)lMemStatus.dwAvailPhys;
+	::GlobalMemoryStatus(&mem_status);
+	return (uint64)mem_status.dwAvailPhys;
 }
 
-uint64 SystemManager::GetAmountVirtualMemory()
-{
-	MEMORYSTATUS lMemStatus;
-	lMemStatus.dwLength = sizeof(lMemStatus);
+uint64 SystemManager::GetAmountVirtualMemory() {
+	MEMORYSTATUS mem_status;
+	mem_status.dwLength = sizeof(mem_status);
 
-	::GlobalMemoryStatus(&lMemStatus);
-	return (uint64)lMemStatus.dwTotalVirtual;
+	::GlobalMemoryStatus(&mem_status);
+	return (uint64)mem_status.dwTotalVirtual;
 }
 
-uint64 SystemManager::GetAvailVirtualMemory()
-{
-	MEMORYSTATUS lMemStatus;
-	lMemStatus.dwLength = sizeof(lMemStatus);
+uint64 SystemManager::GetAvailVirtualMemory() {
+	MEMORYSTATUS mem_status;
+	mem_status.dwLength = sizeof(mem_status);
 
-	::GlobalMemoryStatus(&lMemStatus);
-	return (uint64)lMemStatus.dwAvailVirtual;
+	::GlobalMemoryStatus(&mem_status);
+	return (uint64)mem_status.dwAvailVirtual;
 }
 
-void SystemManager::ExitProcess(int pExitCode)
-{
-	::ExitProcess(pExitCode);
+void SystemManager::ExitProcess(int exit_code) {
+	::ExitProcess(exit_code);
 }
 
 

@@ -33,7 +33,7 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../lepra/include/lepratarget.h"
 #ifdef LEPRA_IOS
 #import "CYRLayoutManager.h"
 
@@ -44,10 +44,10 @@ static CGFloat kMinimumGutterWidth = 18.f;
 @interface CYRLayoutManager ()
 
 @property (nonatomic, assign) CGFloat gutterWidth;
-@property (nonatomic, assign) UIEdgeInsets lineAreaInset;
+@property (nonatomic, assign) UIEdgeInsets area_inset;
 
-@property (nonatomic) NSUInteger lastParaLocation;
-@property (nonatomic) NSUInteger lastParaNumber;
+@property (nonatomic) NSUInteger para_location;
+@property (nonatomic) NSUInteger para_number;
 
 @end
 
@@ -55,60 +55,53 @@ static CGFloat kMinimumGutterWidth = 18.f;
 
 #pragma mark - Initialization & Setup
 
-- (instancetype)init
-{
+- (instancetype)init {
     self = [super init];
-    
-    if (self)
-    {
+
+    if (self) {
         [self _commonSetup];
     }
-    
+
     return self;
 }
 
-- (instancetype)initWithCoder:(NSCoder *)aDecoder
-{
+- (instancetype)initWithCoder:(NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
-    
-    if (self)
-    {
+
+    if (self) {
         [self _commonSetup];
     }
-    
+
     return self;
 }
 
-- (void)_commonSetup
-{
+- (void)_commonSetup {
     self.gutterWidth = kMinimumGutterWidth;
-    self.selectedRange = NSMakeRange(0, 0);
-    
-    self.lineAreaInset = UIEdgeInsetsMake(0, 2, 0, 1);
-    self.lineNumberColor = [UIColor grayColor];
-    self.lineNumberFont = [UIFont systemFontOfSize:10.0f];
-    self.selectedLineNumberColor = [UIColor colorWithWhite:0.9 alpha:1];
+    self.selectedRange_ = NSMakeRange(0, 0);
+
+    self.area_inset = UIEdgeInsetsMake(0, 2, 0, 1);
+    self.number_color = [UIColor grayColor];
+    self.number_font = [UIFont systemFontOfSize:10.0f];
+    self.selectedLineNumberColor_ = [UIColor colorWithWhite:0.9 alpha:1];
 }
 
 
 #pragma mark - Convenience
 
-- (CGRect)paragraphRectForRange:(NSRange)range
-{
+- (CGRect)paragraphRectForRange:(NSRange)range {
     range = [self.textStorage.string paragraphRangeForRange:range];
     range = [self glyphRangeForCharacterRange:range actualCharacterRange:NULL];
-    
-    CGRect startRect = [self lineFragmentRectForGlyphAtIndex:range.location effectiveRange:NULL];
+
+    CGRect rect_ = [self lineFragmentRectForGlyphAtIndex:range.location effectiveRange:NULL];
     CGRect endRect = [self lineFragmentRectForGlyphAtIndex:range.location + range.length - 1 effectiveRange:NULL];
-    
-    CGRect paragraphRectForRange = CGRectUnion(startRect, endRect);
+
+    CGRect paragraphRectForRange = CGRectUnion(rect_, endRect);
     paragraphRectForRange = CGRectOffset(paragraphRectForRange, _gutterWidth, 1);
-    
+
     return paragraphRectForRange;
 }
 
-- (NSUInteger) _paraNumberForRange:(NSRange) charRange
-{
+- (NSUInteger) _paraNumberForRange:(NSRange) charRange {
     //  NSString does not provide a means of efficiently determining the paragraph number of a range of text.  This code
     //  attempts to optimize what would normally be a series linear searches by keeping track of the last paragraph number
     //  found and uses that as the starting point for next paragraph number search.  This works (mostly) because we
@@ -118,18 +111,17 @@ static CGFloat kMinimumGutterWidth = 18.f;
     //
     //  This all falls down when the user edits the text, and can potentially invalidate the cached paragraph number which
     //  causes a (potentially lengthy) search from the beginning of the string.
-    
-    if (charRange.location == self.lastParaLocation)
-        return self.lastParaNumber;
-    else if (charRange.location < self.lastParaLocation)
-    {
+
+    if (charRange.location == self.para_location)
+        return self.para_number;
+    else if (charRange.location < self.para_location) {
         //  We need to look backwards from the last known paragraph for the new paragraph range.  This generally happens
         //  when the text in the UITextView scrolls downward, revaling paragraphs before/above the ones previously drawn.
-        
+
         NSString* s = self.textStorage.string;
-        __block NSUInteger paraNumber = self.lastParaNumber;
-        
-        [s enumerateSubstringsInRange:NSMakeRange(charRange.location, self.lastParaLocation - charRange.location)
+        __block NSUInteger number = self.para_number;
+
+        [s enumerateSubstringsInRange:NSMakeRange(charRange.location, self.para_location - charRange.location)
                               options:NSStringEnumerationByParagraphs |
          NSStringEnumerationSubstringNotRequired |
          NSStringEnumerationReverse
@@ -137,89 +129,83 @@ static CGFloat kMinimumGutterWidth = 18.f;
                                if (enclosingRange.location <= charRange.location) {
                                    *stop = YES;
                                }
-                               --paraNumber;
+                               --number;
                            }];
-        
-        self.lastParaLocation = charRange.location;
-        self.lastParaNumber = paraNumber;
-        
-        return paraNumber;
-    }
-    else
-    {
+
+        self.para_location = charRange.location;
+        self.para_number = number;
+
+        return number;
+    } else {
         //  We need to look forward from the last known paragraph for the new paragraph range.  This generally happens
         //  when the text in the UITextView scrolls upwards, revealing paragraphs that follow the ones previously drawn.
-        
+
         NSString* s = self.textStorage.string;
-        __block NSUInteger paraNumber = self.lastParaNumber;
-        
-        [s enumerateSubstringsInRange:NSMakeRange(self.lastParaLocation, charRange.location - self.lastParaLocation)
+        __block NSUInteger number = self.para_number;
+
+        [s enumerateSubstringsInRange:NSMakeRange(self.para_location, charRange.location - self.para_location)
                               options:NSStringEnumerationByParagraphs | NSStringEnumerationSubstringNotRequired
                            usingBlock:^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop){
                                if (enclosingRange.location >= charRange.location) {
                                    *stop = YES;
                                }
-                               ++paraNumber;
+                               ++number;
                            }];
-        
-        self.lastParaLocation = charRange.location;
-        self.lastParaNumber = paraNumber;
 
-        return paraNumber;
+        self.para_location = charRange.location;
+        self.para_number = number;
+
+        return number;
     }
 }
 
 
 #pragma mark - Layouting
 
-- (void)processEditingForTextStorage:(NSTextStorage *)textStorage edited:(NSTextStorageEditActions)editMask range:(NSRange)newCharRange changeInLength:(NSInteger)delta invalidatedRange:(NSRange)invalidatedCharRange
-{
+- (void)processEditingForTextStorage:(NSTextStorage *)textStorage edited:(NSTextStorageEditActions)editMask range:(NSRange)newCharRange changeInLength:(NSInteger)delta invalidatedRange:(NSRange)invalidatedCharRange {
     [super processEditingForTextStorage:textStorage edited:editMask range:newCharRange changeInLength:delta invalidatedRange:invalidatedCharRange];
-    
-    if (invalidatedCharRange.location < self.lastParaLocation)
-    {
+
+    if (invalidatedCharRange.location < self.para_location) {
         //  When the backing store is edited ahead the cached paragraph location, invalidate the cache and force a complete
         //  recalculation.  We cannot be much smarter than this because we don't know how many paragraphs have been deleted
         //  since the text has already been removed from the backing store.
-        self.lastParaLocation = 0;
-        self.lastParaNumber = 0;
+        self.para_location = 0;
+        self.para_number = 0;
     }
 }
 
 
 #pragma mark - Drawing
 
-- (void) drawBackgroundForGlyphRange:(NSRange)glyphsToShow atPoint:(CGPoint)origin
-{
+- (void) drawBackgroundForGlyphRange:(NSRange)glyphsToShow atPoint:(CGPoint)origin {
     [super drawBackgroundForGlyphRange:glyphsToShow atPoint:origin];
 
     //  Draw line numbers.  Note that the background for line number gutter is drawn by the LineNumberTextView class.
     NSDictionary* atts = @{NSFontAttributeName : _lineNumberFont ,
                            NSForegroundColorAttributeName : _lineNumberColor};
-    
+
     [self enumerateLineFragmentsForGlyphRange:glyphsToShow
                                    usingBlock:^(CGRect rect, CGRect usedRect, NSTextContainer *textContainer, NSRange glyphRange, BOOL *stop) {
                                        NSRange charRange = [self characterRangeForGlyphRange:glyphRange actualGlyphRange:nil];
-                                       NSRange paraRange = [self.textStorage.string paragraphRangeForRange:charRange];
-                                       
-                                       BOOL showCursorRect = NSLocationInRange(_selectedRange.location, paraRange);
-                                       
-                                       if (showCursorRect)
-                                       {
+                                       NSRange _range = [self.textStorage.string paragraphRangeForRange:charRange];
+
+                                       BOOL cursor_rect_ = NSLocationInRange(_selectedRange.location, _range);
+
+                                       if (cursor_rect_) {
                                            CGContextRef context = UIGraphicsGetCurrentContext();
                                            CGRect cursorRect = CGRectMake(0, usedRect.origin.y + 1, _gutterWidth, usedRect.size.height);
-                                           
+
                                            CGContextSetFillColorWithColor(context, _selectedLineNumberColor.CGColor);
                                            CGContextFillRect(context, cursorRect);
                                        }
-                                       
+
                                        //   Only draw line numbers for the paragraph's first line fragment.  Subsequent fragments are wrapped portions of the paragraph and don't get the line number.
-                                       if (charRange.location == paraRange.location) {
+                                       if (charRange.location == _range.location) {
                                            CGRect gutterRect = CGRectOffset(CGRectMake(0, rect.origin.y, _gutterWidth, rect.size.height), origin.x, origin.y);
-                                           NSUInteger paraNumber = [self _paraNumberForRange:charRange];
-                                           NSString* ln = [NSString stringWithFormat:@"%ld", (unsigned long) paraNumber + 1];
+                                           NSUInteger number = [self _paraNumberForRange:charRange];
+                                           NSString* ln = [NSString stringWithFormat:@"%ld", (unsigned long) number + 1];
                                            CGSize size = [ln sizeWithAttributes:atts];
-                                           
+
                                            [ln drawInRect:CGRectOffset(gutterRect, CGRectGetWidth(gutterRect) - _lineAreaInset.right - size.width - _gutterWidth, (CGRectGetHeight(gutterRect) - size.height) / 2.0)
                                            withAttributes:atts];
                                        }

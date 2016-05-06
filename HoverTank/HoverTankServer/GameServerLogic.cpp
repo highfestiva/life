@@ -1,25 +1,22 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "GameServerLogic.h"
+#include "gameserverlogic.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-GameServerLogic::GameServerLogic()
-{
+GameServerLogic::GameServerLogic() {
 }
 
-GameServerLogic::~GameServerLogic()
-{
+GameServerLogic::~GameServerLogic() {
 }
 
 

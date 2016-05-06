@@ -1,24 +1,22 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../RaceScore.h"
+#include "../racescore.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 class GameUiManager;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -26,12 +24,11 @@ class ScreenPart;
 
 
 
-class UiRaceScore: public RaceScore
-{
+class UiRaceScore: public RaceScore {
 	typedef RaceScore Parent;
 public:
-	UiRaceScore(Cure::ContextObject* pContextObject, const str& pAttributeName, ScreenPart* pScreenPart,
-		UiCure::GameUiManager* pUiManager, const str& pClassResourceName);
+	UiRaceScore(cure::ContextObject* context_object, const str& attribute_name, ScreenPart* screen_part,
+		UiCure::GameUiManager* ui_manager, const str& class_resource_name);
 	virtual ~UiRaceScore();
 
 private:

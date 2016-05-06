@@ -5,88 +5,76 @@
 
 
 #include "pch.h"
-#include "../../Include/X11/UiX11Core.h"
-#include "../../../Lepra/Include/Log.h"
-#include "../../../Lepra/Include/SystemManager.h"
-#include "../../../Lepra/Include/Thread.h"
-#include "../../Include/X11/UiX11DisplayManager.h"
+#include "../../include/x11/uix11core.h"
+#include "../../../lepra/include/log.h"
+#include "../../../lepra/include/systemmanager.h"
+#include "../../../lepra/include/thread.h"
+#include "../../include/x11/uix11displaymanager.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-int UiMain(Lepra::Application& pApplication)
-{
-	pApplication.Init();
-	return pApplication.Run();
+int UiMain(lepra::Application& application) {
+	application.Init();
+	return application.Run();
 }
 
 
 
-void Core::Init()
-{
+void Core::Init() {
 	X11Core::Init();
 	SystemManager::ResetTerminal();
 }
 
-void Core::Shutdown()
-{
+void Core::Shutdown() {
 	X11Core::Shutdown();
 }
 
-void Core::ProcessMessages()
-{
+void Core::ProcessMessages() {
 	X11Core::ProcessMessages();
 }
 
 
 
-void X11Core::Init()
-{
-	mLock = new Lock();
+void X11Core::Init() {
+	lock_ = new Lock();
 }
 
-void X11Core::Shutdown()
-{
-	delete (mLock);
-	mLock = 0;
+void X11Core::Shutdown() {
+	delete (lock_);
+	lock_ = 0;
 }
 
-void X11Core::ProcessMessages()
-{
-	ScopeLock lLock(mLock);
-	for (WindowTable::Iterator x = mWindowTable.First(); x != mWindowTable.End(); ++x)
-	{
-		X11DisplayManager* lDisplayManager = x.GetObject();
-		lDisplayManager->ProcessMessages();
+void X11Core::ProcessMessages() {
+	ScopeLock lock(lock_);
+	for (WindowTable::Iterator x = window_table_.First(); x != window_table_.End(); ++x) {
+		X11DisplayManager* _display_manager = x.GetObject();
+		_display_manager->ProcessMessages();
 	}
 }
 
-void X11Core::AddDisplayManager(X11DisplayManager* pDisplayManager)
-{
-	ScopeLock lLock(mLock);
-	mWindowTable.Insert(pDisplayManager->GetWindow(), pDisplayManager);
+void X11Core::AddDisplayManager(X11DisplayManager* display_manager) {
+	ScopeLock lock(lock_);
+	window_table_.Insert(display_manager->GetWindow(), display_manager);
 }
 
-void X11Core::RemoveDisplayManager(X11DisplayManager* pDisplayManager)
-{
-	ScopeLock lLock(mLock);
-	mWindowTable.Remove(pDisplayManager->GetWindow());
+void X11Core::RemoveDisplayManager(X11DisplayManager* display_manager) {
+	ScopeLock lock(lock_);
+	window_table_.Remove(display_manager->GetWindow());
 }
 
-X11DisplayManager* X11Core::GetDisplayManager(Window pWindowHandle)
-{
-	ScopeLock lLock(mLock);
-	return (mWindowTable.FindObject(pWindowHandle));
+X11DisplayManager* X11Core::GetDisplayManager(Window window_handle) {
+	ScopeLock lock(lock_);
+	return (window_table_.FindObject(window_handle));
 }
 
 
 
-Lock* X11Core::mLock = 0;
-X11Core::WindowTable X11Core::mWindowTable;
+Lock* X11Core::lock_ = 0;
+X11Core::WindowTable X11Core::window_table_;
 
 
 

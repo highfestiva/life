@@ -8,18 +8,17 @@
 
 #include <math.h>
 #include <list>
-#include "../../ThirdParty/FastDelegate/FastDelegate.h"
-#include "../../Lepra/Include/String.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../../Lepra/Include/Transformation.h"
-#include "Tbc.h"
-#include "PortalManager.h"
+#include "../../thirdparty/FastDelegate/FastDelegate.h"
+#include "../../lepra/include/string.h"
+#include "../../lepra/include/vector3d.h"
+#include "../../lepra/include/transformation.h"
+#include "tbc.h"
+#include "portalmanager.h"
 
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
@@ -27,15 +26,13 @@ class BoneAnimator;
 
 
 
-class GeometryBase
-{
+class GeometryBase {
 public:
-	// UiTbc::Renderer implements this interface and removes the geometry
+	// uitbc::Renderer implements this interface and removes the geometry
 	// if it is deleted.
-	class Listener
-	{
+	class Listener {
 	public:
-		virtual void DeletingGeometry(GeometryBase* pGeometry) = 0;
+		virtual void DeletingGeometry(GeometryBase* geometry) = 0;
 	};
 
 	typedef fastdelegate::FastDelegate0<bool> PreRenderCallback;
@@ -44,112 +41,106 @@ public:
 	friend class BasicMeshCreator;
 	friend class PortalManager;
 
-	class Edge
-	{
+	class Edge {
 	public:
-		enum
-		{
-			INVALID_INDEX = -1,
+		enum {
+			kInvalidIndex = -1,
 		};
 
 		Edge();
-		Edge(const Edge& pEdge);
-		Edge(const Edge* pEdge);
+		Edge(const Edge& edge);
+		Edge(const Edge* edge);
 		virtual ~Edge();
 
 		void ClearAll();
 
-		void Copy(const Edge* pEdge);
+		void Copy(const Edge* edge);
 
-		void AddTriangle(int pTriangleIndex);
-		void RemoveTriangle(int pTriangleIndex);
+		void AddTriangle(int triangle_index);
+		void RemoveTriangle(int triangle_index);
 
-		bool HaveTriangle(int pTriangleIndex);
-		bool HaveTriangle(int pTriangleIndex, int& pTrianglePos);
+		bool HaveTriangle(int triangle_index);
+		bool HaveTriangle(int triangle_index, int& triangle_pos);
 
-		bool IsSameEdge(int pVertexIndex1, int pVertexIndex2);
-		bool IsSameEdge(int pVertexIndex1, 
-				int pVertexIndex2,
-				int* pTriangles, 
-				int pNumTriangles);
+		bool IsSameEdge(int vertex_index1, int vertex_index2);
+		bool IsSameEdge(int vertex_index1,
+				int vertex_index2,
+				int* triangles,
+				int num_triangles);
 
-		//int* mTriangle;
-		int mTriangle[2];
-		int mVertex[2];
-		int mTriangleCount;
+		//int* triangle_;
+		int triangle_[2];
+		int vertex_[2];
+		int triangle_count_;
 		//int mTriangleElementCount;
 
-		Edge* mReserved;
+		Edge* reserved_;
 	};
 
 	// Buffer object usage hints. These will only have effect
 	// when rendering the geometry using hardware acceleration
 	// APIs. If using a software renderer these won't make any
 	// difference.
-	enum GeometryVolatility
-	{
-		GEOM_STATIC = 1,	// Geometry that will never change.
-		GEOM_SEMI_STATIC,	// Geometry that will never change.
-		GEOM_DYNAMIC,		// Geometry that will change occasionally (like terrain).
-		GEOM_VOLATILE,		// Geometry that will change between every frame.
+	enum GeometryVolatility {
+		kGeomStatic = 1,	// Geometry that will never change.
+		kGeomSemiStatic,	// Geometry that will never change.
+		kGeomDynamic,		// Geometry that will change occasionally (like terrain).
+		kGeomVolatile,		// Geometry that will change between every frame.
 	};
 
 	// Vertex color format.
-	enum ColorFormat
-	{
-		COLOR_RGB = 1,
-		COLOR_RGBA,
+	enum ColorFormat {
+		kColorRgb = 1,
+		kColorRgba,
 	};
 
-	enum PrimitiveType
-	{
-		TRIANGLES = 1,
-		TRIANGLE_STRIP,
-		LINES,
-		LINE_LOOP,
-		QUADS,
+	enum PrimitiveType {
+		kTriangles = 1,
+		kTriangleStrip,
+		kLines,
+		kLineLoop,
+		kQuads,
 	};
 
-	class BasicMaterialSettings
-	{
+	class BasicMaterialSettings {
 	public:
 		BasicMaterialSettings();
-		BasicMaterialSettings(const vec3& pAmbient, const vec3& pDiffuse,
-			const vec3& pSpecular, float pShininess,
-			float pAlpha, bool pSmooth);
-		void SetColor(float pRed, float pGreen, float pBlue);
-		void Set(const vec3& pAmbient, const vec3& pDiffuse,
-			const vec3& pSpecular, float pShininess,
-			float pAlpha, bool pSmooth);
+		BasicMaterialSettings(const vec3& ambient, const vec3& diffuse,
+			const vec3& specular, float shininess,
+			float alpha, bool smooth);
+		void SetColor(float red, float green, float blue);
+		void Set(const vec3& ambient, const vec3& diffuse,
+			const vec3& specular, float shininess,
+			float alpha, bool smooth);
 
-		vec3 mAmbient;
-		vec3 mDiffuse;
-		vec3 mSpecular;
-		float mShininess;	// Specular "exponent".
-		float mAlpha;	// Used on blended (and transparent? materials.
-		bool mSmooth;	// Smooth shaded or flat shaded?
+		vec3 ambient_;
+		vec3 diffuse_;
+		vec3 specular_;
+		float shininess_;	// Specular "exponent".
+		float alpha_;	// Used on blended (and transparent? materials.
+		bool smooth_;	// Smooth shaded or flat shaded?
 	};
 
 	GeometryBase();
 	virtual ~GeometryBase();
-	
-	void AddListener(Listener* pListener);
-	void RemoveListener(Listener* pListener);
+
+	void AddListener(Listener* listener);
+	void RemoveListener(Listener* listener);
 	const PreRenderCallback& GetPreRenderCallback() const;
-	void SetPreRenderCallback(const PreRenderCallback& pCallback);
+	void SetPreRenderCallback(const PreRenderCallback& callback);
 	const PostRenderCallback& GetPostRenderCallback() const;
-	void SetPostRenderCallback(const PostRenderCallback& pCallback);
+	void SetPostRenderCallback(const PostRenderCallback& callback);
 
 	virtual bool IsGeometryReference();
 	void SetExcludeCulling();
 	bool IsExcludeCulling() const;
 	float GetScale() const;
-	void SetScale(float pScale);
+	void SetScale(float scale);
 
 	virtual GeometryVolatility GetGeometryVolatility() const = 0;
-	virtual void SetGeometryVolatility(GeometryVolatility pVolatility) = 0;
+	virtual void SetGeometryVolatility(GeometryVolatility volatility) = 0;
 
-	void SetPrimitiveType(PrimitiveType pType);
+	void SetPrimitiveType(PrimitiveType type);
 	PrimitiveType GetPrimitiveType() const;
 
 	virtual unsigned int GetMaxVertexCount() const = 0;
@@ -160,18 +151,18 @@ public:
 	        unsigned int GetTriangleCount() const;
 	virtual unsigned int GetIndexCount() const = 0;
 	virtual unsigned int GetUVSetCount() const = 0;
-	void SetUVCountPerVertex(int pUVCountPerVertex);
+	void SetUVCountPerVertex(int uv_count_per_vertex);
 	int GetUVCountPerVertex() const;
 	unsigned int GetEdgeCount() const;
 
 	// Sets the UV-set to use when generating tangent- and bitangent vectors.
 	// Default is 0. Tangents and bitangents are used with bump/normal mapping.
-	void SetTangentsUVSet(unsigned int pUVSet);
+	void SetTangentsUVSet(unsigned int uv_set);
 
 	virtual float*         GetVertexData() const                  = 0;
-	virtual float*         GetUVData(unsigned int pUVSet) const   = 0;
+	virtual float*         GetUVData(unsigned int uv_set) const   = 0;
 	virtual vtx_idx_t*     GetIndexData() const                   = 0;
-	virtual Lepra::uint8*  GetColorData() const                   = 0;
+	virtual lepra::uint8*  GetColorData() const                   = 0;
 
 	virtual float* GetNormalData() const;
 	float*         GetSurfaceNormalData() const;
@@ -179,10 +170,10 @@ public:
 	float*         GetTangentData() const;	// Used with bump/normal mapping.
 	float*         GetBitangentData() const;	// Used with bump/normal mapping.
 
-	// 0 <= pTriangle < GetNumTriangles().
-	// Given the triangle index (pTriangle), the function returns the three
-	// indices by setting the values in pIndices.
-	void GetTriangleIndices(int pTriangle, Lepra::uint32 pIndices[4]) const;
+	// 0 <= triangle < GetNumTriangles().
+	// Given the triangle index (triangle), the function returns the three
+	// indices by setting the values in indices.
+	void GetTriangleIndices(int triangle, lepra::uint32 indices[4]) const;
 
 	// Deletes the corresponding arrays and cleans stuff up.
 	virtual void ClearVertexNormalData();
@@ -214,10 +205,10 @@ public:
 	bool GetColorDataChanged() const;
 	bool GetIndexDataChanged() const;
 
-	void SetVertexDataChanged(bool pChanged);
-	void SetUVDataChanged(bool pChanged);
-	void SetColorDataChanged(bool pChanged);
-	void SetIndexDataChanged(bool pChanged);
+	void SetVertexDataChanged(bool changed);
+	void SetUVDataChanged(bool changed);
+	void SetColorDataChanged(bool changed);
+	void SetIndexDataChanged(bool changed);
 
 	void SetVertexNormalsValid();
 	void SetSurfaceNormalsValid();
@@ -228,40 +219,40 @@ public:
 	// by the renderer to associate some arbitrary data with the geometry.
 	// It would be better design to remove these functions and use a hash
 	// table instead to do the association, but that is not as efficient.
-	void SetRendererData(void* pRendererData);
+	void SetRendererData(void* renderer_data);
 	inline void* GetRendererData() const;
 
 	size_t GetExtraData() const;
-	void SetExtraData(size_t pExtraData);
+	void SetExtraData(size_t extra_data);
 
-	void SetTransformation(const xform& pTransformation);
+	void SetTransformation(const xform& transformation);
 	const xform& GetBaseTransformation() const;
 	virtual const xform& GetTransformation();
 	bool GetTransformationChanged() const;
-	void SetTransformationChanged(bool pTransformationChanged);
+	void SetTransformationChanged(bool transformation_changed);
 	bool GetBigOrientationChanged() const;
-	void SetBigOrientationChanged(bool pOrientationChanged);
+	void SetBigOrientationChanged(bool orientation_changed);
 	const quat& GetLastBigOrientation() const;
 	float GetBigOrientationThreshold() const;
-	void SetBigOrientationThreshold(float pBigOrientationThreshold);
-	static void SetDefaultBigOrientationThreshold(float pBigOrientationThreshold);
+	void SetBigOrientationThreshold(float big_orientation_threshold);
+	static void SetDefaultBigOrientationThreshold(float big_orientation_threshold);
 
-	void SetLastFrameVisible(unsigned int pLastFrameVisible);
+	void SetLastFrameVisible(unsigned int last_frame_visible);
 	unsigned int GetLastFrameVisible() const;
-	void SetAlwaysVisible(bool pAlwaysVisible);
+	void SetAlwaysVisible(bool always_visible);
 	bool GetAlwaysVisible() const;
 
 	const BasicMaterialSettings& GetBasicMaterialSettings() const;
 	BasicMaterialSettings& GetBasicMaterialSettings();
-	void SetBasicMaterialSettings(const BasicMaterialSettings& pMatSettings);
+	void SetBasicMaterialSettings(const BasicMaterialSettings& mat_settings);
 
 	// Calling GetBoundingRadius() will recalculate the bounding radius if necessary.
 	float GetBoundingRadius();
 	float GetBoundingRadius() const;
 
-	// Sets the bounding radius. Once set, GetBoundingRadius() will never try to 
+	// Sets the bounding radius. Once set, GetBoundingRadius() will never try to
 	// recalculate the radius again.
-	void SetBoundingRadius(float pBoundingRadius);
+	void SetBoundingRadius(float bounding_radius);
 
 	// Explicitly recalculate the radius.
 	void CalculateBoundingRadius();
@@ -274,134 +265,132 @@ public:
 				// there is no concave angle between any two triangles.
 				// Will generate surface normals if needed.
 	bool IsTwoSided() const;
-	void SetTwoSided(bool pIsTwoSided);
+	void SetTwoSided(bool is_two_sided);
 	bool IsRecvNoShadows() const;
-	void SetRecvNoShadows(bool pRecvShadows);
+	void SetRecvNoShadows(bool recv_shadows);
 
 	// Debug functions.
 	bool VerifyIndexData();
 
 	// Functions used to handle UV-animations. Couldn't find any
 	// better place to put this code.
-	void SetUVAnimator(BoneAnimator* pUVAnimator);
+	void SetUVAnimator(BoneAnimator* uv_animator);
 	BoneAnimator* GetUVAnimator();
 	const xform& GetUVTransform() const;
 
-	void SetSurfaceNormalData(const float* pSurfaceNormalData);
-	void SetVertexNormalData(const float* pVertexNormalData, unsigned int pNumVertices);
-	void SetTangentAndBitangentData(const float* pTangentData, const float* pBitangentData, unsigned int pNumVertices);
-	virtual void SetIndexData(vtx_idx_t* pIndexData, unsigned pIndexCount, unsigned pMaxIndexCount);
+	void SetSurfaceNormalData(const float* surface_normal_data);
+	void SetVertexNormalData(const float* vertex_normal_data, unsigned int num_vertices);
+	void SetTangentAndBitangentData(const float* tangent_data, const float* bitangent_data, unsigned int num_vertices);
+	virtual void SetIndexData(vtx_idx_t* index_data, unsigned index_count, unsigned max_index_count);
 
-	void Copy(GeometryBase* pGeometry);
+	void Copy(GeometryBase* geometry);
 	void ClearAll();
 
-	void SetSolidVolumeCheckValid(bool pValid);
-	void SetSingleObjectCheckValid(bool pValid);
-	void SetConvexVolumeCheckValid(bool pValid);
+	void SetSolidVolumeCheckValid(bool valid);
+	void SetSingleObjectCheckValid(bool valid);
+	void SetConvexVolumeCheckValid(bool valid);
 
 	// Used by PortalManager.
-	void SetParentCell(PortalManager::Cell* pCell);
+	void SetParentCell(PortalManager::Cell* cell);
 	PortalManager::Cell* GetParentCell();
 
-	enum //Flags
-	{
-		BOUNDING_RADIUS_VALID		= (1 << 0),
-		BOUNDING_RADIUS_ALWAYS_VALID	= (1 << 1),
-		SURFACE_NORMALS_VALID		= (1 << 2),
-		VERTEX_NORMALS_VALID		= (1 << 3),
-		TANGENTS_VALID			= (1 << 4),
-		SOLID_VOLUME_VALID		= (1 << 5),
-		SINGLE_OBJECT_VALID		= (1 << 6),
-		CONVEX_VOLUME_VALID		= (1 << 7),
-		VALID_FLAGS_MASK		= CONVEX_VOLUME_VALID-1,
+	enum { //Flags
+		kBoundingRadiusValid		= (1 << 0),
+		kBoundingRadiusAlwaysValid	= (1 << 1),
+		kSurfaceNormalsValid		= (1 << 2),
+		kVertexNormalsValid		= (1 << 3),
+		kTangentsValid			= (1 << 4),
+		kSolidVolumeValid		= (1 << 5),
+		kSingleObjectValid		= (1 << 6),
+		kConvexVolumeValid		= (1 << 7),
+		kValidFlagsMask		= kConvexVolumeValid-1,
 
-		VERTEX_DATA_CHANGED		= (1 << 8),
-		UV_DATA_CHANGED			= (1 << 9),
-		COLOR_DATA_CHANGED		= (1 << 10),
-		INDEX_DATA_CHANGED		= (1 << 11),
-		IS_SOLID_VOLUME			= (1 << 12),
-		IS_SINGLE_OBJECT		= (1 << 13),
-		IS_CONVEX_VOLUME		= (1 << 14),
-		ALWAYS_VISIBLE			= (1 << 15),
-		TRANSFORMATION_CHANGED		= (1 << 16),
-		REF_TRANSFORMATION_CHANGED	= (1 << 17),
-		BIG_ORIENTATION_CHANGED		= (1 << 18),
-		EXCLUDE_CULLING			= (1 << 19),
-		IS_TWO_SIDED			= (1 << 20),
-		RECV_NO_SHADOWS			= (1 << 21),
-		CONTAINS_WIREFRAME		= (1 << 22),
+		kVertexDataChanged		= (1 << 8),
+		kUvDataChanged			= (1 << 9),
+		kColorDataChanged		= (1 << 10),
+		kIndexDataChanged		= (1 << 11),
+		kIsSolidVolume			= (1 << 12),
+		kIsSingleObject		= (1 << 13),
+		kIsConvexVolume		= (1 << 14),
+		kAlwaysVisible			= (1 << 15),
+		kTransformationChanged		= (1 << 16),
+		kRefTransformationChanged	= (1 << 17),
+		kBigOrientationChanged		= (1 << 18),
+		kExcludeCulling			= (1 << 19),
+		kIsTwoSided			= (1 << 20),
+		kRecvNoShadows			= (1 << 21),
+		kContainsWireframe		= (1 << 22),
 	};
 
-	void SetFlag(Lepra::uint32 pFlag, bool pValue);
-	void SetFlag(Lepra::uint32 pFlag);
-	void ClearFlag(Lepra::uint32 pFlag);
-	bool CheckFlag(Lepra::uint32 pFlag) const;
+	void SetFlag(lepra::uint32 pFlag, bool value);
+	void SetFlag(lepra::uint32 pFlag);
+	void ClearFlag(lepra::uint32 pFlag);
+	bool CheckFlag(lepra::uint32 pFlag) const;
 	uint32 GetFlags() const;
-	static void SetDefaultFlags(Lepra::uint32 pFlags);
+	static void SetDefaultFlags(lepra::uint32 flags);
 
 protected:
 	typedef std::list<Listener*> ListenerList;
 
-	Lepra::uint32 mFlags;
-	PrimitiveType mPrimitiveType;
+	lepra::uint32 flags_;
+	PrimitiveType primitive_type_;
 
-	BasicMaterialSettings mMaterialSettings;
+	BasicMaterialSettings material_settings_;
 
-	float mBoundingRadius;
-	float mScale;
+	float bounding_radius_;
+	float scale_;
 
 	// Surface normals are primarily used when generating
 	// the shadow volume (used to perform stencil shadows).
-	float* mSurfaceNormalData;
-	unsigned int mSurfaceNormalCount;
+	float* surface_normal_data_;
+	unsigned int surface_normal_count_;
 
-	float* mVertexNormalData;
+	float* vertex_normal_data_;
 
-	int mUVCountPerVertex;
-	Edge* mEdgeData;
-	unsigned int mEdgeCount;
+	int uv_count_per_vertex_;
+	Edge* edge_data_;
+	unsigned int edge_count_;
 
-	float* mTangentData;   // Contains (x, y, z) triplets for tangent vectors.
-	float* mBitangentData; // Contains (x, y, z) triplets for bitangent vectors.
-	unsigned int mTangentsUVSet;
+	float* tangent_data_;   // Contains (x, y, z) triplets for tangent vectors.
+	float* bitangent_data_; // Contains (x, y, z) triplets for bitangent vectors.
+	unsigned int tangents_uv_set_;
 
 	// Contains arbitrary data. This is used by Renderer and
 	// subclasses to store associated data.
-	void* mRendererData;
+	void* renderer_data_;
 
 	// The Cell pointer used by PortalManager. This is declared as void*
-	// to avoid including PortalManager.h. 
-	PortalManager::Cell* mParentCell;
+	// to avoid including PortalManager.h.
+	PortalManager::Cell* parent_cell_;
 
-	unsigned int mLastFrameVisible;
+	unsigned int last_frame_visible_;
 
-	xform mTransformation;
-	quat mBigOrientation;
+	xform transformation_;
+	quat big_orientation_;
 
-	BoneAnimator* mUVAnimator;
+	BoneAnimator* uv_animator_;
 
-	ListenerList mListenerList;
-	PreRenderCallback mPreRenderCallback;
-	PostRenderCallback mPostRenderCallback;
+	ListenerList listener_list_;
+	PreRenderCallback pre_render_callback_;
+	PostRenderCallback post_render_callback_;
 
-	size_t mExtraData;
+	size_t extra_data_;
 
-	float mBigOrientationThreshold;
+	float big_orientation_threshold_;
 
-	static Lepra::uint32 mDefaultFlags;
-	static float mDefaultBigOrientationThreshold;
+	static lepra::uint32 default_flags_;
+	static float default_big_orientation_threshold_;
 
 public:
-	str mName;
+	str name_;
 
 	logclass();
 };
 
 
 
-inline void* GeometryBase::GetRendererData() const
-{
-	return mRendererData;
+inline void* GeometryBase::GetRendererData() const {
+	return renderer_data_;
 }
 
 

@@ -5,381 +5,321 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiButton.h"
-#include "../../Include/GUI/UiDesktopWindow.h"
+#include "../../include/gui/uibutton.h"
+#include "../../include/gui/uidesktopwindow.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-Button::Button(const wstr& pText):
+Button::Button(const wstr& text):
 	Parent(),
-	mOnPress(0),
-	mOnRelease(0),
-	mOnClick(0),
-	mOnDrag(0),
-	mIconID(Painter::INVALID_IMAGEID),
-	mHighlightedIconId(Painter::INVALID_IMAGEID),
-	mDisabledIconId(Painter::INVALID_IMAGEID),
-	mIconAlignment(ICON_CENTER),
-	mText(),
-	mTextBackgColor(255, 255, 255),
-	mPressed(false),
-	mImageButton(false),
-	mState(PRESSED),
-	mExtraData(0)
-{
+	on_press_(0),
+	on_release_(0),
+	on_click_(0),
+	on_drag_(0),
+	icon_id_(Painter::kInvalidImageid),
+	highlighted_icon_id_(Painter::kInvalidImageid),
+	disabled_icon_id_(Painter::kInvalidImageid),
+	icon_alignment_(kIconCenter),
+	text_(),
+	text_backg_color_(255, 255, 255),
+	pressed_(false),
+	image_button_(false),
+	state_(kPressed),
+	extra_data_(0) {
 	SetBaseColor(GetColor());
 	Init();
-	SetText(pText);
-	SetName(strutil::Encode(pText));
+	SetText(text);
+	SetName(strutil::Encode(text));
 }
 
-Button::Button(const Color& pColor, const wstr& pText):
-	Parent(pColor),
-	mOnPress(0),
-	mOnRelease(0),
-	mOnClick(0),
-	mOnDrag(0),
-	mIconID(Painter::INVALID_IMAGEID),
-	mHighlightedIconId(Painter::INVALID_IMAGEID),
-	mDisabledIconId(Painter::INVALID_IMAGEID),
-	mIconAlignment(ICON_CENTER),
-	mText(pText),
-	mTextBackgColor(255, 255, 255),
-	mPressed(false),
-	mImageButton(false),
-	mState(PRESSED),
-	mExtraData(0)
-{
+Button::Button(const Color& color, const wstr& text):
+	Parent(color),
+	on_press_(0),
+	on_release_(0),
+	on_click_(0),
+	on_drag_(0),
+	icon_id_(Painter::kInvalidImageid),
+	highlighted_icon_id_(Painter::kInvalidImageid),
+	disabled_icon_id_(Painter::kInvalidImageid),
+	icon_alignment_(kIconCenter),
+	text_(text),
+	text_backg_color_(255, 255, 255),
+	pressed_(false),
+	image_button_(false),
+	state_(kPressed),
+	extra_data_(0) {
 	SetBaseColor(GetColor());
 	Init();
-	SetText(pText);
-	SetName(strutil::Encode(pText));
+	SetText(text);
+	SetName(strutil::Encode(text));
 }
 
-Button::Button(BorderComponent::BorderShadeFunc pShadeFunc, int pBorderWidth, const Color& pColor, const wstr& pText):
-	Parent((pShadeFunc == BorderComponent::LINEAR ? Parent::BORDER_LINEARSHADING : 0), pBorderWidth, pColor),
-	mOnPress(0),
-	mOnRelease(0),
-	mOnClick(0),
-	mOnDrag(0),
-	mIconID(Painter::INVALID_IMAGEID),
-	mHighlightedIconId(Painter::INVALID_IMAGEID),
-	mDisabledIconId(Painter::INVALID_IMAGEID),
-	mIconAlignment(ICON_CENTER),
-	mText(pText),
-	mTextBackgColor(255, 255, 255),
-	mPressed(false),
-	mImageButton(false),
-	mState(PRESSED),
-	mExtraData(0)
-{
+Button::Button(BorderComponent::BorderShadeFunc shade_func, int border_width, const Color& color, const wstr& text):
+	Parent((shade_func == BorderComponent::kLinear ? Parent::kBorderLinearshading : 0), border_width, color),
+	on_press_(0),
+	on_release_(0),
+	on_click_(0),
+	on_drag_(0),
+	icon_id_(Painter::kInvalidImageid),
+	highlighted_icon_id_(Painter::kInvalidImageid),
+	disabled_icon_id_(Painter::kInvalidImageid),
+	icon_alignment_(kIconCenter),
+	text_(text),
+	text_backg_color_(255, 255, 255),
+	pressed_(false),
+	image_button_(false),
+	state_(kPressed),
+	extra_data_(0) {
 	SetBaseColor(GetColor());
 	Init();
-	SetText(pText);
-	SetName(strutil::Encode(pText));
+	SetText(text);
+	SetName(strutil::Encode(text));
 }
 
-Button::Button(Painter::ImageID pReleasedImageID, Painter::ImageID pPressedImageID,
-	Painter::ImageID pReleasedActiveImageID,	// Mouse over.
-	Painter::ImageID pPressedActiveImageID, Painter::ImageID pReleasingImageID,
-	Painter::ImageID pPressingImageID, const wstr& pText):
-	Parent(pReleasedImageID),
-	mOnPress(0),
-	mOnRelease(0),
-	mOnClick(0),
-	mOnDrag(0),
-	mReleasedImageID(pReleasedImageID),
-	mPressedImageID(pPressedImageID),
-	mReleasedActiveImageID(pReleasedActiveImageID),
-	mPressedActiveImageID(pPressedActiveImageID),
-	mReleasingImageID(pReleasingImageID),
-	mPressingImageID(pPressingImageID),
-	mIconID(Painter::INVALID_IMAGEID),
-	mHighlightedIconId(Painter::INVALID_IMAGEID),
-	mDisabledIconId(Painter::INVALID_IMAGEID),
-	mIconAlignment(ICON_CENTER),
-	mText(pText),
-	mTextBackgColor(255, 255, 255),
-	mPressed(false),
-	mImageButton(true),
-	mState(PRESSED),
-	mExtraData(0)
-{
+Button::Button(Painter::ImageID released_image_id, Painter::ImageID pressed_image_id,
+	Painter::ImageID released_active_image_id,	// Mouse over.
+	Painter::ImageID pressed_active_image_id, Painter::ImageID releasing_image_id,
+	Painter::ImageID pressing_image_id, const wstr& text):
+	Parent(released_image_id),
+	on_press_(0),
+	on_release_(0),
+	on_click_(0),
+	on_drag_(0),
+	released_image_id_(released_image_id),
+	pressed_image_id_(pressed_image_id),
+	released_active_image_id_(released_active_image_id),
+	pressed_active_image_id_(pressed_active_image_id),
+	releasing_image_id_(releasing_image_id),
+	pressing_image_id_(pressing_image_id),
+	icon_id_(Painter::kInvalidImageid),
+	highlighted_icon_id_(Painter::kInvalidImageid),
+	disabled_icon_id_(Painter::kInvalidImageid),
+	icon_alignment_(kIconCenter),
+	text_(text),
+	text_backg_color_(255, 255, 255),
+	pressed_(false),
+	image_button_(true),
+	state_(kPressed),
+	extra_data_(0) {
 	SetBaseColor(GetColor());
 	Init();
-	SetText(pText);
-	SetName(strutil::Encode(pText));
+	SetText(text);
+	SetName(strutil::Encode(text));
 }
 
-Button::~Button()
-{
-	delete mOnPress;
-	delete mOnRelease;
-	delete mOnClick;
-	delete mOnDrag;
+Button::~Button() {
+	delete on_press_;
+	delete on_release_;
+	delete on_click_;
+	delete on_drag_;
 }
 
-void Button::SetBaseColor(const Color& pColor)
-{
-	Parent::SetBaseColor(pColor);
-	mHooverColor = GetColor() * 1.2f;
-	mPressColor = GetColor() * 0.95f;
+void Button::SetBaseColor(const Color& color) {
+	Parent::SetBaseColor(color);
+	hoover_color_ = GetColor() * 1.2f;
+	press_color_ = GetColor() * 0.95f;
 	GetClientRectComponent()->SetIsHollow(false);
 	SetPressed(false);
 }
 
-void Button::SetPressColor(const Color& pColor)
-{
-	mPressColor = pColor;
+void Button::SetPressColor(const Color& color) {
+	press_color_ = color;
 }
 
-void Button::SetPressed(bool pPressed)
-{
-	mPressed = pPressed;
-	if (mPressed)
-	{
-		SetState(PRESSED);
-	}
-	else
-	{
-		if (HasMouseFocus())
-		{
-			SetState(RELEASED_HOOVER);
-		}
-		else
-		{
-			SetState(RELEASED);
+void Button::SetPressed(bool pressed) {
+	pressed_ = pressed;
+	if (pressed_) {
+		SetState(kPressed);
+	} else {
+		if (HasMouseFocus()) {
+			SetState(kReleasedHoover);
+		} else {
+			SetState(kReleased);
 		}
 	}
 }
 
-void Button::SetState(State pState)
-{
-	if (mState == pState || !mEnabled)
-	{
+void Button::SetState(State state) {
+	if (state_ == state || !enabled_) {
 		return;
 	}
 
 	SetNeedsRepaint(true);
 
-	log_volatile(mLog.Debugf("Button changing state from %i->%i.", mState, pState));
-	mState = pState;
+	log_volatile(log_.Debugf("Button changing state from %i->%i.", state_, state));
+	state_ = state;
 
-	if (mImageButton == true)
-	{
-		switch(mState)
-		{
-		case RELEASED:
-			Parent::SetBackgroundImage(mReleasedImageID);
+	if (image_button_ == true) {
+		switch(state_) {
+		case kReleased:
+			Parent::SetBackgroundImage(released_image_id_);
 			break;
-		case RELEASED_HOOVER:
-			Parent::SetBackgroundImage(mReleasedActiveImageID);
+		case kReleasedHoover:
+			Parent::SetBackgroundImage(released_active_image_id_);
 			break;
-		case RELEASING:
-			Parent::SetBackgroundImage(mReleasingImageID);
+		case kReleasing:
+			Parent::SetBackgroundImage(releasing_image_id_);
 			break;
-		case PRESSED:
-			Parent::SetBackgroundImage(mPressedImageID);
+		case kPressed:
+			Parent::SetBackgroundImage(pressed_image_id_);
 			break;
-		case PRESSED_HOOVER:
-			Parent::SetBackgroundImage(mPressedActiveImageID);
+		case kPressedHoover:
+			Parent::SetBackgroundImage(pressed_active_image_id_);
 			break;
-		case PRESSING:
-			Parent::SetBackgroundImage(mPressingImageID);
+		case kPressing:
+			Parent::SetBackgroundImage(pressing_image_id_);
 			break;
 		}
-	}
-	else
-	{
-		if (mState == PRESSED || mState == PRESSING || mState == PRESSED_HOOVER)
-		{
-			Parent::SetColor(mPressColor);
-			unsigned lStyle = Parent::GetBorderStyle() | Parent::BORDER_SUNKEN;
-			Parent::SetBorder(lStyle, Parent::GetBorderWidth());
-		}
-		else if (mState == RELEASED_HOOVER)
-		{
-			Parent::SetColor(mHooverColor);
-			unsigned lStyle = Parent::GetBorderStyle() | Parent::BORDER_SUNKEN;
-			Parent::SetBorder(lStyle, Parent::GetBorderWidth());
-		}
-		else
-		{
+	} else {
+		if (state_ == kPressed || state_ == kPressing || state_ == kPressedHoover) {
+			Parent::SetColor(press_color_);
+			unsigned style = Parent::GetBorderStyle() | Parent::kBorderSunken;
+			Parent::SetBorder(style, Parent::GetBorderWidth());
+		} else if (state_ == kReleasedHoover) {
+			Parent::SetColor(hoover_color_);
+			unsigned style = Parent::GetBorderStyle() | Parent::kBorderSunken;
+			Parent::SetBorder(style, Parent::GetBorderWidth());
+		} else {
 			Parent::SetColor(GetColor());
-			unsigned lStyle = (Parent::GetBorderStyle() & (~Parent::BORDER_SUNKEN));
-			Parent::SetBorder(lStyle, Parent::GetBorderWidth());
+			unsigned style = (Parent::GetBorderStyle() & (~Parent::kBorderSunken));
+			Parent::SetBorder(style, Parent::GetBorderWidth());
 		}
 	}
 
-	switch(mState)
-	{
-	case RELEASED:
-	case RELEASED_HOOVER:
-		if (mOnRelease != 0)
-		{
-			(*mOnRelease)(this);
-		}
+	switch(state_) {
+	case kReleased:
+	case kReleasedHoover:
+		if (on_release_ != 0) {
+			(*on_release_)(this);
+		} break;
+	case kReleasing:
 		break;
-	case RELEASING:
+	case kPressed:
+	case kPressedHoover:
 		break;
-	case PRESSED:
-	case PRESSED_HOOVER:
-		break;
-	case PRESSING:
-		if (mOnPress != 0)
-		{
-			(*mOnPress)(this);
-		}
-		break;
+	case kPressing:
+		if (on_press_ != 0) {
+			(*on_press_)(this);
+		} break;
 	}
 }
 
-Button::StateComponentList Button::GetStateList(ComponentState pState)
-{
-	StateComponentList lList;
-	if (pState == STATE_CLICKABLE)
-	{
-		lList.push_back(StateComponent(0, this));
+Button::StateComponentList Button::GetStateList(ComponentState state) {
+	StateComponentList list;
+	if (state == kStateClickable) {
+		list.push_back(StateComponent(0, this));
 	}
-	return (lList);
+	return (list);
 }
 
-void Button::Repaint(Painter* pPainter)
-{
-	RepaintBackground(pPainter);
+void Button::Repaint(Painter* painter) {
+	RepaintBackground(painter);
 
-	ActivateFont(pPainter);
-	GUIImageManager* lIMan = GetImageManager();
+	ActivateFont(painter);
+	GUIImageManager* i_man = GetImageManager();
 
-	pPainter->PushAttrib(Painter::ATTR_ALL);
-	PixelRect lRect(GetClientRect());
-	//pPainter->ReduceClippingRect(lRect);
+	painter->PushAttrib(Painter::kAttrAll);
+	PixelRect rect(GetClientRect());
+	//painter->ReduceClippingRect(rect);
 
-	int lOffset = GetPressed() ? 1 : 0;
-	int lTextX = lRect.mLeft + mHorizontalMargin;
-	switch (mIconAlignment)
-	{
-		case ICON_CENTER:
-			lTextX = lRect.GetCenterX() - pPainter->GetStringWidth(mText)/2;
+	int offset = GetPressed() ? 1 : 0;
+	int text_x = rect.left_ + horizontal_margin_;
+	switch (icon_alignment_) {
+		case kIconCenter:
+			text_x = rect.GetCenterX() - painter->GetStringWidth(text_)/2;
 		break;
 	}
 
-	Painter::ImageID lIconId = GetCurrentIcon();
-	if (lIconId != Painter::INVALID_IMAGEID)
-	{
-		PixelCoord lImageSize(lIMan->GetImageSize(lIconId));
+	Painter::ImageID _icon_id = GetCurrentIcon();
+	if (_icon_id != Painter::kInvalidImageid) {
+		PixelCoord image_size(i_man->GetImageSize(_icon_id));
 
 		int x = 0;
 		int y = 0;
-		switch (mIconAlignment)
-		{
-			case ICON_LEFT:
-				x = lRect.mLeft + lOffset;
-				y = lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2 + lOffset;
-				lTextX = lRect.mLeft + lImageSize.x + mHorizontalMargin;
+		switch (icon_alignment_) {
+			case kIconLeft:
+				x = rect.left_ + offset;
+				y = rect.top_ + (rect.GetHeight() - image_size.y) / 2 + offset;
+				text_x = rect.left_ + image_size.x + horizontal_margin_;
 			break;
-			case ICON_CENTER:
-				x = lRect.mLeft + (lRect.GetWidth()  - lImageSize.x) / 2 + lOffset;
-				if (!mText.empty())
-				{
-					y = lRect.mTop;
-				}
-				else
-				{
-					y = lRect.GetCenterY() - lImageSize.y/2;
-				}
-			break;
-			case ICON_RIGHT:
-				x = lRect.mRight - lImageSize.x + lOffset - mHorizontalMargin;
-				y = lRect.mTop + (lRect.GetHeight() - lImageSize.y) / 2 + lOffset;
+			case kIconCenter:
+				x = rect.left_ + (rect.GetWidth()  - image_size.x) / 2 + offset;
+				if (!text_.empty()) {
+					y = rect.top_;
+				} else {
+					y = rect.GetCenterY() - image_size.y/2;
+				} break;
+			case kIconRight:
+				x = rect.right_ - image_size.x + offset - horizontal_margin_;
+				y = rect.top_ + (rect.GetHeight() - image_size.y) / 2 + offset;
 			break;
 		}
-		lIMan->DrawImage(lIconId, x, y);
+		i_man->DrawImage(_icon_id, x, y);
 	}
 
-	RepaintComponents(pPainter);
+	RepaintComponents(painter);
 
-	if (mIconID != Painter::INVALID_IMAGEID)
-	{
+	if (icon_id_ != Painter::kInvalidImageid) {
 		int y;
-		if (mIconAlignment != ICON_CENTER)
-		{
-			y = lRect.mTop + (lRect.GetHeight() - pPainter->GetFontHeight()) / 2;
+		if (icon_alignment_ != kIconCenter) {
+			y = rect.top_ + (rect.GetHeight() - painter->GetFontHeight()) / 2;
+		} else {
+			y = rect.bottom_ - painter->GetFontHeight();
 		}
-		else
-		{
-			y = lRect.mBottom - pPainter->GetFontHeight();
-		}
-		PrintText(pPainter, lTextX + lOffset, y);
-	}
-	else
-	{
-		PrintText(pPainter, 
-			  lTextX + lOffset, 
-			  lRect.mTop + (lRect.GetHeight() - pPainter->GetFontHeight()) / 2 + lOffset);
+		PrintText(painter, text_x + offset, y);
+	} else {
+		PrintText(painter,
+			  text_x + offset,
+			  rect.top_ + (rect.GetHeight() - painter->GetFontHeight()) / 2 + offset);
 	}
 
-	pPainter->PopAttrib();
+	painter->PopAttrib();
 }
 
-void Button::RepaintBackground(Painter* pPainter)
-{
-	GetClientRectComponent()->RepaintBackground(pPainter);
+void Button::RepaintBackground(Painter* painter) {
+	GetClientRectComponent()->RepaintBackground(painter);
 }
 
-void Button::RepaintComponents(Painter* pPainter)
-{
-	if (NeedsRepaint() || GetBorderWidth() > 0)
-	{
-		Parent::RepaintComponents(pPainter);
-	}
-	else
-	{
-		GetClientRectComponent()->RepaintComponents(pPainter);
+void Button::RepaintComponents(Painter* painter) {
+	if (NeedsRepaint() || GetBorderWidth() > 0) {
+		Parent::RepaintComponents(painter);
+	} else {
+		GetClientRectComponent()->RepaintComponents(painter);
 	}
 }
 
-void Button::PrintText(Painter* pPainter, int x, int y)
-{
-	pPainter->SetColor(mTextBackgColor, 1);
-	PrintTextDeactivate(pPainter, mText, x, y);
+void Button::PrintText(Painter* painter, int x, int y) {
+	painter->SetColor(text_backg_color_, 1);
+	PrintTextDeactivate(painter, text_, x, y);
 }
 
-void Button::SetExtraData(void* pData)
-{
-	mExtraData = pData;
+void Button::SetExtraData(void* data) {
+	extra_data_ = data;
 }
 
-void* Button::GetExtraData() const
-{
-	return (mExtraData);
+void* Button::GetExtraData() const {
+	return (extra_data_);
 }
 
-void Button::SetTag(int pTag)
-{
-	SetExtraData((void*)pTag);
+void Button::SetTag(int tag) {
+	SetExtraData((void*)tag);
 }
 
-int Button::GetTag() const
-{
+int Button::GetTag() const {
 	return (int)(intptr_t)GetExtraData();
 }
 
-bool Button::OnLButtonDown(int pMouseX, int pMouseY)
-{
-	if (IsOver(pMouseX, pMouseY) == true)
-	{
-		switch (mState)
-		{
-			case RELEASED:
-			case RELEASED_HOOVER:	SetState(PRESSING);	break;
-			case PRESSED:
-			case PRESSED_HOOVER:	SetState(RELEASING);	break;
+bool Button::OnLButtonDown(int mouse_x, int mouse_y) {
+	if (IsOver(mouse_x, mouse_y) == true) {
+		switch (state_) {
+			case kReleased:
+			case kReleasedHoover:	SetState(kPressing);	break;
+			case kPressed:
+			case kPressedHoover:	SetState(kReleasing);	break;
 		}
 
 		SetMouseFocus();
@@ -390,21 +330,16 @@ bool Button::OnLButtonDown(int pMouseX, int pMouseY)
 	return true;
 }
 
-bool Button::OnLButtonUp(int pMouseX, int pMouseY)
-{
-	bool lCallFunctor = HasMouseFocus();
+bool Button::OnLButtonUp(int mouse_x, int mouse_y) {
+	bool call_functor = HasMouseFocus();
 
-	if (IsOver(pMouseX, pMouseY) == true)
-	{
+	if (IsOver(mouse_x, mouse_y) == true) {
 		SetPressed(false);
-		if (lCallFunctor)
-		{
+		if (call_functor) {
 			Click(true);
 		}
 		ReleaseMouseFocus();
-	}
-	else
-	{
+	} else {
 		ReleaseMouseFocus();
 		SetPressed(false);
 	}
@@ -412,197 +347,168 @@ bool Button::OnLButtonUp(int pMouseX, int pMouseY)
 	return true;
 }
 
-bool Button::OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY)
-{
-	if (HasMouseFocus() == true)
-	{
-		switch(mState)
-		{
-		case RELEASED:
-		case RELEASED_HOOVER:
-			if (IsOver(pMouseX, pMouseY) == true)
-				SetState(PRESSING);
+bool Button::OnMouseMove(int mouse_x, int mouse_y, int delta_x, int delta_y) {
+	if (HasMouseFocus() == true) {
+		switch(state_) {
+		case kReleased:
+		case kReleasedHoover:
+			if (IsOver(mouse_x, mouse_y) == true)
+				SetState(kPressing);
 			else
-				SetState(RELEASED);
+				SetState(kReleased);
 			break;
-		case RELEASING:
-			if (IsOver(pMouseX, pMouseY) == false)
-				SetState(PRESSED);
+		case kReleasing:
+			if (IsOver(mouse_x, mouse_y) == false)
+				SetState(kPressed);
 			break;
-		case PRESSED:
-		case PRESSED_HOOVER:
-			if (IsOver(pMouseX, pMouseY) == true)
-				SetState(RELEASING);
+		case kPressed:
+		case kPressedHoover:
+			if (IsOver(mouse_x, mouse_y) == true)
+				SetState(kReleasing);
 			else
-				SetState(PRESSED);
+				SetState(kPressed);
 			break;
-		case PRESSING:
-			if (IsOver(pMouseX, pMouseY) == false)
-				SetState(RELEASED);
+		case kPressing:
+			if (IsOver(mouse_x, mouse_y) == false)
+				SetState(kReleased);
 			break;
 		}
 
-		if (mOnDrag != 0)
-		{
-			(*mOnDrag)(this, pMouseX, pMouseX, pDeltaX, pDeltaY);
+		if (on_drag_ != 0) {
+			(*on_drag_)(this, mouse_x, mouse_x, delta_x, delta_y);
 		}
-	}
-	else
-	{
-		switch(mState)
-		{
-		case RELEASED:
-		case RELEASED_HOOVER:
-		case RELEASING:
-			if (IsOver(pMouseX, pMouseY) == true)
-				SetState(RELEASED_HOOVER);
+	} else {
+		switch(state_) {
+		case kReleased:
+		case kReleasedHoover:
+		case kReleasing:
+			if (IsOver(mouse_x, mouse_y) == true)
+				SetState(kReleasedHoover);
 			else
-				SetState(RELEASED);
+				SetState(kReleased);
 			break;
-		case PRESSED:
-		case PRESSED_HOOVER:
-		case PRESSING:
-			if (IsOver(pMouseX, pMouseY) == true)
-				SetState(PRESSED_HOOVER);
+		case kPressed:
+		case kPressedHoover:
+		case kPressing:
+			if (IsOver(mouse_x, mouse_y) == true)
+				SetState(kPressedHoover);
 			else
-				SetState(PRESSED);
+				SetState(kPressed);
 			break;
 		}
 	}
-	return Parent::OnMouseMove(pMouseX, pMouseY, pDeltaX, pDeltaY);
+	return Parent::OnMouseMove(mouse_x, mouse_y, delta_x, delta_y);
 }
 
-bool Button::Click(bool pDepress)
-{
-	bool lClicked = false;
-	if (pDepress && mOnClick)
-	{
-		(*mOnClick)(this);
-		lClicked = true;
+bool Button::Click(bool depress) {
+	bool clicked = false;
+	if (depress && on_click_) {
+		(*on_click_)(this);
+		clicked = true;
 	}
-	return (lClicked);
+	return (clicked);
 }
 
-bool Button::GetPressed()
-{
-	return mPressed;
+bool Button::GetPressed() {
+	return pressed_;
 }
 
-Button::State Button::GetState() const
-{
-	return mState;
+Button::State Button::GetState() const {
+	return state_;
 }
 
-void Button::SetIcon(Painter::ImageID pIconID, IconAlignment pAlignment)
-{
-	mIconID = pIconID;
-	mIconAlignment = pAlignment;
+void Button::SetIcon(Painter::ImageID icon_id, IconAlignment alignment) {
+	icon_id_ = icon_id;
+	icon_alignment_ = alignment;
 
-	if (mIconID != Painter::INVALID_IMAGEID && mIconAlignment == ICON_CENTER)
-	{
-		PixelCoord lSize = GetImageManager()->GetImageSize(mIconID);
-		DesktopWindow* lTopmost = (DesktopWindow*)GetParentOfType(DESKTOPWINDOW);
-		const int lFontHeight = lTopmost? lTopmost->GetPainter()->GetFontHeight()*3/2 : 21;	// Just try anything if not into system yet.
-		const int dh = GetText().empty()? 0 : lFontHeight;
-		SetPreferredSize(lSize.x, lSize.y + dh);
+	if (icon_id_ != Painter::kInvalidImageid && icon_alignment_ == kIconCenter) {
+		PixelCoord size = GetImageManager()->GetImageSize(icon_id_);
+		DesktopWindow* topmost = (DesktopWindow*)GetParentOfType(kDesktopwindow);
+		const int font_height = topmost? topmost->GetPainter()->GetFontHeight()*3/2 : 21;	// Just try anything if not into system yet.
+		const int dh = GetText().empty()? 0 : font_height;
+		SetPreferredSize(size.x, size.y + dh);
 	}
 
 	SetNeedsRepaint(true);
 }
 
-Painter::ImageID Button::GetIconCanvas() const
-{
-	return mIconID;
+Painter::ImageID Button::GetIconCanvas() const {
+	return icon_id_;
 }
 
-void Button::SetHighlightedIcon(Painter::ImageID pIconId)
-{
-	mHighlightedIconId = pIconId;
+void Button::SetHighlightedIcon(Painter::ImageID icon_id) {
+	highlighted_icon_id_ = icon_id;
 	SetNeedsRepaint(true);
 }
 
-void Button::SetDisabledIcon(Painter::ImageID pIconId)
-{
-	mDisabledIconId = pIconId;
+void Button::SetDisabledIcon(Painter::ImageID icon_id) {
+	disabled_icon_id_ = icon_id;
 	SetNeedsRepaint(true);
 }
 
-Painter::ImageID Button::GetCurrentIcon() const
-{
-	if (mDisabledIconId != Painter::INVALID_IMAGEID && !mEnabled)
-	{
-		return mDisabledIconId;
-	}
-	else if (mHighlightedIconId != Painter::INVALID_IMAGEID &&
-		(mState == PRESSED || mState == PRESSING
+Painter::ImageID Button::GetCurrentIcon() const {
+	if (disabled_icon_id_ != Painter::kInvalidImageid && !enabled_) {
+		return disabled_icon_id_;
+	} else if (highlighted_icon_id_ != Painter::kInvalidImageid &&
+		(state_ == kPressed || state_ == kPressing
 #ifndef LEPRA_TOUCH	// Hoover states only exist and work on non-touch devices (i.e. computers w/ mouse/trackball).
-		|| mState == PRESSED_HOOVER || mState == RELEASED_HOOVER
-#endif // !Touch
-		))
-	{
-		return mHighlightedIconId;
+		|| state_ == kPressedHoover || state_ == kReleasedHoover
+#endif // !touch
+		)) {
+		return highlighted_icon_id_;
 	}
-	return mIconID;
+	return icon_id_;
 }
 
-void Button::SetText(const wstr& pText,
-		     const Color& pTextColor,
-		     const Color& pBackgColor)
-{
-	deb_assert(pTextColor != BLACK);
-	mText           = pText;
-	SetFontColor(pTextColor);
-	mTextBackgColor = pBackgColor;
+void Button::SetText(const wstr& text,
+		     const Color& text_color,
+		     const Color& backg_color) {
+	deb_assert(text_color != BLACK);
+	text_           = text;
+	SetFontColor(text_color);
+	text_backg_color_ = backg_color;
 
 	OnTextChanged();
 }
 
-const wstr& Button::GetText()
-{
-	return mText;
+const wstr& Button::GetText() {
+	return text_;
 }
 
-Button::Type Button::GetType() const
-{
-	return BUTTON;
+Button::Type Button::GetType() const {
+	return kButton;
 }
 
-void Button::ForceRepaint()
-{
+void Button::ForceRepaint() {
 	SetNeedsRepaint(true);
 }
 
-void Button::OnTextChanged()
-{
+void Button::OnTextChanged() {
 }
 
-void Button::SetOnPressDelegate(const Delegate& pOnPress)
-{
-	delete mOnPress;
-	mOnPress = new Delegate(pOnPress);
+void Button::SetOnPressDelegate(const Delegate& on_press) {
+	delete on_press_;
+	on_press_ = new Delegate(on_press);
 }
 
-void Button::SetOnReleaseDelegate(const Delegate& pOnRelease)
-{
-	delete mOnRelease;
-	mOnRelease = new Delegate(pOnRelease);
+void Button::SetOnReleaseDelegate(const Delegate& on_release) {
+	delete on_release_;
+	on_release_ = new Delegate(on_release);
 }
 
-void Button::SetOnClickDelegate(const Delegate& pOnClick)
-{
-	delete mOnClick;
-	mOnClick = new Delegate(pOnClick);
+void Button::SetOnClickDelegate(const Delegate& on_click) {
+	delete on_click_;
+	on_click_ = new Delegate(on_click);
 }
 
-void Button::SetOnDragDelegate(const DelegateXYXY& pOnDrag)
-{
-	delete mOnDrag;
-	mOnDrag = new DelegateXYXY(pOnDrag);
+void Button::SetOnDragDelegate(const DelegateXYXY& on_drag) {
+	delete on_drag_;
+	on_drag_ = new DelegateXYXY(on_drag);
 }
 
 
 
-loginstance(UI_GFX_2D, Button);
+loginstance(kUiGfx2D, Button);
 
 
 

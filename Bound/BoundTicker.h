@@ -6,58 +6,54 @@
 
 #pragma once
 
-#include "../Life/LifeClient/GameClientMasterTicker.h"
-#include "Bound.h"
+#include "../life/lifeclient/gameclientmasterticker.h"
+#include "bound.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 class MusicPlayer;
 class RendererImageResource;
 }
-namespace Life
-{
+namespace life {
 class GameClientSlaveManager;
 }
 
 
 
-namespace Bound
-{
+namespace Bound {
 
 
 
-class BoundTicker: public Life::GameClientMasterTicker
-{
-	typedef Life::GameClientMasterTicker Parent;
+class BoundTicker: public life::GameClientMasterTicker {
+	typedef life::GameClientMasterTicker Parent;
 public:
-	BoundTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
+	BoundTicker(UiCure::GameUiManager* ui_manager, cure::ResourceManager* resource_manager_, float physics_radius, int physics_levels, float physics_sensitivity);
 	virtual ~BoundTicker();
 
 private:
-	void Suspend(bool pHard);
-	void Resume(bool pHard);
+	void Suspend(bool hard);
+	void Resume(bool hard);
 	virtual bool CreateSlave();
 	virtual void OnSlavesKilled();
-	virtual void OnServerCreated(Life::UiGameServerManager* pServer);
+	virtual void OnServerCreated(life::UiGameServerManager* server);
 
 	virtual bool OpenUiManager();
 
-	virtual void BeginRender(vec3& pColor);
+	virtual void BeginRender(vec3& color);
 	void PreWaitPhysicsTick();
 
 	virtual void CloseMainMenu();
 	virtual bool QueryQuit();
 
-	static Life::GameClientSlaveManager* CreateSlaveManager(Life::GameClientMasterTicker* pMaster,
-		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-		int pSlaveIndex, const PixelRect& pRenderArea);
+	static life::GameClientSlaveManager* CreateSlaveManager(life::GameClientMasterTicker* pMaster,
+		cure::TimeManager* time, cure::RuntimeVariableScope* variable_scope,
+		cure::ResourceManager* resource_manager, UiCure::GameUiManager* ui_manager,
+		int slave_index, const PixelRect& render_area);
 
-	bool mIsPlayerCountViewActive;
-	UiCure::MusicPlayer* mMusicPlayer;
-	UiCure::RendererImageResource* mEnvMap;
+	bool is_player_count_view_active_;
+	UiCure::MusicPlayer* music_player_;
+	UiCure::RendererImageResource* env_map_;
 
 	logclass();
 };

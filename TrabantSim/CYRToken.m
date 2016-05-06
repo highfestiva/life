@@ -32,25 +32,23 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#include "../Lepra/Include/LepraTarget.h"
+#include "../lepra/include/lepratarget.h"
 #ifdef LEPRA_IOS
 #import "CYRToken.h"
 
 @implementation CYRToken
 
-+ (instancetype)tokenWithName:(NSString *)name expression:(NSString *)expression attributes:(NSDictionary *)attributes
-{
++ (instancetype)tokenWithName:(NSString *)name expression:(NSString *)expression attributes:(NSDictionary *)attributes {
     CYRToken *textAttribute = [CYRToken new];
-    
+
     textAttribute.name = name;
     textAttribute.expression = expression;
     textAttribute.attributes = attributes;
-    
+
     return textAttribute;
 }
 
-+ (instancetype)tokenWithName:(NSString*)name expression:(NSString*)expression processRange:(NSRange (^)(NSString* str,NSRange range))process attributes:(NSDictionary*)attributes
-{
++ (instancetype)tokenWithName:(NSString*)name expression:(NSString*)expression processRange:(NSRange (^)(NSString* str,NSRange range))process attributes:(NSDictionary*)attributes {
 	CYRToken *textAttribute = [CYRToken new];
 
 	textAttribute.name = name;

@@ -5,491 +5,394 @@
 
 
 #include "pch.h"
-#include "../Include/ContextManager.h"
+#include "../include/contextmanager.h"
 #include <list>
-#include "../Include/ContextObjectAttribute.h"
-#include "../Include/ContextObject.h"
-#include "../Include/GameManager.h"
-#include "../Include/TimeManager.h"
+#include "../include/contextobjectattribute.h"
+#include "../include/contextobject.h"
+#include "../include/gamemanager.h"
+#include "../include/timemanager.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-#define CHECK_OBJ_ALARM_ERASED(obj)	LEPRA_DEBUG_CODE( for (AlarmSet::iterator x = mAlarmCallbackObjectSet.begin(); x != mAlarmCallbackObjectSet.end(); ++x) { deb_assert(x->mObject != obj); } )
+#define CHECK_OBJ_ALARM_ERASED(obj)	LEPRA_DEBUG_CODE( for (AlarmSet::iterator x = alarm_callback_object_set_.begin(); x != alarm_callback_object_set_.end(); ++x) { deb_assert(x->object_ != obj); } )
 
 
 
-ContextManager::ContextManager(GameManager* pGameManager):
-	mGameManager(pGameManager),
-	mIsObjectOwner(true),
-	mLocalObjectIdManager(0x40000000, 0x7FFFFFFF-1, 0xFFFFFFFF),
-	mRemoteObjectIdManager(1, 0x40000000-1, 0xFFFFFFFF),
-	mMaxPostKillProcessingTime(0.01)
-{
+ContextManager::ContextManager(GameManager* game_manager):
+	game_manager_(game_manager),
+	is_object_owner_(true),
+	local_object_id_manager_(0x40000000, 0x7FFFFFFF-1, 0xFFFFFFFF),
+	remote_object_id_manager_(1, 0x40000000-1, 0xFFFFFFFF),
+	max_post_kill_processing_time_(0.01) {
 }
 
-ContextManager::~ContextManager()
-{
+ContextManager::~ContextManager() {
 	ClearObjects();
-	mGameManager = 0;
+	game_manager_ = 0;
 }
 
 
 
-GameManager* ContextManager::GetGameManager() const
-{
-	return (mGameManager);
+GameManager* ContextManager::GetGameManager() const {
+	return (game_manager_);
 }
 
-void ContextManager::SetLocalRange(unsigned pIndex, unsigned pCount)
-{
-	deb_assert(mObjectTable.empty());
-	const GameObjectId lStartId = 0x40000000;
-	const GameObjectId lBlockSize = (0x7FFFFFFF-lStartId-pCount)/pCount;
-	const GameObjectId lOffset = lStartId + lBlockSize*pIndex;
-	mLocalObjectIdManager = ObjectIdManager(lOffset, lOffset+lBlockSize-1, 0xFFFFFFFF);
+void ContextManager::SetLocalRange(unsigned index, unsigned count) {
+	deb_assert(object_table_.empty());
+	const GameObjectId start_id = 0x40000000;
+	const GameObjectId block_size = (0x7FFFFFFF-start_id-count)/count;
+	const GameObjectId offset = start_id + block_size*index;
+	local_object_id_manager_ = ObjectIdManager(offset, offset+block_size-1, 0xFFFFFFFF);
 }
 
 
-void ContextManager::SetIsObjectOwner(bool pIsObjectOwner)
-{
-	mIsObjectOwner = pIsObjectOwner;
+void ContextManager::SetIsObjectOwner(bool is_object_owner) {
+	is_object_owner_ = is_object_owner;
 }
 
-void ContextManager::AddLocalObject(ContextObject* pObject)
-{
-	deb_assert(pObject->GetInstanceId() == 0);
-	pObject->SetInstanceId(AllocateGameObjectId(NETWORK_OBJECT_LOCAL_ONLY));
-	deb_assert(pObject->GetManager() == 0);
-	pObject->SetManager(this);
-	AddObject(pObject);
+void ContextManager::AddLocalObject(ContextObject* object) {
+	deb_assert(object->GetInstanceId() == 0);
+	object->SetInstanceId(AllocateGameObjectId(kNetworkObjectLocalOnly));
+	deb_assert(object->GetManager() == 0);
+	object->SetManager(this);
+	AddObject(object);
 }
 
-void ContextManager::AddObject(ContextObject* pObject)
-{
-	deb_assert(pObject->GetInstanceId() != 0);
-	deb_assert(mObjectTable.find(pObject->GetInstanceId()) == mObjectTable.end());
-	deb_assert(pObject->GetManager() == this);
-	mObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
+void ContextManager::AddObject(ContextObject* object) {
+	deb_assert(object->GetInstanceId() != 0);
+	deb_assert(object_table_.find(object->GetInstanceId()) == object_table_.end());
+	deb_assert(object->GetManager() == this);
+	object_table_.insert(ContextObjectTable::value_type(object->GetInstanceId(), object));
 }
 
-void ContextManager::RemoveObject(ContextObject* pObject)
-{
+void ContextManager::RemoveObject(ContextObject* object) {
 	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
-	CancelPendingAlarmCallbacks(pObject);
-	DisableMicroTickCallback(pObject);
-	DisableTickCallback(pObject);
-	mPhysicsSenderObjectTable.erase(pObject->GetInstanceId());
-	mAttributeSenderObjectTable.erase(pObject->GetInstanceId());
-	mObjectTable.erase(pObject->GetInstanceId());
+	CancelPendingAlarmCallbacks(object);
+	DisableMicroTickCallback(object);
+	DisableTickCallback(object);
+	physics_sender_object_table_.erase(object->GetInstanceId());
+	attribute_sender_object_table_.erase(object->GetInstanceId());
+	object_table_.erase(object->GetInstanceId());
 }
 
-bool ContextManager::DeleteObject(GameObjectId pInstanceId)
-{
-	bool lOk = false;
-	ContextObject* lObject = GetObject(pInstanceId, true);
-	if (lObject)
-	{
-		log_volatile(mLog.Tracef("Deleting context object %i.", pInstanceId));
-		delete (lObject);
-		lOk = true;
+bool ContextManager::DeleteObject(GameObjectId instance_id) {
+	bool ok = false;
+	ContextObject* _object = GetObject(instance_id, true);
+	if (_object) {
+		log_volatile(log_.Tracef("Deleting context object %i.", instance_id));
+		delete (_object);
+		ok = true;
+	} else {
+		log_volatile(log_.Debugf("Could not delete context object %i, since not found.", instance_id));
 	}
-	else
-	{
-		log_volatile(mLog.Debugf("Could not delete context object %i, since not found.", pInstanceId));
-	}
-	return (lOk);
+	return (ok);
 }
 
-void ContextManager::SetPostKillTimeout(double pTimeout)
-{
-	mMaxPostKillProcessingTime = pTimeout;
+void ContextManager::SetPostKillTimeout(double timeout) {
+	max_post_kill_processing_time_ = timeout;
 }
 
-void ContextManager::PostKillObject(GameObjectId pInstanceId)
-{
-	mPostKillSet.insert(pInstanceId);
+void ContextManager::PostKillObject(GameObjectId instance_id) {
+	post_kill_set_.insert(instance_id);
 }
 
-void ContextManager::DelayKillObject(ContextObject* pObject, float pSeconds)
-{
-	AddAlarmExternalCallback(pObject, AlarmExternalCallback(this, &ContextManager::OnDelayedDelete), 1, pSeconds, 0);
+void ContextManager::DelayKillObject(ContextObject* object, float seconds) {
+	AddAlarmExternalCallback(object, AlarmExternalCallback(this, &ContextManager::OnDelayedDelete), 1, seconds, 0);
 }
 
-ContextObject* ContextManager::GetObject(GameObjectId pInstanceId, bool pForce) const
-{
-	ContextObjectTable::const_iterator x = mObjectTable.find(pInstanceId);
-	ContextObject* lObject = 0;
-	if (x != mObjectTable.end())
-	{
-		lObject = x->second;
-		if (!pForce && !lObject->IsLoaded())
-		{
-			lObject = 0;
+ContextObject* ContextManager::GetObject(GameObjectId instance_id, bool force) const {
+	ContextObjectTable::const_iterator x = object_table_.find(instance_id);
+	ContextObject* _object = 0;
+	if (x != object_table_.end()) {
+		_object = x->second;
+		if (!force && !_object->IsLoaded()) {
+			_object = 0;
 		}
 	}
-	return (lObject);
+	return (_object);
 }
 
-const ContextManager::ContextObjectTable& ContextManager::GetObjectTable() const
-{
-	return (mObjectTable);
+const ContextManager::ContextObjectTable& ContextManager::GetObjectTable() const {
+	return (object_table_);
 }
 
-void ContextManager::ClearObjects()
-{
-	mPhysicsSenderObjectTable.clear();
-	mAttributeSenderObjectTable.clear();
-	while (mObjectTable.size() > 0)
-	{
-		ContextObject* lObject = mObjectTable.begin()->second;
-		if (mIsObjectOwner)
-		{
-			delete (lObject);
-		}
-		else
-		{
-			lObject->SetManager(0);
-			mObjectTable.erase(mObjectTable.begin());
+void ContextManager::ClearObjects() {
+	physics_sender_object_table_.clear();
+	attribute_sender_object_table_.clear();
+	while (object_table_.size() > 0) {
+		ContextObject* _object = object_table_.begin()->second;
+		if (is_object_owner_) {
+			delete (_object);
+		} else {
+			_object->SetManager(0);
+			object_table_.erase(object_table_.begin());
 		}
 	}
 }
 
-void ContextManager::AddPhysicsSenderObject(ContextObject* pObject)
-{
-	deb_assert(pObject->GetInstanceId() != 0);
-	deb_assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
-	deb_assert(pObject->GetManager() == this);
-	deb_assert(pObject->GetManager()->GetGameManager()->GetTickLock()->IsOwner());
-	mPhysicsSenderObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
+void ContextManager::AddPhysicsSenderObject(ContextObject* object) {
+	deb_assert(object->GetInstanceId() != 0);
+	deb_assert(object_table_.find(object->GetInstanceId()) != object_table_.end());
+	deb_assert(object->GetManager() == this);
+	deb_assert(object->GetManager()->GetGameManager()->GetTickLock()->IsOwner());
+	physics_sender_object_table_.insert(ContextObjectTable::value_type(object->GetInstanceId(), object));
 }
 
-void ContextManager::AddPhysicsBody(ContextObject* pObject, Tbc::PhysicsManager::BodyID pBodyId)
-{
-	mBodyTable.insert(BodyPair(pBodyId, pObject));
+void ContextManager::AddPhysicsBody(ContextObject* object, tbc::PhysicsManager::BodyID body_id) {
+	body_table_.insert(BodyPair(body_id, object));
 }
 
-void ContextManager::RemovePhysicsBody(Tbc::PhysicsManager::BodyID pBodyId)
-{
-	if (pBodyId != Tbc::INVALID_BODY)
-	{
-		mBodyTable.erase(pBodyId);
+void ContextManager::RemovePhysicsBody(tbc::PhysicsManager::BodyID body_id) {
+	if (body_id != tbc::INVALID_BODY) {
+		body_table_.erase(body_id);
 	}
 }
 
-void ContextManager::AddAttributeSenderObject(ContextObject* pObject)
-{
-	deb_assert(pObject->GetInstanceId() != 0);
-	deb_assert(mObjectTable.find(pObject->GetInstanceId()) != mObjectTable.end());
-	deb_assert(pObject->GetManager() == this);
-	mAttributeSenderObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
+void ContextManager::AddAttributeSenderObject(ContextObject* object) {
+	deb_assert(object->GetInstanceId() != 0);
+	deb_assert(object_table_.find(object->GetInstanceId()) != object_table_.end());
+	deb_assert(object->GetManager() == this);
+	attribute_sender_object_table_.insert(ContextObjectTable::value_type(object->GetInstanceId(), object));
 }
 
-void ContextManager::UnpackObjectAttribute(GameObjectId pObjectId, const uint8* pData, unsigned pSize)
-{
-	ContextObject* lObject = GetObject(pObjectId, true);
-	if (lObject)
-	{
-		ContextObjectAttribute::Unpack(lObject, pData, pSize);
-	}
-	else
-	{
-		log_volatile(mLog.Debugf("Trying to unpack attribute for non-existent object %u.", pObjectId));
+void ContextManager::UnpackObjectAttribute(GameObjectId object_id, const uint8* data, unsigned _size) {
+	ContextObject* _object = GetObject(object_id, true);
+	if (_object) {
+		ContextObjectAttribute::Unpack(_object, data, _size);
+	} else {
+		log_volatile(log_.Debugf("Trying to unpack attribute for non-existent object %u.", object_id));
 	}
 }
 
 
 
-GameObjectId ContextManager::AllocateGameObjectId(NetworkObjectType pNetworkType)
-{
-	GameObjectId lInstanceId;
-	if (pNetworkType == NETWORK_OBJECT_LOCAL_ONLY)
-	{
-		lInstanceId = mLocalObjectIdManager.GetFreeId();
+GameObjectId ContextManager::AllocateGameObjectId(NetworkObjectType network_type) {
+	GameObjectId _instance_id;
+	if (network_type == kNetworkObjectLocalOnly) {
+		_instance_id = local_object_id_manager_.GetFreeId();
+	} else {
+		_instance_id = remote_object_id_manager_.GetFreeId();
 	}
-	else
-	{
-		lInstanceId = mRemoteObjectIdManager.GetFreeId();
-	}
-	return (lInstanceId);
+	return (_instance_id);
 }
 
-void ContextManager::FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pInstanceId)
-{
-	mRecycledIdQueue.push_back(GameObjectIdRecycleInfo(pInstanceId, pNetworkType));
+void ContextManager::FreeGameObjectId(NetworkObjectType network_type, GameObjectId instance_id) {
+	recycled_id_queue_.push_back(GameObjectIdRecycleInfo(instance_id, network_type));
 }
 
-bool ContextManager::IsLocalGameObjectId(GameObjectId pInstanceId) const
-{
-	return pInstanceId >= mLocalObjectIdManager.GetMinId();
+bool ContextManager::IsLocalGameObjectId(GameObjectId instance_id) const {
+	return instance_id >= local_object_id_manager_.GetMinId();
 }
 
 
 
-void ContextManager::EnableTickCallback(ContextObject* pObject)
-{
-	deb_assert(pObject->GetInstanceId());
-	mTickCallbackObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
+void ContextManager::EnableTickCallback(ContextObject* object) {
+	deb_assert(object->GetInstanceId());
+	tick_callback_object_table_.insert(ContextObjectTable::value_type(object->GetInstanceId(), object));
 }
 
-void ContextManager::DisableTickCallback(ContextObject* pObject)
-{
-	mTickCallbackObjectTable.erase(pObject->GetInstanceId());
+void ContextManager::DisableTickCallback(ContextObject* object) {
+	tick_callback_object_table_.erase(object->GetInstanceId());
 }
 
-void ContextManager::EnableMicroTickCallback(ContextObject* pObject)
-{
-	if (pObject->GetNetworkObjectType() == NETWORK_OBJECT_LOCAL_ONLY || GetGameManager()->IsPrimaryManager())
-	{
-		mMicroTickCallbackObjectTable.insert(ContextObjectTable::value_type(pObject->GetInstanceId(), pObject));
+void ContextManager::EnableMicroTickCallback(ContextObject* object) {
+	if (object->GetNetworkObjectType() == kNetworkObjectLocalOnly || GetGameManager()->IsPrimaryManager()) {
+		micro_tick_callback_object_table_.insert(ContextObjectTable::value_type(object->GetInstanceId(), object));
 	}
 }
 
-void ContextManager::DisableMicroTickCallback(ContextObject* pObject)
-{
-	mMicroTickCallbackObjectTable.erase(pObject->GetInstanceId());
+void ContextManager::DisableMicroTickCallback(ContextObject* object) {
+	micro_tick_callback_object_table_.erase(object->GetInstanceId());
 }
 
-void ContextManager::AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
-{
-	Alarm lAlarm(pObject, 0, pAlarmId, pExtraData);
-	DoAddAlarmCallback(lAlarm, pSeconds);
+void ContextManager::AddAlarmCallback(ContextObject* object, int alarm_id, float seconds, void* extra_data) {
+	Alarm _alarm(object, 0, alarm_id, extra_data);
+	DoAddAlarmCallback(_alarm, seconds);
 }
 
-void ContextManager::AddGameAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData)
-{
-	pSeconds /= ((const GameManager*)mGameManager)->GetTimeManager()->GetRealTimeRatio();
-	AddAlarmCallback(pObject, pAlarmId, pSeconds, pExtraData);
+void ContextManager::AddGameAlarmCallback(ContextObject* object, int alarm_id, float seconds, void* extra_data) {
+	seconds /= ((const GameManager*)game_manager_)->GetTimeManager()->GetRealTimeRatio();
+	AddAlarmCallback(object, alarm_id, seconds, extra_data);
 }
 
-void ContextManager::AddAlarmExternalCallback(ContextObject* pObject, const AlarmExternalCallback& pCallback, int pAlarmId, float pSeconds, void* pExtraData)
-{
-	Alarm lAlarm(pObject, pCallback, 0, pAlarmId, pExtraData);
-	DoAddAlarmCallback(lAlarm, pSeconds);
+void ContextManager::AddAlarmExternalCallback(ContextObject* object, const AlarmExternalCallback& callback, int alarm_id, float seconds, void* extra_data) {
+	Alarm _alarm(object, callback, 0, alarm_id, extra_data);
+	DoAddAlarmCallback(_alarm, seconds);
 }
 
-void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId)
-{
-	ScopeLock lLock(&mAlarmMutex);
-	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
-	while (x != mAlarmCallbackObjectSet.end())
-	{
-		if (x->mObject == pObject && x->mAlarmId == pAlarmId)
-		{
-			mAlarmCallbackObjectSet.erase(x);
-			x = mAlarmCallbackObjectSet.begin();	// Shouldn't be necessary, but is!
-		}
-		else
-		{
+void ContextManager::CancelPendingAlarmCallbacksById(ContextObject* object, int alarm_id) {
+	ScopeLock lock(&alarm_mutex_);
+	AlarmSet::iterator x = alarm_callback_object_set_.begin();
+	while (x != alarm_callback_object_set_.end()) {
+		if (x->object_ == object && x->alarm_id_ == alarm_id) {
+			alarm_callback_object_set_.erase(x);
+			x = alarm_callback_object_set_.begin();	// Shouldn't be necessary, but is!
+		} else {
 			++x;
 		}
 	}
 }
 
-void ContextManager::CancelPendingAlarmCallbacks(ContextObject* pObject)
-{
+void ContextManager::CancelPendingAlarmCallbacks(ContextObject* object) {
 	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
 
-	ScopeLock lLock(&mAlarmMutex);
-	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
-	while (x != mAlarmCallbackObjectSet.end())
-	{
-		if (x->mObject == pObject)
-		{
-			mAlarmCallbackObjectSet.erase(x);
-			x = mAlarmCallbackObjectSet.begin();	// Shouldn't be necessary, but is!
-		}
-		else
-		{
+	ScopeLock lock(&alarm_mutex_);
+	AlarmSet::iterator x = alarm_callback_object_set_.begin();
+	while (x != alarm_callback_object_set_.end()) {
+		if (x->object_ == object) {
+			alarm_callback_object_set_.erase(x);
+			x = alarm_callback_object_set_.begin();	// Shouldn't be necessary, but is!
+		} else {
 			++x;
 		}
 	}
 
-	CHECK_OBJ_ALARM_ERASED(pObject);
+	CHECK_OBJ_ALARM_ERASED(object);
 }
 
 
 
-void ContextManager::MicroTick(float pTimeDelta)
-{
-	DispatchMicroTickCallbacks(pTimeDelta);
+void ContextManager::MicroTick(float time_delta) {
+	DispatchMicroTickCallbacks(time_delta);
 }
 
-void ContextManager::TickPhysics()
-{
+void ContextManager::TickPhysics() {
 	DispatchTickCallbacks();
 	DispatchAlarmCallbacks();
 }
 
-void ContextManager::HandleIdledBodies()
-{
-	typedef Tbc::PhysicsManager::BodySet BodySet;
-	const BodySet& lBodySet = mGameManager->GetPhysicsManager()->GetIdledBodies();
-	BodySet::const_iterator x = lBodySet.begin();
-	for (; x != lBodySet.end(); ++x)
-	{
-		BodyTable::iterator y = mBodyTable.find(*x);
-		if (y != mBodyTable.end())
-		{
-			mGameManager->OnStopped(y->second, y->first);
+void ContextManager::HandleIdledBodies() {
+	typedef tbc::PhysicsManager::BodySet BodySet;
+	const BodySet& body_set = game_manager_->GetPhysicsManager()->GetIdledBodies();
+	BodySet::const_iterator x = body_set.begin();
+	for (; x != body_set.end(); ++x) {
+		BodyTable::iterator y = body_table_.find(*x);
+		if (y != body_table_.end()) {
+			game_manager_->OnStopped(y->second, y->first);
 		}
-		/*else
-		{
-			mLog.Error("Body not present in body table!");
+		/*else {
+			log_.Error("Body not present in body table!");
 		}*/
 	}
 }
 
-void ContextManager::HandlePhysicsSend()
-{
-	ContextObjectTable::iterator x = mPhysicsSenderObjectTable.begin();
-	while (x != mPhysicsSenderObjectTable.end())
-	{
-		if (mGameManager->OnPhysicsSend(x->second))
-		{
-			mPhysicsSenderObjectTable.erase(x++);
-		}
-		else
-		{
+void ContextManager::HandlePhysicsSend() {
+	ContextObjectTable::iterator x = physics_sender_object_table_.begin();
+	while (x != physics_sender_object_table_.end()) {
+		if (game_manager_->OnPhysicsSend(x->second)) {
+			physics_sender_object_table_.erase(x++);
+		} else {
 			++x;
 		}
 	}
 }
 
-void ContextManager::HandleAttributeSend()
-{
-	ContextObjectTable::iterator x = mAttributeSenderObjectTable.begin();
-	while (x != mAttributeSenderObjectTable.end())
-	{
-		if (mGameManager->OnAttributeSend(x->second))
-		{
-			mAttributeSenderObjectTable.erase(x++);
-		}
-		else
-		{
+void ContextManager::HandleAttributeSend() {
+	ContextObjectTable::iterator x = attribute_sender_object_table_.begin();
+	while (x != attribute_sender_object_table_.end()) {
+		if (game_manager_->OnAttributeSend(x->second)) {
+			attribute_sender_object_table_.erase(x++);
+		} else {
 			++x;
 		}
 	}
 }
 
-void ContextManager::HandlePostKill()
-{
-	HiResTimer lTimer(false);
-	while (!mPostKillSet.empty())
-	{
-		mGameManager->DeleteContextObject(*mPostKillSet.begin());
-		mPostKillSet.erase(mPostKillSet.begin());
-		double lDelta = lTimer.QueryTimeDiff();
-		if (lDelta > mMaxPostKillProcessingTime)	// Time's up, have a go later.
-		{
+void ContextManager::HandlePostKill() {
+	HiResTimer timer(false);
+	while (!post_kill_set_.empty()) {
+		game_manager_->DeleteContextObject(*post_kill_set_.begin());
+		post_kill_set_.erase(post_kill_set_.begin());
+		double delta = timer.QueryTimeDiff();
+		if (delta > max_post_kill_processing_time_) {	// Time's up, have a go later.
 			break;
 		}
 	}
 
-	RecycledIdQueue::iterator y = mRecycledIdQueue.begin();
-	while (y != mRecycledIdQueue.end())
-	{
-		if (y->mTimer.QueryTimeDiff() < 10.0)
-		{
+	RecycledIdQueue::iterator y = recycled_id_queue_.begin();
+	while (y != recycled_id_queue_.end()) {
+		if (y->timer_.QueryTimeDiff() < 10.0) {
 			break;
 		}
-		if (y->mNetworkType == NETWORK_OBJECT_LOCAL_ONLY)
-		{
-			mLocalObjectIdManager.RecycleId(y->mInstanceId);
+		if (y->network_type_ == kNetworkObjectLocalOnly) {
+			local_object_id_manager_.RecycleId(y->instance_id_);
+		} else {
+			remote_object_id_manager_.RecycleId(y->instance_id_);
 		}
-		else
-		{
-			mRemoteObjectIdManager.RecycleId(y->mInstanceId);
-		}
-		y = mRecycledIdQueue.erase(y);
+		y = recycled_id_queue_.erase(y);
 	}
 }
 
 
 
-void ContextManager::DoAddAlarmCallback(Alarm& pAlarm, float pSeconds)
-{
-	deb_assert(pAlarm.mObject->GetInstanceId() != 0);
-	deb_assert(pAlarm.mObject->GetManager() == this);
-	deb_assert(GetObject(pAlarm.mObject->GetInstanceId(), true) == pAlarm.mObject);
+void ContextManager::DoAddAlarmCallback(Alarm& alarm, float seconds) {
+	deb_assert(alarm.object_->GetInstanceId() != 0);
+	deb_assert(alarm.object_->GetManager() == this);
+	deb_assert(GetObject(alarm.object_->GetInstanceId(), true) == alarm.object_);
 
-	const TimeManager* lTime = ((const GameManager*)mGameManager)->GetTimeManager();
-	pAlarm.mFrameTime = lTime->GetCurrentPhysicsFrameAddSeconds(pSeconds);
-	ScopeLock lLock(&mAlarmMutex);
-	mAlarmCallbackObjectSet.insert(pAlarm);
+	const TimeManager* time = ((const GameManager*)game_manager_)->GetTimeManager();
+	alarm.frame_time_ = time->GetCurrentPhysicsFrameAddSeconds(seconds);
+	ScopeLock lock(&alarm_mutex_);
+	alarm_callback_object_set_.insert(alarm);
 }
 
-void ContextManager::OnDelayedDelete(int, ContextObject* pObject, void*)
-{
-	PostKillObject(pObject->GetInstanceId());
+void ContextManager::OnDelayedDelete(int, ContextObject* object, void*) {
+	PostKillObject(object->GetInstanceId());
 }
 
-void ContextManager::DispatchTickCallbacks()
-{
-	ContextObjectTable::iterator x = mTickCallbackObjectTable.begin();
-	for (; x != mTickCallbackObjectTable.end(); ++x)
-	{
-		ContextObject* lObject = x->second;
-		lObject->OnTick();
+void ContextManager::DispatchTickCallbacks() {
+	ContextObjectTable::iterator x = tick_callback_object_table_.begin();
+	for (; x != tick_callback_object_table_.end(); ++x) {
+		ContextObject* _object = x->second;
+		_object->OnTick();
 	}
 }
 
-void ContextManager::DispatchMicroTickCallbacks(float pTimeDelta)
-{
-	ContextObjectTable::iterator x = mMicroTickCallbackObjectTable.begin();
-	for (; x != mMicroTickCallbackObjectTable.end(); ++x)
-	{
-		x->second->OnMicroTick(pTimeDelta);
+void ContextManager::DispatchMicroTickCallbacks(float time_delta) {
+	ContextObjectTable::iterator x = micro_tick_callback_object_table_.begin();
+	for (; x != micro_tick_callback_object_table_.end(); ++x) {
+		x->second->OnMicroTick(time_delta);
 	}
 }
 
-void ContextManager::DispatchAlarmCallbacks()
-{
+void ContextManager::DispatchAlarmCallbacks() {
 	// Divide dispatch into two parts to avoid callbacks messing up the skiplist:
 	// 1. Extract due alarms into list.
 	// 2. Callback alarms.
 
-	ScopeLock lLock(&mAlarmMutex);
+	ScopeLock lock(&alarm_mutex_);
 
-	std::list<Alarm> lCallbackList;
-	AlarmSet::iterator x = mAlarmCallbackObjectSet.begin();
-	while (x != mAlarmCallbackObjectSet.end())
-	{
-		if (mGameManager->GetTimeManager()->GetCurrentPhysicsFrameDelta(x->mFrameTime) >= 0)
-		{
-			deb_assert(!x->mObject->GetClassId().empty());
-			lCallbackList.push_back(*x);
-			mAlarmCallbackObjectSet.erase(x);
-			x = mAlarmCallbackObjectSet.begin();	// Shouldn't be necessary, but is!
-		}
-		else
-		{
+	std::list<Alarm> callback_list;
+	AlarmSet::iterator x = alarm_callback_object_set_.begin();
+	while (x != alarm_callback_object_set_.end()) {
+		if (game_manager_->GetTimeManager()->GetCurrentPhysicsFrameDelta(x->frame_time_) >= 0) {
+			deb_assert(!x->object_->GetClassId().empty());
+			callback_list.push_back(*x);
+			alarm_callback_object_set_.erase(x);
+			x = alarm_callback_object_set_.begin();	// Shouldn't be necessary, but is!
+		} else {
 			++x;
 		}
 	}
 
 	// Callback alarms.
-	for (std::list<Alarm>::iterator x = lCallbackList.begin(); x != lCallbackList.end(); ++x)
-	{
-		const Alarm& lAlarm = *x;
-		if (lAlarm.mCallback.empty())
-		{
-			lAlarm.mObject->OnAlarm(lAlarm.mAlarmId, lAlarm.mExtraData);
-		}
-		else
-		{
-			lAlarm.mCallback(lAlarm.mAlarmId, lAlarm.mObject, lAlarm.mExtraData);
+	for (std::list<Alarm>::iterator x = callback_list.begin(); x != callback_list.end(); ++x) {
+		const Alarm& _alarm = *x;
+		if (_alarm.callback_.empty()) {
+			_alarm.object_->OnAlarm(_alarm.alarm_id_, _alarm.extra_data_);
+		} else {
+			_alarm.callback_(_alarm.alarm_id_, _alarm.object_, _alarm.extra_data_);
 		}
 	}
 }
 
 
 
-loginstance(GAME_CONTEXT, ContextManager);
+loginstance(kGameContext, ContextManager);
 
 
 

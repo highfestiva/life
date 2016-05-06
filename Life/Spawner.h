@@ -1,26 +1,24 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/Spawner.h"
-#include "Life.h"
+#include "../cure/include/spawner.h"
+#include "life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class Spawner: public Cure::Spawner
-{
-	typedef Cure::Spawner Parent;
+class Spawner: public cure::Spawner {
+	typedef cure::Spawner Parent;
 public:
-	Spawner(Cure::ContextManager* pManager);
+	Spawner(cure::ContextManager* manager);
 	virtual ~Spawner();
 
 private:

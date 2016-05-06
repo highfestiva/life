@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,51 +8,42 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class HashUtil
-{
+class HashUtil {
 public:
 	template<class _HashSetType> static typename _HashSetType::key_type
-		FindSetObject(const _HashSetType& pHashSetType, typename _HashSetType::key_type pKey)
-	{
-		return FindSetObjectDefault(pHashSetType, pKey, typename _HashSetType::key_type(0));
+		FindSetObject(const _HashSetType& hash_set_type, typename _HashSetType::key_type key) {
+		return FindSetObjectDefault(hash_set_type, key, typename _HashSetType::key_type(0));
 	}
 
 	template<class _HashSetType> static typename _HashSetType::key_type
-		FindSetObjectDefault(const _HashSetType& pHashSetType, typename _HashSetType::key_type pKey,
-			typename _HashSetType::key_type pDefault)
-	{
-		typename _HashSetType::const_iterator x = pHashSetType.find(pKey);
-		if (x != pHashSetType.end())
-		{
+		FindSetObjectDefault(const _HashSetType& hash_set_type, typename _HashSetType::key_type key,
+			typename _HashSetType::key_type _default) {
+		typename _HashSetType::const_iterator x = hash_set_type.find(key);
+		if (x != hash_set_type.end()) {
 			return *x;
 		}
-		return pDefault;
+		return _default;
 	}
 
 	template<class _HashMapType> static typename _HashMapType::mapped_type
-		FindMapObject(const _HashMapType& pHashMapType, typename _HashMapType::key_type pKey)
-	{
-		typename _HashMapType::const_iterator x = pHashMapType.find(pKey);
-		if (x != pHashMapType.end())
-		{
+		FindMapObject(const _HashMapType& hash_map_type, typename _HashMapType::key_type key) {
+		typename _HashMapType::const_iterator x = hash_map_type.find(key);
+		if (x != hash_map_type.end()) {
 			return x->second;
 		}
 		return typename _HashMapType::mapped_type(0);
 	}
 
 	template<class _HashMapType> static bool
-		TryFindMapObject(const _HashMapType& pHashMapType, typename _HashMapType::key_type pKey,
-			typename _HashMapType::mapped_type& pValue)
-	{
-		typename _HashMapType::const_iterator x = pHashMapType.find(pKey);
-		if (x != pHashMapType.end())
-		{
-			pValue = x->second;
+		TryFindMapObject(const _HashMapType& hash_map_type, typename _HashMapType::key_type key,
+			typename _HashMapType::mapped_type& value) {
+		typename _HashMapType::const_iterator x = hash_map_type.find(key);
+		if (x != hash_map_type.end()) {
+			value = x->second;
 			return true;
 		}
 		return false;

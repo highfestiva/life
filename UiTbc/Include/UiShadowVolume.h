@@ -1,35 +1,33 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiTbc.h"
-#include "../../Tbc/Include/GeometryBase.h"
-#include "../../Lepra/Include/Transformation.h"
+#include "uitbc.h"
+#include "../../tbc/include/geometrybase.h"
+#include "../../lepra/include/transformation.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class ShadowVolume: public Tbc::GeometryBase
-{
+class ShadowVolume: public tbc::GeometryBase {
 public:
-	ShadowVolume(Tbc::GeometryBase* pParentGeometry);
+	ShadowVolume(tbc::GeometryBase* parent_geometry);
 	virtual ~ShadowVolume();
 
-	void UpdateShadowVolume(const vec3& pLightPos, float pLightRadius, bool pDirectional);
+	void UpdateShadowVolume(const vec3& light_pos, float light_radius, bool directional);
 
-	Tbc::GeometryBase* GetParentGeometry();
-	void SetParentGeometry(Tbc::GeometryBase* pParentGeometry);
+	tbc::GeometryBase* GetParentGeometry();
+	void SetParentGeometry(tbc::GeometryBase* parent_geometry);
 
-	Tbc::GeometryBase::GeometryVolatility GetGeometryVolatility() const;
-	void SetGeometryVolatility(Tbc::GeometryBase::GeometryVolatility pVolatility);
+	tbc::GeometryBase::GeometryVolatility GetGeometryVolatility() const;
+	void SetGeometryVolatility(tbc::GeometryBase::GeometryVolatility volatility);
 
 	unsigned int GetMaxVertexCount()  const;
 	unsigned int GetMaxIndexCount() const;
@@ -39,42 +37,41 @@ public:
 	unsigned int GetUVSetCount()    const;
 
 	float*         GetVertexData() const;
-	float*         GetUVData(unsigned int pUVSet) const;
+	float*         GetUVData(unsigned int uv_set) const;
 	vtx_idx_t*     GetIndexData() const;
-	Lepra::uint8*  GetColorData() const;
+	lepra::uint8*  GetColorData() const;
 	float*         GetNormalData() const;
 
 protected:
 	void ExtrudeEdges();
 private:
 
-	struct TriangleOrientation
-	{
-		unsigned mV0;
-		unsigned mV1;
-		unsigned mV2;
-		bool mChecked;
-		bool mIsFrontFacing;
+	struct TriangleOrientation {
+		unsigned v0_;
+		unsigned v1_;
+		unsigned v2_;
+		bool checked_;
+		bool is_front_facing_;
 	};
 
 	void InitVertices();
 	void InitTO();
 
-	float* mVertexData;
-	vtx_idx_t* mIndexData;
+	float* vertex_data_;
+	vtx_idx_t* index_data_;
 
 	// Array with mNumParentTriangles elements.
-	TriangleOrientation* mTriangleOrientation;
+	TriangleOrientation* triangle_orientation_;
 
-	unsigned int mVertexCount;
-	unsigned int mTriangleCount;
-	unsigned int mParentVertexCount;
-	unsigned int mMaxTriangleCount;
+	unsigned int vertex_count_;
+	unsigned int triangle_count_;
+	unsigned int parent_vertex_count_;
+	unsigned int max_triangle_count_;
 
-	quat mPreviousOrientation;
+	quat previous_orientation_;
 
 	// The geometry that cast this shadow.
-	Tbc::GeometryBase* mParentGeometry;
+	tbc::GeometryBase* parent_geometry_;
 };
 
 

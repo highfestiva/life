@@ -5,168 +5,139 @@
 
 
 #include "pch.h"
-#include "../Include/ChunkyClass.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/Endian.h"
-#include "../../Lepra/Include/HashUtil.h"
-#include "../../Lepra/Include/Packer.h"
+#include "../include/chunkyclass.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/endian.h"
+#include "../../lepra/include/hashutil.h"
+#include "../../lepra/include/packer.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-ChunkyClass::ChunkyClass()
-{
+ChunkyClass::ChunkyClass() {
 }
 
-ChunkyClass::~ChunkyClass()
-{
+ChunkyClass::~ChunkyClass() {
 }
 
 
 
-const str& ChunkyClass::GetPhysicsBaseName() const
-{
-	return (mPhysicsBaseName);
+const str& ChunkyClass::GetPhysicsBaseName() const {
+	return (physics_base_name_);
 }
 
-str& ChunkyClass::GetPhysicsBaseName()
-{
-	return (mPhysicsBaseName);
+str& ChunkyClass::GetPhysicsBaseName() {
+	return (physics_base_name_);
 }
 
 
 
-bool ChunkyClass::UnpackTag(uint8* pBuffer, unsigned pSize)
-{
-	bool lOk = true;
-	int lIndex = 0;
-	Tag lTag;
-	lTag.mTagName = "<unknown>";
-	if (lOk)
-	{
-		int lStrSize = PackerUnicodeString::Unpack(lTag.mTagName, &pBuffer[lIndex], pSize-lIndex);
-		lStrSize = (lStrSize+3)&(~3);
-		lOk = (lIndex+lStrSize < (int)pSize);
-		deb_assert(lOk);
-		lIndex += lStrSize;
+bool ChunkyClass::UnpackTag(uint8* buffer, unsigned _size) {
+	bool ok = true;
+	int index = 0;
+	Tag _tag;
+	_tag.tag_name_ = "<unknown>";
+	if (ok) {
+		int str_size = PackerUnicodeString::Unpack(_tag.tag_name_, &buffer[index], _size-index);
+		str_size = (str_size+3)&(~3);
+		ok = (index+str_size < (int)_size);
+		deb_assert(ok);
+		index += str_size;
 	}
-	if (lOk)
-	{
-		const int32 lFloatValueCount = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
-		lIndex += sizeof(lFloatValueCount);
-		for (int x = 0; x < lFloatValueCount; ++x)
-		{
-			const float lValue = Endian::BigToHostF(*(uint32*)&pBuffer[lIndex]);
-			lIndex += sizeof(lValue);
-			lTag.mFloatValueList.push_back(lValue);
+	if (ok) {
+		const int32 float_value_count = Endian::BigToHost(*(int32*)&buffer[index]);
+		index += sizeof(float_value_count);
+		for (int x = 0; x < float_value_count; ++x) {
+			const float value = Endian::BigToHostF(*(uint32*)&buffer[index]);
+			index += sizeof(value);
+			_tag.float_value_list_.push_back(value);
 		}
 	}
-	if (lOk)
-	{
-		const int32 lStringValueCount = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
-		lIndex += sizeof(lStringValueCount);
-		for (int x = 0; lOk && x < lStringValueCount; ++x)
-		{
-			str lValue;
-			int lStrSize = PackerUnicodeString::Unpack(lValue, &pBuffer[lIndex], pSize-lIndex);
-			lStrSize = (lStrSize+3)&(~3);
-			lOk = (lIndex+lStrSize < (int)pSize);
-			deb_assert(lOk);
-			if (!lOk)
-			{
-				mLog.Errorf("String index %i had wrong length (%i).", x, lStrSize);
+	if (ok) {
+		const int32 string_value_count = Endian::BigToHost(*(int32*)&buffer[index]);
+		index += sizeof(string_value_count);
+		for (int x = 0; ok && x < string_value_count; ++x) {
+			str value;
+			int str_size = PackerUnicodeString::Unpack(value, &buffer[index], _size-index);
+			str_size = (str_size+3)&(~3);
+			ok = (index+str_size < (int)_size);
+			deb_assert(ok);
+			if (!ok) {
+				log_.Errorf("String index %i had wrong length (%i).", x, str_size);
 			}
-			lIndex += lStrSize;
-			lTag.mStringValueList.push_back(lValue);
+			index += str_size;
+			_tag.string_value_list_.push_back(value);
 		}
 	}
-	if (lOk)
-	{
-		const int32 lBodyIndexCount = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
-		lIndex += sizeof(lBodyIndexCount);
-		for (int x = 0; x < lBodyIndexCount; ++x)
-		{
-			const int32 lBodyIndex = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
-			deb_assert(lBodyIndex >= 0 && lBodyIndex < 200);
-			lIndex += sizeof(lBodyIndex);
-			lTag.mBodyIndexList.push_back(lBodyIndex);
+	if (ok) {
+		const int32 body_index_count = Endian::BigToHost(*(int32*)&buffer[index]);
+		index += sizeof(body_index_count);
+		for (int x = 0; x < body_index_count; ++x) {
+			const int32 body_index = Endian::BigToHost(*(int32*)&buffer[index]);
+			deb_assert(body_index >= 0 && body_index < 200);
+			index += sizeof(body_index);
+			_tag.body_index_list_.push_back(body_index);
 		}
 	}
-	if (lOk)
-	{
-		const int32 lEngineIndexCount = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
-		lIndex += sizeof(lEngineIndexCount);
-		for (int x = 0; x < lEngineIndexCount; ++x)
-		{
-			const int32 lEngineIndex = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
-			deb_assert(lEngineIndex >= 0 && lEngineIndex < 20);
-			lIndex += sizeof(lEngineIndex);
-			lTag.mEngineIndexList.push_back(lEngineIndex);
+	if (ok) {
+		const int32 engine_index_count = Endian::BigToHost(*(int32*)&buffer[index]);
+		index += sizeof(engine_index_count);
+		for (int x = 0; x < engine_index_count; ++x) {
+			const int32 engine_index = Endian::BigToHost(*(int32*)&buffer[index]);
+			deb_assert(engine_index >= 0 && engine_index < 20);
+			index += sizeof(engine_index);
+			_tag.engine_index_list_.push_back(engine_index);
 		}
 	}
-	if (lOk)
-	{
-		const int32 lMeshIndexCount = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
-		lIndex += sizeof(lMeshIndexCount);
-		for (int x = 0; x < lMeshIndexCount; ++x)
-		{
-			const int32 lMeshIndex = Endian::BigToHost(*(int32*)&pBuffer[lIndex]);
-			//deb_assert(lMeshIndex >= 0 && lMeshIndex < (int32)GetMeshCount());
-			lIndex += sizeof(lMeshIndex);
-			lTag.mMeshIndexList.push_back(lMeshIndex);
+	if (ok) {
+		const int32 mesh_index_count = Endian::BigToHost(*(int32*)&buffer[index]);
+		index += sizeof(mesh_index_count);
+		for (int x = 0; x < mesh_index_count; ++x) {
+			const int32 mesh_index = Endian::BigToHost(*(int32*)&buffer[index]);
+			//deb_assert(mesh_index >= 0 && mesh_index < (int32)GetMeshCount());
+			index += sizeof(mesh_index);
+			_tag.mesh_index_list_.push_back(mesh_index);
 		}
 	}
-	lOk = (lIndex == (int)pSize);
-	deb_assert(lOk);
-	if (lOk)
-	{
-		AddTag(lTag);
+	ok = (index == (int)_size);
+	deb_assert(ok);
+	if (ok) {
+		AddTag(_tag);
+	} else {
+		log_.Errorf("File error: could not unpack class tag of type %s.", _tag.tag_name_.c_str());
 	}
-	else
-	{
-		mLog.Errorf("File error: could not unpack class tag of type %s.", lTag.mTagName.c_str());
-	}
-	return (lOk);
+	return (ok);
 }
 
-void ChunkyClass::AddTag(const Tag& pTag)
-{
-	mTagArray.push_back(pTag);
+void ChunkyClass::AddTag(const Tag& tag) {
+	tag_array_.push_back(tag);
 }
 
-void ChunkyClass::RemoveTag(size_t pTagIndex)
-{
-	if (pTagIndex >= GetTagCount())
-	{
+void ChunkyClass::RemoveTag(size_t tag_index) {
+	if (tag_index >= GetTagCount()) {
 		deb_assert(false);
 		return;
 	}
-	mTagArray.erase(mTagArray.begin()+pTagIndex);
+	tag_array_.erase(tag_array_.begin()+tag_index);
 }
 
-size_t ChunkyClass::GetTagCount() const
-{
-	return (mTagArray.size());
+size_t ChunkyClass::GetTagCount() const {
+	return (tag_array_.size());
 }
 
-const ChunkyClass::Tag& ChunkyClass::GetTag(size_t pTagIndex) const
-{
-	deb_assert(pTagIndex < GetTagCount());
-	return (mTagArray[pTagIndex]);
+const ChunkyClass::Tag& ChunkyClass::GetTag(size_t tag_index) const {
+	deb_assert(tag_index < GetTagCount());
+	return (tag_array_[tag_index]);
 }
 
-const ChunkyClass::Tag* ChunkyClass::GetTag(const str& pTagName) const
-{
-	for (size_t x = 0, n = GetTagCount(); x < n; ++x)
-	{
-		const ChunkyClass::Tag& lTag = mTagArray[x];
-		if (lTag.mTagName == pTagName)
-		{
-			return &lTag;
+const ChunkyClass::Tag* ChunkyClass::GetTag(const str& tag_name) const {
+	for (size_t x = 0, n = GetTagCount(); x < n; ++x) {
+		const ChunkyClass::Tag& _tag = tag_array_[x];
+		if (_tag.tag_name_ == tag_name) {
+			return &_tag;
 		}
 	}
 	return 0;
@@ -174,19 +145,17 @@ const ChunkyClass::Tag* ChunkyClass::GetTag(const str& pTagName) const
 
 
 
-void ChunkyClass::AddPhysRoot(int pPhysIndex)
-{
-	mPhysRootSet.insert(pPhysIndex);
+void ChunkyClass::AddPhysRoot(int phys_index) {
+	phys_root_set_.insert(phys_index);
 }
 
-bool ChunkyClass::IsPhysRoot(int pPhysIndex) const
-{
-	return (HashUtil::FindSetObjectDefault(mPhysRootSet, pPhysIndex, -1) == pPhysIndex);
+bool ChunkyClass::IsPhysRoot(int phys_index) const {
+	return (HashUtil::FindSetObjectDefault(phys_root_set_, phys_index, -1) == phys_index);
 }
 
 
 
-loginstance(GAME_CONTEXT, ChunkyClass);
+loginstance(kGameContext, ChunkyClass);
 
 
 

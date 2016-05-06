@@ -1,77 +1,68 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiChunkyClass.h"
-#include "../../Lepra/Include/LepraAssert.h"
+#include "../include/uichunkyclass.h"
+#include "../../lepra/include/lepraassert.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
 ChunkyClass::Material::Material():
-	mAmbient(0,0,0),
-	mDiffuse(1,1,1),
-	mSpecular(0.1f,0.1f,0.1f),
-	mShininess(0),
-	mAlpha(1),
-	mSmooth(true)
-{
+	ambient_(0,0,0),
+	diffuse_(1,1,1),
+	specular_(0.1f,0.1f,0.1f),
+	shininess_(0),
+	alpha_(1),
+	smooth_(true) {
 }
 
 
 
-ChunkyClass::ChunkyClass()
-{
+ChunkyClass::ChunkyClass() {
 }
 
-ChunkyClass::~ChunkyClass()
-{
-}
-
-
-
-void ChunkyClass::AddMesh(int pPhysIndex, const str& pMeshBaseName, const xform& pTransform, float pScale)
-{
-	mMeshArray.push_back(PhysMeshEntry(pPhysIndex, pMeshBaseName, pTransform, pScale));
-}
-
-size_t ChunkyClass::GetMeshCount() const
-{
-	return (mMeshArray.size());
-}
-
-void ChunkyClass::GetMesh(size_t pIndex, int& pPhysIndex, str& pMeshBaseName, xform& pTransform, float& pScale) const
-{
-	deb_assert(pIndex < mMeshArray.size());
-	pPhysIndex = mMeshArray[pIndex].mPhysIndex;
-	pMeshBaseName = mMeshArray[pIndex].mMeshBaseName;
-	pTransform = mMeshArray[pIndex].mTransform;
-	pScale = mMeshArray[pIndex].mScale;
-}
-
-void ChunkyClass::SetLastMeshMaterial(const Material& pMaterial)
-{
-	deb_assert(!mMeshArray.empty());
-	const size_t lLastMesh = mMeshArray.size()-1;
-	mMeshArray[lLastMesh].mMaterial = pMaterial;
-}
-
-const ChunkyClass::Material& ChunkyClass::GetMaterial(size_t pMeshIndex) const
-{
-	deb_assert(pMeshIndex < mMeshArray.size());
-	return (mMeshArray[pMeshIndex].mMaterial);
+ChunkyClass::~ChunkyClass() {
 }
 
 
 
-loginstance(GAME_CONTEXT, ChunkyClass);
+void ChunkyClass::AddMesh(int phys_index, const str& mesh_base_name, const xform& transform, float scale) {
+	mesh_array_.push_back(PhysMeshEntry(phys_index, mesh_base_name, transform, scale));
+}
+
+size_t ChunkyClass::GetMeshCount() const {
+	return (mesh_array_.size());
+}
+
+void ChunkyClass::GetMesh(size_t index, int& phys_index, str& mesh_base_name, xform& transform, float& scale) const {
+	deb_assert(index < mesh_array_.size());
+	phys_index = mesh_array_[index].phys_index_;
+	mesh_base_name = mesh_array_[index].mesh_base_name_;
+	transform = mesh_array_[index].transform_;
+	scale = mesh_array_[index].scale_;
+}
+
+void ChunkyClass::SetLastMeshMaterial(const Material& material) {
+	deb_assert(!mesh_array_.empty());
+	const size_t last_mesh = mesh_array_.size()-1;
+	mesh_array_[last_mesh].material_ = material;
+}
+
+const ChunkyClass::Material& ChunkyClass::GetMaterial(size_t mesh_index) const {
+	deb_assert(mesh_index < mesh_array_.size());
+	return (mesh_array_[mesh_index].material_);
+}
+
+
+
+loginstance(kGameContext, ChunkyClass);
 
 
 

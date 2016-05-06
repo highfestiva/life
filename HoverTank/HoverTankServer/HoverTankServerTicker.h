@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,21 +8,19 @@
 
 
 
-#include "../../Life/LifeServer/GameServerTicker.h"
-#include "../HoverTank.h"
+#include "../../life/lifeserver/gameserverticker.h"
+#include "../hovertank.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-class HoverTankServerTicker: public Life::GameServerTicker
-{
-	typedef Life::GameServerTicker Parent;
+class HoverTankServerTicker: public life::GameServerTicker {
+	typedef life::GameServerTicker Parent;
 public:
-	HoverTankServerTicker(Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
+	HoverTankServerTicker(cure::ResourceManager* resource_manager, float physics_radius, int physics_levels, float physics_sensitivity);
 	virtual ~HoverTankServerTicker();
 };
 

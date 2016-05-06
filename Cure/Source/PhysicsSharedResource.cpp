@@ -5,195 +5,166 @@
 
 
 #include "pch.h"
-#include "../Include/PhysicsSharedResource.h"
-#include "../../Tbc/Include/ChunkyBoneGeometry.h"
-#include "../../Tbc/Include/ChunkyPhysics.h"
-#include "../Include/PositionalData.h"
-#include "../Include/PositionHauler.h"
+#include "../include/physicssharedresource.h"
+#include "../../tbc/include/chunkybonegeometry.h"
+#include "../../tbc/include/chunkyphysics.h"
+#include "../include/positionaldata.h"
+#include "../include/positionhauler.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-PhysicsSharedInitData::PhysicsSharedInitData(const xform& pTransformation, const vec3& pVelocity, PhysicsOverride pPhysicsOverride,
-		Lock* pPhysicsLock, Tbc::PhysicsManager* pPhysicsManager, int pPhysicsFps, GameObjectId pInstanceId):
-	mTransformation(pTransformation),
-	mVelocity(pVelocity),
-	mPhysicsOverride(pPhysicsOverride),
-	mPhysicsLock(pPhysicsLock),
-	mPhysicsManager(pPhysicsManager),
-	mPhysicsFps(pPhysicsFps),
-	mInstanceId(pInstanceId)
-{
+PhysicsSharedInitData::PhysicsSharedInitData(const xform& transformation, const vec3& velocity, PhysicsOverride physics_override,
+		Lock* physics_lock, tbc::PhysicsManager* physics_manager, int physics_fps, GameObjectId instance_id):
+	transformation_(transformation),
+	velocity_(velocity),
+	physics_override_(physics_override),
+	physics_lock_(physics_lock),
+	physics_manager_(physics_manager),
+	physics_fps_(physics_fps),
+	instance_id_(instance_id) {
 }
 
-void PhysicsSharedInitData::operator=(const PhysicsSharedInitData&)
-{
+void PhysicsSharedInitData::operator=(const PhysicsSharedInitData&) {
 	deb_assert(false);
 }
 
 
 
-PhysicsSharedResource::PhysicsSharedResource(ResourceManager* pManager, const str& pName, const PhysicsSharedInitData& pInitData):
-	Parent(pManager, pName),
-	mClassResource(new ClassResource),
-	mInitData(pInitData),
-	mPhysicsLoadState(RESOURCE_UNLOADED)
-{
+PhysicsSharedResource::PhysicsSharedResource(ResourceManager* manager, const str& name, const PhysicsSharedInitData& init_data):
+	Parent(manager, name),
+	class_resource_(new ClassResource),
+	init_data_(init_data),
+	physics_load_state_(kResourceUnloaded) {
 }
 
-PhysicsSharedResource::~PhysicsSharedResource()
-{
-	delete mClassResource;
-	mClassResource = 0;
+PhysicsSharedResource::~PhysicsSharedResource() {
+	delete class_resource_;
+	class_resource_ = 0;
 
-	Tbc::ChunkyPhysics* lStructure = GetRamData();
-	if (lStructure)
-	{
-		ScopeLock lLock(mInitData.mPhysicsLock);
-		lStructure->ClearAll(mInitData.mPhysicsManager);
+	tbc::ChunkyPhysics* structure = GetRamData();
+	if (structure) {
+		ScopeLock lock(init_data_.physics_lock_);
+		structure->ClearAll(init_data_.physics_manager_);
 	}
 }
 
-ResourceLoadState PhysicsSharedResource::InjectPostProcess()
-{
+ResourceLoadState PhysicsSharedResource::InjectPostProcess() {
 	// TODO: leave this code be, if you try calling PostProcess() instead you won't
 	//       be able to discover an already initialized resource.
-	if (mPhysicsLoadState != RESOURCE_UNLOADED)
-	{
+	if (physics_load_state_ != kResourceUnloaded) {
 		// Already initialized for another context object.
-		return mPhysicsLoadState;
+		return physics_load_state_;
 	}
 
-	ResourceLoadState lLoadState = mClassResource->GetLoadState();
-	if (lLoadState != RESOURCE_LOAD_COMPLETE)
-	{
-		return lLoadState;	// Probably "in progress", die another day.
+	ResourceLoadState load_state = class_resource_->GetLoadState();
+	if (load_state != kResourceLoadComplete) {
+		return load_state;	// Probably "in progress", die another day.
 	}
 
 	// First initalization of shared reference or unique instance.
-	mPhysicsLoadState = RESOURCE_LOAD_ERROR;
-	if (FinalizeInit())
-	{
-		mPhysicsLoadState = Parent::PostProcess();
+	physics_load_state_ = kResourceLoadError;
+	if (FinalizeInit()) {
+		physics_load_state_ = Parent::PostProcess();
 	}
-	return mPhysicsLoadState;
+	return physics_load_state_;
 }
 
-const str PhysicsSharedResource::GetType() const
-{
+const str PhysicsSharedResource::GetType() const {
 	return "PhysicsShared";
 }
 
-bool PhysicsSharedResource::IsReferenceType() const
-{
+bool PhysicsSharedResource::IsReferenceType() const {
 	return true;
 }
 
-PhysicsSharedResource::ClassResource* PhysicsSharedResource::GetParent() const
-{
-	return mClassResource;
+PhysicsSharedResource::ClassResource* PhysicsSharedResource::GetParent() const {
+	return class_resource_;
 }
 
 
 
-bool PhysicsSharedResource::Load()
-{
-	const str lFilename = strutil::Split(GetName(), ";", 1)[0];
-	deb_assert(lFilename != GetName());
-	mClassResource->Load(GetManager(), lFilename, ClassResource::TypeLoadCallback(this, &PhysicsSharedResource::OnLoadClass));
+bool PhysicsSharedResource::Load() {
+	const str filename = strutil::Split(GetName(), ";", 1)[0];
+	deb_assert(filename != GetName());
+	class_resource_->Load(GetManager(), filename, ClassResource::TypeLoadCallback(this, &PhysicsSharedResource::OnLoadClass));
 	return true;
 }
 
-ResourceLoadState PhysicsSharedResource::PostProcess()
-{
-	if (mPhysicsLoadState != RESOURCE_UNLOADED)
-	{
+ResourceLoadState PhysicsSharedResource::PostProcess() {
+	if (physics_load_state_ != kResourceUnloaded) {
 		// Already initialized for another context object.
-		return mPhysicsLoadState;
+		return physics_load_state_;
 	}
 
-	ResourceLoadState lLoadState = mClassResource->GetLoadState();
-	if (lLoadState != RESOURCE_LOAD_COMPLETE)
-	{
-		return lLoadState;	// Probably "in progress", die another day.
+	ResourceLoadState load_state = class_resource_->GetLoadState();
+	if (load_state != kResourceLoadComplete) {
+		return load_state;	// Probably "in progress", die another day.
 	}
 
-	return RESOURCE_LOAD_COMPLETE;
+	return kResourceLoadComplete;
 }
 
-bool PhysicsSharedResource::FinalizeInit()
-{
-	Tbc::ChunkyPhysics* lStructure = GetRamData();
-	xform lTransformation = mInitData.mTransformation;
-	if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_BONES)
-	{
-		return lStructure->FinalizeInit(0, 0, &lTransformation, 0);
-	}
-	else if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_STATIC)
-	{
-		lStructure->SetPhysicsType(Tbc::ChunkyPhysics::STATIC);
-	}
-	else if (mInitData.mPhysicsOverride == PHYSICS_OVERRIDE_DYNAMIC)
-	{
-		lStructure->SetPhysicsType(Tbc::ChunkyPhysics::DYNAMIC);
+bool PhysicsSharedResource::FinalizeInit() {
+	tbc::ChunkyPhysics* structure = GetRamData();
+	xform _transformation = init_data_.transformation_;
+	if (init_data_.physics_override_ == kPhysicsOverrideBones) {
+		return structure->FinalizeInit(0, 0, &_transformation, 0);
+	} else if (init_data_.physics_override_ == kPhysicsOverrideStatic) {
+		structure->SetPhysicsType(tbc::ChunkyPhysics::kStatic);
+	} else if (init_data_.physics_override_ == kPhysicsOverrideDynamic) {
+		structure->SetPhysicsType(tbc::ChunkyPhysics::kDynamic);
 	}
 
 	// Pick desired orientation, but reset for FinalizeInit() to work with proper joint orientations.
-	//const bool lIsDynamic = (lStructure->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC);
-	quat lTargetOrientation = lTransformation.GetOrientation();
-	lTransformation.SetOrientation(quat());
+	//const bool is_dynamic = (structure->GetPhysicsType() == tbc::ChunkyPhysics::kDynamic);
+	quat target_orientation = _transformation.GetOrientation();
+	_transformation.SetOrientation(quat());
 
-	const int lPhysicsFps = mInitData.mPhysicsFps;
-	ScopeLock lLock(mInitData.mPhysicsLock);
-	bool lOk = lStructure->FinalizeInit(mInitData.mPhysicsManager, lPhysicsFps, &lTransformation, mInitData.mInstanceId);
-	deb_assert(lOk);
+	const int _physics_fps = init_data_.physics_fps_;
+	ScopeLock lock(init_data_.physics_lock_);
+	bool ok = structure->FinalizeInit(init_data_.physics_manager_, _physics_fps, &_transformation, init_data_.instance_id_);
+	deb_assert(ok);
 
 	// Set orienation (as given in initial transform). The orientation in initial transform
 	// is relative to the initial root bone orientation.
-	if (lOk)
-	{
-		if (lStructure->GetPhysicsType() == Tbc::ChunkyPhysics::DYNAMIC)
-		{
-			const float lTotalMass = lStructure->QueryTotalMass(mInitData.mPhysicsManager);
-			ObjectPositionalData lPlacement;
-			lOk = PositionHauler::Get(lPlacement, mInitData.mPhysicsManager, lStructure, lTotalMass);
-			deb_assert(lOk);
-			if (lOk)
-			{
-				ObjectPositionalData* lNewPlacement = (ObjectPositionalData*)lPlacement.Clone();
-				if (lStructure->GetPhysicsType() == Tbc::ChunkyPhysics::WORLD)
-				{
-					lTargetOrientation *= lNewPlacement->mPosition.mTransformation.GetOrientation();
+	if (ok) {
+		if (structure->GetPhysicsType() == tbc::ChunkyPhysics::kDynamic) {
+			const float total_mass = structure->QueryTotalMass(init_data_.physics_manager_);
+			ObjectPositionalData placement;
+			ok = PositionHauler::Get(placement, init_data_.physics_manager_, structure, total_mass);
+			deb_assert(ok);
+			if (ok) {
+				ObjectPositionalData* new_placement = (ObjectPositionalData*)placement.Clone();
+				if (structure->GetPhysicsType() == tbc::ChunkyPhysics::kWorld) {
+					target_orientation *= new_placement->position_.transformation_.GetOrientation();
 				}
-				lNewPlacement->mPosition.mTransformation =
-					xform(lTargetOrientation,
-						lNewPlacement->mPosition.mTransformation.GetPosition());
-				lNewPlacement->mPosition.mVelocity = mInitData.mVelocity;
-				PositionHauler::Set(*lNewPlacement, mInitData.mPhysicsManager, lStructure, lTotalMass, true);
-				delete lNewPlacement;
+				new_placement->position_.transformation_ =
+					xform(target_orientation,
+						new_placement->position_.transformation_.GetPosition());
+				new_placement->position_.velocity_ = init_data_.velocity_;
+				PositionHauler::Set(*new_placement, init_data_.physics_manager_, structure, total_mass, true);
+				delete new_placement;
 			}
 		}
 	}
-	return lOk;
+	return ok;
 }
 
-void PhysicsSharedResource::OnLoadClass(ClassResource* pClassResource)
-{
-	if (pClassResource->GetLoadState() != RESOURCE_LOAD_COMPLETE)
-	{
+void PhysicsSharedResource::OnLoadClass(ClassResource* class_resource) {
+	if (class_resource->GetLoadState() != kResourceLoadComplete) {
 		return;
 	}
-	Tbc::ChunkyPhysics* lCopy = new Tbc::ChunkyPhysics(*pClassResource->GetData());
+	tbc::ChunkyPhysics* copy = new tbc::ChunkyPhysics(*class_resource->GetData());
 	// We correctly inherit the parent physics' xform. Then the whole object can be displaced
 	// when finalizing. Displacement is a special case, normal is just to load and reload in
 	// the same spot.
-	//  - Don't: lCopy->SetOriginalBoneTransformation(0, xform());
-	//  - Don't: lCopy->SetBoneTransformation(0, xform());
-	SetRamData(lCopy);
+	//  - Don't: copy->SetOriginalBoneTransformation(0, xform());
+	//  - Don't: copy->SetBoneTransformation(0, xform());
+	SetRamData(copy);
 }
 
 

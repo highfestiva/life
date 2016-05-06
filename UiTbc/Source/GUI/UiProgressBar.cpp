@@ -5,136 +5,115 @@
 */
 
 #include "pch.h"
-#include "../../Include/GUI/UiProgressBar.h"
+#include "../../include/gui/uiprogressbar.h"
 #include <math.h>
 
-namespace UiTbc
-{
-ProgressBar::ProgressBar(Style pStyle,
-						 const Color& pBodyColor,
-						 const Color& pProgressColorLeft,
-						 const Color& pProgressColorRight) :
-	Window(BORDER_SUNKEN | BORDER_LINEARSHADING, 2, pBodyColor),
-	mStyle(pStyle),
-	mBoxSize(16),
-	mMax(1),
-	mPos(0),
-	mUserDefinedGfx(false),
-	mProgressColorLeft(pProgressColorLeft),
-	mProgressColorRight(pProgressColorRight),
-	mProgressImageID(Painter::INVALID_IMAGEID)
-{
+namespace uitbc {
+ProgressBar::ProgressBar(Style style,
+						 const Color& body_color,
+						 const Color& progress_color_left,
+						 const Color& progress_color_right) :
+	Window(kBorderSunken | kBorderLinearshading, 2, body_color),
+	style_(style),
+	box_size_(16),
+	max_(1),
+	pos_(0),
+	user_defined_gfx_(false),
+	progress_color_left_(progress_color_left),
+	progress_color_right_(progress_color_right),
+	progress_image_id_(Painter::kInvalidImageid) {
 	Init();
 }
 
-ProgressBar::ProgressBar(Style pStyle, Painter::ImageID pBackgroundImageID, Painter::ImageID pProgressImageID):
-	Window(pBackgroundImageID),
-	mStyle(pStyle),
-	mBoxSize(16),
-	mMax(1),
-	mPos(0),
-	mUserDefinedGfx(true),
-	mProgressColorLeft(0, 0, 0),
-	mProgressColorRight(0, 0, 0),
-	mProgressImageID(pProgressImageID)
-{
+ProgressBar::ProgressBar(Style style, Painter::ImageID background_image_id, Painter::ImageID progress_image_id):
+	Window(background_image_id),
+	style_(style),
+	box_size_(16),
+	max_(1),
+	pos_(0),
+	user_defined_gfx_(true),
+	progress_color_left_(0, 0, 0),
+	progress_color_right_(0, 0, 0),
+	progress_image_id_(progress_image_id) {
 	Init();
 }
 
-void ProgressBar::SetProgressMax(int pMax)
-{
-	mMax = pMax;
+void ProgressBar::SetProgressMax(int max) {
+	max_ = max;
 	SetNeedsRepaint(true);
 }
 
-int ProgressBar::GetProgressMax()
-{
-	return mMax;
+int ProgressBar::GetProgressMax() {
+	return max_;
 }
 
-void ProgressBar::SetProgressPos(int pPos)
-{
-	mPos = pPos;
+void ProgressBar::SetProgressPos(int pos) {
+	pos_ = pos;
 	SetNeedsRepaint(true);
 }
 
-int ProgressBar::GetProgressPos()
-{
-	return mPos;
+int ProgressBar::GetProgressPos() {
+	return pos_;
 }
 
-int ProgressBar::Step()
-{
-	mPos++;
-	mPos = mPos < 0 ? 0 : (mPos > mMax ? mMax : mPos);
+int ProgressBar::Step() {
+	pos_++;
+	pos_ = pos_ < 0 ? 0 : (pos_ > max_ ? max_ : pos_);
 	SetNeedsRepaint(true);
-	return mPos;
+	return pos_;
 }
 
-int ProgressBar::Step(int pSteps)
-{
-	mPos += pSteps;
-	mPos = mPos < 0 ? 0 : (mPos > mMax ? mMax : mPos);
+int ProgressBar::Step(int steps) {
+	pos_ += steps;
+	pos_ = pos_ < 0 ? 0 : (pos_ > max_ ? max_ : pos_);
 	SetNeedsRepaint(true);
-	return mPos;
+	return pos_;
 }
 
-void ProgressBar::Repaint(Painter* pPainter)
-{
-	GUIImageManager* lIMan = GetImageManager();
+void ProgressBar::Repaint(Painter* painter) {
+	GUIImageManager* i_man = GetImageManager();
 
-	Parent::Repaint(pPainter);
-	
-	pPainter->PushAttrib(Painter::ATTR_ALL);
+	Parent::Repaint(painter);
 
-	PixelRect lRect = GetClientRect();
-	pPainter->SetClippingRect(lRect);
+	painter->PushAttrib(Painter::kAttrAll);
 
-	int lProgress = (int)floor(((float64)mPos / (float64)mMax) * (float64)lRect.GetWidth() + 0.5);
-	int lNumBoxes = lProgress / (mBoxSize + 1);
-	if (lProgress % (mBoxSize + 1) > 0)
-	{
-		lNumBoxes++;
+	PixelRect rect = GetClientRect();
+	painter->SetClippingRect(rect);
+
+	int progress = (int)floor(((float64)pos_ / (float64)max_) * (float64)rect.GetWidth() + 0.5);
+	int num_boxes = progress / (box_size_ + 1);
+	if (progress % (box_size_ + 1) > 0) {
+		num_boxes++;
 	}
 
-	if (mUserDefinedGfx == true)
-	{
-		if (mStyle == STYLE_NORMAL)
-		{
-			lRect.mRight = lRect.mLeft + lProgress + 1;
-			lIMan->DrawImage(mProgressImageID, lRect);
+	if (user_defined_gfx_ == true) {
+		if (style_ == kStyleNormal) {
+			rect.right_ = rect.left_ + progress + 1;
+			i_man->DrawImage(progress_image_id_, rect);
+		} else {
+			PixelRect box_rect(rect.left_, rect.top_, rect.left_ + (box_size_ + 1) * num_boxes, rect.bottom_);
+			i_man->DrawImage(progress_image_id_, box_rect);
 		}
-		else
-		{
-			PixelRect lBoxRect(lRect.mLeft, lRect.mTop, lRect.mLeft + (mBoxSize + 1) * lNumBoxes, lRect.mBottom);
-			lIMan->DrawImage(mProgressImageID, lBoxRect);
-		}
-	}
-	else
-	{
-		if (mStyle == STYLE_NORMAL)
-		{
-			Color lRight(mProgressColorLeft, mProgressColorRight, mPos/(float)mMax);
-			lRect.mRight = lRect.mLeft + lProgress;
-			pPainter->SetColor(mProgressColorLeft, 0);
-			pPainter->SetColor(lRight, 1);
-			pPainter->SetColor(lRight, 2);
-			pPainter->SetColor(mProgressColorLeft, 3);
-			pPainter->FillShadedRect(lRect);
-		}
-		else
-		{
-			for (int i = 0; i < lNumBoxes; i++)
-			{
-				int x = i * (mBoxSize + 1);
-				pPainter->SetColor(Color(mProgressColorLeft, mProgressColorRight, (x + (mBoxSize + 1) * 0.5f) / lRect.GetWidth()));
-				pPainter->SetAlphaValue(mProgressColorLeft.mAlpha);
-				pPainter->FillRect(x + lRect.mLeft, lRect.mTop, x + lRect.mLeft + mBoxSize, lRect.mBottom);
+	} else {
+		if (style_ == kStyleNormal) {
+			Color right(progress_color_left_, progress_color_right_, pos_/(float)max_);
+			rect.right_ = rect.left_ + progress;
+			painter->SetColor(progress_color_left_, 0);
+			painter->SetColor(right, 1);
+			painter->SetColor(right, 2);
+			painter->SetColor(progress_color_left_, 3);
+			painter->FillShadedRect(rect);
+		} else {
+			for (int i = 0; i < num_boxes; i++) {
+				int x = i * (box_size_ + 1);
+				painter->SetColor(Color(progress_color_left_, progress_color_right_, (x + (box_size_ + 1) * 0.5f) / rect.GetWidth()));
+				painter->SetAlphaValue(progress_color_left_.alpha_);
+				painter->FillRect(x + rect.left_, rect.top_, x + rect.left_ + box_size_, rect.bottom_);
 			}
 		}
 	}
 
-	pPainter->PopAttrib();
+	painter->PopAttrib();
 }
 
 }

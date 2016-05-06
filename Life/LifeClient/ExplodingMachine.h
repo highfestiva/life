@@ -1,18 +1,17 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../UiCure/Include/UiMachine.h"
-#include "../Life.h"
+#include "../../uicure/include/uimachine.h"
+#include "../life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -20,28 +19,27 @@ class Launcher;
 
 
 
-class ExplodingMachine: public UiCure::Machine
-{
+class ExplodingMachine: public UiCure::Machine {
 public:
 	typedef UiCure::Machine Parent;
 
-	ExplodingMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Launcher* pLauncher);
+	ExplodingMachine(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, Launcher* launcher);
 	virtual ~ExplodingMachine();
 
-	void SetExplosiveStrength(float pExplosiveStrength);
-	void SetDeathFrameDelay(int pDeathFrameDelay);
-	void SetDisappearAfterDeathDelay(float pDisappearDelay);
+	void SetExplosiveStrength(float explosive_strength);
+	void SetDeathFrameDelay(int death_frame_delay);
+	void SetDisappearAfterDeathDelay(float disappear_delay);
 
 protected:
 	virtual void OnTick();
 	virtual void OnDie();
 
-	Launcher* mLauncher;
-	int mTriggerDeathFrame;
-	int mDeathFrameDelay;
-	float mDisappearAfterDeathDelay;
-	bool mIsDetonated;
-	float mExplosiveStrength;
+	Launcher* launcher_;
+	int trigger_death_frame_;
+	int death_frame_delay_;
+	float disappear_after_death_delay_;
+	bool is_detonated_;
+	float explosive_strength_;
 
 	logclass();
 };

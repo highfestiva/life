@@ -5,271 +5,217 @@
 
 
 #include "pch.h"
-#include "TrabantSimConsoleManager.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Lepra/Include/CyclicArray.h"
-#include "../Lepra/Include/Path.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "TrabantSimManager.h"
-#include "RtVar.h"
+#include "trabantsimconsolemanager.h"
+#include "../cure/include/contextmanager.h"
+#include "../lepra/include/cyclicarray.h"
+#include "../lepra/include/path.h"
+#include "../lepra/include/systemmanager.h"
+#include "trabantsimmanager.h"
+#include "rtvar.h"
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
 // Must lie before TrabantSimConsoleManager to compile.
-const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::mCommandIdList[] =
+const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::command_id_list_[] =
 {
-	{"reset", COMMAND_RESET},
-	{"get-platform-name", COMMAND_GET_PLATFORM_NAME},
-	{"create-object", COMMAND_CREATE_OBJECT},
-	{"create-clones", COMMAND_CREATE_CLONES},
-	{"delete-object", COMMAND_DELETE_OBJECT},
-	{"delete-all-objects", COMMAND_DELETE_ALL_OBJECTS},
-	{"pick-objects", COMMAND_PICK_OBJECTS},
-	{"clear-phys", COMMAND_CLEAR_PHYS},
-	{"prep-phys-box", COMMAND_PREP_PHYS_BOX},
-	{"prep-phys-sphere", COMMAND_PREP_PHYS_SPHERE},
-	{"prep-phys-capsule", COMMAND_PREP_PHYS_CAPSULE},
-	{"prep-phys-mesh", COMMAND_PREP_PHYS_MESH},
-	{"prep-gfx-mesh", COMMAND_PREP_GFX_MESH},
-	{"set-vertices", COMMAND_SET_VERTICES},
-	{"add-vertices", COMMAND_ADD_VERTICES},
-	{"set-indices", COMMAND_SET_INDICES},
-	{"add-indices", COMMAND_ADD_INDICES},
-	{"are-loaded", COMMAND_ARE_LOADED},
-	{"wait-until-loaded", COMMAND_WAIT_UNTIL_LOADED},
-	{"explode", COMMAND_EXPLODE},
-	{"play-sound", COMMAND_PLAY_SOUND},
-	{"pop-collisions", COMMAND_POP_COLLISIONS},
-	{"get-keys", COMMAND_GET_KEYS},
-	{"get-touch-drags", COMMAND_GET_TOUCH_DRAGS},
-	{"get-accelerometer", COMMAND_GET_ACCELEROMETER},
-	{"get-mousemove", COMMAND_GET_MOUSEMOVE},
-	{"create-joystick", COMMAND_CREATE_JOYSTICK},
-	{"get-joystick-data", COMMAND_GET_JOYSTICK_DATA},
-	{"get-aspect-ratio", COMMAND_GET_ASPECT_RATIO},
-	{"create-engine", COMMAND_CREATE_ENGINE},
-	{"create-joint", COMMAND_CREATE_JOINT},
-	{"position", COMMAND_POSITION},
-	{"orientation", COMMAND_ORIENTATION},
-	{"velocity", COMMAND_VELOCITY},
-	{"angular-velocity", COMMAND_ANGULAR_VELOCITY},
-	{"mass", COMMAND_MASS},
-	{"color", COMMAND_COLOR},
-	{"engine-force", COMMAND_ENGINE_FORCE},
-	{"set-tag-floats", COMMAND_SET_TAG_FLOATS},
-	{"set-tag-strings", COMMAND_SET_TAG_STRINGS},
-	{"set-tag-phys", COMMAND_SET_TAG_PHYS},
-	{"set-tag-engine", COMMAND_SET_TAG_ENGINE},
-	{"set-tag-mesh", COMMAND_SET_TAG_MESH},
-	{"add-tag", COMMAND_ADD_TAG},
+	{"reset", kCommandReset},
+	{"get-platform-name", kCommandGetPlatformName},
+	{"create-object", kCommandCreateObject},
+	{"create-clones", kCommandCreateClones},
+	{"delete-object", kCommandDeleteObject},
+	{"delete-all-objects", kCommandDeleteAllObjects},
+	{"pick-objects", kCommandPickObjects},
+	{"clear-phys", kCommandClearPhys},
+	{"prep-phys-box", kCommandPrepPhysBox},
+	{"prep-phys-sphere", kCommandPrepPhysSphere},
+	{"prep-phys-capsule", kCommandPrepPhysCapsule},
+	{"prep-phys-mesh", kCommandPrepPhysMesh},
+	{"prep-gfx-mesh", kCommandPrepGfxMesh},
+	{"set-vertices", kCommandSetVertices},
+	{"add-vertices", kCommandAddVertices},
+	{"set-indices", kCommandSetIndices},
+	{"add-indices", kCommandAddIndices},
+	{"are-loaded", kCommandAreLoaded},
+	{"wait-until-loaded", kCommandWaitUntilLoaded},
+	{"explode", kCommandExplode},
+	{"play-sound", kCommandPlaySound},
+	{"pop-collisions", kCommandPopCollisions},
+	{"get-keys", kCommandGetKeys},
+	{"get-touch-drags", kCommandGetTouchDrags},
+	{"get-accelerometer", kCommandGetAccelerometer},
+	{"get-mousemove", kCommandGetMousemove},
+	{"create-joystick", kCommandCreateJoystick},
+	{"get-joystick-data", kCommandGetJoystickData},
+	{"get-aspect-ratio", kCommandGetAspectRatio},
+	{"create-engine", kCommandCreateEngine},
+	{"create-joint", kCommandCreateJoint},
+	{"position", kCommandPosition},
+	{"orientation", kCommandOrientation},
+	{"velocity", kCommandVelocity},
+	{"angular-velocity", kCommandAngularVelocity},
+	{"mass", kCommandMass},
+	{"color", kCommandColor},
+	{"engine-force", kCommandEngineForce},
+	{"set-tag-floats", kCommandSetTagFloats},
+	{"set-tag-strings", kCommandSetTagStrings},
+	{"set-tag-phys", kCommandSetTagPhys},
+	{"set-tag-engine", kCommandSetTagEngine},
+	{"set-tag-mesh", kCommandSetTagMesh},
+	{"add-tag", kCommandAddTag},
 };
 
 
 
-struct ParameterException
-{
+struct ParameterException {
 };
 
-std::vector<float> Strs2Flts(const strutil::strvec& pStrs, size_t pIndex=0)
-{
-	std::vector<float> lFlts;
-	strutil::strvec::const_iterator x = pStrs.begin() + pIndex;
-	for(; x != pStrs.end(); ++x)
-	{
+std::vector<float> Strs2Flts(const strutil::strvec& strs, size_t index=0) {
+	std::vector<float> flts;
+	strutil::strvec::const_iterator x = strs.begin() + index;
+	for(; x != strs.end(); ++x) {
 		double d = 0;
 		strutil::StringToDouble(*x, d);
-		lFlts.push_back((float)d);
+		flts.push_back((float)d);
 	}
-	return lFlts;
+	return flts;
 }
 
-int StrToUInt(const char* s, const char** pEnd)
-{
+int StrToUInt(const char* s, const char** _end) {
 	int i = 0;
-	for(; *s >= '0' && *s <= '9'; ++s)
-	{
+	for(; *s >= '0' && *s <= '9'; ++s) {
 		i = i*10 + (*s-'0');
 	}
-	*pEnd = s;
+	*_end = s;
 	return i;
 }
 
-float StrToFloat(const char* s, const char** pEnd)
-{
+float StrToFloat(const char* s, const char** _end) {
 	float f = 0;
 	float ff = 0.1f;
 	float e = 0;
-	bool lBeforeDot = true;
-	bool lNegative = false;
-	bool lExponent = false;
-	bool lNegativeExponent = false;
-	for (;; ++s)
-	{
-		if (*s >= '0' && *s <= '9')
-		{
-			if (lExponent)
-			{
+	bool before_dot = true;
+	bool negative = false;
+	bool exponent = false;
+	bool negative_exponent = false;
+	for (;; ++s) {
+		if (*s >= '0' && *s <= '9') {
+			if (exponent) {
 				e = e*10 + (*s-'0');
-			}
-			else if (lBeforeDot)
-			{
+			} else if (before_dot) {
 				f = f*10 + (*s-'0');
-			}
-			else
-			{
+			} else {
 				f += (*s-'0')*ff;
 				ff *= 0.1f;
 			}
-		}
-		else if (*s == '.')
-		{
-			lBeforeDot = false;
-		}
-		else if (*s == '-')
-		{
-			if (lExponent)
-			{
-				lNegativeExponent = true;
+		} else if (*s == '.') {
+			before_dot = false;
+		} else if (*s == '-') {
+			if (exponent) {
+				negative_exponent = true;
+			} else {
+				negative = true;
 			}
-			else
-			{
-				lNegative = true;
-			}
-		}
-		else if (*s == 'e')
-		{
-			lExponent = true;
-		}
-		else
-		{
+		} else if (*s == 'e') {
+			exponent = true;
+		} else {
 			break;
 		}
 	}
-	*pEnd = s;
-	f = lNegative? -f : f;
-	if (!lExponent)
-	{
+	*_end = s;
+	f = negative? -f : f;
+	if (!exponent) {
 		return f;
 	}
-	e = lNegativeExponent? -e : e;
+	e = negative_exponent? -e : e;
 	return f*pow(10,e);
 }
 
-str ParamToStr(const strutil::strvec& pParam, size_t pIndex)
-{
-	if (pIndex >= pParam.size())
-	{
+str ParamToStr(const strutil::strvec& param, size_t index) {
+	if (index >= param.size()) {
 		throw ParameterException();
 	}
-	return pParam[pIndex];
+	return param[index];
 }
 
-bool ParamToBool(const strutil::strvec& pParam, size_t pIndex)
-{
-	if (pIndex >= pParam.size())
-	{
+bool ParamToBool(const strutil::strvec& param, size_t index) {
+	if (index >= param.size()) {
 		throw ParameterException();
 	}
-	return pParam[pIndex] == "true";
+	return param[index] == "true";
 }
 
-int ParamToInt(const strutil::strvec& pParam, size_t pIndex, bool* pIsSet = 0)
-{
-	int lValue = 0;
-	if (pIndex >= pParam.size() || !strutil::StringToInt(pParam[pIndex], lValue))
-	{
-		if (!pIsSet)
-		{
+int ParamToInt(const strutil::strvec& param, size_t index, bool* is_set = 0) {
+	int value = 0;
+	if (index >= param.size() || !strutil::StringToInt(param[index], value)) {
+		if (!is_set) {
 			throw ParameterException();
 		}
-		*pIsSet = false;
+		*is_set = false;
+	} else if (is_set) {
+		*is_set = true;
 	}
-	else if (pIsSet)
-	{
-		*pIsSet = true;
-	}
-	return lValue;
+	return value;
 }
 
-float ParamToFloat(const strutil::strvec& pParam, size_t pIndex, bool* pIsSet = 0)
-{
-	double lValue = 0;
-	if (pIndex >= pParam.size() || !strutil::StringToDouble(pParam[pIndex], lValue))
-	{
-		if (!pIsSet)
-		{
+float ParamToFloat(const strutil::strvec& param, size_t index, bool* is_set = 0) {
+	double value = 0;
+	if (index >= param.size() || !strutil::StringToDouble(param[index], value)) {
+		if (!is_set) {
 			throw ParameterException();
 		}
-		*pIsSet = false;
+		*is_set = false;
+	} else if (is_set) {
+		*is_set = true;
 	}
-	else if (pIsSet)
-	{
-		*pIsSet = true;
-	}
-	return (float)lValue;
+	return (float)value;
 }
 
-vec2 ParamToVec2(const strutil::strvec& pParam, size_t pIndex)
-{
-	return vec2(ParamToFloat(pParam,pIndex,0), ParamToFloat(pParam,pIndex+1,0));
+vec2 ParamToVec2(const strutil::strvec& param, size_t index) {
+	return vec2(ParamToFloat(param,index,0), ParamToFloat(param,index+1,0));
 }
 
-vec3 ParamToVec3(const strutil::strvec& pParam, size_t pIndex, bool* pIsSet = 0)
-{
-	return vec3(ParamToFloat(pParam,pIndex,pIsSet), ParamToFloat(pParam,pIndex+1,pIsSet), ParamToFloat(pParam,pIndex+2,pIsSet));
+vec3 ParamToVec3(const strutil::strvec& param, size_t index, bool* is_set = 0) {
+	return vec3(ParamToFloat(param,index,is_set), ParamToFloat(param,index+1,is_set), ParamToFloat(param,index+2,is_set));
 }
 
-quat ParamToQuat(const strutil::strvec& pParam, size_t pIndex, bool* pIsSet = 0)
-{
-	return quat(ParamToFloat(pParam,pIndex,pIsSet), ParamToFloat(pParam,pIndex+1,pIsSet), ParamToFloat(pParam,pIndex+2,pIsSet), ParamToFloat(pParam,pIndex+3,pIsSet));
+quat ParamToQuat(const strutil::strvec& param, size_t index, bool* is_set = 0) {
+	return quat(ParamToFloat(param,index,is_set), ParamToFloat(param,index+1,is_set), ParamToFloat(param,index+2,is_set), ParamToFloat(param,index+3,is_set));
 }
 
-void Params2Ints(const strutil::strvec& pParam, std::vector<int>& pInts)
-{
+void Params2Ints(const strutil::strvec& param, std::vector<int>& ints) {
 	strutil::strvec::const_iterator p;
-	for (p = pParam.begin(); p != pParam.end(); ++p)
-	{
+	for (p = param.begin(); p != param.end(); ++p) {
 		const char* s = p->c_str();
-		const char* lEnd;
-		do
-		{
-			int i = StrToUInt(s, &lEnd);
-			pInts.push_back(i);
-			s = lEnd+1;
-		}
-		while (*lEnd == ',');
+		const char* __end;
+		do {
+			int i = StrToUInt(s, &__end);
+			ints.push_back(i);
+			s = __end+1;
+		} while (*__end == ',');
 	}
 }
 
-void Params2Floats(const strutil::strvec& pParam, std::vector<float>& pFloats, size_t pParamIndex=0)
-{
+void Params2Floats(const strutil::strvec& param, std::vector<float>& floats, size_t param_index=0) {
 	strutil::strvec::const_iterator p;
-	for (p = pParam.begin()+pParamIndex; p != pParam.end(); ++p)
-	{
+	for (p = param.begin()+param_index; p != param.end(); ++p) {
 		const char* s = p->c_str();
-		const char* lEnd;
-		do
-		{
-			float f = StrToFloat(s, &lEnd);
-			pFloats.push_back(f);
-			s = lEnd+1;
-		}
-		while (*lEnd == ',');
+		const char* __end;
+		do {
+			float f = StrToFloat(s, &__end);
+			floats.push_back(f);
+			s = __end+1;
+		} while (*__end == ',');
 	}
 }
 
-strstream& operator<<(strstream& os, const strutil::strvec& pVec)
-{
+strstream& operator<<(strstream& os, const strutil::strvec& vec) {
 	int j = 0;
-	for (strutil::strvec::const_iterator i = pVec.begin(); i != pVec.end(); ++i, ++j)
-	{
-		if (j)
-		{
+	for (strutil::strvec::const_iterator i = vec.begin(); i != vec.end(); ++i, ++j) {
+		if (j) {
 			os << ' ';
 		}
 		os << *i;
@@ -277,608 +223,466 @@ strstream& operator<<(strstream& os, const strutil::strvec& pVec)
 	return os;
 }
 
-strstream& operator<<(strstream& os, char c)
-{
+strstream& operator<<(strstream& os, char c) {
 	(*(std::ostream*)&os) << c;
 	return os;
 }
 
-strstream& operator<<(strstream& os, const char* s)
-{
+strstream& operator<<(strstream& os, const char* s) {
 	(*(std::ostream*)&os) << s;
 	return os;
 }
 
-strstream& operator<<(strstream& os, const str& s)
-{
+strstream& operator<<(strstream& os, const str& s) {
 	(*(std::ostream*)&os) << s;
 	return os;
 }
 
-strstream& operator<<(strstream& os, int i)
-{
+strstream& operator<<(strstream& os, int i) {
 	return os << strutil::IntToString(i, 10);
 }
 
-strstream& operator<<(strstream& os, float f)
-{
+strstream& operator<<(strstream& os, float f) {
 	return os << strutil::FastDoubleToString(f);
 }
 
-strstream& operator<<(strstream& os, const vec3& pVec)
-{
-	return os << pVec.x << ' ' << pVec.y << ' ' << pVec.z;
+strstream& operator<<(strstream& os, const vec3& vec) {
+	return os << vec.x << ' ' << vec.y << ' ' << vec.z;
 }
 
-strstream& operator<<(strstream& os, const quat& pQuat)
-{
-	return os << pQuat.a << ' ' << pQuat.b << ' ' << pQuat.c << ' ' << pQuat.d;
+strstream& operator<<(strstream& os, const quat& _quat) {
+	return os << _quat.a << ' ' << _quat.b << ' ' << _quat.c << ' ' << _quat.d;
 }
 
 
 
-TrabantSimConsoleManager::TrabantSimConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-	UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea):
-	Parent(pResourceManager, pGameManager, pUiManager, pVariableScope, pArea)
-{
+TrabantSimConsoleManager::TrabantSimConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+	UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area):
+	Parent(resource_manager, game_manager, ui_manager, variable_scope, area) {
 	InitCommands();
 	SetSecurityLevel(1);
 }
 
-TrabantSimConsoleManager::~TrabantSimConsoleManager()
-{
+TrabantSimConsoleManager::~TrabantSimConsoleManager() {
 }
 
-bool TrabantSimConsoleManager::Start()
-{
+bool TrabantSimConsoleManager::Start() {
 #ifndef LEPRA_TOUCH
 	return Parent::Start();
-#else // Touch
-	return true;	// Touch device don't need an interactive console.
+#else // touch
+	return true;	// touch device don't need an interactive console.
 #endif // Computer / touch
 }
 
-const str TrabantSimConsoleManager::GetActiveResponse() const
-{
-	return mActiveResponse.str();
+const str TrabantSimConsoleManager::GetActiveResponse() const {
+	return active_response_.str();
 }
 
 
 
-unsigned TrabantSimConsoleManager::GetCommandCount() const
-{
-	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(mCommandIdList);
+unsigned TrabantSimConsoleManager::GetCommandCount() const {
+	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(command_id_list_);
 }
 
-const TrabantSimConsoleManager::CommandPair& TrabantSimConsoleManager::GetCommand(unsigned pIndex) const
-{
-	if (pIndex < Parent::GetCommandCount())
-	{
-		return (Parent::GetCommand(pIndex));
+const TrabantSimConsoleManager::CommandPair& TrabantSimConsoleManager::GetCommand(unsigned index) const {
+	if (index < Parent::GetCommandCount()) {
+		return (Parent::GetCommand(index));
 	}
-	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
+	return (command_id_list_[index-Parent::GetCommandCount()]);
 }
 
-int TrabantSimConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
-{
-	mActiveResponse.str(str());
-	mActiveResponse << "ok\n";
-	int lResult = Parent::OnCommand(pCommand, pParameterVector);
-	if (lResult < 0)
-	{
-		lResult = 0;
-		TrabantSimManager* lManager = ((TrabantSimManager*)GetGameManager());
+int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strutil::strvec& parameter_vector) {
+	active_response_.str(str());
+	active_response_ << "ok\n";
+	int result = Parent::OnCommand(command, parameter_vector);
+	if (result < 0) {
+		result = 0;
+		TrabantSimManager* manager = ((TrabantSimManager*)GetGameManager());
 
-		CommandClient lCommand = (CommandClient)TranslateCommand(pCommand);
-		try
-		{
-			switch ((int)lCommand)
-			{
-				case COMMAND_RESET:
-				{
-					lManager->UserReset();
-				}
-				break;
-				case COMMAND_GET_PLATFORM_NAME:
-				{
+		CommandClient _command = (CommandClient)TranslateCommand(command);
+		try {
+			switch ((int)_command) {
+				case kCommandReset: {
+					manager->UserReset();
+				} break;
+				case kCommandGetPlatformName: {
 #if defined(LEPRA_IOS)
-					mActiveResponse << "iOS";
+					active_response_ << "iOS";
 #elif defined(LEPRA_MAC)
-					mActiveResponse << "Mac";
+					active_response_ << "Mac";
 #elif defined(LEPRA_WINDOWS)
-					mActiveResponse << "Win";
+					active_response_ << "Win";
 #else
-					mActiveResponse << "Unknown";
+					active_response_ << "Unknown";
 #endif // Platform
 
-				}
-				break;
-				case COMMAND_CREATE_OBJECT:
-				{
-					const str lType = ParamToStr(pParameterVector, 0);
-					const str lMaterialInfo = ParamToStr(pParameterVector, 1);
-					const vec3 lPosition = ParamToVec3(pParameterVector, 2);
-					const quat lOrientation = ParamToQuat(pParameterVector, 5);
+				} break;
+				case kCommandCreateObject: {
+					const str type = ParamToStr(parameter_vector, 0);
+					const str material_info = ParamToStr(parameter_vector, 1);
+					const vec3 position = ParamToVec3(parameter_vector, 2);
+					const quat orientation = ParamToQuat(parameter_vector, 5);
 					// Work out material.
-					const bool lIsStatic = strutil::StartsWith(lType, "static");
-					const bool lIsTrigger = (lType.find("trigger") != str::npos);
-					ObjectMaterial lMaterial = MaterialSmooth;
-					if (lMaterialInfo == "flat") lMaterial = MaterialFlat;
-					else if (lMaterialInfo == "checker") lMaterial = MaterialChecker;
-					else if (lMaterialInfo == "noise") lMaterial = MaterialNoise;
+					const bool is_static = strutil::StartsWith(type, "static");
+					const bool is_trigger = (type.find("trigger") != str::npos);
+					ObjectMaterial material = MaterialSmooth;
+					if (material_info == "flat") material = MaterialFlat;
+					else if (material_info == "checker") material = MaterialChecker;
+					else if (material_info == "noise") material = MaterialNoise;
 
-					const int lObjectId = lManager->CreateObject(lOrientation, lPosition, mGfxMesh, mPhysObjects, lMaterial, lIsStatic, lIsTrigger);
-					if (lObjectId == -1)
-					{
+					const int object_id = manager->CreateObject(orientation, position, gfx_mesh_, phys_objects_, material, is_static, is_trigger);
+					if (object_id == -1) {
 						throw ParameterException();
 					}
-					mActiveResponse << lObjectId;
-				}
-				break;
-				case COMMAND_CREATE_CLONES:
-				{
-					const int lOriginalId = ParamToInt(pParameterVector, 0);
-					const str lType = ParamToStr(pParameterVector, 1);
-					const str lMaterialInfo = ParamToStr(pParameterVector, 2);
-					std::vector<float> lPlacements;
-					Params2Floats(pParameterVector, lPlacements, 3);
+					active_response_ << object_id;
+				} break;
+				case kCommandCreateClones: {
+					const int original_id = ParamToInt(parameter_vector, 0);
+					const str type = ParamToStr(parameter_vector, 1);
+					const str material_info = ParamToStr(parameter_vector, 2);
+					std::vector<float> placements;
+					Params2Floats(parameter_vector, placements, 3);
 					// Work out material.
-					const bool lIsStatic = (lType == "static");
-					ObjectMaterial lMaterial = MaterialSmooth;
-					if (lMaterialInfo == "flat") lMaterial = MaterialFlat;
-					else if (lMaterialInfo == "checker") lMaterial = MaterialChecker;
-					else if (lMaterialInfo == "noise") lMaterial = MaterialNoise;
+					const bool is_static = (type == "static");
+					ObjectMaterial material = MaterialSmooth;
+					if (material_info == "flat") material = MaterialFlat;
+					else if (material_info == "checker") material = MaterialChecker;
+					else if (material_info == "noise") material = MaterialNoise;
 
-					std::vector<xform> lTransforms;
-					int x = 0, cnt = (int)lPlacements.size();
-					for (; x <= cnt-7; x += 7)
-					{
-						lTransforms.push_back(xform(quat(&lPlacements[x+3]), vec3(&lPlacements[x])));
+					std::vector<xform> transforms;
+					int x = 0, cnt = (int)placements.size();
+					for (; x <= cnt-7; x += 7) {
+						transforms.push_back(xform(quat(&placements[x+3]), vec3(&placements[x])));
 					}
-					std::vector<int> lObjectIds;
-					lManager->CreateClones(lObjectIds, lOriginalId, lTransforms, lMaterial, lIsStatic);
-					if (lObjectIds.empty())
-					{
+					std::vector<int> object_ids;
+					manager->CreateClones(object_ids, original_id, transforms, material, is_static);
+					if (object_ids.empty()) {
 						throw ParameterException();
 					}
 					x = 0;
-					for (std::vector<int>::iterator y = lObjectIds.begin(); y != lObjectIds.end(); ++y, ++x)
-					{
-						if (x)
-						{
-							mActiveResponse << ',';
+					for (std::vector<int>::iterator y = object_ids.begin(); y != object_ids.end(); ++y, ++x) {
+						if (x) {
+							active_response_ << ',';
 						}
-						mActiveResponse << *y;
+						active_response_ << *y;
 					}
-				}
-				break;
-				case COMMAND_DELETE_OBJECT:
-				{
-					lManager->DeleteObject(ParamToInt(pParameterVector, 0));
-				}
-				break;
-				case COMMAND_DELETE_ALL_OBJECTS:
-				{
-					lManager->DeleteAllObjects();
-				}
-				break;
-				case COMMAND_PICK_OBJECTS:
-				{
-					const vec3 lPosition = ParamToVec3(pParameterVector, 0);
-					const vec3 lDirection = ParamToVec3(pParameterVector, 3);
-					const vec2 lRange = ParamToVec2(pParameterVector, 6);
-					std::vector<int> lObjectIds;
-					std::vector<vec3> lPositions;
-					lManager->PickObjects(lPosition, lDirection, lRange, lObjectIds, lPositions);
-					size_t c = lObjectIds.size();
-					for (size_t x = 0; x < c; ++x)
-					{
-						if (x)
-						{
-							mActiveResponse << ',';
+				} break;
+				case kCommandDeleteObject: {
+					manager->DeleteObject(ParamToInt(parameter_vector, 0));
+				} break;
+				case kCommandDeleteAllObjects: {
+					manager->DeleteAllObjects();
+				} break;
+				case kCommandPickObjects: {
+					const vec3 position = ParamToVec3(parameter_vector, 0);
+					const vec3 direction = ParamToVec3(parameter_vector, 3);
+					const vec2 range = ParamToVec2(parameter_vector, 6);
+					std::vector<int> object_ids;
+					std::vector<vec3> positions;
+					manager->PickObjects(position, direction, range, object_ids, positions);
+					size_t c = object_ids.size();
+					for (size_t x = 0; x < c; ++x) {
+						if (x) {
+							active_response_ << ',';
 						}
-						const vec3& v = lPositions[x];
-						mActiveResponse << lObjectIds[x] << ',' << v.x << ',' << v.y << ',' << v.z;
+						const vec3& v = positions[x];
+						active_response_ << object_ids[x] << ',' << v.x << ',' << v.y << ',' << v.z;
 					}
-				}
-				break;
-				case COMMAND_CLEAR_PHYS:
-				{
+				} break;
+				case kCommandClearPhys: {
 					PhysObjectArray::iterator x;
-					for (x = mPhysObjects.begin(); x != mPhysObjects.end(); ++x)
-					{
+					for (x = phys_objects_.begin(); x != phys_objects_.end(); ++x) {
 						delete *x;
 					}
-					mPhysObjects.clear();
-				}
-				break;
-				case COMMAND_PREP_PHYS_BOX:
-				{
-					if (pParameterVector.size() != 10)
-					{
-						mLog.Warningf("usage: %s followed by ten float arguments (quaternion, position, size)", pCommand.c_str());
+					phys_objects_.clear();
+				} break;
+				case kCommandPrepPhysBox: {
+					if (parameter_vector.size() != 10) {
+						log_.Warningf("usage: %s followed by ten float arguments (quaternion, position, size)", command.c_str());
 						return 1;
 					}
-					std::vector<float> lFloats = Strs2Flts(pParameterVector);
-					PlacedObject* lBox = new BoxObject(quat(&lFloats[0]), vec3(&lFloats[4]), vec3(&lFloats[7]));
-					mPhysObjects.push_back(lBox);
-				}
-				break;
-				case COMMAND_PREP_PHYS_SPHERE:
-				{
-					if (pParameterVector.size() != 8)
-					{
-						mLog.Warningf("usage: %s followed by eight float arguments (quaternion, position, radius)", pCommand.c_str());
+					std::vector<float> _floats = Strs2Flts(parameter_vector);
+					PlacedObject* box = new BoxObject(quat(&_floats[0]), vec3(&_floats[4]), vec3(&_floats[7]));
+					phys_objects_.push_back(box);
+				} break;
+				case kCommandPrepPhysSphere: {
+					if (parameter_vector.size() != 8) {
+						log_.Warningf("usage: %s followed by eight float arguments (quaternion, position, radius)", command.c_str());
 						return 1;
 					}
-					std::vector<float> lFloats = Strs2Flts(pParameterVector);
-					PlacedObject* lSphere = new SphereObject(quat(&lFloats[0]), vec3(&lFloats[4]), lFloats[7]);
-					mPhysObjects.push_back(lSphere);
-				}
-				break;
-				case COMMAND_PREP_PHYS_CAPSULE:
-				{
-					if (pParameterVector.size() != 9)
-					{
-						mLog.Warningf("usage: %s followed by eight float arguments (quaternion, position, radius, length)", pCommand.c_str());
+					std::vector<float> _floats = Strs2Flts(parameter_vector);
+					PlacedObject* sphere = new SphereObject(quat(&_floats[0]), vec3(&_floats[4]), _floats[7]);
+					phys_objects_.push_back(sphere);
+				} break;
+				case kCommandPrepPhysCapsule: {
+					if (parameter_vector.size() != 9) {
+						log_.Warningf("usage: %s followed by eight float arguments (quaternion, position, radius, length)", command.c_str());
 						return 1;
 					}
-					std::vector<float> lFloats = Strs2Flts(pParameterVector);
-					PlacedObject* lCapsule = new CapsuleObject(quat(&lFloats[0]), vec3(&lFloats[4]), lFloats[7], lFloats[8]);
-					mPhysObjects.push_back(lCapsule);
-				}
-				break;
-				case COMMAND_PREP_PHYS_MESH:
-				{
-					if (pParameterVector.size() != 7)
-					{
-						mLog.Warningf("usage: %s followed by seven float arguments (quaternion and position)", pCommand.c_str());
+					std::vector<float> _floats = Strs2Flts(parameter_vector);
+					PlacedObject* capsule = new CapsuleObject(quat(&_floats[0]), vec3(&_floats[4]), _floats[7], _floats[8]);
+					phys_objects_.push_back(capsule);
+				} break;
+				case kCommandPrepPhysMesh: {
+					if (parameter_vector.size() != 7) {
+						log_.Warningf("usage: %s followed by seven float arguments (quaternion and position)", command.c_str());
 						return 1;
 					}
-					if (mVertices.size() % 3 || mIndices.size() % 3)
-					{
+					if (vertices_.size() % 3 || indices_.size() % 3) {
 						throw ParameterException();
 					}
-					std::vector<float> lFloats = Strs2Flts(pParameterVector);
-					MeshObject* lMesh = new MeshObject(quat(&lFloats[0]), vec3(&lFloats[4]));
-					lMesh->mVertices.insert(lMesh->mVertices.end(), mVertices.begin(), mVertices.end());
-					lMesh->mIndices.insert(lMesh->mIndices.end(), mIndices.begin(), mIndices.end());
-					mPhysObjects.push_back(lMesh);
-				}
-				break;
-				case COMMAND_PREP_GFX_MESH:
-				{
-					if (pParameterVector.size() != 7)
-					{
-						mLog.Warningf("usage: %s followed by seven float arguments (quaternion and position)", pCommand.c_str());
+					std::vector<float> _floats = Strs2Flts(parameter_vector);
+					MeshObject* mesh = new MeshObject(quat(&_floats[0]), vec3(&_floats[4]));
+					mesh->vertices_.insert(mesh->vertices_.end(), vertices_.begin(), vertices_.end());
+					mesh->indices_.insert(mesh->indices_.end(), indices_.begin(), indices_.end());
+					phys_objects_.push_back(mesh);
+				} break;
+				case kCommandPrepGfxMesh: {
+					if (parameter_vector.size() != 7) {
+						log_.Warningf("usage: %s followed by seven float arguments (quaternion and position)", command.c_str());
 						return 1;
 					}
-					if (mVertices.size() % 3 || mIndices.size() % 3)
-					{
+					if (vertices_.size() % 3 || indices_.size() % 3) {
 						throw ParameterException();
 					}
-					std::vector<float> lFloats = Strs2Flts(pParameterVector);
-					mGfxMesh.mOrientation.Set(&lFloats[0]);
-					mGfxMesh.mPos.Set(&lFloats[4]);
-					mGfxMesh.mVertices.clear();
-					mGfxMesh.mIndices.clear();
-					mGfxMesh.mVertices.insert(mGfxMesh.mVertices.end(), mVertices.begin(), mVertices.end());
-					mGfxMesh.mIndices.insert(mGfxMesh.mIndices.end(), mIndices.begin(), mIndices.end());
-				}
-				break;
-				case COMMAND_SET_VERTICES:
-					mVertices.clear();
+					std::vector<float> _floats = Strs2Flts(parameter_vector);
+					gfx_mesh_.orientation_.Set(&_floats[0]);
+					gfx_mesh_.pos_.Set(&_floats[4]);
+					gfx_mesh_.vertices_.clear();
+					gfx_mesh_.indices_.clear();
+					gfx_mesh_.vertices_.insert(gfx_mesh_.vertices_.end(), vertices_.begin(), vertices_.end());
+					gfx_mesh_.indices_.insert(gfx_mesh_.indices_.end(), indices_.begin(), indices_.end());
+				} break;
+				case kCommandSetVertices:
+					vertices_.clear();
 					// TRICKY: fall through!
-				case COMMAND_ADD_VERTICES:
-				{
-					Params2Floats(pParameterVector, mVertices);
-				}
-				break;
-				case COMMAND_SET_INDICES:
-					mIndices.clear();
+				case kCommandAddVertices: {
+					Params2Floats(parameter_vector, vertices_);
+				} break;
+				case kCommandSetIndices:
+					indices_.clear();
 					// TRICKY: fall through!
-				case COMMAND_ADD_INDICES:
-				{
-					Params2Ints(pParameterVector, mIndices);
-				}
-				break;
-				case COMMAND_ARE_LOADED:
-				{
-					std::vector<int> lObjectIds;
-					Params2Ints(pParameterVector, lObjectIds);
-					bool lFirst = true;
-					for (std::vector<int>::iterator y = lObjectIds.begin(); y != lObjectIds.end(); ++y)
-					{
-						if (!lFirst)
-						{
-							mActiveResponse << ',';
+				case kCommandAddIndices: {
+					Params2Ints(parameter_vector, indices_);
+				} break;
+				case kCommandAreLoaded: {
+					std::vector<int> object_ids;
+					Params2Ints(parameter_vector, object_ids);
+					bool first = true;
+					for (std::vector<int>::iterator y = object_ids.begin(); y != object_ids.end(); ++y) {
+						if (!first) {
+							active_response_ << ',';
 						}
-						lFirst = false;
-						mActiveResponse << (lManager->IsLoaded(*y)? '1' : '0');
+						first = false;
+						active_response_ << (manager->IsLoaded(*y)? '1' : '0');
 					}
-				}
-				break;
-				case COMMAND_WAIT_UNTIL_LOADED:
-				{
-					int lObjectId = ParamToInt(pParameterVector, 0);
-					bool lLoaded = false;
-					for (int x = 0; !lLoaded && x < 150; ++x)
-					{
-						lLoaded = lManager->IsLoaded(lObjectId);
-						if (!lLoaded)
-						{
+				} break;
+				case kCommandWaitUntilLoaded: {
+					int object_id = ParamToInt(parameter_vector, 0);
+					bool loaded = false;
+					for (int x = 0; !loaded && x < 150; ++x) {
+						loaded = manager->IsLoaded(object_id);
+						if (!loaded) {
 							Thread::Sleep(0.01);
 						}
 					}
-					if (!lLoaded)
-					{
-						mLog.Warningf("Object %i did not load in time. Try calling again.", lObjectId);
+					if (!loaded) {
+						log_.Warningf("Object %i did not load in time. Try calling again.", object_id);
 					}
-				}
-				break;
-				case COMMAND_EXPLODE:
-				{
-					lManager->Explode(ParamToVec3(pParameterVector, 0), ParamToVec3(pParameterVector, 3), ParamToFloat(pParameterVector, 6), ParamToFloat(pParameterVector, 7));
-				}
-				break;
-				case COMMAND_PLAY_SOUND:
-				{
-					lManager->PlaySound(ParamToStr(pParameterVector, 0), ParamToVec3(pParameterVector, 1), ParamToVec3(pParameterVector, 4), ParamToFloat(pParameterVector, 7));
-				}
-				break;
-				case COMMAND_POP_COLLISIONS:
-				{
+				} break;
+				case kCommandExplode: {
+					manager->Explode(ParamToVec3(parameter_vector, 0), ParamToVec3(parameter_vector, 3), ParamToFloat(parameter_vector, 6), ParamToFloat(parameter_vector, 7));
+				} break;
+				case kCommandPlaySound: {
+					manager->PlaySound(ParamToStr(parameter_vector, 0), ParamToVec3(parameter_vector, 1), ParamToVec3(parameter_vector, 4), ParamToFloat(parameter_vector, 7));
+				} break;
+				case kCommandPopCollisions: {
 					typedef TrabantSimManager::CollisionList CollisionList;
-					CollisionList lList;
-					lManager->PopCollisions(lList);
+					CollisionList list;
+					manager->PopCollisions(list);
 					int y = 0;
-					for (CollisionList::iterator x = lList.begin(); x != lList.end() && y < 10; ++x, ++y)
-					{
-						if (y)
-						{
-							mActiveResponse << '\n';
+					for (CollisionList::iterator x = list.begin(); x != list.end() && y < 10; ++x, ++y) {
+						if (y) {
+							active_response_ << '\n';
 						}
-						mActiveResponse << x->mObjectId << ' ' << x->mForce << ' ' << x->mPosition << ' ' << x->mOtherObjectId;
+						active_response_ << x->object_id_ << ' ' << x->force_ << ' ' << x->position_ << ' ' << x->other_object_id_;
 					}
-				}
-				break;
-				case COMMAND_GET_KEYS:
-				{
-					strutil::strvec lKeys;
-					lManager->GetKeys(lKeys);
-					mActiveResponse << strutil::Join(lKeys, "\n");
-				}
-				break;
-				case COMMAND_GET_TOUCH_DRAGS:
-				{
-					PixelRect lRect = lManager->GetRenderArea();
-					const float sx = 1.0f/lRect.GetWidth();
-					const float sy = 1.0f/lRect.GetHeight();
+				} break;
+				case kCommandGetKeys: {
+					strutil::strvec keys;
+					manager->GetKeys(keys);
+					active_response_ << strutil::Join(keys, "\n");
+				} break;
+				case kCommandGetTouchDrags: {
+					PixelRect rect = manager->GetRenderArea();
+					const float sx = 1.0f/rect.GetWidth();
+					const float sy = 1.0f/rect.GetHeight();
 					typedef TrabantSimManager::DragList DragList;
-					DragList lList;
-					lManager->GetTouchDrags(lList);
+					DragList list;
+					manager->GetTouchDrags(list);
 					int y = 0;
-					for (DragList::iterator x = lList.begin(); x != lList.end(); ++x, ++y)
-					{
-						if (y)
-						{
-							mActiveResponse << '\n';
+					for (DragList::iterator x = list.begin(); x != list.end(); ++x, ++y) {
+						if (y) {
+							active_response_ << '\n';
 						}
-						mActiveResponse << x->mLast.x*sx << ' ' << x->mLast.y*sy << ' ' << x->mStart.x*sx << ' ' << x->mStart.y*sy << ' '
-								<< x->mVelocity.x*sx << ' ' << x->mVelocity.y*sy << ' ' << (x->mIsPress?"true":"false") << ' ' << x->mButtonMask;
+						active_response_ << x->last_.x*sx << ' ' << x->last_.y*sy << ' ' << x->start_.x*sx << ' ' << x->start_.y*sy << ' '
+								<< x->velocity_.x*sx << ' ' << x->velocity_.y*sy << ' ' << (x->is_press_?"true":"false") << ' ' << x->button_mask_;
 					}
-				}
-				break;
-				case COMMAND_GET_ACCELEROMETER:
-				{
-					const vec3 a = lManager->GetAccelerometer();
-					mActiveResponse << a;
-				}
-				break;
-				case COMMAND_GET_MOUSEMOVE:
-				{
-					const vec3 m = lManager->GetMouseMove();
-					mActiveResponse << m;
-				}
-				break;
-				case COMMAND_CREATE_JOYSTICK:
-				{
-					const int lJoyId = lManager->CreateJoystick(ParamToFloat(pParameterVector, 0), ParamToFloat(pParameterVector, 1), ParamToBool(pParameterVector, 2));
-					mActiveResponse << lJoyId;
-				}
-				break;
-				case COMMAND_GET_JOYSTICK_DATA:
-				{
+				} break;
+				case kCommandGetAccelerometer: {
+					const vec3 a = manager->GetAccelerometer();
+					active_response_ << a;
+				} break;
+				case kCommandGetMousemove: {
+					const vec3 m = manager->GetMouseMove();
+					active_response_ << m;
+				} break;
+				case kCommandCreateJoystick: {
+					const int joy_id = manager->CreateJoystick(ParamToFloat(parameter_vector, 0), ParamToFloat(parameter_vector, 1), ParamToBool(parameter_vector, 2));
+					active_response_ << joy_id;
+				} break;
+				case kCommandGetJoystickData: {
 					typedef TrabantSimManager::JoystickDataList JoyList;
-					JoyList lList = lManager->GetJoystickData();
+					JoyList list = manager->GetJoystickData();
 					int y = 0;
-					for (JoyList::iterator x = lList.begin(); x != lList.end(); ++x, ++y)
-					{
-						if (y)
-						{
-							mActiveResponse << '\n';
+					for (JoyList::iterator x = list.begin(); x != list.end(); ++x, ++y) {
+						if (y) {
+							active_response_ << '\n';
 						}
-						mActiveResponse << x->mJoystickId << ' ' << x->x << ' ' << x->y;
+						active_response_ << x->joystick_id_ << ' ' << x->x << ' ' << x->y;
 					}
-				}
-				break;
-				case COMMAND_GET_ASPECT_RATIO:
-				{
-					mActiveResponse << lManager->GetAspectRatio();
-				}
-				break;
-				case COMMAND_CREATE_ENGINE:
-				{
-					const int lObjectId = ParamToInt(pParameterVector, 0);
-					const str lEngineType = ParamToStr(pParameterVector, 1);
-					const vec2 lMaxVelocity = ParamToVec2(pParameterVector, 2);
-					const float lStrength = ParamToFloat(pParameterVector, 4);
-					const float lFriction = ParamToFloat(pParameterVector, 5);
-					TrabantSimManager::EngineTargetList lTargets;
-					size_t lCount = pParameterVector.size();
-					for (size_t x = 6; x+1 < lCount; x += 2)
-					{
-						lTargets.push_back(TrabantSimManager::EngineTarget(ParamToInt(pParameterVector, x), ParamToFloat(pParameterVector, x+1)));
+				} break;
+				case kCommandGetAspectRatio: {
+					active_response_ << manager->GetAspectRatio();
+				} break;
+				case kCommandCreateEngine: {
+					const int object_id = ParamToInt(parameter_vector, 0);
+					const str engine_type = ParamToStr(parameter_vector, 1);
+					const vec2 max_velocity = ParamToVec2(parameter_vector, 2);
+					const float strength = ParamToFloat(parameter_vector, 4);
+					const float friction = ParamToFloat(parameter_vector, 5);
+					TrabantSimManager::EngineTargetList targets;
+					size_t count = parameter_vector.size();
+					for (size_t x = 6; x+1 < count; x += 2) {
+						targets.push_back(TrabantSimManager::EngineTarget(ParamToInt(parameter_vector, x), ParamToFloat(parameter_vector, x+1)));
 					}
-					const int lEngineId = lManager->CreateEngine(lObjectId, lEngineType, lMaxVelocity, lStrength, lFriction, lTargets);
-					if (lEngineId < 0)
-					{
+					const int engine_id = manager->CreateEngine(object_id, engine_type, max_velocity, strength, friction, targets);
+					if (engine_id < 0) {
 						throw ParameterException();
 					}
-					mActiveResponse << lEngineId;
-				}
-				break;
-				case COMMAND_CREATE_JOINT:
-				{
-					const int lObjectId = ParamToInt(pParameterVector, 0);
-					const str lJointType = ParamToStr(pParameterVector, 1);
-					const int lOtherObjectId = ParamToInt(pParameterVector, 2);
-					const vec3 lAxis = ParamToVec3(pParameterVector, 3);
-					const vec2 lStop = ParamToVec2(pParameterVector, 6);
-					const vec2 lSpring = ParamToVec2(pParameterVector, 8);
-					const int lJointId = lManager->CreateJoint(lObjectId, lJointType, lOtherObjectId, lAxis, lStop, lSpring);
-					if (lJointId < 0)
-					{
+					active_response_ << engine_id;
+				} break;
+				case kCommandCreateJoint: {
+					const int object_id = ParamToInt(parameter_vector, 0);
+					const str joint_type = ParamToStr(parameter_vector, 1);
+					const int other_object_id = ParamToInt(parameter_vector, 2);
+					const vec3 axis = ParamToVec3(parameter_vector, 3);
+					const vec2 stop = ParamToVec2(parameter_vector, 6);
+					const vec2 spring = ParamToVec2(parameter_vector, 8);
+					const int joint_id = manager->CreateJoint(object_id, joint_type, other_object_id, axis, stop, spring);
+					if (joint_id < 0) {
 						throw ParameterException();
 					}
-					mActiveResponse << lJointId;
-				}
-				break;
-				case COMMAND_POSITION:
-				{
-					bool lIsSet;
-					vec3 lValue = ParamToVec3(pParameterVector, 1, &lIsSet);
-					lManager->Position(ParamToInt(pParameterVector, 0), lIsSet, lValue);
-					if (!lIsSet)
-					{
-						mActiveResponse << lValue;
+					active_response_ << joint_id;
+				} break;
+				case kCommandPosition: {
+					bool _is_set;
+					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
+					manager->Position(ParamToInt(parameter_vector, 0), _is_set, value);
+					if (!_is_set) {
+						active_response_ << value;
 					}
-				}
-				break;
-				case COMMAND_ORIENTATION:
-				{
-					bool lIsSet;
-					quat lValue = ParamToQuat(pParameterVector, 1, &lIsSet);
-					lManager->Orientation(ParamToInt(pParameterVector, 0), lIsSet, lValue);
-					if (!lIsSet)
-					{
-						mActiveResponse << lValue;
+				} break;
+				case kCommandOrientation: {
+					bool _is_set;
+					quat value = ParamToQuat(parameter_vector, 1, &_is_set);
+					manager->Orientation(ParamToInt(parameter_vector, 0), _is_set, value);
+					if (!_is_set) {
+						active_response_ << value;
 					}
-				}
-				break;
-				case COMMAND_VELOCITY:
-				{
-					bool lIsSet;
-					vec3 lValue = ParamToVec3(pParameterVector, 1, &lIsSet);
-					lManager->Velocity(ParamToInt(pParameterVector, 0), lIsSet, lValue);
-					if (!lIsSet)
-					{
-						mActiveResponse << lValue;
+				} break;
+				case kCommandVelocity: {
+					bool _is_set;
+					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
+					manager->Velocity(ParamToInt(parameter_vector, 0), _is_set, value);
+					if (!_is_set) {
+						active_response_ << value;
 					}
-				}
-				break;
-				case COMMAND_ANGULAR_VELOCITY:
-				{
-					bool lIsSet;
-					vec3 lValue = ParamToVec3(pParameterVector, 1, &lIsSet);
-					lManager->AngularVelocity(ParamToInt(pParameterVector, 0), lIsSet, lValue);
-					if (!lIsSet)
-					{
-						mActiveResponse << lValue;
+				} break;
+				case kCommandAngularVelocity: {
+					bool _is_set;
+					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
+					manager->AngularVelocity(ParamToInt(parameter_vector, 0), _is_set, value);
+					if (!_is_set) {
+						active_response_ << value;
 					}
-				}
-				break;
-				case COMMAND_MASS:
-				{
-					bool lIsSet;
-					float lValue = ParamToFloat(pParameterVector, 1, &lIsSet);
-					lManager->Mass(ParamToInt(pParameterVector, 0), lIsSet, lValue);
-					if (!lIsSet)
-					{
-						mActiveResponse << lValue;
+				} break;
+				case kCommandMass: {
+					bool _is_set;
+					float value = ParamToFloat(parameter_vector, 1, &_is_set);
+					manager->Mass(ParamToInt(parameter_vector, 0), _is_set, value);
+					if (!_is_set) {
+						active_response_ << value;
 					}
-				}
-				break;
-				case COMMAND_COLOR:
-				{
-					bool lIsSet;
-					vec3 lValue = ParamToVec3(pParameterVector, 1, &lIsSet);
-					float lAlpha = ParamToFloat(pParameterVector, 4, &lIsSet);
-					lManager->ObjectColor(ParamToInt(pParameterVector, 0), lIsSet, lValue, lAlpha);
-					if (!lIsSet)
-					{
-						mActiveResponse << lValue;
+				} break;
+				case kCommandColor: {
+					bool _is_set;
+					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
+					float alpha = ParamToFloat(parameter_vector, 4, &_is_set);
+					manager->ObjectColor(ParamToInt(parameter_vector, 0), _is_set, value, alpha);
+					if (!_is_set) {
+						active_response_ << value;
 					}
-				}
-				break;
-				case COMMAND_ENGINE_FORCE:
-				{
-					bool lIsSet;
-					vec3 lValue = ParamToVec3(pParameterVector, 2, &lIsSet);
-					lManager->EngineForce(ParamToInt(pParameterVector, 0), ParamToInt(pParameterVector, 1), lIsSet, lValue);
-					if (!lIsSet)
-					{
-						mActiveResponse << lValue;
+				} break;
+				case kCommandEngineForce: {
+					bool _is_set;
+					vec3 value = ParamToVec3(parameter_vector, 2, &_is_set);
+					manager->EngineForce(ParamToInt(parameter_vector, 0), ParamToInt(parameter_vector, 1), _is_set, value);
+					if (!_is_set) {
+						active_response_ << value;
 					}
-				}
-				break;
-				case COMMAND_SET_TAG_FLOATS:
-				{
-					mTagFloats.clear();
-					Params2Floats(pParameterVector, mTagFloats);
-				}
-				break;
-				case COMMAND_SET_TAG_STRINGS:
-				{
-					mTagStrings = pParameterVector;
-				}
-				break;
-				case COMMAND_SET_TAG_PHYS:
-				{
-					mTagPhys.clear();
-					Params2Ints(pParameterVector, mTagPhys);
-				}
-				break;
-				case COMMAND_SET_TAG_ENGINE:
-				{
-					mTagEngines.clear();
-					Params2Ints(pParameterVector, mTagEngines);
-				}
-				break;
-				case COMMAND_SET_TAG_MESH:
-				{
-					mTagMeshes.clear();
-					Params2Ints(pParameterVector, mTagMeshes);
-				}
-				break;
-				case COMMAND_ADD_TAG:
-				{
-					const int lObjectId = ParamToInt(pParameterVector, 0);
-					const str lTagType = ParamToStr(pParameterVector, 1);
-					lManager->AddTag(lObjectId, lTagType, mTagFloats, mTagStrings, mTagPhys, mTagEngines, mTagMeshes);
-				}
-				break;
-				default:
-				{
-					lResult = -1;
-				}
-				break;
+				} break;
+				case kCommandSetTagFloats: {
+					tag_floats_.clear();
+					Params2Floats(parameter_vector, tag_floats_);
+				} break;
+				case kCommandSetTagStrings: {
+					tag_strings_ = parameter_vector;
+				} break;
+				case kCommandSetTagPhys: {
+					tag_phys_.clear();
+					Params2Ints(parameter_vector, tag_phys_);
+				} break;
+				case kCommandSetTagEngine: {
+					tag_engines_.clear();
+					Params2Ints(parameter_vector, tag_engines_);
+				} break;
+				case kCommandSetTagMesh: {
+					tag_meshes_.clear();
+					Params2Ints(parameter_vector, tag_meshes_);
+				} break;
+				case kCommandAddTag: {
+					const int object_id = ParamToInt(parameter_vector, 0);
+					const str tag_type = ParamToStr(parameter_vector, 1);
+					manager->AddTag(object_id, tag_type, tag_floats_, tag_strings_, tag_phys_, tag_engines_, tag_meshes_);
+				} break;
+				default: {
+					result = -1;
+				} break;
 			}
-		}
-		catch (ParameterException)
-		{
-			lResult = 1;
-			mActiveResponse.str(str());
-			mActiveResponse << "ERROR: bad or missing parameter for " << pCommand << '(' << pParameterVector << ")!\n";
-			mLog.Warningf("%s has missing or bad arguments (%s)", pCommand.c_str(), strutil::Join(pParameterVector, ", ").c_str());
+		} catch (ParameterException) {
+			result = 1;
+			active_response_.str(str());
+			active_response_ << "ERROR: bad or missing parameter for " << command << '(' << parameter_vector << ")!\n";
+			log_.Warningf("%s has missing or bad arguments (%s)", command.c_str(), strutil::Join(parameter_vector, ", ").c_str());
 		}
 	}
-	return (lResult);
+	return (result);
 }
 
 
 
-loginstance(CONSOLE, TrabantSimConsoleManager);
+loginstance(kConsole, TrabantSimConsoleManager);
 
 
 

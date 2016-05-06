@@ -6,12 +6,11 @@
 
 #pragma once
 
-#include "String.h"
+#include "string.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -23,8 +22,7 @@ namespace Lepra
 
 // This string obfuscator class really has a different name (#defined above) and also only
 // manages defuscation. Run the Python program obfuscate.py to encode the strings.
-class Obfuxator
-{
+class Obfuxator {
 public:
 	static str de(str s);
 };

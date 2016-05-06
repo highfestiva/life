@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -7,15 +7,14 @@
 #pragma once
 
 #include <vector>
-#include "../../Lepra/Include/Log.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../Include/PhysicsManager.h"
-#include "../Include/Tbc.h"
+#include "../../lepra/include/log.h"
+#include "../../lepra/include/vector3d.h"
+#include "../include/physicsmanager.h"
+#include "../include/tbc.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
@@ -25,61 +24,58 @@ class PhysicsEngine;
 
 
 
-class PhysicsTrigger
-{
+class PhysicsTrigger {
 public:
-	enum Type
-	{
-		TRIGGER_INVALID = 0,
-		TRIGGER_NON_STOP,	// Sorta like a "trampoline", which needs to push, even if at top.
-		TRIGGER_ALWAYS,		// Trigger after delay, "timer triggered".
-		TRIGGER_MOVEMENT,	// Triggered by something physical.
+	enum Type {
+		kTriggerInvalid = 0,
+		kTriggerNonStop,	// Sorta like a "trampoline", which needs to push, even if at top.
+		kTriggerAlways,		// Trigger after delay, "timer triggered".
+		kTriggerMovement,	// Triggered by something physical.
 	};
 
-	struct EngineTrigger
-	{
-		PhysicsEngine* mEngine;
-		float mDelay;
-		str mFunction;
-		bool operator==(const EngineTrigger& pOther) const;
+	struct EngineTrigger {
+		PhysicsEngine* engine_;
+		float delay_;
+		str function_;
+		bool operator==(const EngineTrigger& other) const;
 		size_t Hash() const;
 	};
 
 	PhysicsTrigger();
 	virtual ~PhysicsTrigger();
-	void RelocatePointers(const ChunkyPhysics* pTarget, const ChunkyPhysics* pSource, const PhysicsTrigger& pOriginal);
+	void RelocatePointers(const ChunkyPhysics* target, const ChunkyPhysics* source, const PhysicsTrigger& original);
 
-	static PhysicsTrigger* Load(ChunkyPhysics* pStructure, const void* pData, unsigned pByteCount);
+	static PhysicsTrigger* Load(ChunkyPhysics* structure, const void* data, unsigned byte_count);
 
 	Type GetType() const;
-	PhysicsManager::BodyID GetPhysicsTriggerId(int pTriggerGeometryIndex) const;
+	PhysicsManager::BodyID GetPhysicsTriggerId(int trigger_geometry_index) const;
 	//int GetGroupIndex() const;
 	int GetPriority() const;
 	const str& GetFunction() const;
 
-	void AddTriggerGeometry(ChunkyBoneGeometry* pGeometry);
+	void AddTriggerGeometry(ChunkyBoneGeometry* geometry);
 	int GetTriggerGeometryCount() const;
-	ChunkyBoneGeometry* GetTriggerGeometry(int pIndex) const;
-	void AddControlledEngine(PhysicsEngine* pEngine, float pDelay, str pFunction);
+	ChunkyBoneGeometry* GetTriggerGeometry(int index) const;
+	void AddControlledEngine(PhysicsEngine* engine, float delay, str function);
 	int GetControlledEngineCount() const;
-	const EngineTrigger& GetControlledEngine(int pIndex) const;
+	const EngineTrigger& GetControlledEngine(int index) const;
 
 	unsigned GetChunkySize() const;
-	void SaveChunkyData(const ChunkyPhysics* pStructure, void* pData) const;
+	void SaveChunkyData(const ChunkyPhysics* structure, void* data) const;
 
 private:
-	void LoadChunkyData(ChunkyPhysics* pStructure, const void* pData);
+	void LoadChunkyData(ChunkyPhysics* structure, const void* data);
 
 	typedef std::vector<ChunkyBoneGeometry*> BoneTriggerArray;
 	typedef std::vector<EngineTrigger> ConnectionArray;
 
-	Type mTriggerType;
+	Type trigger_type_;
 	//int mGroupIndex;
-	int mPriority;
-	str mFunction;
+	int priority_;
+	str function_;
 	//ChunkyBoneGeometry* mTriggerNode;
-	BoneTriggerArray mTriggerArray;
-	ConnectionArray mConnectionArray;
+	BoneTriggerArray trigger_array_;
+	ConnectionArray connection_array_;
 
 	logclass();
 };

@@ -6,48 +6,46 @@
 
 #pragma once
 
-#include "UiRectComponent.h"
-#include "UiTextComponent.h"
+#include "uirectcomponent.h"
+#include "uitextcomponent.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class Label: public RectComponent, public TextComponent
-{
+class Label: public RectComponent, public TextComponent {
 	typedef RectComponent Parent;
 public:
 
-	Label(const Color& pColor, const wstr& pText);
+	Label(const Color& color, const wstr& text);
 	virtual ~Label();
 
-	void SetIcon(Painter::ImageID pIconID, IconAlignment pAlignment);
-	void SetText(const wstr& pText);
+	void SetIcon(Painter::ImageID icon_id, IconAlignment alignment);
+	void SetText(const wstr& text);
 	const wstr& GetText() const;
-	virtual void SetSelected(bool pSelected);
+	virtual void SetSelected(bool selected);
 
-	virtual void Repaint(Painter* pPainter);
+	virtual void Repaint(Painter* painter);
 	virtual void ForceRepaint();
 
-	virtual PixelCoord GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoord GetPreferredSize(bool force_adaptive);
 
 	virtual Type GetType() const;
 
 protected:
 	void UpdateBackground();
 
-	Painter::ImageID mIconId;
-	IconAlignment mIconAlignment;
+	Painter::ImageID icon_id_;
+	IconAlignment icon_alignment_;
 
-	wstr mText;
+	wstr text_;
 
-	int mTextWidth;
-	int mTextHeight;
+	int text_width_;
+	int text_height_;
 
-	bool mSelectable;
+	bool selectable_;
 };
 
 

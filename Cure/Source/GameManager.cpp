@@ -5,98 +5,90 @@
 
 
 #include "pch.h"
-#include "../Include/GameManager.h"
-#include "../../Lepra/Include/Number.h"
-#include "../../Lepra/Include/SystemManager.h"
-#include "../../Tbc/Include/PhysicsManager.h"
-#include "../../Tbc/Include/PhysicsManagerFactory.h"
-#include "../../Tbc/Include/PhysicsSpawner.h"
-#include "../Include/ConsoleManager.h"
-#include "../Include/ContextManager.h"
-#include "../Include/ContextObject.h"
-#include "../Include/GameTicker.h"
-#include "../Include/NetworkAgent.h"
-#include "../Include/ResourceManager.h"
-#include "../Include/RuntimeVariable.h"
-#include "../Include/RuntimeVariableName.h"
-#include "../Include/Spawner.h"
-#include "../Include/TerrainManager.h"
-#include "../Include/TimeManager.h"
+#include "../include/gamemanager.h"
+#include "../../lepra/include/number.h"
+#include "../../lepra/include/systemmanager.h"
+#include "../../tbc/include/physicsmanager.h"
+#include "../../tbc/include/physicsmanagerfactory.h"
+#include "../../tbc/include/physicsspawner.h"
+#include "../include/consolemanager.h"
+#include "../include/contextmanager.h"
+#include "../include/contextobject.h"
+#include "../include/gameticker.h"
+#include "../include/networkagent.h"
+#include "../include/resourcemanager.h"
+#include "../include/runtimevariable.h"
+#include "../include/runtimevariablename.h"
+#include "../include/spawner.h"
+#include "../include/terrainmanager.h"
+#include "../include/timemanager.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-GameManager::GameManager(const TimeManager* pTime, RuntimeVariableScope* pVariableScope, ResourceManager* pResourceManager):
-	mIsThreadSafe(true),
-	mVariableScope(pVariableScope),
-	mResource(pResourceManager),
-	mNetwork(0),
-	mTicker(0),
-	mTime(pTime),
-	mContext(0),
-	mTerrain(0),//new TerrainManager(pResourceManager)),
-	mConsole(0)
-{
-	mContext = new ContextManager(this);
+GameManager::GameManager(const TimeManager* time, RuntimeVariableScope* variable_scope, ResourceManager* resource_manager):
+	is_thread_safe_(true),
+	variable_scope_(variable_scope),
+	resource_(resource_manager),
+	network_(0),
+	ticker_(0),
+	time_(time),
+	context_(0),
+	terrain_(0),//new TerrainManager(pResourceManager)),
+	console_(0) {
+	context_ = new ContextManager(this);
 }
 
-GameManager::~GameManager()
-{
-	delete (mConsole);
-	mConsole = 0;
-	delete (mContext);
-	mContext = 0;
+GameManager::~GameManager() {
+	delete (console_);
+	console_ = 0;
+	delete (context_);
+	context_ = 0;
 
 	// Free after killing all game objects.
-	mResource->ForceFreeCache();
-	mResource->ForceFreeCache();
+	resource_->ForceFreeCache();
+	resource_->ForceFreeCache();
 
-	mTime = 0;	// Not owned resource.
-	mTicker = 0;	// Not owned resource.
-	delete (mTerrain);
-	mTerrain = 0;
-	delete (mNetwork);
-	mNetwork = 0;
-	mResource = 0;
-	delete (mVariableScope);
-	mVariableScope = 0;
+	time_ = 0;	// Not owned resource.
+	ticker_ = 0;	// Not owned resource.
+	delete (terrain_);
+	terrain_ = 0;
+	delete (network_);
+	network_ = 0;
+	resource_ = 0;
+	delete (variable_scope_);
+	variable_scope_ = 0;
 
-	while (mLock.IsOwner())
-	{
-		mLock.Release();
+	while (lock_.IsOwner()) {
+		lock_.Release();
 	}
 }
 
-const GameTicker* GameManager::GetTicker() const
-{
-	return mTicker;
+const GameTicker* GameManager::GetTicker() const {
+	return ticker_;
 }
 
-void GameManager::SetTicker(const GameTicker* pTicker)
-{
-	mTicker = pTicker;
+void GameManager::SetTicker(const GameTicker* ticker) {
+	ticker_ = ticker;
 }
 
 
 
-bool GameManager::IsPrimaryManager() const
-{
+bool GameManager::IsPrimaryManager() const {
 	return true;
 }
 
-bool GameManager::BeginTick()
-{
+bool GameManager::BeginTick() {
 	LEPRA_MEASURE_SCOPE(BeginTick);
 
-	bool lPerformanceText;
-	v_get(lPerformanceText, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_ENABLE, false);
-	double lReportInterval;
-	v_get(lReportInterval, =, GetVariableScope(), RTVAR_PERFORMANCE_TEXT_INTERVAL, 1.0);
-	UpdateReportPerformance(lPerformanceText, lReportInterval);
+	bool performance_text;
+	v_get(performance_text, =, GetVariableScope(), kRtvarPerformanceTextEnable, false);
+	double _report_interval;
+	v_get(_report_interval, =, GetVariableScope(), kRtvarPerformanceTextInterval, 1.0);
+	UpdateReportPerformance(performance_text, _report_interval);
 
 	{
 		//LEPRA_MEASURE_SCOPE(AcquireTickLock);
@@ -106,10 +98,10 @@ bool GameManager::BeginTick()
 	{
 		//LEPRA_MEASURE_SCOPE(NetworkAndInput);
 
-		//mTime->Tick();
+		//time_->Tick();
 
 		// Sorts up incoming network data; adds/removes objects (for instance via remote create/delete).
-		// On UI-based managers we handle user input here as well.
+		// On kUi-based managers we handle user input here as well.
 		TickInput();
 	}
 
@@ -118,19 +110,17 @@ bool GameManager::BeginTick()
 		ScriptPhysicsTick();
 	}
 
-	mIsThreadSafe = false;
+	is_thread_safe_ = false;
 
 	return true;
 }
 
-void GameManager::PreEndTick()
-{
-	mIsThreadSafe = true;
+void GameManager::PreEndTick() {
+	is_thread_safe_ = true;
 	GetTickLock()->Release();
 }
 
-bool GameManager::EndTick()
-{
+bool GameManager::EndTick() {
 	{
 		//LEPRA_MEASURE_SCOPE(NetworkSend);
 
@@ -140,351 +130,292 @@ bool GameManager::EndTick()
 		TickNetworkOutput();
 	}
 
-	if (GetConsoleManager())
-	{
+	if (GetConsoleManager()) {
 		GetConsoleManager()->ExecuteYieldCommand();
 	}
 
 	return true;
 }
 
-bool GameManager::TickNetworkOutput()
-{
-	mContext->HandleAttributeSend();
-	if (mNetwork)
-	{
-		return (mNetwork->SendAll());
+bool GameManager::TickNetworkOutput() {
+	context_->HandleAttributeSend();
+	if (network_) {
+		return (network_->SendAll());
 	}
 	return true;
 }
 
-Lock* GameManager::GetTickLock() const
-{
-	return &mLock;
+Lock* GameManager::GetTickLock() const {
+	return &lock_;
 }
 
 
 
-RuntimeVariableScope* GameManager::GetVariableScope() const
-{
-	return (mVariableScope);
+RuntimeVariableScope* GameManager::GetVariableScope() const {
+	return (variable_scope_);
 }
 
-void GameManager::SetVariableScope(RuntimeVariableScope* pScope)
-{
-	mVariableScope = pScope;
+void GameManager::SetVariableScope(RuntimeVariableScope* scope) {
+	variable_scope_ = scope;
 }
 
-ResourceManager* GameManager::GetResourceManager() const
-{
-	return (mResource);
+ResourceManager* GameManager::GetResourceManager() const {
+	return (resource_);
 }
 
-ContextManager* GameManager::GetContext() const
-{
-	return (mContext);
+ContextManager* GameManager::GetContext() const {
+	return (context_);
 }
 
-const TimeManager* GameManager::GetTimeManager() const
-{
-	return (mTime);
+const TimeManager* GameManager::GetTimeManager() const {
+	return (time_);
 }
 
-Tbc::PhysicsManager* GameManager::GetPhysicsManager() const
-{
-	return mTicker->GetPhysicsManager(mIsThreadSafe);
+tbc::PhysicsManager* GameManager::GetPhysicsManager() const {
+	return ticker_->GetPhysicsManager(is_thread_safe_);
 }
 
-ConsoleManager* GameManager::GetConsoleManager() const
-{
-	return (mConsole);
+ConsoleManager* GameManager::GetConsoleManager() const {
+	return (console_);
 }
 
-void GameManager::SetConsoleManager(ConsoleManager* pConsole)
-{
-	mConsole = pConsole;
+void GameManager::SetConsoleManager(ConsoleManager* console) {
+	console_ = console;
 }
 
 
 
-void GameManager::MicroTick(float pTimeDelta)
-{
-	ScopeLock lLock(GetTickLock());
-	mContext->MicroTick(pTimeDelta);
+void GameManager::MicroTick(float time_delta) {
+	ScopeLock lock(GetTickLock());
+	context_->MicroTick(time_delta);
 }
 
-void GameManager::PostPhysicsTick()
-{
-	mContext->HandleIdledBodies();
-	mContext->HandlePhysicsSend();
+void GameManager::PostPhysicsTick() {
+	context_->HandleIdledBodies();
+	context_->HandlePhysicsSend();
 	HandleWorldBoundaries();
 }
 
 
 
-bool GameManager::IsObjectRelevant(const vec3& pPosition, float pDistance) const
-{
-	(void)pPosition;
-	(void)pDistance;
+bool GameManager::IsObjectRelevant(const vec3& position, float distance) const {
+	(void)position;
+	(void)distance;
 	return true;
 }
 
-ContextObject* GameManager::CreateContextObject(const str& pClassId, NetworkObjectType pNetworkType, GameObjectId pInstanceId)
-{
-	ContextObject* lObject = CreateContextObject(pClassId);
-	AddContextObject(lObject, pNetworkType, pInstanceId);
-	return (lObject);
+ContextObject* GameManager::CreateContextObject(const str& class_id, NetworkObjectType network_type, GameObjectId instance_id) {
+	ContextObject* _object = CreateContextObject(class_id);
+	AddContextObject(_object, network_type, instance_id);
+	return (_object);
 }
 
-void GameManager::DeleteContextObject(GameObjectId pInstanceId)
-{
-	mContext->DeleteObject(pInstanceId);
+void GameManager::DeleteContextObject(GameObjectId instance_id) {
+	context_->DeleteObject(instance_id);
 }
 
-void GameManager::AddContextObject(ContextObject* pObject, NetworkObjectType pNetworkType, GameObjectId pInstanceId)
-{
-	pObject->SetNetworkObjectType(pNetworkType);
-	if (pInstanceId)
-	{
-		pObject->SetInstanceId(pInstanceId);
+void GameManager::AddContextObject(ContextObject* object, NetworkObjectType network_type, GameObjectId instance_id) {
+	object->SetNetworkObjectType(network_type);
+	if (instance_id) {
+		object->SetInstanceId(instance_id);
+	} else {
+		object->SetInstanceId(GetContext()->AllocateGameObjectId(network_type));
 	}
-	else
-	{
-		pObject->SetInstanceId(GetContext()->AllocateGameObjectId(pNetworkType));
-	}
-	pObject->SetManager(GetContext());
-	GetContext()->AddObject(pObject);
+	object->SetManager(GetContext());
+	GetContext()->AddObject(object);
 }
 
-ContextObject* GameManager::CreateLogicHandler(const str&)
-{
+ContextObject* GameManager::CreateLogicHandler(const str&) {
 	return 0;
 }
 
-Spawner* GameManager::GetAvatarSpawner(GameObjectId pLevelId) const
-{
-	ContextObject* lLevel = GetContext()->GetObject(pLevelId);
-	if (!lLevel)
-	{
+Spawner* GameManager::GetAvatarSpawner(GameObjectId level_id) const {
+	ContextObject* level = GetContext()->GetObject(level_id);
+	if (!level) {
 		return 0;
 	}
-	const ContextObject::Array& lChildArray = lLevel->GetChildArray();
-	ContextObject::Array::const_iterator x = lChildArray.begin();
-	for (; x != lChildArray.end(); ++x)
-	{
-		if ((*x)->GetClassId() != "Spawner")
-		{
+	const ContextObject::Array& child_array = level->GetChildArray();
+	ContextObject::Array::const_iterator x = child_array.begin();
+	for (; x != child_array.end(); ++x) {
+		if ((*x)->GetClassId() != "Spawner") {
 			continue;
 		}
-		Spawner* lSpawner = (Spawner*)*x;
-		const Tbc::PhysicsSpawner* lSpawnShape = lSpawner->GetSpawner();
-		if (lSpawnShape->GetNumber() == 0)
-		{
-			return lSpawner;
+		Spawner* spawner = (Spawner*)*x;
+		const tbc::PhysicsSpawner* spawn_shape = spawner->GetSpawner();
+		if (spawn_shape->GetNumber() == 0) {
+			return spawner;
 		}
 	}
 	return 0;
 }
 
-bool GameManager::IsUiMoveForbidden(GameObjectId) const
-{
-	return false;	// Non-UI implementors need not bother.
+bool GameManager::IsUiMoveForbidden(GameObjectId) const {
+	return false;	// Non-kUi implementors need not bother.
 }
 
-void GameManager::OnStopped(ContextObject* pObject, Tbc::PhysicsManager::BodyID pBodyId)
-{
+void GameManager::OnStopped(ContextObject* object, tbc::PhysicsManager::BodyID body_id) {
 #ifdef LEPRA_DEBUG
-	const unsigned lRootIndex = 0;
-	deb_assert(pObject->GetStructureGeometry(lRootIndex));
-	deb_assert(pObject->GetStructureGeometry(lRootIndex)->GetBodyId() == pBodyId);
+	const unsigned root_index = 0;
+	deb_assert(object->GetStructureGeometry(root_index));
+	deb_assert(object->GetStructureGeometry(root_index)->GetBodyId() == body_id);
 #endif // Debug / !Debug
-	(void)pBodyId;
+	(void)body_id;
 
-	if (pObject->GetNetworkObjectType() == NETWORK_OBJECT_LOCALLY_CONTROLLED)
-	{
-		log_volatile(mLog.Debugf("Object %u/%s stopped, sending position.", pObject->GetInstanceId(), pObject->GetClassId().c_str()));
-		GetContext()->AddPhysicsSenderObject(pObject);
+	if (object->GetNetworkObjectType() == kNetworkObjectLocallyControlled) {
+		log_volatile(log_.Debugf("Object %u/%s stopped, sending position.", object->GetInstanceId(), object->GetClassId().c_str()));
+		GetContext()->AddPhysicsSenderObject(object);
 	}
 }
 
 
 
-bool GameManager::ValidateVariable(int pSecurityLevel, const str& pVariable, str& pValue) const
-{
-	if (pSecurityLevel < 1 && (pVariable == RTVAR_PHYSICS_FPS ||
-		pVariable == RTVAR_PHYSICS_RTR ||
-		pVariable == RTVAR_PHYSICS_HALT))
-	{
-		mLog.Warning("You're not authorized to change this variable.");
+bool GameManager::ValidateVariable(int security_level, const str& variable, str& value) const {
+	if (security_level < 1 && (variable == kRtvarPhysicsFps ||
+		variable == kRtvarPhysicsRtr ||
+		variable == kRtvarPhysicsHalt)) {
+		log_.Warning("You're not authorized to change this variable.");
 		return false;
 	}
-	if (pVariable == RTVAR_PHYSICS_FPS || pVariable == RTVAR_PHYSICS_MICROSTEPS)
-	{
-		int lValue = 0;
-		if (!strutil::StringToInt(pValue, lValue)) return false;
-		lValue = (pVariable == RTVAR_PHYSICS_FPS)? Math::Clamp(lValue, 5, 10000) : Math::Clamp(lValue, 1, 10);
-		pValue = strutil::IntToString(lValue, 10);
-	}
-	else if (pVariable == RTVAR_PHYSICS_RTR)
-	{
-		double lValue = 0;
-		if (!strutil::StringToDouble(pValue, lValue)) return false;
-		lValue = Math::Clamp(lValue, 0.01, 4.0);
-		strutil::DoubleToString(lValue, 4, pValue);
-	}
-	else if (pVariable == RTVAR_PHYSICS_HALT)
-	{
-		bool lValue = false;
-		if (!strutil::StringToBool(pValue, lValue)) return false;
-		pValue = strutil::BoolToString(lValue);
+	if (variable == kRtvarPhysicsFps || variable == kRtvarPhysicsMicrosteps) {
+		int _value = 0;
+		if (!strutil::StringToInt(value, _value)) return false;
+		_value = (variable == kRtvarPhysicsFps)? Math::Clamp(_value, 5, 10000) : Math::Clamp(_value, 1, 10);
+		value = strutil::IntToString(_value, 10);
+	} else if (variable == kRtvarPhysicsRtr) {
+		double _value = 0;
+		if (!strutil::StringToDouble(value, _value)) return false;
+		_value = Math::Clamp(_value, 0.01, 4.0);
+		strutil::DoubleToString(_value, 4, value);
+	} else if (variable == kRtvarPhysicsHalt) {
+		bool _value = false;
+		if (!strutil::StringToBool(value, _value)) return false;
+		value = strutil::BoolToString(_value);
 	}
 	return true;
 }
 
 
 
-void GameManager::UpdateReportPerformance(bool pReport, double pReportInterval)
-{
-	mPerformanceReportTimer.UpdateTimer();
-	const double lTimeDiff = mPerformanceReportTimer.GetTimeDiff();
-	if (lTimeDiff >= pReportInterval)
-	{
-		mPerformanceReportTimer.ClearTimeDiff();
+void GameManager::UpdateReportPerformance(bool report, double report_interval) {
+	performance_report_timer_.UpdateTimer();
+	const double time_diff = performance_report_timer_.GetTimeDiff();
+	if (time_diff >= report_interval) {
+		performance_report_timer_.ClearTimeDiff();
 
-		if (mNetwork && mNetwork->IsOpen())
-		{
-			mSendBandwidth.Append(lTimeDiff, 0, mNetwork->GetSentByteCount());
-			mReceiveBandwidth.Append(lTimeDiff, 0, mNetwork->GetReceivedByteCount());
-			if (pReport)
-			{
-				mLog.Performancef("Network bandwith. Up: %sB/s (peak %sB/s). Down: %sB/s (peak %sB/s).",
-					Number::ConvertToPostfixNumber(mSendBandwidth.GetLast(), 2).c_str(),
-					Number::ConvertToPostfixNumber(mSendBandwidth.GetMaximum(), 2).c_str(),
-					Number::ConvertToPostfixNumber(mReceiveBandwidth.GetLast(), 2).c_str(),
-					Number::ConvertToPostfixNumber(mReceiveBandwidth.GetMaximum(), 2).c_str());
+		if (network_ && network_->IsOpen()) {
+			send_bandwidth_.Append(time_diff, 0, network_->GetSentByteCount());
+			receive_bandwidth_.Append(time_diff, 0, network_->GetReceivedByteCount());
+			if (report) {
+				log_.Performancef("Network bandwith. Up: %sB/s (peak %sB/s). Down: %sB/s (peak %sB/s).",
+					Number::ConvertToPostfixNumber(send_bandwidth_.GetLast(), 2).c_str(),
+					Number::ConvertToPostfixNumber(send_bandwidth_.GetMaximum(), 2).c_str(),
+					Number::ConvertToPostfixNumber(receive_bandwidth_.GetLast(), 2).c_str(),
+					Number::ConvertToPostfixNumber(receive_bandwidth_.GetMaximum(), 2).c_str());
 			}
-		}
-		else
-		{
-			mSendBandwidth.Clear();
-			mReceiveBandwidth.Clear();
+		} else {
+			send_bandwidth_.Clear();
+			receive_bandwidth_.Clear();
 		}
 
-		if (pReport)
-		{
-			const ScopePerformanceData::NodeArray lRoots = ScopePerformanceData::GetRoots();
+		if (report) {
+			const ScopePerformanceData::NodeArray roots = ScopePerformanceData::GetRoots();
 			ReportPerformance(ScopePerformanceData::GetRoots(), 0);
 		}
 	}
 }
 
-void GameManager::ClearPerformanceData()
-{
-	ScopeLock lLock(&mLock);
+void GameManager::ClearPerformanceData() {
+	ScopeLock lock(&lock_);
 
-	mSendBandwidth.Clear();
-	mReceiveBandwidth.Clear();
+	send_bandwidth_.Clear();
+	receive_bandwidth_.Clear();
 
 	ScopePerformanceData::ResetAll();
 }
 
-void GameManager::GetBandwidthData(BandwidthData& pSent, BandwidthData& pReceived)
-{
-	pSent = mSendBandwidth;
-	pReceived = mReceiveBandwidth;
+void GameManager::GetBandwidthData(BandwidthData& sent, BandwidthData& received) {
+	sent = send_bandwidth_;
+	received = receive_bandwidth_;
 }
 
 
 
-void GameManager::OnTrigger(Tbc::PhysicsManager::BodyID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
-{
-	ContextObject* lObject1 = GetContext()->GetObject(pTriggerListenerId);
-	if (lObject1)
-	{
-		ContextObject* lObject2 = GetContext()->GetObject(pOtherObjectId);
-		if (lObject2)
-		{
-			lObject1->OnTrigger(pTrigger, lObject2, pBodyId, pPosition, pNormal);
+void GameManager::OnTrigger(tbc::PhysicsManager::BodyID trigger, int trigger_listener_id, int other_object_id, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
+	ContextObject* object1 = GetContext()->GetObject(trigger_listener_id);
+	if (object1) {
+		ContextObject* object2 = GetContext()->GetObject(other_object_id);
+		if (object2) {
+			object1->OnTrigger(trigger, object2, body_id, position, normal);
 		}
 	}
 }
 
-void GameManager::OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-		const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity)
-{
-	ContextObject* lObject1 = GetContext()->GetObject(pObjectId);
-	if (lObject1)
-	{
-		ContextObject* lObject2 = GetContext()->GetObject(pOtherObjectId);
-		if (lObject2)
-		{
-			lObject1->OnForceApplied(lObject2, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+void GameManager::OnForceApplied(int object_id, int other_object_id, tbc::PhysicsManager::BodyID body_id, tbc::PhysicsManager::BodyID other_body_id,
+		const vec3& force, const vec3& torque, const vec3& position, const vec3& relative_velocity) {
+	ContextObject* object1 = GetContext()->GetObject(object_id);
+	if (object1) {
+		ContextObject* object2 = GetContext()->GetObject(other_object_id);
+		if (object2) {
+			object1->OnForceApplied(object2, body_id, other_body_id, force, torque, position, relative_velocity);
 		}
 	}
 }
 
 
 
-NetworkAgent* GameManager::GetNetworkAgent() const
-{
-	return (mNetwork);
+NetworkAgent* GameManager::GetNetworkAgent() const {
+	return (network_);
 }
 
-void GameManager::SetNetworkAgent(NetworkAgent* pNetwork)
-{
-	delete (mNetwork);
-	mNetwork = pNetwork;
+void GameManager::SetNetworkAgent(NetworkAgent* network) {
+	delete (network_);
+	network_ = network;
 }
 
 
 
 
-void GameManager::ScriptPhysicsTick()
-{
+void GameManager::ScriptPhysicsTick() {
 	GetTickLock()->Release();
-	ScopeLock lPhysLock(((GameTicker*)GetTicker())->GetPhysicsLock());
+	ScopeLock phys_lock(((GameTicker*)GetTicker())->GetPhysicsLock());
 	GetTickLock()->Acquire();
 
-	//if (mTime->GetAffordedPhysicsStepCount() > 0)
+	//if (time_->GetAffordedPhysicsStepCount() > 0)
 	{
-		mContext->HandlePostKill();
-		mContext->TickPhysics();
+		context_->HandlePostKill();
+		context_->TickPhysics();
 	}
 }
 
 
 
-void GameManager::ReportPerformance(const ScopePerformanceData::NodeArray& pNodes, int pRecursion)
-{
-	const str lIndent = str(pRecursion*3, ' ');
-	ScopePerformanceData::NodeArray::const_iterator x = pNodes.begin();
-	for (; x != pNodes.end(); ++x)
-	{
-		const ScopePerformanceData* lNode = *x;
-		str lName = strutil::Split(lNode->GetName(), ";")[0];
-		mLog.Performancef((lIndent+lName+" Min: %ss, last: %ss, savg: %ss, max: %ss.").c_str(), 
-			Number::ConvertToPostfixNumber(lNode->GetMinimum(), 2).c_str(),
-			Number::ConvertToPostfixNumber(lNode->GetLast(), 2).c_str(),
-			Number::ConvertToPostfixNumber(lNode->GetSlidingAverage(), 2).c_str(),
-			Number::ConvertToPostfixNumber(lNode->GetMaximum(), 2).c_str());
-		ReportPerformance(lNode->GetChildren(), pRecursion+1);
+void GameManager::ReportPerformance(const ScopePerformanceData::NodeArray& nodes, int recursion) {
+	const str indent = str(recursion*3, ' ');
+	ScopePerformanceData::NodeArray::const_iterator x = nodes.begin();
+	for (; x != nodes.end(); ++x) {
+		const ScopePerformanceData* node = *x;
+		str name = strutil::Split(node->GetName(), ";")[0];
+		log_.Performancef((indent+name+" Min: %ss, last: %ss, savg: %ss, max: %ss.").c_str(),
+			Number::ConvertToPostfixNumber(node->GetMinimum(), 2).c_str(),
+			Number::ConvertToPostfixNumber(node->GetLast(), 2).c_str(),
+			Number::ConvertToPostfixNumber(node->GetSlidingAverage(), 2).c_str(),
+			Number::ConvertToPostfixNumber(node->GetMaximum(), 2).c_str());
+		ReportPerformance(node->GetChildren(), recursion+1);
 	}
 }
 
 
 
-bool GameManager::IsThreadSafe() const
-{
-	return (mIsThreadSafe);
+bool GameManager::IsThreadSafe() const {
+	return (is_thread_safe_);
 }
 
-void GameManager::HandleWorldBoundaries()
-{
+void GameManager::HandleWorldBoundaries() {
 }
 
 
 
-loginstance(GAME, GameManager);
+loginstance(kGame, GameManager);
 
 
 

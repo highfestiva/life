@@ -1,12 +1,12 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "LepraTarget.h"
+#include "lepratarget.h"
 #include <stddef.h>
 
 //#define MEMLEAK_DETECT
@@ -15,11 +15,11 @@
 
 #if defined(LEPRA_DEBUG) && defined(LEPRA_WINDOWS) && defined(MEMLEAK_DETECT)
 
-void* operator new(size_t pSize, const char* pFileName, int pLine);
-void operator delete(void* pPointer, const char* pFileName, int pLine);
-//void* operator new(size_t pSize);
-void operator delete(void* pPointer);
-void operator delete[](void* pPointer);
+void* operator new(size_t size, const char* file_name, int line);
+void operator delete(void* pointer, const char* file_name, int line);
+//void* operator new(size_t size);
+void operator delete(void* pointer);
+void operator delete[](void* pointer);
 
 #define new new(__FILE__, __LINE__)
 

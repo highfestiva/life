@@ -1,83 +1,83 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{C0C67F74-79DA-11E3-A932-0019213B7B87}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{C0C67F75-79DA-11E3-BFB1-0019213B7B87}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Fire.cxx">
-      <Filter>Source Files</Filter>
+    <ClCompile include="fire.cxx">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="FireConsoleManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="fireconsolemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="FireManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="firemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="FireTicker.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="fireticker.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Level.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="level.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Sunlight.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="sunlight.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Eater.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="eater.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="AutoPathDriver.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="autopathdriver.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="BaseMachine.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="basemachine.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Fire.mm">
-      <Filter>Source Files</Filter>
+    <ClCompile include="fire.mm">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Fire.h">
+    <Clinclude include="fire.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FireConsoleManager.h">
+    <Clinclude include="fireconsolemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FireManager.h">
+    <Clinclude include="firemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FireTicker.h">
+    <Clinclude include="fireticker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Level.h">
+    <Clinclude include="level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RtVar.h">
+    <Clinclude include="rtvar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Sunlight.h">
+    <Clinclude include="sunlight.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Version.h">
+    <Clinclude include="version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Eater.h">
+    <Clinclude include="eater.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AutoPathDriver.h">
+    <Clinclude include="autopathdriver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BaseMachine.h">
+    <Clinclude include="basemachine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Fire.rc" />
+    <ResourceCompile include="fire.rc" />
   </ItemGroup>
 </Project>

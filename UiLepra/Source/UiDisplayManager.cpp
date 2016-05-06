@@ -5,344 +5,293 @@
 
 
 #include "pch.h"
-#include "../Include/UiDisplayManager.h"
-#include "../../Lepra/Include/LepraAssert.h"
+#include "../include/uidisplaymanager.h"
+#include "../../lepra/include/lepraassert.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
 DisplayManager::DisplayManager():
-	mScreenMode(WINDOWED),
-	mOrientation(ORIENTATION_ALLOW_ANY),
-	mEnumeratedDisplayMode(0),
-	mEnumeratedDisplayModeCount(0)
-{
+	screen_mode_(kWindowed),
+	orientation_(kOrientationAllowAny),
+	enumerated_display_mode_(0),
+	enumerated_display_mode_count_(0) {
 }
 
-DisplayManager::~DisplayManager()
-{
-	delete[] mEnumeratedDisplayMode;
-	mEnumeratedDisplayMode = 0;
-	mEnumeratedDisplayModeCount = 0;
+DisplayManager::~DisplayManager() {
+	delete[] enumerated_display_mode_;
+	enumerated_display_mode_ = 0;
+	enumerated_display_mode_count_ = 0;
 
 	RemoveResizeObserver(this);
-	deb_assert(mResizeObserverSet.empty());
+	deb_assert(resize_observer_set_.empty());
 }
 
 
 
-void DisplayManager::SetOrientation(Orientation pOrientation)
-{
-	mOrientation = pOrientation;
+void DisplayManager::SetOrientation(Orientation orientation) {
+	orientation_ = orientation;
 }
 
-void DisplayManager::AddResizeObserver(DisplayResizeObserver* pResizeObserver)
-{
-	mResizeObserverSet.insert(pResizeObserver);
+void DisplayManager::AddResizeObserver(DisplayResizeObserver* resize_observer) {
+	resize_observer_set_.insert(resize_observer);
 }
 
-void DisplayManager::RemoveResizeObserver(DisplayResizeObserver* pResizeObserver)
-{
-	mResizeObserverSet.erase(pResizeObserver);
+void DisplayManager::RemoveResizeObserver(DisplayResizeObserver* resize_observer) {
+	resize_observer_set_.erase(resize_observer);
 }
 
-void DisplayManager::DispatchResize(int pWidth, int pHeight)
-{
-	OnResize(pWidth, pHeight);
+void DisplayManager::DispatchResize(int width, int height) {
+	OnResize(width, height);
 
-	ResizeObserverSet::iterator x = mResizeObserverSet.begin();
-	for (; x != mResizeObserverSet.end(); ++x)
-	{
-		(*x)->OnResize(pWidth, pHeight);
+	ResizeObserverSet::iterator x = resize_observer_set_.begin();
+	for (; x != resize_observer_set_.end(); ++x) {
+		(*x)->OnResize(width, height);
 	}
 }
 
-void DisplayManager::DispatchMinimize()
-{
+void DisplayManager::DispatchMinimize() {
 	OnMinimize();
 
-	ResizeObserverSet::iterator x = mResizeObserverSet.begin();
-	for (; x != mResizeObserverSet.end(); ++x)
-	{
+	ResizeObserverSet::iterator x = resize_observer_set_.begin();
+	for (; x != resize_observer_set_.end(); ++x) {
 		(*x)->OnMinimize();
 	}
 }
 
-void DisplayManager::DispatchMaximize(int pWidth, int pHeight)
-{
-	OnMaximize(pWidth, pHeight);
+void DisplayManager::DispatchMaximize(int width, int height) {
+	OnMaximize(width, height);
 
-	ResizeObserverSet::iterator x = mResizeObserverSet.begin();
-	for (; x != mResizeObserverSet.end(); ++x)
-	{
-		(*x)->OnMaximize(pWidth, pHeight);
+	ResizeObserverSet::iterator x = resize_observer_set_.begin();
+	for (; x != resize_observer_set_.end(); ++x) {
+		(*x)->OnMaximize(width, height);
 	}
 }
 
 
 
-int DisplayManager::GetNumDisplayModes()
-{
-	return mEnumeratedDisplayModeCount;
+int DisplayManager::GetNumDisplayModes() {
+	return enumerated_display_mode_count_;
 }
 
-int DisplayManager::GetNumDisplayModes(int pBitDepth)
-{
-	int lCount = 0;
+int DisplayManager::GetNumDisplayModes(int bit_depth) {
+	int count = 0;
 
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mBitDepth == pBitDepth)
-		{
-			lCount++;
+	for (int i = 0; i < enumerated_display_mode_count_; i++) {
+		if (enumerated_display_mode_[i].bit_depth_ == bit_depth) {
+			count++;
 		}
 	}
 
-	return lCount;
+	return count;
 }
 
-int DisplayManager::GetNumDisplayModes(int pWidth, int pHeight)
-{
-	int lCount = 0;
+int DisplayManager::GetNumDisplayModes(int width, int height) {
+	int count = 0;
 
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight)
-		{
-			lCount++;
+	for (int i = 0; i < enumerated_display_mode_count_; i++) {
+		if (enumerated_display_mode_[i].width_ == width &&
+		   enumerated_display_mode_[i].height_ == height) {
+			count++;
 		}
 	}
 
-	return lCount;
+	return count;
 }
 
-int DisplayManager::GetNumDisplayModes(int pWidth, int pHeight, int pBitDepth)
-{
-	int lCount = 0;
+int DisplayManager::GetNumDisplayModes(int width, int height, int bit_depth) {
+	int count = 0;
 
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight &&
-		   mEnumeratedDisplayMode[i].mBitDepth == pBitDepth)
-		{
-			lCount++;
+	for (int i = 0; i < enumerated_display_mode_count_; i++) {
+		if (enumerated_display_mode_[i].width_ == width &&
+		   enumerated_display_mode_[i].height_ == height &&
+		   enumerated_display_mode_[i].bit_depth_ == bit_depth) {
+			count++;
 		}
 	}
 
-	return lCount;
+	return count;
 }
 
-bool DisplayManager::GetDisplayMode(DisplayMode& pDisplayMode, int pMode)
-{
-	bool lOk = false;
-	if (pMode >= 0 && pMode < mEnumeratedDisplayModeCount)
-	{
-		pDisplayMode.mWidth = mEnumeratedDisplayMode[pMode].mWidth;
-		pDisplayMode.mHeight = mEnumeratedDisplayMode[pMode].mHeight;
-		pDisplayMode.mBitDepth = mEnumeratedDisplayMode[pMode].mBitDepth;
-		pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[pMode].mRefreshRate;
+bool DisplayManager::GetDisplayMode(DisplayMode& display_mode, int mode) {
+	bool ok = false;
+	if (mode >= 0 && mode < enumerated_display_mode_count_) {
+		display_mode.width_ = enumerated_display_mode_[mode].width_;
+		display_mode.height_ = enumerated_display_mode_[mode].height_;
+		display_mode.bit_depth_ = enumerated_display_mode_[mode].bit_depth_;
+		display_mode.refresh_rate_ = enumerated_display_mode_[mode].refresh_rate_;
 
-		lOk = true;
+		ok = true;
 	}
-	return lOk;
+	return ok;
 }
 
-bool DisplayManager::GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pBitDepth)
-{
-	int lCount = 0;
-	bool lOk = false;
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mBitDepth == pBitDepth)
-		{
-			if (lCount == pMode)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
+bool DisplayManager::GetDisplayMode(DisplayMode& display_mode, int mode, int bit_depth) {
+	int count = 0;
+	bool ok = false;
+	for (int i = 0; i < enumerated_display_mode_count_; i++) {
+		if (enumerated_display_mode_[i].bit_depth_ == bit_depth) {
+			if (count == mode) {
+				display_mode.width_ = enumerated_display_mode_[i].width_;
+				display_mode.height_ = enumerated_display_mode_[i].height_;
+				display_mode.bit_depth_ = enumerated_display_mode_[i].bit_depth_;
+				display_mode.refresh_rate_ = enumerated_display_mode_[i].refresh_rate_;
 
-				lOk = true;
+				ok = true;
 				break;
 			}
 
-			lCount++;
+			count++;
 		}
 	}
-	return lOk;
+	return ok;
 }
 
-bool DisplayManager::GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight)
-{
-	int lCount = 0;
-	bool lOk = false;
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight)
-		{
-			if (lCount == pMode)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
+bool DisplayManager::GetDisplayMode(DisplayMode& display_mode, int mode, int width, int height) {
+	int count = 0;
+	bool ok = false;
+	for (int i = 0; i < enumerated_display_mode_count_; i++) {
+		if (enumerated_display_mode_[i].width_ == width &&
+		   enumerated_display_mode_[i].height_ == height) {
+			if (count == mode) {
+				display_mode.width_ = enumerated_display_mode_[i].width_;
+				display_mode.height_ = enumerated_display_mode_[i].height_;
+				display_mode.bit_depth_ = enumerated_display_mode_[i].bit_depth_;
+				display_mode.refresh_rate_ = enumerated_display_mode_[i].refresh_rate_;
 
-				lOk = true;
+				ok = true;
 				break;
 			}
 
-			lCount++;
+			count++;
 		}
 	}
-	return lOk;
+	return ok;
 }
 
-bool DisplayManager::GetDisplayMode(DisplayMode& pDisplayMode, int pMode, int pWidth, int pHeight, int pBitDepth)
-{
-	int lCount = 0;
-	bool lOk = false;
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight &&
-		   mEnumeratedDisplayMode[i].mBitDepth == pBitDepth)
-		{
-			if (lCount == pMode)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
+bool DisplayManager::GetDisplayMode(DisplayMode& display_mode, int mode, int width, int height, int bit_depth) {
+	int count = 0;
+	bool ok = false;
+	for (int i = 0; i < enumerated_display_mode_count_; i++) {
+		if (enumerated_display_mode_[i].width_ == width &&
+		   enumerated_display_mode_[i].height_ == height &&
+		   enumerated_display_mode_[i].bit_depth_ == bit_depth) {
+			if (count == mode) {
+				display_mode.width_ = enumerated_display_mode_[i].width_;
+				display_mode.height_ = enumerated_display_mode_[i].height_;
+				display_mode.bit_depth_ = enumerated_display_mode_[i].bit_depth_;
+				display_mode.refresh_rate_ = enumerated_display_mode_[i].refresh_rate_;
 
-				lOk = true;
+				ok = true;
 				break;
 			}
 
-			lCount++;
+			count++;
 		}
 	}
-	return lOk;
+	return ok;
 }
 
-bool DisplayManager::FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight)
-{
-	bool lModeFound = false;
+bool DisplayManager::FindDisplayMode(DisplayMode& display_mode, int width, int height) {
+	bool mode_found = false;
 
-	pDisplayMode.mWidth = 0;
-	pDisplayMode.mHeight = 0;
-	pDisplayMode.mBitDepth = 0;
-	pDisplayMode.mRefreshRate = 0;
+	display_mode.width_ = 0;
+	display_mode.height_ = 0;
+	display_mode.bit_depth_ = 0;
+	display_mode.refresh_rate_ = 0;
 
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight)
-		{
-			if (mEnumeratedDisplayMode[i].mBitDepth == pDisplayMode.mBitDepth &&
-			   mEnumeratedDisplayMode[i].mRefreshRate >= pDisplayMode.mRefreshRate)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
+	for (int i = 0; i < enumerated_display_mode_count_; i++) {
+		if (enumerated_display_mode_[i].width_ == width &&
+		   enumerated_display_mode_[i].height_ == height) {
+			if (enumerated_display_mode_[i].bit_depth_ == display_mode.bit_depth_ &&
+			   enumerated_display_mode_[i].refresh_rate_ >= display_mode.refresh_rate_) {
+				display_mode.width_ = enumerated_display_mode_[i].width_;
+				display_mode.height_ = enumerated_display_mode_[i].height_;
+				display_mode.bit_depth_ = enumerated_display_mode_[i].bit_depth_;
+				display_mode.refresh_rate_ = enumerated_display_mode_[i].refresh_rate_;
 
-				lModeFound = true;
-			}
-			else if(mEnumeratedDisplayMode[i].mBitDepth > pDisplayMode.mBitDepth)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
+				mode_found = true;
+			} else if(enumerated_display_mode_[i].bit_depth_ > display_mode.bit_depth_) {
+				display_mode.width_ = enumerated_display_mode_[i].width_;
+				display_mode.height_ = enumerated_display_mode_[i].height_;
+				display_mode.bit_depth_ = enumerated_display_mode_[i].bit_depth_;
+				display_mode.refresh_rate_ = enumerated_display_mode_[i].refresh_rate_;
 
-				lModeFound = true;
+				mode_found = true;
 			}
 		}
 	}
 
-	return lModeFound;
+	return mode_found;
 }
 
-bool DisplayManager::FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth)
-{
-	bool lModeFound = false;
+bool DisplayManager::FindDisplayMode(DisplayMode& display_mode, int width, int height, int bit_depth) {
+	bool mode_found = false;
 
-	pDisplayMode.mWidth = 0;
-	pDisplayMode.mHeight = 0;
-	pDisplayMode.mBitDepth = 0;
-	pDisplayMode.mRefreshRate = 0;
+	display_mode.width_ = 0;
+	display_mode.height_ = 0;
+	display_mode.bit_depth_ = 0;
+	display_mode.refresh_rate_ = 0;
 
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight &&
-		   mEnumeratedDisplayMode[i].mBitDepth == pBitDepth)
-		{
-			if (mEnumeratedDisplayMode[i].mRefreshRate > pDisplayMode.mRefreshRate)
-			{
-				pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-				pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-				pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-				pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
+	for (int i = 0; i < enumerated_display_mode_count_; i++) {
+		if (enumerated_display_mode_[i].width_ == width &&
+		   enumerated_display_mode_[i].height_ == height &&
+		   enumerated_display_mode_[i].bit_depth_ == bit_depth) {
+			if (enumerated_display_mode_[i].refresh_rate_ > display_mode.refresh_rate_) {
+				display_mode.width_ = enumerated_display_mode_[i].width_;
+				display_mode.height_ = enumerated_display_mode_[i].height_;
+				display_mode.bit_depth_ = enumerated_display_mode_[i].bit_depth_;
+				display_mode.refresh_rate_ = enumerated_display_mode_[i].refresh_rate_;
 
-				lModeFound = true;
+				mode_found = true;
 			}
 		}
 	}
 
-	return lModeFound;
+	return mode_found;
 }
 
-bool DisplayManager::FindDisplayMode(DisplayMode& pDisplayMode, int pWidth, int pHeight, int pBitDepth, int pRefreshRate)
-{
-	pDisplayMode.mWidth = 0;
-	pDisplayMode.mHeight = 0;
-	pDisplayMode.mBitDepth = 0;
-	pDisplayMode.mRefreshRate = 0;
+bool DisplayManager::FindDisplayMode(DisplayMode& display_mode, int width, int height, int bit_depth, int refresh_rate) {
+	display_mode.width_ = 0;
+	display_mode.height_ = 0;
+	display_mode.bit_depth_ = 0;
+	display_mode.refresh_rate_ = 0;
 
-	bool lOk = false;
-	for (int i = 0; i < mEnumeratedDisplayModeCount; i++)
-	{
-		if (mEnumeratedDisplayMode[i].mWidth == pWidth &&
-		   mEnumeratedDisplayMode[i].mHeight == pHeight &&
-		   mEnumeratedDisplayMode[i].mBitDepth == pBitDepth &&
-		   mEnumeratedDisplayMode[i].mRefreshRate == pRefreshRate)
-		{
-			pDisplayMode.mWidth = mEnumeratedDisplayMode[i].mWidth;
-			pDisplayMode.mHeight = mEnumeratedDisplayMode[i].mHeight;
-			pDisplayMode.mBitDepth = mEnumeratedDisplayMode[i].mBitDepth;
-			pDisplayMode.mRefreshRate = mEnumeratedDisplayMode[i].mRefreshRate;
+	bool ok = false;
+	for (int i = 0; i < enumerated_display_mode_count_; i++) {
+		if (enumerated_display_mode_[i].width_ == width &&
+		   enumerated_display_mode_[i].height_ == height &&
+		   enumerated_display_mode_[i].bit_depth_ == bit_depth &&
+		   enumerated_display_mode_[i].refresh_rate_ == refresh_rate) {
+			display_mode.width_ = enumerated_display_mode_[i].width_;
+			display_mode.height_ = enumerated_display_mode_[i].height_;
+			display_mode.bit_depth_ = enumerated_display_mode_[i].bit_depth_;
+			display_mode.refresh_rate_ = enumerated_display_mode_[i].refresh_rate_;
 
-			lOk = true;
+			ok = true;
 			break;
 		}
 	}
 
-	return lOk;
+	return ok;
 }
 
 
 
-void DisplayManager::GetScreenCanvas(Canvas& pCanvas)
-{
-	pCanvas.Reset(GetWidth(), GetHeight(), Canvas::IntToBitDepth(GetBitDepth()));
+void DisplayManager::GetScreenCanvas(Canvas& canvas) {
+	canvas.Reset(GetWidth(), GetHeight(), Canvas::IntToBitDepth(GetBitDepth()));
 }
 
-void DisplayManager::GetScreenCanvas(Canvas* pCanvas)
-{
-	GetScreenCanvas(*pCanvas);
+void DisplayManager::GetScreenCanvas(Canvas* canvas) {
+	GetScreenCanvas(*canvas);
 }
 
 
 
-loginstance(UI_GFX, DisplayManager);
+loginstance(kUiGfx, DisplayManager);
 
 
 

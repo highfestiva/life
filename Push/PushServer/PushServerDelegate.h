@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,51 +8,48 @@
 
 
 
-#include "../../Life/LifeServer/ServerDelegate.h"
-#include "../../Lepra/Include/HiResTimer.h"
-#include "../../Life/Launcher.h"
-#include "../Push.h"
+#include "../../life/lifeserver/serverdelegate.h"
+#include "../../lepra/include/hirestimer.h"
+#include "../../life/launcher.h"
+#include "../push.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class FloatAttribute;
 }
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
-class PushServerDelegate: public Life::ServerDelegate
-{
-	typedef Life::ServerDelegate Parent;
+class PushServerDelegate: public life::ServerDelegate {
+	typedef life::ServerDelegate Parent;
 public:
-	PushServerDelegate(Life::GameServerManager* pGameServerManager);
+	PushServerDelegate(life::GameServerManager* game_server_manager);
 	virtual ~PushServerDelegate();
 
-	virtual void SetLevel(const str& pLevelName);
+	virtual void SetLevel(const str& level_name);
 
 private:
-	virtual Cure::ContextObject* CreateContextObject(const str& pClassId) const;
+	virtual cure::ContextObject* CreateContextObject(const str& class_id) const;
 
 	virtual void OnOpen();
-	virtual void OnLogin(Life::Client* pClient);
-	virtual void OnLogout(Life::Client* pClient);
+	virtual void OnLogin(life::Client* client);
+	virtual void OnLogout(life::Client* client);
 
-	virtual void OnSelectAvatar(Life::Client* pClient, const Cure::UserAccount::AvatarId& pAvatarId);
-	virtual void OnLoadAvatar(Life::Client* pClient, Cure::ContextObject* pAvatar);
-	virtual void OnLoadObject(Cure::ContextObject* pObject);
-	virtual void OnDeleteObject(Cure::ContextObject* pObject);
+	virtual void OnSelectAvatar(life::Client* client, const cure::UserAccount::AvatarId& avatar_id);
+	virtual void OnLoadAvatar(life::Client* client, cure::ContextObject* avatar);
+	virtual void OnLoadObject(cure::ContextObject* object);
+	virtual void OnDeleteObject(cure::ContextObject* object);
 
-	virtual bool IsObjectLendable(Life::Client* pClient, Cure::ContextObject* pObject);
+	virtual bool IsObjectLendable(life::Client* client, cure::ContextObject* object);
 
 	virtual void PreEndTick();
 
-	Cure::GameObjectId mLevelId;
+	cure::GameObjectId level_id_;
 
 	logclass();
 };

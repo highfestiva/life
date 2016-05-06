@@ -6,22 +6,20 @@
 
 #pragma once
 
-#include "UiLayout.h"
+#include "uilayout.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-class CenterLayout : public Layout
-{
+class CenterLayout : public Layout {
 public:
-	
+
 	CenterLayout();
 	virtual ~CenterLayout();
 
 	virtual Type GetType() const;
 
-	virtual void Add(Component* pComponent, int pParam1, int pParam2);
-	virtual void Remove(Component* pComponent);
+	virtual void Add(Component* component, int param1, int param2);
+	virtual void Remove(Component* component);
 	virtual int GetNumComponents() const;
 
 	virtual Component* GetFirst();
@@ -31,14 +29,14 @@ public:
 
 	virtual void UpdateLayout();
 
-	virtual PixelCoord GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoord GetPreferredSize(bool force_adaptive);
 	virtual PixelCoord GetMinSize() const;
 	virtual PixelCoord GetContentSize() const;
 
 protected:
 private:
 
-	Component* mChild;
+	Component* child_;
 };
 
 }

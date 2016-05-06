@@ -11,33 +11,31 @@
 
 #pragma once
 
-#include "LepraTypes.h"
+#include "lepratypes.h"
 
-namespace Lepra
-{
+namespace lepra {
 
-class ProgressCallback
-{
+class ProgressCallback {
 public:
 	ProgressCallback();
 	virtual ~ProgressCallback();
 
-	virtual void   SetProgressMax(int /*pMax*/){}
+	virtual void   SetProgressMax(int /*max*/){}
 	virtual int  GetProgressMax(){ return 0; }
-	virtual void   SetProgressPos(int /*pPos*/){}
+	virtual void   SetProgressPos(int /*pos*/){}
 	virtual int  GetProgressPos(){ return 0; }
 	virtual int  Step(){ return 0; }
-	virtual int  Step(int /*pSteps*/) { return 0; }
+	virtual int  Step(int /*steps*/) { return 0; }
 
 	void SignalCancel();
 	bool GetContinue() const;
 
-	void SetPause(bool pPause);
+	void SetPause(bool pause);
 	bool GetPause() const;
 
 private:
-	bool mContinue;
-	bool mPause;
+	bool do_continue_;
+	bool pause_;
 };
 
 }

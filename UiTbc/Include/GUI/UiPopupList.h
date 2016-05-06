@@ -11,56 +11,53 @@
 
 #pragma once
 
-#include "UiListControl.h"
-#include "../../../UiLepra/Include/UiInput.h"
+#include "uilistcontrol.h"
+#include "../../../uilepra/include/uiinput.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-class PopupList: public ListControl
-{
+class PopupList: public ListControl {
 	typedef ListControl Parent;
 public:
-	class Listener
-	{
+	class Listener {
 	public:
 		// Both functions returns false if the list control has been deleted.
-		virtual bool NotifySetKeyboardFocus(PopupList* pList) = 0;
-		virtual bool NotifyReleaseKeyboardFocus(PopupList* pList, Component* pFocusedComponent) = 0;
-		virtual bool NotifyKeyDown(PopupList* pList, UiLepra::InputManager::KeyCode pKeyCode) = 0;
-		virtual bool NotifyLButtonDown(PopupList* pList, int pMouseX, int pMouseY) = 0;
-		virtual bool NotifyDoubleClick(PopupList* pList, int pMouseX, int pMouseY) = 0;
+		virtual bool NotifySetKeyboardFocus(PopupList* _list) = 0;
+		virtual bool NotifyReleaseKeyboardFocus(PopupList* _list, Component* focused_component) = 0;
+		virtual bool NotifyKeyDown(PopupList* _list, uilepra::InputManager::KeyCode key_code) = 0;
+		virtual bool NotifyLButtonDown(PopupList* _list, int mouse_x, int mouse_y) = 0;
+		virtual bool NotifyDoubleClick(PopupList* _list, int mouse_x, int mouse_y) = 0;
 	};
 
-	PopupList(unsigned pBorderStyle,
-		  int pBorderWidth,
-		  const Color& pColor,
-		  ListLayout::ListType pListType = ListLayout::COLUMN);
-	PopupList(unsigned pBorderStyle,
-		  int pBorderWidth,
-		  Painter::ImageID pImageID,
-		  ListLayout::ListType pListType = ListLayout::COLUMN);
-	PopupList(const Color& pColor, ListLayout::ListType pListType = ListLayout::COLUMN);
-	PopupList(Painter::ImageID pImageID, ListLayout::ListType pListType = ListLayout::COLUMN);
+	PopupList(unsigned border_style,
+		  int border_width,
+		  const Color& color,
+		  ListLayout::ListType list_type = ListLayout::kColumn);
+	PopupList(unsigned border_style,
+		  int border_width,
+		  Painter::ImageID image_id,
+		  ListLayout::ListType list_type = ListLayout::kColumn);
+	PopupList(const Color& color, ListLayout::ListType list_type = ListLayout::kColumn);
+	PopupList(Painter::ImageID image_id, ListLayout::ListType list_type = ListLayout::kColumn);
 
 	virtual ~PopupList();
 
-	void AddListener(Listener* pListener);
-	void RemoveListener(Listener* pListener);
+	void AddListener(Listener* listener);
+	void RemoveListener(Listener* listener);
 
 	virtual void SetKeyboardFocus();
-	virtual void ReleaseKeyboardFocus(RecurseDir pDir = RECURSE_UP, Component* pFocusedComponent = 0);
+	virtual void ReleaseKeyboardFocus(RecurseDir dir = kRecurseUp, Component* focused_component = 0);
 
-	bool OnLButtonDown(int pMouseX, int pMouseY);
-	bool OnDoubleClick(int pMouseX, int pMouseY);
+	bool OnLButtonDown(int mouse_x, int mouse_y);
+	bool OnDoubleClick(int mouse_x, int mouse_y);
 
-	bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
+	bool OnKeyDown(uilepra::InputManager::KeyCode key_code);
 
 protected:
 private:
 	typedef std::list<Listener*> ListenerList;
 
-	ListenerList mListeners;
+	ListenerList listeners_;
 };
 
 }

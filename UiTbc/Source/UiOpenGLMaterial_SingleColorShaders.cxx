@@ -6,12 +6,11 @@
 */
 
 #include "pch.h"
-#include "../Include/UiOpenGLMaterials.h"
+#include "../include/uiopenglmaterials.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-const str OpenGLMatSingleColorSolidPXS::smVP =
+const str OpenGLMatSingleColorSolidPXS::vp_ =
 	"!!ARBvp1.0\n\
 	 OPTION ARB_position_invariant;\n\
 	 # Diffuse vp.\n\
@@ -29,7 +28,7 @@ const str OpenGLMatSingleColorSolidPXS::smVP =
 	 PARAM mvp[4] = { state.matrix.mvp };       # model-view * projection matrix\n\
 	 PARAM mv[4]  = { state.matrix.modelview }; # model-view matrix\n\
 	 # inverse transpose of model-view matrix:\n\
-	 PARAM mvIT[4] = { state.matrix.modelview.invtrans };\n\
+	 PARAM it_[4] = { state.matrix.modelview.invtrans };\n\
 	 \n\
 	 TEMP V;                                    # temporary registers\n\
 	 \n\
@@ -45,9 +44,9 @@ const str OpenGLMatSingleColorSolidPXS::smVP =
 	 \n\
 	 MOV oFragPos, V;                           # output position for use in the fragment shader.\n\
 	 \n\
-	 DP3 oNormal.x, iNormal, mvIT[0];           # transform normal to eye space\n\
-	 DP3 oNormal.y, iNormal, mvIT[1];\n\
-	 DP3 oNormal.z, iNormal, mvIT[2];\n\
+	 DP3 oNormal.x, iNormal, it_[0];           # transform normal to eye space\n\
+	 DP3 oNormal.y, iNormal, it_[1];\n\
+	 DP3 oNormal.z, iNormal, it_[2];\n\
 	 \n\
 	 MOV oPriCol, iPriCol;\n\
 	 END";
@@ -164,7 +163,7 @@ MAD outCol.rgb, Temp, iPrimCol, N;\n\
 MOV outCol.a, iPrimCol.a;              # preserve alpha\n\
 END"
 
-const str OpenGLMatSingleColorSolidPXS::smFP[NUM_FP] =
+const str OpenGLMatSingleColorSolidPXS::fp_[kNumFp] =
 {
 	// Ambient light only.
 	"!!ARBfp1.0\n\

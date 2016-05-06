@@ -1,10 +1,10 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 #pragma once
-#include "../Lepra/Include/Vector3D.h"
-#include "Impuzzable.h"
+#include "../lepra/include/vector3d.h"
+#include "impuzzable.h"
 
 #define GRID_SIZE	0.125f
 #define GRID_HALF	(GRID_SIZE/2)
@@ -12,20 +12,17 @@
 
 
 
-namespace Impuzzable
-{
-namespace Grid
-{
+namespace Impuzzable {
+namespace grid {
 
 
 
-static inline vec3 GetCenterPosition(const vec3& pPosition)
-{
-	vec3 lPosition(pPosition);
-	lPosition.x = int(Math::Round(lPosition.x*GRID_INT_INVERT)) * GRID_SIZE;
-	lPosition.y = int(Math::Round(lPosition.y*GRID_INT_INVERT)) * GRID_SIZE;
-	lPosition.z = int(Math::Round(lPosition.z*GRID_INT_INVERT)) * GRID_SIZE;
-	return lPosition;
+static inline vec3 GetCenterPosition(const vec3& position) {
+	vec3 _position(position);
+	_position.x = int(Math::Round(_position.x*GRID_INT_INVERT)) * GRID_SIZE;
+	_position.y = int(Math::Round(_position.y*GRID_INT_INVERT)) * GRID_SIZE;
+	_position.z = int(Math::Round(_position.z*GRID_INT_INVERT)) * GRID_SIZE;
+	return _position;
 }
 
 

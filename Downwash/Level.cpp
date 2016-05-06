@@ -1,55 +1,47 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Level.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/ContextPath.h"
+#include "level.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/contextpath.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-Level::Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Cure::ContextForceListener* pGravelEmitter):
-	Parent(pResourceManager, pClassId, pUiManager, pGravelEmitter),
-	mPath(0)
-{
+Level::Level(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, cure::ContextForceListener* gravel_emitter):
+	Parent(resource_manager, class_id, ui_manager, gravel_emitter),
+	path_(0) {
 }
 
-Level::~Level()
-{
+Level::~Level() {
 }
 
-void Level::OnLoaded()
-{
+void Level::OnLoaded() {
 	Parent::OnLoaded();
 
-	const Tbc::ChunkyClass::Tag* lTag = FindTag("textures", 0, 1);
-	if (lTag)
-	{
-		mBackgroundName = lTag->mStringValueList[0];
+	const tbc::ChunkyClass::Tag* tag = FindTag("textures", 0, 1);
+	if (tag) {
+		background_name_ = tag->string_value_list_[0];
 	}
 }
 
-const str& Level::GetBackgroundName() const
-{
-	return mBackgroundName;
+const str& Level::GetBackgroundName() const {
+	return background_name_;
 }
 
-Cure::ContextPath* Level::QueryPath()
-{
-	if (!mPath)
-	{
-		mPath = new Cure::ContextPath(GetResourceManager(), "ContextPath");
-		GetManager()->AddLocalObject(mPath);
+cure::ContextPath* Level::QueryPath() {
+	if (!path_) {
+		path_ = new cure::ContextPath(GetResourceManager(), "ContextPath");
+		GetManager()->AddLocalObject(path_);
 	}
-	return mPath;
+	return path_;
 }
 
 

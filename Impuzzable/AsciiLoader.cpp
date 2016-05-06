@@ -1,57 +1,50 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "AsciiLoader.h"
+#include "asciiloader.h"
 
 
 
-namespace Impuzzable
-{
+namespace Impuzzable {
 
 
 
-AsciiLoader::AsciiLoader(Cure::ResourceManager* pResourceManager):
-	mResourceManager(pResourceManager)
-{
+AsciiLoader::AsciiLoader(cure::ResourceManager* resource_manager):
+	resource_manager_(resource_manager) {
 }
 
-AsciiLoader::~AsciiLoader()
-{
+AsciiLoader::~AsciiLoader() {
 }
 
-wstr AsciiLoader::Load(const str& pFilename) const
-{
-	File* f = mResourceManager->QueryFile(pFilename);
-	if (!f)
-	{
-		mLog.Errorf("No such file %s present", pFilename.c_str());
+wstr AsciiLoader::Load(const str& filename) const {
+	File* f = resource_manager_->QueryFile(filename);
+	if (!f) {
+		log_.Errorf("No such file %s present", filename.c_str());
 		return wstr();
 	}
 	wstr s;
-	wstrutil::strvec lLines;
-	while (f->ReadLine(s) == IO_OK)
-	{
-		lLines.push_back(s);
+	wstrutil::strvec lines;
+	while (f->ReadLine(s) == kIoOk) {
+		lines.push_back(s);
 	}
-	return wstrutil::Join(lLines, L"\n");
+	return wstrutil::Join(lines, L"\n");
 }
 
 
 
-bool AsciiLoader::ConvertPieces(const wstr& pAscii, std::vector<PieceInfo>& pPieces) const
-{
-	(void)pAscii;
-	(void)pPieces;
+bool AsciiLoader::ConvertPieces(const wstr& ascii, std::vector<PieceInfo>& pieces) const {
+	(void)ascii;
+	(void)pieces;
 	return true;
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, AsciiLoader);
+loginstance(kGameContextCpp, AsciiLoader);
 
 
 

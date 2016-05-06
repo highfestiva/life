@@ -1,68 +1,58 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Automan.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/Health.h"
+#include "automan.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/health.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-Automan::Automan(Cure::GameManager* pGame, Cure::GameObjectId pCarId, const vec3& pDirection):
-	Parent(pGame->GetResourceManager(), "Automan"),
-	mCarId(pCarId),
-	mDirection(pDirection)
-{
-	pGame->GetContext()->AddLocalObject(this);
-	pGame->GetContext()->EnableTickCallback(this);
+Automan::Automan(cure::GameManager* game, cure::GameObjectId car_id, const vec3& direction):
+	Parent(game->GetResourceManager(), "Automan"),
+	car_id_(car_id),
+	direction_(direction) {
+	game->GetContext()->AddLocalObject(this);
+	game->GetContext()->EnableTickCallback(this);
 }
 
-Automan::~Automan()
-{
+Automan::~Automan() {
 }
 
 
 
-void Automan::OnTick()
-{
+void Automan::OnTick() {
 	Parent::OnTick();
 
-	Cure::ContextObject* lCar = mManager->GetObject(mCarId, true);
-	if (!lCar)
-	{
-		mManager->PostKillObject(GetInstanceId());
+	cure::ContextObject* car = manager_->GetObject(car_id_, true);
+	if (!car) {
+		manager_->PostKillObject(GetInstanceId());
 		return;
 	}
-	if (!lCar->IsLoaded())
-	{
+	if (!car->IsLoaded()) {
 		return;
 	}
-	lCar->SetEnginePower(0, 1);
-	const vec2 lWantedDirection(mDirection.x, mDirection.y);
-	const vec3 lCarDirection3d = lCar->GetOrientation()*vec3(0,1,0);
-	const vec2 lCarDirection(lCarDirection3d.x, lCarDirection3d.y);
-	const float lAngle = lWantedDirection.GetAngle(lCarDirection);
-	lCar->SetEnginePower(1, lAngle);
+	car->SetEnginePower(0, 1);
+	const vec2 wanted_direction(direction_.x, direction_.y);
+	const vec3 car_direction3d = car->GetOrientation()*vec3(0,1,0);
+	const vec2 car_direction(car_direction3d.x, car_direction3d.y);
+	const float angle = wanted_direction.GetAngle(car_direction);
+	car->SetEnginePower(1, angle);
 
-	if (lCar->GetVelocity().GetLengthSquared() < 1.0f)
-	{
-		mStillTimer.TryStart();
-		if (mStillTimer.QueryTimeDiff() > 4.0f)
-		{
-			Cure::Health::Set(lCar, 0);
+	if (car->GetVelocity().GetLengthSquared() < 1.0f) {
+		still_timer_.TryStart();
+		if (still_timer_.QueryTimeDiff() > 4.0f) {
+			cure::Health::Set(car, 0);
 		}
-	}
-	else
-	{
-		mStillTimer.Stop();
+	} else {
+		still_timer_.Stop();
 	}
 }
 

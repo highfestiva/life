@@ -1,18 +1,17 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
-#include "../../UiLepra/Include/UiLepra.h"
+#include "../../uilepra/include/uilepra.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
-using namespace Lepra;
+using namespace lepra;
 
 void Init();
 void Shutdown();

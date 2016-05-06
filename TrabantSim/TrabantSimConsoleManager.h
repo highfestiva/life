@@ -6,92 +6,89 @@
 
 #pragma once
 
-#include "../Life/LifeClient/ClientConsoleManager.h"
-#include "PhysGfxObject.h"
-#include "TrabantSim.h"
+#include "../life/lifeclient/clientconsolemanager.h"
+#include "physgfxobject.h"
+#include "trabantsim.h"
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
-class TrabantSimConsoleManager: public Life::ClientConsoleManager
-{
-	typedef Life::ClientConsoleManager Parent;
+class TrabantSimConsoleManager: public life::ClientConsoleManager {
+	typedef life::ClientConsoleManager Parent;
 public:
-	TrabantSimConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-		UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea);
+	TrabantSimConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+		UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area);
 	virtual ~TrabantSimConsoleManager();
 	virtual bool Start();
 
 	const str GetActiveResponse() const;
 
 protected:
-	enum CommandClient
-	{
-		COMMAND_RESET = Parent::COMMAND_COUNT_LIFE_CLIENT,
-		COMMAND_GET_PLATFORM_NAME,
-		COMMAND_CREATE_OBJECT,
-		COMMAND_CREATE_CLONES,
-		COMMAND_DELETE_OBJECT,
-		COMMAND_DELETE_ALL_OBJECTS,
-		COMMAND_PICK_OBJECTS,
-		COMMAND_CLEAR_PHYS,
-		COMMAND_PREP_PHYS_BOX,
-		COMMAND_PREP_PHYS_SPHERE,
-		COMMAND_PREP_PHYS_CAPSULE,
-		COMMAND_PREP_PHYS_MESH,
-		COMMAND_PREP_GFX_MESH,
-		COMMAND_SET_VERTICES,
-		COMMAND_ADD_VERTICES,
-		COMMAND_SET_INDICES,
-		COMMAND_ADD_INDICES,
-		COMMAND_ARE_LOADED,
-		COMMAND_WAIT_UNTIL_LOADED,
-		COMMAND_EXPLODE,
-		COMMAND_PLAY_SOUND,
-		COMMAND_POP_COLLISIONS,
-		COMMAND_GET_KEYS,
-		COMMAND_GET_TOUCH_DRAGS,
-		COMMAND_GET_ACCELEROMETER,
-		COMMAND_GET_MOUSEMOVE,
-		COMMAND_CREATE_JOYSTICK,
-		COMMAND_GET_JOYSTICK_DATA,
-		COMMAND_GET_ASPECT_RATIO,
-		COMMAND_CREATE_ENGINE,
-		COMMAND_CREATE_JOINT,
-		COMMAND_POSITION,
-		COMMAND_ORIENTATION,
-		COMMAND_VELOCITY,
-		COMMAND_ANGULAR_VELOCITY,
-		COMMAND_MASS,
-		COMMAND_COLOR,
-		COMMAND_ENGINE_FORCE,
-		COMMAND_SET_TAG_FLOATS,
-		COMMAND_SET_TAG_STRINGS,
-		COMMAND_SET_TAG_PHYS,
-		COMMAND_SET_TAG_ENGINE,
-		COMMAND_SET_TAG_MESH,
-		COMMAND_ADD_TAG,
+	enum CommandClient {
+		kCommandReset = Parent::kCommandCountLifeClient,
+		kCommandGetPlatformName,
+		kCommandCreateObject,
+		kCommandCreateClones,
+		kCommandDeleteObject,
+		kCommandDeleteAllObjects,
+		kCommandPickObjects,
+		kCommandClearPhys,
+		kCommandPrepPhysBox,
+		kCommandPrepPhysSphere,
+		kCommandPrepPhysCapsule,
+		kCommandPrepPhysMesh,
+		kCommandPrepGfxMesh,
+		kCommandSetVertices,
+		kCommandAddVertices,
+		kCommandSetIndices,
+		kCommandAddIndices,
+		kCommandAreLoaded,
+		kCommandWaitUntilLoaded,
+		kCommandExplode,
+		kCommandPlaySound,
+		kCommandPopCollisions,
+		kCommandGetKeys,
+		kCommandGetTouchDrags,
+		kCommandGetAccelerometer,
+		kCommandGetMousemove,
+		kCommandCreateJoystick,
+		kCommandGetJoystickData,
+		kCommandGetAspectRatio,
+		kCommandCreateEngine,
+		kCommandCreateJoint,
+		kCommandPosition,
+		kCommandOrientation,
+		kCommandVelocity,
+		kCommandAngularVelocity,
+		kCommandMass,
+		kCommandColor,
+		kCommandEngineForce,
+		kCommandSetTagFloats,
+		kCommandSetTagStrings,
+		kCommandSetTagPhys,
+		kCommandSetTagEngine,
+		kCommandSetTagMesh,
+		kCommandAddTag,
 	};
 
 	virtual unsigned GetCommandCount() const;
-	virtual const CommandPair& GetCommand(unsigned pIndex) const;
-	virtual int OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector);
+	virtual const CommandPair& GetCommand(unsigned index) const;
+	virtual int OnCommand(const HashedString& command, const strutil::strvec& parameter_vector);
 
-	std::vector<float> mVertices;
-	std::vector<int> mIndices;
-	MeshObject mGfxMesh;
-	PhysObjectArray mPhysObjects;
-	std::vector<float> mTagFloats;
-	std::vector<str> mTagStrings;
-	std::vector<int> mTagPhys;
-	std::vector<int> mTagEngines;
-	std::vector<int> mTagMeshes;
-	strstream mActiveResponse;
-	static const CommandPair mCommandIdList[];
+	std::vector<float> vertices_;
+	std::vector<int> indices_;
+	MeshObject gfx_mesh_;
+	PhysObjectArray phys_objects_;
+	std::vector<float> tag_floats_;
+	std::vector<str> tag_strings_;
+	std::vector<int> tag_phys_;
+	std::vector<int> tag_engines_;
+	std::vector<int> tag_meshes_;
+	strstream active_response_;
+	static const CommandPair command_id_list_[];
 	logclass();
 };
 

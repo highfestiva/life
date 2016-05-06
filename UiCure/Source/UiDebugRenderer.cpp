@@ -5,222 +5,175 @@
 
 
 #include "pch.h"
-#include "../Include/UiDebugRenderer.h"
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/ContextObject.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Tbc/Include/ChunkyBoneGeometry.h"
-#include "../../Tbc/Include/ChunkyPhysics.h"
-#include "../../UiTbc/Include/UiRenderer.h"
-#include "../Include/UiGameUiManager.h"
-#include "../Include/UiRuntimeVariableName.h"
+#include "../include/uidebugrenderer.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/contextobject.h"
+#include "../../cure/include/gamemanager.h"
+#include "../../cure/include/runtimevariable.h"
+#include "../../tbc/include/chunkybonegeometry.h"
+#include "../../tbc/include/chunkyphysics.h"
+#include "../../uitbc/include/uirenderer.h"
+#include "../include/uigameuimanager.h"
+#include "../include/uiruntimevariablename.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-DebugRenderer::DebugRenderer(const Cure::RuntimeVariableScope* pVariableScope, GameUiManager* pUiManager, const Cure::ContextManager* pContext, const Cure::ContextManager* pRemoteContext, Lock* pTickLock):
-	mUiManager(pUiManager),
-	mContext(pContext),
-	mRemoteContext(pRemoteContext),
-	mTickLock(pTickLock)
-{
+DebugRenderer::DebugRenderer(const cure::RuntimeVariableScope* variable_scope, GameUiManager* ui_manager, const cure::ContextManager* context, const cure::ContextManager* remote_context, Lock* tick_lock):
+	ui_manager_(ui_manager),
+	context_(context),
+	remote_context_(remote_context),
+	tick_lock_(tick_lock) {
 }
 
-DebugRenderer::~DebugRenderer()
-{
+DebugRenderer::~DebugRenderer() {
 }
 
 
 
-void DebugRenderer::Render(const GameUiManager* pUiManager, const PixelRect& pRenderArea)
-{
-	bool lDebugAxes;
-	bool lDebugJoints;
-	bool lDebugShapes;
-	v_get(lDebugAxes, =, GetSettings(), RTVAR_DEBUG_3D_ENABLEAXES, false);
-	v_get(lDebugJoints, =, GetSettings(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
-	v_get(lDebugShapes, =, GetSettings(), RTVAR_DEBUG_3D_ENABLESHAPES, false);
-	if (lDebugAxes || lDebugJoints || lDebugShapes)
-	{
-		ScopeLock lLock(mTickLock);
-		pUiManager->GetRenderer()->ResetClippingRect();
-		pUiManager->GetRenderer()->SetClippingRect(pRenderArea);
-		pUiManager->GetRenderer()->SetViewport(pRenderArea);
+void DebugRenderer::Render(const GameUiManager* ui_manager, const PixelRect& render_area) {
+	bool debug_axes;
+	bool debug_joints;
+	bool debug_shapes;
+	v_get(debug_axes, =, GetSettings(), kRtvarDebug3DEnableaxes, false);
+	v_get(debug_joints, =, GetSettings(), kRtvarDebug3DEnablejoints, false);
+	v_get(debug_shapes, =, GetSettings(), kRtvarDebug3DEnableshapes, false);
+	if (debug_axes || debug_joints || debug_shapes) {
+		ScopeLock lock(tick_lock_);
+		ui_manager->GetRenderer()->ResetClippingRect();
+		ui_manager->GetRenderer()->SetClippingRect(render_area);
+		ui_manager->GetRenderer()->SetViewport(render_area);
 
-		const Cure::ContextManager::ContextObjectTable& lObjectTable = mContext->GetObjectTable();
-		Cure::ContextManager::ContextObjectTable::const_iterator x = lObjectTable.begin();
-		for (; x != lObjectTable.end(); ++x)
-		{
-			Cure::ContextObject* lObject;
-			if (mRemoteContext)
-			{
-				if (mContext->IsLocalGameObjectId(x->first))
-				{
+		const cure::ContextManager::ContextObjectTable& object_table = context_->GetObjectTable();
+		cure::ContextManager::ContextObjectTable::const_iterator x = object_table.begin();
+		for (; x != object_table.end(); ++x) {
+			cure::ContextObject* _object;
+			if (remote_context_) {
+				if (context_->IsLocalGameObjectId(x->first)) {
 					continue;
 				}
-				lObject = mRemoteContext->GetObject(x->first);
-				if (!lObject)
-				{
-					lObject = x->second;
+				_object = remote_context_->GetObject(x->first);
+				if (!_object) {
+					_object = x->second;
 				}
+			} else {
+				_object = x->second;
 			}
-			else
-			{
-				lObject = x->second;
+			if (debug_axes) {
+				DebugDrawPrimitive(_object, kDebugAxes);
 			}
-			if (lDebugAxes)
-			{
-				DebugDrawPrimitive(lObject, DEBUG_AXES);
+			if (debug_joints) {
+				DebugDrawPrimitive(_object, kDebugJoints);
 			}
-			if (lDebugJoints)
-			{
-				DebugDrawPrimitive(lObject, DEBUG_JOINTS);
-			}
-			if (lDebugShapes)
-			{
-				DebugDrawPrimitive(lObject, DEBUG_SHAPES);
+			if (debug_shapes) {
+				DebugDrawPrimitive(_object, kDebugShapes);
 			}
 		}
 	}
 }
 
-void DebugRenderer::DebugDrawPrimitive(Cure::ContextObject* pObject, DebugPrimitive pPrimitive)
-{
-	if (!pObject->GetPhysics())
-	{
+void DebugRenderer::DebugDrawPrimitive(cure::ContextObject* object, DebugPrimitive primitive) {
+	if (!object->GetPhysics()) {
 		return;
 	}
 
-	Cure::ContextManager* lContextManager = pObject->GetManager();
-	xform lPhysicsTransform;
-	const int lBoneCount = pObject->GetPhysics()->GetBoneCount();
-	for (int x = 0; x < lBoneCount; ++x)
-	{
-		const Tbc::ChunkyBoneGeometry* lGeometry = pObject->GetPhysics()->GetBoneGeometry(x);
-		Tbc::PhysicsManager::BodyID lBodyId = lGeometry->GetBodyId();
-		if (lBodyId != Tbc::INVALID_BODY)
-		{
-			lContextManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBodyId, lPhysicsTransform);
-		}
-		else if (lGeometry->GetBoneType() == Tbc::ChunkyBoneGeometry::BONE_POSITION)
-		{
-			lBodyId = pObject->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
-			lContextManager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(lBodyId, lPhysicsTransform);
-			lPhysicsTransform.GetPosition() += lPhysicsTransform.GetOrientation() * pObject->GetPhysics()->GetOriginalBoneTransformation(x).GetPosition();
-		}
-		else
-		{
+	cure::ContextManager* context_manager = object->GetManager();
+	xform physics_transform;
+	const int bone_count = object->GetPhysics()->GetBoneCount();
+	for (int x = 0; x < bone_count; ++x) {
+		const tbc::ChunkyBoneGeometry* geometry = object->GetPhysics()->GetBoneGeometry(x);
+		tbc::PhysicsManager::BodyID body_id = geometry->GetBodyId();
+		if (body_id != tbc::INVALID_BODY) {
+			context_manager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(body_id, physics_transform);
+		} else if (geometry->GetBoneType() == tbc::ChunkyBoneGeometry::kBonePosition) {
+			body_id = object->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+			context_manager->GetGameManager()->GetPhysicsManager()->GetBodyTransform(body_id, physics_transform);
+			physics_transform.GetPosition() += physics_transform.GetOrientation() * object->GetPhysics()->GetOriginalBoneTransformation(x).GetPosition();
+		} else {
 			continue;
 		}
-		vec3 lPos = lPhysicsTransform.GetPosition();
-		switch (pPrimitive)
-		{
-			case DEBUG_AXES:
-			{
-				const float lLength = 2;
-				const vec3& lAxisX = lPhysicsTransform.GetOrientation().GetAxisX();
-				mUiManager->GetRenderer()->DrawLine(lPos, lAxisX*lLength, RED);
-				const vec3& lAxisY = lPhysicsTransform.GetOrientation().GetAxisY();
-				mUiManager->GetRenderer()->DrawLine(lPos, lAxisY*lLength, GREEN);
-				const vec3& lAxisZ = lPhysicsTransform.GetOrientation().GetAxisZ();
-				mUiManager->GetRenderer()->DrawLine(lPos, lAxisZ*lLength, BLUE);
-			}
-			break;
-			case DEBUG_JOINTS:
-			{
-				const Tbc::PhysicsManager::JointID lJoint = lGeometry->GetJointId();
-				if (lJoint != Tbc::INVALID_JOINT)
-				{
-					vec3 lAnchor;
-					if (lGeometry->GetJointType() == Tbc::ChunkyBoneGeometry::JOINT_SLIDER)
-					{
+		vec3 pos = physics_transform.GetPosition();
+		switch (primitive) {
+			case kDebugAxes: {
+				const float length = 2;
+				const vec3& axis_x = physics_transform.GetOrientation().GetAxisX();
+				ui_manager_->GetRenderer()->DrawLine(pos, axis_x*length, RED);
+				const vec3& axis_y = physics_transform.GetOrientation().GetAxisY();
+				ui_manager_->GetRenderer()->DrawLine(pos, axis_y*length, GREEN);
+				const vec3& axis_z = physics_transform.GetOrientation().GetAxisZ();
+				ui_manager_->GetRenderer()->DrawLine(pos, axis_z*length, BLUE);
+			} break;
+			case kDebugJoints: {
+				const tbc::PhysicsManager::JointID joint = geometry->GetJointId();
+				if (joint != tbc::INVALID_JOINT) {
+					vec3 anchor;
+					if (geometry->GetJointType() == tbc::ChunkyBoneGeometry::kJointSlider) {
 						// Ignore, no anchor to be had.
-					}
-					else if (lContextManager->GetGameManager()->GetPhysicsManager()->GetAnchorPos(lJoint, lAnchor))
-					{
-						const float lLength = 1;
-						vec3 lAxis;
-						if (lGeometry->GetJointType() == Tbc::ChunkyBoneGeometry::JOINT_BALL)
-						{
+					} else if (context_manager->GetGameManager()->GetPhysicsManager()->GetAnchorPos(joint, anchor)) {
+						const float length = 1;
+						vec3 axis;
+						if (geometry->GetJointType() == tbc::ChunkyBoneGeometry::kJointBall) {
 							// Ball joints don't have axes.
-							mUiManager->GetRenderer()->DrawLine(lAnchor, vec3(0,0,3), BLACK);
+							ui_manager_->GetRenderer()->DrawLine(anchor, vec3(0,0,3), BLACK);
 							break;
-						}
-						else if (lContextManager->GetGameManager()->GetPhysicsManager()->GetAxis1(lJoint, lAxis))
-						{
-							mUiManager->GetRenderer()->DrawLine(lAnchor, lAxis*lLength, DARK_GRAY);
-						}
-						else
-						{
+						} else if (context_manager->GetGameManager()->GetPhysicsManager()->GetAxis1(joint, axis)) {
+							ui_manager_->GetRenderer()->DrawLine(anchor, axis*length, DARK_GRAY);
+						} else {
 							deb_assert(false);
 						}
-						if (lContextManager->GetGameManager()->GetPhysicsManager()->GetAxis2(lJoint, lAxis))
-						{
-							mUiManager->GetRenderer()->DrawLine(lAnchor, lAxis*lLength, BLACK);
+						if (context_manager->GetGameManager()->GetPhysicsManager()->GetAxis2(joint, axis)) {
+							ui_manager_->GetRenderer()->DrawLine(anchor, axis*length, BLACK);
 						}
-					}
-					else
-					{
+					} else {
 						deb_assert(false);
 					}
 				}
-			}
-			break;
-			case DEBUG_SHAPES:
-			{
-				const vec3 lSize = lGeometry->GetShapeSize() / 2;
-				const quat& lRot = lPhysicsTransform.GetOrientation();
-				vec3 lVertex[8];
-				for (int x = 0; x < 8; ++x)
-				{
-					lVertex[x] = lPos - lRot *
-						vec3(lSize.x*((x&4)? 1 : -1),
-							lSize.y*((x&1)? 1 : -1),
-							lSize.z*((x&2)? 1 : -1));
+			} break;
+			case kDebugShapes: {
+				const vec3 size = geometry->GetShapeSize() / 2;
+				const quat& rot = physics_transform.GetOrientation();
+				vec3 vertex[8];
+				for (int x = 0; x < 8; ++x) {
+					vertex[x] = pos - rot *
+						vec3(size.x*((x&4)? 1 : -1),
+							size.y*((x&1)? 1 : -1),
+							size.z*((x&2)? 1 : -1));
 				}
-				mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[1]-lVertex[0], YELLOW);
-				mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[3]-lVertex[1], YELLOW);
-				mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[2]-lVertex[3], YELLOW);
-				mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[0]-lVertex[2], YELLOW);
-				mUiManager->GetRenderer()->DrawLine(lVertex[4], lVertex[5]-lVertex[4], MAGENTA);
-				mUiManager->GetRenderer()->DrawLine(lVertex[5], lVertex[7]-lVertex[5], MAGENTA);
-				mUiManager->GetRenderer()->DrawLine(lVertex[7], lVertex[6]-lVertex[7], MAGENTA);
-				mUiManager->GetRenderer()->DrawLine(lVertex[6], lVertex[4]-lVertex[6], MAGENTA);
-				mUiManager->GetRenderer()->DrawLine(lVertex[0], lVertex[4]-lVertex[0], CYAN);
-				mUiManager->GetRenderer()->DrawLine(lVertex[1], lVertex[5]-lVertex[1], CYAN);
-				mUiManager->GetRenderer()->DrawLine(lVertex[2], lVertex[6]-lVertex[2], ORANGE);
-				mUiManager->GetRenderer()->DrawLine(lVertex[3], lVertex[7]-lVertex[3], ORANGE);
-			}
-			break;
-			default:
-			{
+				ui_manager_->GetRenderer()->DrawLine(vertex[0], vertex[1]-vertex[0], YELLOW);
+				ui_manager_->GetRenderer()->DrawLine(vertex[1], vertex[3]-vertex[1], YELLOW);
+				ui_manager_->GetRenderer()->DrawLine(vertex[3], vertex[2]-vertex[3], YELLOW);
+				ui_manager_->GetRenderer()->DrawLine(vertex[2], vertex[0]-vertex[2], YELLOW);
+				ui_manager_->GetRenderer()->DrawLine(vertex[4], vertex[5]-vertex[4], MAGENTA);
+				ui_manager_->GetRenderer()->DrawLine(vertex[5], vertex[7]-vertex[5], MAGENTA);
+				ui_manager_->GetRenderer()->DrawLine(vertex[7], vertex[6]-vertex[7], MAGENTA);
+				ui_manager_->GetRenderer()->DrawLine(vertex[6], vertex[4]-vertex[6], MAGENTA);
+				ui_manager_->GetRenderer()->DrawLine(vertex[0], vertex[4]-vertex[0], CYAN);
+				ui_manager_->GetRenderer()->DrawLine(vertex[1], vertex[5]-vertex[1], CYAN);
+				ui_manager_->GetRenderer()->DrawLine(vertex[2], vertex[6]-vertex[2], ORANGE);
+				ui_manager_->GetRenderer()->DrawLine(vertex[3], vertex[7]-vertex[3], ORANGE);
+			} break;
+			default: {
 				deb_assert(false);
-			}
-			break;
+			} break;
 		}
 	}
 }
 
-void DebugRenderer::RenderSpline(const GameUiManager* pUiManager, Spline* pSpline)
-{
-	bool lDebugJoints;
-	v_get(lDebugJoints, =, GetSettings(), RTVAR_DEBUG_3D_ENABLEJOINTS, false);
-	if (!lDebugJoints)
-	{
+void DebugRenderer::RenderSpline(const GameUiManager* ui_manager, Spline* spline) {
+	bool debug_joints;
+	v_get(debug_joints, =, GetSettings(), kRtvarDebug3DEnablejoints, false);
+	if (!debug_joints) {
 		return;
 	}
-	const float t = pSpline->GetCurrentInterpolationTime();
-	for (float x = 0; x < 1; x += 0.01f)
-	{
-		pSpline->GotoAbsoluteTime(x);
-		pUiManager->GetRenderer()->DrawLine(pSpline->GetValue(), pSpline->GetSlope() * 2, WHITE);
+	const float t = spline->GetCurrentInterpolationTime();
+	for (float x = 0; x < 1; x += 0.01f) {
+		spline->GotoAbsoluteTime(x);
+		ui_manager->GetRenderer()->DrawLine(spline->GetValue(), spline->GetSlope() * 2, WHITE);
 	}
-	pSpline->GotoAbsoluteTime(t);
+	spline->GotoAbsoluteTime(t);
 }
 
 

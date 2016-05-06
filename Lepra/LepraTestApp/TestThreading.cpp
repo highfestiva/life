@@ -1,350 +1,303 @@
 /*
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 */
 
 #include "pch.h"
-#include "../../Lepra/Include/LepraAssert.h"
+#include "../../lepra/include/lepraassert.h"
 #include <locale>
-#include "../Include/Timer.h"
-#include "../Include/HiResTimer.h"
-#include "../Include/Log.h"
-#include "../Include/MemberThread.h"
-#include "../Include/Socket.h"
-#include "../Include/SpinLock.h"
+#include "../include/timer.h"
+#include "../include/hirestimer.h"
+#include "../include/log.h"
+#include "../include/memberthread.h"
+#include "../include/socket.h"
+#include "../include/spinlock.h"
 
-using namespace Lepra;
+using namespace lepra;
 
-void ReportTestResult(const Lepra::LogDecorator& pLog, const str& pTestName, const str& pContext, bool pResult);
+void ReportTestResult(const lepra::LogDecorator& log, const str& test_name, const str& context, bool result);
 
 const int STATE_ALLOC_INIT = 0x70010210;
 const int STATE_ALLOC_FOUND = 0x70111091;
 
-volatile int gThreadTestCounter;
+volatile int g_thread_test_counter;
 
-Lock gThreadTestLock;
-Semaphore gThreadTestSemaphore;
-int* gAllocMem = 0;
+Lock g_thread_test_lock;
+Semaphore g_thread_test_semaphore;
+int* g_alloc_mem = 0;
 
-void IncreaseThread(void*)
-{
-	++gThreadTestCounter;
+void IncreaseThread(void*) {
+	++g_thread_test_counter;
 }
 
-void LockThread(void*)
-{
-	gThreadTestCounter = 0;
-	gThreadTestLock.Acquire();
-	++gThreadTestCounter;
-	gThreadTestLock.Release();
-	++gThreadTestCounter;
-	gThreadTestSemaphore.Wait();
-	++gThreadTestCounter;
-	gThreadTestSemaphore.Signal();
-	++gThreadTestCounter;
-	gThreadTestSemaphore.Wait();
-	gThreadTestSemaphore.Wait();
-	++gThreadTestCounter;
-	gThreadTestSemaphore.Signal();
-	++gThreadTestCounter;
-	while (!Thread::GetCurrentThread()->GetStopRequest())
-	{
+void LockThread(void*) {
+	g_thread_test_counter = 0;
+	g_thread_test_lock.Acquire();
+	++g_thread_test_counter;
+	g_thread_test_lock.Release();
+	++g_thread_test_counter;
+	g_thread_test_semaphore.Wait();
+	++g_thread_test_counter;
+	g_thread_test_semaphore.Signal();
+	++g_thread_test_counter;
+	g_thread_test_semaphore.Wait();
+	g_thread_test_semaphore.Wait();
+	++g_thread_test_counter;
+	g_thread_test_semaphore.Signal();
+	++g_thread_test_counter;
+	while (!Thread::GetCurrentThread()->GetStopRequest()) {
 		Thread::Sleep(0.001);
 	}
-	++gThreadTestCounter;
+	++g_thread_test_counter;
 }
 
-void MemAllocThreadEntry(void*)
-{
-	deb_assert(gAllocMem == 0);
-	gAllocMem = new int[3];
-	gAllocMem[1] = STATE_ALLOC_INIT;
+void MemAllocThreadEntry(void*) {
+	deb_assert(g_alloc_mem == 0);
+	g_alloc_mem = new int[3];
+	g_alloc_mem[1] = STATE_ALLOC_INIT;
 }
 
-void MemUseThreadEntry(void*)
-{
-	while (gAllocMem == 0)
+void MemUseThreadEntry(void*) {
+	while (g_alloc_mem == 0)
 		;
-	while (gAllocMem[1] != STATE_ALLOC_FOUND)
+	while (g_alloc_mem[1] != STATE_ALLOC_FOUND)
 		;
-	delete[] (gAllocMem);
-	gAllocMem = 0;
+	delete[] (g_alloc_mem);
+	g_alloc_mem = 0;
 }
 
-class MemberThreadTestClass
-{
+class MemberThreadTestClass {
 public:
-	void OnTest()
-	{
-		gThreadTestCounter = -4;
+	void OnTest() {
+		g_thread_test_counter = -4;
 	}
 };
 
-class ThreadIdTestClass
-{
+class ThreadIdTestClass {
 public:
-	size_t mThreadId;
-	void StoreId()
-	{
-		mThreadId = Thread::GetCurrentThreadId();
+	size_t thread_id_;
+	void StoreId() {
+		thread_id_ = Thread::GetCurrentThreadId();
 	}
 };
 
-bool TestThreading(const LogDecorator& pAccount)
-{
-	str lContext;
-	bool lTestOk = true;
+bool TestThreading(const LogDecorator& account) {
+	str _context;
+	bool test_ok = true;
 
-	if (lTestOk)
-	{
-		lContext = "thread start";
-		for (unsigned x = 0; x < 100 && lTestOk; ++x)
-		{
-			StaticThread lThread("StartupTest");
-			gThreadTestCounter = 7;
-			lTestOk = lThread.Start(IncreaseThread, 0);
-			deb_assert(lTestOk);
-			if (lTestOk)
-			{
-				lContext = "thread run and self termination";
+	if (test_ok) {
+		_context = "thread start";
+		for (unsigned x = 0; x < 100 && test_ok; ++x) {
+			StaticThread thread("StartupTest");
+			g_thread_test_counter = 7;
+			test_ok = thread.Start(IncreaseThread, 0);
+			deb_assert(test_ok);
+			if (test_ok) {
+				_context = "thread run and self termination";
 				//Thread::Sleep(0.001);	// Make sure we sleep at least once.
-				for (unsigned y = 0; y < 200 && lThread.IsRunning(); ++y)
-				{
+				for (unsigned y = 0; y < 200 && thread.IsRunning(); ++y) {
 					Thread::Sleep(0.001);
 				}
-				lTestOk = (gThreadTestCounter == 8);
-				deb_assert(lTestOk);
-				if (lTestOk)
-				{
-					lTestOk = !lThread.IsRunning();
-					deb_assert(lTestOk);
+				test_ok = (g_thread_test_counter == 8);
+				deb_assert(test_ok);
+				if (test_ok) {
+					test_ok = !thread.IsRunning();
+					deb_assert(test_ok);
 				}
 			}
 		}
 	}
 
-	if (lTestOk)
-	{
-		lContext = "mutex ownership";
-		lTestOk = (gThreadTestLock.IsOwner() == false);
-		if (lTestOk)
-		{
-			gThreadTestLock.Acquire();
-			lTestOk = (gThreadTestLock.IsOwner() == true);
+	if (test_ok) {
+		_context = "mutex ownership";
+		test_ok = (g_thread_test_lock.IsOwner() == false);
+		if (test_ok) {
+			g_thread_test_lock.Acquire();
+			test_ok = (g_thread_test_lock.IsOwner() == true);
 		}
-		if (lTestOk)
-		{
-			gThreadTestLock.Release();
-			lTestOk = (gThreadTestLock.IsOwner() == false);
+		if (test_ok) {
+			g_thread_test_lock.Release();
+			test_ok = (g_thread_test_lock.IsOwner() == false);
 		}
-		deb_assert(lTestOk);
+		deb_assert(test_ok);
 	}
 
-	StaticThread lThread("LockTest");
-	if (lTestOk)
-	{
-		lContext = "mutex exclusiveness";
-		gThreadTestCounter = -1;
-		gThreadTestLock.Acquire();
-		lTestOk = lThread.Start(LockThread, 0);
-		if (lTestOk)
-		{
-			lTestOk = lThread.IsRunning();
-			deb_assert(lTestOk);
+	StaticThread thread("LockTest");
+	if (test_ok) {
+		_context = "mutex exclusiveness";
+		g_thread_test_counter = -1;
+		g_thread_test_lock.Acquire();
+		test_ok = thread.Start(LockThread, 0);
+		if (test_ok) {
+			test_ok = thread.IsRunning();
+			deb_assert(test_ok);
 		}
 		Thread::Sleep(0.1);
-		lTestOk = (gThreadTestCounter == 0 && lThread.IsRunning());
-		deb_assert(lTestOk);
+		test_ok = (g_thread_test_counter == 0 && thread.IsRunning());
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "spin lock";
-		SpinLock lLock;
-		lTestOk = lLock.TryAcquire();
-		deb_assert(lTestOk);
-		lLock.Release();
+	if (test_ok) {
+		_context = "spin lock";
+		SpinLock lock;
+		test_ok = lock.TryAcquire();
+		deb_assert(test_ok);
+		lock.Release();
 	}
-	if (lTestOk)
-	{
-		lContext = "semaphore exclusiveness";
-		gThreadTestSemaphore.Signal();
-		gThreadTestSemaphore.Wait();
-		gThreadTestLock.Release();
+	if (test_ok) {
+		_context = "semaphore exclusiveness";
+		g_thread_test_semaphore.Signal();
+		g_thread_test_semaphore.Wait();
+		g_thread_test_lock.Release();
 		Thread::Sleep(0.1);
-		lTestOk = (gThreadTestCounter == 2 && lThread.IsRunning());
-		deb_assert(lTestOk);
+		test_ok = (g_thread_test_counter == 2 && thread.IsRunning());
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "semaphore wait timeout - 1";
-		HiResTimer lTimer(false);
-		lTestOk = !gThreadTestSemaphore.Wait(0.5);
-		deb_assert(lTestOk);
-		lTimer.UpdateTimer();
-		if (lTestOk)
-		{
-			lTestOk = Math::IsInRange(lTimer.GetTimeDiff(), 0.4, 0.9);
-			deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "semaphore wait timeout - 1";
+		HiResTimer timer(false);
+		test_ok = !g_thread_test_semaphore.Wait(0.5);
+		deb_assert(test_ok);
+		timer.UpdateTimer();
+		if (test_ok) {
+			test_ok = Math::IsInRange(timer.GetTimeDiff(), 0.4, 0.9);
+			deb_assert(test_ok);
 		}
-		if (lTestOk)
-		{
-			lTestOk = (gThreadTestCounter == 2 && lThread.IsRunning());
-			deb_assert(lTestOk);
+		if (test_ok) {
+			test_ok = (g_thread_test_counter == 2 && thread.IsRunning());
+			deb_assert(test_ok);
 		}
-		if (lTestOk)
-		{
-			lTestOk = !gThreadTestSemaphore.Wait(0.1);
-			deb_assert(lTestOk);
+		if (test_ok) {
+			test_ok = !g_thread_test_semaphore.Wait(0.1);
+			deb_assert(test_ok);
 		}
-		if (lTestOk)
-		{
-			gThreadTestSemaphore.Signal();
+		if (test_ok) {
+			g_thread_test_semaphore.Signal();
 			Thread::Sleep(0.1);
-			lTestOk = !gThreadTestSemaphore.Wait(0.1);
-			deb_assert(lTestOk);
+			test_ok = !g_thread_test_semaphore.Wait(0.1);
+			deb_assert(test_ok);
 		}
-		if (lTestOk)
-		{
-			lTestOk = (gThreadTestCounter == 4 && lThread.IsRunning());
-			deb_assert(lTestOk);
+		if (test_ok) {
+			test_ok = (g_thread_test_counter == 4 && thread.IsRunning());
+			deb_assert(test_ok);
 		}
 	}
-	if (lTestOk)
-	{
-		lContext = "thread operation";
-		gThreadTestSemaphore.Signal();
+	if (test_ok) {
+		_context = "thread operation";
+		g_thread_test_semaphore.Signal();
 		Thread::Sleep(0.1);
-		lTestOk = (gThreadTestCounter == 6 && lThread.IsRunning());
-		deb_assert(lTestOk);
+		test_ok = (g_thread_test_counter == 6 && thread.IsRunning());
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "thread grace termination";
-		lThread.RequestStop();
+	if (test_ok) {
+		_context = "thread grace termination";
+		thread.RequestStop();
 		Thread::Sleep(0.1);
-		lTestOk = (gThreadTestCounter == 7 && !lThread.IsRunning());
-		deb_assert(lTestOk);
+		test_ok = (g_thread_test_counter == 7 && !thread.IsRunning());
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "MemberThread";
+	if (test_ok) {
+		_context = "MemberThread";
 		{
-			MemberThreadTestClass lTestClass;
-			MemberThread<MemberThreadTestClass> lThread("TestMemberThread");
-			gThreadTestCounter = -5;
-			lTestOk = lThread.Start(&lTestClass, &MemberThreadTestClass::OnTest);
-			deb_assert(lTestOk);
-			if (lTestOk)
-			{
-				lTestOk = lThread.Join();
-				deb_assert(lTestOk);
+			MemberThreadTestClass test_class;
+			MemberThread<MemberThreadTestClass> thread("TestMemberThread");
+			g_thread_test_counter = -5;
+			test_ok = thread.Start(&test_class, &MemberThreadTestClass::OnTest);
+			deb_assert(test_ok);
+			if (test_ok) {
+				test_ok = thread.Join();
+				deb_assert(test_ok);
 			}
 		}
-		if (lTestOk)
-		{
-			lTestOk = (gThreadTestCounter == -4);
-			deb_assert(lTestOk);
+		if (test_ok) {
+			test_ok = (g_thread_test_counter == -4);
+			deb_assert(test_ok);
 		}
 	}
-	if (lTestOk)
-	{
-		lContext = "main thread ID";
-		lTestOk = (Lepra::Thread::GetCurrentThreadId() != 0);
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "main thread ID";
+		test_ok = (lepra::Thread::GetCurrentThreadId() != 0);
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "sub thread ID";
-		ThreadIdTestClass lTestInstance;
-		lTestInstance.mThreadId = 0;
-		MemberThread<ThreadIdTestClass> lThread("TestThreadId");
-		if (lTestOk)
-		{
-			lTestOk = lThread.Start(&lTestInstance, &ThreadIdTestClass::StoreId);
-			deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "sub thread ID";
+		ThreadIdTestClass test_instance;
+		test_instance.thread_id_ = 0;
+		MemberThread<ThreadIdTestClass> thread("TestThreadId");
+		if (test_ok) {
+			test_ok = thread.Start(&test_instance, &ThreadIdTestClass::StoreId);
+			deb_assert(test_ok);
 		}
-		size_t lActualThreadId = lThread.GetThreadId();
-		if (lTestOk)
-		{
-			lTestOk = lThread.Join();
-			deb_assert(lTestOk);
+		size_t actual_thread_id = thread.GetThreadId();
+		if (test_ok) {
+			test_ok = thread.Join();
+			deb_assert(test_ok);
 		}
-		if (lTestOk)
-		{
-			lTestOk = (lTestInstance.mThreadId != 0 && lTestInstance.mThreadId == lActualThreadId);
-			deb_assert(lTestOk);
+		if (test_ok) {
+			test_ok = (test_instance.thread_id_ != 0 && test_instance.thread_id_ == actual_thread_id);
+			deb_assert(test_ok);
 		}
 	}
-	if (lTestOk)
-	{
-		lContext = "semaphore wait timeout";
-		Lepra::Timer lTimer;
-		Lepra::Semaphore lSemaphore;
-		lTestOk = !lSemaphore.Wait(1.0);
-		deb_assert(lTestOk);
-		if (lTestOk)
-		{
-			double lTime = lTimer.PopTimeDiff();
-			lTestOk = (lTime >= 0.9 && lTime < 1.1);
-			deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "semaphore wait timeout";
+		lepra::Timer timer;
+		lepra::Semaphore semaphore;
+		test_ok = !semaphore.Wait(1.0);
+		deb_assert(test_ok);
+		if (test_ok) {
+			double time = timer.PopTimeDiff();
+			test_ok = (time >= 0.9 && time < 1.1);
+			deb_assert(test_ok);
 		}
 	}
-	Lepra::Semaphore lSemaphore;
-	if (lTestOk)
-	{
-		lContext = "semaphore satisfied timed wait 1";
-		Lepra::Timer lTimer;
-		lSemaphore.Signal();
-		lSemaphore.Signal();
-		lTestOk = lSemaphore.Wait(1.0);
-		deb_assert(lTestOk);
-		if (lTestOk)
-		{
-			double lTime = lTimer.PopTimeDiff();
-			lTestOk = (lTime >= 0.0 && lTime < 0.1);
-			deb_assert(lTestOk);
+	lepra::Semaphore semaphore;
+	if (test_ok) {
+		_context = "semaphore satisfied timed wait 1";
+		lepra::Timer timer;
+		semaphore.Signal();
+		semaphore.Signal();
+		test_ok = semaphore.Wait(1.0);
+		deb_assert(test_ok);
+		if (test_ok) {
+			double time = timer.PopTimeDiff();
+			test_ok = (time >= 0.0 && time < 0.1);
+			deb_assert(test_ok);
 		}
 	}
-	if (lTestOk)
-	{
-		lContext = "semaphore satisfied timed wait 2";
-		Lepra::Timer lTimer;
-		lTestOk = lSemaphore.Wait(1.0);
-		deb_assert(lTestOk);
-		if (lTestOk)
-		{
-			double lTime = lTimer.PopTimeDiff();
-			lTestOk = (lTime >= 0.0 && lTime < 0.1);
-			deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "semaphore satisfied timed wait 2";
+		lepra::Timer timer;
+		test_ok = semaphore.Wait(1.0);
+		deb_assert(test_ok);
+		if (test_ok) {
+			double time = timer.PopTimeDiff();
+			test_ok = (time >= 0.0 && time < 0.1);
+			deb_assert(test_ok);
 		}
 	}
-	if (lTestOk)
-	{
-		lContext = "semaphore permit reset";
-		lTestOk = !lSemaphore.Wait(0.0001);
-		deb_assert(lTestOk);
+	if (test_ok) {
+		_context = "semaphore permit reset";
+		test_ok = !semaphore.Wait(0.0001);
+		deb_assert(test_ok);
 	}
 
-	StaticThread lMemAllocThread("MemAllocator");
-	StaticThread lMemUseThread("MemUser");
-	if (lTestOk)
-	{
-		lContext = "Memory allocator";
-		lMemUseThread.Start(MemUseThreadEntry, 0);
-		lMemAllocThread.Start(MemAllocThreadEntry, 0);
+	StaticThread mem_alloc_thread("MemAllocator");
+	StaticThread mem_use_thread("MemUser");
+	if (test_ok) {
+		_context = "Memory allocator";
+		mem_use_thread.Start(MemUseThreadEntry, 0);
+		mem_alloc_thread.Start(MemAllocThreadEntry, 0);
 		Thread::Sleep(0.01);
-		lTestOk = (gAllocMem != 0 && gAllocMem[1] == STATE_ALLOC_INIT && !lMemAllocThread.IsRunning() && lMemUseThread.IsRunning());
-		deb_assert(lTestOk);
+		test_ok = (g_alloc_mem != 0 && g_alloc_mem[1] == STATE_ALLOC_INIT && !mem_alloc_thread.IsRunning() && mem_use_thread.IsRunning());
+		deb_assert(test_ok);
 	}
-	if (lTestOk)
-	{
-		lContext = "Memory freer";
-		gAllocMem[1] = STATE_ALLOC_FOUND;
+	if (test_ok) {
+		_context = "Memory freer";
+		g_alloc_mem[1] = STATE_ALLOC_FOUND;
 		Thread::Sleep(0.01);
-		lTestOk = (gAllocMem == 0 && !lMemUseThread.IsRunning());
-		deb_assert(lTestOk);
+		test_ok = (g_alloc_mem == 0 && !mem_use_thread.IsRunning());
+		deb_assert(test_ok);
 	}
 
-	ReportTestResult(pAccount, "Threading", lContext, lTestOk);
-	return (lTestOk);
+	ReportTestResult(account, "Threading", _context, test_ok);
+	return (test_ok);
 }

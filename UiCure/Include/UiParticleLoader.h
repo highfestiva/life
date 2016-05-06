@@ -1,35 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiCure.h"
+#include "uicure.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ResourceManager;
 }
-namespace UiTbc
-{
+namespace uitbc {
 class Renderer;
 }
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-class ParticleLoader
-{
+class ParticleLoader {
 public:
-	ParticleLoader(Cure::ResourceManager* pResourceManager, UiTbc::Renderer* pRenderer, const str& pTextureName, size_t pSubFeatureTextureCount, size_t pSubTotalTextureCount);
+	ParticleLoader(cure::ResourceManager* resource_manager, uitbc::Renderer* renderer, const str& texture_name, size_t sub_feature_texture_count, size_t sub_total_texture_count);
 
 private:
 	logclass();

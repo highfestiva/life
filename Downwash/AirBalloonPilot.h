@@ -1,19 +1,18 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/ContextPath.h"
-#include "../Cure/Include/CppContextObject.h"
-#include "DownwashManager.h"
+#include "../cure/include/contextpath.h"
+#include "../cure/include/cppcontextobject.h"
+#include "downwashmanager.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
@@ -21,20 +20,19 @@ class DownwashManager;
 
 
 
-class AirBalloonPilot: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class AirBalloonPilot: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	AirBalloonPilot(DownwashManager* pGame, Cure::GameObjectId pBalloonId);
+	AirBalloonPilot(DownwashManager* game, cure::GameObjectId balloon_id);
 	virtual ~AirBalloonPilot();
 
 private:
 	virtual void OnTick();
-	void GetClosestPathDistance(const vec3& pPosition, vec3& pClosestPoint);
+	void GetClosestPathDistance(const vec3& position, vec3& closest_point);
 
-	DownwashManager* mGame;
-	Cure::GameObjectId mBalloonId;
-	Cure::ContextPath::SplinePath* mPath;
+	DownwashManager* game_;
+	cure::GameObjectId balloon_id_;
+	cure::ContextPath::SplinePath* path_;
 	logclass();
 };
 

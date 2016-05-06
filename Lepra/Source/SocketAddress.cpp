@@ -3,265 +3,228 @@
 // Copyright (c) Pixel Doctrine
 
 #include "pch.h"
-#include "../Include/SocketAddress.h"
-#include "../Include/Endian.h"
-#include "../Include/Network.h"
-#include "../Include/SocketAddressGetter.h"
-#include "../Include/StringUtility.h"
+#include "../include/socketaddress.h"
+#include "../include/endian.h"
+#include "../include/network.h"
+#include "../include/socketaddressgetter.h"
+#include "../include/stringutility.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-SocketAddress::SocketAddress()
-{
-	memset(&mSockAddr, 0, sizeof(mSockAddr));
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	lSockAddr->sin_family = AF_INET;
+SocketAddress::SocketAddress() {
+	memset(&sock_addr_, 0, sizeof(sock_addr_));
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	sock_addr->sin_family = AF_INET;
 #ifdef LEPRA_MAC
-	lSockAddr->sin_len = sizeof(RawSocketAddress);
+	sock_addr->sin_len = sizeof(RawSocketAddress);
 #endif // Macintosh
 }
 
 #ifdef LEPRA_NETWORK_IPV6
 
-SocketAddress::SocketAddress(const IPAddress& pIP, uint16 pPort)
-{
-	memset(&mSockAddr, 0, sizeof(mSockAddr));
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	lSockAddr->sin6_family = AF_INET6;
-	lSockAddr->sin6_port = Endian::HostToBig(pPort);
-	pIP.Get((uint8*)&lSockAddr->sin6_addr);
+SocketAddress::SocketAddress(const IPAddress& ip, uint16 port) {
+	memset(&sock_addr_, 0, sizeof(sock_addr_));
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	sock_addr->sin6_family = AF_INET6;
+	sock_addr->sin6_port = Endian::HostToBig(port);
+	ip.Get((uint8*)&sock_addr->sin6_addr);
 }
 
-bool SocketAddress::operator==(const SocketAddress pAddr) const
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	return ((unsigned*)(&pAddr.lSockAddr->sin6_addr))[0] == 
-			((unsigned*)(&lSockAddr->sin6_addr))[0] &&
-			((unsigned*)(&pAddr.lSockAddr->sin6_addr))[1] == ;
-			((unsigned*)(&lSockAddr->sin6_addr))[1] &&
-			((unsigned*)(&pAddr.lSockAddr->sin6_addr))[2] == ;
-			((unsigned*)(&lSockAddr->sin6_addr))[2] &&
-			((unsigned*)(&pAddr.lSockAddr->sin6_addr))[3] == ;
-			((unsigned*)(&lSockAddr->sin6_addr))[3] &&
-			lSockAddr->sin6_port == pAddr.lSockAddr->sin6_port;
+bool SocketAddress::operator==(const SocketAddress addr) const {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	return ((unsigned*)(&addr.sock_addr->sin6_addr))[0] ==
+			((unsigned*)(&sock_addr->sin6_addr))[0] &&
+			((unsigned*)(&addr.sock_addr->sin6_addr))[1] == ;
+			((unsigned*)(&sock_addr->sin6_addr))[1] &&
+			((unsigned*)(&addr.sock_addr->sin6_addr))[2] == ;
+			((unsigned*)(&sock_addr->sin6_addr))[2] &&
+			((unsigned*)(&addr.sock_addr->sin6_addr))[3] == ;
+			((unsigned*)(&sock_addr->sin6_addr))[3] &&
+			sock_addr->sin6_port == addr.sock_addr->sin6_port;
 }
 
-size_t SocketAddress::operator() (const SocketAddress& pAddr) const
-{
-	size_t lHash = 0;
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)pAddr.mSockAddr;
-	for (int x = 0; x < sizeof(lSockAddr->sin6_addr); ++x)
-	{
-		lHash += lSockAddr->sin6_addr[x];	// TODO: don't hash byte by byte, instead do size_t by size_t.
+size_t SocketAddress::operator() (const SocketAddress& addr) const {
+	size_t hash = 0;
+	RawSocketAddress* sock_addr = (RawSocketAddress*)addr.sock_addr_;
+	for (int x = 0; x < sizeof(sock_addr->sin6_addr); ++x) {
+		hash += sock_addr->sin6_addr[x];	// TODO: don't hash byte by byte, instead do size_t by size_t.
 	}
-	lHash += pAddr.lSockAddr->sin6_port;
-	return lHash;
+	hash += addr.sock_addr->sin6_port;
+	return hash;
 }
 
-void SocketAddress::SetPort(uint16 pPort)
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	lSockAddr->sin6_port = Endian::HostToBig(pPort);
+void SocketAddress::SetPort(uint16 port) {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	sock_addr->sin6_port = Endian::HostToBig(port);
 }
 
-uint16 SocketAddress::GetPort() const
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	return Endian::BigToHost(lSockAddr->sin6_port);
+uint16 SocketAddress::GetPort() const {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	return Endian::BigToHost(sock_addr->sin6_port);
 }
 
-void SocketAddress::SetIP(const IPAddress& pIP)
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	pIP.Get((uint8*)&lSockAddr->sin6_addr);
+void SocketAddress::SetIP(const IPAddress& ip) {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	ip.Get((uint8*)&sock_addr->sin6_addr);
 }
 
-IPAddress SocketAddress::GetIP() const
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	return IPAddress((const uint8*)&lSockAddr->sin6_addr, 16);
+IPAddress SocketAddress::GetIP() const {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	return IPAddress((const uint8*)&sock_addr->sin6_addr, 16);
 }
 
 #else // !LEPRA_NETWORK_IPV6
 
-SocketAddress::SocketAddress(const IPAddress& pIP, uint16 pPort)
-{
-	memset(&mSockAddr, 0, sizeof(mSockAddr));
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
+SocketAddress::SocketAddress(const IPAddress& ip, uint16 port) {
+	memset(&sock_addr_, 0, sizeof(sock_addr_));
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
 #ifdef LEPRA_MAC
-	lSockAddr->sin_len = sizeof(RawSocketAddress);
+	sock_addr->sin_len = sizeof(RawSocketAddress);
 #endif // Macintosh
-	lSockAddr->sin_family = AF_INET;
-	lSockAddr->sin_port = Endian::HostToBig(pPort);
-	pIP.Get((uint8*)&lSockAddr->sin_addr);
+	sock_addr->sin_family = AF_INET;
+	sock_addr->sin_port = Endian::HostToBig(port);
+	ip.Get((uint8*)&sock_addr->sin_addr);
 }
 
-bool SocketAddress::operator==(const SocketAddress& pAddr) const
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	RawSocketAddress* lOtherSockAddr = (RawSocketAddress*)pAddr.mSockAddr;
-	return (lOtherSockAddr->sin_addr.s_addr == lSockAddr->sin_addr.s_addr &&
-		lOtherSockAddr->sin_port == lSockAddr->sin_port);
+bool SocketAddress::operator==(const SocketAddress& addr) const {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	RawSocketAddress* other_sock_addr = (RawSocketAddress*)addr.sock_addr_;
+	return (other_sock_addr->sin_addr.s_addr == sock_addr->sin_addr.s_addr &&
+		other_sock_addr->sin_port == sock_addr->sin_port);
 }
 
-size_t SocketAddress::operator() (const SocketAddress& pAddr) const
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)pAddr.mSockAddr;
-	return (lSockAddr->sin_addr.s_addr + lSockAddr->sin_port);
+size_t SocketAddress::operator() (const SocketAddress& addr) const {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)addr.sock_addr_;
+	return (sock_addr->sin_addr.s_addr + sock_addr->sin_port);
 }
 
-void SocketAddress::SetPort(uint16 pPort)
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	lSockAddr->sin_port = Endian::HostToBig(pPort);
+void SocketAddress::SetPort(uint16 port) {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	sock_addr->sin_port = Endian::HostToBig(port);
 }
 
-uint16 SocketAddress::GetPort() const
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	return Endian::BigToHost(lSockAddr->sin_port);
+uint16 SocketAddress::GetPort() const {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	return Endian::BigToHost(sock_addr->sin_port);
 }
 
-void SocketAddress::SetIP(const IPAddress& pIP)
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	pIP.Get((uint8*)&lSockAddr->sin_addr);
+void SocketAddress::SetIP(const IPAddress& ip) {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	ip.Get((uint8*)&sock_addr->sin_addr);
 }
 
-IPAddress SocketAddress::GetIP() const
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	return IPAddress((const uint8*)&lSockAddr->sin_addr, 4);
+IPAddress SocketAddress::GetIP() const {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	return IPAddress((const uint8*)&sock_addr->sin_addr, 4);
 }
 
 #endif // LEPRA_NETWORK_IPV6/!LEPRA_NETWORK_IPV6
 
-void SocketAddress::Set(const IPAddress& pIP, uint16 pPort)
-{
-	RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-	lSockAddr->sin_family = AF_INET;
-	SetIP(pIP);
-	SetPort(pPort);
+void SocketAddress::Set(const IPAddress& ip, uint16 port) {
+	RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+	sock_addr->sin_family = AF_INET;
+	SetIP(ip);
+	SetPort(port);
 }
 
-bool SocketAddress::operator!=(const SocketAddress& pAddr) const
-{
-	return (!(*this == pAddr));
+bool SocketAddress::operator!=(const SocketAddress& addr) const {
+	return (!(*this == addr));
 }
 
-void SocketAddress::operator=(const SocketAddress& pAddr)
-{
-	::memcpy(&mSockAddr, &pAddr.mSockAddr, sizeof(mSockAddr));
+void SocketAddress::operator=(const SocketAddress& addr) {
+	::memcpy(&sock_addr_, &addr.sock_addr_, sizeof(sock_addr_));
 }
 
-str SocketAddress::GetAsString() const
-{
+str SocketAddress::GetAsString() const {
 	str s = GetIP().GetAsString();
 	s += strutil::Format(":%i", GetPort());
 	return (s);
 }
 
-void* SocketAddress::GetRawData() const
-{
-	return (void*)mSockAddr;
+void* SocketAddress::GetRawData() const {
+	return (void*)sock_addr_;
 }
 
-bool SocketAddress::Resolve(const str& pAddress)
-{
-	bool lOk = true;
-	strutil::strvec lVector;
-	int lPort = 0;
-	if (lOk)
-	{
-		lVector = strutil::Split(pAddress, ":");
-		lOk = (lVector.size() == 2);
-		if (lOk)
-		{
-			lOk = (lVector[1].length() > 0 &&
-				strutil::StringToInt(lVector[1], lPort));
-			if (!lOk && lPort > 1024)
-			{
-				lOk = true;
+bool SocketAddress::Resolve(const str& address) {
+	bool ok = true;
+	strutil::strvec vector;
+	int _port = 0;
+	if (ok) {
+		vector = strutil::Split(address, ":");
+		ok = (vector.size() == 2);
+		if (ok) {
+			ok = (vector[1].length() > 0 &&
+				strutil::StringToInt(vector[1], _port));
+			if (!ok && _port > 1024) {
+				ok = true;
 			}
 		}
 	}
-	if (lOk)
-	{
-		lOk = (lPort >= 0 && lPort <= 65535);
+	if (ok) {
+		ok = (_port >= 0 && _port <= 65535);
 	}
-	if (lOk)
-	{
-		lOk = ResolveHost(lVector[0]);
+	if (ok) {
+		ok = ResolveHost(vector[0]);
 	}
-	if (lOk)
-	{
-		SetPort((uint16)lPort);
+	if (ok) {
+		SetPort((uint16)_port);
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool SocketAddress::ResolveRange(const str& pAddress, uint16& pEndPort)
-{
-	strutil::strvec lLocalAddressComponents = strutil::Split(pAddress, "-");
-	bool lOk = (lLocalAddressComponents.size() >= 1 && lLocalAddressComponents.size() <= 2);
-	if (lOk)
-	{
-		lOk = Resolve(lLocalAddressComponents[0]);
+bool SocketAddress::ResolveRange(const str& address, uint16& end_port) {
+	strutil::strvec local_address_components = strutil::Split(address, "-");
+	bool ok = (local_address_components.size() >= 1 && local_address_components.size() <= 2);
+	if (ok) {
+		ok = Resolve(local_address_components[0]);
 	}
 
-	if (lOk)
-	{
-		pEndPort = GetPort();
-		if (lLocalAddressComponents.size() == 2)
-		{
-			int lEndPortInt;
-			lOk = (strutil::StringToInt(lLocalAddressComponents[1], lEndPortInt) && lEndPortInt >= 0);
-			if (lOk)
-			{
-				pEndPort = (uint16)lEndPortInt;
+	if (ok) {
+		end_port = GetPort();
+		if (local_address_components.size() == 2) {
+			int end_port_int;
+			ok = (strutil::StringToInt(local_address_components[1], end_port_int) && end_port_int >= 0);
+			if (ok) {
+				end_port = (uint16)end_port_int;
 			}
 		}
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool SocketAddress::ResolveHost(const str& pHostname)
-{
+bool SocketAddress::ResolveHost(const str& hostname) {
 #ifdef LEPRA_NETWORK_IPV6
 	// TODO: fixme!
-	unsigned lIp;
+	unsigned ip;
 #else // IPV4
-	unsigned lIp;
+	unsigned ip;
 #endif // IPv6/IPV4
-	IPAddress lIpAddress;
-	bool lOk = false;
-	if (Network::ResolveHostname(pHostname, lIpAddress))
-	{
-		lOk = true;
-		SetIP(lIpAddress);
+	IPAddress ip_address;
+	bool ok = false;
+	if (Network::ResolveHostname(hostname, ip_address)) {
+		ok = true;
+		SetIP(ip_address);
 	}
 #ifdef LEPRA_NETWORK_IPV6
 	// TODO: fixme!
-	else if ((lIp = inet_addr(pHostname.c_str())) != 0xFFFFFFFF)
+	else if ((ip = inet_addr(hostname.c_str())) != 0xFFFFFFFF)
 #else // IPV4
-	else if ((lIp = inet_addr(pHostname.c_str())) != 0xFFFFFFFF)
+	else if ((ip = inet_addr(hostname.c_str())) != 0xFFFFFFFF)
 #endif // IPv6/IPV4
 	{
-		lOk = true;
-		RawSocketAddress* lSockAddr = (RawSocketAddress*)mSockAddr;
-		lSockAddr->sin_addr.s_addr = lIp;
+		ok = true;
+		RawSocketAddress* sock_addr = (RawSocketAddress*)sock_addr_;
+		sock_addr->sin_addr.s_addr = ip;
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool SocketAddress::ResolveIpToHostname(str& pHostname) const
-{
-	return Network::ResolveIp(GetIP(), pHostname);
+bool SocketAddress::ResolveIpToHostname(str& hostname) const {
+	return Network::ResolveIp(GetIP(), hostname);
 }
 
 

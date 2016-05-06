@@ -5,7 +5,7 @@
 
 
 #include "pch.h"
-#include "../../Lepra/Include/LepraAssert.h"
+#include "../../lepra/include/lepraassert.h"
 #pragma warning(push)
 #pragma warning(disable: 4100)	// Warning: unreferenced formal parameter (in ODE).
 #pragma warning(disable: 4127)	// Warning: conditional expression is constant (in ODE).
@@ -17,25 +17,22 @@
 #include <../ode/src/joints/slider.h>
 #include <../ode/src/joints/universal.h>
 #pragma warning(pop)
-#include "../../Lepra/Include/CyclicArray.h"
-#include "../../Lepra/Include/Log.h"
-#include "../../Lepra/Include/Math.h"
-#include "../Include/PhysicsManagerODE.h"
+#include "../../lepra/include/cyclicarray.h"
+#include "../../lepra/include/log.h"
+#include "../../lepra/include/math.h"
+#include "../include/physicsmanagerode.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-bool AreBodiesConnectedExcluding(dBodyID b1, dBodyID b2, int joint_type)
-{
+bool AreBodiesConnectedExcluding(dBodyID b1, dBodyID b2, int joint_type) {
 	deb_assert(b1 || b2);
 	dBodyID b = b1? b1 : b2;
 	dBodyID s = b1? b2 : b1;
-	for (dxJointNode* n=b->firstjoint; n; n=n->next)
-	{
+	for (dxJointNode* n=b->firstjoint; n; n=n->next) {
 		if (dJointGetType(n->joint) != joint_type && n->body == s)
 			return true;
 	}
@@ -44,2157 +41,1846 @@ bool AreBodiesConnectedExcluding(dBodyID b1, dBodyID b2, int joint_type)
 
 
 
-PhysicsManagerODE::PhysicsManagerODE(float pRadius, int pLevels, float pSensitivity)
-{
-	mWorldID = dWorldCreate();
-	
+PhysicsManagerODE::PhysicsManagerODE(float _radius, int levels, float sensitivity) {
+	world_id_ = dWorldCreate();
+
 	// Play with these to make the simulation behave better.
 	SetSimulationParameters(0, 0.1f, 1);
 
-	if (pSensitivity)
-	{
-		::dWorldSetAutoDisableFlag(mWorldID, 1);
-		::dWorldSetAutoDisableLinearThreshold(mWorldID, 0.02f/pSensitivity);
-		::dWorldSetAutoDisableAngularThreshold(mWorldID, 0.02f/pSensitivity);
-		::dWorldSetAutoDisableSteps(mWorldID, (int)(2*pSensitivity));
-		//::dWorldSetAutoDisableTime(mWorldID, 0);
-	}
-	else
-	{
-		::dWorldSetAutoDisableFlag(mWorldID, 0);
+	if (sensitivity) {
+		::dWorldSetAutoDisableFlag(world_id_, 1);
+		::dWorldSetAutoDisableLinearThreshold(world_id_, 0.02f/sensitivity);
+		::dWorldSetAutoDisableAngularThreshold(world_id_, 0.02f/sensitivity);
+		::dWorldSetAutoDisableSteps(world_id_, (int)(2*sensitivity));
+		//::dWorldSetAutoDisableTime(world_id_, 0);
+	} else {
+		::dWorldSetAutoDisableFlag(world_id_, 0);
 	}
 
-	//::dWorldSetLinearDampingThreshold(mWorldID, 100.0f);
-	//::dWorldSetLinearDamping(mWorldID, 0.9f);
-	::dWorldSetAngularDampingThreshold(mWorldID, 15.0f);
-	::dWorldSetAngularDamping(mWorldID, 0.5f);
-	::dWorldSetMaxAngularSpeed(mWorldID, 200.0f);
+	//::dWorldSetLinearDampingThreshold(world_id_, 100.0f);
+	//::dWorldSetLinearDamping(world_id_, 0.9f);
+	::dWorldSetAngularDampingThreshold(world_id_, 15.0f);
+	::dWorldSetAngularDamping(world_id_, 0.5f);
+	::dWorldSetMaxAngularSpeed(world_id_, 200.0f);
 
 	// Collision space center and extents.
-	dVector3 lCenter = {0, 0, 0};
-	dVector3 lExtents = {pRadius, pRadius, pRadius};
-	mSpaceID = ::dQuadTreeSpaceCreate(0, lCenter, lExtents, pLevels);
+	dVector3 center = {0, 0, 0};
+	dVector3 extents = {_radius, _radius, _radius};
+	space_id_ = ::dQuadTreeSpaceCreate(0, center, extents, levels);
 
-	::dWorldSetGravity(mWorldID, 0, 0, -9.82f);
+	::dWorldSetGravity(world_id_, 0, 0, -9.82f);
 
 	// Create joint group for contact joints used in collision detection.
-	mContactJointGroupID = ::dJointGroupCreate(0);
+	contact_joint_group_id_ = ::dJointGroupCreate(0);
 }
 
-PhysicsManagerODE::~PhysicsManagerODE()
-{
-	while (!mObjectTable.empty())
-	{
-		Object* lObject = *mObjectTable.begin();
-		DeleteBody((BodyID)lObject);
+PhysicsManagerODE::~PhysicsManagerODE() {
+	while (!object_table_.empty()) {
+		Object* _object = *object_table_.begin();
+		DeleteBody((BodyID)_object);
 	}
 
-	::dWorldDestroy(mWorldID);
-	::dSpaceDestroy(mSpaceID);
-	::dJointGroupDestroy(mContactJointGroupID);
+	::dWorldDestroy(world_id_);
+	::dSpaceDestroy(space_id_);
+	::dJointGroupDestroy(contact_joint_group_id_);
 }
 
-void PhysicsManagerODE::SetSimulationParameters(float pSoftness, float pRubberbanding, float pAccuracy)
-{
-	mWorldCfm = Math::Lerp(1e-9f, 1e-2f, pSoftness);	// World softness and numerical stability, i.e peneraation.
-	::dWorldSetCFM(mWorldID, mWorldCfm);
-	mWorldErp = Math::Lerp(1.0f, 0.2f, pRubberbanding);
-	::dWorldSetERP(mWorldID, mWorldErp);	// Error reduction.
-	::dWorldSetQuickStepNumIterations(mWorldID, (int)Math::Lerp(1, 20, pAccuracy));
+void PhysicsManagerODE::SetSimulationParameters(float softness, float rubberbanding, float accuracy) {
+	world_cfm_ = Math::Lerp(1e-9f, 1e-2f, softness);	// World softness and numerical stability, i.e peneraation.
+	::dWorldSetCFM(world_id_, world_cfm_);
+	world_erp_ = Math::Lerp(1.0f, 0.2f, rubberbanding);
+	::dWorldSetERP(world_id_, world_erp_);	// Error reduction.
+	::dWorldSetQuickStepNumIterations(world_id_, (int)Math::Lerp(1, 20, accuracy));
 }
 
-bool PhysicsManagerODE::InitCurrentThread()
-{
+bool PhysicsManagerODE::InitCurrentThread() {
 	return ::dAllocateODEDataForThread((unsigned)dAllocateMaskAll) != 0;
 }
 
-int PhysicsManagerODE::QueryRayCollisionAgainst(const vec3& pRayPosition, const vec3& pRayDirection,
-	float pLength, BodyID pBody, vec3* pCollisionPoints, int pMaxCollisionCount)
-{
-	if (pMaxCollisionCount <= 0)
-	{
+int PhysicsManagerODE::QueryRayCollisionAgainst(const vec3& ray_position, const vec3& ray_direction,
+	float length, BodyID _body, vec3* collision_points, int max_collision_count) {
+	if (max_collision_count <= 0) {
 		deb_assert(false);
 		return 0;
 	}
 
-	ObjectTable::iterator x = mObjectTable.find((Object*)pBody);
-	if (x == mObjectTable.end())
-	{
+	ObjectTable::iterator x = object_table_.find((Object*)_body);
+	if (x == object_table_.end()) {
 		deb_assert(false);
 		return 0;
 	}
-	const Object* lObject = *x;
+	const Object* _object = *x;
 
-	dGeomID lRayGeometryId = ::dCreateRay(0, pLength);
-	::dGeomRaySet(lRayGeometryId, pRayPosition.x, pRayPosition.y, pRayPosition.z,
-		pRayDirection.x, pRayDirection.y, pRayDirection.z);
+	dGeomID ray_geometry_id = ::dCreateRay(0, length);
+	::dGeomRaySet(ray_geometry_id, ray_position.x, ray_position.y, ray_position.z,
+		ray_direction.x, ray_direction.y, ray_direction.z);
 
-	dContactGeom lContact[8];
-	const int lMaxCount = std::min((int)LEPRA_ARRAY_COUNT(lContact), pMaxCollisionCount*2);
-	const int lCollisionCount = ::dCollide(lRayGeometryId, lObject->mGeomID, lMaxCount, &lContact[0], sizeof(lContact[0]));
+	dContactGeom contact[8];
+	const int max_count = std::min((int)LEPRA_ARRAY_COUNT(contact), max_collision_count*2);
+	const int collision_count = ::dCollide(ray_geometry_id, _object->geom_id_, max_count, &contact[0], sizeof(contact[0]));
 
-	::dGeomDestroy(lRayGeometryId);
+	::dGeomDestroy(ray_geometry_id);
 
-	int lFoundCollisionPoints = 0;
-	for (int x = 0; x < lCollisionCount; ++x)
-	{
+	int found_collision_points = 0;
+	for (int x = 0; x < collision_count; ++x) {
 		// Check that we've found a surface turned towards the given direction.
-		const vec3 lNormal(lContact[x].normal[0], lContact[x].normal[1], lContact[x].normal[2]);
-		if (lNormal*pRayDirection < 0)
-		{
-			pCollisionPoints[lFoundCollisionPoints++].Set(lContact[x].pos[0], lContact[x].pos[1], lContact[x].pos[2]);
+		const vec3 __normal(contact[x].normal[0], contact[x].normal[1], contact[x].normal[2]);
+		if (__normal*ray_direction < 0) {
+			collision_points[found_collision_points++].Set(contact[x].pos[0], contact[x].pos[1], contact[x].pos[2]);
 		}
 	}
 
-	return lFoundCollisionPoints;
+	return found_collision_points;
 }
 
-int PhysicsManagerODE::QueryRayPick(const vec3& pRayPosition, const vec3& pRayDirection, float pLength, int* pForceFeedbackIds, vec3* pPositions, int pMaxBodies)
-{
-	dGeomID lRayGeometryId = ::dCreateRay(0, pLength);
-	::dGeomRaySet(lRayGeometryId, pRayPosition.x, pRayPosition.y, pRayPosition.z,
-		pRayDirection.x, pRayDirection.y, pRayDirection.z);
+int PhysicsManagerODE::QueryRayPick(const vec3& ray_position, const vec3& ray_direction, float length, int* force_feedback_ids, vec3* positions, int max_bodies) {
+	dGeomID ray_geometry_id = ::dCreateRay(0, length);
+	::dGeomRaySet(ray_geometry_id, ray_position.x, ray_position.y, ray_position.z,
+		ray_direction.x, ray_direction.y, ray_direction.z);
 
-	int lHits = 0;
-	void* lData[4] = {pForceFeedbackIds, pPositions, (void*)&lHits, (void*)&pMaxBodies};
-	mSpaceID->collide2(&lData, lRayGeometryId, &PhysicsManagerODE::RayPickCallback);
+	int hits = 0;
+	void* _data[4] = {force_feedback_ids, positions, (void*)&hits, (void*)&max_bodies};
+	space_id_->collide2(&_data, ray_geometry_id, &PhysicsManagerODE::RayPickCallback);
 
-	::dGeomDestroy(lRayGeometryId);
+	::dGeomDestroy(ray_geometry_id);
 
-	return lHits;
+	return hits;
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool pIsRoot, const xform& pTransform,
-	float32 pMass, float32 pRadius, BodyType pType, float32 pFriction, float32 pBounce,
-	int pForceListenerId, bool pIsTrigger)
-{
-	Object* lObject = new Object(mWorldID, pIsRoot);
-	lObject->mGeomID = dCreateSphere(mSpaceID, (dReal)pRadius);
-	if (pIsTrigger)
-	{
-		lObject->mTriggerListenerId = pForceListenerId;
-	}
-	else
-	{
-		lObject->mForceFeedbackId = pForceListenerId;
+PhysicsManager::BodyID PhysicsManagerODE::CreateSphere(bool is_root, const xform& transform,
+	float32 _mass, float32 _radius, BodyType _type, float32 friction, float32 _bounce,
+	int force_listener_id, bool is_trigger) {
+	Object* _object = new Object(world_id_, is_root);
+	_object->geom_id_ = dCreateSphere(space_id_, (dReal)_radius);
+	if (is_trigger) {
+		_object->trigger_listener_id_ = force_listener_id;
+	} else {
+		_object->force_feedback_id_ = force_listener_id;
 	}
 
-	if (pType == PhysicsManager::DYNAMIC)
-	{
-		dMass lMass;
-		::dMassSetSphereTotal(&lMass, (dReal)pMass, (dReal)pRadius);
-		lObject->mBodyID = dBodyCreate(mWorldID);
-		::dBodySetMass(lObject->mBodyID, &lMass);
-		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
-		::dBodySetAutoDisableDefaults(lObject->mBodyID);
-		::dBodySetAngularDampingThreshold(lObject->mBodyID, 200.0f);
-		::dBodySetAngularDamping(lObject->mBodyID, 0.2f);
+	if (_type == PhysicsManager::kDynamic) {
+		dMass __mass;
+		::dMassSetSphereTotal(&__mass, (dReal)_mass, (dReal)_radius);
+		_object->body_id_ = dBodyCreate(world_id_);
+		::dBodySetMass(_object->body_id_, &__mass);
+		::dGeomSetBody(_object->geom_id_, _object->body_id_);
+		::dBodySetAutoDisableDefaults(_object->body_id_);
+		::dBodySetAngularDampingThreshold(_object->body_id_, 200.0f);
+		::dBodySetAngularDamping(_object->body_id_, 0.2f);
 	}
 
-	::dGeomSetData(lObject->mGeomID, lObject);
+	::dGeomSetData(_object->geom_id_, _object);
 
-	lObject->mGeometryData[0] = pRadius;
-	lObject->mMass = pMass;
-	lObject->mFriction = pFriction;
-	lObject->mBounce   = pBounce;
+	_object->geometry_data_[0] = _radius;
+	_object->mass_ = _mass;
+	_object->friction_ = friction;
+	_object->bounce_   = _bounce;
 
-	mObjectTable.insert(lObject);
+	object_table_.insert(_object);
 
-	SetBodyTransform((BodyID)lObject, pTransform);
+	SetBodyTransform((BodyID)_object, transform);
 
-	return ((BodyID)lObject);
+	return ((BodyID)_object);
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool pIsRoot, const xform& pTransform,
-	float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction,
-	float32 pBounce, int pForceListenerId, bool pIsTrigger)
-{
-	Object* lObject = new Object(mWorldID, pIsRoot);
+PhysicsManager::BodyID PhysicsManagerODE::CreateCylinder(bool is_root, const xform& transform,
+	float32 _mass, float32 _radius, float32 length, BodyType _type, float32 friction,
+	float32 _bounce, int force_listener_id, bool is_trigger) {
+	Object* _object = new Object(world_id_, is_root);
 
 	// TODO: Create a real cylinder when ODE supports it.
-	lObject->mGeomID = ::dCreateCylinder(mSpaceID, (dReal)pRadius, (dReal)pLength);
+	_object->geom_id_ = ::dCreateCylinder(space_id_, (dReal)_radius, (dReal)length);
 
-	if (pIsTrigger)
-	{
-		lObject->mTriggerListenerId = pForceListenerId;
-	}
-	else
-	{
-		lObject->mForceFeedbackId = pForceListenerId;
+	if (is_trigger) {
+		_object->trigger_listener_id_ = force_listener_id;
+	} else {
+		_object->force_feedback_id_ = force_listener_id;
 	}
 
-	if (pType == PhysicsManager::DYNAMIC)
-	{
-		dMass lMass;
-		::dMassSetCylinderTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
-		lObject->mBodyID = dBodyCreate(mWorldID);
-		::dBodySetMass(lObject->mBodyID, &lMass);
-		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
-		::dBodySetAutoDisableDefaults(lObject->mBodyID);
+	if (_type == PhysicsManager::kDynamic) {
+		dMass __mass;
+		::dMassSetCylinderTotal(&__mass, (dReal)_mass, 3, (dReal)_radius, (dReal)length);
+		_object->body_id_ = dBodyCreate(world_id_);
+		::dBodySetMass(_object->body_id_, &__mass);
+		::dGeomSetBody(_object->geom_id_, _object->body_id_);
+		::dBodySetAutoDisableDefaults(_object->body_id_);
 	}
 
-	::dGeomSetData(lObject->mGeomID, lObject);
+	::dGeomSetData(_object->geom_id_, _object);
 
-	lObject->mGeometryData[0] = pRadius;
-	lObject->mGeometryData[1] = pLength;
-	lObject->mMass = pMass;
-	lObject->mFriction = pFriction;
-	lObject->mBounce   = pBounce;
+	_object->geometry_data_[0] = _radius;
+	_object->geometry_data_[1] = length;
+	_object->mass_ = _mass;
+	_object->friction_ = friction;
+	_object->bounce_   = _bounce;
 
-	mObjectTable.insert(lObject);
+	object_table_.insert(_object);
 
-	SetBodyTransform((BodyID)lObject, pTransform);
+	SetBodyTransform((BodyID)_object, transform);
 
-	return (BodyID)lObject;
+	return (BodyID)_object;
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool pIsRoot, const xform& pTransform,
-	float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction,
-	float32 pBounce, int pForceListenerId, bool pIsTrigger)
-{
-	Object* lObject = new Object(mWorldID, pIsRoot);
+PhysicsManager::BodyID PhysicsManagerODE::CreateCapsule(bool is_root, const xform& transform,
+	float32 _mass, float32 _radius, float32 length, BodyType _type, float32 friction,
+	float32 _bounce, int force_listener_id, bool is_trigger) {
+	Object* _object = new Object(world_id_, is_root);
 
-	lObject->mGeomID = ::dCreateCapsule(mSpaceID, (dReal)pRadius, (dReal)pLength);
-	if (pIsTrigger)
-	{
-		lObject->mTriggerListenerId = pForceListenerId;
-	}
-	else
-	{
-		lObject->mForceFeedbackId = pForceListenerId;
+	_object->geom_id_ = ::dCreateCapsule(space_id_, (dReal)_radius, (dReal)length);
+	if (is_trigger) {
+		_object->trigger_listener_id_ = force_listener_id;
+	} else {
+		_object->force_feedback_id_ = force_listener_id;
 	}
 
-	if (pType == PhysicsManager::DYNAMIC)
-	{
-		dMass lMass;
-		::dMassSetCapsuleTotal(&lMass, (dReal)pMass, 3, (dReal)pRadius, (dReal)pLength);
-		lObject->mBodyID = dBodyCreate(mWorldID);
-		::dBodySetMass(lObject->mBodyID, &lMass);
-		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
-		::dBodySetAutoDisableDefaults(lObject->mBodyID);
+	if (_type == PhysicsManager::kDynamic) {
+		dMass __mass;
+		::dMassSetCapsuleTotal(&__mass, (dReal)_mass, 3, (dReal)_radius, (dReal)length);
+		_object->body_id_ = dBodyCreate(world_id_);
+		::dBodySetMass(_object->body_id_, &__mass);
+		::dGeomSetBody(_object->geom_id_, _object->body_id_);
+		::dBodySetAutoDisableDefaults(_object->body_id_);
 	}
 
-	lObject->mGeometryData[0] = pRadius;
-	lObject->mGeometryData[1] = pLength;
-	dGeomSetData(lObject->mGeomID, lObject);
+	_object->geometry_data_[0] = _radius;
+	_object->geometry_data_[1] = length;
+	dGeomSetData(_object->geom_id_, _object);
 
-	lObject->mMass = pMass;
-	lObject->mFriction = pFriction;
-	lObject->mBounce = pBounce;
+	_object->mass_ = _mass;
+	_object->friction_ = friction;
+	_object->bounce_ = _bounce;
 
-	mObjectTable.insert(lObject);
+	object_table_.insert(_object);
 
-	SetBodyTransform((BodyID)lObject, pTransform);
+	SetBodyTransform((BodyID)_object, transform);
 
-	return (BodyID)lObject;
+	return (BodyID)_object;
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool pIsRoot, const xform& pTransform,
-	float32 pMass, const vec3& pSize, BodyType pType, float32 pFriction,
-	float32 pBounce, int pForceListenerId, bool pIsTrigger)
-{
-	Object* lObject = new Object(mWorldID, pIsRoot);
+PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool is_root, const xform& transform,
+	float32 _mass, const vec3& size, BodyType _type, float32 friction,
+	float32 _bounce, int force_listener_id, bool is_trigger) {
+	Object* _object = new Object(world_id_, is_root);
 
-	lObject->mGeomID = ::dCreateBox(mSpaceID, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
-	if (pIsTrigger)
-	{
-		lObject->mTriggerListenerId = pForceListenerId;
-	}
-	else
-	{
-		lObject->mForceFeedbackId = pForceListenerId;
+	_object->geom_id_ = ::dCreateBox(space_id_, (dReal)size.x, (dReal)size.y, (dReal)size.z);
+	if (is_trigger) {
+		_object->trigger_listener_id_ = force_listener_id;
+	} else {
+		_object->force_feedback_id_ = force_listener_id;
 	}
 
-	if (pType == PhysicsManager::DYNAMIC)
-	{
-		lObject->mBodyID = ::dBodyCreate(mWorldID);
-		dMass lMass;
-		::dMassSetBoxTotal(&lMass, (dReal)pMass, (dReal)pSize.x, (dReal)pSize.y, (dReal)pSize.z);
-		::dBodySetMass(lObject->mBodyID, &lMass);
-		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
-		::dBodySetAutoDisableDefaults(lObject->mBodyID);
+	if (_type == PhysicsManager::kDynamic) {
+		_object->body_id_ = ::dBodyCreate(world_id_);
+		dMass __mass;
+		::dMassSetBoxTotal(&__mass, (dReal)_mass, (dReal)size.x, (dReal)size.y, (dReal)size.z);
+		::dBodySetMass(_object->body_id_, &__mass);
+		::dGeomSetBody(_object->geom_id_, _object->body_id_);
+		::dBodySetAutoDisableDefaults(_object->body_id_);
 	}
 
-	::dGeomSetData(lObject->mGeomID, lObject);
+	::dGeomSetData(_object->geom_id_, _object);
 
-	lObject->mGeometryData[0] = pSize.x;
-	lObject->mGeometryData[1] = pSize.y;
-	lObject->mGeometryData[2] = pSize.z;
-	lObject->mMass = pMass;
-	lObject->mFriction = -pFriction;
-	lObject->mBounce = pBounce;
+	_object->geometry_data_[0] = size.x;
+	_object->geometry_data_[1] = size.y;
+	_object->geometry_data_[2] = size.z;
+	_object->mass_ = _mass;
+	_object->friction_ = -friction;
+	_object->bounce_ = _bounce;
 
-	mObjectTable.insert(lObject);
+	object_table_.insert(_object);
 
-	SetBodyTransform((BodyID)lObject, pTransform);
+	SetBodyTransform((BodyID)_object, transform);
 
-	return (BodyID)lObject;
+	return (BodyID)_object;
 }
 
-bool PhysicsManagerODE::Attach(BodyID pStaticBody, BodyID pMainBody)
-{
-	ObjectTable::iterator x = mObjectTable.find((Object*)pStaticBody);
-	if (x == mObjectTable.end())
-	{
+bool PhysicsManagerODE::Attach(BodyID static_body, BodyID main_body) {
+	ObjectTable::iterator x = object_table_.find((Object*)static_body);
+	if (x == object_table_.end()) {
 		deb_assert(false);
 		return (false);
 	}
-	ObjectTable::iterator y = mObjectTable.find((Object*)pMainBody);
-	if (y == mObjectTable.end() || x == y)
-	{
+	ObjectTable::iterator y = object_table_.find((Object*)main_body);
+	if (y == object_table_.end() || x == y) {
 		deb_assert(false);
 		return (false);
 	}
-	Object* lStaticObject = *x;
-	dVector3 lPos;
-	::dGeomCopyPosition(lStaticObject->mGeomID, lPos);
+	Object* static_object = *x;
+	dVector3 __pos;
+	::dGeomCopyPosition(static_object->geom_id_, __pos);
 	dQuaternion o;
-	::dGeomGetQuaternion(lStaticObject->mGeomID, o);
-	Object* lMainObject = *y;
-	dBodyID lBodyId = lMainObject->mBodyID;
-	if (!lBodyId)
-	{
+	::dGeomGetQuaternion(static_object->geom_id_, o);
+	Object* main_object = *y;
+	dBodyID _body_id = main_object->body_id_;
+	if (!_body_id) {
 		return true;
 	}
-	if (lStaticObject->mBodyID)
-	{
-		JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
-		lJointInfo->mJointID = dJointCreateFixed(mWorldID, 0);
-		lJointInfo->mType = JOINT_FIXED;
-		lJointInfo->mBody1Id = pStaticBody;
-		lJointInfo->mBody2Id = pMainBody;
-		lJointInfo->mListenerId1 = lStaticObject->mForceFeedbackId;
-		lJointInfo->mListenerId2 = lMainObject->mForceFeedbackId;
-		lMainObject->mHasMassChildren = true;
-		dJointAttach(lJointInfo->mJointID, lStaticObject->mBodyID, lMainObject->mBodyID);
-		dJointSetFixed(lJointInfo->mJointID);
-	}
-	else
-	{
-		::dGeomSetBody(lStaticObject->mGeomID, lBodyId);
-		::dGeomSetOffsetWorldPosition(lStaticObject->mGeomID, lPos[0], lPos[1], lPos[2]);
-		::dGeomSetOffsetWorldQuaternion(lStaticObject->mGeomID, o);
-		AddMass(pStaticBody, pMainBody);
+	if (static_object->body_id_) {
+		JointInfo* _joint_info = joint_info_allocator_.Alloc();
+		_joint_info->joint_id_ = dJointCreateFixed(world_id_, 0);
+		_joint_info->type_ = kJointFixed;
+		_joint_info->body1_id_ = static_body;
+		_joint_info->body2_id_ = main_body;
+		_joint_info->listener_id1_ = static_object->force_feedback_id_;
+		_joint_info->listener_id2_ = main_object->force_feedback_id_;
+		main_object->has_mass_children_ = true;
+		dJointAttach(_joint_info->joint_id_, static_object->body_id_, main_object->body_id_);
+		dJointSetFixed(_joint_info->joint_id_);
+	} else {
+		::dGeomSetBody(static_object->geom_id_, _body_id);
+		::dGeomSetOffsetWorldPosition(static_object->geom_id_, __pos[0], __pos[1], __pos[2]);
+		::dGeomSetOffsetWorldQuaternion(static_object->geom_id_, o);
+		AddMass(static_body, main_body);
 	}
 	return (true);
 }
 
-bool PhysicsManagerODE::DetachToDynamic(BodyID pStaticBody, float32 pMass)
-{
-	Object* lObject = (Object*)pStaticBody;
+bool PhysicsManagerODE::DetachToDynamic(BodyID static_body, float32 _mass) {
+	Object* _object = (Object*)static_body;
 
-	dGeomID g = lObject->mGeomID;
-	dMass lMass;
-	switch (g->type)
-	{
+	dGeomID g = _object->geom_id_;
+	dMass __mass;
+	switch (g->type) {
 		case dTriMeshClass:	// TRICKY: fall through (act as sphere).
-		case dSphereClass:	::dMassSetSphereTotal(&lMass, (dReal)pMass, ((dxSphere*)g)->radius);						break;
-		case dBoxClass:		::dMassSetBoxTotal(&lMass, (dReal)pMass, ((dxBox*)g)->side[0], ((dxBox*)g)->side[1], ((dxBox*)g)->side[2]);	break;
-		case dCapsuleClass:	::dMassSetCapsuleTotal(&lMass, (dReal)pMass, 3, ((dxCapsule*)g)->radius, ((dxCapsule*)g)->lz);			break;
-		case dCylinderClass:	::dMassSetCylinderTotal(&lMass, (dReal)pMass, 3, ((dxCylinder*)g)->radius, ((dxCylinder*)g)->lz);		break;
-		default:
-		{
-			mLog.Error("Trying to detach object of unknown type!");
+		case dSphereClass:	::dMassSetSphereTotal(&__mass, (dReal)_mass, ((dxSphere*)g)->radius);						break;
+		case dBoxClass:		::dMassSetBoxTotal(&__mass, (dReal)_mass, ((dxBox*)g)->side[0], ((dxBox*)g)->side[1], ((dxBox*)g)->side[2]);	break;
+		case dCapsuleClass:	::dMassSetCapsuleTotal(&__mass, (dReal)_mass, 3, ((dxCapsule*)g)->radius, ((dxCapsule*)g)->lz);			break;
+		case dCylinderClass:	::dMassSetCylinderTotal(&__mass, (dReal)_mass, 3, ((dxCylinder*)g)->radius, ((dxCylinder*)g)->lz);		break;
+		default: {
+			log_.Error("Trying to detach object of unknown type!");
 			deb_assert(false);
 		}
 		return (false);
 	}
 
-	if (lObject->mBodyID)
-	{
+	if (_object->body_id_) {
 		// Already dynamic, just update mass.
-	}
-	else
-	{
+	} else {
 		// Create dynamic body for it.
-		lObject->mBodyID = ::dBodyCreate(mWorldID);
-		const dReal* lPos = ::dGeomGetPosition(lObject->mGeomID);
-		dQuaternion lQuat;
-		::dGeomGetQuaternion(lObject->mGeomID, lQuat);
-		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
-		::dGeomSetPosition(lObject->mGeomID, lPos[0], lPos[1], lPos[2]);
-		::dGeomSetQuaternion(lObject->mGeomID, lQuat);
-		::dBodySetAutoDisableDefaults(lObject->mBodyID);
+		_object->body_id_ = ::dBodyCreate(world_id_);
+		const dReal* __pos = ::dGeomGetPosition(_object->geom_id_);
+		dQuaternion __quat;
+		::dGeomGetQuaternion(_object->geom_id_, __quat);
+		::dGeomSetBody(_object->geom_id_, _object->body_id_);
+		::dGeomSetPosition(_object->geom_id_, __pos[0], __pos[1], __pos[2]);
+		::dGeomSetQuaternion(_object->geom_id_, __quat);
+		::dBodySetAutoDisableDefaults(_object->body_id_);
 	}
-	::dBodySetMass(lObject->mBodyID, &lMass);
+	::dBodySetMass(_object->body_id_, &__mass);
 	return true;
 }
 
-bool PhysicsManagerODE::MakeStatic(BodyID pDynamicBody)
-{
-	ObjectTable::iterator x = mObjectTable.find((Object*)pDynamicBody);
-	if (x == mObjectTable.end())
-	{
+bool PhysicsManagerODE::MakeStatic(BodyID dynamic_body) {
+	ObjectTable::iterator x = object_table_.find((Object*)dynamic_body);
+	if (x == object_table_.end()) {
 		deb_assert(false);
 		return (false);
 	}
-	Object* lDynamicObject = *x;
-	if (lDynamicObject->mBodyID)
-	{
-		::dGeomSetBody(lDynamicObject->mGeomID, 0);
-		::dBodyDestroy(lDynamicObject->mBodyID);
-		lDynamicObject->mBodyID = 0;
+	Object* dynamic_object = *x;
+	if (dynamic_object->body_id_) {
+		::dGeomSetBody(dynamic_object->geom_id_, 0);
+		::dBodyDestroy(dynamic_object->body_id_);
+		dynamic_object->body_id_ = 0;
 	}
 	return true;
 }
 
-bool PhysicsManagerODE::AddMass(BodyID pStaticBody, BodyID pMainBody)
-{
-	ObjectTable::iterator x = mObjectTable.find((Object*)pStaticBody);
-	if (x == mObjectTable.end())
-	{
+bool PhysicsManagerODE::AddMass(BodyID static_body, BodyID main_body) {
+	ObjectTable::iterator x = object_table_.find((Object*)static_body);
+	if (x == object_table_.end()) {
 		deb_assert(false);
 		return (false);
 	}
-	ObjectTable::iterator y = mObjectTable.find((Object*)pMainBody);
-	if (y == mObjectTable.end() || x == y)
-	{
+	ObjectTable::iterator y = object_table_.find((Object*)main_body);
+	if (y == object_table_.end() || x == y) {
 		deb_assert(false);
 		return (false);
 	}
-	Object* lStaticObject = *x;
-	Object* lMainObject = *y;
-	if (lStaticObject->mBodyID)
-	{
-		mLog.Error("Attach() with non-static.");
+	Object* static_object = *x;
+	Object* main_object = *y;
+	if (static_object->body_id_) {
+		log_.Error("Attach() with non-static.");
 		deb_assert(false);
 		return (false);
 	}
-	if (!lStaticObject->mMass)	// No point in trying to add flyweight trigger.
-	{
+	if (!static_object->mass_) {	// No point in trying to add flyweight trigger.
 		return false;
 	}
-	dBodyID lBodyId = lMainObject->mBodyID;
-	if (!lBodyId)
-	{
+	dBodyID _body_id = main_object->body_id_;
+	if (!_body_id) {
 		deb_assert(false);
 		return (false);
 	}
 
-	lMainObject->mHasMassChildren = true;
+	main_object->has_mass_children_ = true;
 
-	dMass lMass;
-	const dReal lMassScalar = (dReal)lStaticObject->mMass;
-	deb_assert(lMassScalar > 0);
-	float* lSize = lStaticObject->mGeometryData;
+	dMass __mass;
+	const dReal mass_scalar = (dReal)static_object->mass_;
+	deb_assert(mass_scalar > 0);
+	float* _size = static_object->geometry_data_;
 	// Adding mass to the dynamic object.
-	switch (lStaticObject->mGeomID->type)
-	{
+	switch (static_object->geom_id_->type) {
 		case dTriMeshClass:	// TRICKY: fall through (act as sphere).
-		case dSphereClass:	::dMassSetSphereTotal(&lMass, lMassScalar, (dReal)lSize[0]);					break;
-		case dBoxClass:		::dMassSetBoxTotal(&lMass, lMassScalar, (dReal)lSize[0], (dReal)lSize[1], (dReal)lSize[2]);	break;
-		case dCapsuleClass:	::dMassSetCapsuleTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
-		case dCylinderClass:	::dMassSetCylinderTotal(&lMass, lMassScalar, 3, (dReal)lSize[0], (dReal)lSize[1]);		break;
-		default:
-		{
-			mLog.Error("Trying to attach object of unknown type!");
+		case dSphereClass:	::dMassSetSphereTotal(&__mass, mass_scalar, (dReal)_size[0]);					break;
+		case dBoxClass:		::dMassSetBoxTotal(&__mass, mass_scalar, (dReal)_size[0], (dReal)_size[1], (dReal)_size[2]);	break;
+		case dCapsuleClass:	::dMassSetCapsuleTotal(&__mass, mass_scalar, 3, (dReal)_size[0], (dReal)_size[1]);		break;
+		case dCylinderClass:	::dMassSetCylinderTotal(&__mass, mass_scalar, 3, (dReal)_size[0], (dReal)_size[1]);		break;
+		default: {
+			log_.Error("Trying to attach object of unknown type!");
 			deb_assert(false);
 			return (false);
 		}
 	}
-	const dReal* lRelRot = ::dGeomGetOffsetRotation(lStaticObject->mGeomID);
-	::dMassRotate(&lMass, lRelRot);
-	const dReal* lRelPos = ::dGeomGetOffsetPosition(lStaticObject->mGeomID);
-	::dMassTranslate(&lMass, lRelPos[0], lRelPos[1], lRelPos[2]);
+	const dReal* rel_rot = ::dGeomGetOffsetRotation(static_object->geom_id_);
+	::dMassRotate(&__mass, rel_rot);
+	const dReal* rel_pos = ::dGeomGetOffsetPosition(static_object->geom_id_);
+	::dMassTranslate(&__mass, rel_pos[0], rel_pos[1], rel_pos[2]);
 
-	dMass lDynamicMass;
-	::dBodyGetMass(lBodyId, &lDynamicMass);
-	::dMassAdd(&lDynamicMass, &lMass);
-	::dBodySetMass(lBodyId, &lDynamicMass);
+	dMass dynamic_mass;
+	::dBodyGetMass(_body_id, &dynamic_mass);
+	::dMassAdd(&dynamic_mass, &__mass);
+	::dBodySetMass(_body_id, &dynamic_mass);
 
 	return true;
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices, unsigned pTriangleCount, const Lepra::uint32* pIndices,
-	const xform& pTransform, float32 pMass, BodyType pType, float32 pFriction, float32 pBounce, int pForceListenerId, bool pIsTrigger)
-{
-	Object* lObject = new Object(mWorldID, pIsRoot);
+PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool is_root, unsigned vertex_count, const float* vertices, unsigned triangle_count, const lepra::uint32* indices,
+	const xform& transform, float32 _mass, BodyType _type, float32 friction, float32 _bounce, int force_listener_id, bool is_trigger) {
+	Object* _object = new Object(world_id_, is_root);
 
-	lObject->mTriMeshID = ::dGeomTriMeshDataCreate();
-	::dGeomTriMeshDataBuildSingle(lObject->mTriMeshID,
-				    pVertices,
-				    sizeof(pVertices[0]) * 3,
-				    pVertexCount,
-				    pIndices,
-				    pTriangleCount * 3,
-				    sizeof(pIndices[0]) * 3);
+	_object->tri_mesh_id_ = ::dGeomTriMeshDataCreate();
+	::dGeomTriMeshDataBuildSingle(_object->tri_mesh_id_,
+				    vertices,
+				    sizeof(vertices[0]) * 3,
+				    vertex_count,
+				    indices,
+				    triangle_count * 3,
+				    sizeof(indices[0]) * 3);
 
-	lObject->mGeomID = ::dCreateTriMesh(mSpaceID, lObject->mTriMeshID, 0, 0, 0);
-	//::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
-	::dGeomSetData(lObject->mGeomID, lObject);
-	if (pIsTrigger)
-	{
-		lObject->mTriggerListenerId = pForceListenerId;
-	}
-	else
-	{
-		lObject->mForceFeedbackId = pForceListenerId;
+	_object->geom_id_ = ::dCreateTriMesh(space_id_, _object->tri_mesh_id_, 0, 0, 0);
+	//::dGeomSetBody(_object->geom_id_, _object->body_id_);
+	::dGeomSetData(_object->geom_id_, _object);
+	if (is_trigger) {
+		_object->trigger_listener_id_ = force_listener_id;
+	} else {
+		_object->force_feedback_id_ = force_listener_id;
 	}
 
-//	dGeomTriMeshEnableTC(lObject->mGeomID, dBoxClass, 1);
+//	dGeomTriMeshEnableTC(_object->geom_id_, dBoxClass, 1);
 
-	float lAverageRadius = 0;
-	for (unsigned x = 0; x < pVertexCount; ++x)
-	{
-		lAverageRadius += vec3(pVertices[x*3+0], pVertices[x*3+0], pVertices[x*3+0]).GetLength();
+	float average_radius = 0;
+	for (unsigned x = 0; x < vertex_count; ++x) {
+		average_radius += vec3(vertices[x*3+0], vertices[x*3+0], vertices[x*3+0]).GetLength();
 	}
-	lAverageRadius /= pVertexCount;
-	if (pType == PhysicsManager::DYNAMIC)
-	{
-		dMass lMass;
-		::dMassSetSphereTotal(&lMass, (dReal)pMass, (dReal)lAverageRadius);
-		lObject->mBodyID = dBodyCreate(mWorldID);
-		::dBodySetMass(lObject->mBodyID, &lMass);
-		::dGeomSetBody(lObject->mGeomID, lObject->mBodyID);
-		::dBodySetAutoDisableDefaults(lObject->mBodyID);
-		::dBodySetAngularDampingThreshold(lObject->mBodyID, 200.0f);
-		::dBodySetAngularDamping(lObject->mBodyID, 0.2f);
+	average_radius /= vertex_count;
+	if (_type == PhysicsManager::kDynamic) {
+		dMass __mass;
+		::dMassSetSphereTotal(&__mass, (dReal)_mass, (dReal)average_radius);
+		_object->body_id_ = dBodyCreate(world_id_);
+		::dBodySetMass(_object->body_id_, &__mass);
+		::dGeomSetBody(_object->geom_id_, _object->body_id_);
+		::dBodySetAutoDisableDefaults(_object->body_id_);
+		::dBodySetAngularDampingThreshold(_object->body_id_, 200.0f);
+		::dBodySetAngularDamping(_object->body_id_, 0.2f);
 	}
 
-	lObject->mGeometryData[0] = lAverageRadius;
-	lObject->mMass = pMass;
-	lObject->mFriction = -pFriction;
-	lObject->mBounce = pBounce;
+	_object->geometry_data_[0] = average_radius;
+	_object->mass_ = _mass;
+	_object->friction_ = -friction;
+	_object->bounce_ = _bounce;
 
-	mObjectTable.insert(lObject);
+	object_table_.insert(_object);
 
-	SetBodyTransform((BodyID)lObject, pTransform);
+	SetBodyTransform((BodyID)_object, transform);
 
-	return (BodyID)lObject;
+	return (BodyID)_object;
 }
 
-bool PhysicsManagerODE::IsStaticBody(BodyID pBodyId) const
-{
-	Object* lObject = (Object*)pBodyId;
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("IsStaticBody() - Body %i is not part of this world!", pBodyId);
+bool PhysicsManagerODE::IsStaticBody(BodyID body_id) const {
+	Object* _object = (Object*)body_id;
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("IsStaticBody() - Body %i is not part of this world!", body_id);
 		return (true);
 	}
-	return (lObject->mBodyID == 0);
+	return (_object->body_id_ == 0);
 }
 
-void PhysicsManagerODE::DeleteBody(BodyID pBodyId)
-{
-	ObjectTable::iterator x = mObjectTable.find((Object*)pBodyId);
-	if (x != mObjectTable.end())
-	{
-		Object* lObject = *x;
-		if (lObject->mBodyID != 0)
-		{
-			::dBodyDestroy(lObject->mBodyID);
+void PhysicsManagerODE::DeleteBody(BodyID body_id) {
+	ObjectTable::iterator x = object_table_.find((Object*)body_id);
+	if (x != object_table_.end()) {
+		Object* _object = *x;
+		if (_object->body_id_ != 0) {
+			::dBodyDestroy(_object->body_id_);
 		}
-		if (lObject->mTriMeshID != 0)
-		{
-			::dGeomTriMeshDataDestroy(lObject->mTriMeshID);
+		if (_object->tri_mesh_id_ != 0) {
+			::dGeomTriMeshDataDestroy(_object->tri_mesh_id_);
 		}
-		::dGeomDestroy(lObject->mGeomID);
-		delete (lObject);
-		mObjectTable.erase(x);
-	}
-	else
-	{
-		mLog.Error("DeleteBody() - Can't find body to delete!");
+		::dGeomDestroy(_object->geom_id_);
+		delete (_object);
+		object_table_.erase(x);
+	} else {
+		log_.Error("DeleteBody() - Can't find body to delete!");
 		deb_assert(false);
 	}
 }
 
-vec3 PhysicsManagerODE::GetBodyPosition(BodyID pBodyId) const
-{
-	Object* lObject = (Object*)pBodyId;
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("GetBodyPosition() - Body %i is not part of this world!", pBodyId);
+vec3 PhysicsManagerODE::GetBodyPosition(BodyID body_id) const {
+	Object* _object = (Object*)body_id;
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("GetBodyPosition() - Body %i is not part of this world!", body_id);
 		return (vec3());
 	}
 
-	const dReal* lPosition = dGeomGetPosition(lObject->mGeomID);
-	return (vec3(lPosition[0], lPosition[1], lPosition[2]));
+	const dReal* _position = dGeomGetPosition(_object->geom_id_);
+	return (vec3(_position[0], _position[1], _position[2]));
 }
 
-void PhysicsManagerODE::SetBodyPosition(BodyID pBodyId, const vec3& pPosition) const
-{
-	Object* lObject = (Object*)pBodyId;
+void PhysicsManagerODE::SetBodyPosition(BodyID body_id, const vec3& position) const {
+	Object* _object = (Object*)body_id;
 
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("SetBodyPosition() - Body %i is not part of this world!", pBodyId);
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("SetBodyPosition() - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	if (lObject->mBodyID)
-	{
-		::dBodySetPosition(lObject->mBodyID, pPosition.x, pPosition.y, pPosition.z);
-		::dBodyEnable(lObject->mBodyID);
-	}
-	else
-	{
-		::dGeomSetPosition(lObject->mGeomID, pPosition.x, pPosition.y, pPosition.z);
+	if (_object->body_id_) {
+		::dBodySetPosition(_object->body_id_, position.x, position.y, position.z);
+		::dBodyEnable(_object->body_id_);
+	} else {
+		::dGeomSetPosition(_object->geom_id_, position.x, position.y, position.z);
 	}
 }
 
-quat PhysicsManagerODE::GetBodyOrientation(BodyID pBodyId) const
-{
-	Object* lObject = (Object*)pBodyId;
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("GetBodyOrientation() - Body %i is not part of this world!", pBodyId);
-		return gIdentityQuaternionF;
+quat PhysicsManagerODE::GetBodyOrientation(BodyID body_id) const {
+	Object* _object = (Object*)body_id;
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("GetBodyOrientation() - Body %i is not part of this world!", body_id);
+		return kIdentityQuaternionF;
 	}
 
-	quat lQuat;
-	::dGeomGetQuaternion(lObject->mGeomID, lQuat.mData);
-	return lQuat;
+	quat __quat;
+	::dGeomGetQuaternion(_object->geom_id_, __quat.data_);
+	return __quat;
 }
 
-void PhysicsManagerODE::SetBodyOrientation(BodyID pBodyId, const quat& pOrientation)
-{
-	Object* lObject = (Object*)pBodyId;
+void PhysicsManagerODE::SetBodyOrientation(BodyID body_id, const quat& orientation) {
+	Object* _object = (Object*)body_id;
 
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("SetBodyOrientation() - Body %i is not part of this world!", pBodyId);
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("SetBodyOrientation() - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	if(lObject->mBodyID)
-	{
-		::dBodySetQuaternion(lObject->mBodyID, pOrientation.mData);
-		::dBodyEnable(lObject->mBodyID);
-	}
-	else
-	{
-		::dGeomSetQuaternion(lObject->mGeomID, pOrientation.mData);
+	if(_object->body_id_) {
+		::dBodySetQuaternion(_object->body_id_, orientation.data_);
+		::dBodyEnable(_object->body_id_);
+	} else {
+		::dGeomSetQuaternion(_object->geom_id_, orientation.data_);
 	}
 }
 
-void PhysicsManagerODE::GetBodyTransform(BodyID pBodyId, xform& pTransform) const
-{
-	Object* lObject = (Object*)pBodyId;
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("GetBodyTransform() - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::GetBodyTransform(BodyID body_id, xform& transform) const {
+	Object* _object = (Object*)body_id;
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("GetBodyTransform() - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	::dGeomCopyPosition(lObject->mGeomID, pTransform.mPosition.mData);
-	::dGeomGetQuaternion(lObject->mGeomID, pTransform.mOrientation.mData);
+	::dGeomCopyPosition(_object->geom_id_, transform.position_.data_);
+	::dGeomGetQuaternion(_object->geom_id_, transform.orientation_.data_);
 }
 
-void PhysicsManagerODE::SetBodyTransform(BodyID pBodyId, const xform& pTransform)
-{
-	Object* lObject = (Object*)pBodyId;
+void PhysicsManagerODE::SetBodyTransform(BodyID body_id, const xform& transform) {
+	Object* _object = (Object*)body_id;
 
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("SetBodyTransform() - Body %i is not part of this world!", pBodyId);
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("SetBodyTransform() - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	const vec3 lPos(pTransform.GetPosition());
-	quat lQuat = pTransform.GetOrientation();
-	dReal lQ[4];
-	lQ[0] = lQuat.a;
-	lQ[1] = lQuat.b;
-	lQ[2] = lQuat.c;
-	lQ[3] = lQuat.d;
-	if(lObject->mBodyID)
-	{
-		::dBodySetPosition(lObject->mBodyID, lPos.x, lPos.y, lPos.z);
-		::dBodySetQuaternion(lObject->mBodyID, lQ);
-		::dBodyEnable(lObject->mBodyID);
-	}
-	else
-	{
-		::dGeomSetPosition(lObject->mGeomID, lPos.x, lPos.y, lPos.z);
-		::dGeomSetQuaternion(lObject->mGeomID, lQ);
+	const vec3 __pos(transform.GetPosition());
+	quat __quat = transform.GetOrientation();
+	dReal __q[4];
+	__q[0] = __quat.a;
+	__q[1] = __quat.b;
+	__q[2] = __quat.c;
+	__q[3] = __quat.d;
+	if(_object->body_id_) {
+		::dBodySetPosition(_object->body_id_, __pos.x, __pos.y, __pos.z);
+		::dBodySetQuaternion(_object->body_id_, __q);
+		::dBodyEnable(_object->body_id_);
+	} else {
+		::dGeomSetPosition(_object->geom_id_, __pos.x, __pos.y, __pos.z);
+		::dGeomSetQuaternion(_object->geom_id_, __q);
 	}
 }
 
-void PhysicsManagerODE::GetBodyVelocity(BodyID pBodyId, vec3& pVelocity) const
-{
-	Object* lObject = (Object*)pBodyId;
-	dBodyID lBodyId = lObject->mBodyID;
-	if (!lBodyId)
-	{
-		lBodyId = lObject->mGeomID->body;
+void PhysicsManagerODE::GetBodyVelocity(BodyID body_id, vec3& velocity) const {
+	Object* _object = (Object*)body_id;
+	dBodyID _body_id = _object->body_id_;
+	if (!_body_id) {
+		_body_id = _object->geom_id_->body;
 	}
-	if (lBodyId)
-	{
-		const dReal* lVelocity = dBodyGetLinearVel(lBodyId);
-		pVelocity.x = lVelocity[0];
-		pVelocity.y = lVelocity[1];
-		pVelocity.z = lVelocity[2];
-	}
-	else
-	{
-		pVelocity.Set(0, 0, 0);
+	if (_body_id) {
+		const dReal* _velocity = dBodyGetLinearVel(_body_id);
+		velocity.x = _velocity[0];
+		velocity.y = _velocity[1];
+		velocity.z = _velocity[2];
+	} else {
+		velocity.Set(0, 0, 0);
 	}
 }
 
-void PhysicsManagerODE::SetBodyVelocity(BodyID pBodyId, const vec3& pVelocity)
-{
-	Object* lObject = (Object*)pBodyId;
-	if(lObject->mBodyID)
-	{
-		::dBodySetLinearVel(lObject->mBodyID, pVelocity.x, pVelocity.y, pVelocity.z);
-		::dBodyEnable(lObject->mBodyID);
+void PhysicsManagerODE::SetBodyVelocity(BodyID body_id, const vec3& velocity) {
+	Object* _object = (Object*)body_id;
+	if(_object->body_id_) {
+		::dBodySetLinearVel(_object->body_id_, velocity.x, velocity.y, velocity.z);
+		::dBodyEnable(_object->body_id_);
 	}
 }
 
-void PhysicsManagerODE::GetBodyForce(BodyID pBodyId, vec3& pAcceleration) const
-{
-	Object* lObject = (Object*)pBodyId;
-	dBodyID lBodyId = lObject->mBodyID;
-	if (!lBodyId)
-	{
-		lBodyId = lObject->mGeomID->body;
+void PhysicsManagerODE::GetBodyForce(BodyID body_id, vec3& acceleration) const {
+	Object* _object = (Object*)body_id;
+	dBodyID _body_id = _object->body_id_;
+	if (!_body_id) {
+		_body_id = _object->geom_id_->body;
 	}
-	if(lBodyId)
-	{
-		const dReal* lAcceleration = dBodyGetForce(lBodyId);
-		pAcceleration.x = lAcceleration[0];
-		pAcceleration.y = lAcceleration[1];
-		pAcceleration.z = lAcceleration[2];
-	}
-	else
-	{
-		pAcceleration.Set(0, 0, 0);
+	if(_body_id) {
+		const dReal* _acceleration = dBodyGetForce(_body_id);
+		acceleration.x = _acceleration[0];
+		acceleration.y = _acceleration[1];
+		acceleration.z = _acceleration[2];
+	} else {
+		acceleration.Set(0, 0, 0);
 	}
 }
 
-void PhysicsManagerODE::SetBodyForce(BodyID pBodyId, const vec3& pAcceleration)
-{
-	Object* lObject = (Object*)pBodyId;
-	if(lObject->mBodyID)
-		dBodySetForce(lObject->mBodyID, pAcceleration.x, pAcceleration.y, pAcceleration.z);
+void PhysicsManagerODE::SetBodyForce(BodyID body_id, const vec3& acceleration) {
+	Object* _object = (Object*)body_id;
+	if(_object->body_id_)
+		dBodySetForce(_object->body_id_, acceleration.x, acceleration.y, acceleration.z);
 }
 
-void PhysicsManagerODE::GetBodyAcceleration(BodyID pBodyId, float pTotalMass, vec3& pAcceleration) const
-{
-	deb_assert(pTotalMass > 0);
-	GetBodyForce(pBodyId, pAcceleration);
-	pAcceleration /= pTotalMass;
+void PhysicsManagerODE::GetBodyAcceleration(BodyID body_id, float total_mass, vec3& acceleration) const {
+	deb_assert(total_mass > 0);
+	GetBodyForce(body_id, acceleration);
+	acceleration /= total_mass;
 }
 
-void PhysicsManagerODE::SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const vec3& pAcceleration)
-{
-	deb_assert(pTotalMass > 0);
-	SetBodyForce(pBodyId, pAcceleration * pTotalMass);
+void PhysicsManagerODE::SetBodyAcceleration(BodyID body_id, float total_mass, const vec3& acceleration) {
+	deb_assert(total_mass > 0);
+	SetBodyForce(body_id, acceleration * total_mass);
 }
 
-void PhysicsManagerODE::GetBodyAngularVelocity(BodyID pBodyId, vec3& pAngularVelocity) const
-{
-	Object* lObject = (Object*)pBodyId;
-	dBodyID lBodyId = lObject->mBodyID;
-	if (!lBodyId)
-	{
-		lBodyId = lObject->mGeomID->body;
+void PhysicsManagerODE::GetBodyAngularVelocity(BodyID body_id, vec3& angular_velocity) const {
+	Object* _object = (Object*)body_id;
+	dBodyID _body_id = _object->body_id_;
+	if (!_body_id) {
+		_body_id = _object->geom_id_->body;
 	}
-	if(lBodyId)
-	{
-		const dReal* lAngularVelocity = ::dBodyGetAngularVel(lBodyId);
-		pAngularVelocity.x = lAngularVelocity[0];
-		pAngularVelocity.y = lAngularVelocity[1];
-		pAngularVelocity.z = lAngularVelocity[2];
-	}
-	else
-	{
-		pAngularVelocity.Set(0, 0, 0);
+	if(_body_id) {
+		const dReal* _angular_velocity = ::dBodyGetAngularVel(_body_id);
+		angular_velocity.x = _angular_velocity[0];
+		angular_velocity.y = _angular_velocity[1];
+		angular_velocity.z = _angular_velocity[2];
+	} else {
+		angular_velocity.Set(0, 0, 0);
 	}
 }
 
-void PhysicsManagerODE::SetBodyAngularVelocity(BodyID pBodyId, const vec3& pAngularVelocity)
-{
-	Object* lObject = (Object*)pBodyId;
-	if(lObject->mBodyID)
-	{
-		::dBodySetAngularVel(lObject->mBodyID, pAngularVelocity.x, pAngularVelocity.y, pAngularVelocity.z);
+void PhysicsManagerODE::SetBodyAngularVelocity(BodyID body_id, const vec3& angular_velocity) {
+	Object* _object = (Object*)body_id;
+	if(_object->body_id_) {
+		::dBodySetAngularVel(_object->body_id_, angular_velocity.x, angular_velocity.y, angular_velocity.z);
 	}
 }
 
-void PhysicsManagerODE::GetBodyTorque(BodyID pBodyId, vec3& pAngularAcceleration) const
-{
-	Object* lObject = (Object*)pBodyId;
-	dBodyID lBodyId = lObject->mBodyID;
-	if (!lBodyId)
-	{
-		lBodyId = lObject->mGeomID->body;
+void PhysicsManagerODE::GetBodyTorque(BodyID body_id, vec3& angular_acceleration) const {
+	Object* _object = (Object*)body_id;
+	dBodyID _body_id = _object->body_id_;
+	if (!_body_id) {
+		_body_id = _object->geom_id_->body;
 	}
-	if(lBodyId)
-	{
-		const dReal* lAngularAcceleration = dBodyGetTorque(lBodyId);
-		pAngularAcceleration.x = lAngularAcceleration[0];
-		pAngularAcceleration.y = lAngularAcceleration[1];
-		pAngularAcceleration.z = lAngularAcceleration[2];
-	}
-	else
-	{
-		pAngularAcceleration.Set(0, 0, 0);
+	if(_body_id) {
+		const dReal* _angular_acceleration = dBodyGetTorque(_body_id);
+		angular_acceleration.x = _angular_acceleration[0];
+		angular_acceleration.y = _angular_acceleration[1];
+		angular_acceleration.z = _angular_acceleration[2];
+	} else {
+		angular_acceleration.Set(0, 0, 0);
 	}
 }
 
-void PhysicsManagerODE::SetBodyTorque(BodyID pBodyId, const vec3& pAngularAcceleration)
-{
-	Object* lObject = (Object*)pBodyId;
-	if(lObject->mBodyID)
-	{
-		::dBodySetTorque(lObject->mBodyID, pAngularAcceleration.x, pAngularAcceleration.y, pAngularAcceleration.z);
+void PhysicsManagerODE::SetBodyTorque(BodyID body_id, const vec3& angular_acceleration) {
+	Object* _object = (Object*)body_id;
+	if(_object->body_id_) {
+		::dBodySetTorque(_object->body_id_, angular_acceleration.x, angular_acceleration.y, angular_acceleration.z);
 	}
 }
 
-void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, vec3& pAngularAcceleration) const
-{
-	GetBodyTorque(pBodyId, pAngularAcceleration);
+void PhysicsManagerODE::GetBodyAngularAcceleration(BodyID body_id, float total_mass, vec3& angular_acceleration) const {
+	GetBodyTorque(body_id, angular_acceleration);
 	// TODO: handle moment of inertia?
-	pAngularAcceleration /= pTotalMass;
+	angular_acceleration /= total_mass;
 }
 
-void PhysicsManagerODE::SetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, const vec3& pAngularAcceleration)
-{
+void PhysicsManagerODE::SetBodyAngularAcceleration(BodyID body_id, float total_mass, const vec3& angular_acceleration) {
 	// TODO: handle moment of inertia?
-	SetBodyTorque(pBodyId, pAngularAcceleration * pTotalMass);
+	SetBodyTorque(body_id, angular_acceleration * total_mass);
 }
 
-float PhysicsManagerODE::GetBodyMass(BodyID pBodyId)
-{
-	Object* lObject = (Object*)pBodyId;
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("GetBodyMass() - Body %i is not part of this world!", pBodyId);
+float PhysicsManagerODE::GetBodyMass(BodyID body_id) {
+	Object* _object = (Object*)body_id;
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("GetBodyMass() - Body %i is not part of this world!", body_id);
 		return (0);
 	}
-	return (lObject->mMass);
+	return (_object->mass_);
 }
 
-void PhysicsManagerODE::SetBodyMass(BodyID pBodyId, float pMass)
-{
-	Object* lObject = (Object*)pBodyId;
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("SetBodyMass() - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::SetBodyMass(BodyID body_id, float _mass) {
+	Object* _object = (Object*)body_id;
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("SetBodyMass() - Body %i is not part of this world!", body_id);
 		return;
 	}
-	if (!lObject->mBodyID || pMass <= 0)
-	{
-		mLog.Errorf("SetBodyMass() - body %i is static or mass %f is not greater than zero!", pBodyId, pMass);
+	if (!_object->body_id_ || _mass <= 0) {
+		log_.Errorf("SetBodyMass() - body %i is static or mass %f is not greater than zero!", body_id, _mass);
 		return;
 	}
-	lObject->mMass = pMass;
-	dMass lMass;
-	lMass.setSphereTotal(lObject->mMass, lObject->mGeometryData[0]);
-	::dBodySetMass(lObject->mBodyID, &lMass);
+	_object->mass_ = _mass;
+	dMass __mass;
+	__mass.setSphereTotal(_object->mass_, _object->geometry_data_[0]);
+	::dBodySetMass(_object->body_id_, &__mass);
 }
 
-void PhysicsManagerODE::MassAdjustBody(BodyID pBodyId)
-{
-	Object* lObject = (Object*)pBodyId;
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("MassAdjustBody() - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::MassAdjustBody(BodyID body_id) {
+	Object* _object = (Object*)body_id;
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("MassAdjustBody() - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	dBodyID lBody = lObject->mBodyID;
-	if (!lBody)
-	{
+	dBodyID __body = _object->body_id_;
+	if (!__body) {
 		//mLog.Warningf("MassAdjustBody( - static geometry %i does not have a body!"), pBodyId);
 		return;
 	}
 	// Move geometries and body to center of mass.
 	dMass m;
-	::dBodyGetMass(lBody, &m);
-	if (m.c[0] != 0 || m.c[1] != 0 || m.c[2] != 0)
-	{
-		for (dGeomID lGeometry = lBody->geom; lGeometry; lGeometry = lGeometry->body_next)
-		{
-			const dReal* g = ::dGeomGetOffsetPosition(lGeometry);
-			::dGeomSetOffsetPosition(lGeometry, g[0]-m.c[0], g[1]-m.c[1], g[2]-m.c[2]);
+	::dBodyGetMass(__body, &m);
+	if (m.c[0] != 0 || m.c[1] != 0 || m.c[2] != 0) {
+		for (dGeomID geometry = __body->geom; geometry; geometry = geometry->body_next) {
+			const dReal* g = ::dGeomGetOffsetPosition(geometry);
+			::dGeomSetOffsetPosition(geometry, g[0]-m.c[0], g[1]-m.c[1], g[2]-m.c[2]);
 		}
-		const dReal* p = ::dBodyGetPosition(lBody);
-		::dBodySetPosition(lBody, p[0]-m.c[0], p[1]-m.c[1], p[2]-m.c[2]);
+		const dReal* p = ::dBodyGetPosition(__body);
+		::dBodySetPosition(__body, p[0]-m.c[0], p[1]-m.c[1], p[2]-m.c[2]);
 		::dMassTranslate(&m, -m.c[0], -m.c[1], -m.c[2]);
-		::dBodySetMass(lBody, &m);
+		::dBodySetMass(__body, &m);
 	}
 }
 
-void PhysicsManagerODE::SetBodyData(BodyID pBodyId, void* pUserData)
-{
-	Object* lObject = (Object*)pBodyId;
+void PhysicsManagerODE::SetBodyData(BodyID body_id, void* user_data) {
+	Object* _object = (Object*)body_id;
 
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("SetBodyData() - Body %i is not part of this world!", pBodyId);
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("SetBodyData() - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	lObject->mUserData = pUserData;
+	_object->user_data_ = user_data;
 }
 
-void* PhysicsManagerODE::GetBodyData(BodyID pBodyId)
-{
-	Object* lObject = (Object*)pBodyId;
+void* PhysicsManagerODE::GetBodyData(BodyID body_id) {
+	Object* _object = (Object*)body_id;
 
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("GetBodyData() - Body %i is not part of this world!", pBodyId);
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("GetBodyData() - Body %i is not part of this world!", body_id);
 		return 0;
 	}
 
-	return lObject->mUserData;
+	return _object->user_data_;
 }
 
 
-int PhysicsManagerODE::GetTriggerListenerId(BodyID pTrigger)
-{
-	Object* lObject = (Object*)pTrigger;
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("GetForceFeedbackListenerId() - trigger %i is not part of this world!", pTrigger);
+int PhysicsManagerODE::GetTriggerListenerId(BodyID trigger) {
+	Object* _object = (Object*)trigger;
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("GetForceFeedbackListenerId() - trigger %i is not part of this world!", trigger);
 		return (0);
 	}
-	return (lObject->mTriggerListenerId);
+	return (_object->trigger_listener_id_);
 }
 
-int PhysicsManagerODE::GetForceFeedbackListenerId(BodyID pBody)
-{
-	Object* lObject = (Object*)pBody;
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("GetForceFeedbackListenerId() - Body %i is not part of this world!", pBody);
+int PhysicsManagerODE::GetForceFeedbackListenerId(BodyID _body) {
+	Object* _object = (Object*)_body;
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("GetForceFeedbackListenerId() - Body %i is not part of this world!", _body);
 		return (0);
 	}
-	return (lObject->mForceFeedbackId);
+	return (_object->force_feedback_id_);
 }
 
-void PhysicsManagerODE::SetForceFeedbackListener(BodyID pBody, int pForceFeedbackId)
-{
-	Object* lObject = (Object*)pBody;
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("SetForceFeedbackListener - Body %i is not part of this world!", pBody);
+void PhysicsManagerODE::SetForceFeedbackListener(BodyID _body, int force_feedback_id) {
+	Object* _object = (Object*)_body;
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("SetForceFeedbackListener - Body %i is not part of this world!", _body);
 		return;
 	}
-	lObject->mForceFeedbackId = pForceFeedbackId;
+	_object->force_feedback_id_ = force_feedback_id;
 }
 
-PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID pBody1, BodyID pBody2, const vec3& pAnchorPos)
-{
-	Object* lObject1;
-	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateBallJoint") == false)
+PhysicsManager::JointID PhysicsManagerODE::CreateBallJoint(BodyID body1, BodyID body2, const vec3& anchor_pos) {
+	Object* _object1;
+	Object* _object2;
+	if (CheckBodies(body1, body2, _object1, _object2, "CreateBallJoint") == false)
 		return INVALID_JOINT;
 
-	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
-	lJointInfo->mJointID = dJointCreateBall(mWorldID, 0);
-	lJointInfo->mType = JOINT_BALL;
-	lJointInfo->mBody1Id = pBody1;
-	lJointInfo->mBody2Id = pBody2;
-	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
-	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
+	JointInfo* _joint_info = joint_info_allocator_.Alloc();
+	_joint_info->joint_id_ = dJointCreateBall(world_id_, 0);
+	_joint_info->type_ = kJointBall;
+	_joint_info->body1_id_ = body1;
+	_joint_info->body2_id_ = body2;
+	_joint_info->listener_id1_ = _object1->force_feedback_id_;
+	_joint_info->listener_id2_ = _object2->force_feedback_id_;
 
-	lObject1->mHasMassChildren = true;
-	if (lObject2 != 0)
-	{
-		lObject2->mHasMassChildren = true;
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
-		//::dBodySetLinearDampingThreshold(lObject2->mBodyID, 30.0f);
-		//::dBodySetLinearDamping(lObject2->mBodyID, 0.95f);
-		::dBodySetAngularDampingThreshold(lObject2->mBodyID, 10.0f);
-		::dBodySetAngularDamping(lObject2->mBodyID, 0.97f);
-		::dBodySetMaxAngularSpeed(lObject2->mBodyID, 20.0f);
-	}
-	else
-	{
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
-		::dBodySetAngularDampingThreshold(lObject2->mBodyID, 15.0f);
-		::dBodySetAngularDamping(lObject2->mBodyID, 0.97f);
-		::dBodySetMaxAngularSpeed(lObject2->mBodyID, 30.0f);
+	_object1->has_mass_children_ = true;
+	if (_object2 != 0) {
+		_object2->has_mass_children_ = true;
+		dJointAttach(_joint_info->joint_id_, _object1->body_id_, _object2->body_id_);
+		//::dBodySetLinearDampingThreshold(_object2->body_id_, 30.0f);
+		//::dBodySetLinearDamping(_object2->body_id_, 0.95f);
+		::dBodySetAngularDampingThreshold(_object2->body_id_, 10.0f);
+		::dBodySetAngularDamping(_object2->body_id_, 0.97f);
+		::dBodySetMaxAngularSpeed(_object2->body_id_, 20.0f);
+	} else {
+		dJointAttach(_joint_info->joint_id_, _object1->body_id_, 0);
+		::dBodySetAngularDampingThreshold(_object2->body_id_, 15.0f);
+		::dBodySetAngularDamping(_object2->body_id_, 0.97f);
+		::dBodySetMaxAngularSpeed(_object2->body_id_, 30.0f);
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
-	{
-		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
+	/*if ((_object1 != 0 && _object1->force_feedback_id_ != 0) ||
+	   (_object2 != 0 && _object2->force_feedback_id_ != 0)) {
+		dJointSetFeedback(_joint_info->joint_id_, &_joint_info->feedback_);
 	}*/
 
-	dJointSetBallAnchor(lJointInfo->mJointID, pAnchorPos.x, pAnchorPos.y, pAnchorPos.z);
+	dJointSetBallAnchor(_joint_info->joint_id_, anchor_pos.x, anchor_pos.y, anchor_pos.z);
 
-	mJointTable.insert(lJointInfo);
-	return (JointID)lJointInfo;
+	joint_table_.insert(_joint_info);
+	return (JointID)_joint_info;
 }
 
-PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID pBody1, BodyID pBody2, 
-	const vec3& pAnchorPos, const vec3& pAxis)
-{
-	Object* lObject1;
-	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateHingeJoint") == false)
+PhysicsManager::JointID PhysicsManagerODE::CreateHingeJoint(BodyID body1, BodyID body2,
+	const vec3& anchor_pos, const vec3& axis) {
+	Object* _object1;
+	Object* _object2;
+	if (CheckBodies(body1, body2, _object1, _object2, "CreateHingeJoint") == false)
 		return INVALID_JOINT;
 
-	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
-	lJointInfo->mJointID = dJointCreateHinge(mWorldID, 0);
-	lJointInfo->mType = JOINT_HINGE;
-	lJointInfo->mBody1Id = pBody1;
-	lJointInfo->mBody2Id = pBody2;
-	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
-	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
+	JointInfo* _joint_info = joint_info_allocator_.Alloc();
+	_joint_info->joint_id_ = dJointCreateHinge(world_id_, 0);
+	_joint_info->type_ = kJointHinge;
+	_joint_info->body1_id_ = body1;
+	_joint_info->body2_id_ = body2;
+	_joint_info->listener_id1_ = _object1->force_feedback_id_;
+	_joint_info->listener_id2_ = _object2->force_feedback_id_;
 
-	lObject1->mHasMassChildren = true;
-	if (lObject2 != 0)
-	{
-		lObject2->mHasMassChildren = true;
-		dJointAttach(lJointInfo->mJointID, lObject1->mGeomID->body, lObject2->mGeomID->body);
+	_object1->has_mass_children_ = true;
+	if (_object2 != 0) {
+		_object2->has_mass_children_ = true;
+		dJointAttach(_joint_info->joint_id_, _object1->geom_id_->body, _object2->geom_id_->body);
 
-		if (lObject2->mGeomID->type == dBoxClass)
-		{
+		if (_object2->geom_id_->type == dBoxClass) {
 			// Someone is attaching a revolving box to another dynamic object. That means that we
 			// potentially could crash into something hard, causing overflow in the physics stepper.
 			// We eliminate by making the 2nd body use a pretty limited maximum angular speed. However,
 			// we raise the angular damping threshold to avoid limiting engine power for these high-
 			// rotation/low torque engines (usually rotor or similar).
-			::dBodySetMaxAngularSpeed(lObject2->mBodyID, 50.0f);
-			::dBodySetAngularDampingThreshold(lObject2->mBodyID, 55.0f);
-			lObject2->mIsRotational = true;
+			::dBodySetMaxAngularSpeed(_object2->body_id_, 50.0f);
+			::dBodySetAngularDampingThreshold(_object2->body_id_, 55.0f);
+			_object2->is_rotational_ = true;
 		}
-	}
-	else
-	{
-		dJointAttach(lJointInfo->mJointID, lObject1->mGeomID->body, 0);
-		lObject1->mIsRotational = true;
+	} else {
+		dJointAttach(_joint_info->joint_id_, _object1->geom_id_->body, 0);
+		_object1->is_rotational_ = true;
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
-	{
-		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
+	/*if ((_object1 != 0 && _object1->force_feedback_id_ != 0) ||
+	   (_object2 != 0 && _object2->force_feedback_id_ != 0)) {
+		dJointSetFeedback(_joint_info->joint_id_, &_joint_info->feedback_);
 	}*/
 
-	dJointSetHingeAnchor(lJointInfo->mJointID, pAnchorPos.x, pAnchorPos.y, pAnchorPos.z);
-	dJointSetHingeAxis(lJointInfo->mJointID, pAxis.x, pAxis.y, pAxis.z);
+	dJointSetHingeAnchor(_joint_info->joint_id_, anchor_pos.x, anchor_pos.y, anchor_pos.z);
+	dJointSetHingeAxis(_joint_info->joint_id_, axis.x, axis.y, axis.z);
 
-	mJointTable.insert(lJointInfo);
-	return (JointID)lJointInfo;
+	joint_table_.insert(_joint_info);
+	return (JointID)_joint_info;
 }
 
-PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID pBody1, BodyID pBody2,
-	const vec3& pAnchorPos, const vec3& pAxis1,
-	const vec3& pAxis2)
-{
-	Object* lObject1;
-	Object* lObject2;
-	if (CheckBodies2(pBody1, pBody2, lObject1, lObject2, "CreateHinge2Joint") == false)
+PhysicsManager::JointID PhysicsManagerODE::CreateHinge2Joint(BodyID body1, BodyID body2,
+	const vec3& anchor_pos, const vec3& axis1,
+	const vec3& axis2) {
+	Object* _object1;
+	Object* _object2;
+	if (CheckBodies2(body1, body2, _object1, _object2, "CreateHinge2Joint") == false)
 		return INVALID_JOINT;
 
-	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
-	lJointInfo->mJointID = dJointCreateHinge2(mWorldID, 0);
-	lJointInfo->mType = JOINT_HINGE2;
-	lJointInfo->mBody1Id = pBody1;
-	lJointInfo->mBody2Id = pBody2;
-	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
-	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
+	JointInfo* _joint_info = joint_info_allocator_.Alloc();
+	_joint_info->joint_id_ = dJointCreateHinge2(world_id_, 0);
+	_joint_info->type_ = kJointHinge2;
+	_joint_info->body1_id_ = body1;
+	_joint_info->body2_id_ = body2;
+	_joint_info->listener_id1_ = _object1->force_feedback_id_;
+	_joint_info->listener_id2_ = _object2->force_feedback_id_;
 
-	dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
+	dJointAttach(_joint_info->joint_id_, _object1->body_id_, _object2->body_id_);
 
-	lObject1->mHasMassChildren = true;
-	lObject2->mHasMassChildren = true;
-	lObject2->mIsRotational = true;
-	/*if (lObject1->mForceFeedbackId != 0 || 
-	   lObject2->mForceFeedbackId != 0)
-	{
-		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
+	_object1->has_mass_children_ = true;
+	_object2->has_mass_children_ = true;
+	_object2->is_rotational_ = true;
+	/*if (_object1->force_feedback_id_ != 0 ||
+	   _object2->force_feedback_id_ != 0) {
+		dJointSetFeedback(_joint_info->joint_id_, &_joint_info->feedback_);
 	}*/
 
-	dJointSetHinge2Anchor(lJointInfo->mJointID, pAnchorPos.x, pAnchorPos.y, pAnchorPos.z);
-	dJointSetHinge2Axis1(lJointInfo->mJointID, pAxis1.x, pAxis1.y, pAxis1.z);
-	dJointSetHinge2Axis2(lJointInfo->mJointID, pAxis2.x, pAxis2.y, pAxis2.z);
+	dJointSetHinge2Anchor(_joint_info->joint_id_, anchor_pos.x, anchor_pos.y, anchor_pos.z);
+	dJointSetHinge2Axis1(_joint_info->joint_id_, axis1.x, axis1.y, axis1.z);
+	dJointSetHinge2Axis2(_joint_info->joint_id_, axis2.x, axis2.y, axis2.z);
 
-	mJointTable.insert(lJointInfo);
-	return (JointID)lJointInfo;
+	joint_table_.insert(_joint_info);
+	return (JointID)_joint_info;
 }
 
-PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID pBody1, BodyID pBody2,
-	const vec3& pAnchorPos, const vec3& pAxis1,
-	const vec3& pAxis2)
-{
-	Object* lObject1;
-	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateUniversalJoint") == false)
+PhysicsManager::JointID PhysicsManagerODE::CreateUniversalJoint(BodyID body1, BodyID body2,
+	const vec3& anchor_pos, const vec3& axis1,
+	const vec3& axis2) {
+	Object* _object1;
+	Object* _object2;
+	if (CheckBodies(body1, body2, _object1, _object2, "CreateUniversalJoint") == false)
 		return INVALID_JOINT;
 
-	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
-	lJointInfo->mJointID = ::dJointCreateUniversal(mWorldID, 0);
-	lJointInfo->mType = JOINT_UNIVERSAL;
-	lJointInfo->mBody1Id = pBody1;
-	lJointInfo->mBody2Id = pBody2;
-	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
-	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
+	JointInfo* _joint_info = joint_info_allocator_.Alloc();
+	_joint_info->joint_id_ = ::dJointCreateUniversal(world_id_, 0);
+	_joint_info->type_ = kJointUniversal;
+	_joint_info->body1_id_ = body1;
+	_joint_info->body2_id_ = body2;
+	_joint_info->listener_id1_ = _object1->force_feedback_id_;
+	_joint_info->listener_id2_ = _object2->force_feedback_id_;
 
-	lObject1->mHasMassChildren = true;
-	if (lObject2 != 0)
-	{
-		lObject2->mHasMassChildren = true;
-		::dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
-	}
-	else
-	{
-		::dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
+	_object1->has_mass_children_ = true;
+	if (_object2 != 0) {
+		_object2->has_mass_children_ = true;
+		::dJointAttach(_joint_info->joint_id_, _object1->body_id_, _object2->body_id_);
+	} else {
+		::dJointAttach(_joint_info->joint_id_, _object1->body_id_, 0);
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
-	{
-		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
+	/*if ((_object1 != 0 && _object1->force_feedback_id_ != 0) ||
+	   (_object2 != 0 && _object2->force_feedback_id_ != 0)) {
+		dJointSetFeedback(_joint_info->joint_id_, &_joint_info->feedback_);
 	}*/
 
-	::dJointSetUniversalAnchor(lJointInfo->mJointID, pAnchorPos.x, pAnchorPos.y, pAnchorPos.z);
-	::dJointSetUniversalAxis1(lJointInfo->mJointID, pAxis1.x, pAxis1.y, pAxis1.z);
-	::dJointSetUniversalAxis2(lJointInfo->mJointID, pAxis2.x, pAxis2.y, pAxis2.z);
+	::dJointSetUniversalAnchor(_joint_info->joint_id_, anchor_pos.x, anchor_pos.y, anchor_pos.z);
+	::dJointSetUniversalAxis1(_joint_info->joint_id_, axis1.x, axis1.y, axis1.z);
+	::dJointSetUniversalAxis2(_joint_info->joint_id_, axis2.x, axis2.y, axis2.z);
 
-	mJointTable.insert(lJointInfo);
-	return (JointID)lJointInfo;
+	joint_table_.insert(_joint_info);
+	return (JointID)_joint_info;
 }
 
-PhysicsManager::JointID PhysicsManagerODE::CreateSliderJoint(BodyID pBody1, BodyID pBody2,
-	const vec3& pAxis)
-{
-	Object* lObject1;
-	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateSliderJoint") == false)
+PhysicsManager::JointID PhysicsManagerODE::CreateSliderJoint(BodyID body1, BodyID body2,
+	const vec3& axis) {
+	Object* _object1;
+	Object* _object2;
+	if (CheckBodies(body1, body2, _object1, _object2, "CreateSliderJoint") == false)
 		return INVALID_JOINT;
 
-	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
-	lJointInfo->mJointID = dJointCreateSlider(mWorldID, 0);
-	lJointInfo->mType = JOINT_SLIDER;
-	lJointInfo->mBody1Id = pBody1;
-	lJointInfo->mBody2Id = pBody2;
-	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
-	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
+	JointInfo* _joint_info = joint_info_allocator_.Alloc();
+	_joint_info->joint_id_ = dJointCreateSlider(world_id_, 0);
+	_joint_info->type_ = kJointSlider;
+	_joint_info->body1_id_ = body1;
+	_joint_info->body2_id_ = body2;
+	_joint_info->listener_id1_ = _object1->force_feedback_id_;
+	_joint_info->listener_id2_ = _object2->force_feedback_id_;
 
-	lObject1->mHasMassChildren = true;
-	if (lObject2 != 0)
-	{
-		lObject2->mHasMassChildren = true;
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
-	}
-	else
-	{
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
+	_object1->has_mass_children_ = true;
+	if (_object2 != 0) {
+		_object2->has_mass_children_ = true;
+		dJointAttach(_joint_info->joint_id_, _object1->body_id_, _object2->body_id_);
+	} else {
+		dJointAttach(_joint_info->joint_id_, _object1->body_id_, 0);
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
-	{
-		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
+	/*if ((_object1 != 0 && _object1->force_feedback_id_ != 0) ||
+	   (_object2 != 0 && _object2->force_feedback_id_ != 0)) {
+		dJointSetFeedback(_joint_info->joint_id_, &_joint_info->feedback_);
 	}*/
 
-	dJointSetSliderAxis(lJointInfo->mJointID, pAxis.x, pAxis.y, pAxis.z);
+	dJointSetSliderAxis(_joint_info->joint_id_, axis.x, axis.y, axis.z);
 
-	mJointTable.insert(lJointInfo);
-	return (JointID)lJointInfo;
+	joint_table_.insert(_joint_info);
+	return (JointID)_joint_info;
 }
 
-PhysicsManager::JointID PhysicsManagerODE::CreateFixedJoint(BodyID pBody1, BodyID pBody2)
-{
-	Object* lObject1;
-	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateFixedJoint") == false)
+PhysicsManager::JointID PhysicsManagerODE::CreateFixedJoint(BodyID body1, BodyID body2) {
+	Object* _object1;
+	Object* _object2;
+	if (CheckBodies(body1, body2, _object1, _object2, "CreateFixedJoint") == false)
 		return INVALID_JOINT;
 
-	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
-	lJointInfo->mJointID = dJointCreateFixed(mWorldID, 0);
-	lJointInfo->mType = JOINT_FIXED;
-	lJointInfo->mBody1Id = pBody1;
-	lJointInfo->mBody2Id = pBody2;
-	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
-	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
+	JointInfo* _joint_info = joint_info_allocator_.Alloc();
+	_joint_info->joint_id_ = dJointCreateFixed(world_id_, 0);
+	_joint_info->type_ = kJointFixed;
+	_joint_info->body1_id_ = body1;
+	_joint_info->body2_id_ = body2;
+	_joint_info->listener_id1_ = _object1->force_feedback_id_;
+	_joint_info->listener_id2_ = _object2->force_feedback_id_;
 
-	lObject1->mHasMassChildren = true;
-	if (lObject2 != 0)
-	{
-		lObject2->mHasMassChildren = true;
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
-	}
-	else
-	{
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
+	_object1->has_mass_children_ = true;
+	if (_object2 != 0) {
+		_object2->has_mass_children_ = true;
+		dJointAttach(_joint_info->joint_id_, _object1->body_id_, _object2->body_id_);
+	} else {
+		dJointAttach(_joint_info->joint_id_, _object1->body_id_, 0);
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
-	{
-		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
+	/*if ((_object1 != 0 && _object1->force_feedback_id_ != 0) ||
+	   (_object2 != 0 && _object2->force_feedback_id_ != 0)) {
+		dJointSetFeedback(_joint_info->joint_id_, &_joint_info->feedback_);
 	}*/
 
-	mJointTable.insert(lJointInfo);
-	return (JointID)lJointInfo;
+	joint_table_.insert(_joint_info);
+	return (JointID)_joint_info;
 }
 
-PhysicsManager::JointID PhysicsManagerODE::CreateAngularMotorJoint(BodyID pBody1, BodyID pBody2,
-	const vec3& pAxis)
-{
-	Object* lObject1;
-	Object* lObject2;
-	if (CheckBodies(pBody1, pBody2, lObject1, lObject2, "CreateAngularMotorJoint") == false)
+PhysicsManager::JointID PhysicsManagerODE::CreateAngularMotorJoint(BodyID body1, BodyID body2,
+	const vec3& axis) {
+	Object* _object1;
+	Object* _object2;
+	if (CheckBodies(body1, body2, _object1, _object2, "CreateAngularMotorJoint") == false)
 		return INVALID_JOINT;
 
-	JointInfo* lJointInfo = mJointInfoAllocator.Alloc();
-	lJointInfo->mJointID = dJointCreateAMotor(mWorldID, 0);
-	lJointInfo->mType = JOINT_ANGULARMOTOR;
-	lJointInfo->mBody1Id = pBody1;
-	lJointInfo->mBody2Id = pBody2;
-	lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
-	lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
+	JointInfo* _joint_info = joint_info_allocator_.Alloc();
+	_joint_info->joint_id_ = dJointCreateAMotor(world_id_, 0);
+	_joint_info->type_ = kJointAngularmotor;
+	_joint_info->body1_id_ = body1;
+	_joint_info->body2_id_ = body2;
+	_joint_info->listener_id1_ = _object1->force_feedback_id_;
+	_joint_info->listener_id2_ = _object2->force_feedback_id_;
 
-	lObject1->mHasMassChildren = true;
-	if (lObject2 != 0)
-	{
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, lObject2->mBodyID);
-		lObject2->mHasMassChildren = true;
-		lObject2->mIsRotational = true;
-	}
-	else
-	{
-		dJointAttach(lJointInfo->mJointID, lObject1->mBodyID, 0);
-		lObject1->mIsRotational = true;
+	_object1->has_mass_children_ = true;
+	if (_object2 != 0) {
+		dJointAttach(_joint_info->joint_id_, _object1->body_id_, _object2->body_id_);
+		_object2->has_mass_children_ = true;
+		_object2->is_rotational_ = true;
+	} else {
+		dJointAttach(_joint_info->joint_id_, _object1->body_id_, 0);
+		_object1->is_rotational_ = true;
 	}
 
-	/*if ((lObject1 != 0 && lObject1->mForceFeedbackId != 0) || 
-	   (lObject2 != 0 && lObject2->mForceFeedbackId != 0))
-	{
-		dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
+	/*if ((_object1 != 0 && _object1->force_feedback_id_ != 0) ||
+	   (_object2 != 0 && _object2->force_feedback_id_ != 0)) {
+		dJointSetFeedback(_joint_info->joint_id_, &_joint_info->feedback_);
 	}*/
 
-	dJointSetAMotorMode(lJointInfo->mJointID, dAMotorUser);
-	dJointSetAMotorNumAxes(lJointInfo->mJointID, 1);
+	dJointSetAMotorMode(_joint_info->joint_id_, dAMotorUser);
+	dJointSetAMotorNumAxes(_joint_info->joint_id_, 1);
 
 	// Set axis 0, relative to body 1.
-	dJointSetAMotorAxis(lJointInfo->mJointID, 0, 1, pAxis.x, pAxis.y, pAxis.z);
+	dJointSetAMotorAxis(_joint_info->joint_id_, 0, 1, axis.x, axis.y, axis.z);
 
-	mJointTable.insert(lJointInfo);
-	return (JointID)lJointInfo;
+	joint_table_.insert(_joint_info);
+	return (JointID)_joint_info;
 }
 
-void PhysicsManagerODE::DeleteJoint(JointID pJointId)
-{
-	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	dJointDestroy(lJointInfo->mJointID);
-	RemoveJoint(lJointInfo);
+void PhysicsManagerODE::DeleteJoint(JointID joint_id) {
+	JointInfo* _joint_info = (JointInfo*)joint_id;
+	dJointDestroy(_joint_info->joint_id_);
+	RemoveJoint(_joint_info);
 
-	Object* lObject1;
-	Object* lObject2;
-	if (lJointInfo->mBody1Id && CheckBodies(lJointInfo->mBody1Id, lJointInfo->mBody2Id, lObject1, lObject2, "DeleteJoint"))
-	{
-		if (lObject2)
-		{
-			lObject2->mIsRotational = false;
-		}
-		else
-		{
-			lObject1->mIsRotational = false;
+	Object* _object1;
+	Object* _object2;
+	if (_joint_info->body1_id_ && CheckBodies(_joint_info->body1_id_, _joint_info->body2_id_, _object1, _object2, "DeleteJoint")) {
+		if (_object2) {
+			_object2->is_rotational_ = false;
+		} else {
+			_object1->is_rotational_ = false;
 		}
 	}
 }
 
-bool PhysicsManagerODE::StabilizeJoint(JointID pJointId)
-{
-	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Warningf("Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::StabilizeJoint(JointID joint_id) {
+	JointTable::iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Warningf("Couldn't find joint %i!", joint_id);
 		return (false);
 	}
-	bool lOk = false;
-	JointInfo* lJointInfo = *x;
-	switch (lJointInfo->mType)
-	{
-		case JOINT_BALL:
-		{
-			dVector3 lAnchor;
-			::dJointGetBallAnchor(lJointInfo->mJointID, lAnchor);
-			dVector3 lAnchor2;
-			::dJointGetBallAnchor2(lJointInfo->mJointID, lAnchor2);
-			dxBody* lChildBody = lJointInfo->mJointID->node[1].body;
-			if (!lChildBody)
-			{
-				lChildBody = lJointInfo->mJointID->node[0].body;
+	bool ok = false;
+	JointInfo* _joint_info = *x;
+	switch (_joint_info->type_) {
+		case kJointBall: {
+			dVector3 anchor;
+			::dJointGetBallAnchor(_joint_info->joint_id_, anchor);
+			dVector3 __anchor2;
+			::dJointGetBallAnchor2(_joint_info->joint_id_, __anchor2);
+			dxBody* child_body = _joint_info->joint_id_->node[1].body;
+			if (!child_body) {
+				child_body = _joint_info->joint_id_->node[0].body;
 			}
-			const dReal* lPos = ::dBodyGetPosition(lChildBody);
-			lAnchor[0] = lPos[0] + lAnchor[0] - lAnchor2[0];
-			lAnchor[1] = lPos[1] + lAnchor[1] - lAnchor2[1];
-			lAnchor[2] = lPos[2] + lAnchor[2] - lAnchor2[2];
-			::dBodySetPosition(lChildBody, lAnchor[0], lAnchor[1], lAnchor[2]);
-			const dReal* lVel = ::dBodyGetLinearVel(lChildBody);
-			if (::fabs(lVel[0]) > 50 || ::fabs(lVel[1]) > 50 || ::fabs(lVel[2]) > 50)
-			{
-				::dBodySetLinearVel(lChildBody, 0, 0, 0);
-				::dBodySetAngularVel(lChildBody, 0, 0, 0);
+			const dReal* __pos = ::dBodyGetPosition(child_body);
+			anchor[0] = __pos[0] + anchor[0] - __anchor2[0];
+			anchor[1] = __pos[1] + anchor[1] - __anchor2[1];
+			anchor[2] = __pos[2] + anchor[2] - __anchor2[2];
+			::dBodySetPosition(child_body, anchor[0], anchor[1], anchor[2]);
+			const dReal* vel = ::dBodyGetLinearVel(child_body);
+			if (::fabs(vel[0]) > 50 || ::fabs(vel[1]) > 50 || ::fabs(vel[2]) > 50) {
+				::dBodySetLinearVel(child_body, 0, 0, 0);
+				::dBodySetAngularVel(child_body, 0, 0, 0);
 			}
-		}
-		break;
-		default:
-		{
-			mLog.Errorf("Joint type %i of non-1-type!", lJointInfo->mType);
+		} break;
+		default: {
+			log_.Errorf("Joint type %i of non-1-type!", _joint_info->type_);
 			deb_assert(false);
-		}
-		break;
+		} break;
 	}
-	return (lOk);
+	return (ok);
 }
 
-void PhysicsManagerODE::SetIsGyroscope(BodyID pBodyId, bool pIsGyro)
-{
-	Object* lObject = (Object*)pBodyId;
-	if (lObject->mBodyID)
-	{
-		::dBodySetGyroscopicMode(lObject->mBodyID, pIsGyro);
+void PhysicsManagerODE::SetIsGyroscope(BodyID body_id, bool is_gyro) {
+	Object* _object = (Object*)body_id;
+	if (_object->body_id_) {
+		::dBodySetGyroscopicMode(_object->body_id_, is_gyro);
 	}
 }
 
-bool PhysicsManagerODE::GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		//mLog.Warningf("Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetJoint1Diff(BodyID body_id, JointID joint_id, Joint1Diff& diff) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		//log_.Warningf("Couldn't find joint %i!", joint_id);
 		return (false);
 	}
-	bool lOk = false;
-	const JointInfo* lJointInfo = *x;
-	switch (lJointInfo->mType)
-	{
-		case JOINT_HINGE:
-		{
-			lOk = GetHingeDiff(pBodyId, pJointId, pDiff);
-		}
-		break;
-		case JOINT_SLIDER:
-		{
-			lOk = GetSliderDiff(pBodyId, pJointId, pDiff);
-		}
-		break;
-		default:
-		{
-			mLog.Errorf("Joint type %i of non-1-type!", lJointInfo->mType);
+	bool ok = false;
+	const JointInfo* _joint_info = *x;
+	switch (_joint_info->type_) {
+		case kJointHinge: {
+			ok = GetHingeDiff(body_id, joint_id, diff);
+		} break;
+		case kJointSlider: {
+			ok = GetSliderDiff(body_id, joint_id, diff);
+		} break;
+		default: {
+			log_.Errorf("Joint type %i of non-1-type!", _joint_info->type_);
 			deb_assert(false);
-		}
-		break;
+		} break;
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool PhysicsManagerODE::SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff)
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Warningf("Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::SetJoint1Diff(BodyID body_id, JointID joint_id, const Joint1Diff& diff) {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Warningf("Couldn't find joint %i!", joint_id);
 		return (false);
 	}
-	bool lOk = false;
-	JointInfo* lJointInfo = (JointInfo*)*x;
-	switch (lJointInfo->mType)
-	{
-		case JOINT_HINGE:
-		{
-			lOk = SetHingeDiff(pBodyId, pJointId, pDiff);
-		}
-		break;
-		case JOINT_SLIDER:
-		{
-			lOk = SetSliderDiff(pBodyId, pJointId, pDiff);
-		}
-		break;
-		default:
-		{
-			mLog.Errorf("Joint type %i of non-1-type!", lJointInfo->mType);
+	bool ok = false;
+	JointInfo* _joint_info = (JointInfo*)*x;
+	switch (_joint_info->type_) {
+		case kJointHinge: {
+			ok = SetHingeDiff(body_id, joint_id, diff);
+		} break;
+		case kJointSlider: {
+			ok = SetSliderDiff(body_id, joint_id, diff);
+		} break;
+		default: {
+			log_.Errorf("Joint type %i of non-1-type!", _joint_info->type_);
 			deb_assert(false);
-		}
-		break;
+		} break;
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool PhysicsManagerODE::GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		//mLog.Warningf("Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetJoint2Diff(BodyID body_id, JointID joint_id, Joint2Diff& diff) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		//log_.Warningf("Couldn't find joint %i!", joint_id);
 		return (false);
 	}
-	bool lOk = false;
-	JointInfo* lJointInfo = (JointInfo*)*x;
-	switch (lJointInfo->mType)
-	{
-		case JOINT_UNIVERSAL:
-		{
-			lOk = GetUniversalDiff(pBodyId, pJointId, pDiff);
-		}
-		break;
-		default:
-		{
-			mLog.Errorf("Joint type %i of non-2-type!", lJointInfo->mType);
+	bool ok = false;
+	JointInfo* _joint_info = (JointInfo*)*x;
+	switch (_joint_info->type_) {
+		case kJointUniversal: {
+			ok = GetUniversalDiff(body_id, joint_id, diff);
+		} break;
+		default: {
+			log_.Errorf("Joint type %i of non-2-type!", _joint_info->type_);
 			deb_assert(false);
-		}
-		break;
+		} break;
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool PhysicsManagerODE::SetJoint2Diff(BodyID pBodyId, JointID pJointId, const Joint2Diff& pDiff)
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Warningf("Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::SetJoint2Diff(BodyID body_id, JointID joint_id, const Joint2Diff& diff) {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Warningf("Couldn't find joint %i!", joint_id);
 		return (false);
 	}
-	bool lOk = false;
-	JointInfo* lJointInfo = (JointInfo*)*x;
-	switch (lJointInfo->mType)
-	{
-		case JOINT_UNIVERSAL:
-		{
-			lOk = SetUniversalDiff(pBodyId, pJointId, pDiff);
-		}
-		break;
-		default:
-		{
-			mLog.Errorf("Joint type %i of non-2-type!", lJointInfo->mType);
+	bool ok = false;
+	JointInfo* _joint_info = (JointInfo*)*x;
+	switch (_joint_info->type_) {
+		case kJointUniversal: {
+			ok = SetUniversalDiff(body_id, joint_id, diff);
+		} break;
+		default: {
+			log_.Errorf("Joint type %i of non-2-type!", _joint_info->type_);
 			deb_assert(false);
-		}
-		break;
+		} break;
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool PhysicsManagerODE::GetJoint3Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		//mLog.Warningf("Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetJoint3Diff(BodyID body_id, JointID joint_id, Joint3Diff& diff) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		//log_.Warningf("Couldn't find joint %i!", joint_id);
 		return (false);
 	}
-	bool lOk = false;
-	JointInfo* lJointInfo = (JointInfo*)*x;
-	switch (lJointInfo->mType)
-	{
-		case JOINT_HINGE2:
-		{
-			lOk = GetHinge2Diff(pBodyId, pJointId, pDiff);
-		}
-		break;
-		case JOINT_BALL:
-		{
-			lOk = GetBallDiff(pBodyId, pJointId, pDiff);
-		}
-		break;
-		default:
-		{
-			mLog.Errorf("Joint type %i of non-3-type!", lJointInfo->mType);
+	bool ok = false;
+	JointInfo* _joint_info = (JointInfo*)*x;
+	switch (_joint_info->type_) {
+		case kJointHinge2: {
+			ok = GetHinge2Diff(body_id, joint_id, diff);
+		} break;
+		case kJointBall: {
+			ok = GetBallDiff(body_id, joint_id, diff);
+		} break;
+		default: {
+			log_.Errorf("Joint type %i of non-3-type!", _joint_info->type_);
 			deb_assert(false);
-		}
-		break;
+		} break;
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool PhysicsManagerODE::SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Warningf("Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::SetJoint3Diff(BodyID body_id, JointID joint_id, const Joint3Diff& diff) {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Warningf("Couldn't find joint %i!", joint_id);
 		return (false);
 	}
-	bool lOk = false;
-	JointInfo* lJointInfo = (JointInfo*)*x;
-	switch (lJointInfo->mType)
-	{
-		case JOINT_HINGE2:
-		{
-			lOk = SetHinge2Diff(pBodyId, pJointId, pDiff);
-		}
-		break;
-		case JOINT_BALL:
-		{
-			lOk = SetBallDiff(pBodyId, pJointId, pDiff);
-		}
-		break;
-		default:
-		{
-			mLog.Errorf("Joint type %i of non-3-type!", lJointInfo->mType);
+	bool ok = false;
+	JointInfo* _joint_info = (JointInfo*)*x;
+	switch (_joint_info->type_) {
+		case kJointHinge2: {
+			ok = SetHinge2Diff(body_id, joint_id, diff);
+		} break;
+		case kJointBall: {
+			ok = SetBallDiff(body_id, joint_id, diff);
+		} break;
+		default: {
+			log_.Errorf("Joint type %i of non-3-type!", _joint_info->type_);
 			deb_assert(false);
-		}
-		break;
+		} break;
 	}
-	return (lOk);
+	return (ok);
 }
 
-void PhysicsManagerODE::RemoveJoint(JointInfo* pJointInfo)
-{
-	pJointInfo->mListenerId1 = 0;
-	pJointInfo->mListenerId2 = 0;
-	pJointInfo->mBody1Id = 0;
-	pJointInfo->mBody2Id = 0;
-	mJointInfoAllocator.Free(pJointInfo);
+void PhysicsManagerODE::RemoveJoint(JointInfo* joint_info) {
+	joint_info->listener_id1_ = 0;
+	joint_info->listener_id2_ = 0;
+	joint_info->body1_id_ = 0;
+	joint_info->body2_id_ = 0;
+	joint_info_allocator_.Free(joint_info);
 }
 
-bool PhysicsManagerODE::GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
-{
-	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	deb_assert(lJointInfo->mType == JOINT_HINGE);
-	if (lJointInfo->mType != JOINT_HINGE)
-	{
-		mLog.Errorf("Joint type %i of non-hinge-type!", lJointInfo->mType);
+bool PhysicsManagerODE::GetHingeDiff(BodyID body_id, JointID joint_id, Joint1Diff& diff) const {
+	JointInfo* _joint_info = (JointInfo*)joint_id;
+	deb_assert(_joint_info->type_ == kJointHinge);
+	if (_joint_info->type_ != kJointHinge) {
+		log_.Errorf("Joint type %i of non-hinge-type!", _joint_info->type_);
 		return (false);
 	}
 
-	vec3 lAxis;
-	if (!GetAxis1(pJointId, lAxis) || !GetAngle1(pJointId, pDiff.mValue))
-	{
+	vec3 _axis;
+	if (!GetAxis1(joint_id, _axis) || !GetAngle1(joint_id, diff.value_)) {
 		return (false);
 	}
 
 	{
-		vec3 lVelocity;
-		GetBodyAngularVelocity(pBodyId, lVelocity);
-		pDiff.mVelocity = lAxis * lVelocity;
+		vec3 _velocity;
+		GetBodyAngularVelocity(body_id, _velocity);
+		diff.velocity_ = _axis * _velocity;
 	}
 
 	{
-		vec3 lAcceleration;
-		GetBodyTorque(pBodyId, lAcceleration);
-		pDiff.mAcceleration = lAxis * lAcceleration;
+		vec3 _acceleration;
+		GetBodyTorque(body_id, _acceleration);
+		diff.acceleration_ = _axis * _acceleration;
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff)
-{
-	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	deb_assert(lJointInfo->mType == JOINT_HINGE);
-	if (lJointInfo->mType != JOINT_HINGE)
-	{
-		mLog.Errorf("Joint type %i of non-hinge-type!", lJointInfo->mType);
+bool PhysicsManagerODE::SetHingeDiff(BodyID body_id, JointID joint_id, const Joint1Diff& diff) {
+	JointInfo* _joint_info = (JointInfo*)joint_id;
+	deb_assert(_joint_info->type_ == kJointHinge);
+	if (_joint_info->type_ != kJointHinge) {
+		log_.Errorf("Joint type %i of non-hinge-type!", _joint_info->type_);
 		return (false);
 	}
 
-	vec3 lAnchor;
-	vec3 lAxis;
-	if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis))
-	{
+	vec3 anchor;
+	vec3 _axis;
+	if (!GetAnchorPos(joint_id, anchor) || !GetAxis1(joint_id, _axis)) {
 		return (false);
 	}
-	deb_assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
+	deb_assert(_axis.GetLengthSquared() > 0.99f && _axis.GetLengthSquared() < 1.01f);
 
-	dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
+	dxBody* parent_body = _joint_info->joint_id_->node[0].body;
 
 	// Fetch parent data (or identity if parent is World).
-	const dReal* lPos = ::dBodyGetPosition(lParentBody);
-	const vec3 lParentPosition(lPos);
-	quat lParentQ(-1, 0, 0, 0);
-	vec3 lParentVelocity;
-	vec3 lParentAcceleration;
-	if (!lJointInfo->mJointID->node[1].body)
-	{
-	}
-	else
-	{
-		deb_assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
-		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		lParentQ.Set(lPQ);
+	const dReal* __pos = ::dBodyGetPosition(parent_body);
+	const vec3 parent_position(__pos);
+	quat parent_q(-1, 0, 0, 0);
+	vec3 parent_velocity;
+	vec3 parent_acceleration;
+	if (!_joint_info->joint_id_->node[1].body) {
+	} else {
+		deb_assert(_joint_info->joint_id_->node[1].body == ((Object*)body_id)->body_id_);
+		const dReal* pq = ::dBodyGetQuaternion(parent_body);
+		parent_q.Set(pq);
 	}
 
 	{
 		// Rotate to original child (us) orientation.
-		dxJointHinge* lHinge = (dxJointHinge*)lJointInfo->mJointID;
-		quat lQ(lHinge->qrel);
+		dxJointHinge* __hinge = (dxJointHinge*)_joint_info->joint_id_;
+		quat __q(__hinge->qrel);
 		// Set orientation.
-		xform lTransform;
-		GetBodyTransform(pBodyId, lTransform);
-		if (lJointInfo->mJointID->node[1].body)
-		{
-			lQ = lParentQ * lQ;
-		}
-		else
-		{
-			lQ.MakeInverse();
+		xform _transform;
+		GetBodyTransform(body_id, _transform);
+		if (_joint_info->joint_id_->node[1].body) {
+			__q = parent_q * __q;
+		} else {
+			__q.MakeInverse();
 		}
 		// Rotate to input angle.
-		lQ = quat(-pDiff.mValue, lAxis) * lQ;
-		lTransform.SetOrientation(lQ);
-		if (lJointInfo->mJointID->node[1].body)
-		{
+		__q = quat(-diff.value_, _axis) * __q;
+		_transform.SetOrientation(__q);
+		if (_joint_info->joint_id_->node[1].body) {
 			// Align anchors (happen after rotation) and store.
-			vec3 lAnchor2(lHinge->anchor2);
-			lAnchor2 = lQ*lAnchor2 + lTransform.GetPosition();
-			lTransform.GetPosition() += lAnchor-lAnchor2;
+			vec3 __anchor2(__hinge->anchor2);
+			__anchor2 = __q*__anchor2 + _transform.GetPosition();
+			_transform.GetPosition() += anchor-__anchor2;
 		}
-		SetBodyTransform(pBodyId, lTransform);
+		SetBodyTransform(body_id, _transform);
 	}
 
 	{
-		if (pDiff.mVelocity < PIF*1000)
-		{
-			vec3 lVelocity;
-			GetBodyAngularVelocity(pBodyId, lVelocity);
+		if (diff.velocity_ < PIF*1000) {
+			vec3 _velocity;
+			GetBodyAngularVelocity(body_id, _velocity);
 			// Drop angular velocity along axis 1 & 2, then add the specified amount.
-			vec3 lAxisVelocity = lAxis*(lAxis*lVelocity);
-			lVelocity -= lAxisVelocity;
-			lVelocity += lAxis * pDiff.mVelocity;
-			SetBodyAngularVelocity(pBodyId, lVelocity);
+			vec3 axis_velocity = _axis*(_axis*_velocity);
+			_velocity -= axis_velocity;
+			_velocity += _axis * diff.velocity_;
+			SetBodyAngularVelocity(body_id, _velocity);
 		}
 	}
 
 	{
-		if (pDiff.mAcceleration < PIF*1000)
-		{
-			vec3 lAcceleration;
-			GetBodyTorque(pBodyId, lAcceleration);
+		if (diff.acceleration_ < PIF*1000) {
+			vec3 _acceleration;
+			GetBodyTorque(body_id, _acceleration);
 			// Drop angular acceleration along axis, then add the specified amount.
-			vec3 lAxisAcceleration = lAxis*(lAxis*lAcceleration);
-			lAcceleration -= lAxisAcceleration;
-			lAcceleration += lAxis * pDiff.mAcceleration;
-			SetBodyTorque(pBodyId, lAcceleration);
+			vec3 axis_acceleration = _axis*(_axis*_acceleration);
+			_acceleration -= axis_acceleration;
+			_acceleration += _axis * diff.acceleration_;
+			SetBodyTorque(body_id, _acceleration);
 		}
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const
-{
-	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	deb_assert(lJointInfo->mType == JOINT_SLIDER);
-	if (lJointInfo->mType != JOINT_SLIDER)
-	{
-		mLog.Errorf("Joint type %i of non-slider-type!", lJointInfo->mType);
+bool PhysicsManagerODE::GetSliderDiff(BodyID body_id, JointID joint_id, Joint1Diff& diff) const {
+	JointInfo* _joint_info = (JointInfo*)joint_id;
+	deb_assert(_joint_info->type_ == kJointSlider);
+	if (_joint_info->type_ != kJointSlider) {
+		log_.Errorf("Joint type %i of non-slider-type!", _joint_info->type_);
 		return (false);
 	}
 
-	vec3 lAxis;
-	if (!GetAxis1(pJointId, lAxis))
-	{
+	vec3 _axis;
+	if (!GetAxis1(joint_id, _axis)) {
 		return (false);
 	}
-	deb_assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
+	deb_assert(_axis.GetLengthSquared() > 0.99f && _axis.GetLengthSquared() < 1.01f);
 
-	GetSliderPos(pJointId, pDiff.mValue);
-	GetSliderSpeed(pJointId, pDiff.mVelocity);
+	GetSliderPos(joint_id, diff.value_);
+	GetSliderSpeed(joint_id, diff.velocity_);
 
 	{
-		vec3 lAcceleration;
-		GetBodyForce(pBodyId, lAcceleration);
-		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
-		const dReal* lParentForce = ::dBodyGetForce(lParentBody);
-		lAcceleration -= vec3(lParentForce);
-		pDiff.mAcceleration = lAxis * lAcceleration;
+		vec3 _acceleration;
+		GetBodyForce(body_id, _acceleration);
+		dxBody* parent_body = _joint_info->joint_id_->node[0].body;
+		const dReal* parent_force = ::dBodyGetForce(parent_body);
+		_acceleration -= vec3(parent_force);
+		diff.acceleration_ = _axis * _acceleration;
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::SetSliderDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff)
-{
-	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	deb_assert(lJointInfo->mType == JOINT_SLIDER);
-	if (lJointInfo->mType != JOINT_SLIDER)
-	{
-		mLog.Errorf("Joint type %i of non-hinge-type!", lJointInfo->mType);
+bool PhysicsManagerODE::SetSliderDiff(BodyID body_id, JointID joint_id, const Joint1Diff& diff) {
+	JointInfo* _joint_info = (JointInfo*)joint_id;
+	deb_assert(_joint_info->type_ == kJointSlider);
+	if (_joint_info->type_ != kJointSlider) {
+		log_.Errorf("Joint type %i of non-hinge-type!", _joint_info->type_);
 		return (false);
 	}
 
-	vec3 lAxis;
-	if (!GetAxis1(pJointId, lAxis))
-	{
+	vec3 _axis;
+	if (!GetAxis1(joint_id, _axis)) {
 		return (false);
 	}
-	deb_assert(lAxis.GetLengthSquared() > 0.99f && lAxis.GetLengthSquared() < 1.01f);
+	deb_assert(_axis.GetLengthSquared() > 0.99f && _axis.GetLengthSquared() < 1.01f);
 
-	dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
+	dxBody* parent_body = _joint_info->joint_id_->node[0].body;
 
 	// Fetch parent data (or identity if parent is World).
-	const dReal* lPos = ::dBodyGetPosition(lParentBody);
-	const vec3 lParentPosition(lPos);
-	quat lParentQ(-1, 0, 0, 0);
-	vec3 lParentVelocity;
-	vec3 lParentAcceleration;
-	if (!lJointInfo->mJointID->node[1].body)
-	{
-	}
-	else
-	{
-		deb_assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
-		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		lParentQ.Set(lPQ);
-		const dReal* lParentV = ::dBodyGetLinearVel(lParentBody);
-		lParentVelocity.Set(lParentV);
-		const dReal* lParentForce = ::dBodyGetForce(lParentBody);
-		lParentAcceleration.Set(lParentForce);
+	const dReal* __pos = ::dBodyGetPosition(parent_body);
+	const vec3 parent_position(__pos);
+	quat parent_q(-1, 0, 0, 0);
+	vec3 parent_velocity;
+	vec3 parent_acceleration;
+	if (!_joint_info->joint_id_->node[1].body) {
+	} else {
+		deb_assert(_joint_info->joint_id_->node[1].body == ((Object*)body_id)->body_id_);
+		const dReal* pq = ::dBodyGetQuaternion(parent_body);
+		parent_q.Set(pq);
+		const dReal* parent_v = ::dBodyGetLinearVel(parent_body);
+		parent_velocity.Set(parent_v);
+		const dReal* parent_force = ::dBodyGetForce(parent_body);
+		parent_acceleration.Set(parent_force);
 		// Downscale acceleration with mass.
-		lParentAcceleration *= lJointInfo->mJointID->node[1].body->mass.mass / lParentBody->mass.mass;
+		parent_acceleration *= _joint_info->joint_id_->node[1].body->mass.mass / parent_body->mass.mass;
 	}
 
 	{
 		// Rotate to original child (us) orientation.
-		dxJointSlider* lSlider = (dxJointSlider*)lJointInfo->mJointID;
-		quat lQ(lSlider->qrel);
+		dxJointSlider* __slider = (dxJointSlider*)_joint_info->joint_id_;
+		quat __q(__slider->qrel);
 		// Relative translation.
-		vec3 lOffset(lSlider->offset);
-		if (lJointInfo->mJointID->node[1].body)
-		{
-			lQ = lParentQ * lQ;
-			lOffset = lQ * lOffset;
+		vec3 __offset(__slider->offset);
+		if (_joint_info->joint_id_->node[1].body) {
+			__q = parent_q * __q;
+			__offset = __q * __offset;
+		} else {
+			__q.MakeInverse();
+			__offset = parent_position - __offset;
 		}
-		else
-		{
-			lQ.MakeInverse();
-			lOffset = lParentPosition - lOffset;
-		}
-		lOffset += lAxis*pDiff.mValue;
+		__offset += _axis*diff.value_;
 		// Small translational diff, no orientational diff (world parent is stiff) means we get a
 		// better experiance by not forcing this tiny jerk into the game. Instead let the local
 		// (most probably client) physics engine be chief.
-		if (lJointInfo->mJointID->node[1].body || lOffset.GetLengthSquared() > 0.5f)
-		{
+		if (_joint_info->joint_id_->node[1].body || __offset.GetLengthSquared() > 0.5f) {
 			// Set orientation.
-			xform lTransform(lQ,
-				lParentPosition - lOffset);
-			SetBodyTransform(pBodyId, lTransform);
+			xform _transform(__q,
+				parent_position - __offset);
+			SetBodyTransform(body_id, _transform);
 		}
 	}
 
 	{
-		lParentVelocity -= lAxis*pDiff.mVelocity;
-		SetBodyVelocity(pBodyId, lParentVelocity);
+		parent_velocity -= _axis*diff.velocity_;
+		SetBodyVelocity(body_id, parent_velocity);
 	}
 
 	{
-		lParentAcceleration -= lAxis*pDiff.mAcceleration;
-		SetBodyForce(pBodyId, lParentAcceleration);
+		parent_acceleration -= _axis*diff.acceleration_;
+		SetBodyForce(body_id, parent_acceleration);
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const
-{
-	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
-	LEPRA_DEBUG_CODE(deb_assert(lJointInfo->mType == JOINT_UNIVERSAL));
+bool PhysicsManagerODE::GetUniversalDiff(BodyID body_id, JointID joint_id, Joint2Diff& diff) const {
+	LEPRA_DEBUG_CODE(JointInfo* _joint_info = (JointInfo*)joint_id;)
+	LEPRA_DEBUG_CODE(deb_assert(_joint_info->type_ == kJointUniversal));
 
-	vec3 lAxis1;
-	vec3 lAxis2;
+	vec3 _axis1;
+	vec3 _axis2;
 	{
-		if (!GetAxis1(pJointId, lAxis1) || !GetAxis2(pJointId, lAxis2) ||
-			!GetAngle1(pJointId, pDiff.mValue) || !GetAngle2(pJointId, pDiff.mAngle))
-		{
+		if (!GetAxis1(joint_id, _axis1) || !GetAxis2(joint_id, _axis2) ||
+			!GetAngle1(joint_id, diff.value_) || !GetAngle2(joint_id, diff.angle_)) {
 			return (false);
 		}
-		deb_assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
-		deb_assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
+		deb_assert(_axis1.GetLengthSquared() > 0.99f && _axis1.GetLengthSquared() < 1.01f);
+		deb_assert(_axis2.GetLengthSquared() > 0.99f && _axis2.GetLengthSquared() < 1.01f);
 	}
 
 	{
-		if (!GetAngleRate1(pJointId, pDiff.mValueVelocity) || !GetAngleRate2(pJointId, pDiff.mAngleVelocity))
-		{
+		if (!GetAngleRate1(joint_id, diff.value_velocity_) || !GetAngleRate2(joint_id, diff.angle_velocity_)) {
 			return (false);
 		}
 	}
 
 	{
-		vec3 lAcceleration;
-		GetBodyTorque(pBodyId, lAcceleration);
-		pDiff.mValueAcceleration = -(lAxis2 * lAcceleration);
-		pDiff.mAngleAcceleration = -(lAxis1 * lAcceleration);
+		vec3 _acceleration;
+		GetBodyTorque(body_id, _acceleration);
+		diff.value_acceleration_ = -(_axis2 * _acceleration);
+		diff.angle_acceleration_ = -(_axis1 * _acceleration);
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::SetUniversalDiff(BodyID pBodyId, JointID pJointId, const Joint2Diff& pDiff)
-{
-	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	deb_assert(lJointInfo->mType == JOINT_UNIVERSAL);
+bool PhysicsManagerODE::SetUniversalDiff(BodyID body_id, JointID joint_id, const Joint2Diff& diff) {
+	JointInfo* _joint_info = (JointInfo*)joint_id;
+	deb_assert(_joint_info->type_ == kJointUniversal);
 
-	vec3 lAxis1;
-	vec3 lAxis2;
-	vec3 lAnchor;
-	if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis1))
-	{
+	vec3 _axis1;
+	vec3 _axis2;
+	vec3 anchor;
+	if (!GetAnchorPos(joint_id, anchor) || !GetAxis1(joint_id, _axis1)) {
 		return (false);
 	}
-	deb_assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
+	deb_assert(_axis1.GetLengthSquared() > 0.99f && _axis1.GetLengthSquared() < 1.01f);
 
 	{
 		// Fetch parent orientation.
-		deb_assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
-		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
-		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		const quat lParentQ(lPQ);
-		const dReal* lPP = ::dBodyGetPosition(lParentBody);
-		vec3 lParentP(lPP);
-		dxJointUniversal* lUniversal = (dxJointUniversal*)lJointInfo->mJointID;
+		deb_assert(!_joint_info->joint_id_->node[1].body || _joint_info->joint_id_->node[1].body == ((Object*)body_id)->body_id_);
+		dxBody* parent_body = _joint_info->joint_id_->node[0].body;
+		const dReal* pq = ::dBodyGetQuaternion(parent_body);
+		const quat parent_q(pq);
+		const dReal* pp = ::dBodyGetPosition(parent_body);
+		vec3 parent_p(pp);
+		dxJointUniversal* __universal = (dxJointUniversal*)_joint_info->joint_id_;
 		// TODO: get your linear algebra shit together!
 		quat q;
-		q.RotateAroundVector(lAxis1, pDiff.mValue);
-		q = quat(lUniversal->qrel2) * q;	// Cross piece -> child.
-		q.RotateAroundVector(lAxis2, pDiff.mAngle);
-		xform lChild(q, vec3(lUniversal->anchor2));
-		xform lCrossPiece(quat(lUniversal->qrel1), vec3(lUniversal->anchor1));	// qrel1 is parent -> cross piece.
-		xform lParent(lParentQ, lParentP);
-		lCrossPiece = lParent.Transform(lCrossPiece);
-		lChild = lCrossPiece.Transform(lChild);
+		q.RotateAroundVector(_axis1, diff.value_);
+		q = quat(__universal->qrel2) * q;	// Cross piece -> child.
+		q.RotateAroundVector(_axis2, diff.angle_);
+		xform child(q, vec3(__universal->anchor2));
+		xform cross_piece(quat(__universal->qrel1), vec3(__universal->anchor1));	// qrel1 is parent -> cross piece.
+		xform parent(parent_q, parent_p);
+		cross_piece = parent.Transform(cross_piece);
+		child = cross_piece.Transform(child);
 		// TODO:
-		//SetBodyTransform(pBodyId, lChild);
+		//SetBodyTransform(body_id, child);
 	}
 
 	{
-		vec3 lAxisVelocity;
-		vec3 lOriginalVelocity;
-		GetBodyAngularVelocity(pBodyId, lOriginalVelocity);
-		vec3 lVelocity = lOriginalVelocity;
+		vec3 axis_velocity;
+		vec3 original_velocity;
+		GetBodyAngularVelocity(body_id, original_velocity);
+		vec3 _velocity = original_velocity;
 		// Drop angular velocity along axis 1 & 2, then add the specified amount.
-		if (pDiff.mValueVelocity < PIF*1000)
-		{
-			lAxisVelocity = lAxis1*(lAxis1*lOriginalVelocity);
-			lVelocity -= lAxisVelocity;
-			lVelocity += lAxis1 * -pDiff.mValueVelocity;
+		if (diff.value_velocity_ < PIF*1000) {
+			axis_velocity = _axis1*(_axis1*original_velocity);
+			_velocity -= axis_velocity;
+			_velocity += _axis1 * -diff.value_velocity_;
 		}
-		if (pDiff.mAngleVelocity < PIF*1000)
-		{
-			lAxisVelocity = lAxis2*(lAxis2*lOriginalVelocity);
-			lVelocity -= lAxisVelocity;
-			lVelocity += lAxis2 * -pDiff.mAngleVelocity;
+		if (diff.angle_velocity_ < PIF*1000) {
+			axis_velocity = _axis2*(_axis2*original_velocity);
+			_velocity -= axis_velocity;
+			_velocity += _axis2 * -diff.angle_velocity_;
 		}
-		//SetBodyVelocity(pBodyId, vec3());
-		SetBodyAngularVelocity(pBodyId, lVelocity);
+		//SetBodyVelocity(body_id, vec3());
+		SetBodyAngularVelocity(body_id, _velocity);
 	}
 
 	{
-		vec3 lAxisAcceleration;
-		vec3 lOriginalAcceleration;
-		GetBodyTorque(pBodyId, lOriginalAcceleration);
-		vec3 lAcceleration = lOriginalAcceleration;
+		vec3 axis_acceleration;
+		vec3 original_acceleration;
+		GetBodyTorque(body_id, original_acceleration);
+		vec3 _acceleration = original_acceleration;
 		// Drop angular acceleration along axis 1 & 2, then add the specified amount.
-		if (pDiff.mValueAcceleration < PIF*1000)
-		{
-			lAxisAcceleration = lAxis1*(lAxis1*lOriginalAcceleration);
-			lAcceleration -= lAxisAcceleration;
-			lAcceleration += lAxis1 * -pDiff.mValueAcceleration;
+		if (diff.value_acceleration_ < PIF*1000) {
+			axis_acceleration = _axis1*(_axis1*original_acceleration);
+			_acceleration -= axis_acceleration;
+			_acceleration += _axis1 * -diff.value_acceleration_;
 		}
-		if (pDiff.mAngleAcceleration < PIF*1000)
-		{
-			lAxisAcceleration = lAxis2*(lAxis2*lOriginalAcceleration);
-			lAcceleration -= lAxisAcceleration;
-			lAcceleration += lAxis2 * -pDiff.mAngleAcceleration;
+		if (diff.angle_acceleration_ < PIF*1000) {
+			axis_acceleration = _axis2*(_axis2*original_acceleration);
+			_acceleration -= axis_acceleration;
+			_acceleration += _axis2 * -diff.angle_acceleration_;
 		}
-		//SetBodyForce(pBodyId, vec3());
-		SetBodyTorque(pBodyId, lAcceleration);
+		//SetBodyForce(body_id, vec3());
+		SetBodyTorque(body_id, _acceleration);
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
-{
-	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
-	LEPRA_DEBUG_CODE(deb_assert(lJointInfo->mType == JOINT_HINGE2));
+bool PhysicsManagerODE::GetHinge2Diff(BodyID body_id, JointID joint_id, Joint3Diff& diff) const {
+	LEPRA_DEBUG_CODE(JointInfo* _joint_info = (JointInfo*)joint_id;)
+	LEPRA_DEBUG_CODE(deb_assert(_joint_info->type_ == kJointHinge2));
 
-	vec3 lAxis1;
-	vec3 lAxis2;
+	vec3 _axis1;
+	vec3 _axis2;
 	{
-		xform lTransform;
-		GetBodyTransform(pBodyId, lTransform);
-		vec3 lAnchor;
-		if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis1) || !GetAxis2(pJointId, lAxis2))
-		{
+		xform _transform;
+		GetBodyTransform(body_id, _transform);
+		vec3 anchor;
+		if (!GetAnchorPos(joint_id, anchor) || !GetAxis1(joint_id, _axis1) || !GetAxis2(joint_id, _axis2)) {
 			return (false);
 		}
-		deb_assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
-		deb_assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
-		const vec3 lDiff(lTransform.GetPosition()-lAnchor);
-		float lPosition;
-		lPosition = -(lAxis1 * lDiff);
-		pDiff.mValue = lPosition;
-		pDiff.mAngle2 = 0;	// JB-TODO: use this angle as well (go through body rather than ODE).
-		if (!GetAngle1(pJointId, lPosition))	// JB: not available through ODE: || !GetAngle2(pJointId, pAngle2));
-		{
+		deb_assert(_axis1.GetLengthSquared() > 0.99f && _axis1.GetLengthSquared() < 1.01f);
+		deb_assert(_axis2.GetLengthSquared() > 0.99f && _axis2.GetLengthSquared() < 1.01f);
+		const vec3 _diff(_transform.GetPosition()-anchor);
+		float _position;
+		_position = -(_axis1 * _diff);
+		diff.value_ = _position;
+		diff.angle2_ = 0;	// JB-TODO: use this angle as well (go through body rather than ODE).
+		if (!GetAngle1(joint_id, _position)) {	// JB: not available through ODE: || !GetAngle2(joint_id, pAngle2));
 			return (false);
 		}
-		pDiff.mAngle1 = lPosition;
+		diff.angle1_ = _position;
 	}
 
 	{
-		vec3 lVelocity;
-		GetBodyVelocity(pBodyId, lVelocity);
-		pDiff.mValueVelocity = -(lAxis1 * lVelocity);
-		GetBodyAngularVelocity(pBodyId, lVelocity);
-		pDiff.mAngle1Velocity = -(lAxis2 * lVelocity);
-		pDiff.mAngle2Velocity = -(lAxis1 * lVelocity);
+		vec3 _velocity;
+		GetBodyVelocity(body_id, _velocity);
+		diff.value_velocity_ = -(_axis1 * _velocity);
+		GetBodyAngularVelocity(body_id, _velocity);
+		diff.angle1_velocity_ = -(_axis2 * _velocity);
+		diff.angle2_velocity_ = -(_axis1 * _velocity);
 	}
 
 	{
-		vec3 lAcceleration;
-		GetBodyForce(pBodyId, lAcceleration);
-		pDiff.mValueAcceleration = -(lAxis1 * lAcceleration);
-		GetBodyTorque(pBodyId, lAcceleration);
-		pDiff.mAngle1Acceleration = -(lAxis2 * lAcceleration);
-		pDiff.mAngle2Acceleration = -(lAxis1 * lAcceleration);
+		vec3 _acceleration;
+		GetBodyForce(body_id, _acceleration);
+		diff.value_acceleration_ = -(_axis1 * _acceleration);
+		GetBodyTorque(body_id, _acceleration);
+		diff.angle1_acceleration_ = -(_axis2 * _acceleration);
+		diff.angle2_acceleration_ = -(_axis1 * _acceleration);
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
-{
-	LEPRA_DEBUG_CODE(JointInfo* lJointInfo = (JointInfo*)pJointId;)
-	LEPRA_DEBUG_CODE(deb_assert(lJointInfo->mType == JOINT_HINGE2));
+bool PhysicsManagerODE::SetHinge2Diff(BodyID body_id, JointID joint_id, const Joint3Diff& diff) {
+	LEPRA_DEBUG_CODE(JointInfo* _joint_info = (JointInfo*)joint_id;)
+	LEPRA_DEBUG_CODE(deb_assert(_joint_info->type_ == kJointHinge2));
 
-	vec3 lAxis1;
-	vec3 lAxis2;
+	vec3 _axis1;
+	vec3 _axis2;
 	{
-		vec3 lAnchor;
-		if (!GetAnchorPos(pJointId, lAnchor) || !GetAxis1(pJointId, lAxis1) || !GetAxis2(pJointId, lAxis2))
-		{
+		vec3 anchor;
+		if (!GetAnchorPos(joint_id, anchor) || !GetAxis1(joint_id, _axis1) || !GetAxis2(joint_id, _axis2)) {
 			return (false);
 		}
-		deb_assert(lAxis1.GetLengthSquared() > 0.99f && lAxis1.GetLengthSquared() < 1.01f);
-		deb_assert(lAxis2.GetLengthSquared() > 0.99f && lAxis2.GetLengthSquared() < 1.01f);
-		const vec3 lDiff = lAxis1 * -pDiff.mValue;
-		xform lTransform;
-		GetBodyTransform(pBodyId, lTransform);
-		lTransform.SetPosition(lAnchor+lDiff);
-		float lCurrentAngle;
-		if (pDiff.mAngle1 < PIF*10)
-		{
-			if (!GetAngle1(pJointId, lCurrentAngle))	// JB: not available in ODE: || !GetAngle2(pJointId, lCurrentAngle2));
-			{
+		deb_assert(_axis1.GetLengthSquared() > 0.99f && _axis1.GetLengthSquared() < 1.01f);
+		deb_assert(_axis2.GetLengthSquared() > 0.99f && _axis2.GetLengthSquared() < 1.01f);
+		const vec3 _diff = _axis1 * -diff.value_;
+		xform _transform;
+		GetBodyTransform(body_id, _transform);
+		_transform.SetPosition(anchor+_diff);
+		float current_angle;
+		if (diff.angle1_ < PIF*10) {
+			if (!GetAngle1(joint_id, current_angle)) {	// JB: not available in ODE: || !GetAngle2(joint_id, lCurrentAngle2));
 				return (false);
 			}
-			lTransform.GetOrientation().RotateAroundVector(lAxis1, lCurrentAngle-pDiff.mAngle1);
+			_transform.GetOrientation().RotateAroundVector(_axis1, current_angle-diff.angle1_);
 		}
-		if (pDiff.mAngle2 < PIF*10)
-		{
-			//pDiff.mAngle2;	// JB-TODO: use this angle as well.
+		if (diff.angle2_ < PIF*10) {
+			//diff.angle2_;	// JB-TODO: use this angle as well.
 		}
-		SetBodyTransform(pBodyId, lTransform);
+		SetBodyTransform(body_id, _transform);
 	}
 
 	{
-		vec3 lVelocity;
-		GetBodyVelocity(pBodyId, lVelocity);
+		vec3 _velocity;
+		GetBodyVelocity(body_id, _velocity);
 		// Drop suspension velocity along axis1.
-		vec3 lAxisVelocity(lAxis1*(lAxis1*lVelocity));
-		lVelocity -= lAxisVelocity;
+		vec3 axis_velocity(_axis1*(_axis1*_velocity));
+		_velocity -= axis_velocity;
 		// Add suspension velocity.
-		lVelocity += lAxis1 * -pDiff.mValueVelocity;
-		SetBodyVelocity(pBodyId, lVelocity);
+		_velocity += _axis1 * -diff.value_velocity_;
+		SetBodyVelocity(body_id, _velocity);
 
-		vec3 lOriginalVelocity;
-		GetBodyAngularVelocity(pBodyId, lOriginalVelocity);
-		lVelocity = lOriginalVelocity;
+		vec3 original_velocity;
+		GetBodyAngularVelocity(body_id, original_velocity);
+		_velocity = original_velocity;
 		// Drop angular velocity along axis 1 & 2, then add the specified amount.
-		if (pDiff.mAngle1Velocity < PIF*1000)
-		{
-			lAxisVelocity = lAxis1*(lAxis1*lOriginalVelocity);
-			lVelocity -= lAxisVelocity;
-			lVelocity += lAxis2 * -pDiff.mAngle1Velocity;
+		if (diff.angle1_velocity_ < PIF*1000) {
+			axis_velocity = _axis1*(_axis1*original_velocity);
+			_velocity -= axis_velocity;
+			_velocity += _axis2 * -diff.angle1_velocity_;
 		}
-		if (pDiff.mAngle2Velocity < PIF*1000)
-		{
-			lAxisVelocity = lAxis2*(lAxis2*lOriginalVelocity);
-			lVelocity -= lAxisVelocity;
-			lVelocity += lAxis1 * -pDiff.mAngle2Velocity;
+		if (diff.angle2_velocity_ < PIF*1000) {
+			axis_velocity = _axis2*(_axis2*original_velocity);
+			_velocity -= axis_velocity;
+			_velocity += _axis1 * -diff.angle2_velocity_;
 		}
-		SetBodyAngularVelocity(pBodyId, lVelocity);
+		SetBodyAngularVelocity(body_id, _velocity);
 	}
 
 	{
-		vec3 lAcceleration;
-		GetBodyForce(pBodyId, lAcceleration);
+		vec3 _acceleration;
+		GetBodyForce(body_id, _acceleration);
 		// Drop suspension acceleration along axis1.
-		vec3 lAxisAcceleration(lAxis1*(lAxis1*lAcceleration));
-		lAcceleration -= lAxisAcceleration;
+		vec3 axis_acceleration(_axis1*(_axis1*_acceleration));
+		_acceleration -= axis_acceleration;
 		// Add suspension acceleration.
-		lAcceleration += lAxis1 * -pDiff.mValueAcceleration;
-		SetBodyForce(pBodyId, lAcceleration);
+		_acceleration += _axis1 * -diff.value_acceleration_;
+		SetBodyForce(body_id, _acceleration);
 
-		vec3 lOriginalAcceleration;
-		GetBodyTorque(pBodyId, lOriginalAcceleration);
-		lAcceleration = lOriginalAcceleration;
+		vec3 original_acceleration;
+		GetBodyTorque(body_id, original_acceleration);
+		_acceleration = original_acceleration;
 		// Drop angular acceleration along axis 1 & 2, then add the specified amount.
-		if (pDiff.mAngle1Acceleration < PIF*1000)
-		{
-			lAxisAcceleration = lAxis1*(lAxis1*lOriginalAcceleration);
-			lAcceleration -= lAxisAcceleration;
-			lAcceleration += lAxis2 * -pDiff.mAngle1Acceleration;
+		if (diff.angle1_acceleration_ < PIF*1000) {
+			axis_acceleration = _axis1*(_axis1*original_acceleration);
+			_acceleration -= axis_acceleration;
+			_acceleration += _axis2 * -diff.angle1_acceleration_;
 		}
-		if (pDiff.mAngle2Acceleration < PIF*1000)
-		{
-			lAxisAcceleration = lAxis2*(lAxis2*lOriginalAcceleration);
-			lAcceleration -= lAxisAcceleration;
-			lAcceleration += lAxis1 * -pDiff.mAngle2Acceleration;
+		if (diff.angle2_acceleration_ < PIF*1000) {
+			axis_acceleration = _axis2*(_axis2*original_acceleration);
+			_acceleration -= axis_acceleration;
+			_acceleration += _axis1 * -diff.angle2_acceleration_;
 		}
-		SetBodyTorque(pBodyId, lAcceleration);
+		SetBodyTorque(body_id, _acceleration);
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const
-{
-	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	deb_assert(lJointInfo->mType == JOINT_BALL);
+bool PhysicsManagerODE::GetBallDiff(BodyID body_id, JointID joint_id, Joint3Diff& diff) const {
+	JointInfo* _joint_info = (JointInfo*)joint_id;
+	deb_assert(_joint_info->type_ == kJointBall);
 
 	{
-		deb_assert(lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
-		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
-		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		quat lParentQ(lPQ);
+		deb_assert(_joint_info->joint_id_->node[1].body == ((Object*)body_id)->body_id_);
+		dxBody* parent_body = _joint_info->joint_id_->node[0].body;
+		const dReal* pq = ::dBodyGetQuaternion(parent_body);
+		quat parent_q(pq);
 
-		xform lTransform;
-		GetBodyTransform(pBodyId, lTransform);
-		const quat lQ = lTransform.GetOrientation()/lParentQ;
-		lQ.GetEulerAngles(pDiff.mValue, pDiff.mAngle1, pDiff.mAngle2);
+		xform _transform;
+		GetBodyTransform(body_id, _transform);
+		const quat __q = _transform.GetOrientation()/parent_q;
+		__q.GetEulerAngles(diff.value_, diff.angle1_, diff.angle2_);
 	}
 
 	{
-		vec3 lVelocity;
-		GetBodyAngularVelocity(pBodyId, lVelocity);
-		pDiff.mValueVelocity = lVelocity.x;
-		pDiff.mAngle1Velocity = lVelocity.y;
-		pDiff.mAngle2Velocity = lVelocity.z;
+		vec3 _velocity;
+		GetBodyAngularVelocity(body_id, _velocity);
+		diff.value_velocity_ = _velocity.x;
+		diff.angle1_velocity_ = _velocity.y;
+		diff.angle2_velocity_ = _velocity.z;
 	}
 
 	{
-		vec3 lAcceleration;
-		GetBodyTorque(pBodyId, lAcceleration);
-		pDiff.mValueAcceleration = lAcceleration.x;
-		pDiff.mAngle1Acceleration = lAcceleration.y;
-		pDiff.mAngle2Acceleration = lAcceleration.z;
+		vec3 _acceleration;
+		GetBodyTorque(body_id, _acceleration);
+		diff.value_acceleration_ = _acceleration.x;
+		diff.angle1_acceleration_ = _acceleration.y;
+		diff.angle2_acceleration_ = _acceleration.z;
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::SetBallDiff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff)
-{
-	JointInfo* lJointInfo = (JointInfo*)pJointId;
-	deb_assert(lJointInfo->mType == JOINT_BALL);
+bool PhysicsManagerODE::SetBallDiff(BodyID body_id, JointID joint_id, const Joint3Diff& diff) {
+	JointInfo* _joint_info = (JointInfo*)joint_id;
+	deb_assert(_joint_info->type_ == kJointBall);
 
 	{
-		deb_assert(!lJointInfo->mJointID->node[1].body || lJointInfo->mJointID->node[1].body == ((Object*)pBodyId)->mBodyID);
-		dxBody* lParentBody = lJointInfo->mJointID->node[0].body;
-		const dReal* lPQ = ::dBodyGetQuaternion(lParentBody);
-		quat lParentQ(lPQ);
+		deb_assert(!_joint_info->joint_id_->node[1].body || _joint_info->joint_id_->node[1].body == ((Object*)body_id)->body_id_);
+		dxBody* parent_body = _joint_info->joint_id_->node[0].body;
+		const dReal* pq = ::dBodyGetQuaternion(parent_body);
+		quat parent_q(pq);
 
-		xform lTransform;
-		GetBodyTransform(pBodyId, lTransform);
-		quat lRelativeToParentQ(lParentQ/lTransform.GetOrientation());
-		dVector3 lRawAnchor;
-		::dJointGetBallAnchor2(lJointInfo->mJointID, lRawAnchor);
-		vec3 lAnchor2(lRawAnchor);
-		vec3 lPosition = lTransform.GetPosition()-lAnchor2;
-		lPosition = lRelativeToParentQ*lPosition;	// Go to parent space.
-		quat lRelativeFromParentQ;
-		lRelativeFromParentQ.SetEulerAngles(pDiff.mValue, pDiff.mAngle1, pDiff.mAngle2);
-		lPosition = lRelativeFromParentQ*lPosition;	// Go from parent to given child space.
-		lTransform.SetOrientation(lRelativeFromParentQ*lParentQ);	// Set complete orientation.
-		vec3 lAnchor;
-		if (!GetAnchorPos(pJointId, lAnchor))
-		{
+		xform _transform;
+		GetBodyTransform(body_id, _transform);
+		quat relative_to_parent_q(parent_q/_transform.GetOrientation());
+		dVector3 raw_anchor;
+		::dJointGetBallAnchor2(_joint_info->joint_id_, raw_anchor);
+		vec3 __anchor2(raw_anchor);
+		vec3 _position = _transform.GetPosition()-__anchor2;
+		_position = relative_to_parent_q*_position;	// Go to parent space.
+		quat relative_from_parent_q;
+		relative_from_parent_q.SetEulerAngles(diff.value_, diff.angle1_, diff.angle2_);
+		_position = relative_from_parent_q*_position;	// Go from parent to given child space.
+		_transform.SetOrientation(relative_from_parent_q*parent_q);	// Set complete orientation.
+		vec3 anchor;
+		if (!GetAnchorPos(joint_id, anchor)) {
 			return (false);
 		}
-		lPosition += lAnchor;
-		lTransform.SetPosition(lPosition);
-		SetBodyTransform(pBodyId, lTransform);
+		_position += anchor;
+		_transform.SetPosition(_position);
+		SetBodyTransform(body_id, _transform);
 	}
 
 	{
 		// TODO: adjust linear velocity.
-		//SetBodyVelocity(pBodyId, vec3(0, 0, 0));
-		//SetBodyVelocity(pBodyId, vec3(pDiff.mValueVelocity, pDiff.mAngle1Velocity, pDiff.mAngle2Velocity));
-		SetBodyAngularVelocity(pBodyId, vec3(pDiff.mValueVelocity, pDiff.mAngle1Velocity, pDiff.mAngle2Velocity));
-		//SetBodyAngularVelocity(pBodyId, vec3(0, 0, 0));
+		//SetBodyVelocity(body_id, vec3(0, 0, 0));
+		//SetBodyVelocity(body_id, vec3(diff.value_velocity_, diff.angle1_velocity_, diff.angle2_velocity_));
+		SetBodyAngularVelocity(body_id, vec3(diff.value_velocity_, diff.angle1_velocity_, diff.angle2_velocity_));
+		//SetBodyAngularVelocity(body_id, vec3(0, 0, 0));
 	}
 
 	{
 		// TODO: adjust linear acceleration.
-		//SetBodyForce(pBodyId, vec3(0, 0, 0));
-		//SetBodyForce(pBodyId, vec3(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
-		SetBodyTorque(pBodyId, vec3(pDiff.mValueAcceleration, pDiff.mAngle1Acceleration, pDiff.mAngle2Acceleration));
-		//SetBodyTorque(pBodyId, vec3(0, 0, 0));
+		//SetBodyForce(body_id, vec3(0, 0, 0));
+		//SetBodyForce(body_id, vec3(diff.value_acceleration_, diff.angle1_acceleration_, diff.angle2_acceleration_));
+		SetBodyTorque(body_id, vec3(diff.value_acceleration_, diff.angle1_acceleration_, diff.angle2_acceleration_));
+		//SetBodyTorque(body_id, vec3(0, 0, 0));
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const char* pFunction)
-{
-	if (pBody1 == 0 && pBody2 == 0)
-	{
-		str lMsg(pFunction);
-		lMsg += " - body1 = body2 = NULL!";
-		mLog.Error(lMsg);
+bool PhysicsManagerODE::CheckBodies(BodyID& body1, BodyID& body2, Object*& object1, Object*& object2, const char* function) {
+	if (body1 == 0 && body2 == 0) {
+		str msg(function);
+		msg += " - body1 = body2 = NULL!";
+		log_.Error(msg);
 		return (false);
 	}
 
-	if (pBody1 == pBody2)
-	{
-		str lMsg(pFunction);
-		lMsg += " - body1 = body2!";
-		mLog.Error(lMsg);
+	if (body1 == body2) {
+		str msg(function);
+		msg += " - body1 = body2!";
+		log_.Error(msg);
 		return (false);
 	}
 
-	pObject1 = 0;
-	pObject2 = 0;
+	object1 = 0;
+	object2 = 0;
 
-	if (pBody1 == 0)
-	{
-		pBody1 = pBody2;
-		pBody2 = INVALID_BODY;
+	if (body1 == 0) {
+		body1 = body2;
+		body2 = INVALID_BODY;
 
-		if (((Object*)pBody1)->mWorldID == mWorldID)
-		{
-			pObject1 = (Object*)pBody1;
+		if (((Object*)body1)->world_id_ == world_id_) {
+			object1 = (Object*)body1;
 			return (true);
-		}
-		else
-		{
-			str lMsg(pFunction);
-			lMsg += " - Body is not part of this world!";
-			mLog.Error(lMsg);
+		} else {
+			str msg(function);
+			msg += " - Body is not part of this world!";
+			log_.Error(msg);
 			return (false);
 		}
-	}
-	else
-	{
-		if (((Object*)pBody1)->mWorldID == mWorldID)
-		{
-			pObject1 = (Object*)pBody1;
-		}
-		else
-		{
-			str lMsg(pFunction);
-			lMsg += " - Body1 is not part of this world!";
-			mLog.Error(lMsg);
+	} else {
+		if (((Object*)body1)->world_id_ == world_id_) {
+			object1 = (Object*)body1;
+		} else {
+			str msg(function);
+			msg += " - Body1 is not part of this world!";
+			log_.Error(msg);
 			return (false);
 		}
 
-		if (((Object*)pBody2)->mWorldID == mWorldID)
-		{
-			pObject2 = (Object*)pBody2;
-		}
-		else
-		{
-			str lMsg(pFunction);
-			lMsg += " - Body2 is not part of this world!";
-			mLog.Error(lMsg);
+		if (((Object*)body2)->world_id_ == world_id_) {
+			object2 = (Object*)body2;
+		} else {
+			str msg(function);
+			msg += " - Body2 is not part of this world!";
+			log_.Error(msg);
 			return (false);
 		}
 
@@ -2202,725 +1888,614 @@ bool PhysicsManagerODE::CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pOb
 	}
 }
 
-bool PhysicsManagerODE::CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const char* pFunction)
-{
-	if (pBody1 == 0)
-	{
-		str lMsg(pFunction);
-		lMsg += " - body1 = NULL!";
-		mLog.Error(lMsg);
+bool PhysicsManagerODE::CheckBodies2(BodyID& body1, BodyID& body2, Object*& object1, Object*& object2, const char* function) {
+	if (body1 == 0) {
+		str msg(function);
+		msg += " - body1 = NULL!";
+		log_.Error(msg);
 		return (false);
 	}
 
-	if (pBody2 == 0)
-	{
-		str lMsg(pFunction);
-		lMsg += " - body2 = NULL!";
-		mLog.Error(lMsg);
+	if (body2 == 0) {
+		str msg(function);
+		msg += " - body2 = NULL!";
+		log_.Error(msg);
 		return (false);
 	}
 
-	if (pBody1 == pBody2)
-	{
-		str lMsg(pFunction);
-		lMsg += " - body1 = body2!";
-		mLog.Error(lMsg);
+	if (body1 == body2) {
+		str msg(function);
+		msg += " - body1 = body2!";
+		log_.Error(msg);
 		return (false);
 	}
 
-	pObject1 = 0;
-	pObject2 = 0;
+	object1 = 0;
+	object2 = 0;
 
-	if (((Object*)pBody1)->mWorldID == mWorldID)
-	{
-		pObject1 = (Object*)pBody1;
-	}
-	else
-	{
-		str lMsg(pFunction);
-		lMsg += " - Body1 is not part of this world!";
-		mLog.Error(lMsg);
+	if (((Object*)body1)->world_id_ == world_id_) {
+		object1 = (Object*)body1;
+	} else {
+		str msg(function);
+		msg += " - Body1 is not part of this world!";
+		log_.Error(msg);
 		return (false);
 	}
 
-	if (((Object*)pBody2)->mWorldID == mWorldID)
-	{
-		pObject2 = (Object*)pBody2;
-	}
-	else
-	{
-		str lMsg(pFunction);
-		lMsg += " - Body2 is not part of this world!";
-		mLog.Error(lMsg);
+	if (((Object*)body2)->world_id_ == world_id_) {
+		object2 = (Object*)body2;
+	} else {
+		str msg(function);
+		msg += " - Body2 is not part of this world!";
+		log_.Error(msg);
 		return (false);
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::GetAnchorPos(JointID pJointId, vec3& pAnchorPos) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetAnchorPos - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetAnchorPos(JointID joint_id, vec3& anchor_pos) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetAnchorPos - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	dVector3 lPos;
+	dVector3 __pos;
 
-	switch ((*x)->mType)
-	{
-	case JOINT_BALL:
-		dJointGetBallAnchor((*x)->mJointID, lPos);
+	switch ((*x)->type_) {
+	case kJointBall:
+		dJointGetBallAnchor((*x)->joint_id_, __pos);
 		break;
-	case JOINT_HINGE:
-		dJointGetHingeAnchor((*x)->mJointID, lPos);
+	case kJointHinge:
+		dJointGetHingeAnchor((*x)->joint_id_, __pos);
 		break;
-	case JOINT_HINGE2:
-		dJointGetHinge2Anchor((*x)->mJointID, lPos);
+	case kJointHinge2:
+		dJointGetHinge2Anchor((*x)->joint_id_, __pos);
 		break;
-	case JOINT_UNIVERSAL:
-		dJointGetUniversalAnchor((*x)->mJointID, lPos);
+	case kJointUniversal:
+		dJointGetUniversalAnchor((*x)->joint_id_, __pos);
 		break;
-	case JOINT_FIXED:
-	case JOINT_ANGULARMOTOR:
-	case JOINT_SLIDER:
-		mLog.Error("GetAnchorPos() - Joint doesn't have an anchor!");
+	case kJointFixed:
+	case kJointAngularmotor:
+	case kJointSlider:
+		log_.Error("GetAnchorPos() - Joint doesn't have an anchor!");
 		return (false);
 	default:
-		mLog.Error("GetAnchorPos() - Unknown joint type!");
+		log_.Error("GetAnchorPos() - Unknown joint type!");
 		return (false);
 	};
 
-	pAnchorPos.x = lPos[0];
-	pAnchorPos.y = lPos[1];
-	pAnchorPos.z = lPos[2];
+	anchor_pos.x = __pos[0];
+	anchor_pos.y = __pos[1];
+	anchor_pos.z = __pos[2];
 
 	return (true);
 }
 
-bool PhysicsManagerODE::GetAxis1(JointID pJointId, vec3& pAxis1) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetAxis1 - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetAxis1(JointID joint_id, vec3& axis1) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetAxis1 - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	dVector3 lAxis;
+	dVector3 _axis;
 
-	switch ((*x)->mType)
-	{
-	case JOINT_HINGE:
-		dJointGetHingeAxis((*x)->mJointID, lAxis);
+	switch ((*x)->type_) {
+	case kJointHinge:
+		dJointGetHingeAxis((*x)->joint_id_, _axis);
 		break;
-	case JOINT_HINGE2:
-		dJointGetHinge2Axis1((*x)->mJointID, lAxis);
+	case kJointHinge2:
+		dJointGetHinge2Axis1((*x)->joint_id_, _axis);
 		break;
-	case JOINT_UNIVERSAL:
-		dJointGetUniversalAxis1((*x)->mJointID, lAxis);
+	case kJointUniversal:
+		dJointGetUniversalAxis1((*x)->joint_id_, _axis);
 		break;
-	case JOINT_ANGULARMOTOR:
-		dJointGetAMotorAxis((*x)->mJointID, 0, lAxis);
+	case kJointAngularmotor:
+		dJointGetAMotorAxis((*x)->joint_id_, 0, _axis);
 		break;
-	case JOINT_SLIDER:
-		dJointGetSliderAxis((*x)->mJointID, lAxis);
+	case kJointSlider:
+		dJointGetSliderAxis((*x)->joint_id_, _axis);
 		break;
-	case JOINT_BALL:
-	case JOINT_FIXED:
-		mLog.Error("GetAxis1() - Joint doesn't have an axis!");
+	case kJointBall:
+	case kJointFixed:
+		log_.Error("GetAxis1() - Joint doesn't have an axis!");
 		return (false);
 	default:
-		mLog.Error("GetAxis1() - Unknown joint type!");
+		log_.Error("GetAxis1() - Unknown joint type!");
 		return (false);
 	};
 
-	pAxis1.x = lAxis[0];
-	pAxis1.y = lAxis[1];
-	pAxis1.z = lAxis[2];
+	axis1.x = _axis[0];
+	axis1.y = _axis[1];
+	axis1.z = _axis[2];
 
 	return (true);
 }
 
-bool PhysicsManagerODE::GetAxis2(JointID pJointId, vec3& pAxis2) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetAxis2 - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetAxis2(JointID joint_id, vec3& axis2) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetAxis2 - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	dVector3 lAxis;
+	dVector3 _axis;
 
-	switch ((*x)->mType)
-	{
-	case JOINT_HINGE2:
-		dJointGetHinge2Axis2((*x)->mJointID, lAxis);
+	switch ((*x)->type_) {
+	case kJointHinge2:
+		dJointGetHinge2Axis2((*x)->joint_id_, _axis);
 		break;
-	case JOINT_UNIVERSAL:
-		dJointGetUniversalAxis2((*x)->mJointID, lAxis);
+	case kJointUniversal:
+		dJointGetUniversalAxis2((*x)->joint_id_, _axis);
 		break;
-	case JOINT_BALL:
-	case JOINT_HINGE:
-	case JOINT_SLIDER:
-	case JOINT_FIXED:
-	case JOINT_ANGULARMOTOR:
-		//mLog.Error("GetAxis2() - Joint doesn't have two axes!");
+	case kJointBall:
+	case kJointHinge:
+	case kJointSlider:
+	case kJointFixed:
+	case kJointAngularmotor:
+		//log_.Error("GetAxis2() - Joint doesn't have two axes!");
 		return (false);
 	default:
-		mLog.Error("GetAxis2() - Unknown joint type!");
+		log_.Error("GetAxis2() - Unknown joint type!");
 		return (false);
 	};
 
-	pAxis2.x = lAxis[0];
-	pAxis2.y = lAxis[1];
-	pAxis2.z = lAxis[2];
+	axis2.x = _axis[0];
+	axis2.y = _axis[1];
+	axis2.z = _axis[2];
 
 	return (true);
 }
 
-bool PhysicsManagerODE::GetAngle1(JointID pJointId, float32& pAngle) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetAngle1 - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetAngle1(JointID joint_id, float32& angle) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetAngle1 - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	switch ((*x)->mType)
-	{
-	case JOINT_HINGE2:
-		pAngle = dJointGetHinge2Angle1((*x)->mJointID);
+	switch ((*x)->type_) {
+	case kJointHinge2:
+		angle = dJointGetHinge2Angle1((*x)->joint_id_);
 		break;
-	case JOINT_UNIVERSAL:
-		pAngle = dJointGetUniversalAngle1((*x)->mJointID);
+	case kJointUniversal:
+		angle = dJointGetUniversalAngle1((*x)->joint_id_);
 		break;
-	case JOINT_HINGE:
-		pAngle = dJointGetHingeAngle((*x)->mJointID);
+	case kJointHinge:
+		angle = dJointGetHingeAngle((*x)->joint_id_);
 		break;
-	case JOINT_ANGULARMOTOR:
-		pAngle = dJointGetAMotorAngle((*x)->mJointID, 0);
+	case kJointAngularmotor:
+		angle = dJointGetAMotorAngle((*x)->joint_id_, 0);
 		break;
-	case JOINT_BALL:
-	case JOINT_SLIDER:
-	case JOINT_FIXED:
-		mLog.Error("GetAngle1() - Joint doesn't have an angle!");
+	case kJointBall:
+	case kJointSlider:
+	case kJointFixed:
+		log_.Error("GetAngle1() - Joint doesn't have an angle!");
 		return (false);
 	default:
-		mLog.Error("GetAngle1() - Unknown joint type!");
+		log_.Error("GetAngle1() - Unknown joint type!");
 		return (false);
 	};
 
 	return (true);
 }
 
-bool PhysicsManagerODE::GetAngle2(JointID pJointId, float32& pAngle) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetAngle2 - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetAngle2(JointID joint_id, float32& angle) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetAngle2 - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	switch ((*x)->mType)
-	{
-	case JOINT_UNIVERSAL:
-		pAngle = dJointGetUniversalAngle2((*x)->mJointID);
+	switch ((*x)->type_) {
+	case kJointUniversal:
+		angle = dJointGetUniversalAngle2((*x)->joint_id_);
 		break;
-	case JOINT_HINGE2:
+	case kJointHinge2:
 		// TODO: implement this!
-		mLog.Error("GetAngle2() - Missing hinge2 implementation in ODE!");
+		log_.Error("GetAngle2() - Missing hinge2 implementation in ODE!");
 		return (false);
-	case JOINT_HINGE:
-	case JOINT_ANGULARMOTOR:
-	case JOINT_BALL:
-	case JOINT_SLIDER:
-	case JOINT_FIXED:
-		mLog.Error("GetAngle2() - Joint doesn't have two angles!");
-		return (false);
-	default:
-		mLog.Error("GetAngle2() - Unknown joint type!");
-		return (false);
-	};
-
-	return (true);
-}
-
-bool PhysicsManagerODE::GetAngleRate1(JointID pJointId, float32& pAngleRate) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetAngleRate1 - Couldn't find joint %i!", pJointId);
-		return (false);
-	}
-
-	switch ((*x)->mType)
-	{
-	case JOINT_HINGE2:
-		pAngleRate = dJointGetHinge2Angle1Rate((*x)->mJointID);
-		break;
-	case JOINT_UNIVERSAL:
-		pAngleRate = dJointGetUniversalAngle1Rate((*x)->mJointID);
-		break;
-	case JOINT_HINGE:
-		pAngleRate = dJointGetHingeAngleRate((*x)->mJointID);
-		break;
-	case JOINT_ANGULARMOTOR:
-		pAngleRate = dJointGetAMotorAngleRate((*x)->mJointID, 0);
-		break;
-	case JOINT_BALL:
-	case JOINT_SLIDER:
-	case JOINT_FIXED:
-		mLog.Error("GetAngleRate1() - Joint doesn't have an angle!");
+	case kJointHinge:
+	case kJointAngularmotor:
+	case kJointBall:
+	case kJointSlider:
+	case kJointFixed:
+		log_.Error("GetAngle2() - Joint doesn't have two angles!");
 		return (false);
 	default:
-		mLog.Error("GetAngleRate1() - Unknown joint type!");
+		log_.Error("GetAngle2() - Unknown joint type!");
 		return (false);
 	};
 
 	return (true);
 }
 
-bool PhysicsManagerODE::GetAngleRate2(JointID pJointId, float32& pAngleRate) const
-{	
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetAngleRate2 - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetAngleRate1(JointID joint_id, float32& angle_rate) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetAngleRate1 - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	switch ((*x)->mType)
-	{
-	case JOINT_HINGE2:
-		pAngleRate = dJointGetHinge2Angle2Rate((*x)->mJointID);
+	switch ((*x)->type_) {
+	case kJointHinge2:
+		angle_rate = dJointGetHinge2Angle1Rate((*x)->joint_id_);
 		break;
-	case JOINT_UNIVERSAL:
-		pAngleRate = dJointGetUniversalAngle2Rate((*x)->mJointID);
+	case kJointUniversal:
+		angle_rate = dJointGetUniversalAngle1Rate((*x)->joint_id_);
 		break;
-	case JOINT_HINGE:
-		pAngleRate = dJointGetHingeAngleRate((*x)->mJointID);
+	case kJointHinge:
+		angle_rate = dJointGetHingeAngleRate((*x)->joint_id_);
 		break;
-	case JOINT_BALL:
-	case JOINT_SLIDER:
-	case JOINT_FIXED:
-	case JOINT_ANGULARMOTOR:
-		mLog.Error("GetAngleRate2() - Joint doesn't have two angles!");
+	case kJointAngularmotor:
+		angle_rate = dJointGetAMotorAngleRate((*x)->joint_id_, 0);
+		break;
+	case kJointBall:
+	case kJointSlider:
+	case kJointFixed:
+		log_.Error("GetAngleRate1() - Joint doesn't have an angle!");
 		return (false);
 	default:
-		mLog.Error("GetAngleRate2() - Unknown joint type!");
+		log_.Error("GetAngleRate1() - Unknown joint type!");
 		return (false);
 	};
 
 	return (true);
 }
 
-bool PhysicsManagerODE::SetAngle1(BodyID pBodyId, JointID pJointId, float32 pAngle)
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("SetAngle1 - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetAngleRate2(JointID joint_id, float32& angle_rate) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetAngleRate2 - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	Object* lObject = (Object*)pBodyId;
-	if (lObject->mWorldID != mWorldID)
-	{
-		mLog.Errorf("GetBodyData - Body %i is not part of this world!", pBodyId);
+	switch ((*x)->type_) {
+	case kJointHinge2:
+		angle_rate = dJointGetHinge2Angle2Rate((*x)->joint_id_);
+		break;
+	case kJointUniversal:
+		angle_rate = dJointGetUniversalAngle2Rate((*x)->joint_id_);
+		break;
+	case kJointHinge:
+		angle_rate = dJointGetHingeAngleRate((*x)->joint_id_);
+		break;
+	case kJointBall:
+	case kJointSlider:
+	case kJointFixed:
+	case kJointAngularmotor:
+		log_.Error("GetAngleRate2() - Joint doesn't have two angles!");
+		return (false);
+	default:
+		log_.Error("GetAngleRate2() - Unknown joint type!");
+		return (false);
+	};
+
+	return (true);
+}
+
+bool PhysicsManagerODE::SetAngle1(BodyID body_id, JointID joint_id, float32 angle) {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("SetAngle1 - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	JointInfo* lJoint = (JointInfo*)pJointId;
-	switch (lJoint->mType)
-	{
-		case JOINT_HINGE:
-		{
-			deb_assert(::dJointGetBody(lJoint->mJointID, 1) == lObject->mBodyID);
-			const float lCurrentAngle = ::dJointGetHingeAngle(lJoint->mJointID);
-			if (lCurrentAngle == pAngle)
-			{
+	Object* _object = (Object*)body_id;
+	if (_object->world_id_ != world_id_) {
+		log_.Errorf("GetBodyData - Body %i is not part of this world!", body_id);
+		return (false);
+	}
+
+	JointInfo* __joint = (JointInfo*)joint_id;
+	switch (__joint->type_) {
+		case kJointHinge: {
+			deb_assert(::dJointGetBody(__joint->joint_id_, 1) == _object->body_id_);
+			const float current_angle = ::dJointGetHingeAngle(__joint->joint_id_);
+			if (current_angle == angle) {
 				return (true);
 			}
-			xform lTransform;
-			GetBodyTransform(pBodyId, lTransform);
-			vec3 lAxis;
-			if (GetAxis1(pJointId, lAxis))
-			{
-				dVector3 lRawAnchor;
-				::dJointGetHingeAnchor((*x)->mJointID, lRawAnchor);
-				vec3 lAnchor(lRawAnchor);
-				::dJointGetHingeAnchor2((*x)->mJointID, lRawAnchor);
-				vec3 lAnchor2(lRawAnchor);
-				lTransform.GetPosition() += lAnchor-lAnchor2;
-				lTransform.RotateAroundAnchor(lAnchor, lAxis, -pAngle+lCurrentAngle);
-				SetBodyTransform(pBodyId, lTransform);
+			xform _transform;
+			GetBodyTransform(body_id, _transform);
+			vec3 _axis;
+			if (GetAxis1(joint_id, _axis)) {
+				dVector3 raw_anchor;
+				::dJointGetHingeAnchor((*x)->joint_id_, raw_anchor);
+				vec3 anchor(raw_anchor);
+				::dJointGetHingeAnchor2((*x)->joint_id_, raw_anchor);
+				vec3 __anchor2(raw_anchor);
+				_transform.GetPosition() += anchor-__anchor2;
+				_transform.RotateAroundAnchor(anchor, _axis, -angle+current_angle);
+				SetBodyTransform(body_id, _transform);
+				return (true);
+			} else {
+				log_.Error("SetAngle1() - hinge-2 joint error!");
+			}
+		} break;
+		case kJointHinge2: {
+			deb_assert(::dJointGetBody(__joint->joint_id_, 1) == _object->body_id_);
+			const float current_angle = ::dJointGetHinge2Angle1(__joint->joint_id_);
+			if (current_angle == angle) {
 				return (true);
 			}
-			else
-			{
-				mLog.Error("SetAngle1() - hinge-2 joint error!");
-			}
-		}
-		break;
-		case JOINT_HINGE2:
-		{
-			deb_assert(::dJointGetBody(lJoint->mJointID, 1) == lObject->mBodyID);
-			const float lCurrentAngle = ::dJointGetHinge2Angle1(lJoint->mJointID);
-			if (lCurrentAngle == pAngle)
-			{
+			xform _transform;
+			GetBodyTransform(body_id, _transform);
+			vec3 _axis1;
+			if (GetAxis1(joint_id, _axis1)) {
+				_transform.GetOrientation().RotateAroundVector(_axis1, -angle+current_angle);
+				SetBodyTransform(body_id, _transform);
 				return (true);
+			} else {
+				log_.Error("SetAngle1() - hinge-2 joint error!");
 			}
-			xform lTransform;
-			GetBodyTransform(pBodyId, lTransform);
-			vec3 lAxis1;
-			if (GetAxis1(pJointId, lAxis1))
-			{
-				lTransform.GetOrientation().RotateAroundVector(lAxis1, -pAngle+lCurrentAngle);
-				SetBodyTransform(pBodyId, lTransform);
-				return (true);
-			}
-			else
-			{
-				mLog.Error("SetAngle1() - hinge-2 joint error!");
-			}
-		}
-		break;
-		default:
-		{
-			mLog.Error("SetAngle1() - Unknown joint type!");
+		} break;
+		default: {
+			log_.Error("SetAngle1() - Unknown joint type!");
 		}
 	};
 
 	return (false);
 }
 
-bool PhysicsManagerODE::SetAngularMotorAngle(JointID pJointId, float32 pAngle)
-{
-	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("SetAngularMotorAngle - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::SetAngularMotorAngle(JointID joint_id, float32 angle) {
+	JointTable::iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("SetAngularMotorAngle - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	if ((*x)->mType != JOINT_ANGULARMOTOR)
-	{
-		mLog.Error("SetAngularMotorAngle() - Joint is not an angular motor!");
+	if ((*x)->type_ != kJointAngularmotor) {
+		log_.Error("SetAngularMotorAngle() - Joint is not an angular motor!");
 		return (false);
 	}
 
-	dJointSetAMotorAngle((*x)->mJointID, 0, pAngle);
+	dJointSetAMotorAngle((*x)->joint_id_, 0, angle);
 	return (true);
 }
 
-bool PhysicsManagerODE::SetAngularMotorSpeed(JointID pJointId, float32 pSpeed)
-{
-	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("SetAngularMotorSpeed - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::SetAngularMotorSpeed(JointID joint_id, float32 speed) {
+	JointTable::iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("SetAngularMotorSpeed - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	if ((*x)->mType != JOINT_ANGULARMOTOR)
-	{
-		mLog.Error("SetAngularMotorSpeed() - Joint is not an angular motor!");
+	if ((*x)->type_ != kJointAngularmotor) {
+		log_.Error("SetAngularMotorSpeed() - Joint is not an angular motor!");
 		return (false);
 	}
 
-	dJointSetAMotorParam((*x)->mJointID, dParamVel, pSpeed);
+	dJointSetAMotorParam((*x)->joint_id_, dParamVel, speed);
 	return (true);
 }
 
-bool PhysicsManagerODE::SetMotorMaxForce(JointID pJointId, float32 pMaxForce)
-{
-	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("SetMotorMaxForce - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::SetMotorMaxForce(JointID joint_id, float32 max_force) {
+	JointTable::iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("SetMotorMaxForce - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
 
-	JointInfo* lJoint = *x;
-	if (lJoint->mType == JOINT_ANGULARMOTOR)
-	{
-		dJointSetAMotorParam(lJoint->mJointID, dParamFMax, pMaxForce);
+	JointInfo* __joint = *x;
+	if (__joint->type_ == kJointAngularmotor) {
+		dJointSetAMotorParam(__joint->joint_id_, dParamFMax, max_force);
+		return (true);
+	} else if (__joint->type_ == kJointHinge2) {
+		dJointSetHinge2Param(__joint->joint_id_, dParamFMax, max_force);
+		dJointSetHinge2Param(__joint->joint_id_, dParamFMax2, max_force);
+		return (true);
+	} else if (__joint->type_ == kJointHinge) {
+		dJointSetHingeParam(__joint->joint_id_, dParamFMax, max_force);
+		dJointSetHingeParam(__joint->joint_id_, dParamFMax2, max_force);
+		return (true);
+	} else if (__joint->type_ == kJointSlider) {
+		dJointSetSliderParam(__joint->joint_id_, dParamFMax, max_force);
+		dJointSetSliderParam(__joint->joint_id_, dParamFMax2, max_force);
 		return (true);
 	}
-	else if (lJoint->mType == JOINT_HINGE2)
-	{
-		dJointSetHinge2Param(lJoint->mJointID, dParamFMax, pMaxForce);
-		dJointSetHinge2Param(lJoint->mJointID, dParamFMax2, pMaxForce);
-		return (true);
-	}
-	else if (lJoint->mType == JOINT_HINGE)
-	{
-		dJointSetHingeParam(lJoint->mJointID, dParamFMax, pMaxForce);
-		dJointSetHingeParam(lJoint->mJointID, dParamFMax2, pMaxForce);
-		return (true);
-	}
-	else if (lJoint->mType == JOINT_SLIDER)
-	{
-		dJointSetSliderParam(lJoint->mJointID, dParamFMax, pMaxForce);
-		dJointSetSliderParam(lJoint->mJointID, dParamFMax2, pMaxForce);
-		return (true);
-	}
-	mLog.Error("SetMotorMaxForce() - Joint is not an angular motor!");
+	log_.Error("SetMotorMaxForce() - Joint is not an angular motor!");
 	return (false);
 }
 
-bool PhysicsManagerODE::SetAngularMotorRoll(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity)
-{
-	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("SetAngularMotorRoll - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::SetAngularMotorRoll(JointID joint_id, float32 max_force, float32 target_velocity) {
+	JointTable::iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("SetAngularMotorRoll - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	JointInfo* lJoint = *x;
-	if (lJoint->mType == JOINT_HINGE2)
-	{
-		::dJointSetHinge2Param(lJoint->mJointID, dParamFMax2, pMaxForce);
-		::dJointSetHinge2Param(lJoint->mJointID, dParamVel2, pTargetVelocity);
-		::dBodyEnable(::dJointGetBody(lJoint->mJointID, 1));
+	JointInfo* __joint = *x;
+	if (__joint->type_ == kJointHinge2) {
+		::dJointSetHinge2Param(__joint->joint_id_, dParamFMax2, max_force);
+		::dJointSetHinge2Param(__joint->joint_id_, dParamVel2, target_velocity);
+		::dBodyEnable(::dJointGetBody(__joint->joint_id_, 1));
+		return (true);
+	} else if (__joint->type_ == kJointHinge) {
+		::dJointSetHingeParam(__joint->joint_id_, dParamFMax, max_force);
+		::dJointSetHingeParam(__joint->joint_id_, dParamVel, target_velocity);
+		::dBodyEnable(::dJointGetBody(__joint->joint_id_, 1));
+		return (true);
+	} else if (__joint->type_ == kJointUniversal) {
+		::dJointSetUniversalParam(__joint->joint_id_, dParamFMax, max_force);
+		::dJointSetUniversalParam(__joint->joint_id_, dParamVel, target_velocity);
+		::dJointSetUniversalParam(__joint->joint_id_, dParamFMax2, max_force);
+		::dJointSetUniversalParam(__joint->joint_id_, dParamVel2, target_velocity);
+		::dBodyEnable(::dJointGetBody(__joint->joint_id_, 1));
 		return (true);
 	}
-	else if (lJoint->mType == JOINT_HINGE)
-	{
-		::dJointSetHingeParam(lJoint->mJointID, dParamFMax, pMaxForce);
-		::dJointSetHingeParam(lJoint->mJointID, dParamVel, pTargetVelocity);
-		::dBodyEnable(::dJointGetBody(lJoint->mJointID, 1));
-		return (true);
-	}
-	else if (lJoint->mType == JOINT_UNIVERSAL)
-	{
-		::dJointSetUniversalParam(lJoint->mJointID, dParamFMax, pMaxForce);
-		::dJointSetUniversalParam(lJoint->mJointID, dParamVel, pTargetVelocity);
-		::dJointSetUniversalParam(lJoint->mJointID, dParamFMax2, pMaxForce);
-		::dJointSetUniversalParam(lJoint->mJointID, dParamVel2, pTargetVelocity);
-		::dBodyEnable(::dJointGetBody(lJoint->mJointID, 1));
-		return (true);
-	}
-	mLog.Error("SetAngularMotorRoll() - Joint is not an angular motor!");
+	log_.Error("SetAngularMotorRoll() - Joint is not an angular motor!");
 	return (false);
 }
 
-bool PhysicsManagerODE::GetAngularMotorRoll(JointID pJointId, float32& pMaxForce, float32& pTargetVelocity)
-{
-	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetAngularMotorRoll - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetAngularMotorRoll(JointID joint_id, float32& max_force, float32& target_velocity) {
+	JointTable::iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetAngularMotorRoll - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	JointInfo* lJoint = *x;
-	if (lJoint->mType == JOINT_HINGE2)
-	{
-		pMaxForce = ::dJointGetHinge2Param(lJoint->mJointID, dParamFMax2);
-		pTargetVelocity = ::dJointGetHinge2Param(lJoint->mJointID, dParamVel2);
+	JointInfo* __joint = *x;
+	if (__joint->type_ == kJointHinge2) {
+		max_force = ::dJointGetHinge2Param(__joint->joint_id_, dParamFMax2);
+		target_velocity = ::dJointGetHinge2Param(__joint->joint_id_, dParamVel2);
+		return (true);
+	} else if (__joint->type_ == kJointHinge) {
+		max_force = ::dJointGetHingeParam(__joint->joint_id_, dParamFMax);
+		target_velocity = ::dJointGetHingeParam(__joint->joint_id_, dParamVel);
 		return (true);
 	}
-	else if (lJoint->mType == JOINT_HINGE)
-	{
-		pMaxForce = ::dJointGetHingeParam(lJoint->mJointID, dParamFMax);
-		pTargetVelocity = ::dJointGetHingeParam(lJoint->mJointID, dParamVel);
-		return (true);
-	}
-	mLog.Error("GetAngularMotorRoll() - Joint is not an angular motor!");
+	log_.Error("GetAngularMotorRoll() - Joint is not an angular motor!");
 	return (false);
 }
 
-bool PhysicsManagerODE::SetAngularMotorTurn(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity)
-{
-	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("SetAngularMotorTurn - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::SetAngularMotorTurn(JointID joint_id, float32 max_force, float32 target_velocity) {
+	JointTable::iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("SetAngularMotorTurn - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	JointInfo* lJoint = *x;
-	if (lJoint->mType == JOINT_HINGE2)
-	{
-		dJointSetHinge2Param(lJoint->mJointID, dParamFMax, pMaxForce);
-		dJointSetHinge2Param(lJoint->mJointID, dParamVel, pTargetVelocity);
-		::dBodyEnable(::dJointGetBody(lJoint->mJointID, 1));
+	JointInfo* __joint = *x;
+	if (__joint->type_ == kJointHinge2) {
+		dJointSetHinge2Param(__joint->joint_id_, dParamFMax, max_force);
+		dJointSetHinge2Param(__joint->joint_id_, dParamVel, target_velocity);
+		::dBodyEnable(::dJointGetBody(__joint->joint_id_, 1));
+		return (true);
+	} else if (__joint->type_ == kJointHinge) {
+		dJointSetHingeParam(__joint->joint_id_, dParamFMax, max_force);
+		dJointSetHingeParam(__joint->joint_id_, dParamVel, target_velocity);
+		::dBodyEnable(::dJointGetBody(__joint->joint_id_, 1));
 		return (true);
 	}
-	else if (lJoint->mType == JOINT_HINGE)
-	{
-		dJointSetHingeParam(lJoint->mJointID, dParamFMax, pMaxForce);
-		dJointSetHingeParam(lJoint->mJointID, dParamVel, pTargetVelocity);
-		::dBodyEnable(::dJointGetBody(lJoint->mJointID, 1));
-		return (true);
-	}
-	mLog.Error("SetAngularMotorTurn() - Joint is not an angular motor!");
+	log_.Error("SetAngularMotorTurn() - Joint is not an angular motor!");
 	return (false);
 }
 
-bool PhysicsManagerODE::GetAngularMotorAngle(JointID pJointId, float32& pAngle) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetAngularMotorAngle - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetAngularMotorAngle(JointID joint_id, float32& angle) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetAngularMotorAngle - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	if ((*x)->mType != JOINT_ANGULARMOTOR)
-	{
-		mLog.Error("GetAngularMotorAngle() - Joint is not an angular motor!");
+	if ((*x)->type_ != kJointAngularmotor) {
+		log_.Error("GetAngularMotorAngle() - Joint is not an angular motor!");
 		return (false);
 	}
 
-	pAngle = dJointGetAMotorAngle((*x)->mJointID, 0);
+	angle = dJointGetAMotorAngle((*x)->joint_id_, 0);
 	return (true);
 }
 
-bool PhysicsManagerODE::GetAngularMotorSpeed(JointID pJointId, float32& pSpeed) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetAngularMotorSpeed - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetAngularMotorSpeed(JointID joint_id, float32& speed) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetAngularMotorSpeed - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	if ((*x)->mType != JOINT_ANGULARMOTOR)
-	{
-		mLog.Error("GetAngularMotorSpeed() - Joint is not an angular motor!");
+	if ((*x)->type_ != kJointAngularmotor) {
+		log_.Error("GetAngularMotorSpeed() - Joint is not an angular motor!");
 		return (false);
 	}
 
-	pSpeed = dJointGetAMotorParam((*x)->mJointID, dParamVel);
+	speed = dJointGetAMotorParam((*x)->joint_id_, dParamVel);
 	return (true);
 }
 
-bool PhysicsManagerODE::GetAngularMotorMaxForce(JointID pJointId, float32& pMaxForce) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetAngularMotorMaxForce - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetAngularMotorMaxForce(JointID joint_id, float32& max_force) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetAngularMotorMaxForce - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	if ((*x)->mType != JOINT_ANGULARMOTOR)
-	{
-		mLog.Error("GetAngularMotorMaxForce() - Joint is not an angular motor!");
+	if ((*x)->type_ != kJointAngularmotor) {
+		log_.Error("GetAngularMotorMaxForce() - Joint is not an angular motor!");
 		return (false);
 	}
 
-	pMaxForce = dJointGetAMotorParam((*x)->mJointID, dParamFMax);
+	max_force = dJointGetAMotorParam((*x)->joint_id_, dParamFMax);
 	return (true);
 }
 
-bool PhysicsManagerODE::SetMotorTarget(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity)
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("SetMotorTarget - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::SetMotorTarget(JointID joint_id, float32 max_force, float32 target_velocity) {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("SetMotorTarget - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	if ((*x)->mType != JOINT_SLIDER)
-	{
-		mLog.Error("SetMotorTarget() - Joint is not an angular motor!");
+	if ((*x)->type_ != kJointSlider) {
+		log_.Error("SetMotorTarget() - Joint is not an angular motor!");
 		return (false);
 	}
 
-	::dJointSetSliderParam((*x)->mJointID, dParamFMax, pMaxForce);
-	::dJointSetSliderParam((*x)->mJointID, dParamVel, pTargetVelocity);
-	::dBodyEnable(::dJointGetBody((*x)->mJointID, 1));
+	::dJointSetSliderParam((*x)->joint_id_, dParamFMax, max_force);
+	::dJointSetSliderParam((*x)->joint_id_, dParamVel, target_velocity);
+	::dBodyEnable(::dJointGetBody((*x)->joint_id_, 1));
 	return (true);
 }
 
-bool PhysicsManagerODE::SetJointParams(JointID pJointId, float32 pLowStop, float32 pHighStop, float32 pBounce, int pExtraIndex)
-{
-	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("SetJointParams - Couldn't find joint!", pJointId);
+bool PhysicsManagerODE::SetJointParams(JointID joint_id, float32 low_stop, float32 high_stop, float32 _bounce, int extra_index) {
+	JointTable::iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("SetJointParams - Couldn't find joint!", joint_id);
 		return (false);
 	}
 
-	dJointID lJointId = (*x)->mJointID;
-	switch ((*x)->mType)
-	{
-		case JOINT_SLIDER:
-		{
-			dJointSetSliderParam(lJointId, dParamLoStop, pLowStop);
-			dJointSetSliderParam(lJointId, dParamHiStop, pHighStop);
-			dJointSetSliderParam(lJointId, dParamBounce, pBounce);
-			dJointSetSliderParam(lJointId, dParamBounce2, pBounce);
-		}
-		break;
-		case JOINT_HINGE:
-		{
-			dJointSetHingeParam(lJointId, dParamLoStop, pLowStop);
-			dJointSetHingeParam(lJointId, dParamHiStop, pHighStop);
-			dJointSetHingeParam(lJointId, dParamBounce, pBounce);
-			dJointSetHingeParam(lJointId, dParamStopERP, pBounce);
-			dJointSetHingeParam(lJointId, dParamCFM, 1e-11f);
-			dJointSetHingeParam(lJointId, dParamFudgeFactor, 0.01f);
-		}
-		break;
-		case JOINT_HINGE2:
-		{
-			if (pExtraIndex == 0)
-			{
-				dJointSetHinge2Param(lJointId, dParamLoStop, pLowStop);
-				dJointSetHinge2Param(lJointId, dParamHiStop, pHighStop);
+	dJointID _joint_id = (*x)->joint_id_;
+	switch ((*x)->type_) {
+		case kJointSlider: {
+			dJointSetSliderParam(_joint_id, dParamLoStop, low_stop);
+			dJointSetSliderParam(_joint_id, dParamHiStop, high_stop);
+			dJointSetSliderParam(_joint_id, dParamBounce, _bounce);
+			dJointSetSliderParam(_joint_id, dParamBounce2, _bounce);
+		} break;
+		case kJointHinge: {
+			dJointSetHingeParam(_joint_id, dParamLoStop, low_stop);
+			dJointSetHingeParam(_joint_id, dParamHiStop, high_stop);
+			dJointSetHingeParam(_joint_id, dParamBounce, _bounce);
+			dJointSetHingeParam(_joint_id, dParamStopERP, _bounce);
+			dJointSetHingeParam(_joint_id, dParamCFM, 1e-11f);
+			dJointSetHingeParam(_joint_id, dParamFudgeFactor, 0.01f);
+		} break;
+		case kJointHinge2: {
+			if (extra_index == 0) {
+				dJointSetHinge2Param(_joint_id, dParamLoStop, low_stop);
+				dJointSetHinge2Param(_joint_id, dParamHiStop, high_stop);
+			} else {
+				dJointSetHinge2Param(_joint_id, dParamLoStop2, low_stop);
+				dJointSetHinge2Param(_joint_id, dParamHiStop2, high_stop);
 			}
-			else
-			{
-				dJointSetHinge2Param(lJointId, dParamLoStop2, pLowStop);
-				dJointSetHinge2Param(lJointId, dParamHiStop2, pHighStop);
-			}
-			dJointSetHinge2Param(lJointId, dParamBounce, pBounce);
-		}
-		break;
-		case JOINT_UNIVERSAL:
-		{
-			dJointSetUniversalParam(lJointId, dParamLoStop, pLowStop);
-			dJointSetUniversalParam(lJointId, dParamHiStop, pHighStop);
-			dJointSetUniversalParam(lJointId, dParamBounce, pBounce);
-			dJointSetUniversalParam(lJointId, dParamFudgeFactor, pBounce);
-			dJointSetUniversalParam(lJointId, dParamCFM, 0);
-			dJointSetUniversalParam(lJointId, dParamLoStop2, pLowStop);
-			dJointSetUniversalParam(lJointId, dParamHiStop2, pHighStop);
-			dJointSetUniversalParam(lJointId, dParamBounce2, pBounce);
-			dJointSetUniversalParam(lJointId, dParamFudgeFactor2, pBounce);
-			dJointSetUniversalParam(lJointId, dParamCFM2, 0);
-		}
-		break;
-		case JOINT_ANGULARMOTOR:
-		{
-			dJointSetAMotorParam(lJointId, dParamLoStop, pLowStop);
-			dJointSetAMotorParam(lJointId, dParamHiStop, pHighStop);
-			dJointSetAMotorParam(lJointId, dParamBounce, pBounce);
-		}
-		break;
-		case JOINT_BALL:
-		case JOINT_FIXED:
-		{
-			mLog.Error("SetJointParams() - joint doesn't have params!");
-		}
-		break;
-		default:
-		{
-			mLog.Error("SetJointParams() - Unknown joint type!");
+			dJointSetHinge2Param(_joint_id, dParamBounce, _bounce);
+		} break;
+		case kJointUniversal: {
+			dJointSetUniversalParam(_joint_id, dParamLoStop, low_stop);
+			dJointSetUniversalParam(_joint_id, dParamHiStop, high_stop);
+			dJointSetUniversalParam(_joint_id, dParamBounce, _bounce);
+			dJointSetUniversalParam(_joint_id, dParamFudgeFactor, _bounce);
+			dJointSetUniversalParam(_joint_id, dParamCFM, 0);
+			dJointSetUniversalParam(_joint_id, dParamLoStop2, low_stop);
+			dJointSetUniversalParam(_joint_id, dParamHiStop2, high_stop);
+			dJointSetUniversalParam(_joint_id, dParamBounce2, _bounce);
+			dJointSetUniversalParam(_joint_id, dParamFudgeFactor2, _bounce);
+			dJointSetUniversalParam(_joint_id, dParamCFM2, 0);
+		} break;
+		case kJointAngularmotor: {
+			dJointSetAMotorParam(_joint_id, dParamLoStop, low_stop);
+			dJointSetAMotorParam(_joint_id, dParamHiStop, high_stop);
+			dJointSetAMotorParam(_joint_id, dParamBounce, _bounce);
+		} break;
+		case kJointBall:
+		case kJointFixed: {
+			log_.Error("SetJointParams() - joint doesn't have params!");
+		} break;
+		default: {
+			log_.Error("SetJointParams() - Unknown joint type!");
 		}
 		return (false);
 	}
@@ -2928,795 +2503,680 @@ bool PhysicsManagerODE::SetJointParams(JointID pJointId, float32 pLowStop, float
 	return (true);
 }
 
-bool PhysicsManagerODE::GetJointParams(JointID pJointId, float32& pLowStop, float32& pHighStop, float32& pBounce) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
+bool PhysicsManagerODE::GetJointParams(JointID joint_id, float32& low_stop, float32& high_stop, float32& _bounce) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
 		//mLog.Warningf("GetJointParams( - Couldn't find joint %i!"), pJointId);
 		return (false);
 	}
 
-	switch ((*x)->mType)
-	{
-	case JOINT_SLIDER:
-		pLowStop  = dJointGetSliderParam((*x)->mJointID, dParamLoStop);
-		pHighStop = dJointGetSliderParam((*x)->mJointID, dParamHiStop);
-		pBounce   = dJointGetSliderParam((*x)->mJointID, dParamBounce);
+	switch ((*x)->type_) {
+	case kJointSlider:
+		low_stop  = dJointGetSliderParam((*x)->joint_id_, dParamLoStop);
+		high_stop = dJointGetSliderParam((*x)->joint_id_, dParamHiStop);
+		_bounce   = dJointGetSliderParam((*x)->joint_id_, dParamBounce);
 		break;
-	case JOINT_HINGE:
-		pLowStop  = dJointGetHingeParam((*x)->mJointID, dParamLoStop);
-		pHighStop = dJointGetHingeParam((*x)->mJointID, dParamHiStop);
-		pBounce   = dJointGetHingeParam((*x)->mJointID, dParamBounce);
+	case kJointHinge:
+		low_stop  = dJointGetHingeParam((*x)->joint_id_, dParamLoStop);
+		high_stop = dJointGetHingeParam((*x)->joint_id_, dParamHiStop);
+		_bounce   = dJointGetHingeParam((*x)->joint_id_, dParamBounce);
 		break;
-	case JOINT_HINGE2:
-		pLowStop  = dJointGetHinge2Param((*x)->mJointID, dParamLoStop);
-		pHighStop = dJointGetHinge2Param((*x)->mJointID, dParamHiStop);
-		pBounce   = dJointGetHinge2Param((*x)->mJointID, dParamBounce);
+	case kJointHinge2:
+		low_stop  = dJointGetHinge2Param((*x)->joint_id_, dParamLoStop);
+		high_stop = dJointGetHinge2Param((*x)->joint_id_, dParamHiStop);
+		_bounce   = dJointGetHinge2Param((*x)->joint_id_, dParamBounce);
 		break;
-	case JOINT_UNIVERSAL:
-		pLowStop  = dJointGetUniversalParam((*x)->mJointID, dParamLoStop);
-		pHighStop = dJointGetUniversalParam((*x)->mJointID, dParamHiStop);
-		pBounce   = dJointGetUniversalParam((*x)->mJointID, dParamBounce);
+	case kJointUniversal:
+		low_stop  = dJointGetUniversalParam((*x)->joint_id_, dParamLoStop);
+		high_stop = dJointGetUniversalParam((*x)->joint_id_, dParamHiStop);
+		_bounce   = dJointGetUniversalParam((*x)->joint_id_, dParamBounce);
 		break;
-	case JOINT_ANGULARMOTOR:
-		pLowStop  = dJointGetAMotorParam((*x)->mJointID, dParamLoStop);
-		pHighStop = dJointGetAMotorParam((*x)->mJointID, dParamHiStop);
-		pBounce   = dJointGetAMotorParam((*x)->mJointID, dParamBounce);
+	case kJointAngularmotor:
+		low_stop  = dJointGetAMotorParam((*x)->joint_id_, dParamLoStop);
+		high_stop = dJointGetAMotorParam((*x)->joint_id_, dParamHiStop);
+		_bounce   = dJointGetAMotorParam((*x)->joint_id_, dParamBounce);
 		break;
-	case JOINT_BALL:
-	case JOINT_FIXED:
-		mLog.Error("GetJointParams() - joint doesn't have params!");
+	case kJointBall:
+	case kJointFixed:
+		log_.Error("GetJointParams() - joint doesn't have params!");
 	default:
-		mLog.Error("GetJointParams() - Unknown joint type!");
+		log_.Error("GetJointParams() - Unknown joint type!");
 		return (false);
 	}
 
 	return (true);
 }
 
-bool PhysicsManagerODE::SetSuspension(JointID pJointId, float32 pFrameTime, float32 pSpringConstant, float32 pDampingConstant)
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("SetSuspension - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::SetSuspension(JointID joint_id, float32 frame_time, float32 spring_constant, float32 damping_constant) {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("SetSuspension - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	JointInfo* lJoint = *x;
-	if (lJoint->mType == JOINT_HINGE2)
-	{
-		::dJointSetHinge2Param(lJoint->mJointID, dParamSuspensionERP,
-			pFrameTime * pSpringConstant / (pFrameTime * pSpringConstant + pDampingConstant));
-		::dJointSetHinge2Param(lJoint->mJointID, dParamSuspensionCFM,
-			1 / (pFrameTime * pSpringConstant + pDampingConstant));
+	JointInfo* __joint = *x;
+	if (__joint->type_ == kJointHinge2) {
+		::dJointSetHinge2Param(__joint->joint_id_, dParamSuspensionERP,
+			frame_time * spring_constant / (frame_time * spring_constant + damping_constant));
+		::dJointSetHinge2Param(__joint->joint_id_, dParamSuspensionCFM,
+			1 / (frame_time * spring_constant + damping_constant));
 		return (true);
 	}
-	mLog.Error("SetSuspension() - Joint is not a hinge-2!");
+	log_.Error("SetSuspension() - Joint is not a hinge-2!");
 	return (false);
 }
 
-bool PhysicsManagerODE::GetSuspension(JointID pJointId, float32& pErp, float32& pCfm) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetSuspension - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetSuspension(JointID joint_id, float32& erp, float32& cfm) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetSuspension - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	JointInfo* lJoint = *x;
-	if (lJoint->mType == JOINT_HINGE2)
-	{
-		pErp = ::dJointGetHinge2Param(lJoint->mJointID, dParamSuspensionERP);
-		pCfm = ::dJointGetHinge2Param(lJoint->mJointID, dParamSuspensionCFM);
+	JointInfo* __joint = *x;
+	if (__joint->type_ == kJointHinge2) {
+		erp = ::dJointGetHinge2Param(__joint->joint_id_, dParamSuspensionERP);
+		cfm = ::dJointGetHinge2Param(__joint->joint_id_, dParamSuspensionCFM);
 		return (true);
 	}
-	mLog.Error("GetSuspension() - Joint is not a hinge-2!");
+	log_.Error("GetSuspension() - Joint is not a hinge-2!");
 	return (false);
 }
 
-bool PhysicsManagerODE::GetSliderPos(JointID pJointId, float32& pPos) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetSliderPos - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetSliderPos(JointID joint_id, float32& _pos) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetSliderPos - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	if ((*x)->mType != JOINT_SLIDER)
-	{
-		mLog.Error("GetSliderPos() - Joint is not a slider!");
+	if ((*x)->type_ != kJointSlider) {
+		log_.Error("GetSliderPos() - Joint is not a slider!");
 		return (false);
 	}
 
-	pPos = dJointGetSliderPosition((*x)->mJointID);
+	_pos = dJointGetSliderPosition((*x)->joint_id_);
 	return (true);
 }
 
-bool PhysicsManagerODE::GetSliderSpeed(JointID pJointId, float32& pSpeed) const
-{
-	JointTable::const_iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("GetSliderSpeed - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::GetSliderSpeed(JointID joint_id, float32& speed) const {
+	JointTable::const_iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("GetSliderSpeed - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	if ((*x)->mType != JOINT_SLIDER)
-	{
-		mLog.Error("GetSliderSpeed() - Joint is not a slider!");
+	if ((*x)->type_ != kJointSlider) {
+		log_.Error("GetSliderSpeed() - Joint is not a slider!");
 		return (false);
 	}
 
-	pSpeed = dJointGetSliderPositionRate((*x)->mJointID);
+	speed = dJointGetSliderPositionRate((*x)->joint_id_);
 
 	return (true);
 }
 
-bool PhysicsManagerODE::AddJointForce(JointID pJointId, float32 pForce)
-{
-	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("AddJointForce - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::AddJointForce(JointID joint_id, float32 force) {
+	JointTable::iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("AddJointForce - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	if ((*x)->mType != JOINT_SLIDER)
-	{
-		mLog.Error("AddJointForce() - Joint is not a slider!");
+	if ((*x)->type_ != kJointSlider) {
+		log_.Error("AddJointForce() - Joint is not a slider!");
 		return (false);
 	}
 
-	::dJointAddSliderForce((*x)->mJointID, pForce);
-	::dBodyEnable(::dJointGetBody((*x)->mJointID, 1));
+	::dJointAddSliderForce((*x)->joint_id_, force);
+	::dBodyEnable(::dJointGetBody((*x)->joint_id_, 1));
 
 	return (true);
 }
 
-bool PhysicsManagerODE::AddJointTorque(JointID pJointId, float32 pTorque)
-{
-	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("AddJointTorque - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::AddJointTorque(JointID joint_id, float32 torque) {
+	JointTable::iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("AddJointTorque - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	switch ((*x)->mType)
-	{
-	case JOINT_HINGE:
-		dJointAddHingeTorque((*x)->mJointID, pTorque);
+	switch ((*x)->type_) {
+	case kJointHinge:
+		dJointAddHingeTorque((*x)->joint_id_, torque);
 		break;
-	case JOINT_HINGE2:
-		dJointAddHinge2Torques((*x)->mJointID, pTorque, 0);
+	case kJointHinge2:
+		dJointAddHinge2Torques((*x)->joint_id_, torque, 0);
 		break;
-	case JOINT_UNIVERSAL:
-		dJointAddUniversalTorques((*x)->mJointID, pTorque, 0);
+	case kJointUniversal:
+		dJointAddUniversalTorques((*x)->joint_id_, torque, 0);
 		break;
-	case JOINT_ANGULARMOTOR:
-		dJointAddAMotorTorques((*x)->mJointID, pTorque, 0, 0);
+	case kJointAngularmotor:
+		dJointAddAMotorTorques((*x)->joint_id_, torque, 0, 0);
 		break;
-	case JOINT_BALL:
-	case JOINT_FIXED:
-	case JOINT_SLIDER:
-		mLog.Error("AddJointTorque() - joint is of wrong type!");
+	case kJointBall:
+	case kJointFixed:
+	case kJointSlider:
+		log_.Error("AddJointTorque() - joint is of wrong type!");
 	default:
-		mLog.Error("AddJointTorque() - Unknown joint type!");
+		log_.Error("AddJointTorque() - Unknown joint type!");
 		return (false);
 	}
-	::dBodyEnable(::dJointGetBody((*x)->mJointID, 1));
+	::dBodyEnable(::dJointGetBody((*x)->joint_id_, 1));
 
 	return (true);
 }
 
-bool PhysicsManagerODE::AddJointTorque(JointID pJointId, float32 pTorque1, float32 pTorque2)
-{
-	JointTable::iterator x = mJointTable.find((JointInfo*)pJointId);
-	if (x == mJointTable.end())
-	{
-		mLog.Errorf("AddJointTorque - Couldn't find joint %i!", pJointId);
+bool PhysicsManagerODE::AddJointTorque(JointID joint_id, float32 torque1, float32 torque2) {
+	JointTable::iterator x = joint_table_.find((JointInfo*)joint_id);
+	if (x == joint_table_.end()) {
+		log_.Errorf("AddJointTorque - Couldn't find joint %i!", joint_id);
 		return (false);
 	}
 
-	switch ((*x)->mType)
-	{
-	case JOINT_HINGE2:
-		dJointAddHinge2Torques((*x)->mJointID, pTorque1, pTorque2);
+	switch ((*x)->type_) {
+	case kJointHinge2:
+		dJointAddHinge2Torques((*x)->joint_id_, torque1, torque2);
 		break;
-	case JOINT_UNIVERSAL:
-		dJointAddUniversalTorques((*x)->mJointID, pTorque1, pTorque2);
+	case kJointUniversal:
+		dJointAddUniversalTorques((*x)->joint_id_, torque1, torque2);
 		break;
-	case JOINT_BALL:
-	case JOINT_HINGE:
-	case JOINT_FIXED:
-	case JOINT_SLIDER:
-	case JOINT_ANGULARMOTOR:
-		mLog.Error("AddJointTorque() - joint is of wrong type!");
+	case kJointBall:
+	case kJointHinge:
+	case kJointFixed:
+	case kJointSlider:
+	case kJointAngularmotor:
+		log_.Error("AddJointTorque() - joint is of wrong type!");
 	default:
-		mLog.Error("AddJointTorque() - Unknown joint type!");
+		log_.Error("AddJointTorque() - Unknown joint type!");
 		return (false);
 	}
-	::dBodyEnable(::dJointGetBody((*x)->mJointID, 1));
+	::dBodyEnable(::dJointGetBody((*x)->joint_id_, 1));
 
 	return (true);
 }
 
-void PhysicsManagerODE::AddForce(BodyID pBodyId, const vec3& pForce)
-{
-	if (((Object*)pBodyId)->mWorldID != mWorldID)
-	{
-		mLog.Errorf("AddForce - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::AddForce(BodyID body_id, const vec3& force) {
+	if (((Object*)body_id)->world_id_ != world_id_) {
+		log_.Errorf("AddForce - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	if (((Object*)pBodyId)->mBodyID)
-	{
-		dBodyEnable(((Object*)pBodyId)->mBodyID);
-		dBodyAddForce(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z);
-	}
-	else
-	{
-		mLog.Errorf("AddForce - Body %i is only geometry, not body!", pBodyId);
+	if (((Object*)body_id)->body_id_) {
+		dBodyEnable(((Object*)body_id)->body_id_);
+		dBodyAddForce(((Object*)body_id)->body_id_, force.x, force.y, force.z);
+	} else {
+		log_.Errorf("AddForce - Body %i is only geometry, not body!", body_id);
 	}
 }
 
-void PhysicsManagerODE::AddTorque(BodyID pBodyId, const vec3& pTorque)
-{
-	if (((Object*)pBodyId)->mWorldID != mWorldID)
-	{
-		mLog.Errorf("AddTorque - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::AddTorque(BodyID body_id, const vec3& torque) {
+	if (((Object*)body_id)->world_id_ != world_id_) {
+		log_.Errorf("AddTorque - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	dBodyEnable(((Object*)pBodyId)->mBodyID);
-	dBodyAddTorque(((Object*)pBodyId)->mBodyID, pTorque.x, pTorque.y, pTorque.z);
+	dBodyEnable(((Object*)body_id)->body_id_);
+	dBodyAddTorque(((Object*)body_id)->body_id_, torque.x, torque.y, torque.z);
 }
 
-void PhysicsManagerODE::AddRelForce(BodyID pBodyId, const vec3& pForce)
-{
-	if (((Object*)pBodyId)->mWorldID != mWorldID)
-	{
-		mLog.Errorf("AddRelForce - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::AddRelForce(BodyID body_id, const vec3& force) {
+	if (((Object*)body_id)->world_id_ != world_id_) {
+		log_.Errorf("AddRelForce - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	dBodyEnable(((Object*)pBodyId)->mBodyID);
-	dBodyAddRelForce(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z);
+	dBodyEnable(((Object*)body_id)->body_id_);
+	dBodyAddRelForce(((Object*)body_id)->body_id_, force.x, force.y, force.z);
 }
 
-void PhysicsManagerODE::AddRelTorque(BodyID pBodyId, const vec3& pTorque)
-{
-	if (((Object*)pBodyId)->mWorldID != mWorldID)
-	{
-		mLog.Errorf("AddRelTorque - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::AddRelTorque(BodyID body_id, const vec3& torque) {
+	if (((Object*)body_id)->world_id_ != world_id_) {
+		log_.Errorf("AddRelTorque - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	dBodyEnable(((Object*)pBodyId)->mBodyID);
-	dBodyAddRelTorque(((Object*)pBodyId)->mBodyID, pTorque.x, pTorque.y, pTorque.z);
+	dBodyEnable(((Object*)body_id)->body_id_);
+	dBodyAddRelTorque(((Object*)body_id)->body_id_, torque.x, torque.y, torque.z);
 }
 
-void PhysicsManagerODE::AddForceAtPos(BodyID pBodyId, const vec3& pForce,
-									 const vec3& pPos)
-{
-	if (((Object*)pBodyId)->mWorldID != mWorldID)
-	{
-		mLog.Errorf("AddForceAtPos - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::AddForceAtPos(BodyID body_id, const vec3& force,
+									 const vec3& _pos) {
+	if (((Object*)body_id)->world_id_ != world_id_) {
+		log_.Errorf("AddForceAtPos - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	dBodyEnable(((Object*)pBodyId)->mBodyID);
-	dBodyAddForceAtPos(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z, pPos.x, pPos.y, pPos.z);
+	dBodyEnable(((Object*)body_id)->body_id_);
+	dBodyAddForceAtPos(((Object*)body_id)->body_id_, force.x, force.y, force.z, _pos.x, _pos.y, _pos.z);
 }
 
-void PhysicsManagerODE::AddForceAtRelPos(BodyID pBodyId, const vec3& pForce,
-										const vec3& pPos)
-{
-	if (((Object*)pBodyId)->mWorldID != mWorldID)
-	{
-		mLog.Errorf("AddForceAtRelPos - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::AddForceAtRelPos(BodyID body_id, const vec3& force,
+										const vec3& _pos) {
+	if (((Object*)body_id)->world_id_ != world_id_) {
+		log_.Errorf("AddForceAtRelPos - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	dBodyEnable(((Object*)pBodyId)->mBodyID);
-	dBodyAddForceAtRelPos(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z, pPos.x, pPos.y, pPos.z);
+	dBodyEnable(((Object*)body_id)->body_id_);
+	dBodyAddForceAtRelPos(((Object*)body_id)->body_id_, force.x, force.y, force.z, _pos.x, _pos.y, _pos.z);
 }
 
-void PhysicsManagerODE::AddRelForceAtPos(BodyID pBodyId, const vec3& pForce,
-										const vec3& pPos)
-{
-	if (((Object*)pBodyId)->mWorldID != mWorldID)
-	{
-		mLog.Errorf("AddRelForceAtPos - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::AddRelForceAtPos(BodyID body_id, const vec3& force,
+										const vec3& _pos) {
+	if (((Object*)body_id)->world_id_ != world_id_) {
+		log_.Errorf("AddRelForceAtPos - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	dBodyEnable(((Object*)pBodyId)->mBodyID);
-	dBodyAddRelForceAtPos(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z, pPos.x, pPos.y, pPos.z);
+	dBodyEnable(((Object*)body_id)->body_id_);
+	dBodyAddRelForceAtPos(((Object*)body_id)->body_id_, force.x, force.y, force.z, _pos.x, _pos.y, _pos.z);
 }
 
-void PhysicsManagerODE::AddRelForceAtRelPos(BodyID pBodyId, const vec3& pForce,
-										   const vec3& pPos)
-{
-	if (((Object*)pBodyId)->mWorldID != mWorldID)
-	{
-		mLog.Errorf("AddRelForceAtRelPos - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::AddRelForceAtRelPos(BodyID body_id, const vec3& force,
+										   const vec3& _pos) {
+	if (((Object*)body_id)->world_id_ != world_id_) {
+		log_.Errorf("AddRelForceAtRelPos - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	dBodyEnable(((Object*)pBodyId)->mBodyID);
-	dBodyAddRelForceAtRelPos(((Object*)pBodyId)->mBodyID, pForce.x, pForce.y, pForce.z, pPos.x, pPos.y, pPos.z);
+	dBodyEnable(((Object*)body_id)->body_id_);
+	dBodyAddRelForceAtRelPos(((Object*)body_id)->body_id_, force.x, force.y, force.z, _pos.x, _pos.y, _pos.z);
 }
 
-void PhysicsManagerODE::RestrictBody(BodyID pBodyId, float32 pMaxSpeed, float32 pMaxAngularSpeed)
-{
-	if (((Object*)pBodyId)->mWorldID != mWorldID)
-	{
-		mLog.Errorf("RestrictBody - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::RestrictBody(BodyID body_id, float32 max_speed, float32 max_angular_speed) {
+	if (((Object*)body_id)->world_id_ != world_id_) {
+		log_.Errorf("RestrictBody - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	::dBodySetMaxAngularSpeed(((Object*)pBodyId)->mBodyID, pMaxAngularSpeed);
+	::dBodySetMaxAngularSpeed(((Object*)body_id)->body_id_, max_angular_speed);
 
-	const dReal* lLVel = dBodyGetLinearVel(((Object*)pBodyId)->mBodyID);
-	float32 lLSpeed = lLVel[0] * lLVel[0] + lLVel[1] * lLVel[1] + lLVel[2] * lLVel[2];
-	if (lLSpeed > pMaxSpeed * pMaxSpeed)
-	{
-		float32 k = pMaxSpeed / sqrtf(lLSpeed);
-		dBodySetLinearVel(((Object*)pBodyId)->mBodyID, lLVel[0] * k, lLVel[1] * k, lLVel[2] * k);
+	const dReal* l_vel = dBodyGetLinearVel(((Object*)body_id)->body_id_);
+	float32 l_speed = l_vel[0] * l_vel[0] + l_vel[1] * l_vel[1] + l_vel[2] * l_vel[2];
+	if (l_speed > max_speed * max_speed) {
+		float32 k = max_speed / sqrtf(l_speed);
+		dBodySetLinearVel(((Object*)body_id)->body_id_, l_vel[0] * k, l_vel[1] * k, l_vel[2] * k);
 	}
 }
 
-void PhysicsManagerODE::EnableGravity(BodyID pBodyId, bool pEnable)
-{
-	if (((Object*)pBodyId)->mWorldID != mWorldID)
-	{
-		mLog.Errorf("EnableGravity - Body %i is not part of this world!", pBodyId);
+void PhysicsManagerODE::EnableGravity(BodyID body_id, bool enable) {
+	if (((Object*)body_id)->world_id_ != world_id_) {
+		log_.Errorf("EnableGravity - Body %i is not part of this world!", body_id);
 		return;
 	}
 
-	if (((Object*)pBodyId)->mBodyID)
-	{
-		::dBodySetGravityMode(((Object*)pBodyId)->mBodyID, pEnable? 1 : 0);
+	if (((Object*)body_id)->body_id_) {
+		::dBodySetGravityMode(((Object*)body_id)->body_id_, enable? 1 : 0);
 	}
 }
 
-void PhysicsManagerODE::SetGravity(const vec3& pGravity)
-{
-	dWorldSetGravity(mWorldID, pGravity.x, pGravity.y, pGravity.z);
+void PhysicsManagerODE::SetGravity(const vec3& gravity) {
+	dWorldSetGravity(world_id_, gravity.x, gravity.y, gravity.z);
 }
 
-vec3 PhysicsManagerODE::GetGravity() const
-{
-	dVector3 lGravity;
-	::dWorldGetGravity(mWorldID, lGravity);
-	return vec3(lGravity);
+vec3 PhysicsManagerODE::GetGravity() const {
+	dVector3 _gravity;
+	::dWorldGetGravity(world_id_, _gravity);
+	return vec3(_gravity);
 }
 
-void PhysicsManagerODE::EnableCollideWithSelf(BodyID pBodyId, bool pEnable)
-{
-	ObjectTable::iterator x = mObjectTable.find((Object*)pBodyId);
-	if (x != mObjectTable.end())
-	{
-		(*x)->mCollideWithSelf = pEnable;
-	}
-	else
-	{
-		mLog.Errorf("EnableCollideWithSelf - body %p is not part of this world!", pBodyId);
+void PhysicsManagerODE::EnableCollideWithSelf(BodyID body_id, bool enable) {
+	ObjectTable::iterator x = object_table_.find((Object*)body_id);
+	if (x != object_table_.end()) {
+		(*x)->collide_with_self_ = enable;
+	} else {
+		log_.Errorf("EnableCollideWithSelf - body %p is not part of this world!", body_id);
 		deb_assert(false);
 		return;
 	}
 }
 
-void PhysicsManagerODE::PreSteps()
-{
+void PhysicsManagerODE::PreSteps() {
 	FlagMovingObjects();
 }
 
-void PhysicsManagerODE::StepAccurate(float32 pStepSize, bool pCollide)
-{
-	if (pStepSize > 0)
-	{
-		if (pCollide) dSpaceCollide(mSpaceID, this, CollisionCallback);
-		dWorldStep(mWorldID, pStepSize);
+void PhysicsManagerODE::StepAccurate(float32 step_size, bool collide) {
+	if (step_size > 0) {
+		if (collide) dSpaceCollide(space_id_, this, CollisionCallback);
+		dWorldStep(world_id_, step_size);
 
-		if (pCollide)
-		{
+		if (collide) {
 			DoForceFeedback();
-			dJointGroupEmpty(mContactJointGroupID);
+			dJointGroupEmpty(contact_joint_group_id_);
 		}
 	}
 }
 
-void PhysicsManagerODE::StepFast(float32 pStepSize, bool pCollide)
-{
-	if (pStepSize > 0)
-	{
-		if (pCollide) dSpaceCollide(mSpaceID, this, CollisionCallback);
-		dWorldQuickStep(mWorldID, pStepSize);
-		
-		if (pCollide)
-		{
+void PhysicsManagerODE::StepFast(float32 step_size, bool collide) {
+	if (step_size > 0) {
+		if (collide) dSpaceCollide(space_id_, this, CollisionCallback);
+		dWorldQuickStep(world_id_, step_size);
+
+		if (collide) {
 			DoForceFeedback();
-			dJointGroupEmpty(mContactJointGroupID);
+			dJointGroupEmpty(contact_joint_group_id_);
 		}
 	}
 }
 
-bool PhysicsManagerODE::IsColliding(int pForceFeedbackId)
-{
-	mNoteForceFeedbackId = pForceFeedbackId;
-	mNoteIsCollided = false;
-	dSpaceCollide(mSpaceID, this, CollisionNoteCallback);
-	return mNoteIsCollided;
+bool PhysicsManagerODE::IsColliding(int force_feedback_id) {
+	note_force_feedback_id_ = force_feedback_id;
+	note_is_collided_ = false;
+	dSpaceCollide(space_id_, this, CollisionNoteCallback);
+	return note_is_collided_;
 }
 
-void PhysicsManagerODE::PostSteps()
-{
+void PhysicsManagerODE::PostSteps() {
 	HandleMovableObjects();
 }
 
-void PhysicsManagerODE::DoForceFeedback()
-{
+void PhysicsManagerODE::DoForceFeedback() {
 	TriggerInfoList::iterator y;
-	for (y = mTriggerInfoList.begin(); y != mTriggerInfoList.end(); ++y)
-	{
-		const TriggerInfo& lTriggerInfo = *y;
-		mTriggerCallback->OnTrigger(lTriggerInfo.mTriggerId, lTriggerInfo.mTriggerListenerId, lTriggerInfo.mBodyListenerId, lTriggerInfo.mBodyId, lTriggerInfo.mPosition, lTriggerInfo.mNormal);
+	for (y = trigger_info_list_.begin(); y != trigger_info_list_.end(); ++y) {
+		const TriggerInfo& trigger_info = *y;
+		trigger_callback_->OnTrigger(trigger_info.trigger_id_, trigger_info.trigger_listener_id_, trigger_info.body_listener_id_, trigger_info.body_id_, trigger_info.position_, trigger_info.normal_);
 	}
-	mTriggerInfoList.clear();
+	trigger_info_list_.clear();
 
 	JointList::iterator x;
-	for (x = mFeedbackJointList.begin(); x != mFeedbackJointList.end(); ++x)
-	{
-		JointInfo* lJointInfo = *x;
+	for (x = feedback_joint_list_.begin(); x != feedback_joint_list_.end(); ++x) {
+		JointInfo* _joint_info = *x;
 
-		const bool lIsBody1Static = lJointInfo->IsBody1Static(this);
-		const bool lIsBody2Static = lJointInfo->IsBody2Static(this);
-		//const bool lOneIsDynamic = (!lIsBody1Static || !lIsBody2Static);
-		if (lJointInfo->mListenerId1 != lJointInfo->mListenerId2 /*&& lOneIsDynamic*/)
-		{
-			const dJointFeedback* lFeedback = &lJointInfo->mFeedback;
-			if (lJointInfo->mListenerId1 != 0)
-			{
-				mForceFeedbackCallback->OnForceApplied(
-					lJointInfo->mListenerId1,
-					lJointInfo->mListenerId2,
-					lJointInfo->mBody1Id,
-					lJointInfo->mBody2Id,
-					vec3(lFeedback->f1),
-					vec3(lFeedback->t1),
-					lJointInfo->mPosition,
-					lJointInfo->mRelativeVelocity);
+		const bool is_body1_static = _joint_info->IsBody1Static(this);
+		const bool is_body2_static = _joint_info->IsBody2Static(this);
+		//const bool lOneIsDynamic = (!is_body1_static || !is_body2_static);
+		if (_joint_info->listener_id1_ != _joint_info->listener_id2_ /*&& lOneIsDynamic*/) {
+			const dJointFeedback* feedback = &_joint_info->feedback_;
+			if (_joint_info->listener_id1_ != 0) {
+				force_feedback_callback_->OnForceApplied(
+					_joint_info->listener_id1_,
+					_joint_info->listener_id2_,
+					_joint_info->body1_id_,
+					_joint_info->body2_id_,
+					vec3(feedback->f1),
+					vec3(feedback->t1),
+					_joint_info->position_,
+					_joint_info->relative_velocity_);
 			}
-			if (lJointInfo->mListenerId2 != 0)
-			{
-				if (lIsBody1Static || lIsBody2Static)	// Only a single force/torque pair set?
-				{
-					mForceFeedbackCallback->OnForceApplied(
-						lJointInfo->mListenerId2,
-						lJointInfo->mListenerId1,
-						lJointInfo->mBody2Id,
-						lJointInfo->mBody1Id,
-						vec3(lFeedback->f1),
-						vec3(lFeedback->t1),
-						lJointInfo->mPosition,
-						lJointInfo->mRelativeVelocity);
-				}
-				else
-				{
-					mForceFeedbackCallback->OnForceApplied(
-						lJointInfo->mListenerId2,
-						lJointInfo->mListenerId1,
-						lJointInfo->mBody2Id,
-						lJointInfo->mBody1Id,
-						vec3(lFeedback->f2),
-						vec3(lFeedback->t2),
-						lJointInfo->mPosition,
-						lJointInfo->mRelativeVelocity);
+			if (_joint_info->listener_id2_ != 0) {
+				if (is_body1_static || is_body2_static) {	// Only a single force/torque pair set?
+					force_feedback_callback_->OnForceApplied(
+						_joint_info->listener_id2_,
+						_joint_info->listener_id1_,
+						_joint_info->body2_id_,
+						_joint_info->body1_id_,
+						vec3(feedback->f1),
+						vec3(feedback->t1),
+						_joint_info->position_,
+						_joint_info->relative_velocity_);
+				} else {
+					force_feedback_callback_->OnForceApplied(
+						_joint_info->listener_id2_,
+						_joint_info->listener_id1_,
+						_joint_info->body2_id_,
+						_joint_info->body1_id_,
+						vec3(feedback->f2),
+						vec3(feedback->t2),
+						_joint_info->position_,
+						_joint_info->relative_velocity_);
 				}
 			}
 		}
-		RemoveJoint(lJointInfo);
+		RemoveJoint(_joint_info);
 	}
-	mFeedbackJointList.clear();
+	feedback_joint_list_.clear();
 }
 
-void PhysicsManagerODE::CollisionCallback(void* pData, dGeomID pGeom1, dGeomID pGeom2)
-{
-	Object* lObject1 = (Object*)dGeomGetData(pGeom1);
-	Object* lObject2 = (Object*)dGeomGetData(pGeom2);
+void PhysicsManagerODE::CollisionCallback(void* data, dGeomID geom1, dGeomID geom2) {
+	Object* _object1 = (Object*)dGeomGetData(geom1);
+	Object* _object2 = (Object*)dGeomGetData(geom2);
 
-	if ((lObject1->mForceFeedbackId && lObject1->mForceFeedbackId == lObject2->mForceFeedbackId) ||	// Same body.
-		(lObject1->mTriggerListenerId && lObject2->mTriggerListenerId) ||	// Elevator platform trigger moves into down trigger.
-		(lObject1->mForceFeedbackId && lObject1->mForceFeedbackId == lObject2->mTriggerListenerId) ||	// Trigger on self.
-		(lObject2->mForceFeedbackId && lObject2->mForceFeedbackId == lObject1->mTriggerListenerId))	// Trigger on self.
-	{
-		if (!lObject1->mCollideWithSelf || !lObject2->mCollideWithSelf)
-		{
+	if ((_object1->force_feedback_id_ && _object1->force_feedback_id_ == _object2->force_feedback_id_) ||	// Same body.
+		(_object1->trigger_listener_id_ && _object2->trigger_listener_id_) ||	// Elevator platform trigger moves into down trigger.
+		(_object1->force_feedback_id_ && _object1->force_feedback_id_ == _object2->trigger_listener_id_) ||	// Trigger on self.
+		(_object2->force_feedback_id_ && _object2->force_feedback_id_ == _object1->trigger_listener_id_)) {	// Trigger on self.
+		if (!_object1->collide_with_self_ || !_object2->collide_with_self_) {
 			return;
 		}
 	}
 
-	dBodyID lBody1 = ::dGeomGetBody(pGeom1);
-	dBodyID lBody2 = ::dGeomGetBody(pGeom2);
+	dBodyID _body1 = ::dGeomGetBody(geom1);
+	dBodyID _body2 = ::dGeomGetBody(geom2);
 
-	if (!lBody1 && !lBody2)	// Static body or trigger against static body or trigger?
-	{
+	if (!_body1 && !_body2) {	// Static body or trigger against static body or trigger?
 		return;
 	}
-	if ((lBody1 && !::dBodyIsEnabled(lBody1)) && (lBody2 && !::dBodyIsEnabled(lBody2)))	// Both disabled?
-	{
+	if ((_body1 && !::dBodyIsEnabled(_body1)) && (_body2 && !::dBodyIsEnabled(_body2))) {	// Both disabled?
 		return;
 	}
 	// Exit without doing anything if the two bodies are connected by a joint.
-	if (AreBodiesConnectedExcluding(lBody1, lBody2, dJointTypeContact) != 0)
-	{
-		if (!lObject1->mCollideWithSelf || !lObject2->mCollideWithSelf)
-		{
+	if (AreBodiesConnectedExcluding(_body1, _body2, dJointTypeContact) != 0) {
+		if (!_object1->collide_with_self_ || !_object2->collide_with_self_) {
 			return;
 		}
 	}
 
-	dContact lContact[8];
-	const int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 8, &lContact[0].geom, sizeof(lContact[0]));
-	if (lTriggerContactPointCount <= 0)
-	{
+	dContact contact[8];
+	const int trigger_contact_point_count = ::dCollide(geom1, geom2, 8, &contact[0].geom, sizeof(contact[0]));
+	if (trigger_contact_point_count <= 0) {
 		// In AABB range (since call came here), but no real contact.
 		return;
 	}
 
-	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
-	if (lObject1->mTriggerListenerId != 0)	// Only trig, no force application.
-	{
-		vec3 lPosition(lContact[0].geom.pos);
-		vec3 lNormal(lContact[0].geom.normal);
-		lThis->mTriggerInfoList.push_back(TriggerInfo((BodyID)lObject1, lObject1->mTriggerListenerId, lObject2->mForceFeedbackId, (BodyID)lObject2, lPosition, lNormal));
+	PhysicsManagerODE* value = (PhysicsManagerODE*)data;
+	if (_object1->trigger_listener_id_ != 0) {	// Only trig, no force application.
+		vec3 _position(contact[0].geom.pos);
+		vec3 __normal(contact[0].geom.normal);
+		value->trigger_info_list_.push_back(TriggerInfo((BodyID)_object1, _object1->trigger_listener_id_, _object2->force_feedback_id_, (BodyID)_object2, _position, __normal));
 		return;
 	}
-	if(lObject2->mTriggerListenerId != 0)	// Only trig, no force application.
-	{
-		vec3 lPosition(lContact[0].geom.pos);
-		vec3 lNormal(lContact[0].geom.normal);
-		lThis->mTriggerInfoList.push_back(TriggerInfo((BodyID)lObject2, lObject2->mTriggerListenerId, lObject1->mForceFeedbackId, (BodyID)lObject1, lPosition, lNormal));
+	if(_object2->trigger_listener_id_ != 0) {	// Only trig, no force application.
+		vec3 _position(contact[0].geom.pos);
+		vec3 __normal(contact[0].geom.normal);
+		value->trigger_info_list_.push_back(TriggerInfo((BodyID)_object2, _object2->trigger_listener_id_, _object1->force_feedback_id_, (BodyID)_object1, _position, __normal));
 		return;
 	}
 
-	// Bounce/slide when both objects are dynamic, non-trigger objects.
+	// bounce/slide when both objects are dynamic, non-trigger objects.
 	{
 		// Fetch force, will be used to scale friction (projected against surface normal).
-		vec3 lPosition1 = lThis->GetBodyPosition((BodyID)lObject1);
-		vec3 lPosition2 = lThis->GetBodyPosition((BodyID)lObject2);
-		vec3 lLinearVelocity1;
-		lThis->GetBodyVelocity((BodyID)lObject1, lLinearVelocity1);
-		vec3 lLinearVelocity2;
-		lThis->GetBodyVelocity((BodyID)lObject2, lLinearVelocity2);
-		vec3 lAngularVelocity1;
-		lThis->GetBodyAngularVelocity((BodyID)lObject1, lAngularVelocity1);
-		vec3 lAngularVelocity2;
-		lThis->GetBodyAngularVelocity((BodyID)lObject2, lAngularVelocity2);
+		vec3 position1 = value->GetBodyPosition((BodyID)_object1);
+		vec3 position2 = value->GetBodyPosition((BodyID)_object2);
+		vec3 linear_velocity1;
+		value->GetBodyVelocity((BodyID)_object1, linear_velocity1);
+		vec3 linear_velocity2;
+		value->GetBodyVelocity((BodyID)_object2, linear_velocity2);
+		vec3 angular_velocity1;
+		value->GetBodyAngularVelocity((BodyID)_object1, angular_velocity1);
+		vec3 angular_velocity2;
+		value->GetBodyAngularVelocity((BodyID)_object2, angular_velocity2);
 
-		dMass lMass;
-		float lMass1 = 1;
-		if (lBody1)
-		{
-			::dBodyGetMass(lBody1, &lMass);
-			lMass1 = lMass.mass;
+		dMass __mass;
+		float mass1 = 1;
+		if (_body1) {
+			::dBodyGetMass(_body1, &__mass);
+			mass1 = __mass.mass;
 		}
-		float lMass2Propotions = 1;
-		if (lBody2)
-		{
-			::dBodyGetMass(lBody2, &lMass);
-			lMass2Propotions = lMass.mass / lMass1;
+		float mass2_propotions = 1;
+		if (_body2) {
+			::dBodyGetMass(_body2, &__mass);
+			mass2_propotions = __mass.mass / mass1;
 		}
 
 		// Perform normal collision detection.
-		for (int i = 0; i < lTriggerContactPointCount; i++)
-		{
-			dContact& lC = lContact[i];
-			vec3 lPosition(lC.geom.pos);
-			vec3 lSpin;
-			const float lTotalFriction = ::fabs(lObject1->mFriction*lObject2->mFriction)+0.0001f;
+		for (int i = 0; i < trigger_contact_point_count; i++) {
+			dContact& __c = contact[i];
+			vec3 _position(__c.geom.pos);
+			vec3 spin;
+			const float total_friction = ::fabs(_object1->friction_*_object2->friction_)+0.0001f;
 			// Negative friction factor means simple friction model.
-			if (lObject1->mFriction > 0 || lObject2->mFriction > 0)
-			{
-				lC.surface.mode = dContactSlip1 | dContactSlip2 | dContactApprox1 | dContactFDir1 | dContactBounce;
+			if (_object1->friction_ > 0 || _object2->friction_ > 0) {
+				__c.surface.mode = dContactSlip1 | dContactSlip2 | dContactApprox1 | dContactFDir1 | dContactBounce;
 
-				const vec3 lNormal(lC.geom.normal);
-				const vec3 lCollisionPoint(lC.geom.pos);
-				const vec3 lDistance1(lCollisionPoint-lPosition1);
-				const vec3 lDistance2(lCollisionPoint-lPosition2);
-				const vec3 lAngularSurfaceVelocity1 = lAngularVelocity1.Cross(lDistance1);
-				const vec3 lAngularSurfaceVelocity2 = lAngularVelocity2.Cross(lDistance2);
-				const vec3 lSurfaceVelocity1 = -lLinearVelocity1.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity1;
-				const vec3 lSurfaceVelocity2 = -lLinearVelocity2.ProjectOntoPlane(lNormal) + lAngularSurfaceVelocity2;
-				lSpin = lSurfaceVelocity1-lSurfaceVelocity2;
-				const float lRelativeVelocity = lSpin.GetLength();
-				vec3 lSpinDirection(lSpin);
-				if (lSpinDirection.GetLengthSquared() <= 1e-4)
-				{
-					vec3 lDummy;
-					lNormal.GetOrthogonals(lSpinDirection, lDummy);
+				const vec3 __normal(__c.geom.normal);
+				const vec3 collision_point(__c.geom.pos);
+				const vec3 distance1(collision_point-position1);
+				const vec3 distance2(collision_point-position2);
+				const vec3 angular_surface_velocity1 = angular_velocity1.Cross(distance1);
+				const vec3 angular_surface_velocity2 = angular_velocity2.Cross(distance2);
+				const vec3 surface_velocity1 = -linear_velocity1.ProjectOntoPlane(__normal) + angular_surface_velocity1;
+				const vec3 surface_velocity2 = -linear_velocity2.ProjectOntoPlane(__normal) + angular_surface_velocity2;
+				spin = surface_velocity1-surface_velocity2;
+				const float relative_velocity = spin.GetLength();
+				vec3 spin_direction(spin);
+				if (spin_direction.GetLengthSquared() <= 1e-4) {
+					vec3 dummy;
+					__normal.GetOrthogonals(spin_direction, dummy);
+				} else {
+					spin_direction.Normalize();
 				}
-				else
-				{
-					lSpinDirection.Normalize();
-				}
-				lC.fdir1[0] = lSpinDirection.x;
-				lC.fdir1[1] = lSpinDirection.y;
-				lC.fdir1[2] = lSpinDirection.z;
+				__c.fdir1[0] = spin_direction.x;
+				__c.fdir1[1] = spin_direction.y;
+				__c.fdir1[2] = spin_direction.z;
 
-				lC.surface.mu = dInfinity;
-				const float lSlip = (1e-4f * lRelativeVelocity + 1e-6f) / lTotalFriction;
-				lC.surface.slip1 = lSlip;
-				lC.surface.slip2 = lSlip;
+				__c.surface.mu = dInfinity;
+				const float slip = (1e-4f * relative_velocity + 1e-6f) / total_friction;
+				__c.surface.slip1 = slip;
+				__c.surface.slip2 = slip;
+			} else {
+				__c.surface.mode = dContactBounce;
+				__c.surface.mu = total_friction * 3 * mass1 * mass2_propotions;
 			}
-			else
-			{
-				lC.surface.mode = dContactBounce;
-				lC.surface.mu = lTotalFriction * 3 * lMass1 * lMass2Propotions;
+			__c.surface.bounce = (dReal)(_object1->bounce_ * _object2->bounce_);
+			__c.surface.bounce_vel = (dReal)0.000001;
+			if (__c.surface.bounce < 1e-1f) {
+				__c.surface.mode |= dContactSoftERP;
+				__c.surface.soft_erp = __c.surface.bounce * 1e1f * world_erp_;
 			}
-			lC.surface.bounce = (dReal)(lObject1->mBounce * lObject2->mBounce);
-			lC.surface.bounce_vel = (dReal)0.000001;
-			if (lC.surface.bounce < 1e-1f)
-			{
-				lC.surface.mode |= dContactSoftERP;
-				lC.surface.soft_erp = lC.surface.bounce * 1e1f * mWorldErp;
-			}
-			if (lC.surface.bounce < 1e-7f)
-			{
-				lC.surface.mode |= dContactSoftCFM;
-				lC.surface.soft_cfm = Math::Lerp(1e8f, 1.0f, lC.surface.bounce * 1e7f) * mWorldCfm;
+			if (__c.surface.bounce < 1e-7f) {
+				__c.surface.mode |= dContactSoftCFM;
+				__c.surface.soft_cfm = Math::Lerp(1e8f, 1.0f, __c.surface.bounce * 1e7f) * world_cfm_;
 			}
 
-			if (lObject1->mForceFeedbackId != 0 ||
-			   lObject2->mForceFeedbackId != 0)
-			{
+			if (_object1->force_feedback_id_ != 0 ||
+			   _object2->force_feedback_id_ != 0) {
 				// Create a joint whith feedback info.
-				JointInfo* lJointInfo = lThis->mJointInfoAllocator.Alloc();
-				lJointInfo->mJointID = dJointCreateContact(lThis->mWorldID, lThis->mContactJointGroupID, &lC);
-				lJointInfo->mType = JOINT_CONTACT;
-				lThis->mFeedbackJointList.push_back(lJointInfo);
-				lJointInfo->mListenerId1 = lObject1->mForceFeedbackId;
-				lJointInfo->mListenerId2 = lObject2->mForceFeedbackId;
-				lJointInfo->mPosition = lPosition;
-				lJointInfo->mRelativeVelocity = lSpin;
+				JointInfo* _joint_info = value->joint_info_allocator_.Alloc();
+				_joint_info->joint_id_ = dJointCreateContact(value->world_id_, value->contact_joint_group_id_, &__c);
+				_joint_info->type_ = kJointContact;
+				value->feedback_joint_list_.push_back(_joint_info);
+				_joint_info->listener_id1_ = _object1->force_feedback_id_;
+				_joint_info->listener_id2_ = _object2->force_feedback_id_;
+				_joint_info->position_ = _position;
+				_joint_info->relative_velocity_ = spin;
 
-				dJointAttach(lJointInfo->mJointID, lBody1, lBody2);
-				dJointSetFeedback(lJointInfo->mJointID, &lJointInfo->mFeedback);
-				lJointInfo->mBody1Id = lObject1;
-				lJointInfo->mBody2Id = lObject2;
-			}
-			else
-			{
+				dJointAttach(_joint_info->joint_id_, _body1, _body2);
+				dJointSetFeedback(_joint_info->joint_id_, &_joint_info->feedback_);
+				_joint_info->body1_id_ = _object1;
+				_joint_info->body2_id_ = _object2;
+			} else {
 				// Create a temporary joint without feedback info.
-				dJointID lJointID = dJointCreateContact(lThis->mWorldID, lThis->mContactJointGroupID, &lC);
-				dJointAttach(lJointID, lBody1, lBody2);
+				dJointID joint_id = dJointCreateContact(value->world_id_, value->contact_joint_group_id_, &__c);
+				dJointAttach(joint_id, _body1, _body2);
 			}
 		}
 	}
 }
 
-void PhysicsManagerODE::CollisionNoteCallback(void* pData, dGeomID pGeom1, dGeomID pGeom2)
-{
-	Object* lObject1 = (Object*)dGeomGetData(pGeom1);
-	Object* lObject2 = (Object*)dGeomGetData(pGeom2);
+void PhysicsManagerODE::CollisionNoteCallback(void* data, dGeomID geom1, dGeomID geom2) {
+	Object* _object1 = (Object*)dGeomGetData(geom1);
+	Object* _object2 = (Object*)dGeomGetData(geom2);
 
-	if (!lObject1->mForceFeedbackId ||
-		!lObject2->mForceFeedbackId ||
-		lObject1->mForceFeedbackId == lObject2->mForceFeedbackId)	// One is trigger, or same body.
-	{
+	if (!_object1->force_feedback_id_ ||
+		!_object2->force_feedback_id_ ||
+		_object1->force_feedback_id_ == _object2->force_feedback_id_) {	// One is trigger, or same body.
 		return;
 	}
 
-	PhysicsManagerODE* lThis = (PhysicsManagerODE*)pData;
-	if (lObject1->mForceFeedbackId != lThis->mNoteForceFeedbackId &&
-		lObject2->mForceFeedbackId != lThis->mNoteForceFeedbackId)	// Not observed body.
-	{
+	PhysicsManagerODE* value = (PhysicsManagerODE*)data;
+	if (_object1->force_feedback_id_ != value->note_force_feedback_id_ &&
+		_object2->force_feedback_id_ != value->note_force_feedback_id_) {	// Not observed body.
 		return;
 	}
 
-	dContact lContact[1];
-	const int lTriggerContactPointCount = ::dCollide(pGeom1, pGeom2, 1, &lContact[0].geom, sizeof(lContact[0]));
-	lThis->mNoteIsCollided |= (lTriggerContactPointCount > 0);	// False means in AABB range (since call came here), but no real contact.
+	dContact contact[1];
+	const int trigger_contact_point_count = ::dCollide(geom1, geom2, 1, &contact[0].geom, sizeof(contact[0]));
+	value->note_is_collided_ |= (trigger_contact_point_count > 0);	// False means in AABB range (since call came here), but no real contact.
 }
 
 
 
-const PhysicsManager::BodySet& PhysicsManagerODE::GetIdledBodies()
-{
-	mAutoDisabledObjectSet.clear();
-	ObjectTable::iterator x = mObjectTable.begin();
-	for (; x != mObjectTable.end(); ++x)
-	{
-		Object* lObject = *x;
-		if (lObject->mDidStop)
-		{
-			mAutoDisabledObjectSet.insert((BodyID)lObject);
+const PhysicsManager::BodySet& PhysicsManagerODE::GetIdledBodies() {
+	auto_disabled_object_set_.clear();
+	ObjectTable::iterator x = object_table_.begin();
+	for (; x != object_table_.end(); ++x) {
+		Object* _object = *x;
+		if (_object->did_stop_) {
+			auto_disabled_object_set_.insert((BodyID)_object);
 		}
 	}
-	return (mAutoDisabledObjectSet);
+	return (auto_disabled_object_set_);
 }
 
 
 
-void PhysicsManagerODE::FlagMovingObjects()
-{
-	ObjectTable::iterator x = mObjectTable.begin();
-	for (; x != mObjectTable.end(); ++x)
-	{
-		Object* lObject = *x;
-		if (lObject->mBodyID && lObject->mIsRoot && ::dBodyIsEnabled(lObject->mBodyID))
-		{
-			lObject->mDidStop = true;
+void PhysicsManagerODE::FlagMovingObjects() {
+	ObjectTable::iterator x = object_table_.begin();
+	for (; x != object_table_.end(); ++x) {
+		Object* _object = *x;
+		if (_object->body_id_ && _object->is_root_ && ::dBodyIsEnabled(_object->body_id_)) {
+			_object->did_stop_ = true;
 		}
 	}
 }
 
-void PhysicsManagerODE::HandleMovableObjects()
-{
-	ObjectTable::iterator x = mObjectTable.begin();
-	for (; x != mObjectTable.end(); ++x)
-	{
-		Object* lObject = (Object*)(*x);
-		if (lObject->mBodyID && ::dBodyIsEnabled(lObject->mBodyID))
-		{
-			lObject->mDidStop = false;
-			NormalizeRotation(lObject);
+void PhysicsManagerODE::HandleMovableObjects() {
+	ObjectTable::iterator x = object_table_.begin();
+	for (; x != object_table_.end(); ++x) {
+		Object* _object = (Object*)(*x);
+		if (_object->body_id_ && ::dBodyIsEnabled(_object->body_id_)) {
+			_object->did_stop_ = false;
+			NormalizeRotation(_object);
 		}
 	}
 }
 
-void PhysicsManagerODE::NormalizeRotation(BodyID pObject)
-{
-	Object* lObject = (Object*)pObject;
-	if (!lObject->mIsRotational && (lObject->mHasMassChildren || lObject->mBodyID->geom->type == dBoxClass))
-	{
-		vec3 lVelocity;
-		GetBodyAngularVelocity(lObject, lVelocity);
-		const float lMaxAngularVelocity = 12.0f;
-		if (lVelocity.GetLength() > lMaxAngularVelocity)
-		{
-			lVelocity.Normalize(lMaxAngularVelocity);
-			SetBodyAngularVelocity(lObject, lVelocity);
-			SetBodyTorque(lObject, vec3());
+void PhysicsManagerODE::NormalizeRotation(BodyID object) {
+	Object* _object = (Object*)object;
+	if (!_object->is_rotational_ && (_object->has_mass_children_ || _object->body_id_->geom->type == dBoxClass)) {
+		vec3 _velocity;
+		GetBodyAngularVelocity(_object, _velocity);
+		const float max_angular_velocity = 12.0f;
+		if (_velocity.GetLength() > max_angular_velocity) {
+			_velocity.Normalize(max_angular_velocity);
+			SetBodyAngularVelocity(_object, _velocity);
+			SetBodyTorque(_object, vec3());
 		}
 	}
 }
 
 
 
-void PhysicsManagerODE::RayPickCallback(void* pDataPtr, dGeomID o1, dGeomID o2)
-{
-	void** lData = (void**)pDataPtr;
-	int* lForceFeedbackIds = (int*)lData[0];
-	vec3* lPositions = (vec3*)lData[1];
-	int* lHits = (int*)lData[2];
-	const int lMaxBodies = *(int*)lData[3];
-	if (*lHits >= lMaxBodies)
-	{
+void PhysicsManagerODE::RayPickCallback(void* data_ptr, dGeomID o1, dGeomID o2) {
+	void** _data = (void**)data_ptr;
+	int* _force_feedback_ids = (int*)_data[0];
+	vec3* _positions = (vec3*)_data[1];
+	int* hits = (int*)_data[2];
+	const int _max_bodies = *(int*)_data[3];
+	if (*hits >= _max_bodies) {
 		return;
 	}
-	dContactGeom lContact[4];
-	const int lCollisions = ::dCollide(o1, o2, 1, &lContact[0], sizeof(lContact[0]));
-	if (lCollisions)
-	{
-		Object* lObject = (Object*)::dGeomGetData(o1);
-		lForceFeedbackIds[*lHits] = lObject->mForceFeedbackId;
-		lPositions[*lHits] = vec3(lContact[0].pos);
-		(*lHits)++;
+	dContactGeom contact[4];
+	const int collisions = ::dCollide(o1, o2, 1, &contact[0], sizeof(contact[0]));
+	if (collisions) {
+		Object* _object = (Object*)::dGeomGetData(o1);
+		_force_feedback_ids[*hits] = _object->force_feedback_id_;
+		_positions[*hits] = vec3(contact[0].pos);
+		(*hits)++;
 	}
 }
 
 
 
-float PhysicsManagerODE::mWorldErp;
-float PhysicsManagerODE::mWorldCfm;
-loginstance(PHYSICS, PhysicsManagerODE);
+float PhysicsManagerODE::world_erp_;
+float PhysicsManagerODE::world_cfm_;
+loginstance(kPhysics, PhysicsManagerODE);
 
 
 

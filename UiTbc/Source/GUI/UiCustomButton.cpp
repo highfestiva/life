@@ -5,53 +5,44 @@
 
 
 #include "pch.h"
-#include "../../Include/GUI/UiCustomButton.h"
+#include "../../include/gui/uicustombutton.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-CustomButton::CustomButton(const wstr& pText):
-	Parent(pText),
-	mOnRender(0),
-	mIsOver(0)
-{
+CustomButton::CustomButton(const wstr& text):
+	Parent(text),
+	on_render_(0),
+	is_over_(0) {
 }
 
-CustomButton::~CustomButton()
-{
-	delete (mOnRender);
-	delete (mIsOver);
+CustomButton::~CustomButton() {
+	delete (on_render_);
+	delete (is_over_);
 }
 
-void CustomButton::SetOnRenderDelegate(const Delegate& pOnRenderer)
-{
-	mOnRender = new Delegate(pOnRenderer);
+void CustomButton::SetOnRenderDelegate(const Delegate& on_renderer) {
+	on_render_ = new Delegate(on_renderer);
 }
 
-void CustomButton::SetIsOverDelegate(const DelegateXY& pIsOver)
-{
-	mIsOver = new DelegateXY(pIsOver);
+void CustomButton::SetIsOverDelegate(const DelegateXY& is_over) {
+	is_over_ = new DelegateXY(is_over);
 }
 
-void CustomButton::Repaint(Painter*)
-{
-	if (mOnRender)
-	{
-		(*mOnRender)(this);
+void CustomButton::Repaint(Painter*) {
+	if (on_render_) {
+		(*on_render_)(this);
 	}
 }
 
-bool CustomButton::IsOver(int pScreenX, int pScreenY)
-{
-	if (mIsOver)
-	{
-		return (*mIsOver)(this, pScreenX, pScreenY);
+bool CustomButton::IsOver(int screen_x, int screen_y) {
+	if (is_over_) {
+		return (*is_over_)(this, screen_x, screen_y);
 	}
-	return Parent::IsOver(pScreenX, pScreenY);
+	return Parent::IsOver(screen_x, screen_y);
 }
 
 

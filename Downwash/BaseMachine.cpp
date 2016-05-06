@@ -5,41 +5,36 @@
 
 
 #include "pch.h"
-#include "BaseMachine.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/Health.h"
-#include "../Cure/Include/GameManager.h"
-#include "../Life/Explosion.h"
-#include "../Life/Launcher.h"
+#include "basemachine.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/health.h"
+#include "../cure/include/gamemanager.h"
+#include "../life/explosion.h"
+#include "../life/launcher.h"
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-BaseMachine::BaseMachine(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Life::Launcher* pLauncher):
-	Parent(pResourceManager, pClassId, pUiManager, pLauncher)
-{
-	Cure::Health::Set(this, 1);
+BaseMachine::BaseMachine(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, life::Launcher* launcher):
+	Parent(resource_manager, class_id, ui_manager, launcher) {
+	cure::Health::Set(this, 1);
 }
 
-BaseMachine::~BaseMachine()
-{
+BaseMachine::~BaseMachine() {
 }
 
 
 
-void BaseMachine::OnDie()
-{
-	if (mIsDetonated)
-	{
+void BaseMachine::OnDie() {
+	if (is_detonated_) {
 		//GetManager()->DelayKillObject(this, 3);
 		return;
 	}
 
-	Life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this, true);
+	life::Explosion::FallApart(GetManager()->GetGameManager()->GetPhysicsManager(), this, true);
 	Parent::OnDie();
 	//CenterMeshes();
 }

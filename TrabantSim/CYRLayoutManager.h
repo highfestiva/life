@@ -37,12 +37,12 @@
 
 @interface CYRLayoutManager : NSLayoutManager
 
-@property (nonatomic, strong) UIFont *lineNumberFont;
-@property (nonatomic, strong) UIColor *lineNumberColor;
-@property (nonatomic, strong) UIColor *selectedLineNumberColor;
+@property (nonatomic, strong) UIFont *number_font;
+@property (nonatomic, strong) UIColor *number_color;
+@property (nonatomic, strong) UIColor *selectedLineNumberColor_;
 
 @property (nonatomic, readonly) CGFloat gutterWidth;
-@property (nonatomic, assign) NSRange selectedRange;
+@property (nonatomic, assign) NSRange selectedRange_;
 
 - (CGRect)paragraphRectForRange:(NSRange)range;
 

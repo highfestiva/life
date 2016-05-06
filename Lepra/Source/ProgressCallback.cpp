@@ -5,49 +5,42 @@
 */
 
 #include "pch.h"
-#include "../Include/ProgressCallback.h"
+#include "../include/progresscallback.h"
 
-namespace Lepra
-{
+namespace lepra {
 
 ProgressCallback::ProgressCallback():
-	mContinue(true),
-	mPause(false)
-{
+	do_continue_(true),
+	pause_(false) {
 }
 
 
 
-ProgressCallback::~ProgressCallback()
-{
-}
-
-	
-
-void ProgressCallback::SignalCancel()
-{
-	mContinue = false;
+ProgressCallback::~ProgressCallback() {
 }
 
 
 
-bool ProgressCallback::GetContinue() const
-{
-	return mContinue;
+void ProgressCallback::SignalCancel() {
+	do_continue_ = false;
 }
 
 
 
-void ProgressCallback::SetPause(bool pPause)
-{
-	mPause = pPause;
+bool ProgressCallback::GetContinue() const {
+	return do_continue_;
 }
 
 
 
-bool ProgressCallback::GetPause() const
-{
-	return mPause;
+void ProgressCallback::SetPause(bool pause) {
+	pause_ = pause;
+}
+
+
+
+bool ProgressCallback::GetPause() const {
+	return pause_;
 }
 
 }

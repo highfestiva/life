@@ -6,20 +6,18 @@
 
 #pragma once
 
-#include "../../UiLepra/Include/UiDisplayManager.h"
-#include "UiRenderer.h"
+#include "../../uilepra/include/uidisplaymanager.h"
+#include "uirenderer.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class RendererFactory
-{
+class RendererFactory {
 public:
-	static Renderer* Create(UiLepra::DisplayManager::ContextType pType, Canvas* pScreen);
+	static Renderer* Create(uilepra::DisplayManager::ContextType type, Canvas* screen);
 };
 
 

@@ -5,156 +5,132 @@
 
 
 #include "pch.h"
-#include "../Include/GeometryReference.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/ResourceTracker.h"
+#include "../include/geometryreference.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/resourcetracker.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-GeometryReference::GeometryReference(GeometryBase* pGeometry) :
-	mGeometry(pGeometry)
-{
-	LEPRA_DEBUG_CODE(mName = "Ref->" + pGeometry->mName);
+GeometryReference::GeometryReference(GeometryBase* geometry) :
+	geometry_(geometry) {
+	LEPRA_DEBUG_CODE(name_ = "Ref->" + geometry->name_);
 	LEPRA_ACQUIRE_RESOURCE(GeometryReference);
-	Copy(mGeometry);
-	mFlags = mDefaultFlags;
-	SetFlag(mGeometry->GetFlags()&(~VALID_FLAGS_MASK) | TRANSFORMATION_CHANGED | REF_TRANSFORMATION_CHANGED | BIG_ORIENTATION_CHANGED);
-	mRendererData = 0;
+	Copy(geometry_);
+	flags_ = default_flags_;
+	SetFlag(geometry_->GetFlags()&(~kValidFlagsMask) | kTransformationChanged | kRefTransformationChanged | kBigOrientationChanged);
+	renderer_data_ = 0;
 }
 
-GeometryReference::~GeometryReference()
-{
-	mGeometry = 0;
+GeometryReference::~GeometryReference() {
+	geometry_ = 0;
 	LEPRA_RELEASE_RESOURCE(GeometryReference);
 }
 
-bool GeometryReference::IsGeometryReference()
-{
+bool GeometryReference::IsGeometryReference() {
 	return true;
 }
 
-const xform& GeometryReference::GetOffsetTransformation() const
-{
-	return mOriginalOffset;
+const xform& GeometryReference::GetOffsetTransformation() const {
+	return original_offset_;
 }
 
-void GeometryReference::SetOffsetTransformation(const xform& pOffset)
-{
-	mOriginalOffset = pOffset;
+void GeometryReference::SetOffsetTransformation(const xform& offset) {
+	original_offset_ = offset;
 	SetTransformationChanged(true);
 }
 
-void GeometryReference::AddOffset(const vec3& pOffset)
-{
-	mOriginalOffset.GetPosition() += pOffset;
+void GeometryReference::AddOffset(const vec3& offset) {
+	original_offset_.GetPosition() += offset;
 	SetTransformationChanged(true);
 }
 
-const xform& GeometryReference::GetExtraOffsetTransformation() const
-{
-	return mExtraOffset;
+const xform& GeometryReference::GetExtraOffsetTransformation() const {
+	return extra_offset_;
 }
 
-void GeometryReference::SetExtraOffsetTransformation(const xform& pOffset)
-{
-	mExtraOffset = pOffset;
+void GeometryReference::SetExtraOffsetTransformation(const xform& offset) {
+	extra_offset_ = offset;
 	SetTransformationChanged(true);
 }
 
-const xform& GeometryReference::GetTransformation()
-{
-	if (!CheckFlag(REF_TRANSFORMATION_CHANGED))
-	{
+const xform& GeometryReference::GetTransformation() {
+	if (!CheckFlag(kRefTransformationChanged)) {
 /*#ifdef LEPRA_DEBUG
 		xform lReturnTransformation = GetBaseTransformation();
-		lReturnTransformation.GetPosition() += lReturnTransformation.GetOrientation() * mOriginalOffset.GetPosition();
-		lReturnTransformation.GetOrientation() *= mOriginalOffset.GetOrientation();
-		deb_assert(lReturnTransformation == mReturnTransformation);
+		lReturnTransformation.GetPosition() += lReturnTransformation.GetOrientation() * original_offset_.GetPosition();
+		lReturnTransformation.GetOrientation() *= original_offset_.GetOrientation();
+		deb_assert(lReturnTransformation == return_transformation_);
 #endif // Debug.*/
-		return mReturnTransformation;
+		return return_transformation_;
 	}
-	ClearFlag(REF_TRANSFORMATION_CHANGED);
+	ClearFlag(kRefTransformationChanged);
 
-	mReturnTransformation = GetBaseTransformation();
-	vec3 lDelta;
-	mReturnTransformation.GetOrientation().FastRotatedVector(
-		mReturnTransformation.GetOrientation().GetConjugate(),
-		lDelta,
-		mOriginalOffset.GetPosition() + mExtraOffset.GetPosition());
-	mReturnTransformation.GetPosition() += lDelta;
-	mReturnTransformation.GetOrientation() *= mOriginalOffset.GetOrientation();
-	mReturnTransformation.GetOrientation() *= mExtraOffset.GetOrientation();
-	return mReturnTransformation;
+	return_transformation_ = GetBaseTransformation();
+	vec3 delta;
+	return_transformation_.GetOrientation().FastRotatedVector(
+		return_transformation_.GetOrientation().GetConjugate(),
+		delta,
+		original_offset_.GetPosition() + extra_offset_.GetPosition());
+	return_transformation_.GetPosition() += delta;
+	return_transformation_.GetOrientation() *= original_offset_.GetOrientation();
+	return_transformation_.GetOrientation() *= extra_offset_.GetOrientation();
+	return return_transformation_;
 }
 
-GeometryBase::GeometryVolatility GeometryReference::GetGeometryVolatility() const
-{
-	return mGeometry->GetGeometryVolatility();
+GeometryBase::GeometryVolatility GeometryReference::GetGeometryVolatility() const {
+	return geometry_->GetGeometryVolatility();
 }
 
-void GeometryReference::SetGeometryVolatility(GeometryVolatility pVolatility)
-{
-	mGeometry->SetGeometryVolatility(pVolatility);
+void GeometryReference::SetGeometryVolatility(GeometryVolatility volatility) {
+	geometry_->SetGeometryVolatility(volatility);
 }
 
-unsigned int GeometryReference::GetMaxVertexCount()  const
-{
-	return mGeometry->GetMaxVertexCount();
+unsigned int GeometryReference::GetMaxVertexCount()  const {
+	return geometry_->GetMaxVertexCount();
 }
 
-unsigned int GeometryReference::GetMaxIndexCount() const
-{
-	return mGeometry->GetMaxIndexCount();
+unsigned int GeometryReference::GetMaxIndexCount() const {
+	return geometry_->GetMaxIndexCount();
 }
 
-unsigned int GeometryReference::GetVertexCount()  const
-{
-	return mGeometry->GetVertexCount();
+unsigned int GeometryReference::GetVertexCount()  const {
+	return geometry_->GetVertexCount();
 }
 
-unsigned int GeometryReference::GetIndexCount() const
-{
-	return mGeometry->GetIndexCount();
+unsigned int GeometryReference::GetIndexCount() const {
+	return geometry_->GetIndexCount();
 }
 
-unsigned int GeometryReference::GetUVSetCount()    const
-{
-	return mGeometry->GetUVSetCount();
+unsigned int GeometryReference::GetUVSetCount()    const {
+	return geometry_->GetUVSetCount();
 }
 
-float* GeometryReference::GetVertexData() const
-{
-	return mGeometry->GetVertexData();
+float* GeometryReference::GetVertexData() const {
+	return geometry_->GetVertexData();
 }
 
-float* GeometryReference::GetUVData(unsigned int pUVSet) const
-{
-	return mGeometry->GetUVData(pUVSet);
+float* GeometryReference::GetUVData(unsigned int uv_set) const {
+	return geometry_->GetUVData(uv_set);
 }
 
-vtx_idx_t* GeometryReference::GetIndexData() const
-{
-	return mGeometry->GetIndexData();
+vtx_idx_t* GeometryReference::GetIndexData() const {
+	return geometry_->GetIndexData();
 }
 
-uint8* GeometryReference::GetColorData() const
-{
-	return mGeometry->GetColorData();
+uint8* GeometryReference::GetColorData() const {
+	return geometry_->GetColorData();
 }
 
-float* GeometryReference::GetNormalData() const
-{
-	return mGeometry->GetNormalData();
+float* GeometryReference::GetNormalData() const {
+	return geometry_->GetNormalData();
 }
 
-GeometryBase* GeometryReference::GetParentGeometry() const
-{
-	return mGeometry;
+GeometryBase* GeometryReference::GetParentGeometry() const {
+	return geometry_;
 }
 
 

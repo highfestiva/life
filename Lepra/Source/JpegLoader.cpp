@@ -5,38 +5,34 @@
 */
 
 #include "pch.h"
-#include "../../ThirdParty/jpeg-6b/jinclude.h"
-#include "../../ThirdParty/jpeg-6b/jpeglib.h"
-#include "../../ThirdParty/jpeg-6b/jerror.h"
+#include "../../thirdparty/jpeg-6b/jinclude.h"
+#include "../../thirdparty/jpeg-6b/jpeglib.h"
+#include "../../thirdparty/jpeg-6b/jerror.h"
 
 #define INT32 a_stupid_workaround_that_undefines_a_typedef
-#include "../Include/ArchiveFile.h"
-#include "../Include/Canvas.h"
-#include "../Include/DiskFile.h"
-#include "../Include/MetaFile.h"
-#include "../Include/Graphics2D.h"
-#include "../Include/JpegLoader.h"
-#include "../Include/ProgressCallback.h"
+#include "../include/archivefile.h"
+#include "../include/canvas.h"
+#include "../include/diskfile.h"
+#include "../include/metafile.h"
+#include "../include/graphics2d.h"
+#include "../include/jpegloader.h"
+#include "../include/progresscallback.h"
 #undef INT32
 
-namespace Lepra
-{
+namespace lepra {
 
 /*
-	A class used to (locally, within this file) get access to the 
+	A class used to (locally, within this file) get access to the
 	jpeg loader's private members.
 */
 
-class JpegFriend
-{
+class JpegFriend {
 public:
-	static inline Reader* GetReader(JpegLoader* pJpegLoader)
-	{
-		return pJpegLoader->mReader;
+	static inline Reader* GetReader(JpegLoader* jpeg_loader) {
+		return jpeg_loader->reader_;
 	}
-	static inline Writer* GetWriter(JpegLoader* pJpegLoader)
-	{
-		return pJpegLoader->mWriter;
+	static inline Writer* GetWriter(JpegLoader* jpeg_loader) {
+		return jpeg_loader->writer_;
 	}
 };
 
@@ -44,38 +40,36 @@ public:
 /*
 	C style source management functions.
 */
-void InitSource(j_decompress_ptr pCInfo);
-boolean FillInputBuffer(j_decompress_ptr pCInfo);
-void SkipInputData(j_decompress_ptr pCInfo, long pNumBytes);
-void TerminateSource(j_decompress_ptr pCInfo);
+void InitSource(j_decompress_ptr c_info);
+boolean FillInputBuffer(j_decompress_ptr c_info);
+void SkipInputData(j_decompress_ptr c_info, long num_bytes);
+void TerminateSource(j_decompress_ptr c_info);
 
 /*
 	C style destination management functions.
 */
-void InitDestination(j_compress_ptr pCInfo);
-boolean EmptyOutputBuffer(j_compress_ptr pCInfo);
-void TerminateDestination(j_compress_ptr pCInfo);
+void InitDestination(j_compress_ptr c_info);
+boolean EmptyOutputBuffer(j_compress_ptr c_info);
+void TerminateDestination(j_compress_ptr c_info);
 
 /*
 	C style source manager struct.
 */
-struct SourceManager
-{
-	jpeg_source_mgr mSourceManager;
-	uint8 mIOBuffer[JpegLoader::IO_BUFFER_SIZE];
-	int mIOBufferSize;
-	JpegLoader* mJpegLoader;
+struct SourceManager {
+	jpeg_source_mgr source_manager_;
+	uint8 io_buffer_[JpegLoader::kIoBufferSize];
+	int io_buffer_size_;
+	JpegLoader* jpeg_loader_;
 };
 
 /*
 	C style destination manager struct.
 */
-struct DestinationManager
-{
-	jpeg_destination_mgr mDestManager;
-	uint8 mIOBuffer[JpegLoader::IO_BUFFER_SIZE];
-	int mIOBufferSize;
-	JpegLoader* mJpegLoader;
+struct DestinationManager {
+	jpeg_destination_mgr dest_manager_;
+	uint8 io_buffer_[JpegLoader::kIoBufferSize];
+	int io_buffer_size_;
+	JpegLoader* jpeg_loader_;
 };
 
 
@@ -86,270 +80,234 @@ struct DestinationManager
 */
 
 JpegLoader::JpegLoader() :
-	mReader(0),
-	mWriter(0)
-{
+	reader_(0),
+	writer_(0) {
 }
 
-JpegLoader::~JpegLoader()
-{
+JpegLoader::~JpegLoader() {
 }
 
-JpegLoader::Status JpegLoader::Load(const str& pFileName, Canvas& pCanvas, ProgressCallback* pProgress)
-{
-	Status lStatus = STATUS_SUCCESS;
-	MetaFile lFile;
+JpegLoader::Status JpegLoader::Load(const str& file_name, Canvas& canvas, ProgressCallback* progress) {
+	Status status = kStatusSuccess;
+	MetaFile file;
 
-	if (lFile.Open(pFileName, MetaFile::READ_ONLY) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, MetaFile::kReadOnly) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		mReader = &lFile;
-		lStatus = Load(pCanvas, pProgress);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		reader_ = &file;
+		status = Load(canvas, progress);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-JpegLoader::Status JpegLoader::Save(const str& pFileName, const Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	DiskFile lFile;
+JpegLoader::Status JpegLoader::Save(const str& file_name, const Canvas& canvas) {
+	Status status = kStatusSuccess;
+	DiskFile file;
 
-	if (lFile.Open(pFileName, DiskFile::MODE_WRITE) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, DiskFile::kModeWrite) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		mWriter = &lFile;
-		lStatus = Save(pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		writer_ = &file;
+		status = Save(canvas);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-JpegLoader::Status JpegLoader::Load(const str& pArchiveName, const str& pFileName, Canvas& pCanvas, ProgressCallback* pProgress)
-{
-	Status lStatus = STATUS_SUCCESS;
-	ArchiveFile lFile(pArchiveName);
+JpegLoader::Status JpegLoader::Load(const str& archive_name, const str& file_name, Canvas& canvas, ProgressCallback* progress) {
+	Status status = kStatusSuccess;
+	ArchiveFile file(archive_name);
 
-	if (lFile.Open(pFileName, ArchiveFile::READ_ONLY) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, ArchiveFile::kReadOnly) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		mReader = &lFile;
-		lStatus = Load(pCanvas, pProgress);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		reader_ = &file;
+		status = Load(canvas, progress);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-JpegLoader::Status JpegLoader::Save(const str& pArchiveName, const str& pFileName, const Canvas& pCanvas)
-{
-	Status lStatus = STATUS_SUCCESS;
-	ArchiveFile lFile(pArchiveName);
+JpegLoader::Status JpegLoader::Save(const str& archive_name, const str& file_name, const Canvas& canvas) {
+	Status status = kStatusSuccess;
+	ArchiveFile file(archive_name);
 
-	if (lFile.Open(pFileName, ArchiveFile::WRITE_ONLY) == false)
-	{
-		lStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, ArchiveFile::kWriteOnly) == false) {
+		status = kStatusOpenError;
 	}
 
-	if (lStatus == STATUS_SUCCESS)
-	{
-		mReader = &lFile;
-		lStatus = Save(pCanvas);
-		lFile.Close();
+	if (status == kStatusSuccess) {
+		reader_ = &file;
+		status = Save(canvas);
+		file.Close();
 	}
 
-	return lStatus;
+	return status;
 }
 
-JpegLoader::Status JpegLoader::Load(Reader& pReader, Canvas& pCanvas, ProgressCallback* pProgress)
-{
-	mReader = &pReader;
-	return Load(pCanvas, pProgress);
+JpegLoader::Status JpegLoader::Load(Reader& reader, Canvas& canvas, ProgressCallback* progress) {
+	reader_ = &reader;
+	return Load(canvas, progress);
 }
 
-JpegLoader::Status JpegLoader::Save(Writer& pWriter, const Canvas& pCanvas)
-{
-	mWriter = &pWriter;
-	return Save(pCanvas);
+JpegLoader::Status JpegLoader::Save(Writer& writer, const Canvas& canvas) {
+	writer_ = &writer;
+	return Save(canvas);
 }
 
-JpegLoader::Status JpegLoader::Load(Canvas& pCanvas, ProgressCallback* pProgress)
-{
-	jpeg_decompress_struct lCInfo;
-	jpeg_error_mgr lJErr;
+JpegLoader::Status JpegLoader::Load(Canvas& canvas, ProgressCallback* progress) {
+	jpeg_decompress_struct _c_info;
+	jpeg_error_mgr j_err;
 
-	lCInfo.err = jpeg_std_error(&lJErr);
-	jpeg_create_decompress(&lCInfo);
+	_c_info.err = jpeg_std_error(&j_err);
+	jpeg_create_decompress(&_c_info);
 
-	InitSourceManager(&lCInfo);
+	InitSourceManager(&_c_info);
 
-	if (jpeg_read_header(&lCInfo, TRUE) != JPEG_HEADER_OK)
-	{
-		jpeg_destroy_decompress(&lCInfo);
-		return STATUS_READ_HEADER_ERROR;
+	if (jpeg_read_header(&_c_info, TRUE) != JPEG_HEADER_OK) {
+		jpeg_destroy_decompress(&_c_info);
+		return kStatusReadHeaderError;
 	}
 
-	if (jpeg_start_decompress(&lCInfo) != TRUE)
-	{
-		jpeg_destroy_decompress(&lCInfo);
-		return STATUS_READ_PICTURE_ERROR;
+	if (jpeg_start_decompress(&_c_info) != TRUE) {
+		jpeg_destroy_decompress(&_c_info);
+		return kStatusReadPictureError;
 	}
 
-	if (lCInfo.output_components == 1)
-	{
-		pCanvas.Reset(lCInfo.output_width, lCInfo.output_height, Canvas::BITDEPTH_8_BIT);
-		
+	if (_c_info.output_components == 1) {
+		canvas.Reset(_c_info.output_width, _c_info.output_height, Canvas::kBitdepth8Bit);
+
 		// Create grayscale palette.
-		Color lPalette[256];
-		for (int i = 0; i < 256; i++)
-		{
-			lPalette[i].Set(i, i, i, i);
+		Color palette[256];
+		for (int i = 0; i < 256; i++) {
+			palette[i].Set(i, i, i, i);
 		}
 
-		pCanvas.SetPalette(lPalette);
+		canvas.SetPalette(palette);
+	} else {
+		canvas.Reset(_c_info.output_width, _c_info.output_height, Canvas::kBitdepth24Bit);
 	}
-	else
-	{
-		pCanvas.Reset(lCInfo.output_width, lCInfo.output_height, Canvas::BITDEPTH_24_BIT);
-	}
-	pCanvas.CreateBuffer();
-	uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
-	int lRowStride = pCanvas.GetPitch() * pCanvas.GetPixelByteSize();
-	int lScanLines = pCanvas.GetHeight();
-	if (pProgress)
-	{
-		pProgress->SetProgressMax(lScanLines-1);
+	canvas.CreateBuffer();
+	uint8* buffer = (uint8*)canvas.GetBuffer();
+	int row_stride = canvas.GetPitch() * canvas.GetPixelByteSize();
+	int scan_lines = canvas.GetHeight();
+	if (progress) {
+		progress->SetProgressMax(scan_lines-1);
 	}
 
-	const int lReadRowsAtATime = 16;
-	JSAMPROW lOffset[lReadRowsAtATime];
-	for (int x = 0; x < lReadRowsAtATime; ++x)
-	{
-		lOffset[x] = &lBuffer[x*lRowStride];
+	const int read_rows_at_a_time = 16;
+	JSAMPROW offset[read_rows_at_a_time];
+	for (int x = 0; x < read_rows_at_a_time; ++x) {
+		offset[x] = &buffer[x*row_stride];
 	}
 
-	if (pProgress)
-	{
-		pProgress->SetProgressPos(0);
+	if (progress) {
+		progress->SetProgressPos(0);
 	}
-	for (int i = 0; i < lScanLines;)
-	{
-		const int lRows = jpeg_read_scanlines(&lCInfo, lOffset, lReadRowsAtATime);
-		i += lRows;
-		if (pProgress)
-		{
-			pProgress->SetProgressPos(i);
+	for (int i = 0; i < scan_lines;) {
+		const int rows = jpeg_read_scanlines(&_c_info, offset, read_rows_at_a_time);
+		i += rows;
+		if (progress) {
+			progress->SetProgressPos(i);
 		}
-		for (int x = 0; x < lReadRowsAtATime; ++x)
-		{
-			lOffset[x] += lRowStride*lRows;
+		for (int x = 0; x < read_rows_at_a_time; ++x) {
+			offset[x] += row_stride*rows;
 		}
 	}
 
-	jpeg_finish_decompress(&lCInfo);
-	jpeg_destroy_decompress(&lCInfo);
+	jpeg_finish_decompress(&_c_info);
+	jpeg_destroy_decompress(&_c_info);
 
-	pCanvas.SwapRGBOrder();
+	canvas.SwapRGBOrder();
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-JpegLoader::Status JpegLoader::Save(const Canvas& pCanvas)
-{
-	jpeg_compress_struct lCInfo;
-	jpeg_error_mgr lJErr;
-	lCInfo.err = jpeg_std_error(&lJErr);
-	jpeg_create_compress(&lCInfo);
+JpegLoader::Status JpegLoader::Save(const Canvas& canvas) {
+	jpeg_compress_struct _c_info;
+	jpeg_error_mgr j_err;
+	_c_info.err = jpeg_std_error(&j_err);
+	jpeg_create_compress(&_c_info);
 
-	InitDestinationManager(&lCInfo);
+	InitDestinationManager(&_c_info);
 
-	lCInfo.image_width = pCanvas.GetWidth();
-	lCInfo.image_height = pCanvas.GetHeight();
-	lCInfo.input_components = 3;
-	lCInfo.in_color_space = JCS_RGB;
+	_c_info.image_width = canvas.GetWidth();
+	_c_info.image_height = canvas.GetHeight();
+	_c_info.input_components = 3;
+	_c_info.in_color_space = JCS_RGB;
 
-	// We must make sure that the image is in 24-bit RGB mode.
-	Canvas lCopy(pCanvas, true);
-	if (lCopy.GetBitDepth() != Canvas::BITDEPTH_24_BIT)
-	{
-		lCopy.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
+	// We must make sure that the image is in 24-bit kRgb mode.
+	Canvas copy(canvas, true);
+	if (copy.GetBitDepth() != Canvas::kBitdepth24Bit) {
+		copy.ConvertBitDepth(Canvas::kBitdepth24Bit);
 	}
 
-	lCopy.SwapRGBOrder();
+	copy.SwapRGBOrder();
 
-	jpeg_set_defaults(&lCInfo);
-	jpeg_start_compress(&lCInfo, TRUE);
+	jpeg_set_defaults(&_c_info);
+	jpeg_start_compress(&_c_info, TRUE);
 
-	uint8* lBuffer = (uint8*)lCopy.GetBuffer();
-	int lRowStride = lCopy.GetPitch() * lCopy.GetPixelByteSize();
+	uint8* buffer = (uint8*)copy.GetBuffer();
+	int row_stride = copy.GetPitch() * copy.GetPixelByteSize();
 
-	JSAMPROW lOffset[1];
-	lOffset[0] = lBuffer;
+	JSAMPROW offset[1];
+	offset[0] = buffer;
 
-	for (unsigned i = 0; i < lCopy.GetHeight(); i++)
-	{
-		jpeg_write_scanlines(&lCInfo, lOffset, 1);
-		lOffset[0] += lRowStride;
+	for (unsigned i = 0; i < copy.GetHeight(); i++) {
+		jpeg_write_scanlines(&_c_info, offset, 1);
+		offset[0] += row_stride;
 	}
 
-	jpeg_finish_compress(&lCInfo);
-	jpeg_destroy_compress(&lCInfo);
+	jpeg_finish_compress(&_c_info);
+	jpeg_destroy_compress(&_c_info);
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-void JpegLoader::InitSourceManager(j_decompress_ptr pCInfo)
-{
-	if (pCInfo->src == NULL) 
-	{	
+void JpegLoader::InitSourceManager(j_decompress_ptr c_info) {
+	if (c_info->src == NULL) {
 		// First time for this JPEG object?
-		pCInfo->src = (jpeg_source_mgr*)new SourceManager;
+		c_info->src = (jpeg_source_mgr*)new SourceManager;
 	}
 
-	SourceManager* lSrc = (SourceManager*)pCInfo->src;
-	lSrc->mSourceManager.init_source       = InitSource;
-	lSrc->mSourceManager.fill_input_buffer = FillInputBuffer;
-	lSrc->mSourceManager.skip_input_data   = SkipInputData;
-	lSrc->mSourceManager.resync_to_restart = jpeg_resync_to_restart; /* use default method */
-	lSrc->mSourceManager.term_source       = TerminateSource;
+	SourceManager* __src = (SourceManager*)c_info->src;
+	__src->source_manager_.init_source       = InitSource;
+	__src->source_manager_.fill_input_buffer = FillInputBuffer;
+	__src->source_manager_.skip_input_data   = SkipInputData;
+	__src->source_manager_.resync_to_restart = jpeg_resync_to_restart; /* use default method */
+	__src->source_manager_.term_source       = TerminateSource;
 
 	// Forces FillInputBuffer() on first read.
-	lSrc->mIOBufferSize = 0;
-	lSrc->mJpegLoader = this;
-	lSrc->mSourceManager.bytes_in_buffer = 0; 
-	lSrc->mSourceManager.next_input_byte = NULL;
+	__src->io_buffer_size_ = 0;
+	__src->jpeg_loader_ = this;
+	__src->source_manager_.bytes_in_buffer = 0;
+	__src->source_manager_.next_input_byte = NULL;
 }
 
-void JpegLoader::InitDestinationManager(j_compress_ptr pCInfo)
-{
-	if (pCInfo->dest == NULL)
-	{	
+void JpegLoader::InitDestinationManager(j_compress_ptr c_info) {
+	if (c_info->dest == NULL) {
 		// First time for this JPEG object?
-		pCInfo->dest = (jpeg_destination_mgr*)new DestinationManager;
+		c_info->dest = (jpeg_destination_mgr*)new DestinationManager;
 	}
 
-	DestinationManager* lDest = (DestinationManager*)pCInfo->dest;
+	DestinationManager* __dest = (DestinationManager*)c_info->dest;
 
-	lDest->mIOBufferSize = 0;
-	lDest->mJpegLoader = this;
+	__dest->io_buffer_size_ = 0;
+	__dest->jpeg_loader_ = this;
 
-	lDest->mDestManager.init_destination    = InitDestination;
-	lDest->mDestManager.empty_output_buffer = EmptyOutputBuffer;
-	lDest->mDestManager.term_destination    = TerminateDestination;
+	__dest->dest_manager_.init_destination    = InitDestination;
+	__dest->dest_manager_.empty_output_buffer = EmptyOutputBuffer;
+	__dest->dest_manager_.term_destination    = TerminateDestination;
 }
 
 
@@ -359,70 +317,60 @@ void JpegLoader::InitDestinationManager(j_compress_ptr pCInfo)
 
 
 
-void InitSource(j_decompress_ptr pCInfo)
-{
-	SourceManager* lSrc = (SourceManager*)pCInfo->src;
-	lSrc->mIOBufferSize = 0;
+void InitSource(j_decompress_ptr c_info) {
+	SourceManager* __src = (SourceManager*)c_info->src;
+	__src->io_buffer_size_ = 0;
 }
 
-boolean FillInputBuffer(j_decompress_ptr pCInfo)
-{
-	SourceManager* lSrc = (SourceManager*)pCInfo->src;
+boolean FillInputBuffer(j_decompress_ptr c_info) {
+	SourceManager* __src = (SourceManager*)c_info->src;
 
-	Reader* lReader = JpegFriend::GetReader(lSrc->mJpegLoader);
+	Reader* _reader = JpegFriend::GetReader(__src->jpeg_loader_);
 
-	int lNumBytes = (int)lReader->GetAvailable();
-	if (lNumBytes > JpegLoader::IO_BUFFER_SIZE)
-	{
-		lNumBytes = JpegLoader::IO_BUFFER_SIZE;
+	int _num_bytes = (int)_reader->GetAvailable();
+	if (_num_bytes > JpegLoader::kIoBufferSize) {
+		_num_bytes = JpegLoader::kIoBufferSize;
 	}
 
-	IOError lErr = lReader->ReadData(lSrc->mIOBuffer, lNumBytes);
+	IOError __err = _reader->ReadData(__src->io_buffer_, _num_bytes);
 
-	if (lErr != IO_OK)
-	{
-		WARNMS(pCInfo, JWRN_JPEG_EOF);
+	if (__err != kIoOk) {
+		WARNMS(c_info, JWRN_JPEG_EOF);
 
 		/* Insert a fake EOI marker */
-		lSrc->mIOBuffer[0] = (JOCTET) 0xFF;
-		lSrc->mIOBuffer[1] = (JOCTET) JPEG_EOI;
+		__src->io_buffer_[0] = (JOCTET) 0xFF;
+		__src->io_buffer_[1] = (JOCTET) JPEG_EOI;
 
-		lSrc->mSourceManager.next_input_byte = lSrc->mIOBuffer;
-		lSrc->mSourceManager.bytes_in_buffer = 2;
-	}
-	else
-	{
-		lSrc->mIOBufferSize = lNumBytes;
-		lSrc->mSourceManager.next_input_byte = lSrc->mIOBuffer;
-		lSrc->mSourceManager.bytes_in_buffer = lSrc->mIOBufferSize;
+		__src->source_manager_.next_input_byte = __src->io_buffer_;
+		__src->source_manager_.bytes_in_buffer = 2;
+	} else {
+		__src->io_buffer_size_ = _num_bytes;
+		__src->source_manager_.next_input_byte = __src->io_buffer_;
+		__src->source_manager_.bytes_in_buffer = __src->io_buffer_size_;
 	}
 
 	return TRUE;
 }
 
-void SkipInputData(j_decompress_ptr pCInfo, long pNumBytes)
-{
-	SourceManager* lSrc = (SourceManager*)pCInfo->src;
+void SkipInputData(j_decompress_ptr c_info, long num_bytes) {
+	SourceManager* __src = (SourceManager*)c_info->src;
 
-	if (pNumBytes > 0)
-	{
-		while (pNumBytes > (long)lSrc->mSourceManager.bytes_in_buffer) 
-		{
-			pNumBytes -= (long)lSrc->mSourceManager.bytes_in_buffer;
-			FillInputBuffer(pCInfo);
+	if (num_bytes > 0) {
+		while (num_bytes > (long)__src->source_manager_.bytes_in_buffer) {
+			num_bytes -= (long)__src->source_manager_.bytes_in_buffer;
+			FillInputBuffer(c_info);
 		}
 
-		lSrc->mSourceManager.next_input_byte += (size_t)pNumBytes;
-		lSrc->mSourceManager.bytes_in_buffer -= (size_t)pNumBytes;
+		__src->source_manager_.next_input_byte += (size_t)num_bytes;
+		__src->source_manager_.bytes_in_buffer -= (size_t)num_bytes;
 	}
 }
 
-void TerminateSource(j_decompress_ptr pCInfo)
-{
-	SourceManager* lSrc = (SourceManager*)pCInfo->src;
-	lSrc->mIOBufferSize = 0;
-	lSrc->mJpegLoader = 0;
-	delete lSrc;
+void TerminateSource(j_decompress_ptr c_info) {
+	SourceManager* __src = (SourceManager*)c_info->src;
+	__src->io_buffer_size_ = 0;
+	__src->jpeg_loader_ = 0;
+	delete __src;
 }
 
 
@@ -430,42 +378,38 @@ void TerminateSource(j_decompress_ptr pCInfo)
 
 
 
-void InitDestination(j_compress_ptr pCInfo)
-{
-	DestinationManager* lDest = (DestinationManager*)pCInfo->dest;
+void InitDestination(j_compress_ptr c_info) {
+	DestinationManager* __dest = (DestinationManager*)c_info->dest;
 
-	lDest->mDestManager.next_output_byte = lDest->mIOBuffer;
-	lDest->mDestManager.free_in_buffer = JpegLoader::IO_BUFFER_SIZE;
+	__dest->dest_manager_.next_output_byte = __dest->io_buffer_;
+	__dest->dest_manager_.free_in_buffer = JpegLoader::kIoBufferSize;
 }
 
 
-boolean EmptyOutputBuffer(j_compress_ptr pCInfo)
-{
-	DestinationManager* lDest = (DestinationManager*)pCInfo->dest;
+boolean EmptyOutputBuffer(j_compress_ptr c_info) {
+	DestinationManager* __dest = (DestinationManager*)c_info->dest;
 
-	Writer* lWriter = JpegFriend::GetWriter(lDest->mJpegLoader);
-	lWriter->WriteData(lDest->mIOBuffer, JpegLoader::IO_BUFFER_SIZE);
+	Writer* _writer = JpegFriend::GetWriter(__dest->jpeg_loader_);
+	_writer->WriteData(__dest->io_buffer_, JpegLoader::kIoBufferSize);
 
-	lDest->mDestManager.next_output_byte = lDest->mIOBuffer;
-	lDest->mDestManager.free_in_buffer = JpegLoader::IO_BUFFER_SIZE;
+	__dest->dest_manager_.next_output_byte = __dest->io_buffer_;
+	__dest->dest_manager_.free_in_buffer = JpegLoader::kIoBufferSize;
 
 	return TRUE;
 }
 
-void TerminateDestination(j_compress_ptr pCInfo)
-{
-	DestinationManager* lDest = (DestinationManager*)pCInfo->dest;
-	size_t lDataCount = JpegLoader::IO_BUFFER_SIZE - lDest->mDestManager.free_in_buffer;
+void TerminateDestination(j_compress_ptr c_info) {
+	DestinationManager* __dest = (DestinationManager*)c_info->dest;
+	size_t data_count = JpegLoader::kIoBufferSize - __dest->dest_manager_.free_in_buffer;
 
 	/* Write any data remaining in the buffer */
-	if (lDataCount > 0) 
-	{
-		JpegFriend::GetWriter(lDest->mJpegLoader)->WriteData(lDest->mIOBuffer, (unsigned)lDataCount);
+	if (data_count > 0) {
+		JpegFriend::GetWriter(__dest->jpeg_loader_)->WriteData(__dest->io_buffer_, (unsigned)data_count);
 	}
 
-	lDest->mIOBufferSize = 0;
-	lDest->mJpegLoader = 0;
-	delete lDest;
+	__dest->io_buffer_size_ = 0;
+	__dest->jpeg_loader_ = 0;
+	delete __dest;
 }
 
 }

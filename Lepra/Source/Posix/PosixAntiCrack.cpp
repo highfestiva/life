@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // Anti-cracking techniques. Warning: may contain unreadable code.
@@ -7,12 +7,11 @@
 
 
 #include "pch.h"
-#include "../../Include/AntiCrack.h"
+#include "../../include/anticrack.h"
 
 
 
-AntiCrack::AntiCrack()
-{
+AntiCrack::AntiCrack() {
 }
 
 

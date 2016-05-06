@@ -1,23 +1,22 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2012, Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/Cure.h"
+#include "../cure/include/cure.h"
 
 
 
-namespace Push
-{
+namespace Push {
 
 
 
-using namespace Lepra;
+using namespace lepra;
 
-const int PHYSICS_FPS = CURE_STANDARD_FRAME_RATE;
+const int PHYSICS_FPS = kCureStandardFrameRate;
 
 //#define PUSH_DEMO
 

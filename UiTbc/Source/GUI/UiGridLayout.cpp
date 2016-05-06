@@ -5,675 +5,552 @@
 */
 
 #include "pch.h"
-#include "../../Include/GUI/UiGridLayout.h"
-#include "../../Include/GUI/UiComponent.h"
+#include "../../include/gui/uigridlayout.h"
+#include "../../include/gui/uicomponent.h"
 #include <list>
 
 #include <math.h>
 
-namespace UiTbc
-{
+namespace uitbc {
 
-GridLayout::GridLayout(int pRows, int pCols) :
-	mComponent(0),
-	mNumRows(pRows),
-	mNumCols(pCols),
-	mCurrentIndex(0),
-	mNumComponents(0)
-{
-	if (mNumRows < 0)
-	{
-		mNumRows = 0;
+GridLayout::GridLayout(int rows, int cols) :
+	component_(0),
+	num_rows_(rows),
+	num_cols_(cols),
+	current_index_(0),
+	num_components_(0) {
+	if (num_rows_ < 0) {
+		num_rows_ = 0;
 	}
-	if (mNumCols < 0)
-	{
-		mNumCols = 0;
+	if (num_cols_ < 0) {
+		num_cols_ = 0;
 	}
 
-	mComponent = AllocComponentGrid(mNumRows, mNumCols);
+	component_ = AllocComponentGrid(num_rows_, num_cols_);
 }
 
-GridLayout::~GridLayout()
-{
-	delete[] mComponent;
-	mComponent = 0;
+GridLayout::~GridLayout() {
+	delete[] component_;
+	component_ = 0;
 }
 
-Component** GridLayout::AllocComponentGrid(int pRows, int pCols)
-{
-	Component** lComponent = 0;
+Component** GridLayout::AllocComponentGrid(int rows, int cols) {
+	Component** _component = 0;
 
-	if (pRows != 0 && pCols != 0)
-	{
-		lComponent = new Component*[pRows * pCols];
-		for (int i = 0; i < pRows * pCols; i++)
-		{
-			lComponent[i] = 0;
+	if (rows != 0 && cols != 0) {
+		_component = new Component*[rows * cols];
+		for (int i = 0; i < rows * cols; i++) {
+			_component[i] = 0;
 		}
 	}
 
-	return lComponent;
+	return _component;
 }
 
-Layout::Type GridLayout::GetType() const
-{
-	return Layout::GRIDLAYOUT;
+Layout::Type GridLayout::GetType() const {
+	return Layout::kGridlayout;
 }
 
-void GridLayout::Add(Component* pComponent, int pParam1, int pParam2)
-{
-	if (mComponent == 0)
-	{
+void GridLayout::Add(Component* component, int param1, int param2) {
+	if (component_ == 0) {
 		return;
 	}
 
-	// pParam1 = Row
-	// pParam2 = Column
-	int lIndex = pParam2 + pParam1 * mNumCols;
-	for (; lIndex < mNumRows * mNumCols; lIndex++)
-	{
-		if (mComponent[lIndex] == 0)
-		{
-			mComponent[lIndex] = pComponent;
-			mNumComponents++;
+	// param1 = Row
+	// param2 = Column
+	int index = param2 + param1 * num_cols_;
+	for (; index < num_rows_ * num_cols_; index++) {
+		if (component_[index] == 0) {
+			component_[index] = component;
+			num_components_++;
 			return;
 		}
 	}
 }
 
-void GridLayout::Remove(Component* pComponent)
-{
-	if (mComponent == 0)
-	{
+void GridLayout::Remove(Component* component) {
+	if (component_ == 0) {
 		return;
 	}
 
-	for (int i = 0; i < mNumRows * mNumCols; i++)
-	{
-		if (mComponent[i] == pComponent)
-		{
-			mComponent[i] = 0;
-			mNumComponents--;
+	for (int i = 0; i < num_rows_ * num_cols_; i++) {
+		if (component_[i] == component) {
+			component_[i] = 0;
+			num_components_--;
 		}
 	}
 }
 
-int GridLayout::GetNumComponents() const
-{
-	return mNumComponents;
+int GridLayout::GetNumComponents() const {
+	return num_components_;
 }
 
-Component* GridLayout::GetComponentAt(int pRow, int pCol) const
-{
-	Component* lComp = 0;
-	if (mComponent != 0 && pRow >= 0 && pRow < mNumRows && pCol >= 0 && pCol < mNumCols)
-	{
-		lComp = mComponent[pRow * mNumCols + pCol];
+Component* GridLayout::GetComponentAt(int row, int col) const {
+	Component* comp = 0;
+	if (component_ != 0 && row >= 0 && row < num_rows_ && col >= 0 && col < num_cols_) {
+		comp = component_[row * num_cols_ + col];
 	}
-	return lComp;
+	return comp;
 }
 
-Component* GridLayout::GetFirst()
-{
-	if (mComponent == 0)
-	{
+Component* GridLayout::GetFirst() {
+	if (component_ == 0) {
 		return 0;
 	}
 
-	for (mCurrentIndex = 0; mCurrentIndex < mNumRows * mNumCols; mCurrentIndex++)
-	{
-		if (mComponent[mCurrentIndex] != 0)
-		{
-			return mComponent[mCurrentIndex];
+	for (current_index_ = 0; current_index_ < num_rows_ * num_cols_; current_index_++) {
+		if (component_[current_index_] != 0) {
+			return component_[current_index_];
 		}
 	}
 	return 0;
 }
 
-Component* GridLayout::GetNext()
-{
-	if (mComponent == 0 || mCurrentIndex < 0 || mCurrentIndex >= mNumRows * mNumCols)
-	{
+Component* GridLayout::GetNext() {
+	if (component_ == 0 || current_index_ < 0 || current_index_ >= num_rows_ * num_cols_) {
 		return 0;
 	}
 
-	mCurrentIndex++;
+	current_index_++;
 
-	for (; mCurrentIndex < mNumRows * mNumCols; mCurrentIndex++)
-	{
-		if (mComponent[mCurrentIndex] != 0)
-		{
-			return mComponent[mCurrentIndex];
+	for (; current_index_ < num_rows_ * num_cols_; current_index_++) {
+		if (component_[current_index_] != 0) {
+			return component_[current_index_];
 		}
 	}
 	return 0;
 }
 
-Component* GridLayout::GetLast()
-{
-	if (mComponent == 0)
-	{
+Component* GridLayout::GetLast() {
+	if (component_ == 0) {
 		return 0;
 	}
 
-	for (mCurrentIndex = mNumRows * mNumCols - 1; mCurrentIndex >= 0; mCurrentIndex--)
-	{
-		if (mComponent[mCurrentIndex] != 0)
-		{
-			return mComponent[mCurrentIndex];
+	for (current_index_ = num_rows_ * num_cols_ - 1; current_index_ >= 0; current_index_--) {
+		if (component_[current_index_] != 0) {
+			return component_[current_index_];
 		}
 	}
 	return 0;
 }
 
-Component* GridLayout::GetPrev()
-{
-	if (mComponent == 0 || mCurrentIndex < 0 || mCurrentIndex >= mNumRows * mNumCols)
-	{
+Component* GridLayout::GetPrev() {
+	if (component_ == 0 || current_index_ < 0 || current_index_ >= num_rows_ * num_cols_) {
 		return 0;
 	}
 
-	mCurrentIndex--;
+	current_index_--;
 
-	for (; mCurrentIndex >= 0; mCurrentIndex--)
-	{
-		if (mComponent[mCurrentIndex] != 0)
-		{
-			return mComponent[mCurrentIndex];
+	for (; current_index_ >= 0; current_index_--) {
+		if (component_[current_index_] != 0) {
+			return component_[current_index_];
 		}
 	}
 	return 0;
 }
 
-void GridLayout::UpdateLayout()
-{
-	if (mComponent == 0)
-	{
+void GridLayout::UpdateLayout() {
+	if (component_ == 0) {
 		return;
 	}
 
-	PixelCoord lOwnerSize(GetOwner()->GetSize());
+	PixelCoord owner_size(GetOwner()->GetSize());
 
-	std::list<int> lWidthList;
-	std::list<int> lHeightList;
+	std::list<int> width_list;
+	std::list<int> height_list;
 
 	int x, y;
 
-	int lNumExpandableRows = 0;
-	int lNumExpandableCols = 0;
-	
-	int lHeightSum = 0;
-	int lWidthSum = 0;
+	int num_expandable_rows = 0;
+	int num_expandable_cols = 0;
+
+	int height_sum = 0;
+	int width_sum = 0;
 
 	// Find the maximum height of each row, and store it in the list.
-	for (y = 0; y < mNumRows; y++)
-	{
-		int lMaxHeight = 0;
-		bool lExpandable = true;
-		bool lEmptyRow = true;
-		for (x = 0; x < mNumCols; x++)
-		{
-			int lIndex = y * mNumCols + x;
-				
-			if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsLocalVisible() == true)
-			{
-				lEmptyRow = false;
+	for (y = 0; y < num_rows_; y++) {
+		int max_height = 0;
+		bool expandable = true;
+		bool empty_row = true;
+		for (x = 0; x < num_cols_; x++) {
+			int index = y * num_cols_ + x;
 
-				PixelCoord lSize(mComponent[lIndex]->GetPreferredSize());
+			if (component_[index] != 0 && component_[index]->IsLocalVisible() == true) {
+				empty_row = false;
 
-				if (lSize.y > lMaxHeight)
-				{
-					lMaxHeight = lSize.y;
-					lExpandable = false;
+				PixelCoord size(component_[index]->GetPreferredSize());
+
+				if (size.y > max_height) {
+					max_height = size.y;
+					expandable = false;
 				}
 			}
 		}
 
-		if (lEmptyRow == true)
-		{
-			lHeightList.push_back(-1);
-		}
-		else
-		{
-			lHeightList.push_back(lMaxHeight);
+		if (empty_row == true) {
+			height_list.push_back(-1);
+		} else {
+			height_list.push_back(max_height);
 		}
 
-		lHeightSum += lMaxHeight;
+		height_sum += max_height;
 
-		if (lExpandable == true && lEmptyRow == false)
-		{
-			lNumExpandableRows++;
+		if (expandable == true && empty_row == false) {
+			num_expandable_rows++;
 		}
 	}
 
 	// Find the maximum width of each column, and store it in the list.
-	for (x = 0; x < mNumCols; x++)
-	{
-		int lMaxWidth = 0;
-		bool lExpandable = true;
-		bool lEmptyCol = true;
-		for (y = 0; y < mNumRows; y++)
-		{
-			int lIndex = y * mNumCols + x;
-				
-			if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsLocalVisible() == true)
-			{
-				lEmptyCol = false;
+	for (x = 0; x < num_cols_; x++) {
+		int max_width = 0;
+		bool expandable = true;
+		bool empty_col = true;
+		for (y = 0; y < num_rows_; y++) {
+			int index = y * num_cols_ + x;
 
-				PixelCoord lSize(mComponent[lIndex]->GetPreferredSize());
+			if (component_[index] != 0 && component_[index]->IsLocalVisible() == true) {
+				empty_col = false;
 
-				if (lSize.x > lMaxWidth)
-				{
-					lMaxWidth = lSize.x;
-					lExpandable = false;
+				PixelCoord size(component_[index]->GetPreferredSize());
+
+				if (size.x > max_width) {
+					max_width = size.x;
+					expandable = false;
 				}
 			}
 		}
 
-		if (lEmptyCol == true)
-		{
-			lWidthList.push_back(-1);
-		}
-		else
-		{
-			lWidthList.push_back(lMaxWidth);
+		if (empty_col == true) {
+			width_list.push_back(-1);
+		} else {
+			width_list.push_back(max_width);
 		}
 
-		lWidthSum += lMaxWidth;
+		width_sum += max_width;
 
-		if (lExpandable == true && lEmptyCol == false)
-		{
-			lNumExpandableCols++;
+		if (expandable == true && empty_col == false) {
+			num_expandable_cols++;
 		}
 	}
 
-	double lHeightFactor = 1.0;
-	double lWidthFactor = 1.0;
+	double height_factor = 1.0;
+	double width_factor = 1.0;
 
-	if(lHeightSum > lOwnerSize.y)
-	{
-		lHeightFactor = (double)lOwnerSize.y / (double)lHeightSum;
-		lHeightSum = lOwnerSize.y;
-	}
-	else if(lNumExpandableRows == 0)
-	{
-		lHeightFactor = (double)lOwnerSize.y / (double)lHeightSum;
+	if(height_sum > owner_size.y) {
+		height_factor = (double)owner_size.y / (double)height_sum;
+		height_sum = owner_size.y;
+	} else if(num_expandable_rows == 0) {
+		height_factor = (double)owner_size.y / (double)height_sum;
 	}
 
-	if(lWidthSum > lOwnerSize.x)
-	{
-		lWidthFactor = (double)lOwnerSize.x / (double)lWidthSum;
-		lWidthSum = lOwnerSize.x;
-	}
-	else if(lNumExpandableCols == 0)
-	{
-		lWidthFactor = (double)lOwnerSize.x / (double)lWidthSum;
+	if(width_sum > owner_size.x) {
+		width_factor = (double)owner_size.x / (double)width_sum;
+		width_sum = owner_size.x;
+	} else if(num_expandable_cols == 0) {
+		width_factor = (double)owner_size.x / (double)width_sum;
 	}
 
-	double lRestHeight = 0;
-	double lRestWidth  = 0;
+	double rest_height = 0;
+	double rest_width  = 0;
 
-	if (lNumExpandableRows != 0)
-	{
-		lRestHeight = (double)(lOwnerSize.y - lHeightSum) / (double)lNumExpandableRows;
+	if (num_expandable_rows != 0) {
+		rest_height = (double)(owner_size.y - height_sum) / (double)num_expandable_rows;
 	}
 
-	if (lNumExpandableCols != 0)
-	{
-		lRestWidth  = (double)(lOwnerSize.x - lWidthSum)  / (double)lNumExpandableCols;
+	if (num_expandable_cols != 0) {
+		rest_width  = (double)(owner_size.x - width_sum)  / (double)num_expandable_cols;
 	}
 
-	double lPosY = 0;
-	double lPosX = 0;
-	double lDiff = 0;
+	double pos_y = 0;
+	double pos_x = 0;
+	double diff = 0;
 
-	std::list<int>::iterator lIter;
+	std::list<int>::iterator iter;
 
-	for (y = 0, lIter = lHeightList.begin(); y < mNumRows; ++y, ++lIter)
-	{
-		double lHeight = (double)(*lIter);
+	for (y = 0, iter = height_list.begin(); y < num_rows_; ++y, ++iter) {
+		double height = (double)(*iter);
 
-		if (lHeight >= 0)
-		{
-			if (lHeight == 0)
-			{
-				lHeight = lRestHeight;
-			}
-			else
-			{
-				lHeight *= lHeightFactor;
+		if (height >= 0) {
+			if (height == 0) {
+				height = rest_height;
+			} else {
+				height *= height_factor;
 			}
 
-			lHeight += lDiff;
+			height += diff;
 
-			int lPosYInt = (int)floor(lPosY + 0.5);
-			int lSizeY = (int)floor(lPosY + lHeight + 0.5) - lPosYInt;
+			int pos_y_int = (int)floor(pos_y + 0.5);
+			int size_y = (int)floor(pos_y + height + 0.5) - pos_y_int;
 
-			lDiff = lHeight - (double)lSizeY;
+			diff = height - (double)size_y;
 
 			// Set the height on the entire row.
-			for (x = 0; x < mNumCols; x++)
-			{
-				int lIndex = y * mNumCols + x;
-					
-				if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsLocalVisible() == true)
-				{
-					PixelCoord lPos(mComponent[lIndex]->GetPos());
-					PixelCoord lSize(mComponent[lIndex]->GetSize());
-					lPos.y  = lPosYInt;
-					lSize.y = lSizeY;
-					mComponent[lIndex]->SetPos(lPos);
-					mComponent[lIndex]->SetSize(lSize);
+			for (x = 0; x < num_cols_; x++) {
+				int index = y * num_cols_ + x;
+
+				if (component_[index] != 0 && component_[index]->IsLocalVisible() == true) {
+					PixelCoord pos(component_[index]->GetPos());
+					PixelCoord size(component_[index]->GetSize());
+					pos.y  = pos_y_int;
+					size.y = size_y;
+					component_[index]->SetPos(pos);
+					component_[index]->SetSize(size);
 				}
 			}
 
-			lPosY += lHeight;
+			pos_y += height;
 		}
 	}
 
-	lDiff = 0;
+	diff = 0;
 
-	for (x = 0, lIter = lWidthList.begin(); x < mNumCols; ++x, ++lIter)
-	{
-		double lWidth = (double)(*lIter);
+	for (x = 0, iter = width_list.begin(); x < num_cols_; ++x, ++iter) {
+		double width = (double)(*iter);
 
-		if (lWidth >= 0)
-		{
-			if (lWidth == 0)
-			{
-				lWidth = lRestWidth;
-			}
-			else
-			{
-				lWidth *= lWidthFactor;
+		if (width >= 0) {
+			if (width == 0) {
+				width = rest_width;
+			} else {
+				width *= width_factor;
 			}
 
-			lWidth += lDiff;
+			width += diff;
 
-			int lPosXInt = (int)floor(lPosX + 0.5);
-			int lSizeX = (int)floor(lPosX + lWidth + 0.5) - lPosXInt;
+			int pos_x_int = (int)floor(pos_x + 0.5);
+			int size_x = (int)floor(pos_x + width + 0.5) - pos_x_int;
 
-			lDiff = lWidth - (double)lSizeX;
+			diff = width - (double)size_x;
 
 			// Set the width on the entire column.
-			for (y = 0; y < mNumRows; y++)
-			{
-				int lIndex = y * mNumCols + x;
-					
-				if (mComponent[lIndex] != 0 && mComponent[lIndex]->IsLocalVisible() == true)
-				{
-					PixelCoord lPos(mComponent[lIndex]->GetPos());
-					PixelCoord lSize(mComponent[lIndex]->GetSize());
-					lPos.x  = lPosXInt;
-					lSize.x = lSizeX;
-					mComponent[lIndex]->SetPos(lPos);
-					mComponent[lIndex]->SetSize(lSize);
+			for (y = 0; y < num_rows_; y++) {
+				int index = y * num_cols_ + x;
+
+				if (component_[index] != 0 && component_[index]->IsLocalVisible() == true) {
+					PixelCoord pos(component_[index]->GetPos());
+					PixelCoord size(component_[index]->GetSize());
+					pos.x  = pos_x_int;
+					size.x = size_x;
+					component_[index]->SetPos(pos);
+					component_[index]->SetSize(size);
 				}
 			}
 
-			lPosX += lWidth;
+			pos_x += width;
 		}
 	}
 }
 
-PixelCoord GridLayout::GetPreferredSize(bool pForceAdaptive)
-{
-	PixelCoord lSize(0, 0);
+PixelCoord GridLayout::GetPreferredSize(bool force_adaptive) {
+	PixelCoord size(0, 0);
 
 	int x, y;
 
-	for (y = 0; y < mNumRows; y++)
-	{
-		int lWidthSum = 0;
+	for (y = 0; y < num_rows_; y++) {
+		int width_sum = 0;
 
-		for (x = 0; x < mNumCols; x++)
-		{
-			int lIndex = y * mNumCols + x;
-				
-			if (mComponent[lIndex] != 0)
-			{
-				lWidthSum += mComponent[lIndex]->GetPreferredSize(pForceAdaptive).x;
+		for (x = 0; x < num_cols_; x++) {
+			int index = y * num_cols_ + x;
+
+			if (component_[index] != 0) {
+				width_sum += component_[index]->GetPreferredSize(force_adaptive).x;
 			}
 		}
 
-		if (lWidthSum > lSize.x)
-		{
-			lSize.x = lWidthSum;
+		if (width_sum > size.x) {
+			size.x = width_sum;
 		}
 	}
 
-	for (x = 0; x < mNumCols; x++)
-	{
-		int lHeightSum = 0;
+	for (x = 0; x < num_cols_; x++) {
+		int height_sum = 0;
 
-		for (y = 0; y < mNumRows; y++)
-		{
-			int lIndex = y * mNumCols + x;
-				
-			if (mComponent[lIndex] != 0)
-			{
-				lHeightSum += mComponent[lIndex]->GetPreferredSize(pForceAdaptive).y;
+		for (y = 0; y < num_rows_; y++) {
+			int index = y * num_cols_ + x;
+
+			if (component_[index] != 0) {
+				height_sum += component_[index]->GetPreferredSize(force_adaptive).y;
 			}
 		}
 
-		if (lHeightSum > lSize.y)
-		{
-			lSize.y = lHeightSum;
+		if (height_sum > size.y) {
+			size.y = height_sum;
 		}
 	}
 
-	return lSize;
+	return size;
 }
 
-PixelCoord GridLayout::GetContentSize() const
-{
+PixelCoord GridLayout::GetContentSize() const {
 	return GetOwner()->GetSize();
 }
 
-PixelCoord GridLayout::GetMinSize() const
-{
-	PixelCoord lSize(0, 0);
+PixelCoord GridLayout::GetMinSize() const {
+	PixelCoord size(0, 0);
 
 	int x, y;
 
-	for (y = 0; y < mNumRows; y++)
-	{
-		int lWidthSum = 0;
+	for (y = 0; y < num_rows_; y++) {
+		int width_sum = 0;
 
-		for (x = 0; x < mNumCols; x++)
-		{
-			int lIndex = y * mNumCols + x;
-				
-			if (mComponent[lIndex] != 0)
-			{
-				lWidthSum += mComponent[lIndex]->GetMinSize().x;
+		for (x = 0; x < num_cols_; x++) {
+			int index = y * num_cols_ + x;
+
+			if (component_[index] != 0) {
+				width_sum += component_[index]->GetMinSize().x;
 			}
 		}
 
-		if (lWidthSum > lSize.x)
-		{
-			lSize.x = lWidthSum;
+		if (width_sum > size.x) {
+			size.x = width_sum;
 		}
 	}
 
-	for (x = 0; x < mNumCols; x++)
-	{
-		int lHeightSum = 0;
+	for (x = 0; x < num_cols_; x++) {
+		int height_sum = 0;
 
-		for (y = 0; y < mNumRows; y++)
-		{
-			int lIndex = y * mNumCols + x;
-				
-			if (mComponent[lIndex] != 0)
-			{
-				lHeightSum += mComponent[lIndex]->GetMinSize().y;
+		for (y = 0; y < num_rows_; y++) {
+			int index = y * num_cols_ + x;
+
+			if (component_[index] != 0) {
+				height_sum += component_[index]->GetMinSize().y;
 			}
 		}
 
-		if (lHeightSum > lSize.y)
-		{
-			lSize.y = lHeightSum;
+		if (height_sum > size.y) {
+			size.y = height_sum;
 		}
 	}
 
-	return lSize;
+	return size;
 }
 
-void GridLayout::InsertRow(int pRow)
-{
-	if (pRow < 0)
-	{
-		pRow = 0;
+void GridLayout::InsertRow(int row) {
+	if (row < 0) {
+		row = 0;
 	}
 
-	if (pRow > mNumRows)
-	{
-		pRow = mNumRows;
+	if (row > num_rows_) {
+		row = num_rows_;
 	}
 
-	Component** lComponent = AllocComponentGrid(mNumRows + 1, mNumCols);
+	Component** _component = AllocComponentGrid(num_rows_ + 1, num_cols_);
 
 	int i;
 
-	// Copy all rows before pRow.
-	for (i = 0; i < pRow; i++)
-	{
-		int lRowIndex = i * mNumCols;
-		for (int j = 0; j < mNumCols; j++)
-		{
-			lComponent[lRowIndex + j] = mComponent[lRowIndex + j];
+	// Copy all rows before row.
+	for (i = 0; i < row; i++) {
+		int row_index = i * num_cols_;
+		for (int j = 0; j < num_cols_; j++) {
+			_component[row_index + j] = component_[row_index + j];
 		}
 	}
 
-	// Copy all rows after pRow.
-	for (i = pRow; i < mNumRows; i++)
-	{
-		int lRowIndexSrc = i * mNumCols;
-		int lRowIndexDst = (i + 1) * mNumCols;
-		for (int j = 0; j < mNumCols; j++)
-		{
-			lComponent[lRowIndexDst + j] = mComponent[lRowIndexSrc + j];
+	// Copy all rows after row.
+	for (i = row; i < num_rows_; i++) {
+		int row_index_src = i * num_cols_;
+		int row_index_dst = (i + 1) * num_cols_;
+		for (int j = 0; j < num_cols_; j++) {
+			_component[row_index_dst + j] = component_[row_index_src + j];
 		}
 	}
 
-	delete[] mComponent;
-	mComponent = lComponent;
-	mNumRows++;
+	delete[] component_;
+	component_ = _component;
+	num_rows_++;
 }
 
-void GridLayout::InsertColumn(int pColumn)
-{
-	if (pColumn < 0)
-	{
-		pColumn = 0;
+void GridLayout::InsertColumn(int column) {
+	if (column < 0) {
+		column = 0;
 	}
 
-	if (pColumn > mNumCols)
-	{
-		pColumn = mNumCols;
+	if (column > num_cols_) {
+		column = num_cols_;
 	}
 
-	Component** lComponent = AllocComponentGrid(mNumRows, mNumCols + 1);
+	Component** _component = AllocComponentGrid(num_rows_, num_cols_ + 1);
 
-	for (int j = 0; j < mNumRows; j++)
-	{
+	for (int j = 0; j < num_rows_; j++) {
 		int i;
-		int lRowIndex = j * mNumCols;
+		int row_index = j * num_cols_;
 
-		// Copy all columns before pColumn.
-		for (i = 0; i < pColumn; i++)
-		{
-			lComponent[lRowIndex + i] = mComponent[lRowIndex + i];
+		// Copy all columns before column.
+		for (i = 0; i < column; i++) {
+			_component[row_index + i] = component_[row_index + i];
 		}
 
-		// Copy all columns after pColumn.
-		for (i = pColumn; i < mNumCols; i++)
-		{
-			lComponent[lRowIndex + i + 1] = mComponent[lRowIndex + i];
+		// Copy all columns after column.
+		for (i = column; i < num_cols_; i++) {
+			_component[row_index + i + 1] = component_[row_index + i];
 		}
 	}
 
-	delete[] mComponent;
-	mComponent = lComponent;
-	mNumCols++;
+	delete[] component_;
+	component_ = _component;
+	num_cols_++;
 }
 
-void GridLayout::DeleteRow(int pRow)
-{
-	bool lOk = (pRow >= 0 && pRow < mNumRows);
-	if (lOk)
-	{
-		Component** lComponent = AllocComponentGrid(mNumRows - 1, mNumCols);
+void GridLayout::DeleteRow(int row) {
+	bool ok = (row >= 0 && row < num_rows_);
+	if (ok) {
+		Component** _component = AllocComponentGrid(num_rows_ - 1, num_cols_);
 
 		int i;
 
-		// Copy all rows before pRow.
-		for (i = 0; i < pRow; i++)
-		{
-			int lRowIndex = i * mNumCols;
-			for (int j = 0; j < mNumCols; j++)
-			{
-				lComponent[lRowIndex + j] = mComponent[lRowIndex + j];
+		// Copy all rows before row.
+		for (i = 0; i < row; i++) {
+			int row_index = i * num_cols_;
+			for (int j = 0; j < num_cols_; j++) {
+				_component[row_index + j] = component_[row_index + j];
 			}
 		}
 
-		// Copy all rows after pRow.
-		for (i = pRow + 1; i < mNumRows; i++)
-		{
-			int lRowIndexSrc = i * mNumCols;
-			int lRowIndexDst = (i - 1) * mNumCols;
-			for (int j = 0; j < mNumCols; j++)
-			{
-				lComponent[lRowIndexDst + j] = mComponent[lRowIndexSrc + j];
+		// Copy all rows after row.
+		for (i = row + 1; i < num_rows_; i++) {
+			int row_index_src = i * num_cols_;
+			int row_index_dst = (i - 1) * num_cols_;
+			for (int j = 0; j < num_cols_; j++) {
+				_component[row_index_dst + j] = component_[row_index_src + j];
 			}
 		}
 
-		delete[] mComponent;
-		mComponent = lComponent;
-		mNumRows--;
+		delete[] component_;
+		component_ = _component;
+		num_rows_--;
 	}
 }
 
-void GridLayout::DeleteColumn(int pColumn)
-{
-	bool lOk = (pColumn >= 0 && pColumn < mNumCols);
+void GridLayout::DeleteColumn(int column) {
+	bool ok = (column >= 0 && column < num_cols_);
 
-	if (lOk)
-	{
-		Component** lComponent = AllocComponentGrid(mNumRows, mNumCols - 1);
+	if (ok) {
+		Component** _component = AllocComponentGrid(num_rows_, num_cols_ - 1);
 
-		for (int j = 0; j < mNumRows; j++)
-		{
+		for (int j = 0; j < num_rows_; j++) {
 			int i;
-			int lRowIndex = j * mNumCols;
+			int row_index = j * num_cols_;
 
-			// Copy all columns before pColumn.
-			for (i = 0; i < pColumn; i++)
-			{
-				lComponent[lRowIndex + i] = mComponent[lRowIndex + i];
+			// Copy all columns before column.
+			for (i = 0; i < column; i++) {
+				_component[row_index + i] = component_[row_index + i];
 			}
 
-			// Copy all columns after pColumn.
-			for (i = pColumn + 1; i < mNumCols; i++)
-			{
-				lComponent[lRowIndex + i - 1] = mComponent[lRowIndex + i];
+			// Copy all columns after column.
+			for (i = column + 1; i < num_cols_; i++) {
+				_component[row_index + i - 1] = component_[row_index + i];
 			}
 		}
 
-		delete[] mComponent;
-		mComponent = lComponent;
-		mNumCols--;
+		delete[] component_;
+		component_ = _component;
+		num_cols_--;
 	}
 }
 
-bool GridLayout::HaveDoubles() const
-{
-	for (int i = 0; i < mNumRows * mNumCols; i++)
-	{
-		for (int j = i + 1; j < mNumRows * mNumCols; j++)
-		{
-			if (mComponent[i] == mComponent[j])
-			{
+bool GridLayout::HaveDoubles() const {
+	for (int i = 0; i < num_rows_ * num_cols_; i++) {
+		for (int j = i + 1; j < num_rows_ * num_cols_; j++) {
+			if (component_[i] == component_[j]) {
 				return true;
 			}
 		}

@@ -1,46 +1,41 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/Random.h"
+#include "../include/random.h"
 #include <math.h>
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-void Random::SetSeed(uint32 pSeed)
-{
-	mSeed = pSeed;
+void Random::SetSeed(uint32 seed) {
+	seed_ = seed;
 }
 
-uint32 Random::GetRandomNumber()
-{
-	return GetRandomNumber(mSeed);
+uint32 Random::GetRandomNumber() {
+	return GetRandomNumber(seed_);
 }
 
-uint32 Random::GetRandomNumber(uint32& pSeed)
-{
-	pSeed = pSeed * 214013L + 2531011L;
-        return (pSeed);
+uint32 Random::GetRandomNumber(uint32& seed) {
+	seed = seed * 214013L + 2531011L;
+        return (seed);
 }
 
-uint64 Random::GetRandomNumber64()
-{
-	uint64 lRand = ((uint64)GetRandomNumber()) << 32;
-	lRand += GetRandomNumber();
-	return (lRand);
+uint64 Random::GetRandomNumber64() {
+	uint64 rand = ((uint64)GetRandomNumber()) << 32;
+	rand += GetRandomNumber();
+	return (rand);
 }
 
 
 
-uint32 Random::mSeed = 0;
+uint32 Random::seed_ = 0;
 
 
 

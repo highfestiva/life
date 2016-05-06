@@ -5,12 +5,11 @@
 
 
 #pragma once
-#include "UiButton.h"
+#include "uibutton.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
@@ -18,32 +17,31 @@ class CustomButton;
 
 
 #define SetOnRender(_class, _func) \
-	SetOnRenderDelegate(UiTbc::ButtonType<UiTbc::CustomButton>::Delegate(this, &_class::_func))
+	SetOnRenderDelegate(uitbc::ButtonType<uitbc::CustomButton>::Delegate(this, &_class::_func))
 
 #define SetOnIsOver(_class, _func) \
-	SetIsOverDelegate(UiTbc::ButtonType<UiTbc::CustomButton>::DelegateXY(this, &_class::_func))
+	SetIsOverDelegate(uitbc::ButtonType<uitbc::CustomButton>::DelegateXY(this, &_class::_func))
 
 
 
-class CustomButton: public Button
-{
+class CustomButton: public Button {
 	typedef Button Parent;
 public:
 	typedef ButtonType<CustomButton>::Delegate Delegate;
 	typedef ButtonType<CustomButton>::DelegateXY DelegateXY;
 
-	CustomButton(const wstr& pText);
+	CustomButton(const wstr& text);
 	virtual ~CustomButton();
 
-	void SetOnRenderDelegate(const Delegate& pOnRenderer);
-	void SetIsOverDelegate(const DelegateXY& pIsOver);
+	void SetOnRenderDelegate(const Delegate& on_renderer);
+	void SetIsOverDelegate(const DelegateXY& is_over);
 
 	virtual void Repaint(Painter*);
-	virtual bool IsOver(int pScreenX, int pScreenY);
+	virtual bool IsOver(int screen_x, int screen_y);
 
 private:
-	Delegate* mOnRender;
-	DelegateXY* mIsOver;
+	Delegate* on_render_;
+	DelegateXY* is_over_;
 };
 
 

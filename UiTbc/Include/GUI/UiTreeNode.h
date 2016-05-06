@@ -27,133 +27,127 @@
 
 #pragma once
 
-#include "UiComponent.h"
-#include "UiCheckButton.h"
-#include "UiLabel.h"
-#include "../UiPainter.h"
+#include "uicomponent.h"
+#include "uicheckbutton.h"
+#include "uilabel.h"
+#include "../uipainter.h"
 #include <list>
 
-namespace UiTbc
-{
+namespace uitbc {
 
 class ListControl;
 
-class TreeNode: public Component
-{
+class TreeNode: public Component {
 	typedef Component Parent;
 public:
 	// Uses the default icons.
-	TreeNode(const wstr& pText);
+	TreeNode(const wstr& text);
 
-	// User specifies his own node icons. The default 
+	// User specifies his own node icons. The default
 	// expand/collapse icons are still used.
-	TreeNode(Painter::ImageID pCollapsedIconID,
-		 Painter::ImageID pExpandedIconID,
-		 const wstr& pText);
+	TreeNode(Painter::ImageID collapsed_icon_id,
+		 Painter::ImageID expanded_icon_id,
+		 const wstr& text);
 
 	// User defines all icons.
-	TreeNode(Painter::ImageID pCollapsedIconID,
-		 Painter::ImageID pExpandedIconID,
-		 Painter::ImageID pCollapseIconID,
-		 Painter::ImageID pExpandeIconID,
-		 const wstr& pText);
+	TreeNode(Painter::ImageID collapsed_icon_id,
+		 Painter::ImageID expanded_icon_id,
+		 Painter::ImageID collapse_icon_id,
+		 Painter::ImageID expande_icon_id,
+		 const wstr& text);
 
 	~TreeNode();
 
 	// Use this to create the tree structure.
-	virtual void AddChildNode(TreeNode* pChildNode);
+	virtual void AddChildNode(TreeNode* child_node);
 	inline TreeNode* GetParentNode() const;
 
 	inline bool IsExpandable();
 	inline bool IsExpanded() const;
-	void SetExpanded(bool pExpanded);
+	void SetExpanded(bool expanded);
 
-	virtual void SetSelected(bool pSelected);
+	virtual void SetSelected(bool selected);
 
 	// Specifies the font to be used when creating new TreeNodes. Doesn't affect
 	// currently existing nodes.
-	static void UseFont(const Color& pTextColor,
-			    const Color& pTextBackgColor,
-			    const Color& pTextSelectedColor,
-			    const Color& pTextSelectedBackgColor);
+	static void UseFont(const Color& text_color,
+			    const Color& text_backg_color,
+			    const Color& text_selected_color,
+			    const Color& text_selected_backg_color);
 
 
-	virtual bool OnDoubleClick(int pMouseX, int pMouseY);
-	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual bool OnDoubleClick(int mouse_x, int mouse_y);
+	virtual bool OnKeyDown(uilepra::InputManager::KeyCode key_code);
 
 	virtual void SetKeyboardFocus();
 
 protected:
-	void SetExpanded(bool pExpanded, ListControl* pListControl);
+	void SetExpanded(bool expanded, ListControl* list_control);
 private:
 	// This list type only takes TreeNode*, but is declared as
 	// if it is taking Component*. This way the NodeList is compatible
 	// with ListControl::AddChildrenAfter().
 	typedef std::list<Component*> NodeList;
 
-	void Init(const wstr& pText);
+	void Init(const wstr& text);
 	void ValidatePainterAndIcons();
 	bool ValidateExpandButton();
-	bool ValidateIconRect(const wstr& pText);
+	bool ValidateIconRect(const wstr& text);
 
-	void AddDefaultIconIfNeeded(Painter::ImageID& pLocalIconID, Painter::ImageID& pStaticIconID, void* pBuffer, int pXOffset, int pYOffset);
+	void AddDefaultIconIfNeeded(Painter::ImageID& local_icon_id, Painter::ImageID& static_icon_id, void* buffer, int x_offset, int y_offset);
 	void ResetUserIcons();
 
-	void OnExpandButtonUnclicked(Button* pButton);
+	void OnExpandButtonUnclicked(Button* button);
 
 	inline int GetIndentationLevel() const;
-	inline void SetIndentationLevel(int pIndentationLevel);
+	inline void SetIndentationLevel(int indentation_level);
 
-	static Painter::ImageID smExpandIconID;
-	static Painter::ImageID smCollapseIconID;
-	static Painter::ImageID smExpandedIconID;
-	static Painter::ImageID smCollapsedIconID;
-	static uint8 smIconExpand[];
-	static uint8 smIconCollapse[];
-	static uint8 smIconCollapsed[];
-	static uint8 smIconExpanded[];
-	static Painter* smPrevPainter;
+	static Painter::ImageID expand_icon_id__;
+	static Painter::ImageID collapse_icon_id__;
+	static Painter::ImageID expanded_icon_id__;
+	static Painter::ImageID collapsed_icon_id__;
+	static uint8 icon_expand_[];
+	static uint8 icon_collapse_[];
+	static uint8 icon_collapsed_[];
+	static uint8 icon_expanded_[];
+	static Painter* prev_painter_;
 
 	// Factory members.
-	static Color smFactoryTextColor;
-	static Color smFactoryTextBackgColor;
-	static Color smFactoryTextSelectedColor;
-	static Color smFactoryTextSelectedBackgColor;
-	static uint8 smFactoryAlphaTreshold;
+	static Color factory_text_color_;
+	static Color factory_text_backg_color_;
+	static Color factory_text_selected_color_;
+	static Color factory_text_selected_backg_color_;
+	static uint8 factory_alpha_treshold_;
 
-	TreeNode* mParentNode;
-	NodeList* mChildNodes;
+	TreeNode* parent_node_;
+	NodeList* child_nodes_;
 
-	CheckButton* mExpandButton;
-	Label* mIconLabel;
+	CheckButton* expand_button_;
+	Label* icon_label_;
 
-	Painter::ImageID mCollapseIconID;
-	Painter::ImageID mExpandIconID;
-	Painter::ImageID mCollapsedIconID;
-	Painter::ImageID mExpandedIconID;
+	Painter::ImageID collapse_icon_id_;
+	Painter::ImageID expand_icon_id_;
+	Painter::ImageID collapsed_icon_id_;
+	Painter::ImageID expanded_icon_id_;
 
-	int mIndentationLevel;
-	int mChildIndentation;
+	int indentation_level_;
+	int child_indentation_;
 };
 
-TreeNode* TreeNode::GetParentNode() const
-{
-	return mParentNode;
+TreeNode* TreeNode::GetParentNode() const {
+	return parent_node_;
 }
 
-bool TreeNode::IsExpandable()
-{
-	return (mChildNodes != 0);
+bool TreeNode::IsExpandable() {
+	return (child_nodes_ != 0);
 }
 
-bool TreeNode::IsExpanded() const
-{
-	return mExpandButton->GetPressed();
+bool TreeNode::IsExpanded() const {
+	return expand_button_->GetPressed();
 }
 
-int TreeNode::GetIndentationLevel() const
-{
-	return mIndentationLevel;
+int TreeNode::GetIndentationLevel() const {
+	return indentation_level_;
 }
 
 }

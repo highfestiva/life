@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,8 +8,7 @@
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
@@ -20,32 +19,31 @@ class Window;
 
 
 
-class FixedLayouter
-{
+class FixedLayouter {
 public:
-	FixedLayouter(Dialog* pParent);
+	FixedLayouter(Dialog* parent);
 	virtual ~FixedLayouter();
 
-	void SetContentWidthPart(float pContentWidthPart);
-	void SetContentHeightPart(float pContentHeightPart);
-	void SetContentMargin(int pContentMargin);
+	void SetContentWidthPart(float content_width_part);
+	void SetContentHeightPart(float content_height_part);
+	void SetContentMargin(int content_margin);
 	int GetContentXMargin() const;
-	void SetContentXMargin(int pContentXMargin);
+	void SetContentXMargin(int content_x_margin);
 	int GetContentYMargin() const;
-	void SetContentYMargin(int pContentYMargin);
+	void SetContentYMargin(int content_y_margin);
 
-	void AddComponent(Component* pComponent, int r, int rc, int c, int cw, int cc);
-	void AddWindow(Window* pWindow, int r, int rc, int c, int cw, int cc);
-	void AddButton(Button* pButton, int pTag, int r, int rc, int c, int cw, int cc, bool pAutoDismiss);
-	void AddCornerButton(Button* pButton, int pTag);
+	void AddComponent(Component* component, int r, int rc, int c, int cw, int cc);
+	void AddWindow(Window* window, int r, int rc, int c, int cw, int cc);
+	void AddButton(Button* button, int tag, int r, int rc, int c, int cw, int cc, bool auto_dismiss);
+	void AddCornerButton(Button* button, int tag);
 
 protected:
-	Dialog* mDialog;
-	float mContentWidthPart;
-	float mContentHeightPart;
-	int mMaxRowCount;
-	int mContentXMargin;
-	int mContentYMargin;
+	Dialog* dialog_;
+	float content_width_part_;
+	float content_height_part_;
+	int max_row_count_;
+	int content_x_margin_;
+	int content_y_margin_;
 };
 
 

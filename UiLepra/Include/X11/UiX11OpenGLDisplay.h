@@ -6,19 +6,17 @@
 
 #pragma once
 
-#include "UiX11DisplayManager.h"
+#include "uix11displaymanager.h"
 #include <GL/glx.h>
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-class X11OpenGLDisplay: public X11DisplayManager
-{
-public:	
+class X11OpenGLDisplay: public X11DisplayManager {
+public:
 	X11OpenGLDisplay();
 	virtual ~X11OpenGLDisplay();
 
@@ -28,27 +26,27 @@ public:
 	virtual bool UpdateScreen();
 
 	bool IsVSyncEnabled() const;
-	bool SetVSyncEnabled(bool pEnabled);
+	bool SetVSyncEnabled(bool enabled);
 
 	ContextType GetContextType();
 
 protected:
-	void OnResize(int pWidth, int pHeight);
+	void OnResize(int width, int height);
 	void OnMinimize();
-	void OnMaximize(int pWidth, int pHeight);
+	void OnMaximize(int width, int height);
 
 	bool InitScreen();
-	void SetFocus(bool pFocus);
+	void SetFocus(bool focus);
 
 private:
-	void Resize(int pWidth, int pHeight);
+	void Resize(int width, int height);
 	void UpdateCaption();
 
 	bool CreateGLContext();
 	void DeleteGLContext();
 
-	static GLXContext mGlContext;	// The same one used for all displays (must have same VisualInfo).
-	static int mContextUserCount;
+	static GLXContext gl_context_;	// The same one used for all displays (must have same VisualInfo).
+	static int context_user_count_;
 
 	logclass();
 };

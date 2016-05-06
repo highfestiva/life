@@ -8,15 +8,14 @@
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
-#include "../../../Lepra/Include/HashTable.h"
-#include "../../../Lepra/Include/Thread.h"
-#include "../UiCore.h"
-#include "../UiLepra.h"
+#include "../../../lepra/include/hashtable.h"
+#include "../../../lepra/include/thread.h"
+#include "../uicore.h"
+#include "../uilepra.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
@@ -24,8 +23,7 @@ class X11DisplayManager;
 
 
 
-class X11Core
-{
+class X11Core {
 public:
 	static void Init();
 	static void Shutdown();
@@ -34,14 +32,14 @@ public:
 	// Must be called at least once "per frame".
 	static void ProcessMessages();
 
-	static void AddDisplayManager(X11DisplayManager* pDisplayManager);
-	static void RemoveDisplayManager(X11DisplayManager* pDisplayManager);
-	static X11DisplayManager* GetDisplayManager(Window pWindowHandle);
+	static void AddDisplayManager(X11DisplayManager* display_manager);
+	static void RemoveDisplayManager(X11DisplayManager* display_manager);
+	static X11DisplayManager* GetDisplayManager(Window window_handle);
 
 private:
-	static Lock* mLock;
+	static Lock* lock_;
 	typedef HashTable<Window, X11DisplayManager*, std::hash<Window> > WindowTable;
-	static WindowTable mWindowTable;
+	static WindowTable window_table_;
 };
 
 

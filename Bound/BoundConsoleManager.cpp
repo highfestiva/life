@@ -1,106 +1,91 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "BoundConsoleManager.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Lepra/Include/CyclicArray.h"
-#include "../Lepra/Include/Path.h"
-#include "../Lepra/Include/SystemManager.h"
-#include "BoundManager.h"
-#include "RtVar.h"
+#include "boundconsolemanager.h"
+#include "../cure/include/contextmanager.h"
+#include "../lepra/include/cyclicarray.h"
+#include "../lepra/include/path.h"
+#include "../lepra/include/systemmanager.h"
+#include "boundmanager.h"
+#include "rtvar.h"
 
 
 
-namespace Bound
-{
+namespace Bound {
 
 
 
 // Must lie before BoundConsoleManager to compile.
-const BoundConsoleManager::CommandPair BoundConsoleManager::mCommandIdList[] =
+const BoundConsoleManager::CommandPair BoundConsoleManager::command_id_list_[] =
 {
-	{"step-level", COMMAND_STEP_LEVEL},
+	{"step-level", kCommandStepLevel},
 };
 
 
 
-BoundConsoleManager::BoundConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-	UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea):
-	Parent(pResourceManager, pGameManager, pUiManager, pVariableScope, pArea)
-{
+BoundConsoleManager::BoundConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+	UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area):
+	Parent(resource_manager, game_manager, ui_manager, variable_scope, area) {
 	InitCommands();
 	SetSecurityLevel(1);
 }
 
-BoundConsoleManager::~BoundConsoleManager()
-{
+BoundConsoleManager::~BoundConsoleManager() {
 }
 
-bool BoundConsoleManager::Start()
-{
+bool BoundConsoleManager::Start() {
 #ifndef LEPRA_TOUCH
 	return Parent::Start();
-#else // Touch
-	return true;	// Touch device don't need an interactive console.
+#else // touch
+	return true;	// touch device don't need an interactive console.
 #endif // Computer / touch
 }
 
 
 
-unsigned BoundConsoleManager::GetCommandCount() const
-{
-	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(mCommandIdList);
+unsigned BoundConsoleManager::GetCommandCount() const {
+	return Parent::GetCommandCount() + LEPRA_ARRAY_COUNT(command_id_list_);
 }
 
-const BoundConsoleManager::CommandPair& BoundConsoleManager::GetCommand(unsigned pIndex) const
-{
-	if (pIndex < Parent::GetCommandCount())
-	{
-		return (Parent::GetCommand(pIndex));
+const BoundConsoleManager::CommandPair& BoundConsoleManager::GetCommand(unsigned index) const {
+	if (index < Parent::GetCommandCount()) {
+		return (Parent::GetCommand(index));
 	}
-	return (mCommandIdList[pIndex-Parent::GetCommandCount()]);
+	return (command_id_list_[index-Parent::GetCommandCount()]);
 }
 
-int BoundConsoleManager::OnCommand(const HashedString& pCommand, const strutil::strvec& pParameterVector)
-{
-	int lResult = Parent::OnCommand(pCommand, pParameterVector);
-	if (lResult < 0)
-	{
-		lResult = 0;
+int BoundConsoleManager::OnCommand(const HashedString& command, const strutil::strvec& parameter_vector) {
+	int result = Parent::OnCommand(command, parameter_vector);
+	if (result < 0) {
+		result = 0;
 
-		CommandClient lCommand = (CommandClient)TranslateCommand(pCommand);
-		switch ((int)lCommand)
-		{
-			case COMMAND_STEP_LEVEL:
-			{
-				int lStep = 0;
-				if (pParameterVector.size() == 1 && strutil::StringToInt(pParameterVector[0], lStep))
-				{
+		CommandClient _command = (CommandClient)TranslateCommand(command);
+		switch ((int)_command) {
+			case kCommandStepLevel: {
+				int step = 0;
+				if (parameter_vector.size() == 1 && strutil::StringToInt(parameter_vector[0], step)) {
 					GetGameManager()->GetTickLock()->Acquire();
-					((BoundManager*)GetGameManager())->StepLevel(lStep);
+					((BoundManager*)GetGameManager())->StepLevel(step);
 					GetGameManager()->GetTickLock()->Release();
 					return 0;
 				}
 				return 1;
-			}
-			break;
-			default:
-			{
-				lResult = -1;
-			}
-			break;
+			} break;
+			default: {
+				result = -1;
+			} break;
 		}
 	}
-	return (lResult);
+	return (result);
 }
 
 
 
-loginstance(CONSOLE, BoundConsoleManager);
+loginstance(kConsole, BoundConsoleManager);
 
 
 

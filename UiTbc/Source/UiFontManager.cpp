@@ -5,147 +5,120 @@
 
 
 #include "pch.h"
-#include "../Include/UiFontManager.h"
+#include "../include/uifontmanager.h"
 #include <algorithm>
-#include "../../Lepra/Include/ResourceTracker.h"
+#include "../../lepra/include/resourcetracker.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
 FontManager::FontManager():
-	mCurrentFont(0),
-	mFontIdManager(1, 10000, 0)
-{
+	current_font_(0),
+	font_id_manager_(1, 10000, 0) {
 }
 
-FontManager::~FontManager()
-{
+FontManager::~FontManager() {
 }
 
 
-FontManager::FontId FontManager::QueryAddFont(const str& pFontName, double pSize, int pFlags)
-{
-	FontTable::iterator x = mFontTable.begin();
-	for (; x != mFontTable.end(); ++x)
-	{
-		const Font* lFont = x->second;
-		if (lFont->mName == pFontName && Math::IsEpsEqual(lFont->mSize, pSize, 0.1) && lFont->mFlags == pFlags)
-		{
-			SetActiveFont(lFont->mFontId);
-			return lFont->mFontId;
+FontManager::FontId FontManager::QueryAddFont(const str& font_name, double size, int flags) {
+	FontTable::iterator x = font_table_.begin();
+	for (; x != font_table_.end(); ++x) {
+		const Font* _font = x->second;
+		if (_font->name_ == font_name && Math::IsEpsEqual(_font->size_, size, 0.1) && _font->flags_ == flags) {
+			SetActiveFont(_font->font_id_);
+			return _font->font_id_;
 		}
 	}
-	const FontId lFontId = AddFont(pFontName, pSize, pFlags);
-	if (lFontId)
-	{
-		SetActiveFont(lFontId);
+	const FontId _font_id = AddFont(font_name, size, flags);
+	if (_font_id) {
+		SetActiveFont(_font_id);
 	}
-	return lFontId;
+	return _font_id;
 }
 
-void FontManager::SetActiveFont(FontId pFontId)
-{
-	if (mCurrentFont && mCurrentFont->mFontId == pFontId)
-	{
+void FontManager::SetActiveFont(FontId font_id) {
+	if (current_font_ && current_font_->font_id_ == font_id) {
 		return;
 	}
 
-	FontTable::iterator x = mFontTable.find(pFontId);
-	if (x != mFontTable.end())
-	{
-		mCurrentFont = x->second;
+	FontTable::iterator x = font_table_.find(font_id);
+	if (x != font_table_.end()) {
+		current_font_ = x->second;
 	}
 }
 
-FontManager::FontId FontManager::GetActiveFontId() const
-{
-	if (mCurrentFont)
-	{
-		return (mCurrentFont->mFontId);
+FontManager::FontId FontManager::GetActiveFontId() const {
+	if (current_font_) {
+		return (current_font_->font_id_);
 	}
-	return (INVALID_FONTID);
+	return (kInvalidFontid);
 }
 
-str FontManager::GetActiveFontName() const
-{
-	if (mCurrentFont)
-	{
-		return (mCurrentFont->mName);
+str FontManager::GetActiveFontName() const {
+	if (current_font_) {
+		return (current_font_->name_);
 	}
 	return (str());
 }
 
 
 
-int FontManager::GetStringWidth(const wstr& pString) const
-{
-	int lMaxX = 0;
-	int lCurrentX = 0;
-	const size_t lLength = pString.length();
-	for (size_t i = 0; i < lLength; i++)
-	{
-		wchar_t lChar = pString[i];
+int FontManager::GetStringWidth(const wstr& s) const {
+	int max_x = 0;
+	int current_x = 0;
+	const size_t __length = s.length();
+	for (size_t i = 0; i < __length; i++) {
+		wchar_t c = s[i];
 
-		if (lChar == '\n')
-		{
-			lCurrentX = 0;
-		}
-		else if(lChar != '\r' && 
-			lChar != '\b' &&
-			lChar != '\t')
-		{
-			lCurrentX += GetCharWidth(lChar) + GetCharOffset(lChar);
+		if (c == '\n') {
+			current_x = 0;
+		} else if(c != '\r' &&
+			c != '\b' &&
+			c != '\t') {
+			current_x += GetCharWidth(c) + GetCharOffset(c);
 		}
 
-		if (lCurrentX > lMaxX)
-		{
-			lMaxX = lCurrentX;
+		if (current_x > max_x) {
+			max_x = current_x;
 		}
 	}
-	return (lMaxX);
+	return (max_x);
 }
 
-int FontManager::GetStringHeight(const wstr& pString) const
-{
-	return GetLineHeight() * (std::count(pString.begin(), pString.end(), L'\n') + 1);
+int FontManager::GetStringHeight(const wstr& s) const {
+	return GetLineHeight() * (std::count(s.begin(), s.end(), L'\n') + 1);
 }
 
-int FontManager::GetFontHeight() const
-{
-	if (!mCurrentFont)
-	{
+int FontManager::GetFontHeight() const {
+	if (!current_font_) {
 		return (0);
 	}
-	return (int)(mCurrentFont->mSize + 0.5);
+	return (int)(current_font_->size_ + 0.5);
 }
 
-int FontManager::GetLineHeight() const
-{
-	if (!mCurrentFont)
-	{
+int FontManager::GetLineHeight() const {
+	if (!current_font_) {
 		return (0);
 	}
-	return (int)(mCurrentFont->mSize + 3.5);	// Add some extra pixels for distance to next line.
+	return (int)(current_font_->size_ + 3.5);	// Add some extra pixels for distance to next line.
 }
 
 
 
-bool FontManager::InternalAddFont(Font* pFont)
-{
+bool FontManager::InternalAddFont(Font* font) {
 	LEPRA_ACQUIRE_RESOURCE(Font);
 
-	const int lId = mFontIdManager.GetFreeId();
-	bool lOk = (lId != 0);
-	if (lOk)
-	{
-		pFont->mFontId = (FontId)lId;
-		mFontTable.insert(FontTable::value_type(lId, pFont));
+	const int id = font_id_manager_.GetFreeId();
+	bool ok = (id != 0);
+	if (ok) {
+		font->font_id_ = (FontId)id;
+		font_table_.insert(FontTable::value_type(id, font));
 	}
-	return (lOk);
+	return (ok);
 }
 
 

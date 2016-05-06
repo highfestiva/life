@@ -5,15 +5,15 @@
 
 
 #include "pch.h"
-#include "../../../Lepra/Include/LepraOS.h"
-#include "../../Include/Win32/UiWin32DirectX9Painter.h"
+#include "../../../lepra/include/lepraos.h"
+#include "../../include/win32/uiwin32directx9painter.h"
 #include <math.h>
 #ifdef new
 #undef new
 #endif // new
 #include <D3dx9math.h>
-#include "../../../Lepra/Include/Log.h"
-#include "../../../UiLepra/Include/Win32/UiWin32DirectXDisplay.h"
+#include "../../../lepra/include/log.h"
+#include "../../../uilepra/include/win32/uiwin32directxdisplay.h"
 
 #ifdef DEBUG
 #pragma comment(lib, "d3dx9d.lib")
@@ -23,1553 +23,1389 @@
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-DWORD ToArgb(DWORD pAlpha, const Color& pColor)
-{
-	return pAlpha | (((DWORD)pColor.mRed)   << 16) |
-	                (((DWORD)pColor.mGreen) << 8) |
-	                (((DWORD)pColor.mBlue)  << 0);
+DWORD ToArgb(DWORD alpha, const Color& _color) {
+	return alpha | (((DWORD)_color.red_)   << 16) |
+	                (((DWORD)_color.green_) << 8) |
+	                (((DWORD)_color.blue_)  << 0);
 }
 
-DirectX9Painter::DirectX9Painter(UiLepra::DisplayManager* pDisplayManager):
-	mTextureIDManager(3, 10000, 0),
-	mD3DDevice(0),
-	mD3DDefaultMouseCursor(0)
-{
-	if (pDisplayManager == 0 || pDisplayManager->GetContextType() != UiLepra::DisplayManager::DIRECTX_CONTEXT)
-	{
-		mD3DDevice = 0;
-	}
-	else
-	{
-		mD3DDevice = ((UiLepra::Win32DirectXDisplay*)pDisplayManager)->GetD3DDevice();
+DirectX9Painter::DirectX9Painter(uilepra::DisplayManager* display_manager):
+	texture_id_manager_(3, 10000, 0),
+	d3_d_device_(0),
+	d3_d_default_mouse_cursor_(0) {
+	if (display_manager == 0 || display_manager->GetContextType() != uilepra::DisplayManager::kDirectxContext) {
+		d3_d_device_ = 0;
+	} else {
+		d3_d_device_ = ((uilepra::Win32DirectXDisplay*)display_manager)->GetD3DDevice();
 	}
 }
 
-DirectX9Painter::~DirectX9Painter()
-{
-	TextureTable::Iterator lIter = mTextureTable.First();
-	while (lIter != mTextureTable.End())
-	{
-		Texture* lTexture = *lIter;
+DirectX9Painter::~DirectX9Painter() {
+	TextureTable::Iterator iter = texture_table_.First();
+	while (iter != texture_table_.End()) {
+		Texture* texture = *iter;
 
-		int lTextureName = (int)lIter.GetKey();
-		mTextureIDManager.RecycleId(lTextureName);
+		int texture_name = (int)iter.GetKey();
+		texture_id_manager_.RecycleId(texture_name);
 
-		mTextureTable.Remove(lIter++);
-		delete lTexture;
+		texture_table_.Remove(iter++);
+		delete texture;
 	}
 }
 
-void DirectX9Painter::SetDestCanvas(Canvas* pCanvas)
-{
-	Painter::SetDestCanvas(pCanvas);
+void DirectX9Painter::SetDestCanvas(Canvas* canvas) {
+	Painter::SetDestCanvas(canvas);
 	ResetClippingRect();
 }
 
-void DirectX9Painter::SetRenderMode(RenderMode pRM)
-{
-	if (pRM != GetRenderMode())
-	{
-		Painter::SetRenderMode(pRM);
+void DirectX9Painter::SetRenderMode(RenderMode rm) {
+	if (rm != GetRenderMode()) {
+		Painter::SetRenderMode(rm);
 		DoSetRenderMode();
 	}
 }
 
-void DirectX9Painter::Clear(const Color& pColor)
-{
-	pColor;
+void DirectX9Painter::Clear(const Color& _color) {
+	_color;
 	// TODO: implement!
 }
 
-void DirectX9Painter::PrePaint(bool pClearDepthBuffer)
-{
-	pClearDepthBuffer;
+void DirectX9Painter::PrePaint(bool clear_depth_buffer) {
+	clear_depth_buffer;
 	DoSetRenderMode();
 }
 
-void DirectX9Painter::SetAlphaValue(uint8 pAlpha)
-{
-	Painter::SetAlphaValue(pAlpha);
-	mD3DDevice->SetRenderState(D3DRS_ALPHAREF, GetAlphaValue());
+void DirectX9Painter::SetAlphaValue(uint8 alpha) {
+	Painter::SetAlphaValue(alpha);
+	d3_d_device_->SetRenderState(D3DRS_ALPHAREF, GetAlphaValue());
 }
 
-void DirectX9Painter::SetClippingRect(int pLeft, int pTop, int pRight, int pBottom)
-{
-	Painter::SetClippingRect(pLeft, pTop, pRight, pBottom);
+void DirectX9Painter::SetClippingRect(int _left, int _top, int _right, int _bottom) {
+	Painter::SetClippingRect(_left, _top, _right, _bottom);
 
-	ToScreenCoords(pLeft, pTop);
-	ToScreenCoords(pRight, pBottom);
+	ToScreenCoords(_left, _top);
+	ToScreenCoords(_right, _bottom);
 
-	RECT lRect;
-	lRect.left   = pLeft;
-	lRect.top    = pTop;
-	lRect.right  = pRight;
-	lRect.bottom = pBottom;
-	mD3DDevice->SetScissorRect(&lRect);
+	RECT _rect;
+	_rect.left   = _left;
+	_rect.top    = _top;
+	_rect.right  = _right;
+	_rect.bottom = _bottom;
+	d3_d_device_->SetScissorRect(&_rect);
 }
 
-void DirectX9Painter::ResetClippingRect()
-{
-	D3DXMATRIX lOrthoMtx;
-	D3DXMATRIX lIdentityMtx;
+void DirectX9Painter::ResetClippingRect() {
+	D3DXMATRIX ortho_mtx;
+	D3DXMATRIX identity_mtx;
 
 	//Setup the orthogonal projection matrix and the default world/view matrix
-	D3DXMatrixOrthoLH(&lOrthoMtx, (float)GetCanvas()->GetWidth(), (float)GetCanvas()->GetHeight(), 0.0f, 1.0f);
-	D3DXMatrixIdentity(&lIdentityMtx);
+	D3DXMatrixOrthoLH(&ortho_mtx, (float)GetCanvas()->GetWidth(), (float)GetCanvas()->GetHeight(), 0.0f, 1.0f);
+	D3DXMatrixIdentity(&identity_mtx);
 
-	mD3DDevice->SetTransform(D3DTS_PROJECTION, &lOrthoMtx);
-	mD3DDevice->SetTransform(D3DTS_WORLD, &lIdentityMtx);
-	mD3DDevice->SetTransform(D3DTS_VIEW, &lIdentityMtx);
+	d3_d_device_->SetTransform(D3DTS_PROJECTION, &ortho_mtx);
+	d3_d_device_->SetTransform(D3DTS_WORLD, &identity_mtx);
+	d3_d_device_->SetTransform(D3DTS_VIEW, &identity_mtx);
 
 	//Make sure that the z-buffer and lighting are disabled
-	mD3DDevice->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
-	mD3DDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+	d3_d_device_->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
+	d3_d_device_->SetRenderState(D3DRS_LIGHTING, FALSE);
 
-	int lTop  = 0;
-	int lLeft = 0;
-	int lBottom = (int)GetCanvas()->GetHeight();
-	int lRight  = (int)GetCanvas()->GetWidth();
-	ToUserCoords(lLeft, lTop);
-	ToUserCoords(lRight, lBottom);
-	SetClippingRect(lLeft, lTop, lRight, lBottom);
+	int __top  = 0;
+	int __left = 0;
+	int __bottom = (int)GetCanvas()->GetHeight();
+	int __right  = (int)GetCanvas()->GetWidth();
+	ToUserCoords(__left, __top);
+	ToUserCoords(__right, __bottom);
+	SetClippingRect(__left, __top, __right, __bottom);
 }
 
-void DirectX9Painter::DoSetRenderMode() const
-{
-	switch(GetRenderMode())
-	{
-		case Painter::RM_ALPHATEST:
-		{
-			mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-			mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-			mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
-			mD3DDevice->SetRenderState(D3DRS_ALPHAREF, GetAlphaValue());
-			mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-			mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
-			mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+void DirectX9Painter::DoSetRenderMode() const {
+	switch(GetRenderMode()) {
+		case Painter::kRmAlphatest: {
+			d3_d_device_->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+			d3_d_device_->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+			d3_d_device_->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+			d3_d_device_->SetRenderState(D3DRS_ALPHAREF, GetAlphaValue());
+			d3_d_device_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+			d3_d_device_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+			d3_d_device_->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 			break;
 		}
-		case Painter::RM_ALPHABLEND:
-		{
-			mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-			mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-			mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
-			mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-			mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-			mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+		case Painter::kRmAlphablend: {
+			d3_d_device_->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			d3_d_device_->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+			d3_d_device_->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+			d3_d_device_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+			d3_d_device_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+			d3_d_device_->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 			break;
 		}
-		case Painter::RM_XOR:
-		{
-			// There is no support of logical operations. Just do something. 
+		case Painter::kRmXor: {
+			// There is no support of logical operations. Just do something.
 			// Do just about anything! We are desperate here! :)
-			mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-			mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-			mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
-			mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-			mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-			mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
+			d3_d_device_->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			d3_d_device_->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+			d3_d_device_->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+			d3_d_device_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+			d3_d_device_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+			d3_d_device_->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_REVSUBTRACT);
 			break;
 		}
-		case Painter::RM_ADD:
-		{
-			mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-			mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-			mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
-			mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-			mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-			mD3DDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+		case Painter::kRmAdd: {
+			d3_d_device_->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			d3_d_device_->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+			d3_d_device_->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+			d3_d_device_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+			d3_d_device_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+			d3_d_device_->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 			break;
 		}
-		case Painter::RM_NORMAL:
-		default:
-		{
-			mD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
-			mD3DDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-			mD3DDevice->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
-			mD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
-			mD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
+		case Painter::kRmNormal:
+		default: {
+			d3_d_device_->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+			d3_d_device_->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
+			d3_d_device_->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_ALWAYS);
+			d3_d_device_->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
+			d3_d_device_->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ZERO);
 			break;
 		}
 	}
 }
 
-void DirectX9Painter::DoDrawPixel(int x, int y)
-{
-	mD3DDevice->BeginScene();
+void DirectX9Painter::DoDrawPixel(int x, int y) {
+	d3_d_device_->BeginScene();
 
 	ToScreenCoords(x, y);
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;        // The vertex color.
 	};
 
-	VertexData lVertex;
+	VertexData vertex;
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
 
-	Color& lColor = GetColorInternal(0);
-	lVertex.x   = (float)x;
-	lVertex.y   = (float)y;
-	lVertex.z   = 0;
-	lVertex.rhw = 1;
-	lVertex.color = ToArgb(lAlpha, lColor);
+	Color& __color = GetColorInternal(0);
+	vertex.x   = (float)x;
+	vertex.y   = (float)y;
+	vertex.z   = 0;
+	vertex.rhw = 1;
+	vertex.color = ToArgb(_alpha, __color);
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	mD3DDevice->DrawPrimitiveUP(D3DPT_POINTLIST, 1, &lVertex, sizeof(VertexData));
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	d3_d_device_->DrawPrimitiveUP(D3DPT_POINTLIST, 1, &vertex, sizeof(VertexData));
 
-	mD3DDevice->EndScene();
-	
+	d3_d_device_->EndScene();
+
 }
 
-void DirectX9Painter::DoDrawLine(int pX1, int pY1, int pX2, int pY2)
-{
-	mD3DDevice->BeginScene();
+void DirectX9Painter::DoDrawLine(int x1, int y1, int x2, int y2) {
+	d3_d_device_->BeginScene();
 
-	ToScreenCoords(pX1, pY1);
-	ToScreenCoords(pX2, pY2);
+	ToScreenCoords(x1, y1);
+	ToScreenCoords(x2, y2);
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;        // The vertex color.
 	};
 
-	VertexData lVertex[2];
+	VertexData vertex[2];
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
 
-	Color& lColor = GetColorInternal(0);
-	for (int i = 0; i < 2; i++)
-	{
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
-		lVertex[i].color = ToArgb(lAlpha, lColor);
+	Color& __color = GetColorInternal(0);
+	for (int i = 0; i < 2; i++) {
+		vertex[i].z   = 0;
+		vertex[i].rhw = 1;
+		vertex[i].color = ToArgb(_alpha, __color);
 	}
 
-	lVertex[0].x   = (float)pX1;
-	lVertex[0].y   = (float)pY1;
-	lVertex[1].x   = (float)pX2;
-	lVertex[1].y   = (float)pY2;
+	vertex[0].x   = (float)x1;
+	vertex[0].y   = (float)y1;
+	vertex[1].x   = (float)x2;
+	vertex[1].y   = (float)y2;
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	mD3DDevice->DrawPrimitiveUP(D3DPT_LINELIST, 1, lVertex, sizeof(VertexData));
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	d3_d_device_->DrawPrimitiveUP(D3DPT_LINELIST, 1, vertex, sizeof(VertexData));
 
-	mD3DDevice->EndScene();
+	d3_d_device_->EndScene();
 }
 
-void DirectX9Painter::DoDrawRect(int pLeft, int pTop, int pRight, int pBottom)
-{
-	mD3DDevice->BeginScene();
+void DirectX9Painter::DoDrawRect(int _left, int _top, int _right, int _bottom) {
+	d3_d_device_->BeginScene();
 
-	ToScreenCoords(pLeft, pTop);
-	ToScreenCoords(pRight, pBottom);
+	ToScreenCoords(_left, _top);
+	ToScreenCoords(_right, _bottom);
 
-	float lLeft   = (float)pLeft;
-	float lTop    = (float)pTop;
-	float lRight  = (float)pRight;
-	float lBottom = (float)pBottom;
+	float __left   = (float)_left;
+	float __top    = (float)_top;
+	float __right  = (float)_right;
+	float __bottom = (float)_bottom;
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;        // The vertex color.
 	};
 
-	VertexData lVertex[8];
+	VertexData vertex[8];
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
 	int i;
-	for (i = 0; i < 8; i++)
-	{
-		Color* lColor;
+	for (i = 0; i < 8; i++) {
+		Color* __color;
 		if(i < 4)
-			lColor = &GetColorInternal(0);
+			__color = &GetColorInternal(0);
 		else
-			lColor = &GetColorInternal(1);
+			__color = &GetColorInternal(1);
 
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
-		lVertex[i].color = ToArgb(lAlpha, *lColor);
+		vertex[i].z   = 0;
+		vertex[i].rhw = 1;
+		vertex[i].color = ToArgb(_alpha, *__color);
 	}
 
-	lVertex[0].x   = lLeft;
-	lVertex[0].y   = lTop;
-	lVertex[1].x   = lRight;
-	lVertex[1].y   = lTop;
-	lVertex[2].x   = lRight;
-	lVertex[2].y   = lBottom;
-	lVertex[3].x   = lLeft;
-	lVertex[3].y   = lBottom;
+	vertex[0].x   = __left;
+	vertex[0].y   = __top;
+	vertex[1].x   = __right;
+	vertex[1].y   = __top;
+	vertex[2].x   = __right;
+	vertex[2].y   = __bottom;
+	vertex[3].x   = __left;
+	vertex[3].y   = __bottom;
 
-	lLeft += pWidth;
-	lTop += pWidth;
-	lRight -= pWidth;
-	lBottom -= pWidth;
+	__left += width;
+	__top += width;
+	__right -= width;
+	__bottom -= width;
 
-	lVertex[4].x   = lLeft;
-	lVertex[4].y   = lTop;
-	lVertex[5].x   = lRight;
-	lVertex[5].y   = lTop;
-	lVertex[6].x   = lRight;
-	lVertex[6].y   = lBottom;
-	lVertex[7].x   = lLeft;
-	lVertex[7].y   = lBottom;
+	vertex[4].x   = __left;
+	vertex[4].y   = __top;
+	vertex[5].x   = __right;
+	vertex[5].y   = __top;
+	vertex[6].x   = __right;
+	vertex[6].y   = __bottom;
+	vertex[7].x   = __left;
+	vertex[7].y   = __bottom;
 
-	const static uint16 lIndices[] = {0,4,7, 0,7,3, 0,1,5, 0,5,4, 1,2,6, 1,6,5, 7,6,2, 7,2,3};
+	const static uint16 indices[] = {0,4,7, 0,7,3, 0,1,5, 0,5,4, 1,2,6, 1,6,5, 7,6,2, 7,2,3};
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	mD3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 8, 8, lIndices, D3DFMT_INDEX16, lVertex, sizeof(VertexData));
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	d3_d_device_->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 8, 8, indices, D3DFMT_INDEX16, vertex, sizeof(VertexData));
 
-	mD3DDevice->EndScene();
+	d3_d_device_->EndScene();
 }
 
-void DirectX9Painter::DoFillRect(int pLeft, int pTop, int pRight, int pBottom)
-{
-	mD3DDevice->BeginScene();
+void DirectX9Painter::DoFillRect(int _left, int _top, int _right, int _bottom) {
+	d3_d_device_->BeginScene();
 
-	ToScreenCoords(pLeft, pTop);
-	ToScreenCoords(pRight, pBottom);
+	ToScreenCoords(_left, _top);
+	ToScreenCoords(_right, _bottom);
 
-	float lLeft   = (float)pLeft;
-	float lTop    = (float)pTop;
-	float lRight  = (float)pRight;
-	float lBottom = (float)pBottom;
+	float __left   = (float)_left;
+	float __top    = (float)_top;
+	float __right  = (float)_right;
+	float __bottom = (float)_bottom;
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;        // The vertex color.
 	};
 
-	VertexData lVertex[4];
+	VertexData vertex[4];
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
-	Color& lColor = GetColorInternal(0);
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
+	Color& __color = GetColorInternal(0);
 
-	for (int i = 0; i < 4; i++)
-	{
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
-		lVertex[i].color = ToArgb(lAlpha, lColor);
+	for (int i = 0; i < 4; i++) {
+		vertex[i].z   = 0;
+		vertex[i].rhw = 1;
+		vertex[i].color = ToArgb(_alpha, __color);
 	}
 
-	lVertex[0].x   = lLeft;
-	lVertex[0].y   = lTop;
-	lVertex[1].x   = lRight;
-	lVertex[1].y   = lTop;
-	lVertex[2].x   = lRight;
-	lVertex[2].y   = lBottom;
-	lVertex[3].x   = lLeft;
-	lVertex[3].y   = lBottom;
+	vertex[0].x   = __left;
+	vertex[0].y   = __top;
+	vertex[1].x   = __right;
+	vertex[1].y   = __top;
+	vertex[2].x   = __right;
+	vertex[2].y   = __bottom;
+	vertex[3].x   = __left;
+	vertex[3].y   = __bottom;
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	mD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, lVertex, sizeof(VertexData));
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	d3_d_device_->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, vertex, sizeof(VertexData));
 
-	mD3DDevice->EndScene();
+	d3_d_device_->EndScene();
 }
 
-void DirectX9Painter::DoDraw3DRect(int pLeft, int pTop, int pRight, int pBottom, int pWidth, bool pSunken)
-{
-	mD3DDevice->BeginScene();
+void DirectX9Painter::DoDraw3DRect(int _left, int _top, int _right, int _bottom, int width, bool sunken) {
+	d3_d_device_->BeginScene();
 
-	ToScreenCoords(pLeft, pTop);
-	ToScreenCoords(pRight, pBottom);
+	ToScreenCoords(_left, _top);
+	ToScreenCoords(_right, _bottom);
 
-	float lLeft   = (float)pLeft;
-	float lTop    = (float)pTop;
-	float lRight  = (float)pRight;
-	float lBottom = (float)pBottom;
+	float __left   = (float)_left;
+	float __top    = (float)_top;
+	float __right  = (float)_right;
+	float __bottom = (float)_bottom;
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;        // The vertex color.
 	};
 
-	VertexData lVertex[12];
+	VertexData vertex[12];
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
 
-	for (int i = 0; i < 12; i++)
-	{
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
+	for (int i = 0; i < 12; i++) {
+		vertex[i].z   = 0;
+		vertex[i].rhw = 1;
 	}
 
-	int lZero  = 0;
-	int lOne   = 1;
-	int lTwo   = 2;
-	int lThree = 3;
+	int zero  = 0;
+	int one   = 1;
+	int two   = 2;
+	int three = 3;
 
-	if(pSunken)
-	{
-		lZero  = 2;
-		lOne   = 3;
-		lTwo   = 0;
-		lThree = 1;
+	if(sunken) {
+		zero  = 2;
+		one   = 3;
+		two   = 0;
+		three = 1;
 	}
-	Color* lColor = &GetColorInternal(0);
+	Color* __color = &GetColorInternal(0);
 
-	lVertex[0].x = lLeft; // Outer top left.
-	lVertex[0].y = lTop;
-	lVertex[0].color = ToArgb(lAlpha, lColor[lZero]);
+	vertex[0].x = __left; // Outer top left.
+	vertex[0].y = __top;
+	vertex[0].color = ToArgb(_alpha, __color[zero]);
 
-	lVertex[1].x = lRight; // Outer top right #1.
-	lVertex[1].y = lTop;
-	lVertex[1].color = ToArgb(lAlpha, lColor[lZero]);
+	vertex[1].x = __right; // Outer top right #1.
+	vertex[1].y = __top;
+	vertex[1].color = ToArgb(_alpha, __color[zero]);
 
-	lVertex[2].x = lRight; // Outer top right #2.
-	lVertex[2].y = lTop;
-	lVertex[2].color = ToArgb(lAlpha, lColor[lOne]);
+	vertex[2].x = __right; // Outer top right #2.
+	vertex[2].y = __top;
+	vertex[2].color = ToArgb(_alpha, __color[one]);
 
-	lVertex[3].x = lRight; // Outer bottom right.
-	lVertex[3].y = lBottom;
-	lVertex[3].color = ToArgb(lAlpha, lColor[lOne]);
+	vertex[3].x = __right; // Outer bottom right.
+	vertex[3].y = __bottom;
+	vertex[3].color = ToArgb(_alpha, __color[one]);
 
-	lVertex[4].x = lLeft; // Outer bottom left #1.
-	lVertex[4].y = lBottom;
-	lVertex[4].color = ToArgb(lAlpha, lColor[lZero]);
+	vertex[4].x = __left; // Outer bottom left #1.
+	vertex[4].y = __bottom;
+	vertex[4].color = ToArgb(_alpha, __color[zero]);
 
-	lVertex[5].x = lLeft; // Outer bottom left #2.
-	lVertex[5].y = lBottom;
-	lVertex[5].color = ToArgb(lAlpha, lColor[lOne]);
+	vertex[5].x = __left; // Outer bottom left #2.
+	vertex[5].y = __bottom;
+	vertex[5].color = ToArgb(_alpha, __color[one]);
 
-	lLeft += pWidth;
-	lTop += pWidth;
-	lRight -= pWidth;
-	lBottom -= pWidth;
+	__left += width;
+	__top += width;
+	__right -= width;
+	__bottom -= width;
 
-	lVertex[6].x = lLeft; // Inner top left.
-	lVertex[6].y = lTop;
-	lVertex[6].color = ToArgb(lAlpha, lColor[lTwo]);
+	vertex[6].x = __left; // Inner top left.
+	vertex[6].y = __top;
+	vertex[6].color = ToArgb(_alpha, __color[two]);
 
-	lVertex[7].x = lRight; // Inner top right #1.
-	lVertex[7].y = lTop;
-	lVertex[7].color = ToArgb(lAlpha, lColor[lTwo]);
+	vertex[7].x = __right; // Inner top right #1.
+	vertex[7].y = __top;
+	vertex[7].color = ToArgb(_alpha, __color[two]);
 
-	lVertex[8].x = lRight; // Inner top right #2.
-	lVertex[8].y = lTop;
-	lVertex[8].color = ToArgb(lAlpha, lColor[lThree]);
+	vertex[8].x = __right; // Inner top right #2.
+	vertex[8].y = __top;
+	vertex[8].color = ToArgb(_alpha, __color[three]);
 
-	lVertex[9].x = lRight; // Inner bottom right.
-	lVertex[9].y = lBottom;
-	lVertex[9].color = ToArgb(lAlpha, lColor[lThree]);
+	vertex[9].x = __right; // Inner bottom right.
+	vertex[9].y = __bottom;
+	vertex[9].color = ToArgb(_alpha, __color[three]);
 
-	lVertex[10].x = lLeft; // Inner bottom left #1.
-	lVertex[10].y = lBottom;
-	lVertex[10].color = ToArgb(lAlpha, lColor[lTwo]);
+	vertex[10].x = __left; // Inner bottom left #1.
+	vertex[10].y = __bottom;
+	vertex[10].color = ToArgb(_alpha, __color[two]);
 
-	lVertex[11].x = lLeft; // Inner bottom left #2.
-	lVertex[11].y = lBottom;
-	lVertex[11].color = ToArgb(lAlpha, lColor[lThree]);
+	vertex[11].x = __left; // Inner bottom left #2.
+	vertex[11].y = __bottom;
+	vertex[11].color = ToArgb(_alpha, __color[three]);
 
-	const static uint16 lsIndices[] = {0,1,7, 0,7,6, 0,6,10, 0,10,4, 8,2,3, 8,3,9, 11,9,3, 11,3,5};
+	const static uint16 indices[] = {0,1,7, 0,7,6, 0,6,10, 0,10,4, 8,2,3, 8,3,9, 11,9,3, 11,3,5};
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	mD3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 12, 8, lsIndices, D3DFMT_INDEX16, lVertex, sizeof(VertexData));
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	d3_d_device_->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 12, 8, indices, D3DFMT_INDEX16, vertex, sizeof(VertexData));
 
-	mD3DDevice->EndScene();
+	d3_d_device_->EndScene();
 }
 
-void DirectX9Painter::DoFillShadedRect(int pLeft, int pTop, int pRight, int pBottom)
-{
-	mD3DDevice->BeginScene();
+void DirectX9Painter::DoFillShadedRect(int _left, int _top, int _right, int _bottom) {
+	d3_d_device_->BeginScene();
 
-	ToScreenCoords(pLeft, pTop);
-	ToScreenCoords(pRight, pBottom);
+	ToScreenCoords(_left, _top);
+	ToScreenCoords(_right, _bottom);
 
-	float lLeft   = (float)pLeft;
-	float lTop    = (float)pTop;
-	float lRight  = (float)pRight;
-	float lBottom = (float)pBottom;
+	float __left   = (float)_left;
+	float __top    = (float)_top;
+	float __right  = (float)_right;
+	float __bottom = (float)_bottom;
 
-	Color* lColor = &GetColorInternal(0);
+	Color* __color = &GetColorInternal(0);
 
 	// Calculate center color.
-	DWORD lTopR = (DWORD)lColor[0].mRed   + (DWORD)lColor[1].mRed;
-	DWORD lTopG = (DWORD)lColor[0].mGreen + (DWORD)lColor[1].mGreen;
-	DWORD lTopB = (DWORD)lColor[0].mBlue  + (DWORD)lColor[1].mBlue;
+	DWORD top_r = (DWORD)__color[0].red_   + (DWORD)__color[1].red_;
+	DWORD top_g = (DWORD)__color[0].green_ + (DWORD)__color[1].green_;
+	DWORD top_b = (DWORD)__color[0].blue_  + (DWORD)__color[1].blue_;
 
-	DWORD lBotR = (DWORD)lColor[2].mRed   + (DWORD)lColor[3].mRed;
-	DWORD lBotG = (DWORD)lColor[2].mGreen + (DWORD)lColor[3].mGreen;
-	DWORD lBotB = (DWORD)lColor[2].mBlue  + (DWORD)lColor[3].mBlue;
+	DWORD bot_r = (DWORD)__color[2].red_   + (DWORD)__color[3].red_;
+	DWORD bot_g = (DWORD)__color[2].green_ + (DWORD)__color[3].green_;
+	DWORD bot_b = (DWORD)__color[2].blue_  + (DWORD)__color[3].blue_;
 
-	DWORD lCenterR = ((lTopR + lBotR) >> 2);
-	DWORD lCenterG = ((lTopG + lBotG) >> 2);
-	DWORD lCenterB = ((lTopB + lBotB) >> 2);
+	DWORD center_r = ((top_r + bot_r) >> 2);
+	DWORD center_g = ((top_g + bot_g) >> 2);
+	DWORD center_b = ((top_b + bot_b) >> 2);
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;        // The vertex color.
 	};
 
-	VertexData lVertex[6];
+	VertexData vertex[6];
 
-	for (int i = 0; i < 6; i++)
-	{
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
+	for (int i = 0; i < 6; i++) {
+		vertex[i].z   = 0;
+		vertex[i].rhw = 1;
 	}
 
-	lVertex[0].x   = (lLeft + lRight) * 0.5f;
-	lVertex[0].y   = (lTop + lBottom) * 0.5f;
-	lVertex[0].color = lAlpha | ((lCenterR)   << 16) |
-					((lCenterG) << 8) |
-					((lCenterB)  << 0);
-	
-	lVertex[1].x   = lLeft;
-	lVertex[1].y   = lTop;
-	lVertex[1].color = ToArgb(lAlpha, lColor[0]);
+	vertex[0].x   = (__left + __right) * 0.5f;
+	vertex[0].y   = (__top + __bottom) * 0.5f;
+	vertex[0].color = _alpha | ((center_r)   << 16) |
+					((center_g) << 8) |
+					((center_b)  << 0);
 
-	lVertex[2].x   = lRight;
-	lVertex[2].y   = lTop;
-	lVertex[2].color = ToArgb(lAlpha, lColor[1]);
+	vertex[1].x   = __left;
+	vertex[1].y   = __top;
+	vertex[1].color = ToArgb(_alpha, __color[0]);
 
-	lVertex[3].x   = lRight;
-	lVertex[3].y   = lBottom;
-	lVertex[3].color = ToArgb(lAlpha, lColor[2]);
+	vertex[2].x   = __right;
+	vertex[2].y   = __top;
+	vertex[2].color = ToArgb(_alpha, __color[1]);
 
-	lVertex[4].x   = lLeft;
-	lVertex[4].y   = lBottom;
-	lVertex[4].color = ToArgb(lAlpha, lColor[3]);
+	vertex[3].x   = __right;
+	vertex[3].y   = __bottom;
+	vertex[3].color = ToArgb(_alpha, __color[2]);
 
-	lVertex[5].x   = lLeft;
-	lVertex[5].y   = lTop;
-	lVertex[5].color = ToArgb(lAlpha, lColor[0]);
+	vertex[4].x   = __left;
+	vertex[4].y   = __bottom;
+	vertex[4].color = ToArgb(_alpha, __color[3]);
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	mD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 4, lVertex, sizeof(VertexData));
+	vertex[5].x   = __left;
+	vertex[5].y   = __top;
+	vertex[5].color = ToArgb(_alpha, __color[0]);
 
-	mD3DDevice->EndScene();
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	d3_d_device_->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 4, vertex, sizeof(VertexData));
+
+	d3_d_device_->EndScene();
 }
 
-void DirectX9Painter::DoFillTriangle(float pX1, float pY1,
-				  float pX2, float pY2,
-				  float pX3, float pY3)
-{
-	mD3DDevice->BeginScene();
+void DirectX9Painter::DoFillTriangle(float x1, float y1,
+				  float x2, float y2,
+				  float x3, float y3) {
+	d3_d_device_->BeginScene();
 
-	ToScreenCoords(pX1, pY1);
-	ToScreenCoords(pX2, pY2);
-	ToScreenCoords(pX3, pY3);
+	ToScreenCoords(x1, y1);
+	ToScreenCoords(x2, y2);
+	ToScreenCoords(x3, y3);
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;        // The vertex color.
 	};
 
-	VertexData lVertex[3];
+	VertexData vertex[3];
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
-	Color& lColor = GetColorInternal(0);
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
+	Color& __color = GetColorInternal(0);
 
-	for (int i = 0; i < 3; i++)
-	{
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
-		lVertex[i].color = ToArgb(lAlpha, lColor);
+	for (int i = 0; i < 3; i++) {
+		vertex[i].z   = 0;
+		vertex[i].rhw = 1;
+		vertex[i].color = ToArgb(_alpha, __color);
 	}
 
-	lVertex[0].x   = (FLOAT)pX1;
-	lVertex[0].y   = (FLOAT)pY1;
-	lVertex[1].x   = (FLOAT)pX2;
-	lVertex[1].y   = (FLOAT)pY2;
-	lVertex[2].x   = (FLOAT)pX3;
-	lVertex[2].y   = (FLOAT)pY3;
+	vertex[0].x   = (FLOAT)x1;
+	vertex[0].y   = (FLOAT)y1;
+	vertex[1].x   = (FLOAT)x2;
+	vertex[1].y   = (FLOAT)y2;
+	vertex[2].x   = (FLOAT)x3;
+	vertex[2].y   = (FLOAT)y3;
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	mD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, lVertex, sizeof(VertexData));
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	d3_d_device_->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, vertex, sizeof(VertexData));
 
-	mD3DDevice->EndScene();
+	d3_d_device_->EndScene();
 }
 
-void DirectX9Painter::DoFillShadedTriangle(float pX1, float pY1,
-					float pX2, float pY2,
-					float pX3, float pY3)
-{
-	mD3DDevice->BeginScene();
+void DirectX9Painter::DoFillShadedTriangle(float x1, float y1,
+					float x2, float y2,
+					float x3, float y3) {
+	d3_d_device_->BeginScene();
 
-	ToScreenCoords(pX1, pY1);
-	ToScreenCoords(pX2, pY2);
-	ToScreenCoords(pX3, pY3);
+	ToScreenCoords(x1, y1);
+	ToScreenCoords(x2, y2);
+	ToScreenCoords(x3, y3);
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;        // The vertex color.
 	};
 
-	VertexData lVertex[3];
+	VertexData vertex[3];
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
-	Color* lColor = &GetColorInternal(0);
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
+	Color* __color = &GetColorInternal(0);
 
-	for (int i = 0; i < 3; i++)
-	{
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
-		lVertex[i].color = ToArgb(lAlpha, lColor[i]);
+	for (int i = 0; i < 3; i++) {
+		vertex[i].z   = 0;
+		vertex[i].rhw = 1;
+		vertex[i].color = ToArgb(_alpha, __color[i]);
 	}
 
-	lVertex[0].x   = (FLOAT)pX1;
-	lVertex[0].y   = (FLOAT)pY1;
-	lVertex[1].x   = (FLOAT)pX2;
-	lVertex[1].y   = (FLOAT)pY2;
-	lVertex[2].x   = (FLOAT)pX3;
-	lVertex[2].y   = (FLOAT)pY3;
+	vertex[0].x   = (FLOAT)x1;
+	vertex[0].y   = (FLOAT)y1;
+	vertex[1].x   = (FLOAT)x2;
+	vertex[1].y   = (FLOAT)y2;
+	vertex[2].x   = (FLOAT)x3;
+	vertex[2].y   = (FLOAT)y3;
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	mD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, lVertex, sizeof(VertexData));
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
+	d3_d_device_->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, vertex, sizeof(VertexData));
 
-	mD3DDevice->EndScene();
+	d3_d_device_->EndScene();
 }
 
-void DirectX9Painter::DoFillTriangle(float pX1, float pY1, float pU1, float pV1,
-				  float pX2, float pY2, float pU2, float pV2,
-				  float pX3, float pY3, float pU3, float pV3,
-				  ImageID pImageID)
-{
-	TextureTable::Iterator lIter = mTextureTable.Find((int)pImageID);
-	if (lIter == mTextureTable.End())
-	{
+void DirectX9Painter::DoFillTriangle(float x1, float y1, float u1, float v1,
+				  float x2, float y2, float u2, float v2,
+				  float x3, float y3, float u3, float v3,
+				  ImageID image_id) {
+	TextureTable::Iterator iter = texture_table_.Find((int)image_id);
+	if (iter == texture_table_.End()) {
 		return;
 	}
 
-	Texture* lTexture = *lIter;
+	Texture* texture = *iter;
 
-	mD3DDevice->BeginScene();
+	d3_d_device_->BeginScene();
 
-	ToScreenCoords(pX1, pY1);
-	ToScreenCoords(pX2, pY2);
-	ToScreenCoords(pX3, pY3);
+	ToScreenCoords(x1, y1);
+	ToScreenCoords(x2, y2);
+	ToScreenCoords(x3, y3);
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;	    // TODO: Verify that this works.
 		FLOAT u, v;
 	};
 
-	VertexData lVertex[3];
+	VertexData vertex[3];
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
-	Color* lColor = &GetColorInternal(0);
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
+	Color* __color = &GetColorInternal(0);
 
-	for (int i = 0; i < 3; i++)
-	{
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
+	for (int i = 0; i < 3; i++) {
+		vertex[i].z   = 0;
+		vertex[i].rhw = 1;
 
 		// TODO: Verify that this works.
-		lVertex[i].color = ToArgb(lAlpha, lColor[i]);
+		vertex[i].color = ToArgb(_alpha, __color[i]);
 	}
 
-	lVertex[0].x   = (FLOAT)pX1;
-	lVertex[0].y   = (FLOAT)pY1;
-	lVertex[0].u   = (FLOAT)pU1;
-	lVertex[0].v   = (FLOAT)pV1;
-	lVertex[1].x   = (FLOAT)pX2;
-	lVertex[1].y   = (FLOAT)pY2;
-	lVertex[1].u   = (FLOAT)pU2;
-	lVertex[1].v   = (FLOAT)pV2;
-	lVertex[2].x   = (FLOAT)pX3;
-	lVertex[2].y   = (FLOAT)pY3;
-	lVertex[2].u   = (FLOAT)pU3;
-	lVertex[2].v   = (FLOAT)pV3;
+	vertex[0].x   = (FLOAT)x1;
+	vertex[0].y   = (FLOAT)y1;
+	vertex[0].u   = (FLOAT)u1;
+	vertex[0].v   = (FLOAT)v1;
+	vertex[1].x   = (FLOAT)x2;
+	vertex[1].y   = (FLOAT)y2;
+	vertex[1].u   = (FLOAT)u2;
+	vertex[1].v   = (FLOAT)v2;
+	vertex[2].x   = (FLOAT)x3;
+	vertex[2].y   = (FLOAT)y3;
+	vertex[2].u   = (FLOAT)u3;
+	vertex[2].v   = (FLOAT)v3;
 
-	mD3DDevice->SetTexture(0, lTexture->mD3DTexture);
+	d3_d_device_->SetTexture(0, texture->d3_d_texture_);
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_TEX1);
-	mD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, lVertex, sizeof(VertexData));
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_TEX1);
+	d3_d_device_->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, vertex, sizeof(VertexData));
 
-	mD3DDevice->EndScene();
+	d3_d_device_->EndScene();
 
-	mD3DDevice->SetTexture(0, 0);
+	d3_d_device_->SetTexture(0, 0);
 }
 
-void DirectX9Painter::DrawFan(const std::vector<vec2>& pCoords, bool pFill)
-{
-	pCoords;
-	pFill;
+void DirectX9Painter::DrawFan(const std::vector<vec2>& coords, bool fill) {
+	coords;
+	fill;
 }
 
-Painter::ImageID DirectX9Painter::AddImage(const Canvas* pImage, const Canvas* pAlphaBuffer)
-{
-	if (pImage == 0 && pAlphaBuffer == 0)
-	{
-		return (ImageID)mTextureIDManager.GetInvalidId();
+Painter::ImageID DirectX9Painter::AddImage(const Canvas* image, const Canvas* alpha_buffer) {
+	if (image == 0 && alpha_buffer == 0) {
+		return (ImageID)texture_id_manager_.GetInvalidId();
 	}
 
-	int lID = 0;
+	int id = 0;
 
-	bool lAlpha = false;
-	bool lColor = false;
+	bool _alpha = false;
+	bool __color = false;
 
-	if (pImage != 0)
-	{
-		lColor = true;
+	if (image != 0) {
+		__color = true;
 
-		if (pImage->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
-		{
-			lAlpha = true;
+		if (image->GetBitDepth() == Canvas::kBitdepth32Bit) {
+			_alpha = true;
 		}
 	}
 
-	if (pAlphaBuffer != 0)
-	{
-		lAlpha = true;
+	if (alpha_buffer != 0) {
+		_alpha = true;
 	}
 
-	lID = mTextureIDManager.GetFreeId();
+	id = texture_id_manager_.GetFreeId();
 
-	if (lID != mTextureIDManager.GetInvalidId())
-	{
-		Canvas lImage;
-		D3DFORMAT lFormat = D3DFMT_R8G8B8;
-		bool lCreateTexture = false;
+	if (id != texture_id_manager_.GetInvalidId()) {
+		Canvas _image;
+		D3DFORMAT format = kD3DfmtR8G8B8;
+		bool create_texture = false;
 
-		if (lColor == true && lAlpha == true)
-		{
-			lImage.Copy(*pImage);
+		if (__color == true && _alpha == true) {
+			_image.Copy(*image);
 
-			unsigned lNewWidth  = GetClosestPowerOf2(lImage.GetWidth(), true);
-			unsigned lNewHeight = GetClosestPowerOf2(lImage.GetHeight(), true);
+			unsigned new_width  = GetClosestPowerOf2(_image.GetWidth(), true);
+			unsigned new_height = GetClosestPowerOf2(_image.GetHeight(), true);
 
-			if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
-			{
-				lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_NICEST);
+			if (new_width != _image.GetWidth() || new_height != _image.GetHeight()) {
+				_image.Resize(new_width, new_height, Canvas::kResizeNicest);
 			}
 
-			if (pAlphaBuffer != 0)
-			{
-				Canvas lAlphaBuffer(*pAlphaBuffer, true);
+			if (alpha_buffer != 0) {
+				Canvas _alpha_buffer(*alpha_buffer, true);
 
-				if (lAlphaBuffer.GetWidth() != lImage.GetWidth() ||
-				   lAlphaBuffer.GetHeight() != lImage.GetHeight())
-				{
-					lAlphaBuffer.Resize(lImage.GetWidth(), lImage.GetHeight(), Canvas::RESIZE_FAST);
+				if (_alpha_buffer.GetWidth() != _image.GetWidth() ||
+				   _alpha_buffer.GetHeight() != _image.GetHeight()) {
+					_alpha_buffer.Resize(_image.GetWidth(), _image.GetHeight(), Canvas::kResizeFast);
 				}
-				if (lAlphaBuffer.GetBitDepth() != Canvas::BITDEPTH_8_BIT)
-				{
-					lAlphaBuffer.ConvertToGrayscale(true);
+				if (_alpha_buffer.GetBitDepth() != Canvas::kBitdepth8Bit) {
+					_alpha_buffer.ConvertToGrayscale(true);
 				}
-	
-				lImage.ConvertTo32BitWithAlpha(lAlphaBuffer);
+
+				_image.ConvertTo32BitWithAlpha(_alpha_buffer);
 			}
 
-			lFormat = D3DFMT_A8R8G8B8;
-			lCreateTexture = true;
-		}
-		else if(lColor == true)
-		{
-			lImage.Copy(*pImage);
-			lImage.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
+			format = kD3DfmtA8R8G8B8;
+			create_texture = true;
+		} else if(__color == true) {
+			_image.Copy(*image);
+			_image.ConvertBitDepth(Canvas::kBitdepth24Bit);
 
-			unsigned lNewWidth  = GetClosestPowerOf2(lImage.GetWidth(), true);
-			unsigned lNewHeight = GetClosestPowerOf2(lImage.GetHeight(), true);
-			if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
-			{
-				lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_FAST);
+			unsigned new_width  = GetClosestPowerOf2(_image.GetWidth(), true);
+			unsigned new_height = GetClosestPowerOf2(_image.GetHeight(), true);
+			if (new_width != _image.GetWidth() || new_height != _image.GetHeight()) {
+				_image.Resize(new_width, new_height, Canvas::kResizeFast);
 			}
 
-			lFormat = D3DFMT_R8G8B8;
-			lCreateTexture = true;
-		}
-		else if(pAlphaBuffer != 0)
-		{
-			lImage.Copy(*pAlphaBuffer);
+			format = kD3DfmtR8G8B8;
+			create_texture = true;
+		} else if(alpha_buffer != 0) {
+			_image.Copy(*alpha_buffer);
 
-			Color lPalette[256];
-			for (int i = 0; i < 256; i++)
-			{
-				lPalette[i].mRed   = (uint8)i;
-				lPalette[i].mGreen = (uint8)i;
-				lPalette[i].mBlue  = (uint8)i;
+			Color palette[256];
+			for (int i = 0; i < 256; i++) {
+				palette[i].red_   = (uint8)i;
+				palette[i].green_ = (uint8)i;
+				palette[i].blue_  = (uint8)i;
 			}
 
-			lImage.SetPalette(lPalette);
-			lImage.ConvertTo32BitWithAlpha(*pAlphaBuffer);
+			_image.SetPalette(palette);
+			_image.ConvertTo32BitWithAlpha(*alpha_buffer);
 
-			lFormat = D3DFMT_A8R8G8B8;
-			lCreateTexture = true;
+			format = kD3DfmtA8R8G8B8;
+			create_texture = true;
 		}
 
-		if (lCreateTexture == true)
-		{
-			Texture* lTexture = new Texture();
+		if (create_texture == true) {
+			Texture* texture = new Texture();
 
-			if (pImage != 0)
-			{
-				lTexture->mWidth = pImage->GetWidth();
-				lTexture->mHeight = pImage->GetHeight();
-			}
-			else
-			{
-				lTexture->mWidth = pAlphaBuffer->GetWidth();
-				lTexture->mHeight = pAlphaBuffer->GetHeight();
+			if (image != 0) {
+				texture->width_ = image->GetWidth();
+				texture->height_ = image->GetHeight();
+			} else {
+				texture->width_ = alpha_buffer->GetWidth();
+				texture->height_ = alpha_buffer->GetHeight();
 			}
 
-			HRESULT lRes = mD3DDevice->CreateTexture(lImage.GetWidth(), lImage.GetHeight(), 1, 0,
-				lFormat, D3DPOOL_DEFAULT, &lTexture->mD3DTexture, NULL);
+			HRESULT res = d3_d_device_->CreateTexture(_image.GetWidth(), _image.GetHeight(), 1, 0,
+				format, D3DPOOL_DEFAULT, &texture->d3_d_texture_, NULL);
 
-			if (FAILED(lRes))
-			{
-				delete lTexture;
-				mTextureIDManager.RecycleId(lID);
-				lID = mTextureIDManager.GetInvalidId();
-			}
-			else
-			{
-				IDirect3DSurface9* lSurface;
-				if (FAILED(lTexture->mD3DTexture->GetSurfaceLevel(0, &lSurface)))
-				{
-					mLog.Error("AddImage() - Failed to get surface level 0!");
-					lTexture->mD3DTexture->Release();
-					delete lTexture;
-					mTextureIDManager.RecycleId(lID);
-					return (ImageID)mTextureIDManager.GetInvalidId();
+			if (FAILED(res)) {
+				delete texture;
+				texture_id_manager_.RecycleId(id);
+				id = texture_id_manager_.GetInvalidId();
+			} else {
+				IDirect3DSurface9* surface;
+				if (FAILED(texture->d3_d_texture_->GetSurfaceLevel(0, &surface))) {
+					log_.Error("AddImage() - Failed to get surface level 0!");
+					texture->d3_d_texture_->Release();
+					delete texture;
+					texture_id_manager_.RecycleId(id);
+					return (ImageID)texture_id_manager_.GetInvalidId();
 				}
-				RECT lRect;
-				lRect.top = 0;
-				lRect.left = 0;
-				lRect.bottom = lImage.GetHeight();
-				lRect.right = lImage.GetWidth();
+				RECT _rect;
+				_rect.top = 0;
+				_rect.left = 0;
+				_rect.bottom = _image.GetHeight();
+				_rect.right = _image.GetWidth();
 
-				D3DXLoadSurfaceFromMemory(lSurface, 0, 0, lImage.GetBuffer(), lFormat,
-					lImage.GetPitch() * lImage.GetPixelByteSize(), 0, &lRect, D3DX_FILTER_NONE, 0);
+				D3DXLoadSurfaceFromMemory(surface, 0, 0, _image.GetBuffer(), format,
+					_image.GetPitch() * _image.GetPixelByteSize(), 0, &_rect, D3DX_FILTER_NONE, 0);
 
-				mTextureTable.Insert(lID, lTexture);
+				texture_table_.Insert(id, texture);
 			}
 		}
 	}
 
-	return (ImageID)lID;
+	return (ImageID)id;
 }
 
-void DirectX9Painter::UpdateImage(ImageID pImageID, const Canvas* pImage, const Canvas* pAlphaBuffer, UpdateHint pHint)
-{
-	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
-	if (lIter == mTextureTable.End())
-	{
+void DirectX9Painter::UpdateImage(ImageID image_id, const Canvas* image, const Canvas* alpha_buffer, UpdateHint hint) {
+	TextureTable::Iterator iter = texture_table_.Find(image_id);
+	if (iter == texture_table_.End()) {
 		return;
 	}
-	Texture* lTexture = *lIter;
+	Texture* texture = *iter;
 
-	if (pHint == UPDATE_FAST)
-	{
+	if (hint == kUpdateFast) {
 		// Perform a fast update... Only consider the color map.
-		if (pImage != 0 && 
-		   (int)pImage->GetWidth() == lTexture->mWidth && 
-		   (int)pImage->GetHeight() == lTexture->mHeight)
-		{
-			IDirect3DSurface9* lSurface;
-			if (FAILED(lTexture->mD3DTexture->GetSurfaceLevel(0, &lSurface)))
-			{
-				mLog.Error("UpdateImage() - Failed to get surface level 0!");
+		if (image != 0 &&
+		   (int)image->GetWidth() == texture->width_ &&
+		   (int)image->GetHeight() == texture->height_) {
+			IDirect3DSurface9* surface;
+			if (FAILED(texture->d3_d_texture_->GetSurfaceLevel(0, &surface))) {
+				log_.Error("UpdateImage() - Failed to get surface level 0!");
 				return;
 			}
 
-			RECT lRect;
-			lRect.top = 0;
-			lRect.left = 0;
-			lRect.bottom = pImage->GetHeight();
-			lRect.right = pImage->GetWidth();
+			RECT _rect;
+			_rect.top = 0;
+			_rect.left = 0;
+			_rect.bottom = image->GetHeight();
+			_rect.right = image->GetWidth();
 
-			if (pImage->GetBitDepth() == Canvas::BITDEPTH_24_BIT)
-			{
-				D3DXLoadSurfaceFromMemory(lSurface, 0, 0, pImage->GetBuffer(), 
-							  D3DFMT_R8G8B8, pImage->GetPitch() * pImage->GetPixelByteSize(),
-							  0, &lRect, D3DX_FILTER_NONE, 0);
-			}
-			else if(pImage->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
-			{
-				D3DXLoadSurfaceFromMemory(lSurface, 0, 0, pImage->GetBuffer(), 
-							  D3DFMT_A8R8G8B8, pImage->GetPitch() * pImage->GetPixelByteSize(),
-							  0, &lRect, D3DX_FILTER_NONE, 0);
+			if (image->GetBitDepth() == Canvas::kBitdepth24Bit) {
+				D3DXLoadSurfaceFromMemory(surface, 0, 0, image->GetBuffer(),
+							  kD3DfmtR8G8B8, image->GetPitch() * image->GetPixelByteSize(),
+							  0, &_rect, D3DX_FILTER_NONE, 0);
+			} else if(image->GetBitDepth() == Canvas::kBitdepth32Bit) {
+				D3DXLoadSurfaceFromMemory(surface, 0, 0, image->GetBuffer(),
+							  kD3DfmtA8R8G8B8, image->GetPitch() * image->GetPixelByteSize(),
+							  0, &_rect, D3DX_FILTER_NONE, 0);
 			}
 		}
 		return;
 	}
 
 
-	bool lAlpha = false;
-	bool lColor = false;
+	bool _alpha = false;
+	bool __color = false;
 
-	if (pImage != 0)
-	{
-		lColor = true;
+	if (image != 0) {
+		__color = true;
 
-		if (pImage->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
-		{
-			lAlpha = true;
+		if (image->GetBitDepth() == Canvas::kBitdepth32Bit) {
+			_alpha = true;
 		}
 	}
 
-	if (pAlphaBuffer != 0)
-	{
-		lAlpha = true;
+	if (alpha_buffer != 0) {
+		_alpha = true;
 	}
 
-	Canvas lImage;
-	D3DFORMAT lFormat = D3DFMT_R8G8B8;
-	bool lCreateTexture = false;
+	Canvas _image;
+	D3DFORMAT format = kD3DfmtR8G8B8;
+	bool create_texture = false;
 
-	if (lColor == true && lAlpha == true)
-	{
-		lImage.Copy(*pImage);
+	if (__color == true && _alpha == true) {
+		_image.Copy(*image);
 
-		unsigned lNewWidth  = GetClosestPowerOf2(lImage.GetWidth(), true);
-		unsigned lNewHeight = GetClosestPowerOf2(lImage.GetHeight(), true);
+		unsigned new_width  = GetClosestPowerOf2(_image.GetWidth(), true);
+		unsigned new_height = GetClosestPowerOf2(_image.GetHeight(), true);
 
-		if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
-		{
-			lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_NICEST);
+		if (new_width != _image.GetWidth() || new_height != _image.GetHeight()) {
+			_image.Resize(new_width, new_height, Canvas::kResizeNicest);
 		}
 
-		if (pAlphaBuffer != 0)
-		{
-			Canvas lAlphaBuffer(*pAlphaBuffer, true);
+		if (alpha_buffer != 0) {
+			Canvas _alpha_buffer(*alpha_buffer, true);
 
-			if (lAlphaBuffer.GetWidth() != lImage.GetWidth() ||
-			   lAlphaBuffer.GetHeight() != lImage.GetHeight())
-			{
-				lAlphaBuffer.Resize(lImage.GetWidth(), lImage.GetHeight(), Canvas::RESIZE_FAST);
+			if (_alpha_buffer.GetWidth() != _image.GetWidth() ||
+			   _alpha_buffer.GetHeight() != _image.GetHeight()) {
+				_alpha_buffer.Resize(_image.GetWidth(), _image.GetHeight(), Canvas::kResizeFast);
 			}
-			if (lAlphaBuffer.GetBitDepth() != Canvas::BITDEPTH_8_BIT)
-			{
-				lAlphaBuffer.ConvertToGrayscale(true);
+			if (_alpha_buffer.GetBitDepth() != Canvas::kBitdepth8Bit) {
+				_alpha_buffer.ConvertToGrayscale(true);
 			}
 
-			lImage.ConvertTo32BitWithAlpha(lAlphaBuffer);
+			_image.ConvertTo32BitWithAlpha(_alpha_buffer);
 		}
 
-		lFormat = D3DFMT_A8R8G8B8;
-		lCreateTexture = true;
-	}
-	else if(lColor == true)
-	{
-		Canvas lImage(*pImage, true);
-		lImage.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
+		format = kD3DfmtA8R8G8B8;
+		create_texture = true;
+	} else if(__color == true) {
+		Canvas _image(*image, true);
+		_image.ConvertBitDepth(Canvas::kBitdepth24Bit);
 
-		unsigned lNewWidth  = GetClosestPowerOf2(lImage.GetWidth(), true);
-		unsigned lNewHeight = GetClosestPowerOf2(lImage.GetHeight(), true);
-		if (lNewWidth != lImage.GetWidth() || lNewHeight != lImage.GetHeight())
-		{
-			lImage.Resize(lNewWidth, lNewHeight, Canvas::RESIZE_FAST);
+		unsigned new_width  = GetClosestPowerOf2(_image.GetWidth(), true);
+		unsigned new_height = GetClosestPowerOf2(_image.GetHeight(), true);
+		if (new_width != _image.GetWidth() || new_height != _image.GetHeight()) {
+			_image.Resize(new_width, new_height, Canvas::kResizeFast);
 		}
 
-		lFormat = D3DFMT_R8G8B8;
-		lCreateTexture = true;
-	}
-	else if(pAlphaBuffer != 0)
-	{
-		Canvas lImage(*pAlphaBuffer, true);
+		format = kD3DfmtR8G8B8;
+		create_texture = true;
+	} else if(alpha_buffer != 0) {
+		Canvas _image(*alpha_buffer, true);
 
-		Color lPalette[256];
-		for (int i = 0; i < 256; i++)
-		{
-			lPalette[i].mRed   = (uint8)i;
-			lPalette[i].mGreen = (uint8)i;
-			lPalette[i].mBlue  = (uint8)i;
+		Color palette[256];
+		for (int i = 0; i < 256; i++) {
+			palette[i].red_   = (uint8)i;
+			palette[i].green_ = (uint8)i;
+			palette[i].blue_  = (uint8)i;
 		}
 
-		lImage.SetPalette(lPalette);
-		lImage.ConvertTo32BitWithAlpha(*pAlphaBuffer);
+		_image.SetPalette(palette);
+		_image.ConvertTo32BitWithAlpha(*alpha_buffer);
 
-		lFormat = D3DFMT_A8R8G8B8;
-		lCreateTexture = true;
+		format = kD3DfmtA8R8G8B8;
+		create_texture = true;
 	}
 
-	if (lCreateTexture == true)
-	{
-		IDirect3DTexture9* lD3DTexture;
-		HRESULT lRes = mD3DDevice->CreateTexture(lImage.GetWidth(), lImage.GetHeight(), 1, 0, lFormat,
-			D3DPOOL_DEFAULT, &lD3DTexture, NULL);
+	if (create_texture == true) {
+		IDirect3DTexture9* d3_d_texture;
+		HRESULT res = d3_d_device_->CreateTexture(_image.GetWidth(), _image.GetHeight(), 1, 0, format,
+			D3DPOOL_DEFAULT, &d3_d_texture, NULL);
 
-		if (FAILED(lRes))
-		{
+		if (FAILED(res)) {
 			return;
-		}
-		else
-		{
-			IDirect3DSurface9* lSurface;
-			if (FAILED(lD3DTexture->GetSurfaceLevel(0, &lSurface)))
-			{
-				lD3DTexture->Release();
-				mLog.Error("UpdateImage() - Failed to get surface level 0!");
+		} else {
+			IDirect3DSurface9* surface;
+			if (FAILED(d3_d_texture->GetSurfaceLevel(0, &surface))) {
+				d3_d_texture->Release();
+				log_.Error("UpdateImage() - Failed to get surface level 0!");
 				return;
 			}
-			lTexture->mWidth = pImage->GetWidth();
-			lTexture->mHeight = pImage->GetHeight();
-			lTexture->mD3DTexture->Release();
-			lTexture->mD3DTexture = lD3DTexture;
+			texture->width_ = image->GetWidth();
+			texture->height_ = image->GetHeight();
+			texture->d3_d_texture_->Release();
+			texture->d3_d_texture_ = d3_d_texture;
 
-			RECT lRect;
-			lRect.top = 0;
-			lRect.left = 0;
-			lRect.bottom = lImage.GetHeight();
-			lRect.right = lImage.GetWidth();
+			RECT _rect;
+			_rect.top = 0;
+			_rect.left = 0;
+			_rect.bottom = _image.GetHeight();
+			_rect.right = _image.GetWidth();
 
-			D3DXLoadSurfaceFromMemory(lSurface, 0, 0, lImage.GetBuffer(), 
-						  lFormat, lImage.GetPitch() * lImage.GetPixelByteSize(),
-						  0, &lRect, D3DX_FILTER_NONE, 0);
+			D3DXLoadSurfaceFromMemory(surface, 0, 0, _image.GetBuffer(),
+						  format, _image.GetPitch() * _image.GetPixelByteSize(),
+						  0, &_rect, D3DX_FILTER_NONE, 0);
 		}
 	}
 }
 
-void DirectX9Painter::RemoveImage(ImageID pImageID)
-{
-	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
-	if (lIter == mTextureTable.End())
-	{
+void DirectX9Painter::RemoveImage(ImageID image_id) {
+	TextureTable::Iterator iter = texture_table_.Find(image_id);
+	if (iter == texture_table_.End()) {
 		return;
 	}
 
-	Texture* lTexture = *lIter;
-	mTextureTable.Remove(lIter);
+	Texture* texture = *iter;
+	texture_table_.Remove(iter);
 
-	lTexture->mD3DTexture->Release();
-	delete lTexture;
+	texture->d3_d_texture_->Release();
+	delete texture;
 }
 
-void DirectX9Painter::DoDrawImage(ImageID pImageID, int x, int y)
-{
-	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
+void DirectX9Painter::DoDrawImage(ImageID image_id, int x, int y) {
+	TextureTable::Iterator iter = texture_table_.Find(image_id);
 
-	if (lIter == mTextureTable.End())
-	{
+	if (iter == texture_table_.End()) {
 		return;
 	}
 
-	Texture* lTexture = *lIter;
+	Texture* texture = *iter;
 
 	ToScreenCoords(x, y);
-	PixelRect lRect(x, y, x + lTexture->mWidth, y + lTexture->mHeight);
-	ToUserCoords(lRect.mLeft, lRect.mTop);
-	ToUserCoords(lRect.mRight, lRect.mBottom);
-	DrawImage(pImageID, lRect);
+	PixelRect _rect(x, y, x + texture->width_, y + texture->height_);
+	ToUserCoords(_rect.left_, _rect.top_);
+	ToUserCoords(_rect.right_, _rect.bottom_);
+	DrawImage(image_id, _rect);
 }
 
-void DirectX9Painter::DoDrawImage(ImageID pImageID, int x, int y, const PixelRect& pSubpatchRect)
-{
-	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
+void DirectX9Painter::DoDrawImage(ImageID image_id, int x, int y, const PixelRect& subpatch_rect) {
+	TextureTable::Iterator iter = texture_table_.Find(image_id);
 
-	if (lIter == mTextureTable.End())
-	{
+	if (iter == texture_table_.End()) {
 		return;
 	}
 
-	Texture* lTexture = *lIter;
+	Texture* texture = *iter;
 
 	ToScreenCoords(x, y);
-	PixelRect lRect(x, y, x + lTexture->mWidth, y + lTexture->mHeight);
-	ToUserCoords(lRect.mLeft, lRect.mTop);
-	ToUserCoords(lRect.mRight, lRect.mBottom);
-	DrawImage(pImageID, lRect, pSubpatchRect);
+	PixelRect _rect(x, y, x + texture->width_, y + texture->height_);
+	ToUserCoords(_rect.left_, _rect.top_);
+	ToUserCoords(_rect.right_, _rect.bottom_);
+	DrawImage(image_id, _rect, subpatch_rect);
 }
 
-void DirectX9Painter::DoDrawImage(ImageID pImageID, const PixelRect& pRect)
-{
-	TextureTable::Iterator lIter = mTextureTable.Find((int)pImageID);
-	if (lIter == mTextureTable.End())
-	{
+void DirectX9Painter::DoDrawImage(ImageID image_id, const PixelRect& rect) {
+	TextureTable::Iterator iter = texture_table_.Find((int)image_id);
+	if (iter == texture_table_.End()) {
 		return;
 	}
 
-	Texture* lTexture = *lIter;
+	Texture* texture = *iter;
 
-	mD3DDevice->BeginScene();
+	d3_d_device_->BeginScene();
 
-	float lLeft   = (float)pRect.mLeft;
-	float lRight  = (float)pRect.mRight;
-	float lTop    = (float)pRect.mTop;
-	float lBottom = (float)pRect.mBottom;
+	float __left   = (float)rect.left_;
+	float __right  = (float)rect.right_;
+	float __top    = (float)rect.top_;
+	float __bottom = (float)rect.bottom_;
 
-	ToScreenCoords(lLeft, lTop);
-	ToScreenCoords(lRight, lBottom);
+	ToScreenCoords(__left, __top);
+	ToScreenCoords(__right, __bottom);
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;        // The vertex color.
 		FLOAT u, v;
 	};
 
-	VertexData lVertex[4];
+	VertexData vertex[4];
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
-	
-	if (GetRenderMode() == RM_ALPHATEST)
-	{
-		lAlpha = 0xFF000000;
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
+
+	if (GetRenderMode() == kRmAlphatest) {
+		_alpha = 0xFF000000;
 	}
 
-	Color& lColor = GetColorInternal(0);
-	for (int i = 0; i < 4; i++)
-	{
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
-		lVertex[i].color = ToArgb(lAlpha, lColor);
+	Color& __color = GetColorInternal(0);
+	for (int i = 0; i < 4; i++) {
+		vertex[i].z   = 0;
+		vertex[i].rhw = 1;
+		vertex[i].color = ToArgb(_alpha, __color);
 	}
 
-	lVertex[0].x   = (float)lLeft;
-	lVertex[0].y   = (float)lTop;
-	lVertex[0].u   = 0;
-	lVertex[0].v   = 0;
-	lVertex[1].x   = (float)lRight;
-	lVertex[1].y   = (float)lTop;
-	lVertex[1].u   = 1;
-	lVertex[1].v   = 0;
-	lVertex[2].x   = (float)lRight;
-	lVertex[2].y   = (float)lBottom;
-	lVertex[2].u   = 1;
-	lVertex[2].v   = 1;
-	lVertex[3].x   = (float)lLeft;
-	lVertex[3].y   = (float)lBottom;
-	lVertex[3].u   = 0;
-	lVertex[3].v   = 1;
+	vertex[0].x   = (float)__left;
+	vertex[0].y   = (float)__top;
+	vertex[0].u   = 0;
+	vertex[0].v   = 0;
+	vertex[1].x   = (float)__right;
+	vertex[1].y   = (float)__top;
+	vertex[1].u   = 1;
+	vertex[1].v   = 0;
+	vertex[2].x   = (float)__right;
+	vertex[2].y   = (float)__bottom;
+	vertex[2].u   = 1;
+	vertex[2].v   = 1;
+	vertex[3].x   = (float)__left;
+	vertex[3].y   = (float)__bottom;
+	vertex[3].u   = 0;
+	vertex[3].v   = 1;
 
-	mD3DDevice->SetTexture(0, lTexture->mD3DTexture);
+	d3_d_device_->SetTexture(0, texture->d3_d_texture_);
 
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT/*D3DTA_DIFFUSE*/);
+	d3_d_device_->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);
+	d3_d_device_->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	d3_d_device_->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT/*D3DTA_DIFFUSE*/);
 
-	if (GetRenderMode() == RM_ALPHATEST ||
-	   GetRenderMode() == RM_ALPHABLEND)
-	{
-		mD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
-	}
-	else
-	{
-		mD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_DISABLE);
+	if (GetRenderMode() == kRmAlphatest ||
+	   GetRenderMode() == kRmAlphablend) {
+		d3_d_device_->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
+	} else {
+		d3_d_device_->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_DISABLE);
 	}
 
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
-	mD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, lVertex, sizeof(VertexData));
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
+	d3_d_device_->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, vertex, sizeof(VertexData));
 
-	mD3DDevice->EndScene();
-	mD3DDevice->SetTexture(0, 0);
+	d3_d_device_->EndScene();
+	d3_d_device_->SetTexture(0, 0);
 }
 
-void DirectX9Painter::DoDrawImage(ImageID pImageID, const PixelRect& pRect, const PixelRect& pSubpatchRect)
-{
-	TextureTable::Iterator lIter = mTextureTable.Find((int)pImageID);
-	if (lIter == mTextureTable.End())
-	{
+void DirectX9Painter::DoDrawImage(ImageID image_id, const PixelRect& rect, const PixelRect& subpatch_rect) {
+	TextureTable::Iterator iter = texture_table_.Find((int)image_id);
+	if (iter == texture_table_.End()) {
 		return;
 	}
 
-	Texture* lTexture = *lIter;
+	Texture* texture = *iter;
 
-	mD3DDevice->BeginScene();
+	d3_d_device_->BeginScene();
 
-	float lLeft   = (float)pRect.mLeft;
-	float lRight  = (float)pRect.mRight;
-	float lTop    = (float)pRect.mTop;
-	float lBottom = (float)pRect.mBottom;
+	float __left   = (float)rect.left_;
+	float __right  = (float)rect.right_;
+	float __top    = (float)rect.top_;
+	float __bottom = (float)rect.bottom_;
 
-	ToScreenCoords(lLeft, lTop);
-	ToScreenCoords(lRight, lBottom);
+	ToScreenCoords(__left, __top);
+	ToScreenCoords(__right, __bottom);
 
-	float lOneOverWidth  = 1.0f / (float)lTexture->mWidth;
-	float lOneOverHeight = 1.0f / (float)lTexture->mHeight;
-	float lULeft   = ((float)pSubpatchRect.mLeft   + 0.5f) * lOneOverWidth;
-	float lURight  = ((float)pSubpatchRect.mRight  + 0.5f) * lOneOverWidth;
-	float lVTop    = ((float)pSubpatchRect.mTop    + 0.5f) * lOneOverHeight;
-	float lVBottom = ((float)pSubpatchRect.mBottom + 0.5f) * lOneOverHeight;
+	float one_over_width  = 1.0f / (float)texture->width_;
+	float one_over_height = 1.0f / (float)texture->height_;
+	float u_left   = ((float)subpatch_rect.left_   + 0.5f) * one_over_width;
+	float u_right  = ((float)subpatch_rect.right_  + 0.5f) * one_over_width;
+	float v_top    = ((float)subpatch_rect.top_    + 0.5f) * one_over_height;
+	float v_bottom = ((float)subpatch_rect.bottom_ + 0.5f) * one_over_height;
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;        // The vertex color.
 		FLOAT u, v;
 	};
 
-	VertexData lVertex[4];
+	VertexData vertex[4];
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
 
-	if (GetRenderMode() == RM_ALPHATEST)
-	{
-		lAlpha = 0xFF000000;
+	if (GetRenderMode() == kRmAlphatest) {
+		_alpha = 0xFF000000;
 	}
 
-	Color& lColor = GetColorInternal(0);
-	for (int i = 0; i < 4; i++)
-	{
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
-		lVertex[i].color = ToArgb(lAlpha, lColor);
+	Color& __color = GetColorInternal(0);
+	for (int i = 0; i < 4; i++) {
+		vertex[i].z   = 0;
+		vertex[i].rhw = 1;
+		vertex[i].color = ToArgb(_alpha, __color);
 	}
 
-	lVertex[0].x   = (float)lLeft;
-	lVertex[0].y   = (float)lTop;
-	lVertex[0].u   = lULeft;
-	lVertex[0].v   = lVTop;
-	lVertex[1].x   = (float)lRight;
-	lVertex[1].y   = (float)lTop;
-	lVertex[1].u   = lURight;
-	lVertex[1].v   = lVTop;
-	lVertex[2].x   = (float)lRight;
-	lVertex[2].y   = (float)lBottom;
-	lVertex[2].u   = lURight;
-	lVertex[2].v   = lVBottom;
-	lVertex[3].x   = (float)lLeft;
-	lVertex[3].y   = (float)lBottom;
-	lVertex[3].u   = lULeft;
-	lVertex[3].v   = lVBottom;
+	vertex[0].x   = (float)__left;
+	vertex[0].y   = (float)__top;
+	vertex[0].u   = u_left;
+	vertex[0].v   = v_top;
+	vertex[1].x   = (float)__right;
+	vertex[1].y   = (float)__top;
+	vertex[1].u   = u_right;
+	vertex[1].v   = v_top;
+	vertex[2].x   = (float)__right;
+	vertex[2].y   = (float)__bottom;
+	vertex[2].u   = u_right;
+	vertex[2].v   = v_bottom;
+	vertex[3].x   = (float)__left;
+	vertex[3].y   = (float)__bottom;
+	vertex[3].u   = u_left;
+	vertex[3].v   = v_bottom;
 
-	mD3DDevice->SetTexture(0, lTexture->mD3DTexture);
+	d3_d_device_->SetTexture(0, texture->d3_d_texture_);
 
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT/*D3DTA_DIFFUSE*/);
+	d3_d_device_->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);
+	d3_d_device_->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	d3_d_device_->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT/*D3DTA_DIFFUSE*/);
 
-	if (GetRenderMode() == RM_ALPHATEST ||
-	   GetRenderMode() == RM_ALPHABLEND)
-	{
-		mD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
-	}
-	else
-	{
-		mD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_DISABLE);
+	if (GetRenderMode() == kRmAlphatest ||
+	   GetRenderMode() == kRmAlphablend) {
+		d3_d_device_->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
+	} else {
+		d3_d_device_->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_DISABLE);
 	}
 
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
-	mD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, lVertex, sizeof(VertexData));
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
+	d3_d_device_->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, vertex, sizeof(VertexData));
 
-	mD3DDevice->EndScene();
-	mD3DDevice->SetTexture(0, 0);
+	d3_d_device_->EndScene();
+	d3_d_device_->SetTexture(0, 0);
 }
 
-void DirectX9Painter::DoDrawAlphaImage(ImageID pImageID, int x, int y)
-{
+void DirectX9Painter::DoDrawAlphaImage(ImageID image_id, int x, int y) {
 	ToScreenCoords(x, y);
 
-	TextureTable::Iterator lIter = mTextureTable.Find(pImageID);
+	TextureTable::Iterator iter = texture_table_.Find(image_id);
 
-	if (lIter == mTextureTable.End())
-	{
+	if (iter == texture_table_.End()) {
 		return;
 	}
 
-	Texture* lTexture = *lIter;
+	Texture* texture = *iter;
 
-	float lLeft   = (float)x;
-	float lRight  = (float)(x + lTexture->mWidth);
-	float lTop    = (float)y;
-	float lBottom = (float)(y + lTexture->mHeight);
+	float __left   = (float)x;
+	float __right  = (float)(x + texture->width_);
+	float __top    = (float)y;
+	float __bottom = (float)(y + texture->height_);
 
-	struct VertexData
-	{
+	struct VertexData {
 		FLOAT x, y, z, rhw; // The transformed position for the vertex.
 		DWORD color;        // The vertex color.
 		FLOAT u, v;
 	};
 
-	VertexData lVertex[4];
+	VertexData vertex[4];
 
-	DWORD lAlpha = ((DWORD)GetAlphaValue()) << 24;
+	DWORD _alpha = ((DWORD)GetAlphaValue()) << 24;
 
-	if (GetRenderMode() == RM_ALPHATEST)
-	{
-		lAlpha = 0xFF000000;
+	if (GetRenderMode() == kRmAlphatest) {
+		_alpha = 0xFF000000;
 	}
 
-	Color& lColor = GetColorInternal(0);
-	for (int i = 0; i < 4; i++)
-	{
-		lVertex[i].z   = 0;
-		lVertex[i].rhw = 1;
-		lVertex[i].color = ToArgb(lAlpha, lColor);
+	Color& __color = GetColorInternal(0);
+	for (int i = 0; i < 4; i++) {
+		vertex[i].z   = 0;
+		vertex[i].rhw = 1;
+		vertex[i].color = ToArgb(_alpha, __color);
 	}
 
-	lVertex[0].x   = (float)lLeft;
-	lVertex[0].y   = (float)lTop;
-	lVertex[0].u   = 0;
-	lVertex[0].v   = 0;
-	lVertex[1].x   = (float)lRight;
-	lVertex[1].y   = (float)lTop;
-	lVertex[1].u   = 1;
-	lVertex[1].v   = 0;
-	lVertex[2].x   = (float)lRight;
-	lVertex[2].y   = (float)lBottom;
-	lVertex[2].u   = 1;
-	lVertex[2].v   = 1;
-	lVertex[3].x   = (float)lLeft;
-	lVertex[3].y   = (float)lBottom;
-	lVertex[3].u   = 0;
-	lVertex[3].v   = 1;
+	vertex[0].x   = (float)__left;
+	vertex[0].y   = (float)__top;
+	vertex[0].u   = 0;
+	vertex[0].v   = 0;
+	vertex[1].x   = (float)__right;
+	vertex[1].y   = (float)__top;
+	vertex[1].u   = 1;
+	vertex[1].v   = 0;
+	vertex[2].x   = (float)__right;
+	vertex[2].y   = (float)__bottom;
+	vertex[2].u   = 1;
+	vertex[2].v   = 1;
+	vertex[3].x   = (float)__left;
+	vertex[3].y   = (float)__bottom;
+	vertex[3].u   = 0;
+	vertex[3].v   = 1;
 
-	mD3DDevice->SetTexture(0, lTexture->mD3DTexture);
+	d3_d_device_->SetTexture(0, texture->d3_d_texture_);
 
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-	mD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+	d3_d_device_->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);
+	d3_d_device_->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+	d3_d_device_->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
 
-	if (GetRenderMode() == RM_ALPHATEST ||
-	   GetRenderMode() == RM_ALPHABLEND)
-	{
-		mD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
-	}
-	else
-	{
-		mD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_DISABLE);
+	if (GetRenderMode() == kRmAlphatest ||
+	   GetRenderMode() == kRmAlphablend) {
+		d3_d_device_->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_MODULATE);
+	} else {
+		d3_d_device_->SetTextureStageState(0, D3DTSS_ALPHAOP,   D3DTOP_DISABLE);
 	}
 
 
-	mD3DDevice->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
-	mD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, lVertex, sizeof(VertexData));
+	d3_d_device_->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
+	d3_d_device_->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, vertex, sizeof(VertexData));
 
-	mD3DDevice->EndScene();
-	mD3DDevice->SetTexture(0, 0);
+	d3_d_device_->EndScene();
+	d3_d_device_->SetTexture(0, 0);
 }
 
-void DirectX9Painter::PrintText(const str& pString, int x, int y)
-{
-	pString;
+void DirectX9Painter::PrintText(const str& s, int x, int y) {
+	s;
 	x;
 	y;
 
 	// TODO: there's probably some smart and fast way to render fonts already in DX.
 }
 
-void DirectX9Painter::SetFontSmoothness(bool)
-{
+void DirectX9Painter::SetFontSmoothness(bool) {
 	// TODO: ?
 }
 
-void DirectX9Painter::AdjustVertexFormat(uint16& pVertexFormat)
-{
-	pVertexFormat |= Geometry2D::VTX_INTERLEAVED;
+void DirectX9Painter::AdjustVertexFormat(uint16& vertex_format) {
+	vertex_format |= Geometry2D::kVtxInterleaved;
 }
 
-void DirectX9Painter::ReadPixels(Canvas& pDestCanvas, const PixelRect& pRect)
-{
-	if (GetCanvas() == 0 || GetCanvas()->GetBitDepth() == Canvas::BITDEPTH_8_BIT)
-	{
-		pDestCanvas.Reset(0, 0, Canvas::BITDEPTH_32_BIT);
+void DirectX9Painter::ReadPixels(Canvas& dest_canvas, const PixelRect& rect) {
+	if (GetCanvas() == 0 || GetCanvas()->GetBitDepth() == Canvas::kBitdepth8Bit) {
+		dest_canvas.Reset(0, 0, Canvas::kBitdepth32Bit);
 		return;
 	}
 
-	PixelRect lRect(pRect);
+	PixelRect _rect(rect);
 
-	ToScreenCoords(lRect.mLeft, lRect.mTop);
-	ToScreenCoords(lRect.mRight, lRect.mBottom);
+	ToScreenCoords(_rect.left_, _rect.top_);
+	ToScreenCoords(_rect.right_, _rect.bottom_);
 
-	if (lRect.mLeft < 0)
-	{
-		lRect.mLeft = 0;
+	if (_rect.left_ < 0) {
+		_rect.left_ = 0;
 	}
-	if (lRect.mTop < 0)
-	{
-		lRect.mTop = 0;
+	if (_rect.top_ < 0) {
+		_rect.top_ = 0;
 	}
-	if (lRect.mRight > (int)GetCanvas()->GetWidth())
-	{
-		lRect.mRight = (int)GetCanvas()->GetWidth();
+	if (_rect.right_ > (int)GetCanvas()->GetWidth()) {
+		_rect.right_ = (int)GetCanvas()->GetWidth();
 	}
-	if (lRect.mBottom > (int)GetCanvas()->GetHeight())
-	{
-		lRect.mBottom = (int)GetCanvas()->GetHeight();
+	if (_rect.bottom_ > (int)GetCanvas()->GetHeight()) {
+		_rect.bottom_ = (int)GetCanvas()->GetHeight();
 	}
 
-	if (lRect.mRight <= lRect.mLeft ||
-	   lRect.mBottom <= lRect.mTop)
-	{
-		pDestCanvas.Reset(0, 0, Canvas::BITDEPTH_32_BIT);
+	if (_rect.right_ <= _rect.left_ ||
+	   _rect.bottom_ <= _rect.top_) {
+		dest_canvas.Reset(0, 0, Canvas::kBitdepth32Bit);
 		return;
 	}
 
-	LPDIRECT3DSURFACE9 lRenderTarget = 0;
-	LPDIRECT3DSURFACE9 lInMemTarget = 0;
-	D3DSURFACE_DESC	lSurfDesc;
-	HRESULT	lHRes;
+	LPDIRECT3DSURFACE9 render_target = 0;
+	LPDIRECT3DSURFACE9 in_mem_target = 0;
+	D3DSURFACE_DESC	surf_desc;
+	HRESULT	h_res;
 
-	lHRes = mD3DDevice->GetRenderTarget(0, &lRenderTarget);
-	if (FAILED(lHRes))
-	{
-		mLog.Error("GetRenderTarget failed in ReadPixels().");
+	h_res = d3_d_device_->GetRenderTarget(0, &render_target);
+	if (FAILED(h_res)) {
+		log_.Error("GetRenderTarget failed in ReadPixels().");
 		return;
 	}
 
-	lHRes = lRenderTarget->GetDesc(&lSurfDesc);
-	if (FAILED(lHRes)) 
-	{
-		mLog.Error("GetDesc failed in ReadPixels().");
+	h_res = render_target->GetDesc(&surf_desc);
+	if (FAILED(h_res)) {
+		log_.Error("GetDesc failed in ReadPixels().");
 		return;
 	}
 
-	lHRes = mD3DDevice->CreateOffscreenPlainSurface(lSurfDesc.Width, 
-													   lSurfDesc.Height, 
-													   lSurfDesc.Format, 
-													   D3DPOOL_SYSTEMMEM, 
-													   &lInMemTarget, NULL);
-	if (FAILED(lHRes)) 
-	{
-		mLog.Error("CreateOffscreenPlainSurface failed in ReadPixels().");
+	h_res = d3_d_device_->CreateOffscreenPlainSurface(surf_desc.Width,
+													   surf_desc.Height,
+													   surf_desc.Format,
+													   kD3DpoolSystemmem,
+													   &in_mem_target, NULL);
+	if (FAILED(h_res)) {
+		log_.Error("CreateOffscreenPlainSurface failed in ReadPixels().");
 		return;
 	}
 
-	lHRes = mD3DDevice->GetRenderTargetData(lRenderTarget, lInMemTarget);
-	if (FAILED(lHRes))
-	{
-		mLog.Error("GetRenderTargetData failed in ReadPixels().");
-		lInMemTarget->Release();
+	h_res = d3_d_device_->GetRenderTargetData(render_target, in_mem_target);
+	if (FAILED(h_res)) {
+		log_.Error("GetRenderTargetData failed in ReadPixels().");
+		in_mem_target->Release();
 		return;
 	}
 
-	D3DLOCKED_RECT lLockedRect;
-	if (FAILED(lInMemTarget->LockRect(&lLockedRect, NULL, 0)))
-	{
-		mLog.Error("LockRect failed in ReadPixels().");
-		lInMemTarget->Release();
+	D3DLOCKED_RECT locked_rect;
+	if (FAILED(in_mem_target->LockRect(&locked_rect, NULL, 0))) {
+		log_.Error("LockRect failed in ReadPixels().");
+		in_mem_target->Release();
 		return;
 	}
 
-	Canvas::BitDepth lBitDepth = Canvas::BITDEPTH_32_BIT;
+	Canvas::BitDepth bit_depth = Canvas::kBitdepth32Bit;
 
-	switch(lSurfDesc.Format)
-	{
-	case D3DFMT_R8G8B8:
-		lBitDepth = Canvas::BITDEPTH_24_BIT;
+	switch(surf_desc.Format) {
+	case kD3DfmtR8G8B8:
+		bit_depth = Canvas::kBitdepth24Bit;
 		break;
-	case D3DFMT_A8R8G8B8:
+	case kD3DfmtA8R8G8B8:
 	case D3DFMT_X8R8G8B8:
 	case D3DFMT_A8B8G8R8:
 	case D3DFMT_X8B8G8R8:
-		lBitDepth = Canvas::BITDEPTH_32_BIT;
+		bit_depth = Canvas::kBitdepth32Bit;
 		break;
 	case D3DFMT_R5G6B5:
-		lBitDepth = Canvas::BITDEPTH_16_BIT;
+		bit_depth = Canvas::kBitdepth16Bit;
 		break;
 	case D3DFMT_A1R5G5B5:
 	case D3DFMT_X1R5G5B5:
-		lBitDepth = Canvas::BITDEPTH_15_BIT;
+		bit_depth = Canvas::kBitdepth15Bit;
 		break;
 	case D3DFMT_R3G3B2:
 	case D3DFMT_A8:
 	case D3DFMT_L8:
 	case D3DFMT_P8:
-		lBitDepth = Canvas::BITDEPTH_8_BIT;
-		pDestCanvas.SetPalette(GetCanvas()->GetPalette());
+		bit_depth = Canvas::kBitdepth8Bit;
+		dest_canvas.SetPalette(GetCanvas()->GetPalette());
 		break;
 	default:
-		mLog.Error("Invalid pixel format in ReadPixels().");
-		pDestCanvas.Reset(0, 0, Canvas::BITDEPTH_32_BIT);
-		lInMemTarget->UnlockRect();
-		lInMemTarget->Release();
+		log_.Error("Invalid pixel format in ReadPixels().");
+		dest_canvas.Reset(0, 0, Canvas::kBitdepth32Bit);
+		in_mem_target->UnlockRect();
+		in_mem_target->Release();
 		return;
 	}
 
-	pDestCanvas.Reset(lSurfDesc.Width, lSurfDesc.Height, lBitDepth);
-	pDestCanvas.SetPitch(lLockedRect.Pitch / pDestCanvas.GetPixelByteSize());
-	pDestCanvas.SetBuffer(lLockedRect.pBits);
+	dest_canvas.Reset(surf_desc.Width, surf_desc.Height, bit_depth);
+	dest_canvas.SetPitch(locked_rect.Pitch / dest_canvas.GetPixelByteSize());
+	dest_canvas.SetBuffer(locked_rect.bits);
 
-	// Crop the image. Note that this call will make a copy of the image buffer, 
+	// Crop the image. Note that this call will make a copy of the image buffer,
 	// even if the cropped dimensions equals the current dimensions.
-	pDestCanvas.Crop(lRect.mLeft, lRect.mTop, lRect.mRight, lRect.mBottom);
+	dest_canvas.Crop(_rect.left_, _rect.top_, _rect.right_, _rect.bottom_);
 
-	lInMemTarget->UnlockRect();
-	lInMemTarget->Release();
+	in_mem_target->UnlockRect();
+	in_mem_target->Release();
 }
 
-Painter::RGBOrder DirectX9Painter::GetRGBOrder() const
-{
-	return Painter::RGB;
+Painter::RGBOrder DirectX9Painter::GetRGBOrder() const {
+	return Painter::kRgb;
 }
 
-void DirectX9Painter::DoRenderDisplayList(std::vector<DisplayEntity*>* pDisplayList)
-{
-	PushAttrib(ATTR_ALL);
+void DirectX9Painter::DoRenderDisplayList(std::vector<DisplayEntity*>* display_list) {
+	PushAttrib(kAttrAll);
 
-	mD3DDevice->BeginScene();
+	d3_d_device_->BeginScene();
 
 	std::vector<DisplayEntity*>::iterator it;
-	for(it = pDisplayList->begin(); it != pDisplayList->end(); ++it)
-	{
-		DisplayEntity* lSE = *it;
-		Painter::SetClippingRect(lSE->GetClippingRect());
-		SetAlphaValue(lSE->GetAlpha());
-		SetRenderMode(lSE->GetRenderMode());
+	for(it = display_list->begin(); it != display_list->end(); ++it) {
+		DisplayEntity* se = *it;
+		Painter::SetClippingRect(se->GetClippingRect());
+		SetAlphaValue(se->GetAlpha());
+		SetRenderMode(se->GetRenderMode());
 
-		DWORD lFVF = D3DFVF_XYZRHW;
+		DWORD fvf = D3DFVF_XYZRHW;
 
-		if(lSE->GetImageID() == Painter::INVALID_IMAGEID)
-		{
-			mD3DDevice->SetTexture(0, 0);
-		}
-		else
-		{
-			TextureTable::Iterator lIter = mTextureTable.Find((int)lSE->GetImageID());
-			Texture* lTexture = *lIter;
-			mD3DDevice->SetTexture(0, lTexture->mD3DTexture);
+		if(se->GetImageID() == Painter::kInvalidImageid) {
+			d3_d_device_->SetTexture(0, 0);
+		} else {
+			TextureTable::Iterator iter = texture_table_.Find((int)se->GetImageID());
+			Texture* texture = *iter;
+			d3_d_device_->SetTexture(0, texture->d3_d_texture_);
 
-			mD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);
-			mD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-			mD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT/*D3DTA_DIFFUSE*/);
+			d3_d_device_->SetTextureStageState(0, D3DTSS_COLOROP,   D3DTOP_MODULATE);
+			d3_d_device_->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+			d3_d_device_->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_CURRENT/*D3DTA_DIFFUSE*/);
 
-			if (GetRenderMode() == RM_ALPHATEST || GetRenderMode() == RM_ALPHABLEND)
-			{
-				mD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-			}
-			else
-			{
-				mD3DDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
+			if (GetRenderMode() == kRmAlphatest || GetRenderMode() == kRmAlphablend) {
+				d3_d_device_->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+			} else {
+				d3_d_device_->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_DISABLE);
 			}
 		}
 
-		uint16 lVertexFormat = lSE->GetGeometry().GetVertexFormat() & (Geometry2D::VTX_UV | Geometry2D::VTX_RGB);
-		UINT lVertexSize = 0;
-		switch(lVertexFormat)
-		{
-			case 0:
-			{
-				lVertexSize = sizeof(Geometry2D::VertexXY);
+		uint16 _vertex_format = se->GetGeometry().GetVertexFormat() & (Geometry2D::kVtxUv | Geometry2D::kVtxRgb);
+		UINT vertex_size = 0;
+		switch(_vertex_format) {
+			case 0: {
+				vertex_size = sizeof(Geometry2D::VertexXY);
 			} break;
-			case Geometry2D::VTX_RGB:
-			{
-				lFVF |= D3DFVF_DIFFUSE;
-				lVertexSize = sizeof(Geometry2D::VertexXYRGB);
+			case Geometry2D::kVtxRgb: {
+				fvf |= D3DFVF_DIFFUSE;
+				vertex_size = sizeof(Geometry2D::VertexXYRGB);
 			} break;
-			case Geometry2D::VTX_UV:
-			{
-				lFVF |= D3DFVF_TEX1;
-				lVertexSize = sizeof(Geometry2D::VertexXYUV);
+			case Geometry2D::kVtxUv: {
+				fvf |= D3DFVF_TEX1;
+				vertex_size = sizeof(Geometry2D::VertexXYUV);
 			} break;
-			case Geometry2D::VTX_UV | Geometry2D::VTX_RGB:
-			{
-				lFVF |= (D3DFVF_TEX1 | D3DFVF_DIFFUSE);
-				lVertexSize = sizeof(Geometry2D::VertexXYUVRGB);
+			case Geometry2D::kVtxUv | Geometry2D::kVtxRgb: {
+				fvf |= (D3DFVF_TEX1 | D3DFVF_DIFFUSE);
+				vertex_size = sizeof(Geometry2D::VertexXYUVRGB);
 			} break;
 		}
 
-		mD3DDevice->SetFVF(lFVF);
-		mD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLELIST, lSE->GetGeometry().GetTriangleCount(), lSE->GetGeometry().GetVertexData(), lVertexSize);
+		d3_d_device_->SetFVF(fvf);
+		d3_d_device_->DrawPrimitiveUP(D3DPT_TRIANGLELIST, se->GetGeometry().GetTriangleCount(), se->GetGeometry().GetVertexData(), vertex_size);
 	}
 
-	mD3DDevice->EndScene();
-	mD3DDevice->SetTexture(0, 0);
+	d3_d_device_->EndScene();
+	d3_d_device_->SetTexture(0, 0);
 
 	PopAttrib();
 }
 
-loginstance(UI_GFX_2D, DirectX9Painter);
+loginstance(kUiGfx2D, DirectX9Painter);
 
 
 

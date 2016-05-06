@@ -1,50 +1,45 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiTEXLoader.h"
-#include "../../ThirdParty/jpeg-6b/jinclude.h"
-#include "../../ThirdParty/jpeg-6b/jpeglib.h"
-#include "../../ThirdParty/jpeg-6b/jerror.h"
-#include "../../Lepra/Include/ArchiveFile.h"
-#include "../../Lepra/Include/Canvas.h"
-#include "../../Lepra/Include/DiskFile.h"
-#include "../../Lepra/Include/MetaFile.h"
-#include "../../Lepra/Include/Graphics2D.h"
-#include "../Include/UiTexture.h"
-#include "../Include/UiTbc.h"
+#include "../include/uitexloader.h"
+#include "../../thirdparty/jpeg-6b/jinclude.h"
+#include "../../thirdparty/jpeg-6b/jpeglib.h"
+#include "../../thirdparty/jpeg-6b/jerror.h"
+#include "../../lepra/include/archivefile.h"
+#include "../../lepra/include/canvas.h"
+#include "../../lepra/include/diskfile.h"
+#include "../../lepra/include/metafile.h"
+#include "../../lepra/include/graphics2d.h"
+#include "../include/uitexture.h"
+#include "../include/uitbc.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-enum
-{
-	IO_BUFFER_SIZE = 4096,
+enum {
+	kIoBufferSize = 4096,
 };
 
 
 /*
-	A class used to (locally, within this file) get access to the 
+	A class used to (locally, within this file) get access to the
 	tex loader's private members.
 */
 
-class TEXFriend
-{
+class TEXFriend {
 public:
-	static inline File* GetLoadFile(TEXLoader* pTEXLoader)
-	{
-		return pTEXLoader->mLoadFile;
+	static inline File* GetLoadFile(TEXLoader* tex_loader) {
+		return tex_loader->load_file_;
 	}
-	static inline File* GetSaveFile(TEXLoader* pTEXLoader)
-	{
-		return pTEXLoader->mSaveFile;
+	static inline File* GetSaveFile(TEXLoader* tex_loader) {
+		return tex_loader->save_file_;
 	}
 };
 
@@ -52,78 +47,72 @@ public:
 /*
 	C style jpeg source management functions.
 */
-void TEXInitSource(j_decompress_ptr pCInfo);
-boolean TEXFillInputBuffer(j_decompress_ptr pCInfo);
-void TEXSkipInputData(j_decompress_ptr pCInfo, long pNumBytes);
-void TEXTerminateSource(j_decompress_ptr pCInfo);
+void TEXInitSource(j_decompress_ptr c_info);
+boolean TEXFillInputBuffer(j_decompress_ptr c_info);
+void TEXSkipInputData(j_decompress_ptr c_info, long num_bytes);
+void TEXTerminateSource(j_decompress_ptr c_info);
 
 /*
 	C style jpeg destination management functions.
 */
-void TEXInitDestination(j_compress_ptr pCInfo);
-boolean TEXEmptyOutputBuffer(j_compress_ptr pCInfo);
-void TEXTerminateDestination(j_compress_ptr pCInfo);
+void TEXInitDestination(j_compress_ptr c_info);
+boolean TEXEmptyOutputBuffer(j_compress_ptr c_info);
+void TEXTerminateDestination(j_compress_ptr c_info);
 
 /*
 	C style jpeg source manager struct.
 */
-struct SourceManager
-{
-	jpeg_source_mgr mSourceManager;
-	unsigned char mIOBuffer[IO_BUFFER_SIZE];
-	int mIOBufferSize;
-	TEXLoader* mTEXLoader;
+struct SourceManager {
+	jpeg_source_mgr source_manager_;
+	unsigned char io_buffer_[kIoBufferSize];
+	int io_buffer_size_;
+	TEXLoader* tex_loader_;
 };
 
 /*
 	C style jpeg destination manager struct.
 */
-struct DestinationManager
-{
-	jpeg_destination_mgr mDestManager;
-	unsigned char mIOBuffer[IO_BUFFER_SIZE];
-	int mIOBufferSize;
-	TEXLoader* mTEXLoader;
+struct DestinationManager {
+	jpeg_destination_mgr dest_manager_;
+	unsigned char io_buffer_[kIoBufferSize];
+	int io_buffer_size_;
+	TEXLoader* tex_loader_;
 };
 
-void TEXLoader::InitSourceManager(jpeg_decompress_struct* pCInfo)
-{
-	if (pCInfo->src == NULL) 
-	{	
+void TEXLoader::InitSourceManager(jpeg_decompress_struct* c_info) {
+	if (c_info->src == NULL) {
 		// First time for this JPEG object?
-		pCInfo->src = (jpeg_source_mgr*)new SourceManager;
+		c_info->src = (jpeg_source_mgr*)new SourceManager;
 	}
 
-	SourceManager* lSrc = (SourceManager*)pCInfo->src;
-	lSrc->mSourceManager.init_source       = TEXInitSource;
-	lSrc->mSourceManager.fill_input_buffer = TEXFillInputBuffer;
-	lSrc->mSourceManager.skip_input_data   = TEXSkipInputData;
-	lSrc->mSourceManager.resync_to_restart = jpeg_resync_to_restart; /* use default method */
-	lSrc->mSourceManager.term_source       = TEXTerminateSource;
+	SourceManager* __src = (SourceManager*)c_info->src;
+	__src->source_manager_.init_source       = TEXInitSource;
+	__src->source_manager_.fill_input_buffer = TEXFillInputBuffer;
+	__src->source_manager_.skip_input_data   = TEXSkipInputData;
+	__src->source_manager_.resync_to_restart = jpeg_resync_to_restart; /* use default method */
+	__src->source_manager_.term_source       = TEXTerminateSource;
 
 	// Forces FillInputBuffer() on first read.
-	lSrc->mIOBufferSize = 0;
-	lSrc->mTEXLoader = this;
-	lSrc->mSourceManager.bytes_in_buffer = 0; 
-	lSrc->mSourceManager.next_input_byte = NULL;
+	__src->io_buffer_size_ = 0;
+	__src->tex_loader_ = this;
+	__src->source_manager_.bytes_in_buffer = 0;
+	__src->source_manager_.next_input_byte = NULL;
 }
 
-void TEXLoader::InitDestinationManager(jpeg_compress_struct* pCInfo)
-{
-	if (pCInfo->dest == NULL)
-	{	
+void TEXLoader::InitDestinationManager(jpeg_compress_struct* c_info) {
+	if (c_info->dest == NULL) {
 		// First time for this JPEG object?
-		pCInfo->dest = (jpeg_destination_mgr*)new DestinationManager;
+		c_info->dest = (jpeg_destination_mgr*)new DestinationManager;
 	}
 
-	DestinationManager* lDest = (DestinationManager*)pCInfo->dest;
+	DestinationManager* __dest = (DestinationManager*)c_info->dest;
 
-	lDest->mIOBufferSize = 0;
-	lDest->mTEXLoader = this;
+	__dest->io_buffer_size_ = 0;
+	__dest->tex_loader_ = this;
 
-	lDest->mDestManager.init_destination    = TEXInitDestination;
-	lDest->mDestManager.empty_output_buffer = TEXEmptyOutputBuffer;
-	lDest->mDestManager.term_destination    = TEXTerminateDestination;
+	__dest->dest_manager_.init_destination    = TEXInitDestination;
+	__dest->dest_manager_.empty_output_buffer = TEXEmptyOutputBuffer;
+	__dest->dest_manager_.term_destination    = TEXTerminateDestination;
 }
 
 /*
@@ -132,68 +121,59 @@ void TEXLoader::InitDestinationManager(jpeg_compress_struct* pCInfo)
 
 
 
-void TEXInitSource(j_decompress_ptr pCInfo)
-{
-	SourceManager* lSrc = (SourceManager*)pCInfo->src;
-	lSrc->mIOBufferSize = 0;
+void TEXInitSource(j_decompress_ptr c_info) {
+	SourceManager* __src = (SourceManager*)c_info->src;
+	__src->io_buffer_size_ = 0;
 }
 
-boolean TEXFillInputBuffer(j_decompress_ptr pCInfo)
-{
-	SourceManager* lSrc = (SourceManager*)pCInfo->src;
+boolean TEXFillInputBuffer(j_decompress_ptr c_info) {
+	SourceManager* __src = (SourceManager*)c_info->src;
 
-	File* lFile = TEXFriend::GetLoadFile(lSrc->mTEXLoader);
+	File* file = TEXFriend::GetLoadFile(__src->tex_loader_);
 
-	uint64 lPrevPos = lFile->Tell();
+	uint64 prev_pos = file->Tell();
 	/* TODO: use assigned variable!
-	IOError lErr = */ lFile->ReadData(lSrc->mIOBuffer, IO_BUFFER_SIZE);
-	uint64 lNewPos = lFile->Tell();
-	int lNumBytes = (int)(lNewPos - lPrevPos);
+	IOError __err = */ file->ReadData(__src->io_buffer_, kIoBufferSize);
+	uint64 new_pos = file->Tell();
+	int _num_bytes = (int)(new_pos - prev_pos);
 
-	if (lNumBytes == 0)
-	{
-		WARNMS(pCInfo, JWRN_JPEG_EOF);
+	if (_num_bytes == 0) {
+		WARNMS(c_info, JWRN_JPEG_EOF);
 
 		/* Insert a fake EOI marker */
-		lSrc->mIOBuffer[0] = (JOCTET) 0xFF;
-		lSrc->mIOBuffer[1] = (JOCTET) JPEG_EOI;
+		__src->io_buffer_[0] = (JOCTET) 0xFF;
+		__src->io_buffer_[1] = (JOCTET) JPEG_EOI;
 
-		lSrc->mSourceManager.next_input_byte = lSrc->mIOBuffer;
-		lSrc->mSourceManager.bytes_in_buffer = 2;
-	}
-	else
-	{
-		lSrc->mIOBufferSize = lNumBytes;
-		lSrc->mSourceManager.next_input_byte = lSrc->mIOBuffer;
-		lSrc->mSourceManager.bytes_in_buffer = lSrc->mIOBufferSize;
+		__src->source_manager_.next_input_byte = __src->io_buffer_;
+		__src->source_manager_.bytes_in_buffer = 2;
+	} else {
+		__src->io_buffer_size_ = _num_bytes;
+		__src->source_manager_.next_input_byte = __src->io_buffer_;
+		__src->source_manager_.bytes_in_buffer = __src->io_buffer_size_;
 	}
 
 	return TRUE;
 }
 
-void TEXSkipInputData(j_decompress_ptr pCInfo, long pNumBytes)
-{
-	SourceManager* lSrc = (SourceManager*)pCInfo->src;
+void TEXSkipInputData(j_decompress_ptr c_info, long num_bytes) {
+	SourceManager* __src = (SourceManager*)c_info->src;
 
-	if (pNumBytes > 0)
-	{
-		while (pNumBytes > (long)lSrc->mSourceManager.bytes_in_buffer) 
-		{
-			pNumBytes -= (long)lSrc->mSourceManager.bytes_in_buffer;
-			TEXFillInputBuffer(pCInfo);
+	if (num_bytes > 0) {
+		while (num_bytes > (long)__src->source_manager_.bytes_in_buffer) {
+			num_bytes -= (long)__src->source_manager_.bytes_in_buffer;
+			TEXFillInputBuffer(c_info);
 		}
 
-		lSrc->mSourceManager.next_input_byte += (size_t)pNumBytes;
-		lSrc->mSourceManager.bytes_in_buffer -= (size_t)pNumBytes;
+		__src->source_manager_.next_input_byte += (size_t)num_bytes;
+		__src->source_manager_.bytes_in_buffer -= (size_t)num_bytes;
 	}
 }
 
-void TEXTerminateSource(j_decompress_ptr pCInfo)
-{
-	SourceManager* lSrc = (SourceManager*)pCInfo->src;
-	lSrc->mIOBufferSize = 0;
-	lSrc->mTEXLoader = 0;
-	delete lSrc;
+void TEXTerminateSource(j_decompress_ptr c_info) {
+	SourceManager* __src = (SourceManager*)c_info->src;
+	__src->io_buffer_size_ = 0;
+	__src->tex_loader_ = 0;
+	delete __src;
 }
 
 
@@ -201,604 +181,524 @@ void TEXTerminateSource(j_decompress_ptr pCInfo)
 
 
 
-void TEXInitDestination(j_compress_ptr pCInfo)
-{
-	DestinationManager* lDest = (DestinationManager*)pCInfo->dest;
+void TEXInitDestination(j_compress_ptr c_info) {
+	DestinationManager* __dest = (DestinationManager*)c_info->dest;
 
-	lDest->mDestManager.next_output_byte = lDest->mIOBuffer;
-	lDest->mDestManager.free_in_buffer = IO_BUFFER_SIZE;
+	__dest->dest_manager_.next_output_byte = __dest->io_buffer_;
+	__dest->dest_manager_.free_in_buffer = kIoBufferSize;
 }
 
 
-boolean TEXEmptyOutputBuffer(j_compress_ptr pCInfo)
-{
-	DestinationManager* lDest = (DestinationManager*)pCInfo->dest;
+boolean TEXEmptyOutputBuffer(j_compress_ptr c_info) {
+	DestinationManager* __dest = (DestinationManager*)c_info->dest;
 
-	TEXFriend::GetSaveFile(lDest->mTEXLoader)->WriteData(lDest->mIOBuffer, IO_BUFFER_SIZE);
+	TEXFriend::GetSaveFile(__dest->tex_loader_)->WriteData(__dest->io_buffer_, kIoBufferSize);
 
-	lDest->mDestManager.next_output_byte = lDest->mIOBuffer;
-	lDest->mDestManager.free_in_buffer = IO_BUFFER_SIZE;
+	__dest->dest_manager_.next_output_byte = __dest->io_buffer_;
+	__dest->dest_manager_.free_in_buffer = kIoBufferSize;
 
 	return TRUE;
 }
 
-void TEXTerminateDestination(j_compress_ptr pCInfo)
-{
-	DestinationManager* lDest = (DestinationManager*)pCInfo->dest;
-	size_t lDataCount = IO_BUFFER_SIZE - lDest->mDestManager.free_in_buffer;
+void TEXTerminateDestination(j_compress_ptr c_info) {
+	DestinationManager* __dest = (DestinationManager*)c_info->dest;
+	size_t data_count = kIoBufferSize - __dest->dest_manager_.free_in_buffer;
 
 	/* Write any data remaining in the buffer */
-	if (lDataCount > 0) 
-	{
-		TEXFriend::GetSaveFile(lDest->mTEXLoader)->WriteData(lDest->mIOBuffer, (unsigned)lDataCount);
+	if (data_count > 0) {
+		TEXFriend::GetSaveFile(__dest->tex_loader_)->WriteData(__dest->io_buffer_, (unsigned)data_count);
 	}
 
-	lDest->mIOBufferSize = 0;
-	lDest->mTEXLoader = 0;
-	delete lDest;
+	__dest->io_buffer_size_ = 0;
+	__dest->tex_loader_ = 0;
+	delete __dest;
 }
 
-TEXLoader::IoStatus TEXLoader::ReadJpeg(Canvas& pCanvas)
-{
-	unsigned lSize;
-	mLoadFile->Read(lSize);
+TEXLoader::IoStatus TEXLoader::ReadJpeg(Canvas& canvas) {
+	unsigned size;
+	load_file_->Read(size);
 
-	jpeg_decompress_struct lCInfo;
-	jpeg_error_mgr lJErr;
+	jpeg_decompress_struct _c_info;
+	jpeg_error_mgr j_err;
 
-	lCInfo.err = jpeg_std_error(&lJErr);
-	jpeg_create_decompress(&lCInfo);
+	_c_info.err = jpeg_std_error(&j_err);
+	jpeg_create_decompress(&_c_info);
 
-	InitSourceManager(&lCInfo);
+	InitSourceManager(&_c_info);
 
-	if (jpeg_read_header(&lCInfo, TRUE) != JPEG_HEADER_OK)
-	{
-		jpeg_destroy_decompress(&lCInfo);
-		return STATUS_READ_HEADER_ERROR;
+	if (jpeg_read_header(&_c_info, TRUE) != JPEG_HEADER_OK) {
+		jpeg_destroy_decompress(&_c_info);
+		return kStatusReadHeaderError;
 	}
 
-	if (jpeg_start_decompress(&lCInfo) != TRUE)
-	{
-		jpeg_destroy_decompress(&lCInfo);
-		return STATUS_READ_PICTURE_ERROR;
+	if (jpeg_start_decompress(&_c_info) != TRUE) {
+		jpeg_destroy_decompress(&_c_info);
+		return kStatusReadPictureError;
 	}
 
-	if (lCInfo.output_components == 1)
-	{
+	if (_c_info.output_components == 1) {
 		// Create grayscale palette.
-		Color lPalette[256];
-		for (int i = 0; i < 256; i++)
-		{
-			lPalette[i].Set(i, i, i, i);
+		Color palette[256];
+		for (int i = 0; i < 256; i++) {
+			palette[i].Set(i, i, i, i);
 		}
-		pCanvas.SetPalette(lPalette);
+		canvas.SetPalette(palette);
 	}
 
-	uint8* lBuffer = (uint8*)pCanvas.GetBuffer();
-	int lRowStride = pCanvas.GetPitch() * pCanvas.GetPixelByteSize();
-	int lScanLines = pCanvas.GetHeight();
+	uint8* buffer = (uint8*)canvas.GetBuffer();
+	int row_stride = canvas.GetPitch() * canvas.GetPixelByteSize();
+	int scan_lines = canvas.GetHeight();
 
-	JSAMPROW lOffset[1];
-	lOffset[0] = lBuffer;
+	JSAMPROW offset[1];
+	offset[0] = buffer;
 
-	for (int i = 0; i < lScanLines; i++)
-	{
-		jpeg_read_scanlines(&lCInfo, lOffset, 1);
-		lOffset[0] += lRowStride;
+	for (int i = 0; i < scan_lines; i++) {
+		jpeg_read_scanlines(&_c_info, offset, 1);
+		offset[0] += row_stride;
 	}
 
-	jpeg_finish_decompress(&lCInfo);
-	jpeg_destroy_decompress(&lCInfo);
+	jpeg_finish_decompress(&_c_info);
+	jpeg_destroy_decompress(&_c_info);
 
-	mLoadFile->SeekCur(lSize);
+	load_file_->SeekCur(size);
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-TEXLoader::IoStatus TEXLoader::WriteJpeg(const Canvas& pCanvas)
-{
-	int lSizeOffset = (int)mSaveFile->Tell();
-	unsigned lSize = 0;
-	mSaveFile->Write(lSize);	// We will update this data after writing the jpeg image.
-	int lStartOffset = (int)mSaveFile->Tell();
+TEXLoader::IoStatus TEXLoader::WriteJpeg(const Canvas& canvas) {
+	int size_offset = (int)save_file_->Tell();
+	unsigned size = 0;
+	save_file_->Write(size);	// We will update this data after writing the jpeg image.
+	int start_offset = (int)save_file_->Tell();
 
-	jpeg_compress_struct lCInfo;
-	jpeg_error_mgr lJErr;
-	lCInfo.err = jpeg_std_error(&lJErr);
-	jpeg_create_compress(&lCInfo);
+	jpeg_compress_struct _c_info;
+	jpeg_error_mgr j_err;
+	_c_info.err = jpeg_std_error(&j_err);
+	jpeg_create_compress(&_c_info);
 
-	InitDestinationManager(&lCInfo);
+	InitDestinationManager(&_c_info);
 
-	lCInfo.image_width = pCanvas.GetWidth();
-	lCInfo.image_height = pCanvas.GetHeight();
+	_c_info.image_width = canvas.GetWidth();
+	_c_info.image_height = canvas.GetHeight();
 
-	if (pCanvas.GetBitDepth() == Canvas::BITDEPTH_8_BIT)
-	{
-		lCInfo.input_components = 1;
-		lCInfo.in_color_space = JCS_GRAYSCALE;
-	}
-	else
-	{
-		lCInfo.input_components = 3;
-		lCInfo.in_color_space = JCS_RGB;
+	if (canvas.GetBitDepth() == Canvas::kBitdepth8Bit) {
+		_c_info.input_components = 1;
+		_c_info.in_color_space = JCS_GRAYSCALE;
+	} else {
+		_c_info.input_components = 3;
+		_c_info.in_color_space = JCS_RGB;
 	}
 
 	// If the image is in 8-bit mode, it is considered to be a grayscale image.
-	// Otherwise, we must make sure that the image is in 24-bit RGB mode.
-	Canvas lCopy(pCanvas, true);
-	if (lCopy.GetBitDepth() != Canvas::BITDEPTH_24_BIT &&
-	   lCopy.GetBitDepth() != Canvas::BITDEPTH_8_BIT)
-	{
-		lCopy.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
+	// Otherwise, we must make sure that the image is in 24-bit kRgb mode.
+	Canvas copy(canvas, true);
+	if (copy.GetBitDepth() != Canvas::kBitdepth24Bit &&
+	   copy.GetBitDepth() != Canvas::kBitdepth8Bit) {
+		copy.ConvertBitDepth(Canvas::kBitdepth24Bit);
 	}
 
-	jpeg_set_defaults(&lCInfo);
-	jpeg_start_compress(&lCInfo, TRUE);
+	jpeg_set_defaults(&_c_info);
+	jpeg_start_compress(&_c_info, TRUE);
 
-	uint8* lBuffer = (uint8*)lCopy.GetBuffer();
-	int lRowStride = lCopy.GetPitch() * lCopy.GetPixelByteSize();
-	int lScanLines = lCopy.GetHeight();
+	uint8* buffer = (uint8*)copy.GetBuffer();
+	int row_stride = copy.GetPitch() * copy.GetPixelByteSize();
+	int scan_lines = copy.GetHeight();
 
-	JSAMPROW lOffset[1];
-	lOffset[0] = lBuffer;
+	JSAMPROW offset[1];
+	offset[0] = buffer;
 
-	for (int i = 0; i < lScanLines; i++)
-	{
-		jpeg_write_scanlines(&lCInfo, lOffset, 1);
-		lOffset[0] += lRowStride;
+	for (int i = 0; i < scan_lines; i++) {
+		jpeg_write_scanlines(&_c_info, offset, 1);
+		offset[0] += row_stride;
 	}
 
-	jpeg_finish_compress(&lCInfo);
-	jpeg_destroy_compress(&lCInfo);
+	jpeg_finish_compress(&_c_info);
+	jpeg_destroy_compress(&_c_info);
 
 	// Calculate and write the size of this jpeg image.
-	const int lEndOffset = (int)mSaveFile->Tell();
-	lSize = (unsigned)(lEndOffset - lStartOffset);
-	mSaveFile->SeekSet(lSizeOffset);
-	mSaveFile->Write(lSize);
+	const int end_offset = (int)save_file_->Tell();
+	size = (unsigned)(end_offset - start_offset);
+	save_file_->SeekSet(size_offset);
+	save_file_->Write(size);
 
 	// Go back to where we were...
-	mSaveFile->SeekEnd(0);
+	save_file_->SeekEnd(0);
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-TEXLoader::IoStatus TEXLoader::Load(const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha)
-{
-	IoStatus lIoStatus = STATUS_SUCCESS;
-	MetaFile lFile;
-	mLoadFile = &lFile;
+TEXLoader::IoStatus TEXLoader::Load(const str& file_name, Texture& texture, bool merge_color_and_alpha) {
+	IoStatus io_status = kStatusSuccess;
+	MetaFile file;
+	load_file_ = &file;
 
-	if (lFile.Open(pFileName, MetaFile::READ_ONLY) == false)
-	{
-		lIoStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, MetaFile::kReadOnly) == false) {
+		io_status = kStatusOpenError;
 	}
 
-	if (lIoStatus == STATUS_SUCCESS)
-	{
-		lIoStatus = Load(pTexture, pMergeColorAndAlpha);
+	if (io_status == kStatusSuccess) {
+		io_status = Load(texture, merge_color_and_alpha);
 	}
 
-	return lIoStatus;
+	return io_status;
 }
 
-TEXLoader::IoStatus TEXLoader::Save(const str& pFileName, const Texture& pTexture, bool pCompressed)
-{
-	IoStatus lIoStatus = STATUS_SUCCESS;
-	DiskFile lFile;
-	mSaveFile = &lFile;
+TEXLoader::IoStatus TEXLoader::Save(const str& file_name, const Texture& texture, bool compressed) {
+	IoStatus io_status = kStatusSuccess;
+	DiskFile file;
+	save_file_ = &file;
 
-	if (lFile.Open(pFileName, DiskFile::MODE_WRITE) == false)
-	{
-		lIoStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, DiskFile::kModeWrite) == false) {
+		io_status = kStatusOpenError;
 	}
 
-	if (lIoStatus == STATUS_SUCCESS)
-	{
-		lIoStatus = Save(pTexture, pCompressed);
+	if (io_status == kStatusSuccess) {
+		io_status = Save(texture, compressed);
 	}
 
-	return lIoStatus;
+	return io_status;
 }
 
-TEXLoader::IoStatus TEXLoader::Load(const str& pArchiveName, const str& pFileName, Texture& pTexture, bool pMergeColorAndAlpha)
-{
-	IoStatus lIoStatus = STATUS_SUCCESS;
-	ArchiveFile lFile(pArchiveName);
-	mLoadFile = &lFile;
+TEXLoader::IoStatus TEXLoader::Load(const str& archive_name, const str& file_name, Texture& texture, bool merge_color_and_alpha) {
+	IoStatus io_status = kStatusSuccess;
+	ArchiveFile file(archive_name);
+	load_file_ = &file;
 
-	if (lFile.Open(pFileName, ArchiveFile::READ_ONLY) == false)
-	{
-		lIoStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, ArchiveFile::kReadOnly) == false) {
+		io_status = kStatusOpenError;
 	}
 
-	if (lIoStatus == STATUS_SUCCESS)
-	{
-		lIoStatus = Load(pTexture, pMergeColorAndAlpha);
+	if (io_status == kStatusSuccess) {
+		io_status = Load(texture, merge_color_and_alpha);
 	}
 
-	return lIoStatus;
+	return io_status;
 }
 
-TEXLoader::IoStatus TEXLoader::Save(const str& pArchiveName, const str& pFileName, const Texture& pTexture, bool pCompressed)
-{
-	IoStatus lIoStatus = STATUS_SUCCESS;
-	ArchiveFile lFile(pArchiveName);
-	mSaveFile = &lFile;
+TEXLoader::IoStatus TEXLoader::Save(const str& archive_name, const str& file_name, const Texture& texture, bool compressed) {
+	IoStatus io_status = kStatusSuccess;
+	ArchiveFile file(archive_name);
+	save_file_ = &file;
 
-	if (lFile.Open(pFileName, ArchiveFile::WRITE_ONLY) == false)
-	{
-		lIoStatus = STATUS_OPEN_ERROR;
+	if (file.Open(file_name, ArchiveFile::kWriteOnly) == false) {
+		io_status = kStatusOpenError;
 	}
 
-	if (lIoStatus == STATUS_SUCCESS)
-	{
-		lIoStatus = Save(pTexture, pCompressed);
+	if (io_status == kStatusSuccess) {
+		io_status = Save(texture, compressed);
 	}
 
-	return lIoStatus;
+	return io_status;
 }
 
-TEXLoader::IoStatus TEXLoader::Load(Texture& pTexture, bool pMergeColorAndAlpha)
-{
-	FileHeader lFileHeader;
-	if (lFileHeader.ReadHeader(mLoadFile) == false)
-	{
-		mLoadFile->Close();
-		return STATUS_READ_HEADER_ERROR;
+TEXLoader::IoStatus TEXLoader::Load(Texture& texture, bool merge_color_and_alpha) {
+	FileHeader file_header;
+	if (file_header.ReadHeader(load_file_) == false) {
+		load_file_->Close();
+		return kStatusReadHeaderError;
 	}
 
-	pTexture.ClearAll();
+	texture.ClearAll();
 
-	if (lFileHeader.CheckMapFlag(CUBE_MAP) == false)
-	{
+	if (file_header.CheckMapFlag(kCubeMap) == false) {
 		int i;
-		int lNumLevels = lFileHeader.mNumMipMapLevels;
+		int num_levels = file_header.num_mip_map_levels_;
 
 		// Create all buffers.
-		pTexture.Prepare(true, 
-				  lFileHeader.CheckMapFlag(ALPHA_MAP),
-				  lFileHeader.CheckMapFlag(NORMAL_MAP),
-				  lFileHeader.CheckMapFlag(SPECULAR_MAP),
+		texture.Prepare(true,
+				  file_header.CheckMapFlag(kAlphaMap),
+				  file_header.CheckMapFlag(kNormalMap),
+				  file_header.CheckMapFlag(kSpecularMap),
 				  false,
-				  lFileHeader.mWidth,
-				  lFileHeader.mHeight);
+				  file_header.width_,
+				  file_header.height_);
 
 		// Jump to the color data.
-		mLoadFile->SeekSet(lFileHeader.mDataOffset);
+		load_file_->SeekSet(file_header.data_offset_);
 
 		// Load color map.
-		for (i = 0; i < lNumLevels; i++)
-		{
+		for (i = 0; i < num_levels; i++) {
 			// The last two mip map levels are stored raw.
-			if (i < (lNumLevels - 2) && lFileHeader.mCompressionFlag == 1)
-				ReadJpeg(*pTexture._GetColorMap(i));
+			if (i < (num_levels - 2) && file_header.compression_flag_ == 1)
+				ReadJpeg(*texture._GetColorMap(i));
 			else
-				mLoadFile->ReadData(pTexture._GetColorMap(i)->GetBuffer(), pTexture._GetColorMap(i)->GetBufferByteSize());
+				load_file_->ReadData(texture._GetColorMap(i)->GetBuffer(), texture._GetColorMap(i)->GetBufferByteSize());
 		}
 
 		// Load alpha map.
-		if (lFileHeader.CheckMapFlag(ALPHA_MAP) == true)
-		{
-			for (i = 0; i < lNumLevels; i++)
-			{
+		if (file_header.CheckMapFlag(kAlphaMap) == true) {
+			for (i = 0; i < num_levels; i++) {
 				// The last two mip map levels are stored raw.
-				if (i < (lNumLevels - 2) && lFileHeader.mCompressionFlag == 1)
-					ReadJpeg(*pTexture._GetAlphaMap(i));
+				if (i < (num_levels - 2) && file_header.compression_flag_ == 1)
+					ReadJpeg(*texture._GetAlphaMap(i));
 				else
-					mLoadFile->ReadData(pTexture._GetAlphaMap(i)->GetBuffer(), pTexture._GetAlphaMap(i)->GetBufferByteSize());
+					load_file_->ReadData(texture._GetAlphaMap(i)->GetBuffer(), texture._GetAlphaMap(i)->GetBufferByteSize());
 			}
 
-			if (pMergeColorAndAlpha == true)
-			{
-				for (i = 0; i < lNumLevels; i++)
-				{
-					pTexture._GetColorMap(i)->ConvertTo32BitWithAlpha(*pTexture._GetAlphaMap(i));
+			if (merge_color_and_alpha == true) {
+				for (i = 0; i < num_levels; i++) {
+					texture._GetColorMap(i)->ConvertTo32BitWithAlpha(*texture._GetAlphaMap(i));
 				}
 			}
 		}
 
 		// Load normal map.
-		if (lFileHeader.CheckMapFlag(NORMAL_MAP) == true)
-		{
-			for (i = 0; i < lNumLevels; i++)
-			{
+		if (file_header.CheckMapFlag(kNormalMap) == true) {
+			for (i = 0; i < num_levels; i++) {
 				// The last two mip map levels are stored raw.
-				if (i < (lNumLevels - 2) && lFileHeader.mCompressionFlag == 1)
-					ReadJpeg(*pTexture._GetNormalMap(i));
+				if (i < (num_levels - 2) && file_header.compression_flag_ == 1)
+					ReadJpeg(*texture._GetNormalMap(i));
 				else
-					mLoadFile->ReadData(pTexture._GetNormalMap(i)->GetBuffer(), pTexture._GetNormalMap(i)->GetBufferByteSize());
+					load_file_->ReadData(texture._GetNormalMap(i)->GetBuffer(), texture._GetNormalMap(i)->GetBufferByteSize());
 			}
 		}
 
 		// Load specular map.
-		if (lFileHeader.CheckMapFlag(SPECULAR_MAP) == true)
-		{
-			for (i = 0; i < lNumLevels; i++)
-			{
+		if (file_header.CheckMapFlag(kSpecularMap) == true) {
+			for (i = 0; i < num_levels; i++) {
 				// The last two mip map levels are stored raw.
-				if (i < (lNumLevels - 2) && lFileHeader.mCompressionFlag == 1)
-					ReadJpeg(*pTexture._GetSpecularMap(i));
+				if (i < (num_levels - 2) && file_header.compression_flag_ == 1)
+					ReadJpeg(*texture._GetSpecularMap(i));
 				else
-					mLoadFile->ReadData(pTexture._GetSpecularMap(i)->GetBuffer(), pTexture._GetSpecularMap(i)->GetBufferByteSize());
+					load_file_->ReadData(texture._GetSpecularMap(i)->GetBuffer(), texture._GetSpecularMap(i)->GetBufferByteSize());
 			}
 		}
-	}
-	else
-	{
+	} else {
 		int i;
-		int lNumLevels = lFileHeader.mNumMipMapLevels;
+		int num_levels = file_header.num_mip_map_levels_;
 
 		// Create all buffers.
-		pTexture.Prepare(false, 
+		texture.Prepare(false,
 						  false,
 						  false,
 						  false,
 						  true,
-						  lFileHeader.mWidth,
-						  lFileHeader.mHeight);
+						  file_header.width_,
+						  file_header.height_);
 
 		// Jump to the color data.
-		mLoadFile->SeekSet(lFileHeader.mDataOffset);
+		load_file_->SeekSet(file_header.data_offset_);
 
 		// Load cube map.
-		for (i = 0; i < lNumLevels; i++)
-		{
+		for (i = 0; i < num_levels; i++) {
 			// The last two mip map levels are stored raw.
-			if (i < (lNumLevels - 2) && lFileHeader.mCompressionFlag == 1)
-				ReadJpeg(*pTexture._GetCubeMapPosX(i));
+			if (i < (num_levels - 2) && file_header.compression_flag_ == 1)
+				ReadJpeg(*texture._GetCubeMapPosX(i));
 			else
-				mLoadFile->ReadData(pTexture._GetCubeMapPosX(i)->GetBuffer(), pTexture._GetCubeMapPosX(i)->GetBufferByteSize());
+				load_file_->ReadData(texture._GetCubeMapPosX(i)->GetBuffer(), texture._GetCubeMapPosX(i)->GetBufferByteSize());
 		}
 
-		for (i = 0; i < lNumLevels; i++)
-		{
+		for (i = 0; i < num_levels; i++) {
 			// The last two mip map levels are stored raw.
-			if (i < (lNumLevels - 2) && lFileHeader.mCompressionFlag == 1)
-				ReadJpeg(*pTexture._GetCubeMapNegX(i));
+			if (i < (num_levels - 2) && file_header.compression_flag_ == 1)
+				ReadJpeg(*texture._GetCubeMapNegX(i));
 			else
-				mLoadFile->ReadData(pTexture._GetCubeMapNegX(i)->GetBuffer(), pTexture._GetCubeMapNegX(i)->GetBufferByteSize());
+				load_file_->ReadData(texture._GetCubeMapNegX(i)->GetBuffer(), texture._GetCubeMapNegX(i)->GetBufferByteSize());
 		}
 
-		for (i = 0; i < lNumLevels; i++)
-		{
+		for (i = 0; i < num_levels; i++) {
 			// The last two mip map levels are stored raw.
-			if (i < (lNumLevels - 2) && lFileHeader.mCompressionFlag == 1)
-				ReadJpeg(*pTexture._GetCubeMapPosY(i));
+			if (i < (num_levels - 2) && file_header.compression_flag_ == 1)
+				ReadJpeg(*texture._GetCubeMapPosY(i));
 			else
-				mLoadFile->ReadData(pTexture._GetCubeMapPosY(i)->GetBuffer(), pTexture._GetCubeMapPosY(i)->GetBufferByteSize());
+				load_file_->ReadData(texture._GetCubeMapPosY(i)->GetBuffer(), texture._GetCubeMapPosY(i)->GetBufferByteSize());
 		}
 
-		for (i = 0; i < lNumLevels; i++)
-		{
+		for (i = 0; i < num_levels; i++) {
 			// The last two mip map levels are stored raw.
-			if (i < (lNumLevels - 2) && lFileHeader.mCompressionFlag == 1)
-				ReadJpeg(*pTexture._GetCubeMapNegY(i));
+			if (i < (num_levels - 2) && file_header.compression_flag_ == 1)
+				ReadJpeg(*texture._GetCubeMapNegY(i));
 			else
-				mLoadFile->ReadData(pTexture._GetCubeMapNegY(i)->GetBuffer(), pTexture._GetCubeMapNegY(i)->GetBufferByteSize());
+				load_file_->ReadData(texture._GetCubeMapNegY(i)->GetBuffer(), texture._GetCubeMapNegY(i)->GetBufferByteSize());
 		}
 
-		for (i = 0; i < lNumLevels; i++)
-		{
+		for (i = 0; i < num_levels; i++) {
 			// The last two mip map levels are stored raw.
-			if (i < (lNumLevels - 2) && lFileHeader.mCompressionFlag == 1)
-				ReadJpeg(*pTexture._GetCubeMapPosZ(i));
+			if (i < (num_levels - 2) && file_header.compression_flag_ == 1)
+				ReadJpeg(*texture._GetCubeMapPosZ(i));
 			else
-				mLoadFile->ReadData(pTexture._GetCubeMapPosZ(i)->GetBuffer(), pTexture._GetCubeMapPosZ(i)->GetBufferByteSize());
+				load_file_->ReadData(texture._GetCubeMapPosZ(i)->GetBuffer(), texture._GetCubeMapPosZ(i)->GetBufferByteSize());
 		}
 
-		for (i = 0; i < lNumLevels; i++)
-		{
+		for (i = 0; i < num_levels; i++) {
 			// The last two mip map levels are stored raw.
-			if (i < (lNumLevels - 2) && lFileHeader.mCompressionFlag == 1)
-				ReadJpeg(*pTexture._GetCubeMapNegZ(i));
+			if (i < (num_levels - 2) && file_header.compression_flag_ == 1)
+				ReadJpeg(*texture._GetCubeMapNegZ(i));
 			else
-				mLoadFile->ReadData(pTexture._GetCubeMapNegZ(i)->GetBuffer(), pTexture._GetCubeMapNegZ(i)->GetBufferByteSize());
+				load_file_->ReadData(texture._GetCubeMapNegZ(i)->GetBuffer(), texture._GetCubeMapNegZ(i)->GetBufferByteSize());
 		}
 	}
 
-	mLoadFile->Close();
+	load_file_->Close();
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
-TEXLoader::IoStatus TEXLoader::Save(const Texture& pTexture, bool pCompressed)
-{
-	if (pTexture.GetColorMap(0) == 0)
-	{
-		return STATUS_MISSING_COLORMAP_ERROR;
+TEXLoader::IoStatus TEXLoader::Save(const Texture& texture, bool compressed) {
+	if (texture.GetColorMap(0) == 0) {
+		return kStatusMissingColormapError;
 	}
 
 	// Calculate log2 of width and height.
-	int lWidth = 0;
-	int lHeight = 0;
-	int lLog2Width = 0;
-	int lLog2Height = 0;
+	int width = 0;
+	int height = 0;
+	int log2_width = 0;
+	int log2_height = 0;
 
-	if (pTexture.IsCubeMap() == false)
-	{
-		lWidth  = pTexture.GetColorMap(0)->GetWidth();
-		lHeight = pTexture.GetColorMap(0)->GetHeight();
-	}
-	else
-	{
-		lWidth  = pTexture.GetCubeMapPosX(0)->GetWidth();
-		lHeight = pTexture.GetCubeMapPosX(0)->GetHeight();
+	if (texture.IsCubeMap() == false) {
+		width  = texture.GetColorMap(0)->GetWidth();
+		height = texture.GetColorMap(0)->GetHeight();
+	} else {
+		width  = texture.GetCubeMapPosX(0)->GetWidth();
+		height = texture.GetCubeMapPosX(0)->GetHeight();
 	}
 
-	while ((1 << lLog2Width) < lWidth)
-	{
-		lLog2Width++;
+	while ((1 << log2_width) < width) {
+		log2_width++;
 	}
-	while ((1 << lLog2Height) < lHeight)
-	{
-		lLog2Height++;
+	while ((1 << log2_height) < height) {
+		log2_height++;
 	}
 
 	// Prepare file header.
-	FileHeader lFileHeader;
-	lFileHeader.mTEXMagic[0] = 'T';
-	lFileHeader.mTEXMagic[1] = 'T';
-	lFileHeader.mTEXMagic[2] = 'E';
-	lFileHeader.mTEXMagic[3] = 'X';
+	FileHeader file_header;
+	file_header.tex_magic_[0] = 'T';
+	file_header.tex_magic_[1] = 'T';
+	file_header.tex_magic_[2] = 'E';
+	file_header.tex_magic_[3] = 'X';
 
-	lFileHeader.mVersion = 1;
-	lFileHeader.mDataOffset = 16; // Size of file header.
-	lFileHeader.mDimensionPowers = (uint8)((lLog2Height << 4) | lLog2Width);
+	file_header.version_ = 1;
+	file_header.data_offset_ = 16; // Size of file header.
+	file_header.dimension_powers_ = (uint8)((log2_height << 4) | log2_width);
 
-	lFileHeader.mCompressionFlag = pCompressed == true ? 1 : 0;
-	lFileHeader.mMapFlags = 0;
+	file_header.compression_flag_ = compressed == true ? 1 : 0;
+	file_header.map_flags_ = 0;
 
-	if (pTexture.IsCubeMap() == false)
-	{
-		if (pTexture.GetAlphaMap(0) != 0 || 
-		   pTexture.GetColorMap(0)->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
-			lFileHeader.mMapFlags |= ALPHA_MAP;
-		if (pTexture.GetNormalMap(0) != 0)
-			lFileHeader.mMapFlags |= NORMAL_MAP;
-		if (pTexture.GetSpecularMap(0) != 0)
-			lFileHeader.mMapFlags |= SPECULAR_MAP;
-	}
-	else
-	{
-		lFileHeader.mMapFlags = CUBE_MAP;
+	if (texture.IsCubeMap() == false) {
+		if (texture.GetAlphaMap(0) != 0 ||
+		   texture.GetColorMap(0)->GetBitDepth() == Canvas::kBitdepth32Bit)
+			file_header.map_flags_ |= kAlphaMap;
+		if (texture.GetNormalMap(0) != 0)
+			file_header.map_flags_ |= kNormalMap;
+		if (texture.GetSpecularMap(0) != 0)
+			file_header.map_flags_ |= kSpecularMap;
+	} else {
+		file_header.map_flags_ = kCubeMap;
 	}
 
 	// Write the file header.
-	mSaveFile->WriteData(lFileHeader.mTEXMagic, 4);
-	mSaveFile->Write(lFileHeader.mVersion);
-	mSaveFile->Write(lFileHeader.mDataOffset);
-	mSaveFile->Write(lFileHeader.mDimensionPowers);
-	mSaveFile->Write(lFileHeader.mCompressionFlag);
-	mSaveFile->Write(lFileHeader.mMapFlags);
+	save_file_->WriteData(file_header.tex_magic_, 4);
+	save_file_->Write(file_header.version_);
+	save_file_->Write(file_header.data_offset_);
+	save_file_->Write(file_header.dimension_powers_);
+	save_file_->Write(file_header.compression_flag_);
+	save_file_->Write(file_header.map_flags_);
 
-	int lNumLevels = pTexture.GetNumMipMapLevels();
+	int num_levels = texture.GetNumMipMapLevels();
 
-	if (pTexture.IsCubeMap() == false)
-	{
+	if (texture.IsCubeMap() == false) {
 		int i;
-		for (i = 0; i < lNumLevels; i++)
-		{
-			if (pTexture.GetColorMap(i)->GetBitDepth() != Canvas::BITDEPTH_24_BIT)
-			{
-				Canvas lTemp(*pTexture.GetColorMap(i), true);
-				lTemp.ConvertBitDepth(Canvas::BITDEPTH_24_BIT);
+		for (i = 0; i < num_levels; i++) {
+			if (texture.GetColorMap(i)->GetBitDepth() != Canvas::kBitdepth24Bit) {
+				Canvas temp(*texture.GetColorMap(i), true);
+				temp.ConvertBitDepth(Canvas::kBitdepth24Bit);
 
-				if (i < (lNumLevels - 2) && pCompressed == true)
-					WriteJpeg(lTemp);
+				if (i < (num_levels - 2) && compressed == true)
+					WriteJpeg(temp);
 				else
-					mSaveFile->WriteData(lTemp.GetBuffer(), lTemp.GetBufferByteSize());
-			}
-			else
-			{
-				if (i < (lNumLevels - 2) && pCompressed == true)
-					WriteJpeg(*pTexture.GetColorMap(i));
+					save_file_->WriteData(temp.GetBuffer(), temp.GetBufferByteSize());
+			} else {
+				if (i < (num_levels - 2) && compressed == true)
+					WriteJpeg(*texture.GetColorMap(i));
 				else
-					mSaveFile->WriteData(pTexture.GetColorMap(i)->GetBuffer(), pTexture.GetColorMap(i)->GetBufferByteSize());
+					save_file_->WriteData(texture.GetColorMap(i)->GetBuffer(), texture.GetColorMap(i)->GetBufferByteSize());
 			}
 		}
 
-		if (pTexture.GetAlphaMap(0) != 0)
-		{
-			for (int i = 0; i < pTexture.GetNumMipMapLevels(); i++)
-			{
-				if (i < (lNumLevels - 2) && pCompressed == true)
-					WriteJpeg(*pTexture.GetAlphaMap(i));
+		if (texture.GetAlphaMap(0) != 0) {
+			for (int i = 0; i < texture.GetNumMipMapLevels(); i++) {
+				if (i < (num_levels - 2) && compressed == true)
+					WriteJpeg(*texture.GetAlphaMap(i));
 				else
-					mSaveFile->WriteData(pTexture.GetAlphaMap(i)->GetBuffer(), pTexture.GetAlphaMap(i)->GetBufferByteSize());
+					save_file_->WriteData(texture.GetAlphaMap(i)->GetBuffer(), texture.GetAlphaMap(i)->GetBufferByteSize());
 			}
-		}
-		else if(pTexture.GetColorMap(0)->GetBitDepth() == Canvas::BITDEPTH_32_BIT)
-		{
-			for (i = 0; i < pTexture.GetNumMipMapLevels(); i++)
-			{
-				Canvas lAlphaMap;
-				pTexture.GetColorMap(i)->GetAlphaChannel(lAlphaMap);
+		} else if(texture.GetColorMap(0)->GetBitDepth() == Canvas::kBitdepth32Bit) {
+			for (i = 0; i < texture.GetNumMipMapLevels(); i++) {
+				Canvas alpha_map;
+				texture.GetColorMap(i)->GetAlphaChannel(alpha_map);
 
-				if (i < (lNumLevels - 2) && pCompressed == true)
-					WriteJpeg(lAlphaMap);
+				if (i < (num_levels - 2) && compressed == true)
+					WriteJpeg(alpha_map);
 				else
-					mSaveFile->WriteData(lAlphaMap.GetBuffer(), lAlphaMap.GetBufferByteSize());
+					save_file_->WriteData(alpha_map.GetBuffer(), alpha_map.GetBufferByteSize());
 			}
 		}
 
-		if (pTexture.GetNormalMap(0) != 0)
-		{
-			for (i = 0; i < pTexture.GetNumMipMapLevels(); i++)
-			{
-				if (i < (lNumLevels - 2) && pCompressed == true)
-					WriteJpeg(*pTexture.GetNormalMap(i));
+		if (texture.GetNormalMap(0) != 0) {
+			for (i = 0; i < texture.GetNumMipMapLevels(); i++) {
+				if (i < (num_levels - 2) && compressed == true)
+					WriteJpeg(*texture.GetNormalMap(i));
 				else
-					mSaveFile->WriteData(pTexture.GetNormalMap(i)->GetBuffer(), pTexture.GetNormalMap(i)->GetBufferByteSize());
+					save_file_->WriteData(texture.GetNormalMap(i)->GetBuffer(), texture.GetNormalMap(i)->GetBufferByteSize());
 			}
 		}
 
-		if (pTexture.GetSpecularMap(0) != 0)
-		{
-			for (i = 0; i < pTexture.GetNumMipMapLevels(); i++)
-			{
-				if (i < (lNumLevels - 2) && pCompressed == true)
-					WriteJpeg(*pTexture.GetSpecularMap(i));
+		if (texture.GetSpecularMap(0) != 0) {
+			for (i = 0; i < texture.GetNumMipMapLevels(); i++) {
+				if (i < (num_levels - 2) && compressed == true)
+					WriteJpeg(*texture.GetSpecularMap(i));
 				else
-					mSaveFile->WriteData(pTexture.GetSpecularMap(i)->GetBuffer(), pTexture.GetSpecularMap(i)->GetBufferByteSize());
+					save_file_->WriteData(texture.GetSpecularMap(i)->GetBuffer(), texture.GetSpecularMap(i)->GetBufferByteSize());
 			}
 		}
-	}
-	else
-	{
+	} else {
 		int i;
-		for (i = 0; i < pTexture.GetNumMipMapLevels(); i++)
-		{
-			if (i < (lNumLevels - 2) && pCompressed == true)
-				WriteJpeg(*pTexture.GetCubeMapPosX(i));
+		for (i = 0; i < texture.GetNumMipMapLevels(); i++) {
+			if (i < (num_levels - 2) && compressed == true)
+				WriteJpeg(*texture.GetCubeMapPosX(i));
 			else
-				mSaveFile->WriteData(pTexture.GetCubeMapPosX(i)->GetBuffer(), pTexture.GetCubeMapPosX(i)->GetBufferByteSize());
+				save_file_->WriteData(texture.GetCubeMapPosX(i)->GetBuffer(), texture.GetCubeMapPosX(i)->GetBufferByteSize());
 		}
 
-		for (i = 0; i < pTexture.GetNumMipMapLevels(); i++)
-		{
-			if (i < (lNumLevels - 2) && pCompressed == true)
-				WriteJpeg(*pTexture.GetCubeMapNegX(i));
+		for (i = 0; i < texture.GetNumMipMapLevels(); i++) {
+			if (i < (num_levels - 2) && compressed == true)
+				WriteJpeg(*texture.GetCubeMapNegX(i));
 			else
-				mSaveFile->WriteData(pTexture.GetCubeMapNegX(i)->GetBuffer(), pTexture.GetCubeMapNegX(i)->GetBufferByteSize());
+				save_file_->WriteData(texture.GetCubeMapNegX(i)->GetBuffer(), texture.GetCubeMapNegX(i)->GetBufferByteSize());
 		}
 
-		for (i = 0; i < pTexture.GetNumMipMapLevels(); i++)
-		{
-			if (i < (lNumLevels - 2) && pCompressed == true)
-				WriteJpeg(*pTexture.GetCubeMapPosY(i));
+		for (i = 0; i < texture.GetNumMipMapLevels(); i++) {
+			if (i < (num_levels - 2) && compressed == true)
+				WriteJpeg(*texture.GetCubeMapPosY(i));
 			else
-				mSaveFile->WriteData(pTexture.GetCubeMapPosY(i)->GetBuffer(), pTexture.GetCubeMapPosY(i)->GetBufferByteSize());
+				save_file_->WriteData(texture.GetCubeMapPosY(i)->GetBuffer(), texture.GetCubeMapPosY(i)->GetBufferByteSize());
 		}
 
-		for (i = 0; i < pTexture.GetNumMipMapLevels(); i++)
-		{
-			if (i < (lNumLevels - 2) && pCompressed == true)
-				WriteJpeg(*pTexture.GetCubeMapNegY(i));
+		for (i = 0; i < texture.GetNumMipMapLevels(); i++) {
+			if (i < (num_levels - 2) && compressed == true)
+				WriteJpeg(*texture.GetCubeMapNegY(i));
 			else
-				mSaveFile->WriteData(pTexture.GetCubeMapNegY(i)->GetBuffer(), pTexture.GetCubeMapNegY(i)->GetBufferByteSize());
+				save_file_->WriteData(texture.GetCubeMapNegY(i)->GetBuffer(), texture.GetCubeMapNegY(i)->GetBufferByteSize());
 		}
 
-		for (i = 0; i < pTexture.GetNumMipMapLevels(); i++)
-		{
-			if (i < (lNumLevels - 2) && pCompressed == true)
-				WriteJpeg(*pTexture.GetCubeMapPosZ(i));
+		for (i = 0; i < texture.GetNumMipMapLevels(); i++) {
+			if (i < (num_levels - 2) && compressed == true)
+				WriteJpeg(*texture.GetCubeMapPosZ(i));
 			else
-				mSaveFile->WriteData(pTexture.GetCubeMapPosZ(i)->GetBuffer(), pTexture.GetCubeMapPosZ(i)->GetBufferByteSize());
+				save_file_->WriteData(texture.GetCubeMapPosZ(i)->GetBuffer(), texture.GetCubeMapPosZ(i)->GetBufferByteSize());
 		}
 
-		for (i = 0; i < pTexture.GetNumMipMapLevels(); i++)
-		{
-			if (i < (lNumLevels - 2) && pCompressed == true)
-				WriteJpeg(*pTexture.GetCubeMapNegZ(i));
+		for (i = 0; i < texture.GetNumMipMapLevels(); i++) {
+			if (i < (num_levels - 2) && compressed == true)
+				WriteJpeg(*texture.GetCubeMapNegZ(i));
 			else
-				mSaveFile->WriteData(pTexture.GetCubeMapNegZ(i)->GetBuffer(), pTexture.GetCubeMapNegZ(i)->GetBufferByteSize());
+				save_file_->WriteData(texture.GetCubeMapNegZ(i)->GetBuffer(), texture.GetCubeMapNegZ(i)->GetBufferByteSize());
 		}
 	}
 
-	mSaveFile->Close();
+	save_file_->Close();
 
-	return STATUS_SUCCESS;
+	return kStatusSuccess;
 }
 
 

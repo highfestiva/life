@@ -6,25 +6,23 @@
 
 #pragma once
 
-#include "UiLayout.h"
+#include "uilayout.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-class GridLayout : public Layout
-{
+class GridLayout : public Layout {
 public:
-	
-	GridLayout(int pRows, int pCols);
+
+	GridLayout(int rows, int cols);
 	virtual ~GridLayout();
-	
+
 	virtual Type GetType() const;
 
-	virtual void Add(Component* pComponent, int pParam1, int pParam2);
-	virtual void Remove(Component* pComponent);
+	virtual void Add(Component* component, int param1, int param2);
+	virtual void Remove(Component* component);
 	virtual int GetNumComponents() const;
 
-	virtual Component* GetComponentAt(int pRow, int pCol) const;
+	virtual Component* GetComponentAt(int row, int col) const;
 
 	virtual Component* GetFirst();
 	virtual Component* GetNext();
@@ -33,41 +31,39 @@ public:
 
 	virtual void UpdateLayout();
 
-	virtual PixelCoord GetPreferredSize(bool pForceAdaptive);
+	virtual PixelCoord GetPreferredSize(bool force_adaptive);
 	virtual PixelCoord GetMinSize() const;
 	virtual PixelCoord GetContentSize() const;
 
 	inline int GetNumRows() const;
 	inline int GetNumCols() const;
 
-	void InsertRow(int pRow);
-	void InsertColumn(int pColumn);
-	void DeleteRow(int pRow);
-	void DeleteColumn(int pColumn);
+	void InsertRow(int row);
+	void InsertColumn(int column);
+	void DeleteRow(int row);
+	void DeleteColumn(int column);
 
 	// Debug function...
 	bool HaveDoubles() const;
 protected:
 private:
 
-	Component** AllocComponentGrid(int pRows, int pCols);
+	Component** AllocComponentGrid(int rows, int cols);
 
-	Component** mComponent;
+	Component** component_;
 
-	int mNumRows;
-	int mNumCols;
-	int mCurrentIndex;
-	int mNumComponents;
+	int num_rows_;
+	int num_cols_;
+	int current_index_;
+	int num_components_;
 };
 
-int GridLayout::GetNumRows() const
-{
-	return mNumRows;
+int GridLayout::GetNumRows() const {
+	return num_rows_;
 }
 
-int GridLayout::GetNumCols() const
-{
-	return mNumCols;
+int GridLayout::GetNumCols() const {
+	return num_cols_;
 }
 
 }

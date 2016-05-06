@@ -1,23 +1,22 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../ThirdParty/FastDelegate/FastDelegate.h"
-#include "../../Lepra/Include/Unordered.h"
-#include "../../Lepra/Include/HiResTimer.h"
-#include "../../Lepra/Include/IdManager.h"
-#include "../../Lepra/Include/Thread.h"
-#include "../../Tbc/Include/PhysicsManager.h"
-#include "Cure.h"
+#include "../../thirdparty/FastDelegate/FastDelegate.h"
+#include "../../lepra/include/unordered.h"
+#include "../../lepra/include/hirestimer.h"
+#include "../../lepra/include/idmanager.h"
+#include "../../lepra/include/thread.h"
+#include "../../tbc/include/physicsmanager.h"
+#include "cure.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
@@ -27,51 +26,50 @@ class TimeManager;
 
 
 
-class ContextManager
-{
+class ContextManager {
 public:
 	typedef std::unordered_map<GameObjectId, ContextObject*> ContextObjectTable;
 	typedef fastdelegate::FastDelegate3<int,ContextObject*,void*,void> AlarmExternalCallback;
 
-	ContextManager(GameManager* pGameManager);
+	ContextManager(GameManager* game_manager);
 	virtual ~ContextManager();
 
 	GameManager* GetGameManager() const;
-	void SetLocalRange(unsigned pIndex, unsigned pCount);	// Sets the range that will be used for local ID's.
+	void SetLocalRange(unsigned index, unsigned count);	// Sets the range that will be used for local ID's.
 
-	void SetIsObjectOwner(bool pIsObjectOwner);
-	void AddLocalObject(ContextObject* pObject);
-	void AddObject(ContextObject* pObject);
-	virtual void RemoveObject(ContextObject* pObject);
-	bool DeleteObject(GameObjectId pInstanceId);
-	void SetPostKillTimeout(double pTimeout);
-	void PostKillObject(GameObjectId pInstanceId);
-	void DelayKillObject(ContextObject* pObject, float pSeconds);
-	ContextObject* GetObject(GameObjectId pInstanceId, bool pForce = false) const;
+	void SetIsObjectOwner(bool is_object_owner);
+	void AddLocalObject(ContextObject* object);
+	void AddObject(ContextObject* object);
+	virtual void RemoveObject(ContextObject* object);
+	bool DeleteObject(GameObjectId instance_id);
+	void SetPostKillTimeout(double timeout);
+	void PostKillObject(GameObjectId instance_id);
+	void DelayKillObject(ContextObject* object, float seconds);
+	ContextObject* GetObject(GameObjectId instance_id, bool force = false) const;
 	const ContextObjectTable& GetObjectTable() const;
 	void ClearObjects();
-	void AddPhysicsSenderObject(ContextObject* pObject);
-	void AddPhysicsBody(ContextObject* pObject, Tbc::PhysicsManager::BodyID pBodyId);
-	void RemovePhysicsBody(Tbc::PhysicsManager::BodyID pBodyId);
+	void AddPhysicsSenderObject(ContextObject* object);
+	void AddPhysicsBody(ContextObject* object, tbc::PhysicsManager::BodyID body_id);
+	void RemovePhysicsBody(tbc::PhysicsManager::BodyID body_id);
 
-	void AddAttributeSenderObject(ContextObject* pObject);
-	void UnpackObjectAttribute(GameObjectId pObjectId, const uint8* pData, unsigned pSize);
+	void AddAttributeSenderObject(ContextObject* object);
+	void UnpackObjectAttribute(GameObjectId object_id, const uint8* data, unsigned size);
 
-	GameObjectId AllocateGameObjectId(NetworkObjectType pNetworkType);
-	void FreeGameObjectId(NetworkObjectType pNetworkType, GameObjectId pInstanceId);
-	bool IsLocalGameObjectId(GameObjectId pInstanceId) const;
+	GameObjectId AllocateGameObjectId(NetworkObjectType network_type);
+	void FreeGameObjectId(NetworkObjectType network_type, GameObjectId instance_id);
+	bool IsLocalGameObjectId(GameObjectId instance_id) const;
 
-	void EnableTickCallback(ContextObject* pObject);
-	void DisableTickCallback(ContextObject* pObject);
-	void EnableMicroTickCallback(ContextObject* pObject);
-	void DisableMicroTickCallback(ContextObject* pObject);
-	void AddAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData);
-	void AddGameAlarmCallback(ContextObject* pObject, int pAlarmId, float pSeconds, void* pExtraData);	// Scale time by RTR.
-	void AddAlarmExternalCallback(ContextObject* pObject, const AlarmExternalCallback& pCallback, int pAlarmId, float pSeconds, void* pExtraData);
-	void CancelPendingAlarmCallbacksById(ContextObject* pObject, int pAlarmId);
-	void CancelPendingAlarmCallbacks(ContextObject* pObject);
+	void EnableTickCallback(ContextObject* object);
+	void DisableTickCallback(ContextObject* object);
+	void EnableMicroTickCallback(ContextObject* object);
+	void DisableMicroTickCallback(ContextObject* object);
+	void AddAlarmCallback(ContextObject* object, int alarm_id, float seconds, void* extra_data);
+	void AddGameAlarmCallback(ContextObject* object, int alarm_id, float seconds, void* extra_data);	// Scale time by RTR.
+	void AddAlarmExternalCallback(ContextObject* object, const AlarmExternalCallback& callback, int alarm_id, float seconds, void* extra_data);
+	void CancelPendingAlarmCallbacksById(ContextObject* object, int alarm_id);
+	void CancelPendingAlarmCallbacks(ContextObject* object);
 
-	void MicroTick(float pTimeDelta);
+	void MicroTick(float time_delta);
 	void TickPhysics();
 	void HandleIdledBodies();
 	void HandlePhysicsSend();
@@ -80,93 +78,84 @@ public:
 
 private:
 	typedef IdManager<GameObjectId> ObjectIdManager;
-	struct GameObjectIdRecycleInfo
-	{
-		GameObjectIdRecycleInfo(GameObjectId pInstanceId, NetworkObjectType pNetworkType):
-			mInstanceId(pInstanceId),
-			mNetworkType(pNetworkType)
-		{
+	struct GameObjectIdRecycleInfo {
+		GameObjectIdRecycleInfo(GameObjectId instance_id, NetworkObjectType network_type):
+			instance_id_(instance_id),
+			network_type_(network_type) {
 		}
-		HiResTimer mTimer;
-		GameObjectId mInstanceId;
-		NetworkObjectType mNetworkType;
+		HiResTimer timer_;
+		GameObjectId instance_id_;
+		NetworkObjectType network_type_;
 	};
 	typedef std::vector<GameObjectIdRecycleInfo> RecycledIdQueue;
-	struct Alarm
-	{
-		ContextObject* mObject;
-		AlarmExternalCallback mCallback;
-		int mFrameTime;
-		int mAlarmId;
-		void* mExtraData;
+	struct Alarm {
+		ContextObject* object_;
+		AlarmExternalCallback callback_;
+		int frame_time_;
+		int alarm_id_;
+		void* extra_data_;
 		inline Alarm() {}
-		inline Alarm(ContextObject* pObject, int pFrameTime, int pAlarmId, void* pExtraData):
-			mObject(pObject),
-			mFrameTime(pFrameTime),
-			mAlarmId(pAlarmId),
-			mExtraData(pExtraData)
-		{
+		inline Alarm(ContextObject* object, int frame_time, int alarm_id, void* extra_data):
+			object_(object),
+			frame_time_(frame_time),
+			alarm_id_(alarm_id),
+			extra_data_(extra_data) {
 		}
-		inline Alarm(ContextObject* pObject, const AlarmExternalCallback& pCallback, int pFrameTime, int pAlarmId, void* pExtraData):
-			mObject(pObject),
-			mCallback(pCallback),
-			mFrameTime(pFrameTime),
-			mAlarmId(pAlarmId),
-			mExtraData(pExtraData)
-		{
+		inline Alarm(ContextObject* object, const AlarmExternalCallback& callback, int frame_time, int alarm_id, void* extra_data):
+			object_(object),
+			callback_(callback),
+			frame_time_(frame_time),
+			alarm_id_(alarm_id),
+			extra_data_(extra_data) {
 		}
-		inline bool operator<(const Alarm& pOther) const
-		{
-			return (mObject < pOther.mObject &&
-				mCallback < pOther.mCallback &&
-				mFrameTime < pOther.mFrameTime &&
-				mAlarmId < pOther.mAlarmId &&
-				mExtraData < pOther.mExtraData);
+		inline bool operator<(const Alarm& other) const {
+			return (object_ < other.object_ &&
+				callback_ < other.callback_ &&
+				frame_time_ < other.frame_time_ &&
+				alarm_id_ < other.alarm_id_ &&
+				extra_data_ < other.extra_data_);
 		}
-		inline bool operator==(const Alarm& pOther) const
-		{
-			return (mObject == pOther.mObject &&
-				mCallback == pOther.mCallback &&
-				mFrameTime == pOther.mFrameTime &&
-				mAlarmId == pOther.mAlarmId &&
-				mExtraData == pOther.mExtraData);
+		inline bool operator==(const Alarm& other) const {
+			return (object_ == other.object_ &&
+				callback_ == other.callback_ &&
+				frame_time_ == other.frame_time_ &&
+				alarm_id_ == other.alarm_id_ &&
+				extra_data_ == other.extra_data_);
 		}
 	};
-	struct AlarmHasher
-	{
-		inline size_t operator()(const Alarm& pAlarm) const
-		{
-			const int f = pAlarm.mCallback.empty()? 5527 : 1;
-			return (pAlarm.mFrameTime + pAlarm.mAlarmId + (size_t)pAlarm.mObject) * f;
+	struct AlarmHasher {
+		inline size_t operator()(const Alarm& alarm) const {
+			const int f = alarm.callback_.empty()? 5527 : 1;
+			return (alarm.frame_time_ + alarm.alarm_id_ + (size_t)alarm.object_) * f;
 		}
 	};
 	typedef std::unordered_set<Alarm, AlarmHasher> AlarmSet;
-	typedef std::unordered_map<Tbc::PhysicsManager::BodyID, ContextObject*> BodyTable;
+	typedef std::unordered_map<tbc::PhysicsManager::BodyID, ContextObject*> BodyTable;
 	typedef std::unordered_set<GameObjectId> IdSet;
 	typedef BodyTable::value_type BodyPair;
 
-	void OnDelayedDelete(int, ContextObject* pObject, void*);
-	void DoAddAlarmCallback(Alarm& pAlarm, float pSeconds);
+	void OnDelayedDelete(int, ContextObject* object, void*);
+	void DoAddAlarmCallback(Alarm& alarm, float seconds);
 	void DispatchTickCallbacks();
-	void DispatchMicroTickCallbacks(float pFrameTimeDelta);
+	void DispatchMicroTickCallbacks(float frame_time_delta);
 	void DispatchAlarmCallbacks();
 
-	GameManager* mGameManager;
+	GameManager* game_manager_;
 
-	bool mIsObjectOwner;
-	RecycledIdQueue mRecycledIdQueue;
-	ObjectIdManager mLocalObjectIdManager;
-	ObjectIdManager mRemoteObjectIdManager;
-	ContextObjectTable mObjectTable;
-	ContextObjectTable mPhysicsSenderObjectTable;
-	BodyTable mBodyTable;
-	ContextObjectTable mAttributeSenderObjectTable;
-	ContextObjectTable mTickCallbackObjectTable;
-	ContextObjectTable mMicroTickCallbackObjectTable;
-	Lock mAlarmMutex;
-	AlarmSet mAlarmCallbackObjectSet;
-	double mMaxPostKillProcessingTime;
-	IdSet mPostKillSet;
+	bool is_object_owner_;
+	RecycledIdQueue recycled_id_queue_;
+	ObjectIdManager local_object_id_manager_;
+	ObjectIdManager remote_object_id_manager_;
+	ContextObjectTable object_table_;
+	ContextObjectTable physics_sender_object_table_;
+	BodyTable body_table_;
+	ContextObjectTable attribute_sender_object_table_;
+	ContextObjectTable tick_callback_object_table_;
+	ContextObjectTable micro_tick_callback_object_table_;
+	Lock alarm_mutex_;
+	AlarmSet alarm_callback_object_set_;
+	double max_post_kill_processing_time_;
+	IdSet post_kill_set_;
 
 	logclass();
 };

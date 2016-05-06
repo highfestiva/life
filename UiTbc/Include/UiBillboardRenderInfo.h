@@ -1,39 +1,36 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiTbc.h"
+#include "uitbc.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-struct BillboardRenderInfo
-{
+struct BillboardRenderInfo {
 public:
-	inline BillboardRenderInfo(float pAngle, const vec3& pPosition, float pScale, const vec3& pColor, float pOpacity, int pUVIndex):
-		mAngle(pAngle),
-		mPosition(pPosition),
-		mScale(pScale),
-		mColor(pColor),
-		mOpacity(pOpacity),
-		mUVIndex(pUVIndex)
-	{
+	inline BillboardRenderInfo(float angle, const vec3& position, float scale, const vec3& color, float opacity, int uv_index):
+		angle_(angle),
+		position_(position),
+		scale_(scale),
+		color_(color),
+		opacity_(opacity),
+		uv_index_(uv_index) {
 	}
 
-	float mAngle;
-	vec3 mPosition;
-	float mScale;
-	vec3 mColor;
-	float mOpacity;
-	int mUVIndex;
+	float angle_;
+	vec3 position_;
+	float scale_;
+	vec3 color_;
+	float opacity_;
+	int uv_index_;
 };
 
 typedef std::vector<BillboardRenderInfo> BillboardRenderInfoArray;

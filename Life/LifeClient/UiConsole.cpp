@@ -5,54 +5,50 @@
 
 
 #include "pch.h"
-#include "UiConsole.h"
-#include "../../Cure/Include/GameManager.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Cure/Include/TimeManager.h"
-#include "../../UiCure/Include/UiGameUiManager.h"
-#include "../../UiTbc/Include/GUI/UiConsoleLogListener.h"
-#include "../../UiTbc/Include/GUI/UiConsolePrompt.h"
-#include "../../UiTbc/Include/GUI/UiDesktopWindow.h"
-#include "../../UiTbc/Include/GUI/UiFileNameField.h"
-#include "../../UiTbc/Include/GUI/UiFloatingLayout.h"
-#include "../../UiTbc/Include/GUI/UiTextArea.h"
-#include "../ConsoleManager.h"
-#include "RtVar.h"
+#include "uiconsole.h"
+#include "../../cure/include/gamemanager.h"
+#include "../../cure/include/runtimevariable.h"
+#include "../../cure/include/timemanager.h"
+#include "../../uicure/include/uigameuimanager.h"
+#include "../../uitbc/include/gui/uiconsoleloglistener.h"
+#include "../../uitbc/include/gui/uiconsoleprompt.h"
+#include "../../uitbc/include/gui/uidesktopwindow.h"
+#include "../../uitbc/include/gui/uifilenamefield.h"
+#include "../../uitbc/include/gui/uifloatinglayout.h"
+#include "../../uitbc/include/gui/uitextarea.h"
+#include "../consolemanager.h"
+#include "rtvar.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-UiConsole::UiConsole(ConsoleManager* pManager, UiCure::GameUiManager* pUiManager, const PixelRect& pArea):
-	mManager(pManager),
-	mUiManager(pUiManager),
-	mArea(pArea),
-	mColor(10, 20, 30, 230),
-	mConsoleComponent(0),
-	mConsoleOutput(0),
-	mConsoleInput(0),
-	mIsConsoleVisible(false),
-	mIsFirstConsoleUse(true),
-	mConsoleTargetPosition(0)
-{
-	if (mManager->GetConsoleLogger())
-	{
+UiConsole::UiConsole(ConsoleManager* manager, UiCure::GameUiManager* ui_manager, const PixelRect& area):
+	manager_(manager),
+	ui_manager_(ui_manager),
+	area_(area),
+	color_(10, 20, 30, 230),
+	console_component_(0),
+	console_output_(0),
+	console_input_(0),
+	is_console_visible_(false),
+	is_first_console_use_(true),
+	console_target_position_(0) {
+	if (manager_->GetConsoleLogger()) {
 #ifdef NO_LOG_DEBUG_INFO
-		const LogLevel lAllowedLevel = LEVEL_INFO;
+		const LogLevel allowed_level = kLevelInfo;
 #else // Allow debug logging.
-		const LogLevel lAllowedLevel = LEVEL_LOWEST_TYPE;
+		const LogLevel allowed_level = kLevelLowestType;
 #endif // Disallow/allow debug logging.
-		for (int x = lAllowedLevel; x < LEVEL_TYPE_COUNT; ++x)
-		{
-			LogType::GetLogger(LogType::ROOT)->AddListener(mManager->GetConsoleLogger(), (LogLevel)x);
+		for (int x = allowed_level; x < kLevelTypeCount; ++x) {
+			LogType::GetLogger(LogType::kRoot)->AddListener(manager_->GetConsoleLogger(), (LogLevel)x);
 		}
 	}
 
-	mFontId = UiTbc::FontManager::INVALID_FONTID;
-	const char* lFontNames[] =
+	font_id_ = uitbc::FontManager::kInvalidFontid;
+	const char* font_names[] =
 	{
 		"Courier New",
 		"LiberationMono",
@@ -61,258 +57,215 @@ UiConsole::UiConsole(ConsoleManager* pManager, UiCure::GameUiManager* pUiManager
 		"",
 		0
 	};
-	UiTbc::FontManager::FontId lDefaultFontId = mUiManager->GetFontManager()->GetActiveFontId();
-	for (int x = 0; lFontNames[x] && mFontId == UiTbc::FontManager::INVALID_FONTID; ++x)
-	{
-		mFontId = mUiManager->GetFontManager()->QueryAddFont(lFontNames[x], 14.0f);
+	uitbc::FontManager::FontId default_font_id = ui_manager_->GetFontManager()->GetActiveFontId();
+	for (int x = 0; font_names[x] && font_id_ == uitbc::FontManager::kInvalidFontid; ++x) {
+		font_id_ = ui_manager_->GetFontManager()->QueryAddFont(font_names[x], 14.0f);
 	}
-	mUiManager->GetFontManager()->SetActiveFont(lDefaultFontId);
+	ui_manager_->GetFontManager()->SetActiveFont(default_font_id);
 }
 
-UiConsole::~UiConsole()
-{
+UiConsole::~UiConsole() {
 	Close();
-	mUiManager = 0;
-	mManager = 0;
+	ui_manager_ = 0;
+	manager_ = 0;
 }
 
 
 
-void UiConsole::Open()
-{
+void UiConsole::Open() {
 	InitGraphics();
 
-	((UiTbc::ConsoleLogListener*)mManager->GetConsoleLogger())->SetOutputComponent(mConsoleOutput);
-	((UiTbc::ConsolePrompt*)mManager->GetConsolePrompt())->SetInputComponent(mConsoleInput);
+	((uitbc::ConsoleLogListener*)manager_->GetConsoleLogger())->SetOutputComponent(console_output_);
+	((uitbc::ConsolePrompt*)manager_->GetConsolePrompt())->SetInputComponent(console_input_);
 
 	OnConsoleChange();
 }
 
-void UiConsole::Close()
-{
-	if (mManager->GetConsoleLogger())
-	{
-		((UiTbc::ConsoleLogListener*)mManager->GetConsoleLogger())->SetOutputComponent(0);
+void UiConsole::Close() {
+	if (manager_->GetConsoleLogger()) {
+		((uitbc::ConsoleLogListener*)manager_->GetConsoleLogger())->SetOutputComponent(0);
 	}
-	((UiTbc::ConsolePrompt*)mManager->GetConsolePrompt())->SetInputComponent(0);
+	((uitbc::ConsolePrompt*)manager_->GetConsolePrompt())->SetInputComponent(0);
 	CloseGraphics();
 }
 
 
 
-void UiConsole::SetRenderArea(const PixelRect& pRenderArea)
-{
-	mArea = pRenderArea;
+void UiConsole::SetRenderArea(const PixelRect& render_area) {
+	area_ = render_area;
 
-	if (mConsoleComponent)
-	{
-		PixelCoord lSize = mArea.GetSize();
-		lSize.y = (int)(lSize.y*0.6);	// TODO: use setting for how high console should be.
-		mConsoleComponent->SetPreferredSize(lSize);
-		mConsoleInput->ActivateFont(mUiManager->GetPainter());
-		int lInputHeight = mUiManager->GetPainter()->GetFontHeight()+4;
-		mConsoleInput->DeactivateFont(mUiManager->GetPainter());
-		lSize.y -= lInputHeight;
-		mConsoleOutput->SetPreferredSize(lSize);
-		lSize.y = lInputHeight;
-		mConsoleInput->SetPreferredSize(lSize);
+	if (console_component_) {
+		PixelCoord __size = area_.GetSize();
+		__size.y = (int)(__size.y*0.6);	// TODO: use setting for how high console should be.
+		console_component_->SetPreferredSize(__size);
+		console_input_->ActivateFont(ui_manager_->GetPainter());
+		int input_height = ui_manager_->GetPainter()->GetFontHeight()+4;
+		console_input_->DeactivateFont(ui_manager_->GetPainter());
+		__size.y -= input_height;
+		console_output_->SetPreferredSize(__size);
+		__size.y = input_height;
+		console_input_->SetPreferredSize(__size);
 	}
 }
 
-void UiConsole::SetColor(const Color& pColor)
-{
-	mColor = pColor;
+void UiConsole::SetColor(const Color& color) {
+	color_ = color;
 }
 
-bool UiConsole::ToggleVisible()
-{
-	SetVisible(!mIsConsoleVisible);
-	return (mIsConsoleVisible);
+bool UiConsole::ToggleVisible() {
+	SetVisible(!is_console_visible_);
+	return (is_console_visible_);
 }
 
-void UiConsole::SetVisible(bool pVisible)
-{
-	mIsConsoleVisible = pVisible;
+void UiConsole::SetVisible(bool visible) {
+	is_console_visible_ = visible;
 	OnConsoleChange();
 }
 
-bool UiConsole::IsVisible() const
-{
-	return mIsConsoleVisible;
+bool UiConsole::IsVisible() const {
+	return is_console_visible_;
 }
 
-void UiConsole::Tick()
-{
-	if (!mConsoleComponent)
-	{
+void UiConsole::Tick() {
+	if (!console_component_) {
 		return;
 	}
 
-	const float lFrameTime = mManager->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
-	float lConsoleSpeed;
-	v_get(lConsoleSpeed, =(float), mManager->GetVariableScope(), RTVAR_CTRL_UI_CONSPEED, 2.7);
-	const float lFrameConsoleSpeed = std::min(1.0f, Math::GetIterateLerpTime(lConsoleSpeed, lFrameTime));
-	if (mIsConsoleVisible)
-	{
-		if (mArea.mTop == 0)	// Slide down.
-		{
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)mArea.mTop, lFrameConsoleSpeed);
-			mConsoleComponent->SetPos(mArea.mLeft, (int)mConsoleTargetPosition);
+	const float frame_time = manager_->GetGameManager()->GetTimeManager()->GetRealNormalFrameTime();
+	float console_speed;
+	v_get(console_speed, =(float), manager_->GetVariableScope(), kRtvarCtrlUiConspeed, 2.7);
+	const float frame_console_speed = std::min(1.0f, Math::GetIterateLerpTime(console_speed, frame_time));
+	if (is_console_visible_) {
+		if (area_.top_ == 0) {	// Slide down.
+			console_target_position_ = Math::Lerp(console_target_position_, (float)area_.top_, frame_console_speed);
+			console_component_->SetPos(area_.left_, (int)console_target_position_);
+		} else {	// Slide sideways.
+			console_target_position_ = Math::Lerp(console_target_position_, (float)area_.left_, frame_console_speed);
+			console_component_->SetPos((int)console_target_position_, area_.top_);
 		}
-		else	// Slide sideways.
-		{
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)mArea.mLeft, lFrameConsoleSpeed);
-			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
-		}
-	}
-	else
-	{
-		const int lMargin = 3;
-		if (mArea.mTop == 0)	// Slide out top.
-		{
-			const int lTarget = -mConsoleComponent->GetSize().y-lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lFrameConsoleSpeed);
-			mConsoleComponent->SetPos(mArea.mLeft, (int)mConsoleTargetPosition);
-			if (mConsoleComponent->GetPos().y <= lTarget+lMargin)
-			{
-				mConsoleComponent->SetVisible(false);
+	} else {
+		const int margin = 3;
+		if (area_.top_ == 0) {	// Slide out top.
+			const int target = -console_component_->GetSize().y-margin;
+			console_target_position_ = Math::Lerp(console_target_position_, (float)target, frame_console_speed);
+			console_component_->SetPos(area_.left_, (int)console_target_position_);
+			if (console_component_->GetPos().y <= target+margin) {
+				console_component_->SetVisible(false);
 			}
-		}
-		else if (mArea.mLeft == 0)	// Slide out left.
-		{
-			const int lTarget = -mConsoleComponent->GetSize().x-lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lFrameConsoleSpeed);
-			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
-			if (mConsoleComponent->GetPos().x <= lTarget+lMargin)
-			{
-				mConsoleComponent->SetVisible(false);
+		} else if (area_.left_ == 0) {	// Slide out left.
+			const int target = -console_component_->GetSize().x-margin;
+			console_target_position_ = Math::Lerp(console_target_position_, (float)target, frame_console_speed);
+			console_component_->SetPos((int)console_target_position_, area_.top_);
+			if (console_component_->GetPos().x <= target+margin) {
+				console_component_->SetVisible(false);
 			}
-		}
-		else	// Slide out right.
-		{
-			const int lTarget = mUiManager->GetDisplayManager()->GetWidth()+lMargin;
-			mConsoleTargetPosition = Math::Lerp(mConsoleTargetPosition, (float)lTarget, lFrameConsoleSpeed);
-			mConsoleComponent->SetPos((int)mConsoleTargetPosition, mArea.mTop);
-			if (mConsoleComponent->GetPos().x >= lTarget+lMargin)
-			{
-				mConsoleComponent->SetVisible(false);
+		} else {	// Slide out right.
+			const int target = ui_manager_->GetDisplayManager()->GetWidth()+margin;
+			console_target_position_ = Math::Lerp(console_target_position_, (float)target, frame_console_speed);
+			console_component_->SetPos((int)console_target_position_, area_.top_);
+			if (console_component_->GetPos().x >= target+margin) {
+				console_component_->SetVisible(false);
 			}
 		}
 	}
 }
 
-UiCure::GameUiManager* UiConsole::GetUiManager() const
-{
-	return mUiManager;
+UiCure::GameUiManager* UiConsole::GetUiManager() const {
+	return ui_manager_;
 }
 
-UiTbc::FontManager::FontId UiConsole::GetFontId() const
-{
-	return mFontId;
+uitbc::FontManager::FontId UiConsole::GetFontId() const {
+	return font_id_;
 }
 
 
-void UiConsole::InitGraphics()
-{
+void UiConsole::InitGraphics() {
 	CloseGraphics();
 
-	mConsoleComponent = new UiTbc::Component(new UiTbc::ListLayout());
-	mConsoleOutput = new UiTbc::TextArea(mColor);
-	Color lInputColor = mColor - mColor * 0.3f;
-	lInputColor.mAlpha = mColor.mAlpha;
-	mConsoleInput = new UiTbc::TextField(mConsoleComponent, lInputColor);
+	console_component_ = new uitbc::Component(new uitbc::ListLayout());
+	console_output_ = new uitbc::TextArea(color_);
+	Color input_color = color_ - color_ * 0.3f;
+	input_color.alpha_ = color_.alpha_;
+	console_input_ = new uitbc::TextField(console_component_, input_color);
 
-	SetRenderArea(mArea);
+	SetRenderArea(area_);
 
-	mConsoleOutput->SetHorizontalMargin(3);
-	mConsoleOutput->SetFocusAnchor(UiTbc::TextArea::ANCHOR_BOTTOM_LINE);
-	mConsoleOutput->SetFontId(mFontId);
-	mConsoleOutput->SetFontColor(WHITE);
-	mConsoleInput->SetFontId(mFontId);
-	mConsoleInput->SetFontColor(WHITE);
+	console_output_->SetHorizontalMargin(3);
+	console_output_->SetFocusAnchor(uitbc::TextArea::kAnchorBottomLine);
+	console_output_->SetFontId(font_id_);
+	console_output_->SetFontColor(WHITE);
+	console_input_->SetFontId(font_id_);
+	console_input_->SetFontColor(WHITE);
 
-	mConsoleComponent->AddChild(mConsoleOutput);
-	mConsoleComponent->AddChild(mConsoleInput);
+	console_component_->AddChild(console_output_);
+	console_component_->AddChild(console_input_);
 
-	mUiManager->AssertDesktopLayout(new UiTbc::FloatingLayout, 0);
-	mUiManager->GetDesktopWindow()->AddChild(mConsoleComponent, 0, 0, 0);
-	mConsoleComponent->SetPos(mArea.mLeft, mArea.mTop);
-	mConsoleComponent->SetVisible(false);
+	ui_manager_->AssertDesktopLayout(new uitbc::FloatingLayout, 0);
+	ui_manager_->GetDesktopWindow()->AddChild(console_component_, 0, 0, 0);
+	console_component_->SetPos(area_.left_, area_.top_);
+	console_component_->SetVisible(false);
 
 	// This is just for getting some basic metrics (such as font height).
-	mConsoleComponent->Repaint(mUiManager->GetPainter());
+	console_component_->Repaint(ui_manager_->GetPainter());
 }
 
-void UiConsole::CloseGraphics()
-{
-	if (mUiManager && mConsoleComponent)
-	{
-		mUiManager->GetDesktopWindow()->RemoveChild(mConsoleComponent, 0);
-		mConsoleComponent->RemoveChild(mConsoleOutput, 0);
-		mConsoleComponent->RemoveChild(mConsoleInput, 0);
-		mConsoleComponent->SetVisible(false);
+void UiConsole::CloseGraphics() {
+	if (ui_manager_ && console_component_) {
+		ui_manager_->GetDesktopWindow()->RemoveChild(console_component_, 0);
+		console_component_->RemoveChild(console_output_, 0);
+		console_component_->RemoveChild(console_input_, 0);
+		console_component_->SetVisible(false);
 	}
 
-	delete (mConsoleComponent);
-	mConsoleComponent = 0;
-	delete (mConsoleOutput);
-	mConsoleOutput = 0;
-	delete (mConsoleInput);
-	mConsoleInput = 0;
+	delete (console_component_);
+	console_component_ = 0;
+	delete (console_output_);
+	console_output_ = 0;
+	delete (console_input_);
+	console_input_ = 0;
 }
 
-void UiConsole::OnConsoleChange()
-{
-	if (!mConsoleComponent)
-	{
+void UiConsole::OnConsoleChange() {
+	if (!console_component_) {
 		return;
 	}
 
-	if (mIsConsoleVisible)
-	{
-		mConsoleComponent->SetVisible(true);
-		mUiManager->GetDesktopWindow()->UpdateLayout();
-		mManager->GetConsolePrompt()->SetFocus(true);
-		if (mIsFirstConsoleUse)
-		{
-			mIsFirstConsoleUse = false;
+	if (is_console_visible_) {
+		console_component_->SetVisible(true);
+		ui_manager_->GetDesktopWindow()->UpdateLayout();
+		manager_->GetConsolePrompt()->SetFocus(true);
+		if (is_first_console_use_) {
+			is_first_console_use_ = false;
 			PrintHelp();
 		}
-	}
-	else
-	{
-		mManager->GetConsolePrompt()->SetFocus(false);
+	} else {
+		manager_->GetConsolePrompt()->SetFocus(false);
 	}
 }
 
-void UiConsole::PrintHelp()
-{
-	str lKeys;
-	v_get(lKeys, =, mManager->GetVariableScope(), RTVAR_CTRL_UI_CONTOGGLE, "???");
+void UiConsole::PrintHelp() {
+	str keys;
+	v_get(keys, =, manager_->GetVariableScope(), kRtvarCtrlUiContoggle, "???");
 	typedef strutil::strvec SV;
-	SV lKeyArray = strutil::Split(lKeys, ", \t");
-	SV lNiceKeys;
-	for (SV::iterator x = lKeyArray.begin(); x != lKeyArray.end(); ++x)
-	{
-		const str lKey = strutil::ReplaceAll(*x, "Key.", "");
-		lNiceKeys.push_back(lKey);
+	SV key_array = strutil::Split(keys, ", \t");
+	SV nice_keys;
+	for (SV::iterator x = key_array.begin(); x != key_array.end(); ++x) {
+		const str key = strutil::ReplaceAll(*x, "Key.", "");
+		nice_keys.push_back(key);
 	}
-	str lKeyInfo;
-	if (lKeyArray.size() == 1)
-	{
-		lKeyInfo = "key ";
+	str key_info;
+	if (key_array.size() == 1) {
+		key_info = "key ";
+	} else {
+		key_info = "any of the following keys: ";
 	}
-	else
-	{
-		lKeyInfo = "any of the following keys: ";
-	}
-	lKeyInfo += strutil::Join(lNiceKeys, ", ");
-	mLog.Infof("To bring this console up again press %s.", lKeyInfo.c_str());
+	key_info += strutil::Join(nice_keys, ", ");
+	log_.Infof("To bring this console up again press %s.", key_info.c_str());
 }
 
 
 
-loginstance(CONSOLE, UiConsole);
+loginstance(kConsole, UiConsole);
 
 
 

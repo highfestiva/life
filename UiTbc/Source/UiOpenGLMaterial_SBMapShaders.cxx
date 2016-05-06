@@ -6,12 +6,11 @@
 */
 
 #include "pch.h"
-#include "../Include/UiOpenGLMaterials.h"
+#include "../include/uiopenglmaterials.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-const str OpenGLMatTextureSBMapPXS::smVP =
+const str OpenGLMatTextureSBMapPXS::vp_ =
 	"!!ARBvp1.0\n\
 	 OPTION ARB_position_invariant;\n\
 	 \n\
@@ -37,7 +36,7 @@ const str OpenGLMatTextureSBMapPXS::smVP =
 	 PARAM mv[4]  = { state.matrix.modelview }; # model-view matrix\n\
 	 PARAM mtx[4] = { state.matrix.texture };   # texture matrix\n\
 	 # inverse transpose of model-view matrix:\n\
-	 PARAM mvIT[4] = { state.matrix.modelview.invtrans };\n\
+	 PARAM it_[4] = { state.matrix.modelview.invtrans };\n\
 	 PARAM iLightPos0  = program.local[0];\n\
 	 PARAM iLightPos1  = program.local[1];\n\
 	 PARAM iLightPos2  = program.local[2];\n\
@@ -53,27 +52,27 @@ const str OpenGLMatTextureSBMapPXS::smVP =
 	 DP4 oTCoord0.y, iTCoord0, mtx[1];\n\
 	 DP4 oTCoord0.z, iTCoord0, mtx[2];\n\
 	 DP4 oTCoord0.w, iTCoord0, mtx[3];\n\
-	 #DP4 oPos.x, iPos, mvp[0];             # transform input pos by Tbc::ModelViewProjection\n\
+	 #DP4 oPos.x, iPos, mvp[0];             # transform input pos by tbc::ModelViewProjection\n\
 	 #DP4 oPos.y, iPos, mvp[1];\n\
 	 #DP4 oPos.z, iPos, mvp[2];\n\
 	 #DP4 oPos.w, iPos, mvp[3];\n\
 	 \n\
-	 DP4 V.x, iPos, mv[0];                 # transform input pos by Tbc::ModelView\n\
+	 DP4 V.x, iPos, mv[0];                 # transform input pos by tbc::ModelView\n\
 	 DP4 V.y, iPos, mv[1];\n\
 	 DP4 V.z, iPos, mv[2];\n\
 	 DP4 V.w, iPos, mv[3];\n\
 	 \n\
-	 DP3 N.x, iNormal, mvIT[0];            # transform normal to eye space\n\
-	 DP3 N.y, iNormal, mvIT[1];\n\
-	 DP3 N.z, iNormal, mvIT[2];\n\
+	 DP3 N.x, iNormal, it_[0];            # transform normal to eye space\n\
+	 DP3 N.y, iNormal, it_[1];\n\
+	 DP3 N.z, iNormal, it_[2];\n\
 	 \n"
-	"DP3 T.x, iTangent, mvIT[0];           # transform normal to eye space\n\
-	 DP3 T.y, iTangent, mvIT[1];\n\
-	 DP3 T.z, iTangent, mvIT[2];\n\
+	"DP3 T.x, iTangent, it_[0];           # transform normal to eye space\n\
+	 DP3 T.y, iTangent, it_[1];\n\
+	 DP3 T.z, iTangent, it_[2];\n\
 	 \n\
-	 DP3 B.x, iBitangent, mvIT[0];         # transform normal to eye space\n\
-	 DP3 B.y, iBitangent, mvIT[1];\n\
-	 DP3 B.z, iBitangent, mvIT[2];\n\
+	 DP3 B.x, iBitangent, it_[0];         # transform normal to eye space\n\
+	 DP3 B.y, iBitangent, it_[1];\n\
+	 DP3 B.z, iBitangent, it_[2];\n\
 	 \n\
 	 # Transform light positions to tangent space.\n\
 	 SUB L0, iLightPos0, V;\n\
@@ -140,11 +139,11 @@ TEMP DiffuseCol;\n\
 TEMP SpecularCol;\n\
 TEMP fSpot;\n\
 TEMP fSpotNorm;\n\
-TEMP primCol;\n\
+TEMP col;\n\
 TEMP specular;\n\
 \n\
-TEX primCol, iTCoord0, texture[0], 2D;\n\
-MUL primCol, primCol, iPrimCol;\n\
+TEX col, iTCoord0, texture[0], 2D;\n\
+MUL col, col, iPrimCol;\n\
 \n\
 TEX Temp, iTCoord0, texture[1], 2D;       # read specularity from specular map.\n\
 MUL specular, Temp, iSpecular;\n\
@@ -179,7 +178,7 @@ MUL fSpot, fSpot, "#lcol";        # Light color.\n\
 MUL fSpot, fSpot, L.w;         # Attenuation.\n\
 \n"
 
-#define FP_CALC_POINT_LIGHT(lcol, lightVec) "\
+#define FP_CALC_POINT_LIGHT(lcol, vec) "\
 SUB H, L, V;                           # half-angle vector\n\
 DP3 H.w, H, H;                         # normalize it\n\
 RSQ H.w, H.w;\n\
@@ -222,13 +221,13 @@ MAD SpecularCol, fSpot, fromLIT.z, SpecularCol;\n\
 
 #define FP_END "\
 LRP Temp, specular, SpecularCol, DiffuseCol;\n\
-MUL N, primCol, ambientCol;\n\
-MAD outCol.rgb, Temp, primCol, N;\n\
+MUL N, col, ambientCol;\n\
+MAD outCol.rgb, Temp, col, N;\n\
 MOV outCol.a, iPrimCol.a;              # preserve alpha\n\
 END"
 
 
-const str OpenGLMatTextureSBMapPXS::smFP[NUM_FP] =
+const str OpenGLMatTextureSBMapPXS::fp_[kNumFp] =
 {
 	// Ambient light only.
 	"!!ARBfp1.0\n\
@@ -240,11 +239,11 @@ const str OpenGLMatTextureSBMapPXS::smFP[NUM_FP] =
 	 PARAM specular   = program.local[0];   # specularity factor.\n\
 	 PARAM ambientCol = program.local[3];   # ambient color.\n\
 	 \n\
-	 TEMP  primCol, diffuse, T;\n\
+	 TEMP  col, diffuse, T;\n\
 	 \n\
-	 TEX primCol, iTCoord, texture[0], 2D;\n\
-	 MUL primCol, primCol, iPrimCol;\n\
-	 MUL outCol.rgb, primCol, ambientCol;\n\
+	 TEX col, iTCoord, texture[0], 2D;\n\
+	 MUL col, col, iPrimCol;\n\
+	 MUL outCol.rgb, col, ambientCol;\n\
 	 MOV outCol.a, iPrimCol.a;\n\
 	 END",
 

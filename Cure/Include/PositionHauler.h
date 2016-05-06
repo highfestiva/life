@@ -1,25 +1,23 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "Cure.h"
+#include "cure.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 class ChunkyPhysics;
 class PhysicsManager;
 }
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
@@ -27,11 +25,10 @@ class ObjectPositionalData;
 
 
 
-class PositionHauler
-{
+class PositionHauler {
 public:
-	static bool Get(ObjectPositionalData& pPosition, const Tbc::PhysicsManager* pPhysicsManager, const Tbc::ChunkyPhysics* pStructure, float pTotalMass);
-	static void Set(const ObjectPositionalData& pPosition, Tbc::PhysicsManager* pPhysicsManager, Tbc::ChunkyPhysics* pStructure, float pTotalMass, bool pAllowMoveRoot);
+	static bool Get(ObjectPositionalData& position, const tbc::PhysicsManager* physics_manager, const tbc::ChunkyPhysics* structure, float total_mass);
+	static void Set(const ObjectPositionalData& position, tbc::PhysicsManager* physics_manager, tbc::ChunkyPhysics* structure, float total_mass, bool allow_move_root);
 
 private:
 	logclass();

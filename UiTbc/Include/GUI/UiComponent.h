@@ -8,20 +8,19 @@
 
 #pragma once
 
-#include "../../../Lepra/Include/Unordered.h"
-#include "../../../Lepra/Include/Graphics2D.h"
-#include "../../../Lepra/Include/HashTable.h"
-#include "../../../Lepra/Include/String.h"
-#include "../../../UiLepra/Include/UiInput.h"
-#include "../UiTbc.h"
-#include "../UiPainter.h"
-#include "UiLayout.h"
-#include "UiGUIImageManager.h"
+#include "../../../lepra/include/unordered.h"
+#include "../../../lepra/include/graphics2d.h"
+#include "../../../lepra/include/hashtable.h"
+#include "../../../lepra/include/string.h"
+#include "../../../uilepra/include/uiinput.h"
+#include "../uitbc.h"
+#include "../uipainter.h"
+#include "uilayout.h"
+#include "uiguiimagemanager.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
@@ -29,138 +28,134 @@ class GUIImageManager;
 
 
 
-class Component: public UiLepra::TextInputObserver, public UiLepra::KeyCodeInputObserver, public UiLepra::MouseInputObserver
-{
+class Component: public uilepra::TextInputObserver, public uilepra::KeyCodeInputObserver, public uilepra::MouseInputObserver {
 public:
 
 	friend class DesktopWindow;
 
-	enum Type
-	{
-		COMPONENT = 0,
-		RECTCOMPONENT,
-		BORDER,
-		BUTTON,
-		RADIOBUTTON,
-		CAPTION,
-		LABEL,
-		WINDOW,
-		DESKTOPWINDOW,
-		SCROLLBAR,
-		LISTCONTROL,
+	enum Type {
+		kComponent = 0,
+		kRectcomponent,
+		kBorder,
+		kButton,
+		kRadiobutton,
+		kCaption,
+		kLabel,
+		kWindow,
+		kDesktopwindow,
+		kScrollbar,
+		kListcontrol,
 	};
 
-	enum // Area
-	{
-		AREA_OUTSIDE = 0,
-		AREA_INSIDE,	// Empy client area.
-		AREA_CHILD,
+	enum { // Area
+		kAreaOutside = 0,
+		kAreaInside,	// Empy client area.
+		kAreaChild,
 	};
 
-	enum RecurseDir
-	{
-		RECURSE_UP = 0,
-		RECURSE_DOWN,
+	enum RecurseDir {
+		kRecurseUp = 0,
+		kRecurseDown,
 	};
 
-	Component(Layout* pLayout);
+	Component(Layout* layout);
 	virtual ~Component();
 	void DeleteAllLayers();
 
 	Component* GetParent();
-	Layout* GetLayout(int pLayer = 0) const;
-	void SetParentLayout(Layout* pLayout);
+	Layout* GetLayout(int layer = 0) const;
+	void SetParentLayout(Layout* layout);
 	Layout* GetParentLayout() const;
 
-	int CreateLayer(Layout* pLayout);
-	void DeleteLayer(int pLayer);
-	void DeleteChildrenInLayer(int pLayer);
-	void ReplaceLayer(int pLayer, Layout* pLayout);
+	int CreateLayer(Layout* layout);
+	void DeleteLayer(int layer);
+	void DeleteChildrenInLayer(int layer);
+	void ReplaceLayer(int layer, Layout* layout);
 
 	const PixelCoord& GetPos() const;
 	PixelCoord GetScreenPos() const;
-	
+
 	const PixelCoord& GetSize() const;
 	virtual PixelCoord GetMinSize() const;
 	PixelRect GetScreenRect() const;
-	
-	void SetPreferredSize(const PixelCoord& pSize, bool pAdaptive = true);
-	virtual void SetPreferredSize(int pWidth, int pHeight, bool pAdaptive = true);
-	void SetPreferredWidth(int pWidth);
-	void SetPreferredHeight(int pHeight);
-	virtual PixelCoord GetPreferredSize(bool pForceAdaptive = false);
-	int GetPreferredWidth(bool pForceAdaptive = false);
-	int GetPreferredHeight(bool pForceAdaptive = false);
-	void SetAdaptive(bool pAdaptive);
+
+	void SetPreferredSize(const PixelCoord& size, bool adaptive = true);
+	virtual void SetPreferredSize(int width, int height, bool adaptive = true);
+	void SetPreferredWidth(int width);
+	void SetPreferredHeight(int height);
+	virtual PixelCoord GetPreferredSize(bool force_adaptive = false);
+	int GetPreferredWidth(bool force_adaptive = false);
+	int GetPreferredHeight(bool force_adaptive = false);
+	void SetAdaptive(bool adaptive);
 	bool IsAdaptive();
 
-	void SetVisible(bool pVisible);
+	void SetVisible(bool visible);
 	bool IsVisible() const;
 	bool IsLocalVisible() const;
 
 	// Sets and gets the selected flag. The selected flag isn't actually used
 	// within this class, but is stored here to make it easier to implement
 	// list- and tree-controls.
-	virtual void SetSelected(bool pSelected);
+	virtual void SetSelected(bool selected);
 	bool GetSelected() const;
 
-	virtual void Enable(bool pEnable);
+	virtual void Enable(bool enable);
 
-	// The exact interpretation of pParam1 and pParam2 depends on the layout.
-	virtual void AddChild(Component* pChild, int pParam1 = 0, int pParam2 = 0, int pLayer = 0);
-	virtual void RemoveChild(Component* pChild, int pLayer);
+	// The exact interpretation of param1 and param2 depends on the layout.
+	virtual void AddChild(Component* child, int param1 = 0, int param2 = 0, int layer = 0);
+	virtual void RemoveChild(Component* child, int layer);
 	virtual int GetNumChildren() const;
-	
-	void AddTextListener(UiLepra::TextInputObserver* pListener);
-	void RemoveTextListener(UiLepra::TextInputObserver* pListener);
-	void AddKeyListener(UiLepra::KeyCodeInputObserver* pListener);
-	void RemoveKeyListener(UiLepra::KeyCodeInputObserver* pListener);
+
+	void AddTextListener(uilepra::TextInputObserver* listener);
+	void RemoveTextListener(uilepra::TextInputObserver* listener);
+	void AddKeyListener(uilepra::KeyCodeInputObserver* listener);
+	void RemoveKeyListener(uilepra::KeyCodeInputObserver* listener);
 
 	/*
 		Coordinate convertions.
 	*/
 
-	PixelCoord ClientToWindow(const PixelCoord& pCoords);
-	PixelCoord WindowToClient(const PixelCoord& pCoords);
-	PixelCoord WindowToScreen(const PixelCoord& pCoords);
-	PixelCoord ScreenToWindow(const PixelCoord& pCoords);
-	PixelCoord ClientToScreen(const PixelCoord& pCoords);
-	PixelCoord ScreenToClient(const PixelCoord& pCoords);
+	PixelCoord ClientToWindow(const PixelCoord& coords);
+	PixelCoord WindowToClient(const PixelCoord& coords);
+	PixelCoord WindowToScreen(const PixelCoord& coords);
+	PixelCoord ScreenToWindow(const PixelCoord& coords);
+	PixelCoord ClientToScreen(const PixelCoord& coords);
+	PixelCoord ScreenToClient(const PixelCoord& coords);
 
-	PixelRect ClientToWindow(const PixelRect& pRect);
-	PixelRect WindowToClient(const PixelRect& pRect);
-	PixelRect WindowToScreen(const PixelRect& pRect);
-	PixelRect ScreenToWindow(const PixelRect& pRect);
-	PixelRect ClientToScreen(const PixelRect& pRect);
-	PixelRect ScreenToClient(const PixelRect& pRect);
+	PixelRect ClientToWindow(const PixelRect& rect);
+	PixelRect WindowToClient(const PixelRect& rect);
+	PixelRect WindowToScreen(const PixelRect& rect);
+	PixelRect ScreenToWindow(const PixelRect& rect);
+	PixelRect ClientToScreen(const PixelRect& rect);
+	PixelRect ScreenToClient(const PixelRect& rect);
 
 	/*
 		Virtual functions and events.
 	*/
 
-	virtual void Repaint(Painter* pPainter);
-	virtual void RepaintBackground(Painter* pPainter);
-	virtual void RepaintComponents(Painter* pPainter);
-	virtual void RepaintChild(Component* pChild, Painter* pPainter);
-	virtual bool IsOver(int pScreenX, int pScreenY);
+	virtual void Repaint(Painter* painter);
+	virtual void RepaintBackground(Painter* painter);
+	virtual void RepaintComponents(Painter* painter);
+	virtual void RepaintChild(Component* child, Painter* painter);
+	virtual bool IsOver(int screen_x, int screen_y);
 
-	virtual bool OnDoubleClick(int pMouseX, int pMouseY);
+	virtual bool OnDoubleClick(int mouse_x, int mouse_y);
 
-	virtual bool OnLButtonDown(int pMouseX, int pMouseY);
-	virtual bool OnRButtonDown(int pMouseX, int pMouseY);
-	virtual bool OnMButtonDown(int pMouseX, int pMouseY);
+	virtual bool OnLButtonDown(int mouse_x, int mouse_y);
+	virtual bool OnRButtonDown(int mouse_x, int mouse_y);
+	virtual bool OnMButtonDown(int mouse_x, int mouse_y);
 
-	virtual bool OnLButtonUp(int pMouseX, int pMouseY);
-	virtual bool OnRButtonUp(int pMouseX, int pMouseY);
-	virtual bool OnMButtonUp(int pMouseX, int pMouseY);
+	virtual bool OnLButtonUp(int mouse_x, int mouse_y);
+	virtual bool OnRButtonUp(int mouse_x, int mouse_y);
+	virtual bool OnMButtonUp(int mouse_x, int mouse_y);
 
-	virtual bool OnMouseWheel(int pMouseX, int pMouseY, int pChange, bool pDown);
-	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pDeltaX, int pDeltaY);
+	virtual bool OnMouseWheel(int mouse_x, int mouse_y, int change, bool down);
+	virtual bool OnMouseMove(int mouse_x, int mouse_y, int delta_x, int delta_y);
 
-	virtual bool OnChar(wchar_t pChar);
+	virtual bool OnChar(wchar_t c);
 
-	virtual bool OnKeyDown(UiLepra::InputManager::KeyCode pKeyCode);
-	virtual bool OnKeyUp(UiLepra::InputManager::KeyCode pKeyCode);
+	virtual bool OnKeyDown(uilepra::InputManager::KeyCode key_code);
+	virtual bool OnKeyUp(uilepra::InputManager::KeyCode key_code);
 
 	virtual bool OnDoubleClick();
 
@@ -173,105 +168,104 @@ public:
 	virtual void OnIdle(){}
 
 	// The following are functions that should be handled with care (thus, you need to know
-	// what you are doing). For instance: Don't set the size by calling SetSize()... Call 
+	// what you are doing). For instance: Don't set the size by calling SetSize()... Call
 	// SetPreferredSize() instead. SetSize() is used by the various layout classes in order
 	// to set the definite size of the window, just before it's rendered.
-	void SetPos(const PixelCoord& pPos);
+	void SetPos(const PixelCoord& pos);
 	virtual void SetPos(int x, int y);
-	void SetSize(const PixelCoord& pSize);
-	virtual void SetSize(int pWidth, int pHeight);
-	void SetMinSize(const PixelCoord& pSize);
-	virtual void SetMinSize(int pWidth, int pHeight);
+	void SetSize(const PixelCoord& size);
+	virtual void SetSize(int width, int height);
+	void SetMinSize(const PixelCoord& size);
+	virtual void SetMinSize(int width, int height);
 
 	virtual Type GetType() const;
 
-	Component* GetChild(int pScreenX, int pScreenY, int pLevelsDown = 0);
+	Component* GetChild(int screen_x, int screen_y, int levels_down = 0);
 
 	GUIImageManager* GetImageManager();
 
 	virtual void UpdateLayout();
 
-	virtual void SetParent(Component* pParent);
-	bool IsChildOf(Component* pParent);
+	virtual void SetParent(Component* parent);
+	bool IsChildOf(Component* parent);
 
-	enum ComponentState
-	{
-		STATE_FOCUSABLE	= 1,
-		STATE_CLICKABLE,
+	enum ComponentState {
+		kStateFocusable	= 1,
+		kStateClickable,
 	};
 	typedef std::pair<int, Component*> StateComponent;
 	typedef std::list<StateComponent> StateComponentList;
-	virtual StateComponentList GetStateList(ComponentState pState);
+	virtual StateComponentList GetStateList(ComponentState state);
 
 	virtual void SetMouseFocus();
-	virtual void ReleaseMouseFocus(RecurseDir pDir = RECURSE_UP, Component* pFocusedComponent = 0);
+	virtual void ReleaseMouseFocus(RecurseDir dir = kRecurseUp, Component* focused_component = 0);
 	bool HasMouseFocus() const;
 
 	virtual void SetKeyboardFocus();
-	virtual void ReleaseKeyboardFocus(RecurseDir pDir = RECURSE_UP, Component* pFocusedComponent = 0);
+	virtual void ReleaseKeyboardFocus(RecurseDir dir = kRecurseUp, Component* focused_component = 0);
 	bool HasKeyboardFocus() const;
 
 	void RequestRepaint();
 
 	virtual bool IsComplete() const;
 
-	Component* GetChild(const str& pName) const;
-	void SetName(const str& pName);
+	Component* GetChild(const str& name) const;
+	void SetName(const str& name);
 	const str& GetName() const;
 
 protected:
 	virtual void DoSetPos(int x, int y);
-	virtual void DoSetSize(int pWidth, int pHeight);
-	virtual void DoSetMinSize(int pWidth, int pHeight);
+	virtual void DoSetSize(int width, int height);
+	virtual void DoSetMinSize(int width, int height);
 
 	bool NeedsRepaint();
 	// Should really be protected, but ScrollBar needs access to it.
-	void SetNeedsRepaint(bool pNeedsRepaint);
-	
+	void SetNeedsRepaint(bool needs_repaint);
+
 	// Some helper functions...
-	Component* GetParentOfType(Type pType);
+	Component* GetParentOfType(Type type);
 	Component* GetTopParent();
 
-	void SetImageManager(GUIImageManager* pImageManager);
+	void SetImageManager(GUIImageManager* image_manager);
 
-	virtual void SetKeyboardFocus(Component* pChild);
-	virtual void SetMouseFocus(Component* pChild);
-	void DispatchChar(wchar_t pChar);
+	virtual void SetKeyboardFocus(Component* child);
+	virtual void SetMouseFocus(Component* child);
+	void DispatchChar(wchar_t c);
 	bool IsDispatcher() const;
 
-	void DeleteLayout(int pLayer);
+	void DeleteLayout(int layer);
 
-	typedef std::unordered_set<UiLepra::TextInputObserver*, LEPRA_VOIDP_HASHER> TextListenerSet;
-	typedef std::unordered_set<UiLepra::KeyCodeInputObserver*, LEPRA_VOIDP_HASHER> KeyListenerSet;
-	TextListenerSet mTextListenerSet;
-	KeyListenerSet mKeyListenerSet;
+	typedef std::unordered_set<uilepra::TextInputObserver*, LEPRA_VOIDP_HASHER> TextListenerSet;
+	typedef std::unordered_set<uilepra::KeyCodeInputObserver*, LEPRA_VOIDP_HASHER> KeyListenerSet;
+	TextListenerSet text_listener_set_;
+	KeyListenerSet key_listener_set_;
 
-	Component* mParent;
-	Component* mMouseFocusChild;
-	Component* mKeyboardFocusChild;
-	Layout** mLayout;
-	Layout* mParentLayout;
+	Component* parent_;
+	Component* mouse_focus_child_;
+	Component* keyboard_focus_child_;
+	Layout** layout_;
+	Layout* parent_layout_;
 
-	PixelCoord mPos;
-	PixelCoord mPreferredSize;
-	PixelCoord mSize;
-	PixelCoord mMinSize;
+	PixelCoord pos_;
+	PixelCoord preferred_size_;
+	PixelCoord size_;
+	PixelCoord min_size_;
 
-	bool mNeedsRepaint;
-	bool mVisible;
-	bool mAdaptivePreferredSize;
-	bool mSelected;
-	bool mEnabled;
+	bool needs_repaint_;
+	bool visible_;
+	bool adaptive_preferred_size_;
+	bool selected_;
+	bool enabled_;
 
 	// Used by DesktopWindow to optimize rendering.
-	Painter::ImageID mImageID;
-	Canvas mImage;
+	Painter::ImageID image_id_;
+	Canvas image_;
 
-	int mLayerCount;
+	int layer_count_;
 
-	str mName;
+	str name_;
 
-	static GUIImageManager* smImageManager;
+	static GUIImageManager* image_manager_;
 
 	logclass();
 };

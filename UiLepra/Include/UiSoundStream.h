@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2009, Righteous Games
 
 
@@ -8,8 +8,7 @@
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
@@ -17,10 +16,9 @@ class SoundManager;
 
 
 
-class SoundStream
-{
+class SoundStream {
 public:
-	SoundStream(SoundManager* pSoundManager);
+	SoundStream(SoundManager* sound_manager);
 	virtual ~SoundStream();
 	virtual bool Playback() = 0;
 	virtual bool IsPlaying() const = 0;
@@ -28,13 +26,13 @@ public:
 	virtual bool Pause() = 0;
 	virtual bool Update() = 0;
 	bool IsOpen() const;
-	void SetVolume(float pVolume);
+	void SetVolume(float volume);
 
 protected:
-	SoundManager* mSoundManager;
-	bool mIsOpen;
-	bool mIsLooping;
-	float mVolume;
+	SoundManager* sound_manager_;
+	bool is_open_;
+	bool is_looping_;
+	float volume_;
 };
 
 

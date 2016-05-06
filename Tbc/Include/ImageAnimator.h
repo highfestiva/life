@@ -12,131 +12,121 @@
 
 #pragma once
 
-#include "../../Lepra/Include/HashTable.h"
-#include "../../Lepra/Include/Timer.h"
+#include "../../lepra/include/hashtable.h"
+#include "../../lepra/include/timer.h"
 
 #define TEMPLATE template<class TImageIdentifier>
 #define QUAL ImageAnimator<TImageIdentifier>
 
 
-namespace Tbc
-{
+namespace tbc {
 
-TEMPLATE class ImageAnimator
-{
+TEMPLATE class ImageAnimator {
 public:
 
-	enum PlayMode
-	{
-		LOOP_FORWARD = 0,	// Loops forever.
-		LOOP_BACKWARDS,		// ...
-		PINGPONG,		// Will play the anim back and forth forever.
-		FORWARD_TO_END,		// Play once to the last frame and freeze.
-		FORWARD_TO_START,	// Play once and loop over to the first frame, then freeze.
-		BACKWARD_TO_END,	// Play once backwards and loop over to the first frame, the freeze.
-		BACKWARD_TO_START,	// Play once backwards until the first frame, then freeze.
+	enum PlayMode {
+		kLoopForward = 0,	// Loops forever.
+		kLoopBackwards,		// ...
+		kPingpong,		// Will play the anim back and forth forever.
+		kForwardToEnd,		// Play once to the last frame and freeze.
+		kForwardToStart,	// Play once and loop over to the first frame, then freeze.
+		kBackwardToEnd,	// Play once backwards and loop over to the first frame, the freeze.
+		kBackwardToStart,	// Play once backwards until the first frame, then freeze.
 	};
 
-	enum StartBehaviour
-	{
-		INTERRUPT_ANIM = 0,	// Interrupts the currently playing animation.
-		WAIT_FOR_ANIM,		// Waits until the currently playing animation has ended.
+	enum StartBehaviour {
+		kInterruptAnim = 0,	// Interrupts the currently playing animation.
+		kWaitForAnim,		// Waits until the currently playing animation has ended.
 					// If the animation is looping or in pingpong mode it will
 					// be interrupted when it has completed the current cycle.
 	};
 
-	ImageAnimator(TImageIdentifier pInvalidID);
+	ImageAnimator(TImageIdentifier invalid_id);
 	virtual ~ImageAnimator();
 
-	void AddAnimation(const Lepra::PString& pAnimationName,    // The unique name for the animation.
-			  TImageIdentifier* pImageID,             // A pointer to an array of image IDs.
-			  unsigned pNumFrames,                   // The number of IDs in the array.
-			  unsigned pFPS,                         // Frames Per Second.
-			  PlayMode pPlayMode);
+	void AddAnimation(const lepra::PString& animation_name,    // The unique name for the animation.
+			  TImageIdentifier* image_id,             // A pointer to an array of image IDs.
+			  unsigned num_frames,                   // The number of IDs in the array.
+			  unsigned fps,                         // Frames Per Second.
+			  PlayMode play_mode);
 
 	// Add an animation with uneven spaces between the frames.
-	// In this case, the animation can only be played in FORWARD_TO_END mode.
-	void AddAnimation(const Lepra::PString& pAnimationName,    // The unique name for the animation.
-			  TImageIdentifier* pImageID,             // A pointer to an array of image IDs.
-			  unsigned* pTimeStamp,                 // Time in ms each frame is visible.
-			  unsigned pNumFrames);                  // The number of IDs in the array.
+	// In this case, the animation can only be played in kForwardToEnd mode.
+	void AddAnimation(const lepra::PString& animation_name,    // The unique name for the animation.
+			  TImageIdentifier* image_id,             // A pointer to an array of image IDs.
+			  unsigned* time_stamp,                 // Time in ms each frame is visible.
+			  unsigned num_frames);                  // The number of IDs in the array.
 
 
-	void RemoveAnimation(const Lepra::PString& pAnimationName);
+	void RemoveAnimation(const lepra::PString& animation_name);
 	void RemoveAllAnimations();
 
-	void StartAnimation(const Lepra::PString& pAnimationName, StartBehaviour pBehaviour);
+	void StartAnimation(const lepra::PString& animation_name, StartBehaviour behaviour);
 	void FreezeCurrentAnimation();
 
 	TImageIdentifier GetCurrentImageID();
 
 private:
 
-	class Animation
-	{
+	class Animation {
 	public:
 		Animation();
-		Animation(const Animation& pAnimation);
-		Animation(const Lepra::PString& pName,
-				  TImageIdentifier* pImageID,
-				  unsigned* pTimeStamp,
-				  unsigned pNumFrames,
-				  bool pLooping);
+		Animation(const Animation& animation);
+		Animation(const lepra::PString& name,
+				  TImageIdentifier* image_id,
+				  unsigned* time_stamp,
+				  unsigned num_frames,
+				  bool looping);
 		~Animation();
 
-		inline const Lepra::PString& GetName();
+		inline const lepra::PString& GetName();
 		inline const TImageIdentifier* GetImages();
 		inline const unsigned* GetTimeStamps();
 		inline unsigned GetNumFrames();
 		inline bool GetLooping();
 
 	private:
-		Lepra::PString mName;
-		TImageIdentifier* mImageID;
-		unsigned* mTimeStamp;			// Time stamps in milliseconds.
-		unsigned mNumFrames;
-		bool mLooping;
+		lepra::PString name_;
+		TImageIdentifier* image_id_;
+		unsigned* time_stamp_;			// Time stamps in milliseconds.
+		unsigned num_frames_;
+		bool looping_;
 	};
 
-	typedef Lepra::HashTable<Lepra::PString, Animation*, Lepra::PString> AnimTable;
+	typedef lepra::HashTable<lepra::PString, Animation*, lepra::PString> AnimTable;
 
-	AnimTable mAnimTable;
-	Animation* mCurrentAnim;
-	Animation* mWaitingAnim;
+	AnimTable anim_table_;
+	Animation* current_anim_;
+	Animation* waiting_anim_;
 
-	Lepra::Timer mTimer;
-	unsigned mCurrentFrame;
+	lepra::Timer timer_;
+	unsigned current_frame_;
 
-	TImageIdentifier mInvalidID;
+	TImageIdentifier invalid_id_;
 };
 
 
-TEMPLATE const Lepra::PString& QUAL::Animation::GetName()
-{
-	return mName;
+TEMPLATE const lepra::PString& QUAL::Animation::GetName() {
+	return name_;
 }
 
-TEMPLATE const TImageIdentifier* QUAL::Animation::GetImages()
-{
-	return mImageID;
+TEMPLATE const TImageIdentifier* QUAL::Animation::GetImages() {
+	return image_id_;
 }
 
-TEMPLATE const unsigned* QUAL::Animation::GetTimeStamps()
-{
-	return mTimeStamp;
+TEMPLATE const unsigned* QUAL::Animation::GetTimeStamps() {
+	return time_stamp_;
 }
 
-TEMPLATE unsigned QUAL::Animation::GetNumFrames()
-{
-	return mNumFrames;
+TEMPLATE unsigned QUAL::Animation::GetNumFrames() {
+	return num_frames_;
 }
 
-TEMPLATE bool QUAL::Animation::GetLooping()
-{
-	return mLooping;
+TEMPLATE bool QUAL::Animation::GetLooping() {
+	return looping_;
 }
 
-#include "ImageAnimator.inl"
+#include "imageanimator.inl"
 
 }
 

@@ -7,12 +7,11 @@
 #pragma once
 
 #include <pthread.h>
-#include "../Thread.h"
+#include "../thread.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -20,23 +19,21 @@ class Thread;
 
 
 
-class ThreadPointerStorage
-{
+class ThreadPointerStorage {
 public:
 	ThreadPointerStorage();
 	virtual ~ThreadPointerStorage();
 
-	void SetPointer(void* pThread);
+	void SetPointer(void* thread);
 	void* GetPointer();
 
 private:
-	pthread_key_t mKey;
+	pthread_key_t key_;
 };
 
 
 
-class PosixLock
-{
+class PosixLock {
 public:
 	PosixLock();
 	virtual	~PosixLock();
@@ -46,53 +43,50 @@ public:
 
 private:
 	friend class PosixCondition;
-	pthread_mutex_t mMutex;
+	pthread_mutex_t mutex_;
 };
 
 
 
-class PosixCondition
-{
+class PosixCondition {
 public:
-	PosixCondition(PosixLock* pExternalLock);
+	PosixCondition(PosixLock* external_lock);
 	virtual	~PosixCondition();
 
 	void Wait();
-	bool Wait(float64 pMaxWaitTime);
+	bool Wait(float64 max_wait_time);
 	void Signal();
 	void SignalAll();
 
 private:
-	PosixLock* mExternalLock;
-	pthread_cond_t mCondition;
+	PosixLock* external_lock_;
+	pthread_cond_t condition_;
 };
 
 
 
-class PosixSemaphore
-{
+class PosixSemaphore {
 public:
 	PosixSemaphore();
-	PosixSemaphore(unsigned pMaxCount);
+	PosixSemaphore(unsigned max_count);
 	virtual ~PosixSemaphore();
 
 	void Wait();
-	bool Wait(float64 pMaxWaitTime);
+	bool Wait(float64 max_wait_time);
 	void Signal();
 
 protected:
-	unsigned mMaxPermitCount;
-	volatile unsigned mPermitCount;
-	pthread_mutex_t mMutex;
-	pthread_cond_t mCondition;
+	unsigned max_permit_count_;
+	volatile unsigned permit_count_;
+	pthread_mutex_t mutex_;
+	pthread_cond_t condition_;
 
 	logclass();
 };
 
 
 
-class PosixRwLock
-{
+class PosixRwLock {
 public:
 	PosixRwLock();
 	virtual ~PosixRwLock();
@@ -102,7 +96,7 @@ public:
 	void Release();
 
 private:
-	pthread_rwlock_t mReadWriteLock;
+	pthread_rwlock_t read_write_lock_;
 };
 
 

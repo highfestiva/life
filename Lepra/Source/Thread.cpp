@@ -5,13 +5,12 @@
 
 
 #include "pch.h"
-#include "../Include/Thread.h"
-#include "../Include/FastLock.h"
+#include "../include/thread.h"
+#include "../include/fastlock.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
@@ -19,396 +18,327 @@ StaticThread gMainThread("MainThread");
 
 
 
-bool OwnedLock::IsOwner() const
-{
-	return (mOwner == Thread::GetCurrentThread());
+bool OwnedLock::IsOwner() const {
+	return (owner_ == Thread::GetCurrentThread());
 }
 
-Thread* OwnedLock::GetOwner() const
-{
-	return (mOwner);
+Thread* OwnedLock::GetOwner() const {
+	return (owner_);
 }
 
-int OwnedLock::GetReferenceCount() const
-{
-	return mAcquireCount;
+int OwnedLock::GetReferenceCount() const {
+	return acquire_count_;
 }
 
 OwnedLock::OwnedLock():
-	mOwner(0),
-	mAcquireCount(0)
-{
+	owner_(0),
+	acquire_count_(0) {
 }
 
-OwnedLock::~OwnedLock()
-{
-	deb_assert(mAcquireCount == 0);
+OwnedLock::~OwnedLock() {
+	deb_assert(acquire_count_ == 0);
 }
 
-void OwnedLock::Reference()
-{
-	if (mAcquireCount == 0)
-	{
-		deb_assert(!mOwner);
-		mOwner = Thread::GetCurrentThread();
+void OwnedLock::Reference() {
+	if (acquire_count_ == 0) {
+		deb_assert(!owner_);
+		owner_ = Thread::GetCurrentThread();
 	}
-	++mAcquireCount;
+	++acquire_count_;
 }
 
-void OwnedLock::Dereference()
-{
+void OwnedLock::Dereference() {
 	deb_assert(IsOwner());
-	--mAcquireCount;
-	if (mAcquireCount == 0)
-	{
-		mOwner = 0;
+	--acquire_count_;
+	if (acquire_count_ == 0) {
+		owner_ = 0;
 	}
 }
 
 
 
 Lock::Lock():
-	mSystemLock(new FastLock)
-{
+	system_lock_(new FastLock) {
 }
 
-Lock::~Lock()
-{
-	FastLock* lLock = (FastLock*)mSystemLock;
-	mSystemLock = 0;
-	delete lLock;
+Lock::~Lock() {
+	FastLock* _lock = (FastLock*)system_lock_;
+	system_lock_ = 0;
+	delete _lock;
 }
 
-void Lock::Acquire()
-{
-	((FastLock*)mSystemLock)->Acquire();
+void Lock::Acquire() {
+	((FastLock*)system_lock_)->Acquire();
 	Reference();
 }
 
-bool Lock::TryAcquire()
-{
-	bool lAcquired = ((FastLock*)mSystemLock)->TryAcquire();
-	if (lAcquired)
-	{
+bool Lock::TryAcquire() {
+	bool acquired = ((FastLock*)system_lock_)->TryAcquire();
+	if (acquired) {
 		Reference();
 	}
-	return lAcquired;
+	return acquired;
 }
 
-void Lock::Release()
-{
+void Lock::Release() {
 	Dereference();
-	((FastLock*)mSystemLock)->Release();
+	((FastLock*)system_lock_)->Release();
 }
 
-void* Lock::GetSystemLock() const
-{
-	return mSystemLock;
+void* Lock::GetSystemLock() const {
+	return system_lock_;
 }
 
-void Lock::operator=(const Lock&)
-{
+void Lock::operator=(const Lock&) {
 	deb_assert(false);
 }
 
 
 
-ScopeLock::ScopeLock(Lock* pLock):
-	mLock(pLock)
-{
-	mLock->Acquire();
+ScopeLock::ScopeLock(Lock* lock):
+	lock_(lock) {
+	lock_->Acquire();
 }
 
-ScopeLock::~ScopeLock()
-{
-	mLock->Release();
-	mLock = 0;
+ScopeLock::~ScopeLock() {
+	lock_->Release();
+	lock_ = 0;
 }
 
-void ScopeLock::Acquire()
-{
-	mLock->Acquire();
+void ScopeLock::Acquire() {
+	lock_->Acquire();
 }
 
-void ScopeLock::Release()
-{
-	mLock->Release();
+void ScopeLock::Release() {
+	lock_->Release();
 }
 
 
 
-Condition::Condition(Lock* pExternalLock):
-	mExternalLock(pExternalLock),
-	mSystemCondition(new FastCondition(pExternalLock? (FastLock*)pExternalLock->GetSystemLock() : 0))
-{
+Condition::Condition(Lock* external_lock):
+	external_lock_(external_lock),
+	system_condition_(new FastCondition(external_lock? (FastLock*)external_lock->GetSystemLock() : 0)) {
 }
 
-Condition::~Condition()
-{
-	FastCondition* lCondition = (FastCondition*)mSystemCondition;
-	mSystemCondition = 0;
-	delete lCondition;
+Condition::~Condition() {
+	FastCondition* condition = (FastCondition*)system_condition_;
+	system_condition_ = 0;
+	delete condition;
 }
 
-void Condition::Wait()
-{
-	mExternalLock->Dereference();
-	((FastCondition*)mSystemCondition)->Wait();
-	mExternalLock->Reference();
+void Condition::Wait() {
+	external_lock_->Dereference();
+	((FastCondition*)system_condition_)->Wait();
+	external_lock_->Reference();
 }
 
-bool Condition::Wait(float64 pMaxWaitTime)
-{
-	mExternalLock->Dereference();
-	const bool lSignalled = ((FastCondition*)mSystemCondition)->Wait(pMaxWaitTime);
-	mExternalLock->Reference();
-	return lSignalled;
+bool Condition::Wait(float64 max_wait_time) {
+	external_lock_->Dereference();
+	const bool signalled = ((FastCondition*)system_condition_)->Wait(max_wait_time);
+	external_lock_->Reference();
+	return signalled;
 }
 
-void Condition::Signal()
-{
-	((FastCondition*)mSystemCondition)->Signal();
+void Condition::Signal() {
+	((FastCondition*)system_condition_)->Signal();
 }
 
-void Condition::SignalAll()
-{
-	((FastCondition*)mSystemCondition)->SignalAll();
+void Condition::SignalAll() {
+	((FastCondition*)system_condition_)->SignalAll();
 }
 
 
 Semaphore::Semaphore():
-	mSystemSemaphore(new FastSemaphore)
-{
+	system_semaphore_(new FastSemaphore) {
 }
 
-Semaphore::Semaphore(unsigned pMaxCount):
-	mSystemSemaphore(new FastSemaphore(pMaxCount))
-{
+Semaphore::Semaphore(unsigned max_count):
+	system_semaphore_(new FastSemaphore(max_count)) {
 }
 
-Semaphore::~Semaphore()
-{
-	FastSemaphore* lSemaphore = (FastSemaphore*)mSystemSemaphore;
-	mSystemSemaphore = 0;
-	delete lSemaphore;
+Semaphore::~Semaphore() {
+	FastSemaphore* semaphore = (FastSemaphore*)system_semaphore_;
+	system_semaphore_ = 0;
+	delete semaphore;
 }
 
-void Semaphore::Wait()
-{
-	((FastSemaphore*)mSystemSemaphore)->Wait();
+void Semaphore::Wait() {
+	((FastSemaphore*)system_semaphore_)->Wait();
 }
 
-bool Semaphore::Wait(float64 pMaxWaitTime)
-{
-	return ((FastSemaphore*)mSystemSemaphore)->Wait(pMaxWaitTime);
+bool Semaphore::Wait(float64 max_wait_time) {
+	return ((FastSemaphore*)system_semaphore_)->Wait(max_wait_time);
 }
 
-void Semaphore::Signal()
-{
-	((FastSemaphore*)mSystemSemaphore)->Signal();
+void Semaphore::Signal() {
+	((FastSemaphore*)system_semaphore_)->Signal();
 }
 
 
-RwLock::RwLock(const str& pRwLockName):
-	mName(pRwLockName),
-	mSystemRwLock(new FastRwLock)
-{
+RwLock::RwLock(const str& rw_lock_name):
+	name_(rw_lock_name),
+	system_rw_lock_(new FastRwLock) {
 }
 
-RwLock::~RwLock()
-{
-	FastRwLock* lLock = (FastRwLock*)mSystemRwLock;
-	mSystemRwLock = 0;
-	delete lLock;
+RwLock::~RwLock() {
+	FastRwLock* _lock = (FastRwLock*)system_rw_lock_;
+	system_rw_lock_ = 0;
+	delete _lock;
 }
 
-void RwLock::AcquireRead()
-{
-	((FastRwLock*)mSystemRwLock)->AcquireRead();
+void RwLock::AcquireRead() {
+	((FastRwLock*)system_rw_lock_)->AcquireRead();
 }
 
-void RwLock::AcquireWrite()
-{
-	((FastRwLock*)mSystemRwLock)->AcquireWrite();
+void RwLock::AcquireWrite() {
+	((FastRwLock*)system_rw_lock_)->AcquireWrite();
 }
 
-void RwLock::Release()
-{
-	((FastRwLock*)mSystemRwLock)->Release();
+void RwLock::Release() {
+	((FastRwLock*)system_rw_lock_)->Release();
 }
 
-str RwLock::GetName()
-{
-	return mName;
+str RwLock::GetName() {
+	return name_;
 }
 
 
 
-Thread::Thread(const str& pThreadName):
-	mThreadName(pThreadName),
-	mRunning(false),
-	mStopRequested(false),
-	mSelfDestruct(false),
-	mThreadHandle(0),
-	mThreadId(0)
-{
+Thread::Thread(const str& thread_name):
+	thread_name_(thread_name),
+	running_(false),
+	stop_requested_(false),
+	self_destruct_(false),
+	thread_handle_(0),
+	thread_id_(0) {
 }
 
-Thread::~Thread()
-{
-	if (!GetSelfDestruct())
-	{
-		if (!Join(20.0))
-		{
+Thread::~Thread() {
+	if (!GetSelfDestruct()) {
+		if (!Join(20.0)) {
 			Kill();
 		}
 	}
 }
 
-void Thread::InitializeMainThread()
-{
+void Thread::InitializeMainThread() {
 	InitializeThread(&gMainThread);
 }
 
-bool Thread::QueryInitializeThread()
-{
-	Thread* lSelf = GetCurrentThread();
-	if (!lSelf)
-	{
-		lSelf = new StaticThread("OnTheFly");
-		lSelf->RequestSelfDestruct();
-		InitializeThread(lSelf);
+bool Thread::QueryInitializeThread() {
+	Thread* self = GetCurrentThread();
+	if (!self) {
+		self = new StaticThread("OnTheFly");
+		self->RequestSelfDestruct();
+		InitializeThread(self);
 		return true;
 	}
 	return false;
 }
 
-bool Thread::IsRunning() const
-{
-	return (mRunning);
+bool Thread::IsRunning() const {
+	return (running_);
 }
 
-void Thread::SetRunning(bool pRunning)
-{
-	log_volatile(mLog.Debug("Thread " + mThreadName + " is " + (pRunning? "starting" : "stopping")));
-	mRunning = pRunning;
+void Thread::SetRunning(bool running) {
+	log_volatile(log_.Debug("Thread " + thread_name_ + " is " + (running? "starting" : "stopping")));
+	running_ = running;
 }
 
-void Thread::SetThreadId(size_t pThreadId)
-{
-	mThreadId = pThreadId;
+void Thread::SetThreadId(size_t thread_id) {
+	thread_id_ = thread_id;
 }
 
-bool Thread::GetStopRequest() const
-{
-	return (mStopRequested);
+bool Thread::GetStopRequest() const {
+	return (stop_requested_);
 }
 
-void Thread::SetStopRequest(bool pStopRequest)
-{
-	mStopRequested = pStopRequest;
+void Thread::SetStopRequest(bool stop_request) {
+	stop_requested_ = stop_request;
 }
 
-void Thread::RequestStop()
-{
-	if (IsRunning() == true)
-	{
+void Thread::RequestStop() {
+	if (IsRunning() == true) {
 		SetStopRequest(true);
 	}
 }
 
-bool Thread::GetSelfDestruct() const
-{
-	return (mSelfDestruct);
+bool Thread::GetSelfDestruct() const {
+	return (self_destruct_);
 }
 
-void Thread::RequestSelfDestruct()
-{
-	mSelfDestruct = true;
+void Thread::RequestSelfDestruct() {
+	self_destruct_ = true;
 }
 
-const str& Thread::GetThreadName() const
-{
-	return (mThreadName);
+const str& Thread::GetThreadName() const {
+	return (thread_name_);
 }
 
-size_t Thread::GetThreadId() const
-{
-	return (mThreadId);
+size_t Thread::GetThreadId() const {
+	return (thread_id_);
 }
 
-size_t Thread::GetThreadHandle() const
-{
-	return (mThreadHandle);
+size_t Thread::GetThreadHandle() const {
+	return (thread_handle_);
 }
 
-void Thread::Sleep(float64 pTime)
-{
-	if (pTime > 0)
-	{
-		Sleep((unsigned int)(pTime * 1000000.0));
+void Thread::Sleep(float64 time) {
+	if (time > 0) {
+		Sleep((unsigned int)(time * 1000000.0));
 	}
 }
 
-bool Thread::Join(float64 pTimeOut)
-{
+bool Thread::Join(float64 time_out) {
 	SetStopRequest(true);
-	return GraceJoin(pTimeOut);
+	return GraceJoin(time_out);
 }
 
-void Thread::RunThread()
-{
+void Thread::RunThread() {
 	SetThreadId(GetCurrentThreadId());
 	SetRunning(true);
-	mSemaphore.Signal();
+	semaphore_.Signal();
 	YieldCpu();
 	Run();
 	SetRunning(false);
 	PostRun();
 }
 
-void RunThread(Thread* pThread)
-{
-	pThread->RunThread();
-	if (pThread->GetSelfDestruct())
-	{
-		delete (pThread);
+void RunThread(Thread* thread) {
+	thread->RunThread();
+	if (thread->GetSelfDestruct()) {
+		delete (thread);
 	}
 }
 
-loginstance(GENERAL, Thread);
+loginstance(kGeneral, Thread);
 
 
 
-StaticThread::StaticThread(const str& pThreadName):
-	Thread(pThreadName),
-	mThreadEntry(0),
-	mData(0)
-{
+StaticThread::StaticThread(const str& thread_name):
+	Thread(thread_name),
+	thread_entry_(0),
+	data_(0) {
 }
 
-StaticThread::~StaticThread()
-{
-	mThreadEntry = 0;
-	mData = 0;
+StaticThread::~StaticThread() {
+	thread_entry_ = 0;
+	data_ = 0;
 }
 
-bool StaticThread::Start(void (*pThreadEntry)(void*), void* pData)
-{
-	mThreadEntry = pThreadEntry;
-	mData = pData;
+bool StaticThread::Start(void (*thread_entry)(void*), void* data) {
+	thread_entry_ = thread_entry;
+	data_ = data;
 	return (Start());
 }
 
-bool StaticThread::Start()
-{
+bool StaticThread::Start() {
 	// Only implemented to protect the Start() method.
 	return (Thread::Start());
 }
 
-void StaticThread::Run()
-{
-	mThreadEntry(mData);
+void StaticThread::Run() {
+	thread_entry_(data_);
 }
 
 

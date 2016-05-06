@@ -5,167 +5,145 @@
 */
 
 #include "pch.h"
-#include "../Include/UiUVMapper.h"
-#include "../../Tbc/Include/../../Tbc/Include/GeometryBase.h"
+#include "../include/uiuvmapper.h"
+#include "../../tbc/include/../../tbc/include/geometrybase.h"
 #include <math.h>
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
-bool UVMapper::ApplyPlanarMapping(Tbc::GeometryBase* pGeometry, unsigned int pUVSet, 
-				  const Vector2DD& pUVOffset,
-				  const Vector3DD& pPlaneX, 
-				  const Vector3DD& pPlaneY)
-{
-	const double lEpsilon = 1e-15;
+bool UVMapper::ApplyPlanarMapping(tbc::GeometryBase* geometry, unsigned int uv_set,
+				  const Vector2DD& uv_offset,
+				  const Vector3DD& plane_x,
+				  const Vector3DD& plane_y) {
+	const double epsilon = 1e-15;
 
 	// Check if vectors are parallel.
-	double lDot = pPlaneX.Dot(pPlaneY);
-	lDot /= (pPlaneX.GetLength() * pPlaneY.GetLength());
+	double dot = plane_x.Dot(plane_y);
+	dot /= (plane_x.GetLength() * plane_y.GetLength());
 
-	bool lStatusOK = (fabs(lDot) < 1.0 - lEpsilon);
-	float* lVertexData = pGeometry->GetVertexData();
-	float* lUVData = pGeometry->GetUVData(pUVSet);
+	bool status_ok = (fabs(dot) < 1.0 - epsilon);
+	float* vertex_data = geometry->GetVertexData();
+	float* uv_data = geometry->GetUVData(uv_set);
 
-	if (lStatusOK)
-	{
-		lStatusOK = (lVertexData != 0 && lUVData != 0);
+	if (status_ok) {
+		status_ok = (vertex_data != 0 && uv_data != 0);
 	}
 
-	if (lStatusOK)
-	{
+	if (status_ok) {
 		unsigned int i;
-		for (i = 0; i < pGeometry->GetVertexCount(); i++)
-		{
-			int lVIndex = i * 3;
-			int lUVIndex = i * 2;
-			Vector3DD lV((double)lVertexData[lVIndex + 0],
-					     (double)lVertexData[lVIndex + 1],
-					     (double)lVertexData[lVIndex + 2]);
-			
-			lUVData[lUVIndex + 0] = (float)pPlaneX.Dot(lV) + (float)pUVOffset.x;
-			lUVData[lUVIndex + 1] = (float)pPlaneY.Dot(lV) + (float)pUVOffset.y;
+		for (i = 0; i < geometry->GetVertexCount(); i++) {
+			int v_index = i * 3;
+			int uv_index = i * 2;
+			Vector3DD v((double)vertex_data[v_index + 0],
+					     (double)vertex_data[v_index + 1],
+					     (double)vertex_data[v_index + 2]);
+
+			uv_data[uv_index + 0] = (float)plane_x.Dot(v) + (float)uv_offset.x;
+			uv_data[uv_index + 1] = (float)plane_y.Dot(v) + (float)uv_offset.y;
 		}
 	}
 
-	return lStatusOK;
+	return status_ok;
 }
 
 
-bool UVMapper::ApplyCubeMapping(Tbc::GeometryBase* pGeometry, unsigned int pUVSet, 
-				float pScale,
-				const Vector2DD& pUVOffsetLeft,
-				const Vector2DD& pUVOffsetRight,
-				const Vector2DD& pUVOffsetTop,
-				const Vector2DD& pUVOffsetBottom,
-				const Vector2DD& pUVOffsetFront,
-				const Vector2DD& pUVOffsetBack)
-{
-	pGeometry->GenerateSurfaceNormalData();
+bool UVMapper::ApplyCubeMapping(tbc::GeometryBase* geometry, unsigned int uv_set,
+				float scale,
+				const Vector2DD& uv_offset_left,
+				const Vector2DD& uv_offset_right,
+				const Vector2DD& uv_offset_top,
+				const Vector2DD& uv_offset_bottom,
+				const Vector2DD& uv_offset_front,
+				const Vector2DD& uv_offset_back) {
+	geometry->GenerateSurfaceNormalData();
 
-	float* lVertexData = pGeometry->GetVertexData();
-	float* lSurfaceNormal = pGeometry->GetSurfaceNormalData();
-	vtx_idx_t* lIndex = pGeometry->GetIndexData();
-	float* lUVData = pGeometry->GetUVData(pUVSet);
+	float* vertex_data = geometry->GetVertexData();
+	float* surface_normal = geometry->GetSurfaceNormalData();
+	vtx_idx_t* index = geometry->GetIndexData();
+	float* uv_data = geometry->GetUVData(uv_set);
 
-	pScale = 1.0f / pScale;
+	scale = 1.0f / scale;
 
-	bool lStatusOk = (lVertexData != 0 && lSurfaceNormal != 0 && lIndex != 0 && lUVData != 0);
+	bool status_ok = (vertex_data != 0 && surface_normal != 0 && index != 0 && uv_data != 0);
 
-	if (lStatusOk)
-	{
+	if (status_ok) {
 		unsigned int i;
-		for (i = 0; i < pGeometry->GetTriangleCount(); i++)
-		{
-			int lTriIndex = i * 3;
-			int lV1Index = lIndex[lTriIndex + 0] * 3;
-			int lV2Index = lIndex[lTriIndex + 1] * 3;
-			int lV3Index = lIndex[lTriIndex + 2] * 3;
-			int lUV1 = lIndex[lTriIndex + 0] * 2;
-			int lUV2 = lIndex[lTriIndex + 1] * 2;
-			int lUV3 = lIndex[lTriIndex + 2] * 2;
+		for (i = 0; i < geometry->GetTriangleCount(); i++) {
+			int tri_index = i * 3;
+			int v1_index = index[tri_index + 0] * 3;
+			int v2_index = index[tri_index + 1] * 3;
+			int v3_index = index[tri_index + 2] * 3;
+			int u_v1 = index[tri_index + 0] * 2;
+			int u_v2 = index[tri_index + 1] * 2;
+			int u_v3 = index[tri_index + 2] * 2;
 
-			float x = lSurfaceNormal[lTriIndex + 0];
-			float y = lSurfaceNormal[lTriIndex + 1];
-			float z = lSurfaceNormal[lTriIndex + 2];
+			float x = surface_normal[tri_index + 0];
+			float y = surface_normal[tri_index + 1];
+			float z = surface_normal[tri_index + 2];
 
-			float lAbsX = abs(x);
-			float lAbsY = abs(y);
-			float lAbsZ = abs(z);
+			float abs_x = abs(x);
+			float abs_y = abs(y);
+			float abs_z = abs(z);
 
-			vec3 lXAxis;
-			vec3 lYAxis;
-			vec2 lUVOffset;
+			vec3 x_axis;
+			vec3 y_axis;
+			vec2 _uv_offset;
 
-			if (lAbsX > lAbsY && lAbsX > lAbsZ)
-			{
+			if (abs_x > abs_y && abs_x > abs_z) {
 				// Left or right.
-				if (x > 0)
-				{
-					lXAxis.Set(0, 1, 0);
-					lUVOffset.Set((float)pUVOffsetRight.x, (float)pUVOffsetRight.y);
+				if (x > 0) {
+					x_axis.Set(0, 1, 0);
+					_uv_offset.Set((float)uv_offset_right.x, (float)uv_offset_right.y);
+				} else {
+					x_axis.Set(0, -1, 0);
+					_uv_offset.Set((float)uv_offset_left.x, (float)uv_offset_left.y);
 				}
-				else
-				{
-					lXAxis.Set(0, -1, 0);
-					lUVOffset.Set((float)pUVOffsetLeft.x, (float)pUVOffsetLeft.y);
-				}
-				lYAxis.Set(0, 0, 1.0f);
-			}
-			else if(lAbsY > lAbsX && lAbsY > lAbsZ)
-			{
+				y_axis.Set(0, 0, 1.0f);
+			} else if(abs_y > abs_x && abs_y > abs_z) {
 				// Front or back.
-				if (y < 0)
-				{
-					lXAxis.Set(1, 0, 0);
-					lUVOffset.Set((float)pUVOffsetFront.x, (float)pUVOffsetFront.y);
+				if (y < 0) {
+					x_axis.Set(1, 0, 0);
+					_uv_offset.Set((float)uv_offset_front.x, (float)uv_offset_front.y);
+				} else {
+					x_axis.Set(-1, 0, 0);
+					_uv_offset.Set((float)uv_offset_back.x, (float)uv_offset_back.y);
 				}
-				else
-				{
-					lXAxis.Set(-1, 0, 0);
-					lUVOffset.Set((float)pUVOffsetBack.x, (float)pUVOffsetBack.y);
-				}
-				lYAxis.Set(0, 0, 1.0f);
-			}
-			else
-			{
+				y_axis.Set(0, 0, 1.0f);
+			} else {
 				// Top or bottom.
-				if (z > 0)
-				{
-					lYAxis.Set(0, 1, 0);
-					lUVOffset.Set((float)pUVOffsetTop.x, (float)pUVOffsetTop.y);
+				if (z > 0) {
+					y_axis.Set(0, 1, 0);
+					_uv_offset.Set((float)uv_offset_top.x, (float)uv_offset_top.y);
+				} else {
+					y_axis.Set(0, -1, 0);
+					_uv_offset.Set((float)uv_offset_bottom.x, (float)uv_offset_bottom.y);
 				}
-				else
-				{
-					lYAxis.Set(0, -1, 0);
-					lUVOffset.Set((float)pUVOffsetBottom.x, (float)pUVOffsetBottom.y);
-				}
-				lXAxis.Set(1.0f, 0, 0);
+				x_axis.Set(1.0f, 0, 0);
 			}
 
-			vec3 lV1(lVertexData[lV1Index + 0],
-			                     lVertexData[lV1Index + 1],
-			                     lVertexData[lV1Index + 2]);
-			vec3 lV2(lVertexData[lV2Index + 0],
-			                     lVertexData[lV2Index + 1],
-			                     lVertexData[lV2Index + 2]);
-			vec3 lV3(lVertexData[lV3Index + 0],
-			                     lVertexData[lV3Index + 1],
-			                     lVertexData[lV3Index + 2]);
-			
-			lUVData[lUV1 + 0] = (float)lXAxis.Dot(lV1) * pScale + lUVOffset.x;
-			lUVData[lUV1 + 1] = (float)lYAxis.Dot(-lV1) * pScale + lUVOffset.y;
+			vec3 v1(vertex_data[v1_index + 0],
+			                     vertex_data[v1_index + 1],
+			                     vertex_data[v1_index + 2]);
+			vec3 v2(vertex_data[v2_index + 0],
+			                     vertex_data[v2_index + 1],
+			                     vertex_data[v2_index + 2]);
+			vec3 v3(vertex_data[v3_index + 0],
+			                     vertex_data[v3_index + 1],
+			                     vertex_data[v3_index + 2]);
 
-			lUVData[lUV2 + 0] = (float)lXAxis.Dot(lV2) * pScale + lUVOffset.x;
-			lUVData[lUV2 + 1] = (float)lYAxis.Dot(-lV2) * pScale + lUVOffset.y;
+			uv_data[u_v1 + 0] = (float)x_axis.Dot(v1) * scale + _uv_offset.x;
+			uv_data[u_v1 + 1] = (float)y_axis.Dot(-v1) * scale + _uv_offset.y;
 
-			lUVData[lUV3 + 0] = (float)lXAxis.Dot(lV3) * pScale + lUVOffset.x;
-			lUVData[lUV3 + 1] = (float)lYAxis.Dot(-lV3) * pScale + lUVOffset.y;
+			uv_data[u_v2 + 0] = (float)x_axis.Dot(v2) * scale + _uv_offset.x;
+			uv_data[u_v2 + 1] = (float)y_axis.Dot(-v2) * scale + _uv_offset.y;
+
+			uv_data[u_v3 + 0] = (float)x_axis.Dot(v3) * scale + _uv_offset.x;
+			uv_data[u_v3 + 1] = (float)y_axis.Dot(-v3) * scale + _uv_offset.y;
 		}
 	}
 
-	return lStatusOk;
+	return status_ok;
 }
 
 }

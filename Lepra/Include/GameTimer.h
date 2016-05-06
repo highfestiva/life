@@ -1,22 +1,20 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "HiResTimer.h"
+#include "hirestimer.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class GameTimer
-{
+class GameTimer {
 public:
 	inline GameTimer();
 
@@ -24,10 +22,10 @@ public:
 	// May only be used once per frame, or couting will be off!
 	inline double QueryTimeDiff();
 	inline double GetTimeDiff() const;
-	inline void ReduceTimeDiff(double pSeconds);
+	inline void ReduceTimeDiff(double seconds);
 
 	inline bool TryStart();
-	inline void Start(double pOffset = 0);
+	inline void Start(double offset = 0);
 	inline bool ResumeFromLapTime();
 	inline bool ResumeFromStop();
 	inline void Stop();
@@ -37,96 +35,80 @@ public:
 	inline int GetStartCount() const;
 
 	inline static double GetRealTimeRatio();
-	inline static void SetRealTimeRatio(double pRealTimeRatio);
+	inline static void SetRealTimeRatio(double real_time_ratio);
 
 protected:
-	StopWatch mTimer;
-	double mGameTime;
-	static double mRealTimeRatio;
+	StopWatch timer_;
+	double game_time_;
+	static double real_time_ratio_;
 };
 
 GameTimer::GameTimer():
-	mGameTime(0)
-{
+	game_time_(0) {
 }
 
-double GameTimer::PopTimeDiff()
-{
-	double lGameTime = mGameTime + mTimer.PopTimeDiff()*mRealTimeRatio;
-	mGameTime = 0;
-	return lGameTime;
+double GameTimer::PopTimeDiff() {
+	double game_time = game_time_ + timer_.PopTimeDiff()*real_time_ratio_;
+	game_time_ = 0;
+	return game_time;
 }
 
-double GameTimer::QueryTimeDiff()
-{
-	mGameTime += mTimer.PopTimeDiff()*mRealTimeRatio;
-	return mGameTime;
+double GameTimer::QueryTimeDiff() {
+	game_time_ += timer_.PopTimeDiff()*real_time_ratio_;
+	return game_time_;
 }
 
-double GameTimer::GetTimeDiff() const
-{
-	return mGameTime;
+double GameTimer::GetTimeDiff() const {
+	return game_time_;
 }
 
-void GameTimer::ReduceTimeDiff(double pSeconds)
-{
-	mGameTime -= pSeconds;
+void GameTimer::ReduceTimeDiff(double seconds) {
+	game_time_ -= seconds;
 }
 
-bool GameTimer::TryStart()
-{
-	if (mTimer.TryStart())
-	{
-		mGameTime = 0;
+bool GameTimer::TryStart() {
+	if (timer_.TryStart()) {
+		game_time_ = 0;
 		return true;
 	}
 	return false;
 }
 
-void GameTimer::Start(double pOffset)
-{
-	mTimer.Start();
-	mGameTime = pOffset;
+void GameTimer::Start(double offset) {
+	timer_.Start();
+	game_time_ = offset;
 }
 
-bool GameTimer::ResumeFromLapTime()
-{
-	return mTimer.ResumeFromLapTime();
+bool GameTimer::ResumeFromLapTime() {
+	return timer_.ResumeFromLapTime();
 }
 
-bool GameTimer::ResumeFromStop()
-{
-	return mTimer.ResumeFromStop();
+bool GameTimer::ResumeFromStop() {
+	return timer_.ResumeFromStop();
 }
 
-void GameTimer::Stop()
-{
-	mTimer.Stop();
+void GameTimer::Stop() {
+	timer_.Stop();
 }
 
-bool GameTimer::IsStarted() const
-{
-	return mTimer.IsStarted();
+bool GameTimer::IsStarted() const {
+	return timer_.IsStarted();
 }
 
-double GameTimer::QuerySplitTime()
-{
-	return IsStarted()? QueryTimeDiff() : mGameTime;
+double GameTimer::QuerySplitTime() {
+	return IsStarted()? QueryTimeDiff() : game_time_;
 }
 
-int GameTimer::GetStartCount() const
-{
-	return mTimer.GetStartCount();
+int GameTimer::GetStartCount() const {
+	return timer_.GetStartCount();
 }
 
-double GameTimer::GetRealTimeRatio()
-{
-	return mRealTimeRatio;
+double GameTimer::GetRealTimeRatio() {
+	return real_time_ratio_;
 }
 
-void GameTimer::SetRealTimeRatio(double pRealTimeRatio)
-{
-	mRealTimeRatio = pRealTimeRatio;
+void GameTimer::SetRealTimeRatio(double real_time_ratio) {
+	real_time_ratio_ = real_time_ratio;
 }
 
 

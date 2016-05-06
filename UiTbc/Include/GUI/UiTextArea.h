@@ -7,75 +7,71 @@
 #pragma once
 
 #include <list>
-#include "../../../Lepra/Include/Thread.h"
-#include "UiTextComponent.h"
-#include "UiWindow.h"
+#include "../../../lepra/include/thread.h"
+#include "uitextcomponent.h"
+#include "uiwindow.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
 // Currently a non-editable text area (split in lines). Works good for consoles.
-class TextArea: public Window, public TextComponent
-{
+class TextArea: public Window, public TextComponent {
 public:
 	typedef Window Parent;
 
-	enum FocusAnchor
-	{
-		ANCHOR_TOP_LINE,
-		ANCHOR_BOTTOM_LINE,
+	enum FocusAnchor {
+		kAnchorTopLine,
+		kAnchorBottomLine,
 	};
 
-	TextArea(const Color& pColor);
-	TextArea(Painter::ImageID pImageId);
+	TextArea(const Color& color);
+	TextArea(Painter::ImageID image_id);
 	virtual ~TextArea();
 
 	void Clear();
-	bool InsertLine(unsigned pLineIndex, const wstr& pText, Color* pColor = 0);
-	unsigned AddLine(const wstr& pText, Color* pColor = 0);
-	void AddText(const wstr& pText, Color* pColor = 0);
-	bool RemoveLine(unsigned pLineIndex);
+	bool InsertLine(unsigned line_index, const wstr& text, Color* color = 0);
+	unsigned AddLine(const wstr& text, Color* color = 0);
+	void AddText(const wstr& text, Color* color = 0);
+	bool RemoveLine(unsigned line_index);
 	unsigned GetLineCount() const;
 	unsigned GetFirstVisibleLineIndex() const;
-	void SetFirstVisibleLineIndex(unsigned pLineIndex);
+	void SetFirstVisibleLineIndex(unsigned line_index);
 	unsigned GetVisibleLineCount() const;
 
 	// Set a top anchor for normal text viewing, set bottom anchor for console listings.
-	void SetFocusAnchor(FocusAnchor pAnchor);
-	void SetScrollLock(bool pScrollLock);
-	void SetMaxLineCount(unsigned pMaxLineCount);
+	void SetFocusAnchor(FocusAnchor anchor);
+	void SetScrollLock(bool scroll_lock);
+	void SetMaxLineCount(unsigned max_line_count);
 
-	void Repaint(Painter* pPainter);
+	void Repaint(Painter* painter);
 
 protected:
 	void ForceRepaint();
 
 private:
-	struct LineInfo
-	{
-		wstr mText;
-		Color mColor;
+	struct LineInfo {
+		wstr text_;
+		Color color_;
 	};
 	typedef std::list<LineInfo> TextLineList;
 
-	TextLineList::iterator GetIterator(unsigned pLineIndex);
+	TextLineList::iterator GetIterator(unsigned line_index);
 
-	virtual void DoSetSize(int pWidth, int pHeight);
+	virtual void DoSetSize(int width, int height);
 	void UpdateVisibleSize();
 	void ScrollToLastLine();
 
-	mutable Lock mLock;
-	TextLineList mLineList;
-	unsigned mFirstVisibleLine;
-	unsigned mVisibleLineCount;
-	unsigned mLineHeight;
-	FocusAnchor mFocusAnchor;
-	bool mScrollLock;
-	unsigned mMaxLineCount;
+	mutable Lock lock_;
+	TextLineList line_list_;
+	unsigned first_visible_line_;
+	unsigned visible_line_count_;
+	unsigned line_height_;
+	FocusAnchor focus_anchor_;
+	bool scroll_lock_;
+	unsigned max_line_count_;
 };
 
 

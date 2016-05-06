@@ -1,13 +1,13 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "LepraTypes.h"
-#include "FastAllocator.h"
+#include "lepratypes.h"
+#include "fastallocator.h"
 
 
 
@@ -16,339 +16,284 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
 template<class _TKey, class _TObject>
-class BinTree
-{
+class BinTree {
 public:
 	class Node;
 private:
 	typedef FastAllocator<Node> NodeAllocator;
 public:
-	class Node
-	{
+	class Node {
 	public:
 
 		Node();
-		Node(_TKey pKey, _TObject pObject, Node* pParent);
+		Node(_TKey key, _TObject object, Node* parent);
 		~Node();
 
-		void Init(_TKey pKey, _TObject pObject, Node* pParent);
-		void Destroy(NodeAllocator* pAllocator);
+		void Init(_TKey key, _TObject object, Node* parent);
+		void Destroy(NodeAllocator* allocator);
 
-		Node* Insert(Node* pNode);
-		Node* Find(_TKey pKey);
+		Node* Insert(Node* node);
+		Node* Find(_TKey key);
 		const Node* GetLeftMostNode() const;
 		Node* GetLeftMostNode();
 		const Node* GetRightMostNode() const;
 		Node* GetRightMostNode();
 
-		void Relink(Node* pOldNode, Node* pNewNode);
+		void Relink(Node* old_node, Node* new_node);
 		Node* Unlink();
 
-		Node*    mParent;
-		Node*    mLeft;
-		Node*    mRight;
+		Node*    parent_;
+		Node*    left_;
+		Node*    right_;
 
-		_TKey    mKey;
-		_TObject mObject;
+		_TKey    key_;
+		_TObject object_;
 	};
 
 public:
 
 	class ConstIterator;
 
-	class Iterator
-	{
+	class Iterator {
 	public:
 		friend class BinTree;
 
-		Iterator() : mNode(0), mPrev(0){}
-		Iterator(const Iterator& pIterator) : mNode(pIterator.mNode), mPrev(pIterator.mPrev){}
+		Iterator() : node_(0), prev_(0){}
+		Iterator(const Iterator& iterator) : node_(iterator.node_), prev_(iterator.prev_){}
 
-		Iterator& operator = (const Iterator& pOther)
-		{
-			mNode   = pOther.mNode;
-			mPrev   = pOther.mPrev;
+		Iterator& operator = (const Iterator& other) {
+			node_   = other.node_;
+			prev_   = other.prev_;
 
 			return *this;
 		}
 
-		Iterator& operator = (const Iterator* pOther)
-		{
-			mNode   = pOther->mNode;
-			mPrev   = pOther->mPrev;
+		Iterator& operator = (const Iterator* other) {
+			node_   = other->node_;
+			prev_   = other->prev_;
 
 			return *this;
 		}
 
 		// Logical equality operator for iterator comparisons.
-		int  operator==(const Iterator& pOther) const		{ return mNode == pOther.mNode; }
-		bool   operator==(const ConstIterator& pOther) const	{ return mNode == pOther.mNode; }
+		int  operator==(const Iterator& other) const		{ return node_ == other.node_; }
+		bool   operator==(const ConstIterator& other) const	{ return node_ == other.node_; }
 
 		// Logical inequality operator for iterator comparisons.
-		int  operator!=(const Iterator& pOther) const		{ return !operator==(pOther); }
-		bool   operator!=(const ConstIterator& pOther) const	{ return !operator==(pOther); }
+		int  operator!=(const Iterator& other) const		{ return !operator==(other); }
+		bool   operator!=(const ConstIterator& other) const	{ return !operator==(other); }
 
 		// Gets the contents of the iterator.
-		_TObject& operator*() const	{ return mNode->mObject; }
+		_TObject& operator*() const	{ return node_->object_; }
 
 		// Pre- and postfix increment operators for traversing a tree.
-		Iterator& operator++()
-		{ 
-			if (mNode == 0)
-			{
+		Iterator& operator++() {
+			if (node_ == 0) {
 				return *this;
 			}
 
-			if (mPrev == 0 || mPrev == mNode->mLeft)
-			{
+			if (prev_ == 0 || prev_ == node_->left_) {
 				// Try to go right.
-				if (mNode->mRight != 0)
-				{
-					mNode = mNode->mRight->GetLeftMostNode();
-					mPrev = 0;
-				}
-				else
-				{
+				if (node_->right_ != 0) {
+					node_ = node_->right_->GetLeftMostNode();
+					prev_ = 0;
+				} else {
 					// Go up as long as we are coming from the right.
-					do
-					{
-						mPrev = mNode;
-						mNode = mNode->mParent;
-					} while(mNode != 0 && mPrev == mNode->mRight);
+					do {
+						prev_ = node_;
+						node_ = node_->parent_;
+					} while(node_ != 0 && prev_ == node_->right_);
 				}
-			}
-			else
-			{
+			} else {
 				// Go up as long as we are coming from the right.
-				do
-				{
-					mPrev = mNode;
-					mNode = mNode->mParent;
-				} while(mNode != 0 && mPrev == mNode->mRight);
+				do {
+					prev_ = node_;
+					node_ = node_->parent_;
+				} while(node_ != 0 && prev_ == node_->right_);
 			}
 
-			return *this; 
+			return *this;
 		}
-		Iterator  operator++(int)	
-		{ 
-			Iterator i(mNode, mPrev); ++(*this); return i;
+		Iterator  operator++(int) {
+			Iterator i(node_, prev_); ++(*this); return i;
 		}
 
 		// Pre- and postfix decrement operators for traversing a tree.
-		Iterator& operator--()		
-		{ 
-			if (mNode == 0)
-			{
+		Iterator& operator--() {
+			if (node_ == 0) {
 				return *this;
 			}
 
-			if (mPrev == 0 || mPrev == mNode->mRight)
-			{
+			if (prev_ == 0 || prev_ == node_->right_) {
 				// Try to go left.
-				if (mNode->mLeft != 0)
-				{
-					mNode = mNode->mLeft->GetRightMostNode();
-					mPrev = 0;
-				}
-				else
-				{
+				if (node_->left_ != 0) {
+					node_ = node_->left_->GetRightMostNode();
+					prev_ = 0;
+				} else {
 					// Go up as long as we are coming from the left.
-					do
-					{
-						mPrev = mNode;
-						mNode = mNode->mParent;
-					} while(mNode != 0 && mPrev == mNode->mLeft);
+					do {
+						prev_ = node_;
+						node_ = node_->parent_;
+					} while(node_ != 0 && prev_ == node_->left_);
 				}
-			}
-			else
-			{
+			} else {
 				// Go up as long as we are coming from the left.
-				do
-				{
-					mPrev = mNode;
-					mNode = mNode->mParent;
-				} while(mNode != 0 && mPrev == mNode->mLeft);
+				do {
+					prev_ = node_;
+					node_ = node_->parent_;
+				} while(node_ != 0 && prev_ == node_->left_);
 			}
 
-			return *this; 
+			return *this;
 		}
-		Iterator  operator--(int)	
-		{ 
-			Iterator i(mNode, mPrev); --(*this); return i; 
+		Iterator  operator--(int) {
+			Iterator i(node_, prev_); --(*this); return i;
 		}
 
 	private:
 
-		Iterator(Node* pNode) : mNode(pNode), mPrev(0){}
-		Iterator(Node* pNode, Node* pPrev) : mNode(pNode), mPrev(pPrev){}
+		Iterator(Node* node) : node_(node), prev_(0){}
+		Iterator(Node* node, Node* prev) : node_(node), prev_(prev){}
 
-		Node* mNode;
-		Node* mPrev;
+		Node* node_;
+		Node* prev_;
 	};
 
-	class ConstIterator
-	{
+	class ConstIterator {
 	public:
 		friend class BinTree;
 
-		ConstIterator() : mNode(0){}
-		ConstIterator(const Iterator& pIterator) : mNode(pIterator.mNode){}
+		ConstIterator() : node_(0){}
+		ConstIterator(const Iterator& iterator) : node_(iterator.node_){}
 
-		ConstIterator& operator = (const ConstIterator& pOther)
-		{
-			mNode = pOther.mNode;
-
-			return *this;
-		}
-
-		ConstIterator& operator = (const ConstIterator* pOther)
-		{
-			mNode = pOther->mNode;
+		ConstIterator& operator = (const ConstIterator& other) {
+			node_ = other.node_;
 
 			return *this;
 		}
 
-		ConstIterator& operator = (const Iterator& pOther)
-		{
-			mNode = pOther.mNode;
+		ConstIterator& operator = (const ConstIterator* other) {
+			node_ = other->node_;
 
 			return *this;
 		}
 
-		ConstIterator& operator = (const Iterator* pOther)
-		{
-			mNode = pOther->mNode;
+		ConstIterator& operator = (const Iterator& other) {
+			node_ = other.node_;
+
+			return *this;
+		}
+
+		ConstIterator& operator = (const Iterator* other) {
+			node_ = other->node_;
 
 			return *this;
 		}
 
 
 		// Logical equality operator for iterator comparisons.
-		bool operator==(const ConstIterator& pOther) const		{ return mNode == pOther.mNode; }
-		bool operator==(const Iterator& pOther) const			{ return mNode == pOther.mNode; }
+		bool operator==(const ConstIterator& other) const		{ return node_ == other.node_; }
+		bool operator==(const Iterator& other) const			{ return node_ == other.node_; }
 
 		// Logical inequality operator for iterator comparisons.
-		bool operator!=(const ConstIterator& pOther) const		{ return !operator==(pOther); }
-		bool operator!=(const Iterator& pOther) const			{ return !operator==(pOther); }
+		bool operator!=(const ConstIterator& other) const		{ return !operator==(other); }
+		bool operator!=(const Iterator& other) const			{ return !operator==(other); }
 
 		// Gets the contents of the iterator.
-		_TObject& operator*() const	{ return mNode->mObject; }
+		_TObject& operator*() const	{ return node_->object_; }
 
-		ConstIterator& operator++()
-		{ 
-			if (mNode == 0)
-			{
+		ConstIterator& operator++() {
+			if (node_ == 0) {
 				return *this;
 			}
 
-			if (mPrev == 0 || mPrev == mNode->mLeft)
-			{
+			if (prev_ == 0 || prev_ == node_->left_) {
 				// Try to go right.
-				if (mNode->mRight != 0)
-				{
-					mNode = mNode->mRight->GetLeftMostNode();
-					mPrev = 0;
-				}
-				else
-				{
+				if (node_->right_ != 0) {
+					node_ = node_->right_->GetLeftMostNode();
+					prev_ = 0;
+				} else {
 					// Go up as long as we are coming from the right.
-					do
-					{
-						mPrev = mNode;
-						mNode = mNode->mParent;
-					} while(mNode != 0 && mPrev == mNode->mRight);
+					do {
+						prev_ = node_;
+						node_ = node_->parent_;
+					} while(node_ != 0 && prev_ == node_->right_);
 				}
-			}
-			else
-			{
+			} else {
 				// Go up as long as we are coming from the right.
-				do
-				{
-					mPrev = mNode;
-					mNode = mNode->mParent;
-				} while(mNode != 0 && mPrev == mNode->mRight);
+				do {
+					prev_ = node_;
+					node_ = node_->parent_;
+				} while(node_ != 0 && prev_ == node_->right_);
 			}
 
-			return *this; 
+			return *this;
 		}
-		ConstIterator  operator++(int)	
-		{ 
-			ConstIterator i(mNode, mPrev); ++(*this); return i;
+		ConstIterator  operator++(int) {
+			ConstIterator i(node_, prev_); ++(*this); return i;
 		}
 
 		// Pre- and postfix decrement operators for traversing a tree.
-		ConstIterator& operator--()		
-		{ 
-			if (mNode == 0)
-			{
+		ConstIterator& operator--() {
+			if (node_ == 0) {
 				return *this;
 			}
 
-			if (mPrev == 0 || mPrev == mNode->mRight)
-			{
+			if (prev_ == 0 || prev_ == node_->right_) {
 				// Try to go left.
-				if (mNode->mLeft != 0)
-				{
-					mNode = mNode->mLeft->GetRightMostNode();
-					mPrev = 0;
-				}
-				else
-				{
+				if (node_->left_ != 0) {
+					node_ = node_->left_->GetRightMostNode();
+					prev_ = 0;
+				} else {
 					// Go up as long as we are coming from the left.
-					do
-					{
-						mPrev = mNode;
-						mNode = mNode->mParent;
-					} while(mNode != 0 && mPrev == mNode->mLeft);
+					do {
+						prev_ = node_;
+						node_ = node_->parent_;
+					} while(node_ != 0 && prev_ == node_->left_);
 				}
-			}
-			else
-			{
+			} else {
 				// Go up as long as we are coming from the left.
-				do
-				{
-					mPrev = mNode;
-					mNode = mNode->mParent;
-				} while(mNode != 0 && mPrev == mNode->mLeft);
+				do {
+					prev_ = node_;
+					node_ = node_->parent_;
+				} while(node_ != 0 && prev_ == node_->left_);
 			}
 
-			return *this; 
+			return *this;
 		}
-		ConstIterator  operator--(int)	
-		{ 
-			ConstIterator i(mNode, mPrev); --(*this); return i; 
+		ConstIterator  operator--(int) {
+			ConstIterator i(node_, prev_); --(*this); return i;
 		}
 
 	private:
 
-		ConstIterator(Node* pNode) : mNode(pNode){}
-		ConstIterator(Node* pNode, Node* pPrev) : mNode(pNode), mPrev(pPrev){}
+		ConstIterator(Node* node) : node_(node){}
+		ConstIterator(Node* node, Node* prev) : node_(node), prev_(prev){}
 
-		const Node* mNode;
-		const Node* mPrev;
+		const Node* node_;
+		const Node* prev_;
 	};
 
 	inline BinTree();
 	inline ~BinTree();
 
-	void Insert(_TKey pKey, _TObject pObject);
+	void Insert(_TKey key, _TObject object);
 
-	void Remove(const Iterator& pItem);
-	void Remove(_TKey pKey);
+	void Remove(const Iterator& item);
+	void Remove(_TKey key);
 	void RemoveAll();
 
 	// Will rearrange the nodes in the tree to make it perfectly balanced.
 	void Balance();
 
-	inline Iterator Find(_TKey pKey);
-	inline Iterator FindN(int pNum);
-	inline bool Exists(_TKey pKey);
+	inline Iterator Find(_TKey key);
+	inline Iterator FindN(int num);
+	inline bool Exists(_TKey key);
 
 	inline Iterator First();
 	inline Iterator Last();
@@ -361,310 +306,258 @@ public:
 	inline int GetCount() const;
 	inline bool IsEmpty() const;
 
-	// Copies the pointer to the node allocator of pTree. pTree is 
-	// considered the "owner" of the allocator, and is responsible of 
-	// deleting it. This means that you can't delete the owner tree 
+	// Copies the pointer to the node allocator of tree. tree is
+	// considered the "owner" of the allocator, and is responsible of
+	// deleting it. This means that you can't delete the owner tree
 	// before the others.
 	//
 	// You can only call this function on empty trees. If the tree isn't
 	// empty, the function has no effect.
-	inline void ShareNodePool(BinTree* pTree);
+	inline void ShareNodePool(BinTree* tree);
 
 private:
 	inline NodeAllocator* GetNodeAllocator();
-	inline void SetNodeAllocator(NodeAllocator* pNodeAllocator);
+	inline void SetNodeAllocator(NodeAllocator* node_allocator);
 
-	inline Node* NewNode(_TKey pKey, _TObject pObject, Node* pParent);
-	inline void RecycleNode(Node* pNode);
+	inline Node* NewNode(_TKey key, _TObject object, Node* parent);
+	inline void RecycleNode(Node* node);
 
-	void Balance(int pStart, int pEnd, Node* pNewTopNode);
+	void Balance(int start, int end, Node* new_top_node);
 
-	bool mAllocatorOwner;
-	NodeAllocator* mNodeAllocator;
+	bool allocator_owner_;
+	NodeAllocator* node_allocator_;
 
-	int mCount;
-	Node* mTopNode;
+	int count_;
+	Node* top_node_;
 };
 
 TEMPLATE QUAL::BinTree() :
-	mAllocatorOwner(true),
-	mCount(0),
-	mTopNode(0)
-{
-	mNodeAllocator = new NodeAllocator;
+	allocator_owner_(true),
+	count_(0),
+	top_node_(0) {
+	node_allocator_ = new NodeAllocator;
 }
 
-TEMPLATE QUAL::~BinTree()
-{
-	if (mTopNode != 0)
-	{
-		RecycleNode(mTopNode);
+TEMPLATE QUAL::~BinTree() {
+	if (top_node_ != 0) {
+		RecycleNode(top_node_);
 	}
 
-	if (mAllocatorOwner == true)
-	{
-		delete mNodeAllocator;
+	if (allocator_owner_ == true) {
+		delete node_allocator_;
 	}
 }
 
-TEMPLATE int QUAL::GetCount() const
-{
-	return mCount;
+TEMPLATE int QUAL::GetCount() const {
+	return count_;
 }
 
-TEMPLATE typename QUAL::Iterator QUAL::First()
-{
-	if (mTopNode == 0)
-	{
+TEMPLATE typename QUAL::Iterator QUAL::First() {
+	if (top_node_ == 0) {
 		return End();
 	}
 
-	Iterator lIter(mTopNode->GetLeftMostNode());
-	return lIter;
+	Iterator _iter(top_node_->GetLeftMostNode());
+	return _iter;
 }
 
-TEMPLATE typename QUAL::Iterator QUAL::Last()
-{
-	if (mTopNode == 0)
-	{
+TEMPLATE typename QUAL::Iterator QUAL::Last() {
+	if (top_node_ == 0) {
 		return End();
 	}
 
 	// Keep going right until you reach the bottom.
-	Iterator lIter(mTopNode->GetRightMostNode());
-	return lIter;
+	Iterator _iter(top_node_->GetRightMostNode());
+	return _iter;
 }
 
-TEMPLATE typename QUAL::Iterator QUAL::End()
-{
+TEMPLATE typename QUAL::Iterator QUAL::End() {
 	return Iterator(0);
 }
 
-TEMPLATE typename QUAL::ConstIterator QUAL::First() const
-{
-	if (mTopNode == 0)
-	{
+TEMPLATE typename QUAL::ConstIterator QUAL::First() const {
+	if (top_node_ == 0) {
 		return End();
 	}
 
 	// Keep going left until you reach the bottom.
-	ConstIterator lIter(mTopNode);
-	while (lIter.mNode->mLeft != 0)
-	{
-		lIter.mNode = lIter.mNode->mLeft;
+	ConstIterator _iter(top_node_);
+	while (_iter.node_->left_ != 0) {
+		_iter.node_ = _iter.node_->left_;
 	}
-	
-	return lIter;
+
+	return _iter;
 }
 
-TEMPLATE typename QUAL::ConstIterator QUAL::Last() const
-{
-	if (mTopNode == 0)
-	{
+TEMPLATE typename QUAL::ConstIterator QUAL::Last() const {
+	if (top_node_ == 0) {
 		return End();
 	}
 
 	// Keep going right until you reach the bottom.
-	ConstIterator lIter(mTopNode);
-	while (lIter.mNode->mRight != 0)
-	{
-		lIter.mNode = lIter.mNode->mRight;
+	ConstIterator _iter(top_node_);
+	while (_iter.node_->right_ != 0) {
+		_iter.node_ = _iter.node_->right_;
 	}
 
-	return lIter;
+	return _iter;
 }
 
-TEMPLATE typename QUAL::ConstIterator QUAL::End() const
-{
+TEMPLATE typename QUAL::ConstIterator QUAL::End() const {
 	return ConstIterator(0);
 }
 
-TEMPLATE bool QUAL::IsEmpty() const
-{
-	return (mTopNode == 0);
+TEMPLATE bool QUAL::IsEmpty() const {
+	return (top_node_ == 0);
 }
 
-TEMPLATE void QUAL::Insert(_TKey pKey, _TObject pObject)
-{
-	if (mTopNode == 0)
-	{
-		mTopNode = NewNode(pKey, pObject, 0);
-		mCount = 1;
-	}
-	else
-	{
-		Node* lNode = NewNode(pKey, pObject, 0);
-		if (mTopNode->Insert(lNode) != 0)
-		{
-			mCount++;
-		}
-		else
-		{
+TEMPLATE void QUAL::Insert(_TKey key, _TObject object) {
+	if (top_node_ == 0) {
+		top_node_ = NewNode(key, object, 0);
+		count_ = 1;
+	} else {
+		Node* _node = NewNode(key, object, 0);
+		if (top_node_->Insert(_node) != 0) {
+			count_++;
+		} else {
 			// The node wasn't inserted since the key value already exist.
-			RecycleNode(lNode);
+			RecycleNode(_node);
 		}
 	}
 }
 
-TEMPLATE void QUAL::Remove(const Iterator& pIter)
-{
-	Node* lNode = pIter.mNode;
+TEMPLATE void QUAL::Remove(const Iterator& iter) {
+	Node* _node = iter.node_;
 
-	if (lNode != 0)
-	{
-		if (lNode == mTopNode)
-		{
-			mTopNode = lNode->Unlink();
-		}
-		else
-		{
-			lNode->Unlink();
+	if (_node != 0) {
+		if (_node == top_node_) {
+			top_node_ = _node->Unlink();
+		} else {
+			_node->Unlink();
 		}
 
-		lNode->mParent = 0;
-		lNode->mLeft   = 0;
-		lNode->mRight  = 0;
-		RecycleNode(lNode);
+		_node->parent_ = 0;
+		_node->left_   = 0;
+		_node->right_  = 0;
+		RecycleNode(_node);
 
-		mCount--;
+		count_--;
 	}
 }
 
-TEMPLATE void QUAL::Remove(_TKey pKey)
-{
-	Node* lNode = mTopNode->Find(pKey);
+TEMPLATE void QUAL::Remove(_TKey key) {
+	Node* _node = top_node_->Find(key);
 
-	if (lNode != 0)
-	{
-		if (lNode == mTopNode)
-		{
-			mTopNode = lNode->Unlink();
-		}
-		else
-		{
-			lNode->Unlink();
+	if (_node != 0) {
+		if (_node == top_node_) {
+			top_node_ = _node->Unlink();
+		} else {
+			_node->Unlink();
 		}
 
-		lNode->mParent = 0;
-		lNode->mLeft   = 0;
-		lNode->mRight  = 0;
-		RecycleNode(lNode);
+		_node->parent_ = 0;
+		_node->left_   = 0;
+		_node->right_  = 0;
+		RecycleNode(_node);
 
-		mCount--;
+		count_--;
 	}
 }
 
-TEMPLATE void QUAL::RemoveAll()
-{
-	mTopNode->Destroy(mNodeAllocator);
-	mTopNode = 0;
-	mCount = 0;
+TEMPLATE void QUAL::RemoveAll() {
+	top_node_->Destroy(node_allocator_);
+	top_node_ = 0;
+	count_ = 0;
 }
 
-TEMPLATE typename QUAL::Iterator QUAL::Find(_TKey pKey)
-{
-	if (mTopNode == 0)
-	{
+TEMPLATE typename QUAL::Iterator QUAL::Find(_TKey key) {
+	if (top_node_ == 0) {
 		return End();
 	}
 
-	Node* lNode = mTopNode->Find(pKey);
+	Node* _node = top_node_->Find(key);
 
-	if (lNode == 0)
-	{
+	if (_node == 0) {
 		return End();
 	}
 
-	return Iterator(lNode);
+	return Iterator(_node);
 }
 
-TEMPLATE typename QUAL::Iterator QUAL::FindN(int pNum)
-{
-	Iterator lIter = First();
-	for (int i = 0; i < pNum && lIter != End(); ++i, ++lIter){}
-	return lIter;
+TEMPLATE typename QUAL::Iterator QUAL::FindN(int num) {
+	Iterator _iter = First();
+	for (int i = 0; i < num && _iter != End(); ++i, ++_iter){}
+	return _iter;
 }
 
-TEMPLATE bool QUAL::Exists(_TKey pKey)
-{
-	return (Find(pKey) != End());
+TEMPLATE bool QUAL::Exists(_TKey key) {
+	return (Find(key) != End());
 }
 
-TEMPLATE void QUAL::Balance()
-{
-	if (mCount <= 2)
-	{
+TEMPLATE void QUAL::Balance() {
+	if (count_ <= 2) {
 		return;
 	}
 
-	int lCount = mCount;
+	int count = count_;
 
-	int lMiddle = mCount / 2;
-	Iterator lIter = FindN(lMiddle);
-	Node* lTopNode = NewNode(lIter.mNode->mKey,
-							   lIter.mNode->mObject,
+	int middle = count_ / 2;
+	Iterator _iter = FindN(middle);
+	Node* top_node = NewNode(_iter.node_->key_,
+							   _iter.node_->object_,
 							   0);
-	Remove(lIter);
+	Remove(_iter);
 
-	Balance(0, mCount, lTopNode);
+	Balance(0, count_, top_node);
 	RemoveAll();
-	mTopNode = lTopNode;
-	mCount = lCount;
+	top_node_ = top_node;
+	count_ = count;
 }
 
-TEMPLATE void QUAL::Balance(int pStart, int pEnd, Node* pNewTopNode)
-{
-	if (pEnd == pStart)
-	{
+TEMPLATE void QUAL::Balance(int start, int end, Node* new_top_node) {
+	if (end == start) {
 		return;
 	}
 
-	int lMiddle = (pStart + pEnd) / 2;
-	
-	Iterator lIter = FindN(lMiddle);
-	Node* lNode = NewNode(lIter.mNode->mKey,
-							lIter.mNode->mObject,
+	int middle = (start + end) / 2;
+
+	Iterator _iter = FindN(middle);
+	Node* _node = NewNode(_iter.node_->key_,
+							_iter.node_->object_,
 							0);
-	pNewTopNode->Insert(lNode);
+	new_top_node->Insert(_node);
 
-	Balance(pStart, lMiddle, pNewTopNode);
-	Balance(lMiddle + 1, pEnd, pNewTopNode);
+	Balance(start, middle, new_top_node);
+	Balance(middle + 1, end, new_top_node);
 }
 
-TEMPLATE void QUAL::ShareNodePool(BinTree* pTree)
-{
-	if (IsEmpty() == true)
-	{
-		SetNodeAllocator(pTree->GetNodeAllocator());
+TEMPLATE void QUAL::ShareNodePool(BinTree* tree) {
+	if (IsEmpty() == true) {
+		SetNodeAllocator(tree->GetNodeAllocator());
 	}
 }
 
-TEMPLATE typename QUAL::NodeAllocator* QUAL::GetNodeAllocator()
-{
-	return mNodeAllocator;
+TEMPLATE typename QUAL::NodeAllocator* QUAL::GetNodeAllocator() {
+	return node_allocator_;
 }
 
-TEMPLATE void QUAL::SetNodeAllocator(NodeAllocator* pNodeAllocator)
-{
-	if (mNodeAllocator != 0)
-	{
-		delete mNodeAllocator;
+TEMPLATE void QUAL::SetNodeAllocator(NodeAllocator* node_allocator) {
+	if (node_allocator_ != 0) {
+		delete node_allocator_;
 	}
 
-	mNodeAllocator = pNodeAllocator;
-	mAllocatorOwner = false;
+	node_allocator_ = node_allocator;
+	allocator_owner_ = false;
 }
 
-TEMPLATE typename QUAL::Node* QUAL::NewNode(_TKey pKey, _TObject pObject, Node* pParent)
-{
-	Node* lNode = mNodeAllocator->Alloc();
-	lNode->Init(pKey, pObject, pParent);
-	return lNode;
+TEMPLATE typename QUAL::Node* QUAL::NewNode(_TKey key, _TObject object, Node* parent) {
+	Node* _node = node_allocator_->Alloc();
+	_node->Init(key, object, parent);
+	return _node;
 }
 
-TEMPLATE void QUAL::RecycleNode(Node* pNode)
-{
-	mNodeAllocator->Free(pNode);
+TEMPLATE void QUAL::RecycleNode(Node* node) {
+	node_allocator_->Free(node);
 }
 
 
@@ -682,259 +575,193 @@ TEMPLATE void QUAL::RecycleNode(Node* pNode)
 // class Node
 //
 
-TEMPLATE QUAL::Node::Node() : 
-	mParent(0), 
-	mLeft(0), 
-	mRight(0) 
-{
+TEMPLATE QUAL::Node::Node() :
+	parent_(0),
+	left_(0),
+	right_(0) {
 }
 
-TEMPLATE QUAL::Node::Node(_TKey pKey, _TObject pObject, Node* pParent) : 
-	mParent(pParent), 
-	mLeft(0), 
-	mRight(0), 
-	mKey(pKey),
-	mObject(pObject)
-{
+TEMPLATE QUAL::Node::Node(_TKey key, _TObject object, Node* parent) :
+	parent_(parent),
+	left_(0),
+	right_(0),
+	key_(key),
+	object_(object) {
 }
 
-TEMPLATE QUAL::Node::~Node()
-{
+TEMPLATE QUAL::Node::~Node() {
 }
 
-TEMPLATE void QUAL::Node::Init(_TKey pKey, _TObject pObject, Node* pParent)
-{
-	mParent = pParent;
-	mLeft = 0;
-	mRight = 0;
-	mKey = pKey;
-	mObject = pObject;
+TEMPLATE void QUAL::Node::Init(_TKey key, _TObject object, Node* parent) {
+	parent_ = parent;
+	left_ = 0;
+	right_ = 0;
+	key_ = key;
+	object_ = object;
 }
 
-TEMPLATE void QUAL::Node::Destroy(NodeAllocator* pAllocator)
-{
-	if (mLeft != 0)
-	{
-		mLeft->Destroy(pAllocator);
-		mLeft = 0;
+TEMPLATE void QUAL::Node::Destroy(NodeAllocator* allocator) {
+	if (left_ != 0) {
+		left_->Destroy(allocator);
+		left_ = 0;
 	}
-	if (mRight != 0)
-	{
-		mRight->Destroy(pAllocator);
-		mRight = 0;
+	if (right_ != 0) {
+		right_->Destroy(allocator);
+		right_ = 0;
 	}
 
-	pAllocator->Free(this);
+	allocator->Free(this);
 }
 
-TEMPLATE typename QUAL::Node* QUAL::Node::Insert(Node* pNode)
-{
-	if (mKey == pNode->mKey)
-	{
-		mObject = pNode->mObject;
+TEMPLATE typename QUAL::Node* QUAL::Node::Insert(Node* node) {
+	if (key_ == node->key_) {
+		object_ = node->object_;
 
 		// No new node was created.
 		return 0;
 	}
 
-	if (pNode->mKey < mKey)
-	{
-		if (mLeft == 0)
-		{
-			mLeft = pNode;
-			pNode->mParent = this;
-			return mLeft;
+	if (node->key_ < key_) {
+		if (left_ == 0) {
+			left_ = node;
+			node->parent_ = this;
+			return left_;
+		} else {
+			return left_->Insert(node);
 		}
-		else
-		{
-			return mLeft->Insert(pNode);
-		}
-	}
-	else
-	{
-		if (mRight == 0)
-		{
-			mRight = pNode;
-			pNode->mParent = this;
-			return mRight;
-		}
-		else
-		{
-			return mRight->Insert(pNode);
+	} else {
+		if (right_ == 0) {
+			right_ = node;
+			node->parent_ = this;
+			return right_;
+		} else {
+			return right_->Insert(node);
 		}
 	}
 }
 
-TEMPLATE typename QUAL::Node* QUAL::Node::Find(_TKey pKey)
-{
-	if (mKey == pKey)
-	{
+TEMPLATE typename QUAL::Node* QUAL::Node::Find(_TKey key) {
+	if (key_ == key) {
 		return this;
-	}
-	else if(pKey < mKey)
-	{
-		if (mLeft == 0)
-		{
+	} else if(key < key_) {
+		if (left_ == 0) {
 			return 0;
 		}
 
-		return mLeft->Find(pKey);
-	}
-	else
-	{
-		if (mRight == 0)
-		{
+		return left_->Find(key);
+	} else {
+		if (right_ == 0) {
 			return 0;
 		}
 
-		return mRight->Find(pKey);
+		return right_->Find(key);
 	}
 }
 
-TEMPLATE const typename QUAL::Node* QUAL::Node::GetLeftMostNode() const
-{
-	if (mLeft == 0)
-	{
+TEMPLATE const typename QUAL::Node* QUAL::Node::GetLeftMostNode() const {
+	if (left_ == 0) {
 		return this;
-	}
-	else
-	{
-		return mLeft->GetLeftMostNode();
+	} else {
+		return left_->GetLeftMostNode();
 	}
 }
 
-TEMPLATE typename QUAL::Node* QUAL::Node::GetLeftMostNode()
-{
-	if (mLeft == 0)
-	{
+TEMPLATE typename QUAL::Node* QUAL::Node::GetLeftMostNode() {
+	if (left_ == 0) {
 		return this;
-	}
-	else
-	{
-		return mLeft->GetLeftMostNode();
+	} else {
+		return left_->GetLeftMostNode();
 	}
 }
 
-TEMPLATE const typename QUAL::Node* QUAL::Node::GetRightMostNode() const
-{
-	if (mRight == 0)
-	{
+TEMPLATE const typename QUAL::Node* QUAL::Node::GetRightMostNode() const {
+	if (right_ == 0) {
 		return this;
-	}
-	else
-	{
-		return mRight->GetRightMostNode();
+	} else {
+		return right_->GetRightMostNode();
 	}
 }
 
-TEMPLATE typename QUAL::Node* QUAL::Node::GetRightMostNode()
-{
-	if (mRight == 0)
-	{
+TEMPLATE typename QUAL::Node* QUAL::Node::GetRightMostNode() {
+	if (right_ == 0) {
 		return this;
-	}
-	else
-	{
-		return mRight->GetRightMostNode();
+	} else {
+		return right_->GetRightMostNode();
 	}
 }
 
-TEMPLATE void QUAL::Node::Relink(Node* pOldNode, Node* pNewNode)
-{
-	if (mLeft == pOldNode)
-	{
-		mLeft = pNewNode;
-	}
-	else if(mRight == pOldNode)
-	{
-		mRight = pNewNode;
+TEMPLATE void QUAL::Node::Relink(Node* old_node, Node* new_node) {
+	if (left_ == old_node) {
+		left_ = new_node;
+	} else if(right_ == old_node) {
+		right_ = new_node;
 	}
 
-	if (pNewNode != 0)
-	{
-		pNewNode->mParent = this;
+	if (new_node != 0) {
+		new_node->parent_ = this;
 	}
 }
 
-TEMPLATE typename QUAL::Node* QUAL::Node::Unlink()
-{
-	if (mLeft == 0 && mRight == 0)
-	{
-		if (mParent != 0)
-		{
-			mParent->Relink(this, 0);
+TEMPLATE typename QUAL::Node* QUAL::Node::Unlink() {
+	if (left_ == 0 && right_ == 0) {
+		if (parent_ != 0) {
+			parent_->Relink(this, 0);
 		}
 		return 0;
-	}
-	else if(mLeft == 0 && mRight != 0)
-	{
-		if (mParent != 0)
-		{
-			mParent->Relink(this, mRight);
-		}
-		else
-		{
-			mRight->mParent = 0;
+	} else if(left_ == 0 && right_ != 0) {
+		if (parent_ != 0) {
+			parent_->Relink(this, right_);
+		} else {
+			right_->parent_ = 0;
 		}
 
-		return mRight;
-	}
-	else if(mLeft != 0 && mRight == 0)
-	{
-		if (mParent != 0)
-		{
-			mParent->Relink(this, mLeft);
-		}
-		else
-		{
-			mLeft->mParent = 0;
+		return right_;
+	} else if(left_ != 0 && right_ == 0) {
+		if (parent_ != 0) {
+			parent_->Relink(this, left_);
+		} else {
+			left_->parent_ = 0;
 		}
 
-		return mLeft;
-	}
-	else
-	{
+		return left_;
+	} else {
 		// This algorithm will keep the tree somewhat balanced,
 		// if it's balanced already.
 
-		Node* lRL = mRight->GetLeftMostNode();
+		Node* rl = right_->GetLeftMostNode();
 
-		lRL->mLeft = mLeft;
-		mLeft->mParent = lRL;
+		rl->left_ = left_;
+		left_->parent_ = rl;
 
 
 /*
 		// This code is the original algorithm. If you uncomment this,
 		// you should remove all the code below.
-		if (mParent != 0)
-		{
-			mParent->Relink(this, mRight);
+		if (parent_ != 0) {
+			parent_->Relink(this, right_);
 		}
-		mRight->mParent = mParent;
+		right_->parent_ = parent_;
 */
 
 
 
-		if (lRL != mRight)
-		{
-			lRL->mParent->Relink(lRL, 0);
+		if (rl != right_) {
+			rl->parent_->Relink(rl, 0);
 		}
 
-		lRL->mParent = mParent;
+		rl->parent_ = parent_;
 
-		if (mParent != 0)
-		{
-			mParent->Relink(this, lRL);
+		if (parent_ != 0) {
+			parent_->Relink(this, rl);
 		}
 
-		if (lRL != mRight)
-		{
-			Node* lRR = lRL->GetRightMostNode();
-			lRR->mRight = mRight;
-			mRight->mParent = lRR;
+		if (rl != right_) {
+			Node* rr = rl->GetRightMostNode();
+			rr->right_ = right_;
+			right_->parent_ = rr;
 		}
 
-		return mRight;
+		return right_;
 	}
 }
 

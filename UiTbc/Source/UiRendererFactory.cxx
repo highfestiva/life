@@ -1,30 +1,27 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/UiRendererFactory.h"
+#include "../include/uirendererfactory.h"
 //#include "../Include/UiDirectX9Renderer.h"	// TODO: port!
-#include "../Include/UiOpenGLRenderer.h"
+#include "../include/uiopenglrenderer.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-Renderer* RendererFactory::Create(UiLepra::DisplayManager::ContextType pType, Canvas* pScreen)
-{
-	Renderer* lRenderer = 0;
-	switch (pType)
-	{
-		case UiLepra::DisplayManager::DIRECTX_CONTEXT:	/*lRenderer = new DirectX9Renderer(pScreen);*/	break;
-		case UiLepra::DisplayManager::OPENGL_CONTEXT:	lRenderer = new OpenGLRenderer(pScreen);	break;
+Renderer* RendererFactory::Create(uilepra::DisplayManager::ContextType type, Canvas* screen) {
+	Renderer* renderer = 0;
+	switch (type) {
+		case uilepra::DisplayManager::kDirectxContext:	/*renderer = new DirectX9Renderer(screen);*/	break;
+		case uilepra::DisplayManager::kOpenglContext:	renderer = new OpenGLRenderer(screen);	break;
 	}
-	return (lRenderer);
+	return (renderer);
 }
 
 

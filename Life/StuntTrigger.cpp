@@ -1,112 +1,100 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "StuntTrigger.h"
+#include "stunttrigger.h"
 #include <algorithm>
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/GameManager.h"
-#include "../Tbc/Include/ChunkyPhysics.h"
-#include "../Tbc/Include/PhysicsTrigger.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/gamemanager.h"
+#include "../tbc/include/chunkyphysics.h"
+#include "../tbc/include/physicstrigger.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-StuntTrigger::StuntTrigger(Cure::ContextManager* pManager, const str& pClassId):
-	Cure::CppContextObject(pManager->GetGameManager()->GetResourceManager(), pClassId),
-	mAllowBulletTime(true),
-	mLastFrameTriggered(false),
-	mMinSpeed(0),
-	mMaxSpeed(-1),
-	mMinTime(-1),
-	mRealTimeRatio(-1),
-	mBulletTimeDuration(0)
-{
-	pManager->AddLocalObject(this);
+StuntTrigger::StuntTrigger(cure::ContextManager* manager, const str& class_id):
+	cure::CppContextObject(manager->GetGameManager()->GetResourceManager(), class_id),
+	allow_bullet_time_(true),
+	last_frame_triggered_(false),
+	min_speed_(0),
+	max_speed_(-1),
+	min_time_(-1),
+	real_time_ratio_(-1),
+	bullet_time_duration_(0) {
+	manager->AddLocalObject(this);
 	GetManager()->EnableTickCallback(this);
 }
 
-StuntTrigger::~StuntTrigger()
-{
+StuntTrigger::~StuntTrigger() {
 }
 
 
 
-void StuntTrigger::FinalizeTrigger(const Tbc::PhysicsTrigger* pTrigger)
-{
-	std::vector<int> lTriggerIndexArray;
-	const Tbc::ChunkyPhysics* lPhysics = mParent->GetPhysics();
-	const int lBoneCount = pTrigger->GetTriggerGeometryCount();
-	for (int x = 0; x < lBoneCount; ++x)
-	{
-		const int lBoneIndex = lPhysics->GetIndex(pTrigger->GetTriggerGeometry(x));
-		deb_assert(lBoneIndex >= 0);
-		lTriggerIndexArray.push_back(lBoneIndex);
+void StuntTrigger::FinalizeTrigger(const tbc::PhysicsTrigger* trigger) {
+	std::vector<int> trigger_index_array;
+	const tbc::ChunkyPhysics* physics = parent_->GetPhysics();
+	const int bone_count = trigger->GetTriggerGeometryCount();
+	for (int x = 0; x < bone_count; ++x) {
+		const int bone_index = physics->GetIndex(trigger->GetTriggerGeometry(x));
+		deb_assert(bone_index >= 0);
+		trigger_index_array.push_back(bone_index);
 	}
-	const Tbc::ChunkyClass::Tag* lTag = ((CppContextObject*)mParent)->FindTag("stunt_trigger_data", 5, 2, &lTriggerIndexArray);
-	deb_assert(lTag);
-	if (lTag)
-	{
-		mMinSpeed		= lTag->mFloatValueList[0];
-		mMaxSpeed		= lTag->mFloatValueList[1];
-		mMinTime		= lTag->mFloatValueList[2];
-		mRealTimeRatio		= lTag->mFloatValueList[3];
-		mBulletTimeDuration	= lTag->mFloatValueList[4];
-		mClientStartCommand	= lTag->mStringValueList[0];
-		mClientStopCommand	= lTag->mStringValueList[1];
+	const tbc::ChunkyClass::Tag* tag = ((CppContextObject*)parent_)->FindTag("stunt_trigger_data", 5, 2, &trigger_index_array);
+	deb_assert(tag);
+	if (tag) {
+		min_speed_		= tag->float_value_list_[0];
+		max_speed_		= tag->float_value_list_[1];
+		min_time_		= tag->float_value_list_[2];
+		real_time_ratio_		= tag->float_value_list_[3];
+		bullet_time_duration_	= tag->float_value_list_[4];
+		client_start_command_	= tag->string_value_list_[0];
+		client_stop_command_	= tag->string_value_list_[1];
 	}
 }
 
-void StuntTrigger::OnTick()
-{
-	if (!mLastFrameTriggered)
-	{
-		mTriggerTimer.Stop();
+void StuntTrigger::OnTick() {
+	if (!last_frame_triggered_) {
+		trigger_timer_.Stop();
 	}
-	mLastFrameTriggered = false;
+	last_frame_triggered_ = false;
 }
 
-void StuntTrigger::OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
-{
-	(void)pTriggerId;
-	(void)pBodyId;
-	(void)pPosition;
-	(void)pNormal;
+void StuntTrigger::OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
+	(void)trigger_id;
+	(void)body_id;
+	(void)position;
+	(void)normal;
 
-	if (!mAllowBulletTime)
-	{
+	if (!allow_bullet_time_) {
 		return;
 	}
 
-	mLastFrameTriggered = true;
+	last_frame_triggered_ = true;
 
-	ContextObject* lObject = pOtherObject;
-	const float lSpeed = lObject->GetVelocity().GetLength();
-	if (lSpeed < mMinSpeed || lSpeed > mMaxSpeed)
-	{
-		mTriggerTimer.Stop();
+	ContextObject* object = other_object;
+	const float speed = object->GetVelocity().GetLength();
+	if (speed < min_speed_ || speed > max_speed_) {
+		trigger_timer_.Stop();
 		return;
 	}
-	mTriggerTimer.TryStart();
-	if (mTriggerTimer.QueryTimeDiff() < mMinTime)
-	{
+	trigger_timer_.TryStart();
+	if (trigger_timer_.QueryTimeDiff() < min_time_) {
 		return;
 	}
 
-	mAllowBulletTime = false;
-	DidTrigger(lObject);
+	allow_bullet_time_ = false;
+	DidTrigger(object);
 }
 
 
 
-loginstance(GAME_CONTEXT_CPP, StuntTrigger);
+loginstance(kGameContextCpp, StuntTrigger);
 
 
 

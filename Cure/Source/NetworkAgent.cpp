@@ -1,178 +1,153 @@
 
 // Author: Jonas Byström
 // Copyright (c) Pixel Doctrine
- 
+
 
 
 #include "pch.h"
-#include "../../Lepra/Include/Network.h"
-#include "../../Lepra/Include/Socket.h"
-#include "../Include/NetworkAgent.h"
+#include "../../lepra/include/network.h"
+#include "../../lepra/include/socket.h"
+#include "../include/networkagent.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-NetworkAgent::NetworkAgent(RuntimeVariableScope* pVariableScope):
-	mVariableScope(pVariableScope),
-	mMuxSocket(0),
-	mPacketFactory(new PacketFactory(new MessageFactory()))
-{
+NetworkAgent::NetworkAgent(RuntimeVariableScope* variable_scope):
+	variable_scope_(variable_scope),
+	mux_socket_(0),
+	packet_factory_(new PacketFactory(new MessageFactory())) {
 }
 
-NetworkAgent::~NetworkAgent()
-{
-	mVariableScope = 0;
+NetworkAgent::~NetworkAgent() {
+	variable_scope_ = 0;
 	SetPacketFactory(0);
 	Stop();
 }
 
-void NetworkAgent::Stop()
-{
-	ScopeLock lLock(&mLock);
+void NetworkAgent::Stop() {
+	ScopeLock lock(&lock_);
 	SetMuxSocket(0);
 }
 
 
 
-void NetworkAgent::SetPacketFactory(PacketFactory* pPacketFactory)
-{
-	ScopeLock lLock(&mLock);
-	delete (mPacketFactory);
-	mPacketFactory = pPacketFactory;
-	/*if (mMuxSocket)
-	{
-		mMuxSocket->SetDatagramReceiver(mPacketFactory);
+void NetworkAgent::SetPacketFactory(PacketFactory* packet_factory) {
+	ScopeLock lock(&lock_);
+	delete (packet_factory_);
+	packet_factory_ = packet_factory;
+	/*if (mux_socket_) {
+		mux_socket_->SetDatagramReceiver(packet_factory_);
 	}*/
 }
 
-PacketFactory* NetworkAgent::GetPacketFactory() const
-{
-	return (mPacketFactory);
+PacketFactory* NetworkAgent::GetPacketFactory() const {
+	return (packet_factory_);
 }
 
 
 
-Lock* NetworkAgent::GetLock() const
-{
-	return (&mLock);
+Lock* NetworkAgent::GetLock() const {
+	return (&lock_);
 }
 
 
 
-bool NetworkAgent::IsOpen() const
-{
-	return (mMuxSocket && mMuxSocket->IsOpen());
+bool NetworkAgent::IsOpen() const {
+	return (mux_socket_ && mux_socket_->IsOpen());
 }
 
-uint64 NetworkAgent::GetSentByteCount() const
-{
-	return (mMuxSocket->GetSentByteCount());
+uint64 NetworkAgent::GetSentByteCount() const {
+	return (mux_socket_->GetSentByteCount());
 }
 
-uint64 NetworkAgent::GetReceivedByteCount() const
-{
-	return (mMuxSocket->GetReceivedByteCount());
+uint64 NetworkAgent::GetReceivedByteCount() const {
+	return (mux_socket_->GetReceivedByteCount());
 }
 
-unsigned NetworkAgent::GetConnectionCount() const
-{
-	return (mMuxSocket->GetConnectionCount());
+unsigned NetworkAgent::GetConnectionCount() const {
+	return (mux_socket_->GetConnectionCount());
 }
 
-const SocketAddress& NetworkAgent::GetLocalAddress() const
-{
-	return mMuxSocket->GetLocalAddress();
+const SocketAddress& NetworkAgent::GetLocalAddress() const {
+	return mux_socket_->GetLocalAddress();
 }
 
 
 
-bool NetworkAgent::SendStatusMessage(VSocket* pSocket, int32 pInteger, RemoteStatus pStatus,
-	MessageStatus::InfoType pInfoType, str pMessage, Packet* pPacket)
-{
-	pPacket->Release();
-	MessageStatus* lStatus = (MessageStatus*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_STATUS);
-	pPacket->AddMessage(lStatus);
-	lStatus->Store(pPacket, pStatus, pInfoType, pInteger, pMessage);
-	bool lOk = PlaceInSendBuffer(true, pSocket, pPacket);
-	return (lOk);
+bool NetworkAgent::SendStatusMessage(VSocket* socket, int32 integer, RemoteStatus status,
+	MessageStatus::InfoType info_type, str message, Packet* packet) {
+	packet->Release();
+	MessageStatus* _status = (MessageStatus*)packet_factory_->GetMessageFactory()->Allocate(kMessageTypeStatus);
+	packet->AddMessage(_status);
+	_status->Store(packet, status, info_type, integer, message);
+	bool ok = PlaceInSendBuffer(true, socket, packet);
+	return (ok);
 }
 
-bool NetworkAgent::SendNumberMessage(bool pSafe, VSocket* pSocket, MessageNumber::InfoType pInfo, int32 pInteger, float32 pFloat, Packet* pPacket)
-{
-	Packet* lPacket = pPacket;
-	if (!pPacket)
-	{
-		lPacket = mPacketFactory->Allocate();
+bool NetworkAgent::SendNumberMessage(bool safe, VSocket* socket, MessageNumber::InfoType info, int32 integer, float32 f, Packet* packet) {
+	Packet* _packet = packet;
+	if (!packet) {
+		_packet = packet_factory_->Allocate();
 	}
-	MessageNumber* lNumber = (MessageNumber*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_NUMBER);
-	lPacket->AddMessage(lNumber);
-	lNumber->Store(lPacket, pInfo, pInteger, pFloat);
-	bool lOk = PlaceInSendBuffer(pSafe, pSocket, lPacket);
-	if (!pPacket)
-	{
-		GetPacketFactory()->Release(lPacket);
+	MessageNumber* number = (MessageNumber*)packet_factory_->GetMessageFactory()->Allocate(kMessageTypeNumber);
+	_packet->AddMessage(number);
+	number->Store(_packet, info, integer, f);
+	bool ok = PlaceInSendBuffer(safe, socket, _packet);
+	if (!packet) {
+		GetPacketFactory()->Release(_packet);
 	}
-	return (lOk);
+	return (ok);
 }
 
-bool NetworkAgent::SendObjectFullPosition(VSocket* pSocket, GameObjectId pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData)
-{
-	Packet* lPacket = mPacketFactory->Allocate();
-	MessageObjectPosition* lPosition = (MessageObjectPosition*)mPacketFactory->GetMessageFactory()->Allocate(MESSAGE_TYPE_OBJECT_POSITION);
-	lPacket->AddMessage(lPosition);
-	lPosition->Store(lPacket, pInstanceId, pFrameIndex, pData);
-	bool lOk = PlaceInSendBuffer(false, pSocket, lPacket);
-	GetPacketFactory()->Release(lPacket);
-	return (lOk);
+bool NetworkAgent::SendObjectFullPosition(VSocket* socket, GameObjectId instance_id, int32 frame_index, const ObjectPositionalData& data) {
+	Packet* _packet = packet_factory_->Allocate();
+	MessageObjectPosition* position = (MessageObjectPosition*)packet_factory_->GetMessageFactory()->Allocate(kMessageTypeObjectPosition);
+	_packet->AddMessage(position);
+	position->Store(_packet, instance_id, frame_index, data);
+	bool ok = PlaceInSendBuffer(false, socket, _packet);
+	GetPacketFactory()->Release(_packet);
+	return (ok);
 }
 
-bool NetworkAgent::PlaceInSendBuffer(bool pSafe, VSocket* pSocket, Packet* pPacket)
-{
-	if (!pSocket)
-	{
-		mLog.Error("PlaceInSendBuffer(): unable send data via uninitialized socket.");
+bool NetworkAgent::PlaceInSendBuffer(bool safe, VSocket* socket, Packet* packet) {
+	if (!socket) {
+		log_.Error("PlaceInSendBuffer(): unable send data via uninitialized socket.");
 		return false;
 	}
 
-	/*for (size_t x = 0; x < pPacket->GetMessageCount(); ++x)
-	{
-		log_volatile(mLog.Tracef("Sending message of type %i.", pPacket->GetMessageAt(x)->GetType()));
+	/*for (size_t x = 0; x < packet->GetMessageCount(); ++x) {
+		log_volatile(log_.Tracef("Sending message of type %i.", packet->GetMessageAt(x)->GetType()));
 	}*/
 
-	pSocket->SetSafeSend(pSafe);
+	socket->SetSafeSend(safe);
 
 	// Try to append this packet to the existing packet buffer.
-	bool lOk = pPacket->AppendToPacketBuffer(pSocket->GetSendBuffer());
-	if (!lOk)
-	{
-		pPacket->StoreHeader();
+	bool ok = packet->AppendToPacketBuffer(socket->GetSendBuffer());
+	if (!ok) {
+		packet->StoreHeader();
 		// Buffer was full. We go for the socket way (send existing buffer, then copy this one for next send).
-		lOk = (pSocket->AppendSendBuffer(pPacket->GetReadBuffer(), pPacket->GetPacketSize()) == IO_OK);
+		ok = (socket->AppendSendBuffer(packet->GetReadBuffer(), packet->GetPacketSize()) == kIoOk);
 	}
-	if (!lOk)
-	{
-		mLog.Error("PlaceInSendBuffer(): unable to place data in socket output buffer.");
+	if (!ok) {
+		log_.Error("PlaceInSendBuffer(): unable to place data in socket output buffer.");
 	}
-	return (lOk);
+	return (ok);
 }
 
-void NetworkAgent::SetMuxSocket(MuxSocket* pSocket)
-{
-	delete (mMuxSocket);
-	mMuxSocket = pSocket;
-	/*if (mMuxSocket)
-	{
-		mMuxSocket->SetDatagramReceiver(mPacketFactory);
+void NetworkAgent::SetMuxSocket(MuxSocket* socket) {
+	delete (mux_socket_);
+	mux_socket_ = socket;
+	/*if (mux_socket_) {
+		mux_socket_->SetDatagramReceiver(packet_factory_);
 	}*/
 }
 
 
 
-loginstance(NETWORK, NetworkAgent);
+loginstance(kNetwork, NetworkAgent);
 
 
 

@@ -1,230 +1,197 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "HoverTankViewer.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Tbc/Include/ChunkyPhysics.h"
-#include "../UiTbc/Include/GUI/UiDesktopWindow.h"
-#include "../UiTbc/Include/GUI/UiCenterLayout.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiCure/Include/UiGravelEmitter.h"
-#include "../UiCure/Include/UiMachine.h"
-#include "../Life/LifeClient/ClientConsoleManager.h"
-#include "../Life/LifeClient/GameClientMasterTicker.h"
-#include "../Life/LifeClient/Level.h"
-#include "../Life/LifeClient/UiConsole.h"
-#include "../Life/LifeServer/MasterServerConnection.h"
-#include "RtVar.h"
+#include "hovertankviewer.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/runtimevariable.h"
+#include "../tbc/include/chunkyphysics.h"
+#include "../uitbc/include/gui/uidesktopwindow.h"
+#include "../uitbc/include/gui/uicenterlayout.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uicure/include/uigravelemitter.h"
+#include "../uicure/include/uimachine.h"
+#include "../life/lifeclient/clientconsolemanager.h"
+#include "../life/lifeclient/gameclientmasterticker.h"
+#include "../life/lifeclient/level.h"
+#include "../life/lifeclient/uiconsole.h"
+#include "../life/lifeserver/masterserverconnection.h"
+#include "rtvar.h"
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
-HoverTankViewer::HoverTankViewer(Life::GameClientMasterTicker* pMaster, const Cure::TimeManager* pTime,
-	Cure::RuntimeVariableScope* pVariableScope, Cure::ResourceManager* pResourceManager,
-	UiCure::GameUiManager* pUiManager, int pSlaveIndex, const PixelRect& pRenderArea):
-	Parent(pMaster, pTime, pVariableScope, pResourceManager, pUiManager, pSlaveIndex, pRenderArea),
-	mServerListView(0)
-{
-	mCameraPosition = vec3(-22, -5, 43.1f);
-	mCameraOrientation = vec3(-PIF*1.1f/2, PIF*0.86f/2, 0.05f);
+HoverTankViewer::HoverTankViewer(life::GameClientMasterTicker* pMaster, const cure::TimeManager* time,
+	cure::RuntimeVariableScope* variable_scope, cure::ResourceManager* resource_manager,
+	UiCure::GameUiManager* ui_manager, int slave_index, const PixelRect& render_area):
+	Parent(pMaster, time, variable_scope, resource_manager, ui_manager, slave_index, render_area),
+	server_list_view_(0) {
+	camera_position_ = vec3(-22, -5, 43.1f);
+	camera_orientation_ = vec3(-PIF*1.1f/2, PIF*0.86f/2, 0.05f);
 }
 
-HoverTankViewer::~HoverTankViewer()
-{
+HoverTankViewer::~HoverTankViewer() {
 	CloseJoinServerView();
 }
 
 
 
-void HoverTankViewer::LoadSettings()
-{
-	v_set(GetVariableScope(), RTVAR_DEBUG_INPUT_PRINT, false);
+void HoverTankViewer::LoadSettings() {
+	v_set(GetVariableScope(), kRtvarDebugInputPrint, false);
 
-	v_internal(GetVariableScope(), RTVAR_GAME_DRAWSCORE, false);
-	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMDISTANCE, 20.0);
-	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMHEIGHT, 10.0);
-	v_internal(GetVariableScope(), RTVAR_UI_3D_CAMROTATE, 0.0);
-	v_internal(GetVariableScope(), RTVAR_STEERING_PLAYBACKMODE, PLAYBACK_NONE);
+	v_internal(GetVariableScope(), kRtvarGameDrawscore, false);
+	v_internal(GetVariableScope(), kRtvarUi3DCamdistance, 20.0);
+	v_internal(GetVariableScope(), kRtvarUi3DCamheight, 10.0);
+	v_internal(GetVariableScope(), kRtvarUi3DCamrotate, 0.0);
+	v_internal(GetVariableScope(), kRtvarSteeringPlaybackmode, kPlaybackNone);
 }
 
-void HoverTankViewer::SaveSettings()
-{
+void HoverTankViewer::SaveSettings() {
 }
 
-bool HoverTankViewer::Open()
-{
-	return Life::GameClientSlaveManager::Open();
+bool HoverTankViewer::Open() {
+	return life::GameClientSlaveManager::Open();
 }
 
-void HoverTankViewer::TickUiInput()
-{
+void HoverTankViewer::TickUiInput() {
 }
 
-void HoverTankViewer::TickUiUpdate()
-{
-	((Life::ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
+void HoverTankViewer::TickUiUpdate() {
+	((life::ClientConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 
-	if (mServerListView)
-	{
-		mServerListView->Tick();
+	if (server_list_view_) {
+		server_list_view_->Tick();
 	}
 
-	/*mCameraPreviousPosition = mCameraPosition;
-	Cure::ContextObject* lObject = GetContext()->GetObject(mBackdropVehicleId);
-	if (!lObject)
-	{
+	/*camera_previous_position_ = camera_position_;
+	cure::ContextObject* _object = GetContext()->GetObject(mBackdropVehicleId);
+	if (!_object) {
 		return;
 	}
-	mCameraPivotPosition = lObject->GetPosition();
-	mCameraPosition = mCameraPivotPosition - vec3(10, 0, 0);
-	mCameraPreviousPosition = mCameraPosition;
-	mCameraOrientation = vec3(0, PIF/2, 0);*/
+	camera_pivot_position_ = _object->GetPosition();
+	camera_position_ = camera_pivot_position_ - vec3(10, 0, 0);
+	camera_previous_position_ = camera_position_;
+	camera_orientation_ = vec3(0, PIF/2, 0);*/
 }
 
-void HoverTankViewer::CreateLoginView()
-{
-	quat lFlip;
-	lFlip.RotateAroundOwnZ(PIF);
-	CreateButton(-0.2f, +0.2f,  6.0f, "1",	"road_sign_02", "road_sign_1p.png", RoadSignButton::SHAPE_BOX);
-	RoadSignButton* lButton = CreateButton(+0.2f, +0.2f,  6.0f, "2",	"road_sign_02", "road_sign_2p.png", RoadSignButton::SHAPE_BOX);
-	lButton->SetOrientation(lFlip);
-	CreateButton(-0.2f, -0.2f,  6.0f, "3",	"road_sign_02", "road_sign_3p.png", RoadSignButton::SHAPE_BOX);
-	lButton = CreateButton(+0.2f, -0.2f,  6.0f, "4",	"road_sign_02", "road_sign_4p.png", RoadSignButton::SHAPE_BOX);
-	lButton->SetOrientation(lFlip);
+void HoverTankViewer::CreateLoginView() {
+	quat flip;
+	flip.RotateAroundOwnZ(PIF);
+	CreateButton(-0.2f, +0.2f,  6.0f, "1",	"road_sign_02", "road_sign_1p.png", RoadSignButton::kShapeBox);
+	RoadSignButton* _button = CreateButton(+0.2f, +0.2f,  6.0f, "2",	"road_sign_02", "road_sign_2p.png", RoadSignButton::kShapeBox);
+	_button->SetOrientation(flip);
+	CreateButton(-0.2f, -0.2f,  6.0f, "3",	"road_sign_02", "road_sign_3p.png", RoadSignButton::kShapeBox);
+	_button = CreateButton(+0.2f, -0.2f,  6.0f, "4",	"road_sign_02", "road_sign_4p.png", RoadSignButton::kShapeBox);
+	_button->SetOrientation(flip);
 
-	CreateButton(-0.4f, +0.4f, 12.0f, "server",	"road_sign_01", "road_sign_roundabout.png", RoadSignButton::SHAPE_ROUND);
+	CreateButton(-0.4f, +0.4f, 12.0f, "server",	"road_sign_01", "road_sign_roundabout.png", RoadSignButton::kShapeRound);
 
-	CreateButton(+0.4f, +0.4f, 12.0f, "quit",	"road_sign_01", "road_sign_nostop.png", RoadSignButton::SHAPE_ROUND);
+	CreateButton(+0.4f, +0.4f, 12.0f, "quit",	"road_sign_01", "road_sign_nostop.png", RoadSignButton::kShapeRound);
 }
 
-bool HoverTankViewer::InitializeUniverse()
-{
-	if (!Parent::InitializeUniverse())
-	{
+bool HoverTankViewer::InitializeUniverse() {
+	if (!Parent::InitializeUniverse()) {
 		return (false);
 	}
 
-	UiCure::GravelEmitter* lGravelParticleEmitter = new UiCure::GravelEmitter(GetResourceManager(), mUiManager, 0.5f, 1, 10, 2);
-	mLevel = new Life::Level(GetResourceManager(), "level_02", mUiManager, lGravelParticleEmitter);
-	AddContextObject(mLevel, Cure::NETWORK_OBJECT_REMOTE_CONTROLLED, 0);
-	mLevel->EnableRootShadow(false);
-	mLevel->SetAllowNetworkLogic(false);
-	mLevel->StartLoading();
+	UiCure::GravelEmitter* gravel_particle_emitter = new UiCure::GravelEmitter(GetResourceManager(), ui_manager_, 0.5f, 1, 10, 2);
+	level_ = new life::Level(GetResourceManager(), "level_02", ui_manager_, gravel_particle_emitter);
+	AddContextObject(level_, cure::kNetworkObjectRemoteControlled, 0);
+	level_->EnableRootShadow(false);
+	level_->SetAllowNetworkLogic(false);
+	level_->StartLoading();
 
-	Cure::ContextObject* lVehicle = new UiCure::Machine(GetResourceManager(), "hover_tank_01", mUiManager);
-	GetContext()->AddLocalObject(lVehicle);
-	lVehicle->SetInitialTransform(xform(gIdentityQuaternionF, vec3(-23, -80, 53)));
-	lVehicle->StartLoading();
-	mAvatarId = lVehicle->GetInstanceId();
+	cure::ContextObject* vehicle = new UiCure::Machine(GetResourceManager(), "hover_tank_01", ui_manager_);
+	GetContext()->AddLocalObject(vehicle);
+	vehicle->SetInitialTransform(xform(kIdentityQuaternionF, vec3(-23, -80, 53)));
+	vehicle->StartLoading();
+	avatar_id_ = vehicle->GetInstanceId();
 	GetConsoleManager()->ExecuteCommand("fork execute-file Data/Steering.rec");
 	return (true);
 }
 
-void HoverTankViewer::OnLoadCompleted(Cure::ContextObject* pObject, bool pOk)
-{
-	if (pOk)
-	{
-	}
-	else
-	{
-		Parent::OnLoadCompleted(pObject, pOk);
+void HoverTankViewer::OnLoadCompleted(cure::ContextObject* object, bool ok) {
+	if (ok) {
+	} else {
+		Parent::OnLoadCompleted(object, ok);
 	}
 }
 
-void HoverTankViewer::OnCancelJoinServer()
-{
+void HoverTankViewer::OnCancelJoinServer() {
 	CloseJoinServerView();
 }
 
-void HoverTankViewer::OnRequestJoinServer(const str& pServerAddress)
-{
-	v_set(GetVariableScope(), RTVAR_NETWORK_SERVERADDRESS, pServerAddress);
-	v_internal(UiCure::GetSettings(), RTVAR_LOGIN_ISSERVERSELECTED, true);
-	mLog.Infof("Will use server %s when logging in.", pServerAddress.c_str());
+void HoverTankViewer::OnRequestJoinServer(const str& server_address) {
+	v_set(GetVariableScope(), kRtvarNetworkServeraddress, server_address);
+	v_internal(UiCure::GetSettings(), kRtvarLoginIsserverselected, true);
+	log_.Infof("Will use server %s when logging in.", server_address.c_str());
 	CloseJoinServerView();
 }
 
-bool HoverTankViewer::UpdateServerList(Life::ServerInfoList& pServerList) const
-{
-	if (GetMaster()->GetMasterServerConnection())	// TRICKY: uses master ticker's connection, as this is the one that downloads server lists!
-	{
-		return GetMaster()->GetMasterServerConnection()->UpdateServerList(pServerList);
+bool HoverTankViewer::UpdateServerList(life::ServerInfoList& server_list) const {
+	if (GetMaster()->GetMasterServerConnection()) {	// TRICKY: uses master ticker's connection, as this is the one that downloads server lists!
+		return GetMaster()->GetMasterServerConnection()->UpdateServerList(server_list);
 	}
 	return false;
 }
 
-bool HoverTankViewer::IsMasterServerConnectError() const
-{
-	if (GetMaster()->GetMasterServerConnection())	// TRICKY: uses master ticker's connection, as this is the one that downloads server lists!
-	{
+bool HoverTankViewer::IsMasterServerConnectError() const {
+	if (GetMaster()->GetMasterServerConnection()) {	// TRICKY: uses master ticker's connection, as this is the one that downloads server lists!
 		return GetMaster()->GetMasterServerConnection()->IsConnectError();
 	}
 	return true;
 }
 
-void HoverTankViewer::CloseJoinServerView()
-{
-	if (mServerListView)
-	{
-		mUiManager->GetDesktopWindow()->RemoveChild(mServerListView, 1);
-		delete (mServerListView);
-		mServerListView = 0;
+void HoverTankViewer::CloseJoinServerView() {
+	if (server_list_view_) {
+		ui_manager_->GetDesktopWindow()->RemoveChild(server_list_view_, 1);
+		delete (server_list_view_);
+		server_list_view_ = 0;
 	}
 }
 
-RoadSignButton* HoverTankViewer::CreateButton(float x, float y, float z, const str& pName, const str& pClass, const str& pTexture, RoadSignButton::Shape pShape)
-{
-	RoadSignButton* lButton = new RoadSignButton(this, GetResourceManager(), mUiManager, pName, pClass, pTexture, pShape);
-	GetContext()->AddLocalObject(lButton);
-	lButton->SetTrajectory(vec2(x, y), z);
-	lButton->GetButton().SetOnClick(HoverTankViewer, OnButtonClick);
-	mRoadSignMap.insert(RoadSignMap::value_type(lButton->GetInstanceId(), lButton));
-	lButton->StartLoading();
-	return (lButton);
+RoadSignButton* HoverTankViewer::CreateButton(float x, float y, float z, const str& name, const str& clazz, const str& texture, RoadSignButton::Shape shape) {
+	RoadSignButton* _button = new RoadSignButton(this, GetResourceManager(), ui_manager_, name, clazz, texture, shape);
+	GetContext()->AddLocalObject(_button);
+	_button->SetTrajectory(vec2(x, y), z);
+	_button->GetButton().SetOnClick(HoverTankViewer, OnButtonClick);
+	road_sign_map_.insert(RoadSignMap::value_type(_button->GetInstanceId(), _button));
+	_button->StartLoading();
+	return (_button);
 }
 
-void HoverTankViewer::OnButtonClick(UiTbc::Button* pButton)
-{
-	if (pButton->GetName() == "server")
-	{
-		if (!mServerListView)
-		{
+void HoverTankViewer::OnButtonClick(uitbc::Button* button) {
+	if (button->GetName() == "server") {
+		if (!server_list_view_) {
 			GetMaster()->DownloadServerList();
-			mServerListView = new ServerListView(this);
-			mUiManager->AssertDesktopLayout(new UiTbc::CenterLayout, 1);
-			mUiManager->GetDesktopWindow()->AddChild(mServerListView, 0, 0, 1);
+			server_list_view_ = new ServerListView(this);
+			ui_manager_->AssertDesktopLayout(new uitbc::CenterLayout, 1);
+			ui_manager_->GetDesktopWindow()->AddChild(server_list_view_, 0, 0, 1);
 		}
-		v_set(GetVariableScope(), RTVAR_NETWORK_ENABLEONLINEMASTER, true);
+		v_set(GetVariableScope(), kRtvarNetworkEnableonlinemaster, true);
 		return;
 	}
-	if (pButton->GetName() == "quit")
-	{
+	if (button->GetName() == "quit") {
 		GetMaster()->OnExit();
 		return;
 	}
-	int lValue = 0;
-	if (strutil::StringToInt(pButton->GetName(), lValue))
-	{
-		GetMaster()->OnSetPlayerCount(lValue);
-	}
-	else
-	{
+	int value = 0;
+	if (strutil::StringToInt(button->GetName(), value)) {
+		GetMaster()->OnSetPlayerCount(value);
+	} else {
 		deb_assert(false);
 	}
 }
 
 
 
-loginstance(GAME, HoverTankViewer);
+loginstance(kGame, HoverTankViewer);
 
 
 

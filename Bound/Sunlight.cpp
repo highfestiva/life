@@ -1,46 +1,41 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Sunlight.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../UiCure/Include/UiGameUiManager.h"
-#include "../UiCure/Include/UiRuntimeVariableName.h"
+#include "sunlight.h"
+#include "../cure/include/runtimevariable.h"
+#include "../uicure/include/uigameuimanager.h"
+#include "../uicure/include/uiruntimevariablename.h"
 
 
 
-namespace Bound
-{
+namespace Bound {
 
 
 
-Sunlight::Sunlight(UiCure::GameUiManager* pUiManager):
-	mUiManager(pUiManager),
-	mLightAverageDirection(0,0,-1)
-{
-	const bool lPixelShadersEnabled = mUiManager->GetRenderer()->IsPixelShadersEnabled();
-	mLightId = mUiManager->GetRenderer()->AddDirectionalLight(
-		UiTbc::Renderer::LIGHT_MOVABLE, mLightAverageDirection,
-		vec3(0.6f,0.6f,0.6f) * (lPixelShadersEnabled? 1.0f : 1.5f), 100);
+Sunlight::Sunlight(UiCure::GameUiManager* ui_manager):
+	ui_manager_(ui_manager),
+	light_average_direction_(0,0,-1) {
+	const bool pixel_shaders_enabled = ui_manager_->GetRenderer()->IsPixelShadersEnabled();
+	light_id_ = ui_manager_->GetRenderer()->AddDirectionalLight(
+		uitbc::Renderer::kLightMovable, light_average_direction_,
+		vec3(0.6f,0.6f,0.6f) * (pixel_shaders_enabled? 1.0f : 1.5f), 100);
 }
 
-Sunlight::~Sunlight()
-{
-	mUiManager->GetRenderer()->RemoveLight(mLightId);
+Sunlight::~Sunlight() {
+	ui_manager_->GetRenderer()->RemoveLight(light_id_);
 }
 
-void Sunlight::Tick(const quat& pCameraOrientation)
-{
-	vec3 d = mUiManager->GetAccelerometer();
-	d = pCameraOrientation*d.GetNormalized();
-	d = Math::Lerp(mLightAverageDirection, d, 0.5f);
-	if (d.GetDistanceSquared(mLightAverageDirection) > 1e-5f)
-	{
-		mLightAverageDirection = d;
-		mUiManager->GetRenderer()->SetLightDirection(mLightId, mLightAverageDirection);
+void Sunlight::Tick(const quat& camera_orientation) {
+	vec3 d = ui_manager_->GetAccelerometer();
+	d = camera_orientation*d.GetNormalized();
+	d = Math::Lerp(light_average_direction_, d, 0.5f);
+	if (d.GetDistanceSquared(light_average_direction_) > 1e-5f) {
+		light_average_direction_ = d;
+		ui_manager_->GetRenderer()->SetLightDirection(light_id_, light_average_direction_);
 	}
 }
 

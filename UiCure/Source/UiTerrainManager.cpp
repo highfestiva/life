@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2002-2007, Righteous Games
 
 // TODO: implement a physical terrain.
@@ -7,22 +7,19 @@
 
 
 #include "pch.h"
-#include "../Include/UiCure.h"
-#include "../Include/UiTerrainManager.h"
+#include "../include/uicure.h"
+#include "../include/uiterrainmanager.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-TerrainManager::TerrainManager()
-{
+TerrainManager::TerrainManager() {
 }
 
-TerrainManager::~TerrainManager()
-{
+TerrainManager::~TerrainManager() {
 }
 
 

@@ -1,34 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Lepra/Include/Transformation.h"
-#include "Life.h"
+#include "../lepra/include/transformation.h"
+#include "life.h"
 
 
 
-namespace Tbc
-{
+namespace tbc {
 class ChunkyBoneGeometry;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-class Launcher
-{
+class Launcher {
 public:
-	virtual void Shoot(Cure::ContextObject* pAvatar, int pWeapon) = 0;
-	virtual void Detonate(Cure::ContextObject* pExplosive, const Tbc::ChunkyBoneGeometry* pExplosiveGeometry, const vec3& pPosition, const vec3& pVelocity, const vec3& pNormal, float pStrength) = 0;
-	virtual void OnBulletHit(Cure::ContextObject* pBullet, Cure::ContextObject* pHitObject) = 0;
+	virtual void Shoot(cure::ContextObject* avatar, int weapon) = 0;
+	virtual void Detonate(cure::ContextObject* explosive, const tbc::ChunkyBoneGeometry* explosive_geometry, const vec3& position, const vec3& velocity, const vec3& normal, float strength) = 0;
+	virtual void OnBulletHit(cure::ContextObject* bullet, cure::ContextObject* hit_object) = 0;
 };
 
 

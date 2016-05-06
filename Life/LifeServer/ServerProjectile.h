@@ -1,18 +1,17 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../../Cure/Include/CppContextObject.h"
-#include "../Life.h"
+#include "../../cure/include/cppcontextobject.h"
+#include "../life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -20,25 +19,24 @@ class Launcher;
 
 
 
-class ServerProjectile: public Cure::CppContextObject
-{
+class ServerProjectile: public cure::CppContextObject {
 public:
-	typedef Cure::CppContextObject Parent;
+	typedef cure::CppContextObject Parent;
 
-	ServerProjectile(Cure::ResourceManager* pResourceManager, const str& pClassId, float pMuzzleVelocity, Launcher* pLauncher);
+	ServerProjectile(cure::ResourceManager* resource_manager, const str& class_id, float muzzle_velocity, Launcher* launcher);
 	virtual ~ServerProjectile();
 
 private:
 	virtual void OnLoaded();
-	virtual void OnForceApplied(Cure::ContextObject* pOtherObject,
-		Tbc::PhysicsManager::BodyID pOwnBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-		const vec3& pForce, const vec3& pTorque,
-		const vec3& pPosition, const vec3& pRelativeVelocity);
+	virtual void OnForceApplied(cure::ContextObject* other_object,
+		tbc::PhysicsManager::BodyID own_body_id, tbc::PhysicsManager::BodyID other_body_id,
+		const vec3& force, const vec3& torque,
+		const vec3& position, const vec3& relative_velocity);
 
-	float mMuzzleVelocity;
-	Launcher* mLauncher;
-	bool mIsDetonated;
-	float mExplosiveEnergy;
+	float muzzle_velocity_;
+	Launcher* launcher_;
+	bool is_detonated_;
+	float explosive_energy_;
 
 	logclass();
 };

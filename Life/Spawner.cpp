@@ -1,38 +1,34 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "Spawner.h"
-#include "../Cure/Include/ContextManager.h"
-#include "../Cure/Include/GameManager.h"
-#include "../Cure/Include/RuntimeVariable.h"
-#include "../Tbc/Include/PhysicsSpawner.h"
-#include "RtVar.h"
+#include "spawner.h"
+#include "../cure/include/contextmanager.h"
+#include "../cure/include/gamemanager.h"
+#include "../cure/include/runtimevariable.h"
+#include "../tbc/include/physicsspawner.h"
+#include "rtvar.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-Spawner::Spawner(Cure::ContextManager* pManager):
-	Parent(pManager)
-{
+Spawner::Spawner(cure::ContextManager* manager):
+	Parent(manager) {
 }
 
-Spawner::~Spawner()
-{
+Spawner::~Spawner() {
 }
 
-int Spawner::GetSpawnCount() const
-{
-	float lSpawnPart;
-	v_get(lSpawnPart, =(float), GetManager()->GetGameManager()->GetVariableScope(), RTVAR_GAME_SPAWNPART, 1.0);
-	return (int)(GetSpawner()->GetNumber() * lSpawnPart);
+int Spawner::GetSpawnCount() const {
+	float spawn_part;
+	v_get(spawn_part, =(float), GetManager()->GetGameManager()->GetVariableScope(), kRtvarGameSpawnpart, 1.0);
+	return (int)(GetSpawner()->GetNumber() * spawn_part);
 }
 
 

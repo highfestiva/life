@@ -7,16 +7,16 @@
 #pragma once
 
 // Unreachable code warning below (MSVC8). For some reason just this file happens to temper with some shitty template.
-#include "../../Lepra/Include/LepraTarget.h"
+#include "../../lepra/include/lepratarget.h"
 #ifdef LEPRA_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4702)
 #endif // LEPRA_MSVC
-#include "UiLepra.h"
+#include "uilepra.h"
 #ifdef LEPRA_MSVC
 #pragma warning(pop)
 #endif // LEPRA_MSVC
-#include "../../Lepra/Include/LepraOS.h"
+#include "../../lepra/include/lepraos.h"
 
 
 #if defined(LEPRA_WINDOWS)
@@ -24,8 +24,8 @@
 #define LEPRA_GL_INDEX_TYPE GL_UNSIGNED_INT
 #include <gl/gl.h>
 #include <gl/glu.h>
-#include "Win32/WGLEXT.h"
-#include "GLEXT.H"
+#include "win32/WGLEXT.h"
+#include "glext.h"
 
 #elif defined(LEPRA_IOS)
 
@@ -69,18 +69,16 @@
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-class OpenGLExtensions
-{
+class OpenGLExtensions {
 public:
-	
-	static bool IsExtensionSupported(const char* pExtension);
+
+	static bool IsExtensionSupported(const char* extension);
 #if !defined(LEPRA_MAC)
-	static void* GetExtensionPointer(const char* pFunctionName);
+	static void* GetExtensionPointer(const char* function_name);
 #endif // !Mac
 
 	// OpenGL extension function pointers...
@@ -276,10 +274,10 @@ public:
 	static bool IsShaderCProgramsSupported();
 
 	static float GetMaxAnisotropy();
-	static void SetAnisotropy(float pAmountAnisotropy);
+	static void SetAnisotropy(float amount_anisotropy);
 
 	static bool IsVSyncEnabled();
-	static bool SetVSyncEnabled(bool pEnabled);
+	static bool SetVSyncEnabled(bool enabled);
 
 protected:
 private:
@@ -296,17 +294,17 @@ private:
 	static bool CheckShaderProgramFunctions();
 	static bool CheckShaderFunctions();
 
-	static bool mIsGLVersion14;
-	static bool mIsGLVersion15;
-	static bool mIsFrameBufferObjectsSupported;
-	static bool mIsBufferObjectsSupported;
-	static bool mIsAnisotropicFilteringSupported;
-	static bool mIsCompressedTexturesSupported;
-	static bool mIsMultiTextureSupported;
-	static bool mIsShaderAsmProgramsSupported;
-	static bool mIsShaderCProgramsSupported;
+	static bool is_gl_version14_;
+	static bool is_gl_version15_;
+	static bool is_frame_buffer_objects_supported_;
+	static bool is_buffer_objects_supported_;
+	static bool is_anisotropic_filtering_supported_;
+	static bool is_compressed_textures_supported_;
+	static bool is_multi_texture_supported_;
+	static bool is_shader_asm_programs_supported_;
+	static bool is_shader_c_programs_supported_;
 
-	static float mMaxAnisotropy;
+	static float max_anisotropy_;
 
 #ifdef LEPRA_WINDOWS
 	// Vsync on/off.

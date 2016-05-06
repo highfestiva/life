@@ -1,154 +1,128 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "OptionsManager.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Lepra/Include/CyclicArray.h"
-#include "../../Lepra/Include/Math.h"
-#include "RtVar.h"
+#include "optionsmanager.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../cure/include/runtimevariable.h"
+#include "../../lepra/include/cyclicarray.h"
+#include "../../lepra/include/math.h"
+#include "rtvar.h"
 
 
 
-namespace Life
-{
-namespace Options
-{
+namespace life {
+namespace options {
 
 
 
-OptionsManager::OptionsManager(Cure::RuntimeVariableScope* pVariableScope, int pPriority):
-	mVariableScope(pVariableScope),
-	mConsoleToggle(0)
-{
-	SetDefault(pPriority);
+OptionsManager::OptionsManager(cure::RuntimeVariableScope* variable_scope, int priority):
+	variable_scope_(variable_scope),
+	console_toggle_(0) {
+	SetDefault(priority);
 	DoRefreshConfiguration();
 }
 
 
 
-void OptionsManager::RefreshConfiguration()
-{
-	if (mLastConfigRefresh.QueryTimeDiff() > 5.0)
-	{
-		mLastConfigRefresh.ClearTimeDiff();
+void OptionsManager::RefreshConfiguration() {
+	if (last_config_refresh_.QueryTimeDiff() > 5.0) {
+		last_config_refresh_.ClearTimeDiff();
 		DoRefreshConfiguration();
 	}
 }
 
-void OptionsManager::DoRefreshConfiguration()
-{
-	const KeyValue lEntries[] =
+void OptionsManager::DoRefreshConfiguration() {
+	const KeyValue _entries[] =
 	{
-		KeyValue(RTVAR_CTRL_UI_CONTOGGLE, &mConsoleToggle),
+		KeyValue(kRtvarCtrlUiContoggle, &console_toggle_),
 	};
-	SetValuePointers(lEntries, LEPRA_ARRAY_COUNT(lEntries));
+	SetValuePointers(_entries, LEPRA_ARRAY_COUNT(_entries));
 }
 
-bool OptionsManager::UpdateInput(UiLepra::InputManager::KeyCode pKeyCode, bool pActive)
-{
-	const str lInputElementName = ConvertToString(pKeyCode);
-	return (SetValue(lInputElementName, pActive? 1.0f : 0.0f, false));
+bool OptionsManager::UpdateInput(uilepra::InputManager::KeyCode key_code, bool active) {
+	const str input_element_name = ConvertToString(key_code);
+	return (SetValue(input_element_name, active? 1.0f : 0.0f, false));
 }
 
-bool OptionsManager::UpdateInput(UiLepra::InputElement* pElement)
-{
-	(void)pElement;
+bool OptionsManager::UpdateInput(uilepra::InputElement* element) {
+	(void)element;
 	return false;
 }
 
-void OptionsManager::ResetToggles()
-{
-	mConsoleToggle = 0;
+void OptionsManager::ResetToggles() {
+	console_toggle_ = 0;
 }
 
-bool OptionsManager::IsToggleConsole() const
-{
-	return mConsoleToggle >= 0.5f;
+bool OptionsManager::IsToggleConsole() const {
+	return console_toggle_ >= 0.5f;
 }
 
-OptionsManager::ValueArray* OptionsManager::GetValuePointers(const str& pKey, bool& pIsAnySteeringValue)
-{
-	InputMap::iterator x = mInputMap.find(pKey);
-	if (x == mInputMap.end())
-	{
+OptionsManager::ValueArray* OptionsManager::GetValuePointers(const str& key, bool& is_any_steering_value) {
+	InputMap::iterator x = input_map_.find(key);
+	if (x == input_map_.end()) {
 		return 0;
 	}
-	InputEntry& lEntry = x->second;
-	pIsAnySteeringValue = lEntry.mIsAnySteeringValue;
-	return &lEntry.mValuePointerArray;
+	InputEntry& entry = x->second;
+	is_any_steering_value = entry.is_any_steering_value_;
+	return &entry.value_pointer_array_;
 }
 
 
 
-bool OptionsManager::SetDefault(int)
-{
-	v_override(mVariableScope, RTVAR_CTRL_UI_CONTOGGLE, "Key.F11");
+bool OptionsManager::SetDefault(int) {
+	v_override(variable_scope_, kRtvarCtrlUiContoggle, "Key.F11");
 	return (true);
 }
 
-const str OptionsManager::ConvertToString(UiLepra::InputManager::KeyCode pKeyCode)
-{
-	return ("Key."+UiLepra::InputManager::GetKeyName(pKeyCode));
+const str OptionsManager::ConvertToString(uilepra::InputManager::KeyCode key_code) {
+	return ("Key."+uilepra::InputManager::GetKeyName(key_code));
 }
 
-bool OptionsManager::SetValue(const str& pKey, float pValue, bool pAdd)
-{
-	//log_volatile(mLog.Tracef("Got input %s: %g", pKey.c_str(), pValue));
+bool OptionsManager::SetValue(const str& key, float value, bool add) {
+	//log_volatile(log_.Tracef("Got input %s: %g", key.c_str(), value));
 
-	bool lIsAnySteeringValue;
-	ValueArray* lValuePointers = GetValuePointers(pKey, lIsAnySteeringValue);
-	if (!lValuePointers)
-	{
+	bool _is_any_steering_value;
+	ValueArray* value_pointers = GetValuePointers(key, _is_any_steering_value);
+	if (!value_pointers) {
 		return false;
 	}
 
-	bool lInputChanged = false;
-	for (ValueArray::const_iterator x = lValuePointers->begin(); x != lValuePointers->end(); ++x)
-	{
-		if (pAdd)
-		{
-			lInputChanged = true;
-			*(*x) += Math::Clamp(pValue, -1.0f, 1.0f);
-		}
-		else if (!Math::IsEpsEqual(*(*x), pValue, 0.06f))
-		{
-			lInputChanged = true;
-			*(*x) = pValue;
+	bool input_changed = false;
+	for (ValueArray::const_iterator x = value_pointers->begin(); x != value_pointers->end(); ++x) {
+		if (add) {
+			input_changed = true;
+			*(*x) += Math::Clamp(value, -1.0f, 1.0f);
+		} else if (!Math::IsEpsEqual(*(*x), value, 0.06f)) {
+			input_changed = true;
+			*(*x) = value;
 		}
 	}
-	return (lIsAnySteeringValue && lInputChanged);
+	return (_is_any_steering_value && input_changed);
 }
 
-void OptionsManager::SetValuePointers(const KeyValue pEntries[], size_t pEntryCount)
-{
-	mInputMap.clear();
-	for (size_t x = 0; x < pEntryCount; ++x)
-	{
-		const str lKeys = mVariableScope->GetDefaultValue(Cure::RuntimeVariableScope::READ_ONLY, pEntries[x].first);
+void OptionsManager::SetValuePointers(const KeyValue entries[], size_t entry_count) {
+	input_map_.clear();
+	for (size_t x = 0; x < entry_count; ++x) {
+		const str keys = variable_scope_->GetDefaultValue(cure::RuntimeVariableScope::kReadOnly, entries[x].first);
 		typedef strutil::strvec SV;
-		SV lKeyArray = strutil::Split(lKeys, ", \t");
-		for (SV::iterator y = lKeyArray.begin(); y != lKeyArray.end(); ++y)
-		{
-			const bool lIsSteeringValue = (pEntries[x].first.find("Steer") != str::npos);
-			const str& lKey = *y;
-			InputMap::iterator z = mInputMap.find(lKey);
-			if (z == mInputMap.end())
-			{
-				InputEntry lEntry;
-				lEntry.mIsAnySteeringValue = lIsSteeringValue;
-				lEntry.mValuePointerArray.push_back(pEntries[x].second);
-				mInputMap.insert(InputMap::value_type(lKey, lEntry));
-			}
-			else
-			{
-				InputEntry& lEntry = z->second;
-				lEntry.mIsAnySteeringValue |= lIsSteeringValue;
-				lEntry.mValuePointerArray.push_back(pEntries[x].second);
+		SV key_array = strutil::Split(keys, ", \t");
+		for (SV::iterator y = key_array.begin(); y != key_array.end(); ++y) {
+			const bool is_steering_value = (entries[x].first.find("Steer") != str::npos);
+			const str& _key = *y;
+			InputMap::iterator z = input_map_.find(_key);
+			if (z == input_map_.end()) {
+				InputEntry entry;
+				entry.is_any_steering_value_ = is_steering_value;
+				entry.value_pointer_array_.push_back(entries[x].second);
+				input_map_.insert(InputMap::value_type(_key, entry));
+			} else {
+				InputEntry& entry = z->second;
+				entry.is_any_steering_value_ |= is_steering_value;
+				entry.value_pointer_array_.push_back(entries[x].second);
 			}
 		}
 	}
@@ -156,14 +130,13 @@ void OptionsManager::SetValuePointers(const KeyValue pEntries[], size_t pEntryCo
 
 
 
-void OptionsManager::operator=(const OptionsManager&)
-{
+void OptionsManager::operator=(const OptionsManager&) {
 	deb_assert(false);
 }
 
 
 
-loginstance(UI_INPUT, OptionsManager);
+loginstance(kUiInput, OptionsManager);
 
 
 

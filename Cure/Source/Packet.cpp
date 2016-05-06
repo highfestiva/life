@@ -5,997 +5,826 @@
 
 
 #include "pch.h"
-#include "../Include/Packet.h"
-#include "../../Lepra/Include/LepraAssert.h"
-#include "../../Lepra/Include/Packer.h"
-#include "../../Lepra/Include/Socket.h"
-#include "../Include/PositionalData.h"
+#include "../include/packet.h"
+#include "../../lepra/include/lepraassert.h"
+#include "../../lepra/include/packer.h"
+#include "../../lepra/include/socket.h"
+#include "../include/positionaldata.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-Packet::Packet(MessageFactory* pMessageFactory):
-	mMessageFactory(pMessageFactory),
-	mPacketSize(PACKET_SIZE_MARKER_LENGTH),
-	mParsedPacketSize(0)
-{
+Packet::Packet(MessageFactory* message_factory):
+	message_factory_(message_factory),
+	packet_size_(PACKET_SIZE_MARKER_LENGTH),
+	parsed_packet_size_(0) {
 	resize(PACKET_LENGTH);
 }
 
-Packet::~Packet()
-{
+Packet::~Packet() {
 	Release();
 }
 
-void Packet::Release()
-{
-	for (unsigned x = 0; x < mMessageVector.size(); ++x)
-	{
-		Message* lMessage = mMessageVector[x];
-		mMessageFactory->Release(lMessage);
+void Packet::Release() {
+	for (unsigned x = 0; x < message_vector_.size(); ++x) {
+		Message* _message = message_vector_[x];
+		message_factory_->Release(_message);
 	}
 	Clear();
 }
 
-void Packet::Clear()
-{
-	mMessageVector.clear();
+void Packet::Clear() {
+	message_vector_.clear();
 
-	mPacketSize = PACKET_SIZE_MARKER_LENGTH;
-	mParsedPacketSize = 0;
+	packet_size_ = PACKET_SIZE_MARKER_LENGTH;
+	parsed_packet_size_ = 0;
 }
 
-Packet::ParseResult Packet::ParseMore()
-{
-	unsigned lNextPacketOffset = mParsedPacketSize;
-	for (unsigned x = 0; x < mMessageVector.size(); ++x)
-	{
-		Message* lMessage = mMessageVector[x];
-		mMessageFactory->Release(lMessage);
+Packet::ParseResult Packet::ParseMore() {
+	unsigned next_packet_offset = parsed_packet_size_;
+	for (unsigned x = 0; x < message_vector_.size(); ++x) {
+		Message* _message = message_vector_[x];
+		message_factory_->Release(_message);
 	}
-	mMessageVector.clear();
-	return (Parse(lNextPacketOffset));
+	message_vector_.clear();
+	return (Parse(next_packet_offset));
 }
 
-Packet::ParseResult Packet::Parse(unsigned pOffset)
-{
-	if (pOffset == mPacketSize)
-	{
-		return (PARSE_NO_DATA);	// TRICKY: RAII simplifies code here.
+Packet::ParseResult Packet::Parse(unsigned offset) {
+	if (offset == packet_size_) {
+		return (kParseNoData);	// TRICKY: RAII simplifies code here.
 	}
 
-	const uint8* lData = GetReadBuffer();
-	bool lOk;
+	const uint8* _data = GetReadBuffer();
+	bool ok;
 	{
-		int lThisPacketSize;
-		lOk = ReadHeader(lThisPacketSize, &lData[pOffset], mPacketSize-pOffset);
-		if (lOk)
-		{
-			lThisPacketSize += pOffset+PACKET_SIZE_MARKER_LENGTH;
-			lOk = ((unsigned)lThisPacketSize <= mPacketSize);
-			if (!lOk && mPacketSize == PACKET_LENGTH && (unsigned)(lThisPacketSize-pOffset) <= PACKET_LENGTH)
-			{
+		int this_packet_size;
+		ok = ReadHeader(this_packet_size, &_data[offset], packet_size_-offset);
+		if (ok) {
+			this_packet_size += offset+PACKET_SIZE_MARKER_LENGTH;
+			ok = ((unsigned)this_packet_size <= packet_size_);
+			if (!ok && packet_size_ == PACKET_LENGTH && (unsigned)(this_packet_size-offset) <= PACKET_LENGTH) {
 				// This means we cut a packet in half (only happens in TCP-backed sockets).
-				::memmove(GetWriteBuffer(), &lData[pOffset], mPacketSize-pOffset);
-				mParsedPacketSize = 0;
-				mPacketSize -= pOffset;
-				return PARSE_SHIFT;
+				::memmove(GetWriteBuffer(), &_data[offset], packet_size_-offset);
+				parsed_packet_size_ = 0;
+				packet_size_ -= offset;
+				return kParseShift;
 			}
 		}
-		if (lOk)
-		{
-			mParsedPacketSize = lThisPacketSize;
+		if (ok) {
+			parsed_packet_size_ = this_packet_size;
 		}
 	}
 	unsigned x;
-	for (x = pOffset+PACKET_SIZE_MARKER_LENGTH; lOk && x < mParsedPacketSize;)
-	{
-		MessageType lType = (MessageType)lData[x];
-		Message* lMessage = mMessageFactory->Allocate(lType);
-		lOk = (lMessage != 0);
-		int lMessageSize;
-		if (lOk)
-		{
-			lMessageSize = lMessage->Parse(&lData[x], mParsedPacketSize-x);
-			lOk = (lMessageSize > 0);
-			x += lMessageSize;
-			//log_volatile(mLog.Debugf("Received message type %i of size %i.", lType, lMessageSize));
+	for (x = offset+PACKET_SIZE_MARKER_LENGTH; ok && x < parsed_packet_size_;) {
+		MessageType _type = (MessageType)_data[x];
+		Message* _message = message_factory_->Allocate(_type);
+		ok = (_message != 0);
+		int message_size;
+		if (ok) {
+			message_size = _message->Parse(&_data[x], parsed_packet_size_-x);
+			ok = (message_size > 0);
+			x += message_size;
+			//log_volatile(log_.Debugf("Received message type %i of size %i.", _type, message_size));
 		}
-		if (lOk)
-		{
-			mMessageVector.push_back(lMessage);
-		}
-		else if (lMessage)
-		{
-			mMessageFactory->Release(lMessage);
+		if (ok) {
+			message_vector_.push_back(_message);
+		} else if (_message) {
+			message_factory_->Release(_message);
 		}
 	}
-	if (x != mParsedPacketSize)
-	{
-		lOk = false;
+	if (x != parsed_packet_size_) {
+		ok = false;
 	}
-	if (!lOk)
-	{
-		mLog.Errorf("Received a bad network packet (length=%u, offset=%u)!", mPacketSize, pOffset);
-		if (mPacketSize < 100)
-		{
-			mLog.Errorf("  DATA: %s\n  STR:  %s",
-				strutil::DumpData(lData, mPacketSize).c_str(),
-				strutil::ReplaceCtrlChars(str((const char*)lData, mPacketSize), '.').c_str());
+	if (!ok) {
+		log_.Errorf("Received a bad network packet (length=%u, offset=%u)!", packet_size_, offset);
+		if (packet_size_ < 100) {
+			log_.Errorf("  DATA: %s\n  STR:  %s",
+				strutil::DumpData(_data, packet_size_).c_str(),
+				strutil::ReplaceCtrlChars(str((const char*)_data, packet_size_), '.').c_str());
 		}
 	}
-	return (lOk? PARSE_OK : PARSE_ERROR);
+	return (ok? kParseOk : kParseError);
 }
 
-void Packet::StoreHeader(unsigned pOffset)
-{
-	const int lPacketDataSize = mPacketSize-PACKET_SIZE_MARKER_LENGTH;
-	PackerInt16::Pack(&GetWriteBuffer()[pOffset], lPacketDataSize);
+void Packet::StoreHeader(unsigned offset) {
+	const int packet_data_size = packet_size_-PACKET_SIZE_MARKER_LENGTH;
+	PackerInt16::Pack(&GetWriteBuffer()[offset], packet_data_size);
 }
 
-void Packet::AddMessage(Message* pMessage)
-{
-	mMessageVector.push_back(pMessage);
-	pMessage->SetStorage(GetWriteBuffer()+mPacketSize);
-	//log_volatile(mLog.Debugf("Sending message type %i from offset %i.", pMessage->GetType(), mPacketSize));
+void Packet::AddMessage(Message* message) {
+	message_vector_.push_back(message);
+	message->SetStorage(GetWriteBuffer()+packet_size_);
+	//log_volatile(log_.Debugf("Sending message type %i from offset %i.", message->GetType(), packet_size_));
 }
 
-bool Packet::AppendToPacketBuffer(Datagram& pWriteBuffer) const
-{
-	bool lOk = false;
+bool Packet::AppendToPacketBuffer(Datagram& write_buffer) const {
+	bool ok = false;
 	// We only try appending if there is already a packet in place. Otherwise we will route the normal
 	// way and will be copied by the socket class.
-	if (pWriteBuffer.mDataSize > 0)
-	{
-		const int lThisDataLength = GetPacketSize()-PACKET_SIZE_MARKER_LENGTH;
-		const int lTotalNewLength = pWriteBuffer.mDataSize+lThisDataLength;
-		lOk = (lTotalNewLength <= Datagram::BUFFER_SIZE);
-		if (lOk)
-		{
-			::memcpy(&pWriteBuffer.mDataBuffer[pWriteBuffer.mDataSize], GetReadBuffer()+PACKET_SIZE_MARKER_LENGTH, lThisDataLength);
-			pWriteBuffer.mDataSize = lTotalNewLength;
-			PackerInt16::Pack(pWriteBuffer.mDataBuffer, lTotalNewLength-PACKET_SIZE_MARKER_LENGTH);
+	if (write_buffer.data_size_ > 0) {
+		const int this_data_length = GetPacketSize()-PACKET_SIZE_MARKER_LENGTH;
+		const int total_new_length = write_buffer.data_size_+this_data_length;
+		ok = (total_new_length <= Datagram::kBufferSize);
+		if (ok) {
+			::memcpy(&write_buffer.data_buffer_[write_buffer.data_size_], GetReadBuffer()+PACKET_SIZE_MARKER_LENGTH, this_data_length);
+			write_buffer.data_size_ = total_new_length;
+			PackerInt16::Pack(write_buffer.data_buffer_, total_new_length-PACKET_SIZE_MARKER_LENGTH);
 		}
 	}
-	return (lOk);
+	return (ok);
 }
 
-unsigned Packet::GetPacketSize() const
-{
-	return (mPacketSize);
+unsigned Packet::GetPacketSize() const {
+	return (packet_size_);
 }
 
-void Packet::SetPacketSize(int pSize)
-{
-	deb_assert(pSize > 0);
-	mPacketSize = pSize;
-	deb_assert((int)mPacketSize <= PACKET_LENGTH);
+void Packet::SetPacketSize(int _size) {
+	deb_assert(_size > 0);
+	packet_size_ = _size;
+	deb_assert((int)packet_size_ <= PACKET_LENGTH);
 }
 
-void Packet::AddPacketSize(int pSize)
-{
-	deb_assert(pSize > 0);
-	mPacketSize += pSize;
-	deb_assert((int)mPacketSize <= PACKET_LENGTH);
+void Packet::AddPacketSize(int _size) {
+	deb_assert(_size > 0);
+	packet_size_ += _size;
+	deb_assert((int)packet_size_ <= PACKET_LENGTH);
 }
 
-int Packet::GetMessageCount() const
-{
-	return ((int)mMessageVector.size());
+int Packet::GetMessageCount() const {
+	return ((int)message_vector_.size());
 }
 
-Message* Packet::GetMessageAt(int pIndex) const
-{
-	deb_assert((int)mMessageVector.size() > pIndex);
-	return (mMessageVector[pIndex]);
+Message* Packet::GetMessageAt(int index) const {
+	deb_assert((int)message_vector_.size() > index);
+	return (message_vector_[index]);
 }
 
-const uint8* Packet::GetReadBuffer() const
-{
+const uint8* Packet::GetReadBuffer() const {
 	return ((const uint8*)c_str());
 }
 
-uint8* Packet::GetWriteBuffer() const
-{
+uint8* Packet::GetWriteBuffer() const {
 	return ((uint8*)c_str());
 }
 
-int Packet::GetBufferSize() const
-{
+int Packet::GetBufferSize() const {
 	return ((int)length());
 }
 
-int Packet::Receive(TcpSocket* pSocket, void* pBuffer, int pMaxSize)
-{
+int Packet::Receive(TcpSocket* socket, void* buffer, int max_size) {
 	// Split up the TCP stream into packets that all fit into the buffer.
 
-	uint8* lBuffer = (uint8*)pBuffer;
-	int lCurrentOffset = 0;
-	const int lReadQuickLength = 4;
-	deb_assert(lReadQuickLength >= PACKET_SIZE_MARKER_LENGTH);
-	int lReceiveCount = 0;
-	bool lOk = (pMaxSize > lCurrentOffset+lReadQuickLength);
-	if (lOk)
-	{
-		int lHeaderReceiveCount = pSocket->Receive(lBuffer+lCurrentOffset, lReadQuickLength);
-		lOk = (lHeaderReceiveCount == lReadQuickLength);
-		if (lOk)
-		{
-			lReceiveCount += lHeaderReceiveCount;
+	uint8* _buffer = (uint8*)buffer;
+	int current_offset = 0;
+	const int read_quick_length = 4;
+	deb_assert(read_quick_length >= PACKET_SIZE_MARKER_LENGTH);
+	int receive_count = 0;
+	bool ok = (max_size > current_offset+read_quick_length);
+	if (ok) {
+		int header_receive_count = socket->Receive(_buffer+current_offset, read_quick_length);
+		ok = (header_receive_count == read_quick_length);
+		if (ok) {
+			receive_count += header_receive_count;
 		}
 	}
-	while (lOk)
-	{
-		int lPacketSize = -1;
-		if (lOk)
-		{
-			lOk = ReadHeader(lPacketSize, lBuffer+lCurrentOffset, lReadQuickLength);
+	while (ok) {
+		int _packet_size = -1;
+		if (ok) {
+			ok = ReadHeader(_packet_size, _buffer+current_offset, read_quick_length);
 		}
-		if (lOk)
-		{
-			lOk = (lPacketSize >= 1 && lPacketSize+lCurrentOffset < (int)pMaxSize-PACKET_SIZE_MARKER_LENGTH);
-			if (!lOk && lCurrentOffset > 0)
-			{
-				pSocket->Unreceive(lBuffer+lCurrentOffset, lReadQuickLength);
-				lReceiveCount -= lReadQuickLength;
+		if (ok) {
+			ok = (_packet_size >= 1 && _packet_size+current_offset < (int)max_size-PACKET_SIZE_MARKER_LENGTH);
+			if (!ok && current_offset > 0) {
+				socket->Unreceive(_buffer+current_offset, read_quick_length);
+				receive_count -= read_quick_length;
 			}
 		}
-		if (lOk)
-		{
-			const int lContentSize = lPacketSize-lReadQuickLength+PACKET_SIZE_MARKER_LENGTH;
-			int lExtraHeaderSize = lContentSize;
-			if (lCurrentOffset+PACKET_SIZE_MARKER_LENGTH+lPacketSize+lReadQuickLength < pMaxSize)
-			{
+		if (ok) {
+			const int content_size = _packet_size-read_quick_length+PACKET_SIZE_MARKER_LENGTH;
+			int extra_header_size = content_size;
+			if (current_offset+PACKET_SIZE_MARKER_LENGTH+_packet_size+read_quick_length < max_size) {
 				// Try and read the NEXT header, if available.
-				lExtraHeaderSize += lReadQuickLength;
+				extra_header_size += read_quick_length;
 			}
-			int lExtraReceiveCount = pSocket->Receive(lBuffer+lCurrentOffset+lReadQuickLength, lExtraHeaderSize);
-			if (lExtraReceiveCount == lContentSize)
-			{
+			int extra_receive_count = socket->Receive(_buffer+current_offset+read_quick_length, extra_header_size);
+			if (extra_receive_count == content_size) {
 				// No more header available or wanted, settle with what we've got.
-				lReceiveCount += lExtraReceiveCount;
+				receive_count += extra_receive_count;
 				break;
-			}
-			else if (lExtraReceiveCount == lExtraHeaderSize)
-			{
+			} else if (extra_receive_count == extra_header_size) {
 				// Found next header, take next packet onboard (if space available).
-				lReceiveCount += lExtraReceiveCount;
-				lCurrentOffset += PACKET_SIZE_MARKER_LENGTH+lPacketSize;
-			}
-			else
-			{
-				lOk = false;
+				receive_count += extra_receive_count;
+				current_offset += PACKET_SIZE_MARKER_LENGTH+_packet_size;
+			} else {
+				ok = false;
 			}
 		}
 	}
-	return (lReceiveCount);
+	return (receive_count);
 }
 
-bool Packet::ReadHeader(int& pPacketSize, const uint8* pBuffer, int pByteCount)
-{
-	bool lOk = (PackerInt16::Unpack(pPacketSize, pBuffer, pByteCount) == PACKET_SIZE_MARKER_LENGTH);
-	if (lOk)
-	{
-		lOk = (pPacketSize > 0);
+bool Packet::ReadHeader(int& packet_size, const uint8* buffer, int byte_count) {
+	bool ok = (PackerInt16::Unpack(packet_size, buffer, byte_count) == PACKET_SIZE_MARKER_LENGTH);
+	if (ok) {
+		ok = (packet_size > 0);
 	}
-	return (lOk);
+	return (ok);
 }
 
-loginstance(NETWORK, Packet);
+loginstance(kNetwork, Packet);
 
 
 
 Message::Message():
-	mWritableData(0),
-	mIsDataOwner(false)
-{
+	writable_data_(0),
+	is_data_owner_(false) {
 }
 
-Message::~Message()
-{
-	if (mIsDataOwner)
-	{
-		delete[] (mWritableData);
+Message::~Message() {
+	if (is_data_owner_) {
+		delete[] (writable_data_);
 	}
-	mWritableData = 0;
+	writable_data_ = 0;
 }
 
-void Message::SetStorage(uint8* pData)
-{
-	mWritableData = pData;
+void Message::SetStorage(uint8* data) {
+	writable_data_ = data;
 }
 
 
 
 MessageLoginRequest::MessageLoginRequest():
-	mPasswordData(0)
-{
+	password_data_(0) {
 }
 
-MessageType MessageLoginRequest::GetType() const
-{
-	return (MESSAGE_TYPE_LOGIN_REQUEST);
+MessageType MessageLoginRequest::GetType() const {
+	return (kMessageTypeLoginRequest);
 }
 
-int MessageLoginRequest::Parse(const uint8* pData, int pSize)
-{
-	int lTotalSize = -1;
-	if ((MessageType)pData[0] == MESSAGE_TYPE_LOGIN_REQUEST)
-	{
-		mData = pData;
+int MessageLoginRequest::Parse(const uint8* data, int _size) {
+	int total_size = -1;
+	if ((MessageType)data[0] == kMessageTypeLoginRequest) {
+		data_ = data;
 
-		lTotalSize = 1;
-		int lSize = -1;
-		if (pSize >= 1+4+22)
-		{
-			lSize = PackerUnicodeString::UnpackRaw(0, &mData[lTotalSize], pSize-1-22);
-			lTotalSize += lSize;
+		total_size = 1;
+		int __size = -1;
+		if (_size >= 1+4+22) {
+			__size = PackerUnicodeString::UnpackRaw(0, &data_[total_size], _size-1-22);
+			total_size += __size;
 		}
-		if (lSize > 0)
-		{
-			lSize = PackerOctetString::Unpack(0, &mData[lTotalSize], 22);
-			if (lSize > 0)
-			{
-				mPasswordData = &mData[lTotalSize+2];
+		if (__size > 0) {
+			__size = PackerOctetString::Unpack(0, &data_[total_size], 22);
+			if (__size > 0) {
+				password_data_ = &data_[total_size+2];
 			}
-			lTotalSize += lSize;
+			total_size += __size;
 		}
-		if (lSize <= 0)
-		{
-			lTotalSize = -1;
-		}
-	}
-	return (lTotalSize);
-}
-
-int MessageLoginRequest::Store(Packet* pPacket, const str& pLoginName, const MangledPassword& pPassword)
-{
-	mWritableData[0] = (uint8)GetType();
-	unsigned lSize = 1;
-	lSize += PackerUnicodeString::Pack(&mWritableData[lSize], pLoginName);
-	lSize += PackerOctetString::Pack(&mWritableData[lSize], (const uint8*)pPassword.Get().c_str(), 20);
-	pPacket->AddPacketSize(lSize);
-	return (lSize);
-}
-
-void MessageLoginRequest::GetLoginName(str& pLoginName)
-{
-	PackerUnicodeString::Unpack(pLoginName, &mData[1], 1024);
-}
-
-MangledPassword MessageLoginRequest::GetPassword()
-{
-	std::string lMangledData((const char*)mPasswordData, 20);
-	MangledPassword lMangledPassword;
-	lMangledPassword.SetUnmodified(lMangledData);
-	return (lMangledPassword);
-}
-
-
-
-MessageStatus::MessageStatus()
-{
-}
-
-MessageType MessageStatus::GetType() const
-{
-	return (MESSAGE_TYPE_STATUS);
-}
-
-int MessageStatus::Parse(const uint8* pData, int pSize)
-{
-	int lTotalSize = -1;
-	if ((MessageType)pData[0] == MESSAGE_TYPE_STATUS)
-	{
-		mData = pData;
-
-		lTotalSize = 1+sizeof(uint32)*3;
-		int lSize = -1;
-		if (pSize >= (int)(1+sizeof(uint32)*3+4))
-		{
-			lSize = PackerUnicodeString::UnpackRaw(0, &mData[lTotalSize], pSize-lTotalSize);
-			lTotalSize += lSize;
-		}
-		if (lSize <= 0)
-		{
-			lTotalSize = -1;
+		if (__size <= 0) {
+			total_size = -1;
 		}
 	}
-	return (lTotalSize);
+	return (total_size);
 }
 
-int MessageStatus::Store(Packet* pPacket, RemoteStatus pStatus, InfoType pInfoType, int32 pInteger, const str& pMessage)
-{
-	int32 lStatus = (int32)pStatus;
-	int32 lInfoType = (int32)pInfoType;
-	mWritableData[0] = (uint8)GetType();
-	unsigned lSize = 1;
-	lSize += PackerInt32::Pack(&mWritableData[lSize], lStatus);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], lInfoType);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pInteger);
-	lSize += PackerUnicodeString::Pack(&mWritableData[lSize], pMessage);
-	pPacket->AddPacketSize(lSize);
-	return (lSize);
+int MessageLoginRequest::Store(Packet* packet, const str& login_name, const MangledPassword& password) {
+	writable_data_[0] = (uint8)GetType();
+	unsigned __size = 1;
+	__size += PackerUnicodeString::Pack(&writable_data_[__size], login_name);
+	__size += PackerOctetString::Pack(&writable_data_[__size], (const uint8*)password.Get().c_str(), 20);
+	packet->AddPacketSize(__size);
+	return (__size);
 }
 
-RemoteStatus MessageStatus::GetRemoteStatus() const
-{
-	int32 lStatus = -1;
-	PackerInt32::Unpack(lStatus, mData+1, 4);
-	return ((RemoteStatus)lStatus);
+void MessageLoginRequest::GetLoginName(str& login_name) {
+	PackerUnicodeString::Unpack(login_name, &data_[1], 1024);
 }
 
-MessageStatus::InfoType MessageStatus::GetInfo() const
-{
-	int32 lInfoType = -1;
-	PackerInt32::Unpack(lInfoType, mData+1+sizeof(int32), 4);
-	return ((InfoType)lInfoType);
-}
-
-int32 MessageStatus::GetInteger() const
-{
-	int32 lInteger = -1;
-	PackerInt32::Unpack(lInteger, mData+1+sizeof(int32)*2, 4);
-	return (lInteger);
-}
-
-void MessageStatus::GetMessageString(str& pMessage) const
-{
-	PackerUnicodeString::Unpack(pMessage, &mData[1+sizeof(int32)*3], 1024);
+MangledPassword MessageLoginRequest::GetPassword() {
+	std::string mangled_data((const char*)password_data_, 20);
+	MangledPassword mangled_password;
+	mangled_password.SetUnmodified(mangled_data);
+	return (mangled_password);
 }
 
 
 
-MessageNumber::MessageNumber()
-{
+MessageStatus::MessageStatus() {
 }
 
-MessageType MessageNumber::GetType() const
-{
-	return (MESSAGE_TYPE_NUMBER);
+MessageType MessageStatus::GetType() const {
+	return (kMessageTypeStatus);
 }
 
-int MessageNumber::Parse(const uint8* pData, int pSize)
-{
-	int lTotalSize = -1;
-	if ((MessageType)pData[0] == MESSAGE_TYPE_NUMBER)
-	{
-		mData = pData;
+int MessageStatus::Parse(const uint8* data, int _size) {
+	int total_size = -1;
+	if ((MessageType)data[0] == kMessageTypeStatus) {
+		data_ = data;
 
-		lTotalSize = 1+sizeof(int32)*2+sizeof(float32);
-		if (pSize < lTotalSize)
-		{
-			lTotalSize = -1;
+		total_size = 1+sizeof(uint32)*3;
+		int __size = -1;
+		if (_size >= (int)(1+sizeof(uint32)*3+4)) {
+			__size = PackerUnicodeString::UnpackRaw(0, &data_[total_size], _size-total_size);
+			total_size += __size;
+		}
+		if (__size <= 0) {
+			total_size = -1;
 		}
 	}
-	return (lTotalSize);
+	return (total_size);
 }
 
-int MessageNumber::Store(Packet* pPacket, InfoType pInfo, int32 pInteger, float32 pFloat)
-{
-	int32 lInfo = pInfo;
-
-	mWritableData[0] = (uint8)GetType();
-	unsigned lSize = 1;
-	lSize += PackerInt32::Pack(&mWritableData[lSize], lInfo);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pInteger);
-	lSize += PackerReal::Pack(&mWritableData[lSize], pFloat);
-	pPacket->AddPacketSize(lSize);
-	return (lSize);
+int MessageStatus::Store(Packet* packet, RemoteStatus status, InfoType info_type, int32 integer, const str& message) {
+	int32 _status = (int32)status;
+	int32 _info_type = (int32)info_type;
+	writable_data_[0] = (uint8)GetType();
+	unsigned __size = 1;
+	__size += PackerInt32::Pack(&writable_data_[__size], _status);
+	__size += PackerInt32::Pack(&writable_data_[__size], _info_type);
+	__size += PackerInt32::Pack(&writable_data_[__size], integer);
+	__size += PackerUnicodeString::Pack(&writable_data_[__size], message);
+	packet->AddPacketSize(__size);
+	return (__size);
 }
 
-MessageNumber::InfoType MessageNumber::GetInfo() const
-{
-	int32 lInfo = -1;
-	PackerInt32::Unpack(lInfo, mData+1, 4);
-	return ((InfoType)lInfo);
+RemoteStatus MessageStatus::GetRemoteStatus() const {
+	int32 _status = -1;
+	PackerInt32::Unpack(_status, data_+1, 4);
+	return ((RemoteStatus)_status);
 }
 
-int32 MessageNumber::GetInteger() const
-{
-	int32 lInteger = -1;
-	PackerInt32::Unpack(lInteger, mData+1+sizeof(int32), 4);
-	return (lInteger);
+MessageStatus::InfoType MessageStatus::GetInfo() const {
+	int32 _info_type = -1;
+	PackerInt32::Unpack(_info_type, data_+1+sizeof(int32), 4);
+	return ((InfoType)_info_type);
 }
 
-float32 MessageNumber::GetFloat() const
-{
-	float32 lFloat = -1;
-	PackerReal::Unpack(lFloat, mData+1+sizeof(int32)*2, 4);
-	return (lFloat);
+int32 MessageStatus::GetInteger() const {
+	int32 _integer = -1;
+	PackerInt32::Unpack(_integer, data_+1+sizeof(int32)*2, 4);
+	return (_integer);
+}
+
+void MessageStatus::GetMessageString(str& message) const {
+	PackerUnicodeString::Unpack(message, &data_[1+sizeof(int32)*3], 1024);
 }
 
 
 
-MessageObject::MessageObject()
-{
+MessageNumber::MessageNumber() {
 }
 
-int MessageObject::Parse(const uint8* pData, int pSize)
-{
-	mData = pData;
+MessageType MessageNumber::GetType() const {
+	return (kMessageTypeNumber);
+}
 
-	int lTotalSize = 1+sizeof(uint32);
-	if (pSize < lTotalSize)
-	{
-		lTotalSize = -1;
+int MessageNumber::Parse(const uint8* data, int _size) {
+	int total_size = -1;
+	if ((MessageType)data[0] == kMessageTypeNumber) {
+		data_ = data;
+
+		total_size = 1+sizeof(int32)*2+sizeof(float32);
+		if (_size < total_size) {
+			total_size = -1;
+		}
 	}
-	return (lTotalSize);
+	return (total_size);
 }
 
-int MessageObject::Store(Packet*, uint32 pInstanceId)
-{
-	mWritableData[0] = (uint8)GetType();
-	unsigned lSize = 1;
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pInstanceId);
-	return (lSize);
+int MessageNumber::Store(Packet* packet, InfoType info, int32 integer, float32 f) {
+	int32 _info = info;
+
+	writable_data_[0] = (uint8)GetType();
+	unsigned __size = 1;
+	__size += PackerInt32::Pack(&writable_data_[__size], _info);
+	__size += PackerInt32::Pack(&writable_data_[__size], integer);
+	__size += PackerReal::Pack(&writable_data_[__size], f);
+	packet->AddPacketSize(__size);
+	return (__size);
 }
 
-uint32 MessageObject::GetObjectId() const
-{
-	int32 lInstanceId;
-	PackerInt32::Unpack(lInstanceId, &mData[1], sizeof(lInstanceId));
-	return (lInstanceId);
+MessageNumber::InfoType MessageNumber::GetInfo() const {
+	int32 _info = -1;
+	PackerInt32::Unpack(_info, data_+1, 4);
+	return ((InfoType)_info);
+}
+
+int32 MessageNumber::GetInteger() const {
+	int32 _integer = -1;
+	PackerInt32::Unpack(_integer, data_+1+sizeof(int32), 4);
+	return (_integer);
+}
+
+float32 MessageNumber::GetFloat() const {
+	float32 _f = -1;
+	PackerReal::Unpack(_f, data_+1+sizeof(int32)*2, 4);
+	return (_f);
 }
 
 
 
-MessageCreateObject::MessageCreateObject()
-{
+MessageObject::MessageObject() {
 }
 
-MessageType MessageCreateObject::GetType() const
-{
-	return (MESSAGE_TYPE_CREATE_OBJECT);
+int MessageObject::Parse(const uint8* data, int _size) {
+	data_ = data;
+
+	int total_size = 1+sizeof(uint32);
+	if (_size < total_size) {
+		total_size = -1;
+	}
+	return (total_size);
 }
 
-int MessageCreateObject::Parse(const uint8* pData, int pSize)
-{
-	int lTotalSize = -1;
-	if ((MessageType)pData[0] == MESSAGE_TYPE_CREATE_OBJECT ||
-		(MessageType)pData[0] == MESSAGE_TYPE_CREATE_OWNED_OBJECT)
-	{
-		lTotalSize = Parent::Parse(pData, pSize);
-		if (lTotalSize > 0)
-		{
-			lTotalSize += 7*sizeof(float);
-			int lSize = -1;
-			if (pSize >= lTotalSize+4)
-			{
-				lSize = PackerUnicodeString::UnpackRaw(0, &mData[lTotalSize], pSize-lTotalSize);
-				lTotalSize += lSize;
+int MessageObject::Store(Packet*, uint32 instance_id) {
+	writable_data_[0] = (uint8)GetType();
+	unsigned __size = 1;
+	__size += PackerInt32::Pack(&writable_data_[__size], instance_id);
+	return (__size);
+}
+
+uint32 MessageObject::GetObjectId() const {
+	int32 _instance_id;
+	PackerInt32::Unpack(_instance_id, &data_[1], sizeof(_instance_id));
+	return (_instance_id);
+}
+
+
+
+MessageCreateObject::MessageCreateObject() {
+}
+
+MessageType MessageCreateObject::GetType() const {
+	return (kMessageTypeCreateObject);
+}
+
+int MessageCreateObject::Parse(const uint8* data, int _size) {
+	int total_size = -1;
+	if ((MessageType)data[0] == kMessageTypeCreateObject ||
+		(MessageType)data[0] == kMessageTypeCreateOwnedObject) {
+		total_size = Parent::Parse(data, _size);
+		if (total_size > 0) {
+			total_size += 7*sizeof(float);
+			int __size = -1;
+			if (_size >= total_size+4) {
+				__size = PackerUnicodeString::UnpackRaw(0, &data_[total_size], _size-total_size);
+				total_size += __size;
 			}
-			if (lSize <= 0)
-			{
-				lTotalSize = -1;
+			if (__size <= 0) {
+				total_size = -1;
 			}
 		}
 	}
-	return (lTotalSize);
+	return (total_size);
 }
 
-int MessageCreateObject::Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const str& pClassId)
-{
-	int32 lInstanceId = (int32)pInstanceId;
-	unsigned lSize = Parent::Store(pPacket, lInstanceId);
-	lSize += PackerTransformation::Pack(&mWritableData[lSize], pTransformation);
-	lSize += PackerUnicodeString::Pack(&mWritableData[lSize], pClassId);
-	pPacket->AddPacketSize(lSize);
-	return (lSize);
+int MessageCreateObject::Store(Packet* packet, GameObjectId instance_id, const xform& transformation, const str& class_id) {
+	int32 _instance_id = (int32)instance_id;
+	unsigned __size = Parent::Store(packet, _instance_id);
+	__size += PackerTransformation::Pack(&writable_data_[__size], transformation);
+	__size += PackerUnicodeString::Pack(&writable_data_[__size], class_id);
+	packet->AddPacketSize(__size);
+	return (__size);
 }
 
-void MessageCreateObject::GetTransformation(xform& pTransformation) const
-{
-	PackerTransformation::Unpack(pTransformation, &mData[1+sizeof(int32)], 1024);
+void MessageCreateObject::GetTransformation(xform& transformation) const {
+	PackerTransformation::Unpack(transformation, &data_[1+sizeof(int32)], 1024);
 }
 
-void MessageCreateObject::GetClassId(str& pClassId) const
-{
-	PackerUnicodeString::Unpack(pClassId, &mData[1+sizeof(int32)+7*sizeof(float)], 1024);
+void MessageCreateObject::GetClassId(str& class_id) const {
+	PackerUnicodeString::Unpack(class_id, &data_[1+sizeof(int32)+7*sizeof(float)], 1024);
 }
 
 
 
 MessageCreateOwnedObject::MessageCreateOwnedObject():
-	mOwnerOffset(0)
-{
+	owner_offset_(0) {
 }
 
-MessageType MessageCreateOwnedObject::GetType() const
-{
-	return MESSAGE_TYPE_CREATE_OWNED_OBJECT;
+MessageType MessageCreateOwnedObject::GetType() const {
+	return kMessageTypeCreateOwnedObject;
 }
 
-int MessageCreateOwnedObject::Parse(const uint8* pData, int pSize)
-{
-	int lTotalSize = -1;
-	if ((MessageType)pData[0] == MESSAGE_TYPE_CREATE_OWNED_OBJECT)
-	{
-		lTotalSize = Parent::Parse(pData, pSize);
-		if (lTotalSize > 0)
-		{
-			if (lTotalSize < pSize-(int)sizeof(uint32))
-			{
-				mOwnerOffset = lTotalSize;
-				lTotalSize += sizeof(uint32);
-			}
-			else
-			{
-				lTotalSize = -1;
+int MessageCreateOwnedObject::Parse(const uint8* data, int _size) {
+	int total_size = -1;
+	if ((MessageType)data[0] == kMessageTypeCreateOwnedObject) {
+		total_size = Parent::Parse(data, _size);
+		if (total_size > 0) {
+			if (total_size < _size-(int)sizeof(uint32)) {
+				owner_offset_ = total_size;
+				total_size += sizeof(uint32);
+			} else {
+				total_size = -1;
 			}
 		}
 	}
-	return lTotalSize;
+	return total_size;
 }
 
-int MessageCreateOwnedObject::Store(Packet* pPacket, GameObjectId pInstanceId, const xform& pTransformation, const str& pClassId, GameObjectId pOwnerInstanceId)
-{
-	int32 lInstanceId = (int32)pInstanceId;
-	unsigned lSize = Parent::Store(pPacket, lInstanceId, pTransformation, pClassId);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pOwnerInstanceId);
-	pPacket->AddPacketSize(sizeof(int32));
-	return lSize;
+int MessageCreateOwnedObject::Store(Packet* packet, GameObjectId instance_id, const xform& transformation, const str& class_id, GameObjectId owner_instance_id) {
+	int32 _instance_id = (int32)instance_id;
+	unsigned __size = Parent::Store(packet, _instance_id, transformation, class_id);
+	__size += PackerInt32::Pack(&writable_data_[__size], owner_instance_id);
+	packet->AddPacketSize(sizeof(int32));
+	return __size;
 }
 
-uint32 MessageCreateOwnedObject::GetOwnerInstanceId() const
-{
-	int32 lInstanceId;
-	PackerInt32::Unpack(lInstanceId, &mData[mOwnerOffset], sizeof(lInstanceId));
-	return lInstanceId;
+uint32 MessageCreateOwnedObject::GetOwnerInstanceId() const {
+	int32 _instance_id;
+	PackerInt32::Unpack(_instance_id, &data_[owner_offset_], sizeof(_instance_id));
+	return _instance_id;
 }
 
 
 
-MessageDeleteObject::MessageDeleteObject()
-{
+MessageDeleteObject::MessageDeleteObject() {
 }
 
-MessageType MessageDeleteObject::GetType() const
-{
-	return (MESSAGE_TYPE_DELETE_OBJECT);
+MessageType MessageDeleteObject::GetType() const {
+	return (kMessageTypeDeleteObject);
 }
 
-int MessageDeleteObject::Parse(const uint8* pData, int pSize)
-{
-	int lTotalSize = -1;
-	if ((MessageType)pData[0] == MESSAGE_TYPE_DELETE_OBJECT)
-	{
-		lTotalSize = Parent::Parse(pData, pSize);
+int MessageDeleteObject::Parse(const uint8* data, int _size) {
+	int total_size = -1;
+	if ((MessageType)data[0] == kMessageTypeDeleteObject) {
+		total_size = Parent::Parse(data, _size);
 	}
-	return (lTotalSize);
+	return (total_size);
 }
 
-int MessageDeleteObject::Store(Packet* pPacket, GameObjectId pInstanceId)
-{
-	unsigned lSize = Parent::Store(pPacket, pInstanceId);
-	pPacket->AddPacketSize(lSize);
-	return (lSize);
+int MessageDeleteObject::Store(Packet* packet, GameObjectId instance_id) {
+	unsigned __size = Parent::Store(packet, instance_id);
+	packet->AddPacketSize(__size);
+	return (__size);
 }
 
 
-MessageObjectMovement::MessageObjectMovement()
-{
+MessageObjectMovement::MessageObjectMovement() {
 }
 
-int MessageObjectMovement::Parse(const uint8* pData, int pSize)
-{
-	int lTotalSize = Parent::Parse(pData, pSize);
-	if (lTotalSize > 0)
-	{
-		lTotalSize += sizeof(int32);
-		if (pSize < lTotalSize)
-		{
-			lTotalSize = -1;
+int MessageObjectMovement::Parse(const uint8* data, int _size) {
+	int total_size = Parent::Parse(data, _size);
+	if (total_size > 0) {
+		total_size += sizeof(int32);
+		if (_size < total_size) {
+			total_size = -1;
 		}
 	}
-	return (lTotalSize);
+	return (total_size);
 }
 
-int MessageObjectMovement::Store(Packet* pPacket, uint32 pInstanceId, int32 pFrameIndex)
-{
-	int lSize = Parent::Store(pPacket, pInstanceId);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pFrameIndex);
-	return (lSize);
+int MessageObjectMovement::Store(Packet* packet, uint32 instance_id, int32 frame_index) {
+	int __size = Parent::Store(packet, instance_id);
+	__size += PackerInt32::Pack(&writable_data_[__size], frame_index);
+	return (__size);
 }
 
-int32 MessageObjectMovement::GetFrameIndex() const
-{
-	int32 lFrameIndex;
-	PackerInt32::Unpack(lFrameIndex, &mData[1+sizeof(uint32)], sizeof(lFrameIndex));
-	return (lFrameIndex);
+int32 MessageObjectMovement::GetFrameIndex() const {
+	int32 _frame_index;
+	PackerInt32::Unpack(_frame_index, &data_[1+sizeof(uint32)], sizeof(_frame_index));
+	return (_frame_index);
 }
 
 
 
-MessageObjectPosition::MessageObjectPosition()
-{
+MessageObjectPosition::MessageObjectPosition() {
 }
 
-MessageType MessageObjectPosition::GetType() const
-{
-	return (MESSAGE_TYPE_OBJECT_POSITION);
+MessageType MessageObjectPosition::GetType() const {
+	return (kMessageTypeObjectPosition);
 }
 
-int MessageObjectPosition::Parse(const uint8* pData, int pSize)
-{
-	int lTotalSize = -1;
-	mPosition.Clear();
-	if ((MessageType)pData[0] == MESSAGE_TYPE_OBJECT_POSITION)
-	{
-		lTotalSize = Parent::Parse(pData, pSize);
-		if (lTotalSize > 0)
-		{
-			int lPositionSize = mPosition.Unpack(&pData[lTotalSize], pSize-lTotalSize);
-			if (lPositionSize <= 0)
-			{
-				lTotalSize = -1;
-			}
-			else
-			{
-				lTotalSize += lPositionSize;
-				deb_assert(lTotalSize <= pSize);
+int MessageObjectPosition::Parse(const uint8* data, int _size) {
+	int total_size = -1;
+	position_.Clear();
+	if ((MessageType)data[0] == kMessageTypeObjectPosition) {
+		total_size = Parent::Parse(data, _size);
+		if (total_size > 0) {
+			int position_size = position_.Unpack(&data[total_size], _size-total_size);
+			if (position_size <= 0) {
+				total_size = -1;
+			} else {
+				total_size += position_size;
+				deb_assert(total_size <= _size);
 			}
 		}
 	}
-	return (lTotalSize);
+	return (total_size);
 }
 
-int MessageObjectPosition::Store(Packet* pPacket, uint32 pInstanceId, int32 pFrameIndex, const ObjectPositionalData& pData)
-{
-	int lSize = Parent::Store(pPacket, pInstanceId, pFrameIndex);
-	lSize += pData.Pack(&mWritableData[lSize]);
-	pPacket->AddPacketSize(lSize);
-	return (lSize);
+int MessageObjectPosition::Store(Packet* packet, uint32 instance_id, int32 frame_index, const ObjectPositionalData& data) {
+	int __size = Parent::Store(packet, instance_id, frame_index);
+	__size += data.Pack(&writable_data_[__size]);
+	packet->AddPacketSize(__size);
+	return (__size);
 }
 
-MessageObjectMovement* MessageObjectPosition::CloneToStandalone()
-{
-	return (new MessageObjectPosition(mPosition, mWritableData, Parent::Parse(mData, 1024)));
+MessageObjectMovement* MessageObjectPosition::CloneToStandalone() {
+	return (new MessageObjectPosition(position_, writable_data_, Parent::Parse(data_, 1024)));
 }
 
-ObjectPositionalData& MessageObjectPosition::GetPositionalData()
-{
-	return (mPosition);
+ObjectPositionalData& MessageObjectPosition::GetPositionalData() {
+	return (position_);
 }
 
-MessageObjectPosition::MessageObjectPosition(const ObjectPositionalData& pPosition, uint8* pData, int pSize)
-{
-	mPosition.CopyData(&pPosition);
+MessageObjectPosition::MessageObjectPosition(const ObjectPositionalData& position, uint8* data, int _size) {
+	position_.CopyData(&position);
 
-	mIsDataOwner = true;
-	mWritableData = new uint8[pSize];
-	::memcpy(mWritableData, pData, pSize);
+	is_data_owner_ = true;
+	writable_data_ = new uint8[_size];
+	::memcpy(writable_data_, data, _size);
 }
 
 
 
-MessageObjectAttach::MessageObjectAttach()
-{
+MessageObjectAttach::MessageObjectAttach() {
 }
 
-MessageType MessageObjectAttach::GetType() const
-{
-	return (MESSAGE_TYPE_OBJECT_ATTACH);
+MessageType MessageObjectAttach::GetType() const {
+	return (kMessageTypeObjectAttach);
 }
 
-int MessageObjectAttach::Parse(const uint8* pData, int pSize)
-{
-	int lTotalSize = -1;
-	if ((MessageType)pData[0] == MESSAGE_TYPE_OBJECT_ATTACH)
-	{
-		lTotalSize = Parent::Parse(pData, pSize);
-		if (lTotalSize > 0)
-		{
-			lTotalSize += sizeof(uint32)+sizeof(uint16)*2;
-			if (pSize < lTotalSize)
-			{
-				lTotalSize = -1;
+int MessageObjectAttach::Parse(const uint8* data, int _size) {
+	int total_size = -1;
+	if ((MessageType)data[0] == kMessageTypeObjectAttach) {
+		total_size = Parent::Parse(data, _size);
+		if (total_size > 0) {
+			total_size += sizeof(uint32)+sizeof(uint16)*2;
+			if (_size < total_size) {
+				total_size = -1;
 			}
 		}
 	}
-	return (lTotalSize);
+	return (total_size);
 }
 
-int MessageObjectAttach::Store(Packet* pPacket, uint32 pObject1Id,
-	uint32 pObject2Id, uint16 pBody1Id, uint16 pBody2Id)
-{
-	int lSize = Parent::Store(pPacket, pObject1Id);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pObject2Id);
-	lSize += PackerInt16::Pack(&mWritableData[lSize], pBody1Id);
-	lSize += PackerInt16::Pack(&mWritableData[lSize], pBody2Id);
-	pPacket->AddPacketSize(lSize);
-	return (lSize);
+int MessageObjectAttach::Store(Packet* packet, uint32 object1_id,
+	uint32 object2_id, uint16 body1_id, uint16 body2_id) {
+	int __size = Parent::Store(packet, object1_id);
+	__size += PackerInt32::Pack(&writable_data_[__size], object2_id);
+	__size += PackerInt16::Pack(&writable_data_[__size], body1_id);
+	__size += PackerInt16::Pack(&writable_data_[__size], body2_id);
+	packet->AddPacketSize(__size);
+	return (__size);
 }
 
-uint32 MessageObjectAttach::GetObject2Id() const
-{
-	int32 lObject2Id;
-	PackerInt32::Unpack(lObject2Id, &mData[1+sizeof(uint32)], sizeof(lObject2Id));
-	return (lObject2Id);
+uint32 MessageObjectAttach::GetObject2Id() const {
+	int32 _object2_id;
+	PackerInt32::Unpack(_object2_id, &data_[1+sizeof(uint32)], sizeof(_object2_id));
+	return (_object2_id);
 }
 
-uint16 MessageObjectAttach::GetBody1Index() const
-{
-	int lBody1Id;
-	PackerInt16::Unpack(lBody1Id, &mData[1+sizeof(uint32)*2], sizeof(lBody1Id));
-	return ((uint16)lBody1Id);
+uint16 MessageObjectAttach::GetBody1Index() const {
+	int _body1_id;
+	PackerInt16::Unpack(_body1_id, &data_[1+sizeof(uint32)*2], sizeof(_body1_id));
+	return ((uint16)_body1_id);
 }
 
-uint16 MessageObjectAttach::GetBody2Index() const
-{
-	int lBody2Id;
-	PackerInt16::Unpack(lBody2Id, &mData[1+sizeof(uint32)*2+sizeof(uint16)], sizeof(lBody2Id));
-	return ((int16)lBody2Id);
+uint16 MessageObjectAttach::GetBody2Index() const {
+	int _body2_id;
+	PackerInt16::Unpack(_body2_id, &data_[1+sizeof(uint32)*2+sizeof(uint16)], sizeof(_body2_id));
+	return ((int16)_body2_id);
 }
 
 
 
-MessageObjectDetach::MessageObjectDetach()
-{
+MessageObjectDetach::MessageObjectDetach() {
 }
 
-MessageType MessageObjectDetach::GetType() const
-{
-	return (MESSAGE_TYPE_OBJECT_DETACH);
+MessageType MessageObjectDetach::GetType() const {
+	return (kMessageTypeObjectDetach);
 }
 
-int MessageObjectDetach::Parse(const uint8* pData, int pSize)
-{
-	int lTotalSize = -1;
-	if ((MessageType)pData[0] == MESSAGE_TYPE_OBJECT_DETACH)
-	{
-		lTotalSize = Parent::Parse(pData, pSize);
-		if (lTotalSize > 0)
-		{
-			lTotalSize += sizeof(uint32);
-			if (pSize < lTotalSize)
-			{
-				lTotalSize = -1;
+int MessageObjectDetach::Parse(const uint8* data, int _size) {
+	int total_size = -1;
+	if ((MessageType)data[0] == kMessageTypeObjectDetach) {
+		total_size = Parent::Parse(data, _size);
+		if (total_size > 0) {
+			total_size += sizeof(uint32);
+			if (_size < total_size) {
+				total_size = -1;
 			}
 		}
 	}
-	return (lTotalSize);
+	return (total_size);
 }
 
-int MessageObjectDetach::Store(Packet* pPacket, uint32 pObject1Id, uint32 pObject2Id)
-{
-	int lSize = Parent::Store(pPacket, pObject1Id);
-	lSize += PackerInt32::Pack(&mWritableData[lSize], pObject2Id);
-	pPacket->AddPacketSize(lSize);
-	return (lSize);
+int MessageObjectDetach::Store(Packet* packet, uint32 object1_id, uint32 object2_id) {
+	int __size = Parent::Store(packet, object1_id);
+	__size += PackerInt32::Pack(&writable_data_[__size], object2_id);
+	packet->AddPacketSize(__size);
+	return (__size);
 }
 
-uint32 MessageObjectDetach::GetObject2Id() const
-{
-	int32 lObject2Id;
-	PackerInt32::Unpack(lObject2Id, &mData[1+sizeof(uint32)], sizeof(lObject2Id));
-	return (lObject2Id);
+uint32 MessageObjectDetach::GetObject2Id() const {
+	int32 _object2_id;
+	PackerInt32::Unpack(_object2_id, &data_[1+sizeof(uint32)], sizeof(_object2_id));
+	return (_object2_id);
 }
 
 
 
-MessageObjectAttribute::MessageObjectAttribute()
-{
+MessageObjectAttribute::MessageObjectAttribute() {
 }
 
-MessageType MessageObjectAttribute::GetType() const
-{
-	return (MESSAGE_TYPE_OBJECT_ATTRIBUTE);
+MessageType MessageObjectAttribute::GetType() const {
+	return (kMessageTypeObjectAttribute);
 }
 
-int MessageObjectAttribute::Parse(const uint8* pData, int pSize)
-{
-	int lTotalSize = -1;
-	if ((MessageType)pData[0] == MESSAGE_TYPE_OBJECT_ATTRIBUTE)
-	{
-		lTotalSize = Parent::Parse(pData, pSize);
-		if (lTotalSize > 0)
-		{
-			int lByteSize;
-			const int lInt16UnpackSize = PackerInt16::Unpack(lByteSize, &pData[lTotalSize], pSize);
-			if (lInt16UnpackSize > 0)
-			{
-				lTotalSize += lInt16UnpackSize + lByteSize;
-				if (pSize < lTotalSize)
-				{
-					lTotalSize = -1;
+int MessageObjectAttribute::Parse(const uint8* data, int _size) {
+	int total_size = -1;
+	if ((MessageType)data[0] == kMessageTypeObjectAttribute) {
+		total_size = Parent::Parse(data, _size);
+		if (total_size > 0) {
+			int byte_size;
+			const int int16_unpack_size = PackerInt16::Unpack(byte_size, &data[total_size], _size);
+			if (int16_unpack_size > 0) {
+				total_size += int16_unpack_size + byte_size;
+				if (_size < total_size) {
+					total_size = -1;
 				}
 			}
 		}
 	}
-	return (lTotalSize);
+	return (total_size);
 }
 
-uint8* MessageObjectAttribute::GetWriteBuffer(Packet* pPacket, uint32 pInstanceId, unsigned pSize)
-{
-	int lOffset = Store(pPacket, pInstanceId);
-	lOffset += PackerInt16::Pack(&mWritableData[lOffset], pSize);
-	pPacket->AddPacketSize(lOffset+pSize);
-	return &mWritableData[lOffset];
+uint8* MessageObjectAttribute::GetWriteBuffer(Packet* packet, uint32 instance_id, unsigned _size) {
+	int _offset = Store(packet, instance_id);
+	_offset += PackerInt16::Pack(&writable_data_[_offset], _size);
+	packet->AddPacketSize(_offset+_size);
+	return &writable_data_[_offset];
 }
 
-const uint8* MessageObjectAttribute::GetReadBuffer(unsigned& pSize) const
-{
-	PackerInt16::Unpack((int&)pSize, &mData[1+sizeof(uint32)], 2);
-	return &mData[1+sizeof(uint32)+sizeof(int16)];
+const uint8* MessageObjectAttribute::GetReadBuffer(unsigned& _size) const {
+	PackerInt16::Unpack((int&)_size, &data_[1+sizeof(uint32)], 2);
+	return &data_[1+sizeof(uint32)+sizeof(int16)];
 }
 
 
 
-PacketFactory::PacketFactory(MessageFactory* pMessageFactory):
-	mMessageFactory(pMessageFactory)
-{
+PacketFactory::PacketFactory(MessageFactory* message_factory):
+	message_factory_(message_factory) {
 }
 
-PacketFactory::~PacketFactory()
-{
+PacketFactory::~PacketFactory() {
 	SetMessageFactory(0);
 }
 
-Packet* PacketFactory::Allocate()
-{
+Packet* PacketFactory::Allocate() {
 	// TODO: optimize when needed.
-	return (new Packet(mMessageFactory));
+	return (new Packet(message_factory_));
 }
 
-void PacketFactory::Release(Packet* pPacket)
-{
+void PacketFactory::Release(Packet* packet) {
 	// TODO: optimize when needed.
-	delete (pPacket);
+	delete (packet);
 }
 
-void PacketFactory::SetMessageFactory(MessageFactory* pMessageFactory)
-{
-	delete (mMessageFactory);
-	mMessageFactory = pMessageFactory;
+void PacketFactory::SetMessageFactory(MessageFactory* message_factory) {
+	delete (message_factory_);
+	message_factory_ = message_factory;
 }
 
-MessageFactory* PacketFactory::GetMessageFactory() const
-{
-	return (mMessageFactory);
+MessageFactory* PacketFactory::GetMessageFactory() const {
+	return (message_factory_);
 }
 
-/*int PacketFactory::Receive(TcpSocket* pSocket, void* pBuffer, int pMaxSize)
-{
-	return (Packet::Receive(pSocket, pBuffer, pMaxSize));
+/*int PacketFactory::Receive(TcpSocket* socket, void* buffer, int max_size) {
+	return (Packet::Receive(socket, buffer, max_size));
 }*/
 
 
-Message* MessageFactory::Allocate(MessageType pType)
-{
+Message* MessageFactory::Allocate(MessageType type) {
 	// TODO: optimize when needed.
-	Message* lMessage = 0;
-	switch (pType)
-	{
-		case MESSAGE_TYPE_LOGIN_REQUEST:	lMessage = new MessageLoginRequest();		break;
-		case MESSAGE_TYPE_STATUS:		lMessage = new MessageStatus();			break;
-		case MESSAGE_TYPE_NUMBER:		lMessage = new MessageNumber();			break;
-		case MESSAGE_TYPE_CREATE_OBJECT:	lMessage = new MessageCreateObject();		break;
-		case MESSAGE_TYPE_CREATE_OWNED_OBJECT:	lMessage = new MessageCreateOwnedObject();	break;
-		case MESSAGE_TYPE_DELETE_OBJECT:	lMessage = new MessageDeleteObject();		break;
-		case MESSAGE_TYPE_OBJECT_POSITION:	lMessage = new MessageObjectPosition();		break;
-		case MESSAGE_TYPE_OBJECT_ATTACH:	lMessage = new MessageObjectAttach();		break;
-		case MESSAGE_TYPE_OBJECT_DETACH:	lMessage = new MessageObjectDetach();		break;
-		case MESSAGE_TYPE_OBJECT_ATTRIBUTE:	lMessage = new MessageObjectAttribute();	break;
+	Message* _message = 0;
+	switch (type) {
+		case kMessageTypeLoginRequest:	_message = new MessageLoginRequest();		break;
+		case kMessageTypeStatus:		_message = new MessageStatus();			break;
+		case kMessageTypeNumber:		_message = new MessageNumber();			break;
+		case kMessageTypeCreateObject:	_message = new MessageCreateObject();		break;
+		case kMessageTypeCreateOwnedObject:	_message = new MessageCreateOwnedObject();	break;
+		case kMessageTypeDeleteObject:	_message = new MessageDeleteObject();		break;
+		case kMessageTypeObjectPosition:	_message = new MessageObjectPosition();		break;
+		case kMessageTypeObjectAttach:	_message = new MessageObjectAttach();		break;
+		case kMessageTypeObjectDetach:	_message = new MessageObjectDetach();		break;
+		case kMessageTypeObjectAttribute:	_message = new MessageObjectAttribute();	break;
 	}
-	if (!lMessage)
-	{
-		mLog.Errorf("Got invalid network message of type %i!", pType);
+	if (!_message) {
+		log_.Errorf("Got invalid network message of type %i!", type);
 	}
-	return (lMessage);
+	return (_message);
 }
 
-void MessageFactory::Release(Message* pMessage)
-{
+void MessageFactory::Release(Message* message) {
 	// TODO: optimize when needed.
-	delete (pMessage);
+	delete (message);
 }
 
-loginstance(NETWORK, MessageFactory);
+loginstance(kNetwork, MessageFactory);
 
 
 

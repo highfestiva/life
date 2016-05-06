@@ -10,73 +10,64 @@
 
 #pragma once
 
-#include "Vector3D.h"
+#include "vector3d.h"
 
 #define TEMPLATE template<class _TVarType>
 #define QUAL Sphere<_TVarType>
 
-namespace Lepra
-{
+namespace lepra {
 
 TEMPLATE
-class Sphere
-{
+class Sphere {
 public:
 	inline Sphere();
-	inline Sphere(const Vector3D<_TVarType>& pPosition, _TVarType pRadius);
+	inline Sphere(const Vector3D<_TVarType>& position, _TVarType radius);
 
-	inline void SetPosition(const Vector3D<_TVarType>& pPosition);
+	inline void SetPosition(const Vector3D<_TVarType>& position);
 	inline const Vector3D<_TVarType>& GetPosition() const;
 
-	inline void SetRadius(const _TVarType pRadius);
+	inline void SetRadius(const _TVarType radius);
 	inline _TVarType GetRadius() const;
 	inline _TVarType GetRadiusSquared() const;
 
 private:
-	Vector3D<_TVarType> mPosition;
-	_TVarType mRadius;
-	_TVarType mRadiusSquared;
+	Vector3D<_TVarType> position_;
+	_TVarType radius_;
+	_TVarType radius_squared_;
 };
 
 
 TEMPLATE QUAL::Sphere() :
-	mPosition(0, 0, 0),
-	mRadius(0),
-	mRadiusSquared(0)
-{
+	position_(0, 0, 0),
+	radius_(0),
+	radius_squared_(0) {
 }
 
-TEMPLATE QUAL::Sphere(const Vector3D<_TVarType>& pPosition, _TVarType pRadius) :
-	mPosition(pPosition),
-	mRadius(pRadius),
-	mRadiusSquared(pRadius * pRadius)
-{
+TEMPLATE QUAL::Sphere(const Vector3D<_TVarType>& position, _TVarType radius) :
+	position_(position),
+	radius_(radius),
+	radius_squared_(radius * radius) {
 }
 
-TEMPLATE void QUAL::SetPosition(const Vector3D<_TVarType>& pPosition)
-{
-	mPosition.Set(pPosition);
+TEMPLATE void QUAL::SetPosition(const Vector3D<_TVarType>& position) {
+	position_.Set(position);
 }
 
-TEMPLATE const Vector3D<_TVarType>& QUAL::GetPosition() const
-{
-	return mPosition;
+TEMPLATE const Vector3D<_TVarType>& QUAL::GetPosition() const {
+	return position_;
 }
 
-TEMPLATE void QUAL::SetRadius(const _TVarType pRadius)
-{
-	mRadius = pRadius;
-	mRadiusSquared = pRadius * pRadius;
+TEMPLATE void QUAL::SetRadius(const _TVarType radius) {
+	radius_ = radius;
+	radius_squared_ = radius * radius;
 }
 
-TEMPLATE _TVarType QUAL::GetRadius() const
-{
-	return mRadius;
+TEMPLATE _TVarType QUAL::GetRadius() const {
+	return radius_;
 }
 
-TEMPLATE _TVarType QUAL::GetRadiusSquared() const
-{
-	return mRadiusSquared;
+TEMPLATE _TVarType QUAL::GetRadiusSquared() const {
+	return radius_squared_;
 }
 
 }

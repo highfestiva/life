@@ -1,23 +1,21 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) 2012, Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiWin32DisplayManager.h"
+#include "uiwin32displaymanager.h"
 
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
-class Win32GDIDisplay: public Win32DisplayManager
-{
+class Win32GDIDisplay: public Win32DisplayManager {
 public:
 	Win32GDIDisplay();
 	virtual ~Win32GDIDisplay();
@@ -29,15 +27,15 @@ protected:
 	virtual bool UpdateScreen();
 
 	virtual bool IsVSyncEnabled() const;
-	virtual bool SetVSyncEnabled(bool pEnabled);
+	virtual bool SetVSyncEnabled(bool enabled);
 
-	virtual void OnResize(int pWidth, int pHeight);
+	virtual void OnResize(int width, int height);
 
 	virtual void OnMinimize();
-	virtual void OnMaximize(int pWidth, int pHeight);
+	virtual void OnMaximize(int width, int height);
 
 	virtual bool InitScreen();
-	virtual void SetFocus(bool pFocus);
+	virtual void SetFocus(bool focus);
 };
 
 

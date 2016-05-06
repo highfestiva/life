@@ -7,84 +7,79 @@
 #pragma once
 
 #include <string>
-#include "../../Lepra/Include/String.h"
-#include "Cure.h"
-//#include "../Include/ResourceManager.h"
+#include "../../lepra/include/string.h"
+#include "cure.h"
+//#include "../include/resourcemanager.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-class MangledPassword
-{
+class MangledPassword {
 public:
 	MangledPassword();
-	MangledPassword(str& pPassword);
-	MangledPassword(const MangledPassword& pPassword);
+	MangledPassword(str& password);
+	MangledPassword(const MangledPassword& password);
 	~MangledPassword();
-	void operator=(const MangledPassword& pPassword);
+	void operator=(const MangledPassword& password);
 	void Clear();
 
 	const std::string& Get() const;
-	void MangleAndSet(str& pPassword);
-	void SetUnmodified(const std::string& pPassword);
-	bool operator==(const MangledPassword& pPassword) const;
+	void MangleAndSet(str& password);
+	void SetUnmodified(const std::string& password);
+	bool operator==(const MangledPassword& password) const;
 
 private:
-	std::string mMangledPassword;
+	std::string mangled_password_;
 };
 
 
 
-class LoginId
-{
+class LoginId {
 public:
 	LoginId();
-	LoginId(const str& pUserAccountName, const MangledPassword& pPassword);
+	LoginId(const str& user_account_name, const MangledPassword& password);
 	virtual ~LoginId();
 
 	const str& GetName() const;
 	const MangledPassword& GetMangledPassword() const;
 
-	bool operator==(const LoginId& pUserAccount) const;
+	bool operator==(const LoginId& user_account) const;
 
 private:
-	str mUserName;
-	MangledPassword mMangledPassword;
+	str user_name_;
+	MangledPassword mangled_password_;
 };
 
 
 
-class UserAccount: public LoginId
-{
+class UserAccount: public LoginId {
 public:
 	typedef uint32 AccountId;
 	typedef str AvatarId;
 	typedef std::unordered_set<AvatarId> AvatarIdSet;
-	enum Availability
-	{
-		STATUS_OK		= 1,
-		STATUS_NOT_PRESENT	= 2,
-		STATUS_TEMPORARY_BANNED	= 3,
-		STATUS_BANNED		= 4,
+	enum Availability {
+		kStatusOk		= 1,
+		kStatusNotPresent	= 2,
+		kStatusTemporaryBanned	= 3,
+		kStatusBanned		= 4,
 	};
 
-	UserAccount(const LoginId& pLoginId, AccountId pId);
+	UserAccount(const LoginId& login_id, AccountId id);
 	virtual ~UserAccount();
 
 	AccountId GetId() const;
 	Availability GetStatus() const;
-	void SetStatus(Availability pStatus);
-	bool AddAvatarId(const AvatarId& pAvatarId);
+	void SetStatus(Availability status);
+	bool AddAvatarId(const AvatarId& avatar_id);
 	const AvatarIdSet& GetAvatarIdSet() const;
 
 private:
-	AccountId mId;
-	Availability mStatus;
-	AvatarIdSet mAvatarIdSet;
+	AccountId id_;
+	Availability status_;
+	AvatarIdSet avatar_id_set_;
 };
 
 

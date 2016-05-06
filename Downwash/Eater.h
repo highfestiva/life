@@ -1,29 +1,27 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Cure/Include/CppContextObject.h"
-#include "DownwashManager.h"
+#include "../cure/include/cppcontextobject.h"
+#include "downwashmanager.h"
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-class Eater: public Cure::CppContextObject
-{
-	typedef Cure::CppContextObject Parent;
+class Eater: public cure::CppContextObject {
+	typedef cure::CppContextObject Parent;
 public:
-	Eater(Cure::ContextManager* pManager);
+	Eater(cure::ContextManager* manager);
 	virtual ~Eater();
 
 protected:
-	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTriggerId, ContextObject* pOtherObject, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
+	virtual void OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal);
 
 	logclass();
 };

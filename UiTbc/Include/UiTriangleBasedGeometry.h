@@ -6,78 +6,76 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Graphics2D.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "../../Lepra/Include/Vector2D.h"
-#include "../../Tbc/Include/GeometryBase.h"
-#include "UiTbc.h"
+#include "../../lepra/include/graphics2d.h"
+#include "../../lepra/include/vector3d.h"
+#include "../../lepra/include/vector2d.h"
+#include "../../tbc/include/geometrybase.h"
+#include "uitbc.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-class TriangleBasedGeometry: public Tbc::GeometryBase
-{
+class TriangleBasedGeometry: public tbc::GeometryBase {
 public:
 	TriangleBasedGeometry();
-	TriangleBasedGeometry(const TriangleBasedGeometry& pGeometry);
+	TriangleBasedGeometry(const TriangleBasedGeometry& geometry);
 
-	TriangleBasedGeometry(const vec3* pVertices,      // Must containt pVertexCount elements.
-			      const vec3* pVertexNormals, // NULL or must contain pVertexCount elements.
-			      const Vector2D<float>* pUV,      // NULL or must contain pVertexCount elements.
-			      const Color* pColor,             // NULL or must contain pVertexCount elements.
-			      ColorFormat pColorFormat,
-			      const Lepra::uint32* pIndices,
-			      unsigned int pVertexCount,
-			      unsigned int pIndexCount,
-			      Tbc::GeometryBase::PrimitiveType pPrimitiveType,
-			      Tbc::GeometryBase::GeometryVolatility pGeomType);
+	TriangleBasedGeometry(const vec3* vertices,      // Must containt pVertexCount elements.
+			      const vec3* vertex_normals, // NULL or must contain vertex_count elements.
+			      const Vector2D<float>* uv,      // NULL or must contain vertex_count elements.
+			      const Color* color,             // NULL or must contain vertex_count elements.
+			      ColorFormat color_format,
+			      const lepra::uint32* indices,
+			      unsigned int vertex_count,
+			      unsigned int index_count,
+			      tbc::GeometryBase::PrimitiveType primitive_type,
+			      tbc::GeometryBase::GeometryVolatility geom_type);
 
-	TriangleBasedGeometry(const float* pVertexData,
-			      const float* pVertexNormals,
-			      const float* pUVData,
-			      const Lepra::uint8* pColorData,
-			      ColorFormat pColorFormat,
-			      const Lepra::uint32* pIndices,
-			      unsigned int pVertexCount,
-			      unsigned int pIndexCount,
-			      Tbc::GeometryBase::PrimitiveType pPrimitiveType,
-			      Tbc::GeometryBase::GeometryVolatility pGeomType);
+	TriangleBasedGeometry(const float* vertex_data,
+			      const float* vertex_normals,
+			      const float* uv_data,
+			      const lepra::uint8* color_data,
+			      ColorFormat color_format,
+			      const lepra::uint32* indices,
+			      unsigned int vertex_count,
+			      unsigned int index_count,
+			      tbc::GeometryBase::PrimitiveType primitive_type,
+			      tbc::GeometryBase::GeometryVolatility geom_type);
 	virtual ~TriangleBasedGeometry();
 
-	void Copy(const TriangleBasedGeometry& pGeometry);
+	void Copy(const TriangleBasedGeometry& geometry);
 
-	void Set(const vec3* pVertices,
-		 const vec3* pVertexNormals,
-		 const Vector2D<float>* pUV,
-		 const Color* pColor,
-		 ColorFormat pColorFormat,
-		 const Lepra::uint32* pIndices,
-		 unsigned int pVertexCount,
-		 unsigned int pIndexCount,
-		 Tbc::GeometryBase::PrimitiveType pPrimitiveType,
-		 Tbc::GeometryBase::GeometryVolatility pGeomType);
+	void Set(const vec3* vertices,
+		 const vec3* vertex_normals,
+		 const Vector2D<float>* uv,
+		 const Color* color,
+		 ColorFormat color_format,
+		 const lepra::uint32* indices,
+		 unsigned int vertex_count,
+		 unsigned int index_count,
+		 tbc::GeometryBase::PrimitiveType primitive_type,
+		 tbc::GeometryBase::GeometryVolatility geom_type);
 
-	void Set(const float* pVertexData,
-		 const float* pVertexNormals,
-		 const float* pUVData,
-		 const Lepra::uint8* pColorData,
-		 ColorFormat pColorFormat,
-		 const Lepra::uint32* pIndices,
-		 unsigned int pVertexCount,
-		 unsigned int pIndexCount,
-		 Tbc::GeometryBase::PrimitiveType pPrimitiveType,
-		 Tbc::GeometryBase::GeometryVolatility pGeomType);
+	void Set(const float* vertex_data,
+		 const float* vertex_normals,
+		 const float* uv_data,
+		 const lepra::uint8* color_data,
+		 ColorFormat color_format,
+		 const lepra::uint32* indices,
+		 unsigned int vertex_count,
+		 unsigned int index_count,
+		 tbc::GeometryBase::PrimitiveType primitive_type,
+		 tbc::GeometryBase::GeometryVolatility geom_type);
 
 	// AddUVSet() returns the index of the uv set.
-	// pUVData must contain mVertexCount * 2 elements.
-	int AddUVSet(const float* pUVData);
-	int AddUVSet(const Vector2D<float>* pUVData);
+	// uv_data must contain vertex_count_ * 2 elements.
+	int AddUVSet(const float* uv_data);
+	int AddUVSet(const Vector2D<float>* uv_data);
 	int AddEmptyUVSet();
-	int DupUVSet(int pUVSet);
+	int DupUVSet(int uv_set);
 	int PopUVSet();
 
 	// Data access...
@@ -90,67 +88,67 @@ public:
 	virtual unsigned int GetUVSetCount() const;
 
 	virtual float* GetVertexData() const;
-	virtual float* GetUVData(unsigned int pUVSet = 0) const;
+	virtual float* GetUVData(unsigned int uv_set = 0) const;
 	virtual vtx_idx_t* GetIndexData() const;
-	virtual Lepra::uint8* GetColorData() const;
+	virtual lepra::uint8* GetColorData() const;
 
-	void SetColorData(unsigned char* pColorData, ColorFormat pColorFormat);
-	void ConvertColorData(ColorFormat pColorFormat, unsigned char pAlpha);
+	void SetColorData(unsigned char* color_data, ColorFormat color_format);
+	void ConvertColorData(ColorFormat color_format, unsigned char alpha);
 	ColorFormat GetColorFormat() const;
 
 	// Misc work funcs.
 	void ClearAll();
 
 	// Know what you're doing when calling this internal function.
-	virtual void SetIndexData(vtx_idx_t* pIndexData, unsigned pIndexCount, unsigned pMaxIndexCount);
+	virtual void SetIndexData(vtx_idx_t* index_data, unsigned index_count, unsigned max_index_count);
 
 	// Will erase all current data.
-	void SetPolygon(vec3* pVertices, unsigned int pVertexCount);
+	void SetPolygon(vec3* vertices, unsigned int vertex_count);
 
 	// Flips the triangles from being clockwise to counter clockwise,
 	// and vice versa. FlipTriangle() only works if the primitive type
-	// is TRIANGLES.
-	void FlipTriangles(); 
-	void FlipTriangle(int pTriangleIndex);
+	// is kTriangles.
+	void FlipTriangles();
+	void FlipTriangle(int triangle_index);
 
 	// Generates unique vertices for each triangle. New UV-coordinate arrays and Color-
 	// arrays will be created, and the vertex normals will be regenerated according
-	// to the BasicMaterialSettings::mSmooth. This is an irreversible operation,
-	// so use it with care. 
+	// to the BasicMaterialSettings::smooth_. This is an irreversible operation,
+	// so use it with care.
 	void SplitVertices();
 
-	void Translate(const vec3& pPositionOffset);
-	void Rotate(const RotationMatrix<float>& pRotation);
+	void Translate(const vec3& position_offset);
+	void Rotate(const RotationMatrix<float>& rotation);
 
-	// This definitly won't work if "this" has a primitive type other than TRIANGLES.
-	void AddGeometry(TriangleBasedGeometry* pGeometry);
-	
+	// This definitly won't work if "this" has a primitive type other than kTriangles.
+	void AddGeometry(TriangleBasedGeometry* geometry);
+
 	// Use this if IsSingleObject() returns false and you want to get the separate objects.
 	// The pointer that is returned will point to an array of TriangleBasedGeometry.
-	// The number of elements in this array is stored in pNumObjects.
+	// The number of elements in this array is stored in num_objects.
 	// The caller is responsible of deleting this array.
-	TriangleBasedGeometry* GetSeparateObjects(int& pNumObjects);
+	TriangleBasedGeometry* GetSeparateObjects(int& num_objects);
 
-	// Overloads from Tbc::GeometryBase.
+	// Overloads from tbc::GeometryBase.
 	GeometryVolatility GetGeometryVolatility() const;
-	void SetGeometryVolatility(GeometryVolatility pVolatility);
+	void SetGeometryVolatility(GeometryVolatility volatility);
 
 private:
 
-	unsigned int mVertexCount;
-	unsigned int mIndexCount;
-	unsigned int mMaxIndexCount;
-	unsigned int mUVSetCount;
+	unsigned int vertex_count_;
+	unsigned int index_count_;
+	unsigned int max_index_count_;
+	unsigned int uv_set_count_;
 
-	float* mVertexData;			// Triplets of (x, y, z).
-	float** mUVData;			// Doublets of (u, v).
-	unsigned char* mColorData;
-	vtx_idx_t* mIndexData;	// Triplets of vertex indices.
+	float* vertex_data_;			// Triplets of (x, y, z).
+	float** uv_data_;			// Doublets of (u, v).
+	unsigned char* color_data_;
+	vtx_idx_t* index_data_;	// Triplets of vertex indices.
 
-	ColorFormat mColorFormat;
+	ColorFormat color_format_;
 
-	Tbc::GeometryBase::GeometryVolatility mGeometryVolatility;
-	Tbc::GeometryBase::PrimitiveType mPrimitiveType;
+	tbc::GeometryBase::GeometryVolatility geometry_volatility_;
+	tbc::GeometryBase::PrimitiveType primitive_type_;
 };
 
 

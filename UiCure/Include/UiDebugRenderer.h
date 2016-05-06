@@ -5,16 +5,15 @@
 
 
 #pragma once
-#include "../../Lepra/Include/CubicDeCasteljauSpline.h"
-#include "../../Lepra/Include/Graphics2D.h"
-#include "../../Lepra/Include/Thread.h"
-#include "../../Lepra/Include/Vector3D.h"
-#include "UiCure.h"
+#include "../../lepra/include/cubicdecasteljauspline.h"
+#include "../../lepra/include/graphics2d.h"
+#include "../../lepra/include/thread.h"
+#include "../../lepra/include/vector3d.h"
+#include "uicure.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ContextManager;
 class ContextObject;
 class RuntimeVariableScope;
@@ -22,8 +21,7 @@ class RuntimeVariableScope;
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
@@ -31,30 +29,28 @@ class GameUiManager;
 
 
 
-class DebugRenderer
-{
+class DebugRenderer {
 public:
-	enum DebugPrimitive
-	{
-		DEBUG_AXES = 1,
-		DEBUG_JOINTS,
-		DEBUG_SHAPES,
+	enum DebugPrimitive {
+		kDebugAxes = 1,
+		kDebugJoints,
+		kDebugShapes,
 	};
 
 	typedef CubicDeCasteljauSpline<vec3, float> Spline;
 
-	DebugRenderer(const Cure::RuntimeVariableScope* pVariableScope, GameUiManager* pUiManager, const Cure::ContextManager* pContext, const Cure::ContextManager* pRemoteContext, Lock* pTickLock);
+	DebugRenderer(const cure::RuntimeVariableScope* variable_scope, GameUiManager* ui_manager, const cure::ContextManager* context, const cure::ContextManager* remote_context, Lock* tick_lock);
 	virtual ~DebugRenderer();
 
-	void Render(const GameUiManager* pUiManager, const PixelRect& pRenderArea);
-	void DebugDrawPrimitive(Cure::ContextObject* pObject, DebugPrimitive pPrimitive);
-	void RenderSpline(const GameUiManager* pUiManager, Spline* pSpline);
+	void Render(const GameUiManager* ui_manager, const PixelRect& render_area);
+	void DebugDrawPrimitive(cure::ContextObject* object, DebugPrimitive primitive);
+	void RenderSpline(const GameUiManager* ui_manager, Spline* spline);
 
 private:
-	GameUiManager* mUiManager;
-	const Cure::ContextManager* mContext;
-	const Cure::ContextManager* mRemoteContext;
-	Lock* mTickLock;
+	GameUiManager* ui_manager_;
+	const cure::ContextManager* context_;
+	const cure::ContextManager* remote_context_;
+	Lock* tick_lock_;
 };
 
 

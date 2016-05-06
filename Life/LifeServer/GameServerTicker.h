@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,14 +8,13 @@
 
 
 
-#include "../../Cure/Include/GameTicker.h"
-#include "../../Lepra/Include/LogListener.h"
-#include "../Life.h"
+#include "../../cure/include/gameticker.h"
+#include "../../lepra/include/loglistener.h"
+#include "../life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -25,14 +24,13 @@ struct ServerInfo;
 
 
 
-class GameServerTicker: public Cure::GameTicker
-{
-	typedef Cure::GameTicker Parent;
+class GameServerTicker: public cure::GameTicker {
+	typedef cure::GameTicker Parent;
 public:
-	GameServerTicker(Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
+	GameServerTicker(cure::ResourceManager* resource_manager, float physics_radius, int physics_levels, float physics_sensitivity);
 	virtual ~GameServerTicker();
-	virtual void StartConsole(InteractiveConsoleLogListener* pConsoleLogger);
-	void SetMasterServerConnection(MasterServerConnection* pConnection);
+	virtual void StartConsole(InteractiveConsoleLogListener* console_logger);
+	void SetMasterServerConnection(MasterServerConnection* connection);
 
 protected:
 	virtual bool Initialize();
@@ -41,16 +39,16 @@ protected:
 	virtual float GetTickTimeReduction() const;
 	virtual float GetPowerSaveAmount() const;
 
-	virtual void WillMicroTick(float pTimeDelta);
+	virtual void WillMicroTick(float time_delta);
 	virtual void DidPhysicsTick();
 
-	virtual void OnTrigger(Tbc::PhysicsManager::BodyID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal);
-	virtual void OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-		const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity);
+	virtual void OnTrigger(tbc::PhysicsManager::BodyID trigger, int trigger_listener_id, int other_object_id, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal);
+	virtual void OnForceApplied(int object_id, int other_object_id, tbc::PhysicsManager::BodyID body_id, tbc::PhysicsManager::BodyID other_body_id,
+		const vec3& force, const vec3& torque, const vec3& position, const vec3& relative_velocity);
 
-	Cure::ResourceManager* mResourceManager;
-	GameServerManager* mGameManager;
-	MasterServerConnection* mMasterConnection;
+	cure::ResourceManager* resource_manager_;
+	GameServerManager* game_manager_;
+	MasterServerConnection* master_connection_;
 
 	logclass();
 };

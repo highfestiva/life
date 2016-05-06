@@ -5,91 +5,85 @@
 
 
 #include "pch.h"
-#include "../Include/Cure.h"
-#include "../Include/RuntimeVariable.h"
+#include "../include/cure.h"
+#include "../include/runtimevariable.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-RuntimeVariableScope* gCureScope = 0;
+RuntimeVariableScope* g_cure_scope = 0;
 
 
 
-void Init()
-{
-	if (!gCureScope)
-	{
-		gCureScope = new RuntimeVariableScope(0);
+void Init() {
+	if (!g_cure_scope) {
+		g_cure_scope = new RuntimeVariableScope(0);
 	}
-	SetDefault(gCureScope);
+	SetDefault(g_cure_scope);
 }
 
-void Shutdown()
-{
-	delete (gCureScope);
-	gCureScope = 0;
+void Shutdown() {
+	delete (g_cure_scope);
+	g_cure_scope = 0;
 }
 
-void SetDefault(RuntimeVariableScope* pSettings)
-{
-	v_set(pSettings, RTVAR_CONSOLE_COLUMNSPACING, 2);
-	v_set(pSettings, RTVAR_CONSOLE_CHARACTERWIDTH, 80);
-	v_set(pSettings, RTVAR_CONSOLE_CHARACTERDELIMITORS, " \t\v\r\n.,!?:;/\\'\"()&%#@{[]+-*|<>^_$`");
-	v_set(pSettings, RTVAR_CONSOLE_KEY_COMPLETION, (int)'\t');
-	v_set(pSettings, RTVAR_CONSOLE_KEY_ENTER, (int)'\r');
-	v_set(pSettings, RTVAR_CONSOLE_KEY_SILENT, (int)'\v');
-	v_set(pSettings, RTVAR_CONSOLE_KEY_BACKSPACE, (int)'\b');
-	v_set(pSettings, RTVAR_CONSOLE_KEY_DELETE, ConsolePrompt::CON_KEY_DELETE);
-	v_set(pSettings, RTVAR_CONSOLE_KEY_CTRLLEFT, ConsolePrompt::CON_KEY_CTRL_LEFT);
-	v_set(pSettings, RTVAR_CONSOLE_KEY_CTRLRIGHT, ConsolePrompt::CON_KEY_CTRL_RIGHT);
-	v_set(pSettings, RTVAR_CONSOLE_KEY_HOME, ConsolePrompt::CON_KEY_HOME);
-	v_set(pSettings, RTVAR_CONSOLE_KEY_END, ConsolePrompt::CON_KEY_END);
-	v_set(pSettings, RTVAR_CONSOLE_KEY_UP, ConsolePrompt::CON_KEY_UP);
-	v_set(pSettings, RTVAR_CONSOLE_KEY_DOWN, ConsolePrompt::CON_KEY_DOWN);
-	v_set(pSettings, RTVAR_CONSOLE_KEY_LEFT, ConsolePrompt::CON_KEY_LEFT);
-	v_set(pSettings, RTVAR_CONSOLE_KEY_RIGHT, ConsolePrompt::CON_KEY_RIGHT);
-	v_set(pSettings, RTVAR_CONSOLE_KEY_ESC, ConsolePrompt::CON_KEY_ESCAPE);
-	v_set(pSettings, RTVAR_CONSOLE_KEY_PAGEUP, ConsolePrompt::CON_KEY_PAGE_UP);
-	v_set(pSettings, RTVAR_CONSOLE_KEY_PAGEDOWN, ConsolePrompt::CON_KEY_PAGE_DOWN);
+void SetDefault(RuntimeVariableScope* settings) {
+	v_set(settings, kRtvarConsoleColumnspacing, 2);
+	v_set(settings, kRtvarConsoleCharacterwidth, 80);
+	v_set(settings, kRtvarConsoleCharacterdelimitors, " \t\v\r\n.,!?:;/\\'\"()&%#@{[]+-*|<>^_$`");
+	v_set(settings, kRtvarConsoleKeyCompletion, (int)'\t');
+	v_set(settings, kRtvarConsoleKeyEnter, (int)'\r');
+	v_set(settings, kRtvarConsoleKeySilent, (int)'\v');
+	v_set(settings, kRtvarConsoleKeyBackspace, (int)'\b');
+	v_set(settings, kRtvarConsoleKeyDelete, ConsolePrompt::kConKeyDelete);
+	v_set(settings, kRtvarConsoleKeyCtrlleft, ConsolePrompt::kConKeyCtrlLeft);
+	v_set(settings, kRtvarConsoleKeyCtrlright, ConsolePrompt::kConKeyCtrlRight);
+	v_set(settings, kRtvarConsoleKeyHome, ConsolePrompt::kConKeyHome);
+	v_set(settings, kRtvarConsoleKeyEnd, ConsolePrompt::kConKeyEnd);
+	v_set(settings, kRtvarConsoleKeyUp, ConsolePrompt::kConKeyUp);
+	v_set(settings, kRtvarConsoleKeyDown, ConsolePrompt::kConKeyDown);
+	v_set(settings, kRtvarConsoleKeyLeft, ConsolePrompt::kConKeyLeft);
+	v_set(settings, kRtvarConsoleKeyRight, ConsolePrompt::kConKeyRight);
+	v_set(settings, kRtvarConsoleKeyEsc, ConsolePrompt::kConKeyEscape);
+	v_set(settings, kRtvarConsoleKeyPageup, ConsolePrompt::kConKeyPageUp);
+	v_set(settings, kRtvarConsoleKeyPagedown, ConsolePrompt::kConKeyPageDown);
 
-	v_set(pSettings, RTVAR_DEBUG_ENABLE, false);
+	v_set(settings, kRtvarDebugEnable, false);
 
-	v_set(pSettings, RTVAR_NETPHYS_POSSENDINTERVALLIMIT, 0.5);
-	v_set(pSettings, RTVAR_NETPHYS_RESYNCONDIFFGT, 0.2);
-	v_set(pSettings, RTVAR_NETPHYS_SLOWFRAMECOUNT, 2);
-	v_set(pSettings, RTVAR_NETPHYS_ENABLESMOOTHING, true);
-	v_set(pSettings, RTVAR_NETPHYS_EXTRAPOLATIONFACTOR, 0.0);
+	v_set(settings, kRtvarNetphysPossendintervallimit, 0.5);
+	v_set(settings, kRtvarNetphysResyncondiffgt, 0.2);
+	v_set(settings, kRtvarNetphysSlowframecount, 2);
+	v_set(settings, kRtvarNetphysEnablesmoothing, true);
+	v_set(settings, kRtvarNetphysExtrapolationfactor, 0.0);
 
-	v_set(pSettings, RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
-	v_set(pSettings, RTVAR_NETWORK_CONNECT_RETRYCOUNT, 1);
-	v_set(pSettings, RTVAR_NETWORK_CONNECT_LOCALPORTRANGE, "1025-65535");
-	v_set(pSettings, RTVAR_NETWORK_CONNECT_TIMEOUT, 3.0);
-	v_set(pSettings, RTVAR_NETWORK_LOGIN_TIMEOUT, 3.0);
-	v_set(pSettings, RTVAR_NETWORK_KEEPALIVE_SENDINTERVAL, 5.0);
-	v_set(pSettings, RTVAR_NETWORK_KEEPALIVE_PINGINTERVAL, 7.0);
-	v_set(pSettings, RTVAR_NETWORK_KEEPALIVE_PINGRETRYCOUNT, 4);
-	v_set(pSettings, RTVAR_NETWORK_KEEPALIVE_KILLINTERVAL, 20.0);
+	v_set(settings, kRtvarNetworkServeraddress, "localhost:16650");
+	v_set(settings, kRtvarNetworkConnectRetrycount, 1);
+	v_set(settings, kRtvarNetworkConnectLocalportrange, "1025-65535");
+	v_set(settings, kRtvarNetworkConnectTimeout, 3.0);
+	v_set(settings, kRtvarNetworkLoginTimeout, 3.0);
+	v_set(settings, kRtvarNetworkKeepaliveSendinterval, 5.0);
+	v_set(settings, kRtvarNetworkKeepalivePinginterval, 7.0);
+	v_set(settings, kRtvarNetworkKeepalivePingretrycount, 4);
+	v_set(settings, kRtvarNetworkKeepaliveKillinterval, 20.0);
 
-	v_set(pSettings, RTVAR_PHYSICS_FPS, CURE_STANDARD_FRAME_RATE);
-	v_set(pSettings, RTVAR_PHYSICS_RTR, 1.0);
-	v_set(pSettings, RTVAR_PHYSICS_MICROSTEPS, 3);
-	v_internal(pSettings, RTVAR_PHYSICS_FASTALGO, true);
-	v_set(pSettings, RTVAR_PHYSICS_HALT, false);
-	v_set(pSettings, RTVAR_PHYSICS_PARALLEL, true);
-	v_set(pSettings, RTVAR_PHYSICS_ISFIXEDFPS, false);
-	v_set(pSettings, RTVAR_PHYSICS_NOCLIP, false);
+	v_set(settings, kRtvarPhysicsFps, kCureStandardFrameRate);
+	v_set(settings, kRtvarPhysicsRtr, 1.0);
+	v_set(settings, kRtvarPhysicsMicrosteps, 3);
+	v_internal(settings, kRtvarPhysicsFastalgo, true);
+	v_set(settings, kRtvarPhysicsHalt, false);
+	v_set(settings, kRtvarPhysicsParallel, true);
+	v_set(settings, kRtvarPhysicsIsfixedfps, false);
+	v_set(settings, kRtvarPhysicsNoclip, false);
 
-	v_set(pSettings, RTVAR_PERFORMANCE_TEXT_INTERVAL, 1.0);
-	v_set(pSettings, RTVAR_PERFORMANCE_TEXT_ENABLE, false);
+	v_set(settings, kRtvarPerformanceTextInterval, 1.0);
+	v_set(settings, kRtvarPerformanceTextEnable, false);
 }
 
-RuntimeVariableScope* GetSettings()
-{
-	return (gCureScope);
+RuntimeVariableScope* GetSettings() {
+	return (g_cure_scope);
 }
 
 

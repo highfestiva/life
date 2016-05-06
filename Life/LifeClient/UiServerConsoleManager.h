@@ -1,26 +1,23 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../LifeServer/ServerConsoleManager.h"
+#include "../lifeserver/serverconsolemanager.h"
 
-namespace Lepra
-{
+namespace lepra {
 class PixelRect;
 };
-namespace UiCure
-{
+namespace UiCure {
 class GameUiManager;
 }
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -28,13 +25,12 @@ class UiConsole;
 
 
 
-class UiServerConsoleManager: public ServerConsoleManager
-{
+class UiServerConsoleManager: public ServerConsoleManager {
 	typedef ServerConsoleManager Parent;
 public:
-	UiServerConsoleManager(Cure::ResourceManager* pResourceManager, Cure::GameManager* pGameManager,
-		UiCure::GameUiManager* pUiManager, Cure::RuntimeVariableScope* pVariableScope, const PixelRect& pArea,
-		InteractiveConsoleLogListener* pConsoleLogger, ConsolePrompt* pConsolePrompt);
+	UiServerConsoleManager(cure::ResourceManager* resource_manager, cure::GameManager* game_manager,
+		UiCure::GameUiManager* ui_manager, cure::RuntimeVariableScope* variable_scope, const PixelRect& area,
+		InteractiveConsoleLogListener* console_logger, ConsolePrompt* console_prompt);
 	virtual ~UiServerConsoleManager();
 
 	virtual bool Start();
@@ -44,7 +40,7 @@ public:
 	UiConsole* GetUiConsole() const;
 
 private:
-	UiConsole* mUiConsole;
+	UiConsole* ui_console_;
 	logclass();
 };
 

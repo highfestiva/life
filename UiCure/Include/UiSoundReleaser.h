@@ -1,42 +1,40 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "UiCppContextObject.h"
+#include "uicppcontextobject.h"
 
 
 
-namespace UiCure
-{
+namespace UiCure {
 
 
 
-class SoundReleaser: public CppContextObject
-{
+class SoundReleaser: public CppContextObject {
 	typedef CppContextObject Parent;
 public:
-	SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, Cure::ContextManager* pManager,
-		const str& pSoundName, UiCure::UserSound3dResource* pSound, const vec3& pPosition, const vec3& pVelocity,
-		float pVolume, float pPitch);
-	SoundReleaser(Cure::ResourceManager* pResourceManager, GameUiManager* pUiManager, Cure::ContextManager* pManager,
-		const str& pSoundName, UiCure::UserSound2dResource* pSound, float pVolume, float pPitch);
+	SoundReleaser(cure::ResourceManager* resource_manager, GameUiManager* ui_manager, cure::ContextManager* manager,
+		const str& sound_name, UiCure::UserSound3dResource* sound, const vec3& position, const vec3& velocity,
+		float volume, float pitch);
+	SoundReleaser(cure::ResourceManager* resource_manager, GameUiManager* ui_manager, cure::ContextManager* manager,
+		const str& sound_name, UiCure::UserSound2dResource* sound, float volume, float pitch);
 	virtual ~SoundReleaser();
 
 private:
 	void OnTick();
-	void LoadPlaySound3d(UiCure::UserSound3dResource* pSoundResource);
-	void LoadPlaySound2d(UiCure::UserSound2dResource* pSoundResource);
+	void LoadPlaySound3d(UiCure::UserSound3dResource* sound_resource);
+	void LoadPlaySound2d(UiCure::UserSound2dResource* sound_resource);
 
-	UiCure::UserSound3dResource* mSound3d;
-	UiCure::UserSound2dResource* mSound2d;
-	vec3 mPosition;
-	vec3 mVelocity;
-	float mVolume;
-	float mPitch;
+	UiCure::UserSound3dResource* sound3d_;
+	UiCure::UserSound2dResource* sound2d_;
+	vec3 position_;
+	vec3 velocity_;
+	float volume_;
+	float pitch_;
 };
 
 

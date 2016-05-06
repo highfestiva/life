@@ -7,43 +7,40 @@
 #pragma once
 
 #if 0
-#include "../../Lepra/Include/String.h"
-#include "ContextObject.h"
+#include "../../lepra/include/string.h"
+#include "contextobject.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-namespace PythonInterface
-{
+namespace pythoninterface {
 class PythonObjectBase;
 }
 
 
 
-class PythonContextObject: public ContextObject
-{
+class PythonContextObject: public ContextObject {
 public:
-	PythonContextObject(GameObjectId pId, PyObject* pInstance, PythonInterface::PythonObjectBase* pCppInstance);
+	PythonContextObject(GameObjectId id, PyObject* instance, pythoninterface::PythonObjectBase* cpp_instance);
 	virtual ~PythonContextObject();
-	static PythonContextObject* Load(bool pCppInterface, const Lepra::String& pPythonName, PyObject* pArguments = 0);
+	static PythonContextObject* Load(bool cpp_interface, const lepra::String& python_name, PyObject* arguments = 0);
 
 	void Clear();
 	PyObject* GetInstance() const;
-	PythonInterface::PythonObjectBase* GetCppInstance() const;
+	pythoninterface::PythonObjectBase* GetCppInstance() const;
 
-	void OnTick(double pFrameTime);
-	void OnAlarm(int pAlarmId);
-	void OnForceApplied(const Lepra::Vector3DF& pForce, const Lepra::Vector3DF& pTorque);
+	void OnTick(double frame_time);
+	void OnAlarm(int alarm_id);
+	void OnForceApplied(const lepra::Vector3DF& force, const lepra::Vector3DF& torque);
 
 private:
-	static PyObject* LoadNative(const Lepra::String& pPythonName, PyObject* pArguments = 0);
+	static PyObject* LoadNative(const lepra::String& python_name, PyObject* arguments = 0);
 
-	PyObject* mInstance;
-	PythonInterface::PythonObjectBase* mCppInstance;
+	PyObject* instance_;
+	pythoninterface::PythonObjectBase* cpp_instance_;
 };
 
 

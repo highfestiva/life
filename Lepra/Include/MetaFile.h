@@ -1,6 +1,6 @@
 /*
 	Class:  MetaFile
-	Author: Jonas Byström
+	Author: Jonas BystrÃ¶m
 	Copyright (c) Pixel Doctrine
 
 	NOTES:
@@ -32,104 +32,101 @@
 
 
 
-#include "Lepra.h"
-#include "File.h"
-#include "InputStream.h"
-#include "OutputStream.h"
-#include "DiskFile.h"
-#include "ArchiveFile.h"
-#include "String.h"
+#include "lepra.h"
+#include "file.h"
+#include "inputstream.h"
+#include "outputstream.h"
+#include "diskfile.h"
+#include "archivefile.h"
+#include "string.h"
 #include <list>
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class MetaFile: public File, protected InputStream, protected OutputStream
-{
+class MetaFile: public File, protected InputStream, protected OutputStream {
 	typedef File Parent;
 public:
-	enum OpenMode
-	{
-		READ_ONLY = 0,
-		WRITE_ONLY,
-		WRITE_APPEND,
+	enum OpenMode {
+		kReadOnly = 0,
+		kWriteOnly,
+		kWriteAppend,
 	};
 
 	MetaFile();
-	MetaFile(Reader* pReader);
-	MetaFile(Writer* pWriter);
-	MetaFile(Reader* pReader, Writer* pWriter);
+	MetaFile(Reader* reader);
+	MetaFile(Writer* writer);
+	MetaFile(Reader* reader, Writer* writer);
 	virtual ~MetaFile();
 
-	bool Open(const str& pFileName, OpenMode pMode, bool pCreatePath = false, Endian::EndianType pEndian = Endian::TYPE_BIG_ENDIAN);
+	bool Open(const str& file_name, OpenMode mode, bool create_path = false, Endian::EndianType endian = Endian::kTypeBigEndian);
 	void Close();
 
-	void SetEndian(Endian::EndianType pEndian);
+	void SetEndian(Endian::EndianType endian);
 	Endian::EndianType GetEndian();
 
 	int64 GetSize() const;
 
 	int64 Tell() const;
-	int64 Seek(int64 pOffset, FileOrigin pFrom);
+	int64 Seek(int64 offset, FileOrigin from);
 
 	str GetFullName() const;	// Returns path+filename.
 	str GetName() const;		// Returns filename only.
 	str GetPath() const;		// Returns path.
 
 	// Overrided from Reader/Writer.
-	IOError ReadData(void* pBuffer, size_t pSize);
-	IOError WriteData(const void* pBuffer, size_t pSize);
+	IOError ReadData(void* buffer, size_t size);
+	IOError WriteData(const void* buffer, size_t size);
 
-	static void AddZipExtension(const str& pExtension);
-	static void AddUncompressedExtension(const str& pExtension);
+	static void AddZipExtension(const str& extension);
+	static void AddUncompressedExtension(const str& extension);
 	static void ClearExtensions();
 
 //protected:
 	// Overrided from InputStream.
 	int64 GetAvailable() const;
-	virtual IOError ReadRaw(void* pBuffer, size_t pSize);
-	IOError Skip(size_t pSize);
+	virtual IOError ReadRaw(void* buffer, size_t size);
+	IOError Skip(size_t size);
 
 	// Overrided from OutputStream.
-	virtual IOError WriteRaw(const void* pBuffer, size_t pSize);
+	virtual IOError WriteRaw(const void* buffer, size_t size);
 	void Flush();
 
 private:
 
 	void AllocDiskFile();
-	void AllocArchiveFile(const str& pArchiveName);
-	DiskFile::OpenMode ToDiskFileMode(OpenMode pMode);
-	ArchiveFile::OpenMode ToArchiveMode(OpenMode pMode);
+	void AllocArchiveFile(const str& archive_name);
+	DiskFile::OpenMode ToDiskFileMode(OpenMode mode);
+	ArchiveFile::OpenMode ToArchiveMode(OpenMode mode);
 
-	static std::list<str>* smZipExtensions;
-	static std::list<str>* smArchiveExtensions;
+	static std::list<str>* zip_extensions_;
+	static std::list<str>* archive_extensions_;
 
-	static bool IsZipFile(const str& pExtension);
-	static bool IsUncompressedArchive(const str& pExtension);
+	static bool IsZipFile(const str& extension);
+	static bool IsUncompressedArchive(const str& extension);
 
 	// Splits the filename into an archive name and a filename at
-	// the '/' pointed to by pSplitIndex, counting from right to
+	// the '/' pointed to by split_index, counting from right to
 	// left. Examples:
 	//
-	// pFilename = "C:/My/Current/Directory/Filename.file"
+	// filename = "C:/My/Current/Directory/Filename.file"
 	//
-	// pSplitIndex = 0 returns pLeft = "C:/My/Current/Directory/Filename.file" and pRight = "".
-	// pSplitIndex = 1 returns pLeft = "C:/My/Current/Directory" and pFile = "Filename.file".
-	static bool SplitPath(const str& pFilename, str& pLeft, str& pRight, size_t pSplitIndex);
+	// split_index = 0 returns left = "C:/My/Current/Directory/Filename.file" and right = "".
+	// split_index = 1 returns left = "C:/My/Current/Directory" and file = "Filename.file".
+	static bool SplitPath(const str& filename, str& left, str& right, size_t split_index);
 
-	static bool FindValidArchiveName(const str& pArchivePrefix, str& pFullArchiveName);
+	static bool FindValidArchiveName(const str& archive_prefix, str& full_archive_name);
 
-	DiskFile* mDiskFile;
-	ArchiveFile* mArchiveFile;
+	DiskFile* disk_file_;
+	ArchiveFile* archive_file_;
 
-	Reader* mReader;
-	Writer* mWriter;
+	Reader* reader_;
+	Writer* writer_;
 
-	Endian::EndianType mEndian;
+	Endian::EndianType endian_;
 };
 
 

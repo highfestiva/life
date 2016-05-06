@@ -1,42 +1,39 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life/LifeClient/Level.h"
-#include "Downwash.h"
+#include "../life/lifeclient/level.h"
+#include "downwash.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 class ContextPath;
 }
 
 
 
-namespace Downwash
-{
+namespace Downwash {
 
 
 
-class Level: public Life::Level
-{
-	typedef Life::Level Parent;
+class Level: public life::Level {
+	typedef life::Level Parent;
 public:
-	Level(Cure::ResourceManager* pResourceManager, const str& pClassId, UiCure::GameUiManager* pUiManager, Cure::ContextForceListener* pGravelEmitter);
+	Level(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager, cure::ContextForceListener* gravel_emitter);
 	virtual ~Level();
 
 	virtual void OnLoaded();
 	const str& GetBackgroundName() const;
-	Cure::ContextPath* QueryPath();
+	cure::ContextPath* QueryPath();
 
 private:
-	str mBackgroundName;
-	Cure::ContextPath* mPath;
+	str background_name_;
+	cure::ContextPath* path_;
 };
 
 

@@ -5,166 +5,149 @@
 
 
 #include "pch.h"
-#include "GameServerTicker.h"
-#include "../../Cure/Include/ContextObjectAttribute.h"
-#include "../../Cure/Include/ResourceManager.h"
-#include "../../Cure/Include/RuntimeVariable.h"
-#include "../../Cure/Include/TimeManager.h"
-#include "../../Lepra/Include/SystemManager.h"
-#include "../ConsoleManager.h"
-#include "../LifeApplication.h"
-#include "../LifeString.h"
-#include "GameServerManager.h"
-#include "MasterServerConnection.h"
-#include "RtVar.h"
-#include "ServerConsoleManager.h"
+#include "gameserverticker.h"
+#include "../../cure/include/contextobjectattribute.h"
+#include "../../cure/include/resourcemanager.h"
+#include "../../cure/include/runtimevariable.h"
+#include "../../cure/include/timemanager.h"
+#include "../../lepra/include/systemmanager.h"
+#include "../consolemanager.h"
+#include "../lifeapplication.h"
+#include "../lifestring.h"
+#include "gameservermanager.h"
+#include "masterserverconnection.h"
+#include "rtvar.h"
+#include "serverconsolemanager.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
-GameServerTicker::GameServerTicker(Cure::ResourceManager* pResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity):
-	Parent(pPhysicsRadius, pPhysicsLevels, pPhysicsSensitivity),
-	mResourceManager(pResourceManager),
-	mGameManager(0),
-	mMasterConnection(0)
-{
-	v_set(Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
-	v_set(Cure::GetSettings(), RTVAR_NETWORK_ENABLEOPENSERVER, true);
-	v_set(Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, _("0.0.0.0:16650"));
+GameServerTicker::GameServerTicker(cure::ResourceManager* resource_manager, float physics_radius, int physics_levels, float physics_sensitivity):
+	Parent(physics_radius, physics_levels, physics_sensitivity),
+	resource_manager_(resource_manager),
+	game_manager_(0),
+	master_connection_(0) {
+	v_set(cure::GetSettings(), kRtvarApplicationAutoexitonemptyserver, false);
+	v_set(cure::GetSettings(), kRtvarNetworkEnableopenserver, true);
+	v_set(cure::GetSettings(), kRtvarNetworkServeraddress, _("0.0.0.0:16650"));
 
-	Cure::ContextObjectAttribute::SetCreator(&CreateObjectAttribute);
+	cure::ContextObjectAttribute::SetCreator(&CreateObjectAttribute);
 
-	pResourceManager->InitDefault();
+	resource_manager->InitDefault();
 
-	Cure::RuntimeVariableScope* lVariableScope = new Cure::RuntimeVariableScope(Cure::GetSettings());
-	mGameManager = new GameServerManager(GetTimeManager(), lVariableScope, pResourceManager);
-	mGameManager->SetTicker(this);
+	cure::RuntimeVariableScope* variable_scope = new cure::RuntimeVariableScope(cure::GetSettings());
+	game_manager_ = new GameServerManager(GetTimeManager(), variable_scope, resource_manager);
+	game_manager_->SetTicker(this);
 }
 
-GameServerTicker::~GameServerTicker()
-{
-	delete (mGameManager);
-	mGameManager = 0;
+GameServerTicker::~GameServerTicker() {
+	delete (game_manager_);
+	game_manager_ = 0;
 
 	{
-		ConsoleManager lConsole(mResourceManager, 0, Cure::GetSettings(), 0, 0);
-		lConsole.InitCommands();
-		lConsole.ExecuteCommand("save-system-config-file 0 " + Application::GetIoFile("ServerBase", "lsh"));
+		ConsoleManager console(resource_manager_, 0, cure::GetSettings(), 0, 0);
+		console.InitCommands();
+		console.ExecuteCommand("save-system-config-file 0 " + Application::GetIoFile("ServerBase", "lsh"));
 	}
 
-	mResourceManager = 0;
+	resource_manager_ = 0;
 
-	mMasterConnection->SetSocketInfo(0, -1);
-	delete mMasterConnection;
-	mMasterConnection = 0;
+	master_connection_->SetSocketInfo(0, -1);
+	delete master_connection_;
+	master_connection_ = 0;
 }
 
-void GameServerTicker::StartConsole(InteractiveConsoleLogListener* pConsoleLogger)
-{
-	ConsoleManager lConsole(mResourceManager, 0, Cure::GetSettings(), 0, 0);
-	lConsole.InitCommands();
-	lConsole.ExecuteCommand("execute-file -i ServerDefault.lsh");
-	lConsole.ExecuteCommand("execute-file -i " + Application::GetIoFile("ServerBase", "lsh"));
+void GameServerTicker::StartConsole(InteractiveConsoleLogListener* console_logger) {
+	ConsoleManager console(resource_manager_, 0, cure::GetSettings(), 0, 0);
+	console.InitCommands();
+	console.ExecuteCommand("execute-file -i ServerDefault.lsh");
+	console.ExecuteCommand("execute-file -i " + Application::GetIoFile("ServerBase", "lsh"));
 
-	mGameManager->StartConsole(pConsoleLogger, new StdioConsolePrompt);
+	game_manager_->StartConsole(console_logger, new StdioConsolePrompt);
 }
 
-void GameServerTicker::SetMasterServerConnection(MasterServerConnection* pConnection)
-{
-	delete mMasterConnection;
-	mMasterConnection = pConnection;
+void GameServerTicker::SetMasterServerConnection(MasterServerConnection* connection) {
+	delete master_connection_;
+	master_connection_ = connection;
 }
 
 
 
-bool GameServerTicker::Initialize()
-{
-	str lServerAddress;
-	v_get(lServerAddress, =, Cure::GetSettings(), RTVAR_NETWORK_SERVERADDRESS, "localhost:16650");
-	return mGameManager->Initialize(mMasterConnection, lServerAddress);
+bool GameServerTicker::Initialize() {
+	str server_address;
+	v_get(server_address, =, cure::GetSettings(), kRtvarNetworkServeraddress, "localhost:16650");
+	return game_manager_->Initialize(master_connection_, server_address);
 }
 
-bool GameServerTicker::Tick()
-{
-	mMasterConnection->Tick();
+bool GameServerTicker::Tick() {
+	master_connection_->Tick();
 
 	GetTimeManager()->Tick();
 
-	bool lOk = mGameManager->BeginTick();
-	if (lOk)
-	{
+	bool ok = game_manager_->BeginTick();
+	if (ok) {
 		StartPhysicsTick();
-		mGameManager->PreEndTick();
+		game_manager_->PreEndTick();
 		WaitPhysicsTick();
-		lOk = mGameManager->EndTick();
+		ok = game_manager_->EndTick();
 	}
 
-	mResourceManager->Tick();
+	resource_manager_->Tick();
 
-	bool lAutoShutdown;
-	v_get(lAutoShutdown, =, Cure::GetSettings(), RTVAR_APPLICATION_AUTOEXITONEMPTYSERVER, false);
-	if (lAutoShutdown)
-	{
-		static size_t lMaxLoginCount = 0;
-		size_t lUserCount = mGameManager->ListUsers().size();
-		lMaxLoginCount = (lUserCount > lMaxLoginCount)? lUserCount : lMaxLoginCount;
-		if (lMaxLoginCount > 0 && lUserCount == 0)
-		{
-			mLog.Warning("Server automatically shuts down since rtvar active and all users now logged off.");
+	bool auto_shutdown;
+	v_get(auto_shutdown, =, cure::GetSettings(), kRtvarApplicationAutoexitonemptyserver, false);
+	if (auto_shutdown) {
+		static size_t max_login_count = 0;
+		size_t user_count = game_manager_->ListUsers().size();
+		max_login_count = (user_count > max_login_count)? user_count : max_login_count;
+		if (max_login_count > 0 && user_count == 0) {
+			log_.Warning("Server automatically shuts down since rtvar active and all users now logged off.");
 			SystemManager::AddQuitRequest(+1);
 		}
 	}
 
-	return (lOk);
+	return (ok);
 }
 
-void GameServerTicker::PollRoundTrip()
-{
-	mGameManager->TickInput();
+void GameServerTicker::PollRoundTrip() {
+	game_manager_->TickInput();
 }
 
-float GameServerTicker::GetTickTimeReduction() const
-{
+float GameServerTicker::GetTickTimeReduction() const {
 	return GetTimeManager()->GetTickLoopTimeReduction();
 }
 
-float GameServerTicker::GetPowerSaveAmount() const
-{
-	return (mGameManager->GetPowerSaveAmount());
+float GameServerTicker::GetPowerSaveAmount() const {
+	return (game_manager_->GetPowerSaveAmount());
 }
 
 
 
-void GameServerTicker::WillMicroTick(float pTimeDelta)
-{
-	mGameManager->MicroTick(pTimeDelta);
+void GameServerTicker::WillMicroTick(float time_delta) {
+	game_manager_->MicroTick(time_delta);
 }
 
-void GameServerTicker::DidPhysicsTick()
-{
-	mGameManager->PostPhysicsTick();
-}
-
-
-
-void GameServerTicker::OnTrigger(Tbc::PhysicsManager::BodyID pTrigger, int pTriggerListenerId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, const vec3& pPosition, const vec3& pNormal)
-{
-	mGameManager->OnTrigger(pTrigger, pTriggerListenerId, pOtherObjectId, pBodyId, pPosition, pNormal);
-}
-
-void GameServerTicker::OnForceApplied(int pObjectId, int pOtherObjectId, Tbc::PhysicsManager::BodyID pBodyId, Tbc::PhysicsManager::BodyID pOtherBodyId,
-		const vec3& pForce, const vec3& pTorque, const vec3& pPosition, const vec3& pRelativeVelocity)
-{
-	mGameManager->OnForceApplied(pObjectId, pOtherObjectId, pBodyId, pOtherBodyId, pForce, pTorque, pPosition, pRelativeVelocity);
+void GameServerTicker::DidPhysicsTick() {
+	game_manager_->PostPhysicsTick();
 }
 
 
 
-loginstance(GAME, GameServerTicker);
+void GameServerTicker::OnTrigger(tbc::PhysicsManager::BodyID trigger, int trigger_listener_id, int other_object_id, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
+	game_manager_->OnTrigger(trigger, trigger_listener_id, other_object_id, body_id, position, normal);
+}
+
+void GameServerTicker::OnForceApplied(int object_id, int other_object_id, tbc::PhysicsManager::BodyID body_id, tbc::PhysicsManager::BodyID other_body_id,
+		const vec3& force, const vec3& torque, const vec3& position, const vec3& relative_velocity) {
+	game_manager_->OnForceApplied(object_id, other_object_id, body_id, other_body_id, force, torque, position, relative_velocity);
+}
+
+
+
+loginstance(kGame, GameServerTicker);
 
 
 

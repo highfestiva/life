@@ -1,26 +1,24 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #pragma once
 
-#include "../Life/LifeClient/GameClientMasterTicker.h"
-#include "HoverTank.h"
-#include "Sunlight.h"
+#include "../life/lifeclient/gameclientmasterticker.h"
+#include "hovertank.h"
+#include "sunlight.h"
 
 
 
-namespace Life
-{
+namespace life {
 class GameClientSlaveManager;
 }
 
 
 
-namespace HoverTank
-{
+namespace HoverTank {
 
 
 
@@ -28,11 +26,10 @@ class Sunlight;
 
 
 
-class HoverTankTicker: public Life::GameClientMasterTicker
-{
-	typedef Life::GameClientMasterTicker Parent;
+class HoverTankTicker: public life::GameClientMasterTicker {
+	typedef life::GameClientMasterTicker Parent;
 public:
-	HoverTankTicker(UiCure::GameUiManager* pUiManager, Cure::ResourceManager* mResourceManager, float pPhysicsRadius, int pPhysicsLevels, float pPhysicsSensitivity);
+	HoverTankTicker(UiCure::GameUiManager* ui_manager, cure::ResourceManager* resource_manager_, float physics_radius, int physics_levels, float physics_sensitivity);
 	virtual ~HoverTankTicker();
 
 	Sunlight* GetSunlight() const;
@@ -40,29 +37,29 @@ public:
 private:
 	virtual bool CreateSlave();
 	virtual void OnSlavesKilled();
-	virtual void OnServerCreated(Life::UiGameServerManager* pServer);
+	virtual void OnServerCreated(life::UiGameServerManager* server);
 
 	virtual bool Reinitialize();
 	virtual bool OpenUiManager();
 	void DisplaySplashLogo();
 	void DisplayCompanyLogo();
 
-	virtual void BeginRender(vec3& pColor);
+	virtual void BeginRender(vec3& color);
 
 	virtual void CloseMainMenu();
 	virtual bool QueryQuit();
 
-	static Life::GameClientSlaveManager* CreateSlaveManager(Life::GameClientMasterTicker* pMaster,
-		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-		int pSlaveIndex, const PixelRect& pRenderArea);
-	static Life::GameClientSlaveManager* CreateViewer(Life::GameClientMasterTicker* pMaster,
-		Cure::TimeManager* pTime, Cure::RuntimeVariableScope* pVariableScope,
-		Cure::ResourceManager* pResourceManager, UiCure::GameUiManager* pUiManager,
-		int pSlaveIndex, const PixelRect& pRenderArea);
+	static life::GameClientSlaveManager* CreateSlaveManager(life::GameClientMasterTicker* pMaster,
+		cure::TimeManager* time, cure::RuntimeVariableScope* variable_scope,
+		cure::ResourceManager* resource_manager, UiCure::GameUiManager* ui_manager,
+		int slave_index, const PixelRect& render_area);
+	static life::GameClientSlaveManager* CreateViewer(life::GameClientMasterTicker* pMaster,
+		cure::TimeManager* time, cure::RuntimeVariableScope* variable_scope,
+		cure::ResourceManager* resource_manager, UiCure::GameUiManager* ui_manager,
+		int slave_index, const PixelRect& render_area);
 
-	bool mIsPlayerCountViewActive;
-	Sunlight* mSunlight;		// TODO: remove hack and come up with something better?
+	bool is_player_count_view_active_;
+	Sunlight* sunlight_;		// TODO: remove hack and come up with something better?
 
 	logclass();
 };

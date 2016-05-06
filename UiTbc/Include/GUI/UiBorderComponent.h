@@ -6,53 +6,49 @@
 
 #pragma once
 
-#include "UiRectComponent.h"
+#include "uirectcomponent.h"
 
-namespace UiTbc
-{
+namespace uitbc {
 
-class BorderComponent: public RectComponent
-{
+class BorderComponent: public RectComponent {
 	typedef RectComponent Parent;
 public:
 
-	enum BorderPart
-	{
-		INVALID_PART = 0,
+	enum BorderPart {
+		kInvalidPart = 0,
 
-		TOPLEFT_CORNER,
-		TOPRIGHT_CORNER,
-		BOTTOMRIGHT_CORNER,
-		BOTTOMLEFT_CORNER,
-		TOP_BORDER,
-		BOTTOM_BORDER,
-		LEFT_BORDER,
-		RIGHT_BORDER,
+		kTopleftCorner,
+		kToprightCorner,
+		kBottomrightCorner,
+		kBottomleftCorner,
+		kTopBorder,
+		kBottomBorder,
+		kLeftBorder,
+		kRightBorder,
 	};
 
-	enum BorderShadeFunc
-	{
-		LINEAR = 0,
-		ZIGZAG,
+	enum BorderShadeFunc {
+		kLinear = 0,
+		kZigzag,
 	};
 
-	BorderComponent(BorderPart pPart, const Color& pColor, BorderShadeFunc pShadeFunc);
-	BorderComponent(BorderPart pPart, Painter::ImageID pImageID);
+	BorderComponent(BorderPart part, const Color& color, BorderShadeFunc shade_func);
+	BorderComponent(BorderPart part, Painter::ImageID image_id);
 	virtual ~BorderComponent();
 
-	void SetSunken(bool pSunken);
+	void SetSunken(bool sunken);
 
-	inline void SetResizable(bool pResizable);
+	inline void SetResizable(bool resizable);
 
-	void Set(const Color& pColor, BorderShadeFunc pShadeFunc);
-	void Set(Painter::ImageID pImageID);
+	void Set(const Color& color, BorderShadeFunc shade_func);
+	void Set(Painter::ImageID image_id);
 
-	virtual void Repaint(Painter* pPainter);
+	virtual void Repaint(Painter* painter);
 
-	virtual bool OnLButtonDown(int pMouseX, int pMouseY);
-	virtual bool OnLButtonUp(int pMouseX, int pMouseY);
+	virtual bool OnLButtonDown(int mouse_x, int mouse_y);
+	virtual bool OnLButtonUp(int mouse_x, int mouse_y);
 
-	virtual bool OnMouseMove(int pMouseX, int pMouseY, int pMouseDX, int pMouseDY);
+	virtual bool OnMouseMove(int mouse_x, int mouse_y, int mouse_dx, int mouse_dy);
 
 	inline virtual Type GetType() const;
 
@@ -61,26 +57,24 @@ private:
 
 	void CalcColors();
 
-	bool mImageBorder;
-	bool mResizable;
-	bool mResizing;
+	bool image_border_;
+	bool resizable_;
+	bool resizing_;
 
-	BorderPart mPart;
-	BorderShadeFunc mShading;
+	BorderPart part_;
+	BorderShadeFunc shading_;
 
-	Color mBodyColor;
-	Color mLightColor;
-	Color mDarkColor;
+	Color body_color_;
+	Color light_color_;
+	Color dark_color_;
 };
 
-Component::Type BorderComponent::GetType() const
-{
-	return Component::BORDER;
+Component::Type BorderComponent::GetType() const {
+	return Component::kBorder;
 }
 
-void BorderComponent::SetResizable(bool pResizable)
-{
-	mResizable = pResizable;
+void BorderComponent::SetResizable(bool resizable) {
+	resizable_ = resizable;
 }
 
 }

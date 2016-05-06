@@ -6,14 +6,13 @@
 
 #pragma once
 
-#include "../UiInput.h"
-#include "../X11/UiX11DisplayManager.h"
-#include "../UiLepra.h"
+#include "../uiinput.h"
+#include "../x11/uix11displaymanager.h"
+#include "../uilepra.h"
 
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
@@ -22,11 +21,10 @@ class X11InputDevice;
 
 
 
-class X11InputElement: public InputElement
-{
+class X11InputElement: public InputElement {
 public:
-	X11InputElement(InputElement::Type pType, Interpretation pInterpretation, int pTypeIndex,
-		X11InputDevice* pParentDevice);
+	X11InputElement(InputElement::Type type, Interpretation interpretation, int type_index,
+		X11InputDevice* parent_device);
 	virtual ~X11InputElement();
 
 protected:
@@ -36,13 +34,12 @@ private:
 
 
 
-class X11InputDevice: public InputDevice
-{
+class X11InputDevice: public InputDevice {
 public:
-	X11InputDevice(InputManager* pManager);
+	X11InputDevice(InputManager* manager);
 	virtual ~X11InputDevice();
 
-	void AddElement(X11InputElement* pElement);
+	void AddElement(X11InputElement* element);
 
 	virtual void Activate();
 	virtual void Release();
@@ -56,14 +53,13 @@ private:
 
 
 
-class X11InputManager: public InputManager, public X11Observer
-{
+class X11InputManager: public InputManager, public X11Observer {
 	typedef InputManager Parent;
 public:
 	// Declared as friend in order to get access to screen width and height.
 	friend class X11InputElement;
 
-	X11InputManager(X11DisplayManager* pDisplayManager);
+	X11InputManager(X11DisplayManager* display_manager);
 	virtual ~X11InputManager();
 
 	virtual void PreProcessEvents();
@@ -79,7 +75,7 @@ public:
 	virtual const InputDevice* GetMouse() const;
 	virtual InputDevice* GetMouse();
 
-	virtual void SetCursorVisible(bool pVisible);
+	virtual void SetCursorVisible(bool visible);
 
 	virtual float GetCursorX();
 	virtual float GetCursorY();
@@ -88,37 +84,37 @@ public:
 	bool IsInitialized();
 
 protected:
-	bool OnMessage(const XEvent& pEvent);
-	static KeyCode TranslateKey(int pState, KeySym pKeySym, bool& pIsSpecialKey);
+	bool OnMessage(const XEvent& event);
+	static KeyCode TranslateKey(int state, KeySym key_sym, bool& is_special_key);
 
 private:
 	void AddObserver();
 	void RemoveObserver();
 
-	X11DisplayManager* mDisplayManager;
+	X11DisplayManager* display_manager_;
 
-	bool mInitialized;
+	bool initialized_;
 
 	// The entire display area (not just the user's window).
-	int mScreenWidth;
-	int mScreenHeight;
+	int screen_width_;
+	int screen_height_;
 
 	// Mouse related stuff.
-	float mCursorX;
-	float mCursorY;
-	bool mIgnoreNextMouseMove;	// Leave+enter.
-	bool mGrabCursor;	// Used when invisible but lost focus.
-	int mMouseGrabX;
-	int mMouseGrabY;
-	int mMouseGrabDeltaX;
-	int mMouseGrabDeltaY;
+	float cursor_x_;
+	float cursor_y_;
+	bool ignore_next_mouse_move_;	// Leave+enter.
+	bool grab_cursor_;	// Used when invisible but lost focus.
+	int mouse_grab_x_;
+	int mouse_grab_y_;
+	int mouse_grab_delta_x_;
+	int mouse_grab_delta_y_;
 
 	// Default devices.
-	InputDevice* mKeyboard;
-	InputDevice* mMouse;
-	int mTypeCount[InputDevice::TYPE_COUNT];
+	InputDevice* keyboard_;
+	InputDevice* mouse_;
+	int type_count_[InputDevice::kTypeCount];
 
-	XIC mInputContext;
+	XIC input_context_;
 
 	logclass();
 };

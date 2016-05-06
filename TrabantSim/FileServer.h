@@ -6,49 +6,45 @@
 
 #pragma once
 
-#include "../Lepra/Include/MemberThread.h"
-#include "TrabantSim.h"
+#include "../lepra/include/memberthread.h"
+#include "trabantsim.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class TcpSocket;
 class TcpListenerSocket;
 }
 
 
 
-namespace TrabantSim
-{
+namespace TrabantSim {
 
 
 
-struct SyncDelegate
-{
-	virtual bool WillSync(const str& pHostname) = 0;
+struct SyncDelegate {
+	virtual bool WillSync(const str& hostname) = 0;
 	virtual void DidSync() = 0;
 };
 
 
 
-class FileServer
-{
+class FileServer {
 public:
-	FileServer(SyncDelegate* pSyncDelegate);
+	FileServer(SyncDelegate* sync_delegate);
 	virtual ~FileServer();
 	void Start();
 	void Stop();
 
 private:
-	char ReadCommand(TcpSocket* pSocket, str& pData);
-	char WriteCommand(TcpSocket* pSocket, char pCommand, const str& pData);
-	void ClientCommandEntry(TcpSocket* pSocket);
+	char ReadCommand(TcpSocket* socket, str& data);
+	char WriteCommand(TcpSocket* socket, char command, const str& data);
+	void ClientCommandEntry(TcpSocket* socket);
 	void AcceptThreadEntry();
 
-	MemberThread<FileServer>* mAcceptThread;
-	TcpListenerSocket* mAcceptSocket;
-	SyncDelegate* mSyncDelegate;
+	MemberThread<FileServer>* accept_thread_;
+	TcpListenerSocket* accept_socket_;
+	SyncDelegate* sync_delegate_;
 
 	logclass();
 };

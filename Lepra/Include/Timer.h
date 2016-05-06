@@ -1,33 +1,31 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 // A time class that counts milliseconds and seconds.
 
-// Each time you call UpdateTimer(), the time difference 
-// since the last clear will be updated. You can clear or 
-// reduce this time difference by calling ClearTimeDiff() 
+// Each time you call UpdateTimer(), the time difference
+// since the last clear will be updated. You can clear or
+// reduce this time difference by calling ClearTimeDiff()
 // or ReduceTimeDiff().
 
 
 
 #pragma once
 
-#include "LepraTypes.h"
+#include "lepratypes.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-class Timer
-{
+class Timer {
 public:
 	Timer();
-	Timer(uint64 pMilliSecs);
-	Timer(const Timer& pTimer);
+	Timer(uint64 milli_secs);
+	Timer(const Timer& timer);
 	virtual ~Timer();
 
 	// Updates time, returns current time diff and resets time diff.
@@ -37,39 +35,39 @@ public:
 	// Returns the time in seconds.
 	double GetTime();
 
-	// Updates to the current time. 
+	// Updates to the current time.
 	// Does not update the previous time.
 	void UpdateTimer();
 
 	// Sets the previous time to the same value as
 	// the current time.
 	void ClearTimeDiff();
-	void ReduceTimeDiff(uint64 pMilliSecs);
-	void ReduceTimeDiff(double pSecs);
+	void ReduceTimeDiff(uint64 milli_secs);
+	void ReduceTimeDiff(double secs);
 
 	// Returns the time difference between the current time
 	// and the previous time.
 	double GetTimeDiff() const;
 
 	// Operators.
-	const Timer& operator = (const Timer& pTimer);
+	const Timer& operator = (const Timer& timer);
 
-	bool operator <  (const Timer& pTimer) const;
-	bool operator >  (const Timer& pTimer) const;
-	bool operator == (const Timer& pTimer) const;
-	bool operator != (const Timer& pTimer) const;
-	bool operator <= (const Timer& pTimer) const;
-	bool operator >= (const Timer& pTimer) const;
+	bool operator <  (const Timer& timer) const;
+	bool operator >  (const Timer& timer) const;
+	bool operator == (const Timer& timer) const;
+	bool operator != (const Timer& timer) const;
+	bool operator <= (const Timer& timer) const;
+	bool operator >= (const Timer& timer) const;
 
-	Timer& operator += (const Timer& pTimer);
-	Timer& operator -= (const Timer& pTimer);
+	Timer& operator += (const Timer& timer);
+	Timer& operator -= (const Timer& timer);
 
 protected:
-	void SetTime(uint64 pMilliSecs);
+	void SetTime(uint64 milli_secs);
 
 private:
-	uint64 mMilliSecs;
-	uint64 mPrevMilliSecs;
+	uint64 milli_secs_;
+	uint64 prev_milli_secs_;
 };
 
 

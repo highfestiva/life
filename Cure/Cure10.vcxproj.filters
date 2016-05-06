@@ -1,258 +1,258 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter include="src Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Source Files\Client">
+    <Filter include="src Files\Client">
       <UniqueIdentifier>{bdebfdc7-3214-4bf8-8327-4b4cdde506c2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Server">
+    <Filter include="src Files\Server">
       <UniqueIdentifier>{592efae6-1183-4244-9def-6c2be397445a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Header Files\Client">
+    <Filter include="Header Files\Client">
       <UniqueIdentifier>{d6b1006d-e904-4e2f-bb2b-2f43eeabe82d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Server">
+    <Filter include="Header Files\Server">
       <UniqueIdentifier>{dc595848-09d4-4f0e-a146-04508bee1303}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\ConsoleManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\consolemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ContextManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\contextmanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ContextObject.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\contextobject.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ContextObjectAttribute.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\contextobjectattribute.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ContextPath.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\contextpath.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\CppContextObject.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\cppcontextobject.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Cure.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\cure.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\FloatAttribute.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\floatattribute.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GameManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\gamemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\NetworkAgent.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\networkagent.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\NetworkFreeAgent.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\networkfreeagent.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Packet.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\packet.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PositionalData.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\positionaldata.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ResourceManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\resourcemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\RuntimeVariable.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\runtimevariable.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\TerrainFunctionManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\terrainfunctionmanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\TerrainManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\terrainmanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\TerrainPatchLoader.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\terrainpatchloader.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\TerrainPatchManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\terrainpatchmanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\TimeManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\timemanager.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\NetworkClient.cpp">
-      <Filter>Source Files\Client</Filter>
+    <ClCompile include="src\networkclient.cpp">
+      <Filter>src Files\Client</Filter>
     </ClCompile>
-    <ClCompile Include="Source\NetworkServer.cpp">
-      <Filter>Source Files\Server</Filter>
+    <ClCompile include="src\networkserver.cpp">
+      <Filter>src Files\Server</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UserAccount.cpp">
-      <Filter>Source Files\Server</Filter>
+    <ClCompile include="src\useraccount.cpp">
+      <Filter>src Files\Server</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UserAccountManager.cpp">
-      <Filter>Source Files\Server</Filter>
+    <ClCompile include="src\useraccountmanager.cpp">
+      <Filter>src Files\Server</Filter>
     </ClCompile>
-    <ClCompile Include="Source\UserConnection.cpp">
-      <Filter>Source Files\Server</Filter>
+    <ClCompile include="src\userconnection.cpp">
+      <Filter>src Files\Server</Filter>
     </ClCompile>
-    <ClCompile Include="Source\HiscoreAgent.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\hiscoreagent.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Elevator.cpp">
-      <Filter>Source Files\Server</Filter>
+    <ClCompile include="src\elevator.cpp">
+      <Filter>src Files\Server</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PhysicsSharedResource.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\physicssharedresource.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GameTicker.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\gameticker.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PositionHauler.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\positionhauler.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\IntAttribute.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\intattribute.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PythonInterface.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\pythoninterface.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Spawner.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\spawner.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Health.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\health.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Driver.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile include="src\driver.cpp">
+      <Filter>src Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\ConsoleManager.h">
+    <Clinclude include="include\consolemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ContextManager.h">
+    <Clinclude include="include\contextmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ContextObject.h">
+    <Clinclude include="include\contextobject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ContextObjectAttribute.h">
+    <Clinclude include="include\contextobjectattribute.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ContextPath.h">
+    <Clinclude include="include\contextpath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\CppContextObject.h">
+    <Clinclude include="include\cppcontextobject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Cure.h">
+    <Clinclude include="include\cure.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\FloatAttribute.h">
+    <Clinclude include="include\floatattribute.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\GameManager.h">
+    <Clinclude include="include\gamemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\NetworkAgent.h">
+    <Clinclude include="include\networkagent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\NetworkFreeAgent.h">
+    <Clinclude include="include\networkfreeagent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Packet.h">
+    <Clinclude include="include\packet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PositionalData.h">
+    <Clinclude include="include\positionaldata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\RemoteStatus.h">
+    <Clinclude include="include\remotestatus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ResourceManager.h">
+    <Clinclude include="include\resourcemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\RuntimeVariable.h">
+    <Clinclude include="include\runtimevariable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\RuntimeVariableName.h">
+    <Clinclude include="include\runtimevariablename.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\TerrainFunctionManager.h">
+    <Clinclude include="include\terrainfunctionmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\TerrainManager.h">
+    <Clinclude include="include\terrainmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\TerrainPatchLoader.h">
+    <Clinclude include="include\terrainpatchloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\TerrainPatchManager.h">
+    <Clinclude include="include\terrainpatchmanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\TimeManager.h">
+    <Clinclude include="include\timemanager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\NetworkClient.h">
+    <Clinclude include="include\networkclient.h">
       <Filter>Header Files\Client</Filter>
     </ClInclude>
-    <ClInclude Include="Include\NetworkServer.h">
+    <Clinclude include="include\networkserver.h">
       <Filter>Header Files\Server</Filter>
     </ClInclude>
-    <ClInclude Include="Include\SocketIoHandler.h">
+    <Clinclude include="include\socketiohandler.h">
       <Filter>Header Files\Server</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UserAccount.h">
+    <Clinclude include="include\useraccount.h">
       <Filter>Header Files\Server</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UserAccountManager.h">
+    <Clinclude include="include\useraccountmanager.h">
       <Filter>Header Files\Server</Filter>
     </ClInclude>
-    <ClInclude Include="Include\UserConnection.h">
+    <Clinclude include="include\userconnection.h">
       <Filter>Header Files\Server</Filter>
     </ClInclude>
-    <ClInclude Include="Include\HiscoreAgent.h">
+    <Clinclude include="include\hiscoreagent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Elevator.h">
+    <Clinclude include="include\elevator.h">
       <Filter>Header Files\Server</Filter>
     </ClInclude>
-    <ClInclude Include="Include\IntAttribute.h">
+    <Clinclude include="include\intattribute.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ContextForceListener.h">
+    <Clinclude include="include\contextforcelistener.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\GameTicker.h">
+    <Clinclude include="include\gameticker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PhysicsSharedResource.h">
+    <Clinclude include="include\physicssharedresource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PositionHauler.h">
+    <Clinclude include="include\positionhauler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Spawner.h">
+    <Clinclude include="include\spawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\DelayedDeleter.h">
+    <Clinclude include="include\delayeddeleter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Health.h">
+    <Clinclude include="include\health.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Driver.h">
+    <Clinclude include="include\driver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Include\ResourceManager.inl">
+    <None include="include\resourcemanager.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="Include\DelayedDeleter.inl">
+    <None include="include\delayeddeleter.inl">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

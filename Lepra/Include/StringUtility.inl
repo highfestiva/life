@@ -8,217 +8,167 @@
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::Split(const _String& pString, const _String& pCharDelimitors, int pSplitMaxCount)
-{
-	strvec lTokenVector;
-	size_t lLastPosition = 0;
+STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::Split(const _String& s, const _String& char_delimitors, int split_max_count) {
+	strvec _token_vector;
+	size_t last_position = 0;
 	// Find next delimiter at end of token
-	size_t lCurrentPosition = pString.find_first_of(pCharDelimitors, lLastPosition);
-	for (int lSplitCount = 0; lSplitCount < pSplitMaxCount &&
-		(lCurrentPosition != _String::npos || lLastPosition != _String::npos); ++lSplitCount)
-	{
+	size_t current_position = s.find_first_of(char_delimitors, last_position);
+	for (int split_count = 0; split_count < split_max_count &&
+		(current_position != _String::npos || last_position != _String::npos); ++split_count) {
 		// Found a token, add it to the vector.
-		lTokenVector.push_back(pString.substr(lLastPosition, lCurrentPosition - lLastPosition));
+		_token_vector.push_back(s.substr(last_position, current_position - last_position));
 		// Skip delimitor characters after token.  Note the "not_of". this is beginning of token
-		lLastPosition = pString.find_first_not_of(pCharDelimitors, lCurrentPosition);
+		last_position = s.find_first_not_of(char_delimitors, current_position);
 		// Find next delimiter at end of token.
-		lCurrentPosition = pString.find_first_of(pCharDelimitors, lLastPosition);
+		current_position = s.find_first_of(char_delimitors, last_position);
 	}
 	// If not all has been added.
-	if (lLastPosition != _String::npos)
-	{
-		lTokenVector.push_back(pString.substr(lLastPosition));
+	if (last_position != _String::npos) {
+		_token_vector.push_back(s.substr(last_position));
 	}
 	// If the string ends with a delimitor.
-	else if (pString.length() > 0 && pCharDelimitors.find_first_of(pString[pString.length()-1]) != str::npos)
-	{
-		lTokenVector.push_back(_String());
+	else if (s.length() > 0 && char_delimitors.find_first_of(s[s.length()-1]) != str::npos) {
+		_token_vector.push_back(_String());
 	}
-	return (lTokenVector);
+	return (_token_vector);
 }
 
-STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::BlockSplit(const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount)
-{
-	strvec lTokenVector;
-	FastBlockSplit(lTokenVector, pString, pCharDelimitors, pKeepQuotes, pIsCString, pSplitMaxCount);
-	return lTokenVector;
+STR_UTIL_TEMPLATE typename STR_UTIL_QUAL::strvec STR_UTIL_QUAL::BlockSplit(const _String& s, const _String& char_delimitors, bool keep_quotes, bool is_c_string, int split_max_count) {
+	strvec _token_vector;
+	FastBlockSplit(_token_vector, s, char_delimitors, keep_quotes, is_c_string, split_max_count);
+	return _token_vector;
 }
 
-STR_UTIL_TEMPLATE void STR_UTIL_QUAL::FastBlockSplit(strvec& pTokenVector, const _String& pString, const _String& pCharDelimitors, bool pKeepQuotes, bool pIsCString, int pSplitMaxCount)
-{
-	typename _String::value_type lCurrentToken[32*1024];
+STR_UTIL_TEMPLATE void STR_UTIL_QUAL::FastBlockSplit(strvec& token_vector, const _String& s, const _String& char_delimitors, bool keep_quotes, bool is_c_string, int split_max_count) {
+	typename _String::value_type current_token[32*1024];
 	int y = 0;
-	bool lTakeNextString = true;
-	bool lInsideString = false;
+	bool take_next_string = true;
+	bool inside_string = false;
 	size_t x = 0;
-	for (int lSplitCount = 0; x < pString.length(); ++x)
-	{
-		if (pIsCString && pString[x] == '\\' && x+1 < pString.length())
-		{
-			lCurrentToken[y++] = pString[x];
-			lCurrentToken[y++] = pString[++x];
-		}
-		else if (pString[x] == '"')
-		{
-			lInsideString = !lInsideString;
-			if (pKeepQuotes)
-			{
-				lCurrentToken[y++] = pString[x];
-			}
-			else if (y == 0 && !lInsideString)
-			{
+	for (int split_count = 0; x < s.length(); ++x) {
+		if (is_c_string && s[x] == '\\' && x+1 < s.length()) {
+			current_token[y++] = s[x];
+			current_token[y++] = s[++x];
+		} else if (s[x] == '"') {
+			inside_string = !inside_string;
+			if (keep_quotes) {
+				current_token[y++] = s[x];
+			} else if (y == 0 && !inside_string) {
 				// Push empty token.
-				pTokenVector.push_back(_String());
+				token_vector.push_back(_String());
 			}
-		}
-		else if (!lInsideString && pCharDelimitors.find_first_of(pString[x]) != str::npos)
-		{
-			if (lTakeNextString)
-			{
-				pTokenVector.push_back(_String(lCurrentToken, y));
+		} else if (!inside_string && char_delimitors.find_first_of(s[x]) != str::npos) {
+			if (take_next_string) {
+				token_vector.push_back(_String(current_token, y));
 				y = 0;
-				if (++lSplitCount >= pSplitMaxCount)
-				{
-					x = pString.find_first_not_of(pCharDelimitors, x);
+				if (++split_count >= split_max_count) {
+					x = s.find_first_not_of(char_delimitors, x);
 					break;
 				}
 			}
-			lTakeNextString = false;
+			take_next_string = false;
+		} else {
+			current_token[y++] = s[x];
+			take_next_string = true;
 		}
-		else
-		{
-			lCurrentToken[y++] = pString[x];
-			lTakeNextString = true;
-		}
-		deb_assert(y < sizeof(lCurrentToken));
+		deb_assert(y < sizeof(current_token));
 	}
 	// If we reached end of string while parsing.
-	if (y != 0)
-	{
-		pTokenVector.push_back(_String(lCurrentToken, y));
+	if (y != 0) {
+		token_vector.push_back(_String(current_token, y));
 	}
-	if (x < pString.length())	// If we stopped splitting due to split maximum count.
-	{
-		pTokenVector.push_back(pString.substr(x));
+	if (x < s.length()) {	// If we stopped splitting due to split maximum count.
+		token_vector.push_back(s.substr(x));
 	}
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Join(const strvec& pStringVector, const _String& pJoinString, size_t pStartIndex, size_t pEndIndex)
-{
-	_String lResultString;
-	for (size_t x = pStartIndex; x < pStringVector.size() && x < pEndIndex; ++x)
-	{
-		if (x > pStartIndex)
-		{
-			lResultString += pJoinString;
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Join(const strvec& string_vector, const _String& join_string, size_t start_index, size_t end_index) {
+	_String result_string;
+	for (size_t x = start_index; x < string_vector.size() && x < end_index; ++x) {
+		if (x > start_index) {
+			result_string += join_string;
 		}
-		lResultString += pStringVector[x];
+		result_string += string_vector[x];
 	}
-	return (lResultString);
+	return (result_string);
 }
 
-STR_UTIL_TEMPLATE void STR_UTIL_QUAL::Append(strvec& pDestination, const strvec& pAppend)
-{
-		pDestination.insert(pDestination.end(), pAppend.begin(), pAppend.end());
+STR_UTIL_TEMPLATE void STR_UTIL_QUAL::Append(strvec& destination, const strvec& append) {
+		destination.insert(destination.end(), append.begin(), append.end());
 }
 
 
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StringToCString(const _String& pString)
-{
-	_String lCString;
-	size_t lLength = pString.length();
-	for (size_t x = 0; x < lLength; ++x)
-	{
-		switch (pString[x])
-		{
-			case '\\':	lCString += "\\\\";	break;
-			case '\t':	lCString += "\\t";	break;
-			case '\v':	lCString += "\\v";	break;
-			case '\r':	lCString += "\\r";	break;
-			case '\n':	lCString += "\\n";	break;
-			case '"':	lCString += "\\\"";	break;
-			default:	lCString += pString[x];	break;
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StringToCString(const _String& s) {
+	_String _c_string;
+	size_t __length = s.length();
+	for (size_t x = 0; x < __length; ++x) {
+		switch (s[x]) {
+			case '\\':	_c_string += "\\\\";	break;
+			case '\t':	_c_string += "\\t";	break;
+			case '\v':	_c_string += "\\v";	break;
+			case '\r':	_c_string += "\\r";	break;
+			case '\n':	_c_string += "\\n";	break;
+			case '"':	_c_string += "\\\"";	break;
+			default:	_c_string += s[x];	break;
 		}
 	}
-	return (lCString);
+	return (_c_string);
 }
 
-STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::CStringToString(const _String& pCString, _String& pString)
-{
-	pString.clear();
-	bool lOk = true;
-	size_t lLength = pCString.length();
-	for (size_t x = 0; x < lLength; ++x)
-	{
-		if (pCString[x] == '\\')
-		{
-			if (x+1 >= lLength)
-			{
-				lOk = false;
+STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::CStringToString(const _String& c_string, _String& s) {
+	s.clear();
+	bool ok = true;
+	size_t __length = c_string.length();
+	for (size_t x = 0; x < __length; ++x) {
+		if (c_string[x] == '\\') {
+			if (x+1 >= __length) {
+				ok = false;
 				break;
 			}
-			switch (pCString[x+1])
-			{
-				case 'n':
-				{
-					pString += '\n';
+			switch (c_string[x+1]) {
+				case 'n': {
+					s += '\n';
 					++x;
-				}
-				break;
-				case 'r':
-				{
-					pString += '\r';
+				} break;
+				case 'r': {
+					s += '\r';
 					++x;
-				}
-				break;
-				case 't':
-				{
-					pString += '\t';
+				} break;
+				case 't': {
+					s += '\t';
 					++x;
-				}
-				break;
-				case 'v':
-				{
-					pString += '\v';
+				} break;
+				case 'v': {
+					s += '\v';
 					++x;
-				}
-				break;
-				case '\\':
-				{
-					pString += '\\';
+				} break;
+				case '\\': {
+					s += '\\';
 					++x;
-				}
-				break;
-				case '"':
-				{
-					pString += '"';
+				} break;
+				case '"': {
+					s += '"';
 					++x;
-				}
-				break;
-				case 'x':
-				{
-					const char* lNumber = pCString.c_str()+x+2;
-					char* lEnd = 0;
-					int lCharacter = StrToL(lNumber, &lEnd, 16);
-					pString += (char)lCharacter;
-					x += 1+(unsigned)(lEnd-lNumber);
-				}
-				break;
-				case '0':
-				{
-					const char* lNumber = pCString.c_str()+x+2;
-					char* lEnd = 0;
-					int lCharacter = StrToL(lNumber, &lEnd, 8);
-					pString += (char)lCharacter;
-					x += 1+(unsigned)(lEnd-lNumber);
-				}
-				break;
+				} break;
+				case 'x': {
+					const char* number = c_string.c_str()+x+2;
+					char* __end = 0;
+					int character = StrToL(number, &__end, 16);
+					s += (char)character;
+					x += 1+(unsigned)(__end-number);
+				} break;
+				case '0': {
+					const char* number = c_string.c_str()+x+2;
+					char* __end = 0;
+					int character = StrToL(number, &__end, 8);
+					s += (char)character;
+					x += 1+(unsigned)(__end-number);
+				} break;
 				case '1':
 				case '2':
 				case '3':
@@ -227,428 +177,340 @@ STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::CStringToString(const _String& pCString, _
 				case '6':
 				case '7':
 				case '8':
-				case '9':
-				{
-					const char* lNumber = pCString.c_str()+x+1;
-					char* lEnd = 0;
-					int lCharacter = StrToL(lNumber, &lEnd, 10);
-					pString += (char)lCharacter;
-					x += 1+(unsigned)(lEnd-lNumber);
-				}
-				break;
-				default:
-				{
-					pString += '\\';
-					lOk = false;
-				}
-				break;
+				case '9': {
+					const char* number = c_string.c_str()+x+1;
+					char* __end = 0;
+					int character = StrToL(number, &__end, 10);
+					s += (char)character;
+					x += 1+(unsigned)(__end-number);
+				} break;
+				default: {
+					s += '\\';
+					ok = false;
+				} break;
 
 			}
-		}
-		else
-		{
-			pString += pCString[x];
+		} else {
+			s += c_string[x];
 		}
 	}
-	return (lOk);
+	return (ok);
 }
 
 
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StripLeft(const _String& pString, const _String& pCharDelimitors)
-{
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StripLeft(const _String& s, const _String& char_delimitors) {
 	// Skip delimitor characters at beginning, find start of first token.
-	size_t lTokenStartPosition = pString.find_first_not_of(pCharDelimitors, 0);
-	if (lTokenStartPosition == 0)
-	{
-		return pString;
+	size_t token_start_position = s.find_first_not_of(char_delimitors, 0);
+	if (token_start_position == 0) {
+		return s;
 	}
-	if (lTokenStartPosition != _String::npos)
-	{
-		return (pString.substr(lTokenStartPosition));
+	if (token_start_position != _String::npos) {
+		return (s.substr(token_start_position));
 	}
 	return (_String());
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StripRight(const _String& pString, const _String& pCharDelimitors)
-{
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::StripRight(const _String& s, const _String& char_delimitors) {
 	// Skip delimitor characters at end, find end of last token.
-	size_t lTokenEndPosition = pString.find_last_not_of(pCharDelimitors, pString.size()-1);
-	if (lTokenEndPosition != _String::npos)
-	{
-		return (pString.substr(0, lTokenEndPosition+1));
+	size_t token_end_position = s.find_last_not_of(char_delimitors, s.size()-1);
+	if (token_end_position != _String::npos) {
+		return (s.substr(0, token_end_position+1));
 	}
 	return (_String());
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Strip(const _String& pString, const _String& pCharDelimitors)
-{
-	return StripRight(StripLeft(pString, pCharDelimitors), pCharDelimitors);
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Strip(const _String& s, const _String& char_delimitors) {
+	return StripRight(StripLeft(s, char_delimitors), char_delimitors);
 }
 
 
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, typename _String::value_type pFromChar, typename _String::value_type pToChar)
-{
-	_String lString = pString;
-	int length = (int)pString.length();
-	for (int x = 0; x < length; ++x)
-	{
-		if (lString[x] == pFromChar)
-		{
-			lString[x] = pToChar;
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& s, typename _String::value_type from_char, typename _String::value_type to_char) {
+	_String _s = s;
+	int length = (int)s.length();
+	for (int x = 0; x < length; ++x) {
+		if (_s[x] == from_char) {
+			_s[x] = to_char;
 		}
 	}
-	return (lString);
+	return (_s);
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& pString, const _String& pFrom, const _String& pTo)
-{
-	_String lString = pString;
-	typename _String::size_type lPosition = 0;
-	while ((lPosition = lString.find(pFrom, lPosition)) != str::npos)
-	{
-		lString.replace(lPosition, pFrom.length(), pTo);
-		lPosition += pTo.length();
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceAll(const _String& s, const _String& from, const _String& to) {
+	_String _s = s;
+	typename _String::size_type position = 0;
+	while ((position = _s.find(from, position)) != str::npos) {
+		_s.replace(position, from.length(), to);
+		position += to.length();
 	}
-	return (lString);
-}
-
-
-
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Format(const typename _String::value_type* pFormat, ...)
-{
-	va_list	lArguments;
-	va_start(lArguments, pFormat);
-	_String lResult = VFormat(pFormat, lArguments);
-	va_end(lArguments);
-	return (lResult);
+	return (_s);
 }
 
 
 
-STR_UTIL_TEMPLATE size_t STR_UTIL_QUAL::FindPreviousWord(const _String& pLine, const _String& pDelimitors, size_t pStartIndex)
-{
-	_String lReverseLine = Reverse(pLine);
-	size_t lReverseIndex = pLine.length()-pStartIndex;
-	size_t lIndex = lReverseLine.find_first_not_of(pDelimitors, lReverseIndex);
-	lIndex = lReverseLine.find_first_of(pDelimitors, lIndex);
-	if (lIndex != str::npos)
-	{
-		lReverseIndex = lIndex;
-	}
-	else
-	{
-		lReverseIndex = pLine.length();
-	}
-	pStartIndex = pLine.length()-lReverseIndex;
-	return (pStartIndex);
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Format(const typename _String::value_type* format, ...) {
+	va_list	arguments;
+	va_start(arguments, format);
+	_String result = VFormat(format, arguments);
+	va_end(arguments);
+	return (result);
 }
 
-STR_UTIL_TEMPLATE size_t STR_UTIL_QUAL::FindNextWord(const _String& pLine, const _String& pDelimitors, size_t pStartIndex)
-{
-	size_t lIndex = pLine.find_first_of(pDelimitors, pStartIndex);
-	lIndex = pLine.find_first_not_of(pDelimitors, lIndex);
-	if (lIndex != str::npos)
-	{
-		pStartIndex = lIndex;
+
+
+STR_UTIL_TEMPLATE size_t STR_UTIL_QUAL::FindPreviousWord(const _String& line, const _String& delimitors, size_t start_index) {
+	_String reverse_line = Reverse(line);
+	size_t reverse_index = line.length()-start_index;
+	size_t index = reverse_line.find_first_not_of(delimitors, reverse_index);
+	index = reverse_line.find_first_of(delimitors, index);
+	if (index != str::npos) {
+		reverse_index = index;
+	} else {
+		reverse_index = line.length();
 	}
-	else
-	{
-		pStartIndex = pLine.length();
-	}
-	return (pStartIndex);
+	start_index = line.length()-reverse_index;
+	return (start_index);
 }
 
-STR_UTIL_TEMPLATE int STR_UTIL_QUAL::FindFirstWhiteSpace(const _String& pString, size_t pOffset, int pSearchDirection)
-{
-	int lLength = (int)pString.length();
-	int x = (int)pOffset;
-	for (; x >= 0 && x < lLength; x += pSearchDirection)
-	{
-		if (IsWhiteSpace(pString[x]))
-		{
+STR_UTIL_TEMPLATE size_t STR_UTIL_QUAL::FindNextWord(const _String& line, const _String& delimitors, size_t start_index) {
+	size_t index = line.find_first_of(delimitors, start_index);
+	index = line.find_first_not_of(delimitors, index);
+	if (index != str::npos) {
+		start_index = index;
+	} else {
+		start_index = line.length();
+	}
+	return (start_index);
+}
+
+STR_UTIL_TEMPLATE int STR_UTIL_QUAL::FindFirstWhiteSpace(const _String& s, size_t offset, int search_direction) {
+	int __length = (int)s.length();
+	int x = (int)offset;
+	for (; x >= 0 && x < __length; x += search_direction) {
+		if (IsWhiteSpace(s[x])) {
 			break;
 		}
 	}
-	if (x >= lLength)
-	{
+	if (x >= __length) {
 		x = -1;
 	}
 	return (x);
 }
 
-STR_UTIL_TEMPLATE void STR_UTIL_QUAL::StripAllWhiteSpaces(_String& pString)
-{
-	int lDestIndex = 0;
-	for (size_t i = 0; i < pString.length(); i++)
-	{
-		if (!IsWhiteSpace(pString[i]))
-		{
-			pString[lDestIndex++] = pString[i];
+STR_UTIL_TEMPLATE void STR_UTIL_QUAL::StripAllWhiteSpaces(_String& s) {
+	int dest_index = 0;
+	for (size_t i = 0; i < s.length(); i++) {
+		if (!IsWhiteSpace(s[i])) {
+			s[dest_index++] = s[i];
 		}
 	}
-	pString.resize(lDestIndex);
+	s.resize(dest_index);
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceCtrlChars(const _String& pString, typename _String::value_type pReplacement)
-{
-	_String lString(pString);
-	for (size_t x = 0; x < lString.length(); ++x)
-	{
-		if (lString[x] < ' ')
-		{
-			lString[x] = pReplacement;
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::ReplaceCtrlChars(const _String& s, typename _String::value_type replacement) {
+	_String _s(s);
+	for (size_t x = 0; x < _s.length(); ++x) {
+		if (_s[x] < ' ') {
+			_s[x] = replacement;
 		}
 	}
-	return (lString);
+	return (_s);
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::DumpData(const uint8* pData, size_t pLength)
-{
-	const char lHexTable[] = "0123456789ABCDEF";
-	str lDataString(pLength*2, '?');
-	for (size_t x = 0; x < pLength; ++x)
-	{
-		lDataString[x*2+0] = lHexTable[pData[x]>>4];
-		lDataString[x*2+1] = lHexTable[pData[x]&0xF];
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::DumpData(const uint8* data, size_t _length) {
+	const char hex_table[] = "0123456789ABCDEF";
+	str data_string(_length*2, '?');
+	for (size_t x = 0; x < _length; ++x) {
+		data_string[x*2+0] = hex_table[data[x]>>4];
+		data_string[x*2+1] = hex_table[data[x]&0xF];
 	}
-	return lDataString;
+	return data_string;
 }
 
 
 
 #ifdef LEPRA_POSIX
 
-STR_UTIL_TEMPLATE int STR_UTIL_QUAL::StrCmpI(const typename _String::value_type* pString1, const typename _String::value_type* pString2)
-{
-	typename _String::value_type lC1;
-	typename _String::value_type lC2;
+STR_UTIL_TEMPLATE int STR_UTIL_QUAL::StrCmpI(const typename _String::value_type* string1, const typename _String::value_type* string2) {
+	typename _String::value_type c1;
+	typename _String::value_type c2;
 
-	while (true)
-	{
-		lC1 = *pString1++;
-		lC2 = *pString2++;
+	while (true) {
+		c1 = *string1++;
+		c2 = *string2++;
 
-		if (!lC1 || !lC2)
-		{
+		if (!c1 || !c2) {
 			break;
 		}
 
-		if (lC1 == lC2)
-		{
+		if (c1 == c2) {
 			continue;
 		}
 
-		lC1 = std::tolower(lC1, mLocale);
-		lC2 = std::tolower(lC2, mLocale);
+		c1 = std::tolower(c1, locale_);
+		c2 = std::tolower(c2, locale_);
 
-		if (lC1 != lC2)
-		{
+		if (c1 != c2) {
 			break;
 		}
 	}
-	return (int)lC1 - (int)lC2;
+	return (int)c1 - (int)c2;
 }
 
 #endif // !LEPRA_POSIX
 
 
 
-STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::StringToInt(const _String& pString, int& pValue, int pRadix)
-{
-	if (pString.empty())
-	{
+STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::StringToInt(const _String& s, int& value, int radix) {
+	if (s.empty()) {
 		return (false);
 	}
-	typename _String::value_type* lEndPtr;
-	pValue = StrToL(pString.c_str(), &lEndPtr, pRadix);
-	return (pString.c_str()+pString.length() == lEndPtr);
+	typename _String::value_type* end_ptr;
+	value = StrToL(s.c_str(), &end_ptr, radix);
+	return (s.c_str()+s.length() == end_ptr);
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::IntToString(int64 pValue, int pRadix)
-{
-	bool lSign = (pValue < 0);
-	if (lSign)
-	{
-		pValue = -pValue;
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::IntToString(int64 value, int radix) {
+	bool sign = (value < 0);
+	if (sign) {
+		value = -value;
 	}
 
-	static typename _String::value_type lString[64] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	static typename _String::value_type _s[64] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	int i = 62;	// Leave a zero at the end.
-	if (pRadix == 10)
-	{
-		while (pValue > 0)
-		{
-			const int lDigit = (int)(pValue % 10);
-			lString[i--] = (typename _String::value_type)('0' + lDigit);
-			pValue /= 10;
+	if (radix == 10) {
+		while (value > 0) {
+			const int digit = (int)(value % 10);
+			_s[i--] = (typename _String::value_type)('0' + digit);
+			value /= 10;
 		}
-	}
-	else
-	{
-		while (pValue > 0)
-		{
-			int lDigit = (int)(pValue % pRadix);
-			pValue /= pRadix;
+	} else {
+		while (value > 0) {
+			int digit = (int)(value % radix);
+			value /= radix;
 
-			if (lDigit >= 0 && lDigit <= 9)
-			{
-				lString[i--] = (typename _String::value_type)('0' + lDigit);
-			}
-			else if(lDigit > 9)
-			{
-				lString[i--] = (typename _String::value_type)('a' + (lDigit - 10));
+			if (digit >= 0 && digit <= 9) {
+				_s[i--] = (typename _String::value_type)('0' + digit);
+			} else if(digit > 9) {
+				_s[i--] = (typename _String::value_type)('a' + (digit - 10));
 			}
 		}
 	}
-	if (lSign)
-	{
-		lString[i--] = '-';
+	if (sign) {
+		_s[i--] = '-';
 	}
-	if (i == 62)	// Empty string means zero.
-	{
-		lString[i--] = '0';
+	if (i == 62) {	// Empty string means zero.
+		_s[i--] = '0';
 	}
-	return &lString[i+1];
+	return &_s[i+1];
 }
 
-STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::StringToBool(const _String& pString, bool& pValue)
-{
-	bool lOk = false;
-	if (pString == "false")
-	{
-		pValue = false;
-		lOk = true;
+STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::StringToBool(const _String& s, bool& value) {
+	bool ok = false;
+	if (s == "false") {
+		value = false;
+		ok = true;
+	} else if (s == "true") {
+		value = true;
+		ok = true;
 	}
-	else if (pString == "true")
-	{
-		pValue = true;
-		lOk = true;
-	}
-	return (lOk);
+	return (ok);
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::DoubleToString(double pValue, int pNumDecimals)
-{
-	_String lValue;
-	DoubleToString(pValue, pNumDecimals, lValue);
-	return (lValue);
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::DoubleToString(double value, int num_decimals) {
+	_String _value;
+	DoubleToString(value, num_decimals, _value);
+	return (_value);
 }
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::FastDoubleToString(double pValue)
-{
-	if (pValue > -1000 && pValue < 1000)
-	{
-		int lValue = (int)(pValue*1000000);
-		bool lPositive;
-		if (lValue >= 0)
-		{
-			lPositive = true;
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::FastDoubleToString(double value) {
+	if (value > -1000 && value < 1000) {
+		int _value = (int)(value*1000000);
+		bool positive;
+		if (_value >= 0) {
+			positive = true;
+		} else {
+			positive = false;
+			_value = -_value;
 		}
-		else
-		{
-			lPositive = false;
-			lValue = -lValue;
-		}
-		const size_t lBufferSize = 11;
-		typename _String::value_type lString[lBufferSize];
-		size_t lIndex = lBufferSize-1;
+		const size_t buffer_size = 11;
+		typename _String::value_type _s[buffer_size];
+		size_t index = buffer_size-1;
 		int x;
-		for (x = 0; x < 5; ++x, lValue /= 10)
-		{
-			int lDigit;
-			if ((lDigit = lValue%10) != 0)
-			{
-				lString[lIndex--] = '0' + typename _String::value_type(lDigit);
+		for (x = 0; x < 5; ++x, _value /= 10) {
+			int digit;
+			if ((digit = _value%10) != 0) {
+				_s[index--] = '0' + typename _String::value_type(digit);
 			}
 		}
-		for (; x < 6; ++x, lValue /= 10)
-		{
-			lString[lIndex--] = '0' + typename _String::value_type(lValue%10);
+		for (; x < 6; ++x, _value /= 10) {
+			_s[index--] = '0' + typename _String::value_type(_value%10);
 		}
-		lString[lIndex--] = '.';
-		lString[lIndex--] = '0' + typename _String::value_type(lValue%10);
-		lValue /= 10;
-		for (x = 0; lValue && x < 2; ++x, lValue /= 10)
-		{
-			lString[lIndex--] = '0' + typename _String::value_type(lValue%10);
+		_s[index--] = '.';
+		_s[index--] = '0' + typename _String::value_type(_value%10);
+		_value /= 10;
+		for (x = 0; _value && x < 2; ++x, _value /= 10) {
+			_s[index--] = '0' + typename _String::value_type(_value%10);
 		}
-		if (lPositive)
-		{
-			++lIndex;
+		if (positive) {
+			++index;
+		} else {
+			_s[index] = '-';
 		}
-		else
-		{
-			lString[lIndex] = '-';
-		}
-		const size_t lCount = lBufferSize-lIndex;
-		return _String(&lString[lIndex], lCount);
-	}
-	else
-	{
-		return DoubleToString(pValue, 6);
+		const size_t count = buffer_size-index;
+		return _String(&_s[index], count);
+	} else {
+		return DoubleToString(value, 6);
 	}
 }
 
 
 
-STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Reverse(const _String& pString)
-{
-	_String lReverse(pString);
-	for (size_t x = 0; x < pString.length(); ++x)
-	{
-		lReverse[pString.length()-x-1] = pString[x];
+STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::Reverse(const _String& s) {
+	_String reverse(s);
+	for (size_t x = 0; x < s.length(); ++x) {
+		reverse[s.length()-x-1] = s[x];
 	}
-	return (lReverse);
+	return (reverse);
 }
 
-STR_UTIL_TEMPLATE const _String STR_UTIL_QUAL::Right(const _String& pString, size_t pCharCount)
-{
-	if (pCharCount <= pString.length())
-	{
-		return (pString.substr(pString.length()-pCharCount, pCharCount));
+STR_UTIL_TEMPLATE const _String STR_UTIL_QUAL::Right(const _String& s, size_t char_count) {
+	if (char_count <= s.length()) {
+		return (s.substr(s.length()-char_count, char_count));
 	}
-	return (pString);
+	return (s);
 }
 
-STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::StartsWith(const _String& pString, const _String& pStart)
-{
-	if (pString.length() >= pStart.length())
-	{
-		return (pString.substr(0, pStart.length()) == pStart);
+STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::StartsWith(const _String& s, const _String& start) {
+	if (s.length() >= start.length()) {
+		return (s.substr(0, start.length()) == start);
 	}
 	return (false);
 }
 
-STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::EndsWith(const _String& pString, const _String& pEnd)
-{
-	return (Right(pString, pEnd.length()) == pEnd);
+STR_UTIL_TEMPLATE bool STR_UTIL_QUAL::EndsWith(const _String& s, const _String& _end) {
+	return (Right(s, _end.length()) == _end);
 }
 
 
 
-STR_UTIL_TEMPLATE void STR_UTIL_QUAL::ToLower(_String& pString)
-{
-	for (int i = 0; i < (int)pString.length(); i++)
-	{
-		pString[i] = std::tolower(pString[i], mLocale);
+STR_UTIL_TEMPLATE void STR_UTIL_QUAL::ToLower(_String& s) {
+	for (int i = 0; i < (int)s.length(); i++) {
+		s[i] = std::tolower(s[i], locale_);
 	}
 }
 
-STR_UTIL_TEMPLATE void STR_UTIL_QUAL::ToUpper(_String& pString)
-{
-	for (int i = 0; i < (int)pString.length(); i++)
-	{
-		pString[i] = std::toupper(pString[i], mLocale);
+STR_UTIL_TEMPLATE void STR_UTIL_QUAL::ToUpper(_String& s) {
+	for (int i = 0; i < (int)s.length(); i++) {
+		s[i] = std::toupper(s[i], locale_);
 	}
 }
 
 
 
-STR_UTIL_TEMPLATE int STR_UTIL_QUAL::CompareIgnoreCase(const _String& pString1, const _String& pString2)
-{
-	return (StrCmpI(pString1.c_str(), pString2.c_str()));
+STR_UTIL_TEMPLATE int STR_UTIL_QUAL::CompareIgnoreCase(const _String& string1, const _String& string2) {
+	return (StrCmpI(string1.c_str(), string2.c_str()));
 }
 
 

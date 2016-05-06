@@ -4,430 +4,345 @@
 
 
 #include "pch.h"
-#include "../Include/UiMaterial.h"
-#include "../../Tbc/Include/GeometryBase.h"
-#include "../../Lepra/Include/ListUtil.h"
-#include "../../Lepra/Include/Math.h"
+#include "../include/uimaterial.h"
+#include "../../tbc/include/geometrybase.h"
+#include "../../lepra/include/listutil.h"
+#include "../../lepra/include/math.h"
 
 
 
-namespace UiTbc
-{
+namespace uitbc {
 
 
 
-GeometryGroup::GeometryGroup(Material* pMaterial, int pAllocSize) :
-	mParentMaterial(pMaterial),
-	mGeomArray(new Pair[pAllocSize]),
-	mGeometryCount(0),
-	mArrayLength(pAllocSize),
-	mMeanDepth(0),
-	mGroupTextureID(Renderer::INVALID_TEXTURE)
-{
+GeometryGroup::GeometryGroup(Material* material, int alloc_size) :
+	parent_material_(material),
+	geom_array_(new Pair[alloc_size]),
+	geometry_count_(0),
+	array_length_(alloc_size),
+	mean_depth_(0),
+	group_texture_id_(Renderer::INVALID_TEXTURE) {
 }
 
-GeometryGroup::~GeometryGroup()
-{
-	delete[] mGeomArray;
-	mGeomArray = 0;
+GeometryGroup::~GeometryGroup() {
+	delete[] geom_array_;
+	geom_array_ = 0;
 }
 
-void GeometryGroup::AddGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (mGeometryCount >= mArrayLength)
-	{
+void GeometryGroup::AddGeometry(tbc::GeometryBase* geometry) {
+	if (geometry_count_ >= array_length_) {
 		// Realloc... Increase memory usage by a constant
 		// to avoid excessive use of memory.
-		mArrayLength += 8;
-		Pair* lNewArray = new Pair[mArrayLength];
-		::memcpy(lNewArray, mGeomArray, mGeometryCount * sizeof(Pair));
-		delete[] mGeomArray;
-		mGeomArray = lNewArray;
+		array_length_ += 8;
+		Pair* new_array = new Pair[array_length_];
+		::memcpy(new_array, geom_array_, geometry_count_ * sizeof(Pair));
+		delete[] geom_array_;
+		geom_array_ = new_array;
 	}
 
-	Renderer::GeometryData* lGeomData = (Renderer::GeometryData*)pGeometry->GetRendererData();
-	deb_assert(lGeomData != 0);
-	lGeomData->mGeometryGroup = this;
-	mGeomArray[mGeometryCount++].mGeometry = pGeometry;
+	Renderer::GeometryData* geom_data = (Renderer::GeometryData*)geometry->GetRendererData();
+	deb_assert(geom_data != 0);
+	geom_data->geometry_group_ = this;
+	geom_array_[geometry_count_++].geometry_ = geometry;
 }
 
-bool GeometryGroup::RemoveGeometry(Tbc::GeometryBase* pGeometry)
-{
+bool GeometryGroup::RemoveGeometry(tbc::GeometryBase* geometry) {
 	int i;
 
 	// Search for the geometry...
-	for (i = 0; i < mGeometryCount && mGeomArray[i].mGeometry != pGeometry; i++) {}
+	for (i = 0; i < geometry_count_ && geom_array_[i].geometry_ != geometry; i++) {}
 
-	bool lRemoved = false;
-	if (i < mGeometryCount)
-	{
+	bool removed = false;
+	if (i < geometry_count_) {
 		// The geometry has been found.
-		lRemoved = true;
-		mGeometryCount--;
-		for (int j = i; j < mGeometryCount; j++)
-		{
-			mGeomArray[j] = mGeomArray[j + 1];
+		removed = true;
+		geometry_count_--;
+		for (int j = i; j < geometry_count_; j++) {
+			geom_array_[j] = geom_array_[j + 1];
 		}
 	}
-	return lRemoved;
+	return removed;
 }
 
-int GeometryGroup::CalculateDepths(bool pF2B)
-{
-	mMeanDepth = 0.0f;
+int GeometryGroup::CalculateDepths(bool f2_b) {
+	mean_depth_ = 0.0f;
 
-	const xform& lCam = mParentMaterial->GetRenderer()->GetCameraTransformation();
-	const quat& lCamOrientation = lCam.GetOrientation();
-	const quat& lCamOrientationInverse = mParentMaterial->GetRenderer()->GetCameraOrientationInverse();
-	const vec3& lCamPosition = lCam.GetPosition();
-	int lInversionCount = 0;
+	const xform& cam = parent_material_->GetRenderer()->GetCameraTransformation();
+	const quat& cam_orientation = cam.GetOrientation();
+	const quat& cam_orientation_inverse = parent_material_->GetRenderer()->GetCameraOrientationInverse();
+	const vec3& cam_position = cam.GetPosition();
+	int inversion_count = 0;
 
 	// The first depth goes outside the loop...
-	vec3 lTemp;
-	lCamOrientation.FastInverseRotatedVector(lCamOrientationInverse, lTemp, mGeomArray[0].mGeometry->GetTransformation().GetPosition() - lCamPosition);
-	mGeomArray[0].mDepth = lTemp.y;
-	mMeanDepth += mGeomArray[0].mDepth;
+	vec3 temp;
+	cam_orientation.FastInverseRotatedVector(cam_orientation_inverse, temp, geom_array_[0].geometry_->GetTransformation().GetPosition() - cam_position);
+	geom_array_[0].depth_ = temp.y;
+	mean_depth_ += geom_array_[0].depth_;
 
 	int i;
-	for (i = 1; i < mGeometryCount; i++)
-	{
-		lCamOrientation.FastInverseRotatedVector(lCamOrientationInverse, lTemp, mGeomArray[i].mGeometry->GetTransformation().GetPosition() - lCamPosition);
-		mGeomArray[i].mDepth = lTemp.y;
-		mMeanDepth += mGeomArray[i].mDepth;
+	for (i = 1; i < geometry_count_; i++) {
+		cam_orientation.FastInverseRotatedVector(cam_orientation_inverse, temp, geom_array_[i].geometry_->GetTransformation().GetPosition() - cam_position);
+		geom_array_[i].depth_ = temp.y;
+		mean_depth_ += geom_array_[i].depth_;
 
-		if(pF2B)
-		{
-			if (mGeomArray[i - 1].mDepth > mGeomArray[i].mDepth)
-				++lInversionCount;
-		}
-		else
-		{
-			if (mGeomArray[i - 1].mDepth < mGeomArray[i].mDepth)
-				++lInversionCount;
+		if(f2_b) {
+			if (geom_array_[i - 1].depth_ > geom_array_[i].depth_)
+				++inversion_count;
+		} else {
+			if (geom_array_[i - 1].depth_ < geom_array_[i].depth_)
+				++inversion_count;
 		}
 	}
 
-	mMeanDepth /= (float)mGeometryCount;
+	mean_depth_ /= (float)geometry_count_;
 
-	return lInversionCount;
+	return inversion_count;
 }
 
-void GeometryGroup::F2BSortGroup()
-{
-	int lInversionCount = CalculateDepths(true);
+void GeometryGroup::F2BSortGroup() {
+	int inversion_count = CalculateDepths(true);
 
-	if (lInversionCount == 0)
-	{
+	if (inversion_count == 0) {
 		// Already sorted.
 		return;
 	}
 
-	if (mGeometryCount < 4 || lInversionCount < Math::Log2(mGeometryCount))
-	{
+	if (geometry_count_ < 4 || inversion_count < Math::Log2(geometry_count_)) {
 		// Bubble sorting is faster for almost sorted lists.
 		BubbleSort(F2BCompare);
-	}
-	else
-	{
-		::qsort(mGeomArray, mGeometryCount, sizeof(Pair), F2BCompare);
+	} else {
+		::qsort(geom_array_, geometry_count_, sizeof(Pair), F2BCompare);
 	}
 }
 
-void GeometryGroup::B2FSortGroup()
-{
-	int lInversionCount = CalculateDepths(false);
+void GeometryGroup::B2FSortGroup() {
+	int inversion_count = CalculateDepths(false);
 
-	if (lInversionCount == 0)
-	{
+	if (inversion_count == 0) {
 		// Already sorted.
 		return;
 	}
 
-	if (mGeometryCount < 4 || lInversionCount < Math::Log2(mGeometryCount))
-	{
+	if (geometry_count_ < 4 || inversion_count < Math::Log2(geometry_count_)) {
 		// Bubble sorting is faster for almost sorted lists.
 		BubbleSort(B2FCompare);
-	}
-	else
-	{
-		::qsort(mGeomArray, mGeometryCount, sizeof(Pair), B2FCompare);
+	} else {
+		::qsort(geom_array_, geometry_count_, sizeof(Pair), B2FCompare);
 	}
 }
 
-void GeometryGroup::BubbleSort(int (*Cmp)(const void* pGeom1, const void* pGeom2))
-{
-	bool lDone = false;
-	while (lDone == false)
-	{
-		lDone = true;
-		for (int i = 1; i < mGeometryCount; i++)
-		{
-			if (Cmp(&mGeomArray[i - 1], &mGeomArray[i]) > 0)
-			{
-				Pair lTmp = mGeomArray[i - 1];
-				mGeomArray[i - 1] = mGeomArray[i];
-				mGeomArray[i] = lTmp;
-				lDone = false;
+void GeometryGroup::BubbleSort(int (*Cmp)(const void* geom1, const void* geom2)) {
+	bool done = false;
+	while (done == false) {
+		done = true;
+		for (int i = 1; i < geometry_count_; i++) {
+			if (Cmp(&geom_array_[i - 1], &geom_array_[i]) > 0) {
+				Pair tmp = geom_array_[i - 1];
+				geom_array_[i - 1] = geom_array_[i];
+				geom_array_[i] = tmp;
+				done = false;
 			}
 		}
 	}
 }
 
-int GeometryGroup::F2BCompare(const void* pPair1, const void* pPair2)
-{
-	if (((Pair*)pPair1)->mDepth < ((Pair*)pPair2)->mDepth)
-	{
+int GeometryGroup::F2BCompare(const void* pair1, const void* pair2) {
+	if (((Pair*)pair1)->depth_ < ((Pair*)pair2)->depth_) {
 		return -1;
-	}
-	else if (((Pair*)pPair1)->mDepth > ((Pair*)pPair2)->mDepth)
-	{
+	} else if (((Pair*)pair1)->depth_ > ((Pair*)pair2)->depth_) {
 		return 1;
-	}
-	else
-	{
+	} else {
 		return 0;
 	}
 }
 
-int GeometryGroup::B2FCompare(const void* pPair1, const void* pPair2)
-{
-	if (((Pair*)pPair1)->mDepth > ((Pair*)pPair2)->mDepth)
-	{
+int GeometryGroup::B2FCompare(const void* pair1, const void* pair2) {
+	if (((Pair*)pair1)->depth_ > ((Pair*)pair2)->depth_) {
 		return -1;
-	}
-	else if (((Pair*)pPair1)->mDepth < ((Pair*)pPair2)->mDepth)
-	{
+	} else if (((Pair*)pair1)->depth_ < ((Pair*)pair2)->depth_) {
 		return 1;
-	}
-	else
-	{
+	} else {
 		return 0;
 	}
 }
 
 
 
-Material::Material(Renderer* pRenderer, DepthSortHint pSortHint, Material* pFallBackMaterial):
-	mRenderer(pRenderer),
-	mSortHint(pSortHint),
-	mFallBackMaterial(pFallBackMaterial)
-{
+Material::Material(Renderer* renderer, DepthSortHint sort_hint, Material* fall_back_material):
+	renderer_(renderer),
+	sort_hint_(sort_hint),
+	fall_back_material_(fall_back_material) {
 }
 
-Material::~Material()
-{
+Material::~Material() {
 	RemoveAllGeometry();
 }
 
 
 
-void Material::EnableWireframe(bool pEnabled)
-{
-	mEnableWireframe = pEnabled;
+void Material::EnableWireframe(bool enabled) {
+	enable_wireframe_ = enabled;
 }
 
-void Material::SetEnableDepthSorting(bool pEnabled)
-{
-	mEnableDepthSort = pEnabled;
+void Material::SetEnableDepthSorting(bool enabled) {
+	enable_depth_sort_ = enabled;
 }
 
-void Material::EnableDrawMaterial(bool pEnabled)
-{
-	mEnableDrawMaterial = pEnabled;
+void Material::EnableDrawMaterial(bool enabled) {
+	enable_draw_material_ = enabled;
 }
 
 
 
-Renderer* Material::GetRenderer()
-{
-	return mRenderer;
+Renderer* Material::GetRenderer() {
+	return renderer_;
 }
 
-bool Material::AddGeometry(Tbc::GeometryBase* pGeometry)
-{
-	if (pGeometry == 0)
+bool Material::AddGeometry(tbc::GeometryBase* geometry) {
+	if (geometry == 0)
 		return false;
 
 
-	GeometryGroupList::iterator lIter;
-	for (lIter = mGeometryGroupList.begin(); lIter != mGeometryGroupList.end(); ++lIter)
-	{
-		if ((*lIter)->GetGroupTextureID() == GetGroupTextureID(pGeometry))
-		{
+	GeometryGroupList::iterator iter;
+	for (iter = geometry_group_list_.begin(); iter != geometry_group_list_.end(); ++iter) {
+		if ((*iter)->GetGroupTextureID() == GetGroupTextureID(geometry)) {
 			break;
 		}
 	}
 
-	GeometryGroup* lGroup = 0;
-	if (lIter != mGeometryGroupList.end())
-	{
-		lGroup = *lIter;
-	}
-	else
-	{
-		lGroup = new GeometryGroup(this);
-		mGeometryGroupList.push_back(lGroup);
+	GeometryGroup* group = 0;
+	if (iter != geometry_group_list_.end()) {
+		group = *iter;
+	} else {
+		group = new GeometryGroup(this);
+		geometry_group_list_.push_back(group);
 	}
 
-	lGroup->AddGeometry(pGeometry);
+	group->AddGeometry(geometry);
 
 	return true;
 }
 
-Material::RemoveStatus Material::RemoveGeometry(Tbc::GeometryBase* pGeometry)
-{
-	Renderer::GeometryData* lGeomData = (Renderer::GeometryData*)pGeometry->GetRendererData();
-	RemoveStatus lStatus = (lGeomData->mGeometryGroup->RemoveGeometry(pGeometry) ? REMOVED : NOT_REMOVED);
+Material::RemoveStatus Material::RemoveGeometry(tbc::GeometryBase* geometry) {
+	Renderer::GeometryData* geom_data = (Renderer::GeometryData*)geometry->GetRendererData();
+	RemoveStatus status = (geom_data->geometry_group_->RemoveGeometry(geometry) ? kRemoved : kNotRemoved);
 
-	if (lGeomData->mGeometryGroup->GetGeometryCount() == 0)
-	{
-		Material* lMaterial = this;
-		while (lMaterial && !ListUtil::Contains(lMaterial->mGeometryGroupList, lGeomData->mGeometryGroup))
-		{
-			lMaterial = lMaterial->mFallBackMaterial;
+	if (geom_data->geometry_group_->GetGeometryCount() == 0) {
+		Material* _material = this;
+		while (_material && !ListUtil::Contains(_material->geometry_group_list_, geom_data->geometry_group_)) {
+			_material = _material->fall_back_material_;
 		}
-		deb_assert(lMaterial);
-		if (lMaterial)
-		{
-			lMaterial->mGeometryGroupList.remove(lGeomData->mGeometryGroup);
-			delete lGeomData->mGeometryGroup;
-			lGeomData->mGeometryGroup = 0;
+		deb_assert(_material);
+		if (_material) {
+			_material->geometry_group_list_.remove(geom_data->geometry_group_);
+			delete geom_data->geometry_group_;
+			geom_data->geometry_group_ = 0;
 		}
 	}
 
-	return lStatus;
+	return status;
 }
 
-void Material::RemoveAllGeometry()
-{
-	GeometryGroupList::iterator lIter;
-	while(mGeometryGroupList.empty() == false)
-	{
-		GeometryGroup* lGroup = mGeometryGroupList.front();
-		mGeometryGroupList.pop_front();
-		delete lGroup;
+void Material::RemoveAllGeometry() {
+	GeometryGroupList::iterator iter;
+	while(geometry_group_list_.empty() == false) {
+		GeometryGroup* group = geometry_group_list_.front();
+		geometry_group_list_.pop_front();
+		delete group;
 	}
 }
 
-void Material::PreRender()
-{
+void Material::PreRender() {
 }
 
-void Material::PostRender()
-{
+void Material::PostRender() {
 }
 
-void Material::RenderAllGeometry(unsigned pCurrentFrame, Material* pGeometryContainer, Material* pRenderer)
-{
-	const GeometryGroupList& lGeometries = pGeometryContainer->GetGeometryGroupList();
-	if (lGeometries.empty())
-	{
+void Material::RenderAllGeometry(unsigned current_frame, Material* geometry_container, Material* renderer) {
+	const GeometryGroupList& geometries = geometry_container->GetGeometryGroupList();
+	if (geometries.empty()) {
 		return;
 	}
-	if (!pRenderer)
-	{
-		pRenderer = pGeometryContainer;
+	if (!renderer) {
+		renderer = geometry_container;
 	}
-	pRenderer->RenderAllGeometry(pCurrentFrame, lGeometries);
+	renderer->RenderAllGeometry(current_frame, geometries);
 }
 
-Tbc::GeometryBase* Material::GetFirstGeometry()
-{
-	mGroupIter = mGeometryGroupList.begin();
-	mIndex = 0;
-	Tbc::GeometryBase* lGeometry = 0;
-	if(mGroupIter != mGeometryGroupList.end())
-	{
-		lGeometry = (*mGroupIter)->GetGeometry(mIndex);
+tbc::GeometryBase* Material::GetFirstGeometry() {
+	group_iter_ = geometry_group_list_.begin();
+	index_ = 0;
+	tbc::GeometryBase* _geometry = 0;
+	if(group_iter_ != geometry_group_list_.end()) {
+		_geometry = (*group_iter_)->GetGeometry(index_);
 	}
-	return lGeometry;
+	return _geometry;
 }
 
-Tbc::GeometryBase* Material::GetNextGeometry()
-{
-	Tbc::GeometryBase* lGeometry = 0;
-	if (mGroupIter != mGeometryGroupList.end())
-	{
-		++mIndex;
-		if(mIndex >= (*mGroupIter)->GetGeometryCount())
-		{
-			mIndex = 0;
-			++mGroupIter;
+tbc::GeometryBase* Material::GetNextGeometry() {
+	tbc::GeometryBase* _geometry = 0;
+	if (group_iter_ != geometry_group_list_.end()) {
+		++index_;
+		if(index_ >= (*group_iter_)->GetGeometryCount()) {
+			index_ = 0;
+			++group_iter_;
 		}
 	}
-	if(mGroupIter != mGeometryGroupList.end())
-	{
-		lGeometry = (*mGroupIter)->GetGeometry(mIndex);
+	if(group_iter_ != geometry_group_list_.end()) {
+		_geometry = (*group_iter_)->GetGeometry(index_);
 	}
-	return lGeometry;
+	return _geometry;
 }
 
-void Material::RenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
-	if (mEnableDrawMaterial)
-	{
-		DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
-	}
-	else
-	{
-		Material::DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+void Material::RenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
+	if (enable_draw_material_) {
+		DoRenderAllGeometry(current_frame, geometry_group_list);
+	} else {
+		Material::DoRenderAllGeometry(current_frame, geometry_group_list);
 	}
 }
 
-void Material::RenderAllBlendedGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
-	Tbc::GeometryBase::BasicMaterialSettings lPreviousMaterial = mCurrentMaterial;
-	bool lOldEnableDrawMaterial = mEnableDrawMaterial;
-	mEnableDrawMaterial = true;
-	mEnableDepthSort = true;
+void Material::RenderAllBlendedGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
+	tbc::GeometryBase::BasicMaterialSettings previous_material = current_material_;
+	bool old_enable_draw_material = enable_draw_material_;
+	enable_draw_material_ = true;
+	enable_depth_sort_ = true;
 
-	DoRenderAllGeometry(pCurrentFrame, pGeometryGroupList);
+	DoRenderAllGeometry(current_frame, geometry_group_list);
 
-	SetBasicMaterial(lPreviousMaterial);
+	SetBasicMaterial(previous_material);
 	GetRenderer()->ResetAmbientLight(true);
-	mEnableDrawMaterial = lOldEnableDrawMaterial;
-	mEnableDepthSort = false;
+	enable_draw_material_ = old_enable_draw_material;
+	enable_depth_sort_ = false;
 }
 
-void Material::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupList& pGeometryGroupList)
-{
+void Material::DoRenderAllGeometry(unsigned current_frame, const GeometryGroupList& geometry_group_list) {
 	PreRender();
 
-	GeometryGroupList::const_iterator lIter;
-	for (lIter = pGeometryGroupList.begin(); lIter != pGeometryGroupList.end(); ++lIter)
-	{
-		GeometryGroup* lGroup = *lIter;
+	GeometryGroupList::const_iterator iter;
+	for (iter = geometry_group_list.begin(); iter != geometry_group_list.end(); ++iter) {
+		GeometryGroup* group = *iter;
 
-		if (mEnableDepthSort == true)
-		{
-			if (mSortHint == DEPTHSORT_F2B)
-			{
-				lGroup->F2BSortGroup();
-			}
-			else if (mSortHint == DEPTHSORT_B2F)
-			{
-				lGroup->B2FSortGroup();
+		if (enable_depth_sort_ == true) {
+			if (sort_hint_ == kDepthsortF2B) {
+				group->F2BSortGroup();
+			} else if (sort_hint_ == kDepthsortB2F) {
+				group->B2FSortGroup();
 			}
 		}
 
-		const int lGeometryCount = lGroup->GetGeometryCount();
-		for (int i = 0; i < lGeometryCount; i++)
-		{
-			Tbc::GeometryBase* lGeometry = lGroup->GetGeometry(i);
-			if (lGeometry->GetAlwaysVisible() || lGeometry->GetLastFrameVisible() == pCurrentFrame)
-			{
-				if (mRenderer->PreRender(lGeometry))
-				{
-					if (mEnableDrawMaterial)
-					{
-						RenderGeometry(lGeometry);
-					}
-					else
-					{
-						RenderBaseGeometry(lGeometry);
+		const int geometry_count = group->GetGeometryCount();
+		for (int i = 0; i < geometry_count; i++) {
+			tbc::GeometryBase* _geometry = group->GetGeometry(i);
+			if (_geometry->GetAlwaysVisible() || _geometry->GetLastFrameVisible() == current_frame) {
+				if (renderer_->PreRender(_geometry)) {
+					if (enable_draw_material_) {
+						RenderGeometry(_geometry);
+					} else {
+						RenderBaseGeometry(_geometry);
 					}
 				}
-				mRenderer->PostRender(lGeometry);
+				renderer_->PostRender(_geometry);
 			}
 		}
 	}
@@ -435,31 +350,28 @@ void Material::DoRenderAllGeometry(unsigned pCurrentFrame, const GeometryGroupLi
 	PostRender();
 }
 
-Renderer::TextureID Material::GetGroupTextureID(Tbc::GeometryBase* pGeometry) const
-{
-	Renderer::TextureID lTextureID = Renderer::INVALID_TEXTURE;
+Renderer::TextureID Material::GetGroupTextureID(tbc::GeometryBase* geometry) const {
+	Renderer::TextureID texture_id = Renderer::INVALID_TEXTURE;
 
-	Renderer::GeometryData* lGeomData = (Renderer::GeometryData*)pGeometry->GetRendererData();
-	if (lGeomData->mTA && lGeomData->mTA->mNumTextures > 0)
-	{
+	Renderer::GeometryData* geom_data = (Renderer::GeometryData*)geometry->GetRendererData();
+	if (geom_data->ta_ && geom_data->ta_->num_textures_ > 0) {
 		// Select the first texture for grouping.
-		lTextureID = lGeomData->mTA->mTextureID[0];
+		texture_id = geom_data->ta_->texture_id_[0];
 	}
 
-	return lTextureID;
+	return texture_id;
 }
 
-const Material::GeometryGroupList& Material::GetGeometryGroupList() const
-{
-	return mGeometryGroupList;
+const Material::GeometryGroupList& Material::GetGeometryGroupList() const {
+	return geometry_group_list_;
 }
 
 
 
-Tbc::GeometryBase::BasicMaterialSettings Material::mCurrentMaterial;
-bool Material::mEnableWireframe = false;
-bool Material::mEnableDepthSort = false;
-bool Material::mEnableDrawMaterial = true;
+tbc::GeometryBase::BasicMaterialSettings Material::current_material_;
+bool Material::enable_wireframe_ = false;
+bool Material::enable_depth_sort_ = false;
+bool Material::enable_draw_material_ = true;
 
 
 

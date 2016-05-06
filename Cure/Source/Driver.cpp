@@ -1,98 +1,81 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../Include/Driver.h"
-#include "../Include/ContextManager.h"
-#include "../Include/GameManager.h"
-#include "../Include/TimeManager.h"
-#include "../../Lepra/Include/Random.h"
-#include "../../Tbc/Include/PhysicsEngine.h"
+#include "../include/driver.h"
+#include "../include/contextmanager.h"
+#include "../include/gamemanager.h"
+#include "../include/timemanager.h"
+#include "../../lepra/include/random.h"
+#include "../../tbc/include/physicsengine.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-Driver::Driver(ContextManager* pManager):
-	CppContextObject(pManager->GetGameManager()->GetResourceManager(), "Driver")
-{
-	pManager->AddLocalObject(this);
+Driver::Driver(ContextManager* manager):
+	CppContextObject(manager->GetGameManager()->GetResourceManager(), "Driver") {
+	manager->AddLocalObject(this);
 	GetManager()->EnableTickCallback(this);
 }
 
-Driver::~Driver()
-{
+Driver::~Driver() {
 }
 
 
 
-void Driver::SetTagIndex(int pIndex)
-{
-	mTag = ((CppContextObject*)mParent)->GetClass()->GetTag(pIndex);
-	mType = strutil::Split(mTag.mTagName, ":")[1];
+void Driver::SetTagIndex(int index) {
+	tag_ = ((CppContextObject*)parent_)->GetClass()->GetTag(index);
+	type_ = strutil::Split(tag_.tag_name_, ":")[1];
 }
 
-void Driver::OnTick()
-{
+void Driver::OnTick() {
 	Parent::OnTick();
-	if (!mParent->GetPhysics())
-	{
+	if (!parent_->GetPhysics()) {
 		return;
 	}
 
-	for (size_t x = 0; x < mTag.mEngineIndexList.size(); ++x)
-	{
-		const int lEngineIndex = mTag.mEngineIndexList[x];
-		if (lEngineIndex >= mParent->GetPhysics()->GetEngineCount())
-		{
+	for (size_t x = 0; x < tag_.engine_index_list_.size(); ++x) {
+		const int engine_index = tag_.engine_index_list_[x];
+		if (engine_index >= parent_->GetPhysics()->GetEngineCount()) {
 			break;
 		}
-		Tbc::PhysicsEngine* lEngine = mParent->GetPhysics()->GetEngine(lEngineIndex);
+		tbc::PhysicsEngine* engine = parent_->GetPhysics()->GetEngine(engine_index);
 
 		float f = 1;
-		if (mTag.mFloatValueList.size() > 0)
-		{
-			f = mTag.mFloatValueList[0];
+		if (tag_.float_value_list_.size() > 0) {
+			f = tag_.float_value_list_[0];
 		}
-		if (mType == "cos")
-		{
-			deb_assert(mTag.mFloatValueList.size() == 1);
-			lEngine->SetValue(lEngine->GetControllerIndex(), (float)::cos(mTime.QueryTimeDiff()*f));
-			const double lPeriod = 2*PI/f;
-			if (mTime.GetTimeDiff() > lPeriod)
-			{
-				mTime.ReduceTimeDiff(lPeriod);
+		if (type_ == "cos") {
+			deb_assert(tag_.float_value_list_.size() == 1);
+			engine->SetValue(engine->GetControllerIndex(), (float)::cos(time_.QueryTimeDiff()*f));
+			const double period = 2*PI/f;
+			if (time_.GetTimeDiff() > period) {
+				time_.ReduceTimeDiff(period);
 			}
-		}
-		else if (mType == "random_jerker")
-		{
-			deb_assert(mTag.mFloatValueList.size() == 2);
-			const float g = mTag.mFloatValueList[1];
-			const float t = (float)mTime.QueryTimeDiff();
-			if (t < f)
-			{
-				lEngine->SetValue(lEngine->GetControllerIndex()+0, 0);
-				lEngine->SetValue(lEngine->GetControllerIndex()+1, 0);
-				lEngine->SetValue(lEngine->GetControllerIndex()+3, 0);	// 3 for Z... Yup, I know!
-			}
-			else
-			{
-				vec3 lPush = RNDVEC(1.0f);
-				lPush.x = ::pow(std::abs(lPush.x), 0.1f) * ((lPush.x <= 0)? -1 : +1);
-				lPush.y = ::pow(std::abs(lPush.y), 0.1f) * ((lPush.y <= 0)? -1 : +1);
-				lPush.z = ::pow(std::abs(lPush.z), 0.1f) * ((lPush.z <= 0)? -1 : +1);
-				lEngine->SetValue(lEngine->GetControllerIndex()+0, lPush.x);
-				lEngine->SetValue(lEngine->GetControllerIndex()+1, lPush.y);
-				lEngine->SetValue(lEngine->GetControllerIndex()+3, lPush.z);	// 3 for Z... Yup, I know!
-				if (t > f+g)
-				{
-					mTime.ReduceTimeDiff(f+g);
+		} else if (type_ == "random_jerker") {
+			deb_assert(tag_.float_value_list_.size() == 2);
+			const float g = tag_.float_value_list_[1];
+			const float t = (float)time_.QueryTimeDiff();
+			if (t < f) {
+				engine->SetValue(engine->GetControllerIndex()+0, 0);
+				engine->SetValue(engine->GetControllerIndex()+1, 0);
+				engine->SetValue(engine->GetControllerIndex()+3, 0);	// 3 for Z... Yup, I know!
+			} else {
+				vec3 push = RNDVEC(1.0f);
+				push.x = ::pow(std::abs(push.x), 0.1f) * ((push.x <= 0)? -1 : +1);
+				push.y = ::pow(std::abs(push.y), 0.1f) * ((push.y <= 0)? -1 : +1);
+				push.z = ::pow(std::abs(push.z), 0.1f) * ((push.z <= 0)? -1 : +1);
+				engine->SetValue(engine->GetControllerIndex()+0, push.x);
+				engine->SetValue(engine->GetControllerIndex()+1, push.y);
+				engine->SetValue(engine->GetControllerIndex()+3, push.z);	// 3 for Z... Yup, I know!
+				if (t > f+g) {
+					time_.ReduceTimeDiff(f+g);
 				}
 			}
 		}
@@ -101,7 +84,7 @@ void Driver::OnTick()
 
 
 
-loginstance(GAME_CONTEXT_CPP, Driver);
+loginstance(kGameContextCpp, Driver);
 
 
 

@@ -1,5 +1,5 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
@@ -8,14 +8,13 @@
 
 
 
-#include "../../Cure/Include/ContextManager.h"
-#include "../../Cure/Include/Packet.h"
-#include "../Life.h"
+#include "../../cure/include/contextmanager.h"
+#include "../../cure/include/packet.h"
+#include "../life.h"
 
 
 
-namespace Life
-{
+namespace life {
 
 
 
@@ -24,19 +23,18 @@ class GameServerManager;
 
 
 
-class ServerMessageProcessor
-{
+class ServerMessageProcessor {
 public:
-	ServerMessageProcessor(GameServerManager* pGameServerManager);
+	ServerMessageProcessor(GameServerManager* game_server_manager);
 	virtual ~ServerMessageProcessor();
 
-	virtual void ProcessNetworkInputMessage(Client* pClient, Cure::Message* pMessage);
-	virtual void ProcessNumber(Client* pClient, Cure::MessageNumber::InfoType pType, int32 pInteger, float32 pFloat);
+	virtual void ProcessNetworkInputMessage(Client* client, cure::Message* message);
+	virtual void ProcessNumber(Client* client, cure::MessageNumber::InfoType type, int32 integer, float32 f);
 
 protected:
-	typedef Cure::ContextManager::ContextObjectTable ContextTable;
+	typedef cure::ContextManager::ContextObjectTable ContextTable;
 
-	GameServerManager* mGameServerManager;
+	GameServerManager* game_server_manager_;
 
 	logclass();
 };

@@ -6,11 +6,11 @@
 
 #pragma once
 
-#include "../../Lepra/Include/Unordered.h"
-#include "Tbc.h"
-#include "PhysicsManager.h"
-#include "../../Lepra/Include/FastAllocator.h"
-#include "../../Lepra/Include/Log.h"
+#include "../../lepra/include/unordered.h"
+#include "tbc.h"
+#include "physicsmanager.h"
+#include "../../lepra/include/fastallocator.h"
+#include "../../lepra/include/log.h"
 #pragma warning(push)
 #pragma warning(disable: 4100)	// Warning: unreferenced formal parameter (in ODE).
 #include <ode/ode.h>
@@ -18,149 +18,147 @@
 #include <vector>
 
 
-namespace Tbc
-{
+namespace tbc {
 
 
 
-class PhysicsManagerODE: public PhysicsManager
-{
+class PhysicsManagerODE: public PhysicsManager {
 public:
-	PhysicsManagerODE(float pRadius, int pLevels, float pSensitivity);
+	PhysicsManagerODE(float radius, int levels, float sensitivity);
 	virtual ~PhysicsManagerODE();
 
-	virtual void SetSimulationParameters(float pSoftness, float pRubberbanding, float pAccuracy);
+	virtual void SetSimulationParameters(float softness, float rubberbanding, float accuracy);
 	virtual bool InitCurrentThread();
 
-	virtual int QueryRayCollisionAgainst(const vec3& pRayPosition, const vec3& pRayDirection, float pLength, BodyID pBody, vec3* pCollisionPoints, int pMaxCollisionCount);
-	virtual int QueryRayPick(const vec3& pRayPosition, const vec3& pRayDirection, float pLength, int* pForceFeedbackIds, vec3* pPositions, int pMaxBodies);
+	virtual int QueryRayCollisionAgainst(const vec3& ray_position, const vec3& ray_direction, float length, BodyID body, vec3* collision_points, int max_collision_count);
+	virtual int QueryRayPick(const vec3& ray_position, const vec3& ray_direction, float length, int* force_feedback_ids, vec3* positions, int max_bodies);
 
-	virtual BodyID CreateSphere(bool pIsRoot, const xform& pTransform, float32 pMass, float32 pRadius, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0, bool pIsTrigger = false);
-	virtual BodyID CreateCylinder(bool pIsRoot, const xform& pTransform, float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0, bool pIsTrigger = false);
-	virtual BodyID CreateCapsule(bool pIsRoot, const xform& pTransform, float32 pMass, float32 pRadius, float32 pLength, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0, bool pIsTrigger = false);
-	virtual BodyID CreateBox(bool pIsRoot, const xform& pTransform, float32 pMass, const Vector3D<float32>& pSize, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0, bool pIsTrigger = false);
-	virtual bool Attach(BodyID pStaticBody, BodyID pMainBody);
-	virtual bool DetachToDynamic(BodyID pStaticBody, float32 pMass);
-	virtual bool MakeStatic(BodyID pDynamicBody);
-	virtual bool AddMass(BodyID pStaticBody, BodyID pMainBody);
+	virtual BodyID CreateSphere(bool is_root, const xform& transform, float32 mass, float32 radius, BodyType type, float32 friction = 1, float32 bounce = 0, int force_listener_id = 0, bool is_trigger = false);
+	virtual BodyID CreateCylinder(bool is_root, const xform& transform, float32 mass, float32 radius, float32 length, BodyType type, float32 friction = 1, float32 bounce = 0, int force_listener_id = 0, bool is_trigger = false);
+	virtual BodyID CreateCapsule(bool is_root, const xform& transform, float32 mass, float32 radius, float32 length, BodyType type, float32 friction = 1, float32 bounce = 0, int force_listener_id = 0, bool is_trigger = false);
+	virtual BodyID CreateBox(bool is_root, const xform& transform, float32 mass, const Vector3D<float32>& size, BodyType type, float32 friction = 1, float32 bounce = 0, int force_listener_id = 0, bool is_trigger = false);
+	virtual bool Attach(BodyID static_body, BodyID main_body);
+	virtual bool DetachToDynamic(BodyID static_body, float32 mass);
+	virtual bool MakeStatic(BodyID dynamic_body);
+	virtual bool AddMass(BodyID static_body, BodyID main_body);
 
 	// Tri meshes are always static.
-	virtual BodyID CreateTriMesh(bool pIsRoot, unsigned pVertexCount, const float* pVertices, unsigned pTriangleCount, const Lepra::uint32* pIndices,
-		const xform& pTransform, float32 pMass, BodyType pType, float32 pFriction = 1, float32 pBounce = 0, int pForceListenerId = 0, bool pIsTrigger = false);
+	virtual BodyID CreateTriMesh(bool is_root, unsigned vertex_count, const float* vertices, unsigned triangle_count, const lepra::uint32* indices,
+		const xform& transform, float32 mass, BodyType type, float32 friction = 1, float32 bounce = 0, int force_listener_id = 0, bool is_trigger = false);
 
-	virtual bool IsStaticBody(BodyID pBodyId) const;
+	virtual bool IsStaticBody(BodyID body_id) const;
 
-	virtual void DeleteBody(BodyID pBodyId);
+	virtual void DeleteBody(BodyID body_id);
 
-	virtual vec3 GetBodyPosition(BodyID pBodyId) const;
-	virtual void SetBodyPosition(BodyID pBodyId, const vec3& pPosition) const;
-	virtual quat GetBodyOrientation(BodyID pBodyId) const;
-	virtual void SetBodyOrientation(BodyID pBodyId, const quat& pOrientation);
-	virtual void GetBodyTransform(BodyID pBodyId, xform& pTransform) const;
-	virtual void SetBodyTransform(BodyID pBodyId, const xform& pTransform);
-	virtual void GetBodyVelocity(BodyID pBodyId, vec3& pVelocity) const;
-	virtual void SetBodyVelocity(BodyID pBodyId, const vec3& pVelocity);
-	virtual void GetBodyForce(BodyID pBodyId, vec3& pAcceleration) const;
-	virtual void SetBodyForce(BodyID pBodyId, const vec3& pAcceleration);
-	virtual void GetBodyAcceleration(BodyID pBodyId, float pTotalMass, vec3& pAcceleration) const;
-	virtual void SetBodyAcceleration(BodyID pBodyId, float pTotalMass, const vec3& pAcceleration);
-	virtual void GetBodyAngularVelocity(BodyID pBodyId, vec3& pAngularVelocity) const;
-	virtual void SetBodyAngularVelocity(BodyID pBodyId, const vec3& pAngularVelocity);
-	virtual void GetBodyTorque(BodyID pBodyId, vec3& pAngularAcceleration) const;
-	virtual void SetBodyTorque(BodyID pBodyId, const vec3& pAngularAcceleration);
-	virtual void GetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, vec3& pAngularAcceleration) const;
-	virtual void SetBodyAngularAcceleration(BodyID pBodyId, float pTotalMass, const vec3& pAngularAcceleration);
+	virtual vec3 GetBodyPosition(BodyID body_id) const;
+	virtual void SetBodyPosition(BodyID body_id, const vec3& position) const;
+	virtual quat GetBodyOrientation(BodyID body_id) const;
+	virtual void SetBodyOrientation(BodyID body_id, const quat& orientation);
+	virtual void GetBodyTransform(BodyID body_id, xform& transform) const;
+	virtual void SetBodyTransform(BodyID body_id, const xform& transform);
+	virtual void GetBodyVelocity(BodyID body_id, vec3& velocity) const;
+	virtual void SetBodyVelocity(BodyID body_id, const vec3& velocity);
+	virtual void GetBodyForce(BodyID body_id, vec3& acceleration) const;
+	virtual void SetBodyForce(BodyID body_id, const vec3& acceleration);
+	virtual void GetBodyAcceleration(BodyID body_id, float total_mass, vec3& acceleration) const;
+	virtual void SetBodyAcceleration(BodyID body_id, float total_mass, const vec3& acceleration);
+	virtual void GetBodyAngularVelocity(BodyID body_id, vec3& angular_velocity) const;
+	virtual void SetBodyAngularVelocity(BodyID body_id, const vec3& angular_velocity);
+	virtual void GetBodyTorque(BodyID body_id, vec3& angular_acceleration) const;
+	virtual void SetBodyTorque(BodyID body_id, const vec3& angular_acceleration);
+	virtual void GetBodyAngularAcceleration(BodyID body_id, float total_mass, vec3& angular_acceleration) const;
+	virtual void SetBodyAngularAcceleration(BodyID body_id, float total_mass, const vec3& angular_acceleration);
 
-	virtual float GetBodyMass(BodyID pBodyId);
-	virtual void SetBodyMass(BodyID pBodyId, float pMass);
-	virtual void MassAdjustBody(BodyID pBodyId);
+	virtual float GetBodyMass(BodyID body_id);
+	virtual void SetBodyMass(BodyID body_id, float mass);
+	virtual void MassAdjustBody(BodyID body_id);
 
 	// Set and get user data.
-	virtual void SetBodyData(BodyID pBodyId, void* pUserData);
-	virtual void* GetBodyData(BodyID pBodyId);
+	virtual void SetBodyData(BodyID body_id, void* user_data);
+	virtual void* GetBodyData(BodyID body_id);
 
-	virtual int GetTriggerListenerId(BodyID pTrigger);
-	virtual int GetForceFeedbackListenerId(BodyID pBody);
-	virtual void SetForceFeedbackListener(BodyID pBody, int pForceFeedbackId);
+	virtual int GetTriggerListenerId(BodyID trigger);
+	virtual int GetForceFeedbackListenerId(BodyID body);
+	virtual void SetForceFeedbackListener(BodyID body, int force_feedback_id);
 
 	//
 	// Create/delete joints.
 	//
-	virtual JointID CreateBallJoint(BodyID pBody1, BodyID pBody2, const Vector3D<float32>& pAnchorPos);
-	virtual JointID CreateHingeJoint(BodyID pBody1, BodyID pBody2, const Vector3D<float32>& pAnchorPos, const Vector3D<float32>& pAxis);
-	virtual JointID CreateHinge2Joint(BodyID pBody1, BodyID pBody2, const Vector3D<float32>& pAnchorPos, const Vector3D<float32>& pAxis1, const Vector3D<float32>& pAxis2);
-	virtual JointID CreateUniversalJoint(BodyID pBody1, BodyID pBody2, const Vector3D<float32>& pAnchorPos, const Vector3D<float32>& pAxis1, const Vector3D<float32>& pAxis2);
-	virtual JointID CreateSliderJoint(BodyID pBody1, BodyID pBody2, const Vector3D<float32>& pAxis);
-	virtual JointID CreateFixedJoint(BodyID pBody1, BodyID pBody2);
-	virtual JointID CreateAngularMotorJoint(BodyID pBody1, BodyID pBody2, const Vector3D<float32>& pAxis);
+	virtual JointID CreateBallJoint(BodyID body1, BodyID body2, const Vector3D<float32>& anchor_pos);
+	virtual JointID CreateHingeJoint(BodyID body1, BodyID body2, const Vector3D<float32>& anchor_pos, const Vector3D<float32>& axis);
+	virtual JointID CreateHinge2Joint(BodyID body1, BodyID body2, const Vector3D<float32>& anchor_pos, const Vector3D<float32>& axis1, const Vector3D<float32>& axis2);
+	virtual JointID CreateUniversalJoint(BodyID body1, BodyID body2, const Vector3D<float32>& anchor_pos, const Vector3D<float32>& axis1, const Vector3D<float32>& axis2);
+	virtual JointID CreateSliderJoint(BodyID body1, BodyID body2, const Vector3D<float32>& axis);
+	virtual JointID CreateFixedJoint(BodyID body1, BodyID body2);
+	virtual JointID CreateAngularMotorJoint(BodyID body1, BodyID body2, const Vector3D<float32>& axis);
 
-	virtual void DeleteJoint(JointID pJointId);
+	virtual void DeleteJoint(JointID joint_id);
 
-	virtual bool StabilizeJoint(JointID pJointId);
-	virtual void SetIsGyroscope(BodyID pBodyId, bool pIsGyro);
+	virtual bool StabilizeJoint(JointID joint_id);
+	virtual void SetIsGyroscope(BodyID body_id, bool is_gyro);
 
-	bool GetJoint1Diff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const;
-	bool SetJoint1Diff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff);
-	bool GetJoint2Diff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const;
-	bool SetJoint2Diff(BodyID pBodyId, JointID pJointId, const Joint2Diff& pDiff);
-	bool GetJoint3Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const;
-	bool SetJoint3Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff);
+	bool GetJoint1Diff(BodyID body_id, JointID joint_id, Joint1Diff& diff) const;
+	bool SetJoint1Diff(BodyID body_id, JointID joint_id, const Joint1Diff& diff);
+	bool GetJoint2Diff(BodyID body_id, JointID joint_id, Joint2Diff& diff) const;
+	bool SetJoint2Diff(BodyID body_id, JointID joint_id, const Joint2Diff& diff);
+	bool GetJoint3Diff(BodyID body_id, JointID joint_id, Joint3Diff& diff) const;
+	bool SetJoint3Diff(BodyID body_id, JointID joint_id, const Joint3Diff& diff);
 
 	// Returns true on success, false if joint is of wrong type.
-	virtual bool GetAnchorPos(JointID pJointId, Vector3D<float32>& pAnchorPos) const;
-	virtual bool GetAxis1(JointID pJointId, Vector3D<float32>& pAxis1) const;
-	virtual bool GetAxis2(JointID pJointId, Vector3D<float32>& pAxis1) const;
-	virtual bool GetAngle1(JointID pJointId, float32& pAngle) const;
-	virtual bool GetAngle2(JointID pJointId, float32& pAngle) const;
-	virtual bool GetAngleRate1(JointID pJointId, float32& pAngleRate) const;
-	virtual bool GetAngleRate2(JointID pJointId, float32& pAngleRate) const;
-	virtual bool SetAngle1(BodyID pBodyId, JointID pJointId, float32 pAngle);
+	virtual bool GetAnchorPos(JointID joint_id, Vector3D<float32>& anchor_pos) const;
+	virtual bool GetAxis1(JointID joint_id, Vector3D<float32>& axis1) const;
+	virtual bool GetAxis2(JointID joint_id, Vector3D<float32>& axis1) const;
+	virtual bool GetAngle1(JointID joint_id, float32& angle) const;
+	virtual bool GetAngle2(JointID joint_id, float32& angle) const;
+	virtual bool GetAngleRate1(JointID joint_id, float32& angle_rate) const;
+	virtual bool GetAngleRate2(JointID joint_id, float32& angle_rate) const;
+	virtual bool SetAngle1(BodyID body_id, JointID joint_id, float32 angle);
 
-	virtual bool SetAngularMotorAngle(JointID pJointId, float32 pAngle);
-	virtual bool SetAngularMotorSpeed(JointID pJointId, float32 pSpeed);
-	virtual bool SetMotorMaxForce(JointID pJointId, float32 pMaxForce);
-	virtual bool SetAngularMotorRoll(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity);
-	virtual bool GetAngularMotorRoll(JointID pJointId, float32& pMaxForce, float32& pTargetVelocity);
-	virtual bool SetAngularMotorTurn(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity);
-	virtual bool GetAngularMotorAngle(JointID pJointId, float32& pAngle) const;
-	virtual bool GetAngularMotorSpeed(JointID pJointId, float32& pSpeed) const;
-	virtual bool GetAngularMotorMaxForce(JointID pJointId, float32& pMaxForce) const;
-	virtual bool SetMotorTarget(JointID pJointId, float32 pMaxForce, float32 pTargetVelocity);
+	virtual bool SetAngularMotorAngle(JointID joint_id, float32 angle);
+	virtual bool SetAngularMotorSpeed(JointID joint_id, float32 speed);
+	virtual bool SetMotorMaxForce(JointID joint_id, float32 max_force);
+	virtual bool SetAngularMotorRoll(JointID joint_id, float32 max_force, float32 target_velocity);
+	virtual bool GetAngularMotorRoll(JointID joint_id, float32& max_force, float32& target_velocity);
+	virtual bool SetAngularMotorTurn(JointID joint_id, float32 max_force, float32 target_velocity);
+	virtual bool GetAngularMotorAngle(JointID joint_id, float32& angle) const;
+	virtual bool GetAngularMotorSpeed(JointID joint_id, float32& speed) const;
+	virtual bool GetAngularMotorMaxForce(JointID joint_id, float32& max_force) const;
+	virtual bool SetMotorTarget(JointID joint_id, float32 max_force, float32 target_velocity);
 
-	virtual bool SetJointParams(JointID pJointId, float32 pLowStop, float32 pHighStop, float32 pBounce, int pExtraIndex);
-	virtual bool GetJointParams(JointID pJointId, float32& pLowStop, float32& pHighStop, float32& pBounce) const;
-	virtual bool SetSuspension(JointID pJointId, float32 pFrameTime, float32 pSpringConstant, float32 pDampingConstant);
-	virtual bool GetSuspension(JointID pJointId, float32& pErp, float32& pCfm) const;
+	virtual bool SetJointParams(JointID joint_id, float32 low_stop, float32 high_stop, float32 bounce, int extra_index);
+	virtual bool GetJointParams(JointID joint_id, float32& low_stop, float32& high_stop, float32& bounce) const;
+	virtual bool SetSuspension(JointID joint_id, float32 frame_time, float32 spring_constant, float32 damping_constant);
+	virtual bool GetSuspension(JointID joint_id, float32& erp, float32& cfm) const;
 
-	virtual bool GetSliderPos(JointID pJointId, float32& pPos) const;
-	virtual bool GetSliderSpeed(JointID pJointId, float32& pSpeed) const;
+	virtual bool GetSliderPos(JointID joint_id, float32& pos) const;
+	virtual bool GetSliderSpeed(JointID joint_id, float32& speed) const;
 
 	// Adding a force to a joint is only possible on slider joints.
-	virtual bool AddJointForce(JointID pJointId, float32 pForce);
-	virtual bool AddJointTorque(JointID pJointId, float32 pTorque);
-	virtual bool AddJointTorque(JointID pJointId, float32 pTorque1, float32 pTorque2);
+	virtual bool AddJointForce(JointID joint_id, float32 force);
+	virtual bool AddJointTorque(JointID joint_id, float32 torque);
+	virtual bool AddJointTorque(JointID joint_id, float32 torque1, float32 torque2);
 
-	virtual void AddForce            (BodyID pBodyId, const Vector3D<float32>& pForce);
-	virtual void AddTorque           (BodyID pBodyId, const Vector3D<float32>& pTorque);
-	virtual void AddRelForce         (BodyID pBodyId, const Vector3D<float32>& pForce);
-	virtual void AddRelTorque        (BodyID pBodyId, const Vector3D<float32>& pTorque);
-	virtual void AddForceAtPos       (BodyID pBodyId, const Vector3D<float32>& pForce, const Vector3D<float32>& pPos);
-	virtual void AddForceAtRelPos    (BodyID pBodyId, const Vector3D<float32>& pForce, const Vector3D<float32>& pPos);
-	virtual void AddRelForceAtPos    (BodyID pBodyId, const Vector3D<float32>& pForce, const Vector3D<float32>& pPos);
-	virtual void AddRelForceAtRelPos (BodyID pBodyId, const Vector3D<float32>& pForce, const Vector3D<float32>& pPos);
+	virtual void AddForce            (BodyID body_id, const Vector3D<float32>& force);
+	virtual void AddTorque           (BodyID body_id, const Vector3D<float32>& torque);
+	virtual void AddRelForce         (BodyID body_id, const Vector3D<float32>& force);
+	virtual void AddRelTorque        (BodyID body_id, const Vector3D<float32>& torque);
+	virtual void AddForceAtPos       (BodyID body_id, const Vector3D<float32>& force, const Vector3D<float32>& pos);
+	virtual void AddForceAtRelPos    (BodyID body_id, const Vector3D<float32>& force, const Vector3D<float32>& pos);
+	virtual void AddRelForceAtPos    (BodyID body_id, const Vector3D<float32>& force, const Vector3D<float32>& pos);
+	virtual void AddRelForceAtRelPos (BodyID body_id, const Vector3D<float32>& force, const Vector3D<float32>& pos);
 
-	virtual void RestrictBody(BodyID pBodyId, float32 pMaxSpeed, float32 pMaxAngularSpeed);
+	virtual void RestrictBody(BodyID body_id, float32 max_speed, float32 max_angular_speed);
 
-	virtual void EnableGravity(BodyID pBodyId, bool pEnable);
-	virtual void SetGravity(const Vector3D<float32>& pGravity);
+	virtual void EnableGravity(BodyID body_id, bool enable);
+	virtual void SetGravity(const Vector3D<float32>& gravity);
 	virtual vec3 GetGravity() const;
 
-	virtual void EnableCollideWithSelf(BodyID pBodyId, bool pEnable);
+	virtual void EnableCollideWithSelf(BodyID body_id, bool enable);
 
 	virtual void PreSteps();
-	virtual void StepAccurate(float32 pStepSize, bool pCollide);
-	virtual void StepFast(float32 pStepSize, bool pCollide);
-	virtual bool IsColliding(int pForceFeedbackId);
+	virtual void StepAccurate(float32 step_size, bool collide);
+	virtual void StepFast(float32 step_size, bool collide);
+	virtual bool IsColliding(int force_feedback_id);
 	virtual void PostSteps();
 
 	virtual const BodySet& GetIdledBodies();
@@ -169,66 +167,63 @@ private:
 	void FlagMovingObjects();
 	void HandleMovableObjects();
 
-	void NormalizeRotation(BodyID pObject);
+	void NormalizeRotation(BodyID object);
 
-	static void RayPickCallback(void* pDataPtr, dGeomID o1, dGeomID o2);
+	static void RayPickCallback(void* data_ptr, dGeomID o1, dGeomID o2);
 
-	enum JointType
-	{
-		JOINT_INVALID = 0,
-		JOINT_BALL,
-		JOINT_HINGE,
-		JOINT_HINGE2,
-		JOINT_UNIVERSAL,
-		JOINT_SLIDER,
-		JOINT_FIXED,
-		JOINT_ANGULARMOTOR,
-		JOINT_CONTACT,
+	enum JointType {
+		kJointInvalid = 0,
+		kJointBall,
+		kJointHinge,
+		kJointHinge2,
+		kJointUniversal,
+		kJointSlider,
+		kJointFixed,
+		kJointAngularmotor,
+		kJointContact,
 	};
 
-	struct Object
-	{
-		Object(dWorldID pWorldID, bool pIsRoot) :
-			mWorldID(pWorldID),
-			mIsRoot(pIsRoot),
-			mCollideWithSelf(false),
-			mBodyID(0),
-			mGeomID(0),
-			mTriMeshID(0),
-			mMass(0),
-			mFriction(0),
-			mBounce(0),
-			mUserData(0),
-			mTriggerListenerId(0),
-			mForceFeedbackId(0),
-			mHasMassChildren(false),
-			mIsRotational(false),
-			mDidStop(false)
-		{
+	struct Object {
+		Object(dWorldID world_id, bool is_root) :
+			world_id_(world_id),
+			is_root_(is_root),
+			collide_with_self_(false),
+			body_id_(0),
+			geom_id_(0),
+			tri_mesh_id_(0),
+			mass_(0),
+			friction_(0),
+			bounce_(0),
+			user_data_(0),
+			trigger_listener_id_(0),
+			force_feedback_id_(0),
+			has_mass_children_(false),
+			is_rotational_(false),
+			did_stop_(false) {
 		}
 
-		dWorldID mWorldID;
-		bool mIsRoot;
-		bool mCollideWithSelf;
-		dBodyID mBodyID;
-		dGeomID mGeomID;
-		float mGeometryData[3];
-		dTriMeshDataID mTriMeshID;
-		float mMass;
-		float32 mFriction;
-		float32 mBounce;
-		void* mUserData;
+		dWorldID world_id_;
+		bool is_root_;
+		bool collide_with_self_;
+		dBodyID body_id_;
+		dGeomID geom_id_;
+		float geometry_data_[3];
+		dTriMeshDataID tri_mesh_id_;
+		float mass_;
+		float32 friction_;
+		float32 bounce_;
+		void* user_data_;
 
 		// The only thing that differs between standard bodies and triggers
 		// is the value of this member. If this is 0, this is a regular
 		// body, a trigger otherwise.
-		int mTriggerListenerId;
+		int trigger_listener_id_;
 
-		int mForceFeedbackId;
+		int force_feedback_id_;
 
-		bool mHasMassChildren;
-		bool mIsRotational;
-		bool mDidStop;
+		bool has_mass_children_;
+		bool is_rotational_;
+		bool did_stop_;
 	};
 
 	class TriggerInfo;
@@ -238,95 +233,89 @@ private:
 	typedef std::vector<TriggerInfo> TriggerInfoList;
 	typedef std::vector<JointInfo*> JointList;
 
-	class TriggerInfo
-	{
+	class TriggerInfo {
 	public:
-		inline TriggerInfo(BodyID pTriggerId, int pTriggerListenerId, int pBodyListenerId, BodyID pBodyId, const vec3& pPosition, const vec3& pNormal):
-			mTriggerId(pTriggerId),
-			mTriggerListenerId(pTriggerListenerId),
-			mBodyListenerId(pBodyListenerId),
-			mBodyId(pBodyId),
-			mPosition(pPosition),
-			mNormal(pNormal)
-		{
+		inline TriggerInfo(BodyID trigger_id, int trigger_listener_id, int body_listener_id, BodyID body_id, const vec3& position, const vec3& normal):
+			trigger_id_(trigger_id),
+			trigger_listener_id_(trigger_listener_id),
+			body_listener_id_(body_listener_id),
+			body_id_(body_id),
+			position_(position),
+			normal_(normal) {
 		}
 
-		BodyID mTriggerId;
-		int mTriggerListenerId;
-		int mBodyListenerId;
-		BodyID mBodyId;
-		vec3 mPosition;
-		vec3 mNormal;
+		BodyID trigger_id_;
+		int trigger_listener_id_;
+		int body_listener_id_;
+		BodyID body_id_;
+		vec3 position_;
+		vec3 normal_;
 	};
 
-	class JointInfo
-	{
+	class JointInfo {
 	public:
 		inline JointInfo() :
-			mBody1Id(0),
-			mBody2Id(0),
-			mListenerId1(0),
-			mListenerId2(0)
-		{
+			body1_id_(0),
+			body2_id_(0),
+			listener_id1_(0),
+			listener_id2_(0) {
 		}
 
-		inline bool IsBody1Static(PhysicsManagerODE* pManager) const
-		{
-			return !mBody1Id || pManager->IsStaticBody(mBody1Id);
+		inline bool IsBody1Static(PhysicsManagerODE* manager) const {
+			return !body1_id_ || manager->IsStaticBody(body1_id_);
 		}
-		inline bool IsBody2Static(PhysicsManagerODE* pManager) const
-		{
-			return !mBody2Id || pManager->IsStaticBody(mBody2Id);
+		inline bool IsBody2Static(PhysicsManagerODE* manager) const {
+			return !body2_id_ || manager->IsStaticBody(body2_id_);
 		}
 
-		dJointID mJointID;
-		JointType mType;
-		BodyID mBody1Id;
-		BodyID mBody2Id;
-		dJointFeedback mFeedback;
-		int mListenerId1;
-		int mListenerId2;
-		vec3 mPosition;
-		vec3 mRelativeVelocity;
+		dJointID joint_id_;
+		JointType type_;
+		BodyID body1_id_;
+		BodyID body2_id_;
+		dJointFeedback feedback_;
+		int listener_id1_;
+		int listener_id2_;
+		vec3 position_;
+		vec3 relative_velocity_;
 	};
 
-	void RemoveJoint(JointInfo* pJointInfo);
+	void RemoveJoint(JointInfo* joint_info);
 
-	bool GetHingeDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const;
-	bool SetHingeDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff);
-	bool GetSliderDiff(BodyID pBodyId, JointID pJointId, Joint1Diff& pDiff) const;
-	bool SetSliderDiff(BodyID pBodyId, JointID pJointId, const Joint1Diff& pDiff);
-	bool GetUniversalDiff(BodyID pBodyId, JointID pJointId, Joint2Diff& pDiff) const;
-	bool SetUniversalDiff(BodyID pBodyId, JointID pJointId, const Joint2Diff& pDiff);
-	bool GetHinge2Diff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const;
-	bool SetHinge2Diff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff);
-	bool GetBallDiff(BodyID pBodyId, JointID pJointId, Joint3Diff& pDiff) const;
-	bool SetBallDiff(BodyID pBodyId, JointID pJointId, const Joint3Diff& pDiff);
+	bool GetHingeDiff(BodyID body_id, JointID joint_id, Joint1Diff& diff) const;
+	bool SetHingeDiff(BodyID body_id, JointID joint_id, const Joint1Diff& diff);
+	bool GetSliderDiff(BodyID body_id, JointID joint_id, Joint1Diff& diff) const;
+	bool SetSliderDiff(BodyID body_id, JointID joint_id, const Joint1Diff& diff);
+	bool GetUniversalDiff(BodyID body_id, JointID joint_id, Joint2Diff& diff) const;
+	bool SetUniversalDiff(BodyID body_id, JointID joint_id, const Joint2Diff& diff);
+	bool GetHinge2Diff(BodyID body_id, JointID joint_id, Joint3Diff& diff) const;
+	bool SetHinge2Diff(BodyID body_id, JointID joint_id, const Joint3Diff& diff);
+	bool GetBallDiff(BodyID body_id, JointID joint_id, Joint3Diff& diff) const;
+	bool SetBallDiff(BodyID body_id, JointID joint_id, const Joint3Diff& diff);
 
-	bool CheckBodies(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const char* pFunction);
-	bool CheckBodies2(BodyID& pBody1, BodyID& pBody2, Object*& pObject1, Object*& pObject2, const char* pFunction);
-	
+	bool CheckBodies(BodyID& body1, BodyID& body2, Object*& object1, Object*& object2, const char* function);
+	bool CheckBodies2(BodyID& body1, BodyID& body2, Object*& object1, Object*& object2, const char* function);
+
 	void DoForceFeedback();
 
-	static void CollisionCallback(void* pData, dGeomID pObject1, dGeomID pObject2);
-	static void CollisionNoteCallback(void* pData, dGeomID pObject1, dGeomID pObject2);
+	static void CollisionCallback(void* data, dGeomID object1, dGeomID object2);
+	static void CollisionNoteCallback(void* data, dGeomID object1, dGeomID object2);
 
-	dWorldID mWorldID;
-	static float mWorldErp;
-	static float mWorldCfm;
-	dSpaceID mSpaceID;
-	dJointGroupID mContactJointGroupID;
-	int mNoteForceFeedbackId;
-	bool mNoteIsCollided;
+	dWorldID world_id_;
+	static float world_erp_;
+	static float world_cfm_;
+	dSpaceID space_id_;
+	dJointGroupID contact_joint_group_id_;
+	int note_force_feedback_id_;
+	bool note_is_collided_;
 
-	ObjectTable mObjectTable;
-	BodySet mAutoDisabledObjectSet;
-	JointTable mJointTable;
+	ObjectTable object_table_;
+	BodySet auto_disabled_object_set_;
+	JointTable joint_table_;
 
-	TriggerInfoList mTriggerInfoList;
-	JointList mFeedbackJointList;
+	TriggerInfoList trigger_info_list_;
+	JointList feedback_joint_list_;
 
-	FastAllocator<JointInfo> mJointInfoAllocator;
+	FastAllocator<JointInfo> joint_info_allocator_;
 
 	logclass();
 };

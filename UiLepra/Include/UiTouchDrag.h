@@ -7,19 +7,17 @@
 #pragma once
 
 #include <list>
-#include "../../Lepra/Include/Graphics2D.h"
-#include "UiLepra.h"
+#include "../../lepra/include/graphics2d.h"
+#include "uilepra.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 class Lock;
 }
 
 
-namespace UiLepra
-{
+namespace uilepra {
 
 
 
@@ -27,65 +25,61 @@ class InputManager;
 
 
 
-namespace Touch
-{
+namespace touch {
 
 
 
-using namespace Lepra;
+using namespace lepra;
 
 
 
-enum DragFlags
-{
-	DRAGGING_STICK	= (1<<0),
-	DRAGGING_UI	= (1<<1),
-	DRAGGING_OTHER	= 0xFFFF,
-	DRAG_USER	= (1<<16)
+enum DragFlags {
+	kDraggingStick	= (1<<0),
+	kDraggingUi	= (1<<1),
+	kDraggingOther	= 0xFFFF,
+	kDragUser	= (1<<16)
 };
 
-struct Drag
-{
-	Drag(int x, int y, bool isPress, int pButtonMask);
-	void Update(const PixelCoord& pCoord, bool pIsPress, int pButtonMask);
-	int GetDiamondDistanceTo(const PixelCoord& pCoord) const;
+struct Drag {
+	Drag(int x, int y, bool isPress, int button_mask);
+	void Update(const PixelCoord& coord, bool is_press, int button_mask);
+	int GetDiamondDistanceTo(const PixelCoord& coord) const;
 
-	PixelCoord mStart;
-	PixelCoord mLast;
-	bool mIsPress;
-	bool mIsNew;
-	int mButtonMask;
-	uint32 mFlags;
-	intptr_t mExtra;
+	PixelCoord start_;
+	PixelCoord last_;
+	bool is_press_;
+	bool is_new_;
+	int button_mask_;
+	uint32 flags_;
+	intptr_t extra_;
 };
 
 
 
-class DragManager
-{
+class DragManager {
 public:
 	typedef std::vector<Drag> DragList;
 
 	DragManager();
 	virtual ~DragManager();
 
-	void SetMaxDragDistance(int pMaxDragDistance);
-	void UpdateDrag(const PixelCoord& pPrevious, const PixelCoord& pLocation, bool pIsPressed, int pButtonMask);
-	void UpdateDragByMouse(const InputManager* pInputManager);
-	void UpdateMouseByDrag(InputManager* pInputManager);
-	bool UpdateTouchsticks(InputManager* pInputManager) const;
-	void SetDraggingUi(bool pIsUi);
+	void SetMaxDragDistance(int max_drag_distance);
+	void UpdateDrag(const PixelCoord& previous, const PixelCoord& location, bool is_pressed, int button_mask);
+	void UpdateDragByMouse(const InputManager* input_manager);
+	void UpdateMouseByDrag(InputManager* input_manager);
+	bool UpdateTouchsticks(InputManager* input_manager) const;
+	void SetDraggingUi(bool is_ui);
 	void DropReleasedDrags();
-	void ClearDrags(InputManager* pInputManager);
+	void ClearDrags(InputManager* input_manager);
 	DragList GetDragList();
-	void SetDragList(const DragList& pDragList);
+	void SetDragList(const DragList& drag_list);
 
 private:
-	Lock* mLock;
-	DragList mDragList;
-	PixelCoord mLastMouse;
-	bool mMouseLastPressed;
-	int mMaxDragDiamondDistance;
+	Lock* lock_;
+	DragList drag_list_;
+	PixelCoord last_mouse_;
+	bool mouse_last_pressed_;
+	int max_drag_diamond_distance_;
 
 	logclass();
 };

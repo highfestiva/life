@@ -1,84 +1,73 @@
 
-// Author: Jonas Byström
+// Author: Jonas BystrÃ¶m
 // Copyright (c) Pixel Doctrine
 
 
 
 #include "pch.h"
-#include "../../Tbc/Include/TerrainPatch.h"
-#include "../Include/TerrainFunctionManager.h"
-#include "../Include/TerrainPatchLoader.h"
+#include "../../tbc/include/terrainpatch.h"
+#include "../include/terrainfunctionmanager.h"
+#include "../include/terrainpatchloader.h"
 
 
 
-namespace Cure
-{
+namespace cure {
 
 
 
-TerrainPatchLoader::TerrainPatchLoader(ResourceManager* pResourceManager):
-	mResourceManager(pResourceManager)
-{
+TerrainPatchLoader::TerrainPatchLoader(ResourceManager* resource_manager):
+	resource_manager_(resource_manager) {
 }
 
-TerrainPatchLoader::~TerrainPatchLoader()
-{
-	mResourceManager = 0;
+TerrainPatchLoader::~TerrainPatchLoader() {
+	resource_manager_ = 0;
 }
 
 
 
-Tbc::TerrainPatch* TerrainPatchLoader::LoadPatch(const PatchArea& pArea, float pLod)
-{
-	Tbc::TerrainPatch* lPatch = LoadPatchMesh(pArea, pLod);
-	if (!lPatch)
-	{
-		lPatch = GeneratePatchMesh(pArea, pLod);
+tbc::TerrainPatch* TerrainPatchLoader::LoadPatch(const PatchArea& area, float lod) {
+	tbc::TerrainPatch* _patch = LoadPatchMesh(area, lod);
+	if (!_patch) {
+		_patch = GeneratePatchMesh(area, lod);
 	}
-	return (lPatch);
+	return (_patch);
 }
 
-void TerrainPatchLoader::DeletePatch(Tbc::TerrainPatch* pPatch)
-{
-	delete (pPatch);
+void TerrainPatchLoader::DeletePatch(tbc::TerrainPatch* patch) {
+	delete (patch);
 }
 
 
 
-Tbc::TerrainPatch* TerrainPatchLoader::LoadPatchMesh(const PatchArea&, float)
-{
+tbc::TerrainPatch* TerrainPatchLoader::LoadPatchMesh(const PatchArea&, float) {
 	// Loading 3D-meshes for terrain not implemented yet. TODO: implement!
 	return (0);
 }
 
-Tbc::TerrainPatch* TerrainPatchLoader::GeneratePatchMesh(const PatchArea& pArea, float pLod)
-{
-	TerrainFunctionManager* lFunctionManager = mResourceManager->GetTerrainFunctionManager();
-	deb_assert(lFunctionManager);
-	lFunctionManager->LoadFunctions(pArea, pLod);
-	Tbc::TerrainPatch* lPatch = lFunctionManager->GeneratePatchMesh(pArea, pLod);
-	return (lPatch);
+tbc::TerrainPatch* TerrainPatchLoader::GeneratePatchMesh(const PatchArea& area, float lod) {
+	TerrainFunctionManager* function_manager = resource_manager_->GetTerrainFunctionManager();
+	deb_assert(function_manager);
+	function_manager->LoadFunctions(area, lod);
+	tbc::TerrainPatch* _patch = function_manager->GeneratePatchMesh(area, lod);
+	return (_patch);
 }
 
 
 
-/*TerrainPatchLoader::PatchId TerrainPatchLoader::ConvertGridToId(int pX, int pY)
-{
-	const PatchId lPatchId = (pY<<16)|pX;
-	return (lPatchId);
+/*TerrainPatchLoader::PatchId TerrainPatchLoader::ConvertGridToId(int x, int y) {
+	const PatchId patch_id = (y<<16)|x;
+	return (patch_id);
 }
 
-TerrainPatchLoader::PatchId TerrainPatchLoader::ConvertGridToPosition(int pX, int pY, float& pPositionX, float& pPositionY)
-{
-	pPositionX = pX*Tbc::TerrainP
-	const PatchId lPatchId = (pY<<16)|pX;
-	return (lPatchId);
+TerrainPatchLoader::PatchId TerrainPatchLoader::ConvertGridToPosition(int x, int y, float& pPositionX, float& pPositionY) {
+	pPositionX = x*tbc::TerrainP
+	const PatchId patch_id = (y<<16)|x;
+	return (patch_id);
 }
 
-void TerrainPatchLoader::ConvertIdToGrid(PatchId pId, int& pX, int& pY)
-{
-	pX = (pId&0xFFFF);
-	pY = (pId>>16);
+void TerrainPatchLoader::ConvertIdToGrid(PatchId id, int& x, int& y) {
+	x = (id&0xFFFF);
+	y = (id>>16);
 }*/
 
 

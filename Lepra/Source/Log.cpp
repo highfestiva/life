@@ -5,168 +5,142 @@
 
 
 #include "pch.h"
-#include "../Include/Log.h"
-#include "../Include/Logger.h"
+#include "../include/log.h"
+#include "../include/logger.h"
 
 
 
-namespace Lepra
-{
+namespace lepra {
 
 
 
-LogDecorator::LogDecorator(Logger* pLogger, const std::type_info& pTypeId):
-	mLogger(pLogger)
+LogDecorator::LogDecorator(Logger* logger, const std::type_info& type_id):
+	logger_(logger)
 #ifdef LEPRA_MSVC
 	// Skip "class " in beginning of name.
-	, mClassName(str(pTypeId.name(+6)))
-{
+	, class_name_(str(type_id.name(+6))) {
 #elif defined(LEPRA_POSIX)
 {
 	// Parse up to class name.
 	// The format looks something like "1w5Lepra14TestBajjaMajjaE", thus (((BCD length)(data))...).
 	// If in global namespace, the namespace (len)(data) pair is left out.
-	const char* s = pTypeId.name();
-	const size_t lLength = ::strlen(s);
-	int lWordCount = 0;
-	int lTargetWordCount = 1;
+	const char* s = type_id.name();
+	const size_t length = ::strlen(s);
+	int word_count = 0;
+	int target_word_count = 1;
 	size_t x = 0;
-	size_t lStartOfWord = 0;
-	size_t lStepLength = 1;
-	for (; lWordCount < lTargetWordCount && x < lLength && lStepLength > 0; ++lWordCount, x += lStepLength)
-	{
-		for (; x < lLength && ::isalpha(s[x]); ++x)
+	size_t start_of_word = 0;
+	size_t step_length = 1;
+	for (; word_count < target_word_count && x < length && step_length > 0; ++word_count, x += step_length) {
+		for (; x < length && ::isalpha(s[x]); ++x)
 			;
-		char* lEndPtr;
-		long lWordLength = strutil::StrToL(&s[x], &lEndPtr, 10);
-		lStepLength = lEndPtr-&s[x];
-		lStartOfWord = x+lStepLength;
-		lStepLength = (lStepLength < 1)? 1 : lStepLength;
-		lStepLength += lWordLength;
-		if (lWordCount == 0 && x+lStepLength < lLength && ::isdigit(s[x+lStepLength]))
-		{
-			++lTargetWordCount;
+		char* end_ptr;
+		long word_length = strutil::StrToL(&s[x], &end_ptr, 10);
+		step_length = end_ptr-&s[x];
+		start_of_word = x+step_length;
+		step_length = (step_length < 1)? 1 : step_length;
+		step_length += word_length;
+		if (word_count == 0 && x+step_length < length && ::isdigit(s[x+step_length])) {
+			++target_word_count;
 		}
 	}
-	if (x <= lLength)
-	{
-		str lCrop(&s[lStartOfWord], x-lStartOfWord);
-		mClassName = lCrop;
-	}
-	else
-	{
-		mClassName = s;
+	if (x <= length) {
+		str crop(&s[start_of_word], x-start_of_word);
+		class_name_ = crop;
+	} else {
+		class_name_ = s;
 	}
 #else // !MSVC
 #error typeid parsing not implemented.
 #endif // MSVC/!MSVC
 }
 
-void LogDecorator::Print(LogLevel pLogLevel, const str& pText) const
-{
-	mLogger->Print(mClassName, pText, pLogLevel);
+void LogDecorator::Print(LogLevel log_level, const str& text) const {
+	logger_->Print(class_name_, text, log_level);
 }
 
-void LogDecorator::RawPrint(LogLevel pLogLevel, const str& pText) const
-{
-	mLogger->RawPrint(pText, pLogLevel);
+void LogDecorator::RawPrint(LogLevel log_level, const str& text) const {
+	logger_->RawPrint(text, log_level);
 }
 
 #define StrV()	\
-	va_list	lArguments;	\
-	va_start(lArguments, pText);	\
-	str lText = strutil::VFormat(pText, lArguments);	\
-	va_end(lArguments)
+	va_list	arguments;	\
+	va_start(arguments, text);	\
+	str _text = strutil::VFormat(text, arguments);	\
+	va_end(arguments)
 
 #define StrVLog(level)	\
 	StrV();	\
-	mLogger->Print(mClassName, lText, level)
+	logger_->Print(class_name_, _text, level)
 
 #ifndef NO_LOG_DEBUG_INFO
-void LogDecorator::Tracef(const char* pText, ...) const
-{
-	StrVLog(LEVEL_TRACE);
+void LogDecorator::Tracef(const char* text, ...) const {
+	StrVLog(kLevelTrace);
 }
 
-void LogDecorator::Trace(const str& pText) const
-{
-	Print(LEVEL_TRACE, pText);
+void LogDecorator::Trace(const str& text) const {
+	Print(kLevelTrace, text);
 }
 
-void LogDecorator::Debugf(const char* pText, ...) const
-{
-	StrVLog(LEVEL_DEBUG);
+void LogDecorator::Debugf(const char* text, ...) const {
+	StrVLog(kLevelDebug);
 }
 
-void LogDecorator::Debug(const str& pText) const
-{
-	Print(LEVEL_DEBUG, pText);
+void LogDecorator::Debug(const str& text) const {
+	Print(kLevelDebug, text);
 }
 #endif // !NO_LOG_DEBUG_INFO
 
-void LogDecorator::Performancef(const char* pText, ...) const
-{
-	StrVLog(LEVEL_PERFORMANCE);
+void LogDecorator::Performancef(const char* text, ...) const {
+	StrVLog(kLevelPerformance);
 }
 
-void LogDecorator::Performance(const str& pText) const
-{
-	Print(LEVEL_PERFORMANCE, pText);
+void LogDecorator::Performance(const str& text) const {
+	Print(kLevelPerformance, text);
 }
 
-void LogDecorator::Infof(const char* pText, ...) const
-{
-	StrVLog(LEVEL_INFO);
+void LogDecorator::Infof(const char* text, ...) const {
+	StrVLog(kLevelInfo);
 }
 
-void LogDecorator::Info(const str& pText) const
-{
-	Print(LEVEL_INFO, pText);
+void LogDecorator::Info(const str& text) const {
+	Print(kLevelInfo, text);
 }
 
-void LogDecorator::Headlinef(const char* pText, ...) const
-{
-	StrVLog(LEVEL_HEADLINE);
+void LogDecorator::Headlinef(const char* text, ...) const {
+	StrVLog(kLevelHeadline);
 }
 
-void LogDecorator::Headline(const str& pText) const
-{
-	Print(LEVEL_HEADLINE, pText);
+void LogDecorator::Headline(const str& text) const {
+	Print(kLevelHeadline, text);
 }
 
-void LogDecorator::Warningf(const char* pText, ...) const
-{
-	StrVLog(LEVEL_WARNING);
+void LogDecorator::Warningf(const char* text, ...) const {
+	StrVLog(kLevelWarning);
 }
 
-void LogDecorator::Warning(const str& pText) const
-{
-	Print(LEVEL_WARNING, pText);
+void LogDecorator::Warning(const str& text) const {
+	Print(kLevelWarning, text);
 }
 
-void LogDecorator::Errorf(const char* pText, ...) const
-{
-	StrVLog(LEVEL_ERROR);
+void LogDecorator::Errorf(const char* text, ...) const {
+	StrVLog(kLevelError);
 }
 
-void LogDecorator::Error(const str& pText) const
-{
-	Print(LEVEL_ERROR, pText);
+void LogDecorator::Error(const str& text) const {
+	Print(kLevelError, text);
 }
 
-void LogDecorator::Fatalf(const char* pText, ...) const
-{
-	StrVLog(LEVEL_FATAL);
+void LogDecorator::Fatalf(const char* text, ...) const {
+	StrVLog(kLevelFatal);
 }
 
-void LogDecorator::Fatal(const str& pText) const
-{
-	Print(LEVEL_FATAL, pText);
+void LogDecorator::Fatal(const str& text) const {
+	Print(kLevelFatal, text);
 }
 
-const str& LogDecorator::GetClassName() const
-{
-	return (mClassName);
+const str& LogDecorator::GetClassName() const {
+	return (class_name_);
 }
 
 

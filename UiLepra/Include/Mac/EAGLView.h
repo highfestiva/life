@@ -8,8 +8,8 @@
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
 #import <OpenGLES/EAGL.h>
-#import "../../../Lepra/Include/Canvas.h"
-#import "../UiInput.h"
+#import "../../../lepra/include/canvas.h"
+#import "../uiinput.h"
 
 // This class wraps the CAEAGLLayer from CoreAnimation into a convenient UIView subclass.
 // The view content is basically an EAGL surface you render your OpenGL scene into.
@@ -18,7 +18,7 @@
 {
 @private
 	EAGLContext *context;
-	Lepra::Canvas* canvas;
+	lepra::Canvas* canvas;
 	int baseAngle;
 
 	// The pixel dimensions of the CAEAGLLayer.
@@ -37,13 +37,13 @@
 }
 
 @property(nonatomic, retain) EAGLContext* context;
-@property(nonatomic, assign) Lepra::Canvas* canvas;
+@property(nonatomic, assign) lepra::Canvas* canvas;
 @property(nonatomic, assign) int baseAngle;
 @property(nonatomic, readonly) bool isOpen;
 @property(nonatomic, assign) UIResponder* responder;
 @property(nonatomic, assign) int orientationStrictness;
 @property(nonatomic, assign) UIInterfaceOrientation preferredRotation;
-@property(nonatomic, assign) UiLepra::InputManager* inputManager;
+@property(nonatomic, assign) uilepra::InputManager* inputManager;
 // Mandatory under the UITextInputTraits protocol.
 @property(nonatomic) UITextAutocapitalizationType autocapitalizationType;
 @property(nonatomic) UITextAutocorrectionType autocorrectionType;
@@ -51,18 +51,18 @@
 @property(nonatomic) UIKeyboardAppearance keyboardAppearance;
 @property(nonatomic) UIKeyboardType keyboardType;
 @property(nonatomic) UIReturnKeyType returnKeyType;
-@property(nonatomic, getter=isSecureTextEntry) BOOL secureTextEntry;
+@property(nonatomic, getter=isSecureTextEntry) BOOL secureTextEntry_;
 //@property(nonatomic) UITextSpellCheckingType spellCheckingType;
 
-+ (EAGLView*)sharedView;
-- (void)setFramebuffer;
++ (EAGLView*)sharedView_;
+- (void)framebuffer_;
 - (BOOL)presentFramebuffer;
-- (void)powerUpAcc;
-- (void)powerDownAcc;
+- (void)up_acc;
+- (void)down_acc;
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
-- (BOOL)shouldAutorotate;
-- (NSUInteger)supportedInterfaceOrientations;
+- (BOOL)shouldAutorotate_;
+- (NSUInteger)supportedInterfaceOrientations_;
 - (void)orientationDidChange:(NSNotification*)notification;
 
 @end
