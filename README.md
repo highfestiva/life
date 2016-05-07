@@ -1,7 +1,7 @@
 Life - a basic 3D physics game engine
 -----------------------------------------------------
 
-I've spent many years writing this engine, but if you want advanced rendering, character animation and skinning, you should go with UT4. If you're more interested in vehicles, robots and simulations in 3D, this engine might prove helpful.
+I've spent many years writing this engine, but if you want advanced rendering, character animation and skinning, you should go with UE4. If you're more interested in vehicles, robots and simulations in 3D, this engine might prove helpful.
 
 Life is portable and supports Windows, X11, MacOS and iOS. I've released [five](http://pixeldoctrine.com/) (unsuccessful) games with it over the years.
 
