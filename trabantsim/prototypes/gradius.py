@@ -12,7 +12,7 @@
 #  - bosses.
 
 from trabant import *
-from trabant.gameapi import setvar
+from trabant.gameapi import setvar, waitload
 from trabant.objects import gfxscale
 from math import fmod
 from time import time
@@ -41,8 +41,10 @@ collisions(False)
 bubble = create_sphere(radius=1.5, col='#33b')
 ship.joint(fixed_joint, bubble)
 collisions(True)
-ship_parts = (ship, bubble)
+ship_parts = [ship, bubble]
 ship.ship_parts = bubble.ship_parts = ship_parts
+ship.shield = None
+ship.radius = 5
 ship.health = 100
 ship.hurt = bubble.hurt = 100
 ship.immortal = False
@@ -145,14 +147,35 @@ while loop():
 
     new_shots = []
     if 'Space' in keys() and timeout(0.1, first_hit=True):
-        p = ship.pos()
-        new_shots += [create_capsule(p+vec3(12,0, 0), orientation=quat().rotate_y(pi/2), vel=vec3(90,0,0), col='#a60', trigger=True)]
-        new_shots += [create_capsule(p+vec3( 0,0,+3), orientation=quat().rotate_y(pi/2), vel=vec3(90,0,0), col='#a60', trigger=True)]
-        new_shots += [create_capsule(p+vec3( 0,0,-3), orientation=quat().rotate_y(pi/2), vel=vec3(90,0,0), col='#a60', trigger=True)]
+        p,d = ship.pos(),ship.radius*2+2
+        new_shots += [create_capsule(p+vec3(d,0, 0), orientation=quat().rotate_y(pi/2), vel=vec3(90,0,0), col='#a60', trigger=True)]
+        new_shots += [create_capsule(p+vec3(0,0,+3), orientation=quat().rotate_y(pi/2), vel=vec3(90,0,0), col='#a60', trigger=True)]
+        new_shots += [create_capsule(p+vec3(0,0,-3), orientation=quat().rotate_y(pi/2), vel=vec3(90,0,0), col='#a60', trigger=True)]
         for shot in new_shots:
             shot.physical = True
             shot.shooters = ship_parts
             shot.hurt = 30
+            shot.move = None
+        sound(sound_bang, p, volume=0.1)
+    elif 'LShift' in keys() and timeout(0.4, first_hit=True):
+        p,d = ship.pos(),ship.radius*2+3
+        shot = create_capsule(p+vec3(d,0, 0), length=3, orientation=quat().rotate_y(pi/2), vel=vec3(70,0,0), col='#a60', trigger=True)
+        shot.physical = True
+        shot.shooters = ship_parts
+        shot.hurt = 300
+        shot.move = None
+        es = [e for e in enemies if e.isloaded and e.pos().x > p.x+25]
+        if es:
+            tgt = min(es, key=lambda e:(e.pos()-p).length2())
+            def guide(shot):
+                if tgt in enemies:
+                    v = tgt.pos()-shot.pos()
+                    shot.orientation(quat().rotate_y(v.angle_y(vec3(0,1,0))))
+                    return v.normalize(70)
+                shot.move = None
+                return shot.vel()
+            shot.move = lambda s,t: guide(s)
+        new_shots += [shot]
         sound(sound_bang, p, volume=0.1)
     elif 'LCtrl' in keys() and timeout(1, first_hit=True):
         p = ship.pos()
@@ -164,6 +187,7 @@ while loop():
             shot.physical = False
             shot.shooters = ship_parts
             shot.hurt = 60
+            shot.move = None
         new_shots += laser_shots[:]
         def remove_shot():
             for laser_shot in laser_shots:
@@ -174,7 +198,7 @@ while loop():
     # Create new enemies.
     if timeout(4, 1):
         es = []
-        if random() > 0.1:
+        if random() > 0.9:
             start_t = time()
             for i in range(20):
                 ang = 2*pi*i/20
@@ -182,7 +206,7 @@ while loop():
                 enemy = create_sphere(tgtpos(0,ang), radius=2.5, vel=(-8,0,0), col='#493' if i!=0 else '#631')
                 enemy.start_t = start_t
                 enemy.angle = ang
-                enemy.move = lambda t: (tgtpos(t-enemy.start_t,enemy.angle) - enemy.pos()) * 20
+                enemy.move = lambda e,t: (tgtpos(t-e.start_t,e.angle) - e.pos()) * 20
                 enemy.shoots = (i==0)
                 es += [enemy]
         elif random() > 0.3:
@@ -192,7 +216,7 @@ while loop():
             es += [enemy]
         else:
             enemy = create_ascii_object(enemyasc, pos=vec3(80,0,random()*80-40), vel=(-5,0,0), col='#f00')
-            enemy.move = lambda t: (-10,0,10*sin(2*t))
+            enemy.move = lambda e,t: (-10,0,10*sin(2*t))
             enemy.shoots = True
             es += [enemy]
         for enemy in es:
@@ -212,6 +236,7 @@ while loop():
         shot.physical = True
         shot.shooters = enemy.ship_parts
         shot.hurt = 40
+        shot.move = None
         new_shots += [shot]
 
     shots += new_shots
@@ -226,7 +251,7 @@ while loop():
                 continue
             hull.health -= obj2.hurt
             if hull.health <= 0:
-                explode(pos, obj1.vel(), obj1.hurt/50, volume=0.1)
+                explode(pos, obj1.vel(), obj2.hurt**0.5/5, volume=0.1)
                 if hull == ship:
                     ship.health = 100
                     ship.immortal = True
@@ -240,6 +265,17 @@ while loop():
                 explode(pos, obj1.vel()*0.5, obj1.hurt/50, volume=0.1)
                 shots.remove(obj1)
                 obj1.release()
+
+    if not ship.shield and timeout(t=3, timer=10):
+        collisions(False)
+        ship.vel((0,0,0))   # Freeze!
+        ship.shield = create_sphere(pos=ship.pos(), radius=ship.radius*1.3, col='#ca65')
+        ship.shield.hurt = 400
+        ship_parts += [ship.shield]
+        ship.shield.ship_parts = ship_parts
+        waitload(ship.shield.id)
+        ship.joint(fixed_joint, ship.shield)
+        collisions(True)
 
     for obj in shots[:len(shots)//4+4] + enemies[:len(enemies)//4+4] + tunnel_segs[:2]:
         if not obj.physical:
@@ -256,6 +292,6 @@ while loop():
 
 
     t = time()
-    for enemy in enemies:
-        if enemy.move:
-            enemy.vel(enemy.move(t), avel=(2,0,0))
+    for o in shots+enemies:
+        if o.move:
+            o.vel(o.move(o,t), avel=(2,0,0))
