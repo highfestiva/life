@@ -790,7 +790,7 @@ bool App::Poll() {
 	if (ok) {
 		// Take care of the "brake and reverse" steering.
 		if (game_->GetCutie() && game_->GetCutie()->IsLoaded()) {
-			const bool is_moving_forward = (game_->GetCutie()->GetForwardSpeed() > 3.0f*SCALE_FACTOR);
+			const bool is_moving_forward = (game_->GetCutie()->GetForwardSpeed() > 3.0f*kScaleFactor);
 			if (reverse_and_brake_) {
 				game_->GetCutie()->SetEnginePower(0, is_moving_forward? 0 : -1*reverse_and_brake_);	// Reverse.
 				game_->GetCutie()->SetEnginePower(2, is_moving_forward? +1*reverse_and_brake_ : 0);	// Brake.

@@ -272,8 +272,8 @@ bool TextField::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
 	const DesktopWindow* desktop_window = (DesktopWindow*)GetParentOfType(Component::kDesktopwindow);
 	uilepra::InputManager* input_manager = desktop_window->GetInputManager();
 
-	bool ctrl_down = input_manager->ReadKey(uilepra::InputManager::kInKbdLctrl) ||
-		input_manager->ReadKey(uilepra::InputManager::kInKbdRctrl);
+	bool ctrl_down = input_manager->ReadKey(uilepra::InputManager::kInKbdLCtrl) ||
+		input_manager->ReadKey(uilepra::InputManager::kInKbdRCtrl);
 	const wstr delimitors = L" \t";
 
 

@@ -373,16 +373,16 @@ X11InputManager::KeyCode X11InputManager::TranslateKey(int _state, KeySym key_sy
 		case 65293:	return kInKbdEnter;
 		case 65421:	return kInKbdEnter;	// Numpad.
 		case 65437:	return kInKbdCenter;
-		case 65505:	return kInKbdLshift;
-		case 65507:	return kInKbdLctrl;
-		case 65513:	return kInKbdLalt;
+		case 65505:	return kInKbdLShift;
+		case 65507:	return kInKbdLCtrl;
+		case 65513:	return kInKbdLAlt;
 		case 65299:	return kInKbdPause;
 		case 65509:	return kInKbdCapsLock;
 
 		case 65307:	return kInKbdEsc;
 
-		case 65365:	return kInKbdPgup;
-		case 65366:	return kInKbdPgdown;
+		case 65365:	return kInKbdPgUp;
+		case 65366:	return kInKbdPgDown;
 		case 65367:	return kInKbdEnd;
 		case 65360:	return kInKbdHome;
 		case 65361:	return kInKbdLeft;
@@ -392,7 +392,7 @@ X11InputManager::KeyCode X11InputManager::TranslateKey(int _state, KeySym key_sy
 		case 65379:	return kInKbdInsert;
 		case 65535:	return kInKbdDel;
 
-		case 65516:	return kInKbdRos;
+		case 65516:	return kInKbdROs;
 		case 65383:	return kInKbdContextMenu;
 
 		case 65456:	return kInKbdNumpad0;
@@ -444,9 +444,9 @@ X11InputManager::KeyCode X11InputManager::TranslateKey(int _state, KeySym key_sy
 		case '<':	return kInKbdCompare;
 		case '>':	return kInKbdCompare;
 
-		case 65506:	return kInKbdRshift;
-		case 65508:	return kInKbdRctrl;
-		case 65027:	return kInKbdRalt;
+		case 65506:	return kInKbdRShift;
+		case 65508:	return kInKbdRCtrl;
+		case 65027:	return kInKbdRAlt;
 	}
 	if (key_sym >= 'a' && key_sym <= 'z') {
 		return KeyCode(key_sym-'a'+'A');

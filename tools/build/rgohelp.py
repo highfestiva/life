@@ -173,6 +173,12 @@ def _zipdir(dirname, include, arcname):
 	_zipfiles(zf, arc_no_inc, fs)
 	zf.close()
 
+def _shzipdir(dirname, arcname):
+	_run(["zip","-r9",arcname,dirname], "zipping archive")
 
 def _targzdir(dirname, arcname):
-	_run(["tar","-czf",arcname,dirname], "taring archive")
+	_run(["tar","--numeric-owner","--owner=0","--group=0","-cpf",arcname.replace('.gz',''),dirname], "taring archive")
+	_run(["gzip","-9",arcname.replace('.gz','')], "gzipping archive")
+
+def _7zdir(dirname, arcname):
+	_run(["7z","a",arcname,dirname], "7zipping archive")

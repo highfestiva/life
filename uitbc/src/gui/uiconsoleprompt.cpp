@@ -58,11 +58,11 @@ bool ConsolePrompt::OnChar(wchar_t c) {
 }
 
 bool ConsolePrompt::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
-	if (key_code == uilepra::InputManager::kInKbdLctrl || key_code == uilepra::InputManager::kInKbdRctrl) {
+	if (key_code == uilepra::InputManager::kInKbdLCtrl || key_code == uilepra::InputManager::kInKbdRCtrl) {
 		is_ctrl_pressed_ = true;
-	} else if (key_code == uilepra::InputManager::kInKbdLalt || key_code == uilepra::InputManager::kInKbdRalt) {
+	} else if (key_code == uilepra::InputManager::kInKbdLAlt || key_code == uilepra::InputManager::kInKbdRAlt) {
 		is_alt_pressed_ = true;
-	} else if (key_code == uilepra::InputManager::kInKbdLshift || key_code == uilepra::InputManager::kInKbdRshift) {
+	} else if (key_code == uilepra::InputManager::kInKbdLShift || key_code == uilepra::InputManager::kInKbdRShift) {
 		is_shift_pressed_ = true;
 	}
 
@@ -83,13 +83,13 @@ bool ConsolePrompt::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
 					buffered_chars_.push_back(kConKeyRight);
 				}
 			} break;
-			case uilepra::InputManager::kInKbdHome:	buffered_chars_.push_back(kConKeyHome);		break;
+			case uilepra::InputManager::kInKbdHome:		buffered_chars_.push_back(kConKeyHome);		break;
 			case uilepra::InputManager::kInKbdEnd:		buffered_chars_.push_back(kConKeyEnd);		break;
-			case uilepra::InputManager::kInKbdDown:	buffered_chars_.push_back(kConKeyDown);		break;
+			case uilepra::InputManager::kInKbdDown:		buffered_chars_.push_back(kConKeyDown);		break;
 			case uilepra::InputManager::kInKbdUp:		buffered_chars_.push_back(kConKeyUp);		break;
 			case uilepra::InputManager::kInKbdDel:		buffered_chars_.push_back(kConKeyDelete);	break;
-			case uilepra::InputManager::kInKbdPgup:	buffered_chars_.push_back(kConKeyPageUp);	break;
-			case uilepra::InputManager::kInKbdPgdown:	buffered_chars_.push_back(kConKeyPageDown);	break;
+			case uilepra::InputManager::kInKbdPgUp:		buffered_chars_.push_back(kConKeyPageUp);	break;
+			case uilepra::InputManager::kInKbdPgDown:	buffered_chars_.push_back(kConKeyPageDown);	break;
 			default:					return (false);	// TRICKY: RAII!
 		}
 	}
@@ -98,11 +98,11 @@ bool ConsolePrompt::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
 }
 
 bool ConsolePrompt::OnKeyUp(uilepra::InputManager::KeyCode key_code) {
-	if (key_code == uilepra::InputManager::kInKbdLctrl || key_code == uilepra::InputManager::kInKbdRctrl) {
+	if (key_code == uilepra::InputManager::kInKbdLCtrl || key_code == uilepra::InputManager::kInKbdRCtrl) {
 		is_ctrl_pressed_ = false;
-	} else if (key_code == uilepra::InputManager::kInKbdLalt || key_code == uilepra::InputManager::kInKbdRalt) {
+	} else if (key_code == uilepra::InputManager::kInKbdLAlt || key_code == uilepra::InputManager::kInKbdRAlt) {
 		is_alt_pressed_ = false;
-	} else if (key_code == uilepra::InputManager::kInKbdLshift || key_code == uilepra::InputManager::kInKbdRshift) {
+	} else if (key_code == uilepra::InputManager::kInKbdLShift || key_code == uilepra::InputManager::kInKbdRShift) {
 		is_shift_pressed_ = false;
 	}
 	return (false);

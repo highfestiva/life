@@ -110,7 +110,7 @@ X11FontManager::FontId X11FontManager::AddFont(const str& font_name, double size
 	const str font_file = GetFontFile(font_name, _suffixes);
 	FT_Face face;
 	if (font_file.empty() || FT_New_Face(library_, font_file.c_str(), 0, &face) != 0) {
-		log_.Debugf("Unable to find font %s.", font_name.c_str());
+		log_volatile(log_.Debugf("Unable to find font %s.", font_name.c_str()));
 		return kInvalidFontid;
 	}
 	FT_Set_Char_Size(face, 0, int(size*0.7*64), 90, 90);

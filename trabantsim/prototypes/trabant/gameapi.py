@@ -163,7 +163,7 @@ def setmesh(vertices, indices):
 		_cached_vertices,_cached_indices = verts,indices
 
 def setbgcolor(col):
-	r,g,b,a = _htmlcol(col)
+	r,g,b,a = htmlcol(col)
 	setvar('Ui.3D.ClearRed', r)
 	setvar('Ui.3D.ClearGreen', g)
 	setvar('Ui.3D.ClearBlue', b)
@@ -172,7 +172,7 @@ def setoutline(enable):
 	setvar('Ui.3D.OutlineMode', enable)
 
 def setpencolor(col):
-	r,g,b,a = _htmlcol(col)
+	r,g,b,a = htmlcol(col)
 	setvar('Ui.PenRed', r)
 	setvar('Ui.PenGreen', g)
 	setvar('Ui.PenBlue', b)
@@ -239,7 +239,7 @@ def mass(oid, w):
 	return getsetoidcmd('mass', oid, w)
 
 def col(oid, color):
-	return getsetoidcmd('color', oid, _htmlcol(color))
+	return getsetoidcmd('color', oid, htmlcol(color))
 
 def set_engine_force(oid, eid, xyz):
 	return getsetoidcmd('engine-force', oid, (eid,), xyz)
@@ -404,7 +404,7 @@ def _run_local_sim(addr):
 			open_prefix,end_suffix,binname = [],[],'trabantsim'
 		else:
 			open_prefix,end_suffix,binname = [],[],'TrabantSim.exe'
-		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('../../bin/sim','./'), ('..','Release/'), ('..','Debug/')]:
+		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('sim','./'), ('../../bin/sim','./'), ('..','Release/'), ('..','Debug/')]:
 			import os.path
 			import subprocess
 			curdir = os.path.abspath(os.path.curdir)
@@ -423,7 +423,7 @@ def _run_local_sim(addr):
 			print('Error: TrabantSim process could not be started.')
 	return proc != None
 
-def _htmlcol(col):
+def htmlcol(col):
 	if col:
 		if type(col) == str:
 			assert col[0]=='#'

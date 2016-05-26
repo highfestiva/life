@@ -1,0 +1,6 @@
+Trabant fixes:
+ - timer shouldn't have to keep a timer index... Better API!
+ - timeout objects! Shouldn't have to call time()!
+ - joint should go both ways. Engine must take it into account.
+ - A car with wheels could be created in one line.
+ - quat().rotate_y(...) shouldn't be necessary.

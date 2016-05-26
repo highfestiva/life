@@ -35,7 +35,7 @@
 #define DOUBLE_OFF_END_PATH_TIME	0.9990f	// Close to end, but not quite. Double that.
 #define REACT_TO_GRENADE_HEIGHT		50.0f	// How low a grenade needs to be for AI to take notice.
 #define SMOOTH_BRAKING_FACTOR		0.7f	// Factor to multiply with to ensure monster truck does not "rotate" too much.
-#define AIM_DISTANCE()			(((GetVehicleIndex() == 1)? 1.2f : 1.0f) * SCALE_FACTOR * NORMAL_AIM_AHEAD)
+#define AIM_DISTANCE()			(((GetVehicleIndex() == 1)? 1.2f : 1.0f) * kScaleFactor * NORMAL_AIM_AHEAD)
 
 
 namespace grenaderun {
@@ -123,7 +123,7 @@ void VehicleAi::OnTick() {
 				Spline* _path = game_->GetLevel()->QueryPath()->GetPath(x);
 				_path->GotoAbsoluteTime(start_time);
 				float _likeliness = 1;
-				const float nearest_distance = GetClosestPathDistance(_position, x, &_likeliness)/SCALE_FACTOR/2;
+				const float nearest_distance = GetClosestPathDistance(_position, x, &_likeliness)/kScaleFactor/2;
 				log_.Infof(" - Path %2i is %2.2f units away.", x, nearest_distance);
 				if (mode_ == kModeFindPathOffElevator) {
 					if (_path->GetCurrentInterpolationTime() > 0.7f) {
@@ -132,7 +132,7 @@ void VehicleAi::OnTick() {
 						log_.Info("   (Not relevant, too close to path end.)");
 						continue;
 					} else {
-						const float towards_distance = GetClosestPathDistance(_position+elevator_direction, x)/SCALE_FACTOR/2;
+						const float towards_distance = GetClosestPathDistance(_position+elevator_direction, x)/kScaleFactor/2;
 						if (towards_distance < nearest_distance) {
 							current_lifting_towards_goal = true;
 							if (!lifting_towards_goal) {
@@ -250,12 +250,12 @@ void VehicleAi::OnTick() {
 					}
 				}
 				_path->GotoAbsoluteTime(current_time);
-				if (nearest_path_distance < SCALE_FACTOR * OFF_COURSE_DISTANCE * velocity_scale_factor) {
+				if (nearest_path_distance < kScaleFactor * OFF_COURSE_DISTANCE * velocity_scale_factor) {
 					// We were able to return to normal, keep on running.
 					SetMode(kModeNormal);
 					return;
 				}
-				/*else if (nearest_path_distance > SCALE_FACTOR * OFF_COURSE_DISTANCE * velocity_scale_factor * 5) {
+				/*else if (nearest_path_distance > kScaleFactor * OFF_COURSE_DISTANCE * velocity_scale_factor * 5) {
 					// We're far off, perhaps we fell down from a plateu.
 					active_path_ = -1;
 					SetMode(kModeFindBestPath);
@@ -288,13 +288,13 @@ void VehicleAi::OnTick() {
 
 			if (mode_ != kModeHeadingBackOnTrack && mode_ != kModeGetOnElevator && mode_run_delta_frame_count%20 == 19) {
 				const float _distance = GetClosestPathDistance(_position);
-				if (_distance > SCALE_FACTOR * TOTALLY_OFF_COURSE_DISTANCE) {
+				if (_distance > kScaleFactor * TOTALLY_OFF_COURSE_DISTANCE) {
 					log_.Headline("Fell off something. Trying some new path.");
 					SetMode(kModeFindBestPath);
 					return;
 				}
 				const float velocity_scale_factor = ((mode_ == kModeNormal)? 1.0f : 3.0f) * Math::Clamp(_velocity.GetLength() / 2.5f, 0.3f, 1.0f);
-				if (_distance > SCALE_FACTOR * OFF_COURSE_DISTANCE * velocity_scale_factor) {
+				if (_distance > kScaleFactor * OFF_COURSE_DISTANCE * velocity_scale_factor) {
 					log_.Headline("Going about my way, but got offside somehow. Heading back.");
 					SetMode(kModeHeadingBackOnTrack);
 					return;
@@ -418,7 +418,7 @@ void VehicleAi::OnTick() {
 			last_average_angle_ = Math::Lerp(last_average_angle_, angle, 0.5f);
 
 			// Check if we need to slow down.
-			const float high_speed = SCALE_FACTOR * 2.7f;
+			const float high_speed = kScaleFactor * 2.7f;
 			const float abs_angle = ::fabs(angle);
 			if (_velocity.GetLengthSquared() > high_speed*high_speed) {
 				if (abs_angle > 0.2f) {
@@ -437,7 +437,7 @@ void VehicleAi::OnTick() {
 		} break;
 		case kModeBackingUp: {
 			// Brake or move backward.
-			const bool is_moving_forward = (game_->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
+			const bool is_moving_forward = (game_->GetCutie()->GetForwardSpeed() > 0.1f*kScaleFactor);
 			game_->GetCutie()->SetEnginePower(0, is_moving_forward? 0.0f : -strength);
 			game_->GetCutie()->SetEnginePower(2, is_moving_forward? strength :  0.0f);
 
@@ -461,7 +461,7 @@ void VehicleAi::OnTick() {
 			}
 
 			// Brake or move backward.
-			const bool is_moving_forward = (game_->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
+			const bool is_moving_forward = (game_->GetCutie()->GetForwardSpeed() > 0.1f*kScaleFactor);
 			game_->GetCutie()->SetEnginePower(0, is_moving_forward? 0.0f : -strength);
 			game_->GetCutie()->SetEnginePower(2, is_moving_forward? strength :  0.0f);
 
@@ -498,7 +498,7 @@ void VehicleAi::OnTick() {
 			Spline* _path = game_->GetLevel()->QueryPath()->GetPath(active_path_);
 			if (!IsCloseToTarget(_position, ON_GOAL_DISTANCE)) {
 				// If either already stopped at goal, OR stopped but at the wrong spot.
-				if (mode_ != kModeStoppingAtGoal || game_->GetCutie()->GetForwardSpeed() < 0.5f*SCALE_FACTOR) {
+				if (mode_ != kModeStoppingAtGoal || game_->GetCutie()->GetForwardSpeed() < 0.5f*kScaleFactor) {
 					_path->GotoAbsoluteTime(DOUBLE_OFF_END_PATH_TIME);	// Close to end, but not at end.
 					SetMode(kModeHeadingBackOnTrack);
 					return;
@@ -534,7 +534,7 @@ void VehicleAi::OnTick() {
 				const vec3 wanted_direction = _path->GetSlope();
 				const float angle = LEPRA_XY_ANGLE(wanted_direction, _direction);
 				game_->GetCutie()->SetEnginePower(1, +angle);
-				const bool is_moving_forward = (game_->GetCutie()->GetForwardSpeed() > 0.1f*SCALE_FACTOR);
+				const bool is_moving_forward = (game_->GetCutie()->GetForwardSpeed() > 0.1f*kScaleFactor);
 				game_->GetCutie()->SetEnginePower(0, is_moving_forward? 0.0f : -strength);
 				game_->GetCutie()->SetEnginePower(2, is_moving_forward? strength :  0.0f);
 
@@ -772,8 +772,8 @@ bool VehicleAi::AvoidGrenade(const vec3& position, const vec3& velocity, float c
 		const vec3 grenade_position = grenade->GetPosition();
 		const float h = grenade_position.z - position.z;
 		const vec3 grenade_velocity = grenade->GetVelocity();
-		if (h > REACT_TO_GRENADE_HEIGHT * SCALE_FACTOR ||
-			h < 4.0f * SCALE_FACTOR ||	// Still gonna blow up in our face, so ignore it.
+		if (h > REACT_TO_GRENADE_HEIGHT * kScaleFactor ||
+			h < 4.0f * kScaleFactor ||	// Still gonna blow up in our face, so ignore it.
 			grenade_velocity.z >= 0) {
 			continue;
 		}
@@ -804,11 +804,11 @@ bool VehicleAi::AvoidGrenade(const vec3& position, const vec3& velocity, float c
 			grenade_position.y + grenade_velocity.y * t);
 		// Compare against some point in front of my vehicle, so that I won't break
 		// if it's better to speed up.
-		const float damage_range = 8.0f * SCALE_FACTOR * caution;
+		const float damage_range = 8.0f * kScaleFactor * caution;
 		const vec2 my_target(position.x + velocity.x * t,
 			position.y + velocity.y * t);
 		vec2 my_extra_step(velocity.x, velocity.y);
-		if (my_extra_step.GetLengthSquared() < SCALE_FACTOR*SCALE_FACTOR) {
+		if (my_extra_step.GetLengthSquared() < kScaleFactor*kScaleFactor) {
 			my_extra_step.Set(0, 0);
 		} else {
 			// Overlap the sweet spot some with my probable position.
@@ -883,7 +883,7 @@ bool VehicleAi::IsCloseToTarget(const vec3& position, float distance) const {
 	const vec3 target = _path->GetValue();
 	const float target_distance2 = target.GetDistanceSquared(position);
 	//log_.Headlinef("IsCloseToTarget ^2: %f.", target_distance2);
-	const float goal_distance = distance*SCALE_FACTOR;
+	const float goal_distance = distance*kScaleFactor;
 	return (target_distance2 <= goal_distance*goal_distance);
 }
 
@@ -1020,7 +1020,7 @@ float VehicleAi::GetRelativeDriveOnAngle(const vec3& direction) const {
 }
 
 bool VehicleAi::QueryCutieHindered(const cure::TimeManager* time, const vec3& velocity) {
-	const float slow_speed = 0.35f * SCALE_FACTOR;
+	const float slow_speed = 0.35f * kScaleFactor;
 	if (velocity.GetLengthSquared() < slow_speed*slow_speed) {
 		if (stopped_frame_ == -1) {
 			stopped_frame_ = time->GetCurrentPhysicsFrame();

@@ -263,8 +263,8 @@ void ListControl::Select(Component* child, int selected_x, int selected_y) {
 		if (style_ == kMultiSelect) {
 			const DesktopWindow* desktop_window = (DesktopWindow*)GetParentOfType(kDesktopwindow);
 			uilepra::InputManager* input_manager = desktop_window->GetInputManager();
-			bool ctrl  = input_manager->ReadKey(uilepra::InputManager::kInKbdLctrl) || input_manager->ReadKey(uilepra::InputManager::kInKbdRctrl);
-			bool shift = input_manager->ReadKey(uilepra::InputManager::kInKbdLshift) || input_manager->ReadKey(uilepra::InputManager::kInKbdRshift);
+			bool ctrl  = input_manager->ReadKey(uilepra::InputManager::kInKbdLCtrl) || input_manager->ReadKey(uilepra::InputManager::kInKbdRCtrl);
+			bool shift = input_manager->ReadKey(uilepra::InputManager::kInKbdLShift) || input_manager->ReadKey(uilepra::InputManager::kInKbdRShift);
 
 			if (ctrl == false && shift == false) {
 				DeselectAll();

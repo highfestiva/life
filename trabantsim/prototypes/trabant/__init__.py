@@ -293,8 +293,8 @@ def loop(delay=0.03, end_after=None):
 				del _async_loaders[oid]
 	if _want_mousemove:
 		_mousemove = tovec3([float(a) for a in gameapi.mousemove().split()])
-	if end_after and timeout(end_after,timer=-154):
-		timeout(timer=-154, reset=True)	# Remove timer.
+	if end_after and timeout(end_after, timer='exit'):
+		timeout(timer='exit', reset=True)	# Remove timer.
 		return False
 	return gameapi.opened()
 
@@ -302,7 +302,7 @@ def sleep(t):
 	'''Wraps time.sleep so you won't have to import it.'''
 	time.sleep(min(0.5,t))
 
-def timeout(t=1, timer=0, first_hit=False, reset=False):
+def timeout(t=1, timer='default_timer', first_hit=False, reset=False):
 	'''Will check if t seconds elapsed since first called. If first_hit is true, it will elapse
 	   immediately on first call. You can run several simultaneous timers, use the timer parameter
 	   to select which one. Uses the same timers as timein().'''
@@ -319,7 +319,7 @@ def timeout(t=1, timer=0, first_hit=False, reset=False):
 		return True
 	return False
 
-def timein(t, timer=0):
+def timein(t, timer='default_timer'):
 	'''Checks if a less than t seconds elapsed since last called. Uses the same times as timeout().'''
 	global _timers
 	if not timer in _timers:
@@ -678,7 +678,7 @@ def _poll_joysticks():
 		used_joys.add(jid)
 		j = _joysticks[jid]
 		j.x,j.y = x,y
-	if timeout(0.05, timer=-155):	# Ensure an engine frame has passed.
+	if timeout(0.05, timer='reset_joysticks'):	# Ensure an engine frame has passed.
 		for j in [joy for jid,joy in _joysticks.items() if jid not in used_joys and not joy.sloppy]:
 			j.x = j.y = 0.0
 
@@ -826,7 +826,7 @@ def _update_cam_shadow():
 		_cam_pos += _cam_q * vec3(0,-_cam_distance,0)
 
 def _get_aspect_ratio():
-	if timeout(3,timer=-152,first_hit=True):
+	if timeout(3,timer='update_aspect_ratio',first_hit=True):
 		global _aspect_ratio
 		_aspect_ratio = gameapi.get_aspect_ratio()
 	return _aspect_ratio

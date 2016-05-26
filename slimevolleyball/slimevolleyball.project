@@ -52,6 +52,15 @@
     <File Name="app.mm" ExcludeProjConfig="Debug;Profile;Release"/>
     <File Name="slimeai.mm" ExcludeProjConfig="Debug;Profile;Release"/>
   </VirtualDirectory>
+  <Dependencies Name="Debug">
+    <Project Name="life"/>
+  </Dependencies>
+  <Dependencies Name="Profile">
+    <Project Name="life"/>
+  </Dependencies>
+  <Dependencies Name="Release">
+    <Project Name="life"/>
+  </Dependencies>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="-std=c++11" C_Options="" Assembler="">
@@ -160,6 +169,7 @@
       <Compiler Options="-O2;-Wall" C_Options="-O2;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <Preprocessor Value="NDEBUG"/>
+        <Preprocessor Value="NO_LOG_DEBUG_INFO"/>
       </Compiler>
       <Linker Options="" Required="yes">
         <LibraryPath Value="../life/Release"/>
@@ -205,13 +215,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <Dependencies Name="Debug">
-    <Project Name="life"/>
-  </Dependencies>
-  <Dependencies Name="Profile">
-    <Project Name="life"/>
-  </Dependencies>
-  <Dependencies Name="Release">
-    <Project Name="life"/>
-  </Dependencies>
 </CodeLite_Project>

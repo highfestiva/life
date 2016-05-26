@@ -154,7 +154,7 @@ def _incremental_copy(filelist, targetdir, buildtype, recursive=False):
 			if os.path.isdir(filename):
 				shutil.copytree(filename, targetfile)
 			else:
-				shutil.copyfile(filename, targetfile)
+				shutil.copy2(filename, targetfile)
 			updates += 1
 
 
@@ -279,8 +279,9 @@ def _create_zip(targetdir, targetfile, buildtype):
 
 def _buildzip(builder, buildtype):
 	rgohelp._verify_base_dir()
-	subdir = fullname if not ismac else '.'
-	targetdir = fullname
+	bestname = fullname if osname != 'Linux' else fullname.replace(' ','')
+	subdir = bestname if not ismac else '.'
+	targetdir = bestname
 	if buildtype == "rc":
 		targetdir = "PRE_ALPHA."+targetdir
 	elif buildtype != "final":
@@ -288,11 +289,14 @@ def _buildzip(builder, buildtype):
 	targetdir = 'tmp/'+targetdir
 	os.makedirs(targetdir)
 	builder(targetdir, buildtype)
+	for app in appnames:
+		if bestname != app and os.path.exists(targetdir+'/'+app):
+			os.rename(targetdir+'/'+app, targetdir+'/'+bestname)
 	tmpdirs = ('tmp', '..') if not ismac else (targetdir, '../..')
 	os.chdir(tmpdirs[0])
-	targetfile = _create_zip(subdir, fullname, buildtype)
+	targetfile = _create_zip(subdir, bestname, buildtype)
 	os.chdir(tmpdirs[1])
-	nicefile = fullname+"."+osname+"."+hwname+"."+buildtype+"."+datename+'.'+targetfile.split('.',1)[1]
+	nicefile = bestname+"."+osname+"."+hwname+"."+buildtype+"."+datename+'.'+targetfile.split('.',1)[1]
 	os.rename(tmpdirs[0]+'/'+targetfile, nicefile)
 	_cleandir('tmp')
 	os.rmdir('tmp')

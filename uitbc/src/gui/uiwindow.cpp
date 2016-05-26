@@ -431,8 +431,8 @@ bool Window::OnChar(wchar_t c) {
 			if (x->first == 2) {
 				return (Parent::OnChar(c));	// RAII simplifies.
 			} else if (x->first) {
-				if (input_manager->ReadKey(uilepra::InputManager::kInKbdLshift) ||
-					input_manager->ReadKey(uilepra::InputManager::kInKbdRshift)) {
+				if (input_manager->ReadKey(uilepra::InputManager::kInKbdLShift) ||
+					input_manager->ReadKey(uilepra::InputManager::kInKbdRShift)) {
 					focus_previous = true;
 					break;
 				}

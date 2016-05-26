@@ -211,7 +211,7 @@ str Game::GetVehicle() const {
 void Game::SetVehicle(const str& vehicle) {
 	allow_win_ = true;
 	if (vehicle_ && vehicle_->IsLoaded() &&
-		vehicle_->GetPosition().GetDistance(GetCutieStart().GetPosition()) < 2.0f*SCALE_FACTOR &&
+		vehicle_->GetPosition().GetDistance(GetCutieStart().GetPosition()) < 2.0f*kScaleFactor &&
 		vehicle_->GetClassId() == vehicle &&
 		vehicle_->GetHealth() > 0) {
 		vehicle_->DrainHealth(-1);
@@ -410,7 +410,7 @@ void Game::Detonate(const vec3& force, const vec3& torque, const vec3& position,
 
 	if (target == level_) {
 		// Stones and mud. More if hit ground, less otherwise.
-		const float scale = SCALE_FACTOR * 320 / ui_manager_->GetCanvas()->GetWidth();
+		const float scale = kScaleFactor * 320 / ui_manager_->GetCanvas()->GetWidth();
 		const int particle_count = (level_->GetStructureGeometry((unsigned)0)->GetBodyId() == target_body_id)? Random::GetRandomNumber()%50+50 : 10;
 		for (int i = 0; i < particle_count; ++i) {
 			UiCure::Props* puff = new UiCure::Props(GetResourceManager(), "mud_particle_01", ui_manager_);
@@ -483,8 +483,8 @@ void Game::Detonate(const vec3& force, const vec3& torque, const vec3& position,
 			const vec3 body_center = GameTicker::GetPhysicsManager(true)->GetBodyPosition(geometry->GetBodyId());
 			vec3 f = body_center - epicenter;
 			float d = f.GetLength();
-			if (d > 80*SCALE_FACTOR ||
-				(d > 50*SCALE_FACTOR && _object != vehicle_)) {
+			if (d > 80*kScaleFactor ||
+				(d > 50*kScaleFactor && _object != vehicle_)) {
 				continue;
 			}
 			float distance = d;
@@ -516,7 +516,7 @@ void Game::Detonate(const vec3& force, const vec3& torque, const vec3& position,
 				}
 				score *= 63;
 				score = std::min(20000.0, score*score);
-				if (distance < 25*SCALE_FACTOR) {
+				if (distance < 25*kScaleFactor) {
 					did_hit_vehicle = true;
 				} else {
 					score = 0;
@@ -624,7 +624,7 @@ float Game::GetVehicleStartHealth(int round_index) const {
 	if (GetComputerIndex() == -1 || round_index < 2) {
 		return 1;
 	}
-	return ::pow(HEALTH_ROUND_FACTOR, round_index/2);
+	return ::pow(kHealthRoundFactor, round_index/2);
 }
 
 void Game::EndSlowmo() {
@@ -706,8 +706,8 @@ bool Game::Render() {
 		const vec3 vehicle_pos = vehicle_->GetPosition();
 		vec3 offset = vehicle_cam_pos_ - vehicle_pos;
 		offset.z = 0;
-		const float cam_xy_distance = 13 * SCALE_FACTOR;
-		float cam_height = 5 * SCALE_FACTOR;
+		const float cam_xy_distance = 13 * kScaleFactor;
+		float cam_height = 5 * kScaleFactor;
 		offset.Normalize(cam_xy_distance);
 		float angle = (-offset).GetAngle(vec3(0, cam_xy_distance, 0));
 		if (offset.x < 0) {
@@ -725,7 +725,7 @@ bool Game::Render() {
 			if (!is_collision) {
 				break;
 			}
-			cam_height += 10*SCALE_FACTOR;
+			cam_height += 10*kScaleFactor;
 			offset.z = cam_height;
 		}
 		vehicle_cam_height_ = Math::Lerp(vehicle_cam_height_, cam_height, 0.2f);
@@ -754,7 +754,7 @@ bool Game::Render() {
 		const float launcher_height = 3;
 		const vec3 muzzle_position(launcher_position_ + launcher_->GetOrientation()*vec3(0, 0, launcher_height));
 
-		float range = 100 * SCALE_FACTOR;
+		float range = 100 * kScaleFactor;
 		float look_down_angle = -PIF/2;
 		if (vehicle_ && vehicle_->IsLoaded()) {
 			range = muzzle_position.GetDistance(vehicle_->GetPosition());
@@ -762,7 +762,7 @@ bool Game::Render() {
 		}
 
 		vec3 straight_vector(vehicle_->GetPosition() - muzzle_position);
-		const float cam_distance = 10 * SCALE_FACTOR;
+		const float cam_distance = 10 * kScaleFactor;
 		straight_vector.Normalize(cam_distance);
 		straight_vector.x = cam_distance*sin(launcher_yaw_);
 		straight_vector.y = -cam_distance*cos(launcher_yaw_);
@@ -816,7 +816,7 @@ bool Game::FlybyRender() {
 
 	xform t;
 	const double sweep_time = total_flyby_time * 0.25;
-	const float distance = 100 * SCALE_FACTOR;
+	const float distance = 100 * kScaleFactor;
 	if (fly_by_time_ < sweep_time || flyby_mode_ == kFlybyPause) {
 		// Sweep around the area in a circle.
 		const float a = 0.8f * 2*PIF * (float)(fly_by_time_/sweep_time);

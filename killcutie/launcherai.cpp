@@ -61,7 +61,7 @@ void LauncherAi::OnTick() {
 		did_shoot_ = false;
 	}
 	if (difficulty > 0.9f) {
-		if (ctf_distance < 60*SCALE_FACTOR && ctf_position.z-target_position.z < 7) {
+		if (ctf_distance < 60*kScaleFactor && ctf_position.z-target_position.z < 7) {
 			handled = true;
 			if (shot_count_ > 2) {
 				shot_count_ = 0;
@@ -69,8 +69,8 @@ void LauncherAi::OnTick() {
 			// Alternate between firing twice at CTF platform and once at vehicle.
 			if (shot_count_ <= 1) {
 				target_position = ctf_position;
-				target_position.x += -direction.x * (2 * SCALE_FACTOR) + Random::Uniform(-0.3f*SCALE_FACTOR, 0.3f*SCALE_FACTOR);
-				target_position.y += -direction.y * (2 * SCALE_FACTOR) + Random::Uniform(-0.3f*SCALE_FACTOR, 0.3f*SCALE_FACTOR);
+				target_position.x += -direction.x * (2 * kScaleFactor) + Random::Uniform(-0.3f*kScaleFactor, 0.3f*kScaleFactor);
+				target_position.y += -direction.y * (2 * kScaleFactor) + Random::Uniform(-0.3f*kScaleFactor, 0.3f*kScaleFactor);
 				target_velocity.Set(0, 0, 0);
 				target_offset_.Set(0, 0, 0);
 				adjusted_for_slowing_down = true;
@@ -86,7 +86,7 @@ void LauncherAi::OnTick() {
 			}
 		}
 	} else {
-		if (ctf_distance < 20*SCALE_FACTOR) {
+		if (ctf_distance < 20*kScaleFactor) {
 			handled = true;
 			// She's close, assume she's going to be close and brake hard soon.
 			//target_position = (target_position+ctf_position) * 0.5f;
@@ -95,7 +95,7 @@ void LauncherAi::OnTick() {
 		}
 	}
 	if (!handled && heading_towards_ctf) {
-		if (ctf_distance < 170*SCALE_FACTOR) {
+		if (ctf_distance < 170*kScaleFactor) {
 			if (ctf_position.z-target_position.z > 7) {
 				// Nevermind - this gal is far below the goal. Keep aiming at her instead of camping at the goal.
 			} else if (target_speed * 10 > ctf_distance * 1.2f) {
@@ -140,7 +140,7 @@ void LauncherAi::OnTick() {
 			last_shot_.ClearTimeDiff();
 			if (difficulty >= 0.7f) {
 				// Good player has some tactics.
-				if (target_speed > 2*SCALE_FACTOR && !adjusted_for_slowing_down &&
+				if (target_speed > 2*kScaleFactor && !adjusted_for_slowing_down &&
 					game_->GetCutie()->GetPhysics()->GetEngineCount() >= 2) {
 					// Guess direction depending on steering.
 					const float angle = game_->GetCutie()->GetPhysics()->GetEngine(1)->GetValue();
@@ -158,11 +158,11 @@ void LauncherAi::OnTick() {
 				}
 			} else if (difficulty <= 0.3f) {
 				// Poor player spreads 'em a lot.
-				const float o = 16*SCALE_FACTOR / (0.8f+difficulty*8);
+				const float o = 16*kScaleFactor / (0.8f+difficulty*8);
 				target_offset_.Set(Random::Uniform(-o, o), Random::Uniform(-o, o), 0);
 			} else {
 				// Average computer player always spreads 'em a little.
-				const float o = 5*SCALE_FACTOR;
+				const float o = 5*kScaleFactor;
 				target_offset_.Set(Random::Uniform(-o, o), Random::Uniform(-o, o), 0);
 			}
 		}

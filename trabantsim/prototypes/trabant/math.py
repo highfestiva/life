@@ -33,8 +33,10 @@ def tovec3(v):
 		return v
 	if type(v) == vec3:
 		return v
-	elif len(v) == 3:
+	try:
 		return vec3(*v)
+	except:
+		return vec3(v,v,v)
 
 def toaxis(v):
 	global _axis
