@@ -10,7 +10,7 @@
   <Project Name="killcutie" Path="../killcutie/killcutie.project" Active="No"/>
   <Project Name="fire" Path="../fire/fire.project" Active="No"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="no">
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
       <Project Name="life" ConfigName="Debug"/>
       <Project Name="trabantsim" ConfigName="Debug"/>
@@ -22,7 +22,7 @@
       <Project Name="killcutie" ConfigName="Debug"/>
       <Project Name="fire" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="yes">
+    <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
       <Project Name="trabantsim" ConfigName="Release"/>
       <Project Name="life" ConfigName="Release"/>

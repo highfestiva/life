@@ -45,6 +45,8 @@ public:
 		kEngineBallBrake,
 		kEngineYawBrake,
 		kEngineAirBrake,
+		kEngineUprightStabilize,
+		kEngineForwardStabilize,
 	};
 	enum EngineMode {
 		kModeNormal = 1,

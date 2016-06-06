@@ -411,7 +411,7 @@ void TrabantSimManager::CreateClones(IntList& created_object_ids, int original_i
 			Object* _object = (Object*)Parent::CreateContextObject("object", cure::kNetworkObjectLocallyControlled, 0);
 			_object->SetPhysicsTypeOverride(is_static? cure::kPhysicsOverrideStatic : cure::kPhysicsOverrideDynamic);
 			{
-				const quat pq = x->orientation_ * original_xform.GetOrientation();
+				const quat pq = x->orientation_;
 				_object->SetRootOrientation(pq);
 				_object->SetRootPosition(x->position_ - original_xform.GetPosition());
 				{
@@ -689,6 +689,10 @@ int TrabantSimManager::CreateEngine(int object_id, const str& engine_type, const
 	} else if (engine_type == "slider") {
 		_engine_type = tbc::PhysicsEngine::kEngineSliderForce;
 		is_attachment = true;
+	} else if (engine_type == "upright_stabilize") {
+		_engine_type = tbc::PhysicsEngine::kEngineUprightStabilize;
+	} else if (engine_type == "forward_stabilize") {
+		_engine_type = tbc::PhysicsEngine::kEngineForwardStabilize;
 	} else {
 		return -1;
 	}

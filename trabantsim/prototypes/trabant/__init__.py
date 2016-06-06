@@ -7,6 +7,7 @@ import sys
 import trabant.asc2obj
 import trabant.gameapi
 import trabant.objgen
+from trabant.objects import sphere_resolution,capsule_resolution
 import time
 
 
@@ -21,7 +22,7 @@ class _flushfile:
 		self.f.flush()
 sys.stdout = _flushfile(sys.stdout)
 
-roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine,slider_engine = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt slider'.split()
+roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine,slider_engine,upright_stabilizer = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt slider upright_stabilizer'.split()
 hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider fixed'.split()
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
@@ -90,9 +91,14 @@ class Obj:
 			gameapi.orientation(self.id, orientation)
 		if not pos and not orientation:
 			return gameapi.pos(self.id, None)
-	def orientation(self, orientation=None):
-		'''Orientation is a quaternion.'''
-		return gameapi.orientation(self.id, orientation)
+	def orientation(self, orientation=None, avel=None):
+		'''Orientation is a quaternion. avel means angular velocity, i.e. rotation speed about each axis.'''
+		if orientation:
+			gameapi.orientation(self.id, orientation)
+		if avel:
+			gameapi.avel(self.id, avel)
+		if not orientation and not avel:
+			return gameapi.orientation(self.id, None)
 	def vel(self, vel=None, avel=None):
 		'''avel means angular velocity, i.e. rotation speed about each axis.'''
 		if vel:
@@ -156,9 +162,6 @@ class Obj:
 		   joints this is the low and high angle (in radians).'''
 		self.last_joint_axis = tovec3(axis)
 		return gameapi.create_joint(self.id, joint_type, obj2.id, axis, stop, spring)
-	def add_stabilizer(self, force=0.5):
-		'''Adds a stabilizer to the object, this is useful if you're building a helicopter or similar.'''
-		gameapi.addtag(self.id, 'upright_stabilizer', [force], [], [0], [], [])
 	def release(self):
 		'''Remove the object from the game.'''
 		if self.id in _async_loaders:
@@ -362,9 +365,10 @@ def bg(col):
 	_tryinit()
 	gameapi.setbgcolor(col)
 
-def fg(col=None, outline=None):
+def fg(col=None, outline=None, shadows=None):
 	'''Set default foreground color either as (0.3,1,0.5), '#ffa', or '#F6AA03'. outline=False means the whole
-	   shape will be filled with color. Default is outline=True.'''
+	   shape will be filled with color. Default is outline=True. shadows=False turns of shadow volume rendering.
+	   Default is shadows=True.'''
 	_tryinit()
 	if col:
 		global _prev_col
@@ -373,6 +377,8 @@ def fg(col=None, outline=None):
 			gameapi.setpencolor(col)
 	if outline != None:
 		gameapi.setoutline(outline)
+	if shadows != None:
+		gameapi.setshadows(shadows)
 
 def fog(near,far):
 	'''Sets fog near and far plane in physical range, e.g. fog(130,750).'''
@@ -438,24 +444,25 @@ def create_box(pos=None, orientation=None, side=1, vel=None, avel=None, mass=Non
 		orientation,gfx,phys = process(orientation,gfx,phys)
 	return _create_object(gfx, phys, static, trigger, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
-def create_sphere(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, trigger=False, process=None):
+def create_sphere(pos=None, radius=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, trigger=False, process=None, resolution=sphere_resolution):
 	'''Returns an Obj. static=True means object if fixed in absolute space. trigger=True means it won't apply any
 	   force during collisions. Only four types of materials exist: flat, smooth, checker and noise. orientation
 	   is a quaternion, avel is angular velocity. You can pre-process the physics and graphics with the process
 	   callback function before it's added to the simulation.'''
-	orientation,resolution = quat(),int(min(8, max(4,radius**0.3)*8))
-	gfx,phys = objgen.createsphere(radius, latitude=resolution, longitude=int(resolution*1.5))
+	orientation = quat()
+	latitude_resolution,longitude_resolution = resolution(radius)
+	gfx,phys = objgen.createsphere(radius, latitude=latitude_resolution, longitude=longitude_resolution)
 	if process:
 		orientation,gfx,phys = process(orientation,gfx,phys)
 	return _create_object(gfx, phys, static, trigger, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)
 
-def create_capsule(pos=None, orientation=None, radius=0.5, length=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, trigger=False, process=None):
+def create_capsule(pos=None, orientation=None, radius=0.5, length=1, vel=None, avel=None, mass=None, col=None, mat='smooth', static=False, trigger=False, process=None, resolution=capsule_resolution):
 	'''Returns an Obj. static=True means object if fixed in absolute space. trigger=True means it won't apply any
 	   force during collisions. Only four types of materials exist: flat, smooth, checker and noise. orientation
 	   is a quaternion, avel is angular velocity. You can pre-process the physics and graphics with the process
 	   callback function before it's added to the simulation.'''
-	resolution = int(min(8, max(4,radius**0.3)*8))
-	gfx,phys = objgen.createcapsule(radius, length, latitude=resolution, longitude=int(resolution*1.5))
+	latitude_resolution,longitude_resolution = resolution(radius, length)
+	gfx,phys = objgen.createcapsule(radius, length, latitude=latitude_resolution, longitude=longitude_resolution)
 	if process:
 		orientation,gfx,phys = process(orientation,gfx,phys)
 	return _create_object(gfx, phys, static, trigger, pos=pos, orientation=orientation, vel=vel, avel=avel, mass=mass, col=col, mat=mat)

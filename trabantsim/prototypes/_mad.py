@@ -164,10 +164,6 @@ good = [[hinge_joint,joint_obj,(0,1,0),(-1,+1),(0.5,0.5)]]
 bad = [['gack?',None,(0,0),(+1,-1,0),(-0.5,-0.5)], [{},{},{},'ab','cd']]
 testrun(obj.joint, good, bad)
 
-good = [[1]]
-bad = [['a'], [{}]]
-testrun(obj.add_stabilizer, good, bad)
-
 obj.release()
 
 

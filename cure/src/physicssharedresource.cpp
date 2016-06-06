@@ -132,7 +132,7 @@ bool PhysicsSharedResource::FinalizeInit() {
 	// Set orienation (as given in initial transform). The orientation in initial transform
 	// is relative to the initial root bone orientation.
 	if (ok) {
-		if (structure->GetPhysicsType() == tbc::ChunkyPhysics::kDynamic) {
+		/*if (structure->GetPhysicsType() == tbc::ChunkyPhysics::kDynamic)*/ {
 			const float total_mass = structure->QueryTotalMass(init_data_.physics_manager_);
 			ObjectPositionalData placement;
 			ok = PositionHauler::Get(placement, init_data_.physics_manager_, structure, total_mass);

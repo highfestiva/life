@@ -85,13 +85,13 @@ class Obj:
 	def __repr__(self):
 		return str(self.gfxmesh) + '\n'.join((print(geom) for geom in self.physgeoms))
 
+
 def orthoscale(scale):
 	def doscale(orientation,gfx,phys):
 		s = tovec3(scale)
 		o = toquat(orientation)
 		gfx.orthoscale(o,s)
-		ophys = o.rotate_x(-pi/2)   # Physics flip table.
-		[p.orthoscale(ophys,s) for p in phys]
+		[p.orthoscale(o,s) for p in phys]
 		return o,gfx,phys
 	return doscale
 
@@ -119,3 +119,12 @@ def process_chain(*processors):
 			orientation,gfx,phys = process(orientation,gfx,phys)
 		return orientation,gfx,phys
 	return doprocess
+
+
+def sphere_resolution(radius):
+	latitude = int(min(8, max(4,radius**0.3)*8))
+	longitude = int(latitude*1.5)
+	return latitude,longitude
+
+def capsule_resolution(radius, length):
+	return sphere_resolution(radius)

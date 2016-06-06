@@ -171,6 +171,9 @@ def setbgcolor(col):
 def setoutline(enable):
 	setvar('Ui.3D.OutlineMode', enable)
 
+def setshadows(enable):
+	setvar('Ui.3D.Shadows', 'Force:Volumes' if enable else 'None')
+
 def setpencolor(col):
 	r,g,b,a = htmlcol(col)
 	setvar('Ui.PenRed', r)

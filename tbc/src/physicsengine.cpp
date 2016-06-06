@@ -168,10 +168,10 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 	intensity_ = 0;
 	EngineNodeArray::const_iterator i = engine_node_array_.begin();
 	for (; i != engine_node_array_.end(); ++i) {
-		const EngineNode& _engine_node = *i;
-		ChunkyBoneGeometry* _geometry = _engine_node.geometry_;
-		const float _scale = _engine_node.scale_;
-		if (!_geometry) {
+		const EngineNode& engine_node = *i;
+		ChunkyBoneGeometry* geometry = engine_node.geometry_;
+		const float scale = engine_node.scale_;
+		if (!geometry) {
 			log_.Error("Missing node!");
 			continue;
 		}
@@ -191,16 +191,16 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 					axis[2] = orientation*axis[2];
 				}
 				vec3 offset;
-				while (_geometry->GetJointType() == ChunkyBoneGeometry::kJointExclude) {
-					ChunkyBoneGeometry* parent = _geometry->GetParent();
+				while (geometry->GetJointType() == ChunkyBoneGeometry::kJointExclude) {
+					ChunkyBoneGeometry* parent = geometry->GetParent();
 					if (!parent) {
 						break;
 					}
-					vec3 maya_offset = _geometry->GetOriginalOffset();
+					vec3 maya_offset = geometry->GetOriginalOffset();
 					std::swap(maya_offset.y, maya_offset.z);
 					maya_offset.y = -maya_offset.y;
 					offset += maya_offset;
-					_geometry = parent;
+					geometry = parent;
 				}
 				vec3 push_vector;
 				for (int i = kAspectPrimary; i <= kAspectTertiary; ++i) {
@@ -210,7 +210,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 				if (push_force > 0.1f || friction_) {
 					if (friction_) {
 						vec3 velocity_vector;
-						physics_manager->GetBodyVelocity(_geometry->GetBodyId(), velocity_vector);
+						physics_manager->GetBodyVelocity(geometry->GetBodyId(), velocity_vector);
 						velocity_vector /= max_speed_;
 						if (engine_type_ == kEngineWalk) {
 							velocity_vector.z = 0;	// When walking we won't apply brakes in Z.
@@ -218,7 +218,7 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 						vec3 f = (velocity_vector-push_vector) * (0.5f*friction_);
 						push_vector -= f;
 					}
-					physics_manager->AddForceAtRelPos(_geometry->GetBodyId(), push_vector*strength_*_scale, offset);
+					physics_manager->AddForceAtRelPos(geometry->GetBodyId(), push_vector*strength_*scale, offset);
 				}
 				intensity_ += Math::Lerp(Math::Clamp(friction_,0.1f,0.5f), 1.0f, push_force);
 			} break;
@@ -242,51 +242,51 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 				if (push_force > 0.1f || friction_ != 0) {
 					if (friction_) {
 						vec3 angular_velocity_vector;
-						physics_manager->GetBodyAngularVelocity(_geometry->GetBodyId(), angular_velocity_vector);
+						physics_manager->GetBodyAngularVelocity(geometry->GetBodyId(), angular_velocity_vector);
 						angular_velocity_vector /= max_speed_;
 						vec3 f = (angular_velocity_vector-push_vector) * (0.5f*friction_);
 						push_vector -= f;
 					}
-					physics_manager->AddTorque(_geometry->GetBodyId(), push_vector*strength_*_scale);
+					physics_manager->AddTorque(geometry->GetBodyId(), push_vector*strength_*scale);
 				}
 				intensity_ += Math::Lerp(Math::Clamp(friction_,0.1f,0.5f), 1.0f, push_force);
 			} break;
 			case kEngineHover: {
 				if (primary_force != 0 || value_[kAspectSecondary] != 0) {
 					// Arcade stabilization for lifter (typically hovercraft, elevator or similar vehicle).
-					vec3 lift_pivot = physics_manager->GetBodyPosition(_geometry->GetBodyId()) + vec3(0,0,1)*friction_*_scale;
+					vec3 lift_pivot = physics_manager->GetBodyPosition(geometry->GetBodyId()) + vec3(0,0,1)*friction_*scale;
 
-					const vec3 lift_force = vec3(0,0,1)*strength_*_scale;
-					physics_manager->AddForceAtPos(_geometry->GetBodyId(), lift_force, lift_pivot);
+					const vec3 lift_force = vec3(0,0,1)*strength_*scale;
+					physics_manager->AddForceAtPos(geometry->GetBodyId(), lift_force, lift_pivot);
 				}
 			} break;
 			case kEngineHingeGyro: {
 				// Apply a fake gyro torque to parent in order to emulate a heavier gyro than
 				// it actually is. The gyro must be light weight, or physics simulation will be
 				// unstable when rolling bodies around any other axis than the hinge one.
-				deb_assert(_geometry->GetJointId() != INVALID_JOINT);
-				if (_geometry->GetJointId() != INVALID_JOINT && friction_ >= 0) {
+				deb_assert(geometry->GetJointId() != INVALID_JOINT);
+				if (geometry->GetJointId() != INVALID_JOINT && friction_ >= 0) {
 					vec3 axis;
-					physics_manager->GetAxis1(_geometry->GetJointId(), axis);
+					physics_manager->GetAxis1(geometry->GetJointId(), axis);
 					vec3 __y;
 					vec3 __z;
 					axis.GetNormalized().GetOrthogonals(__y, __z);
 					const float _strength = 3 * primary_force * strength_;
 					__z *= _strength;
 					vec3 pos;
-					physics_manager->GetAnchorPos(_geometry->GetJointId(), pos);
-					physics_manager->AddForceAtPos(_geometry->GetParent()->GetBodyId(), __z, pos+__y);
-					physics_manager->AddForceAtPos(_geometry->GetParent()->GetBodyId(), -__z, pos-__y);
+					physics_manager->GetAnchorPos(geometry->GetJointId(), pos);
+					physics_manager->AddForceAtPos(geometry->GetParent()->GetBodyId(), __z, pos+__y);
+					physics_manager->AddForceAtPos(geometry->GetParent()->GetBodyId(), -__z, pos-__y);
 				}
 			}
 			// TRICKY: fall through.
 			case kEngineHingeRoll: {
-				//deb_assert(_geometry->GetJointId() != INVALID_JOINT);
-				if (_geometry->GetJointId() != INVALID_JOINT) {
+				//deb_assert(geometry->GetJointId() != INVALID_JOINT);
+				if (geometry->GetJointId() != INVALID_JOINT) {
 					float _value = primary_force;
 					float directional_max_speed = ((_value >= 0)? max_speed_ : -max_speed2_) * _value;
 					float rotation_speed;
-					physics_manager->GetAngleRate2(_geometry->GetJointId(), rotation_speed);
+					physics_manager->GetAngleRate2(geometry->GetJointId(), rotation_speed);
 					const float intensity = rotation_speed / max_speed_;
 					intensity_ += std::abs(intensity);
 					if (engine_type_ == kEngineHingeGyro) {
@@ -308,28 +308,28 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 					const float used_strength = strength_*(std::abs(_value) + std::abs(friction_));
 					float previous_strength = 0;
 					float previous_target_speed = 0;
-					physics_manager->GetAngularMotorRoll(_geometry->GetJointId(), previous_strength, previous_target_speed);
-					const float target_speed = Math::Lerp(previous_target_speed, directional_max_speed*_scale, 0.5f);
+					physics_manager->GetAngularMotorRoll(geometry->GetJointId(), previous_strength, previous_target_speed);
+					const float target_speed = Math::Lerp(previous_target_speed, directional_max_speed*scale, 0.5f);
 					const float target_strength = Math::Lerp(previous_strength, used_strength, 0.5f);
-					physics_manager->SetAngularMotorRoll(_geometry->GetJointId(), target_strength, target_speed);
+					physics_manager->SetAngularMotorRoll(geometry->GetJointId(), target_strength, target_speed);
 				} else {
 					log_.Error("Missing roll joint!");
 				}
 			} break;
 			case kEngineHingeBrake: {
-				//deb_assert(_geometry->GetJointId() != INVALID_JOINT);
-				if (_geometry->GetJointId() != INVALID_JOINT) {
+				//deb_assert(geometry->GetJointId() != INVALID_JOINT);
+				if (geometry->GetJointId() != INVALID_JOINT) {
 					// "Max speed" used as a type of "break threashold", so that a joystick or similar
 					// won't start breaking on the tiniest movement. "Scaling" here determines part of
 					// functionality (such as only affecting some wheels), may be positive or negative.
 					const float abs_value = std::abs(primary_force);
-					if (abs_value > max_speed_ && primary_force < _scale) {
+					if (abs_value > max_speed_ && primary_force < scale) {
 						const float break_force_used = strength_*abs_value;
-						_geometry->SetExtraData(1);
-						physics_manager->SetAngularMotorRoll(_geometry->GetJointId(), break_force_used, 0);
-					} else if (_geometry->GetExtraData()) {
-						_geometry->SetExtraData(0);
-						physics_manager->SetAngularMotorRoll(_geometry->GetJointId(), 0, 0);
+						geometry->SetExtraData(1);
+						physics_manager->SetAngularMotorRoll(geometry->GetJointId(), break_force_used, 0);
+					} else if (geometry->GetExtraData()) {
+						geometry->SetExtraData(0);
+						physics_manager->SetAngularMotorRoll(geometry->GetJointId(), 0, 0);
 					}
 				} else {
 					log_.Error("Missing break joint!");
@@ -337,27 +337,27 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 			} break;
 			case kEngineHingeTorque:
 			case kEngineHinge2Turn: {
-				ApplyTorque(physics_manager, limited_frame_time, _geometry, _engine_node);
+				ApplyTorque(physics_manager, limited_frame_time, geometry, engine_node);
 			} break;
 			case kEngineRotor: {
-				deb_assert(_geometry->GetJointId() != INVALID_JOINT);
-				if (_geometry->GetJointId() != INVALID_JOINT) {
-					const vec3 rotor_force = GetRotorLiftForce(physics_manager, _geometry, _engine_node);
+				deb_assert(geometry->GetJointId() != INVALID_JOINT);
+				if (geometry->GetJointId() != INVALID_JOINT) {
+					const vec3 rotor_force = GetRotorLiftForce(physics_manager, geometry, engine_node);
 					vec3 lift_force = rotor_force * primary_force;
-					const int parent_bone = structure->GetIndex(_geometry->GetParent());
+					const int parent_bone = structure->GetIndex(geometry->GetParent());
 					const quat orientation =
-						physics_manager->GetBodyOrientation(_geometry->GetParent()->GetBodyId()) *
+						physics_manager->GetBodyOrientation(geometry->GetParent()->GetBodyId()) *
 						structure->GetOriginalBoneTransformation(parent_bone).GetOrientation().GetInverse();
 
 					vec3 rotor_pivot;
-					physics_manager->GetAnchorPos(_geometry->GetJointId(), rotor_pivot);
-					const vec3 offset = orientation * vec3(0, 0, max_speed_*_scale);
+					physics_manager->GetAnchorPos(geometry->GetJointId(), rotor_pivot);
+					const vec3 offset = orientation * vec3(0, 0, max_speed_*scale);
 					rotor_pivot += offset;
 
 					if (max_speed2_) {
 						// Arcade stabilization for VTOL rotor.
 						vec3 parent_angular_velocity;
-						physics_manager->GetBodyAngularVelocity(_geometry->GetParent()->GetBodyId(), parent_angular_velocity);
+						physics_manager->GetBodyAngularVelocity(geometry->GetParent()->GetBodyId(), parent_angular_velocity);
 						parent_angular_velocity = orientation.GetInverse() * parent_angular_velocity;
 						const vec3 parent_angle = orientation.GetInverse() * vec3(0, 0, 1);	// TRICKY: assumes original joint direction is towards heaven.
 						const float stability_x = -parent_angle.x * 0.5f + parent_angular_velocity.y * max_speed2_;
@@ -366,41 +366,41 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 					}
 
 					// Smooth rotor force - for digital controls and to make acceleration seem more realistic.
-					const float smooth = normalized_frame_time * 0.05f * _engine_node.scale_;
+					const float smooth = normalized_frame_time * 0.05f * engine_node.scale_;
 					lift_force.x = smooth_value_[kAspectPrimary] = Math::Lerp(smooth_value_[kAspectPrimary], lift_force.x, smooth);
 					lift_force.y = smooth_value_[kAspectSecondary] = Math::Lerp(smooth_value_[kAspectSecondary], lift_force.y, smooth);
 					lift_force.z = smooth_value_[kAspectTertiary] = Math::Lerp(smooth_value_[kAspectTertiary], lift_force.z, smooth);
 
 					// Counteract rotor's movement through perpendicular air.
 					vec3 drag_force;
-					physics_manager->GetBodyVelocity(_geometry->GetBodyId(), drag_force);
+					physics_manager->GetBodyVelocity(geometry->GetBodyId(), drag_force);
 					drag_force = ((-drag_force*rotor_force.GetNormalized()) * friction_ * normalized_frame_time) * rotor_force;
 
-					physics_manager->AddForceAtPos(_geometry->GetParent()->GetBodyId(), lift_force + drag_force, rotor_pivot);
+					physics_manager->AddForceAtPos(geometry->GetParent()->GetBodyId(), lift_force + drag_force, rotor_pivot);
 				} else {
 					log_.Error("Missing rotor joint!");
 				}
 			} break;
 			case kEngineRotorTilt: {
-				deb_assert(_geometry->GetJointId() != INVALID_JOINT);
-				if (_geometry->GetJointId() != INVALID_JOINT) {
-					const vec3 lift_force = GetRotorLiftForce(physics_manager, _geometry, _engine_node) * std::abs(primary_force);
-					const int parent_bone = structure->GetIndex(_geometry->GetParent());
+				deb_assert(geometry->GetJointId() != INVALID_JOINT);
+				if (geometry->GetJointId() != INVALID_JOINT) {
+					const vec3 lift_force = GetRotorLiftForce(physics_manager, geometry, engine_node) * std::abs(primary_force);
+					const int parent_bone = structure->GetIndex(geometry->GetParent());
 					const float placement = (primary_force >= 0)? 1.0f : -1.0f;
 					const vec3 offset =
-						physics_manager->GetBodyOrientation(_geometry->GetParent()->GetBodyId()) *
+						physics_manager->GetBodyOrientation(geometry->GetParent()->GetBodyId()) *
 						structure->GetOriginalBoneTransformation(parent_bone).GetOrientation().GetInverse() *
 						vec3(placement*max_speed_, -placement*max_speed2_, 0);
-					const vec3 world_pos = offset + physics_manager->GetBodyPosition(_geometry->GetBodyId());
-					physics_manager->AddForceAtPos(_geometry->GetParent()->GetBodyId(), lift_force, world_pos);
+					const vec3 world_pos = offset + physics_manager->GetBodyPosition(geometry->GetBodyId());
+					physics_manager->AddForceAtPos(geometry->GetParent()->GetBodyId(), lift_force, world_pos);
 					//{
 					//	static int cnt = 0;
 					//	if ((++cnt)%300 == 0)
 					//	{
-					//		//vec3 r = physics_manager->GetBodyOrientation(_geometry->GetBodyId()).GetInverse() * rel_pos;
+					//		//vec3 r = physics_manager->GetBodyOrientation(geometry->GetBodyId()).GetInverse() * rel_pos;
 					//		//vec3 r = rel_pos;
 					//		vec3 r = offset;
-					//		vec3 w = physics_manager->GetBodyPosition(_geometry->GetBodyId());
+					//		vec3 w = physics_manager->GetBodyPosition(geometry->GetBodyId());
 					//		mLog.Infof("Got pos (%f, %f, %f - world pos is (%f, %f, %f)."), r.x, r.y, r.z, w.x, w.y, w.z);
 					//	}
 					//}
@@ -418,41 +418,41 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 						physics_manager->GetBodyOrientation(root_geometry->GetBodyId()) *
 						structure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
 					const vec3 push_force = orientation * vec3(0, primary_force*strength_, 0);
-					physics_manager->AddForce(_geometry->GetBodyId(), push_force);
+					physics_manager->AddForce(geometry->GetBodyId(), push_force);
 				}
 				intensity_ += primary_force;
 			} break;
 			case kEngineSliderForce: {
-				deb_assert(_geometry->GetJointId() != INVALID_JOINT);
-				if (_geometry->GetJointId() != INVALID_JOINT) {
-					if (!primary_force && _engine_node.mode_ == kModeNormal) {	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
+				deb_assert(geometry->GetJointId() != INVALID_JOINT);
+				if (geometry->GetJointId() != INVALID_JOINT) {
+					if (!primary_force && engine_node.mode_ == kModeNormal) {	// Normal slider behavior is to pull back to origin while half-lock keep last motor target.
 						float position;
-						physics_manager->GetSliderPos(_geometry->GetJointId(), position);
+						physics_manager->GetSliderPos(geometry->GetJointId(), position);
 						if (!Math::IsEpsEqual(position, 0.0f, 0.1f)) {
-							float _value = -position*std::abs(_scale);
+							float _value = -position*std::abs(scale);
 							_value = (_value > 0)? _value*max_speed_ : _value*max_speed2_;
-							physics_manager->SetMotorTarget(_geometry->GetJointId(), strength_, _value);
+							physics_manager->SetMotorTarget(geometry->GetJointId(), strength_, _value);
 						}
-					} else if (!primary_force && _engine_node.mode_ == kModeRelease) {	// Release slider behavior just lets go.
-						physics_manager->SetMotorTarget(_geometry->GetJointId(), 0, 0);
+					} else if (!primary_force && engine_node.mode_ == kModeRelease) {	// Release slider behavior just lets go.
+						physics_manager->SetMotorTarget(geometry->GetJointId(), 0, 0);
 					} else {
 						const float _value = (primary_force > 0)? primary_force*max_speed_ : primary_force*max_speed2_;
-						physics_manager->SetMotorTarget(_geometry->GetJointId(), strength_, _value*_scale);
+						physics_manager->SetMotorTarget(geometry->GetJointId(), strength_, _value*scale);
 					}
 					float speed = 0;
-					physics_manager->GetSliderSpeed(_geometry->GetJointId(), speed);
+					physics_manager->GetSliderSpeed(geometry->GetJointId(), speed);
 					intensity_ += std::abs(speed) / max_speed_;
 				}
 			} break;
 			case kEngineGlue:
 			case kEngineBallBrake: {
-				deb_assert(_geometry->GetJointId() != INVALID_JOINT);
-				if (_geometry->GetJointId() != INVALID_JOINT) {
-					physics_manager->StabilizeJoint(_geometry->GetJointId());
+				deb_assert(geometry->GetJointId() != INVALID_JOINT);
+				if (geometry->GetJointId() != INVALID_JOINT) {
+					physics_manager->StabilizeJoint(geometry->GetJointId());
 				}
 			} break;
 			case kEngineYawBrake: {
-				const tbc::PhysicsManager::BodyID body_id = _geometry->GetBodyId();
+				const tbc::PhysicsManager::BodyID body_id = geometry->GetBodyId();
 				vec3 angular_velocity;
 				physics_manager->GetBodyAngularVelocity(body_id, angular_velocity);
 				// Reduce rotation of craft.
@@ -469,12 +469,18 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 				// F =  - pv^2 C  A
 				//  D   2       d
 				const float cd_a = 0.5f * 1.225f * friction_;	// Density of air multiplied with friction coefficient and area (the two latter combined in friction_).
-				const tbc::PhysicsManager::BodyID body_id = _geometry->GetBodyId();
+				const tbc::PhysicsManager::BodyID body_id = geometry->GetBodyId();
 				vec3 velocity;
 				physics_manager->GetBodyVelocity(body_id, velocity);
 				const float speed = velocity.GetLength();
 				const vec3 drag = velocity * -speed * cd_a;
 				physics_manager->AddForce(body_id, drag);
+			} break;
+			case kEngineUprightStabilize: {
+				UprightStabilize(physics_manager, structure, geometry, strength_, friction_);
+			} break;
+			case kEngineForwardStabilize: {
+				ForwardStabilize(physics_manager, structure, geometry, strength_, friction_);
 			} break;
 			default: {
 				deb_assert(false);
@@ -491,10 +497,10 @@ vec3 PhysicsEngine::GetCurrentMaxSpeed(const PhysicsManager* physics_manager) co
 	float _max_speed = 0;
 	EngineNodeArray::const_iterator i = engine_node_array_.begin();
 	for (; i != engine_node_array_.end(); ++i) {
-		const EngineNode& _engine_node = *i;
-		ChunkyBoneGeometry* _geometry = _engine_node.geometry_;
+		const EngineNode& engine_node = *i;
+		ChunkyBoneGeometry* geometry = engine_node.geometry_;
 		vec3 velocity;
-		physics_manager->GetBodyVelocity(_geometry->GetBodyId(), velocity);
+		physics_manager->GetBodyVelocity(geometry->GetBodyId(), velocity);
 		const float speed = velocity.GetLengthSquared();
 		if (speed > _max_speed) {
 			_max_speed = speed;
@@ -653,11 +659,11 @@ void PhysicsEngine::LoadChunkyData(ChunkyPhysics* structure, const void* data) {
 	const int controlled_node_count = Endian::BigToHost(_data[6]);
 	int x;
 	for (x = 0; x < controlled_node_count; ++x) {
-		ChunkyBoneGeometry* _geometry = structure->GetBoneGeometry(Endian::BigToHost(_data[7+x*3]));
-		deb_assert(_geometry);
-		float _scale = Endian::BigToHostF(_data[8+x*3]);
+		ChunkyBoneGeometry* geometry = structure->GetBoneGeometry(Endian::BigToHost(_data[7+x*3]));
+		deb_assert(geometry);
+		float scale = Endian::BigToHostF(_data[8+x*3]);
 		EngineMode _mode = (EngineMode)Endian::BigToHost(_data[9+x*3]);
-		AddControlledGeometry(_geometry, _scale, _mode);
+		AddControlledGeometry(geometry, scale, _mode);
 	}
 }
 
@@ -683,8 +689,8 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* physics_manager, float frame_tim
 
 	float force = GetPrimaryValue();
 
-	const float _scale = engine_node.scale_;
-	//const float lReverseScale = (_scale + 1) * 0.5f;	// Move towards linear scaling.
+	const float scale = engine_node.scale_;
+	//const float lReverseScale = (scale + 1) * 0.5f;	// Move towards linear scaling.
 	float lo_stop;
 	float hi_stop;
 	float bounce;
@@ -693,7 +699,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* physics_manager, float frame_tim
 	const float _target = 0;
 	if (lo_stop < -1000 || hi_stop > 1000) {
 		// Open interval -> relative torque.
-		const float target_speed = force*_scale*max_speed_;
+		const float target_speed = force*scale*max_speed_;
 		physics_manager->SetAngularMotorTurn(geometry->GetJointId(), strength_, target_speed);
 		float actual_speed = 0;
 		physics_manager->GetAngleRate2(geometry->GetJointId(), actual_speed);
@@ -734,7 +740,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* physics_manager, float frame_tim
 		lo_stop *= range_factor;
 	}
 	const float angle_span = (hi_stop-lo_stop)*0.9f;
-	const float target_angle = Math::Lerp(lo_stop, hi_stop, _scale*force*0.5f+0.5f);
+	const float target_angle = Math::Lerp(lo_stop, hi_stop, scale*force*0.5f+0.5f);
 	const float diff = (target_angle-irl_angle);
 	const float abs_diff = std::abs(diff);
 	float target_speed;
@@ -745,7 +751,7 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* physics_manager, float frame_tim
 	} else {
 		target_speed = max_speed_*diff/abs_big_diff;
 	}
-	//target_speed *= (force > 0)? _scale : lReverseScale;
+	//target_speed *= (force > 0)? scale : lReverseScale;
 	// If we're far from the desired target speed, we speed up.
 	float current_speed = 0;
 	if (engine_type_ == kEngineHinge2Turn) {
@@ -756,14 +762,14 @@ void PhysicsEngine::ApplyTorque(PhysicsManager* physics_manager, float frame_tim
 	} else {
 		physics_manager->GetAngleRate1(geometry->GetJointId(), current_speed);
 		if (!close_to_goal) {
-			target_speed += (target_speed-current_speed) * std::abs(_scale);
+			target_speed += (target_speed-current_speed) * std::abs(scale);
 		}
 	}
 	/*if (Math::IsEpsEqual(target_speed, 0.0f, 0.01f)) {	// Stop when almost already at a halt.
 		target_speed = 0;
 	}*/
 	physics_manager->SetAngularMotorTurn(geometry->GetJointId(), strength_, target_speed);
-	intensity_ += std::abs(target_speed / (max_speed_ * _scale));
+	intensity_ += std::abs(target_speed / (max_speed_ * scale));
 }
 
 

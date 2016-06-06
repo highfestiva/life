@@ -37,8 +37,7 @@ def create_terrain_patch(px,py):
         for u in range(0,grid+1):
             lpos = vec3((u-g2)*s, (v-g2)*s, 0)
             wpos = vec3(x,y,0)+lpos
-            rnd = wpos.y*29+wpos.x*13    # Pseudo random to give terrain some fluctuation.
-            lpos.z = -54 + 25*sin2(wpos.x/73) + 21*sin2(wpos.y/123) + rnd//20%11    # Terrain mostly below Z=0.
+            lpos.z = -84 + 19*sin2(wpos.x/73) + 13*sin2(wpos.y/123) + 17*sin2((wpos.x+wpos.y)/173) + 28*(sin2(wpos.x/243)+sin2(wpos.y/253))
             vertices.append(lpos)
             if v < grid and u < grid:
                 triangles += [v*g1+u, v*g1+u+1, (v+1)*g1+u, v*g1+u+1, (v+1)*g1+u+1, (v+1)*g1+u]
