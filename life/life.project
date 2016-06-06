@@ -943,6 +943,12 @@
       <File Name="../lepra/include/transformation.inl"/>
       <File Name="../lepra/include/vector2d.inl"/>
       <File Name="../lepra/include/vector3d.inl"/>
+      <File Name="../lepra/include/collisiondetector2d.inl"/>
+      <File Name="../lepra/include/collisiondetector3d.inl"/>
+      <File Name="../lepra/include/cubicdecasteljauspline.inl"/>
+      <File Name="../lepra/include/performance.inl"/>
+      <File Name="../lepra/include/quaternion.inl"/>
+      <File Name="../lepra/include/rotationmatrix.inl"/>
     </VirtualDirectory>
     <VirtualDirectory Name="lepratestapp">
       <File Name="../lepra/lepratestapp/lepratest.cpp"/>

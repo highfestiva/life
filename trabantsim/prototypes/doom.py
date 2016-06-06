@@ -159,6 +159,7 @@ def create_player(isplayer, pos, col):
     # Create a man-like capsule.
     avatar = create_capsule(pos, col=col, length=0.3, radius=0.7)
     avatar.create_engine(walk_abs_engine, strength=70, max_velocity=4)
+    avatar.create_engine(stabilize)
     return avatar
 player = create_player(True, (0,0,0), '#00f0')    # Alpha=0 means invisible. We hide in case we use some rendering mode which displays backfacing polygons.
 # Create monsters. NPC = Non-Playing Character.
@@ -266,8 +267,6 @@ while loop():
         bob_angle += vxy / 35
         bob = sin(bob_angle)/5
     cam(pos=vec3(0,0,bob+0.4), angle=(pitch,0,yaw))
-    player.avel((0,0,0)) # Angular velocity. Makes sure the player doesn't start rotating for some reason.
-    player.orientation(quat()) # Keep player straight at all times.
 
     # Open doors.
     if 'Space' in keys():

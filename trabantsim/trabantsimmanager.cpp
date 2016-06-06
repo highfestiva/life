@@ -689,10 +689,15 @@ int TrabantSimManager::CreateEngine(int object_id, const str& engine_type, const
 	} else if (engine_type == "slider") {
 		_engine_type = tbc::PhysicsEngine::kEngineSliderForce;
 		is_attachment = true;
+	} else if (engine_type == "stabilize") {
+		_engine_type = tbc::PhysicsEngine::kEngineStabilize;
+		_friction = friction;
 	} else if (engine_type == "upright_stabilize") {
 		_engine_type = tbc::PhysicsEngine::kEngineUprightStabilize;
+		_friction = friction;
 	} else if (engine_type == "forward_stabilize") {
 		_engine_type = tbc::PhysicsEngine::kEngineForwardStabilize;
+		_friction = friction;
 	} else {
 		return -1;
 	}

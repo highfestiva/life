@@ -4,7 +4,6 @@
 
 from trabant import *
 from trabant.objects import orthoscale
-from time import time
 
 # ASCII geometries.
 floorasc = r'''
@@ -54,7 +53,7 @@ def create_avatar(pos, col):
     # Create a man-like capsule. OK, maybe not man-like but a capsule then.
     avatar = create_capsule(pos, col=col)
     avatar.create_engine(walk_abs_engine, strength=30, max_velocity=3)
-    avatar.floortime = time()
+    avatar.floortime = gametime()
     avatar.powerup = 1
     return avatar
 player = create_avatar((-15,0,4), '#00f0')    # Alpha=0 means invisible. We hide in case we use some rendering mode which displays backfacing polygons.
@@ -103,7 +102,7 @@ while loop():
     # XY movement relative to the current yaw angle, jumps are controlled with Z velocity.
     xyrot = rotz(yaw)
     player.engine[0].force(xyrot * (vec3(stick.x,stick.y,0)+keydir().with_z(0)) * player.powerup)
-    if keydir().z>0 and time()-player.floortime < 0.1 and timeout(0.3, first_hit=True):
+    if keydir().z>0 and gametime()-player.floortime < 0.1 and timeout(0.3, first_hit=True):
         player.vel(player.vel()+vec3(0,0,6))
 
     # Look around.
@@ -118,7 +117,7 @@ while loop():
             pos = player.pos() + vel*0.05 + orientation*vec3(0,1,0)
             vel = vel + orientation*vec3(0,10,0)
             grenade = create_sphere(pos=pos, vel=vel, radius=0.05, col='#3a3')
-            grenade.starttime = time()
+            grenade.starttime = gametime()
             grenades += [grenade]
             sound(sound_bang, pos)
 
@@ -128,7 +127,7 @@ while loop():
             obj.starttime -= 100    # Set timeout to long ago, will explode below.
         # Store time of last floor touch so we know if we're able to jump.
         if force.z > force.length()/2 and obj in avatars:    # Check that force is mostly aimed upwards (i.e. stepping on ground).
-            obj.floortime = time()    # Last time we touched the floor.
+            obj.floortime = gametime()    # Last time we touched the floor.
         # Check if someone took the powerup.
         if obj2==powerup and obj in avatars:
             sound(sound_engine_wobble, pos, volume=20)
@@ -142,7 +141,7 @@ while loop():
 
     # Explode grenades and remove missed grenades.
     for g in list(grenades):
-        if time()-g.starttime > 3:
+        if gametime()-g.starttime > 3:
             pos = g.pos()
             explode(pos, vel=(0,0,3), strength=0.5)
             g.release()

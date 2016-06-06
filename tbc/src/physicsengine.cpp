@@ -144,7 +144,10 @@ bool PhysicsEngine::SetValue(unsigned aspect, float value) {
 			}
 		} break;
 		case kEngineGlue:
-		case kEngineBallBrake: {
+		case kEngineBallBrake:
+		case kEngineStabilize:
+		case kEngineUprightStabilize:
+		case kEngineForwardStabilize: {
 			// Fixed mode "engine".
 		} break;
 		default: {
@@ -476,11 +479,14 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 				const vec3 drag = velocity * -speed * cd_a;
 				physics_manager->AddForce(body_id, drag);
 			} break;
+			case kEngineStabilize: {
+				Stabilize(physics_manager, structure, geometry, friction_*scale);
+			} break;
 			case kEngineUprightStabilize: {
-				UprightStabilize(physics_manager, structure, geometry, strength_, friction_);
+				UprightStabilize(physics_manager, structure, geometry, strength_*scale*10, friction_);
 			} break;
 			case kEngineForwardStabilize: {
-				ForwardStabilize(physics_manager, structure, geometry, strength_, friction_);
+				ForwardStabilize(physics_manager, structure, geometry, strength_*scale*10, friction_);
 			} break;
 			default: {
 				deb_assert(false);
@@ -511,6 +517,22 @@ vec3 PhysicsEngine::GetCurrentMaxSpeed(const PhysicsManager* physics_manager) co
 }
 
 
+
+void PhysicsEngine::Stabilize(PhysicsManager* physics_manager, const ChunkyPhysics* structure,
+	const ChunkyBoneGeometry* geometry, float friction) {
+	// 1st: angular velocity damping.
+	vec3 angular;
+	physics_manager->GetBodyAngularVelocity(geometry->GetBodyId(), angular);
+	angular -= angular * friction;
+	physics_manager->SetBodyAngularVelocity(geometry->GetBodyId(), angular);
+
+	// 2nd: slerp towards straight.
+	const int root_bone = 0;	// Use root bone for fetching original transform, or "up" will be off.
+	quat current_orientation = physics_manager->GetBodyOrientation(geometry->GetBodyId());
+	const quat original_orientation = structure->GetOriginalBoneTransformation(root_bone).GetOrientation();
+	current_orientation.Slerp(current_orientation, original_orientation, friction);
+	physics_manager->SetBodyOrientation(geometry->GetBodyId(), current_orientation);
+}
 
 void PhysicsEngine::UprightStabilize(PhysicsManager* physics_manager, const ChunkyPhysics* structure,
 	const ChunkyBoneGeometry* geometry, float strength, float friction) {

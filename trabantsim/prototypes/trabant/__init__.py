@@ -22,12 +22,13 @@ class _flushfile:
 		self.f.flush()
 sys.stdout = _flushfile(sys.stdout)
 
-roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine,slider_engine,upright_stabilizer = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt slider upright_stabilizer'.split()
+roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine,slider_engine,stabilize,upright_stabilize,forward_stabilize = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt slider stabilize upright_stabilize forward_stabilize'.split()
 hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider fixed'.split()
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
 osname = sys.platform
 _lastlooptime = time.time()
+_starttime = None
 _accurate_ascii_generate = False
 _has_opened = False
 _last_ascii_top_left_offset = None
@@ -275,9 +276,9 @@ def loop(delay=0.03, end_after=None):
 	'''Call this every loop, check return value if you should continue looping.'''
 	_tryinit()
 	global _lastlooptime,_timer_callbacks,_async_loaders
-	looptime = time.time()-_lastlooptime
-	_lastlooptime += looptime
-	sleep(max(0,delay-looptime))
+	_thislooptime = time.time()-_lastlooptime
+	_lastlooptime += _thislooptime
+	sleep(max(0,delay-_thislooptime))
 	global _keys,_taps,_mousemove,_collisions,_cam_pos
 	_keys,_taps,_collisions,_cam_pos = None,None,None,None
 	_poll_joysticks()
@@ -300,6 +301,12 @@ def loop(delay=0.03, end_after=None):
 		timeout(timer='exit', reset=True)	# Remove timer.
 		return False
 	return gameapi.opened()
+
+def gametime():
+	global _starttime
+	if _starttime == None:
+		_starttime = time.time()
+	return time.time()-_starttime
 
 def sleep(t):
 	'''Wraps time.sleep so you won't have to import it.'''
@@ -777,6 +784,11 @@ def _normalize_engine_values(engine_type, max_velocity, offset, strength, fricti
 		strength *= 5
 		max_velocity[0] = 3 if not max_velocity[0] else max_velocity[0]
 		max_velocity[1] = 3 if not max_velocity[1] else max_velocity[1]
+	elif engine_type == stabilize:
+		strength = 0
+		friction = 1 if not friction else friction
+	elif engine_type in (stabilize, upright_stabilize, forward_stabilize):
+		friction = 1 if not friction else friction
 	return max_velocity, strength, friction
 
 def _world2screen(crd):

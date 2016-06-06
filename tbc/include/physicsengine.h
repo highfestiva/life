@@ -45,6 +45,7 @@ public:
 		kEngineBallBrake,
 		kEngineYawBrake,
 		kEngineAirBrake,
+		kEngineStabilize,
 		kEngineUprightStabilize,
 		kEngineForwardStabilize,
 	};
@@ -85,6 +86,8 @@ public:
 	void OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhysics* structure, float frame_time) const;
 	vec3 GetCurrentMaxSpeed(const PhysicsManager* physics_manager) const;
 
+	static void Stabilize(PhysicsManager* physics_manager, const ChunkyPhysics* structure,
+		const ChunkyBoneGeometry* geometry, float friction);
 	static void UprightStabilize(PhysicsManager* physics_manager, const ChunkyPhysics* structure,
 		const ChunkyBoneGeometry* geometry, float strength, float friction);
 	static void ForwardStabilize(PhysicsManager* physics_manager, const ChunkyPhysics* structure,

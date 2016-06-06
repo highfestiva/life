@@ -120,7 +120,6 @@ def process_chain(*processors):
 		return orientation,gfx,phys
 	return doprocess
 
-
 def sphere_resolution(radius):
 	latitude = int(min(8, max(4,radius**0.3)*8))
 	longitude = int(latitude*1.5)

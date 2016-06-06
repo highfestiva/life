@@ -16,7 +16,6 @@ from trabant import *
 from trabant.gameapi import htmlcol, setvar, waitload
 from trabant.objects import gfxscale
 from functools import partial
-from time import time
 from random import choice
 
 rotx = lambda a: quat().rotate_x(a)
@@ -262,7 +261,7 @@ def powerup(power):
         ship.shield_type = power
         ship.vel((0,0,0))   # Freeze!
         shieldcnt = len(ship.shields)
-        start_t = time() if not shieldcnt else ship.shields[0].start_t
+        start_t = gametime() if not shieldcnt else ship.shields[0].start_t
         r = vec3(ship.radius*1.6+3,0,0)
         pos = ship.pos() + roty(2*pi*shieldcnt/(shieldcnt+1)) * r
         ship.shields += [create_sphere(pos=pos, radius=1.5, col='#c6a')]
@@ -291,7 +290,7 @@ def powerup(power):
             s.hurt = 400
             s.health = 1500
             s.move = None
-            s.shield_timeout = time()+30
+            s.shield_timeout = gametime()+30
             s.ship_parts = []
             waitload(s.id)
             ship.joint(fixed_joint, s)
@@ -312,6 +311,7 @@ def finalize_enemies(es):
         enemy.hurt = enemy.hurt if hasattr(enemy,'hurt') else 60
         enemy.immortal = False
         enemy.move = enemy.move if hasattr(enemy,'move') else None
+        enemy.amove = enemy.amove if hasattr(enemy,'amove') else lambda t:(2,0,0)
         enemy.shoots = enemy.shoots if hasattr(enemy,'shoots') else None
     return es
 
@@ -321,7 +321,7 @@ def create_enemy():
         return es
     etype,_ = pick_random({'snake':1, 'box':5, 'planet':5, 'capsule':5, 'redship':3})
     if etype == 'snake':
-        start_t = time()
+        start_t = gametime()
         for i in range(20):
             ang = 2*pi*i/20
             tgtpos = lambda t,a: vec3(80-t*8,0,0) + curb(-1.2*t+a,1.4)*12
@@ -361,12 +361,13 @@ def create_boss():
     eyes = [create_sphere((80-9,0,1), radius=1, col='#fff'), create_sphere((80-8,0,5), radius=1, col='#fff')]
     [waitload(e.id) for e in eyes]
     waitload(body.id)
-    body.create_engine(upright_stabilizer)
+    body.create_engine(stabilize)
     [body.joint(fixed_joint, e) for e in eyes]
     def move(t):
         t,p = vec3(50+20*cos(t),0,-20*sin(t)), body.pos()
         return (t-p).normalize(10)
     body.move = move
+    body.amove = lambda t:None
     collisions(True)
     return finalize_enemies([body]+eyes)
 
@@ -424,7 +425,7 @@ while loop():
     else:
         ship.immortal = False
 
-    now = time()
+    now = gametime()
     for o in [ship]+powerups:
         if o.blink_start_t:
             t = now - o.blink_start_t
@@ -458,7 +459,7 @@ while loop():
                 shot.angle = angle
                 shot.hurt = 100
                 shot.move = None
-                shot.start_t = time()
+                shot.start_t = gametime()
                 shot.tgt = tgt
                 def guide(shot, t):
                     if not shot.tgt and random()>0.9:
@@ -523,7 +524,7 @@ while loop():
             pup.color = ship.color
             pname = 'ship'
         if pup:
-            pup.blink_start_t = time()
+            pup.blink_start_t = gametime()
             pup.blink_duration = 100
             pup.power = pname
             pup.positionbased = True
@@ -596,13 +597,14 @@ while loop():
         if sum(ship.shot_cnt.values()) == 0:
             ship.shot_cnt['laser'] = 1
         ship.immortal = True
-        ship.blink_start_t = time()
-        difficulty = max(difficulty-3, 0.5)
+        ship.blink_start_t = gametime()
+        if difficulty:
+            difficulty = max(difficulty-3, 0.5)
 
     for s in ship.shields:
         if not s.shield_timeout:
             continue
-        if s.shield_timeout-time() <= 0:
+        if s.shield_timeout-gametime() <= 0:
             drop_shields(ship)
             break
 
@@ -625,7 +627,7 @@ while loop():
                 tunnel_segs.remove(obj)
 
 
-    t = time()
+    t = gametime()
     for o in shots+enemies+ship.shields:
         if o.move:
-            o.vel(o.move(t), avel=(2,0,0))
+            o.vel(o.move(t), avel=o.amove(t))
