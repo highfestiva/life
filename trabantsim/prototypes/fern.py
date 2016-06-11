@@ -30,7 +30,7 @@ def create_capsules(posdata, radius_factor):
     min_capsule_resolution = lambda r,l:(2,2)
     maxlen = max(posdata, key=lambda l:l[2])[2]
     while posdata:
-        maxlen *= 0.9
+        maxlen *= 0.75
         clones = [l for l in posdata if l[2]>=maxlen]
         if clones:
             pos,ori,_ = clones[0]
