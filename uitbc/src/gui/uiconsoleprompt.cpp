@@ -49,7 +49,7 @@ bool ConsolePrompt::OnChar(wchar_t c) {
 		ScopeLock lock(&lock_);
 		wchar_t _c = c;
 		if (_c == 27) {
-			_c = kConKeyEscape;
+			_c = (wchar_t)kConKeyEscape;
 		}
 		buffered_chars_.push_back(_c);
 	}

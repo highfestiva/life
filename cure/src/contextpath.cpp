@@ -115,8 +115,8 @@ void ContextPath::SetTagIndex(int index) {
 	times[1+body_count] = total_distance+1.0f;
 	times[1+body_count+1] = total_distance+2.0f;
 	const float scale = 1 / total_distance;
-	for (size_t x = 0; x <= 1+body_count+1; ++x) {
-		times[x] *= scale;
+	for (size_t y = 0; y <= 1+body_count+1; ++y) {
+		times[y] *= scale;
 	}
 	path_positions[1+body_count] = path_positions[1+body_count-1];
 	path_positions[1+body_count+1] = path_positions[1+body_count-1];

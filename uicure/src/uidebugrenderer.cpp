@@ -27,6 +27,7 @@ DebugRenderer::DebugRenderer(const cure::RuntimeVariableScope* variable_scope, G
 	context_(context),
 	remote_context_(remote_context),
 	tick_lock_(tick_lock) {
+	(void)variable_scope;
 }
 
 DebugRenderer::~DebugRenderer() {
@@ -136,11 +137,11 @@ void DebugRenderer::DebugDrawPrimitive(cure::ContextObject* object, DebugPrimiti
 				const vec3 size = geometry->GetShapeSize() / 2;
 				const quat& rot = physics_transform.GetOrientation();
 				vec3 vertex[8];
-				for (int x = 0; x < 8; ++x) {
-					vertex[x] = pos - rot *
-						vec3(size.x*((x&4)? 1 : -1),
-							size.y*((x&1)? 1 : -1),
-							size.z*((x&2)? 1 : -1));
+				for (int y = 0; y < 8; ++y) {
+					vertex[y] = pos - rot *
+						vec3(size.x*((y&4)? 1 : -1),
+							size.y*((y&1)? 1 : -1),
+							size.z*((y&2)? 1 : -1));
 				}
 				ui_manager_->GetRenderer()->DrawLine(vertex[0], vertex[1]-vertex[0], YELLOW);
 				ui_manager_->GetRenderer()->DrawLine(vertex[1], vertex[3]-vertex[1], YELLOW);

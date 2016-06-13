@@ -202,14 +202,14 @@ ConsoleCommandManager::CommandList ConsoleCommandManager::GetCommandCompletionLi
 		if (completion.length() < completion_letter_count) {
 			completion_letter_count = completion.length();
 		}
-		size_t y;
-		for (y = _partial_command.length(); y < completion_letter_count; ++y) {
-			if (y >= completed.length()) {
+		size_t z;
+		for (z = _partial_command.length(); z < completion_letter_count; ++z) {
+			if (z >= completed.length()) {
 				// Add more text (more completed).
-				completed += completion[y];
-			} else if (completion[y] != completed[y]) {
+				completed += completion[z];
+			} else if (completion[z] != completed[z]) {
 				// Cut completion, since this command is shorter.
-				completion_letter_count = y;
+				completion_letter_count = z;
 			}
 		}
 		completed.resize(completion_letter_count);

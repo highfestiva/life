@@ -1,0 +1,639 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\win32">
+      <UniqueIdentifier>{a7e5f72c-d075-4490-bec4-598a0e3114ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\posix">
+      <UniqueIdentifier>{ff56f430-5f41-48d4-89fa-9d13ce3cd13a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="src Files\win32">
+      <UniqueIdentifier>{32513fa1-8894-4c43-a6b5-88e94f6db58a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src Files\posix">
+      <UniqueIdentifier>{f733a9b7-9e01-4638-8bab-9edf2583f94a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\aabb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\aabr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\alarm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\anticrack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\application.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\archivefile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bintree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bmploader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bufferstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\buslock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\canvas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\checksum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\circle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\collisiondetector2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\collisiondetector3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\consolecommandmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cubicdecasteljauspline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cubicspline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cyclicarray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\cylinder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\des.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\diskfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\endian.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fastallocator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fdset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\filearchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fileopener.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gammalookup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\graphics2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hasher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hashset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hashtable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hashutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\hirestimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\idmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imageloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\inputstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\iobuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ioerror.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ipaddress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\jpegloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lepra.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lepratarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lepratypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lepraundef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\listutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\loglistener.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\logtype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\loosebintree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\looseoctree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\loosequadtree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\memberthread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\memfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\memoryleaktracker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\metafile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\network.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\number.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\obb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\obr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\orderedmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\outputstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\packer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\path.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\performance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\pngloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\progresscallback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\quaternion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\quicklist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\random.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rotationmatrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sha1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\skiplist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\smartpointer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\socket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\socketaddress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\socketstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\spinlock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\string.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\stringutility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\subfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\systemmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tgaloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\thread.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tiffloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\transformation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vector2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vector3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\writer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ziparchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\win32\win32target.h">
+      <Filter>Header Files\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="include\win32\win32thread.h">
+      <Filter>Header Files\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="include\obfuxator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\jsonstring.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\resourcetracker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gametimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\unordered.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\plane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\timelogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lepraos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\logger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tcpmuxsocket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\socketaddressgetter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\fastlock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pch.h">
+      <Filter>src Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\datagram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\collisiondetector2d.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\collisiondetector3d.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\consolecommandmanager.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\cubicdecasteljauspline.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\idmanager.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\loosebintree.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\looseoctree.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\loosequadtree.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\performance.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\quaternion.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\rotationmatrix.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\stringutility.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\transformation.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\vector2d.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="include\vector3d.inl">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\alarm.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\application.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\archivefile.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bmploader.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\bufferstream.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\canvas.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\checksum.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\consolecommandmanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cubicspline.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\des.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\diskfile.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\endian.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fdset.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\file.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\filearchive.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gammalookup.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hirestimer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\imageloader.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\iobuffer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ioerror.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ipaddress.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\jpegloader.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\lepra.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\log.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\loglistener.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\logtype.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\math.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\memfile.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\memoryleaktracker.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\metafile.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\number.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\packer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\path.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\performance.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pngloader.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\progresscallback.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\random.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\reader.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sha1.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\socket.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\socketaddress.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\socketstream.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\spinlock.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stringutility.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\subfile.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\systemmanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tgaloader.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\thread.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tiffloader.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\time.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\writer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ziparchive.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32\win32anticrack.cpp">
+      <Filter>src Files\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32\win32buslock.cpp">
+      <Filter>src Files\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32\win32systemmanager.cpp">
+      <Filter>src Files\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32\win32thread.cpp">
+      <Filter>src Files\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\posix\posixanticrack.cpp">
+      <Filter>src Files\posix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\posix\posixbuslock.cpp">
+      <Filter>src Files\posix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\posix\maclog.mm">
+      <Filter>src Files\posix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\obfuxator.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\jsonstring.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\resourcetracker.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gametimer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plane.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\timelogger.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\posix\posixthread.cxx">
+      <Filter>src Files\posix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\posix\macthread.mm">
+      <Filter>src Files\posix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\logger.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\timer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tcpmuxsocket.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\posix\posixsystemmanager.cxx">
+      <Filter>src Files\posix</Filter>
+    </ClCompile>
+    <ClCompile Include="src\posix\macsystemmanager.mm">
+      <Filter>src Files\posix</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuildStep Include="include\posix\posixtarget.h">
+      <Filter>Header Files\posix</Filter>
+    </CustomBuildStep>
+    <CustomBuildStep Include="include\posix\posixthread.h">
+      <Filter>Header Files\posix</Filter>
+    </CustomBuildStep>
+  </ItemGroup>
+</Project>

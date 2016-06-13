@@ -870,7 +870,7 @@ void OpenGLPainter::UpdateImage(ImageID image_id,
 			_image.Resize(new_width, new_height, Canvas::kResizeFast);
 		}
 
-		Texture* texture = new Texture();
+		texture = new Texture();
 
 		texture->width_ = image->GetWidth();
 		texture->height_ = image->GetHeight();
@@ -1232,14 +1232,14 @@ void OpenGLPainter::PrintText(const wstr& s, int x, int y) {
 			};
 			const int index_base = glyph_index*kIndicesPerGlyph;
 			const int vertex_base = glyph_index*4;
-			for (int i = 0; i < kIndicesPerGlyph; ++i) {
-				glyph_indices[index_base+i] = template_glyph_indices[i]+vertex_base;
+			for (int j = 0; j < kIndicesPerGlyph; ++j) {
+				glyph_indices[index_base+j] = template_glyph_indices[j]+vertex_base;
 			}
-			for (int i = 0; i < 4; ++i) {
-				vertices[(vertex_base+i)*2+0] = template_vertices[i*2+0];
-				vertices[(vertex_base+i)*2+1] = template_vertices[i*2+1];
-				uv[(vertex_base+i)*2+0] = template_uv[i*2+0];
-				uv[(vertex_base+i)*2+1] = template_uv[i*2+1];
+			for (int j = 0; j < 4; ++j) {
+				vertices[(vertex_base+j)*2+0] = template_vertices[j*2+0];
+				vertices[(vertex_base+j)*2+1] = template_vertices[j*2+1];
+				uv[(vertex_base+j)*2+0] = template_uv[j*2+0];
+				uv[(vertex_base+j)*2+1] = template_uv[j*2+1];
 			}
 			++glyph_index;
 

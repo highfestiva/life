@@ -313,15 +313,15 @@ int TrabantSimManager::CreateObject(const quat& orientation, const vec3& positio
 				bone->triangle_count_ = (int)_mesh->indices_.size()/3;
 				bone->vertices_ = new float[bone->vertex_count_*3];
 				bone->indices_ = new uint32[bone->triangle_count_*3];
-				for (unsigned x = 0; x < bone->vertex_count_; ++x) {
-					bone->vertices_[x*3+0] = _mesh->vertices_[x*3+0];
-					bone->vertices_[x*3+1] = _mesh->vertices_[x*3+1];
-					bone->vertices_[x*3+2] = _mesh->vertices_[x*3+2];
+				for (unsigned z = 0; z < bone->vertex_count_; ++z) {
+					bone->vertices_[z*3+0] = _mesh->vertices_[z*3+0];
+					bone->vertices_[z*3+1] = _mesh->vertices_[z*3+1];
+					bone->vertices_[z*3+2] = _mesh->vertices_[z*3+2];
 				}
-				for (unsigned x = 0; x < bone->triangle_count_; ++x) {
-					bone->indices_[x*3+0] = _mesh->indices_[x*3+0];
-					bone->indices_[x*3+1] = _mesh->indices_[x*3+1];
-					bone->indices_[x*3+2] = _mesh->indices_[x*3+2];
+				for (unsigned z = 0; z < bone->triangle_count_; ++z) {
+					bone->indices_[z*3+0] = _mesh->indices_[z*3+0];
+					bone->indices_[z*3+1] = _mesh->indices_[z*3+1];
+					bone->indices_[z*3+2] = _mesh->indices_[z*3+2];
 				}
 				physics->AddBoneGeometry(t, bone, parent);
 			}

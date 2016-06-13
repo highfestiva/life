@@ -616,7 +616,7 @@ TEXLoader::IoStatus TEXLoader::Save(const Texture& texture, bool compressed) {
 		}
 
 		if (texture.GetAlphaMap(0) != 0) {
-			for (int i = 0; i < texture.GetNumMipMapLevels(); i++) {
+			for (i = 0; i < texture.GetNumMipMapLevels(); i++) {
 				if (i < (num_levels - 2) && compressed == true)
 					WriteJpeg(*texture.GetAlphaMap(i));
 				else

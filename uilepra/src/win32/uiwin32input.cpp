@@ -143,8 +143,8 @@ BOOL CALLBACK Win32InputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE l
 			range.diph.dwHow = DIPH_BYID;
 			range.diph.dwObj = lpddoi->dwType;
 			if (device->di_device_->GetProperty(DIPROP_RANGE, &range.diph) == DI_OK) {
-				const int interval_range = range.max-range.min;
-				const int mid = interval_range / 2 + range.min;
+				const int interval_range = range.lMax-range.lMin;
+				const int mid = interval_range / 2 + range.lMin;
 				const int min = mid - interval_range/2/8;	// Don't use full range, might not be physically accessible.
 				const int max = mid + interval_range/2/8;	// Don't use full range, might not be physically accessible.
 				_element->SetValue(min);
@@ -350,40 +350,40 @@ Win32DisplayManager* Win32InputManager::GetDisplayManager() const {
 	return (display_manager_);
 }
 
-bool Win32InputManager::OnMessage(int msg, int param, long param) {
+bool Win32InputManager::OnMessage(int msg, int wparam, long lparam) {
 	bool consumed = false;
 	switch (msg) {
 		case WM_CHAR: {
-			consumed = NotifyOnChar((wchar_t)param);
+			consumed = NotifyOnChar((wchar_t)wparam);
 		} break;
 		case WM_LBUTTONDBLCLK: {
 			consumed = NotifyMouseDoubleClick();
 		} break;
 		case WM_MOUSEMOVE:
 		case WM_NCMOUSEMOVE: {
-			int x = GET_X_LPARAM(param);
-			int y = GET_Y_LPARAM(param);
+			int x = GET_X_LPARAM(lparam);
+			int y = GET_Y_LPARAM(lparam);
 			SetMousePosition(msg, x, y);
 		} break;
 		case WM_KEYUP: {
-			SetKey((KeyCode)param, param, false);
-			consumed = NotifyOnKeyUp((KeyCode)param);
+			SetKey((KeyCode)wparam, lparam, false);
+			consumed = NotifyOnKeyUp((KeyCode)wparam);
 		} break;
 		case WM_KEYDOWN: {
-			SetKey((KeyCode)param, param, true);
-			consumed = NotifyOnKeyDown((KeyCode)param);
+			SetKey((KeyCode)wparam, lparam, true);
+			consumed = NotifyOnKeyDown((KeyCode)wparam);
 		} break;
 		case WM_SYSKEYUP: {
-			SetKey((KeyCode)param, param, false);
-			consumed = NotifyOnKeyUp((KeyCode)param);
+			SetKey((KeyCode)wparam, lparam, false);
+			consumed = NotifyOnKeyUp((KeyCode)wparam);
 		} break;
 		case WM_SYSKEYDOWN: {
-			SetKey((KeyCode)param, param, true);
-			consumed = NotifyOnKeyDown((KeyCode)param);
+			SetKey((KeyCode)wparam, lparam, true);
+			consumed = NotifyOnKeyDown((KeyCode)wparam);
 		} break;
 		case WM_ACTIVATE: {
 			if (!is_cursor_visible_) {
-				if (param == WA_INACTIVE) {
+				if (wparam == WA_INACTIVE) {
 					SetCursorVisible(true);
 					is_cursor_visible_ = false;
 				} else {
@@ -411,11 +411,11 @@ bool Win32InputManager::OnMessage(int msg, int param, long param) {
 void Win32InputManager::SetKey(KeyCode w_param, long l_param, bool is_down) {
 	if (l_param&0x1000000) {	// Extended key = right Alt, Ctrl...
 		switch (w_param) {
-			case kInKbdLctrl:		w_param = kInKbdRctrl;	break;
-			case kInKbdLalt:		w_param = kInKbdRalt;	break;
+			case kInKbdLCtrl:		w_param = kInKbdRCtrl;	break;
+			case kInKbdLAlt:		w_param = kInKbdRAlt;	break;
 		}
-	} else if (w_param == kInKbdLshift && (l_param&0xFF0000) == 0x360000) {
-		w_param = kInKbdRshift;
+	} else if (w_param == kInKbdLShift && (l_param&0xFF0000) == 0x360000) {
+		w_param = kInKbdRShift;
 	}
 	Parent::SetKey(w_param, is_down);
 }

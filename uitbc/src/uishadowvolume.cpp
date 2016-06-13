@@ -252,7 +252,7 @@ void ShadowVolume::UpdateShadowVolume(const vec3& light_pos, float shadow_range,
 			*target++ = _light_pos.z + *source++;
 		}
 	} else { // Point or spot light.
-		const vtx_idx_t* indices = parent_geometry_->GetIndexData();
+		indices = parent_geometry_->GetIndexData();
 		// Calculate triangle orientations relative to light source.
 		for (unsigned i = 0; i < triangle_count; i++, indices+=3, surface_normal_data+=3) {
 			//if (parent_geometry_->GetPrimitiveType() == tbc::GeometryBase::kTriangles)

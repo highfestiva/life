@@ -23,9 +23,9 @@ bool CollisionDetector2D<_TVarType>::IsAABREnclosingCircle(const AABR<_TVarType>
 	Vector2D<_TVarType> dim(circle.GetRadius(), circle.GetRadius());
 	Vector2D<_TVarType> c_min(circle.GetPosition() - dim);
 	Vector2D<_TVarType> c_max(circle.GetPosition() + dim);
-	Vector2D<_TVarType> __min(box.GetPosition() - box.GetSize());
-	Vector2D<_TVarType> __max(box.GetPosition() + box.GetSize());
-	return (__min.x <= c_min.x && __min.y <= c_min.y && __max.x >= c_max.x && __max.y >= c_max.y);
+	Vector2D<_TVarType> b_min(box.GetPosition() - box.GetSize());
+	Vector2D<_TVarType> b_max(box.GetPosition() + box.GetSize());
+	return (b_min.x <= c_min.x && b_min.y <= c_min.y && b_max.x >= c_max.x && b_max.y >= c_max.y);
 }
 
 template<class _TVarType>
@@ -827,21 +827,21 @@ template<class _TVarType>
 bool CollisionDetector2D<_TVarType>::StaticAABRToCircleTest(const AABR<_TVarType>& box,
 							    const Circle<_TVarType>& circle,
 							    CollisionInfo* collision_info) {
-	Vector2D<_TVarType> __min(box.GetPosition() - box.GetSize());
-	Vector2D<_TVarType> __max(box.GetPosition() + box.GetSize());
+	Vector2D<_TVarType> b_min(box.GetPosition() - box.GetSize());
+	Vector2D<_TVarType> b_max(box.GetPosition() + box.GetSize());
 	Vector2D<_TVarType> point_on_box(0, 0);
 
-	if(circle.GetPosition().x < __min.x)
-		point_on_box.x = __min.x;
-	else if(circle.GetPosition().x > __max.x)
-		point_on_box.x = __max.x;
+	if(circle.GetPosition().x < b_min.x)
+		point_on_box.x = b_min.x;
+	else if(circle.GetPosition().x > b_max.x)
+		point_on_box.x = b_max.x;
 	else
 		point_on_box.x = circle.GetPosition().x;
 
-	if(circle.GetPosition().y < __min.y)
-		point_on_box.y = __min.y;
-	else if(circle.GetPosition().y > __max.y)
-		point_on_box.y = __max.y;
+	if(circle.GetPosition().y < b_min.y)
+		point_on_box.y = b_min.y;
+	else if(circle.GetPosition().y > b_max.y)
+		point_on_box.y = b_max.y;
 	else if(collision_info != 0)
 		point_on_box.y = circle.GetPosition().y;
 

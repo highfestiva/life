@@ -108,8 +108,8 @@ void RectComponent::RepaintBackground(Painter* painter) {
 		} else {	// Draw with rounded corners.
 			painter->SetColor(color_[0], 0);
 			painter->SetAlphaValue(color_[0].alpha_);
-			PixelRect rect(GetScreenPos(), GetScreenPos() + GetSize());
-			painter->DrawRoundedRect(rect, corner_radius_, corner_radius_mask_, true);
+			PixelRect _rect(GetScreenPos(), GetScreenPos() + GetSize());
+			painter->DrawRoundedRect(_rect, corner_radius_, corner_radius_mask_, true);
 		}
 	}
 

@@ -25,9 +25,9 @@ Win32FontManager::Win32FontManager(uilepra::Win32DisplayManager* display_manager
 	HWND wnd = display_manager_->GetHWND();
 	dc_ = ::GetDC(wnd);
 
-	COLORREF color = kRgb(255, 255, 255);
+	COLORREF color = RGB(255, 255, 255);
 	color_ref_[0] = color;
-	color = kRgb(0, 0, 0);
+	color = RGB(0, 0, 0);
 	color_ref_[1] = color;
 	color_ref_[2] = color;
 	color_ref_[3] = color;
@@ -61,10 +61,10 @@ Win32FontManager::FontId Win32FontManager::AddFont(const str& font_name, double 
 					  italic,
 					  underline,
 					  strike_out,
-					  kDefaultCharset,
-					  kOutDefaultPrecis,
-					  kClipDefaultPrecis,
-					  kDefaultQuality,
+					  DEFAULT_CHARSET,
+					  OUT_DEFAULT_PRECIS,
+					  CLIP_DEFAULT_PRECIS,
+					  DEFAULT_QUALITY,
 					  DEFAULT_PITCH | FF_DONTCARE,
 					  font_name.c_str());
 
@@ -118,7 +118,7 @@ bool Win32FontManager::RenderGlyph(wchar_t c, Canvas& image, const PixelRect& re
 		::SetTextColor(ram_dc, color_ref_[0]);
 		::SetBkColor(ram_dc, color_ref_[1]);
 		::SetTextAlign(dc_, TA_BASELINE | TA_LEFT);
-		ok = (::TextOut(ram_dc, 0, 0, &c, 1) != FALSE);
+		ok = (::TextOutW(ram_dc, 0, 0, &c, 1) != FALSE);
 		::SelectObject(ram_dc, default_object);
 	}
 	uint8* bitmap = 0;
@@ -202,7 +202,7 @@ int Win32FontManager::GetCharWidth(wchar_t c) const {
 
 int Win32FontManager::GetCharOffset(wchar_t c) const {
 	Win32Font* font = (Win32Font*)current_font_;
-	HGDIOBJ default_object = ::SelectObject(dc_, font->win32_font_handle_);
+	::SelectObject(dc_, font->win32_font_handle_);
 	ABC abc;
 	if (::GetCharABCWidths(dc_, (utchar)c, (utchar)c, &abc) != FALSE) {
 		return abc.abcA;

@@ -991,7 +991,7 @@ void OpenGLMatTextureAndLightmap::RawRender(tbc::GeometryBase* geometry, int uv_
 		uilepra::OpenGLExtensions::glClientActiveTexture(GL_TEXTURE1);
 		BindTexture(_geometry->ta_->maps_[1].map_id_[Texture::kColorMap], _geometry->ta_->maps_[1].mip_map_level_count_[Texture::kColorMap]);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		int uv_count_per_vertex = geometry->GetUVCountPerVertex();
+		uv_count_per_vertex = geometry->GetUVCountPerVertex();
 		if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() == true) {
 			uilepra::OpenGLExtensions::glBindBuffer(GL_ARRAY_BUFFER, (GLuint)_geometry->vertex_buffer_id_);
 			glTexCoordPointer(uv_count_per_vertex, GL_FLOAT, 0, (GLvoid*)(_geometry->uv_offset_ + sizeof(float)*uv_count_per_vertex*(uv_set_index+1)*geometry->GetMaxVertexCount()));
@@ -1150,7 +1150,7 @@ OpenGLMatPXS::OpenGLMatPXS(const str& vp, const str fp[kNumFp]):
 
 			uilepra::OpenGLExtensions::glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, fpid_[i]);
 
-			GLint lErrorPos;
+			lErrorPos;
 			uilepra::OpenGLExtensions::glProgramStringARB(GL_FRAGMENT_PROGRAM_ARB,
 								    GL_PROGRAM_FORMAT_ASCII_ARB,
 								    (GLsizei)fp[i].length(),

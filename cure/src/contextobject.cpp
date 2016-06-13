@@ -226,17 +226,17 @@ bool ContextObject::DetachFromObject(ContextObject* object) {
 				manager_->GetGameManager()->SendDetach(this, object);
 			}
 			const int bone_count = object->GetPhysics()->GetBoneCount();
-			for (int x = 0; x < bone_count; ++x) {
-				if (object->GetPhysics()->GetBoneGeometry(x)->GetJointId() == joint_id) {
-					object->GetPhysics()->GetBoneGeometry(x)->GetBodyData().parent_ = 0;
-					object->GetPhysics()->GetBoneGeometry(x)->SetJointId(tbc::INVALID_JOINT);
-					object->GetPhysics()->GetBoneGeometry(x)->SetJointType(tbc::ChunkyBoneGeometry::kJointExclude);
+			for (int y = 0; y < bone_count; ++y) {
+				if (object->GetPhysics()->GetBoneGeometry(y)->GetJointId() == joint_id) {
+					object->GetPhysics()->GetBoneGeometry(y)->GetBodyData().parent_ = 0;
+					object->GetPhysics()->GetBoneGeometry(y)->SetJointId(tbc::INVALID_JOINT);
+					object->GetPhysics()->GetBoneGeometry(y)->SetJointType(tbc::ChunkyBoneGeometry::kJointExclude);
 					break;
 				}
 			}
-			EngineList::iterator x = engine_list.begin();
-			for (; x != engine_list.end(); ++x) {
-				tbc::PhysicsEngine* _engine = *x;
+			EngineList::iterator y = engine_list.begin();
+			for (; y != engine_list.end(); ++y) {
+				tbc::PhysicsEngine* _engine = *y;
 				_engine->RemoveControlledGeometry(object->GetPhysics()->GetBoneGeometry(0));
 			}
 			removed = true;
@@ -806,9 +806,9 @@ void ContextObject::SetupChildHandlers() {
 		}
 		AddChild(handler_child);
 		const int bone_trigger_count = _trigger->GetTriggerGeometryCount();
-		for (int x = 0; x < bone_trigger_count; ++x) {
-			AddTrigger(_trigger->GetPhysicsTriggerId(x), handler_child);
-			handler_child->AddTrigger(_trigger->GetPhysicsTriggerId(x), _trigger);
+		for (int y = 0; y < bone_trigger_count; ++y) {
+			AddTrigger(_trigger->GetPhysicsTriggerId(y), handler_child);
+			handler_child->AddTrigger(_trigger->GetPhysicsTriggerId(y), _trigger);
 		}
 		if (bone_trigger_count == 0) {
 			handler_child->AddTrigger(tbc::INVALID_BODY, _trigger);

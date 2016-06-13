@@ -206,8 +206,8 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 					geometry = parent;
 				}
 				vec3 push_vector;
-				for (int i = kAspectPrimary; i <= kAspectTertiary; ++i) {
-					push_vector += value_[i] * axis[i];
+				for (int j = kAspectPrimary; j <= kAspectTertiary; ++j) {
+					push_vector += value_[j] * axis[j];
 				}
 				const float push_force = push_vector.GetLength();
 				if (push_force > 0.1f || friction_) {
@@ -238,8 +238,8 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 					axis[2] = orientation*axis[2];
 				}
 				vec3 push_vector;
-				for (int i = kAspectPrimary; i <= kAspectTertiary; ++i) {
-					push_vector += value_[i] * axis[i];
+				for (int j = kAspectPrimary; j <= kAspectTertiary; ++j) {
+					push_vector += value_[j] * axis[j];
 				}
 				const float push_force = push_vector.GetLength();
 				if (push_force > 0.1f || friction_ != 0) {

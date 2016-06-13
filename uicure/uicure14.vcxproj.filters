@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\uicollisionsoundmanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uicppcontextobject.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uicure.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uigameuimanager.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiiconbutton.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uilinegraph2d.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uimachine.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uimusicplayer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiprops.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiresourcemanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uisound.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uigravelemitter.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiexhaustemitter.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uidebugrenderer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uisoundreleaser.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiparticleloader.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uijetengineemitter.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uipythoninterface.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiterrainmanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiburnemitter.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uigameuimanager.mm">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uidebugstick.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\uiresourcemanager.inl">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\uicollisionsoundmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uicppcontextobject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uicure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uigameuimanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiiconbutton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uilinegraph2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uimachine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uimusicplayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiprops.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiresourcemanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiruntimevariablename.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uisound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiterrainmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uisoundreleaser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiparticleloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uidebugrenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiexhaustemitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uigravelemitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uijetengineemitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uipythoninterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiburnemitter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uidebugstick.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

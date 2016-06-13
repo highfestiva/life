@@ -224,8 +224,8 @@ void Texture::Set(const Canvas& color_map, Canvas::ResizeHint resize_hint, int n
 
 	// And finally, resize them to their respective size.
 	for (int level = 0; level < num_levels; level++) {
-		int _width  = (nearest_pow2_width  >> level);
-		int _height = (nearest_pow2_height >> level);
+		_width  = (nearest_pow2_width  >> level);
+		_height = (nearest_pow2_height >> level);
 
 		// If the texture isn't square, either width or height
 		// will become 0 at the smallest levels, which we can't
@@ -314,8 +314,8 @@ void Texture::Set(const Canvas& cube_map_pos_x,
 
 	// And finally, resize them to their respective size.
 	for (unsigned int level = 0; level < _num_levels; level++) {
-		int _width  = (nearest_pow2_width  >> level);
-		int _height = (nearest_pow2_height >> level);
+		_width  = (nearest_pow2_width  >> level);
+		_height = (nearest_pow2_height >> level);
 
 		// If the texture isn't square, either width or height
 		// will become 0 at the smallest levels, which we can't

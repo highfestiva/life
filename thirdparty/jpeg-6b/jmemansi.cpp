@@ -14,7 +14,7 @@
 
 #ifdef _WIN32 // Jonas Byström: added this as a fallback for non-admin users on Win32.
 #include <share.h>
-#include <char.h>
+//#include <char.h>
 #endif // _WIN32
 #define JPEG_INTERNALS
 #include "jinclude.h"
@@ -145,7 +145,7 @@ FILE* __cdecl jb_tmpfile(backing_store_ptr info)
 	char a[] = "jpgtmp00.tmp";
 	FILE* fh;
 	info->temp_name[0] = 0;
-	while ((fh = _tfsopen(a, "wb+", _SH_DENYRW)) == NULL)
+	while ((fh = _fsopen(a, "wb+", _SH_DENYRW)) == NULL)
 	{
 		++a[7];
 		if (a[7] > '9')

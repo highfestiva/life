@@ -73,7 +73,7 @@ private:
 						      Parent::Cell* cell2);
 	virtual Parent::Cell* NewCell(const str& cell_id,
 						  const str& cell_description,
-						  Parent::PortalManager* portal_manager);
+						  Parent* portal_manager);
 
 	logclass();
 };

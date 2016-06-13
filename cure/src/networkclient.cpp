@@ -64,7 +64,7 @@ bool NetworkClient::Open(const str& local_address) {
 		}
 	}
 	if (ok) {
-		ScopeLock lock(&lock_);
+		//ScopeLock lock(&lock_);
 		for (; _local_address.GetPort() <= end_port; _local_address.SetPort(_local_address.GetPort()+1)) {
 			SetMuxSocket(new MuxSocket("Client ", _local_address, false));
 			if (mux_socket_->IsOpen()) {

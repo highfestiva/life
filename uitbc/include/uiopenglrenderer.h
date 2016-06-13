@@ -62,7 +62,7 @@ public:
 
 	virtual bool IsPixelShadersEnabled() const;
 
-	void SetViewFrustum(float fov_angle, float near, float far);
+	void SetViewFrustum(float fov_angle, float cam_near, float cam_far);
 
 	void SetShadowMode(Shadows shadow_mode, ShadowHint hint);
 	void SetDepthWriteEnabled(bool enabled);
@@ -165,7 +165,7 @@ private:
 	// Here's a function that does it the other way around.
 	// fov_angle is the angle in degrees between the left and the right
 	// frustum planes (left and right screen edges).
-	void Perspective(float fov_angle, float aspect_ratio, float near, float far);
+	void Perspective(float fov_angle, float aspect_ratio, float cam_near, float cam_far);
 
 	void SetPixelFormat(int& size, GLenum& pixel_format, bool compress, const str& error_message);
 

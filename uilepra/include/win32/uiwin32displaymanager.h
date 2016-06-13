@@ -22,7 +22,7 @@ public:
 	// in which case the DefWindowProc() will be called.
 	// If there are many observers listening to the same message,
 	// the one returning true "has the right of veto".
-	virtual bool OnMessage(int msg, int param, long param) = 0;
+	virtual bool OnMessage(int msg, int wparam, long lparam) = 0;
 };
 
 class Win32DisplayManager: public DisplayManager, public Win32Observer {
@@ -52,8 +52,8 @@ public:
 
 	HWND GetHWND();
 
-	static LRESULT CALLBACK WndProc(HWND wnd, unsigned int message, unsigned int param, LONG param);
-	bool InternalDispatchMessage(int message, int param, long param);
+	static LRESULT CALLBACK WndProc(HWND wnd, unsigned int message, unsigned int wparam, LONG lparam);
+	bool InternalDispatchMessage(int message, int wparam, long lparam);
 	void ProcessMessages();
 	void AddObserver(unsigned int message, Win32Observer* observer);
 	void RemoveObserver(unsigned int message, Win32Observer* observer);
@@ -61,7 +61,7 @@ public:
 	// Show a popup dialog with a message.
 	void ShowMessageBox(const str& msg, const str& caption);
 
-	virtual bool OnMessage(int msg, int param, long param);
+	virtual bool OnMessage(int msg, int wparam, long lparam);
 
 protected:
 

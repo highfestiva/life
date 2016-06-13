@@ -662,7 +662,7 @@ void BasicMeshCreator::CreateYBonedSkin(float start_y, float end_y, const Triang
 				const float n = bone_stiffness;
 				yp = ::pow(yp, n);
 				// Scale down to [0, 1] again.
-				yp /= ::pow(2, n);
+				yp /= (float)::pow(2, n);
 				weight_group.vector_weight_array_[v*2+0] = 1-yp;
 				weight_group.vector_weight_array_[v*2+1] = yp;
 			}

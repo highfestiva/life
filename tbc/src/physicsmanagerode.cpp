@@ -122,11 +122,11 @@ int PhysicsManagerODE::QueryRayCollisionAgainst(const vec3& ray_position, const 
 	::dGeomDestroy(ray_geometry_id);
 
 	int found_collision_points = 0;
-	for (int x = 0; x < collision_count; ++x) {
+	for (int y = 0; y < collision_count; ++y) {
 		// Check that we've found a surface turned towards the given direction.
-		const vec3 __normal(contact[x].normal[0], contact[x].normal[1], contact[x].normal[2]);
+		const vec3 __normal(contact[y].normal[0], contact[y].normal[1], contact[y].normal[2]);
 		if (__normal*ray_direction < 0) {
-			collision_points[found_collision_points++].Set(contact[x].pos[0], contact[x].pos[1], contact[x].pos[2]);
+			collision_points[found_collision_points++].Set(contact[y].pos[0], contact[y].pos[1], contact[y].pos[2]);
 		}
 	}
 

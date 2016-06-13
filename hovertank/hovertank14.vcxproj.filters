@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src Files">
+      <UniqueIdentifier>{5B43775E-AF75-11E2-8031-0019213B7B87}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{5B43775F-AF75-11E2-9233-0019213B7B87}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{5B437760-AF75-11E2-96D7-0019213B7B87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Master">
+      <UniqueIdentifier>{5B437761-AF75-11E2-BC7F-0019213B7B87}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\life\lifeserver\masterserverconnection.cpp">
+      <Filter>Master</Filter>
+    </ClCompile>
+    <ClCompile Include="..\life\lifemaster\masterservernetworkparser.cpp">
+      <Filter>Master</Filter>
+    </ClCompile>
+    <ClCompile Include="view.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertank.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertankconsolemanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertankmanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertankticker.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertankviewer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="loginview.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="roadsignbutton.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="serverlistview.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sunlight.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertankserver\bombplane.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertankserver\gameserverlogic.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertankserver\hovertankserverconsole.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertankserver\hovertankserverdelegate.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertankserver\hovertankservermessageprocessor.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertankserver\hovertankserverticker.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertankserver\npc.cpp">
+      <Filter>Server</Filter>
+    </ClCompile>
+    <ClCompile Include="hovertank.mm">
+      <Filter>src Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\life\lifemaster\masterserver.h">
+      <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="..\life\lifeserver\masterserverconnection.h">
+      <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="..\life\lifemaster\masterservernetworkparser.h">
+      <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankmaster\masterserverport.h">
+      <Filter>Master</Filter>
+    </ClInclude>
+    <ClInclude Include="view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertank.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankconsolemanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankticker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankviewer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="loginview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="roadsignbutton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rtvar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="serverlistview.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sunlight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankserver\bombplane.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankserver\gameserverlogic.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankserver\hovertankserverconsole.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankserver\hovertankserverdelegate.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankserver\hovertankservermessageprocessor.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankserver\hovertankserverticker.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="hovertankserver\npc.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

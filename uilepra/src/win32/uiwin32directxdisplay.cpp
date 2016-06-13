@@ -150,7 +150,7 @@ bool Win32DirectXDisplay::InitScreen() {
 	InitD3DPresentParams(d3_d_present_params);
 
 	HRESULT res = d3_d_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, wnd_,
-					     kD3DcreateSoftwareVertexprocessing,
+					     D3DCREATE_SOFTWARE_VERTEXPROCESSING,
 					     &d3_d_present_params, &d3_d_device_);
 	if (FAILED(res)) {
 		MessageBox(NULL,
@@ -201,7 +201,7 @@ void Win32DirectXDisplay::Resize(int width, int height) {
 }
 
 void Win32DirectXDisplay::UpdateCaption() {
-	str s = strutil::Format("Win32DirectXDisplay (%ix%i %iBit %iHz %s"),
+	str s = strutil::Format("Win32DirectXDisplay (%ix%i %iBit %iHz %s)",
 		 display_mode_.width_, display_mode_.height_,
 		display_mode_.bit_depth_, display_mode_.refresh_rate_, kLepraBuildTypeText);
 	SetCaption(s, true);

@@ -12,6 +12,7 @@
 #include "../include/hirestimer.h"
 #include "../include/resourcetracker.h"
 #include "../include/systemmanager.h"
+#include <algorithm>
 
 
 

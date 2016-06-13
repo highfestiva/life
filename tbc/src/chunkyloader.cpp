@@ -156,8 +156,8 @@ bool ChunkyLoader::AllocLoadChunkyList(FileElementList& load_list, int64 chunk_e
 						// Check that elements appear in the same order as given in the load list, otherwise
 						// we're looking at a new (optional) element in a chunk array.
 						for (++y; ok && y != load_list.end(); ++y) {
-							const ChunkyFileElement& element = *y;
-							already_loaded = element.is_element_loaded_;
+							const ChunkyFileElement& _element = *y;
+							already_loaded = _element.is_element_loaded_;
 							ok = !already_loaded;
 						}
 					}

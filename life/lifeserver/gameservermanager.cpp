@@ -143,13 +143,13 @@ bool GameServerManager::Initialize(MasterServerConnection* master_connection, co
 				if (file_array.empty()) {
 					file_array = GetResourceManager()->ListFiles("*.class");
 				}
-				strutil::strvec::const_iterator x = file_array.begin();
-				for (; _ok && x != file_array.end(); ++x) {
-					if (x->find("level_") != str::npos ||
-						x->find("road_sign") != str::npos) {
+				strutil::strvec::const_iterator y = file_array.begin();
+				for (; _ok && y != file_array.end(); ++y) {
+					if (y->find("level_") != str::npos ||
+						y->find("road_sign") != str::npos) {
 						continue;
 					}
-					cure::UserAccount::AvatarId id(Path::GetFileBase(*x));
+					cure::UserAccount::AvatarId id(Path::GetFileBase(*y));
 					_ok = user_account_manager_->AddUserAvatarId(user_name, id);
 				}
 			}
@@ -532,9 +532,9 @@ void GameServerManager::Build(const str& what) {
 		if (_object) {
 			vec3 _position = _object->GetPosition() + vec3(10, 0, 0);
 			log_.Info("Building object '"+what+"' near user "+_client->GetUserConnection()->GetLoginName()+".");
-			cure::ContextObject* _object = Parent::CreateContextObject(what, cure::kNetworkObjectLocallyControlled);
-			_object->SetInitialTransform(xform(kIdentityQuaternionF, _position));
-			_object->StartLoading();
+			cure::ContextObject* _obj = Parent::CreateContextObject(what, cure::kNetworkObjectLocallyControlled);
+			_obj->SetInitialTransform(xform(kIdentityQuaternionF, _position));
+			_obj->StartLoading();
 		}
 	}
 }

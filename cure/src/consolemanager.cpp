@@ -389,7 +389,7 @@ void ConsoleManager::ConsoleThreadEntry() {
 			console_logger_->StepPage(+1);
 		} else if (c < 0) {
 		} else {
-			const wstr __c(1, c);
+			const wstr __c(1, (wchar_t)c);
 			input_text.insert(edit_index, __c);
 			++edit_index;
 		}

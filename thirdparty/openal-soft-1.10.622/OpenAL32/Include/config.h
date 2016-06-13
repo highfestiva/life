@@ -26,10 +26,11 @@
 #define HAVE_TIME_H		1
 #define HAVE_WINDOWS_H		1
 #define _CRT_SECURE_NO_WARNINGS
-#define snprintf		sprintf_s
-#define strncasecmp		strnicmp
-#define strcasecmp		stricmp
-#define isnan			_isnan
+//#define snprintf		sprintf_s
+#define strncasecmp		_strnicmp
+#define strcasecmp		_stricmp
+//#define isnan			_isnan
+#define strdup			_strdup
 
 #else	// Assume Posixy stuff... Currently compiles on my Ubuntu machine. :)
 

@@ -21,7 +21,7 @@ tbc::PortalManager::Portal* PortalManager::NewPortal(int num_vertices,
 
 tbc::PortalManager::Cell* PortalManager::NewCell(const str& cell_id,
 						 const str& cell_description,
-						 Parent::PortalManager* portal_manager) {
+						 Parent* portal_manager) {
 	return new Cell(cell_id, cell_description, (PortalManager*)portal_manager);
 }
 

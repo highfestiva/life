@@ -188,7 +188,6 @@ PngLoader::Status PngLoader::Load(Reader& reader, Canvas& canvas) {
 			const int pixel_byte_size = canvas.GetPixelByteSize();
 			const int pitch = canvas.GetPitch();
 
-			int i;
 			int num_entries;
 			png_color* png_palette;
 			png_get_PLTE(_png, info, &png_palette, &num_entries);
@@ -211,7 +210,7 @@ PngLoader::Status PngLoader::Load(Reader& reader, Canvas& canvas) {
 			canvas.SetPalette(palette);
 
 			uint8** row = png_get_rows(_png, info);
-			for (int i = 0; i < (int)height; i++) {
+			for (i = 0; i < (int)height; i++) {
 				memcpy(&buffer[i * pitch * pixel_byte_size], row[i], width * pixel_byte_size);
 			}
 		} break;

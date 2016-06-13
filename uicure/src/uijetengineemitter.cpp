@@ -144,8 +144,8 @@ void JetEngineEmitter::EmitFromTag(const CppContextObject* object, const uitbc::
 			float overshoot_factor = -(cam_direction*direction);
 			if (overshoot_factor > tag.float_value_list_[kFvOvershootCutoffDot]) {
 				overshoot_factor = Math::Lerp(overshoot_factor*0.5f, overshoot_factor, engine_throttle);
-				const float _opacity = (overshoot_factor+0.6f) * tag.float_value_list_[kFvOvershootOpacity];
-				DrawOvershoot(mesh_pos, _distance_scale_factor*distance, _radius, _color, _opacity, cam_direction);
+				const float opacity = (overshoot_factor+0.6f) * tag.float_value_list_[kFvOvershootOpacity];
+				DrawOvershoot(mesh_pos, _distance_scale_factor*distance, _radius, _color, opacity, cam_direction);
 			}
 
 			if (create_particle) {

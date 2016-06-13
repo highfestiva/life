@@ -1,5 +1,7 @@
 CallGraph/
 Profile/
+*.VC.db
+*.VC.opendb
 *.obj
 *.htm
 *.idb

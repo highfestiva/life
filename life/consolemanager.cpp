@@ -6,7 +6,6 @@
 
 #include "pch.h"
 #include "consolemanager.h"
-#include <algorithm>
 #include "../cure/include/gamemanager.h"
 #include "../cure/include/resourcemanager.h"
 #include "../cure/include/runtimevariable.h"
@@ -486,9 +485,9 @@ int ConsoleManager::OnCommand(const HashedString& command, const strutil::strvec
 			if (parameter_vector.size() >= 2) {
 				int repeat_count = 0;
 				if (strutil::StringToInt(parameter_vector[0], repeat_count)) {
-					const str _command = strutil::Join(parameter_vector, " ", 1);
+					const str _cmd = strutil::Join(parameter_vector, " ", 1);
 					for (int x = 0; x < repeat_count; ++x) {
-						ExecuteCommand(_command);
+						ExecuteCommand(_cmd);
 					}
 				} else {
 					usage = true;
@@ -689,13 +688,13 @@ bool ConsoleManager::SaveConfigFile(File* file, const str& prefix, std::list<str
 	}
 
 	file->WriteString("\n");
-	for (AliasMap::iterator x = alias_map_.begin(); x != alias_map_.end(); ++x) {
-		file->WriteString("alias " + GetQuoted(x->first) + " " + GetQuoted(x->second) + "\n");
+	for (AliasMap::iterator y = alias_map_.begin(); y != alias_map_.end(); ++y) {
+		file->WriteString("alias " + GetQuoted(y->first) + " " + GetQuoted(y->second) + "\n");
 	}
 
 	file->WriteString("\n");
-	for (KeyMap::iterator x = key_map_.begin(); x != key_map_.end(); ++x) {
-		file->WriteString("bind-key " + GetQuoted(x->first) + " " + GetQuoted(x->second) + "\n");
+	for (KeyMap::iterator y = key_map_.begin(); y != key_map_.end(); ++y) {
+		file->WriteString("bind-key " + GetQuoted(y->first) + " " + GetQuoted(y->second) + "\n");
 	}
 
 	file->WriteString("\nset-stdout-log-level 1\n");

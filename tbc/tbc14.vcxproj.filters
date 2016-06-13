@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\bones.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\chunkybonegeometry.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\chunkyclass.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\chunkyloader.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\chunkyphysics.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometrybase.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometryreference.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\model.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physicsengine.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physicsmanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physicsmanagerfactory.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physicsmanagerode.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physicsspawner.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\physicstrigger.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\portalmanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tbc.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\terrainfunction.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\terrainpatch.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\bones.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chunkybonegeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chunkyclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chunkyloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\chunkyphysics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\geometrybase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\geometryreference.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\physicsengine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\physicsmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\physicsmanagerfactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\physicsmanagerode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\physicsspawner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\physicstrigger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\portalmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tbc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\terrainfunction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\terrainpatch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

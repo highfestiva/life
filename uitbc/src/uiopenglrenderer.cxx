@@ -158,9 +158,9 @@ bool OpenGLRenderer::IsPixelShadersEnabled() const {
 	return uilepra::OpenGLExtensions::IsShaderAsmProgramsSupported() && Parent::IsPixelShadersEnabled();
 }
 
-void OpenGLRenderer::SetViewFrustum(float fov_angle, float near, float far) {
-	Parent::SetViewFrustum(fov_angle, near, far);
-	Perspective(fov_angle, GetAspectRatio(), near, far);
+void OpenGLRenderer::SetViewFrustum(float fov_angle, float cam_near, float cam_far) {
+	Parent::SetViewFrustum(fov_angle, cam_near, cam_far);
+	Perspective(fov_angle, GetAspectRatio(), cam_near, cam_far);
 	OGL_FAST_ASSERT();
 }
 
@@ -1057,7 +1057,7 @@ bool OpenGLRenderer::ChangeMaterial(GeometryID geometry_id, MaterialType materia
 	if (ok) {
 		OGLGeometryData* _geometry = (OGLGeometryData*)*iter;
 		if (_geometry->material_type_ != material_type) {
-			OpenGLMaterial* mat = (OpenGLMaterial*)GetMaterial(_geometry->material_type_);
+			mat = (OpenGLMaterial*)GetMaterial(_geometry->material_type_);
 			mat->RemoveGeometry(_geometry->geometry_);
 			_geometry->material_type_ = material_type;
 			mat = (OpenGLMaterial*)GetMaterial(_geometry->material_type_);
@@ -1907,7 +1907,7 @@ void OpenGLRenderer::RegenerateShadowMap(LightData* light) {
 	OGL_FAST_ASSERT();
 }
 
-void OpenGLRenderer::Perspective(float fov_angle, float aspect_ratio, float near, float far) {
+void OpenGLRenderer::Perspective(float fov_angle, float aspect_ratio, float cam_near, float cam_far) {
 	/*
 	    Looking at the FOV from above.
 
@@ -1963,12 +1963,12 @@ void OpenGLRenderer::Perspective(float fov_angle, float aspect_ratio, float near
 
 	projection_matrix[8]  = 0;
 	projection_matrix[9]  = 0;
-	projection_matrix[10] = -(far + near) / (far - near);
+	projection_matrix[10] = -(cam_far + cam_near) / (cam_far - cam_near);
 	projection_matrix[11] = -1;
 
 	projection_matrix[12] = 0;
 	projection_matrix[13] = 0;
-	projection_matrix[14] = (-2.0f * far * near) / (far - near);
+	projection_matrix[14] = (-2.0f * cam_far * cam_near) / (cam_far - cam_near);
 	projection_matrix[15] = 0;
 
 	::glMatrixMode(GL_PROJECTION);

@@ -1,0 +1,313 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Final|Win32">
+      <Configuration>Final</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Candidate|Win32">
+      <Configuration>Release Candidate</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>uitbc</ProjectName>
+    <ProjectGuid>{BDBF3606-E371-454B-B162-27FD92B67D51}</ProjectGuid>
+    <RootNamespace>Migel</RootNamespace>
+    <Keyword>ManagedCProj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(Configuration)\</IntDir>
+    <includePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(LEPRA_DX)\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;$(IncludePath)</includePath>
+    <includePath Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(LEPRA_DX)\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;$(IncludePath)</includePath>
+    <includePath Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(LEPRA_DX)\include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;$(IncludePath)</includePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(TargetPath)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(TargetPath)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(TargetPath)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Data">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\gui\uidialog.cpp" />
+    <ClCompile Include="src\gui\uifixedlayouter.cpp" />
+    <ClCompile Include="src\gui\uimessagedialog.cpp" />
+    <ClCompile Include="src\uianimatedgeometry.cpp" />
+    <ClCompile Include="src\uibasicmeshcreator.cpp" />
+    <ClCompile Include="src\uibillboardgeometry.cpp" />
+    <ClCompile Include="src\uichunkyclass.cpp" />
+    <ClCompile Include="src\uichunkyloader.cpp" />
+    <ClCompile Include="src\uidynamicrenderer.cpp" />
+    <ClCompile Include="src\uifontmanager.cpp" />
+    <ClCompile Include="src\uifonttexture.cpp" />
+    <ClCompile Include="src\uigeometry2d.cpp" />
+    <ClCompile Include="src\uigeometrybatch.cpp" />
+    <ClCompile Include="src\uigraphicalmodel.cpp" />
+    <ClCompile Include="src\uimaterial.cpp" />
+    <ClCompile Include="src\uiopenglmaterial_diffusebumpmapshaders.cxx" />
+    <ClCompile Include="src\uiopenglmaterial_sbmapshaders.cxx" />
+    <ClCompile Include="src\uiopenglmaterial_singlecolorshaders.cxx" />
+    <ClCompile Include="src\uiopenglmaterial_singletextureshaders.cxx" />
+    <ClCompile Include="src\uiopenglmaterial_textureandlightmapshaders.cxx" />
+    <ClCompile Include="src\uiopenglmaterials.cxx" />
+    <ClCompile Include="src\uiopenglpainter.cxx" />
+    <ClCompile Include="src\uiopenglrenderer.cxx" />
+    <ClCompile Include="src\uipainter.cpp" />
+    <ClCompile Include="src\uiparticlerenderer.cpp" />
+    <ClCompile Include="src\uiportalmanager.cpp" />
+    <ClCompile Include="src\uiprogressivetrianglegeometry.cpp" />
+    <ClCompile Include="src\uirenderer.cpp" />
+    <ClCompile Include="src\uirendererfactory.cxx" />
+    <ClCompile Include="src\uishadowvolume.cpp" />
+    <ClCompile Include="src\uitbc.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\uiterraintexturegenerator.cpp" />
+    <ClCompile Include="src\uitexloader.cpp" />
+    <ClCompile Include="src\uitexture.cpp" />
+    <ClCompile Include="src\uitrianglebasedgeometry.cpp" />
+    <ClCompile Include="src\uiuvmapper.cpp" />
+    <ClCompile Include="src\gui\uibordercomponent.cpp" />
+    <ClCompile Include="src\gui\uibutton.cpp" />
+    <ClCompile Include="src\gui\uicaption.cpp" />
+    <ClCompile Include="src\gui\uicenterlayout.cpp" />
+    <ClCompile Include="src\gui\uicheckbutton.cpp" />
+    <ClCompile Include="src\gui\uicomponent.cpp" />
+    <ClCompile Include="src\gui\uiconsoleloglistener.cpp" />
+    <ClCompile Include="src\gui\uiconsoleprompt.cpp" />
+    <ClCompile Include="src\gui\uicustombutton.cpp" />
+    <ClCompile Include="src\gui\uidesktopwindow.cpp" />
+    <ClCompile Include="src\gui\uifilenamefield.cpp" />
+    <ClCompile Include="src\gui\uifloatinglayout.cpp" />
+    <ClCompile Include="src\gui\uigridlayout.cpp" />
+    <ClCompile Include="src\gui\uiguiimagemanager.cpp" />
+    <ClCompile Include="src\gui\uilabel.cpp" />
+    <ClCompile Include="src\gui\uilistcontrol.cpp" />
+    <ClCompile Include="src\gui\uilistlayout.cpp" />
+    <ClCompile Include="src\gui\uipopuplist.cpp" />
+    <ClCompile Include="src\gui\uiprogressbar.cpp" />
+    <ClCompile Include="src\gui\uiradiobutton.cpp" />
+    <ClCompile Include="src\gui\uirectcomponent.cpp" />
+    <ClCompile Include="src\gui\uiscrollbar.cpp" />
+    <ClCompile Include="src\gui\uistacklayout.cpp" />
+    <ClCompile Include="src\gui\uitextarea.cpp" />
+    <ClCompile Include="src\gui\uitextcomponent.cpp" />
+    <ClCompile Include="src\gui\uitextfield.cpp" />
+    <ClCompile Include="src\gui\uitreenode.cpp" />
+    <ClCompile Include="src\gui\uiwindow.cpp" />
+    <ClCompile Include="src\win32\uiwin32directx9painter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="src\win32\uiwin32fontmanager.cpp" />
+    <ClCompile Include="src\x11\uix11fontmanager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\uiopenglmaterials.mm" />
+    <None Include="src\uiopenglpainter.mm" />
+    <None Include="src\uiopenglrenderer.mm" />
+    <None Include="src\uirendererfactory.mm" />
+    <ClCompile Include="src\mac\uimacfontmanager.mm">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\gui\uifixedlayouter.h" />
+    <ClInclude Include="include\gui\uimessagedialog.h" />
+    <ClInclude Include="include\uianimatedgeometry.h" />
+    <ClInclude Include="include\uibasicmeshcreator.h" />
+    <ClInclude Include="include\uibillboardgeometry.h" />
+    <ClInclude Include="include\uibillboardrenderinfo.h" />
+    <ClInclude Include="include\uichunkyclass.h" />
+    <ClInclude Include="include\uichunkyloader.h" />
+    <ClInclude Include="include\uidynamicrenderer.h" />
+    <ClInclude Include="include\uifontmanager.h" />
+    <ClInclude Include="include\uifonttexture.h" />
+    <ClInclude Include="include\uigeometry2d.h" />
+    <ClInclude Include="include\uigeometrybatch.h" />
+    <ClInclude Include="include\uigraphicalmodel.h" />
+    <ClInclude Include="include\uimaterial.h" />
+    <ClInclude Include="include\uiopenglmaterials.h" />
+    <ClInclude Include="include\uiopenglpainter.h" />
+    <ClInclude Include="include\uiopenglrenderer.h" />
+    <ClInclude Include="include\uipainter.h" />
+    <ClInclude Include="include\uiparticlerenderer.h" />
+    <ClInclude Include="include\uiportalmanager.h" />
+    <ClInclude Include="include\uiprogressivetrianglegeometry.h" />
+    <ClInclude Include="include\uirenderer.h" />
+    <ClInclude Include="include\uirendererfactory.h" />
+    <ClInclude Include="include\uishadowvolume.h" />
+    <ClInclude Include="include\uitbc.h" />
+    <ClInclude Include="include\uiterraintexturegenerator.h" />
+    <ClInclude Include="include\uitexloader.h" />
+    <ClInclude Include="include\uitexture.h" />
+    <ClInclude Include="include\uitrianglebasedgeometry.h" />
+    <ClInclude Include="include\uiuvmapper.h" />
+    <ClInclude Include="include\gui\uibordercomponent.h" />
+    <ClInclude Include="include\gui\uibutton.h" />
+    <ClInclude Include="include\gui\uicaption.h" />
+    <ClInclude Include="include\gui\uicenterlayout.h" />
+    <ClInclude Include="include\gui\uicheckbutton.h" />
+    <ClInclude Include="include\gui\uicleaner.h" />
+    <ClInclude Include="include\gui\uicomponent.h" />
+    <ClInclude Include="include\gui\uiconsoleloglistener.h" />
+    <ClInclude Include="include\gui\uiconsoleprompt.h" />
+    <ClInclude Include="include\gui\uicustombutton.h" />
+    <ClInclude Include="include\gui\uidesktopwindow.h" />
+    <ClInclude Include="include\gui\uidialog.h" />
+    <ClInclude Include="include\gui\uifilenamefield.h" />
+    <ClInclude Include="include\gui\uifloatinglayout.h" />
+    <ClInclude Include="include\gui\uigridlayout.h" />
+    <ClInclude Include="include\gui\uiguiimagemanager.h" />
+    <ClInclude Include="include\gui\uilabel.h" />
+    <ClInclude Include="include\gui\uilayout.h" />
+    <ClInclude Include="include\gui\uilistcontrol.h" />
+    <ClInclude Include="include\gui\uilistlayout.h" />
+    <ClInclude Include="include\gui\uipopuplist.h" />
+    <ClInclude Include="include\gui\uiprogressbar.h" />
+    <ClInclude Include="include\gui\uiradiobutton.h" />
+    <ClInclude Include="include\gui\uirectcomponent.h" />
+    <ClInclude Include="include\gui\uiscrollbar.h" />
+    <ClInclude Include="include\gui\uistacklayout.h" />
+    <ClInclude Include="include\gui\uitextarea.h" />
+    <ClInclude Include="include\gui\uitextcomponent.h" />
+    <ClInclude Include="include\gui\uitextfield.h" />
+    <ClInclude Include="include\gui\uitreenode.h" />
+    <ClInclude Include="include\gui\uiwindow.h" />
+    <ClInclude Include="include\win32\uiwin32directx9painter.h" />
+    <ClInclude Include="include\win32\uiwin32fontmanager.h" />
+    <ClInclude Include="include\x11\uix11fontmanager.h" />
+    <ClInclude Include="include\mac\uimacfontmanager.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

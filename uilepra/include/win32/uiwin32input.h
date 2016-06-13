@@ -118,7 +118,7 @@ public:
 
 
 protected:
-	bool OnMessage(int msg, int param, long param);
+	bool OnMessage(int msg, int wparam, long lparam);
 	void SetKey(KeyCode w_param, long l_param, bool is_down);
 
 private:

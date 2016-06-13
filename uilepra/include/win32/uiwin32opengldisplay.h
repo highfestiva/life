@@ -39,8 +39,6 @@ protected:
 	void SetFocus(bool focus);
 
 private:
-	void Deactivate();
-
 	void Resize(int width, int height);
 	void UpdateCaption();
 

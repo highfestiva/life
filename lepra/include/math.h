@@ -10,6 +10,7 @@
 #include "lepratypes.h"
 #include <cmath>
 #include <vector>
+#include <algorithm>
 
 
 

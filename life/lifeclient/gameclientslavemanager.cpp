@@ -361,9 +361,9 @@ bool GameClientSlaveManager::TickNetworkOutput() {
 			}
 		}
 		if (send) {
-			ObjectIdSet::iterator x = owned_object_list_.begin();
-			for (; x != owned_object_list_.end(); ++x) {
-				cure::ContextObject* _object = GetContext()->GetObject(*x);
+			ObjectIdSet::iterator y = owned_object_list_.begin();
+			for (; y != owned_object_list_.end(); ++y) {
+				cure::ContextObject* _object = GetContext()->GetObject(*y);
 				if (_object) {
 					const cure::ObjectPositionalData* positional_data = 0;
 					if (_object->UpdateFullPosition(positional_data)) {
@@ -601,12 +601,12 @@ void GameClientSlaveManager::HandleUnusedRelativeAxis() {
 			if (!value_pointers) {
 				continue;
 			}
-			options::OptionsManager::ValueArray::iterator x = value_pointers->begin();
-			for (; x != value_pointers->end(); ++x) {
-				if (std::abs(**x) > 0.02f) {
-					**x *= mouse_filter;
-				} else if (**x != 0) {
-					**x = 0;
+			options::OptionsManager::ValueArray::iterator z = value_pointers->begin();
+			for (; z != value_pointers->end(); ++z) {
+				if (std::abs(**z) > 0.02f) {
+					**z *= mouse_filter;
+				} else if (**z != 0) {
+					**z = 0;
 					relative_axis_.erase(axis);
 				}
 			}

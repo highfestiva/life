@@ -323,37 +323,37 @@ def generate_makefiles(basedir, vcfileinfolist):
 def main():
     basedir = "../../"
     projects = [
-        ["ThirdParty",      "lib_nowarn", "ThirdParty/ThirdPartyLib_10.vcxproj", ""],
-        ["alut",            "lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut10.vcxproj", ""],
-        ["Lepra",           "lib",        "Lepra/Lepra10.vcxproj", "ThirdParty"],
-        ["Tbc",             "lib",        "Tbc/Tbc10.vcxproj", "Lepra"],
-        ["Cure",            "lib",        "Cure/Cure10.vcxproj", "Tbc"],
-        ["UiLepra",         "gfx_lib",    "UiLepra/UiLepra10.vcxproj", "Lepra alut"+space_mac_hid],
-        ["UiTbc",           "gfx_lib",    "UiTbc/UiTbc10.vcxproj", "UiLepra Tbc"],
-        ["UiCure",          "gfx_lib",    "UiCure/UiCure10.vcxproj", "UiTbc Cure"],
-        ["Life",            "lib",        "Life/Life10.vcxproj", "Cure"],
-        ["LifeServer",      "lib",        "Life/LifeServer/LifeServer10.vcxproj", "Life"],
-        ["LifeMaster",      "lib",        "Life/LifeMaster/LifeMaster10.vcxproj", "Life"],
-        ["LifeClient",      "gfx_lib",    "Life/LifeClient/LifeClient10.vcxproj", "Life UiCure"],
-        ["SlimeVolleyball", "gfx_bin",    "SlimeVolleyball/SlimeVolleyball10.vcxproj", "UiTbc"],
-        ["KillCutie",       "gfx_bin",    "KillCutie/KillCutie10.vcxproj", "UiCure"],
-        ["Push",            "gfx_bin",    "Push/Push10.vcxproj", "LifeClient LifeServer"],
-        ["HoverTank",       "gfx_bin",    "HoverTank/HoverTank10.vcxproj", "LifeClient LifeServer"],
-        ["Downwash",        "gfx_bin",    "Downwash/Downwash10.vcxproj", "LifeClient"],
-        ["Fire",            "gfx_bin",    "Fire/Fire10.vcxproj", "LifeClient"],
-        ["Bound",           "gfx_bin",    "Bound/Bound10.vcxproj", "LifeClient"],
-        ["TrabantSim",      "gfx_bin",    "TrabantSim/TrabantSim10.vcxproj", "LifeClient"],
-        ["Impuzzable",      "gfx_bin",    "Impuzzable/Impuzzable10.vcxproj", "LifeClient"],
-        ["PushServer",      "bin",        "Push/PushServer/PushServer10.vcxproj", "LifeServer"],
-        ["HoverTankServer", "bin",        "HoverTank/HoverTankServer/HoverTankServer10.vcxproj", "LifeServer"],
-        ["PushMaster",      "bin",        "Push/PushMaster/PushMaster10.vcxproj", "LifeMaster"],
-        ["HoverTankMaster", "bin",        "HoverTank/HoverTankMaster/HoverTankMaster10.vcxproj", "LifeMaster"],
-        ["TireFire",        "gfx_bin",    "TireFire/TireFire10.vcxproj", "UiCure"],
-        ["Bounce",          "gfx_bin",    "Bounce/Bounce10.vcxproj", "UiCure"],
-        ["CureTest",        "gfx_bin",    "UiCure/CureTestApp/CureTestApp10.vcxproj", "UiCure"]]
+        ["ThirdParty",      "lib_nowarn", "ThirdParty/ThirdPartyLib_14.vcxproj", ""],
+        ["alut",            "lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut14.vcxproj", ""],
+        ["Lepra",           "lib",        "Lepra/Lepra14.vcxproj", "ThirdParty"],
+        ["Tbc",             "lib",        "Tbc/Tbc14.vcxproj", "Lepra"],
+        ["Cure",            "lib",        "Cure/Cure14.vcxproj", "Tbc"],
+        ["UiLepra",         "gfx_lib",    "UiLepra/UiLepra14.vcxproj", "Lepra alut"+space_mac_hid],
+        ["UiTbc",           "gfx_lib",    "UiTbc/UiTbc14.vcxproj", "UiLepra Tbc"],
+        ["UiCure",          "gfx_lib",    "UiCure/UiCure14.vcxproj", "UiTbc Cure"],
+        ["Life",            "lib",        "Life/Life14.vcxproj", "Cure"],
+        ["LifeServer",      "lib",        "Life/LifeServer/LifeServer14.vcxproj", "Life"],
+        ["LifeMaster",      "lib",        "Life/LifeMaster/LifeMaster14.vcxproj", "Life"],
+        ["LifeClient",      "gfx_lib",    "Life/LifeClient/LifeClient14.vcxproj", "Life UiCure"],
+        ["SlimeVolleyball", "gfx_bin",    "SlimeVolleyball/SlimeVolleyball14.vcxproj", "UiTbc"],
+        ["KillCutie",       "gfx_bin",    "KillCutie/KillCutie14.vcxproj", "UiCure"],
+        ["Push",            "gfx_bin",    "Push/Push14.vcxproj", "LifeClient LifeServer"],
+        ["HoverTank",       "gfx_bin",    "HoverTank/HoverTank14.vcxproj", "LifeClient LifeServer"],
+        ["Downwash",        "gfx_bin",    "Downwash/Downwash14.vcxproj", "LifeClient"],
+        ["Fire",            "gfx_bin",    "Fire/Fire14.vcxproj", "LifeClient"],
+        ["Bound",           "gfx_bin",    "Bound/Bound14.vcxproj", "LifeClient"],
+        ["TrabantSim",      "gfx_bin",    "TrabantSim/TrabantSim14.vcxproj", "LifeClient"],
+        ["Impuzzable",      "gfx_bin",    "Impuzzable/Impuzzable14.vcxproj", "LifeClient"],
+        ["PushServer",      "bin",        "Push/PushServer/PushServer14.vcxproj", "LifeServer"],
+        ["HoverTankServer", "bin",        "HoverTank/HoverTankServer/HoverTankServer14.vcxproj", "LifeServer"],
+        ["PushMaster",      "bin",        "Push/PushMaster/PushMaster14.vcxproj", "LifeMaster"],
+        ["HoverTankMaster", "bin",        "HoverTank/HoverTankMaster/HoverTankMaster14.vcxproj", "LifeMaster"],
+        ["TireFire",        "gfx_bin",    "TireFire/TireFire14.vcxproj", "UiCure"],
+        ["Bounce",          "gfx_bin",    "Bounce/Bounce14.vcxproj", "UiCure"],
+        ["CureTest",        "gfx_bin",    "UiCure/CureTestApp/CureTestApp14.vcxproj", "UiCure"]]
 
     if not is_mac:
-        projects = [["OpenAL", "lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_10.vcxproj", ""]] + projects
+        projects = [["OpenAL", "lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_14.vcxproj", ""]] + projects
     else:
         projects = [[mac_hid, "lib_nowarn", "ThirdParty/HID_Utilities/HID_Utilities.vcxproj", ""]] + projects
 

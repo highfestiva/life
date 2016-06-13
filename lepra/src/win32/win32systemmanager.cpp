@@ -110,10 +110,7 @@ str SystemManager::GetCurrentDirectory() {
 		log_.Error("Failed to GetCurrentDirectory()");
 	}
 
-	str s(str(buffer));
-	s = strutil::ReplaceAll(s, '\\', '/');
-
-	return (s);
+	return strutil::ReplaceAll(buffer, '\\', '/');
 }
 
 str SystemManager::GetUserDirectory() {
@@ -175,7 +172,7 @@ str SystemManager::QueryFullUserName() {
 		ok = (::NetUserGetInfo((LPWSTR)domain_controller_name, unicode_login_name.c_str(), 2, (LPBYTE*)&user_info) == NERR_Success);
 		if (ok) {
 			if (user_info->usri2_full_name[0]) {
-				full_name = user_info->usri2_full_name;
+				full_name = strutil::Encode(user_info->usri2_full_name);
 			}
 			::NetApiBufferFree(user_info);
 		}
@@ -257,6 +254,7 @@ str SystemManager::GetOsName() {
 	OSVERSIONINFO os_ver;
 	os_ver.dwOSVersionInfoSize = sizeof(os_ver);
 
+#pragma warning(disable: 4996)	// XXX was declared deprecated.
 	if (::GetVersionEx(&os_ver)) {
 		switch(os_ver.dwPlatformId) {
 			case VER_PLATFORM_WIN32_NT:

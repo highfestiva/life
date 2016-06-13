@@ -560,9 +560,9 @@ TiffLoader::Status TiffLoader::ReadIFD(File& file, IFDInfo& ifd_info) {
 						int64 prev_pos = file.Tell();
 						file.SeekSet(de.value_offset_);
 
-						for (unsigned i = 0; i < ifd_info.samples_per_pixel_; i++) {
-							file.Read(ifd_info.sample_bits_[i]);
-							ifd_info.bits_per_pixel_ += (unsigned)ifd_info.sample_bits_[i];
+						for (unsigned u = 0; u < ifd_info.samples_per_pixel_; ++u) {
+							file.Read(ifd_info.sample_bits_[u]);
+							ifd_info.bits_per_pixel_ += (unsigned)ifd_info.sample_bits_[u];
 						}
 
 						file.SeekSet(prev_pos);
@@ -576,23 +576,22 @@ TiffLoader::Status TiffLoader::ReadIFD(File& file, IFDInfo& ifd_info) {
 				int64 prev_pos = file.Tell();
 				file.SeekSet(de.value_offset_);
 
-				uint16 i;
-				for (i = 0; i < ifd_info.palette_color_count_; i++) {
+				for (unsigned u = 0; u < ifd_info.palette_color_count_; u++) {
 					uint16 red;
 					file.Read(red);
-					ifd_info.palette_[i].red_  = (uint8)(red >> 8);
+					ifd_info.palette_[u].red_  = (uint8)(red >> 8);
 				}
 
-				for (i = 0; i < ifd_info.palette_color_count_; i++) {
+				for (unsigned u = 0; u < ifd_info.palette_color_count_; u++) {
 					uint16 green;
 					file.Read(green);
-					ifd_info.palette_[i].green_  = (uint8)(green >> 8);
+					ifd_info.palette_[u].green_  = (uint8)(green >> 8);
 				}
 
-				for (i = 0; i < ifd_info.palette_color_count_; i++) {
+				for (unsigned u = 0; u < ifd_info.palette_color_count_; u++) {
 					uint16 blue;
 					file.Read(blue);
-					ifd_info.palette_[i].blue_  = (uint8)(blue >> 8);
+					ifd_info.palette_[u].blue_  = (uint8)(blue >> 8);
 				}
 
 				file.SeekSet(prev_pos);
@@ -652,20 +651,19 @@ TiffLoader::Status TiffLoader::ReadIFD(File& file, IFDInfo& ifd_info) {
 			if (ifd_info.strip_count_ == 1) {
 				ifd_info.strip_byte_counts_[0] = de.value_offset_;
 			} else {
-				unsigned i;
 				int64 prev_pos = file.Tell();
 				file.SeekSet(de.value_offset_);
 
 				if (de.type_ == kTypeShort) {
 					uint16 temp;
 
-					for (i = 0; i < ifd_info.strip_count_; i++) {
+					for (unsigned u = 0; u < ifd_info.strip_count_; u++) {
 						file.Read(temp);
-						ifd_info.strip_byte_counts_[i] = (unsigned)temp;
+						ifd_info.strip_byte_counts_[u] = (unsigned)temp;
 					}
 				} else if(de.type_ == kTypeLong) {
-					for (i = 0; i < ifd_info.strip_count_; i++) {
-						file.Read(ifd_info.strip_byte_counts_[i]);
+					for (unsigned u = 0; u < ifd_info.strip_count_; u++) {
+						file.Read(ifd_info.strip_byte_counts_[u]);
 					}
 				} else {
 					current_status = kStatusReadInfoError;
@@ -685,20 +683,19 @@ TiffLoader::Status TiffLoader::ReadIFD(File& file, IFDInfo& ifd_info) {
 			if (ifd_info.strip_count_ == 1) {
 				ifd_info.strip_offsets_[0] = de.value_offset_;
 			} else {
-				unsigned i;
 				int64 prev_pos = file.Tell();
 				file.SeekSet(de.value_offset_);
 
 				if (de.type_ == kTypeShort) {
 					uint16 temp;
 
-					for (i = 0; i < ifd_info.strip_count_; i++) {
+					for (unsigned u = 0; u < ifd_info.strip_count_; u++) {
 						file.Read(temp);
-						ifd_info.strip_offsets_[i] = (unsigned)temp;
+						ifd_info.strip_offsets_[u] = (unsigned)temp;
 					}
 				} else if(de.type_ == kTypeLong) {
-					for (i = 0; i < ifd_info.strip_count_; i++) {
-						file.Read(ifd_info.strip_offsets_[i]);
+					for (unsigned u = 0; u < ifd_info.strip_count_; u++) {
+						file.Read(ifd_info.strip_offsets_[u]);
 					}
 				} else {
 					current_status = kStatusReadInfoError;
@@ -798,8 +795,7 @@ TiffLoader::Status TiffLoader::ReadMonochromeImage(File& file,
 
 	uint8* dest = (uint8*)canvas.GetBuffer();
 
-	unsigned i;
-	for (i = 0; i < ifd_info.strip_count_; i++) {
+	for (unsigned i = 0; i < ifd_info.strip_count_; i++) {
 		file.SeekSet(ifd_info.strip_offsets_[i]);
 		for (unsigned y = 0; y < ifd_info.rows_per_strip_; y++) {
 			// Read one row.
@@ -812,7 +808,7 @@ TiffLoader::Status TiffLoader::ReadMonochromeImage(File& file,
 
 	// Generate grayscale palette.
 	Color palette[256];
-	for (i = 0; i < 256; i++) {
+	for (unsigned i = 0; i < 256; i++) {
 		uint8 col = (uint8)i;
 
 		if (invert == true) {

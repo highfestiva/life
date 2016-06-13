@@ -131,7 +131,7 @@ float StrToFloat(const char* s, const char** _end) {
 		return f;
 	}
 	e = negative_exponent? -e : e;
-	return f*pow(10,e);
+	return f*(float)pow(10,e);
 }
 
 str ParamToStr(const strutil::strvec& param, size_t index) {

@@ -105,7 +105,7 @@ for i in range(0,len(boxes),6):
         s = +1 if idx < floor_count else -1
         col = int(((pos.z+s*size.z/2)+3)*219)
         col = ((col&0xf)<<8) + (col>>4)
-        col = (col+0xeee)/2
+        col = (col+0xeee)//2
         col = '#%3.3x' % col
     q = rotz(l[box_angles[idx]])
     b = create_box(pos, orientation=q, side=size, mat='flat', col=col, static=idx not in elevators)

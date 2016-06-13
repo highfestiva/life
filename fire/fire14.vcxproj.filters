@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src Files">
+      <UniqueIdentifier>{C0C67F74-79DA-11E3-A932-0019213B7B87}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{C0C67F75-79DA-11E3-BFB1-0019213B7B87}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="fire.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fireconsolemanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="firemanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fireticker.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="level.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sunlight.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="eater.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="autopathdriver.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="basemachine.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fire.mm">
+      <Filter>src Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="fire.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fireconsolemanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="firemanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fireticker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="level.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rtvar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sunlight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="eater.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="autopathdriver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="basemachine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="fire.rc" />
+  </ItemGroup>
+</Project>

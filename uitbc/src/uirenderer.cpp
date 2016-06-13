@@ -1494,9 +1494,9 @@ vec2 Renderer::PositionToScreenCoord(const vec3& position, float aspect_ratio) c
 	camera_transformation_.orientation_.FastInverseRotatedVector(camera_orientation_inverse_, direction, cam_direction);
 
 	// Normalize so Y-distance from camera is 1.
-	const float eps = 1e-5f;	// Something small.
-	if (std::abs(direction.y) < eps) {
-		direction.y = eps;
+	const float _eps = 1e-5f;	// Something small.
+	if (std::abs(direction.y) < _eps) {
+		direction.y = _eps;
 	}
 	direction.x /= direction.y;
 	direction.z /= direction.y;

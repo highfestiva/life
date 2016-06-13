@@ -1,0 +1,457 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="src Files\gui">
+      <UniqueIdentifier>{4f652ec6-83e7-4550-be4e-9427fdcfc3a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src Files\win32">
+      <UniqueIdentifier>{71ec1253-3cae-4588-9c78-38757514fc5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src Files\x11">
+      <UniqueIdentifier>{faa371f2-3b98-4e67-bba7-138fcef4f17e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src Files\mac">
+      <UniqueIdentifier>{81e728c2-45ec-43f7-a31c-cc6f53f9718b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\gui">
+      <UniqueIdentifier>{d618b0df-4cb0-4927-897b-606ffb692955}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\win32">
+      <UniqueIdentifier>{a5f021e9-4e6b-49e4-9f72-b69eb374dca8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\x11">
+      <UniqueIdentifier>{9fac3ad8-a2bc-4cca-8208-8a96af1e2347}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\mac">
+      <UniqueIdentifier>{b90c5a27-77cb-4837-9dc4-e405ffb7e9f0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\uianimatedgeometry.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uibasicmeshcreator.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uichunkyclass.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uichunkyloader.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uifontmanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uifonttexture.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uigeometry2d.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uigeometrybatch.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uigraphicalmodel.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uimaterial.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiopenglmaterial_diffusebumpmapshaders.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiopenglmaterial_sbmapshaders.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiopenglmaterial_singlecolorshaders.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiopenglmaterial_singletextureshaders.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiopenglmaterial_textureandlightmapshaders.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiopenglmaterials.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiopenglpainter.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiopenglrenderer.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uipainter.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiportalmanager.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiprogressivetrianglegeometry.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uirenderer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uirendererfactory.cxx">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uishadowvolume.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uitbc.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiterraintexturegenerator.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uitexloader.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uitexture.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uitrianglebasedgeometry.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiuvmapper.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uibordercomponent.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uibutton.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uicaption.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uicenterlayout.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uicheckbutton.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uicomponent.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uiconsoleloglistener.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uiconsoleprompt.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uicustombutton.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uidesktopwindow.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uifilenamefield.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uifloatinglayout.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uigridlayout.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uiguiimagemanager.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uilabel.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uilistcontrol.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uilistlayout.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uipopuplist.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uiprogressbar.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uiradiobutton.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uirectcomponent.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uiscrollbar.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uistacklayout.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uitextarea.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uitextcomponent.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uitextfield.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uitreenode.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uiwindow.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32\uiwin32fontmanager.cpp">
+      <Filter>src Files\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\x11\uix11fontmanager.cpp">
+      <Filter>src Files\x11</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mac\uimacfontmanager.mm">
+      <Filter>src Files\mac</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uimessagedialog.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uidialog.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiparticlerenderer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uidynamicrenderer.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uibillboardgeometry.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win32\uiwin32directx9painter.cpp">
+      <Filter>src Files\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\uifixedlayouter.cpp">
+      <Filter>src Files\gui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\uiopenglmaterials.mm">
+      <Filter>src Files</Filter>
+    </None>
+    <None Include="src\uiopenglpainter.mm">
+      <Filter>src Files</Filter>
+    </None>
+    <None Include="src\uiopenglrenderer.mm">
+      <Filter>src Files</Filter>
+    </None>
+    <None Include="src\uirendererfactory.mm">
+      <Filter>src Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\uianimatedgeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uibasicmeshcreator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uichunkyclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uichunkyloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uifontmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uifonttexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uigeometry2d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uigeometrybatch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uigraphicalmodel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uimaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiopenglmaterials.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiopenglpainter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiopenglrenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uipainter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiportalmanager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiprogressivetrianglegeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uirenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uirendererfactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uishadowvolume.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uitbc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiterraintexturegenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uitexloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uitexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uitrianglebasedgeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiuvmapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uibordercomponent.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uibutton.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uicaption.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uicenterlayout.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uicheckbutton.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uicleaner.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uicomponent.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uiconsoleloglistener.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uiconsoleprompt.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uicustombutton.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uidesktopwindow.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uidialog.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uifilenamefield.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uifloatinglayout.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uigridlayout.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uiguiimagemanager.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uilabel.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uilayout.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uilistcontrol.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uilistlayout.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uipopuplist.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uiprogressbar.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uiradiobutton.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uirectcomponent.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uiscrollbar.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uistacklayout.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uitextarea.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uitextcomponent.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uitextfield.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uitreenode.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uiwindow.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\win32\uiwin32directx9painter.h">
+      <Filter>Header Files\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="include\win32\uiwin32fontmanager.h">
+      <Filter>Header Files\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="include\x11\uix11fontmanager.h">
+      <Filter>Header Files\x11</Filter>
+    </ClInclude>
+    <ClInclude Include="include\mac\uimacfontmanager.h">
+      <Filter>Header Files\mac</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uimessagedialog.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uiparticlerenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uidynamicrenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uibillboardrenderinfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\uibillboardgeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\gui\uifixedlayouter.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

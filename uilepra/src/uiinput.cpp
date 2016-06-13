@@ -94,7 +94,7 @@ void InputElement::SetValue(int value) {
 }
 
 void InputElement::AddValue(int value) {
-	const int prev_value = (value_*(max_-min_) + (max_+min_)) / 2.0f;
+	const int prev_value = int((value_*(max_-min_) + (max_+min_)) / 2.0f);
 	SetValue(prev_value + value);
 }
 

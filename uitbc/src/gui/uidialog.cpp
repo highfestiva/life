@@ -201,9 +201,9 @@ void Dialog::UpdateLayout() {
 		int x = __size.x/2 + half_gap - space_per_each*button_count/2;
 		const int y = label_? __size.y/2 : __size.y/2-button_size.y/2;
 		for (int i = 0; i < button_count; ++i) {
-			Button* _button = button_list_[i];
-			if (_button->GetTag() >= 0) {
-				_button->SetPos(PixelCoord(x, y) + offset_);
+			Button* _btn = button_list_[i];
+			if (_btn->GetTag() >= 0) {
+				_btn->SetPos(PixelCoord(x, y) + offset_);
 				x += space_per_each;
 			}
 		}
@@ -214,9 +214,9 @@ void Dialog::UpdateLayout() {
 		int y = __size.y/2 + half_gap - space_per_each*button_count/2;
 		y += label_? button_size.y/2 : 0;
 		for (int i = 0; i < button_count; ++i) {
-			Button* _button = button_list_[i];
-			if (_button->GetTag() >= 0) {
-				_button->SetPos(PixelCoord(x, y) + offset_);
+			Button* _btn = button_list_[i];
+			if (_btn->GetTag() >= 0) {
+				_btn->SetPos(PixelCoord(x, y) + offset_);
 				y += space_per_each;
 			}
 		}

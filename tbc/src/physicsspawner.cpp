@@ -173,12 +173,12 @@ void PhysicsSpawner::LoadChunkyData(ChunkyPhysics* structure, const void* data) 
 	initial_velocity_.Set(x, y, z);
 	number_ = Endian::BigToHostF(_data[i++]);
 	const int interval_count = Endian::BigToHost(_data[i++]);
-	for (int x = 0; x < interval_count; ++x) {
+	for (int j = 0; j < interval_count; ++j) {
 		interval_array_.push_back(Endian::BigToHostF(_data[i++]));
 	}
 	total_object_probability_ = 0;
 	const int spawn_object_count = Endian::BigToHost(_data[i++]);
-	for (int x = 0; x < spawn_object_count; ++x) {
+	for (int j = 0; j < spawn_object_count; ++j) {
 		str _spawn_object;
 		const int string_raw_length = PackerUnicodeString::Unpack(_spawn_object, (uint8*)&_data[i], 1024);
 		deb_assert(string_raw_length % sizeof(_data[0]) == 0);

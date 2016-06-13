@@ -6,6 +6,7 @@
 
 #include "pch.h"
 #include "explosion.h"
+#include <algorithm>
 #include "../cure/include/contextmanager.h"
 #include "../cure/include/cppcontextobject.h"
 #include "../cure/include/gamemanager.h"

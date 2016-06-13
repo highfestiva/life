@@ -771,7 +771,7 @@ unsigned ResourceManager::ForceFreeCache(const strutil::strvec& resource_type_li
 	}
 	log_.Headline("---------------");*/
 	int prev_dropped_resource_count = -1;
-	unsigned dropped_resource_count = 0;
+	int dropped_resource_count = 0;
 	while (prev_dropped_resource_count != dropped_resource_count) {
 		prev_dropped_resource_count = dropped_resource_count;
 		ResourceTable::iterator x = cached_resource_table_.begin();
@@ -858,7 +858,7 @@ Resource* ResourceManager::GetAddCachedResource(const str& name, UserResource* u
 	if (x != active_resource_table_.end()) {
 		_resource = x->second;
 	} else {
-		ResourceTable::iterator x = cached_resource_table_.find(name);
+		x = cached_resource_table_.find(name);
 		if (x != cached_resource_table_.end()) {
 			_resource = x->second;
 			// Resource found on the way out, move it back into the system.

@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="App">
+      <UniqueIdentifier>{646581d0-8212-4aa4-ab84-e0cf21edd270}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="curetest.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lepra\lepratestapp\lepratest.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="networkphysicstest.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\uitbc\uitbcTestApp\rotationalagreementtest.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\uitbc\uitbcTestApp\tbctest.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lepra\lepratestapp\testbintree.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lepra\lepratestapp\testloosetree.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lepra\lepratestapp\testskiplist.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lepra\lepratestapp\testthreading.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\lepra\lepratestapp\testudpsockets.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uicuretest.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\uilepra\lepratestapp\uilepratest.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\uitbc\uitbcTestApp\uitbctest.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="curetestapp.cpp">
+      <Filter>App</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\uitbc\uitbcTestApp\rotationalagreementtest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

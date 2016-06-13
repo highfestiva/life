@@ -1,0 +1,235 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Final|Win32">
+      <Configuration>Final</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Candidate|Win32">
+      <Configuration>Release Candidate</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>cure</ProjectName>
+    <ProjectGuid>{6DBF3606-E311-454B-B162-27FD92B67D53}</ProjectGuid>
+    <RootNamespace>Migel</RootNamespace>
+    <Keyword>ManagedCProj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\thirdparty\happyhttp-0.1;..\thirdparty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(TargetPath)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\thirdparty\happyhttp-0.1;..\thirdparty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;NO_LOG_DEBUG_INFO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(TargetPath)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..\thirdparty\happyhttp-0.1;..\thirdparty\FastDelegate;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(TargetPath)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Data">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\consolemanager.cpp" />
+    <ClCompile Include="src\contextmanager.cpp" />
+    <ClCompile Include="src\contextobject.cpp" />
+    <ClCompile Include="src\contextobjectattribute.cpp" />
+    <ClCompile Include="src\contextpath.cpp" />
+    <ClCompile Include="src\cppcontextobject.cpp" />
+    <ClCompile Include="src\cure.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Candidate|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\driver.cpp" />
+    <ClCompile Include="src\elevator.cpp" />
+    <ClCompile Include="src\floatattribute.cpp" />
+    <ClCompile Include="src\gamemanager.cpp" />
+    <ClCompile Include="src\gameticker.cpp" />
+    <ClCompile Include="src\health.cpp" />
+    <ClCompile Include="src\hiscoreagent.cpp" />
+    <ClCompile Include="src\intattribute.cpp" />
+    <ClCompile Include="src\networkagent.cpp" />
+    <ClCompile Include="src\networkfreeagent.cpp" />
+    <ClCompile Include="src\packet.cpp" />
+    <ClCompile Include="src\physicssharedresource.cpp" />
+    <ClCompile Include="src\positionaldata.cpp" />
+    <ClCompile Include="src\positionhauler.cpp" />
+    <ClCompile Include="src\pythoninterface.cpp" />
+    <ClCompile Include="src\resourcemanager.cpp" />
+    <ClCompile Include="src\runtimevariable.cpp" />
+    <ClCompile Include="src\spawner.cpp" />
+    <ClCompile Include="src\terrainfunctionmanager.cpp" />
+    <ClCompile Include="src\terrainmanager.cpp" />
+    <ClCompile Include="src\terrainpatchloader.cpp" />
+    <ClCompile Include="src\terrainpatchmanager.cpp" />
+    <ClCompile Include="src\timemanager.cpp" />
+    <ClCompile Include="src\networkclient.cpp" />
+    <ClCompile Include="src\networkserver.cpp" />
+    <ClCompile Include="src\useraccount.cpp" />
+    <ClCompile Include="src\useraccountmanager.cpp" />
+    <ClCompile Include="src\userconnection.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\consolemanager.h" />
+    <ClInclude Include="include\contextforcelistener.h" />
+    <ClInclude Include="include\contextmanager.h" />
+    <ClInclude Include="include\contextobject.h" />
+    <ClInclude Include="include\contextobjectattribute.h" />
+    <ClInclude Include="include\contextpath.h" />
+    <ClInclude Include="include\cppcontextobject.h" />
+    <ClInclude Include="include\cure.h" />
+    <ClInclude Include="include\delayeddeleter.h" />
+    <ClInclude Include="include\driver.h" />
+    <ClInclude Include="include\elevator.h" />
+    <ClInclude Include="include\floatattribute.h" />
+    <ClInclude Include="include\gamemanager.h" />
+    <ClInclude Include="include\gameticker.h" />
+    <ClInclude Include="include\health.h" />
+    <ClInclude Include="include\hiscoreagent.h" />
+    <ClInclude Include="include\intattribute.h" />
+    <ClInclude Include="include\networkagent.h" />
+    <ClInclude Include="include\networkfreeagent.h" />
+    <ClInclude Include="include\packet.h" />
+    <ClInclude Include="include\physicssharedresource.h" />
+    <ClInclude Include="include\positionaldata.h" />
+    <ClInclude Include="include\positionhauler.h" />
+    <ClInclude Include="include\remotestatus.h" />
+    <ClInclude Include="include\resourcemanager.h" />
+    <ClInclude Include="include\runtimevariable.h" />
+    <ClInclude Include="include\runtimevariablename.h" />
+    <ClInclude Include="include\spawner.h" />
+    <ClInclude Include="include\terrainfunctionmanager.h" />
+    <ClInclude Include="include\terrainmanager.h" />
+    <ClInclude Include="include\terrainpatchloader.h" />
+    <ClInclude Include="include\terrainpatchmanager.h" />
+    <ClInclude Include="include\timemanager.h" />
+    <ClInclude Include="include\networkclient.h" />
+    <ClInclude Include="include\networkserver.h" />
+    <ClInclude Include="include\socketiohandler.h" />
+    <ClInclude Include="include\useraccount.h" />
+    <ClInclude Include="include\useraccountmanager.h" />
+    <ClInclude Include="include\userconnection.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\delayeddeleter.inl" />
+    <None Include="include\resourcemanager.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

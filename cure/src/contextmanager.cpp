@@ -18,7 +18,7 @@ namespace cure {
 
 
 
-#define CHECK_OBJ_ALARM_ERASED(obj)	LEPRA_DEBUG_CODE( for (AlarmSet::iterator x = alarm_callback_object_set_.begin(); x != alarm_callback_object_set_.end(); ++x) { deb_assert(x->object_ != obj); } )
+#define CHECK_OBJ_ALARM_ERASED(obj)	LEPRA_DEBUG_CODE( for (AlarmSet::iterator _x = alarm_callback_object_set_.begin(); _x != alarm_callback_object_set_.end(); ++_x) { deb_assert(_x->object_ != obj); } )
 
 
 
@@ -380,8 +380,8 @@ void ContextManager::DispatchAlarmCallbacks() {
 	}
 
 	// Callback alarms.
-	for (std::list<Alarm>::iterator x = callback_list.begin(); x != callback_list.end(); ++x) {
-		const Alarm& _alarm = *x;
+	for (std::list<Alarm>::iterator y = callback_list.begin(); y != callback_list.end(); ++y) {
+		const Alarm& _alarm = *y;
 		if (_alarm.callback_.empty()) {
 			_alarm.object_->OnAlarm(_alarm.alarm_id_, _alarm.extra_data_);
 		} else {

@@ -1101,9 +1101,9 @@ void Canvas::Resize8BitSmooth(unsigned new_width, unsigned new_height) {
 						int u = u_lookup[sgx];
 
 						if (u >= 0 && u < (int)width_) {
-							uint8 _color = ((uint8*)buffer_)[v_offset + u];
+							uint8 _col = ((uint8*)buffer_)[v_offset + u];
 
-							_color += GammaLookup::GammaToLinearFloat(_color) * (*sgw);
+							_col += GammaLookup::GammaToLinearFloat(_col) * (*sgw);
 
 							weight_sum += (*sgw);
 						}

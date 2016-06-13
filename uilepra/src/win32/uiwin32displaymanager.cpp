@@ -105,14 +105,14 @@ bool Win32DisplayManager::Register() {
 		window_class_.cbClsExtra	= 0;
 		window_class_.cbWndExtra	= 0;
 		window_class_.hbrBackground	= GetStockBrush(BLACK_BRUSH);
-		window_class_.style		= CS_DBLCLKS;
-		window_class_.wnd_proc	= WndProc;
+		window_class_.style			= CS_DBLCLKS;
+		window_class_.lpfnWndProc	= WndProc;
 		window_class_.hInstance		= (HINSTANCE)this_instance_;
-		window_class_.hIcon		= ::LoadIcon((HINSTANCE)this_instance_, MAKEINTRESOURCE(kIdiMainIcon));
+		window_class_.hIcon			= ::LoadIcon((HINSTANCE)this_instance_, MAKEINTRESOURCE(kIdiMainIcon));
 		window_class_.hIconSm		= ::LoadIcon((HINSTANCE)this_instance_, MAKEINTRESOURCE(kIdiMainIcon));
 		window_class_.hCursor		= ::LoadCursor(0, IDC_ARROW);
-		window_class_.menu_name	= NULL;
-		window_class_.class_name	= "LepraWin32Class";
+		window_class_.lpszMenuName	= NULL;
+		window_class_.lpszClassName	= "LepraWin32Class";
 
 		ok = (RegisterClassEx(&window_class_) != 0);
 	}
@@ -215,7 +215,7 @@ bool Win32DisplayManager::OpenScreen(const DisplayMode& display_mode, ScreenMode
 			}
 
 			if (supported_mode == false) {
-				str err(strutil::Format("OpenScreen( - Display mode %i-bit %ix%i at %i Hz is not supported!"),
+				str err(strutil::Format("OpenScreen() - Display mode %i-bit %ix%i at %i Hz is not supported!",
 						 display_mode.bit_depth_,
 						 display_mode.width_,
 						 display_mode.height_,
@@ -418,7 +418,7 @@ HWND Win32DisplayManager::GetHWND() {
 	return wnd_;
 }
 
-LRESULT CALLBACK Win32DisplayManager::WndProc(HWND wnd, unsigned int message, unsigned int param, LONG param) {
+LRESULT CALLBACK Win32DisplayManager::WndProc(HWND wnd, unsigned int message, unsigned int wparam, LONG lparam) {
 	if (message  == WM_QUIT ||
 		message == WM_DESTROY ||
 		message == WM_CLOSE) {
@@ -437,16 +437,16 @@ LRESULT CALLBACK Win32DisplayManager::WndProc(HWND wnd, unsigned int message, un
 	bool message_was_consumed = false;
 	Win32DisplayManager* display_manager = Win32Core::GetDisplayManager(wnd);
 	if (display_manager) {
-		message_was_consumed = display_manager->InternalDispatchMessage(message, param, param);
+		message_was_consumed = display_manager->InternalDispatchMessage(message, wparam, lparam);
 	}
 	LRESULT result = 0;
 	if (!message_was_consumed) {
-		result = DefWindowProc(wnd, message, param, param);
+		result = DefWindowProc(wnd, message, wparam, lparam);
 	}
 	return (result);
 }
 
-bool Win32DisplayManager::InternalDispatchMessage(int message, int param, long param) {
+bool Win32DisplayManager::InternalDispatchMessage(int message, int wparam, long lparam) {
 	if (message == WM_CHAR && consume_char_) {	// Consume all follow-up WM_CHAR's when we already dispatched the WM_KEYDOWN.
 		return (true);
 	}
@@ -457,7 +457,7 @@ bool Win32DisplayManager::InternalDispatchMessage(int message, int param, long p
 		ObserverSet* set = *t_iter;
 		ObserverSet::iterator l_iter;
 		for (l_iter = set->begin(); l_iter != set->end(); ++l_iter) {
-			consumed |= (*l_iter)->OnMessage(message, param, param);
+			consumed |= (*l_iter)->OnMessage(message, wparam, lparam);
 		}
 	}
 	if (message == WM_KEYDOWN) {
@@ -530,10 +530,10 @@ void Win32DisplayManager::ShowMessageBox(const str& msg, const str& caption) {
 	::MessageBox(wnd_, msg.c_str(), caption.c_str(), MB_OK);
 }
 
-bool Win32DisplayManager::OnMessage(int msg, int param, long param) {
+bool Win32DisplayManager::OnMessage(int msg, int wparam, long lparam) {
 	switch(msg) {
 		case WM_SIZING: {
-			LPRECT rect = (LPRECT)(intptr_t)param;
+			LPRECT rect = (LPRECT)(intptr_t)lparam;
 
 			int _client_width  = GetClientWidth(rect->right - rect->left);
 			int _client_height = GetClientHeight(rect->bottom - rect->top);
@@ -543,7 +543,7 @@ bool Win32DisplayManager::OnMessage(int msg, int param, long param) {
 			maximized_ = false;
 		} break;
 		case WM_SIZE: {
-			switch(param) {
+			switch(wparam) {
 				case SIZE_MINIMIZED: {
 					DispatchMinimize();
 					minimized_ = true;
@@ -552,12 +552,12 @@ bool Win32DisplayManager::OnMessage(int msg, int param, long param) {
 				case SIZE_MAXIMIZED: {
 					normal_width_  = display_mode_.width_;
 					normal_height_ = display_mode_.height_;
-					DispatchMaximize((int)LOWORD(param), (int)HIWORD(param));
+					DispatchMaximize((int)LOWORD(lparam), (int)HIWORD(lparam));
 					maximized_ = true;
 					minimized_ = false;
 				} break;
 				case SIZE_RESTORED: {
-					DispatchResize((int)LOWORD(param), (int)HIWORD(param));
+					DispatchResize((int)LOWORD(lparam), (int)HIWORD(lparam));
 					minimized_ = false;
 					maximized_ = false;
 				} break;

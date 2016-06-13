@@ -18,7 +18,7 @@ LogDecorator::LogDecorator(Logger* logger, const std::type_info& type_id):
 	logger_(logger)
 #ifdef LEPRA_MSVC
 	// Skip "class " in beginning of name.
-	, class_name_(str(type_id.name(+6))) {
+	, class_name_(strutil::ReplaceAll(type_id.name(), "class ", "")) {
 #elif defined(LEPRA_POSIX)
 {
 	// Parse up to class name.

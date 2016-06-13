@@ -929,7 +929,6 @@ void Component::SetImageManager(GUIImageManager* image_manager) {
 }
 
 Component* Component::GetChild(const str& name) const {
-	int i;
 	for (int i = 0; i < layer_count_; ++i) {
 		if (layout_[i]) {
 			Component* _child = layout_[i]->GetFirst();

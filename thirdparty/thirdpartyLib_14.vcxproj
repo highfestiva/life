@@ -1,0 +1,543 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>ThirdPartyLib</ProjectName>
+    <ProjectGuid>{00F89E9D-7870-4921-9022-9AD4951BC224}</ProjectGuid>
+    <RootNamespace>ThirdPartyLib_800</RootNamespace>
+    <Keyword>ManagedCProj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CLRSupport>false</CLRSupport>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>../ThirdParty/ode-0.11.1/include;../ThirdParty/ode-0.11.1/ode/src;../ThirdParty/ode-0.11.1/ode/src/joints;../ThirdParty/ode-0.11.1/OPCODE;../ThirdParty/ode-0.11.1/GIMPACT/include;../ThirdParty/ode-0.11.1/ou/include;../ThirdParty/libogg-1.2.2/include;../ThirdParty/libvorbis-1.3.2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_DEBUG;dSINGLE;ODE_LIB;dTLS_ENABLED=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(TargetPath)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>../ThirdParty/ode-0.11.1/include;../ThirdParty/ode-0.11.1/ode/src;../ThirdParty/ode-0.11.1/ode/src/joints;../ThirdParty/ode-0.11.1/OPCODE;../ThirdParty/ode-0.11.1/GIMPACT/include;../ThirdParty/ode-0.11.1/ou/include;../ThirdParty/libogg-1.2.2/include;../ThirdParty/libvorbis-1.3.2/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;NDEBUG;dSINGLE;ODE_LIB;dTLS_ENABLED=1;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(TargetPath)</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Data">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+    <Reference Include="System.Xml">
+      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="happyhttp-0.1\happyhttp.h" />
+    <ClInclude Include="jpeg-6b\jchuff.h" />
+    <ClInclude Include="jpeg-6b\jconfig.h" />
+    <ClInclude Include="jpeg-6b\jdct.h" />
+    <ClInclude Include="jpeg-6b\jdhuff.h" />
+    <ClInclude Include="jpeg-6b\jerror.h" />
+    <ClInclude Include="jpeg-6b\jinclude.h" />
+    <ClInclude Include="jpeg-6b\jmemsys.h" />
+    <ClInclude Include="jpeg-6b\jmorecfg.h" />
+    <ClInclude Include="jpeg-6b\jpegint.h" />
+    <ClInclude Include="jpeg-6b\jpeglib.h" />
+    <ClInclude Include="jpeg-6b\jversion.h" />
+    <ClInclude Include="lpng1212\png.h" />
+    <ClInclude Include="lpng1212\pngconf.h" />
+    <ClInclude Include="zlib\crc32.h" />
+    <ClInclude Include="zlib\deflate.h" />
+    <ClInclude Include="zlib\inffast.h" />
+    <ClInclude Include="zlib\inffixed.h" />
+    <ClInclude Include="zlib\inflate.h" />
+    <ClInclude Include="zlib\inftrees.h" />
+    <ClInclude Include="zlib\trees.h" />
+    <ClInclude Include="zlib\zconf.h" />
+    <ClInclude Include="zlib\zlib.h" />
+    <ClInclude Include="zlib\zutil.h" />
+    <ClInclude Include="minizip\crypt.h" />
+    <ClInclude Include="minizip\ioapi.h" />
+    <ClInclude Include="minizip\iowin32.h" />
+    <ClInclude Include="minizip\mztools.h" />
+    <ClInclude Include="minizip\unzip.h" />
+    <ClInclude Include="minizip\zip.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\array.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\collision_kernel.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\collision_space_internal.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\collision_std.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\collision_transform.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\collision_trimesh_colliders.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\collision_trimesh_internal.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\collision_util.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\config.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\heightfield.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\lcp.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\mat.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\objects.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\obstack.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\odeou.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\odetls.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\quickstep.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\step.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\testing.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\util.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\amotor.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\ball.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\contact.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\fixed.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\hinge.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\hinge2.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\joint.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\joint_internal.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\joints.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\lmotor.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\null.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\piston.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\plane2d.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\pr.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\pu.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\slider.h" />
+    <ClInclude Include="ode-0.11.1\ode\src\joints\universal.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\collision.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\collision_space.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\collision_trimesh.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\common.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\compatibility.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\contact.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\error.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\export-dif.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\mass.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\matrix.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\memory.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\misc.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\objects.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\ode.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\odeconfig.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\odecpp.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\odecpp_collision.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\odeinit.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\odemath.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\rotation.h" />
+    <ClInclude Include="ode-0.11.1\include\ode\timer.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_AABBCollider.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_AABBTree.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_BaseModel.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_BoxBoxOverlap.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_Collider.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_Common.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_HybridModel.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_IceHook.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_LSSAABBOverlap.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_LSSCollider.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_LSSTriOverlap.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_MeshInterface.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_Model.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_OBBCollider.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_OptimizedTree.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_Picking.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_PlanesAABBOverlap.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_PlanesCollider.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_PlanesTriOverlap.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_RayAABBOverlap.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_RayCollider.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_RayTriOverlap.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_Settings.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_SphereAABBOverlap.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_SphereCollider.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_SphereTriOverlap.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_TreeBuilders.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_TreeCollider.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_TriBoxOverlap.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_TriTriOverlap.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\OPC_VolumeCollider.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Opcode.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Stdafx.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceAABB.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceAxes.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceBoundingSphere.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceContainer.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceFPU.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceHPoint.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceIndexedTriangle.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceLSS.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceMatrix3x3.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceMatrix4x4.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceMemoryMacros.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceOBB.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IcePairs.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IcePlane.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IcePoint.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IcePreprocessor.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceRandom.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceRay.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceRevisitedRadix.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceSegment.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceTriangle.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceTriList.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceTypes.h" />
+    <ClInclude Include="ode-0.11.1\OPCODE\Ice\IceUtils.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\assert.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\atomic.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\atomicflags.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\customization.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\enumarrays.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\flags.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\flagsdefines.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\inttypes.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\macros.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\malloc.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\namespace.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\platform.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\simpleflags.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\templates.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\threadlocalstorage.h" />
+    <ClInclude Include="ode-0.11.1\ou\include\ou\typewrapper.h" />
+    <ClInclude Include="FastDelegate\FastDelegate.h" />
+    <ClInclude Include="FastDelegate\FastDelegateBind.h" />
+    <ClInclude Include="utf8cpp\utf8.h" />
+    <ClInclude Include="utf8cpp\utf8\checked.h" />
+    <ClInclude Include="utf8cpp\utf8\core.h" />
+    <ClInclude Include="utf8cpp\utf8\unchecked.h" />
+    <ClInclude Include="libogg-1.2.2\include\ogg\ogg.h" />
+    <ClInclude Include="libogg-1.2.2\include\ogg\os_types.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\backends.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\bitrate.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\codebook.h" />
+    <ClInclude Include="libvorbis-1.3.2\include\vorbis\codec.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\codec_internal.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\envelope.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\floor_all.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\books\floor\floor_books.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\highlevel.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\lookup.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\lookup_data.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\lpc.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\lsp.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\masking.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\mdct.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\misc.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\os.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\psy.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\psych_11.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\psych_16.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\psych_44.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\psych_8.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\registry.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\books\coupled\res_books_stereo.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\books\uncoupled\res_books_uncoupled.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\residue_16.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\residue_44.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\residue_44u.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\residue_8.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\scales.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_11.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_16.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_22.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_32.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_44.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_44u.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_8.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\modes\setup_X.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\smallft.h" />
+    <ClInclude Include="libvorbis-1.3.2\include\vorbis\vorbisenc.h" />
+    <ClInclude Include="libvorbis-1.3.2\include\vorbis\vorbisfile.h" />
+    <ClInclude Include="libvorbis-1.3.2\lib\window.h" />
+    <ClInclude Include="ChibiXM\xmplay.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="happyhttp-0.1\happyhttp.cpp" />
+    <ClCompile Include="jpeg-6b\jcapimin.cpp" />
+    <ClCompile Include="jpeg-6b\jcapistd.cpp" />
+    <ClCompile Include="jpeg-6b\jccoefct.cpp" />
+    <ClCompile Include="jpeg-6b\jccolor.cpp" />
+    <ClCompile Include="jpeg-6b\jcdctmgr.cpp" />
+    <ClCompile Include="jpeg-6b\jchuff.cpp" />
+    <ClCompile Include="jpeg-6b\jcinit.cpp" />
+    <ClCompile Include="jpeg-6b\jcmainct.cpp" />
+    <ClCompile Include="jpeg-6b\jcmarker.cpp" />
+    <ClCompile Include="jpeg-6b\jcmaster.cpp" />
+    <ClCompile Include="jpeg-6b\jcomapi.cpp" />
+    <ClCompile Include="jpeg-6b\jcparam.cpp" />
+    <ClCompile Include="jpeg-6b\jcphuff.cpp" />
+    <ClCompile Include="jpeg-6b\jcprepct.cpp" />
+    <ClCompile Include="jpeg-6b\jcsample.cpp" />
+    <ClCompile Include="jpeg-6b\jctrans.cpp" />
+    <ClCompile Include="jpeg-6b\jdapimin.cpp" />
+    <ClCompile Include="jpeg-6b\jdapistd.cpp" />
+    <ClCompile Include="jpeg-6b\jdatadst.cpp" />
+    <ClCompile Include="jpeg-6b\jdatasrc.cpp" />
+    <ClCompile Include="jpeg-6b\jdcoefct.cpp" />
+    <ClCompile Include="jpeg-6b\jdcolor.cpp" />
+    <ClCompile Include="jpeg-6b\jddctmgr.cpp" />
+    <ClCompile Include="jpeg-6b\jdhuff.cpp" />
+    <ClCompile Include="jpeg-6b\jdinput.cpp" />
+    <ClCompile Include="jpeg-6b\jdmainct.cpp" />
+    <ClCompile Include="jpeg-6b\jdmarker.cpp" />
+    <ClCompile Include="jpeg-6b\jdmaster.cpp" />
+    <ClCompile Include="jpeg-6b\jdmerge.cpp" />
+    <ClCompile Include="jpeg-6b\jdphuff.cpp" />
+    <ClCompile Include="jpeg-6b\jdpostct.cpp" />
+    <ClCompile Include="jpeg-6b\jdsample.cpp" />
+    <ClCompile Include="jpeg-6b\jdtrans.cpp" />
+    <ClCompile Include="jpeg-6b\jerror.cpp" />
+    <ClCompile Include="jpeg-6b\jfdctflt.cpp" />
+    <ClCompile Include="jpeg-6b\jfdctfst.cpp" />
+    <ClCompile Include="jpeg-6b\jfdctint.cpp" />
+    <ClCompile Include="jpeg-6b\jidctflt.cpp" />
+    <ClCompile Include="jpeg-6b\jidctfst.cpp" />
+    <ClCompile Include="jpeg-6b\jidctint.cpp" />
+    <ClCompile Include="jpeg-6b\jidctred.cpp" />
+    <ClCompile Include="jpeg-6b\jmemansi.cpp" />
+    <ClCompile Include="jpeg-6b\jmemmgr.cpp" />
+    <ClCompile Include="jpeg-6b\jquant1.cpp" />
+    <ClCompile Include="jpeg-6b\jquant2.cpp" />
+    <ClCompile Include="jpeg-6b\jutils.cpp" />
+    <ClCompile Include="lpng1212\png.c" />
+    <ClCompile Include="lpng1212\pngerror.c" />
+    <ClCompile Include="lpng1212\pnggccrd.c" />
+    <ClCompile Include="lpng1212\pngget.c" />
+    <ClCompile Include="lpng1212\pngmem.c" />
+    <ClCompile Include="lpng1212\pngpread.c" />
+    <ClCompile Include="lpng1212\pngread.c" />
+    <ClCompile Include="lpng1212\pngrio.c" />
+    <ClCompile Include="lpng1212\pngrtran.c" />
+    <ClCompile Include="lpng1212\pngrutil.c" />
+    <ClCompile Include="lpng1212\pngset.c" />
+    <ClCompile Include="lpng1212\pngtrans.c" />
+    <ClCompile Include="lpng1212\pngvcrd.c" />
+    <ClCompile Include="lpng1212\pngwio.c" />
+    <ClCompile Include="lpng1212\pngwrite.c" />
+    <ClCompile Include="lpng1212\pngwtran.c" />
+    <ClCompile Include="lpng1212\pngwutil.c" />
+    <ClCompile Include="zlib\adler32.c" />
+    <ClCompile Include="zlib\compress.c" />
+    <ClCompile Include="zlib\crc32.c" />
+    <ClCompile Include="zlib\deflate.c" />
+    <ClCompile Include="zlib\infback.c" />
+    <ClCompile Include="zlib\inffast.c" />
+    <ClCompile Include="zlib\inflate.c" />
+    <ClCompile Include="zlib\inftrees.c" />
+    <ClCompile Include="zlib\trees.c" />
+    <ClCompile Include="zlib\uncompr.c" />
+    <ClCompile Include="zlib\zutil.c" />
+    <ClCompile Include="minizip\ioapi.c" />
+    <ClCompile Include="minizip\iowin32.c" />
+    <ClCompile Include="minizip\mztools.c" />
+    <ClCompile Include="minizip\unzip.c" />
+    <ClCompile Include="minizip\zip.c" />
+    <ClCompile Include="ode-0.11.1\ode\src\array.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\box.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\capsule.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_cylinder_box.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_cylinder_plane.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_cylinder_sphere.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_cylinder_trimesh.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_kernel.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_quadtreespace.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_sapspace.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_space.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_transform.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_box.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_ccylinder.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_disabled.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_distance.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_gimpact.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_opcode.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_plane.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_ray.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_sphere.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_trimesh.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_trimesh_trimesh_new.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\collision_util.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\convex.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\cylinder.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\error.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\export-dif.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\fastdot.c" />
+    <ClCompile Include="ode-0.11.1\ode\src\fastldlt.c" />
+    <ClCompile Include="ode-0.11.1\ode\src\fastlsolve.c" />
+    <ClCompile Include="ode-0.11.1\ode\src\fastltsolve.c" />
+    <ClCompile Include="ode-0.11.1\ode\src\heightfield.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\lcp.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\mass.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\mat.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\matrix.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\memory.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\misc.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\obstack.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\ode.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\odeinit.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\odemath.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\odeou.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\odetls.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\plane.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\quickstep.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\ray.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\rotation.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\sphere.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\step.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\stepfast.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\testing.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\timer.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\util.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\amotor.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\ball.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\contact.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\fixed.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\hinge.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\hinge2.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\joint.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\lmotor.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\null.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\piston.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\plane2d.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\pr.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\pu.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\slider.cpp" />
+    <ClCompile Include="ode-0.11.1\ode\src\joints\universal.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_AABBCollider.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_AABBTree.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_BaseModel.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_Collider.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_Common.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_HybridModel.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_LSSCollider.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_MeshInterface.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_Model.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_OBBCollider.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_OptimizedTree.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_Picking.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_PlanesCollider.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_RayCollider.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_SphereCollider.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_TreeBuilders.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_TreeCollider.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\OPC_VolumeCollider.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Opcode.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceAABB.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceContainer.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceHPoint.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceIndexedTriangle.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceMatrix3x3.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceMatrix4x4.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceOBB.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IcePlane.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IcePoint.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceRandom.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceRay.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceRevisitedRadix.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceSegment.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceTriangle.cpp" />
+    <ClCompile Include="ode-0.11.1\OPCODE\Ice\IceUtils.cpp" />
+    <ClCompile Include="ode-0.11.1\ou\src\ou\atomic.cpp" />
+    <ClCompile Include="ode-0.11.1\ou\src\ou\customization.cpp" />
+    <ClCompile Include="ode-0.11.1\ou\src\ou\malloc.cpp" />
+    <ClCompile Include="ode-0.11.1\ou\src\ou\threadlocalstorage.cpp" />
+    <ClCompile Include="libogg-1.2.2\src\bitwise.c" />
+    <ClCompile Include="libogg-1.2.2\src\framing.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\analysis.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\bitrate.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\block.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\codebook.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\envelope.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\floor0.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\floor1.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\info.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\lookup.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\lpc.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\lsp.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\mapping0.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\mdct.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\psy.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\registry.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\res0.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\sharedbook.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\smallft.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\synthesis.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\vorbisenc.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\vorbisfile.c" />
+    <ClCompile Include="libvorbis-1.3.2\lib\window.c" />
+    <ClCompile Include="ChibiXM\xmplay.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libogg-1.2.2\win32\ogg.def" />
+    <None Include="libvorbis-1.3.2\win32\vorbis.def" />
+    <None Include="Readme.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

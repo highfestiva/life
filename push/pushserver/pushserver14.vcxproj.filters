@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{04018145-1cd5-4b77-a5ad-4d7f73718596}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pushserverdelegate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pushserverticker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pushserver.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pushserverdelegate.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pushserverticker.cpp">
+      <Filter>src Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

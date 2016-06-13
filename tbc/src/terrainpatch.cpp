@@ -193,37 +193,37 @@ void TerrainPatch::GenerateUVData(float west_u1, float east_u1, float south_v1, 
 		}
 	}
 	if (CheckFlag(hi_res_edge_flags_, kWestEdge) == true) {
-		float _v1 = south_v1 + v1_small_step;
-		float _v2 = south_v2 + v2_small_step;
+		float __v1 = south_v1 + v1_small_step;
+		float __v2 = south_v2 + v2_small_step;
 		for (int i = 0; i < patch_res_; i++) {
 			for (int j = 1; j < patch_size_multiplier_; j++) {
 				uv_data_[0][uv_index + 0] = west_u1;
-				uv_data_[0][uv_index + 1] = _v1;
+				uv_data_[0][uv_index + 1] = __v1;
 				uv_data_[1][uv_index + 0] = west_u2;
-				uv_data_[1][uv_index + 1] = _v2;
-				_v1 += v1_small_step;
-				_v2 += v2_small_step;
+				uv_data_[1][uv_index + 1] = __v2;
+				__v1 += v1_small_step;
+				__v2 += v2_small_step;
 				uv_index += 2;
 			}
-			_v1 += v1_small_step;
-			_v2 += v2_small_step;
+			__v1 += v1_small_step;
+			__v2 += v2_small_step;
 		}
 	}
 	if (CheckFlag(hi_res_edge_flags_, kEastEdge) == true) {
-		float _v1 = south_v1 + v1_small_step;
-		float _v2 = south_v2 + v2_small_step;
+		float __v1 = south_v1 + v1_small_step;
+		float __v2 = south_v2 + v2_small_step;
 		for (int i = 0; i < patch_res_; i++) {
 			for (int j = 1; j < patch_size_multiplier_; j++) {
 				uv_data_[0][uv_index + 0] = east_u1;
-				uv_data_[0][uv_index + 1] = _v1;
+				uv_data_[0][uv_index + 1] = __v1;
 				uv_data_[1][uv_index + 0] = east_u2;
-				uv_data_[1][uv_index + 1] = _v2;
-				_v1 += v1_small_step;
-				_v2 += v2_small_step;
+				uv_data_[1][uv_index + 1] = __v2;
+				__v1 += v1_small_step;
+				__v2 += v2_small_step;
 				uv_index += 2;
 			}
-			_v1 += v1_small_step;
-			_v2 += v2_small_step;
+			__v1 += v1_small_step;
+			__v2 += v2_small_step;
 		}
 	}
 }
@@ -379,32 +379,32 @@ void TerrainPatch::IterateOverPatch(const Modifier& modifier, int min_x_index, i
 		}
 	}
 	if (CheckFlag(hi_res_edge_flags_, kWestEdge) == true && min_x_index == 0) {
-		float _world_y = south_west_corner_.y + small_y_step;
+		float __world_y = south_west_corner_.y + small_y_step;
 		for (int i = min_y_index; i < max_y_index - 1; i++) {
 			int vertex_index = (west_edge_index_ + i * (patch_size_multiplier_ - 1)) * 3;
 			for (int j = 1; j < patch_size_multiplier_; j++) {
 				// TRICKY: Typecasting float-array to vec3 is risky if the implementation
 				// of Vector3D changes.
-				modifier.ModifyVertex(vec2(south_west_corner_.x, _world_y), *((vec3*)&vertex_data_[vertex_index]));
-				_world_y += small_y_step;
+				modifier.ModifyVertex(vec2(south_west_corner_.x, __world_y), *((vec3*)&vertex_data_[vertex_index]));
+				__world_y += small_y_step;
 				vertex_index += 3;
 			}
-			_world_y += small_y_step;
+			__world_y += small_y_step;
 		}
 	}
 
 	if (CheckFlag(hi_res_edge_flags_, kEastEdge) == true && max_x_index == patch_res_ + 1) {
-		float _world_y = south_west_corner_.y + small_y_step;
+		float __world_y = south_west_corner_.y + small_y_step;
 		for (int i = min_y_index; i < max_y_index - 1; i++) {
 			int vertex_index = (east_edge_index_ + i * (patch_size_multiplier_ - 1)) * 3;
 			for (int j = 1; j < patch_size_multiplier_; j++) {
 				// TRICKY: Typecasting float-array to vec3 is risky if the implementation
 				// of Vector3D changes.
-				modifier.ModifyVertex(vec2(north_east_corner_.x, _world_y), *((vec3*)&vertex_data_[vertex_index]));
-				_world_y += small_y_step;
+				modifier.ModifyVertex(vec2(north_east_corner_.x, __world_y), *((vec3*)&vertex_data_[vertex_index]));
+				__world_y += small_y_step;
 				vertex_index += 3;
 			}
-			_world_y += small_y_step;
+			__world_y += small_y_step;
 		}
 	}
 }

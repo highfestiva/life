@@ -780,9 +780,9 @@ bool GameClientMasterTicker::Reinitialize() {
 		}*/
 		ui_manager_->GetInputManager()->AddFunctor(new MasterInputFunctor(this, &GameClientMasterTicker::OnInput));
 
-		SlaveArray::iterator x;
-		for (x = slave_array_.begin(); ok && x != slave_array_.end(); ++x) {
-			GameClientSlaveManager* _slave = *x;
+		SlaveArray::iterator y;
+		for (y = slave_array_.begin(); ok && y != slave_array_.end(); ++y) {
+			GameClientSlaveManager* _slave = *y;
 			if (_slave) {
 				ok = OpenSlave(_slave);
 			}

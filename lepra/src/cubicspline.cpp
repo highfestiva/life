@@ -157,8 +157,7 @@ float CubicSpline::FindNearestTime(float step_length, const float* where, float&
 	float _nearest_distance[4];
 	float new_nearest_distance[4];
 	float distance2 = 0;
-	int x;
-	for (x = 0; x < num_values_per_point_; ++x) {
+	for (int x = 0; x < num_values_per_point_; ++x) {
 		_nearest_distance[x] = GetValue(x)-where[x];
 		distance2 += _nearest_distance[x]*_nearest_distance[x];
 	}
@@ -194,7 +193,7 @@ float CubicSpline::FindNearestTime(float step_length, const float* where, float&
 
 	// Fill in our output values.
 	nearest_distance = ::sqrt(distance2);
-	for (x = 0; x < num_values_per_point_; ++x) {
+	for (int x = 0; x < num_values_per_point_; ++x) {
 		nearest_point[x] = _nearest_distance[x]+where[x];
 	}
 	return (current_time_);

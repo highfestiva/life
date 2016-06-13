@@ -50,7 +50,7 @@ bool Win32OpenGLDisplay::Activate() {
 	return (ok);
 }
 
-void Win32OpenGLDisplay::Deactivate() {
+bool Win32OpenGLDisplay::Deactivate() {
 	::wglMakeCurrent(0, 0);
 	if (dc_) {
 		::ReleaseDC(wnd_, dc_);
@@ -216,7 +216,7 @@ bool Win32OpenGLDisplay::InitScreen() {
 }
 
 void Win32OpenGLDisplay::UpdateCaption() {
-	str s = strutil::Format("Win32OpenGLDisplay (%ix%i %iBit %iHz %s"),
+	str s = strutil::Format("Win32OpenGLDisplay (%ix%i %iBit %iHz %s)",
 		display_mode_.width_, display_mode_.height_,
 		display_mode_.bit_depth_, display_mode_.refresh_rate_,
 		 kLepraStringTypeText " " kLepraBuildTypeText);

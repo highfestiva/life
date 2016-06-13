@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ResourceCompile Include="bounce.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="game.cpp" />
+    <ClCompile Include="racket.cpp" />
+    <ClCompile Include="app.cxx" />
+    <ClCompile Include="ball.cpp" />
+    <ClCompile Include="app.mm" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="game.h" />
+    <ClInclude Include="racket.h" />
+    <ClInclude Include="ball.h" />
+  </ItemGroup>
+</Project>
