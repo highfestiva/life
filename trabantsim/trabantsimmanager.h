@@ -128,6 +128,8 @@ public:
 	void Orientation(int object_id, bool _set, quat& orientation);
 	void Velocity(int object_id, bool _set, vec3& velocity);
 	void AngularVelocity(int object_id, bool _set, vec3& angular_velocity);
+	void Force(int object_id, bool _set, vec3& force);
+	void Torque(int object_id, bool _set, vec3& torque);
 	void Mass(int object_id, bool _set, float& mass);
 	void ObjectColor(int object_id, bool _set, vec3& color, float alpha);
 	void EngineForce(int object_id, int engine_index, bool _set, vec3& force);

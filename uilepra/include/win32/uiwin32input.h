@@ -62,7 +62,7 @@ public:
 	Win32InputDevice(LPDIRECTINPUTDEVICE8 di_device, LPCDIDEVICEINSTANCE info, InputManager* manager);
 	virtual ~Win32InputDevice();
 
-	virtual void Activate();
+	virtual void Activate(bool disable_win_mgr);
 	virtual void Release();
 
 	virtual void PollEvents();

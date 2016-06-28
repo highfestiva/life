@@ -41,7 +41,7 @@ public:
 
 	void AddElement(X11InputElement* element);
 
-	virtual void Activate();
+	virtual void Activate(bool disable_win_mgr);
 	virtual void Release();
 
 	virtual void PollEvents();

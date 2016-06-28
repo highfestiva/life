@@ -57,6 +57,8 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::command_id
 	{"orientation", kCommandOrientation},
 	{"velocity", kCommandVelocity},
 	{"angular-velocity", kCommandAngularVelocity},
+	{"force", kCommandForce},
+	{"torque", kCommandTorque},
 	{"mass", kCommandMass},
 	{"color", kCommandColor},
 	{"engine-force", kCommandEngineForce},
@@ -613,6 +615,22 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					bool _is_set;
 					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
 					manager->AngularVelocity(ParamToInt(parameter_vector, 0), _is_set, value);
+					if (!_is_set) {
+						active_response_ << value;
+					}
+				} break;
+				case kCommandForce: {
+					bool _is_set;
+					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
+					manager->Force(ParamToInt(parameter_vector, 0), _is_set, value);
+					if (!_is_set) {
+						active_response_ << value;
+					}
+				} break;
+				case kCommandTorque: {
+					bool _is_set;
+					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
+					manager->Torque(ParamToInt(parameter_vector, 0), _is_set, value);
 					if (!_is_set) {
 						active_response_ << value;
 					}

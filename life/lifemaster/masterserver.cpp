@@ -206,9 +206,9 @@ bool MasterServer::RegisterGameServer(const ServerInfo& server_info, UdpVSocket*
 		}
 		if (ok) {
 			log_.RawPrint(kLevelDebug, "----------------------------------------\nServer list:\n");
-			GameServerTable::iterator x = game_server_table_.begin();
-			for (; x != game_server_table_.end(); ++x) {
-				log_.RawPrint(kLevelDebug, x->second.name_ + " @ " + x->first + "\n");
+			GameServerTable::iterator y = game_server_table_.begin();
+			for (; y != game_server_table_.end(); ++y) {
+				log_.RawPrint(kLevelDebug, y->second.name_ + " @ " + y->first + "\n");
 			}
 		}
 	}

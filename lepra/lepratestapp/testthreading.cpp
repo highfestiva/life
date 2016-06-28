@@ -199,12 +199,12 @@ bool TestThreading(const LogDecorator& account) {
 		_context = "MemberThread";
 		{
 			MemberThreadTestClass test_class;
-			MemberThread<MemberThreadTestClass> thread("TestMemberThread");
+			MemberThread<MemberThreadTestClass> mthread("TestMemberThread");
 			g_thread_test_counter = -5;
-			test_ok = thread.Start(&test_class, &MemberThreadTestClass::OnTest);
+			test_ok = mthread.Start(&test_class, &MemberThreadTestClass::OnTest);
 			deb_assert(test_ok);
 			if (test_ok) {
-				test_ok = thread.Join();
+				test_ok = mthread.Join();
 				deb_assert(test_ok);
 			}
 		}
@@ -222,14 +222,14 @@ bool TestThreading(const LogDecorator& account) {
 		_context = "sub thread ID";
 		ThreadIdTestClass test_instance;
 		test_instance.thread_id_ = 0;
-		MemberThread<ThreadIdTestClass> thread("TestThreadId");
+		MemberThread<ThreadIdTestClass> mthread("TestThreadId");
 		if (test_ok) {
-			test_ok = thread.Start(&test_instance, &ThreadIdTestClass::StoreId);
+			test_ok = mthread.Start(&test_instance, &ThreadIdTestClass::StoreId);
 			deb_assert(test_ok);
 		}
-		size_t actual_thread_id = thread.GetThreadId();
+		size_t actual_thread_id = mthread.GetThreadId();
 		if (test_ok) {
-			test_ok = thread.Join();
+			test_ok = mthread.Join();
 			deb_assert(test_ok);
 		}
 		if (test_ok) {

@@ -27,6 +27,10 @@ bool Win32GDIDisplay::Activate() {
 	return true;
 }
 
+bool Win32GDIDisplay::Deactivate() {
+	return true;
+}
+
 bool Win32GDIDisplay::UpdateScreen() {
 	return true;
 }

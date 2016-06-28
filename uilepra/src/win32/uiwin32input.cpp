@@ -170,11 +170,11 @@ BOOL CALLBACK Win32InputDevice::EnumElementsCallback(LPCDIDEVICEOBJECTINSTANCE l
 	return (DIENUM_CONTINUE);
 }
 
-void Win32InputDevice::Activate() {
+void Win32InputDevice::Activate(bool disable_win_mgr) {
 	if (IsActive() == false) {
 		HRESULT hr;
 		DWORD cooperative_flags = 0;
-		if (this == GetManager()->GetKeyboard()) {
+		if (disable_win_mgr && this == GetManager()->GetKeyboard()) {
 			cooperative_flags |= DISCL_NOWINKEY;
 		}
 		hr = di_device_->SetCooperativeLevel(((Win32InputManager*)GetManager())->GetDisplayManager()->GetHWND(), DISCL_NONEXCLUSIVE|DISCL_FOREGROUND|cooperative_flags);

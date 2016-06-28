@@ -144,12 +144,12 @@ void LauncherAi::OnTick() {
 					game_->GetCutie()->GetPhysics()->GetEngineCount() >= 2) {
 					// Guess direction depending on steering.
 					const float angle = game_->GetCutie()->GetPhysics()->GetEngine(1)->GetValue();
-					vec3 direction = game_->GetCutie()->GetForwardDirection();
+					vec3 _direction = game_->GetCutie()->GetForwardDirection();
 					quat rotation(angle*-0.5f, vec3(0, 0, 1));
-					direction = rotation * direction;
-					direction.z = 0;
+					_direction = rotation * _direction;
+					_direction.z = 0;
 					const float adjusted_target_speed = (target_speed > 10)? 10 : target_speed;
-					target_offset_ = direction * adjusted_target_speed * 1.0f;
+					target_offset_ = _direction * adjusted_target_speed * 1.0f;
 					if (target_speed < 30) {
 						target_offset_ += target_velocity * 2.0f;
 					}

@@ -471,8 +471,8 @@ void Game::Detonate(const vec3& force, const vec3& torque, const vec3& position,
 		// Dynamics only get hit in the main body, while statics gets all their dynamic sub-bodies hit.
 		const vec3 epicenter = position + vec3(0, 0, -0.75f);
 		const int bone_count = (physics->GetPhysicsType() == tbc::ChunkyPhysics::kDynamic)? 1 : physics->GetBoneCount();
-		for (int x = 0; x < bone_count; ++x) {
-			const tbc::ChunkyBoneGeometry* geometry = physics->GetBoneGeometry(x);
+		for (int y = 0; y < bone_count; ++y) {
+			const tbc::ChunkyBoneGeometry* geometry = physics->GetBoneGeometry(y);
 			if (geometry->GetBodyId() == tbc::INVALID_BODY) {
 				continue;
 			}

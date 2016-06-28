@@ -751,7 +751,7 @@ bool GameClientMasterTicker::Reinitialize() {
 		ui_manager_->GetInputManager()->AddKeyCodeInputObserver(this);
 	}
 	if (ok) {
-		/*ui_manager_->GetInputManager()->ActivateAll();
+		/*ui_manager_->GetInputManager()->ActivateAll(true);
 		ui_manager_->GetInputManager()->PollEvents();
 		const uilepra::InputManager::DeviceList& lDeviceList = ui_manager_->GetInputManager()->GetDeviceList();
 		uilepra::InputManager::DeviceList::const_iterator y = lDeviceList.begin();

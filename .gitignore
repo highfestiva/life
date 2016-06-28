@@ -84,7 +84,7 @@ Doc/getting_real.pdf
 Downwash/Icons/icon_data/
 project.xcworkspace/
 xcuserdata/
-
+__pycache__/
 .codelite/
 ThirdParty/libogg-1.2.2/config.h
 ThirdParty/libogg-1.2.2/config.status

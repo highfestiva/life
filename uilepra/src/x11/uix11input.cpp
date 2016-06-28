@@ -103,7 +103,7 @@ void X11InputDevice::AddElement(X11InputElement* element) {
 	element_array_.push_back(element);
 }
 
-void X11InputDevice::Activate() {
+void X11InputDevice::Activate(bool disable_win_mgr) {
 	if (IsActive() == false) {
 		/*HRESULT hr;
 		DWORD cooperative_flags = 0;

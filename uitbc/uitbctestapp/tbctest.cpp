@@ -803,7 +803,7 @@ bool ExportStructure() {
 		body_data.parameter_[6] = lHookAnchor.x;
 		body_data.parameter_[7] = lHookAnchor.y;
 		body_data.parameter_[8] = lHookAnchor.z;
-		body_data.connector_type_ = tbc::ChunkyBoneGeometry::kConnector3Dof;
+		body_data.connector_type_ = tbc::ChunkyBoneGeometry::kConnectorBall;
 		geometry = new tbc::ChunkyBoneBox(body_data, lepra::vec3(lHookWidth, lHookWidth, lHookHeight));
 		structure.AddBoneGeometry(lHookTransform, geometry, body_data.parent_);
 

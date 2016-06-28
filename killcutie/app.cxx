@@ -1860,6 +1860,7 @@ void App::Layout() {
 
 
 void App::Suspend(bool hard) {
+	(void)hard;
 	if (music_player_) {
 		music_player_->Pause();
 	}
@@ -1870,6 +1871,7 @@ void App::Suspend(bool hard) {
 }
 
 void App::Resume(bool hard) {
+	(void)hard;
 #ifdef LEPRA_IOS
 	[animated_app_ tick_];
 #endif // iOS

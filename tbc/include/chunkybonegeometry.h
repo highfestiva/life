@@ -54,7 +54,7 @@ public:
 		kConnectorSuspendHinge,
 		kConnectorHinge,
 		kConnectorHinge2,
-		kConnector3Dof,	// Three degrees of freedom.
+		kConnectorBall,	// Three degrees of freedom.
 		kConnectorFixed,
 		kConnectee3Dof,
 	};

@@ -71,7 +71,7 @@ MacInputDevice::~MacInputDevice() {
 	//native_device_->Release();
 }
 
-void MacInputDevice::Activate() {
+void MacInputDevice::Activate(disable_win_mgr) {
 	if (IsActive() == false) {
 		//native_device_->Acquire();
 		SetActive(true);

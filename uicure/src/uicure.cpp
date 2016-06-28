@@ -31,6 +31,7 @@ void SetDefault(cure::RuntimeVariableScope* settings) {
 	v_internal(settings, kRtvarCtrlAccelerometerX,  0.0);
 	v_internal(settings, kRtvarCtrlAccelerometerY, +1.0);
 	v_internal(settings, kRtvarCtrlAccelerometerZ,  0.0);
+	v_set(settings, kRtvarCtrlDisableWinMgr, true);
 	v_set(settings, kRtvarDebug3DEnableaxes, false);
 	v_set(settings, kRtvarDebug3DEnablejoints, false);
 	v_set(settings, kRtvarDebug3DEnableshapes, true);

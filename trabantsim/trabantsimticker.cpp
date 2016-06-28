@@ -28,6 +28,7 @@ namespace TrabantSim {
 TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* ui_manager, cure::ResourceManager* resource_manager, float physics_radius, int physics_levels, float physics_sensitivity):
 	Parent(ui_manager, resource_manager, physics_radius, physics_levels, physics_sensitivity),
 	env_map_(0) {
+	v_override(UiCure::GetSettings(), kRtvarCtrlDisableWinMgr, false);
 	v_override(UiCure::GetSettings(), kRtvarUi3DCamlookatx, 0.0);
 	v_override(UiCure::GetSettings(), kRtvarUi3DCamlookaty, 0.0);
 	v_override(UiCure::GetSettings(), kRtvarUi3DCamlookatz, 0.0);

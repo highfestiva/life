@@ -232,7 +232,7 @@ private:
 };
 
 bool SceneTest::Run(double time) {
-	g_input->ActivateAll();
+	g_input->ActivateAll(false);
 
 	if (test_ok_) {
 		lepra::Timer total_timer;
@@ -509,8 +509,8 @@ bool OpenRenderer(const lepra::LogDecorator& log, uilepra::DisplayManager::Conte
 
 			texture_map.Set(canvas);
 			if (ok) {
-				uitbc::TEXLoader tex_loader;
-				tex_loader.Save("texturemap.tex", texture_map, false);
+				uitbc::TEXLoader _tex_loader;
+				_tex_loader.Save("texturemap.tex", texture_map, false);
 			}
 			deb_assert(ok);
 		}
@@ -530,8 +530,8 @@ bool OpenRenderer(const lepra::LogDecorator& log, uilepra::DisplayManager::Conte
 			light_map.Set(canvas);
 
 			if (ok) {
-				uitbc::TEXLoader tex_loader;
-				tex_loader.Save("lightmap.tex", light_map, false);
+				uitbc::TEXLoader _tex_loader;
+				_tex_loader.Save("lightmap.tex", light_map, false);
 			}
 			deb_assert(ok);
 		}
@@ -551,8 +551,8 @@ bool OpenRenderer(const lepra::LogDecorator& log, uilepra::DisplayManager::Conte
 			env_map.Set(canvas);
 
 			if (ok) {
-				uitbc::TEXLoader tex_loader;
-				tex_loader.Save("envmap.tex", env_map, false);
+				uitbc::TEXLoader _tex_loader;
+				_tex_loader.Save("envmap.tex", env_map, false);
 			}
 			deb_assert(ok);
 		}
@@ -572,8 +572,8 @@ bool OpenRenderer(const lepra::LogDecorator& log, uilepra::DisplayManager::Conte
 			spec_map.Set(canvas);
 
 			if (ok) {
-				uitbc::TEXLoader tex_loader;
-				tex_loader.Save("specmap.tex", spec_map, false);
+				uitbc::TEXLoader _tex_loader;
+				_tex_loader.Save("specmap.tex", spec_map, false);
 			}
 			deb_assert(ok);
 		}
@@ -593,8 +593,8 @@ bool OpenRenderer(const lepra::LogDecorator& log, uilepra::DisplayManager::Conte
 			normal_map.Set(canvas);
 
 			if (ok) {
-				uitbc::TEXLoader tex_loader;
-				tex_loader.Save("normalmap.tex", normal_map, false);
+				uitbc::TEXLoader _tex_loader;
+				_tex_loader.Save("normalmap.tex", normal_map, false);
 			}
 			deb_assert(ok);
 		}
@@ -607,8 +607,8 @@ bool OpenRenderer(const lepra::LogDecorator& log, uilepra::DisplayManager::Conte
 		ok = tex_loader.Load("multiMap.tex", multi_map, false) == uitbc::TEXLoader::kStatusSuccess;
 		if (!ok) {
 			multi_map.Set(*texture_map.GetColorMap(0), Canvas::kResizeFast, 0, 0, normal_map.GetColorMap(0), spec_map.GetColorMap(0));
-			uitbc::TEXLoader tex_loader;
-			tex_loader.Save("multiMap.tex", multi_map, false);
+			uitbc::TEXLoader _tex_loader;
+			_tex_loader.Save("multiMap.tex", multi_map, false);
 			ok = true;
 		}
 		deb_assert(ok);
@@ -1008,30 +1008,30 @@ bool TestSkinningSaveLoad(const lepra::LogDecorator& log, double show_time) {
 		const str this_mesh_name = file_name+lepra::strutil::Format("%i.mesh", mesh_index);
 		if (test_ok) {
 			_context = "save chain mesh";
-			//uitbc::TriangleBasedGeometry* _geometry = uitbc::BasicMeshCreator::CreateFlatBox(cuboid_length/4.0f, cuboid_length/2.0f, cuboid_length/4.0f, 1, 2, 1);
-			uitbc::TriangleBasedGeometry* _geometry = uitbc::BasicMeshCreator::CreateTorus(cuboid_length/4.0f, cuboid_length/10.0f, cuboid_length/10.0f, 32, 24);
-			//uitbc::TriangleBasedGeometry* _geometry = uitbc::BasicMeshCreator::CreateCylinder(cuboid_length/10.0f, cuboid_length/10.0f, cuboid_length/2.0f, 32);
+			//uitbc::TriangleBasedGeometry* geometry = uitbc::BasicMeshCreator::CreateFlatBox(cuboid_length/4.0f, cuboid_length/2.0f, cuboid_length/4.0f, 1, 2, 1);
+			uitbc::TriangleBasedGeometry* geometry = uitbc::BasicMeshCreator::CreateTorus(cuboid_length/4.0f, cuboid_length/10.0f, cuboid_length/10.0f, 32, 24);
+			//uitbc::TriangleBasedGeometry* geometry = uitbc::BasicMeshCreator::CreateCylinder(cuboid_length/10.0f, cuboid_length/10.0f, cuboid_length/2.0f, 32);
 			lepra::RotationMatrixF rotation;
 			rotation.RotateAroundVector(lepra::vec3(1, 0, 0), -lepra::PIF/2.0f);
-			_geometry->Rotate(rotation);
+			geometry->Rotate(rotation);
 			float displacement = (mesh_index*2-1)*cuboid_length/4.0f;
-			_geometry->Translate(lepra::vec3(0, displacement, 0));
+			geometry->Translate(lepra::vec3(0, displacement, 0));
 			lepra::DiskFile file;
 			test_ok = file.Open(this_mesh_name, lepra::DiskFile::kModeWrite);
 			deb_assert(test_ok);
 			if (test_ok) {
-				test_ok = InitializeGeometry(_geometry);
+				test_ok = InitializeGeometry(geometry);
 				deb_assert(test_ok);
 			}
 			if (test_ok) {
-				AddRandomVertexColor(_geometry);
+				AddRandomVertexColor(geometry);
 			}
 			if (test_ok) {
 				uitbc::ChunkyMeshLoader mesh_loader(&file, false);
-				test_ok = mesh_loader.Save(_geometry, true);
+				test_ok = mesh_loader.Save(geometry, true);
 				deb_assert(test_ok);
 			}
-			delete (_geometry);
+			delete (geometry);
 		}
 		if (test_ok) {
 			_context = "load chain mesh";
@@ -2064,7 +2064,7 @@ bool TestGUI(const lepra::LogDecorator& /*log*/, double show_time) {
 	desktop_window->AddChild(new GUITestWindow);
 	//desktop_window->AddChild(new uitbc::ASEFileConverter(desktop_window));
 
-	g_input->ActivateAll();
+	g_input->ActivateAll(false);
 
 	lepra::Timer total_timer;
 

@@ -129,6 +129,7 @@ void Ctf::OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other
 	(void)trigger_id;
 	(void)other_object;
 	(void)body_id;
+	(void)position;
 	(void)normal;
 
 	last_frame_triggered_ = true;

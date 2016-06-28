@@ -123,7 +123,7 @@ void Cutie::OnTick() {
 				GetManager()->GetGameManager()->GetPhysicsManager()->DeleteJoint(wheel->GetJointId());
 				wheel->ResetJointId();
 				// Push the wheel away somewhat, not too much.
-				const int push_factor = 200;
+				const float push_factor = 200;
 				const vec3 wheel_position = GetManager()->GetGameManager()->GetPhysicsManager()->GetBodyPosition(wheel->GetBodyId());
 				const vec3 force = (wheel_position-position).GetNormalized()*push_factor*wheel->GetMass();
 				GetManager()->GetGameManager()->GetPhysicsManager()->AddForce(wheel->GetBodyId(), force);

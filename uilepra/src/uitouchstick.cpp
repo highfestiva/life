@@ -227,7 +227,8 @@ bool TouchstickInputDevice::IncludesCoord(const PixelCoord& coord) const {
 
 
 
-void TouchstickInputDevice::Activate() {
+void TouchstickInputDevice::Activate(bool disable_win_mgr) {
+	(void)disable_win_mgr;
 }
 
 void TouchstickInputDevice::Release() {

@@ -27,6 +27,6 @@ while loop():
     f2 = dir2.normalize() * 4000/(dir2.length()**2)
     f3 = dir3.normalize() * 4/(dir3.length()**2)
     # All forces applied to engines are adjusted to mass, so we have to scale down accordingly.
-    mars.engine[0].force((f1+f2)*1e-3)
-    phobos.engine[0].force(-f1-f3)
-    deimos.engine[0].force(-f2+f3)
+    mars.engines[0].force((f1+f2)*1e-3)
+    phobos.engines[0].force(-f1-f3)
+    deimos.engines[0].force(-f2+f3)

@@ -289,7 +289,7 @@ bool NetworkLoginClients() {
 		_client->StartConnectLogin(":12345", 2.0, user);
 		cure::RemoteStatus status = _client->WaitLogin();
 		g_client[x].client_id_ = _client->GetLoginAccountId();
-		bool test_ok = (status == cure::kRemoteOk);
+		test_ok = (status == cure::kRemoteOk);
 		if (test_ok) {
 			g_server.emulated_network_send_latency_frame_count_ = 0.400f*PHYSICS_FPS;
 			g_server.emulated_network_send_jitter_frame_count_ = 0.080f*PHYSICS_FPS;	// Interval around latency between -jitter to +jitter.

@@ -71,7 +71,7 @@ private:
 
 	bool IncludesCoord(const PixelCoord& coord) const;
 
-	virtual void Activate();
+	virtual void Activate(bool disable_win_mgr);
 	virtual void Release();
 	virtual void PollEvents();
 

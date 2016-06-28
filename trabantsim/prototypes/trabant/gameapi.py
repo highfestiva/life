@@ -238,6 +238,12 @@ def vel(oid, velocity):
 def avel(oid, angular_velocity):
 	return getsetoidcmd('angular-velocity', oid, angular_velocity)
 
+def force(oid, f):
+	return getsetoidcmd('force', oid, f)
+
+def torque(oid, t):
+	return getsetoidcmd('torque', oid, t)
+
 def mass(oid, w):
 	return getsetoidcmd('mass', oid, w)
 
@@ -407,7 +413,7 @@ def _run_local_sim(addr):
 			open_prefix,end_suffix,binname = [],[],'trabantsim'
 		else:
 			open_prefix,end_suffix,binname = [],[],'TrabantSim.exe'
-		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('sim','./'), ('../../bin/sim','./'), ('..','Release/'), ('..','Debug/')]:
+		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('sim','./'), ('../../bin/sim','./'), ('..','Release/'), ('..','Final/'), ('..','Debug/')]:
 			import os.path
 			import subprocess
 			curdir = os.path.abspath(os.path.curdir)

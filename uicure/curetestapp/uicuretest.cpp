@@ -468,11 +468,11 @@ bool ResourceTest::TestStress() {
 		g_resource_load_count = 0;
 		typedef std::list<UiCure::UserGeometryReferenceResource*> MeshList;
 		MeshList resources;
-		const int loop_count = 100;
-		const int add_count = 10;
-		const int dec_count = add_count/3;
-		for (int x = 0; x < loop_count; ++x) {
-			for (int y = 0; y < add_count; ++y) {
+		const int _loop_count = 100;
+		const int _add_count = 10;
+		const int _dec_count = _add_count/3;
+		for (int x = 0; x < _loop_count; ++x) {
+			for (int y = 0; y < _add_count; ++y) {
 				UiCure::UserGeometryReferenceResource* mesh =
 					new UiCure::UserGeometryReferenceResource(ui_manager_, UiCure::GeometryOffset(0));
 				mesh->Load(resource_manager_, "hover_tank_01_tower.mesh;0",
@@ -482,7 +482,7 @@ bool ResourceTest::TestStress() {
 			}
 			size_t c = resource_manager_->QueryResourceCount();
 			deb_assert(c <= 2);
-			for (int z = 0; z < dec_count; ++z) {
+			for (int z = 0; z < _dec_count; ++z) {
 				int drop_index = lepra::Random::GetRandomNumber()%resources.size();
 				MeshList::reverse_iterator u = resources.rbegin();
 				for (int v = 0; v < drop_index; ++u, ++v)

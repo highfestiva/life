@@ -256,7 +256,7 @@ while loop():
     picks = [(obj,pos) for obj,pos in pick_objects(pos+push_dir, vec3(0,0,-1), 0,0.5) if obj != player]
     if picks and pos.z-picks[0][1].z > 0.1: # Something below player, not pushing against a wall.
         push_dir.z = 0.5
-    player.engine[0].force(push_dir)
+    player.engines[0].force(push_dir)
 
     # Look around and view bob.
     vxy = player.vel().with_z(0).length()

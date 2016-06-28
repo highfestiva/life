@@ -632,7 +632,7 @@ bool HiscoreTest::Test() {
 
 	if (test_ok) {
 		_context = "downloading score";
-		for (int x = 0; x < 50; ++x) {
+		for (int y = 0; y < 50; ++y) {
 			Thread::Sleep(0.1f);
 			cure::ResourceLoadState load_state = hiscore.Poll();
 			test_ok = (load_state == cure::kResourceLoadComplete);
@@ -677,7 +677,7 @@ bool HiscoreTest::Test() {
 
 	if (test_ok) {
 		_context = "uploading score";
-		for (int x = 0; x < 50; ++x) {
+		for (int y = 0; y < 50; ++y) {
 			Thread::Sleep(0.1f);
 			cure::ResourceLoadState load_state = hiscore.Poll();
 			test_ok = (load_state == cure::kResourceLoadComplete);

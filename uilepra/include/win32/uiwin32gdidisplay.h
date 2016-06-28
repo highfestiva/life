@@ -24,6 +24,7 @@ protected:
 	virtual ContextType GetContextType();
 
 	virtual bool Activate();
+	virtual bool Deactivate();
 	virtual bool UpdateScreen();
 
 	virtual bool IsVSyncEnabled() const;

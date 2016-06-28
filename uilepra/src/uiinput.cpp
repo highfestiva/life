@@ -669,11 +669,11 @@ void InputManager::RemoveInputDevice(InputDevice* device) {
 	device_list_.remove(device);
 }
 
-void InputManager::ActivateAll() {
+void InputManager::ActivateAll(bool disable_win_mgr) {
 	DeviceList::iterator x;
 	for (x = device_list_.begin(); x != device_list_.end(); ++x) {
 		InputDevice* _device = *x;
-		_device->Activate();
+		_device->Activate(disable_win_mgr);
 	}
 }
 

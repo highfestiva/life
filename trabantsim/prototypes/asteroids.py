@@ -33,11 +33,11 @@ while loop():
     if taps():
         angle = (closest_tap(shippos).pos3d()-shippos).angle_y(vec3(0,0,1))
         ship.orientation(quat().rotate_y(angle))
-    ship.engine[0].force((0,0,1 if taps() or keydir().y>0 else 0))
-    ship.engine[1].force((0,keydir().x,0))
+    ship.engines[0].force((0,0,1 if taps() or keydir().y>0 else 0))
+    ship.engines[1].force((0,keydir().x,0))
     # Check if we crashed into something, if so explode.
     if ship in collided_objects():
-        [e.force((0,0,0)) for e in ship.engine]
+        [e.force((0,0,0)) for e in ship.engines]
         explode(shippos,shipvel)
         sleep(1)
         release_all_objects()

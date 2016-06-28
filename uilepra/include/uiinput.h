@@ -181,7 +181,7 @@ public:
 
 	// Since only one window (or application) should be in focus of
 	// the input, the display manager is required.
-	virtual void Activate() = 0;
+	virtual void Activate(bool disable_win_mgr) = 0;
 	virtual void Release() = 0;
 
 	virtual void PollEvents() = 0;
@@ -455,8 +455,8 @@ public:
 	void AddInputDevice(InputDevice* device);
 	void RemoveInputDevice(InputDevice* device);
 
-	// Activase/release all devices.
-	void ActivateAll();
+	// Activate/release all devices.
+	void ActivateAll(bool disable_win_mgr);
 	void ReleaseAll();
 
 	virtual void ActivateKeyboard();

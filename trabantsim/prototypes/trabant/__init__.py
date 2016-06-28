@@ -3,6 +3,7 @@
 
 from math import radians,tan
 from trabant.math import *
+import inspect
 import sys
 import trabant.asc2obj
 import trabant.gameapi
@@ -23,7 +24,7 @@ class _flushfile:
 sys.stdout = _flushfile(sys.stdout)
 
 roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine,slider_engine,stabilize,upright_stabilize,forward_stabilize = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt slider stabilize upright_stabilize forward_stabilize'.split()
-hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider fixed'.split()
+hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,ball_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider ball fixed'.split()
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
 osname = sys.platform
@@ -48,7 +49,7 @@ _joysticks = {}
 _accelerometer_calibration = vec3()
 _timers = {}
 _timer_callbacks = {}
-_objects = {}
+objects = {}
 _async_load = False
 _async_loaders = {}
 _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative,_cam_is_smooth = vec3(),10,None,vec3(),0.5,False,False
@@ -78,8 +79,9 @@ class Engine:
 
 class Obj:
 	def __init__(self, id, gfx, phys):
+		self.name = 'object'
 		self.id = id
-		self.engine = []
+		self.engines = []
 		self.last_joint_axis = None
 		self.gfx = gfx
 		self.phys = phys
@@ -111,6 +113,12 @@ class Obj:
 	def avel(self, avel=None):
 		'''Angular velocity.'''
 		return gameapi.avel(self.id, avel)
+	def force(self, f):
+		'''Apply force through center of mass.'''
+		return gameapi.force(self.id, f)
+	def torque(self, t):
+		'''Apply torque.'''
+		return gameapi.torque(self.id, t)
 	def mass(self, w):
 		'''Setting mass is only useful for interaction between dynamic objects.'''
 		return gameapi.mass(self.id, (w,))
@@ -154,10 +162,10 @@ class Obj:
 		max_velocity, strength, friction = _normalize_engine_values(engine_type, max_velocity, offset, strength, friction, topmounted_gyro)
 		target_efcts = [(t.id,efct) for t,efct in targets] if targets else []
 		eid = gameapi.create_engine(self.id, engine_type, max_velocity, strength, friction, target_efcts)
-		self.engine += [Engine(self.id, eid, engine_type)]
+		self.engines += [Engine(self.id, eid, engine_type)]
 		if sound:
-			self.engine[-1].addsound(sound, 1)
-		return self.engine[-1]
+			self.engines[-1].addsound(sound, 1)
+		return self.engines[-1]
 	def joint(self, joint_type, obj2, axis=None, stop=None, spring=None):
 		'''Create a joint between two objects. The stop parameter contains low and high stops, in hinge-type
 		   joints this is the low and high angle (in radians).'''
@@ -168,14 +176,18 @@ class Obj:
 		if self.id in _async_loaders:
 			del _async_loaders[self.id]
 		gameapi.releaseobj(self.id)
-		global _objects,_last_created_object
-		del _objects[self.id]
+		global objects,_last_created_object
+		del objects[self.id]
 		if _last_created_object == self:
 			_last_created_object = None
 		self.id = None
 	def released(self):
 		'''Check if an object is still present in the game.'''
 		return self.id == None
+	def __str__(self):
+		return '%s %s' % (self.name,str(self.id) if self.id!=None else '<deleted>')
+	def __repr__(self):
+		return 'Obj(%s) <%s>' % (str(self.id) if self.id!=None else '<deleted>',self.name)
 
 
 class Tap:
@@ -346,12 +358,19 @@ def timer_callback(t, func):
 			_timer_callbacks[tr] = (t,func)
 			break
 
+def release_all_timers():
+	global _timer_callbacks,_timers,_starttime
+	_timer_callbacks = {}
+	_timers = {}
+	_starttime = None
+
 def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relative_angle=None, light_angle=None, smooth=None):
 	'''Set camera angle, distance, target object, position, fov. target_relative_angle=True means that the
 	   angle is relative to your target object rather than absolute. light_angle is used to change the
 	   direction of the directional light in the scene.'''
 	_tryinit()
-	if not (angle or distance or target or pos or fov or target_relative_angle or light_angle or smooth):
+	if angle==None and distance==None and target==None and pos==None and fov==None and \
+		target_relative_angle==None and light_angle==None and smooth==None:
 		_update_cam_shadow()
 		return _cam_pos
 	angle = tovec3(angle)
@@ -359,13 +378,13 @@ def cam(angle=None, distance=None, target=None, pos=None, fov=None, target_relat
 	gameapi.light(tovec3(light_angle))
 	# Update shadow variables for screen<-->world space transformations.
 	global _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative,_cam_is_smooth
-	if angle:		 _cam_angle = angle
+	if angle:		 		_cam_angle = angle
 	if distance != None:	_cam_distance = distance
-	if target:		_cam_target = target
-	if pos:			_cam_lookat = tovec3(pos)
-	if fov:			_cam_fov_radians = radians(fov)
+	if target:				_cam_target = target
+	if pos:					_cam_lookat = tovec3(pos)
+	if fov:					_cam_fov_radians = radians(fov)
 	if target_relative_angle != None: _cam_relative = target_relative_angle
-	if smooth != None:	_cam_is_smooth = not not smooth
+	if smooth != None:		_cam_is_smooth = not not smooth
 
 def bg(col):
 	'''Set background color either as (0.3,1,0.5), '#ffa', or '#F6AA03'.'''
@@ -478,7 +497,7 @@ def create_clones(obj, placements, mat=None, static=False):
 	'''Creates multiple clones at once of the original Obj, returns a list of Objs. Placement is a list of
 	   tuples, each tuple contains position (vec3) and orientation (quat) IN THAT ORDER. This function is
 	   much faster when creating many objects.'''
-	global _objects
+	global objects
 	mat = mat if mat else _last_mat
 	objs = []
 	str_placements = ''
@@ -486,7 +505,8 @@ def create_clones(obj, placements, mat=None, static=False):
 		global _last_created_object
 		for oid in gameapi.cloneobjs(obj.id, static, mat, splacements):
 			o = Obj(oid,None,None)
-			_objects[oid] = o
+			o.name = obj.name+'-clone'
+			objects[oid] = o
 			objs.append(o)
 			_last_created_object = o
 	for pos,q in placements:
@@ -512,16 +532,23 @@ def accurate_ascii_generate(enable):
 def pick_objects(pos, direction, near=2, far=1000):
 	'''Ray-pick an list of Objs.'''
 	pos = tovec3(pos)
-	objects = [(_objects[oid],pos) for oid,pos in gameapi.pickobjs(pos, direction, near, far) if oid in _objects]
-	return sorted(objects, key=lambda op: (op[1]-pos).length2())
+	object_pos_list = [(objects[oid],pos) for oid,pos in gameapi.pickobjs(pos, direction, near, far) if oid in objects]
+	return sorted(object_pos_list, key=lambda op: (op[1]-pos).length2())
 
-def release_all_objects():
+def release_objects(keep=None):
 	'''Clean slate, start over fresh.'''
-	gameapi.release_all_objects()
-	global _objects,_last_created_object
-	for o in _objects.values():
-		o.id = None
-	_objects,_last_created_object = {},None
+	global objects,_last_created_object
+	if keep:
+		for o in list(objects.values()):
+			if not keep(o):
+				o.release()
+		if last_created_object not in objects.values():
+			_last_created_object = None
+	else:
+		gameapi.release_all_objects()
+		for o in objects.values():
+			o.id = None
+		objects,_last_created_object = {},None
 
 def last_ascii_top_left_offset():
 	'''Returns the distance from the center of the last create ASCII object to the top-left-front corner of
@@ -557,10 +584,10 @@ def collisions(enable=None):
 			continue
 		words = line.split()
 		oid,other_oid = int(words[0]),int(words[7])
-		if oid in _objects and other_oid in _objects:
+		if oid in objects and other_oid in objects:
 			force,pos = tovec3([float(f) for f in words[1:4]]),tovec3([float(f) for f in words[4:7]])
-			_collisions.append((_objects[oid],_objects[other_oid],force,pos))
-			_collisions.append((_objects[other_oid],_objects[oid],-force,pos))
+			_collisions.append((objects[oid],objects[other_oid],force,pos))
+			_collisions.append((objects[other_oid],objects[oid],-force,pos))
 	return _collisions
 
 def keys():
@@ -670,12 +697,14 @@ def is_touch_device():
 
 def onload(obj, func):
 	'''Perform function when object has been loaded.'''
+	if obj.released():
+		return
 	global _async_loaders
-	oldfunc = _async_loaders[obj.id]
+	oldfunc = _async_loaders[obj.id] if obj.id in _async_loaders else None
 	def doit():
 		oldfunc()
 		func()
-	_async_loaders[obj.id] = doit
+	_async_loaders[obj.id] = doit if oldfunc else func
 
 
 ########################################
@@ -721,8 +750,13 @@ def _create_object(gfx, phys, static, trigger, pos, orientation, vel, avel, mass
 	if not _async_load:
 		gameapi.waitload(oid)
 	o = Obj(oid,gfx,phys)
-	global _objects,_last_created_object,_async_loaders
-	_objects[oid] = o
+	stack = inspect.stack()
+	if len(stack) >= 3 and 'create' in stack[2][3]:
+		o.name = stack[2][3].replace('create','').strip('_')
+	elif len(phys) == 1:
+		o.name = str(type(phys[0])).split('.')[-1].split("'")[0].replace('Phys','').lower()
+	global objects,_last_created_object,_async_loaders
+	objects[oid] = o
 	def postload(o):
 		if not o.id:
 			return

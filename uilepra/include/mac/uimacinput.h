@@ -51,7 +51,7 @@ public:
 	MacInputDevice(pRecDevice native_device, InputManager* manager);
 	virtual ~MacInputDevice();
 
-	virtual void Activate();
+	virtual void Activate(bool disable_win_mgr);
 	virtual void Release();
 
 	virtual void PollEvents();

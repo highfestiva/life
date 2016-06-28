@@ -47,7 +47,7 @@
 
 
 
-#define UIKEY(name)			uilepra::InputManager::IN_KBD_##name
+#define UIKEY(name)				uilepra::InputManager::kInKbd##name
 #define BGCOLOR_DIALOG			Color(5, 20, 30, 192)
 #define FGCOLOR_DIALOG			Color(170, 170, 170, 255)
 #define ICONBTN(i,n)			new UiCure::IconButton(ui_manager_, resource_manager_, i, n)
@@ -55,7 +55,7 @@
 #define kContentLevels			"levels"
 #define kContentVehicles		"vehicles"
 #define kRtvarContentLevels		"Content.Levels"
-#define kRtvarContentVehicles		"Content.Vehicles"
+#define kRtvarContentVehicles	"Content.Vehicles"
 #define kRtvarHiscoreName		"Hiscore.Name"	// Last entered name.
 
 
@@ -91,12 +91,12 @@ public:
 	void DisplayLogo();
 	bool Poll();
 	void PollTaps();
-	void PrintText(const str& text, float angle, int center_x, int center_y) const;
+	void PrintText(const wstr& text, float angle, int center_x, int center_y) const;
 	void Layout();
 	void MainMenu();
 	void UpdateHiscore(bool error);
 	void HiscoreMenu(int direction);
-	void EnterHiscore(const str& message, const Color& color);
+	void EnterHiscore(const wstr& message, const Color& color);
 	void SuperReset();
 	void CreateHiscoreAgent();
 	void Purchase(const str& product_name);
@@ -138,10 +138,10 @@ public:
 
 	typedef void (App::*ButtonAction)(uitbc::Button*);
 	uitbc::Dialog* CreateTbcDialog(ButtonAction action);
-	static uitbc::Button* CreateButton(const str& text, const Color& color, uitbc::Component* parent);
+	static uitbc::Button* CreateButton(const wstr& text, const Color& color, uitbc::Component* parent);
 	void Transpose(int& x, int& y, float& angle) const;
 	void Transpose(float& x, float& y, float& angle) const;
-	static str Int2Str(int number);
+	static wstr Int2Str(int number);
 
 	StdioConsoleLogListener console_logger_;
 	DebuggerLogListener debug_logger_;
@@ -195,11 +195,10 @@ class HiscoreTextField: public uitbc::TextField {
 public:
 	typedef uitbc::TextField Parent;
 	App* app_;
-	HiscoreTextField(Component* top_parent, unsigned border_style, int border_width,
-		const Color& color, const str& _name):
-		Parent(top_parent, border_style, border_width, color, _name) {
+	HiscoreTextField(Component* top_parent, unsigned border_style, int border_width, const Color& color):
+		Parent(top_parent, border_style, border_width, color) {
 	}
-	virtual bool OnChar(tchar _c) {
+	virtual bool OnChar(wchar_t _c) {
 		bool b = false;
 		if (GetText().length() < 13 || _c < ' ') {	// Limit character length.
 			b = Parent::OnChar(_c);
@@ -208,7 +207,7 @@ public:
 			}
 		}
 		if (_c == '\r' || _c == '\n') {
-			const str _text = strutil::Strip(GetText(), " \t\v\r\n");
+			const wstr _text = wstrutil::Strip(GetText(), L" \t\v\r\n");
 			if (!_text.empty()) {
 				app_->dialog_->Dismiss();
 				b = true;
@@ -429,16 +428,16 @@ void App::Close() {
 }
 
 void App::Init() {
-	deb_assert(Int2Str(-123) == "-123");
-	deb_assert(Int2Str(-1234) == "-1,234");
-	deb_assert(Int2Str(-12345) == "-12,345");
-	deb_assert(Int2Str(-123456) == "-123,456");
-	deb_assert(Int2Str(-1234567) == "-1,234,567");
-	deb_assert(Int2Str(+123) == "123");
-	deb_assert(Int2Str(+1234) == "1,234");
-	deb_assert(Int2Str(+12345) == "12,345");
-	deb_assert(Int2Str(+123456) == "123,456");
-	deb_assert(Int2Str(+1234567) == "1,234,567");
+	deb_assert(Int2Str(-123) == L"-123");
+	deb_assert(Int2Str(-1234) == L"-1,234");
+	deb_assert(Int2Str(-12345) == L"-12,345");
+	deb_assert(Int2Str(-123456) == L"-123,456");
+	deb_assert(Int2Str(-1234567) == L"-1,234,567");
+	deb_assert(Int2Str(+123) == L"123");
+	deb_assert(Int2Str(+1234) == L"1,234");
+	deb_assert(Int2Str(+12345) == L"12,345");
+	deb_assert(Int2Str(+123456) == L"123,456");
+	deb_assert(Int2Str(+1234567) == L"1,234,567");
 }
 
 
@@ -451,7 +450,7 @@ int App::Run() {
 	const str log_name = Path::JoinPath(SystemManager::GetIoDirectory("TireFire"), "log", "txt");
 	FileLogListener file_logger(log_name);
 	{
-		LogType::GetLogger(LogType::SUB_ROOT)->SetupBasicListeners(&console_logger_, &debug_logger_, &file_logger, 0, 0);
+		LogType::GetLogger(LogType::kRoot)->SetupBasicListeners(&console_logger_, &debug_logger_, &file_logger, 0, 0);
 		const std::vector<Logger*> log_array = LogType::GetLoggers();
 		std::vector<Logger*>::const_iterator x = log_array.begin();
 		for (; x != log_array.end(); ++x) {
@@ -576,13 +575,13 @@ bool App::Poll() {
 						if (load_state == cure::kResourceLoadComplete) {
 							HiscoreMenu(+1);
 						} else {
-							EnterHiscore("Please retry; score server obstipated", LIGHT_RED);
+							EnterHiscore(L"Please retry; score server obstipated", LIGHT_RED);
 						}
 					} break;
 					default: {
 						delete hiscore_agent_;
 						hiscore_agent_ = 0;
-						log_.AError("Oops! Completed hiscore communication, but something went wrong.");
+						log_.Error("Oops! Completed hiscore communication, but something went wrong.");
 						deb_assert(false);
 						MainMenu();	// Well... assume some super-shitty state...
 					} break;
@@ -646,7 +645,7 @@ bool App::Poll() {
 		if (game_->GetFlybyMode() == Game::kFlybyInactive &&
 			game_->IsScoreCountingEnabled()) {
 			ui_manager_->GetPainter()->SetColor(WHITE);
-			const str score = "Score: " + Int2Str((int)game_->GetScore());
+			const wstr score = L"Score: " + Int2Str((int)game_->GetScore());
 			int sy = 8 + ui_manager_->GetPainter()->GetFontHeight()/2;
 			const int sx = ui_manager_->GetCanvas()->GetWidth()/2;
 			PrintText(score, 0, sx, sy);
@@ -660,7 +659,7 @@ bool App::Poll() {
 
 		if (is_purchasing_ || hiscore_agent_) {
 			ui_manager_->GetPainter()->SetColor(WHITE, 0);
-			const str info = is_purchasing_? "Communicating with App Store..." : "Speaking to score server";
+			const wstr info = is_purchasing_? L"Communicating with App Store..." : L"Speaking to score server";
 			PrintText(info, 0,
 				ui_manager_->GetCanvas()->GetWidth()/2,
 				ui_manager_->GetCanvas()->GetHeight() - ui_manager_->GetPainter()->GetFontHeight());
@@ -684,7 +683,7 @@ bool App::Poll() {
 	if (game_over_timer_.IsStarted()) {
 		if (game_over_timer_.QueryTimeDiff() > 11.0) {
 			if (game_->GetScore() >= 1000.0) {		// Negative score isn't any good - at least be positive.
-				EnterHiscore(str(), FGCOLOR_DIALOG);
+				EnterHiscore(wstr(), FGCOLOR_DIALOG);
 			} else {
 				// Score wasn't high enough, not allowed in on hiscore list.
 				SuperReset();
@@ -729,7 +728,7 @@ void App::PollTaps() {
 #endif // touch L&F
 }
 
-void App::PrintText(const str& text, float angle, int center_x, int center_y) const {
+void App::PrintText(const wstr& text, float angle, int center_x, int center_y) const {
 	if (angle) {
 		::glMatrixMode(GL_PROJECTION);
 		::glPushMatrix();
@@ -796,25 +795,25 @@ bool App::Steer(uilepra::InputManager::KeyCode key_code, float factor) {
 	};
 	Directive directive = kDirectiveNone;
 	switch (key_code) {
-		case UIKEY(UP):
-		case UIKEY(NUMPAD_8):	directive = kDirectiveUp;		break;
-		case UIKEY(W):		directive = kDirectiveUp;		break;
-		case UIKEY(DOWN):
-		case UIKEY(NUMPAD_2):
-		case UIKEY(NUMPAD_5):	directive = kDirectiveDown;		break;
-		case UIKEY(S):		directive = kDirectiveDown;		break;
-		case UIKEY(LEFT):
-		case UIKEY(NUMPAD_4):	directive = kDirectiveLeft;		break;
-		case UIKEY(A):		directive = kDirectiveLeft;		break;
-		case UIKEY(RIGHT):
-		case UIKEY(NUMPAD_6):	directive = kDirectiveRight;		break;
-		case UIKEY(D):		directive = kDirectiveRight;		break;
-		case UIKEY(LCTRL):
-		case UIKEY(RCTRL):
-		case UIKEY(INSERT):
-		case UIKEY(NUMPAD_0):	directive = kDirectiveFunction;	break;
+		case UIKEY(Up):
+		case UIKEY(Numpad8):	directive = kDirectiveUp;		break;
+		case UIKEY(W):			directive = kDirectiveUp;		break;
+		case UIKEY(Down):
+		case UIKEY(Numpad2):
+		case UIKEY(Numpad5):	directive = kDirectiveDown;		break;
+		case UIKEY(S):			directive = kDirectiveDown;		break;
+		case UIKEY(Left):
+		case UIKEY(Numpad4):	directive = kDirectiveLeft;		break;
+		case UIKEY(A):			directive = kDirectiveLeft;		break;
+		case UIKEY(Right):
+		case UIKEY(Numpad6):	directive = kDirectiveRight;		break;
+		case UIKEY(D):			directive = kDirectiveRight;		break;
+		case UIKEY(LCtrl):
+		case UIKEY(RCtrl):
+		case UIKEY(Insert):
+		case UIKEY(Numpad0):	directive = kDirectiveFunction;	break;
 		case UIKEY(E):
-		case UIKEY(F):		directive = kDirectiveFunction;	break;
+		case UIKEY(F):			directive = kDirectiveFunction;	break;
 
 #ifdef LEPRA_DEBUG
 		case UIKEY(0): {
@@ -822,7 +821,7 @@ bool App::Steer(uilepra::InputManager::KeyCode key_code, float factor) {
 				do_layout_ = true;
 			}
 		} break;
-		case UIKEY(PLUS): {
+		case UIKEY(Plus): {
 			if (!factor) {
 				const cure::ObjectPositionalData* position = 0;
 				vehicle->UpdateFullPosition(position);
@@ -879,7 +878,7 @@ bool App::Steer(uilepra::InputManager::KeyCode key_code, float factor) {
 				delete dialog_;
 				dialog_ = 0;
 				game_->AddScore(Random::Uniform(500.0f, 5000.0f));
-				EnterHiscore(str(), WHITE);
+				EnterHiscore(wstr(), WHITE);
 			}
 		} break;
 #endif // Debug
@@ -971,10 +970,10 @@ void App::MainMenu() {
 	// TRICKY-END!
 
 	uitbc::Dialog* d = CreateTbcDialog(&App::OnMainMenuAction);
-	d->AddButton(1, ICONBTNA("btn_1p.png", "Single player"), true);
-	d->AddButton(2, ICONBTNA("btn_2p.png", "Two players"), true);
-	d->AddButton(3, ICONBTNA("btn_hiscore.png", "Hiscore"), true);
-	d->AddButton(4, ICONBTNA("btn_credits.png", "Credits"), true);
+	d->AddButton(1, ICONBTNA("btn_1p.png", L"Single player"), true);
+	d->AddButton(2, ICONBTNA("btn_2p.png", L"Two players"), true);
+	d->AddButton(3, ICONBTNA("btn_hiscore.png", L"Hiscore"), true);
+	d->AddButton(4, ICONBTNA("btn_credits.png", L"Credits"), true);
 }
 
 void App::UpdateHiscore(bool error) {
@@ -982,7 +981,7 @@ void App::UpdateHiscore(bool error) {
 		return;
 	}
 	if (error) {
-		uitbc::Label* _text = new uitbc::Label(LIGHT_RED, "Network problem, try again l8r.");
+		uitbc::Label* _text = new uitbc::Label(LIGHT_RED, L"Network problem, try again l8r.");
 		_text->SetVericalAlignment(uitbc::Label::kValignTop);
 		dialog_->AddChild(_text, 135, 75);
 		return;
@@ -1000,7 +999,7 @@ void App::UpdateHiscore(bool error) {
 	for (int x = 0; x < (int)hiscore_list.entry_list_.size() && x < entry_count; ++x) {
 		const int place = x + 1 + base_place;
 		const HiscoreEntry& entry = hiscore_list.entry_list_[x];
-		const str score = Int2Str(entry.score_);
+		const wstr score = Int2Str(entry.score_);
 		char pointer = ' ';
 		char pointer2 = ' ';
 		if (last_hiscore_name == entry.name_) {
@@ -1022,12 +1021,12 @@ void App::UpdateHiscore(bool error) {
 	if (hiscore.empty()) {
 		hiscore = "No score entered. Yet.";
 	}
-	uitbc::Label* _text = new uitbc::Label(FGCOLOR_DIALOG, hiscore);
+	uitbc::Label* _text = new uitbc::Label(FGCOLOR_DIALOG, wstrutil::Encode(hiscore));
 	_text->SetFontId(monospaced_font_id_);
 	_text->SetVericalAlignment(uitbc::Label::kValignTop);
 	const uitbc::FontManager::FontId previous_font_id = ui_manager_->GetFontManager()->GetActiveFontId();
 	ui_manager_->GetFontManager()->SetActiveFont(monospaced_font_id_);
-	const int char_width = ui_manager_->GetFontManager()->GetStringWidth(" ");
+	const int char_width = ui_manager_->GetFontManager()->GetStringWidth(L" ");
 	ui_manager_->GetFontManager()->SetActiveFont(previous_font_id);
 	dialog_->AddChild(_text, 110 - position_digits/2 * char_width, 75);
 }
@@ -1048,8 +1047,8 @@ void App::HiscoreMenu(int direction) {
 	d->SetPreClickTarget(uitbc::Dialog::Action(this, &App::OnPreHiscoreAction));
 	d->SetDirection(direction, true);
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel("Hiscore " + level_name + "/" + vehicle_name, big_font_id_);
-	uitbc::Button* main_menu_button = ICONBTNA("btn_back.png", "");
+	d->SetQueryLabel(wstrutil::Encode("Hiscore " + level_name + "/" + vehicle_name), big_font_id_);
+	uitbc::Button* main_menu_button = ICONBTNA("btn_back.png", L"");
 	main_menu_button->SetPreferredSize(d->GetPreferredWidth() / 2, d->GetPreferredHeight());
 	d->AddButton(-1, main_menu_button, true);
 	main_menu_button->SetPos(d->GetPreferredWidth()/4, 0);
@@ -1058,21 +1057,21 @@ void App::HiscoreMenu(int direction) {
 	}
 }
 
-void App::EnterHiscore(const str& message, const Color& color) {
+void App::EnterHiscore(const wstr& message, const Color& color) {
 	game_over_timer_.Stop();
 
 	uitbc::Dialog* d = CreateTbcDialog(&App::OnEnterHiscoreAction);
 	d->SetPreClickTarget(uitbc::Dialog::Action(this, &App::OnPreEnterAction));
 	d->SetOffset(PixelCoord(0, -30));
-	d->SetQueryLabel("Enter hiscore name ("+Int2Str((int)game_->GetScore())+" points", big_font_id_);
+	d->SetQueryLabel(L"Enter hiscore name ("+Int2Str((int)game_->GetScore())+L" points", big_font_id_);
 	if (!message.empty()) {
 		uitbc::Label* _message = new uitbc::Label(color, message);
 		const int string_width = ui_manager_->GetPainter()->GetStringWidth(message);
 		d->AddChild(_message, d->GetSize().x/2 - string_width/2, 80);
 	}
-	hiscore_text_field_ = new HiscoreTextField(d, uitbc::TextField::kBorderSunken, 2, WHITE, "hiscore");
+	hiscore_text_field_ = new HiscoreTextField(d, uitbc::TextField::kBorderSunken, 2, WHITE);
 	hiscore_text_field_->app_ = this;
-	hiscore_text_field_->SetText(v_slowget(variable_scope_, kRtvarHiscoreName, ""));
+	hiscore_text_field_->SetText(wstrutil::Encode(v_slowget(variable_scope_, kRtvarHiscoreName, "")));
 	hiscore_text_field_->SetPreferredSize(205, 25, false);
 #ifdef LEPRA_TOUCH_LOOKANDFEEL
 	d->AddChild(hiscore_text_field_, 70, 97);
@@ -1080,10 +1079,10 @@ void App::EnterHiscore(const str& message, const Color& color) {
 	d->AddChild(hiscore_text_field_, 70, 130);
 #endif // touch / computer
 	hiscore_text_field_->SetKeyboardFocus();	// TRICKY: focus after adding.
-	uitbc::Button* cancel_button = new uitbc::Button("cancel");
+	uitbc::Button* cancel_button = new uitbc::Button(L"cancel");
 	Color c = Color(180, 50, 40);
 	cancel_button->SetBaseColor(c);
-	cancel_button->SetText("Cancel", FGCOLOR_DIALOG, CLEAR_COLOR);
+	cancel_button->SetText(L"Cancel", FGCOLOR_DIALOG, CLEAR_COLOR);
 	cancel_button->SetRoundedRadius(8);
 	cancel_button->SetPreferredSize(300-hiscore_text_field_->GetPreferredWidth()-8, hiscore_text_field_->GetPreferredHeight()+1);
 	d->AddButton(-1, cancel_button, true);
@@ -1127,10 +1126,10 @@ void App::Purchase(const str& product_name) {
 	(void)product_name;
 	button_delegate_ = uitbc::Dialog::Action(this, &App::OnOk);
 	uitbc::MessageDialog* _message = new uitbc::MessageDialog(ui_manager_->GetDesktopWindow(), button_delegate_,
-		"Content purchase not yet implemented on this platform.");
+		L"Content purchase not yet implemented on this platform.");
 	_message->SetColor(BGCOLOR_DIALOG, FGCOLOR_DIALOG, BLACK, BLACK);
-	_message->AddButton(+10, "OK", true);
-	_message->AddButton(+33, "Nooo!", true);
+	_message->AddButton(+10, L"OK", true);
+	_message->AddButton(+33, L"Nooo!", true);
 	dialog_ = _message;
 #endif // iOS
 }
@@ -1193,26 +1192,26 @@ void App::OnMainMenuAction(uitbc::Button* button) {
 		} break;
 		case 3: {
 			HiscoreMenu(+1);
-			//EnterHiscore("Press enter when you're done", FGCOLOR_DIALOG);
+			//EnterHiscore(L"Press enter when you're done", FGCOLOR_DIALOG);
 		}
 		return;
 		case 4: {
 			uitbc::Dialog* d = CreateTbcDialog(&App::OnCreditsAction);
 			d->SetOffset(PixelCoord(0, -30));
-			d->SetQueryLabel("Credits", big_font_id_);
-			str s =	"Game    Pixel Doctrine\n"
-				"Music   Jonas Kapla\n"
-				"Thanks  ODE, STLport, ChibiXM, Ogg/Vorbis, OpenAL, ALUT\n"
-				"        libpng, Minizip, zlib, FastDelegate, UTF-8 CPP,\n"
-				"        DMI, freesound, HappyHTTP, GAE, Python, py-cgkit\n"
-				"\n"
-				"Idiots kill civilians for real. Visit Avaaz.org if you\n"
-				"too belive media attention eventually can crush tyrants.";
+			d->SetQueryLabel(L"Credits", big_font_id_);
+			wstr s = L"Game    Pixel Doctrine\n"
+					  "Music   Jonas Kapla\n"
+					  "Thanks  ODE, STLport, ChibiXM, Ogg/Vorbis, OpenAL, ALUT\n"
+					  "        libpng, Minizip, zlib, FastDelegate, UTF-8 CPP,\n"
+					  "        DMI, freesound, HappyHTTP, GAE, Python, py-cgkit\n"
+					  "\n"
+					  "Idiots kill civilians for real. Visit Avaaz.org if you\n"
+					  "too belive media attention eventually can crush tyrants.";
 			uitbc::Label* _text = new uitbc::Label(FGCOLOR_DIALOG, s);
 			_text->SetFontId(monospaced_font_id_);
 			_text->SetVericalAlignment(uitbc::Label::kValignTop);
 			d->AddChild(_text, 25, 85);
-			uitbc::Button* back_button = new uitbc::CustomButton("back");
+			uitbc::Button* back_button = new uitbc::CustomButton(L"back");
 			back_button->SetPreferredSize(d->GetPreferredSize());
 			d->AddButton(-1, back_button, true);
 			back_button->SetPos(0, 0);
@@ -1233,7 +1232,7 @@ void App::OnMainMenuAction(uitbc::Button* button) {
 
 void App::OnEnterHiscoreAction(uitbc::Button* button) {
 	if (!button) {
-		str last_hiscore_name = strutil::Strip(hiscore_text_field_->GetText(), " \t\v\r\n");
+		str last_hiscore_name = strutil::Strip(strutil::Encode(hiscore_text_field_->GetText()), " \t\v\r\n");
 		hiscore_text_field_ = 0;
 		if (!last_hiscore_name.empty()) {
 			v_set(variable_scope_, kRtvarHiscoreName, last_hiscore_name);
@@ -1337,11 +1336,11 @@ void App::DoPause() {
 		return;
 	}
 	uitbc::Dialog* d = CreateTbcDialog(&App::OnPauseAction);
-	d->AddButton(1, ICONBTNA("btn_resume.png", "Resume"), true);
+	d->AddButton(1, ICONBTNA("btn_resume.png", L"Resume"), true);
 	if (game_->GetFlybyMode() == Game::kFlybyInactive) {	// Restart not available in tutorial mode.
-		d->AddButton(2, ICONBTNA("btn_restart.png", "Restart"), true);
+		d->AddButton(2, ICONBTNA("btn_restart.png", L"Restart"), true);
 	}
-	d->AddButton(3, ICONBTNA("btn_main_menu.png", "Main menu"), true);
+	d->AddButton(3, ICONBTNA("btn_main_menu.png", L"Main menu"), true);
 }
 
 void App::OnPauseClickWithSound(uitbc::Button* button) {
@@ -1379,8 +1378,8 @@ uitbc::Dialog* App::CreateTbcDialog(ButtonAction action) {
 	return d;
 }
 
-uitbc::Button* App::CreateButton(const str& text, const Color& color, uitbc::Component* parent) {
-	uitbc::Button* _button = new uitbc::Button(uitbc::BorderComponent::kLinear, 6, color, "");
+uitbc::Button* App::CreateButton(const wstr& text, const Color& color, uitbc::Component* parent) {
+	uitbc::Button* _button = new uitbc::Button(uitbc::BorderComponent::kLinear, 6, color, L"");
 	_button->SetText(text);
 	_button->SetPreferredSize(44, 44);
 	parent->AddChild(_button);
@@ -1417,8 +1416,8 @@ void App::Transpose(float& x, float& y, float& angle) const {
 	}
 }
 
-str App::Int2Str(int number) {
-	str s = strutil::IntToString(number, 10);
+wstr App::Int2Str(int number) {
+	wstr s = wstrutil::IntToString(number, 10);
 	size_t l = s.length();
 	if (number < 0) {
 		--l;

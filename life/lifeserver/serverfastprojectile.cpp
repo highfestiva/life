@@ -51,6 +51,7 @@ void ServerFastProjectile::OnMicroTick(float frame_time) {
 void ServerFastProjectile::OnTrigger(tbc::PhysicsManager::BodyID trigger_id, ContextObject* other_object, tbc::PhysicsManager::BodyID body_id, const vec3& position, const vec3& normal) {
 	(void)trigger_id;
 	(void)body_id;
+	(void)position;
 	if (explosive_energy_) {
 		ProjectileUtil::Detonate(this, &is_detonated_, launcher_, GetPosition(), GetVelocity(), normal, explosive_energy_, 0);
 	} else {

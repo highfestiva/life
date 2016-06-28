@@ -44,7 +44,7 @@ public:
 	IosInputDevice(InputManager* manager);
 	virtual ~IosInputDevice();
 
-	virtual void Activate();
+	virtual void Activate(bool disable_win_mgr);
 	virtual void Release();
 
 	virtual void PollEvents();

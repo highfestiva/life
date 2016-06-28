@@ -194,7 +194,9 @@ bool GameUiManager::OpenRest() {
 	}
 	if (ok) {
 		input_ = uilepra::InputManager::CreateInputManager(display_);
-		input_->ActivateAll();
+		bool disable_win_mgr;
+		v_get(disable_win_mgr, =, variable_scope_, kRtvarCtrlDisableWinMgr, true);
+		input_->ActivateAll(disable_win_mgr);
 	}
 	if (ok) {
 		desktop_window_ = new uitbc::DesktopWindow(input_, painter_, new uitbc::FloatingLayout(), 0, 0);

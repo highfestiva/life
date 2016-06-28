@@ -21,6 +21,9 @@ def cos2(a):
 	x = cos(a)
 	return x*x
 
+def lerp(a,b,t):
+	return a*(1-t) + b*t
+
 def angmod(a):
     if a > pi:
         return a-2*pi
@@ -221,6 +224,10 @@ class quat:
 			c = self.q[0] * v.q[2] + self.q[2] * v.q[0] + self.q[3] * v.q[1] - self.q[1] * v.q[3];
 			d = self.q[0] * v.q[3] + self.q[3] * v.q[0] + self.q[1] * v.q[2] - self.q[2] * v.q[1];
 			return quat(a,b,c,d)
+		return quat(*[f*v for f in self.q])
 
 	def __truediv__(self,divisor):
 		return quat(self.q[0]/divisor, self.q[1]/divisor, self.q[2]/divisor, self.q[3]/divisor)
+
+	def __add__(self,q):
+		return quat(*[qs+qo for qs,qo in zip(self.q,q)])

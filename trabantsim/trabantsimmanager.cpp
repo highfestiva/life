@@ -766,7 +766,7 @@ int TrabantSimManager::CreateJoint(int object_id, const str& joint_type, int oth
 		spring_damping = (spring_damping<=0)? 0.8f : spring_damping;
 		spring_constant *= _object->GetMass() * 100;
 	} else if (joint_type == "ball") {
-		type = tbc::ChunkyBoneGeometry::kConnector3Dof;
+		type = tbc::ChunkyBoneGeometry::kConnectorBall;
 	} else if (joint_type == "slider") {
 		type = tbc::ChunkyBoneGeometry::kConnectorSlider;
 		if (lo_stop == 0 && hi_stop == 0) {
@@ -863,6 +863,34 @@ void TrabantSimManager::AngularVelocity(int object_id, bool _set, vec3& angular_
 		GetMaster()->GetPhysicsManager(true)->SetBodyAngularVelocity(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), angular_velocity);
 	} else {
 		GetMaster()->GetPhysicsManager(true)->GetBodyAngularVelocity(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), angular_velocity);
+	}
+}
+
+void TrabantSimManager::Force(int object_id, bool _set, vec3& force) {
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+		return;
+	}
+	if (_set) {
+		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+		GetMaster()->GetPhysicsManager(true)->AddForce(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), force);
+	}
+	else {
+		GetMaster()->GetPhysicsManager(true)->GetBodyAcceleration(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), 1, force);
+	}
+}
+
+void TrabantSimManager::Torque(int object_id, bool _set, vec3& torque) {
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+		return;
+	}
+	if (_set) {
+		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+		GetMaster()->GetPhysicsManager(true)->SetBodyTorque(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), torque);
+	}
+	else {
+		GetMaster()->GetPhysicsManager(true)->GetBodyTorque(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), torque);
 	}
 }
 
@@ -1640,7 +1668,7 @@ void TrabantSimManager::MoveCamera(float frame_time) {
 	camera_angle_.x = fmod(camera_angle_.x+crx*frame_time*2*PIF,2*PIF);
 	camera_angle_.y = fmod(camera_angle_.y+cry*frame_time*2*PIF,2*PIF);
 	camera_angle_.z = fmod(camera_angle_.z+crz*frame_time*2*PIF,2*PIF);
-	camera_transform_.position_ = t.position_;
+	camera_transform_.position_ = Math::Lerp(t.position_, camera_transform_.position_, smooth);
 	camera_transform_.orientation_.Slerp(t.orientation_, camera_transform_.orientation_, smooth);
 }
 

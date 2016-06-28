@@ -38,7 +38,7 @@ while loop():
 
     # XY movement relative to the current yaw angle, jumps are controlled with Z velocity.
     xyrot = quat().rotate_z(yaw)
-    player.engine[0].force(xyrot * (vec3(stick.x,stick.y,0)+keydir().with_z(0)))
+    player.engines[0].force(xyrot * (vec3(stick.x,stick.y,0)+keydir().with_z(0)))
     if keydir().z>0 and timeout(1, first_hit=True):
         player.vel(player.vel()+vec3(0,0,6))
 

@@ -732,7 +732,7 @@ void ContextObject::AttachToObject(tbc::ChunkyBoneGeometry* bone_geometry1, Cont
 
 	object2->SetAllowMoveRoot(false);
 
-	if (bone_geometry1->IsConnectorType(tbc::ChunkyBoneGeometry::kConnector3Dof)) {
+	if (bone_geometry1->IsConnectorType(tbc::ChunkyBoneGeometry::kConnectorBall)) {
 		log_debug("Attaching two objects with ball joint.");
 		bone_geometry2->SetJointType(tbc::ChunkyBoneGeometry::kJointBall);
 	} else if (bone_geometry1->IsConnectorType(tbc::ChunkyBoneGeometry::kConnectorFixed)) {

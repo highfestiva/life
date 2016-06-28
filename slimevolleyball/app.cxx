@@ -248,7 +248,7 @@ bool App::Open() {
 	}
 	if (ok) {
 		input_ = uilepra::InputManager::CreateInputManager(display_);
-		input_->ActivateAll();
+		input_->ActivateAll(false);
 		input_->AddKeyCodeInputObserver(this);
 		input_->SetCursorVisible(true);
 	}
@@ -483,6 +483,7 @@ bool App::CanRender() const {
 
 
 void App::Suspend(bool hard) {
+	(void)hard;
 	if (game_->fInPlay) {
 		extra_sleep_ = 0.2;
 	}
@@ -492,6 +493,7 @@ void App::Suspend(bool hard) {
 }
 
 void App::Resume(bool hard) {
+	(void)hard;
 #ifdef LEPRA_IOS
 	[animated_app_ tick_];
 #endif // iOS

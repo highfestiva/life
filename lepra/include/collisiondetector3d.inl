@@ -31,12 +31,12 @@ bool CollisionDetector3D<_TVarType>::IsSphereEnclosingPoint(const Sphere<_TVarTy
 template<class _TVarType>
 bool CollisionDetector3D<_TVarType>::IsAABBEnclosingPoint(const AABB<_TVarType>& aabb,
 							  const Vector3D<_TVarType>& point) {
-	Vector3D<_TVarType> __min(aabb.GetPosition() - aabb.GetSize());
-	Vector3D<_TVarType> __max(aabb.GetPosition() + aabb.GetSize());
+	Vector3D<_TVarType> b_min(aabb.GetPosition() - aabb.GetSize());
+	Vector3D<_TVarType> b_max(aabb.GetPosition() + aabb.GetSize());
 
-	return (__min.x <= point.x && __max.x > point.x &&
-		__min.y <= point.y && __max.y > point.y &&
-		__min.z <= point.z && __max.z > point.z);
+	return (b_min.x <= point.x && b_max.x > point.x &&
+		b_min.y <= point.y && b_max.y > point.y &&
+		b_min.z <= point.z && b_max.z > point.z);
 }
 
 template<class _TVarType>
@@ -255,15 +255,15 @@ bool CollisionDetector3D<_TVarType>::IsSphereEnclosingAABB(const Sphere<_TVarTyp
 template<class _TVarType>
 bool CollisionDetector3D<_TVarType>::IsAABBEnclosingSphere(const AABB<_TVarType>& aabb,
 							   const Sphere<_TVarType>& sphere) {
-	Vector3D<_TVarType> __min(aabb.GetPosition() - aabb.GetSize());
-	Vector3D<_TVarType> __max(aabb.GetPosition() + aabb.GetSize());
+	Vector3D<_TVarType> b_min(aabb.GetPosition() - aabb.GetSize());
+	Vector3D<_TVarType> b_max(aabb.GetPosition() + aabb.GetSize());
 	Vector3D<_TVarType> r(sphere.GetRadius(), sphere.GetRadius(), sphere.GetRadius());
 	Vector3D<_TVarType> s_min(sphere.GetPosition() - r);
 	Vector3D<_TVarType> s_max(sphere.GetPosition() + r);
 
-	return (__min.x < s_min.x && __max.x > s_max.x &&
-	        __min.y < s_min.y && __max.y > s_max.y &&
-	        __min.z < s_min.z && __max.z > s_max.z);
+	return (b_min.x < s_min.x && b_max.x > s_max.x &&
+	        b_min.y < s_min.y && b_max.y > s_max.y &&
+	        b_min.z < s_min.z && b_max.z > s_max.z);
 }
 
 template<class _TVarType>
@@ -282,69 +282,69 @@ bool CollisionDetector3D<_TVarType>::IsOBBEnclosingSphere(const OBB<_TVarType>& 
 template<class _TVarType>
 bool CollisionDetector3D<_TVarType>::IsAABBEnclosingOBB(const AABB<_TVarType>& aabb,
 							const OBB<_TVarType>& obb) {
-	Vector3D<_TVarType> __min(aabb.GetPosition() - aabb.GetSize());
-	Vector3D<_TVarType> __max(aabb.GetPosition() + aabb.GetSize());
+	Vector3D<_TVarType> b_min(aabb.GetPosition() - aabb.GetSize());
+	Vector3D<_TVarType> b_max(aabb.GetPosition() + aabb.GetSize());
 
 	Vector3D<_TVarType> x_ext(obb.GetRotation().GetAxisX() * obb.GetSize().x);
 	Vector3D<_TVarType> y_ext(obb.GetRotation().GetAxisY() * obb.GetSize().y);
 	Vector3D<_TVarType> z_ext(obb.GetRotation().GetAxisZ() * obb.GetSize().z);
 	Vector3D<_TVarType> v(obb.GetPosition() - x_ext - y_ext - z_ext);
 
-	if(v.x < __min.x || v.x > __max.x ||
-	   v.y < __min.y || v.y > __max.y ||
-	   v.z < __min.z || v.z > __max.z) {
+	if(v.x < b_min.x || v.x > b_max.x ||
+	   v.y < b_min.y || v.y > b_max.y ||
+	   v.z < b_min.z || v.z > b_max.z) {
 		return false;
 	}
 
 	x_ext *= 2;
 	v += x_ext;
-	if(v.x < __min.x || v.x > __max.x ||
-	   v.y < __min.y || v.y > __max.y ||
-	   v.z < __min.z || v.z > __max.z) {
+	if(v.x < b_min.x || v.x > b_max.x ||
+	   v.y < b_min.y || v.y > b_max.y ||
+	   v.z < b_min.z || v.z > b_max.z) {
 		return false;
 	}
 
 	y_ext *= 2;
 	v += y_ext;
-	if(v.x < __min.x || v.x > __max.x ||
-	   v.y < __min.y || v.y > __max.y ||
-	   v.z < __min.z || v.z > __max.z) {
+	if(v.x < b_min.x || v.x > b_max.x ||
+	   v.y < b_min.y || v.y > b_max.y ||
+	   v.z < b_min.z || v.z > b_max.z) {
 		return false;
 	}
 
 	z_ext *= 2;
 	v += z_ext;
-	if(v.x < __min.x || v.x > __max.x ||
-	   v.y < __min.y || v.y > __max.y ||
-	   v.z < __min.z || v.z > __max.z) {
+	if(v.x < b_min.x || v.x > b_max.x ||
+	   v.y < b_min.y || v.y > b_max.y ||
+	   v.z < b_min.z || v.z > b_max.z) {
 		return false;
 	}
 
 	v -= y_ext;
-	if(v.x < __min.x || v.x > __max.x ||
-	   v.y < __min.y || v.y > __max.y ||
-	   v.z < __min.z || v.z > __max.z) {
+	if(v.x < b_min.x || v.x > b_max.x ||
+	   v.y < b_min.y || v.y > b_max.y ||
+	   v.z < b_min.z || v.z > b_max.z) {
 		return false;
 	}
 
 	v -= x_ext;
-	if(v.x < __min.x || v.x > __max.x ||
-	   v.y < __min.y || v.y > __max.y ||
-	   v.z < __min.z || v.z > __max.z) {
+	if(v.x < b_min.x || v.x > b_max.x ||
+	   v.y < b_min.y || v.y > b_max.y ||
+	   v.z < b_min.z || v.z > b_max.z) {
 		return false;
 	}
 
 	v += y_ext;
-	if(v.x < __min.x || v.x > __max.x ||
-	   v.y < __min.y || v.y > __max.y ||
-	   v.z < __min.z || v.z > __max.z) {
+	if(v.x < b_min.x || v.x > b_max.x ||
+	   v.y < b_min.y || v.y > b_max.y ||
+	   v.z < b_min.z || v.z > b_max.z) {
 		return false;
 	}
 
 	v -= z_ext;
-	if(v.x < __min.x || v.x > __max.x ||
-	   v.y < __min.y || v.y > __max.y ||
-	   v.z < __min.z || v.z > __max.z) {
+	if(v.x < b_min.x || v.x > b_max.x ||
+	   v.y < b_min.y || v.y > b_max.y ||
+	   v.z < b_min.z || v.z > b_max.z) {
 		return false;
 	}
 
@@ -491,28 +491,28 @@ template<class _TVarType>
 bool CollisionDetector3D<_TVarType>::IsAABBOverlappingSphere(const AABB<_TVarType>& aabb,
 							     const Sphere<_TVarType>& sphere,
 							     CollisionInfo* collision_info) {
-	Vector3D<_TVarType> __min(aabb.GetPosition() - aabb.GetSize());
-	Vector3D<_TVarType> __max(aabb.GetPosition() + aabb.GetSize());
+	Vector3D<_TVarType> b_min(aabb.GetPosition() - aabb.GetSize());
+	Vector3D<_TVarType> b_max(aabb.GetPosition() + aabb.GetSize());
 	Vector3D<_TVarType> point_on_box(0, 0, 0);
 
-	if(sphere.GetPosition().x < __min.x)
-		point_on_box.x = __min.x;
-	else if(sphere.GetPosition().x > __max.x)
-		point_on_box.x = __max.x;
+	if(sphere.GetPosition().x < b_min.x)
+		point_on_box.x = b_min.x;
+	else if(sphere.GetPosition().x > b_max.x)
+		point_on_box.x = b_max.x;
 	else
 		point_on_box.x = sphere.GetPosition().x;
 
-	if(sphere.GetPosition().y < __min.y)
-		point_on_box.y = __min.y;
-	else if(sphere.GetPosition().y > __max.y)
-		point_on_box.y = __max.y;
+	if(sphere.GetPosition().y < b_min.y)
+		point_on_box.y = b_min.y;
+	else if(sphere.GetPosition().y > b_max.y)
+		point_on_box.y = b_max.y;
 	else
 		point_on_box.y = sphere.GetPosition().y;
 
-	if(sphere.GetPosition().z < __min.z)
-		point_on_box.z = __min.z;
-	else if(sphere.GetPosition().z > __max.z)
-		point_on_box.z = __max.z;
+	if(sphere.GetPosition().z < b_min.z)
+		point_on_box.z = b_min.z;
+	else if(sphere.GetPosition().z > b_max.z)
+		point_on_box.z = b_max.z;
 	else
 		point_on_box.z = sphere.GetPosition().z;
 

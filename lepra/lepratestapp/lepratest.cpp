@@ -448,7 +448,7 @@ bool TestVector3D(const LogDecorator& account) {
 			desired_result = -5*PIF/6;
 			_context = "testing polar angle Y " + strutil::Format("%.1f", desired_result);
 			//_result = vec3(-sqrtf(3),0,-1).GetPolarCoordAngleY();
-			_result = atan2(-1, -sqrtf(3));
+			_result = atan2(-1.0f, -sqrtf(3.0f));
 			_test_ok = Math::IsEpsEqual(_result, desired_result);
 			deb_assert(_test_ok);
 		}
@@ -551,8 +551,8 @@ bool TestOrderedMap(const LogDecorator& account) {
 			deb_assert(map.GetCount() == set_count);
 			int index = Random::GetRandomNumber()%entries;
 			if (!(x%59)) {
-				for (int x = 0; x < entries; ++x) {
-					set[x] = EmptyAnsiString;
+				for (int y = 0; y < entries; ++y) {
+					set[y] = EmptyAnsiString;
 				}
 				map.RemoveAll();
 				set_count = 0;

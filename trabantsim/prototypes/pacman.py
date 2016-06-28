@@ -40,13 +40,13 @@ while loop():
     force = vec3(keydir().x, 0, keydir().y) * 5
     if taps():
         force += closest_tap(pacman.pos()).pos3d() - pacman.pos()
-    pacman.engine[0].force(force)
+    pacman.engines[0].force(force)
 
     # Ghost movement.
     if timeout(2):    # Move randomly.
-        [ghost.engine[0].force(rndvec().normalize(5).with_y(0)) for ghost in ghosts]
+        [ghost.engines[0].force(rndvec().normalize(5).with_y(0)) for ghost in ghosts]
     if timeout(5.5, timer=2):    # Move towards Pacman.
-        [ghost.engine[0].force(pacman.pos()-ghost.pos().limit(5)) for ghost in ghosts]
+        [ghost.engines[0].force(pacman.pos()-ghost.pos().limit(5)) for ghost in ghosts]
 
     for o1,o2,_,_ in collisions():
         if o1 == pacman and o2 in ghosts:

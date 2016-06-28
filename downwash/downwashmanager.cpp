@@ -183,6 +183,7 @@ DownwashManager::~DownwashManager() {
 }
 
 void DownwashManager::Suspend(bool hard) {
+	(void)hard;
 	if (!menu_->GetDialog()) {
 		pause_button_->SetVisible(false);
 		OnPauseButton(0);
@@ -472,12 +473,12 @@ bool DownwashManager::Paint() {
 		double rtr_offset;
 		v_get(rtr_offset, =, GetVariableScope(), kRtvarPhysicsRtrOffset, 0.0);
 		if (rtr_offset > 0.1) {
-			uint8 r = uint8(sin(toy_mode_color_timer_.QueryTimeDiff()*3)*120+128);
-			uint8 g = uint8(sin(toy_mode_color_timer_.QueryTimeDiff()*5)*120+128);
-			uint8 b = uint8(sin(toy_mode_color_timer_.QueryTimeDiff()*7)*120+128);
+			uint8 _r = uint8(sin(toy_mode_color_timer_.QueryTimeDiff()*3)*120+128);
+			uint8 _g = uint8(sin(toy_mode_color_timer_.QueryTimeDiff()*5)*120+128);
+			uint8 _b = uint8(sin(toy_mode_color_timer_.QueryTimeDiff()*7)*120+128);
 			ui_manager_->GetPainter()->SetColor(Color(10, 10, 10, 128));
 			ui_manager_->GetPainter()->PrintText(L"Toy mode", 11, 5);
-			ui_manager_->GetPainter()->SetColor(Color(r, g, b, 255));
+			ui_manager_->GetPainter()->SetColor(Color(_r, _g, _b, 255));
 			ui_manager_->GetPainter()->PrintText(L"Toy mode", 10, 4);
 		} else {
 			const bool is_flying = fly_time_.IsStarted();
@@ -1467,8 +1468,8 @@ vec3 DownwashManager::GetLandingTriggerPosition(cure::ContextObject* level) cons
 		LandingTrigger* landing_trigger = dynamic_cast<LandingTrigger*>(*x);
 		if (landing_trigger) {
 			const int trigger_count = level->GetPhysics()->GetTriggerCount();
-			for (int x = 0; x < trigger_count; ++x) {
-				const tbc::PhysicsTrigger* trigger = level->GetPhysics()->GetTrigger(x);
+			for (int y = 0; y < trigger_count; ++y) {
+				const tbc::PhysicsTrigger* trigger = level->GetPhysics()->GetTrigger(y);
 				if (level->GetTrigger(trigger->GetPhysicsTriggerId(0)) == landing_trigger) {
 					last_landing_trigger_position_ = GetPhysicsManager()->GetBodyPosition(trigger->GetPhysicsTriggerId(0));
 					return last_landing_trigger_position_;
