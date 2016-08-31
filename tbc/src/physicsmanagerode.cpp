@@ -294,6 +294,59 @@ PhysicsManager::BodyID PhysicsManagerODE::CreateBox(bool is_root, const xform& t
 	return (BodyID)_object;
 }
 
+PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool is_root, unsigned vertex_count, const float* vertices, unsigned triangle_count, const lepra::uint32* indices,
+	const xform& transform, float32 _mass, BodyType _type, float32 friction, float32 _bounce, int force_listener_id, bool is_trigger) {
+	Object* _object = new Object(world_id_, is_root);
+
+	_object->tri_mesh_id_ = ::dGeomTriMeshDataCreate();
+	::dGeomTriMeshDataBuildSingle(_object->tri_mesh_id_,
+		vertices,
+		sizeof(vertices[0]) * 3,
+		vertex_count,
+		indices,
+		triangle_count * 3,
+		sizeof(indices[0]) * 3);
+
+	_object->geom_id_ = ::dCreateTriMesh(space_id_, _object->tri_mesh_id_, 0, 0, 0);
+	//::dGeomSetBody(_object->geom_id_, _object->body_id_);
+	::dGeomSetData(_object->geom_id_, _object);
+	if (is_trigger) {
+		_object->trigger_listener_id_ = force_listener_id;
+	}
+	else {
+		_object->force_feedback_id_ = force_listener_id;
+	}
+
+	//	dGeomTriMeshEnableTC(_object->geom_id_, dBoxClass, 1);
+
+	float average_radius = 0;
+	for (unsigned x = 0; x < vertex_count; ++x) {
+		average_radius += vec3(vertices[x * 3 + 0], vertices[x * 3 + 0], vertices[x * 3 + 0]).GetLength();
+	}
+	average_radius /= vertex_count;
+	if (_type == PhysicsManager::kDynamic) {
+		dMass __mass;
+		::dMassSetSphereTotal(&__mass, (dReal)_mass, (dReal)average_radius);
+		_object->body_id_ = dBodyCreate(world_id_);
+		::dBodySetMass(_object->body_id_, &__mass);
+		::dGeomSetBody(_object->geom_id_, _object->body_id_);
+		::dBodySetAutoDisableDefaults(_object->body_id_);
+		::dBodySetAngularDampingThreshold(_object->body_id_, 200.0f);
+		::dBodySetAngularDamping(_object->body_id_, 0.2f);
+	}
+
+	_object->geometry_data_[0] = average_radius;
+	_object->mass_ = _mass;
+	_object->friction_ = -friction;
+	_object->bounce_ = _bounce;
+
+	object_table_.insert(_object);
+
+	SetBodyTransform((BodyID)_object, transform);
+
+	return (BodyID)_object;
+}
+
 bool PhysicsManagerODE::Attach(BodyID static_body, BodyID main_body) {
 	ObjectTable::iterator x = object_table_.find((Object*)static_body);
 	if (x == object_table_.end()) {
@@ -444,56 +497,43 @@ bool PhysicsManagerODE::AddMass(BodyID static_body, BodyID main_body) {
 	return true;
 }
 
-PhysicsManager::BodyID PhysicsManagerODE::CreateTriMesh(bool is_root, unsigned vertex_count, const float* vertices, unsigned triangle_count, const lepra::uint32* indices,
-	const xform& transform, float32 _mass, BodyType _type, float32 friction, float32 _bounce, int force_listener_id, bool is_trigger) {
-	Object* _object = new Object(world_id_, is_root);
-
-	_object->tri_mesh_id_ = ::dGeomTriMeshDataCreate();
-	::dGeomTriMeshDataBuildSingle(_object->tri_mesh_id_,
-				    vertices,
-				    sizeof(vertices[0]) * 3,
-				    vertex_count,
-				    indices,
-				    triangle_count * 3,
-				    sizeof(indices[0]) * 3);
-
-	_object->geom_id_ = ::dCreateTriMesh(space_id_, _object->tri_mesh_id_, 0, 0, 0);
-	//::dGeomSetBody(_object->geom_id_, _object->body_id_);
-	::dGeomSetData(_object->geom_id_, _object);
-	if (is_trigger) {
-		_object->trigger_listener_id_ = force_listener_id;
-	} else {
-		_object->force_feedback_id_ = force_listener_id;
+bool PhysicsManagerODE::Scale(BodyID body, const vec3& scale) {
+	Object* object = (Object*)body;
+	if (object->world_id_ != world_id_) {
+		log_.Errorf("Scale() - body %i is not part of this world!", body);
+		return false;
 	}
-
-//	dGeomTriMeshEnableTC(_object->geom_id_, dBoxClass, 1);
-
-	float average_radius = 0;
-	for (unsigned x = 0; x < vertex_count; ++x) {
-		average_radius += vec3(vertices[x*3+0], vertices[x*3+0], vertices[x*3+0]).GetLength();
+	switch (object->geom_id_->type) {
+		case dTriMeshClass:
+			// TRICKY: implement!
+			break;
+		case dSphereClass: {
+			const float radius = ::dGeomSphereGetRadius(object->geom_id_);
+			::dGeomSphereSetRadius(object->geom_id_, radius*scale.x);
+		} break;
+		case dBoxClass: {
+			dVector3 sides;
+			::dGeomBoxGetLengths(object->geom_id_, sides);
+			::dGeomBoxSetLengths(object->geom_id_, sides[0] * scale.x, sides[1] * scale.y, sides[2] * scale.z);
+		} break;
+		case dCapsuleClass: {
+			dReal radius;
+			dReal length;
+			::dGeomCapsuleGetParams(object->geom_id_, &radius, &length);
+			::dGeomCapsuleSetParams(object->geom_id_, radius*scale.x, length*scale.z);
+		} break;
+		case dCylinderClass: {
+			dReal radius;
+			dReal length;
+			::dGeomCylinderGetParams(object->geom_id_, &radius, &length);
+			::dGeomCylinderSetParams(object->geom_id_, radius*scale.x, length*scale.z);
+		} break;
+		default: {
+			log_.Error("Trying to scale object of unknown type!");
+			deb_assert(false);
+		}
 	}
-	average_radius /= vertex_count;
-	if (_type == PhysicsManager::kDynamic) {
-		dMass __mass;
-		::dMassSetSphereTotal(&__mass, (dReal)_mass, (dReal)average_radius);
-		_object->body_id_ = dBodyCreate(world_id_);
-		::dBodySetMass(_object->body_id_, &__mass);
-		::dGeomSetBody(_object->geom_id_, _object->body_id_);
-		::dBodySetAutoDisableDefaults(_object->body_id_);
-		::dBodySetAngularDampingThreshold(_object->body_id_, 200.0f);
-		::dBodySetAngularDamping(_object->body_id_, 0.2f);
-	}
-
-	_object->geometry_data_[0] = average_radius;
-	_object->mass_ = _mass;
-	_object->friction_ = -friction;
-	_object->bounce_ = _bounce;
-
-	object_table_.insert(_object);
-
-	SetBodyTransform((BodyID)_object, transform);
-
-	return (BodyID)_object;
+	return (false);
 }
 
 bool PhysicsManagerODE::IsStaticBody(BodyID body_id) const {

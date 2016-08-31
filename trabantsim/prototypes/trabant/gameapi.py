@@ -78,7 +78,7 @@ def cam(angle, distance, target_oid, pos, fov, relative_angle, smooth):
 def light(angle):
 	if angle:
 		setvar('Ui.3D.LightAngleX', float(angle.x))
-		setvar('Ui.3D.LightAngleY', float(angle.y))
+		#setvar('Ui.3D.LightAngleY', float(angle.y))
 		setvar('Ui.3D.LightAngleZ', float(angle.z))
 
 def fog(near,far):
@@ -247,6 +247,9 @@ def torque(oid, t):
 def mass(oid, w):
 	return getsetoidcmd('mass', oid, w)
 
+def scale(oid, s):
+	return getsetoidcmd('scale', oid, s)
+
 def col(oid, color):
 	return getsetoidcmd('color', oid, htmlcol(color))
 
@@ -275,10 +278,12 @@ def cmd(c, return_type=str, errhandle=None):
 	try:
 		resend = True
 		while resend:
-			#print(c)
+			#print('>>>', c)
 			sock.send((c+'\n').encode())
 			result = sock.recv(80*1024)
 			resend = (result == b'\x16pause\x16')
+			if resend:
+				sleep(0.1)
 	except ConnectionResetError as e:
 		if errhandle:
 			errhandle(e)
@@ -299,7 +304,7 @@ def cmd(c, return_type=str, errhandle=None):
 			import sys
 			sys.exit(1)
 		raise e
-	#print(result)
+	#print('<<<', result)
 	result = result.decode(errors='replace')
 	if result.startswith('ok\n'):
 		return return_type(result[3:])

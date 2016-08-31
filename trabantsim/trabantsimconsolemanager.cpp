@@ -60,6 +60,7 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::command_id
 	{"force", kCommandForce},
 	{"torque", kCommandTorque},
 	{"mass", kCommandMass},
+	{"scale", kCommandScale},
 	{"color", kCommandColor},
 	{"engine-force", kCommandEngineForce},
 	{"set-tag-floats", kCommandSetTagFloats},
@@ -276,10 +277,6 @@ bool TrabantSimConsoleManager::Start() {
 #endif // Computer / touch
 }
 
-const str TrabantSimConsoleManager::GetActiveResponse() const {
-	return active_response_.str();
-}
-
 
 
 unsigned TrabantSimConsoleManager::GetCommandCount() const {
@@ -294,8 +291,8 @@ const TrabantSimConsoleManager::CommandPair& TrabantSimConsoleManager::GetComman
 }
 
 int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strutil::strvec& parameter_vector) {
-	active_response_.str(str());
-	active_response_ << "ok\n";
+	strstream active_response;
+	active_response << "ok\n";
 	int result = Parent::OnCommand(command, parameter_vector);
 	if (result < 0) {
 		result = 0;
@@ -309,13 +306,13 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 				} break;
 				case kCommandGetPlatformName: {
 #if defined(LEPRA_IOS)
-					active_response_ << "iOS";
+					active_response << "iOS";
 #elif defined(LEPRA_MAC)
-					active_response_ << "Mac";
+					active_response << "Mac";
 #elif defined(LEPRA_WINDOWS)
-					active_response_ << "Win";
+					active_response << "Win";
 #else
-					active_response_ << "Unknown";
+					active_response << "Unknown";
 #endif // Platform
 
 				} break;
@@ -336,7 +333,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					if (object_id == -1) {
 						throw ParameterException();
 					}
-					active_response_ << object_id;
+					active_response << object_id;
 				} break;
 				case kCommandCreateClones: {
 					const int original_id = ParamToInt(parameter_vector, 0);
@@ -364,9 +361,9 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					x = 0;
 					for (std::vector<int>::iterator y = object_ids.begin(); y != object_ids.end(); ++y, ++x) {
 						if (x) {
-							active_response_ << ',';
+							active_response << ',';
 						}
-						active_response_ << *y;
+						active_response << *y;
 					}
 				} break;
 				case kCommandDeleteObject: {
@@ -385,10 +382,10 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					size_t c = object_ids.size();
 					for (size_t x = 0; x < c; ++x) {
 						if (x) {
-							active_response_ << ',';
+							active_response << ',';
 						}
 						const vec3& v = positions[x];
-						active_response_ << object_ids[x] << ',' << v.x << ',' << v.y << ',' << v.z;
+						active_response << object_ids[x] << ',' << v.x << ',' << v.y << ',' << v.z;
 					}
 				} break;
 				case kCommandClearPhys: {
@@ -473,10 +470,10 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					bool first = true;
 					for (std::vector<int>::iterator y = object_ids.begin(); y != object_ids.end(); ++y) {
 						if (!first) {
-							active_response_ << ',';
+							active_response << ',';
 						}
 						first = false;
-						active_response_ << (manager->IsLoaded(*y)? '1' : '0');
+						active_response << (manager->IsLoaded(*y)? '1' : '0');
 					}
 				} break;
 				case kCommandWaitUntilLoaded: {
@@ -505,15 +502,15 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					int y = 0;
 					for (CollisionList::iterator x = list.begin(); x != list.end() && y < 10; ++x, ++y) {
 						if (y) {
-							active_response_ << '\n';
+							active_response << '\n';
 						}
-						active_response_ << x->object_id_ << ' ' << x->force_ << ' ' << x->position_ << ' ' << x->other_object_id_;
+						active_response << x->object_id_ << ' ' << x->force_ << ' ' << x->position_ << ' ' << x->other_object_id_;
 					}
 				} break;
 				case kCommandGetKeys: {
 					strutil::strvec keys;
 					manager->GetKeys(keys);
-					active_response_ << strutil::Join(keys, "\n");
+					active_response << strutil::Join(keys, "\n");
 				} break;
 				case kCommandGetTouchDrags: {
 					PixelRect rect = manager->GetRenderArea();
@@ -525,23 +522,23 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					int y = 0;
 					for (DragList::iterator x = list.begin(); x != list.end(); ++x, ++y) {
 						if (y) {
-							active_response_ << '\n';
+							active_response << '\n';
 						}
-						active_response_ << x->last_.x*sx << ' ' << x->last_.y*sy << ' ' << x->start_.x*sx << ' ' << x->start_.y*sy << ' '
+						active_response << x->last_.x*sx << ' ' << x->last_.y*sy << ' ' << x->start_.x*sx << ' ' << x->start_.y*sy << ' '
 								<< x->velocity_.x*sx << ' ' << x->velocity_.y*sy << ' ' << (x->is_press_?"true":"false") << ' ' << x->button_mask_;
 					}
 				} break;
 				case kCommandGetAccelerometer: {
 					const vec3 a = manager->GetAccelerometer();
-					active_response_ << a;
+					active_response << a;
 				} break;
 				case kCommandGetMousemove: {
 					const vec3 m = manager->GetMouseMove();
-					active_response_ << m;
+					active_response << m;
 				} break;
 				case kCommandCreateJoystick: {
 					const int joy_id = manager->CreateJoystick(ParamToFloat(parameter_vector, 0), ParamToFloat(parameter_vector, 1), ParamToBool(parameter_vector, 2));
-					active_response_ << joy_id;
+					active_response << joy_id;
 				} break;
 				case kCommandGetJoystickData: {
 					typedef TrabantSimManager::JoystickDataList JoyList;
@@ -549,13 +546,13 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					int y = 0;
 					for (JoyList::iterator x = list.begin(); x != list.end(); ++x, ++y) {
 						if (y) {
-							active_response_ << '\n';
+							active_response << '\n';
 						}
-						active_response_ << x->joystick_id_ << ' ' << x->x << ' ' << x->y;
+						active_response << x->joystick_id_ << ' ' << x->x << ' ' << x->y;
 					}
 				} break;
 				case kCommandGetAspectRatio: {
-					active_response_ << manager->GetAspectRatio();
+					active_response << manager->GetAspectRatio();
 				} break;
 				case kCommandCreateEngine: {
 					const int object_id = ParamToInt(parameter_vector, 0);
@@ -572,7 +569,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					if (engine_id < 0) {
 						throw ParameterException();
 					}
-					active_response_ << engine_id;
+					active_response << engine_id;
 				} break;
 				case kCommandCreateJoint: {
 					const int object_id = ParamToInt(parameter_vector, 0);
@@ -585,14 +582,14 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					if (joint_id < 0) {
 						throw ParameterException();
 					}
-					active_response_ << joint_id;
+					active_response << joint_id;
 				} break;
 				case kCommandPosition: {
 					bool _is_set;
 					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
 					manager->Position(ParamToInt(parameter_vector, 0), _is_set, value);
 					if (!_is_set) {
-						active_response_ << value;
+						active_response << value;
 					}
 				} break;
 				case kCommandOrientation: {
@@ -600,7 +597,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					quat value = ParamToQuat(parameter_vector, 1, &_is_set);
 					manager->Orientation(ParamToInt(parameter_vector, 0), _is_set, value);
 					if (!_is_set) {
-						active_response_ << value;
+						active_response << value;
 					}
 				} break;
 				case kCommandVelocity: {
@@ -608,7 +605,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
 					manager->Velocity(ParamToInt(parameter_vector, 0), _is_set, value);
 					if (!_is_set) {
-						active_response_ << value;
+						active_response << value;
 					}
 				} break;
 				case kCommandAngularVelocity: {
@@ -616,7 +613,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
 					manager->AngularVelocity(ParamToInt(parameter_vector, 0), _is_set, value);
 					if (!_is_set) {
-						active_response_ << value;
+						active_response << value;
 					}
 				} break;
 				case kCommandForce: {
@@ -624,7 +621,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
 					manager->Force(ParamToInt(parameter_vector, 0), _is_set, value);
 					if (!_is_set) {
-						active_response_ << value;
+						active_response << value;
 					}
 				} break;
 				case kCommandTorque: {
@@ -632,7 +629,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
 					manager->Torque(ParamToInt(parameter_vector, 0), _is_set, value);
 					if (!_is_set) {
-						active_response_ << value;
+						active_response << value;
 					}
 				} break;
 				case kCommandMass: {
@@ -640,7 +637,15 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					float value = ParamToFloat(parameter_vector, 1, &_is_set);
 					manager->Mass(ParamToInt(parameter_vector, 0), _is_set, value);
 					if (!_is_set) {
-						active_response_ << value;
+						active_response << value;
+					}
+				} break;
+				case kCommandScale: {
+					bool _is_set;
+					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
+					manager->Scale(ParamToInt(parameter_vector, 0), _is_set, value);
+					if (!_is_set) {
+						active_response << value;
 					}
 				} break;
 				case kCommandColor: {
@@ -649,7 +654,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					float alpha = ParamToFloat(parameter_vector, 4, &_is_set);
 					manager->ObjectColor(ParamToInt(parameter_vector, 0), _is_set, value, alpha);
 					if (!_is_set) {
-						active_response_ << value;
+						active_response << value;
 					}
 				} break;
 				case kCommandEngineForce: {
@@ -657,7 +662,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					vec3 value = ParamToVec3(parameter_vector, 2, &_is_set);
 					manager->EngineForce(ParamToInt(parameter_vector, 0), ParamToInt(parameter_vector, 1), _is_set, value);
 					if (!_is_set) {
-						active_response_ << value;
+						active_response << value;
 					}
 				} break;
 				case kCommandSetTagFloats: {
@@ -690,11 +695,12 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 			}
 		} catch (ParameterException) {
 			result = 1;
-			active_response_.str(str());
-			active_response_ << "ERROR: bad or missing parameter for " << command << '(' << parameter_vector << ")!\n";
+			active_response.str(str());
+			active_response << "ERROR: bad or missing parameter for " << command << '(' << parameter_vector << ")!\n";
 			log_.Warningf("%s has missing or bad arguments (%s)", command.c_str(), strutil::Join(parameter_vector, ", ").c_str());
 		}
 	}
+	thread_set_str("cmd_response", active_response.str());
 	return (result);
 }
 

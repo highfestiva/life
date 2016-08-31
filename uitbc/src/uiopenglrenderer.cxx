@@ -1640,7 +1640,8 @@ void OpenGLRenderer::RenderShadowVolumes() {
 	//glDisable(GL_POLYGON_OFFSET_FILL);
 	glDepthMask(GL_TRUE);
 
-	OGL_FAST_ASSERT();
+	//OGL_FAST_ASSERT();
+	glGetError();	// TRICKY: for some reason when recording with Fraps we get an error here.
 }
 
 int OpenGLRenderer::RenderShadowMaps() {

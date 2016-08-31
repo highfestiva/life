@@ -157,6 +157,9 @@ public:
 	void Signal(int signal);
 	void Kill();
 
+	void SetValue(const HashedString& key, const str& value);
+	const str& GetValue(const HashedString& key) const;
+
 protected:
 	static void Sleep(unsigned int micro_seconds);
 	virtual void Run() = 0;
@@ -170,6 +173,8 @@ protected:
 	void SetThreadId(size_t thread_id);
 
 private:
+	typedef std::unordered_map<HashedString, str, HashedStringHasher> ValueTable;
+
 	str thread_name_;	// Must be ANSI, to be compliant with non-unicode builds.
 
 	volatile bool running_;
@@ -180,6 +185,8 @@ private:
 	size_t thread_id_;
 
 	Semaphore semaphore_;
+
+	ValueTable values_;
 
 	logclass();
 };
@@ -201,6 +208,12 @@ private:
 	void (*thread_entry_)(void*);
 	void* data_;
 };
+
+
+
+#define thread_val_token(name)		static const HashedString _tkey(name);
+#define thread_set_str(name, var)	thread_val_token(name); lepra::Thread::GetCurrentThread()->SetValue(_tkey, var)
+#define thread_get_str(name, var)	thread_val_token(name); const str var = lepra::Thread::GetCurrentThread()->GetValue(_tkey)
 
 
 

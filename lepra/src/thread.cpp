@@ -283,6 +283,18 @@ size_t Thread::GetThreadHandle() const {
 	return (thread_handle_);
 }
 
+void Thread::SetValue(const HashedString& key, const str& value) {
+	values_[key] = std::move(value);
+}
+
+const str& Thread::GetValue(const HashedString& key) const {
+	ValueTable::const_iterator x = values_.find(key);
+	if (x != values_.end()) {
+		return x->second;
+	}
+	return EmptyString;
+}
+
 void Thread::Sleep(float64 time) {
 	if (time > 0) {
 		Sleep((unsigned int)(time * 1000000.0));

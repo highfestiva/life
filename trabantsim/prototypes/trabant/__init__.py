@@ -122,6 +122,11 @@ class Obj:
 	def mass(self, w):
 		'''Setting mass is only useful for interaction between dynamic objects.'''
 		return gameapi.mass(self.id, (w,))
+	def scale(self, s):
+		'''Scale object's size up (>1) or down (<1). Does *not* affect mass or move joints.'''
+		try:	scale = tovec3(s)
+		except:	scale = vec3(s,s,s)
+		return gameapi.scale(self.id, scale)
 	def col(self, col=None):
 		'''Set color, input is either a 3-tuple (R,G,B) or an html string color such as #ff3 or #304099.'''
 		return gameapi.col(self.id, col)
@@ -322,7 +327,7 @@ def gametime():
 
 def sleep(t):
 	'''Wraps time.sleep so you won't have to import it.'''
-	time.sleep(min(0.5,t))
+	time.sleep(t)
 
 def timeout(t=1, timer='default_timer', first_hit=False, reset=False):
 	'''Will check if t seconds elapsed since first called. If first_hit is true, it will elapse
@@ -751,10 +756,14 @@ def _create_object(gfx, phys, static, trigger, pos, orientation, vel, avel, mass
 		gameapi.waitload(oid)
 	o = Obj(oid,gfx,phys)
 	stack = inspect.stack()
-	if len(stack) >= 3 and 'create' in stack[2][3]:
-		o.name = stack[2][3].replace('create','').strip('_')
-	elif len(phys) == 1:
-		o.name = str(type(phys[0])).split('.')[-1].split("'")[0].replace('Phys','').lower()
+	name,stax = None,2
+	while len(stack) > stax and 'create' in stack[stax][3]:
+		name = stack[stax][3].replace('create','').strip('_')
+		stax += 1
+	if not name and len(phys) == 1:
+		name = str(type(phys[0])).split('.')[-1].split("'")[0].replace('Phys','').lower()
+	if name:
+		o.name = name
 	global objects,_last_created_object,_async_loaders
 	objects[oid] = o
 	def postload(o):

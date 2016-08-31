@@ -69,7 +69,7 @@ def play(level, ship):
 			updown = max(min(updown,5),-7)
 		updown -= ship.vel().y/20
 		mover.force((0.9, updown, -10*keydir().x))
-		ship.orientation(lerp(quat(), quat().rotate_z(updown/7), 0.05).normalize())
+		ship.orientation(lerp(quat(), rotz(updown/7), 0.05).normalize())
 
 		# Banking and nose.
 		#roll_force = -yaw_force*1.3 + (orientation*vec3(1,0,0)).z*10    # Banking.
@@ -93,7 +93,7 @@ def transition(ship):
 		speed = 400
 		up = lerp(up,8.5,0.1)
 		ship.vel((speed,-3*up*up,0))
-		ship.orientation(quat().rotate_z(-up/11))
+		ship.orientation(rotz(-up/11))
 		bgcol = lerp(bgcol,vec3(),up/70)
 		bg(bgcol)
 	release_objects(keep=lambda obj: obj in ship.ship_parts)

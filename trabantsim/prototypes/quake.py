@@ -39,11 +39,6 @@ XXXX     XXXXX
       ´`
 '''
 
-# Helper functions.
-rotx = lambda a: quat().rotate_x(a)
-roty = lambda a: quat().rotate_y(a)
-rotz = lambda a: quat().rotate_z(a)
-
 accurate_ascii_generate(False)
 floor = create_ascii_object(floorasc, orientation=rotx(-pi/2), mat='checker', static=True, process=orthoscale((3,3,1)))
 bgcol = vec3(0.4,0.8,1)

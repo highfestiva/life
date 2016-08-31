@@ -26,7 +26,7 @@ class socket:
 		self.timeout = t
 
 	def send(self, data):
-		#print(data)
+		#print('>>>', data)
 		if self.s.sendto(data, self.hostport) != len(data):
 			raise _socket.error('unable to send')
 
@@ -37,7 +37,7 @@ class socket:
 			if not r: raise _socket.error('timeout')
 		data,hostport = self.s.recvfrom(l)
 		if hostport == self.hostport:
-			#print(data)
+			#print('<<<', data)
 			if data == b'disconnect\n':
 				raise _socket.error('disconnected')
 			return data

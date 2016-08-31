@@ -127,16 +127,13 @@ public:
 	virtual BodyID CreateCylinder(bool is_root, const xform& transform, float32 mass, float32 radius, float32 length, BodyType type, float32 friction = 1, float32 bounce = 0, int force_listener_id = 0, bool is_trigger = false) = 0;
 	virtual BodyID CreateCapsule(bool is_root, const xform& transform, float32 mass, float32 radius, float32 length, BodyType type, float32 friction = 1, float32 bounce = 0, int force_listener_id = 0, bool is_trigger = false) = 0;
 	virtual BodyID CreateBox(bool is_root, const xform& transform, float32 mass, const vec3& size, BodyType type, float32 friction = 1, float32 bounce = 0, int force_listener_id = 0, bool is_trigger = false) = 0;
+	virtual BodyID CreateTriMesh(bool is_root, unsigned vertex_count, const float* vertices, unsigned triangle_count, const lepra::uint32* indices,
+		const xform& transform, float32 mass, BodyType type, float32 friction = 1, float32 bounce = 0, int force_listener_id = 0, bool is_trigger = false) = 0;
 	virtual bool Attach(BodyID static_body, BodyID main_body) = 0;
 	virtual bool DetachToDynamic(BodyID static_body, float32 mass) = 0;
 	virtual bool MakeStatic(BodyID dynamic_body) = 0;
 	virtual bool AddMass(BodyID static_body, BodyID main_body) = 0;
-
-	// Tri meshes are always static.
-	virtual BodyID CreateTriMesh(bool is_root, unsigned vertex_count, const float* vertices,
-		unsigned triangle_count, const lepra::uint32* indices,
-		const xform& transform, float32 mass, BodyType type,
-		float32 friction = 1, float32 bounce = 0, int force_listener_id = 0, bool is_trigger = false) = 0;
+	virtual bool Scale(BodyID body, const vec3& scale) = 0;
 
 	virtual bool IsStaticBody(BodyID body_id) const = 0;
 

@@ -19,8 +19,6 @@ from functools import partial
 from random import choice
 
 
-rotx = lambda a: quat().rotate_x(a)
-roty = lambda a: quat().rotate_y(a)
 seed = 501
 tunnel_x,tunnel_segs,celestials = -90,[],[]
 
@@ -373,13 +371,13 @@ def play(level, ship):
 	def create_boss():
 		collisions(False)
 		async_load(False)
-		x = 80
-		body = create_sphere((x,0,0), radius=10)
+		r = 80
+		body = create_sphere((r,0,0), radius=10)
 		body.color = vec3(0.2,0.7,0.2)
 		body.health = 300
 		body.immortal = True
-		eyes   = [create_sphere((x-10,  0,0), radius=2), create_sphere((x-8,  0,5), radius=2)]
-		pupils = [create_sphere((x-11.5,0,0), radius=1), create_sphere((x-9.5,0,5), radius=1)]
+		eyes   = [create_sphere((r-10,  0,0), radius=2), create_sphere((r-8,  0,5), radius=2)]
+		pupils = [create_sphere((r-11.5,0,0), radius=1), create_sphere((r-9.5,0,5), radius=1)]
 		body.create_engine(stabilize)
 		[body.joint(hinge_joint, e, vec3(0,1,0)) for e in eyes]
 		[e.joint(fixed_joint, p) for e,p in zip(eyes,pupils)]
@@ -398,11 +396,26 @@ def play(level, ship):
 			if body.immortal and all(e.released() for e in eyes):
 				body.immortal = False
 			return (t-p).normalize(10)
+		armsegs,armlen = [],30
+		for a in range(3):
+			for x in range(5):
+				x /= 7
+				pos = vec3(r-40,0,0) + roty(a+2) * vec3(x*armlen+10,0,sin(x*6)*armlen/5)
+				armseg = create_box(pos, side=x+3, mat='flat')
+				if a == 0:
+					armseg.color = vec3(x*0.5+0.5,x*0.25+0.75,1)
+				elif a == 1:
+					armseg.color = vec3(1,x*0.1+0.9,x)
+				else:
+					armseg.color = vec3(x*0.5+0.5,x*0.5,x*0.5+0.5)
+				armsegs += [armseg]
+		for p in pupils:
+			p.color = vec3(0.1,0.1,0.1)
 		body.move = bodymove
 		body.amove = lambda t:None
 		async_load(True)
 		collisions(True)
-		finalize_enemies([body]+eyes+pupils)
+		finalize_enemies([body]+eyes+pupils+armsegs)
 		body.ship_parts = (body,)	# Eyes not attached in a boss.
 		for eye,pupil in zip(eyes,pupils):
 			eye.ship_parts = (eye,pupil)

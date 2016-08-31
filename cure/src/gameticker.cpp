@@ -93,7 +93,11 @@ tbc::PhysicsManager* GameTicker::GetPhysicsManager(bool is_thread_safe) const {
 		size_t this_thread_id = Thread::GetCurrentThreadId();
 		// Make sure we're the physics thread, otherwise we're not allowed to
 		// read/write any physical stuff.
-		deb_assert(physics_thread_id == this_thread_id);
+		if (physics_thread_id != this_thread_id) {
+			assert(physics_lock_.GetOwner() == Thread::GetCurrentThread());
+		} else {
+			deb_assert(false);
+		}
 	}
 #endif // LEPRA_DEBUG
 	return physics_manager_;

@@ -38,8 +38,8 @@ void Light::Tick(const quat& camera_orientation) {
 	v_get(ax, =(float), ui_manager_->GetVariableScope(), kRtvarUi3DLightanglex, -1.4);
 	v_get(az, =(float), ui_manager_->GetVariableScope(), kRtvarUi3DLightanglez, 0.1);
 	quat q;
-	q.RotateAroundOwnX(ax);
 	q.RotateAroundOwnZ(az);
+	q.RotateAroundOwnX(ax);
 	vec3 d = q*vec3(0,1,0);
 	d = Math::Lerp(light_average_direction_, d, 0.5f);
 	if (d.GetDistanceSquared(light_average_direction_) > 1e-5f) {

@@ -908,6 +908,22 @@ void TrabantSimManager::Mass(int object_id, bool _set, float& mass) {
 	}
 }
 
+void TrabantSimManager::Scale(int object_id, bool _set, vec3& scale) {
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+		return;
+	}
+	if (_set) {
+		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+		const float prev_scale = _object->GetMeshResource(0)->GetRamData()->GetScale();
+		GetMaster()->GetPhysicsManager(true)->Scale(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), scale/prev_scale);
+		_object->GetMeshResource(0)->GetRamData()->SetScale(scale.x);
+	}
+	else {
+		scale.Set(1, 1, 1);
+	}
+}
+
 void TrabantSimManager::ObjectColor(int object_id, bool _set, vec3& color, float alpha) {
 	ScopeLock game_lock(GetTickLock());
 	Object* _object = (Object*)GetContext()->GetObject(object_id);
@@ -1116,7 +1132,7 @@ void TrabantSimManager::CommandLoop() {
 			break;
 		}
 		GetConsoleManager()->ExecuteCommand(command);
-		const str cmd_response = ((TrabantSimConsoleManager*)GetConsoleManager())->GetActiveResponse();
+		thread_get_str("cmd_response", cmd_response);
 		resend_last_response_ = cmd_response;
 		if (command_socket_->SendTo((const uint8*)resend_last_response_.c_str(), (int)resend_last_response_.length(), last_remote_address_) != (int)resend_last_response_.length()) {
 			is_controlled_ = false;

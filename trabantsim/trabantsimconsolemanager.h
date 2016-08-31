@@ -67,6 +67,7 @@ protected:
 		kCommandForce,
 		kCommandTorque,
 		kCommandMass,
+		kCommandScale,
 		kCommandColor,
 		kCommandEngineForce,
 		kCommandSetTagFloats,
@@ -90,7 +91,6 @@ protected:
 	std::vector<int> tag_phys_;
 	std::vector<int> tag_engines_;
 	std::vector<int> tag_meshes_;
-	strstream active_response_;
 	static const CommandPair command_id_list_[];
 	logclass();
 };

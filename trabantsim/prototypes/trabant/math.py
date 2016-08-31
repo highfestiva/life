@@ -13,6 +13,9 @@ def almosteq(a,b):
 def rndvec():
 	return vec3(*[random()*2-1 for _ in range(3)])
 
+def rndquat():
+	return quat(*[random()-0.5 for _ in range(4)]).normalize()
+
 def sin2(a):
 	x = sin(a)
 	return x*x
@@ -54,6 +57,12 @@ def toquat(q):
 		return q
 	elif len(q) == 4:
 		return quat(*q)
+
+
+# Helper lambdas.
+rotx = lambda a: quat().rotate_x(a)
+roty = lambda a: quat().rotate_y(a)
+rotz = lambda a: quat().rotate_z(a)
 
 
 class vec3:
