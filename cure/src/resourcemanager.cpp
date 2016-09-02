@@ -132,7 +132,7 @@ Resource::Resource(ResourceManager* manager, const str& name):
 
 Resource::~Resource() {
 	state_ = kResourceLoadError;
-	log_volatile(log_.Tracef(("Deleting resource "+name_).c_str(), kLevelTrace));
+	log_volatile(log_.Trace("Deleting resource " + name_));
 	manager_ = 0;
 
 	CallbackList::iterator x = load_callback_list_.begin();
@@ -304,6 +304,7 @@ PhysicsResource::PhysicsResource(cure::ResourceManager* manager, const str& name
 }
 
 PhysicsResource::~PhysicsResource() {
+	//log_.Trace("~PhysicsResource " + GetName());
 	SetRamData(0);
 }
 
@@ -331,6 +332,8 @@ bool PhysicsResource::LoadName(const str& name) {
 	delete file;
 	return (ok);
 }
+
+loginstance(kPhysics, PhysicsResource);
 
 
 
@@ -720,8 +723,19 @@ void ResourceManager::Release(Resource* resource) {
 			}
 		} else {
 			active_resource_table_.erase(resource->GetName());	// TRICKY: this is for shared resources that are not to be kept any more when dereferenced.
+			/*log_.Trace("Logging request_load_list_:");
+			for (ResourceMapList::Iterator x = request_load_list_.First(); x != request_load_list_.End(); ++x) {
+				log_.Trace("ReqLoadL:" + x.GetObject()->GetName());
+			}
+			for (ResourceMapList::Iterator x = loaded_list_.First(); x != loaded_list_.End(); ++x) {
+				log_.Trace("LoadedL:" + x.GetObject()->GetName());
+			}*/
 			if (PrepareRemoveInLoadProgress(resource)) {
-				log_volatile(log_.Trace("Resource "+resource->GetName()+" (unique) dereferenced. Deleted immediately."));
+				if (resource->GetLoadState() == kResourceLoadComplete) {
+					log_volatile(log_.Trace("Resource " + resource->GetName() + " (unique) dereferenced. Resource is completely loaded, and will be deleted immediately."));
+				} else {
+					log_volatile(log_.Trace("Resource " + resource->GetName() + " (unique) dereferenced. Deleted immediately, before loader thread catches up."));
+				}
 				deb_assert(request_load_list_.Find(resource) == request_load_list_.End());
 				DeleteResource(resource);
 			} else {

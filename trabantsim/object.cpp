@@ -24,7 +24,7 @@ Object::Object(cure::ResourceManager* resource_manager, const str& class_id, UiC
 }
 
 Object::~Object() {
-	delete generated_physics_;
+	generated_physics_ = 0;	// Will auto-delete when physics goes missing.
 	delete clazz_;
 }
 

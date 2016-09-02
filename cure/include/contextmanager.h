@@ -146,6 +146,7 @@ private:
 	RecycledIdQueue recycled_id_queue_;
 	ObjectIdManager local_object_id_manager_;
 	ObjectIdManager remote_object_id_manager_;
+	mutable Lock id_lock_;
 	ContextObjectTable object_table_;
 	ContextObjectTable physics_sender_object_table_;
 	BodyTable body_table_;

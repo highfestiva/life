@@ -236,9 +236,13 @@ void OpenGLRenderer::AddAmbience(float red, float green, float blue) {
 }
 
 void OpenGLRenderer::DoSetClippingRect(const PixelRect& rect) {
-	::glGetError();
-	::glEnable(GL_SCISSOR_TEST);
-	::glScissor(GetScreen()->GetActualWidth() - rect.right_, GetScreen()->GetActualHeight() - rect.bottom_, rect.GetWidth(), rect.GetHeight());
+	//::glGetError();
+	if (rect.GetWidth() == (int)GetScreen()->GetActualWidth() && rect.GetHeight() == (int)GetScreen()->GetActualHeight()) {
+		::glDisable(GL_SCISSOR_TEST);
+	} else {
+		::glEnable(GL_SCISSOR_TEST);
+		::glScissor(GetScreen()->GetActualWidth() - rect.right_, GetScreen()->GetActualHeight() - rect.bottom_, rect.GetWidth(), rect.GetHeight());
+	}
 	OGL_FAST_ASSERT();
 }
 

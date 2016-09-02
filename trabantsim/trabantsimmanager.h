@@ -8,6 +8,7 @@
 
 #include "../life/lifeclient/gameclientslavemanager.h"
 #include <map>
+#include "../cure/include/contextmanager.h"
 #include "../lepra/include/socketaddress.h"
 #include "../life/lifeclient/menu.h"
 #include "../uicure/include/uiresourcemanager.h"
@@ -152,7 +153,10 @@ public:
 	void DrawStick(Touchstick* stick, bool is_sloppy);
 
 protected:
+	typedef std::list<Object*> CreatedObjectList;
+	typedef std::set<int> DeletedObjectSet;
 	typedef std::map<uilepra::InputManager::KeyCode,bool> KeyMap;
+	typedef cure::ContextManager::ContextObjectTable ContextObjectTable;
 
 	virtual bool InitializeUniverse();
 	virtual void TickInput();
@@ -190,10 +194,13 @@ protected:
 
 	UiCure::CollisionSoundManager* collision_sound_manager_;
 	std::set<cure::GameObjectId> objects_;
+	ContextObjectTable created_objects_;
+	DeletedObjectSet deleted_objects_;
 	CollisionList collision_list_;
 	KeyMap key_map_;
 	DragList drag_list_;
 	DragEraseList drag_erase_list_;
+	Lock objects_lock_;
 	bool is_mouse_controlled_;
 	bool set_focus_;
 	bool set_cursor_visible_;

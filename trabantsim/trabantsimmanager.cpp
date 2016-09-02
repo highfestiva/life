@@ -361,15 +361,12 @@ int TrabantSimManager::CreateObject(const quat& orientation, const vec3& positio
 	}
 	_object->initial_orientation_ = pq;
 	_object->initial_inverse_orientation_ = pq.GetInverse();
+	_object->generated_physics_ = physics;
 
-	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
-	ScopeLock game_lock(GetTickLock());
-	AddContextObject(_object, cure::kNetworkObjectLocalOnly, 0);
-	objects_.insert(_object->GetInstanceId());
-	_object->CreatePhysics(physics);
-	//_object->generated_physics_ = physics;
-
-	return _object->GetInstanceId();
+	cure::GameObjectId object_id = GetContext()->AllocateGameObjectId(cure::kNetworkObjectLocalOnly);
+	ScopeLock object_lock(&objects_lock_);
+	created_objects_.insert(ContextObjectTable::value_type(object_id, _object));
+	return object_id;
 }
 
 void TrabantSimManager::CreateClones(IntList& created_object_ids, int original_id, const XformList& placements, ObjectMaterial material, bool is_static) {
@@ -440,17 +437,21 @@ void TrabantSimManager::CreateClones(IntList& created_object_ids, int original_i
 }
 
 void TrabantSimManager::DeleteObject(int object_id) {
-	ScopeLock game_lock(GetTickLock());
-	GetContext()->PostKillObject(object_id);
-	std::set<cure::GameObjectId>::iterator x = objects_.find(object_id);
-	if (x != objects_.end()) {
-		objects_.erase(x);
-	}
-	GetResourceManager()->ForceFreeCache();
+	ScopeLock object_lock(&objects_lock_);
+	deleted_objects_.insert(object_id);
 }
 
 void TrabantSimManager::DeleteAllObjects() {
 	GetContext()->SetPostKillTimeout(1);
+	{
+		ScopeLock object_lock(&objects_lock_);
+		deleted_objects_.clear();
+		ContextObjectTable::iterator x = created_objects_.begin();
+		for (; x != created_objects_.end(); ++x) {
+			Object* object = (Object*)x->second;
+			delete object;
+		}
+	}
 	{
 		ScopeLock game_lock(GetTickLock());
 		std::set<cure::GameObjectId>::iterator x;
@@ -1230,6 +1231,11 @@ bool TrabantSimManager::Open() {
 
 void TrabantSimManager::Close() {
 	ScopeLock lock(GetTickLock());
+	ContextObjectTable::iterator x = created_objects_.begin();
+	for (; x != created_objects_.end(); ++x) {
+		Object* object = (Object*)x->second;
+		delete object;
+	}
 	delete pause_button_;
 	pause_button_ = 0;
 	delete back_button_;
@@ -1562,16 +1568,28 @@ void TrabantSimManager::OnMenuAlternative(uitbc::Button*) {
 
 
 void TrabantSimManager::ScriptPhysicsTick() {
-	/*typedef cure::ContextManager::ContextObjectTable ContextTable;
-	const ContextTable& object_table = GetContext()->GetObjectTable();
-	ContextTable::const_iterator x = object_table.begin();
-	for (; x != object_table.end(); ++x) {
-		Object* _object = (Object*)x->second;
-		if (_object->generated_physics_) {
-			_object->CreatePhysics(_object->generated_physics_);
-			_object->generated_physics_ = 0;
+	{
+		ScopeLock object_lock(&objects_lock_);
+		ContextObjectTable::const_iterator x = created_objects_.begin();
+		for (; x != created_objects_.end(); ++x) {
+			cure::GameObjectId object_id = x->first;
+			Object* object = (Object*)x->second;
+			AddContextObject(object, cure::kNetworkObjectLocalOnly, object_id);
+			objects_.insert(object_id);
+			object->CreatePhysics(object->generated_physics_);
 		}
-	}*/
+		created_objects_.clear();
+		DeletedObjectSet::const_iterator y = deleted_objects_.begin();
+		for (; y != deleted_objects_.end(); ++y) {
+			int object_id = *y;
+			GetContext()->PostKillObject(object_id);
+			std::set<cure::GameObjectId>::iterator z = objects_.find(object_id);
+			if (z != objects_.end()) {
+				objects_.erase(z);
+			}
+		}
+		deleted_objects_.clear();
+	}
 
 	// Camera moves in a "moving average" kinda curve (halfs the distance in x seconds).
 	const float physics_time = GetTimeManager()->GetAffordedPhysicsTotalTime();

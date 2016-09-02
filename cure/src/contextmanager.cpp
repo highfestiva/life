@@ -171,6 +171,7 @@ void ContextManager::UnpackObjectAttribute(GameObjectId object_id, const uint8* 
 
 
 GameObjectId ContextManager::AllocateGameObjectId(NetworkObjectType network_type) {
+	ScopeLock lock(&id_lock_);
 	GameObjectId _instance_id;
 	if (network_type == kNetworkObjectLocalOnly) {
 		_instance_id = local_object_id_manager_.GetFreeId();
@@ -185,6 +186,7 @@ void ContextManager::FreeGameObjectId(NetworkObjectType network_type, GameObject
 }
 
 bool ContextManager::IsLocalGameObjectId(GameObjectId instance_id) const {
+	ScopeLock lock(&id_lock_);
 	return instance_id >= local_object_id_manager_.GetMinId();
 }
 
@@ -313,6 +315,7 @@ void ContextManager::HandlePostKill() {
 		}
 	}
 
+	ScopeLock lock(&id_lock_);
 	RecycledIdQueue::iterator y = recycled_id_queue_.begin();
 	while (y != recycled_id_queue_.end()) {
 		if (y->timer_.QueryTimeDiff() < 10.0) {
