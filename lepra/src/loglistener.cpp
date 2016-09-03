@@ -112,6 +112,7 @@ LogLevel LogListener::GetLevelThreashold() const {
 
 void LogListener::SetLevelThreashold(LogLevel level) {
 	level_ = level;
+	log_->UpdateLevelThreashold();
 }
 
 const str& LogListener::GetName() const {

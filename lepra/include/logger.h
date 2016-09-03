@@ -38,6 +38,7 @@ public:
 	const str& GetName() const;
 	LogLevel GetLevelThreashold() const;
 	void SetLevelThreashold(LogLevel level);
+	void UpdateLevelThreashold();
 	void Print(const str& account, const str& message, LogLevel level = kLevelInfo);
 	void RawPrint(const str& message, LogLevel level = kLevelInfo);
 

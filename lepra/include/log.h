@@ -50,6 +50,9 @@ public:
 
 	const str& GetClassName() const;
 
+	static LogLevel GetLogLevel();
+	static void SetLogLevel(LogLevel level);
+
 private:
 	Logger* logger_;
 	str class_name_;

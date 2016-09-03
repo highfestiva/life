@@ -299,12 +299,16 @@ void CppContextObject::UpdateMaterial(int mesh_index) {
 	if (post_load_material_delegate_) {
 		post_load_material_delegate_(_mesh);
 	}
+	static const str blend("blend");
+	static const str highlight("highlight");
+	static const str env("env");
+	static const str env_blend("env_blend");
 	if (_mesh->GetRamData()->GetUVData(0) && texture) {
 		const str shader = clazz->GetMaterial(mesh_index).shader_name_;
-		const bool is_blended = (transparent || shader == "blend");
-		const bool is_highlight = (shader == "highlight");
-		const bool is_env = (shader == "env");
-		const bool is_env_blend = ((transparent && is_env) || shader == "env_blend");
+		const bool is_blended = (transparent || shader == blend);
+		const bool is_highlight = (shader == highlight);
+		const bool is_env = (shader == env);
+		const bool is_env_blend = ((transparent && is_env) || shader == env_blend);
 		uitbc::Renderer::MaterialType material_type = enable_pixel_shader_? uitbc::Renderer::kMatSingleTextureSolidPxs : uitbc::Renderer::kMatSingleTextureSolid;
 		if (is_env_blend) {
 			material_type = uitbc::Renderer::kMatSingleTextureEnvmapBlended;
@@ -320,9 +324,9 @@ void CppContextObject::UpdateMaterial(int mesh_index) {
 	} else {
 		uitbc::Renderer::MaterialType material_type = enable_pixel_shader_? uitbc::Renderer::kMatSingleColorSolidPxs : uitbc::Renderer::kMatSingleColorSolid;
 		const str shader = clazz->GetMaterial(mesh_index).shader_name_;
-		const bool is_blended = (transparent || shader == "blend");
-		const bool is_env = (shader == "env");
-		const bool is_env_blend = ((transparent && is_env) || shader == "env_blend");
+		const bool is_blended = (transparent || shader == blend);
+		const bool is_env = (shader == env);
+		const bool is_env_blend = ((transparent && is_env) || shader == env_blend);
 		if (is_env_blend) {
 			material_type = uitbc::Renderer::kMatSingleColorEnvmapBlended;
 		} else if (is_env) {

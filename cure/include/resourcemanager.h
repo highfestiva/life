@@ -398,6 +398,7 @@ public:
 	void AddLoaded(UserResource* user_resource);
 	void SafeRelease(UserResource* user_resource);
 	void Release(Resource* resource);
+	Resource* ReferenceResource(const str& resource_name);
 	bool IsLoading();
 	bool WaitLoading();
 

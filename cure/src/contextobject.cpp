@@ -78,7 +78,6 @@ ContextObject::~ContextObject() {
 	trigger_map_.clear();
 	spawner_ = 0;
 
-	deb_assert(manager_);
 	if (manager_) {
 		manager_->RemoveObject(this);
 	}

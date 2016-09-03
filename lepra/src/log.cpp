@@ -10,6 +10,12 @@
 
 
 
+namespace {
+lepra::LogLevel g_min_log_level = lepra::kLevelInfo;
+}
+
+
+
 namespace lepra {
 
 
@@ -75,35 +81,59 @@ void LogDecorator::RawPrint(LogLevel log_level, const str& text) const {
 
 #ifndef NO_LOG_DEBUG_INFO
 void LogDecorator::Tracef(const char* text, ...) const {
+	if (g_min_log_level > kLevelTrace) {
+		return;
+	}
 	StrVLog(kLevelTrace);
 }
 
 void LogDecorator::Trace(const str& text) const {
+	if (g_min_log_level > kLevelTrace) {
+		return;
+	}
 	Print(kLevelTrace, text);
 }
 
 void LogDecorator::Debugf(const char* text, ...) const {
+	if (g_min_log_level > kLevelDebug) {
+		return;
+	}
 	StrVLog(kLevelDebug);
 }
 
 void LogDecorator::Debug(const str& text) const {
+	if (g_min_log_level > kLevelDebug) {
+		return;
+	}
 	Print(kLevelDebug, text);
 }
 #endif // !NO_LOG_DEBUG_INFO
 
 void LogDecorator::Performancef(const char* text, ...) const {
+	if (g_min_log_level > kLevelPerformance) {
+		return;
+	}
 	StrVLog(kLevelPerformance);
 }
 
 void LogDecorator::Performance(const str& text) const {
+	if (g_min_log_level > kLevelPerformance) {
+		return;
+	}
 	Print(kLevelPerformance, text);
 }
 
 void LogDecorator::Infof(const char* text, ...) const {
+	if (g_min_log_level > kLevelInfo) {
+		return;
+	}
 	StrVLog(kLevelInfo);
 }
 
 void LogDecorator::Info(const str& text) const {
+	if (g_min_log_level > kLevelInfo) {
+		return;
+	}
 	Print(kLevelInfo, text);
 }
 
@@ -143,6 +173,13 @@ const str& LogDecorator::GetClassName() const {
 	return (class_name_);
 }
 
+LogLevel LogDecorator::GetLogLevel() {
+	return g_min_log_level;
+}
+
+void LogDecorator::SetLogLevel(LogLevel level) {
+	g_min_log_level = level;
+}
 
 
 }

@@ -7,6 +7,9 @@
 #include "pch.h"
 #include "object.h"
 #include "../cure/include/contextmanager.h"
+#include "../cure/include/gamemanager.h"
+#include "../cure/include/gameticker.h"
+#include "../cure/include/timemanager.h"
 #include "../uitbc/include/uitrianglebasedgeometry.h"
 
 
@@ -15,10 +18,15 @@ namespace TrabantSim {
 
 
 
-Object::Object(cure::ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager):
+using namespace cure;
+
+
+
+Object::Object(ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager):
 	Parent(resource_manager, class_id, ui_manager),
 	generated_physics_(0),
 	clazz_(new uitbc::ChunkyClass),
+	physics_index_(0),
 	gfx_mesh_(0),
 	gfx_mesh_id_(0) {
 }
@@ -32,6 +40,40 @@ Object::~Object() {
 
 const tbc::ChunkyClass* Object::GetClass() const {
 	return clazz_;
+}
+
+void Object::CreatePhysics(tbc::ChunkyPhysics* physics) {
+	deb_assert(physics_resource_ == 0);
+
+	const str physics_name = strutil::Format("RawPhys%i.phys", physics_index_);
+	const str physics_ref_name = strutil::Format("%s;%i", physics_name.c_str(), GetInstanceId());
+	PhysicsSharedInitData init_data(position_.position_.transformation_, position_.position_.velocity_, physics_override_,
+		((GameTicker*)manager_->GetGameManager()->GetTicker())->GetPhysicsLock(), manager_->GetGameManager()->GetPhysicsManager(),
+		manager_->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
+	physics_resource_ = new UserPhysicsReferenceResource(init_data);
+	UserPhysicsReferenceResource* user_physics_ref = physics_resource_;
+	PhysicsSharedResource* physics_ref_resource = (PhysicsSharedResource*)user_physics_ref->CreateResource(GetResourceManager(), physics_ref_name);
+	user_physics_ref->SetResource(physics_ref_resource);
+	physics_ref_resource->SetIsUnique(true);
+	UserResource::LoadCallback callback_cast;
+	callback_cast.SetMemento(UserPhysicsReferenceResource::TypeLoadCallback(this, &Object::OnLoadPhysics).GetMemento());
+	physics_ref_resource->AddCaller(user_physics_ref, callback_cast);
+	tbc::ChunkyPhysics* copy = new tbc::ChunkyPhysics(*physics);
+	physics_ref_resource->SetRamDataType(copy);
+	PhysicsSharedResource::ClassResource* user_physics = physics_ref_resource->GetParent();
+	PhysicsResource* physics_resource = (PhysicsResource*)GetResourceManager()->ReferenceResource(physics_name);
+	if (!physics_resource) {
+		physics_resource = (PhysicsResource*)user_physics->CreateResource(GetResourceManager(), physics_name);
+		physics_resource->SetIsUnique(true);
+		physics_resource->SetRamDataType(physics);
+		user_physics->SetResource(physics_resource);
+		physics_resource->SetLoadState(kResourceLoadInProgress);	// Handle pushing to physics engine in postprocessing by some other thread at a later stage.
+		GetResourceManager()->AddLoaded(user_physics);
+	} else {
+		user_physics->SetResource(physics_resource);
+	}
+	physics_ref_resource->SetLoadState(kResourceLoadInProgress);	// We're waiting for the root resource to get loaded.
+	GetResourceManager()->AddLoaded(user_physics_ref);
 }
 
 uitbc::TriangleBasedGeometry* Object::CreateGfxMesh(const std::vector<float>& vertices, const std::vector<int>& indices, const vec3& color, float alpha, bool is_smooth) {
@@ -76,6 +118,12 @@ void Object::OnLoaded() {
 	if (GetPhysics()->GetPhysicsType() == tbc::ChunkyPhysics::kStatic) {
 		GetManager()->DisableTickCallback(this);
 	}
+}
+
+
+
+void Object::OnLoadPhysics(UserPhysicsReferenceResource* physics_resource) {
+	Parent::OnLoadPhysics(physics_resource);
 }
 
 

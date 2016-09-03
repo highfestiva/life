@@ -91,44 +91,58 @@ void Machine::OnTick() {
 		return;
 	}
 
+	static const str float_childishness("float_childishness");
+	static const str ambient_sounds("ambient_sounds");
+	static const str eye("eye");
+	static const str brake_light("brake_light");
+	static const str engine_light("engine_light");
+	static const str blink_light("blink_light");
+	static const str jet_engine_emitter("jet_engine_emitter");
+	static const str engine_sound("engine_sound");
+	static const str engine_mesh_offset("engine_mesh_offset");
+	static const str mesh_offset("mesh_offset");
+	static const str mesh_rotate("mesh_rotate");
+	static const str exhaust("exhaust");
+	static const str burn("burn");
+
 	const cure::TimeManager* time_manager = GetManager()->GetGameManager()->GetTimeManager();
 	float _real_time_ratio = time_manager->GetRealTimeRatio();
 	const float _frame_time = time_manager->GetNormalGameFrameTime();
-	const bool _is_child = IsAttributeTrue("float_childishness");
+	const bool _is_child = IsAttributeTrue(float_childishness);
 	const tbc::PhysicsManager* _physics_manager = manager_->GetGameManager()->GetPhysicsManager();
 	vec3 _velocity = GetVelocity();
 	size_t _engine_sound_index = 0;
 	for (size_t x = 0; x < clazz->GetTagCount(); ++x) {
 		const uitbc::ChunkyClass::Tag& _tag = clazz->GetTag(x);
-		if (_tag.tag_name_ == "ambient_sounds") {
+		if (_tag.tag_name_ == ambient_sounds) {
 			HandleTagAmbientSounds(_tag, _real_time_ratio);
-		} else if (_tag.tag_name_ == "eye") {
+		} else if (_tag.tag_name_ == eye) {
 			HandleTagEye(_tag, _physics_manager, _is_child);
-		} else if (_tag.tag_name_ == "brake_light") {
+		} else if (_tag.tag_name_ == brake_light) {
 			HandleTagBrakeLight(_tag);
-		} else if (_tag.tag_name_ == "engine_light") {
+		} else if (_tag.tag_name_ == engine_light) {
 			HandleTagEngineLight(_tag, _frame_time*_real_time_ratio);
-		} else if (_tag.tag_name_ == "blink_light") {
+		} else if (_tag.tag_name_ == blink_light) {
 			HandleTagBlinkLight(_tag, _frame_time*_real_time_ratio);
-		} else if (_tag.tag_name_ == "jet_engine_emitter") {
+		} else if (_tag.tag_name_ == jet_engine_emitter) {
 			// Faijah!
 			if (jet_engine_emitter_) {
 				jet_engine_emitter_->EmitFromTag(this, _tag, _frame_time*_real_time_ratio);
 			}
-		} else if (_tag.tag_name_ == "engine_sound") {
+		} else if (_tag.tag_name_ == engine_sound) {
 			HandleTagEngineSound(_tag, _physics_manager, _velocity, _frame_time*_real_time_ratio, _real_time_ratio, _engine_sound_index);
-		} else if (_tag.tag_name_ == "engine_mesh_offset") {
+		} else if (_tag.tag_name_ == engine_mesh_offset) {
 			HandleTagEngineMeshOffset(_tag, _frame_time);
-		} else if (_tag.tag_name_ == "mesh_offset") {
+		} else if (_tag.tag_name_ == mesh_offset) {
 			HandleTagMeshOffset(_tag, _frame_time*_real_time_ratio);
-		} else if (_tag.tag_name_ == "mesh_rotate") {
+		} else if (_tag.tag_name_ == mesh_rotate) {
 			HandleTagMeshRotate(_tag, _frame_time*_real_time_ratio);
-		} else if (_tag.tag_name_ == "exhaust") {
+		} else if (_tag.tag_name_ == exhaust) {
 			// Particles coming out of exhaust.
 			if (exhaust_emitter_) {
 				exhaust_emitter_->EmitFromTag(this, _tag, _frame_time);
 			}
-		} else if (_tag.tag_name_ == "burn") {
+		} else if (_tag.tag_name_ == burn) {
 			// Particles caused by burning.
 			if (burn_emitter_) {
 				const float health = Math::Clamp(cure::Health::Get(this), 0.0f, 1.0f);

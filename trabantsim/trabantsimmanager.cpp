@@ -1576,6 +1576,8 @@ void TrabantSimManager::ScriptPhysicsTick() {
 			Object* object = (Object*)x->second;
 			AddContextObject(object, cure::kNetworkObjectLocalOnly, object_id);
 			objects_.insert(object_id);
+			static int physics_index = 0;
+			object->physics_index_ = physics_index;
 			object->CreatePhysics(object->generated_physics_);
 		}
 		created_objects_.clear();

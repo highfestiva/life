@@ -748,6 +748,26 @@ void ResourceManager::Release(Resource* resource) {
 	}
 }
 
+Resource* ResourceManager::ReferenceResource(const str& resource_name) {
+	ScopeLock mutex(&thread_lock_);
+	ResourceTable::iterator x = active_resource_table_.find(resource_name);
+	if (x != active_resource_table_.end()) {
+		Resource* resource = x->second;
+		resource->Reference();
+		return resource;
+	}
+	x = cached_resource_table_.find(resource_name);
+	if (x != cached_resource_table_.end()) {
+		Resource* resource = x->second;
+		resource->Reference();
+		cached_resource_table_.erase(x);
+		active_resource_table_.insert(ResourceTable::value_type(resource_name, resource));
+		resource->Resume();
+		return resource;
+	}
+	return 0;
+}
+
 bool ResourceManager::IsLoading() {
 	ScopeLock lock(&thread_lock_);
 	return (request_load_list_.GetCount() || loaded_list_.GetCount());

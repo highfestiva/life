@@ -31,7 +31,6 @@ public:
 
 	tbc::ChunkyPhysics* GetPhysics() const;
 	UserPhysicsReferenceResource* GetPhysicsResource() const;
-	void CreatePhysics(tbc::ChunkyPhysics* physics);
 	void CreatePhysicsRef(const str& name);
 	virtual const tbc::ChunkyClass* GetClass() const;
 	const tbc::ChunkyClass::Tag* FindTag(const str& tag_type, int float_value_count, int string_value_count, const std::vector<int>* trigger_index_array = 0) const;
@@ -56,7 +55,7 @@ protected:
 
 	bool GetAllowNetworkLogic() const;
 
-private:
+protected:
 	typedef std::unordered_map<int, const tbc::PhysicsTrigger*> ActiveTriggerGroupMap;
 
 	UserClassResource* class_resource_;

@@ -9,7 +9,6 @@
 #include "../../lepra/include/lepraassert.h"
 #include "../../lepra/include/diskfile.h"
 #include "../../lepra/include/hashutil.h"
-#include "../../tbc/include/chunkyphysics.h"
 #include "../../tbc/include/physicsengine.h"
 #include "../../tbc/include/physicstrigger.h"
 #include "../include/contextmanager.h"
@@ -126,35 +125,6 @@ tbc::ChunkyPhysics* CppContextObject::GetPhysics() const {
 
 UserPhysicsReferenceResource* CppContextObject::GetPhysicsResource() const {
 	return physics_resource_;
-}
-
-void CppContextObject::CreatePhysics(tbc::ChunkyPhysics* physics) {
-	deb_assert(physics_resource_ == 0);
-	static int physics_counter = 0;
-	const str _physics_name = strutil::Format("RawPhys%i.phys", ++physics_counter);
-	const str physics_ref_name = strutil::Format("%s;%i", _physics_name.c_str(), GetInstanceId());
-	PhysicsSharedInitData init_data(position_.position_.transformation_, position_.position_.velocity_, physics_override_,
-		((cure::GameTicker*)manager_->GetGameManager()->GetTicker())->GetPhysicsLock(), manager_->GetGameManager()->GetPhysicsManager(),
-		manager_->GetGameManager()->GetTimeManager()->GetDesiredMicroSteps(), GetInstanceId());
-	physics_resource_ = new UserPhysicsReferenceResource(init_data);
-	UserPhysicsReferenceResource* physics_ref = physics_resource_;
-	PhysicsSharedResource* physics_ref_resource = (PhysicsSharedResource*)physics_ref->CreateResource(GetResourceManager(), physics_ref_name);
-	physics_ref->SetResource(physics_ref_resource);
-	cure::UserResource::LoadCallback callback_cast;
-	callback_cast.SetMemento(UserPhysicsReferenceResource::TypeLoadCallback(this, &CppContextObject::OnLoadPhysics).GetMemento());
-	physics_ref_resource->AddCaller(physics_ref, callback_cast);
-	PhysicsSharedResource::ClassResource* _physics = physics_ref_resource->GetParent();
-	PhysicsResource* _physics_resource = (PhysicsResource*)_physics->CreateResource(GetResourceManager(), _physics_name);
-	_physics_resource->SetIsUnique(true);
-	physics_ref_resource->SetIsUnique(true);
-	_physics->SetResource(_physics_resource);
-	_physics_resource->SetRamDataType(physics);
-	tbc::ChunkyPhysics* copy = new tbc::ChunkyPhysics(*physics);
-	physics_ref_resource->SetRamDataType(copy);
-	_physics_resource->SetLoadState(cure::kResourceLoadInProgress);	// Handle pushing to physics engine in postprocessing by some other thread at a later stage.
-	physics_ref_resource->SetLoadState(cure::kResourceLoadInProgress);	// We're waiting for the root resource to get loaded.
-	GetResourceManager()->AddLoaded(_physics);
-	GetResourceManager()->AddLoaded(physics_ref);
 }
 
 void CppContextObject::CreatePhysicsRef(const str& name) {

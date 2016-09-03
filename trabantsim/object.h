@@ -35,6 +35,7 @@ public:
 	virtual ~Object();
 
 	virtual const tbc::ChunkyClass* GetClass() const;
+	void CreatePhysics(tbc::ChunkyPhysics* physics);
 	uitbc::TriangleBasedGeometry* CreateGfxMesh(const std::vector<float>& vertices, const std::vector<int>& indices, const vec3& color, float alpha, bool is_smooth);
 	void AddMeshInfo(const str& mesh_name, const str& shader, const str& texture, const vec3& color=vec3(1,1,1), float alpha=1, bool is_smooth=false);
 
@@ -43,8 +44,11 @@ public:
 	quat initial_orientation_;
 	quat initial_inverse_orientation_;
 	tbc::ChunkyPhysics* generated_physics_;
+	int physics_index_;
 
 private:
+	void OnLoadPhysics(cure::UserPhysicsReferenceResource* physics_resource);
+
 	uitbc::ChunkyClass* clazz_;
 	uitbc::TriangleBasedGeometry* gfx_mesh_;
 	uitbc::Renderer::GeometryID gfx_mesh_id_;

@@ -81,23 +81,31 @@ void Logger::AddListener(LogListener* logger, LogLevel level) {
 			ScopeSpinLock scope_lock(logger_list_lock_);
 			logger_list_[level].push_back(logger);
 			logger->AddLog(this);
+			if (logger->GetLevelThreashold() < LogDecorator::GetLogLevel()) {
+				LogDecorator::SetLogLevel(logger->GetLevelThreashold());
+			}
 		}
 	}
 }
 
 void Logger::RemoveListener(LogListener* logger) {
 	deb_assert(logger);
-	ScopeSpinLock scope_lock(logger_list_lock_);
-	for (int x = kLevelLowestType; x < kLevelTypeCount; ++x) {
-		std::vector<LogListener*>::iterator y = logger_list_[x].begin();
-		for (; y != logger_list_[x].end(); ++y) {
-			if (*y == logger) {
-				logger_list_[x].erase(y);
-				break;
+	{
+		ScopeSpinLock scope_lock(logger_list_lock_);
+		for (int x = kLevelLowestType; x < kLevelTypeCount; ++x) {
+			std::vector<LogListener*>::iterator y = logger_list_[x].begin();
+			for (; y != logger_list_[x].end(); ++y) {
+				if (*y == logger) {
+					logger_list_[x].erase(y);
+					break;
+				}
 			}
 		}
+		logger->RemoveLog(this);
 	}
-	logger->RemoveLog(this);
+	if (logger->GetLevelThreashold() == LogDecorator::GetLogLevel()) {
+		UpdateLevelThreashold();
+	}
 }
 
 LogListener* Logger::GetListener(const str& name) const {
@@ -128,7 +136,23 @@ void Logger::SetLevelThreashold(LogLevel level) {
 	} else if (level >= kLevelTypeCount) {
 		level = (LogLevel)(kLevelTypeCount-1);
 	}
-	level_ = level;
+	if (level != level_) {
+		level_ = level;
+		UpdateLevelThreashold();
+	}
+}
+
+void Logger::UpdateLevelThreashold() {
+	LogLevel level = level_;
+	ScopeSpinLock scope_lock(logger_list_lock_);
+	for (int x = kLevelLowestType; x < kLevelTypeCount; ++x) {
+		std::vector<LogListener*>::const_iterator y = logger_list_[x].begin();
+		for (; y != logger_list_[x].end(); ++y) {
+			LogLevel listener_level = (*y)->GetLevelThreashold();
+			level = (level < listener_level) ? level : listener_level;
+		}
+	}
+	LogDecorator::SetLogLevel(level);
 }
 
 void Logger::Print(const str& account, const str& message, LogLevel level) {
