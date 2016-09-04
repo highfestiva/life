@@ -4,9 +4,6 @@
 
 from trabant import *
 
-# draw all shapes filled
-fg(outline=False)
-
 # floor
 for y in range(5):
     for x in range(5):

@@ -358,6 +358,7 @@ int TrabantSimManager::CreateObject(const quat& orientation, const vec3& positio
 		_object->AddMeshResource(_mesh, is_static? -1 : 1);
 		_object->AddMeshInfo(_object->GetMeshResource(0)->GetName(), "texture", texture, _color, a);
 		_object->GetMeshResource(0)->offset_.offset_.orientation_ = gfx_object.orientation_;
+		_object->GetMeshResource(0)->offset_.offset_.position_ = gfx_object.pos_;
 	}
 	_object->initial_orientation_ = pq;
 	_object->initial_inverse_orientation_ = pq.GetInverse();
@@ -678,6 +679,8 @@ int TrabantSimManager::CreateEngine(int object_id, const str& engine_type, const
 		_engine_type = tbc::PhysicsEngine::kEnginePushTurnAbsolute;
 	} else if (engine_type == "push_turn_rel") {
 		_engine_type = tbc::PhysicsEngine::kEnginePushTurnRelative;
+	} else if (engine_type == "vel_abs_xy") {
+		_engine_type = tbc::PhysicsEngine::kEngineVelocityAbsoluteXY;
 	} else if (engine_type == "gyro") {
 		_engine_type = tbc::PhysicsEngine::kEngineHingeGyro;
 		is_attachment = true;
@@ -956,6 +959,7 @@ void TrabantSimManager::EngineForce(int object_id, int engine_index, bool _set, 
 			case tbc::PhysicsEngine::kEngineWalk:
 			case tbc::PhysicsEngine::kEnginePushAbsolute:
 			case tbc::PhysicsEngine::kEnginePushRelative:
+			case tbc::PhysicsEngine::kEngineVelocityAbsoluteXY:
 				_object->SetEnginePower(engine_index*4+0, force.y);
 				_object->SetEnginePower(engine_index*4+1, force.x);
 				_object->SetEnginePower(engine_index*4+3, force.z);

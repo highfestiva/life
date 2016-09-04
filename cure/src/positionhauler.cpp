@@ -159,7 +159,8 @@ bool PositionHauler::Get(ObjectPositionalData& position, const tbc::PhysicsManag
 			case tbc::PhysicsEngine::kEnginePushRelative:
 			case tbc::PhysicsEngine::kEnginePushAbsolute:
 			case tbc::PhysicsEngine::kEnginePushTurnRelative:
-			case tbc::PhysicsEngine::kEnginePushTurnAbsolute: {
+			case tbc::PhysicsEngine::kEnginePushTurnAbsolute:
+			case tbc::PhysicsEngine::kEngineVelocityAbsoluteXY: {
 				GETSET_OBJECT_POSITIONAL_AT(position, y, RealData3, data, PositionalData::kTypeReal3, 100);
 				++y;
 				::memcpy(data->value_, engine->GetValues(), sizeof(float)*tbc::PhysicsEngine::kAspectMaxRemoteCount);
@@ -329,7 +330,8 @@ void PositionHauler::Set(const ObjectPositionalData& position, tbc::PhysicsManag
 			case tbc::PhysicsEngine::kEnginePushRelative:
 			case tbc::PhysicsEngine::kEnginePushAbsolute:
 			case tbc::PhysicsEngine::kEnginePushTurnRelative:
-			case tbc::PhysicsEngine::kEnginePushTurnAbsolute: {
+			case tbc::PhysicsEngine::kEnginePushTurnAbsolute:
+			case tbc::PhysicsEngine::kEngineVelocityAbsoluteXY: {
 				deb_assert(position.body_position_array_.size() > y);
 				deb_assert(position.body_position_array_[y]->GetType() == PositionalData::kTypeReal3);
 				GET_OBJECT_POSITIONAL_AT(position, y, const RealData3, data, PositionalData::kTypeReal3);

@@ -35,7 +35,6 @@ XX
 '''.strip('\n')
 
 gravity((0,0,0))
-fg(outline=False)
 debugsim()
 cam(distance=50)
 

@@ -12,7 +12,7 @@ from trabant.objects import nophys
 
 
 bg(col='#fff')
-fg(col='#222', outline=False)
+fg(col='#222')
 fog(200,600)
 gravity((0,0,0))
 cam(distance=200, pos=(0,0,-10), fov=25, light_angle=(-1.1,0,-0.5))

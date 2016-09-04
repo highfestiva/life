@@ -441,7 +441,7 @@ def play(level, ship):
 
 
 	async_load()
-	fg(outline=False, shadows=False)
+	fg(shadows=False)
 	cam(distance=100, target=0, pos=vec3())
 
 	global tunnel_x,tunnel_segs,celestials

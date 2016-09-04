@@ -13,7 +13,6 @@ look_angle,target_angle = 0,0
 hits,trials = 0,0
 
 
-fg(outline=False)
 cam(distance=0, fov=60)
 create_box(vec3(0,0,-500), side=1000-2, static=True)    # Ground.
 template_house = create_box(vec3(0,0,-10), side=6, mat='flat', col='#fff', static=True)

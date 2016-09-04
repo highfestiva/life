@@ -432,7 +432,7 @@ def pick_random(coll, term=lambda x:x[1], name=lambda x:x[0], retval=lambda x:x[
     return n,r
 
 
-fg(outline=False, shadows=False)
+fg(shadows=False)
 gravity((0,0,0))
 setvar('Phyics.FPS',60)
 cam(distance=100)

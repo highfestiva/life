@@ -114,7 +114,8 @@ bool PhysicsEngine::SetValue(unsigned aspect, float value) {
 		case kEnginePushRelative:
 		case kEnginePushAbsolute:
 		case kEnginePushTurnRelative:
-		case kEnginePushTurnAbsolute: {
+		case kEnginePushTurnAbsolute:
+		case kEngineVelocityAbsoluteXY: {
 			const unsigned controlled_aspects = 3;
 			if (aspect >= controller_index_+0 && aspect <= controller_index_+controlled_aspects) {
 				switch (aspect - controller_index_) {
@@ -253,6 +254,30 @@ void PhysicsEngine::OnMicroTick(PhysicsManager* physics_manager, const ChunkyPhy
 					physics_manager->AddTorque(geometry->GetBodyId(), push_vector*strength_*scale);
 				}
 				intensity_ += Math::Lerp(Math::Clamp(friction_,0.1f,0.5f), 1.0f, push_force);
+			} break;
+			case kEngineVelocityAbsoluteXY: {
+				vec3 axis[3] = { vec3(0, 1, 0),
+					vec3(1, 0, 0), vec3(0, 0, 1) };
+				if (engine_type_ == kEnginePushRelative) {
+					const ChunkyBoneGeometry* root_geometry = structure->GetBoneGeometry(0);
+					const quat orientation =
+						physics_manager->GetBodyOrientation(root_geometry->GetBodyId()) *
+						structure->GetOriginalBoneTransformation(0).GetOrientation().GetInverse();
+					axis[0] = orientation*axis[0];
+					axis[1] = orientation*axis[1];
+					axis[2] = orientation*axis[2];
+				}
+				vec3 velocity_vector;
+				for (int j = kAspectPrimary; j <= kAspectTertiary; ++j) {
+					velocity_vector += value_[j] * axis[j];
+				}
+				velocity_vector *= strength_*scale;
+				if (!value_[kAspectTertiary]) {
+					vec3 vel;
+					physics_manager->GetBodyVelocity(geometry->GetBodyId(), vel);
+					velocity_vector.z = vel.z;
+				}
+				physics_manager->SetBodyVelocity(geometry->GetBodyId(), velocity_vector);
 			} break;
 			case kEngineHover: {
 				if (primary_force != 0 || value_[kAspectSecondary] != 0) {

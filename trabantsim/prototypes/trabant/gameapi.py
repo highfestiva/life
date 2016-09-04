@@ -36,6 +36,9 @@ def reset():
 def debugsim(enable):
 	setvar('Debug.Enable', enable)
 
+def haltsim(halt):
+	setvar('Physics.Halt', halt)
+
 def userinfo(message):
 	setvar('Game.UserMessage', '"%s"' % message)
 

@@ -33,7 +33,6 @@ def grow(obj, eaten_radius):
 	obj.radius = new_radius
 
 
-fg(outline=False)
 bg('#fff')
 gravity((0,0,0), bounce=0)
 create_box((0,0,+50+2), side=(100,4,4), static=True)

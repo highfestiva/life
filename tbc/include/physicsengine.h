@@ -31,6 +31,7 @@ public:
 		kEnginePushAbsolute,
 		kEnginePushTurnRelative,
 		kEnginePushTurnAbsolute,
+		kEngineVelocityAbsoluteXY,
 		kEngineHover,
 		kEngineHingeRoll,
 		kEngineHingeGyro,

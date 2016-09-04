@@ -1,6 +1,4 @@
 from trabant import *
-
-fg(outline=False)
  
 #bus with wheels
 bus = create_box(side=(6,1.5,2))

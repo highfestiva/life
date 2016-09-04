@@ -9,6 +9,7 @@ class socket:
 		self.s = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM)
 		self.s.setblocking(0)
 		self.timeout = 0.2
+		self.recv_cnt = 0
 
 	def connect(self, hostport):
 		self.hostport = (_socket.gethostbyname(hostport[0]), hostport[1])
@@ -37,6 +38,7 @@ class socket:
 			if not r: raise _socket.error('timeout')
 		data,hostport = self.s.recvfrom(l)
 		if hostport == self.hostport:
+			self.recv_cnt += len(data)
 			#print('<<<', data)
 			if data == b'disconnect\n':
 				raise _socket.error('disconnected')

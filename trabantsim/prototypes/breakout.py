@@ -12,7 +12,6 @@ paddle = r'''
 '''
 brick = 'XX'
 
-fg(outline=False)
 cam(angle=(0,-pi/2,0), distance=45)    # Flip camera for iPad portrait layout.
 gravity((0,0,0), bounce=1, friction=1)
 

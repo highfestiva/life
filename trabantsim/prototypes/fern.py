@@ -3,7 +3,7 @@
 from trabant import *
 from trabant.objects import nophys
 
-fg(outline=False, shadows=False)
+fg(shadows=False)
 bg(col='#44d')
 
 def generate_fern(pos, ang, d_ang, length, depth=1):

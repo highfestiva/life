@@ -5,7 +5,6 @@ from trabant import *
 from random import randint, choice
 
 lanes,cars,avatar = [],[],None
-fg(outline=False)
 gravity((0,0,-20), friction=0)
 
 def create_lane(y, name):

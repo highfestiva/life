@@ -4,7 +4,6 @@
 
 from trabant import *
 
-fg(outline=False)
 camdistance = 25
 cam(distance=camdistance)
 gravity((0,0,-9), bounce=0.3)

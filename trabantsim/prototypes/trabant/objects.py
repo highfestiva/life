@@ -103,6 +103,12 @@ def gfxscale(scale):
 		return o,gfx,phys
 	return doscale
 
+def gfxoffset(x,y,z):
+	def dooffset(orientation,gfx,phys):
+		gfx.pos += vec3(x,y,z)
+		return orientation,gfx,phys
+	return dooffset
+
 def nophys(orientation,gfx,phys):
 	return orientation,gfx,[]
 

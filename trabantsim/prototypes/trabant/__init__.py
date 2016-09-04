@@ -23,12 +23,15 @@ class _flushfile:
 		self.f.flush()
 sys.stdout = _flushfile(sys.stdout)
 
-roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,gyro_engine,rotor_engine,tilt_engine,slider_engine,stabilize,upright_stabilize,forward_stabilize = 'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel gyro rotor tilt slider stabilize upright_stabilize forward_stabilize'.split()
+roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,vel_abs_xy_engine,\
+	gyro_engine,rotor_engine,tilt_engine,slider_engine,stabilize,upright_stabilize,forward_stabilize = \
+		'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel vel_abs_xy gyro rotor tilt slider stabilize upright_stabilize forward_stabilize'.split()
 hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,ball_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider ball fixed'.split()
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
 osname = sys.platform
 _lastlooptime = time.time()
+_lastloop_recv_cnt = 0
 _starttime = None
 _accurate_ascii_generate = False
 _has_opened = False
@@ -130,29 +133,29 @@ class Obj:
 	def col(self, col=None):
 		'''Set color, input is either a 3-tuple (R,G,B) or an html string color such as #ff3 or #304099.'''
 		return gameapi.col(self.id, col)
-	def bounce_in_rect(self,ltn,rbf,spring=1):
-		'''Change velocity if position goes outside box defined by left-top-near corner (ltn)
-		   and right-bottom-far corner (rbf).'''
+	def bounce_in_rect(self,lnb,rft,spring=1):
+		'''Change velocity if position goes outside box defined by left-near-bottom corner (lnb)
+		   and right-far-top corner (rft).'''
 		p,v = self.pos(),self.vel()
 		_v = vec3(v)
-		ltn,rbf = tovec3(ltn),tovec3(rbf)
-		if p.x < ltn.x:
-			p.x = ltn.x
+		lnb,rft = tovec3(lnb),tovec3(rft)
+		if p.x < lnb.x:
+			p.x = lnb.x
 			v.x = +abs(v.x)*spring
-		if p.x > rbf.x:
-			p.x = rbf.x
+		if p.x > rft.x:
+			p.x = rft.x
 			v.x = -abs(v.x)*spring
-		if p.y < ltn.y:
-			p.y = ltn.y
+		if p.y < lnb.y:
+			p.y = lnb.y
 			v.y = +abs(v.y)*spring
-		if p.y > rbf.y:
-			p.y = rbf.y
+		if p.y > rft.y:
+			p.y = rft.y
 			v.y = -abs(v.y)*spring
-		if p.z < ltn.z:
-			p.z = ltn.z
+		if p.z < lnb.z:
+			p.z = lnb.z
 			v.z = +abs(v.z)*spring
-		if p.z > rbf.z:
-			p.z = rbf.z
+		if p.z > rft.z:
+			p.z = rft.z
 			v.z = -abs(v.z)*spring
 		if v != _v:
 			self.pos(p)
@@ -292,7 +295,7 @@ def userinfo(message=''):
 def loop(delay=0.03, end_after=None):
 	'''Call this every loop, check return value if you should continue looping.'''
 	_tryinit()
-	global _lastlooptime,_timer_callbacks,_async_loaders
+	global _lastlooptime,_timer_callbacks,_async_loaders,_lastloop_recv_cnt
 	_thislooptime = time.time()-_lastlooptime
 	_lastlooptime += _thislooptime
 	sleep(max(0,delay-_thislooptime))
@@ -317,6 +320,10 @@ def loop(delay=0.03, end_after=None):
 	if end_after and timeout(end_after, timer='exit'):
 		timeout(timer='exit', reset=True)	# Remove timer.
 		return False
+	if _lastloop_recv_cnt == gameapi.sock.recv_cnt:
+		# Nothing exchanged with simulation client during last loop. Avoid timeout/resend.
+		gameapi.cmd('get-platform-name')
+	_lastloop_recv_cnt = gameapi.sock.recv_cnt
 	return gameapi.opened()
 
 def gametime():
@@ -353,6 +360,7 @@ def timein(t, timer='default_timer'):
 		_timers[timer] = time.time()
 	if time.time() - _timers[timer] < t:
 		return True
+	del _timers[timer]
 	return False
 
 def timer_callback(t, func):
@@ -801,7 +809,7 @@ def _normalize_engine_values(engine_type, max_velocity, offset, strength, fricti
 		max_velocity[0] = 100 if not max_velocity[0] else max_velocity[0]
 		max_velocity[1] = -20 if not max_velocity[1] else max_velocity[1]
 		strength *= 10
-	elif engine_type in (walk_abs_engine, push_abs_engine, push_rel_engine):
+	elif engine_type in (walk_abs_engine, push_abs_engine, push_rel_engine, vel_abs_xy_engine):
 		max_velocity[0] = 20 if not max_velocity[0] else max_velocity[0]
 		if engine_type == walk_abs_engine:
 			friction = friction if friction else 1

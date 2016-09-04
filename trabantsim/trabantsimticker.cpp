@@ -53,7 +53,7 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* ui_manager, cure::Reso
 	v_override(UiCure::GetSettings(), kRtvarUi3DClearred, 1.0);
 	v_override(UiCure::GetSettings(), kRtvarUi3DCleargreen, 1.0);
 	v_override(UiCure::GetSettings(), kRtvarUi3DClearblue, 1.0);
-	v_override(UiCure::GetSettings(), kRtvarUi3DOutlinemode, true);
+	v_override(UiCure::GetSettings(), kRtvarUi3DOutlinemode, false);
 
 	//v_override(UiCure::GetSettings(), kRtvarUi2DFontheight, 30.0);
 

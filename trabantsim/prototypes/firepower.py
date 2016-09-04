@@ -62,7 +62,6 @@ def update_terrain(pos, create_one_patch_at_a_time=True):
 
 update_terrain(vec3(),False)
 gravity((0,0,-9))
-fg(outline=False)
 cam(angle=(-pi/2,0,0), distance=80, target=tank, light_angle=(-pi/4,0,0))
 stick = create_joystick((0,0))
 

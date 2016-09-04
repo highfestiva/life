@@ -4,7 +4,6 @@
 
 from trabant import *
 
-fg(outline=False)
 cam(distance=65, angle=(-0.2,0,0), light_angle=(-0.05,0,0.3))
 gravity((0,0,0))
 

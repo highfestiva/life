@@ -81,7 +81,6 @@ rotz = lambda a: quat().rotate_z(a)
 is_shoot_tap = lambda: (fasttap() or check_reset_time_tap()) if is_touch_device() else click(left=True)
 
 # Setup without gravity so things don't move around until everything loaded.
-fg(outline=False)
 bg(col='#421')
 gravity((0,0,0))
 collisions(False)
