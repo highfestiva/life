@@ -17,8 +17,8 @@ invader = r'''
  XX  XX  XX
  ´XXXXXXXX`
   /XX  XX\
- /X` ´` `X\
- X`      `X
+ /X` ´` ´X\
+ X`      ´X
 '''
 
 cam(distance=250)
@@ -44,12 +44,12 @@ while loop():
         ship.vel((vmin if dx>0 else -vmin, 0, 0))
     else:
         ship.vel((keydir().x*50,0,0))
-    if ('Space' in keys() or tap_dx<5) and timeout(0.7):
+    if ('Space' in keys() or 'LCtrl' in keys() or tap_dx<5) and timeout(0.7, first_hit=True):
         shots += [create_sphere(ship.pos()+vec3(0,0,10), vel=(0,0,200), col='#fff')]
         sound(sound_bang, shots[-1].pos())
 
     # Run invaders.
-    if timeout(3,timer=2):
+    if timeout(3, timer='invaders'):
         isi = (isi+1)%len(invaderspeeds)
         [i.vel(invaderspeeds[isi]) for i in invaders]
 

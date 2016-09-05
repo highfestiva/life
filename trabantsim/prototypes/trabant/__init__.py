@@ -137,7 +137,7 @@ class Obj:
 		'''Change velocity if position goes outside box defined by left-near-bottom corner (lnb)
 		   and right-far-top corner (rft).'''
 		p,v = self.pos(),self.vel()
-		_v = vec3(v)
+		_p,_v = vec3(p),vec3(v)
 		lnb,rft = tovec3(lnb),tovec3(rft)
 		if p.x < lnb.x:
 			p.x = lnb.x
@@ -157,8 +157,9 @@ class Obj:
 		if p.z > rft.z:
 			p.z = rft.z
 			v.z = -abs(v.z)*spring
-		if v != _v:
+		if p != _p:
 			self.pos(p)
+		if v != _v:
 			self.vel(v)
 	def create_engine(self, engine_type, max_velocity=None, offset=None, strength=1, friction=0, targets=None, sound=None):
 		'''Offset is only used in a few engines (such as rotor tilt). Friction is used for engine brake,

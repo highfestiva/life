@@ -86,12 +86,13 @@ class Obj:
 		return str(self.gfxmesh) + '\n'.join((print(geom) for geom in self.physgeoms))
 
 
-def orthoscale(scale):
+def orthoscale(scale, scalephys=True):
 	def doscale(orientation,gfx,phys):
 		s = tovec3(scale)
 		o = toquat(orientation)
 		gfx.orthoscale(o,s)
-		[p.orthoscale(o,s) for p in phys]
+		if scalephys:
+			[p.orthoscale(o,s) for p in phys]
 		return o,gfx,phys
 	return doscale
 

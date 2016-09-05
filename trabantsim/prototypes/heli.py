@@ -43,7 +43,7 @@ yaw = body.create_engine(rotor_engine, strength=0.1)
 body.create_engine(push_abs_engine, strength=5, friction=0.5)
 
 # Stabilize the chopper, or it will be a nightmare to fly for the n00bs.
-body.add_stabilizer()
+body.create_engine(upright_stabilize, strength=0.5)
 
 [create_ascii_object('X', pos=vec3(0,50,3)+rndvec()*3, col=rndvec().abs()) for _ in range(5)]
 

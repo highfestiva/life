@@ -46,7 +46,7 @@ create_ascii_object(shipasc, pos=(-10,+10,10), col='#0f0')
 create_ascii_object(diamond_with_bom_hook, pos=(+10,+10,10), col='#0f0')
 create_ascii_object(square_with_diamond, pos=(-10,+10,-10), col='#0f0')
 create_ascii_object(diamond_with_bom_hook, pos=(+10,+10,-10), col='#0f0', physmesh=True)
-ball = create_sphere(pos=(0,0,-500), radius=0.5, mass=1)
+ball = create_sphere(pos=(0,0,-500), radius=0.5, mass=1, col='#00f')
 
 a = 0
 while loop():

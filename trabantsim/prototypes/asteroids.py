@@ -40,5 +40,5 @@ while loop():
         [e.force((0,0,0)) for e in ship.engines]
         explode(shippos,shipvel)
         sleep(1)
-        release_all_objects()
+        release_objects()
         init()

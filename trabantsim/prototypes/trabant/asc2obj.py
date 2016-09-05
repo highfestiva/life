@@ -337,6 +337,7 @@ def shape2obj(shape, fast=True, force_phys_mesh=False):
 	setcenterobj(gfx,physgeoms)
 	centerobjs(gfx,physgeoms)
 	flipaxis(gfx,physgeoms)
+	gfx.pos = vec3()
 	#[print(g) for g in [gfx]+physgeoms]
 	return Obj(gfx,physgeoms)
 

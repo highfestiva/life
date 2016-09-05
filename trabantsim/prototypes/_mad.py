@@ -169,7 +169,7 @@ obj.release()
 
 ######################################################################
 # We're done. Try loading a game from scratch and see if it's working.
-release_all_objects()
+release_objects()
 from trabant.gameapi import reset
 reset()
 import asteroids
