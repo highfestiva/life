@@ -106,8 +106,6 @@ private:
 
 	void operator=(const ArchiveFile&);
 
-	Endian::EndianType file_endian_;
-
 	str archive_file_name_;
 	bool is_zip_archive_;
 

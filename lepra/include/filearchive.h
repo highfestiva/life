@@ -140,7 +140,6 @@ private:
 	DiskFile archive_file_;
 	IOType io_type_;
 
-	int current_find_index_;
 	FileNameTable::Iterator current_find_iterator_;
 
 	FileArchiveFile* current_write_file_;

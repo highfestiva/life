@@ -291,6 +291,7 @@ const TrabantSimConsoleManager::CommandPair& TrabantSimConsoleManager::GetComman
 }
 
 int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strutil::strvec& parameter_vector) {
+	static bool is_obj_updated = false;
 	strstream active_response;
 	active_response << "ok\n";
 	int result = Parent::OnCommand(command, parameter_vector);
@@ -328,8 +329,9 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					if (material_info == "flat") material = MaterialFlat;
 					else if (material_info == "checker") material = MaterialChecker;
 					else if (material_info == "noise") material = MaterialNoise;
+					const bool same_as_previous = !is_obj_updated;
 
-					const int object_id = manager->CreateObject(orientation, position, gfx_mesh_, phys_objects_, material, is_static, is_trigger);
+					const int object_id = manager->CreateObject(orientation, position, gfx_mesh_, phys_objects_, material, is_static, is_trigger, same_as_previous);
 					if (object_id == -1) {
 						throw ParameterException();
 					}
@@ -367,9 +369,11 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					}
 				} break;
 				case kCommandDeleteObject: {
+					is_obj_updated = true;
 					manager->DeleteObject(ParamToInt(parameter_vector, 0));
 				} break;
 				case kCommandDeleteAllObjects: {
+					is_obj_updated = true;
 					manager->DeleteAllObjects();
 				} break;
 				case kCommandPickObjects: {
@@ -389,6 +393,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					}
 				} break;
 				case kCommandClearPhys: {
+					is_obj_updated = true;
 					PhysObjectArray::iterator x;
 					for (x = phys_objects_.begin(); x != phys_objects_.end(); ++x) {
 						delete *x;
@@ -396,6 +401,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					phys_objects_.clear();
 				} break;
 				case kCommandPrepPhysBox: {
+					is_obj_updated = true;
 					if (parameter_vector.size() != 10) {
 						log_.Warningf("usage: %s followed by ten float arguments (quaternion, position, size)", command.c_str());
 						return 1;
@@ -405,6 +411,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					phys_objects_.push_back(box);
 				} break;
 				case kCommandPrepPhysSphere: {
+					is_obj_updated = true;
 					if (parameter_vector.size() != 8) {
 						log_.Warningf("usage: %s followed by eight float arguments (quaternion, position, radius)", command.c_str());
 						return 1;
@@ -414,6 +421,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					phys_objects_.push_back(sphere);
 				} break;
 				case kCommandPrepPhysCapsule: {
+					is_obj_updated = true;
 					if (parameter_vector.size() != 9) {
 						log_.Warningf("usage: %s followed by eight float arguments (quaternion, position, radius, length)", command.c_str());
 						return 1;
@@ -423,6 +431,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					phys_objects_.push_back(capsule);
 				} break;
 				case kCommandPrepPhysMesh: {
+					is_obj_updated = true;
 					if (parameter_vector.size() != 7) {
 						log_.Warningf("usage: %s followed by seven float arguments (quaternion and position)", command.c_str());
 						return 1;
@@ -437,6 +446,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					phys_objects_.push_back(mesh);
 				} break;
 				case kCommandPrepGfxMesh: {
+					is_obj_updated = true;
 					if (parameter_vector.size() != 7) {
 						log_.Warningf("usage: %s followed by seven float arguments (quaternion and position)", command.c_str());
 						return 1;
@@ -456,12 +466,14 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					vertices_.clear();
 					// TRICKY: fall through!
 				case kCommandAddVertices: {
+					is_obj_updated = true;
 					Params2Floats(parameter_vector, vertices_);
 				} break;
 				case kCommandSetIndices:
 					indices_.clear();
 					// TRICKY: fall through!
 				case kCommandAddIndices: {
+					is_obj_updated = true;
 					Params2Ints(parameter_vector, indices_);
 				} break;
 				case kCommandAreLoaded: {
@@ -482,7 +494,7 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					for (int x = 0; !loaded && x < 150; ++x) {
 						loaded = manager->IsLoaded(object_id);
 						if (!loaded) {
-							Thread::Sleep(0.01);
+							Thread::Sleep(0.001);
 						}
 					}
 					if (!loaded) {

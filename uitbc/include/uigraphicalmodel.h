@@ -202,13 +202,13 @@ public:
 	tbc::GeometryBase* GetGeometry();
 private:
 	AnimatedGeometry* geometry_;
-	Renderer::TextureID* texture_id_;
+	/*Renderer::TextureID* texture_id_;
 	int num_textures_;
 	Renderer::MaterialType material_;
 	Renderer::Shadows shadows_;
 
 	Renderer::GeometryID geom_id_;
-	Renderer* renderer_;
+	Renderer* renderer_;*/
 };
 
 

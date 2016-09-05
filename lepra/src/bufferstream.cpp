@@ -75,7 +75,7 @@ void BufferOutputStream::Close() {
 void BufferOutputStream::Flush() {
 }
 
-IOError BufferOutputStream::WriteRaw(void* data, size_t length) {
+IOError BufferOutputStream::WriteRaw(const void* data, size_t length) {
 	IOError error = kIoOk;
 	size_t copy_length = length;
 

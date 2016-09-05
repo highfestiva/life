@@ -69,9 +69,9 @@ TrabantSim* TrabantSim::GetApp() {
 
 TrabantSim::TrabantSim(const strutil::strvec& argument_list):
 	Parent("trabant", argument_list),
-	ui_manager_(0),
 	active_counter_(-100),
-	is_in_tick_(false) {
+	is_in_tick_(false),
+	ui_manager_(0) {
 	app_ = this;
 }
 

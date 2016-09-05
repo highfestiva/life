@@ -276,8 +276,8 @@ Win32InputManager::Win32InputManager(Win32DisplayManager* display_manager):
 	screen_height_(0),
 	cursor_x_(0),
 	cursor_y_(0),
-	mouse_(0),
-	keyboard_(0) {
+	keyboard_(0),
+	mouse_(0) {
 	::ShowCursor(FALSE);	// Start by decreasing the mouse show counter to 0, so it can be hidden (-1) or shown again (0).
 
 	Refresh();

@@ -36,7 +36,7 @@ public:
 
 	virtual void Close();
 	virtual void Flush();
-	virtual IOError WriteRaw(void* data, size_t length);
+	virtual IOError WriteRaw(const void* data, size_t length);
 protected:
 private:
 	uint8* buffer_;

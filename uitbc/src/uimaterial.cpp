@@ -169,9 +169,9 @@ int GeometryGroup::B2FCompare(const void* pair1, const void* pair2) {
 
 
 Material::Material(Renderer* renderer, DepthSortHint sort_hint, Material* fall_back_material):
+	fall_back_material_(fall_back_material),
 	renderer_(renderer),
-	sort_hint_(sort_hint),
-	fall_back_material_(fall_back_material) {
+	sort_hint_(sort_hint) {
 }
 
 Material::~Material() {

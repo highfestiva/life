@@ -726,7 +726,7 @@ vec3 PhysicsEngine::GetRotorLiftForce(PhysicsManager* physics_manager, ChunkyBon
 }
 
 void PhysicsEngine::ApplyTorque(PhysicsManager* physics_manager, float frame_time, ChunkyBoneGeometry* geometry, const EngineNode& engine_node) const {
-	frame_time;
+	(void)frame_time;
 
 	//deb_assert(geometry->GetJointId() != INVALID_JOINT);
 	if (geometry->GetJointId() == INVALID_JOINT) {

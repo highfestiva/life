@@ -25,10 +25,9 @@ using namespace cure;
 Object::Object(ResourceManager* resource_manager, const str& class_id, UiCure::GameUiManager* ui_manager):
 	Parent(resource_manager, class_id, ui_manager),
 	generated_physics_(0),
-	clazz_(new uitbc::ChunkyClass),
 	physics_index_(0),
-	gfx_mesh_(0),
-	gfx_mesh_id_(0) {
+	same_as_previous_(false),
+	clazz_(new uitbc::ChunkyClass) {
 }
 
 Object::~Object() {

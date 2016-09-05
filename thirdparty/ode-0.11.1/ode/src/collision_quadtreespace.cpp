@@ -347,6 +347,7 @@ struct dxQuadTreeSpace : public dxSpace{
 	int CurrentIndex;
 };
 
+#pragma optimize("", off)	// high_festiva was here (misaligned movemps instruction generated in VS2015)!
 dxQuadTreeSpace::dxQuadTreeSpace(dSpaceID _space, const dVector3 Center, const dVector3 Extents, int Depth) : dxSpace(_space){
 	type = dQuadTreeSpaceClass;
 
@@ -392,6 +393,7 @@ dxQuadTreeSpace::~dxQuadTreeSpace(){
 	dFree(Blocks, BlockCount * sizeof(Block));
 	dFree(CurrentChild, (Depth + 1) * sizeof(int));
 }
+#pragma optimize("", on)	// high_festiva was here!
 
 dxGeom* dxQuadTreeSpace::getGeom(int Index){
 	dUASSERT(Index >= 0 && Index < count, "index out of range");

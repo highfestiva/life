@@ -754,7 +754,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* physics) {
 					geometry->SaveChunkyData(physics, _data);
 					deb_assert(geometry->GetChunkySize(_data) == _size);
 					ok = (file_->WriteData(_data, _size) == kIoOk);
-					delete (_data);
+					delete[] _data;
 				}
 			}
 		}
@@ -781,7 +781,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* physics) {
 			char* _data = new char[_size];
 			engine->SaveChunkyData(physics, _data);
 			ok = (file_->WriteData(_data, _size) == kIoOk);
-			delete (_data);
+			delete[] _data;
 		}
 	}
 	if (ok) {
@@ -806,7 +806,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* physics) {
 			char* _data = new char[_size];
 			trigger->SaveChunkyData(physics, _data);
 			ok = (file_->WriteData(_data, _size) == kIoOk);
-			delete (_data);
+			delete[] _data;
 		}
 	}
 	if (ok) {
@@ -830,7 +830,7 @@ bool ChunkyPhysicsLoader::Save(const ChunkyPhysics* physics) {
 			char* _data = new char[_size];
 			spawner->SaveChunkyData(physics, _data);
 			ok = (file_->WriteData(_data, _size) == kIoOk);
-			delete (_data);
+			delete[] _data;
 		}
 	}
 	if (ok) {

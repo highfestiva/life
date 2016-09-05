@@ -107,7 +107,7 @@ public:
 	virtual void RefreshOptions();
 
 	void UserReset();
-	int CreateObject(const quat& orientation, const vec3& position, const MeshObject& gfx_object, const PhysObjectArray& phys_objects, ObjectMaterial material, bool is_static, bool is_trigger);
+	int CreateObject(const quat& orientation, const vec3& position, const MeshObject& gfx_object, const PhysObjectArray& phys_objects, ObjectMaterial material, bool is_static, bool is_trigger, bool same_as_previous);
 	void CreateClones(IntList& created_object_ids, int original_id, const XformList& placements, ObjectMaterial material, bool is_static);
 	void DeleteObject(int object_id);
 	void DeleteAllObjects();
@@ -200,7 +200,7 @@ protected:
 	KeyMap key_map_;
 	DragList drag_list_;
 	DragEraseList drag_erase_list_;
-	Lock objects_lock_;
+	mutable Lock objects_lock_;
 	bool is_mouse_controlled_;
 	bool set_focus_;
 	bool set_cursor_visible_;

@@ -246,7 +246,7 @@ void TrabantSimManager::UserReset() {
 }
 
 int TrabantSimManager::CreateObject(const quat& orientation, const vec3& position, const MeshObject& gfx_object, const PhysObjectArray& phys_objects,
-					ObjectMaterial material, bool is_static, bool is_trigger) {
+					ObjectMaterial material, bool is_static, bool is_trigger, bool same_as_previous) {
 	quat pq, rootq;
 	Object* _object = (Object*)CreateContextObject("object");
 	tbc::ChunkyPhysics* physics = new tbc::ChunkyPhysics(tbc::BoneHierarchy::kTransformLocal2World, is_static? tbc::ChunkyPhysics::kStatic : tbc::ChunkyPhysics::kDynamic);
@@ -363,6 +363,7 @@ int TrabantSimManager::CreateObject(const quat& orientation, const vec3& positio
 	_object->initial_orientation_ = pq;
 	_object->initial_inverse_orientation_ = pq.GetInverse();
 	_object->generated_physics_ = physics;
+	_object->same_as_previous_ = same_as_previous;
 
 	cure::GameObjectId object_id = GetContext()->AllocateGameObjectId(cure::kNetworkObjectLocalOnly);
 	ScopeLock object_lock(&objects_lock_);
@@ -396,7 +397,8 @@ void TrabantSimManager::CreateClones(IntList& created_object_ids, int original_i
 	phys_name = original->GetPhysicsResource()->GetName();
 	phys_name.resize(phys_name.find(".phys"));
 	xform original_xform = original->GetPhysics()->GetOriginalBoneTransformation(0);
-	quat original_offset_orientation = original->GetMeshResource(0)->offset_.offset_.orientation_;
+	xform original_offset_xform = original->GetMeshResource(0)->offset_.offset_;
+
 
 	// Tricky loop to ensure we don't hold any of the mutexes very long.
 	while (!GetMaster()->GetPhysicsLock()->TryAcquire()) {
@@ -426,7 +428,7 @@ void TrabantSimManager::CreateClones(IntList& created_object_ids, int original_i
 					LEPRA_MEASURE_SCOPE(CreateClonesMesh);
 					_object->AddMeshResourceRef(mesh_name, is_static? -1 : 1);
 				}
-				_object->GetMeshResource(0)->offset_.offset_.orientation_ = original_offset_orientation;
+				_object->GetMeshResource(0)->offset_.offset_ = original_offset_xform;
 				_object->initial_orientation_ = pq;
 				_object->initial_inverse_orientation_ = pq.GetInverse();
 				objects_.insert(_object->GetInstanceId());
@@ -562,7 +564,7 @@ void TrabantSimManager::PopCollisions(CollisionList& collision_list) {
 }
 
 void TrabantSimManager::GetKeys(strutil::strvec& keys) {
-	ScopeLock game_lock(GetTickLock());
+	ScopeLock key_lock(&objects_lock_);
 	for (KeyMap::iterator x = key_map_.begin(); x != key_map_.end();) {
 		keys.push_back(uilepra::InputManager::GetKeyName(x->first));
 		if (x->second) {
@@ -937,7 +939,9 @@ void TrabantSimManager::ObjectColor(int object_id, bool _set, vec3& color, float
 	if (_set) {
 		_object->GetMesh(0)->GetBasicMaterialSettings().diffuse_ = color;
 		_object->GetMesh(0)->GetBasicMaterialSettings().alpha_ = alpha;
-		_object->GetMesh(0)->SetAlwaysVisible(!!alpha);
+		if (_object->GetMesh(0)->GetAlwaysVisible()) {
+			_object->GetMesh(0)->SetAlwaysVisible(!!alpha);
+		}
 	} else {
 		color = _object->GetMesh(0)->GetBasicMaterialSettings().diffuse_;
 	}
@@ -1574,14 +1578,15 @@ void TrabantSimManager::OnMenuAlternative(uitbc::Button*) {
 void TrabantSimManager::ScriptPhysicsTick() {
 	{
 		ScopeLock object_lock(&objects_lock_);
+		int create_index = 0;
 		ContextObjectTable::const_iterator x = created_objects_.begin();
-		for (; x != created_objects_.end(); ++x) {
+		for (; x != created_objects_.end(); ++x, ++create_index) {
 			cure::GameObjectId object_id = x->first;
 			Object* object = (Object*)x->second;
 			AddContextObject(object, cure::kNetworkObjectLocalOnly, object_id);
 			objects_.insert(object_id);
 			static int physics_index = 0;
-			object->physics_index_ = physics_index;
+			object->physics_index_ = (object->same_as_previous_ && create_index!=0)? physics_index : ++physics_index;
 			object->CreatePhysics(object->generated_physics_);
 		}
 		created_objects_.clear();
@@ -1645,6 +1650,7 @@ void TrabantSimManager::ScriptPhysicsTick() {
 					}
 					y->last_ = x->last_;
 					y->is_press_ = x->is_press_;
+					y->button_mask_ = x->button_mask_;
 				}
 			}
 			if (!found) {
@@ -1782,7 +1788,7 @@ void TrabantSimManager::DrawImage(uitbc::Painter::ImageID image_id, float cx, fl
 
 bool TrabantSimManager::OnKeyDown(uilepra::InputManager::KeyCode key_code) {
 	if (!Parent::OnKeyDown(key_code)) {
-		ScopeLock game_lock(GetTickLock());
+		ScopeLock key_lock(&objects_lock_);
 		key_map_.insert(KeyMap::value_type(key_code,false));
 		return false;
 	}
@@ -1808,7 +1814,7 @@ bool TrabantSimManager::OnKeyUp(uilepra::InputManager::KeyCode key_code) {
 	}
 
 	{
-		ScopeLock game_lock(GetTickLock());
+		ScopeLock key_lock(&objects_lock_);
 		key_map_[key_code] = true;
 	}
 	return Parent::OnKeyUp(key_code);

@@ -11,6 +11,10 @@ namespace uilepra {
 
 
 
+int g_vsync_shadow = -1;
+
+
+
 bool OpenGLExtensions::IsExtensionSupported(const char* extension) {
 	str _extension(extension);
 	strutil::StripAllWhiteSpaces(_extension);
@@ -392,6 +396,11 @@ bool OpenGLExtensions::IsVSyncEnabled() {
 }
 
 bool OpenGLExtensions::SetVSyncEnabled(bool enabled) {
+	int vsync = enabled ? 1 : 0;
+	if (g_vsync_shadow == vsync) {
+		return true;
+	}
+	g_vsync_shadow = vsync;
 #ifdef LEPRA_WINDOWS
 	if (wglSwapIntervalEXT != 0) {
 		return (wglSwapIntervalEXT(enabled ? 1 : 0) != FALSE);
@@ -400,6 +409,7 @@ bool OpenGLExtensions::SetVSyncEnabled(bool enabled) {
 	CGLContextObj context = CGLGetCurrentContext();
 	GLint swap_interval = enabled? 1 : 0;
 	CGLSetParameter(context, kCGLCPSwapInterval, &swap_interval);
+	return true;
 #else
 #pragma message("Warning: OpenGLExtensions::SetVSyncEnabled() is not implemented.")
 #endif

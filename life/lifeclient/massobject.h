@@ -53,7 +53,6 @@ private:
 		typedef std::vector<MassMeshPair> MassMeshArray;
 		MassMeshArray mass_mesh_array_;
 		uitbc::Renderer* renderer_;
-		bool disable_transparency_;
 	};
 
 	enum {

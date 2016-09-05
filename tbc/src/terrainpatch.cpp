@@ -643,8 +643,8 @@ void TerrainPatch::ProcessSharedEdge(TerrainPatch& neighbour,
 				     void (TerrainPatch::*process_element)(float* dst, float* srs),
 				     void (TerrainPatch::*opposite_share_edge_function)(TerrainPatch&)) {
 	// Not used in release compilation.
-	edge;
-	opposite_edge;
+	(void)edge;
+	(void)opposite_edge;
 
 	Vector2D<int> _south_west(GetSouthWestUnitPos());
 	Vector2D<int> _north_east(GetNorthEastUnitPos());
@@ -682,29 +682,29 @@ void TerrainPatch::ProcessSharedEdge(TerrainPatch& neighbour,
 void TerrainPatch::AssertNorthAlignment(const Vector2D<int>&, const Vector2D<int>& north_east, const Vector2D<int>& south_west_neighbour,	const Vector2D<int>&) {
 	// TODO: Implement a check along the x-axis!?
 	deb_assert(north_east.y == south_west_neighbour.y);
-	north_east;
-	south_west_neighbour;
+	(void)north_east;
+	(void)south_west_neighbour;
 }
 
 void TerrainPatch::AssertSouthAlignment(const Vector2D<int>& south_west, const Vector2D<int>&, const Vector2D<int>&, const Vector2D<int>& north_east_neighbour) {
 	// TODO: Implement a check along the x-axis!?
 	deb_assert(south_west.y == north_east_neighbour.y);
-	south_west;
-	north_east_neighbour;
+	(void)south_west;
+	(void)north_east_neighbour;
 }
 
 void TerrainPatch::AssertEastAlignment(const Vector2D<int>&, const Vector2D<int>& north_east, const Vector2D<int>& south_west_neighbour, const Vector2D<int>&) {
 	// TODO: Implement a check along the y-axis!?
 	deb_assert(north_east.x == south_west_neighbour.x);
-	north_east;
-	south_west_neighbour;
+	(void)north_east;
+	(void)south_west_neighbour;
 }
 
 void TerrainPatch::AssertWestAlignment(const Vector2D<int>& south_west, const Vector2D<int>&, const Vector2D<int>&, const Vector2D<int>& north_east_neighbour) {
 	// TODO: Implement a check along the y-axis!?
 	deb_assert(south_west.x == north_east_neighbour.x);
-	south_west;
-	north_east_neighbour;
+	(void)south_west;
+	(void)north_east_neighbour;
 }
 
 int TerrainPatch::GetHorizontalDisplacement(const Vector2D<int>& south_west, const Vector2D<int>& south_west_neighbour) {
@@ -752,7 +752,10 @@ bool TerrainPatch::GetEdgeFlagValue(unsigned int edge_flag) {
 }
 
 void TerrainPatch::GetPosAndNormal(float normalized_x, float normalized_y, vec3& pos, vec3& normal) const {
-	normalized_x; normalized_y; pos; normal;
+	(void)normalized_x;
+	(void)normalized_y;
+	(void)pos;
+	(void)normal;
 }
 
 GeometryBase::GeometryVolatility TerrainPatch::GetGeometryVolatility() const {
@@ -788,7 +791,7 @@ float* TerrainPatch::GetVertexData() const {
 
 float* TerrainPatch::GetUVData(unsigned int uv_set) const {
 	float* _uv_set = 0;
-	if (uv_set >= 0 && uv_set < 2) {
+	if (uv_set < 2) {
 		_uv_set = uv_data_[uv_set];
 	}
 	return _uv_set;

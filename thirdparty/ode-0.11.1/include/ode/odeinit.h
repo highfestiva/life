@@ -148,7 +148,7 @@ enum dAllocateODEDataFlags {
 
 	dAllocateFlagCollisionData = 0x00000001, //@< Allocate data for collision detection
 
-	dAllocateMaskAll = ~0U, //@< Allocate all the possible data that is currently defined or will be defined in the future.
+	dAllocateMaskAll = ~0, //@< Allocate all the possible data that is currently defined or will be defined in the future.
 };
 
 /**

@@ -21,7 +21,7 @@ GeometryReference::GeometryReference(GeometryBase* geometry) :
 	LEPRA_ACQUIRE_RESOURCE(GeometryReference);
 	Copy(geometry_);
 	flags_ = default_flags_;
-	SetFlag(geometry_->GetFlags()&(~kValidFlagsMask) | kTransformationChanged | kRefTransformationChanged | kBigOrientationChanged);
+	SetFlag((geometry_->GetFlags()&(~kValidFlagsMask)) | kTransformationChanged | kRefTransformationChanged | kBigOrientationChanged);
 	renderer_data_ = 0;
 }
 

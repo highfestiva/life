@@ -21,7 +21,6 @@ FileArchive::FileArchive() :
 	archive_file_name_(),
 	temp_file_name_(),
 	io_type_(kReadOnly),
-	current_find_index_(0),
 	current_write_file_(0),
 	file_handle_counter_(0),
 	write_buffer_(0),

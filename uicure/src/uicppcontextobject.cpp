@@ -32,10 +32,10 @@ CppContextObject::CppContextObject(cure::ResourceManager* resource_manager, cons
 	enable_pixel_shader_(true),
 	enable_mesh_move_(true),
 	enable_mesh_slide_(false),
-	mesh_load_count_(0),
-	texture_load_count_(0),
 	sink_speed_(0),
 	sink_offset_(0),
+	mesh_load_count_(0),
+	texture_load_count_(0),
 	lerp_mode_(kLerpStop) {
 	log_volatile(log_.Tracef("Construct CppCO %s.", class_id.c_str()));
 }
@@ -587,6 +587,11 @@ bool CppContextObject::TryComplete() {
 	}
 
 	UiMove();
+
+	for (size_t x = 0; x < mesh_resource_array_.size(); ++x) {
+		UserGeometryReferenceResource* _mesh = mesh_resource_array_[x];
+		_mesh->GetRamData()->SetAlwaysVisible(true);
+	}
 
 	return (true);
 }

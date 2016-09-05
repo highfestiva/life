@@ -232,13 +232,18 @@ DefaultAnimatedProgressiveGeometryHandler::DefaultAnimatedProgressiveGeometryHan
 										     Renderer::MaterialType material,
 										     Renderer::Shadows shadows,
 										     Renderer* renderer) :
-	geometry_(geometry),
+	geometry_(geometry)/*,
 	texture_id_(texture_id),
 	num_textures_(num_textures),
 	material_(material),
 	shadows_(shadows),
 	geom_id_(Renderer::INVALID_GEOMETRY),
-	renderer_(renderer) {
+	renderer_(renderer)*/ {
+	(void)texture_id;
+	(void)num_textures;
+	(void)material;
+	(void)shadows;
+	(void)renderer;
 }
 
 void DefaultAnimatedProgressiveGeometryHandler::UpdateGeometry(float lod_level) {

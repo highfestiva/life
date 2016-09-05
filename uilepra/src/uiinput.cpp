@@ -17,12 +17,12 @@ namespace uilepra {
 
 InputElement::InputElement(Type type, Interpretation interpretation, int type_index, InputDevice* parent_device):
 	value_(0),
+	min_(+1),
+	max_(-1),
 	type_(type),
 	interpretation_(interpretation),
 	type_index_(type_index),
-	parent_device_(parent_device),
-	min_(+1),
-	max_(-1) {
+	parent_device_(parent_device) {
 }
 
 InputElement::~InputElement() {

@@ -45,13 +45,12 @@ public:
 	quat initial_inverse_orientation_;
 	tbc::ChunkyPhysics* generated_physics_;
 	int physics_index_;
+	bool same_as_previous_;
 
 private:
 	void OnLoadPhysics(cure::UserPhysicsReferenceResource* physics_resource);
 
 	uitbc::ChunkyClass* clazz_;
-	uitbc::TriangleBasedGeometry* gfx_mesh_;
-	uitbc::Renderer::GeometryID gfx_mesh_id_;
 };
 
 

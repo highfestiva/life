@@ -599,13 +599,13 @@ int ConsoleManager::OnCommand(const HashedString& command, const strutil::strvec
 					cure::GameManager* manager = GetGameManager();
 					if (manager) {
 						ok = manager->ValidateVariable(security_level_, variable, value);
-						manager->GetTickLock()->Acquire();
+						//manager->GetTickLock()->Acquire();
 					}
 					if (ok) {
 						ok = scope->SetUntypedValue(mode, variable, value);
 					}
 					if (manager) {
-						manager->GetTickLock()->Release();
+						//manager->GetTickLock()->Release();
 					}
 					if (!ok) {
 						result = 1;

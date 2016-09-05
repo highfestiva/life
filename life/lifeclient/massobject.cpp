@@ -195,8 +195,7 @@ bool MassObject::GetObjectPlacement(vec3& position) const {
 
 MassObject::Square::Square(uint32 seed, const MeshArray& resource_array,
 	const std::vector<xform>& displacement_array, uitbc::Renderer* renderer):
-	renderer_(renderer),
-	disable_transparency_(false) {
+	renderer_(renderer) {
 	if (displacement_array.empty()) {
 		return;	// No mesh batches if not inside terrain.
 	}

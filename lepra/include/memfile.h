@@ -66,8 +66,6 @@ public:
 	void* GetBuffer();
 
 private:
-	Endian::EndianType file_endian_;
-
 	Lock lock_;
 	uint8* buffer_;
 	size_t size_;
