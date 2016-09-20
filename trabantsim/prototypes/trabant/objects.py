@@ -10,9 +10,16 @@ class GfxMesh:
 		self.pos = pos
 		self.vertices = vertices
 		self.indices = indices
+		self._radius = None
 	def orthoscale(self, orientation, scale):
 		self.pos = self.pos.mulvec((orientation*scale).abs())
 		self.vertices = [v.mulvec(scale) for v in self.vertices]
+	@property
+	def radius(self):
+		if not self._radius:
+			self._radius = max(v*v for v in self.vertices)
+			self._radius = sqrt(self._radius)
+		return self._radius
 	def __repr__(self):
 		return 'gfx-mesh (%g,%g,%g,%g,%g,%g,%g) %s %s' % tuple(list(self.q)+list(self.pos)+['('+', '.join(str(v) for v in self.vertices)+')']+[tuple(self.indices)])
 	def __eq__(self,o):
@@ -109,6 +116,21 @@ def gfxoffset(x,y,z):
 		gfx.pos += vec3(x,y,z)
 		return orientation,gfx,phys
 	return dooffset
+
+def gfx_vertex_func(func):
+	def dovfunc(orientation,gfx,phys):
+		gfx.vertices = [func(gfx,v) for v in gfx.vertices]
+		return orientation,gfx,phys
+	return dovfunc
+
+def gfx_ortho_pinch(x,y,z, amp=1, rimscale=1, func=lambda a:abs(sin(a))-0.9):
+	pinch_axes = vec3(x,y,z)
+	def pinch_func(gfx, v):
+		vp = v.mulvec(pinch_axes).abs()
+		angle = vp.length() * pi * rimscale / gfx.radius
+		A = amp * func(angle)
+		return v + v.mulvec(vp*A)
+	return gfx_vertex_func(pinch_func)
 
 def nophys(orientation,gfx,phys):
 	return orientation,gfx,[]

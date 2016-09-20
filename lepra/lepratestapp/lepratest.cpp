@@ -174,6 +174,14 @@ bool TestString(const LogDecorator& account) {
 			_test_ok = (strutil::FastDoubleToString(-2.625) == "-2.625");
 			deb_assert(_test_ok);
 		}
+		if (_test_ok) {
+			_test_ok = (strutil::FastDoubleToString(-2.60502) == "-2.60502");
+			deb_assert(_test_ok);
+		}
+		if (_test_ok) {
+			_test_ok = (strutil::FastDoubleToString(992.5100) == "992.51");
+			deb_assert(_test_ok);
+		}
 	}
 
 	if (_test_ok) {
@@ -277,7 +285,7 @@ bool TestString(const LogDecorator& account) {
 		_context = "JSON coder";
 		const wstr wc = _WIDE("åäöabcÅÄÖACQñï");
 		const str __c = strutil::Encode(wc);
-		const str json = "\"\\u00E5\\u00E4\\u00F6abc\\u00C5\\u00C4\\u00D6ACQ\\u00F1\\u00EF\"";
+		const str json = "\"\\u00C3\\u00A5\\u00C3\\u00A4\\u00C3\\u00B6abc\\u00C3\\u2026\\u00C3\\u201E\\u00C3\\u2013ACQ\\u00C3\\u00B1\\u00C3\\u00AF\"";
 		const str json_string = JsonString::ToJson(__c);
 		_test_ok = (json_string == json);
 		deb_assert(_test_ok);

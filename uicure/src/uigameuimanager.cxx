@@ -596,6 +596,11 @@ void GameUiManager::UpdateSettings() {
 		shadows_string = shadows_string.substr(6);
 		force_shadows_on_all = true;
 	}
+	bool solid_shadows = false;
+	if (strutil::StartsWith(shadows_string, "Solid")) {
+		shadows_string = shadows_string.substr(5);
+		solid_shadows = true;
+	}
 	if (shadows_string == "Volumes") {
 		shadow_mode = uitbc::Renderer::kCastShadows;
 		shadow_type = uitbc::Renderer::kShVolumesOnly;
@@ -608,6 +613,7 @@ void GameUiManager::UpdateSettings() {
 	}
 	renderer_->SetShadowMode(shadow_mode, shadow_type);
 	renderer_->SetShadowUpdateFrameDelay(60);
+	renderer_->EnableSolidShadows(solid_shadows);
 	tbc::GeometryBase::SetDefaultBigOrientationThreshold((float)shadow_deviation);
 
 	// ----------------------------------------

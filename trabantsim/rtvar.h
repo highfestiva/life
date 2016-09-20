@@ -28,6 +28,7 @@
 #define kRtvarUi3DCamanglerelative	"Ui.3D.CamAngleRelative"
 #define kRtvarUi3DLightanglex		"Ui.3D.LightAngleX"
 #define kRtvarUi3DLightanglez		"Ui.3D.LightAngleZ"
+#define kRtvarUi3DShadowRange		"Ui.3D.ShadowRange"
 #define kRtvarUiPenred				"Ui.PenRed"
 #define kRtvarUiPengreen			"Ui.PenGreen"
 #define kRtvarUiPenblue				"Ui.PenBlue"

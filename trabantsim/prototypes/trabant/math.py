@@ -16,6 +16,9 @@ def rndvec():
 def rndquat():
 	return quat(*[random()-0.5 for _ in range(4)]).normalize()
 
+def intvec3(v):
+	return vec3(int(v.x),int(v.y),int(v.z))
+
 def sin2(a):
 	x = sin(a)
 	return x*x
@@ -26,6 +29,9 @@ def cos2(a):
 
 def lerp(a,b,t):
 	return a*(1-t) + b*t
+
+def clamp(val, minval, maxval):
+	return max(minval, min(maxval, val))
 
 def angmod(a):
     if a > pi:
@@ -194,16 +200,16 @@ class quat:
 		return self.q[0]*self.q[0] + self.q[1]*self.q[1] + self.q[2]*self.q[2] + self.q[3]*self.q[3]
 
 	def rotate_x(self,a):
-		q = quat(cos(a*0.5), sin(a*0.5), 0, 0);
-		return self*q
+		return self * quat(cos(a*0.5), sin(a*0.5), 0, 0)
 
 	def rotate_y(self,a):
-		q = quat(cos(a*0.5), 0, sin(a*0.5), 0);
-		return self*q
+		return self * quat(cos(a*0.5), 0, sin(a*0.5), 0)
 
 	def rotate_z(self,a):
-		q = quat(cos(a*0.5), 0, 0, sin(a*0.5));
-		return self*q
+		return self * quat(cos(a*0.5), 0, 0, sin(a*0.5))
+
+	def yaw_pitch_roll(self, v):
+		return self.rotate_z(v.x).rotate_x(v.y).rotate_y(v.z).normalize()
 
 	def __eq__(self,q):
 		q = toquat(q)

@@ -256,6 +256,9 @@ def scale(oid, s):
 def col(oid, color):
 	return getsetoidcmd('color', oid, htmlcol(color))
 
+def shadow(oid, mode):
+	return getsetoidcmd('shadow', oid, (mode,))
+
 def set_engine_force(oid, eid, xyz):
 	return getsetoidcmd('engine-force', oid, (eid,), xyz)
 

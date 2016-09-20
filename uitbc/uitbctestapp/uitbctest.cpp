@@ -1392,7 +1392,7 @@ bool TestRayPicker(const lepra::LogDecorator& log) {
 	g_renderer->SetCameraTransformation(xform());
 
 	if (test_ok) {
-		str _context = "pick and inverse";
+		_context = "pick and inverse";
 		PixelCoord xs(640, 480/2);
 		PixelCoord ys(640/2, 480);
 		PixelCoord zs(0, 0);

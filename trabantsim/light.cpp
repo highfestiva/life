@@ -34,9 +34,10 @@ void Light::Tick(const quat& camera_orientation) {
 	if (!ui_manager_->CanRender()) {
 		return;
 	}
-	float ax,az;
+	float ax,az, shadow_range;
 	v_get(ax, =(float), ui_manager_->GetVariableScope(), kRtvarUi3DLightanglex, -1.4);
 	v_get(az, =(float), ui_manager_->GetVariableScope(), kRtvarUi3DLightanglez, 0.1);
+	v_get(shadow_range, =(float), ui_manager_->GetVariableScope(), kRtvarUi3DShadowRange, 100.0);
 	quat q;
 	q.RotateAroundOwnZ(az);
 	q.RotateAroundOwnX(ax);
@@ -46,6 +47,7 @@ void Light::Tick(const quat& camera_orientation) {
 		light_average_direction_ = d;
 		ui_manager_->GetRenderer()->SetLightDirection(light_id_, light_average_direction_);
 	}
+	ui_manager_->GetRenderer()->SetShadowRange(light_id_, shadow_range);
 }
 
 

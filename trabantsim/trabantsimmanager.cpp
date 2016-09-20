@@ -355,7 +355,7 @@ int TrabantSimManager::CreateObject(const quat& orientation, const vec3& positio
 			AddCheckerTexturing(_mesh, _scale);
 			_object->LoadTexture(texture);
 		}
-		_object->AddMeshResource(_mesh, is_static? -1 : 1);
+		_object->AddMeshResource(_mesh, is_static? 0 : 1);
 		_object->AddMeshInfo(_object->GetMeshResource(0)->GetName(), "texture", texture, _color, a);
 		_object->GetMeshResource(0)->offset_.offset_.orientation_ = gfx_object.orientation_;
 		_object->GetMeshResource(0)->offset_.offset_.position_ = gfx_object.pos_;
@@ -944,6 +944,20 @@ void TrabantSimManager::ObjectColor(int object_id, bool _set, vec3& color, float
 		}
 	} else {
 		color = _object->GetMesh(0)->GetBasicMaterialSettings().diffuse_;
+	}
+}
+
+void TrabantSimManager::ObjectShadow(int object_id, bool _set, int& shadow_mode) {
+	ScopeLock game_lock(GetTickLock());
+	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	if (!_object) {
+		return;
+	}
+	if (_set) {
+		((uitbc::Renderer::GeometryData*)_object->GetMesh(0)->GetRendererData())->shadow_ = Math::Clamp((uitbc::Renderer::Shadows)shadow_mode, uitbc::Renderer::kForceNoShadows, uitbc::Renderer::kForceCastShadows);
+	}
+	else {
+		shadow_mode = ((uitbc::Renderer::GeometryData*)_object->GetMesh(0)->GetRendererData())->shadow_;
 	}
 }
 

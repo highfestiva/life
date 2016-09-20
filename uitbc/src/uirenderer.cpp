@@ -89,6 +89,7 @@ Renderer::Renderer(Canvas* screen):
 	is_outline_render_enabled_(false),
 	is_wireframe_enabled_(false),
 	is_pixel_shaders_enabled_(true),
+	is_solid_shadows_enabled_(false),
 	viewport_(0, 0, screen->GetWidth(), screen->GetHeight()),
 	geometry_id_manager_(1, 1000000, INVALID_GEOMETRY),
 	texture_id_manager_(1, 1000000, INVALID_TEXTURE),
@@ -220,6 +221,14 @@ void Renderer::EnablePixelShaders(bool enable) {
 
 bool Renderer::IsPixelShadersEnabled() const {
 	return (is_pixel_shaders_enabled_);
+}
+
+void Renderer::EnableSolidShadows(bool enable) {
+	is_solid_shadows_enabled_ = enable;
+}
+
+bool Renderer::IsSolidShadowsEnabled() const {
+	return is_solid_shadows_enabled_;
 }
 
 void Renderer::SetViewport(const PixelRect& viewport) {
@@ -592,6 +601,12 @@ void Renderer::SetShadowMapOptions(LightID light_id,
 		data->shadow_map_near_ = near_plane;
 		data->shadow_map_far_  = far_plane;
 	}
+}
+
+void Renderer::SetShadowRange(LightID light_id, float shadow_range) {
+	LightData* data = GetLightData(light_id);
+	deb_assert(data);
+	data->shadow_range_ = shadow_range;
 }
 
 void Renderer::SetLightPosition(LightID light_id, const vec3& pos) {
@@ -1238,13 +1253,9 @@ unsigned Renderer::UpdateShadowMaps(tbc::GeometryBase* geometry, LightData* clos
 					_shadow_volume->SetRendererData(shadow_geom);
 
 					if (_light_data->type_ == Renderer::kLightDirectional) {
-						_shadow_volume->UpdateShadowVolume(_light_data->direction_,
-										    _light_data->shadow_range_,
-										    true);
+						_shadow_volume->UpdateShadowVolume(_light_data->direction_, _light_data->shadow_range_, true);
 					} else {
-						_shadow_volume->UpdateShadowVolume(_light_data->position_,
-										    _light_data->shadow_range_,
-										    false);
+						_shadow_volume->UpdateShadowVolume(_light_data->position_, _light_data->shadow_range_, false);
 					}
 
 					shadow_volume_table_.Insert(id, shadow_geom);
@@ -1263,18 +1274,14 @@ unsigned Renderer::UpdateShadowMaps(tbc::GeometryBase* geometry, LightData* clos
 					if (x != shadow_volume_table_.End()) {
 						GeometryData* shadow_geom = *x;
 						ShadowVolume* _shadow_volume = (ShadowVolume*)shadow_geom->geometry_;
-						if (!geometry->GetBigOrientationChanged()) {
+						if (!geometry->GetBigOrientationChanged() && !_light_data->transformation_changed_) {
 							// Only update translation if orientation didn't change much.
 							xform _transform(geometry->GetLastBigOrientation(), geometry->GetTransformation().GetPosition());
 							_shadow_volume->SetTransformation(_transform);
 						} else if (_light_data->type_ == Renderer::kLightDirectional) {
-							_shadow_volume->UpdateShadowVolume(_light_data->direction_,
-											    _light_data->shadow_range_,
-											    true);
+							_shadow_volume->UpdateShadowVolume(_light_data->direction_, _light_data->shadow_range_, true);
 						} else {
-							_shadow_volume->UpdateShadowVolume(_light_data->position_,
-											    _light_data->shadow_range_,
-											    false);
+							_shadow_volume->UpdateShadowVolume(_light_data->position_, _light_data->shadow_range_, false);
 						}
 
 						shadows_updated = true;

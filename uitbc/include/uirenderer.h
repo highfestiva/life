@@ -282,6 +282,8 @@ public:
 	bool IsWireframeEnabled() const;
 	void EnablePixelShaders(bool enable);
 	virtual bool IsPixelShadersEnabled() const;
+	void EnableSolidShadows(bool enable);
+	bool IsSolidShadowsEnabled() const;
 
 	// A viewport is a portion of the screen where the graphics will be rendered.
 	// The center of the viewport is also the center of perspective. The viewport may
@@ -389,6 +391,7 @@ public:
 					 unsigned char log2_res,
 					 float near_plane,
 					 float far_plane);
+	void SetShadowRange(LightID light_id, float shadow_range);
 
 	virtual void SetLightPosition(LightID light_id, const vec3& pos);
 	virtual void SetLightDirection(LightID light_id, const vec3& dir);
@@ -570,6 +573,7 @@ protected:
 	bool is_outline_render_enabled_;
 	bool is_wireframe_enabled_;
 	bool is_pixel_shaders_enabled_;
+	bool is_solid_shadows_enabled_;
 
 	// Viewport.
 	PixelRect viewport_;

@@ -1236,9 +1236,9 @@ unsigned OpenGLRenderer::RenderScene() {
 		}
 
 		// Shadow stencil buffer operations.
-		::glEnable(GL_STENCIL_TEST);
-		::glStencilFunc(GL_ALWAYS, 128, 0xFF);
-		::glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+		//::glEnable(GL_STENCIL_TEST);
+		//::glStencilFunc(GL_ALWAYS, 128, 0xFF);
+		//::glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
 
 		// Render all shadow maps. In this step, we only render the shadows
 		// using alpha testing to the stencil buffer (no output to the color buffer).
@@ -1557,10 +1557,15 @@ void OpenGLRenderer::RenderShadowVolumes() {
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glShadeModel(GL_FLAT);
-	glColorMask(0, 0, 0, 0);
-	glDepthMask(GL_FALSE);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_STENCIL_TEST);
+	if (!is_solid_shadows_enabled_) {
+		glStencilFunc(GL_ALWAYS, 128, 0xFF);
+		glColorMask(0, 0, 0, 0);
+		glDepthMask(GL_FALSE);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_STENCIL_TEST);
+	} else {
+		glDisable(GL_CULL_FACE);
+	}
 
 	glDepthFunc(GL_LESS);
 	//glEnable(GL_POLYGON_OFFSET_FILL);
@@ -1578,16 +1583,17 @@ void OpenGLRenderer::RenderShadowVolumes() {
 	}
 
 	// Render shadow volumes in two steps.
-	for (int step = 0; step < 2; step++) {
-		if (step == 0) {
+	const int steps = is_solid_shadows_enabled_ ? 1 : 2;
+	for (int step = 0; step < steps; step++) {
+		if (is_solid_shadows_enabled_) {
+			// Nothing.
+		} else if (step == 0) {
 			// Render back faces.
 			glCullFace(GL_FRONT);
-			glStencilFunc(GL_ALWAYS, 128, 0xFF);
 			glStencilOp(GL_KEEP, GL_INCR, GL_KEEP);
 		} else { // step == 1
 			// Render front faces.
 			glCullFace(GL_BACK);
-			glStencilFunc(GL_ALWAYS, 128, 0xFF);
 			glStencilOp(GL_KEEP, GL_DECR, GL_KEEP);
 		}
 

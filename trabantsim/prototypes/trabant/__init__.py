@@ -133,6 +133,9 @@ class Obj:
 	def col(self, col=None):
 		'''Set color, input is either a 3-tuple (R,G,B) or an html string color such as #ff3 or #304099.'''
 		return gameapi.col(self.id, col)
+	def shadow(self, mode='on'):
+		mode = {'force_off':0, 'off':1, 'on':2, 'force_on':3, None:None}[mode]
+		return gameapi.shadow(self.id, mode)
 	def bounce_in_rect(self,lnb,rft,spring=1):
 		'''Change velocity if position goes outside box defined by left-near-bottom corner (lnb)
 		   and right-far-top corner (rft).'''
@@ -182,6 +185,8 @@ class Obj:
 		return gameapi.create_joint(self.id, joint_type, obj2.id, axis, stop, spring)
 	def release(self):
 		'''Remove the object from the game.'''
+		if self.id == None:
+			return
 		if self.id in _async_loaders:
 			del _async_loaders[self.id]
 		gameapi.releaseobj(self.id)
@@ -230,6 +235,11 @@ class Tap:
 	def movement2(self):
 		'''Returns the magnitude between the tap and it's starting point.'''
 		return (self.x-self.startx)**2+(self.y-self.starty)**2
+	def startpos3d(self, z=None):
+		'''Returns the 3D position where the tap/drag was started.'''
+		if not z:
+			z = _cam_distance
+		return _screen2world(self.startx,self.starty, z)
 	def _distance2(self, x, y):
 		return (self.x-x)**2+(self.y-y)**2
 	def __hash__(self):
@@ -334,7 +344,10 @@ def gametime():
 	return time.time()-_starttime
 
 def sleep(t):
-	'''Wraps time.sleep so you won't have to import it.'''
+	'''Wraps time.sleep so you won't have to import it. Also prevents simulator timeout.'''
+	while t > 0.2:
+		loop(delay=0.2)
+		t -= 0.2
 	time.sleep(t)
 
 def timeout(t=1, timer='default_timer', first_hit=False, reset=False):
@@ -799,7 +812,7 @@ def _normalize_engine_values(engine_type, max_velocity, offset, strength, fricti
 	try:	offset = (float(offset), 0)
 	except:	offset = (0,0) if not offset else offset
 
-	# Offset and max_velocity are used for different purposes for different engines.
+	# Offset and max_velocity are used for different purposes for different engines; they are one and the same.
 	max_velocity = [mv+ov for mv,ov in zip(max_velocity,offset)]
 
 	# Make engine-specific adjustions.

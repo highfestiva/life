@@ -59,7 +59,7 @@ def ai(computer, ball):
 	t = t_peak2head - t_peak2now
 	x = p.x + v.x * t + 0.2
 	if x > 0: # On our side of the net?
-		movex = max(-1,min(+1,x-computer.pos().x))
+		movex = clamp(x-computer.pos().x, -1, +1)
 		jump = 1 if t < 0.2 else 0
 		steer(computer, movex, jump, +1.1, +10)
 	else:

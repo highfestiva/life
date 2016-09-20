@@ -442,6 +442,9 @@ STR_UTIL_TEMPLATE _String STR_UTIL_QUAL::FastDoubleToString(double value) {
 			int digit;
 			if ((digit = _value%10) != 0) {
 				_s[index--] = '0' + typename _String::value_type(digit);
+				++x;
+				_value /= 10;
+				break;
 			}
 		}
 		for (; x < 6; ++x, _value /= 10) {

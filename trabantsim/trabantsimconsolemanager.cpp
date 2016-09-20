@@ -19,6 +19,10 @@ namespace TrabantSim {
 
 
 
+typedef std::ostringstream ostrstream;
+
+
+
 // Must lie before TrabantSimConsoleManager to compile.
 const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::command_id_list_[] =
 {
@@ -62,6 +66,7 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::command_id
 	{"mass", kCommandMass},
 	{"scale", kCommandScale},
 	{"color", kCommandColor},
+	{"shadow", kCommandShadow},
 	{"engine-force", kCommandEngineForce},
 	{"set-tag-floats", kCommandSetTagFloats},
 	{"set-tag-strings", kCommandSetTagStrings},
@@ -215,7 +220,7 @@ void Params2Floats(const strutil::strvec& param, std::vector<float>& floats, siz
 	}
 }
 
-strstream& operator<<(strstream& os, const strutil::strvec& vec) {
+ostrstream& operator<<(ostrstream& os, const strutil::strvec& vec) {
 	int j = 0;
 	for (strutil::strvec::const_iterator i = vec.begin(); i != vec.end(); ++i, ++j) {
 		if (j) {
@@ -226,34 +231,34 @@ strstream& operator<<(strstream& os, const strutil::strvec& vec) {
 	return os;
 }
 
-strstream& operator<<(strstream& os, char c) {
+ostrstream& operator<<(ostrstream& os, char c) {
 	(*(std::ostream*)&os) << c;
 	return os;
 }
 
-strstream& operator<<(strstream& os, const char* s) {
+ostrstream& operator<<(ostrstream& os, const char* s) {
 	(*(std::ostream*)&os) << s;
 	return os;
 }
 
-strstream& operator<<(strstream& os, const str& s) {
+ostrstream& operator<<(ostrstream& os, const str& s) {
 	(*(std::ostream*)&os) << s;
 	return os;
 }
 
-strstream& operator<<(strstream& os, int i) {
+ostrstream& operator<<(ostrstream& os, int i) {
 	return os << strutil::IntToString(i, 10);
 }
 
-strstream& operator<<(strstream& os, float f) {
+ostrstream& operator<<(ostrstream& os, float f) {
 	return os << strutil::FastDoubleToString(f);
 }
 
-strstream& operator<<(strstream& os, const vec3& vec) {
+ostrstream& operator<<(ostrstream& os, const vec3& vec) {
 	return os << vec.x << ' ' << vec.y << ' ' << vec.z;
 }
 
-strstream& operator<<(strstream& os, const quat& _quat) {
+ostrstream& operator<<(ostrstream& os, const quat& _quat) {
 	return os << _quat.a << ' ' << _quat.b << ' ' << _quat.c << ' ' << _quat.d;
 }
 
@@ -292,8 +297,8 @@ const TrabantSimConsoleManager::CommandPair& TrabantSimConsoleManager::GetComman
 
 int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strutil::strvec& parameter_vector) {
 	static bool is_obj_updated = false;
-	strstream active_response;
-	active_response << "ok\n";
+	ostrstream active_response;
+	active_response.write("ok\n", 3);
 	int result = Parent::OnCommand(command, parameter_vector);
 	if (result < 0) {
 		result = 0;
@@ -531,9 +536,9 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					typedef TrabantSimManager::DragList DragList;
 					DragList list;
 					manager->GetTouchDrags(list);
-					int y = 0;
-					for (DragList::iterator x = list.begin(); x != list.end(); ++x, ++y) {
-						if (y) {
+					int i = 0;
+					for (DragList::iterator x = list.begin(); x != list.end(); ++x, ++i) {
+						if (i) {
 							active_response << '\n';
 						}
 						active_response << x->last_.x*sx << ' ' << x->last_.y*sy << ' ' << x->start_.x*sx << ' ' << x->start_.y*sy << ' '
@@ -667,6 +672,14 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					manager->ObjectColor(ParamToInt(parameter_vector, 0), _is_set, value, alpha);
 					if (!_is_set) {
 						active_response << value;
+					}
+				} break;
+				case kCommandShadow: {
+					bool _is_set;
+					int shadow_mode = ParamToInt(parameter_vector, 1, &_is_set);
+					manager->ObjectShadow(ParamToInt(parameter_vector, 0), _is_set, shadow_mode);
+					if (!_is_set) {
+						active_response << shadow_mode;
 					}
 				} break;
 				case kCommandEngineForce: {

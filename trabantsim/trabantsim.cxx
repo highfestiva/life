@@ -130,7 +130,7 @@ void TrabantSim::Init() {
 	v_override(UiCure::GetSettings(), kRtvarUi3DClipnear, 0.1);
 	v_override(UiCure::GetSettings(), kRtvarUi3DClipfar, 20.0);
 	//v_override(UiCure::GetSettings(), kRtvarUi3DShadows, "None");
-	v_override(UiCure::GetSettings(), kRtvarUi3DShadows, "Force:Volumes");
+	v_override(UiCure::GetSettings(), kRtvarUi3DShadows, "Volumes");
 	v_override(UiCure::GetSettings(), kRtvarUi3DClearred, 0.0);
 	v_override(UiCure::GetSettings(), kRtvarUi3DCleargreen, 0.0);
 	v_override(UiCure::GetSettings(), kRtvarUi3DClearblue, 0.0);

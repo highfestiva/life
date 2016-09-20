@@ -134,6 +134,7 @@ public:
 	void Mass(int object_id, bool _set, float& mass);
 	void Scale(int object_id, bool _set, vec3& scale);
 	void ObjectColor(int object_id, bool _set, vec3& color, float alpha);
+	void ObjectShadow(int object_id, bool _set, int& shadow_mode);
 	void EngineForce(int object_id, int engine_index, bool _set, vec3& force);
 	void AddTag(int object_id, const str& tag_type, const FloatList& floats, const StringList& strings, const IntList& phys, const IntList& engines, const IntList& meshes);
 

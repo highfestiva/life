@@ -69,6 +69,7 @@ protected:
 		kCommandMass,
 		kCommandScale,
 		kCommandColor,
+		kCommandShadow,
 		kCommandEngineForce,
 		kCommandSetTagFloats,
 		kCommandSetTagStrings,
