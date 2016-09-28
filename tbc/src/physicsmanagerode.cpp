@@ -571,8 +571,12 @@ vec3 PhysicsManagerODE::GetBodyPosition(BodyID body_id) const {
 		return (vec3());
 	}
 
+	if (_object->body_id_) {
+		const dReal* _position = dBodyGetPosition(_object->body_id_);
+		return vec3(_position);
+	}
 	const dReal* _position = dGeomGetPosition(_object->geom_id_);
-	return (vec3(_position[0], _position[1], _position[2]));
+	return vec3(_position);
 }
 
 void PhysicsManagerODE::SetBodyPosition(BodyID body_id, const vec3& position) const {

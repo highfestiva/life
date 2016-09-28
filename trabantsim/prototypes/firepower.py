@@ -75,7 +75,7 @@ while loop():
     # Auto aim and shooting.
     if closest_tap(tankpos):
         target_pos,reset_turret = closest_tap(tankpos).pos3d(),False
-        timeout(reset=True)
+        timeout_restart()
     elif timeout(10.0):
         turret_turn.force(0)    # Stop following target after some seconds.
         target_pos,reset_turret = None,not target_pos   # Double that time, we rotate turret forward again.

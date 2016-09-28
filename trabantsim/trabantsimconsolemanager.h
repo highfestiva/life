@@ -61,6 +61,7 @@ protected:
 		kCommandDeleteEngine,
 		kCommandCreateJoint,
 		kCommandPosition,
+		kCommandPositionObjects,
 		kCommandOrientation,
 		kCommandVelocity,
 		kCommandAngularVelocity,

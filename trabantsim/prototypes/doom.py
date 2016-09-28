@@ -82,7 +82,7 @@ is_shoot_tap = lambda: (fasttap() or check_reset_time_tap()) if is_touch_device(
 
 # Setup without gravity so things don't move around until everything loaded.
 bg(col='#421')
-gravity((0,0,0))
+gravity((0,0,0), friction=0)
 collisions(False)
 
 # Load map, i.e. place the pre-calculated boxes.
@@ -228,7 +228,6 @@ yaw,pitch = 0,0
 
 collisions(True)
 gravity((0,0,-30), friction=1, bounce=4)    # Higer gravity to keep player against ground. Bounce is a state variable. We want bouncing grenades.
-userinfo()
 
 while loop():
     pos = player.pos()

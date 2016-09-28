@@ -86,6 +86,7 @@ project.xcworkspace/
 xcuserdata/
 __pycache__/
 .codelite/
+.vscode/
 ThirdParty/libogg-1.2.2/config.h
 ThirdParty/libogg-1.2.2/config.status
 ThirdParty/libogg-1.2.2/include/ogg/config_types.h

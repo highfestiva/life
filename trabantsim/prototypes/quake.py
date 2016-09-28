@@ -83,7 +83,7 @@ gravity((0,0,-15), friction=1, bounce=4)    # Higer gravity than Earth in Quake.
 
 # Touch device controls.
 fasttap = lambda: timein(0.2, timer=5) and bool(taps()) and taps()[0].isrelease
-check_reset_time_tap = lambda: not taps() and timeout(timer=5, reset=True)
+check_reset_time_tap = lambda: not taps() and timeout_restart(timer=5)
 is_shoot_tap = lambda: (fasttap() or check_reset_time_tap()) if is_touch_device() else click(left=True)
 
 while loop():
@@ -133,7 +133,7 @@ while loop():
     # Respawn powerup.
     if not powerup and timeout(10, timer=3):
         powerup = create_box(vec3(0,-25.5,1.5), side=0.5, mat='flat', col='#ff0')
-        timeout(timer=3, reset=True)    # Erase timeout to avoid immediate spawn next time.
+        timeout_restart(timer=3)    # Erase timeout to avoid immediate spawn next time.
 
     # Explode grenades and remove missed grenades.
     for g in list(grenades):

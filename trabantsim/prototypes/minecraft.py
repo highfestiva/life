@@ -22,7 +22,7 @@ fg(col='#3a4')    # Build in green color.
 # Touch device controls.
 fasttap = lambda: taps()[0].isrelease and timein(0.4, timer=3)
 holdtap = lambda: taps()[0].movement2()<3e-5 and timeout(0.6, timer=3)
-reset_time_tap = lambda: timeout(timer=3, reset=True)
+reset_time_tap = lambda: timeout_restart(timer=3)
 is_add_tap = lambda: fasttap() if is_touch_device() else click(right=True)
 is_remove_tap = lambda: holdtap() if is_touch_device() else click(left=True)
 

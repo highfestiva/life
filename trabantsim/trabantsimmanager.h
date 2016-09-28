@@ -126,6 +126,7 @@ public:
 	int CreateEngine(int object_id, const str& engine_type, const vec2& max_velocity, float strength, float friction, const EngineTargetList& engine_targets);
 	int CreateJoint(int object_id, const str& joint_type, int other_object_id, const vec3& axis, const vec2& stop, const vec2& spring_settings);
 	void Position(int object_id, bool _set, vec3& position);
+	void PositionObjects(const vec3& position, std::vector<int> object_ids);
 	void Orientation(int object_id, bool _set, quat& orientation);
 	void Velocity(int object_id, bool _set, vec3& velocity);
 	void AngularVelocity(int object_id, bool _set, vec3& angular_velocity);
@@ -133,7 +134,7 @@ public:
 	void Torque(int object_id, bool _set, vec3& torque);
 	void Mass(int object_id, bool _set, float& mass);
 	void Scale(int object_id, bool _set, vec3& scale);
-	void ObjectColor(int object_id, bool _set, vec3& color, float alpha);
+	void ObjectColor(int object_id, bool _set, vec3& color, float alpha, float ambient);
 	void ObjectShadow(int object_id, bool _set, int& shadow_mode);
 	void EngineForce(int object_id, int engine_index, bool _set, vec3& force);
 	void AddTag(int object_id, const str& tag_type, const FloatList& floats, const StringList& strings, const IntList& phys, const IntList& engines, const IntList& meshes);

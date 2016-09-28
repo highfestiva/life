@@ -26,7 +26,6 @@ accurate_ascii_generate(False)    # Optimization to load faster.
 
 userinfo('Loading level...')
 level = create_ascii_object(level, pos=(0,0,0), col='#00f', static=True)
-userinfo()
 def ball(pos, col):
     ball = create_sphere(radius=0.4, pos=pos, col=col)
     ball.create_engine(push_abs_engine)

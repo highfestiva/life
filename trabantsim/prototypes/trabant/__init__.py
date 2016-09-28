@@ -23,9 +23,9 @@ class _flushfile:
 		self.f.flush()
 sys.stdout = _flushfile(sys.stdout)
 
-roll_turn_engine,roll_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine,vel_abs_xy_engine,\
-	gyro_engine,rotor_engine,tilt_engine,slider_engine,stabilize,upright_stabilize,forward_stabilize = \
-		'roll_turn roll walk_abs push_abs push_rel push_turn_abs push_turn_rel vel_abs_xy gyro rotor tilt slider stabilize upright_stabilize forward_stabilize'.split()
+roll_turn_engine,roll_engine,roll_brake_engine,walk_abs_engine,push_abs_engine,push_rel_engine,push_turn_abs_engine,push_turn_rel_engine, \
+	vel_abs_xy_engine,gyro_engine,rotor_engine,tilt_engine,slider_engine,stabilize,upright_stabilize,forward_stabilize = \
+		'roll_turn roll roll_brake walk_abs push_abs push_rel push_turn_abs push_turn_rel vel_abs_xy gyro rotor tilt slider stabilize upright_stabilize forward_stabilize'.split()
 hinge_joint,suspend_hinge_joint,turn_hinge_joint,slider_joint,ball_joint,fixed_joint = 'hinge suspend_hinge turn_hinge slider ball fixed'.split()
 sound_clank,sound_bang,sound_engine_hizz,sound_engine_wobble,sound_engine_combustion,sound_engine_rotor = 'clank bang hizz wobble combustion rotor'.split()
 
@@ -89,10 +89,14 @@ class Obj:
 		self.gfx = gfx
 		self.phys = phys
 		self.isloaded = False
+		self.jointed = set()
 	def pos(self, pos=None, orientation=None):
 		'''Orientation is a quaternion.'''
 		if pos:
-			gameapi.pos(self.id, pos)
+			if self.jointed:
+				self._teleport(pos)
+			else:
+				gameapi.pos(self.id, pos)
 		if orientation:
 			gameapi.orientation(self.id, orientation)
 		if not pos and not orientation:
@@ -133,9 +137,6 @@ class Obj:
 	def col(self, col=None):
 		'''Set color, input is either a 3-tuple (R,G,B) or an html string color such as #ff3 or #304099.'''
 		return gameapi.col(self.id, col)
-	def shadow(self, mode='on'):
-		mode = {'force_off':0, 'off':1, 'on':2, 'force_on':3, None:None}[mode]
-		return gameapi.shadow(self.id, mode)
 	def bounce_in_rect(self,lnb,rft,spring=1):
 		'''Change velocity if position goes outside box defined by left-near-bottom corner (lnb)
 		   and right-far-top corner (rft).'''
@@ -182,6 +183,8 @@ class Obj:
 		'''Create a joint between two objects. The stop parameter contains low and high stops, in hinge-type
 		   joints this is the low and high angle (in radians).'''
 		self.last_joint_axis = tovec3(axis)
+		self.jointed.add(obj2)
+		obj2.jointed.add(self)
 		return gameapi.create_joint(self.id, joint_type, obj2.id, axis, stop, spring)
 	def release(self):
 		'''Remove the object from the game.'''
@@ -198,6 +201,17 @@ class Obj:
 	def released(self):
 		'''Check if an object is still present in the game.'''
 		return self.id == None
+	def _teleport(self, pos):
+		def get_island(obj, jointed):
+			obj.jointed = set(o for o in obj.jointed if not o.released())
+			new_obj = obj.jointed - jointed
+			jointed.update(obj.jointed)
+			for o in new_obj:
+				get_island(o, jointed)
+		objs = {self}
+		get_island(self, objs)
+		objs -= {self}
+		gameapi.posobjs([self.id]+[o.id for o in objs], pos)
 	def __str__(self):
 		return '%s %s' % (self.name,str(self.id) if self.id!=None else '<deleted>')
 	def __repr__(self):
@@ -295,13 +309,15 @@ def debugsim(enable=True):
 	gameapi.debugsim(enable)
 
 def async_load(enable=True):
-    global _async_load
-    _async_load = enable
+	global _async_load
+	_async_load = enable
 
-def userinfo(message=''):
+def userinfo(message='', timeout=1):
 	'''Shows a message dialog to the user. Dismiss dialog by calling without parameters.'''
 	_tryinit()
 	gameapi.userinfo(message)
+	if message and timeout:
+		timer_callback(timeout, userinfo)
 
 def loop(delay=0.03, end_after=None):
 	'''Call this every loop, check return value if you should continue looping.'''
@@ -317,7 +333,7 @@ def loop(delay=0.03, end_after=None):
 		t,func = t_func
 		if timeout(t, timer):
 			del _timer_callbacks[timer]
-			timeout(timer=timer, reset=True)
+			timeout_restart(timer=timer)
 			func()
 	if _async_loaders:
 		loaded = gameapi.areloaded(_async_loaders.keys())
@@ -329,7 +345,7 @@ def loop(delay=0.03, end_after=None):
 	if _want_mousemove:
 		_mousemove = tovec3([float(a) for a in gameapi.mousemove().split()])
 	if end_after and timeout(end_after, timer='exit'):
-		timeout(timer='exit', reset=True)	# Remove timer.
+		timeout_restart(timer='exit')	# Remove timer.
 		return False
 	if _lastloop_recv_cnt == gameapi.sock.recv_cnt:
 		# Nothing exchanged with simulation client during last loop. Avoid timeout/resend.
@@ -346,11 +362,12 @@ def gametime():
 def sleep(t):
 	'''Wraps time.sleep so you won't have to import it. Also prevents simulator timeout.'''
 	while t > 0.2:
+		s = time.time()
 		loop(delay=0.2)
-		t -= 0.2
+		t -= time.time()-s
 	time.sleep(t)
 
-def timeout(t=1, timer='default_timer', first_hit=False, reset=False):
+def timeout(t=1, timer='default_timer', first_hit=False):
 	'''Will check if t seconds elapsed since first called. If first_hit is true, it will elapse
 	   immediately on first call. You can run several simultaneous timers, use the timer parameter
 	   to select which one. Uses the same timers as timein().'''
@@ -359,23 +376,33 @@ def timeout(t=1, timer='default_timer', first_hit=False, reset=False):
 		_timers[timer] = time.time()
 		if first_hit:
 			return True
-	if reset:
-		del _timers[timer]
-		return False
 	if time.time() - _timers[timer] > t:
 		_timers[timer] = time.time()
 		return True
 	return False
 
-def timein(t, timer='default_timer'):
-	'''Checks if a less than t seconds elapsed since last called. Uses the same times as timeout().'''
+def timein(t, timer='default_timer', auto_start=True):
+	'''Checks if a less than t seconds elapsed since last called. Uses the same timers as timeout().'''
 	global _timers
 	if not timer in _timers:
+		if not auto_start:
+			return False
 		_timers[timer] = time.time()
 	if time.time() - _timers[timer] < t:
 		return True
 	del _timers[timer]
 	return False
+
+def timeout_restart(timer='default_timer', seconds=None):
+	global _timers
+	if seconds != None:
+		_timers[timer] = time.time() - seconds
+		return
+	if timer in _timers:
+		del _timers[timer]
+
+def timein_restart(timer='default_timer', seconds=0):
+	timeout_restart(timer, seconds)
 
 def timer_callback(t, func):
 	global _timer_callbacks
@@ -628,7 +655,7 @@ def keydir():
 	'''Returns the keyboard input direction as a 3D vector. X and Y is controlled by arrow keys
 	   up/down/left/right and by WSAD. +Z is controlled by Space, -Z is controlled by Shift.'''
 	directions = vec3()
-	directions += vec3(0,+1,0) if    'Up' in keys() or 'W' in keys() else vec3()
+	directions += vec3(0,+1,0) if	'Up' in keys() or 'W' in keys() else vec3()
 	directions += vec3(0,-1,0) if  'Down' in keys() or 'S' in keys() else vec3()
 	directions += vec3(-1,0,0) if  'Left' in keys() or 'A' in keys() else vec3()
 	directions += vec3(+1,0,0) if 'Right' in keys() or 'D' in keys() else vec3()
@@ -779,8 +806,13 @@ def _create_object(gfx, phys, static, trigger, pos, orientation, vel, avel, mass
 	o = Obj(oid,gfx,phys)
 	stack = inspect.stack()
 	name,stax = None,2
-	while len(stack) > stax and 'create' in stack[stax][3]:
-		name = stack[stax][3].replace('create','').strip('_')
+	while len(stack) > stax:
+		fname = stack[stax][3]
+		if 'create' in fname:
+			name = fname.replace('create','').strip('_')
+			break
+		elif 'lambda' not in fname and 'listcomp' not in fname:
+			break
 		stax += 1
 	if not name and len(phys) == 1:
 		name = str(type(phys[0])).split('.')[-1].split("'")[0].replace('Phys','').lower()
@@ -822,6 +854,10 @@ def _normalize_engine_values(engine_type, max_velocity, offset, strength, fricti
 	elif engine_type == roll_engine:
 		max_velocity[0] = 100 if not max_velocity[0] else max_velocity[0]
 		max_velocity[1] = -20 if not max_velocity[1] else max_velocity[1]
+		strength *= 10
+	elif engine_type == roll_brake_engine:
+		max_velocity[0] = 0.1 if not max_velocity[0] else max_velocity[0]
+		max_velocity[1] = 0.1 if not max_velocity[1] else max_velocity[1]
 		strength *= 10
 	elif engine_type in (walk_abs_engine, push_abs_engine, push_rel_engine, vel_abs_xy_engine):
 		max_velocity[0] = 20 if not max_velocity[0] else max_velocity[0]

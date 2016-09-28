@@ -81,9 +81,7 @@ while loop():
 		# Pause simulation and let user see ball hitting ground.
 		haltsim(True)
 		userinfo('Inferior human controlled slime wins.' if ball.pos().x>0 else 'Angry red slimonds wins.')
-		while timein(1) and loop():
-			pass
-		userinfo('')
+		sleep(1)
 		# Reset positions.
 		[avatar.engines[-1].force((0,0,0)) for avatar in (player,computer)]
 		def reset(obj, p):

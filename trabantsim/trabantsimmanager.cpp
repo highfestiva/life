@@ -248,11 +248,11 @@ void TrabantSimManager::UserReset() {
 int TrabantSimManager::CreateObject(const quat& orientation, const vec3& position, const MeshObject& gfx_object, const PhysObjectArray& phys_objects,
 					ObjectMaterial material, bool is_static, bool is_trigger, bool same_as_previous) {
 	quat pq, rootq;
-	Object* _object = (Object*)CreateContextObject("object");
+	Object* object = (Object*)CreateContextObject("object");
 	tbc::ChunkyPhysics* physics = new tbc::ChunkyPhysics(tbc::BoneHierarchy::kTransformLocal2World, is_static? tbc::ChunkyPhysics::kStatic : tbc::ChunkyPhysics::kDynamic);
 	physics->SetGuideMode(tbc::ChunkyPhysics::kGuideAlways);
 	if (phys_objects.empty()) {
-		_object->SetPhysicsTypeOverride(cure::kPhysicsOverrideBones);
+		object->SetPhysicsTypeOverride(cure::kPhysicsOverrideBones);
 		physics->SetBoneCount(1);
 		tbc::ChunkyBoneGeometry::BodyData bone_data(0,0,0);
 		tbc::ChunkyBoneGeometry* bone = new tbc::ChunkyBoneSphere(bone_data);
@@ -331,7 +331,7 @@ int TrabantSimManager::CreateObject(const quat& orientation, const vec3& positio
 			}
 		}
 	}
-	_object->SetRootOrientation(pq);
+	object->SetRootOrientation(pq);
 	if (!gfx_object.vertices_.empty() && !gfx_object.indices_.empty()) {
 		float r,g,b,a;
 		if (material == MaterialChecker) {
@@ -344,30 +344,30 @@ int TrabantSimManager::CreateObject(const quat& orientation, const vec3& positio
 		}
 		vec3 _color(r,g,b);
 		const bool is_smooth = (material == MaterialSmooth);
-		uitbc::TriangleBasedGeometry* _mesh = _object->CreateGfxMesh(gfx_object.vertices_, gfx_object.indices_, _color, a, is_smooth);
+		uitbc::TriangleBasedGeometry* _mesh = object->CreateGfxMesh(gfx_object.vertices_, gfx_object.indices_, _color, a, is_smooth);
 		if (!_mesh) {
-			delete _object;
+			delete object;
 			return -1;
 		}
 		const str texture = (material==MaterialChecker)? "checker.png" : "noise.png";
 		if (material == MaterialChecker || material == MaterialNoise) {
 			const float _scale = (fabs(gfx_object.vertices_[gfx_object.vertices_.size()-3]-gfx_object.vertices_[0]) >= 60)? 20.0f : 2.0f;
 			AddCheckerTexturing(_mesh, _scale);
-			_object->LoadTexture(texture);
+			object->LoadTexture(texture);
 		}
-		_object->AddMeshResource(_mesh, is_static? 0 : 1);
-		_object->AddMeshInfo(_object->GetMeshResource(0)->GetName(), "texture", texture, _color, a);
-		_object->GetMeshResource(0)->offset_.offset_.orientation_ = gfx_object.orientation_;
-		_object->GetMeshResource(0)->offset_.offset_.position_ = gfx_object.pos_;
+		object->AddMeshResource(_mesh, is_static? 0 : 1);
+		object->AddMeshInfo(object->GetMeshResource(0)->GetName(), "texture", texture, _color, a);
+		object->GetMeshResource(0)->offset_.offset_.orientation_ = gfx_object.orientation_;
+		object->GetMeshResource(0)->offset_.offset_.position_ = gfx_object.pos_;
 	}
-	_object->initial_orientation_ = pq;
-	_object->initial_inverse_orientation_ = pq.GetInverse();
-	_object->generated_physics_ = physics;
-	_object->same_as_previous_ = same_as_previous;
+	object->initial_orientation_ = pq;
+	object->initial_inverse_orientation_ = pq.GetInverse();
+	object->generated_physics_ = physics;
+	object->same_as_previous_ = same_as_previous;
 
 	cure::GameObjectId object_id = GetContext()->AllocateGameObjectId(cure::kNetworkObjectLocalOnly);
 	ScopeLock object_lock(&objects_lock_);
-	created_objects_.insert(ContextObjectTable::value_type(object_id, _object));
+	created_objects_.insert(ContextObjectTable::value_type(object_id, object));
 	return object_id;
 }
 
@@ -408,31 +408,31 @@ void TrabantSimManager::CreateClones(IntList& created_object_ids, int original_i
 	}
 	{
 		for (XformList::const_iterator x = placements.begin(); x != placements.end(); ++x) {
-			Object* _object = (Object*)Parent::CreateContextObject("object", cure::kNetworkObjectLocallyControlled, 0);
-			_object->SetPhysicsTypeOverride(is_static? cure::kPhysicsOverrideStatic : cure::kPhysicsOverrideDynamic);
+			Object* object = (Object*)Parent::CreateContextObject("object", cure::kNetworkObjectLocallyControlled, 0);
+			object->SetPhysicsTypeOverride(is_static? cure::kPhysicsOverrideStatic : cure::kPhysicsOverrideDynamic);
 			{
 				const quat pq = x->orientation_;
-				_object->SetRootOrientation(pq);
-				_object->SetRootPosition(x->position_ - original_xform.GetPosition());
+				object->SetRootOrientation(pq);
+				object->SetRootPosition(x->position_ - original_xform.GetPosition());
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesPhys);
-					_object->CreatePhysicsRef(phys_name);
+					object->CreatePhysicsRef(phys_name);
 				}
 				const str texture = (material==MaterialChecker)? "checker.png" : "noise.png";
 				if (material == MaterialChecker || material == MaterialNoise) {
 					LEPRA_MEASURE_SCOPE(CreateClonesTexture);
-					_object->LoadTexture(texture);
+					object->LoadTexture(texture);
 				}
-				_object->AddMeshInfo(mesh_name, "texture", texture, _color, a, is_smooth);
+				object->AddMeshInfo(mesh_name, "texture", texture, _color, a, is_smooth);
 				{
 					LEPRA_MEASURE_SCOPE(CreateClonesMesh);
-					_object->AddMeshResourceRef(mesh_name, is_static? -1 : 1);
+					object->AddMeshResourceRef(mesh_name, is_static? -1 : 1);
 				}
-				_object->GetMeshResource(0)->offset_.offset_ = original_offset_xform;
-				_object->initial_orientation_ = pq;
-				_object->initial_inverse_orientation_ = pq.GetInverse();
-				objects_.insert(_object->GetInstanceId());
-				created_object_ids.push_back(_object->GetInstanceId());
+				object->GetMeshResource(0)->offset_.offset_ = original_offset_xform;
+				object->initial_orientation_ = pq;
+				object->initial_inverse_orientation_ = pq.GetInverse();
+				objects_.insert(object->GetInstanceId());
+				created_object_ids.push_back(object->GetInstanceId());
 			}
 		}
 	}
@@ -655,21 +655,24 @@ float TrabantSimManager::GetAspectRatio() const {
 int TrabantSimManager::CreateEngine(int object_id, const str& engine_type, const vec2& max_velocity, float strength, float friction, const EngineTargetList& engine_targets) {
 	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
 	ScopeLock game_lock(GetTickLock());
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object) {
 		return -1;
 	}
 
 	bool is_attachment = false;
 	tbc::PhysicsEngine::EngineType _engine_type;
 	vec2 _max_velocity(max_velocity);
-	float _strength = strength * _object->GetMass();
+	float _strength = strength * object->GetMass();
 	float _friction = friction*2;
 	if (engine_type == "roll_turn") {
 		_engine_type = tbc::PhysicsEngine::kEngineHinge2Turn;
 		is_attachment = true;
 	} else if (engine_type == "roll") {
 		_engine_type = tbc::PhysicsEngine::kEngineHingeRoll;
+		is_attachment = true;
+	} else if (engine_type == "roll_brake") {
+		_engine_type = tbc::PhysicsEngine::kEngineHingeBrake;
 		is_attachment = true;
 	} else if (engine_type == "walk_abs") {
 		_engine_type = tbc::PhysicsEngine::kEngineWalk;
@@ -710,9 +713,9 @@ int TrabantSimManager::CreateEngine(int object_id, const str& engine_type, const
 
 	EngineTargetList targets(engine_targets);
 	if (targets.empty()) {
-		Object::Array objects = _object->GetAttachedObjects();
+		Object::Array objects = object->GetAttachedObjects();
 		cure::ContextObject* last_attached_object = objects.empty()? 0 : objects.back();
-		cure::ContextObject* engine_object = is_attachment? last_attached_object : _object;
+		cure::ContextObject* engine_object = is_attachment? last_attached_object : object;
 		if (!engine_object) {
 			log_.Warningf("No object attached to create a %s engine to.", engine_type.c_str());
 			return -1;
@@ -720,29 +723,29 @@ int TrabantSimManager::CreateEngine(int object_id, const str& engine_type, const
 		targets.push_back(EngineTarget(engine_object->GetInstanceId(),1));
 	}
 
-	tbc::PhysicsEngine* engine = new tbc::PhysicsEngine(_engine_type, _strength, _max_velocity.x, _max_velocity.y, _friction, _object->GetPhysics()->GetEngineCount()*4);
+	tbc::PhysicsEngine* engine = new tbc::PhysicsEngine(_engine_type, _strength, _max_velocity.x, _max_velocity.y, _friction, object->GetPhysics()->GetEngineCount()*4);
 	for (EngineTargetList::iterator x = targets.begin(); x != targets.end(); ++x) {
 		cure::ContextObject* engine_object = GetContext()->GetObject(x->instance_id_);
 		tbc::ChunkyBoneGeometry* geometry = engine_object->GetPhysics()->GetBoneGeometry(0);
 		engine->AddControlledGeometry(geometry, x->strength_);
 	}
-	_object->GetPhysics()->AddEngine(engine);
+	object->GetPhysics()->AddEngine(engine);
 	if (is_attachment) {
 		for (EngineTargetList::iterator x = targets.begin(); x != targets.end(); ++x) {
 			cure::ContextObject* engine_object = GetContext()->GetObject(x->instance_id_);
-			_object->AddAttachedObjectEngine(engine_object, engine);
+			object->AddAttachedObjectEngine(engine_object, engine);
 		}
 	}
-	GetContext()->EnableMicroTickCallback(_object);
-	return _object->GetPhysics()->GetEngineCount()-1;
+	GetContext()->EnableMicroTickCallback(object);
+	return object->GetPhysics()->GetEngineCount()-1;
 }
 
 int TrabantSimManager::CreateJoint(int object_id, const str& joint_type, int other_object_id, const vec3& axis, const vec2& stop, const vec2& spring_settings) {
 	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
 	ScopeLock game_lock(GetTickLock());
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
+	Object* object = (Object*)GetContext()->GetObject(object_id);
 	Object* _object2 = (Object*)GetContext()->GetObject(other_object_id);
-	if (!_object || !_object2) {
+	if (!object || !_object2) {
 		return -1;
 	}
 
@@ -761,7 +764,7 @@ int TrabantSimManager::CreateJoint(int object_id, const str& joint_type, int oth
 		type = tbc::ChunkyBoneGeometry::kConnectorSuspendHinge;
 		spring_constant = (spring_constant<=0)? 22 : spring_constant;
 		spring_damping = (spring_damping<=0)? 0.8f : spring_damping;
-		spring_constant *= _object->GetMass() * 100;
+		spring_constant *= object->GetMass() * 100;
 	} else if (joint_type == "turn_hinge") {
 		type = tbc::ChunkyBoneGeometry::kConnectorHinge2;
 		if (lo_stop == 0 && hi_stop == 0) {
@@ -770,7 +773,7 @@ int TrabantSimManager::CreateJoint(int object_id, const str& joint_type, int oth
 		}
 		spring_constant = (spring_constant<=0)? 22 : spring_constant;
 		spring_damping = (spring_damping<=0)? 0.8f : spring_damping;
-		spring_constant *= _object->GetMass() * 100;
+		spring_constant *= object->GetMass() * 100;
 	} else if (joint_type == "ball") {
 		type = tbc::ChunkyBoneGeometry::kConnectorBall;
 	} else if (joint_type == "slider") {
@@ -788,8 +791,8 @@ int TrabantSimManager::CreateJoint(int object_id, const str& joint_type, int oth
 		return -1;
 	}
 
-	_object->GetPhysics()->GetBoneGeometry(0)->ClearConnectorTypes();
-	_object->GetPhysics()->GetBoneGeometry(0)->AddConnectorType(type);
+	object->GetPhysics()->GetBoneGeometry(0)->ClearConnectorTypes();
+	object->GetPhysics()->GetBoneGeometry(0)->AddConnectorType(type);
 	tbc::ChunkyBoneGeometry::BodyDataBase& body_data = _object2->GetPhysics()->GetBoneGeometry(0)->GetBodyData();
 	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamEulerTheta] = axis.GetPolarCoordAngleZ();
 	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamEulerPhi] = axis.GetAngle(vec3(0,0,1));
@@ -800,198 +803,225 @@ int TrabantSimManager::CreateJoint(int object_id, const str& joint_type, int oth
 	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamOffsetX] = 0;
 	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamOffsetY] = 0;
 	body_data.parameter_[tbc::ChunkyBoneGeometry::kParamOffsetZ] = 0;
-	_object->AttachToObjectByBodyIndices(0, _object2, 0);
-	const float total_mass = _object->GetMass() + _object2->GetMass();
-	_object->SetMass(total_mass);	// Avoid collision sounds.
+	object->AttachToObjectByBodyIndices(0, _object2, 0);
+	const float total_mass = object->GetMass() + _object2->GetMass();
+	object->SetMass(total_mass);	// Avoid collision sounds.
 	_object2->SetMass(total_mass);
 	return 0;
 }
 
 void TrabantSimManager::Position(int object_id, bool _set, vec3& position) {
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object || !object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
 	if (_set) {
 		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->SetBodyPosition(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), position);
-		if (_object->GetPhysics()->GetPhysicsType() == tbc::ChunkyPhysics::kStatic) {
+		GetMaster()->GetPhysicsManager(true)->SetBodyPosition(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), position);
+		if (object->GetPhysics()->GetPhysicsType() == tbc::ChunkyPhysics::kStatic) {
 			ScopeLock game_lock(GetTickLock());
-			_object->UiMove();
+			object->UiMove();
 		}
 	} else {
-		position = GetMaster()->GetPhysicsManager(true)->GetBodyPosition(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+		position = GetMaster()->GetPhysicsManager(true)->GetBodyPosition(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+	}
+}
+
+void TrabantSimManager::PositionObjects(const vec3& position, std::vector<int> object_ids) {
+	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+	ScopeLock game_lock(GetTickLock());
+	bool is_diff_set = false;
+	vec3 diff;
+	for (std::vector<int>::const_iterator oid = object_ids.begin(); oid != object_ids.end(); ++oid) {
+		Object* object = (Object*)GetContext()->GetObject(*oid);
+		if (!object || !object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+			continue;
+		}
+		tbc::ChunkyBoneGeometry* bone = object->GetPhysics()->GetBoneGeometry(0);
+		if (bone->GetBodyData().joint_type_ == tbc::ChunkyBoneGeometry::kJointFixed) {
+			continue;
+		}
+		if (!is_diff_set) {
+			diff = position - GetMaster()->GetPhysicsManager(true)->GetBodyPosition(bone->GetBodyId());
+			is_diff_set = true;
+		}
+		const vec3 pos = GetMaster()->GetPhysicsManager(true)->GetBodyPosition(bone->GetBodyId());
+		GetMaster()->GetPhysicsManager(true)->SetBodyPosition(bone->GetBodyId(), pos+diff);
+		if (object->GetPhysics()->GetPhysicsType() == tbc::ChunkyPhysics::kStatic) {
+			object->UiMove();
+		}
 	}
 }
 
 void TrabantSimManager::Orientation(int object_id, bool _set, quat& orientation) {
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object || !object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
 	if (_set) {
-		orientation = orientation * _object->initial_orientation_;
+		orientation = orientation * object->initial_orientation_;
 		if (orientation.GetNorm() < 0.5) {
 			return;
 		}
 		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->SetBodyOrientation(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), orientation);
-		if (_object->GetPhysics()->GetPhysicsType() == tbc::ChunkyPhysics::kStatic) {
+		GetMaster()->GetPhysicsManager(true)->SetBodyOrientation(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), orientation);
+		if (object->GetPhysics()->GetPhysicsType() == tbc::ChunkyPhysics::kStatic) {
 			ScopeLock game_lock(GetTickLock());
-			_object->UiMove();
+			object->UiMove();
 		}
 	} else {
-		quat _orientation = GetMaster()->GetPhysicsManager(true)->GetBodyOrientation(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
-		orientation = _orientation * _object->initial_inverse_orientation_;
+		quat _orientation = GetMaster()->GetPhysicsManager(true)->GetBodyOrientation(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+		orientation = _orientation * object->initial_inverse_orientation_;
 	}
 }
 
 void TrabantSimManager::Velocity(int object_id, bool _set, vec3& velocity) {
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object || !object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
 	if (_set) {
 		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->SetBodyVelocity(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), velocity);
+		GetMaster()->GetPhysicsManager(true)->SetBodyVelocity(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), velocity);
 	} else {
-		GetMaster()->GetPhysicsManager(true)->GetBodyVelocity(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), velocity);
+		GetMaster()->GetPhysicsManager(true)->GetBodyVelocity(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), velocity);
 	}
 }
 
 void TrabantSimManager::AngularVelocity(int object_id, bool _set, vec3& angular_velocity) {
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object || !object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
 	if (_set) {
 		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->SetBodyAngularVelocity(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), angular_velocity);
+		GetMaster()->GetPhysicsManager(true)->SetBodyAngularVelocity(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), angular_velocity);
 	} else {
-		GetMaster()->GetPhysicsManager(true)->GetBodyAngularVelocity(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), angular_velocity);
+		GetMaster()->GetPhysicsManager(true)->GetBodyAngularVelocity(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), angular_velocity);
 	}
 }
 
 void TrabantSimManager::Force(int object_id, bool _set, vec3& force) {
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object || !object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
 	if (_set) {
 		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->AddForce(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), force);
+		GetMaster()->GetPhysicsManager(true)->AddForce(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), force);
 	}
 	else {
-		GetMaster()->GetPhysicsManager(true)->GetBodyAcceleration(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), 1, force);
+		GetMaster()->GetPhysicsManager(true)->GetBodyAcceleration(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), 1, force);
 	}
 }
 
 void TrabantSimManager::Torque(int object_id, bool _set, vec3& torque) {
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object || !object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
 	if (_set) {
 		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->SetBodyTorque(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), torque);
+		GetMaster()->GetPhysicsManager(true)->SetBodyTorque(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), torque);
 	}
 	else {
-		GetMaster()->GetPhysicsManager(true)->GetBodyTorque(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), torque);
+		GetMaster()->GetPhysicsManager(true)->GetBodyTorque(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), torque);
 	}
 }
 
 void TrabantSimManager::Mass(int object_id, bool _set, float& mass) {
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object || !object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
 	if (_set) {
 		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
-		GetMaster()->GetPhysicsManager(true)->SetBodyMass(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), mass);
-		_object->QueryMass();
+		GetMaster()->GetPhysicsManager(true)->SetBodyMass(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), mass);
+		object->QueryMass();
 	} else {
-		mass = GetMaster()->GetPhysicsManager(true)->GetBodyMass(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
+		mass = GetMaster()->GetPhysicsManager(true)->GetBodyMass(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId());
 	}
 }
 
 void TrabantSimManager::Scale(int object_id, bool _set, vec3& scale) {
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object || !_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object || !object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
 		return;
 	}
 	if (_set) {
 		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
-		const float prev_scale = _object->GetMeshResource(0)->GetRamData()->GetScale();
-		GetMaster()->GetPhysicsManager(true)->Scale(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), scale/prev_scale);
-		_object->GetMeshResource(0)->GetRamData()->SetScale(scale.x);
+		const float prev_scale = object->GetMeshResource(0)->GetRamData()->GetScale();
+		GetMaster()->GetPhysicsManager(true)->Scale(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), scale/prev_scale);
+		object->GetMeshResource(0)->GetRamData()->SetScale(scale.x);
 	}
 	else {
 		scale.Set(1, 1, 1);
 	}
 }
 
-void TrabantSimManager::ObjectColor(int object_id, bool _set, vec3& color, float alpha) {
+void TrabantSimManager::ObjectColor(int object_id, bool _set, vec3& color, float alpha, float ambient) {
 	ScopeLock game_lock(GetTickLock());
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object) {
 		return;
 	}
 	if (_set) {
-		_object->GetMesh(0)->GetBasicMaterialSettings().diffuse_ = color;
-		_object->GetMesh(0)->GetBasicMaterialSettings().alpha_ = alpha;
-		if (_object->GetMesh(0)->GetAlwaysVisible()) {
-			_object->GetMesh(0)->SetAlwaysVisible(!!alpha);
+		object->GetMesh(0)->GetBasicMaterialSettings().diffuse_ = color;
+		object->GetMesh(0)->GetBasicMaterialSettings().alpha_ = alpha;
+		object->GetMesh(0)->GetBasicMaterialSettings().ambient_ = color*ambient;
+		if (object->GetMesh(0)->GetAlwaysVisible()) {
+			object->GetMesh(0)->SetAlwaysVisible(!!alpha);
 		}
 	} else {
-		color = _object->GetMesh(0)->GetBasicMaterialSettings().diffuse_;
+		color = object->GetMesh(0)->GetBasicMaterialSettings().diffuse_;
 	}
 }
 
 void TrabantSimManager::ObjectShadow(int object_id, bool _set, int& shadow_mode) {
 	ScopeLock game_lock(GetTickLock());
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object) {
 		return;
 	}
 	if (_set) {
-		((uitbc::Renderer::GeometryData*)_object->GetMesh(0)->GetRendererData())->shadow_ = Math::Clamp((uitbc::Renderer::Shadows)shadow_mode, uitbc::Renderer::kForceNoShadows, uitbc::Renderer::kForceCastShadows);
+		((uitbc::Renderer::GeometryData*)object->GetMesh(0)->GetRendererData())->shadow_ = Math::Clamp((uitbc::Renderer::Shadows)shadow_mode, uitbc::Renderer::kForceNoShadows, uitbc::Renderer::kForceCastShadows);
 	}
 	else {
-		shadow_mode = ((uitbc::Renderer::GeometryData*)_object->GetMesh(0)->GetRendererData())->shadow_;
+		shadow_mode = ((uitbc::Renderer::GeometryData*)object->GetMesh(0)->GetRendererData())->shadow_;
 	}
 }
 
 void TrabantSimManager::EngineForce(int object_id, int engine_index, bool _set, vec3& force) {
 	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
 	ScopeLock game_lock(GetTickLock());
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object) {
 		return;
 	}
-	if (engine_index < 0 || engine_index >= _object->GetPhysics()->GetEngineCount()) {
+	if (engine_index < 0 || engine_index >= object->GetPhysics()->GetEngineCount()) {
 		log_.Warningf("Object %i does not have an engine with index %i.", object_id, engine_index);
 		return;
 	}
 	if (_set) {
-		switch (_object->GetPhysics()->GetEngine(engine_index)->GetEngineType()) {
+		switch (object->GetPhysics()->GetEngine(engine_index)->GetEngineType()) {
 			case tbc::PhysicsEngine::kEngineWalk:
 			case tbc::PhysicsEngine::kEnginePushAbsolute:
 			case tbc::PhysicsEngine::kEnginePushRelative:
 			case tbc::PhysicsEngine::kEngineVelocityAbsoluteXY:
-				_object->SetEnginePower(engine_index*4+0, force.y);
-				_object->SetEnginePower(engine_index*4+1, force.x);
-				_object->SetEnginePower(engine_index*4+3, force.z);
+				object->SetEnginePower(engine_index*4+0, force.y);
+				object->SetEnginePower(engine_index*4+1, force.x);
+				object->SetEnginePower(engine_index*4+3, force.z);
 				break;
 			case tbc::PhysicsEngine::kEnginePushTurnAbsolute:
 			case tbc::PhysicsEngine::kEnginePushTurnRelative:
-				_object->SetEnginePower(engine_index*4+0, force.z);
-				_object->SetEnginePower(engine_index*4+1, force.x);
-				_object->SetEnginePower(engine_index*4+3, force.y);
+				object->SetEnginePower(engine_index*4+0, force.z);
+				object->SetEnginePower(engine_index*4+1, force.x);
+				object->SetEnginePower(engine_index*4+3, force.y);
 				break;
 			default:
-				_object->SetEnginePower(engine_index*4+0, force.x);
-				_object->SetEnginePower(engine_index*4+1, force.y);
-				_object->SetEnginePower(engine_index*4+3, force.z);
+				object->SetEnginePower(engine_index*4+0, force.x);
+				object->SetEnginePower(engine_index*4+1, force.y);
+				object->SetEnginePower(engine_index*4+3, force.z);
 				break;
 		}
 	} else {
@@ -1002,11 +1032,11 @@ void TrabantSimManager::EngineForce(int object_id, int engine_index, bool _set, 
 void TrabantSimManager::AddTag(int object_id, const str& tag_type, const FloatList& floats, const StringList& strings, const IntList& phys, const IntList& engines, const IntList& meshes) {
 	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
 	ScopeLock game_lock(GetTickLock());
-	Object* _object = (Object*)GetContext()->GetObject(object_id);
-	if (!_object) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	if (!object) {
 		return;
 	}
-	const tbc::ChunkyPhysics* physics = _object->GetPhysics();
+	const tbc::ChunkyPhysics* physics = object->GetPhysics();
 	for (IntList::const_iterator x = phys.begin(); x != phys.end(); ++x) {
 		if (*x >= physics->GetBoneCount()) {
 			log_.Warningf("Object %i does not have a body with index %i.", object_id, *x);
@@ -1020,7 +1050,7 @@ void TrabantSimManager::AddTag(int object_id, const str& tag_type, const FloatLi
 		}
 	}
 	for (IntList::const_iterator x = meshes.begin(); x != meshes.end(); ++x) {
-		if (*x >= (int)((uitbc::ChunkyClass*)_object->GetClass())->GetMeshCount()) {
+		if (*x >= (int)((uitbc::ChunkyClass*)object->GetClass())->GetMeshCount()) {
 			log_.Warningf("Object %i does not have a mesh with index %i.", object_id, *x);
 			return;
 		}
@@ -1032,7 +1062,7 @@ void TrabantSimManager::AddTag(int object_id, const str& tag_type, const FloatLi
 	tag.body_index_list_ = phys;
 	tag.engine_index_list_ = engines;
 	tag.mesh_index_list_ = meshes;
-	((tbc::ChunkyClass*)_object->GetClass())->AddTag(tag);
+	((tbc::ChunkyClass*)object->GetClass())->AddTag(tag);
 }
 
 
@@ -1502,9 +1532,9 @@ void TrabantSimManager::AddCheckerTexturing(uitbc::TriangleBasedGeometry* mesh, 
 
 
 cure::ContextObject* TrabantSimManager::CreateContextObject(const str& class_id) const {
-	UiCure::Machine* _object = new Object(GetResourceManager(), class_id, ui_manager_);
-	_object->SetAllowNetworkLogic(true);
-	return _object;
+	UiCure::Machine* object = new Object(GetResourceManager(), class_id, ui_manager_);
+	object->SetAllowNetworkLogic(true);
+	return object;
 }
 
 void TrabantSimManager::OnLoadCompleted(cure::ContextObject* object, bool ok) {
@@ -1638,7 +1668,7 @@ void TrabantSimManager::ScriptPhysicsTick() {
 	if (sound_volume != last_sound_volume_) {
 		master_volume_ = sound_volume;
 	}
-	const double _volume = IsControlled()? master_volume_ : 0.0;
+	const double _volume = is_controlled_ ? master_volume_ : 0.0;
 	v_set(GetVariableScope(), kRtvarUiSoundMastervolume, _volume);
 	ui_manager_->GetSoundManager()->SetMasterVolume((float)_volume);
 	last_sound_volume_ = _volume;
@@ -1703,22 +1733,22 @@ void TrabantSimManager::MoveCamera(float frame_time) {
 	v_get(crz, =(float), GetVariableScope(), kRtvarUi3DCamrotatez, 0.0);
 	v_get(smooth, =(float), GetVariableScope(), kRtvarUi3DCamsmooth, 0.0);
 	vec3 look_at(clx,cly,clz);
-	Object* _object = 0;
+	Object* object = 0;
 	if (ctgt) {
-		_object = (Object*)GetContext()->GetObject(ctgt);
-		if (_object) {
-			look_at = _object->GetPosition() + _object->GetOrientation()*look_at;
-			camera_velocity_ = _object->GetVelocity();
+		object = (Object*)GetContext()->GetObject(ctgt);
+		if (object) {
+			look_at = object->GetPosition() + object->GetOrientation()*look_at;
+			camera_velocity_ = object->GetVelocity();
 		}
 	}
 	xform t(quat(), look_at+vec3(0,-cdist,0));
 	t.RotateAroundAnchor(look_at, vec3(0,1,0), cay);
 	t.RotateAroundAnchor(look_at, vec3(1,0,0), cax);
 	t.RotateAroundAnchor(look_at, vec3(0,0,1), caz);
-	if (_object && car) {
+	if (object && car) {
 		xform pt;
-		GetPhysicsManager()->GetBodyTransform(_object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pt);
-		quat q = pt.orientation_ * _object->initial_inverse_orientation_;
+		GetPhysicsManager()->GetBodyTransform(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), pt);
+		quat q = pt.orientation_ * object->initial_inverse_orientation_;
 		t.orientation_ = q * t.orientation_;
 		t.position_ = q*(t.position_-look_at) + look_at;
 	}

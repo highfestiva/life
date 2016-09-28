@@ -166,7 +166,7 @@ def setmesh(vertices, indices):
 		_cached_vertices,_cached_indices = verts,indices
 
 def setbgcolor(col):
-	r,g,b,a = htmlcol(col)
+	r,g,b,a,ambient = htmlcol(col)
 	setvar('Ui.3D.ClearRed', r)
 	setvar('Ui.3D.ClearGreen', g)
 	setvar('Ui.3D.ClearBlue', b)
@@ -178,11 +178,15 @@ def setshadows(enable):
 	setvar('Ui.3D.Shadows', 'Force:Volumes' if enable else 'None')
 
 def setpencolor(col):
-	r,g,b,a = htmlcol(col)
+	r,g,b,a,ambient = htmlcol(col, default_ambient=-1)
 	setvar('Ui.PenRed', r)
 	setvar('Ui.PenGreen', g)
 	setvar('Ui.PenBlue', b)
 	setvar('Ui.PenAlpha', a)
+	if ambient >= 0:
+		setvar('Ui.3D.AmbientRed', r*ambient)
+		setvar('Ui.3D.AmbientGreen', g*ambient)
+		setvar('Ui.3D.AmbientBlue', b*ambient)
 
 def createobj(static, trigger, mat, pos, orientation):
 	phystype = 'static' if static else 'dynamic'
@@ -232,6 +236,9 @@ def addtag(oid, name, floats, strings, physidxs, engineidxs, meshidxs):
 def pos(oid, pos):
 	return getsetoidcmd('position', oid, pos)
 
+def posobjs(oids, pos):
+	return getsetoidcmd('position-objects', ' '.join(str(c) for c in pos), oids)
+
 def orientation(oid, orientation):
 	return getsetoidcmd('orientation', oid, orientation)
 
@@ -256,7 +263,8 @@ def scale(oid, s):
 def col(oid, color):
 	return getsetoidcmd('color', oid, htmlcol(color))
 
-def shadow(oid, mode):
+def shadow_obj(oid, mode='cast'):
+	mode = {'force_hide':0, 'hide':1, 'cast':2, 'force_cast':3, None:None}[mode]
 	return getsetoidcmd('shadow', oid, (mode,))
 
 def set_engine_force(oid, eid, xyz):
@@ -268,7 +276,7 @@ def getsetoidcmd(name, oid, *args):
 	if args != (None,):
 		for arg in args:
 			l += [str(a) for a in arg if a != None]
-	result = cmd('%s %i %s' % (name, oid, ' '.join(l)))
+	result = cmd('%s %s %s' % (name, oid, ' '.join(l)))
 	if not l and result:
 		result = [float(r) for r in result.split()]
 		if len(result) == 1:
@@ -443,16 +451,18 @@ def _run_local_sim(addr):
 			print('Error: TrabantSim process could not be started.')
 	return proc != None
 
-def htmlcol(col):
+def htmlcol(col, default_ambient=0.0):
 	if col:
 		if type(col) == str:
 			assert col[0]=='#'
-			if len(col) in (4,5):	# 5 = with alpha.
-				col = [int(c,16)/16 for c in col[1:]]
-			elif len(col) in (7,9):	# 9 = with alpha.
-				col = [int(col[i:i+2],16)/256 for i in range(1,len(col),2)]
+			if len(col) in (4,5,6):	# 5 = with alpha, 6 = with ambient.
+				col = [int(c,16)/15 for c in col[1:]]
+			elif len(col) in (7,9,11):	# 9 = with alpha, 11 = with ambient.
+				col = [int(col[i:i+2],16)/255 for i in range(1,len(col),2)]
 		else:
 			col = [float(c) for c in col]
 		if len(col) < 4:	# No alpha included?
 			col += [1.0]	# Opaque by default.
+		if len(col) < 5:	# No ambient included?
+			col += [default_ambient]
 	return col

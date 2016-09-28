@@ -58,6 +58,7 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::command_id
 	{"create-engine", kCommandCreateEngine},
 	{"create-joint", kCommandCreateJoint},
 	{"position", kCommandPosition},
+	{"position-objects", kCommandPositionObjects},
 	{"orientation", kCommandOrientation},
 	{"velocity", kCommandVelocity},
 	{"angular-velocity", kCommandAngularVelocity},
@@ -90,6 +91,17 @@ std::vector<float> Strs2Flts(const strutil::strvec& strs, size_t index=0) {
 		flts.push_back((float)d);
 	}
 	return flts;
+}
+
+std::vector<int> Strs2Ints(const strutil::strvec& strs, size_t index = 0) {
+	std::vector<int> ints;
+	strutil::strvec::const_iterator x = strs.begin() + index;
+	for (; x != strs.end(); ++x) {
+		int i = 0;
+		strutil::StringToInt(*x, i);
+		ints.push_back(i);
+	}
+	return ints;
 }
 
 int StrToUInt(const char* s, const char** _end) {
@@ -609,6 +621,13 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 						active_response << value;
 					}
 				} break;
+				case kCommandPositionObjects: {
+					bool _is_set;
+					vec3 value = ParamToVec3(parameter_vector, 0, &_is_set);
+					std::vector<int> object_ids = Strs2Ints(parameter_vector, 3);
+					manager->PositionObjects(value, object_ids);
+					active_response << value;
+				} break;
 				case kCommandOrientation: {
 					bool _is_set;
 					quat value = ParamToQuat(parameter_vector, 1, &_is_set);
@@ -669,7 +688,8 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					bool _is_set;
 					vec3 value = ParamToVec3(parameter_vector, 1, &_is_set);
 					float alpha = ParamToFloat(parameter_vector, 4, &_is_set);
-					manager->ObjectColor(ParamToInt(parameter_vector, 0), _is_set, value, alpha);
+					float ambient = ParamToFloat(parameter_vector, 5, &_is_set);
+					manager->ObjectColor(ParamToInt(parameter_vector, 0), _is_set, value, alpha, ambient);
 					if (!_is_set) {
 						active_response << value;
 					}
