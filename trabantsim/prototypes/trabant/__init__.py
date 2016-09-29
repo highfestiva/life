@@ -129,6 +129,9 @@ class Obj:
 	def mass(self, w):
 		'''Setting mass is only useful for interaction between dynamic objects.'''
 		return gameapi.mass(self.id, (w,))
+	def physics_type(self, static=False, trigger=False):
+		'''Change physics type of object: dynamic, static or trigger.'''
+		return gameapi.physics_type(self.id, static, trigger)
 	def scale(self, s):
 		'''Scale object's size up (>1) or down (<1). Does *not* affect mass or move joints.'''
 		try:	scale = tovec3(s)

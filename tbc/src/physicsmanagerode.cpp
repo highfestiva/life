@@ -411,7 +411,8 @@ bool PhysicsManagerODE::DetachToDynamic(BodyID static_body, float32 _mass) {
 	} else {
 		// Create dynamic body for it.
 		_object->body_id_ = ::dBodyCreate(world_id_);
-		const dReal* __pos = ::dGeomGetPosition(_object->geom_id_);
+		dVector3 __pos;
+		::dGeomCopyPosition(_object->geom_id_, __pos);
 		dQuaternion __quat;
 		::dGeomGetQuaternion(_object->geom_id_, __quat);
 		::dGeomSetBody(_object->geom_id_, _object->body_id_);
@@ -434,6 +435,25 @@ bool PhysicsManagerODE::MakeStatic(BodyID dynamic_body) {
 		::dGeomSetBody(dynamic_object->geom_id_, 0);
 		::dBodyDestroy(dynamic_object->body_id_);
 		dynamic_object->body_id_ = 0;
+	}
+	return true;
+}
+
+bool PhysicsManagerODE::SetTrigger(BodyID body, bool is_trigger) {
+	ObjectTable::iterator x = object_table_.find((Object*)body);
+	if (x == object_table_.end()) {
+		deb_assert(false);
+		return false;
+	}
+	Object* object = *x;
+	const int listener = object->force_feedback_id_ ? object->force_feedback_id_ : object->trigger_listener_id_;
+	if (is_trigger) {
+		object->trigger_listener_id_ = listener;
+		object->force_feedback_id_ = 0;
+	}
+	else {
+		object->trigger_listener_id_ = 0;
+		object->force_feedback_id_ = listener;
 	}
 	return true;
 }

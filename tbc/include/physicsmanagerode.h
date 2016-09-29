@@ -42,6 +42,7 @@ public:
 	virtual bool Attach(BodyID static_body, BodyID main_body);
 	virtual bool DetachToDynamic(BodyID static_body, float32 mass);
 	virtual bool MakeStatic(BodyID dynamic_body);
+	virtual bool SetTrigger(BodyID body, bool is_trigger);
 	virtual bool AddMass(BodyID static_body, BodyID main_body);
 	virtual bool Scale(BodyID body, const vec3& scale);
 

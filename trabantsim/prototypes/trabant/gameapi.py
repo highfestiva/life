@@ -257,6 +257,11 @@ def torque(oid, t):
 def mass(oid, w):
 	return getsetoidcmd('mass', oid, w)
 
+def physics_type(oid, static, trigger):
+	phystype = 'static' if static else 'dynamic'
+	phystype += '_trigger' if trigger else ''
+	return cmd('physics-type %i %s' % (oid, phystype))
+
 def scale(oid, s):
 	return getsetoidcmd('scale', oid, s)
 

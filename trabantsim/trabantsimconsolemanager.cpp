@@ -65,6 +65,7 @@ const TrabantSimConsoleManager::CommandPair TrabantSimConsoleManager::command_id
 	{"force", kCommandForce},
 	{"torque", kCommandTorque},
 	{"mass", kCommandMass},
+	{"physics-type", kCommandPhysicsType},
 	{"scale", kCommandScale},
 	{"color", kCommandColor},
 	{"shadow", kCommandShadow},
@@ -675,6 +676,12 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 					if (!_is_set) {
 						active_response << value;
 					}
+				} break;
+				case kCommandPhysicsType: {
+					const str physics_type = ParamToStr(parameter_vector, 1);
+					const bool is_static = strutil::StartsWith(physics_type, "static");
+					const bool is_trigger = (physics_type.find("trigger") != str::npos);
+					manager->PhysicsType(ParamToInt(parameter_vector, 0), is_static, is_trigger);
 				} break;
 				case kCommandScale: {
 					bool _is_set;

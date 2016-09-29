@@ -133,6 +133,7 @@ public:
 	void Force(int object_id, bool _set, vec3& force);
 	void Torque(int object_id, bool _set, vec3& torque);
 	void Mass(int object_id, bool _set, float& mass);
+	void PhysicsType(int object_id, bool is_static, bool is_trigger);
 	void Scale(int object_id, bool _set, vec3& scale);
 	void ObjectColor(int object_id, bool _set, vec3& color, float alpha, float ambient);
 	void ObjectShadow(int object_id, bool _set, int& shadow_mode);

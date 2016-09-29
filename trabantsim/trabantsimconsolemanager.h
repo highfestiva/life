@@ -68,6 +68,7 @@ protected:
 		kCommandForce,
 		kCommandTorque,
 		kCommandMass,
+		kCommandPhysicsType,
 		kCommandScale,
 		kCommandColor,
 		kCommandShadow,

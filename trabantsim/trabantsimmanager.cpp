@@ -943,6 +943,22 @@ void TrabantSimManager::Mass(int object_id, bool _set, float& mass) {
 	}
 }
 
+void TrabantSimManager::PhysicsType(int object_id, bool is_static, bool is_trigger) {
+	Object* object = (Object*)GetContext()->GetObject(object_id);
+	const tbc::PhysicsManager::BodyID body_id = object->GetPhysics()->GetBoneGeometry(0)->GetBodyId();
+	if (!object || !body_id) {
+		return;
+	}
+	ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
+	if (!is_static) {
+		GetMaster()->GetPhysicsManager(true)->DetachToDynamic(body_id, 15);
+		GetContext()->EnableTickCallback(object);
+	} else {
+		GetMaster()->GetPhysicsManager(true)->MakeStatic(body_id);
+	}
+	GetMaster()->GetPhysicsManager(true)->SetTrigger(body_id, is_trigger);
+}
+
 void TrabantSimManager::Scale(int object_id, bool _set, vec3& scale) {
 	Object* object = (Object*)GetContext()->GetObject(object_id);
 	if (!object || !object->GetPhysics()->GetBoneGeometry(0)->GetBodyId()) {
