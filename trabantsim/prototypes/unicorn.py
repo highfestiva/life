@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-# The ugliest unicorn in history had it's objects, rig and keyframes built in code.
+# The ugliest unicorn in history was conceived with objects, rig and keyframes written in code.
 
 from trabant import *
+
+cam()
 
 def tube(name, pos, ang, r, l):
     o = quat().rotate_y((90-ang)*pi/180)

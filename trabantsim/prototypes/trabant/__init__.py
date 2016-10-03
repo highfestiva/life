@@ -480,7 +480,8 @@ def gravity(g, bounce=None, friction=None):
 	gameapi.gravity(tovec3(g))
 	if bounce != None:
 		gameapi.bounce(bounce)
-	trabant.friction(friction)
+	if friction != None:
+		gameapi.friction(friction)
 
 def friction(f, bounce=None):
 	if f != None:

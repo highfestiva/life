@@ -6,7 +6,7 @@ from trabant import *
 import random
 
 bg(col='#888')
-cam(angle=(0,-pi/2,0), distance=30, pos=(5,0,10))
+cam(angle=(0,-pi/2 if is_touch_device() else 0,0), distance=30, pos=(5,0,10))
 gravity((0,0,0))
 
 tetromino_lines = '''

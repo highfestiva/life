@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Candy Crush 9x9 prototype.
+# Simplistic Candy Crush 9x9 prototype.
 
 from trabant import *
 from itertools import groupby

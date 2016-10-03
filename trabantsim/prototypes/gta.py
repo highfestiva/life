@@ -3,7 +3,7 @@
 # An RC car sim prototype using physical motors for control.
 
 from trabant import *
-from trabant.objects import gfx_ortho_pinch
+from trabant.objects import process_chain,gfx_ortho_pinch,gfxrot
 
 # ASCII geometry for the car. An X is one unit wide, high and deep.
 chassis = r'''
@@ -26,7 +26,14 @@ def create_brake_lights(car, pos):
     car.brake_lights = lambda c: [bl.col(c) for bl in car._brake_lights]
 
 def create_wheels(car, pos):
-    wheel = lambda x,y,z: create_sphere(pos=vec3(*pos)+vec3(x,y,z), col='#111', process=gfx_ortho_pinch(0,1,0, func=lambda a:abs(sin(a)**3)*0.5-0.7), resolution=lambda radius:[x*r for x,r in zip([1,2],sphere_resolution(radius))])
+	# The graphics are processed while generating: since the sphere vertices are generated
+	# symmetrically around the Z-axis, and the relative vertex density is higher near the
+	# north- and south poles, we first rotate the sphere 90 degrees along the X-axis. Then
+	# we "pinch" the sphere using a sinus function to generate something resembling a car
+	# wheel.
+    wheelshape = gfx_ortho_pinch(0,1,0, func=lambda a:abs(sin(a)**3)*0.5-0.7)
+	process_gfx_spheres_to_wheels = process_chain(gfxrot(pi/2,0,0), wheelshape)
+    wheel = lambda x,y,z: create_sphere(pos=vec3(*pos)+vec3(x,y,z), col='#111', process=process_gfx_spheres_to_wheels)
     rr,rl,fr,fl = wheel(-3.5,-1.8,-1.5), wheel(-3.5,+1.8,-1.5), wheel(2.6,-1.6,-1.5), wheel(2.6,+1.6,-1.5)
     suspension_spring,suspension_damping = 0.1,2
     car.joint(turn_hinge_joint, fl, axis=(0,-1,0), spring=(suspension_spring,suspension_damping))

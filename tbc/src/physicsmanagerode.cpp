@@ -3113,9 +3113,9 @@ void PhysicsManagerODE::CollisionCallback(void* data, dGeomID geom1, dGeomID geo
 				__c.surface.mode |= dContactSoftERP;
 				__c.surface.soft_erp = __c.surface.bounce * 1e1f * world_erp_;
 			}
-			if (__c.surface.bounce < 1e-7f) {
+			if (__c.surface.bounce < 1e-2f) {
 				__c.surface.mode |= dContactSoftCFM;
-				__c.surface.soft_cfm = Math::Lerp(1e8f, 1.0f, __c.surface.bounce * 1e7f) * world_cfm_;
+				__c.surface.soft_cfm = pow(10.0f, Math::Lerp(10.0f, 1.0f, __c.surface.bounce * 1e2f)) * world_cfm_;
 			}
 
 			if (_object1->force_feedback_id_ != 0 ||

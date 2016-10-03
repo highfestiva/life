@@ -117,6 +117,13 @@ def gfxoffset(x,y,z):
 		return orientation,gfx,phys
 	return dooffset
 
+def gfxrot(x,y,z):
+	def dooffset(orientation,gfx,phys):
+		o = quat().rotate_x(x).rotate_y(y).rotate_z(z)
+		gfx.vertices = [o*v for v in gfx.vertices]
+		return orientation,gfx,phys
+	return dooffset
+
 def gfx_vertex_func(func):
 	def dovfunc(orientation,gfx,phys):
 		gfx.vertices = [func(gfx,v) for v in gfx.vertices]

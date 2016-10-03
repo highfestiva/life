@@ -34,11 +34,11 @@ def grow(obj, eaten_radius):
 
 
 bg('#fff')
-gravity((0,0,0), bounce=0)
 create_box((0,0,+50+2), side=(100,4,4), static=True)
 create_box((0,0,-50-2), side=(100,4,4), static=True)
 create_box((+50+2,0,0), side=(4,4,108), static=True)
 create_box((-50-2,0,0), side=(4,4,108), static=True)
+gravity((0,0,0), bounce=0.04)
 avatar = create_player(col='#0f0')
 cam(distance=35, target=avatar, smooth=0.9)
 
