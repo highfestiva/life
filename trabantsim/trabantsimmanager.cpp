@@ -116,7 +116,6 @@ TrabantSimManager::TrabantSimManager(life::GameClientMasterTicker* pMaster, cons
 	ui_manager_->SetVariableScope(variable_scope);
 
 	collision_sound_manager_ = new UiCure::CollisionSoundManager(this, ui_manager);
-	collision_sound_manager_->SetScale(1, 0.5f, 0.08f, 0.2f);
 	collision_sound_manager_->AddSound("explosion",	UiCure::CollisionSoundManager::SoundResourceInfo(0.8f, 0.1f, 0));
 	collision_sound_manager_->AddSound("rubber",		UiCure::CollisionSoundManager::SoundResourceInfo(1.0f, 0.1f, 0));
 
@@ -1489,6 +1488,10 @@ void TrabantSimManager::TickUiUpdate() {
 		v_set(GetVariableScope(), kRtvarPhysicsMicrosteps, micro_steps);
 		hide_counter_ = 0;
 	}
+
+	double sound_collision_mass_scale;
+	v_get(sound_collision_mass_scale, =, GetVariableScope(), kRtvarUiSoundCollisionMassScale, 2.0);
+	collision_sound_manager_->SetScale((float)sound_collision_mass_scale, 0.5f, 0.08f, 0.2f);
 
 	((TrabantSimConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 	collision_sound_manager_->Tick(camera_transform_.GetPosition());

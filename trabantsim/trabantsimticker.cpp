@@ -69,6 +69,8 @@ TrabantSimTicker::TrabantSimTicker(UiCure::GameUiManager* ui_manager, cure::Reso
 	v_override(UiCure::GetSettings(), kRtvarPhysicsGravityy, 0.0);
 	v_override(UiCure::GetSettings(), kRtvarPhysicsGravityz, -9.8);
 
+	v_set(UiCure::GetSettings(), kRtvarUiSoundCollisionMassScale, 2.0);
+
 	v_set(UiCure::GetSettings(), "Simulator.DeniedHosts", "");
 	v_set(UiCure::GetSettings(), "Simulator.AllowedHosts", "");
 	v_set(UiCure::GetSettings(), "Simulator.AllowRemoteSync", false);

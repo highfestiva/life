@@ -26,7 +26,7 @@ terrain_meshes,patch_size = {},120
 
 bg(col='#aaa')
 gravity((0,0,0))
-cam(angle=(pi/2.5,0,0), distance=80, target=ship, target_relative_angle=True, smooth=0.3)
+cam(angle=(pi/2.5,0,0), distance=80, target=ship, target_relative_angle=True, smooth=0.8)
 fog(350,430)
 
 def create_terrain_patch(px,py):

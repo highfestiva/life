@@ -8,7 +8,7 @@ cam(distance=60)
 
 steps = [vec3(1,0,0),vec3(0,0,1),vec3(-1,0,0),vec3(0,0,-1)]
 pos,step = vec3(),steps[0]
-block = lambda p: create_box(p, static=True)
+block = lambda p: create_box(p, side=0.7, static=True)
 blocks,snake_coords = [block(pos)],[pos]
 length = 5
 

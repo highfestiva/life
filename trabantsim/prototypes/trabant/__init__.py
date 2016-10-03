@@ -261,6 +261,10 @@ class Tap:
 		return (self.x-x)**2+(self.y-y)**2
 	def __hash__(self):
 		return self.starty*35797+self.startx	# Prime larger than screen width is ok.
+	def __str__(self):
+		return '(%f, %f) buttonmask=0x%x' % (self.x, self.y, self.buttonmask)
+	def __repr__(self):
+		return self.__str__()
 
 
 class Joystick:
@@ -476,8 +480,13 @@ def gravity(g, bounce=None, friction=None):
 	gameapi.gravity(tovec3(g))
 	if bounce != None:
 		gameapi.bounce(bounce)
-	if friction != None:
-		gameapi.friction(friction)
+	trabant.friction(friction)
+
+def friction(f, bounce=None):
+	if f != None:
+		gameapi.friction(f)
+	if bounce != None:
+		gameapi.bounce(bounce)
 
 def create_ascii_object(ascii, pos=None, orientation=None, vel=None, avel=None, mass=None, col=None, mat='flat', static=False, trigger=False, physmesh=False, process=None):
 	'''Returns an Obj. static=True means object if fixed in absolute space. trigger=True means it won't apply any
