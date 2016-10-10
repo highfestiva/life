@@ -262,6 +262,12 @@ void Dialog::Animate() {
 			}
 		}
 	}
+
+	// If animating in coinsides with dismissal.
+	if (!animation_step_ && is_closing_) {
+		is_closing_ = false;
+		Dismiss();
+	}
 }
 
 void Dialog::OnDismissClick(Button* button) {

@@ -52,8 +52,8 @@ def create_avatar(pos, col):
     avatar.floortime = gametime()
     avatar.powerup = 1
     return avatar
-player = create_avatar((-15,0,4), '#00f0')    # Alpha=0 means invisible. We hide in case we use some rendering mode which displays backfacing polygons.
-bot = create_avatar((15,0,2), '#f00')
+player = create_avatar((-15,0,4), '#00f0') # Alpha=0 means invisible. We hide in case we use some rendering mode which displays backfacing polygons.
+bot = create_avatar((15,0,2), '#f00') # Moving the bot is an exercise for the reader.
 avatars = (player,bot)
 cam(distance=0, fov=60, target=player, target_relative_angle=True)
 stick = create_joystick((0,0))
@@ -77,13 +77,13 @@ for i,c in enumerate(coords):
     door.opener = walls[i+2].create_engine(slider_engine)
     doors += [door]
 
-yaw,pitch = -pi/2,0    # Start looking to the right, towards the center of the map.
+yaw,pitch = -pi/2,0 # Start looking to the right, towards the center of the map.
 grenades = []
-gravity((0,0,-15), friction=1, bounce=4)    # Higer gravity than Earth in Quake. Bounce is a state variable. We want bouncing grenades.
+gravity((0,0,-15), friction=1, bounce=4) # Higer gravity than Earth in Quake. Bounce is a state variable. We want bouncing grenades.
 
 # Touch device controls.
-fasttap = lambda: timein(0.2, timer=5) and bool(taps()) and taps()[0].isrelease
-check_reset_time_tap = lambda: not taps() and timeout_restart(timer=5)
+fasttap = lambda: timein(0.2, timer='tap') and bool(taps()) and taps()[0].isrelease
+check_reset_time_tap = lambda: not taps() and timeout_restart(timer='tap')
 is_shoot_tap = lambda: (fasttap() or check_reset_time_tap()) if is_touch_device() else click(left=True)
 
 while loop():
@@ -107,7 +107,7 @@ while loop():
     [avatar.orientation(quat()) for avatar in [player,bot]]    # Keep avatars straight at all times.
 
     # Throw grenades.
-    if is_shoot_tap() and timeout(1, timer=2, first_hit=True): # Limit shooting frequency.
+    if is_shoot_tap() and timeout(1, timer='shooting', first_hit=True): # Limit shooting frequency.
             orientation = xyrot.rotate_x(pitch)
             vel = player.vel()
             pos = player.pos() + vel*0.05 + orientation*vec3(0,1,0)
@@ -131,9 +131,9 @@ while loop():
             powerup.release()
             powerup = None
     # Respawn powerup.
-    if not powerup and timeout(10, timer=3):
+    if not powerup and timeout(10, timer='powerup'):
         powerup = create_box(vec3(0,-25.5,1.5), side=0.5, mat='flat', col='#ff0')
-        timeout_restart(timer=3)    # Erase timeout to avoid immediate spawn next time.
+        timeout_restart(timer='powerup')    # Erase timeout to avoid immediate spawn next time.
 
     # Explode grenades and remove missed grenades.
     for g in list(grenades):
@@ -152,7 +152,7 @@ while loop():
     pos,bpos = player.pos(),bot.pos()
 
     # Open sliding doors if anyone nearby, otherwise close 'em.
-    if timeout(0.2, timer=4):
+    if timeout(0.2, timer='doors'):
         neardoors = [1 for distance in [(p-doorcenter).length() for p in (pos,bpos)] if distance<3.5]
         [door.opener.force(1 if neardoors else -1) for door in doors]
 

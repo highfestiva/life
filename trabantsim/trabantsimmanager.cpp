@@ -354,7 +354,7 @@ int TrabantSimManager::CreateObject(const quat& orientation, const vec3& positio
 			AddCheckerTexturing(_mesh, _scale);
 			object->LoadTexture(texture);
 		}
-		object->AddMeshResource(_mesh, is_static? 0 : 1);
+		object->AddMeshResource(_mesh, (phys_objects.empty() || is_static)? 0 : 1);
 		object->AddMeshInfo(object->GetMeshResource(0)->GetName(), "texture", texture, _color, a);
 		object->GetMeshResource(0)->offset_.offset_.orientation_ = gfx_object.orientation_;
 		object->GetMeshResource(0)->offset_.offset_.position_ = gfx_object.pos_;

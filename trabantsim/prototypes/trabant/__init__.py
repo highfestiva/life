@@ -33,7 +33,7 @@ osname = sys.platform
 _lastlooptime = time.time()
 _lastloop_recv_cnt = 0
 _starttime = None
-_accurate_ascii_generate = False
+_accurate_ascii_generate = False # True removes redundant triangles, but is slower.
 _has_opened = False
 _last_ascii_top_left_offset = None
 _last_created_object = None
@@ -414,8 +414,8 @@ def timein_restart(timer='default_timer', seconds=0):
 def timer_callback(t, func):
 	global _timer_callbacks
 	for tr in range(-2000,-1000):
-		if tr not in _timers:
-			timeout(t, timer=tr)
+		if tr not in _timer_callbacks:
+			timeout_restart(timer=tr)
 			_timer_callbacks[tr] = (t,func)
 			break
 
@@ -591,11 +591,6 @@ def last_created_object():
 	'''Returns the last created object. Pretty much only useful if experimenting in an interactive shell.'''
 	return _last_created_object
 
-def accurate_ascii_generate(enable):
-	'''Turn this on to remove unnecessary graphics triangles when generating ascii objects. It's sloooww.'''
-	global _accurate_ascii_generate
-	_accurate_ascii_generate = enable
-
 def pick_objects(pos, direction, near=2, far=1000):
 	'''Ray-pick an list of Objs.'''
 	pos = tovec3(pos)
@@ -704,7 +699,7 @@ def closest_tap(pos3):
 	pos3 = tovec3(pos3)
 	x,y = _world2screen(pos3)
 	tap = min(taps(), key=lambda t: t._distance2(x,y))
-	tap.close_pos = pos3
+	tap.tap_pos = pos3
 	return tap
 
 clicks = taps

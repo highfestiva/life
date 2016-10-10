@@ -99,6 +99,12 @@ class vec3:
 		il = length/l
 		return vec3(self.x*il, self.y*il, self.z*il)
 
+	def reduce(self, length=1):
+		l = self.length()
+		if l < length: return self
+		il = length/l
+		return vec3(self.x*il, self.y*il, self.z*il)
+
 	def length(self):
 		return sqrt(self.x*self.x + self.y*self.y + self.z*self.z)
 

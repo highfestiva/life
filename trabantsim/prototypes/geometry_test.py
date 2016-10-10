@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# I made this test when fixing a bug in the orientation handling.
+# I made this test while fixing a bug in the orientation handling.
 
 from trabant import *
 

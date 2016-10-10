@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Planet+moons simulation.
 
 from trabant import *
@@ -21,7 +20,7 @@ while loop():
     dir1 = phobos.pos() - mars.pos()
     dir2 = deimos.pos() - mars.pos()
     dir3 = phobos.pos() - deimos.pos()
-    # These constants are just plucked out of thin air.
+    # These constants are just plucked out of thin air. Vacuum, one might say.
     f1 = dir1.normalize() * 4000/(dir1.length()**2)
     f2 = dir2.normalize() * 4000/(dir2.length()**2)
     f3 = dir3.normalize() * 4/(dir3.length()**2)

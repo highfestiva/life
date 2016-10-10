@@ -302,7 +302,8 @@ def cmd(c, return_type=str, errhandle=None):
 			result = sock.recv(80*1024)
 			resend = (result == b'\x16pause\x16')
 			if resend:
-				sleep(0.1)
+				import time
+				time.sleep(0.1)
 	except ConnectionResetError as e:
 		if errhandle:
 			errhandle(e)

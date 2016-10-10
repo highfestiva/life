@@ -26,17 +26,17 @@ mods = [__import__(g) for g in games]
 
 level,ship = 0,None
 while True:
-	userinfo('Level %i' % (level+1))
-	timer_callback(0.5, userinfo)
-	try:
-		mod = mods[level%len(games)]
-		ship = mod.play(level, ship)
-		mod.transition(ship)
-	except Exception as e:
-		import traceback
-		traceback.print_exc()
-		#ship = []
-		release_all_timers()
-		release_objects()
-		continue
-	level += 1
+    userinfo('Level %i' % (level+1))
+    timer_callback(0.5, userinfo)
+    try:
+        mod = mods[level%len(games)]
+        ship = mod.play(level, ship)
+        mod.transition(ship)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        #ship = []
+        release_all_timers()
+        release_objects()
+        continue
+    level += 1

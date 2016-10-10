@@ -28,7 +28,7 @@ roll = car.create_engine(roll_engine, targets=[(rl,1),(rr,1)], strength=0.5, sou
 collisions(True)
 
 # Setup ground, gravity, camera angle and controls.
-create_box(pos=(0,0,-253), side=500, static=True)
+ground = create_box(pos=(0,0,-253), side=500, static=True)
 gravity((0,0,-9))    # Allow objects to fall down now that they're attached by joints.
 cam(angle=(-0.3,0,0), distance=20, target=car)
 left_stick,right_stick = create_joystick((0,0)),create_joystick((1,0))

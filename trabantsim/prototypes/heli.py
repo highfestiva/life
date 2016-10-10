@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# An RC heli sim prototype, using physical motors for control.
+# An RC heli sim prototype, using actuators for control.
 
 from trabant import *
 

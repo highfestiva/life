@@ -1,25 +1,17 @@
 #!/usr/bin/env python3
-# Gradius (space side scroller) prototype.
+# Inspired by Gradius, a 1985 Konami space side scroller.
+#
+# One of the more advanced prototypes. It does different types of enemies, different types of shots,
+# generates tunnels and background, health, powerups such as homing missiles and shields, increases
+# pace/pace as time goes, etc.
 
-# Ideas:
-#  + planets in the background,
-#  + health,
-#  + blink when immortal after death,
-#  + tunnel,
-#  + different & classical enemies,
-#  + power-ups including weapons and shield,
-#  + explosion effect when firing heavy weapons,
-#  - bosses,
-#  - 3D flying intermission mini-game.
 
 from trabant import *
-from trabant.gameapi import htmlcol, setvar, waitload
+from trabant.gameapi import htmlcol, waitload
 from trabant.objects import gfxscale
 from functools import partial
-from random import choice
+from random import choice, random
 
-rotx = lambda a: quat().rotate_x(a)
-roty = lambda a: quat().rotate_y(a)
 
 shipasc = r'''
     \
@@ -40,11 +32,11 @@ XXXXX`
 ´X`
 ===
  X
-XX
+XXX
  XXXXXXXX\
 XXXXXXXXXX>
  XXXXXXXX`
-XX
+XXX
  X
 ===
     X
@@ -96,51 +88,44 @@ enemyasc = r'''
 '''
 
 def create_ship(ship, ship_idx):
-    shot_cnt,pos = {'bullet':0,'laser':1,'homing':0},vec3()
+    shot_cnt = {'bullet':0,'laser':1,'homing':0}
+    pos = vec3()
     if ship:
-        shot_cnt,pos = ship.shot_cnt,ship.pos()
+        shot_cnt = ship.shot_cnt
+        pos = ship.pos()
         [s.release() for s in ship.ship_parts]
-        #for ammo,cnt in shot_cnt.items():
-        #    shot_cnt[ammo] = max(cnt-1,0)
-        #if sum(ship.shot_cnt.values()) == 0:
-        #    ship.shot_cnt['laser'] = 1
     collisions(False)
     color = vec3(0.5,0.5,0.7)
     ship = create_ascii_object(shipascs[ship_idx], pos=pos, col=color, mass=500)
     ship_radius = len(max(shipascs[ship_idx].split('\n'), key=lambda r:len(r))) / 2
+    cockpit = create_capsule(pos=pos, orientation=roty(pi/2), radius=1, col='#33b')
     waitload(ship.id)
-    bubble = create_capsule(pos=pos, orientation=roty(pi/2), radius=1, col='#33b')
-    waitload(bubble.id)
-    ship.joint(fixed_joint, bubble)
+    waitload(cockpit.id)
+    ship.joint(fixed_joint, cockpit)
     collisions(True)
-    ship.ship_parts = bubble.ship_parts = [ship, bubble]
+    ship.ship_parts = cockpit.ship_parts = [ship, cockpit]
     ship.color = color
     ship.blink_start_t = None
     ship.blink_duration = 3
-    ship.shields = []
     ship.shield_type = None
     ship.radius = ship_radius
+    ship.shields = []
     ship.max_health = 100*(ship_idx+1)
     ship.health = ship.max_health
-    ship.hurt = bubble.hurt = 100
+    ship.hurt = cockpit.hurt = 100
     ship.immortal = False
     ship.shot_cnt = shot_cnt
     return ship
 
-def create_celestial(x):
-    global celestials
+def create_star(x):
+    global stars
     idist = random()*0.4+0.3
-    celestials += [create_sphere((x, 50-10*idist, random()*80-40), radius=0.15, col=vec3(idist,idist,idist), vel=(idist*-30*difficulty, 0, 0))]
-    celestials[-1].positionbased = True
+    stars += [create_sphere((x, 50-10*idist, random()*80-40), radius=0.15, col=vec3(idist,idist,idist), vel=(idist*-30*pace, 0, 0))]
+    stars[-1].positionbased = True
 def do_celestials():
-    global celestials
-    create_celestial(100)
+    global stars
+    create_star(100)
     timer_callback(0.2+random(), do_celestials)
-
-def srand(smin=0, smax=1):
-    global seed
-    seed = (seed * 214013 + 2531011) & 0x7fffffff
-    return (seed*(smax-smin)/0x7fffffff) + smin
 
 def create_tunnel_seg(z, z2, x, rx, fx):
     verts,tris = [],[]
@@ -148,18 +133,18 @@ def create_tunnel_seg(z, z2, x, rx, fx):
     width,subs = 20,7
     for mx in range(subs+1):
         xx = mx*4-width/2
-        rz = srand(-0.5,+0.5) + fx(rx+xx, -d)
+        rz = random()-0.5 + fx(rx+xx, -d)
         verts += [(xx,0,0), (xx,0,rz+z2-z)]
         t = mx*2
         tris += [0+t,2+t,1+t, 1+t,2+t,3+t] if d>0 else [0+t,1+t,2+t, 1+t,3+t,2+t]
-    seg = create_mesh(verts, tris[:-6], pos=(x,0,z), vel=(-5*difficulty,0,0), col='#334', trigger=True)
+    seg = create_mesh(verts, tris[:-6], pos=(x,0,z), vel=(-5*pace,0,0), col='#334', trigger=True)
     seg.hurt = 100
     seg.positionbased = True
     return seg
 def create_tunnel_segs(x, rx, fx):
     global tunnel_segs
     for s in tunnel_segs:
-        s.vel((-5*difficulty,0,0))
+        s.vel((-5*pace,0,0))
     height2,gap2 = 100/2,50/2
     segtop    = create_tunnel_seg(+height2, +gap2, x, rx, fx)
     segbottom = create_tunnel_seg(-height2, -gap2, x, rx, fx)
@@ -173,12 +158,13 @@ def do_tunnel():
     px = tunnel_segs[-1].pos().x
     if px != 0: # Object not loaded yet.
         while px < 130:
-            px += 20-0.5*difficulty
+            px += 20-0.5*pace
             tunnel_x += 20
             create_tunnel_segs(px, tunnel_x, fx)
     timer_callback(0.5, do_tunnel)
 
-def curb(angle, circle_amount):
+def slither(angle, circle_amount):
+    '''Returns a position; use this function to create slithering motion.'''
     period = int(angle // pi)
     ca_half = 0.5*circle_amount + 0.5
     angle = (angle-pi*period - pi/2) * circle_amount + pi/2
@@ -233,9 +219,9 @@ def powerup(power):
             drop_shields(ship)
         else:
             for s in ship.shields:
-                ship.ship_parts.remove(s)   # Don't cause duplicates.
+                ship.ship_parts.remove(s) # Don't cause duplicates.
         ship.shield_type = power
-        ship.vel((0,0,0))   # Freeze!
+        ship.vel((0,0,0)) # Freeze!
         shieldcnt = len(ship.shields)
         start_t = gametime() if not shieldcnt else ship.shields[0].start_t
         r = vec3(ship.radius*1.6+3,0,0)
@@ -260,7 +246,7 @@ def powerup(power):
         ship.shield_type = power
         ship.immortal = True
         collisions(False)
-        ship.vel((0,0,0))   # Freeze!
+        ship.vel((0,0,0)) # Freeze!
         ship.shields = [create_sphere(pos=ship.pos(), radius=ship.radius*1.3, col='#c6a5')]
         ship.ship_parts += ship.shields
         for s in ship.shields:
@@ -360,12 +346,12 @@ def create_enemy():
         start_t = gametime()
         for i in range(20):
             ang = 2*pi*i/20
-            tgtpos = lambda t,a: vec3(80-t*8,0,0) + curb(-1.2*t+a,1.4)*12
+            tgtpos = lambda t,a: vec3(80-t*8,0,0) + slither(-1.2*t+a,1.4)*12
             def targetpos(enemy, t):
-                enemy.t += (t-enemy.last_t) * (difficulty**0.5)
+                enemy.t += (t-enemy.last_t) * (pace**0.5)
                 enemy.last_t = t
                 return tgtpos(enemy.t, enemy.angle)
-            enemy = create_sphere(tgtpos(0,ang), radius=2.5, vel=(-8*(difficulty**0.5),0,0), col='#444' if i!=0 else '#911')
+            enemy = create_sphere(tgtpos(0,ang), radius=2.5, vel=(-8*(pace**0.5),0,0), col='#444' if i!=0 else '#911')
             enemy.last_t = start_t
             enemy.t = 0
             enemy.angle = ang
@@ -373,37 +359,37 @@ def create_enemy():
             enemy.shoots = (i==0)
             es += [enemy]
     elif etype == 'box':
-        enemy = create_box((80,0,random()*60-30), side=3, vel=(-10*difficulty,0,0), avel=rndvec())
+        enemy = create_box((80,0,random()*60-30), side=3, vel=(-10*pace,0,0), avel=rndvec())
         es += [enemy]
     elif etype == 'planet':
-        enemy = create_sphere((80,0,random()*60-30), radius=2, vel=(-10*difficulty,0,0), avel=rndvec(), col='#00a')
+        enemy = create_sphere((80,0,random()*60-30), radius=2, vel=(-10*pace,0,0), avel=rndvec(), col='#00a')
         es += [enemy]
     elif etype == 'capsule':
-        enemy = create_capsule((80,0,random()*60-30), radius=2, length=4, vel=(-10*difficulty,0,0), avel=rndvec())
+        enemy = create_capsule((80,0,random()*60-30), radius=2, length=4, vel=(-10*pace,0,0), avel=rndvec())
         enemy.hurt = 200
         enemy.color = vec3(0.3,1,0.5)
         es += [enemy]
-    elif etype == 'red ship':
-        enemy = create_ascii_object(enemyasc, pos=vec3(80,0,random()*60-30), vel=(-5*difficulty,0,0), col='#f00')
-        enemy.move = lambda t: (-10*difficulty,0,10*sin(2*t))
+    elif etype == 'redship':
+        enemy = create_ascii_object(enemyasc, pos=vec3(80,0,random()*60-30), vel=(-5*pace,0,0), col='#f00')
+        enemy.move = lambda t: (-10*pace,0,10*sin(2*t))
         enemy.shoots = True
         es += [enemy]
     return finalize_enemies(es)
 
 def create_powerup():
     powdesc = { 'health':           (20, partial(create_capsule,col='#d34',avel=(1,0,1))),
-                'spin_shield':      ( 5, partial(create_sphere,col='#c6a')),
-                'sphere_shield':    ( 3, partial(create_sphere,radius=2,col='#c6a5')),
+                'spin_shield':      ( 7, partial(create_sphere,col='#c6a')),
+                'sphere_shield':    ( 4, partial(create_sphere,radius=2,col='#c6a5')),
                 'bullet':           (15, partial(create_capsule,col='#ab0',avel=(1,0,1))),
                 'laser':            (10, partial(create_capsule,length=3,radius=0.24,col='#f0f',avel=(1,0,1))),
-                'homing':           ( 2, partial(create_box,side=(0.9,0.9,3),mat='flat',col='#850',avel=(0,0,1))) }
+                'homing':           ( 3, partial(create_box,side=(0.9,0.9,3),mat='flat',col='#850',avel=(0,0,1))) }
     pname,pfunc = pick_random(powdesc.items(), term=lambda i:i[1][0], name=lambda i:i[0], retval=lambda i:i[1][1])
-    pup = pfunc(vec3(80,0,random()*50-25), vel=(-15*difficulty,0,0), trigger=True)
+    pup = pfunc(vec3(80,0,random()*50-25), vel=(-15*pace,0,0), trigger=True)
     pup.color = vec3(*htmlcol(pfunc.keywords['col'])[:3])
     return finalize_powerup(pup, pname)
 
 def create_ship_powerup():
-    pup = create_ascii_object(shipsym, vec3(80,0,random()*50-25), vel=(-15*difficulty,0,0), col=ship.color, avel=(0,0,1), trigger=True)
+    pup = create_ascii_object(shipsym, vec3(80,0,random()*50-25), vel=(-15*pace,0,0), col=ship.color, avel=(0,0,1), trigger=True)
     pup.color = ship.color
     return finalize_powerup(pup, 'ship')
 
@@ -432,29 +418,34 @@ def pick_random(coll, term=lambda x:x[1], name=lambda x:x[0], retval=lambda x:x[
     return n,r
 
 
+fps = 60 # 30 FPS is default, we want smoother movement in this prototype.
+trabant_init(fps=fps)
 fg(shadows=False)
 gravity((0,0,0))
-setvar('Phyics.FPS',60)
 cam(distance=100)
+# Enabling asynchronous loading mode is an optimization so we don't have to wait for all
+# objects to load until code can move on. If you *need* an object completely loaded in
+# this mode you call waitload() to make sure loading is completed.
 async_load()
 
-seed = 501
-difficulty = 1
-celestials,shots,enemies,powerups,tunnel_segs = [],[],[],[],[]
+pace = 1
+stars,shots,enemies,powerups,tunnel_segs = [],[],[],[],[]
 tunnel_x = -90
 ship_steer = 0
 ship_idx = 0
 ship = create_ship(None, ship_idx)
 for i in range(40):
-    create_celestial((i-20)*5)
+    create_star((i-20)*5)
 do_celestials()
 do_tunnel()
 
 
 while loop():
 
-    x = keydir().x
-    z = keydir().y
+    tap = closest_tap(ship.pos()).pos3d()-ship.pos() if taps() else vec3()
+    tap = tap.normalize() if tap.length() > 1 else tap
+    x = keydir().x + tap.x
+    z = keydir().y + tap.z
     ship.vel((40*x,0,40*z))
     ship.bounce_in_rect((-65,-0.1,-40), (65,0.1,40), spring=0)
     ship_steer = ship_steer*0.9 - z*0.1
@@ -476,14 +467,13 @@ while loop():
                 o.blink_start_t = None
                 o.col(o.color)
 
-    new_shots = []
-    if ('Space' in keys() or 'LCtrl' in keys()):
-        new_shots += shoot(ship)
+    # Unlimited ammo, so always keep the finger on the trigger.
+    new_shots = shoot(ship)
 
-    if timeout(2/difficulty, 'create_enemy'):
+    if timeout(2/pace, 'create_enemy'):
         enemies += create_enemy()
 
-    difficulty += 1 / (60*60)
+    pace += 1 / (20*fps) # Make things one unit harder+faster every 20 seconds.
 
     pup = None
     if timeout(3, 'create_powerup'):
@@ -496,7 +486,7 @@ while loop():
         if es:
             enemy = choice(es)
             p = enemy.pos()
-            shot = create_capsule(p+vec3(-8,0, 0), radius=1, length=2, orientation=roty(pi/2), vel=vec3(-45*difficulty,0,0), col='#ff4', trigger=True, process=gfxscale(0.5))
+            shot = create_capsule(p+vec3(-8,0, 0), radius=1, length=2, orientation=roty(pi/2), vel=vec3(-45*pace,0,0), col='#ff4', trigger=True, process=gfxscale(0.5))
             shot.positionbased = True
             shot.shooters = enemy.ship_parts
             shot.hurt = 40
@@ -532,7 +522,7 @@ while loop():
                     for o in obj1.ship_parts:
                         obj1.release()
         elif obj1 in shots:
-            if obj1.positionbased and obj2 not in obj1.shooters:
+            if obj1.positionbased and obj2 not in obj1.shooters: # E.g. laser shots don't explode.
                 explode(pos, obj1.vel()*0.5, obj1.hurt/50, volume=0.1)
                 shots.remove(obj1)
                 obj1.release()
@@ -542,7 +532,7 @@ while loop():
             obj1.release()
 
     if died:
-        drop_shields(ship)
+        #drop_shields(ship)
         ship.pos((0,0,0))
         if ship_idx > 0:
             ship_idx -= 1
@@ -553,24 +543,22 @@ while loop():
             ship.shot_cnt['laser'] = 1
         ship.immortal = True
         ship.blink_start_t = gametime()
-        difficulty = max(difficulty-3, 0.5)
+        pace = max(pace-3, 1)
 
     for s in ship.shields:
-        if not s.shield_timeout:
-            continue
-        if s.shield_timeout-gametime() <= 0:
+        if s.shield_timeout and s.shield_timeout-gametime() <= 0:
             drop_shields(ship)
             break
 
 
-    for obj in celestials[:len(celestials)//4+1] + powerups[:len(powerups)//4+1] + shots[:len(shots)//4+1] + enemies[:len(enemies)//4+1] + tunnel_segs[:2]:
-        if not obj.positionbased:
+    for obj in stars[:len(stars)//4+1] + powerups[:len(powerups)//4+1] + shots[:len(shots)//4+1] + enemies[:len(enemies)//4+1] + tunnel_segs[:2]:
+        if not obj.positionbased: # Laser is not "position based."
             continue
         x,_,z = obj.pos()
         if x < -100 or x > +150 or z < -70 or z > +70:
             obj.release()
-            if obj in celestials:
-                celestials.remove(obj)
+            if obj in stars:
+                stars.remove(obj)
             elif obj in powerups:
                 powerups.remove(obj)
             elif obj in shots:

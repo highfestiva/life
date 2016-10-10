@@ -53,10 +53,6 @@ cube = create_box(pos=(-1e5,-1e5,-1e5), side=cube_side, static=True)    # Create
 # Rooms are lists of cubes. Cubes actualy constitutes half rooms. The remainder is made up by adjoining rooms.
 # Rooms are hashed by their grid positions.
 rooms = {}
-# Helper functions.
-rotx = lambda a: quat().rotate_x(a)
-roty = lambda a: quat().rotate_y(a)
-rotz = lambda a: quat().rotate_z(a)
 
 def create_room(pos):
     '''Returns cube positions+sizes for half a room, i.e. three walls and three "gateways".'''

@@ -7,10 +7,10 @@ from trabant.packstr import unpack
 from math import sin,fmod
 from time import time
 
-userinfo('Press space to open doors.')
+userinfo('Tap to open doors.' if is_touch_device() else 'Press space to open doors.')
 
-# E1M1 Doom 1 map in buggy short format.
-#from e1m1 import compressed_E1M1
+# E1M1 Doom 1 map converted to big bunch of boxes, in a type of shortened ASCII format.
+# trabant.packstr packet is used to pack and unpack the text data.
 compressed_E1M1 = '''3{n*rzYfv%PA]50)A8<V L2/+h9R\\APGc6;]-.\\LR$Pw{p5._UTY:Rs^+Jfr>Rd-R4w{B0*;{k:![vUN[~B<l>x}lKJ`:Hg?b&xH~Is'8)p<RIK5(@=B8;xCx|0Yth+%'Z\\$WidUNG&+Ztq}NF)2z0T4@\\l
 h&*%KPb6$3-W4DWa,*?vZ#gYEgCNNtx3gr_lxyW=&SuLCsU}dP;{h](m*fp.qE)2q$H6BsH>5<N\\uAx\\"lzL_YOxn)-aF[rIWMgZQfOk<ABer],snJ=z5F=0%-}zic^7Ex&Lb_nd6.[?-fuI^kk+6{dJ2+Pk#Y%-gC-`~6i'Mt-9,Ca#L:
 MDCd$SWx*Wyn=}IGqbu)AwuS+_|]\\zpzz*ta^O<6leGL[`JOI(Y"8-NW:^~Er~0D=zgt;!~z+KV+'[cqatf@Lxs^Vp+6^r?%-l:yYc_"ca4O1rJMx(iDh~n|i]5gauDaMc7m58!1`,Ml5v\\ZwMjN;`&K`)d/CdlQ)PJy.d]%SE#oE<:No6
@@ -76,9 +76,11 @@ n:PbQp v9P<(08Q'`iCD):g+#.wtu25Wvz@g7m;Hx33jv*JA1?E%L'.%Tce34"[X ?92bib4\\VS*a+J
 j0!'''
 exec(unpack(compressed_E1M1)) # This creates three global arrays: boxes, box_angles and float_lookup.
 
-# Helper functions.
-rotz = lambda a: quat().rotate_z(a)
+# Helper functions, and a soft stick for touch devices.
+fasttap = lambda: timein(0.2, timer='tap') and bool(taps()) and taps()[0].isrelease
+check_reset_time_tap = lambda: not taps() and timeout_restart(timer='tap')
 is_shoot_tap = lambda: (fasttap() or check_reset_time_tap()) if is_touch_device() else click(left=True)
+stick = create_joystick((0,0))
 
 # Setup without gravity so things don't move around until everything loaded.
 bg(col='#421')
@@ -204,6 +206,7 @@ def ai(npc):
         fire(npc.shoot_timer, pos+naim, vec3(0,0,0), rotz(angle), naim)
 
 def fire(timer, pos, vel, orientation, direction):
+    '''Shoot a grenade.'''
     pos = pos + vel*0.05 + direction*1.8
     vel = vel + orientation*vec3(0,12,8)
     def create_grenade():
@@ -244,12 +247,16 @@ while loop():
         npcs = npcs[1:] + npcs[:1]  # Put moved NPC last.
 
     # Update mouse look angles.
-    yaw,pitch = yaw-mousemove().x*0.09, pitch-mousemove().y*0.05
+    if is_touch_device():
+        yaw += sum(tap.vx*0.1 for tap in taps())
+        pitch += sum(tap.vy*0.1 for tap in taps())
+    else:
+        yaw,pitch = yaw-mousemove().x*0.09, pitch-mousemove().y*0.05
     pitch = max(min(pitch,pi/2),-pi/2)    # Allowed to look straight up and straight down, but no further.
 
     # XY movement relative to the current yaw angle.
     xyrot = rotz(yaw)
-    push_dir = xyrot * keydir().with_z(0)
+    push_dir = xyrot * (keydir().with_z(0) + vec3(stick.x,stick.y,0))
     # Check if walking towards stairs or raised step, if so we push upwards.
     picks = [(obj,pos) for obj,pos in pick_objects(pos+push_dir, vec3(0,0,-1), 0,0.5) if obj != player]
     if picks and pos.z-picks[0][1].z > 0.1: # Something below player, not pushing against a wall.
@@ -267,7 +274,7 @@ while loop():
     cam(pos=vec3(0,0,bob+0.4), angle=(pitch,0,yaw))
 
     # Open doors.
-    if 'Space' in keys():
+    if 'Space' in keys() or (is_touch_device() and is_shoot_tap()):
         direction = xyrot.rotate_x(pitch) * vec3(0,1,0)
         for obj,_ in pick_objects(pos, direction, 0,2):
             if hasattr(obj, 'trigger_door'):
@@ -277,7 +284,7 @@ while loop():
     if is_shoot_tap():
             orientation = xyrot.rotate_x(pitch)
             direction = orientation*vec3(0,1,0)
-            fire(2, pos, player.vel(), orientation, direction)
+            fire('player_shoot', pos, player.vel(), orientation, direction)
             print('player pos (for debugging purposes)', pos)
 
     # Check if grenade exploded or if a player touched ground.

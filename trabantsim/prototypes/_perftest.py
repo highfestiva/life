@@ -32,4 +32,4 @@ def testall():
 
 async_load(True)
 for _ in range(10):
-	testall()
+    testall()

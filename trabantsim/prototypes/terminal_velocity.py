@@ -51,7 +51,7 @@ def update_terrain(pos):
     top,left,s = int(pos.y)//patch_size-3,int(pos.x)//patch_size-3,7
     for y in reversed(range(top,top+s)):
         for x in range(left,left+s):
-            key = y*3301919+x    # Anything large prime ok for hashing.
+            key = y*3301919+x # Anything large prime ok for hashing.
             if key in terrain_meshes:
                 del old_meshes[key]
             elif not created:
@@ -66,12 +66,12 @@ while loop():
 
     update_terrain(ship.pos() + orientation*vec3(0,0,100))
 
-    # Turn ship.
-    yaw_force = acc.roll*6 - sum(t.x*10-5 for t in taps()) - 5*keydir().x    # Control by either accelerometer, tapping or keyboard.
+    # Turn ship. Control by either accelerometer, tapping or keyboard.
+    yaw_force = acc.roll*6 - sum(t.x*10-5 for t in taps()) - 5*keydir().x
     yawer.force((0,0,yaw_force))
 
     # Banking and nose.
-    roll_force = -yaw_force*1.3 + (orientation*vec3(1,0,0)).z*10    # Banking.
-    pitch_factor = (orientation*vec3(0,0,1)).z*10 + ship.pos().z/10    # Level ship at around Z=0.
-    pitch_force = acc.pitch*6 - sum(t.y*20-10 for t in taps()) - 3*keydir().y - pitch_factor    # Control nose by either accelerometer, tapping or keyboard.
+    roll_force = -yaw_force*1.3 + (orientation*vec3(1,0,0)).z*10 # Banking.
+    pitch_factor = (orientation*vec3(0,0,1)).z*10 + ship.pos().z/10 # Level ship at around Z=0.
+    pitch_force = acc.pitch*6 - sum(t.y*20-10 for t in taps()) - 3*keydir().y - pitch_factor # Control nose by either accelerometer, tapping or keyboard.
     roller.force((pitch_force,0,roll_force))

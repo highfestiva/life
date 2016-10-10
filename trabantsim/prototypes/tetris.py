@@ -15,11 +15,12 @@ XXXX  |  XX  |  X    |    X  |  XXX  |   XX  |  XX
 '''.strip('\n').split('\n')
 # Slice and dice the tetrominos to get them on the form 'XX \n XX'.
 tetromino_lines = [tl.split('  |  ') for tl in tetromino_lines]
-tetromino,tetrominos = None,['\n'.join(t) for t in zip(*tetromino_lines)]
+tetrominos = ['\n'.join(t) for t in zip(*tetromino_lines)]
+tetromino = None
 
 colors = '#0ff #ff0 #00f #a50 #f0f #0f0 #f00'.split()
-directions = [vec3(1,0,0),vec3(0,0,1),vec3(-1,0,0),vec3(0,0,-1)]
-gridsize = vec3(10,20,0)
+directions = [vec3(0,0,+1),vec3(0,0,-1),vec3(-1,0,0),vec3(+1,0,0)] # Up, down, left, right.
+gridsize = vec3(10,20,0) # Standard tetris grid.
 fixed_blocks = [[None]*gridsize.x for _ in range(gridsize.y+5)]
 
 # Create floor and walls.
@@ -27,7 +28,8 @@ create_box(pos=(5,0,-20-0.5), side=40, static=True)
 create_box(pos=(-20-0.5,0,10), side=40, static=True)
 create_box(pos=(10+20-0.5,0,10), side=40, static=True)
 
-def getblocks(pos, orientation):
+def get_tetronimo_blocks(pos, orientation):
+    '''Returns a list coordinates of the blocks which constitude the current tetromino.'''
     coords = []
     piece = [line for line in tetrominos[tetromino_index].split('\n') if line.strip()]
     for y,row in enumerate(piece):
@@ -38,27 +40,29 @@ def getblocks(pos, orientation):
     return coords
 
 def trymove(movement, orientation):
+    '''Attempt moving and/or rotating the current tetromino. Will fixate tetromino if it
+       hits "ground" and if so consume any completed rows.'''
     global tetromino,fixed_blocks
     pos = tetromino.pos() + tetromino.orientation()*tetromino_rot_center
-    coords = getblocks(pos+movement, orientation)
+    coords = get_tetronimo_blocks(pos+movement, orientation)
     if movement.z<0 and ([c for c in coords if c.y<0] or [c for c in coords if fixed_blocks[c.y][c.x]]):
         # We've hit something below, kill tetromino and fixate blocks without movement.
         tetromino = tetromino.release()
-        for coord in getblocks(pos, orientation):
+        for coord in get_tetronimo_blocks(pos, orientation):
             fixed_blocks[coord.y][coord.x] = create_ascii_object('X', pos=(coord.x, 0, coord.y), col=colors[tetromino_index], static=True)
         # Consume completed rows.
-        ri = 0
-        while ri < len(fixed_blocks):
-            row = fixed_blocks[ri]
+        row_i = 0
+        while row_i < len(fixed_blocks):
+            row = fixed_blocks[row_i]
             if len([1 for block in row if block]) == gridsize.x:    # Complete row? Yes: shift down, then add empty row at top.
                 [block.release() for block in row]
-                for rj in range(ri+1,len(fixed_blocks)):
-                    fixed_blocks[rj-1] = fixed_blocks[rj]
-                    [block.pos((x,0,rj-1)) for x,block in enumerate(fixed_blocks[rj-1]) if block]
+                for row_j in range(row_i+1,len(fixed_blocks)):
+                    fixed_blocks[row_j-1] = fixed_blocks[row_j]
+                    [block.pos((x,0,row_j-1)) for x,block in enumerate(fixed_blocks[row_j-1]) if block]
                 fixed_blocks[-1] = [None]*gridsize.x
                 sound(sound_clank)
             else:
-                ri += 1
+                row_i += 1
 
     elif not [c for c in coords if c.x<0 or c.x>=gridsize.x or c.y<0] and not [c for c in coords if fixed_blocks[c.y][c.x]]:
         # This is an ok rotation or move: it neither hits the side nor a fixed block.
@@ -66,18 +70,26 @@ def trymove(movement, orientation):
 
 while loop():
     if not tetromino:
+        # Create a random tetromino.
         tetromino_index = random.choice(range(len(tetrominos)))
         tetromino = create_ascii_object(tetrominos[tetromino_index], pos=(0,0,100), col=colors[tetromino_index])
+        # We can't rotate around a "randomly" placed center, so instead we rotate about a point *relative* to the
+        # top-left corner of the tetromino. Center of rotation (1.5,0.5,0.5) works well for all types of tetrominos.
         tetromino_rot_center = vec3(1.5,0.5,0.5) - last_ascii_top_left_offset()    # Rotate about a point in the middle of the first row.
         tetromino.pos(vec3(gridsize.x/2,0,gridsize.y) - tetromino_rot_center)
 
-    if (keys() or taps()) and timeout(0.2):    # Steering.
-        tap = closest_tap(tetromino.pos())
-        v = min(directions, key=lambda s:(tap.pos3d()-s-tap.close_pos).length()) if tap else vec3(keydir().x,0,keydir().y)
+    if (keys() or taps()) and timeout(0.15): # Steering.
+        if taps():
+            # Find the direction the user is tapping: up, down, left, right.
+            t_pos = tetromino.pos()
+            tap_pos = closest_tap(t_pos).pos3d()
+            v = min(directions, key=lambda d:(tap_pos-d-t_pos).length())
+        else:
+            v = vec3(keydir().x,0,keydir().y)
         # Tapping above means "rotate", tapping left/below/right means move in that direction.
-        if v == vec3(0,0,1): trymove(vec3(), tetromino.orientation().rotate_y(pi/2))
-        else:                trymove(v, tetromino.orientation())
+        if v.z > 0: trymove(vec3(), tetromino.orientation().rotate_y(pi/2))
+        else:       trymove(v, tetromino.orientation())
 
     # Move down every once in a while.
-    if tetromino and timeout(0.8):    # Use same timer as user movement. This hinders step down indefinitely when tapping/holding/pressing.
+    if tetromino and timeout(0.8): # Use same timer as user movement. This hinders step down indefinitely when tapping/holding/pressing.
         trymove(vec3(0,0,-1), tetromino.orientation())
