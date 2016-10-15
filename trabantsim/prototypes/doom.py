@@ -77,9 +77,9 @@ j0!'''
 exec(unpack(compressed_E1M1)) # This creates three global arrays: boxes, box_angles and float_lookup.
 
 # Helper functions, and a soft stick for touch devices.
-fasttap = lambda: timein(0.2, timer='tap') and bool(taps()) and taps()[0].isrelease
-check_reset_time_tap = lambda: not taps() and timeout_restart(timer='tap')
-is_shoot_tap = lambda: (fasttap() or check_reset_time_tap()) if is_touch_device() else click(left=True)
+fasttap = lambda: timein(0.2, timer='tap') and taps() and taps()[0].isrelease
+check_reset_time_tap = lambda: not taps() and timein_restart(timer='tap')
+is_shoot_tap = lambda: fasttap() or check_reset_time_tap()
 stick = create_joystick((0,0))
 
 # Setup without gravity so things don't move around until everything loaded.
@@ -157,7 +157,7 @@ hidden_trig = create_elevator(hidden_elevator, 156, hidden_elevator_trigger)
 
 # Create avatars.
 def create_player(isplayer, pos, col):
-    # Create a man-like capsule.
+    # Create a capsule for our man. It needs to have a large radius to slide up stairs properly.
     avatar = create_capsule(pos, col=col, length=0.3, radius=0.7)
     avatar.create_engine(walk_abs_engine, strength=70, max_velocity=4)
     avatar.create_engine(stabilize)
@@ -167,7 +167,6 @@ player = create_player(True, (0,0,0), '#00f0')    # Alpha=0 means invisible. We 
 npcs = [create_capsule(p, col='#975', static=True) for p in [(-31,10,2.7), (-29,9,2.7), (-24, 6, -0.5), (-19,15,-0.5), (20,26,-0.4), (20,34,-0.4),
                                                              (34,35,0.3), (34,31,0.3), (67,4,2), (65,2.5,2), (63,-7,-1.5), (41,-8,-4.3), (38,-10,-4.3),
                                                              (63,-19,-1), (54,-24,-1), (49,-22,-1), (55,-33,-1)]]
-#npcs = [create_capsule(p, col='#975', static=True) for p in [(-19,15,-0.5)]]
 for idx,npc in enumerate(npcs):
     npc.walk_dir = vec3(0,-1,0) # Just any starting direction.
     npc.start_pos = npc.pos()   # We stay near to starting position.
@@ -208,7 +207,12 @@ def ai(npc):
 def fire(timer, pos, vel, orientation, direction):
     '''Shoot a grenade.'''
     pos = pos + vel*0.05 + direction*1.8
-    vel = vel + orientation*vec3(0,12,8)
+    # Check if we have a high ceiling where we stand and up ahead.
+    ceiling = pick_objects(pos, vec3(0,0,1), 1, 4) + pick_objects(pos+direction*5, vec3(0,0,1), 1, 4)
+    if not ceiling: # High ceiling, so aim high.
+        vel = vel + orientation*vec3(0,16,16)
+    else: # Nope, aim low.
+        vel = vel + orientation*vec3(0,12,8)
     def create_grenade():
         grenade = create_sphere(pos=pos, vel=vel, radius=0.1, col='#3a3')
         grenades.add(grenade)
@@ -227,7 +231,7 @@ bob,bob_angle = 0,0
 avatars = [player] + npcs
 grenades = set()
 cam(distance=0, fov=60, target=player, target_relative_angle=True)
-yaw,pitch = 0,0
+yaw = 0
 
 collisions(True)
 gravity((0,0,-30), friction=1, bounce=4)    # Higer gravity to keep player against ground. Bounce is a state variable. We want bouncing grenades.
@@ -247,16 +251,12 @@ while loop():
         npcs = npcs[1:] + npcs[:1]  # Put moved NPC last.
 
     # Update mouse look angles.
-    if is_touch_device():
-        yaw += sum(tap.vx*0.1 for tap in taps())
-        pitch += sum(tap.vy*0.1 for tap in taps())
-    else:
-        yaw,pitch = yaw-mousemove().x*0.09, pitch-mousemove().y*0.05
-    pitch = max(min(pitch,pi/2),-pi/2)    # Allowed to look straight up and straight down, but no further.
+    yaw -= keydir().x*0.05
+    yaw += sum(tap.vx*0.1 for tap in taps())
 
     # XY movement relative to the current yaw angle.
-    xyrot = rotz(yaw)
-    push_dir = xyrot * (keydir().with_z(0) + vec3(stick.x,stick.y,0))
+    yaw_orientation = rotz(yaw)
+    push_dir = yaw_orientation * vec3(stick.x,stick.y+keydir().y,0)
     # Check if walking towards stairs or raised step, if so we push upwards.
     picks = [(obj,pos) for obj,pos in pick_objects(pos+push_dir, vec3(0,0,-1), 0,0.5) if obj != player]
     if picks and pos.z-picks[0][1].z > 0.1: # Something below player, not pushing against a wall.
@@ -271,20 +271,19 @@ while loop():
     else:
         bob_angle += vxy / 35
         bob = sin(bob_angle)/5
-    cam(pos=vec3(0,0,bob+0.4), angle=(pitch,0,yaw))
+    cam(pos=vec3(0,0,bob+0.4), angle=(0,0,yaw))
 
     # Open doors.
-    if 'Space' in keys() or (is_touch_device() and is_shoot_tap()):
-        direction = xyrot.rotate_x(pitch) * vec3(0,1,0)
+    if 'Space' in keys() or is_shoot_tap():
+        direction = yaw_orientation * vec3(0,1,0)
         for obj,_ in pick_objects(pos, direction, 0,2):
             if hasattr(obj, 'trigger_door'):
                 obj.trigger_door()
 
     # Throw grenades.
-    if is_shoot_tap():
-            orientation = xyrot.rotate_x(pitch)
-            direction = orientation*vec3(0,1,0)
-            fire('player_shoot', pos, player.vel(), orientation, direction)
+    if 'LCtrl' in keys() or is_shoot_tap():
+            direction = yaw_orientation*vec3(0,1,0)
+            fire('player_shoot', pos, player.vel(), yaw_orientation, direction)
             print('player pos (for debugging purposes)', pos)
 
     # Check if grenade exploded or if a player touched ground.

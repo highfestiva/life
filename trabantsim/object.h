@@ -46,6 +46,7 @@ public:
 	tbc::ChunkyPhysics* generated_physics_;
 	int physics_index_;
 	bool same_as_previous_;
+	vec3 scale_;
 
 private:
 	void OnLoadPhysics(cure::UserPhysicsReferenceResource* physics_resource);

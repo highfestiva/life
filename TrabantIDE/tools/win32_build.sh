@@ -9,12 +9,12 @@ $rgo -m final copycode cleandata builddata zipdata
 mkdir bin/sim/
 mv bin/* bin/sim/
 
-cp ../C++/TrabantIDE/scite/bin/TrabantIDE.exe TrabantIDE/
+cp ../cpp/scite/bin/TrabantIDE.exe TrabantIDE/
 cp -r TrabantIDE/* bin/
 rm -Rf bin/tools
 rm bin/todo.txt
 
-cp -r TrabantSim/prototypes TrabantSim/progwar bin/
+cp -r trabantsim/prototypes bin/
 rm -Rf bin/prototypes/_*.py bin/*/__pycache__ bin/*/*/__pycache__
 
 mkdir bin/sync

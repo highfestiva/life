@@ -6,7 +6,7 @@ from random import choice
 
 def create_edible(pos, radius, col, mass):
     edible = create_sphere(pos=pos, radius=radius, col=col, mass=mass)
-    edible.original_radius = edible.radius = radius
+    edible.radius = radius
     return edible
 
 def create_player(pos=vec3(), radius=1, col='#000'):
@@ -29,7 +29,7 @@ def kill(obj):
 def grow(obj, eaten_radius):
     eaten_area = pi*eaten_radius**2
     new_radius = sqrt(obj.radius**2 + eaten_area/pi)
-    obj.scale(new_radius / obj.original_radius)
+    obj.scale(new_radius / obj.radius)
     obj.radius = new_radius
 
 
@@ -38,7 +38,7 @@ borders = [ create_box((0,0,+50+2), side=(100,4,4), static=True),
             create_box((0,0,-50-2), side=(100,4,4), static=True),
             create_box((+50+2,0,0), side=(4,4,108), static=True),
             create_box((-50-2,0,0), side=(4,4,108), static=True) ]
-gravity((0,0,0), bounce=0.04) # Set low bounce *after* creating the borders.
+gravity((0,0,0), bounce=0.03) # Set low bounce *after* creating the borders.
 avatar = create_player(col='#0f0')
 cam(distance=35, target=avatar, smooth=0.9)
 
@@ -48,7 +48,7 @@ edibles = set(players)
 
 while loop():
     if taps():
-        move = (tap()[0].pos3d() - avatar.pos()).with_y(0).reduce(1)
+        move = (taps()[0].pos3d() - avatar.pos()).with_y(0).reduce(1)
     else:
         move = vec3(keydir().x, 0, keydir().y)
     avatar.engines[0].force(move)
@@ -58,7 +58,8 @@ while loop():
         if obj1 in edibles and obj2 in edibles:
             d = (obj1.pos()-obj2.pos()).length()
             maxr = max(obj1.radius,obj2.radius)
-            if d < maxr:
+            minr = min(obj1.radius,obj2.radius)
+            if d < maxr-minr*0.8: # Mostly overlapping = eat!
                 if obj1.radius > obj2.radius:
                     grow(obj1, obj2.radius)
                     kill(obj2)

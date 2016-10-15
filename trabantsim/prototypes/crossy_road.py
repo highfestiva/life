@@ -6,6 +6,8 @@ from random import randint, choice
 
 lanes,cars,avatar = [],[],None
 gravity((0,0,-20), friction=0) # No friction, so the "cars" can move freely.
+async_load() # So game won't "freeze" during creation of lanes, cars, etc.
+tap_directions = [vec3(0,+1,0),vec3(0,-1,0),vec3(-1,0,0),vec3(+1,0,0)] # Forward, backward, left, right.
 
 def create_lane(y, name):
     speed = 0
@@ -35,13 +37,15 @@ def create_lane(y, name):
 
 def fill_lanes():
     global lanes
+    if not lanes[-1][0].isloaded:
+        return
     # Create lanes at the top of the screen, remove when they disappear at the bottom.
     ay = avatar.pos().y
     last_lane_y = int(lanes[-1][0].pos().y)
-    while ay+7 >= last_lane_y:
+    if ay+7 >= last_lane_y:
         last_lane_y += 1
         lanes += [create_lane(last_lane_y, choice('grass grass road pavement'.split()))]
-    while len(lanes) > 13:
+    elif len(lanes) > 13:
         for o in lanes[0]:
             o.release()
         del lanes[0]
@@ -51,7 +55,7 @@ def init():
     release_objects()
     lanes = [create_lane(y, 'grass') for y in range(-5,3)]
     cars = []
-    avatar = create_box((0,0,1), side=0.5)
+    avatar = wait_load(create_box((0,0,1), side=0.5, col='#ff0', mat='flat'))
     avatar.create_engine(stabilize)
     avatar.adjusted = False
     fill_lanes()
@@ -60,7 +64,8 @@ def init():
 init()
 
 while loop():
-    if avatar in collided_objects():
+    avatar_on_ground = avatar in collided_objects()
+    if avatar_on_ground:
         # Each time the avatar skips one jump ahead, we just stop it as it lands (preventing it from
         # sliding away) and place it on the center of the closest coordinate.
         if not avatar.adjusted:
@@ -71,17 +76,17 @@ while loop():
             keys()
         else:
             if keydir().length2() or taps():
-!!!!!add tap steering!!!!!!!
-                x = avatar.pos().x
-                v = 2.2
-                if keydir().x > 0 and x < +4:
-                    avatar.vel((+v,0,4))
-                elif keydir().x < 0 and x > -4:
-                    avatar.vel((-v,0,4))
-                elif keydir().y < 0:
-                    avatar.vel((0,-v,4))
-                elif keydir().y or keydir().z:
-                    avatar.vel((0,+v,4))
+                pos = avatar.pos()
+                godir = keydir() + tapdir(pos, digital_direction=True)
+                vel = 2.2
+                if godir.x > 0 and pos.x < +4:
+                    avatar.vel((+vel,0,4))
+                elif godir.x < 0 and pos.x > -4:
+                    avatar.vel((-vel,0,4))
+                elif godir.y < 0:
+                    avatar.vel((0,-vel,4))
+                elif godir.y or godir.z:
+                    avatar.vel((0,+vel,4))
                 def unadjusted(avatar):
                     if avatar:
                         avatar.adjusted = False
@@ -98,13 +103,14 @@ while loop():
     carset = set(cars)
     for o1,o2,_,_ in collisions():
         if o1 == avatar and o2 in carset:
+            avatar.scale((1,1,0.2))
             avatar = None
             userinfo('Splat!')
             sound(sound_bang)
             timer_callback(3, init)
             break
 
-    while cars and cars[0].pos().z < 0:
+    if cars and cars[0].pos().z < 0:
         cars[0].release()
         del cars[0]
 

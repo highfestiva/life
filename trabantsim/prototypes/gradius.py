@@ -7,7 +7,7 @@
 
 
 from trabant import *
-from trabant.gameapi import htmlcol, waitload
+from trabant.gameapi import htmlcol
 from trabant.objects import gfxscale
 from functools import partial
 from random import choice, random
@@ -96,11 +96,9 @@ def create_ship(ship, ship_idx):
         [s.release() for s in ship.ship_parts]
     collisions(False)
     color = vec3(0.5,0.5,0.7)
-    ship = create_ascii_object(shipascs[ship_idx], pos=pos, col=color, mass=500)
+    ship = wait_load(create_ascii_object(shipascs[ship_idx], pos=pos, col=color, mass=500))
     ship_radius = len(max(shipascs[ship_idx].split('\n'), key=lambda r:len(r))) / 2
-    cockpit = create_capsule(pos=pos, orientation=roty(pi/2), radius=1, col='#33b')
-    waitload(ship.id)
-    waitload(cockpit.id)
+    cockpit = wait_load(create_capsule(pos=pos, orientation=roty(pi/2), radius=1, col='#33b'))
     ship.joint(fixed_joint, cockpit)
     collisions(True)
     ship.ship_parts = cockpit.ship_parts = [ship, cockpit]
@@ -247,7 +245,7 @@ def powerup(power):
         ship.immortal = True
         collisions(False)
         ship.vel((0,0,0)) # Freeze!
-        ship.shields = [create_sphere(pos=ship.pos(), radius=ship.radius*1.3, col='#c6a5')]
+        ship.shields = [wait_load(create_sphere(pos=ship.pos(), radius=ship.radius*1.3, col='#c6a5'))]
         ship.ship_parts += ship.shields
         for s in ship.shields:
             s.hurt = 400
@@ -255,7 +253,6 @@ def powerup(power):
             s.move = None
             s.shield_timeout = gametime()+30
             s.ship_parts = []
-            waitload(s.id)
             ship.joint(fixed_joint, s)
         collisions(True)
     elif power in ('bullet','laser','homing'):
@@ -425,7 +422,7 @@ gravity((0,0,0))
 cam(distance=100)
 # Enabling asynchronous loading mode is an optimization so we don't have to wait for all
 # objects to load until code can move on. If you *need* an object completely loaded in
-# this mode you call waitload() to make sure loading is completed.
+# this mode you call wait_load(obj) on each object to make sure loading is completed.
 async_load()
 
 pace = 1

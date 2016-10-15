@@ -899,11 +899,16 @@ void OpenGLRenderer::UpdateGeometry(GeometryID geometry_id, bool force) {
 		tbc::GeometryBase* _geometry = geom_data->geometry_;
 
 		if (force) {
+			RemoveShadowVolumes(geom_data);
 			ReleaseGeometry(_geometry, kGroIgnoreMaterial);
 			BindGeometry(_geometry, geometry_id, GetMaterialType(geometry_id));
 			return;
 		}
-		// Force update of shadow volumes.
+
+		if (_geometry->GetVertexDataChanged() ||
+			_geometry->GetIndexDataChanged()) {
+			RemoveShadowVolumes(geom_data);
+		}
 
 		if (uilepra::OpenGLExtensions::IsBufferObjectsSupported() && !_geometry->IsGeometryReference()) {
 			int vertex_count = _geometry->GetVertexCount();

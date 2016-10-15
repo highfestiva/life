@@ -24,12 +24,8 @@ for y in range(2):
 
 while loop():
     # Paddle controls.
-    if taps():
-        p = paddle.pos()
-        v = ((closest_tap(p).pos3d().x-p.x)*6 - keydir().y*20, 0, 0)
-    else:
-        v = (keydir().x*20,0,0)
-    paddle.vel(v, avel=(0,0,0))
+    v = keydir()*20 + tapdir(paddle.pos())*10
+    paddle.vel((v.x,0,0), avel=(0,0,0)) # Only move in X, no rotation.
     # Make the ball bounce against invisible edges.
     ball.bounce_in_rect((-20,-0.1,-25), (20,0.1,17))
     # Check if ball fell down below the paddle.

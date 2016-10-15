@@ -21,11 +21,11 @@ from trabant.gameapi import setvar,waitload
 gravity((0,0,0))
 setvar('Phyics.FPS',60)
 
-games = 'retro_gradius retro_planet_of_zoom'.split()
+games = '_retro_gradius _retro_planet_of_zoom'.split()
 mods = [__import__(g) for g in games]
 
 level,ship = 0,None
-while True:
+while loop():
     userinfo('Level %i' % (level+1))
     timer_callback(0.5, userinfo)
     try:

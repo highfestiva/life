@@ -11,5 +11,4 @@ echo "Fixing XCode signing by dropping shebang..."
 ./xcode_py_fixup.py ~/RnD/python-embedded/pylib
 
 cd ../..
-python -B Tools/build/rgo.py cleandata zipdata
-
+python -B tools/build/rgo.py cleandata zipdata

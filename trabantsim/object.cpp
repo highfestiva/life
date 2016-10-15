@@ -27,6 +27,7 @@ Object::Object(ResourceManager* resource_manager, const str& class_id, UiCure::G
 	generated_physics_(0),
 	physics_index_(0),
 	same_as_previous_(false),
+	scale_(1,1,1),
 	clazz_(new uitbc::ChunkyClass) {
 }
 

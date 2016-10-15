@@ -333,7 +333,6 @@ int TrabantSimConsoleManager::OnCommand(const HashedString& command, const strut
 #else
 					active_response << "Unknown";
 #endif // Platform
-
 				} break;
 				case kCommandCreateObject: {
 					const str type = ParamToStr(parameter_vector, 0);

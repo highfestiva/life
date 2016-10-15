@@ -438,7 +438,10 @@ def _run_local_sim(addr):
 			open_prefix,end_suffix,binname = [],[],'trabantsim'
 		else:
 			open_prefix,end_suffix,binname = [],[],'TrabantSim.exe'
-		for directory,rel in [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('sim','./'), ('../../bin/sim','./'), ('..','Release/'), ('..','Final/'), ('..','Debug/')]:
+		dirs = [('.',''), ('.','./'), ('..','./'), ('../sim','./'), ('sim','./'), ('../../bin/sim','./'), ('..','Release/'), ('..','Final/'), ('..','Debug/')]
+		if hasattr(sys, '_MEIPASS'):
+			dirs = [(sys._MEIPASS+'/sim', './')] + dirs
+		for directory,rel in dirs:
 			import os.path
 			import subprocess
 			curdir = os.path.abspath(os.path.curdir)

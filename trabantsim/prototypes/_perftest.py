@@ -31,5 +31,5 @@ def testall():
     perftest('lambda pos: create_box(pos, vel=(0,0,-5), trigger=True)')
 
 async_load(True)
-for _ in range(10):
+for _ in range(3):
     testall()

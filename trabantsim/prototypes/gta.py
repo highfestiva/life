@@ -39,9 +39,10 @@ def create_wheels(body, pos):
     body.joint(suspend_hinge_joint, rr, axis=(0,-1,0), spring=(suspension_spring,suspension_damping))
     return rr,rl,fr,fl
 
-def create_car(pos, col):
+def create_car(pos, col, name):
     # A body, four wheels and three actuators: acceleration, turn and braking.
     body = create_ascii_object(chassis, pos=vec3(*pos), mass=200, col=col)
+    body.name = name
     create_brake_lights(body, pos)
     rr,rl,fr,fl = create_wheels(body, pos)
     body.turn = body.create_engine(roll_turn_engine, targets=[(fl,1),(fr,1)])
@@ -75,8 +76,8 @@ def update_terrain(pos):
         [o.release() for o in ground_patches[patch_id]]
         del ground_patches[patch_id]
 
-me = create_car((30,0,0), '#cc5')
-ai_cars = create_car((100,0,0), '#000'),create_car((-40,0,0), '#11b')
+me = create_car((30,0,0), '#cc5', 'myself')
+ai_cars = create_car((100,0,0), '#000', 'black'), create_car((-40,0,0), '#11b', 'blue')
 ground_patches = {}
 [update_terrain(vec3(30,0,0)) for _ in range(4)]
 
@@ -91,7 +92,7 @@ def ai_reverse_due_to_obstruction(car):
     # Check if obstructed, and if so we start the reverse timer. We're obstructed when we've had a low
     # velocity for some time. The reverse timer will keep us backing up for some time; it takes a little
     # bit of time to reverse a few meters.
-    is_obstructed = car.vel().length2() < 1 and timeout(2, 'obstruction'+str(car))
+    is_obstructed = car.vel().length2() < 1 and timeout(1, 'obstruction'+str(car))
     if is_obstructed:
         timein_restart('reverse'+str(car)) # Start backing up.
     # Back up for some time if it's decided we've been obstructed.
@@ -121,7 +122,7 @@ def ai_drive(car):
     # If we fall too far behind, the ground patches beneath us will be removed.
     got_lost = car.pos().z < -1  # Fell down when ground was taken away underneath us.
     if got_lost and timeout(1):
-        userinfo('Got away from one!')
+        userinfo('Got away from %s!' % car.name)
         # When the player gets away from one of the two gangsters, we teleport it up ahead.
         ai_teleport_car(car)
 

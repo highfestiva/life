@@ -89,6 +89,7 @@ void Menu::InitButton(uitbc::Button* button) const {
 }
 
 void Menu::DismissDialog() {
+	log_.Infof("Dismissing dialog %p due to direct call", dialog_);
 	if (dialog_) {
 		dialog_->Dismiss();
 		dialog_ = 0;
@@ -104,10 +105,14 @@ cure::ResourceManager* Menu::GetResourceManager() const {
 }
 
 void Menu::OnAction(uitbc::Button* button) {
+	if (!dialog_) {
+		return;
+	}
 	uitbc::Dialog* d = dialog_;
 	button_delegate_(button);
 	if (d == dialog_ && (!button || d->IsAutoDismissButton(button))) {
 		button_delegate_.clear();
+		log_.Infof("Dismissing dialog %p due to auto-dismiss", d);
 		dialog_ = 0;
 	}
 }
@@ -120,6 +125,10 @@ void Menu::OnTapSound(uitbc::Button*) {
 
 void Menu::SoundLoadCallback(UiCure::UserSound2dResource*) {
 }
+
+
+
+loginstance(kUiGfx2D, Menu);
 
 
 

@@ -44,6 +44,8 @@ _asc2obj_lookup = []
 _aspect_ratio = 1.33333
 _keys = None
 _taps = None
+_previous_taps = []
+_release_taps = []
 _want_mousemove = False
 _mousemove = vec3()
 _invalidated_taps = set()
@@ -57,6 +59,7 @@ _async_load = False
 _async_loaders = {}
 _cam_angle,_cam_distance,_cam_target,_cam_lookat,_cam_fov_radians,_cam_relative,_cam_is_smooth = vec3(),10,None,vec3(),0.5,False,False
 _cam_pos,_cam_q,_cam_inv_q = vec3(0,-10,0),quat(),quat()
+_tap_directions = [vec3(0,0,+1),vec3(0,0,-1),vec3(-1,0,0),vec3(+1,0,0),vec3(0,+1,0),vec3(0,-1,0)] # Up, down, left, right, forward, backward.
 
 
 class Engine:
@@ -262,7 +265,7 @@ class Tap:
 	def __hash__(self):
 		return self.starty*35797+self.startx	# Prime larger than screen width is ok.
 	def __str__(self):
-		return '(%f, %f) buttonmask=0x%x' % (self.x, self.y, self.buttonmask)
+		return '(%f, %f) press=%s buttonmask=0x%x' % (self.x, self.y, self.ispress, self.buttonmask)
 	def __repr__(self):
 		return self.__str__()
 
@@ -295,8 +298,8 @@ def trabant_init(**kwargs):
 		except:
 			pass
 	config.update(kwargs)
-	global _keys,_joysticks,_timers,_timer_callbacks,_async_loaders,_has_opened,_accelerometer_calibration
-	_keys,_joysticks,_timers,_timer_callbacks,_async_loaders,_has_opened = None,{},{},{},{},True
+	global _keys,_joysticks,_timers,_timer_callbacks,_async_loaders,_has_opened,_want_mousemove,_accelerometer_calibration
+	_keys,_joysticks,_timers,_timer_callbacks,_async_loaders,_has_opened,_want_mousemove = None,{},{},{},{},True,False
 	if 'osname' in config:
 		global osname
 		osname = config['osname']
@@ -318,6 +321,10 @@ def debugsim(enable=True):
 def async_load(enable=True):
 	global _async_load
 	_async_load = enable
+
+def wait_load(object):
+	gameapi.waitload(object.id)
+	return object
 
 def userinfo(message='', timeout=1):
 	'''Shows a message dialog to the user. Dismiss dialog by calling without parameters.'''
@@ -372,7 +379,8 @@ def sleep(t):
 		s = time.time()
 		loop(delay=0.2)
 		t -= time.time()-s
-	time.sleep(t)
+	if t > 0:
+		time.sleep(t)
 
 def timeout(t=1, timer='default_timer', first_hit=False):
 	'''Will check if t seconds elapsed since first called. If first_hit is true, it will elapse
@@ -397,19 +405,16 @@ def timein(t, timer='default_timer', auto_start=True):
 		_timers[timer] = time.time()
 	if time.time() - _timers[timer] < t:
 		return True
-	del _timers[timer]
 	return False
 
-def timeout_restart(timer='default_timer', seconds=None):
+def timeout_restart(timer='default_timer'):
 	global _timers
-	if seconds != None:
-		_timers[timer] = time.time() - seconds
-		return
 	if timer in _timers:
 		del _timers[timer]
 
-def timein_restart(timer='default_timer', seconds=0):
-	timeout_restart(timer, seconds)
+def timein_restart(timer='default_timer'):
+	global _timers
+	_timers[timer] = time.time()
 
 def timer_callback(t, func):
 	global _timer_callbacks
@@ -673,23 +678,31 @@ def keydir():
 
 def taps():
 	'''Returns all taps since last loop. Each tap is an object of class Tap.'''
-	global _taps
+	global _taps,_previous_taps,_release_taps
 	if _taps != None:
 		return _taps
+	old_taps = {(tap.startx,tap.starty) for tap in _previous_taps}
 	def processline(line):
 		ws = line.split()
 		return [float(w) for w in ws[:6]] + [ws[6]=='true',int(ws[7])]
 	taps_info = [processline(line) for line in gameapi.taps().split('\n') if line]
-	_taps = []
+	_taps = _release_taps
+	_release_taps = []
 	used_invalidations = set()
 	for x,y,startx,starty,vx,vy,ispress,buttonmask in taps_info:
 		if (startx,starty) not in _invalidated_taps:
-			_taps.append(Tap(x,y,startx,starty,vx,vy,ispress,buttonmask))
+			if not ispress and ((startx,starty) not in old_taps):
+				# Quick press-release, happened in one frame. Make it into a press and a release the next frame.
+				_taps.append(Tap(x,y,startx,starty,vx,vy,True,buttonmask))
+				_release_taps.append(Tap(x,y,startx,starty,vx,vy,ispress,buttonmask))
+			else:
+				_taps.append(Tap(x,y,startx,starty,vx,vy,ispress,buttonmask))
 		else:
 			used_invalidations.add((startx,starty))
 	for tapstart in set(_invalidated_taps):
 		if not tapstart in used_invalidations:
 			_invalidated_taps.remove(tapstart)
+	_previous_taps = _taps
 	return _taps
 
 def closest_tap(pos3):
@@ -699,11 +712,32 @@ def closest_tap(pos3):
 	pos3 = tovec3(pos3)
 	x,y = _world2screen(pos3)
 	tap = min(taps(), key=lambda t: t._distance2(x,y))
-	tap.tap_pos = pos3
+	tap.origin = pos3
 	return tap
+
+def tapdir(origin3, digital_direction=False):
+	'''The parameter origin3 is a 3D coordinate. Returns the 3D direction that the user tapped
+	   relative to origin3, or a zero vector if no tap/click present. If digital_direction is
+	   True only one direction of X,Y,Z will be picked and the length will be 1 - behaving like
+	   an old-school joystick.'''
+	origin3 = tovec3(origin3)
+	tap = closest_tap(origin3)
+	if not tap or not tap.ispress:
+		direction = vec3()
+		direction.ispress = direction.buttonmask = 0
+		direction.tap = tap
+		return direction
+	direction = tap.pos3d(_world2cam(origin3).y) - origin3
+	if digital_direction:
+		direction = min(_tap_directions, key=lambda d:(direction-d).length2())
+	direction.ispress = tap.ispress
+	direction.buttonmask = tap.buttonmask
+	direction.tap = tap
+	return direction
 
 clicks = taps
 closest_click = closest_tap
+clickdir = tapdir
 
 def click(left=False, right=False, middle=False):
 	'''Returns clicks (instances of Tap) matching left/right/middle.
@@ -809,6 +843,7 @@ def _create_object(gfx, phys, static, trigger, pos, orientation, vel, avel, mass
 	objpos = tovec3(pos) if tovec3(pos) else vec3()
 	objori = toquat(orientation) if toquat(orientation) else quat()
 	oid = gameapi.createobj(static, trigger, mat, objpos, objori)
+	assert oid
 	if not _async_load:
 		gameapi.waitload(oid)
 	o = Obj(oid,gfx,phys)
@@ -928,6 +963,11 @@ def _relscreen2world(x,y,distance):
 	dy = tana * -2*y
 	crd = (_cam_q * vec3(dx, distance, dy)) + _cam_pos
 	return crd
+
+def _world2cam(crd):
+	'''Move to camera space.'''
+	_update_cam_shadow()
+	return _cam_inv_q*(crd-_cam_pos)
 
 def _update_cam_shadow():
 	global _cam_pos,_cam_q,_cam_inv_q,_cam_target

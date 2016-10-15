@@ -57,6 +57,8 @@ protected:
 	UiCure::UserSound2dResource* tap_click_;
 	float tap_volume_;
 	float tap_pitch_offset_;
+
+	logclass();
 };
 
 

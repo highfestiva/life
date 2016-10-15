@@ -66,7 +66,10 @@ def ai(computer, ball):
         steer(computer, 0, 0, +1.1, +10)
 
 while loop():
-    steer(player, keydir().x, keydir().y, -10, -1.1)
+    tap_x = tapdir(player.pos()).with_z(0).limit(1).x # Control X-movement.
+    tap_y = 1 if len(taps())>=2 else 0 # Use two fingers to jump.
+    steer(player, keydir().x+tap_x, keydir().y+tap_y, -10, -1.1)
+
     ai(computer, ball)
 
     # Every time the ball bounces we make sure it gets full velocity.

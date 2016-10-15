@@ -86,7 +86,7 @@ while loop():
         turret_turn.force(delta_angle)
         # Shoot if tapping close to where we're currently aiming.
         if taps() and abs(delta_angle) < 0.3 and timeout(1.0, timer='shoot'):
-            closest_tap(tankpos).invalidate()
+            closest_tap(tankpos).invalidate() # We won't see this tap again.
             shots += [create_sphere(pos=turret.pos()+tdir*10, col='#333', vel=tdir*70)]
 
     # Explode shells whenever they hit something.

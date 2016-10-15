@@ -44,6 +44,7 @@
 #define GREEN_BUTTON		Color(20, 190, 15)
 
 
+
 namespace TrabantSim {
 
 
@@ -446,6 +447,7 @@ void TrabantSimManager::DeleteObject(int object_id) {
 void TrabantSimManager::DeleteAllObjects() {
 	GetContext()->SetPostKillTimeout(1);
 	{
+		ScopeLock game_lock(GetTickLock());
 		ScopeLock object_lock(&objects_lock_);
 		deleted_objects_.clear();
 		ContextObjectTable::iterator x = created_objects_.begin();
@@ -453,6 +455,7 @@ void TrabantSimManager::DeleteAllObjects() {
 			Object* object = (Object*)x->second;
 			delete object;
 		}
+		created_objects_.clear();
 	}
 	{
 		ScopeLock game_lock(GetTickLock());
@@ -965,9 +968,26 @@ void TrabantSimManager::Scale(int object_id, bool _set, vec3& scale) {
 	}
 	if (_set) {
 		ScopeLock phys_lock(GetMaster()->GetPhysicsLock());
-		const float prev_scale = object->GetMeshResource(0)->GetRamData()->GetScale();
-		GetMaster()->GetPhysicsManager(true)->Scale(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), scale/prev_scale);
-		object->GetMeshResource(0)->GetRamData()->SetScale(scale.x);
+		object->scale_ = vec3(scale.x*object->scale_.x, scale.y*object->scale_.y, scale.z*object->scale_.z);
+		GetMaster()->GetPhysicsManager(true)->Scale(object->GetPhysics()->GetBoneGeometry(0)->GetBodyId(), scale);
+		const float dxy = fabs(object->scale_.x / object->scale_.y);
+		const float dxz = fabs(object->scale_.x / object->scale_.z);
+		const bool xyz_scale = (dxy < 0.99 || dxy > 1.01 || dxz < 0.99 || dxz > 1.01);
+		if (xyz_scale) {
+			float* vertices = object->GetMeshResource(0)->GetRamData()->GetVertexData();
+			const int end = object->GetMeshResource(0)->GetRamData()->GetVertexCount() * 3;
+			for (int i = 0; i < end; i += 3) {
+				vertices[i+0] *= scale.x;
+				vertices[i+1] *= scale.y;
+				vertices[i+2] *= scale.z;
+			}
+			object->GetMeshResource(0)->GetRamData()->SetVertexDataChanged(true);
+			((UiCure::GeometryReferenceResource*)object->GetMeshResource(0)->GetResource())->GetParent()->GetRamData()->SetVertexDataChanged(true);
+			ScopeLock game_lock(GetTickLock());
+			gfx_update_objects_.insert(object->GetInstanceId());
+		} else {
+			object->GetMeshResource(0)->GetRamData()->SetScale(object->scale_.x);
+		}
 	}
 	else {
 		scale.Set(1, 1, 1);
@@ -1238,7 +1258,7 @@ bool TrabantSimManager::IsControlled() {
 			FoldSuspendSimulator();
 #else // Computer
 			if (is_paused_) {
-				menu_->DismissDialog();
+				DismissDialog();
 				OnMenuAlternative(0);
 			}
 			v_set(GetVariableScope(), kRtvarPhysicsMicrosteps, 1);
@@ -1415,6 +1435,14 @@ void TrabantSimManager::DrawStick(Touchstick* stick, bool is_sloppy) {
 	}
 }
 
+void TrabantSimManager::DismissDialog() {
+	if (user_info_dialog_) {
+		log_.Info("Main dialog dismissal!");
+		menu_->DismissDialog();
+		user_info_dialog_ = 0;
+		user_info_label_ = 0;
+	}
+}
 
 
 bool TrabantSimManager::InitializeUniverse() {
@@ -1495,6 +1523,17 @@ void TrabantSimManager::TickUiUpdate() {
 
 	((TrabantSimConsoleManager*)GetConsoleManager())->GetUiConsole()->Tick();
 	collision_sound_manager_->Tick(camera_transform_.GetPosition());
+
+	// Update any meshes if necessary.
+	std::set<cure::GameObjectId>::iterator x;
+	for (x = gfx_update_objects_.begin(); x != gfx_update_objects_.end(); ++x) {
+		Object* object = (Object*)GetContext()->GetObject(*x);
+		if (object) {
+			ui_manager_->GetRenderer()->UpdateGeometry(((UiCure::GeometryReferenceResource*)object->GetMeshResource(0)->GetResource())->GetParent()->GetData(), false);
+			ui_manager_->GetRenderer()->UpdateGeometry(((UiCure::GeometryReferenceResource*)object->GetMeshResource(0)->GetResource())->GetUserData(0), false);
+		}
+	}
+	gfx_update_objects_.clear();
 }
 
 void TrabantSimManager::SetLocalRender(bool render) {
@@ -1792,11 +1831,7 @@ void TrabantSimManager::UpdateUserMessage() {
 	str user_message;
 	v_get(user_message, =, GetVariableScope(), kRtvarGameUsermessage, " ");
 	if (strutil::Strip(user_message, " \t\r\n").empty()) {
-		if (user_info_dialog_) {
-			menu_->DismissDialog();
-			user_info_dialog_ = 0;
-			user_info_label_ = 0;
-		}
+		DismissDialog();
 	} else {
 		wstr wide_user_message = wstrutil::Encode(user_message);
 		if (user_info_dialog_) {

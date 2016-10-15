@@ -46,8 +46,7 @@ ghost_random_directions = [None,None,None]
 while loop():
     # Steering.
     force = vec3(keydir().x, 0, keydir().y) * 5
-    if taps():
-        force += closest_tap(pacman.pos()).pos3d() - pacman.pos()
+    force += tapdir(pacman.pos()).with_y(0)
     pacman.engines[0].force(force)
 
     # Ghost movement.

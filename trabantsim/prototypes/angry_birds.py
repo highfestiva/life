@@ -37,7 +37,7 @@ def create_pig_box(pos, scale):
     return pig
 
 # This loop restarts the game after finishing the pigs.
-while True:
+while loop():
     release_objects()
 
     floor = create_box(pos=(0,0,-0.5), side=(55,12,1), static=True)

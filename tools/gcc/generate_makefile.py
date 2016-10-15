@@ -274,39 +274,39 @@ def generate_makefiles(basedir, vcfileinfolist):
 
         vcfile = os.path.join(basedir, vcfile)
         projdir = os.path.dirname(vcfile)
-        includedirs = [os.path.relpath(basedir+"ThirdParty/utf8cpp", projdir),
-                       os.path.relpath(basedir+"ThirdParty/ChibiXM", projdir),
-                       os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/include/", projdir),
-                       os.path.relpath(basedir+"ThirdParty/happyhttp-0.1/", projdir),
-                       os.path.relpath(basedir+"ThirdParty/libogg-1.2.2/include/", projdir),
-                       os.path.relpath(basedir+"ThirdParty/libvorbis-1.3.2/include/", projdir),
-                       os.path.relpath(basedir+"ThirdParty/libvorbis-1.3.2/lib/", projdir),
-                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/include", projdir),
-                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src", projdir),
-                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ode/src/joints", projdir),
-                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/OPCODE", projdir),
-                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/GIMPACT/include", projdir),
-                       os.path.relpath(basedir+"ThirdParty/ode-0.11.1/ou/include", projdir)]
-        libdirs = [os.path.relpath(basedir+"ThirdParty", projdir),
-                   os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622", projdir),
-                   os.path.relpath(basedir+"ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut", projdir),
-                   os.path.relpath(basedir+"Lepra", projdir),
-                   os.path.relpath(basedir+"Tbc", projdir),
-                   os.path.relpath(basedir+"Cure", projdir),
-                   os.path.relpath(basedir+"UiLepra", projdir),
-                   os.path.relpath(basedir+"UiTbc", projdir),
-                   os.path.relpath(basedir+"UiCure", projdir),
-                   os.path.relpath(basedir+"Life", projdir),
-                   os.path.relpath(basedir+"Life/LifeClient", projdir),
-                   os.path.relpath(basedir+"Life/LifeServer", projdir),
-                   os.path.relpath(basedir+"Life/LifeMaster", projdir)]
+        includedirs = [os.path.relpath(basedir+"thirdparty/utf8cpp", projdir),
+                       os.path.relpath(basedir+"thirdparty/ChibiXM", projdir),
+                       os.path.relpath(basedir+"thirdparty/freealut-1.1.0/include/", projdir),
+                       os.path.relpath(basedir+"thirdparty/happyhttp-0.1/", projdir),
+                       os.path.relpath(basedir+"thirdparty/libogg-1.2.2/include/", projdir),
+                       os.path.relpath(basedir+"thirdparty/libvorbis-1.3.2/include/", projdir),
+                       os.path.relpath(basedir+"thirdparty/libvorbis-1.3.2/lib/", projdir),
+                       os.path.relpath(basedir+"thirdparty/ode-0.11.1/include", projdir),
+                       os.path.relpath(basedir+"thirdparty/ode-0.11.1/ode/src", projdir),
+                       os.path.relpath(basedir+"thirdparty/ode-0.11.1/ode/src/joints", projdir),
+                       os.path.relpath(basedir+"thirdparty/ode-0.11.1/OPCODE", projdir),
+                       os.path.relpath(basedir+"thirdparty/ode-0.11.1/GIMPACT/include", projdir),
+                       os.path.relpath(basedir+"thirdparty/ode-0.11.1/ou/include", projdir)]
+        libdirs = [os.path.relpath(basedir+"thirdparty", projdir),
+                   os.path.relpath(basedir+"thirdparty/openal-soft-1.10.622", projdir),
+                   os.path.relpath(basedir+"thirdparty/freealut-1.1.0/admin/VisualStudioDotNET/alut", projdir),
+                   os.path.relpath(basedir+"lepra", projdir),
+                   os.path.relpath(basedir+"tbc", projdir),
+                   os.path.relpath(basedir+"cure", projdir),
+                   os.path.relpath(basedir+"uilepra", projdir),
+                   os.path.relpath(basedir+"uitbc", projdir),
+                   os.path.relpath(basedir+"uicure", projdir),
+                   os.path.relpath(basedir+"life", projdir),
+                   os.path.relpath(basedir+"life/lifeclient", projdir),
+                   os.path.relpath(basedir+"life/lifeserver", projdir),
+                   os.path.relpath(basedir+"life/lifemaster", projdir)]
 
         if not is_mac:
-            includedirs = [os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
-                os.path.relpath(basedir+"ThirdParty/openal-soft-1.10.622/include/", projdir)]+includedirs
+            includedirs = [os.path.relpath(basedir+"thirdparty/openal-soft-1.10.622/OpenAL32/Include/", projdir),
+                os.path.relpath(basedir+"thirdparty/openal-soft-1.10.622/include/", projdir)]+includedirs
         else:
-            includedirs = [os.path.relpath(basedir+"ThirdParty/HID_Utilities/", projdir)] + includedirs
-            libdirs = [os.path.relpath(basedir+"ThirdParty/HID_Utilities/", projdir)] + libdirs
+            includedirs = [os.path.relpath(basedir+"thirdparty/HID_Utilities/", projdir)] + includedirs
+            libdirs = [os.path.relpath(basedir+"thirdparty/HID_Utilities/", projdir)] + libdirs
 
         makename = os.path.join(os.path.dirname(vcfile), "makefile")
         printstart(makename)
@@ -323,39 +323,39 @@ def generate_makefiles(basedir, vcfileinfolist):
 def main():
     basedir = "../../"
     projects = [
-        ["ThirdParty",      "lib_nowarn", "ThirdParty/ThirdPartyLib_14.vcxproj", ""],
-        ["alut",            "lib_nowarn", "ThirdParty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut14.vcxproj", ""],
-        ["Lepra",           "lib",        "Lepra/Lepra14.vcxproj", "ThirdParty"],
-        ["Tbc",             "lib",        "Tbc/Tbc14.vcxproj", "Lepra"],
-        ["Cure",            "lib",        "Cure/Cure14.vcxproj", "Tbc"],
-        ["UiLepra",         "gfx_lib",    "UiLepra/UiLepra14.vcxproj", "Lepra alut"+space_mac_hid],
-        ["UiTbc",           "gfx_lib",    "UiTbc/UiTbc14.vcxproj", "UiLepra Tbc"],
-        ["UiCure",          "gfx_lib",    "UiCure/UiCure14.vcxproj", "UiTbc Cure"],
-        ["Life",            "lib",        "Life/Life14.vcxproj", "Cure"],
-        ["LifeServer",      "lib",        "Life/LifeServer/LifeServer14.vcxproj", "Life"],
-        ["LifeMaster",      "lib",        "Life/LifeMaster/LifeMaster14.vcxproj", "Life"],
-        ["LifeClient",      "gfx_lib",    "Life/LifeClient/LifeClient14.vcxproj", "Life UiCure"],
-        ["SlimeVolleyball", "gfx_bin",    "SlimeVolleyball/SlimeVolleyball14.vcxproj", "UiTbc"],
-        ["KillCutie",       "gfx_bin",    "KillCutie/KillCutie14.vcxproj", "UiCure"],
-        ["Push",            "gfx_bin",    "Push/Push14.vcxproj", "LifeClient LifeServer"],
-        ["HoverTank",       "gfx_bin",    "HoverTank/HoverTank14.vcxproj", "LifeClient LifeServer"],
-        ["Downwash",        "gfx_bin",    "Downwash/Downwash14.vcxproj", "LifeClient"],
-        ["Fire",            "gfx_bin",    "Fire/Fire14.vcxproj", "LifeClient"],
-        ["Bound",           "gfx_bin",    "Bound/Bound14.vcxproj", "LifeClient"],
-        ["TrabantSim",      "gfx_bin",    "TrabantSim/TrabantSim14.vcxproj", "LifeClient"],
-        ["Impuzzable",      "gfx_bin",    "Impuzzable/Impuzzable14.vcxproj", "LifeClient"],
-        ["PushServer",      "bin",        "Push/PushServer/PushServer14.vcxproj", "LifeServer"],
-        ["HoverTankServer", "bin",        "HoverTank/HoverTankServer/HoverTankServer14.vcxproj", "LifeServer"],
-        ["PushMaster",      "bin",        "Push/PushMaster/PushMaster14.vcxproj", "LifeMaster"],
-        ["HoverTankMaster", "bin",        "HoverTank/HoverTankMaster/HoverTankMaster14.vcxproj", "LifeMaster"],
-        ["TireFire",        "gfx_bin",    "TireFire/TireFire14.vcxproj", "UiCure"],
-        ["Bounce",          "gfx_bin",    "Bounce/Bounce14.vcxproj", "UiCure"],
-        ["CureTest",        "gfx_bin",    "UiCure/CureTestApp/CureTestApp14.vcxproj", "UiCure"]]
+        ["thirdparty",      "lib_nowarn", "thirdparty/thirdpartyLib_14.vcxproj", ""],
+        ["alut",            "lib_nowarn", "thirdparty/freealut-1.1.0/admin/VisualStudioDotNET/alut/alut14.vcxproj", ""],
+        ["lepra",           "lib",        "lepra/lepra14.vcxproj", "thirdparty"],
+        ["tbc",             "lib",        "tbc/tbc14.vcxproj", "lepra"],
+        ["cure",            "lib",        "cure/cure14.vcxproj", "tbc"],
+        ["uilepra",         "gfx_lib",    "uilepra/uilepra14.vcxproj", "lepra alut"+space_mac_hid],
+        ["uitbc",           "gfx_lib",    "uitbc/uitbc14.vcxproj", "uilepra tbc"],
+        ["uicure",          "gfx_lib",    "uicure/uicure14.vcxproj", "uitbc cure"],
+        ["life",            "lib",        "life/life14.vcxproj", "cure"],
+        ["lifeserver",      "lib",        "life/lifeserver/lifeserver14.vcxproj", "life"],
+        ["lifemaster",      "lib",        "life/lifemaster/lifemaster14.vcxproj", "life"],
+        ["lifeclient",      "gfx_lib",    "life/lifeclient/lifeclient14.vcxproj", "life uicure"],
+        ["slimevolleyball", "gfx_bin",    "slimevolleyball/slimevolleyball14.vcxproj", "uitbc"],
+        ["killcutie",       "gfx_bin",    "killcutie/killcutie14.vcxproj", "uicure"],
+        ["push",            "gfx_bin",    "push/push14.vcxproj", "lifeclient lifeserver"],
+        ["hovertank",       "gfx_bin",    "hovertank/hovertank14.vcxproj", "lifeclient lifeserver"],
+        ["downwash",        "gfx_bin",    "downwash/downwash14.vcxproj", "lifeclient"],
+        ["fire",            "gfx_bin",    "fire/fire14.vcxproj", "lifeclient"],
+        ["bound",           "gfx_bin",    "bound/bound14.vcxproj", "lifeclient"],
+        ["trabantsim",      "gfx_bin",    "trabantsim/trabantsim14.vcxproj", "lifeclient"],
+        ["impuzzable",      "gfx_bin",    "impuzzable/impuzzable14.vcxproj", "lifeclient"],
+        ["pushserver",      "bin",        "push/pushserver/pushserver14.vcxproj", "lifeserver"],
+        ["hovertankserver", "bin",        "hovertank/hovertankserver/hovertankserver14.vcxproj", "lifeserver"],
+        ["pushmaster",      "bin",        "push/pushmaster/pushmaster14.vcxproj", "lifemaster"],
+        ["hovertankmaster", "bin",        "hovertank/hovertankmaster/hovertankmaster14.vcxproj", "lifemaster"],
+        ["tirefire",        "gfx_bin",    "tirefire/tirefire14.vcxproj", "uicure"],
+        ["bounce",          "gfx_bin",    "bounce/bounce14.vcxproj", "uicure"],
+        ["cureTest",        "gfx_bin",    "uicure/curetestapp/curetestapp14.vcxproj", "uicure"]]
 
     if not is_mac:
-        projects = [["OpenAL", "lib_nowarn", "ThirdParty/openal-soft-1.10.622/OpenAL_14.vcxproj", ""]] + projects
+        projects = [["OpenAL", "lib_nowarn", "thirdparty/openal-soft-1.10.622/OpenAL_14.vcxproj", ""]] + projects
     else:
-        projects = [[mac_hid, "lib_nowarn", "ThirdParty/HID_Utilities/HID_Utilities.vcxproj", ""]] + projects
+        projects = [[mac_hid, "lib_nowarn", "thirdparty/HID_Utilities/HID_Utilities.vcxproj", ""]] + projects
 
     skipnames = os.environ.get("PD_SKIP_PROJECTS")
     if skipnames:

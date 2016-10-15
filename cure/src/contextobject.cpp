@@ -58,7 +58,7 @@ ContextObject::ContextObject(cure::ResourceManager* resource_manager, const str&
 }
 
 ContextObject::~ContextObject() {
-	deb_assert(Thread::GetCurrentThread()->GetThreadName() == "MainThread");
+	deb_assert(!manager_ || Thread::GetCurrentThread()->GetThreadName() == "MainThread");
 
 	log_volatile(log_.Tracef("Destructing context object %s.", class_id_.c_str()));
 

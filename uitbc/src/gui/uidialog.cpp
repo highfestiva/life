@@ -26,6 +26,9 @@ Dialog::Dialog(Component* parent, Action target):
 	is_closing_(false),
 	animation_step_(0),
 	direction_(0) {
+
+	log_.Infof("Constructing dialog %p", this);
+
 	SetCornerRadius(20);
 	color_[1] = DARK_GRAY;
 	parent->AddChild(this);
@@ -39,16 +42,19 @@ Dialog::Dialog(Component* parent, Action target):
 }
 
 Dialog::~Dialog() {
+	log_.Infof("Destructing dialog %p", this);
 	target_.clear();
 	pre_click_target_.clear();
 	post_click_target_.clear();
 }
 
 void Dialog::Dismiss() {
+	log_.Infof("Dismissing dialog %p", this);
 	if (!is_closing_) {
 		GetTopParent()->ReleaseKeyboardFocus(kRecurseDown);
 		animation_step_ = -kSpeed * direction_;
 		is_closing_ = true;
+		DoClick(clicked_button_);
 	}
 }
 
@@ -62,6 +68,8 @@ void Dialog::SetColor(const Color& top_left_color, const Color& top_right_color,
 }
 
 void Dialog::SetDirection(int direction, bool set_pos) {
+	log_.Infof("Setting direction of dialog %p to %i", this, direction);
+
 	direction_ = direction;
 
 	const PixelCoord& parent_size = GetParent()->GetSize();
@@ -93,6 +101,8 @@ void Dialog::SetPostClickTarget(Action post_click_target) {
 }
 
 void Dialog::Center() {
+	log_.Infof("Centering dialog %p", this);
+
 	if (animation_step_) {
 		return;
 	}
@@ -257,8 +267,8 @@ void Dialog::Animate() {
 			animation_step_ -= kAcceleration * direction_;
 			if ((direction_ > 0 && (pos.x+GetSize().x < -kMargin || animation_step_ >= 0)) ||
 				(direction_ < 0 && (pos.x > parent_size.x+kMargin || animation_step_ <= 0))) {
-				DoClick(clicked_button_);
 				((DesktopWindow*)GetParentOfType(kDesktopwindow))->PostDeleteComponent(this, 0);
+				log_.Infof("Post-deleting dialog %p", this);
 			}
 		}
 	}
@@ -297,6 +307,10 @@ void Dialog::DoClick(Button* button) {
 		_post_click_target(button);
 	}
 }
+
+
+
+loginstance(kUiGfx2D, Dialog);
 
 
 

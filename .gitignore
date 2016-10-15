@@ -71,7 +71,7 @@ Impuzzable/Impuzzable
 TrabantSim/TrabantSim
 TrabantSim/loke
 TrabantIDE/tools/*.html
-TrabantIDE/python34/
+TrabantIDE/python*/
 /ThirdParty/stlport/build
 /bin/
 */Data/Download

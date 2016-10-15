@@ -10,8 +10,8 @@ import sys
 import rgohelp
 
 
-#appnames = ["UiCure/CureTestApp", "Life", "SlimeVolleyball", "KillCutie", "TireFire"]
-appnames = ["Bound"]
+#appnames = ["uicure/curetestapp", "life", "slimevolleyball", "killCutie", "tirefire"]
+appnames = ["bound"]
 fullname = "Bound"
 osname = rgohelp._getosname()
 hwname = rgohelp._gethwname()
@@ -77,23 +77,23 @@ def _buildcode(command, buildtype):
 	projext = "900" if ver == 9 else "10";
 	if command == "build":
 		_buildext()
-		if osname == "Windows":	args = [make, "/useenv", "/M4", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
+		if osname == "Windows":	args = [make, "/useenv", "/M4", "life"+projext+".sln", own_tt[buildtype]+"|Win32"]
 		else:			args = [make]
 		what = "incremental building code"
 	elif command == "rebuild":
 		_buildext()
-		if osname == "Windows": args = [make, "/useenv", "/M4", "/rebuild", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
+		if osname == "Windows": args = [make, "/useenv", "/M4", "/rebuild", "life"+projext+".sln", own_tt[buildtype]+"|Win32"]
 		else:			args = [make, "clean", "all"]
 		what = "rebuilding code"
 	elif command == "clean":
-		if osname == "Windows": args = [make, "/useenv", "/clean", "Life"+projext+".sln", own_tt[buildtype]+"|Win32"]
+		if osname == "Windows": args = [make, "/useenv", "/clean", "life"+projext+".sln", own_tt[buildtype]+"|Win32"]
 		else:			args = [make, "clean"]
 		what = "cleaning code"
 	print(args)
 	args = rgohelp.fixbuildcmd(args)
 	print(args)
 	if osname == "Windows":
-		os.chdir("Life")
+		os.chdir("life")
 	rgohelp._run(args, what)
 	if osname == "Windows":
 		os.chdir("..")
@@ -174,7 +174,7 @@ def _incremental_copy_code(targetdir, buildtype):
 				obj = line.strip()
 				if obj:
 					obj = obj.split()[0]
-				if obj.startswith("ThirdParty/"):
+				if obj.startswith("thirdparty/"):
 					fl += glob.glob(os.path.join(obj, lgpl_tt[buildtype], "*.dll"))
 				elif list(filter(lambda x: x, [obj.startswith(an) for an in appnames])):
 					fl += glob.glob(os.path.join(obj, own_tt[buildtype], "*.exe"))

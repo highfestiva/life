@@ -58,6 +58,8 @@ protected:
 	bool is_closing_;
 	int animation_step_;
 	int direction_;
+
+	logclass();
 };
 
 

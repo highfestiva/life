@@ -35,16 +35,14 @@ for invader in invaders:
     invader.vel(invaderspeeds[0])
 
 while loop():
-    # Steering, shooting.
-    tap_dx = 100
-    if taps():
-        dx = closest_tap(ship.pos()).pos3d().x - ship.pos().x
-        tap_dx = abs(dx)
-        vmin = min(25,tap_dx*3)*4
-        ship.vel((vmin if dx>0 else -vmin, 0, 0))
-    else:
-        ship.vel((keydir().x*50,0,0))
-    if ('Space' in keys() or 'LCtrl' in keys() or tap_dx<5) and timeout(0.7, first_hit=True):
+    # Steering.
+    vel = keydir()*50 + tapdir(ship.pos())*4
+    ship.vel((vel.x,0,0)) # Only move in X.
+
+    # Shooting.
+    is_tap_close = taps() and tapdir(ship.pos()).x < 3
+    is_shooting = 'Space' in keys() or 'LCtrl' in keys() or is_tap_close
+    if is_shooting and timeout(0.7, first_hit=True):
         shots += [create_sphere(ship.pos()+vec3(0,0,10), vel=(0,0,200), col='#fff')]
         sound(sound_bang, shots[-1].pos())
 

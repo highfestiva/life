@@ -154,6 +154,7 @@ public:
 
 	virtual bool Paint();
 	void DrawStick(Touchstick* stick, bool is_sloppy);
+	void TrabantSimManager::DismissDialog();
 
 protected:
 	typedef std::list<Object*> CreatedObjectList;
@@ -197,6 +198,7 @@ protected:
 
 	UiCure::CollisionSoundManager* collision_sound_manager_;
 	std::set<cure::GameObjectId> objects_;
+	std::set<cure::GameObjectId> gfx_update_objects_;
 	ContextObjectTable created_objects_;
 	DeletedObjectSet deleted_objects_;
 	CollisionList collision_list_;

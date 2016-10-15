@@ -19,7 +19,6 @@ tetrominos = ['\n'.join(t) for t in zip(*tetromino_lines)]
 tetromino = None
 
 colors = '#0ff #ff0 #00f #a50 #f0f #0f0 #f00'.split()
-directions = [vec3(0,0,+1),vec3(0,0,-1),vec3(-1,0,0),vec3(+1,0,0)] # Up, down, left, right.
 gridsize = vec3(10,20,0) # Standard tetris grid.
 fixed_blocks = [[None]*gridsize.x for _ in range(gridsize.y+5)]
 
@@ -79,13 +78,8 @@ while loop():
         tetromino.pos(vec3(gridsize.x/2,0,gridsize.y) - tetromino_rot_center)
 
     if (keys() or taps()) and timeout(0.15): # Steering.
-        if taps():
-            # Find the direction the user is tapping: up, down, left, right.
-            t_pos = tetromino.pos()
-            tap_pos = closest_tap(t_pos).pos3d()
-            v = min(directions, key=lambda d:(tap_pos-d-t_pos).length())
-        else:
-            v = vec3(keydir().x,0,keydir().y)
+        v = vec3(keydir().x,0,keydir().y)
+        v += tapdir(tetromino.pos(), digital_direction=True)
         # Tapping above means "rotate", tapping left/below/right means move in that direction.
         if v.z > 0: trymove(vec3(), tetromino.orientation().rotate_y(pi/2))
         else:       trymove(v, tetromino.orientation())
