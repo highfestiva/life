@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 from codecs import open
-from json import dumps as tojson
+import http.client
+from json import dumps as tojson, loads as fromjson
 from os.path import split as splitpath
-from requests import post
 from sys import argv
 import webbrowser
 
@@ -18,15 +18,17 @@ data = {
 		}
 	},
 	"description": description,
-	"public": True
+	"public": True,
 }
 
-headers = {}
+headers = {
+	'User-agent': fname,
+	'Content-type': 'application/json',
+}
 
-r = post('https://api.github.com/gists', data=tojson(data), headers=headers)
-if r.status_code == 201:
-	url = 'https://gist.github.com/%s' % r.json()['id']
-	print('Gist created: %s' % url)
-	webbrowser.open_new_tab(url)
-else:
-	print('GIST CREATE ERROR %s: %s' % (r.status_code, r.text))
+connection = http.client.HTTPSConnection('api.github.com')
+connection.request('POST', '/gists', tojson(data), headers)
+response = connection.getresponse().read().decode()
+url = 'https://gist.github.com/%s' % fromjson(response)['id']
+print('Gist created: %s' % url)
+webbrowser.open_new_tab(url)

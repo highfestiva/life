@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import socket
-import trabant.socket
+import trabant.socket_wrapper
 from trabant.math import vec3,quat
 
 
@@ -409,7 +409,7 @@ def _tryconnect(addr, retries):
 			if proc and attempt>1:
 				import time
 				time.sleep(0.1)
-			sock = trabant.socket.socket()
+			sock = trabant.socket_wrapper.socket()
 			if retries>1 and attempt==retries:
 				sock.settimeout(sock.timeout+1)
 			sock.connect((ip,int(port)))
