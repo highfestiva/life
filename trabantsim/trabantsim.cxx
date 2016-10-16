@@ -324,7 +324,7 @@ bool TrabantSim::ConnectQuery(const str& hostname) {
 
 
 str TrabantSim::GetTypeName() const {
-	return "Simulator";
+	return "Trabant Simulator";
 }
 
 str TrabantSim::GetVersion() const {

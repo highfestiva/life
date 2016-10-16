@@ -8,4 +8,4 @@
 
 #include "../lepra/include/lepratypes.h"
 
-#define kTrabantVersion "0.9"
+#define kTrabantVersion "1.0"
