@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # An RC heli sim prototype, using actuators for control.
 
 from trabant import *
@@ -13,7 +12,7 @@ XXX
     /XXX\
 /XXXXXXXXX\
 XXXXXXXXXXXXXXXXXXXX
-´XXXXXXXXX`
+\XXXXXXXXX/
 '''.split('~~~')
 near,middle,far = [body]*3    # Make the body a bit wider.
 near,far = [s.replace('XXXXXXXXX\n', '\n') for s in [near,far]]    # Only keep tail in the middle (i.e. make it thin).

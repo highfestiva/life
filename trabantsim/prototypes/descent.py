@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Descent-like prototype, tap/keyboard controlled.
 
 from trabant import *
@@ -13,19 +12,19 @@ r'''
 
 
   XXXXXX
- /`    ´\
+ //    \\
 ----------
-  /` ´\
-  ´\ /`
+  // \\
+  \\ //
   XXXXXX
- /`    ´\
-/`      ´\
+ //    \\
+//      \\
 ----------
 
 
     XX    
 
-/`      ´\
+//      \\
 ----------
 
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8
 # Looks a bit like a simplified scene from Limbo.
 
 # NOTE:

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # I made this test while fixing a bug in the orientation handling.
 
 from trabant import *
@@ -16,15 +15,15 @@ shipasc = r'''
 diamond_with_bom_hook = r'''
  XX\
  /XX\
- ´XX`
-  ´`
+ \XX/
+  \/
 ---
  X
 '''.strip('\n')
 
 square_with_diamond = r'''
    ^
-   ´>
+   \>
 
 XX
 -----

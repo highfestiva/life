@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # A bit like Amiga Fire Power anno 1987.
 
 from trabant import *

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 
 import codecs
@@ -9,8 +10,9 @@ from trabant.math import vec3
 
 GRID = 0.5
 W2E, NW2SE, N2S, NE2SW, E2W, SE2NW, S2N, SW2NE, F2B, B2F, NORMAL_COUNT = range(11)
-chars = r' X><^v`´\/|*ltrb'
-square_triangles =	[	[[False,False],[False,False]],
+chars = r' X><^v`´\/|¤ltrb'
+square_triangles =	[
+				[[False,False],[False,False]],
 				[[True ,True ],[True ,True ]],
 				[[True ,False],[False,False]],
 				[[False,False],[False,True ]],
@@ -25,7 +27,8 @@ square_triangles =	[	[[False,False],[False,False]],
 				[[False,True ],[True ,True ]],
 				[[True ,False],[True ,True ]],
 				[[True ,True ],[True ,False]],
-				[[True ,True ],[False,True ]],	]
+				[[True ,True ],[False,True ]],
+]
 
 
 class Shape:
@@ -46,11 +49,15 @@ class Shape:
 					tlayer += [[False]*self.size.x,[False]*self.size.x]	# Add two triangle rows per char row.
 					for x,ch in enumerate(row):
 						self.tricnt += _ch2tricnt(ch)
-						ts = _ch2tris(ch)
-						self.triangles[z][y*2  ][x*2]	= ts[0][0]
-						self.triangles[z][y*2  ][x*2+1]	= ts[0][1]
-						self.triangles[z][y*2+1][x*2]	= ts[1][0]
-						self.triangles[z][y*2+1][x*2+1]	= ts[1][1]
+						self.settris(ch,x,y,z)
+
+	def settris(self, ch, x, y, z):
+		ts = _ch2tris(ch)
+		self.triangles[z][y*2+0][x*2+0] = ts[0][0]
+		self.triangles[z][y*2+0][x*2+1] = ts[0][1]
+		self.triangles[z][y*2+1][x*2+0] = ts[1][0]
+		self.triangles[z][y*2+1][x*2+1] = ts[1][1]
+
 	def __iter__(self):
 		cs = []
 		for z,tlayer in enumerate(self.triangles):
@@ -60,10 +67,11 @@ class Shape:
 				row = ''
 				for x in range(self.size.x//2):
 					ts = [	[self.triangles[z][y*2  ][x*2], self.triangles[z][y*2  ][x*2+1]],
-						[self.triangles[z][y*2+1][x*2], self.triangles[z][y*2+1][x*2+1]],  ]
+						    [self.triangles[z][y*2+1][x*2], self.triangles[z][y*2+1][x*2+1]],  ]
 					row += _tris2ch(ts)
 				layer.append(row)
 		return iter(cs)
+
 	def __str__(self):
 		return shape2str(self)
 
@@ -72,7 +80,7 @@ def _ch2tricnt(ch):
 	if ch == ' ':       return 0
 	if ch == 'X':       return 4
 	if ch in '><^v':    return 1
-	if ch in '`´\\/*|': return 2
+	if ch in '`´\\/¤|': return 2
 	if ch in 'ltrb':    return 3
 	raise ValueError('Invalid character %s' % repr(ch))
 
@@ -117,6 +125,11 @@ def hasboundstri(shape,crd):
 	if crd.x<0 or crd.x>=shape.size.x or crd.y<0 or crd.y>=shape.size.y or crd.z<0 or crd.z>=shape.size.z:
 		return None
 	return hastri(shape,crd)
+
+def boundtricnt(shape,crd):
+	if crd.x<0 or crd.x>=shape.size.x or crd.y<0 or crd.y>=shape.size.y or crd.z<0 or crd.z>=shape.size.z:
+		return 0
+	return 1 if hastri(shape,crd) else 0
 
 def hastri(shape,crd):
 	return shape.triangles[crd.z][crd.y][crd.x]
@@ -315,23 +328,57 @@ def load_shapes(ascii, crop=True):
 	return load_shapes_from_file(codecs.open(ascii+'.txt', encoding='utf-8'), crop)
 
 def load_shapes_from_file(f, crop):
-	shapes = []
+	contains_specific = False
+	char_shapes = []
 	shape = []	# List of layers.
 	layer = []	# List of strings. One string per row.
 	for line in f:
 		line = line.rstrip() if crop else line.rstrip('\r\n')
 		if '~~~' in line:
 			shape += [layer]
-			shapes += [shape]
+			char_shapes += [shape]
 			shape,layer = [],[]
 		elif '---' in line:
 			shape += [layer]
 			layer = []
 		else:
-			layer += [line.rstrip('\n')]
+			contains_specific |= bool([1 for ch in '`´ltrb' if ch in line])
+			layer += [line]
 	shape += [layer]
-	shapes += [shape]
-	return [Shape(unify_chars(shape,crop)) for shape in shapes]
+	char_shapes += [shape]
+
+	shapes = [Shape(unify_chars(shape,crop)) for shape in char_shapes]
+
+	# Handle simplified ascii art, for instance '\' and '/' can mean either upper or lower triangle.
+	if not contains_specific:
+		for shape,char_shape in zip(shapes,char_shapes):
+			for z,layer in enumerate(char_shape):
+				for y,row in enumerate(layer):
+					for _ in range(2): # Run two times to resolve.
+						for x,ch in enumerate(row):
+							if ch not in '/\\><^v':
+								continue
+							left   = boundtricnt(shape, vec3(x*2-1,y*2+1,z))
+							right  = boundtricnt(shape, vec3(x*2+2,y*2+0,z))
+							top    = boundtricnt(shape, vec3(x*2+0,y*2-1,z))
+							bottom = boundtricnt(shape, vec3(x*2+1,y*2+2,z))
+							sumtot = left+right+top+bottom
+							no_neighbour_tris = (sumtot == 0)
+							nch = '`´lrtb'[r'/\><^v'.index(ch)]
+							if ch == '/' and (left+top > right+bottom or (no_neighbour_tris and row[x-1:x] == '\\')):
+								ch = nch
+							elif ch == '\\' and (right+top > left+bottom or (no_neighbour_tris and row[x+1:x+2] == '/')):
+								ch = nch
+							elif ch == '>' and top+right+bottom-1 > left:
+								ch = nch
+							elif ch == '<' and top+left+bottom-1 > right:
+								ch = nch
+							elif ch == '^' and left+top+right-1 > bottom:
+								ch = nch
+							elif ch == 'v' and left+bottom+right-1 > top:
+								ch = nch
+							shape.settris(ch, x, y, z)
+	return shapes
 
 
 def shape2str(shape):

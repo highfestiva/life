@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Terminal Velocity prototype, accelerometer controlled.
 
 from trabant import *
@@ -10,8 +9,8 @@ shipasc = r'''
     XX
     XX
 XX  XX  XX
-´XXXXXXXX`
- ´XXXXXX`
+\XXXXXXXX/
+ \XXXXXX/
 '''
 
 ship = create_ascii_object(shipasc)

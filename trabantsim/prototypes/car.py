@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # An RC car sim prototype using physical motors for control.
 
 from trabant import *

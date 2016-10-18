@@ -11,36 +11,36 @@ shipasc = r'''
     \
    / \
   /XXX>
-XXXXX`
- /`
-/`
+XXXXX/
+ //
+//
 ===
 XXXXX\
  XXXXXX>
-XXXXX`
+XXXXX/
 ===
 /X\
-´XXXX\
+\XXXX\
  lXXXXXXX>
-/XXXX`
-´X`
+/XXXX/
+\X/
 ===
  X
 XX
  XXXXXXXX\
 XXXXXXXXXX>
- XXXXXXXX`
+ XXXXXXXX/
 XX
  X
 ===
     X
  /XXXXX\
-´XXXXX`
- ´XXXXXXXXX>
+\XXXXX/
+ \XXXXXXXXX>
   lXXXXXXXXXXXX>
  /XXXXXXXXX>
 /XXXXX\
- ´XXXXX`
+ \XXXXX/
     X
 ===
   \
@@ -49,12 +49,12 @@ XXXX\
 XXXXX
   XXX
 XXXXXXX\
-XXXXXXX`
+XXXXXXX/
   XXX
 XXXXX
-XXXX`
-  X`
-  `
+XXXX/
+  X/
+  /
 ===
   \
   X\
@@ -63,8 +63,8 @@ XXXXXXXXXXXX
 XXXXXXXXX>
 XXXXXXXXXXXX
 XXXXXXXXXXXX
-  X`
-  `
+  X/
+  /
 '''
 shipascs = shipasc.split('\n===\n')
 
@@ -77,8 +77,8 @@ shipsym = r'''
 enemyasc = r'''
    /XXX
 /XXXX
-´XXXX
-   ´XXX
+\XXXX
+   \XXX
 '''
 
 def create_ship(ship, ship_idx):

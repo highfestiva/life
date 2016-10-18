@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Simple Tetris prototyping. Move left/right/down by tapping left/right/below tetromino. Rotate by tapping above.
 
 from trabant import *

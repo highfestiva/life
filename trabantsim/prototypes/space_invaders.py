@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # Space Invadersishkebab.
 
 from trabant import *
@@ -15,10 +14,10 @@ invader = r'''
  /XXXXXXXX\
  XXXXXXXXXX
  XX  XX  XX
- ´XXXXXXXX`
+ \XXXXXXXX/
   /XX  XX\
- /X` ´` ´X\
- X`      ´X
+ /X/ \/ \X\
+ X/      \X
 '''
 
 cam(distance=250)
