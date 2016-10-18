@@ -101,7 +101,8 @@ bool MacFontManager::RenderGlyph(wchar_t c, Canvas& image, const PixelRect& _rec
 	UIGraphicsPopContext();
 #else // !iOS
 	int y = _rect.GetHeight() - ((MacFont*)current_font_)->actual_size_;
-	CGContextShowTextAtPoint(textcontext, 0, y, &c, 1);
+	const char ch = (char)c;
+	CGContextShowTextAtPoint(textcontext, 0, y, &ch, 1);
 	CGContextFlush(textcontext);
 	image.FlipVertical();
 #endif // iOS / Mac

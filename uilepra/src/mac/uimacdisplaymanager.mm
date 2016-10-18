@@ -280,7 +280,7 @@ bool MacDisplayManager::OpenScreen(const DisplayMode& display_mode, ScreenMode s
 			}
 
 			if (supported_mode == false) {
-				str err(strutil::Format("OpenScreen( - Display mode %i-bit %ix%i at %i Hz is not supported!"),
+				str err(strutil::Format("OpenScreen( - Display mode %i-bit %ix%i at %i Hz is not supported!",
 						 display_mode.bit_depth_,
 						 display_mode.width_,
 						 display_mode.height_,

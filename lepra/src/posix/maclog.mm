@@ -26,7 +26,7 @@ str MacLog::Decode(NSString* text) {
 		return str();
 	}
 	const char* cString = [text UTF8String];
-	lepra::astr utf8_string(cString);
+	lepra::str utf8_string(cString);
 	return lepra::strutil::Encode(utf8_string);
 }
 

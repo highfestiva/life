@@ -43,9 +43,9 @@ def userinfo(message):
 	setvar('Game.UserMessage', '"%s"' % message)
 
 def areloaded(oids):
-	c = 'are-loaded %s' % ','.join('%i'%oid for oid in oids)
+	c = 'are-loaded '
 	conv = lambda r: [s=='1' for s in r.split(',')]
-	return cmd(c, conv)
+	return _break_any_cmd(c, c, '%i', oids, conv)
 
 def waitload(oid):
 	cmd('wait-until-loaded %i' % oid)
@@ -384,16 +384,17 @@ def _closecom():
 		proc.wait()
 		proc = None
 
-def _break_any_cmd(start, add, fmt, values):
-	c,s = start,''
+def _break_any_cmd(start, add, fmt, values, return_type=str):
+	c,s,r = start,'',return_type('')
 	for v in values:
 		s += ',' if s else ''
 		s += fmt%v
 		if len(s) > 1450:
-			cmd(c+s)
+			r += cmd(c+s, return_type)
 			c,s = add,''
 	if s:
-		cmd(c+s)
+		r += cmd(c+s, return_type)
+	return r
 
 def _args2str(args, default=''):
 	if not args:

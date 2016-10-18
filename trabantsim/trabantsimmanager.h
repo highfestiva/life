@@ -154,7 +154,7 @@ public:
 
 	virtual bool Paint();
 	void DrawStick(Touchstick* stick, bool is_sloppy);
-	void TrabantSimManager::DismissDialog();
+	void DismissDialog();
 
 protected:
 	typedef std::list<Object*> CreatedObjectList;

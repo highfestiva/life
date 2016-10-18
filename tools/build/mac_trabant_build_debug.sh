@@ -4,18 +4,18 @@ rgo='python3 -B Tools/build/rgo.py'
 
 $rgo copycode
 rm bin/*
-rm UiLepra/libUiLepra.so
-rm UiLepra/Source/Mac/UiMacInput.o
-cd UiLepra
+rm uilepra/libuilepra.so
+rm uilepra/src/mac/uimacinput.o
+cd uilepra
 make
 cd ..
-rm TrabantSim/TrabantSim
+rm trabantsim/trabantsim
 make
-cd TrabantSim
+cd trabantsim
 make
 cd ..
-cp TrabantSim/TrabantSim bin/
+cp trabantsim/trabantsim bin/
 $rgo macappify
 cd bin/TrabantSim.app/Contents/MacOS
-lldb TrabantSim
+lldb trabantsim
 

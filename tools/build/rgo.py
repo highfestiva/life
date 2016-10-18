@@ -343,26 +343,26 @@ def _macappify(exe, name):
 			#print("install_name_tool -change %s @executable_path/%s %s" % (o, o, i))
 			os.system("install_name_tool -change %s @executable_path/%s %s" % (o, o, i))
 	import shutil
-	shutil.copytree("../tools/build/macosx", exe+".app")
+	shutil.copytree("../tools/build/macosx", name+".app")
 	for f in fs:
-		os.rename(f, os.path.join(exe+".app/Contents/MacOS", f))
+		os.rename(f, os.path.join(name+".app/Contents/MacOS", f))
 		updates += 1
 	try:
-		os.rename("data", exe+".app/Contents/Resources/data")
+		os.rename("data", name+".app/Contents/Resources/data")
 		updates += 1
-		shutil.copy("../"+exe+"/Icons/Main.icns", exe+".app/Contents/Resources")
+		shutil.copy("../"+name+"/Icons/Main.icns", exe+".app/Contents/Resources")
 		updates += 1
 	except:
 		pass
 	plist = ".app/Contents/Info.plist"
-	r = open(exe+plist, "rt")
-	w = open(exe+plist+".tmp", "wt")
+	r = open(name+plist, "rt")
+	w = open(name+plist+".tmp", "wt")
 	for line in r:
 		w.write(line.replace("@EXE_NAME@", exe).replace("@BUNDLE_NAME@", name))
 	r.close()
 	w.close()
-	os.remove(exe+plist)
-	os.rename(exe+plist+".tmp", exe+plist)
+	os.remove(name+plist)
+	os.rename(name+plist+".tmp", name+plist)
 	updates += 1
 	os.chdir("..")
 

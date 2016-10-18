@@ -60,7 +60,7 @@ MacInputDevice::MacInputDevice(pRecDevice native_device, InputManager* manager):
 	abs_axis_count_(0),
 	analogue_count_(0),
 	button_count_(0) {
-	SetIdentifier(str(native_device->product));
+	SetIdentifier(str((const char*)native_device->product));
 	EnumElements();
 }
 
@@ -71,7 +71,7 @@ MacInputDevice::~MacInputDevice() {
 	//native_device_->Release();
 }
 
-void MacInputDevice::Activate(disable_win_mgr) {
+void MacInputDevice::Activate(bool disable_win_mgr) {
 	if (IsActive() == false) {
 		//native_device_->Acquire();
 		SetActive(true);
@@ -329,14 +329,14 @@ MacInputManager::KeyCode MacInputManager::ConvertMacKeyCodeToKeyCode(unsigned ma
 		case kVK_Space:			return kInKbdSpace;
 		case kVK_Delete:		return kInKbdDel;
 		case kVK_Escape:		return kInKbdEsc;
-		case kVK_Command:		return kInKbdLalt;
-		case kVK_Shift:			return kInKbdLshift;
+		case kVK_Command:		return kInKbdLAlt;
+		case kVK_Shift:			return kInKbdLShift;
 		case kVK_CapsLock:		return kInKbdCapsLock;
-		case kVK_Option:		return kInKbdLos;
-		case kVK_Control:		return kInKbdLctrl;
-		case kVK_RightShift:		return kInKbdRshift;
-		case kVK_RightOption:		return kInKbdRos;
-		case kVK_RightControl:		return kInKbdRctrl;
+		case kVK_Option:		return kInKbdLOs;
+		case kVK_Control:		return kInKbdLCtrl;
+		case kVK_RightShift:		return kInKbdRShift;
+		case kVK_RightOption:		return kInKbdROs;
+		case kVK_RightControl:		return kInKbdRCtrl;
 		case kVK_Function:		return kInKbdContextMenu;
 		case kVK_F17:			return kInKbdF12;
 		case kVK_VolumeUp:		return kInKbdQuickIncrVolume;
@@ -360,12 +360,12 @@ MacInputManager::KeyCode MacInputManager::ConvertMacKeyCodeToKeyCode(unsigned ma
 		case kVK_F15:			return kInKbdF12;
 		case kVK_Help:			return kInKbdF1;
 		case kVK_Home:			return kInKbdHome;
-		case kVK_PageUp:		return kInKbdPgup;
+		case kVK_PageUp:		return kInKbdPgUp;
 		case kVK_ForwardDelete:		return kInKbdDel;
 		case kVK_F4:			return kInKbdF4;
 		case kVK_End:			return kInKbdEnd;
 		case kVK_F2:			return kInKbdF2;
-		case kVK_PageDown:		return kInKbdPgdown;
+		case kVK_PageDown:		return kInKbdPgDown;
 		case kVK_F1:			return kInKbdF1;
 		case kVK_LeftArrow:		return kInKbdLeft;
 		case kVK_RightArrow:		return kInKbdRight;
@@ -419,8 +419,8 @@ MacInputManager::KeyCode MacInputManager::ConvertCharToKeyCode(unichar c, bool i
 		case NSDeleteFunctionKey:	NC();	return kInKbdDel;
 		case NSHomeFunctionKey:		NC();	return kInKbdHome;
 		case NSEndFunctionKey:		NC();	return kInKbdEnd;
-		case NSPageUpFunctionKey:	NC();	return kInKbdPgup;
-		case NSPageDownFunctionKey:	NC();	return kInKbdPgdown;
+		case NSPageUpFunctionKey:	NC();	return kInKbdPgUp;
+		case NSPageDownFunctionKey:	NC();	return kInKbdPgDown;
 		case NSSysReqFunctionKey:	// Fall thru.
 		case NSPrintScreenFunctionKey:	NC();	return kInKbdPrintScreen;
 		case NSScrollLockFunctionKey:	NC();	return kInKbdScrollLock;
@@ -490,10 +490,10 @@ void MacInputManager::OnEvent(NSEvent* event) {
 			const int translation_table[][2] =
 			{
 				{ uilepra::InputManager::kInKbdCapsLock,	NSAlphaShiftKeyMask, },
-				{ uilepra::InputManager::kInKbdLshift,		NSShiftKeyMask, },
-				{ uilepra::InputManager::kInKbdLctrl,		NSControlKeyMask, },
-				{ uilepra::InputManager::kInKbdLalt,		NSAlternateKeyMask, },
-				{ uilepra::InputManager::kInKbdLos,		NSCommandKeyMask, },
+				{ uilepra::InputManager::kInKbdLShift,		NSShiftKeyMask, },
+				{ uilepra::InputManager::kInKbdLCtrl,		NSControlKeyMask, },
+				{ uilepra::InputManager::kInKbdLAlt,		NSAlternateKeyMask, },
+				{ uilepra::InputManager::kInKbdLOs,		NSCommandKeyMask, },
 			};
 			for (unsigned x = 0; x < LEPRA_ARRAY_COUNT(translation_table); ++x) {
 				if (!(delta_modifiers & translation_table[x][1])) {

@@ -53,7 +53,7 @@ bool MacOpenGLDisplay::Activate() {
 	return true;
 }
 
-void MacOpenGLDisplay::Deactivate() {
+bool MacOpenGLDisplay::Deactivate() {
 	if (is_open_) {
 #ifdef LEPRA_IOS
 		[LEPRA_APPLE_GL_CONTEXT setCurrentContext:nil];
@@ -256,10 +256,10 @@ bool MacOpenGLDisplay::InitScreen() {
 }
 
 void MacOpenGLDisplay::UpdateCaption() {
-	str s = strutil::Format("MacOpenGLDisplay (%ix%i %iBit %iHz %s"),
+	str s = strutil::Format("MacOpenGLDisplay (%ix%i %iBit %iHz %s)",
 		display_mode_.width_, display_mode_.height_,
 		display_mode_.bit_depth_, display_mode_.refresh_rate_,
-		 kLepraStringTypeText " " kLepraBuildTypeText);
+		kLepraStringTypeText " " kLepraBuildTypeText);
 	SetCaption(s, true);
 }
 
