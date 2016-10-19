@@ -47,8 +47,8 @@ using namespace lepra;
 
 -(id) init:(Canvas*)canvas;
 -(void) dealloc;
--(void) tick_;
--(void) tick_;
+-(void) startTick;
+-(void) stopTick;
 -(void) pushSimulatorController:(UIViewController*)viewController;
 -(void) pushViewController:(UIViewController*)viewController animated:(BOOL)animated;
 -(void) popViewControllerAnimated:(BOOL)animated;

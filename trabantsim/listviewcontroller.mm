@@ -201,7 +201,7 @@
 	} else {
 		UIBarButtonItem* doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneiPhoneSettings)];
 		self.settingsController_.navigationItem.rightBarButtonItem = doneButton;
-		nav.transition_style_ = UIModalTransitionStyleFlipHorizontal;
+		nav.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
 		[self.navigationController presentViewController:nav animated:YES completion:nil];
 	}
 }

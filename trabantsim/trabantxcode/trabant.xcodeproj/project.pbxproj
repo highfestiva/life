@@ -528,15 +528,14 @@
 		B1F3C40E16E0029C00B2EFB5 /* uiparticleloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1F3C40D16E0029C00B2EFB5 /* uiparticleloader.cpp */; };
 		B1F48EB61AEED4A0004FD96A /* settingsviewcontroller.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1F48EB51AEED4A0004FD96A /* settingsviewcontroller.mm */; };
 		B1F48EB91AEEFD64004FD96A /* filehelper.m in Sources */ = {isa = PBXBuildFile; fileRef = B1F48EB81AEEFD64004FD96A /* filehelper.m */; };
-		B1F61C861AA8EE9B00D38387 /* libpython_sim.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B1F61C851AA8EE9B00D38387 /* libpython_sim.a */; };
-		B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* Data.pk3 */; };
+		B1FB293A1450CAD600F1C762 /* data.pk3 in Resources */ = {isa = PBXBuildFile; fileRef = B1FB29391450CAD600F1C762 /* data.pk3 */; };
 		B1FBD9811AC58E9B009C3973 /* macsystemmanager.mm in Sources */ = {isa = PBXBuildFile; fileRef = B1FBD9801AC58E9B009C3973 /* macsystemmanager.mm */; };
 		B1FBD9831AC58EB7009C3973 /* fileserver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B1FBD9821AC58EB7009C3973 /* fileserver.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		1D6058910D05DD3D006BFB54 /* Trabant.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trabant.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D6058910D05DD3D006BFB54 /* trabant.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = trabant.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		35128A4C147262150006467C /* uisound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = uisound.cpp; path = ../../uicure/src/uisound.cpp; sourceTree = "<group>"; };
@@ -1195,6 +1194,21 @@
 		B1B559E917F7800A00A4BB17 /* driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = driver.cpp; path = ../../cure/src/driver.cpp; sourceTree = SOURCE_ROOT; };
 		B1B80C3C180F4294003AE676 /* menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = menu.cpp; path = ../../life/lifeclient/menu.cpp; sourceTree = SOURCE_ROOT; };
 		B1BC733C140EEAEE003F70F3 /* maclog.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = maclog.mm; sourceTree = "<group>"; };
+		B1C2C3D01DB7F6ED00B6C4CE /* trabantsimmanager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trabantsimmanager.h; path = ../trabantsim/trabantsimmanager.h; sourceTree = "<group>"; };
+		B1C2C3D11DB7F6ED00B6C4CE /* fileserver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fileserver.h; path = ../trabantsim/fileserver.h; sourceTree = "<group>"; };
+		B1C2C3D21DB7F6ED00B6C4CE /* light.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = light.h; path = ../trabantsim/light.h; sourceTree = "<group>"; };
+		B1C2C3D31DB7F6ED00B6C4CE /* listviewcontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = listviewcontroller.h; path = ../trabantsim/listviewcontroller.h; sourceTree = "<group>"; };
+		B1C2C3D41DB7F6ED00B6C4CE /* object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = object.h; path = ../trabantsim/object.h; sourceTree = "<group>"; };
+		B1C2C3D51DB7F6ED00B6C4CE /* physgfxobject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = physgfxobject.h; path = ../trabantsim/physgfxobject.h; sourceTree = "<group>"; };
+		B1C2C3D61DB7F6ED00B6C4CE /* pythontextview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pythontextview.h; path = ../trabantsim/pythontextview.h; sourceTree = "<group>"; };
+		B1C2C3D71DB7F6ED00B6C4CE /* rtvar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = rtvar.h; path = ../trabantsim/rtvar.h; sourceTree = "<group>"; };
+		B1C2C3D81DB7F6ED00B6C4CE /* trabantsimconsolemanager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trabantsimconsolemanager.h; path = ../trabantsim/trabantsimconsolemanager.h; sourceTree = "<group>"; };
+		B1C2C3D91DB7F6ED00B6C4CE /* trabantsimticker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trabantsimticker.h; path = ../trabantsim/trabantsimticker.h; sourceTree = "<group>"; };
+		B1C2C3DA1DB7F6ED00B6C4CE /* cyrlayoutmanager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cyrlayoutmanager.h; path = ../trabantsim/cyrlayoutmanager.h; sourceTree = "<group>"; };
+		B1C2C3DB1DB7F6ED00B6C4CE /* cyrtextstorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cyrtextstorage.h; path = ../trabantsim/cyrtextstorage.h; sourceTree = "<group>"; };
+		B1C2C3DC1DB7F6ED00B6C4CE /* cyrtextview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cyrtextview.h; path = ../trabantsim/cyrtextview.h; sourceTree = "<group>"; };
+		B1C2C3DD1DB7F6ED00B6C4CE /* cyrtoken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cyrtoken.h; path = ../trabantsim/cyrtoken.h; sourceTree = "<group>"; };
+		B1C2C3DE1DB7F6ED00B6C4CE /* editviewcontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = editviewcontroller.h; path = ../trabantsim/editviewcontroller.h; sourceTree = "<group>"; };
 		B1C4116618033EC7007D64F7 /* systemutil.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = systemutil.mm; path = ../../life/systemutil.mm; sourceTree = SOURCE_ROOT; };
 		B1CC28E313BA906B009BD34A /* uiiosinput.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uiiosinput.mm; sourceTree = "<group>"; };
 		B1CF1ED41854E66800765E60 /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
@@ -1244,7 +1258,6 @@
 		B1F48EB51AEED4A0004FD96A /* settingsviewcontroller.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = settingsviewcontroller.mm; sourceTree = "<group>"; };
 		B1F48EB71AEEFD64004FD96A /* filehelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = filehelper.h; sourceTree = "<group>"; };
 		B1F48EB81AEEFD64004FD96A /* filehelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = filehelper.m; sourceTree = "<group>"; };
-		B1F61C851AA8EE9B00D38387 /* libpython_sim.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpython_sim.a; path = "../../../RnD/python-embedded/libpython_sim.a"; sourceTree = "<group>"; };
 		B1FB29391450CAD600F1C762 /* data.pk3 */ = {isa = PBXFileReference; lastKnownFileType = file; name = data.pk3; path = ../data/data.pk3; sourceTree = SOURCE_ROOT; };
 		B1FBD9801AC58E9B009C3973 /* macsystemmanager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = macsystemmanager.mm; sourceTree = "<group>"; };
 		B1FBD9821AC58EB7009C3973 /* fileserver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fileserver.cpp; sourceTree = "<group>"; };
@@ -1257,7 +1270,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B1F61C861AA8EE9B00D38387 /* libpython_sim.a in Frameworks */,
 				B16547CB1AA07AE80035F3F7 /* libpython.a in Frameworks */,
 				B18D589B1A9E19A90029D2C0 /* CoreText.framework in Frameworks */,
 				B11E415718662E3B00C25073 /* StoreKit.framework in Frameworks */,
@@ -1277,7 +1289,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1D6058910D05DD3D006BFB54 /* Trabant.app */,
+				1D6058910D05DD3D006BFB54 /* trabant.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1311,6 +1323,7 @@
 			children = (
 				B19A146913A122DE0051A61C /* trabant */,
 				B1D37EE3166AB29400536CE5 /* life */,
+				B19A128813A122AF0051A61C /* tbc */,
 				B15F795413FC59E300E01A90 /* uicure */,
 				B15F791D13FC597B00E01A90 /* cure */,
 				B19A15AA13A127E40051A61C /* thirdparty */,
@@ -1324,7 +1337,6 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				B1F61C851AA8EE9B00D38387 /* libpython_sim.a */,
 				B16547CA1AA07AE80035F3F7 /* libpython.a */,
 				B18D589A1A9E19A90029D2C0 /* CoreText.framework */,
 				B11E415618662E3B00C25073 /* StoreKit.framework */,
@@ -1564,6 +1576,21 @@
 		B19A146913A122DE0051A61C /* trabant */ = {
 			isa = PBXGroup;
 			children = (
+				B1C2C3D01DB7F6ED00B6C4CE /* trabantsimmanager.h */,
+				B1C2C3D11DB7F6ED00B6C4CE /* fileserver.h */,
+				B1C2C3D21DB7F6ED00B6C4CE /* light.h */,
+				B1C2C3D31DB7F6ED00B6C4CE /* listviewcontroller.h */,
+				B1C2C3D41DB7F6ED00B6C4CE /* object.h */,
+				B1C2C3D51DB7F6ED00B6C4CE /* physgfxobject.h */,
+				B1C2C3D61DB7F6ED00B6C4CE /* pythontextview.h */,
+				B1C2C3D71DB7F6ED00B6C4CE /* rtvar.h */,
+				B1C2C3D81DB7F6ED00B6C4CE /* trabantsimconsolemanager.h */,
+				B1C2C3D91DB7F6ED00B6C4CE /* trabantsimticker.h */,
+				B1C2C3DA1DB7F6ED00B6C4CE /* cyrlayoutmanager.h */,
+				B1C2C3DB1DB7F6ED00B6C4CE /* cyrtextstorage.h */,
+				B1C2C3DC1DB7F6ED00B6C4CE /* cyrtextview.h */,
+				B1C2C3DD1DB7F6ED00B6C4CE /* cyrtoken.h */,
+				B1C2C3DE1DB7F6ED00B6C4CE /* editviewcontroller.h */,
 				B1EF1B311AF2C39600AEA0D8 /* webviewcontroller.h */,
 				B1EF1B321AF2C39600AEA0D8 /* webviewcontroller.m */,
 				B1F48EB71AEEFD64004FD96A /* filehelper.h */,
@@ -1596,7 +1623,6 @@
 				B1FFC8C91A9F547E002368AA /* animatedapp.h */,
 				B16547CC1AA07F350035F3F7 /* pythonrunner.mm */,
 				B16547CE1AA07FB40035F3F7 /* pythonrunner.h */,
-				B19A128813A122AF0051A61C /* tbc */,
 			);
 			name = trabant;
 			path = ..;
@@ -2449,7 +2475,7 @@
 		B1FB291E1450C8A600F1C762 /* data */ = {
 			isa = PBXGroup;
 			children = (
-				B1FB29391450CAD600F1C762 /* Data.pk3 */,
+				B1FB29391450CAD600F1C762 /* data.pk3 */,
 			);
 			name = data;
 			sourceTree = "<group>";
@@ -2471,7 +2497,7 @@
 			);
 			name = trabant;
 			productName = trabant;
-			productReference = 1D6058910D05DD3D006BFB54 /* Trabant.app */;
+			productReference = 1D6058910D05DD3D006BFB54 /* trabant.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -2493,7 +2519,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "trabant" */;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Trabant" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -2521,7 +2547,7 @@
 				B187FA051AFD8C8700E0272B /* images.xcassets in Resources */,
 				B1049DF41AAA0BDA00E34D85 /* launchscreen.xib in Resources */,
 				B1EF1B301AF2BBD600AEA0D8 /* trabant_py_api.html in Resources */,
-				B1FB293A1450CAD600F1C762 /* Data.pk3 in Resources */,
+				B1FB293A1450CAD600F1C762 /* data.pk3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3184,7 +3210,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "trabant" */ = {
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Trabant" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,

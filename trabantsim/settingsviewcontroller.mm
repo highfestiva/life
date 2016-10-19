@@ -31,7 +31,7 @@ using namespace lepra;
 	UILabel* explanationLabel = [[UILabel alloc] initWithFrame:CGRectMake(8, 112, 304, 160)];
 	explanationLabel.text = @"Remote sync will allow synchronization of prototypes between the device and a computer. " \
 				 "You can also run the simulation from the computer. (TCP and UDP port 2541 used).";
-	explanationLabel.break_mode = NSLineBreakByWordWrapping;
+	explanationLabel.lineBreakMode = NSLineBreakByWordWrapping;
 	explanationLabel.numberOfLines = 0;
 
 	[self.view addSubview:allowRemoteSyncLabel];

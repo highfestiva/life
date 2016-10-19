@@ -63,7 +63,7 @@ static EAGLView* g_shared_view;
 		eaglLayer.contentsScale = [[UIScreen mainScreen] scale];
 	}
 
-	self.multipleTouchEnabled_ = YES;
+	self.multipleTouchEnabled = YES;
 	g_shared_view = self;
 	isOpen = false;
 	responder = nil;

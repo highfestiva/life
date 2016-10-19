@@ -89,7 +89,6 @@ void Menu::InitButton(uitbc::Button* button) const {
 }
 
 void Menu::DismissDialog() {
-	log_.Infof("Dismissing dialog %p due to direct call", dialog_);
 	if (dialog_) {
 		dialog_->Dismiss();
 		dialog_ = 0;
@@ -112,7 +111,6 @@ void Menu::OnAction(uitbc::Button* button) {
 	button_delegate_(button);
 	if (d == dialog_ && (!button || d->IsAutoDismissButton(button))) {
 		button_delegate_.clear();
-		log_.Infof("Dismissing dialog %p due to auto-dismiss", d);
 		dialog_ = 0;
 	}
 }

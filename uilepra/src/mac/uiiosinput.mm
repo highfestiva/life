@@ -61,7 +61,7 @@ IosInputDevice::~IosInputDevice() {
 	element_array_.clear();
 }
 
-void IosInputDevice::Activate(disable_win_mgr) {
+void IosInputDevice::Activate(bool disable_win_mgr) {
 	if (IsActive() == false) {
 		//native_device_->Acquire();
 		SetActive(true);

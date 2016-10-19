@@ -204,7 +204,7 @@ void TrabantSim::Resume(bool hard) {
 
 	game_ticker_->Resume(false);	// Resume sets some internal states of the simulator state machine.
 #ifdef LEPRA_IOS
-	[animated_app_ tick_];
+	[animated_app_ startTick];
 #endif // iOS
 	ui_manager_->GetSoundManager()->Resume();
 }
@@ -223,7 +223,7 @@ void TrabantSim::Suspend(bool hard) {
 	game_ticker_->Suspend(hard);	// Hard means cut the chord, soft just sends "disconnect" to remote end.
 	ui_manager_->GetSoundManager()->Suspend();
 #ifdef LEPRA_IOS
-	[animated_app_ tick_];
+	[animated_app_ stopTick];
 	if (!is_running_locally) {
 		FoldSimulator();
 	}
@@ -288,7 +288,7 @@ void TrabantSim::UnfoldSimulator() {
 void TrabantSim::DidSyncFiles() {
 #ifdef LEPRA_IOS
 	dispatch_async(dispatch_get_main_queue(), ^{
-		[TrabantSim::TrabantSim::animated_app_.__controller reloadPrototypes];
+		[TrabantSim::TrabantSim::animated_app_.controller reloadPrototypes];
 	});
 #endif // iOS
 }

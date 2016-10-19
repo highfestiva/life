@@ -1437,7 +1437,6 @@ void TrabantSimManager::DrawStick(Touchstick* stick, bool is_sloppy) {
 
 void TrabantSimManager::DismissDialog() {
 	if (user_info_dialog_) {
-		log_.Info("Main dialog dismissal!");
 		menu_->DismissDialog();
 		user_info_dialog_ = 0;
 		user_info_label_ = 0;
@@ -1669,10 +1668,12 @@ void TrabantSimManager::OnBackButton(uitbc::Button*) {
 }
 
 void TrabantSimManager::OnMenuAlternative(uitbc::Button*) {
-	pause_button_->SetVisible(true);
-	is_paused_ = false;
-	HiResTimer::StepCounterShadow();
-	v_set(GetVariableScope(), kRtvarPhysicsHalt, false);
+	if (pause_button_) {
+		pause_button_->SetVisible(true);
+		is_paused_ = false;
+		HiResTimer::StepCounterShadow();
+		v_set(GetVariableScope(), kRtvarPhysicsHalt, false);
+	}
 }
 
 

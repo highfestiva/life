@@ -38,19 +38,20 @@ void FontTexture::StoreGlyph(wchar_t c, FontManager* font_manager) {
 	}
 
 	GlyphXMap::const_iterator x = glyph_x_offset_map_.find(c);
+	GlyphX gx;
 	if (x == glyph_x_offset_map_.end()) {
-		const int char_start_x = free_x_offset_;
-		const int _width = font_manager->GetCharWidth(c);
-		const int offset = font_manager->GetCharOffset(c);
-		glyph_x_offset_map_.insert(GlyphXMap::value_type(c, GlyphX{char_start_x, _width, offset}));
-		free_x_offset_ += _width;
+		gx.start_x_ = free_x_offset_;
+		gx.width_ = font_manager->GetCharWidth(c);
+		gx.placement_offset_ = font_manager->GetCharOffset(c);
+		glyph_x_offset_map_.insert(GlyphXMap::value_type(c, gx));
+		free_x_offset_ += gx.width_;
 		if (free_x_offset_ > (int)canvas_.GetWidth()) {
 			canvas_.Crop(0, 0, canvas_.GetWidth()*2, canvas_.GetHeight());
 		}
-		Canvas char_canvas(_width, canvas_.GetHeight(), canvas_.GetBitDepth());
-		PixelRect canvas_rect(0, 0, _width, canvas_.GetHeight());
+		Canvas char_canvas(gx.width_, canvas_.GetHeight(), canvas_.GetBitDepth());
+		PixelRect canvas_rect(0, 0, gx.width_, canvas_.GetHeight());
 		font_manager->RenderGlyph(c, char_canvas, canvas_rect);
-		canvas_.PartialCopy(char_start_x, 0, char_canvas);
+		canvas_.PartialCopy(gx.start_x_, 0, char_canvas);
 
 		/*printf("Updated texture with glyph '%c' (height=%i):\n", c, canvas_.GetHeight());
 		const int max_width = (canvas_.GetWidth() > 80)? 80 : canvas_.GetWidth();

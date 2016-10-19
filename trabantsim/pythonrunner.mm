@@ -8,6 +8,7 @@
 
 #include "pythonrunner.h"
 #import "animatedapp.h"
+#include "../lepra/include/thread.h"
 #include "trabantsimticker.h"
 
 
@@ -89,13 +90,13 @@ void PythonRunner::Break() {
 }
 
 str PythonRunner::GetStdOut() {
-	ScopeLock _(&std_out_lock_);
+	ScopeLock l(&std_out_lock_);
 	return std_out_;
 }
 
 void PythonRunner::ClearStdOut() {
 	if (std_out_reader_.IsRunning()) {
-		ScopeLock _(&std_out_lock_);
+		ScopeLock l(&std_out_lock_);
 		std_out_.clear();
 	}
 }
@@ -108,7 +109,7 @@ void PythonRunner::WorkerEntry(void*) {
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &_);
 
 	HiResTimer timer(false);
-	str full_pathname = filename_;
+	str full_pathname = strutil::Encode(filename_);
 	strutil::strvec parts = strutil::Split(full_pathname, "/");
 	str _filename = parts[parts.size()-1];
 	FILE* fp = fopen(full_pathname.c_str(), "r");
@@ -164,7 +165,7 @@ void PythonRunner::StdOutReadEntry(void*) {
 		ssize_t read_count = read(pipe_pair[0], buffer, 10);
 		if (read_count > 0) {
 			buffer[read_count] = 0;
-			ScopeLock _(&std_out_lock_);
+			ScopeLock l(&std_out_lock_);
 			std_out_ += buffer;
 #ifdef LEPRA_DEBUG
 			//NSLog(@"%s", buffer);

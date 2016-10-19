@@ -106,15 +106,15 @@ static const float kCursorVelocity = 1.0f/8.0f;
 	self.gutterLineColor	   = [UIColor lightGrayColor];
 
 	// Inset the content to make room for line numbers
-	self.textContainerInset = UIEdgeInsetsMake(1, self.number_layout_manager.gutterWidth, 1, 0);
+	self.textContainerInset = UIEdgeInsetsMake(1, self.number_layout_manager.gutter_width, 1, 0);
 
 	// Setup the gesture recognizers
-	_singleFingerPanRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(singleFingerPanHappend:)];
-	_singleFingerPanRecognizer.maximumNumberOfTouches_ = 1;
-	[self addGestureRecognizer:_singleFingerPanRecognizer];
+	_singleFingerPanRecognizer_ = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(singleFingerPanHappend:)];
+	_singleFingerPanRecognizer_.maximumNumberOfTouches = 1;
+	[self addGestureRecognizer:_singleFingerPanRecognizer_];
 
 	_doubleFingerPanRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(doubleFingerPanHappend:)];
-	_doubleFingerPanRecognizer.minimumNumberOfTouches_ = 2;
+	_doubleFingerPanRecognizer.minimumNumberOfTouches = 2;
 	[self addGestureRecognizer:_doubleFingerPanRecognizer];
 }
 
@@ -197,18 +197,18 @@ static const float kCursorVelocity = 1.0f/8.0f;
 
 	// Set the regular fill
 	CGContextSetFillColorWithColor(context, self.gutterBackgroundColor.CGColor);
-	CGContextFillRect(context, CGRectMake(bounds.origin.x, bounds.origin.y, self.number_layout_manager.gutterWidth, height));
+	CGContextFillRect(context, CGRectMake(bounds.origin.x, bounds.origin.y, self.number_layout_manager.gutter_width, height));
 
 	// Draw line
 	CGContextSetFillColorWithColor(context, self.gutterLineColor.CGColor);
-	CGContextFillRect(context, CGRectMake(self.number_layout_manager.gutterWidth, bounds.origin.y, 0.5, height));
+	CGContextFillRect(context, CGRectMake(self.number_layout_manager.gutter_width, bounds.origin.y, 0.5, height));
 
-	if (_lineCursorEnabled) {
-		self.number_layout_manager.selectedRange_ = self.selectedRange_;
+	if (_cursor_enabled) {
+		self.number_layout_manager.selected_range = self.selectedRange;
 
-		NSRange glyphRange = [self.number_layout_manager.textStorage.string paragraphRangeForRange:self.selectedRange_];
+		NSRange glyphRange = [self.number_layout_manager.textStorage.string paragraphRangeForRange:self.selectedRange];
 		glyphRange = [self.number_layout_manager glyphRangeForCharacterRange:glyphRange actualCharacterRange:NULL];
-		self.number_layout_manager.selectedRange_ = glyphRange;
+		self.number_layout_manager.selected_range = glyphRange;
 		[self.number_layout_manager invalidateDisplayForGlyphRange:glyphRange];
 	}
 
@@ -221,7 +221,7 @@ static const float kCursorVelocity = 1.0f/8.0f;
 // Sourced from: https://github.com/srijs/NLTextView
 - (BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)gestureRecognizer {
 	// Only accept horizontal pans for the code navigation to preserve correct scrolling behaviour.
-	if (gestureRecognizer == _singleFingerPanRecognizer || gestureRecognizer == _doubleFingerPanRecognizer) {
+	if (gestureRecognizer == _singleFingerPanRecognizer_ || gestureRecognizer == _doubleFingerPanRecognizer) {
 		//CGPoint translation = [gestureRecognizer translationInView:self];
 		//return fabsf(translation.x) > fabsf(translation.y);
 		return NO;
@@ -234,26 +234,26 @@ static const float kCursorVelocity = 1.0f/8.0f;
 // Sourced from: https://github.com/srijs/NLTextView
 - (void)singleFingerPanHappend:(UIPanGestureRecognizer *)sender {
 	if (sender.state == UIGestureRecognizerStateBegan) {
-		range_ = self.selectedRange_;
+		range_ = self.selectedRange;
 	}
 
 	CGFloat cursorLocation = MAX(range_.location + [sender translationInView:self].x * kCursorVelocity, 0);
 
-	self.selectedRange_ = NSMakeRange(cursorLocation, 0);
+	self.selectedRange = NSMakeRange(cursorLocation, 0);
 }
 
 // Sourced from: https://github.com/srijs/NLTextView
 - (void)doubleFingerPanHappend:(UIPanGestureRecognizer *)sender {
 	if (sender.state == UIGestureRecognizerStateBegan) {
-		range_ = self.selectedRange_;
+		range_ = self.selectedRange;
 	}
 
 	CGFloat cursorLocation = MAX(range_.location + [sender translationInView:self].x * kCursorVelocity, 0);
 
 	if (cursorLocation > range_.location) {
-		self.selectedRange_ = NSMakeRange(range_.location, fabsf(range_.location - cursorLocation));
+		self.selectedRange = NSMakeRange(range_.location, fabs(range_.location - cursorLocation));
 	} else {
-		self.selectedRange_ = NSMakeRange(cursorLocation, fabsf(range_.location - cursorLocation));
+		self.selectedRange = NSMakeRange(cursorLocation, fabs(range_.location - cursorLocation));
 	}
 }
 

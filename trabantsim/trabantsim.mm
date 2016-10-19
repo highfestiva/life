@@ -23,10 +23,10 @@
 
 @implementation AnimatedApp
 
--(id) init:(Canvas*)_canvas {
+-(id) init:(Canvas*)__canvas {
 	// Init stuff for future simulation.
 	//[UIApplication sharedApplication].statusBarOrientation_ = UIInterfaceOrientationLandscapeRight;
-	_canvas = _canvas;
+	_canvas = __canvas;
 	_canvas->SetDeviceRotation(0);
 	/*if ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0) {
 		_canvas->SetOutputRotation(90);
@@ -67,7 +67,7 @@
         //[super dealloc];
 }
 
--(void) tick_
+-(void) startTick
 {
 	self.alert = nil;
 	if (!_animationTimer) {
@@ -78,7 +78,7 @@
 	}
 }
 
--(void) tick_
+-(void) stopTick
 {
 	[_motionManager stopAccelerometerUpdates];
 	[[EAGLView sharedView_] down_acc];
@@ -143,7 +143,7 @@
 	out_controller_.title = @"Output";
 	out_controller_.text = text;
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-		out_controller_.presentation_style_ = UIModalPresentationPopover;
+		out_controller_.modalPresentationStyle = UIModalPresentationPopover;
 		UIPopoverController* popover = [[UIPopoverController alloc] initWithContentViewController:out_controller_];
 		CGSize fit = [PythonTextView slowFitTextSize:text];
 		popover.popoverContentSize = fit;

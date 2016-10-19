@@ -12,7 +12,7 @@
 
 -(void)viewDidLoad {
 	UIWebView* webView = [[UIWebView alloc] initWithFrame:self.view.frame];
-	webView.scalesPageToFit_ = YES;
+	webView.scalesPageToFit = YES;
 	webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	NSURL* url = [[NSBundle mainBundle] URLForResource:self.filename withExtension:@"html"];
 	[webView loadRequest:[NSURLRequest requestWithURL:url]];

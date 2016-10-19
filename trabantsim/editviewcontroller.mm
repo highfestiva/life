@@ -62,7 +62,7 @@ bool g_backspace_to_linefeed = false;
 	self.manageButton_ = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(manageFile)];
 	UIBarButtonItem* executeButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPlay target:self action:@selector(execute)];
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-		((UISplitViewController*)self.view.window.rootViewController).maximumPrimaryColumnWidth_ = 0;
+		((UISplitViewController*)self.view.window.rootViewController).maximumPrimaryColumnWidth = 0;
 		[self toggleiPadSidebar];
 		self.navigationItem.rightBarButtonItem = executeButton;
 	} else {
@@ -162,7 +162,7 @@ bool g_backspace_to_linefeed = false;
 	if ([_smartIndent length] > 0) {
 		NSString* indent = [NSString stringWithString:_smartIndent];
 		[_smartIndent setString:@""];
-		NSRange selectedRange_ = textView.selectedRange_;
+		NSRange selectedRange_ = textView.selectedRange;
 		UITextRange* textRange = [textView textRangeFromPosition:textView.selectedTextRange.start toPosition:textView.selectedTextRange.start];
 		[textView replaceRange:textRange withText:indent];
 		[textView setSelectedRange:NSMakeRange(selectedRange_.location+[indent length], 0)];
@@ -290,7 +290,7 @@ bool g_backspace_to_linefeed = false;
 - (void) toggleiPadSidebar {
 	int width_;
 	UIBarButtonItem* toggleFullscreenButton;
-	if (((UISplitViewController*)self.view.window.rootViewController).maximumPrimaryColumnWidth_ == 0) {
+	if (((UISplitViewController*)self.view.window.rootViewController).maximumPrimaryColumnWidth == 0) {
 		width_ = 5000;
 		toggleFullscreenButton = [[UIBarButtonItem alloc] initWithTitle:@"<" style:UIBarButtonItemStylePlain target:self action:@selector(toggleiPadSidebar)];
 	} else {
@@ -300,9 +300,9 @@ bool g_backspace_to_linefeed = false;
 	UIFont* cogWheelFont = [UIFont fontWithName:@"Helvetica" size:24.0];
 	NSDictionary* fontDict = @{NSFontAttributeName: cogWheelFont};
 	[toggleFullscreenButton setTitleTextAttributes:fontDict forState:UIControlStateNormal];
-	self.navigationItem.bar_button_items = [NSArray arrayWithObjects:toggleFullscreenButton, self.manageButton_, nil];
+	self.navigationItem.leftBarButtonItems = [NSArray arrayWithObjects:toggleFullscreenButton, self.manageButton_, nil];
 
-	((UISplitViewController*)self.view.window.rootViewController).maximumPrimaryColumnWidth_ = width_;
+	((UISplitViewController*)self.view.window.rootViewController).maximumPrimaryColumnWidth = width_;
 }
 
 - (void) manageFile {

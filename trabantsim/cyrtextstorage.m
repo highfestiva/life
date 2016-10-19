@@ -55,7 +55,7 @@
         _attributedString = [NSMutableAttributedString new];
 
         _tokens = @[];
-        _regularExpressionCache = @{}.mutableCopy_;
+        _regularExpressionCache = @{}.mutableCopy;
     }
 
     return self;

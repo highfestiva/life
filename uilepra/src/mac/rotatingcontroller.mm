@@ -42,7 +42,7 @@
 	if (forceGameLayout || self.visibleViewController.view == [EAGLView sharedView_]) {
 		return [[EAGLView sharedView_] shouldAutorotate_];
 	}
-	return [super shouldAutorotate_];
+	return [super shouldAutorotate];
 }
 
 -(NSUInteger)supportedInterfaceOrientations_
@@ -50,7 +50,7 @@
 	if (forceGameLayout || self.visibleViewController.view == [EAGLView sharedView_]) {
 		return [[EAGLView sharedView_] supportedInterfaceOrientations_];
 	}
-	return [super supportedInterfaceOrientations_];
+	return [super supportedInterfaceOrientations];
 }
 
 -(UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
