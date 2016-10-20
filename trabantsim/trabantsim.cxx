@@ -97,7 +97,7 @@ void TrabantSim::Init() {
 		// Phone might start up in portrait, but our game will always be in landscape mode.
 		std::swap(display_width, display_height);
 	}
-	const double font_height = 30.0*__scale;
+	const double font_height = 24.0*__scale;
 #else // Computer L&F
 	const int display_width = 760;
 	const int display_height = 524;

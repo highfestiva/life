@@ -173,6 +173,7 @@ void PythonRunner::StdOutReadEntry(void*) {
 		}
 	}
 	free(buffer);
+	ScopeLock l(&std_out_lock_);
 	std_out_ += "\nBroken pipe, unable to read more of stdout!";
 }
 

@@ -181,7 +181,7 @@ void CppContextObject::StartLoadingPhysics(const str& physics_name) {
 }
 
 bool CppContextObject::TryComplete() {
-	if (!physics_resource_ || IsLoaded()) {
+	if (!physics_resource_ || is_loaded_) {
 		return (false);
 	}
 
