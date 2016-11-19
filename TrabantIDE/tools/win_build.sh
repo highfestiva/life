@@ -27,7 +27,7 @@ cp bin/prototypes/* bin/sync/originals
 mkdir bin/Trabant
 mv bin/* bin/Trabant/
 cd bin
-/c/Program\ Files/7-Zip/7z.exe a -tzip Trabant_Win32
+/c/Program\ Files/7-Zip/7z.exe a -tzip Trabant_Win
 cd ..
-mv bin/Trabant_Win32.zip .
+mv bin/Trabant_Win.zip .
 echo "Done! .zip in PD root folder."

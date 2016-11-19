@@ -29,7 +29,7 @@ while loop():
     shippos,shipvel = ship.pos(),ship.vel()
 
     # Steering.
-    if taps():
+    if any(tap.ispress for tap in taps()):
         angle = tapdir(shippos).angle_y(vec3(0,0,1))
         ship.orientation(roty(angle))
     is_moving = taps() or keydir().y>0

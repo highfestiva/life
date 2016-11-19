@@ -364,7 +364,7 @@ def load_shapes_from_file(f, crop):
 							bottom = boundtricnt(shape, vec3(x*2+1,y*2+2,z))
 							sumtot = left+right+top+bottom
 							no_neighbour_tris = (sumtot == 0)
-							nch = '`´lrtb'[r'/\><^v'.index(ch)]
+							nch = '`´lrbt'[r'/\><^v'.index(ch)]
 							if ch == '/' and (left+top > right+bottom or (no_neighbour_tris and row[x-1:x] == '\\')):
 								ch = nch
 							elif ch == '\\' and (right+top > left+bottom or (no_neighbour_tris and row[x+1:x+2] == '/')):
