@@ -6,11 +6,13 @@ cd ../..
 rm -Rf bin
 mkdir bin
 $rgo -m final copycode cleandata builddata zipdata
+cp TrabantIDE/tools/vcruntime140.dll.fortrabant bin/vcruntime140.dll
 mkdir bin/sim/
 mv bin/* bin/sim/
 
 cp ../cpp/scite/bin/TrabantIDE.exe TrabantIDE/
 cp -r TrabantIDE/* bin/
+cp TrabantIDE/tools/vcruntime140.dll.forpy35 bin/python35/vcruntime140.dll
 rm -Rf bin/tools
 rm bin/todo.txt
 
