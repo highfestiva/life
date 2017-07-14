@@ -8,7 +8,7 @@ if [ -d /c/Users ]; then
 sed '/__api__/{
 	s/__api__//g
 	r ../../TrabantIDE/tools/trabant_py_api.html
-	}' /c/data/pd-company/WebDev/html/trabant_help.template > \
-		/c/data/pd-company/WebDev/html/trabant_help.html
+	}' /c/data/pd-company/WebDev/site-trabant/trabant_help.template > \
+		/c/data/pd-company/WebDev/site-trabant/trabant_help.html
 echo "Updated html documentation."
 fi
