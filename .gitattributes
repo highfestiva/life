@@ -1,4 +1,4 @@
 *				text=auto
-*.ma				-diff
+*.ma				linguist-vendored -diff
 TrabantSim/prototypes/*.py	eol=lf
 TrabantIDE/sync/*.py		eol=lf
